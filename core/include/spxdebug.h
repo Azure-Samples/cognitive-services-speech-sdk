@@ -9,6 +9,7 @@
 #ifdef DEBUG
 #ifdef SPX_CONFIG_INCLUDE_ALL_IN_DEBUG
 #define SPX_CONFIG_INCLUDE_ALL                          1
+#define SPX_CONFIG_INCLUDE_ALL_DBG
 #endif
 #endif
 
@@ -82,28 +83,28 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
             __SPX_TRACE_INFO(title, msg, __VA_ARGS__);              \
     } } while (0)
 
-#define __SPX_TRACE_WARNING(msg, ...) __SPX_DOTRACE(__SPX_TRACE_LEVEL_WARNING, msg, __VA_ARGS__)
-#define __SPX_TRACE_WARNING_IF(cond, msg, ...)                      \
+#define __SPX_TRACE_WARNING(title, msg, ...) __SPX_DOTRACE(__SPX_TRACE_LEVEL_WARNING, title, msg, __VA_ARGS__)
+#define __SPX_TRACE_WARNING_IF(cond, title, msg, ...)               \
     do {                                                            \
         int fCond = (cond);                                         \
         if (fCond) {                                                \
-            __SPX_TRACE_WARNING(msg, __VA_ARGS__);                  \
+            __SPX_TRACE_WARNING(title, msg, __VA_ARGS__);           \
     } } while (0)
 
-#define __SPX_TRACE_ERROR(msg, ...) __SPX_DOTRACE(__SPX_TRACE_LEVEL_ERROR, msg, __VA_ARGS__)
-#define __SPX_TRACE_ERROR_IF(cond, msg, ...)                        \
+#define __SPX_TRACE_ERROR(title, msg, ...) __SPX_DOTRACE(__SPX_TRACE_LEVEL_ERROR, title, msg, __VA_ARGS__)
+#define __SPX_TRACE_ERROR_IF(cond, title, msg, ...)                 \
     do {                                                            \
         int fCond = (cond);                                         \
         if (fCond) {                                                \
-            __SPX_TRACE_ERROR(msg, __VA_ARGS__);                    \
+            __SPX_TRACE_ERROR(title, msg, __VA_ARGS__);             \
     } } while (0)
 
-#define __SPX_TRACE_VERBOSE(msg, ...) __SPX_DOTRACE(__SPX_TRACE_LEVEL_VERBOSE, msg, __VA_ARGS__)
-#define __SPX_TRACE_VERBOSE_IF(cond, msg, ...)                      \
+#define __SPX_TRACE_VERBOSE(title, msg, ...) __SPX_DOTRACE(__SPX_TRACE_LEVEL_VERBOSE, title, msg, __VA_ARGS__)
+#define __SPX_TRACE_VERBOSE_IF(cond, title, msg, ...)               \
     do {                                                            \
         int fCond = (cond);                                         \
         if (fCond) {                                                \
-            __SPX_TRACE_VERBOSE(msg, __VA_ARGS__);                  \
+            __SPX_TRACE_VERBOSE(title, msg, __VA_ARGS__);           \
     } } while (0)
 
 #include <memory>
@@ -115,7 +116,7 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 #define ___SPX_EXPR_AS_STRING(_String) "" ## #_String
 #define __SPX_EXPR_AS_STRING(_String) ___SPX_EXPR_AS_STRING(_String)
 
-#define __SPX_TRACE_HRX(title, hrx, x)           __SPX_TRACE_ERROR(title, __SPX_EXPR_AS_STRING(hrx) ## " = 0x%0x", x)
+#define __SPX_TRACE_HR(title, hr, x)             __SPX_TRACE_ERROR(title, __SPX_EXPR_AS_STRING(hr) ## " = 0x%0x", x)
 #define __SPX_TRACE_ASSERT(title, expr)          __SPX_TRACE_ERROR_IF(!(expr), title, __SPX_EXPR_AS_STRING(expr) ## " = false")
 #define __SPX_TRACE_ASSERT_MSG(title, expr, ...) __SPX_TRACE_ERROR_IF(!(expr), title, __SPX_EXPR_AS_STRING(expr) ## " = false; " ## __VA_ARGS__)
 
@@ -143,7 +144,7 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 #define SPX_TRACE_VERBOSE_IF(...)
 #endif
 
-#if defined(SPX_CONFIG_DBG_TRACE_INFO_WARN_ERR_VERBOSE) || defined(SPX_CONFIG_INCLUDE_ALL)
+#if defined(SPX_CONFIG_DBG_TRACE_INFO_WARN_ERR_VERBOSE) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
 #define SPX_DBG_TRACE_INFO(msg, ...)             __SPX_TRACE_INFO("SPX_DBG_TRACE_INFO: ", msg, __VA_ARGS__)
 #define SPX_DBG_TRACE_ERROR(msg, ...)            __SPX_TRACE_ERROR("SPX_DBG_TRACE_ERROR: ", msg, __VA_ARGS__)
 #define SPX_DBG_TRACE_WARNING(msg, ...)          __SPX_TRACE_WARNING("SPX_DBG_TRACE_WARNING:", msg, __VA_ARGS__)
@@ -169,7 +170,7 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 #define SPX_TRACE_FUNCTION(...)
 #endif
 
-#if defined(SPX_CONFIG_DBG_TRACE_FUNCTION) || defined(SPX_CONFIG_INCLUDE_ALL)
+#if defined(SPX_CONFIG_DBG_TRACE_FUNCTION) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
 #define SPX_DBG_TRACE_FUNCTION(...) __SPX_TRACE_VERBOSE("SPX_DBG_TRACE_FUNCTION: ", __FUNCTION__)
 #else
 #define SPX_DBG_TRACE_FUNCTION(...)
@@ -181,7 +182,7 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 #define SPX_TRACE_SCOPE(x, y)
 #endif
 
-#if defined(SPX_CONFIG_DBG_TRACE_SCOPE) || defined(SPX_CONFIG_INCLUDE_ALL)
+#if defined(SPX_CONFIG_DBG_TRACE_SCOPE) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
 #define SPX_DBG_TRACE_SCOPE(x, y) __SPX_TRACE_SCOPE("SPX_DBG_TRACE_SCOPE_ENTER: ", "SPX_DBG_TRACE_SCOPE_EXIT: ", x, y)
 #else
 #define SPX_DBG_TRACE_SCOPE(...)
@@ -195,7 +196,7 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 #define SPX_ASSERT_WITH_MESSAGE(expr, ...)
 #endif
 
-#if defined(SPX_CONFIG_DBG_ASSERT) || defined(SPX_CONFIG_INCLUDE_ALL)
+#if defined(SPX_CONFIG_DBG_ASSERT) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
 #define SPX_DBG_ASSERT(expr)                    __SPX_TRACE_ASSERT("SPX_DBG_ASSERT: ", expr)
 #define SPX_DBG_ASSERT_WITH_MESSAGE(expr, ...)  __SPX_TRACE_ASSERT_MSG("SPX_DBG_ASSERT: ", expr, __VA_ARGS__)
 #else
@@ -211,7 +212,7 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 #define SPX_VERIFY_WITH_MESSAGE(expr, ...)      (expr)
 #endif
 
-#if defined(SPX_CONFIG_DBG_TRACE_VERIFY) || defined(SPX_CONFIG_INCLUDE_ALL)
+#if defined(SPX_CONFIG_DBG_TRACE_VERIFY) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
 #define SPX_DBG_VERIFY(expr)                        __SPX_TRACE_ASSERT("SPX_DBG_VERIFY: ", expr)
 #define SPX_DBG_VERIFY_WITH_MESSAGE(expr, ...)      __SPX_TRACE_ASSERT_MSG("SPX_DBG_VERIFY: ", expr, __VA_ARGS__)
 #else
@@ -219,54 +220,83 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 #define SPX_DBG_VERIFY_WITH_MESSAGE(expr, ...)      (expr)
 #endif
 
-using HRX = uint32_t;
+using SPXHR = uint32_t;
+#define SPX_OK           0x00000000;
 #define SPX_SUCCEEDED(x) ((x & 0x80000000) == 0)
 #define SPX_FAILED(x)    (!SPX_SUCCEEDED(x))   
 
-#if defined(SPX_CONFIG_RPT_ONFAIL) || defined(SPX_CONFIG_INCLUDE_ALL)
+#define SPX_INIT_HR(hr)	 SPXHR hr = SPX_OK
+
+#if defined(SPX_CONFIG_REPORT_ON_FAIL) || defined(SPX_CONFIG_INCLUDE_ALL) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
 #define SPX_REPORT_ON_FAIL(hr)                                  \
     do {                                                        \
-        HRX x = hr;                                             \
+        SPXHR x = hr;                                           \
         if (SPX_FAILED(x)) {                                    \
-            __SPX_TRACE_HRX("SPX_REPORT_ON_FAIL: ", hr, x);     \
+            __SPX_TRACE_HR("SPX_REPORT_ON_FAIL: ", hr, x);      \
     } } while (0)
 #define SPX_REPORT_ON_FAIL_IFNOT(hr, hrNot)                     \
     do {                                                        \
-        HRX x = hr;                                             \
+        SPXHR x = hr;                                           \
         if (x != hrNot) {                                       \
             if (SPX_FAILED(x)) {                                \
-                __SPX_TRACE_HRX("SPX_REPORT_ON_FAIL: ", hr, x); \
+                __SPX_TRACE_HR("SPX_REPORT_ON_FAIL: ", hr, x);  \
     } } } while (0)
 #else
 #define SPX_REPORT_ON_FAIL(...)
 #define SPX_REPORT_ON_FAIL_IFNOT(...)
 #endif
 
-#if defined(SPX_CONFIG_TRACE_RET_ONFAIL) || defined(SPX_CONFIG_INCLUDE_ALL)
+#if defined(SPX_CONFIG_TRACE_RETURN_ON_FAIL) || defined(SPX_CONFIG_INCLUDE_ALL) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
+#define SPX_RETURN_HR(hr)                						\
+    do {                                                        \
+        SPXHR x = hr;                                           \
+        if (SPX_FAILED(x)) {                                    \
+            __SPX_TRACE_HR("SPX_RETURN_ON_FAIL: ", hr, x);      \
+        }                                                       \
+        return x;                                               \
+    } while (0)
+#define SPX_RETURN_HR_IF(hr, cond)								\
+    do {                                                        \
+        int fCond = (cond);                                     \
+        if (fCond) {                                            \
+			SPXHR x = hr;                                       \
+			if (SPX_FAILED(x)) {                                \
+				__SPX_TRACE_HR("SPX_RETURN_ON_FAIL: ", hr, x);  \
+			}                                                   \
+			return x;                                           \
+    } } while (0)
 #define SPX_RETURN_ON_FAIL(hr)                                  \
     do {                                                        \
-        HRX x = hr;                                             \
+        SPXHR x = hr;                                           \
         if (SPX_FAILED(x)) {                                    \
-            __SPX_TRACE_HRX("SPX_RETURN_ON_FAIL: ", hr, x);     \
+            __SPX_TRACE_HR("SPX_RETURN_ON_FAIL: ", hr, x);      \
             return x;                                           \
     } } while (0)
 #define SPX_RETURN_ON_FAIL_IF_NOT(hr, hrNot)                    \
     do {                                                        \
-        HRX x = hr;                                             \
+        SPXHR x = hr;                                           \
         if (x != hrNot) {                                       \
             if (SPX_FAILED(x)) {                                \
-                __SPX_TRACE_HRX("SPX_RETURN_ON_FAIL: ", hr, x); \
+                __SPX_TRACE_HR("SPX_RETURN_ON_FAIL: ", hr, x);  \
                 return x;                                       \
     } } } while (0)
 #else
+#define SPX_RETURN_HR(hr) return hr
+#define SPX_RETURN_HR_IF(hr, cond)								\
+    do {                                                        \
+        int fCond = (cond);                                     \
+        if (fCond) {                                            \
+			return hr;                                          \
+    } } while (0)
 #define SPX_RETURN_ON_FAIL(hr)                                  \
     do {                                                        \
-        HRX x = hr;                                             \
+        SPXHR x = hr;                                           \
         if (SPX_FAILED(x)) {                                    \
             return x;                                           \
     } } while (0)
 #define SPX_RETURN_ON_FAIL_IF_NOT(hr, hrNot)                    \
-    do {HRX x = hr;                                             \
+    do {                                                        \
+        SPXHR x = hr;                                           \
         if (x != hrNot) {                                       \
             if (SPX_FAILED(x)) {                                \
                 return x;                                       \
@@ -371,19 +401,19 @@ void main()
     SPX_DBG_VERIFY_WITH_MESSAGE(false, "HEY!");
     SPX_DBG_VERIFY_WITH_MESSAGE(true, "HEY!!");
 
-    HRX hrx1 { 0x80001111 };
-    HRX hrx2 { 0x00001111 };
+    SPXHR hr1 { 0x80001111 };
+    SPXHR hr2 { 0x00001111 };
 
     SPX_TRACE_VERBOSE("Testing out SPX_REPORT_ON_FAIL, should see two failures...");
-    SPX_REPORT_ON_FAIL(hrx1);
-    SPX_REPORT_ON_FAIL_IFNOT(hrx1, 0x80001000);
+    SPX_REPORT_ON_FAIL(hr1);
+    SPX_REPORT_ON_FAIL_IFNOT(hr1, 0x80001000);
     SPX_TRACE_VERBOSE("Testing out SPX_REPORT_ON_FAIL, should see two failures... Done!");
     
     SPX_TRACE_VERBOSE("Testing out SPX_REPORT_ON_FAIL, should see zero failures...");
-    SPX_REPORT_ON_FAIL(hrx2);
-    SPX_REPORT_ON_FAIL_IFNOT(hrx1, 0x80001111);
-    SPX_REPORT_ON_FAIL_IFNOT(hrx2, 0x80001111);
-    SPX_REPORT_ON_FAIL_IFNOT(hrx2, 0x80001000);
+    SPX_REPORT_ON_FAIL(hr2);
+    SPX_REPORT_ON_FAIL_IFNOT(hr1, 0x80001111);
+    SPX_REPORT_ON_FAIL_IFNOT(hr2, 0x80001111);
+    SPX_REPORT_ON_FAIL_IFNOT(hr2, 0x80001000);
     SPX_TRACE_VERBOSE("Testing out SPX_REPORT_ON_FAIL, should see zero failures... Done!");
 }
 
