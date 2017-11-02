@@ -13,31 +13,31 @@ private:
 
     struct ConsoleArgs
     {
-		bool m_fWaitForDebugger = false;
+        bool m_fWaitForDebugger = false;
 
-		std::wstring m_strRecognizerType;
-		bool m_fCommandSystem = false;
-		
-		bool m_fMicrophoneInput = true;
-		std::wstring m_strInput;
+        std::wstring m_strRecognizerType;
+        bool m_fCommandSystem = false;
+        
+        bool m_fMicrophoneInput = true;
+        std::wstring m_strInput;
 
-		std::wstring m_strEndpointUri;
-		std::wstring m_strSubscriptionKey;
+        std::wstring m_strEndpointUri;
+        std::wstring m_strSubscriptionKey;
 
-		bool m_fRecognizeAsync = false;
+        bool m_fRecognizeAsync = false;
 
-		bool m_fContinuousRecognition = false;
-		std::wstring m_strContinuousRecognitionSeconds;
-		uint16_t m_continuousRecognitionSeconds = 0;
+        bool m_fContinuousRecognition = false;
+        std::wstring m_strContinuousRecognitionSeconds;
+        uint16_t m_continuousRecognitionSeconds = 0;
 
-		std::wstring m_strRunSampleName;
+        std::wstring m_strRunSampleName;
 
-		bool m_fInteractivePrompt = false;
+        bool m_fInteractivePrompt = false;
     };
 
     bool ParseConsoleArgs(int argc, const wchar_t* argv[], ConsoleArgs *pconsoleArgs);
     bool ValidateConsoleArgs(ConsoleArgs *pconsoleArgs);
-    SPXHR InitFromConsoleArgs(ConsoleArgs *pconsoleArgs);
+    void ProcessConsoleArgs(ConsoleArgs *pconsoleArgs);
 
     void DisplayConsoleHeader();
     void DisplayConsoleUsage();
@@ -45,45 +45,42 @@ private:
 
     void ConsoleWrite(const wchar_t* psz, ...);
     void ConsoleWriteLine(const wchar_t* pszFormat, ...);
-	bool ConsoleReadLine(std::wstring& str);
+    bool ConsoleReadLine(std::wstring& str);
 
-	bool GetConsoleInput(std::wstring& str);
-    SPXHR ProcessConsoleInput(const wchar_t* psz);
+    bool GetConsoleInput(std::wstring& str);
+    void ProcessConsoleInput(const wchar_t* psz);
 
-    SPXHR ConsoleInput_Help();
-    SPXHR ConsoleInput_HelpOn(const wchar_t* psz);
-    SPXHR ConsoleInput_Recognizer(const wchar_t *psz);
+    void ConsoleInput_Help();
+    void ConsoleInput_HelpOn(const wchar_t* psz);
+    void ConsoleInput_Recognizer(const wchar_t *psz);
 
     bool NeedsInit() { return true; } // return m_recognizer == nullptr; } // TODO: ROBCH: Implement this correctly
-    SPXHR EnsureInit(bool fMicrophone, 
-		             const std::wstring &strInputFileName, 
-		             const std::wstring& strEndpointUri, 
-		             const std::wstring& strSubscriptionKey);
+    void EnsureInit(bool fMicrophone, const std::wstring &strInputFileName, const std::wstring& strEndpointUri, const std::wstring& strSubscriptionKey);
 
-    SPXHR Init(bool fMicrophone,
-			   const std::wstring &strInputFileName,
-			   const std::wstring& strEndpointUri,
-			   const std::wstring& strSubscriptionKey);
-    SPXHR Term();
+    void Init(bool fMicrophone, const std::wstring &strInputFileName, const std::wstring& strEndpointUri, const std::wstring& strSubscriptionKey);
+    void Term();
 
-    SPXHR InitRecognizer();
-    SPXHR InitCommandSystem();
+    void InitRecognizer();
+    void InitCommandSystem();
 
     void WaitForDebugger();
 
-	SPXHR RecognizeAsync();
-	SPXHR ContinuousRecognition(uint16_t seconds);
-	SPXHR RunSample(const std::wstring& strSampleName);
+    void RecognizeAsync();
+    void ContinuousRecognition(uint16_t seconds);
+
+    void RunSample(const std::wstring& strSampleName);
+
+    void RunInteractivePrompt();
 
 private:
 
-	// TODO: ROBCH: declare members here ****
+    // TODO: ROBCH: declare members here ****
 
-	// shared_ptr<Recognizer> 		 m_recognizer;
-	// shared_ptr<SpeechRecognizer>  m_speechRecognizer;
-	// shared_ptr<IntentRecognizer>  m_intentRecognizer;
+    // shared_ptr<Recognizer> 		 m_recognizer;
+    // shared_ptr<SpeechRecognizer>  m_speechRecognizer;
+    // shared_ptr<IntentRecognizer>  m_intentRecognizer;
 
-	// shared_ptr<CommandSystem>     m_commandSystem;
+    // shared_ptr<CommandSystem>     m_commandSystem;
 };
 
 
@@ -99,28 +96,18 @@ CarbonTestConsole::~CarbonTestConsole()
 
 int CarbonTestConsole::Run(int argc, const wchar_t* argv[])
 {
-	DisplayConsoleHeader();
+    DisplayConsoleHeader();
 
-	ConsoleArgs consoleArgs;
+    ConsoleArgs consoleArgs;
     if (!ParseConsoleArgs(argc, argv, &consoleArgs) || !ValidateConsoleArgs(&consoleArgs))
     {
         DisplayConsoleUsage();
         return -1;
     }
 
-    SPXHR hr = InitFromConsoleArgs(&consoleArgs);
-	SPX_RETURN_HR_IF(hr, SPX_FAILED(hr) || !consoleArgs.m_fInteractivePrompt);
+    ProcessConsoleArgs(&consoleArgs);
 
-	std::wstring strInput;
-    ConsoleWriteLine(L"Enter you command (? for help, EXIT to exit)...");
-    while (SPX_SUCCEEDED(hr) && GetConsoleInput(strInput))
-    {
-		if (_wcsicmp(strInput.c_str(), L"exit") == 0) break;
-		if (_wcsicmp(strInput.c_str(), L"quit") == 0) break;
-		hr = ProcessConsoleInput(strInput.c_str());
-    }
-
-	SPX_RETURN_HR(hr);
+    return 0;
 }
 
 bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], ConsoleArgs *pconsoleArgs)
@@ -139,7 +126,7 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
             pconsoleArgs->m_fWaitForDebugger = true;
             pstrNextArg = nullptr;
             fNextArgRequired = false;
-		}
+        }
         else if (_wcsicmp(pszArg, L"/speech") == 0)
         {
             fShowOptions = pconsoleArgs->m_strRecognizerType.length() > 0 || fNextArgRequired;
@@ -185,13 +172,13 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
             pconsoleArgs->m_fRecognizeAsync = true;
             pstrNextArg = nullptr;
             fNextArgRequired = false;
-		}
+        }
         else if (_wcsnicmp(pszArg, L"/continuous", wcslen(L"/continuous")) == 0)
         {
             fShowOptions = pconsoleArgs->m_fRecognizeAsync || fNextArgRequired;
             pconsoleArgs->m_fContinuousRecognition = true;
-			pconsoleArgs->m_continuousRecognitionSeconds = UINT16_MAX;
-			pstrNextArg = &pconsoleArgs->m_strContinuousRecognitionSeconds;
+            pconsoleArgs->m_continuousRecognitionSeconds = UINT16_MAX;
+            pstrNextArg = &pconsoleArgs->m_strContinuousRecognitionSeconds;
             fNextArgRequired = false;
         }
         else if (_wcsnicmp(pszArg, L"/sample", wcslen(L"/sample")) == 0)
@@ -209,18 +196,18 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
         }
         else if (pstrNextArg != NULL)
         {
-			fShowOptions = pstrNextArg->length() > 0;
+            fShowOptions = pstrNextArg->length() > 0;
             *pstrNextArg = pszArg;
             pstrNextArg = NULL;
             fNextArgRequired = false;
-			continue;
+            continue;
         }
         else
         {
             fShowOptions = true;
         }
 
-		if (fShowOptions) break;
+        if (fShowOptions) break;
 
         const wchar_t *pszArgInsideThisArg = wcspbrk(pszArg, L":=");
         if (pszArgInsideThisArg)
@@ -231,7 +218,7 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
                 break;
             }
 
-			fShowOptions = pstrNextArg->length() > 0;
+            fShowOptions = pstrNextArg->length() > 0;
             *pstrNextArg = pszArgInsideThisArg + 1;
             pstrNextArg = NULL;
             fNextArgRequired = false;
@@ -245,56 +232,45 @@ bool CarbonTestConsole::ValidateConsoleArgs(ConsoleArgs *pconsoleArgs)
 {
     auto fValid = true;
 
-	if (pconsoleArgs->m_strInput.length() > 0 && _wcsicmp(pconsoleArgs->m_strInput.c_str(), L"microphone") == 0)
-	{
-		pconsoleArgs->m_fMicrophoneInput = true;
-		pconsoleArgs->m_strInput.clear();
-	}
+    if (pconsoleArgs->m_strInput.length() > 0 && _wcsicmp(pconsoleArgs->m_strInput.c_str(), L"microphone") == 0)
+    {
+        pconsoleArgs->m_fMicrophoneInput = true;
+        pconsoleArgs->m_strInput.clear();
+    }
 
-	if (pconsoleArgs->m_strInput.length() > 0 && _waccess(pconsoleArgs->m_strInput.c_str(), 0) != 0)
-	{
-		SPX_TRACE_ERROR("File does not exist: %S", pconsoleArgs->m_strInput.c_str());
-		fValid = false;
-	}
+    if (pconsoleArgs->m_strInput.length() > 0 && _waccess(pconsoleArgs->m_strInput.c_str(), 0) != 0)
+    {
+        SPX_TRACE_ERROR("File does not exist: %S", pconsoleArgs->m_strInput.c_str());
+        fValid = false;
+    }
 
-	if (pconsoleArgs->m_fContinuousRecognition && pconsoleArgs->m_strContinuousRecognitionSeconds.length() > 0)
-	{
-		auto seconds = std::stoi(pconsoleArgs->m_strContinuousRecognitionSeconds.c_str());
-		pconsoleArgs->m_continuousRecognitionSeconds = std::min(std::max(seconds, 0), 30);
-	}
+    if (pconsoleArgs->m_fContinuousRecognition && pconsoleArgs->m_strContinuousRecognitionSeconds.length() > 0)
+    {
+        auto seconds = std::stoi(pconsoleArgs->m_strContinuousRecognitionSeconds.c_str());
+        pconsoleArgs->m_continuousRecognitionSeconds = std::min(std::max(seconds, 0), 30);
+    }
 
     return fValid;
 }
 
-SPXHR CarbonTestConsole::InitFromConsoleArgs(ConsoleArgs *pconsoleArgs)
+void CarbonTestConsole::ProcessConsoleArgs(ConsoleArgs *pconsoleArgs)
 {
-	SPX_INIT_HR(hr);
+    if (pconsoleArgs->m_strRunSampleName.length() > 0)
+    {
+        RunSample(pconsoleArgs->m_strRunSampleName);
+    }
 
-	if (pconsoleArgs->m_strRunSampleName.length() > 0)
-	{
-		hr = RunSample(pconsoleArgs->m_strRunSampleName);
-	}
+    EnsureInit(pconsoleArgs->m_fMicrophoneInput, pconsoleArgs->m_strInput, pconsoleArgs->m_strEndpointUri, pconsoleArgs->m_strSubscriptionKey);
 
-	if (SPX_SUCCEEDED(hr))
-	{
-		hr = EnsureInit(
-				pconsoleArgs->m_fMicrophoneInput,
-				pconsoleArgs->m_strInput,
-				pconsoleArgs->m_strEndpointUri,
-				pconsoleArgs->m_strSubscriptionKey);
-	}
+    if (pconsoleArgs->m_fRecognizeAsync)
+    {
+        RecognizeAsync();
+    }
 
-	if (SPX_SUCCEEDED(hr) && pconsoleArgs->m_fRecognizeAsync)
-	{
-		hr = RecognizeAsync();
-	}
-
-	if (SPX_SUCCEEDED(hr) && pconsoleArgs->m_fContinuousRecognition)
-	{
-		hr = ContinuousRecognition(pconsoleArgs->m_continuousRecognitionSeconds);
-	}
-
-	SPX_RETURN_HR(hr);
+    if (pconsoleArgs->m_fContinuousRecognition)
+    {
+        ContinuousRecognition(pconsoleArgs->m_continuousRecognitionSeconds);
+    }
 }
 
 void CarbonTestConsole::DisplayConsoleHeader()
@@ -307,23 +283,23 @@ void CarbonTestConsole::DisplayConsoleUsage()
     ConsoleWriteLine(L"  ctc [/speech | /intent | /commands] {input} {auth} {additional}");
     ConsoleWriteLine(L"");
     ConsoleWriteLine(L"     Input: /input:[microphone | {waveFileName}]");
-	ConsoleWriteLine(L"");
-	ConsoleWriteLine(L"       /input:microphone      Use the default microphone for audio input.");
-	ConsoleWriteLine(L"       /input:{waveFileName}  Use WAV file for audio input.");
-	ConsoleWriteLine(L"");
-	ConsoleWriteLine(L"     Authentication:");
-	ConsoleWriteLine(L"");
-	ConsoleWriteLine(L"       /endpoint:{uri}        Use {uri} as the USP endpoint.");
-	ConsoleWriteLine(L"       /subscription:{key}    Use {key} as the subscription key.");
+    ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"       /input:microphone      Use the default microphone for audio input.");
+    ConsoleWriteLine(L"       /input:{waveFileName}  Use WAV file for audio input.");
+    ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"     Authentication:");
+    ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"       /endpoint:{uri}        Use {uri} as the USP endpoint.");
+    ConsoleWriteLine(L"       /subscription:{key}    Use {key} as the subscription key.");
     ConsoleWriteLine(L"");
     ConsoleWriteLine(L"     Additional:");
     ConsoleWriteLine(L"");
-	ConsoleWriteLine(L"       /single                Use RecognizeAsync for a single utterance.");
-	ConsoleWriteLine(L"       /continuous:{seconds}  Use [Start/Stop]ContinuousRecognition, waiting");
-	ConsoleWriteLine(L"                              {seconds} in between starting and stopping.");
-	ConsoleWriteLine(L"");
-	ConsoleWriteLine(L"       /sample:{sampleName}   Run the sample named {sampleName}.");
-	ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"       /single                Use RecognizeAsync for a single utterance.");
+    ConsoleWriteLine(L"       /continuous:{seconds}  Use [Start/Stop]ContinuousRecognition, waiting");
+    ConsoleWriteLine(L"                              {seconds} in between starting and stopping.");
+    ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"       /sample:{sampleName}   Run the sample named {sampleName}.");
+    ConsoleWriteLine(L"");
     ConsoleWriteLine(L"       /debugbreak            Stops program execution and waits for debugger.");
     ConsoleWriteLine(L"       /interactive           Allows interactive Carbon use via console window.");
     ConsoleWriteLine(L"");
@@ -354,151 +330,122 @@ void CarbonTestConsole::ConsoleWriteLine(const wchar_t* pszFormat, ...)
 
 bool CarbonTestConsole::ConsoleReadLine(std::wstring& str)
 {
-	const int cchMax = 1024;
-	str.reserve(cchMax);
-	str[0] = L'\0';
+    const int cchMax = 1024;
+    str.reserve(cchMax);
+    str[0] = L'\0';
 
-	wchar_t* data = (wchar_t*)str.data(); // should use CX17 .data(); VC2017 works fine; might not work cross-platform
-	str = fgetws(data, cchMax - 1, stdin);
+    wchar_t* data = (wchar_t*)str.data(); // should use CX17 .data(); VC2017 works fine; might not work cross-platform
+    str = fgetws(data, cchMax - 1, stdin);
 
-	return str.length() > 0;
+    return str.length() > 0;
 }
 
 bool CarbonTestConsole::GetConsoleInput(std::wstring& str)
 {
     DisplayConsolePrompt();
 
-	bool readLine = ConsoleReadLine(str);
-	auto lastLF = str.find_last_of(L'\n');
+    bool readLine = ConsoleReadLine(str);
+    auto lastLF = str.find_last_of(L'\n');
 
-	if (lastLF != std::wstring::npos)
-	{
-		str.resize(lastLF);
-	}
+    if (lastLF != std::wstring::npos)
+    {
+        str.resize(lastLF);
+    }
 
-	return str.length() > 0;
+    return str.length() > 0;
 }
 
-SPXHR CarbonTestConsole::ProcessConsoleInput(const wchar_t* psz)
+void CarbonTestConsole::ProcessConsoleInput(const wchar_t* psz)
 {
-	SPX_INIT_HR(hr);
-
     if (_wcsicmp(psz, L"help") == 0 || _wcsicmp(psz, L"?") == 0)
     {
-        hr = ConsoleInput_Help();
+        ConsoleInput_Help();
     }
     else if (_wcsnicmp(psz, L"help ", wcslen(L"help ")) == 0)
     {
-        hr = ConsoleInput_HelpOn(psz + wcslen(L"help "));
+        ConsoleInput_HelpOn(psz + wcslen(L"help "));
     }
-
-	SPX_RETURN_HR(hr);
 }
 
-SPXHR CarbonTestConsole::ConsoleInput_Help()
+void CarbonTestConsole::ConsoleInput_Help()
 {
     ConsoleWriteLine(L"HELP Not Yet Implemented...");
-    return SPX_OK;
 }
 
-SPXHR CarbonTestConsole::ConsoleInput_HelpOn(const wchar_t* psz)
+void CarbonTestConsole::ConsoleInput_HelpOn(const wchar_t* psz)
 {
     ConsoleWriteLine(L"HELP on %s Not Yet Implemented...", psz);
-    return SPX_OK;
 }
 
-SPXHR CarbonTestConsole::ConsoleInput_Recognizer(const wchar_t *psz)
+void CarbonTestConsole::ConsoleInput_Recognizer(const wchar_t *psz)
 {
-	SPX_INIT_HR(hr);
-
-	// TODO: ROBCH: Implement this methods
+    // TODO: ROBCH: Implement this methods
 
     // if (_wcsicmp(psz, L"foo") == 0)
     // {
-    //     hr = ConsoleInput_Recognizer_FooBar();
+    //     ConsoleInput_Recognizer_FooBar();
     // }
     // else if (_wcsnicmp(psz, L"foo_with_param ", wcslen(L"foo_with_param ")) == 0)
     // {
-    //     hr = ConsoleInput_Recognizer_Foo(psz + wcslen(L"foo_with_param  "));
+    //     ConsoleInput_Recognizer_Foo(psz + wcslen(L"foo_with_param  "));
     // }
     // else if (_wcsicmp(psz, L"baz") == 0)
     // {
-    //     hr = ConsoleInput_Recognizer_Baz();
+    //     ConsoleInput_Recognizer_Baz();
     // }
-
-	SPX_RETURN_HR(hr);
 }
 
-SPXHR CarbonTestConsole::EnsureInit(bool fMicrophone, 
-									const std::wstring &strInputFileName, 
-									const std::wstring& strEndpointUri, 
-									const std::wstring& strSubscriptionKey)
+void CarbonTestConsole::EnsureInit(bool fMicrophone, 
+                                   const std::wstring &strInputFileName, 
+                                   const std::wstring& strEndpointUri, 
+                                   const std::wstring& strSubscriptionKey)
 {
-	SPX_INIT_HR(hr);
-
-	if (NeedsInit())
-	{
-		hr = Init(fMicrophone, strInputFileName, strEndpointUri, strSubscriptionKey);
-	}
-
-	SPX_RETURN_HR(hr);
-}
-
-SPXHR CarbonTestConsole::Term()
-{
-	SPX_INIT_HR(hr);
-
-	// TODO: ROBCH: implement this method
-
-	//m_recognizer = nullptr;
-	//m_speechRecognizer = nullptr;
-	//m_intentRecognizer = nullptr;
-	//m_commandSystem = nullptr;
-
-	SPX_RETURN_HR(hr);
-}
-
-SPXHR CarbonTestConsole::Init(bool fMicrophone,
-							  const std::wstring &strInputFileName,
-							  const std::wstring& strEndpointUri,
-							  const std::wstring& strSubscriptionKey)
-{
-    SPXHR hr = InitRecognizer();
-
-    if (SPX_SUCCEEDED(hr))
+    if (NeedsInit())
     {
-        hr = InitCommandSystem();
+        Init(fMicrophone, strInputFileName, strEndpointUri, strSubscriptionKey);
     }
+}
 
-    if (SPX_FAILED(hr))
+void CarbonTestConsole::Term()
+{
+    // TODO: ROBCH: implement this method
+
+    //m_recognizer = nullptr;
+    //m_speechRecognizer = nullptr;
+    //m_intentRecognizer = nullptr;
+    //m_commandSystem = nullptr;
+}
+
+void CarbonTestConsole::Init(bool fMicrophone, const std::wstring &strInputFileName, const std::wstring& strEndpointUri, const std::wstring& strSubscriptionKey)
+{
+    try
     {
-        auto ignore = Term();
+        InitRecognizer();
+        InitCommandSystem();
     }
-
-	SPX_RETURN_HR(hr);
+    catch (std::exception ex)
+    {
+        Term();
+    }
 }
 
-SPXHR CarbonTestConsole::InitRecognizer()
+void CarbonTestConsole::InitRecognizer()
 {
-	SPX_INIT_HR(hr);
-	// TODO: ROBCH: implement this method
-	SPX_RETURN_HR(hr);
+    // TODO: ROBCH: implement this method
 }
 
-SPXHR CarbonTestConsole::InitCommandSystem()
+void CarbonTestConsole::InitCommandSystem()
 {
-	SPX_INIT_HR(hr);
-	// TODO: ROBCH: implement this method
-	SPX_RETURN_HR(hr);
+    // TODO: ROBCH: implement this method
 }
 
 void CarbonTestConsole::WaitForDebugger()
 {
-	// TODO: ROBCH: Implement this methods
-	PAL_DebugBreak();
-	
-	//uint16_t msWaitForDebugger = 30 * 1000;
-	//uint16_t msSleepPeriod = 100;
+    // TODO: ROBCH: Implement this methods
+    PAL_DebugBreak();
+    
+    //uint16_t msWaitForDebugger = 30 * 1000;
+    //uint16_t msSleepPeriod = 100;
     //bool fDebugBreak = false;
 
     //for(DWORD dwTickStart = GetTickCount(); GetTickCount() - dwTickStart < msWaitForDebugger; Sleep(msSleepPeriod))
@@ -516,30 +463,67 @@ void CarbonTestConsole::WaitForDebugger()
     //}
 }
 
-SPXHR CarbonTestConsole::RecognizeAsync()
+void CarbonTestConsole::RecognizeAsync()
 {
-	SPX_INIT_HR(hr);
-	// TODO: ROBCH: implement this method
-	SPX_RETURN_HR(hr);
+    SPX_TRACE_INFO("CTC: RecognizeAsync...");
+
+    // TODO: ROBCH: implement this method
+
+    SPX_TRACE_INFO("CTC: RecognizeAsync... Done!");
 }
 
-SPXHR CarbonTestConsole::ContinuousRecognition(uint16_t seconds)
+void CarbonTestConsole::ContinuousRecognition(uint16_t seconds)
 {
-	SPX_INIT_HR(hr);
-	// TODO: ROBCH: implement this method
-	SPX_RETURN_HR(hr);
+    SPX_TRACE_INFO("CTC: ContinuousRecognition...");
+
+    // TODO: ROBCH: implement this method
+
+    SPX_TRACE_INFO("CTC: ContinuousRecognition... Done!");
 }
 
-SPXHR CarbonTestConsole::RunSample(const std::wstring& strSampleName)
+void CarbonTestConsole::RunSample(const std::wstring& strSampleName)
 {
-	SPX_INIT_HR(hr);
-	// TODO: ROBCH: implement this method
-	SPX_RETURN_HR(hr);
+    SPX_TRACE_INFO("CTC: RunSample('%S')...", strSampleName.c_str());
+
+    // TODO: ROBCH: implement this method
+    throw new std::exception("hmm... we shoudl do something about that");
+
+    SPX_TRACE_INFO("CTC: RunSample('%S')... Done!", strSampleName.c_str());
+}
+
+void CarbonTestConsole::RunInteractivePrompt()
+{
+    std::wstring strInput;
+    ConsoleWriteLine(L"Enter you command (? for help, EXIT to exit)...");
+    while (GetConsoleInput(strInput))
+    {
+        if (_wcsicmp(strInput.c_str(), L"exit") == 0) break;
+        if (_wcsicmp(strInput.c_str(), L"quit") == 0) break;
+        ProcessConsoleInput(strInput.c_str());
+    }
 }
 
 int __cdecl wmain(int argc, const wchar_t* argv[])
 {
-	CarbonTestConsole test;
-	auto result = test.Run(argc, argv);
-}
+    SPX_DBG_TRACE_SCOPE("CTC.exe (Carbon Test Console) started", "CTC.exe terminated");
 
+    auto unhandledException = []() ->void { SPX_TRACE_ERROR("CTC.exe: Unhandled exception!"); };
+    set_terminate(unhandledException);
+
+    try
+    {
+        CarbonTestConsole test;
+        auto result = test.Run(argc, argv);
+        return result;
+    }
+    catch (std::exception e)
+    {
+        SPX_TRACE_ERROR("CTC.exe: Unhandled exception on main thread! what=%s", e.what());
+        exit(0);
+    }
+    catch (...)
+    {
+        SPX_TRACE_ERROR("CTC.exe: Unhandled exception on main thread!");
+        exit(0);
+    }
+}

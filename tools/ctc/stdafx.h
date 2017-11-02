@@ -2,6 +2,7 @@
 
 #include "targetver.h"
 
+#include <exception>
 #include <stdio.h>
 #include <tchar.h>
 #include <stdarg.h>
