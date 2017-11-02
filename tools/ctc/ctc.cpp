@@ -271,6 +271,11 @@ void CarbonTestConsole::ProcessConsoleArgs(ConsoleArgs *pconsoleArgs)
     {
         ContinuousRecognition(pconsoleArgs->m_continuousRecognitionSeconds);
     }
+
+    if (pconsoleArgs->m_fInteractivePrompt)
+    {
+        RunInteractivePrompt();
+    }
 }
 
 void CarbonTestConsole::DisplayConsoleHeader()
@@ -364,6 +369,14 @@ void CarbonTestConsole::ProcessConsoleInput(const wchar_t* psz)
     else if (_wcsnicmp(psz, L"help ", wcslen(L"help ")) == 0)
     {
         ConsoleInput_HelpOn(psz + wcslen(L"help "));
+    }
+    else if (_wcsnicmp(psz, L"recognizer ", wcslen(L"recognizer ")) == 0)
+    {
+        ConsoleInput_Recognizer(psz + wcslen(L"recognizer "));
+    }
+    else if (_wcsnicmp(psz, L"reco ", wcslen(L"reco ")) == 0)
+    {
+        ConsoleInput_Recognizer(psz + wcslen(L"reco "));
     }
 }
 
