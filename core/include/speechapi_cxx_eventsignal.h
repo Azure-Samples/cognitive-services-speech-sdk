@@ -13,15 +13,20 @@ public:
     EventSignal(){};
     virtual ~EventSignal(){};
 
-    using Callback = void (*) (const T& eventArgs);
+    using Callback1 = void(*) (const T& eventArgs);
+    using Callback2 = void(*) (const T& eventArgs, void* pvContext);
 
-    EventSignal& operator+=(Callback callback) { Connect(callback); return *this; }
-    EventSignal& operator-=(Callback callback) { Disconnect(callback); return *this; }
+    EventSignal& operator+=(Callback1 callback1) { Connect(callback1); return *this; }
+    EventSignal& operator-=(Callback1 callback1) { Disconnect(callback1); return *this; }
 
     void operator()(const T& t) { Signal(t); }
 
-    void Connect(Callback callback) { throw nullptr; };
-    void Disconnect(Callback callback) { throw nullptr; };
+    void Connect(Callback1 callback) { throw nullptr; };
+    void Disconnect(Callback1 callback) { throw nullptr; };
+
+    void Connect(Callback2 callback, void* pvContext) { throw nullptr; };
+    void Disconnect(Callback2 callback, void* pvContext = nullptr) { throw nullptr; };
+    void Disconnect(void* pvContext) { throw nullptr; };
 
     void DisconnectAll() { throw nullptr; };
 
@@ -35,7 +40,8 @@ private:
 
     EventSignal& operator=(const EventSignal&) = delete;
 
-    std::list<Callback> m_callbacks;
+    std::list<Callback1> m_callbacks1;
+    std::list<std::pair<void*, Callback2>> m_callbacks2;
 };
 
 }; // CARBON_NAMESPACE_ROOT

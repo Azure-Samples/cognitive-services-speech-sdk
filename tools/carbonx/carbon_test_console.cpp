@@ -177,10 +177,8 @@ bool CarbonTestConsole::ValidateConsoleArgs(ConsoleArgs *pconsoleArgs)
     }
     else if (pconsoleArgs->m_strRecognizerType.length() > 0)
     {
-        pconsoleArgs->m_fRecognizeAsync = !pconsoleArgs->m_fCommandSystem;
+        pconsoleArgs->m_fRecognizeAsync = !pconsoleArgs->m_fCommandSystem && !pconsoleArgs->m_fInteractivePrompt;
     }
-
-    if (pconsoleArgs)
 
     return fValid;
 }
@@ -302,21 +300,29 @@ void CarbonTestConsole::ProcessConsoleInput(const wchar_t* psz)
     {
         ConsoleInput_HelpOn(psz + wcslen(L"help "));
     }
+    else if (_wcsnicmp(psz, L"sample ", wcslen(L"sample ")) == 0)
+    {
+        RunSample(psz + wcslen(L"sample "));
+    }
     else if (_wcsnicmp(psz, L"recognizer ", wcslen(L"recognizer ")) == 0)
     {
-        ConsoleInput_Recognizer(psz + wcslen(L"recognizer "));
+        ConsoleInput_Recognizer(psz + wcslen(L"recognizer "), m_recognizer);
     }
     else if (_wcsnicmp(psz, L"speech ", wcslen(L"speech ")) == 0)
     {
-        ConsoleInput_Speech(psz + wcslen(L"speech "));
+        ConsoleInput_SpeechRecognizer(psz + wcslen(L"speech "), m_speechRecognizer);
     }
     else if (_wcsnicmp(psz, L"intent ", wcslen(L"intent ")) == 0)
     {
-        ConsoleInput_Intent(psz + wcslen(L"intent "));
+        ConsoleInput_IntentRecognizer(psz + wcslen(L"intent "), m_intentRecognizer);
     }
     else if (_wcsnicmp(psz, L"commandsystem ", wcslen(L"commandsystem ")) == 0)
     {
         ConsoleInput_CommandSystem(psz + wcslen(L"commandsystem "));
+    }
+    else
+    {
+        ConsoleWriteLine(L"\nUnknown command: '%s'.\n\nUse 'HELP' for a list of valid commands.\n", psz);
     }
 }
 
@@ -325,10 +331,11 @@ void CarbonTestConsole::ConsoleInput_Help()
     ConsoleWriteLine(L"");
     ConsoleWriteLine(L"COMMANDs: ");
     ConsoleWriteLine(L"");
-    ConsoleWriteLine(L"    recognizer       Access methods/properties/events on the base RECOGNIZER object.");
+    ConsoleWriteLine(L"    intent           Access methods/properties/events on the base RECOGNIZER object.");
     ConsoleWriteLine(L"    speech           Access methods/properties/events on the SPEECH recognizer object.");
     ConsoleWriteLine(L"    intent           Access methods/properties/events on the INTENT recognizer object.");
     ConsoleWriteLine(L"    commandsystem    Access methods/properties/events on the COMMAND SYSTEM object.");
+    ConsoleWriteLine(L"    sample {name}    Run the sample named 'NAME'.");
     ConsoleWriteLine(L"    help {command}   Get help w/ 'recognizer', 'speech', 'intent', or 'commandsystem' commands.");
     ConsoleWriteLine(L"    exit             Exit interactive mode.");
     ConsoleWriteLine(L"");
@@ -449,76 +456,282 @@ void CarbonTestConsole::ConsoleInput_HelpOnCommandSystem()
     ConsoleWriteLine(L"");
 }
 
-void CarbonTestConsole::ConsoleInput_Recognizer(const wchar_t* psz)
+void CarbonTestConsole::ConsoleInput_Recognizer(const wchar_t* psz, std::shared_ptr<BaseAsyncRecognizer>& recognizer)
 {
-    // TODO: ROBCH: Implement this methods
-
-    // if (_wcsicmp(psz, L"foo") == 0)
-    // {
-    //     ConsoleInput_Recognizer_FooBar();
-    // }
-    // else if (_wcsnicmp(psz, L"foo_with_param ", wcslen(L"foo_with_param ")) == 0)
-    // {
-    //     ConsoleInput_Recognizer_Foo(psz + wcslen(L"foo_with_param  "));
-    // }
-    // else if (_wcsicmp(psz, L"baz") == 0)
-    // {
-    //     ConsoleInput_Recognizer_Baz();
-    // }
+     if (_wcsicmp(psz, L"isenabled") == 0)
+     {
+         Recognizer_IsEnabled(recognizer);
+     }
+     else if (_wcsicmp(psz, L"enable") == 0)
+     {
+         Recognizer_Enable(recognizer);
+     }
+     else if (_wcsicmp(psz, L"disable") == 0)
+     {
+         Recognizer_Disable(recognizer);
+     }
+     else if (_wcsicmp(psz, L"recognize") == 0)
+     {
+         Recognizer_Recognize(recognizer);
+     }
+     else if (_wcsicmp(psz, L"startcontinuous") == 0)
+     {
+         Recognizer_StartContinuousRecognition(recognizer);
+     }
+     else if (_wcsicmp(psz, L"stopcontinuous") == 0)
+     {
+         Recognizer_StopContinuousRecognition(recognizer);
+     }
+     else if (_wcsnicmp(psz, L"sessionstarted ", wcslen(L"sessionstarted ")) == 0)
+     {
+         Recognizer_Event(psz + wcslen(L"sessionstarted "), m_recognizer->SessionStarted, Recognizer_SessionStartedHandler);
+     }
+     else if (_wcsnicmp(psz, L"sessionstopped ", wcslen(L"sessionstopped ")) == 0)
+     {
+         Recognizer_Event(psz + wcslen(L"sessionstopped "), m_recognizer->SessionStopped, Recognizer_SessionStoppedHandler);
+     }
+     else if (_wcsnicmp(psz, L"soundstarted ", wcslen(L"soundstarted ")) == 0)
+     {
+         Recognizer_Event(psz + wcslen(L"soundstarted "), m_recognizer->SoundStarted, Recognizer_SoundStartedHandler);
+     }
+     else if (_wcsnicmp(psz, L"soundstopped ", wcslen(L"soundstopped ")) == 0)
+     {
+         Recognizer_Event(psz + wcslen(L"soundstopped "), m_recognizer->SoundStopped, Recognizer_SoundStoppedHandler);
+     }
+     else if (_wcsnicmp(psz, L"intermediateresult ", wcslen(L"intermediateresult ")) == 0)
+     {
+         Recognizer_Event(psz + wcslen(L"intermediateresult "), m_recognizer->IntermediateResult, Recognizer_IntermediateResultHandler);
+     }
+     else if (_wcsnicmp(psz, L"finalresult ", wcslen(L"finalresult ")) == 0)
+     {
+         Recognizer_Event(psz + wcslen(L"finalresult "), m_recognizer->FinalResult, Recognizer_FinalResultHandler);
+     }
+     else if (_wcsnicmp(psz, L"nomatch ", wcslen(L"nomatch ")) == 0)
+     {
+         Recognizer_Event(psz + wcslen(L"nomatch "), m_recognizer->NoMatch, Recognizer_NoMatchHandler);
+     }
+     else if (_wcsnicmp(psz, L"canceled ", wcslen(L"canceled ")) == 0)
+     {
+         Recognizer_Event(psz + wcslen(L"canceled "), m_recognizer->Canceled, Recognizer_CanceledHandler);
+     }
+     else
+     {
+         ConsoleWriteLine(L"\nUnknown method/event: '%s'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
+     }
 }
 
-void CarbonTestConsole::ConsoleInput_Speech(const wchar_t* psz)
+void CarbonTestConsole::ConsoleInput_SpeechRecognizer(const wchar_t* psz, std::shared_ptr<SpeechRecognizer>& speechRecognizer)
 {
-    // TODO: ROBCH: Implement this methods
-
-    // if (_wcsicmp(psz, L"foo") == 0)
-    // {
-    //     ConsoleInput_Recognizer_FooBar();
-    // }
-    // else if (_wcsnicmp(psz, L"foo_with_param ", wcslen(L"foo_with_param ")) == 0)
-    // {
-    //     ConsoleInput_Recognizer_Foo(psz + wcslen(L"foo_with_param  "));
-    // }
-    // else if (_wcsicmp(psz, L"baz") == 0)
-    // {
-    //     ConsoleInput_Recognizer_Baz();
-    // }
+    if (_wcsicmp(psz, L"isenabled") == 0)
+    {
+        Recognizer_IsEnabled(speechRecognizer);
+    }
+    else if (_wcsicmp(psz, L"enable") == 0)
+    {
+        Recognizer_Enable(speechRecognizer);
+    }
+    else if (_wcsicmp(psz, L"disable") == 0)
+    {
+        Recognizer_Disable(speechRecognizer);
+    }
+    else if (_wcsicmp(psz, L"recognize") == 0)
+    {
+        Recognizer_Recognize(speechRecognizer);
+    }
+    else if (_wcsicmp(psz, L"startcontinuous") == 0)
+    {
+        Recognizer_StartContinuousRecognition(speechRecognizer);
+    }
+    else if (_wcsicmp(psz, L"stopcontinuous") == 0)
+    {
+        Recognizer_StopContinuousRecognition(speechRecognizer);
+    }
+    else if (_wcsnicmp(psz, L"sessionstarted ", wcslen(L"sessionstarted ")) == 0)
+    {
+        Recognizer_Event(psz + wcslen(L"sessionstarted "), m_speechRecognizer->SessionStarted, Recognizer_SessionStartedHandler);
+    }
+    else if (_wcsnicmp(psz, L"sessionstopped ", wcslen(L"sessionstopped ")) == 0)
+    {
+        Recognizer_Event(psz + wcslen(L"sessionstopped "), m_speechRecognizer->SessionStopped, Recognizer_SessionStoppedHandler);
+    }
+    else if (_wcsnicmp(psz, L"soundstarted ", wcslen(L"soundstarted ")) == 0)
+    {
+        Recognizer_Event(psz + wcslen(L"soundstarted "), m_speechRecognizer->SoundStarted, Recognizer_SoundStartedHandler);
+    }
+    else if (_wcsnicmp(psz, L"soundstopped ", wcslen(L"soundstopped ")) == 0)
+    {
+        Recognizer_Event(psz + wcslen(L"soundstopped "), m_speechRecognizer->SoundStopped, Recognizer_SoundStoppedHandler);
+    }
+    else if (_wcsnicmp(psz, L"intermediateresult ", wcslen(L"intermediateresult ")) == 0)
+    {
+        Recognizer_Event(psz + wcslen(L"intermediateresult "), m_speechRecognizer->IntermediateResult, SpeechRecognizer_IntermediateResultHandler);
+    }
+    else if (_wcsnicmp(psz, L"finalresult ", wcslen(L"finalresult ")) == 0)
+    {
+        Recognizer_Event(psz + wcslen(L"finalresult "), m_speechRecognizer->FinalResult, SpeechRecognizer_FinalResultHandler);
+    }
+    else if (_wcsnicmp(psz, L"nomatch ", wcslen(L"nomatch ")) == 0)
+    {
+        Recognizer_Event(psz + wcslen(L"nomatch "), m_speechRecognizer->NoMatch, SpeechRecognizer_NoMatchHandler);
+    }
+    else if (_wcsnicmp(psz, L"canceled ", wcslen(L"canceled ")) == 0)
+    {
+        Recognizer_Event(psz + wcslen(L"canceled "), m_speechRecognizer->Canceled, SpeechRecognizer_CanceledHandler);
+    }
+    else
+    {
+        ConsoleWriteLine(L"\nUnknown method/event: '%s'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
+    }
 }
 
-void CarbonTestConsole::ConsoleInput_Intent(const wchar_t* psz)
+void CarbonTestConsole::ConsoleInput_IntentRecognizer(const wchar_t* psz, std::shared_ptr<IntentRecognizer>& intentRecognizer)
 {
-    // TODO: ROBCH: Implement this methods
+    if (_wcsicmp(psz, L"isenabled") == 0)
+    {
+        Recognizer_IsEnabled(intentRecognizer);
+    }
+    else if (_wcsicmp(psz, L"enable") == 0)
+    {
+        Recognizer_Enable(intentRecognizer);
+    }
+    else if (_wcsicmp(psz, L"disable") == 0)
+    {
+        Recognizer_Disable(intentRecognizer);
+    }
+    else if (_wcsicmp(psz, L"recognize") == 0)
+    {
+        Recognizer_Recognize(intentRecognizer);
+    }
+    else if (_wcsicmp(psz, L"startcontinuous") == 0)
+    {
+        Recognizer_StartContinuousRecognition(intentRecognizer);
+    }
+    else if (_wcsicmp(psz, L"stopcontinuous") == 0)
+    {
+        Recognizer_StopContinuousRecognition(intentRecognizer);
+    }
+    else if (_wcsnicmp(psz, L"sessionstarted ", wcslen(L"sessionstarted ")) == 0)
+    {
+        Recognizer_Event(psz + wcslen(L"sessionstarted "), m_intentRecognizer->SessionStarted, Recognizer_SessionStartedHandler);
+    }
+    else if (_wcsnicmp(psz, L"sessionstopped ", wcslen(L"sessionstopped ")) == 0)
+    {
+        Recognizer_Event(psz + wcslen(L"sessionstopped "), m_intentRecognizer->SessionStopped, Recognizer_SessionStoppedHandler);
+    }
+    else if (_wcsnicmp(psz, L"soundstarted ", wcslen(L"soundstarted ")) == 0)
+    {
+        Recognizer_Event(psz + wcslen(L"soundstarted "), m_intentRecognizer->SoundStarted, Recognizer_SoundStartedHandler);
+    }
+    else if (_wcsnicmp(psz, L"soundstopped ", wcslen(L"soundstopped ")) == 0)
+    {
+        Recognizer_Event(psz + wcslen(L"soundstopped "), m_intentRecognizer->SoundStopped, Recognizer_SoundStoppedHandler);
+    }
+    else if (_wcsnicmp(psz, L"intermediateresult ", wcslen(L"intermediateresult ")) == 0)
+    {
+        Recognizer_Event(psz + wcslen(L"intermediateresult "), m_intentRecognizer->IntermediateResult, IntentRecognizer_IntermediateResultHandler);
+    }
+    else if (_wcsnicmp(psz, L"finalresult ", wcslen(L"finalresult ")) == 0)
+    {
+        Recognizer_Event(psz + wcslen(L"finalresult "), m_intentRecognizer->FinalResult, IntentRecognizer_FinalResultHandler);
+    }
+    else if (_wcsnicmp(psz, L"nomatch ", wcslen(L"nomatch ")) == 0)
+    {
+        Recognizer_Event(psz + wcslen(L"nomatch "), m_intentRecognizer->NoMatch, IntentRecognizer_NoMatchHandler);
+    }
+    else if (_wcsnicmp(psz, L"canceled ", wcslen(L"canceled ")) == 0)
+    {
+        Recognizer_Event(psz + wcslen(L"canceled "), m_intentRecognizer->Canceled, IntentRecognizer_CanceledHandler);
+    }
+    else
+    {
+        ConsoleWriteLine(L"\nUnknown method/event: '%s'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
+    }
+}
 
-    // if (_wcsicmp(psz, L"foo") == 0)
-    // {
-    //     ConsoleInput_Recognizer_FooBar();
-    // }
-    // else if (_wcsnicmp(psz, L"foo_with_param ", wcslen(L"foo_with_param ")) == 0)
-    // {
-    //     ConsoleInput_Recognizer_Foo(psz + wcslen(L"foo_with_param  "));
-    // }
-    // else if (_wcsicmp(psz, L"baz") == 0)
-    // {
-    //     ConsoleInput_Recognizer_Baz();
-    // }
+template <class T>
+void CarbonTestConsole::Recognizer_IsEnabled(std::shared_ptr<T>& recognizer)
+{
+    ConsoleWrite(L"\n%S.IsEnabled == ", typeid(*recognizer.get()).name());
+    bool enabled = recognizer->IsEnabled();
+    ConsoleWriteLine(L"%S\n", enabled ? "true" : "false");
+}
+
+template <class T>
+void CarbonTestConsole::Recognizer_Enable(std::shared_ptr<T>& recognizer)
+{
+    ConsoleWriteLine(L"\nEnabling %S...", typeid(*recognizer.get()).name());
+    recognizer->Enable();
+    ConsoleWriteLine(L"Ensabling %S... Done!\n", typeid(*recognizer.get()).name());
+
+    bool enabled = recognizer->IsEnabled();
+    ConsoleWriteLine(L"%S.IsEnabled == %S\n", typeid(*recognizer.get()).name(), enabled ? "true" : "false");
+}
+
+template <class T>
+void CarbonTestConsole::Recognizer_Disable(std::shared_ptr<T>& recognizer)
+{
+    ConsoleWriteLine(L"\nDisabling %S...", typeid(*recognizer.get()).name());
+    recognizer->Disable();
+    ConsoleWriteLine(L"Disabling %S... Done!\n", typeid(*recognizer.get()).name());
+
+    bool enabled = recognizer->IsEnabled();
+    ConsoleWriteLine(L"%S.IsEnabled == %S\n", typeid(*recognizer.get()).name(), enabled ? "true" : "false");
+}
+
+template <class T>
+void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<T>& recognizer)
+{
+    ConsoleWriteLine(L"\nRecognizeAsync %S...", typeid(*recognizer.get()).name());
+    auto future = recognizer->RecognizeAsync();
+    ConsoleWriteLine(L"RecognizeAsync %S... Waiting...", typeid(*recognizer.get()).name());
+    future.get();
+    ConsoleWriteLine(L"RecognizeAsync %S... Waiting... Done!\n", typeid(*recognizer.get()).name());
+}
+
+template <class T>
+void CarbonTestConsole::Recognizer_StartContinuousRecognition(std::shared_ptr<T>& recognizer)
+{
+    ConsoleWriteLine(L"\nStartContinuousRecognitionAsync %S...", typeid(*recognizer.get()).name());
+    auto future = recognizer->StartContinuousRecognitionAsync();
+    ConsoleWriteLine(L"StartContinuousRecognitionAsync %S... Waiting...", typeid(*recognizer.get()).name());
+    future.get();
+    ConsoleWriteLine(L"StartContinuousRecognitionAsync %S... Waiting... Done!\n", typeid(*recognizer.get()).name());
+}
+
+template <class T>
+void CarbonTestConsole::Recognizer_StopContinuousRecognition(std::shared_ptr<T>& recognizer)
+{
+    ConsoleWriteLine(L"\nStopContinuousRecognitionAsync %S...", typeid(*recognizer.get()).name());
+    auto future = recognizer->StopContinuousRecognitionAsync();
+    ConsoleWriteLine(L"StopContinuousRecognitionAsync %S... Waiting...", typeid(*recognizer.get()).name());
+    future.get();
+    ConsoleWriteLine(L"StopContinuousRecognitionAsync %S... Waiting... Done!\n", typeid(*recognizer.get()).name());
+}
+
+template <class T>
+void CarbonTestConsole::Recognizer_Event(const wchar_t *psz, EventSignal<T>& recognizerEvent, typename::EventSignal<T>::Callback2 callback)
+{
+    if (_wcsicmp(psz, L"connect") == 0)
+    {
+        recognizerEvent.Connect(callback, this);
+    }
+    else if (_wcsicmp(psz, L"disconnect") == 0)
+    {
+        recognizerEvent.Disconnect(callback, this);
+    }
+    else if (_wcsicmp(psz, L"disconnectall") == 0)
+    {
+        recognizerEvent.DisconnectAll();
+    }
+    else
+    {
+        ConsoleWriteLine(L"\nUnknown event method: '%s'.\n\nUse 'HELP' for a list of valid commands.", psz);
+    }
 }
 
 void CarbonTestConsole::ConsoleInput_CommandSystem(const wchar_t* psz)
 {
     // TODO: ROBCH: Implement this methods
-
-    // if (_wcsicmp(psz, L"foo") == 0)
-    // {
-    //     ConsoleInput_Recognizer_FooBar();
-    // }
-    // else if (_wcsnicmp(psz, L"foo_with_param ", wcslen(L"foo_with_param ")) == 0)
-    // {
-    //     ConsoleInput_Recognizer_Foo(psz + wcslen(L"foo_with_param  "));
-    // }
-    // else if (_wcsicmp(psz, L"baz") == 0)
-    // {
-    //     ConsoleInput_Recognizer_Baz();
-    // }
 }
 
 void CarbonTestConsole::EnsureInitCarbon(ConsoleArgs* pconsoleArgs)
@@ -576,34 +789,65 @@ void CarbonTestConsole::WaitForDebugger()
 
 void CarbonTestConsole::RecognizeAsync()
 {
-    SPX_TRACE_INFO("CarbonX: RecognizeAsync...");
-
-    // TODO: ROBCH: implement this method
-    // m_speechRecognizer->RecognizeAsync().get();
-
-    SPX_TRACE_INFO("CarbonX: RecognizeAsync... Done!");
+    if (m_intentRecognizer != nullptr)
+    {
+        Recognizer_Recognize(m_intentRecognizer);
+    }
+    else if (m_speechRecognizer != nullptr)
+    {
+        Recognizer_Recognize(m_speechRecognizer);
+    }
+    else if (m_recognizer != nullptr)
+    {
+        Recognizer_Recognize(m_recognizer);
+    }
 }
 
 void CarbonTestConsole::ContinuousRecognition(uint16_t seconds)
 {
-    SPX_TRACE_INFO("CarbonX: ContinuousRecognition...");
+    if (m_intentRecognizer != nullptr)
+    {
+        Recognizer_StartContinuousRecognition(m_intentRecognizer);
 
-    // TODO: ROBCH: implement this method
+        ConsoleWrite(L"Waiting for %d seconds... ", seconds);
+        std::this_thread::sleep_for(std::chrono::seconds(seconds));
+        ConsoleWriteLine(L"Done!");
 
-    // m_recognizer->StartContinuousRecognitionAsync();
-    // std::this_thread::sleep_for(std::chrono::seconds(seconds));
-    // m_recognizer->StopContinuousRecognitionAsync();
+        Recognizer_StopContinuousRecognition(m_intentRecognizer);
+    }
+    else if (m_speechRecognizer != nullptr)
+    {
+        Recognizer_StartContinuousRecognition(m_speechRecognizer);
 
-    SPX_TRACE_INFO("CarbonX: ContinuousRecognition... Done!");
+        ConsoleWrite(L"Waiting for %d seconds... ", seconds);
+        std::this_thread::sleep_for(std::chrono::seconds(seconds));
+        ConsoleWriteLine(L"Done!");
+
+        Recognizer_StopContinuousRecognition(m_speechRecognizer);
+    }
+    else if (m_recognizer != nullptr)
+    {
+        Recognizer_StartContinuousRecognition(m_recognizer);
+
+        ConsoleWrite(L"Waiting for %d seconds... ", seconds);
+        std::this_thread::sleep_for(std::chrono::seconds(seconds));
+        ConsoleWriteLine(L"Done!");
+
+        Recognizer_StopContinuousRecognition(m_recognizer);
+    }
 }
 
 void CarbonTestConsole::RunSample(const std::wstring& strSampleName)
 {
-    SPX_TRACE_INFO("CarbonX: RunSample('%S')...", strSampleName.c_str());
-
-    // TODO: ROBCH: implement this method
-
-    SPX_TRACE_INFO("CarbonX: RunSample('%S')... Done!", strSampleName.c_str());
+    if (_wcsicmp(strSampleName.c_str(), L"helloworld") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %s\n", strSampleName.c_str());
+        Sample_HelloWorld();
+    }
+    else
+    {
+        ConsoleWriteLine(L"\nUnknown sample: '%s'.\n", strSampleName.c_str());
+    }
 }
 
 void CarbonTestConsole::RunInteractivePrompt()
@@ -613,7 +857,15 @@ void CarbonTestConsole::RunInteractivePrompt()
     {
         if (_wcsicmp(strInput.c_str(), L"exit") == 0) break;
         if (_wcsicmp(strInput.c_str(), L"quit") == 0) break;
-        ProcessConsoleInput(strInput.c_str());
+
+        try
+        {
+            ProcessConsoleInput(strInput.c_str());
+        }
+        catch (NotYetImplementedException e)
+        {
+            SPX_TRACE_ERROR("CarbonX: Not Yet Implemented!!");
+        }
     }
 }
 

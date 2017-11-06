@@ -6,7 +6,7 @@
 
 namespace CARBON_NAMESPACE_ROOT :: Recognition :: Speech {
 
-    
+
 class SpeeechRecognitionEventArgs : public RecognitionEventArgs
 {
 public:

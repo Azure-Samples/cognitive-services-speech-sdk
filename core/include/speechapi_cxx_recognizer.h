@@ -56,7 +56,7 @@ public:
     EventSignal<SessionEventArgs> SessionStopped;
 
     EventSignal<SessionEventArgs> SoundStarted;
-    EventSignal<SessionEventArgs> SoundEnded;
+    EventSignal<SessionEventArgs> SoundStopped;
 
     EventSignal<RecoEventArgs> IntermediateResult;
     EventSignal<RecoEventArgs> FinalResult;
