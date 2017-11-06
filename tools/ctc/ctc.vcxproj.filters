@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>precomp_and_generated</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>precomp_and_generated</Filter>
+    </ClInclude>
+    <ClInclude Include="carbon_test_console.h" />
+    <ClInclude Include="carbonx_pal.h">
+      <Filter>platform_abstraction_levels</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>precomp_and_generated</Filter>
+    </ClCompile>
+    <ClCompile Include="carbon_test_console.cpp" />
+    <ClCompile Include="carbonx_pal_windows.cpp">
+      <Filter>platform_abstraction_levels</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="precomp_and_generated">
+      <UniqueIdentifier>{5c5aec5f-8df9-48a0-9c13-0f827322874f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="platform_abstraction_levels">
+      <UniqueIdentifier>{55e55381-ea83-40c0-bc66-28ebddd46647}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt">
+      <Filter>precomp_and_generated</Filter>
+    </Text>
+  </ItemGroup>
+</Project>

@@ -53,11 +53,28 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
         va_list argptr;
         va_start(argptr, pszFormat);
 
-        std::string format { pszTitle };
+        std::string format;
+        while (*pszFormat == '\n' || *pszFormat == '\r')
+        {
+            if (*pszFormat == '\r')
+            {
+                pszTitle = nullptr;
+            }
+
+            format += *pszFormat++;
+        }
+
+        if (pszTitle != nullptr)
+        {
+            format += pszTitle;
+        }
+
         format += pszFormat;
 
         if (format.length() < 1 || format[format.length() - 1] != '\n')
+        {
             format += "\n";
+        }
 
         vfprintf(stderr, format.c_str(), argptr);
 
