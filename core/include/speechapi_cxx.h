@@ -16,6 +16,8 @@
 #include <speechapi_cxx_speech_recognition_eventargs.h>
 #include <speechapi_cxx_speech_recognizer.h>
 
+#include <speechapi_cxx_recognizer_factory.h>
+
 #include <speechapi_cxx_todo_session.h>
 #include <speechapi_cxx_todo_recognition.h>
 #include <speechapi_cxx_todo_intent.h>

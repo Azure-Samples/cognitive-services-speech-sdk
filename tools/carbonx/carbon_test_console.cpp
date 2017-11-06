@@ -648,6 +648,11 @@ void CarbonTestConsole::ConsoleInput_IntentRecognizer(const wchar_t* psz, std::s
     }
 }
 
+void CarbonTestConsole::ConsoleInput_CommandSystem(const wchar_t* psz)
+{
+    // TODO: ROBCH: Implement this methods
+}
+
 template <class T>
 void CarbonTestConsole::Recognizer_IsEnabled(std::shared_ptr<T>& recognizer)
 {
@@ -729,11 +734,6 @@ void CarbonTestConsole::Recognizer_Event(const wchar_t *psz, EventSignal<T>& rec
     }
 }
 
-void CarbonTestConsole::ConsoleInput_CommandSystem(const wchar_t* psz)
-{
-    // TODO: ROBCH: Implement this methods
-}
-
 void CarbonTestConsole::EnsureInitCarbon(ConsoleArgs* pconsoleArgs)
 {
     if (ShouldInitCarbon())
@@ -767,12 +767,12 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType)
 {
     if (recognizerType == typeid(SpeechRecognizer).name())
     {
-        m_speechRecognizer = std::make_shared<SpeechRecognizer>();
+        m_speechRecognizer = RecognizerFactory::CreateSpeechRecognizer();
         m_recognizer = BaseAsyncRecognizer::From(m_speechRecognizer);
     }
     else if (recognizerType == typeid(IntentRecognizer).name())
     {
-        m_intentRecognizer= std::make_shared<IntentRecognizer>();
+        m_intentRecognizer = RecognizerFactory::CreateIntentRecognizer();
         m_recognizer = BaseAsyncRecognizer::From(m_intentRecognizer);
     }
 }
@@ -871,7 +871,7 @@ void CarbonTestConsole::RunInteractivePrompt()
 
 void CarbonTestConsole::Sample_HelloWorld()
 {
-    auto recognizer = new SpeechRecognizer(); // RecognizerFactory.CreateSpeechRecognizer();
+    auto recognizer = RecognizerFactory::CreateSpeechRecognizer();
 
     ConsoleWriteLine(L"Say something...");
     auto result = recognizer->RecognizeAsync().get();

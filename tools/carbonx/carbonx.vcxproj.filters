@@ -11,6 +11,57 @@
     <ClInclude Include="carbonx_pal.h">
       <Filter>platform_abstraction_levels</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_cxx.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_cxx_common.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_cxx_eventargs.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_cxx_eventsignal.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_cxx_recognition_eventargs.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_cxx_recognition_result.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_cxx_recognizer.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_cxx_recognizer_factory.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_cxx_session_eventargs.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_cxx_speech_recognition_eventargs.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_cxx_speech_recognition_result.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_cxx_speech_recognizer.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_cxx_todo.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_cxx_todo_intent.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_cxx_todo_recognition.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_cxx_todo_session.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\spxdebug.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -27,6 +78,9 @@
     </Filter>
     <Filter Include="platform_abstraction_levels">
       <UniqueIdentifier>{55e55381-ea83-40c0-bc66-28ebddd46647}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="speechapi_cxx_h">
+      <UniqueIdentifier>{00f5a3e6-a465-4281-91f6-cb235f836099}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

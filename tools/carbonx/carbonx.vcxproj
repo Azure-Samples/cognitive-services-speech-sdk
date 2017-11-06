@@ -161,6 +161,23 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\core\include\speechapi_cxx.h" />
+    <ClInclude Include="..\..\core\include\speechapi_cxx_common.h" />
+    <ClInclude Include="..\..\core\include\speechapi_cxx_eventargs.h" />
+    <ClInclude Include="..\..\core\include\speechapi_cxx_eventsignal.h" />
+    <ClInclude Include="..\..\core\include\speechapi_cxx_recognition_eventargs.h" />
+    <ClInclude Include="..\..\core\include\speechapi_cxx_recognition_result.h" />
+    <ClInclude Include="..\..\core\include\speechapi_cxx_recognizer.h" />
+    <ClInclude Include="..\..\core\include\speechapi_cxx_recognizer_factory.h" />
+    <ClInclude Include="..\..\core\include\speechapi_cxx_session_eventargs.h" />
+    <ClInclude Include="..\..\core\include\speechapi_cxx_speech_recognition_eventargs.h" />
+    <ClInclude Include="..\..\core\include\speechapi_cxx_speech_recognition_result.h" />
+    <ClInclude Include="..\..\core\include\speechapi_cxx_speech_recognizer.h" />
+    <ClInclude Include="..\..\core\include\speechapi_cxx_todo.h" />
+    <ClInclude Include="..\..\core\include\speechapi_cxx_todo_intent.h" />
+    <ClInclude Include="..\..\core\include\speechapi_cxx_todo_recognition.h" />
+    <ClInclude Include="..\..\core\include\speechapi_cxx_todo_session.h" />
+    <ClInclude Include="..\..\core\include\spxdebug.h" />
     <ClInclude Include="carbon_test_console.h" />
     <ClInclude Include="carbonx_pal.h" />
     <ClInclude Include="stdafx.h" />
