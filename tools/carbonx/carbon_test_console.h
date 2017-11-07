@@ -128,6 +128,7 @@ private:
     void RunInteractivePrompt();
 
     void Sample_HelloWorld();
+    void Sample_HelloWorld_C();
 
 private:
 

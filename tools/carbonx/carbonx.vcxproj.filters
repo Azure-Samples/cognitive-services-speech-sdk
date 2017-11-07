@@ -62,6 +62,27 @@
     <ClInclude Include="..\..\core\include\spxdebug.h">
       <Filter>speechapi_cxx_h</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_c.h">
+      <Filter>speechapi_c_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_c_common.h">
+      <Filter>speechapi_c_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_c_recognizer.h">
+      <Filter>speechapi_c_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_c_recognizer_factory.h">
+      <Filter>speechapi_c_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_c_result.h">
+      <Filter>speechapi_c_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_cxx_recognition_async_recognizer.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\core\include\speechapi_cxx_recognition_base_async_recognizer.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -81,6 +102,9 @@
     </Filter>
     <Filter Include="speechapi_cxx_h">
       <UniqueIdentifier>{00f5a3e6-a465-4281-91f6-cb235f836099}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="speechapi_c_h">
+      <UniqueIdentifier>{19a1ec82-589b-413e-a21d-8888c322e91d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -2,8 +2,10 @@
 #include <string>
 #include <speechapi_cxx_common.h>
 
+
 namespace CARBON_NAMESPACE_ROOT :: Recognition {
     
+
 class RecognitionEventArgs : public SessionEventArgs
 {
 public:
@@ -26,5 +28,6 @@ private:
 
     RecognitionEventArgs& operator=(const RecognitionEventArgs&) = delete;
 };
+
 
 }; // CARBON_NAMESPACE_ROOT :: Recognition

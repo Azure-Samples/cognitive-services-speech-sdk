@@ -3,7 +3,9 @@
 #include <string>
 #include <speechapi_cxx_common.h>
 
+
 namespace CARBON_NAMESPACE_ROOT {
+
 
 template <class T>
 class EventSignal
@@ -43,5 +45,6 @@ private:
     std::list<Callback1> m_callbacks1;
     std::list<std::pair<void*, Callback2>> m_callbacks2;
 };
+
 
 }; // CARBON_NAMESPACE_ROOT

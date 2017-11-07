@@ -10,6 +10,8 @@
 
 #include <speechapi_cxx_recognition_result.h>
 #include <speechapi_cxx_recognition_eventargs.h>
+#include <speechapi_cxx_recognition_async_recognizer.h>
+#include <speechapi_cxx_recognition_base_async_recognizer.h>
 #include <speechapi_cxx_recognizer.h>
 
 #include <speechapi_cxx_speech_recognition_result.h>

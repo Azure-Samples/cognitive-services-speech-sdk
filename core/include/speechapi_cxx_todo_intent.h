@@ -1,8 +1,9 @@
 #pragma once
-
 #include <speechapi_cxx_recognizer.h>
 
+
 namespace CARBON_NAMESPACE_ROOT::Recognition::Intent { // ---------------
+
 
 class IntentRecognizer : virtual public AsyncRecognizer<int, int>
 {
@@ -23,5 +24,6 @@ private:
 
     RecognizerParameters m_parameters;
 };
+
 
 }

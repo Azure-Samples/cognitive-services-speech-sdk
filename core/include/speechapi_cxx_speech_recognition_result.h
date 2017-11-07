@@ -2,7 +2,9 @@
 #include <string>
 #include <speechapi_cxx_common.h>
 
+
 namespace CARBON_NAMESPACE_ROOT :: Recognition :: Speech {
+
 
 class SpeechRecognitionResult final : public RecognitionResult
 {
@@ -29,5 +31,6 @@ private:
     std::wstring m_text;
     PayloadItems m_payload;    
 };
+
 
 }; // CARBON_NAMESPACE_ROOT :: Recognition

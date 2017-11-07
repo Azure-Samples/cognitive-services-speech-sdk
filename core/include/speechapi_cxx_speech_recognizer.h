@@ -4,11 +4,13 @@
 #include <memory>
 #include <string>
 #include <speechapi_cxx_common.h>
-#include <speechapi_cxx_recognizer.h>
+#include <speechapi_cxx_recognition_async_recognizer.h>
 #include <speechapi_cxx_speech_recognition_eventargs.h>
 #include <speechapi_cxx_speech_recognition_result.h>
 
+
 namespace CARBON_NAMESPACE_ROOT :: Recognition :: Speech {
+
 
 class SpeechRecognizer final : virtual public AsyncRecognizer<SpeechRecognitionResult, SpeeechRecognitionEventArgs>
 {

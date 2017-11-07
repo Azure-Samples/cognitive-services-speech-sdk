@@ -3,7 +3,9 @@
 #include <speechapi_cxx_common.h>
 #include <speechapi_cxx_todo_recognition.h>
 
+
 namespace CARBON_NAMESPACE_ROOT :: Recognition {
+
 
 class RecognitionResult
 {
@@ -34,5 +36,6 @@ private:
 
     RecognitionResult& operator=(const RecognitionResult&) = delete;
 };
+
 
 }; // CARBON_NAMESPACE_ROOT :: Recognition

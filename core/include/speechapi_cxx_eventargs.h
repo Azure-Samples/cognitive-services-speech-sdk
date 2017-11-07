@@ -2,7 +2,9 @@
 #include <string>
 #include <speechapi_cxx_common.h>
 
+
 namespace CARBON_NAMESPACE_ROOT {
+
     
 class EventArgs
 {
@@ -22,5 +24,6 @@ private:
 
     EventArgs& operator=(const EventArgs&) = delete;
 };
+
 
 }; // CARBON_NAMESPACE_ROOT
