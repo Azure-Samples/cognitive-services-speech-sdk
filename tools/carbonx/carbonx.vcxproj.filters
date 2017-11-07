@@ -11,76 +11,76 @@
     <ClInclude Include="carbonx_pal.h">
       <Filter>platform_abstraction_levels</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_cxx.h">
-      <Filter>speechapi_cxx_h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_cxx_common.h">
-      <Filter>speechapi_cxx_h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_cxx_eventargs.h">
-      <Filter>speechapi_cxx_h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_cxx_eventsignal.h">
-      <Filter>speechapi_cxx_h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_cxx_recognition_eventargs.h">
-      <Filter>speechapi_cxx_h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_cxx_recognition_result.h">
-      <Filter>speechapi_cxx_h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_cxx_recognizer.h">
-      <Filter>speechapi_cxx_h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_cxx_recognizer_factory.h">
-      <Filter>speechapi_cxx_h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_cxx_session_eventargs.h">
-      <Filter>speechapi_cxx_h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_cxx_speech_recognition_eventargs.h">
-      <Filter>speechapi_cxx_h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_cxx_speech_recognition_result.h">
-      <Filter>speechapi_cxx_h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_cxx_speech_recognizer.h">
-      <Filter>speechapi_cxx_h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_cxx_todo.h">
-      <Filter>speechapi_cxx_h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_cxx_todo_intent.h">
-      <Filter>speechapi_cxx_h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_cxx_todo_recognition.h">
-      <Filter>speechapi_cxx_h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_cxx_todo_session.h">
-      <Filter>speechapi_cxx_h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\include\spxdebug.h">
-      <Filter>speechapi_cxx_h</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_c.h">
+    <ClInclude Include="..\..\source\public\c_api\speechapi_c.h">
       <Filter>speechapi_c_h</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_c_common.h">
+    <ClInclude Include="..\..\source\public\c_api\speechapi_c_common.h">
       <Filter>speechapi_c_h</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_c_recognizer.h">
+    <ClInclude Include="..\..\source\public\c_api\speechapi_c_recognizer.h">
       <Filter>speechapi_c_h</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_c_recognizer_factory.h">
+    <ClInclude Include="..\..\source\public\c_api\speechapi_c_recognizer_factory.h">
       <Filter>speechapi_c_h</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_c_result.h">
+    <ClInclude Include="..\..\source\public\c_api\speechapi_c_result.h">
       <Filter>speechapi_c_h</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_cxx_recognition_async_recognizer.h">
+    <ClInclude Include="..\..\source\public\c_api\spxdebug.h">
+      <Filter>speechapi_c_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\public\cxx_api\speechapi_cxx.h">
       <Filter>speechapi_cxx_h</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\core\include\speechapi_cxx_recognition_base_async_recognizer.h">
+    <ClInclude Include="..\..\source\public\cxx_api\speechapi_cxx_common.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\public\cxx_api\speechapi_cxx_eventargs.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\public\cxx_api\speechapi_cxx_eventsignal.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\public\cxx_api\speechapi_cxx_recognition_async_recognizer.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\public\cxx_api\speechapi_cxx_recognition_base_async_recognizer.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\public\cxx_api\speechapi_cxx_recognition_eventargs.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\public\cxx_api\speechapi_cxx_recognition_result.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\public\cxx_api\speechapi_cxx_recognizer.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\public\cxx_api\speechapi_cxx_recognizer_factory.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\public\cxx_api\speechapi_cxx_session_eventargs.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\public\cxx_api\speechapi_cxx_speech_recognition_eventargs.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\public\cxx_api\speechapi_cxx_speech_recognition_result.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\public\cxx_api\speechapi_cxx_speech_recognizer.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\public\cxx_api\speechapi_cxx_todo.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\public\cxx_api\speechapi_cxx_todo_intent.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\public\cxx_api\speechapi_cxx_todo_recognition.h">
+      <Filter>speechapi_cxx_h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\public\cxx_api\speechapi_cxx_todo_session.h">
       <Filter>speechapi_cxx_h</Filter>
     </ClInclude>
   </ItemGroup>

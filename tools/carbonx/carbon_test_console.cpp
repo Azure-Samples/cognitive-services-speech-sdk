@@ -887,47 +887,45 @@ void CarbonTestConsole::Sample_HelloWorld()
 
 void CarbonTestConsole::Sample_HelloWorld_C()
 {
-    //wchar_t text[1024];
-
-    //SPXHR hr = SPX_OK;
-    //SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
-    //SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
-    //SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
-
-    //if (SPX_SUCCEEDED(hr))
-    //{
+    // SPXHR hr = SPX_OK;
+    // SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
+    // if (SPX_SUCCEEDED(hr))
+    // {
     //    hr = ::RecognizerFactory_CreateSpeechRecognzier_With_Defaults(&hreco);
-    //}
+    // }
 
-    //if (SPX_SUCCEEDED(hr))
-    //{
+    // SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
+    // if (SPX_SUCCEEDED(hr))
+    // {
     //    ConsoleWriteLine(L"Say something...");
     //    hr = ::Recognizer_RecognizeAsync(hreco, &hasync);
-    //}
+    // }
 
-    //if (SPX_SUCCEEDED(hr))
-    //{
+    // SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
+    // if (SPX_SUCCEEDED(hr))
+    // {
     //    hr = ::Recognizer_RecognizeAsync_WaitFor(hasync, 30 * 1000, &hresult);
-    //}
+    // }
 
-    //if (SPX_SUCCEEDED(hr))
-    //{
+    // wchar_t text[1024];
+    // if (SPX_SUCCEEDED(hr))
+    // {
     //    hr = ::Result_GetText(hresult, text, sizeof(text) / sizeof(text[0]));
-    //}
+    // }
 
-    //if (SPX_SUCCEEDED(hr))
-    //{
+    // if (SPX_SUCCEEDED(hr))
+    // {
     //    ConsoleWriteLine(L"You said %s", text);
-    //}
+    // }
 
-    //::Recognizer_AsyncHandle_Close(hresult);
-    //hasync = SPXHANDLE_INVALID;
+    // ::Recognizer_AsyncHandle_Close(hresult);
+    // hasync = SPXHANDLE_INVALID;
 
-    //::Recognizer_ResultHandle_Close(hresult);
-    //hresult = SPXHANDLE_INVALID;
+    // ::Recognizer_ResultHandle_Close(hresult);
+    // hresult = SPXHANDLE_INVALID;
 
-    //::Recognizer_Handle_Close(hreco);
-    //hreco = SPXHANDLE_INVALID;
+    // ::Recognizer_Handle_Close(hreco);
+    // hreco = SPXHANDLE_INVALID;
 }
 
 int __cdecl wmain(int argc, const wchar_t* argv[])
