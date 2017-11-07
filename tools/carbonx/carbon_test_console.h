@@ -40,9 +40,9 @@ private:
         bool m_fInteractivePrompt = false;
     };
 
-    bool ParseConsoleArgs(int argc, const wchar_t* argv[], ConsoleArgs *pconsoleArgs);
-    bool ValidateConsoleArgs(ConsoleArgs *pconsoleArgs);
-    void ProcessConsoleArgs(ConsoleArgs *pconsoleArgs);
+    bool ParseConsoleArgs(int argc, const wchar_t* argv[], ConsoleArgs* pconsoleArgs);
+    bool ValidateConsoleArgs(ConsoleArgs* pconsoleArgs);
+    void ProcessConsoleArgs(ConsoleArgs* pconsoleArgs);
 
     void DisplayConsoleHeader();
     void DisplayConsoleUsage();
@@ -62,9 +62,9 @@ private:
     void ConsoleInput_HelpOnIntent();
     void ConsoleInput_HelpOnCommandSystem();
 
-    void ConsoleInput_Recognizer(const wchar_t *psz, std::shared_ptr<BaseAsyncRecognizer>& recognizer);
-    void ConsoleInput_SpeechRecognizer(const wchar_t *psz, std::shared_ptr<SpeechRecognizer>& speechRecognizer);
-    void ConsoleInput_IntentRecognizer(const wchar_t *psz, std::shared_ptr<IntentRecognizer>& intentRecognizer);
+    void ConsoleInput_Recognizer(const wchar_t* psz, std::shared_ptr<BaseAsyncRecognizer>& recognizer);
+    void ConsoleInput_SpeechRecognizer(const wchar_t* psz, std::shared_ptr<SpeechRecognizer>& speechRecognizer);
+    void ConsoleInput_IntentRecognizer(const wchar_t* psz, std::shared_ptr<IntentRecognizer>& intentRecognizer);
 
     template <class T>
     void Recognizer_IsEnabled(std::shared_ptr<T>& recognizer);
@@ -85,7 +85,7 @@ private:
     void Recognizer_StopContinuousRecognition(std::shared_ptr<T>& recognizer);
 
     template <class T>
-    void Recognizer_Event(const wchar_t *psz, EventSignal<T>& recognizerEvent, typename::EventSignal<T>::Callback2 callback);
+    void Recognizer_Event(const wchar_t* psz, EventSignal<T>& recognizerEvent, typename::EventSignal<T>::Callback2 callback);
 
     static void Recognizer_SessionStartedHandler(const SessionEventArgs& e, void* pthis) {};
     static void Recognizer_SessionStoppedHandler(const SessionEventArgs& e, void* pthis) {};
@@ -107,12 +107,12 @@ private:
      static void IntentRecognizer_NoMatchHandler(const int& e, void* pthis) {};
      static void IntentRecognizer_CanceledHandler(const int& e, void* pthis) {};
 
-    void ConsoleInput_CommandSystem(const wchar_t *psz);
+    void ConsoleInput_CommandSystem(const wchar_t* psz);
 
     bool ShouldInitCarbon() { return m_recognizer == nullptr; }
-    void EnsureInitCarbon(ConsoleArgs *pconsoleArgs);
+    void EnsureInitCarbon(ConsoleArgs* pconsoleArgs);
 
-    void InitCarbon(ConsoleArgs *pconsoleArgs);
+    void InitCarbon(ConsoleArgs* pconsoleArgs);
     void TermCarbon();
 
     void InitRecognizer(const std::string& recognizerType);

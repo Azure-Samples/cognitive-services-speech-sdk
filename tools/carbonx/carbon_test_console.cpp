@@ -28,7 +28,7 @@ int CarbonTestConsole::Run(int argc, const wchar_t* argv[])
     return 0;
 }
 
-bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], ConsoleArgs *pconsoleArgs)
+bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], ConsoleArgs* pconsoleArgs)
 {
     std::wstring* pstrNextArg = nullptr;
     bool fNextArgRequired = false;
@@ -147,7 +147,7 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
     return !(fShowOptions || fNextArgRequired);
 }
 
-bool CarbonTestConsole::ValidateConsoleArgs(ConsoleArgs *pconsoleArgs)
+bool CarbonTestConsole::ValidateConsoleArgs(ConsoleArgs* pconsoleArgs)
 {
     auto fValid = true;
 
@@ -184,7 +184,7 @@ bool CarbonTestConsole::ValidateConsoleArgs(ConsoleArgs *pconsoleArgs)
     return fValid;
 }
 
-void CarbonTestConsole::ProcessConsoleArgs(ConsoleArgs *pconsoleArgs)
+void CarbonTestConsole::ProcessConsoleArgs(ConsoleArgs* pconsoleArgs)
 {
     if (pconsoleArgs->m_strRunSampleName.length() > 0)
     {
@@ -715,7 +715,7 @@ void CarbonTestConsole::Recognizer_StopContinuousRecognition(std::shared_ptr<T>&
 }
 
 template <class T>
-void CarbonTestConsole::Recognizer_Event(const wchar_t *psz, EventSignal<T>& recognizerEvent, typename::EventSignal<T>::Callback2 callback)
+void CarbonTestConsole::Recognizer_Event(const wchar_t* psz, EventSignal<T>& recognizerEvent, typename::EventSignal<T>::Callback2 callback)
 {
     if (_wcsicmp(psz, L"connect") == 0)
     {
