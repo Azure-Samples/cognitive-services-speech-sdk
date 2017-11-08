@@ -1,3 +1,6 @@
 [submodule "external/libwebsockets"]
 	path = external/libwebsockets
 	url = https://github.com/warmcat/libwebsockets
+[submodule "external/openssl"]
+	path = external/openssl
+	url = https://github.com/openssl/openssl
