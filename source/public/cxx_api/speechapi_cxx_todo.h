@@ -13,5 +13,4 @@ public:
 };
 
 
-};
-
+}; // CARBON_NAMESPACE_ROOT

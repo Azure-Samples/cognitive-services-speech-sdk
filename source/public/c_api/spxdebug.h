@@ -141,6 +141,12 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 //  SPX_ macro definitions
 //-------------------------------------------------------
 
+#ifdef __cplusplus
+#define SPX_STATIC_ASSERT_IS_BASE_OF(x, y)  static_assert(std::is_base_of<x, y>::value, "std::is_base_of<" ## # x ## ", " ## # y ## ">::value")
+#else
+#define SPX_STATIC_ASSERT_IS_BASE_OF(x, y)
+#endif
+
 #if defined(SPX_CONFIG_TRACE_INFO_WARN_ERR_VERBOSE) || defined(SPX_CONFIG_INCLUDE_ALL)
 #define SPX_TRACE_INFO(msg, ...)             __SPX_TRACE_INFO("SPX_TRACE_INFO: ", msg, __VA_ARGS__)
 #define SPX_TRACE_ERROR(msg, ...)            __SPX_TRACE_ERROR("SPX_TRACE_ERROR: ", msg, __VA_ARGS__)

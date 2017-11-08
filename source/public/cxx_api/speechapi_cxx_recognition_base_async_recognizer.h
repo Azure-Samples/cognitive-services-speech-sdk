@@ -7,7 +7,8 @@
 #include <speechapi_cxx_recognition_base_async_recognizer.h>
 
 
-namespace CARBON_NAMESPACE_ROOT :: Recognition {
+namespace CARBON_NAMESPACE_ROOT {
+namespace Recognition {
 
 
 class BaseAsyncRecognizer : public AsyncRecognizer<RecognitionResult, RecognitionEventArgs>
@@ -17,11 +18,11 @@ public:
     template <class T>
     static std::shared_ptr<BaseAsyncRecognizer> From(const std::shared_ptr<T> &recognizer) 
     {
-        static_assert(std::is_base_of<Recognizer, T>::value);
+        SPX_STATIC_ASSERT_IS_BASE_OF(Recognizer, T);
         return nullptr;
     }
 
 };
 
 
-}; // CARBON_NAMESPACE_ROOT :: Recognition
+} }; // CARBON_NAMESPACE_ROOT :: Recognition

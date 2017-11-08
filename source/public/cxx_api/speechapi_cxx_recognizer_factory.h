@@ -8,7 +8,8 @@
 using namespace CARBON_NAMESPACE_ROOT::Recognition::Speech;
 using namespace CARBON_NAMESPACE_ROOT::Recognition::Intent;
 
-namespace CARBON_NAMESPACE_ROOT :: Recognition {
+namespace CARBON_NAMESPACE_ROOT {
+namespace Recognition {
 
 
 class RecognizerFactory
@@ -42,4 +43,4 @@ private:
 };
 
 
-}; // CARBON_NAMESPACE_ROOT :: Recognition
+} }; // CARBON_NAMESPACE_ROOT :: Recognition

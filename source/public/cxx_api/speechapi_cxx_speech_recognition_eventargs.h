@@ -4,7 +4,9 @@
 #include <speechapi_cxx_recognition_eventargs.h>
 
 
-namespace CARBON_NAMESPACE_ROOT :: Recognition :: Speech {
+namespace CARBON_NAMESPACE_ROOT { 
+namespace Recognition {
+namespace Speech {
 
 
 class SpeeechRecognitionEventArgs : public RecognitionEventArgs
@@ -33,4 +35,4 @@ private:
 };
 
 
-}; // CARBON_NAMESPACE_ROOT :: Recognition
+} } }; // CARBON_NAMESPACE_ROOT :: Recognition :: Speech
