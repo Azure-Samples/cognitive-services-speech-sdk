@@ -9,7 +9,9 @@
 #include <speechapi_cxx_speech_recognition_result.h>
 
 
-namespace CARBON_NAMESPACE_ROOT :: Recognition :: Speech {
+namespace CARBON_NAMESPACE_ROOT {
+namespace Recognition {
+namespace Speech {
 
 
 class SpeechRecognizer final : virtual public AsyncRecognizer<SpeechRecognitionResult, SpeeechRecognitionEventArgs>
@@ -53,4 +55,4 @@ private:
 };
 
 
-}; // CARBON_NAMESPACE_ROOT :: Recognition
+} } }; // CARBON_NAMESPACE_ROOT :: Recognition :: Speech

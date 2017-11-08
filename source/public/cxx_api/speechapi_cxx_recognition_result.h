@@ -4,7 +4,8 @@
 #include <speechapi_cxx_todo_recognition.h>
 
 
-namespace CARBON_NAMESPACE_ROOT :: Recognition {
+namespace CARBON_NAMESPACE_ROOT {
+namespace Recognition {
 
 
 class RecognitionResult
@@ -38,4 +39,4 @@ private:
 };
 
 
-}; // CARBON_NAMESPACE_ROOT :: Recognition
+} }; // CARBON_NAMESPACE_ROOT :: Recognition

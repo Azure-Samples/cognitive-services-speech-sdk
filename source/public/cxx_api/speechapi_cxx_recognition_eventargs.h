@@ -3,8 +3,9 @@
 #include <speechapi_cxx_common.h>
 
 
-namespace CARBON_NAMESPACE_ROOT :: Recognition {
-    
+namespace CARBON_NAMESPACE_ROOT {
+namespace Recognition {
+
 
 class RecognitionEventArgs : public SessionEventArgs
 {
@@ -30,4 +31,4 @@ private:
 };
 
 
-}; // CARBON_NAMESPACE_ROOT :: Recognition
+} }; // CARBON_NAMESPACE_ROOT :: Recognition

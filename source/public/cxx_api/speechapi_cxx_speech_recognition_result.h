@@ -3,7 +3,9 @@
 #include <speechapi_cxx_common.h>
 
 
-namespace CARBON_NAMESPACE_ROOT :: Recognition :: Speech {
+namespace CARBON_NAMESPACE_ROOT {
+namespace Recognition {
+namespace Speech {
 
 
 class SpeechRecognitionResult final : public RecognitionResult
@@ -33,4 +35,4 @@ private:
 };
 
 
-}; // CARBON_NAMESPACE_ROOT :: Recognition
+} } }; // CARBON_NAMESPACE_ROOT :: Recognition :: Speech

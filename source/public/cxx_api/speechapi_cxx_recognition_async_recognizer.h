@@ -7,7 +7,8 @@
 #include <speechapi_cxx_session_eventargs.h>
 
 
-namespace CARBON_NAMESPACE_ROOT :: Recognition {
+namespace CARBON_NAMESPACE_ROOT {
+namespace Recognition {
 
 
 template <class RecoResult, class RecoEventArgs>
@@ -52,4 +53,4 @@ private:
 };
 
 
-}; // CARBON_NAMESPACE_ROOT :: Recognition
+} }; // CARBON_NAMESPACE_ROOT :: Recognition

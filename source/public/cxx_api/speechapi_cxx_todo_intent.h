@@ -2,7 +2,9 @@
 #include <speechapi_cxx_recognizer.h>
 
 
-namespace CARBON_NAMESPACE_ROOT::Recognition::Intent { // ---------------
+namespace CARBON_NAMESPACE_ROOT {
+namespace Recognition {
+namespace Intent {
 
 
 class IntentRecognizer : virtual public AsyncRecognizer<int, int>
@@ -26,4 +28,4 @@ private:
 };
 
 
-}
+} } }; // CARBON_NAMESPACE_ROOT :: Recognition :: Intent
