@@ -1,4 +1,6 @@
 #pragma once
+#include <spxerror.h>
+#include <spxdebug.h>
 #include <speechapi_c_common.h>
 
 SPXAPI RecognizerFactory_CreateSpeechRecognzier_With_Defaults(SPXRECOHANDLE* phreco);

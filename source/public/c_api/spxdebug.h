@@ -1,4 +1,5 @@
 #pragma once
+#include <spxdebug.h>
 
 //-------------------------------------------------------
 //  SPX_ and SPX_DBG_ macro configuration
@@ -242,13 +243,6 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 #define SPX_DBG_VERIFY(expr)                        (expr)
 #define SPX_DBG_VERIFY_WITH_MESSAGE(expr, ...)      (expr)
 #endif
-
-using SPXHR = uint32_t;
-#define SPX_OK           0x00000000;
-#define SPX_SUCCEEDED(x) ((x & 0x80000000) == 0)
-#define SPX_FAILED(x)    (!SPX_SUCCEEDED(x))   
-
-#define SPX_INIT_HR(hr)	 SPXHR hr = SPX_OK
 
 #if defined(SPX_CONFIG_REPORT_ON_FAIL) || defined(SPX_CONFIG_INCLUDE_ALL) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
 #define SPX_REPORT_ON_FAIL(hr)                                  \
