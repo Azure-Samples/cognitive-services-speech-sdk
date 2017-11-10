@@ -185,6 +185,7 @@
     <ClInclude Include="..\..\source\public\c_api\speechapi_c_recognizer_factory.h" />
     <ClInclude Include="..\..\source\public\c_api\speechapi_c_result.h" />
     <ClInclude Include="..\..\source\public\c_api\spxdebug.h" />
+    <ClInclude Include="..\..\source\public\c_api\spxerror.h" />
     <ClInclude Include="carbon_test_console.h" />
     <ClInclude Include="carbonx_pal.h" />
     <ClInclude Include="stdafx.h" />

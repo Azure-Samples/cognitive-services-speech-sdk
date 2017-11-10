@@ -3,6 +3,7 @@
 #include <speechapi_cxx_common.h>
 #include <speechapi_cxx_speech_recognizer.h>
 #include <speechapi_cxx_todo_intent.h>
+#include <speechapi_c_recognizer_factory.h>
 
 
 using namespace CARBON_NAMESPACE_ROOT::Recognition::Speech;
@@ -16,7 +17,19 @@ class RecognizerFactory
 {
 public:
 
-    static std::shared_ptr<SpeechRecognizer> CreateSpeechRecognizer() { return std::make_shared<SpeechRecognizer>(); }
+    static std::shared_ptr<SpeechRecognizer> CreateSpeechRecognizer()
+    {
+        SPX_INIT_HR(hr);
+
+        SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
+        if (SPX_SUCCEEDED(hr))
+        {
+            hr = ::RecognizerFactory_CreateSpeechRecognzier_With_Defaults(&hreco);
+        }
+
+        return std::make_shared<SpeechRecognizer>(hreco); 
+    }
+
     static std::shared_ptr<SpeechRecognizer> CreateSpeechRecognizer(bool passiveListeningEnaled) { throw nullptr; }
     static std::shared_ptr<SpeechRecognizer> CreateSpeechRecognizer(const std::wstring& language) { throw nullptr; };
     static std::shared_ptr<SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& filename) { throw nullptr; };

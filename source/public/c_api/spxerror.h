@@ -1,6 +1,7 @@
 #pragma once
 
-using SPXHR = uint32_t;
+typedef unsigned int SPXHR;
+
 #define SPX_NOERROR                 0x00000000;
 #define SPX_INIT_HR(hr)	            SPXHR hr = SPX_NOERROR
 
@@ -11,10 +12,10 @@ using SPXHR = uint32_t;
 #define __SPX_ERRCODE_FAILED(x)     (0x800f5000 | (x & 0x0fff))
 
 
-/*** SPXERR_NOTIMPL
+/*** SPXERR_NOT_IMPL
 *   The function is not implemented.
 */
-#define SPXERR_NOTIMPL              __SPX_ERRCODE_FAILED(0xfff)
+#define SPXERR_NOT_IMPL             __SPX_ERRCODE_FAILED(0xfff)
 
 /*** SPXERR_UNINITIALIZED
 *   The object has not been properly initialized.
@@ -26,3 +27,17 @@ using SPXHR = uint32_t;
 */
 #define SPXERR_ALREADY_INITIALIZED  __SPX_ERRCODE_FAILED(0x002)
 
+/*** SPXERR_UNHANDLED_EXCEPTION
+*   The object has already been initialized.
+*/
+#define SPXERR_UNHANDLED_EXCEPTION  __SPX_ERRCODE_FAILED(0x003)
+
+/*** SPXERR_NOT_FOUND
+*   The object or property was not found.
+*/
+#define SPXERR_NOT_FOUND            __SPX_ERRCODE_FAILED(0x004)
+
+/*** SPXERR_INVALID_ARG
+*   One or more arguments are not valid.
+*/
+#define SPXERR_INVALID_ARG          __SPX_ERRCODE_FAILED(0x004)

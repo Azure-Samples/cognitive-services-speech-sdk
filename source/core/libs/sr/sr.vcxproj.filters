@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="recognition_result.h" />
+    <ClInclude Include="recognizer.h" />
+    <ClInclude Include="recognizer_factory.h" />
+    <ClInclude Include="handle_table.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="recognition_result.cpp" />
+    <ClCompile Include="recognizer.cpp" />
+    <ClCompile Include="recognizer_factory.cpp" />
+    <ClCompile Include="handle_table.cpp" />
+  </ItemGroup>
+</Project>

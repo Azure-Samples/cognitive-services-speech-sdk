@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <speechapi_c.h>
 #include <speechapi_cxx_common.h>
 
 
@@ -12,13 +13,23 @@ class SpeechRecognitionResult final : public RecognitionResult
 {
 public:
 
-    SpeechRecognitionResult() :
-        RecognitionResult(m_resultId, m_reason, m_text, m_payload)
+    SpeechRecognitionResult(SPXRESULTHANDLE hresult) :
+        RecognitionResult(m_resultId, m_reason, m_text, m_payload),
+        m_hresult(hresult)
     {
-        throw nullptr;
+        SPX_DBG_TRACE_FUNCTION();
+
+        //TODO:ROBCH: check to make sure the hresult is valid
+        //throw nullptr;
     };
 
-    virtual ~SpeechRecognitionResult(){};
+    virtual ~SpeechRecognitionResult()
+    {
+        SPX_DBG_TRACE_FUNCTION();
+
+        ::Recognizer_ResultHandle_Close(m_hresult);
+        m_hresult = SPXHANDLE_INVALID;
+    };
 
     
 private:
@@ -27,6 +38,8 @@ private:
     SpeechRecognitionResult(const SpeechRecognitionResult&&) = delete;
 
     SpeechRecognitionResult& operator=(const SpeechRecognitionResult&) = delete;
+
+    SPXRESULTHANDLE m_hresult;
 
     std::wstring m_resultId;
     RecognitionReason m_reason;

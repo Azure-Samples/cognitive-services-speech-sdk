@@ -1,5 +1,4 @@
 #pragma once
-#include <spxerror.h>
 #include <spxdebug.h>
 #include <speechapi_c_common.h>
 

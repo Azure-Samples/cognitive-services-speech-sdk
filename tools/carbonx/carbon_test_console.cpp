@@ -9,6 +9,7 @@ CarbonTestConsole::CarbonTestConsole()
 
 CarbonTestConsole::~CarbonTestConsole()
 {
+    
     TermCarbon();
 }
 

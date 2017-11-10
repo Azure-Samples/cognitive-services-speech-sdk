@@ -16,7 +16,7 @@ class AsyncRecognizer : public Recognizer
 {
 public:
 
-    AsyncRecognizer(RecognizerParameters& parameters) :
+    AsyncRecognizer(RecognizerParameters& parameters) throw() :
         Recognizer(parameters)
     {
     };

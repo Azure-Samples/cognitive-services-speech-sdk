@@ -12,7 +12,7 @@ class RecognitionResult
 {
 public:
 
-    virtual ~RecognitionResult() = 0;
+    virtual ~RecognitionResult() {};
 
     const std::wstring& ResultId;
     const RecognitionReason Reason;
