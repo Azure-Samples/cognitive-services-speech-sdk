@@ -1,0 +1,23 @@
+azure-c-shared-util (0.1.0-16) vivid; urgency=low
+
+  * Initial release (Closes: #5069014)
+
+  * Updated project to build WinCE (#5210823)
+
+  * Update the control file to use libssl-dev (#5210833)
+
+  * Added xio socket information to handle communications (#5248333)
+
+  * valgrind c shared utility (#c3e1096)
+
+  * Update TLS layer to handle windows and Linux changes (#51d2e3f)
+
+  * Add the set options to the provided functions (#7a14fba)
+
+  * Change azure_c_shared_utility to have all namespaced includes (#d588c49)
+
+  * Update socket to recieve Data in bulk (#57b1ac6)
+
+  * Updated tlsio to to successfully use certificates (#975b971e)
+
+ -- AzureIoT User <aziotsdklinux@outlook.com>  Fri, 6 May 2016 14:18:00 -0800

@@ -1,0 +1,5 @@
+azure-c-shared-util (0.1.0-1) jessie; urgency=low
+
+  * Initial release (Closes: #5069014)
+
+ -- AzureIoT User <aziotsdklinux@outlook.com>  Fri, 22 Apr 2016 14:18:00 -0800

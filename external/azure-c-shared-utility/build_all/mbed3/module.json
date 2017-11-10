@@ -1,0 +1,20 @@
+{
+  "name": "azure-c-shared-utility",
+  "version": "0.0.2",
+  "description": "Azure C shared utility library",
+  "repository": {
+    "url": "git@github.com:Azure/azure-c-shared-utility.git",
+    "type": "git"
+  }, 
+  "keywords": [],
+  "author": "Microsoft",
+  "license": "MIT",
+  "dependencies": {},
+  "targetDependencies": {
+    "arm": {
+
+      "mbedtls": "^2.0.0"
+
+    }
+  } 
+}

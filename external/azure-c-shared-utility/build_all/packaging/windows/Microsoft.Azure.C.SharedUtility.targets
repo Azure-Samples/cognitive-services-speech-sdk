@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" InitialTargets="Microsoft_Azure_C_SharedUtil_Init">
+  <PropertyGroup Label="Default initializers for properties">
+    <Linkage-Microsoft_Azure_C_SharedUtil_Init Condition="'$(Linkage-Microsoft_Azure_C_SharedUtil_Init)' == ''">static</Linkage-Microsoft_Azure_C_SharedUtil_Init>
+    <CallingConvention-Microsoft_Azure_C_SharedUtil Condition="'$(CallingConvention-Microsoft_Azure_C_SharedUtil)' == ''">cdecl</CallingConvention-Microsoft_Azure_C_SharedUtil>
+  </PropertyGroup>
+   <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)../../build/native/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)../../build/native/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="Win32Debug" Condition="(( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 ) And ('$(Platform)' == 'Win32' ) )">
+    <Link>
+      <AdditionalDependencies>Secur32.lib;Ws2_32.lib;$(MSBuildThisFileDirectory)../../build/native/Win32/Debug/aziotsharedutil.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="Win32Release" Condition="(( $(Configuration.ToLower().IndexOf('debug')) == -1 ) And ('$(Platform)' == 'Win32' ) )">
+    <Link>
+      <AdditionalDependencies>Secur32.lib;Ws2_32.lib;$(MSBuildThisFileDirectory)../../build/native/Win32/Release/aziotsharedutil.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="Win64Debug" Condition="(( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 ) And ('$(Platform)' == 'x64' ) )">
+    <Link>
+      <AdditionalDependencies>Secur32.lib;Ws2_32.lib;$(MSBuildThisFileDirectory)../../build/native/x64/Debug/aziotsharedutil.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="Win64Release" Condition="(( $(Configuration.ToLower().IndexOf('debug')) == -1 ) And ('$(Platform)' == 'x64' ) )">
+    <Link>
+      <AdditionalDependencies>Secur32.lib;Ws2_32.lib;$(MSBuildThisFileDirectory)../../build/native/x64/Release/aziotsharedutil.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="ARMDebug" Condition="(( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 ) And ('$(Platform)' == 'ARM' ) )">
+    <Link>
+      <AdditionalDependencies>Secur32.lib;Ws2_32.lib;$(MSBuildThisFileDirectory)../../build/native/arm/Debug/aziotsharedutil.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="ARMRelease" Condition="(( $(Configuration.ToLower().IndexOf('debug')) == -1 ) And ('$(Platform)' == 'ARM' ) )">
+    <Link>
+      <AdditionalDependencies>Secur32.lib;Ws2_32.lib;$(MSBuildThisFileDirectory)../../build/native/arm/Release/aziotsharedutil.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="ARM64Debug" Condition="(( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 ) And ('$(Platform)' == 'ARM64' ) )">
+    <Link>
+      <AdditionalDependencies>Secur32.lib;Ws2_32.lib;$(MSBuildThisFileDirectory)../../build/native/arm64/Debug/aziotsharedutil.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="ARM64Release" Condition="(( $(Configuration.ToLower().IndexOf('debug')) == -1 ) And ('$(Platform)' == 'ARM64' ) )">
+    <Link>
+      <AdditionalDependencies>Secur32.lib;Ws2_32.lib;$(MSBuildThisFileDirectory)../../build/native/arm64/Release/aziotsharedutil.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <UsingTask TaskName="Microsoft_Azure_Shared_Util_Contains" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" TaskFactory="CodeTaskFactory">
+    <ParameterGroup>
+      <Text Output="false" ParameterType="System.String" />
+      <Library Output="false" Required="true" ParameterType="System.String" />
+      <Value Output="false" Required="true" ParameterType="System.String" />
+      <Result Output="true" ParameterType="System.String" />
+    </ParameterGroup>
+    <Task>
+      <Code>Result = ((Text ?? "").Split(';').Contains(Library) ) ? Value : String.Empty;</Code>
+    </Task>
+  </UsingTask>
+  <Target Name="Microsoft_Azure_C_SharedUtil_Init">
+    <Microsoft_Azure_Shared_Util_Contains Text="Linkage-dynamic" Library="Microsoft_Azure_Shared_Util" Value="dynamic" Condition="'$(Linkage-Microsoft_Azure_C_SharedUtil_Init)'==''">
+      <Output TaskParameter="Result" PropertyName="Linkage-Microsoft_Azure_C_SharedUtil_Init" />
+    </Microsoft_Azure_Shared_Util_Contains>
+    <Microsoft_Azure_Shared_Util_Contains Text="Linkage-static" Library="Microsoft_Azure_Shared_Util" Value="static" Condition="'$(Linkage-Microsoft_Azure_C_SharedUtil_Init)'==''">
+      <Output TaskParameter="Result" PropertyName="Linkage-Microsoft_Azure_C_SharedUtil_Init" />
+    </Microsoft_Azure_Shared_Util_Contains>
+    <Microsoft_Azure_Shared_Util_Contains Text="Linkage-ltcg" Library="Microsoft_Azure_Shared_Util" Value="ltcg" Condition="'$(Linkage-Microsoft_Azure_C_SharedUtil_Init)'==''">
+      <Output TaskParameter="Result" PropertyName="Linkage-Microsoft_Azure_C_SharedUtil_Init" />
+    </Microsoft_Azure_Shared_Util_Contains>
+    <Microsoft_Azure_Shared_Util_Contains Text="Linkage-sxs" Library="Microsoft_Azure_Shared_Util" Value="sxs" Condition="'$(Linkage-Microsoft_Azure_C_SharedUtil_Init)'==''">
+      <Output TaskParameter="Result" PropertyName="Linkage-Microsoft_Azure_C_SharedUtil_Init" />
+    </Microsoft_Azure_Shared_Util_Contains>
+    <Microsoft_Azure_Shared_Util_Contains Text="CallingConvention-cdecl" Library="Microsoft_Azure_Shared_Util" Value="cdecl" Condition="'$(CallingConvention-Microsoft_Azure_Shared_Util)'==''">
+      <Output TaskParameter="Result" PropertyName="CallingConvention-Microsoft_Azure_Shared_Util" />
+    </Microsoft_Azure_Shared_Util_Contains>
+    <Microsoft_Azure_Shared_Util_Contains Text="CallingConvention-stdcall" Library="Microsoft_Azure_Shared_Util" Value="stdcall" Condition="'$(CallingConvention-Microsoft_Azure_Shared_Util)'==''">
+      <Output TaskParameter="Result" PropertyName="CallingConvention-Microsoft_Azure_Shared_Util" />
+    </Microsoft_Azure_Shared_Util_Contains>
+    <Microsoft_Azure_Shared_Util_Contains Text="CallingConvention-fastcall" Library="Microsoft_Azure_Shared_Util" Value="fastcall" Condition="'$(CallingConvention-Microsoft_Azure_Shared_Util)'==''">
+      <Output TaskParameter="Result" PropertyName="CallingConvention-Microsoft_Azure_Shared_Util" />
+    </Microsoft_Azure_Shared_Util_Contains>
+    <Microsoft_Azure_Shared_Util_Contains Text="CallingConvention-thiscall" Library="Microsoft_Azure_Shared_Util" Value="thiscall" Condition="'$(CallingConvention-Microsoft_Azure_Shared_Util)'==''">
+      <Output TaskParameter="Result" PropertyName="CallingConvention-Microsoft_Azure_Shared_Util" />
+    </Microsoft_Azure_Shared_Util_Contains>
+    <Microsoft_Azure_Shared_Util_Contains Text="CallingConvention-clrcall" Library="Microsoft_Azure_Shared_Util" Value="clrcall" Condition="'$(CallingConvention-Microsoft_Azure_Shared_Util)'==''">
+      <Output TaskParameter="Result" PropertyName="CallingConvention-Microsoft_Azure_Shared_Util" />
+    </Microsoft_Azure_Shared_Util_Contains>
+  </Target>
+  <Target Name="Microsoft_Azure_Shared_Util_redist_AfterBuild" AfterTargets="AfterBuild" />
+  <Target Name="Microsoft_Azure_Shared_Util_redist_AfterBuild_Win32_and_Debug" Label="Win32 and Debug" Condition="'$(Platform.ToLower())' == 'win32' And ( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 )" AfterTargets="Microsoft_Azure_Shared_Util_redist_AfterBuild">
+  </Target>
+  <Target Name="Microsoft_Azure_Shared_Util_redist_AfterBuild_Win32_and_Release" Label="Win32 and Release" Condition="'$(Platform.ToLower())' == 'win32' And ( $(Configuration.ToLower().IndexOf('debug')) == -1 )" AfterTargets="Microsoft_Azure_Shared_Util_redist_AfterBuild">
+  </Target>
+
+  <Target Name="Microsoft_Azure_Shared_Util_redist_AfterBuild_Win64_and_Debug" Label="Win64 and Debug" Condition="'$(Platform.ToLower())' == 'x64' And ( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 )" AfterTargets="Microsoft_Azure_Shared_Util_redist_AfterBuild">
+  </Target>
+  <Target Name="Microsoft_Azure_Shared_Util_redist_AfterBuild_Win64_and_Release" Label="Win64 and Release" Condition="'$(Platform.ToLower())' == 'x64' And ( $(Configuration.ToLower().IndexOf('debug')) == -1 )" AfterTargets="Microsoft_Azure_Shared_Util_redist_AfterBuild">
+  </Target>
+  
+  <Target Name="Microsoft_Azure_Shared_Util_redist_AfterBuild_ARM_and_Debug" Label="ARM and Debug" Condition="'$(Platform.ToLower())' == 'ARM' And ( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 )" AfterTargets="Microsoft_Azure_Shared_Util_redist_AfterBuild">
+  </Target>
+  <Target Name="Microsoft_Azure_Shared_Util_redist_AfterBuild_ARM_and_Release" Label="ARM and Release" Condition="'$(Platform.ToLower())' == 'ARM' And ( $(Configuration.ToLower().IndexOf('debug')) == -1 )" AfterTargets="Microsoft_Azure_Shared_Util_redist_AfterBuild">
+  </Target>  
+  <Target Name="Microsoft_Azure_Shared_Util_redist_AfterBuild_ARM64_and_Debug" Label="ARM64 and Debug" Condition="'$(Platform.ToLower())' == 'ARM64' And ( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 )" AfterTargets="Microsoft_Azure_Shared_Util_redist_AfterBuild">
+  </Target>
+  <Target Name="Microsoft_Azure_Shared_Util_redist_AfterBuild_ARM64_and_Release" Label="ARM64 and Release" Condition="'$(Platform.ToLower())' == 'ARM64' And ( $(Configuration.ToLower().IndexOf('debug')) == -1 )" AfterTargets="Microsoft_Azure_Shared_Util_redist_AfterBuild">
+  </Target>  
+  
+</Project>
