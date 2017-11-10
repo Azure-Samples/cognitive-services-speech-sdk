@@ -83,6 +83,9 @@
     <ClInclude Include="..\..\source\public\cxx_api\speechapi_cxx_todo_session.h">
       <Filter>speechapi_cxx_h</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\public\c_api\spxerror.h">
+      <Filter>speechapi_c_h</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

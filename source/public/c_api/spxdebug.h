@@ -1,4 +1,5 @@
 #pragma once
+#include <spxerror.h>
 
 //-------------------------------------------------------
 //  SPX_ and SPX_DBG_ macro configuration
@@ -243,12 +244,82 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 #define SPX_DBG_VERIFY_WITH_MESSAGE(expr, ...)      (expr)
 #endif
 
-using SPXHR = uint32_t;
-#define SPX_OK           0x00000000;
-#define SPX_SUCCEEDED(x) ((x & 0x80000000) == 0)
-#define SPX_FAILED(x)    (!SPX_SUCCEEDED(x))   
-
-#define SPX_INIT_HR(hr)	 SPXHR hr = SPX_OK
+#ifdef __cplusplus
+#ifndef __SPX_THROW_HR_IMPL
+inline void __spx_throw_hr_impl(SPXHR hr)
+{
+    throw hr;
+}
+#define __SPX_THROW_HR_IMPL(hr) __spx_throw_hr_impl(hr)
+#endif
+#ifndef __SPX_THROW_HR
+#define __SPX_THROW_HR(hr) __SPX_THROW_HR_IMPL(hr)
+#endif
+#if defined(SPX_CONFIG_TRACE_THROW_ON_FAIL) || defined(SPX_CONFIG_INCLUDE_ALL) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
+#define SPX_THROW_ON_FAIL(hr)                                   \
+    do {                                                        \
+        SPXHR x = hr;                                           \
+        if (SPX_FAILED(x)) {                                    \
+            __SPX_TRACE_HR("SPX_THROW_ON_FAIL: ", hr, x);       \
+            __SPX_THROW_HR(x);                                  \
+    } } while (0)
+#define SPX_THROW_ON_FAIL_IF_NOT(hr, hrNot)                     \
+    do {                                                        \
+        SPXHR x = hr;                                           \
+        if (x != hrNot) {                                       \
+            if (SPX_FAILED(x)) {                                \
+                __SPX_TRACE_HR("SPX_THROW_ON_FAIL: ", hr, x);   \
+                __SPX_THROW_HR(x);                              \
+    } } } while (0)
+#define SPX_THROW_HR_IF(hr, cond)                               \
+    do {                                                        \
+        int fCond = (cond);                                     \
+        if (fCond) {                                            \
+			SPXHR x = hr;                                       \
+            __SPX_TRACE_HR("SPX_THROW_HR_IF: ", hr, x);         \
+            __SPX_THROW_HR(x);                                  \
+    } } while (0)
+#define SPX_THROW_HR_IF(hr, cond)                               \
+    do {                                                        \
+        int fCond = (cond);                                     \
+        if (fCond) {                                            \
+			SPXHR x = hr;                                       \
+            __SPX_TRACE_HR("SPX_THROW_HR_IF: ", hr, x);         \
+            __SPX_THROW_HR(x);                                  \
+    } } while (0)
+#define SPX_THROW_HR(hr)                                        \
+    do {                                                        \
+        SPXHR x = hr;                                           \
+        __SPX_TRACE_HR("SPX_THROW_HR_IF: ", hr, x);             \
+        __SPX_THROW_HR(x);                                      \
+    } while (0)
+#else
+#define SPX_THROW_ON_FAIL_IF_NOT(hr, hrNot)                     \
+    do {                                                        \
+        SPXHR x = hr;                                           \
+        if (x != hrNot) {                                       \
+            if (SPX_FAILED(x)) {                                \
+                __SPX_THROW_HR(x);                              \
+    } } } while (0)
+#define SPX_THROW_HR_IF(hr, cond)                               \
+    do {                                                        \
+        int fCond = (cond);                                     \
+        if (fCond) {                                            \
+			SPXHR x = hr;                                       \
+            __SPX_THROW_HR(x);                                  \
+    } } while (0)
+#define SPX_THROW_HR(hr)                                        \
+    do {                                                        \
+        SPXHR x = hr;                                           \
+        __SPX_THROW_HR(x);                                      \
+    } while (0)
+#endif
+#else
+#define SPX_THROW_ON_FAIL(hr)                   static_assert(false)
+#define SPX_THROW_ON_FAIL_IF_NOT(hr, hrNot)     static_assert(false)
+#define SPX_THROW_HR_IF(hr, cond)               static_assert(false)
+#define SPX_THROW_HR(hr)                        static_assert(false)
+#endif
 
 #if defined(SPX_CONFIG_REPORT_ON_FAIL) || defined(SPX_CONFIG_INCLUDE_ALL) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
 #define SPX_REPORT_ON_FAIL(hr)                                  \
@@ -325,6 +396,7 @@ using SPXHR = uint32_t;
                 return x;                                       \
     } } } while (0)
 #endif
+
 
 //---------------------------------------------------------------------------
 

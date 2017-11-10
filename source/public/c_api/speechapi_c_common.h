@@ -3,20 +3,34 @@
 #include <stdbool.h>
 #include <spxdebug.h>
 
-#ifndef SPX_EXTERN_C
 #ifdef __cplusplus
 #define SPX_EXTERN_C        extern "C"
 #else
 #define SPX_EXTERN_C        extern
 #endif
+
+#ifdef SPX_CONFIG_EXPORTAPIS
+#define SPXAPI_EXPORT       __declspec(dllexport)
 #endif
 
-#define SPXAPI_RESULTTYPE   SPXHR
-#define SPXAPI_NOTHROW      __declspec(nothrow)
-#define SPXAPI_CALLTYPE     __stdcall
+#ifdef SPX_CONFIG_IMPORTAPIS
+#define SPXAPI_EXPORT       __declspec(dllimport)
+#endif
 
-#define SPXAPI              SPXAPI_NOTHROW SPXAPI_RESULTTYPE SPXAPI_CALLTYPE
-#define SPXAPI_(type)       SPXAPI_NOTHROW type SPXAPI_CALLTYPE
+#ifndef SPXAPI_EXPORT
+#define SPXAPI_EXPORT __declspec(dllimport)
+#endif
+
+#define SPXAPI_NOTHROW      __declspec(nothrow)
+#define SPXAPI_RESULTTYPE   SPXHR
+#define SPXAPI_CALLTYPE     __stdcall
+#define SPXAPI_VCALLTYPE    __cdecl
+
+#define SPXAPI              SPX_EXTERN_C SPXAPI_EXPORT SPXAPI_RESULTTYPE SPXAPI_NOTHROW SPXAPI_CALLTYPE 
+#define SPXAPI_(type)       SPX_EXTERN_C SPXAPI_EXPORT type SPXAPI_NOTHROW SPXAPI_CALLTYPE 
+
+#define SPXAPIV             SPX_EXTERN_C SPXAPI_EXPORT SPXAPI_NOTHROW SPXAPI_RESULTTYPE SPXAPI_VCALLTYPE
+#define SPXAPIV_(type)      SPX_EXTERN_C SPXAPI_EXPORT SPXAPI_NOTHROW type SPXAPI_VCALLTYPE
 
 #define SPXHANDLE           void*
 #define SPXRECOHANDLE       SPXHANDLE
@@ -25,4 +39,3 @@
 #define SPXEVENTHANDLE      SPXHANDLE
 
 #define SPXHANDLE_INVALID   ((void*)-1)
-

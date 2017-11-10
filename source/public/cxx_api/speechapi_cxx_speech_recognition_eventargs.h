@@ -15,7 +15,8 @@ public:
 
     SpeeechRecognitionEventArgs() :
         RecognitionEventArgs(m_sessionId),
-        Result(m_result)
+        Result(m_result),
+        m_result(SPXHANDLE_INVALID)
     {
     };
 
