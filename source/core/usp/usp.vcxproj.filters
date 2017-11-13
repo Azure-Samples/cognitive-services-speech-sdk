@@ -19,6 +19,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="usplib.c">
+	  <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="transport.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SpeechAPI.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
