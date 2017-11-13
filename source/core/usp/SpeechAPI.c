@@ -1,6 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include "private-iot-cortana-sdk.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/urlencode.h"
@@ -1030,6 +1034,9 @@ speech_initialize(
 {
     SPEECH_RESULT   ret = 0;
     SPEECH_CONTEXT* pSC = (SPEECH_CONTEXT*)hSpeech;
+
+    //Todo: remove the parameter
+    (void)keyword_table_path;
 
     // initialize the default audio device.
     ret = cortana_create_audio(hSpeech, NULL);

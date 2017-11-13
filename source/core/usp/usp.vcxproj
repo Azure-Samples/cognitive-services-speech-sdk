@@ -79,9 +79,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_CRTDBG_MAP_ALLOC;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 <<<<<<< HEAD
+<<<<<<< HEAD
       <AdditionalIncludeDirectories>..\include</AdditionalIncludeDirectories>
 =======
       <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir)..\..\..\external\</AdditionalIncludeDirectories>
+=======
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir)..\..\..\external\azure-c-shared-utility\inc</AdditionalIncludeDirectories>
+>>>>>>> make usplib build
       <TreatWarningAsError>true</TreatWarningAsError>
 >>>>>>> add SpeechAPI, transport from cortanaSDK
     </ClCompile>
@@ -110,7 +114,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir)..\..\..\external\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir)..\..\..\external\azure-c-shared-utility\inc</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>

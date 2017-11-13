@@ -17,7 +17,7 @@
 #include "iot-cortana-sdk.h"
 #include "private_audio_manager.h"
 #include "metrics.h"
-// #include "skills/timeex.h"
+#include "timeex.h"
 #include "azure_c_shared_utility/audio_sys.h"
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/xlogging.h"
