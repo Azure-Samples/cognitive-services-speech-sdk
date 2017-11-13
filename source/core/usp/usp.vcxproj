@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClCompile Include="usplib.c" />	
     <ClCompile Include="SpeechAPI.c" />
+    <ClCompile Include="transcode.c" />
     <ClCompile Include="transport.c" />
   </ItemGroup>
   <ItemGroup>

@@ -27,6 +27,9 @@
     <ClCompile Include="SpeechAPI.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="transcode.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\usp.h">
