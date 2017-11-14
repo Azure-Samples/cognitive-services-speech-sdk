@@ -21,21 +21,30 @@ public:
 
     SpeechRecognizer() : 
         AsyncRecognizer(m_recoParameters),
-        m_hreco(SPXHANDLE_INVALID)
+        m_hreco(SPXHANDLE_INVALID),
+        m_hasyncRecognize(SPXHANDLE_INVALID),
+        m_hasyncStartContinuous(SPXHANDLE_INVALID),
+        m_hasyncStopContinuous(SPXHANDLE_INVALID)
     {
         throw nullptr;
     };
 
     SpeechRecognizer(const std::wstring& language) : 
         AsyncRecognizer(m_recoParameters),
-        m_hreco(SPXHANDLE_INVALID)
+        m_hreco(SPXHANDLE_INVALID),
+        m_hasyncRecognize(SPXHANDLE_INVALID),
+        m_hasyncStartContinuous(SPXHANDLE_INVALID),
+        m_hasyncStopContinuous(SPXHANDLE_INVALID)
     {
         throw nullptr;
     };
 
     SpeechRecognizer(SPXRECOHANDLE hreco) :
         AsyncRecognizer(m_recoParameters),
-        m_hreco(hreco)
+        m_hreco(hreco),
+        m_hasyncRecognize(SPXHANDLE_INVALID),
+        m_hasyncStartContinuous(SPXHANDLE_INVALID),
+        m_hasyncStopContinuous(SPXHANDLE_INVALID)
     {
         SPX_DBG_TRACE_FUNCTION();
     }
@@ -44,14 +53,51 @@ public:
     {
         SPX_DBG_TRACE_FUNCTION();
 
-        ::Recognizer_Handle_Close(m_hreco);
-        m_hreco = SPXHANDLE_INVALID;
+        if (m_hreco != SPXHANDLE_INVALID)
+        {
+            ::Recognizer_Handle_Close(m_hreco);
+            m_hreco = SPXHANDLE_INVALID;
+        }
+
+        if (m_hreco != SPXHANDLE_INVALID)
+        {
+            ::Recognizer_AsyncHandle_Close(m_hasyncRecognize);
+            m_hasyncRecognize = SPXHANDLE_INVALID;
+        }
+
+        if (m_hreco != SPXHANDLE_INVALID)
+        {
+            ::Recognizer_AsyncHandle_Close(m_hasyncStartContinuous);
+            m_hasyncStartContinuous = SPXHANDLE_INVALID;
+        }
+
+        if (m_hreco != SPXHANDLE_INVALID)
+        {
+            ::Recognizer_AsyncHandle_Close(m_hasyncStopContinuous);
+            m_hasyncStopContinuous = SPXHANDLE_INVALID;
+        }
     };
 
-    bool IsEnabled() override { return false; };
-    void Enable() override { throw nullptr; };
-    void Disable() override { throw nullptr; };
-   
+    bool IsEnabled() override 
+    {
+        bool fEnabled = false;
+        SPX_INIT_HR(hr);
+        SPX_THROW_ON_FAIL(hr = Recognizer_IsEnabled(m_hreco, &fEnabled));
+        return fEnabled;
+    };
+
+    void Enable() override
+    {
+        SPX_INIT_HR(hr);
+        SPX_THROW_ON_FAIL(hr = Recognizer_Enable(m_hreco));
+    };
+
+    void Disable() override
+    {
+        SPX_INIT_HR(hr);
+        SPX_THROW_ON_FAIL(hr = Recognizer_Disable(m_hreco));
+    };
+
     std::future<std::shared_ptr<SpeechRecognitionResult>> RecognizeAsync() override
     {
         auto future = std::async([=]() -> std::shared_ptr<SpeechRecognitionResult> {
@@ -66,8 +112,43 @@ public:
         return future;
     };
 
-    std::future<void> StartContinuousRecognitionAsync() override { throw nullptr; };
-    std::future<void> StopContinuousRecognitionAsync() override { throw nullptr; };
+    std::future<void> StartContinuousRecognitionAsync() override 
+    {
+        auto future = std::async([=]() -> void {
+            SPX_INIT_HR(hr);
+            SPX_THROW_ON_FAIL(hr = Recognizer_AsyncHandle_Close(m_hasyncStartContinuous)); // close any unfinished previous attempt
+
+            SPX_EXITFN_ON_FAIL(hr = Recognizer_StartContinuousRecognitionAsync(m_hreco, &m_hasyncStartContinuous));
+            SPX_EXITFN_ON_FAIL(hr = Recognizer_StartContinuousRecognitionAsync_WaitFor(m_hasyncStartContinuous, UINT32_MAX));
+
+            SPX_EXITFN_CLEANUP:
+            SPX_REPORT_ON_FAIL(/* hr = */ Recognizer_AsyncHandle_Close(m_hasyncStartContinuous)); // don't overwrite HR on cleanup
+            m_hasyncStartContinuous = SPXHANDLE_INVALID;
+
+            SPX_THROW_ON_FAIL(hr);
+        });
+
+        return future;
+    };
+
+    std::future<void> StopContinuousRecognitionAsync() override
+    {
+        auto future = std::async([=]() -> void {
+            SPX_INIT_HR(hr);
+            SPX_THROW_ON_FAIL(hr = Recognizer_AsyncHandle_Close(m_hasyncStopContinuous)); // close any unfinished previous attempt
+
+            SPX_EXITFN_ON_FAIL(hr = Recognizer_StopContinuousRecognitionAsync(m_hreco, &m_hasyncStopContinuous));
+            SPX_EXITFN_ON_FAIL(hr = Recognizer_StopContinuousRecognitionAsync_WaitFor(m_hasyncStopContinuous, UINT32_MAX));
+
+            SPX_EXITFN_CLEANUP:
+            SPX_REPORT_ON_FAIL(/* hr = */ Recognizer_AsyncHandle_Close(m_hasyncStopContinuous)); // don't overwrite HR on cleanup
+            m_hasyncStartContinuous = SPXHANDLE_INVALID;
+
+            SPX_THROW_ON_FAIL(hr);
+        });
+
+        return future;
+    };
 
 
 private:
@@ -78,6 +159,10 @@ private:
     SpeechRecognizer& operator=(const SpeechRecognizer&) = delete;
 
     SPXRECOHANDLE m_hreco;
+    SPXASYNCHANDLE m_hasyncRecognize;
+    SPXASYNCHANDLE m_hasyncStartContinuous;
+    SPXASYNCHANDLE m_hasyncStopContinuous;
+
     RecognizerParameters m_recoParameters; 
 };
 

@@ -8,6 +8,9 @@ namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
 
 
+enum class Reason { Recognized, NoMatch, Canceled, OtherRecognizer };
+
+
 class RecognitionResult
 {
 public:
@@ -15,7 +18,7 @@ public:
     virtual ~RecognitionResult() {};
 
     const std::wstring& ResultId;
-    const RecognitionReason Reason;
+    const enum class Reason Reason;
     
     const std::wstring& Text;
 
@@ -24,7 +27,7 @@ public:
     
 protected:
 
-    RecognitionResult(const std::wstring& resultId,const RecognitionReason reason,const std::wstring& text,const PayloadItems& payload) :
+    RecognitionResult(const std::wstring& resultId, const enum class Reason reason, const std::wstring& text, const PayloadItems& payload) :
         ResultId(resultId), Reason(reason), Text(text), Payload(payload)
     {
     };

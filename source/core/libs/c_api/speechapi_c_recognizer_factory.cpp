@@ -34,8 +34,8 @@ SPXAPI RecognizerFactory_CreateSpeechRecognzier_With_Defaults(SPXRECOHANDLE* phr
     {
         *phreco = SPXHANDLE_INVALID;
         auto recognizer = CSpxRecognizerFactory::CreateSpeechRecognizer();
-        auto ht = CSpxHandleTableManager::Get<CSpxRecognizer, SPXRECOHANDLE>();
-        *phreco = ht->TrackHandle(recognizer);
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<CSpxRecognizer, SPXRECOHANDLE>();
+        *phreco = recohandles->TrackHandle(recognizer);
     }
     catch (std::exception ex)
     {

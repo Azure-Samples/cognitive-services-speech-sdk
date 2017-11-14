@@ -19,8 +19,7 @@ public:
     {
         SPX_DBG_TRACE_FUNCTION();
 
-        //TODO:ROBCH: check to make sure the hresult is valid
-        //throw nullptr;
+        PopulateResultFields(hresult);
     };
 
     virtual ~SpeechRecognitionResult()
@@ -31,7 +30,33 @@ public:
         m_hresult = SPXHANDLE_INVALID;
     };
 
+
+protected:
+
+    void PopulateResultFields(SPXRESULTHANDLE hresult)
+    {
+        static_assert((int)Reason_NoMatch == (int)Reason::NoMatch, "Reason_* enum values == Reason::* enum values");
+        static_assert((int)Reason_Canceled == (int)Reason::Canceled, "Reason_* enum values == Reason::* enum values");
+        static_assert((int)Reason_Recognized == (int)Reason::Recognized, "Reason_* enum values == Reason::* enum values");
+        static_assert((int)Reason_OtherRecognizer == (int)Reason::OtherRecognizer, "Reason_* enum values == Reason::* enum values");
     
+        SPX_INIT_HR(hr);
+
+        const size_t cch = 1024;
+        wchar_t sz[cch+1];
+
+        SPX_THROW_ON_FAIL(hr = Result_GetResultId(hresult, sz, cch));
+        m_resultId = sz;
+
+        Result_RecognitionReason reason;
+        SPX_THROW_ON_FAIL(hr = Result_GetRecognitionReason(hresult, &reason));
+        m_reason = (enum class Reason)reason;
+
+        SPX_THROW_ON_FAIL(hr = Result_GetText(hresult, sz, cch));
+        m_text = sz;
+    };
+
+
 private:
 
     SpeechRecognitionResult(const SpeechRecognitionResult&) = delete;
@@ -42,7 +67,7 @@ private:
     SPXRESULTHANDLE m_hresult;
 
     std::wstring m_resultId;
-    RecognitionReason m_reason;
+    enum class Reason m_reason;
     std::wstring m_text;
     PayloadItems m_payload;    
 };

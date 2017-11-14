@@ -4,6 +4,9 @@
 
 namespace CARBON_IMPL_NAMESPACE() {
 
+    
+enum class Reason { Recognized, NoMatch, Canceled, OtherRecognizer };
+   
 
 class CSpxRecognitionResult
 {
@@ -15,7 +18,8 @@ public:
     std::wstring GetResultId();
     std::wstring GetText();
 
-    // TODO: RobCh: Reason
+    enum class Reason GetReason();
+
     // TODO: RobCh: Payload
 
 
