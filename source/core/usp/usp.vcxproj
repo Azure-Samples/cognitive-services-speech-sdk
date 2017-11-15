@@ -144,6 +144,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="usplib.c" />	
+    <ClCompile Include="dns_cache.c" />
+    <ClCompile Include="skills.c" />
     <ClCompile Include="SpeechAPI.c" />
     <ClCompile Include="transcode.c" />
     <ClCompile Include="transport.c" />

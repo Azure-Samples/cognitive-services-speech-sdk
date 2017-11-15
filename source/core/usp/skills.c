@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "private-iot-cortana-sdk.h"
-#include "parson/parson.h"
+#include "../../../external/parson/parson.h"
 
 #if defined(__linux__) && !defined(IOT_CORTANA_NO_CDP)
 #define USE_CDP
