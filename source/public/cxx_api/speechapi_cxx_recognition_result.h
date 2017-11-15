@@ -1,3 +1,10 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// speechapi_cxx_recognition_result.h: Public API declarations for RecognitionResult C++ base class and related enum class
+//
+
 #pragma once
 #include <string>
 #include <speechapi_cxx_common.h>
@@ -8,6 +15,9 @@ namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
 
 
+enum class Reason { Recognized, NoMatch, Canceled, OtherRecognizer };
+
+
 class RecognitionResult
 {
 public:
@@ -15,7 +25,7 @@ public:
     virtual ~RecognitionResult() {};
 
     const std::wstring& ResultId;
-    const RecognitionReason Reason;
+    const enum class Reason Reason;
     
     const std::wstring& Text;
 
@@ -24,7 +34,7 @@ public:
     
 protected:
 
-    RecognitionResult(const std::wstring& resultId,const RecognitionReason reason,const std::wstring& text,const PayloadItems& payload) :
+    RecognitionResult(const std::wstring& resultId, const enum class Reason reason, const std::wstring& text, const PayloadItems& payload) :
         ResultId(resultId), Reason(reason), Text(text), Payload(payload)
     {
     };

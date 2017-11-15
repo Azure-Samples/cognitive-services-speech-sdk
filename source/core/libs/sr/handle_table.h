@@ -66,7 +66,7 @@ class CSpxHandleTableManager
 public:
 
     template<class T, class Handle>
-    static CSpxHandleTable<T, Handle>* Get() 
+    static CSpxHandleTable<T, Handle>* Get()
     {
         auto name = typeid(T).raw_name();
         if (m_tables->find(name) == m_tables->end())
@@ -77,15 +77,14 @@ public:
         return (CSpxHandleTable<T, Handle>*) (*m_tables)[name];
     }
 
-    static void Term()
-    {
-        m_tables.reset(nullptr);
-    }
 
 private:
 
     static std::unique_ptr<std::map<const char*, void*>> m_tables;
 };
+
+
+using CSpxSharedPtrHandleTableManager = CSpxHandleTableManager;
 
 
 }; // CARBON_IMPL_NAMESPACE()

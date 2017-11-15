@@ -1,17 +1,24 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// speechapi_c_recognizer.h: Public API declarations for Recognizer related C methods and typedefs
+//
+
 #pragma once
 #include <speechapi_c_common.h>
 
 
-SPXAPI Recognzier_Handle_IsValid(SPXRECOHANDLE hreco);
+SPXAPI_(bool) Recognzier_Handle_IsValid(SPXRECOHANDLE hreco);
 SPXAPI Recognizer_Handle_Close(SPXRECOHANDLE hreco);
 
-SPXAPI Recognizer_AsyncHandle_IsValid(SPXASYNCHANDLE hasync);
+SPXAPI_(bool) Recognizer_AsyncHandle_IsValid(SPXASYNCHANDLE hasync);
 SPXAPI Recognizer_AsyncHandle_Close(SPXASYNCHANDLE hasync);
 
-SPXAPI Recognizer_ResultHandle_IsValid(SPXRESULTHANDLE hresult);
+SPXAPI_(bool) Recognizer_ResultHandle_IsValid(SPXRESULTHANDLE hresult);
 SPXAPI Recognizer_ResultHandle_Close(SPXRESULTHANDLE hresult);
 
-SPXAPI Recognizer_EventHandle_IsValid(SPXEVENTHANDLE hevent);
+SPXAPI_(bool) Recognizer_EventHandle_IsValid(SPXEVENTHANDLE hevent);
 SPXAPI Recognizer_EventHandle_Close(SPXEVENTHANDLE hevent);
 
 SPXAPI Recognizer_Enable(SPXRECOHANDLE hreco);

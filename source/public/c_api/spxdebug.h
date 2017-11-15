@@ -1,3 +1,10 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// spxdebug.h: Public API definitions for global C Trace/Debug methods and related #defines
+//
+
 #pragma once
 #include <spxerror.h>
 
@@ -394,6 +401,68 @@ inline void __spx_throw_hr_impl(SPXHR hr)
         if (x != hrNot) {                                       \
             if (SPX_FAILED(x)) {                                \
                 return x;                                       \
+    } } } while (0)
+#endif
+
+#if defined(SPX_CONFIG_TRACE_EXITFN_ON_FAIL) || defined(SPX_CONFIG_INCLUDE_ALL) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
+#define SPX_EXITFN_HR(hr)                						\
+    do {                                                        \
+        SPXHR x = hr;                                           \
+        if (SPX_FAILED(x)) {                                    \
+            __SPX_TRACE_HR("SPX_RETURN_ON_FAIL: ", hr, x);      \
+        }                                                       \
+        goto SPX_EXITFN_CLEANUP;                                \
+    } while (0)
+#define SPX_EXITFN_HR_IF(hr, cond)								\
+    do {                                                        \
+        int fCond = (cond);                                     \
+        if (fCond) {                                            \
+            SPXHR x = hr;                                       \
+            if (SPX_FAILED(x)) {                                \
+                __SPX_TRACE_HR("SPX_RETURN_ON_FAIL: ", hr, x);  \
+            }                                                   \
+            goto SPX_EXITFN_CLEANUP;                            \
+    } } while (0)
+#define SPX_EXITFN_ON_FAIL(hr)                                  \
+    do {                                                        \
+        SPXHR x = hr;                                           \
+        if (SPX_FAILED(x)) {                                    \
+            __SPX_TRACE_HR("SPX_RETURN_ON_FAIL: ", hr, x);      \
+            goto SPX_EXITFN_CLEANUP;                            \
+    } } while (0)
+#define SPX_EXITFN_ON_FAIL_IF_NOT(hr, hrNot)                    \
+    do {                                                        \
+        SPXHR x = hr;                                           \
+        if (x != hrNot) {                                       \
+            if (SPX_FAILED(x)) {                                \
+                __SPX_TRACE_HR("SPX_RETURN_ON_FAIL: ", hr, x);  \
+                goto SPX_EXITFN_CLEANUP;                        \
+    } } } while (0)
+#else
+#define SPX_EXITFN_HR(hr)                						\
+    do {                                                        \
+        SPXHR x = hr;                                           \
+        goto SPX_EXITFN_CLEANUP;                                \
+    } while (0)
+#define SPX_EXITFN_HR_IF(hr, cond)								\
+    do {                                                        \
+        int fCond = (cond);                                     \
+        if (fCond) {                                            \
+            SPXHR x = hr;                                       \
+            goto SPX_EXITFN_CLEANUP;                            \
+    } } while (0)
+#define SPX_EXITFN_ON_FAIL(hr)                                  \
+    do {                                                        \
+        SPXHR x = hr;                                           \
+        if (SPX_FAILED(x)) {                                    \
+            goto SPX_EXITFN_CLEANUP;                            \
+    } } while (0)
+#define SPX_EXITFN_ON_FAIL_IF_NOT(hr, hrNot)                    \
+    do {                                                        \
+        SPXHR x = hr;                                           \
+        if (x != hrNot) {                                       \
+            if (SPX_FAILED(x)) {                                \
+                goto SPX_EXITFN_CLEANUP;                        \
     } } } while (0)
 #endif
 

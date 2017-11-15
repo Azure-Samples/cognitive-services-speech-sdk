@@ -1,8 +1,15 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// spxerror.h: Public API definitions for global SPX errors and realted #define macros
+//
+
 #pragma once
 
 typedef unsigned int SPXHR;
 
-#define SPX_NOERROR                 0x00000000;
+#define SPX_NOERROR                 0x00000000
 #define SPX_INIT_HR(hr)	            SPXHR hr = SPX_NOERROR
 
 #define SPX_SUCCEEDED(x)            ((x & 0x80000000) == 0)
@@ -28,7 +35,7 @@ typedef unsigned int SPXHR;
 #define SPXERR_ALREADY_INITIALIZED  __SPX_ERRCODE_FAILED(0x002)
 
 /*** SPXERR_UNHANDLED_EXCEPTION
-*   The object has already been initialized.
+*   An unnhandled exception was detected.
 */
 #define SPXERR_UNHANDLED_EXCEPTION  __SPX_ERRCODE_FAILED(0x003)
 
@@ -41,3 +48,13 @@ typedef unsigned int SPXHR;
 *   One or more arguments are not valid.
 */
 #define SPXERR_INVALID_ARG          __SPX_ERRCODE_FAILED(0x004)
+
+/*** SPXERR_TIMEOUT
+*   The specified timeout value has ellapsed.
+*/
+#define SPXERR_TIMEOUT              __SPX_ERRCODE_FAILED(0x005)
+
+/*** SPXERR_ALREADY_IN_PROGRESS
+*   The asynchronous operation is already in progress.
+*/
+#define SPXERR_ALREADY_IN_PROGRESS  __SPX_ERRCODE_FAILED(0x005)

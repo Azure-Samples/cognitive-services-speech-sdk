@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "recognition_result.h"
 
 
 using namespace CARBON_IMPL_NAMESPACE();
@@ -6,17 +7,79 @@ using namespace CARBON_IMPL_NAMESPACE();
 
 SPXAPI Result_GetResultId(SPXRESULTHANDLE hresult, wchar_t* pszResultId, uint32_t cchResultId)
 {
-    return SPXERR_NOT_IMPL;
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, cchResultId == 0);
+    
+    try
+    {
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<CSpxRecognitionResult, SPXRESULTHANDLE>();
+        auto result = (*resulthandles)[hresult];
+
+        auto strActual = result->GetResultId();
+        auto pszActual = strActual.c_str();
+        wcsncpy_s(pszResultId, cchResultId, pszActual, _TRUNCATE);
+    }
+    catch (SPXHR hr)
+    {
+        SPX_RETURN_HR(hr);
+    }
+    catch (std::exception ex)
+    {
+        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
+    }
+
+    SPX_RETURN_HR(SPX_NOERROR);
 }
 
 SPXAPI Result_GetRecognitionReason(SPXRESULTHANDLE hresult, Result_RecognitionReason* preason)
 {
-    return SPXERR_NOT_IMPL;
+    static_assert((int)Reason_NoMatch == (int)Reason::NoMatch, "Reason_* enum values == Reason::* enum values");
+    static_assert((int)Reason_Canceled == (int)Reason::Canceled, "Reason_* enum values == Reason::* enum values");
+    static_assert((int)Reason_Recognized == (int)Reason::Recognized, "Reason_* enum values == Reason::* enum values");
+    static_assert((int)Reason_OtherRecognizer == (int)Reason::OtherRecognizer, "Reason_* enum values == Reason::* enum values");
+
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, preason == nullptr);
+    
+    try
+    {
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<CSpxRecognitionResult, SPXRESULTHANDLE>();
+        auto result = (*resulthandles)[hresult];
+        *preason = (Result_RecognitionReason)result->GetReason();
+    }
+    catch (SPXHR hr)
+    {
+        SPX_RETURN_HR(hr);
+    }
+    catch (std::exception ex)
+    {
+        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
+    }
+
+    SPX_RETURN_HR(SPX_NOERROR);
 }
 
 SPXAPI Result_GetText(SPXRESULTHANDLE hresult, wchar_t* pszText, uint32_t cchText)
 {
-    return SPXERR_NOT_IMPL;
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, cchText == 0);
+    
+    try
+    {
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<CSpxRecognitionResult, SPXRESULTHANDLE>();
+        auto result = (*resulthandles)[hresult];
+
+        auto strActual = result->GetText();
+        auto pszActual = strActual.c_str();
+        wcsncpy_s(pszText, cchText, pszActual, _TRUNCATE);
+    }
+    catch (SPXHR hr)
+    {
+        SPX_RETURN_HR(hr);
+    }
+    catch (std::exception ex)
+    {
+        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
+    }
+
+    SPX_RETURN_HR(SPX_NOERROR);
 }
 
 SPXAPI Result_Payload_GetCount(SPXRESULTHANDLE hresult, uint32_t* pcount)

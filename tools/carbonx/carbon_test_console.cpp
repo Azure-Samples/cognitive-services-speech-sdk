@@ -1,3 +1,10 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// carbon_test_console.h: Definitions for the CarbonTestConsole tool C++ class
+//
+
 #include "stdafx.h"
 #include "carbon_test_console.h"
 #include "speechapi_c.h"
@@ -691,7 +698,7 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<T>& recognizer)
     ConsoleWriteLine(L"\nRecognizeAsync %S...", typeid(*recognizer.get()).name());
     auto future = recognizer->RecognizeAsync();
     ConsoleWriteLine(L"RecognizeAsync %S... Waiting...", typeid(*recognizer.get()).name());
-    future.get();
+    auto result = future.get();
     ConsoleWriteLine(L"RecognizeAsync %S... Waiting... Done!\n", typeid(*recognizer.get()).name());
 }
 
@@ -883,7 +890,7 @@ void CarbonTestConsole::Sample_HelloWorld()
     ConsoleWriteLine(L"Say something...");
     auto result = recognizer->RecognizeAsync().get();
 
-    ConsoleWriteLine(L"You said %s", result->Text);
+    ConsoleWriteLine(L"You said %s", result->Text.c_str());
 }
 
 void CarbonTestConsole::Sample_HelloWorld_C()
