@@ -1,3 +1,10 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// speechapi_cxx_recognizer_factory.h: Public API declarations for RecognizerFactory C++ static class methods
+//
+
 #pragma once
 #include <memory>
 #include <speechapi_cxx_common.h>

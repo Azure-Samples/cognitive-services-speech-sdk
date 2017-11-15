@@ -1,3 +1,10 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// carbon_test_console.h: Definitions for the CarbonTestConsole tool C++ class
+//
+
 #include "stdafx.h"
 #include "carbon_test_console.h"
 #include "speechapi_c.h"

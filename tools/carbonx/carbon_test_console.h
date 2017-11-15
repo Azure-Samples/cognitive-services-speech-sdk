@@ -1,3 +1,10 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// carbon_test_console.h: Declarations for CarbonTestConsole tool C++ class
+//
+
 #pragma once
 
 using namespace CARBON_NAMESPACE_ROOT;

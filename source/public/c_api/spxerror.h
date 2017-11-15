@@ -1,3 +1,10 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// spxerror.h: Public API definitions for global SPX errors and realted #define macros
+//
+
 #pragma once
 
 typedef unsigned int SPXHR;

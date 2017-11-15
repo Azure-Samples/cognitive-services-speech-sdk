@@ -1,3 +1,10 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// speech_c_recognizer_factory.h: Public API declarations for RecognizerFactory related C methods
+//
+
 #pragma once
 #include <spxdebug.h>
 #include <speechapi_c_common.h>
