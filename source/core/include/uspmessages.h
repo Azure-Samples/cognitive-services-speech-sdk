@@ -70,8 +70,6 @@ typedef struct _UspMsgTurnStart
 
 /**
  * Represents turn.end message
+ * Note: Body is empty.
  */
-typedef struct _UspMsgTurnEnd
-{
-    // body is empty.
-} UspMsgTurnEnd;
+typedef struct _UspMsgTurnEnd UspMsgTurnEnd;

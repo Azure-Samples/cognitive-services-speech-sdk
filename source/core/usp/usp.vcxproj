@@ -136,6 +136,7 @@
     <ClCompile Include="SpeechAPI.c" />
     <ClCompile Include="transcode.c" />
     <ClCompile Include="transport.c" />
+    <ClCompile Include="usplib.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\usp.h" />

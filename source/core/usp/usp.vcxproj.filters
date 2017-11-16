@@ -33,6 +33,9 @@
     <ClCompile Include="skills.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="usplib.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\usp.h">

@@ -23,8 +23,9 @@ typedef unsigned int USP_ERROR;
 
 #define USP_SUCCESS ((USP_ERROR)0)
 
-#define USP_ERRCODE(x) (0x800f6000 | (x & 0x0fff))
+#define _USP_ERRCODE(x) (0x800f6000 | (x & 0x0fff))
 
+#define USP_NOT_IMPLEMENTED _USP_ERRCODE(0xfff)
 
 /**
  * The PUspOnSpeechStartDetectedCallback represents an application-defined callback function
@@ -108,4 +109,6 @@ typedef struct _UspCallbacks
 } UspCallbacks;
 
 
-int UspInitialize(UspHandle* ppHandle, UspCallbacks *pCallbacks, void* pContext);
+int UspInitialize(UspHandle* pHandle, UspCallbacks *pCallbacks, void* pContext);
+
+int UspWrite(UspHandle handle, const uint8_t* pBuffer, size_t byteToWrite);
