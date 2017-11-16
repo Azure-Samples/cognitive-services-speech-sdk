@@ -130,6 +130,17 @@
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dns_cache.c" />
+    <ClCompile Include="skills.c" />
+    <ClCompile Include="SpeechAPI.c" />
+    <ClCompile Include="transcode.c" />
+    <ClCompile Include="transport.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\usp.h" />
+    <ClInclude Include="..\include\uspmessages.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

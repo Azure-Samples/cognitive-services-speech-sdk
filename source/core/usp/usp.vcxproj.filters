@@ -17,4 +17,29 @@
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="transport.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SpeechAPI.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="transcode.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dns_cache.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="skills.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\usp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\uspmessages.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>
