@@ -1,10 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "uspclientconsole", "uspclientconsole.vcxproj", "{BBE5E5FC-3118-46BB-8F0D-C30552319AD8}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{D06FBF25-02E2-4BC0-A8CA-E8F4BA6FB0C8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "usp", "..\..\source\core\usp\usp.vcxproj", "{DDBECCBE-4147-4D4B-A2A6-ACAAEE389567}"
@@ -12,6 +10,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{417F3F12-8D56-493A-87B7-14BD54089780}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "azure-c-shared-utility", "..\..\external\azure-c-shared-utility\azure-c-shared-utility.vcxproj", "{2FEB90A0-E50D-48B1-B2C3-AE4AF21218BC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "uspclientconsole", "uspclientconsole.vcxproj", "{F29F207E-65B8-4A45-9594-7E524B81D1E0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DDBECCBE-4147-4D4B-A2A6-ACAAEE389567} = {DDBECCBE-4147-4D4B-A2A6-ACAAEE389567}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,16 +26,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{BBE5E5FC-3118-46BB-8F0D-C30552319AD8}.Debug|ARM.ActiveCfg = Debug|Win32
-		{BBE5E5FC-3118-46BB-8F0D-C30552319AD8}.Debug|x64.ActiveCfg = Debug|x64
-		{BBE5E5FC-3118-46BB-8F0D-C30552319AD8}.Debug|x64.Build.0 = Debug|x64
-		{BBE5E5FC-3118-46BB-8F0D-C30552319AD8}.Debug|x86.ActiveCfg = Debug|Win32
-		{BBE5E5FC-3118-46BB-8F0D-C30552319AD8}.Debug|x86.Build.0 = Debug|Win32
-		{BBE5E5FC-3118-46BB-8F0D-C30552319AD8}.Release|ARM.ActiveCfg = Release|Win32
-		{BBE5E5FC-3118-46BB-8F0D-C30552319AD8}.Release|x64.ActiveCfg = Release|x64
-		{BBE5E5FC-3118-46BB-8F0D-C30552319AD8}.Release|x64.Build.0 = Release|x64
-		{BBE5E5FC-3118-46BB-8F0D-C30552319AD8}.Release|x86.ActiveCfg = Release|Win32
-		{BBE5E5FC-3118-46BB-8F0D-C30552319AD8}.Release|x86.Build.0 = Release|Win32
 		{DDBECCBE-4147-4D4B-A2A6-ACAAEE389567}.Debug|ARM.ActiveCfg = Debug|Win32
 		{DDBECCBE-4147-4D4B-A2A6-ACAAEE389567}.Debug|x64.ActiveCfg = Debug|x64
 		{DDBECCBE-4147-4D4B-A2A6-ACAAEE389567}.Debug|x64.Build.0 = Debug|x64
@@ -55,6 +48,16 @@ Global
 		{2FEB90A0-E50D-48B1-B2C3-AE4AF21218BC}.Release|x64.Build.0 = Release|x64
 		{2FEB90A0-E50D-48B1-B2C3-AE4AF21218BC}.Release|x86.ActiveCfg = Release|Win32
 		{2FEB90A0-E50D-48B1-B2C3-AE4AF21218BC}.Release|x86.Build.0 = Release|Win32
+		{F29F207E-65B8-4A45-9594-7E524B81D1E0}.Debug|ARM.ActiveCfg = Debug|Win32
+		{F29F207E-65B8-4A45-9594-7E524B81D1E0}.Debug|x64.ActiveCfg = Debug|x64
+		{F29F207E-65B8-4A45-9594-7E524B81D1E0}.Debug|x64.Build.0 = Debug|x64
+		{F29F207E-65B8-4A45-9594-7E524B81D1E0}.Debug|x86.ActiveCfg = Debug|Win32
+		{F29F207E-65B8-4A45-9594-7E524B81D1E0}.Debug|x86.Build.0 = Debug|Win32
+		{F29F207E-65B8-4A45-9594-7E524B81D1E0}.Release|ARM.ActiveCfg = Release|Win32
+		{F29F207E-65B8-4A45-9594-7E524B81D1E0}.Release|x64.ActiveCfg = Release|x64
+		{F29F207E-65B8-4A45-9594-7E524B81D1E0}.Release|x64.Build.0 = Release|x64
+		{F29F207E-65B8-4A45-9594-7E524B81D1E0}.Release|x86.ActiveCfg = Release|Win32
+		{F29F207E-65B8-4A45-9594-7E524B81D1E0}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,5 +65,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{DDBECCBE-4147-4D4B-A2A6-ACAAEE389567} = {D06FBF25-02E2-4BC0-A8CA-E8F4BA6FB0C8}
 		{2FEB90A0-E50D-48B1-B2C3-AE4AF21218BC} = {417F3F12-8D56-493A-87B7-14BD54089780}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8C4D5394-61F1-40E8-9026-5773CCFC4465}
 	EndGlobalSection
 EndGlobal
