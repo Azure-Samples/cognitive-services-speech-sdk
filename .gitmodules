@@ -1,9 +1,6 @@
 [submodule "external/libwebsockets"]
 	path = external/libwebsockets
 	url = https://github.com/warmcat/libwebsockets
-[submodule "external/openssl"]
-	path = external/openssl
-	url = https://github.com/openssl/openssl
 [submodule "external/parson"]
 	path = external/parson
 	url = https://github.com/kgabis/parson
