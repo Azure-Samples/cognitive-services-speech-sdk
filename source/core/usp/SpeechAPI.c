@@ -55,6 +55,7 @@ const char* const kString_keywordconfidence = "keywordconfidence";
 const char* const kString_keywordstartoffset = "keywordstartoffset";
 const char* const kString_keywordduration = "keywordduration";
 
+// Zhou: Callback for AudioEncode Ondata, probably not needed.
 static void AudioEncode_OnData(const uint8_t* pBuffer, size_t byteToWrite, void *pContext)
 {
     metrics_encoder_data(byteToWrite);
@@ -73,6 +74,7 @@ static void AudioEncode_OnData(const uint8_t* pBuffer, size_t byteToWrite, void 
     }
 }
 
+// Zhou: called by AudioInput_Write(). Just check the audio thread is unchanged and write to log if timeout exceeds. No need.
 static void audio_input_health_check(SPEECH_CONTEXT* pSC)
 {
     uint64_t const now = cortana_gettickcount();
@@ -101,6 +103,7 @@ static void audio_input_health_check(SPEECH_CONTEXT* pSC)
     }
 }
 
+//Zhou: part of audio call back.
 void Audio_Error(void* pContext, AUDIO_ERROR error)
 {
     (void)pContext;
@@ -108,7 +111,7 @@ void Audio_Error(void* pContext, AUDIO_ERROR error)
     metrics_audio_stack_error(error);
 }
 
-
+//ZHou: called by AudioInput_Write()
 size_t ProcessAudioInput(void* pContext, KWS_ID kwsID, uint8_t* pBuffer, size_t byteToWrite)
 {
     size_t          ret           = 0;
@@ -159,6 +162,7 @@ exit:
     return ret;
 }
 
+// Zhou: A part of Audio callbacks.
 int AudioInput_Write(void* pContext, uint8_t* pBuffer, size_t byteToWrite)
 {
     SPEECH_CONTEXT* pSC           = (SPEECH_CONTEXT*)pContext;
@@ -267,6 +271,7 @@ exit:
 }
 #endif
 
+// Zhou: A part of Audio callbacks
 void AudioInput_StateChanged(void* pContext, AUDIO_STATE state)
 {
     SPEECH_CONTEXT* pSC = (SPEECH_CONTEXT*)pContext;
@@ -284,6 +289,7 @@ void AudioInput_StateChanged(void* pContext, AUDIO_STATE state)
     }
 }
 
+// Zhou: a part of Audio callbacks
 void AudioOutput_StateChanged(void* pContext, AUDIO_STATE state)
 {
     SPEECH_CONTEXT* pSC = (SPEECH_CONTEXT*)pContext;
@@ -326,6 +332,7 @@ void AudioOutput_StateChanged(void* pContext, AUDIO_STATE state)
     }
 }
 
+// Zhou: write the audio data into a file, mainly for log or debug purpose.
 static void write_wave_file(const char* filename, const int16_t* pAudioBuffer, size_t sampleSize)
 {
 
@@ -365,6 +372,7 @@ static void write_wave_file(const char* filename, const int16_t* pAudioBuffer, s
     file_close(pFile);
 }
 
+// Zhou: write metadata into the log file. mainly for debug purpose (if WRITE_DUMP_PATH is defined when keyword is rejected.
 static void write_meta_file(char const* logName, KWS_STATUS const* pStatus)
 {
     STRING_HANDLE const metaName = STRING_construct(logName);
@@ -392,6 +400,7 @@ static void write_meta_file(char const* logName, KWS_STATUS const* pStatus)
     }
 }
 
+//Zhou: write the audio buffer into file for debug
 void cortana_dump_audio_buffer(
     CORTANA_HANDLE speechHandle,
     const char* pszPath)
@@ -416,6 +425,8 @@ void cortana_dump_audio_buffer(
 #endif
 }
 
+// Zhou: called by KwsONStatus: KEYWORD_DETECTED, send audio. It bascially encodes the data into internal buffer, but not really send out. 
+// Only when audio_encoder_flush() is called, the data is sent out by calling EncodeOnData call back.
 static void AudioEncoderWrite(SPEECH_CONTEXT* pSC, const KWS_STATUS* pStatus)
 {
     // Using mono PCM bitrate as AUDIO_SAMPLE_RATE_HZ * 16 * 1
@@ -440,6 +451,7 @@ static void AudioEncoderWrite(SPEECH_CONTEXT* pSC, const KWS_STATUS* pStatus)
         pStatus->detectionBufferSize);
 }
 
+// Zhou: callbacks for KwsCallbacks
 static void KwsOnStatus(void* pContext, const KWS_STATUS* pStatus)
 {
     SPEECH_CONTEXT* pSC = (SPEECH_CONTEXT*)pContext;
@@ -662,7 +674,7 @@ KWS_CALLBACKS kwsCallbacks = {
     KwsOnStatus,
 };
 
-
+// Zhou: Callback when Speech.TurnEnd message is received.
 int skill_TurnEnd(PROPERTYBAG_HANDLE hProperty, void* pContext)
 {
     SPEECH_CONTEXT* pSC = (SPEECH_CONTEXT*)pContext;
@@ -703,6 +715,7 @@ void OnRecognitionStarted(SPEECH_CONTEXT* pSC)
     (void)pSC;
 }
 
+//zhou: Creaet a new request id.
 void cortana_reset_speech_request_id(SPEECH_CONTEXT* pSC)
 {
     transport_create_request_id(pSC->mSpeechRequest);
@@ -719,6 +732,7 @@ void cortana_reset_speech_request_id(SPEECH_CONTEXT* pSC)
     agent_handle_response(pSC, CORTANA_ERROR_GENERIC);
 }
 
+//ZHou: callback for Speech.EndDetected
 int skill_EndOfSpeech(PROPERTYBAG_HANDLE hProperty, void* pContext)
 {
     (void)hProperty;
@@ -732,11 +746,14 @@ int skill_EndOfSpeech(PROPERTYBAG_HANDLE hProperty, void* pContext)
     return 0;
 }
 
+
+//zhou: called when Speech.TurnEnd is received, or turn is cancelled.
 static void TurnEnd(void* pContext)
 {
     skill_dispatch(kApiPath_TurnEnd, NULL, pContext);
 }
 
+// Zhou: called when turn is cancelled due to timeout, error in respose or 
 static void TurnCancelled(CORTANA_ERROR error, void* pContext)
 {
     // Only proceed if we are in a turn or agent event.  
@@ -755,6 +772,7 @@ static void TurnCancelled(CORTANA_ERROR error, void* pContext)
     }
 }
 
+// Zhou: called by timer when timeout. see below
 static void SpeechSessionTimeout(
     TIMER_HANDLE        hTimer,
     void*               pContext
@@ -772,6 +790,7 @@ static void SpeechSessionTimeout(
     TurnCancelled(CORTANA_ERROR_TIMEOUT, pContext);
 }
 
+// Zhou: set the timer for timeout
 void UpdateTurnTimeout(
     SPEECH_CONTEXT* pSC)
 {
@@ -790,6 +809,8 @@ void UpdateTurnTimeout(
     }
 }
 
+
+// ZHou: create SPEECH_CONTEXT, and dns_cache
 SPEECH_RESULT
 speech_open(
     SPEECH_HANDLE*  ppHandle,
@@ -819,6 +840,7 @@ speech_open(
     return -1;
 }
 
+// Zhou: clean up and free the speech context
 SPEECH_RESULT
 speech_close(
     SPEECH_HANDLE hSpeech
@@ -916,6 +938,7 @@ speech_close(
     return 0;
 }
 
+// Zhou: Set callbacks for the specific SpeechContext
 SPEECH_RESULT
 SPEECH_DLL_EXPORT
 speech_setcallbacks(
@@ -941,6 +964,7 @@ speech_setcallbacks(
     return 0;
 }
 
+// Zhou: Create an audio entry in the AUdioConfig, called from  speech_initialize() and evtl. audio_manager.c
 int cortana_create_audio(
     SPEECH_HANDLE           handle,
     const char*             pszName)
@@ -1024,6 +1048,8 @@ int cortana_create_audio(
     return -1;
 }
 
+
+// Speech initialize: creaet audio, initialize encoder, Speech_Initialize().
 SPEECH_RESULT
 SPEECH_DLL_EXPORT
 speech_initialize(
@@ -1143,6 +1169,7 @@ speech_initialize(
     return ret;
 }
 
+// Zhou: set audio device based on state: start/stop audio input.
 SPEECH_RESULT
 SPEECH_DLL_EXPORT
 conversation_audio_setstate(
@@ -1202,6 +1229,7 @@ conversation_audio_setstate(
     return ret;
 }
 
+// Zhou: called by AudioEncode_OnData callback: write audio stream to the service: call transport to write/flush stream
 SPEECH_RESULT
 SPEECH_DLL_EXPORT
 audiostream_write(
@@ -1270,6 +1298,7 @@ audiostream_write(
     return ret;
 }
 
+// Zhou: called by AudioEncode_OnData callback: write audio stream to the service: call transport:stream_flush
 SPEECH_RESULT
 SPEECH_DLL_EXPORT
 audiostream_flush(
@@ -1295,6 +1324,7 @@ audiostream_flush(
     return ret;
 }
 
+// Zhou: callback for transport error
 static void TransportError(
     TRANSPORT_HANDLE        hTransport, 
     enum transport_error    reason,
@@ -1326,6 +1356,7 @@ static void TransportError(
     TurnCancelled(cortanaError, pContext);
 }
 
+//zhou: callback for Speech.EndDetected handler
 static void SpeechEnd_Handler(
     TRANSPORT_HANDLE     hTransport,
     const char*          pszPath,
@@ -1342,6 +1373,7 @@ static void SpeechEnd_Handler(
     skill_dispatch(pszPath, NULL, pContext);
 }
 
+// zhou: callback for Speech.TurnEnd 
 static void TurnEnd_PathHandler(
     TRANSPORT_HANDLE     hTransport,
     const char*          pszPath,
@@ -1378,6 +1410,8 @@ static void TurnEnd_PathHandler(
     TurnEnd(pContext);
 }
 
+
+// Zhou: callback for Speech.TurnStart, Speech.Hypothesis, Speech.Phrase, and also for Response.
 static void Content_PathHandler(
     TRANSPORT_HANDLE     hTransport,
     const char*          pszPath,
@@ -1403,6 +1437,7 @@ static void Content_PathHandler(
         size);
 }
 
+// Zhou: callback for SpeechStartDetected.
 static void SpeechStart_Handler(
     TRANSPORT_HANDLE     hTransport,
     const char*          pszPath,
@@ -1423,6 +1458,7 @@ static void SpeechStart_Handler(
     OnRecognitionStarted((SPEECH_CONTEXT*)pContext);
 }
 
+// Zhou: Callback for http response
 static void CortanaResponse_Handler(
     TRANSPORT_HANDLE     hTransport,
     const char*          pszPath,
@@ -1442,6 +1478,7 @@ static void CortanaResponse_Handler(
         pContext);
 }
 
+// Zhou Dispatch table for PATH message
 struct _PATHHANDLER
 {
     const char*            pszPath;
@@ -1456,6 +1493,8 @@ struct _PATHHANDLER
     { kApiPath_Response,            CortanaResponse_Handler },
 };
 
+
+// Zhou: callback for data available on tranport
 static void ResponseHandler(
     TRANSPORT_HANDLE     hTransport,
     HTTP_HEADERS_HANDLE  hResponseHeader,
@@ -1518,6 +1557,7 @@ static void ResponseHandler(
     metrics_transport_unhandledresponse();
 }
 
+// zhou: called by speech_initialize. Intialize transport and URL
 SPEECH_RESULT 
 Speech_Initialize(
     SPEECH_CONTEXT* pSC
@@ -1598,6 +1638,7 @@ Speech_Initialize(
     return 0;
 }
 
+// zhou: callback for Skill:SpeechRecognizer
 int skill_speechRecognizer(PROPERTYBAG_HANDLE hProperty, void* pContext)
 {
     SPEECH_CONTEXT* pSC = (SPEECH_CONTEXT*)pContext;
@@ -1618,6 +1659,7 @@ int skill_speechRecognizer(PROPERTYBAG_HANDLE hProperty, void* pContext)
     return -1;
 }
 
+// called by Text_ResponseHandler that is a depreated V1 handler for partial results. Probably not needed anymore.
 void OnSpeechPartialResult(
     SPEECH_CONTEXT* pSC,
     const char*     pszUtf8PartialText)
@@ -1668,6 +1710,7 @@ SPEECH_RESULT Text_ResponseHandler(
     return 0;
 }
 
+// zhou: called from outside, to reset status?
 void speech_cancel(
     CORTANA_HANDLE          hCortana, 
     enum speech_cancel_type cancelationType)
@@ -1691,6 +1734,7 @@ void speech_cancel(
     }
 }
 
+// Zhou: callback used by speech_serilize
 static int speech_serialize_internal(
     PROPERTYBAG_HANDLE   hProperty,
     void*                pContext)
@@ -1709,6 +1753,7 @@ static int speech_serialize_internal(
     return 0;
 }
 
+// Zhou: called by skills.c to serilize SpeechContext into propertybag.
 int speech_serialize(
     PROPERTYBAG_HANDLE  hProperty,
     void*               pContext)

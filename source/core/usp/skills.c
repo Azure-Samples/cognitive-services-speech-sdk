@@ -696,6 +696,7 @@ static int Handle_Json_Speech_Phrase(
     DeserializeContext * deserializeContext = (DeserializeContext*)pContext;
     SPEECH_CONTEXT* pSC = (SPEECH_CONTEXT*)deserializeContext->pContext;
 
+    // Zhou: why not differentiae by "Path", but just by "DisplayText" or "Text"??
     if (pSC->mCallbacks  &&  pSC->mCallbacks->OnSpeech)
     {
         const char *displayText = propertybag_getstringvalue(hProperty, "DisplayText");

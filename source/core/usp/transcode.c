@@ -66,6 +66,7 @@ static void FlushEncoderBuffer()
     }
 }
 
+// Zhou: it saves the data in buffer, and only when size is 0, fflush the buffer (FlushEncoderBuffer), then call onEncodeDataCallback indicates fflushed.
 static void onEncodedData(const uint8_t* pdata, size_t size)
 {
     if (!size)
@@ -98,6 +99,7 @@ static void onEncodedData(const uint8_t* pdata, size_t size)
     }
 }
 
+// Zhou: encode the buffer into Silk format, then call onEncodedData().
 static int audio_silk_encodeframe(
     const uint8_t* pBuffer)
 {
@@ -125,6 +127,8 @@ static int audio_silk_encodeframe(
     return ret;
 }
 
+// zhou: append the pBuffer to the data already there, and call audio_silk_encodeframe() if the buffer is full repeatly until the buffer is not full. 
+// There might be data left in the buffer, which will be sent next time when this function is called.
 int audio_encoder_write(
     const uint8_t* pBuffer,
     size_t         byteToWrite) 
