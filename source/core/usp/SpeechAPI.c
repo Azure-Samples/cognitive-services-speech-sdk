@@ -1049,7 +1049,7 @@ int cortana_create_audio(
 }
 
 
-// Speech initialize: creaet audio, initialize encoder, Speech_Initialize().
+// Zhou Speech initialize: creaet audio, initialize encoder, Speech_Initialize().
 SPEECH_RESULT
 SPEECH_DLL_EXPORT
 speech_initialize(
@@ -1659,14 +1659,14 @@ int skill_speechRecognizer(PROPERTYBAG_HANDLE hProperty, void* pContext)
     return -1;
 }
 
-// called by Text_ResponseHandler that is a depreated V1 handler for partial results. Probably not needed anymore.
+// Zhou: called by Text_ResponseHandler that is a depreated V1 handler for partial results. Probably not needed anymore.
 void OnSpeechPartialResult(
     SPEECH_CONTEXT* pSC,
     const char*     pszUtf8PartialText)
 {
     OnRecognitionStarted(pSC);
 
-    // extend the turn timeout when speech is happening.
+    // extend the turn timeout when speech is happening.git 
     UpdateTurnTimeout(pSC);
 
     if (pSC->mCallbacks  && pSC->mCallbacks->OnSpeech)
