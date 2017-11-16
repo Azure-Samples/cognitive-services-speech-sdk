@@ -27,6 +27,7 @@ typedef unsigned int UspError;
 
 #define USP_NOT_IMPLEMENTED USP_ERRCODE(0xfff)
 
+
 /**
  * The UspOnSpeechStartDetectedCallback represents an application-defined callback function
  * used for signaling a speech.startDetected message.
@@ -46,7 +47,7 @@ typedef void(*UspOnSpeechStartDetectedCallback)(UspHandle handle, void* context,
 typedef void(*UspOnSpeechEndDetectedCallback)(UspHandle handle, void* context, UspMsgSpeechEndDetected *message);
 
 /**
-* The PUspOnSpeechHypothesisCallback represents an application-defined callback function
+* The UspOnSpeechHypothesisCallback represents an application-defined callback function
 * used for signaling a speech.hypothesis message.
 * @param handle The UspHandle.
 * @param context A pointer to the application-defined callback context.
@@ -55,7 +56,7 @@ typedef void(*UspOnSpeechEndDetectedCallback)(UspHandle handle, void* context, U
 typedef void(*UspOnSpeechHypothesisCallback)(UspHandle handle, void* context, UspMsgSpeechHypothesis *message);
 
 /**
-* The PUspOnSpeechPhraseCallback represents an application-defined callback function
+* The UspOnSpeechPhraseCallback represents an application-defined callback function
 * used for signaling a speech.phrase message.
 * @param handle The UspHandle.
 * @param context A pointer to the application-defined callback context.
@@ -89,7 +90,6 @@ typedef void(*UspOnTurnEndCallback)(UspHandle handle, void* context, UspMsgTurnE
 * @param error an error code.
 */
 typedef void(*UspOnErrorCallback)(UspHandle handle, void* context, UspError error);
-
 
 /**
 * The UspCallbacks type represents an application-defined
