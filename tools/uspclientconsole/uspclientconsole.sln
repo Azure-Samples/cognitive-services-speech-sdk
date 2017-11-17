@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{D06FBF25-02E2-4BC0-A8CA-E8F4BA6FB0C8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "usp", "..\..\source\core\usp\usp.vcxproj", "{DDBECCBE-4147-4D4B-A2A6-ACAAEE389567}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2FEB90A0-E50D-48B1-B2C3-AE4AF21218BC} = {2FEB90A0-E50D-48B1-B2C3-AE4AF21218BC}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{417F3F12-8D56-493A-87B7-14BD54089780}"
 EndProject

@@ -12,12 +12,14 @@ int main(int argc, char* argv[])
     UspHandle handle;
     void* context = NULL;
     UspCallbacks* testCallbacks = NULL;
-    uint8_t pBuffer[256];
+    uint8_t buffer[256];
 
     (void)argc;
     (void)argv;
 
     UspInitialize(&handle, testCallbacks, context);
 
-    UspWrite(handle, pBuffer, sizeof(pBuffer));
+    UspWrite(handle, buffer, sizeof(buffer));
+
+    UspShutdown(handle);
 }

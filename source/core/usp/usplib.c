@@ -7,20 +7,27 @@
 
 #include "usp.h"
 
-int UspInitialize(UspHandle* ppHandle, UspCallbacks *pCallbacks, void* pContext)
+int UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackContext)
 {
-    (void)ppHandle;
-    (void)pCallbacks;
-    (void)pContext;
+    (void)handle;
+    (void)callbacks;
+    (void)callbackContext;
 
     return USP_NOT_IMPLEMENTED;
 }
 
-int UspWrite(UspHandle handle, const uint8_t* pBuffer, size_t byteToWrite)
+int UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite)
 {
     (void)handle;
-    (void)pBuffer;
+    (void)buffer;
     (void)byteToWrite;
+
+    return USP_NOT_IMPLEMENTED;
+}
+
+int UspShutdown(UspHandle handle)
+{
+    (void)handle;
 
     return USP_NOT_IMPLEMENTED;
 }

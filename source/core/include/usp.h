@@ -112,3 +112,5 @@ typedef struct _UspCallbacks
 int UspInitialize(UspHandle* pHandle, UspCallbacks *pCallbacks, void* pContext);
 
 int UspWrite(UspHandle handle, const uint8_t* pBuffer, size_t byteToWrite);
+
+int UspShutdown(UspHandle handle);
