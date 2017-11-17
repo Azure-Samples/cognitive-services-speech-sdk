@@ -11,26 +11,26 @@
 
 int UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackContext)
 {
-    UspContext* pUspContext = (UspContext *)malloc(sizeof(UspContext));
-    SPEECH_HANDLE pSpeechHandle;
+    UspContext* uspContext = (UspContext *)malloc(sizeof(UspContext));
+    SPEECH_HANDLE speechHandle;
 
-    if (speech_open(&pSpeechHandle, 0, NULL))
+    if (speech_open(&speechHandle, 0, NULL))
     {
         LogError("speech_open failed.");
         return USP_INITIALIZATION_FAILURE;
     }
 
-    pUspContext->speechContext = (SPEECH_CONTEXT *)pSpeechHandle;
-    if (Speech_Initialize(pUspContext->speechContext))
+    uspContext->speechContext = (SPEECH_CONTEXT *)speechHandle;
+    if (Speech_Initialize(uspContext->speechContext))
     {
         LogError("Speech_Initialize failed.");
         return USP_INITIALIZATION_FAILURE;
     }
 
-    (void)pCallbacks;
-    (void)pContext;
+    (void)callbacks;
+    (void)callbackContext;
     
-    *ppHandle = pUspContext;
+    *handle = uspContext;
     return USP_SUCCESS;
 }
 
@@ -45,13 +45,13 @@ int UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite)
 
 int UspShutdown(UspHandle handle)
 {
-    UspContext* pContext = (UspContext *)handle;
+    UspContext* context = (UspContext *)handle;
     if (handle == NULL)
     {
         return USP_INVALID_HANDLE;
     }
 
-    free(pContext);
+    free(context);
 
     return USP_SUCCESS;
 }
