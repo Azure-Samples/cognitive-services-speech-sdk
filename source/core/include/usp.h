@@ -25,8 +25,31 @@ typedef unsigned int UspError;
 
 #define USP_ERRCODE(x) (0x800f6000 | (x & 0x0fff))
 
+/**
+ * USP_NOT_IMPLEMENTED USP_ERRCODE The required functionality is not implemented yet.
+*/
 #define USP_NOT_IMPLEMENTED USP_ERRCODE(0xfff)
 
+
+/**
+ * USP_UNINTIALIZED The usp handle is not initialized yet. 
+*/
+#define USP_UNINTIALIZED USP_ERRCODE(0x001)
+
+/**
+* USP_ALREADY_INTIALIZED The usp handle has already been initialized.
+*/
+#define USP_ALREADY_INTIALIZED USP_ERRCODE(0x002)
+
+/**
+* USP_INITIALIZATION_FAILURE Erros during usp initialization.
+*/
+#define USP_INITIALIZATION_FAILURE USP_ERRCODE(0x003)
+
+/**
+* USP_INVALID_HANDLE The usp handle is invalid.
+*/
+#define USP_INVALID_HANDLE USP_ERRCODE(0x004)
 
 /**
  * The UspOnSpeechStartDetectedCallback represents an application-defined callback function
@@ -113,4 +136,10 @@ int UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackCont
 
 int UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite);
 
+<<<<<<< HEAD
 int UspShutdown(UspHandle handle);
+=======
+int UspWrite(UspHandle handle, const uint8_t* pBuffer, size_t byteToWrite);
+
+int UspShutdown(UspHandle handle);
+>>>>>>> add uspinternal.h; use mock for functions used by Cortana but not related to speech for building a quick prototype; will cleanup/refactor later

@@ -55,6 +55,29 @@ const char* const kString_keywordconfidence = "keywordconfidence";
 const char* const kString_keywordstartoffset = "keywordstartoffset";
 const char* const kString_keywordduration = "keywordduration";
 
+
+// Zhou: stub functions to resolve dependency
+void cortana_system_setstate(cortana_system_state_event evt)
+{
+    (void)evt;
+    return;
+}
+
+int cortana_setstate(SPEECH_HANDLE        handle,
+    CORTANA_STATE        state)
+{
+    (void)handle;
+    (void)state;
+    return 0;
+}
+
+
+uint64_t telemetry_gettime()
+{
+    return 0;
+}
+
+
 // Zhou: Callback for AudioEncode Ondata, probably not needed.
 static void AudioEncode_OnData(const uint8_t* pBuffer, size_t byteToWrite, void *pContext)
 {
@@ -137,7 +160,7 @@ size_t ProcessAudioInput(void* pContext, KWS_ID kwsID, uint8_t* pBuffer, size_t 
                 Unlock(pSC->mSpeechRequestLock);
             }
 
-            keyword_spotter_reset(pKWS);
+            // keyword_spotter_reset(pKWS);
             metrics_kws_reset(kwsID);
             metrics_audio_sentkws(pKC->AudioSamples_KWS);
 
@@ -145,7 +168,7 @@ size_t ProcessAudioInput(void* pContext, KWS_ID kwsID, uint8_t* pBuffer, size_t 
         }
 
         pKC->AudioSamples_KWS += (uint32_t)(sampleCount);
-        keyword_spotter_write(pKWS, pBuffer, byteToWrite);
+        // keyword_spotter_write(pKWS, pBuffer, byteToWrite);
         ret = byteToWrite;
 
         // samples were KWS consumed, buffered audio will be sent through detection callback if needed
@@ -159,6 +182,7 @@ size_t ProcessAudioInput(void* pContext, KWS_ID kwsID, uint8_t* pBuffer, size_t 
     }
 
 exit:
+    (void)pBuffer;
     return ret;
 }
 
@@ -325,10 +349,10 @@ void AudioOutput_StateChanged(void* pContext, AUDIO_STATE state)
     else if (state == AUDIO_STATE_STOPPED)
     {
         metrics_earcon_end();
-        if (cortana_ux_getstate(pSC, AUDIO_STATE_MASK_PLUGGEDIN))
+        /*if (cortana_ux_getstate(pSC, AUDIO_STATE_MASK_PLUGGEDIN))
         {
             cortana_ux_clearstate(pSC, AUDIO_STATE_MASK_PLUGGEDIN);
-        }
+        }*/
     }
 }
 
@@ -499,7 +523,7 @@ static void KwsOnStatus(void* pContext, const KWS_STATUS* pStatus)
 
             // cortana state doesn't touch the network, and not required to be 
             // behind the speech request lock.
-            cortana_setstate_internal(pSC, CORTANA_STATE_LISTENING, CORTANA_REASON_KWS_PRIMARY);
+            // cortana_setstate_internal(pSC, CORTANA_STATE_LISTENING, CORTANA_REASON_KWS_PRIMARY);
 
             // Lock to protect again transmission and ensure request id syncronization.
             Lock(pSC->mSpeechRequestLock);
@@ -683,13 +707,13 @@ int skill_TurnEnd(PROPERTYBAG_HANDLE hProperty, void* pContext)
     
     if (pSC->hTurnTimeout)
     {
-        cortana_timer_destroy(pSC->hTurnTimeout);
+        // cortana_timer_destroy(pSC->hTurnTimeout);
         pSC->hTurnTimeout = NULL;
     }
 
     if (pSC->hThinkingEarcon)
     {
-        cortana_timer_destroy(pSC->hThinkingEarcon);
+        // cortana_timer_destroy(pSC->hThinkingEarcon);
         pSC->hThinkingEarcon = NULL;
     }
 
@@ -729,7 +753,7 @@ void cortana_reset_speech_request_id(SPEECH_CONTEXT* pSC)
     //
     // In most cases, agent_handle_response would already have been called by
     // this point.
-    agent_handle_response(pSC, CORTANA_ERROR_GENERIC);
+    // agent_handle_response(pSC, CORTANA_ERROR_GENERIC);
 }
 
 //ZHou: callback for Speech.EndDetected
@@ -764,7 +788,7 @@ static void TurnCancelled(CORTANA_ERROR error, void* pContext)
     if ((error == CORTANA_ERROR_TIMEOUT) || 
         CORTANA_IN_TURN(((SPEECH_CONTEXT*)pContext)))
     {
-        cortana_onerror(pContext, error);
+        // cortana_onerror(pContext, error);
         TurnEnd(pContext);
 
         // When any bad thing happended for the speech transport, we treat it as heartbeat offline
@@ -794,7 +818,8 @@ static void SpeechSessionTimeout(
 void UpdateTurnTimeout(
     SPEECH_CONTEXT* pSC)
 {
-    if (pSC)
+    (void)pSC;
+    /*if (pSC)
     {
         if (pSC->hTurnTimeout)
         {
@@ -806,7 +831,7 @@ void UpdateTurnTimeout(
             SpeechSessionTimeout,
             "Speech Session Timeout",
             pSC);
-    }
+    }*/
 }
 
 
@@ -879,7 +904,7 @@ speech_close(
     {
         for(size_t idx = 0; idx < pSC->numKWS; ++idx)
         {
-            keyword_spotter_close(pSC->pKWS[idx].mKWS);
+            // keyword_spotter_close(pSC->pKWS[idx].mKWS);
         }
 
         free(pSC->pKWS);
@@ -901,7 +926,7 @@ speech_close(
 
     if (pSC->DataLock)
     {
-        agent_shutdown_events(pSC);
+        // agent_shutdown_events(pSC);
         Lock_Deinit(pSC->DataLock);
     }
 
@@ -1003,8 +1028,8 @@ int cortana_create_audio(
             hName = STRING_construct(pszName);
             if (NULL != hName)
             {
-                STRING_concat(hName, kAudioSetting_InitVolume);
-                hBuffer = cortana_storage_read(STRING_c_str(hName));
+                STRING_concat(hName, ".initvol"); // kAudioSetting_InitVolume);
+                hBuffer = NULL; // cortana_storage_read(STRING_c_str(hName));
                 if (NULL != hBuffer)
                 {
                     if (BUFFER_length(hBuffer) >= sizeof(long))
@@ -1170,64 +1195,64 @@ speech_initialize(
 }
 
 // Zhou: set audio device based on state: start/stop audio input.
-SPEECH_RESULT
-SPEECH_DLL_EXPORT
-conversation_audio_setstate(
-    SPEECH_HANDLE hConversation,
-    SPEECH_STATE  state
-    )
-{
-    CONV_CONTEXT* pCC = (CONV_CONTEXT*)hConversation;
-    SPEECH_RESULT ret = -1;
-    AUDIO_SYS_HANDLE hSpeechDevice;
-
-    hSpeechDevice = cortana_getaudiodevice(hConversation, CORTANA_AUDIO_TYPE_SPEECH);
-    if (!hSpeechDevice)
-    {
-        return -1;
-    }
-#ifdef ENABLE_SKYPE_CHANNEL_KWS
-    AUDIO_SYS_HANDLE hSkypeDevice;
-    hSkypeDevice  = cortana_getaudiodevice(hConversation, CORTANA_AUDIO_TYPE_TELEPHONY_INPUT);
-    if (!hSkypeDevice)
-    {
-        return -1;
-    }
-#endif
-
-    switch (state)
-    {
-        case SPEECH_STATE_RUNNING:
-            if (pCC->pKWS)
-            {
-                pCC->fKWSListening = 1;
-                pCC->KWTriggered = 0;
-                metrics_kws_enabled();
-            }
-
-            metrics_microphone_start();
-            audio_set_options(hSpeechDevice, "buff_frame_cnt", &kKWSFrameCount);
-            ret = audio_input_start(hSpeechDevice);
-
-#ifdef ENABLE_SKYPE_CHANNEL_KWS
-            audio_set_options(hSkypeDevice, "buff_frame_cnt", &kKWSFrameCount);
-            audio_set_options(hSkypeDevice, "write_cb", AudioInput_Write_Skype);
-            ret = audio_input_start(hSkypeDevice);
-#endif
-            break;
-        case SPEECH_STATE_STOPPED:
-            metrics_microphone_stop();
-            ret = audio_input_stop(hSpeechDevice);
-#ifdef ENABLE_SKYPE_CHANNEL_KWS
-            ret = audio_input_stop(hSkypeDevice);
-#endif
-            break;
-        default:
-            break;
-    }
-
-    return ret;
-}
+//SPEECH_RESULT
+//SPEECH_DLL_EXPORT
+//conversation_audio_setstate(
+//    SPEECH_HANDLE hConversation,
+//    SPEECH_STATE  state
+//    )
+//{
+//    CONV_CONTEXT* pCC = (CONV_CONTEXT*)hConversation;
+//    SPEECH_RESULT ret = -1;
+//    AUDIO_SYS_HANDLE hSpeechDevice;
+//
+//    hSpeechDevice = cortana_getaudiodevice(hConversation, CORTANA_AUDIO_TYPE_SPEECH);
+//    if (!hSpeechDevice)
+//    {
+//        return -1;
+//    }
+//#ifdef ENABLE_SKYPE_CHANNEL_KWS
+//    AUDIO_SYS_HANDLE hSkypeDevice;
+//    hSkypeDevice  = cortana_getaudiodevice(hConversation, CORTANA_AUDIO_TYPE_TELEPHONY_INPUT);
+//    if (!hSkypeDevice)
+//    {
+//        return -1;
+//    }
+//#endif
+//
+//    switch (state)
+//    {
+//        case SPEECH_STATE_RUNNING:
+//            if (pCC->pKWS)
+//            {
+//                pCC->fKWSListening = 1;
+//                pCC->KWTriggered = 0;
+//                metrics_kws_enabled();
+//            }
+//
+//            metrics_microphone_start();
+//            audio_set_options(hSpeechDevice, "buff_frame_cnt", &kKWSFrameCount);
+//            ret = audio_input_start(hSpeechDevice);
+//
+//#ifdef ENABLE_SKYPE_CHANNEL_KWS
+//            audio_set_options(hSkypeDevice, "buff_frame_cnt", &kKWSFrameCount);
+//            audio_set_options(hSkypeDevice, "write_cb", AudioInput_Write_Skype);
+//            ret = audio_input_start(hSkypeDevice);
+//#endif
+//            break;
+//        case SPEECH_STATE_STOPPED:
+//            metrics_microphone_stop();
+//            ret = audio_input_stop(hSpeechDevice);
+//#ifdef ENABLE_SKYPE_CHANNEL_KWS
+//            ret = audio_input_stop(hSkypeDevice);
+//#endif
+//            break;
+//        default:
+//            break;
+//    }
+//
+//    return ret;
+//}
 
 // Zhou: called by AudioEncode_OnData callback: write audio stream to the service: call transport to write/flush stream
 SPEECH_RESULT
@@ -1393,7 +1418,7 @@ static void TurnEnd_PathHandler(
     if (((SPEECH_CONTEXT*)pContext)->AudioTurn && 
         !((SPEECH_CONTEXT*)pContext)->ResponseRecv)
     {
-        cortana_onerror(pContext, CORTANA_ERROR_NO_RESPONSE);
+        // cortana_onerror(pContext, CORTANA_ERROR_NO_RESPONSE);
     }
     else
     {
@@ -1402,7 +1427,7 @@ static void TurnEnd_PathHandler(
         // Mark the response as successful as long as we receive a response,
         // even if that response contains an error.  We do this for simplicity,
         // to avoid retrying bad requests.
-        agent_handle_response(pContext, CORTANA_SUCCESS);
+        // agent_handle_response(pContext, CORTANA_SUCCESS);
     }
 
     telemetry_flush();
@@ -1453,7 +1478,7 @@ static void SpeechStart_Handler(
     (void)size;
 
     // let the ux know that the service has entered the listening state.
-    cortana_ux_onlisten(pContext, UX_LISTEN_SERVICE, CORTANA_REASON_NONE);
+    // cortana_ux_onlisten(pContext, UX_LISTEN_SERVICE, CORTANA_REASON_NONE);
 
     OnRecognitionStarted((SPEECH_CONTEXT*)pContext);
 }
@@ -1566,23 +1591,23 @@ Speech_Initialize(
     const char *ep = kSpeechEndpoint;
 
     // check for overrides
-    BUFFER_HANDLE hSpeechUrl = cortana_storage_read("SPEECHURL");
-    if (hSpeechUrl)
-    {
-        // null terminate
-        size_t size = BUFFER_length(hSpeechUrl);
-        if (!BUFFER_enlarge(hSpeechUrl, 1))
-        {
-            ep = (const char*)BUFFER_u_char(hSpeechUrl);
-            BUFFER_u_char(hSpeechUrl)[size] = 0;
-        }
-    }
+    //BUFFER_HANDLE hSpeechUrl = cortana_storage_read("SPEECHURL");
+    //if (hSpeechUrl)
+    //{
+    //    // null terminate
+    //    size_t size = BUFFER_length(hSpeechUrl);
+    //    if (!BUFFER_enlarge(hSpeechUrl, 1))
+    //    {
+    //        ep = (const char*)BUFFER_u_char(hSpeechUrl);
+    //        BUFFER_u_char(hSpeechUrl)[size] = 0;
+    //    }
+    //}
 
     pSC->mSpeechRequest = transport_request_create(ep, pSC);
-    if (hSpeechUrl)
-    {
-        BUFFER_delete(hSpeechUrl);
-    }
+    //if (hSpeechUrl)
+    //{
+    //    BUFFER_delete(hSpeechUrl);
+    //}
 
     if (NULL == pSC->mSpeechRequest)
     {
@@ -1630,10 +1655,10 @@ Speech_Initialize(
         return -1;
     }
 
-    if (agent_initialize_events(pSC))
+    /*if (agent_initialize_events(pSC))
     {
         return -1;
-    }
+    }*/
 
     return 0;
 }
@@ -1722,7 +1747,7 @@ void speech_cancel(
         (pSC->PendingListen != 0 || pSC->fKWSListening == 0))
     {
         pSC->PendingListen = 0;
-        agent_queue_event(hCortana, CORTANA_EVENT_SPEECH_CANCEL_LISTENING);
+        // agent_queue_event(hCortana, CORTANA_EVENT_SPEECH_CANCEL_LISTENING);
     }
 
     if ((cancelationType & SPEECH_CANCEL_TYPE_SPEAKING) && 
@@ -1730,7 +1755,7 @@ void speech_cancel(
         (pSC->TTSCount != 0))
     {
         // TTSCount is reset through audio events, no need to reset here.
-        agent_queue_event(hCortana, CORTANA_EVENT_SPEECH_CANCEL_OUTPUT);
+        // agent_queue_event(hCortana, CORTANA_EVENT_SPEECH_CANCEL_OUTPUT);
     }
 }
 
@@ -1742,7 +1767,7 @@ static int speech_serialize_internal(
     SPEECH_CONTEXT* pSC = (SPEECH_CONTEXT*)pContext;
     propertybag_setnumbervalue(hProperty, kString_version, 1.1);
     propertybag_setbooleanvalue(hProperty, kString_audioincludeskeyword, pSC->KWTriggered);
-    propertybag_setbooleanvalue(hProperty, kEarconSetting, pSC->EarconSetting == EARCON_SETTING_ENABLED);
+    propertybag_setbooleanvalue(hProperty, "earconsetting" /*kEarconSetting*/, pSC->EarconSetting == EARCON_SETTING_ENABLED);
     if (pSC->KWTriggered)
     {
         propertybag_setnumbervalue(hProperty, kString_keywordconfidence, pSC->kw_confidence);

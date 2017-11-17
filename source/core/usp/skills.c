@@ -11,6 +11,15 @@
 #include "cdp/CDPsdk.h"
 #endif
 
+
+// mocks
+int skill_alarms(PROPERTYBAG_HANDLE hProperty, void* pContext)
+{
+    (void)hProperty;
+    (void)pContext;
+    return 0;
+}
+
 const char* kString_version = "version";
 const char* const kString_context = "context";
 const char* const kString_deviceId = "deviceId";
@@ -47,8 +56,8 @@ extern struct INTENT_HANDLERS
 
 const PPROPERTYBAG_OBJECT_CALLBACK kOptional_Service_Serializers[] = {
     speech_serialize,
-    card_serialize,
-    spotify_serialize,
+    //card_serialize,
+    //spotify_serialize,
 };
 
 const struct
@@ -56,14 +65,14 @@ const struct
     const char* const            pszId;
     PPROPERTYBAG_OBJECT_CALLBACK Handler;
 } kRequired_Service_Serializers[] = {
-    { "audioPlayer",        audioplayer_serialize },
-    { "volumeControl",      skill_volume_control_getcontext },
-    { "bluetooth",          bluetooth_serialize },
-    { "alarms",             skill_alarms_getcontext },
+    //{ "audioPlayer",        audioplayer_serialize },
+    //{ "volumeControl",      skill_volume_control_getcontext },
+    //{ "bluetooth",          bluetooth_serialize },
+    //{ "alarms",             skill_alarms_getcontext },
     { "system",             skill_system_getcontext },
-    { "location",           skill_location_getcontext },
-    { "calls",              skill_call_getcontext },
-    { "timers",             skill_timers_getcontext },
+    //{ "location",           skill_location_getcontext },
+    //{ "calls",              skill_call_getcontext },
+    //{ "timers",             skill_timers_getcontext },
 };
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -370,7 +379,7 @@ const char* get_cdp_device_thumbprint()
     // if memory cache is empty, try to read from local storage
     if (*thumbprint == 0)
     {
-        BUFFER_HANDLE hStore = cortana_storage_read(kKey_device_thumbprint);
+        BUFFER_HANDLE hStore = NULL; // cortana_storage_read(kKey_device_thumbprint);
         if (hStore)
         {
             // Null terminate the end of the string
@@ -445,7 +454,7 @@ static int skill_settings_getcontext(
     SPEECH_CONTEXT *pSC = (SPEECH_CONTEXT*)pContext;
     
     const char* thumbprint = get_cdp_device_thumbprint();
-    propertybag_setstringvalue(hProperty, kString_timezone, get_device_location_info(pContext)->timezone);
+    propertybag_setstringvalue(hProperty, kString_timezone, ""); //get_device_location_info(pContext)->timezone);
     propertybag_setstringvalue(hProperty, "deviceName", pSC->deviceName);
     propertybag_setstringvalue(hProperty, kString_deviceId, thumbprint);
     propertybag_serialize_object(hProperty, "sdk", context_system_settings_sdk_serialize, pContext);
@@ -546,10 +555,10 @@ static int skills_devicecontext(
 
     if (info->sendEvents)
     {
-        agent_send_queued_event(
+        /*agent_send_queued_event(
             info->hCortana,
             cortana_system_current_state(),
-            hProperty);
+            hProperty);*/
     }
 
     return propertybag_serialize_object(
@@ -571,20 +580,21 @@ STRING_HANDLE skill_serialize_context(void *pContext, int sendEvents)
 
 void cortana_delight_me(CORTANA_HANDLE hCortana)
 {
-    cortana_system_state current_state = cortana_system_current_state();
-    if (current_state == ST_ONLINE_RUN || current_state == ST_OFFLINE_RUN)
-    {
-        cortana_cancel(hCortana);
-        agent_queue_event(hCortana, CORTANA_EVENT_DELIGHT_ME);
-    }
-    else if (current_state == ST_ERROR)
-    {
-        cortana_playfile(hCortana, CORTANA_AUDIO_TYPE_VOICE, "C_406_o_oobeerror.wav");
-    }
-    else if (current_state == ST_AGENT_SETUP)
-    {
-        cortana_playfile(hCortana, CORTANA_AUDIO_TYPE_VOICE, MAKESOUNDNAME("302_d_wifisetup.wav"));
-    }
+    //cortana_system_state current_state = cortana_system_current_state();
+    //if (current_state == ST_ONLINE_RUN || current_state == ST_OFFLINE_RUN)
+    //{
+    //    cortana_cancel(hCortana);
+    //    agent_queue_event(hCortana, CORTANA_EVENT_DELIGHT_ME);
+    //}
+    //else if (current_state == ST_ERROR)
+    //{
+    //    cortana_playfile(hCortana, CORTANA_AUDIO_TYPE_VOICE, "C_406_o_oobeerror.wav");
+    //}
+    //else if (current_state == ST_AGENT_SETUP)
+    //{
+    //    cortana_playfile(hCortana, CORTANA_AUDIO_TYPE_VOICE, MAKESOUNDNAME("302_d_wifisetup.wav"));
+    //}
+    (void)hCortana;
 }
 
 SPEECH_RESULT Content_DispatchBuffer(
@@ -792,20 +802,20 @@ SPEECH_RESULT Json_ResponseHandler(
 
 struct INTENT_HANDLERS gIntentHandlers[] =
 {
-    { "skill:audioPlayer", skill_audioPlayer },
-    { "skill:timezone", skill_deviceSettings },
+    //{ "skill:audioPlayer", skill_audioPlayer },
+    //{ "skill:timezone", skill_deviceSettings },
     { kApiPath_SpeechEndDetected, skill_EndOfSpeech },
     { kApiPath_TurnEnd, skill_TurnEnd },
-    { "skill:bluetooth", skill_bluetooth },
-    { "skill:diagnostics", skill_diagnostics },
-    { "skill:timers", skill_timers },
+    //{ "skill:bluetooth", skill_bluetooth },
+    //{ "skill:diagnostics", skill_diagnostics },
+    //{ "skill:timers", skill_timers },
     { "skill:speechRecognizer", skill_speechRecognizer },
-    { "skill:call", skill_call },
-    { "skill:text", skill_text },
-    { "skill:agent", skill_agent },
-    { "skill:Alarm", skill_alarms },
-    { "skill:notification", skill_notification },
-    { "skill:spotify", skill_spotify},
+    //{ "skill:call", skill_call },
+    //{ "skill:text", skill_text },
+    //{ "skill:agent", skill_agent },
+    //{ "skill:Alarm", skill_alarms },
+    //{ "skill:notification", skill_notification },
+    //{ "skill:spotify", skill_spotify},
     { NULL, NULL } // terminator
 };
 

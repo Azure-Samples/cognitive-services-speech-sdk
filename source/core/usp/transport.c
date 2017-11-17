@@ -1072,7 +1072,7 @@ static int add_auth_headers(
 
     int tokenChanged = 0;
     STRING_HANDLE access_token = STRING_new();
-    int ret = token_store_get_access_token(token_store, kCortanaScope, access_token);
+    int ret = 0; //token_store_get_access_token(token_store, kCortanaScope, access_token);
 
     if (ret == 0 && STRING_length(access_token) > 0)
     {
@@ -1091,6 +1091,7 @@ static int add_auth_headers(
     
     STRING_delete(access_token);
 
+    (void)token_store;
     return tokenChanged;
 }
 
