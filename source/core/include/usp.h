@@ -109,8 +109,8 @@ typedef struct _UspCallbacks
 } UspCallbacks;
 
 
-int UspInitialize(UspHandle* pHandle, UspCallbacks *pCallbacks, void* pContext);
+int UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackContext);
 
-int UspWrite(UspHandle handle, const uint8_t* pBuffer, size_t byteToWrite);
+int UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite);
 
 int UspShutdown(UspHandle handle);
