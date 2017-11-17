@@ -136,10 +136,4 @@ int UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackCont
 
 int UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite);
 
-<<<<<<< HEAD
 int UspShutdown(UspHandle handle);
-=======
-int UspWrite(UspHandle handle, const uint8_t* pBuffer, size_t byteToWrite);
-
-int UspShutdown(UspHandle handle);
->>>>>>> add uspinternal.h; use mock for functions used by Cortana but not related to speech for building a quick prototype; will cleanup/refactor later
