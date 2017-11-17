@@ -61,7 +61,7 @@ typedef struct _UspMsgSpeechEndDetected
 } UspMsgSpeechEndDetected;
 
 /**
- * Represnets turn.start message
+ * Represents turn.start message
  */
 typedef struct _UspMsgTurnStart
 {
