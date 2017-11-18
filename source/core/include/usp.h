@@ -11,6 +11,9 @@
 
 #include "uspmessages.h"
 
+
+#define USP_VERSION 1.0
+
 /**
  * The UspHandle represents an opaque handle used by usplib.
  */
@@ -58,9 +61,19 @@ typedef unsigned int UspError;
 #define USP_INVALID_HANDLE USP_ERRCODE(0x004)
 
 /**
+ * USP_INVALID_PARAMETER The parameter is invalid.
+*/
+#define USP_INVALID_PARAMETER USP_ERRCODE(0x005)
+
+/**
+ * USP_INVALID_DATA the data is invalid.
+*/
+#define USP_INVALID_DATA USP_ERRCODE(0x006)
+
+/**
 * USP_WRITE_ERROR Error when sending data via the usp handle.
 */
-#define USP_WRITE_ERROR USP_ERRCODE(0x005)
+#define USP_WRITE_ERROR USP_ERRCODE(0x010)
 
 /**
  * The UspOnSpeechStartDetectedCallback represents an application-defined callback function

@@ -390,6 +390,7 @@ typedef struct KWS_CONTEXT
     int           AudioSamples_KWS;
 } KWS_CONTEXT;
 
+#include "../include/usp.h"
 /**
  * The SPEECH_CONTEXT type represents a structure used for all Cortana+Speech related context.
  */
@@ -401,6 +402,10 @@ typedef struct _SPEECH_CONTEXT
     LOCK_HANDLE                 DataLock;
     CORTANA_CALLBACKS*          mCallbacks;
     void*                       mContext;
+
+    // For Sppech Client
+    UspHandle* uspHandle;
+
 #define MAX_DEVICES             ((int)CORTANA_AUDIO_TYPE_LAST)
     struct
     {

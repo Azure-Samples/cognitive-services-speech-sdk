@@ -18,6 +18,8 @@
 typedef struct _UspContext
 {
     SPEECH_CONTEXT* speechContext;
+    UspCallbacks* callbacks;
+    void* callbackContext;
 
 } UspContext;
 

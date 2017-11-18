@@ -8,11 +8,15 @@
 #include "usp.h"
 #include "uspinternal.h"
 
-
 UspResult UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackContext)
 {
     UspContext* uspContext = (UspContext *)malloc(sizeof(UspContext));
     SPEECH_HANDLE speechHandle;
+
+    if (handle == NULL)
+    {
+        return USP_INVALID_PARAMETER;
+    }
 
     if (speech_open(&speechHandle, 0, NULL))
     {
@@ -28,10 +32,19 @@ UspResult UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callba
         return USP_INITIALIZATION_FAILURE;
     }
 
-    (void)callbacks;
-    (void)callbackContext;
+    if ((callbacks == NULL) || (callbacks->version != USP_VERSION) || (callbacks->size != sizeof(UspCallbacks)))
+    {
+        return USP_INVALID_PARAMETER;
+    }
 
-    *handle = uspContext;
+    uspContext->callbacks = callbacks;
+    uspContext->callbackContext = callbackContext;
+
+    *handle = (UspHandle)uspContext;
+
+    // Todo: remove SPEECH_CONTEXT 
+    uspContext->speechContext->uspHandle = (UspHandle)uspContext;
+
     return USP_SUCCESS;
 }
 
