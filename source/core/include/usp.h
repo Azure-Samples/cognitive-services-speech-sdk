@@ -17,8 +17,14 @@
 typedef void * UspHandle;
 
 /**
+  * The UspResult represents the result of a function call of usplib.
+*/
+typedef int UspResult;
+
+/**
  * The UspError represents error codes.
- */
+ * Todo: Can be merged with UspResult??
+*/
 typedef unsigned int UspError;
 
 #define USP_SUCCESS ((UspError)0)
@@ -50,6 +56,11 @@ typedef unsigned int UspError;
 * USP_INVALID_HANDLE The usp handle is invalid.
 */
 #define USP_INVALID_HANDLE USP_ERRCODE(0x004)
+
+/**
+* USP_WRITE_ERROR Error when sending data via the usp handle.
+*/
+#define USP_WRITE_ERROR USP_ERRCODE(0x005)
 
 /**
  * The UspOnSpeechStartDetectedCallback represents an application-defined callback function
@@ -132,8 +143,8 @@ typedef struct _UspCallbacks
 } UspCallbacks;
 
 
-int UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackContext);
+UspResult UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackContext);
 
-int UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite);
+UspResult UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite);
 
-int UspShutdown(UspHandle handle);
+UspResult UspShutdown(UspHandle handle);

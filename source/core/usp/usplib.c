@@ -9,7 +9,7 @@
 #include "uspinternal.h"
 
 
-int UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackContext)
+UspResult UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackContext)
 {
     UspContext* uspContext = (UspContext *)malloc(sizeof(UspContext));
     SPEECH_HANDLE speechHandle;
@@ -24,31 +24,56 @@ int UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackCont
     if (Speech_Initialize(uspContext->speechContext))
     {
         LogError("Speech_Initialize failed.");
+        speech_close(speechHandle);
         return USP_INITIALIZATION_FAILURE;
     }
 
     (void)callbacks;
     (void)callbackContext;
-    
+
     *handle = uspContext;
     return USP_SUCCESS;
 }
 
-int UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite)
+UspResult UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite)
 {
-    (void)handle;
-    (void)buffer;
-    (void)byteToWrite;
+    UspContext* context = (UspContext *)handle;
 
-    return USP_NOT_IMPLEMENTED;
+    if (context->speechContext == NULL)
+    {
+        return USP_UNINTIALIZED;
+    }
+
+    if (byteToWrite == 0)
+    {
+        if (audiostream_flush(context->speechContext) != 0)
+        {
+            return USP_WRITE_ERROR;
+        }
+    }
+    else
+    {
+        // Todo: mismatch between size_t ad byteToWrite...
+        if (audiostream_write(context->speechContext, buffer, (uint32_t)byteToWrite, NULL))
+        {
+            return USP_WRITE_ERROR;
+        }
+    }
+
+    return USP_SUCCESS;
 }
 
-int UspShutdown(UspHandle handle)
+UspResult UspShutdown(UspHandle handle)
 {
     UspContext* context = (UspContext *)handle;
     if (handle == NULL)
     {
         return USP_INVALID_HANDLE;
+    }
+
+    if (context->speechContext)
+    {
+        speech_close((SPEECH_HANDLE)context->speechContext);
     }
 
     free(context);
