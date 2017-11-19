@@ -10,6 +10,8 @@
 #include "azure_c_shared_utility/urlencode.h"
 #include <assert.h>
 
+#include "uspinternal.h"
+
 #ifdef __linux__
 #include <unistd.h>
 #endif
@@ -1379,6 +1381,16 @@ static void TransportError(
     }
 
     TurnCancelled(cortanaError, pContext);
+
+    // USP handling of errors
+    UspResult uspError = USP_TRANSPORT_ERROR_GENERIC;
+    SPEECH_CONTEXT* pSc = (SPEECH_CONTEXT *)(pContext);
+    UspContext* uspContext = (UspContext *)pSc->uspHandle;
+    if (uspContext->callbacks)
+    {
+        uspContext->callbacks->OnError(uspContext, uspContext->callbackContext, uspError);
+    }
+
 }
 
 //zhou: callback for Speech.EndDetected handler
@@ -1394,6 +1406,18 @@ static void SpeechEnd_Handler(
     (void)pszMime;
     (void)buffer;
     (void)size;
+
+    // USP handling
+    UspContext* uspContext = (UspContext *)(((SPEECH_CONTEXT*)pContext)->uspHandle);
+    if (uspContext->callbacks)
+    {
+        UspMsgSpeechEndDetected* msg = malloc(sizeof(UspMsgSpeechEndDetected));
+        // Todo: deal with char to wchar
+        // Todo: add more field;
+        uspContext->callbacks->onSpeechEndDetected(uspContext, uspContext->callbackContext, msg);
+        // Todo: better handling of memory management.
+        free(msg);
+    }
 
     skill_dispatch(pszPath, NULL, pContext);
 }
@@ -1412,6 +1436,18 @@ static void TurnEnd_PathHandler(
     (void)pszMime;
     (void)buffer;
     (void)size;
+
+    // USP handling
+    UspContext* uspContext = (UspContext *)(((SPEECH_CONTEXT*)pContext)->uspHandle);
+    if (uspContext->callbacks)
+    {
+        UspMsgTurnEnd* msg = NULL;
+        // Todo: deal with char to wchar
+        // Todo: add more field;
+        uspContext->callbacks->onTurnEnd(uspContext, uspContext->callbackContext, msg);
+        // Todo: better handling of memory management.
+        // free(msg);
+    }
 
     // raise an error if we didn't get a cortana response at the end of a turn 
     // and we were triggered via voice.
@@ -1476,6 +1512,19 @@ static void SpeechStart_Handler(
     (void)pszMime;
     (void)buffer;
     (void)size;
+
+
+    // USP handling
+    UspContext* uspContext = (UspContext *)(((SPEECH_CONTEXT*)pContext)->uspHandle);
+    if (uspContext->callbacks)
+    {
+        UspMsgSpeechStartDetected* msg = malloc(sizeof(UspMsgSpeechStartDetected));
+        // Todo: deal with char to wchar
+        // Todo: add more field;
+        uspContext->callbacks->onSpeechStartDetected(uspContext, uspContext->callbackContext, msg);
+        // Todo: better handling of memory management.
+        free(msg);
+    }
 
     // let the ux know that the service has entered the listening state.
     // cortana_ux_onlisten(pContext, UX_LISTEN_SERVICE, CORTANA_REASON_NONE);

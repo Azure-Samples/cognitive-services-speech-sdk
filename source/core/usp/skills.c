@@ -11,6 +11,7 @@
 #include "cdp/CDPsdk.h"
 #endif
 
+#include "uspinternal.h"
 
 // mocks
 int skill_alarms(PROPERTYBAG_HANDLE hProperty, void* pContext)
@@ -712,6 +713,24 @@ static int Handle_Json_Speech_Phrase(
         const char *displayText = propertybag_getstringvalue(hProperty, "DisplayText");
         if (displayText != NULL)
         {
+            // USp handling
+            UspContext* uspContext = (UspContext *)pSC->uspHandle;
+            if (uspContext->callbacks)
+            {
+                // Todo: better handling of char to wchar
+                size_t textLen = strlen(displayText) + 1;
+                wchar_t *wcText = malloc(textLen * sizeof(wchar_t));
+                mbtowc(wcText, displayText, textLen);
+
+                UspMsgSpeechPhrase* msg = malloc(sizeof(UspMsgSpeechPhrase));
+                // Todo: add more field;
+                msg->DisplayText = wcText;
+                uspContext->callbacks->onSpeechPhrase(uspContext, uspContext->callbackContext, msg);
+                // Todo: better handling of memory management.
+                free(msg);
+                free(wcText);
+            }
+
             pSC->mCallbacks->OnSpeech(pSC, pSC->mContext, displayText, SPEECH_PHRASE_STATE_FINAL);
         }
         else
@@ -720,6 +739,25 @@ static int Handle_Json_Speech_Phrase(
             displayText = propertybag_getstringvalue(hProperty, "Text");
             if (NULL != displayText)
             {
+                // USP handling
+                UspContext* uspContext = (UspContext *)pSC->uspHandle;
+                if (uspContext->callbacks)
+                {
+                    // Todo: better handling of char to wchar
+                    size_t textLen = strlen(displayText) + 1;
+                    wchar_t *wcText = malloc(textLen * sizeof(wchar_t));
+                    mbtowc(wcText, displayText, textLen);
+
+                    UspMsgSpeechHypothesis* msg = malloc(sizeof(UspMsgSpeechHypothesis));
+                    // Todo: deal with char to wchar
+                    // Todo: add more field;
+                    msg->Text = wcText;
+                    uspContext->callbacks->onSpeechHypothesis(uspContext, uspContext->callbackContext, msg);
+                    // Todo: better handling of memory management.
+                    free(msg);
+                    free(wcText);
+                }
+
                 pSC->mCallbacks->OnSpeech(pSC, pSC->mContext, displayText, SPEECH_PHRASE_STATE_PARTIAL);
             }
         }
@@ -739,6 +777,18 @@ static int Handle_Json_Turn_Start(
     }
 
     DeserializeContext * deserializeContext = (DeserializeContext*)pContext;
+
+    // USP handling
+    UspContext* uspContext = (UspContext *)(((SPEECH_CONTEXT *)deserializeContext->pContext)->uspHandle);
+    if (uspContext->callbacks)
+    {
+        UspMsgTurnStart* msg = malloc(sizeof(UspMsgTurnStart));
+        // Todo: deal with char to wchar
+        // Todo: add more field;
+        uspContext->callbacks->onTurnStart(uspContext, uspContext->callbackContext, msg);
+        // Todo: better handling of memory management.
+        free(msg);
+    }
 
     SkillResponse response = { { 0 }, { 0 }, NULL };
     response.pContext = deserializeContext->pContext;
