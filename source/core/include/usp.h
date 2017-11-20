@@ -46,7 +46,7 @@ typedef void(*UspOnSpeechStartDetected)(UspHandle handle, void* context, UspMsgS
 typedef void(*UspOnSpeechEndDetected)(UspHandle handle, void* context, UspMsgSpeechEndDetected *message);
 
 /**
-* The PUspOnSpeechHypothesis represents an application-defined callback function
+* The UspOnSpeechHypothesis represents an application-defined callback function
 * used for signaling a speech.hypothesis message.
 * @param handle The UspHandle.
 * @param context A pointer to the application-defined callback context.
@@ -55,7 +55,7 @@ typedef void(*UspOnSpeechEndDetected)(UspHandle handle, void* context, UspMsgSpe
 typedef void(*UspOnSpeechHypothesis)(UspHandle handle, void* context, UspMsgSpeechHypothesis *message);
 
 /**
-* The PUspOnSpeechPhrase represents an application-defined callback function
+* The UspOnSpeechPhrase represents an application-defined callback function
 * used for signaling a speech.phrase message.
 * @param handle The UspHandle.
 * @param context A pointer to the application-defined callback context.
