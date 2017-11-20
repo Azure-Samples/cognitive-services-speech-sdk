@@ -1,6 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include "private-iot-cortana-sdk.h"
 #include "../../../external/parson/parson.h"
 
@@ -699,6 +703,7 @@ static int Handle_Json_Speech_Phrase(
     PROPERTYBAG_HANDLE  hProperty,
     void*               pContext)
 {
+    int i = 0;
     if (NULL == pContext)
     {
         return -1;
@@ -708,8 +713,8 @@ static int Handle_Json_Speech_Phrase(
     SPEECH_CONTEXT* pSC = (SPEECH_CONTEXT*)deserializeContext->pContext;
 
     // Zhou: why not differentiae by "Path", but just by "DisplayText" or "Text"??
-    if (pSC->mCallbacks  &&  pSC->mCallbacks->OnSpeech)
-    {
+    /*if (pSC->mCallbacks  &&  pSC->mCallbacks->OnSpeech)
+    {*/
         const char *displayText = propertybag_getstringvalue(hProperty, "DisplayText");
         if (displayText != NULL)
         {
@@ -720,7 +725,7 @@ static int Handle_Json_Speech_Phrase(
                 // Todo: better handling of char to wchar
                 size_t textLen = strlen(displayText) + 1;
                 wchar_t *wcText = malloc(textLen * sizeof(wchar_t));
-                mbtowc(wcText, displayText, textLen);
+                i= mbstowcs(wcText, displayText, textLen);
 
                 UspMsgSpeechPhrase* msg = malloc(sizeof(UspMsgSpeechPhrase));
                 // Todo: add more field;
@@ -731,7 +736,7 @@ static int Handle_Json_Speech_Phrase(
                 free(wcText);
             }
 
-            pSC->mCallbacks->OnSpeech(pSC, pSC->mContext, displayText, SPEECH_PHRASE_STATE_FINAL);
+            //pSC->mCallbacks->OnSpeech(pSC, pSC->mContext, displayText, SPEECH_PHRASE_STATE_FINAL);
         }
         else
         {
@@ -746,7 +751,7 @@ static int Handle_Json_Speech_Phrase(
                     // Todo: better handling of char to wchar
                     size_t textLen = strlen(displayText) + 1;
                     wchar_t *wcText = malloc(textLen * sizeof(wchar_t));
-                    mbtowc(wcText, displayText, textLen);
+                    i = mbstowcs(wcText, displayText, textLen);
 
                     UspMsgSpeechHypothesis* msg = malloc(sizeof(UspMsgSpeechHypothesis));
                     // Todo: deal with char to wchar
@@ -758,10 +763,10 @@ static int Handle_Json_Speech_Phrase(
                     free(wcText);
                 }
 
-                pSC->mCallbacks->OnSpeech(pSC, pSC->mContext, displayText, SPEECH_PHRASE_STATE_PARTIAL);
+                //pSC->mCallbacks->OnSpeech(pSC, pSC->mContext, displayText, SPEECH_PHRASE_STATE_PARTIAL);
             }
         }
-    }
+    //}
 
     return 0;
 }

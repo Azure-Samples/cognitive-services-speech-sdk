@@ -177,3 +177,5 @@ UspResult UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callba
 UspResult UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite);
 
 UspResult UspShutdown(UspHandle handle);
+
+void UspRun(UspHandle handle);

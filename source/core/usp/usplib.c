@@ -12,11 +12,16 @@ UspResult UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callba
 {
     UspContext* uspContext = (UspContext *)malloc(sizeof(UspContext));
     SPEECH_HANDLE speechHandle;
+    // Todo: use configuration data 
+    const char endpoint[] = "wss://speech.platform.bing.com/speech/recognition/interactive/cognitiveservices/v1?language=en-us";
 
     if (handle == NULL)
     {
         return USP_INVALID_PARAMETER;
     }
+
+    telemetry_initialize();
+    propertybag_initialize();
 
     if (speech_open(&speechHandle, 0, NULL))
     {
@@ -25,7 +30,7 @@ UspResult UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callba
     }
 
     uspContext->speechContext = (SPEECH_CONTEXT *)speechHandle;
-    if (Speech_Initialize(uspContext->speechContext))
+    if (Speech_Initialize(uspContext->speechContext, endpoint))
     {
         LogError("Speech_Initialize failed.");
         speech_close(speechHandle);
@@ -44,6 +49,7 @@ UspResult UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callba
 
     // Todo: remove SPEECH_CONTEXT 
     uspContext->speechContext->uspHandle = (UspHandle)uspContext;
+
 
     return USP_SUCCESS;
 }
@@ -91,5 +97,20 @@ UspResult UspShutdown(UspHandle handle)
 
     free(context);
 
+    propertybag_shutdown();
+    telemetry_uninitialize();
+
     return USP_SUCCESS;
+}
+
+void UspRun(UspHandle handle)
+{
+    UspContext* uspContext = (UspContext *)handle;
+
+    Lock(uspContext->speechContext->mSpeechRequestLock);
+
+    transport_dowork(uspContext->speechContext->mTransportRequest[0]);
+
+    Unlock(uspContext->speechContext->mSpeechRequestLock);
+
 }

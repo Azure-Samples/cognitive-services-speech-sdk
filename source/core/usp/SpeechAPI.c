@@ -719,9 +719,9 @@ int skill_TurnEnd(PROPERTYBAG_HANDLE hProperty, void* pContext)
         pSC->hThinkingEarcon = NULL;
     }
 
-    Lock(pSC->mSpeechRequestLock);
+   /* Lock(pSC->mSpeechRequestLock);
     (void)audio_encoder_flush();
-    Unlock(pSC->mSpeechRequestLock);
+    Unlock(pSC->mSpeechRequestLock);*/
 
     // we only set the state to ready from a turn.end on an audio turn.
     if (pSC->AudioTurn)
@@ -900,7 +900,8 @@ speech_close(
 
     free(pSC->dumpBuffer);
 
-    ring_buffer_delete(pSC->pAudioContext[KWS_CORTANA]);
+    if (pSC->pAudioContext)
+        ring_buffer_delete(pSC->pAudioContext[KWS_CORTANA]);
 
     if (pSC->pKWS)
     {
@@ -1190,7 +1191,8 @@ speech_initialize(
     // prepare each component
     if (ret == 0)
     {
-        ret = Speech_Initialize(pSC);
+        LogError("Not worked anymore");
+        ret = -1; // Speech_Initialize(pSC, null);
     }
 
     return ret;
@@ -1634,11 +1636,10 @@ static void ResponseHandler(
 // zhou: called by speech_initialize. Intialize transport and URL
 SPEECH_RESULT 
 Speech_Initialize(
-    SPEECH_CONTEXT* pSC
+    SPEECH_CONTEXT* pSC,
+    const char *endpoint
     )
 {
-    const char *ep = kSpeechEndpoint;
-
     // check for overrides
     //BUFFER_HANDLE hSpeechUrl = cortana_storage_read("SPEECHURL");
     //if (hSpeechUrl)
@@ -1652,7 +1653,7 @@ Speech_Initialize(
     //    }
     //}
 
-    pSC->mSpeechRequest = transport_request_create(ep, pSC);
+    pSC->mSpeechRequest = transport_request_create(endpoint, pSC);
     //if (hSpeechUrl)
     //{
     //    BUFFER_delete(hSpeechUrl);

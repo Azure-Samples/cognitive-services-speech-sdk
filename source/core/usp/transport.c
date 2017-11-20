@@ -1006,6 +1006,8 @@ static int transport_open(TRANSPORT_REQUEST* pRequest)
             else
             {
                 transport_create_connection_id(pRequest);
+                //Hack: hardcode subscription key. TODO: use access token. 
+                transport_request_addrequestheader(pRequest, "Ocp-Apim-Subscription-Key", " 92069ee289b84e5594a9564ab77ed2ba");
                 transport_request_addrequestheader(pRequest, "X-ConnectionId", pRequest->connectionId);
                 AddMUID(pRequest);
                 metrics_transport_start(pRequest->connectionId);

@@ -696,7 +696,7 @@ void cortana_incoming_call_event(
 */
 void cortana_incoming_call_event_with_propertybag(CORTANA_HANDLE handle, PROPERTYBAG_HANDLE hProperty);
 
-SPEECH_RESULT Speech_Initialize(SPEECH_CONTEXT* pContext);
+SPEECH_RESULT Speech_Initialize(SPEECH_CONTEXT* pContext, const char*);
 
 typedef void(*PCONTENT_ASYNCCOMPLETE_CALLBACK)(
     void*           pContext);
