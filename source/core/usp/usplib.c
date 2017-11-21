@@ -50,7 +50,6 @@ UspResult UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callba
     // Todo: remove SPEECH_CONTEXT 
     uspContext->speechContext->uspHandle = (UspHandle)uspContext;
 
-
     return USP_SUCCESS;
 }
 

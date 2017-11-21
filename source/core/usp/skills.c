@@ -703,7 +703,6 @@ static int Handle_Json_Speech_Phrase(
     PROPERTYBAG_HANDLE  hProperty,
     void*               pContext)
 {
-    int i = 0;
     if (NULL == pContext)
     {
         return -1;
@@ -713,28 +712,37 @@ static int Handle_Json_Speech_Phrase(
     SPEECH_CONTEXT* pSC = (SPEECH_CONTEXT*)deserializeContext->pContext;
 
     // Zhou: why not differentiae by "Path", but just by "DisplayText" or "Text"??
-    /*if (pSC->mCallbacks  &&  pSC->mCallbacks->OnSpeech)
-    {*/
+    //if (pSC->mCallbacks  &&  pSC->mCallbacks->OnSpeech)
+    //{
+
+    // USp handling
+    UspContext* uspContext = (UspContext *)pSC->uspHandle;
+    wchar_t *wcText = NULL;
+    if (uspContext->callbacks)
+    {
+        // Todo: better handling of char to wchar
         const char *displayText = propertybag_getstringvalue(hProperty, "DisplayText");
         if (displayText != NULL)
         {
-            // USp handling
-            UspContext* uspContext = (UspContext *)pSC->uspHandle;
-            if (uspContext->callbacks)
-            {
-                // Todo: better handling of char to wchar
-                size_t textLen = strlen(displayText) + 1;
-                wchar_t *wcText = malloc(textLen * sizeof(wchar_t));
-                i= mbstowcs(wcText, displayText, textLen);
+            // Speech.Phrase message
+            UspMsgSpeechPhrase* msg = malloc(sizeof(UspMsgSpeechPhrase));
 
-                UspMsgSpeechPhrase* msg = malloc(sizeof(UspMsgSpeechPhrase));
-                // Todo: add more field;
-                msg->displayText = wcText;
-                uspContext->callbacks->onSpeechPhrase(uspContext, uspContext->callbackContext, msg);
-                // Todo: better handling of memory management.
-                free(msg);
-                free(wcText);
-            }
+            size_t textLen = strlen(displayText) + 1;
+            wcText = malloc(textLen * sizeof(wchar_t));
+            mbstowcs(wcText, displayText, textLen);
+
+            // Todo: add more field;
+            msg->displayText = wcText;
+
+            msg->offset = (UspOffsetType)propertybag_getnumbervalue(hProperty, "Offset");
+            msg->duration = (UspOffsetType)propertybag_getnumbervalue(hProperty, "Duration");
+            msg->recognitionStatus = (UspRecognitionStatus)propertybag_getnumbervalue(hProperty, "RecognitionStatus");
+
+            uspContext->callbacks->onSpeechPhrase(uspContext, uspContext->callbackContext, msg);
+
+            // Todo: better handling of memory management.
+            free(msg);
+            free(wcText);
 
             //pSC->mCallbacks->OnSpeech(pSC, pSC->mContext, displayText, SPEECH_PHRASE_STATE_FINAL);
         }
@@ -744,29 +752,31 @@ static int Handle_Json_Speech_Phrase(
             displayText = propertybag_getstringvalue(hProperty, "Text");
             if (NULL != displayText)
             {
-                // USP handling
-                UspContext* uspContext = (UspContext *)pSC->uspHandle;
-                if (uspContext->callbacks)
-                {
-                    // Todo: better handling of char to wchar
-                    size_t textLen = strlen(displayText) + 1;
-                    wchar_t *wcText = malloc(textLen * sizeof(wchar_t));
-                    i = mbstowcs(wcText, displayText, textLen);
+                // Todo: better handling of char to wchar
+                size_t textLen = strlen(displayText) + 1;
+                wcText = malloc(textLen * sizeof(wchar_t));
+                mbstowcs(wcText, displayText, textLen);
 
-                    UspMsgSpeechHypothesis* msg = malloc(sizeof(UspMsgSpeechHypothesis));
-                    // Todo: deal with char to wchar
-                    // Todo: add more field;
-                    msg->text = wcText;
-                    uspContext->callbacks->onSpeechHypothesis(uspContext, uspContext->callbackContext, msg);
-                    // Todo: better handling of memory management.
-                    free(msg);
-                    free(wcText);
-                }
+                UspMsgSpeechHypothesis* msg = malloc(sizeof(UspMsgSpeechHypothesis));
+                // Todo: deal with char to wchar
+                // Todo: add more field;
+                msg->text = wcText;
+                msg->offset = (UspOffsetType)propertybag_getnumbervalue(hProperty, "Offset");
+                msg->duration = (UspOffsetType)propertybag_getnumbervalue(hProperty, "Duration");
+
+                uspContext->callbacks->onSpeechHypothesis(uspContext, uspContext->callbackContext, msg);
+                // Todo: better handling of memory management.
+                free(msg);
+                free(wcText);
 
                 //pSC->mCallbacks->OnSpeech(pSC, pSC->mContext, displayText, SPEECH_PHRASE_STATE_PARTIAL);
             }
+            else
+            {
+                LogError("Wrong message type");
+            }
         }
-    //}
+    }
 
     return 0;
 }
@@ -788,8 +798,19 @@ static int Handle_Json_Turn_Start(
     if (uspContext->callbacks)
     {
         UspMsgTurnStart* msg = malloc(sizeof(UspMsgTurnStart));
-        // Todo: deal with char to wchar
-        // Todo: add more field;
+        //// Todo: add more field;
+        //// Todo: better handling of char to wchar
+        //size_t textLen = strlen(displayText) + 1;
+        //wchar_t *wcText = malloc(textLen * sizeof(wchar_t));
+        //i = mbstowcs(wcText, displayText, textLen);
+
+        //UspMsgSpeechPhrase* msg = malloc(sizeof(UspMsgSpeechPhrase));
+        //// Todo: add more field;
+        //msg->displayText = wcText;
+        //uspContext->callbacks->onSpeechPhrase(uspContext, uspContext->callbackContext, msg);
+        //// Todo: better handling of memory management.
+        //free(msg);
+        //free(wcText);
         uspContext->callbacks->onTurnStart(uspContext, uspContext->callbackContext, msg);
         // Todo: better handling of memory management.
         free(msg);
@@ -797,8 +818,9 @@ static int Handle_Json_Turn_Start(
 
     SkillResponse response = { { 0 }, { 0 }, NULL };
     response.pContext = deserializeContext->pContext;
-    Execute_SkillContext(hProperty, &response);
+    // Execute_SkillContext(hProperty, &response);
 
+    (void)hProperty;
     return 0;
 }
 

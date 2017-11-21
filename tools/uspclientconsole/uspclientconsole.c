@@ -15,40 +15,49 @@
 
 boolean turnEnd = FALSE;
 
+char* recognitionStatusToText[] =
+{
+    "Success",  // RECOGNITON_SUCCESS
+    "No Match", // RECOGNITION_NO_MATCH
+    "Initial Silence Timeout", //RECOGNITION_INITIAL_SILENCE_TIMEOUT
+    "Babble Timeout", // RECOGNITION_BABBLE_TIMEOUT
+    "Error", // RECOGNITION_ERROR
+};
+
 void OnSpeechStartDetected(UspHandle handle, void* context, UspMsgSpeechStartDetected *message)
 {
-    printf("Speech.StartDetected message.\n");
+    printf("Response: Speech.StartDetected message. Speech starts at offset %u (100ns).\n", message->offset);
 }
 
 void OnSpeechEndDetected(UspHandle handle, void* context, UspMsgSpeechEndDetected *message)
 {
-    printf("Speech.EndDetected message.\n");
+    printf("Response: Speech.EndDetected message. Speech ends at offset %u (100ns)\n", message->offset);
 }
 
 void OnSpeechHypothesis(UspHandle handle, void* context, UspMsgSpeechHypothesis *message)
 {
-    printf("Speech.Hypothesis message. Text: %S\n", message->text);
+    printf("Response: Speech.Hypothesis message. Text: %S, starts at offset %u, with duration %u (100ns).\n", message->text, message->offset, message->duration);
 }
 
 void OnSpeechPhrase(UspHandle handle, void* context, UspMsgSpeechPhrase *message)
 {
-    printf("Speech.Phrase message. Text: %S\n", message->displayText);
+    printf("Response: Speech.Phrase message. Status: %s, Text: %S, starts at %u, with duration %u (100ns).\n", recognitionStatusToText[message->recognitionStatus], message->displayText, message->offset, message->duration);
 }
 
 void OnTurnStart(UspHandle handle, void* context, UspMsgTurnStart *message)
 {
-    printf("Turn.Start message.\n");
+    printf("Response: Turn.Start message. \n");
 }
 
 void OnTurnEnd(UspHandle handle, void* context, UspMsgTurnEnd *message)
 {
-    printf("Turn.End message.\n");
+    printf("Response: Turn.End message.\n");
     turnEnd = TRUE;
 }
 
 void OnError(UspHandle handle, void* context, UspResult error)
 {
-    printf("On Error: %x.\n", error);
+    printf("Response: On Error: 0x%x.\n", error);
 }
 
 #define MAX_AUDIO_SIZE_IN_BYTE (1024*1024)
