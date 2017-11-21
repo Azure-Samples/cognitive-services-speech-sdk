@@ -57,10 +57,13 @@ void CSpxAudioPump::StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProc
     std::unique_lock<std::mutex> lock(m_mutex);
     SPX_IFTRUE_THROW_HR(m_audioReader.get() == nullptr, SPXERR_UNINITIALIZED);
     SPX_IFTRUE_THROW_HR(m_thread.joinable(), SPXERR_AUDIO_IS_PUMPING);
+    SPX_IFTRUE_THROW_HR(m_state == State::NoInput, SPXERR_UNINITIALIZED);
     SPX_IFTRUE_THROW_HR(m_state == State::Processing, SPXERR_AUDIO_IS_PUMPING);
     SPX_IFTRUE_THROW_HR(m_state == State::Paused, SPXERR_NOT_IMPL); // TODO: FUTURE: Implement PausePump
-    SPX_DBG_ASSERT_WITH_MESSAGE(m_state != State::NoInput, "We have a reader; we have a joinable pump; state should != State::NoInput");
-    SPX_DBG_ASSERT_WITH_MESSAGE(m_state != State::Idle, "State MUST == State::Idle at this point");
+    SPX_DBG_ASSERT_WITH_MESSAGE(m_state == State::Idle, 
+        "If the state is not one of the previous three checks, it MUST be Idle (there are only 4 states "
+        "in the enumeration); unless someone adds a new state and doesn't change this code. This assert "
+        "guards in DBG for that possibility.");
 
     auto keepAliveForThread = std::dynamic_pointer_cast<CSpxAudioPump>(this->shared_from_this());
     m_thread = std::move(std::thread(&CSpxAudioPump::PumpThread, this, std::move(keepAliveForThread), pISpxAudioProcessor));
