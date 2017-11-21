@@ -27,12 +27,12 @@ void OnSpeechEndDetected(UspHandle handle, void* context, UspMsgSpeechEndDetecte
 
 void OnSpeechHypothesis(UspHandle handle, void* context, UspMsgSpeechHypothesis *message)
 {
-    printf("Speech.Hypothesis message. Text: %S\n", message->Text);
+    printf("Speech.Hypothesis message. Text: %S\n", message->text);
 }
 
 void OnSpeechPhrase(UspHandle handle, void* context, UspMsgSpeechPhrase *message)
 {
-    printf("Speech.Phrase message. Text: %S\n", message->DisplayText);
+    printf("Speech.Phrase message. Text: %S\n", message->displayText);
 }
 
 void OnTurnStart(UspHandle handle, void* context, UspMsgTurnStart *message)

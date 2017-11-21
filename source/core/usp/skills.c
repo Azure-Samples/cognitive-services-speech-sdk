@@ -729,7 +729,7 @@ static int Handle_Json_Speech_Phrase(
 
                 UspMsgSpeechPhrase* msg = malloc(sizeof(UspMsgSpeechPhrase));
                 // Todo: add more field;
-                msg->DisplayText = wcText;
+                msg->displayText = wcText;
                 uspContext->callbacks->onSpeechPhrase(uspContext, uspContext->callbackContext, msg);
                 // Todo: better handling of memory management.
                 free(msg);
@@ -756,7 +756,7 @@ static int Handle_Json_Speech_Phrase(
                     UspMsgSpeechHypothesis* msg = malloc(sizeof(UspMsgSpeechHypothesis));
                     // Todo: deal with char to wchar
                     // Todo: add more field;
-                    msg->Text = wcText;
+                    msg->text = wcText;
                     uspContext->callbacks->onSpeechHypothesis(uspContext, uspContext->callbackContext, msg);
                     // Todo: better handling of memory management.
                     free(msg);
