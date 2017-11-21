@@ -19,7 +19,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="usplib.c">
-	  <Filter>Source Files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="transport.c">
       <Filter>Source Files</Filter>
@@ -66,6 +66,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="uspinternal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\usperror.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

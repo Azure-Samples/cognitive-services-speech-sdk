@@ -157,7 +157,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="usplib.c" />	
+    <ClCompile Include="usplib.c" />
     <ClCompile Include="..\..\..\external\parson\parson.c">
       <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</TreatWarningAsError>
       <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</TreatWarningAsError>
@@ -175,6 +175,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\usp.h" />
+    <ClInclude Include="..\include\usperror.h" />
     <ClInclude Include="..\include\uspmessages.h" />
     <ClInclude Include="uspinternal.h" />
   </ItemGroup>
