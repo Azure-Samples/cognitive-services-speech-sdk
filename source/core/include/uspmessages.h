@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// usp.h: the header for usplib
+// uspmessages.h: definition of USP messages that are exposed to users.
 //
 #pragma once
 
@@ -16,11 +16,11 @@ typedef uint32_t UspDurationType;
  */
 typedef enum _UspRecognitionStatus
 {
-    USP_RECOGNITON_SUCCESS,
-    USP_RECOGNITION_NO_MATCH,
-    USP_RECOGNITION_INITIAL_SILENCE_TIMEOUT,
-    USP_RECOGNITION_BABBLE_TIMEOUT,
-    USP_RECOGNITION_ERROR
+    RECOGNITON_SUCCESS,
+    RECOGNITION_NO_MATCH,
+    RECOGNITION_INITIAL_SILENCE_TIMEOUT,
+    RECOGNITION_BABBLE_TIMEOUT,
+    RECOGNITION_ERROR
 } UspRecognitionStatus;
 
 /**
@@ -28,7 +28,7 @@ typedef enum _UspRecognitionStatus
  */
 typedef struct _UspMsgSpeechStartDetected
 {
-    UspOffsetType Offset;
+    UspOffsetType offset;
 } UspMsgSpeechStartDetected;
 
 /**
@@ -36,9 +36,9 @@ typedef struct _UspMsgSpeechStartDetected
  */
 typedef struct _UspMsgSpeechHypothesis
 {
-    wchar_t* Text;
-    UspOffsetType Offset;
-    UspDurationType Duration;
+    wchar_t* text;
+    UspOffsetType offset;
+    UspDurationType duration;
 } UspMsgSpeechHypothesis;
 
 /**
@@ -46,10 +46,10 @@ typedef struct _UspMsgSpeechHypothesis
  */
 typedef struct _UspMsgSpeechPhrase
 {
-    UspRecognitionStatus RecognitionStatus;
-    wchar_t* DisplayText;
-    UspOffsetType Offset;
-    UspDurationType Duration;
+    UspRecognitionStatus recognitionStatus;
+    wchar_t* displayText;
+    UspOffsetType offset;
+    UspDurationType duration;
 } UspMsgSpeechPhrase;
 
 /**
@@ -57,7 +57,7 @@ typedef struct _UspMsgSpeechPhrase
  */
 typedef struct _UspMsgSpeechEndDetected
 {
-    UspOffsetType Offset;
+    UspOffsetType offset;
 } UspMsgSpeechEndDetected;
 
 /**
@@ -65,7 +65,7 @@ typedef struct _UspMsgSpeechEndDetected
  */
 typedef struct _UspMsgTurnStart
 {
-    wchar_t* ContextServiceTag;
+    wchar_t* contextServiceTag;
 } UspMsgTurnStart;
 
 /**

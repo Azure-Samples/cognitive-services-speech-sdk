@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// usp.h: the header for usplib
+// usp.h: the header file includes types, methods and error code exposed by usplib
 //
 
 #pragma once
@@ -89,8 +89,6 @@ typedef int UspResult;
 */
 #define USP_CONNECTION_TIMEOUT_ERROR USP_ERRCODE(0x023)
 
-
-
 /**
  * The UspOnSpeechStartDetected represents an application-defined callback function
  * used for signaling a speech.startDetected message.
@@ -154,9 +152,10 @@ typedef void(*UspOnTurnEnd)(UspHandle handle, void* context, UspMsgTurnEnd *mess
 */
 typedef void(*UspOnError)(UspHandle handle, void* context, UspResult error);
 
+
 /**
 * The UspCallbacks type represents an application-defined
-* structure used to register all usp events.
+* structure used to register all USP events.
 */
 typedef struct _UspCallbacks
 {
@@ -179,3 +178,4 @@ UspResult UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite);
 UspResult UspShutdown(UspHandle handle);
 
 void UspRun(UspHandle handle);
+
