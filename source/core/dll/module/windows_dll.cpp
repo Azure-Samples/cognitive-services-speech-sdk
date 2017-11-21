@@ -21,9 +21,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
             break;
 
         case DLL_PROCESS_DETACH:
-            CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<std::shared_ptr<CSpxRecognitionResult>>, SPXASYNCHANDLE>()->Term();
-            CSpxSharedPtrHandleTableManager::Get<CSpxRecognitionResult, SPXRESULTHANDLE>()->Term();
-            CSpxSharedPtrHandleTableManager::Get<CSpxRecognizer, SPXRECOHANDLE>()->Term();
+            CSpxSharedPtrHandleTableManager::Term();
             break;
 	}
 	return TRUE;

@@ -34,7 +34,7 @@ SPXAPI RecognizerFactory_CreateSpeechRecognzier_With_Defaults(SPXRECOHANDLE* phr
     {
         *phreco = SPXHANDLE_INVALID;
         auto recognizer = CSpxRecognizerFactory::CreateSpeechRecognizer();
-        auto recohandles = CSpxSharedPtrHandleTableManager::Get<CSpxRecognizer, SPXRECOHANDLE>();
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }
     catch (std::exception ex)
@@ -52,7 +52,21 @@ SPXAPI RecognizerFactory_CreateSpeechRecognzier_With_Language(SPXRECOHANDLE* phr
 
 SPXAPI RecognizerFactory_CreateSpeechRecognzier_With_FileInput(SPXRECOHANDLE* phreco, const wchar_t* pszFileName)
 {
-    return SPXERR_NOT_IMPL;
+    SPX_INIT_HR(hr);
+
+    try
+    {
+        *phreco = SPXHANDLE_INVALID;
+        auto recognizer = CSpxRecognizerFactory::CreateSpeechRecognizerWithFileInput(pszFileName);
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        *phreco = recohandles->TrackHandle(recognizer);
+    }
+    catch (std::exception ex)
+    {
+        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
+    }
+
+    SPX_RETURN_HR(hr);
 }
 
 SPXAPI RecognizerFactory_CreateSpeechRecognzier_With_PassiveListening(SPXRECOHANDLE* phreco, bool passive)

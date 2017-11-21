@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "recognition_result.h"
 
 
 using namespace CARBON_IMPL_NAMESPACE();
@@ -11,7 +10,7 @@ SPXAPI Result_GetResultId(SPXRESULTHANDLE hresult, wchar_t* pszResultId, uint32_
     
     try
     {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<CSpxRecognitionResult, SPXRESULTHANDLE>();
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
 
         auto strActual = result->GetResultId();
@@ -41,7 +40,7 @@ SPXAPI Result_GetRecognitionReason(SPXRESULTHANDLE hresult, Result_RecognitionRe
     
     try
     {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<CSpxRecognitionResult, SPXRESULTHANDLE>();
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
         *preason = (Result_RecognitionReason)result->GetReason();
     }
@@ -63,7 +62,7 @@ SPXAPI Result_GetText(SPXRESULTHANDLE hresult, wchar_t* pszText, uint32_t cchTex
     
     try
     {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<CSpxRecognitionResult, SPXRESULTHANDLE>();
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
 
         auto strActual = result->GetText();

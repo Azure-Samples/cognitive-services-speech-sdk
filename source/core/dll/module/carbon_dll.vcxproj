@@ -92,7 +92,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>SPX_CONFIG_EXPORTAPIS;NDEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\..\public\c_api;..\..\include;..\..\libs\sr</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\public\c_api;..\..\include;..\..\libs\sr;..\..\libs\audio</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -116,7 +116,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>SPX_CONFIG_EXPORTAPIS;WIN32;_DEBUG;carbon_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\..\public\c_api;..\..\include;..\..\libs\sr</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\public\c_api;..\..\include;..\..\libs\sr;..\..\libs\audio</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -135,7 +135,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>SPX_CONFIG_EXPORTAPIS;_DEBUG;carbon_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\..\public\c_api;..\..\include;..\..\libs\sr</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\public\c_api;..\..\include;..\..\libs\sr;..\..\libs\audio</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -156,7 +156,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>SPX_CONFIG_EXPORTAPIS;WIN32;NDEBUG;carbon_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\..\public\c_api;..\..\include;..\..\libs\sr</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\public\c_api;..\..\include;..\..\libs\sr;..\..\libs\audio</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -184,6 +184,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\libs\audio\audio.vcxproj">
+      <Project>{ba9ec81e-f7c4-4a44-bb15-19db0dc3f899}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\libs\c_api\c_api.vcxproj">
       <Project>{2ad40154-2403-44a4-89c5-e0821418f25c}</Project>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>

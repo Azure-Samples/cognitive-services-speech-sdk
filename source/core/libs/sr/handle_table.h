@@ -1,4 +1,6 @@
 #pragma once
+#include <functional>
+#include <list>
 #include <map>
 #include <memory>
 
@@ -69,18 +71,32 @@ public:
     static CSpxHandleTable<T, Handle>* Get()
     {
         auto name = typeid(T).raw_name();
+
         if (m_tables->find(name) == m_tables->end())
         {
             auto ht = new CSpxHandleTable<T, Handle>();
             m_tables->emplace(name, ht);
+
+            auto fn = [=]() { ht->Term(); };
+            m_termFns->push_back(fn);
         }
+
         return (CSpxHandleTable<T, Handle>*) (*m_tables)[name];
+    }
+
+    static void Term()
+    {
+        for (auto termFn : *m_termFns.get())
+        {
+            termFn();
+        }
     }
 
 
 private:
 
     static std::unique_ptr<std::map<const char*, void*>> m_tables;
+    static std::unique_ptr<std::list<std::function<void(void)>>> m_termFns;
 };
 
 

@@ -659,7 +659,7 @@ void CarbonTestConsole::ConsoleInput_IntentRecognizer(const wchar_t* psz, std::s
 
 void CarbonTestConsole::ConsoleInput_CommandSystem(const wchar_t* psz)
 {
-    // TODO: ROBCH: Implement this methods
+    // TODO: ROBCH: Implement CarbonTestConsole::ConsoleInput_CommandSystem
 }
 
 template <class T>
@@ -763,7 +763,7 @@ void CarbonTestConsole::InitCarbon(ConsoleArgs* pconsoleArgs)
 {
     try
     {
-        InitRecognizer(pconsoleArgs->m_strRecognizerType);
+        InitRecognizer(pconsoleArgs->m_strRecognizerType, pconsoleArgs->m_strInput);
         InitCommandSystem();
     }
     catch (std::exception ex)
@@ -772,23 +772,27 @@ void CarbonTestConsole::InitCarbon(ConsoleArgs* pconsoleArgs)
     }
 }
 
-void CarbonTestConsole::InitRecognizer(const std::string& recognizerType)
+void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const std::wstring& wavFileName)
 {
     if (recognizerType == typeid(SpeechRecognizer).name())
     {
-        m_speechRecognizer = RecognizerFactory::CreateSpeechRecognizer();
+        m_speechRecognizer = wavFileName.length() == 0
+            ? RecognizerFactory::CreateSpeechRecognizer() 
+            : RecognizerFactory::CreateSpeechRecognizerWithFileInput(wavFileName);
         m_recognizer = BaseAsyncRecognizer::From(m_speechRecognizer);
     }
     else if (recognizerType == typeid(IntentRecognizer).name())
     {
-        m_intentRecognizer = RecognizerFactory::CreateIntentRecognizer();
+        m_intentRecognizer = wavFileName.length() == 0
+            ? RecognizerFactory::CreateIntentRecognizer()
+            : RecognizerFactory::CreateIntentRecognizerWithFileInput(wavFileName);
         m_recognizer = BaseAsyncRecognizer::From(m_intentRecognizer);
     }
 }
 
 void CarbonTestConsole::InitCommandSystem()
 {
-    // TODO: ROBCH: implement this method
+    // TODO: ROBCH: Implement CarbonTestConsole::InitCommandSystem
 }
 
 void CarbonTestConsole::WaitForDebugger()
@@ -938,7 +942,7 @@ void CarbonTestConsole::Sample_HelloWorld_C()
 
 int __cdecl wmain(int argc, const wchar_t* argv[])
 {
-    SPX_DBG_TRACE_SCOPE("\r\n=== CarbonX (Carbon Test Console) started\n\n", "\r\n=== CarbonX (carbon test console) terminated");
+    SPX_DBG_TRACE_SCOPE("\r\n=== CarbonX (Carbon Test Console) started\n\n", "\r\n=== CarbonX (carbon test console) ended");
 
     auto unhandledException = []() ->void { SPX_TRACE_ERROR("CarbonX: Unhandled exception!"); };
     set_terminate(unhandledException);
