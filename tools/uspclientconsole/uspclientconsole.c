@@ -46,7 +46,7 @@ void OnSpeechPhrase(UspHandle handle, void* context, UspMsgSpeechPhrase *message
 
 void OnTurnStart(UspHandle handle, void* context, UspMsgTurnStart *message)
 {
-    printf("Response: Turn.Start message. \n");
+    printf("Response: Turn.Start message. Context.ServiceTag: %S\n", message->contextServiceTag);
 }
 
 void OnTurnEnd(UspHandle handle, void* context, UspMsgTurnEnd *message)

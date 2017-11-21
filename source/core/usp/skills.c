@@ -781,6 +781,24 @@ static int Handle_Json_Speech_Phrase(
     return 0;
 }
 
+static int Handle_Turn_Start_Context(
+    PROPERTYBAG_HANDLE  hProperty,
+    void*               pContext)
+{
+    const char* serviceTag = propertybag_getstringvalue(hProperty, "serviceTag");
+    UspMsgTurnStart *msg = (UspMsgTurnStart *)pContext;
+
+    // Todo: better handling of char to wchar
+    size_t textLen = strlen(serviceTag) + 1;
+    wchar_t *wcText = malloc(textLen * sizeof(wchar_t));
+    mbstowcs(wcText, serviceTag, textLen);
+
+    // Todo: add more field;
+    msg->contextServiceTag = wcText;
+
+    return 0;
+}
+
 // handles "turn.start" API path
 static int Handle_Json_Turn_Start(
     PROPERTYBAG_HANDLE  hProperty,
@@ -798,21 +816,17 @@ static int Handle_Json_Turn_Start(
     if (uspContext->callbacks)
     {
         UspMsgTurnStart* msg = malloc(sizeof(UspMsgTurnStart));
-        //// Todo: add more field;
-        //// Todo: better handling of char to wchar
-        //size_t textLen = strlen(displayText) + 1;
-        //wchar_t *wcText = malloc(textLen * sizeof(wchar_t));
-        //i = mbstowcs(wcText, displayText, textLen);
 
-        //UspMsgSpeechPhrase* msg = malloc(sizeof(UspMsgSpeechPhrase));
-        //// Todo: add more field;
-        //msg->displayText = wcText;
-        //uspContext->callbacks->onSpeechPhrase(uspContext, uspContext->callbackContext, msg);
-        //// Todo: better handling of memory management.
-        //free(msg);
-        //free(wcText);
+        (void)propertybag_getchildvalue(
+            hProperty,
+            "context",
+            Handle_Turn_Start_Context,
+            msg);
+
         uspContext->callbacks->onTurnStart(uspContext, uspContext->callbackContext, msg);
+
         // Todo: better handling of memory management.
+        free(msg->contextServiceTag);
         free(msg);
     }
 
