@@ -1,0 +1,138 @@
+/*
+ *  ======== package.bld ========
+ */
+ 
+var Build = xdc.useModule('xdc.bld.BuildEnvironment');
+var Pkg = xdc.useModule('xdc.bld.PackageContents');
+
+/* make command to search for the srcs */
+Pkg.makePrologue = "vpath %.c ../../src ../../adapters";
+
+/* lib/ is a generated directory that 'xdc clean' should remove */
+Pkg.generatedFiles.$add("lib/");
+
+var SRCS = [
+    "platform_stub.c",
+    "httpapi_tirtos.c",
+    "threadapi_pthreads.c",
+    "lock_pthreads.c",
+    "agenttime.c", 
+    "base64.c",
+    "buffer.c",
+    "crt_abstractions.c",
+    "doublylinkedlist.c",
+    "gballoc.c",
+    "hmac.c",
+    "hmacsha256.c",
+    "httpapiex.c",
+    "httpapiexsas.c",
+    "httpheaders.c",
+    "map.c",
+    "sastoken.c",
+    "sha1.c",
+    "sha224.c",
+    "sha384-512.c",
+    "strings.c",
+    "string_tokenizer.c",
+    "tickcounter_tirtos.c",
+    "urlencode.c",
+    "usha.c",
+    "vector.c"
+];
+
+/* Paths to external source libraries */
+xdcargs = java.lang.System.getenv("XDCARGS").split(" ");
+
+var slIncs = "";
+var ndkIncs = "";
+var wolfsslIncs = "";
+var commonIncs = "-I../../inc -I../../inc/azure_c_shared_utility ";
+var pthreadIncs = "";
+
+/* Parse out the XDCARGS options for the library source paths */
+for (x = 0; x < xdcargs.length; x++) {
+
+    if (xdcargs[x].match(/^CC3200SDK=/)) {
+        slIncs = (xdcargs[x] + "").replace(/'/g, '');
+        slIncs = slIncs.substring(slIncs.indexOf('=') + 1);
+        if (slIncs != "") {
+            slIncs += "/simplelink";
+            slIncs = "-I" + slIncs + " -I" + slIncs + "/include ";
+        }
+    }
+
+    if (xdcargs[x].match(/^NDK=/)) {
+        ndkIncs = (xdcargs[x] + "").replace(/'/g, '');
+        ndkIncs = ndkIncs.substring(ndkIncs.indexOf('=') + 1);
+        if (ndkIncs != "") {
+            ndkIncs = "-I" + ndkIncs + "/packages/ti/ndk/inc/bsd ";
+        }
+    }
+
+    if (xdcargs[x].match(/^BIOS=/)) {
+        pthreadIncs = (xdcargs[x] + "").replace(/'/g, '');
+        pthreadIncs = pthreadIncs.substring(pthreadIncs.indexOf('=') + 1);
+        if (pthreadIncs != "") {
+            pthreadIncs = "-I" + pthreadIncs + "/packages/ti/sysbios/posix ";
+        }
+    }
+
+    if (xdcargs[x].match(/^WOLFSSL=/)) {
+        wolfsslIncs = (xdcargs[x] + "").replace(/'/g, '');
+        wolfsslIncs = wolfsslIncs.substring(wolfsslIncs.indexOf('=') + 1);
+        if (wolfsslIncs != "") {
+            wolfsslIncs = "-I" + wolfsslIncs;
+        }
+    }
+}
+
+if (ndkIncs != "") {
+
+    if (wolfsslIncs == "") {
+        print("Warning: Cannot find WolfSSL directory: '" + wolfsslPath
+                + "'. Skipping TLS support build.");
+        wolfsslIncs = "";
+    }
+
+    var wolfsslPath = wolfsslIncs.substring(2);
+    try {
+        var f = new java.io.File(wolfsslPath);
+        if (!f.exists()) {
+            print("Warning: Cannot find WolfSSL directory: '" + wolfsslPath
+                    + "'. Skipping TLS support build.");
+            wolfsslIncs = "";
+        }
+    }
+    catch(e) {
+        print("Warning: Cannot find WolfSSL directory: '" + wolfsslPath
+                + "'. Skipping TLS support build.");
+        wolfsslIncs = "";
+    }
+}
+
+for (var i = 0; i < Build.targets.length; i++) {
+    var profile = "release";
+    var target = Build.targets[i];
+    var extraOpts = commonIncs + pthreadIncs;
+
+    if (slIncs != "") {
+        Pkg.addLibrary("lib/common_sl", target, { profile: profile,
+            defs: "-DNET_SL " + extraOpts, incs: slIncs
+        }).addObjects(SRCS);
+    }
+
+    if (ndkIncs != "") {
+        if (wolfsslIncs != "") {
+             Pkg.addLibrary("lib/common_ndk_wolfssl", target, {
+                profile: profile,
+                defs: "-DNET_NDK -DNET_WOLFSSL -DWOLFSSL_TIRTOS "
+                        + extraOpts,
+                incs: ndkIncs + wolfsslIncs
+            }).addObjects(SRCS)
+        }
+
+        Pkg.addLibrary("lib/common_ndk", target, { profile: profile,
+            defs: "-DNET_NDK " + extraOpts, incs: ndkIncs
+        }).addObjects(SRCS);
+    }
+}

@@ -1,0 +1,304 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".h" #>
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+/*THIS FILE IS GENERATED*/
+/*DO NOT EDIT BY HAND!!!*/
+/*instead edit macro_utils.tt */
+<#/*CHANGE BELOW 2 VARIABLES TO GET MORE / LESS */ #>
+<#int nArithmetic=1024;#>
+<#int nMacroParameters=124;/*127 parameters in one macro deﬁnition in C99 in chapter 5.2.4.1 Translation limits*/#>
+
+#ifndef MACRO_UTILS_H
+#define MACRO_UTILS_H
+
+#include <string.h>
+
+#define TOSTRING_(x) #x
+#define TOSTRING(x) TOSTRING_(x)
+
+#define IFCOMMA(N) C2(IFCOMMA_, N)
+#define IFCOMMA_0
+#define IFCOMMA_2
+<#for(var i=4;i<=nMacroParameters;i+=2)#>
+<#{#>
+#define IFCOMMA_<#=i#> ,
+<#}#>
+
+#define IFCOMMA_NOFIRST(N) C2(IFCOMMA_NOFIRST, N)
+#define IFCOMMA_NOFIRST1 
+<#for(var i=2;i<=nMacroParameters;i++)#>
+<#{#>
+#define IFCOMMA_NOFIRST<#=i#> ,
+<#}#>
+
+#define DEC(x) C2(DEC,x)
+<#for(var i=nArithmetic;i>=1;i--)#>
+<#{#>
+#define DEC<#=i#> <#=i-1#>
+<#}#>
+
+#define INC(x) C2(INC,x)
+<#for(var i=nArithmetic;i>=0;i--)#>
+<#{#>
+#define INC<#=i#> <#=i+1#>
+<#}#>
+
+#define DIV2(x) C2(DIV2_,x)
+
+<#for(var i=nArithmetic;i>=0;i--)#>
+<#{#>
+#define DIV2_<#=i#> <#=i/2#>
+<#}#>
+
+#define THE_NTH_ARG(<#for(var i=1;i<=nMacroParameters;i++)#>
+<#{#>P<#=i#>, <#}#> ... ) P<#=nMacroParameters#>
+
+#define _TRIGGER_PARENTHESIS_(...) ,
+
+#ifdef _MSC_VER
+#define LPAREN (
+#define COUNT_1_OR_MORE_ARG(...) THE_NTH_ARG LPAREN __VA_ARGS__, \
+<#for(var i=nMacroParameters-1;i>=1;i--){#><#=i.ToString()+((i>1)?", ":"")#><#}#>)
+#define MORE_THAN_1_ARG(...) THE_NTH_ARG LPAREN __VA_ARGS__, <#for(var i=nMacroParameters-2;i>=1;i--){#><#=1#>,<#}#>0)
+#else
+#define COUNT_1_OR_MORE_ARG(...) THE_NTH_ARG (__VA_ARGS__, \
+<#for(var i=nMacroParameters-1;i>=1;i--){#><#=i.ToString()+((i>1)?", ":"")#><#}#>)
+#define MORE_THAN_1_ARG(...) THE_NTH_ARG(__VA_ARGS__, <#for(var i=nMacroParameters-2;i>=1;i--){#><#=1#>,<#}#> 0)
+#endif
+
+#define COUNT_ARG(...) C2(COUNT_ARG_, ISEMPTY(__VA_ARGS__))(__VA_ARGS__)
+#define COUNT_ARG_1(...) 0
+#define COUNT_ARG_0(...) C1(COUNT_1_OR_MORE_ARG(__VA_ARGS__))
+
+#define ISEMPTY(...) C3(DISPTACH_EMPTY_, MORE_THAN_1_ARG(_TRIGGER_PARENTHESIS_ __VA_ARGS__ ()), MORE_THAN_1_ARG(__VA_ARGS__))
+#define DISPTACH_EMPTY_10 1
+#define DISPTACH_EMPTY_00 0
+#define DISPTACH_EMPTY_11 0
+
+
+#define C2_(x,y) x##y
+
+#define C2(x,y) C2_(x,y)
+
+#define C3(x,y,z) C2(x, C2(y,z))
+
+#define C4(x,y,z, u) C2(C2(x,y), C2(z,u))
+
+#define C5(x,y,z,u, v) C2(C4(x,y, z, u), v)
+
+#define C1_(x) x
+
+#define C1(x) C1_(x)
+
+#define C2STRING(x,y) x y
+
+#define C3STRING(x,y,z) x y z
+
+#define C4STRING(x,y,z,u) x y z u
+
+#define C5STRING(x,y,z,u,v) x y z u v
+
+
+<#for(var i=nMacroParameters;i>=2;i--)#>
+<#{#>
+#define FOR_EACH_1_<#=i#>(X, <#for(var j=1;j<=i;j++){#>P<#=j.ToString()+((j<i)?", ":"")#><#}#>) \
+X(P1) \
+FOR_EACH_1_<#=i-1#>(X, <#for(var j=2;j<=i;j++){#>P<#=j.ToString()+((j<i)?", ":"")#><#}#>)
+
+<#}#>
+#define FOR_EACH_1_1(X, P1) \
+X(P1)
+
+#ifdef _MSC_VER
+#define FOR_EACH_1(MACRO_TO_INVOKE, ...) C2(FOR_EACH_1_,C1(COUNT_ARG(__VA_ARGS__))) LPAREN MACRO_TO_INVOKE, __VA_ARGS__)
+#else
+#define FOR_EACH_1(MACRO_TO_INVOKE, ...) C2(FOR_EACH_1_,C1(COUNT_ARG(__VA_ARGS__))) ( MACRO_TO_INVOKE, __VA_ARGS__)
+#endif
+
+<#for(var i=nMacroParameters;i>=2;i--)#>
+<#{#>
+#define FOR_EACH_1_KEEP_1_<#=i#>(X, keep, <#for(var j=1;j<=i;j++){#>P<#=j.ToString()+(j<i?", ":"")#><#}#>) \
+X(keep, P1) \
+FOR_EACH_1_KEEP_1_<#=i-1#>(X, keep, <#for(var j=2;j<=i;j++){#>P<#=(j).ToString()+(j<i?", ":"")#><#}#>)
+
+
+<#}#>
+
+#define FOR_EACH_1_KEEP_1_1(X, keep, P1) \
+X(keep, P1)
+
+#ifdef _MSC_VER
+#define FOR_EACH_1_KEEP_1(MACRO_TO_INVOKE, ...) C2(FOR_EACH_1_KEEP_1_, C2(DEC,C1(COUNT_ARG(__VA_ARGS__)))) LPAREN MACRO_TO_INVOKE, __VA_ARGS__)
+#else
+#define FOR_EACH_1_KEEP_1(MACRO_TO_INVOKE, ...) C2(FOR_EACH_1_KEEP_1_, C2(DEC,C1(COUNT_ARG(__VA_ARGS__)))) ( MACRO_TO_INVOKE, __VA_ARGS__)
+#endif
+
+<#for(var i=nMacroParameters;i>=4;i-=2)#>
+<#{#>
+#define FOR_EACH_2_KEEP_1_<#=i#>(X, keep, <#for(var j=1;j<=i;j++){#>P<#=j.ToString()+(j<i?", ":"")#><#}#>) \
+X(keep, P1, P2) \
+FOR_EACH_2_KEEP_1_<#=i-2#>(X, keep, <#for(var j=3;j<=i;j++){#>P<#=(j).ToString()+(j<i?", ":"")#><#}#>)
+
+
+<#}#>
+
+#define FOR_EACH_2_KEEP_1_2(X, keep, P1, P2) \
+    X(keep, P1, P2) \
+
+#ifdef _MSC_VER
+#define FOR_EACH_2_KEEP_1(MACRO_TO_INVOKE, ...) C2(FOR_EACH_2_KEEP_1_, C2(DEC,C1(COUNT_ARG(__VA_ARGS__)))) LPAREN MACRO_TO_INVOKE, __VA_ARGS__)
+#else
+#define FOR_EACH_2_KEEP_1(MACRO_TO_INVOKE, ...) C2(FOR_EACH_2_KEEP_1_, C2(DEC,C1(COUNT_ARG(__VA_ARGS__)))) ( MACRO_TO_INVOKE, __VA_ARGS__)
+#endif
+
+#define FOR_EACH_2_0(...)
+
+#define FOR_EACH_2_2(X, P1, P2) \
+X(P1, P2)
+
+<#for(var i=4;i<=nMacroParameters;i+=2) {#>
+#define FOR_EACH_2_<#=i#>(X, <#for(var j=1;j<=i;j++){#>P<#=j.ToString()+((j<i)?", ":"")#><#}#>) \
+X(P1, P2) \
+FOR_EACH_2_<#=i-2#>(X, <#for(var j=3;j<=i;j++){#>P<#=j.ToString()+((j<i)?", ":"")#><#}#>)
+
+<#}#>
+
+#define FOR_EACH_1_COUNTED_0(...)
+
+#define FOR_EACH_1_COUNTED_1(X, P1) \
+    X(1, P1)
+
+<#for(var i=2;i<=nMacroParameters;i++) {#>
+#define FOR_EACH_1_COUNTED_<#=i#>(X, <#for(var j=1;j<=i;j++){#>P<#=j.ToString()+((j<i)?", ":"")#><#}#>) \
+X(<#=i#>, P1) \
+FOR_EACH_1_COUNTED_<#=i-1#>(X, <#for(var j=2;j<=i;j++){#>P<#=j.ToString()+((j<i)?", ":"")#><#}#>)
+
+<#}#>
+
+#define FOR_EACH_2_COUNTED_0(...)
+
+#define FOR_EACH_2_COUNTED_2(X, P1, P2) \
+    X(2, P1, P2)
+
+<#for(var i=4;i<=nMacroParameters;i+=2) {#>
+#define FOR_EACH_2_COUNTED_<#=i#>(X, <#for(var j=1;j<=i;j++){#>P<#=j.ToString()+((j<i)?", ":"")#><#}#>) \
+X(<#=i#>, P1, P2) \
+FOR_EACH_2_COUNTED_<#=i-2#>(X, <#for(var j=3;j<=i;j++){#>P<#=j.ToString()+((j<i)?", ":"")#><#}#>)
+
+<#}#>
+
+#ifdef _MSC_VER
+#define FOR_EACH_2(MACRO_TO_INVOKE, ...) C2(FOR_EACH_2_, C1(COUNT_ARG(__VA_ARGS__))) LPAREN MACRO_TO_INVOKE, __VA_ARGS__)
+/*the COUNTED breed of FOR_EACH macro invokes a macro with 3 parameters: 1st being the count of invocation. For example.
+FOR_EACH_2_COUNTER(MACRO, a,b,c,d,e,f) will result in 
+MACRO(6, a,b)
+MACRO(4, c,d)
+MACRO(2, e,f)
+This macro exists because we need a "stop condition" in outputting COMMA... when calling a function f(a,b,c,d) cannot be f(a,b,c,d,) <=doesn't compile (as opposed to enum definition)
+*/
+#define FOR_EACH_2_COUNTED(MACRO_TO_INVOKE, ...) C2(FOR_EACH_2_COUNTED_, C1(COUNT_ARG(__VA_ARGS__))) LPAREN MACRO_TO_INVOKE, __VA_ARGS__)
+#define FOR_EACH_1_COUNTED(MACRO_TO_INVOKE, ...) C2(FOR_EACH_1_COUNTED_, C1(COUNT_ARG(__VA_ARGS__))) LPAREN MACRO_TO_INVOKE, __VA_ARGS__)
+#else
+#define FOR_EACH_2(MACRO_TO_INVOKE, ...) C2(FOR_EACH_2_, C1(COUNT_ARG(__VA_ARGS__))) ( MACRO_TO_INVOKE, __VA_ARGS__)
+#define FOR_EACH_2_COUNTED(MACRO_TO_INVOKE, ...) C2(FOR_EACH_2_COUNTED_, C1(COUNT_ARG(__VA_ARGS__))) ( MACRO_TO_INVOKE,  __VA_ARGS__)
+#define FOR_EACH_1_COUNTED(MACRO_TO_INVOKE, ...) C2(FOR_EACH_1_COUNTED_, C1(COUNT_ARG(__VA_ARGS__))) ( MACRO_TO_INVOKE,  __VA_ARGS__)
+#endif
+
+#ifdef _MSC_VER
+#define EXPAND_OR_C1(x) x
+#else
+#define EXPAND_OR_C1(...) __VA_ARGS__
+#endif
+
+#define EXPAND_ARGS(...) __VA_ARGS__
+#define EXPAND_TWICE(...) EXPAND_ARGS(__VA_ARGS__)
+
+#define DO_0(MACRO, ...) \
+MACRO(0, __VA_ARGS__)
+
+<#for(var i=1;i<=nArithmetic;i++){#>
+#define DO_<#=i#>(MACRO, ...) \
+MACRO(<#=i#>, __VA_ARGS__) \
+DO_<#=i-1#>(MACRO, __VA_ARGS__)
+
+
+<#}#>
+
+#define DO(TIMES, MACRO, ...) C2(DO_, TIMES)(MACRO, __VA_ARGS__)
+
+
+/* we need some sort of macro that does:
+IF(0, "true", "false") => "false"
+IF(1, "true", "false") => "true"
+IF(X, "true", "false") => "true"
+*/
+
+#define INTERNALIF(x) INTERNALIF##x
+#define INTERNALIF0
+
+#define ISZERO(x) COUNT_ARG(INTERNALIF(x))
+
+#define IF(condition, trueBranch, falseBranch) C2(IF,ISZERO(condition))(trueBranch, falseBranch)
+#define IF0(trueBranch, falseBranch) falseBranch
+#define IF1(trueBranch, falseBranch) trueBranch
+
+
+
+#define DEFINE_ENUMERATION_CONSTANT(x) x,
+/*DEFINE_ENUM goes to header*/
+#define DEFINE_ENUM(enumName, ...) typedef enum C2(enumName, _TAG) { FOR_EACH_1(DEFINE_ENUMERATION_CONSTANT, __VA_ARGS__)} enumName; \
+    extern const char* C2(enumName,Strings)(enumName value); \
+    extern int C2(enumName, _FromString)(const char* enumAsString, enumName* destination);
+
+
+#define DEFINE_ENUMERATION_CONSTANT_AS_WIDESTRING(x) C2(L, TOSTRING(x)) , 
+#define DEFINE_ENUMERATION_CONSTANT_AS_STRING(x) TOSTRING(x) , 
+/*DEFINE_ENUM_STRINGS goes to .c*/
+#define DEFINE_ENUM_STRINGS(enumName, ...) const char* C2(enumName, StringStorage)[COUNT_ARG(__VA_ARGS__)] = {FOR_EACH_1(DEFINE_ENUMERATION_CONSTANT_AS_STRING, __VA_ARGS__)}; \
+const char* C2(enumName,Strings)(enumName value)                   \
+{                                                                  \
+    if(value>=COUNT_ARG(__VA_ARGS__))                              \
+    {                                                              \
+        /*this is an error case*/                                  \
+        return NULL;                                               \
+    }                                                              \
+    else                                                           \
+    {                                                              \
+        return C2(enumName, StringStorage)[value];                 \
+    }                                                              \
+}                                                                  \
+int C2(enumName, _FromString)(const char* enumAsString, enumName* destination)  \
+{                                                                               \
+    if(                                                                         \
+        (enumAsString==NULL) || (destination==NULL)                             \
+    )                                                                           \
+    {                                                                           \
+        return __LINE__;                                                        \
+    }                                                                           \
+    else                                                                        \
+    {                                                                           \
+        size_t i;                                                               \
+        for(i=0;i<COUNT_ARG(__VA_ARGS__);i++)                                   \
+        {                                                                       \
+            if(strcmp(enumAsString, C2(enumName, StringStorage)[i])==0)         \
+            {                                                                   \
+                *destination = (enumName)i;                                               \
+                return 0;                                                       \
+            }                                                                   \
+        }                                                                       \
+        return __LINE__;                                                        \
+    }                                                                           \
+}                                                                               \
+
+#define ENUM_TO_STRING(enumName, enumValue) C2(enumName, Strings)(enumValue)
+#define STRING_TO_ENUM(stringValue, enumName, addressOfEnumVariable) C2(enumName, _FromString)(stringValue, addressOfEnumVariable)
+
+#define DEFINE_MICROMOCK_ENUM_TO_STRING(type, ...) MICROMOCK_ENUM_TO_STRING(type, FOR_EACH_1(DEFINE_ENUMERATION_CONSTANT_AS_WIDESTRING, __VA_ARGS__));
+
+#endif /*MACRO_UTILS_H*/
