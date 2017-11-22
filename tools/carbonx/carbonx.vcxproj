@@ -202,8 +202,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\source\core\dll\module\carbon_dll.vcxproj">
+    <ProjectReference Include="..\..\source\core\carbon_dll\carbon_dll.vcxproj">
       <Project>{64a00c50-830d-4e0d-839b-caa2dc303266}</Project>
+      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
