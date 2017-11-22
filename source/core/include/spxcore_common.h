@@ -6,3 +6,13 @@
 
 
 #define CARBON_IMPL_NAMESPACE() CarbonIMPL
+
+
+namespace CARBON_IMPL_NAMESPACE() {
+
+
+class ISpxRecognizer;
+
+
+
+}; // CARBON_IMPL_NAMESPACE()

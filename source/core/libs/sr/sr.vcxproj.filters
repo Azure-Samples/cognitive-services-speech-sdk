@@ -6,6 +6,12 @@
     <ClInclude Include="recognizer.h" />
     <ClInclude Include="recognizer_factory.h" />
     <ClInclude Include="handle_table.h" />
+    <ClInclude Include="session.h" />
+    <ClInclude Include="asyncop.h" />
+    <ClInclude Include="ispxinterfaces.h" />
+    <ClInclude Include="interactive_session.h" />
+    <ClInclude Include="audio_stream_session.h" />
+    <ClInclude Include="audio_pump.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -13,5 +19,8 @@
     <ClCompile Include="recognizer.cpp" />
     <ClCompile Include="recognizer_factory.cpp" />
     <ClCompile Include="handle_table.cpp" />
+    <ClCompile Include="session.cpp" />
+    <ClCompile Include="audio_stream_session.cpp" />
+    <ClCompile Include="audio_pump.cpp" />
   </ItemGroup>
 </Project>

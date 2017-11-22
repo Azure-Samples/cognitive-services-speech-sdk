@@ -91,7 +91,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\..\public\c_api;..\..\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\public\c_api;..\..\include;..\audio</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -100,6 +100,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <ProjectReference />
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -108,7 +111,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\..\public\c_api;..\..\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\public\c_api;..\..\include;..\audio</AdditionalIncludeDirectories>
       <FunctionLevelLinking>true</FunctionLevelLinking>
     </ClCompile>
     <Link>
@@ -126,7 +129,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\..\public\c_api;..\..\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\public\c_api;..\..\include;..\audio</AdditionalIncludeDirectories>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
     </ClCompile>
@@ -147,7 +150,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\..\public\c_api;..\..\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\public\c_api;..\..\include;..\audio</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -160,17 +163,26 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="asyncop.h" />
+    <ClInclude Include="audio_pump.h" />
+    <ClInclude Include="audio_stream_session.h" />
     <ClInclude Include="handle_table.h" />
+    <ClInclude Include="interactive_session.h" />
+    <ClInclude Include="ispxinterfaces.h" />
     <ClInclude Include="recognition_result.h" />
     <ClInclude Include="recognizer.h" />
     <ClInclude Include="recognizer_factory.h" />
+    <ClInclude Include="session.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="audio_pump.cpp" />
+    <ClCompile Include="audio_stream_session.cpp" />
     <ClCompile Include="handle_table.cpp" />
     <ClCompile Include="recognition_result.cpp" />
     <ClCompile Include="recognizer.cpp" />
     <ClCompile Include="recognizer_factory.cpp" />
+    <ClCompile Include="session.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

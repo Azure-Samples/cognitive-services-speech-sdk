@@ -57,4 +57,30 @@ typedef unsigned int SPXHR;
 /*** SPXERR_ALREADY_IN_PROGRESS
 *   The asynchronous operation is already in progress.
 */
-#define SPXERR_ALREADY_IN_PROGRESS  __SPX_ERRCODE_FAILED(0x005)
+#define SPXERR_ALREADY_IN_PROGRESS  __SPX_ERRCODE_FAILED(0x006)
+
+/*** SPXERR_FILE_OPEN_FAILED
+*   The attempt to open the file failed.
+*/
+#define SPXERR_FILE_OPEN_FAILED     __SPX_ERRCODE_FAILED(0x007)
+
+/*** SPXERR_UNEXPECTED_EOF
+*   The end of the file was reached unexpectedly.
+*/
+#define SPXERR_UNEXPECTED_EOF       __SPX_ERRCODE_FAILED(0x008)
+
+/*** SPXERR_INVALID_HEADER
+*   One or more arguments are not valid.
+*/
+#define SPXERR_INVALID_HEADER       __SPX_ERRCODE_FAILED(0x009)
+
+/*** SPXERR_AUDIO_IS_PUMPING
+*   The requested operation cannot be performed while audio is pumping
+*/
+#define SPXERR_AUDIO_IS_PUMPING     __SPX_ERRCODE_FAILED(0x00a)
+
+/*** SPXERR_UNSUPPORTED_FORMAT
+*   The requested operation cannot be performed while audio is pumping
+*/
+#define SPXERR_UNSUPPORTED_FORMAT   __SPX_ERRCODE_FAILED(0x00b)
+

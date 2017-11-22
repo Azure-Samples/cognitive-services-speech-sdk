@@ -466,6 +466,21 @@ inline void __spx_throw_hr_impl(SPXHR hr)
     } } } while (0)
 #endif
 
+#define SPX_IFTRUE_THROW_HR(cond, hr)               SPX_THROW_HR_IF(hr, cond)
+#define SPX_IFFALSE_THROW_HR(cond, hr)              SPX_THROW_HR_IF(hr, !(cond))
+#define SPX_IFFAILED_THROW_HR(hr)                   SPX_THROW_ON_FAIL(hr)
+#define SPX_IFFAILED_THROW_HR_IFNOT()               SPX_THROW_ON_FAIL_IF_NOT(hr, hrNot)
+
+#define SPX_IFTRUE_EXITFN_WHR(cond, hr)             SPX_EXITFN_HR_IF(hr, cond)
+#define SPX_IFFALSE_EXITFN_WHR(cond, hr)            SPX_EXITFN_HR_IF(hr, !(cond))
+#define SPX_IFFAILED_EXITFN_WHR(hr)                 SPX_EXITFN_ON_FAIL(hr)
+#define SPX_IFFAILED_EXITFN_WHR_IFNOT(hr, hrNot)    SPX_EXITFN_ON_FAIL_IF_NOT(hr, hrNot)
+
+#define SPX_IFTRUE_RETURN_HR(cond, hr)              SPX_RETURN_HR_IF(hr, cond)
+#define SPX_IFFALSE_RETURN_HR(cond, hr)             SPX_RETURN_HR_IF(hr, !(cond))
+#define SPX_IFFAILED_RETURN_HR(hr)                  SPX_RETURN_ON_FAIL(hr)
+#define SPX_IFFAILED_RETURN_HR_IFNOT(hr, hrNot)     SPX_RETURN_ON_FAIL_IF_NOT(hr, hrNot)
+
 
 //---------------------------------------------------------------------------
 

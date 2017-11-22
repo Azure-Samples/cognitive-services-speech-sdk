@@ -1,14 +1,12 @@
 #pragma once
 #include <string>
+#include "ispxinterfaces.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
 
     
-enum class Reason { Recognized, NoMatch, Canceled, OtherRecognizer };
-   
-
-class CSpxRecognitionResult
+class CSpxRecognitionResult : public ISpxRecognitionResult
 {
 public:
 

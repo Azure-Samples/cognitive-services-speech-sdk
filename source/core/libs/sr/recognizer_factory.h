@@ -9,23 +9,23 @@ class CSpxRecognizerFactory
 {
 public:
 
-    static std::shared_ptr<CSpxRecognizer> CreateSpeechRecognizer();
-    static std::shared_ptr<CSpxRecognizer> CreateSpeechRecognizer(bool passiveListeningEnaled);
-    static std::shared_ptr<CSpxRecognizer> CreateSpeechRecognizer(const std::wstring& language);
-    static std::shared_ptr<CSpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& filename);
-    static std::shared_ptr<CSpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& filename, const std::wstring& language);
+    static std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer();
+    static std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(bool passiveListeningEnaled);
+    static std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language);
+    static std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName);
+    static std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language);
 
-    static std::shared_ptr<CSpxRecognizer> CreateDictationRecognizer();
-    static std::shared_ptr<CSpxRecognizer> CreateDictationRecognizer(bool passiveListeningEnaled);
-    static std::shared_ptr<CSpxRecognizer> CreateDictationRecognizer(const std::wstring& language);
-    static std::shared_ptr<CSpxRecognizer> CreateDictationRecognizerWithFileInput(const std::wstring& filename);
-    static std::shared_ptr<CSpxRecognizer> CreateDictationRecognizerWithFileInput(const std::wstring& filename, const std::wstring& language);
+    static std::shared_ptr<ISpxRecognizer> CreateDictationRecognizer();
+    static std::shared_ptr<ISpxRecognizer> CreateDictationRecognizer(bool passiveListeningEnaled);
+    static std::shared_ptr<ISpxRecognizer> CreateDictationRecognizer(const std::wstring& language);
+    static std::shared_ptr<ISpxRecognizer> CreateDictationRecognizerWithFileInput(const std::wstring& fileName);
+    static std::shared_ptr<ISpxRecognizer> CreateDictationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language);
 
-    static std::shared_ptr<CSpxRecognizer> CreateIntentRecognizer();
-    static std::shared_ptr<CSpxRecognizer> CreateIntentRecognizer(bool passiveListeningEnaled);
-    static std::shared_ptr<CSpxRecognizer> CreateIntentRecognizer(const std::wstring& language);
-    static std::shared_ptr<CSpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& filename);
-    static std::shared_ptr<CSpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& filename, const std::wstring& language);
+    static std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer();
+    static std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer(bool passiveListeningEnaled);
+    static std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer(const std::wstring& language);
+    static std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName);
+    static std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language);
 
 
 private:
