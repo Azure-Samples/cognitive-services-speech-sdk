@@ -721,60 +721,96 @@ static int Handle_Json_Speech_Phrase(
     if (uspContext->callbacks)
     {
         // Todo: better handling of char to wchar
-        const char *displayText = propertybag_getstringvalue(hProperty, "DisplayText");
+        const char *displayText = propertybag_getstringvalue(hProperty, "Text");
         if (displayText != NULL)
         {
-            // Speech.Phrase message
-            UspMsgSpeechPhrase* msg = malloc(sizeof(UspMsgSpeechPhrase));
+            // V2 of the speech protocol for partial results
 
+            // Todo: better handling of char to wchar
             size_t textLen = strlen(displayText) + 1;
             wcText = malloc(textLen * sizeof(wchar_t));
             mbstowcs(wcText, displayText, textLen);
 
+            UspMsgSpeechHypothesis* msg = malloc(sizeof(UspMsgSpeechHypothesis));
+            // Todo: deal with char to wchar
             // Todo: add more field;
-            msg->displayText = wcText;
+            msg->text = wcText;
+            msg->offset = (UspOffsetType)propertybag_getnumbervalue(hProperty, "Offset");
+            msg->duration = (UspOffsetType)propertybag_getnumbervalue(hProperty, "Duration");
+
+            uspContext->callbacks->onSpeechHypothesis(uspContext, uspContext->callbackContext, msg);
+            // Todo: better handling of memory management.
+            free(msg);
+            free(wcText);
+
+            //pSC->mCallbacks->OnSpeech(pSC, pSC->mContext, displayText, SPEECH_PHRASE_STATE_PARTIAL);
+
+        }
+        else
+        {
+            // Speech.Phrase message
+            UspMsgSpeechPhrase* msg = malloc(sizeof(UspMsgSpeechPhrase));
+
+            const char* statusStr = propertybag_getstringvalue(hProperty, "RecognitionStatus");
+            if (statusStr == NULL)
+            {
+                LogError("Incorrect RecognitionStatus in Speech.Phrase.");
+            }
+
+            if (!strcmp(statusStr, "Success"))
+            {
+                msg->recognitionStatus = RECOGNITON_SUCCESS;
+            }
+            else if (!strcmp(statusStr, "NoMatch"))
+            {
+                msg->recognitionStatus = RECOGNITION_NO_MATCH;
+            }
+            else if (!strcmp(statusStr, "InitialSilenceTimeout"))
+            {
+                msg->recognitionStatus = RECOGNITION_INITIAL_SILENCE_TIMEOUT;
+            }
+            else if (!strcmp(statusStr, "BabbleTimeout"))
+            {
+                msg->recognitionStatus = RECOGNITION_BABBLE_TIMEOUT;
+            }
+            else if (!strcmp(statusStr, "Error"))
+            {
+                msg->recognitionStatus = RECOGNITION_ERROR;
+            }
+            else
+            {
+                LogError("Unknown RecognitionStatus: %s", statusStr);
+            }
 
             msg->offset = (UspOffsetType)propertybag_getnumbervalue(hProperty, "Offset");
             msg->duration = (UspOffsetType)propertybag_getnumbervalue(hProperty, "Duration");
-            msg->recognitionStatus = (UspRecognitionStatus)propertybag_getnumbervalue(hProperty, "RecognitionStatus");
+
+            displayText = propertybag_getstringvalue(hProperty, "Text");
+            if (displayText != NULL)
+            {
+                size_t textLen = strlen(displayText) + 1;
+                wcText = malloc(textLen * sizeof(wchar_t));
+                mbstowcs(wcText, displayText, textLen);
+
+                // Todo: add more field;
+                msg->displayText = wcText;
+            }
+            else
+            {
+                msg->displayText = NULL;
+            }
+
 
             uspContext->callbacks->onSpeechPhrase(uspContext, uspContext->callbackContext, msg);
 
             // Todo: better handling of memory management.
             free(msg);
-            free(wcText);
+            if (displayText != NULL)
+            {
+                free(wcText);
+            }
 
             //pSC->mCallbacks->OnSpeech(pSC, pSC->mContext, displayText, SPEECH_PHRASE_STATE_FINAL);
-        }
-        else
-        {
-            // V2 of the speech protocol for partial results
-            displayText = propertybag_getstringvalue(hProperty, "Text");
-            if (NULL != displayText)
-            {
-                // Todo: better handling of char to wchar
-                size_t textLen = strlen(displayText) + 1;
-                wcText = malloc(textLen * sizeof(wchar_t));
-                mbstowcs(wcText, displayText, textLen);
-
-                UspMsgSpeechHypothesis* msg = malloc(sizeof(UspMsgSpeechHypothesis));
-                // Todo: deal with char to wchar
-                // Todo: add more field;
-                msg->text = wcText;
-                msg->offset = (UspOffsetType)propertybag_getnumbervalue(hProperty, "Offset");
-                msg->duration = (UspOffsetType)propertybag_getnumbervalue(hProperty, "Duration");
-
-                uspContext->callbacks->onSpeechHypothesis(uspContext, uspContext->callbackContext, msg);
-                // Todo: better handling of memory management.
-                free(msg);
-                free(wcText);
-
-                //pSC->mCallbacks->OnSpeech(pSC, pSC->mContext, displayText, SPEECH_PHRASE_STATE_PARTIAL);
-            }
-            else
-            {
-                LogError("Wrong message type");
-            }
         }
     }
 
