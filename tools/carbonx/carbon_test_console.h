@@ -122,7 +122,7 @@ private:
     void InitCarbon(ConsoleArgs* pconsoleArgs);
     void TermCarbon();
 
-    void InitRecognizer(const std::string& recognizerType);
+    void InitRecognizer(const std::string& recognizerType, const std::wstring& wavFileName);
     void InitCommandSystem();
 
     void WaitForDebugger();

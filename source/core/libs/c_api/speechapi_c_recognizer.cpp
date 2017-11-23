@@ -10,7 +10,7 @@ SPXAPI_(bool) Recognzier_Handle_IsValid(SPXRECOHANDLE hreco)
     
     try
     {
-        auto recohandles = CSpxSharedPtrHandleTableManager::Get<CSpxRecognizer, SPXRECOHANDLE>();
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         fIsValid = recohandles->IsTracked(hreco);
     }
     catch (SPXHR hr)
@@ -33,7 +33,7 @@ SPXAPI Recognizer_Handle_Close(SPXRECOHANDLE hreco)
 
     try
     {
-        auto recohandles = CSpxSharedPtrHandleTableManager::Get<CSpxRecognizer, SPXRECOHANDLE>();
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         recohandles->StopTracking(hreco);
     }
     catch (SPXHR hr)
@@ -98,7 +98,7 @@ SPXAPI_(bool) Recognizer_ResultHandle_IsValid(SPXRESULTHANDLE hresult)
 
     try
     {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<CSpxRecognitionResult, SPXRESULTHANDLE>();
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         fIsValid = resulthandles->IsTracked(hresult);
     }
     catch (SPXHR hr)
@@ -121,7 +121,7 @@ SPXAPI Recognizer_ResultHandle_Close(SPXRESULTHANDLE hresult)
 
     try
     {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<CSpxRecognitionResult, SPXRESULTHANDLE>();
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         resulthandles->StopTracking(hresult);
     }
     catch (SPXHR hr)
@@ -152,7 +152,7 @@ SPXAPI Recognizer_Enable(SPXRECOHANDLE hreco)
     
     try
     {
-        auto recohandles = CSpxSharedPtrHandleTableManager::Get<CSpxRecognizer, SPXRECOHANDLE>();
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         auto precognizer = (*recohandles)[hreco];
         precognizer->Enable();
     }
@@ -174,7 +174,7 @@ SPXAPI Recognizer_Disable(SPXRECOHANDLE hreco)
     
     try
     {
-        auto recohandles = CSpxSharedPtrHandleTableManager::Get<CSpxRecognizer, SPXRECOHANDLE>();
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         auto precognizer = (*recohandles)[hreco];
         precognizer->Disable();
     }
@@ -196,7 +196,7 @@ SPXAPI Recognizer_IsEnabled(SPXRECOHANDLE hreco, bool* pfEnabled)
 
     try
     {
-        auto recohandles = CSpxSharedPtrHandleTableManager::Get<CSpxRecognizer, SPXRECOHANDLE>();
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         auto precognizer = (*recohandles)[hreco];
         *pfEnabled = precognizer->IsEnabled();
     }
@@ -266,13 +266,13 @@ SPXAPI Recognizer_RecognizeAsync(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync)
     {
         *phasync = SPXHANDLE_INVALID;
 
-        auto recohandles = CSpxSharedPtrHandleTableManager::Get<CSpxRecognizer, SPXRECOHANDLE>();
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         auto precognizer = (*recohandles)[hreco];
 
         auto asyncop = precognizer->RecognizeAsync();
-        auto ptr = std::make_shared<CSpxAsyncOp<std::shared_ptr<CSpxRecognitionResult>>>(std::move(asyncop));
+        auto ptr = std::make_shared<CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>>>(std::move(asyncop));
 
-        auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<std::shared_ptr<CSpxRecognitionResult>>, SPXASYNCHANDLE>();
+        auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>>, SPXASYNCHANDLE>();
         *phasync = asynchandles->TrackHandle(ptr);
     }
     catch (SPXHR hr)
@@ -295,7 +295,7 @@ SPXAPI Recognizer_RecognizeAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t millise
     {
         *phresult = SPXHANDLE_INVALID;
 
-        auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<std::shared_ptr<CSpxRecognitionResult>>, SPXASYNCHANDLE>();
+        auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>>, SPXASYNCHANDLE>();
         auto asyncop = (*asynchandles)[hasync];
 
         hr = SPXERR_TIMEOUT;
@@ -304,7 +304,7 @@ SPXAPI Recognizer_RecognizeAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t millise
         if (completed)
         {
             auto result = asyncop->Future.get();
-            auto resulthandles = CSpxSharedPtrHandleTableManager::Get<CSpxRecognitionResult, SPXRESULTHANDLE>();
+            auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
             *phresult = resulthandles->TrackHandle(result);
             hr = SPX_NOERROR;
         }
@@ -354,7 +354,7 @@ SPXAPI Recognizer_StartContinuousRecognitionAsync(SPXRECOHANDLE hreco, SPXASYNCH
     {
         *phasync = SPXHANDLE_INVALID;
 
-        auto recohandles = CSpxSharedPtrHandleTableManager::Get<CSpxRecognizer, SPXRECOHANDLE>();
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         auto precognizer = (*recohandles)[hreco];
 
         auto asyncop = precognizer->StartContinuousRecognitionAsync();
@@ -433,7 +433,7 @@ SPXAPI Recognizer_StopContinuousRecognitionAsync(SPXRECOHANDLE hreco, SPXASYNCHA
     {
         *phasync = SPXHANDLE_INVALID;
 
-        auto recohandles = CSpxSharedPtrHandleTableManager::Get<CSpxRecognizer, SPXRECOHANDLE>();
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         auto precognizer = (*recohandles)[hreco];
 
         auto asyncop = precognizer->StopContinuousRecognitionAsync();

@@ -3,24 +3,24 @@
 #include <future>
 #include <memory>
 #include "asyncop.h"
-#include "recognition_result.h"
+#include "ispxinterfaces.h"
+
 
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-class CSpxRecognizer
+class CSpxRecognizer : public ISpxRecognizer
 {
 public:
 
-    CSpxRecognizer();
-    CSpxRecognizer(const std::wstring& language);
+    CSpxRecognizer(std::shared_ptr<ISpxSession>& session);
     virtual ~CSpxRecognizer();
 
     bool IsEnabled();
     void Enable();
     void Disable();
 
-    CSpxAsyncOp<std::shared_ptr<CSpxRecognitionResult>> RecognizeAsync();
+    CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync();
     CSpxAsyncOp<void> StartContinuousRecognitionAsync();
     CSpxAsyncOp<void> StopContinuousRecognitionAsync();
 
@@ -36,6 +36,7 @@ private:
 
     CSpxRecognizer& operator=(const CSpxRecognizer&) = delete;
 
+    std::shared_ptr<ISpxSession> m_defaultSession;
     std::atomic_bool m_fEnabled;
 };
 
