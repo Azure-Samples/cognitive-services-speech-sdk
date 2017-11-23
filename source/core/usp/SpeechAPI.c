@@ -758,7 +758,7 @@ void cortana_reset_speech_request_id(SPEECH_CONTEXT* pSC)
     // agent_handle_response(pSC, CORTANA_ERROR_GENERIC);
 }
 
-//ZHou: callback for Speech.EndDetected
+//Zhou: callback for Speech.EndDetected
 int skill_EndOfSpeech(PROPERTYBAG_HANDLE hProperty, void* pContext)
 {
     (void)hProperty;

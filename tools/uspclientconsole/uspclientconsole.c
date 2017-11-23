@@ -99,6 +99,7 @@ int main(int argc, char* argv[])
 
     UspWrite(handle, buffer, bytesRead);
 
+    // Todo: use a worker thread inside usplib to process the event loop. Consider threading issue.
     while (!turnEnd)
     {
         UspRun(handle);

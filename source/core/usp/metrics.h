@@ -4,7 +4,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "../../../external/parson/parson.h"
+#include "parson.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -6,7 +6,7 @@
 #endif
 
 #include "private-iot-cortana-sdk.h"
-#include "../../../external/parson/parson.h"
+#include "parson.h"
 
 #if defined(__linux__) && !defined(IOT_CORTANA_NO_CDP)
 #define USE_CDP
@@ -61,8 +61,6 @@ extern struct INTENT_HANDLERS
 
 const PPROPERTYBAG_OBJECT_CALLBACK kOptional_Service_Serializers[] = {
     speech_serialize,
-    //card_serialize,
-    //spotify_serialize,
 };
 
 const struct
@@ -70,14 +68,7 @@ const struct
     const char* const            pszId;
     PPROPERTYBAG_OBJECT_CALLBACK Handler;
 } kRequired_Service_Serializers[] = {
-    //{ "audioPlayer",        audioplayer_serialize },
-    //{ "volumeControl",      skill_volume_control_getcontext },
-    //{ "bluetooth",          bluetooth_serialize },
-    //{ "alarms",             skill_alarms_getcontext },
     { "system",             skill_system_getcontext },
-    //{ "location",           skill_location_getcontext },
-    //{ "calls",              skill_call_getcontext },
-    //{ "timers",             skill_timers_getcontext },
 };
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -785,7 +776,7 @@ static int Handle_Json_Speech_Phrase(
             msg->offset = (UspOffsetType)propertybag_getnumbervalue(hProperty, "Offset");
             msg->duration = (UspOffsetType)propertybag_getnumbervalue(hProperty, "Duration");
 
-            displayText = propertybag_getstringvalue(hProperty, "Text");
+            displayText = propertybag_getstringvalue(hProperty, "DisplayText");
             if (displayText != NULL)
             {
                 size_t textLen = strlen(displayText) + 1;
@@ -799,7 +790,6 @@ static int Handle_Json_Speech_Phrase(
             {
                 msg->displayText = NULL;
             }
-
 
             uspContext->callbacks->onSpeechPhrase(uspContext, uspContext->callbackContext, msg);
 

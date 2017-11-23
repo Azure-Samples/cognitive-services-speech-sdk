@@ -3,7 +3,7 @@
 
 #include "azure_c_shared_utility/gballoc.h"
 #include "iot-cortana-sdk.h"
-#include "../../../external/parson/parson.h"
+#include "parson.h"
 
 int propertybag_initialize()
 {

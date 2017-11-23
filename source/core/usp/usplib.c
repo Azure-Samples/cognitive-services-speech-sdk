@@ -8,6 +8,7 @@
 #include "usp.h"
 #include "uspinternal.h"
 
+// Todo: seperate UspIntialize into UspOpen, UspSetCallbacks, UspSetOptions...
 UspResult UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackContext)
 {
     UspContext* uspContext = (UspContext *)malloc(sizeof(UspContext));
@@ -53,6 +54,7 @@ UspResult UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callba
     return USP_SUCCESS;
 }
 
+// Pass another parameter to return the bytes have been written.
 UspResult UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite)
 {
     UspContext* context = (UspContext *)handle;
@@ -81,6 +83,7 @@ UspResult UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite)
     return USP_SUCCESS;
 }
 
+// Todo: UspClose is better
 UspResult UspShutdown(UspHandle handle)
 {
     UspContext* context = (UspContext *)handle;
@@ -102,6 +105,7 @@ UspResult UspShutdown(UspHandle handle)
     return USP_SUCCESS;
 }
 
+// Todo: Hide it into a work thread.
 void UspRun(UspHandle handle)
 {
     UspContext* uspContext = (UspContext *)handle;
