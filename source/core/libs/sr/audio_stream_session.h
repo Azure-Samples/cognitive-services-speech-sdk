@@ -13,28 +13,16 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-class CSpxAudioStreamSession : public CSpxSession, public ISpxAudioStreamSessionInit, public ISpxAudioProcessor
+class CSpxAudioStreamSession : public CSpxAudioSession, public ISpxAudioStreamSessionInit
 {
 public:
 
-    CSpxAudioStreamSession();
+    CSpxAudioStreamSession() = default;
 
     // --- ISpxAudioStreamSessionInit
     
     void InitFromFile(const wchar_t* pszFileName) override;
 
-    // --- ISpxAudioProcessor
-
-    void SetFormat(WAVEFORMATEX* pformat) override;
-    void ProcessAudio(AudioData_Type data, uint32_t size) override;
-
-
-protected:
-
-    void StartRecognizing() override;
-    void StopRecognizing() override;
-    
-    
 private:
 
     using Base_Type = CSpxSession;
@@ -46,8 +34,6 @@ private:
 
     std::wstring m_fileName;
     std::shared_ptr<ISpxAudioFile> m_audioFile;
-
-    std::shared_ptr<ISpxAudioPump> m_audioPump;
     std::shared_ptr<ISpxAudioReader> m_audioReader;
 };
 

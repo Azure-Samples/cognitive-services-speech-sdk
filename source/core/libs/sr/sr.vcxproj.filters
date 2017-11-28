@@ -12,6 +12,7 @@
     <ClInclude Include="interactive_session.h" />
     <ClInclude Include="audio_stream_session.h" />
     <ClInclude Include="audio_pump.h" />
+    <ClInclude Include="mic_session.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />

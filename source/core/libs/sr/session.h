@@ -53,4 +53,34 @@ private:
 };
 
 
+class CSpxAudioSession : public CSpxSession, public ISpxAudioProcessor
+{
+public:
+
+    CSpxAudioSession() = default;
+
+    // --- ISpxAudioProcessor
+
+    void SetFormat(WAVEFORMATEX* pformat) override;
+    void ProcessAudio(AudioData_Type data, uint32_t size) override;
+
+
+protected:
+
+    void StartRecognizing() override;
+    void StopRecognizing() override;
+
+    std::shared_ptr<ISpxAudioPump> m_audioPump;
+
+private:
+
+    using Base_Type = CSpxSession;
+
+    CSpxAudioSession(const CSpxAudioSession&) = delete;
+    CSpxAudioSession(const CSpxAudioSession&&) = delete;
+
+    CSpxAudioSession& operator=(const CSpxAudioSession&) = delete;
+};
+
+
 }; // CARBON_IMPL_NAMESPACE()

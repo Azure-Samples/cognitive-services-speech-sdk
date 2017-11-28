@@ -7,13 +7,13 @@
 
 #pragma once
 #include <spxcore_common.h>
-#include "session.h"
+#include "mic_session.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-class CSpxInteractiveSession : public CSpxSession
+class CSpxInteractiveSession : public CSpxMicSession
 {
 public:
 
