@@ -8,6 +8,29 @@
 #include "usp.h"
 #include "uspinternal.h"
 
+static int UspEventLoop(UspHandle handle)
+{
+    UspContext* uspContext = (UspContext *)handle;
+
+    while (1)
+    {
+        // Todo: deal with concurrency? 
+        if (uspContext->flags & USP_FLAG_SHUTDOWN)
+        {
+            break;
+        }
+
+        if (uspContext->flags & USP_FLAG_INITIALIZED)
+        {
+            UspRun(handle);
+        }
+
+        ThreadAPI_Sleep(200);
+    }
+
+    return 0;
+}
+
 // Todo: seperate UspIntialize into UspOpen, UspSetCallbacks, UspSetOptions...
 UspResult UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackContext)
 {
@@ -17,6 +40,11 @@ UspResult UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callba
     const char endpoint[] = "wss://speech.platform.bing.com/speech/recognition/interactive/cognitiveservices/v1?language=en-us";
 
     if (handle == NULL)
+    {
+        return USP_INVALID_PARAMETER;
+    }
+
+    if ((callbacks == NULL) || (callbacks->version != USP_VERSION) || (callbacks->size != sizeof(UspCallbacks)))
     {
         return USP_INVALID_PARAMETER;
     }
@@ -38,19 +66,22 @@ UspResult UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callba
         return USP_INITIALIZATION_FAILURE;
     }
 
-    if ((callbacks == NULL) || (callbacks->version != USP_VERSION) || (callbacks->size != sizeof(UspCallbacks)))
-    {
-        return USP_INVALID_PARAMETER;
-    }
-
     uspContext->callbacks = callbacks;
     uspContext->callbackContext = callbackContext;
-
-    *handle = (UspHandle)uspContext;
-
     // Todo: remove SPEECH_CONTEXT 
     uspContext->speechContext->uspHandle = (UspHandle)uspContext;
 
+    // Create work thread for processing USP messages.
+    if (ThreadAPI_Create(&uspContext->workThreadHandle, UspEventLoop, uspContext) != THREADAPI_OK)
+    {
+        LogError("Create work thread in USP failed.");
+        speech_close(speechHandle);
+        return USP_INITIALIZATION_FAILURE;
+    }
+
+    uspContext->flags = USP_FLAG_INITIALIZED;
+
+    *handle = (UspHandle)uspContext;
     return USP_SUCCESS;
 }
 
@@ -92,6 +123,14 @@ UspResult UspShutdown(UspHandle handle)
         return USP_INVALID_HANDLE;
     }
 
+    context->flags |= USP_FLAG_SHUTDOWN;
+
+    if (context->workThreadHandle != NULL)
+    {
+        LogInfo("Wait for work thread to complete");
+        ThreadAPI_Join(context->workThreadHandle, NULL);
+    }
+
     if (context->speechContext)
     {
         speech_close((SPEECH_HANDLE)context->speechContext);
@@ -117,3 +156,4 @@ void UspRun(UspHandle handle)
     Unlock(uspContext->speechContext->mSpeechRequestLock);
 
 }
+
