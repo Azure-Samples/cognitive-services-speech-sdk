@@ -11,22 +11,22 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "carbon_test_console", "tool
 		{E2FA6971-4F9E-4DEC-B97D-AFE1ABB955E8} = {E2FA6971-4F9E-4DEC-B97D-AFE1ABB955E8}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "carbon_dll", "source\core\dll\module\carbon_dll.vcxproj", "{64A00C50-830D-4E0D-839B-CAA2DC303266}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "carbon_dll", "source\core\carbon_dll\carbon_dll.vcxproj", "{64A00C50-830D-4E0D-839B-CAA2DC303266}"
 	ProjectSection(ProjectDependencies) = postProject
 		{2AD40154-2403-44A4-89C5-E0821418F25C} = {2AD40154-2403-44A4-89C5-E0821418F25C}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "c_api", "source\core\libs\c_api\c_api.vcxproj", "{2AD40154-2403-44A4-89C5-E0821418F25C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "c_api", "source\core\c_api\c_api.vcxproj", "{2AD40154-2403-44A4-89C5-E0821418F25C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{BA9EC81E-F7C4-4A44-BB15-19DB0DC3F899} = {BA9EC81E-F7C4-4A44-BB15-19DB0DC3F899}
 		{E2FA6971-4F9E-4DEC-B97D-AFE1ABB955E8} = {E2FA6971-4F9E-4DEC-B97D-AFE1ABB955E8}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sr", "source\core\libs\sr\sr.vcxproj", "{E2FA6971-4F9E-4DEC-B97D-AFE1ABB955E8}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sr", "source\core\sr\sr.vcxproj", "{E2FA6971-4F9E-4DEC-B97D-AFE1ABB955E8}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libs", "libs", "{8D4A56C1-FBCC-4717-A516-865133021FA2}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "carbon_libs", "carbon_libs", "{8D4A56C1-FBCC-4717-A516-865133021FA2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "audio", "source\core\libs\audio\audio.vcxproj", "{BA9EC81E-F7C4-4A44-BB15-19DB0DC3F899}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "audio", "source\core\audio\audio.vcxproj", "{BA9EC81E-F7C4-4A44-BB15-19DB0DC3F899}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
