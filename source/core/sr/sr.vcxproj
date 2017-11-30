@@ -169,6 +169,7 @@
     <ClInclude Include="handle_table.h" />
     <ClInclude Include="interactive_session.h" />
     <ClInclude Include="ispxinterfaces.h" />
+    <ClInclude Include="mic_session.h" />
     <ClInclude Include="recognition_result.h" />
     <ClInclude Include="recognizer.h" />
     <ClInclude Include="recognizer_factory.h" />

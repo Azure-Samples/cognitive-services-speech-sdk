@@ -3,9 +3,16 @@
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="wav_file_reader.h" />
+    <ClInclude Include="microphone.h" />
+    <ClInclude Include="windows\sample_handler.h" />
+    <ClInclude Include="windows\iunknown.h" />
+    <ClInclude Include="windows\audio_sample_handler.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="wav_file_reader.cpp" />
+    <ClCompile Include="windows\sample_handler.cpp" />
+    <ClCompile Include="windows\audio_sample_handler.cpp" />
+    <ClCompile Include="windows\microphone.cpp" />
   </ItemGroup>
 </Project>

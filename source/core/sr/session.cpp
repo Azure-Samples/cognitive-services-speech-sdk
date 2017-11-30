@@ -104,4 +104,38 @@ void CSpxSession::StopRecognizing()
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 }
 
+
+void CSpxAudioSession::SetFormat(WAVEFORMATEX* pformat)
+{
+    SPX_DBG_TRACE_VERBOSE_IF(pformat == nullptr, "%s - pformat == nullptr", __FUNCTION__);
+    SPX_DBG_TRACE_VERBOSE_IF(pformat != nullptr, "%s\n  wFormatTag:      %s\n  nChannels:       %d\n  nSamplesPerSec:  %d\n  nAvgBytesPerSec: %d\n  nBlockAlign:     %d\n  wBitsPerSample:  %d\n  cbSize:          %d",
+        __FUNCTION__,
+        pformat->wFormatTag == WAVE_FORMAT_PCM ? "PCM" : "non-PCM",
+        pformat->nChannels,
+        pformat->nSamplesPerSec,
+        pformat->nAvgBytesPerSec,
+        pformat->nBlockAlign,
+        pformat->wBitsPerSample,
+        pformat->cbSize);
+}
+
+void CSpxAudioSession::ProcessAudio(AudioData_Type data, uint32_t size)
+{
+    SPX_DBG_TRACE_VERBOSE("%s - size=%d", __FUNCTION__, size);
+}
+
+void CSpxAudioSession::StartRecognizing()
+{
+    Base_Type::StartRecognizing();
+
+    m_audioPump->StartPump(static_cast<ISpxAudioProcessor*>(this)->shared_from_this());
+}
+
+void CSpxAudioSession::StopRecognizing()
+{
+    m_audioPump->StopPump();
+
+    Base_Type::StopRecognizing();
+}
+
 }; // CARBON_IMPL_NAMESPACE()

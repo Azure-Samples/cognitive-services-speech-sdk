@@ -161,8 +161,12 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="microphone.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="wav_file_reader.h" />
+    <ClInclude Include="windows\audio_sample_handler.h" />
+    <ClInclude Include="windows\iunknown.h" />
+    <ClInclude Include="windows\sample_handler.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -172,6 +176,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="wav_file_reader.cpp" />
+    <ClCompile Include="windows\audio_sample_handler.cpp" />
+    <ClCompile Include="windows\sample_handler.cpp" />
+    <ClCompile Include="windows\microphone.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

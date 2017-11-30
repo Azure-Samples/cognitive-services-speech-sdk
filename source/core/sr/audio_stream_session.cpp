@@ -18,10 +18,6 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-CSpxAudioStreamSession::CSpxAudioStreamSession()
-{
-}
-
 void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
 {
     SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_fileName.length() > 0);
@@ -47,41 +43,5 @@ void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
     auto pISpxAudioPump = std::dynamic_pointer_cast<ISpxAudioPump>(pump);
     m_audioPump = pISpxAudioPump;
 }
-
-void CSpxAudioStreamSession::SetFormat(WAVEFORMATEX* pformat)
-{
-    SPX_DBG_TRACE_VERBOSE_IF(pformat == nullptr, "%s - pformat == nullptr", __FUNCTION__);
-    SPX_DBG_TRACE_VERBOSE_IF(pformat != nullptr, "%s\n  wFormatTag:      %s\n  nChannels:       %d\n  nSamplesPerSec:  %d\n  nAvgBytesPerSec: %d\n  nBlockAlign:     %d\n  wBitsPerSample:  %d\n  cbSize:          %d",
-        __FUNCTION__,
-        pformat->wFormatTag == WAVE_FORMAT_PCM ? "PCM" : "non-PCM",
-        pformat->nChannels,
-        pformat->nSamplesPerSec,
-        pformat->nAvgBytesPerSec,
-        pformat->nBlockAlign,
-        pformat->wBitsPerSample,
-        pformat->cbSize);
-}
-
-void CSpxAudioStreamSession::ProcessAudio(AudioData_Type data, uint32_t size)
-{
-    SPX_DBG_TRACE_VERBOSE("%s - size=%d", __FUNCTION__, size);
-}
-
-void CSpxAudioStreamSession::StartRecognizing()
-{
-    Base_Type::StartRecognizing();
-
-    auto ptr = (ISpxAudioProcessor*)this;
-    auto pISpxAudioProcessor = std::dynamic_pointer_cast<ISpxAudioProcessor>(ptr->shared_from_this());
-    m_audioPump->StartPump(pISpxAudioProcessor);
-}
-
-void CSpxAudioStreamSession::StopRecognizing()
-{
-    m_audioPump->StopPump();
-
-    Base_Type::StopRecognizing();
-}
-
 
 }; // CARBON_IMPL_NAMESPACE()
