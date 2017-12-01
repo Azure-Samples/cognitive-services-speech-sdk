@@ -10,6 +10,10 @@
 #include <stdint.h>
 
 #include "uspmessages.h"
+#include "usperror.h"
+
+
+#define USP_VERSION 1.0
 
 /**
  * The UspHandle represents an opaque handle used by usplib.
@@ -17,15 +21,9 @@
 typedef void * UspHandle;
 
 /**
- * The UspError represents error codes.
- */
-typedef unsigned int UspError;
-
-#define USP_SUCCESS ((UspError)0)
-
-#define USP_ERRCODE(x) (0x800f6000 | (x & 0x0fff))
-
-#define USP_NOT_IMPLEMENTED USP_ERRCODE(0xfff)
+ * The UspResult represents the result of a function call of usplib.
+*/
+typedef int UspResult;
 
 /**
  * The UspOnSpeechStartDetected represents an application-defined callback function
@@ -88,7 +86,7 @@ typedef void(*UspOnTurnEnd)(UspHandle handle, void* context, UspMsgTurnEnd *mess
 * @param context A pointer to the application-defined callback context.
 * @param error an error code.
 */
-typedef void(*UspOnError)(UspHandle handle, void* context, UspError error);
+typedef void(*UspOnError)(UspHandle handle, void* context, UspResult error);
 
 
 /**
@@ -109,8 +107,31 @@ typedef struct _UspCallbacks
 } UspCallbacks;
 
 
-int UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackContext);
+/**
+* Opens and initializes a UspHandle.
+* @param handle The pointer to UspHandle. If the function returns USP_SUCCESS, the value pointered by handle is the initialzed UspHandle that is ready for use.
+* @param callbacks The struct contains callbacks that will be called when vairous USP events.
+* @param bacllbackContext A pointer to the caller provided data, which will be passed as paraemter of the callback.
+*/
+UspResult UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackContext);
 
-int UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite);
+/**
+* Sends data to the handle.
+* @param handle The UspHandle to which the data is sent.
+* @param buffer The buffer contains data to be sent.
+* @param byteToWrite The amount of data in bytes to be sent.
+*/
+UspResult UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite);
 
-int UspShutdown(UspHandle handle);
+/**
+* Closes the handle.
+* @param handle The UspHandle to be closed.
+*/
+UspResult UspShutdown(UspHandle handle);
+
+/**
+* Runs the event loop.
+* @param handle The UspHandle.
+*/
+void UspRun(UspHandle handle);
+
