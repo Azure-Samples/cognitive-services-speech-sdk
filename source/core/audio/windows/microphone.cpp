@@ -86,7 +86,7 @@ std::shared_ptr<ISpxAudioPump> Microphone::Create() {
 
 MicrophonePump::MicrophonePump()
     : m_sampleHandler(new AudioSampleHandler()), 
-    m_state(State::Idle)
+    m_state(State::NoInput)
 {
 }
 
@@ -116,9 +116,15 @@ uint32_t MicrophonePump::GetFormat(WAVEFORMATEX* format, uint32_t size) {
 
 void MicrophonePump::StartPump(std::shared_ptr<ISpxAudioProcessor> processor)
 {
+    SPX_DBG_TRACE_FUNCTION();
+    if (processor == nullptr) {
+        SPX_THROW_ON_FAIL(SPXERR_INVALID_ARG);
+    }
     SPX_INIT_HR(hr);
-    State idle{ State::Idle };
-    if (!m_state.compare_exchange_strong(idle, State::NoInput)) {
+    State initialState { State::NoInput };
+    if (!m_state.compare_exchange_strong(initialState, State::Idle)) {
+        SPX_DBG_TRACE_VERBOSE("%s when we're already in %s state",
+            __FUNCTION__, (initialState == State::Idle ? "State::Idle" : "State::Processing"));
         return; // already started.
     }
 
@@ -129,18 +135,22 @@ void MicrophonePump::StartPump(std::shared_ptr<ISpxAudioProcessor> processor)
 
     // Need to reselect source on every audio start to support
     // multiple audio start and stop on the same conversation.
-    // TODO: this is what CSP used to do, can we stop scheduling async reads instead?
+    // TODO: this is what CSP used to do, can we reuse the same source 
+    // and just schedule a new read here?
     SPX_EXITFN_ON_FAIL(hr = SelectSource());
     SPX_EXITFN_ON_FAIL(hr = m_sampleHandler->Start(processor));
 
-    // TODO: pass a callback to m_sampleHandler and change the state to Processing
-    // the first time around ProcessAudio is invoked.
+    // TODO: clarify the semantics of the StartPump method. 
+    // If it needs to be blocking, pass a callback to m_sampleHandler
+    // and change the state to Processing the first time around ProcessAudio is invoked.
+    // Wait here on a CV until the callback's been invoked.
+    // TODO: should this method return some result value (success/failure)?
     m_state.store(State::Processing);
 
 SPX_EXITFN_CLEANUP:
     if (SPX_FAILED(hr))
     {
-        m_state.store(idle);
+        m_state.store(initialState);
     }
     SPX_THROW_ON_FAIL(hr);
 }
@@ -206,10 +216,11 @@ SPX_EXITFN_CLEANUP:
 
 void MicrophonePump::StopPump()
 {
-    State state{ State::Processing };
-    if (!m_state.compare_exchange_strong(state, State::Idle)) {
+    SPX_DBG_TRACE_FUNCTION();
+    State initialState { State::Processing };
+    if (!m_state.compare_exchange_strong(initialState, State::NoInput)) {
         SPX_DBG_TRACE_VERBOSE("%s when we're already in %s state", 
-            __FUNCTION__, (state == State::Idle ? "State::Idle" : "State::NoInput"));
+            __FUNCTION__, (initialState == State::NoInput ? "State::NoInput" : "State::Idle"));
         return; // not running (could be in the no-input initialization phase).
     }
 

@@ -35,8 +35,6 @@ HRESULT SampleHandler::OnReadSample(
 
 SPXHR SampleHandler::Start(const Sink_Type& sink)
 {
-    SPX_DBG_TRACE_FUNCTION();
-
     const auto& prevSink = atomic_exchange(&m_sink, sink);
 
     if (prevSink != sink) {
@@ -54,7 +52,6 @@ SPXHR SampleHandler::Start(const Sink_Type& sink)
 }
 
 void SampleHandler::Stop() { 
-    SPX_DBG_TRACE_FUNCTION();
     const auto& prevSink = atomic_exchange(&m_sink, Sink_Type());
     if (prevSink != nullptr) {
         // Let the sink know we're done for now...
@@ -97,7 +94,14 @@ SPXHR SampleHandler::Process(IMFSample* sample)
     SPX_EXITFN_ON_FAIL(hr = mediaBuffer->Lock(&audioData, NULL, &numBytes));
 
     if (audioData != nullptr) {
-        sink->ProcessAudio({ audioData, [](auto p) { /*do nothing*/} }, numBytes);
+        // Is this really a good idea to create a copy of the audio data
+        // here? It seems, the sink should be capable of creating a copy if it 
+        // needs to.
+        // TODO: maybe change the ISpxAudioProcessor::ProcessAudio signature to
+        // take a const ptr?
+        ISpxAudioProcessor::AudioData_Type copy(new uint8_t[numBytes]);
+        memcpy(copy.get(), audioData, numBytes);
+        sink->ProcessAudio(copy, numBytes);
     }
 
 SPX_EXITFN_CLEANUP:
