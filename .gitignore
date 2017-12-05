@@ -34,5 +34,4 @@
 # Visual Studio + build folders
 *.vs
 *.vscode
-**/x64/debug
-**/x64/release
+build/**/*
