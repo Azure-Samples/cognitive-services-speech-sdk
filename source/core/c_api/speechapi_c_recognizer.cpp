@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "event_helpers.h"
 
 
 using namespace CARBON_IMPL_NAMESPACE();
@@ -138,11 +139,13 @@ SPXAPI Recognizer_ResultHandle_Close(SPXRESULTHANDLE hresult)
 
 SPXAPI_(bool) Recognizer_EventHandle_IsValid(SPXEVENTHANDLE hevent)
 {
+    // TODO: RobCh: Next: Implement
     return false; // TODO: RobCh: SPXERR_NOT_IMPL
 }
 
 SPXAPI Recognizer_EventHandle_Close(SPXEVENTHANDLE hevent)
 {
+    // TODO: RobCh: Next: Implement
     return SPXERR_NOT_IMPL;
 }
 
@@ -377,7 +380,6 @@ SPXAPI Recognizer_StartContinuousRecognitionAsync(SPXRECOHANDLE hreco, SPXASYNCH
 
 SPXAPI Recognizer_StartContinuousRecognitionAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t milliseconds)
 {
-    // TODO: ROBCH: Consider: Move this to CSpxAsyncOp::WaitFor<void>(hasync, milliseconds); call from all _WaitFor void C apis
     SPX_INIT_HR(hr);
 
     try
@@ -456,7 +458,6 @@ SPXAPI Recognizer_StopContinuousRecognitionAsync(SPXRECOHANDLE hreco, SPXASYNCHA
 
 SPXAPI Recognizer_StopContinuousRecognitionAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t milliseconds)
 {
-    // TODO: ROBCH: Consider: Move this to CSpxAsyncOp::WaitFor<void>(hasync, milliseconds); call from all _WaitFor void C apis
     SPX_INIT_HR(hr);
 
     try
@@ -479,52 +480,77 @@ SPXAPI Recognizer_StopContinuousRecognitionAsync_WaitFor(SPXASYNCHANDLE hasync, 
     SPX_RETURN_HR(hr);
 }
 
-SPXAPI Recognizer_SessionStarted_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC* pCallback, void* pvContext)
+SPXAPI Recognizer_SessionStarted_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext)
 {
+    // TODO: RobCh: Next: Implement
     return SPXERR_NOT_IMPL;
 }
 
-SPXAPI Recognizer_SessionStopped_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC* pCallback, void* pvContext)
+SPXAPI Recognizer_SessionStopped_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext)
 {
+    // TODO: RobCh: Next: Implement
     return SPXERR_NOT_IMPL;
 }
 
-SPXAPI Recognizer_SoundStarted_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC* pCallback, void* pvContext)
+SPXAPI Recognizer_SoundStarted_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext)
 {
+    // TODO: RobCh: Next: Implement
     return SPXERR_NOT_IMPL;
 }
 
-SPXAPI Recognizer_SoundStopped_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC* pCallback, void* pvContext)
+SPXAPI Recognizer_SoundStopped_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext)
 {
+    // TODO: RobCh: Next: Implement
     return SPXERR_NOT_IMPL;
 }
 
-SPXAPI Recognizer_IntermediateResult_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC* pCallback, void* pvContext)
+SPXAPI Recognizer_IntermediateResult_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext)
 {
-    return SPXERR_NOT_IMPL;
+    return Recognizer_Event_SetCallback(&ISpxRecognizerEvents::IntermediateResult, hreco, pCallback, pvContext);
 }
 
-SPXAPI Recognizer_FinalResult_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC* pCallback, void* pvContext)
+SPXAPI Recognizer_FinalResult_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext)
 {
-    return SPXERR_NOT_IMPL;
+    return Recognizer_Event_SetCallback(&ISpxRecognizerEvents::FinalResult, hreco, pCallback, pvContext);
 }
 
-SPXAPI Recognizer_NoMatch_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC* pCallback, void* pvContext)
+SPXAPI Recognizer_NoMatch_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext)
 {
-    return SPXERR_NOT_IMPL;
+    return Recognizer_Event_SetCallback(&ISpxRecognizerEvents::NoMatch, hreco, pCallback, pvContext);
 }
 
-SPXAPI Recognizer_Canceled_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC* pCallback, void* pvContext)
+SPXAPI Recognizer_Canceled_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext)
 {
-    return SPXERR_NOT_IMPL;
+    return Recognizer_Event_SetCallback(&ISpxRecognizerEvents::Canceled, hreco, pCallback, pvContext);
 }
 
 SPXAPI Recognizer_SessionEvent_GetSessionId(SPXEVENTHANDLE hevent, wchar_t* pszSessionId, uint32_t cchSessionId)
 {
+    // TODO: RobCh: Next: Implement
     return SPXERR_NOT_IMPL;
 }
 
 SPXAPI Recognizer_RecognitionEvent_GetResult(SPXEVENTHANDLE hevent, SPXRESULTHANDLE* phresult)
 {
-    return SPXERR_NOT_IMPL;
+    SPX_INIT_HR(hr);
+    
+    try
+    {
+        auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
+        auto recoEvent = (*eventhandles)[hevent];
+        auto result = recoEvent->GetResult();
+
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
+        *phresult = resulthandles->TrackHandle(result);
+    }
+    catch (SPXHR hr)
+    {
+        SPX_RETURN_HR(hr);
+    }
+    catch (std::exception ex)
+    {
+        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
+    }
+
+    SPX_RETURN_HR(hr);
 }

@@ -2,13 +2,13 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="event_helpers.h" />
+    <ClInclude Include="handle_table.h" />
+    <ClInclude Include="asyncop.h" />
+    <ClInclude Include="trace_message.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="speechapi_c_recognizer.cpp" />
-    <ClCompile Include="speechapi_c_recognizer_factory.cpp" />
-    <ClCompile Include="speechapi_c_result.cpp" />
-    <ClCompile Include="event_helpers.cpp" />
+    <ClCompile Include="handle_table.cpp" />
+    <ClCompile Include="trace_message.cpp" />
   </ItemGroup>
 </Project>

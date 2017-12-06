@@ -24,7 +24,15 @@ class AsyncRecognizer : public Recognizer
 public:
 
     AsyncRecognizer(RecognizerParameters& parameters) throw() :
-        Recognizer(parameters)
+        Recognizer(parameters),
+        SessionStarted(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
+        SessionStopped(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
+        SoundStarted(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
+        SoundStopped(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
+        IntermediateResult(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback()),
+        FinalResult(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback()),
+        NoMatch(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback()),
+        Canceled(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback())
     {
     };
 
@@ -34,22 +42,24 @@ public:
     virtual std::future<void> StartContinuousRecognitionAsync() = 0;
     virtual std::future<void> StopContinuousRecognitionAsync() = 0;
 
-    EventSignal<SessionEventArgs> SessionStarted;
-    EventSignal<SessionEventArgs> SessionStopped;
+    EventSignal<const SessionEventArgs&> SessionStarted;
+    EventSignal<const SessionEventArgs&> SessionStopped;
 
-    EventSignal<SessionEventArgs> SoundStarted;
-    EventSignal<SessionEventArgs> SoundStopped;
+    EventSignal<const SessionEventArgs&> SoundStarted;
+    EventSignal<const SessionEventArgs&> SoundStopped;
 
-    EventSignal<RecoEventArgs> IntermediateResult;
-    EventSignal<RecoEventArgs> FinalResult;
-    EventSignal<RecoEventArgs> NoMatch;
-    EventSignal<RecoEventArgs> Canceled;
+    EventSignal<const RecoEventArgs&> IntermediateResult;
+    EventSignal<const RecoEventArgs&> FinalResult;
+    EventSignal<const RecoEventArgs&> NoMatch;
+    EventSignal<const RecoEventArgs&> Canceled;
 
 
 protected:
 
     AsyncRecognizer() {};
 
+    virtual void RecoEventConnectionsChanged(const EventSignal<const RecoEventArgs&>& recoEvent) {};
+    virtual void SessionEventConnectionsChanged(const EventSignal<const SessionEventArgs&>& sessionEvent) {};
 
 private:
 
@@ -57,6 +67,16 @@ private:
     AsyncRecognizer(const AsyncRecognizer&&) = delete;
 
     AsyncRecognizer& operator=(const AsyncRecognizer&) = delete;
+
+    inline std::function<void(const EventSignal<const SessionEventArgs&>&)> GetSessionEventConnectionsChangedCallback()
+    {
+        return [=](const EventSignal<const SessionEventArgs&>& sessionEvent) { this->SessionEventConnectionsChanged(sessionEvent); };
+    }
+
+    inline std::function<void(const EventSignal<const RecoEventArgs&>&)> GetRecoEventConnectionsChangedCallback()
+    {
+        return [=](const EventSignal<const RecoEventArgs&>& recoEvent) { this->RecoEventConnectionsChanged(recoEvent); };
+    }
 };
 
 

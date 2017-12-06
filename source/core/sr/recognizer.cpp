@@ -1,12 +1,15 @@
 #include "stdafx.h"
-#include <future>
 #include "recognizer.h"
+#include <future>
+#include "handle_table.h"
+#include "recognition_event_args.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
 
 
 CSpxRecognizer::CSpxRecognizer(std::shared_ptr<ISpxSession>& session) :
+    ISpxRecognizerEvents(nullptr, nullptr),
     m_defaultSession(session),
     m_fEnabled(true)
 {
@@ -53,6 +56,44 @@ CSpxAsyncOp<void> CSpxRecognizer::StartContinuousRecognitionAsync()
 CSpxAsyncOp<void> CSpxRecognizer::StopContinuousRecognitionAsync()
 {
     return m_defaultSession->StopContinuousRecognitionAsync();
+}
+
+void CSpxRecognizer::FireResultEvent(std::shared_ptr<ISpxRecognitionResult> result)
+{
+    auto sessionId = std::wstring(L"{A4AF690D-3548-4985-BB32-BAA278B32DC5}"); // TODO: RobCh: Next: SPXERR_NOT_IMPL
+
+    if (result->GetReason() == Reason::Recognized && FinalResult.IsConnected())
+    {
+        auto recoEvent = SpxMakeShared<CSpxRecognitionEventArgs, ISpxRecognitionEventArgs>(sessionId, result);
+
+        auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
+        auto hevent = eventhandles->TrackHandle(recoEvent);
+
+        FinalResult.Signal(recoEvent);
+    }
+    // else if (result->GetReason() == Reason::IntermediateResult && IntermediateResult.IsConnected())
+    // {
+    //     auto recoEvent = SpxMakeShared<CSpxRecognitionEventArgs, ISpxRecognitionEventArgs>(sessionId, result);
+    //     IntermediateResult.Signal(recoEvent);
+    // }
+    else if (result->GetReason() == Reason::NoMatch && NoMatch.IsConnected())
+    {
+        auto recoEvent = SpxMakeShared<CSpxRecognitionEventArgs, ISpxRecognitionEventArgs>(sessionId, result);
+
+        auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
+        auto hevent = eventhandles->TrackHandle(recoEvent);
+
+        NoMatch.Signal(recoEvent);
+    }
+    else if (result->GetReason() == Reason::Canceled && Canceled.IsConnected())
+    {
+        auto recoEvent = SpxMakeShared<CSpxRecognitionEventArgs, ISpxRecognitionEventArgs>(sessionId, result);
+
+        auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
+        auto hevent = eventhandles->TrackHandle(recoEvent);
+
+        Canceled.Signal(recoEvent);
+    }
 }
 
 void CSpxRecognizer::OnIsEnabledChanged()

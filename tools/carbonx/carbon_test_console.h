@@ -84,6 +84,7 @@ private:
 
     template <class T>
     void Recognizer_Recognize(std::shared_ptr<T>& recognizer);
+    void Recognizer_Recognize(std::shared_ptr<SpeechRecognizer>& recognizer);
 
     template <class T>
     void Recognizer_StartContinuousRecognition(std::shared_ptr<T>& recognizer);
@@ -92,27 +93,27 @@ private:
     void Recognizer_StopContinuousRecognition(std::shared_ptr<T>& recognizer);
 
     template <class T>
-    void Recognizer_Event(const wchar_t* psz, EventSignal<T>& recognizerEvent, typename::EventSignal<T>::Callback2 callback);
+    void Recognizer_Event(const wchar_t* psz, EventSignal<T>& recognizerEvent, typename::EventSignal<T>::CallbackFunction callback);
 
-    static void Recognizer_SessionStartedHandler(const SessionEventArgs& e, void* pthis) {};
-    static void Recognizer_SessionStoppedHandler(const SessionEventArgs& e, void* pthis) {};
-    static void Recognizer_SoundStartedHandler(const SessionEventArgs& e, void* pthis) {};
-    static void Recognizer_SoundStoppedHandler(const SessionEventArgs& e, void* pthis) {};
+    void Recognizer_SessionStartedHandler(const SessionEventArgs& e) {};
+    void Recognizer_SessionStoppedHandler(const SessionEventArgs& e) {};
+    void Recognizer_SoundStartedHandler(const SessionEventArgs& e) {};
+    void Recognizer_SoundStoppedHandler(const SessionEventArgs& e) {};
 
-    static void Recognizer_IntermediateResultHandler(const RecognitionEventArgs& e, void* pthis) {};
-    static void Recognizer_FinalResultHandler(const RecognitionEventArgs& e, void* pthis) {};
-    static void Recognizer_NoMatchHandler(const RecognitionEventArgs& e, void* pthis) {};
-    static void Recognizer_CanceledHandler(const RecognitionEventArgs& e, void* pthis) {};
+    void Recognizer_IntermediateResultHandler(const RecognitionEventArgs& e) {};
+    void Recognizer_FinalResultHandler(const RecognitionEventArgs& e) {};
+    void Recognizer_NoMatchHandler(const RecognitionEventArgs& e) {};
+    void Recognizer_CanceledHandler(const RecognitionEventArgs& e) {};
 
-    static void SpeechRecognizer_IntermediateResultHandler(const SpeeechRecognitionEventArgs& e, void* pthis) {};
-    static void SpeechRecognizer_FinalResultHandler(const SpeeechRecognitionEventArgs& e, void* pthis) {};
-    static void SpeechRecognizer_NoMatchHandler(const SpeeechRecognitionEventArgs& e, void* pthis) {};
-    static void SpeechRecognizer_CanceledHandler(const SpeeechRecognitionEventArgs& e, void* pthis) {};
+    void SpeechRecognizer_IntermediateResultHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"SpeechRecognizer_IntermediateResultHandler!!!"); };
+    void SpeechRecognizer_FinalResultHandler(const SpeechRecognitionEventArgs& e);
+    void SpeechRecognizer_NoMatchHandler(const SpeechRecognitionEventArgs& e);
+    void SpeechRecognizer_CanceledHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"SpeechRecognizer_CanceledHandler!!!"); };
 
-     static void IntentRecognizer_IntermediateResultHandler(const int& e, void* pthis) {};
-     static void IntentRecognizer_FinalResultHandler(const int& e, void* pthis) {};
-     static void IntentRecognizer_NoMatchHandler(const int& e, void* pthis) {};
-     static void IntentRecognizer_CanceledHandler(const int& e, void* pthis) {};
+    void IntentRecognizer_IntermediateResultHandler(const int& e) {};
+    void IntentRecognizer_FinalResultHandler(const int& e) {};
+    void IntentRecognizer_NoMatchHandler(const int& e) {};
+    void IntentRecognizer_CanceledHandler(const int& e) {};
 
     void ConsoleInput_CommandSystem(const wchar_t* psz);
 

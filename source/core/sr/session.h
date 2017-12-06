@@ -16,7 +16,7 @@
 
 
 namespace CARBON_IMPL_NAMESPACE() {
-
+    
 
 class CSpxSession : public ISpxSession
 {
@@ -28,17 +28,35 @@ public:
     std::wstring GetSessionId() const;
 
     void AddRecognizer(std::shared_ptr<ISpxRecognizer> recognizer);
-    void RemoveRecognizer(ISpxRecognizer* precognzier);
+    void RemoveRecognizer(ISpxRecognizer* recognizer);
 
     CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync();
     CSpxAsyncOp<void> StartContinuousRecognitionAsync();
     CSpxAsyncOp<void> StopContinuousRecognitionAsync();
 
 
-public:
+protected:
 
     virtual void StartRecognizing();
     virtual void StopRecognizing();
+
+    virtual std::shared_ptr<ISpxRecognitionResult> WaitForRecognition();
+    virtual void WaitForRecognition_Complete(std::shared_ptr<ISpxRecognitionResult> result);
+
+    virtual void FireSessionStartedEvent();
+    virtual void FireSessionStoppedEvent();
+
+    virtual void FireResultEvent(std::shared_ptr<ISpxRecognitionResult> result);
+    virtual void EnsureFireResultEvent();
+
+    std::mutex m_mutex;
+    std::condition_variable m_cv;
+
+    const int m_recoAsyncTimeout = 5;
+    const int m_waitForDoneTimeout = 20;
+
+    bool m_fRecoAsyncWaiting;
+    std::shared_ptr<ISpxRecognitionResult> m_recoAsyncResult;
 
 
 private:
@@ -50,36 +68,6 @@ private:
 
     std::wstring m_sessionId;
     std::list<std::weak_ptr<ISpxRecognizer>> m_recognizers;
-};
-
-
-class CSpxAudioSession : public CSpxSession, public ISpxAudioProcessor
-{
-public:
-
-    CSpxAudioSession() = default;
-
-    // --- ISpxAudioProcessor
-
-    void SetFormat(WAVEFORMATEX* pformat) override;
-    void ProcessAudio(AudioData_Type data, uint32_t size) override;
-
-
-protected:
-
-    void StartRecognizing() override;
-    void StopRecognizing() override;
-
-    std::shared_ptr<ISpxAudioPump> m_audioPump;
-
-private:
-
-    using Base_Type = CSpxSession;
-
-    CSpxAudioSession(const CSpxAudioSession&) = delete;
-    CSpxAudioSession(const CSpxAudioSession&&) = delete;
-
-    CSpxAudioSession& operator=(const CSpxAudioSession&) = delete;
 };
 
 

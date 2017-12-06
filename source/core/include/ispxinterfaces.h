@@ -9,6 +9,11 @@
 #include <memory>
 #include <spxcore_common.h>
 #include "asyncop.h"
+#include "speechapi_cxx_common.h"
+#include "speechapi_cxx_eventsignal.h"
+
+
+using namespace CARBON_NAMESPACE_ROOT;
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -19,9 +24,6 @@ class ISpxInterfaceBase : public std::enable_shared_from_this<ISpxInterfaceBase>
 protected:
 
     typedef std::enable_shared_from_this<ISpxInterfaceBase> base_type;
-
-    template<typename T>
-    friend struct ISpxInterfaceBaseFor;
 
     std::shared_ptr<ISpxInterfaceBase> shared_from_this()
     {
@@ -35,6 +37,8 @@ struct ISpxInterfaceBaseFor : virtual public ISpxInterfaceBase
 {
 public:
 
+    virtual ~ISpxInterfaceBaseFor() = default;
+
     std::shared_ptr<T> shared_from_this()
     {
         std::shared_ptr<T> result(base_type::shared_from_this(), static_cast<T*>(this));
@@ -47,6 +51,76 @@ private:
     typedef ISpxInterfaceBase base_type;
 };
     
+
+class ISpxObjectInit : public ISpxInterfaceBaseFor<ISpxObjectInit>
+{
+public:
+
+    virtual void Init() = 0;
+    virtual void Term() = 0;
+};
+
+
+class ISpxSite : public ISpxInterfaceBaseFor<ISpxSite>
+{
+};
+
+
+class ISpxObjectWithSite : public ISpxInterfaceBaseFor<ISpxObjectWithSite>
+{
+public:
+
+    virtual void SetSite(std::weak_ptr<ISpxSite> site) = 0;
+};
+
+template <class T>
+class ISpxObjectWithSiteInitImpl : public ISpxObjectWithSite, public ISpxObjectInit
+{
+public:
+
+    // --- ISpxObjectWithSite
+
+    void SetSite(std::weak_ptr<ISpxSite> site) override
+    {
+        auto shared = site.lock();
+        auto ptr = std::dynamic_pointer_cast<T>(shared);
+        SPX_IFFALSE_THROW_HR((bool)ptr == (bool)shared, SPXERR_INVALID_ARG);
+
+        if (m_hasSite)
+        {
+            Term();
+            m_site.reset();
+            m_hasSite = false;
+        }
+
+        m_site = ptr;
+        m_hasSite = ptr.get() != nullptr;
+
+        if (m_hasSite)
+        {
+            Init();
+        }
+    }
+
+    // --- ISpxObjectInit
+
+    void Init() override
+    {
+    };
+
+    void Term() override
+    {
+    };
+
+
+protected:
+
+    ISpxObjectWithSiteInitImpl() : m_hasSite(false) {};
+
+    bool m_hasSite;
+    std::weak_ptr<T> m_site;
+};
+
 
 #pragma pack (push, 1)
 struct WAVEFORMAT
@@ -118,6 +192,14 @@ public:
 };
 
 
+class ISpxAudioReaderPump : public ISpxInterfaceBaseFor<ISpxAudioReaderPump>
+{
+public:
+
+    virtual void SetAudioReader(std::shared_ptr<ISpxAudioReader>& reader) = 0;
+};
+
+
 class ISpxAudioPump : public ISpxInterfaceBaseFor<ISpxAudioPump>
 {
 public:
@@ -162,6 +244,50 @@ public:
 };
 
 
+class ISpxSessionEventArgs : public ISpxInterfaceBaseFor<ISpxSessionEventArgs>
+{
+public:
+
+    virtual std::wstring GetSessionId() = 0;
+};
+
+
+class ISpxRecognitionEventArgs : public ISpxSessionEventArgs, public ISpxInterfaceBaseFor<ISpxRecognitionEventArgs>
+{
+public:
+
+    virtual std::shared_ptr<ISpxRecognitionResult> GetResult() = 0;
+};
+
+
+class ISpxRecognizerEvents : public ISpxInterfaceBaseFor<ISpxRecognizerEvents>
+{
+public:
+
+    using RecoEvent_Type = EventSignal<std::shared_ptr<ISpxRecognitionEventArgs>>;
+    using SessionEvent_Type = EventSignal<std::shared_ptr<ISpxSessionEventArgs>>;
+
+    virtual void FireResultEvent(std::shared_ptr<ISpxRecognitionResult> result) = 0;
+
+    RecoEvent_Type IntermediateResult;
+    RecoEvent_Type FinalResult;
+    RecoEvent_Type NoMatch;
+    RecoEvent_Type Canceled;
+    
+
+protected:
+
+    ISpxRecognizerEvents(RecoEvent_Type::NotifyCallback_Type connectedCallback, RecoEvent_Type::NotifyCallback_Type disconnectedCallback) :
+        FinalResult(connectedCallback, disconnectedCallback)
+    {
+    };
+
+private:
+
+    ISpxRecognizerEvents() = delete;
+};
+
+
 class ISpxSession : public ISpxInterfaceBaseFor<ISpxSession>
 {
 public:
@@ -169,7 +295,7 @@ public:
     virtual std::wstring GetSessionId() const = 0;
 
     virtual void AddRecognizer(std::shared_ptr<ISpxRecognizer> recognizer) = 0;
-    virtual void RemoveRecognizer(ISpxRecognizer* precognzier) = 0;
+    virtual void RemoveRecognizer(ISpxRecognizer* recognizer) = 0;
 
     virtual CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync() = 0;
     virtual CSpxAsyncOp<void> StartContinuousRecognitionAsync() = 0;
@@ -182,8 +308,38 @@ class ISpxAudioStreamSessionInit : public ISpxInterfaceBaseFor<ISpxAudioStreamSe
 public:
 
     virtual void InitFromFile(const wchar_t* pszFileName) = 0;
+    virtual void InitFromMicrophone() = 0;
 };
 
+
+class ISpxRecoEngineAdapter : public ISpxAudioProcessor, public ISpxInterfaceBaseFor<ISpxRecoEngineAdapter>
+{
+};
+
+
+class ISpxRecoEngineAdapterSite : public ISpxSite
+{
+public:
+
+    using ResultPayload_Type = std::shared_ptr<ISpxRecognitionResult>;
+    using AdditionalMessagePayload_Type = void*;
+    using ErrorPayload_Type = SPXHR;
+    
+    virtual void SpeechStartDetected(ISpxRecoEngineAdapter* adapter, uint32_t offset) = 0;
+    virtual void SpeechEndDetected(ISpxRecoEngineAdapter* adapter, uint32_t offset) = 0;
+
+    virtual void SoundStartDetected(ISpxRecoEngineAdapter* adapter, uint32_t offset) = 0;
+    virtual void SoundEndDetected(ISpxRecoEngineAdapter* adapter, uint32_t offset) = 0;
+
+    virtual void IntermediateResult(ISpxRecoEngineAdapter* adapter, uint32_t offset, ResultPayload_Type payload) = 0;
+    virtual void FinalResult(ISpxRecoEngineAdapter* adapter, uint32_t offset, ResultPayload_Type payload) = 0;
+
+    virtual void DoneProcessingAudio(ISpxRecoEngineAdapter* adapter) = 0;
+
+    virtual void AdditionalMessage(ISpxRecoEngineAdapter* adapter, uint32_t offset, AdditionalMessagePayload_Type payload) = 0;
+
+    virtual void Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload) = 0;
+};
 
 
 }; // CARBON_IMPL_NAMESPACE()

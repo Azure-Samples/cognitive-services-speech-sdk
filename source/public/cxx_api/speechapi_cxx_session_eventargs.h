@@ -17,7 +17,7 @@ class SessionEventArgs : public EventArgs
 {
 public:
 
-    virtual ~SessionEventArgs() = 0;
+    virtual ~SessionEventArgs() {}
 
     const std::wstring& SessionId;
     

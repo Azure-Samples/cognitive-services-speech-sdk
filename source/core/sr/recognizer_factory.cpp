@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "recognizer_factory.h"
 #include "audio_stream_session.h"
-#include "interactive_session.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -9,15 +8,16 @@ namespace CARBON_IMPL_NAMESPACE() {
 
 std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateSpeechRecognizer() 
 {
-    auto session = std::make_shared<CSpxInteractiveSession>();
+    // Create the sesion and initialize it
+    auto session = SpxMakeShared<CSpxAudioStreamSession, ISpxSession>();
+    auto sessionInit = std::dynamic_pointer_cast<ISpxAudioStreamSessionInit>(session);
+    sessionInit->InitFromMicrophone();
 
-    auto pISpxSession = std::dynamic_pointer_cast<ISpxSession>(session);
-    auto recognizer = std::make_shared<CSpxRecognizer>(pISpxSession);
-
-    auto pISpxRecognizer = std::dynamic_pointer_cast<ISpxRecognizer>(recognizer);
+    // Create the recognizer and add it to the session
+    auto recognizer = SpxMakeShared<CSpxRecognizer, ISpxRecognizer>(session);
     session->AddRecognizer(recognizer);
 
-    return pISpxRecognizer;
+    return recognizer;
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateSpeechRecognizer(bool passiveListeningEnaled)
@@ -32,18 +32,16 @@ std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateSpeechRecognizer(co
 
 std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateSpeechRecognizerWithFileInput(const std::wstring& fileName)
 {
-    auto session = std::make_shared<CSpxAudioStreamSession>();
+    // Create the session and initialize it
+    auto session = SpxMakeShared<CSpxAudioStreamSession, ISpxSession>();
+    auto sessionInit = std::dynamic_pointer_cast<ISpxAudioStreamSessionInit>(session);
+    sessionInit->InitFromFile(fileName.c_str());
 
-    auto pISpxAudioStreamSessionInit = std::dynamic_pointer_cast<ISpxAudioStreamSessionInit>(session);
-    pISpxAudioStreamSessionInit->InitFromFile(fileName.c_str());
+    // Create the recognizer and add it to the session
+    auto recognizer = SpxMakeShared<CSpxRecognizer, ISpxRecognizer>(session);
+    session->AddRecognizer(recognizer);
 
-    auto pISpxSession = std::dynamic_pointer_cast<ISpxSession>(session);
-    auto recognizer = std::make_shared<CSpxRecognizer>(pISpxSession);
-    
-    auto pISpxRecognizer = std::dynamic_pointer_cast<ISpxRecognizer>(recognizer);
-    pISpxSession->AddRecognizer(pISpxRecognizer);
-
-    return pISpxRecognizer;
+    return recognizer;
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language)

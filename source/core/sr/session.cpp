@@ -7,7 +7,8 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-CSpxSession::CSpxSession()
+CSpxSession::CSpxSession() :
+    m_fRecoAsyncWaiting(false)
 {
     SPX_DBG_TRACE_FUNCTION();
 }
@@ -27,11 +28,11 @@ void CSpxSession::AddRecognizer(std::shared_ptr<ISpxRecognizer> recognizer)
      m_recognizers.push_back(recognizer);
 }
 
-void CSpxSession::RemoveRecognizer(ISpxRecognizer* precognzier)
+void CSpxSession::RemoveRecognizer(ISpxRecognizer* recognizer)
 {
      m_recognizers.remove_if([&](std::weak_ptr<ISpxRecognizer>& item) {
-         std::shared_ptr<ISpxRecognizer> recognizer = item.lock();
-         return recognizer.get() == precognzier; 
+         std::shared_ptr<ISpxRecognizer> sharedPtr = item.lock();
+         return sharedPtr.get() == recognizer;
      });
 }
 
@@ -42,13 +43,11 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxSession::RecognizeAsync(
     std::packaged_task<std::shared_ptr<ISpxRecognitionResult>()> taskHack([=](){
 
         this->StartRecognizing();
-        std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+
+        auto result = this->WaitForRecognition();
         this->StopRecognizing();
 
-        auto result = std::make_shared<CSpxRecognitionResult>();
-        auto pISpxRecognitionResult = std::dynamic_pointer_cast<ISpxRecognitionResult>(result);
-
-        return pISpxRecognitionResult;
+        return result;
     });
 
     auto futureHack = taskHack.get_future();
@@ -96,46 +95,86 @@ CSpxAsyncOp<void> CSpxSession::StopContinuousRecognitionAsync()
 
 void CSpxSession::StartRecognizing()
 {
+    SPX_DBG_TRACE_SCOPE("Sleeping for 500ms...", "Sleeping for 500ms... Done!");
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }
 
 void CSpxSession::StopRecognizing()
 {
+    SPX_DBG_TRACE_SCOPE("Sleeping for 1000ms...", "Sleeping for 1000ms... Done!");
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 }
 
-
-void CSpxAudioSession::SetFormat(WAVEFORMATEX* pformat)
+std::shared_ptr<ISpxRecognitionResult> CSpxSession::WaitForRecognition()
 {
-    SPX_DBG_TRACE_VERBOSE_IF(pformat == nullptr, "%s - pformat == nullptr", __FUNCTION__);
-    SPX_DBG_TRACE_VERBOSE_IF(pformat != nullptr, "%s\n  wFormatTag:      %s\n  nChannels:       %d\n  nSamplesPerSec:  %d\n  nAvgBytesPerSec: %d\n  nBlockAlign:     %d\n  wBitsPerSample:  %d\n  cbSize:          %d",
-        __FUNCTION__,
-        pformat->wFormatTag == WAVE_FORMAT_PCM ? "PCM" : "non-PCM",
-        pformat->nChannels,
-        pformat->nSamplesPerSec,
-        pformat->nAvgBytesPerSec,
-        pformat->nBlockAlign,
-        pformat->wBitsPerSample,
-        pformat->cbSize);
+    std::unique_lock<std::mutex> lock(m_mutex);
+
+    m_fRecoAsyncWaiting = true;
+    m_cv.wait_for(lock, std::chrono::seconds(m_recoAsyncTimeout), [&] { return !m_fRecoAsyncWaiting; });
+
+    if (!m_recoAsyncResult) // If we don't have a result, make a 'NoMatch' result
+    {
+        lock.unlock();
+        EnsureFireResultEvent();
+    }
+
+    return std::move(m_recoAsyncResult);
 }
 
-void CSpxAudioSession::ProcessAudio(AudioData_Type data, uint32_t size)
+void CSpxSession::WaitForRecognition_Complete(std::shared_ptr<ISpxRecognitionResult> result)
 {
-    SPX_DBG_TRACE_VERBOSE("%s - size=%d", __FUNCTION__, size);
+    std::unique_lock<std::mutex> lock(m_mutex);
+    m_fRecoAsyncWaiting = false;
+    m_recoAsyncResult = result;
+
+    m_cv.notify_all();
+    lock.unlock();
+
+    FireResultEvent(result);
 }
 
-void CSpxAudioSession::StartRecognizing()
+void CSpxSession::FireSessionStartedEvent()
 {
-    Base_Type::StartRecognizing();
-
-    m_audioPump->StartPump(static_cast<ISpxAudioProcessor*>(this)->shared_from_this());
+    // TODO: RobCh: Next: Implement
+    // SPX_THROW_HR(SPXERR_NOT_IMPL);
 }
 
-void CSpxAudioSession::StopRecognizing()
+void CSpxSession::FireSessionStoppedEvent()
 {
-    m_audioPump->StopPump();
+    EnsureFireResultEvent();
 
-    Base_Type::StopRecognizing();
+    // TODO: RobCh: Next: Implement
+    // SPX_THROW_HR(SPXERR_NOT_IMPL);
 }
+
+void CSpxSession::FireResultEvent(std::shared_ptr<ISpxRecognitionResult> result)
+{
+    // Make a copy of the recognizers (under lock), to use to send events; 
+    // otherwise the underlying list could be modified while we're sending events...
+
+    std::unique_lock<std::mutex> lock(m_mutex);
+    decltype(m_recognizers) weakRecognizers(m_recognizers.begin(), m_recognizers.end());
+    lock.unlock();
+
+    for (auto weakRecognizer : weakRecognizers)
+    {
+        auto recognizer = weakRecognizer.lock();
+        auto ptr = std::dynamic_pointer_cast<ISpxRecognizerEvents>(recognizer);
+        if (recognizer)
+        {
+            ptr->FireResultEvent(result);
+        }
+    }
+}
+
+void CSpxSession::EnsureFireResultEvent()
+{
+    if (m_fRecoAsyncWaiting)
+    {
+        auto noMatchResult = SpxMakeShared<CSpxRecognitionResult, ISpxRecognitionResult>(CSpxRecognitionResult::NoMatch);
+        WaitForRecognition_Complete(noMatchResult);
+    }
+}
+
 
 }; // CARBON_IMPL_NAMESPACE()

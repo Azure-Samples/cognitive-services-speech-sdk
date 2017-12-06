@@ -87,9 +87,14 @@ typedef unsigned int SPXHR;
 /*** SPXERR_ABORT
 *   Operation aborted.
 */
-#define SPXERR_ABORT               __SPX_ERRCODE_FAILED(0x00c)
+#define SPXERR_ABORT                __SPX_ERRCODE_FAILED(0x00c)
 
 /*** SPXERR_MIC_NOT_AVAILABLE
 *   Microphone is not available.
 */
-#define SPXERR_MIC_NOT_AVAILABLE   __SPX_ERRCODE_FAILED(0x00d)
+#define SPXERR_MIC_NOT_AVAILABLE    __SPX_ERRCODE_FAILED(0x00d)
+
+/*** SPXERR_INVALID_STATE
+*   An invalid state was encountered.
+*/
+#define SPXERR_INVALID_STATE        __SPX_ERRCODE_FAILED(0x00e)

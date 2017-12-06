@@ -16,16 +16,15 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-CSpxAudioPump::CSpxAudioPump() :
+CSpxAudioPump::CSpxAudioPump(std::shared_ptr<ISpxAudioReader>& reader) :
     m_state(State::NoInput),
     m_stateRequested(State::NoInput)
 {
-    // SPX_THROW_HR(SPXERR_NOT_IMPL);
+    SetAudioReader(reader);
 }
 
 CSpxAudioPump::~CSpxAudioPump()
 {
-    // SPX_THROW_HR(SPXERR_NOT_IMPL);
     if (m_thread.joinable())
     {
         m_thread.join();
@@ -44,6 +43,7 @@ void CSpxAudioPump::SetAudioReader(std::shared_ptr<ISpxAudioReader>& reader)
 
 uint32_t CSpxAudioPump::GetFormat(WAVEFORMATEX* pformat, uint32_t cbFormat)
 {
+    SPX_IFTRUE_THROW_HR(m_audioReader.get() == nullptr, SPXERR_UNINITIALIZED);
     return m_audioReader->GetFormat(pformat, cbFormat);
 }
 
@@ -65,7 +65,8 @@ void CSpxAudioPump::StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProc
         "in the enumeration); unless someone adds a new state and doesn't change this code. This assert "
         "guards in DBG for that possibility.");
 
-    auto keepAliveForThread = std::dynamic_pointer_cast<CSpxAudioPump>(this->shared_from_this());
+    auto pump = ((ISpxAudioPump*)this);
+    auto keepAliveForThread = std::dynamic_pointer_cast<CSpxAudioPump>(pump->shared_from_this());
     m_thread = std::move(std::thread(&CSpxAudioPump::PumpThread, this, std::move(keepAliveForThread), pISpxAudioProcessor));
 
     m_stateRequested = State::Processing; // it's ok we set the requested state after we 'start' the thread; PumpThread will wait for the lock

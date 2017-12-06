@@ -132,11 +132,15 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
             __SPX_TRACE_VERBOSE(title, msg, __VA_ARGS__);           \
     } } while (0)
 
+
+#ifdef __cplusplus
 #include <memory>
 #define __SPX_TRACE_SCOPE(t1, t2, x, y)                             \
     __SPX_TRACE_INFO(t1, x);                                        \
     auto f2 = [](int*) -> void { __SPX_TRACE_INFO(t2, y); };        \
     std::unique_ptr<int, decltype(f2)> onExit((int*)1, f2)
+#endif /* __cplusplus */
+
 
 #define ___SPX_EXPR_AS_STRING(_String) "" ## #_String
 #define __SPX_EXPR_AS_STRING(_String) ___SPX_EXPR_AS_STRING(_String)
@@ -469,7 +473,7 @@ inline void __spx_throw_hr_impl(SPXHR hr)
 #define SPX_IFTRUE_THROW_HR(cond, hr)               SPX_THROW_HR_IF(hr, cond)
 #define SPX_IFFALSE_THROW_HR(cond, hr)              SPX_THROW_HR_IF(hr, !(cond))
 #define SPX_IFFAILED_THROW_HR(hr)                   SPX_THROW_ON_FAIL(hr)
-#define SPX_IFFAILED_THROW_HR_IFNOT()               SPX_THROW_ON_FAIL_IF_NOT(hr, hrNot)
+#define SPX_IFFAILED_THROW_HR_IFNOT(hr, hrNot)      SPX_THROW_ON_FAIL_IF_NOT(hr, hrNot)
 
 #define SPX_IFTRUE_EXITFN_WHR(cond, hr)             SPX_EXITFN_HR_IF(hr, cond)
 #define SPX_IFFALSE_EXITFN_WHR(cond, hr)            SPX_EXITFN_HR_IF(hr, !(cond))

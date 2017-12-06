@@ -27,11 +27,13 @@ public:
         SPX_DBG_TRACE_FUNCTION();
 
         PopulateResultFields(hresult);
+
+        SPX_DBG_TRACE_VERBOSE("%s (0x%x) -- resultid=%S; reason=0x%x; text=%S", __FUNCTION__, m_hresult, m_resultId.c_str(), m_reason, m_text.c_str());
     };
 
     virtual ~SpeechRecognitionResult()
     {
-        SPX_DBG_TRACE_FUNCTION();
+        SPX_DBG_TRACE_VERBOSE("%s (0x%lu)", __FUNCTION__, m_hresult);
 
         ::Recognizer_ResultHandle_Close(m_hresult);
         m_hresult = SPXHANDLE_INVALID;

@@ -13,14 +13,18 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-class CSpxAudioPump : public ISpxAudioPump
+class CSpxAudioPump : public ISpxAudioPump, public ISpxAudioReaderPump
 {
 public:
 
-    CSpxAudioPump();
+    CSpxAudioPump(std::shared_ptr<ISpxAudioReader>& reader);
     ~CSpxAudioPump();
 
-    void SetAudioReader(std::shared_ptr<ISpxAudioReader>& reader);
+    // --- ISpxAudioReaderPump
+
+    void SetAudioReader(std::shared_ptr<ISpxAudioReader>& reader) override;
+
+    // --- ISpxAudioPump
 
     uint32_t GetFormat(WAVEFORMATEX* pformat, uint32_t cbFormat) override;
     void SetFormat(const WAVEFORMATEX* pformat, uint32_t cbFormat) override;

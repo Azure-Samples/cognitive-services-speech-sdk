@@ -15,5 +15,7 @@
 
 #include <speechapi_c.h>
 #include <spxcore_common.h>
+#include <trace_message.h>
+
 #include <handle_table.h>
 #include <recognizer.h>

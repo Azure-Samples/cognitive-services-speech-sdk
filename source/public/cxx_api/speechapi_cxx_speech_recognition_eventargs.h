@@ -16,30 +16,46 @@ namespace Recognition {
 namespace Speech {
 
 
-class SpeeechRecognitionEventArgs final : public RecognitionEventArgs
+class SpeechRecognitionEventArgs final : public RecognitionEventArgs
 {
 public:
 
-    SpeeechRecognitionEventArgs() :
+    SpeechRecognitionEventArgs(SPXEVENTHANDLE hevent) :
         RecognitionEventArgs(m_sessionId),
-        Result(m_result),
-        m_result(SPXHANDLE_INVALID)
+        Result(InitResult(hevent)),
+        m_hevent(hevent)
     {
+        // TODO: RobCh: Next: Init m_sessionId
     };
 
-    virtual ~SpeeechRecognitionEventArgs() {};
+    virtual ~SpeechRecognitionEventArgs() {};
 
     const SpeechRecognitionResult& Result;
 
 private:
 
-    SpeeechRecognitionEventArgs(const SpeeechRecognitionEventArgs&) = delete;
-    SpeeechRecognitionEventArgs(const SpeeechRecognitionEventArgs&&) = delete;
+    SpeechRecognitionEventArgs(const SpeechRecognitionEventArgs&) = delete;
+    SpeechRecognitionEventArgs(const SpeechRecognitionEventArgs&&) = delete;
 
-    SpeeechRecognitionEventArgs& operator=(const SpeeechRecognitionEventArgs&) = delete;
+    SpeechRecognitionEventArgs& operator=(const SpeechRecognitionEventArgs&) = delete;
 
+    SPXRESULTHANDLE ResultHandleFromEventHandle(SPXEVENTHANDLE hevent)
+    {
+        SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(Recognizer_RecognitionEvent_GetResult(hevent, &hresult));
+        return hresult;
+    }
+
+    const SpeechRecognitionResult& InitResult(SPXEVENTHANDLE hevent)
+    {
+        m_result = std::make_shared<SpeechRecognitionResult>(ResultHandleFromEventHandle(hevent));
+        return *m_result.get();
+    }
+
+    SPXEVENTHANDLE m_hevent;
     std::wstring m_sessionId;
-    SpeechRecognitionResult m_result;
+
+    std::shared_ptr<SpeechRecognitionResult> m_result;
 };
 
 

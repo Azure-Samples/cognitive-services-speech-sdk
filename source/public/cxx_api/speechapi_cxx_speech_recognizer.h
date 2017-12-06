@@ -22,7 +22,7 @@ namespace Recognition {
 namespace Speech {
 
 
-class SpeechRecognizer final : virtual public AsyncRecognizer<SpeechRecognitionResult, SpeeechRecognitionEventArgs>
+class SpeechRecognizer final : virtual public AsyncRecognizer<SpeechRecognitionResult, SpeechRecognitionEventArgs>
 {
 public:
 
@@ -107,7 +107,7 @@ public:
 
     std::future<std::shared_ptr<SpeechRecognitionResult>> RecognizeAsync() override
     {
-        auto future = std::async([=]() -> std::shared_ptr<SpeechRecognitionResult> {
+        auto future = std::async(std::launch::async, [=]() -> std::shared_ptr<SpeechRecognitionResult> {
             SPX_INIT_HR(hr);
 
             SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
@@ -121,7 +121,7 @@ public:
 
     std::future<void> StartContinuousRecognitionAsync() override 
     {
-        auto future = std::async([=]() -> void {
+        auto future = std::async(std::launch::async, [=]() -> void {
             SPX_INIT_HR(hr);
             SPX_THROW_ON_FAIL(hr = Recognizer_AsyncHandle_Close(m_hasyncStartContinuous)); // close any unfinished previous attempt
 
@@ -140,7 +140,7 @@ public:
 
     std::future<void> StopContinuousRecognitionAsync() override
     {
-        auto future = std::async([=]() -> void {
+        auto future = std::async(std::launch::async, [=]() -> void {
             SPX_INIT_HR(hr);
             SPX_THROW_ON_FAIL(hr = Recognizer_AsyncHandle_Close(m_hasyncStopContinuous)); // close any unfinished previous attempt
 
@@ -156,6 +156,77 @@ public:
 
         return future;
     };
+
+
+protected:
+
+    void RecoEventConnectionsChanged(const EventSignal<const SpeechRecognitionEventArgs&>& recoEvent) override
+    {
+        if (&recoEvent == &IntermediateResult)
+        {
+            Recognizer_IntermediateResult_SetEventCallback(m_hreco, IntermediateResult.IsConnected() ? SpeechRecognizer::FireEvent_IntermediateResult: nullptr, this);
+        }
+        else if (&recoEvent == &FinalResult)
+        {
+            Recognizer_FinalResult_SetEventCallback(m_hreco, FinalResult.IsConnected() ? SpeechRecognizer::FireEvent_FinalResult: nullptr, this);
+        }
+        else if (&recoEvent == &NoMatch)
+        {
+            Recognizer_NoMatch_SetEventCallback(m_hreco, NoMatch.IsConnected() ? SpeechRecognizer::FireEvent_NoMatch : nullptr, this);
+        }
+        else if (&recoEvent == &Canceled)
+        {
+            Recognizer_Canceled_SetEventCallback(m_hreco, Canceled.IsConnected() ? SpeechRecognizer::FireEvent_Canceled : nullptr, this);
+        }
+    }
+
+    void SessionEventConnectionsChanged(const EventSignal<const SessionEventArgs&>& sessionEvent) override
+    {
+        if (&sessionEvent == &SessionStarted)
+        {
+            //Recognizer_SessionStarted_SetEventCallback(m_hreco, SessionStarted.IsConnected() ? SpeechRecognizer::FireEvent_SessionStarted: nullptr, this);
+        }
+        else if (&sessionEvent == &SessionStopped)
+        {
+            //Recognizer_SessionStopped_SetEventCallback(m_hreco, SessionStopped.IsConnected() ? SpeechRecognizer::FireEvent_SessionStopped : nullptr, this);
+        }
+        else if (&sessionEvent == &SoundStarted)
+        {
+            //Recognizer_SoundStarted_SetEventCallback(m_hreco, SoundStarted.IsConnected() ? SpeechRecognizer::FireEvent_SoundStarted: nullptr, this);
+        }
+        else if (&sessionEvent == &SoundStopped)
+        {
+            //Recognizer_SoundStopped_SetEventCallback(m_hreco, SoundStopped.IsConnected() ? SpeechRecognizer::FireEvent_SoundStopped: nullptr, this);
+        }
+    }
+
+    static void FireEvent_IntermediateResult(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
+    {
+        auto recoEvent = std::make_unique<SpeechRecognitionEventArgs>(hevent);
+        auto pThis = static_cast<SpeechRecognizer*>(pvContext);
+        pThis->IntermediateResult.Signal(*recoEvent.get());
+    }
+
+    static void FireEvent_FinalResult(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
+    {
+        auto recoEvent = std::make_unique<SpeechRecognitionEventArgs>(hevent);
+        auto pThis = static_cast<SpeechRecognizer*>(pvContext);
+        pThis->FinalResult.Signal(*recoEvent.get());
+    }
+
+    static void FireEvent_NoMatch(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
+    {
+        auto recoEvent = std::make_unique<SpeechRecognitionEventArgs>(hevent);
+        auto pThis = static_cast<SpeechRecognizer*>(pvContext);
+        pThis->NoMatch.Signal(*recoEvent.get());
+    }
+
+    static void FireEvent_Canceled(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
+    {
+        auto recoEvent = std::make_unique<SpeechRecognitionEventArgs>(hevent);
+        auto pThis = static_cast<SpeechRecognizer*>(pvContext);
+        pThis->Canceled.Signal(*recoEvent.get());
+    }
 
 
 private:

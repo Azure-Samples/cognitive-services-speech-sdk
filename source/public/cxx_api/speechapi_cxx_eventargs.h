@@ -17,7 +17,7 @@ class EventArgs
 {
 public:
 
-    virtual ~EventArgs() = 0;
+    virtual ~EventArgs() {}
 
 protected:
 

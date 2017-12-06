@@ -6,6 +6,7 @@
 //
 
 #pragma once
+#include <functional>
 #include <list>
 #include <string>
 #include <speechapi_cxx_common.h>
@@ -19,27 +20,88 @@ class EventSignal
 {
 public:
 
-    EventSignal(){};
+    using NotifyCallback_Type = std::function<void(EventSignal<T>&)>;
+
+    EventSignal() :
+        m_connectedCallback(nullptr),
+        m_disconnectedCallback(nullptr)
+    {
+    };
+
+    EventSignal(NotifyCallback_Type connected, NotifyCallback_Type disconnected) :
+        m_connectedCallback(connected),
+        m_disconnectedCallback(disconnected)
+    {
+    };
+
     virtual ~EventSignal(){};
 
-    using Callback1 = void(*) (const T& eventArgs);
-    using Callback2 = void(*) (const T& eventArgs, void* pvContext);
+    using CallbackFunction = std::function<void(T eventArgs)>;
 
-    EventSignal& operator+=(Callback1 callback1) { Connect(callback1); return *this; }
-    EventSignal& operator-=(Callback1 callback1) { Disconnect(callback1); return *this; }
+    EventSignal<T>& operator+=(CallbackFunction callback)
+    {
+        Connect(callback);
+        return *this;
+    };
 
-    void operator()(const T& t) { Signal(t); }
+    EventSignal<T>& operator-=(CallbackFunction callback)
+    {
+        Disconnect(callback);
+        return *this;
+    };
 
-    void Connect(Callback1 callback) { throw nullptr; };
-    void Disconnect(Callback1 callback) { throw nullptr; };
+    void operator()(T t)
+    {
+        Signal(t);
+    }
 
-    void Connect(Callback2 callback, void* pvContext) { throw nullptr; };
-    void Disconnect(Callback2 callback, void* pvContext = nullptr) { throw nullptr; };
-    void Disconnect(void* pvContext) { throw nullptr; };
+    void Connect(CallbackFunction callback)
+    {
+        m_callbacks.push_back(callback);
+        if (m_callbacks.size() == 1 && m_connectedCallback != nullptr)
+        {
+            m_connectedCallback(*this);
+        }
+    };
 
-    void DisconnectAll() { throw nullptr; };
+    void Disconnect(CallbackFunction callback)
+    {
+        auto prevSize = m_callbacks.size();
 
-    void Signal(const T& t) { throw nullptr; };
+        m_callbacks.remove_if([&](CallbackFunction item) {
+            return callback.target_type() == item.target_type(); 
+        });
+
+        if (m_callbacks.size() == 0 && prevSize > 0 && m_disconnectedCallback != nullptr)
+        {
+            m_disconnectedCallback(*this);
+        }
+    };
+
+    void DisconnectAll()
+    {
+        auto prevSize = m_callbacks.size();
+
+        m_callbacks.clear();
+
+        if (m_callbacks.size() == 0 && prevSize > 0 && m_disconnectedCallback != nullptr)
+        {
+            m_disconnectedCallback(*this);
+        }
+    };
+
+    void Signal(T t)
+    {
+        for (auto c3 : m_callbacks)
+        {
+            c3(t);
+        }
+    };
+
+    bool IsConnected() const 
+    {
+        return m_callbacks.size() > 0;
+    };
 
     
 private:
@@ -49,8 +111,10 @@ private:
 
     EventSignal& operator=(const EventSignal&) = delete;
 
-    std::list<Callback1> m_callbacks1;
-    std::list<std::pair<void*, Callback2>> m_callbacks2;
+    std::list<CallbackFunction> m_callbacks;
+
+    NotifyCallback_Type m_connectedCallback;
+    NotifyCallback_Type m_disconnectedCallback;
 };
 
 

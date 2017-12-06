@@ -9,20 +9,29 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-class CSpxRecognizer : public ISpxRecognizer
+class CSpxRecognizer : public ISpxRecognizer, public ISpxRecognizerEvents
 {
 public:
 
     CSpxRecognizer(std::shared_ptr<ISpxSession>& session);
     virtual ~CSpxRecognizer();
 
-    bool IsEnabled();
-    void Enable();
-    void Disable();
+    // --- ISpxRecognizer
 
-    CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync();
-    CSpxAsyncOp<void> StartContinuousRecognitionAsync();
-    CSpxAsyncOp<void> StopContinuousRecognitionAsync();
+    bool IsEnabled() override;
+    void Enable() override;
+    void Disable() override;
+
+    CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync() override;
+    CSpxAsyncOp<void> StartContinuousRecognitionAsync() override;
+    CSpxAsyncOp<void> StopContinuousRecognitionAsync() override;
+
+    // --- ISpxRecognizerEvents
+
+    void FireResultEvent(std::shared_ptr<ISpxRecognitionResult> result) override;
+
+    
+    
 
 protected:
 

@@ -18,7 +18,7 @@ class RecognitionEventArgs : public SessionEventArgs
 {
 public:
 
-    virtual ~RecognitionEventArgs() = 0;
+    virtual ~RecognitionEventArgs() {}
 
 
 protected:

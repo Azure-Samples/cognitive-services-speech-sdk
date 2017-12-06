@@ -5,9 +5,25 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-CSpxRecognitionResult::CSpxRecognitionResult()
+CSpxRecognitionResult::CSpxRecognitionResult(const wchar_t* resultId, const wchar_t* text)
 {
     SPX_DBG_TRACE_FUNCTION();
+
+    if (resultId == nullptr)
+    {
+        // TODO: RobCh: Next: Generate a real result id here
+        resultId = L"ffff-ffff-ffff-result-id-goes-here-ffff";
+    }
+
+    m_reason = Reason::Recognized;
+    m_resultId = resultId;
+    m_text = text;
+}
+
+CSpxRecognitionResult::CSpxRecognitionResult(NoMatch_Type)
+{
+    SPX_DBG_TRACE_VERBOSE("%s NOMATCH", __FUNCTION__);
+    m_reason = Reason::NoMatch;
 }
 
 CSpxRecognitionResult::~CSpxRecognitionResult()
@@ -17,20 +33,17 @@ CSpxRecognitionResult::~CSpxRecognitionResult()
 
 std::wstring CSpxRecognitionResult::GetResultId()
 {
-    auto hackResultId = std::wstring(L"{7B252810-CDFF-442E-9A7A-483B09019CEF}");
-    return hackResultId; // TODO: RobCh: SPXERR_NOT_IMPL
+    return m_resultId;
 }
 
 std::wstring CSpxRecognitionResult::GetText()
 {
-    auto hackText = std::wstring(L"This is a test of the emergency broadcast system.");
-    return hackText; // TODO: RobCh: SPXERR_NOT_IMPL
+    return m_text;
 }
 
 Reason CSpxRecognitionResult::GetReason()
 {
-    auto hackReason = Reason::Recognized;
-    return hackReason; // TODO: RobCh: SPXERR_NOT_IMPL
+    return m_reason;
 }
 
 
