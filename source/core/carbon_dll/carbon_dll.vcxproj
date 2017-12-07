@@ -95,8 +95,8 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
-      <AdditionalDependencies>secur32.lib;ws2_32.lib;mf.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;winhttp.lib;rpcrt4.lib;azure-c-shared-utility.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)external\azure-c-shared-utility\bin\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>secur32.lib;ws2_32.lib;mf.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;winhttp.lib;rpcrt4.lib;azure-c-shared-utility.lib;usp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ProjectReference>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
@@ -118,8 +118,8 @@
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <GenerateMapFile>true</GenerateMapFile>
-      <AdditionalDependencies>secur32.lib;ws2_32.lib;mf.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;winhttp.lib;rpcrt4.lib;azure-c-shared-utility.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)external\azure-c-shared-utility\bin\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>secur32.lib;ws2_32.lib;mf.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;winhttp.lib;rpcrt4.lib;azure-c-shared-utility.lib;usp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ProjectReference>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
@@ -140,8 +140,8 @@
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <GenerateMapFile>true</GenerateMapFile>
-      <AdditionalDependencies>secur32.lib;ws2_32.lib;mf.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;winhttp.lib;rpcrt4.lib;azure-c-shared-utility.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)external\azure-c-shared-utility\bin\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>secur32.lib;ws2_32.lib;mf.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;winhttp.lib;rpcrt4.lib;azure-c-shared-utility.lib;usp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ProjectReference>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
@@ -166,8 +166,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
-      <AdditionalDependencies>secur32.lib;ws2_32.lib;mf.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;winhttp.lib;rpcrt4.lib;azure-c-shared-utility.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(OutDir);$(SolutionDir)external\azure-c-shared-utility\bin\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>secur32.lib;ws2_32.lib;mf.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;winhttp.lib;rpcrt4.lib;azure-c-shared-utility.lib;usp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ProjectReference>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
