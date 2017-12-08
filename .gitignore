@@ -1,6 +1,10 @@
 # Prerequisites
 *.d
 
+# User-specific files
+*.suo
+*.user
+
 # Compiled Object files
 *.slo
 *.lo
@@ -35,3 +39,17 @@
 *.vs
 *.vscode
 build/**/*
+
+# Visual C++ cache files
+ipch/
+*.aps
+*.ncb
+*.opensdf
+*.sdf
+*.cachefile
+*.userosscache
+
+# Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
