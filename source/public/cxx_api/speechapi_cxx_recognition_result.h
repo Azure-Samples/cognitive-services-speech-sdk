@@ -15,7 +15,7 @@ namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
 
 
-enum class Reason { Recognized, NoMatch, Canceled, OtherRecognizer };
+enum class Reason { Recognized, IntermediateResult, NoMatch, Canceled, OtherRecognizer };
 
 
 class RecognitionResult

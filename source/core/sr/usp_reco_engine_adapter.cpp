@@ -17,7 +17,11 @@ namespace CARBON_IMPL_NAMESPACE() {
 
 
 CSpxUspRecoEngineAdapter::CSpxUspRecoEngineAdapter() :
-    m_handle(INVALID_USP_HANDLE)
+    m_handle(INVALID_USP_HANDLE),
+    m_servicePreferedBufferSize(0),
+    m_ptrIntoBuffer(nullptr),
+    m_bytesInBuffer(0),
+    m_bytesLeftInBuffer(0)
 {
     InitCallbacks(&m_callbacks);
 }
@@ -27,59 +31,31 @@ void CSpxUspRecoEngineAdapter::Init()
     SPX_IFTRUE_THROW_HR(IsUspHandleValid(m_handle), SPXERR_ALREADY_INITIALIZED);
 
     UspInitialize(&m_handle, &m_callbacks, static_cast<void*>(this));
+    DumpFileInit();
 }
 
 void CSpxUspRecoEngineAdapter::Term()
 {
     UspShutdown(m_handle);
     m_handle = INVALID_USP_HANDLE;
+
+    DumpFileClose();
 }
 
 void CSpxUspRecoEngineAdapter::SetFormat(WAVEFORMATEX* pformat)
 {
-    bool fUspImplReady = false; // TODO: RobCh: Once Zhou has the USP ready, should be able to change this to true (better: remove condition)
-    SPX_IFTRUE_THROW_HR(fUspImplReady && !IsUspHandleValid(m_handle), SPXERR_UNINITIALIZED);
+    SPX_IFTRUE_THROW_HR(!IsUspHandleValid(m_handle), SPXERR_UNINITIALIZED);
 
     if (pformat != nullptr)
     {
-        static const uint16_t cbTag = 4;
-        static const uint16_t cbChunkType = 4;
-        static const uint16_t cbChunkSize = 4;
-
-        uint32_t cbFormatChunk = sizeof(WAVEFORMAT) + pformat->cbSize;
-        uint32_t cbRiffChunk = 0;       // NOTE: This isn't technically accurate for a RIFF/WAV file, but it's fine for Truman/Newman/Skyman
-        uint32_t cbDataChunk = 0;       // NOTE: Similarly, this isn't technically correct for the 'data' chunk, but it's fine for Truman/Newman/Skyman
-
-        size_t cbHeader =
-            cbTag + cbChunkSize +       // 'RIFF' #size_of_RIFF#
-            cbChunkType +               // 'WAVE'
-            cbChunkType + cbChunkSize + // 'fmt ' #size_fmt#
-            cbFormatChunk +             // actual format
-            cbChunkType + cbChunkSize;  // 'data' #size_of_data#
-
-        // Allocate the buffer, and create a ptr we'll use to advance thru the buffer as we're writing stuff into it
-        std::unique_ptr<uint8_t> header(new uint8_t[cbHeader]);
-        auto ptr = header.get();
-
-        // The 'RIFF' header (consists of 'RIFF' followed by size of paylaod that folows)
-        ptr = BufferWriteChars(ptr, "RIFF", cbTag);
-        ptr = BufferWriteNumber(ptr, cbRiffChunk);
-
-        // The 'WAVE' chunk header
-        ptr = BufferWriteChars(ptr, "WAVE", cbChunkType);
-
-        // The 'fmt ' chunk (consists of 'fmt ' followed by the total size of the WAVEFORMAT(EX)(TENSIBLE), followed by the WAVEFORMAT(EX)(TENSIBLE)
-        ptr = BufferWriteChars(ptr, "fmt ", cbChunkType);
-        ptr = BufferWriteNumber(ptr, cbFormatChunk);
-        ptr = BufferWriteBytes(ptr, (uint8_t*)pformat, cbFormatChunk);
-
-        // The 'data' chunk is next
-        ptr = BufferWriteChars(ptr, "data", cbChunkType);
-        ptr = BufferWriteNumber(ptr, cbDataChunk);
-
-        // Now that we've prepared the header/buffer, send it along to Truman/Newman/Skyman via UspWrite
-        SPX_DBG_ASSERT(cbHeader == (ptr - header.get()));
-        UspWrite(m_handle, header.get(), cbHeader);
+        UspWriteFormat(m_handle, pformat);
+        m_servicePreferedBufferSize = m_fUseVeryLargeBuffer
+            ? 1024 * 1024
+            : (size_t)pformat->nSamplesPerSec * pformat->nBlockAlign * m_servicePreferedMilliseconds / 1000;
+    }
+    else
+    {
+        UspWrite_Flush(m_handle);
     }
 }
 
@@ -93,30 +69,64 @@ bool CSpxUspRecoEngineAdapter::IsUspHandleValid(UspHandle handle)
     return handle != INVALID_USP_HANDLE;
 }
 
-FILE* hfile = 0;
-
 void CSpxUspRecoEngineAdapter::UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackContext)
 {
     SPX_DBG_TRACE_VERBOSE("%s(0x%x)", __FUNCTION__, handle);
 
-    // SPX_IFFAILED_THROW_HR(::UspInitialize(handle, callbacks, callbackContext);
-    SPX_IFFAILED_THROW_HR_IFNOT(::UspInitialize(handle, callbacks, callbackContext), USP_NOT_IMPLEMENTED);
+    SPX_IFFAILED_THROW_HR(::UspInitialize(handle, callbacks, callbackContext));
+}
 
-    fopen_s(&hfile, "output.wav", "wb");
+void CSpxUspRecoEngineAdapter::UspWriteFormat(UspHandle handle, WAVEFORMATEX* pformat)
+{
+    static const uint16_t cbTag = 4;
+    static const uint16_t cbChunkType = 4;
+    static const uint16_t cbChunkSize = 4;
+
+    uint32_t cbFormatChunk = sizeof(WAVEFORMAT) + pformat->cbSize;
+    uint32_t cbRiffChunk = 0;       // NOTE: This isn't technically accurate for a RIFF/WAV file, but it's fine for Truman/Newman/Skyman
+    uint32_t cbDataChunk = 0;       // NOTE: Similarly, this isn't technically correct for the 'data' chunk, but it's fine for Truman/Newman/Skyman
+
+    size_t cbHeader =
+        cbTag + cbChunkSize +       // 'RIFF' #size_of_RIFF#
+        cbChunkType +               // 'WAVE'
+        cbChunkType + cbChunkSize + // 'fmt ' #size_fmt#
+        cbFormatChunk +             // actual format
+        cbChunkType + cbChunkSize;  // 'data' #size_of_data#
+
+    // Allocate the buffer, and create a ptr we'll use to advance thru the buffer as we're writing stuff into it
+    std::unique_ptr<uint8_t> buffer(new uint8_t[cbHeader]);
+    auto ptr = buffer.get();
+
+    // The 'RIFF' header (consists of 'RIFF' followed by size of paylaod that folows)
+    ptr = FormatBufferWriteChars(ptr, "RIFF", cbTag);
+    ptr = FormatBufferWriteNumber(ptr, cbRiffChunk);
+
+    // The 'WAVE' chunk header
+    ptr = FormatBufferWriteChars(ptr, "WAVE", cbChunkType);
+
+    // The 'fmt ' chunk (consists of 'fmt ' followed by the total size of the WAVEFORMAT(EX)(TENSIBLE), followed by the WAVEFORMAT(EX)(TENSIBLE)
+    ptr = FormatBufferWriteChars(ptr, "fmt ", cbChunkType);
+    ptr = FormatBufferWriteNumber(ptr, cbFormatChunk);
+    ptr = FormatBufferWriteBytes(ptr, (uint8_t*)pformat, cbFormatChunk);
+
+    // The 'data' chunk is next
+    ptr = FormatBufferWriteChars(ptr, "data", cbChunkType);
+    ptr = FormatBufferWriteNumber(ptr, cbDataChunk);
+
+    // Now that we've prepared the header/buffer, send it along to Truman/Newman/Skyman via UspWrite
+    SPX_DBG_ASSERT(cbHeader == (ptr - buffer.get()));
+    UspWrite_Actual(m_handle, buffer.get(), cbHeader);
 }
 
 void CSpxUspRecoEngineAdapter::UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite)
 {
     SPX_DBG_TRACE_VERBOSE_IF(byteToWrite == 0, "%s(..., %d)", __FUNCTION__, byteToWrite);
 
-    static const bool fBuffer = true;
-    auto fn = !fBuffer
+    auto fn = !m_fUseBufferedImplementation || m_servicePreferedBufferSize == 0
         ? &CSpxUspRecoEngineAdapter::UspWrite_Actual
         : &CSpxUspRecoEngineAdapter::UspWrite_Buffered;
 
     (this->*fn)(handle, buffer, byteToWrite);
-
-    fwrite(buffer, 1, byteToWrite, hfile);
 }
 
 void CSpxUspRecoEngineAdapter::UspWrite_Actual(UspHandle handle, const uint8_t* buffer, size_t byteToWrite)
@@ -126,46 +136,70 @@ void CSpxUspRecoEngineAdapter::UspWrite_Actual(UspHandle handle, const uint8_t* 
     hr = ::UspWrite(handle, buffer, byteToWrite);
     hr = (byteToWrite == 0 && hr == USP_WRITE_ERROR) ? SPX_NOERROR : hr; // ::UspWrite currently returns USP_WRITE_ERROR on zero bytes, but there's no other way to flush buffer...
 
+    DumpFileWrite(buffer, byteToWrite);
+
     SPX_IFFAILED_THROW_HR(hr);
 }
 
-void CSpxUspRecoEngineAdapter::UspWrite_Buffered(UspHandle handle, const uint8_t* buffer, size_t byteToWrite)
+void CSpxUspRecoEngineAdapter::UspWrite_Buffered(UspHandle handle, const uint8_t* buffer, size_t bytesToWrite)
 {
-    if (m_bufferForUspWrite.get() == nullptr)
-    {
-        auto ptr = new uint8_t[1024 * 1024];
-        std::unique_ptr<uint8_t> buffer(ptr);
-        m_bufferForUspWrite = std::move(buffer);
+    bool flushBuffer = bytesToWrite == 0;
 
-        m_ptrIntoBufferForUspWrite = m_bufferForUspWrite.get();
+    if (m_buffer.get() == nullptr)
+    {
+        auto ptr = new uint8_t[m_servicePreferedBufferSize];
+        std::unique_ptr<uint8_t> buffer(ptr);
+
+        m_buffer = std::move(buffer);
+        m_bytesInBuffer = m_servicePreferedBufferSize;
+
+        m_ptrIntoBuffer = m_buffer.get();
+        m_bytesLeftInBuffer = m_bytesInBuffer;
     }
 
-    memcpy(m_ptrIntoBufferForUspWrite, buffer, byteToWrite);
-    m_ptrIntoBufferForUspWrite += byteToWrite;
-
-    if (byteToWrite == 0)
+    for (;;)
     {
-        UspWrite_Buffered_Flush();
+        if (flushBuffer || (m_bytesInBuffer > 0 && m_bytesLeftInBuffer == 0))
+        {
+            auto bytesToFlush = m_bytesInBuffer - m_bytesLeftInBuffer;
+            UspWrite_Actual(handle, m_buffer.get(), bytesToFlush);
+
+            m_bytesLeftInBuffer = m_bytesInBuffer;
+            m_ptrIntoBuffer = m_buffer.get();
+        }
+
+        if (flushBuffer)
+        {
+            m_buffer = nullptr;
+            m_bytesInBuffer = 0;
+            m_ptrIntoBuffer = nullptr;
+            m_bytesLeftInBuffer = 0;
+        }
+
+        if (bytesToWrite == 0)
+        {
+            break;
+        }
+
+        size_t bytesThisLoop = std::min(bytesToWrite, m_bytesLeftInBuffer);
+        memcpy(m_ptrIntoBuffer, buffer, bytesThisLoop);
+
+        m_ptrIntoBuffer += bytesThisLoop;
+        m_bytesLeftInBuffer -= bytesThisLoop;
+        bytesToWrite -= bytesThisLoop;
     }
 }
 
-void CSpxUspRecoEngineAdapter::UspWrite_Buffered_Flush()
+void CSpxUspRecoEngineAdapter::UspWrite_Flush(UspHandle handle)
 {
-    auto bufferStart = m_bufferForUspWrite.get();
-    UspWrite_Actual(m_handle, bufferStart, m_ptrIntoBufferForUspWrite - bufferStart);
-
-    m_ptrIntoBufferForUspWrite = nullptr;
-    m_bufferForUspWrite = nullptr;
+    UspWrite_Buffered(handle, nullptr, 0);
 }
 
 void CSpxUspRecoEngineAdapter::UspShutdown(UspHandle handle)
 {
     SPX_DBG_TRACE_VERBOSE("%s(0x%x)", __FUNCTION__, handle);
 
-    // SPX_IFFAILED_THROW_HR(::UspShutdown(handle));
-    SPX_IFFAILED_THROW_HR_IFNOT(::UspShutdown(handle), USP_NOT_IMPLEMENTED);
-
-    fclose(hfile);
+    SPX_IFFAILED_THROW_HR(::UspShutdown(handle));
 }
 
 void CSpxUspRecoEngineAdapter::InitCallbacks(UspCallbacks* pcallbacks)
@@ -184,7 +218,7 @@ void CSpxUspRecoEngineAdapter::InitCallbacks(UspCallbacks* pcallbacks)
     };
 
     pcallbacks->onSpeechHypothesis = [](UspHandle handle, void* context, UspMsgSpeechHypothesis *message) {
-        SPX_DBG_TRACE_VERBOSE("Response: Speech.Hypothesis message. Text: %S, starts at offset %u, with duration %u (100ns).\n", message->text, message->offset, message->duration);
+        SPX_DBG_TRACE_VERBOSE("Response: Speech.Hypothesis message. Starts at offset %u, with duration %u (100ns). Text: %S\n", message->offset, message->duration, message->text);
         CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechHypothesis(handle, context, message);
     };
 
@@ -249,6 +283,22 @@ void CSpxUspRecoEngineAdapter::UspOnError(UspHandle handle, void* context, UspRe
 {
     SPX_DBG_ASSERT(GetSite());
     GetSite()->Error(this, ErrorPayloadFrom(error));
+}
+
+void CSpxUspRecoEngineAdapter::DumpFileInit()
+{
+    fopen_s(&m_hfile, "uspaudiodump.wav", "wb");
+}
+
+void CSpxUspRecoEngineAdapter::DumpFileWrite(const uint8_t* buffer, size_t bytesToWrite)
+{
+    fwrite(buffer, 1, bytesToWrite, m_hfile);
+}
+
+void CSpxUspRecoEngineAdapter::DumpFileClose()
+{
+    fclose(m_hfile);
+    m_hfile = nullptr;
 }
 
 

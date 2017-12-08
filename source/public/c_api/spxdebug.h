@@ -286,7 +286,7 @@ inline void __spx_throw_hr_impl(SPXHR hr)
     do {                                                        \
         int fCond = (cond);                                     \
         if (fCond) {                                            \
-			SPXHR x = hr;                                       \
+            SPXHR x = hr;                                       \
             __SPX_TRACE_HR("SPX_THROW_HR_IF: ", hr, x);         \
             __SPX_THROW_HR(x);                                  \
     } } while (0)
@@ -294,7 +294,7 @@ inline void __spx_throw_hr_impl(SPXHR hr)
     do {                                                        \
         int fCond = (cond);                                     \
         if (fCond) {                                            \
-			SPXHR x = hr;                                       \
+            SPXHR x = hr;                                       \
             __SPX_TRACE_HR("SPX_THROW_HR_IF: ", hr, x);         \
             __SPX_THROW_HR(x);                                  \
     } } while (0)
@@ -316,7 +316,7 @@ inline void __spx_throw_hr_impl(SPXHR hr)
     do {                                                        \
         int fCond = (cond);                                     \
         if (fCond) {                                            \
-			SPXHR x = hr;                                       \
+            SPXHR x = hr;                                       \
             __SPX_THROW_HR(x);                                  \
     } } while (0)
 #define SPX_THROW_HR(hr)                                        \
@@ -364,11 +364,11 @@ inline void __spx_throw_hr_impl(SPXHR hr)
     do {                                                        \
         int fCond = (cond);                                     \
         if (fCond) {                                            \
-			SPXHR x = hr;                                       \
-			if (SPX_FAILED(x)) {                                \
-				__SPX_TRACE_HR("SPX_RETURN_ON_FAIL: ", hr, x);  \
-			}                                                   \
-			return x;                                           \
+            SPXHR x = hr;                                       \
+            if (SPX_FAILED(x)) {                                \
+                __SPX_TRACE_HR("SPX_RETURN_ON_FAIL: ", hr, x);  \
+            }                                                   \
+            return x;                                           \
     } } while (0)
 #define SPX_RETURN_ON_FAIL(hr)                                  \
     do {                                                        \
@@ -391,7 +391,7 @@ inline void __spx_throw_hr_impl(SPXHR hr)
     do {                                                        \
         int fCond = (cond);                                     \
         if (fCond) {                                            \
-			return hr;                                          \
+            return hr;                                          \
     } } while (0)
 #define SPX_RETURN_ON_FAIL(hr)                                  \
     do {                                                        \

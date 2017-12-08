@@ -105,15 +105,17 @@ private:
     void Recognizer_NoMatchHandler(const RecognitionEventArgs& e) {};
     void Recognizer_CanceledHandler(const RecognitionEventArgs& e) {};
 
-    void SpeechRecognizer_IntermediateResultHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"SpeechRecognizer_IntermediateResultHandler!!!"); };
-    void SpeechRecognizer_FinalResultHandler(const SpeechRecognitionEventArgs& e);
-    void SpeechRecognizer_NoMatchHandler(const SpeechRecognitionEventArgs& e);
+    void SpeechRecognizer_IntermediateResultHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"IntermediateResultHandler: %s", ToString(e).c_str()); };
+    void SpeechRecognizer_FinalResultHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"FinalResultHandler: %s", ToString(e).c_str());}
+    void SpeechRecognizer_NoMatchHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"NoMatchHandler: %s", ToString(e).c_str()); }
     void SpeechRecognizer_CanceledHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"SpeechRecognizer_CanceledHandler!!!"); };
 
     void IntentRecognizer_IntermediateResultHandler(const int& e) {};
     void IntentRecognizer_FinalResultHandler(const int& e) {};
     void IntentRecognizer_NoMatchHandler(const int& e) {};
     void IntentRecognizer_CanceledHandler(const int& e) {};
+
+    std::wstring ToString(const SpeechRecognitionEventArgs& e);
 
     void ConsoleInput_CommandSystem(const wchar_t* psz);
 
@@ -136,7 +138,8 @@ private:
     void RunInteractivePrompt();
 
     void Sample_HelloWorld();
-    void Sample_HelloWorld_C();
+    void Sample_HelloWorld_WithEvents();
+    void Sample_HelloWorld_In_C();
 
 private:
 

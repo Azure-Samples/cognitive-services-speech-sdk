@@ -21,14 +21,21 @@ class SpeechRecognitionEventArgs final : public RecognitionEventArgs
 public:
 
     SpeechRecognitionEventArgs(SPXEVENTHANDLE hevent) :
-        RecognitionEventArgs(m_sessionId),
+        RecognitionEventArgs(InitSessionId(hevent)),
         Result(InitResult(hevent)),
-        m_hevent(hevent)
+        m_hevent(hevent),
+        m_sessionId(InitSessionIdFromCopy()),
+        m_result(InitResultFromCopy())
     {
-        // TODO: RobCh: Next: Init m_sessionId
+        SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hevent);
+        m_sessionIdCopy.clear();
     };
 
-    virtual ~SpeechRecognitionEventArgs() {};
+    virtual ~SpeechRecognitionEventArgs()
+    {
+        SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hevent);
+        SPX_THROW_ON_FAIL(Recognizer_EventHandle_Close(m_hevent));
+    };
 
     const SpeechRecognitionResult& Result;
 
@@ -49,13 +56,38 @@ private:
     const SpeechRecognitionResult& InitResult(SPXEVENTHANDLE hevent)
     {
         m_result = std::make_shared<SpeechRecognitionResult>(ResultHandleFromEventHandle(hevent));
+        m_resultCopy = m_result;
         return *m_result.get();
+    }
+
+    const std::shared_ptr<SpeechRecognitionResult>&& InitResultFromCopy()
+    {
+        m_result = nullptr;
+        return std::move(m_resultCopy);
+    }
+
+    const std::wstring& InitSessionId(SPXEVENTHANDLE hevent)
+    {
+        static const auto cchMaxSessionId = 36 + 1;
+        wchar_t sessionId[cchMaxSessionId];
+
+        SPX_THROW_ON_FAIL(Recognizer_SessionEvent_GetSessionId(hevent, sessionId, cchMaxSessionId));
+        m_sessionId = sessionId;
+        m_sessionIdCopy = m_sessionId;
+        return m_sessionId;
+    }
+
+    const std::wstring&& InitSessionIdFromCopy()
+    {
+        return std::move(m_sessionIdCopy);
     }
 
     SPXEVENTHANDLE m_hevent;
     std::wstring m_sessionId;
-
     std::shared_ptr<SpeechRecognitionResult> m_result;
+
+    std::wstring m_sessionIdCopy;
+    std::shared_ptr<SpeechRecognitionResult> m_resultCopy;
 };
 
 

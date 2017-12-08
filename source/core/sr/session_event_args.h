@@ -13,7 +13,7 @@ public:
 
     // --- ISpxSessionEventArgs
     
-    virtual std::wstring GetSessionId() override;
+    virtual const std::wstring& GetSessionId() override;
 
 
 private:
@@ -23,7 +23,7 @@ private:
 
     CSpxSessionEventArgs& operator=(const CSpxSessionEventArgs&) = delete;
 
-    std::wstring m_sessionId;
+    const std::wstring m_sessionId;
 };
 
 

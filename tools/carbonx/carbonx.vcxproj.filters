@@ -95,6 +95,12 @@
     <ClCompile Include="carbonx_pal_windows.cpp">
       <Filter>platform_abstraction_levels</Filter>
     </ClCompile>
+    <ClCompile Include="hello_world.cpp">
+      <Filter>samples</Filter>
+    </ClCompile>
+    <ClCompile Include="hello_world_c.cpp">
+      <Filter>samples</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="precomp_and_generated">
@@ -108,6 +114,9 @@
     </Filter>
     <Filter Include="speechapi_c_h">
       <UniqueIdentifier>{19a1ec82-589b-413e-a21d-8888c322e91d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="samples">
+      <UniqueIdentifier>{0b985d88-dff2-487a-9855-abb33a88aea1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

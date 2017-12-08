@@ -25,7 +25,9 @@ public:
     CSpxSession();
     virtual ~CSpxSession();
 
-    std::wstring GetSessionId() const;
+    // --- ISpxSession
+
+    const std::wstring& GetSessionId() const;
 
     void AddRecognizer(std::shared_ptr<ISpxRecognizer> recognizer);
     void RemoveRecognizer(ISpxRecognizer* recognizer);
@@ -46,7 +48,7 @@ protected:
     virtual void FireSessionStartedEvent();
     virtual void FireSessionStoppedEvent();
 
-    virtual void FireResultEvent(std::shared_ptr<ISpxRecognitionResult> result);
+    virtual void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result);
     virtual void EnsureFireResultEvent();
 
     std::mutex m_mutex;
@@ -66,7 +68,7 @@ private:
 
     CSpxSession& operator=(const CSpxSession&) = delete;
 
-    std::wstring m_sessionId;
+    const std::wstring m_sessionId;
     std::list<std::weak_ptr<ISpxRecognizer>> m_recognizers;
 };
 

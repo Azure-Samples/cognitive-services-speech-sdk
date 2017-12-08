@@ -24,16 +24,14 @@ public:
         RecognitionResult(m_resultId, m_reason, m_text, m_payload),
         m_hresult(hresult)
     {
-        SPX_DBG_TRACE_FUNCTION();
-
         PopulateResultFields(hresult);
 
-        SPX_DBG_TRACE_VERBOSE("%s (0x%x) -- resultid=%S; reason=0x%x; text=%S", __FUNCTION__, m_hresult, m_resultId.c_str(), m_reason, m_text.c_str());
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%S; reason=0x%x; text=%S", __FUNCTION__, this, m_hresult, m_resultId.c_str(), m_reason, m_text.c_str());
     };
 
     virtual ~SpeechRecognitionResult()
     {
-        SPX_DBG_TRACE_VERBOSE("%s (0x%lu)", __FUNCTION__, m_hresult);
+        SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hresult);
 
         ::Recognizer_ResultHandle_Close(m_hresult);
         m_hresult = SPXHANDLE_INVALID;
@@ -48,7 +46,8 @@ protected:
         static_assert((int)Reason_Canceled == (int)Reason::Canceled, "Reason_* enum values == Reason::* enum values");
         static_assert((int)Reason_Recognized == (int)Reason::Recognized, "Reason_* enum values == Reason::* enum values");
         static_assert((int)Reason_OtherRecognizer == (int)Reason::OtherRecognizer, "Reason_* enum values == Reason::* enum values");
-    
+        static_assert((int)Reason_IntermediateResult == (int)Reason::IntermediateResult, "Reason_* enum values == Reason::* enum values");
+
         SPX_INIT_HR(hr);
 
         const size_t cch = 1024;

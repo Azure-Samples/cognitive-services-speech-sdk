@@ -191,6 +191,8 @@
   <ItemGroup>
     <ClCompile Include="carbon_test_console.cpp" />
     <ClCompile Include="carbonx_pal_windows.cpp" />
+    <ClCompile Include="hello_world.cpp" />
+    <ClCompile Include="hello_world_c.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

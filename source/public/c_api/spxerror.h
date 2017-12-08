@@ -10,7 +10,7 @@
 typedef unsigned int SPXHR;
 
 #define SPX_NOERROR                 0x00000000
-#define SPX_INIT_HR(hr)	            SPXHR hr = SPX_NOERROR
+#define SPX_INIT_HR(hr)             SPXHR hr = SPX_NOERROR
 
 #define SPX_SUCCEEDED(x)            ((x & 0x80000000) == 0)
 #define SPX_FAILED(x)               (!SPX_SUCCEEDED(x))   
@@ -98,3 +98,32 @@ typedef unsigned int SPXHR;
 *   An invalid state was encountered.
 */
 #define SPXERR_INVALID_STATE        __SPX_ERRCODE_FAILED(0x00e)
+
+/*** SPXERR_UUID_CREATE_FAILED
+*   Attempting to create a UUID failed.
+*/
+#define SPXERR_UUID_CREATE_FAILED   __SPX_ERRCODE_FAILED(0x00f)
+
+/*** SPXERR_SETFORMAT_UNEXPECTED_STATE_TRANSITION
+*   An unexpected session state transition was encountered when setting the session audio format. Valid transitions are:
+*   - StartingPump --> ProcessingAudio (at the beginning of stream)
+*   - StoppingPump --> WaitingForAdapterDone (at the end of stream)
+*   - ProcessingAudio --> WaitingForAdapterDone (when the stream runs out of data)
+*   NOTE: All other state transitions are invalid
+*/
+#define SPXERR_SETFORMAT_UNEXPECTED_STATE_TRANSITION __SPX_ERRCODE_FAILED(0x010)
+
+/*** SPXERR_PROCESS_AUDIO_INVALID_STATE
+*   An unexpected session state was encountered in while processing audio. Valid states to encounter are:
+*   - ProcessingAudio: We're allowed to process audio while in this state
+*   - StoppingPump: We're allowed to be called to process audio, but we'll ignore the data passed in while we're attempting to stop the pump
+*   NOTE: All other states are invalid while processing audio.
+*/
+#define SPXERR_PROCESS_AUDIO_INVALID_STATE __SPX_ERRCODE_FAILED(0x011)
+
+/*** SPXERR_START_RECOGNIZING_INVALID_STATE_TRANSITION
+*   An unexpected state transition was encountered while attempting to start recognizing. Valid state transitions are:
+*   - Idle --> StartingPump
+*   NOTE: All other state transitions are invalid when attempting to start recognizing
+*/
+#define SPXERR_START_RECOGNIZING_INVALID_STATE_TRANSITION __SPX_ERRCODE_FAILED(0x012)

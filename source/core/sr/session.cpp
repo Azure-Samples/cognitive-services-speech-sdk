@@ -2,13 +2,15 @@
 #include <future>
 #include "session.h"
 #include "recognition_result.h"
+#include "guid_utils.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
 
 
 CSpxSession::CSpxSession() :
-    m_fRecoAsyncWaiting(false)
+    m_fRecoAsyncWaiting(false),
+    m_sessionId(PAL_CreateGuid())
 {
     SPX_DBG_TRACE_FUNCTION();
 }
@@ -18,7 +20,7 @@ CSpxSession::~CSpxSession()
     SPX_DBG_TRACE_FUNCTION();
 }
 
-std::wstring CSpxSession::GetSessionId() const
+const std::wstring& CSpxSession::GetSessionId() const
 {
     return m_sessionId;
 }
@@ -130,7 +132,7 @@ void CSpxSession::WaitForRecognition_Complete(std::shared_ptr<ISpxRecognitionRes
     m_cv.notify_all();
     lock.unlock();
 
-    FireResultEvent(result);
+    FireResultEvent(GetSessionId(), result);
 }
 
 void CSpxSession::FireSessionStartedEvent()
@@ -147,7 +149,7 @@ void CSpxSession::FireSessionStoppedEvent()
     // SPX_THROW_HR(SPXERR_NOT_IMPL);
 }
 
-void CSpxSession::FireResultEvent(std::shared_ptr<ISpxRecognitionResult> result)
+void CSpxSession::FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result)
 {
     // Make a copy of the recognizers (under lock), to use to send events; 
     // otherwise the underlying list could be modified while we're sending events...
@@ -162,7 +164,7 @@ void CSpxSession::FireResultEvent(std::shared_ptr<ISpxRecognitionResult> result)
         auto ptr = std::dynamic_pointer_cast<ISpxRecognizerEvents>(recognizer);
         if (recognizer)
         {
-            ptr->FireResultEvent(result);
+            ptr->FireResultEvent(sessionId, result);
         }
     }
 }

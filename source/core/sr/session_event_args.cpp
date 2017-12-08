@@ -10,7 +10,7 @@ CSpxSessionEventArgs::CSpxSessionEventArgs(const std::wstring& sessionId, std::s
 {
 }
 
-std::wstring CSpxSessionEventArgs::GetSessionId()
+const std::wstring& CSpxSessionEventArgs::GetSessionId()
 {
     return m_sessionId;
 }

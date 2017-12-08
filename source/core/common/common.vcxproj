@@ -162,11 +162,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="asyncop.h" />
+    <ClInclude Include="guid_utils.h" />
     <ClInclude Include="handle_table.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="trace_message.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="guid_utils_windows.cpp" />
     <ClCompile Include="handle_table.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

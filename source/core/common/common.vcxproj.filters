@@ -5,10 +5,12 @@
     <ClInclude Include="handle_table.h" />
     <ClInclude Include="asyncop.h" />
     <ClInclude Include="trace_message.h" />
+    <ClInclude Include="guid_utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="handle_table.cpp" />
     <ClCompile Include="trace_message.cpp" />
+    <ClCompile Include="guid_utils_windows.cpp" />
   </ItemGroup>
 </Project>

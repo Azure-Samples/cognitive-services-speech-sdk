@@ -11,7 +11,7 @@ CSpxRecognitionEventArgs::CSpxRecognitionEventArgs(const std::wstring& sessionId
 {
 }
 
-std::wstring CSpxRecognitionEventArgs::GetSessionId()
+const std::wstring& CSpxRecognitionEventArgs::GetSessionId()
 {
     return m_sessionId;
 }

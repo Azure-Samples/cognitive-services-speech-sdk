@@ -35,6 +35,7 @@ SPXAPI Result_GetRecognitionReason(SPXRESULTHANDLE hresult, Result_RecognitionRe
     static_assert((int)Reason_Canceled == (int)Reason::Canceled, "Reason_* enum values == Reason::* enum values");
     static_assert((int)Reason_Recognized == (int)Reason::Recognized, "Reason_* enum values == Reason::* enum values");
     static_assert((int)Reason_OtherRecognizer == (int)Reason::OtherRecognizer, "Reason_* enum values == Reason::* enum values");
+    static_assert((int)Reason_IntermediateResult == (int)Reason::IntermediateResult, "Reason_* enum values == Reason::* enum values");
 
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, preason == nullptr);
     

@@ -95,7 +95,15 @@ void CSpxAudioStreamSession::SetFormat(WAVEFORMATEX* pformat)
     }
     else
     {
-        SPX_THROW_HR(SPXERR_ABORT); // TODO: RobCh: Now: Better error
+        // Valid transitions are:
+        //
+        //   StartingPump --> ProcessingAudio (when pformat != nullptr, signifying beginning of stream)
+        //   StoppingPump --> WaitingForAdapterDone (when pformat == nullptr, signifying we will get no more data)
+        //   ProcessingAudio --> WaitingForAdapterDone (this can happen when the pump runs dry of audio data itself)
+        //
+        //   NOTE: All other state transitions are invalid inside ISpxAudioProcessor::SetFormat.
+        
+        SPX_THROW_HR(SPXERR_SETFORMAT_UNEXPECTED_STATE_TRANSITION);
     }
 }
 
@@ -113,7 +121,14 @@ void CSpxAudioStreamSession::ProcessAudio(AudioData_Type data, uint32_t size)
     }
     else
     {
-        SPX_THROW_HR(SPXERR_ABORT); // TODO: RobCh: Now: Better error
+        // Valid states to encounter are:
+        //
+        // - ProcessingAudio: We're allowed to process audio while in this state
+        // - StoppingPump: We're allowed to be called to process audio, but we'll ignore the data passed in while we're attempting to stop the pump
+        //
+        // NOTE: All other states are invalid inside ISpxAudioProcessor::ProcessAudio.
+
+        SPX_THROW_HR(SPXERR_PROCESS_AUDIO_INVALID_STATE);
     }
 }
 
@@ -127,7 +142,10 @@ void CSpxAudioStreamSession::StartRecognizing()
     }
     else
     {
-        SPX_THROW_HR(SPXERR_ABORT); // TODO: RobCh: Now: Better error
+        // The only valid state transition is Idle --> StartingPump. 
+        // All other state transitions are invalid when attempting to start recognizing...
+
+        SPX_THROW_HR(SPXERR_START_RECOGNIZING_INVALID_STATE_TRANSITION);
     }
 }
 
@@ -189,10 +207,12 @@ void CSpxAudioStreamSession::SoundEndDetected(ISpxRecoEngineAdapter* adapter, ui
     // SPX_THROW_HR(SPXERR_NOT_IMPL);
 }
 
-void CSpxAudioStreamSession::IntermediateResult(ISpxRecoEngineAdapter* adapter, uint32_t offset, ResultPayload_Type paylaod)
+void CSpxAudioStreamSession::IntermediateResult(ISpxRecoEngineAdapter* adapter, uint32_t offset, std::shared_ptr<ISpxRecognitionResult> result)
 {
-    // TODO: RobCh: Next: Implement
-    // SPX_THROW_HR(SPXERR_NOT_IMPL);
+    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::Idle), "ERROR! IntermediateResult was called with SessionState==Idle");
+    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::StartingPump), "ERROR! IntermediateResult was called with SessionState==StartingPump");
+
+    FireResultEvent(GetSessionId(), result);
 }
 
 void CSpxAudioStreamSession::FinalResult(ISpxRecoEngineAdapter* adapter, uint32_t offset, std::shared_ptr<ISpxRecognitionResult> result)
@@ -208,9 +228,6 @@ void CSpxAudioStreamSession::DoneProcessingAudio(ISpxRecoEngineAdapter* adapter)
     if (ChangeState(SessionState::WaitingForAdapterDone, SessionState::Idle))
     {
         // The adapter request to finish processing audio has completed
-
-        // TODO: RobCh: Next: Implement
-        // SPX_THROW_HR(SPXERR_NOT_IMPL);
     }
 }
 

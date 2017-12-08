@@ -85,7 +85,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>SPX_CONFIG_EXPORTAPIS;NDEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\public\c_api;..\..\public\cxx_api;..\include;..\sr;..\audio;..\common</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\public\c_api;..\..\public\cxx_api;..\include;..\sr;..\audio;..\common;..\..\..\external\azure-c-shared-utility\inc;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -110,7 +110,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>SPX_CONFIG_EXPORTAPIS;WIN32;_DEBUG;carbon_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\public\c_api;..\..\public\cxx_api;..\include;..\sr;..\audio;..\common</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\public\c_api;..\..\public\cxx_api;..\include;..\sr;..\audio;..\common;..\..\..\external\azure-c-shared-utility\inc;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -132,7 +132,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>SPX_CONFIG_EXPORTAPIS;_DEBUG;carbon_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\public\c_api;..\..\public\cxx_api;..\include;..\sr;..\audio;..\common</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\public\c_api;..\..\public\cxx_api;..\include;..\sr;..\audio;..\common;..\..\..\external\azure-c-shared-utility\inc;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -157,7 +157,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>SPX_CONFIG_EXPORTAPIS;WIN32;NDEBUG;carbon_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\public\c_api;..\..\public\cxx_api;..\include;..\sr;..\audio;..\common</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\public\c_api;..\..\public\cxx_api;..\include;..\sr;..\audio;..\common;..\..\..\external\azure-c-shared-utility\inc;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

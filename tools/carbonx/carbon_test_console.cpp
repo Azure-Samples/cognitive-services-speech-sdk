@@ -16,7 +16,6 @@ CarbonTestConsole::CarbonTestConsole()
 
 CarbonTestConsole::~CarbonTestConsole()
 {
-    
     TermCarbon();
 }
 
@@ -779,28 +778,33 @@ void CarbonTestConsole::Recognizer_Event(const wchar_t* psz, EventSignal<T>& rec
     }
 }
 
-void CarbonTestConsole::SpeechRecognizer_FinalResultHandler(const SpeechRecognitionEventArgs& e)
+std::wstring CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
 {
-    if (e.Result.Reason == Reason::Recognized)
-    {
-        ConsoleWriteLine(L"FinalResultHandler: Reason=Recognized; Text=%s", e.Result.Text.c_str());
-    }
-    else
-    {
-        ConsoleWriteLine(L"FinalResultHandler: Reason=%d", e.Result.Reason);
-    }
-}
+    static_assert(0 == (int)Reason::Recognized, "Reason::* enum values changed!");
+    static_assert(1 == (int)Reason::IntermediateResult, "Reason::* enum values changed!");
+    static_assert(2 == (int)Reason::NoMatch, "Reason::* enum values changed!");
+    static_assert(3 == (int)Reason::Canceled, "Reason::* enum values changed!");
+    static_assert(4 == (int)Reason::OtherRecognizer, "Reason::* enum values changed!");
+    
+    std::wstring reasons[] = {
+        L"Recognized",
+        L"IntermediateResult",
+        L"NoMatch",
+        L"Canceled",
+        L"OtherRecognizer"
+    };
 
-void CarbonTestConsole::SpeechRecognizer_NoMatchHandler(const SpeechRecognitionEventArgs& e)
-{
-    if (e.Result.Reason == Reason::NoMatch)
-    {
-        ConsoleWriteLine(L"NoMatchHandler: Reason=NoMatch");
-    }
-    else
-    {
-        ConsoleWriteLine(L"NoMatchHandler: Reason=%d", e.Result.Reason);
-    }
+    std::wstring str;
+    str += L"SpeechRecognitionEventArgs = { \n";
+    str += L"  SessionId = '" + e.SessionId + L"'\n";
+    str += L"  Result = {\n";
+    str += L"    ResultId = '" + e.Result.ResultId + L"'\n";
+    str += L"    Reason = Reason::" + reasons[(int)e.Result.Reason] + L"\n";
+    str += L"    Text = '" + e.Result.Text + L"\n";
+    str += L"  } \n";
+    str += L"} \n";
+
+    return str;
 }
 
 void CarbonTestConsole::EnsureInitCarbon(ConsoleArgs* pconsoleArgs)
@@ -840,8 +844,11 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
             ? RecognizerFactory::CreateSpeechRecognizer() 
             : RecognizerFactory::CreateSpeechRecognizerWithFileInput(wavFileName);
 
-        auto fn = std::bind(&CarbonTestConsole::SpeechRecognizer_FinalResultHandler, this, std::placeholders::_1);
-        m_speechRecognizer->FinalResult.Connect(fn);
+        auto fn1 = std::bind(&CarbonTestConsole::SpeechRecognizer_FinalResultHandler, this, std::placeholders::_1);
+        m_speechRecognizer->FinalResult.Connect(fn1);
+
+        auto fn2 = std::bind(&CarbonTestConsole::SpeechRecognizer_IntermediateResultHandler, this, std::placeholders::_1);
+        m_speechRecognizer->IntermediateResult.Connect(fn2);
 
         m_recognizer = BaseAsyncRecognizer::From(m_speechRecognizer);
     }
@@ -921,10 +928,15 @@ void CarbonTestConsole::RunSample(const std::wstring& strSampleName)
         ConsoleWriteLine(L"Running sample: %s\n", strSampleName.c_str());
         Sample_HelloWorld();
     }
+    else if (_wcsicmp(strSampleName.c_str(), L"helloworld with events") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %s\n", strSampleName.c_str());
+        Sample_HelloWorld_WithEvents();
+    }
     else if (_wcsicmp(strSampleName.c_str(), L"helloworld c") == 0)
     {
         ConsoleWriteLine(L"Running sample: %s\n", strSampleName.c_str());
-        Sample_HelloWorld_C();
+        Sample_HelloWorld_In_C();
     }
     else
     {
@@ -949,59 +961,6 @@ void CarbonTestConsole::RunInteractivePrompt()
             SPX_TRACE_ERROR("CarbonX: Not Yet Implemented!!");
         }
     }
-}
-
-void CarbonTestConsole::Sample_HelloWorld()
-{
-    auto recognizer = RecognizerFactory::CreateSpeechRecognizer();
-
-    ConsoleWriteLine(L"Say something...");
-    auto result = recognizer->RecognizeAsync().get();
-
-    ConsoleWriteLine(L"You said %s", result->Text.c_str());
-}
-
-void CarbonTestConsole::Sample_HelloWorld_C()
-{
-     SPXHR hr = SPX_NOERROR;
-     SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
-     if (SPX_SUCCEEDED(hr))
-     {
-        hr = ::RecognizerFactory_CreateSpeechRecognzier_With_Defaults(&hreco);
-     }
-
-     SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
-     if (SPX_SUCCEEDED(hr))
-     {
-        ConsoleWriteLine(L"Say something...");
-        hr = ::Recognizer_RecognizeAsync(hreco, &hasync);
-     }
-
-     SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
-     if (SPX_SUCCEEDED(hr))
-     {
-        hr = ::Recognizer_RecognizeAsync_WaitFor(hasync, 30 * 1000, &hresult);
-     }
-
-     wchar_t text[1024];
-     if (SPX_SUCCEEDED(hr))
-     {
-        hr = ::Result_GetText(hresult, text, sizeof(text) / sizeof(text[0]));
-     }
-
-     if (SPX_SUCCEEDED(hr))
-     {
-        ConsoleWriteLine(L"You said %s", text);
-     }
-
-     ::Recognizer_AsyncHandle_Close(hresult);
-     hasync = SPXHANDLE_INVALID;
-
-     ::Recognizer_ResultHandle_Close(hresult);
-     hresult = SPXHANDLE_INVALID;
-
-     ::Recognizer_Handle_Close(hreco);
-     hreco = SPXHANDLE_INVALID;
 }
 
 int __cdecl wmain(int argc, const wchar_t* argv[])

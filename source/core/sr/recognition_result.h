@@ -13,7 +13,11 @@ public:
     struct NoMatch_Type {};
     constexpr static NoMatch_Type NoMatch {};
 
+    struct IntermediateResult_Type {};
+    constexpr static IntermediateResult_Type IntermediateResult {};
+
     CSpxRecognitionResult(const wchar_t* resultId, const wchar_t* text);
+    CSpxRecognitionResult(const wchar_t* resultId, const wchar_t* text, IntermediateResult_Type);
     CSpxRecognitionResult(NoMatch_Type);
     virtual ~CSpxRecognitionResult();
 

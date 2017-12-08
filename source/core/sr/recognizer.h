@@ -28,7 +28,7 @@ public:
 
     // --- ISpxRecognizerEvents
 
-    void FireResultEvent(std::shared_ptr<ISpxRecognitionResult> result) override;
+    void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) override;
 
     
     

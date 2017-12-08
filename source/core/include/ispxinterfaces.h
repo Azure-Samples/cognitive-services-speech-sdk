@@ -216,7 +216,7 @@ public:
 };
 
 
-enum class Reason { Recognized, NoMatch, Canceled, OtherRecognizer };
+enum class Reason { Recognized, IntermediateResult, NoMatch, Canceled, OtherRecognizer };
 
 
 class ISpxRecognitionResult : public ISpxInterfaceBaseFor<ISpxRecognitionResult>
@@ -248,7 +248,7 @@ class ISpxSessionEventArgs : public ISpxInterfaceBaseFor<ISpxSessionEventArgs>
 {
 public:
 
-    virtual std::wstring GetSessionId() = 0;
+    virtual const std::wstring& GetSessionId() = 0;
 };
 
 
@@ -267,7 +267,7 @@ public:
     using RecoEvent_Type = EventSignal<std::shared_ptr<ISpxRecognitionEventArgs>>;
     using SessionEvent_Type = EventSignal<std::shared_ptr<ISpxSessionEventArgs>>;
 
-    virtual void FireResultEvent(std::shared_ptr<ISpxRecognitionResult> result) = 0;
+    virtual void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) = 0;
 
     RecoEvent_Type IntermediateResult;
     RecoEvent_Type FinalResult;
@@ -292,7 +292,7 @@ class ISpxSession : public ISpxInterfaceBaseFor<ISpxSession>
 {
 public:
 
-    virtual std::wstring GetSessionId() const = 0;
+    virtual const std::wstring& GetSessionId() const = 0;
 
     virtual void AddRecognizer(std::shared_ptr<ISpxRecognizer> recognizer) = 0;
     virtual void RemoveRecognizer(ISpxRecognizer* recognizer) = 0;

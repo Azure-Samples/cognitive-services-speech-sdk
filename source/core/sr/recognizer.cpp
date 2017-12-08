@@ -58,10 +58,8 @@ CSpxAsyncOp<void> CSpxRecognizer::StopContinuousRecognitionAsync()
     return m_defaultSession->StopContinuousRecognitionAsync();
 }
 
-void CSpxRecognizer::FireResultEvent(std::shared_ptr<ISpxRecognitionResult> result)
+void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result)
 {
-    auto sessionId = std::wstring(L"{A4AF690D-3548-4985-BB32-BAA278B32DC5}"); // TODO: RobCh: Next: SPXERR_NOT_IMPL
-
     if (result->GetReason() == Reason::Recognized && FinalResult.IsConnected())
     {
         auto recoEvent = SpxMakeShared<CSpxRecognitionEventArgs, ISpxRecognitionEventArgs>(sessionId, result);
@@ -71,11 +69,15 @@ void CSpxRecognizer::FireResultEvent(std::shared_ptr<ISpxRecognitionResult> resu
 
         FinalResult.Signal(recoEvent);
     }
-    // else if (result->GetReason() == Reason::IntermediateResult && IntermediateResult.IsConnected())
-    // {
-    //     auto recoEvent = SpxMakeShared<CSpxRecognitionEventArgs, ISpxRecognitionEventArgs>(sessionId, result);
-    //     IntermediateResult.Signal(recoEvent);
-    // }
+    else if (result->GetReason() == Reason::IntermediateResult && IntermediateResult.IsConnected())
+    {
+        auto recoEvent = SpxMakeShared<CSpxRecognitionEventArgs, ISpxRecognitionEventArgs>(sessionId, result);
+
+        auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
+        auto hevent = eventhandles->TrackHandle(recoEvent);
+
+        IntermediateResult.Signal(recoEvent);
+    }
     else if (result->GetReason() == Reason::NoMatch && NoMatch.IsConnected())
     {
         auto recoEvent = SpxMakeShared<CSpxRecognitionEventArgs, ISpxRecognitionEventArgs>(sessionId, result);
@@ -93,6 +95,21 @@ void CSpxRecognizer::FireResultEvent(std::shared_ptr<ISpxRecognitionResult> resu
         auto hevent = eventhandles->TrackHandle(recoEvent);
 
         Canceled.Signal(recoEvent);
+    }
+    else if (result->GetReason() == Reason::OtherRecognizer)
+    {
+        SPX_THROW_HR(SPXERR_INVALID_ARG);
+    }
+    else
+    {
+        auto reason = result->GetReason();
+        SPX_DBG_ASSERT_WITH_MESSAGE(
+            reason != Reason::Recognized && 
+            reason != Reason::IntermediateResult &&
+            reason != Reason::NoMatch &&
+            reason != Reason::Canceled && 
+            reason != Reason::OtherRecognizer,
+            "The reason found in the result was unexpected.");
     }
 }
 

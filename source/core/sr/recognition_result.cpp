@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "recognition_result.h"
+#include "guid_utils.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -9,14 +10,23 @@ CSpxRecognitionResult::CSpxRecognitionResult(const wchar_t* resultId, const wcha
 {
     SPX_DBG_TRACE_FUNCTION();
 
-    if (resultId == nullptr)
-    {
-        // TODO: RobCh: Next: Generate a real result id here
-        resultId = L"ffff-ffff-ffff-result-id-goes-here-ffff";
-    }
+    m_resultId = resultId == nullptr
+        ? PAL_CreateGuid()
+        : resultId;
 
     m_reason = Reason::Recognized;
-    m_resultId = resultId;
+    m_text = text;
+}
+
+CSpxRecognitionResult::CSpxRecognitionResult(const wchar_t* resultId, const wchar_t* text, IntermediateResult_Type)
+{
+    SPX_DBG_TRACE_FUNCTION();
+
+    m_resultId = resultId == nullptr
+        ? PAL_CreateGuid()
+        : resultId;
+
+    m_reason = Reason::IntermediateResult;
     m_text = text;
 }
 

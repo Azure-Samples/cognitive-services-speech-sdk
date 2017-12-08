@@ -25,10 +25,10 @@ void PAL_WaitForDebugger()
 
 bool PAL_IsDebuggerPresent()
 {
-	return IsDebuggerPresent();
+    return IsDebuggerPresent();
 }
 
 void PAL_DebugBreak()
 {
-	DebugBreak();
+    DebugBreak();
 }

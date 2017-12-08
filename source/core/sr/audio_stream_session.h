@@ -51,7 +51,7 @@ private:
     void SoundStartDetected(ISpxRecoEngineAdapter* adapter, uint32_t offset) override;
     void SoundEndDetected(ISpxRecoEngineAdapter* adapter, uint32_t offset) override;
 
-    void IntermediateResult(ISpxRecoEngineAdapter* adapter, uint32_t offset, ResultPayload_Type paylaod) override;
+    void IntermediateResult(ISpxRecoEngineAdapter* adapter, uint32_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
     void FinalResult(ISpxRecoEngineAdapter* adapter, uint32_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
 
     void DoneProcessingAudio(ISpxRecoEngineAdapter* adapter) override;
