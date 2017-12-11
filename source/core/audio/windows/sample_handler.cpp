@@ -21,6 +21,7 @@ SampleHandler::SampleHandler(GUID major, GUID subType)
 //
 //  Implementation of SampleHandler::OnReadSample().  When a sample is ready, add it to the sample queue.
 //
+// This is a callback, executed on the thread owned/controlled by the MFF.
 HRESULT SampleHandler::OnReadSample(
     _In_ HRESULT /*hrStatus*/, 
     _In_ DWORD /*dwStreamIndex*/, 
@@ -35,41 +36,76 @@ HRESULT SampleHandler::OnReadSample(
 
 SPXHR SampleHandler::Start(const Sink_Type& sink)
 {
-    const auto& prevSink = atomic_exchange(&m_sink, sink);
-
-    if (prevSink != sink) {
-        const auto& format = GetFormat();
-        m_sink->SetFormat(const_cast<WAVEFORMATEX*>(&format));
-    }
-
-    if (prevSink == nullptr)
+    Sink_Type prevSink(sink);
     {
-        // we're transitioning from non-running to running, 
-        // kick off the first ReadSample.
-        return QueueRead();
+        unique_lock<mutex> lock(m_mutex);
+        // Somebody already called start. Second time around we throw.
+        SPX_IFTRUE_THROW_HR((m_sink != nullptr), SPXERR_AUDIO_IS_PUMPING);
+        // Sink is nullptr, wait until the currently scheduled read operation completes, 
+        // before scheduling a new one.
+        m_cv.wait(lock, [&] { return !m_readInProgress; });
+        
+        SPX_ASSERT_WITH_MESSAGE(!m_readInProgress, "@ %s", __FUNCTION__);
+        m_sink = sink;
+        m_readInProgress = true;
     }
-    SPX_RETURN_HR(SPX_NOERROR);
+
+    const auto& format = GetFormat();
+    sink->SetFormat(const_cast<WAVEFORMATEX*>(&format));
+
+    // we're transitioning from non-running to running, 
+    // kick off the first ReadSample.
+    return QueueRead();
 }
 
-void SampleHandler::Stop() { 
-    const auto& prevSink = atomic_exchange(&m_sink, Sink_Type());
-    if (prevSink != nullptr) {
-        // Let the sink know we're done for now...
-        // TODO: this should be a dedicated method.
-        prevSink->SetFormat(nullptr);
+void SampleHandler::Stop() {
+    Sink_Type prevSink;
+    {
+        unique_lock<mutex> lock(m_mutex);
+        m_sink.swap(prevSink);
+        if (prevSink == nullptr) {
+            // already stopped.
+            SPX_ASSERT_WITH_MESSAGE(!m_readInProgress, "@ %s", __FUNCTION__);
+            return;
+        }
     }
+
+    // Let the sink know we're done for now... 
+    // TODO: this should be a dedicated method.
+    prevSink->SetFormat(nullptr);
 }
 
 SPXHR SampleHandler::QueueRead()
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, m_reader == nullptr);
-
-    if (atomic_load(&m_sink) == nullptr)
+    SPX_INIT_HR(hr);
+    Sink_Type sink;
     {
-        return SPXERR_ABORT; // not exactly an error, somebody called stop.
+        unique_lock<mutex> lock(m_mutex);
+        SPX_ASSERT_WITH_MESSAGE(m_readInProgress, "@ %s", __FUNCTION__);
+        if (!m_sink) 
+        {
+            // somebody called stop.
+            m_readInProgress = false;
+            m_cv.notify_all();
+            return SPXERR_ABORT;
+        }
     }
 
-    return m_reader->ReadSample(m_streamIndex, 0, NULL, NULL, NULL, NULL);
+    hr = m_reader->ReadSample(m_streamIndex, 0, NULL, NULL, NULL, NULL);
+
+    if (!SUCCEEDED(hr))
+    {
+        SPX_TRACE_VERBOSE("%s: ReadSample failed", __FUNCTION__);
+        unique_lock<mutex> lock(m_mutex);
+        // In case, read failed, unset the sink, so that the next call to Start 
+        // won't fail without an explicit call to Stop.
+        m_sink.reset();
+        m_readInProgress = false;
+        m_cv.notify_all();
+    }
+
+    return hr;
 }
 
 SPXHR SampleHandler::Process(IMFSample* sample)
@@ -78,9 +114,14 @@ SPXHR SampleHandler::Process(IMFSample* sample)
     // this callback is invoked with a nullptr. Safe to ignore.
     SPX_RETURN_HR_IF(SPX_NOERROR, sample == nullptr);
 
-    const auto& sink = atomic_load(&m_sink);
-    if (!sink) {
-       return SPXERR_ABORT;
+    Sink_Type sink;
+    {
+        unique_lock<mutex> lock(m_mutex);
+        sink = m_sink;
+        if (!sink) {
+            return SPXERR_ABORT;
+        }
+        SPX_ASSERT_WITH_MESSAGE(m_readInProgress, "@ %s", __FUNCTION__);
     }
 
     SPX_INIT_HR(hr);

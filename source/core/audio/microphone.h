@@ -12,6 +12,8 @@ namespace CARBON_IMPL_NAMESPACE() {
 class Microphone
 {
 public:
+    // TODO: add parameters to allow specifing a device to use if
+    // multiple are available (not sure if we really need it).
     static std::shared_ptr<ISpxAudioPump> Create();
 private:
     Microphone() = delete;

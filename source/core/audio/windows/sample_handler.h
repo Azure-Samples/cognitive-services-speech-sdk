@@ -42,7 +42,13 @@ private:
     DWORD m_streamIndex;
     GUID m_majorType;
     GUID m_subType;
+    // TODO: microphone should be shareable, replace this with 
+    // a collection of sinks.
     Sink_Type m_sink;
+    bool m_readInProgress;
+    std::mutex m_mutex;
+    std::condition_variable m_cv;
+
 };
 
 }; // CARBON_IMPL_NAMESPACE()
