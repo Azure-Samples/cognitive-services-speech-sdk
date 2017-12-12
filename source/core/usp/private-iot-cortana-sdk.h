@@ -390,7 +390,7 @@ typedef struct KWS_CONTEXT
     int           AudioSamples_KWS;
 } KWS_CONTEXT;
 
-#include "../include/usp.h"
+#include "usp.h"
 /**
  * The SPEECH_CONTEXT type represents a structure used for all Cortana+Speech related context.
  */

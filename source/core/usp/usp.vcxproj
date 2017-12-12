@@ -69,19 +69,19 @@
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir)..\..\..\external\azure-c-shared-utility\inc;$(ProjectDir)..\..\..\external\parson</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\inc\;$(ProjectDir)..\..\..\external\azure-c-shared-utility\inc;$(ProjectDir)..\..\..\external\parson</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-	  <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
     </Link>
     <Lib>
       <AdditionalDependencies>azure-c-shared-utility.lib</AdditionalDependencies>
     </Lib>
-	<Lib>
+    <Lib>
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
     </Lib>
     <ProjectReference>
@@ -98,7 +98,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-     </ClCompile>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -147,9 +147,9 @@
     <ClCompile Include="transport.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\usp.h" />
-    <ClInclude Include="..\include\usperror.h" />
-    <ClInclude Include="..\include\uspmessages.h" />
+    <ClInclude Include="inc\usp.h" />
+    <ClInclude Include="inc\usperror.h" />
+    <ClInclude Include="inc\uspmessages.h" />
     <ClInclude Include="uspinternal.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
