@@ -21,9 +21,7 @@ public:
     {
     };
 
-    ~CSpxAsyncOp()
-    {
-    };
+    ~CSpxAsyncOp() = default;
 
     bool WaitFor(uint32_t milliseconds)
     {

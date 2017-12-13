@@ -3,6 +3,7 @@
 #include <atomic>
 #include <numeric>
 #include <functional>
+#include "ispxinterfaces.h"
 
 using namespace CARBON_IMPL_NAMESPACE();
 using namespace std;

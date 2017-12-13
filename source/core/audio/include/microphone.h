@@ -4,10 +4,11 @@
 //
 
 #pragma once
-#include "ispxinterfaces.h"
-
+#include "spxcore_common.h"
 
 namespace CARBON_IMPL_NAMESPACE() {
+
+class ISpxAudioPump;
 
 class Microphone
 {

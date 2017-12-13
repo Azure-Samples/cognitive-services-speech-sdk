@@ -89,7 +89,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>SPX_CONFIG_EXPORTAPIS;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\public\c_api;..\..\public\cxx_api;..\include;..\sr;..\audio;..\common</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\public\c_api;..\..\public\cxx_api;..\include;..\sr;..\common\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -110,7 +110,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>SPX_CONFIG_EXPORTAPIS;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\public\c_api;..\..\public\cxx_api;..\include;..\sr;..\audio;..\common</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\public\c_api;..\..\public\cxx_api;..\include;..\sr;..\common\include;</AdditionalIncludeDirectories>
       <FunctionLevelLinking>true</FunctionLevelLinking>
     </ClCompile>
     <Link>
@@ -128,7 +128,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>SPX_CONFIG_EXPORTAPIS;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\public\c_api;..\..\public\cxx_api;..\include;..\sr;..\audio;..\common</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\public\c_api;..\..\public\cxx_api;..\include;..\sr;..\common\include;</AdditionalIncludeDirectories>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>
@@ -150,7 +150,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>SPX_CONFIG_EXPORTAPIS;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\public\c_api;..\..\public\cxx_api;..\include;..\sr;..\audio;..\common</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\public\c_api;..\..\public\cxx_api;..\include;..\sr;..\common\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
