@@ -69,7 +69,7 @@
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>$(ProjectDir)\inc\;$(ProjectDir)..\..\..\external\azure-c-shared-utility\inc;$(ProjectDir)..\..\..\external\parson</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)..\..\..\external\azure-c-shared-utility\inc;$(ProjectDir)..\..\..\external\parson</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <LanguageStandard>stdcpp14</LanguageStandard>
@@ -147,9 +147,9 @@
     <ClCompile Include="transport.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="inc\usp.h" />
-    <ClInclude Include="inc\usperror.h" />
-    <ClInclude Include="inc\uspmessages.h" />
+    <ClInclude Include="include\usp.h" />
+    <ClInclude Include="include\usperror.h" />
+    <ClInclude Include="include\uspmessages.h" />
     <ClInclude Include="uspinternal.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

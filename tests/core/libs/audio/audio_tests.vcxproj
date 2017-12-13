@@ -79,7 +79,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)external\Catch2;$(SolutionDir)source\core\include;$(SolutionDir)source\core\audio;$(SolutionDir)source\core\common;$(SolutionDir)source\public\common;$(SolutionDir)source\core\sr;$(SolutionDir)source\public\c_api;$(SolutionDir)source\public\cxx_api;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)external\Catch2;$(SolutionDir)source\core\include;$(SolutionDir)source\core\audio\include;$(SolutionDir)source\core\common;$(SolutionDir)source\public\common;$(SolutionDir)source\core\sr;$(SolutionDir)source\public\c_api;$(SolutionDir)source\public\cxx_api;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(OutDir)..\</AdditionalLibraryDirectories>
@@ -91,7 +91,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)external\Catch2;$(SolutionDir)source\core\include;$(SolutionDir)source\core\audio;$(SolutionDir)source\core\common;$(SolutionDir)source\public\common;$(SolutionDir)source\core\sr;$(SolutionDir)source\public\c_api;$(SolutionDir)source\public\cxx_api;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)external\Catch2;$(SolutionDir)source\core\include;$(SolutionDir)source\core\audio\include;$(SolutionDir)source\core\common;$(SolutionDir)source\public\common;$(SolutionDir)source\core\sr;$(SolutionDir)source\public\c_api;$(SolutionDir)source\public\cxx_api;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(OutDir)..\</AdditionalLibraryDirectories>
@@ -105,7 +105,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)external\Catch2;$(SolutionDir)source\core\include;$(SolutionDir)source\core\audio;$(SolutionDir)source\core\common;$(SolutionDir)source\public\common;$(SolutionDir)source\core\sr;$(SolutionDir)source\public\c_api;$(SolutionDir)source\public\cxx_api;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)external\Catch2;$(SolutionDir)source\core\include;$(SolutionDir)source\core\audio\include;$(SolutionDir)source\core\common;$(SolutionDir)source\public\common;$(SolutionDir)source\core\sr;$(SolutionDir)source\public\c_api;$(SolutionDir)source\public\cxx_api;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -121,7 +121,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)external\Catch2;$(SolutionDir)source\core\include;$(SolutionDir)source\core\audio;$(SolutionDir)source\core\common;$(SolutionDir)source\public\common;$(SolutionDir)source\core\sr;$(SolutionDir)source\public\c_api;$(SolutionDir)source\public\cxx_api;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)external\Catch2;$(SolutionDir)source\core\include;$(SolutionDir)source\core\audio\include;$(SolutionDir)source\core\common;$(SolutionDir)source\public\common;$(SolutionDir)source\core\sr;$(SolutionDir)source\public\c_api;$(SolutionDir)source\public\cxx_api;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

@@ -9,7 +9,7 @@
 
 #undef WAVE_FORMAT_PCM // already defined in mmeapi.h
 #include "audio_sample_handler.h"
-#include "../microphone.h"
+#include "microphone.h"
 
 #undef min
 

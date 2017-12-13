@@ -2,11 +2,11 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="wav_file_reader.h" />
-    <ClInclude Include="microphone.h" />
     <ClInclude Include="windows\sample_handler.h" />
     <ClInclude Include="windows\iunknown.h" />
     <ClInclude Include="windows\audio_sample_handler.h" />
+    <ClInclude Include="include\microphone.h" />
+    <ClInclude Include="include\wav_file_reader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
