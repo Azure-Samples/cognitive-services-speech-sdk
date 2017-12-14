@@ -3,14 +3,14 @@
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="recognition_result.h" />
-    <ClInclude Include="recognizer.h" />
-    <ClInclude Include="recognizer_factory.h" />
     <ClInclude Include="session.h" />
     <ClInclude Include="audio_stream_session.h" />
     <ClInclude Include="audio_pump.h" />
     <ClInclude Include="usp_reco_engine_adapter.h" />
     <ClInclude Include="recognition_event_args.h" />
     <ClInclude Include="session_event_args.h" />
+    <ClInclude Include="include\recognizer.h" />
+    <ClInclude Include="include\recognizer_factory.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
