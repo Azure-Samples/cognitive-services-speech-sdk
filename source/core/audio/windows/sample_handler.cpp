@@ -9,10 +9,13 @@
 
 namespace CARBON_IMPL_NAMESPACE() {
 
-using namespace std;
+    using namespace std;
 
-SampleHandler::SampleHandler(GUID major, GUID subType)
-    : m_majorType(major), m_subType(subType), m_streamIndex(0)
+    SampleHandler::SampleHandler(GUID major, GUID subType) :
+        m_majorType{ major },
+        m_subType{ subType },
+        m_streamIndex{ 0 },
+        m_readInProgress{ false }
 {
 }
 
