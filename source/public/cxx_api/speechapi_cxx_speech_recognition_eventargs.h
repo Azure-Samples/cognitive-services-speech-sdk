@@ -7,6 +7,7 @@
 
 #pragma once
 #include <string>
+#include <speechapi_c_common.h>
 #include <speechapi_cxx_common.h>
 #include <speechapi_cxx_recognition_eventargs.h>
 
@@ -18,17 +19,21 @@ namespace Speech {
 
 class SpeechRecognitionEventArgs final : public RecognitionEventArgs
 {
+private:
+
+    SPXEVENTHANDLE m_hevent;
+    std::shared_ptr<SpeechRecognitionResult> m_result;
+
+
 public:
 
     SpeechRecognitionEventArgs(SPXEVENTHANDLE hevent) :
-        RecognitionEventArgs(InitSessionId(hevent)),
-        Result(InitResult(hevent)),
+        RecognitionEventArgs(hevent),
         m_hevent(hevent),
-        m_sessionId(InitSessionIdFromCopy()),
-        m_result(InitResultFromCopy())
+        m_result(std::make_shared<SpeechRecognitionResult>(ResultHandleFromEventHandle(hevent))),
+        Result(*m_result.get())
     {
         SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hevent);
-        m_sessionIdCopy.clear();
     };
 
     virtual ~SpeechRecognitionEventArgs()
@@ -52,42 +57,6 @@ private:
         SPX_THROW_ON_FAIL(Recognizer_RecognitionEvent_GetResult(hevent, &hresult));
         return hresult;
     }
-
-    const SpeechRecognitionResult& InitResult(SPXEVENTHANDLE hevent)
-    {
-        m_result = std::make_shared<SpeechRecognitionResult>(ResultHandleFromEventHandle(hevent));
-        m_resultCopy = m_result;
-        return *m_result.get();
-    }
-
-    const std::shared_ptr<SpeechRecognitionResult>&& InitResultFromCopy()
-    {
-        m_result = nullptr;
-        return std::move(m_resultCopy);
-    }
-
-    const std::wstring& InitSessionId(SPXEVENTHANDLE hevent)
-    {
-        static const auto cchMaxSessionId = 36 + 1;
-        wchar_t sessionId[cchMaxSessionId];
-
-        SPX_THROW_ON_FAIL(Recognizer_SessionEvent_GetSessionId(hevent, sessionId, cchMaxSessionId));
-        m_sessionId = sessionId;
-        m_sessionIdCopy = m_sessionId;
-        return m_sessionId;
-    }
-
-    const std::wstring&& InitSessionIdFromCopy()
-    {
-        return std::move(m_sessionIdCopy);
-    }
-
-    SPXEVENTHANDLE m_hevent;
-    std::wstring m_sessionId;
-    std::shared_ptr<SpeechRecognitionResult> m_result;
-
-    std::wstring m_sessionIdCopy;
-    std::shared_ptr<SpeechRecognitionResult> m_resultCopy;
 };
 
 

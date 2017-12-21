@@ -4,45 +4,16 @@
 using namespace CARBON_IMPL_NAMESPACE();
 
 
-/// <summary>
-/// Creates a recognizer object using default construction parameters.
-/// </summary>
-/// <param name="phreco"> Address of pointer variable that receives the recognizer handle. 
-///    Upon successful return, <paramref name="*phreco"/> contains the recognizer handle. 
-///    Upon failure, <paramref name="*phreco"/> contains nullptr. </param>
-/// <returns>This function can return the following values.
-/// <list type="table">
-/// <listheader>
-/// <term> Return code </term>
-/// <term> Description </term>
-/// </listheader>
-/// <item>
-/// <term> SPX_NOERROR </term>
-/// <term> The recognizer was created successfully. </term>
-/// </item>
-/// <item>
-/// <term> SPXERR_NOT_IMPL </term>
-/// <term> This function is not implemented. </term>
-/// </item>
-/// </list>
-/// </returns>
 SPXAPI RecognizerFactory_CreateSpeechRecognzier_With_Defaults(SPXRECOHANDLE* phreco)
 {
-    SPX_INIT_HR(hr);
-
-    try
+    SPXAPI_INIT_TRY(hr)
     {
         *phreco = SPXHANDLE_INVALID;
         auto recognizer = CSpxRecognizerFactory::CreateSpeechRecognizer();
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(hr);
+    SPXAPI_CATCH_AND_RETURN(hr);
 }
 
 SPXAPI RecognizerFactory_CreateSpeechRecognzier_With_Language(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage)
@@ -52,21 +23,14 @@ SPXAPI RecognizerFactory_CreateSpeechRecognzier_With_Language(SPXRECOHANDLE* phr
 
 SPXAPI RecognizerFactory_CreateSpeechRecognzier_With_FileInput(SPXRECOHANDLE* phreco, const wchar_t* pszFileName)
 {
-    SPX_INIT_HR(hr);
-
-    try
+    SPXAPI_INIT_TRY(hr)
     {
         *phreco = SPXHANDLE_INVALID;
         auto recognizer = CSpxRecognizerFactory::CreateSpeechRecognizerWithFileInput(pszFileName);
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(hr);
+    SPXAPI_CATCH_AND_RETURN(hr);
 }
 
 SPXAPI RecognizerFactory_CreateSpeechRecognzier_With_PassiveListening(SPXRECOHANDLE* phreco, bool passive)

@@ -9,7 +9,7 @@ class CSpxSessionEventArgs : public ISpxSessionEventArgs
 {
 public:
 
-    CSpxSessionEventArgs(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result);
+    CSpxSessionEventArgs(const std::wstring& sessionId);
 
     // --- ISpxSessionEventArgs
     

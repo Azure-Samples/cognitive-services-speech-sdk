@@ -5,11 +5,33 @@
 namespace CARBON_IMPL_NAMESPACE() {
     
 
-SPXAPI_PRIVATE Recognizer_Event_SetCallback(ISpxRecognizerEvents::RecoEvent_Type ISpxRecognizerEvents::*precoEvent, SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext)
+SPXAPI_PRIVATE Recognizer_SessionEvent_SetCallback(ISpxRecognizerEvents::SessionEvent_Type ISpxRecognizerEvents::*psessionEvent, SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext)
 {
-    SPX_INIT_HR(hr);
-    
-    try
+    SPXAPI_INIT_TRY(hr)
+    {
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        auto recognizer = (*recohandles)[hreco];
+
+        auto pfn = [=](std::shared_ptr<ISpxSessionEventArgs> e) {
+            auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSessionEventArgs, SPXEVENTHANDLE>();
+            auto hevent = (*eventhandles)[e.get()];
+            (*pCallback)(hreco, hevent, pvContext);
+        };
+
+        auto pISpxRecognizerEvents = std::dynamic_pointer_cast<ISpxRecognizerEvents>(recognizer).get();
+        (pISpxRecognizerEvents->*psessionEvent).Disconnect(pfn);
+
+        if (pCallback != nullptr)
+        {
+            (pISpxRecognizerEvents->*psessionEvent).Connect(pfn);
+        }
+    }
+    SPXAPI_CATCH_AND_RETURN(hr);
+}
+
+SPXAPI_PRIVATE Recognizer_RecoEvent_SetCallback(ISpxRecognizerEvents::RecoEvent_Type ISpxRecognizerEvents::*precoEvent, SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext)
+{
+    SPXAPI_INIT_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         auto recognizer = (*recohandles)[hreco];
@@ -20,24 +42,15 @@ SPXAPI_PRIVATE Recognizer_Event_SetCallback(ISpxRecognizerEvents::RecoEvent_Type
             (*pCallback)(hreco, hevent, pvContext);
         };
 
-        auto recoevents = std::dynamic_pointer_cast<ISpxRecognizerEvents>(recognizer).get();
-        (recoevents->*precoEvent).Disconnect(pfn);
+        auto pISpxRecognizerEvents = std::dynamic_pointer_cast<ISpxRecognizerEvents>(recognizer).get();
+        (pISpxRecognizerEvents->*precoEvent).Disconnect(pfn);
 
         if (pCallback != nullptr)
         {
-            (recoevents->*precoEvent).Connect(pfn);
+            (pISpxRecognizerEvents->*precoEvent).Connect(pfn);
         }
     }
-    catch (SPXHR hr)
-    {
-        SPX_RETURN_HR(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(hr);
+    SPXAPI_CATCH_AND_RETURN(hr);
 }
 
 

@@ -5,7 +5,7 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-CSpxSessionEventArgs::CSpxSessionEventArgs(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) :
+CSpxSessionEventArgs::CSpxSessionEventArgs(const std::wstring& sessionId) :
     m_sessionId(sessionId)
 {
 }

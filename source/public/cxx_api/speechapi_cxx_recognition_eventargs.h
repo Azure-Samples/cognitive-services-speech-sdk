@@ -23,8 +23,8 @@ public:
 
 protected:
 
-    RecognitionEventArgs(const std::wstring& sessionId) :
-        SessionEventArgs(sessionId)
+    RecognitionEventArgs(SPXEVENTHANDLE hevent) :
+        SessionEventArgs(hevent)
     {
     };
 

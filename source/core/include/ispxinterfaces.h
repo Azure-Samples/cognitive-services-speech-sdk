@@ -267,20 +267,30 @@ public:
     using RecoEvent_Type = EventSignal<std::shared_ptr<ISpxRecognitionEventArgs>>;
     using SessionEvent_Type = EventSignal<std::shared_ptr<ISpxSessionEventArgs>>;
 
+    virtual void FireSessionStarted(const std::wstring& sessionId) = 0;
+    virtual void FireSessionStopped(const std::wstring& sessionId) = 0;
+    
     virtual void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) = 0;
+
+    SessionEvent_Type SessionStarted;
+    SessionEvent_Type SessionStopped;
 
     RecoEvent_Type IntermediateResult;
     RecoEvent_Type FinalResult;
     RecoEvent_Type NoMatch;
     RecoEvent_Type Canceled;
-    
+
 
 protected:
 
     ISpxRecognizerEvents(RecoEvent_Type::NotifyCallback_Type connectedCallback, RecoEvent_Type::NotifyCallback_Type disconnectedCallback) :
-        FinalResult(connectedCallback, disconnectedCallback)
+        IntermediateResult(connectedCallback, disconnectedCallback),
+        FinalResult(connectedCallback, disconnectedCallback),
+        NoMatch(connectedCallback, disconnectedCallback),
+        Canceled(connectedCallback, disconnectedCallback)
     {
     };
+
 
 private:
 

@@ -228,6 +228,7 @@ void CSpxAudioStreamSession::DoneProcessingAudio(ISpxRecoEngineAdapter* adapter)
     if (ChangeState(SessionState::WaitingForAdapterDone, SessionState::Idle))
     {
         // The adapter request to finish processing audio has completed
+        FireSessionStoppedEvent();
     }
 }
 

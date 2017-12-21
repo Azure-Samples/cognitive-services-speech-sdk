@@ -95,8 +95,8 @@ private:
     template <class T>
     void Recognizer_Event(const wchar_t* psz, EventSignal<T>& recognizerEvent, typename::EventSignal<T>::CallbackFunction callback);
 
-    void Recognizer_SessionStartedHandler(const SessionEventArgs& e) {};
-    void Recognizer_SessionStoppedHandler(const SessionEventArgs& e) {};
+    void Recognizer_SessionStartedHandler(const SessionEventArgs& e) { ConsoleWriteLine(L"SessionStartedHandler: %s", e.SessionId.c_str()); };
+    void Recognizer_SessionStoppedHandler(const SessionEventArgs& e) { ConsoleWriteLine(L"SessionStoppedHandler: %s", e.SessionId.c_str()); };
     void Recognizer_SoundStartedHandler(const SessionEventArgs& e) {};
     void Recognizer_SoundStoppedHandler(const SessionEventArgs& e) {};
 

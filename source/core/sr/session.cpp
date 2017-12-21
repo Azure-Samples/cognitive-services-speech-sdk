@@ -137,16 +137,44 @@ void CSpxSession::WaitForRecognition_Complete(std::shared_ptr<ISpxRecognitionRes
 
 void CSpxSession::FireSessionStartedEvent()
 {
-    // TODO: RobCh: Next: Implement
-    // SPX_THROW_HR(SPXERR_NOT_IMPL);
+    // Make a copy of the recognizers (under lock), to use to send events; 
+    // otherwise the underlying list could be modified while we're sending events...
+
+    std::unique_lock<std::mutex> lock(m_mutex);
+    decltype(m_recognizers) weakRecognizers(m_recognizers.begin(), m_recognizers.end());
+    lock.unlock();
+
+    for (auto weakRecognizer : weakRecognizers)
+    {
+        auto recognizer = weakRecognizer.lock();
+        auto ptr = std::dynamic_pointer_cast<ISpxRecognizerEvents>(recognizer);
+        if (recognizer)
+        {
+            ptr->FireSessionStarted(m_sessionId);
+        }
+    }
 }
 
 void CSpxSession::FireSessionStoppedEvent()
 {
     EnsureFireResultEvent();
 
-    // TODO: RobCh: Next: Implement
-    // SPX_THROW_HR(SPXERR_NOT_IMPL);
+    // Make a copy of the recognizers (under lock), to use to send events; 
+    // otherwise the underlying list could be modified while we're sending events...
+
+    std::unique_lock<std::mutex> lock(m_mutex);
+    decltype(m_recognizers) weakRecognizers(m_recognizers.begin(), m_recognizers.end());
+    lock.unlock();
+
+    for (auto weakRecognizer : weakRecognizers)
+    {
+        auto recognizer = weakRecognizer.lock();
+        auto ptr = std::dynamic_pointer_cast<ISpxRecognizerEvents>(recognizer);
+        if (recognizer)
+        {
+            ptr->FireSessionStopped(m_sessionId);
+        }
+    }
 }
 
 void CSpxSession::FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result)

@@ -184,11 +184,11 @@ protected:
     {
         if (&sessionEvent == &SessionStarted)
         {
-            //Recognizer_SessionStarted_SetEventCallback(m_hreco, SessionStarted.IsConnected() ? SpeechRecognizer::FireEvent_SessionStarted: nullptr, this);
+            Recognizer_SessionStarted_SetEventCallback(m_hreco, SessionStarted.IsConnected() ? SpeechRecognizer::FireEvent_SessionStarted: nullptr, this);
         }
         else if (&sessionEvent == &SessionStopped)
         {
-            //Recognizer_SessionStopped_SetEventCallback(m_hreco, SessionStopped.IsConnected() ? SpeechRecognizer::FireEvent_SessionStopped : nullptr, this);
+            Recognizer_SessionStopped_SetEventCallback(m_hreco, SessionStopped.IsConnected() ? SpeechRecognizer::FireEvent_SessionStopped : nullptr, this);
         }
         else if (&sessionEvent == &SoundStarted)
         {
@@ -198,6 +198,20 @@ protected:
         {
             //Recognizer_SoundStopped_SetEventCallback(m_hreco, SoundStopped.IsConnected() ? SpeechRecognizer::FireEvent_SoundStopped: nullptr, this);
         }
+    }
+
+    static void FireEvent_SessionStarted(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
+    {
+        auto sessionEvent = std::make_unique<SessionEventArgs>(hevent);
+        auto pThis = static_cast<SpeechRecognizer*>(pvContext);
+        pThis->SessionStarted.Signal(*sessionEvent.get());
+    }
+
+    static void FireEvent_SessionStopped(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
+    {
+        auto sessionEvent = std::make_unique<SessionEventArgs>(hevent);
+        auto pThis = static_cast<SpeechRecognizer*>(pvContext);
+        pThis->SessionStopped.Signal(*sessionEvent.get());
     }
 
     static void FireEvent_IntermediateResult(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)

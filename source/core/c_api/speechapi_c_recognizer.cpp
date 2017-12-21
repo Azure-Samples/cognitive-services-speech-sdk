@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "event_helpers.h"
+#include "handle_helpers.h"
 
 
 using namespace CARBON_IMPL_NAMESPACE();
@@ -7,236 +8,75 @@ using namespace CARBON_IMPL_NAMESPACE();
 
 SPXAPI_(bool) Recognzier_Handle_IsValid(SPXRECOHANDLE hreco)
 {
-    bool fIsValid = false;
-    
-    try
-    {
-        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        fIsValid = recohandles->IsTracked(hreco);
-    }
-    catch (SPXHR hr)
-    {
-        SPX_REPORT_ON_FAIL(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_REPORT_ON_FAIL(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    return fIsValid;
+    return Handle_IsValid<SPXRECOHANDLE, ISpxRecognizer>(hreco);
 }
 
 SPXAPI Recognizer_Handle_Close(SPXRECOHANDLE hreco)
 {
-    SPX_INIT_HR(hr);
-
-    try
-    {
-        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        recohandles->StopTracking(hreco);
-    }
-    catch (SPXHR hr)
-    {
-        SPX_RETURN_HR(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(hr);
+    return Handle_Close<SPXRECOHANDLE, ISpxRecognizer>(hreco);
 }
 
 SPXAPI_(bool) Recognizer_AsyncHandle_IsValid(SPXASYNCHANDLE hasync)
 {
-    bool fIsValid = false;
-
-    try
-    {
-        auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
-        fIsValid = asynchandles->IsTracked(hasync);
-    }
-    catch (SPXHR hr)
-    {
-        SPX_REPORT_ON_FAIL(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_REPORT_ON_FAIL(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    return fIsValid;
+    return Handle_IsValid<SPXASYNCHANDLE, CSpxAsyncOp<void>>(hasync);
 }
 
 SPXAPI Recognizer_AsyncHandle_Close(SPXASYNCHANDLE hasync)
 {
-    SPX_INIT_HR(hr);
-
-    try
-    {
-        auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
-        asynchandles->StopTracking(hasync);
-    }
-    catch (SPXHR hr)
-    {
-        SPX_RETURN_HR(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(hr);
+    return Handle_Close<SPXASYNCHANDLE, CSpxAsyncOp<void>>(hasync);
 }
 
 SPXAPI_(bool) Recognizer_ResultHandle_IsValid(SPXRESULTHANDLE hresult)
 {
-    bool fIsValid = false;
-
-    try
-    {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
-        fIsValid = resulthandles->IsTracked(hresult);
-    }
-    catch (SPXHR hr)
-    {
-        SPX_REPORT_ON_FAIL(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_REPORT_ON_FAIL(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    return fIsValid;
+    return Handle_IsValid<SPXRESULTHANDLE, ISpxRecognitionResult>(hresult);
 }
 
 SPXAPI Recognizer_ResultHandle_Close(SPXRESULTHANDLE hresult)
 {
-    SPX_INIT_HR(hr);
-
-    try
-    {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
-        resulthandles->StopTracking(hresult);
-    }
-    catch (SPXHR hr)
-    {
-        SPX_RETURN_HR(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(hr);
+    return Handle_Close<SPXRESULTHANDLE, ISpxRecognitionResult>(hresult);
 }
 
 SPXAPI_(bool) Recognizer_EventHandle_IsValid(SPXEVENTHANDLE hevent)
 {
-    bool fIsValid = false;
-    
-    try
-    {
-        auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
-        fIsValid = eventhandles->IsTracked(hevent);
-    }
-    catch (SPXHR hr)
-    {
-        SPX_REPORT_ON_FAIL(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_REPORT_ON_FAIL(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    return fIsValid;
+    return Handle_IsValid<SPXEVENTHANDLE, ISpxRecognitionEventArgs>(hevent);
 }
 
 SPXAPI Recognizer_EventHandle_Close(SPXEVENTHANDLE hevent)
 {
-    SPX_INIT_HR(hr);
-
-    try
-    {
-        auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
-        eventhandles->StopTracking(hevent);
-    }
-    catch (SPXHR hr)
-    {
-        SPX_RETURN_HR(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(hr);
+    return Handle_IsValid<SPXEVENTHANDLE, ISpxRecognitionEventArgs>(hevent);
 }
 
 SPXAPI Recognizer_Enable(SPXRECOHANDLE hreco)
 {
-    SPX_INIT_HR(hr);
-    
-    try
+    SPXAPI_INIT_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         auto precognizer = (*recohandles)[hreco];
         precognizer->Enable();
     }
-    catch (SPXHR hr)
-    {
-        SPX_RETURN_HR(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(hr);
+    SPXAPI_CATCH_AND_RETURN(hr);
 }
 
 SPXAPI Recognizer_Disable(SPXRECOHANDLE hreco)
 {
-    SPX_INIT_HR(hr);
-    
-    try
+    SPXAPI_INIT_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         auto precognizer = (*recohandles)[hreco];
         precognizer->Disable();
     }
-    catch (SPXHR hr)
-    {
-        SPX_RETURN_HR(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(hr);
+    SPXAPI_CATCH_AND_RETURN(hr);
 }
 
 SPXAPI Recognizer_IsEnabled(SPXRECOHANDLE hreco, bool* pfEnabled)
 {
-    SPX_INIT_HR(hr);
-
-    try
+    SPXAPI_INIT_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         auto precognizer = (*recohandles)[hreco];
         *pfEnabled = precognizer->IsEnabled();
     }
-    catch (SPXHR hr)
-    {
-        SPX_RETURN_HR(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(hr);
+    SPXAPI_CATCH_AND_RETURN(hr);
 }
 
 SPXAPI Recognizer_SetParameter_String(SPXRECOHANDLE hreco, const wchar_t* name, const wchar_t* value)
@@ -287,9 +127,7 @@ SPXAPI Recognizer_Recognize(SPXRECOHANDLE hreco, SPXRESULTHANDLE* phresult)
 
 SPXAPI Recognizer_RecognizeAsync(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync)
 {
-    SPX_INIT_HR(hr);
-
-    try
+    SPXAPI_INIT_TRY(hr)
     {
         *phasync = SPXHANDLE_INVALID;
 
@@ -302,23 +140,12 @@ SPXAPI Recognizer_RecognizeAsync(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync)
         auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>>, SPXASYNCHANDLE>();
         *phasync = asynchandles->TrackHandle(ptr);
     }
-    catch (SPXHR hr)
-    {
-        SPX_RETURN_HR(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(hr);
+    SPXAPI_CATCH_AND_RETURN(hr);
 }
 
 SPXAPI Recognizer_RecognizeAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t milliseconds, SPXRESULTHANDLE* phresult)
 {
-    SPX_INIT_HR(hr);
-
-    try
+    SPXAPI_INIT_TRY(hr)
     {
         *phresult = SPXHANDLE_INVALID;
 
@@ -336,16 +163,7 @@ SPXAPI Recognizer_RecognizeAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t millise
             hr = SPX_NOERROR;
         }
     }
-    catch (SPXHR hr)
-    {
-        SPX_RETURN_HR(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(hr);
+    SPXAPI_CATCH_AND_RETURN(hr);
 }
 
 SPXAPI Recognizer_StartContinuousRecognition(SPXRECOHANDLE hreco)
@@ -375,9 +193,7 @@ SPXAPI Recognizer_StartContinuousRecognition(SPXRECOHANDLE hreco)
 
 SPXAPI Recognizer_StartContinuousRecognitionAsync(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync)
 {
-    SPX_INIT_HR(hr);
-    
-    try
+    SPXAPI_INIT_TRY(hr)
     {
         *phasync = SPXHANDLE_INVALID;
 
@@ -390,23 +206,12 @@ SPXAPI Recognizer_StartContinuousRecognitionAsync(SPXRECOHANDLE hreco, SPXASYNCH
         auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
         *phasync = asynchandles->TrackHandle(ptr);
     }
-    catch (SPXHR hr)
-    {
-        SPX_RETURN_HR(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(hr);
+    SPXAPI_CATCH_AND_RETURN(hr);
 }
 
 SPXAPI Recognizer_StartContinuousRecognitionAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t milliseconds)
 {
-    SPX_INIT_HR(hr);
-
-    try
+    SPXAPI_INIT_TRY(hr)
     {
         auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
         auto asyncop = (*asynchandles)[hasync];
@@ -414,16 +219,7 @@ SPXAPI Recognizer_StartContinuousRecognitionAsync_WaitFor(SPXASYNCHANDLE hasync,
         auto completed = asyncop->WaitFor(milliseconds);
         hr = completed ? SPX_NOERROR : SPXERR_TIMEOUT;
     }
-    catch (SPXHR hr)
-    {
-        SPX_RETURN_HR(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(hr);
+    SPXAPI_CATCH_AND_RETURN(hr);
 }
 
 SPXAPI Recognizer_StopContinuousRecognition(SPXRECOHANDLE hreco)
@@ -453,9 +249,7 @@ SPXAPI Recognizer_StopContinuousRecognition(SPXRECOHANDLE hreco)
 
 SPXAPI Recognizer_StopContinuousRecognitionAsync(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync)
 {
-    SPX_INIT_HR(hr);
-
-    try
+    SPXAPI_INIT_TRY(hr)
     {
         *phasync = SPXHANDLE_INVALID;
 
@@ -468,23 +262,12 @@ SPXAPI Recognizer_StopContinuousRecognitionAsync(SPXRECOHANDLE hreco, SPXASYNCHA
         auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
         *phasync = asynchandles->TrackHandle(ptr);
     }
-    catch (SPXHR hr)
-    {
-        SPX_RETURN_HR(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(hr);
+    SPXAPI_CATCH_AND_RETURN(hr);
 }
 
 SPXAPI Recognizer_StopContinuousRecognitionAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t milliseconds)
 {
-    SPX_INIT_HR(hr);
-
-    try
+    SPXAPI_INIT_TRY(hr)
     {
         auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
         auto asyncop = (*asynchandles)[hasync];
@@ -492,28 +275,17 @@ SPXAPI Recognizer_StopContinuousRecognitionAsync_WaitFor(SPXASYNCHANDLE hasync, 
         auto completed = asyncop->WaitFor(milliseconds);
         hr = completed ? SPX_NOERROR : SPXERR_TIMEOUT;
     }
-    catch (SPXHR hr)
-    {
-        SPX_RETURN_HR(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(hr);
+    SPXAPI_CATCH_AND_RETURN(hr);
 }
 
 SPXAPI Recognizer_SessionStarted_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext)
 {
-    // TODO: RobCh: Next: Implement
-    return SPXERR_NOT_IMPL;
+    return Recognizer_SessionEvent_SetCallback(&ISpxRecognizerEvents::SessionStarted, hreco, pCallback, pvContext);
 }
 
 SPXAPI Recognizer_SessionStopped_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext)
 {
-    // TODO: RobCh: Next: Implement
-    return SPXERR_NOT_IMPL;
+    return Recognizer_SessionEvent_SetCallback(&ISpxRecognizerEvents::SessionStopped, hreco, pCallback, pvContext);
 }
 
 SPXAPI Recognizer_SoundStarted_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext)
@@ -530,53 +302,43 @@ SPXAPI Recognizer_SoundStopped_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CA
 
 SPXAPI Recognizer_IntermediateResult_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext)
 {
-    return Recognizer_Event_SetCallback(&ISpxRecognizerEvents::IntermediateResult, hreco, pCallback, pvContext);
+    return Recognizer_RecoEvent_SetCallback(&ISpxRecognizerEvents::IntermediateResult, hreco, pCallback, pvContext);
 }
 
 SPXAPI Recognizer_FinalResult_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext)
 {
-    return Recognizer_Event_SetCallback(&ISpxRecognizerEvents::FinalResult, hreco, pCallback, pvContext);
+    return Recognizer_RecoEvent_SetCallback(&ISpxRecognizerEvents::FinalResult, hreco, pCallback, pvContext);
 }
 
 SPXAPI Recognizer_NoMatch_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext)
 {
-    return Recognizer_Event_SetCallback(&ISpxRecognizerEvents::NoMatch, hreco, pCallback, pvContext);
+    return Recognizer_RecoEvent_SetCallback(&ISpxRecognizerEvents::NoMatch, hreco, pCallback, pvContext);
 }
 
 SPXAPI Recognizer_Canceled_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext)
 {
-    return Recognizer_Event_SetCallback(&ISpxRecognizerEvents::Canceled, hreco, pCallback, pvContext);
+    return Recognizer_RecoEvent_SetCallback(&ISpxRecognizerEvents::Canceled, hreco, pCallback, pvContext);
 }
 
 SPXAPI Recognizer_SessionEvent_GetSessionId(SPXEVENTHANDLE hevent, wchar_t* pszSessionId, uint32_t cchSessionId)
 {
-    SPX_INIT_HR(hr);
-    
-    try
+    SPXAPI_INIT_TRY(hr)
     {
-        auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
-        auto recoEvent = (*eventhandles)[hevent];
+        auto recoHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
+        auto sessionHandleTable = CSpxSharedPtrHandleTableManager::Get<ISpxSessionEventArgs, SPXEVENTHANDLE>();
+        auto recoEvent = recoHandleTable->IsTracked(hevent)
+            ? (*recoHandleTable)[hevent]
+            : (*sessionHandleTable)[hevent];
 
         auto sessionId = recoEvent->GetSessionId();
         wcscpy_s(pszSessionId, cchSessionId, sessionId.c_str());
     }
-    catch (SPXHR hr)
-    {
-        SPX_RETURN_HR(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(hr);
+    SPXAPI_CATCH_AND_RETURN(hr);
 }
 
 SPXAPI Recognizer_RecognitionEvent_GetResult(SPXEVENTHANDLE hevent, SPXRESULTHANDLE* phresult)
 {
-    SPX_INIT_HR(hr);
-    
-    try
+    SPXAPI_INIT_TRY(hr)
     {
         auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
         auto recoEvent = (*eventhandles)[hevent];
@@ -585,14 +347,5 @@ SPXAPI Recognizer_RecognitionEvent_GetResult(SPXEVENTHANDLE hevent, SPXRESULTHAN
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         *phresult = resulthandles->TrackHandle(result);
     }
-    catch (SPXHR hr)
-    {
-        SPX_RETURN_HR(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(hr);
+    SPXAPI_CATCH_AND_RETURN(hr);
 }

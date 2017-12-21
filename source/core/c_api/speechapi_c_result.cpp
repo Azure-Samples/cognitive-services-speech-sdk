@@ -7,8 +7,8 @@ using namespace CARBON_IMPL_NAMESPACE();
 SPXAPI Result_GetResultId(SPXRESULTHANDLE hresult, wchar_t* pszResultId, uint32_t cchResultId)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, cchResultId == 0);
-    
-    try
+
+    SPXAPI_INIT_TRY(hr)
     {
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
@@ -17,16 +17,7 @@ SPXAPI Result_GetResultId(SPXRESULTHANDLE hresult, wchar_t* pszResultId, uint32_
         auto pszActual = strActual.c_str();
         wcsncpy_s(pszResultId, cchResultId, pszActual, _TRUNCATE);
     }
-    catch (SPXHR hr)
-    {
-        SPX_RETURN_HR(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(SPX_NOERROR);
+    SPXAPI_CATCH_AND_RETURN(hr);
 }
 
 SPXAPI Result_GetRecognitionReason(SPXRESULTHANDLE hresult, Result_RecognitionReason* preason)
@@ -38,30 +29,21 @@ SPXAPI Result_GetRecognitionReason(SPXRESULTHANDLE hresult, Result_RecognitionRe
     static_assert((int)Reason_IntermediateResult == (int)Reason::IntermediateResult, "Reason_* enum values == Reason::* enum values");
 
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, preason == nullptr);
-    
-    try
+
+    SPXAPI_INIT_TRY(hr)    
     {
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
         *preason = (Result_RecognitionReason)result->GetReason();
     }
-    catch (SPXHR hr)
-    {
-        SPX_RETURN_HR(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(SPX_NOERROR);
+    SPXAPI_CATCH_AND_RETURN(hr);
 }
 
 SPXAPI Result_GetText(SPXRESULTHANDLE hresult, wchar_t* pszText, uint32_t cchText)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, cchText == 0);
-    
-    try
+
+    SPXAPI_INIT_TRY(hr)    
     {
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
@@ -70,16 +52,7 @@ SPXAPI Result_GetText(SPXRESULTHANDLE hresult, wchar_t* pszText, uint32_t cchTex
         auto pszActual = strActual.c_str();
         wcsncpy_s(pszText, cchText, pszActual, _TRUNCATE);
     }
-    catch (SPXHR hr)
-    {
-        SPX_RETURN_HR(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    SPX_RETURN_HR(SPX_NOERROR);
+    SPXAPI_CATCH_AND_RETURN(hr);
 }
 
 SPXAPI Result_Payload_GetCount(SPXRESULTHANDLE hresult, uint32_t* pcount)

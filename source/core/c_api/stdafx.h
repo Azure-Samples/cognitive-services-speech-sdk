@@ -17,3 +17,5 @@
 #include <recognizer.h>
 #include <recognizer_factory.h>
 
+#include "try_catch_helpers.h"
+

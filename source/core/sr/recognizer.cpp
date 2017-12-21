@@ -3,6 +3,7 @@
 #include <future>
 #include "handle_table.h"
 #include "recognition_event_args.h"
+#include "session_event_args.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -56,6 +57,30 @@ CSpxAsyncOp<void> CSpxRecognizer::StartContinuousRecognitionAsync()
 CSpxAsyncOp<void> CSpxRecognizer::StopContinuousRecognitionAsync()
 {
     return m_defaultSession->StopContinuousRecognitionAsync();
+}
+
+void CSpxRecognizer::FireSessionStarted(const std::wstring& sessionId)
+{
+    auto sessionEvent = SpxMakeShared<CSpxSessionEventArgs, ISpxSessionEventArgs>(sessionId);
+
+    auto handletable = CSpxSharedPtrHandleTableManager::Get<ISpxSessionEventArgs, SPXEVENTHANDLE>();
+    auto hevent = handletable->TrackHandle(sessionEvent);
+
+    SessionStarted.Signal(sessionEvent);
+
+    handletable->StopTracking(hevent);
+}
+
+void CSpxRecognizer::FireSessionStopped(const std::wstring& sessionId)
+{
+    auto sessionEvent = SpxMakeShared<CSpxSessionEventArgs, ISpxSessionEventArgs>(sessionId);
+
+    auto handletable = CSpxSharedPtrHandleTableManager::Get<ISpxSessionEventArgs, SPXEVENTHANDLE>();
+    auto hevent = handletable->TrackHandle(sessionEvent);
+
+    SessionStopped.Signal(sessionEvent);
+
+    handletable->StopTracking(hevent);
 }
 
 void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result)
