@@ -1,14 +1,31 @@
-#include "private-iot-cortana-sdk.h"
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// dnscache.c: implementation of DNS lookup and cache results.
+//
+
+#ifdef _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+#endif
+
 #include <assert.h>
+#include <stdlib.h>
 #ifdef __linux__
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #endif
 
-///////////////////////////////////////////////////////////////////////////////
+#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/lock.h"
+#include "azure_c_shared_utility/condition.h"
+#include "azure_c_shared_utility/list.h"
+#include "azure_c_shared_utility/queue.h"
+#include "dnscache.h"
 
-void dns_cache_result_free(DNS_RESULT_HANDLE handle)
+
+void DnsCacheResultFree(DNS_RESULT_HANDLE handle)
 {
 #ifdef __linux__
     freeaddrinfo((struct addrinfo*)handle);
@@ -17,9 +34,7 @@ void dns_cache_result_free(DNS_RESULT_HANDLE handle)
 #endif
 }
 
-int dns_cache_lookup(
-    const char* pszHost,
-    DNS_RESULT_HANDLE* result)
+int DnsCacheLookup(const char* host, DNS_RESULT_HANDLE* result)
 {
 #ifdef __linux__
     struct addrinfo hints;
@@ -27,49 +42,44 @@ int dns_cache_lookup(
 
     memset(&hints, 0, sizeof(hints));
 
-    if (0 != (ret = getaddrinfo(pszHost, NULL, &hints, (struct addrinfo**)result)))
-    {
-        return ret;
-    }
-    return ret;
+    return getaddrinfo(host, NULL, &hints, (struct addrinfo**)result)))
+
 #else
     // TODO: intentionally not implemented right now.
-    (void)pszHost;
+    (void)host;
     static int dummy = 0;
     *result = (DNS_RESULT_HANDLE)&dummy;
     return dummy;
 #endif
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
 typedef struct _DNS_REQUEST
 {
-    char* pszHost;
-    DNS_CACHE_NAMERESOLVEDCB pfnResolvedCB;
-    void *pContext;
-    int res;
-    DNS_RESULT_HANDLE hResult;
+    char* host;
+    DNS_CACHE_NAMERESOLVEDCB resolvedCallback;
+    void *context;
+    int result;
+    DNS_RESULT_HANDLE resultHandle;
 } DNS_REQUEST;
 
 #define DNS_CTX_FLAG_SHUTDOWN   1
 
 typedef struct _DNS_CONTEXT
 {
-    THREAD_HANDLE hThread;
-    LOCK_HANDLE   EntryLock;
-    LIST_HANDLE   hEntryList;
-    LIST_HANDLE   hCompleteList;
-    COND_HANDLE   hWorkEvent;
+    THREAD_HANDLE thread;
+    LOCK_HANDLE   entryLock;
+    LIST_HANDLE   entryList;
+    LIST_HANDLE   completeList;
+    COND_HANDLE   workEvent;
     DNS_REQUEST*  currentRequest;
     int           flags;
 } DNS_CONTEXT;
 
 static void dns_cache_free_request(DNS_REQUEST* request)
 {
-    if (request->hResult)
+    if (request->resultHandle)
     {
-        dns_cache_result_free(request->hResult);
+        DnsCacheResultFree(request->resultHandle);
     }
 
     free(request);
@@ -80,19 +90,19 @@ static int DnsWorker(void *args)
     DNS_CONTEXT* ctx = (DNS_CONTEXT*)args;
     DNS_REQUEST* req;
 
-    Lock(ctx->EntryLock);
+    Lock(ctx->entryLock);
     do
     {
-        req = (DNS_REQUEST*)queue_dequeue(ctx->hEntryList);
+        req = (DNS_REQUEST*)queue_dequeue(ctx->entryList);
         while (req != NULL)
         {
             // This is the only thread that sets the current request.
             assert(ctx->currentRequest == NULL);
             ctx->currentRequest = req;
 
-            Unlock(ctx->EntryLock);
-            req->res = dns_cache_lookup(req->pszHost, &req->hResult);
-            Lock(ctx->EntryLock);
+            Unlock(ctx->entryLock);
+            req->result = DnsCacheLookup(req->host, &req->resultHandle);
+            Lock(ctx->entryLock);
 
             // The current request may have been cleared if the caller lost
             // interest in the result.
@@ -101,14 +111,14 @@ static int DnsWorker(void *args)
                 assert(ctx->currentRequest == req);
                 ctx->currentRequest = NULL;
 
-                queue_enqueue(ctx->hCompleteList, req);
+                queue_enqueue(ctx->completeList, req);
             }
             else
             {
                 dns_cache_free_request(req);
             }
 
-            req = (DNS_REQUEST*)queue_dequeue(ctx->hEntryList);
+            req = (DNS_REQUEST*)queue_dequeue(ctx->entryList);
         }
 
         if (ctx->flags & DNS_CTX_FLAG_SHUTDOWN)
@@ -118,100 +128,96 @@ static int DnsWorker(void *args)
 
         // If we got here, then there's nothing in the request queue.  Wait for
         // new work and loop back.
-    } while (COND_OK == Condition_Wait(ctx->hWorkEvent, ctx->EntryLock, 0));
-    Unlock(ctx->EntryLock);
+    } while (COND_OK == Condition_Wait(ctx->workEvent, ctx->entryLock, 0));
+    Unlock(ctx->entryLock);
 
     return 0;
 }
 
 static void SignalWork(DNS_CONTEXT* ctx)
 {
-    Lock(ctx->EntryLock);
-    Condition_Post(ctx->hWorkEvent);
-    Unlock(ctx->EntryLock);
+    Lock(ctx->entryLock);
+    Condition_Post(ctx->workEvent);
+    Unlock(ctx->entryLock);
 }
 
-DNS_CACHE_HANDLE dns_cache_create()
+DnsCacheHandle DnsCacheCreate()
 {
     DNS_CONTEXT* ctx = (DNS_CONTEXT*)malloc(sizeof(DNS_CONTEXT));
 
     memset(ctx, 0, sizeof(DNS_CONTEXT));
 
-    ctx->hEntryList = list_create();
-    ctx->hCompleteList = list_create();
-    ctx->EntryLock = Lock_Init();
-    ctx->hWorkEvent = Condition_Init();
+    ctx->entryList = list_create();
+    ctx->completeList = list_create();
+    ctx->entryLock = Lock_Init();
+    ctx->workEvent = Condition_Init();
 
-    if (ctx->hEntryList     &&
-        ctx->hCompleteList  &&
-        ctx->EntryLock      &&
-        ctx->hWorkEvent     &&
-        ThreadAPI_Create(&ctx->hThread, DnsWorker, ctx) == THREADAPI_OK)
+    if (ctx->entryList     &&
+        ctx->completeList  &&
+        ctx->entryLock      &&
+        ctx->workEvent     &&
+        ThreadAPI_Create(&ctx->thread, DnsWorker, ctx) == THREADAPI_OK)
     {
         return ctx;
     }
 
-    dns_cache_destroy(ctx);
+    DnsCacheDestroy(ctx);
     return NULL;
 }
 
-void dns_cache_destroy(DNS_CACHE_HANDLE handle)
+void DnsCacheDestroy(DnsCacheHandle handle)
 {
     DNS_CONTEXT* ctx = (DNS_CONTEXT*)handle;
 
     ctx->flags |= DNS_CTX_FLAG_SHUTDOWN;
 
     // wake up the worker thread
-    if (NULL != ctx->hWorkEvent)
+    if (NULL != ctx->workEvent)
     {
         SignalWork(ctx);
     }
 
-    if (NULL != ctx->hThread)
+    if (NULL != ctx->thread)
     {
-        ThreadAPI_Join(ctx->hThread, NULL);
+        ThreadAPI_Join(ctx->thread, NULL);
     }
 
-    if (NULL != ctx->hCompleteList)
+    if (NULL != ctx->completeList)
     {
-        list_destroy(ctx->hCompleteList);
+        list_destroy(ctx->completeList);
     }
 
-    if (NULL != ctx->hEntryList)
+    if (NULL != ctx->entryList)
     {
-        list_destroy(ctx->hEntryList);
+        list_destroy(ctx->entryList);
     }
 
-    if (NULL != ctx->hWorkEvent)
+    if (NULL != ctx->workEvent)
     {
-        Condition_Deinit(ctx->hWorkEvent);
+        Condition_Deinit(ctx->workEvent);
     }
 
-    if (NULL != ctx->EntryLock)
+    if (NULL != ctx->entryLock)
     {
-        Lock_Deinit(ctx->EntryLock);
+        Lock_Deinit(ctx->entryLock);
     }
 
     free(ctx);
 }
 
-int dns_cache_getaddr(
-    DNS_CACHE_HANDLE handle,
-    const char* pszHost,
-    DNS_CACHE_NAMERESOLVEDCB pfnResolvedCB,
-    void *pContext)
+int DnsCacheGetAddr(DnsCacheHandle handle, const char* host, DNS_CACHE_NAMERESOLVEDCB resolvedCallback, void *context)
 {
     size_t len;
     DNS_REQUEST* req;
     DNS_CONTEXT* ctx = (DNS_CONTEXT*)handle;
 
-    if (!handle || !pszHost || !pfnResolvedCB)
+    if (!handle || !host || !resolvedCallback)
     {
         return -1;
     }
 
     // create a new request
-    len = strlen(pszHost);
+    len = strlen(host);
 
     req = (DNS_REQUEST*)malloc(sizeof(DNS_REQUEST) + len + 1);
     if (NULL == req)
@@ -219,16 +225,16 @@ int dns_cache_getaddr(
         return -1;
     }
 
-    req->pfnResolvedCB = pfnResolvedCB;
-    req->pContext = pContext;
-    req->pszHost = (char*)&req[1];
-    req->hResult = NULL;
-    strcpy_s(req->pszHost, len + 1, pszHost);
+    req->resolvedCallback = resolvedCallback;
+    req->context = context;
+    req->host = (char*)&req[1];
+    req->resultHandle = NULL;
+    strcpy_s(req->host, len + 1, host);
 
     // queue it up
-    Lock(ctx->EntryLock);
-    queue_enqueue(ctx->hEntryList, req);
-    Unlock(ctx->EntryLock);
+    Lock(ctx->entryLock);
+    queue_enqueue(ctx->entryList, req);
+    Unlock(ctx->entryLock);
 
     // tell the worker to get started on it.
     SignalWork(ctx);
@@ -236,20 +242,18 @@ int dns_cache_getaddr(
     return 0;
 }
 
-static bool dns_cache_dequeue_context_match_callback(
-    LIST_ITEM_HANDLE item,
-    const void* pContext)
+static bool dns_cache_dequeue_context_match_callback(LIST_ITEM_HANDLE item, const void* context)
 {
     const DNS_REQUEST* const request =
         (const DNS_REQUEST*)list_item_get_value(item);
-    return request->pContext == pContext;
+    return request->context == context;
 }
 
-static DNS_REQUEST* dns_cache_dequeue_context_match(LIST_HANDLE list, void* pContext)
+static DNS_REQUEST* dns_cache_dequeue_context_match(LIST_HANDLE list, void* context)
 {
     DNS_REQUEST* req = NULL;
     const LIST_ITEM_HANDLE item =
-        list_find(list, dns_cache_dequeue_context_match_callback, pContext);
+        list_find(list, dns_cache_dequeue_context_match_callback, context);
 
     if (item != NULL)
     {
@@ -265,7 +269,7 @@ static DNS_REQUEST* dns_cache_dequeue_context_match(LIST_HANDLE list, void* pCon
  * Worker thread will run through each requested DNS host, look up the address, 
  * and then post back to the callers thread.
  */
-void dns_cache_dowork(DNS_CACHE_HANDLE handle, void* pContextToMatch)
+void DnsCacheDoWork(DnsCacheHandle handle, void* contextToMatch)
 {
     DNS_CONTEXT* ctx = (DNS_CONTEXT*)handle;
     DNS_REQUEST* req;
@@ -274,17 +278,17 @@ void dns_cache_dowork(DNS_CACHE_HANDLE handle, void* pContextToMatch)
         do
         {
             // dequeue a completed work item
-            Lock(ctx->EntryLock);
-            req = dns_cache_dequeue_context_match(ctx->hCompleteList, pContextToMatch);
-            Unlock(ctx->EntryLock);
+            Lock(ctx->entryLock);
+            req = dns_cache_dequeue_context_match(ctx->completeList, contextToMatch);
+            Unlock(ctx->entryLock);
 
             if (NULL != req)
             {
                 // call the user back with the result (currently not used but
                 // we could expose another api to look up the address later)
-                if (req->pfnResolvedCB)
+                if (req->resolvedCallback)
                 {
-                    req->pfnResolvedCB(handle, req->res, req->hResult, req->pContext);
+                    req->resolvedCallback(handle, req->result, req->resultHandle, req->context);
                 }
 
                 dns_cache_free_request(req);
@@ -293,9 +297,7 @@ void dns_cache_dowork(DNS_CACHE_HANDLE handle, void* pContextToMatch)
     }
 }
 
-static void remove_all_context_matches_from_list(
-    LIST_HANDLE list,
-    void* pContext)
+static void remove_all_context_matches_from_list(LIST_HANDLE list, void* context)
 {
     LIST_ITEM_HANDLE current = list_get_head_item(list);
 
@@ -306,7 +308,7 @@ static void remove_all_context_matches_from_list(
         const LIST_ITEM_HANDLE next = list_get_next_item(current);
 
         DNS_REQUEST* const req = (DNS_REQUEST*)list_item_get_value(current);
-        if (req->pContext == pContext)
+        if (req->context == context)
         {
             list_remove(list, current);
 
@@ -321,23 +323,22 @@ static void remove_all_context_matches_from_list(
  * Find all DNS requests that have the supplied context and remove them.  This
  * function is intended to clear out callbacks when its context is deleted.
  */
-void dns_cache_remove_context_matches(DNS_CACHE_HANDLE handle, void* pContext)
+void DnsCacheRemoveContextMatches(DnsCacheHandle handle, void* context)
 {
     DNS_CONTEXT* ctx = (DNS_CONTEXT*)handle;
 
-    Lock(ctx->EntryLock);
+    Lock(ctx->entryLock);
 
-    remove_all_context_matches_from_list(ctx->hEntryList, pContext);
-    remove_all_context_matches_from_list(ctx->hCompleteList, pContext);
+    remove_all_context_matches_from_list(ctx->entryList, context);
+    remove_all_context_matches_from_list(ctx->completeList, context);
 
-    if (ctx->currentRequest && (ctx->currentRequest->pContext == pContext))
+    if (ctx->currentRequest && (ctx->currentRequest->context == context))
     {
         // The DnsWorker thread is still using this request -- signal that
         // thread to ignore and free the request.
         ctx->currentRequest = NULL;
     }
 
-    Unlock(ctx->EntryLock);
+    Unlock(ctx->entryLock);
 }
 
-///////////////////////////////////////////////////////////////////////////////

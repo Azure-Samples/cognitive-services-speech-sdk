@@ -1,193 +1,202 @@
-#include "private-iot-cortana-sdk.h"
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// iobuffer.c: implements IOBUFFER related functions.
+//
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-IOBUFFER* IOBUFFER_NEW()
-{
-	IOBUFFER* p = malloc(sizeof(IOBUFFER));
-    if (p)
-    {
-        memset(p, 0, sizeof(IOBUFFER));
-        p->hLocker = Lock_Init();
-        p->hDataCondition = Condition_Init();
-        p->hBuffer = BUFFER_new();
-        p->nRef = 1;
-		p->nActiveReaders = 0;
-	}
+#include "azure_c_shared_utility/threadapi.h"
+#include "iobuffer.h"
 
-	return p;
+IOBUFFER* IoBufferNew()
+{
+    IOBUFFER* buffer = malloc(sizeof(IOBUFFER));
+    if (buffer)
+    {
+        memset(buffer, 0, sizeof(IOBUFFER));
+        buffer->lockerHandle = Lock_Init();
+        buffer->dataConditionHandle = Condition_Init();
+        buffer->bufferHandle = BUFFER_new();
+        buffer->refCount = 1;
+        buffer->activeReaders = 0;
+    }
+
+    return buffer;
 }
 
-void IOBUFFER_DELETE(IOBUFFER* pIoBuffer)
+void IoBufferDelete(IOBUFFER* buffer)
 {
-    int nRef = 0;
-    Lock(pIoBuffer->hLocker);
-    nRef = --pIoBuffer->nRef;
-    Unlock(pIoBuffer->hLocker);
-    if (nRef != 0)
+    int refCount = 0;
+    Lock(buffer->lockerHandle);
+    refCount = --buffer->refCount;
+    Unlock(buffer->lockerHandle);
+    if (refCount != 0)
     {
         return;
     }
 
-	IOBUFFER_Reset(pIoBuffer); // ensure IO readers exit
+    IoBufferReset(buffer); // ensure IO readers exit
 
-    if (pIoBuffer->hLocker)
+    if (buffer->lockerHandle)
     {
-        Lock_Deinit(pIoBuffer->hLocker);
+        Lock_Deinit(buffer->lockerHandle);
     }
 
-    if (pIoBuffer->hDataCondition)
+    if (buffer->dataConditionHandle)
     {
-        Condition_Deinit(pIoBuffer->hDataCondition);
+        Condition_Deinit(buffer->dataConditionHandle);
     }
 
-	if (pIoBuffer->hBuffer)
-	{
-        BUFFER_delete(pIoBuffer->hBuffer);
-	}
+    if (buffer->bufferHandle)
+    {
+        BUFFER_delete(buffer->bufferHandle);
+    }
 
-	free(pIoBuffer);
+    free(buffer);
 }
 
-void IOBUFFER_AddRef(IOBUFFER* pIoBuffer)
+void IoBufferAddRef(IOBUFFER* buffer)
 {
-    Lock(pIoBuffer->hLocker);
-    ++pIoBuffer->nRef;
-    Unlock(pIoBuffer->hLocker);
+    Lock(buffer->lockerHandle);
+    ++buffer->refCount;
+    Unlock(buffer->lockerHandle);
 }
 
-void IOBUFFER_Reset(IOBUFFER* pIoBuffer)
+void IoBufferReset(IOBUFFER* buffer)
 {
-    Lock(pIoBuffer->hLocker);
+    Lock(buffer->lockerHandle);
 
-	// make sure all active readers exit as part of the reset
-	if (pIoBuffer->nActiveReaders > 0)
-	{
-		pIoBuffer->nReadBytes = 0;
-		pIoBuffer->hasNewCome = 1;
-		pIoBuffer->nCompleted = 1;
-		pIoBuffer->nTotalBytes = 0;
-		Condition_Post(pIoBuffer->hDataCondition);
-		while (pIoBuffer->nActiveReaders > 0)
-		{
-			// spin until they exit
-			Unlock(pIoBuffer->hLocker);
-			ThreadAPI_Sleep(5);
-			Lock(pIoBuffer->hLocker);
-		}
-	}
+    // make sure all active readers exit as part of the reset
+    if (buffer->activeReaders > 0)
+    {
+        buffer->readBytes = 0;
+        buffer->hasNewCome = 1;
+        buffer->completedBytes = 1;
+        buffer->totalBytes = 0;
+        Condition_Post(buffer->dataConditionHandle);
+        while (buffer->activeReaders > 0)
+        {
+            // spin until they exit
+            Unlock(buffer->lockerHandle);
+            ThreadAPI_Sleep(5);
+            Lock(buffer->lockerHandle);
+        }
+    }
 
-	pIoBuffer->nReadBytes = 0;
-	pIoBuffer->nCompleted = 0;
-	pIoBuffer->nTotalBytes = 0;
-	pIoBuffer->hasNewCome = 0;
-	Unlock(pIoBuffer->hLocker);
+    buffer->readBytes = 0;
+    buffer->completedBytes = 0;
+    buffer->totalBytes = 0;
+    buffer->hasNewCome = 0;
+    Unlock(buffer->lockerHandle);
 }
 
-int IOBUFFER_GetTotalBytes(IOBUFFER* pIoBuffer)
-{
-	int ret = 0;
-    Lock(pIoBuffer->hLocker);
-    ret = pIoBuffer->nCompleted ? pIoBuffer->nTotalBytes : -1;
-    Unlock(pIoBuffer->hLocker);
-    return ret;
-}
-
-int IOBUFFER_GetUnReadBytes(IOBUFFER* pIoBuffer)
+int IoBufferGetTotalBytes(IOBUFFER* buffer)
 {
     int ret = 0;
-    Lock(pIoBuffer->hLocker);
-    ret = pIoBuffer->nTotalBytes - pIoBuffer->nReadBytes;
-    Unlock(pIoBuffer->hLocker);
+    Lock(buffer->lockerHandle);
+    ret = buffer->completedBytes ? buffer->totalBytes : -1;
+    Unlock(buffer->lockerHandle);
     return ret;
 }
 
-int IOBUFFER_WaitForNewBytes(IOBUFFER* pIoBuffer, int timeout)
+int IoBufferGetUnReadBytes(IOBUFFER* buffer)
+{
+    int ret = 0;
+    Lock(buffer->lockerHandle);
+    ret = buffer->totalBytes - buffer->readBytes;
+    Unlock(buffer->lockerHandle);
+    return ret;
+}
+
+int IoBufferWaitForNewBytes(IOBUFFER* buffer, int timeout)
 {
     COND_RESULT waitret = COND_OK;
-    Lock(pIoBuffer->hLocker);
-    ++pIoBuffer->nActiveReaders;
-    if (!pIoBuffer->hasNewCome)
+    Lock(buffer->lockerHandle);
+    ++buffer->activeReaders;
+    if (!buffer->hasNewCome)
     {
-        waitret = Condition_Wait(pIoBuffer->hDataCondition, pIoBuffer->hLocker, timeout);
+        waitret = Condition_Wait(buffer->dataConditionHandle, buffer->lockerHandle, timeout);
     }
 
-    pIoBuffer->hasNewCome = 0;
-    --pIoBuffer->nActiveReaders;
-    Unlock(pIoBuffer->hLocker);
+    buffer->hasNewCome = 0;
+    --buffer->activeReaders;
+    Unlock(buffer->lockerHandle);
     return waitret == COND_OK ? 0 : -1;
 }
 
-static int IOBUFFER_ReadInternal(IOBUFFER* pIoBuffer, void* pDstBuff, int nOffset, int nBytes, int timeout, int isPeek)
+static int IoBufferReadInternal(IOBUFFER* buffer, void* targetBuffer, int offset, int bytesToRead, int timeout, int isPeek)
 {
     COND_RESULT waitret = COND_OK;
-    Lock(pIoBuffer->hLocker);
-	++pIoBuffer->nActiveReaders;
-    while (waitret == COND_OK && pIoBuffer->nTotalBytes < pIoBuffer->nReadBytes + nBytes && !pIoBuffer->nCompleted)
-	{
-        waitret = Condition_Wait(pIoBuffer->hDataCondition, pIoBuffer->hLocker, timeout);
-	}
-
-	if (pIoBuffer->nTotalBytes < pIoBuffer->nReadBytes + nBytes)
-	{
-		nBytes = -1;
-	}
-    else
+    Lock(buffer->lockerHandle);
+    ++buffer->activeReaders;
+    while (waitret == COND_OK && buffer->totalBytes < buffer->readBytes + bytesToRead && !buffer->completedBytes)
     {
-        memcpy((uint8_t*)pDstBuff + nOffset, BUFFER_u_char(pIoBuffer->hBuffer) + pIoBuffer->nReadBytes, nBytes);
-		if (!isPeek)
-		{
-			pIoBuffer->nReadBytes += nBytes;
-		}
+        waitret = Condition_Wait(buffer->dataConditionHandle, buffer->lockerHandle, timeout);
     }
 
-    pIoBuffer->hasNewCome = 0;
-	--pIoBuffer->nActiveReaders;
-	Unlock(pIoBuffer->hLocker);
+    if (buffer->totalBytes < buffer->readBytes + bytesToRead)
+    {
+        bytesToRead = -1;
+    }
+    else
+    {
+        memcpy((uint8_t*)targetBuffer + offset, BUFFER_u_char(buffer->bufferHandle) + buffer->readBytes, bytesToRead);
+        if (!isPeek)
+        {
+            buffer->readBytes += bytesToRead;
+        }
+    }
 
-	return nBytes;
+    buffer->hasNewCome = 0;
+    --buffer->activeReaders;
+    Unlock(buffer->lockerHandle);
+
+    return bytesToRead;
 }
 
-int IOBUFFER_PeekRead(IOBUFFER* pIoBuffer, void* pDstBuff, int nOffset, int nBytes, int timeout)
+int IoBufferPeekRead(IOBUFFER* buffer, void* targetBuffer, int offset, int bytesToRead, int timeout)
 {
-	return IOBUFFER_ReadInternal(pIoBuffer, pDstBuff, nOffset, nBytes, timeout, 1);
+    return IoBufferReadInternal(buffer, targetBuffer, offset, bytesToRead, timeout, 1);
 }
 
 
-int IOBUFFER_Read(IOBUFFER* pIoBuffer, void* pDstBuff, int nOffset, int nBytes, int timeout)
+int IoBufferRead(IOBUFFER* buffer, void* targetBuffer, int offset, int bytesToRead, int timeout)
 {
-	return IOBUFFER_ReadInternal(pIoBuffer, pDstBuff, nOffset, nBytes, timeout, 0);
+    return IoBufferReadInternal(buffer, targetBuffer, offset, bytesToRead, timeout, 0);
 }
 
-int IOBUFFER_Write(IOBUFFER* pIoBuffer, const void* pSrcBuff, int nOffset, int nBytes)
+int IoBufferWrite(IOBUFFER* buffer, const void* sourceBuffer, int offset, int bytesToWrite)
 {
-    int ret = nBytes;
-    Lock(pIoBuffer->hLocker);
-    if (pSrcBuff == NULL)
-	{
-		pIoBuffer->nCompleted = 1;
-	}
-	else
-	{
-        if (pIoBuffer->nTotalBytes + nBytes > (int)BUFFER_length(pIoBuffer->hBuffer) &&
-            BUFFER_enlarge(pIoBuffer->hBuffer, pIoBuffer->nTotalBytes + nBytes))
+    int ret = bytesToWrite;
+    Lock(buffer->lockerHandle);
+    if (sourceBuffer == NULL)
+    {
+        buffer->completedBytes = 1;
+    }
+    else
+    {
+        if (buffer->totalBytes + bytesToWrite > (int)BUFFER_length(buffer->bufferHandle) &&
+            BUFFER_enlarge(buffer->bufferHandle, buffer->totalBytes + bytesToWrite))
         {
             ret = -1;
         }
         else
         {
-            memcpy(BUFFER_u_char(pIoBuffer->hBuffer) + pIoBuffer->nTotalBytes, (uint8_t*)pSrcBuff + nOffset, nBytes);
-            pIoBuffer->nTotalBytes += nBytes;
+            memcpy(BUFFER_u_char(buffer->bufferHandle) + buffer->totalBytes, (uint8_t*)sourceBuffer + offset, bytesToWrite);
+            buffer->totalBytes += bytesToWrite;
         }
     }
 
-    if (!pIoBuffer->hasNewCome)
+    if (!buffer->hasNewCome)
     {
-        Condition_Post(pIoBuffer->hDataCondition);
-        pIoBuffer->hasNewCome = 1;
+        Condition_Post(buffer->dataConditionHandle);
+        buffer->hasNewCome = 1;
     }
 
-    Unlock(pIoBuffer->hLocker);
+    Unlock(buffer->lockerHandle);
     return ret;
 }

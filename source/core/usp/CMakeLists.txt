@@ -20,24 +20,27 @@ set(HEADERS
     )
 
 set(HEADERS_PRIVATE
+    "${SRC_DIR}/uspcommon.h"
     "${SRC_DIR}/uspinternal.h"
-    # add others here as well?
+    "${SRC_DIR}/dnscache.h"
+    "${SRC_DIR}/iobuffer.h"
+    "${SRC_DIR}/metricids.h"
+    "${SRC_DIR}/metrics.h"
+    "${SRC_DIR}/propbag.h"
+    "${SRC_DIR}/tokenstore.h"
+    "${SRC_DIR}/transport.h"
     )
 
 set(SOURCES
-    "${SRC_DIR}/SpeechAPI.c"
-    "${SRC_DIR}/contentHandlers.c"
-    "${SRC_DIR}/dns_cache.c"
-    "${SRC_DIR}/file_linux.c"
-    "${SRC_DIR}/file_win.cpp"
+    "${CARBON_ROOT}/external/parson/parson.c"
+    "${SRC_DIR}/dnscache.c"
     "${SRC_DIR}/iobuffer.c"
     "${SRC_DIR}/metrics.c"
-    "${CARBON_ROOT}/external/parson/parson.c"
-    "${SRC_DIR}/propbag_parson.c"
-    "${SRC_DIR}/skills.c"
-    "${SRC_DIR}/transcode.c"
+    "${SRC_DIR}/propbag.c"
+    "${SRC_DIR}/responses.c"
     "${SRC_DIR}/transport.c"
-    "${SRC_DIR}/usplib.c"
+    "${SRC_DIR}/uspapi.c"
+    "${SRC_DIR}/uspimpl.c"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})

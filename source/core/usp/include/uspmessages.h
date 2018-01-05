@@ -6,6 +6,10 @@
 //
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 
 typedef uint32_t UspOffsetType;
@@ -74,3 +78,6 @@ typedef struct _UspMsgTurnStart
  */
 typedef struct _UspMsgTurnEnd UspMsgTurnEnd;
 
+#ifdef __cplusplus
+}
+#endif

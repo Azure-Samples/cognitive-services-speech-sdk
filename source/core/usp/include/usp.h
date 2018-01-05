@@ -12,6 +12,9 @@
 #include "uspmessages.h"
 #include "usperror.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define USP_VERSION 1.0
 
@@ -135,3 +138,6 @@ UspResult UspShutdown(UspHandle handle);
 */
 void UspRun(UspHandle handle);
 
+#ifdef __cplusplus
+}
+#endif

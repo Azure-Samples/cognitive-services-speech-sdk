@@ -1,179 +1,170 @@
-#ifndef TRANSPORT_H
-#define TRANSPORT_H
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// transport.h: defines functions provided by the transport layer.
+//
+
+#pragma once
+
+#include <stdbool.h>
 
 #include "azure_c_shared_utility/httpheaders.h"
-#include "SpeechAPI.h"
-#include "token_store.h"
-#include "dns_cache.h"
+#include "azure_c_shared_utility/uhttp.h"
+#include "azure_c_shared_utility/tlsio.h"
+#include "azure_c_shared_utility/wsio.h"
+#include "azure_c_shared_utility/list.h"
+#include "azure_c_shared_utility/buffer_.h"
+#include "azure_c_shared_utility/lock.h"
+
+#include "tokenstore.h"
+#include "dnscache.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef void*           TRANSPORT_HANDLE;
+#define KEYWORD_PATH "Path"
+
+typedef void* TransportHandle;
 
 /**
  * Creates a new transport request.
- * @param pszHost The host name.
- * @param pContext The application defined context to return.
+ * @param host The host name.
+ * @param context The application defined context that will be passed back during callback.
  * @return A new transport handle.
  */
-TRANSPORT_HANDLE transport_request_create(
-    const char*        pszHost,
-    void*              pContext
-    );
+TransportHandle TransportRequestCreate(const char* host, void* context);
 
 /**
  * Destroys a transport request.
- * @param hTransport The request to destroy.
+ * @param transportHandle The tranport handle representing the request to be destroyed.
  */
-void transport_request_destroy(
-    TRANSPORT_HANDLE hTransport
-    );
+void TransportRequestDestroy(TransportHandle transportHandle);
 
 /**
  * Executes a transport request.
- * @param hTransport The request to execute.
- * @param pszPath The path to request.
- * @param pBuffer The buffer to send to the transport service.
+ * @param transportHandle The request to execute.
+ * @param path The path to request.
+ * @param buffer The buffer to send to the transport service.
  * @param length The length of pBuffer.
  * @return A return code or zero if successful.
  */
-SPEECH_RESULT transport_request_execute(
-    TRANSPORT_HANDLE   hTransport,
-    const char*        pszPath,
-    uint8_t*           pBuffer,
-    size_t             length
-    );
+int TransportRequestExecute(TransportHandle transportHandle, const char* path, uint8_t* buffer, size_t length);
 
 /**
  * Prepares the start of a new transport request.
- * @param hTransport The request to prepare.
+ * @param transportHandle The request to prepare.
  * @return A return code or zero if successful.
  */
-int transport_request_prepare(
-    TRANSPORT_HANDLE hTransport
-);
+int TransportRequestPrepare(TransportHandle transportHandle);
 
 /**
- * Adds a request header to be used in each transport request.
- * @param hTransport The request to prepare.
- * @param pszName The name of the header.
- * @param pszValue The value of the header.
+ * Adds a request header to be used in the transport request.
+ * @param transportHandle The request to prepare.
+ * @param name The name of the header.
+ * @param value The value of the header.
  * @return A return code or zero if successful.
  */
-int transport_request_addrequestheader(
-    TRANSPORT_HANDLE hTransport,
-    const char *pszName,
-    const char *pszValue
-);
+int TransportRequestAddRequestHeader(TransportHandle transportHandle, const char *name, const char *´value);
 
 /**
  * Prepares the start of a new transport stream.
- * @param hTransport The request to prepare.
- * @param pszPath The path to use for stream I/O.
+ * @param transportHandle The request to prepare.
+ * @param path The path to use for stream I/O.
  * @return A return code or zero if successful.
  */
-int transport_stream_prepare(
-    TRANSPORT_HANDLE hTransport,
-    const char* pszPath
-);
+int TransportStreamPrepare(TransportHandle transportHandle, const char* path);
 
 /**
  * Writes to the transport stream.
- * @param hTransport The request to prepare.
- * @param pBuffer The buffer to write to the stream.
+ * @param transportHandle The request to prepare.
+ * @param buffer The buffer to write to the stream.
  * @param bufferSize The byte size of pBuffer.
  * @return A return code or zero if successful.
  */
-int transport_stream_write(
-    TRANSPORT_HANDLE hTransport,
-    const uint8_t*   pBuffer,
-    size_t           bufferSize
-);
+int TransportStreamWrite(TransportHandle transportHandle, const uint8_t* buffer, size_t bufferSize);
 
 /**
  * Flushes any outstanding I/O on the transport stream.
- * @param hTransport The request to prepare.
+ * @param transportHandle The request to prepare.
  * @return A return code or zero if successful.
  */
-int transport_stream_flush(
-    TRANSPORT_HANDLE hTransport
-);
+int TransportStreamFlush(TransportHandle transportHandle);
 
 /**
  * Processes any outstanding operations that need attention.
- * @param handle The request handle.
+ * @param tranportHandle The request to process.
  * @return Returns zero when the request has completed, or non-zero if there is still pending I/O.
  */
-int transport_dowork(
-    TRANSPORT_HANDLE hTransport
-);
+int TransportDoWork(TransportHandle transportHandle);
 
-enum transport_error
+typedef enum _TransportError
 {
-    transport_error_none = 0,
-    transport_error_authentication,
-    transport_error_remoteclosed,
-    transport_error_connection_failure,
-    transport_error_dns_failure,
-};
+    TRANSPORT_ERROR_NONE = 0,
+    TRANSPORT_ERROR_AUTHENTICATION,
+    TRANSPORT_ERROR_REMOTECLOSED,
+    TRANSPORT_ERROR_CONNECTION_FAILURE,
+    TRANSPORT_ERROR_DNS_FAILURE
+} TransportError;
 
 /**
- * The PTRANSPORT_ERROR type represents an application-defined
+ * The TransportErrorCallback type represents an application-defined
  * status callback function used for signaling when the transport has failed.
- * @param hTransport The transport handle.
+ * @param transportHandle The transport handle.
  * @param reason The reeason for the error.
- * @param pContext A pointer to the application-defined callback context.
+ * @param context A pointer to the application-defined callback context.
  */
-typedef void(*PTRANSPORT_ERROR)(
-    TRANSPORT_HANDLE        hTransport,
-    enum transport_error    reason,
-    void*                   pContext);
+typedef void(*TransportErrorCallback)(TransportHandle transportHandle, TransportError reason, void* context);
 
 /**
  * The PTRANSPORT_RECV_CALLBACK type represents an application-defined
  * status callback function used for signaling when data has been received.
- * @param hTransport The transport handle.
- * @param hResponseHeader A response header handle.
- * @param pBuffer A pointer to the received content.
+ * @param transportHandle The transport handle.
+ * @param responseHeader A response header handle.
+ * @param buffer A pointer to the received content.
  * @param bufferLen The length of pBuffer.
  * @param errorCode The transport error code.
- * @param pContext A pointer to the application-defined callback context.
+ * @param context A pointer to the application-defined callback context.
  */
-typedef void(*PTRANSPORT_RESPONSE_CALLBACK)(
-    TRANSPORT_HANDLE     hTransport,
-    HTTP_HEADERS_HANDLE  hResponseHeader,
-    const unsigned char* pBuffer,
-    size_t               bufferLen,
-    unsigned int         errorCode,
-    void*                pContext); 
+typedef void(*TransportResponseCallback)(TransportHandle transportHandle, HTTP_HEADERS_HANDLE  responseHeader, const unsigned char* buffer, size_t bufferLen, unsigned int errorCode, void* context); 
 
 /**
  * Registers for events from the transport.
- * @param hTransport The request to prepare.
- * @param pfnErrorCB The error callback.
- * @param pfnRecvCB The response callback.
+ * @param transportHandle The request to prepare.
+ * @param errorCallback The error callback.
+ * @param recvCallback The response callback.
  * @return A return code or zero if successful.
  */
-int transport_setcallbacks(
-    TRANSPORT_HANDLE             hTransport,
-    PTRANSPORT_ERROR             pfnErrorCB,
-    PTRANSPORT_RESPONSE_CALLBACK pfnRecvCB
-);
+int TransportSetCallbacks(TransportHandle transportHandle, TransportErrorCallback errorCallback, TransportResponseCallback recvCallback);
 
 /**
- * Enable authorization header on transport
- * @param token_store The token store to pull tokens from
+ * Enables authorization header on transport.
+ * @param transportHandle The request to set.
+ * @param token_store The token store to pull tokens from.
  * @return A return code or zero if successful.
  */
-int transport_set_tokenstore(
-    TRANSPORT_HANDLE hTransport,
-    TokenStore token_store
-);
+int TransportSetTokenStore(TransportHandle transportHandle, TokenStore token_store);
+
+/**
+* Creates a new request id on transport
+* @param transportHandle The transport handle.
+*/
+void TransportCreateRequestId(TransportHandle transportHandle);
+
+/**
+* Gets the current request id on transport
+* @param transportHandle The transport handle.
+*/
+const char* TransportGetRequestId(TransportHandle transportHandle);
+
+/**
+* sets the DNS cache on transport
+* @param transportHandle The transport handle.
+*/
+void TransportSetDnsCache(TransportHandle transportHandle, DnsCacheHandle dnsCache);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif

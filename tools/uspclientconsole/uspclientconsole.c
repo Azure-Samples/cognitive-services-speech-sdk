@@ -83,12 +83,14 @@ int main(int argc, char* argv[])
     if (argc < 2)
     {
         printf("Usage: uspclientconsole audio_file");
+        exit(1);
     }
     
     FILE *audio = fopen(argv[1], "rb");
     if (audio == NULL)
     {
         printf("Error: open file %s failed", argv[1]);
+        exit(1);
     }
 
     bytesRead = fread(buffer, sizeof(uint8_t), MAX_AUDIO_SIZE_IN_BYTE, audio);
