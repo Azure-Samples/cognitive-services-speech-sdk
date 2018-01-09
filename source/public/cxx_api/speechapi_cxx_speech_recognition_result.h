@@ -42,11 +42,16 @@ protected:
 
     void PopulateResultFields(SPXRESULTHANDLE hresult)
     {
-        static_assert((int)Reason_NoMatch == (int)Reason::NoMatch, "Reason_* enum values == Reason::* enum values");
-        static_assert((int)Reason_Canceled == (int)Reason::Canceled, "Reason_* enum values == Reason::* enum values");
-        static_assert((int)Reason_Recognized == (int)Reason::Recognized, "Reason_* enum values == Reason::* enum values");
-        static_assert((int)Reason_OtherRecognizer == (int)Reason::OtherRecognizer, "Reason_* enum values == Reason::* enum values");
-        static_assert((int)Reason_IntermediateResult == (int)Reason::IntermediateResult, "Reason_* enum values == Reason::* enum values");
+        static_assert((int)Reason_NoMatch == (int)CARBON_NAMESPACE_ROOT::Recognition::Reason::NoMatch, 
+            "Reason_* enum values == Reason::* enum values");
+        static_assert((int)Reason_Canceled == (int)CARBON_NAMESPACE_ROOT::Recognition::Reason::Canceled, 
+            "Reason_* enum values == Reason::* enum values");
+        static_assert((int)Reason_Recognized == (int)CARBON_NAMESPACE_ROOT::Recognition::Reason::Recognized, 
+            "Reason_* enum values == Reason::* enum values");
+        static_assert((int)Reason_OtherRecognizer == (int)CARBON_NAMESPACE_ROOT::Recognition::Reason::OtherRecognizer, 
+            "Reason_* enum values == Reason::* enum values");
+        static_assert((int)Reason_IntermediateResult == (int)CARBON_NAMESPACE_ROOT::Recognition::Reason::IntermediateResult, 
+            "Reason_* enum values == Reason::* enum values");
 
         SPX_INIT_HR(hr);
 
@@ -58,7 +63,7 @@ protected:
 
         Result_RecognitionReason reason;
         SPX_THROW_ON_FAIL(hr = Result_GetRecognitionReason(hresult, &reason));
-        m_reason = (enum class Reason)reason;
+        m_reason = (enum Reason)reason;
 
         SPX_THROW_ON_FAIL(hr = Result_GetText(hresult, sz, cch));
         m_text = sz;
@@ -75,7 +80,7 @@ private:
     SPXRESULTHANDLE m_hresult;
 
     std::wstring m_resultId;
-    enum class Reason m_reason;
+    enum Reason m_reason;
     std::wstring m_text;
     PayloadItems m_payload;    
 };

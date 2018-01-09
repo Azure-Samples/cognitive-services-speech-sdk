@@ -66,7 +66,7 @@ int TransportRequestPrepare(TransportHandle transportHandle);
  * @param value The value of the header.
  * @return A return code or zero if successful.
  */
-int TransportRequestAddRequestHeader(TransportHandle transportHandle, const char *name, const char *´value);
+int TransportRequestAddRequestHeader(TransportHandle transportHandle, const char *name, const char *value);
 
 /**
  * Prepares the start of a new transport stream.

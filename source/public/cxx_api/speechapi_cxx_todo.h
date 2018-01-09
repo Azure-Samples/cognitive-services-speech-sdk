@@ -6,17 +6,17 @@
 //
 
 #pragma once
-#include <exception>
+#include <stdexcept>
 
 
 namespace CARBON_NAMESPACE_ROOT { // ----------------------------------------
 
 
-class NotYetImplementedException : public std::exception
+class NotYetImplementedException : public std::runtime_error
 {
 public:
 
-    NotYetImplementedException() : std::exception("CARBON: not yet implemented"){};
+    NotYetImplementedException() : std::runtime_error("CARBON: not yet implemented"){};
 };
 
 

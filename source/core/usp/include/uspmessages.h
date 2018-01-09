@@ -11,6 +11,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include <wchar.h>
 
 typedef uint32_t UspOffsetType;
 typedef uint32_t UspDurationType;

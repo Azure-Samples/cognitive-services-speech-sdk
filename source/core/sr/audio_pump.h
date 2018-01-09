@@ -50,8 +50,8 @@ private:
     std::condition_variable m_cv;
 
     std::shared_ptr<ISpxAudioReader> m_audioReader;
-    enum class State m_stateRequested;
-    enum class State m_state;
+    enum State m_stateRequested;
+    enum State m_state;
 
     std::thread m_thread;
 };

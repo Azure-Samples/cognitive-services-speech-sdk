@@ -26,11 +26,7 @@ void SpxTraceMessage(int level, const char* pszTitle, const char* pszFormat, ...
         auto now = std::chrono::high_resolution_clock::now();
         unsigned long delta = (unsigned long)std::chrono::duration_cast<std::chrono::milliseconds>(now - __g_spx_trace_message_time0).count();
 
-        char deltastr[20];
-        _ultoa_s(delta, deltastr, sizeof(deltastr), 10);
-        strcat_s(deltastr, sizeof(deltastr), "ms ");
-
-        std::string format(deltastr);
+        std::string format("ms " + std::to_string(delta));
         while (*pszFormat == '\n' || *pszFormat == '\r')
         {
             if (*pszFormat == '\r')

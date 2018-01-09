@@ -226,7 +226,7 @@ public:
     virtual std::wstring GetResultId() = 0;
     virtual std::wstring GetText() = 0;
 
-    virtual enum class Reason GetReason() = 0;
+    virtual enum Reason GetReason() = 0;
 };
 
 

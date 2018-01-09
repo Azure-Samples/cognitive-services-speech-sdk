@@ -43,6 +43,10 @@ if(WIN32)
         mfreadwrite.lib
         mfuuid.lib
     )
+else()
+    list(APPEND SOURCES
+        "${SRC_DIR}/linux/microphone.cpp"
+    )
 endif()
 
 source_group("Header Files (public)" FILES ${HEADERS})

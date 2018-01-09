@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "string_utils.h"
 
 
 using namespace CARBON_IMPL_NAMESPACE();
@@ -15,7 +16,7 @@ SPXAPI Result_GetResultId(SPXRESULTHANDLE hresult, wchar_t* pszResultId, uint32_
 
         auto strActual = result->GetResultId();
         auto pszActual = strActual.c_str();
-        wcsncpy_s(pszResultId, cchResultId, pszActual, _TRUNCATE);
+        PAL_wcscpy(pszResultId, cchResultId, pszActual, strActual.size(), true);
     }
     SPXAPI_CATCH_AND_RETURN(hr);
 }
@@ -50,7 +51,7 @@ SPXAPI Result_GetText(SPXRESULTHANDLE hresult, wchar_t* pszText, uint32_t cchTex
 
         auto strActual = result->GetText();
         auto pszActual = strActual.c_str();
-        wcsncpy_s(pszText, cchText, pszActual, _TRUNCATE);
+        PAL_wcscpy(pszText, cchText, pszActual, strActual.size(), true);
     }
     SPXAPI_CATCH_AND_RETURN(hr);
 }

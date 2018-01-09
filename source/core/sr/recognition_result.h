@@ -25,7 +25,7 @@ public:
 
     std::wstring GetResultId();
     std::wstring GetText();
-    enum class Reason GetReason();
+    enum Reason GetReason();
 
     // TODO: RobCh: Payload
 
@@ -39,7 +39,7 @@ private:
 
     std::wstring m_resultId;
     std::wstring m_text;
-    enum class Reason m_reason;
+    enum Reason m_reason;
 };
 
 

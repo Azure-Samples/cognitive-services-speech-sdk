@@ -5,11 +5,14 @@ set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
 
+include_directories("${COMMON}/include") # for PAL utils
+
 set(HEADERS)
 
 set(HEADERS_PRIVATE 
     "${SRC_DIR}/carbon_test_console.h"
     "${SRC_DIR}/carbonx_pal.h"
+    "${SRC_DIR}/stdafx.h"
 )
 
 set(SOURCES 
@@ -19,15 +22,19 @@ set(SOURCES
     "${SRC_DIR}/hello_world_c.cpp"
 )
 
+include_directories("${SRC_DIR}")
+
 if(WIN32)
-    include_directories("${SRC_DIR}") # for "carbonx_pal.h"   
-    include_directories("${SRC_DIR}/windows") # for "stdafx.h"   
+    include_directories("${SRC_DIR}/windows") # for "stdafx.h"
     list(APPEND HEADERS_PRIVATE
-        "${SRC_DIR}/windows/stdafx.h"
         "${SRC_DIR}/windows/targetver.h"
     )
     list(APPEND SOURCES
         "${SRC_DIR}/windows/carbonx_pal.cpp"
+    )
+else()
+    list(APPEND SOURCES
+        "${SRC_DIR}/linux/carbonx_pal.cpp"
     )
 endif()
 
@@ -43,7 +50,7 @@ add_executable(carbon_test_console
     ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES}
     )
  
-target_link_libraries(carbon_test_console carbon)
+target_link_libraries(carbon_test_console common carbon)
 
 set_target_properties (carbon_test_console PROPERTIES
     FOLDER tools

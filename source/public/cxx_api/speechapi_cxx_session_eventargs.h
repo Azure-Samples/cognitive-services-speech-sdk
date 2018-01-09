@@ -35,7 +35,7 @@ protected:
     {
         static const auto cchMaxUUID = 36;
         static const auto cchMaxSessionId = cchMaxUUID + 1;
-        wchar_t sessionId[cchMaxSessionId];
+        wchar_t sessionId[cchMaxSessionId] = {};
 
         SPX_THROW_ON_FAIL(Recognizer_SessionEvent_GetSessionId(hevent, sessionId, cchMaxSessionId));
         return std::wstring(sessionId);

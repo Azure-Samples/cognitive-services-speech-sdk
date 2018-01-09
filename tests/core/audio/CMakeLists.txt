@@ -19,6 +19,11 @@ source_group("Source Files" FILES ${SOURCES})
 add_executable(audio_tests ${SOURCES})
 target_link_libraries(audio_tests audio)
 
+if (NOT WIN32)
+    find_package (Threads)
+    target_link_libraries (audio_tests ${CMAKE_THREAD_LIBS_INIT})
+endif()
+
 set_target_properties (audio_tests PROPERTIES
     FOLDER tests/audio
 )

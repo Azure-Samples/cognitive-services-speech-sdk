@@ -1,10 +1,11 @@
 #pragma once
 
-#include "targetver.h"
+#ifdef _MSC_VER
+#include "windows/targetver.h"
+#endif
 
 #include <exception>
 #include <stdio.h>
-#include <tchar.h>
 #include <stdarg.h>
 #include <algorithm>
 #include <iostream>

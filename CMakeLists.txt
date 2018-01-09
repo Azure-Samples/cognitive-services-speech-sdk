@@ -1,4 +1,10 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.5)
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
 project(carbon)
 
@@ -63,6 +69,22 @@ set(TESTS "${CARBON_ROOT}/tests")
 
 set(USP_CONSOLE "${CARBON_ROOT}/tools/uspclientconsole")
 set(CARBONX "${CARBON_ROOT}/tools/carbonx")
+
+add_subdirectory ("${CARBON_EXTERNAL}/azure-c-shared-utility" azure_c_shared_utility EXCLUDE_FROM_ALL)
+set_target_properties (aziotsharedutil PROPERTIES
+    FOLDER external_libs
+    )
+set(AZURE_SHARED_LIB aziotsharedutil)
+include_directories (AZURE_SHARED_UTIL_INCLUDE ${SHARED_UTIL_INC_FOLDER})
+
+if(WIN32)
+    list(APPEND AZURE_SHARED_LIB rpcrt4.lib)
+endif()
+
+if(LINUX)
+    # todo: double check this!
+    list(APPEND AZURE_SHARED_LIB uuid)
+endif()
 
 add_subdirectory(${COMMON})
 add_subdirectory(${AUDIO})
