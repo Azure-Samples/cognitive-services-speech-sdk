@@ -5,6 +5,8 @@
 
 namespace CARBON_IMPL_NAMESPACE() {
 
+constexpr /*static*/ CSpxRecognitionResult::NoMatch_Type CSpxRecognitionResult::NoMatch;
+constexpr /*static*/ CSpxRecognitionResult::IntermediateResult_Type CSpxRecognitionResult::IntermediateResult;
 
 CSpxRecognitionResult::CSpxRecognitionResult(const wchar_t* resultId, const wchar_t* text)
 {

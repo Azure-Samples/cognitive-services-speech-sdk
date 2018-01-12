@@ -9,6 +9,8 @@
 #include <iostream>
 #include <istream>
 #include <fstream>
+#include <platform.h>
+#include <file_utils.h>
 #include "wav_file_reader.h"
 
 
@@ -30,7 +32,13 @@ void CSpxWavFileReader::Open(const wchar_t* fileName)
     m_fileName = fileName;
 
     SPX_DBG_TRACE_VERBOSE("Opening WAV file '%S'", fileName);
+
+    // TODO (alrezni): move this to common/file_utils
+#ifdef _MSC_VER
     auto file = std::make_unique<WavFile_Type>(fileName, WavFile_Type::binary);
+#else
+    auto file = std::make_unique<WavFile_Type>(wtocharpath(fileName).c_str(), WavFile_Type::binary);
+#endif
 
     SPX_IFTRUE_THROW_HR(!file->good(), SPXERR_FILE_OPEN_FAILED);
     SPX_IFTRUE_THROW_HR(file->eof(), SPXERR_UNEXPECTED_EOF);
@@ -73,7 +81,7 @@ uint32_t CSpxWavFileReader::GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat)
     if (pformat != nullptr) // Calling with GetFormat(nullptr, ???) is valid; we don't copy bits, only return sizeof block required
     {
         size_t cb = std::min(cbFormat, cbFormatRequired);
-        memcpy(pformat, m_waveformat.get(), cb);
+        std::memcpy(pformat, m_waveformat.get(), cb);
     }
 
     return cbFormatRequired;
@@ -119,7 +127,7 @@ void CSpxWavFileReader::FindFormatAndDataChunks()
     // RIFF tag MUST be 'RIFF'
     SPX_IFTRUE_THROW_HR(!m_file->read(tag, cbTag), SPXERR_UNEXPECTED_EOF);
     SPX_IFTRUE_THROW_HR(m_file->eof(), SPXERR_UNEXPECTED_EOF);
-    SPX_IFTRUE_THROW_HR(0 != memcmp(tag, "RIFF", 4), SPXERR_INVALID_HEADER);
+    SPX_IFTRUE_THROW_HR(0 != std::memcmp(tag, "RIFF", 4), SPXERR_INVALID_HEADER);
 
     // RIFF chunk size comes next
     SPX_IFTRUE_THROW_HR(!m_file->read(chunkSizeBuffer, cbChunkSize), SPXERR_UNEXPECTED_EOF);
@@ -128,7 +136,7 @@ void CSpxWavFileReader::FindFormatAndDataChunks()
     // Format chunk MUST be 'WAVE'
     SPX_IFTRUE_THROW_HR(!m_file->read(chunkType, cbChunkType), SPXERR_UNEXPECTED_EOF);
     SPX_IFTRUE_THROW_HR(m_file->eof(), SPXERR_UNEXPECTED_EOF);
-    SPX_IFTRUE_THROW_HR(0 != memcmp(chunkType, "WAVE", 4), SPXERR_INVALID_HEADER);
+    SPX_IFTRUE_THROW_HR(0 != std::memcmp(chunkType, "WAVE", 4), SPXERR_INVALID_HEADER);
 
     // Initialize the first data chunk seek position to zero
     std::streamoff seekDataChunkPos = 0;
@@ -136,11 +144,11 @@ void CSpxWavFileReader::FindFormatAndDataChunks()
     // Read chunks until we've read the WAVEFORMAT and found the 'data' chunk position
     while ((m_waveformat.get() == nullptr || seekDataChunkPos == 0) && ReadChunkTypeAndSize(chunkType, &chunkSize))
     {
-        if (0 == memcmp(chunkType, "fmt ", cbChunkType)) // Is this the format chunk?
+        if (0 == std::memcmp(chunkType, "fmt ", cbChunkType)) // Is this the format chunk?
         {
             ReadFormatChunk(chunkSize);
         }
-        else if (0 == memcmp(chunkType, "data", cbChunkType)) // Is this a 'data' chunk?
+        else if (0 == std::memcmp(chunkType, "data", cbChunkType)) // Is this a 'data' chunk?
         {
             seekDataChunkPos = m_file->tellg();
             seekDataChunkPos -= sizeof(chunkType) + sizeof(chunkSizeBuffer); // account for bytes read w/ReadChunkTypeAndSize()
@@ -210,7 +218,7 @@ void CSpxWavFileReader::EnsureDataChunk()
     {
         if (ReadChunkTypeAndSize(chunkType, &chunkSize))
         {
-            if (0 == memcmp(chunkType, "data", cbChunkSize))
+            if (0 == std::memcmp(chunkType, "data", cbChunkSize))
             {
                 m_dataChunkBytesLeft = chunkSize;
             }

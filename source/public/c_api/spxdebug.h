@@ -97,39 +97,39 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 
 #define __SPX_DOTRACE(level, title, ...)                            \
     do {                                                            \
-        __SPX_DO_TRACE_IMPL(level, title, __VA_ARGS__);             \
+        __SPX_DO_TRACE_IMPL(level, title, ##__VA_ARGS__);           \
     } while (0)
 
-#define __SPX_TRACE_INFO(title, msg, ...) __SPX_DOTRACE(__SPX_TRACE_LEVEL_INFO, title, msg, __VA_ARGS__)
+#define __SPX_TRACE_INFO(title, msg, ...) __SPX_DOTRACE(__SPX_TRACE_LEVEL_INFO, title, msg, ##__VA_ARGS__)
 #define __SPX_TRACE_INFO_IF(cond, title, msg, ...)                  \
     do {                                                            \
         int fCond = (cond);                                         \
         if (fCond) {                                                \
-            __SPX_TRACE_INFO(title, msg, __VA_ARGS__);              \
+            __SPX_TRACE_INFO(title, msg, ##__VA_ARGS__);            \
     } } while (0)
 
-#define __SPX_TRACE_WARNING(title, msg, ...) __SPX_DOTRACE(__SPX_TRACE_LEVEL_WARNING, title, msg, __VA_ARGS__)
+#define __SPX_TRACE_WARNING(title, msg, ...) __SPX_DOTRACE(__SPX_TRACE_LEVEL_WARNING, title, msg, ##__VA_ARGS__)
 #define __SPX_TRACE_WARNING_IF(cond, title, msg, ...)               \
     do {                                                            \
         int fCond = (cond);                                         \
         if (fCond) {                                                \
-            __SPX_TRACE_WARNING(title, msg, __VA_ARGS__);           \
+            __SPX_TRACE_WARNING(title, msg, ##__VA_ARGS__);         \
     } } while (0)
 
-#define __SPX_TRACE_ERROR(title, msg, ...) __SPX_DOTRACE(__SPX_TRACE_LEVEL_ERROR, title, msg, __VA_ARGS__)
+#define __SPX_TRACE_ERROR(title, msg, ...) __SPX_DOTRACE(__SPX_TRACE_LEVEL_ERROR, title, msg, ##__VA_ARGS__)
 #define __SPX_TRACE_ERROR_IF(cond, title, msg, ...)                 \
     do {                                                            \
         int fCond = (cond);                                         \
         if (fCond) {                                                \
-            __SPX_TRACE_ERROR(title, msg, __VA_ARGS__);             \
+            __SPX_TRACE_ERROR(title, msg, ##__VA_ARGS__);           \
     } } while (0)
 
-#define __SPX_TRACE_VERBOSE(title, msg, ...) __SPX_DOTRACE(__SPX_TRACE_LEVEL_VERBOSE, title, msg, __VA_ARGS__)
+#define __SPX_TRACE_VERBOSE(title, msg, ...) __SPX_DOTRACE(__SPX_TRACE_LEVEL_VERBOSE, title, msg, ##__VA_ARGS__)
 #define __SPX_TRACE_VERBOSE_IF(cond, title, msg, ...)               \
     do {                                                            \
         int fCond = (cond);                                         \
         if (fCond) {                                                \
-            __SPX_TRACE_VERBOSE(title, msg, __VA_ARGS__);           \
+            __SPX_TRACE_VERBOSE(title, msg, ##__VA_ARGS__);         \
     } } while (0)
 
 
@@ -142,32 +142,32 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 #endif /* __cplusplus */
 
 
-#define ___SPX_EXPR_AS_STRING(_String) "" ## #_String
+#define ___SPX_EXPR_AS_STRING(_String) "" #_String
 #define __SPX_EXPR_AS_STRING(_String) ___SPX_EXPR_AS_STRING(_String)
 
-#define __SPX_TRACE_HR(title, hr, x)             __SPX_TRACE_ERROR(title, __SPX_EXPR_AS_STRING(hr) ## " = 0x%0x", x)
-#define __SPX_TRACE_ASSERT(title, expr)          __SPX_TRACE_ERROR_IF(!(expr), title, __SPX_EXPR_AS_STRING(expr) ## " = false")
-#define __SPX_TRACE_ASSERT_MSG(title, expr, ...) __SPX_TRACE_ERROR_IF(!(expr), title, __SPX_EXPR_AS_STRING(expr) ## " = false; " ## __VA_ARGS__)
+#define __SPX_TRACE_HR(title, hr, x)             __SPX_TRACE_ERROR(title, __SPX_EXPR_AS_STRING(hr) " = 0x%0x", x)
+#define __SPX_TRACE_ASSERT(title, expr)          __SPX_TRACE_ERROR_IF(!(expr), title, __SPX_EXPR_AS_STRING(expr) " = false")
+#define __SPX_TRACE_ASSERT_MSG(title, expr, ...) __SPX_TRACE_ERROR_IF(!(expr), title, __SPX_EXPR_AS_STRING(expr) " = false; " ## __VA_ARGS__)
 
 //-------------------------------------------------------
 //  SPX_ macro definitions
 //-------------------------------------------------------
 
 #ifdef __cplusplus
-#define SPX_STATIC_ASSERT_IS_BASE_OF(x, y)  static_assert(std::is_base_of<x, y>::value, "std::is_base_of<" ## # x ## ", " ## # y ## ">::value")
+#define SPX_STATIC_ASSERT_IS_BASE_OF(x, y)  static_assert(std::is_base_of<x, y>::value, "std::is_base_of<" # x ", " # y ">::value")
 #else
 #define SPX_STATIC_ASSERT_IS_BASE_OF(x, y)
 #endif
 
 #if defined(SPX_CONFIG_TRACE_INFO_WARN_ERR_VERBOSE) || defined(SPX_CONFIG_INCLUDE_ALL)
-#define SPX_TRACE_INFO(msg, ...)             __SPX_TRACE_INFO("SPX_TRACE_INFO: ", msg, __VA_ARGS__)
-#define SPX_TRACE_ERROR(msg, ...)            __SPX_TRACE_ERROR("SPX_TRACE_ERROR: ", msg, __VA_ARGS__)
-#define SPX_TRACE_WARNING(msg, ...)          __SPX_TRACE_WARNING("SPX_TRACE_WARNING:", msg, __VA_ARGS__)
-#define SPX_TRACE_VERBOSE(msg, ...)          __SPX_TRACE_VERBOSE("SPX_TRACE_VERBOSE: ", msg, __VA_ARGS__)
-#define SPX_TRACE_INFO_IF(cond, msg, ...)    __SPX_TRACE_INFO_IF(cond, "SPX_TRACE_INFO: ", msg, __VA_ARGS__)
-#define SPX_TRACE_ERROR_IF(cond, msg, ...)   __SPX_TRACE_ERROR_IF(cond, "SPX_TRACE_ERROR: ", msg, __VA_ARGS__)
-#define SPX_TRACE_WARNING_IF(cond, msg, ...) __SPX_TRACE_WARNING_IF(cond, "SPX_TRACE_WARNING:", msg, __VA_ARGS__)
-#define SPX_TRACE_VERBOSE_IF(cond, msg, ...) __SPX_TRACE_VERBOSE_IF(cond, "SPX_TRACE_VERBOSE: ", msg, __VA_ARGS__)
+#define SPX_TRACE_INFO(msg, ...)             __SPX_TRACE_INFO("SPX_TRACE_INFO: ", msg, ##__VA_ARGS__)
+#define SPX_TRACE_ERROR(msg, ...)            __SPX_TRACE_ERROR("SPX_TRACE_ERROR: ", msg, ##__VA_ARGS__)
+#define SPX_TRACE_WARNING(msg, ...)          __SPX_TRACE_WARNING("SPX_TRACE_WARNING:", msg, ##__VA_ARGS__)
+#define SPX_TRACE_VERBOSE(msg, ...)          __SPX_TRACE_VERBOSE("SPX_TRACE_VERBOSE: ", msg, ##__VA_ARGS__)
+#define SPX_TRACE_INFO_IF(cond, msg, ...)    __SPX_TRACE_INFO_IF(cond, "SPX_TRACE_INFO: ", msg, ##__VA_ARGS__)
+#define SPX_TRACE_ERROR_IF(cond, msg, ...)   __SPX_TRACE_ERROR_IF(cond, "SPX_TRACE_ERROR: ", msg, ##__VA_ARGS__)
+#define SPX_TRACE_WARNING_IF(cond, msg, ...) __SPX_TRACE_WARNING_IF(cond, "SPX_TRACE_WARNING:", msg, ##__VA_ARGS__)
+#define SPX_TRACE_VERBOSE_IF(cond, msg, ...) __SPX_TRACE_VERBOSE_IF(cond, "SPX_TRACE_VERBOSE: ", msg, ##__VA_ARGS__)
 #else
 #define SPX_TRACE_INFO(...)
 #define SPX_TRACE_ERROR(...)
@@ -180,14 +180,14 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 #endif
 
 #if defined(SPX_CONFIG_DBG_TRACE_INFO_WARN_ERR_VERBOSE) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
-#define SPX_DBG_TRACE_INFO(msg, ...)             __SPX_TRACE_INFO("SPX_DBG_TRACE_INFO: ", msg, __VA_ARGS__)
-#define SPX_DBG_TRACE_ERROR(msg, ...)            __SPX_TRACE_ERROR("SPX_DBG_TRACE_ERROR: ", msg, __VA_ARGS__)
-#define SPX_DBG_TRACE_WARNING(msg, ...)          __SPX_TRACE_WARNING("SPX_DBG_TRACE_WARNING:", msg, __VA_ARGS__)
-#define SPX_DBG_TRACE_VERBOSE(msg, ...)          __SPX_TRACE_VERBOSE("SPX_DBG_TRACE_VERBOSE: ", msg, __VA_ARGS__)
-#define SPX_DBG_TRACE_INFO_IF(cond, msg, ...)    __SPX_TRACE_INFO_IF(cond, "SPX_DBG_TRACE_INFO: ", msg, __VA_ARGS__)
-#define SPX_DBG_TRACE_ERROR_IF(cond, msg, ...)   __SPX_TRACE_ERROR_IF(cond, "SPX_DBG_TRACE_ERROR: ", msg, __VA_ARGS__)
-#define SPX_DBG_TRACE_WARNING_IF(cond, msg, ...) __SPX_TRACE_WARNING_IF(cond, "SPX_DBG_TRACE_WARNING:", msg, __VA_ARGS__)
-#define SPX_DBG_TRACE_VERBOSE_IF(cond, msg, ...) __SPX_TRACE_VERBOSE_IF(cond, "SPX_DBG_TRACE_VERBOSE: ", msg, __VA_ARGS__)
+#define SPX_DBG_TRACE_INFO(msg, ...)             __SPX_TRACE_INFO("SPX_DBG_TRACE_INFO: ", msg, ##__VA_ARGS__)
+#define SPX_DBG_TRACE_ERROR(msg, ...)            __SPX_TRACE_ERROR("SPX_DBG_TRACE_ERROR: ", msg, ##__VA_ARGS__)
+#define SPX_DBG_TRACE_WARNING(msg, ...)          __SPX_TRACE_WARNING("SPX_DBG_TRACE_WARNING:", msg, ##__VA_ARGS__)
+#define SPX_DBG_TRACE_VERBOSE(msg, ...)          __SPX_TRACE_VERBOSE("SPX_DBG_TRACE_VERBOSE: ", msg, ##__VA_ARGS__)
+#define SPX_DBG_TRACE_INFO_IF(cond, msg, ...)    __SPX_TRACE_INFO_IF(cond, "SPX_DBG_TRACE_INFO: ", msg, ##__VA_ARGS__)
+#define SPX_DBG_TRACE_ERROR_IF(cond, msg, ...)   __SPX_TRACE_ERROR_IF(cond, "SPX_DBG_TRACE_ERROR: ", msg, ##__VA_ARGS__)
+#define SPX_DBG_TRACE_WARNING_IF(cond, msg, ...) __SPX_TRACE_WARNING_IF(cond, "SPX_DBG_TRACE_WARNING:", msg, ##__VA_ARGS__)
+#define SPX_DBG_TRACE_VERBOSE_IF(cond, msg, ...) __SPX_TRACE_VERBOSE_IF(cond, "SPX_DBG_TRACE_VERBOSE: ", msg, ##__VA_ARGS__)
 #else
 #define SPX_DBG_TRACE_INFO(...)
 #define SPX_DBG_TRACE_ERROR(...)
@@ -225,7 +225,7 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 
 #if defined(SPX_CONFIG_ASSERT) || defined(SPX_CONFIG_INCLUDE_ALL)
 #define SPX_ASSERT(expr)                        __SPX_TRACE_ASSERT("SPX_ASSERT: ", expr)
-#define SPX_ASSERT_WITH_MESSAGE(expr, ...)      __SPX_TRACE_ASSERT_MSG("SPX_ASSERT: ", expr, __VA_ARGS__)
+#define SPX_ASSERT_WITH_MESSAGE(expr, ...)      __SPX_TRACE_ASSERT_MSG("SPX_ASSERT: ", expr, ##__VA_ARGS__)
 #else
 #define SPX_ASSERT(expr)
 #define SPX_ASSERT_WITH_MESSAGE(expr, ...)
@@ -233,7 +233,7 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 
 #if defined(SPX_CONFIG_DBG_ASSERT) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
 #define SPX_DBG_ASSERT(expr)                    __SPX_TRACE_ASSERT("SPX_DBG_ASSERT: ", expr)
-#define SPX_DBG_ASSERT_WITH_MESSAGE(expr, ...)  __SPX_TRACE_ASSERT_MSG("SPX_DBG_ASSERT: ", expr, __VA_ARGS__)
+#define SPX_DBG_ASSERT_WITH_MESSAGE(expr, ...)  __SPX_TRACE_ASSERT_MSG("SPX_DBG_ASSERT: ", expr, ##__VA_ARGS__)
 #else
 #define SPX_DBG_ASSERT(expr)
 #define SPX_DBG_ASSERT_WITH_MESSAGE(expr, ...)
@@ -241,7 +241,7 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 
 #if defined(SPX_CONFIG_TRACE_VERIFY) || defined(SPX_CONFIG_INCLUDE_ALL)
 #define SPX_VERIFY(expr)                        __SPX_TRACE_ASSERT("SPX_VERIFY: ", expr)
-#define SPX_VERIFY_WITH_MESSAGE(expr, ...)      __SPX_TRACE_ASSERT_MSG("SPX_VERIFY: ", expr, __VA_ARGS__)
+#define SPX_VERIFY_WITH_MESSAGE(expr, ...)      __SPX_TRACE_ASSERT_MSG("SPX_VERIFY: ", expr, ##__VA_ARGS__)
 #else
 #define SPX_VERIFY(expr)                        (expr)
 #define SPX_VERIFY_WITH_MESSAGE(expr, ...)      (expr)
@@ -249,7 +249,7 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 
 #if defined(SPX_CONFIG_DBG_TRACE_VERIFY) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
 #define SPX_DBG_VERIFY(expr)                        __SPX_TRACE_ASSERT("SPX_DBG_VERIFY: ", expr)
-#define SPX_DBG_VERIFY_WITH_MESSAGE(expr, ...)      __SPX_TRACE_ASSERT_MSG("SPX_DBG_VERIFY: ", expr, __VA_ARGS__)
+#define SPX_DBG_VERIFY_WITH_MESSAGE(expr, ...)      __SPX_TRACE_ASSERT_MSG("SPX_DBG_VERIFY: ", expr, ##__VA_ARGS__)
 #else
 #define SPX_DBG_VERIFY(expr)                        (expr)
 #define SPX_DBG_VERIFY_WITH_MESSAGE(expr, ...)      (expr)

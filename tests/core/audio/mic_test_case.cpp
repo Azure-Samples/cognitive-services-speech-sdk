@@ -1,6 +1,7 @@
 #include "catch.hpp"
 #include "microphone.h"
 #include <atomic>
+#include <cstring>
 #include <numeric>
 #include <functional>
 #include "ispxinterfaces.h"
@@ -27,7 +28,7 @@ public:
         if (format != nullptr) 
         {
             m_setFormatCallCounter++;
-            memcpy(&m_format, format, sizeof(WAVEFORMATEX));
+            std::memcpy(&m_format, format, sizeof(WAVEFORMATEX));
         }
         else 
         {

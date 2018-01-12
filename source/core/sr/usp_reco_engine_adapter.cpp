@@ -8,7 +8,7 @@
 #include "stdafx.h"
 #include "usp_reco_engine_adapter.h"
 #include "handle_table.h"
-
+#include <cstring>
 
 #define INVALID_USP_HANDLE ((void*)-1)
 
@@ -182,7 +182,7 @@ void CSpxUspRecoEngineAdapter::UspWrite_Buffered(UspHandle handle, const uint8_t
         }
 
         size_t bytesThisLoop = std::min(bytesToWrite, m_bytesLeftInBuffer);
-        memcpy(m_ptrIntoBuffer, buffer, bytesThisLoop);
+        std::memcpy(m_ptrIntoBuffer, buffer, bytesThisLoop);
 
         m_ptrIntoBuffer += bytesThisLoop;
         m_bytesLeftInBuffer -= bytesThisLoop;
@@ -287,7 +287,12 @@ void CSpxUspRecoEngineAdapter::UspOnError(UspHandle handle, void* context, UspRe
 
 void CSpxUspRecoEngineAdapter::DumpFileInit()
 {
+    // TODO (alrezni): move this to common/file_utils
+#ifdef _MSC_VER
     fopen_s(&m_hfile, "uspaudiodump.wav", "wb");
+#else
+    m_hfile = fopen("uspaudiodump.wav", "wb");
+#endif
 }
 
 void CSpxUspRecoEngineAdapter::DumpFileWrite(const uint8_t* buffer, size_t bytesToWrite)
@@ -299,6 +304,24 @@ void CSpxUspRecoEngineAdapter::DumpFileClose()
 {
     fclose(m_hfile);
     m_hfile = nullptr;
+}
+
+uint8_t* CSpxUspRecoEngineAdapter::FormatBufferWriteBytes(uint8_t* buffer, const uint8_t* source, size_t bytes)
+{
+    std::memcpy(buffer, source, bytes);
+    return buffer + bytes;
+}
+
+uint8_t* CSpxUspRecoEngineAdapter::FormatBufferWriteNumber(uint8_t* buffer, uint32_t number)
+{
+    std::memcpy(buffer, &number, sizeof(number));
+    return buffer + sizeof(number);
+}
+
+uint8_t* CSpxUspRecoEngineAdapter::FormatBufferWriteChars(uint8_t* buffer, const char* psz, size_t cch)
+{
+    std::memcpy(buffer, psz, cch);
+    return buffer + cch;
 }
 
 

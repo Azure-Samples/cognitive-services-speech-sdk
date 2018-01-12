@@ -7,13 +7,16 @@
 
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
+#include <windows.h>
 #endif
 
 #include <stdio.h>
-#include <Windows.h>
+#include <stdbool.h>
 #include "usp.h"
 
-boolean turnEnd = FALSE;
+
+
+bool turnEnd = false;
 
 char* recognitionStatusToText[] =
 {
@@ -52,7 +55,7 @@ void OnTurnStart(UspHandle handle, void* context, UspMsgTurnStart *message)
 void OnTurnEnd(UspHandle handle, void* context, UspMsgTurnEnd *message)
 {
     printf("Response: Turn.End message.\n");
-    turnEnd = TRUE;
+    turnEnd = true;
 }
 
 void OnError(UspHandle handle, void* context, UspResult error)
@@ -95,7 +98,7 @@ int main(int argc, char* argv[])
 
     bytesRead = fread(buffer, sizeof(uint8_t), MAX_AUDIO_SIZE_IN_BYTE, audio);
 
-    turnEnd = FALSE;
+    turnEnd = true;
 
     UspInitialize(&handle, &testCallbacks, context);
 
@@ -103,7 +106,12 @@ int main(int argc, char* argv[])
 
     while (!turnEnd)
     {
+        // TODO (alrezni): move this to common/platform
+#ifdef _WIN32
         Sleep(2000);
+#else // assuming __unix__
+        sleep(2);
+#endif
     }
 
     UspShutdown(handle);

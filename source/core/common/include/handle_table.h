@@ -99,7 +99,7 @@ public:
     template<class T, class Handle>
     static CSpxHandleTable<T, Handle>* Get()
     {
-        auto name = typeid(T).raw_name();
+        auto name = typeid(T).name();
 
         if (s_tables->find(name) == s_tables->end())
         {

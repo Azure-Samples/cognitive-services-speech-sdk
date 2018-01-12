@@ -3,14 +3,8 @@ project(usp)
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
-add_subdirectory ("${CARBON_EXTERNAL}/azure-c-shared-utility" azure_c_shared_utility EXCLUDE_FROM_ALL)
-
-set_target_properties (aziotsharedutil PROPERTIES
-    FOLDER external_libs
-    )
-
 include_directories(${INC_DIR})
-include_directories (${SHARED_UTIL_INC_FOLDER})
+include_directories (${AZURE_SHARED_UTIL_INCLUDE})
 include_directories ("${CARBON_EXTERNAL}/parson")
 
 set(HEADERS
@@ -49,16 +43,7 @@ source_group("Source Files" FILES ${SOURCES})
 
 add_library(usp STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
-set(USP_LIBS aziotsharedutil)
-
-if(WIN32)
-    list(APPEND USP_LIBS rpcrt4.lib)
-endif()
-
-if(LINUX)
-    # todo: double check this!
-    list(APPEND USP_LIBS uuid)
-endif()
+set(USP_LIBS ${AZURE_SHARED_LIB})
 
 set_target_properties (usp PROPERTIES
     FOLDER carbon_libs

@@ -16,6 +16,8 @@
 #define SPX_EXTERN_C        extern
 #endif
 
+#ifdef _WIN32
+
 #ifdef SPX_CONFIG_EXPORTAPIS
 #define SPXAPI_EXPORT       __declspec(dllexport)
 #endif
@@ -32,6 +34,18 @@
 #define SPXAPI_RESULTTYPE   SPXHR
 #define SPXAPI_CALLTYPE     __stdcall
 #define SPXAPI_VCALLTYPE    __cdecl
+
+#else
+
+#define SPXAPI_EXPORT       __attribute__ ((__visibility__("default")))
+
+#define SPXAPI_NOTHROW      __attribute__((nothrow))
+#define SPXAPI_RESULTTYPE   SPXHR
+// when __attribute__((stdcall)) is set, gcc generates a warning : ‘stdcall’ attribute ignored.
+#define SPXAPI_CALLTYPE
+#define SPXAPI_VCALLTYPE    __attribute__((cdecl))
+
+#endif
 
 #define SPXAPI              SPX_EXTERN_C SPXAPI_EXPORT SPXAPI_RESULTTYPE SPXAPI_NOTHROW SPXAPI_CALLTYPE 
 #define SPXAPI_(type)       SPX_EXTERN_C SPXAPI_EXPORT type SPXAPI_NOTHROW SPXAPI_CALLTYPE 

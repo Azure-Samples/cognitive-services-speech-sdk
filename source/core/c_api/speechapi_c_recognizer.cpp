@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "event_helpers.h"
 #include "handle_helpers.h"
-
+#include "string_utils.h"
 
 using namespace CARBON_IMPL_NAMESPACE();
 
@@ -331,7 +331,7 @@ SPXAPI Recognizer_SessionEvent_GetSessionId(SPXEVENTHANDLE hevent, wchar_t* pszS
             : (*sessionHandleTable)[hevent];
 
         auto sessionId = recoEvent->GetSessionId();
-        wcscpy_s(pszSessionId, cchSessionId, sessionId.c_str());
+        PAL_wcscpy(pszSessionId, cchSessionId, sessionId.c_str(), sessionId.size(), false);
     }
     SPXAPI_CATCH_AND_RETURN(hr);
 }

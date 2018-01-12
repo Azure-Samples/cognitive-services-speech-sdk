@@ -127,23 +127,11 @@ private:
 
     ISpxRecoEngineAdapterSite::ErrorPayload_Type ErrorPayloadFrom(UspResult error) { return error; } // TODO: RobCh: Implement this
 
-    uint8_t* FormatBufferWriteBytes(uint8_t* buffer, const uint8_t* source, size_t bytes)
-    {
-        memcpy(buffer, source, bytes);
-        return buffer + bytes;
-    }
+    uint8_t* FormatBufferWriteBytes(uint8_t* buffer, const uint8_t* source, size_t bytes);
 
-    uint8_t* FormatBufferWriteNumber(uint8_t* buffer, uint32_t number)
-    {
-        memcpy(buffer, &number, sizeof(number));
-        return buffer + sizeof(number);
-    }
+    uint8_t* FormatBufferWriteNumber(uint8_t* buffer, uint32_t number);
 
-    uint8_t* FormatBufferWriteChars(uint8_t* buffer, const char* psz, size_t cch)
-    {
-        memcpy(buffer, psz, cch);
-        return buffer + cch;
-    }
+    uint8_t* FormatBufferWriteChars(uint8_t* buffer, const char* psz, size_t cch);
 
     uint32_t EndianConverter(uint32_t number)
     {

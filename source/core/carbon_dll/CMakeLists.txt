@@ -18,22 +18,25 @@ set(HEADERS_PRIVATE)
 
 set(SOURCES "${SRC_DIR}/stdafx.cpp")
 
-set_source_files_properties("${SRC_DIR}/stdafx.cpp"
-    PROPERTIES
-    COMPILE_FLAGS "/Ycstdafx.h"
-)
+include_directories(${SRC_DIR}) # for "stdafx.h"
 
 if(WIN32)
     if (MSVC)
+
+        set_source_files_properties("${SRC_DIR}/stdafx.cpp"
+            PROPERTIES
+            COMPILE_FLAGS "/Ycstdafx.h"
+        )
+
         # For precompiled header.
         # Set 
         # "Precompiled Header" to "Use (/Yu)"
         # "Precompiled Header File" to "stdafx.h"
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Yustdafx.h /FIstdafx.h")
     endif()
-    include_directories("${SRC_DIR}/windows") # for "stdafx.h"   
+
     list(APPEND HEADERS_PRIVATE
-        "${SRC_DIR}/windows/stdafx.h"
+        "${SRC_DIR}/stdafx.h"
         "${SRC_DIR}/windows/targetver.h"
     )
     list(APPEND SOURCES

@@ -7,8 +7,11 @@ if (SHARED_UTILS_NO_LOGGING)
     SET(LWS_WITH_NO_LOGS ON CACHE BOOL "disable libWebSockets logging option" FORCE)
 endif()
 
+set(LIBWEBSOCKETS_DIR "${CARBON_EXTERNAL}/libwebsockets")
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR ANDROID)
-    add_subdirectory(libwebsocket EXCLUDE_FROM_ALL)
+    add_subdirectory(${LIBWEBSOCKETS_DIR} libwebsockets EXCLUDE_FROM_ALL)
+    include_directories (${LIBWEBSOCKETS_INCLUDE_DIRS})
 endif()
 
 if (DEFINED AZURE_C_SHARED_UTILITY_BUILT)
@@ -559,8 +562,6 @@ set_platform_files()
 
 
 include_directories(${UMOCK_C_INC_FOLDER})
-include_directories(${CMAKE_CURRENT_LIST_DIR}/libwebsocket)
-include_directories(${CMAKE_CURRENT_LIST_DIR}/libwebsocket/lib)
 
 if(${use_condition})
     compileAsC11()
@@ -785,7 +786,9 @@ if(${use_audio})
     endif()
 endif()
 
-link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libwebsocket/lib)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR ANDROID)
+    target_link_libraries(aziotsharedutil ${LIBWEBSOCKETS_LIBRARIES})
+endif()
 
 if (NOT ${skip_unittests})
     add_subdirectory(testtools)
@@ -798,4 +801,3 @@ else()
     install (FILES ${source_h_files} DESTINATION ${INCLUDE_INSTALL_DIR})
 endif (WIN32)
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/libwebsocket)

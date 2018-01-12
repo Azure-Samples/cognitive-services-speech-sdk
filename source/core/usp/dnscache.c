@@ -42,7 +42,7 @@ int DnsCacheLookup(const char* host, DNS_RESULT_HANDLE* result)
 
     memset(&hints, 0, sizeof(hints));
 
-    return getaddrinfo(host, NULL, &hints, (struct addrinfo**)result)))
+    return getaddrinfo(host, NULL, &hints, (struct addrinfo**)result);
 
 #else
     // TODO: intentionally not implemented right now.

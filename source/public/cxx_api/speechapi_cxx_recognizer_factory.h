@@ -34,6 +34,8 @@ public:
             hr = ::RecognizerFactory_CreateSpeechRecognzier_With_Defaults(&hreco);
         }
 
+        SPX_THROW_ON_FAIL(hr);
+
         return std::make_shared<SpeechRecognizer>(hreco); 
     }
 
@@ -49,6 +51,8 @@ public:
         {
             hr = ::RecognizerFactory_CreateSpeechRecognzier_With_FileInput(&hreco, fileName.c_str());
         }
+
+        SPX_THROW_ON_FAIL(hr);
 
         return std::make_shared<SpeechRecognizer>(hreco);
     };

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "handle_table.h"
+#include "platform.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {

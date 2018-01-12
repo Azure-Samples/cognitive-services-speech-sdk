@@ -25,7 +25,7 @@ public:
     virtual ~RecognitionResult() {};
 
     const std::wstring& ResultId;
-    const enum class Reason& Reason;
+    const enum Reason& Reason;
     
     const std::wstring& Text;
 
@@ -34,7 +34,7 @@ public:
     
 protected:
 
-    RecognitionResult(const std::wstring& resultId, const enum class Reason& reason, const std::wstring& text, const PayloadItems& payload) :
+    RecognitionResult(const std::wstring& resultId, const enum Reason& reason, const std::wstring& text, const PayloadItems& payload) :
         ResultId(resultId), Reason(reason), Text(text), Payload(payload)
     {
     };
