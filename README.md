@@ -1,20 +1,30 @@
 # Introduction 
 
-This is the inital working project repository for the Client Speech SDK aka Carbon
+This is the initial working project repository for the Client Speech SDK aka Carbon
 
-This is a `working directory` to collaborate on initial ideas and prototypes, move to a common ground, and prepare to move this SDK in GitHub
+# Cloning the repo
 
-# Getting Started
+* `git clone https://msasg.visualstudio.com/DefaultCollection/Skyman/_git/Carbon`
+* `git submodule init`
+* `git submodule update --recursive`
 
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+# Building Carbon
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+* Create a `build` directory __inside__ the local `Carbon` repository: `cd Carbon && mkdir build && cd build`.
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+## Windows
 
+* Run `cmake` to generate VS solution:
+    * (32-bit platform): `cmake -G "Visual Studio 15" ..` 
+    * (64-bit platform): `cmake -G "Visual Studio 15 Win64" ..` 
+* Open up `carbon.sln` and build using Visual Studio (alternatively run `cmake --build .`)
+
+## Linux
+
+* Install dependencies: 
+    * `sudo apt-get update`
+    * `sudo apt-get build-essential zlib1g-dev libssl-dev libcurl4-openssl-dev`
+* Run `cmake` to generate makefiles:
+    * (Release build): `cmake ..` 
+    * (Debug build): `cmake -DCMAKE_BUILD_TYPE=Debug ..` 
+* Run the build command: `cmake --build .`

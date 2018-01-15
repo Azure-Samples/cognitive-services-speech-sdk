@@ -28,6 +28,7 @@ set(SOURCES
     "${SRC_DIR}/string_utils.cpp"
     "${SRC_DIR}/file_utils.cpp"
     "${SRC_DIR}/guid_utils.cpp"
+    "${SRC_DIR}/platform.cpp"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})

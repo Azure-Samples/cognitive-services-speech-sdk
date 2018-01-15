@@ -7,8 +7,26 @@
 #pragma once
 
 
+#include <string>
+#include <typeinfo>
+
 #ifndef _MSC_VER
 #include <cstring>
 #include <cstdlib>
-
 #endif
+
+namespace PAL {
+
+std::string demangle(const char* name);
+
+template <class T>
+std::string GetTypeName() {
+    return demangle(typeid(T).name());
+}
+
+template <class T>
+std::string GetTypeName(const T& t) {
+    return demangle(typeid(t).name());
+}
+
+}; // PAL

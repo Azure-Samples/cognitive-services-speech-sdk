@@ -49,8 +49,7 @@ private:
     void EnsureDataChunk();
     uint32_t ReadFromDataChunk(uint8_t** ppbuffer, uint32_t* pcbBuffer);
 
-    
-    using WavFile_Type = std::basic_ifstream<uint8_t>;
+    using WavFile_Type = std::fstream;
 
     static const uint16_t cbTag = 4;
     static const uint16_t cbChunkType = 4;

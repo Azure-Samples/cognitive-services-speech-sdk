@@ -6,10 +6,24 @@
 
 #pragma once
 
-int PAL_waccess(const wchar_t *path, int mode);
+#include <fstream>
 
 #ifndef _MSC_VER
+#define _FILE_OFFSET_BITS 64
 #include <string>
-
-std::string wtocharpath(const wchar_t *wstr);
+typedef int errno_t;
 #endif
+
+namespace PAL {
+
+    int waccess(const wchar_t *path, int mode);
+
+    errno_t fopen_s(FILE **file, const char *fileName, const char *mode);
+
+    void OpenStream(std::fstream& stream, const std::wstring& filename, bool readonly);
+
+#ifndef _MSC_VER
+    std::string wtocharpath(const wchar_t *wstr);
+#endif
+
+}; // PAL

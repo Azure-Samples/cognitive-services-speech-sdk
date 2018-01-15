@@ -13,7 +13,7 @@ CSpxRecognitionResult::CSpxRecognitionResult(const wchar_t* resultId, const wcha
     SPX_DBG_TRACE_FUNCTION();
 
     m_resultId = resultId == nullptr
-        ? PAL_CreateGuid()
+        ? PAL::CreateGuid()
         : resultId;
 
     m_reason = Reason::Recognized;
@@ -25,7 +25,7 @@ CSpxRecognitionResult::CSpxRecognitionResult(const wchar_t* resultId, const wcha
     SPX_DBG_TRACE_FUNCTION();
 
     m_resultId = resultId == nullptr
-        ? PAL_CreateGuid()
+        ? PAL::CreateGuid()
         : resultId;
 
     m_reason = Reason::IntermediateResult;

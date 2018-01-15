@@ -8,6 +8,8 @@
 #include "file_utils.h"
 #include "platform.h"
 
+namespace PAL {
+
 #ifndef _MSC_VER
 #include <unistd.h>
 
@@ -23,7 +25,23 @@ std::string wtocharpath(const wchar_t *wstr)
 
 #endif
 
-int PAL_waccess(const wchar_t *path, int mode)
+errno_t fopen_s(FILE** file, const char* fileName, const char* mode)
+{
+#ifdef _MSC_VER
+    return ::fopen_s(file, fileName, mode);
+#else
+    FILE *f = fopen(fileName, mode);
+    if (f == NULL) 
+    {
+        return -1;
+    }
+    *file = f;
+    return 0;
+#endif
+}
+
+
+int waccess(const wchar_t *path, int mode)
 {
 #ifdef _MSC_VER
     return _waccess(path, mode);
@@ -31,3 +49,20 @@ int PAL_waccess(const wchar_t *path, int mode)
     return access(wtocharpath(path).c_str(), mode);
 #endif
 }
+
+void OpenStream(std::fstream& stream, const std::wstring& filename, bool readonly)
+{
+    if (filename.empty())
+        throw std::runtime_error("File: filename is empty");
+
+    std::ios_base::openmode mode = std::ios_base::binary;
+    mode = mode | (readonly ? std::ios_base::in : std::ios_base::out);
+
+#ifdef _MSC_VER
+    stream.open(filename.c_str(), mode);
+#else
+    stream.open(wtocharpath(filename.c_str()).c_str(), mode);
+#endif
+}
+
+}; // PAL

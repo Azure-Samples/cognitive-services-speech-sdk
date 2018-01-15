@@ -106,12 +106,7 @@ int main(int argc, char* argv[])
 
     while (!turnEnd)
     {
-        // TODO (alrezni): move this to common/platform
-#ifdef _WIN32
-        Sleep(2000);
-#else // assuming __unix__
-        sleep(2);
-#endif
+        ThreadAPI_Sleep(2000);
     }
 
     UspShutdown(handle);

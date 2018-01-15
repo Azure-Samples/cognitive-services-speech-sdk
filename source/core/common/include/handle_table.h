@@ -127,6 +127,7 @@ public:
 
 private:
 
+    // TODO: replace const char* with std::type_index?
     static std::unique_ptr<std::map<const char*, void*>> s_tables;
     static std::unique_ptr<std::list<std::function<void(void)>>> s_termFns;
 };

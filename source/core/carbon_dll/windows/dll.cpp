@@ -8,15 +8,17 @@ using namespace CARBON_IMPL_NAMESPACE();
 
 void InitLogging()
 {
-    #ifndef _DEBUG
+#ifndef _DEBUG
 
     LOGGER_LOG tracelog = [](LOG_CATEGORY log_category, unsigned int options, const char* format, ...) {
     };
 
     xlogging_set_log_function(nullptr);
 
-    #endif // DEBUG
+#endif // DEBUG
 }
+
+#ifdef _MSC_VER
 
 BOOL APIENTRY DllMain(HMODULE hModule,
                       DWORD  ul_reason_for_call,
@@ -40,3 +42,16 @@ BOOL APIENTRY DllMain(HMODULE hModule,
     }
     return TRUE;
 }
+#else
+
+__attribute__((constructor)) static void LibLoad(int argc, char** argv, char** envp)
+{
+    InitLogging();
+}
+
+__attribute__((destructor)) static void LibUnload()
+{
+    CSpxSharedPtrHandleTableManager::Term();
+}
+
+#endif

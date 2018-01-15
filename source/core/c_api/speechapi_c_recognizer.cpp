@@ -331,7 +331,7 @@ SPXAPI Recognizer_SessionEvent_GetSessionId(SPXEVENTHANDLE hevent, wchar_t* pszS
             : (*sessionHandleTable)[hevent];
 
         auto sessionId = recoEvent->GetSessionId();
-        PAL_wcscpy(pszSessionId, cchSessionId, sessionId.c_str(), sessionId.size(), false);
+        PAL::wcscpy(pszSessionId, cchSessionId, sessionId.c_str(), sessionId.size(), false);
     }
     SPXAPI_CATCH_AND_RETURN(hr);
 }

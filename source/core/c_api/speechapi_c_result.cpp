@@ -16,7 +16,7 @@ SPXAPI Result_GetResultId(SPXRESULTHANDLE hresult, wchar_t* pszResultId, uint32_
 
         auto strActual = result->GetResultId();
         auto pszActual = strActual.c_str();
-        PAL_wcscpy(pszResultId, cchResultId, pszActual, strActual.size(), true);
+        PAL::wcscpy(pszResultId, cchResultId, pszActual, strActual.size(), true);
     }
     SPXAPI_CATCH_AND_RETURN(hr);
 }
@@ -51,7 +51,7 @@ SPXAPI Result_GetText(SPXRESULTHANDLE hresult, wchar_t* pszText, uint32_t cchTex
 
         auto strActual = result->GetText();
         auto pszActual = strActual.c_str();
-        PAL_wcscpy(pszText, cchText, pszActual, strActual.size(), true);
+        PAL::wcscpy(pszText, cchText, pszActual, strActual.size(), true);
     }
     SPXAPI_CATCH_AND_RETURN(hr);
 }

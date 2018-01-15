@@ -10,7 +10,7 @@ namespace CARBON_IMPL_NAMESPACE() {
 
 CSpxSession::CSpxSession() :
     m_fRecoAsyncWaiting(false),
-    m_sessionId(PAL_CreateGuid())
+    m_sessionId(PAL::CreateGuid())
 {
     SPX_DBG_TRACE_FUNCTION();
 }
