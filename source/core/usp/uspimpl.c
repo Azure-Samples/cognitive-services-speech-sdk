@@ -137,6 +137,7 @@ static void TransportErrorHandler(TransportHandle transportHandle, TransportErro
     (void)transportHandle;
     UspResult uspError;
 
+    LogInfo("On TranportError: reason=%d, context=", reason);
     switch (reason)
     {
     default:
@@ -157,7 +158,7 @@ static void TransportErrorHandler(TransportHandle transportHandle, TransportErro
     }
 
     UspContext* uspContext = (UspContext *)(context);
-    if (uspContext->callbacks)
+    if (uspContext != NULL && uspContext->callbacks)
     {
         uspContext->callbacks->OnError(uspContext, uspContext->callbackContext, uspError);
     }
@@ -281,7 +282,7 @@ const struct _PathHandler
 } g_pathHandlers[] = {
     { g_messagePathTurnStart, ContentPathHandler },
     { g_messagePathSpeechStartDetected, SpeechStartHandler },
-    { g_messagePathSpeechEndDetected, SpeechEndHandler   },
+    { g_messagePathSpeechEndDetected, SpeechEndHandler },
     { g_messagePathTurnEnd, TurnEndHandler },
     { g_messagePathSpeechHypothesis, ContentPathHandler },
     { g_messagePathSpeechPhrase, ContentPathHandler },
