@@ -447,6 +447,8 @@ UspResult UspContextDestroy(UspContext* uspContext)
         return USP_INVALID_PARAMETER;
     }
 
+    uspContext->callbacks = NULL;
+    uspContext->callbackContext = NULL;
     (void)TransportShutdown(uspContext);
 
     if (uspContext->dnsCache != NULL)

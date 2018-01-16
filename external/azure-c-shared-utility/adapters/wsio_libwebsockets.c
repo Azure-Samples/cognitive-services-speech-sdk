@@ -169,6 +169,15 @@ static void destroy_context(WSIO_INSTANCE* wsio_instance, IO_STATE io_state)
 {
     if (NULL != wsio_instance->ws_context)
     {
+        // calling lws_context_destroy will close the WS connection and the LWS_CALLBACK_CLOSED callback will be then invoked, where
+        // a tranport error will be triggered if the state is not IO_STATE_NOT_OPEN (to indicate unexpected connection failure).
+        // However, in case the caller of this function wants to set the io_state to IO_STATE_NOT_OPEN, e.g. in wsio_close(), we set the io_state to
+        // IO_STATE_NOT_OPEN to avoid false alarm.
+        if (io_state == IO_STATE_NOT_OPEN)
+        {
+            wsio_instance->io_state = IO_STATE_NOT_OPEN;
+        }
+
         lws_context_destroy(wsio_instance->ws_context);
         wsio_instance->ws_context = NULL;
         wsio_instance->wsi = NULL; // lws_context_destroy frees wsi as well.
