@@ -158,9 +158,16 @@ static void TransportErrorHandler(TransportHandle transportHandle, TransportErro
     }
 
     UspContext* uspContext = (UspContext *)(context);
-    if (uspContext != NULL && uspContext->callbacks)
+    if (uspContext == NULL)
     {
-        uspContext->callbacks->OnError(uspContext, uspContext->callbackContext, uspError);
+        LogError("No context provided in TransportErrorHandler.");
+    }
+    else
+    {
+        if (uspContext->callbacks)
+        {
+            uspContext->callbacks->OnError(uspContext, uspContext->callbackContext, uspError);
+        }
     }
 }
 
@@ -175,14 +182,21 @@ static void SpeechEndHandler(TransportHandle transportHandle, const char* path, 
 
     // USP handling
     UspContext* uspContext = (UspContext *)context;
-    if (uspContext->callbacks)
+    if (uspContext == NULL)
     {
-        UspMsgSpeechEndDetected* msg = malloc(sizeof(UspMsgSpeechEndDetected));
-        // Todo: deal with char to wchar
-        // Todo: add more field;
-        uspContext->callbacks->onSpeechEndDetected(uspContext, uspContext->callbackContext, msg);
-        // Todo: better handling of memory management.
-        free(msg);
+        LogError("No context provided in TransportErrorHandler.");
+    }
+    else
+    {
+        if (uspContext->callbacks)
+        {
+            UspMsgSpeechEndDetected* msg = malloc(sizeof(UspMsgSpeechEndDetected));
+            // Todo: deal with char to wchar
+            // Todo: add more field;
+            uspContext->callbacks->onSpeechEndDetected(uspContext, uspContext->callbackContext, msg);
+            // Todo: better handling of memory management.
+            free(msg);
+        }
     }
 }
 
@@ -197,14 +211,21 @@ static void TurnEndHandler(TransportHandle transportHandle, const char* path, co
 
     // USP handling
     UspContext* uspContext = (UspContext *)context;
-    if (uspContext->callbacks)
+    if (uspContext == NULL)
     {
-        UspMsgTurnEnd* msg = NULL;
-        // Todo: deal with char to wchar
-        // Todo: add more field;
-        uspContext->callbacks->onTurnEnd(uspContext, uspContext->callbackContext, msg);
-        // Todo: better handling of memory management.
-        // free(msg);
+        LogError("No context provided in TransportErrorHandler.");
+    }
+    else
+    {
+        if (uspContext->callbacks)
+        {
+            UspMsgTurnEnd* msg = NULL;
+            // Todo: deal with char to wchar
+            // Todo: add more field;
+            uspContext->callbacks->onTurnEnd(uspContext, uspContext->callbackContext, msg);
+            // Todo: better handling of memory management.
+            // free(msg);
+        }
     }
 
     telemetry_flush();
@@ -240,6 +261,11 @@ static void ContentPathHandler(TransportHandle transportHandle, const char* path
 
     BUFFER_u_char(responseContentHandle)[size] = 0;
 
+    if (context == NULL)
+    {
+        LogError("Context passed to ContentPathHandler is null.");
+    }
+
     ret = ContentDispatch(context, path, mime, 0, responseContentHandle, size);
 
     BUFFER_delete(responseContentHandle);
@@ -257,14 +283,21 @@ static void SpeechStartHandler(TransportHandle transportHandle, const char* path
 
     // USP handling
     UspContext* uspContext = (UspContext *)context;
-    if (uspContext->callbacks)
+    if (uspContext == NULL)
     {
-        UspMsgSpeechStartDetected* msg = malloc(sizeof(UspMsgSpeechStartDetected));
-        // Todo: deal with char to wchar
-        // Todo: add more field;
-        uspContext->callbacks->onSpeechStartDetected(uspContext, uspContext->callbackContext, msg);
-        // Todo: better handling of memory management.
-        free(msg);
+        LogError("No context provided in TransportErrorHandler.");
+    }
+    else
+    {
+        if (uspContext->callbacks)
+        {
+            UspMsgSpeechStartDetected* msg = malloc(sizeof(UspMsgSpeechStartDetected));
+            // Todo: deal with char to wchar
+            // Todo: add more field;
+            uspContext->callbacks->onSpeechStartDetected(uspContext, uspContext->callbackContext, msg);
+            // Todo: better handling of memory management.
+            free(msg);
+        }
     }
 }
 
