@@ -137,7 +137,7 @@ static void TransportErrorHandler(TransportHandle transportHandle, TransportErro
     (void)transportHandle;
     UspResult uspError;
 
-    LogInfo("On TranportError: reason=%d, context=", reason);
+    LogInfo("On TranportError: reason=%d", reason);
     switch (reason)
     {
     default:
@@ -162,12 +162,9 @@ static void TransportErrorHandler(TransportHandle transportHandle, TransportErro
     {
         LogError("No context provided in TransportErrorHandler.");
     }
-    else
+    else if (uspContext->callbacks)
     {
-        if (uspContext->callbacks)
-        {
-            uspContext->callbacks->OnError(uspContext, uspContext->callbackContext, uspError);
-        }
+        uspContext->callbacks->OnError(uspContext, uspContext->callbackContext, uspError);
     }
 }
 
@@ -184,19 +181,16 @@ static void SpeechEndHandler(TransportHandle transportHandle, const char* path, 
     UspContext* uspContext = (UspContext *)context;
     if (uspContext == NULL)
     {
-        LogError("No context provided in TransportErrorHandler.");
+        LogError("No context provided in SpeechEndHandler.");
     }
-    else
+    else if (uspContext->callbacks)
     {
-        if (uspContext->callbacks)
-        {
-            UspMsgSpeechEndDetected* msg = malloc(sizeof(UspMsgSpeechEndDetected));
-            // Todo: deal with char to wchar
-            // Todo: add more field;
-            uspContext->callbacks->onSpeechEndDetected(uspContext, uspContext->callbackContext, msg);
-            // Todo: better handling of memory management.
-            free(msg);
-        }
+        UspMsgSpeechEndDetected* msg = malloc(sizeof(UspMsgSpeechEndDetected));
+        // Todo: deal with char to wchar
+        // Todo: add more field;
+        uspContext->callbacks->onSpeechEndDetected(uspContext, uspContext->callbackContext, msg);
+        // Todo: better handling of memory management.
+        free(msg);
     }
 }
 
@@ -213,19 +207,16 @@ static void TurnEndHandler(TransportHandle transportHandle, const char* path, co
     UspContext* uspContext = (UspContext *)context;
     if (uspContext == NULL)
     {
-        LogError("No context provided in TransportErrorHandler.");
+        LogError("No context provided in TurnEndHandler.");
     }
-    else
+    else if (uspContext->callbacks)
     {
-        if (uspContext->callbacks)
-        {
-            UspMsgTurnEnd* msg = NULL;
-            // Todo: deal with char to wchar
-            // Todo: add more field;
-            uspContext->callbacks->onTurnEnd(uspContext, uspContext->callbackContext, msg);
-            // Todo: better handling of memory management.
-            // free(msg);
-        }
+        UspMsgTurnEnd* msg = NULL;
+        // Todo: deal with char to wchar
+        // Todo: add more field;
+        uspContext->callbacks->onTurnEnd(uspContext, uspContext->callbackContext, msg);
+        // Todo: better handling of memory management.
+        // free(msg);
     }
 
     telemetry_flush();
@@ -285,19 +276,16 @@ static void SpeechStartHandler(TransportHandle transportHandle, const char* path
     UspContext* uspContext = (UspContext *)context;
     if (uspContext == NULL)
     {
-        LogError("No context provided in TransportErrorHandler.");
+        LogError("No context provided in SpeechStartHandler.");
     }
-    else
+    else if (uspContext->callbacks)
     {
-        if (uspContext->callbacks)
-        {
-            UspMsgSpeechStartDetected* msg = malloc(sizeof(UspMsgSpeechStartDetected));
-            // Todo: deal with char to wchar
-            // Todo: add more field;
-            uspContext->callbacks->onSpeechStartDetected(uspContext, uspContext->callbackContext, msg);
-            // Todo: better handling of memory management.
-            free(msg);
-        }
+        UspMsgSpeechStartDetected* msg = malloc(sizeof(UspMsgSpeechStartDetected));
+        // Todo: deal with char to wchar
+        // Todo: add more field;
+        uspContext->callbacks->onSpeechStartDetected(uspContext, uspContext->callbackContext, msg);
+        // Todo: better handling of memory management.
+        free(msg);
     }
 }
 
