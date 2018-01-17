@@ -160,7 +160,7 @@ static void TransportErrorHandler(TransportHandle transportHandle, TransportErro
     UspContext* uspContext = (UspContext *)(context);
     if (uspContext == NULL)
     {
-        LogError("No context provided in TransportErrorHandler.");
+        LogError("No context provided in %s.", __FUNCTION__);
     }
     else if (uspContext->callbacks)
     {
@@ -181,7 +181,7 @@ static void SpeechEndHandler(TransportHandle transportHandle, const char* path, 
     UspContext* uspContext = (UspContext *)context;
     if (uspContext == NULL)
     {
-        LogError("No context provided in SpeechEndHandler.");
+        LogError("No context provided in %s.", __FUNCTION__);
     }
     else if (uspContext->callbacks)
     {
@@ -207,7 +207,7 @@ static void TurnEndHandler(TransportHandle transportHandle, const char* path, co
     UspContext* uspContext = (UspContext *)context;
     if (uspContext == NULL)
     {
-        LogError("No context provided in TurnEndHandler.");
+        LogError("No context provided in %s.", __FUNCTION__);
     }
     else if (uspContext->callbacks)
     {
@@ -246,7 +246,7 @@ static void ContentPathHandler(TransportHandle transportHandle, const char* path
         size + 1);
     if (!responseContentHandle)
     {
-        LogError("BUFFER_create failed");
+        LogError("BUFFER_create failed in %s", __FUNCTION__);
         return;
     }
 
@@ -254,7 +254,7 @@ static void ContentPathHandler(TransportHandle transportHandle, const char* path
 
     if (context == NULL)
     {
-        LogError("Context passed to ContentPathHandler is null.");
+        LogError("No context provided in %s.", __FUNCTION__);
     }
 
     ret = ContentDispatch(context, path, mime, 0, responseContentHandle, size);
@@ -276,7 +276,7 @@ static void SpeechStartHandler(TransportHandle transportHandle, const char* path
     UspContext* uspContext = (UspContext *)context;
     if (uspContext == NULL)
     {
-        LogError("No context provided in SpeechStartHandler.");
+        LogError("No context provided in %s.", __FUNCTION__);
     }
     else if (uspContext->callbacks)
     {
@@ -318,7 +318,7 @@ static void TransportRecvResponseHandler(TransportHandle transportHandle, HTTP_H
 
     if (errorCode != 0)
     {
-        LogError("Response error %d", errorCode);
+        LogError("Response error %d in %s", errorCode, __FUNCTION__);
         // TODO: Lower layers need appropriate signals
         return;
     }
@@ -370,7 +370,7 @@ UspResult TextResponseHandler(void* context, const char* path, uint8_t* buffer, 
     (void)buffer;
     (void)bufferSize;
 
-    LogError("Not implemented");
+    LogError("%s: Not implemented", __FUNCTION__);
 
     return USP_NOT_IMPLEMENTED;
 }
@@ -489,7 +489,7 @@ UspResult UspContextCreate(UspContext** contextCreated, const char* endpoint)
     UspContext* uspContext = (UspContext*)malloc(sizeof(UspContext));
     if (uspContext == NULL)
     {
-        LogError("UspInitialize failed: unexpected runtime error.");
+        LogError("%s failed: unexpected runtime error.", __FUNCTION__);
         return USP_OUT_OF_MEMORY;
     }
     memset(uspContext, 0, sizeof(UspContext));
@@ -501,14 +501,14 @@ UspResult UspContextCreate(UspContext** contextCreated, const char* endpoint)
     uspContext->dnsCache = DnsCacheCreate();
     if (uspContext->dnsCache == NULL)
     {
-        LogError("Create DNSCache failed in UspContextCreate()");
+        LogError("Create DNSCache failed in %s", __FUNCTION__);
         UspContextDestroy(uspContext);
         return USP_INITIALIZATION_FAILURE;
     }
 
     if (TransportInitialize(uspContext, endpoint) != USP_SUCCESS)
     {
-        LogError("Initialize transport failed in UspContextCreate()");
+        LogError("Initialize transport failed in %s", __FUNCTION__);
         UspContextDestroy(uspContext);
         return USP_INITIALIZATION_FAILURE;
     }
