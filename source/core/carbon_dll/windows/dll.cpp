@@ -8,7 +8,7 @@ using namespace CARBON_IMPL_NAMESPACE();
 
 void InitLogging()
 {
-    #ifndef DEBUG
+    #ifndef _DEBUG
 
     LOGGER_LOG tracelog = [](LOG_CATEGORY log_category, unsigned int options, const char* format, ...) {
     };

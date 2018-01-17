@@ -14,7 +14,7 @@
 
 // #define SPX_CONFIG_TRACE_INFO_WARN_ERR_VERBOSE  1
 
-#ifdef DEBUG
+#ifdef _DEBUG
 #ifdef SPX_CONFIG_INCLUDE_ALL_IN_DEBUG
 #define SPX_CONFIG_INCLUDE_ALL                          1
 #define SPX_CONFIG_INCLUDE_ALL_DBG
