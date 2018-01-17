@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 
     bytesRead = fread(buffer, sizeof(uint8_t), MAX_AUDIO_SIZE_IN_BYTE, audio);
 
-    turnEnd = true;
+    turnEnd = false;
 
     UspInitialize(&handle, &testCallbacks, context);
 

@@ -362,11 +362,12 @@ static int on_ws_callback(struct lws *wsi, enum lws_callback_reasons reason, voi
         context = lws_get_context(wsi);
         wsio_instance = lws_context_user(context);
         // called when the network or remote server dropped the connection or when calling lws_context_destroy.
-        if (wsio_instance->io_state != IO_STATE_NOT_OPEN)
+        if ((wsio_instance->io_state != IO_STATE_NOT_OPEN) &&
+            (wsio_instance->io_state != IO_STATE_CLOSING))
         {
             indicate_error(wsio_instance);
-            wsio_instance->io_state = IO_STATE_NOT_OPEN;
         }
+        wsio_instance->io_state = IO_STATE_NOT_OPEN;
         break;
 
     case LWS_CALLBACK_CLIENT_FILTER_PRE_ESTABLISH:
@@ -1216,7 +1217,8 @@ int wsio_close(CONCRETE_IO_HANDLE ws_io, ON_IO_CLOSE_COMPLETE on_io_close_comple
 
         /* Codes_SRS_WSIO_01_045: [wsio_close when no open action has been issued shall fail and return a non-zero value.] */
         /* Codes_SRS_WSIO_01_046: [wsio_close after a wsio_close shall fail and return a non-zero value.] */
-        if (wsio_instance->io_state == IO_STATE_NOT_OPEN)
+        if ((wsio_instance->io_state == IO_STATE_NOT_OPEN) ||
+            (wsio_instance->io_state == IO_STATE_CLOSING))
         {
             result = __LINE__;
         }
@@ -1231,6 +1233,8 @@ int wsio_close(CONCRETE_IO_HANDLE ws_io, ON_IO_CLOSE_COMPLETE on_io_close_comple
             {
                 cancel_io(wsio_instance);
             }
+
+            wsio_instance->io_state = IO_STATE_CLOSING;
 
             /* Codes_SRS_WSIO_01_041: [wsio_close shall close the websockets IO if an open action is either pending or has completed successfully (if the IO is open).] */
             /* Codes_SRS_WSIO_01_043: [wsio_close shall close the connection by calling lws_context_destroy.] */
