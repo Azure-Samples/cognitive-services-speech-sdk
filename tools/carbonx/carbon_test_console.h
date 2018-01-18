@@ -95,8 +95,8 @@ private:
     template <class T>
     void Recognizer_Event(const wchar_t* psz, EventSignal<T>& recognizerEvent, typename::EventSignal<T>::CallbackFunction callback);
 
-    void Recognizer_SessionStartedHandler(const SessionEventArgs& e) { ConsoleWriteLine(L"SessionStartedHandler: %s", e.SessionId.c_str()); };
-    void Recognizer_SessionStoppedHandler(const SessionEventArgs& e) { ConsoleWriteLine(L"SessionStoppedHandler: %s", e.SessionId.c_str()); };
+    void Recognizer_SessionStartedHandler(const SessionEventArgs& e) { ConsoleWriteLine(L"SessionStartedHandler: %ls", e.SessionId.c_str()); };
+    void Recognizer_SessionStoppedHandler(const SessionEventArgs& e) { ConsoleWriteLine(L"SessionStoppedHandler: %ls", e.SessionId.c_str()); };
     void Recognizer_SoundStartedHandler(const SessionEventArgs& e) {};
     void Recognizer_SoundStoppedHandler(const SessionEventArgs& e) {};
 
@@ -105,9 +105,9 @@ private:
     void Recognizer_NoMatchHandler(const RecognitionEventArgs& e) {};
     void Recognizer_CanceledHandler(const RecognitionEventArgs& e) {};
 
-    void SpeechRecognizer_IntermediateResultHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"IntermediateResultHandler: %s", ToString(e).c_str()); };
-    void SpeechRecognizer_FinalResultHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"FinalResultHandler: %s", ToString(e).c_str());}
-    void SpeechRecognizer_NoMatchHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"NoMatchHandler: %s", ToString(e).c_str()); }
+    void SpeechRecognizer_IntermediateResultHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"IntermediateResultHandler: %ls", ToString(e).c_str()); };
+    void SpeechRecognizer_FinalResultHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"FinalResultHandler: %ls", ToString(e).c_str());}
+    void SpeechRecognizer_NoMatchHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"NoMatchHandler: %ls", ToString(e).c_str()); }
     void SpeechRecognizer_CanceledHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"SpeechRecognizer_CanceledHandler!!!"); };
 
     void IntentRecognizer_IntermediateResultHandler(const int& e) {};

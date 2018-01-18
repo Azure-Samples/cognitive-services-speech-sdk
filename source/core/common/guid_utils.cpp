@@ -11,22 +11,24 @@
 
 #define UUID_LENGTH 36
 
-// TODO: drop prefix, use a namespace instead?
-std::wstring PAL_CreateGuid()
-{
-    std::string uuidStr(UUID_LENGTH, char{ 0 });
-    auto result = UniqueId_Generate(&uuidStr[0], UUID_LENGTH + 1);
-
-    SPX_IFTRUE_THROW_HR(result != UNIQUEID_OK, SPXERR_UUID_CREATE_FAILED);
-
-    std::wstring uuidWStr;
-    for (int i = 0; i < UUID_LENGTH; i++)
+namespace PAL {
+    // TODO: drop prefix, use a namespace instead?
+    std::wstring CreateGuid()
     {
-        if (uuidStr[i] != '-')
-        {
-            uuidWStr.push_back(uuidStr[i]);
-        }
-    }
+        std::string uuidStr(UUID_LENGTH, char{ 0 });
+        auto result = UniqueId_Generate(&uuidStr[0], UUID_LENGTH + 1);
 
-    return uuidWStr;
-}
+        SPX_IFTRUE_THROW_HR(result != UNIQUEID_OK, SPXERR_UUID_CREATE_FAILED);
+
+        std::wstring uuidWStr;
+        for (int i = 0; i < UUID_LENGTH; i++)
+        {
+            if (uuidStr[i] != '-')
+            {
+                uuidWStr.push_back(uuidStr[i]);
+            }
+        }
+
+        return uuidWStr;
+    }
+}; // PAL

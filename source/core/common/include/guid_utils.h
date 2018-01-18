@@ -7,5 +7,8 @@
 
 #pragma once
 
+namespace PAL {
 
-std::wstring PAL_CreateGuid();
+std::wstring CreateGuid();
+
+}; // PAL

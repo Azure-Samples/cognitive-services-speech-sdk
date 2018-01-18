@@ -8,8 +8,9 @@
 #include "stdafx.h"
 #include "carbon_test_console.h"
 #include "speechapi_c.h"
-#include "string_utils.h"
-#include "file_utils.h"
+#include <string_utils.h>
+#include <file_utils.h>
+#include <platform.h>
 
 CarbonTestConsole::CarbonTestConsole()
 {
@@ -45,7 +46,7 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
     for (int i = 1; !fShowOptions && i < argc; i++)
     {
         const wchar_t *pszArg = argv[i];
-        if (PAL_wcsicmp(pszArg, L"/debug") == 0)
+        if (PAL::wcsicmp(pszArg, L"/debug") == 0)
         {
             WaitForDebugger();
             fShowOptions = pconsoleArgs->m_fWaitForDebugger || fNextArgRequired;
@@ -53,54 +54,54 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
             pstrNextArg = nullptr;
             fNextArgRequired = false;
         }
-        else if (PAL_wcsicmp(pszArg, L"/speech") == 0)
+        else if (PAL::wcsicmp(pszArg, L"/speech") == 0)
         {
             fShowOptions = pconsoleArgs->m_strRecognizerType.length() > 0 || fNextArgRequired;
-            pconsoleArgs->m_strRecognizerType = typeid(SpeechRecognizer).name();
+            pconsoleArgs->m_strRecognizerType = PAL::GetTypeName<SpeechRecognizer>();
             pstrNextArg = nullptr;
             fNextArgRequired = false;
         }
-        else if (PAL_wcsicmp(pszArg, L"/intent") == 0)
+        else if (PAL::wcsicmp(pszArg, L"/intent") == 0)
         {
             fShowOptions = pconsoleArgs->m_strRecognizerType.length() > 0 || fNextArgRequired;
-            pconsoleArgs->m_strRecognizerType = typeid(IntentRecognizer).name();
+            pconsoleArgs->m_strRecognizerType = PAL::GetTypeName<IntentRecognizer>();
             pstrNextArg = nullptr;
             fNextArgRequired = false;
         }
-        else if (PAL_wcsicmp(pszArg, L"/commands") == 0)
+        else if (PAL::wcsicmp(pszArg, L"/commands") == 0)
         {
-            fShowOptions = (pconsoleArgs->m_strRecognizerType.length() > 0 && pconsoleArgs->m_strRecognizerType != typeid(IntentRecognizer).name()) || pconsoleArgs->m_fCommandSystem || fNextArgRequired;
-            pconsoleArgs->m_strRecognizerType = typeid(IntentRecognizer).name();
+            fShowOptions = (pconsoleArgs->m_strRecognizerType.length() > 0 && pconsoleArgs->m_strRecognizerType != PAL::GetTypeName<IntentRecognizer>()) || pconsoleArgs->m_fCommandSystem || fNextArgRequired;
+            pconsoleArgs->m_strRecognizerType = PAL::GetTypeName<IntentRecognizer>();
             pconsoleArgs->m_fCommandSystem = true;
             pstrNextArg = nullptr;
             fNextArgRequired = false;
         }
-        else if (PAL_wcsnicmp(pszArg, L"/input", wcslen(L"/input")) == 0)
+        else if (PAL::wcsnicmp(pszArg, L"/input", wcslen(L"/input")) == 0)
         {
             fShowOptions = pconsoleArgs->m_strInput.length() > 0 || fNextArgRequired;
             pstrNextArg = &pconsoleArgs->m_strInput;
             fNextArgRequired = true;
         }
-        else if (PAL_wcsnicmp(pszArg, L"/endpoint", wcslen(L"/endpoint")) == 0)
+        else if (PAL::wcsnicmp(pszArg, L"/endpoint", wcslen(L"/endpoint")) == 0)
         {
             fShowOptions = pconsoleArgs->m_strEndpointUri.length() > 0 || fNextArgRequired;
             pstrNextArg = &pconsoleArgs->m_strEndpointUri;
             fNextArgRequired = true;
         }
-        else if (PAL_wcsnicmp(pszArg, L"/subscription", wcslen(L"/subscription")) == 0)
+        else if (PAL::wcsnicmp(pszArg, L"/subscription", wcslen(L"/subscription")) == 0)
         {
             fShowOptions = pconsoleArgs->m_strSubscriptionKey.length() > 0 || fNextArgRequired;
             pstrNextArg = &pconsoleArgs->m_strSubscriptionKey;
             fNextArgRequired = true;
         }
-        else if (PAL_wcsicmp(pszArg, L"/single") == 0)
+        else if (PAL::wcsicmp(pszArg, L"/single") == 0)
         {
             fShowOptions = pconsoleArgs->m_fContinuousRecognition || fNextArgRequired;
             pconsoleArgs->m_fRecognizeAsync = true;
             pstrNextArg = nullptr;
             fNextArgRequired = false;
         }
-        else if (PAL_wcsnicmp(pszArg, L"/continuous", wcslen(L"/continuous")) == 0)
+        else if (PAL::wcsnicmp(pszArg, L"/continuous", wcslen(L"/continuous")) == 0)
         {
             fShowOptions = pconsoleArgs->m_fRecognizeAsync || fNextArgRequired;
             pconsoleArgs->m_fContinuousRecognition = true;
@@ -108,13 +109,13 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
             pstrNextArg = &pconsoleArgs->m_strContinuousRecognitionSeconds;
             fNextArgRequired = false;
         }
-        else if (PAL_wcsnicmp(pszArg, L"/sample", wcslen(L"/sample")) == 0)
+        else if (PAL::wcsnicmp(pszArg, L"/sample", wcslen(L"/sample")) == 0)
         {
             fShowOptions = pconsoleArgs->m_strRunSampleName.length() > 0 || fNextArgRequired;
             pstrNextArg = &pconsoleArgs->m_strRunSampleName;
             fNextArgRequired = true;
         }
-        else if (PAL_wcsicmp(pszArg, L"/interactive") == 0)
+        else if (PAL::wcsicmp(pszArg, L"/interactive") == 0)
         {
             fShowOptions = pconsoleArgs->m_fInteractivePrompt || fNextArgRequired;
             pconsoleArgs->m_fInteractivePrompt = true;
@@ -159,15 +160,15 @@ bool CarbonTestConsole::ValidateConsoleArgs(ConsoleArgs* pconsoleArgs)
 {
     auto fValid = true;
 
-    if (pconsoleArgs->m_strInput.length() > 0 && PAL_wcsicmp(pconsoleArgs->m_strInput.c_str(), L"microphone") == 0)
+    if (pconsoleArgs->m_strInput.length() > 0 && PAL::wcsicmp(pconsoleArgs->m_strInput.c_str(), L"microphone") == 0)
     {
         pconsoleArgs->m_fMicrophoneInput = true;
         pconsoleArgs->m_strInput.clear();
     }
 
-    if (pconsoleArgs->m_strInput.length() > 0 && PAL_waccess(pconsoleArgs->m_strInput.c_str(), 0) != 0)
+    if (pconsoleArgs->m_strInput.length() > 0 && PAL::waccess(pconsoleArgs->m_strInput.c_str(), 0) != 0)
     {
-        SPX_DBG_TRACE_ERROR("File does not exist: %S", pconsoleArgs->m_strInput.c_str());
+        SPX_DBG_TRACE_ERROR("File does not exist: %ls", pconsoleArgs->m_strInput.c_str());
         fValid = false;
     }
 
@@ -181,7 +182,7 @@ bool CarbonTestConsole::ValidateConsoleArgs(ConsoleArgs* pconsoleArgs)
     {
         if (pconsoleArgs->m_strRecognizerType.length() == 0)
         {
-            pconsoleArgs->m_strRecognizerType = typeid(SpeechRecognizer).name();
+            pconsoleArgs->m_strRecognizerType = PAL::GetTypeName<SpeechRecognizer>();
         }
     }
     else if (pconsoleArgs->m_strRecognizerType.length() > 0)
@@ -302,31 +303,31 @@ bool CarbonTestConsole::GetConsoleInput(std::wstring& str)
 
 void CarbonTestConsole::ProcessConsoleInput(const wchar_t* psz)
 {
-    if (PAL_wcsicmp(psz, L"help") == 0 || PAL_wcsicmp(psz, L"?") == 0)
+    if (PAL::wcsicmp(psz, L"help") == 0 || PAL::wcsicmp(psz, L"?") == 0)
     {
         ConsoleInput_Help();
     }
-    else if (PAL_wcsnicmp(psz, L"help ", wcslen(L"help ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"help ", wcslen(L"help ")) == 0)
     {
         ConsoleInput_HelpOn(psz + wcslen(L"help "));
     }
-    else if (PAL_wcsnicmp(psz, L"sample ", wcslen(L"sample ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"sample ", wcslen(L"sample ")) == 0)
     {
         RunSample(psz + wcslen(L"sample "));
     }
-    else if (PAL_wcsnicmp(psz, L"recognizer ", wcslen(L"recognizer ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"recognizer ", wcslen(L"recognizer ")) == 0)
     {
         ConsoleInput_Recognizer(psz + wcslen(L"recognizer "), m_recognizer);
     }
-    else if (PAL_wcsnicmp(psz, L"speech ", wcslen(L"speech ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"speech ", wcslen(L"speech ")) == 0)
     {
         ConsoleInput_SpeechRecognizer(psz + wcslen(L"speech "), m_speechRecognizer);
     }
-    else if (PAL_wcsnicmp(psz, L"intent ", wcslen(L"intent ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"intent ", wcslen(L"intent ")) == 0)
     {
         ConsoleInput_IntentRecognizer(psz + wcslen(L"intent "), m_intentRecognizer);
     }
-    else if (PAL_wcsnicmp(psz, L"commandsystem ", wcslen(L"commandsystem ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"commandsystem ", wcslen(L"commandsystem ")) == 0)
     {
         ConsoleInput_CommandSystem(psz + wcslen(L"commandsystem "));
     }
@@ -353,19 +354,19 @@ void CarbonTestConsole::ConsoleInput_Help()
 
 void CarbonTestConsole::ConsoleInput_HelpOn(const wchar_t* psz)
 {
-    if (PAL_wcsicmp(psz, L"recognizer") == 0)
+    if (PAL::wcsicmp(psz, L"recognizer") == 0)
     {
         ConsoleInput_HelpOnRecognizer();
     }
-    else if (PAL_wcsicmp(psz, L"speech") == 0)
+    else if (PAL::wcsicmp(psz, L"speech") == 0)
     {
         ConsoleInput_HelpOnSpeech();
     }
-    else if (PAL_wcsicmp(psz, L"intent") == 0)
+    else if (PAL::wcsicmp(psz, L"intent") == 0)
     {
         ConsoleInput_HelpOnIntent();
     }
-    else if (PAL_wcsicmp(psz, L"commandsystem") == 0)
+    else if (PAL::wcsicmp(psz, L"commandsystem") == 0)
     {
         ConsoleInput_HelpOnCommandSystem();
     }
@@ -468,66 +469,66 @@ void CarbonTestConsole::ConsoleInput_HelpOnCommandSystem()
 
 void CarbonTestConsole::ConsoleInput_Recognizer(const wchar_t* psz, std::shared_ptr<BaseAsyncRecognizer>& recognizer)
 {
-     if (PAL_wcsicmp(psz, L"isenabled") == 0)
+     if (PAL::wcsicmp(psz, L"isenabled") == 0)
      {
          Recognizer_IsEnabled(recognizer);
      }
-     else if (PAL_wcsicmp(psz, L"enable") == 0)
+     else if (PAL::wcsicmp(psz, L"enable") == 0)
      {
          Recognizer_Enable(recognizer);
      }
-     else if (PAL_wcsicmp(psz, L"disable") == 0)
+     else if (PAL::wcsicmp(psz, L"disable") == 0)
      {
          Recognizer_Disable(recognizer);
      }
-     else if (PAL_wcsicmp(psz, L"recognize") == 0)
+     else if (PAL::wcsicmp(psz, L"recognize") == 0)
      {
          Recognizer_Recognize(recognizer);
      }
-     else if (PAL_wcsicmp(psz, L"startcontinuous") == 0)
+     else if (PAL::wcsicmp(psz, L"startcontinuous") == 0)
      {
          Recognizer_StartContinuousRecognition(recognizer);
      }
-     else if (PAL_wcsicmp(psz, L"stopcontinuous") == 0)
+     else if (PAL::wcsicmp(psz, L"stopcontinuous") == 0)
      {
          Recognizer_StopContinuousRecognition(recognizer);
      }
-     else if (PAL_wcsnicmp(psz, L"sessionstarted ", wcslen(L"sessionstarted ")) == 0)
+     else if (PAL::wcsnicmp(psz, L"sessionstarted ", wcslen(L"sessionstarted ")) == 0)
      {
          auto fn = std::bind(&CarbonTestConsole::Recognizer_SessionStartedHandler, this, std::placeholders::_1);
          Recognizer_Event(psz + wcslen(L"sessionstarted "), m_recognizer->SessionStarted, fn);
      }
-     else if (PAL_wcsnicmp(psz, L"sessionstopped ", wcslen(L"sessionstopped ")) == 0)
+     else if (PAL::wcsnicmp(psz, L"sessionstopped ", wcslen(L"sessionstopped ")) == 0)
      {
          auto fn = std::bind(&CarbonTestConsole::Recognizer_SessionStoppedHandler, this, std::placeholders::_1);
          Recognizer_Event(psz + wcslen(L"sessionstopped "), m_recognizer->SessionStopped, fn);
      }
-     else if (PAL_wcsnicmp(psz, L"soundstarted ", wcslen(L"soundstarted ")) == 0)
+     else if (PAL::wcsnicmp(psz, L"soundstarted ", wcslen(L"soundstarted ")) == 0)
      {
          auto fn = std::bind(&CarbonTestConsole::Recognizer_SoundStartedHandler, this, std::placeholders::_1);
          Recognizer_Event(psz + wcslen(L"soundstarted "), m_recognizer->SoundStarted, fn);
      }
-     else if (PAL_wcsnicmp(psz, L"soundstopped ", wcslen(L"soundstopped ")) == 0)
+     else if (PAL::wcsnicmp(psz, L"soundstopped ", wcslen(L"soundstopped ")) == 0)
      {
          auto fn = std::bind(&CarbonTestConsole::Recognizer_SoundStoppedHandler, this, std::placeholders::_1);
          Recognizer_Event(psz + wcslen(L"soundstopped "), m_recognizer->SoundStopped, fn);
      }
-     else if (PAL_wcsnicmp(psz, L"intermediateresult ", wcslen(L"intermediateresult ")) == 0)
+     else if (PAL::wcsnicmp(psz, L"intermediateresult ", wcslen(L"intermediateresult ")) == 0)
      {
          auto fn = std::bind(&CarbonTestConsole::Recognizer_IntermediateResultHandler, this, std::placeholders::_1);
          Recognizer_Event(psz + wcslen(L"intermediateresult "), m_recognizer->IntermediateResult, fn);
      }
-     else if (PAL_wcsnicmp(psz, L"finalresult ", wcslen(L"finalresult ")) == 0)
+     else if (PAL::wcsnicmp(psz, L"finalresult ", wcslen(L"finalresult ")) == 0)
      {
          auto fn = std::bind(&CarbonTestConsole::Recognizer_FinalResultHandler, this, std::placeholders::_1);
          Recognizer_Event(psz + wcslen(L"finalresult "), m_recognizer->FinalResult, fn);
      }
-     else if (PAL_wcsnicmp(psz, L"nomatch ", wcslen(L"nomatch ")) == 0)
+     else if (PAL::wcsnicmp(psz, L"nomatch ", wcslen(L"nomatch ")) == 0)
      {
          auto fn = std::bind(&CarbonTestConsole::Recognizer_NoMatchHandler, this, std::placeholders::_1);
          Recognizer_Event(psz + wcslen(L"nomatch "), m_recognizer->NoMatch, fn);
      }
-     else if (PAL_wcsnicmp(psz, L"canceled ", wcslen(L"canceled ")) == 0)
+     else if (PAL::wcsnicmp(psz, L"canceled ", wcslen(L"canceled ")) == 0)
      {
          auto fn = std::bind(&CarbonTestConsole::Recognizer_CanceledHandler, this, std::placeholders::_1);
          Recognizer_Event(psz + wcslen(L"canceled "), m_recognizer->Canceled, fn);
@@ -540,66 +541,66 @@ void CarbonTestConsole::ConsoleInput_Recognizer(const wchar_t* psz, std::shared_
 
 void CarbonTestConsole::ConsoleInput_SpeechRecognizer(const wchar_t* psz, std::shared_ptr<SpeechRecognizer>& speechRecognizer)
 {
-    if (PAL_wcsicmp(psz, L"isenabled") == 0)
+    if (PAL::wcsicmp(psz, L"isenabled") == 0)
     {
         Recognizer_IsEnabled(speechRecognizer);
     }
-    else if (PAL_wcsicmp(psz, L"enable") == 0)
+    else if (PAL::wcsicmp(psz, L"enable") == 0)
     {
         Recognizer_Enable(speechRecognizer);
     }
-    else if (PAL_wcsicmp(psz, L"disable") == 0)
+    else if (PAL::wcsicmp(psz, L"disable") == 0)
     {
         Recognizer_Disable(speechRecognizer);
     }
-    else if (PAL_wcsicmp(psz, L"recognize") == 0)
+    else if (PAL::wcsicmp(psz, L"recognize") == 0)
     {
         Recognizer_Recognize(speechRecognizer);
     }
-    else if (PAL_wcsicmp(psz, L"startcontinuous") == 0)
+    else if (PAL::wcsicmp(psz, L"startcontinuous") == 0)
     {
         Recognizer_StartContinuousRecognition(speechRecognizer);
     }
-    else if (PAL_wcsicmp(psz, L"stopcontinuous") == 0)
+    else if (PAL::wcsicmp(psz, L"stopcontinuous") == 0)
     {
         Recognizer_StopContinuousRecognition(speechRecognizer);
     }
-    else if (PAL_wcsnicmp(psz, L"sessionstarted ", wcslen(L"sessionstarted ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"sessionstarted ", wcslen(L"sessionstarted ")) == 0)
     {
         auto fn = std::bind(&CarbonTestConsole::Recognizer_SessionStartedHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"sessionstarted "), m_speechRecognizer->SessionStarted, fn);
     }
-    else if (PAL_wcsnicmp(psz, L"sessionstopped ", wcslen(L"sessionstopped ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"sessionstopped ", wcslen(L"sessionstopped ")) == 0)
     {
         auto fn = std::bind(&CarbonTestConsole::Recognizer_SessionStoppedHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"sessionstopped "), m_speechRecognizer->SessionStopped, fn);
     }
-    else if (PAL_wcsnicmp(psz, L"soundstarted ", wcslen(L"soundstarted ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"soundstarted ", wcslen(L"soundstarted ")) == 0)
     {
         auto fn = std::bind(&CarbonTestConsole::Recognizer_SoundStartedHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"soundstarted "), m_speechRecognizer->SoundStarted, fn);
     }
-    else if (PAL_wcsnicmp(psz, L"soundstopped ", wcslen(L"soundstopped ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"soundstopped ", wcslen(L"soundstopped ")) == 0)
     {
         auto fn = std::bind(&CarbonTestConsole::Recognizer_SoundStoppedHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"soundstopped "), m_speechRecognizer->SoundStopped, fn);
     }
-    else if (PAL_wcsnicmp(psz, L"intermediateresult ", wcslen(L"intermediateresult ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"intermediateresult ", wcslen(L"intermediateresult ")) == 0)
     {
         auto fn = std::bind(&CarbonTestConsole::SpeechRecognizer_IntermediateResultHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"intermediateresult "), m_speechRecognizer->IntermediateResult, fn);
     }
-    else if (PAL_wcsnicmp(psz, L"finalresult ", wcslen(L"finalresult ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"finalresult ", wcslen(L"finalresult ")) == 0)
     {
         auto fn = std::bind(&CarbonTestConsole::SpeechRecognizer_FinalResultHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"finalresult "), m_speechRecognizer->FinalResult, fn);
     }
-    else if (PAL_wcsnicmp(psz, L"nomatch ", wcslen(L"nomatch ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"nomatch ", wcslen(L"nomatch ")) == 0)
     {
         auto fn = std::bind(&CarbonTestConsole::SpeechRecognizer_NoMatchHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"nomatch "), m_speechRecognizer->NoMatch, fn);
     }
-    else if (PAL_wcsnicmp(psz, L"canceled ", wcslen(L"canceled ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"canceled ", wcslen(L"canceled ")) == 0)
     {
         auto fn = std::bind(&CarbonTestConsole::SpeechRecognizer_CanceledHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"canceled "), m_speechRecognizer->Canceled, fn);
@@ -612,66 +613,66 @@ void CarbonTestConsole::ConsoleInput_SpeechRecognizer(const wchar_t* psz, std::s
 
 void CarbonTestConsole::ConsoleInput_IntentRecognizer(const wchar_t* psz, std::shared_ptr<IntentRecognizer>& intentRecognizer)
 {
-    if (PAL_wcsicmp(psz, L"isenabled") == 0)
+    if (PAL::wcsicmp(psz, L"isenabled") == 0)
     {
         Recognizer_IsEnabled(intentRecognizer);
     }
-    else if (PAL_wcsicmp(psz, L"enable") == 0)
+    else if (PAL::wcsicmp(psz, L"enable") == 0)
     {
         Recognizer_Enable(intentRecognizer);
     }
-    else if (PAL_wcsicmp(psz, L"disable") == 0)
+    else if (PAL::wcsicmp(psz, L"disable") == 0)
     {
         Recognizer_Disable(intentRecognizer);
     }
-    else if (PAL_wcsicmp(psz, L"recognize") == 0)
+    else if (PAL::wcsicmp(psz, L"recognize") == 0)
     {
         Recognizer_Recognize(intentRecognizer);
     }
-    else if (PAL_wcsicmp(psz, L"startcontinuous") == 0)
+    else if (PAL::wcsicmp(psz, L"startcontinuous") == 0)
     {
         Recognizer_StartContinuousRecognition(intentRecognizer);
     }
-    else if (PAL_wcsicmp(psz, L"stopcontinuous") == 0)
+    else if (PAL::wcsicmp(psz, L"stopcontinuous") == 0)
     {
         Recognizer_StopContinuousRecognition(intentRecognizer);
     }
-    else if (PAL_wcsnicmp(psz, L"sessionstarted ", wcslen(L"sessionstarted ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"sessionstarted ", wcslen(L"sessionstarted ")) == 0)
     {
         auto fn = std::bind(&CarbonTestConsole::Recognizer_SessionStartedHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"sessionstarted "), m_intentRecognizer->SessionStarted, fn);
     }
-    else if (PAL_wcsnicmp(psz, L"sessionstopped ", wcslen(L"sessionstopped ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"sessionstopped ", wcslen(L"sessionstopped ")) == 0)
     {
         auto fn = std::bind(&CarbonTestConsole::Recognizer_SessionStoppedHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"sessionstopped "), m_intentRecognizer->SessionStopped, fn);
     }
-    else if (PAL_wcsnicmp(psz, L"soundstarted ", wcslen(L"soundstarted ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"soundstarted ", wcslen(L"soundstarted ")) == 0)
     {
         auto fn = std::bind(&CarbonTestConsole::Recognizer_SoundStartedHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"soundstarted "), m_intentRecognizer->SoundStarted, fn);
     }
-    else if (PAL_wcsnicmp(psz, L"soundstopped ", wcslen(L"soundstopped ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"soundstopped ", wcslen(L"soundstopped ")) == 0)
     {
         auto fn = std::bind(&CarbonTestConsole::Recognizer_SoundStoppedHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"soundstopped "), m_intentRecognizer->SoundStopped, fn);
     }
-    else if (PAL_wcsnicmp(psz, L"intermediateresult ", wcslen(L"intermediateresult ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"intermediateresult ", wcslen(L"intermediateresult ")) == 0)
     {
         auto fn = std::bind(&CarbonTestConsole::IntentRecognizer_IntermediateResultHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"intermediateresult "), m_intentRecognizer->IntermediateResult, fn);
     }
-    else if (PAL_wcsnicmp(psz, L"finalresult ", wcslen(L"finalresult ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"finalresult ", wcslen(L"finalresult ")) == 0)
     {
         auto fn = std::bind(&CarbonTestConsole::IntentRecognizer_FinalResultHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"finalresult "), m_intentRecognizer->FinalResult, fn);
     }
-    else if (PAL_wcsnicmp(psz, L"nomatch ", wcslen(L"nomatch ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"nomatch ", wcslen(L"nomatch ")) == 0)
     {
         auto fn = std::bind(&CarbonTestConsole::IntentRecognizer_NoMatchHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"nomatch "), m_intentRecognizer->NoMatch, fn);
     }
-    else if (PAL_wcsnicmp(psz, L"canceled ", wcslen(L"canceled ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"canceled ", wcslen(L"canceled ")) == 0)
     {
         auto fn = std::bind(&CarbonTestConsole::IntentRecognizer_CanceledHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"canceled "), m_intentRecognizer->Canceled, fn);
@@ -690,50 +691,55 @@ void CarbonTestConsole::ConsoleInput_CommandSystem(const wchar_t* psz)
 template <class T>
 void CarbonTestConsole::Recognizer_IsEnabled(std::shared_ptr<T>& recognizer)
 {
-    ConsoleWrite(L"\n%S.IsEnabled == ", typeid(*recognizer.get()).name());
+    auto name = PAL::ToWString(PAL::GetTypeName(*recognizer.get()));
+    ConsoleWrite(L"\n%ls.IsEnabled == ", name.c_str());
     bool enabled = recognizer->IsEnabled();
-    ConsoleWriteLine(L"%S\n", enabled ? "true" : "false");
+    ConsoleWriteLine(L"%ls\n", enabled ? L"true" : L"false");
 }
 
 template <class T>
 void CarbonTestConsole::Recognizer_Enable(std::shared_ptr<T>& recognizer)
 {
-    ConsoleWriteLine(L"\nEnabling %S...", typeid(*recognizer.get()).name());
+    auto name = PAL::ToWString(PAL::GetTypeName(*recognizer.get()));
+    ConsoleWriteLine(L"\nEnabling %ls...", name.c_str());
     recognizer->Enable();
-    ConsoleWriteLine(L"Ensabling %S... Done!\n", typeid(*recognizer.get()).name());
+    ConsoleWriteLine(L"Enabling %ls... Done!\n", name.c_str());
 
     bool enabled = recognizer->IsEnabled();
-    ConsoleWriteLine(L"%S.IsEnabled == %S\n", typeid(*recognizer.get()).name(), enabled ? "true" : "false");
+    ConsoleWriteLine(L"%ls.IsEnabled == %ls\n", name.c_str(), enabled ? L"true" : L"false");
 }
 
 template <class T>
 void CarbonTestConsole::Recognizer_Disable(std::shared_ptr<T>& recognizer)
 {
-    ConsoleWriteLine(L"\nDisabling %S...", typeid(*recognizer.get()).name());
+    auto name = PAL::ToWString(PAL::GetTypeName(*recognizer.get()));
+    ConsoleWriteLine(L"\nDisabling %ls...", name.c_str());
     recognizer->Disable();
-    ConsoleWriteLine(L"Disabling %S... Done!\n", typeid(*recognizer.get()).name());
+    ConsoleWriteLine(L"Disabling %ls... Done!\n", name.c_str());
 
     bool enabled = recognizer->IsEnabled();
-    ConsoleWriteLine(L"%S.IsEnabled == %S\n", typeid(*recognizer.get()).name(), enabled ? "true" : "false");
+    ConsoleWriteLine(L"%ls.IsEnabled == %ls\n", name.c_str(), enabled ? L"true" : L"false");
 }
 
 template <class T>
 void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<T>& recognizer)
 {
-    ConsoleWriteLine(L"\nRecognizeAsync %S...", typeid(*recognizer.get()).name());
+    auto name = PAL::ToWString(PAL::GetTypeName(*recognizer.get()));
+    ConsoleWriteLine(L"\nRecognizeAsync %ls...", name.c_str());
     auto future = recognizer->RecognizeAsync();
-    ConsoleWriteLine(L"RecognizeAsync %S... Waiting...", typeid(*recognizer.get()).name());
+    ConsoleWriteLine(L"RecognizeAsync %ls... Waiting...", name.c_str());
     auto result = future.get();
-    ConsoleWriteLine(L"RecognizeAsync %S... Waiting... Done!\n", typeid(*recognizer.get()).name());
+    ConsoleWriteLine(L"RecognizeAsync %ls... Waiting... Done!\n", name.c_str());
 }
 
 void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<SpeechRecognizer>& recognizer)
 {
-    ConsoleWriteLine(L"\nRecognizeAsync %S...", typeid(*recognizer.get()).name());
+    auto name = PAL::ToWString(PAL::GetTypeName(*recognizer.get()));
+    ConsoleWriteLine(L"\nRecognizeAsync %ls...", name.c_str());
     auto future = recognizer->RecognizeAsync();
-    ConsoleWriteLine(L"RecognizeAsync %S... Waiting...", typeid(*recognizer.get()).name());
+    ConsoleWriteLine(L"RecognizeAsync %ls... Waiting...", name.c_str());
     auto result = future.get();
-    ConsoleWriteLine(L"RecognizeAsync %S... Waiting... Done!\n", typeid(*recognizer.get()).name());
+    ConsoleWriteLine(L"RecognizeAsync %ls... Waiting... Done!\n", name.c_str());
 
     ConsoleWriteLine(L"SpeechRecognitionResult: ResultId=%d; Reason=%d; Text=%ls", result->ResultId.c_str(), result->Reason, result->Text.c_str());
 }
@@ -741,35 +747,37 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<SpeechRecognizer>& 
 template <class T>
 void CarbonTestConsole::Recognizer_StartContinuousRecognition(std::shared_ptr<T>& recognizer)
 {
-    ConsoleWriteLine(L"\nStartContinuousRecognitionAsync %S...", typeid(*recognizer.get()).name());
+    auto name = PAL::ToWString(PAL::GetTypeName(*recognizer.get()));
+    ConsoleWriteLine(L"\nStartContinuousRecognitionAsync %ls...", name.c_str());
     auto future = recognizer->StartContinuousRecognitionAsync();
-    ConsoleWriteLine(L"StartContinuousRecognitionAsync %S... Waiting...", typeid(*recognizer.get()).name());
+    ConsoleWriteLine(L"StartContinuousRecognitionAsync %ls... Waiting...", name.c_str());
     future.get();
-    ConsoleWriteLine(L"StartContinuousRecognitionAsync %S... Waiting... Done!\n", typeid(*recognizer.get()).name());
+    ConsoleWriteLine(L"StartContinuousRecognitionAsync %ls... Waiting... Done!\n", name.c_str());
 }
 
 template <class T>
 void CarbonTestConsole::Recognizer_StopContinuousRecognition(std::shared_ptr<T>& recognizer)
 {
-    ConsoleWriteLine(L"\nStopContinuousRecognitionAsync %S...", typeid(*recognizer.get()).name());
+    auto name = PAL::ToWString(PAL::GetTypeName(*recognizer.get()));
+    ConsoleWriteLine(L"\nStopContinuousRecognitionAsync %ls...", name.c_str());
     auto future = recognizer->StopContinuousRecognitionAsync();
-    ConsoleWriteLine(L"StopContinuousRecognitionAsync %S... Waiting...", typeid(*recognizer.get()).name());
+    ConsoleWriteLine(L"StopContinuousRecognitionAsync %ls... Waiting...", name.c_str());
     future.get();
-    ConsoleWriteLine(L"StopContinuousRecognitionAsync %S... Waiting... Done!\n", typeid(*recognizer.get()).name());
+    ConsoleWriteLine(L"StopContinuousRecognitionAsync %ls... Waiting... Done!\n", name.c_str());
 }
 
 template <class T>
 void CarbonTestConsole::Recognizer_Event(const wchar_t* psz, EventSignal<T>& recognizerEvent, typename::EventSignal<T>::CallbackFunction callback)
 {
-    if (PAL_wcsicmp(psz, L"connect") == 0)
+    if (PAL::wcsicmp(psz, L"connect") == 0)
     {
         recognizerEvent.Connect(callback);
     }
-    else if (PAL_wcsicmp(psz, L"disconnect") == 0)
+    else if (PAL::wcsicmp(psz, L"disconnect") == 0)
     {
         recognizerEvent.Disconnect(callback);
     }
-    else if (PAL_wcsicmp(psz, L"disconnectall") == 0)
+    else if (PAL::wcsicmp(psz, L"disconnectall") == 0)
     {
         recognizerEvent.DisconnectAll();
     }
@@ -801,7 +809,7 @@ std::wstring CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
     str += L"  Result = {\n";
     str += L"    ResultId = '" + e.Result.ResultId + L"'\n";
     str += L"    Reason = Reason::" + reasons[(int)e.Result.Reason] + L"\n";
-    str += L"    Text = '" + e.Result.Text + L"\n";
+    str += L"    Text = '" + e.Result.Text + L"'\n";
     str += L"  } \n";
     str += L"} \n";
 
@@ -839,7 +847,7 @@ void CarbonTestConsole::InitCarbon(ConsoleArgs* pconsoleArgs)
 
 void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const std::wstring& wavFileName)
 {
-    if (recognizerType == typeid(SpeechRecognizer).name())
+    if (recognizerType == PAL::GetTypeName<SpeechRecognizer>())
     {
         m_speechRecognizer = wavFileName.length() == 0
             ? RecognizerFactory::CreateSpeechRecognizer() 
@@ -853,7 +861,7 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
 
         m_recognizer = BaseAsyncRecognizer::From(m_speechRecognizer);
     }
-    else if (recognizerType == typeid(IntentRecognizer).name())
+    else if (recognizerType == PAL::GetTypeName<IntentRecognizer>())
     {
         m_intentRecognizer = wavFileName.length() == 0
             ? RecognizerFactory::CreateIntentRecognizer()
@@ -924,17 +932,17 @@ void CarbonTestConsole::ContinuousRecognition(uint16_t seconds)
 
 void CarbonTestConsole::RunSample(const std::wstring& strSampleName)
 {
-    if (PAL_wcsicmp(strSampleName.c_str(), L"helloworld") == 0)
+    if (PAL::wcsicmp(strSampleName.c_str(), L"helloworld") == 0)
     {
         ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
         Sample_HelloWorld();
     }
-    else if (PAL_wcsicmp(strSampleName.c_str(), L"helloworld with events") == 0)
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"helloworld with events") == 0)
     {
         ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
         Sample_HelloWorld_WithEvents();
     }
-    else if (PAL_wcsicmp(strSampleName.c_str(), L"helloworld c") == 0)
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"helloworld c") == 0)
     {
         ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
         Sample_HelloWorld_In_C();
@@ -950,8 +958,8 @@ void CarbonTestConsole::RunInteractivePrompt()
     std::wstring strInput;
     while (GetConsoleInput(strInput))
     {
-        if (PAL_wcsicmp(strInput.c_str(), L"exit") == 0) break;
-        if (PAL_wcsicmp(strInput.c_str(), L"quit") == 0) break;
+        if (PAL::wcsicmp(strInput.c_str(), L"exit") == 0) break;
+        if (PAL::wcsicmp(strInput.c_str(), L"quit") == 0) break;
 
         try
         {

@@ -8,6 +8,7 @@
 #include "stdafx.h"
 #include "usp_reco_engine_adapter.h"
 #include "handle_table.h"
+#include <file_utils.h>
 #include <cstring>
 
 #define INVALID_USP_HANDLE ((void*)-1)
@@ -287,12 +288,7 @@ void CSpxUspRecoEngineAdapter::UspOnError(UspHandle handle, void* context, UspRe
 
 void CSpxUspRecoEngineAdapter::DumpFileInit()
 {
-    // TODO (alrezni): move this to common/file_utils
-#ifdef _MSC_VER
-    fopen_s(&m_hfile, "uspaudiodump.wav", "wb");
-#else
-    m_hfile = fopen("uspaudiodump.wav", "wb");
-#endif
+    PAL::fopen_s(&m_hfile, "uspaudiodump.wav", "wb");
 }
 
 void CSpxUspRecoEngineAdapter::DumpFileWrite(const uint8_t* buffer, size_t bytesToWrite)
