@@ -1373,6 +1373,10 @@ void wsio_dowork(CONCRETE_IO_HANDLE ws_io)
             /* Codes_SRS_WSIO_01_112: [The timeout for lws_service shall be 0.] */
             (void)lws_service(wsio_instance->ws_context, 0);
 
+
+            // The current version of LibWebsocket (v2.4.1 Commit: e4e774b8) supports TCP Keepalive feature ("TCP Keepalive" on https://libwebsockets.org/lws-api-doc-master/html/md_README.coding.html),
+            // So the following check is disabled by default.
+#ifdef CHECK_ALIVE_TIMEOUT
             // later versions of libWS fix the ping-pong timeout checks.
             // for now, we can also implement our own.
             if (wsio_instance->ka_time)
@@ -1414,9 +1418,14 @@ void wsio_dowork(CONCRETE_IO_HANDLE ws_io)
                 }
                 else if (wsio_instance->choked_state && ((now - wsio_instance->choked_time) >= PING_PONG_INTERVAL_SECONDS))
                 {
+                    // The check here is flaky. If a large chunk of data is sent, the websocket connection could be busy (choked) for a certain period longer
+                    // than PING_PONG_INTERVAL_SECONDS, which then leads to close the websocket connection incorrectly. 
+                    // If we have to check timeout due to congestion by ourselves, the timeout value to check here must be adjusted.
+                    LogError("%s: close websocket connection because the network congestion time longer than expected(%d seconds).", __FUNCTION__, PING_PONG_INTERVAL_SECONDS);
                     wsio_close(ws_io, NULL, NULL);
                 }
             }
+#endif
         }
     }
 }
