@@ -209,7 +209,7 @@ void CSpxUspRecoEngineAdapter::UspShutdown(UspHandle handle)
 void CSpxUspRecoEngineAdapter::InitCallbacks(UspCallbacks* pcallbacks)
 {
     pcallbacks->size = sizeof(UspCallbacks);
-    pcallbacks->version = (uint16_t)USP_VERSION;
+    pcallbacks->version = (uint16_t)USP_CALLBACK_VERSION;
 
     pcallbacks->onSpeechStartDetected = [](UspHandle handle, void* context, UspMsgSpeechStartDetected *message) {
         SPX_DBG_TRACE_VERBOSE("Response: Speech.StartDetected message. Speech starts at offset %llu (100ns).\n", message->offset);
@@ -224,6 +224,11 @@ void CSpxUspRecoEngineAdapter::InitCallbacks(UspCallbacks* pcallbacks)
     pcallbacks->onSpeechHypothesis = [](UspHandle handle, void* context, UspMsgSpeechHypothesis *message) {
         SPX_DBG_TRACE_VERBOSE("Response: Speech.Hypothesis message. Starts at offset %llu, with duration %llu (100ns). Text: %ls\n", message->offset, message->duration, message->text);
         CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechHypothesis(handle, context, message);
+    };
+
+    pcallbacks->onSpeechFragment = [](UspHandle handle, void* context, UspMsgSpeechFragment *message) {
+        SPX_DBG_TRACE_VERBOSE("Response: Speech.Fragment message. Starts at offset %llu, with duration %llu (100ns). Text: %ls\n", message->offset, message->duration, message->text);
+        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechFragment(handle, context, message);
     };
 
     pcallbacks->onSpeechPhrase = [](UspHandle handle, void* context, UspMsgSpeechPhrase *message) {
@@ -262,6 +267,13 @@ void CSpxUspRecoEngineAdapter::UspOnSpeechEndDetected(UspHandle handle, void* co
 void CSpxUspRecoEngineAdapter::UspOnSpeechHypothesis(UspHandle handle, void* context, UspMsgSpeechHypothesis *message)
 {
     SPX_DBG_ASSERT(GetSite());
+    GetSite()->IntermediateResult(this, message->offset, ResultPayloadFrom(message));
+}
+
+void CSpxUspRecoEngineAdapter::UspOnSpeechFragment(UspHandle handle, void* context, UspMsgSpeechFragment *message)
+{
+    SPX_DBG_ASSERT(GetSite());
+    // Todo: Rob: do we want to treate speech.fragment message different than speech.hypothesis message at this level?
     GetSite()->IntermediateResult(this, message->offset, ResultPayloadFrom(message));
 }
 

@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-#define USP_VERSION 1.0
+#define USP_CALLBACK_VERSION 1
 
 /**
  * The UspHandle represents an opaque handle used by usplib.
@@ -29,8 +29,7 @@ typedef struct _UspContext* UspHandle;
 typedef int UspResult;
 
 /**
- * The UspOnSpeechStartDetected represents an application-defined callback function
- * used for signaling a speech.startDetected message.
+ * A callback function that will be called when a speech.startDetected message is received from service.
  * @param uspHandle The UspHandle.
  * @param context A pointer to the application-defined callback context.
  * @param message A pointer to the speech.startDetected message.
@@ -38,8 +37,7 @@ typedef int UspResult;
 typedef void(*UspOnSpeechStartDetected)(UspHandle uspHandle, void* context, UspMsgSpeechStartDetected *message);
 
 /**
-* The UspOnSpeechEndDetected represents an application-defined callback function
-* used for signaling a speech.endDetected message.
+* A callback function that will be called when a speech.endDetected message is received from service.
 * @param uspHandle The UspHandle.
 * @param context A pointer to the application-defined callback context.
 * @param message A pointer to the speech.endDetected message.
@@ -47,8 +45,7 @@ typedef void(*UspOnSpeechStartDetected)(UspHandle uspHandle, void* context, UspM
 typedef void(*UspOnSpeechEndDetected)(UspHandle uspHandle, void* context, UspMsgSpeechEndDetected *message);
 
 /**
-* The UspOnSpeechHypothesis represents an application-defined callback function
-* used for signaling a speech.hypothesis message.
+* A callback function that will be called when a speech.hypothesis message is received from service.
 * @param uspHandle The UspHandle.
 * @param context A pointer to the application-defined callback context.
 * @param message A pointer to the speech.hypothesis message.
@@ -56,8 +53,7 @@ typedef void(*UspOnSpeechEndDetected)(UspHandle uspHandle, void* context, UspMsg
 typedef void(*UspOnSpeechHypothesis)(UspHandle uspHandle, void* context, UspMsgSpeechHypothesis *message);
 
 /**
-* The UspOnSpeechPhrase represents an application-defined callback function
-* used for signaling a speech.phrase message.
+* A callback function that will be called when a speech.phrase message is received from service.
 * @param uspHandle The UspHandle.
 * @param context A pointer to the application-defined callback context.
 * @param message A pointer to the speech.phrase message.
@@ -65,8 +61,15 @@ typedef void(*UspOnSpeechHypothesis)(UspHandle uspHandle, void* context, UspMsgS
 typedef void(*UspOnSpeechPhrase)(UspHandle uspHandle, void* context, UspMsgSpeechPhrase *message);
 
 /**
-* The UspOnTurnStart represents an application-defined callback function
-* used for signaling a turn.start message.
+* A callback function that will be called when a speech.fragment message is received from service.
+* @param uspHandle The UspHandle.
+* @param context A pointer to the application-defined callback context.
+* @param message A pointer to the speech.hypothesis message.
+*/
+typedef void(*UspOnSpeechFragment)(UspHandle handle, void* context, UspMsgSpeechFragment *message);
+
+/**
+A callback function that will be called when a turn.start message is received from service.
 * @param uspHandle The UspHandle.
 * @param context A pointer to the application-defined callback context.
 * @param message A pointer to the turn.start message.
@@ -74,8 +77,7 @@ typedef void(*UspOnSpeechPhrase)(UspHandle uspHandle, void* context, UspMsgSpeec
 typedef void(*UspOnTurnStart)(UspHandle uspHandle, void* context, UspMsgTurnStart *message);
 
 /**
-* The UspOnTurnEndDetected represents an application-defined callback function
-* used for signaling a turn.end message.
+A callback function that will be called when a turn.end message is received from service.
 * @param uspHandle The UspHandle.
 * @param context A pointer to the application-defined callback context.
 * @param message A pointer to the turn.end message.
@@ -83,8 +85,7 @@ typedef void(*UspOnTurnStart)(UspHandle uspHandle, void* context, UspMsgTurnStar
 typedef void(*UspOnTurnEnd)(UspHandle uspHandle, void* context, UspMsgTurnEnd *message);
 
 /**
-* The UspOnError represents an application-defined callback function
-* used for signaling the an error.
+A callback function that will be called when an error occurs in handling communication with service.
 * @param uspHandle The UspHandle.
 * @param context A pointer to the application-defined callback context.
 * @param error an error code.
@@ -104,6 +105,7 @@ typedef struct _UspCallbacks
     UspOnSpeechEndDetected onSpeechEndDetected;
     UspOnSpeechHypothesis onSpeechHypothesis;
     UspOnSpeechPhrase onSpeechPhrase;
+    UspOnSpeechFragment onSpeechFragment;
     UspOnTurnStart onTurnStart;
     UspOnTurnEnd onTurnEnd;
     UspOnError OnError;

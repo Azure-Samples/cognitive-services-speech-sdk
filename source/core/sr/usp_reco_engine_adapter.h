@@ -75,6 +75,7 @@ private:
     void UspOnSpeechStartDetected(UspHandle handle, void* context, UspMsgSpeechStartDetected *message);
     void UspOnSpeechEndDetected(UspHandle handle, void* context, UspMsgSpeechEndDetected *message);
     void UspOnSpeechHypothesis(UspHandle handle, void* context, UspMsgSpeechHypothesis *message);
+    void UspOnSpeechFragment(UspHandle handle, void *context, UspMsgSpeechFragment *message);
     void UspOnSpeechPhrase(UspHandle handle, void* context, UspMsgSpeechPhrase *message);
     void UspOnTurnStart(UspHandle handle, void* context, UspMsgTurnStart *message);
     void UspOnTurnEnd(UspHandle handle, void* context, UspMsgTurnEnd *message);
@@ -83,6 +84,13 @@ private:
     ISpxRecoEngineAdapterSite::ResultPayload_Type ResultPayloadFrom(UspMsgSpeechHypothesis* message)
     {
         // TODO: RobCh: Do something with the other fields in UspMsgSpeechHypothesis
+        auto result = SpxMakeShared<CSpxRecognitionResult, ISpxRecognitionResult>(nullptr, message->text, CSpxRecognitionResult::IntermediateResult);
+        return result;
+    }
+
+    ISpxRecoEngineAdapterSite::ResultPayload_Type ResultPayloadFrom(UspMsgSpeechFragment* message)
+    {
+        // TODO: RobCh: Do something with the other fields in UspMsgSpeechFragment
         auto result = SpxMakeShared<CSpxRecognitionResult, ISpxRecognitionResult>(nullptr, message->text, CSpxRecognitionResult::IntermediateResult);
         return result;
     }

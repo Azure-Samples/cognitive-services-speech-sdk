@@ -25,7 +25,8 @@ typedef enum _UspRecognitionStatus
     USP_RECOGNITION_NO_MATCH,
     USP_RECOGNITION_INITIAL_SILENCE_TIMEOUT,
     USP_RECOGNITION_BABBLE_TIMEOUT,
-    USP_RECOGNITION_ERROR
+    USP_RECOGNITION_ERROR,
+    USP_RECOGNITION_END_OF_DICTATION
 } UspRecognitionStatus;
 
 /**
@@ -56,6 +57,16 @@ typedef struct _UspMsgSpeechPhrase
     UspOffsetType offset;
     UspDurationType duration;
 } UspMsgSpeechPhrase;
+
+/**
+* Represents speech.fragment message
+*/
+typedef struct _UspMsgSpeechFragment
+{
+    wchar_t* text;
+    UspOffsetType offset;
+    UspDurationType duration;
+} UspMsgSpeechFragment;
 
 /**
  * Represents speech.endDetected message

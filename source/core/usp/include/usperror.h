@@ -19,7 +19,7 @@ extern "C" {
 // Initialization errors.
 
 /**
- * USP_UNINTIALIZED indicates that the USP handle is not initialized yet. 
+ * USP_NOT_OPENED indicates that the USP handle is not initialized yet. 
 */
 #define USP_NOT_OPENED USP_ERRCODE(0x001)
 
@@ -37,7 +37,6 @@ extern "C" {
 * USP_OPERATION_IN_WRONG_STATE indicates the current operation cannot be performed in the current USP state. 
 */
 #define USP_OPERATION_IN_WRONG_STATE USP_ERRCODE(0x004)
-
 
 // Parameter errors.
 

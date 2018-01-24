@@ -24,6 +24,7 @@ extern const char* g_keywordContentType;
 
 extern const char g_messagePathSpeechHypothesis[];
 extern const char g_messagePathSpeechPhrase[];
+extern const char g_messagePathSpeechFragment[];
 extern const char g_messagePathTurnStart[];
 extern const char g_messagePathTurnEnd[];
 extern const char g_messagePathSpeechEndDetected[];

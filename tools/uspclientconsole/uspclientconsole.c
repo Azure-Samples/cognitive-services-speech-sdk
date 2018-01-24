@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include "azure_c_shared_utility/threadapi.h"
 #include "usp.h"
 
 
@@ -25,26 +26,32 @@ char* recognitionStatusToText[] =
     "Initial Silence Timeout", //RECOGNITION_INITIAL_SILENCE_TIMEOUT
     "Babble Timeout", // RECOGNITION_BABBLE_TIMEOUT
     "Error", // RECOGNITION_ERROR
+    "EndOfDictation" // END_OF_DICTATION 
 };
 
 void OnSpeechStartDetected(UspHandle handle, void* context, UspMsgSpeechStartDetected *message)
 {
-    printf("Response: Speech.StartDetected message. Speech starts at offset %llu (100ns).\n", message->offset);
+    printf("Response: Speech.StartDetected message. Speech starts at offset %llu.\n", message->offset);
 }
 
 void OnSpeechEndDetected(UspHandle handle, void* context, UspMsgSpeechEndDetected *message)
 {
-    printf("Response: Speech.EndDetected message. Speech ends at offset %llu (100ns)\n", message->offset);
+    printf("Response: Speech.EndDetected message. Speech ends at offset %llu\n", message->offset);
 }
 
 void OnSpeechHypothesis(UspHandle handle, void* context, UspMsgSpeechHypothesis *message)
 {
-    printf("Response: Speech.Hypothesis message. Text: %ls, starts at offset %llu, with duration %llu (100ns).\n", message->text, message->offset, message->duration);
+    printf("Response: Speech.Hypothesis message. Text: %ls, starts at offset %llu, with duration %llu.\n", message->text, message->offset, message->duration);
 }
 
 void OnSpeechPhrase(UspHandle handle, void* context, UspMsgSpeechPhrase *message)
 {
-    printf("Response: Speech.Phrase message. Status: %s, Text: %ls, starts at %llu, with duration %llu (100ns).\n", recognitionStatusToText[message->recognitionStatus], message->displayText, message->offset, message->duration);
+    printf("Response: Speech.Phrase message. Status: %s, Text: %ls, starts at %llu, with duration %llu.\n", recognitionStatusToText[message->recognitionStatus], message->displayText, message->offset, message->duration);
+}
+
+void OnSpeechFragment(UspHandle handle, void* context, UspMsgSpeechFragment *message)
+{
+    printf("Response: Speech.Fragment message. Text: %ls, starts at %llu, with duration %llu.\n", message->text, message->offset, message->duration);
 }
 
 void OnTurnStart(UspHandle handle, void* context, UspMsgTurnStart *message)
@@ -63,7 +70,7 @@ void OnError(UspHandle handle, void* context, UspResult error)
     printf("Response: On Error: 0x%x.\n", error);
 }
 
-#define MAX_AUDIO_SIZE_IN_BYTE (1024*1024)
+#define AUDIO_BYTES_PER_SECOND (16000*2) //16KHz, 16bit PCM
 
 int main(int argc, char* argv[])
 {
@@ -71,25 +78,23 @@ int main(int argc, char* argv[])
     UspResult ret;
     void* context = NULL;
     UspCallbacks testCallbacks;
-    uint8_t *buffer = malloc(MAX_AUDIO_SIZE_IN_BYTE);
-    size_t bytesRead;
-    size_t bytesWritten;
     UspEndpointType endpoint = USP_ENDPOINT_BING_SPEECH;
     UspRecognitionMode mode = USP_RECO_MODE_INTERACTIVE;
 
-    testCallbacks.version = (uint16_t)USP_VERSION;
+    testCallbacks.version = (uint16_t)USP_CALLBACK_VERSION;
     testCallbacks.size = sizeof(testCallbacks);
     testCallbacks.OnError = OnError;
     testCallbacks.onSpeechEndDetected = OnSpeechEndDetected;
     testCallbacks.onSpeechHypothesis = OnSpeechHypothesis;
     testCallbacks.onSpeechPhrase = OnSpeechPhrase;
+    testCallbacks.onSpeechFragment = OnSpeechFragment;
     testCallbacks.onSpeechStartDetected = OnSpeechStartDetected;
     testCallbacks.onTurnEnd = OnTurnEnd;
     testCallbacks.onTurnStart = OnTurnStart;
 
     if (argc < 2)
     {
-        printf("Usage: uspclientconsole audio_file");
+        printf("Usage: uspclientconsole audio_file endpoint_type(speech/cris) mode(interactive/conversation/dictation) language output(simple/detailed)");
         exit(1);
     }
 
@@ -100,9 +105,6 @@ int main(int argc, char* argv[])
         printf("Error: open file %s failed", argv[1]);
         exit(1);
     }
-    bytesRead = fread(buffer, sizeof(uint8_t), MAX_AUDIO_SIZE_IN_BYTE, audio);
-
-    turnEnd = false;
 
     // Set service endpoint type.
     if (argc > 2)
@@ -148,6 +150,7 @@ int main(int argc, char* argv[])
     if ((ret = UspOpen(endpoint, mode, &testCallbacks, context, &handle)) != USP_SUCCESS)
     {
         printf("Error: open UspHandle failed (error=0x%x).\n", ret);
+        exit(1);
     }
 
     // Set language.
@@ -190,23 +193,63 @@ int main(int argc, char* argv[])
     if ((ret = UspConnect(handle)) != USP_SUCCESS)
     {
         printf("Error: connect to service failed (error=0x%x).\n", ret);
+        exit(1);
     }
 
+    turnEnd = false;
+
     // Send audio to service
-    printf("Info: send audio with %d bytes for recognition\n", (uint32_t)bytesRead);
-    if ((ret = UspWrite(handle, buffer, bytesRead, &bytesWritten)) != USP_SUCCESS)
+    uint8_t *buffer;
+    size_t bytesToWrite;
+    size_t bytesWritten;
+    size_t chunkSize = AUDIO_BYTES_PER_SECOND * 2 / 5; // 2x real-time, 5 chunks per second.
+    size_t totalBytesWritten = 0;
+    size_t fileSize;
+
+    fseek(audio, 0L, SEEK_END);
+    fileSize = ftell(audio);
+    rewind(audio);
+
+    buffer = malloc(chunkSize);
+    while (!feof(audio))
     {
-        printf("Error: send data to service failed (error=0x%x).\n", ret);
+        bytesToWrite = fread(buffer, sizeof(uint8_t), chunkSize, audio);
+
+        if ((ret = UspWrite(handle, buffer, bytesToWrite, &bytesWritten)) != USP_SUCCESS)
+        {
+            printf("Error: send data to service failed (error=0x%x).\n", ret);
+            UspClose(handle);
+            exit(1);
+        }
+        else
+        {
+            totalBytesWritten += bytesWritten;
+            printf("Info: successfully sent %zu bytes (expected=%zu). Totally: %zu\n", bytesWritten, bytesToWrite, totalBytesWritten);
+            if (bytesToWrite != bytesWritten)
+            {
+                printf("Error: the number of bytes sent to service (%zu) does not match expected (%zu).\n", bytesWritten, bytesToWrite);
+                exit(1);
+            }
+        }
+
+        // Sleep to simulate real-time traffic
+        ThreadAPI_Sleep(200);
+    }
+
+    if (totalBytesWritten != fileSize)
+    {
+        printf("Error: the total number of bytes sent (%zu) does not match the file size (%zu).\n", totalBytesWritten, fileSize);
+        exit(1);
     }
     else
     {
-        printf("Info: successfully sent %d bytes.\n", (uint32_t)bytesWritten);
+        printf("Totally send %zu bytes of audio.\n", totalBytesWritten);
     }
 
     // Wait for end of recognition.
     while (!turnEnd)
     {
-        ThreadAPI_Sleep(2000);
+        ThreadAPI_Sleep(500);
     }
 
     UspClose(handle);

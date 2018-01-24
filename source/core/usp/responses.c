@@ -88,7 +88,7 @@ UspResult ContentDispatch(void* context, const char* path, const char* mime, IOB
 
 typedef struct _DeserializeContext
 {
-    const char * responseJson;
+    const char* responseJson;
     void*        context;
 } DeserializeContext;
 
@@ -182,6 +182,10 @@ static int HandleJsonSpeechPhrase(PROPERTYBAG_HANDLE  propertyHandle, void* cont
             {
                 msg->recognitionStatus = USP_RECOGNITION_ERROR;
             }
+            else if (!strcmp(statusStr, "EndOfDictation"))
+            {
+                msg->recognitionStatus = USP_RECOGNITION_END_OF_DICTATION;
+            }
             else
             {
                 LogError("Unknown RecognitionStatus: %s", statusStr);
@@ -214,6 +218,49 @@ static int HandleJsonSpeechPhrase(PROPERTYBAG_HANDLE  propertyHandle, void* cont
                 free(wcText);
             }
         }
+    }
+
+    return 0;
+}
+
+// handles "speech.fragment" API path
+static int HandleJsonSpeechFragment(PROPERTYBAG_HANDLE  propertyHandle, void* context)
+{
+    if (context == NULL)
+    {
+        return -1;
+    }
+
+    DeserializeContext* deserializeContext = (DeserializeContext*)context;
+    UspContext* uspContext = (UspContext*)deserializeContext->context;
+    if (uspContext == NULL || uspContext->callbacks == NULL)
+    {
+        LogError("%s: SpeechContext is null or SpeechContext->Callback is null.", __FUNCTION__);
+        return -1;
+    }
+
+    UspMsgSpeechFragment* msg = malloc(sizeof(UspMsgSpeechFragment));
+
+    wchar_t* wcText = NULL;
+    const char* text = PropertybagGetStringValue(propertyHandle, "Text");
+    if (text != NULL)
+    {
+        // Todo: better handling of char to wchar
+        size_t textLen = strlen(text) + 1;
+        wcText = malloc(textLen * sizeof(wchar_t));
+        mbstowcs(wcText, text, textLen);
+        msg->text = wcText;
+    }
+
+    msg->offset = (UspOffsetType)PropertybagGetNumberValue(propertyHandle, "Offset");
+    msg->duration = (UspOffsetType)PropertybagGetNumberValue(propertyHandle, "Duration");
+
+    uspContext->callbacks->onSpeechFragment(uspContext, uspContext->callbackContext, msg);
+
+    free(msg);
+    if (wcText != NULL)
+    {
+        free(wcText);
     }
 
     return 0;
@@ -282,6 +329,7 @@ const struct JSON_CONTENT_HANDLER
     { g_messagePathResponse, HandleJsonIntentResponse },
     { g_messagePathSpeechPhrase, HandleJsonSpeechPhrase },
     { g_messagePathSpeechHypothesis, HandleJsonSpeechPhrase },
+    { g_messagePathSpeechFragment, HandleJsonSpeechFragment },
     { g_messagePathTurnStart, HandleJsonTurnStart },
     { NULL, NULL } // terminator
 };

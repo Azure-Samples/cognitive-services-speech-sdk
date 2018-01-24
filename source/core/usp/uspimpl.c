@@ -25,6 +25,7 @@ typedef void(*ResponsePathHandler)(TransportHandle transportHandle, const char* 
 
 const char g_messagePathSpeechHypothesis[] = "speech.hypothesis";
 const char g_messagePathSpeechPhrase[] = "speech.phrase";
+const char g_messagePathSpeechFragment[] = "speech.fragment";
 const char g_messagePathTurnStart[] = "turn.start";
 const char g_messagePathTurnEnd[] = "turn.end";
 const char g_messagePathSpeechStartDetected[] = "speech.startDetected";
@@ -255,6 +256,7 @@ static void ContentPathHandler(TransportHandle transportHandle, const char* path
         LogError("No context provided in %s.", __FUNCTION__);
     }
 
+    LogInfo("Content Message: path: %s, content type: %s, size: %zu, buffer: %s", path, mime, size, (char *)BUFFER_u_char(responseContentHandle));
     ret = ContentDispatch(context, path, mime, 0, responseContentHandle, size);
 
     BUFFER_delete(responseContentHandle);
@@ -287,12 +289,6 @@ static void SpeechStartHandler(TransportHandle transportHandle, const char* path
     }
 }
 
-// Zhou: Callback for http response
-static void ResponseHandler(TransportHandle transportHandle, const char* path, const char* mime, const unsigned char* buffer, size_t size, void* context)
-{
-    ContentPathHandler(transportHandle, path, mime, buffer, size, context);
-}
-
 // Zhou Dispatch table for PATH message
 const struct _PathHandler
 {
@@ -305,7 +301,8 @@ const struct _PathHandler
     { g_messagePathTurnEnd, TurnEndHandler },
     { g_messagePathSpeechHypothesis, ContentPathHandler },
     { g_messagePathSpeechPhrase, ContentPathHandler },
-    { g_messagePathResponse, ResponseHandler },
+    { g_messagePathSpeechFragment, ContentPathHandler },
+    { g_messagePathResponse, ContentPathHandler },
 };
 
 // Zhou: callback for data available on tranport
@@ -516,9 +513,9 @@ UspResult UspSetCallbacks(UspContext* uspContext, UspCallbacks *callbacks, void*
         return USP_INVALID_PARAMETER;
     }
 
-    if ((callbacks->version != USP_VERSION) || (callbacks->size != sizeof(UspCallbacks)))
+    if ((callbacks->version != USP_CALLBACK_VERSION) || (callbacks->size != sizeof(UspCallbacks)))
     {
-        LogError("The callbacks passed to %s is invalid. version:%u (expected: %u), size:%u (expected: %zu).", __FUNCTION__, callbacks->version, USP_VERSION, callbacks->size, sizeof(UspCallbacks));
+        LogError("The callbacks passed to %s is invalid. version:%u (expected: %u), size:%u (expected: %zu).", __FUNCTION__, callbacks->version, USP_CALLBACK_VERSION, callbacks->size, sizeof(UspCallbacks));
         return USP_INVALID_PARAMETER;
     }
 
