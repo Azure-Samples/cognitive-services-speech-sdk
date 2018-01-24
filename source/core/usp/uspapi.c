@@ -6,6 +6,7 @@
 //
 
 #include "uspinternal.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 
 // Todo: read from a configuration file.
 const char g_bingSpeechHostname[] = "wss://speech.platform.bing.com/speech/recognition/%s/cognitiveservices/v1";
