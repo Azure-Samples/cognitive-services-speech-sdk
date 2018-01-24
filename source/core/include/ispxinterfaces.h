@@ -335,18 +335,18 @@ public:
     using AdditionalMessagePayload_Type = void*;
     using ErrorPayload_Type = SPXHR;
     
-    virtual void SpeechStartDetected(ISpxRecoEngineAdapter* adapter, uint32_t offset) = 0;
-    virtual void SpeechEndDetected(ISpxRecoEngineAdapter* adapter, uint32_t offset) = 0;
+    virtual void SpeechStartDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) = 0;
+    virtual void SpeechEndDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) = 0;
 
-    virtual void SoundStartDetected(ISpxRecoEngineAdapter* adapter, uint32_t offset) = 0;
-    virtual void SoundEndDetected(ISpxRecoEngineAdapter* adapter, uint32_t offset) = 0;
+    virtual void SoundStartDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) = 0;
+    virtual void SoundEndDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) = 0;
 
-    virtual void IntermediateResult(ISpxRecoEngineAdapter* adapter, uint32_t offset, ResultPayload_Type payload) = 0;
-    virtual void FinalResult(ISpxRecoEngineAdapter* adapter, uint32_t offset, ResultPayload_Type payload) = 0;
+    virtual void IntermediateResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, ResultPayload_Type payload) = 0;
+    virtual void FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, ResultPayload_Type payload) = 0;
 
     virtual void DoneProcessingAudio(ISpxRecoEngineAdapter* adapter) = 0;
 
-    virtual void AdditionalMessage(ISpxRecoEngineAdapter* adapter, uint32_t offset, AdditionalMessagePayload_Type payload) = 0;
+    virtual void AdditionalMessage(ISpxRecoEngineAdapter* adapter, uint64_t offset, AdditionalMessagePayload_Type payload) = 0;
 
     virtual void Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload) = 0;
 };

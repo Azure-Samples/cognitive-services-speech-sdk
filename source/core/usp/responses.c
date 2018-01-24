@@ -105,13 +105,18 @@ static int HandleJsonIntentResponse(PROPERTYBAG_HANDLE  propertyHandle, void* co
 // handles "speech.phrase" API path
 static int HandleJsonSpeechPhrase(PROPERTYBAG_HANDLE  propertyHandle, void* context)
 {
-    if (NULL == context)
+    if (context == NULL)
     {
         return -1;
     }
 
     DeserializeContext * deserializeContext = (DeserializeContext*)context;
     UspContext* uspContext = (UspContext*)deserializeContext->context;
+    if (uspContext == NULL || uspContext->callbacks == NULL)
+    {
+        LogError("SpeechContext is null or SpeechContext->Callback is null when handling speech phrase messages.");
+        return -1;
+    }
 
     // Zhou: why not differentiae by "Path", but just by "DisplayText" or "Text"??
     //if (pSC->mCallbacks  &&  pSC->mCallbacks->OnSpeech)
@@ -159,23 +164,23 @@ static int HandleJsonSpeechPhrase(PROPERTYBAG_HANDLE  propertyHandle, void* cont
 
             if (!strcmp(statusStr, "Success"))
             {
-                msg->recognitionStatus = RECOGNITON_SUCCESS;
+                msg->recognitionStatus = USP_RECOGNITON_SUCCESS;
             }
             else if (!strcmp(statusStr, "NoMatch"))
             {
-                msg->recognitionStatus = RECOGNITION_NO_MATCH;
+                msg->recognitionStatus = USP_RECOGNITION_NO_MATCH;
             }
             else if (!strcmp(statusStr, "InitialSilenceTimeout"))
             {
-                msg->recognitionStatus = RECOGNITION_INITIAL_SILENCE_TIMEOUT;
+                msg->recognitionStatus = USP_RECOGNITION_INITIAL_SILENCE_TIMEOUT;
             }
             else if (!strcmp(statusStr, "BabbleTimeout"))
             {
-                msg->recognitionStatus = RECOGNITION_BABBLE_TIMEOUT;
+                msg->recognitionStatus = USP_RECOGNITION_BABBLE_TIMEOUT;
             }
             else if (!strcmp(statusStr, "Error"))
             {
-                msg->recognitionStatus = RECOGNITION_ERROR;
+                msg->recognitionStatus = USP_RECOGNITION_ERROR;
             }
             else
             {
@@ -232,7 +237,7 @@ static int HandleTurnStartContext(PROPERTYBAG_HANDLE propertyHandle, void* conte
 // handles "turn.start" API path
 static int HandleJsonTurnStart(PROPERTYBAG_HANDLE  propertyHandle, void* context)
 {
-    if (NULL == context)
+    if (context == NULL)
     {
         return -1;
     }
@@ -241,6 +246,12 @@ static int HandleJsonTurnStart(PROPERTYBAG_HANDLE  propertyHandle, void* context
 
     // USP handling
     UspContext* uspContext = (UspContext *)(deserializeContext->context);
+    if (uspContext == NULL || uspContext->callbacks == NULL)
+    {
+        LogError("SpeechContext is null or SpeechContext->Callback is null when handling turn.start messages.");
+        return -1;
+    }
+
     if (uspContext->callbacks)
     {
         UspMsgTurnStart* msg = malloc(sizeof(UspMsgTurnStart));
@@ -251,6 +262,7 @@ static int HandleJsonTurnStart(PROPERTYBAG_HANDLE  propertyHandle, void* context
             HandleTurnStartContext,
             msg);
 
+        LogInfo("Turn.Start response: serviceTag: %ls.", msg->contextServiceTag);
         uspContext->callbacks->onTurnStart(uspContext, uspContext->callbackContext, msg);
 
         // Todo: better handling of memory management.

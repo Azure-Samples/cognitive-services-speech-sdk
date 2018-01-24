@@ -22,6 +22,8 @@
 #include <errno.h>
 #endif
 
+#include <assert.h>
+
 #include "azure_c_shared_utility/threadapi.h"
 #include "usp.h"
 #include "uspcommon.h"
@@ -50,8 +52,9 @@ extern "C" {
 /**
  * USP_FLAG_XXX indicates state of the USP context.
 */
-#define USP_FLAG_INITIALIZED 0x01
-#define USP_FLAG_SHUTDOWN    0x02
+#define USP_FLAG_OPENED      0x01
+#define USP_FLAG_CONNECTED   0x02
+#define USP_FLAG_SHUTDOWN    0x04
 
 /**
 * The UspContext represents the context data related to a USP client.
@@ -60,8 +63,13 @@ typedef struct _UspContext
 {
     UspCallbacks* callbacks;
     void* callbackContext;
+    UspEndpointType type;
+    UspRecognitionMode mode;
+    STRING_HANDLE outputFormat;
+    STRING_HANDLE language;
 
     int flags;
+
     // Todo: can multiple UspContexts share the work thread?
     THREAD_HANDLE workThreadHandle;
 
@@ -73,17 +81,16 @@ typedef struct _UspContext
 
     // This tick count is set when the UspContext is created.  It is used
     // for metrics.
-    uint64_t createTime;
+    uint64_t creationTime;
 } UspContext;
 
 
 /**
 * Creates a new UspContext.
 * @param contextCreated The pointer that points to the pointer of the created UspContext on return.
-* @param endpoint The service endpoint.
 * @return A UspResult indicating success or error.
 */
-UspResult UspContextCreate(UspContext** contextCreated, const char* endpoint);
+UspResult UspContextCreate(UspContext** contextCreated);
 
 /**
 * Destroys the specified UspContext.
@@ -100,6 +107,21 @@ UspResult UspContextDestroy(UspContext* uspContext);
 * @return A UspResult indicating success or error.
 */
 UspResult UspSetCallbacks(UspContext* uspContext, UspCallbacks *callbacks, void* callbackContext);
+
+/**
+* Initializes transport connection to service.
+* @param uspContext A pointer to the UspContext.
+* @param endpoint The endpoint URL.
+* @return A UspResult indicating success or error.
+*/
+UspResult TransportInitialize(UspContext* uspContext, const char* endpoint);
+
+/**
+* Tears down transport connection to service.
+* @param uspContext A pointer to the UspContext.
+* @return A UspResult indicating success or error.
+*/
+UspResult TransportShutdown(UspContext* uspContext);
 
 /**
 * Defines the callback function of asynchrnous complete during content handling.
@@ -123,7 +145,7 @@ typedef UspResult(*CONTENT_HANDLER_CALLBACK)(void* context, const char* path, ui
 
 /**
 * Opens a new Speech instance.
-* @param ppHandle A pointer to a Speech handle to be returned back to the
+* @param ppHandle A pointer to a Speech uspHandle to be returned back to the
 * caller.
 * @param reserved Reserved, do not use.
 * @param pReserved Reserved, do not use.
@@ -165,20 +187,20 @@ const char* GetCdpDeviceThumbprint();
 
 /**
 * Writes an audio segment to the service.
-* @param handle the UspHandle for sending the audio.
+* @param uspHandle the UspHandle for sending the audio.
 * @param data The audio data to be sent. Audio data must be aligned on the audio sample boundary.
 * @param size The length of the audio data, in bytes.
 * @param bytesWritten A returned pointer to the amount of data that was sent to the service.
 * @return A UspResult indicating success or error.
 */
-UspResult AudioStreamWrite(UspHandle handle, const void *data, uint32_t size, uint32_t * bytesWritten);
+UspResult AudioStreamWrite(UspHandle uspHandle, const void *data, uint32_t size, uint32_t * bytesWritten);
 
 /**
 * Flushes any pending audio to be sent to the service.
-* @param handle the UspHandle for sending the audio.
+* @param uspHandle the UspHandle for sending the audio.
 * @return A UspResult indicating success or error.
 */
-UspResult AudioStreamFlush(UspHandle handle);
+UspResult AudioStreamFlush(UspHandle uspHandle);
 
 #ifdef __cplusplus
 } // extern "C" 

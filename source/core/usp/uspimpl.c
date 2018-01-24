@@ -39,53 +39,52 @@ uint64_t telemetry_gettime()
 }
 
 // Zhou: write audio stream to the service: call transport to write/flush stream; used by usplib
-UspResult AudioStreamWrite(UspHandle handle, const void * data, uint32_t size, uint32_t* bytesWritten)
+UspResult AudioStreamWrite(UspHandle uspHandle, const void * data, uint32_t size, uint32_t* bytesWritten)
 {
-    UspContext* uspContext = (UspContext*)handle;
     const char* httpArgs = "/audio";
     int ret = -1;
 
-    if (!handle || !data || !size)
+    if (!uspHandle || !data || !size)
     {
         return USP_INVALID_PARAMETER;
     }
 
-    Lock(uspContext->transportRequestLock);
+    Lock(uspHandle->transportRequestLock);
 
     metrics_audiostream_data(size);
     if (!size)
     {
-        ret = TransportStreamFlush(uspContext->transportRequest);
+        ret = TransportStreamFlush(uspHandle->transportRequest);
     }
     else
     {
-        if (!uspContext->audioOffset)
+        if (!uspHandle->audioOffset)
         {
             metrics_audiostream_init();
             // user initiated listening and multi-turn require the request id to 
             // be re-created here to ensure barge-in scenerios work.
-            // if (!uspContext->KWTriggered)
+            // if (!uspHandle->KWTriggered)
             // {
-            //    TransportCreateRequestId(uspContext->transportRequest);
-            //    // cortana_reset_speech_request_id(uspContext);
+            //    TransportCreateRequestId(uspHandle->transportRequest);
+            //    // cortana_reset_speech_request_id(uspHandle);
             // }
 
             metrics_audio_start();
 
-            ret = TransportStreamPrepare(uspContext->transportRequest, httpArgs);
+            ret = TransportStreamPrepare(uspHandle->transportRequest, httpArgs);
             if (ret)
             {
-                Unlock(uspContext->transportRequestLock);
+                Unlock(uspHandle->transportRequestLock);
                 return ret;
             }
         }
 
-        ret = TransportStreamWrite(uspContext->transportRequest, (uint8_t*)data, size);
+        ret = TransportStreamWrite(uspHandle->transportRequest, (uint8_t*)data, size);
     }
 
-    Unlock(uspContext->transportRequestLock);
+    Unlock(uspHandle->transportRequestLock);
 
-    uspContext->audioOffset += size;
+    uspHandle->audioOffset += size;
 
     if (!ret && NULL != bytesWritten)
     {
@@ -103,21 +102,20 @@ UspResult AudioStreamWrite(UspHandle handle, const void * data, uint32_t size, u
 }
 
 // Zhou: write audio stream to the service: call transport:stream_flush; used by usplib.c
-UspResult AudioStreamFlush(UspHandle handle)
+UspResult AudioStreamFlush(UspHandle uspHandle)
 {
-    UspContext* uspContext = (UspContext*)handle;
     int ret;
-    if (!handle)
+    if (!uspHandle)
     {
         return USP_INVALID_PARAMETER;
     }
-    else if (!uspContext->audioOffset)
+    else if (!uspHandle->audioOffset)
     {
         return USP_SUCCESS;
     }
 
-    ret = TransportStreamFlush(uspContext->transportRequest);
-    uspContext->audioOffset = 0;
+    ret = TransportStreamFlush(uspHandle->transportRequest);
+    uspHandle->audioOffset = 0;
     metrics_audiostream_flush();
     metrics_audio_end();
 
@@ -421,14 +419,13 @@ const char* GetCdpDeviceThumbprint()
     return thumbprint;
 }
 
-// zhou: called by speech_initialize. Intialize transport and URL
-static UspResult TransportInitialize(UspContext* uspContext, const char *endpoint)
+UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
 {
     uspContext->transportRequest = TransportRequestCreate(endpoint, uspContext);
-
-    if (NULL == uspContext->transportRequest)
+    if (uspContext->transportRequest == NULL)
     {
-        return USP_TRANSPORT_ERROR_GENERIC;
+        LogError("Failed to create transport request in %s", __FUNCTION__);
+        return USP_CONNECT_FAILURE;
     }
 
     TransportSetDnsCache(uspContext->transportRequest, uspContext->dnsCache);
@@ -438,15 +435,16 @@ static UspResult TransportInitialize(UspContext* uspContext, const char *endpoin
     TransportSetTokenStore(uspContext->transportRequest, uspContext->token_store);
 
     uspContext->transportRequestLock = Lock_Init();
-    if (!uspContext->transportRequestLock)
+    if (uspContext->transportRequestLock == NULL)
     {
-        return USP_INITIALIZATION_FAILURE;
+        LogError("Failed to create a lock for transport request in %s", __FUNCTION__);
+        return USP_CONNECT_FAILURE;
     }
 
     return USP_SUCCESS;
 }
 
-static UspResult TransportShutdown(UspContext* uspContext)
+UspResult TransportShutdown(UspContext* uspContext)
 {
     if (uspContext->transportRequest != NULL)
     {
@@ -465,12 +463,9 @@ UspResult UspContextDestroy(UspContext* uspContext)
 {
     if (uspContext == NULL)
     {
+        LogError("UspContext passed to %s is null.", __FUNCTION__);
         return USP_INVALID_PARAMETER;
     }
-
-    uspContext->callbacks = NULL;
-    uspContext->callbackContext = NULL;
-    (void)TransportShutdown(uspContext);
 
     if (uspContext->dnsCache != NULL)
     {
@@ -480,16 +475,19 @@ UspResult UspContextDestroy(UspContext* uspContext)
     telemetry_uninitialize();
     PropertybagShutdown();
 
+    STRING_delete(uspContext->language);
+    STRING_delete(uspContext->outputFormat);
+
     free(uspContext);
     return USP_SUCCESS;
 }
 
-UspResult UspContextCreate(UspContext** contextCreated, const char* endpoint)
+UspResult UspContextCreate(UspContext** contextCreated)
 {
     UspContext* uspContext = (UspContext*)malloc(sizeof(UspContext));
     if (uspContext == NULL)
     {
-        LogError("%s failed: unexpected runtime error.", __FUNCTION__);
+        LogError("UspInitialize failed: allocate memory for UspContext failed.");
         return USP_OUT_OF_MEMORY;
     }
     memset(uspContext, 0, sizeof(UspContext));
@@ -497,20 +495,13 @@ UspResult UspContextCreate(UspContext** contextCreated, const char* endpoint)
     PropertybagInitialize();
     telemetry_initialize();
 
-    uspContext->createTime = telemetry_gettime();
+    uspContext->creationTime = telemetry_gettime();
     uspContext->dnsCache = DnsCacheCreate();
     if (uspContext->dnsCache == NULL)
     {
         LogError("Create DNSCache failed in %s", __FUNCTION__);
         UspContextDestroy(uspContext);
-        return USP_INITIALIZATION_FAILURE;
-    }
-
-    if (TransportInitialize(uspContext, endpoint) != USP_SUCCESS)
-    {
-        LogError("Initialize transport failed in %s", __FUNCTION__);
-        UspContextDestroy(uspContext);
-        return USP_INITIALIZATION_FAILURE;
+        return USP_OPEN_FAILURE;
     }
 
     *contextCreated = uspContext;
@@ -519,8 +510,15 @@ UspResult UspContextCreate(UspContext** contextCreated, const char* endpoint)
 
 UspResult UspSetCallbacks(UspContext* uspContext, UspCallbacks *callbacks, void* callbackContext)
 {
-    if ((uspContext == NULL) || (callbacks == NULL) || (callbacks->version != USP_VERSION) || (callbacks->size != sizeof(UspCallbacks)))
+    if ((uspContext == NULL) || (callbacks == NULL))
     {
+        LogError("One of the following parameters is null in %s. UspContext:0x%x, callbacks:0x%x.", __FUNCTION__,  uspContext, callbacks);
+        return USP_INVALID_PARAMETER;
+    }
+
+    if ((callbacks->version != USP_VERSION) || (callbacks->size != sizeof(UspCallbacks)))
+    {
+        LogError("The callbacks passed to %s is invalid. version:%u (expected: %u), size:%u (expected: %zu).", __FUNCTION__, callbacks->version, USP_VERSION, callbacks->size, sizeof(UspCallbacks));
         return USP_INVALID_PARAMETER;
     }
 
@@ -528,3 +526,4 @@ UspResult UspSetCallbacks(UspContext* uspContext, UspCallbacks *callbacks, void*
     uspContext->callbackContext = callbackContext;
     return USP_SUCCESS;
 }
+

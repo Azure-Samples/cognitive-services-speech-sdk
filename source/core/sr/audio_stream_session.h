@@ -45,18 +45,18 @@ protected:
 private:
 
     // --- ISpxRecoEngineAdapterSite
-    void SpeechStartDetected(ISpxRecoEngineAdapter* adapter, uint32_t offset) override;
-    void SpeechEndDetected(ISpxRecoEngineAdapter* adapter, uint32_t offset) override;
+    void SpeechStartDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
+    void SpeechEndDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
 
-    void SoundStartDetected(ISpxRecoEngineAdapter* adapter, uint32_t offset) override;
-    void SoundEndDetected(ISpxRecoEngineAdapter* adapter, uint32_t offset) override;
+    void SoundStartDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
+    void SoundEndDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
 
-    void IntermediateResult(ISpxRecoEngineAdapter* adapter, uint32_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
-    void FinalResult(ISpxRecoEngineAdapter* adapter, uint32_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
+    void IntermediateResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
+    void FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
 
     void DoneProcessingAudio(ISpxRecoEngineAdapter* adapter) override;
 
-    void AdditionalMessage(ISpxRecoEngineAdapter* adapter, uint32_t offset, AdditionalMessagePayload_Type payload) override;
+    void AdditionalMessage(ISpxRecoEngineAdapter* adapter, uint64_t offset, AdditionalMessagePayload_Type payload) override;
 
     void Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload) override;
     

@@ -11,7 +11,7 @@
 #include <file_utils.h>
 #include <cstring>
 
-#define INVALID_USP_HANDLE ((void*)-1)
+#define INVALID_USP_HANDLE ((UspHandle)-1)
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -74,7 +74,10 @@ void CSpxUspRecoEngineAdapter::UspInitialize(UspHandle* handle, UspCallbacks *ca
 {
     SPX_DBG_TRACE_VERBOSE("%s(0x%x)", __FUNCTION__, handle);
 
-    SPX_IFFAILED_THROW_HR(::UspInitialize(handle, callbacks, callbackContext));
+    UspEndpointType type = USP_ENDPOINT_BING_SPEECH;
+    UspRecognitionMode mode = USP_RECO_MODE_INTERACTIVE;
+    SPX_IFFAILED_THROW_HR(::UspOpen(type, mode, callbacks, callbackContext, handle));
+    SPX_IFFAILED_THROW_HR(::UspConnect(*handle));
 }
 
 void CSpxUspRecoEngineAdapter::UspWriteFormat(UspHandle handle, WAVEFORMATEX* pformat)
@@ -134,7 +137,7 @@ void CSpxUspRecoEngineAdapter::UspWrite_Actual(UspHandle handle, const uint8_t* 
 {
     SPX_INIT_HR(hr);
 
-    hr = ::UspWrite(handle, buffer, byteToWrite);
+    hr = ::UspWrite(handle, buffer, byteToWrite, NULL);
     hr = (byteToWrite == 0 && hr == USP_WRITE_ERROR) ? SPX_NOERROR : hr; // ::UspWrite currently returns USP_WRITE_ERROR on zero bytes, but there's no other way to flush buffer...
 
     DumpFileWrite(buffer, byteToWrite);
@@ -200,7 +203,7 @@ void CSpxUspRecoEngineAdapter::UspShutdown(UspHandle handle)
 {
     SPX_DBG_TRACE_VERBOSE("%s(0x%x)", __FUNCTION__, handle);
 
-    SPX_IFFAILED_THROW_HR(::UspShutdown(handle));
+    SPX_IFFAILED_THROW_HR(::UspClose(handle));
 }
 
 void CSpxUspRecoEngineAdapter::InitCallbacks(UspCallbacks* pcallbacks)
@@ -209,27 +212,27 @@ void CSpxUspRecoEngineAdapter::InitCallbacks(UspCallbacks* pcallbacks)
     pcallbacks->version = (uint16_t)USP_VERSION;
 
     pcallbacks->onSpeechStartDetected = [](UspHandle handle, void* context, UspMsgSpeechStartDetected *message) {
-        SPX_DBG_TRACE_VERBOSE("Response: Speech.StartDetected message. Speech starts at offset %u (100ns).\n", message->offset);
+        SPX_DBG_TRACE_VERBOSE("Response: Speech.StartDetected message. Speech starts at offset %llu (100ns).\n", message->offset);
         CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechStartDetected(handle, context, message);
     };
 
     pcallbacks->onSpeechEndDetected = [](UspHandle handle, void* context, UspMsgSpeechEndDetected *message) {
-        SPX_DBG_TRACE_VERBOSE("Response: Speech.EndDetected message. Speech ends at offset %u (100ns)\n", message->offset);
+        SPX_DBG_TRACE_VERBOSE("Response: Speech.EndDetected message. Speech ends at offset %llu (100ns)\n", message->offset);
         CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechEndDetected(handle, context, message);
     };
 
     pcallbacks->onSpeechHypothesis = [](UspHandle handle, void* context, UspMsgSpeechHypothesis *message) {
-        SPX_DBG_TRACE_VERBOSE("Response: Speech.Hypothesis message. Starts at offset %u, with duration %u (100ns). Text: %S\n", message->offset, message->duration, message->text);
+        SPX_DBG_TRACE_VERBOSE("Response: Speech.Hypothesis message. Starts at offset %llu, with duration %llu (100ns). Text: %ls\n", message->offset, message->duration, message->text);
         CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechHypothesis(handle, context, message);
     };
 
     pcallbacks->onSpeechPhrase = [](UspHandle handle, void* context, UspMsgSpeechPhrase *message) {
-        SPX_DBG_TRACE_VERBOSE("Response: Speech.Phrase message. Status: %d, Text: %S, starts at %u, with duration %u (100ns).\n", message->recognitionStatus, message->displayText, message->offset, message->duration);
+        SPX_DBG_TRACE_VERBOSE("Response: Speech.Phrase message. Status: %d, Text: %ls, starts at %llu, with duration %llu (100ns).\n", message->recognitionStatus, message->displayText, message->offset, message->duration);
         CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechPhrase(handle, context, message);
     };
 
     pcallbacks->onTurnStart = [](UspHandle handle, void* context, UspMsgTurnStart *message) {
-        SPX_DBG_TRACE_VERBOSE("Response: Turn.Start message. Context.ServiceTag: %S\n", message->contextServiceTag);
+        SPX_DBG_TRACE_VERBOSE("Response: Turn.Start message. Context.ServiceTag: %ls\n", message->contextServiceTag);
         CSpxUspRecoEngineAdapter::From(handle, context)->UspOnTurnStart(handle, context, message);
     };
 

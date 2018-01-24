@@ -91,25 +91,25 @@ private:
     {
         // TODO: RobCh: Do something with the other fields in UspMsgSpeechPhrase
         ISpxRecoEngineAdapterSite::ResultPayload_Type payload;
-        if (message->recognitionStatus == RECOGNITON_SUCCESS)
+        if (message->recognitionStatus == USP_RECOGNITON_SUCCESS)
         {
             payload = SpxMakeShared<CSpxRecognitionResult, ISpxRecognitionResult>(nullptr, message->displayText);
         }
-        else if (message->recognitionStatus == RECOGNITION_NO_MATCH)
+        else if (message->recognitionStatus == USP_RECOGNITION_NO_MATCH)
         {
             payload = SpxMakeShared<CSpxRecognitionResult, ISpxRecognitionResult>(CSpxRecognitionResult::NoMatch);
         }
-        else if (message->recognitionStatus == RECOGNITION_INITIAL_SILENCE_TIMEOUT)
-        {
-            // TODO: RobCh: Construct appropriate result
-            payload = SpxMakeShared<CSpxRecognitionResult, ISpxRecognitionResult>(CSpxRecognitionResult::NoMatch);
-        }
-        else if (message->recognitionStatus == RECOGNITION_BABBLE_TIMEOUT)
+        else if (message->recognitionStatus == USP_RECOGNITION_INITIAL_SILENCE_TIMEOUT)
         {
             // TODO: RobCh: Construct appropriate result
             payload = SpxMakeShared<CSpxRecognitionResult, ISpxRecognitionResult>(CSpxRecognitionResult::NoMatch);
         }
-        else if (message->recognitionStatus == RECOGNITION_ERROR)
+        else if (message->recognitionStatus == USP_RECOGNITION_BABBLE_TIMEOUT)
+        {
+            // TODO: RobCh: Construct appropriate result
+            payload = SpxMakeShared<CSpxRecognitionResult, ISpxRecognitionResult>(CSpxRecognitionResult::NoMatch);
+        }
+        else if (message->recognitionStatus == USP_RECOGNITION_ERROR)
         {
             // TODO: RobCh: Construct appropriate result
             payload = SpxMakeShared<CSpxRecognitionResult, ISpxRecognitionResult>(CSpxRecognitionResult::NoMatch);

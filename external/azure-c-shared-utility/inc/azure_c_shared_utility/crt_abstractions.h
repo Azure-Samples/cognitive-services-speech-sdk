@@ -95,6 +95,7 @@ extern int strcat_s(char* dst, size_t dstSizeInBytes, const char* src);
 extern int strncpy_s(char* dst, size_t dstSizeInBytes, const char* src, size_t maxCount);
 extern int sprintf_s(char* dst, size_t dstSizeInBytes, const char* format, ...);
 #define _strcmpi    strcasecmp
+#define _strnicmp    strncasecmp
 #endif
 
 MOCKABLE_FUNCTION(, int, mallocAndStrcpy_s, char**, destination, const char*, source);

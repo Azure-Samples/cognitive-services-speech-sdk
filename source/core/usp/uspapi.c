@@ -7,21 +7,31 @@
 
 #include "uspinternal.h"
 
-static int UspEventLoop(UspHandle handle)
-{
-    UspContext* uspContext = (UspContext *)handle;
+// Todo: read from a configuration file.
+const char g_bingSpeechHostname[] = "wss://speech.platform.bing.com/speech/recognition/%s/cognitiveservices/v1";
+const char g_CRISHostname[] = "wss://%s.api.cris.ai";
+const char g_interactiveMode[] = "interactive";
+const char g_conversationMode[] = "conversation";
+const char g_dictationMode[] = "dictation";
+const char g_langQueryStr[] = "language=%s";
+const char g_formatQueryStr[] = "format=%s";
+const char g_defaultLangValue[] = "en-us";
+const char g_outputDetailedStr[] = "detailed";
+const char g_outputSimpleStr[] = "simple";
 
+static int UspEventLoop(UspHandle uspHandle)
+{
     while (1)
     {
         // Todo: deal with concurrency? 
-        if (uspContext->flags & USP_FLAG_SHUTDOWN)
+        if (uspHandle->flags == USP_FLAG_SHUTDOWN)
         {
             break;
         }
 
-        if (uspContext->flags & USP_FLAG_INITIALIZED)
+        if (uspHandle->flags == USP_FLAG_CONNECTED)
         {
-            UspRun(handle);
+            UspRun(uspHandle);
         }
 
         ThreadAPI_Sleep(200);
@@ -30,87 +40,267 @@ static int UspEventLoop(UspHandle handle)
     return 0;
 }
 
-UspResult UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackContext)
+UspResult UspOpen(UspEndpointType type, UspRecognitionMode mode, UspCallbacks *callbacks, void* callbackContext, UspHandle* uspHandle)
 {
-    // Todo: use configuration data 
-    const char endpoint[] = "wss://speech.platform.bing.com/speech/recognition/interactive/cognitiveservices/v1?language=en-us";
     UspContext* uspContext;
     UspResult ret;
 
-    if (handle == NULL)
+    if (uspHandle == NULL || callbacks == NULL)
     {
+        LogError("One of the following parameters is null. uspHandle:0x%x, callbacks:0x%x.", uspHandle, callbacks);
         return USP_INVALID_PARAMETER;
     }
 
     // Create UspContext
-    if ((ret = UspContextCreate(&uspContext, endpoint)) != USP_SUCCESS)
+    if ((ret = UspContextCreate(&uspContext)) != USP_SUCCESS)
     {
+        LogError("Failed to create UspContext in %s with error code:0x%x.", __FUNCTION__, ret);
         return ret;
     }
-    if (uspContext == NULL)
-    {
-        LogError("uspContext should not be null");
-        return USP_RUNTIME_ERROR;
-    }
+
+    assert(uspContext != NULL);
+
+    uspContext->type = type;
+    uspContext->mode = mode;
 
     // Set callbacks
     if ((ret = UspSetCallbacks(uspContext, callbacks, callbackContext)) != USP_SUCCESS)
     {
+        LogError("Failed to set USP callbacks in %s with error code:0x%x.", __FUNCTION__, ret);
         UspContextDestroy(uspContext);
         return ret;
     }
 
-    // Create work thread for processing USP messages.
-    if (ThreadAPI_Create(&uspContext->workThreadHandle, UspEventLoop, uspContext) != THREADAPI_OK)
-    {
-        LogError("Create work thread in USP failed.");
-        UspContextDestroy(uspContext);
-        return USP_INITIALIZATION_FAILURE;
-    }
-
-    uspContext->flags = USP_FLAG_INITIALIZED;
-    *handle = (UspHandle)uspContext;
+    uspContext->flags = USP_FLAG_OPENED;
+    *uspHandle = uspContext;
     return USP_SUCCESS;
 }
 
-
-
-// Todo: UspClose is better
-UspResult UspShutdown(UspHandle handle)
+UspResult UspSetOption(UspHandle uspHandle, UspOption optionKey, const char* optionValue)
 {
-    UspContext* uspContext = (UspContext *)handle;
-    if (handle == NULL)
+    if (uspHandle == NULL)
     {
         return USP_INVALID_HANDLE;
     }
 
-    uspContext->flags |= USP_FLAG_SHUTDOWN;
-
-    if (uspContext->workThreadHandle != NULL)
+    if (optionValue == NULL)
     {
-        LogInfo("Wait for work thread to complete");
-        ThreadAPI_Join(uspContext->workThreadHandle, NULL);
+        LogError("The option value for key %d must be not null in %s.", optionKey, __FUNCTION__);
+        return USP_INVALID_PARAMETER;
     }
 
-    UspContextDestroy(uspContext);
+    if (uspHandle->flags != USP_FLAG_OPENED)
+    {
+        LogError("Set option after connecting to service is not supported. Current state: %d", uspHandle->flags);
+        return USP_OPERATION_IN_WRONG_STATE;
+    }
+
+    switch (optionKey)
+    {
+    case USP_OPTION_LANGUAGE:
+        if (uspHandle->type == USP_ENDPOINT_CRIS)
+        {
+            LogError("Language option for CRIS service is not supported.");
+            return USP_NOT_SUPPORTED_OPTION;
+        }
+        uspHandle->language = STRING_construct(optionValue);
+        break;
+
+    case USP_OPTION_OUTPUT_FORMAT:
+        if (_strnicmp(g_outputDetailedStr, optionValue, strlen(g_outputDetailedStr) + 1) == 0)
+        {
+            uspHandle->outputFormat = STRING_construct(g_outputDetailedStr);
+        }
+        else if (_strnicmp(g_outputSimpleStr, optionValue, strlen(g_outputSimpleStr) + 1) == 0)
+        {
+            uspHandle->outputFormat = STRING_construct(g_outputSimpleStr);
+        }
+        else
+        {
+            LogError("The output format is invalid: %s.", optionValue);
+            return USP_NOT_SUPPORTED_OPTION;
+        }
+        break;
+
+    default:
+        LogError("Option %d is not supported", optionKey);
+        return USP_NOT_SUPPORTED_OPTION;
+    }
+
+    return USP_SUCCESS;
+}
+
+// Todo: Currently we assume that UspLib API is singe-threaded. If it needs to be accessed by multiple concurrent threads,
+// We need to make it thread-safe.
+UspResult UspConnect(UspHandle uspHandle)
+{
+    size_t urlLength = 0;
+    const char* hostnameStr = NULL;
+    const char* modeStr = NULL;
+    const char *langStr = NULL;
+    const char *formatStr = NULL;
+    char separator = '?';
+
+    if (uspHandle == NULL)
+    {
+        LogError("The uspHandle is null in %s.", __FUNCTION__);
+        return USP_INVALID_HANDLE;
+    }
+
+    if (uspHandle->flags != USP_FLAG_OPENED)
+    {
+        LogError("UspConnect() is only allowed when the uspHandle in opened state. Current state: %d", uspHandle->flags);
+        return USP_NOT_OPENED;
+    }
+
+    // Callbacks must be set before initializing transport.
+    if (uspHandle->callbacks == NULL)
+    {
+        LogError("%s: The callbacks for uspHandle is null.", __FUNCTION__);
+        return USP_CALLBACKS_NOT_SET;
+    }
+
+    switch (uspHandle->type)
+    {
+    case USP_ENDPOINT_BING_SPEECH:
+        hostnameStr = g_bingSpeechHostname;
+        langStr = STRING_c_str(uspHandle->language);
+        if (langStr == NULL)
+        {
+            langStr = g_defaultLangValue;
+        }
+        break;
+    case USP_ENDPOINT_CRIS:
+        hostnameStr = g_CRISHostname;
+        break;
+    default:
+        return USP_UNKNOWN_SERVICE_ENDPOINT;
+    }
+    urlLength = strlen(hostnameStr);
+
+    switch (uspHandle->mode)
+    {
+    case USP_RECO_MODE_INTERACTIVE:
+        modeStr = g_interactiveMode;
+        break;
+    case USP_RECO_MODE_CONVERSATION:
+        modeStr = g_conversationMode;
+        break;
+    case USP_RECO_MODE_DICTATION:
+        modeStr = g_dictationMode;
+        break;
+    default:
+        LogError("Invalid recognition mode: %d", uspHandle->mode);
+        return USP_UNKNOWN_RECOGNITION_MODE;
+    }
+    urlLength += strlen(modeStr);
+
+    if (langStr != NULL)
+    {
+        urlLength += 1 /* query separator char. */ +  strlen(g_langQueryStr) + strlen(langStr);
+    }
+
+    if ((formatStr = STRING_c_str(uspHandle->outputFormat)) != NULL)
+    {
+        urlLength += 1 /* query separator char. */ + strlen(g_formatQueryStr) + strlen(formatStr);
+    }
+
+    char *endpointUrl;
+    char *endpointUrlFormat;
+
+    urlLength += 1; // for null character at the end.
+    if ((endpointUrl = malloc(urlLength)) == NULL || (endpointUrlFormat = malloc(urlLength)) == NULL)
+    {
+        LogError("Memory allocation failed in %s:%s.", __FUNCTION__, __LINE__);
+        return USP_OUT_OF_MEMORY;
+    }
+
+    snprintf(endpointUrl, urlLength, hostnameStr, modeStr);
+
+    if (langStr != NULL)
+    {
+        assert(strlen(endpointUrl) + strlen(g_langQueryStr) + strlen(langStr) + 1 < urlLength);
+        snprintf(endpointUrlFormat, urlLength, "%s%c%s", endpointUrl, separator, g_langQueryStr);
+        snprintf(endpointUrl, urlLength, endpointUrlFormat, langStr);
+        separator = '&';
+    }
+
+    if (formatStr != NULL)
+    {
+        assert(strlen(endpointUrl) + strlen(g_formatQueryStr) + strlen(formatStr) + 1 < urlLength);
+        snprintf(endpointUrlFormat, urlLength, "%s%c%s", endpointUrl, separator, g_formatQueryStr);
+        snprintf(endpointUrl, urlLength, endpointUrlFormat, formatStr);
+        separator = '&';  // this is needed if there is no langStr and we have other query parameter to append.
+    }
+
+    free(endpointUrlFormat);
+
+    LogInfo("Connect to service endpoint %s.", endpointUrl);
+    if (TransportInitialize(uspHandle, endpointUrl) != USP_SUCCESS)
+    {
+        LogError("Initialize transport failed in %s", __FUNCTION__);
+        free(endpointUrl);
+        UspContextDestroy(uspHandle);
+        return USP_CONNECT_FAILURE;
+    }
+    free(endpointUrl);
+
+    // Create work thread for processing USP messages.
+    if (ThreadAPI_Create(&uspHandle->workThreadHandle, UspEventLoop, uspHandle) != THREADAPI_OK)
+    {
+        LogError("Create work thread in USP failed.");
+        UspContextDestroy(uspHandle);
+        return USP_CONNECT_FAILURE;
+    }
+
+    uspHandle->flags = USP_FLAG_CONNECTED;
+    return USP_SUCCESS;
+}
+
+UspResult UspClose(UspHandle uspHandle)
+{
+    if (uspHandle == NULL)
+    {
+        return USP_INVALID_HANDLE;
+    }
+
+    uspHandle->flags = USP_FLAG_SHUTDOWN;
+
+    uspHandle->callbacks = NULL;
+    uspHandle->callbackContext = NULL;
+    (void)TransportShutdown(uspHandle);
+
+    if (uspHandle->workThreadHandle != NULL)
+    {
+        LogInfo("Wait for work thread to complete");
+        ThreadAPI_Join(uspHandle->workThreadHandle, NULL);
+    }
+
+    UspContextDestroy(uspHandle);
 
     return USP_SUCCESS;
 }
 
 
 // Pass another parameter to return the bytes have been written.
-UspResult UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite)
+UspResult UspWrite(UspHandle uspHandle, const uint8_t* buffer, size_t bytesToWrite, size_t *bytesWritten)
 {
-    UspContext* context = (UspContext *)handle;
+    uint32_t count = 0;
 
-    if (context == NULL)
+    if (uspHandle == NULL)
     {
-        return USP_UNINTIALIZED;
+        return USP_INVALID_PARAMETER;
     }
 
-    if (byteToWrite == 0)
+    if (uspHandle->flags != USP_FLAG_CONNECTED)
     {
-        if (AudioStreamFlush(context) != 0)
+        LogError("UspWrite only allowed when the UspHandle is connected. Current state: %d", uspHandle->flags);
+        return USP_OPERATION_IN_WRONG_STATE;
+    }
+
+    if (bytesToWrite == 0)
+    {
+        if (AudioStreamFlush(uspHandle) != 0)
         {
             return USP_WRITE_ERROR;
         }
@@ -118,27 +308,28 @@ UspResult UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite)
     else
     {
         // Todo: mismatch between size_t ad byteToWrite...
-        if (AudioStreamWrite(context, buffer, (uint32_t)byteToWrite, NULL))
+        if (AudioStreamWrite(uspHandle, buffer, (uint32_t)bytesToWrite, &count))
         {
             return USP_WRITE_ERROR;
         }
     }
 
+    if (bytesWritten != NULL)
+    {
+        *bytesWritten = count;
+    }
+
     return USP_SUCCESS;
 }
 
-
-
 // Todo: Hide it into a work thread.
-void UspRun(UspHandle handle)
+void UspRun(UspHandle uspHandle)
 {
-    UspContext* uspContext = (UspContext *)handle;
+    Lock(uspHandle->transportRequestLock);
 
-    Lock(uspContext->transportRequestLock);
+    TransportDoWork(uspHandle->transportRequest);
 
-    TransportDoWork(uspContext->transportRequest);
-
-    Unlock(uspContext->transportRequestLock);
+    Unlock(uspHandle->transportRequestLock);
 
 }
 

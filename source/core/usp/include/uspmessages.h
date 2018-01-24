@@ -13,19 +13,19 @@ extern "C" {
 #include <stdint.h>
 #include <wchar.h>
 
-typedef uint32_t UspOffsetType;
-typedef uint32_t UspDurationType;
+typedef uint64_t UspOffsetType;
+typedef uint64_t UspDurationType;
 
 /**
  * Represents recognition status in speech phrase.
  */
 typedef enum _UspRecognitionStatus
 {
-    RECOGNITON_SUCCESS,
-    RECOGNITION_NO_MATCH,
-    RECOGNITION_INITIAL_SILENCE_TIMEOUT,
-    RECOGNITION_BABBLE_TIMEOUT,
-    RECOGNITION_ERROR
+    USP_RECOGNITON_SUCCESS,
+    USP_RECOGNITION_NO_MATCH,
+    USP_RECOGNITION_INITIAL_SILENCE_TIMEOUT,
+    USP_RECOGNITION_BABBLE_TIMEOUT,
+    USP_RECOGNITION_ERROR
 } UspRecognitionStatus;
 
 /**
