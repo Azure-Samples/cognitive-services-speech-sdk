@@ -69,7 +69,7 @@ typedef void(*UspOnSpeechPhrase)(UspHandle uspHandle, void* context, UspMsgSpeec
 typedef void(*UspOnSpeechFragment)(UspHandle handle, void* context, UspMsgSpeechFragment *message);
 
 /**
-A callback function that will be called when a turn.start message is received from service.
+* A callback function that will be called when a turn.start message is received from service.
 * @param uspHandle The UspHandle.
 * @param context A pointer to the application-defined callback context.
 * @param message A pointer to the turn.start message.
@@ -77,7 +77,7 @@ A callback function that will be called when a turn.start message is received fr
 typedef void(*UspOnTurnStart)(UspHandle uspHandle, void* context, UspMsgTurnStart *message);
 
 /**
-A callback function that will be called when a turn.end message is received from service.
+* A callback function that will be called when a turn.end message is received from service.
 * @param uspHandle The UspHandle.
 * @param context A pointer to the application-defined callback context.
 * @param message A pointer to the turn.end message.
@@ -85,12 +85,22 @@ A callback function that will be called when a turn.end message is received from
 typedef void(*UspOnTurnEnd)(UspHandle uspHandle, void* context, UspMsgTurnEnd *message);
 
 /**
-A callback function that will be called when an error occurs in handling communication with service.
+* A callback function that will be called when an error occurs in handling communication with service.
 * @param uspHandle The UspHandle.
 * @param context A pointer to the application-defined callback context.
 * @param error an error code.
 */
 typedef void(*UspOnError)(UspHandle uspHandle, void* context, UspResult error);
+
+/**
+* A callback function that will be called when a message having a path defined by user is received from service.
+* @param uspHandle The UspHandle.
+* @param path The message path.
+* @param contentType The content type of the message.
+* @param buffer The message buffer.
+* @param context A pointer to the application-defined callback context.
+*/
+typedef void(*UspOnUserMessage)(UspHandle uspHandle, const char* path, const char* contentType, const unsigned char* buffer, size_t size, void* context);
 
 
 /**
@@ -198,6 +208,14 @@ UspResult UspClose(UspHandle uspHandle);
 * @param uspHandle The UspHandle.
 */
 void UspRun(UspHandle uspHandle);
+
+/**
+* Registers a callback for a user-defined message.
+* @param uspHandle The UspHandle.
+* @param messagePath The path of the user-defined message.
+* @param callback The callback function will be invoked on receiving the specified message. 
+*/
+UspResult UspRegisterUserMessage(UspHandle uspHandle, const char* messagePath, UspOnUserMessage callback);
 
 #ifdef __cplusplus
 }

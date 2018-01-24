@@ -22,8 +22,6 @@
 #include <unistd.h>
 #endif
 
-typedef void(*ResponsePathHandler)(TransportHandle transportHandle, const char* path, const char* mime, const unsigned char* buffer, size_t size, void* context);
-
 const char g_messagePathSpeechHypothesis[] = "speech.hypothesis";
 const char g_messagePathSpeechPhrase[] = "speech.phrase";
 const char g_messagePathSpeechFragment[] = "speech.fragment";
@@ -52,7 +50,7 @@ UspResult AudioStreamWrite(UspHandle uspHandle, const void * data, uint32_t size
     if (size == 0)
     {
         LogError("%s: size should not be 0. Use AudioStreamFlush() to flush the buffer.");
-        return USP_INVALID_PARAMETER;
+        return USP_INVALID_ARGUMENT;
     }
 
     Lock(uspHandle->transportRequestLock);
@@ -134,13 +132,25 @@ UspResult AudioStreamFlush(UspHandle uspHandle)
     }
 }
 
-// Zhou: callback for transport error
-static void TransportErrorHandler(TransportHandle transportHandle, TransportError reason, void* context)
+// Callback for transport error
+static UspResult TransportErrorHandler(TransportHandle transportHandle, TransportError reason, void* context)
 {
-    (void)transportHandle;
     UspResult uspError;
 
-    LogInfo("On TranportError: reason=%d", reason);
+    (void)transportHandle;
+
+    UspContext* uspContext = (UspContext*)context;
+    assert(uspContext != NULL);
+    USP_RETURN_IF_CALLBACKS_NULL(uspContext);
+
+    LogInfo("%s: uspContext:0x%x, reason=%d.", uspContext, reason);
+
+    if (uspContext->callbacks->OnError == NULL)
+    {
+        LogInfo("%s: No callback is defined for onError.", __FUNCTION__);
+        return USP_SUCCESS;
+    }
+
     switch (reason)
     {
     default:
@@ -160,61 +170,56 @@ static void TransportErrorHandler(TransportHandle transportHandle, TransportErro
         uspError = USP_CONNECTION_REMOTE_CLOSED;
     }
 
-    UspContext* uspContext = (UspContext *)(context);
-    if (uspContext == NULL)
-    {
-        LogError("No context provided in %s.", __FUNCTION__);
-    }
-    else if (uspContext->callbacks)
-    {
-        uspContext->callbacks->OnError(uspContext, uspContext->callbackContext, uspError);
-    }
+    uspContext->callbacks->OnError(uspContext, uspContext->callbackContext, uspError);
+
+    return USP_SUCCESS;
 }
 
-//zhou: callback for Speech.EndDetected handler
-static void SpeechEndHandler(TransportHandle transportHandle, const char* path, const char* mime, const unsigned char* buffer, size_t size, void* context)
+// Callback for speech.end
+static UspResult SpeechEndHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size)
 {
-    (void)transportHandle;
     (void)mime;
     (void)buffer;
     (void)size;
     (void)path;
 
-    UspContext* uspContext = (UspContext *)context;
-    if (uspContext == NULL)
+    assert(uspContext != NULL);
+    USP_RETURN_IF_CALLBACKS_NULL(uspContext);
+    if (uspContext->callbacks->OnError == NULL)
     {
-        LogError("%s: The UspContext is null.", __FUNCTION__);
-        return;
+        LogInfo("%s: No callback is defined for speech.end.", __FUNCTION__);
+        return USP_SUCCESS;
     }
 
-    if (uspContext->callbacks)
-    {
-        UspMsgSpeechEndDetected* msg = malloc(sizeof(UspMsgSpeechEndDetected));
-        // Todo: deal with char to wchar
-        // Todo: add more field;
-        uspContext->callbacks->onSpeechEndDetected(uspContext, uspContext->callbackContext, msg);
-        // Todo: better handling of memory management.
-        free(msg);
-    }
+    UspMsgSpeechEndDetected* msg = malloc(sizeof(UspMsgSpeechEndDetected));
+    // Todo: deal with char to wchar
+    // Todo: add more field;
+    uspContext->callbacks->onSpeechEndDetected(uspContext, uspContext->callbackContext, msg);
+    // Todo: better handling of memory management.
+    free(msg);
+
+    // NOTE: If any further post processing is needed after user callback, please do it in PostProcessAfterUserCallback(),
+    // because this handler can be overwritten by a user-defined handler.
+
+    return USP_SUCCESS;
 }
 
-// zhou: callback for Speech.TurnEnd 
-static void TurnEndHandler(TransportHandle transportHandle, const char* path, const char* mime, const unsigned char* buffer, size_t size, void* context)
+// callback for turn.end
+static UspResult TurnEndHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size)
 {
-    (void)transportHandle;
     (void)path;
     (void)mime;
     (void)buffer;
     (void)size;
 
-    UspContext* uspContext = (UspContext *)context;
-    if (uspContext == NULL)
-    {
-        LogError("%s: The UspContext is null.", __FUNCTION__);
-        return;
-    }
+    assert(uspContext != NULL);
+    USP_RETURN_IF_CALLBACKS_NULL(uspContext);
 
-    if (uspContext->callbacks)
+    if (uspContext->callbacks->OnError == NULL)
+    {
+        LogInfo("%s: No callback is defined for turn.end.", __FUNCTION__);
+    }
+    else
     {
         UspMsgTurnEnd* msg = NULL;
         // Todo: deal with char to wchar
@@ -224,25 +229,24 @@ static void TurnEndHandler(TransportHandle transportHandle, const char* path, co
         // free(msg);
     }
 
-    telemetry_flush();
+    // NOTE: If any further post processing is needed after user callback, please do it in PostProcessAfterUserCallback(),
+    // because this handler can be overwritten by a user-defined handler.
 
-    // Todo: need to reset request_id?
-    // Todo: the caller need to flush audio buffer?
-    Lock(uspContext->transportRequestLock);
-    TransportCreateRequestId(uspContext->transportRequest);
-    Unlock(uspContext->transportRequestLock);
+    return USP_SUCCESS;
 }
 
 
-// Zhou: callback for Speech.TurnStart, Speech.Hypothesis, Speech.Phrase, and also for Response.
-static void ContentPathHandler(TransportHandle transportHandle, const char* path, const char* mime, const unsigned char* buffer, size_t size, void* context)
+// Callback handler for turn.start, speech.hypothesis, speech.phrase, and also for response.
+static UspResult ContentPathHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size)
 {
-    (void)transportHandle;
+    UspResult ret;
+
+    assert(uspContext != NULL);
 
     if (size == 0)
     {
         PROTOCOL_VIOLATION("response contains no body");
-        return;
+        return USP_INVALID_MESSAGE;
     }
 
     BUFFER_HANDLE responseContentHandle = BUFFER_create(
@@ -251,56 +255,83 @@ static void ContentPathHandler(TransportHandle transportHandle, const char* path
     if (!responseContentHandle)
     {
         LogError("BUFFER_create failed in %s", __FUNCTION__);
-        return;
+        return USP_OUT_OF_MEMORY;
     }
 
     BUFFER_u_char(responseContentHandle)[size] = 0;
 
-    if (context == NULL)
-    {
-        LogError("No context provided in %s.", __FUNCTION__);
-    }
-
     LogInfo("Content Message: path: %s, content type: %s, size: %zu, buffer: %s", path, mime, size, (char *)BUFFER_u_char(responseContentHandle));
-    ContentDispatch(context, path, mime, 0, responseContentHandle, size);
+    ret = ContentDispatch(uspContext, path, mime, 0, responseContentHandle, size);
 
     BUFFER_delete(responseContentHandle);
-    return;
+
+    // NOTE: If any further post processing is needed after user callback, please do it in PostProcessAfterUserCallback(),
+    // because this handler can be overwritten by a user-defined handler.
+
+    return ret;
 }
 
-// Zhou: callback for SpeechStartDetected.
-static void SpeechStartHandler(TransportHandle transportHandle, const char* path, const char* mime, const unsigned char* buffer, size_t size, void* context)
+// Callback for SpeechStartDetected.
+static UspResult SpeechStartHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size)
 {
-    (void)transportHandle;
     (void)path;
     (void)mime;
     (void)buffer;
     (void)size;
 
-    UspContext* uspContext = (UspContext *)context;
-    if (uspContext == NULL)
+    assert(uspContext != NULL);
+    USP_RETURN_IF_CALLBACKS_NULL(uspContext);
+    if (uspContext->callbacks->OnError == NULL)
     {
-        LogError("%s: The UspContext is null.", __FUNCTION__);
-        return;
+        LogInfo("%s: No callback is defined for speech.start.", __FUNCTION__);
+        return USP_SUCCESS;
     }
 
-    if (uspContext->callbacks)
-    {
-        UspMsgSpeechStartDetected* msg = malloc(sizeof(UspMsgSpeechStartDetected));
-        // Todo: deal with char to wchar
-        // Todo: add more field;
-        uspContext->callbacks->onSpeechStartDetected(uspContext, uspContext->callbackContext, msg);
-        // Todo: better handling of memory management.
-        free(msg);
-    }
+    UspMsgSpeechStartDetected* msg = malloc(sizeof(UspMsgSpeechStartDetected));
+    // Todo: deal with char to wchar
+    // Todo: add more field;
+    uspContext->callbacks->onSpeechStartDetected(uspContext, uspContext->callbackContext, msg);
+    // Todo: better handling of memory management.
+    free(msg);
+
+    // NOTE: If any further post processing is needed after user callback, please do it in PostProcessAfterUserCallback(),
+    // because this handler can be overwritten by a user-defined handler.
+
+    return USP_SUCCESS;
 }
 
-// Zhou Dispatch table for PATH message
+// This method is called after return from user callbacks, no matter whether the message is handled by default handler or user-defined handler.
+UspResult PostProcessingAfterUserCallback(UspContext* uspContext, const char* path, const char* contentType, const unsigned char* buffer, size_t size)
+{
+    (void)size;
+    (void)buffer;
+    (void)contentType;
+
+    if (!strcmp(path, g_messagePathTurnEnd))
+    {
+        telemetry_flush();
+
+        // Todo: need to reset request_id?
+        // Todo: the caller need to flush audio buffer?
+        Lock(uspContext->transportRequestLock);
+        TransportCreateRequestId(uspContext->transportRequest);
+        Unlock(uspContext->transportRequestLock);
+    }
+
+    return USP_SUCCESS;
+}
+
+/**
+* The dispatch table for message.
+*/
+typedef UspResult(*ResponsePathHandler)(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size);
+
 const struct _PathHandler
 {
-    const char*            path;
+    const char* path;
     ResponsePathHandler handler;
-} g_pathHandlers[] = {
+} g_predefinedPathHandlers[] =
+{
     { g_messagePathTurnStart, ContentPathHandler },
     { g_messagePathSpeechStartDetected, SpeechStartHandler },
     { g_messagePathSpeechEndDetected, SpeechEndHandler },
@@ -311,11 +342,13 @@ const struct _PathHandler
     { g_messagePathResponse, ContentPathHandler },
 };
 
-// Zhou: callback for data available on tranport
+// Callback for data available on tranport
 static void TransportRecvResponseHandler(TransportHandle transportHandle, HTTP_HEADERS_HANDLE responseHeader, const unsigned char* buffer, size_t size, unsigned int errorCode, void* context)
 {
-    const char * path;
-    const char * contentType = NULL;
+    const char* path;
+    const char* contentType = NULL;
+
+    (void)transportHandle;
 
     if (errorCode != 0)
     {
@@ -345,11 +378,33 @@ static void TransportRecvResponseHandler(TransportHandle transportHandle, HTTP_H
         }
     }
 
-    for (unsigned int i = 0; i < sizeof(g_pathHandlers) / sizeof(g_pathHandlers[0]); i++)
+    // Check user-defined message handler first.
+    if (context == NULL)
     {
-        if (!strcmp(path, g_pathHandlers[i].path))
+        LogError("No context provided in %s.", __FUNCTION__);
+        return;
+    }
+
+    UspContext *uspContext = (UspContext *)context;
+
+    for (size_t i = 0; i < uspContext->userMessageHandlerSize; i++)
+    {
+        if (!strcmp(path, uspContext->userMessageHandlerTable[i].path))
         {
-            g_pathHandlers[i].handler(transportHandle, path, contentType, buffer, size, context);
+            assert(uspContext->userMessageHandlerTable[i].handler != NULL);
+            LogInfo("User Message: path: %s, content type: %s, size: %zu.", path, contentType, size);
+            uspContext->userMessageHandlerTable[i].handler(uspContext, path, contentType, buffer, size, uspContext->callbackContext);
+            PostProcessingAfterUserCallback(uspContext, path, contentType, buffer, size);
+            return;
+        }
+    }
+
+    for (int i = 0; i < ARRAYSIZE(g_predefinedPathHandlers); i++)
+    {
+        if (!strcmp(path, g_predefinedPathHandlers[i].path))
+        {
+            g_predefinedPathHandlers[i].handler(uspContext, path, contentType, buffer, size);
+            PostProcessingAfterUserCallback(uspContext, path, contentType, buffer, size);
             return;
         }
     }
@@ -358,23 +413,6 @@ static void TransportRecvResponseHandler(TransportHandle transportHandle, HTTP_H
     metrics_transport_unhandledresponse();
 }
 
-
-// Todo: check whether this is still used?
-// Deprecated V1 handler for partial results.  Remove once the service switched.
-UspResult TextResponseHandler(void* context, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK callback, void* asyncContext)
-{
-    (void)path;
-    (void)ioBuffer;
-    (void)callback;
-    (void)asyncContext;
-    (void)context;
-    (void)buffer;
-    (void)bufferSize;
-
-    LogError("%s: Not implemented", __FUNCTION__);
-
-    return USP_NOT_IMPLEMENTED;
-}
 
 // Device thumbprint doesn't change when user account switch.
 // First, try to hit memory cache.
@@ -529,6 +567,13 @@ UspResult UspContextDestroy(UspContext* uspContext)
     STRING_delete(uspContext->modelId);
     STRING_delete(uspContext->authData);
 
+    for (size_t i = 0; i < uspContext->userMessageHandlerSize; i++)
+    {
+        free(uspContext->userMessageHandlerTable[i].path);
+    }
+    uspContext->userMessageHandlerSize = 0;
+    free(uspContext->userMessageHandlerTable);
+
     free(uspContext);
     return USP_SUCCESS;
 }
@@ -567,11 +612,10 @@ UspResult UspSetCallbacks(UspContext* uspContext, UspCallbacks *callbacks, void*
     if ((callbacks->version != USP_CALLBACK_VERSION) || (callbacks->size != sizeof(UspCallbacks)))
     {
         LogError("The callbacks passed to %s is invalid. version:%u (expected: %u), size:%u (expected: %zu).", __FUNCTION__, callbacks->version, USP_CALLBACK_VERSION, callbacks->size, sizeof(UspCallbacks));
-        return USP_INVALID_PARAMETER;
+        return USP_INVALID_ARGUMENT;
     }
 
     uspContext->callbacks = callbacks;
     uspContext->callbackContext = callbackContext;
     return USP_SUCCESS;
 }
-

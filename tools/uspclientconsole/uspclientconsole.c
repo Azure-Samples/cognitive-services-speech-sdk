@@ -87,6 +87,13 @@ void OnError(UspHandle handle, void* context, UspResult error)
     printf("Response: On Error: 0x%x.\n", error);
 }
 
+void OnUserMessage(UspHandle uspHandle, const char* path, const char* contentType, const unsigned char* buffer, size_t size, void* context)
+{
+    UNUSED(uspHandle);
+    UNUSED(context);
+    printf("Response: User defined message. Path: %s, contentType: %s, size: %zu, content: %s.\n", path, contentType, size, buffer);
+}
+
 #define AUDIO_BYTES_PER_SECOND (16000*2) //16KHz, 16bit PCM
 
 int main(int argc, char* argv[])
@@ -236,6 +243,19 @@ int main(int argc, char* argv[])
         {
             printf("unknown output format: %s\n", argv[curArg]);
             exit(1);
+        }
+    }
+
+    if (argc > 6)
+    {
+        for (int argIndex = 6; argIndex < argc; argIndex++)
+        {
+            printf("Register user message: %s\n", argv[argIndex]);
+            if (UspRegisterUserMessage(handle, argv[argIndex], OnUserMessage) != USP_SUCCESS)
+            {
+                printf("Failed to register user-defined message: %s\n", argv[argIndex]);
+                exit(1);
+            }
         }
     }
 

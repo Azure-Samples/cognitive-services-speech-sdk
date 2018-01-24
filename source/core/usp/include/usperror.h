@@ -41,9 +41,9 @@ extern "C" {
 #define USP_CALLBACKS_NOT_SET USP_ERRCODE(0x011)
 
 /**
- * USP_INVALID_PARAMETER indicates an invalid parameter passed to a function.
+ * USP_INVALID_ARGUMENT indicates an invalid parameter passed to a function.
 */
-#define USP_INVALID_PARAMETER USP_ERRCODE(0x012)
+#define USP_INVALID_ARGUMENT USP_ERRCODE(0x012)
 
 /**
 * USP_BUFFER_TOO_SMALL indicates the buffer passed to the function is too small.
@@ -92,9 +92,14 @@ extern "C" {
 // Response errors
 
 /**
-* USP_UNKNOWN_MESSAGE indicates that the message received is invalid.
+* USP_UNKNOWN_MESSAGE indicates that the message path is unknown.
 */
 #define USP_UNKNOWN_MESSAGE USP_ERRCODE(0x040)
+
+/**
+* USP_INVALID_MESSAGE indicates that the message content is not valid.
+*/
+#define USP_INVALID_MESSAGE USP_ERRCODE(0x041)
 
 // Service errors
 
