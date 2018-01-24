@@ -127,3 +127,8 @@ typedef unsigned int SPXHR;
 *   NOTE: All other state transitions are invalid when attempting to start recognizing
 */
 #define SPXERR_START_RECOGNIZING_INVALID_STATE_TRANSITION __SPX_ERRCODE_FAILED(0x012)
+
+/*** SPXERR_MIC_ERROR
+*   An error in the audio-capturing system.
+*/
+#define SPXERR_MIC_ERROR    __SPX_ERRCODE_FAILED(0x00d)

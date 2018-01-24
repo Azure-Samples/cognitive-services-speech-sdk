@@ -16,7 +16,7 @@ void CarbonTestConsole::Sample_HelloWorld()
     ConsoleWriteLine(L"Say something...");
     auto result = recognizer->RecognizeAsync().get();
 
-    ConsoleWriteLine(L"You said:\n\n    '%s'", result->Text.c_str());
+    ConsoleWriteLine(L"You said:\n\n    '%ls'", result->Text.c_str());
 }
 
 void CarbonTestConsole::Sample_HelloWorld_WithEvents()
@@ -24,11 +24,11 @@ void CarbonTestConsole::Sample_HelloWorld_WithEvents()
     auto recognizer = RecognizerFactory::CreateSpeechRecognizer();
 
     recognizer->IntermediateResult += [&](const SpeechRecognitionEventArgs& e) {
-        ConsoleWriteLine(L"IntermediateResult: text=%s", e.Result.Text.c_str());
+        ConsoleWriteLine(L"IntermediateResult: text=%ls", e.Result.Text.c_str());
     };
 
     ConsoleWriteLine(L"Say something...");
     auto result = recognizer->RecognizeAsync().get();
 
-    ConsoleWriteLine(L"You said:\n\n    '%s'", result->Text.c_str());
+    ConsoleWriteLine(L"You said:\n\n    '%ls'", result->Text.c_str());
 }

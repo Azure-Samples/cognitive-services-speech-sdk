@@ -46,7 +46,7 @@ void wcscpy(wchar_t *dst, size_t dstSize, const wchar_t *src, size_t srcSize, bo
     // for more details on error conditions, add unit tests.
     assert(src);
     assert(dst);
-    assert(dstSize != 0 && srcSize != 0);
+    assert(dstSize != 0);
 
     auto toCopy = std::min(dstSize, srcSize);
 

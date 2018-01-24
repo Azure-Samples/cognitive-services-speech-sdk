@@ -1103,6 +1103,9 @@ static int CaptureAudio(void *p)
         audioData->input_state_cb(audioData->user_inputctx, audioData->current_input_state);
     }
 
+    // increment semaphore to wake up processing thread (otherwise, audio_input_stop deadlocks).
+    sem_post(&audioData->audioFrameAvailable);
+
     return 0;
 }
 
@@ -1138,6 +1141,11 @@ static int ProcessAudio(void *p)
 
         if (val + 1 != audioData->bufferSize / audioData->inputFrameCnt)
         {
+            if (audioData->current_input_state == AUDIO_STATE_STOPPED)
+            {
+                Unlock(audioData->audioBufferLock);
+                break;
+            }
             LogError("Processing buffer drift : sem %d buffer %d", val + 1, audioData->bufferSize / audioData->inputFrameCnt);
         }
 
@@ -1303,7 +1311,7 @@ AUDIO_RESULT audio_set_options(AUDIO_SYS_HANDLE handle, const char* optionName, 
         else if (strcmp("sample_rate", optionName) == 0)
         {
             uint32_t sampleRate = *((uint32_t*)value);
-            if (sampleRate == 11025 || sampleRate == 22050 || sampleRate == 44100|| sampleRate == 96000)
+            if (sampleRate == 11025 || sampleRate == 16000 || sampleRate == 22050 || sampleRate == 44100|| sampleRate == 96000)
             {
                 audioData->sampleRate = sampleRate;
                 audioData->waveDataDirty = true;

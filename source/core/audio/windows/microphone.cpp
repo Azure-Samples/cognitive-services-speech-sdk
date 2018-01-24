@@ -48,6 +48,8 @@ private:
 long WMFInitializer::s_count { 0 };
 mutex WMFInitializer::s_mutex;
 
+// TODO (alrezni): factor out a shared base with Linux implementation. 
+// Replace Win-specific bits with audio_sys from azure-c-shared.
 class MicrophonePump : public ISpxAudioPump
 {
 public:

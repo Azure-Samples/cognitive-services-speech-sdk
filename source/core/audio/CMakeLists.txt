@@ -25,8 +25,9 @@ set(SOURCES
 
 set(AUDIO_LIBS common)
 
+include_directories(${SRC_DIR}) # for "stdafx.h"
+
 if(WIN32)
-    include_directories(${SRC_DIR}) # for "stdafx.h"
     list(APPEND HEADERS_PRIVATE
         "${SRC_DIR}/windows/audio_sample_handler.h"
         "${SRC_DIR}/windows/iunknown.h"
