@@ -33,14 +33,22 @@ void OnSpeechStartDetected(UspHandle handle, void* context, UspMsgSpeechStartDet
 {
     UNUSED(handle);
     UNUSED(context);
-    printf("Response: Speech.StartDetected message. Speech starts at offset %llu.\n", message->offset);
+    UNUSED(message);
+
+    // offset not supported yet.
+    printf("Response: Speech.StartDetected message.\n");
+    //printf("Response: Speech.StartDetected message. Speech starts at offset %llu.\n", message->offset);
 }
 
 void OnSpeechEndDetected(UspHandle handle, void* context, UspMsgSpeechEndDetected *message)
 {
     UNUSED(handle);
     UNUSED(context);
-    printf("Response: Speech.EndDetected message. Speech ends at offset %llu\n", message->offset);
+    UNUSED(message);
+
+    // offset not supported yet.
+    printf("Response: Speech.EndDetected message.\n");
+    // printf("Response: Speech.EndDetected message. Speech ends at offset %llu\n", message->offset);
 }
 
 void OnSpeechHypothesis(UspHandle handle, void* context, UspMsgSpeechHypothesis *message)

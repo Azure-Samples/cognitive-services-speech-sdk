@@ -200,19 +200,20 @@ typedef void(*CONTENT_ASYNCCOMPLETE_CALLBACK)(void* context);
 * @param asyncCompleteContext The context parameter that is passed when the asyncCompleteCallback is invoked.
 * @return A UspResult indicating success or error.
 */
-typedef UspResult(*CONTENT_HANDLER_CALLBACK)(void* context, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK asyncCompleteCallback, void* asyncCompleteContext);
-
+typedef UspResult(*CONTENT_HANDLER_CALLBACK)(void* context, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK asyncCompleteCallback, void* asyncCompleteContext, bool userCallbackInvoked);
 
 /**
-* Opens a new Speech instance.
-* @param ppHandle A pointer to a Speech uspHandle to be returned back to the
-* caller.
-* @param reserved Reserved, do not use.
-* @param pReserved Reserved, do not use.
-* @return A UspResult.
+* Handles response messages based on content type.
+* @param context The content context.
+* @param path The content path.
+* @param mime The content type.
+* @param ioBuffer The pointer to ioBuffer.
+* @param responseContent The content buffer of the response.
+* @param responseSize The size of the content buffer.
+* @param userCallbackInvoked A boolean value indicating whether a user-callback has already been invoked.
+* @return A UspResult indicating success or error.
 */
-UspResult ContentDispatch(void* context, const char* path, const char* mime, IOBUFFER* ioBuffer, BUFFER_HANDLE responseContent, size_t responseSize);
-
+UspResult ContentDispatch(void* context, const char* path, const char* mime, IOBUFFER* ioBuffer, BUFFER_HANDLE responseContent, size_t responseSize, bool userCallbackInvoked);
 
 /**
 * Return device thumbprint generated from CDP

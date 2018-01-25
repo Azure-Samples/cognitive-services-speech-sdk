@@ -176,68 +176,78 @@ static UspResult TransportErrorHandler(TransportHandle transportHandle, Transpor
 }
 
 // Callback for speech.end
-static UspResult SpeechEndHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size)
+static UspResult SpeechEndHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size, bool userCallbackInvoked)
 {
     (void)mime;
     (void)buffer;
     (void)size;
     (void)path;
 
-    assert(uspContext != NULL);
-    USP_RETURN_IF_CALLBACKS_NULL(uspContext);
-    if (uspContext->callbacks->OnError == NULL)
+    // Call userback only if the message is not defined in the user-defined handlers.
+    if (!userCallbackInvoked)
     {
-        LogInfo("%s: No callback is defined for speech.end.", __FUNCTION__);
-        return USP_SUCCESS;
+        assert(uspContext != NULL);
+        USP_RETURN_IF_CALLBACKS_NULL(uspContext);
+        if (uspContext->callbacks->onSpeechEndDetected == NULL)
+        {
+            LogInfo("%s: No callback is defined for speech.end.", __FUNCTION__);
+            return USP_SUCCESS;
+        }
+
+        UspMsgSpeechEndDetected* msg = malloc(sizeof(UspMsgSpeechEndDetected));
+        // Todo: deal with char to wchar
+        // Todo: add more field;
+        uspContext->callbacks->onSpeechEndDetected(uspContext, uspContext->callbackContext, msg);
+        // Todo: better handling of memory management.
+        free(msg);
     }
-
-    UspMsgSpeechEndDetected* msg = malloc(sizeof(UspMsgSpeechEndDetected));
-    // Todo: deal with char to wchar
-    // Todo: add more field;
-    uspContext->callbacks->onSpeechEndDetected(uspContext, uspContext->callbackContext, msg);
-    // Todo: better handling of memory management.
-    free(msg);
-
-    // NOTE: If any further post processing is needed after user callback, please do it in PostProcessAfterUserCallback(),
-    // because this handler can be overwritten by a user-defined handler.
 
     return USP_SUCCESS;
 }
 
 // callback for turn.end
-static UspResult TurnEndHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size)
+static UspResult TurnEndHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size, bool userCallbackInvoked)
 {
     (void)path;
     (void)mime;
     (void)buffer;
     (void)size;
 
-    assert(uspContext != NULL);
-    USP_RETURN_IF_CALLBACKS_NULL(uspContext);
-
-    if (uspContext->callbacks->OnError == NULL)
+    // Call userback only if the message is not defined in the user-defined handlers.
+    if (!userCallbackInvoked)
     {
-        LogInfo("%s: No callback is defined for turn.end.", __FUNCTION__);
-    }
-    else
-    {
-        UspMsgTurnEnd* msg = NULL;
-        // Todo: deal with char to wchar
-        // Todo: add more field;
-        uspContext->callbacks->onTurnEnd(uspContext, uspContext->callbackContext, msg);
-        // Todo: better handling of memory management.
-        // free(msg);
+        assert(uspContext != NULL);
+        USP_RETURN_IF_CALLBACKS_NULL(uspContext);
+
+        if (uspContext->callbacks->onTurnEnd == NULL)
+        {
+            LogInfo("%s: No callback is defined for turn.end.", __FUNCTION__);
+        }
+        else
+        {
+            UspMsgTurnEnd* msg = NULL;
+            // Todo: deal with char to wchar
+            // Todo: add more field;
+            uspContext->callbacks->onTurnEnd(uspContext, uspContext->callbackContext, msg);
+            // Todo: better handling of memory management.
+            // free(msg);
+        }
     }
 
-    // NOTE: If any further post processing is needed after user callback, please do it in PostProcessAfterUserCallback(),
-    // because this handler can be overwritten by a user-defined handler.
+    telemetry_flush();
+
+    // Todo: need to reset request_id?
+    // Todo: the caller need to flush audio buffer?
+    Lock(uspContext->transportRequestLock);
+    TransportCreateRequestId(uspContext->transportRequest);
+    Unlock(uspContext->transportRequestLock);
 
     return USP_SUCCESS;
 }
 
 
 // Callback handler for turn.start, speech.hypothesis, speech.phrase, and also for response.
-static UspResult ContentPathHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size)
+static UspResult ContentPathHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size, bool userCallbackInvoked)
 {
     UspResult ret;
 
@@ -260,62 +270,41 @@ static UspResult ContentPathHandler(UspContext* uspContext, const char* path, co
 
     BUFFER_u_char(responseContentHandle)[size] = 0;
 
+#ifdef _DEBUG
     LogInfo("Content Message: path: %s, content type: %s, size: %zu, buffer: %s", path, mime, size, (char *)BUFFER_u_char(responseContentHandle));
-    ret = ContentDispatch(uspContext, path, mime, 0, responseContentHandle, size);
+#endif
+    ret = ContentDispatch((void*)uspContext, path, mime, 0, responseContentHandle, size, userCallbackInvoked);
 
     BUFFER_delete(responseContentHandle);
-
-    // NOTE: If any further post processing is needed after user callback, please do it in PostProcessAfterUserCallback(),
-    // because this handler can be overwritten by a user-defined handler.
 
     return ret;
 }
 
 // Callback for SpeechStartDetected.
-static UspResult SpeechStartHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size)
+static UspResult SpeechStartHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size, bool userCallbackInvoked)
 {
     (void)path;
     (void)mime;
     (void)buffer;
     (void)size;
 
-    assert(uspContext != NULL);
-    USP_RETURN_IF_CALLBACKS_NULL(uspContext);
-    if (uspContext->callbacks->OnError == NULL)
+    // Call userback only if the message is not defined in the user-defined handlers.
+    if (!userCallbackInvoked)
     {
-        LogInfo("%s: No callback is defined for speech.start.", __FUNCTION__);
-        return USP_SUCCESS;
-    }
+        assert(uspContext != NULL);
+        USP_RETURN_IF_CALLBACKS_NULL(uspContext);
+        if (uspContext->callbacks->onSpeechStartDetected == NULL)
+        {
+            LogInfo("%s: No callback is defined for speech.start.", __FUNCTION__);
+            return USP_SUCCESS;
+        }
 
-    UspMsgSpeechStartDetected* msg = malloc(sizeof(UspMsgSpeechStartDetected));
-    // Todo: deal with char to wchar
-    // Todo: add more field;
-    uspContext->callbacks->onSpeechStartDetected(uspContext, uspContext->callbackContext, msg);
-    // Todo: better handling of memory management.
-    free(msg);
-
-    // NOTE: If any further post processing is needed after user callback, please do it in PostProcessAfterUserCallback(),
-    // because this handler can be overwritten by a user-defined handler.
-
-    return USP_SUCCESS;
-}
-
-// This method is called after return from user callbacks, no matter whether the message is handled by default handler or user-defined handler.
-UspResult PostProcessingAfterUserCallback(UspContext* uspContext, const char* path, const char* contentType, const unsigned char* buffer, size_t size)
-{
-    (void)size;
-    (void)buffer;
-    (void)contentType;
-
-    if (!strcmp(path, g_messagePathTurnEnd))
-    {
-        telemetry_flush();
-
-        // Todo: need to reset request_id?
-        // Todo: the caller need to flush audio buffer?
-        Lock(uspContext->transportRequestLock);
-        TransportCreateRequestId(uspContext->transportRequest);
-        Unlock(uspContext->transportRequestLock);
+        UspMsgSpeechStartDetected* msg = malloc(sizeof(UspMsgSpeechStartDetected));
+        // Todo: deal with char to wchar
+        // Todo: add more field;
+        uspContext->callbacks->onSpeechStartDetected(uspContext, uspContext->callbackContext, msg);
+        // Todo: better handling of memory management.
+        free(msg);
     }
 
     return USP_SUCCESS;
@@ -324,13 +313,13 @@ UspResult PostProcessingAfterUserCallback(UspContext* uspContext, const char* pa
 /**
 * The dispatch table for message.
 */
-typedef UspResult(*ResponsePathHandler)(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size);
+typedef UspResult(*SystemMessageHandler)(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size, bool userCallbackInvoked);
 
 const struct _PathHandler
 {
     const char* path;
-    ResponsePathHandler handler;
-} g_predefinedPathHandlers[] =
+    SystemMessageHandler handler;
+} g_SystemMessageHandlers[] =
 {
     { g_messagePathTurnStart, ContentPathHandler },
     { g_messagePathSpeechStartDetected, SpeechStartHandler },
@@ -347,6 +336,7 @@ static void TransportRecvResponseHandler(TransportHandle transportHandle, HTTP_H
 {
     const char* path;
     const char* contentType = NULL;
+    bool userCallbackInvoked = false;
 
     (void)transportHandle;
 
@@ -394,23 +384,25 @@ static void TransportRecvResponseHandler(TransportHandle transportHandle, HTTP_H
             assert(uspContext->userMessageHandlerTable[i].handler != NULL);
             LogInfo("User Message: path: %s, content type: %s, size: %zu.", path, contentType, size);
             uspContext->userMessageHandlerTable[i].handler(uspContext, path, contentType, buffer, size, uspContext->callbackContext);
-            PostProcessingAfterUserCallback(uspContext, path, contentType, buffer, size);
-            return;
+            userCallbackInvoked = true;
+            break;
         }
     }
 
-    for (int i = 0; i < ARRAYSIZE(g_predefinedPathHandlers); i++)
+    for (int i = 0; i < ARRAYSIZE(g_SystemMessageHandlers); i++)
     {
-        if (!strcmp(path, g_predefinedPathHandlers[i].path))
+        if (!strcmp(path, g_SystemMessageHandlers[i].path))
         {
-            g_predefinedPathHandlers[i].handler(uspContext, path, contentType, buffer, size);
-            PostProcessingAfterUserCallback(uspContext, path, contentType, buffer, size);
+            g_SystemMessageHandlers[i].handler(uspContext, path, contentType, buffer, size, userCallbackInvoked);
             return;
         }
     }
 
-    PROTOCOL_VIOLATION("unhandled response '%s'", path);
-    metrics_transport_unhandledresponse();
+    if (!userCallbackInvoked)
+    {
+        PROTOCOL_VIOLATION("unhandled response '%s'", path);
+        metrics_transport_unhandledresponse();
+    }
 }
 
 

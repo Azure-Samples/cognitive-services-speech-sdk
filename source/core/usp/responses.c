@@ -12,8 +12,8 @@
 #include "propbag.h"
 #include "uspinternal.h"
 
-UspResult JsonResponseHandler(UspContext* uspContext, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK callback, void* asyncContext);
-UspResult TextResponseHandler(UspContext* uspContext, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK callback, void* asyncContext);
+UspResult JsonResponseHandler(void* context, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK callback, void* asyncContext, bool userCallbackInvoked);
+UspResult TextResponseHandler(void* Context, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK callback, void* asyncContext, bool userCallbackInvoked);
 
 /**
 * ContentBuffer manages the message buffers.
@@ -29,7 +29,7 @@ const char* g_keywordContentType = "Content-Type";
 struct CONTENT_HANDLER
 {
     const char* mime;
-    CONTENT_HANDLER_CALLBACK   handler;
+    CONTENT_HANDLER_CALLBACK handler;
 } g_ContentHandlers[] =
 {
     // ordered by frequency of responses.
@@ -53,7 +53,8 @@ static void ContentDispatchAsyncComplete(void* pContext)
     free(pContext);
 }
 
-UspResult ContentDispatch(void* context, const char* path, const char* mime, IOBUFFER* ioBuffer, BUFFER_HANDLE responseContentHandle, size_t responseSize)
+// Handle WS responses based on content type, also handle HTTP responses, and responses for a stream (see transport.c)
+UspResult ContentDispatch(void* context, const char* path, const char* mime, IOBUFFER* ioBuffer, BUFFER_HANDLE responseContentHandle, size_t responseSize, bool userCallbackInvoked)
 {
     unsigned i;
 
@@ -84,7 +85,7 @@ UspResult ContentDispatch(void* context, const char* path, const char* mime, IOB
     {
         if (!strcmp(g_ContentHandlers[i].mime, mime))
         {
-            return g_ContentHandlers[i].handler(context, path, BUFFER_u_char(responseContentHandle), responseSize, ioBuffer, ContentDispatchAsyncComplete, contentBuffer);
+            return g_ContentHandlers[i].handler(context, path, BUFFER_u_char(responseContentHandle), responseSize, ioBuffer, ContentDispatchAsyncComplete, contentBuffer, userCallbackInvoked);
         }
     }
 
@@ -95,7 +96,8 @@ UspResult ContentDispatch(void* context, const char* path, const char* mime, IOB
 typedef struct _DeserializeContext
 {
     const char* responseJson;
-    void*        context;
+    void* context;
+    bool userCallbackInvoked;
 } DeserializeContext;
 
 // handles "response" API path
@@ -103,9 +105,18 @@ static int HandleJsonIntentResponse(PROPERTYBAG_HANDLE  propertyHandle, void* co
 {
     // Todo: do we need to handle "response" message?
     (void)propertyHandle;
-    (void)context;
-    LogError("%s: Not implemented", __FUNCTION__);
-    return USP_NOT_IMPLEMENTED;
+
+    USP_RETURN_IF_CONTEXT_NULL(context);
+    DeserializeContext* deserializeContext = (DeserializeContext*)context;
+
+    // return error only if the message is not defined in the user-defined handlers.
+    if (!deserializeContext->userCallbackInvoked)
+    {
+        LogError("%s: Not implemented", __FUNCTION__);
+        return USP_NOT_IMPLEMENTED;
+    }
+
+    return USP_SUCCESS;
 }
 
 // handles "speech.phrase" API path
@@ -113,121 +124,121 @@ static int HandleJsonSpeechPhrase(PROPERTYBAG_HANDLE propertyHandle, void* conte
 {
     USP_RETURN_IF_CONTEXT_NULL(context);
 
-    DeserializeContext * deserializeContext = (DeserializeContext*)context;
-    UspContext* uspContext = (UspContext*)deserializeContext->context;
-    USP_RETURN_IF_CALLBACKS_NULL(uspContext);
+    DeserializeContext* deserializeContext = (DeserializeContext*)context;
 
-    // Zhou: why not differentiae by "Path", but just by "DisplayText" or "Text"??
-    //if (pSC->mCallbacks  &&  pSC->mCallbacks->OnSpeech)
-    //{
-
-    wchar_t *wcText = NULL;
-    // Todo: better handling of char to wchar
-    const char *displayText = PropertybagGetStringValue(propertyHandle, "Text");
-    if (displayText != NULL)
+    // Call userback only if the message is not defined in the user-defined handlers.
+    if (!deserializeContext->userCallbackInvoked)
     {
-        // V2 of the speech protocol for partial results
-        if (uspContext->callbacks->onSpeechHypothesis == NULL)
-        {
-            LogInfo("No callback defined for speech.hypothesis.");
-            return USP_SUCCESS;
-        }
+        UspContext* uspContext = (UspContext*)deserializeContext->context;
+        USP_RETURN_IF_CALLBACKS_NULL(uspContext);
 
+        // Zhou: why not differentiae by "Path", but just by "DisplayText" or "Text"??
+
+        wchar_t *wcText = NULL;
         // Todo: better handling of char to wchar
-        size_t textLen = strlen(displayText) + 1;
-        wcText = malloc(textLen * sizeof(wchar_t));
-        mbstowcs(wcText, displayText, textLen);
-
-        UspMsgSpeechHypothesis* msg = malloc(sizeof(UspMsgSpeechHypothesis));
-        // Todo: deal with char to wchar
-        // Todo: add more field;
-        msg->text = wcText;
-        msg->offset = (UspOffsetType)PropertybagGetNumberValue(propertyHandle, "Offset");
-        msg->duration = (UspOffsetType)PropertybagGetNumberValue(propertyHandle, "Duration");
-
-        uspContext->callbacks->onSpeechHypothesis(uspContext, uspContext->callbackContext, msg);
-        // Todo: better handling of memory management.
-        free(msg);
-        free(wcText);
-    }
-    else
-    {
-        // Speech.Phrase message
-        if (uspContext->callbacks->onSpeechPhrase == NULL)
-        {
-            LogInfo("No callback defined for speech.hypothesis.");
-            return USP_SUCCESS;
-        }
-
-        UspMsgSpeechPhrase* msg = malloc(sizeof(UspMsgSpeechPhrase));
-
-        const char* statusStr = PropertybagGetStringValue(propertyHandle, "RecognitionStatus");
-        if (statusStr == NULL)
-        {
-            LogError("Incorrect RecognitionStatus in Speech.Phrase.");
-            return USP_INVALID_MESSAGE;
-        }
-
-        if (!strcmp(statusStr, "Success"))
-        {
-            msg->recognitionStatus = USP_RECOGNITON_SUCCESS;
-        }
-        else if (!strcmp(statusStr, "NoMatch"))
-        {
-            msg->recognitionStatus = USP_RECOGNITION_NO_MATCH;
-        }
-        else if (!strcmp(statusStr, "InitialSilenceTimeout"))
-        {
-            msg->recognitionStatus = USP_RECOGNITION_INITIAL_SILENCE_TIMEOUT;
-        }
-        else if (!strcmp(statusStr, "BabbleTimeout"))
-        {
-            msg->recognitionStatus = USP_RECOGNITION_BABBLE_TIMEOUT;
-        }
-        else if (!strcmp(statusStr, "Error"))
-        {
-            msg->recognitionStatus = USP_RECOGNITION_ERROR;
-        }
-        else if (!strcmp(statusStr, "EndOfDictation"))
-        {
-            msg->recognitionStatus = USP_RECOGNITION_END_OF_DICTATION;
-        }
-        else
-        {
-            LogError("Unknown RecognitionStatus: %s", statusStr);
-            return USP_INVALID_MESSAGE;
-        }
-
-        msg->offset = (UspOffsetType)PropertybagGetNumberValue(propertyHandle, "Offset");
-        msg->duration = (UspOffsetType)PropertybagGetNumberValue(propertyHandle, "Duration");
-
-        displayText = PropertybagGetStringValue(propertyHandle, "DisplayText");
+        const char *displayText = PropertybagGetStringValue(propertyHandle, "Text");
         if (displayText != NULL)
         {
+            // V2 of the speech protocol for partial results
+            if (uspContext->callbacks->onSpeechHypothesis == NULL)
+            {
+                LogInfo("No callback defined for speech.hypothesis.");
+                return USP_SUCCESS;
+            }
+
+            // Todo: better handling of char to wchar
             size_t textLen = strlen(displayText) + 1;
             wcText = malloc(textLen * sizeof(wchar_t));
             mbstowcs(wcText, displayText, textLen);
 
+            UspMsgSpeechHypothesis* msg = malloc(sizeof(UspMsgSpeechHypothesis));
+            // Todo: deal with char to wchar
             // Todo: add more field;
-            msg->displayText = wcText;
+            msg->text = wcText;
+            msg->offset = (UspOffsetType)PropertybagGetNumberValue(propertyHandle, "Offset");
+            msg->duration = (UspOffsetType)PropertybagGetNumberValue(propertyHandle, "Duration");
+
+            uspContext->callbacks->onSpeechHypothesis(uspContext, uspContext->callbackContext, msg);
+            // Todo: better handling of memory management.
+            free(msg);
+            free(wcText);
         }
         else
         {
-            msg->displayText = NULL;
-        }
+            // Speech.Phrase message
+            if (uspContext->callbacks->onSpeechPhrase == NULL)
+            {
+                LogInfo("No callback defined for speech.hypothesis.");
+                return USP_SUCCESS;
+            }
 
-        uspContext->callbacks->onSpeechPhrase(uspContext, uspContext->callbackContext, msg);
+            UspMsgSpeechPhrase* msg = malloc(sizeof(UspMsgSpeechPhrase));
 
-        // Todo: better handling of memory management.
-        free(msg);
-        if (displayText != NULL)
-        {
-            free(wcText);
+            const char* statusStr = PropertybagGetStringValue(propertyHandle, "RecognitionStatus");
+            if (statusStr == NULL)
+            {
+                LogError("Incorrect RecognitionStatus in Speech.Phrase.");
+                return USP_INVALID_MESSAGE;
+            }
+
+            if (!strcmp(statusStr, "Success"))
+            {
+                msg->recognitionStatus = USP_RECOGNITON_SUCCESS;
+            }
+            else if (!strcmp(statusStr, "NoMatch"))
+            {
+                msg->recognitionStatus = USP_RECOGNITION_NO_MATCH;
+            }
+            else if (!strcmp(statusStr, "InitialSilenceTimeout"))
+            {
+                msg->recognitionStatus = USP_RECOGNITION_INITIAL_SILENCE_TIMEOUT;
+            }
+            else if (!strcmp(statusStr, "BabbleTimeout"))
+            {
+                msg->recognitionStatus = USP_RECOGNITION_BABBLE_TIMEOUT;
+            }
+            else if (!strcmp(statusStr, "Error"))
+            {
+                msg->recognitionStatus = USP_RECOGNITION_ERROR;
+            }
+            else if (!strcmp(statusStr, "EndOfDictation"))
+            {
+                msg->recognitionStatus = USP_RECOGNITION_END_OF_DICTATION;
+            }
+            else
+            {
+                LogError("Unknown RecognitionStatus: %s", statusStr);
+                return USP_INVALID_MESSAGE;
+            }
+
+            msg->offset = (UspOffsetType)PropertybagGetNumberValue(propertyHandle, "Offset");
+            msg->duration = (UspOffsetType)PropertybagGetNumberValue(propertyHandle, "Duration");
+
+            displayText = PropertybagGetStringValue(propertyHandle, "DisplayText");
+            if (displayText != NULL)
+            {
+                size_t textLen = strlen(displayText) + 1;
+                wcText = malloc(textLen * sizeof(wchar_t));
+                mbstowcs(wcText, displayText, textLen);
+
+                // Todo: add more field;
+                msg->displayText = wcText;
+            }
+            else
+            {
+                msg->displayText = NULL;
+            }
+
+            uspContext->callbacks->onSpeechPhrase(uspContext, uspContext->callbackContext, msg);
+
+            // Todo: better handling of memory management.
+            free(msg);
+            if (displayText != NULL)
+            {
+                free(wcText);
+            }
         }
     }
-
-    // NOTE: If any further post processing is needed after user callback, please do it in PostProcessAfterUserCallback(),
-    // because this handler can be overwritten by a user-defined handler.
 
     return USP_SUCCESS;
 }
@@ -238,41 +249,43 @@ static int HandleJsonSpeechFragment(PROPERTYBAG_HANDLE  propertyHandle, void* co
     USP_RETURN_IF_CONTEXT_NULL(context);
 
     DeserializeContext* deserializeContext = (DeserializeContext*)context;
-    UspContext* uspContext = (UspContext*)deserializeContext->context;
-    USP_RETURN_IF_CALLBACKS_NULL(uspContext);
 
-    if (uspContext->callbacks->onSpeechFragment == NULL)
+    // Call userback only if the message is not defined in the user-defined handlers.
+    if (!deserializeContext->userCallbackInvoked)
     {
-        LogInfo("%s: no callback is defined for speech.fragment.", __FUNCTION__);
-        return USP_SUCCESS;
+        UspContext* uspContext = (UspContext*)deserializeContext->context;
+        USP_RETURN_IF_CALLBACKS_NULL(uspContext);
+
+        if (uspContext->callbacks->onSpeechFragment == NULL)
+        {
+            LogInfo("%s: no callback is defined for speech.fragment.", __FUNCTION__);
+            return USP_SUCCESS;
+        }
+
+        UspMsgSpeechFragment* msg = malloc(sizeof(UspMsgSpeechFragment));
+
+        wchar_t* wcText = NULL;
+        const char* text = PropertybagGetStringValue(propertyHandle, "Text");
+        if (text != NULL)
+        {
+            // Todo: better handling of char to wchar
+            size_t textLen = strlen(text) + 1;
+            wcText = malloc(textLen * sizeof(wchar_t));
+            mbstowcs(wcText, text, textLen);
+            msg->text = wcText;
+        }
+
+        msg->offset = (UspOffsetType)PropertybagGetNumberValue(propertyHandle, "Offset");
+        msg->duration = (UspOffsetType)PropertybagGetNumberValue(propertyHandle, "Duration");
+
+        uspContext->callbacks->onSpeechFragment(uspContext, uspContext->callbackContext, msg);
+
+        free(msg);
+        if (wcText != NULL)
+        {
+            free(wcText);
+        }
     }
-
-    UspMsgSpeechFragment* msg = malloc(sizeof(UspMsgSpeechFragment));
-
-    wchar_t* wcText = NULL;
-    const char* text = PropertybagGetStringValue(propertyHandle, "Text");
-    if (text != NULL)
-    {
-        // Todo: better handling of char to wchar
-        size_t textLen = strlen(text) + 1;
-        wcText = malloc(textLen * sizeof(wchar_t));
-        mbstowcs(wcText, text, textLen);
-        msg->text = wcText;
-    }
-
-    msg->offset = (UspOffsetType)PropertybagGetNumberValue(propertyHandle, "Offset");
-    msg->duration = (UspOffsetType)PropertybagGetNumberValue(propertyHandle, "Duration");
-
-    uspContext->callbacks->onSpeechFragment(uspContext, uspContext->callbackContext, msg);
-
-    free(msg);
-    if (wcText != NULL)
-    {
-        free(wcText);
-    }
-
-    // NOTE: If any further post processing is needed after user callback, please do it in PostProcessAfterUserCallback(),
-    // because this handler can be overwritten by a user-defined handler.
 
     return USP_SUCCESS;
 }
@@ -299,33 +312,34 @@ static int HandleJsonTurnStart(PROPERTYBAG_HANDLE  propertyHandle, void* context
 
     DeserializeContext* deserializeContext = (DeserializeContext*)context;
 
-    // USP handling
-    UspContext* uspContext = (UspContext *)(deserializeContext->context);
-    USP_RETURN_IF_CALLBACKS_NULL(uspContext);
-
-    if (uspContext->callbacks->onTurnStart == NULL)
+    // Call userback only if the message is not defined in the user-defined handlers.
+    if (!deserializeContext->userCallbackInvoked)
     {
-        LogInfo("%s: No callback is defined for turn.start.", __FUNCTION__);
-        return USP_SUCCESS;
+        // USP handling
+        UspContext* uspContext = (UspContext *)(deserializeContext->context);
+        USP_RETURN_IF_CALLBACKS_NULL(uspContext);
+
+        if (uspContext->callbacks->onTurnStart == NULL)
+        {
+            LogInfo("%s: No callback is defined for turn.start.", __FUNCTION__);
+            return USP_SUCCESS;
+        }
+
+        UspMsgTurnStart* msg = malloc(sizeof(UspMsgTurnStart));
+
+        (void)PropertybagGetChildValue(
+            propertyHandle,
+            "context",
+            HandleTurnStartContext,
+            msg);
+
+        LogInfo("Turn.Start response: serviceTag: %ls.", msg->contextServiceTag);
+        uspContext->callbacks->onTurnStart(uspContext, uspContext->callbackContext, msg);
+
+        // Todo: better handling of memory management.
+        free(msg->contextServiceTag);
+        free(msg);
     }
-
-    UspMsgTurnStart* msg = malloc(sizeof(UspMsgTurnStart));
-
-    (void)PropertybagGetChildValue(
-        propertyHandle,
-        "context",
-        HandleTurnStartContext,
-        msg);
-
-    LogInfo("Turn.Start response: serviceTag: %ls.", msg->contextServiceTag);
-    uspContext->callbacks->onTurnStart(uspContext, uspContext->callbackContext, msg);
-
-    // Todo: better handling of memory management.
-    free(msg->contextServiceTag);
-    free(msg);
-
-    // NOTE: If any further post processing is needed after user callback, please do it in PostProcessAfterUserCallback(),
-    // because this handler can be overwritten by a user-defined handler.
 
     return USP_SUCCESS;
 }
@@ -355,15 +369,15 @@ const struct JSON_CONTENT_HANDLER
 * @param asyncCompleteContext The context parameter that is passed when the asyncCompleteCallback is invoked.
 * @return A UspResult indicating success or error.
 */
-UspResult JsonResponseHandler(UspContext* uspContext, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK callback, void* asyncContext)
+UspResult JsonResponseHandler(void* context, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK callback, void* asyncContext, bool userCallbackInvoked)
 {
     (void)ioBuffer;
     (void)callback;
     (void)asyncContext;
 
-    if (uspContext == NULL || buffer == NULL || path == NULL)
+    if (context == NULL || buffer == NULL || path == NULL)
     {
-        LogError("%s: One of the following parameters is null: uspContext:0x%x, buffer:0x%x, path:0x%x.", __FUNCTION__, uspContext, buffer, path);
+        LogError("%s: One of the following parameters is null: uspContext:0x%x, buffer:0x%x, path:0x%x.", __FUNCTION__, context, buffer, path);
         return USP_INVALID_ARGUMENT;
     }
 
@@ -383,13 +397,11 @@ UspResult JsonResponseHandler(UspContext* uspContext, const char* path, uint8_t*
     }
 
     DeserializeContext deserializeContext;
-    deserializeContext.context = (void *)uspContext;
+    deserializeContext.context = (void *)context;
     deserializeContext.responseJson = (const char*)buffer;
+    deserializeContext.userCallbackInvoked = userCallbackInvoked;
 
     int ret = PropertybagDeserializeJson((const char*)buffer, bufferSize, ch->handler, &deserializeContext);
-
-    // NOTE: If any further post processing is needed after user callback, please do it in PostProcessAfterUserCallback(),
-    // because this handler can be overwritten by a user-defined handler.
 
     if (ret)
     {
@@ -415,21 +427,24 @@ UspResult JsonResponseHandler(UspContext* uspContext, const char* path, uint8_t*
 */
 // Todo: check whether this is still used?
 // Deprecated V1 handler for partial results.  Remove once the service switched.
-UspResult TextResponseHandler(UspContext* uspContext, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK callback, void* asyncContext)
+UspResult TextResponseHandler(void* context, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK callback, void* asyncContext, bool userCallbackInvoked)
 {
     (void)path;
     (void)ioBuffer;
     (void)callback;
     (void)asyncContext;
-    (void)uspContext;
+    (void)context;
     (void)buffer;
     (void)bufferSize;
 
-    LogError("%s: Not implemented", __FUNCTION__);
+    // If user has already defined his own handler, it should not return error.
+    if (!userCallbackInvoked)
+    {
+        LogError("%s: Not implemented", __FUNCTION__);
 
-    // NOTE: If any further post processing is needed after user callback, please do it in PostProcessAfterUserCallback(),
-    // because this handler can be overwritten by a user-defined handler.
+        return USP_NOT_IMPLEMENTED;
+    }
 
-    return USP_NOT_IMPLEMENTED;
+    return USP_SUCCESS;
 }
 
