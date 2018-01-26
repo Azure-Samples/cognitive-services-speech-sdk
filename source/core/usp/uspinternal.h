@@ -25,6 +25,7 @@
 #include <assert.h>
 
 #include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/list.h"
 #include "usp.h"
 #include "uspcommon.h"
 #include "metrics.h"
@@ -50,7 +51,7 @@ extern "C" {
 #endif
 
 /**
- * USP_FLAG_XXX indicates state of the UspContext.
+* USP_FLAG_XXX indicates state of the UspContext.
 */
 #define USP_FLAG_INITIALIZED 0x01
 #define USP_FLAG_CONNECTED   0x02
@@ -102,7 +103,6 @@ extern "C" {
     } while (0)
 
 
-#define USER_PATH_HANDLER_ENTRIES 10
 typedef struct _UserPathHandler
 {
     char* path;
@@ -127,9 +127,7 @@ typedef struct _UspContext
 
     int flags;
 
-    UserPathHandler* userMessageHandlerTable;
-    size_t userMessageHandlerTableCapacilty;
-    size_t userMessageHandlerSize;
+    LIST_HANDLE userPathHandlerList;
 
     // Todo: can multiple UspContexts share the work thread?
     THREAD_HANDLE workThreadHandle;
@@ -143,7 +141,6 @@ typedef struct _UspContext
     // for metrics.
     uint64_t creationTime;
 } UspContext;
-
 
 /**
 * Creates a new UspContext.
@@ -184,36 +181,22 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint);
 UspResult TransportShutdown(UspContext* uspContext);
 
 /**
-* Defines the callback function of asynchrnous complete during content handling.
-* @param context The context provided by the application.
-*/
-typedef void(*CONTENT_ASYNCCOMPLETE_CALLBACK)(void* context);
-
-/**
-* Defines the callback function of handling contents.
-* @param context The content context.
-* @param path The content path.
-* @param buffer The content buffer.
-* @param bufferSize The size of the buffer.
-* @param ioBuffer The pointer to ioBuffer.
-* @param asyncCompleteCallback The callback when handling is complete.
-* @param asyncCompleteContext The context parameter that is passed when the asyncCompleteCallback is invoked.
-* @return A UspResult indicating success or error.
-*/
-typedef UspResult(*CONTENT_HANDLER_CALLBACK)(void* context, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK asyncCompleteCallback, void* asyncCompleteContext, bool userCallbackInvoked);
-
-/**
-* Handles response messages based on content type.
+* Handles response messages from service based on content type.
 * @param context The content context.
 * @param path The content path.
 * @param mime The content type.
 * @param ioBuffer The pointer to ioBuffer.
 * @param responseContent The content buffer of the response.
-* @param responseSize The size of the content buffer.
-* @param userCallbackInvoked A boolean value indicating whether a user-callback has already been invoked.
+* @param responseSize The size of responseContent.
 * @return A UspResult indicating success or error.
 */
-UspResult ContentDispatch(void* context, const char* path, const char* mime, IOBUFFER* ioBuffer, BUFFER_HANDLE responseContent, size_t responseSize, bool userCallbackInvoked);
+UspResult ContentDispatch(
+    void* context,
+    const char* path,
+    const char* mime,
+    IOBUFFER* ioBuffer,
+    BUFFER_HANDLE responseContent,
+    size_t responseSize);
 
 /**
 * Return device thumbprint generated from CDP

@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 
     if (argc < 2)
     {
-        printf("Usage: uspclientconsole audio_file authentication endpoint_type(speech/cris) mode(interactive/conversation/dictation) language output(simple/detailed)");
+        printf("Usage: uspclientconsole audio_file authentication endpoint_type(speech/cris) mode(interactive/conversation/dictation) language output(simple/detailed) user-defined-messages");
         exit(1);
     }
 
@@ -254,14 +254,15 @@ int main(int argc, char* argv[])
         }
     }
 
-    if (argc > 6)
+    curArg++;
+    if (argc > curArg)
     {
-        for (int argIndex = 6; argIndex < argc; argIndex++)
+        for (int argIndex = curArg; argIndex < argc; argIndex++)
         {
-            printf("Register user message: %s\n", argv[argIndex]);
+            printf("Register user-defined response message: %s\n", argv[argIndex]);
             if (UspRegisterUserMessage(handle, argv[argIndex], OnUserMessage) != USP_SUCCESS)
             {
-                printf("Failed to register user-defined message: %s\n", argv[argIndex]);
+                printf("Failed to register user-defined response message: %s\n", argv[argIndex]);
                 exit(1);
             }
         }

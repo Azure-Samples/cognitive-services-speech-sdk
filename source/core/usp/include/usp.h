@@ -162,21 +162,21 @@ UspResult UspInit(UspEndpointType type, UspRecognitionMode mode, UspCallbacks *c
 UspResult UspSetAuthentication(UspHandle uspHandle, UspAuthenticationType authType, const char* authData);
 
 /**
-* Sets language that the audio is targeted for. It must be set before establising connection to service.
+* Sets language that the audio is targeted for. It must be set before establishing connection to service.
 * @param uspHandle The UspHandle.
-* @param language The language to be set. It uses the IETF language tag BCP 47, and must be one of the languages that are supported.
+* @param language The language to be set. It uses the IETF language tag BCP 47 (https://en.wikipedia.org/wiki/IETF_language_tag), and must be one of the languages that are supported.
 */
 UspResult UspSetLanguage(UspHandle uspHandle, const char* language);
 
 /**
-* Sets the output format. It must be set before establising connection to service.
+* Sets the output format. It must be set before establishing connection to service.
 * @param uspHandle The UspHandle.
 * @param format The output format, can be either USP_OUTPUT_DETAILED or USP_OUTPUT_SIMPLE.
 */
 UspResult UspSetOutputFormat(UspHandle uspHandle, UspOutputFormat format);
 
 /**
-* Sets the model id if a customized speech model is used. It must be set before establising connection to service.
+* Sets the model id if a customized speech model is used. It must be set before establishing connection to service.
 * @param uspHandle The UspHandle.
 * @param modelId The model id for the customized speech model.
 */

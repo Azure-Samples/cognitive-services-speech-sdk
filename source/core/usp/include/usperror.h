@@ -41,7 +41,7 @@ extern "C" {
 #define USP_CALLBACKS_NOT_SET USP_ERRCODE(0x011)
 
 /**
- * USP_INVALID_ARGUMENT indicates an invalid parameter passed to a function.
+ * USP_INVALID_ARGUMENT indicates an invalid argument passed to a function.
 */
 #define USP_INVALID_ARGUMENT USP_ERRCODE(0x012)
 
@@ -92,14 +92,14 @@ extern "C" {
 // Response errors
 
 /**
-* USP_UNKNOWN_MESSAGE indicates that the message path is unknown.
+* USP_UNKNOWN_PATH_IN_RESPONSE indicates that the message path is unknown.
 */
-#define USP_UNKNOWN_MESSAGE USP_ERRCODE(0x040)
+#define USP_UNKNOWN_PATH_IN_RESPONSE USP_ERRCODE(0x040)
 
 /**
-* USP_INVALID_MESSAGE indicates that the message content is not valid.
+* USP_INVALID_RESPONSE indicates that a message does not conform to the protocol specification.
 */
-#define USP_INVALID_MESSAGE USP_ERRCODE(0x041)
+#define USP_INVALID_RESPONSE USP_ERRCODE(0x041)
 
 // Service errors
 

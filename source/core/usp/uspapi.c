@@ -355,6 +355,8 @@ void UspRun(UspHandle uspHandle)
 
 }
 
+bool userPathHandlerCompare(LIST_ITEM_HANDLE item1, const void* path);
+
 UspResult UspRegisterUserMessage(UspHandle uspHandle, const char* messagePath, UspOnUserMessage messageHandler)
 {
     USP_RETURN_IF_HANDLE_NULL(uspHandle);
@@ -373,46 +375,25 @@ UspResult UspRegisterUserMessage(UspHandle uspHandle, const char* messagePath, U
 
     USP_RETURN_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
 
-    if (uspHandle->userMessageHandlerTable == NULL)
+    assert(uspHandle->userPathHandlerList != NULL);
+    LIST_ITEM_HANDLE foundItem = list_find(uspHandle->userPathHandlerList, userPathHandlerCompare, messagePath);
+    if (foundItem != NULL)
     {
-        uspHandle->userMessageHandlerTable = (UserPathHandler *)malloc(sizeof(UserPathHandler) * USER_PATH_HANDLER_ENTRIES);
-        if (uspHandle->userMessageHandlerTable == NULL)
+        UserPathHandler* existingHandler = (UserPathHandler*)list_item_get_value(foundItem);
+        existingHandler->handler = messageHandler;
+    }
+    else
+    {
+        UserPathHandler* newHandler = malloc(sizeof(UserPathHandler));
+        if (newHandler == NULL)
         {
-            LogError("Failed to allocate userMessageHandlerTable in %s.", __FUNCTION__);
+            LogError("%s: Failed to allocate userPathHandler entry.", __FUNCTION__);
             return USP_OUT_OF_MEMORY;
         }
-        uspHandle->userMessageHandlerTableCapacilty = USER_PATH_HANDLER_ENTRIES;
+        newHandler->handler = messageHandler;
+        newHandler->path = _strdup(messagePath);
+        list_add(uspHandle->userPathHandlerList, newHandler);
     }
-
-    for (size_t i = 0; i < uspHandle->userMessageHandlerSize; i++)
-    {
-        if (!strcmp(messagePath, uspHandle->userMessageHandlerTable[i].path))
-        {
-            assert(uspHandle->userMessageHandlerTable[i].handler != NULL);
-            LogInfo("Replace existing user Message: path: %s.", messagePath);
-            free(uspHandle->userMessageHandlerTable[i].path);
-            uspHandle->userMessageHandlerTable[i].path = _strdup(messagePath);
-            uspHandle->userMessageHandlerTable[i].handler = messageHandler;
-            return USP_SUCCESS;
-        }
-    }
-
-    if (uspHandle->userMessageHandlerSize >= uspHandle->userMessageHandlerTableCapacilty)
-    {
-        uspHandle->userMessageHandlerTable = (UserPathHandler *)realloc(uspHandle->userMessageHandlerTable, sizeof(UserPathHandler) * (uspHandle->userMessageHandlerSize + USER_PATH_HANDLER_ENTRIES));
-        if (uspHandle->userMessageHandlerTable == NULL)
-        {
-            LogError("Failed to increase userMessageHandlerTable in %s.", __FUNCTION__);
-            return USP_OUT_OF_MEMORY;
-        }
-        uspHandle->userMessageHandlerTableCapacilty += USER_PATH_HANDLER_ENTRIES;
-    }
-
-    assert(uspHandle->userMessageHandlerSize < uspHandle->userMessageHandlerTableCapacilty);
-
-    uspHandle->userMessageHandlerTable[uspHandle->userMessageHandlerSize].path = _strdup(messagePath);
-    uspHandle->userMessageHandlerTable[uspHandle->userMessageHandlerSize].handler = messageHandler;
-    uspHandle->userMessageHandlerSize++;
 
     return USP_SUCCESS;
 }

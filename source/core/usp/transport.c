@@ -319,8 +319,7 @@ static void ChunkedMessageRecv(HTTP_CLIENT_HANDLE handle, void* callbackContext,
             mime = HTTPHeaders_FindHeaderValue(responseHeadersHandle, g_keywordContentType);
             if (NULL != mime)
             {
-                // Current it is not supported to use replace default handler in responses for HTTP.
-                ContentDispatch(request->context, NULL /* path */, mime, 0, request->responseContentHandle, USE_BUFFER_SIZE, false);
+                ContentDispatch(request->context, NULL /* path */, mime, NULL /* ioBuffer */, request->responseContentHandle, USE_BUFFER_SIZE);
             }
         }
 
@@ -413,15 +412,13 @@ static int OnStreamChunk(TransportStream* stream, const uint8_t* buffer, size_t 
         LogInfo("First chunk for %s", STRING_c_str(stream->contentType));
         metrics_tts_first_chunk();
 
-        // Currently it is not supported to handle overwrite default handler in reponses for a stream.
         ContentDispatch(
             stream->context,
             NULL,  // path
             STRING_c_str(stream->contentType),
             stream->ioBuffer,
-            NULL,
-            stream->bufferSize,
-            false);
+            NULL, // responseContentHandle
+            stream->bufferSize);
     }
     else if (0 == bufferSize)
     {

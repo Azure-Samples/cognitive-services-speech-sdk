@@ -49,7 +49,7 @@ UspResult AudioStreamWrite(UspHandle uspHandle, const void * data, uint32_t size
 
     if (size == 0)
     {
-        LogError("%s: size should not be 0. Use AudioStreamFlush() to flush the buffer.");
+        LogError("%s: size should not be 0. Use AudioStreamFlush() to flush the buffer.", __FUNCTION__);
         return USP_INVALID_ARGUMENT;
     }
 
@@ -133,22 +133,26 @@ UspResult AudioStreamFlush(UspHandle uspHandle)
 }
 
 // Callback for transport error
-static UspResult TransportErrorHandler(TransportHandle transportHandle, TransportError reason, void* context)
+static void TransportErrorHandler(TransportHandle transportHandle, TransportError reason, void* context)
 {
     UspResult uspError;
 
     (void)transportHandle;
 
     UspContext* uspContext = (UspContext*)context;
-    assert(uspContext != NULL);
-    USP_RETURN_IF_CALLBACKS_NULL(uspContext);
-
     LogInfo("%s: uspContext:0x%x, reason=%d.", uspContext, reason);
+
+    assert(uspContext != NULL);
+    if (uspContext->callbacks == NULL)
+    {
+        LogError("%s: callbacks is null.", __FUNCTION__);
+        return;
+    }
 
     if (uspContext->callbacks->OnError == NULL)
     {
         LogInfo("%s: No callback is defined for onError.", __FUNCTION__);
-        return USP_SUCCESS;
+        return;
     }
 
     switch (reason)
@@ -171,67 +175,57 @@ static UspResult TransportErrorHandler(TransportHandle transportHandle, Transpor
     }
 
     uspContext->callbacks->OnError(uspContext, uspContext->callbackContext, uspError);
-
-    return USP_SUCCESS;
 }
 
 // Callback for speech.end
-static UspResult SpeechEndHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size, bool userCallbackInvoked)
+static UspResult SpeechEndHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size)
 {
     (void)mime;
     (void)buffer;
     (void)size;
     (void)path;
 
-    // Call userback only if the message is not defined in the user-defined handlers.
-    if (!userCallbackInvoked)
+    assert(uspContext != NULL);
+    USP_RETURN_IF_CALLBACKS_NULL(uspContext);
+    if (uspContext->callbacks->onSpeechEndDetected == NULL)
     {
-        assert(uspContext != NULL);
-        USP_RETURN_IF_CALLBACKS_NULL(uspContext);
-        if (uspContext->callbacks->onSpeechEndDetected == NULL)
-        {
-            LogInfo("%s: No callback is defined for speech.end.", __FUNCTION__);
-            return USP_SUCCESS;
-        }
-
-        UspMsgSpeechEndDetected* msg = malloc(sizeof(UspMsgSpeechEndDetected));
-        // Todo: deal with char to wchar
-        // Todo: add more field;
-        uspContext->callbacks->onSpeechEndDetected(uspContext, uspContext->callbackContext, msg);
-        // Todo: better handling of memory management.
-        free(msg);
+        LogInfo("%s: No callback is defined for speech.end.", __FUNCTION__);
+        return USP_SUCCESS;
     }
+
+    UspMsgSpeechEndDetected* msg = malloc(sizeof(UspMsgSpeechEndDetected));
+    // Todo: deal with char to wchar
+    // Todo: add more field;
+    uspContext->callbacks->onSpeechEndDetected(uspContext, uspContext->callbackContext, msg);
+    // Todo: better handling of memory management.
+    free(msg);
 
     return USP_SUCCESS;
 }
 
 // callback for turn.end
-static UspResult TurnEndHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size, bool userCallbackInvoked)
+static UspResult TurnEndHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size)
 {
     (void)path;
     (void)mime;
     (void)buffer;
     (void)size;
 
-    // Call userback only if the message is not defined in the user-defined handlers.
-    if (!userCallbackInvoked)
-    {
-        assert(uspContext != NULL);
-        USP_RETURN_IF_CALLBACKS_NULL(uspContext);
+    assert(uspContext != NULL);
+    USP_RETURN_IF_CALLBACKS_NULL(uspContext);
 
-        if (uspContext->callbacks->onTurnEnd == NULL)
-        {
-            LogInfo("%s: No callback is defined for turn.end.", __FUNCTION__);
-        }
-        else
-        {
-            UspMsgTurnEnd* msg = NULL;
-            // Todo: deal with char to wchar
-            // Todo: add more field;
-            uspContext->callbacks->onTurnEnd(uspContext, uspContext->callbackContext, msg);
-            // Todo: better handling of memory management.
-            // free(msg);
-        }
+    if (uspContext->callbacks->onTurnEnd == NULL)
+    {
+        LogInfo("%s: No callback is defined for turn.end.", __FUNCTION__);
+    }
+    else
+    {
+        UspMsgTurnEnd* msg = NULL;
+        // Todo: deal with char to wchar
+        // Todo: add more field;
+        uspContext->callbacks->onTurnEnd(uspContext, uspContext->callbackContext, msg);
+        // Todo: better handling of memory management.
+        // free(msg);
     }
 
     telemetry_flush();
@@ -247,7 +241,7 @@ static UspResult TurnEndHandler(UspContext* uspContext, const char* path, const 
 
 
 // Callback handler for turn.start, speech.hypothesis, speech.phrase, and also for response.
-static UspResult ContentPathHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size, bool userCallbackInvoked)
+static UspResult ContentPathHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size)
 {
     UspResult ret;
 
@@ -256,7 +250,7 @@ static UspResult ContentPathHandler(UspContext* uspContext, const char* path, co
     if (size == 0)
     {
         PROTOCOL_VIOLATION("response contains no body");
-        return USP_INVALID_MESSAGE;
+        return USP_INVALID_RESPONSE;
     }
 
     BUFFER_HANDLE responseContentHandle = BUFFER_create(
@@ -273,7 +267,7 @@ static UspResult ContentPathHandler(UspContext* uspContext, const char* path, co
 #ifdef _DEBUG
     LogInfo("Content Message: path: %s, content type: %s, size: %zu, buffer: %s", path, mime, size, (char *)BUFFER_u_char(responseContentHandle));
 #endif
-    ret = ContentDispatch((void*)uspContext, path, mime, 0, responseContentHandle, size, userCallbackInvoked);
+    ret = ContentDispatch((void*)uspContext, path, mime, NULL, responseContentHandle, size);
 
     BUFFER_delete(responseContentHandle);
 
@@ -281,39 +275,42 @@ static UspResult ContentPathHandler(UspContext* uspContext, const char* path, co
 }
 
 // Callback for SpeechStartDetected.
-static UspResult SpeechStartHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size, bool userCallbackInvoked)
+static UspResult SpeechStartHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size)
 {
     (void)path;
     (void)mime;
     (void)buffer;
     (void)size;
 
-    // Call userback only if the message is not defined in the user-defined handlers.
-    if (!userCallbackInvoked)
+    assert(uspContext != NULL);
+    USP_RETURN_IF_CALLBACKS_NULL(uspContext);
+    if (uspContext->callbacks->onSpeechStartDetected == NULL)
     {
-        assert(uspContext != NULL);
-        USP_RETURN_IF_CALLBACKS_NULL(uspContext);
-        if (uspContext->callbacks->onSpeechStartDetected == NULL)
-        {
-            LogInfo("%s: No callback is defined for speech.start.", __FUNCTION__);
-            return USP_SUCCESS;
-        }
-
-        UspMsgSpeechStartDetected* msg = malloc(sizeof(UspMsgSpeechStartDetected));
-        // Todo: deal with char to wchar
-        // Todo: add more field;
-        uspContext->callbacks->onSpeechStartDetected(uspContext, uspContext->callbackContext, msg);
-        // Todo: better handling of memory management.
-        free(msg);
+        LogInfo("%s: No callback is defined for speech.start.", __FUNCTION__);
+        return USP_SUCCESS;
     }
 
+    UspMsgSpeechStartDetected* msg = malloc(sizeof(UspMsgSpeechStartDetected));
+    // Todo: deal with char to wchar
+    // Todo: add more field;
+    uspContext->callbacks->onSpeechStartDetected(uspContext, uspContext->callbackContext, msg);
+    // Todo: better handling of memory management.
+    free(msg);
+
     return USP_SUCCESS;
+}
+
+
+bool userPathHandlerCompare(LIST_ITEM_HANDLE item1, const void* path)
+{
+    UserPathHandler* value1 = (UserPathHandler*)list_item_get_value(item1);
+    return (strcmp(value1->path, path) == 0);
 }
 
 /**
 * The dispatch table for message.
 */
-typedef UspResult(*SystemMessageHandler)(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size, bool userCallbackInvoked);
+typedef UspResult(*SystemMessageHandler)(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size);
 
 const struct _PathHandler
 {
@@ -336,7 +333,6 @@ static void TransportRecvResponseHandler(TransportHandle transportHandle, HTTP_H
 {
     const char* path;
     const char* contentType = NULL;
-    bool userCallbackInvoked = false;
 
     (void)transportHandle;
 
@@ -368,41 +364,35 @@ static void TransportRecvResponseHandler(TransportHandle transportHandle, HTTP_H
         }
     }
 
-    // Check user-defined message handler first.
     if (context == NULL)
     {
         LogError("No context provided in %s.", __FUNCTION__);
         return;
     }
-
     UspContext *uspContext = (UspContext *)context;
 
-    for (size_t i = 0; i < uspContext->userMessageHandlerSize; i++)
-    {
-        if (!strcmp(path, uspContext->userMessageHandlerTable[i].path))
-        {
-            assert(uspContext->userMessageHandlerTable[i].handler != NULL);
-            LogInfo("User Message: path: %s, content type: %s, size: %zu.", path, contentType, size);
-            uspContext->userMessageHandlerTable[i].handler(uspContext, path, contentType, buffer, size, uspContext->callbackContext);
-            userCallbackInvoked = true;
-            break;
-        }
-    }
-
-    for (int i = 0; i < ARRAYSIZE(g_SystemMessageHandlers); i++)
+    for (unsigned int i = 0; i < ARRAYSIZE(g_SystemMessageHandlers); i++)
     {
         if (!strcmp(path, g_SystemMessageHandlers[i].path))
         {
-            g_SystemMessageHandlers[i].handler(uspContext, path, contentType, buffer, size, userCallbackInvoked);
+            g_SystemMessageHandlers[i].handler(uspContext, path, contentType, buffer, size);
             return;
         }
     }
 
-    if (!userCallbackInvoked)
+    LIST_ITEM_HANDLE foundItem = list_find(uspContext->userPathHandlerList, userPathHandlerCompare, path);
+    if (foundItem != NULL)
     {
-        PROTOCOL_VIOLATION("unhandled response '%s'", path);
-        metrics_transport_unhandledresponse();
+        UserPathHandler* pathHandler = (UserPathHandler*)list_item_get_value(foundItem);
+        assert(pathHandler->handler != NULL);
+        assert(strcmp(pathHandler->path, path) == 0);
+        LogInfo("User Message: path: %s, content type: %s, size: %zu.", path, contentType, size);
+        pathHandler->handler(uspContext, path, contentType, buffer, size, uspContext->callbackContext);
+        return;
     }
+
+    PROTOCOL_VIOLATION("unhandled response '%s'", path);
+    metrics_transport_unhandledresponse();
 }
 
 
@@ -544,6 +534,9 @@ UspResult TransportShutdown(UspContext* uspContext)
 
 UspResult UspContextDestroy(UspContext* uspContext)
 {
+    LIST_ITEM_HANDLE userPathHandlerItem;
+    UserPathHandler* pathHandler;
+
     USP_RETURN_IF_HANDLE_NULL(uspContext);
 
     if (uspContext->dnsCache != NULL)
@@ -559,12 +552,14 @@ UspResult UspContextDestroy(UspContext* uspContext)
     STRING_delete(uspContext->modelId);
     STRING_delete(uspContext->authData);
 
-    for (size_t i = 0; i < uspContext->userMessageHandlerSize; i++)
+    while ((userPathHandlerItem = list_get_head_item(uspContext->userPathHandlerList)) != NULL)
     {
-        free(uspContext->userMessageHandlerTable[i].path);
+        pathHandler = (UserPathHandler*)list_item_get_value(userPathHandlerItem);
+        list_remove(uspContext->userPathHandlerList, userPathHandlerItem);
+        free(pathHandler->path);
+        free(pathHandler);
     }
-    uspContext->userMessageHandlerSize = 0;
-    free(uspContext->userMessageHandlerTable);
+    list_destroy(uspContext->userPathHandlerList);
 
     free(uspContext);
     return USP_SUCCESS;
@@ -591,6 +586,8 @@ UspResult UspContextCreate(UspContext** contextCreated)
         UspContextDestroy(uspContext);
         return USP_INITIALIZATION_FAILURE;
     }
+
+    uspContext->userPathHandlerList = list_create();
 
     *contextCreated = uspContext;
     return USP_SUCCESS;
