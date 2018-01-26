@@ -8,7 +8,6 @@
 
 #define CARBON_IMPL_NAMESPACE() CarbonIMPL
 
-
 namespace CARBON_IMPL_NAMESPACE() {
 
 
@@ -39,7 +38,7 @@ inline std::shared_ptr<I> SpxMakeShared(Types&&... Args)
 {
     auto factory = CSpxCarbonFactory::Get();
     return factory->make_shared<T, I>(std::forward<Types>(Args)...);
-};
+}
 
 
-}; // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE()

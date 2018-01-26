@@ -35,4 +35,4 @@ private:
 };
 
 
-} } }; // CARBON_NAMESPACE_ROOT :: Recognition :: Intent
+} } } // CARBON_NAMESPACE_ROOT :: Recognition :: Intent

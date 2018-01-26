@@ -54,4 +54,4 @@ SPXAPI_PRIVATE Recognizer_RecoEvent_SetCallback(ISpxRecognizerEvents::RecoEvent_
 }
 
 
-}; // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE()

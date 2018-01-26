@@ -26,7 +26,7 @@ typedef struct _UspContext* UspHandle;
 /**
  * The UspResult represents the result of a function call of usplib.
 */
-typedef int UspResult;
+typedef unsigned int UspResult;
 
 /**
  * A callback function that will be called when a speech.startDetected message is received from service.

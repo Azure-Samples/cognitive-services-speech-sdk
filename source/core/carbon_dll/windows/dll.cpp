@@ -11,7 +11,12 @@ void InitLogging()
 #ifndef _DEBUG
 
     LOGGER_LOG tracelog = [](LOG_CATEGORY log_category, unsigned int options, const char* format, ...) {
+        UNUSED(log_category);
+        UNUSED(options);
+        UNUSED(format);
     };
+
+    UNUSED(tracelog);
 
     xlogging_set_log_function(nullptr);
 
@@ -24,6 +29,8 @@ BOOL APIENTRY DllMain(HMODULE hModule,
                       DWORD  ul_reason_for_call,
                       LPVOID lpReserved)
 {
+    UNUSED(hModule);
+    UNUSED(lpReserved);
     switch (ul_reason_for_call)
     {
         case DLL_PROCESS_ATTACH:

@@ -14,6 +14,7 @@
 #include  <wchar.h>
 #include <assert.h>
 #include <algorithm>
+#include <vector>
 #include "string_utils.h"
 
 namespace PAL {
@@ -72,9 +73,9 @@ std::string ToString(const std::wstring& wstring)
     return converter.to_bytes(wstring);
 #else
     const auto length = wstring.length() * sizeof(std::wstring::value_type) + 1;
-    char buf[length];
-    const auto res = std::wcstombs(buf, wstring.c_str(), sizeof(buf));
-    return (res >= 0) ? buf : "";
+    std::vector<char> buf(length);
+    const auto res = std::wcstombs(buf.data(), wstring.c_str(), sizeof(char)*length);
+    return (res <= length) ? buf.data() : "";
 #endif
 }
 
@@ -85,10 +86,10 @@ std::wstring ToWString(const std::string& string)
     return converter.from_bytes(string);
 #else
     const auto length = string.length() + 1;
-    wchar_t buf[length];
-    const auto res = std::mbstowcs(buf, string.c_str(), sizeof(buf));
-    return (res >= 0) ? buf : L"";
+    std::vector<wchar_t> buf(length);
+    const auto res = std::mbstowcs(buf.data(), string.c_str(), sizeof(wchar_t)*length);
+    return (res <= length) ? buf.data() : L"";
 #endif
 }
 
-}; // PAL
+} // PAL

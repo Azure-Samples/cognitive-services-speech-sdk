@@ -65,4 +65,4 @@ void OpenStream(std::fstream& stream, const std::wstring& filename, bool readonl
 #endif
 }
 
-}; // PAL
+} // PAL

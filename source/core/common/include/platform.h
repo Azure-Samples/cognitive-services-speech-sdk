@@ -29,4 +29,4 @@ std::string GetTypeName(const T& t) {
     return demangle(typeid(t).name());
 }
 
-}; // PAL
+} // PAL

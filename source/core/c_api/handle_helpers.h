@@ -48,4 +48,4 @@ SPXHR Handle_Close(handle_type handle)
 }
 
 
-}; // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE()

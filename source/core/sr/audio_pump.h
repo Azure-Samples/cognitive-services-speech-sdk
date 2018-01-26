@@ -26,8 +26,8 @@ public:
 
     // --- ISpxAudioPump
 
-    uint32_t GetFormat(WAVEFORMATEX* pformat, uint32_t cbFormat) override;
-    void SetFormat(const WAVEFORMATEX* pformat, uint32_t cbFormat) override;
+    uint16_t GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat) override;
+    void SetFormat(const WAVEFORMATEX* pformat, uint16_t cbFormat) override;
 
     void StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor) override;
     void PausePump() override;
@@ -50,11 +50,12 @@ private:
     std::condition_variable m_cv;
 
     std::shared_ptr<ISpxAudioReader> m_audioReader;
-    enum State m_stateRequested;
+
     enum State m_state;
+    enum State m_stateRequested;
 
     std::thread m_thread;
 };
 
 
-}; // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE()

@@ -60,4 +60,4 @@ private:
 };
 
 
-} } }; // CARBON_NAMESPACE_ROOT :: Recognition :: Speech
+} } } // CARBON_NAMESPACE_ROOT :: Recognition :: Speech

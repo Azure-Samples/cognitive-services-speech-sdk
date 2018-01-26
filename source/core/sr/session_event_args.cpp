@@ -16,4 +16,4 @@ const std::wstring& CSpxSessionEventArgs::GetSessionId()
 }
 
 
-}; // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE()

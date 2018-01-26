@@ -15,7 +15,7 @@
 extern "C"
 {
     #include "usp.h"
-};
+}
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -52,6 +52,8 @@ private:
         return m_site.lock();
     }
 
+    // TODO (robch): Why do all these method take a handle as a paramter when the handle is alredy a member
+    // of this calss?
     bool IsUspHandleValid(UspHandle handle);
 
     void UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackContext);
@@ -64,6 +66,7 @@ private:
 
     static std::shared_ptr<CSpxUspRecoEngineAdapter> From(UspHandle handle, void* callbackContext)
     {
+        UNUSED(handle);
         auto ptrClass = static_cast<CSpxUspRecoEngineAdapter*>(callbackContext);
         auto ptrProcessor = ((ISpxAudioProcessor*)ptrClass);
         auto shared = std::dynamic_pointer_cast<CSpxUspRecoEngineAdapter>(ptrProcessor->shared_from_this());
@@ -72,14 +75,14 @@ private:
 
     void InitCallbacks(UspCallbacks* pcallbacks);
 
-    void UspOnSpeechStartDetected(UspHandle handle, void* context, UspMsgSpeechStartDetected *message);
-    void UspOnSpeechEndDetected(UspHandle handle, void* context, UspMsgSpeechEndDetected *message);
-    void UspOnSpeechHypothesis(UspHandle handle, void* context, UspMsgSpeechHypothesis *message);
-    void UspOnSpeechFragment(UspHandle handle, void *context, UspMsgSpeechFragment *message);
-    void UspOnSpeechPhrase(UspHandle handle, void* context, UspMsgSpeechPhrase *message);
-    void UspOnTurnStart(UspHandle handle, void* context, UspMsgTurnStart *message);
-    void UspOnTurnEnd(UspHandle handle, void* context, UspMsgTurnEnd *message);
-    void UspOnError(UspHandle handle, void* context, UspResult error);
+    void UspOnSpeechStartDetected(UspMsgSpeechStartDetected *message);
+    void UspOnSpeechEndDetected(UspMsgSpeechEndDetected *message);
+    void UspOnSpeechHypothesis(UspMsgSpeechHypothesis *message);
+    void UspOnSpeechFragment(UspMsgSpeechFragment *message);
+    void UspOnSpeechPhrase(UspMsgSpeechPhrase *message);
+    void UspOnTurnStart(UspMsgTurnStart *message);
+    void UspOnTurnEnd(UspMsgTurnEnd *message);
+    void UspOnError(UspResult error);
 
     ISpxRecoEngineAdapterSite::ResultPayload_Type ResultPayloadFrom(UspMsgSpeechHypothesis* message)
     {
@@ -130,8 +133,8 @@ private:
         return payload;
     }
 
-    ISpxRecoEngineAdapterSite::AdditionalMessagePayload_Type AdditionalMessagePayloadFrom(UspMsgTurnStart* message) { return nullptr; } // TODO: RobCh: Implement this
-    ISpxRecoEngineAdapterSite::AdditionalMessagePayload_Type AdditionalMessagePayloadFrom(UspMsgTurnEnd* message) { return nullptr; } // TODO: RobCh: Implement this
+    ISpxRecoEngineAdapterSite::AdditionalMessagePayload_Type AdditionalMessagePayloadFrom(UspMsgTurnStart* message) { UNUSED(message); return nullptr; } // TODO: RobCh: Implement this
+    ISpxRecoEngineAdapterSite::AdditionalMessagePayload_Type AdditionalMessagePayloadFrom(UspMsgTurnEnd* message) { UNUSED(message); return nullptr; } // TODO: RobCh: Implement this
 
     ISpxRecoEngineAdapterSite::ErrorPayload_Type ErrorPayloadFrom(UspResult error) { return error; } // TODO: RobCh: Implement this
 
@@ -175,4 +178,4 @@ private:
 };
 
 
-}; // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE()

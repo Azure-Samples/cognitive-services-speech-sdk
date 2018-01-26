@@ -32,7 +32,7 @@ public:
 
     // --- ISpxAudioReader
 
-    uint32_t GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat);
+    uint16_t GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat);
     
     uint32_t Read(uint8_t* pbuffer, uint32_t cbBuffer);
 
@@ -63,4 +63,4 @@ private:
 };
 
 
-}; // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE()

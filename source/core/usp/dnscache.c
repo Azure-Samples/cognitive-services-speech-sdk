@@ -22,6 +22,7 @@
 #include "azure_c_shared_utility/condition.h"
 #include "azure_c_shared_utility/list.h"
 #include "azure_c_shared_utility/queue.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 #include "dnscache.h"
 
 
@@ -38,7 +39,6 @@ int DnsCacheLookup(const char* host, DNS_RESULT_HANDLE* result)
 {
 #ifdef __linux__
     struct addrinfo hints;
-    int ret;
 
     memset(&hints, 0, sizeof(hints));
 

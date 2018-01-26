@@ -97,23 +97,23 @@ private:
 
     void Recognizer_SessionStartedHandler(const SessionEventArgs& e) { ConsoleWriteLine(L"SessionStartedHandler: %ls", e.SessionId.c_str()); };
     void Recognizer_SessionStoppedHandler(const SessionEventArgs& e) { ConsoleWriteLine(L"SessionStoppedHandler: %ls", e.SessionId.c_str()); };
-    void Recognizer_SoundStartedHandler(const SessionEventArgs& e) {};
-    void Recognizer_SoundStoppedHandler(const SessionEventArgs& e) {};
+    void Recognizer_SoundStartedHandler(const SessionEventArgs& e) { UNUSED(e); };
+    void Recognizer_SoundStoppedHandler(const SessionEventArgs& e) { UNUSED(e); };
 
-    void Recognizer_IntermediateResultHandler(const RecognitionEventArgs& e) {};
-    void Recognizer_FinalResultHandler(const RecognitionEventArgs& e) {};
-    void Recognizer_NoMatchHandler(const RecognitionEventArgs& e) {};
-    void Recognizer_CanceledHandler(const RecognitionEventArgs& e) {};
+    void Recognizer_IntermediateResultHandler(const RecognitionEventArgs& e) { UNUSED(e); };
+    void Recognizer_FinalResultHandler(const RecognitionEventArgs& e) { UNUSED(e); };
+    void Recognizer_NoMatchHandler(const RecognitionEventArgs& e) { UNUSED(e); };
+    void Recognizer_CanceledHandler(const RecognitionEventArgs& e) { UNUSED(e); };
 
     void SpeechRecognizer_IntermediateResultHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"IntermediateResultHandler: %ls", ToString(e).c_str()); };
     void SpeechRecognizer_FinalResultHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"FinalResultHandler: %ls", ToString(e).c_str());}
     void SpeechRecognizer_NoMatchHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"NoMatchHandler: %ls", ToString(e).c_str()); }
-    void SpeechRecognizer_CanceledHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"SpeechRecognizer_CanceledHandler!!!"); };
+    void SpeechRecognizer_CanceledHandler(const SpeechRecognitionEventArgs& e) { UNUSED(e); ConsoleWriteLine(L"SpeechRecognizer_CanceledHandler!!!"); };
 
-    void IntentRecognizer_IntermediateResultHandler(const int& e) {};
-    void IntentRecognizer_FinalResultHandler(const int& e) {};
-    void IntentRecognizer_NoMatchHandler(const int& e) {};
-    void IntentRecognizer_CanceledHandler(const int& e) {};
+    void IntentRecognizer_IntermediateResultHandler(const int& e) { UNUSED(e); };
+    void IntentRecognizer_FinalResultHandler(const int& e) { UNUSED(e); };
+    void IntentRecognizer_NoMatchHandler(const int& e) { UNUSED(e); };
+    void IntentRecognizer_CanceledHandler(const int& e) { UNUSED(e); };
 
     std::wstring ToString(const SpeechRecognitionEventArgs& e);
 

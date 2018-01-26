@@ -230,4 +230,4 @@ HRESULT SampleHandler::OnEvent(
     return E_NOTIMPL;
 }
 
-}; // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE()

@@ -13,4 +13,4 @@ namespace Session {
 
 class Session{};
 
-} }; // CARBON_NAMESPACE_ROOT :: Session
+} } // CARBON_NAMESPACE_ROOT :: Session

@@ -41,14 +41,16 @@ void CSpxAudioPump::SetAudioReader(std::shared_ptr<ISpxAudioReader>& reader)
     m_state = reader.get() != nullptr ? State::Idle : State::NoInput;
 }
 
-uint32_t CSpxAudioPump::GetFormat(WAVEFORMATEX* pformat, uint32_t cbFormat)
+uint16_t CSpxAudioPump::GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat)
 {
     SPX_IFTRUE_THROW_HR(m_audioReader.get() == nullptr, SPXERR_UNINITIALIZED);
     return m_audioReader->GetFormat(pformat, cbFormat);
 }
 
-void CSpxAudioPump::SetFormat(const WAVEFORMATEX* pformat, uint32_t cbFormat)
+void CSpxAudioPump::SetFormat(const WAVEFORMATEX* pformat, uint16_t cbFormat)
 {
+    UNUSED(pformat);
+    UNUSED(cbFormat);
     SPX_THROW_HR(SPXERR_NOT_IMPL); // TODO: FUTURE: Implement CSpxAudioPump::SetFormat and hook up audio format conversion
 }
 
@@ -106,6 +108,7 @@ ISpxAudioPump::State CSpxAudioPump::GetState()
 
 void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor)
 {
+    UNUSED(keepAlive);
     SPX_DBG_TRACE_SCOPE("AudioPumpThread started!", "AudioPumpThread stopped!");
 
     // Get the format from the reader and give it to the processor
@@ -164,4 +167,4 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
 }
 
 
-}; // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE()

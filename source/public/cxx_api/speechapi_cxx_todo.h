@@ -20,4 +20,4 @@ public:
 };
 
 
-}; // CARBON_NAMESPACE_ROOT
+} // CARBON_NAMESPACE_ROOT

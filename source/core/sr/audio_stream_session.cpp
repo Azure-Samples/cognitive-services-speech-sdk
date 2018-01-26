@@ -185,30 +185,40 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::WaitForRecognitio
 
 void CSpxAudioStreamSession::SpeechStartDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset)
 {
+    UNUSED(adapter);
+    UNUSED(offset);
     // TODO: RobCh: Next: Implement
     // SPX_THROW_HR(SPXERR_NOT_IMPL);
 }
 
 void CSpxAudioStreamSession::SpeechEndDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset)
 {
+    UNUSED(adapter);
+    UNUSED(offset);
     // TODO: RobCh: Next: Implement
     // SPX_THROW_HR(SPXERR_NOT_IMPL);
 }
 
 void CSpxAudioStreamSession::SoundStartDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset)
 {
+    UNUSED(adapter);
+    UNUSED(offset);
     // TODO: RobCh: Next: Implement
     // SPX_THROW_HR(SPXERR_NOT_IMPL);
 }
 
 void CSpxAudioStreamSession::SoundEndDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset)
 {
+    UNUSED(adapter);
+    UNUSED(offset);
     // TODO: RobCh: Next: Implement
     // SPX_THROW_HR(SPXERR_NOT_IMPL);
 }
 
 void CSpxAudioStreamSession::IntermediateResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result)
 {
+    UNUSED(adapter);
+    UNUSED(offset);
     SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::Idle), "ERROR! IntermediateResult was called with SessionState==Idle");
     SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::StartingPump), "ERROR! IntermediateResult was called with SessionState==StartingPump");
 
@@ -217,6 +227,8 @@ void CSpxAudioStreamSession::IntermediateResult(ISpxRecoEngineAdapter* adapter, 
 
 void CSpxAudioStreamSession::FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result)
 {
+    UNUSED(adapter);
+    UNUSED(offset);
     SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::Idle), "ERROR! FinalResult was called with SessionState==Idle");
     SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::StartingPump), "ERROR! FinalResult was called with SessionState==StartingPump");
 
@@ -225,6 +237,7 @@ void CSpxAudioStreamSession::FinalResult(ISpxRecoEngineAdapter* adapter, uint64_
 
 void CSpxAudioStreamSession::DoneProcessingAudio(ISpxRecoEngineAdapter* adapter)
 {
+    UNUSED(adapter);
     if (ChangeState(SessionState::WaitingForAdapterDone, SessionState::Idle))
     {
         // The adapter request to finish processing audio has completed
@@ -234,12 +247,17 @@ void CSpxAudioStreamSession::DoneProcessingAudio(ISpxRecoEngineAdapter* adapter)
 
 void CSpxAudioStreamSession::AdditionalMessage(ISpxRecoEngineAdapter* adapter, uint64_t offset, AdditionalMessagePayload_Type payload)
 {
+    UNUSED(adapter);
+    UNUSED(offset);
+    UNUSED(payload);
     // TODO: RobCh: FUTURE: Implement
     // SPX_THROW_HR(SPXERR_NOT_IMPL);
 }
 
 void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload)
 {
+    UNUSED(adapter);
+    UNUSED(payload);
     // TODO: RobCh: Next: Implement
     // SPX_THROW_HR(SPXERR_NOT_IMPL);
 }
@@ -279,4 +297,4 @@ bool CSpxAudioStreamSession::ChangeState(SessionState from, SessionState to)
 }
 
 
-}; // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE()

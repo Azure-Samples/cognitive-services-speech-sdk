@@ -17,15 +17,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D_DEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 
-# TODO
-#[[
 if(MSVC)
   # Force to always compile with W4
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX")
 elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra -Wno-long-long -Wpedantic")
 endif()
-#]]
 
 set(CARBON_ROOT ${PROJECT_SOURCE_DIR})
 set(CARBON_SOURCE "${CARBON_ROOT}/source")
@@ -92,11 +89,6 @@ include_directories (AZURE_SHARED_UTIL_INCLUDE ${SHARED_UTIL_INC_FOLDER})
 
 if(WIN32)
     list(APPEND AZURE_SHARED_LIB rpcrt4.lib)
-endif()
-
-if(LINUX)
-    # todo: double check this!
-    list(APPEND AZURE_SHARED_LIB uuid)
 endif()
 
 add_subdirectory(${COMMON})

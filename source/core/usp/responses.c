@@ -54,7 +54,7 @@ UspResult ContentDispatch(void* context, const char* path, const char* mime, IOB
 {
     unsigned i;
 
-    if (!mime || (!responseContentHandle && !ioBuffer)) { return -1; }
+    if (!mime || (!responseContentHandle && !ioBuffer)) { return (UspResult)-1; }
 
     if (responseSize == USE_BUFFER_SIZE)
     {

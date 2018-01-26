@@ -8,6 +8,18 @@
 #pragma once
 #include <spxerror.h>
 
+#ifndef _MSC_VER
+// macros in this header generate a bunch of
+// "ISO C++11 requires at least one argument for the "..." in a variadic macro" errors.
+// system_header pragma is the only mechanism that helps to suppress them.
+// https://stackoverflow.com/questions/35587137/how-to-suppress-gcc-variadic-macro-argument-warning-for-zero-arguments-for-a-par
+// TODO: try to make macros standard-compliant.
+#pragma GCC system_header
+#endif
+
+
+#define UNUSED(x) (void)(x)
+
 //-------------------------------------------------------
 //  SPX_ and SPX_DBG_ macro configuration
 //-------------------------------------------------------
@@ -56,6 +68,7 @@
 #include <string>
 inline void __spx_do_trace_message(int level, const char* pszTitle, const char* pszFormat, ...) throw()
 {
+    UNUSED(level);
     try 
     {
         va_list argptr;

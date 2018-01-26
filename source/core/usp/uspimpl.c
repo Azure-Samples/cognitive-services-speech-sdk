@@ -14,6 +14,7 @@
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 
 #include "uspinternal.h"
 
@@ -239,7 +240,6 @@ static void ContentPathHandler(TransportHandle transportHandle, const char* path
         return;
     }
 
-    int ret = -1;
     BUFFER_HANDLE responseContentHandle = BUFFER_create(
         (unsigned char*)buffer,
         size + 1);
@@ -257,7 +257,7 @@ static void ContentPathHandler(TransportHandle transportHandle, const char* path
     }
 
     LogInfo("Content Message: path: %s, content type: %s, size: %zu, buffer: %s", path, mime, size, (char *)BUFFER_u_char(responseContentHandle));
-    ret = ContentDispatch(context, path, mime, 0, responseContentHandle, size);
+    ContentDispatch(context, path, mime, 0, responseContentHandle, size);
 
     BUFFER_delete(responseContentHandle);
     return;
@@ -339,7 +339,7 @@ static void TransportRecvResponseHandler(TransportHandle transportHandle, HTTP_H
         }
     }
 
-    for (int i = 0; i < sizeof(g_pathHandlers) / sizeof(g_pathHandlers[0]); i++)
+    for (unsigned int i = 0; i < sizeof(g_pathHandlers) / sizeof(g_pathHandlers[0]); i++)
     {
         if (!strcmp(path, g_pathHandlers[i].path))
         {
@@ -390,7 +390,7 @@ const char* GetCdpDeviceThumbprint()
         int result = -1;
         // generate one.
         uint8_t bThumbPrint[32];
-        for (int i = 0; i < sizeof(bThumbPrint); i++)
+        for (unsigned int i = 0; i < sizeof(bThumbPrint); i++)
         {
             bThumbPrint[i] = (unsigned char)rand();
         }

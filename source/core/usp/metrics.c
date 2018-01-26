@@ -25,6 +25,7 @@
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/queue.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 #include "uspcommon.h"
 #include "metrics.h"
 
@@ -343,8 +344,6 @@ int GetISO8601Time(char *buffer, unsigned int length)
 
     return (int)timeStringLength;
 }
-
-#pragma warning( push )
 
 void telemetry_setcallbacks(PTELEMETRY_WRITE pfnCallback, void* pContext)
 {
@@ -826,8 +825,6 @@ void inband_event_timestamp_populate(PROPERTYBAG_HANDLE *pBag, const char *event
 exit:
     Unlock(metricLock);
 }
-
-#pragma warning( pop )
 
 #pragma pack(pop)
 

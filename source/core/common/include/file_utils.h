@@ -26,4 +26,4 @@ namespace PAL {
     std::string wtocharpath(const wchar_t *wstr);
 #endif
 
-}; // PAL
+} // PAL

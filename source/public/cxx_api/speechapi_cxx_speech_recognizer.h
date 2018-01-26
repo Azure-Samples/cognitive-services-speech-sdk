@@ -43,6 +43,7 @@ public:
         m_hasyncStartContinuous(SPXHANDLE_INVALID),
         m_hasyncStopContinuous(SPXHANDLE_INVALID)
     {
+        UNUSED(language);
         throw nullptr;
     };
 
@@ -202,6 +203,7 @@ protected:
 
     static void FireEvent_SessionStarted(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
     {
+        UNUSED(hreco);
         // need C++14 for make_unique
         // auto sessionEvent = std::make_unique<SessionEventArgs>(hevent);
         std::unique_ptr<SessionEventArgs> sessionEvent{ new SessionEventArgs(hevent) };
@@ -211,6 +213,7 @@ protected:
 
     static void FireEvent_SessionStopped(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
     {
+        UNUSED(hreco);
         // need C++14 for make_unique
         // auto sessionEvent = std::make_unique<SessionEventArgs>(hevent);
         std::unique_ptr<SessionEventArgs> sessionEvent{ new SessionEventArgs(hevent) };
@@ -220,6 +223,7 @@ protected:
 
     static void FireEvent_IntermediateResult(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
     {
+        UNUSED(hreco);
         // need C++14 for make_unique
         // auto recoEvent = std::make_unique<SpeechRecognitionEventArgs>(hevent);
         std::unique_ptr<SpeechRecognitionEventArgs> recoEvent{ new SpeechRecognitionEventArgs(hevent) };
@@ -229,6 +233,7 @@ protected:
 
     static void FireEvent_FinalResult(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
     {
+        UNUSED(hreco);
         // need C++14 for make_unique
         // auto recoEvent = std::make_unique<SpeechRecognitionEventArgs>(hevent);
         std::unique_ptr<SpeechRecognitionEventArgs> recoEvent{ new SpeechRecognitionEventArgs(hevent) };
@@ -238,6 +243,7 @@ protected:
 
     static void FireEvent_NoMatch(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
     {
+        UNUSED(hreco);
         // need C++14 for make_unique
         // auto recoEvent = std::make_unique<SpeechRecognitionEventArgs>(hevent);
         std::unique_ptr<SpeechRecognitionEventArgs> recoEvent{ new SpeechRecognitionEventArgs(hevent) };
@@ -247,6 +253,7 @@ protected:
 
     static void FireEvent_Canceled(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
     {
+        UNUSED(hreco);
         // need C++14 for make_unique
         // auto recoEvent = std::make_unique<SpeechRecognitionEventArgs>(hevent);
         std::unique_ptr<SpeechRecognitionEventArgs> recoEvent{ new SpeechRecognitionEventArgs(hevent) };
@@ -271,4 +278,4 @@ private:
 };
 
 
-} } }; // CARBON_NAMESPACE_ROOT :: Recognition :: Speech
+} } } // CARBON_NAMESPACE_ROOT :: Recognition :: Speech

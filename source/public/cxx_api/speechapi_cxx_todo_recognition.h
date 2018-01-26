@@ -17,4 +17,4 @@ class PayloadItems{};
 class RecognizerParameters{};
 
 
-} }; // CARBON_NAMESPACE_ROOT :: Recognition
+} } // CARBON_NAMESPACE_ROOT :: Recognition

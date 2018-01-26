@@ -39,8 +39,8 @@ public:
         return std::make_shared<SpeechRecognizer>(hreco); 
     }
 
-    static std::shared_ptr<SpeechRecognizer> CreateSpeechRecognizer(bool passiveListeningEnaled) { throw nullptr; }
-    static std::shared_ptr<SpeechRecognizer> CreateSpeechRecognizer(const std::wstring& language) { throw nullptr; };
+    static std::shared_ptr<SpeechRecognizer> CreateSpeechRecognizer(bool passiveListeningEnaled) { UNUSED(passiveListeningEnaled); throw nullptr; }
+    static std::shared_ptr<SpeechRecognizer> CreateSpeechRecognizer(const std::wstring& language) { UNUSED(language); throw nullptr; };
 
     static std::shared_ptr<SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName)
     {
@@ -57,19 +57,19 @@ public:
         return std::make_shared<SpeechRecognizer>(hreco);
     };
 
-    static std::shared_ptr<SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { throw nullptr; };
+    static std::shared_ptr<SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { UNUSED(fileName); UNUSED(language); throw nullptr; };
 
     static std::shared_ptr<SpeechRecognizer> CreateDictationRecognizer() { return std::make_shared<SpeechRecognizer>(); }
-    static std::shared_ptr<SpeechRecognizer> CreateDictationRecognizer(bool passiveListeningEnaled) { throw nullptr; }
-    static std::shared_ptr<SpeechRecognizer> CreateDictationRecognizer(const std::wstring& language) { throw nullptr; };
-    static std::shared_ptr<SpeechRecognizer> CreateDictationRecognizerWithFileInput(const std::wstring& fileName) { throw nullptr; };
-    static std::shared_ptr<SpeechRecognizer> CreateDictationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { throw nullptr; };
+    static std::shared_ptr<SpeechRecognizer> CreateDictationRecognizer(bool passiveListeningEnaled) { UNUSED(passiveListeningEnaled); throw nullptr; }
+    static std::shared_ptr<SpeechRecognizer> CreateDictationRecognizer(const std::wstring& language) { UNUSED(language); throw nullptr; };
+    static std::shared_ptr<SpeechRecognizer> CreateDictationRecognizerWithFileInput(const std::wstring& fileName) { UNUSED(fileName); throw nullptr; };
+    static std::shared_ptr<SpeechRecognizer> CreateDictationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { UNUSED(fileName); UNUSED(language); throw nullptr; };
 
     static std::shared_ptr<IntentRecognizer> CreateIntentRecognizer() { return std::make_shared<IntentRecognizer>(); }
-    static std::shared_ptr<IntentRecognizer> CreateIntentRecognizer(bool passiveListeningEnaled) { throw nullptr; }
-    static std::shared_ptr<IntentRecognizer> CreateIntentRecognizer(const std::wstring& language) { throw nullptr; };
-    static std::shared_ptr<IntentRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName) { throw nullptr; };
-    static std::shared_ptr<IntentRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { throw nullptr; };
+    static std::shared_ptr<IntentRecognizer> CreateIntentRecognizer(bool passiveListeningEnaled) { UNUSED(passiveListeningEnaled); throw nullptr; }
+    static std::shared_ptr<IntentRecognizer> CreateIntentRecognizer(const std::wstring& language) { UNUSED(language); throw nullptr; };
+    static std::shared_ptr<IntentRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName) { UNUSED(fileName);  throw nullptr; };
+    static std::shared_ptr<IntentRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { UNUSED(fileName); UNUSED(language); throw nullptr; };
 
 
 private:
@@ -80,4 +80,4 @@ private:
 };
 
 
-} }; // CARBON_NAMESPACE_ROOT :: Recognition
+} } // CARBON_NAMESPACE_ROOT :: Recognition

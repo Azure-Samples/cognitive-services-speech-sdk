@@ -22,4 +22,4 @@ int wcsnicmp(const wchar_t *a, const wchar_t *b, size_t n);
 std::string ToString(const std::wstring& wstring);
 std::wstring ToWString(const std::string& string);
 
-}; // PAL
+} // PAL

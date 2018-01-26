@@ -33,4 +33,4 @@ AudioSampleHandler::AudioSampleHandler(const WAVEFORMATEX& format, GUID subType)
 {
 }
 
-}; // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE()

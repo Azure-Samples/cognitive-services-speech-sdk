@@ -16,6 +16,7 @@
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_c_shared_utility/queue.h"
 #include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 
 #include "uspinternal.h"
 

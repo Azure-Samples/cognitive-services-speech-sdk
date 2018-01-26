@@ -15,7 +15,7 @@
 #include "azure_c_shared_utility/threadapi.h"
 #include "usp.h"
 
-
+#define UNUSED(x) (void)(x)
 
 bool turnEnd = false;
 
@@ -31,42 +31,59 @@ char* recognitionStatusToText[] =
 
 void OnSpeechStartDetected(UspHandle handle, void* context, UspMsgSpeechStartDetected *message)
 {
+    UNUSED(handle);
+    UNUSED(context);
     printf("Response: Speech.StartDetected message. Speech starts at offset %llu.\n", message->offset);
 }
 
 void OnSpeechEndDetected(UspHandle handle, void* context, UspMsgSpeechEndDetected *message)
 {
+    UNUSED(handle);
+    UNUSED(context);
     printf("Response: Speech.EndDetected message. Speech ends at offset %llu\n", message->offset);
 }
 
 void OnSpeechHypothesis(UspHandle handle, void* context, UspMsgSpeechHypothesis *message)
 {
+    UNUSED(handle);
+    UNUSED(context);
     printf("Response: Speech.Hypothesis message. Text: %ls, starts at offset %llu, with duration %llu.\n", message->text, message->offset, message->duration);
 }
 
 void OnSpeechPhrase(UspHandle handle, void* context, UspMsgSpeechPhrase *message)
 {
+    UNUSED(handle);
+    UNUSED(context);
     printf("Response: Speech.Phrase message. Status: %s, Text: %ls, starts at %llu, with duration %llu.\n", recognitionStatusToText[message->recognitionStatus], message->displayText, message->offset, message->duration);
 }
 
 void OnSpeechFragment(UspHandle handle, void* context, UspMsgSpeechFragment *message)
 {
+    UNUSED(handle);
+    UNUSED(context);
     printf("Response: Speech.Fragment message. Text: %ls, starts at %llu, with duration %llu.\n", message->text, message->offset, message->duration);
 }
 
 void OnTurnStart(UspHandle handle, void* context, UspMsgTurnStart *message)
 {
+    UNUSED(handle);
+    UNUSED(context);
     printf("Response: Turn.Start message. Context.ServiceTag: %S\n", message->contextServiceTag);
 }
 
 void OnTurnEnd(UspHandle handle, void* context, UspMsgTurnEnd *message)
 {
+    UNUSED(handle);
+    UNUSED(context);
+    UNUSED(message);
     printf("Response: Turn.End message.\n");
     turnEnd = true;
 }
 
 void OnError(UspHandle handle, void* context, UspResult error)
 {
+    UNUSED(handle);
+    UNUSED(context);
     printf("Response: On Error: 0x%x.\n", error);
 }
 

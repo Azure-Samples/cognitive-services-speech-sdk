@@ -58,75 +58,125 @@ SPXAPI Result_GetText(SPXRESULTHANDLE hresult, wchar_t* pszText, uint32_t cchTex
 
 SPXAPI Result_Payload_GetCount(SPXRESULTHANDLE hresult, uint32_t* pcount)
 {
+    UNUSED(hresult);
+    UNUSED(pcount);
     return SPXERR_NOT_IMPL;
 }
 
-SPXAPI Result_Payload_GetKey(SPXRESULTHANDLE hresult, uint32_t i, wchar_t* pkey, uint32_t cchKey)
+SPXAPI Result_Payload_GetKey(SPXRESULTHANDLE hresult, uint32_t index, wchar_t* pkey, uint32_t cchKey)
 {
+    UNUSED(hresult);
+    UNUSED(index);
+    UNUSED(pkey);
+    UNUSED(cchKey);
     return SPXERR_NOT_IMPL;
 }
 
 SPXAPI Result_Payload_GetByIndex_String(SPXRESULTHANDLE hresult, uint32_t index, wchar_t* pvalue, uint32_t cchValue)
 {
+    UNUSED(hresult);
+    UNUSED(index);
+    UNUSED(pvalue);
+    UNUSED(cchValue);
     return SPXERR_NOT_IMPL;
 }
 
 SPXAPI Result_Payload_GetByIndex_Int32(SPXRESULTHANDLE hresult, uint32_t index, uint32_t* pvalue)
 {
+    UNUSED(hresult);
+    UNUSED(index);
+    UNUSED(pvalue);
     return SPXERR_NOT_IMPL;
 }
 
 SPXAPI_(bool) Result_Payload_TryGetByIndex_String(SPXRESULTHANDLE hresult, uint32_t index, wchar_t* pvalue, uint32_t cchValue)
 {
+    UNUSED(hresult);
+    UNUSED(index);
+    UNUSED(pvalue);
+    UNUSED(cchValue);
     return false;
 }
 
 SPXAPI_(bool) Result_Payload_TryGetByIndex_Int32(SPXRESULTHANDLE hresult, uint32_t index, uint32_t* pvalue)
 {
+    UNUSED(hresult);
+    UNUSED(index);
+    UNUSED(pvalue);
     return false;
 }
 
 SPXAPI Result_Payload_ContainsKey(SPXRESULTHANDLE hresult, const wchar_t* name)
 {
+    UNUSED(hresult);
+    UNUSED(name);
     return SPXERR_NOT_IMPL;
 }
 
 SPXAPI Result_Payload_GetByName_String(SPXRESULTHANDLE hresult, const wchar_t* name, wchar_t* pvalue, uint32_t cchValue)
 {
+    UNUSED(hresult);
+    UNUSED(name);
+    UNUSED(pvalue);
+    UNUSED(cchValue);
     return SPXERR_NOT_IMPL;
 }
 
 SPXAPI Result_Payload_GetByName_Int32(SPXRESULTHANDLE hresult, const wchar_t* name, uint32_t* pvalue)
 {
+    UNUSED(hresult);
+    UNUSED(name);
+    UNUSED(pvalue);
     return SPXERR_NOT_IMPL;
 }
 
 SPXAPI_(bool) Result_Payload_TryGetByName_String(SPXRESULTHANDLE hresult, const wchar_t* name, wchar_t* pvalue, uint32_t cchValue)
 {
+    UNUSED(hresult);
+    UNUSED(name);
+    UNUSED(pvalue);
+    UNUSED(cchValue);
     return false;
 }
 
 SPXAPI_(bool) Result_Payload_TryGetByName_Int32(SPXRESULTHANDLE hresult, const wchar_t* name, uint32_t* pvalue)
 {
+    UNUSED(hresult);
+    UNUSED(name);
+    UNUSED(pvalue);
     return false;
 }
 
 SPXAPI Result_Payload_GetByEnum_String(SPXRESULTHANDLE hresult, Payload_Item item, wchar_t* pvalue, uint32_t cchValue)
 {
+    UNUSED(hresult);
+    UNUSED(item);
+    UNUSED(pvalue);
+    UNUSED(cchValue);
     return SPXERR_NOT_IMPL;
 }
 
 SPXAPI Result_Payload_GetByEnum_Int32(SPXRESULTHANDLE hresult, Payload_Item item, uint32_t* pvalue)
 {
+    UNUSED(hresult);
+    UNUSED(item);
+    UNUSED(pvalue);
     return SPXERR_NOT_IMPL;
 }
 
 SPXAPI_(bool) Result_Payload_TryGetByEnum_String(SPXRESULTHANDLE hresult, Payload_Item item, wchar_t* pvalue, uint32_t cchValue)
 {
+    UNUSED(hresult);
+    UNUSED(item);
+    UNUSED(pvalue);
+    UNUSED(cchValue);
     return false;
 }
 
 SPXAPI_(bool) Result_Payload_TryGetByEnum_Int32(SPXRESULTHANDLE hresult, Payload_Item item, uint32_t* pvalue)
 {
+    UNUSED(hresult);
+    UNUSED(item);
+    UNUSED(pvalue);
     return false;
 }

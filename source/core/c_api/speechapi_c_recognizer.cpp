@@ -81,21 +81,34 @@ SPXAPI Recognizer_IsEnabled(SPXRECOHANDLE hreco, bool* pfEnabled)
 
 SPXAPI Recognizer_SetParameter_String(SPXRECOHANDLE hreco, const wchar_t* name, const wchar_t* value)
 {
+    UNUSED(hreco);
+    UNUSED(name);
+    UNUSED(value);
     return SPXERR_NOT_IMPL;
 }
 
 SPXAPI Recognizer_GetParameter_String(SPXRECOHANDLE hreco, const wchar_t* name, wchar_t* value, uint32_t cchValue)
 {
+    UNUSED(hreco);
+    UNUSED(name);
+    UNUSED(value);
+    UNUSED(cchValue);
     return SPXERR_NOT_IMPL;
 }
 
 SPXAPI Recognizer_SetParameter_Int32(SPXRECOHANDLE hreco, const wchar_t* name, int32_t value)
 {
+    UNUSED(hreco);
+    UNUSED(name);
+    UNUSED(value);
     return SPXERR_NOT_IMPL;
 }
 
 SPXAPI Recognizer_GetParameter_Int32(SPXRECOHANDLE hreco, const wchar_t* name, int32_t* pvalue)
 {
+    UNUSED(hreco);
+    UNUSED(name);
+    UNUSED(pvalue);
     return SPXERR_NOT_IMPL;
 }
 
@@ -290,12 +303,18 @@ SPXAPI Recognizer_SessionStopped_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_
 
 SPXAPI Recognizer_SoundStarted_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext)
 {
+    UNUSED(hreco);
+    UNUSED(pCallback);
+    UNUSED(pvContext);
     // TODO: RobCh: Next: Implement
     return SPXERR_NOT_IMPL;
 }
 
 SPXAPI Recognizer_SoundStopped_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext)
 {
+    UNUSED(hreco);
+    UNUSED(pCallback);
+    UNUSED(pvContext);
     // TODO: RobCh: Next: Implement
     return SPXERR_NOT_IMPL;
 }

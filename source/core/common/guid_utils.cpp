@@ -7,7 +7,7 @@
 
 #include "stdafx.h"
 #include "guid_utils.h"
-#include "azure_c_shared_utility/uniqueid.h"
+#include "azure_c_shared_utility_uniqueid_wrapper.h"
 
 #define UUID_LENGTH 36
 
@@ -31,4 +31,4 @@ namespace PAL {
 
         return uuidWStr;
     }
-}; // PAL
+} // PAL

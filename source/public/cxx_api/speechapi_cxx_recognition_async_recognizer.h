@@ -58,8 +58,8 @@ protected:
 
     AsyncRecognizer() {};
 
-    virtual void RecoEventConnectionsChanged(const EventSignal<const RecoEventArgs&>& recoEvent) {};
-    virtual void SessionEventConnectionsChanged(const EventSignal<const SessionEventArgs&>& sessionEvent) {};
+    virtual void RecoEventConnectionsChanged(const EventSignal<const RecoEventArgs&>& recoEvent) { UNUSED(recoEvent); };
+    virtual void SessionEventConnectionsChanged(const EventSignal<const SessionEventArgs&>& sessionEvent) { UNUSED(sessionEvent); };
 
 private:
 
@@ -80,4 +80,4 @@ private:
 };
 
 
-} }; // CARBON_NAMESPACE_ROOT :: Recognition
+} } // CARBON_NAMESPACE_ROOT :: Recognition

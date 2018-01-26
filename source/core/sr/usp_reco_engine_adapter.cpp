@@ -20,8 +20,8 @@ namespace CARBON_IMPL_NAMESPACE() {
 CSpxUspRecoEngineAdapter::CSpxUspRecoEngineAdapter() :
     m_handle(INVALID_USP_HANDLE),
     m_servicePreferedBufferSize(0),
-    m_ptrIntoBuffer(nullptr),
     m_bytesInBuffer(0),
+    m_ptrIntoBuffer(nullptr),
     m_bytesLeftInBuffer(0)
 {
     InitCallbacks(&m_callbacks);
@@ -82,6 +82,7 @@ void CSpxUspRecoEngineAdapter::UspInitialize(UspHandle* handle, UspCallbacks *ca
 
 void CSpxUspRecoEngineAdapter::UspWriteFormat(UspHandle handle, WAVEFORMATEX* pformat)
 {
+    UNUSED(handle);
     static const uint16_t cbTag = 4;
     static const uint16_t cbChunkType = 4;
     static const uint16_t cbChunkSize = 4;
@@ -118,7 +119,7 @@ void CSpxUspRecoEngineAdapter::UspWriteFormat(UspHandle handle, WAVEFORMATEX* pf
     ptr = FormatBufferWriteNumber(ptr, cbDataChunk);
 
     // Now that we've prepared the header/buffer, send it along to Truman/Newman/Skyman via UspWrite
-    SPX_DBG_ASSERT(cbHeader == (ptr - buffer.get()));
+    SPX_DBG_ASSERT(cbHeader == size_t(ptr - buffer.get()));
     UspWrite_Actual(m_handle, buffer.get(), cbHeader);
 }
 
@@ -152,9 +153,9 @@ void CSpxUspRecoEngineAdapter::UspWrite_Buffered(UspHandle handle, const uint8_t
     if (m_buffer.get() == nullptr)
     {
         auto ptr = new uint8_t[m_servicePreferedBufferSize];
-        std::unique_ptr<uint8_t> buffer(ptr);
+        std::unique_ptr<uint8_t> tmp(ptr);
 
-        m_buffer = std::move(buffer);
+        m_buffer = std::move(tmp);
         m_bytesInBuffer = m_servicePreferedBufferSize;
 
         m_ptrIntoBuffer = m_buffer.get();
@@ -213,89 +214,90 @@ void CSpxUspRecoEngineAdapter::InitCallbacks(UspCallbacks* pcallbacks)
 
     pcallbacks->onSpeechStartDetected = [](UspHandle handle, void* context, UspMsgSpeechStartDetected *message) {
         SPX_DBG_TRACE_VERBOSE("Response: Speech.StartDetected message. Speech starts at offset %llu (100ns).\n", message->offset);
-        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechStartDetected(handle, context, message);
+        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechStartDetected(message);
     };
 
     pcallbacks->onSpeechEndDetected = [](UspHandle handle, void* context, UspMsgSpeechEndDetected *message) {
         SPX_DBG_TRACE_VERBOSE("Response: Speech.EndDetected message. Speech ends at offset %llu (100ns)\n", message->offset);
-        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechEndDetected(handle, context, message);
+        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechEndDetected(message);
     };
 
     pcallbacks->onSpeechHypothesis = [](UspHandle handle, void* context, UspMsgSpeechHypothesis *message) {
         SPX_DBG_TRACE_VERBOSE("Response: Speech.Hypothesis message. Starts at offset %llu, with duration %llu (100ns). Text: %ls\n", message->offset, message->duration, message->text);
-        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechHypothesis(handle, context, message);
+        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechHypothesis(message);
     };
 
     pcallbacks->onSpeechFragment = [](UspHandle handle, void* context, UspMsgSpeechFragment *message) {
         SPX_DBG_TRACE_VERBOSE("Response: Speech.Fragment message. Starts at offset %llu, with duration %llu (100ns). Text: %ls\n", message->offset, message->duration, message->text);
-        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechFragment(handle, context, message);
+        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechFragment(message);
     };
 
     pcallbacks->onSpeechPhrase = [](UspHandle handle, void* context, UspMsgSpeechPhrase *message) {
         SPX_DBG_TRACE_VERBOSE("Response: Speech.Phrase message. Status: %d, Text: %ls, starts at %llu, with duration %llu (100ns).\n", message->recognitionStatus, message->displayText, message->offset, message->duration);
-        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechPhrase(handle, context, message);
+        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechPhrase(message);
     };
 
     pcallbacks->onTurnStart = [](UspHandle handle, void* context, UspMsgTurnStart *message) {
         SPX_DBG_TRACE_VERBOSE("Response: Turn.Start message. Context.ServiceTag: %ls\n", message->contextServiceTag);
-        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnTurnStart(handle, context, message);
+        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnTurnStart(message);
     };
 
     pcallbacks->onTurnEnd = [](UspHandle handle, void* context, UspMsgTurnEnd *message) {
         SPX_DBG_TRACE_VERBOSE("Response: Turn.End message.\n");
-        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnTurnEnd(handle, context, message);
+        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnTurnEnd(message);
     };
 
     pcallbacks->OnError = [](UspHandle handle, void* context, UspResult error) {
         SPX_DBG_TRACE_VERBOSE("Response: On Error: 0x%x.\n", error);
-        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnError(handle, context, error);
+        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnError(error);
     };
 }
 
-void CSpxUspRecoEngineAdapter::UspOnSpeechStartDetected(UspHandle handle, void* context, UspMsgSpeechStartDetected *message)
+void CSpxUspRecoEngineAdapter::UspOnSpeechStartDetected(UspMsgSpeechStartDetected *message)
 {
     SPX_DBG_ASSERT(GetSite());
     GetSite()->SpeechStartDetected(this, message->offset);
 }
 
-void CSpxUspRecoEngineAdapter::UspOnSpeechEndDetected(UspHandle handle, void* context, UspMsgSpeechEndDetected *message)
+void CSpxUspRecoEngineAdapter::UspOnSpeechEndDetected(UspMsgSpeechEndDetected *message)
 {
     SPX_DBG_ASSERT(GetSite());
     GetSite()->SpeechEndDetected(this, message->offset);
 }
 
-void CSpxUspRecoEngineAdapter::UspOnSpeechHypothesis(UspHandle handle, void* context, UspMsgSpeechHypothesis *message)
+void CSpxUspRecoEngineAdapter::UspOnSpeechHypothesis(UspMsgSpeechHypothesis *message)
 {
     SPX_DBG_ASSERT(GetSite());
     GetSite()->IntermediateResult(this, message->offset, ResultPayloadFrom(message));
 }
 
-void CSpxUspRecoEngineAdapter::UspOnSpeechFragment(UspHandle handle, void* context, UspMsgSpeechFragment *message)
+void CSpxUspRecoEngineAdapter::UspOnSpeechFragment(UspMsgSpeechFragment *message)
 {
     SPX_DBG_ASSERT(GetSite());
     // Todo: Rob: do we want to treate speech.fragment message different than speech.hypothesis message at this level?
     GetSite()->IntermediateResult(this, message->offset, ResultPayloadFrom(message));
 }
 
-void CSpxUspRecoEngineAdapter::UspOnSpeechPhrase(UspHandle handle, void* context, UspMsgSpeechPhrase *message)
+void CSpxUspRecoEngineAdapter::UspOnSpeechPhrase(UspMsgSpeechPhrase *message)
 {
     SPX_DBG_ASSERT(GetSite());
     GetSite()->FinalResult(this, message->offset, ResultPayloadFrom(message));
 }
 
-void CSpxUspRecoEngineAdapter::UspOnTurnStart(UspHandle handle, void* context, UspMsgTurnStart *message)
+void CSpxUspRecoEngineAdapter::UspOnTurnStart(UspMsgTurnStart *message)
 {
     SPX_DBG_ASSERT(GetSite());
     GetSite()->AdditionalMessage(this, 0, AdditionalMessagePayloadFrom(message));
 }
 
-void CSpxUspRecoEngineAdapter::UspOnTurnEnd(UspHandle handle, void* context, UspMsgTurnEnd *message)
+void CSpxUspRecoEngineAdapter::UspOnTurnEnd(UspMsgTurnEnd *message)
 {
+    UNUSED(message);
     SPX_DBG_ASSERT(GetSite());
     GetSite()->DoneProcessingAudio(this);
 }
 
-void CSpxUspRecoEngineAdapter::UspOnError(UspHandle handle, void* context, UspResult error)
+void CSpxUspRecoEngineAdapter::UspOnError(UspResult error)
 {
     SPX_DBG_ASSERT(GetSite());
     GetSite()->Error(this, ErrorPayloadFrom(error));
@@ -336,4 +338,4 @@ uint8_t* CSpxUspRecoEngineAdapter::FormatBufferWriteChars(uint8_t* buffer, const
 }
 
 
-}; // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE()

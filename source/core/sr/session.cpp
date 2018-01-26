@@ -207,4 +207,4 @@ void CSpxSession::EnsureFireResultEvent()
 }
 
 
-}; // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE()

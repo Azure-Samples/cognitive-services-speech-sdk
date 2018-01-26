@@ -25,6 +25,7 @@ public:
     template <class T>
     static std::shared_ptr<BaseAsyncRecognizer> From(const std::shared_ptr<T> &recognizer) 
     {
+        UNUSED(recognizer);
         SPX_STATIC_ASSERT_IS_BASE_OF(Recognizer, T);
         return nullptr;
     }
@@ -32,4 +33,4 @@ public:
 };
 
 
-} }; // CARBON_NAMESPACE_ROOT :: Recognition
+} } // CARBON_NAMESPACE_ROOT :: Recognition

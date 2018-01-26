@@ -65,7 +65,7 @@ bool CSpxWavFileReader::IsOpen() const
     return m_file.get() != nullptr;
 }
 
-uint32_t CSpxWavFileReader::GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat)
+uint16_t CSpxWavFileReader::GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat)
 {
     SPX_IFTRUE_THROW_HR(!IsOpen(), SPXERR_UNINITIALIZED);
     
@@ -240,4 +240,4 @@ uint32_t CSpxWavFileReader::ReadFromDataChunk(uint8_t** ppbuffer, uint32_t* pcbB
 }
 
 
-}; // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE()

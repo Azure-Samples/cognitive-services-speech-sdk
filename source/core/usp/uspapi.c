@@ -20,8 +20,9 @@ const char g_defaultLangValue[] = "en-us";
 const char g_outputDetailedStr[] = "detailed";
 const char g_outputSimpleStr[] = "simple";
 
-static int UspEventLoop(UspHandle uspHandle)
+static int UspEventLoop(void* ptr)
 {
+    UspHandle uspHandle = (UspHandle)ptr;
     while (1)
     {
         // Todo: deal with concurrency? 

@@ -16,10 +16,10 @@ class AudioTestSink final : public ISpxAudioProcessor
 public:
     AudioTestSink(bool running = true)
         : m_running{ running }, 
+        m_format{ 0, 0, 0, 0, 0, 0, 0 },
         m_setFormatCallCounter{ 0 },
-        m_processAudioCallCounter{ 0 },
         m_setFormatWithNullptrCallCounter{ 0 },
-        m_format {0, 0, 0, 0, 0, 0, 0 }
+        m_processAudioCallCounter{ 0 }
     {}
 
     virtual void SetFormat(WAVEFORMATEX* format) override 
@@ -80,14 +80,14 @@ public:
         return m_processAudioCallCounter;
     }
 
-    const WAVEFORMATEX GetFormat() const
+    const WAVEFORMATEX& GetFormat() const
     {
         unique_lock<mutex> lock(m_mutex);
         REQUIRE(!m_running);
         return m_format;
     }
 
-    const size_t GetTotalAudioBytes() const 
+    size_t GetTotalAudioBytes() const 
     {
         unique_lock<mutex> lock(m_mutex);
         REQUIRE(!m_running);
@@ -310,7 +310,7 @@ TEST_CASE("Mic is properly functioning", "[audio][mic]")
 
     SECTION("different mic instances can be used from multiple threads (different sinks)") 
     {
-        int numThreads = 3;
+        unsigned int numThreads = 3;
         CyclicBarrier barrier(numThreads + 1);
         mutex m;
         vector<shared_ptr<AudioTestSink>> sinks;
@@ -335,7 +335,7 @@ TEST_CASE("Mic is properly functioning", "[audio][mic]")
         for (int j = 0; j < 3; ++j) {
             vector<thread> v;
 
-            for (int i = numThreads; i >0; --i) 
+            for (unsigned int i = numThreads; i >0; --i) 
             {
                 v.emplace_back(run);
             }
@@ -430,7 +430,7 @@ TEST_CASE("Mic is properly functioning", "[audio][mic]")
     SECTION("check a few corner cases")
     {
         REQUIRE(mic->GetFormat(nullptr, 0) != 0);
-        REQUIRE(mic->GetFormat(nullptr, uint32_t(-1)) != 0);
+        REQUIRE(mic->GetFormat(nullptr, uint16_t(-1)) != 0);
         vector<char> x(sizeof(WAVEFORMATEX)/sizeof(char));
         REQUIRE(mic->GetFormat(reinterpret_cast<WAVEFORMATEX*>(x.data()), 1) != 0);
         CHECK_THROWS(mic->StartPump(nullptr)); 

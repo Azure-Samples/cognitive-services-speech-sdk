@@ -163,7 +163,7 @@ class ISpxAudioReader : public ISpxInterfaceBaseFor<ISpxAudioReader>
 {
 public:
 
-    virtual uint32_t GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
+    virtual uint16_t GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
     virtual uint32_t Read(uint8_t* pbuffer, uint32_t cbBuffer) = 0;
     virtual void Close() = 0;
 };
@@ -204,8 +204,8 @@ class ISpxAudioPump : public ISpxInterfaceBaseFor<ISpxAudioPump>
 {
 public:
 
-    virtual uint32_t GetFormat(WAVEFORMATEX* pformat, uint32_t cbFormat) = 0;
-    virtual void SetFormat(const WAVEFORMATEX* pformat, uint32_t cbFormat) = 0;
+    virtual uint16_t GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
+    virtual void SetFormat(const WAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
 
     virtual void StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor) = 0;
     virtual void PausePump() = 0;
@@ -352,4 +352,4 @@ public:
 };
 
 
-}; // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE()

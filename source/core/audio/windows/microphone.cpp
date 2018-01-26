@@ -57,9 +57,11 @@ public:
     MicrophonePump();
     ~MicrophonePump();
 
-    virtual uint32_t GetFormat(WAVEFORMATEX* format, uint32_t size) override;
+    virtual uint16_t GetFormat(WAVEFORMATEX* format, uint16_t size) override;
 
-    virtual void SetFormat(const WAVEFORMATEX* format, uint32_t size) override {
+    virtual void SetFormat(const WAVEFORMATEX* format, uint16_t size) override {
+        UNUSED(format);
+        UNUSED(size);
         // TODO: create a new sample handler with the given format.
         SPX_THROW_HR(SPXERR_NOT_IMPL);
     }
@@ -108,10 +110,10 @@ MicrophonePump::~MicrophonePump()
     }
 }
 
-uint32_t MicrophonePump::GetFormat(WAVEFORMATEX* format, uint32_t size) 
+uint16_t MicrophonePump::GetFormat(WAVEFORMATEX* format, uint16_t size) 
 {
     const auto& micFormat = m_sampleHandler->GetFormat();
-    uint32_t totalSize = sizeof(WAVEFORMATEX) + micFormat.cbSize;
+    uint16_t totalSize = sizeof(WAVEFORMATEX) + micFormat.cbSize;
     if (format != nullptr) {
         memcpy(format, &micFormat, min(totalSize, size));
     }
@@ -214,6 +216,6 @@ void MicrophonePump::StopPump()
     m_sampleHandler->Stop();
 }
 
-}; // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE()
 
 

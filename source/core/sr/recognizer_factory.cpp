@@ -22,11 +22,13 @@ std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateSpeechRecognizer()
 
 std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateSpeechRecognizer(bool passiveListeningEnaled)
 {
+    UNUSED(passiveListeningEnaled);
     throw nullptr;
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateSpeechRecognizer(const std::wstring& language)
 {
+    UNUSED(language);
     throw nullptr;
 }
 
@@ -46,6 +48,8 @@ std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateSpeechRecognizerWit
 
 std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language)
 {
+    UNUSED(fileName);
+    UNUSED(language);
     throw nullptr;
 }
 
@@ -56,21 +60,26 @@ std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateDictationRecognizer
 
 std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateDictationRecognizer(bool passiveListeningEnaled)
 {
+    UNUSED(passiveListeningEnaled);
     throw nullptr;
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateDictationRecognizer(const std::wstring& language)
 {
+    UNUSED(language);
     throw nullptr;
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateDictationRecognizerWithFileInput(const std::wstring& fileName)
 {
+    UNUSED(fileName);
     throw nullptr;
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateDictationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language)
 {
+    UNUSED(fileName);
+    UNUSED(language);
     throw nullptr;
 }
 
@@ -81,24 +90,29 @@ std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateIntentRecognizer()
 
 std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateIntentRecognizer(bool passiveListeningEnaled)
 {
+    UNUSED(passiveListeningEnaled);
     throw nullptr;
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateIntentRecognizer(const std::wstring& language)
 {
+    UNUSED(language);
     throw nullptr;
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateIntentRecognizerWithFileInput(const std::wstring& fileName)
 {
+    UNUSED(fileName);
     throw nullptr;
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language)
 {
+    UNUSED(fileName);
+    UNUSED(language);
     throw nullptr;
 }
 
 
-}; // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE()
 

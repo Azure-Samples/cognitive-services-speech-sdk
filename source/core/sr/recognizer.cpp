@@ -91,6 +91,7 @@ void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_
 
         auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
         auto hevent = eventhandles->TrackHandle(recoEvent);
+        UNUSED(hevent);
 
         FinalResult.Signal(recoEvent);
     }
@@ -100,6 +101,7 @@ void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_
 
         auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
         auto hevent = eventhandles->TrackHandle(recoEvent);
+        UNUSED(hevent);
 
         IntermediateResult.Signal(recoEvent);
     }
@@ -109,6 +111,7 @@ void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_
 
         auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
         auto hevent = eventhandles->TrackHandle(recoEvent);
+        UNUSED(hevent);
 
         NoMatch.Signal(recoEvent);
     }
@@ -118,6 +121,7 @@ void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_
 
         auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
         auto hevent = eventhandles->TrackHandle(recoEvent);
+        UNUSED(hevent);
 
         Canceled.Signal(recoEvent);
     }
@@ -135,6 +139,7 @@ void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_
             reason != Reason::Canceled && 
             reason != Reason::OtherRecognizer,
             "The reason found in the result was unexpected.");
+        UNUSED(reason);
     }
 }
 
@@ -144,4 +149,4 @@ void CSpxRecognizer::OnIsEnabledChanged()
 }
 
 
-}; // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE()

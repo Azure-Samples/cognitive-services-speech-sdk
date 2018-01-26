@@ -175,7 +175,7 @@ bool CarbonTestConsole::ValidateConsoleArgs(ConsoleArgs* pconsoleArgs)
     if (pconsoleArgs->m_fContinuousRecognition && pconsoleArgs->m_strContinuousRecognitionSeconds.length() > 0)
     {
         auto seconds = std::stoi(pconsoleArgs->m_strContinuousRecognitionSeconds.c_str());
-        pconsoleArgs->m_continuousRecognitionSeconds = std::min(std::max(seconds, 0), 30);
+        pconsoleArgs->m_continuousRecognitionSeconds = uint16_t(std::min(std::max(seconds, 0), 30));
     }
 
     if (pconsoleArgs->m_fRecognizeAsync || pconsoleArgs->m_fContinuousRecognition)
@@ -290,7 +290,7 @@ bool CarbonTestConsole::GetConsoleInput(std::wstring& str)
 {
     DisplayConsolePrompt();
 
-    bool readLine = ConsoleReadLine(str);
+    ConsoleReadLine(str);
     auto lastLF = str.find_last_of(L'\n');
 
     if (lastLF != std::wstring::npos)
@@ -683,7 +683,7 @@ void CarbonTestConsole::ConsoleInput_IntentRecognizer(const wchar_t* psz, std::s
     }
 }
 
-void CarbonTestConsole::ConsoleInput_CommandSystem(const wchar_t* psz)
+void CarbonTestConsole::ConsoleInput_CommandSystem(const wchar_t*)
 {
     // TODO: ROBCH: Implement CarbonTestConsole::ConsoleInput_CommandSystem
 }

@@ -7,6 +7,19 @@ include_directories(${INC_DIR})
 include_directories (${AZURE_SHARED_UTIL_INCLUDE})
 include_directories ("${CARBON_EXTERNAL}/parson")
 
+
+add_library(parson STATIC "${CARBON_ROOT}/external/parson/parson.c")
+
+if(MSVC)
+  set_target_properties (parson PROPERTIES
+      COMPILE_FLAGS "/wd4232"
+  )
+endif()
+
+set_target_properties (parson PROPERTIES
+    FOLDER external_libs
+)
+
 set(HEADERS
     "${INC_DIR}/usp.h"
     "${INC_DIR}/usperror.h"
@@ -26,7 +39,6 @@ set(HEADERS_PRIVATE
     )
 
 set(SOURCES
-    "${CARBON_ROOT}/external/parson/parson.c"
     "${SRC_DIR}/dnscache.c"
     "${SRC_DIR}/iobuffer.c"
     "${SRC_DIR}/metrics.c"
@@ -43,7 +55,13 @@ source_group("Source Files" FILES ${SOURCES})
 
 add_library(usp STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
-set(USP_LIBS ${AZURE_SHARED_LIB})
+set(USP_LIBS ${AZURE_SHARED_LIB} parson)
+
+if(UNIX)
+  set_target_properties (usp PROPERTIES
+      COMPILE_FLAGS "-Wall -Werror -Wextra -Wno-long-long" # TODO:  -Wpedantic
+  )
+endif()
 
 set_target_properties (usp PROPERTIES
     FOLDER carbon_libs

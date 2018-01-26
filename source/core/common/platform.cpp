@@ -40,4 +40,4 @@ std::string demangle(const char* name) {
 
 #endif
 
-}; // PAL
+} // PAL

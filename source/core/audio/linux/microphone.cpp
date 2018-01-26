@@ -3,7 +3,7 @@
 #include "microphone.h"
 #include "ispxinterfaces.h"
 
-#include "azure_c_shared_utility/audio_sys.h"
+#include "azure_c_shared_utility_audio_sys_wrapper.h"
 
 
 //#define FRAME_COUNT (snd_pcm_uframes_t) 232
@@ -27,9 +27,11 @@ public:
     MicrophonePump();
     ~MicrophonePump();
 
-    virtual uint32_t GetFormat(WAVEFORMATEX* format, uint32_t size) override;
+    virtual uint16_t GetFormat(WAVEFORMATEX* format, uint16_t size) override;
 
-    virtual void SetFormat(const WAVEFORMATEX* format, uint32_t size) override {
+    virtual void SetFormat(const WAVEFORMATEX* format, uint16_t size) override {
+        UNUSED(format);
+        UNUSED(size);
         // TODO: 
         SPX_THROW_HR(SPXERR_NOT_IMPL);
     }
@@ -74,7 +76,7 @@ shared_ptr<ISpxAudioPump> Microphone::Create()
 
 MicrophonePump::MicrophonePump(): 
     m_state {State::NoInput},
-    m_format { WAVE_FORMAT_PCM, CHANNELS, SAMPLES_PER_SECOND, AVG_BYTES_PER_SECOND, BLOCK_ALIGN, BITS_PER_SAMPLE }
+    m_format { WAVE_FORMAT_PCM, CHANNELS, SAMPLES_PER_SECOND, AVG_BYTES_PER_SECOND, BLOCK_ALIGN, BITS_PER_SAMPLE, 0 }
 {
     m_audioHandle = audio_create();
     SPX_THROW_HR_IF(SPXERR_MIC_NOT_AVAILABLE, m_audioHandle == NULL);
@@ -99,9 +101,9 @@ MicrophonePump::~MicrophonePump()
     audio_destroy(m_audioHandle);
 }
 
-uint32_t MicrophonePump::GetFormat(WAVEFORMATEX* format, uint32_t size) 
+uint16_t MicrophonePump::GetFormat(WAVEFORMATEX* format, uint16_t size) 
 {
-    uint32_t totalSize = sizeof(WAVEFORMATEX) + m_format.cbSize;
+    auto totalSize = uint16_t(sizeof(WAVEFORMATEX) + m_format.cbSize);
     if (format != nullptr) {
         memcpy(format, &m_format, min(totalSize, size));
     }
@@ -211,6 +213,4 @@ void MicrophonePump::UpdateState(AUDIO_STATE state)
     }
 }
 
-}; // CARBON_IMPL_NAMESPACE()
-
-
+} // CARBON_IMPL_NAMESPACE()

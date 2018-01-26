@@ -18,6 +18,7 @@ decltype(std::chrono::high_resolution_clock::now()) __g_spx_trace_message_time0 
 
 void SpxTraceMessage(int level, const char* pszTitle, const char* pszFormat, ...)
 {
+    UNUSED(level);
     try
     {
         va_list argptr;
