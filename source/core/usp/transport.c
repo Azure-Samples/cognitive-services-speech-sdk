@@ -966,7 +966,7 @@ static void AddMUID(TransportRequest* request)
     }
 }
 
-static int transport_open(TransportRequest* request)
+static int TransportOpen(TransportRequest* request)
 {
     if (!request->isOpen)
     {
@@ -990,8 +990,6 @@ static int transport_open(TransportRequest* request)
             else
             {
                 TransportCreateConnectionId(request);
-                //Hack: hardcode subscription key. TODO: use access token. 
-                TransportRequestAddRequestHeader(request, "Ocp-Apim-Subscription-Key", "92069ee289b84e5594a9564ab77ed2ba");
                 TransportRequestAddRequestHeader(request, "X-ConnectionId", request->connectionId);
                 AddMUID(request);
                 metrics_transport_start(request->connectionId);
@@ -1352,7 +1350,7 @@ int TransportDoWork(TransportHandle transportHandle)
         return 1;
 
     case TRANSPORT_STATE_OPENING:
-        if (transport_open(request))
+        if (TransportOpen(request))
         {
             return 0;
         }

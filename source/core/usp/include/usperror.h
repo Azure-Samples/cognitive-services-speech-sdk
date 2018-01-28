@@ -19,24 +19,14 @@ extern "C" {
 // Initialization errors.
 
 /**
- * USP_NOT_OPENED indicates that the USP handle is not initialized yet. 
+* USP_INITIALIZATION_FAILURE An error during USP initialization.
 */
-#define USP_NOT_OPENED USP_ERRCODE(0x001)
+#define USP_INITIALIZATION_FAILURE USP_ERRCODE(0x001)
 
 /**
-* USP_OPEN_FAILURE indicates an error during USP initialization.
+* USP_WRONG_STATE indicates the current operation cannot be performed in the current USP state.
 */
-#define USP_OPEN_FAILURE USP_ERRCODE(0x002)
-
-/**
-* USP_CONNECT_FAILURE indicates an error during setting up connection to service.
-*/
-#define USP_CONNECT_FAILURE USP_ERRCODE(0x003)
-
-/**
-* USP_OPERATION_IN_WRONG_STATE indicates the current operation cannot be performed in the current USP state. 
-*/
-#define USP_OPERATION_IN_WRONG_STATE USP_ERRCODE(0x004)
+#define USP_WRONG_STATE USP_ERRCODE(0x002)
 
 // Parameter errors.
 
@@ -61,6 +51,11 @@ extern "C" {
 #define USP_BUFFER_TOO_SMALL USP_ERRCODE(0x013)
 
 // Authentication errors
+
+/**
+* USP_AUTH_TYPE_NOT_SUPPORTED The authentication type is not supported.
+*/
+#define USP_AUTH_TYPE_NOT_SUPPORTED USP_ERRCODE(0x020)
 
 /**
 * USP_AUTH_ERROR indicates an authentication error.

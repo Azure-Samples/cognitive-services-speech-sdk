@@ -127,31 +127,50 @@ typedef enum {
     USP_OUTPUT_DETAILED
 } UspOutputFormat;
 
-/**
-* The UspOption defines supported options for a connection to services.
-*/
 typedef enum {
-    USP_OPTION_LANGUAGE,
-    USP_OPTION_OUTPUT_FORMAT,
-} UspOption;
+    USP_AUTHENTICATION_SUBSCRIPTION_KEY = 1, // to avoid 0 as the default value
+    USP_AUTHENTICATION_AUTHORIZATION_TOKEN
+} UspAuthenticationType;
+
 
 /**
-* Opens a UspHandle for the specified speech service endpoint.
+* Creates a UspHandle for the specified speech service endpoint.
 * @param type  The speech service to be used, e.g. USP_ENDPOINT_BING_SPEECH, USP_ENDPOINT_CRIS.
 * @param mode  The recognition mode to be used, e.g. USP_RECO_MODE_INTERACTIVE, USP_RECO_MODE_CONVERSATION, and USP_RECO_MODE_DICTATION.
 * @param callbacks The struct defines callback functions that will be called when various USP events occur.
 * @param callbackContext A pointer to the caller provided data, which will be passed as parameter when the callback function is invoked.
 * @param uspHandle The pointer to UspHandle. If the function returns USP_SUCCESS, the value pointered by uspHandle is the initialzed UspHandle that is ready for use.
 */
-UspResult UspOpen(UspEndpointType type, UspRecognitionMode mode, UspCallbacks *callbacks, void* callbackContext, UspHandle* uspHandle);
+UspResult UspInit(UspEndpointType type, UspRecognitionMode mode, UspCallbacks *callbacks, void* callbackContext, UspHandle* uspHandle);
 
 /**
-* Sets option of the specified uspHandle. Options must be set before calling UspConnect.
+* Sets authentication data for the specified uspHandle.
 * @param uspHandle The UspHandle.
-* @param optionKey The option to be set.
-* @param optionValue The value of the option to be set.
+* @param authType The type of authentication to be used.
+* @param authData The authnetication data for the specified authentication type.
 */
-UspResult UspSetOption(UspHandle uspHandle, UspOption optionKey, const char* optionValue);
+UspResult UspSetAuthentication(UspHandle uspHandle, UspAuthenticationType authType, const char* authData);
+
+/**
+* Sets language that the audio is targeted for. It must be set before establising connection to service.
+* @param uspHandle The UspHandle.
+* @param language The language to be set. It uses the IETF language tag BCP 47, and must be one of the languages that are supported.
+*/
+UspResult UspSetLanguage(UspHandle uspHandle, const char* language);
+
+/**
+* Sets the output format. It must be set before establising connection to service.
+* @param uspHandle The UspHandle.
+* @param format The output format, can be either USP_OUTPUT_DETAILED or USP_OUTPUT_SIMPLE.
+*/
+UspResult UspSetOutputFormat(UspHandle uspHandle, UspOutputFormat format);
+
+/**
+* Sets the model id if a customized speech model is used. It must be set before establising connection to service.
+* @param uspHandle The UspHandle.
+* @param modelId The model id for the customized speech model.
+*/
+UspResult UspSetModelId(UspHandle uspHandle, const char* modelId);
 
 /**
 * Establish connection to the service.

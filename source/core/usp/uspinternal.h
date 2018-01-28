@@ -52,9 +52,36 @@ extern "C" {
 /**
  * USP_FLAG_XXX indicates state of the USP context.
 */
-#define USP_FLAG_OPENED      0x01
+#define USP_FLAG_INITIALIZED      0x01
 #define USP_FLAG_CONNECTED   0x02
 #define USP_FLAG_SHUTDOWN    0x04
+
+#define USP_RETURN_IF_HANDLE_NULL(uspHandle) \
+    do { \
+        if (uspHandle == NULL) \
+        { \
+            LogError("%s: The UspHandle is null.", __FUNCTION__); \
+            return USP_INVALID_HANDLE; \
+        } \
+    } while (0)
+
+#define USP_RETURN_IF_ARGUMENT_NULL(argument, argumentName) \
+    do { \
+        if (argument == NULL) \
+        { \
+            LogError("%s: The argument '%s' is null.", __FUNCTION__, argumentName); \
+            return USP_INVALID_PARAMETER; \
+        } \
+    } while (0)
+
+#define USP_RETURN_IF_WRONG_STATE(uspHandle, expectedState) \
+    do { \
+        if (uspHandle->flags != expectedState) \
+        { \
+            LogError("This operation must be executed in state %d. The current state (%d) is not allowed.", expectedState, uspHandle->flags); \
+            return USP_WRONG_STATE; \
+        } \
+    } while (0)
 
 /**
 * The UspContext represents the context data related to a USP client.
@@ -67,6 +94,10 @@ typedef struct _UspContext
     UspRecognitionMode mode;
     STRING_HANDLE outputFormat;
     STRING_HANDLE language;
+    STRING_HANDLE modelId;
+
+    UspAuthenticationType authType;
+    STRING_HANDLE authData;
 
     int flags;
 
@@ -77,7 +108,6 @@ typedef struct _UspContext
     LOCK_HANDLE transportRequestLock;
     TransportHandle transportRequest;
     DnsCacheHandle dnsCache;
-    TokenStore token_store;
 
     // This tick count is set when the UspContext is created.  It is used
     // for metrics.

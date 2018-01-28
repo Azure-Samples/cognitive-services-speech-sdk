@@ -40,14 +40,18 @@ uint64_t telemetry_gettime()
     return 0;
 }
 
-// Zhou: write audio stream to the service: call transport to write/flush stream; used by usplib
+// Write audio stream to the service: call transport to write/flush stream
 UspResult AudioStreamWrite(UspHandle uspHandle, const void * data, uint32_t size, uint32_t* bytesWritten)
 {
     const char* httpArgs = "/audio";
     int ret = -1;
 
-    if (!uspHandle || !data || !size)
+    USP_RETURN_IF_HANDLE_NULL(uspHandle);
+    USP_RETURN_IF_ARGUMENT_NULL(data, "data");
+
+    if (size == 0)
     {
+        LogError("%s: size should not be 0. Use AudioStreamFlush() to flush the buffer.");
         return USP_INVALID_PARAMETER;
     }
 
@@ -103,15 +107,14 @@ UspResult AudioStreamWrite(UspHandle uspHandle, const void * data, uint32_t size
     }
 }
 
-// Zhou: write audio stream to the service: call transport:stream_flush; used by usplib.c
+// Write audio stream to the service: call transport:stream_flush
 UspResult AudioStreamFlush(UspHandle uspHandle)
 {
     int ret;
-    if (!uspHandle)
-    {
-        return USP_INVALID_PARAMETER;
-    }
-    else if (!uspHandle->audioOffset)
+
+    USP_RETURN_IF_HANDLE_NULL(uspHandle);
+
+    if (!uspHandle->audioOffset)
     {
         return USP_SUCCESS;
     }
@@ -177,13 +180,14 @@ static void SpeechEndHandler(TransportHandle transportHandle, const char* path, 
     (void)size;
     (void)path;
 
-    // USP handling
     UspContext* uspContext = (UspContext *)context;
     if (uspContext == NULL)
     {
-        LogError("No context provided in %s.", __FUNCTION__);
+        LogError("%s: The UspContext is null.", __FUNCTION__);
+        return;
     }
-    else if (uspContext->callbacks)
+
+    if (uspContext->callbacks)
     {
         UspMsgSpeechEndDetected* msg = malloc(sizeof(UspMsgSpeechEndDetected));
         // Todo: deal with char to wchar
@@ -203,13 +207,14 @@ static void TurnEndHandler(TransportHandle transportHandle, const char* path, co
     (void)buffer;
     (void)size;
 
-    // USP handling
     UspContext* uspContext = (UspContext *)context;
     if (uspContext == NULL)
     {
-        LogError("No context provided in %s.", __FUNCTION__);
+        LogError("%s: The UspContext is null.", __FUNCTION__);
+        return;
     }
-    else if (uspContext->callbacks)
+
+    if (uspContext->callbacks)
     {
         UspMsgTurnEnd* msg = NULL;
         // Todo: deal with char to wchar
@@ -272,13 +277,14 @@ static void SpeechStartHandler(TransportHandle transportHandle, const char* path
     (void)buffer;
     (void)size;
 
-    // USP handling
     UspContext* uspContext = (UspContext *)context;
     if (uspContext == NULL)
     {
-        LogError("No context provided in %s.", __FUNCTION__);
+        LogError("%s: The UspContext is null.", __FUNCTION__);
+        return;
     }
-    else if (uspContext->callbacks)
+
+    if (uspContext->callbacks)
     {
         UspMsgSpeechStartDetected* msg = malloc(sizeof(UspMsgSpeechStartDetected));
         // Todo: deal with char to wchar
@@ -418,24 +424,72 @@ const char* GetCdpDeviceThumbprint()
 
 UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
 {
-    uspContext->transportRequest = TransportRequestCreate(endpoint, uspContext);
-    if (uspContext->transportRequest == NULL)
+    TransportHandle transportHandle = TransportRequestCreate(endpoint, uspContext);
+    if (transportHandle == NULL)
     {
         LogError("Failed to create transport request in %s", __FUNCTION__);
-        return USP_CONNECT_FAILURE;
+        return USP_INITIALIZATION_FAILURE;
     }
 
-    TransportSetDnsCache(uspContext->transportRequest, uspContext->dnsCache);
-    TransportSetCallbacks(uspContext->transportRequest, TransportErrorHandler, TransportRecvResponseHandler);
+    uspContext->transportRequest = transportHandle;
+
+    TransportSetDnsCache(transportHandle, uspContext->dnsCache);
+    TransportSetCallbacks(transportHandle, TransportErrorHandler, TransportRecvResponseHandler);
     // Todo: does USP require User-Agent in CogSvc?
     // TransportRequestAddRequestHeader(uspContext->transportRequest, "User-Agent", kUserAgent);
-    TransportSetTokenStore(uspContext->transportRequest, uspContext->token_store);
+
+    // Hackhack: Because Carbon API does not support authentication yet, use a default subscription key if no authentication is set.
+    // TODO: This should be removed after Carbon API is ready for authentication, and before public release!!!
+    if (uspContext->authData == NULL)
+    {
+        uspContext->authType = USP_AUTHENTICATION_SUBSCRIPTION_KEY;
+        uspContext->authData = STRING_construct("92069ee289b84e5594a9564ab77ed2ba");
+    }
+
+    switch (uspContext->authType)
+    {
+    case USP_AUTHENTICATION_SUBSCRIPTION_KEY:
+        if (TransportRequestAddRequestHeader(transportHandle, "Ocp-Apim-Subscription-Key", STRING_c_str(uspContext->authData)) != 0)
+        {
+            LogError("%s: Set authentication using subscription key failed.", __FUNCTION__);
+            return USP_INITIALIZATION_FAILURE;
+        }
+        break;
+
+    case USP_AUTHENTICATION_AUTHORIZATION_TOKEN:
+        {
+            const char* bearerHeader = "Bearer";
+            const char* tokenValue = STRING_c_str(uspContext->authData);
+            UspResult ret = USP_SUCCESS;
+            size_t tokenStrSize = strlen(bearerHeader) + strlen(tokenValue) + 1 /*space separator*/ + 1 /* the ending \0 */;
+            char *tokenStr = malloc(tokenStrSize);
+            if (tokenStr == NULL)
+            {
+                LogError("%s: failed to allocate memory for token.", __FUNCTION__);
+                return USP_OUT_OF_MEMORY;
+            }
+            snprintf(tokenStr, tokenStrSize, "%s %s", bearerHeader, tokenValue);
+            if (TransportRequestAddRequestHeader(transportHandle, "Authorization", tokenStr) != 0)
+            {
+                LogError("%s: Set authentication using authorization token failed.", __FUNCTION__);
+                ret = USP_INITIALIZATION_FAILURE;
+            }
+            free(tokenStr);
+            return ret;
+        }
+
+        break;
+
+    default:
+        LogError("%s: Unsupported authentication type %d.", __FUNCTION__, uspContext->authType);
+        return USP_INITIALIZATION_FAILURE;
+    }
 
     uspContext->transportRequestLock = Lock_Init();
     if (uspContext->transportRequestLock == NULL)
     {
         LogError("Failed to create a lock for transport request in %s", __FUNCTION__);
-        return USP_CONNECT_FAILURE;
+        return USP_INITIALIZATION_FAILURE;
     }
 
     return USP_SUCCESS;
@@ -443,6 +497,8 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
 
 UspResult TransportShutdown(UspContext* uspContext)
 {
+    USP_RETURN_IF_HANDLE_NULL(uspContext);
+
     if (uspContext->transportRequest != NULL)
     {
         TransportRequestDestroy(uspContext->transportRequest);
@@ -458,11 +514,7 @@ UspResult TransportShutdown(UspContext* uspContext)
 
 UspResult UspContextDestroy(UspContext* uspContext)
 {
-    if (uspContext == NULL)
-    {
-        LogError("UspContext passed to %s is null.", __FUNCTION__);
-        return USP_INVALID_PARAMETER;
-    }
+    USP_RETURN_IF_HANDLE_NULL(uspContext);
 
     if (uspContext->dnsCache != NULL)
     {
@@ -474,6 +526,8 @@ UspResult UspContextDestroy(UspContext* uspContext)
 
     STRING_delete(uspContext->language);
     STRING_delete(uspContext->outputFormat);
+    STRING_delete(uspContext->modelId);
+    STRING_delete(uspContext->authData);
 
     free(uspContext);
     return USP_SUCCESS;
@@ -498,7 +552,7 @@ UspResult UspContextCreate(UspContext** contextCreated)
     {
         LogError("Create DNSCache failed in %s", __FUNCTION__);
         UspContextDestroy(uspContext);
-        return USP_OPEN_FAILURE;
+        return USP_INITIALIZATION_FAILURE;
     }
 
     *contextCreated = uspContext;
@@ -507,11 +561,8 @@ UspResult UspContextCreate(UspContext** contextCreated)
 
 UspResult UspSetCallbacks(UspContext* uspContext, UspCallbacks *callbacks, void* callbackContext)
 {
-    if ((uspContext == NULL) || (callbacks == NULL))
-    {
-        LogError("One of the following parameters is null in %s. UspContext:0x%x, callbacks:0x%x.", __FUNCTION__,  uspContext, callbacks);
-        return USP_INVALID_PARAMETER;
-    }
+    USP_RETURN_IF_HANDLE_NULL(uspContext);
+    USP_RETURN_IF_ARGUMENT_NULL(callbacks, "callbacks");
 
     if ((callbacks->version != USP_CALLBACK_VERSION) || (callbacks->size != sizeof(UspCallbacks)))
     {

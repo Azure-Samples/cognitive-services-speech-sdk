@@ -76,7 +76,7 @@ void CSpxUspRecoEngineAdapter::UspInitialize(UspHandle* handle, UspCallbacks *ca
 
     UspEndpointType type = USP_ENDPOINT_BING_SPEECH;
     UspRecognitionMode mode = USP_RECO_MODE_INTERACTIVE;
-    SPX_IFFAILED_THROW_HR(::UspOpen(type, mode, callbacks, callbackContext, handle));
+    SPX_IFFAILED_THROW_HR(::UspInit(type, mode, callbacks, callbackContext, handle));
     SPX_IFFAILED_THROW_HR(::UspConnect(*handle));
 }
 

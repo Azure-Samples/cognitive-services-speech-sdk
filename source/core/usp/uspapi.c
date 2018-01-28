@@ -10,7 +10,7 @@
 
 // Todo: read from a configuration file.
 const char g_bingSpeechHostname[] = "wss://speech.platform.bing.com/speech/recognition/%s/cognitiveservices/v1";
-const char g_CRISHostname[] = "wss://%s.api.cris.ai";
+const char g_CRISHostname[] = "wss://%s.api.cris.ai/speech/recognition/%s/cognitiveservices/v1";
 const char g_interactiveMode[] = "interactive";
 const char g_conversationMode[] = "conversation";
 const char g_dictationMode[] = "dictation";
@@ -42,16 +42,13 @@ static int UspEventLoop(void* ptr)
     return 0;
 }
 
-UspResult UspOpen(UspEndpointType type, UspRecognitionMode mode, UspCallbacks *callbacks, void* callbackContext, UspHandle* uspHandle)
+UspResult UspInit(UspEndpointType type, UspRecognitionMode mode, UspCallbacks *callbacks, void* callbackContext, UspHandle* uspHandle)
 {
     UspContext* uspContext;
     UspResult ret;
 
-    if (uspHandle == NULL || callbacks == NULL)
-    {
-        LogError("One of the following parameters is null. uspHandle:0x%x, callbacks:0x%x.", uspHandle, callbacks);
-        return USP_INVALID_PARAMETER;
-    }
+    USP_RETURN_IF_HANDLE_NULL(uspHandle);
+    USP_RETURN_IF_ARGUMENT_NULL(callbacks, "callbacks");
 
     // Create UspContext
     if ((ret = UspContextCreate(&uspContext)) != USP_SUCCESS)
@@ -73,64 +70,87 @@ UspResult UspOpen(UspEndpointType type, UspRecognitionMode mode, UspCallbacks *c
         return ret;
     }
 
-    uspContext->flags = USP_FLAG_OPENED;
+    uspContext->flags = USP_FLAG_INITIALIZED;
     *uspHandle = uspContext;
     return USP_SUCCESS;
 }
 
-UspResult UspSetOption(UspHandle uspHandle, UspOption optionKey, const char* optionValue)
+UspResult UspSetLanguage(UspHandle uspHandle, const char* language)
 {
-    if (uspHandle == NULL)
+    USP_RETURN_IF_HANDLE_NULL(uspHandle);
+    USP_RETURN_IF_ARGUMENT_NULL(language, "language");
+    USP_RETURN_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
+
+    if (uspHandle->type == USP_ENDPOINT_CRIS)
     {
-        return USP_INVALID_HANDLE;
+        LogError("Language option for CRIS service is not supported.");
+        return USP_NOT_SUPPORTED_OPTION;
     }
 
-    if (optionValue == NULL)
+    uspHandle->language = STRING_construct(language);
+    return USP_SUCCESS;
+}
+
+UspResult UspSetOutputFormat(UspHandle uspHandle, UspOutputFormat format)
+{
+    USP_RETURN_IF_HANDLE_NULL(uspHandle);
+    USP_RETURN_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
+
+    if (format == USP_OUTPUT_DETAILED)
     {
-        LogError("The option value for key %d must be not null in %s.", optionKey, __FUNCTION__);
-        return USP_INVALID_PARAMETER;
+        uspHandle->outputFormat = STRING_construct(g_outputDetailedStr);
     }
-
-    if (uspHandle->flags != USP_FLAG_OPENED)
+    else if (format == USP_OUTPUT_SIMPLE)
     {
-        LogError("Set option after connecting to service is not supported. Current state: %d", uspHandle->flags);
-        return USP_OPERATION_IN_WRONG_STATE;
+        uspHandle->outputFormat = STRING_construct(g_outputSimpleStr);
     }
-
-    switch (optionKey)
+    else
     {
-    case USP_OPTION_LANGUAGE:
-        if (uspHandle->type == USP_ENDPOINT_CRIS)
-        {
-            LogError("Language option for CRIS service is not supported.");
-            return USP_NOT_SUPPORTED_OPTION;
-        }
-        uspHandle->language = STRING_construct(optionValue);
-        break;
-
-    case USP_OPTION_OUTPUT_FORMAT:
-        if (_strnicmp(g_outputDetailedStr, optionValue, strlen(g_outputDetailedStr) + 1) == 0)
-        {
-            uspHandle->outputFormat = STRING_construct(g_outputDetailedStr);
-        }
-        else if (_strnicmp(g_outputSimpleStr, optionValue, strlen(g_outputSimpleStr) + 1) == 0)
-        {
-            uspHandle->outputFormat = STRING_construct(g_outputSimpleStr);
-        }
-        else
-        {
-            LogError("The output format is invalid: %s.", optionValue);
-            return USP_NOT_SUPPORTED_OPTION;
-        }
-        break;
-
-    default:
-        LogError("Option %d is not supported", optionKey);
+        LogError("The output format is invalid: %d.", format);
         return USP_NOT_SUPPORTED_OPTION;
     }
 
     return USP_SUCCESS;
 }
+
+UspResult UspSetModelId(UspHandle uspHandle, const char* modelId)
+{
+    USP_RETURN_IF_HANDLE_NULL(uspHandle);
+    USP_RETURN_IF_ARGUMENT_NULL(modelId, "model ID");
+    USP_RETURN_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
+
+    if (uspHandle->type != USP_ENDPOINT_CRIS)
+    {
+        LogError("USP_CONFIG_MODEL_ID is only allowed if the endpoint type is USP_ENDPOINT_CRIS");
+        return USP_NOT_SUPPORTED_OPTION;
+    }
+    uspHandle->modelId = STRING_construct(modelId);
+
+    return USP_SUCCESS;
+}
+
+
+UspResult UspSetAuthentication(UspHandle uspHandle, UspAuthenticationType authType, const char* authData)
+{
+    USP_RETURN_IF_HANDLE_NULL(uspHandle);
+    USP_RETURN_IF_ARGUMENT_NULL(authData, "authentication data");
+
+    switch (authType)
+    {
+    case USP_AUTHENTICATION_SUBSCRIPTION_KEY:
+    case USP_AUTHENTICATION_AUTHORIZATION_TOKEN:
+        uspHandle->authType = authType;
+        uspHandle->authData = STRING_construct(authData);
+        break;
+
+    default:
+        LogError("Authentication type %d is not supported", authType);
+        return USP_NOT_SUPPORTED_OPTION;
+    }
+
+    return USP_SUCCESS;
+}
+
 
 // Todo: Currently we assume that UspLib API is singe-threaded. If it needs to be accessed by multiple concurrent threads,
 // We need to make it thread-safe.
@@ -143,17 +163,8 @@ UspResult UspConnect(UspHandle uspHandle)
     const char *formatStr = NULL;
     char separator = '?';
 
-    if (uspHandle == NULL)
-    {
-        LogError("The uspHandle is null in %s.", __FUNCTION__);
-        return USP_INVALID_HANDLE;
-    }
-
-    if (uspHandle->flags != USP_FLAG_OPENED)
-    {
-        LogError("UspConnect() is only allowed when the uspHandle in opened state. Current state: %d", uspHandle->flags);
-        return USP_NOT_OPENED;
-    }
+    USP_RETURN_IF_HANDLE_NULL(uspHandle);
+    USP_RETURN_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
 
     // Callbacks must be set before initializing transport.
     if (uspHandle->callbacks == NULL)
@@ -171,14 +182,22 @@ UspResult UspConnect(UspHandle uspHandle)
         {
             langStr = g_defaultLangValue;
         }
+        urlLength = strlen(hostnameStr);
         break;
+
     case USP_ENDPOINT_CRIS:
+        if (uspHandle->modelId == NULL)
+        {
+            LogError("ModelId must be set before connecting to CRIS service.");
+            return USP_INITIALIZATION_FAILURE;
+        }
         hostnameStr = g_CRISHostname;
+        urlLength = strlen(hostnameStr) + STRING_length(uspHandle->modelId);
         break;
+
     default:
         return USP_UNKNOWN_SERVICE_ENDPOINT;
     }
-    urlLength = strlen(hostnameStr);
 
     switch (uspHandle->mode)
     {
@@ -217,7 +236,19 @@ UspResult UspConnect(UspHandle uspHandle)
         return USP_OUT_OF_MEMORY;
     }
 
-    snprintf(endpointUrl, urlLength, hostnameStr, modeStr);
+    switch (uspHandle->type)
+    {
+    case USP_ENDPOINT_BING_SPEECH:
+        snprintf(endpointUrl, urlLength, hostnameStr, modeStr);
+        break;
+
+    case USP_ENDPOINT_CRIS:
+        snprintf(endpointUrl, urlLength, hostnameStr, STRING_c_str(uspHandle->modelId), modeStr);
+        break;
+
+    default:
+        return USP_UNKNOWN_SERVICE_ENDPOINT;
+    }
 
     if (langStr != NULL)
     {
@@ -243,7 +274,7 @@ UspResult UspConnect(UspHandle uspHandle)
         LogError("Initialize transport failed in %s", __FUNCTION__);
         free(endpointUrl);
         UspContextDestroy(uspHandle);
-        return USP_CONNECT_FAILURE;
+        return USP_INITIALIZATION_FAILURE;
     }
     free(endpointUrl);
 
@@ -252,7 +283,7 @@ UspResult UspConnect(UspHandle uspHandle)
     {
         LogError("Create work thread in USP failed.");
         UspContextDestroy(uspHandle);
-        return USP_CONNECT_FAILURE;
+        return USP_INITIALIZATION_FAILURE;
     }
 
     uspHandle->flags = USP_FLAG_CONNECTED;
@@ -261,10 +292,7 @@ UspResult UspConnect(UspHandle uspHandle)
 
 UspResult UspClose(UspHandle uspHandle)
 {
-    if (uspHandle == NULL)
-    {
-        return USP_INVALID_HANDLE;
-    }
+    USP_RETURN_IF_HANDLE_NULL(uspHandle);
 
     uspHandle->flags = USP_FLAG_SHUTDOWN;
 
@@ -289,16 +317,8 @@ UspResult UspWrite(UspHandle uspHandle, const uint8_t* buffer, size_t bytesToWri
 {
     uint32_t count = 0;
 
-    if (uspHandle == NULL)
-    {
-        return USP_INVALID_PARAMETER;
-    }
-
-    if (uspHandle->flags != USP_FLAG_CONNECTED)
-    {
-        LogError("UspWrite only allowed when the UspHandle is connected. Current state: %d", uspHandle->flags);
-        return USP_OPERATION_IN_WRONG_STATE;
-    }
+    USP_RETURN_IF_HANDLE_NULL(uspHandle);
+    USP_RETURN_IF_WRONG_STATE(uspHandle, USP_FLAG_CONNECTED);
 
     if (bytesToWrite == 0)
     {

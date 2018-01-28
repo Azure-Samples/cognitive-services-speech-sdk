@@ -97,6 +97,8 @@ int main(int argc, char* argv[])
     UspCallbacks testCallbacks;
     UspEndpointType endpoint = USP_ENDPOINT_BING_SPEECH;
     UspRecognitionMode mode = USP_RECO_MODE_INTERACTIVE;
+    int curArg = 0;
+    char* authData = NULL;
 
     testCallbacks.version = (uint16_t)USP_CALLBACK_VERSION;
     testCallbacks.size = sizeof(testCallbacks);
@@ -111,7 +113,7 @@ int main(int argc, char* argv[])
 
     if (argc < 2)
     {
-        printf("Usage: uspclientconsole audio_file endpoint_type(speech/cris) mode(interactive/conversation/dictation) language output(simple/detailed)");
+        printf("Usage: uspclientconsole audio_file authentication endpoint_type(speech/cris) mode(interactive/conversation/dictation) language output(simple/detailed)");
         exit(1);
     }
 
@@ -123,77 +125,108 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    // Set service endpoint type.
-    if (argc > 2)
+    curArg = 2;
+    if (argc > curArg)
     {
-        if (strcmp(argv[2], "speech") == 0)
+        authData = argv[curArg];
+    }
+
+    curArg++;
+    // Set service endpoint type.
+    if (argc > curArg)
+    {
+        if (strcmp(argv[curArg], "speech") == 0)
         {
             endpoint = USP_ENDPOINT_BING_SPEECH;
         }
-        else if (strcmp(argv[2], "cris") == 0)
+        else if (strcmp(argv[curArg], "cris") == 0)
         {
             endpoint = USP_ENDPOINT_CRIS;
         }
         else
         {
-            printf("unknown service endpoint type: %s\n", argv[2]);
+            printf("unknown service endpoint type: %s\n", argv[curArg]);
             exit(1);
         }
     }
 
+    curArg++;
     // Set recognition mode.
-    if (argc > 3)
+    if (argc > curArg)
     {
-        if (strcmp(argv[3], "interactive") == 0)
+        if (strcmp(argv[curArg], "interactive") == 0)
         {
             mode = USP_RECO_MODE_INTERACTIVE;
         }
-        else if (strcmp(argv[3], "conversation") == 0)
+        else if (strcmp(argv[curArg], "conversation") == 0)
         {
             mode = USP_RECO_MODE_CONVERSATION;
         }
-        else if (strcmp(argv[3], "dictation") == 0)
+        else if (strcmp(argv[curArg], "dictation") == 0)
         {
             mode = USP_RECO_MODE_DICTATION;
         }
         else
         {
-            printf("unknown reco mode: %s\n", argv[3]);
+            printf("unknown reco mode: %s\n", argv[curArg]);
             exit(1);
         }
     }
 
     // Create USP handle.
-    if ((ret = UspOpen(endpoint, mode, &testCallbacks, context, &handle)) != USP_SUCCESS)
+    if ((ret = UspInit(endpoint, mode, &testCallbacks, context, &handle)) != USP_SUCCESS)
     {
         printf("Error: open UspHandle failed (error=0x%x).\n", ret);
         exit(1);
     }
 
-    // Set language.
-    if (argc > 4)
+    // Set Authentication.
+    if (authData != NULL)
     {
-        if (UspSetOption(handle, USP_OPTION_LANGUAGE, argv[4]) != USP_SUCCESS)
+        if ((ret = UspSetAuthentication(handle, USP_AUTHENTICATION_SUBSCRIPTION_KEY, authData)) != USP_SUCCESS)
         {
-            printf("Set language to %s failed.\n", argv[4]);
+            printf("Error: set authentication data failed. (error=0x%x).\n", ret);
             exit(1);
         }
     }
 
-    // Set output format if needed.
-    if (argc > 5)
+    curArg++;
+    // Set language.
+    if (argc > curArg)
     {
-        if (strcmp(argv[5], "detailed") == 0)
+        if (endpoint == USP_ENDPOINT_CRIS)
         {
-            if (UspSetOption(handle, USP_OPTION_OUTPUT_FORMAT, "detailed") != USP_SUCCESS)
+            if (UspSetModelId(handle, argv[curArg]) != USP_SUCCESS)
+            {
+                printf("Set model id for CRIS failed.\n");
+                exit(1);
+            }
+        }
+        else
+        {
+            if (UspSetLanguage(handle, argv[curArg]) != USP_SUCCESS)
+            {
+                printf("Set language to %s failed.\n", argv[curArg]);
+                exit(1);
+            }
+        }
+    }
+
+    curArg++;
+    // Set output format if needed.
+    if (argc > curArg)
+    {
+        if (strcmp(argv[curArg], "detailed") == 0)
+        {
+            if (UspSetOutputFormat(handle, USP_OUTPUT_DETAILED) != USP_SUCCESS)
             {
                 printf("Set output format to detailed failed.\n");
                 exit(1);
             }
         }
-        else if (strcmp(argv[5], "simple") == 0)
+        else if (strcmp(argv[curArg], "simple") == 0)
         {
-            if (UspSetOption(handle, USP_OPTION_OUTPUT_FORMAT, "simple") != USP_SUCCESS)
+            if (UspSetOutputFormat(handle, USP_OUTPUT_SIMPLE) != USP_SUCCESS)
             {
                 printf("Set output format to simple failed.\n");
                 exit(1);
@@ -201,7 +234,7 @@ int main(int argc, char* argv[])
         }
         else
         {
-            printf("unknown output format: %s\n", argv[5]);
+            printf("unknown output format: %s\n", argv[curArg]);
             exit(1);
         }
     }
@@ -241,7 +274,9 @@ int main(int argc, char* argv[])
         else
         {
             totalBytesWritten += bytesWritten;
+#ifdef _DEBUG
             printf("Info: successfully sent %zu bytes (expected=%zu). Totally: %zu\n", bytesWritten, bytesToWrite, totalBytesWritten);
+#endif
             if (bytesToWrite != bytesWritten)
             {
                 printf("Error: the number of bytes sent to service (%zu) does not match expected (%zu).\n", bytesWritten, bytesToWrite);
