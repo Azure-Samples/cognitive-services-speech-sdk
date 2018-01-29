@@ -33,14 +33,22 @@ void OnSpeechStartDetected(UspHandle handle, void* context, UspMsgSpeechStartDet
 {
     UNUSED(handle);
     UNUSED(context);
-    printf("Response: Speech.StartDetected message. Speech starts at offset %llu.\n", message->offset);
+    UNUSED(message);
+
+    // offset not supported yet.
+    printf("Response: Speech.StartDetected message.\n");
+    //printf("Response: Speech.StartDetected message. Speech starts at offset %llu.\n", message->offset);
 }
 
 void OnSpeechEndDetected(UspHandle handle, void* context, UspMsgSpeechEndDetected *message)
 {
     UNUSED(handle);
     UNUSED(context);
-    printf("Response: Speech.EndDetected message. Speech ends at offset %llu\n", message->offset);
+    UNUSED(message);
+
+    // offset not supported yet.
+    printf("Response: Speech.EndDetected message.\n");
+    // printf("Response: Speech.EndDetected message. Speech ends at offset %llu\n", message->offset);
 }
 
 void OnSpeechHypothesis(UspHandle handle, void* context, UspMsgSpeechHypothesis *message)
@@ -87,6 +95,13 @@ void OnError(UspHandle handle, void* context, UspResult error)
     printf("Response: On Error: 0x%x.\n", error);
 }
 
+void OnUserMessage(UspHandle uspHandle, const char* path, const char* contentType, const unsigned char* buffer, size_t size, void* context)
+{
+    UNUSED(uspHandle);
+    UNUSED(context);
+    printf("Response: User defined message. Path: %s, contentType: %s, size: %zu, content: %s.\n", path, contentType, size, buffer);
+}
+
 #define AUDIO_BYTES_PER_SECOND (16000*2) //16KHz, 16bit PCM
 
 int main(int argc, char* argv[])
@@ -113,7 +128,7 @@ int main(int argc, char* argv[])
 
     if (argc < 2)
     {
-        printf("Usage: uspclientconsole audio_file authentication endpoint_type(speech/cris) mode(interactive/conversation/dictation) language output(simple/detailed)");
+        printf("Usage: uspclientconsole audio_file authentication endpoint_type(speech/cris) mode(interactive/conversation/dictation) language output(simple/detailed) user-defined-messages");
         exit(1);
     }
 
@@ -236,6 +251,20 @@ int main(int argc, char* argv[])
         {
             printf("unknown output format: %s\n", argv[curArg]);
             exit(1);
+        }
+    }
+
+    curArg++;
+    if (argc > curArg)
+    {
+        for (int argIndex = curArg; argIndex < argc; argIndex++)
+        {
+            printf("Register user-defined response message: %s\n", argv[argIndex]);
+            if (UspRegisterUserMessage(handle, argv[argIndex], OnUserMessage) != USP_SUCCESS)
+            {
+                printf("Failed to register user-defined response message: %s\n", argv[argIndex]);
+                exit(1);
+            }
         }
     }
 

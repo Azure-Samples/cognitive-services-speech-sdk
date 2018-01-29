@@ -25,6 +25,7 @@
 #include <assert.h>
 
 #include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/list.h"
 #include "usp.h"
 #include "uspcommon.h"
 #include "metrics.h"
@@ -50,9 +51,9 @@ extern "C" {
 #endif
 
 /**
- * USP_FLAG_XXX indicates state of the USP context.
+* USP_FLAG_XXX indicates state of the UspContext.
 */
-#define USP_FLAG_INITIALIZED      0x01
+#define USP_FLAG_INITIALIZED 0x01
 #define USP_FLAG_CONNECTED   0x02
 #define USP_FLAG_SHUTDOWN    0x04
 
@@ -70,7 +71,7 @@ extern "C" {
         if (argument == NULL) \
         { \
             LogError("%s: The argument '%s' is null.", __FUNCTION__, argumentName); \
-            return USP_INVALID_PARAMETER; \
+            return USP_INVALID_ARGUMENT; \
         } \
     } while (0)
 
@@ -82,6 +83,31 @@ extern "C" {
             return USP_WRONG_STATE; \
         } \
     } while (0)
+
+#define USP_RETURN_IF_CONTEXT_NULL(context) \
+    do { \
+        if (context == NULL) \
+        { \
+            LogError("%s: context is null.", __FUNCTION__); \
+            return USP_INVALID_ARGUMENT; \
+        } \
+    } while (0)
+
+#define USP_RETURN_IF_CALLBACKS_NULL(context) \
+    do { \
+        if (context->callbacks == NULL) \
+        { \
+            LogError("%s: callbacks is null.", __FUNCTION__); \
+            return USP_CALLBACKS_NOT_SET; \
+        } \
+    } while (0)
+
+
+typedef struct _UserPathHandler
+{
+    char* path;
+    UspOnUserMessage handler;
+} UserPathHandler;
 
 /**
 * The UspContext represents the context data related to a USP client.
@@ -101,6 +127,8 @@ typedef struct _UspContext
 
     int flags;
 
+    LIST_HANDLE userPathHandlerList;
+
     // Todo: can multiple UspContexts share the work thread?
     THREAD_HANDLE workThreadHandle;
 
@@ -113,7 +141,6 @@ typedef struct _UspContext
     // for metrics.
     uint64_t creationTime;
 } UspContext;
-
 
 /**
 * Creates a new UspContext.
@@ -154,61 +181,22 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint);
 UspResult TransportShutdown(UspContext* uspContext);
 
 /**
-* Defines the callback function of asynchrnous complete during content handling.
-* @param context The context provided by the application.
-*/
-typedef void(*CONTENT_ASYNCCOMPLETE_CALLBACK)(void* context);
-
-/**
-* Defines the callback function of handling contents.
+* Handles response messages from service based on content type.
 * @param context The content context.
 * @param path The content path.
-* @param buffer The content buffer.
-* @param bufferSize The size of the buffer.
+* @param mime The content type.
 * @param ioBuffer The pointer to ioBuffer.
-* @param asyncCompleteCallback The callback when handling is complete.
-* @param asyncCompleteContext The context parameter that is passed when the asyncCompleteCallback is invoked.
+* @param responseContent The content buffer of the response.
+* @param responseSize The size of responseContent.
 * @return A UspResult indicating success or error.
 */
-typedef UspResult(*CONTENT_HANDLER_CALLBACK)(void* context, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK asyncCompleteCallback, void* asyncCompleteContext);
-
-
-/**
-* Opens a new Speech instance.
-* @param ppHandle A pointer to a Speech uspHandle to be returned back to the
-* caller.
-* @param reserved Reserved, do not use.
-* @param pReserved Reserved, do not use.
-* @return A UspResult.
-*/
-UspResult ContentDispatch(void* context, const char* path, const char* mime, IOBUFFER* ioBuffer, BUFFER_HANDLE responseContent, size_t responseSize);
-
-/**
-* Handles JSON responses.
-* @param context The content context.
-* @param path The content path.
-* @param buffer The content buffer.
-* @param bufferSize The size of the buffer.
-* @param ioBuffer The pointer to ioBuffer.
-* @param asyncCompleteCallback The callback when handling is complete.
-* @param asyncCompleteContext The context parameter that is passed when the asyncCompleteCallback is invoked.
-* @return A UspResult indicating success or error.
-*/
-UspResult JsonResponseHandler(void* context, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK asyncCompleteCallBack, void* asyncCompleteContext);
-
-/**
-* Handles text responses.
-* @param context The content context.
-* @param path The content path.
-* @param buffer The content buffer.
-* @param bufferSize The size of the buffer.
-* @param ioBuffer The pointer to ioBuffer.
-* @param asyncCompleteCallback The callback when handling is complete.
-* @param asyncCompleteContext The context parameter that is passed when the asyncCompleteCallback is invoked.
-* @return A UspResult indicating success or error.
-*/
-UspResult TextResponseHandler(void* context, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK asyncCompleteCallBack, void* asyncCompleteContext);
-
+UspResult ContentDispatch(
+    void* context,
+    const char* path,
+    const char* mime,
+    IOBUFFER* ioBuffer,
+    BUFFER_HANDLE responseContent,
+    size_t responseSize);
 
 /**
 * Return device thumbprint generated from CDP

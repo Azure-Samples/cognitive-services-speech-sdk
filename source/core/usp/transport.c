@@ -319,7 +319,7 @@ static void ChunkedMessageRecv(HTTP_CLIENT_HANDLE handle, void* callbackContext,
             mime = HTTPHeaders_FindHeaderValue(responseHeadersHandle, g_keywordContentType);
             if (NULL != mime)
             {
-                ContentDispatch(request->context, NULL /* path */, mime, 0, request->responseContentHandle, USE_BUFFER_SIZE);
+                ContentDispatch(request->context, NULL /* path */, mime, NULL /* ioBuffer */, request->responseContentHandle, USE_BUFFER_SIZE);
             }
         }
 
@@ -411,12 +411,13 @@ static int OnStreamChunk(TransportStream* stream, const uint8_t* buffer, size_t 
     {
         LogInfo("First chunk for %s", STRING_c_str(stream->contentType));
         metrics_tts_first_chunk();
+
         ContentDispatch(
             stream->context,
             NULL,  // path
             STRING_c_str(stream->contentType),
             stream->ioBuffer,
-            NULL,
+            NULL, // responseContentHandle
             stream->bufferSize);
     }
     else if (0 == bufferSize)

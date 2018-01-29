@@ -355,3 +355,46 @@ void UspRun(UspHandle uspHandle)
 
 }
 
+bool userPathHandlerCompare(LIST_ITEM_HANDLE item1, const void* path);
+
+UspResult UspRegisterUserMessage(UspHandle uspHandle, const char* messagePath, UspOnUserMessage messageHandler)
+{
+    USP_RETURN_IF_HANDLE_NULL(uspHandle);
+
+    if (messagePath == NULL || strlen(messagePath) == 0)
+    {
+        LogError("%s: The messagePath is null or empty.", __FUNCTION__);
+        return USP_INVALID_ARGUMENT;
+    }
+
+    if (messageHandler == NULL)
+    {
+        LogError("%s: the callback is null.", __FUNCTION__);
+        return USP_INVALID_ARGUMENT;
+    }
+
+    USP_RETURN_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
+
+    assert(uspHandle->userPathHandlerList != NULL);
+    LIST_ITEM_HANDLE foundItem = list_find(uspHandle->userPathHandlerList, userPathHandlerCompare, messagePath);
+    if (foundItem != NULL)
+    {
+        UserPathHandler* existingHandler = (UserPathHandler*)list_item_get_value(foundItem);
+        existingHandler->handler = messageHandler;
+    }
+    else
+    {
+        UserPathHandler* newHandler = malloc(sizeof(UserPathHandler));
+        if (newHandler == NULL)
+        {
+            LogError("%s: Failed to allocate userPathHandler entry.", __FUNCTION__);
+            return USP_OUT_OF_MEMORY;
+        }
+        newHandler->handler = messageHandler;
+        newHandler->path = _strdup(messagePath);
+        list_add(uspHandle->userPathHandlerList, newHandler);
+    }
+
+    return USP_SUCCESS;
+}
+
