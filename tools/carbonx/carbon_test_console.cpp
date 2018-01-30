@@ -1010,6 +1010,9 @@ int main(int argc, char* argv[])
     {
         wargs[i] = new wchar_t[strlen(argv[i]) + 1];
         size_t ans = ::mbstowcs(wargs[i], argv[i], strlen(argv[i]) + 1);
+#ifndef _DEBUG
+        UNUSED(ans);
+#endif
         assert(ans == strlen(argv[i]));
     }
     int ret = wmain(argc, const_cast<const wchar_t**>(wargs));

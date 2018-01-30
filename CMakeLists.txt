@@ -81,9 +81,10 @@ set(USP_CONSOLE "${CARBON_ROOT}/tools/uspclientconsole")
 set(CARBONX "${CARBON_ROOT}/tools/carbonx")
 
 add_subdirectory ("${CARBON_EXTERNAL}/azure-c-shared-utility" azure_c_shared_utility EXCLUDE_FROM_ALL)
-set_target_properties (aziotsharedutil PROPERTIES
-    FOLDER external_libs
-    )
+set_target_properties (aziotsharedutil PROPERTIES FOLDER external_libs)
+if (UNIX)
+    set_target_properties (aziotsharedutil PROPERTIES COMPILE_FLAGS "-Wno-error=unused-variable")
+endif()
 set(AZURE_SHARED_LIB aziotsharedutil)
 include_directories (AZURE_SHARED_UTIL_INCLUDE ${SHARED_UTIL_INC_FOLDER})
 
