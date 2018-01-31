@@ -19,7 +19,12 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 
 if(MSVC)
   # Force to always compile with W4
+  # first remove all possible warning settings to avoid warning D9025
+  string(REGEX REPLACE "/W[0-3]" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+  # then add warning level 4 flags
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX")
+  # disable precompiled headers (for now) to allow build in IDE environment
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Y-")
 elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra -Wno-long-long -Wpedantic")
 endif()
