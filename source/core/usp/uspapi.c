@@ -47,13 +47,13 @@ UspResult UspInit(UspEndpointType type, UspRecognitionMode mode, UspCallbacks *c
     UspContext* uspContext;
     UspResult ret;
 
-    USP_RETURN_IF_HANDLE_NULL(uspHandle);
-    USP_RETURN_IF_ARGUMENT_NULL(callbacks, "callbacks");
+    USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
+    USP_RETURN_ERROR_IF_ARGUMENT_NULL(callbacks, "callbacks");
 
     // Create UspContext
     if ((ret = UspContextCreate(&uspContext)) != USP_SUCCESS)
     {
-        LogError("Failed to create UspContext in %s with error code:0x%x.", __FUNCTION__, ret);
+        LogError("Failed to create UspContext. Error:0x%x.", ret);
         return ret;
     }
 
@@ -65,7 +65,7 @@ UspResult UspInit(UspEndpointType type, UspRecognitionMode mode, UspCallbacks *c
     // Set callbacks
     if ((ret = UspSetCallbacks(uspContext, callbacks, callbackContext)) != USP_SUCCESS)
     {
-        LogError("Failed to set USP callbacks in %s with error code:0x%x.", __FUNCTION__, ret);
+        LogError("Failed to set USP callbacks. Error:0x%x.", ret);
         UspContextDestroy(uspContext);
         return ret;
     }
@@ -77,9 +77,9 @@ UspResult UspInit(UspEndpointType type, UspRecognitionMode mode, UspCallbacks *c
 
 UspResult UspSetLanguage(UspHandle uspHandle, const char* language)
 {
-    USP_RETURN_IF_HANDLE_NULL(uspHandle);
-    USP_RETURN_IF_ARGUMENT_NULL(language, "language");
-    USP_RETURN_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
+    USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
+    USP_RETURN_ERROR_IF_ARGUMENT_NULL(language, "language");
+    USP_RETURN_ERROR_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
 
     if (uspHandle->type == USP_ENDPOINT_CRIS)
     {
@@ -93,8 +93,8 @@ UspResult UspSetLanguage(UspHandle uspHandle, const char* language)
 
 UspResult UspSetOutputFormat(UspHandle uspHandle, UspOutputFormat format)
 {
-    USP_RETURN_IF_HANDLE_NULL(uspHandle);
-    USP_RETURN_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
+    USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
+    USP_RETURN_ERROR_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
 
     if (format == USP_OUTPUT_DETAILED)
     {
@@ -115,9 +115,9 @@ UspResult UspSetOutputFormat(UspHandle uspHandle, UspOutputFormat format)
 
 UspResult UspSetModelId(UspHandle uspHandle, const char* modelId)
 {
-    USP_RETURN_IF_HANDLE_NULL(uspHandle);
-    USP_RETURN_IF_ARGUMENT_NULL(modelId, "model ID");
-    USP_RETURN_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
+    USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
+    USP_RETURN_ERROR_IF_ARGUMENT_NULL(modelId, "model ID");
+    USP_RETURN_ERROR_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
 
     if (uspHandle->type != USP_ENDPOINT_CRIS)
     {
@@ -132,8 +132,8 @@ UspResult UspSetModelId(UspHandle uspHandle, const char* modelId)
 
 UspResult UspSetAuthentication(UspHandle uspHandle, UspAuthenticationType authType, const char* authData)
 {
-    USP_RETURN_IF_HANDLE_NULL(uspHandle);
-    USP_RETURN_IF_ARGUMENT_NULL(authData, "authentication data");
+    USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
+    USP_RETURN_ERROR_IF_ARGUMENT_NULL(authData, "authentication data");
 
     switch (authType)
     {
@@ -152,7 +152,7 @@ UspResult UspSetAuthentication(UspHandle uspHandle, UspAuthenticationType authTy
 }
 
 
-// Todo: Currently we assume that UspLib API is singe-threaded. If it needs to be accessed by multiple concurrent threads,
+// Todo: Currently we assume that UspLib API is single-threaded. If it needs to be accessed by multiple concurrent threads,
 // We need to make it thread-safe.
 UspResult UspConnect(UspHandle uspHandle)
 {
@@ -163,15 +163,11 @@ UspResult UspConnect(UspHandle uspHandle)
     const char *formatStr = NULL;
     char separator = '?';
 
-    USP_RETURN_IF_HANDLE_NULL(uspHandle);
-    USP_RETURN_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
+    USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
+    USP_RETURN_ERROR_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
 
     // Callbacks must be set before initializing transport.
-    if (uspHandle->callbacks == NULL)
-    {
-        LogError("%s: The callbacks for uspHandle is null.", __FUNCTION__);
-        return USP_CALLBACKS_NOT_SET;
-    }
+    USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspHandle);
 
     switch (uspHandle->type)
     {
@@ -232,7 +228,7 @@ UspResult UspConnect(UspHandle uspHandle)
     urlLength += 1; // for null character at the end.
     if ((endpointUrl = malloc(urlLength)) == NULL || (endpointUrlFormat = malloc(urlLength)) == NULL)
     {
-        LogError("Memory allocation failed in %s:%s.", __FUNCTION__, __LINE__);
+        LogError("Memory allocation failed.");
         return USP_OUT_OF_MEMORY;
     }
 
@@ -271,7 +267,7 @@ UspResult UspConnect(UspHandle uspHandle)
     LogInfo("Connect to service endpoint %s.", endpointUrl);
     if (TransportInitialize(uspHandle, endpointUrl) != USP_SUCCESS)
     {
-        LogError("Initialize transport failed in %s", __FUNCTION__);
+        LogError("Initialize transport failed");
         free(endpointUrl);
         UspContextDestroy(uspHandle);
         return USP_INITIALIZATION_FAILURE;
@@ -292,7 +288,7 @@ UspResult UspConnect(UspHandle uspHandle)
 
 UspResult UspClose(UspHandle uspHandle)
 {
-    USP_RETURN_IF_HANDLE_NULL(uspHandle);
+    USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
 
     uspHandle->flags = USP_FLAG_SHUTDOWN;
 
@@ -308,6 +304,7 @@ UspResult UspClose(UspHandle uspHandle)
 
     UspContextDestroy(uspHandle);
 
+    LogInfo("UspClose complete.");
     return USP_SUCCESS;
 }
 
@@ -317,8 +314,8 @@ UspResult UspWriteAudio(UspHandle uspHandle, const uint8_t* buffer, size_t bytes
 {
     uint32_t count = 0;
 
-    USP_RETURN_IF_HANDLE_NULL(uspHandle);
-    USP_RETURN_IF_WRONG_STATE(uspHandle, USP_FLAG_CONNECTED);
+    USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
+    USP_RETURN_ERROR_IF_WRONG_STATE(uspHandle, USP_FLAG_CONNECTED);
 
     if (bytesToWrite == 0)
     {
@@ -369,21 +366,21 @@ bool userPathHandlerCompare(LIST_ITEM_HANDLE item1, const void* path);
 
 UspResult UspRegisterUserMessage(UspHandle uspHandle, const char* messagePath, UspOnUserMessage messageHandler)
 {
-    USP_RETURN_IF_HANDLE_NULL(uspHandle);
+    USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
 
     if (messagePath == NULL || strlen(messagePath) == 0)
     {
-        LogError("%s: The messagePath is null or empty.", __FUNCTION__);
+        LogError("The messagePath is null or empty.");
         return USP_INVALID_ARGUMENT;
     }
 
     if (messageHandler == NULL)
     {
-        LogError("%s: the callback is null.", __FUNCTION__);
+        LogError("The messageHandler is null.");
         return USP_INVALID_ARGUMENT;
     }
 
-    USP_RETURN_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
+    USP_RETURN_ERROR_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
 
     assert(uspHandle->userPathHandlerList != NULL);
     LIST_ITEM_HANDLE foundItem = list_find(uspHandle->userPathHandlerList, userPathHandlerCompare, messagePath);
@@ -397,7 +394,7 @@ UspResult UspRegisterUserMessage(UspHandle uspHandle, const char* messagePath, U
         UserPathHandler* newHandler = malloc(sizeof(UserPathHandler));
         if (newHandler == NULL)
         {
-            LogError("%s: Failed to allocate userPathHandler entry.", __FUNCTION__);
+            LogError("Failed to allocate userPathHandler entry.");
             return USP_OUT_OF_MEMORY;
         }
         newHandler->handler = messageHandler;

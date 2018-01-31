@@ -64,14 +64,13 @@ UspResult AudioStreamWrite(UspHandle uspHandle, const void * data, uint32_t size
     const char* httpArgs = "/audio";
     int ret = -1;
 
-    LogInfo("TS:%llu, %s: Write %zu bytes audio data.", USP_LIFE_TIME(uspHandle), __FUNCTION__, size);
-
-    USP_RETURN_IF_HANDLE_NULL(uspHandle);
-    USP_RETURN_IF_ARGUMENT_NULL(data, "data");
+    LogInfo("TS:%llu, Write %zu bytes audio data.", USP_LIFE_TIME(uspHandle), size);
+    USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
+    USP_RETURN_ERROR_IF_ARGUMENT_NULL(data, "data");
 
     if (size == 0)
     {
-        LogError("%s: size should not be 0. Use AudioStreamFlush() to flush the buffer.", __FUNCTION__);
+        LogError("Size should not be 0. Use AudioStreamFlush() to flush the buffer.");
         return USP_INVALID_ARGUMENT;
     }
 
@@ -81,6 +80,10 @@ UspResult AudioStreamWrite(UspHandle uspHandle, const void * data, uint32_t size
     if (!size)
     {
         ret = TransportStreamFlush(uspHandle->transportRequest);
+        if (ret != 0)
+        {
+            LogError("TransportStreamFlush failed. error=%d", ret);
+        }
     }
     else
     {
@@ -98,14 +101,19 @@ UspResult AudioStreamWrite(UspHandle uspHandle, const void * data, uint32_t size
             metrics_audio_start();
 
             ret = TransportStreamPrepare(uspHandle->transportRequest, httpArgs);
-            if (ret)
+            if (ret != 0)
             {
                 Unlock(uspHandle->transportRequestLock);
+                LogError("TransportStreamPrepare failed. error=%d", ret);
                 return ret;
             }
         }
 
         ret = TransportStreamWrite(uspHandle->transportRequest, (uint8_t*)data, size);
+        if (ret != 0)
+        {
+            LogError("TransportStreamWrite failed. error=%d", ret);
+        }
     }
 
     Unlock(uspHandle->transportRequestLock);
@@ -132,9 +140,8 @@ UspResult AudioStreamFlush(UspHandle uspHandle)
 {
     int ret;
 
-    LogInfo("TS:%llu, %s: Flush audio buffer.", USP_LIFE_TIME(uspHandle), __FUNCTION__);
-
-    USP_RETURN_IF_HANDLE_NULL(uspHandle);
+    LogInfo("TS:%llu, Flush audio buffer.", USP_LIFE_TIME(uspHandle));
+    USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
 
     if (!uspHandle->audioOffset)
     {
@@ -146,12 +153,13 @@ UspResult AudioStreamFlush(UspHandle uspHandle)
     metrics_audiostream_flush();
     metrics_audio_end();
 
-    if (!ret)
+    if (ret == 0)
     {
         return USP_SUCCESS;
     }
     else
     {
+        LogError("Returns failure, reason: TransportStreamFlush returns %d", ret);
         return USP_TRANSPORT_ERROR_GENERIC;
     }
 }
@@ -167,15 +175,11 @@ static void TransportErrorHandler(TransportHandle transportHandle, TransportErro
     LogInfo("TS:%llu, TransportError: uspContext:0x%x, reason=%d.", USP_LIFE_TIME(uspContext), uspContext, reason);
 
     assert(uspContext != NULL);
-    if (uspContext->callbacks == NULL)
-    {
-        LogError("%s: callbacks is null.", __FUNCTION__);
-        return;
-    }
+    USP_RETURN_VOID_IF_CALLBACKS_NULL(uspContext);
 
     if (uspContext->callbacks->OnError == NULL)
     {
-        LogInfo("%s: No callback is defined for onError.", __FUNCTION__);
+        LogInfo("No callback is defined for onError.");
         return;
     }
 
@@ -215,10 +219,10 @@ static UspResult SpeechStartHandler(UspContext* uspContext, const char* path, co
     (void)buffer;
     (void)size;
 
-    USP_RETURN_IF_CALLBACKS_NULL(uspContext);
+    USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspContext);
     if (uspContext->callbacks->onSpeechStartDetected == NULL)
     {
-        LogInfo("%s: No callback is defined for speech.start.", __FUNCTION__);
+        LogInfo("No user callback is defined for callbacks->onSpeechStartDetected.");
         return USP_SUCCESS;
     }
 
@@ -247,10 +251,10 @@ static UspResult SpeechEndHandler(UspContext* uspContext, const char* path, cons
     (void)buffer;
     (void)size;
 
-     USP_RETURN_IF_CALLBACKS_NULL(uspContext);
+     USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspContext);
     if (uspContext->callbacks->onSpeechEndDetected == NULL)
     {
-        LogInfo("%s: No callback is defined for speech.end.", __FUNCTION__);
+        LogInfo("No user callback is defined for callbacks->onSpeechEndDetected.");
         return USP_SUCCESS;
     }
 
@@ -278,10 +282,10 @@ static UspResult TurnEndHandler(UspContext* uspContext, const char* path, const 
     (void)buffer;
     (void)size;
 
-    USP_RETURN_IF_CALLBACKS_NULL(uspContext);
+    USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspContext);
     if (uspContext->callbacks->onTurnEnd == NULL)
     {
-        LogInfo("%s: No callback is defined for turn.end.", __FUNCTION__);
+        LogInfo("No user callback is defined for callbacks->onTurnEnd.");
     }
     else
     {
@@ -323,7 +327,7 @@ static UspResult ContentPathHandler(UspContext* uspContext, const char* path, co
         size + 1);
     if (!responseContentHandle)
     {
-        LogError("BUFFER_create failed in %s", __FUNCTION__);
+        LogError("BUFFER_create failed.");
         return USP_OUT_OF_MEMORY;
     }
 
@@ -374,19 +378,22 @@ static void TransportRecvResponseHandler(TransportHandle transportHandle, HTTP_H
 
     (void)transportHandle;
 
+    USP_RETURN_VOID_IF_CONTEXT_NULL(context);
+
     if (errorCode != 0)
     {
-        LogError("Response error %d in %s", errorCode, __FUNCTION__);
+        LogError("Response error %d.", errorCode);
         // TODO: Lower layers need appropriate signals
         return;
     }
-    else if (!context || NULL == responseHeader)
+    else if (responseHeader == NULL)
     {
+        LogError("ResponseHeader is NULL.");
         return;
     }
 
     path = HTTPHeaders_FindHeaderValue(responseHeader, KEYWORD_PATH);
-    if (!path)
+    if (path == NULL)
     {
         PROTOCOL_VIOLATION("response missing '" KEYWORD_PATH "' header");
         return;
@@ -395,18 +402,13 @@ static void TransportRecvResponseHandler(TransportHandle transportHandle, HTTP_H
     if (size != 0)
     {
         contentType = HTTPHeaders_FindHeaderValue(responseHeader, g_keywordContentType);
-        if (NULL == contentType)
+        if (contentType == NULL)
         {
             PROTOCOL_VIOLATION("response '%s' contains body with no content-type", path);
             return;
         }
     }
 
-    if (context == NULL)
-    {
-        LogError("No context provided in %s.", __FUNCTION__);
-        return;
-    }
     UspContext *uspContext = (UspContext *)context;
 
     LogInfo("%llu Response Message: path: %s, content type: %s, size: %zu.", USP_LIFE_TIME(uspContext), path, contentType, size);
@@ -487,7 +489,7 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
     TransportHandle transportHandle = TransportRequestCreate(endpoint, uspContext);
     if (transportHandle == NULL)
     {
-        LogError("Failed to create transport request in %s", __FUNCTION__);
+        LogError("Failed to create transport request.");
         return USP_INITIALIZATION_FAILURE;
     }
 
@@ -511,7 +513,7 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
     case USP_AUTHENTICATION_SUBSCRIPTION_KEY:
         if (TransportRequestAddRequestHeader(transportHandle, "Ocp-Apim-Subscription-Key", STRING_c_str(uspContext->authData)) != 0)
         {
-            LogError("%s: Set authentication using subscription key failed.", __FUNCTION__);
+            LogError("Failed to set authentication using subscription key.");
             return USP_INITIALIZATION_FAILURE;
         }
         break;
@@ -525,13 +527,13 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
             char *tokenStr = malloc(tokenStrSize);
             if (tokenStr == NULL)
             {
-                LogError("%s: failed to allocate memory for token.", __FUNCTION__);
+                LogError("Failed to allocate memory for token.");
                 return USP_OUT_OF_MEMORY;
             }
             snprintf(tokenStr, tokenStrSize, "%s %s", bearerHeader, tokenValue);
             if (TransportRequestAddRequestHeader(transportHandle, "Authorization", tokenStr) != 0)
             {
-                LogError("%s: Set authentication using authorization token failed.", __FUNCTION__);
+                LogError("Failed to set authentication using authorization token.");
                 ret = USP_INITIALIZATION_FAILURE;
             }
             free(tokenStr);
@@ -541,14 +543,14 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
         break;
 
     default:
-        LogError("%s: Unsupported authentication type %d.", __FUNCTION__, uspContext->authType);
+        LogError("Unsupported authentication type %d.", uspContext->authType);
         return USP_INITIALIZATION_FAILURE;
     }
 
     uspContext->transportRequestLock = Lock_Init();
     if (uspContext->transportRequestLock == NULL)
     {
-        LogError("Failed to create a lock for transport request in %s", __FUNCTION__);
+        LogError("Failed to create a lock for transport request.");
         return USP_INITIALIZATION_FAILURE;
     }
 
@@ -557,7 +559,7 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
 
 UspResult TransportShutdown(UspContext* uspContext)
 {
-    USP_RETURN_IF_HANDLE_NULL(uspContext);
+    USP_RETURN_ERROR_IF_HANDLE_NULL(uspContext);
 
     if (uspContext->transportRequest != NULL)
     {
@@ -577,7 +579,7 @@ UspResult UspContextDestroy(UspContext* uspContext)
     LIST_ITEM_HANDLE userPathHandlerItem;
     UserPathHandler* pathHandler;
 
-    USP_RETURN_IF_HANDLE_NULL(uspContext);
+    USP_RETURN_ERROR_IF_HANDLE_NULL(uspContext);
 
     if (uspContext->dnsCache != NULL)
     {
@@ -639,7 +641,7 @@ UspResult UspContextCreate(UspContext** contextCreated)
     uspContext->dnsCache = DnsCacheCreate();
     if (uspContext->dnsCache == NULL)
     {
-        LogError("Create DNSCache failed in %s", __FUNCTION__);
+        LogError("Create DNSCache failed.");
         UspContextDestroy(uspContext);
         return USP_INITIALIZATION_FAILURE;
     }
@@ -652,12 +654,12 @@ UspResult UspContextCreate(UspContext** contextCreated)
 
 UspResult UspSetCallbacks(UspContext* uspContext, UspCallbacks *callbacks, void* callbackContext)
 {
-    USP_RETURN_IF_HANDLE_NULL(uspContext);
-    USP_RETURN_IF_ARGUMENT_NULL(callbacks, "callbacks");
+    USP_RETURN_ERROR_IF_HANDLE_NULL(uspContext);
+    USP_RETURN_ERROR_IF_ARGUMENT_NULL(callbacks, "callbacks");
 
     if ((callbacks->version != USP_CALLBACK_VERSION) || (callbacks->size != sizeof(UspCallbacks)))
     {
-        LogError("The callbacks passed to %s is invalid. version:%u (expected: %u), size:%u (expected: %zu).", __FUNCTION__, callbacks->version, USP_CALLBACK_VERSION, callbacks->size, sizeof(UspCallbacks));
+        LogError("The version or size of callbacks is invalid. version:%u (expected: %u), size:%u (expected: %zu).", callbacks->version, USP_CALLBACK_VERSION, callbacks->size, sizeof(UspCallbacks));
         return USP_INVALID_ARGUMENT;
     }
 

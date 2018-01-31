@@ -57,25 +57,25 @@ extern "C" {
 #define USP_FLAG_CONNECTED   0x02
 #define USP_FLAG_SHUTDOWN    0x04
 
-#define USP_RETURN_IF_HANDLE_NULL(uspHandle) \
+#define USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle) \
     do { \
         if (uspHandle == NULL) \
         { \
-            LogError("%s: The UspHandle is null.", __FUNCTION__); \
+            LogError("The UspHandle is null."); \
             return USP_INVALID_HANDLE; \
         } \
     } while (0)
 
-#define USP_RETURN_IF_ARGUMENT_NULL(argument, argumentName) \
+#define USP_RETURN_ERROR_IF_ARGUMENT_NULL(argument, argumentName) \
     do { \
         if (argument == NULL) \
         { \
-            LogError("%s: The argument '%s' is null.", __FUNCTION__, argumentName); \
+            LogError("The argument '%s' is null.", argumentName); \
             return USP_INVALID_ARGUMENT; \
         } \
     } while (0)
 
-#define USP_RETURN_IF_WRONG_STATE(uspHandle, expectedState) \
+#define USP_RETURN_ERROR_IF_WRONG_STATE(uspHandle, expectedState) \
     do { \
         if (uspHandle->flags != expectedState) \
         { \
@@ -84,22 +84,46 @@ extern "C" {
         } \
     } while (0)
 
-#define USP_RETURN_IF_CONTEXT_NULL(context) \
+#define USP_RETURN_ERROR_IF_CONTEXT_NULL(context) \
     do { \
         if (context == NULL) \
         { \
-            LogError("%s: context is null.", __FUNCTION__); \
+            LogError("Context is null."); \
             return USP_INVALID_ARGUMENT; \
         } \
     } while (0)
 
-#define USP_RETURN_IF_CALLBACKS_NULL(context) \
+#define USP_RETURN_ERROR_IF_CALLBACKS_NULL(context) \
     do { \
         if (context->callbacks == NULL) \
         { \
-            LogError("%s: callbacks is null.", __FUNCTION__); \
+            LogError("User callbacks are null."); \
             return USP_CALLBACKS_NOT_SET; \
         } \
+    } while (0)
+
+#define USP_RETURN_VOID_IF_CONTEXT_NULL(context) \
+    do { \
+        if (context == NULL) \
+        { \
+            LogError("Context is null."); \
+            return; \
+        } \
+    } while (0)
+
+#define USP_RETURN_VOID_IF_CALLBACKS_NULL(context) \
+    do { \
+        if (context->callbacks == NULL) \
+        { \
+            LogError("User callbacks are null."); \
+            return; \
+        } \
+    } while (0)
+
+#define USP_RETURN_NOT_IMPLEMENTED() \
+    do { \
+        LogError("Not implemented"); \
+        return USP_NOT_IMPLEMENTED; \
     } while (0)
 
 #ifdef WIN32

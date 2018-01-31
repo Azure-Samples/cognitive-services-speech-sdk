@@ -1192,9 +1192,9 @@ int TransportStreamWrite(TransportHandle transportHandle, const uint8_t* buffer,
     TransportRequest* request = (TransportRequest*)transportHandle;
     if (NULL == request)
     {
+        LogError("transportHandle is NULL.");
         return -1;
     }
-
     if (request->isWS)
     {
         uint8_t msgtype = METRIC_MESSAGE_TYPE_INVALID;
@@ -1281,16 +1281,15 @@ int TransportStreamFlush(TransportHandle transportHandle)
     TransportRequest* request = (TransportRequest*)transportHandle;
     if (NULL == request)
     {
+        LogError("transportHandle is null.");
         return -1;
     }
-
     if (request->isWS)
     {
-        if (!request->isOpen)
-        {
-            return -1;
-        }
-
+        // No need to check whether WS is open, since it is possbile that
+        // flush is called even before the WS connection is established, in
+        // particular if the audio file is very short. Just append the zero-sized
+        // buffer as indication of end-of-audio.
         return TransportStreamWrite(request, NULL, 0);
     }
     else

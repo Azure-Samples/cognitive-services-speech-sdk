@@ -319,16 +319,9 @@ int main(int argc, char* argv[])
     // Send End of Audio to service to close the session.
     if (feof(audio))
     {
-        if ((ret = UspWriteAudio(handle, NULL, 0, &bytesWritten)) != USP_SUCCESS)
+        if ((ret = UspFlushAudio(handle)) != USP_SUCCESS)
         {
-            printf("%s: Error: send End of Audio to service failed (error=0x%x).\n", __FUNCTION__, ret);
-            UspClose(handle);
-            exit(1);
-        }
-
-        if (bytesWritten != 0)
-        {
-            printf("%s: Error: For End of Audio, the number of bytes sent to service (%zu) must be 0.\n", __FUNCTION__, bytesWritten);
+            printf("%s: Error: flushing audio failed (error=0x%x).\n", __FUNCTION__, ret);
             UspClose(handle);
             exit(1);
         }

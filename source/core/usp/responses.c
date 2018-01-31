@@ -95,7 +95,7 @@ UspResult ContentDispatch(void* context, const char* path, const char* mime, IOB
     }
     else if (responseSize > BUFFER_length(responseContentHandle))
     {
-        LogError("%s: responseSize is too large", __FUNCTION__);
+        LogError("responseSize is too large.");
         return USP_BUFFER_TOO_SMALL;
     }
 
@@ -115,7 +115,7 @@ UspResult ContentDispatch(void* context, const char* path, const char* mime, IOB
         }
     }
 
-    LogError("%s: Content '%s' not handled.", __FUNCTION__, mime);
+    LogError("No handler defined for Content '%s'.", mime);
     return USP_UNKNOWN_PATH_IN_RESPONSE;
 }
 
@@ -131,21 +131,19 @@ static int HandleJsonIntentResponse(PROPERTYBAG_HANDLE  propertyHandle, void* co
     // Todo: do we need to handle "response" message?
     (void)propertyHandle;
 
-    USP_RETURN_IF_CONTEXT_NULL(context);
-
-    LogError("%s: Not implemented", __FUNCTION__);
-    return USP_NOT_IMPLEMENTED;
+    USP_RETURN_ERROR_IF_CONTEXT_NULL(context);
+    USP_RETURN_NOT_IMPLEMENTED();
 }
 
 // handles "speech.phrase" API path
 static int HandleJsonSpeechPhrase(PROPERTYBAG_HANDLE propertyHandle, void* context)
 {
-    USP_RETURN_IF_CONTEXT_NULL(context);
+    USP_RETURN_ERROR_IF_CONTEXT_NULL(context);
 
     DeserializeContext* deserializeContext = (DeserializeContext*)context;
 
     UspContext* uspContext = (UspContext*)deserializeContext->context;
-    USP_RETURN_IF_CALLBACKS_NULL(uspContext);
+    USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspContext);
 
     // Zhou: why not differentiae by "Path", but just by "DisplayText" or "Text"??
 
@@ -157,7 +155,7 @@ static int HandleJsonSpeechPhrase(PROPERTYBAG_HANDLE propertyHandle, void* conte
         // V2 of the speech protocol for partial results
         if (uspContext->callbacks->onSpeechHypothesis == NULL)
         {
-            LogInfo("No callback defined for speech.hypothesis.");
+            LogInfo("No user callback defined for callbacks->onSpeechHypothesis.");
             return USP_SUCCESS;
         }
 
@@ -183,7 +181,7 @@ static int HandleJsonSpeechPhrase(PROPERTYBAG_HANDLE propertyHandle, void* conte
         // Speech.Phrase message
         if (uspContext->callbacks->onSpeechPhrase == NULL)
         {
-            LogInfo("No callback defined for speech.hypothesis.");
+            LogInfo("No user callback defined for callbacks->onSpeechPhrase.");
             return USP_SUCCESS;
         }
 
@@ -261,16 +259,16 @@ static int HandleJsonSpeechPhrase(PROPERTYBAG_HANDLE propertyHandle, void* conte
 // handles "speech.fragment" API path
 static int HandleJsonSpeechFragment(PROPERTYBAG_HANDLE  propertyHandle, void* context)
 {
-    USP_RETURN_IF_CONTEXT_NULL(context);
+    USP_RETURN_ERROR_IF_CONTEXT_NULL(context);
 
     DeserializeContext* deserializeContext = (DeserializeContext*)context;
 
     UspContext* uspContext = (UspContext*)deserializeContext->context;
-    USP_RETURN_IF_CALLBACKS_NULL(uspContext);
+    USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspContext);
 
     if (uspContext->callbacks->onSpeechFragment == NULL)
     {
-        LogInfo("%s: no callback is defined for speech.fragment.", __FUNCTION__);
+        LogInfo("No user callback defined for callbacks->onSpeechFragment.");
         return USP_SUCCESS;
     }
 
@@ -319,17 +317,17 @@ static int HandleTurnStartContext(PROPERTYBAG_HANDLE propertyHandle, void* conte
 // handles "turn.start" API path
 static int HandleJsonTurnStart(PROPERTYBAG_HANDLE  propertyHandle, void* context)
 {
-    USP_RETURN_IF_CONTEXT_NULL(context);
+    USP_RETURN_ERROR_IF_CONTEXT_NULL(context);
 
     DeserializeContext* deserializeContext = (DeserializeContext*)context;
 
     // USP handling
     UspContext* uspContext = (UspContext *)(deserializeContext->context);
-    USP_RETURN_IF_CALLBACKS_NULL(uspContext);
+    USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspContext);
 
     if (uspContext->callbacks->onTurnStart == NULL)
     {
-        LogInfo("%s: No callback is defined for turn.start.", __FUNCTION__);
+        LogInfo("No user callback defined for callbacks->onTurnStart.");
         return USP_SUCCESS;
     }
 
@@ -383,7 +381,7 @@ UspResult JsonResponseHandler(void* context, const char* path, uint8_t* buffer, 
 
     if (context == NULL || buffer == NULL || path == NULL)
     {
-        LogError("%s: One of the following parameters is null: uspContext:0x%x, buffer:0x%x, path:0x%x.", __FUNCTION__, context, buffer, path);
+        LogError("One of the following parameters is null: uspContext:0x%x, buffer:0x%x, path:0x%x.", context, buffer, path);
         return USP_INVALID_ARGUMENT;
     }
 
@@ -442,8 +440,6 @@ UspResult TextResponseHandler(void* context, const char* path, uint8_t* buffer, 
     (void)buffer;
     (void)bufferSize;
 
-    LogError("%s: Not implemented", __FUNCTION__);
-
-    return USP_NOT_IMPLEMENTED;
+    USP_RETURN_NOT_IMPLEMENTED();
 }
 
