@@ -9,8 +9,12 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include <assert.h>
+#ifdef WIN32
+#include <windows.h>
+#endif
 
+#include <assert.h>
+#include <time.h>
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/base64.h"
@@ -32,10 +36,26 @@ const char g_messagePathSpeechEndDetected[] = "speech.endDetected";
 const char g_messagePathResponse[] = "response";
 // const char kUserAgent[] = "CortanaSDK (" CORTANASDK_BUILD_HASH "DeviceType=Near;SpeechClient=" CORTANA_SDK_VERSION ")";
 
-// Todo: add get real time
+#ifdef WIN32
+uint64_t g_perfCounterFrequency;
+#endif
+
 uint64_t telemetry_gettime()
 {
-    return 0;
+#if defined(WIN32)
+    LARGE_INTEGER tickCount;
+    if (QueryPerformanceCounter(&tickCount) == 0)
+    {
+        LogError("tickcounter failed: QueryPerformanceCounter failed %d.", GetLastError());
+        return 0;
+    }
+    return (uint64_t)tickCount.QuadPart;
+
+#else
+    // Todo: a time function with higher resolution
+    return (uint64_t)time(NULL);
+
+#endif
 }
 
 // Write audio stream to the service: call transport to write/flush stream
@@ -43,6 +63,8 @@ UspResult AudioStreamWrite(UspHandle uspHandle, const void * data, uint32_t size
 {
     const char* httpArgs = "/audio";
     int ret = -1;
+
+    LogInfo("TS:%llu, %s: Write %zu bytes audio data.", USP_LIFE_TIME(uspHandle), __FUNCTION__, size);
 
     USP_RETURN_IF_HANDLE_NULL(uspHandle);
     USP_RETURN_IF_ARGUMENT_NULL(data, "data");
@@ -110,6 +132,8 @@ UspResult AudioStreamFlush(UspHandle uspHandle)
 {
     int ret;
 
+    LogInfo("TS:%llu, %s: Flush audio buffer.", USP_LIFE_TIME(uspHandle), __FUNCTION__);
+
     USP_RETURN_IF_HANDLE_NULL(uspHandle);
 
     if (!uspHandle->audioOffset)
@@ -140,7 +164,7 @@ static void TransportErrorHandler(TransportHandle transportHandle, TransportErro
     (void)transportHandle;
 
     UspContext* uspContext = (UspContext*)context;
-    LogInfo("%s: uspContext:0x%x, reason=%d.", uspContext, reason);
+    LogInfo("TS:%llu, TransportError: uspContext:0x%x, reason=%d.", USP_LIFE_TIME(uspContext), uspContext, reason);
 
     assert(uspContext != NULL);
     if (uspContext->callbacks == NULL)
@@ -177,16 +201,53 @@ static void TransportErrorHandler(TransportHandle transportHandle, TransportErro
     uspContext->callbacks->OnError(uspContext, uspContext->callbackContext, uspError);
 }
 
-// Callback for speech.end
-static UspResult SpeechEndHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size)
+// Callback for SpeechStartDetected.
+static UspResult SpeechStartHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size)
 {
+    assert(uspContext != NULL);
+
+#ifdef _DEBUG
+    LogInfo("TS: %llu, speech.start Message: path: %s, content type: %s, size: %zu.", USP_LIFE_TIME(uspContext), path, mime, size);
+#endif
+
+    (void)path;
     (void)mime;
     (void)buffer;
     (void)size;
-    (void)path;
 
-    assert(uspContext != NULL);
     USP_RETURN_IF_CALLBACKS_NULL(uspContext);
+    if (uspContext->callbacks->onSpeechStartDetected == NULL)
+    {
+        LogInfo("%s: No callback is defined for speech.start.", __FUNCTION__);
+        return USP_SUCCESS;
+    }
+
+    UspMsgSpeechStartDetected* msg = malloc(sizeof(UspMsgSpeechStartDetected));
+    // Todo: deal with char to wchar
+    // Todo: add more field;
+    uspContext->callbacks->onSpeechStartDetected(uspContext, uspContext->callbackContext, msg);
+    // Todo: better handling of memory management.
+    free(msg);
+
+    return USP_SUCCESS;
+}
+
+
+// Callback for speech.end
+static UspResult SpeechEndHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size)
+{
+    assert(uspContext != NULL);
+
+#ifdef _DEBUG
+    LogInfo("TS:%llu, speech.end Message: path: %s, content type: %s, size: %zu.", USP_LIFE_TIME(uspContext), path, mime, size);
+#endif
+
+    (void)path;
+    (void)mime;
+    (void)buffer;
+    (void)size;
+
+     USP_RETURN_IF_CALLBACKS_NULL(uspContext);
     if (uspContext->callbacks->onSpeechEndDetected == NULL)
     {
         LogInfo("%s: No callback is defined for speech.end.", __FUNCTION__);
@@ -206,14 +267,18 @@ static UspResult SpeechEndHandler(UspContext* uspContext, const char* path, cons
 // callback for turn.end
 static UspResult TurnEndHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size)
 {
+    assert(uspContext != NULL);
+
+#ifdef _DEBUG
+    LogInfo("TS:%llu, turn.end Message: path: %s, content type: %s, size: %zu.", USP_LIFE_TIME(uspContext), path, mime, size);
+#endif
+
     (void)path;
     (void)mime;
     (void)buffer;
     (void)size;
 
-    assert(uspContext != NULL);
     USP_RETURN_IF_CALLBACKS_NULL(uspContext);
-
     if (uspContext->callbacks->onTurnEnd == NULL)
     {
         LogInfo("%s: No callback is defined for turn.end.", __FUNCTION__);
@@ -265,7 +330,7 @@ static UspResult ContentPathHandler(UspContext* uspContext, const char* path, co
     BUFFER_u_char(responseContentHandle)[size] = 0;
 
 #ifdef _DEBUG
-    LogInfo("Content Message: path: %s, content type: %s, size: %zu, buffer: %s", path, mime, size, (char *)BUFFER_u_char(responseContentHandle));
+    LogInfo("TS:%llu, Content Message: path: %s, content type: %s, size: %zu, buffer: %s", USP_LIFE_TIME(uspContext), path, mime, size, (char *)BUFFER_u_char(responseContentHandle));
 #endif
     ret = ContentDispatch((void*)uspContext, path, mime, NULL, responseContentHandle, size);
 
@@ -273,33 +338,6 @@ static UspResult ContentPathHandler(UspContext* uspContext, const char* path, co
 
     return ret;
 }
-
-// Callback for SpeechStartDetected.
-static UspResult SpeechStartHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size)
-{
-    (void)path;
-    (void)mime;
-    (void)buffer;
-    (void)size;
-
-    assert(uspContext != NULL);
-    USP_RETURN_IF_CALLBACKS_NULL(uspContext);
-    if (uspContext->callbacks->onSpeechStartDetected == NULL)
-    {
-        LogInfo("%s: No callback is defined for speech.start.", __FUNCTION__);
-        return USP_SUCCESS;
-    }
-
-    UspMsgSpeechStartDetected* msg = malloc(sizeof(UspMsgSpeechStartDetected));
-    // Todo: deal with char to wchar
-    // Todo: add more field;
-    uspContext->callbacks->onSpeechStartDetected(uspContext, uspContext->callbackContext, msg);
-    // Todo: better handling of memory management.
-    free(msg);
-
-    return USP_SUCCESS;
-}
-
 
 bool userPathHandlerCompare(LIST_ITEM_HANDLE item1, const void* path)
 {
@@ -370,6 +408,8 @@ static void TransportRecvResponseHandler(TransportHandle transportHandle, HTTP_H
         return;
     }
     UspContext *uspContext = (UspContext *)context;
+
+    LogInfo("%llu Response Message: path: %s, content type: %s, size: %zu.", USP_LIFE_TIME(uspContext), path, contentType, size);
 
     for (unsigned int i = 0; i < ARRAYSIZE(g_SystemMessageHandlers); i++)
     {
@@ -577,6 +617,23 @@ UspResult UspContextCreate(UspContext** contextCreated)
 
     PropertybagInitialize();
     telemetry_initialize();
+
+#ifdef WIN32
+    LARGE_INTEGER perfCounterFrequency;
+    if (QueryPerformanceFrequency(&perfCounterFrequency) == 0)
+    {
+        LogError("Get performance counter frequency failed %d.", GetLastError());
+    }
+    else
+    {
+        // Todo: There is a potential concurrency risk. 
+        if (g_perfCounterFrequency == 0)
+        {
+            g_perfCounterFrequency = (uint64_t)perfCounterFrequency.QuadPart;
+        }
+        LogInfo("The performance counter frequency is %llu.", (uint64_t)perfCounterFrequency.QuadPart);
+    }
+#endif
 
     uspContext->creationTime = telemetry_gettime();
     uspContext->dnsCache = DnsCacheCreate();

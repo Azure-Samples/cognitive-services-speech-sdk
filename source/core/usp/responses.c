@@ -341,7 +341,6 @@ static int HandleJsonTurnStart(PROPERTYBAG_HANDLE  propertyHandle, void* context
         HandleTurnStartContext,
         msg);
 
-    LogInfo("Turn.Start response: serviceTag: %ls.", msg->contextServiceTag);
     uspContext->callbacks->onTurnStart(uspContext, uspContext->callbackContext, msg);
 
     // Todo: better handling of memory management.

@@ -93,6 +93,7 @@ void OnError(UspHandle handle, void* context, UspResult error)
     UNUSED(handle);
     UNUSED(context);
     printf("Response: On Error: 0x%x.\n", error);
+    turnEnd = true;
 }
 
 void OnUserMessage(UspHandle uspHandle, const char* path, const char* contentType, const unsigned char* buffer, size_t size, void* context)
@@ -294,21 +295,19 @@ int main(int argc, char* argv[])
     {
         bytesToWrite = fread(buffer, sizeof(uint8_t), chunkSize, audio);
 
-        if ((ret = UspWrite(handle, buffer, bytesToWrite, &bytesWritten)) != USP_SUCCESS)
+        if ((ret = UspWriteAudio(handle, buffer, bytesToWrite, &bytesWritten)) != USP_SUCCESS)
         {
-            printf("Error: send data to service failed (error=0x%x).\n", ret);
+            printf("%s: Error: send data to service failed (error=0x%x).\n", __FUNCTION__, ret);
             UspClose(handle);
             exit(1);
         }
         else
         {
             totalBytesWritten += bytesWritten;
-#ifdef _DEBUG
-            printf("Info: successfully sent %zu bytes (expected=%zu). Totally: %zu\n", bytesWritten, bytesToWrite, totalBytesWritten);
-#endif
             if (bytesToWrite != bytesWritten)
             {
-                printf("Error: the number of bytes sent to service (%zu) does not match expected (%zu).\n", bytesWritten, bytesToWrite);
+                printf("%s: Error: the number of bytes sent to service (%zu) does not match expected (%zu).\n", __FUNCTION__, bytesWritten, bytesToWrite);
+                UspClose(handle);
                 exit(1);
             }
         }
@@ -317,14 +316,32 @@ int main(int argc, char* argv[])
         ThreadAPI_Sleep(200);
     }
 
+    // Send End of Audio to service to close the session.
+    if (feof(audio))
+    {
+        if ((ret = UspWriteAudio(handle, NULL, 0, &bytesWritten)) != USP_SUCCESS)
+        {
+            printf("%s: Error: send End of Audio to service failed (error=0x%x).\n", __FUNCTION__, ret);
+            UspClose(handle);
+            exit(1);
+        }
+
+        if (bytesWritten != 0)
+        {
+            printf("%s: Error: For End of Audio, the number of bytes sent to service (%zu) must be 0.\n", __FUNCTION__, bytesWritten);
+            UspClose(handle);
+            exit(1);
+        }
+    }
+
     if (totalBytesWritten != fileSize)
     {
-        printf("Error: the total number of bytes sent (%zu) does not match the file size (%zu).\n", totalBytesWritten, fileSize);
+        printf("%s: Error: the total number of bytes sent (%zu) does not match the file size (%zu).\n", __FUNCTION__, totalBytesWritten, fileSize);
         exit(1);
     }
     else
     {
-        printf("Totally send %zu bytes of audio.\n", totalBytesWritten);
+        printf("%s: Totally send %zu bytes of audio.\n", __FUNCTION__, totalBytesWritten);
     }
 
     // Wait for end of recognition.

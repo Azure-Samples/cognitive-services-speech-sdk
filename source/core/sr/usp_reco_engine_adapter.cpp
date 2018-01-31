@@ -118,7 +118,7 @@ void CSpxUspRecoEngineAdapter::UspWriteFormat(UspHandle handle, WAVEFORMATEX* pf
     ptr = FormatBufferWriteChars(ptr, "data", cbChunkType);
     ptr = FormatBufferWriteNumber(ptr, cbDataChunk);
 
-    // Now that we've prepared the header/buffer, send it along to Truman/Newman/Skyman via UspWrite
+    // Now that we've prepared the header/buffer, send it along to Truman/Newman/Skyman via UspWriteAudio
     SPX_DBG_ASSERT(cbHeader == size_t(ptr - buffer.get()));
     UspWrite_Actual(m_handle, buffer.get(), cbHeader);
 }
@@ -138,8 +138,8 @@ void CSpxUspRecoEngineAdapter::UspWrite_Actual(UspHandle handle, const uint8_t* 
 {
     SPX_INIT_HR(hr);
 
-    hr = ::UspWrite(handle, buffer, byteToWrite, NULL);
-    hr = (byteToWrite == 0 && hr == USP_WRITE_ERROR) ? SPX_NOERROR : hr; // ::UspWrite currently returns USP_WRITE_ERROR on zero bytes, but there's no other way to flush buffer...
+    hr = ::UspWriteAudio(handle, buffer, byteToWrite, NULL);
+    hr = (byteToWrite == 0 && hr == USP_WRITE_AUDIO_ERROR) ? SPX_NOERROR : hr; // ::UspWriteAudio currently returns USP_WRITE_AUDIO_ERROR on zero bytes, but there's no other way to flush buffer...
 
     DumpFileWrite(buffer, byteToWrite);
 

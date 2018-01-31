@@ -195,7 +195,13 @@ UspResult UspConnect(UspHandle uspHandle);
 * @param bytesToWrite The amount of data in bytes to be sent.
 * @param bytesWritten On a successful return, the number of bytes have been sent is returned.
 */
-UspResult UspWrite(UspHandle uspHandle, const uint8_t* buffer, size_t bytesToWrite, size_t* bytesWritten);
+UspResult UspWriteAudio(UspHandle uspHandle, const uint8_t* buffer, size_t bytesToWrite, size_t* bytesWritten);
+
+/**
+* Finalizes sending audio data to indicate the end of audio.
+* @param uspHandle The UspHandle to which the data is sent.
+*/
+UspResult UspFlushAudio(UspHandle uspHandle);
 
 /**
 * Closes the uspHandle.

@@ -313,7 +313,7 @@ UspResult UspClose(UspHandle uspHandle)
 
 
 // Pass another parameter to return the bytes have been written.
-UspResult UspWrite(UspHandle uspHandle, const uint8_t* buffer, size_t bytesToWrite, size_t *bytesWritten)
+UspResult UspWriteAudio(UspHandle uspHandle, const uint8_t* buffer, size_t bytesToWrite, size_t *bytesWritten)
 {
     uint32_t count = 0;
 
@@ -324,7 +324,7 @@ UspResult UspWrite(UspHandle uspHandle, const uint8_t* buffer, size_t bytesToWri
     {
         if (AudioStreamFlush(uspHandle) != 0)
         {
-            return USP_WRITE_ERROR;
+            return USP_WRITE_AUDIO_ERROR;
         }
     }
     else
@@ -332,13 +332,23 @@ UspResult UspWrite(UspHandle uspHandle, const uint8_t* buffer, size_t bytesToWri
         // Todo: mismatch between size_t ad byteToWrite...
         if (AudioStreamWrite(uspHandle, buffer, (uint32_t)bytesToWrite, &count))
         {
-            return USP_WRITE_ERROR;
+            return USP_WRITE_AUDIO_ERROR;
         }
     }
 
     if (bytesWritten != NULL)
     {
         *bytesWritten = count;
+    }
+
+    return USP_SUCCESS;
+}
+
+UspResult UspFlushAudio(UspHandle uspHandle)
+{
+    if (AudioStreamFlush(uspHandle) != 0)
+    {
+        return USP_FLUSH_AUDIO_ERROR;
     }
 
     return USP_SUCCESS;

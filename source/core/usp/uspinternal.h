@@ -50,9 +50,9 @@ extern "C" {
 #define sscanf_s sscanf
 #endif
 
-/**
-* USP_FLAG_XXX indicates state of the UspContext.
-*/
+    /**
+    * USP_FLAG_XXX indicates state of the UspContext.
+    */
 #define USP_FLAG_INITIALIZED 0x01
 #define USP_FLAG_CONNECTED   0x02
 #define USP_FLAG_SHUTDOWN    0x04
@@ -102,6 +102,12 @@ extern "C" {
         } \
     } while (0)
 
+#ifdef WIN32
+// Convert performance counter to microseconds. First coverting to microsecond before dividing
+#define USP_LIFE_TIME(uspContext) ((telemetry_gettime() - uspContext->creationTime)*1000000/g_perfCounterFrequency)
+#else
+#define USP_LIFE_TIME(uspContext) (telemetry_gettime() - uspContext->creationTime)
+#endif
 
 typedef struct _UserPathHandler
 {

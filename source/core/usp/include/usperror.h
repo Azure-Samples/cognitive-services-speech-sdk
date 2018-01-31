@@ -85,9 +85,14 @@ extern "C" {
 #define USP_CONNECTION_REMOTE_CLOSED USP_ERRCODE(0x033)
 
 /**
-* USP_WRITE_ERROR indicates an error when calling UspWrite().
+* USP_WRITE_AUDIO_ERROR indicates an error when calling UspWriteAudio().
 */
-#define USP_WRITE_ERROR USP_ERRCODE(0x034)
+#define USP_WRITE_AUDIO_ERROR USP_ERRCODE(0x034)
+
+/**
+* USP_FLUSH_AUDIO_ERROR indicates an error when calling UspFlushAudio().
+*/
+#define USP_FLUSH_AUDIO_ERROR USP_ERRCODE(0x035)
 
 // Response errors
 
