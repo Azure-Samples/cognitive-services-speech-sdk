@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <inttypes.h>
 #include "azure_c_shared_utility/threadapi.h"
 #include "usp.h"
 
@@ -56,21 +57,21 @@ void OnSpeechHypothesis(UspHandle handle, void* context, UspMsgSpeechHypothesis 
 {
     UNUSED(handle);
     UNUSED(context);
-    printf("Response: Speech.Hypothesis message. Text: %ls, starts at offset %llu, with duration %llu.\n", message->text, message->offset, message->duration);
+    printf("Response: Speech.Hypothesis message. Text: %ls, starts at offset %" PRIu64 ", with duration %" PRIu64 ".\n", message->text, message->offset, message->duration);
 }
 
 void OnSpeechPhrase(UspHandle handle, void* context, UspMsgSpeechPhrase *message)
 {
     UNUSED(handle);
     UNUSED(context);
-    printf("Response: Speech.Phrase message. Status: %s, Text: %ls, starts at %llu, with duration %llu.\n", recognitionStatusToText[message->recognitionStatus], message->displayText, message->offset, message->duration);
+    printf("Response: Speech.Phrase message. Status: %s, Text: %ls, starts at %" PRIu64 ", with duration %" PRIu64 ".\n", recognitionStatusToText[message->recognitionStatus], message->displayText, message->offset, message->duration);
 }
 
 void OnSpeechFragment(UspHandle handle, void* context, UspMsgSpeechFragment *message)
 {
     UNUSED(handle);
     UNUSED(context);
-    printf("Response: Speech.Fragment message. Text: %ls, starts at %llu, with duration %llu.\n", message->text, message->offset, message->duration);
+    printf("Response: Speech.Fragment message. Text: %ls, starts at %" PRIu64 ", with duration %" PRIu64 ".\n", message->text, message->offset, message->duration);
 }
 
 void OnTurnStart(UspHandle handle, void* context, UspMsgTurnStart *message)

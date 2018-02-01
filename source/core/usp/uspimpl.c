@@ -77,43 +77,33 @@ UspResult AudioStreamWrite(UspHandle uspHandle, const void * data, uint32_t size
     Lock(uspHandle->transportRequestLock);
 
     metrics_audiostream_data(size);
-    if (!size)
+
+    if (!uspHandle->audioOffset)
     {
-        ret = TransportStreamFlush(uspHandle->transportRequest);
+        metrics_audiostream_init();
+        // user initiated listening and multi-turn require the request id to 
+        // be re-created here to ensure barge-in scenerios work.
+        // if (!uspHandle->KWTriggered)
+        // {
+        //    TransportCreateRequestId(uspHandle->transportRequest);
+        //    // cortana_reset_speech_request_id(uspHandle);
+        // }
+
+        metrics_audio_start();
+
+        ret = TransportStreamPrepare(uspHandle->transportRequest, httpArgs);
         if (ret != 0)
         {
-            LogError("TransportStreamFlush failed. error=%d", ret);
+            Unlock(uspHandle->transportRequestLock);
+            LogError("TransportStreamPrepare failed. error=%d", ret);
+            return ret;
         }
     }
-    else
+
+    ret = TransportStreamWrite(uspHandle->transportRequest, (uint8_t*)data, size);
+    if (ret != 0)
     {
-        if (!uspHandle->audioOffset)
-        {
-            metrics_audiostream_init();
-            // user initiated listening and multi-turn require the request id to 
-            // be re-created here to ensure barge-in scenerios work.
-            // if (!uspHandle->KWTriggered)
-            // {
-            //    TransportCreateRequestId(uspHandle->transportRequest);
-            //    // cortana_reset_speech_request_id(uspHandle);
-            // }
-
-            metrics_audio_start();
-
-            ret = TransportStreamPrepare(uspHandle->transportRequest, httpArgs);
-            if (ret != 0)
-            {
-                Unlock(uspHandle->transportRequestLock);
-                LogError("TransportStreamPrepare failed. error=%d", ret);
-                return ret;
-            }
-        }
-
-        ret = TransportStreamWrite(uspHandle->transportRequest, (uint8_t*)data, size);
-        if (ret != 0)
-        {
-            LogError("TransportStreamWrite failed. error=%d", ret);
-        }
+        LogError("TransportStreamWrite failed. error=%d", ret);
     }
 
     Unlock(uspHandle->transportRequestLock);
@@ -148,7 +138,10 @@ UspResult AudioStreamFlush(UspHandle uspHandle)
         return USP_SUCCESS;
     }
 
+    Lock(uspHandle->transportRequestLock);
     ret = TransportStreamFlush(uspHandle->transportRequest);
+    Unlock(uspHandle->transportRequestLock);
+
     uspHandle->audioOffset = 0;
     metrics_audiostream_flush();
     metrics_audio_end();

@@ -4,7 +4,7 @@
 
 void PAL_WaitForDebugger()
 {
-    uint16_t msWaitForDebugger = 30 * 1000;
+    uint16_t msWaitForDebugger = 5 * 1000;
     uint16_t msSleepPeriod = 100;
     bool fDebugBreak = false;
 
