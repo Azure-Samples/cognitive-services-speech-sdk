@@ -344,7 +344,7 @@ static void WsioOnOpened(void* context, IO_OPEN_RESULT open_result)
     {
         request->state = TRANSPORT_STATE_CONNECTED;
         request->connectionTime = telemetry_gettime();
-        LogInfo("Transport websocket connected");
+        LogInfo("Opening websocket completed. TransportRequest: 0x%x, wsio handle: 0x%x", request, request->ws.WSHandle);
         metrics_transport_connected(request->connectionId);
     }
     else
@@ -357,7 +357,7 @@ static void WsioOnOpened(void* context, IO_OPEN_RESULT open_result)
         request->isCompleted = true;
 
         status = wsio_gethttpstatus(request->ws.WSHandle); 
-        LogError("WSIO open failed %d %d", status, open_result);
+        LogError("Wsio failed to open. wsio handle: 0x%x, status=%d, open_result=%d", request->ws.WSHandle, status, open_result);
         metrics_transport_error(request->connectionId, status);
 
         switch (status)
@@ -822,6 +822,7 @@ void TransportRequestDestroy(TransportHandle transportHandle)
                 while (request->isOpen)
                 {
                     wsio_dowork(request->ws.WSHandle);
+                    ThreadAPI_Sleep(100);
                 }
             }
 

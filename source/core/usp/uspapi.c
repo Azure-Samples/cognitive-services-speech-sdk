@@ -288,6 +288,8 @@ UspResult UspConnect(UspHandle uspHandle)
 
 UspResult UspClose(UspHandle uspHandle)
 {
+    FUNC_ENTER("");
+
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
 
     uspHandle->flags = USP_FLAG_SHUTDOWN;
@@ -304,7 +306,7 @@ UspResult UspClose(UspHandle uspHandle)
 
     UspContextDestroy(uspHandle);
 
-    LogInfo("UspClose complete.");
+    FUNC_RETURN("");
     return USP_SUCCESS;
 }
 

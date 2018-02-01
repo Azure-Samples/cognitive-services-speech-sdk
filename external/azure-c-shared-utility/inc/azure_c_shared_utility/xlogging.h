@@ -41,6 +41,9 @@ typedef void(*LOGGER_LOG)(LOG_CATEGORY log_category, unsigned int options, const
 #define LogError(FORMAT, ...) do{ time_t t = time(NULL); struct tm *ptm = localtime(&t); LOG(LOG_ERROR, LOG_LINE, "Error: Time:" ISOPRINTFMT " File:%s Func:%s Line:%d " FORMAT, ISOPRINTARGS(ptm), __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__); }while(0)
 #endif
 
+#define FUNC_ENTER(FORMAT, ...) do { LOG(LOG_INFO, LOG_LINE, "Info: Enter %s(): " FORMAT, __FUNCTION__, ##__VA_ARGS__); } while(0)
+#define FUNC_RETURN(FORMAT, ...) do { LOG(LOG_INFO, LOG_LINE, "Info: Leave %s(): " FORMAT, __FUNCTION__, ##__VA_ARGS__); } while(0)
+
 extern void xlogging_set_log_function(LOGGER_LOG log_function);
 extern LOGGER_LOG xlogging_get_log_function(void);
 #endif

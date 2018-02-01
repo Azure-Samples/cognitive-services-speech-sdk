@@ -11,6 +11,7 @@
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include "azure_c_shared_utility/threadapi.h"
 #include "usp.h"
