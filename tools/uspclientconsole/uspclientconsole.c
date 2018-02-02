@@ -39,7 +39,7 @@ void OnSpeechStartDetected(UspHandle handle, void* context, UspMsgSpeechStartDet
 
     // offset not supported yet.
     printf("Response: Speech.StartDetected message.\n");
-    //printf("Response: Speech.StartDetected message. Speech starts at offset %llu.\n", message->offset);
+    //printf("Response: Speech.StartDetected message. Speech starts at offset %" PRIu64 ".\n", message->offset);
 }
 
 void OnSpeechEndDetected(UspHandle handle, void* context, UspMsgSpeechEndDetected *message)
@@ -50,7 +50,7 @@ void OnSpeechEndDetected(UspHandle handle, void* context, UspMsgSpeechEndDetecte
 
     // offset not supported yet.
     printf("Response: Speech.EndDetected message.\n");
-    // printf("Response: Speech.EndDetected message. Speech ends at offset %llu\n", message->offset);
+    // printf("Response: Speech.EndDetected message. Speech ends at offset %" PRIu64 "\n", message->offset);
 }
 
 void OnSpeechHypothesis(UspHandle handle, void* context, UspMsgSpeechHypothesis *message)

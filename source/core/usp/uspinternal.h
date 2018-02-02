@@ -50,13 +50,6 @@ extern "C" {
 #define sscanf_s sscanf
 #endif
 
-    /**
-    * USP_FLAG_XXX indicates state of the UspContext.
-    */
-#define USP_FLAG_INITIALIZED 0x01
-#define USP_FLAG_CONNECTED   0x02
-#define USP_FLAG_SHUTDOWN    0x04
-
 #define USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle) \
     do { \
         if (uspHandle == NULL) \
@@ -72,15 +65,6 @@ extern "C" {
         { \
             LogError("The argument '%s' is null.", argumentName); \
             return USP_INVALID_ARGUMENT; \
-        } \
-    } while (0)
-
-#define USP_RETURN_ERROR_IF_WRONG_STATE(uspHandle, expectedState) \
-    do { \
-        if (uspHandle->flags != expectedState) \
-        { \
-            LogError("This operation must be executed in state %d. The current state (%d) is not allowed.", expectedState, uspHandle->flags); \
-            return USP_WRONG_STATE; \
         } \
     } while (0)
 
@@ -140,6 +124,17 @@ typedef struct _UserPathHandler
 } UserPathHandler;
 
 /**
+* The UspState represents the state of UspHandle.
+*/
+typedef enum _USP_STATE
+{
+    USP_STATE_NOT_INITIALIZED,
+    USP_STATE_INITIALIZED,
+    USP_STATE_CONNECTED,
+    USP_STATE_SHUTDOWN
+} UspState;
+
+/**
 * The UspContext represents the context data related to a USP client.
 */
 typedef struct _UspContext
@@ -155,7 +150,7 @@ typedef struct _UspContext
     UspAuthenticationType authType;
     STRING_HANDLE authData;
 
-    int flags;
+    int state;
 
     LIST_HANDLE userPathHandlerList;
 
@@ -163,7 +158,7 @@ typedef struct _UspContext
     THREAD_HANDLE workThreadHandle;
 
     size_t audioOffset;
-    LOCK_HANDLE transportRequestLock;
+    LOCK_HANDLE uspContextLock;
     TransportHandle transportRequest;
     DnsCacheHandle dnsCache;
 
@@ -171,6 +166,14 @@ typedef struct _UspContext
     // for metrics.
     uint64_t creationTime;
 } UspContext;
+
+/**
+* Runs the event loop.
+* @param uspHandle The uspHandle.
+* @return the current state of the uspHandle.
+*
+*/
+UspState UspRun(UspHandle uspHandle);
 
 /**
 * Creates a new UspContext.

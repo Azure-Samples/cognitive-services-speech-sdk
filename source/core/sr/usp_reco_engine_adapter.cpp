@@ -5,6 +5,7 @@
 // usp_reco_engine_adapter.cpp: Implementation definitions for CSpxUspRecoEngineAdapter C++ class
 //
 
+#include <inttypes.h>
 #include "stdafx.h"
 #include "usp_reco_engine_adapter.h"
 #include "handle_table.h"
@@ -213,27 +214,27 @@ void CSpxUspRecoEngineAdapter::InitCallbacks(UspCallbacks* pcallbacks)
     pcallbacks->version = (uint16_t)USP_CALLBACK_VERSION;
 
     pcallbacks->onSpeechStartDetected = [](UspHandle handle, void* context, UspMsgSpeechStartDetected *message) {
-        SPX_DBG_TRACE_VERBOSE("Response: Speech.StartDetected message. Speech starts at offset %llu (100ns).\n", message->offset);
+        SPX_DBG_TRACE_VERBOSE("Response: Speech.StartDetected message. Speech starts at offset %" PRIu64 " (100ns).\n", message->offset);
         CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechStartDetected(message);
     };
 
     pcallbacks->onSpeechEndDetected = [](UspHandle handle, void* context, UspMsgSpeechEndDetected *message) {
-        SPX_DBG_TRACE_VERBOSE("Response: Speech.EndDetected message. Speech ends at offset %llu (100ns)\n", message->offset);
+        SPX_DBG_TRACE_VERBOSE("Response: Speech.EndDetected message. Speech ends at offset %" PRIu64 " (100ns)\n", message->offset);
         CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechEndDetected(message);
     };
 
     pcallbacks->onSpeechHypothesis = [](UspHandle handle, void* context, UspMsgSpeechHypothesis *message) {
-        SPX_DBG_TRACE_VERBOSE("Response: Speech.Hypothesis message. Starts at offset %llu, with duration %llu (100ns). Text: %ls\n", message->offset, message->duration, message->text);
+        SPX_DBG_TRACE_VERBOSE("Response: Speech.Hypothesis message. Starts at offset %" PRIu64 ", with duration %" PRIu64 " (100ns). Text: %ls\n", message->offset, message->duration, message->text);
         CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechHypothesis(message);
     };
 
     pcallbacks->onSpeechFragment = [](UspHandle handle, void* context, UspMsgSpeechFragment *message) {
-        SPX_DBG_TRACE_VERBOSE("Response: Speech.Fragment message. Starts at offset %llu, with duration %llu (100ns). Text: %ls\n", message->offset, message->duration, message->text);
+        SPX_DBG_TRACE_VERBOSE("Response: Speech.Fragment message. Starts at offset %" PRIu64 ", with duration %" PRIu64 " (100ns). Text: %ls\n", message->offset, message->duration, message->text);
         CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechFragment(message);
     };
 
     pcallbacks->onSpeechPhrase = [](UspHandle handle, void* context, UspMsgSpeechPhrase *message) {
-        SPX_DBG_TRACE_VERBOSE("Response: Speech.Phrase message. Status: %d, Text: %ls, starts at %llu, with duration %llu (100ns).\n", message->recognitionStatus, message->displayText, message->offset, message->duration);
+        SPX_DBG_TRACE_VERBOSE("Response: Speech.Phrase message. Status: %d, Text: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n", message->recognitionStatus, message->displayText, message->offset, message->duration);
         CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechPhrase(message);
     };
 

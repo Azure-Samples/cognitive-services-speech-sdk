@@ -24,9 +24,14 @@ extern "C" {
 #define USP_INITIALIZATION_FAILURE USP_ERRCODE(0x001)
 
 /**
+* USP_ALREADY_INITIALIZED_ERROR The UspHandle has been already initialized.
+*/
+#define USP_ALREADY_INITIALIZED_ERROR USP_ERRCODE(0x002)
+
+/**
 * USP_WRONG_STATE indicates the current operation cannot be performed in the current USP state.
 */
-#define USP_WRONG_STATE USP_ERRCODE(0x002)
+#define USP_WRONG_STATE USP_ERRCODE(0x003)
 
 // Parameter errors.
 

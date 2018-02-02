@@ -25,17 +25,10 @@ static int UspEventLoop(void* ptr)
     UspHandle uspHandle = (UspHandle)ptr;
     while (1)
     {
-        // Todo: deal with concurrency? 
-        if (uspHandle->flags == USP_FLAG_SHUTDOWN)
+        if (UspRun(uspHandle) != USP_STATE_CONNECTED)
         {
             break;
         }
-
-        if (uspHandle->flags == USP_FLAG_CONNECTED)
-        {
-            UspRun(uspHandle);
-        }
-
         ThreadAPI_Sleep(200);
     }
 
@@ -70,33 +63,55 @@ UspResult UspInit(UspEndpointType type, UspRecognitionMode mode, UspCallbacks *c
         return ret;
     }
 
-    uspContext->flags = USP_FLAG_INITIALIZED;
+    uspContext->state = USP_STATE_INITIALIZED;
     *uspHandle = uspContext;
     return USP_SUCCESS;
 }
 
 UspResult UspSetLanguage(UspHandle uspHandle, const char* language)
 {
+    UspResult ret;
+
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
     USP_RETURN_ERROR_IF_ARGUMENT_NULL(language, "language");
-    USP_RETURN_ERROR_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
 
-    if (uspHandle->type == USP_ENDPOINT_CRIS)
+    Lock(uspHandle->uspContextLock);
+
+    if (uspHandle->state != USP_STATE_INITIALIZED)
+    {
+        LogError("Error: This must be called in state %d. The current state (%d) is not allowed.", USP_STATE_INITIALIZED, uspHandle->state);
+        ret = USP_WRONG_STATE;
+    }
+    else if (uspHandle->type == USP_ENDPOINT_CRIS)
     {
         LogError("Language option for CRIS service is not supported.");
-        return USP_NOT_SUPPORTED_OPTION;
+        ret = USP_NOT_SUPPORTED_OPTION;
+    }
+    else
+    {
+        uspHandle->language = STRING_construct(language);
+        ret = USP_SUCCESS;
     }
 
-    uspHandle->language = STRING_construct(language);
-    return USP_SUCCESS;
+    Unlock(uspHandle->uspContextLock);
+
+    return ret;
 }
 
 UspResult UspSetOutputFormat(UspHandle uspHandle, UspOutputFormat format)
 {
-    USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
-    USP_RETURN_ERROR_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
+    UspResult ret = USP_SUCCESS;
 
-    if (format == USP_OUTPUT_DETAILED)
+    USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
+
+    Lock(uspHandle->uspContextLock);
+
+    if (uspHandle->state != USP_STATE_INITIALIZED)
+    {
+        LogError("Error: This must be called in state %d. The current state (%d) is not allowed.", USP_STATE_INITIALIZED, uspHandle->state);
+        ret = USP_WRONG_STATE;
+    }
+    else if (format == USP_OUTPUT_DETAILED)
     {
         uspHandle->outputFormat = STRING_construct(g_outputDetailedStr);
     }
@@ -107,48 +122,78 @@ UspResult UspSetOutputFormat(UspHandle uspHandle, UspOutputFormat format)
     else
     {
         LogError("The output format is invalid: %d.", format);
-        return USP_NOT_SUPPORTED_OPTION;
+        ret = USP_NOT_SUPPORTED_OPTION;
     }
 
-    return USP_SUCCESS;
+    Unlock(uspHandle->uspContextLock);
+
+    return ret;
 }
 
 UspResult UspSetModelId(UspHandle uspHandle, const char* modelId)
 {
+    UspResult ret;
+
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
     USP_RETURN_ERROR_IF_ARGUMENT_NULL(modelId, "model ID");
-    USP_RETURN_ERROR_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
 
-    if (uspHandle->type != USP_ENDPOINT_CRIS)
+    Lock(uspHandle->uspContextLock);
+
+    if (uspHandle->state != USP_STATE_INITIALIZED)
+    {
+        LogError("Error: This must be called in state %d. The current state (%d) is not allowed.", USP_STATE_INITIALIZED, uspHandle->state);
+        ret = USP_WRONG_STATE;
+    }
+    else if (uspHandle->type != USP_ENDPOINT_CRIS)
     {
         LogError("USP_CONFIG_MODEL_ID is only allowed if the endpoint type is USP_ENDPOINT_CRIS");
-        return USP_NOT_SUPPORTED_OPTION;
+        ret = USP_NOT_SUPPORTED_OPTION;
     }
-    uspHandle->modelId = STRING_construct(modelId);
+    else
+    {
+        uspHandle->modelId = STRING_construct(modelId);
+        ret = USP_SUCCESS;
+    }
 
-    return USP_SUCCESS;
+    Unlock(uspHandle->uspContextLock);
+
+    return ret;
 }
 
 
 UspResult UspSetAuthentication(UspHandle uspHandle, UspAuthenticationType authType, const char* authData)
 {
+    UspResult ret = USP_SUCCESS;
+
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
     USP_RETURN_ERROR_IF_ARGUMENT_NULL(authData, "authentication data");
 
-    switch (authType)
-    {
-    case USP_AUTHENTICATION_SUBSCRIPTION_KEY:
-    case USP_AUTHENTICATION_AUTHORIZATION_TOKEN:
-        uspHandle->authType = authType;
-        uspHandle->authData = STRING_construct(authData);
-        break;
+    Lock(uspHandle->uspContextLock);
 
-    default:
-        LogError("Authentication type %d is not supported", authType);
-        return USP_NOT_SUPPORTED_OPTION;
+    if (uspHandle->state != USP_STATE_INITIALIZED)
+    {
+        LogError("Error: This must be called in state %d. The current state (%d) is not allowed.", USP_STATE_INITIALIZED, uspHandle->state);
+        ret = USP_WRONG_STATE;
+    }
+    else
+    {
+        switch (authType)
+        {
+        case USP_AUTHENTICATION_SUBSCRIPTION_KEY:
+        case USP_AUTHENTICATION_AUTHORIZATION_TOKEN:
+            uspHandle->authType = authType;
+            uspHandle->authData = STRING_construct(authData);
+            break;
+
+        default:
+            LogError("Authentication type %d is not supported", authType);
+            ret = USP_NOT_SUPPORTED_OPTION;
+        }
     }
 
-    return USP_SUCCESS;
+    Unlock(uspHandle->uspContextLock);
+
+    return ret;
 }
 
 
@@ -162,9 +207,9 @@ UspResult UspConnect(UspHandle uspHandle)
     const char *langStr = NULL;
     const char *formatStr = NULL;
     char separator = '?';
+    UspResult ret;
 
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
-    USP_RETURN_ERROR_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
 
     // Callbacks must be set before initializing transport.
     USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspHandle);
@@ -264,26 +309,37 @@ UspResult UspConnect(UspHandle uspHandle)
 
     free(endpointUrlFormat);
 
+    Lock(uspHandle->uspContextLock);
+
     LogInfo("Connect to service endpoint %s.", endpointUrl);
-    if (TransportInitialize(uspHandle, endpointUrl) != USP_SUCCESS)
+    if (uspHandle->state != USP_STATE_INITIALIZED)
     {
-        LogError("Initialize transport failed");
-        free(endpointUrl);
-        UspContextDestroy(uspHandle);
-        return USP_INITIALIZATION_FAILURE;
+        LogError("Error: UspConnect() must be called in %d state. The current state (%d) is not allowed.", USP_STATE_INITIALIZED, uspHandle->state);
+        ret = USP_WRONG_STATE;
     }
+    else
+    {
+        ret = TransportInitialize(uspHandle, endpointUrl);
+        if (ret != USP_SUCCESS)
+        {
+            LogError("Initialize transport failed");
+        }
+        else if (ThreadAPI_Create(&uspHandle->workThreadHandle, UspEventLoop, uspHandle) != THREADAPI_OK)
+        {
+            LogError("Create work thread in USP failed.");
+            TransportShutdown(uspHandle);
+            ret = USP_RUNTIME_ERROR;
+        }
+        else
+        {
+            uspHandle->state = USP_STATE_CONNECTED;
+        }
+    }
+
+    Unlock(uspHandle->uspContextLock);
     free(endpointUrl);
 
-    // Create work thread for processing USP messages.
-    if (ThreadAPI_Create(&uspHandle->workThreadHandle, UspEventLoop, uspHandle) != THREADAPI_OK)
-    {
-        LogError("Create work thread in USP failed.");
-        UspContextDestroy(uspHandle);
-        return USP_INITIALIZATION_FAILURE;
-    }
-
-    uspHandle->flags = USP_FLAG_CONNECTED;
-    return USP_SUCCESS;
+    return ret;
 }
 
 UspResult UspClose(UspHandle uspHandle)
@@ -292,11 +348,14 @@ UspResult UspClose(UspHandle uspHandle)
 
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
 
-    uspHandle->flags = USP_FLAG_SHUTDOWN;
+    Lock(uspHandle->uspContextLock);
 
+    uspHandle->state = USP_STATE_SHUTDOWN;
     uspHandle->callbacks = NULL;
     uspHandle->callbackContext = NULL;
     (void)TransportShutdown(uspHandle);
+
+    Unlock(uspHandle->uspContextLock);
 
     if (uspHandle->workThreadHandle != NULL)
     {
@@ -315,59 +374,66 @@ UspResult UspClose(UspHandle uspHandle)
 UspResult UspWriteAudio(UspHandle uspHandle, const uint8_t* buffer, size_t bytesToWrite, size_t *bytesWritten)
 {
     uint32_t count = 0;
+    UspResult ret = USP_WRITE_AUDIO_ERROR;
 
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
-    USP_RETURN_ERROR_IF_WRONG_STATE(uspHandle, USP_FLAG_CONNECTED);
 
-    if (bytesToWrite == 0)
+    Lock(uspHandle->uspContextLock);
+
+    if (uspHandle->state != USP_STATE_CONNECTED)
     {
-        if (AudioStreamFlush(uspHandle) != 0)
-        {
-            return USP_WRITE_AUDIO_ERROR;
-        }
+        LogError("Error: Sending audio data must be called in state %d. The current state (%d) is not allowed.", USP_STATE_CONNECTED, uspHandle->state);
+        ret = USP_WRONG_STATE;
     }
     else
     {
-        // Todo: mismatch between size_t ad byteToWrite...
-        if (AudioStreamWrite(uspHandle, buffer, (uint32_t)bytesToWrite, &count))
+        if (bytesToWrite == 0)
         {
-            return USP_WRITE_AUDIO_ERROR;
+            ret = (AudioStreamFlush(uspHandle) == 0) ? USP_SUCCESS : USP_WRITE_AUDIO_ERROR;
+        }
+        else
+        {
+            // Todo: mismatch between size_t ad byteToWrite...
+            ret = (AudioStreamWrite(uspHandle, buffer, (uint32_t)bytesToWrite, &count) == 0) ? USP_SUCCESS : USP_WRITE_AUDIO_ERROR;
         }
     }
 
-    if (bytesWritten != NULL)
+    Unlock(uspHandle->uspContextLock);
+
+    if ((ret == USP_SUCCESS) && (bytesWritten != NULL))
     {
         *bytesWritten = count;
     }
-
-    return USP_SUCCESS;
+    return ret;
 }
 
 UspResult UspFlushAudio(UspHandle uspHandle)
 {
-    if (AudioStreamFlush(uspHandle) != 0)
-    {
-        return USP_FLUSH_AUDIO_ERROR;
-    }
-
-    return USP_SUCCESS;
+    return UspWriteAudio(uspHandle, NULL /* buffer */, 0 /* size */, NULL);
 }
 
-// Todo: Hide it into a work thread.
-void UspRun(UspHandle uspHandle)
+UspState UspRun(UspHandle uspHandle)
 {
-    Lock(uspHandle->transportRequestLock);
+    UspState ret;
 
-    TransportDoWork(uspHandle->transportRequest);
+    Lock(uspHandle->uspContextLock);
 
-    Unlock(uspHandle->transportRequestLock);
+    if (uspHandle->state == USP_STATE_CONNECTED)
+    {
+        TransportDoWork(uspHandle->transportRequest);
+    }
+    ret = uspHandle->state;
 
+    Unlock(uspHandle->uspContextLock);
+    return ret;
 }
 
 bool userPathHandlerCompare(LIST_ITEM_HANDLE item1, const void* path);
 
 UspResult UspRegisterUserMessage(UspHandle uspHandle, const char* messagePath, UspOnUserMessage messageHandler)
 {
+    UspResult ret = USP_SUCCESS;
+
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
 
     if (messagePath == NULL || strlen(messagePath) == 0)
@@ -382,28 +448,40 @@ UspResult UspRegisterUserMessage(UspHandle uspHandle, const char* messagePath, U
         return USP_INVALID_ARGUMENT;
     }
 
-    USP_RETURN_ERROR_IF_WRONG_STATE(uspHandle, USP_FLAG_INITIALIZED);
+    Lock(uspHandle->uspContextLock);
 
-    assert(uspHandle->userPathHandlerList != NULL);
-    LIST_ITEM_HANDLE foundItem = list_find(uspHandle->userPathHandlerList, userPathHandlerCompare, messagePath);
-    if (foundItem != NULL)
+    if (uspHandle->state != USP_STATE_INITIALIZED)
     {
-        UserPathHandler* existingHandler = (UserPathHandler*)list_item_get_value(foundItem);
-        existingHandler->handler = messageHandler;
+        LogError("Error: UspRegisterUserMessage must be called in state %d. The current state (%d) is not allowed.", USP_STATE_INITIALIZED, uspHandle->state);
+        ret = USP_WRONG_STATE;
     }
     else
     {
-        UserPathHandler* newHandler = malloc(sizeof(UserPathHandler));
-        if (newHandler == NULL)
+        assert(uspHandle->userPathHandlerList != NULL);
+        LIST_ITEM_HANDLE foundItem = list_find(uspHandle->userPathHandlerList, userPathHandlerCompare, messagePath);
+        if (foundItem != NULL)
         {
-            LogError("Failed to allocate userPathHandler entry.");
-            return USP_OUT_OF_MEMORY;
+            UserPathHandler* existingHandler = (UserPathHandler*)list_item_get_value(foundItem);
+            existingHandler->handler = messageHandler;
         }
-        newHandler->handler = messageHandler;
-        newHandler->path = _strdup(messagePath);
-        list_add(uspHandle->userPathHandlerList, newHandler);
+        else
+        {
+            UserPathHandler* newHandler = malloc(sizeof(UserPathHandler));
+            if (newHandler == NULL)
+            {
+                LogError("Failed to allocate userPathHandler entry.");
+                ret = USP_OUT_OF_MEMORY;
+            }
+            else
+            {
+                newHandler->handler = messageHandler;
+                newHandler->path = _strdup(messagePath);
+                list_add(uspHandle->userPathHandlerList, newHandler);
+            }
+        }
     }
 
-    return USP_SUCCESS;
+    Unlock(uspHandle->uspContextLock);
+    return ret;
 }
 

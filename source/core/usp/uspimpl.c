@@ -15,6 +15,7 @@
 
 #include <assert.h>
 #include <time.h>
+#include <inttypes.h>
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/base64.h"
@@ -64,7 +65,7 @@ UspResult AudioStreamWrite(UspHandle uspHandle, const void * data, uint32_t size
     const char* httpArgs = "/audio";
     int ret = -1;
 
-    LogInfo("TS:%llu, Write %zu bytes audio data.", USP_LIFE_TIME(uspHandle), size);
+    LogInfo("TS:%" PRIu64 ", Write %zu bytes audio data.", USP_LIFE_TIME(uspHandle), size);
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
     USP_RETURN_ERROR_IF_ARGUMENT_NULL(data, "data");
 
@@ -73,8 +74,6 @@ UspResult AudioStreamWrite(UspHandle uspHandle, const void * data, uint32_t size
         LogError("Size should not be 0. Use AudioStreamFlush() to flush the buffer.");
         return USP_INVALID_ARGUMENT;
     }
-
-    Lock(uspHandle->transportRequestLock);
 
     metrics_audiostream_data(size);
 
@@ -94,7 +93,6 @@ UspResult AudioStreamWrite(UspHandle uspHandle, const void * data, uint32_t size
         ret = TransportStreamPrepare(uspHandle->transportRequest, httpArgs);
         if (ret != 0)
         {
-            Unlock(uspHandle->transportRequestLock);
             LogError("TransportStreamPrepare failed. error=%d", ret);
             return ret;
         }
@@ -105,8 +103,6 @@ UspResult AudioStreamWrite(UspHandle uspHandle, const void * data, uint32_t size
     {
         LogError("TransportStreamWrite failed. error=%d", ret);
     }
-
-    Unlock(uspHandle->transportRequestLock);
 
     uspHandle->audioOffset += size;
 
@@ -130,7 +126,7 @@ UspResult AudioStreamFlush(UspHandle uspHandle)
 {
     int ret;
 
-    LogInfo("TS:%llu, Flush audio buffer.", USP_LIFE_TIME(uspHandle));
+    LogInfo("TS:%" PRIu64 ", Flush audio buffer.", USP_LIFE_TIME(uspHandle));
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
 
     if (!uspHandle->audioOffset)
@@ -138,9 +134,7 @@ UspResult AudioStreamFlush(UspHandle uspHandle)
         return USP_SUCCESS;
     }
 
-    Lock(uspHandle->transportRequestLock);
     ret = TransportStreamFlush(uspHandle->transportRequest);
-    Unlock(uspHandle->transportRequestLock);
 
     uspHandle->audioOffset = 0;
     metrics_audiostream_flush();
@@ -165,7 +159,7 @@ static void TransportErrorHandler(TransportHandle transportHandle, TransportErro
     (void)transportHandle;
 
     UspContext* uspContext = (UspContext*)context;
-    LogInfo("TS:%llu, TransportError: uspContext:0x%x, reason=%d.", USP_LIFE_TIME(uspContext), uspContext, reason);
+    LogInfo("TS:%" PRIu64 ", TransportError: uspContext:0x%x, reason=%d.", USP_LIFE_TIME(uspContext), uspContext, reason);
 
     assert(uspContext != NULL);
     USP_RETURN_VOID_IF_CALLBACKS_NULL(uspContext);
@@ -204,7 +198,7 @@ static UspResult SpeechStartHandler(UspContext* uspContext, const char* path, co
     assert(uspContext != NULL);
 
 #ifdef _DEBUG
-    LogInfo("TS: %llu, speech.start Message: path: %s, content type: %s, size: %zu.", USP_LIFE_TIME(uspContext), path, mime, size);
+    LogInfo("TS:%" PRIu64 ", speech.start Message: path: %s, content type: %s, size: %zu.", USP_LIFE_TIME(uspContext), path, mime, size);
 #endif
 
     (void)path;
@@ -236,7 +230,7 @@ static UspResult SpeechEndHandler(UspContext* uspContext, const char* path, cons
     assert(uspContext != NULL);
 
 #ifdef _DEBUG
-    LogInfo("TS:%llu, speech.end Message: path: %s, content type: %s, size: %zu.", USP_LIFE_TIME(uspContext), path, mime, size);
+    LogInfo("TS:%" PRIu64 ", speech.end Message: path: %s, content type: %s, size: %zu.", USP_LIFE_TIME(uspContext), path, mime, size);
 #endif
 
     (void)path;
@@ -267,7 +261,7 @@ static UspResult TurnEndHandler(UspContext* uspContext, const char* path, const 
     assert(uspContext != NULL);
 
 #ifdef _DEBUG
-    LogInfo("TS:%llu, turn.end Message: path: %s, content type: %s, size: %zu.", USP_LIFE_TIME(uspContext), path, mime, size);
+    LogInfo("TS:%" PRIu64 ", turn.end Message: path: %s, content type: %s, size: %zu.", USP_LIFE_TIME(uspContext), path, mime, size);
 #endif
 
     (void)path;
@@ -294,9 +288,9 @@ static UspResult TurnEndHandler(UspContext* uspContext, const char* path, const 
 
     // Todo: need to reset request_id?
     // Todo: the caller need to flush audio buffer?
-    Lock(uspContext->transportRequestLock);
+    Lock(uspContext->uspContextLock);
     TransportCreateRequestId(uspContext->transportRequest);
-    Unlock(uspContext->transportRequestLock);
+    Unlock(uspContext->uspContextLock);
 
     return USP_SUCCESS;
 }
@@ -327,7 +321,7 @@ static UspResult ContentPathHandler(UspContext* uspContext, const char* path, co
     BUFFER_u_char(responseContentHandle)[size] = 0;
 
 #ifdef _DEBUG
-    LogInfo("TS:%llu, Content Message: path: %s, content type: %s, size: %zu, buffer: %s", USP_LIFE_TIME(uspContext), path, mime, size, (char *)BUFFER_u_char(responseContentHandle));
+    LogInfo("TS:%" PRIu64 ", Content Message: path: %s, content type: %s, size: %zu, buffer: %s", USP_LIFE_TIME(uspContext), path, mime, size, (char *)BUFFER_u_char(responseContentHandle));
 #endif
     ret = ContentDispatch((void*)uspContext, path, mime, NULL, responseContentHandle, size);
 
@@ -368,6 +362,7 @@ static void TransportRecvResponseHandler(TransportHandle transportHandle, HTTP_H
 {
     const char* path;
     const char* contentType = NULL;
+    UspOnUserMessage userMsgHandler = NULL;
 
     (void)transportHandle;
 
@@ -404,7 +399,7 @@ static void TransportRecvResponseHandler(TransportHandle transportHandle, HTTP_H
 
     UspContext *uspContext = (UspContext *)context;
 
-    LogInfo("%llu Response Message: path: %s, content type: %s, size: %zu.", USP_LIFE_TIME(uspContext), path, contentType, size);
+    LogInfo("TS:%" PRIu64 " Response Message: path: %s, content type: %s, size: %zu.", USP_LIFE_TIME(uspContext), path, contentType, size);
 
     for (unsigned int i = 0; i < ARRAYSIZE(g_SystemMessageHandlers); i++)
     {
@@ -415,6 +410,7 @@ static void TransportRecvResponseHandler(TransportHandle transportHandle, HTTP_H
         }
     }
 
+    Lock(uspContext->uspContextLock);
     LIST_ITEM_HANDLE foundItem = list_find(uspContext->userPathHandlerList, userPathHandlerCompare, path);
     if (foundItem != NULL)
     {
@@ -422,12 +418,19 @@ static void TransportRecvResponseHandler(TransportHandle transportHandle, HTTP_H
         assert(pathHandler->handler != NULL);
         assert(strcmp(pathHandler->path, path) == 0);
         LogInfo("User Message: path: %s, content type: %s, size: %zu.", path, contentType, size);
-        pathHandler->handler(uspContext, path, contentType, buffer, size, uspContext->callbackContext);
-        return;
+        userMsgHandler = pathHandler->handler;
     }
+    Unlock(uspContext->uspContextLock);
 
-    PROTOCOL_VIOLATION("unhandled response '%s'", path);
-    metrics_transport_unhandledresponse();
+    if (userMsgHandler != NULL)
+    {
+        userMsgHandler(uspContext, path, contentType, buffer, size, uspContext->callbackContext);
+    }
+    else
+    {
+        PROTOCOL_VIOLATION("unhandled response '%s'", path);
+        metrics_transport_unhandledresponse();
+    }
 }
 
 
@@ -479,6 +482,12 @@ const char* GetCdpDeviceThumbprint()
 
 UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
 {
+    if (uspContext->transportRequest != NULL)
+    {
+        LogError("TransportHandle has been initialized.");
+        return USP_ALREADY_INITIALIZED_ERROR;
+    }
+
     TransportHandle transportHandle = TransportRequestCreate(endpoint, uspContext);
     if (transportHandle == NULL)
     {
@@ -540,13 +549,6 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
         return USP_INITIALIZATION_FAILURE;
     }
 
-    uspContext->transportRequestLock = Lock_Init();
-    if (uspContext->transportRequestLock == NULL)
-    {
-        LogError("Failed to create a lock for transport request.");
-        return USP_INITIALIZATION_FAILURE;
-    }
-
     return USP_SUCCESS;
 }
 
@@ -559,10 +561,7 @@ UspResult TransportShutdown(UspContext* uspContext)
         TransportRequestDestroy(uspContext->transportRequest);
     }
 
-    if (uspContext->transportRequestLock != NULL)
-    {
-        Lock_Deinit(uspContext->transportRequestLock);
-    }
+    uspContext->transportRequest = NULL;
 
     return USP_SUCCESS;
 }
@@ -574,6 +573,7 @@ UspResult UspContextDestroy(UspContext* uspContext)
 
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspContext);
 
+    Lock(uspContext->uspContextLock);
     if (uspContext->dnsCache != NULL)
     {
         DnsCacheDestroy(uspContext->dnsCache);
@@ -595,6 +595,10 @@ UspResult UspContextDestroy(UspContext* uspContext)
         free(pathHandler);
     }
     list_destroy(uspContext->userPathHandlerList);
+
+    Unlock(uspContext->uspContextLock);
+    assert(uspContext->uspContextLock != NULL);
+    Lock_Deinit(uspContext->uspContextLock);
 
     free(uspContext);
     return USP_SUCCESS;
@@ -626,10 +630,17 @@ UspResult UspContextCreate(UspContext** contextCreated)
         {
             g_perfCounterFrequency = (uint64_t)perfCounterFrequency.QuadPart;
         }
-        LogInfo("The performance counter frequency is %llu.", (uint64_t)perfCounterFrequency.QuadPart);
+        LogInfo("The performance counter frequency is %" PRIu64 ".", (uint64_t)perfCounterFrequency.QuadPart);
     }
 #endif
 
+    uspContext->uspContextLock = Lock_Init();
+    if (uspContext->uspContextLock == NULL)
+    {
+        LogError("Failed to initialize uspContextLock.");
+    }
+
+    uspContext->userPathHandlerList = list_create();
     uspContext->creationTime = telemetry_gettime();
     uspContext->dnsCache = DnsCacheCreate();
     if (uspContext->dnsCache == NULL)
@@ -638,8 +649,6 @@ UspResult UspContextCreate(UspContext** contextCreated)
         UspContextDestroy(uspContext);
         return USP_INITIALIZATION_FAILURE;
     }
-
-    uspContext->userPathHandlerList = list_create();
 
     *contextCreated = uspContext;
     return USP_SUCCESS;

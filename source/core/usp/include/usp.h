@@ -150,6 +150,7 @@ typedef enum {
 * @param callbacks The struct defines callback functions that will be called when various USP events occur.
 * @param callbackContext A pointer to the caller provided data, which will be passed as parameter when the callback function is invoked.
 * @param uspHandle The pointer to UspHandle. If the function returns USP_SUCCESS, the value pointered by uspHandle is the initialzed UspHandle that is ready for use.
+* @return A UspResult indicating success or error.
 */
 UspResult UspInit(UspEndpointType type, UspRecognitionMode mode, UspCallbacks *callbacks, void* callbackContext, UspHandle* uspHandle);
 
@@ -158,6 +159,7 @@ UspResult UspInit(UspEndpointType type, UspRecognitionMode mode, UspCallbacks *c
 * @param uspHandle The UspHandle.
 * @param authType The type of authentication to be used.
 * @param authData The authnetication data for the specified authentication type.
+* @return A UspResult indicating success or error.
 */
 UspResult UspSetAuthentication(UspHandle uspHandle, UspAuthenticationType authType, const char* authData);
 
@@ -165,6 +167,7 @@ UspResult UspSetAuthentication(UspHandle uspHandle, UspAuthenticationType authTy
 * Sets language that the audio is targeted for. It must be set before establishing connection to service.
 * @param uspHandle The UspHandle.
 * @param language The language to be set. It uses the IETF language tag BCP 47 (https://en.wikipedia.org/wiki/IETF_language_tag), and must be one of the languages that are supported.
+* @return A UspResult indicating success or error.
 */
 UspResult UspSetLanguage(UspHandle uspHandle, const char* language);
 
@@ -172,6 +175,7 @@ UspResult UspSetLanguage(UspHandle uspHandle, const char* language);
 * Sets the output format. It must be set before establishing connection to service.
 * @param uspHandle The UspHandle.
 * @param format The output format, can be either USP_OUTPUT_DETAILED or USP_OUTPUT_SIMPLE.
+* @return A UspResult indicating success or error.
 */
 UspResult UspSetOutputFormat(UspHandle uspHandle, UspOutputFormat format);
 
@@ -179,12 +183,23 @@ UspResult UspSetOutputFormat(UspHandle uspHandle, UspOutputFormat format);
 * Sets the model id if a customized speech model is used. It must be set before establishing connection to service.
 * @param uspHandle The UspHandle.
 * @param modelId The model id for the customized speech model.
+* @return A UspResult indicating success or error.
 */
 UspResult UspSetModelId(UspHandle uspHandle, const char* modelId);
 
 /**
+* Registers a callback for a user-defined message.
+* @param uspHandle The UspHandle.
+* @param messagePath The path of the user-defined message.
+* @param callback The callback function will be invoked on receiving the specified message.
+* @return A UspResult indicating success or error.
+*/
+UspResult UspRegisterUserMessage(UspHandle uspHandle, const char* messagePath, UspOnUserMessage callback);
+
+/**
 * Establish connection to the service.
 * @param uspHandle The UspHandle.
+* @return A UspResult indicating success or error.
 */
 UspResult UspConnect(UspHandle uspHandle);
 
@@ -194,34 +209,24 @@ UspResult UspConnect(UspHandle uspHandle);
 * @param buffer The buffer contains data to be sent.
 * @param bytesToWrite The amount of data in bytes to be sent.
 * @param bytesWritten On a successful return, the number of bytes have been sent is returned.
+* @return A UspResult indicating success or error.
 */
 UspResult UspWriteAudio(UspHandle uspHandle, const uint8_t* buffer, size_t bytesToWrite, size_t* bytesWritten);
 
 /**
 * Finalizes sending audio data to indicate the end of audio.
 * @param uspHandle The UspHandle to which the data is sent.
+* @return A UspResult indicating success or error.
 */
 UspResult UspFlushAudio(UspHandle uspHandle);
 
 /**
 * Closes the uspHandle.
+* The uspHandle becomes invalid after return. The behavior is undefined if the same handle is closed more than once.
 * @param uspHandle The uspHandle to be closed.
+* @return A UspResult indicating success or error.
 */
 UspResult UspClose(UspHandle uspHandle);
-
-/**
-* Runs the event loop.
-* @param uspHandle The UspHandle.
-*/
-void UspRun(UspHandle uspHandle);
-
-/**
-* Registers a callback for a user-defined message.
-* @param uspHandle The UspHandle.
-* @param messagePath The path of the user-defined message.
-* @param callback The callback function will be invoked on receiving the specified message. 
-*/
-UspResult UspRegisterUserMessage(UspHandle uspHandle, const char* messagePath, UspOnUserMessage callback);
 
 #ifdef __cplusplus
 }

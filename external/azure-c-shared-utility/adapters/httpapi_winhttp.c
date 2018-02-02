@@ -2296,6 +2296,8 @@ void wsio_dowork(CONCRETE_IO_HANDLE ws_io)
             break;
         case IO_STATE_CLOSING:
             break;
+        case IO_STATE_CLOSED:
+            break;
         default:
             if (wsio_instance->io_state == IO_STATE_CONNECTED && !wsio_instance->request.pending_socket_io)
             {
