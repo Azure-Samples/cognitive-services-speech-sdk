@@ -31,7 +31,7 @@ public:
         SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
         if (SPX_SUCCEEDED(hr))
         {
-            hr = ::RecognizerFactory_CreateSpeechRecognzier_With_Defaults(&hreco);
+            hr = ::RecognizerFactory_CreateSpeechRecognizer_With_Defaults(&hreco);
         }
 
         SPX_THROW_ON_FAIL(hr);
@@ -49,7 +49,7 @@ public:
         SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
         if (SPX_SUCCEEDED(hr))
         {
-            hr = ::RecognizerFactory_CreateSpeechRecognzier_With_FileInput(&hreco, fileName.c_str());
+            hr = ::RecognizerFactory_CreateSpeechRecognizer_With_FileInput(&hreco, fileName.c_str());
         }
 
         SPX_THROW_ON_FAIL(hr);

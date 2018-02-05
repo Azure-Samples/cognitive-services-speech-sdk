@@ -6,7 +6,7 @@
 using namespace CARBON_IMPL_NAMESPACE();
 
 
-SPXAPI_(bool) Recognzier_Handle_IsValid(SPXRECOHANDLE hreco)
+SPXAPI_(bool) Recognizer_Handle_IsValid(SPXRECOHANDLE hreco)
 {
     return Handle_IsValid<SPXRECOHANDLE, ISpxRecognizer>(hreco);
 }

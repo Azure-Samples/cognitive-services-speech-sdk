@@ -4,7 +4,7 @@
 using namespace CARBON_IMPL_NAMESPACE();
 
 
-SPXAPI RecognizerFactory_CreateSpeechRecognzier_With_Defaults(SPXRECOHANDLE* phreco)
+SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_Defaults(SPXRECOHANDLE* phreco)
 {
     SPXAPI_INIT_TRY(hr)
     {
@@ -16,14 +16,14 @@ SPXAPI RecognizerFactory_CreateSpeechRecognzier_With_Defaults(SPXRECOHANDLE* phr
     SPXAPI_CATCH_AND_RETURN(hr);
 }
 
-SPXAPI RecognizerFactory_CreateSpeechRecognzier_With_Language(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage)
+SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_Language(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage)
 {
     UNUSED(phreco);
     UNUSED(pszLanguage);
     return SPXERR_NOT_IMPL;
 }
 
-SPXAPI RecognizerFactory_CreateSpeechRecognzier_With_FileInput(SPXRECOHANDLE* phreco, const wchar_t* pszFileName)
+SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_FileInput(SPXRECOHANDLE* phreco, const wchar_t* pszFileName)
 {
     SPXAPI_INIT_TRY(hr)
     {
@@ -35,14 +35,14 @@ SPXAPI RecognizerFactory_CreateSpeechRecognzier_With_FileInput(SPXRECOHANDLE* ph
     SPXAPI_CATCH_AND_RETURN(hr);
 }
 
-SPXAPI RecognizerFactory_CreateSpeechRecognzier_With_PassiveListening(SPXRECOHANDLE* phreco, bool passive)
+SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_PassiveListening(SPXRECOHANDLE* phreco, bool passive)
 {
     UNUSED(phreco);
     UNUSED(passive);
     return SPXERR_NOT_IMPL;
 }
 
-SPXAPI RecognizerFactory_CreateSpeechRecognzier(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName, bool passive)
+SPXAPI RecognizerFactory_CreateSpeechRecognizer(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName, bool passive)
 {
     UNUSED(phreco);
     UNUSED(pszLanguage);
@@ -51,70 +51,70 @@ SPXAPI RecognizerFactory_CreateSpeechRecognzier(SPXRECOHANDLE* phreco, const wch
     return SPXERR_NOT_IMPL;
 }
 
-SPXAPI RecognizerFactory_CreateDictationRecognzier_With_Defaults(SPXRECOHANDLE* phreco)
+SPXAPI RecognizerFactory_CreateDictationRecognizer_With_Defaults(SPXRECOHANDLE* phreco)
 {
     UNUSED(phreco);
     return SPXERR_NOT_IMPL;
 }
 
-SPXAPI RecognizerFactory_CreateDictationRecognzier_With_Language(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage)
-{
-    UNUSED(phreco);
-    UNUSED(pszLanguage);
-    return SPXERR_NOT_IMPL;
-}
-
-SPXAPI RecognizerFactory_CreateDictationRecognzier_With_FileInput(SPXRECOHANDLE* phreco, const wchar_t* pszFileName)
-{
-    UNUSED(phreco);
-    UNUSED(pszFileName);
-    return SPXERR_NOT_IMPL;
-}
-
-SPXAPI RecognizerFactory_CreateDictationRecognzier_With_PassiveListening(SPXRECOHANDLE* phreco, bool passive)
-{
-    UNUSED(phreco);
-    UNUSED(passive);
-    return SPXERR_NOT_IMPL;
-}
-
-SPXAPI RecognizerFactory_CreateDictationRecognzier(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName, bool passive)
-{
-    UNUSED(phreco);
-    UNUSED(pszLanguage);
-    UNUSED(pszFileName);
-    UNUSED(passive);
-    return SPXERR_NOT_IMPL;
-}
-
-SPXAPI RecognizerFactory_CreateIntentRecognzier_With_Defaults(SPXRECOHANDLE* phreco)
-{
-    UNUSED(phreco);
-    return SPXERR_NOT_IMPL;
-}
-
-SPXAPI RecognizerFactory_CreateIntentRecognzier_With_Language(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage)
+SPXAPI RecognizerFactory_CreateDictationRecognizer_With_Language(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage)
 {
     UNUSED(phreco);
     UNUSED(pszLanguage);
     return SPXERR_NOT_IMPL;
 }
 
-SPXAPI RecognizerFactory_CreateIntentRecognzier_With_FileInput(SPXRECOHANDLE* phreco, const wchar_t* pszFileName)
+SPXAPI RecognizerFactory_CreateDictationRecognizer_With_FileInput(SPXRECOHANDLE* phreco, const wchar_t* pszFileName)
 {
     UNUSED(phreco);
     UNUSED(pszFileName);
     return SPXERR_NOT_IMPL;
 }
 
-SPXAPI RecognizerFactory_CreateIntentRecognzier_With_PassiveListening(SPXRECOHANDLE* phreco, bool passive)
+SPXAPI RecognizerFactory_CreateDictationRecognizer_With_PassiveListening(SPXRECOHANDLE* phreco, bool passive)
 {
     UNUSED(phreco);
     UNUSED(passive);
     return SPXERR_NOT_IMPL;
 }
 
-SPXAPI RecognizerFactory_CreateIntentRecognzier(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName, bool passive)
+SPXAPI RecognizerFactory_CreateDictationRecognizer(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName, bool passive)
+{
+    UNUSED(phreco);
+    UNUSED(pszLanguage);
+    UNUSED(pszFileName);
+    UNUSED(passive);
+    return SPXERR_NOT_IMPL;
+}
+
+SPXAPI RecognizerFactory_CreateIntentRecognizer_With_Defaults(SPXRECOHANDLE* phreco)
+{
+    UNUSED(phreco);
+    return SPXERR_NOT_IMPL;
+}
+
+SPXAPI RecognizerFactory_CreateIntentRecognizer_With_Language(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage)
+{
+    UNUSED(phreco);
+    UNUSED(pszLanguage);
+    return SPXERR_NOT_IMPL;
+}
+
+SPXAPI RecognizerFactory_CreateIntentRecognizer_With_FileInput(SPXRECOHANDLE* phreco, const wchar_t* pszFileName)
+{
+    UNUSED(phreco);
+    UNUSED(pszFileName);
+    return SPXERR_NOT_IMPL;
+}
+
+SPXAPI RecognizerFactory_CreateIntentRecognizer_With_PassiveListening(SPXRECOHANDLE* phreco, bool passive)
+{
+    UNUSED(phreco);
+    UNUSED(passive);
+    return SPXERR_NOT_IMPL;
+}
+
+SPXAPI RecognizerFactory_CreateIntentRecognizer(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName, bool passive)
 {
     UNUSED(phreco);
     UNUSED(pszLanguage);

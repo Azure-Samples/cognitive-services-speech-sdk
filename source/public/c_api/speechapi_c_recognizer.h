@@ -9,7 +9,7 @@
 #include <speechapi_c_common.h>
 
 
-SPXAPI_(bool) Recognzier_Handle_IsValid(SPXRECOHANDLE hreco);
+SPXAPI_(bool) Recognizer_Handle_IsValid(SPXRECOHANDLE hreco);
 SPXAPI Recognizer_Handle_Close(SPXRECOHANDLE hreco);
 
 SPXAPI_(bool) Recognizer_AsyncHandle_IsValid(SPXASYNCHANDLE hasync);

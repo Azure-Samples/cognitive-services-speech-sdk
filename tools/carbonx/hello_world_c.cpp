@@ -15,7 +15,7 @@ void CarbonTestConsole::Sample_HelloWorld_In_C()
      SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
      if (SPX_SUCCEEDED(hr))
      {
-        hr = ::RecognizerFactory_CreateSpeechRecognzier_With_Defaults(&hreco);
+        hr = ::RecognizerFactory_CreateSpeechRecognizer_With_Defaults(&hreco);
      }
 
      SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
