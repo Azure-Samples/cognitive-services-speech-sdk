@@ -104,8 +104,9 @@ typedef void(*UspOnUserMessage)(UspHandle uspHandle, const char* path, const cha
 
 
 /**
-* The UspCallbacks type represents an application-defined
-* structure used to register all USP events.
+* The UspCallbacks type represents an application-defined structure used to register callbcks for USP events.
+* The callbacks are invoked during the processing of the request, an application should spend as little time as possible
+* in the callback function.
 */
 typedef struct _UspCallbacks
 {
@@ -122,11 +123,13 @@ typedef struct _UspCallbacks
 } UspCallbacks;
 
 typedef enum {
+    USP_ENDPOINT_UNKNOWN,
     USP_ENDPOINT_BING_SPEECH,
     USP_ENDPOINT_CRIS
 } UspEndpointType;
 
 typedef enum {
+    USP_RECO_MODE_UNKNOWN,
     USP_RECO_MODE_INTERACTIVE,
     USP_RECO_MODE_CONVERSATION,
     USP_RECO_MODE_DICTATION
@@ -138,13 +141,13 @@ typedef enum {
 } UspOutputFormat;
 
 typedef enum {
-    USP_AUTHENTICATION_SUBSCRIPTION_KEY = 1, // to avoid 0 as the default value
+    USP_AUTHENTICATION_UNKNOWN,
+    USP_AUTHENTICATION_SUBSCRIPTION_KEY,
     USP_AUTHENTICATION_AUTHORIZATION_TOKEN
 } UspAuthenticationType;
 
-
 /**
-* Creates a UspHandle for the specified speech service endpoint.
+* Creates a UspHandle based on speech type and recognition mode.
 * @param type  The speech service to be used, e.g. USP_ENDPOINT_BING_SPEECH, USP_ENDPOINT_CRIS.
 * @param mode  The recognition mode to be used, e.g. USP_RECO_MODE_INTERACTIVE, USP_RECO_MODE_CONVERSATION, and USP_RECO_MODE_DICTATION.
 * @param callbacks The struct defines callback functions that will be called when various USP events occur.
@@ -153,6 +156,17 @@ typedef enum {
 * @return A UspResult indicating success or error.
 */
 UspResult UspInit(UspEndpointType type, UspRecognitionMode mode, UspCallbacks *callbacks, void* callbackContext, UspHandle* uspHandle);
+
+/**
+* Creates a UspHandle by specifying the URL of the service endpoint.
+* @param endpointUrl The URL of the service endpoint. It should contain the host name, resoure path and all query parameters needed. The URL cannot be changed after initialization.
+* @param callbacks The struct defines callback functions that will be called when various USP events occur.
+* @param callbackContext A pointer to the caller provided data, which will be passed as parameter when the callback function is invoked.
+* @param uspHandle The pointer to UspHandle. If the function returns USP_SUCCESS, the value pointered by uspHandle is the initialzed UspHandle that is ready for use.
+* @return A UspResult indicating success or error.
+*/
+UspResult UspInitByUrl(const char *endpointUrl, UspCallbacks *callbacks, void* callbackContext, UspHandle* uspHandle);
+
 
 /**
 * Sets authentication data for the specified uspHandle.

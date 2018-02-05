@@ -141,16 +141,19 @@ typedef struct _UspContext
 {
     UspCallbacks* callbacks;
     void* callbackContext;
+
     UspEndpointType type;
     UspRecognitionMode mode;
     STRING_HANDLE outputFormat;
     STRING_HANDLE language;
     STRING_HANDLE modelId;
 
+    STRING_HANDLE endpointUrl;
+
     UspAuthenticationType authType;
     STRING_HANDLE authData;
 
-    int state;
+    UspState state;
 
     LIST_HANDLE userPathHandlerList;
 

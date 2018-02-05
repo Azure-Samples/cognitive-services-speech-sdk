@@ -541,7 +541,6 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
             free(tokenStr);
             return ret;
         }
-
         break;
 
     default:
@@ -586,6 +585,7 @@ UspResult UspContextDestroy(UspContext* uspContext)
     STRING_delete(uspContext->outputFormat);
     STRING_delete(uspContext->modelId);
     STRING_delete(uspContext->authData);
+    STRING_delete(uspContext->endpointUrl);
 
     while ((userPathHandlerItem = list_get_head_item(uspContext->userPathHandlerList)) != NULL)
     {

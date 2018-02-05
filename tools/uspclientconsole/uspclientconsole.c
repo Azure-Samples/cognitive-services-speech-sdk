@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
 
     if (argc < 2)
     {
-        printf("Usage: uspclientconsole audio_file authentication endpoint_type(speech/cris) mode(interactive/conversation/dictation) language output(simple/detailed) user-defined-messages");
+        printf("Usage: uspclientconsole audio_file authentication endpoint_type(speech/cris/url) mode(interactive/conversation/dictation)/url language output(simple/detailed) user-defined-messages");
         exit(1);
     }
 
@@ -161,6 +161,15 @@ int main(int argc, char* argv[])
         {
             endpoint = USP_ENDPOINT_CRIS;
         }
+        else if (strcmp(argv[curArg], "url") == 0)
+        {
+            endpoint = USP_ENDPOINT_UNKNOWN;
+            if (argc != curArg + 2)
+            {
+                printf("No URL specified or too many parameters.\n");
+                exit(1);
+            }
+        }
         else
         {
             printf("unknown service endpoint type: %s\n", argv[curArg]);
@@ -172,27 +181,41 @@ int main(int argc, char* argv[])
     // Set recognition mode.
     if (argc > curArg)
     {
-        if (strcmp(argv[curArg], "interactive") == 0)
+        if (endpoint != USP_ENDPOINT_UNKNOWN)
         {
-            mode = USP_RECO_MODE_INTERACTIVE;
-        }
-        else if (strcmp(argv[curArg], "conversation") == 0)
-        {
-            mode = USP_RECO_MODE_CONVERSATION;
-        }
-        else if (strcmp(argv[curArg], "dictation") == 0)
-        {
-            mode = USP_RECO_MODE_DICTATION;
-        }
-        else
-        {
-            printf("unknown reco mode: %s\n", argv[curArg]);
-            exit(1);
+            if (strcmp(argv[curArg], "interactive") == 0)
+            {
+                mode = USP_RECO_MODE_INTERACTIVE;
+            }
+            else if (strcmp(argv[curArg], "conversation") == 0)
+            {
+                mode = USP_RECO_MODE_CONVERSATION;
+            }
+            else if (strcmp(argv[curArg], "dictation") == 0)
+            {
+                mode = USP_RECO_MODE_DICTATION;
+            }
+            else
+            {
+                printf("unknown reco mode: %s\n", argv[curArg]);
+                exit(1);
+            }
         }
     }
 
     // Create USP handle.
-    if ((ret = UspInit(endpoint, mode, &testCallbacks, context, &handle)) != USP_SUCCESS)
+    if (endpoint == USP_ENDPOINT_UNKNOWN)
+    {
+        printf("Open USP by URL.\n");
+        ret = UspInitByUrl(argv[curArg], &testCallbacks, context, &handle);
+    }
+    else
+    {
+        printf("Open USP by service type and mode.");
+        ret = UspInit(endpoint, mode, &testCallbacks, context, &handle);
+    }
+
+    if (ret != USP_SUCCESS)
     {
         printf("Error: open UspHandle failed (error=0x%x).\n", ret);
         exit(1);

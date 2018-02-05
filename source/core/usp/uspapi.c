@@ -35,12 +35,11 @@ static int UspEventLoop(void* ptr)
     return 0;
 }
 
-UspResult UspInit(UspEndpointType type, UspRecognitionMode mode, UspCallbacks *callbacks, void* callbackContext, UspHandle* uspHandle)
+inline static UspResult UspCreateContextAndSetCallbacks(UspCallbacks *callbacks, void* callbackContext, UspContext** uspContextReturned)
 {
     UspContext* uspContext;
     UspResult ret;
 
-    USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
     USP_RETURN_ERROR_IF_ARGUMENT_NULL(callbacks, "callbacks");
 
     // Create UspContext
@@ -52,9 +51,6 @@ UspResult UspInit(UspEndpointType type, UspRecognitionMode mode, UspCallbacks *c
 
     assert(uspContext != NULL);
 
-    uspContext->type = type;
-    uspContext->mode = mode;
-
     // Set callbacks
     if ((ret = UspSetCallbacks(uspContext, callbacks, callbackContext)) != USP_SUCCESS)
     {
@@ -64,7 +60,60 @@ UspResult UspInit(UspEndpointType type, UspRecognitionMode mode, UspCallbacks *c
     }
 
     uspContext->state = USP_STATE_INITIALIZED;
+    *uspContextReturned = uspContext;
+    return USP_SUCCESS;
+}
+
+UspResult UspInit(UspEndpointType type, UspRecognitionMode mode, UspCallbacks *callbacks, void* callbackContext, UspHandle* uspHandle)
+{
+    UspContext* uspContext;
+    UspResult ret;
+
+    USP_RETURN_ERROR_IF_ARGUMENT_NULL(uspHandle, "uspHandle");
+
+    if ((ret = UspCreateContextAndSetCallbacks(callbacks, callbackContext, &uspContext)) != USP_SUCCESS)
+    {
+        return ret;
+    }
+
+    uspContext->type = type;
+    uspContext->mode = mode;
+
     *uspHandle = uspContext;
+    return USP_SUCCESS;
+}
+
+UspResult UspInitByUrl(const char *endpointUrl, UspCallbacks *callbacks, void* callbackContext, UspHandle* uspHandle)
+{
+    UspContext* uspContext;
+    UspResult ret;
+
+    USP_RETURN_ERROR_IF_ARGUMENT_NULL(uspHandle, "uspHandle");
+
+    if ((ret = UspCreateContextAndSetCallbacks(callbacks, callbackContext, &uspContext)) != USP_SUCCESS)
+    {
+        return ret;
+    }
+
+    uspContext->endpointUrl = STRING_construct(endpointUrl);
+
+    *uspHandle = uspContext;
+    return USP_SUCCESS;
+
+}
+
+inline static UspResult CheckStateAndUrl(UspHandle uspHandle, UspState expectedState)
+{
+    if (uspHandle->state != expectedState)
+    {
+        LogError("Error: This must be called in state %d. The current state (%d) is not allowed.", USP_STATE_INITIALIZED, uspHandle->state);
+        return USP_WRONG_STATE;
+    }
+    else if (uspHandle->endpointUrl != NULL)
+    {
+        LogError("Error: It is not allowed to change configuration if the handle is initialized by UspInitByUrl().");
+        return USP_NOT_SUPPORTED_OPTION;
+    }
     return USP_SUCCESS;
 }
 
@@ -77,20 +126,18 @@ UspResult UspSetLanguage(UspHandle uspHandle, const char* language)
 
     Lock(uspHandle->uspContextLock);
 
-    if (uspHandle->state != USP_STATE_INITIALIZED)
+    if ((ret = CheckStateAndUrl(uspHandle, USP_STATE_INITIALIZED)) == USP_SUCCESS)
     {
-        LogError("Error: This must be called in state %d. The current state (%d) is not allowed.", USP_STATE_INITIALIZED, uspHandle->state);
-        ret = USP_WRONG_STATE;
-    }
-    else if (uspHandle->type == USP_ENDPOINT_CRIS)
-    {
-        LogError("Language option for CRIS service is not supported.");
-        ret = USP_NOT_SUPPORTED_OPTION;
-    }
-    else
-    {
-        uspHandle->language = STRING_construct(language);
-        ret = USP_SUCCESS;
+        if (uspHandle->type == USP_ENDPOINT_CRIS)
+        {
+            LogError("Language option for CRIS service is not supported.");
+            ret = USP_NOT_SUPPORTED_OPTION;
+        }
+        else
+        {
+            uspHandle->language = STRING_construct(language);
+            ret = USP_SUCCESS;
+        }
     }
 
     Unlock(uspHandle->uspContextLock);
@@ -106,23 +153,21 @@ UspResult UspSetOutputFormat(UspHandle uspHandle, UspOutputFormat format)
 
     Lock(uspHandle->uspContextLock);
 
-    if (uspHandle->state != USP_STATE_INITIALIZED)
+    if ((ret = CheckStateAndUrl(uspHandle, USP_STATE_INITIALIZED)) == USP_SUCCESS)
     {
-        LogError("Error: This must be called in state %d. The current state (%d) is not allowed.", USP_STATE_INITIALIZED, uspHandle->state);
-        ret = USP_WRONG_STATE;
-    }
-    else if (format == USP_OUTPUT_DETAILED)
-    {
-        uspHandle->outputFormat = STRING_construct(g_outputDetailedStr);
-    }
-    else if (format == USP_OUTPUT_SIMPLE)
-    {
-        uspHandle->outputFormat = STRING_construct(g_outputSimpleStr);
-    }
-    else
-    {
-        LogError("The output format is invalid: %d.", format);
-        ret = USP_NOT_SUPPORTED_OPTION;
+        if (format == USP_OUTPUT_DETAILED)
+        {
+            uspHandle->outputFormat = STRING_construct(g_outputDetailedStr);
+        }
+        else if (format == USP_OUTPUT_SIMPLE)
+        {
+            uspHandle->outputFormat = STRING_construct(g_outputSimpleStr);
+        }
+        else
+        {
+            LogError("The output format is invalid: %d.", format);
+            ret = USP_NOT_SUPPORTED_OPTION;
+        }
     }
 
     Unlock(uspHandle->uspContextLock);
@@ -139,20 +184,18 @@ UspResult UspSetModelId(UspHandle uspHandle, const char* modelId)
 
     Lock(uspHandle->uspContextLock);
 
-    if (uspHandle->state != USP_STATE_INITIALIZED)
+    if ((ret = CheckStateAndUrl(uspHandle, USP_STATE_INITIALIZED)) == USP_SUCCESS)
     {
-        LogError("Error: This must be called in state %d. The current state (%d) is not allowed.", USP_STATE_INITIALIZED, uspHandle->state);
-        ret = USP_WRONG_STATE;
-    }
-    else if (uspHandle->type != USP_ENDPOINT_CRIS)
-    {
-        LogError("USP_CONFIG_MODEL_ID is only allowed if the endpoint type is USP_ENDPOINT_CRIS");
-        ret = USP_NOT_SUPPORTED_OPTION;
-    }
-    else
-    {
-        uspHandle->modelId = STRING_construct(modelId);
-        ret = USP_SUCCESS;
+        if (uspHandle->type != USP_ENDPOINT_CRIS)
+        {
+            LogError("USP_CONFIG_MODEL_ID is only allowed if the endpoint type is USP_ENDPOINT_CRIS");
+            ret = USP_NOT_SUPPORTED_OPTION;
+        }
+        else
+        {
+            uspHandle->modelId = STRING_construct(modelId);
+            ret = USP_SUCCESS;
+        }
     }
 
     Unlock(uspHandle->uspContextLock);
@@ -186,6 +229,8 @@ UspResult UspSetAuthentication(UspHandle uspHandle, UspAuthenticationType authTy
             break;
 
         default:
+            uspHandle->authType = USP_AUTHENTICATION_UNKNOWN;
+            uspHandle->authData = NULL;
             LogError("Authentication type %d is not supported", authType);
             ret = USP_NOT_SUPPORTED_OPTION;
         }
@@ -197,9 +242,7 @@ UspResult UspSetAuthentication(UspHandle uspHandle, UspAuthenticationType authTy
 }
 
 
-// Todo: Currently we assume that UspLib API is single-threaded. If it needs to be accessed by multiple concurrent threads,
-// We need to make it thread-safe.
-UspResult UspConnect(UspHandle uspHandle)
+static UspResult UspBuildUrl(UspHandle uspHandle, const char** urlResult)
 {
     size_t urlLength = 0;
     const char* hostnameStr = NULL;
@@ -207,13 +250,10 @@ UspResult UspConnect(UspHandle uspHandle)
     const char *langStr = NULL;
     const char *formatStr = NULL;
     char separator = '?';
-    UspResult ret;
+    char *endpointUrl;
+    char *endpointUrlFormat;
 
-    USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
-
-    // Callbacks must be set before initializing transport.
-    USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspHandle);
-
+    // Get the URL length
     switch (uspHandle->type)
     {
     case USP_ENDPOINT_BING_SPEECH:
@@ -259,7 +299,7 @@ UspResult UspConnect(UspHandle uspHandle)
 
     if (langStr != NULL)
     {
-        urlLength += 1 /* query separator char. */ +  strlen(g_langQueryStr) + strlen(langStr);
+        urlLength += 1 /* query separator char. */ + strlen(g_langQueryStr) + strlen(langStr);
     }
 
     if ((formatStr = STRING_c_str(uspHandle->outputFormat)) != NULL)
@@ -267,13 +307,16 @@ UspResult UspConnect(UspHandle uspHandle)
         urlLength += 1 /* query separator char. */ + strlen(g_formatQueryStr) + strlen(formatStr);
     }
 
-    char *endpointUrl;
-    char *endpointUrlFormat;
-
     urlLength += 1; // for null character at the end.
+
+    // Allocate memory for building URL string.
     if ((endpointUrl = malloc(urlLength)) == NULL || (endpointUrlFormat = malloc(urlLength)) == NULL)
     {
         LogError("Memory allocation failed.");
+        if (endpointUrl != NULL)
+        {
+            free(endpointUrl);
+        }
         return USP_OUT_OF_MEMORY;
     }
 
@@ -309,9 +352,24 @@ UspResult UspConnect(UspHandle uspHandle)
 
     free(endpointUrlFormat);
 
+    if (urlResult != NULL)
+    {
+        *urlResult = endpointUrl;
+    }
+    return USP_SUCCESS;
+}
+
+UspResult UspConnect(UspHandle uspHandle)
+{
+    UspResult ret = USP_RUNTIME_ERROR;
+    const char* endpointUrl;
+
+    USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
+    // Callbacks must be set before initializing transport.
+    USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspHandle);
+
     Lock(uspHandle->uspContextLock);
 
-    LogInfo("Connect to service endpoint %s.", endpointUrl);
     if (uspHandle->state != USP_STATE_INITIALIZED)
     {
         LogError("Error: UspConnect() must be called in %d state. The current state (%d) is not allowed.", USP_STATE_INITIALIZED, uspHandle->state);
@@ -319,7 +377,20 @@ UspResult UspConnect(UspHandle uspHandle)
     }
     else
     {
-        ret = TransportInitialize(uspHandle, endpointUrl);
+        endpointUrl = STRING_c_str(uspHandle->endpointUrl);
+
+        // Either use the specified URL or build URL based on service type and configurations
+        if ((endpointUrl != NULL) || ((ret = UspBuildUrl(uspHandle, &endpointUrl)) == USP_SUCCESS))
+        {
+            LogInfo("Connect to service %s", endpointUrl);
+            ret = TransportInitialize(uspHandle, endpointUrl);
+        }
+
+        if ((uspHandle->endpointUrl == NULL) && (ret == USP_SUCCESS))
+        {
+            free((void *)endpointUrl);  // free the string returned by BuildUrl
+        }
+
         if (ret != USP_SUCCESS)
         {
             LogError("Initialize transport failed");
@@ -337,7 +408,6 @@ UspResult UspConnect(UspHandle uspHandle)
     }
 
     Unlock(uspHandle->uspContextLock);
-    free(endpointUrl);
 
     return ret;
 }
