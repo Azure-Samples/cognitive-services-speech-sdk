@@ -35,6 +35,14 @@
 #define SPXAPI_CALLTYPE     __stdcall
 #define SPXAPI_VCALLTYPE    __cdecl
 
+#elif defined(SWIG)
+
+#define SPXAPI_EXPORT
+#define SPXAPI_NOTHROW
+#define SPXAPI_RESULTTYPE   SPXHR
+#define SPXAPI_CALLTYPE
+#define SPXAPI_VCALLTYPE
+
 #else
 
 #define SPXAPI_EXPORT       __attribute__ ((__visibility__("default")))

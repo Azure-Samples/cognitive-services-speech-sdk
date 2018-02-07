@@ -1,0 +1,25 @@
+import sys;
+
+lib_dir = '${CMAKE_LIBRARY_OUTPUT_DIRECTORY}'
+bin_dir = '${CMAKE_BINARY_OUTPUT_DIRECTORY}'
+
+sys.path.append(lib_dir)
+sys.path.append(lib_dir + '/Debug')
+sys.path.append(lib_dir + '/Release')
+
+import os
+os.environ['PATH'] = bin_dir + '/Debug;' + bin_dir + '/Release;' + ';' + os.environ['PATH']
+
+#sys.path.append('./bindings/python');
+
+
+import carbon_py
+
+dir(carbon_py)
+
+reco = carbon_py.RecognizerFactory.create_speech_recognizer()
+
+future = reco.recognize_async()
+result = future.get() # this is a blocking call
+print()
+print(result.text)

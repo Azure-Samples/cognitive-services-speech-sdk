@@ -1,5 +1,14 @@
 cmake_minimum_required(VERSION 3.5)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING
+      "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
+      FORCE)
+endif(NOT CMAKE_BUILD_TYPE)
+
+
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -26,7 +35,8 @@ if(MSVC)
   # disable precompiled headers (for now) to allow build in IDE environment
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Y-")
 elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra -Wno-long-long -Wpedantic")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra -Wno-long-long -Wpedantic -fPIC")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 endif()
 
 set(CARBON_ROOT ${PROJECT_SOURCE_DIR})
@@ -75,7 +85,7 @@ set(SPEECH_CXX_API_HEADERS
 # individual components
 set(COMMON "${CARBON_CORE}/common")
 set(SR "${CARBON_CORE}/sr")
-set(CARBON_DLL "${CARBON_CORE}/carbon_dll")
+set(CARBON_LIB "${CARBON_CORE}/carbon_lib")
 set(C_API "${CARBON_CORE}/c_api")
 set(AUDIO "${CARBON_CORE}/audio")
 set(USP "${CARBON_CORE}/usp")
@@ -97,6 +107,16 @@ if(WIN32)
     list(APPEND AZURE_SHARED_LIB rpcrt4.lib)
 endif()
 
+# set(CMAKE_VERBOSE_MAKEFILE ON)
+if(UNIX)
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+    #option(BUILD_SHARED_LIBS "Build shared libraries(.so or .dyld)." ON)
+else()
+    # Windows only support static build.
+    #set(BUILD_SHARED_LIBS OFF)
+    include(swig)
+endif()
+
 add_subdirectory(${COMMON})
 add_subdirectory(${AUDIO})
 add_subdirectory(${USP})
@@ -104,5 +124,6 @@ add_subdirectory(${USP_CONSOLE})
 add_subdirectory(${TESTS})
 add_subdirectory(${C_API})
 add_subdirectory(${SR})
-add_subdirectory(${CARBON_DLL})
+add_subdirectory(${CARBON_LIB})
 add_subdirectory(${CARBONX})
+add_subdirectory("${CARBON_ROOT}/bindings")

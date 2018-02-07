@@ -163,39 +163,39 @@ protected:
 
     void RecoEventConnectionsChanged(const EventSignal<const SpeechRecognitionEventArgs&>& recoEvent) override
     {
-        if (&recoEvent == &IntermediateResult)
+        if (&recoEvent == &IntermediateResult())
         {
-            Recognizer_IntermediateResult_SetEventCallback(m_hreco, IntermediateResult.IsConnected() ? SpeechRecognizer::FireEvent_IntermediateResult: nullptr, this);
+            Recognizer_IntermediateResult_SetEventCallback(m_hreco, IntermediateResult().IsConnected() ? SpeechRecognizer::FireEvent_IntermediateResult: nullptr, this);
         }
-        else if (&recoEvent == &FinalResult)
+        else if (&recoEvent == &FinalResult())
         {
-            Recognizer_FinalResult_SetEventCallback(m_hreco, FinalResult.IsConnected() ? SpeechRecognizer::FireEvent_FinalResult: nullptr, this);
+            Recognizer_FinalResult_SetEventCallback(m_hreco, FinalResult().IsConnected() ? SpeechRecognizer::FireEvent_FinalResult: nullptr, this);
         }
-        else if (&recoEvent == &NoMatch)
+        else if (&recoEvent == &NoMatch())
         {
-            Recognizer_NoMatch_SetEventCallback(m_hreco, NoMatch.IsConnected() ? SpeechRecognizer::FireEvent_NoMatch : nullptr, this);
+            Recognizer_NoMatch_SetEventCallback(m_hreco, NoMatch().IsConnected() ? SpeechRecognizer::FireEvent_NoMatch : nullptr, this);
         }
-        else if (&recoEvent == &Canceled)
+        else if (&recoEvent == &Canceled())
         {
-            Recognizer_Canceled_SetEventCallback(m_hreco, Canceled.IsConnected() ? SpeechRecognizer::FireEvent_Canceled : nullptr, this);
+            Recognizer_Canceled_SetEventCallback(m_hreco, Canceled().IsConnected() ? SpeechRecognizer::FireEvent_Canceled : nullptr, this);
         }
     }
 
     void SessionEventConnectionsChanged(const EventSignal<const SessionEventArgs&>& sessionEvent) override
     {
-        if (&sessionEvent == &SessionStarted)
+        if (&sessionEvent == &SessionStarted())
         {
-            Recognizer_SessionStarted_SetEventCallback(m_hreco, SessionStarted.IsConnected() ? SpeechRecognizer::FireEvent_SessionStarted: nullptr, this);
+            Recognizer_SessionStarted_SetEventCallback(m_hreco, SessionStarted().IsConnected() ? SpeechRecognizer::FireEvent_SessionStarted: nullptr, this);
         }
-        else if (&sessionEvent == &SessionStopped)
+        else if (&sessionEvent == &SessionStopped())
         {
-            Recognizer_SessionStopped_SetEventCallback(m_hreco, SessionStopped.IsConnected() ? SpeechRecognizer::FireEvent_SessionStopped : nullptr, this);
+            Recognizer_SessionStopped_SetEventCallback(m_hreco, SessionStopped().IsConnected() ? SpeechRecognizer::FireEvent_SessionStopped : nullptr, this);
         }
-        else if (&sessionEvent == &SoundStarted)
+        else if (&sessionEvent == &SoundStarted())
         {
             //Recognizer_SoundStarted_SetEventCallback(m_hreco, SoundStarted.IsConnected() ? SpeechRecognizer::FireEvent_SoundStarted: nullptr, this);
         }
-        else if (&sessionEvent == &SoundStopped)
+        else if (&sessionEvent == &SoundStopped())
         {
             //Recognizer_SoundStopped_SetEventCallback(m_hreco, SoundStopped.IsConnected() ? SpeechRecognizer::FireEvent_SoundStopped: nullptr, this);
         }
@@ -208,7 +208,7 @@ protected:
         // auto sessionEvent = std::make_unique<SessionEventArgs>(hevent);
         std::unique_ptr<SessionEventArgs> sessionEvent{ new SessionEventArgs(hevent) };
         auto pThis = static_cast<SpeechRecognizer*>(pvContext);
-        pThis->SessionStarted.Signal(*sessionEvent.get());
+        pThis->SessionStarted().Signal(*sessionEvent.get());
     }
 
     static void FireEvent_SessionStopped(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
@@ -218,7 +218,7 @@ protected:
         // auto sessionEvent = std::make_unique<SessionEventArgs>(hevent);
         std::unique_ptr<SessionEventArgs> sessionEvent{ new SessionEventArgs(hevent) };
         auto pThis = static_cast<SpeechRecognizer*>(pvContext);
-        pThis->SessionStopped.Signal(*sessionEvent.get());
+        pThis->SessionStopped().Signal(*sessionEvent.get());
     }
 
     static void FireEvent_IntermediateResult(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
@@ -228,7 +228,7 @@ protected:
         // auto recoEvent = std::make_unique<SpeechRecognitionEventArgs>(hevent);
         std::unique_ptr<SpeechRecognitionEventArgs> recoEvent{ new SpeechRecognitionEventArgs(hevent) };
         auto pThis = static_cast<SpeechRecognizer*>(pvContext);
-        pThis->IntermediateResult.Signal(*recoEvent.get());
+        pThis->IntermediateResult().Signal(*recoEvent.get());
     }
 
     static void FireEvent_FinalResult(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
@@ -238,7 +238,7 @@ protected:
         // auto recoEvent = std::make_unique<SpeechRecognitionEventArgs>(hevent);
         std::unique_ptr<SpeechRecognitionEventArgs> recoEvent{ new SpeechRecognitionEventArgs(hevent) };
         auto pThis = static_cast<SpeechRecognizer*>(pvContext);
-        pThis->FinalResult.Signal(*recoEvent.get());
+        pThis->FinalResult().Signal(*recoEvent.get());
     }
 
     static void FireEvent_NoMatch(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
@@ -248,7 +248,7 @@ protected:
         // auto recoEvent = std::make_unique<SpeechRecognitionEventArgs>(hevent);
         std::unique_ptr<SpeechRecognitionEventArgs> recoEvent{ new SpeechRecognitionEventArgs(hevent) };
         auto pThis = static_cast<SpeechRecognizer*>(pvContext);
-        pThis->NoMatch.Signal(*recoEvent.get());
+        pThis->NoMatch().Signal(*recoEvent.get());
     }
 
     static void FireEvent_Canceled(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
@@ -258,7 +258,7 @@ protected:
         // auto recoEvent = std::make_unique<SpeechRecognitionEventArgs>(hevent);
         std::unique_ptr<SpeechRecognitionEventArgs> recoEvent{ new SpeechRecognitionEventArgs(hevent) };
         auto pThis = static_cast<SpeechRecognizer*>(pvContext);
-        pThis->Canceled.Signal(*recoEvent.get());
+        pThis->Canceled().Signal(*recoEvent.get());
     }
 
 

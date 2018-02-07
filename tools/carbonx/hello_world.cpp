@@ -23,7 +23,7 @@ void CarbonTestConsole::Sample_HelloWorld_WithEvents()
 {
     auto recognizer = RecognizerFactory::CreateSpeechRecognizer();
 
-    recognizer->IntermediateResult += [&](const SpeechRecognitionEventArgs& e) {
+    recognizer->IntermediateResult() += [&](const SpeechRecognitionEventArgs& e) {
         ConsoleWriteLine(L"IntermediateResult: text=%ls", e.Result.Text.c_str());
     };
 

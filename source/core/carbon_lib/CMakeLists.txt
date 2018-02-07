@@ -1,4 +1,4 @@
-project(carbon_dll)
+project(carbon_lib)
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 

@@ -7,4 +7,8 @@
 
 #pragma once
 
+#ifdef SWIG
+#define final
+#endif
+
 #define CARBON_NAMESPACE_ROOT   Carbon

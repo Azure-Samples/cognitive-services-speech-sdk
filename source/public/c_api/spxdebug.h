@@ -63,6 +63,7 @@
 #define __SPX_TRACE_LEVEL_VERBOSE     0x10 // Trace_Verbose
 
 #ifndef __SPX_DO_TRACE_IMPL
+#ifdef __cplusplus
 #include <stdio.h>
 #include <stdarg.h>
 #include <string>
@@ -106,6 +107,9 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
     }
 }
 #define __SPX_DO_TRACE_IMPL __spx_do_trace_message
+#else
+#define __SPX_DO_TRACE_IMPL
+#endif 
 #endif
 
 #define __SPX_DOTRACE(level, title, ...)                            \

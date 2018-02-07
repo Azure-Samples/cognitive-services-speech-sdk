@@ -30,6 +30,8 @@ public:
         return nullptr;
     }
 
+protected:
+    BaseAsyncRecognizer() = default;
 };
 
 
