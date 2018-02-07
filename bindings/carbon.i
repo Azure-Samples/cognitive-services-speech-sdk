@@ -30,6 +30,10 @@
 #include <speechapi_cxx_speech_recognition_eventargs.h>
 #include <speechapi_cxx_speech_recognizer.h>
 
+#include <speechapi_cxx_translation_result.h>
+#include <speechapi_cxx_translation_eventargs.h>
+#include <speechapi_cxx_translation_recognizer.h>
+
 #include <speechapi_cxx_todo_intent.h>
 
 #include <speechapi_cxx_recognizer_factory.h>
@@ -59,16 +63,27 @@
 %ignore Carbon::Recognition::Speech::SpeechRecognizer::StartContinuousRecognitionAsync();
 %ignore Carbon::Recognition::Speech::SpeechRecognizer::StopContinuousRecognitionAsync();
 
+%ignore Carbon::Recognition::Translation::TranslationRecognizer::RecognizeAsync();
+%ignore Carbon::Recognition::Translation::TranslationRecognizer::StartContinuousRecognitionAsync();
+%ignore Carbon::Recognition::Translation::TranslationRecognizer::StopContinuousRecognitionAsync();
+%ignore OnTranslationIntermediateTextResult;
+%ignore OnTranslationFinalTextResult;
+%ignore OnTranslationAudioResult;
+%ignore OnTranslationFullResult;
+%ignore OnTranslationError;
+
 %ignore Carbon::Recognition::Intent::IntentRecognizer::RecognizeAsync();
 %ignore Carbon::Recognition::Intent::IntentRecognizer::StartContinuousRecognitionAsync();
 %ignore Carbon::Recognition::Intent::IntentRecognizer::StopContinuousRecognitionAsync();
 
 %shared_ptr(Carbon::Recognition::BaseAsyncRecognizer)
 %shared_ptr(Carbon::Recognition::Speech::SpeechRecognizer)
+%shared_ptr(Carbon::Recognition::Translation::TranslationRecognizer)
 %shared_ptr(Carbon::Recognition::Intent::IntentRecognizer)
 
 %shared_ptr(Carbon::Recognition::RecognitionResult)
 %shared_ptr(Carbon::Recognition::Speech::SpeechRecognitionResult)
+%shared_ptr(Carbon::Recognition::Translation::TranslationResult)
 
 // Process symbols in header
 %include <speechapi_cxx_eventargs.h>
@@ -122,9 +137,9 @@
 %include <speechapi_cxx_speech_recognizer.h>
 
 %template() Carbon::EventSignal<const int&>;
+
 %template(IntentRecognizerBase) Carbon::Recognition::AsyncRecognizer<int, int>;
 %include <speechapi_cxx_todo_intent.h>
-
 
 %include <speechapi_cxx_recognizer_factory.h>
 

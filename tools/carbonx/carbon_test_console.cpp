@@ -68,6 +68,13 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
             pstrNextArg = nullptr;
             fNextArgRequired = false;
         }
+        else if (PAL::wcsicmp(pszArg, L"/translation") == 0)
+        {
+            fShowOptions = pconsoleArgs->m_strRecognizerType.length() > 0 || fNextArgRequired;
+            pconsoleArgs->m_strRecognizerType = PAL::GetTypeName<TranslationRecognizer>();
+            pstrNextArg = nullptr;
+            fNextArgRequired = false;
+        }
         else if (PAL::wcsicmp(pszArg, L"/commands") == 0)
         {
             fShowOptions = (pconsoleArgs->m_strRecognizerType.length() > 0 && pconsoleArgs->m_strRecognizerType != PAL::GetTypeName<IntentRecognizer>()) || pconsoleArgs->m_fCommandSystem || fNextArgRequired;
@@ -225,7 +232,7 @@ void CarbonTestConsole::DisplayConsoleHeader()
 
 void CarbonTestConsole::DisplayConsoleUsage()
 {
-    ConsoleWriteLine(L"  carbonx [/speech | /intent | /commands] {input} {auth} {additional}");
+    ConsoleWriteLine(L"  carbonx [/speech | /intent | /commands | /translation ] {input} {auth} {additional}");
     ConsoleWriteLine(L"");
     ConsoleWriteLine(L"     Input: /input:[microphone | {waveFileName}]");
     ConsoleWriteLine(L"");
@@ -744,6 +751,23 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<SpeechRecognizer>& 
     ConsoleWriteLine(L"SpeechRecognitionResult: ResultId=%d; Reason=%d; Text=%ls", result->ResultId.c_str(), result->Reason, result->Text.c_str());
 }
 
+void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<TranslationRecognizer>& recognizer)
+{
+    auto name = PAL::ToWString(PAL::GetTypeName(*recognizer.get()));
+    ConsoleWriteLine(L"\nRecognizeAsync %ls...", name.c_str());
+    auto future = recognizer->RecognizeAsync();
+    ConsoleWriteLine(L"RecognizeAsync %ls... Waiting...", name.c_str());
+    auto result = future.get();
+    ConsoleWriteLine(L"RecognizeAsync %ls... Waiting... Done!\n", name.c_str());
+
+    ConsoleWriteLine(L"TranslationResult: ResultId=%d, TranslationStatus=%d, RecognizedText=%ls, TranslationText=%ls, TranslationAudio size=%d",
+        result->ResultId.c_str(),
+        result->TranslationStatus,
+        result->RecognizedText.c_str(),
+        result->TranslationText.c_str(),
+        (int)result->TranslationAudio.size());
+}
+
 template <class T>
 void CarbonTestConsole::Recognizer_StartContinuousRecognition(std::shared_ptr<T>& recognizer)
 {
@@ -794,7 +818,7 @@ std::wstring CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
     static_assert(2 == (int)Reason::NoMatch, "Reason::* enum values changed!");
     static_assert(3 == (int)Reason::Canceled, "Reason::* enum values changed!");
     static_assert(4 == (int)Reason::OtherRecognizer, "Reason::* enum values changed!");
-    
+
     std::wstring reasons[] = {
         L"Recognized",
         L"IntermediateResult",
@@ -810,6 +834,46 @@ std::wstring CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
     str += L"    ResultId = '" + e.Result.ResultId + L"'\n";
     str += L"    Reason = Reason::" + reasons[(int)e.Result.Reason] + L"\n";
     str += L"    Text = '" + e.Result.Text + L"'\n";
+    str += L"  } \n";
+    str += L"} \n";
+
+    return str;
+}
+
+std::wstring CarbonTestConsole::ToString(const TranslationEventArgs& e)
+{
+    static_assert(0 == (int)TranslationStatus::Unknown, "TranslationStatus::* enum values changed!");
+    static_assert(1 == (int)TranslationStatus::IntermediateTextResult, "Reason::* enum values changed!");
+    static_assert(2 == (int)TranslationStatus::FinalTextResult, "Reason::* enum values changed!");
+    static_assert(3 == (int)TranslationStatus::AudioResult, "Reason::* enum values changed!");
+    static_assert(4 == (int)TranslationStatus::FullResult, "Reason::* enum values changed!");
+    static_assert(5 == (int)TranslationStatus::SpeechNotRecognized, "Reason::* enum values changed!");
+    static_assert(6 == (int)TranslationStatus::TranslationNoMatch, "Reason::* enum values changed!");
+    static_assert(7 == (int)TranslationStatus::Failed, "Reason::* enum values changed!");
+    static_assert(8 == (int)TranslationStatus::Cancelled, "Reason::* enum values changed!");
+
+    std::wstring translationStatusString[] = {
+        L"Unknown",
+        L"IntermediateTextResult",
+        L"FinalTextResult",
+        L"AudioResult",
+        L"EndOfAudioResult",
+        L"FullResult",
+        L"SpeechNotRecognized",
+        L"TranslationNoMatch",
+        L"Failed",
+        L"Cancelled"
+    };
+
+    std::wstring str;
+    str += L"TranslationEventArgs = { \n";
+    str += L"  SessionId = '" + e.SessionId + L"'\n";
+    str += L"  Result = {\n";
+    str += L"    ResultId = '" + e.Result.ResultId + L"'\n";
+    str += L"    TranslationStatus = TranslationStatus::" + translationStatusString[(int)e.Result.TranslationStatus] + L"\n";
+    str += L"    RecognizedText = '" + e.Result.RecognizedText + L"'\n";
+    str += L"    TranslationText = '" + e.Result.TranslationText + L"'\n";
+    str += L"    SizeOfAudioData = " + std::to_wstring(e.Result.TranslationAudio.size()) + L"\n";
     str += L"  } \n";
     str += L"} \n";
 
@@ -861,6 +925,30 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
 
         m_recognizer = BaseAsyncRecognizer::From(m_speechRecognizer);
     }
+    else if (recognizerType == PAL::GetTypeName<TranslationRecognizer>())
+    {
+        TranslationLanguageResource availableLanguages = TranslationRecognizer::GetLanguageResource(
+            TRANSLATION_LANGUAGE_RESOURCE_SCOPE_SPEECH | TRANSLATION_LANGUAGE_RESOURCE_SCOPE_TEXT | TRANSLATION_LANGUAGE_RESOURCE_SCOPE_TTS,
+            L"en-us");
+        (void)availableLanguages;
+
+        m_translationRecognizer = RecognizerFactory::CreateTranslationRecognizer(L"en-us", L"zh-cn", true /*voice output*/);
+
+        auto fn1 = std::bind(&CarbonTestConsole::TranslationRecognizer_FinalResultHandler, this, std::placeholders::_1);
+        m_translationRecognizer->OnTranslationFinalTextResult.Connect(fn1);
+
+        auto fn2 = std::bind(&CarbonTestConsole::TranslationRecognizer_IntermediateResultHandler, this, std::placeholders::_1);
+        m_translationRecognizer->OnTranslationIntermediateTextResult.Connect(fn2);
+
+        auto fn3 = std::bind(&CarbonTestConsole::TranslationRecognizer_AudioResultHandler, this, std::placeholders::_1);
+        m_translationRecognizer->OnTranslationAudioResult.Connect(fn3);
+
+        auto fn4 = std::bind(&CarbonTestConsole::TranslationRecognizer_FullResultHandler, this, std::placeholders::_1);
+        m_translationRecognizer->OnTranslationFullResult.Connect(fn4);
+
+        auto fn5 = std::bind(&CarbonTestConsole::TranslationRecognizer_ErrorHandler, this, std::placeholders::_1);
+        m_translationRecognizer->OnTranslationError.Connect(fn5);
+    }
     else if (recognizerType == PAL::GetTypeName<IntentRecognizer>())
     {
         m_intentRecognizer = wavFileName.length() == 0
@@ -890,6 +978,10 @@ void CarbonTestConsole::RecognizeAsync()
     {
         Recognizer_Recognize(m_speechRecognizer);
     }
+    else if (m_translationRecognizer != nullptr)
+    {
+        Recognizer_Recognize(m_translationRecognizer);
+    }
     else if (m_recognizer != nullptr)
     {
         Recognizer_Recognize(m_recognizer);
@@ -917,6 +1009,16 @@ void CarbonTestConsole::ContinuousRecognition(uint16_t seconds)
         ConsoleWriteLine(L"Done!");
 
         Recognizer_StopContinuousRecognition(m_speechRecognizer);
+    }
+    else if (m_translationRecognizer != nullptr)
+    {
+        Recognizer_StartContinuousRecognition(m_translationRecognizer);
+
+        ConsoleWrite(L"Waiting for %d seconds... ", seconds);
+        std::this_thread::sleep_for(std::chrono::seconds(seconds));
+        ConsoleWriteLine(L"Done!");
+
+        Recognizer_StopContinuousRecognition(m_translationRecognizer);
     }
     else if (m_recognizer != nullptr)
     {
