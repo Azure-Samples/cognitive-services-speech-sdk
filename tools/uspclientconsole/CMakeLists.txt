@@ -6,8 +6,8 @@ set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 set(SOURCES "${SRC_DIR}/uspclientconsole.c")
 source_group("Source Files" FILES ${SOURCES})
 
-add_executable(uspclientconsole ${SOURCES})
-target_link_libraries(uspclientconsole usp)
+add_executable(${PROJECT_NAME} ${SOURCES})
+target_link_libraries(${PROJECT_NAME} usp)
 
 # TODO
 #[[
@@ -18,6 +18,6 @@ if(UNIX)
 endif()
 ]]
 
-set_target_properties (uspclientconsole PROPERTIES
+set_target_properties (${PROJECT_NAME} PROPERTIES
     FOLDER tools
 )

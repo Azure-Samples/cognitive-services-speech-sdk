@@ -87,7 +87,6 @@ endif()
 
 swig_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARIES} carbon)
 
-
 # Copied from https://www.vlam3d.com/2016/09/14/swig-monologues-part-1-getting-started-with-cmake/?lang=en,
 # TODO: check to make sure this is really needed.
 if(MSVC)
