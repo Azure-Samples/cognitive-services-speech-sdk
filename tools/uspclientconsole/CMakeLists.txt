@@ -1,6 +1,6 @@
 project(uspclientconsole)
 
-include_directories ("${USP}/include")
+include_directories("${USP}/include")
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 set(SOURCES "${SRC_DIR}/uspclientconsole.c")
@@ -12,12 +12,12 @@ target_link_libraries(${PROJECT_NAME} usp)
 # TODO
 #[[
 if(UNIX)
-  set_target_properties (usp PROPERTIES
+  set_target_properties(usp PROPERTIES
       COMPILE_FLAGS "-Wall -Werror -Wextra -Wno-long-long" # TODO:  -Wpedantic
   )
 endif()
 ]]
 
-set_target_properties (${PROJECT_NAME} PROPERTIES
+set_target_properties(${PROJECT_NAME} PROPERTIES
     FOLDER tools
 )

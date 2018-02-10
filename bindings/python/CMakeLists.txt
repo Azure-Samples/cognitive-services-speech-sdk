@@ -99,7 +99,7 @@ endif()
 #target_link_libraries(${SWIG_MODULE_carbon_py_REAL_NAME} PRIVATE
     #${PROJECT_NAME})
 
-set_target_properties (${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} PROPERTIES
+set_target_properties(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} PROPERTIES
     FOLDER bindings/python
 )
 

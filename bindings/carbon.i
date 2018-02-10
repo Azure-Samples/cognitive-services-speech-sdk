@@ -114,7 +114,6 @@
 %include <speechapi_cxx_speech_recognition_result.h>
 %include <speechapi_cxx_speech_recognition_eventargs.h>
 
-
 %template(SpeechRecognizerBase) Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::Speech::SpeechRecognitionResult, Carbon::Recognition::Speech::SpeechRecognitionEventArgs>;
 %include <speechapi_cxx_speech_recognizer.h>
 

@@ -10,7 +10,7 @@ include_directories(${CARBON_INCLUDE})
 include_directories("${SR}/include")
 include_directories("${COMMON}/include")
 include_directories("${USP}/include")
-include_directories (${SHARED_UTIL_INC_FOLDER})
+include_directories(${SHARED_UTIL_INC_FOLDER})
 
 set(HEADERS)
 
@@ -32,7 +32,7 @@ if(WIN32)
         # Set 
         # "Precompiled Header" to "Use (/Yu)"
         # "Precompiled Header File" to "stdafx.h"
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Yustdafx.h /FIstdafx.h")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Yustdafx.h /FIstdafx.h")
     endif()
 
     list(APPEND HEADERS_PRIVATE
@@ -61,7 +61,7 @@ target_sources(carbon PRIVATE "${SRC_DIR}/exports.def")
 
 target_link_libraries(carbon PUBLIC c_api)
 
-SET_TARGET_PROPERTIES (carbon PROPERTIES
+SET_TARGET_PROPERTIES(carbon PROPERTIES
     DEFINE_SYMBOL  "SPX_CONFIG_EXPORTAPIS" 
     PROJECT_LABEL "carbon_lib"
 )
