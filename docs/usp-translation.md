@@ -72,7 +72,7 @@ X-ClientVersion identifies the version of the client application. Example: "2.1.
 
 X-OsPlatform Identifies the name and version of the operating system the client application is running on. Examples: "Android 5.0", "iOs 8.1.3", "Windows 8.1".
 
-**NOTE** The [speech.config](https://speechwiki.azurewebsites.net/partners/speechsdk#speech-config-message) message provides similar data. We should check whether client should provide the data in HTTP headers, and the speech service could forward the data to the translation service (if the data is needed by the translation service).
+**NOTE** I would recommend to use the [speech.config](https://speechwiki.azurewebsites.net/partners/speechsdk#speech-config-message) message which provides more data about client. The speech service could forward the data to the translation service, if the data is needed by the translation service.
 
 ## Websocket Messages for Translation Speech Service
 
@@ -136,7 +136,7 @@ The body is the JSON serialization of an object with the following properties:
 
 **NOTE** What does the `id` in the current translation partial result mean? Does it uniquely identify each partial result, or used to correlate the client request and the result? In the later case, the X-RequestId already provides this information.
 
-**NOTE** The following properties are removed: `type` (the Path has this information), , and `audioSizeBytes` (the speech service does not support bytes based offset).
+**NOTE** The following properties are removed: `type` (the Path has this information), `audioSizeOffset`, and `audioSizeBytes` (the speech service does not support bytes based offset).
 
 #### Sample Message
 
@@ -148,8 +148,8 @@ X-RequestId: 123e4567e89b12d3a456426655440000
 {
   recognition: "what was",
   translation: "translation of what was",
-  audioStreamPosition: 319680,
-  audioSizeBytes: 25840
+  audioTimeOffset: 2731600000,
+  audioTimeSize: 11900000
 }
 ```
 
@@ -216,6 +216,12 @@ The first `translation.synthesis` message contains a well-formed header that pro
 **NOTE** Different than the audio message in the current translation speech service, service should send out a zero-length body to indicate the end of audio, instead of using the FIN bit in WebSocket. This is consistent with the behavior when client sends audio to the service for recognition. In addition, the FIN bit is not available for some Websocket libraries.
 
 **NOTE** The current translation service does not have any correlation schema between the translation.hypotheis/phrase message and the following translation.synthesis messages. It assumes that all translation.synthesis messages for the current translation.phrase should be sent before the next translaton.phrase and before the translation.hypothesis messages for the next translation.phrase. If this assumption does not hold anymore, a kind of identifier needs to added both to translation.hypotheis/phrase and translation.synthesis in order to correctly associate these messages.
+
+### Telemetry Messages
+
+The speech USP protocol defines a set of telemetry messages to be exchanged between client and service. Please see [Telemetry schema](https://docs.microsoft.com/en-us/azure/cognitive-services/speech/api-reference-rest/websocketprotocol#telemetry-schema) details.
+
+**NOTE** Currently, the translation team is working on intrumentation spec for the translation service. Further discussions are need how to define telemetry messages for translation and how to align with the speech telemetry messages.
 
 ### Management Messages
 
