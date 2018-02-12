@@ -13,11 +13,12 @@ To establish a Websocket connection, the client application sends an HTTPS GET r
 The endpoint of the translation service is
 `https://dev.microsofttranslator.com/speech/translate/v1`
 
-**NOTE** What is the backward compatibility expectation for current translation service users? Keeping the old service running for some time and asking them to migrate to the new service, or maintaining both services for long term?
+**NOTE** What is the expectation regarding backward compatibility for current translation service users? Keeping the old service running for some
+ time and asking them to migrate to the new service, or maintaining both services for long term?
 
 #### Hostname
 
-**NOTE** The host name "dev.microsofttranslator.com" is what the current translation service is using. What is the final host name used in Skyman is unknown. Further discussion is needed with the translation team and Skyman service team.
+**NOTE** The host name "dev.microsofttranslator.com" is what the current translation service is using. What is the final host name used in Skyman is unknown at this time. Further discussion is needed with the translation team and Skyman service team.
 
 **NOTE** The URL assumes using the base model for translation. To support user customized models, the URL might need to include model identifier, like what CRIS is using. Any time plan to publically support customized models?
 
@@ -25,9 +26,9 @@ The endpoint of the translation service is
 
 The URL path `speech/translate` defines the translation service, and the `v1` specifies the service API version.
 
-**NOTE** Does the translation service need different speech recognition modes (`interactive`, `conversation`, `dictation`), or only use the `conversation` mode? If multiple recognition modes are needed, the mode should be embedded into the path in the same way as the speech service, like `https://speech.platform.bing.com/speech/recognition/<RECOGNITION_MODE>/cognitiveservices/v1`. A detailed description of speech URL pattern is described [here](https://speechwiki.azurewebsites.net/architecture/url-patterns-for-speech-apis.html).
+**NOTE** Does the translation service need different speech recognition modes (`interactive`, `conversation`, `dictation`), or only use the `conversation` mode? If multiple recognition modes are needed, the mode name should be embedded into the path in the same way as the speech service, like `https://speech.platform.bing.com/speech/recognition/<RECOGNITION_MODE>/cognitiveservices/v1`. A detailed description of speech URL pattern is described [here](https://speechwiki.azurewebsites.net/architecture/url-patterns-for-speech-apis.html).
 
-**NOTE** Aligned with the speech service, the version of service API is now a part of URL resource path, instead of as query parameter, which is used by the current translation service. This is not critical, but would be nice to keep things aligned.
+**NOTE** Aligned with the speech service, the version of service API is now a part of URL resource path, instead of as query parameter, which is used by the current translation service. It is not critical, but would be nice to keep things aligned.
 
 #### Query parameters
 
@@ -38,12 +39,16 @@ The following query parameters are supported.
 | from | (empty) | Specifies the language of the incoming speech. The value is one of the language identifiers from the speech scope in the response from the [Languages API](https://docs.microsofttranslator.com/languages.html). | string |
 | to | (empty) | Specifies the language to translate the transcribed text into. The value is one of the language identifiers from the text scope in the response from the Languages API. | string |
 | features | (empty) | Comma-separated set of features selected by the client. Available features include: `TextToSpeech`: specifies that the service must return the translated audio of the final translated sentence. `Partial`: specifies that the service must return intermediate recognition results while the audio is streaming to the service. `TimingInfo`: specifies that the service must return timing information associated with each recognition. As an example, a client would specify `features=partial,texttospeech` to receive partial results and text-to-speech, but no timing information. Note that final results are always streamed to the client. | string |
-| voice | (empty) | Identifies what voice to use for text-to-speech rendering of the translated text. The value is one of the voice identifiers from the tts scope in the response from the Languages API. If a voice is not specified the system will automatically choose one when the text-to-speech feature is enabled.| string |
+| voice | (empty) | Identifies what voice to use for text-to-speech rendering of the translated text. The value is one of the voice identifiers from the tts scope in the response from the Languages API. If a voice is not specified, the system will automatically choose one when the text-to-speech feature is enabled.| string |
 | format | (empty) | Specifies the format of the text-to-speech audio stream returned by the service. Available options are: `audio/wav`: Waveform audio stream. `audio/mp3`: MP3 audio stream. The default is `audio/wav`.| string |
 | ProfanityAction | (empty) | Specifies how the service should handle profanities recognized in the speech. Valid actions are: `NoAction`: Profanities are left as is.`Marked`: Profanities are replaced with a marker. See `ProfanityMarker` parameter. `Deleted`: Profanities are deleted. For example, if the word "jackass" is treated as a profanity, the phrase "He is a jackass." will become "He is a .". The default is `Marked`. | string |
 | ProfanityMarker | (empty) | Specifies how detected profanities are handled when ProfanityAction is set to Marked. Valid options are: `Asterisk`: Profanities are replaced with the string `\*\*\*`. For example, if the word "jackass" is treated as a profanity, the phrase "He is a jackass." will become "He is a ***.". `Tag`: Profanity is surrounded by a profanity XML tag. For example, if the word "jackass" is treated as a profanity, the phrase "He is a jackass." will become "He is a <profanity>jackass</profanity>.". The default is `Asterisk`. | string |
 
+**NOTE** Which query parameters are required and which are optional? I assume that `from` and `to` are required, and the others are optional.
+
 **NOTE** Since Client SDK should be able to set HTTP headers, there is no need to support access\_token, subscription-key, X-ClientTraceId, X-CorrelationId, X-CLientVersion, X-OsPlatform in query parameters as an alternative way for passing authentication information.
+
+**NOTE** Since all query parameters have to be set before establishing connection and cannot be changed after that, another option is to use a Translation.Config message to set parameters, which allow users to change the setting without disconnecting and connecting. Of course, this requires the translation service to support such on-the-fly configuration change.
 
 ### HTTP Headers
 
@@ -72,7 +77,7 @@ X-ClientVersion identifies the version of the client application. Example: "2.1.
 
 X-OsPlatform Identifies the name and version of the operating system the client application is running on. Examples: "Android 5.0", "iOs 8.1.3", "Windows 8.1".
 
-**NOTE** I would recommend to use the [speech.config](https://speechwiki.azurewebsites.net/partners/speechsdk#speech-config-message) message which provides more data about client. The speech service could forward the data to the translation service, if the data is needed by the translation service.
+**NOTE** I would recommend using the [speech.config](https://speechwiki.azurewebsites.net/partners/speechsdk#speech-config-message) message that provides more data about client. The speech service could forward the data to the translation service, if the data is needed by the translation service.
 
 ## Websocket Messages for Translation Speech Service
 
@@ -115,7 +120,7 @@ The following messages are added to support the translation speech service. mess
 
 The speech recognition service periodically generates hypotheses about the words the service has recognized. Based on these hypotheses (also known as partial results or intermediate results), the translation service creates *translation.hypothesis* response messages.
 
-The hypothesis messages contain only results in text. Thes are not sent back to the client by default. The client can use the `features` query parameter to request them. The *translation.hypothesis* message is suitable **only** for enhancing the user speech experience; you must not take any dependency on the content or accuracy of the text in these messages.
+The hypothesis messages contain only results in text. They are not sent back to the client by default. The client can use the `features` query parameter to request them. The *translation.hypothesis* message is suitable **only** for enhancing the user speech experience; you must not take any dependency on the content or accuracy of the text in these messages.
 
 | Field | Description |
 | - | - |
@@ -219,9 +224,9 @@ The first `translation.synthesis` message contains a well-formed header that pro
 
 ### Telemetry Messages
 
-The speech USP protocol defines a set of telemetry messages to be exchanged between client and service. Please see [Telemetry schema](https://docs.microsoft.com/en-us/azure/cognitive-services/speech/api-reference-rest/websocketprotocol#telemetry-schema) details.
+The speech USP protocol defines a set of telemetry messages to be exchanged between client and service. See [Telemetry schema](https://docs.microsoft.com/en-us/azure/cognitive-services/speech/api-reference-rest/websocketprotocol#telemetry-schema) details.
 
-**NOTE** Currently, the translation team is working on intrumentation spec for the translation service. Further discussions are need how to define telemetry messages for translation and how to align with the speech telemetry messages.
+**NOTE** Currently, the translation team is working on instrumentation spec for the translation service. Further discussions are need how to define telemetry messages for translation and how to align with the speech telemetry messages.
 
 ### Management Messages
 
@@ -243,7 +248,7 @@ The payload of the `translation.discoveryRequest` message is a JSON structure co
 
 | Property | Description |
 | - | - |
-| scope | The sets of language capability to discover. Possible values are `speech`, `text`, , and their combination. |
+| scope | The sets of language capability to discover. Possible values are `speech`, `text`, `tts`, and their combination. |
 | Accept-Language | The language in which names of languages or regions are returned. |
 
 The property `scope` defines which sets of languages a user is interested in. `scope=speech` to retrieve the set of languages available to transcribe speech into text. `scope=text` to retrieve the set of languages available to translate transcribed text. And `scope=tts` to retrieve the set of languages and voices available to synthesize translated text into speech. A client can retrieve multiple sets simultaneously by specifying a comma-separated list of choices. For example, `scope=speech,text,tts`.
@@ -253,6 +258,8 @@ The `Accept-Language` specifies the language in which names of languages and reg
 **NOTE** It is not clear from documentation of the current translation service whether client can specify a language or a set of languages of interesting. If this is supported, a field `languages` can be added to request. It also needs to be defined how the language is specified. The preferred way is using BCP 47 language tag. However, it seems that scope `text` and `tts` require different language tags. This needs to be clarified with the translation team.
 
 **NOTE** The X-ClientTraceId is removed, since the request is not associated with a specific client request. And the X-ConnectionId in the HTTP header should be sufficient to identify the client. If this is required by the translation service, it can be added though.
+
+**NOTE** User should be able to send this message without establishing any Websocket connection, since the discovery response contains data that he needs to set up the Websocket connection. It needs to be decided though how to support this capability.
 
 #### Sample Message
 
