@@ -7,13 +7,6 @@ if (SHARED_UTILS_NO_LOGGING)
     SET(LWS_WITH_NO_LOGS ON CACHE BOOL "disable libWebSockets logging option" FORCE)
 endif()
 
-set(LIBWEBSOCKETS_DIR "${CARBON_EXTERNAL}/libwebsockets")
-
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR ANDROID)
-    add_subdirectory(${LIBWEBSOCKETS_DIR} libwebsockets EXCLUDE_FROM_ALL)
-    include_directories (${LIBWEBSOCKETS_INCLUDE_DIRS})
-endif()
-
 if (DEFINED AZURE_C_SHARED_UTILITY_BUILT)
     RETURN()
 else()
@@ -549,7 +542,7 @@ function(set_platform_files)
         set(TICKCOUTER_C_FILE ${CMAKE_CURRENT_LIST_DIR}/adapters/tickcounter_linux.c PARENT_SCOPE)
         set(HTTP_C_FILE ${CMAKE_CURRENT_LIST_DIR}/adapters/httpapi_curl.c PARENT_SCOPE)
         set(UNIQUEID_C_FILE ${CMAKE_CURRENT_LIST_DIR}/adapters/uniqueid_stub.c PARENT_SCOPE)
-        if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
+        if (NOT (APPLE OR CMAKE_SYSTEM_NAME STREQUAL "Android"))
             if(${use_audio})
                 set(AUDIO_C_FILE ${CMAKE_CURRENT_LIST_DIR}/adapters/audio_sys_linux.c PARENT_SCOPE)
             endif()
@@ -606,6 +599,12 @@ ${UNIQUEID_C_FILE}
 ${AUDIO_C_FILE}
 ${WSIO_FILE}
 )
+
+if(UNIX) #LINUX OR APPLE
+    set(source_c_files ${source_c_files}
+        ./adapters/linux_time.c
+    )
+endif()
 
 if(${use_http})
     set(source_c_files ${source_c_files}
@@ -674,6 +673,12 @@ set(source_h_files
 ./inc/azure_c_shared_utility/constbuffer.h
 ./inc/azure_c_shared_utility/tlsio.h
 )
+
+if(UNIX) #LINUX OR APPLE
+    set(source_h_files ${source_h_files}
+        ./adapters/linux_time.h
+    )
+endif()
 
 if(${use_audio})
     set(source_h_files ${source_h_files}
@@ -780,13 +785,13 @@ elseif (NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
 endif()
 
 if(${use_audio})
-    if (UNIX AND NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
+    if (UNIX AND NOT (CMAKE_SYSTEM_NAME STREQUAL "Android" OR APPLE))
         MESSAGE(STATUS "adding libasound")
         target_link_libraries(aziotsharedutil asound)
     endif()
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR ANDROID)
+if(UNIX)
     target_link_libraries(aziotsharedutil ${LIBWEBSOCKETS_LIBRARIES})
 endif()
 

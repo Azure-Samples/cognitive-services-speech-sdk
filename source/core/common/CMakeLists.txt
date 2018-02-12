@@ -6,7 +6,6 @@ set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 include_directories(${INC_DIR})
 include_directories(${CARBON_C_API})
 include_directories(${CARBON_INCLUDE})
-include_directories (${AZURE_SHARED_UTIL_INCLUDE})
 #include_directories(${SRC_DIR}) # for "stdafx.h"
 
 set(HEADERS

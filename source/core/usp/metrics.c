@@ -26,6 +26,8 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/queue.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/tickcounter.h"
+#include "azure_c_shared_utility/agenttime.h"
 #include "uspcommon.h"
 #include "metrics.h"
 
@@ -247,8 +249,10 @@ int GetISO8601TimeOffset(char *buffer, unsigned int length, int offset)
         return -1;
     }
 
-    struct tm timeinfo;
+// TODO: get rid of WIN32 branch, else branch should work for 
+// all platforms.
 #if defined(WIN32)
+    struct tm timeinfo;
     SYSTEMTIME stCurrentTime = { 0 };
     FILETIME ftCurrentTime = { 0 };
 
@@ -276,49 +280,46 @@ int GetISO8601TimeOffset(char *buffer, unsigned int length, int offset)
     timeinfo.tm_min = stCurrentTimeAfterOffset.wMinute;
     timeinfo.tm_hour = stCurrentTimeAfterOffset.wHour;
 #else
-    struct timespec tspec, adjustedTspec;
-    if (clock_gettime(CLOCK_REALTIME, &tspec) != 0)
+    TICK_COUNTER_HANDLE tickHandle = tickcounter_create();
+
+    int result;
+    uint64_t current_ms;
+    result = tickcounter_get_current_ms(tickHandle, &current_ms);
+
+    tickcounter_destroy(tickHandle);
+
+    if (result != 0)
     {
         LogError("Unable to determine current system Time");
         return -1;
     }
 
-    int milliSecondsOffset = offset % 1000;
-    int secondsOffset = offset / 1000;
+    current_ms -= offset;
 
-    adjustedTspec.tv_sec = tspec.tv_sec - secondsOffset;
+    time_t adjusted_seconds = (time_t)(current_ms / 1000);
+    int adjusted_ms = current_ms % 1000;
 
-    if (tspec.tv_nsec >= (milliSecondsOffset * 1000000))
-    {
-        adjustedTspec.tv_nsec = tspec.tv_nsec - (milliSecondsOffset * 1000000);
-    }
-    // If current_time nano second is less than the offset in nanosecond
-    // subtract 1 second from tv_sec and add 1000000000 nano seconds to tv_nsec
-    // essentially carry over subtraction
-    else
-    {
-        adjustedTspec.tv_sec -= 1;
-        adjustedTspec.tv_nsec = tspec.tv_nsec + 1000000000 - (milliSecondsOffset * 1000000);
-    }
+    struct tm* timeinfo = get_gmtime(&(adjusted_seconds));
 
-    if (gmtime_r(&(adjustedTspec.tv_sec), &timeinfo) == NULL)
+    if (timeinfo == NULL)
     {
         return -1;
     }
 #endif
 
-    strftime(buffer, length, "%FT%T.", &timeinfo);
-
 #if defined(WIN32)
+    strftime(buffer, length, "%FT%T.", &timeinfo);
     snprintf(buffer + 20, 5, "%03dZ", stCurrentTimeAfterOffset.wMilliseconds);
 #else
-    snprintf(buffer + 20, 5, "%03ldZ", (adjustedTspec.tv_nsec / 1000000));
+    strftime(buffer, length, "%FT%T.", timeinfo);
+    snprintf(buffer + 20, 5, "%03dZ", adjusted_ms);
 #endif
     return 0;
 }
 
 int GetISO8601Time(char *buffer, unsigned int length)
 {
+    // TODO: refactor using azure-c-shared functions.
     if (length < TIME_STRING_MAX_SIZE)
     {
         return -1;
@@ -339,7 +340,11 @@ int GetISO8601Time(char *buffer, unsigned int length)
 #else
     struct timeval curTime;
     gettimeofday(&curTime, NULL);
+#ifdef __MACH__  // Ugh!
+    timeStringLength += snprintf(buffer + 20, 5, "%03dZ", (curTime.tv_usec / 1000));
+#else
     timeStringLength += snprintf(buffer + 20, 5, "%03ldZ", (curTime.tv_usec / 1000));
+#endif
 #endif
 
     return (int)timeStringLength;

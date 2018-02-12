@@ -44,6 +44,10 @@ if(WIN32)
         mfreadwrite.lib
         mfuuid.lib
     )
+elseif(APPLE)    
+    list(APPEND SOURCES
+        "${SRC_DIR}/osx/microphone.cpp"
+    )
 else()
     list(APPEND SOURCES
         "${SRC_DIR}/linux/microphone.cpp"

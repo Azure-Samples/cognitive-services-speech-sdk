@@ -13,14 +13,14 @@ if(BUILD_PYTHON)
     endif()   
 endif()
 
+if(WIN32)
+    option(BUILD_CSHARP "Build C# SWIG module" ON)
+    if(BUILD_CSHARP)
+        add_subdirectory(csharp)
+    endif()
+endif()
+
 # Dummy target to make this CMakeLists file appear 
 # in the generated VS solution.
 add_custom_target(swig)
 set_target_properties(swig PROPERTIES FOLDER bindings)
-
-if(WIN32)
-option(BUILD_CSHARP "Build C# SWIG module" ON)
-if(BUILD_CSHARP)
-    add_subdirectory(csharp)
-endif()
-endif()

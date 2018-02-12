@@ -4,7 +4,6 @@ set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
 include_directories(${INC_DIR})
-include_directories (${AZURE_SHARED_UTIL_INCLUDE})
 include_directories ("${CARBON_EXTERNAL}/parson")
 
 
@@ -56,6 +55,10 @@ source_group("Source Files" FILES ${SOURCES})
 add_library(usp STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
 set(USP_LIBS ${AZURE_SHARED_LIB} parson)
+
+if(WIN32)
+    list(APPEND USP_LIBS rpcrt4.lib)
+endif()
 
 if(UNIX)
   set_target_properties (usp PROPERTIES
