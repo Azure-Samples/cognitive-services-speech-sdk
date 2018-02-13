@@ -49,7 +49,7 @@
 
 #define SPXAPI_NOTHROW      __attribute__((nothrow))
 #define SPXAPI_RESULTTYPE   SPXHR
-// when __attribute__((stdcall)) is set, gcc generates a warning : ‘stdcall’ attribute ignored.
+// when __attribute__((stdcall)) is set, gcc generates a warning : stdcall attribute ignored.
 #define SPXAPI_CALLTYPE
 #define SPXAPI_VCALLTYPE    __attribute__((cdecl))
 

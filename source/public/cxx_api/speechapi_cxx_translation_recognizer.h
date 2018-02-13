@@ -23,11 +23,11 @@ namespace Recognition {
 namespace Translation {
 
 // Defines scopes for requesting language resources.
-// A client uses the scope define which sets of languages it is interested in.
+// Clients use the scope define which sets of languages they are interested in.
 //    TRANSLATION_LANGUAGE_RESOURCE_SCOPE_SPEECH: retrieves the set of languages available to transcribe speech into text.
 //    TRANSLATION_LANGUAGE_RESOURCE_SCOPE_TEXT: retrieves the set of languages available to translate transcribed text.
 //    TRANSLATION_LANGUAGE_RESOURCE_SCOPE_TTS: retrieves the set of languages and voices available to synthesize translated text back into speech.
-// A client can retrieve multiple sets simultaneously by setting one or more values via bit-or. 
+// Clients can retrieve multiple sets simultaneously by setting one or more values via bit-or.
 typedef unsigned int LanguageResourceScope;
 #define TRANSLATION_LANGUAGE_RESOURCE_SCOPE_SPEECH 0x01
 #define TRANSLATION_LANGUAGE_RESOURCE_SCOPE_TEXT 0x02
@@ -88,38 +88,37 @@ typedef struct _TranslationLanguageResource
     // Represents language resources associated with the text property. It is also a dictionary where each key identifies a language
     // supported for text translation. The value associated with the key is of type TextScopeResourceValue.
     ::std::unordered_map<::std::wstring, TextScopeResourceValue> textResources;
-    
-    // Represents language resources associated with the text-to-speech property. It is a dictionary where each key identifies a 
+
+    // Represents language resources associated with the text-to-speech property. It is a dictionary where each key identifies a
     // supported voice. The value associated with the key is of type SynthesisScopeResourceValue.
     ::std::unordered_map<::std::wstring, SynthesisScopeResourceValue> voiceResources;
 
 } TranslationLanguageResource;
 
 /*
-* The translation recognizer.
+* Gets available language resources supported by the translation service.
+* @param scopes: specifies which language scopes to query. Combing each scope (bitwise OR) is supported. See https://docs.microsofttranslator.com/speech-translate.html for details.
+* @param acceptLanguage: specifies the language (BCP 47 language tag), in which names of languages and regions are returned.
+* @return Supported translation language resources.
 */
-class TranslationRecognizer final : virtual public AsyncRecognizer<TranslationResult, TranslationEventArgs>
+inline TranslationLanguageResource GetLanguageResource(LanguageResourceScope scopes, ::std::wstring acceptLanguage)
+{
+    TranslationLanguageResource discoveredResources{ {},{},{} };
+    UNUSED(scopes);
+    UNUSED(acceptLanguage);
+    SPX_THROW_ON_FAIL(SPXERR_NOT_IMPL);
+    return discoveredResources;
+}
+
+/*
+* The translation recognizer.
+* TODO: We might want to have 2 TranslationRecognizer: one is TranslationRecoginizerText for text-only translation result, and the 
+* other is TranslationRecognizer for both text and audio results. See work item  <1127978>.
+*/
+class TranslationRecognizer final : virtual public AsyncRecognizer<TranslationResult, TranslationEventArgs<TranslationTextResult>>
 {
 public:
-    
-    /*
-    * Gets available language resources supported by the translation service.
-    * @param scopes: specifies which language scopes to query. Combing each scope (bitwise OR) is supported. See https://docs.microsofttranslator.com/speech-translate.html for details.
-    * @param acceptLanguage: specifies the language (BCP 47 language tag), in which names of languages and regions are returned.
-    * @return Supported translation language resources.
-    */
-    // TODO: Move this function outside the class as a global plain function in the namespace, after we have real implementation
-    // in C API, and then exposed as C++ API. 
-    // Keeping it here for now. Otherwise we have to create a separate CPP file to define this function, in order to pass compiler.  
-    static TranslationLanguageResource GetLanguageResource(LanguageResourceScope scopes, ::std::wstring acceptLanguage)
-    {
-        TranslationLanguageResource discoveredResources{ {},{},{} };
-        UNUSED(scopes);
-        UNUSED(acceptLanguage);
-        SPX_THROW_ON_FAIL(SPXERR_NOT_IMPL);
-        return discoveredResources;
-    }
-    
+
     /*
     * Constructs a translation recognizer.
     * TODO: Other configuration options should be added either as constructor parameters or as separate options. Needs to be aligned with
@@ -128,17 +127,13 @@ public:
     * @param targetlanguage: Specifies the language to translate the transcribed text into. The value must be one of the keys of TranslationLanguageResource.textResource.
     * @param requireVoiceOutput: The translation result includes translated audio of the final translation text.
     */
-    TranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage, const bool requireVoiceOutput = false) :
+    TranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage) :
         AsyncRecognizer(m_speechRecoParameters),
-        OnTranslationIntermediateTextResult(m_onTranslationIntermediateTextResult),
-        OnTranslationFinalTextResult(m_onTranslationFinalTextResult),
         OnTranslationAudioResult(m_onTranslationAudioResult),
-        OnTranslationFullResult(m_onTranslationFullResult),
         OnTranslationError(m_onTranslationError)
     {
         UNUSED(sourceLanguage);
         UNUSED(targetLanguage);
-        UNUSED(requireVoiceOutput);
         SPX_THROW_ON_FAIL(SPXERR_NOT_IMPL);
     };
 
@@ -192,14 +187,11 @@ public:
     /*
     * Defines translation specific events.
     * TODO: Currently, AsyncRecognizer defines events for speech recognitions. Some of events in AsyncRecognizer
-    * is indeed not related to translation. The AsyncRecognizer should be refactored to only include common events,
-    * and moves speech specific ones to SpeechRecognizer.
+    * is indeed not related to translation or other services like TTS. The AsyncRecognizer should be refactored 
+    * to only include common events.
     */
-    EventSignal<const TranslationEventArgs&>& OnTranslationIntermediateTextResult;
-    EventSignal<const TranslationEventArgs&>& OnTranslationFinalTextResult;
-    EventSignal<const TranslationEventArgs&>& OnTranslationAudioResult;
-    EventSignal<const TranslationEventArgs&>& OnTranslationFullResult;
-    EventSignal<const TranslationEventArgs&>& OnTranslationError;
+    EventSignal<const TranslationEventArgs<AudioResult>&>& OnTranslationAudioResult;
+    EventSignal<const TranslationEventArgs<TranslationResult>&>& OnTranslationError;
 
 private:
 
@@ -208,11 +200,8 @@ private:
 
     TranslationRecognizer& operator=(const TranslationRecognizer&) = delete;
 
-    EventSignal<const TranslationEventArgs&> m_onTranslationIntermediateTextResult;
-    EventSignal<const TranslationEventArgs&> m_onTranslationFinalTextResult;
-    EventSignal<const TranslationEventArgs&> m_onTranslationAudioResult;
-    EventSignal<const TranslationEventArgs&> m_onTranslationFullResult;
-    EventSignal<const TranslationEventArgs&> m_onTranslationError;
+    EventSignal<const TranslationEventArgs<AudioResult>&> m_onTranslationAudioResult;
+    EventSignal<const TranslationEventArgs<TranslationResult>&> m_onTranslationError;
 
     RecognizerParameters m_speechRecoParameters;
 };

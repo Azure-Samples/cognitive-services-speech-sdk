@@ -19,6 +19,7 @@ namespace Translation {
 /*
 * Defines the arguments passed with translation events.
 */
+template <class ResultT>
 class TranslationEventArgs final : public SessionEventArgs
 {
 public:
@@ -33,7 +34,7 @@ public:
 
     virtual ~TranslationEventArgs() { };
 
-    const TranslationResult& Result;
+    const ResultT& Result;
 
 private:
 
@@ -43,7 +44,7 @@ private:
     TranslationEventArgs& operator=(const TranslationEventArgs&) = delete;
 
     SPXEVENTHANDLE m_hevent;
-    std::shared_ptr<TranslationResult> m_result;
+    std::shared_ptr<ResultT> m_result;
 };
 
 

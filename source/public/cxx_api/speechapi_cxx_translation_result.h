@@ -17,46 +17,107 @@ namespace Recognition {
 namespace Translation {
 
 /*
-* The status code of translation result.
+* Represents translation text result.
 */
-enum class TranslationStatus {
-    Unknown, // Status is unknown
-    IntermediateTextResult, // Intermediate text result.
-    FinalTextResult, // Final text result.
-    AudioResult, // The result contains a chunk of translation audio output. It might contain only a part of the complete audio output.
-    FullResult, // The result contains full result, including both final text result and the complete audio output.
-    SpeechNotRecognized, // Cannot recognize text from speech.
-    TranslationNoMatch, // Cannot create translated text from the recognized text.
-    Failed, // Failure during translaton.
-    Cancelled // The translation request has been cancelled.
-};
-
-/*
-* Represents translation result.
-* Depending on TranslationStatus, it is possible that not all members contain valid value.
-*/
-class TranslationResult final
+class TranslationTextResult
 {
 public:
-    TranslationResult(SPXRESULTHANDLE hresult) :
+    TranslationTextResult(SPXRESULTHANDLE hresult) :
         ResultId(m_resultId),
         RecognizedText(m_recognizedText),
         TranslationText(m_translationText),
-        TranslationStatus(m_translationStatus),
-        TranslationAudio(m_translationAudio),
+        IsFinalResult(m_isFinalResult),
         m_hresult(hresult)
     {
         // Todo: retrieves results from the hresult handle.
-        SPX_THROW_ON_FAIL(SPXERR_NOT_IMPL);
     };
 
-    ~TranslationResult() { };
+    virtual ~TranslationTextResult() { };
 
     const std::wstring& ResultId;
     const std::wstring& RecognizedText;
     const std::wstring& TranslationText;
-    const enum TranslationStatus& TranslationStatus;
-    const std::vector<uint8_t>& TranslationAudio;
+    const bool& IsFinalResult;
+
+private:
+
+    TranslationTextResult(const TranslationTextResult&) = delete;
+    TranslationTextResult(const TranslationTextResult&&) = delete;
+
+    TranslationTextResult& operator=(const TranslationTextResult&) = delete;
+
+    SPXRESULTHANDLE m_hresult;
+
+    std::wstring m_resultId;
+    std::wstring m_recognizedText;
+    std::wstring m_translationText;
+    bool m_isFinalResult;
+};
+
+/*
+* Represents synthesized audio data returned as result from service.
+* TODO: This might be unified with the TTS response.
+*/
+class AudioResult
+{
+public:
+    AudioResult(SPXRESULTHANDLE hresult) :
+        ResultId(m_resultId),
+        AudioData(m_audioData),
+        m_hresult(hresult)
+    {
+        // Todo: retrieves results from the hresult handle.
+    };
+
+    virtual ~AudioResult() { };
+
+    const std::wstring& ResultId;
+    const std::vector<uint8_t>& AudioData;
+
+private:
+
+    AudioResult(const AudioResult&) = delete;
+    AudioResult(const AudioResult&&) = delete;
+
+    AudioResult& operator=(const AudioResult&) = delete;
+
+    SPXRESULTHANDLE m_hresult;
+
+    std::wstring m_resultId;
+    std::wstring m_recognizedText;
+    std::vector<uint8_t> m_audioData;
+};
+
+/*
+* The status code of translation result.
+*/
+enum class TranslationStatus {
+    Success,
+    SpeechNotRecognized, // Cannot recognize text from speech.
+    TranslationNoMatch, // Cannot create translated text from the recognized text.
+    VoiceSynthesisError, // Cannot generate voice from the transcribed text.
+    Error, // service encountered an internal error and could not continue.
+    Cancelled // The translation request has been cancelled.
+};
+
+/*
+* Represents the translation result containing both text and audio
+*/
+class TranslationResult final : public TranslationTextResult, public AudioResult
+{
+public:
+    TranslationResult(SPXRESULTHANDLE hresult) :
+        TranslationTextResult(hresult),
+        AudioResult(hresult),
+        ResultStatus(m_resultStatus),
+        m_hresult(hresult)
+    {
+        // Todo: retrieves results from the hresult handle.
+    };
+
+    virtual ~TranslationResult() { };
+
+    const TranslationStatus& ResultStatus;
 
 private:
 
@@ -67,12 +128,7 @@ private:
 
     SPXRESULTHANDLE m_hresult;
 
-    std::wstring m_resultId;
-    std::wstring m_recognizedText;
-    std::wstring m_translationText;
-    enum TranslationStatus m_translationStatus;
-    std::vector<uint8_t> m_translationAudio;
+    TranslationStatus m_resultStatus;
 };
-
 
 } } } // CARBON_NAMESPACE_ROOT::Recognition::Translation

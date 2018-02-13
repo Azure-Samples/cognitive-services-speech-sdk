@@ -16,7 +16,6 @@
 
 using namespace CARBON_NAMESPACE_ROOT::Recognition::Speech;
 using namespace CARBON_NAMESPACE_ROOT::Recognition::Intent;
-using namespace CARBON_NAMESPACE_ROOT::Recognition::Translation;
 
 namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
@@ -66,17 +65,16 @@ public:
     static std::shared_ptr<SpeechRecognizer> CreateDictationRecognizerWithFileInput(const std::wstring& fileName) { UNUSED(fileName); throw nullptr; };
     static std::shared_ptr<SpeechRecognizer> CreateDictationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { UNUSED(fileName); UNUSED(language); throw nullptr; };
 
-    static std::shared_ptr<TranslationRecognizer> CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage, bool requireVoiceOutput = false)
+    static std::shared_ptr<CARBON_NAMESPACE_ROOT::Recognition::Translation::TranslationRecognizer> CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
     {
-        return std::make_shared<TranslationRecognizer>(sourceLanguage, targetLanguage, requireVoiceOutput);
+        return std::make_shared<CARBON_NAMESPACE_ROOT::Recognition::Translation::TranslationRecognizer>(sourceLanguage, targetLanguage);
     }
 
-    static std::shared_ptr<TranslationRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::wstring& targetLanguage, bool requireVoiceOutput = false)
+    static std::shared_ptr<CARBON_NAMESPACE_ROOT::Recognition::Translation::TranslationRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
     {
         UNUSED(fileName);
         UNUSED(sourceLanguage);
         UNUSED(targetLanguage);
-        UNUSED(requireVoiceOutput);
         throw nullptr;
     }
 
