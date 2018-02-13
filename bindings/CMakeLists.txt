@@ -22,5 +22,6 @@ endif()
 
 # Dummy target to make this CMakeLists file appear 
 # in the generated VS solution.
-add_custom_target(swig)
+add_custom_target(swig 
+    SOURCES ${SWIG_INTERFACE} ${SWIG_WRAPPER})
 set_target_properties(swig PROPERTIES FOLDER bindings)

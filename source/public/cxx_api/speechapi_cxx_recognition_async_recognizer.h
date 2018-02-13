@@ -25,14 +25,14 @@ public:
 
     AsyncRecognizer(RecognizerParameters& parameters) throw() :
         Recognizer(parameters),
-        m_SessionStarted(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
-        m_SessionStopped(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
-        m_SoundStarted(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
-        m_SoundStopped(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
-        m_IntermediateResult(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback()),
-        m_FinalResult(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback()),
-        m_NoMatch(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback()),
-        m_Canceled(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback())
+        SessionStarted(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
+        SessionStopped(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
+        SoundStarted(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
+        SoundStopped(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
+        IntermediateResult(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback()),
+        FinalResult(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback()),
+        NoMatch(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback()),
+        Canceled(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback())
     {
     };
 
@@ -42,29 +42,16 @@ public:
     virtual std::future<void> StartContinuousRecognitionAsync() = 0;
     virtual std::future<void> StopContinuousRecognitionAsync() = 0;
 
-    EventSignal<const SessionEventArgs&>& SessionStarted() { return m_SessionStarted; }
-    EventSignal<const SessionEventArgs&>& SessionStopped() { return m_SessionStopped; }
+    EventSignal<const SessionEventArgs&> SessionStarted;
+    EventSignal<const SessionEventArgs&> SessionStopped;
 
-    EventSignal<const SessionEventArgs&>& SoundStarted() { return m_SoundStarted; }
-    EventSignal<const SessionEventArgs&>& SoundStopped() { return m_SoundStopped; }
+    EventSignal<const SessionEventArgs&> SoundStarted;
+    EventSignal<const SessionEventArgs&> SoundStopped;
 
-    EventSignal<const RecoEventArgs&>& IntermediateResult() { return m_IntermediateResult; }
-    EventSignal<const RecoEventArgs&>& FinalResult() { return m_FinalResult; }
-    EventSignal<const RecoEventArgs&>& NoMatch() { return m_NoMatch; }
-    EventSignal<const RecoEventArgs&>& Canceled() { return m_Canceled; }
-
-private:
-    EventSignal<const SessionEventArgs&> m_SessionStarted;
-    EventSignal<const SessionEventArgs&> m_SessionStopped;
-
-    EventSignal<const SessionEventArgs&> m_SoundStarted;
-    EventSignal<const SessionEventArgs&> m_SoundStopped;
-
-    EventSignal<const RecoEventArgs&> m_IntermediateResult;
-    EventSignal<const RecoEventArgs&> m_FinalResult;
-    EventSignal<const RecoEventArgs&> m_NoMatch;
-    EventSignal<const RecoEventArgs&> m_Canceled;
-
+    EventSignal<const RecoEventArgs&> IntermediateResult;
+    EventSignal<const RecoEventArgs&> FinalResult;
+    EventSignal<const RecoEventArgs&> NoMatch;
+    EventSignal<const RecoEventArgs&> Canceled;
 
 protected:
 

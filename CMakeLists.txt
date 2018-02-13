@@ -117,3 +117,13 @@ endif()
 
 add_subdirectory(${CARBON_BINDINGS})
 add_subdirectory(${CARBON_CSHARP_CONSOLE})
+
+# Dummy targets to make API header appear
+# in the generated VS solution.
+add_custom_target(c_header
+    SOURCES ${SPEECH_C_API_HEADERS})
+set_target_properties(c_header PROPERTIES FOLDER api)
+
+add_custom_target(cxx_headers
+    SOURCES ${SPEECH_CXX_API_HEADERS})
+set_target_properties(cxx_headers PROPERTIES FOLDER api)

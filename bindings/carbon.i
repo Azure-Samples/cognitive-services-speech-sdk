@@ -80,6 +80,9 @@
 %include <speechapi_cxx_recognition_result.h>
 %include <speechapi_cxx_recognition_eventargs.h>
 
+%template() Carbon::EventSignal<const Carbon::SessionEventArgs&>;
+%template() Carbon::EventSignal<const Carbon::Recognition::RecognitionEventArgs&>;
+
 %include <speechapi_cxx_recognizer.h>
 %include <speechapi_cxx_recognition_async_recognizer.h>
 
@@ -114,10 +117,11 @@
 %include <speechapi_cxx_speech_recognition_result.h>
 %include <speechapi_cxx_speech_recognition_eventargs.h>
 
+%template() Carbon::EventSignal<const Carbon::Recognition::Speech::SpeechRecognitionEventArgs&>;
 %template(SpeechRecognizerBase) Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::Speech::SpeechRecognitionResult, Carbon::Recognition::Speech::SpeechRecognitionEventArgs>;
 %include <speechapi_cxx_speech_recognizer.h>
 
-
+%template() Carbon::EventSignal<const int&>;
 %template(IntentRecognizerBase) Carbon::Recognition::AsyncRecognizer<int, int>;
 %include <speechapi_cxx_todo_intent.h>
 

@@ -1,7 +1,7 @@
 import sys;
 
 lib_dir = '${CMAKE_LIBRARY_OUTPUT_DIRECTORY}'
-bin_dir = '${CMAKE_BINARY_OUTPUT_DIRECTORY}'
+bin_dir = '${CMAKE_RUNTIME_OUTPUT_DIRECTORY}'
 
 sys.path.append(lib_dir)
 sys.path.append(lib_dir + '/Debug')
