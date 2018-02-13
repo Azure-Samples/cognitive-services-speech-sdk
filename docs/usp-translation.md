@@ -10,25 +10,12 @@ To establish a Websocket connection, the client application sends an HTTPS GET r
 
 ### Translation Endpoint URL
 
-The endpoint of the translation service is
-`https://dev.microsofttranslator.com/speech/translate/v1`
+The current endpoint of the translation service is `https://dev.microsofttranslator.com/speech/translate/v1`. After merging the translation service into Skyman, a different URL endpoint is expected. It is desirable that the same endpoint is used as that for speech recognition, and translation is just a feature parameter. However, this needs to be discussed with the Skyman service team.
+
+The translation service is using conversational model or customized models. We need discuss with the Skyman service team about how to pass customized model information to the service.
 
 **NOTE** What is the expectation regarding backward compatibility for current translation service users? Keeping the old service running for some
  time and asking them to migrate to the new service, or maintaining both services for long term?
-
-#### Hostname
-
-**NOTE** The host name "dev.microsofttranslator.com" is what the current translation service is using. What is the final host name used in Skyman is unknown at this time. Further discussion is needed with the translation team and Skyman service team.
-
-**NOTE** The URL assumes using the base model for translation. To support user customized models, the URL might need to include model identifier, like what CRIS is using. Any time plan to publically support customized models?
-
-#### Path
-
-The URL path `speech/translate` defines the translation service, and the `v1` specifies the service API version.
-
-**NOTE** Does the translation service need different speech recognition modes (`interactive`, `conversation`, `dictation`), or only use the `conversation` mode? If multiple recognition modes are needed, the mode name should be embedded into the path in the same way as the speech service, like `https://speech.platform.bing.com/speech/recognition/<RECOGNITION_MODE>/cognitiveservices/v1`. A detailed description of speech URL pattern is described [here](https://speechwiki.azurewebsites.net/architecture/url-patterns-for-speech-apis.html).
-
-**NOTE** Aligned with the speech service, the version of service API is now a part of URL resource path, instead of as query parameter, which is used by the current translation service. It is not critical, but would be nice to keep things aligned.
 
 #### Query parameters
 
@@ -44,11 +31,11 @@ The following query parameters are supported.
 | ProfanityAction | (empty) | Specifies how the service should handle profanities recognized in the speech. Valid actions are: `NoAction`: Profanities are left as is.`Marked`: Profanities are replaced with a marker. See `ProfanityMarker` parameter. `Deleted`: Profanities are deleted. For example, if the word "jackass" is treated as a profanity, the phrase "He is a jackass." will become "He is a .". The default is `Marked`. | string |
 | ProfanityMarker | (empty) | Specifies how detected profanities are handled when ProfanityAction is set to Marked. Valid options are: `Asterisk`: Profanities are replaced with the string `\*\*\*`. For example, if the word "jackass" is treated as a profanity, the phrase "He is a jackass." will become "He is a ***.". `Tag`: Profanity is surrounded by a profanity XML tag. For example, if the word "jackass" is treated as a profanity, the phrase "He is a jackass." will become "He is a <profanity>jackass</profanity>.". The default is `Asterisk`. | string |
 
-**NOTE** Which query parameters are required and which are optional? I assume that `from` and `to` are required, and the others are optional.
+**NOTE** In future, both `from` and `to` will contain a set of languages. It is also possible that `from` is empty, which means that the service will auto-detect what is the language being spoken.
 
 **NOTE** Since Client SDK should be able to set HTTP headers, there is no need to support access\_token, subscription-key, X-ClientTraceId, X-CorrelationId, X-CLientVersion, X-OsPlatform in query parameters as an alternative way for passing authentication information.
 
-**NOTE** Since all query parameters have to be set before establishing connection and cannot be changed after that, another option is to use a Translation.Config message to set parameters, which allow users to change the setting without disconnecting and connecting. Of course, this requires the translation service to support such on-the-fly configuration change.
+**NOTE** Currently query parameters are set before establishing connection and cannot be changed after that. In future, these parameters can be changed dynamically after setting up connection.
 
 ### HTTP Headers
 
@@ -77,7 +64,7 @@ X-ClientVersion identifies the version of the client application. Example: "2.1.
 
 X-OsPlatform Identifies the name and version of the operating system the client application is running on. Examples: "Android 5.0", "iOs 8.1.3", "Windows 8.1".
 
-**NOTE** I would recommend using the [speech.config](https://speechwiki.azurewebsites.net/partners/speechsdk#speech-config-message) message that provides more data about client. The speech service could forward the data to the translation service, if the data is needed by the translation service.
+The X-OsPlatform platform will be removed from the header. Instead, [speech.config](https://speechwiki.azurewebsites.net/partners/speechsdk#speech-config-message) message is used to collect the device data about client.
 
 ## Websocket Messages for Translation Speech Service
 
@@ -249,13 +236,12 @@ The payload of the `translation.discoveryRequest` message is a JSON structure co
 | Property | Description |
 | - | - |
 | scope | The sets of language capability to discover. Possible values are `speech`, `text`, `tts`, and their combination. |
+| inputLanguages | A comma-separated list that specifies the languages to query. Only language resource of specified languages will be returned. If the list is empty, resource of all languages is returned.
 | Accept-Language | The language in which names of languages or regions are returned. |
 
 The property `scope` defines which sets of languages a user is interested in. `scope=speech` to retrieve the set of languages available to transcribe speech into text. `scope=text` to retrieve the set of languages available to translate transcribed text. And `scope=tts` to retrieve the set of languages and voices available to synthesize translated text into speech. A client can retrieve multiple sets simultaneously by specifying a comma-separated list of choices. For example, `scope=speech,text,tts`.
 
 The `Accept-Language` specifies the language in which names of languages and regions are returned. The language is specified by providing a well-formed BCP 47 language tag. For unsupported languages, the names are provided in the English language. For instance, use the value fr to request names in French or use the value zh-Hant to request names in Chinese Traditional.
-
-**NOTE** It is not clear from documentation of the current translation service whether client can specify a language or a set of languages of interesting. If this is supported, a field `languages` can be added to request. It also needs to be defined how the language is specified. The preferred way is using BCP 47 language tag. However, it seems that scope `text` and `tts` require different language tags. This needs to be clarified with the translation team.
 
 **NOTE** The X-ClientTraceId is removed, since the request is not associated with a specific client request. And the X-ConnectionId in the HTTP header should be sufficient to identify the client. If this is required by the translation service, it can be added though.
 
@@ -270,6 +256,7 @@ X-Timestamp: 2018-02-09T13:03:54.183Z
 
 {
   scope: "speech,text,tts",
+  inputLanguage: "en-us, zh-cn"
   Accept-Language: "en-us"
 }
 ```
