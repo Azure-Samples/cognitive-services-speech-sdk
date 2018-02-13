@@ -121,11 +121,14 @@ The body is the JSON serialization of an object with the following properties:
 
 | Property | Description |
 | - | - |
+| sourceLanguage | The name of source language. |
+| targetLanguage | The name of target language. |
 | recognition | Recognized text in the source language |
 | translation | Recognized text translated in the target language |
 | audioTimeOffset | Time offset of the start of the recognition in ticks (1 tick = 100 nanoseconds). The offset is relative to the beginning of streaming. |
 | audioTimeSize | Duration in ticks (100 nanoseconds) of the recognition. |
 
+The `sourceLanguage` and `targetLanguage` in the response describe the language name, in BCP 47 language tag format, of the recognized text and translated text. These data are needed since user might specify multiple languages, or none language, in `from` or/and `to` parameters.
 **NOTE** What does the `id` in the current translation partial result mean? Does it uniquely identify each partial result, or used to correlate the client request and the result? In the later case, the X-RequestId already provides this information.
 
 **NOTE** The following properties are removed: `type` (the Path has this information), `audioSizeOffset`, and `audioSizeBytes` (the speech service does not support bytes based offset).
@@ -139,7 +142,9 @@ X-RequestId: 123e4567e89b12d3a456426655440000
 
 {
   recognition: "what was",
-  translation: "translation of what was",
+  translation: "Was war",
+  sourceLanguage: "en-us",
+  targetLanguage: "de-de",
   audioTimeOffset: 2731600000,
   audioTimeSize: 11900000
 }
@@ -159,10 +164,13 @@ The translation.phrase is generated at the end of an utterance. The translation 
 The body is the JSON serialization of an object with the following properties:
 | Property | Description |
 | - | - |
+| sourceLanguage | The name of source language. |
+| targetLanguage | The name of target language. |
 | recognition | Recognized text in the source language. The text may be an empty string in the case of a false recognition. |
 | recognitionStatus | has the following value representing speech recognition result: `Success`, `NoMatch`, `InitialSlienceTimeout`, `BabbleTimeout`, `Error`. Details see [here](https://speechwiki.azurewebsites.net/partners/speechsdk#speech-phrase)|
 | translation | Recognized text translated in the target language. |
 | translationStatus | TBD |
+
 | audioTimeOffset | Time offset of the start of the recognition in ticks (1 tick = 100 nanoseconds). The offset is relative to the beginning of streaming. |
 | audioTimeSize | Duration in ticks (100 nanoseconds) of the recognition. |
 
@@ -182,7 +190,9 @@ X-RequestId: 123e4567e89b12d3a456426655440000
 {
   recognition: "what was said",
   recognitionStatus: "Success",
-  translation: "translation of what was said",
+  translation: "Was wurde gesagt",
+  sourceLanguage: "en-us",
+  targetLanguage: "de-de",
   translationStatus: TBD
   audioTimeOffset: 2731600000,
   audioTimeSize: 21900000
@@ -208,6 +218,8 @@ The first `translation.synthesis` message contains a well-formed header that pro
 **NOTE** Different than the audio message in the current translation speech service, service should send out a zero-length body to indicate the end of audio, instead of using the FIN bit in WebSocket. This is consistent with the behavior when client sends audio to the service for recognition. In addition, the FIN bit is not available for some Websocket libraries.
 
 **NOTE** The current translation service does not have any correlation schema between the translation.hypotheis/phrase message and the following translation.synthesis messages. It assumes that all translation.synthesis messages for the current translation.phrase should be sent before the next translaton.phrase and before the translation.hypothesis messages for the next translation.phrase. If this assumption does not hold anymore, a kind of identifier needs to added both to translation.hypotheis/phrase and translation.synthesis in order to correctly associate these messages.
+
+**NOTE** Currently there is no plan to support audio output in multiple languages, so there is no information about the language of synthesized audio data in `translation.synthesis`.
 
 ### Telemetry Messages
 
