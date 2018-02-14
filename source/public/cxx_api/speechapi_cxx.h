@@ -25,6 +25,10 @@
 #include <speechapi_cxx_speech_recognition_eventargs.h>
 #include <speechapi_cxx_speech_recognizer.h>
 
+#include <speechapi_cxx_translation_result.h>
+#include <speechapi_cxx_translation_eventargs.h>
+#include <speechapi_cxx_translation_recognizer.h>
+
 #include <speechapi_cxx_recognizer_factory.h>
 
 #include <speechapi_cxx_todo_session.h>

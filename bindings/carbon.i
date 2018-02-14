@@ -122,10 +122,12 @@
 %include <speechapi_cxx_speech_recognizer.h>
 
 %template() Carbon::EventSignal<const int&>;
+
 %template(IntentRecognizerBase) Carbon::Recognition::AsyncRecognizer<int, int>;
 %include <speechapi_cxx_todo_intent.h>
 
-
+%ignore Carbon::Recognition::RecognizerFactory::CreateTranslationRecognizer();
+%ignore Carbon::Recognition::RecognizerFactory::CreateTranslationRecognizerWithFileInput();
 %include <speechapi_cxx_recognizer_factory.h>
 
 %include <speechapi_cxx_todo_session.h>

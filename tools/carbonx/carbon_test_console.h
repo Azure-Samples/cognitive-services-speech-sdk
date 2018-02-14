@@ -11,6 +11,7 @@ using namespace CARBON_NAMESPACE_ROOT;
 using namespace CARBON_NAMESPACE_ROOT::Recognition;
 using namespace CARBON_NAMESPACE_ROOT::Recognition::Speech;
 using namespace CARBON_NAMESPACE_ROOT::Recognition::Intent;
+using namespace CARBON_NAMESPACE_ROOT::Recognition::Translation;
 
 class CarbonTestConsole
 {
@@ -85,6 +86,7 @@ private:
     template <class T>
     void Recognizer_Recognize(std::shared_ptr<T>& recognizer);
     void Recognizer_Recognize(std::shared_ptr<SpeechRecognizer>& recognizer);
+    void Recognizer_Recognize(std::shared_ptr<TranslationRecognizer>& recognizer);
 
     template <class T>
     void Recognizer_StartContinuousRecognition(std::shared_ptr<T>& recognizer);
@@ -110,12 +112,20 @@ private:
     void SpeechRecognizer_NoMatchHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"NoMatchHandler: %ls", ToString(e).c_str()); }
     void SpeechRecognizer_CanceledHandler(const SpeechRecognitionEventArgs& e) { UNUSED(e); ConsoleWriteLine(L"SpeechRecognizer_CanceledHandler!!!"); };
 
+    void TranslationRecognizer_IntermediateResultHandler(const TranslationEventArgs<TranslationTextResult>& e) { ConsoleWriteLine(L"Translation IntermediateResultHandler: %ls", ToString(e).c_str()); };
+    void TranslationRecognizer_FinalResultHandler(const TranslationEventArgs<TranslationTextResult>& e) { ConsoleWriteLine(L"Translation FinalResultHandler: %ls", ToString(e).c_str()); }
+    void TranslationRecognizer_AudioResultHandler(const TranslationEventArgs<AudioResult>& e) { ConsoleWriteLine(L"Translation AudioResultHandler: %ls", ToString(e).c_str()); }
+    void TranslationRecognizer_ErrorHandler(const TranslationEventArgs<TranslationResult>& e) { ConsoleWriteLine(L"Translation ErrorHandler: %ls", ToString(e).c_str()); }
+
     void IntentRecognizer_IntermediateResultHandler(const int& e) { UNUSED(e); };
     void IntentRecognizer_FinalResultHandler(const int& e) { UNUSED(e); };
     void IntentRecognizer_NoMatchHandler(const int& e) { UNUSED(e); };
     void IntentRecognizer_CanceledHandler(const int& e) { UNUSED(e); };
 
     std::wstring ToString(const SpeechRecognitionEventArgs& e);
+    std::wstring ToString(const TranslationEventArgs<TranslationTextResult>& e);
+    std::wstring ToString(const TranslationEventArgs<AudioResult>& e);
+    std::wstring ToString(const TranslationEventArgs<TranslationResult>& e);
 
     void ConsoleInput_CommandSystem(const wchar_t* psz);
 
@@ -145,6 +155,7 @@ private:
 
     std::shared_ptr<BaseAsyncRecognizer> m_recognizer;
     std::shared_ptr<SpeechRecognizer> m_speechRecognizer;
+    std::shared_ptr<TranslationRecognizer> m_translationRecognizer;
     std::shared_ptr<IntentRecognizer> m_intentRecognizer;
     void* m_commandSystem = nullptr;
 };
