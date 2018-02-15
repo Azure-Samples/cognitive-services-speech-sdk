@@ -74,7 +74,7 @@ WebSocket messages in USP can use either a text or a binary encoding as specifie
 
 Clients using the current translation speech service only send audio data to the service. The [`Audio` message](https://speechwiki.azurewebsites.net/partners/speechsdk#audio) is used to send audio chunk to the translation speech service.
 
-The first *audio* message must contain a well-formed header that properly specifies that the audio conforms to one of the encoding formats supported by the service. Additional *audio* messages contain only the binary audio stream data read from the microphone. The maximum size of a single audio chunk is 8192 bytes. Audio stream messages are *Binary WebSocket messages*.
+The first *audio* message must contain a well-formed header that properly specifies that the audio conforms to one of the encoding formats supported by the service. Additional *audio* messages contain only the binary audio stream data. The maximum size of a single audio chunk is 8192 bytes. Audio stream messages are *Binary WebSocket messages*.
 
 Clients may optionally send an *audio* message with a zero-length body; this message tells the service that the client knows that the user has stopped speaking, that the utterance is complete, and that the microphone is turned off.
 
