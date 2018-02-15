@@ -99,6 +99,11 @@ extern "C" {
 */
 #define USP_FLUSH_AUDIO_ERROR USP_ERRCODE(0x035)
 
+/**
+* USP_SEND_USER_MESSAGE_ERROR indicates an error when calling UspSendUserMessage().
+*/
+#define USP_SEND_USER_MESSAGE_ERROR USP_ERRCODE(0x036)
+
 // Response errors
 
 /**

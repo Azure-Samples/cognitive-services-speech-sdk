@@ -77,6 +77,17 @@ int TransportRequestAddRequestHeader(TransportHandle transportHandle, const char
 int TransportStreamPrepare(TransportHandle transportHandle, const char* path);
 
 /**
+ * Write a text message to the websocket.
+ * @param transportHandle The request to prepare.
+ * @param path The path to use for message
+ * @param buffer The buffer to write to the websocket.
+ * @param bufferSize The byte size of the buffer.
+ * @return A return code or zero if successful.
+ */
+int TransportMessageWrite(TransportHandle transportHandle, const char* path, const uint8_t* buffer, size_t bufferSize);
+
+
+/**
  * Writes to the transport stream.
  * @param transportHandle The request to prepare.
  * @param buffer The buffer to write to the stream.

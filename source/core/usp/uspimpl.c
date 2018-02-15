@@ -35,7 +35,13 @@ const char g_messagePathTurnEnd[] = "turn.end";
 const char g_messagePathSpeechStartDetected[] = "speech.startDetected";
 const char g_messagePathSpeechEndDetected[] = "speech.endDetected";
 const char g_messagePathResponse[] = "response";
-// const char kUserAgent[] = "CortanaSDK (" CORTANASDK_BUILD_HASH "DeviceType=Near;SpeechClient=" CORTANA_SDK_VERSION ")";
+//Todo: Figure out what to do about user agent build hash and version number
+const char g_userAgent[] = "CortanaSDK (Windows;Win32;DeviceType=Near;SpeechClient=2.0.4)";
+
+const char g_requestHeaderUserAgent[] = "User-Agent";
+const char g_requestHeaderOcpApimSubscriptionKey[] = "Ocp-Apim-Subscription-Key";
+const char g_requestHeaderAuthorization[] = "Authorization";
+const char g_requestHeaderSearchDelegationRPSToken[] = "X-Search-DelegationRPSToken";
 
 #ifdef WIN32
 uint64_t g_perfCounterFrequency;
@@ -57,6 +63,36 @@ uint64_t telemetry_gettime()
     return (uint64_t)time(NULL);
 
 #endif
+}
+
+UspResult MessageWrite(UspHandle uspHandle, const char *path, const uint8_t *data, uint32_t size)
+{
+    int ret = -1;
+
+    USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
+    USP_RETURN_ERROR_IF_ARGUMENT_NULL(data, "data");
+
+    if (path == NULL || strlen(path) == 0)
+    {
+        LogError("The path is null or empty.");
+        return USP_INVALID_ARGUMENT;
+    }
+
+    Lock(uspHandle->uspContextLock);
+
+    USP_RETURN_ERROR_IF_WRONG_STATE(uspHandle, USP_STATE_CONNECTED);
+    ret = TransportMessageWrite(uspHandle->transportRequest, path, data, size);
+
+    Unlock(uspHandle->uspContextLock);
+
+    if (!ret)
+    {
+        return USP_SUCCESS;
+    }
+    else
+    {
+        return USP_TRANSPORT_ERROR_GENERIC;
+    }
 }
 
 // Write audio stream to the service: call transport to write/flush stream
@@ -499,9 +535,11 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
 
     TransportSetDnsCache(transportHandle, uspContext->dnsCache);
     TransportSetCallbacks(transportHandle, TransportErrorHandler, TransportRecvResponseHandler);
-    // Todo: does USP require User-Agent in CogSvc?
-    // TransportRequestAddRequestHeader(uspContext->transportRequest, "User-Agent", kUserAgent);
 
+    if (uspContext->type == USP_ENDPOINT_CDSDK)
+    {
+        TransportRequestAddRequestHeader(uspContext->transportRequest, g_requestHeaderUserAgent, g_userAgent);
+    }
     // Hackhack: Because Carbon API does not support authentication yet, use a default subscription key if no authentication is set.
     // TODO: This should be removed after Carbon API is ready for authentication, and before public release!!!
     if (uspContext->authData == NULL)
@@ -513,7 +551,7 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
     switch (uspContext->authType)
     {
     case USP_AUTHENTICATION_SUBSCRIPTION_KEY:
-        if (TransportRequestAddRequestHeader(transportHandle, "Ocp-Apim-Subscription-Key", STRING_c_str(uspContext->authData)) != 0)
+        if (TransportRequestAddRequestHeader(transportHandle, g_requestHeaderOcpApimSubscriptionKey, STRING_c_str(uspContext->authData)) != 0)
         {
             LogError("Failed to set authentication using subscription key.");
             return USP_INITIALIZATION_FAILURE;
@@ -533,7 +571,7 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
                 return USP_OUT_OF_MEMORY;
             }
             snprintf(tokenStr, tokenStrSize, "%s %s", bearerHeader, tokenValue);
-            if (TransportRequestAddRequestHeader(transportHandle, "Authorization", tokenStr) != 0)
+            if (TransportRequestAddRequestHeader(transportHandle, g_requestHeaderAuthorization, tokenStr) != 0)
             {
                 LogError("Failed to set authentication using authorization token.");
                 ret = USP_INITIALIZATION_FAILURE;
@@ -541,6 +579,15 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
             free(tokenStr);
             return ret;
         }
+
+    // TODO(1126805): url builder + auth interfaces
+    case USP_AUTHENTICATION_SEARCH_DELEGATION_RPS_TOKEN:
+        if (TransportRequestAddRequestHeader(transportHandle, g_requestHeaderSearchDelegationRPSToken, STRING_c_str(uspContext->authData)) != 0)
+        {
+            LogError("Failed to set authentication using Search-DelegationRPSToken.");
+            return USP_INITIALIZATION_FAILURE;
+        }
+
         break;
 
     default:

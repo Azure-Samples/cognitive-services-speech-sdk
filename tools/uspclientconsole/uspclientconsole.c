@@ -115,8 +115,10 @@ int main(int argc, char* argv[])
     UspCallbacks testCallbacks;
     UspEndpointType endpoint = USP_ENDPOINT_BING_SPEECH;
     UspRecognitionMode mode = USP_RECO_MODE_INTERACTIVE;
+    bool isAudioMessage = true;
     int curArg = 0;
     char* authData = NULL;
+    char* messagePath = NULL;
 
     testCallbacks.version = (uint16_t)USP_CALLBACK_VERSION;
     testCallbacks.size = sizeof(testCallbacks);
@@ -129,21 +131,48 @@ int main(int argc, char* argv[])
     testCallbacks.onTurnEnd = OnTurnEnd;
     testCallbacks.onTurnStart = OnTurnStart;
 
-    if (argc < 2)
+    if (argc < 3)
     {
-        printf("Usage: uspclientconsole audio_file authentication endpoint_type(speech/cris/url) mode(interactive/conversation/dictation)/url language output(simple/detailed) user-defined-messages");
+        printf("Usage: uspclientconsole message_type(audio/message:[path]) file authentication endpoint_type(speech/cris/cdsdk/url) mode(interactive/conversation/dictation) language output(simple/detailed) user-defined-messages");
         exit(1);
     }
 
-    // Read audio file.
-    FILE *audio = fopen(argv[1], "rb");
-    if (audio == NULL)
+    curArg++;
+    if (strstr(argv[curArg], "message") != NULL)
     {
-        printf("Error: open file %s failed", argv[1]);
+        isAudioMessage = false;
+        char *path = strchr(argv[curArg], ':');
+        if (path == NULL)
+        {
+            //default message path if not specified
+            messagePath = "message";
+        }
+        else
+        {
+            messagePath = ++path;
+        }
+
+    }
+    else if (strcmp(argv[curArg], "audio") == 0)
+    {
+        isAudioMessage = true;
+    }
+    else
+    {
+        printf("unknown message type: %s\n", argv[curArg]);
         exit(1);
     }
 
-    curArg = 2;
+    // Read input file.
+    curArg++;
+    FILE *data = fopen(argv[curArg], isAudioMessage ? "rb" : "rt");
+    if (data == NULL)
+    {
+        printf("Error: open file %s failed", argv[curArg]);
+        exit(1);
+    }
+
+    curArg++;
     if (argc > curArg)
     {
         authData = argv[curArg];
@@ -160,6 +189,10 @@ int main(int argc, char* argv[])
         else if (strcmp(argv[curArg], "cris") == 0)
         {
             endpoint = USP_ENDPOINT_CRIS;
+        }
+        else if (strcmp(argv[curArg], "cdsdk") == 0)
+        {
+            endpoint = USP_ENDPOINT_CDSDK;
         }
         else if (strcmp(argv[curArg], "url") == 0)
         {
@@ -224,7 +257,10 @@ int main(int argc, char* argv[])
     // Set Authentication.
     if (authData != NULL)
     {
-        if ((ret = UspSetAuthentication(handle, USP_AUTHENTICATION_SUBSCRIPTION_KEY, authData)) != USP_SUCCESS)
+        UspAuthenticationType authType = (endpoint == USP_ENDPOINT_CDSDK) ? 
+            USP_AUTHENTICATION_SEARCH_DELEGATION_RPS_TOKEN : USP_AUTHENTICATION_SUBSCRIPTION_KEY;
+
+        if ((ret = UspSetAuthentication(handle, authType, authData)) != USP_SUCCESS)
         {
             printf("Error: set authentication data failed. (error=0x%x).\n", ret);
             exit(1);
@@ -294,7 +330,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    // Conenct to service
+    // Connect to service
     if ((ret = UspConnect(handle)) != USP_SUCCESS)
     {
         printf("Error: connect to service failed (error=0x%x).\n", ret);
@@ -303,53 +339,67 @@ int main(int argc, char* argv[])
 
     turnEnd = false;
 
-    // Send audio to service
+    // Send data to service
     uint8_t *buffer;
     size_t bytesToWrite;
     size_t bytesWritten;
-    size_t chunkSize = AUDIO_BYTES_PER_SECOND * 2 / 5; // 2x real-time, 5 chunks per second.
     size_t totalBytesWritten = 0;
     size_t fileSize;
 
-    fseek(audio, 0L, SEEK_END);
-    fileSize = ftell(audio);
-    rewind(audio);
+    fseek(data, 0L, SEEK_END);
+    fileSize = ftell(data);
+    rewind(data);
 
-    buffer = malloc(chunkSize);
-    while (!feof(audio))
+    if (isAudioMessage)
     {
-        bytesToWrite = fread(buffer, sizeof(uint8_t), chunkSize, audio);
+        size_t chunkSize = AUDIO_BYTES_PER_SECOND * 2 / 5; // 2x real-time, 5 chunks per second.
+        buffer = malloc(chunkSize);
+        while (!feof(data))
+        {
+            bytesToWrite = fread(buffer, sizeof(uint8_t), chunkSize, data);
+            if (UspWriteAudio(handle, buffer, bytesToWrite, &bytesWritten) != USP_SUCCESS)
+            {
+                printf("%s: Error: send data to service failed (error=0x%x).\n", __FUNCTION__, ret);
+                UspClose(handle);
+                exit(1);
+            }
+            else
+            {
+                totalBytesWritten += bytesWritten;
+                if (bytesToWrite != bytesWritten)
+                {
+                    printf("%s: Error: the number of bytes sent to service (%zu) does not match expected (%zu).\n", __FUNCTION__, bytesWritten, bytesToWrite);
+                    UspClose(handle);
+                    exit(1);
+                }
+            }
 
-        if ((ret = UspWriteAudio(handle, buffer, bytesToWrite, &bytesWritten)) != USP_SUCCESS)
+            // Sleep to simulate real-time traffic
+            ThreadAPI_Sleep(200);
+        }
+
+        // Send End of Audio to service to close the session.
+        if (feof(data))
+        {
+            if ((ret = UspFlushAudio(handle)) != USP_SUCCESS)
+            {
+                printf("%s: Error: flushing audio failed (error=0x%x).\n", __FUNCTION__, ret);
+                UspClose(handle);
+                exit(1);
+            }
+        }
+    }
+    else
+    {
+        buffer = malloc(fileSize);
+        bytesToWrite = fread(buffer, sizeof(uint8_t), fileSize, data);
+        if (UspSendMessage(handle, messagePath, buffer, bytesToWrite) != USP_SUCCESS)
         {
             printf("%s: Error: send data to service failed (error=0x%x).\n", __FUNCTION__, ret);
             UspClose(handle);
             exit(1);
         }
-        else
-        {
-            totalBytesWritten += bytesWritten;
-            if (bytesToWrite != bytesWritten)
-            {
-                printf("%s: Error: the number of bytes sent to service (%zu) does not match expected (%zu).\n", __FUNCTION__, bytesWritten, bytesToWrite);
-                UspClose(handle);
-                exit(1);
-            }
-        }
-
-        // Sleep to simulate real-time traffic
-        ThreadAPI_Sleep(200);
-    }
-
-    // Send End of Audio to service to close the session.
-    if (feof(audio))
-    {
-        if ((ret = UspFlushAudio(handle)) != USP_SUCCESS)
-        {
-            printf("%s: Error: flushing audio failed (error=0x%x).\n", __FUNCTION__, ret);
-            UspClose(handle);
-            exit(1);
-        }
+        totalBytesWritten = fileSize;
     }
 
     if (totalBytesWritten != fileSize)
@@ -359,7 +409,7 @@ int main(int argc, char* argv[])
     }
     else
     {
-        printf("%s: Totally send %zu bytes of audio.\n", __FUNCTION__, totalBytesWritten);
+        printf("%s: Totally send %zu bytes of data.\n", __FUNCTION__, totalBytesWritten);
     }
 
     // Wait for end of recognition.
@@ -371,5 +421,5 @@ int main(int argc, char* argv[])
     UspClose(handle);
 
     free(buffer);
-    fclose(audio);
+    fclose(data);
 }

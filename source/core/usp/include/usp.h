@@ -125,7 +125,8 @@ typedef struct _UspCallbacks
 typedef enum {
     USP_ENDPOINT_UNKNOWN,
     USP_ENDPOINT_BING_SPEECH,
-    USP_ENDPOINT_CRIS
+    USP_ENDPOINT_CRIS,
+    USP_ENDPOINT_CDSDK
 } UspEndpointType;
 
 typedef enum {
@@ -143,7 +144,8 @@ typedef enum {
 typedef enum {
     USP_AUTHENTICATION_UNKNOWN,
     USP_AUTHENTICATION_SUBSCRIPTION_KEY,
-    USP_AUTHENTICATION_AUTHORIZATION_TOKEN
+    USP_AUTHENTICATION_AUTHORIZATION_TOKEN,
+    USP_AUTHENTICATION_SEARCH_DELEGATION_RPS_TOKEN
 } UspAuthenticationType;
 
 /**
@@ -241,6 +243,15 @@ UspResult UspFlushAudio(UspHandle uspHandle);
 * @return A UspResult indicating success or error.
 */
 UspResult UspClose(UspHandle uspHandle);
+
+/**
+* Sends a user defined message. 
+* @param uspHandle The UspHandle.
+* @param messagePath The path of the user-defined message.
+* @param buffer The message payload.
+* @param bytesToWrite The length of the message in bytes.
+*/
+UspResult UspSendMessage(UspHandle uspHandle, const char* messagePath, const uint8_t* buffer, size_t bytesToWrite);
 
 #ifdef __cplusplus
 }

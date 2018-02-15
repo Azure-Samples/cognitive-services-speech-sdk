@@ -59,6 +59,15 @@ extern "C" {
         } \
     } while (0)
 
+#define USP_RETURN_ERROR_IF_WRONG_STATE(uspHandle, expectedState) \
+    do { \
+        if (uspHandle->state != expectedState) \
+        { \
+            LogError("The USP was expected to be in state %d, but its current state is %d.", expectedState, uspHandle->state); \
+            return USP_WRONG_STATE; \
+        } \
+    } while (0)
+
 #define USP_RETURN_ERROR_IF_ARGUMENT_NULL(argument, argumentName) \
     do { \
         if (argument == NULL) \
@@ -199,7 +208,7 @@ UspResult UspContextDestroy(UspContext* uspContext);
 * @param callbackContext The context that will be passed as parameter when one of callbacks is invoked.
 * @return A UspResult indicating success or error.
 */
-UspResult UspSetCallbacks(UspContext* uspContext, UspCallbacks *callbacks, void* callbackContext);
+UspResult UspSetCallbacks(UspContext* uspContext, UspCallbacks* callbacks, void* callbackContext);
 
 /**
 * Initializes transport connection to service.
@@ -247,7 +256,17 @@ const char* GetCdpDeviceThumbprint();
 * @param bytesWritten A returned pointer to the amount of data that was sent to the service.
 * @return A UspResult indicating success or error.
 */
-UspResult AudioStreamWrite(UspHandle uspHandle, const void *data, uint32_t size, uint32_t * bytesWritten);
+UspResult AudioStreamWrite(UspHandle uspHandle, const void* data, uint32_t size, uint32_t* bytesWritten);
+
+/**
+* Writes a message to the service.
+* @param uspHandle the UspHandle for sending the message.
+* @param path The path associated with the message being sent.
+* @param data The message payload.
+* @param size The length of the message in bytes.
+* @return A UspResult indicating success or error.
+*/
+UspResult MessageWrite(UspHandle uspHandle, const char* path, const uint8_t* data, uint32_t size);
 
 /**
 * Flushes any pending audio to be sent to the service.

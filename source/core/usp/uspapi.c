@@ -11,6 +11,8 @@
 // Todo: read from a configuration file.
 const char g_bingSpeechHostname[] = "wss://speech.platform.bing.com/speech/recognition/%s/cognitiveservices/v1";
 const char g_CRISHostname[] = "wss://%s.api.cris.ai/speech/recognition/%s/cognitiveservices/v1";
+// Todo(1126805) url builder + auth interfaces
+const char g_CDSDKHostName[] = "wss://speech.platform.bing.com/cortana/api/v1?environment=Home";
 const char g_interactiveMode[] = "interactive";
 const char g_conversationMode[] = "conversation";
 const char g_dictationMode[] = "dictation";
@@ -224,6 +226,7 @@ UspResult UspSetAuthentication(UspHandle uspHandle, UspAuthenticationType authTy
         {
         case USP_AUTHENTICATION_SUBSCRIPTION_KEY:
         case USP_AUTHENTICATION_AUTHORIZATION_TOKEN:
+        case USP_AUTHENTICATION_SEARCH_DELEGATION_RPS_TOKEN:
             uspHandle->authType = authType;
             uspHandle->authData = STRING_construct(authData);
             break;
@@ -274,6 +277,18 @@ static UspResult UspBuildUrl(UspHandle uspHandle, const char** urlResult)
         }
         hostnameStr = g_CRISHostname;
         urlLength = strlen(hostnameStr) + STRING_length(uspHandle->modelId);
+        break;
+
+    // TODO(1126805): url builder + auth interfaces
+    case USP_ENDPOINT_CDSDK:
+        hostnameStr = g_CDSDKHostName;
+        langStr = STRING_c_str(uspHandle->language);
+        separator = '&';
+        if (langStr == NULL)
+        {
+            langStr = g_defaultLangValue;
+        }
+        urlLength = strlen(hostnameStr);
         break;
 
     default:
@@ -328,6 +343,10 @@ static UspResult UspBuildUrl(UspHandle uspHandle, const char** urlResult)
 
     case USP_ENDPOINT_CRIS:
         snprintf(endpointUrl, urlLength, hostnameStr, STRING_c_str(uspHandle->modelId), modeStr);
+        break;
+
+    case USP_ENDPOINT_CDSDK:
+        strcpy_s(endpointUrl, urlLength, hostnameStr);
         break;
 
     default:
@@ -553,5 +572,24 @@ UspResult UspRegisterUserMessage(UspHandle uspHandle, const char* messagePath, U
 
     Unlock(uspHandle->uspContextLock);
     return ret;
+}
+
+UspResult UspSendMessage(UspHandle uspHandle, const char* messagePath, const uint8_t* buffer, size_t bytesToWrite)
+{
+    USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
+    USP_RETURN_ERROR_IF_ARGUMENT_NULL(buffer, "buffer");
+
+    if (messagePath == NULL || strlen(messagePath) == 0)
+    {
+        LogError("The messagePath is null or empty.");
+        return USP_INVALID_ARGUMENT;
+    }
+
+    if (MessageWrite(uspHandle, messagePath, buffer, (uint32_t)bytesToWrite))
+    {
+        return USP_SEND_USER_MESSAGE_ERROR;
+    }
+
+    return USP_SUCCESS;
 }
 

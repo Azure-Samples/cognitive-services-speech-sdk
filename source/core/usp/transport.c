@@ -30,6 +30,8 @@ const char g_KeywordStreamId[]       = "X-StreamId";
 const char g_keywordRequestId[]      = "X-RequestId";
 const char g_keywordWSS[]            = "wss://";
 const char g_keywordWS[]             = "ws://";
+const char g_messageHeader[]         = "%s:%s\r\nPath:%s\r\nContent-Type:application/json\r\n%s:%s\r\n\r\n";
+
 const char g_requestFormat[]  = "%s:%s\r\nPath:%s\r\n%s:%d\r\n%s:%s\r\n";
 const char g_telemetryHeader[] = "%s:%s\r\nPath: telemetry\r\nContent-Type: application/json; charset=utf-8\r\n%s:%s\r\n\r\n";
 const char g_timeStampHeaderName[] = "X-Timestamp";
@@ -1140,6 +1142,68 @@ int TransportRequestAddRequestHeader(TransportHandle transportHandle, const char
     return HTTPHeaders_ReplaceHeaderNameValuePair(request->headersHandle, name, value);
 }
 
+int TransportMessageWrite(TransportHandle transportHandle, const char* path, const uint8_t* buffer, size_t bufferSize)
+{
+    TransportRequest* request = (TransportRequest*)transportHandle;
+    int ret;
+
+    if (NULL == request)
+    {
+        return -1;
+    }
+
+    request->path = path;
+    request->ws.pathLen = strlen(request->path);
+
+    ret = wsio_setoption(request->ws.WSHandle, "connectionheaders", request->headersHandle);
+    if (ret)
+    {
+        LogInfo("ERROR settings connectionheaders\n");
+    }
+
+    ret = TransportRequestPrepare(request);
+    if (ret)
+    {
+        return ret;
+    }
+
+    size_t payloadSize = sizeof(g_messageHeader) +
+                         (size_t)(request->ws.pathLen) +
+                         sizeof(g_keywordRequestId) +
+                         sizeof(request->requestId) +
+                         sizeof(g_timeStampHeaderName) +
+                         TIME_STRING_MAX_SIZE +
+                         bufferSize;
+    TransportPacket *msg = (TransportPacket *)malloc(sizeof(TransportPacket) + payloadSize);
+
+    msg->msgtype = METRIC_MESSAGE_TYPE_DEVICECONTEXT;
+    msg->wstype = WSIO_MSG_TYPE_TEXT;
+
+    char timeString[TIME_STRING_MAX_SIZE];
+    int timeStringLen = GetISO8601Time(timeString, TIME_STRING_MAX_SIZE);
+    if (timeStringLen < 0)
+    {
+        return -1;
+    }
+
+    // add headers
+    msg->length = sprintf_s((char *)msg->buffer,
+                             payloadSize,
+                             g_messageHeader,
+                             g_timeStampHeaderName,
+                             timeString,
+                             request->path,
+                             g_keywordRequestId,
+                             request->requestId);
+
+    // add body
+    memcpy(msg->buffer + msg->length, buffer, bufferSize);
+    msg->length += bufferSize;
+
+    WsioQueue(request, msg);
+    return 0;
+}
+
 int TransportStreamPrepare(TransportHandle transportHandle, const char* path)
 {
     TransportRequest* request = (TransportRequest*)transportHandle;
@@ -1175,9 +1239,8 @@ int TransportStreamPrepare(TransportHandle transportHandle, const char* path)
 
     if (request->isWS)
     {
-        // Todo: send Speech.config message?
-        /*STRING_HANDLE turnContext =
-            skill_serialize_context(request->context, !pszPath);*/
+        // Todo: Add client context option
+        // ret = TransportMessageWrite(transportHandle, path);
     }
     else
     {
