@@ -48,7 +48,7 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
     for (int i = 1; !fShowOptions && i < argc; i++)
     {
         const wchar_t *pszArg = argv[i];
-        if (PAL::wcsicmp(pszArg, L"/debug") == 0)
+        if (PAL::wcsicmp(pszArg, L"--debug") == 0)
         {
             WaitForDebugger();
             fShowOptions = pconsoleArgs->m_fWaitForDebugger || fNextArgRequired;
@@ -56,28 +56,28 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
             pstrNextArg = nullptr;
             fNextArgRequired = false;
         }
-        else if (PAL::wcsicmp(pszArg, L"/speech") == 0)
+        else if (PAL::wcsicmp(pszArg, L"--speech") == 0)
         {
             fShowOptions = pconsoleArgs->m_strRecognizerType.length() > 0 || fNextArgRequired;
             pconsoleArgs->m_strRecognizerType = PAL::GetTypeName<SpeechRecognizer>();
             pstrNextArg = nullptr;
             fNextArgRequired = false;
         }
-        else if (PAL::wcsicmp(pszArg, L"/intent") == 0)
+        else if (PAL::wcsicmp(pszArg, L"--intent") == 0)
         {
             fShowOptions = pconsoleArgs->m_strRecognizerType.length() > 0 || fNextArgRequired;
             pconsoleArgs->m_strRecognizerType = PAL::GetTypeName<IntentRecognizer>();
             pstrNextArg = nullptr;
             fNextArgRequired = false;
         }
-        else if (PAL::wcsicmp(pszArg, L"/translation") == 0)
+        else if (PAL::wcsicmp(pszArg, L"--translation") == 0)
         {
             fShowOptions = pconsoleArgs->m_strRecognizerType.length() > 0 || fNextArgRequired;
             pconsoleArgs->m_strRecognizerType = PAL::GetTypeName<TranslationRecognizer>();
             pstrNextArg = nullptr;
             fNextArgRequired = false;
         }
-        else if (PAL::wcsicmp(pszArg, L"/commands") == 0)
+        else if (PAL::wcsicmp(pszArg, L"--commands") == 0)
         {
             fShowOptions = (pconsoleArgs->m_strRecognizerType.length() > 0 && pconsoleArgs->m_strRecognizerType != PAL::GetTypeName<IntentRecognizer>()) || pconsoleArgs->m_fCommandSystem || fNextArgRequired;
             pconsoleArgs->m_strRecognizerType = PAL::GetTypeName<IntentRecognizer>();
@@ -85,32 +85,32 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
             pstrNextArg = nullptr;
             fNextArgRequired = false;
         }
-        else if (PAL::wcsnicmp(pszArg, L"/input", wcslen(L"/input")) == 0)
+        else if (PAL::wcsnicmp(pszArg, L"--input", wcslen(L"--input")) == 0)
         {
             fShowOptions = pconsoleArgs->m_strInput.length() > 0 || fNextArgRequired;
             pstrNextArg = &pconsoleArgs->m_strInput;
             fNextArgRequired = true;
         }
-        else if (PAL::wcsnicmp(pszArg, L"/endpoint", wcslen(L"/endpoint")) == 0)
+        else if (PAL::wcsnicmp(pszArg, L"--endpoint", wcslen(L"--endpoint")) == 0)
         {
             fShowOptions = pconsoleArgs->m_strEndpointUri.length() > 0 || fNextArgRequired;
             pstrNextArg = &pconsoleArgs->m_strEndpointUri;
             fNextArgRequired = true;
         }
-        else if (PAL::wcsnicmp(pszArg, L"/subscription", wcslen(L"/subscription")) == 0)
+        else if (PAL::wcsnicmp(pszArg, L"--subscription", wcslen(L"--subscription")) == 0)
         {
             fShowOptions = pconsoleArgs->m_strSubscriptionKey.length() > 0 || fNextArgRequired;
             pstrNextArg = &pconsoleArgs->m_strSubscriptionKey;
             fNextArgRequired = true;
         }
-        else if (PAL::wcsicmp(pszArg, L"/single") == 0)
+        else if (PAL::wcsicmp(pszArg, L"--single") == 0)
         {
             fShowOptions = pconsoleArgs->m_fContinuousRecognition || fNextArgRequired;
             pconsoleArgs->m_fRecognizeAsync = true;
             pstrNextArg = nullptr;
             fNextArgRequired = false;
         }
-        else if (PAL::wcsnicmp(pszArg, L"/continuous", wcslen(L"/continuous")) == 0)
+        else if (PAL::wcsnicmp(pszArg, L"--continuous", wcslen(L"--continuous")) == 0)
         {
             fShowOptions = pconsoleArgs->m_fRecognizeAsync || fNextArgRequired;
             pconsoleArgs->m_fContinuousRecognition = true;
@@ -118,13 +118,13 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
             pstrNextArg = &pconsoleArgs->m_strContinuousRecognitionSeconds;
             fNextArgRequired = false;
         }
-        else if (PAL::wcsnicmp(pszArg, L"/sample", wcslen(L"/sample")) == 0)
+        else if (PAL::wcsnicmp(pszArg, L"--sample", wcslen(L"--sample")) == 0)
         {
             fShowOptions = pconsoleArgs->m_strRunSampleName.length() > 0 || fNextArgRequired;
             pstrNextArg = &pconsoleArgs->m_strRunSampleName;
             fNextArgRequired = true;
         }
-        else if (PAL::wcsicmp(pszArg, L"/interactive") == 0)
+        else if (PAL::wcsicmp(pszArg, L"--interactive") == 0)
         {
             fShowOptions = pconsoleArgs->m_fInteractivePrompt || fNextArgRequired;
             pconsoleArgs->m_fInteractivePrompt = true;
@@ -234,28 +234,28 @@ void CarbonTestConsole::DisplayConsoleHeader()
 
 void CarbonTestConsole::DisplayConsoleUsage()
 {
-    ConsoleWriteLine(L"  carbonx [/speech | /intent | /commands | /translation ] {input} {auth} {additional}");
+    ConsoleWriteLine(L"  carbonx [--speech | --intent | --commands | --translation ] {input} {auth} {additional}");
     ConsoleWriteLine(L"");
-    ConsoleWriteLine(L"     Input: /input:[microphone | {waveFileName}]");
+    ConsoleWriteLine(L"     Input: --input:[microphone | {waveFileName}]");
     ConsoleWriteLine(L"");
-    ConsoleWriteLine(L"       /input:microphone      Use the default microphone for audio input.");
-    ConsoleWriteLine(L"       /input:{waveFileName}  Use WAV file for audio input.");
+    ConsoleWriteLine(L"       --input:microphone      Use the default microphone for audio input.");
+    ConsoleWriteLine(L"       --input:{waveFileName}  Use WAV file for audio input.");
     ConsoleWriteLine(L"");
     ConsoleWriteLine(L"     Authentication:");
     ConsoleWriteLine(L"");
-    ConsoleWriteLine(L"       /endpoint:{uri}        Use {uri} as the USP endpoint.");
-    ConsoleWriteLine(L"       /subscription:{key}    Use {key} as the subscription key.");
+    ConsoleWriteLine(L"       --endpoint:{uri}        Use {uri} as the USP endpoint.");
+    ConsoleWriteLine(L"       --subscription:{key}    Use {key} as the subscription key.");
     ConsoleWriteLine(L"");
     ConsoleWriteLine(L"     Additional:");
     ConsoleWriteLine(L"");
-    ConsoleWriteLine(L"       /single                Use RecognizeAsync for a single utterance.");
-    ConsoleWriteLine(L"       /continuous:{seconds}  Use [Start/Stop]ContinuousRecognition, waiting");
-    ConsoleWriteLine(L"                              {seconds} in between starting and stopping.");
+    ConsoleWriteLine(L"       --single                Use RecognizeAsync for a single utterance.");
+    ConsoleWriteLine(L"       --continuous:{seconds}  Use [Start/Stop]ContinuousRecognition, waiting");
+    ConsoleWriteLine(L"                               {seconds} in between starting and stopping.");
     ConsoleWriteLine(L"");
-    ConsoleWriteLine(L"       /sample:{sampleName}   Run the sample named {sampleName}.");
+    ConsoleWriteLine(L"       --sample:{sampleName}   Run the sample named {sampleName}.");
     ConsoleWriteLine(L"");
-    ConsoleWriteLine(L"       /debug                 Stops execution and waits (max 30s) for debugger.");
-    ConsoleWriteLine(L"       /interactive           Allows interactive Carbon use via console window.");
+    ConsoleWriteLine(L"       --debug                 Stops execution and waits (max 30s) for debugger.");
+    ConsoleWriteLine(L"       --interactive           Allows interactive Carbon use via console window.");
     ConsoleWriteLine(L"");
 }
 

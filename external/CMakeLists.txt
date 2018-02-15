@@ -1,5 +1,5 @@
 set(LIBWEBSOCKETS_DIR "${CMAKE_CURRENT_LIST_DIR}/libwebsockets")
-if(NOT EXISTS ${LIBWEBSOCKETS_DIR})
+if(NOT EXISTS ${LIBWEBSOCKETS_DIR} OR NOT EXISTS ${LIBWEBSOCKETS_DIR}/CMakeLists.txt)
     execute_process(COMMAND git submodule update --init)
 endif()
 
