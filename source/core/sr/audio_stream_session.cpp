@@ -11,11 +11,9 @@
 #include <istream>
 #include <fstream>
 #include <thread>
-#include "audio_pump.h"
+#include "create_object_helpers.h"
 #include "microphone.h"
-#include "recognition_result.h"
-#include "usp_reco_engine_adapter.h"
-#include "wav_file_reader.h"
+#include "site_helpers.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -39,16 +37,19 @@ void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
 {
     SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_audioPump.get() != nullptr);
 
-    // Open the file
-    auto audioFile = SpxMakeShared<CSpxWavFileReader, ISpxAudioFile>();
+    // Create the reader and open the file
+    auto audioFile = SpxCreateObjectWithSite<ISpxAudioFile>("CSpxWavFileReader", this);
+    auto fileAsReader = std::dynamic_pointer_cast<ISpxAudioReader>(audioFile);
     audioFile->Open(pszFileName);
     
     // Create the pump, and set the reader
-    auto audioReader = std::dynamic_pointer_cast<ISpxAudioReader>(audioFile);
-    m_audioPump = SpxMakeShared<CSpxAudioPump, ISpxAudioPump>(audioReader);
+    auto pumpInit = SpxCreateObjectWithSite<ISpxAudioPumpReaderInit>("CSpxAudioPump", this);
+    pumpInit->SetAudioReader(fileAsReader);
 
-    // And finally ... init the USP reco engine adapter
-    InitUspRecoEngineAdapter();
+    m_audioPump = std::dynamic_pointer_cast<ISpxAudioPump>(pumpInit);
+
+    // And finally ... init the reco engine adapter
+    InitRecoEngineAdapter();
 }
 
 void CSpxAudioStreamSession::InitFromMicrophone()
@@ -58,8 +59,8 @@ void CSpxAudioStreamSession::InitFromMicrophone()
     // Create the microphone pump
     m_audioPump = Microphone::Create();
 
-    // And finally ... init the USP reco engine adapter
-    InitUspRecoEngineAdapter();
+    // And finally ... init the reco engine adapter
+    InitRecoEngineAdapter();
 }
 
 void CSpxAudioStreamSession::SetFormat(WAVEFORMATEX* pformat)
@@ -170,7 +171,9 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::WaitForRecognitio
     {
         if (ChangeState(SessionState::ProcessingAudio, SessionState::StoppingPump))
         {
+            lock.unlock();
             m_audioPump->StopPump();
+            lock.lock();
         }
 
         SPX_DBG_TRACE_VERBOSE("Waiting for AdapterDone...");
@@ -213,6 +216,27 @@ void CSpxAudioStreamSession::SoundEndDetected(ISpxRecoEngineAdapter* adapter, ui
     UNUSED(offset);
     // TODO: RobCh: Next: Implement
     // SPX_THROW_HR(SPXERR_NOT_IMPL);
+}
+
+std::shared_ptr<ISpxSessionEventArgs> CSpxAudioStreamSession::CreateSessionEventArgs(const std::wstring& sessionId)
+{
+    auto sessionEvent = SpxCreateObjectWithSite<ISpxSessionEventArgs>("CSpxSessionEventArgs", this);
+
+    auto argsInit = std::dynamic_pointer_cast<ISpxSessionEventArgsInit>(sessionEvent);
+    argsInit->Init(sessionId);
+
+    return sessionEvent;
+}
+
+std::shared_ptr<ISpxRecognitionEventArgs> CSpxAudioStreamSession::CreateRecognitionEventArgs(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result)
+{
+    auto site = SpxSiteFromThis(this);
+    auto recoEvent = SpxCreateObjectWithSite<ISpxRecognitionEventArgs>("CSpxRecognitionEventArgs", site);
+
+    auto argsInit = std::dynamic_pointer_cast<ISpxRecognitionEventArgsInit>(recoEvent);
+    argsInit->Init(sessionId, result);
+
+    return recoEvent;
 }
 
 void CSpxAudioStreamSession::IntermediateResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result)
@@ -262,18 +286,60 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
     // SPX_THROW_HR(SPXERR_NOT_IMPL);
 }
 
-void CSpxAudioStreamSession::InitUspRecoEngineAdapter()
+std::shared_ptr<ISpxSession> CSpxAudioStreamSession::GetDefaultSession()
 {
-    // Create the USP reco engine adapter
-    m_adapter = SpxMakeShared<CSpxUspRecoEngineAdapter, ISpxRecoEngineAdapter>();
+    return SpxSharedPtrFromThis<ISpxSession>(this);
+}
 
-    // Convert 'this' to the adapter site interface
-    auto ptr = ((ISpxRecoEngineAdapterSite*)this);
-    auto site = std::dynamic_pointer_cast<ISpxSite>(ptr->shared_from_this());
+std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text)
+{
+    auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
 
-    // And set the site on the adapter
-    auto wsite = std::dynamic_pointer_cast<ISpxObjectWithSite>(m_adapter);
-    wsite->SetSite(site);
+    auto initResult = std::dynamic_pointer_cast<ISpxRecognitionResultInit>(result);
+    initResult->InitIntermediateResult(resultId, text);
+
+    return result;
+}
+
+std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateFinalResult(const wchar_t* resultId, const wchar_t* text)
+{
+    auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
+
+    auto initResult = std::dynamic_pointer_cast<ISpxRecognitionResultInit>(result);
+    initResult->InitFinalResult(resultId, text);
+
+    return result;
+}
+
+std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateNoMatchResult()
+{
+    auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
+
+    auto initResult = std::dynamic_pointer_cast<ISpxRecognitionResultInit>(result);
+    initResult->InitNoMatch();
+
+    return result;
+}
+
+void CSpxAudioStreamSession::InitRecoEngineAdapter()
+{
+    // try creating the hybrid reco engine adapter
+    if (m_adapter == nullptr)
+    {
+        m_adapter = SpxCreateObjectWithSite<ISpxRecoEngineAdapter>("CSpxHybridRecoEngineAdapter", this);
+    }
+
+    // try creating the unidec reco engine adapter, if we couldn't create/find the hybrid adapter
+    if (m_adapter == nullptr)
+    {
+        m_adapter = SpxCreateObjectWithSite<ISpxRecoEngineAdapter>("CSpxUnidecRecoEngineAdapter", this);
+    }
+
+    // try creating the USP reco engine adapter, if we couldn't create/find the other adapters
+    if (m_adapter == nullptr)
+    {
+        m_adapter = SpxCreateObjectWithSite<ISpxRecoEngineAdapter>("CSpxUspRecoEngineAdapter", this);
+    }
 }
 
 bool CSpxAudioStreamSession::IsState(SessionState state)
@@ -297,4 +363,4 @@ bool CSpxAudioStreamSession::ChangeState(SessionState from, SessionState to)
 }
 
 
-} // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE

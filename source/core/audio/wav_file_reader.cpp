@@ -9,8 +9,8 @@
 #include <iostream>
 #include <istream>
 #include <fstream>
-#include <platform.h>
-#include <file_utils.h>
+#include "platform.h"
+#include "file_utils.h"
 #include "wav_file_reader.h"
 
 
@@ -240,4 +240,4 @@ uint32_t CSpxWavFileReader::ReadFromDataChunk(uint8_t** ppbuffer, uint32_t* pcbB
 }
 
 
-} // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE

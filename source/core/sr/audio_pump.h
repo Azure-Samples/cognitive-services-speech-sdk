@@ -6,21 +6,21 @@
 //
 
 #pragma once
-#include <spxcore_common.h>
+#include "spxcore_common.h"
 #include "ispxinterfaces.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-class CSpxAudioPump : public ISpxAudioPump, public ISpxAudioReaderPump
+class CSpxAudioPump : public ISpxAudioPump, public ISpxAudioPumpReaderInit
 {
 public:
 
-    CSpxAudioPump(std::shared_ptr<ISpxAudioReader>& reader);
+    CSpxAudioPump();
     ~CSpxAudioPump();
 
-    // --- ISpxAudioReaderPump
+    // --- ISpxAudioPumpReaderInit
 
     void SetAudioReader(std::shared_ptr<ISpxAudioReader>& reader) override;
 
@@ -58,4 +58,4 @@ private:
 };
 
 
-} // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE

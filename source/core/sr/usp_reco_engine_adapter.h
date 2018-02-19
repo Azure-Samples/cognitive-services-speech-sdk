@@ -7,10 +7,10 @@
 
 #pragma once
 #include <memory>
-#include <spxcore_common.h>
+#include "spxcore_common.h"
 #include "ispxinterfaces.h"
-#include "session.h"
 #include "recognition_result.h"
+#include "service_helpers.h"
 
 extern "C"
 {
@@ -47,13 +47,6 @@ private:
 
     CSpxUspRecoEngineAdapter& operator=(const CSpxUspRecoEngineAdapter&) = delete;
 
-    std::shared_ptr<ISpxRecoEngineAdapterSite> GetSite()
-    {
-        return m_site.lock();
-    }
-
-    // TODO (robch): Why do all these method take a handle as a paramter when the handle is alredy a member
-    // of this calss?
     bool IsUspHandleValid(UspHandle handle);
 
     void UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackContext);
@@ -84,46 +77,35 @@ private:
     void UspOnTurnEnd(UspMsgTurnEnd *message);
     void UspOnError(UspResult error);
 
-    ISpxRecoEngineAdapterSite::ResultPayload_Type ResultPayloadFrom(UspMsgSpeechHypothesis* message)
-    {
-        // TODO: RobCh: Do something with the other fields in UspMsgSpeechHypothesis
-        auto result = SpxMakeShared<CSpxRecognitionResult, ISpxRecognitionResult>(nullptr, message->text, CSpxRecognitionResult::IntermediateResult);
-        return result;
-    }
-
-    ISpxRecoEngineAdapterSite::ResultPayload_Type ResultPayloadFrom(UspMsgSpeechFragment* message)
-    {
-        // TODO: RobCh: Do something with the other fields in UspMsgSpeechFragment
-        auto result = SpxMakeShared<CSpxRecognitionResult, ISpxRecognitionResult>(nullptr, message->text, CSpxRecognitionResult::IntermediateResult);
-        return result;
-    }
-
     ISpxRecoEngineAdapterSite::ResultPayload_Type ResultPayloadFrom(UspMsgSpeechPhrase* message)
     {
+        SPX_DBG_ASSERT(GetSite());
+        auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
+
         // TODO: RobCh: Do something with the other fields in UspMsgSpeechPhrase
         ISpxRecoEngineAdapterSite::ResultPayload_Type payload;
         if (message->recognitionStatus == USP_RECOGNITON_SUCCESS)
         {
-            payload = SpxMakeShared<CSpxRecognitionResult, ISpxRecognitionResult>(nullptr, message->displayText);
+            payload = factory->CreateFinalResult(nullptr, message->displayText);
         }
         else if (message->recognitionStatus == USP_RECOGNITION_NO_MATCH)
         {
-            payload = SpxMakeShared<CSpxRecognitionResult, ISpxRecognitionResult>(CSpxRecognitionResult::NoMatch);
+            payload = factory->CreateNoMatchResult();
         }
         else if (message->recognitionStatus == USP_RECOGNITION_INITIAL_SILENCE_TIMEOUT)
         {
             // TODO: RobCh: Construct appropriate result
-            payload = SpxMakeShared<CSpxRecognitionResult, ISpxRecognitionResult>(CSpxRecognitionResult::NoMatch);
+            payload = factory->CreateNoMatchResult();
         }
         else if (message->recognitionStatus == USP_RECOGNITION_BABBLE_TIMEOUT)
         {
             // TODO: RobCh: Construct appropriate result
-            payload = SpxMakeShared<CSpxRecognitionResult, ISpxRecognitionResult>(CSpxRecognitionResult::NoMatch);
+            payload = factory->CreateNoMatchResult();
         }
         else if (message->recognitionStatus == USP_RECOGNITION_ERROR)
         {
             // TODO: RobCh: Construct appropriate result
-            payload = SpxMakeShared<CSpxRecognitionResult, ISpxRecognitionResult>(CSpxRecognitionResult::NoMatch);
+            payload = factory->CreateNoMatchResult();
         }
         else
         {
@@ -165,17 +147,16 @@ private:
     const size_t m_servicePreferedMilliseconds = 600;
     size_t m_servicePreferedBufferSize;
 
+    const bool m_fUseBufferedImplementation = true;
+    
     std::unique_ptr<uint8_t> m_buffer;
     size_t m_bytesInBuffer;
 
     uint8_t* m_ptrIntoBuffer;
     size_t m_bytesLeftInBuffer;
 
-    const bool m_fUseBufferedImplementation = true;
-    const bool m_fUseVeryLargeBuffer = false;
-
     FILE* m_hfile = 0;
 };
 
 
-} // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE

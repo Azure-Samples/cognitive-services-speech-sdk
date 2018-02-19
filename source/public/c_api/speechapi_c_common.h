@@ -35,6 +35,8 @@
 #define SPXAPI_CALLTYPE     __stdcall
 #define SPXAPI_VCALLTYPE    __cdecl
 
+#define SPXDLL_EXPORT       __declspec(dllexport)
+
 #elif defined(SWIG)
 
 #define SPXAPI_EXPORT
@@ -42,6 +44,7 @@
 #define SPXAPI_RESULTTYPE   SPXHR
 #define SPXAPI_CALLTYPE
 #define SPXAPI_VCALLTYPE
+#define SPXDLL_EXPORT
 
 #else
 
@@ -52,6 +55,8 @@
 // when __attribute__((stdcall)) is set, gcc generates a warning : stdcall attribute ignored.
 #define SPXAPI_CALLTYPE
 #define SPXAPI_VCALLTYPE    __attribute__((cdecl))
+
+#define SPXDLL_EXPORT       __attribute__ ((__visibility__("default")))
 
 #endif
 

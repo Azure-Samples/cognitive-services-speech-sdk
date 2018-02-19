@@ -5,13 +5,21 @@ set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
 include_directories(${INC_DIR})
 include_directories(${CARBON_C_API})
+include_directories(${CARBON_CXX_API})
 include_directories(${CARBON_INCLUDE})
-#include_directories(${SRC_DIR}) # for "stdafx.h"
 
 set(HEADERS
     "${SRC_DIR}/stdafx.h"
+    "${INC_DIR}/create_object_helpers.h"
+    "${INC_DIR}/factory_helpers.h"
     "${INC_DIR}/guid_utils.h"
     "${INC_DIR}/handle_table.h"
+    "${INC_DIR}/resource_manager.h"
+    "${INC_DIR}/service_helpers.h"
+    "${INC_DIR}/service_provider_impl.h"
+    "${INC_DIR}/shared_ptr_helpers.h"
+    "${INC_DIR}/singleton.h"
+    "${INC_DIR}/site_helpers.h"
     "${INC_DIR}/trace_message.h"
     "${INC_DIR}/platform.h"
     "${INC_DIR}/string_utils.h"

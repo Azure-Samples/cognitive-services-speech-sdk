@@ -6,9 +6,8 @@ include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
 include_directories(${CARBON_INCLUDE})
 
-
-include_directories("${SR}/include")
 include_directories("${COMMON}/include")
+include_directories("${SR}/include")
 include_directories("${USP}/include")
 include_directories(${SHARED_UTIL_INC_FOLDER})
 

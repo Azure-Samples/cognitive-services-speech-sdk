@@ -5,12 +5,14 @@
 // usp_reco_engine_adapter.cpp: Implementation definitions for CSpxUspRecoEngineAdapter C++ class
 //
 
-#include <inttypes.h>
 #include "stdafx.h"
 #include "usp_reco_engine_adapter.h"
 #include "handle_table.h"
-#include <file_utils.h>
+#include "file_utils.h"
+#include <inttypes.h>
 #include <cstring>
+#include "service_helpers.h"
+
 
 #define INVALID_USP_HANDLE ((UspHandle)-1)
 
@@ -30,6 +32,7 @@ CSpxUspRecoEngineAdapter::CSpxUspRecoEngineAdapter() :
 
 void CSpxUspRecoEngineAdapter::Init()
 {
+    SPX_IFTRUE_THROW_HR(GetSite() == nullptr, SPXERR_UNINITIALIZED);
     SPX_IFTRUE_THROW_HR(IsUspHandleValid(m_handle), SPXERR_ALREADY_INITIALIZED);
 
     UspInitialize(&m_handle, &m_callbacks, static_cast<void*>(this));
@@ -51,9 +54,7 @@ void CSpxUspRecoEngineAdapter::SetFormat(WAVEFORMATEX* pformat)
     if (pformat != nullptr)
     {
         UspWriteFormat(m_handle, pformat);
-        m_servicePreferedBufferSize = m_fUseVeryLargeBuffer
-            ? 1024 * 1024
-            : (size_t)pformat->nSamplesPerSec * pformat->nBlockAlign * m_servicePreferedMilliseconds / 1000;
+        m_servicePreferedBufferSize = (size_t)pformat->nSamplesPerSec * pformat->nBlockAlign * m_servicePreferedMilliseconds / 1000;
     }
     else
     {
@@ -119,9 +120,9 @@ void CSpxUspRecoEngineAdapter::UspWriteFormat(UspHandle handle, WAVEFORMATEX* pf
     ptr = FormatBufferWriteChars(ptr, "data", cbChunkType);
     ptr = FormatBufferWriteNumber(ptr, cbDataChunk);
 
-    // Now that we've prepared the header/buffer, send it along to Truman/Newman/Skyman via UspWriteAudio
+    // Now that we've prepared the header/buffer, send it along to Truman/Newman/Skyman via UspWrite
     SPX_DBG_ASSERT(cbHeader == size_t(ptr - buffer.get()));
-    UspWrite_Actual(m_handle, buffer.get(), cbHeader);
+    UspWrite(m_handle, buffer.get(), cbHeader);
 }
 
 void CSpxUspRecoEngineAdapter::UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite)
@@ -138,6 +139,7 @@ void CSpxUspRecoEngineAdapter::UspWrite(UspHandle handle, const uint8_t* buffer,
 void CSpxUspRecoEngineAdapter::UspWrite_Actual(UspHandle handle, const uint8_t* buffer, size_t byteToWrite)
 {
     SPX_INIT_HR(hr);
+    SPX_DBG_TRACE_VERBOSE("%s(..., %d)", __FUNCTION__, byteToWrite);
 
     hr = ::UspWriteAudio(handle, buffer, byteToWrite, NULL);
     hr = (byteToWrite == 0 && hr == USP_WRITE_AUDIO_ERROR) ? SPX_NOERROR : hr; // ::UspWriteAudio currently returns USP_WRITE_AUDIO_ERROR on zero bytes, but there's no other way to flush buffer...
@@ -269,20 +271,35 @@ void CSpxUspRecoEngineAdapter::UspOnSpeechEndDetected(UspMsgSpeechEndDetected *m
 void CSpxUspRecoEngineAdapter::UspOnSpeechHypothesis(UspMsgSpeechHypothesis *message)
 {
     SPX_DBG_ASSERT(GetSite());
-    GetSite()->IntermediateResult(this, message->offset, ResultPayloadFrom(message));
+
+    // TODO: RobCh: Do something with the other fields in UspMsgSpeechHypothesis
+    auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
+    auto result = factory->CreateIntermediateResult(nullptr, message->text);
+
+    GetSite()->IntermediateResult(this, message->offset, result);
 }
 
 void CSpxUspRecoEngineAdapter::UspOnSpeechFragment(UspMsgSpeechFragment *message)
 {
     SPX_DBG_ASSERT(GetSite());
-    // Todo: Rob: do we want to treate speech.fragment message different than speech.hypothesis message at this level?
-    GetSite()->IntermediateResult(this, message->offset, ResultPayloadFrom(message));
+
+    // TODO: RobCh: Do something with the other fields in UspMsgSpeechHypothesis
+    // TODO: Rob: do we want to treate speech.fragment message different than speech.hypothesis message at this level?
+
+    auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
+    auto result = factory->CreateIntermediateResult(nullptr, message->text);
+    GetSite()->IntermediateResult(this, message->offset, result);
 }
 
 void CSpxUspRecoEngineAdapter::UspOnSpeechPhrase(UspMsgSpeechPhrase *message)
 {
     SPX_DBG_ASSERT(GetSite());
-    GetSite()->FinalResult(this, message->offset, ResultPayloadFrom(message));
+
+    // TODO: RobCh: Do something with the other fields in UspMsgSpeechPhrase
+    auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
+    auto result = factory->CreateFinalResult(nullptr, message->displayText);
+
+    GetSite()->FinalResult(this, message->offset, result);
 }
 
 void CSpxUspRecoEngineAdapter::UspOnTurnStart(UspMsgTurnStart *message)
@@ -339,4 +356,4 @@ uint8_t* CSpxUspRecoEngineAdapter::FormatBufferWriteChars(uint8_t* buffer, const
 }
 
 
-} // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE

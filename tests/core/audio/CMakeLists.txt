@@ -8,6 +8,7 @@ include_directories ("${CARBON_EXTERNAL}/Catch2")
 include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
 include_directories(${CARBON_INCLUDE})
+include_directories("${COMMON}/include")
 
 set(SOURCES
     "${SRC_DIR}/main.cpp"

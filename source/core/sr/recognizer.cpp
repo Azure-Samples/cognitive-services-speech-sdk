@@ -2,16 +2,14 @@
 #include "recognizer.h"
 #include <future>
 #include "handle_table.h"
-#include "recognition_event_args.h"
-#include "session_event_args.h"
+#include "service_helpers.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-CSpxRecognizer::CSpxRecognizer(std::shared_ptr<ISpxSession>& session) :
+CSpxRecognizer::CSpxRecognizer() :
     ISpxRecognizerEvents(nullptr, nullptr),
-    m_defaultSession(session),
     m_fEnabled(true)
 {
     SPX_DBG_TRACE_FUNCTION();
@@ -20,7 +18,13 @@ CSpxRecognizer::CSpxRecognizer(std::shared_ptr<ISpxSession>& session) :
 CSpxRecognizer::~CSpxRecognizer()
 {
     SPX_DBG_TRACE_FUNCTION();
-    m_defaultSession->RemoveRecognizer(this);
+    TermDefaultSession();
+}
+
+void CSpxRecognizer::Init()
+{
+    SPX_IFTRUE_THROW_HR(GetSite() == nullptr, SPXERR_UNINITIALIZED);
+    EnsureDefaultSession();
 }
 
 bool CSpxRecognizer::IsEnabled()
@@ -61,85 +65,96 @@ CSpxAsyncOp<void> CSpxRecognizer::StopContinuousRecognitionAsync()
 
 void CSpxRecognizer::FireSessionStarted(const std::wstring& sessionId)
 {
-    auto sessionEvent = SpxMakeShared<CSpxSessionEventArgs, ISpxSessionEventArgs>(sessionId);
+    SPX_DBG_ASSERT(GetSite());
+    auto factory = SpxQueryService<ISpxEventArgsFactory>(GetSite());
+    auto sessionEvent = factory->CreateSessionEventArgs(sessionId);
 
     auto handletable = CSpxSharedPtrHandleTableManager::Get<ISpxSessionEventArgs, SPXEVENTHANDLE>();
     auto hevent = handletable->TrackHandle(sessionEvent);
 
     SessionStarted.Signal(sessionEvent);
-
     handletable->StopTracking(hevent);
 }
 
 void CSpxRecognizer::FireSessionStopped(const std::wstring& sessionId)
 {
-    auto sessionEvent = SpxMakeShared<CSpxSessionEventArgs, ISpxSessionEventArgs>(sessionId);
+    SPX_DBG_ASSERT(GetSite());
+    auto factory = SpxQueryService<ISpxEventArgsFactory>(GetSite());
+    auto sessionEvent = factory->CreateSessionEventArgs(sessionId);
 
     auto handletable = CSpxSharedPtrHandleTableManager::Get<ISpxSessionEventArgs, SPXEVENTHANDLE>();
     auto hevent = handletable->TrackHandle(sessionEvent);
 
     SessionStopped.Signal(sessionEvent);
-
     handletable->StopTracking(hevent);
 }
 
 void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result)
 {
-    if (result->GetReason() == Reason::Recognized && FinalResult.IsConnected())
+    ISpxRecognizerEvents::RecoEvent_Type* pevent = nullptr;
+
+    auto reason = result->GetReason();
+    switch (reason)
     {
-        auto recoEvent = SpxMakeShared<CSpxRecognitionEventArgs, ISpxRecognitionEventArgs>(sessionId, result);
+        case Reason::Recognized:
+            pevent = &FinalResult;
+            break;
+
+        case Reason::IntermediateResult:
+            pevent = &IntermediateResult;
+            break;
+
+        case Reason::NoMatch:
+            pevent = &NoMatch;
+            break;
+
+        case Reason::Canceled:
+            pevent = &Canceled;
+            break;
+
+        case Reason::OtherRecognizer:
+            SPX_THROW_HR(SPXERR_INVALID_ARG);
+            break;
+
+        default:
+            SPX_DBG_ASSERT_WITH_MESSAGE(
+                reason != Reason::Recognized && 
+                reason != Reason::IntermediateResult &&
+                reason != Reason::NoMatch &&
+                reason != Reason::Canceled && 
+                reason != Reason::OtherRecognizer,
+                "The reason found in the result was unexpected.");
+            break;
+    }
+
+    if (pevent != nullptr && pevent->IsConnected())
+    {
+        SPX_DBG_ASSERT(GetSite());
+        auto factory = SpxQueryService<ISpxEventArgsFactory>(GetSite());
+        auto recoEvent = factory->CreateRecognitionEventArgs(sessionId, result);
 
         auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
         auto hevent = eventhandles->TrackHandle(recoEvent);
-        UNUSED(hevent);
 
-        FinalResult.Signal(recoEvent);
+        pevent->Signal(recoEvent);
+        eventhandles->StopTracking(hevent);
     }
-    else if (result->GetReason() == Reason::IntermediateResult && IntermediateResult.IsConnected())
+}
+
+void CSpxRecognizer::EnsureDefaultSession()
+{
+    if (m_defaultSession == nullptr)
     {
-        auto recoEvent = SpxMakeShared<CSpxRecognitionEventArgs, ISpxRecognitionEventArgs>(sessionId, result);
-
-        auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
-        auto hevent = eventhandles->TrackHandle(recoEvent);
-        UNUSED(hevent);
-
-        IntermediateResult.Signal(recoEvent);
+        SPX_DBG_ASSERT(GetSite());
+        m_defaultSession = GetSite()->GetDefaultSession();
     }
-    else if (result->GetReason() == Reason::NoMatch && NoMatch.IsConnected())
-    {
-        auto recoEvent = SpxMakeShared<CSpxRecognitionEventArgs, ISpxRecognitionEventArgs>(sessionId, result);
+}
 
-        auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
-        auto hevent = eventhandles->TrackHandle(recoEvent);
-        UNUSED(hevent);
-
-        NoMatch.Signal(recoEvent);
-    }
-    else if (result->GetReason() == Reason::Canceled && Canceled.IsConnected())
+void CSpxRecognizer::TermDefaultSession()
+{
+    if (m_defaultSession != nullptr)
     {
-        auto recoEvent = SpxMakeShared<CSpxRecognitionEventArgs, ISpxRecognitionEventArgs>(sessionId, result);
-
-        auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
-        auto hevent = eventhandles->TrackHandle(recoEvent);
-        UNUSED(hevent);
-
-        Canceled.Signal(recoEvent);
-    }
-    else if (result->GetReason() == Reason::OtherRecognizer)
-    {
-        SPX_THROW_HR(SPXERR_INVALID_ARG);
-    }
-    else
-    {
-        auto reason = result->GetReason();
-        SPX_DBG_ASSERT_WITH_MESSAGE(
-            reason != Reason::Recognized && 
-            reason != Reason::IntermediateResult &&
-            reason != Reason::NoMatch &&
-            reason != Reason::Canceled && 
-            reason != Reason::OtherRecognizer,
-            "The reason found in the result was unexpected.");
-        UNUSED(reason);
+        m_defaultSession->RemoveRecognizer(this);
     }
 }
 
@@ -149,4 +164,4 @@ void CSpxRecognizer::OnIsEnabledChanged()
 }
 
 
-} // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE

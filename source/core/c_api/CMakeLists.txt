@@ -42,4 +42,4 @@ set_target_properties (c_api PROPERTIES
     COMPILE_DEFINITIONS "SPX_CONFIG_EXPORTAPIS"
 )
 
-target_link_libraries(c_api PRIVATE sr audio usp common)
+target_link_libraries(c_api PRIVATE sr audio usp common factory)

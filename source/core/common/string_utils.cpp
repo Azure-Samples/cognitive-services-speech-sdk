@@ -7,17 +7,27 @@
 #if defined(_MSC_VER) || defined(_CODECVT_H)
 #include <codecvt>
 #else
+#include <strings.h>
 #include <cstdlib>
 #include <clocale>
 #endif
 
-#include  <wchar.h>
+#include <wchar.h>
 #include <assert.h>
 #include <algorithm>
 #include <vector>
 #include "string_utils.h"
 
 namespace PAL {
+
+int stricmp(const char *a, const char *b)
+{
+#ifdef _MSC_VER
+    return _stricmp(a, b);
+#else
+    return ::strcasecmp(a, b);
+#endif
+}
 
 int wcsicmp(const wchar_t *a, const wchar_t *b)
 {

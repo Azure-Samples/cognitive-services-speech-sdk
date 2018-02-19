@@ -10,7 +10,7 @@
 #include <future>
 #include <memory>
 #include <list>
-#include <spxcore_common.h>
+#include "spxcore_common.h"
 #include "asyncop.h"
 #include "ispxinterfaces.h"
 
@@ -73,4 +73,4 @@ private:
 };
 
 
-} // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE

@@ -10,5 +10,5 @@ std::unique_ptr<std::map<const char*, void*>> CSpxSharedPtrHandleTableManager::s
 std::unique_ptr<std::list<std::function<void(void)>>> CSpxSharedPtrHandleTableManager::s_termFns = std::make_unique<std::list<std::function<void(void)>>>();
 
 
-} // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE
 

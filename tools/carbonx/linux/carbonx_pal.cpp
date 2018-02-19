@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "carbonx_pal.h"
+#include <unistd.h>
 
 void PAL_WaitForDebugger()
 {

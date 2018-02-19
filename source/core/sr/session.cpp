@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include <future>
 #include "session.h"
-#include "recognition_result.h"
 #include "guid_utils.h"
+#include "service_helpers.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -201,10 +201,11 @@ void CSpxSession::EnsureFireResultEvent()
 {
     if (m_fRecoAsyncWaiting)
     {
-        auto noMatchResult = SpxMakeShared<CSpxRecognitionResult, ISpxRecognitionResult>(CSpxRecognitionResult::NoMatch);
+        auto factory = SpxQueryService<ISpxRecoResultFactory>(this);
+        auto noMatchResult = factory->CreateNoMatchResult();
         WaitForRecognition_Complete(noMatchResult);
     }
 }
 
 
-} // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE

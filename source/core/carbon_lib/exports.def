@@ -1,4 +1,5 @@
 EXPORTS 
+	CreateModuleObject
 	RecognizerFactory_CreateDictationRecognizer
 	RecognizerFactory_CreateDictationRecognizer_With_Defaults
 	RecognizerFactory_CreateDictationRecognizer_With_FileInput

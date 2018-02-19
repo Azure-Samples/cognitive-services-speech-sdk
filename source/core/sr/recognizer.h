@@ -9,12 +9,19 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-class CSpxRecognizer : public ISpxRecognizer, public ISpxRecognizerEvents
+class CSpxRecognizer :
+    public ISpxRecognizer,
+    public ISpxRecognizerEvents,
+    public ISpxObjectWithSiteInitImpl<ISpxRecognizerSite>
 {
 public:
 
-    CSpxRecognizer(std::shared_ptr<ISpxSession>& session);
+    CSpxRecognizer();
     virtual ~CSpxRecognizer();
+
+    // --- ISpxObjectWithSiteInit
+
+    void Init() override;
 
     // --- ISpxRecognizer
 
@@ -36,6 +43,9 @@ public:
 
 protected:
 
+    void EnsureDefaultSession();
+    void TermDefaultSession();
+    
     void OnIsEnabledChanged();
 
 
@@ -51,4 +61,4 @@ private:
 };
 
 
-} // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE

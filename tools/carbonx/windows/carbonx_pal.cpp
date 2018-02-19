@@ -2,6 +2,7 @@
 #include "carbonx_pal.h"
 #include <Windows.h>
 
+
 void PAL_WaitForDebugger()
 {
     uint16_t msWaitForDebugger = 5 * 1000;

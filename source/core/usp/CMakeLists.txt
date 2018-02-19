@@ -6,7 +6,6 @@ set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 include_directories(${INC_DIR})
 include_directories ("${CARBON_EXTERNAL}/parson")
 
-
 add_library(parson STATIC "${CARBON_ROOT}/external/parson/parson.c")
 
 if(MSVC)

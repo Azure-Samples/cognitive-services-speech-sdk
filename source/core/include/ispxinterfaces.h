@@ -7,7 +7,8 @@
 
 #pragma once
 #include <memory>
-#include <spxcore_common.h>
+#include "spxcore_common.h"
+#include "platform.h"
 #include "asyncop.h"
 #include "speechapi_cxx_common.h"
 #include "speechapi_cxx_eventsignal.h"
@@ -21,6 +22,11 @@ namespace CARBON_IMPL_NAMESPACE() {
 
 class ISpxInterfaceBase : public std::enable_shared_from_this<ISpxInterfaceBase>
 {
+public:
+
+    virtual ~ISpxInterfaceBase() = default;
+
+
 protected:
 
     typedef std::enable_shared_from_this<ISpxInterfaceBase> base_type;
@@ -49,6 +55,8 @@ public:
 private:
 
     typedef ISpxInterfaceBase base_type;
+
+    ISpxInterfaceBaseFor&& operator =(const ISpxInterfaceBaseFor&&) = delete;
 };
     
 
@@ -72,6 +80,52 @@ public:
 
     virtual void SetSite(std::weak_ptr<ISpxSite> site) = 0;
 };
+
+
+template <class T, class I, class... Types>
+inline std::shared_ptr<I> SpxCreateObjectInternal(Types&&... Args)
+{
+    SPX_DBG_TRACE_VERBOSE("Creating object via %s: %s as %s", __FUNCTION__, PAL::GetTypeName<T>(), PAL::GetTypeName<I>());
+    std::shared_ptr<T> ptr = std::make_shared<T>(std::forward<Types>(Args)...);
+    auto it = std::dynamic_pointer_cast<I>(ptr);
+    return it;
+}
+
+class ISpxObjectFactory : public ISpxInterfaceBaseFor<ISpxObjectFactory>
+{
+public:
+
+    template <class I>
+    std::shared_ptr<I> CreateObject(const char* className)
+    {
+        // try to create the object from our interface virtual method... 
+        auto obj = CreateObject(className, PAL::GetTypeName<I>().c_str());
+        if (obj != nullptr)
+        {
+            auto ptr = reinterpret_cast<I*>(obj);
+            return std::shared_ptr<I>(ptr);
+        }
+
+        // if we can't, return nullptr to let the caller know
+        return nullptr;
+    }
+
+    template <class T, class I>
+    std::shared_ptr<I> CreateObject()
+    {
+        auto obj = CreateObject<I>(PAL::GetTypeName<T>());
+        if (obj != nullptr)
+        {
+            return obj;
+        }
+
+        // if that didn't work, just go ahead and delegate to our internal helper for this module
+        return SpxCreateObjectInternal<T, I>();
+    }
+
+    virtual void* CreateObject(const char* className, const char* interfaceName) = 0;
+};
+
 
 template <class T>
 class ISpxObjectWithSiteInitImpl : public ISpxObjectWithSite, public ISpxObjectInit
@@ -106,19 +160,48 @@ public:
 
     void Init() override
     {
-    };
+    }
 
     void Term() override
     {
-    };
+    }
 
 
 protected:
 
-    ISpxObjectWithSiteInitImpl() : m_hasSite(false) {};
+    ISpxObjectWithSiteInitImpl() : m_hasSite(false) {}
+
+    std::shared_ptr<T> GetSite()
+    {
+        return m_site.lock();
+    }
+
+
+private:
 
     bool m_hasSite;
     std::weak_ptr<T> m_site;
+};
+
+class ISpxServiceProvider : public ISpxInterfaceBaseFor<ISpxServiceProvider>
+{
+public:
+
+    virtual std::shared_ptr<ISpxInterfaceBase> QueryService(const char* serviceName) = 0;
+};
+
+
+class ISpxAddServiceProvider : public ISpxInterfaceBaseFor<ISpxAddServiceProvider>
+{
+public:
+
+    template <class T>
+    void AddService(std::shared_ptr<T> service)
+    {
+        AddService(PAL::GetTypeName<T>(), service);
+    }
+
+    virtual void AddService(const char* serviceName, std::shared_ptr<ISpxInterfaceBase> service) = 0;
 };
 
 
@@ -192,14 +275,6 @@ public:
 };
 
 
-class ISpxAudioReaderPump : public ISpxInterfaceBaseFor<ISpxAudioReaderPump>
-{
-public:
-
-    virtual void SetAudioReader(std::shared_ptr<ISpxAudioReader>& reader) = 0;
-};
-
-
 class ISpxAudioPump : public ISpxInterfaceBaseFor<ISpxAudioPump>
 {
 public:
@@ -216,6 +291,14 @@ public:
 };
 
 
+class ISpxAudioPumpReaderInit : public ISpxInterfaceBaseFor<ISpxAudioPumpReaderInit>
+{
+public:
+
+    virtual void SetAudioReader(std::shared_ptr<ISpxAudioReader>& reader) = 0;
+};
+
+
 enum class Reason { Recognized, IntermediateResult, NoMatch, Canceled, OtherRecognizer };
 
 
@@ -227,6 +310,16 @@ public:
     virtual std::wstring GetText() = 0;
 
     virtual enum Reason GetReason() = 0;
+};
+
+
+class ISpxRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxRecognitionResultInit>
+{
+public:
+
+    virtual void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text) = 0;
+    virtual void InitFinalResult(const wchar_t* resultId, const wchar_t* text) = 0;
+    virtual void InitNoMatch() = 0;
 };
 
 
@@ -252,11 +345,27 @@ public:
 };
 
 
+class ISpxSessionEventArgsInit : public ISpxInterfaceBaseFor<ISpxSessionEventArgsInit>
+{
+public:
+
+    virtual void Init(const std::wstring& sessionId) = 0;
+};
+
+
 class ISpxRecognitionEventArgs : public ISpxSessionEventArgs, public ISpxInterfaceBaseFor<ISpxRecognitionEventArgs>
 {
 public:
 
     virtual std::shared_ptr<ISpxRecognitionResult> GetResult() = 0;
+};
+
+
+class ISpxRecognitionEventArgsInit : public ISpxInterfaceBaseFor<ISpxRecognitionEventArgsInit>
+{
+public:
+
+    virtual void Init(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) = 0;
 };
 
 
@@ -289,7 +398,7 @@ protected:
         NoMatch(connectedCallback, disconnectedCallback),
         Canceled(connectedCallback, disconnectedCallback)
     {
-    };
+    }
 
 
 private:
@@ -327,7 +436,7 @@ class ISpxRecoEngineAdapter : public ISpxAudioProcessor, public ISpxInterfaceBas
 };
 
 
-class ISpxRecoEngineAdapterSite : public ISpxSite
+class ISpxRecoEngineAdapterSite : virtual public ISpxSite
 {
 public:
 
@@ -352,4 +461,43 @@ public:
 };
 
 
-} // CARBON_IMPL_NAMESPACE()
+class ISpxRecoResultFactory : public ISpxInterfaceBaseFor<ISpxRecoResultFactory>
+{
+public:
+
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text) = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, const wchar_t* text) = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateNoMatchResult() = 0;
+};
+
+
+class ISpxEventArgsFactory : public ISpxInterfaceBaseFor<ISpxEventArgsFactory>
+{
+public:
+
+    virtual std::shared_ptr<ISpxSessionEventArgs> CreateSessionEventArgs(const std::wstring& sessionId) = 0;
+    virtual std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) = 0;
+};
+
+
+class ISpxRecognizerSite : virtual public ISpxSite
+{
+public:
+
+    virtual std::shared_ptr<ISpxSession> GetDefaultSession() = 0;
+};
+
+
+class ISpxRecognizerFactory : public ISpxInterfaceBaseFor<ISpxRecognizerFactory>
+{
+public:
+
+    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer() = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(bool passiveListeningEnaled) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) = 0;
+};
+
+
+} // CARBON_IMPL_NAMESPACE

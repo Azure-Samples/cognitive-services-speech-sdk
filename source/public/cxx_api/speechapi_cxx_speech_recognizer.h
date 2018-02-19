@@ -204,9 +204,8 @@ protected:
     static void FireEvent_SessionStarted(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
     {
         UNUSED(hreco);
-        // need C++14 for make_unique
-        // auto sessionEvent = std::make_unique<SessionEventArgs>(hevent);
-        std::unique_ptr<SessionEventArgs> sessionEvent{ new SessionEventArgs(hevent) };
+        std::unique_ptr<SessionEventArgs> sessionEvent { new SessionEventArgs(hevent) };
+
         auto pThis = static_cast<SpeechRecognizer*>(pvContext);
         pThis->SessionStarted.Signal(*sessionEvent.get());
     }
@@ -214,9 +213,8 @@ protected:
     static void FireEvent_SessionStopped(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
     {
         UNUSED(hreco);
-        // need C++14 for make_unique
-        // auto sessionEvent = std::make_unique<SessionEventArgs>(hevent);
-        std::unique_ptr<SessionEventArgs> sessionEvent{ new SessionEventArgs(hevent) };
+        std::unique_ptr<SessionEventArgs> sessionEvent { new SessionEventArgs(hevent) };
+
         auto pThis = static_cast<SpeechRecognizer*>(pvContext);
         pThis->SessionStopped.Signal(*sessionEvent.get());
     }
@@ -224,9 +222,8 @@ protected:
     static void FireEvent_IntermediateResult(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
     {
         UNUSED(hreco);
-        // need C++14 for make_unique
-        // auto recoEvent = std::make_unique<SpeechRecognitionEventArgs>(hevent);
-        std::unique_ptr<SpeechRecognitionEventArgs> recoEvent{ new SpeechRecognitionEventArgs(hevent) };
+        std::unique_ptr<SpeechRecognitionEventArgs> recoEvent { new SpeechRecognitionEventArgs(hevent) };
+
         auto pThis = static_cast<SpeechRecognizer*>(pvContext);
         pThis->IntermediateResult.Signal(*recoEvent.get());
     }
@@ -234,9 +231,8 @@ protected:
     static void FireEvent_FinalResult(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
     {
         UNUSED(hreco);
-        // need C++14 for make_unique
-        // auto recoEvent = std::make_unique<SpeechRecognitionEventArgs>(hevent);
-        std::unique_ptr<SpeechRecognitionEventArgs> recoEvent{ new SpeechRecognitionEventArgs(hevent) };
+        std::unique_ptr<SpeechRecognitionEventArgs> recoEvent { new SpeechRecognitionEventArgs(hevent) };
+
         auto pThis = static_cast<SpeechRecognizer*>(pvContext);
         pThis->FinalResult.Signal(*recoEvent.get());
     }
@@ -244,9 +240,8 @@ protected:
     static void FireEvent_NoMatch(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
     {
         UNUSED(hreco);
-        // need C++14 for make_unique
-        // auto recoEvent = std::make_unique<SpeechRecognitionEventArgs>(hevent);
-        std::unique_ptr<SpeechRecognitionEventArgs> recoEvent{ new SpeechRecognitionEventArgs(hevent) };
+        std::unique_ptr<SpeechRecognitionEventArgs> recoEvent { new SpeechRecognitionEventArgs(hevent) };
+
         auto pThis = static_cast<SpeechRecognizer*>(pvContext);
         pThis->NoMatch.Signal(*recoEvent.get());
     }
@@ -254,9 +249,8 @@ protected:
     static void FireEvent_Canceled(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
     {
         UNUSED(hreco);
-        // need C++14 for make_unique
-        // auto recoEvent = std::make_unique<SpeechRecognitionEventArgs>(hevent);
-        std::unique_ptr<SpeechRecognitionEventArgs> recoEvent{ new SpeechRecognitionEventArgs(hevent) };
+        std::unique_ptr<SpeechRecognitionEventArgs> recoEvent { new SpeechRecognitionEventArgs(hevent) };
+
         auto pThis = static_cast<SpeechRecognizer*>(pvContext);
         pThis->Canceled.Signal(*recoEvent.get());
     }

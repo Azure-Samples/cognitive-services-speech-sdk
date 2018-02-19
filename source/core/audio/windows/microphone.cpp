@@ -216,6 +216,6 @@ void MicrophonePump::StopPump()
     m_sampleHandler->Stop();
 }
 
-} // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE
 
 

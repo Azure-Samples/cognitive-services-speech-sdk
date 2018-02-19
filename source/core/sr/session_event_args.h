@@ -5,15 +5,21 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-class CSpxSessionEventArgs : public ISpxSessionEventArgs
+class CSpxSessionEventArgs :
+    public ISpxSessionEventArgs, 
+    public ISpxSessionEventArgsInit
 {
 public:
 
-    CSpxSessionEventArgs(const std::wstring& sessionId);
+    CSpxSessionEventArgs();
 
     // --- ISpxSessionEventArgs
     
     virtual const std::wstring& GetSessionId() override;
+
+    // --- ISpxSessionEventArgsInit
+
+    virtual void Init(const std::wstring& sessionId) override;
 
 
 private:
@@ -23,8 +29,8 @@ private:
 
     CSpxSessionEventArgs& operator=(const CSpxSessionEventArgs&) = delete;
 
-    const std::wstring m_sessionId;
+    std::wstring m_sessionId;
 };
 
 
-} // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE

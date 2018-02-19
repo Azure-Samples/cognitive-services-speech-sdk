@@ -5,16 +5,22 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-class CSpxRecognitionEventArgs : public ISpxRecognitionEventArgs
+class CSpxRecognitionEventArgs :
+    public ISpxRecognitionEventArgs, 
+    public ISpxRecognitionEventArgsInit
 {
 public:
 
-    CSpxRecognitionEventArgs(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result);
+    CSpxRecognitionEventArgs();
 
     // --- ISpxRecognitionEventArgs
     
     virtual const std::wstring& GetSessionId() override;
     virtual std::shared_ptr<ISpxRecognitionResult> GetResult() override;
+
+    // --- ISpxRecognitionEventArgsInit
+
+    virtual void Init(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) override;
 
 
 private:
@@ -24,9 +30,9 @@ private:
 
     CSpxRecognitionEventArgs& operator=(const CSpxRecognitionEventArgs&) = delete;
 
-    const std::wstring m_sessionId;
+    std::wstring m_sessionId;
     std::shared_ptr<ISpxRecognitionResult> m_result;
 };
 
 
-} // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE

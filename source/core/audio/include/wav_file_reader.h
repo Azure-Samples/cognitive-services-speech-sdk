@@ -6,8 +6,7 @@
 //
 
 #pragma once
-#include <spxcore_common.h>
-#include "ispxinterfaces.h"
+#include "spxcore_common.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -63,4 +62,4 @@ private:
 };
 
 
-} // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE

@@ -16,11 +16,10 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-CSpxAudioPump::CSpxAudioPump(std::shared_ptr<ISpxAudioReader>& reader) :
+CSpxAudioPump::CSpxAudioPump() :
     m_state(State::NoInput),
     m_stateRequested(State::NoInput)
 {
-    SetAudioReader(reader);
 }
 
 CSpxAudioPump::~CSpxAudioPump()
@@ -167,4 +166,4 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
 }
 
 
-} // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE

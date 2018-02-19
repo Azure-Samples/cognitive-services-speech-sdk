@@ -213,4 +213,4 @@ void MicrophonePump::UpdateState(AUDIO_STATE state)
     }
 }
 
-} // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE

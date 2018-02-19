@@ -128,7 +128,12 @@ typedef unsigned int SPXHR;
 */
 #define SPXERR_START_RECOGNIZING_INVALID_STATE_TRANSITION __SPX_ERRCODE_FAILED(0x012)
 
+/*** SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE
+*   An unexpected error was encountered when trying to create an internal object.
+*/
+#define SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE  __SPX_ERRCODE_FAILED(0x013)
+
 /*** SPXERR_MIC_ERROR
 *   An error in the audio-capturing system.
 */
-#define SPXERR_MIC_ERROR    __SPX_ERRCODE_FAILED(0x00d)
+#define SPXERR_MIC_ERROR            __SPX_ERRCODE_FAILED(0x014)

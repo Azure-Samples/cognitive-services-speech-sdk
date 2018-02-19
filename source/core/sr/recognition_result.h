@@ -6,19 +6,13 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
     
-class CSpxRecognitionResult : public ISpxRecognitionResult
+class CSpxRecognitionResult :
+    public ISpxRecognitionResult,
+    public ISpxRecognitionResultInit
 {
 public:
 
-    struct NoMatch_Type {};
-    constexpr static NoMatch_Type NoMatch {};
-
-    struct IntermediateResult_Type {};
-    constexpr static IntermediateResult_Type IntermediateResult {};
-
-    CSpxRecognitionResult(const wchar_t* resultId, const wchar_t* text);
-    CSpxRecognitionResult(const wchar_t* resultId, const wchar_t* text, IntermediateResult_Type);
-    CSpxRecognitionResult(NoMatch_Type);
+    CSpxRecognitionResult();
     virtual ~CSpxRecognitionResult();
 
     // --- ISpxRecognitionResult
@@ -27,7 +21,11 @@ public:
     std::wstring GetText();
     enum Reason GetReason();
 
-    // TODO: RobCh: Payload
+    // --- ISpxRecognitionResultInit
+
+    void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text) override;
+    void InitFinalResult(const wchar_t* resultId, const wchar_t* text) override;
+    void InitNoMatch() override;
 
 
 private:
@@ -43,4 +41,4 @@ private:
 };
 
 
-} // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE

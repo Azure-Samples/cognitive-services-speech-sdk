@@ -8,6 +8,7 @@
 #include "stdafx.h"
 #include "carbon_test_console.h"
 #include "speechapi_c.h"
+#include <chrono>
 #include <string_utils.h>
 #include <file_utils.h>
 #include <platform.h>
@@ -911,6 +912,8 @@ void CarbonTestConsole::EnsureInitCarbon(ConsoleArgs* pconsoleArgs)
 
 void CarbonTestConsole::TermCarbon()
 {
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
     m_recognizer = nullptr;
     m_speechRecognizer = nullptr;
     m_intentRecognizer = nullptr;

@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include <mfapi.h>
 #include <mfidl.h>
-
-#undef WAVE_FORMAT_PCM // already defined in mmeapi.h
 #include "audio_sample_handler.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,4 +31,4 @@ AudioSampleHandler::AudioSampleHandler(const WAVEFORMATEX& format, GUID subType)
 {
 }
 
-} // CARBON_IMPL_NAMESPACE()
+} // CARBON_IMPL_NAMESPACE

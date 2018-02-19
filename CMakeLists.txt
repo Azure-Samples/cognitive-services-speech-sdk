@@ -87,11 +87,15 @@ set(SPEECH_CXX_API_HEADERS
 
 # individual components
 set(COMMON "${CARBON_CORE}/common")
+set(FACTORY "${CARBON_CORE}/factory")
 set(SR "${CARBON_CORE}/sr")
 set(CARBON_LIB "${CARBON_CORE}/carbon_lib")
 set(C_API "${CARBON_CORE}/c_api")
 set(AUDIO "${CARBON_CORE}/audio")
 set(USP "${CARBON_CORE}/usp")
+if(CMAKE_CL_64)
+    set(UNIDEC "${CARBON_CORE}/unidec")
+endif()
 
 set(TESTS "${CARBON_ROOT}/tests")
 
@@ -105,6 +109,7 @@ add_subdirectory("${CARBON_EXTERNAL}")
 include_directories(${AZURE_SHARED_UTIL_INCLUDE})
 
 add_subdirectory(${COMMON})
+add_subdirectory(${FACTORY})
 add_subdirectory(${AUDIO})
 add_subdirectory(${USP})
 add_subdirectory(${USP_CONSOLE})
@@ -112,6 +117,9 @@ add_subdirectory(${TESTS})
 add_subdirectory(${C_API})
 add_subdirectory(${SR})
 add_subdirectory(${CARBON_LIB})
+if(CMAKE_CL_64)
+    add_subdirectory(${UNIDEC})
+endif()
 add_subdirectory(${CARBONX})
 
 if(MSVC)

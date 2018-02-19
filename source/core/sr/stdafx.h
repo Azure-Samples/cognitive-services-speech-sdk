@@ -12,9 +12,7 @@
 #define SPX_CONFIG_INCLUDE_ALL 1
 #endif
 
+#include "trace_message.h"
 #define __SPX_DO_TRACE_IMPL SpxTraceMessage
 
-#include <spxcore_common.h>
-#include <trace_message.h>
-
-
+#include "spxcore_common.h"
