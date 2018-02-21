@@ -1,8 +1,9 @@
 #pragma once
 #include <functional>
-#include <list>
 #include <map>
 #include <memory>
+#include <list>
+#include <unordered_map>
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -65,9 +66,12 @@ public:
     {
         if (IsTracked(handle))
         {
-            T* ptr = m_handleMap[handle].get();
-            m_handleMap.erase(handle);
-            m_ptrMap.erase(ptr);
+            auto iterHandleMap = m_handleMap.find(handle);
+            auto ptr = iterHandleMap->second.get();
+            auto iterPtrMap = m_ptrMap.find(ptr);
+
+            m_handleMap.erase(iterHandleMap);
+            m_ptrMap.erase(iterPtrMap);
         }
     }
 
@@ -75,11 +79,15 @@ public:
     {
         if (IsTracked(ptr))
         {
-            Handle handle = m_ptrMap[ptr];
-            m_handleMap.erase(handle);
-            m_ptrMap.erase(ptr);
+            auto iterPtrMap = m_ptrMap.find(ptr);
+            auto handle = iterPtrMap->second;
+            auto iterHandleMap = m_handleMap.find(handle);
+
+            m_ptrMap.erase(iterPtrMap);
+            m_handleMap.erase(iterHandleMap);
         }
     }
+
     void Term()
     {
         m_handleMap.clear();
@@ -88,8 +96,8 @@ public:
 
 private:
 
-    std::map<Handle, std::shared_ptr<T>> m_handleMap;
-    std::map<T*, Handle> m_ptrMap;
+    std::unordered_multimap<Handle, std::shared_ptr<T>> m_handleMap;
+    std::unordered_multimap<T*, Handle> m_ptrMap;
 };
 
 class CSpxSharedPtrHandleTableManager
