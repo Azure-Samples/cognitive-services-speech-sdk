@@ -90,11 +90,11 @@ void OnTurnEnd(UspHandle handle, void* context, UspMsgTurnEnd *message)
     turnEnd = true;
 }
 
-void OnError(UspHandle handle, void* context, UspResult error)
+void OnError(UspHandle handle, void* context, const UspError* error)
 {
     UNUSED(handle);
     UNUSED(context);
-    printf("Response: On Error: 0x%x.\n", error);
+    printf("Response: On Error: 0x%x (%s).\n", error->errorCode, error->description);
     turnEnd = true;
 }
 

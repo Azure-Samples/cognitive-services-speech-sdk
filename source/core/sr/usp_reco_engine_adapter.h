@@ -75,7 +75,7 @@ private:
     void UspOnSpeechPhrase(UspMsgSpeechPhrase *message);
     void UspOnTurnStart(UspMsgTurnStart *message);
     void UspOnTurnEnd(UspMsgTurnEnd *message);
-    void UspOnError(UspResult error);
+    void UspOnError(const UspError* error);
 
     ISpxRecoEngineAdapterSite::ResultPayload_Type ResultPayloadFrom(UspMsgSpeechPhrase* message)
     {
@@ -118,7 +118,7 @@ private:
     ISpxRecoEngineAdapterSite::AdditionalMessagePayload_Type AdditionalMessagePayloadFrom(UspMsgTurnStart* message) { UNUSED(message); return nullptr; } // TODO: RobCh: Implement this
     ISpxRecoEngineAdapterSite::AdditionalMessagePayload_Type AdditionalMessagePayloadFrom(UspMsgTurnEnd* message) { UNUSED(message); return nullptr; } // TODO: RobCh: Implement this
 
-    ISpxRecoEngineAdapterSite::ErrorPayload_Type ErrorPayloadFrom(UspResult error) { return error; } // TODO: RobCh: Implement this
+    ISpxRecoEngineAdapterSite::ErrorPayload_Type ErrorPayloadFrom(const UspError* error) { return error->errorCode; } // TODO: RobCh: Implement this
 
     uint8_t* FormatBufferWriteBytes(uint8_t* buffer, const uint8_t* source, size_t bytes);
 

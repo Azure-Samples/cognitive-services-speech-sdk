@@ -55,6 +55,11 @@ extern "C" {
 */
 #define USP_BUFFER_TOO_SMALL USP_ERRCODE(0x013)
 
+/**
+* USP_INVALID_ENUM_VALUE indicates an unexpected enum value.
+*/
+#define USP_INVALID_ENUM_VALUE USP_ERRCODE(0x014)
+
 // Authentication errors
 
 /**

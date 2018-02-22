@@ -29,6 +29,16 @@ typedef struct _UspContext* UspHandle;
 typedef unsigned int UspResult;
 
 /**
+* The UspError defines a type that is used as an argument in the OnError callback to communicate 
+* errors in the protocol stack to the subscribed clients.
+*/
+typedef struct _UspError
+{
+    UspResult errorCode;
+    char* description;
+} UspError;
+
+/**
  * A callback function that will be called when a speech.startDetected message is received from service.
  * @param uspHandle The UspHandle.
  * @param context A pointer to the application-defined callback context.
@@ -88,9 +98,10 @@ typedef void(*UspOnTurnEnd)(UspHandle uspHandle, void* context, UspMsgTurnEnd *m
 * A callback function that will be called when an error occurs in handling communication with service.
 * @param uspHandle The UspHandle.
 * @param context A pointer to the application-defined callback context.
-* @param error an error code.
+* @param error A pointer to instance of UspError, containing both the error code
+* and a human-readable description.
 */
-typedef void(*UspOnError)(UspHandle uspHandle, void* context, UspResult error);
+typedef void(*UspOnError)(UspHandle uspHandle, void* context, const UspError* error);
 
 /**
 * A callback function that will be called when a message having a path defined by user is received from service.

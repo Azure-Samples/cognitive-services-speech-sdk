@@ -250,8 +250,8 @@ void CSpxUspRecoEngineAdapter::InitCallbacks(UspCallbacks* pcallbacks)
         CSpxUspRecoEngineAdapter::From(handle, context)->UspOnTurnEnd(message);
     };
 
-    pcallbacks->OnError = [](UspHandle handle, void* context, UspResult error) {
-        SPX_DBG_TRACE_VERBOSE("Response: On Error: 0x%x.\n", error);
+    pcallbacks->OnError = [](UspHandle handle, void* context, const UspError* error) {
+        SPX_DBG_TRACE_VERBOSE("Response: On Error: 0x%x (%s).\n", error->errorCode, error->description);
         CSpxUspRecoEngineAdapter::From(handle, context)->UspOnError(error);
     };
 }
@@ -315,7 +315,7 @@ void CSpxUspRecoEngineAdapter::UspOnTurnEnd(UspMsgTurnEnd *message)
     GetSite()->DoneProcessingAudio(this);
 }
 
-void CSpxUspRecoEngineAdapter::UspOnError(UspResult error)
+void CSpxUspRecoEngineAdapter::UspOnError(const UspError* error)
 {
     SPX_DBG_ASSERT(GetSite());
     GetSite()->Error(this, ErrorPayloadFrom(error));

@@ -190,8 +190,6 @@ UspResult AudioStreamFlush(UspHandle uspHandle)
 // Callback for transport error
 static void TransportErrorHandler(TransportHandle transportHandle, TransportError reason, void* context)
 {
-    UspResult uspError;
-
     (void)transportHandle;
 
     UspContext* uspContext = (UspContext*)context;
@@ -206,26 +204,44 @@ static void TransportErrorHandler(TransportHandle transportHandle, TransportErro
         return;
     }
 
+    UspError error;
+
     switch (reason)
     {
-    default:
-        uspError = USP_TRANSPORT_ERROR_GENERIC;
+    case TRANSPORT_ERROR_NONE:
+        error.errorCode = USP_TRANSPORT_ERROR_GENERIC;
+        error.description = "Unknown transport error.";
         break;
 
     case TRANSPORT_ERROR_AUTHENTICATION:
-        uspError = USP_AUTH_ERROR;
+        error.errorCode = USP_AUTH_ERROR;
+        error.description = "Authentication error (401/403).";
         break;
 
     case TRANSPORT_ERROR_CONNECTION_FAILURE:
+        error.errorCode = USP_CONNECTION_FAILURE;
+        error.description = "Connection failed (no connection to the remote host).";
+        break;
+
     case TRANSPORT_ERROR_DNS_FAILURE:
-        uspError = USP_CONNECTION_FAILURE;
+        error.errorCode = USP_CONNECTION_FAILURE;
+        error.description = "Connection failed (the remote host did not respond).";
         break;
 
     case TRANSPORT_ERROR_REMOTECLOSED:
-        uspError = USP_CONNECTION_REMOTE_CLOSED;
+        error.errorCode = USP_CONNECTION_REMOTE_CLOSED;
+        error.description = "Connection was closed by the remote host.";
+        break;
+
+    default:
+        // TODO # 1134639.
+        assert(false); // fail-fast (for unit-tests).
+        error.errorCode = USP_INVALID_ENUM_VALUE;
+        error.description = "Unknown TransportError enum value.";
+        break;
     }
 
-    uspContext->callbacks->OnError(uspContext, uspContext->callbackContext, uspError);
+    uspContext->callbacks->OnError(uspContext, uspContext->callbackContext, &error);
 }
 
 // Callback for SpeechStartDetected.
