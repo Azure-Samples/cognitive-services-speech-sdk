@@ -9,6 +9,7 @@
 #include <functional>
 #include <list>
 #include <string>
+#include <mutex>
 #include <speechapi_cxx_common.h>
 
 
@@ -34,7 +35,10 @@ public:
     {
     };
 
-    virtual ~EventSignal(){};
+    virtual ~EventSignal()
+    {
+        DisconnectAll();
+    };
 
     using CallbackFunction = std::function<void(T eventArgs)>;
 
@@ -57,7 +61,9 @@ public:
 
     void Connect(CallbackFunction callback)
     {
+        std::unique_lock<std::mutex> lock(m_mutex);
         m_callbacks.push_back(callback);
+
         if (m_callbacks.size() == 1 && m_connectedCallback != nullptr)
         {
             m_connectedCallback(*this);
@@ -66,13 +72,14 @@ public:
 
     void Disconnect(CallbackFunction callback)
     {
+        std::unique_lock<std::mutex> lock(m_mutex);
         auto prevSize = m_callbacks.size();
 
         m_callbacks.remove_if([&](CallbackFunction item) {
             return callback.target_type() == item.target_type(); 
         });
 
-        if (m_callbacks.size() == 0 && prevSize > 0 && m_disconnectedCallback != nullptr)
+        if (m_callbacks.empty() && prevSize > 0 && m_disconnectedCallback != nullptr)
         {
             m_disconnectedCallback(*this);
         }
@@ -80,11 +87,12 @@ public:
 
     void DisconnectAll()
     {
+        std::unique_lock<std::mutex> lock(m_mutex);
         auto prevSize = m_callbacks.size();
 
         m_callbacks.clear();
 
-        if (m_callbacks.size() == 0 && prevSize > 0 && m_disconnectedCallback != nullptr)
+        if (m_callbacks.empty() && prevSize > 0 && m_disconnectedCallback != nullptr)
         {
             m_disconnectedCallback(*this);
         }
@@ -92,6 +100,7 @@ public:
 
     void Signal(T t)
     {
+        std::unique_lock<std::mutex> lock(m_mutex);
         for (auto c3 : m_callbacks)
         {
             c3(t);
@@ -100,10 +109,9 @@ public:
 
     bool IsConnected() const 
     {
-        return m_callbacks.size() > 0;
+        return !m_callbacks.empty();
     };
 
-    
 private:
 
     EventSignal(const EventSignal&) = delete;
@@ -112,6 +120,7 @@ private:
     EventSignal& operator=(const EventSignal&) = delete;
 
     std::list<CallbackFunction> m_callbacks;
+    std::mutex m_mutex;
 
     NotifyCallback_Type m_connectedCallback;
     NotifyCallback_Type m_disconnectedCallback;

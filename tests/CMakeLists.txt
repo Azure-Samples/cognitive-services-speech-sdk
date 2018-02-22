@@ -11,3 +11,4 @@ foreach(script_file ${SCRIPTS})
 endforeach()
 
 add_subdirectory("${SRC_DIR}/core/audio")
+add_subdirectory("${SRC_DIR}/public/cxx_api")

@@ -1728,6 +1728,8 @@ static void WSUnlock(WSIO_INSTANCE *wsio_instance)
 // The lock should be held while calling this function.
 static void WSClose(WSIO_INSTANCE* wsio_instance)
 {
+    // TODO (#1134584): This is a mess! Refactor! 
+    // Better yet, git rid completely, migrate to whatever the official azure-c-shared is using (uWS).
     FUNC_ENTER("Close wsio_instance=0x%x, requestHandle:0x%x", wsio_instance, wsio_instance->request.requestHandle);
     wsio_instance->io_state = IO_STATE_CLOSING;
 

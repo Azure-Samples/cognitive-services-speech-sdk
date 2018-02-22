@@ -22,9 +22,21 @@ const char g_defaultLangValue[] = "en-us";
 const char g_outputDetailedStr[] = "detailed";
 const char g_outputSimpleStr[] = "simple";
 
+inline static void UspShutdown(UspContext* uspContext)
+{
+    Lock(uspContext->uspContextLock);
+    uspContext->callbacks = NULL;
+    uspContext->callbackContext = NULL;
+    (void)TransportShutdown(uspContext);
+    Unlock(uspContext->uspContextLock);
+
+    UspContextDestroy(uspContext);
+}
+
 static int UspEventLoop(void* ptr)
 {
     UspHandle uspHandle = (UspHandle)ptr;
+
     while (1)
     {
         if (UspRun(uspHandle) != USP_STATE_CONNECTED)
@@ -33,6 +45,12 @@ static int UspEventLoop(void* ptr)
         }
         ThreadAPI_Sleep(200);
     }
+
+    // We're done here (somebody called UspClose),
+    // since we're currently on the thread that talks to the transport 
+    // and invoke callbacks (both of which only happens in the while loop above),
+    // it's now safe to close the transport and clean up all resources needed by USP.
+    UspShutdown(uspHandle);
 
     return 0;
 }
@@ -438,21 +456,26 @@ UspResult UspClose(UspHandle uspHandle)
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
 
     Lock(uspHandle->uspContextLock);
-
+    if (uspHandle->state == USP_STATE_SHUTDOWN) {
+        Unlock(uspHandle->uspContextLock);
+        return USP_SUCCESS;
+    }
     uspHandle->state = USP_STATE_SHUTDOWN;
-    uspHandle->callbacks = NULL;
-    uspHandle->callbackContext = NULL;
-    (void)TransportShutdown(uspHandle);
-
     Unlock(uspHandle->uspContextLock);
 
-    if (uspHandle->workThreadHandle != NULL)
+    if (uspHandle->workThreadHandle == NULL) {
+        // work thread was never created, clean up the handle
+        UspContextDestroy(uspHandle);
+    }
+    else
     {
+        // If shutdown was invoked on the worker thread (in a callback), 
+        // setting the state is enough to eventually terminate the 'event loop' 
+        // (whenever the callback completes), so just return from here (join is a no-op).
+        // Otherwise, wait until the worker thread terminates.
         LogInfo("Wait for work thread to complete");
         ThreadAPI_Join(uspHandle->workThreadHandle, NULL);
     }
-
-    UspContextDestroy(uspHandle);
 
     FUNC_RETURN("");
     return USP_SUCCESS;

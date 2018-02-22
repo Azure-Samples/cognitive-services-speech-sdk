@@ -163,8 +163,8 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::WaitForRecognitio
     std::unique_lock<std::mutex> lock(m_mutex);
 
     SPX_DBG_TRACE_VERBOSE("Waiting for Recognition...");
-    m_fRecoAsyncWaiting = true;
-    m_cv.wait_for(lock, std::chrono::seconds(m_recoAsyncTimeout), [&] { return !m_fRecoAsyncWaiting; });
+    m_recoAsyncWaiting = true;
+    m_cv.wait_for(lock, std::chrono::seconds(m_recoAsyncTimeout), [&] { return !m_recoAsyncWaiting; });
     SPX_DBG_TRACE_VERBOSE("Waiting for Recognition... Done!");
 
     if (!m_recoAsyncResult)

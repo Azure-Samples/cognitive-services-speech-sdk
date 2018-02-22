@@ -57,7 +57,7 @@ protected:
     const int m_recoAsyncTimeout = 5;
     const int m_waitForDoneTimeout = 20;
 
-    bool m_fRecoAsyncWaiting;
+    bool m_recoAsyncWaiting;
     std::shared_ptr<ISpxRecognitionResult> m_recoAsyncResult;
 
 

@@ -9,7 +9,7 @@ namespace CARBON_IMPL_NAMESPACE() {
 
 
 CSpxSession::CSpxSession() :
-    m_fRecoAsyncWaiting(false),
+    m_recoAsyncWaiting(false),
     m_sessionId(PAL::CreateGuid())
 {
     SPX_DBG_TRACE_FUNCTION();
@@ -111,8 +111,8 @@ std::shared_ptr<ISpxRecognitionResult> CSpxSession::WaitForRecognition()
 {
     std::unique_lock<std::mutex> lock(m_mutex);
 
-    m_fRecoAsyncWaiting = true;
-    m_cv.wait_for(lock, std::chrono::seconds(m_recoAsyncTimeout), [&] { return !m_fRecoAsyncWaiting; });
+    m_recoAsyncWaiting = true;
+    m_cv.wait_for(lock, std::chrono::seconds(m_recoAsyncTimeout), [&] { return !m_recoAsyncWaiting; });
 
     if (!m_recoAsyncResult) // If we don't have a result, make a 'NoMatch' result
     {
@@ -126,7 +126,7 @@ std::shared_ptr<ISpxRecognitionResult> CSpxSession::WaitForRecognition()
 void CSpxSession::WaitForRecognition_Complete(std::shared_ptr<ISpxRecognitionResult> result)
 {
     std::unique_lock<std::mutex> lock(m_mutex);
-    m_fRecoAsyncWaiting = false;
+    m_recoAsyncWaiting = false;
     m_recoAsyncResult = result;
 
     m_cv.notify_all();
@@ -199,7 +199,7 @@ void CSpxSession::FireResultEvent(const std::wstring& sessionId, std::shared_ptr
 
 void CSpxSession::EnsureFireResultEvent()
 {
-    if (m_fRecoAsyncWaiting)
+    if (m_recoAsyncWaiting)
     {
         auto factory = SpxQueryService<ISpxRecoResultFactory>(this);
         auto noMatchResult = factory->CreateNoMatchResult();

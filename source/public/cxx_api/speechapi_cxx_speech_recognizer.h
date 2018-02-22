@@ -67,22 +67,13 @@ public:
             m_hreco = SPXHANDLE_INVALID;
         }
 
-        if (m_hreco != SPXHANDLE_INVALID)
+        for (auto handle : { &m_hasyncRecognize, &m_hasyncStartContinuous, &m_hasyncStopContinuous }) 
         {
-            ::Recognizer_AsyncHandle_Close(m_hasyncRecognize);
-            m_hasyncRecognize = SPXHANDLE_INVALID;
-        }
-
-        if (m_hreco != SPXHANDLE_INVALID)
-        {
-            ::Recognizer_AsyncHandle_Close(m_hasyncStartContinuous);
-            m_hasyncStartContinuous = SPXHANDLE_INVALID;
-        }
-
-        if (m_hreco != SPXHANDLE_INVALID)
-        {
-            ::Recognizer_AsyncHandle_Close(m_hasyncStopContinuous);
-            m_hasyncStopContinuous = SPXHANDLE_INVALID;
+            if (*handle != SPXHANDLE_INVALID)
+            {
+                ::Recognizer_AsyncHandle_Close(*handle);
+                *handle = SPXHANDLE_INVALID;
+            }
         }
     };
 
