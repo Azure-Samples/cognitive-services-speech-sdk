@@ -2,6 +2,7 @@
 
 #include <future>
 #include <memory>
+#include <functional>
 
 
 template<class T>
@@ -14,7 +15,23 @@ public:
         : m_future(std::make_shared<std::future<T>>(std::move(future)))
     {}
 
+    ~FutureWrapper() = default;
+
     T Get() { return m_future->get(); }
 private:
     std::shared_ptr<std::future<T>> m_future;
 };
+
+template<class T>
+class CallbackWrapper
+{
+public:
+    virtual void operator()(T eventArgs) const = 0;
+
+    virtual ~CallbackWrapper() = default;
+
+    std::function<void(T eventArgs)> GetFunction() 
+    {
+        return std::bind(&CallbackWrapper::operator(), this, std::placeholders::_1);
+    }
+}; 

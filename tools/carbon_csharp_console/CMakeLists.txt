@@ -7,7 +7,6 @@ set(SOURCES "${SRC_DIR}/carbon_csharp_console.cs")
 source_group("Source Files" FILES ${SOURCES})
 
 add_executable(${PROJECT_NAME} carbon_csharp_console.cs)
-set(CSHARP_LIB "carbon_csharp_lib")
 target_link_libraries(${PROJECT_NAME} ${CSHARP_LIB})
 add_dependencies(${PROJECT_NAME} ${CSHARP_LIB})
 

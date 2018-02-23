@@ -1,25 +1,75 @@
-import sys;
+import sys, argparse, time
 
 lib_dir = '${CMAKE_LIBRARY_OUTPUT_DIRECTORY}'
 bin_dir = '${CMAKE_RUNTIME_OUTPUT_DIRECTORY}'
 
-sys.path.append(lib_dir)
-sys.path.append(lib_dir + '/Debug')
-sys.path.append(lib_dir + '/Release')
+if ${TEST_PY_UNIX}:
+    sys.path.append(lib_dir)
+else:
+    sys.path.append(lib_dir + '/Debug')
+    sys.path.append(lib_dir + '/Release')
+    import os
+    os.environ['PATH'] = bin_dir + '/Debug;' + bin_dir + '/Release;' + ';' + os.environ['PATH']
 
-import os
-os.environ['PATH'] = bin_dir + '/Debug;' + bin_dir + '/Release;' + ';' + os.environ['PATH']
+from carbon_py import RecognizerFactory, SessionEventCallback, SpeechRecognitionEventCallback
+# TODO: #1137487
+session_started_cb = SessionEventCallback(lambda event: 
+    _print('In session_started callback: {}'.format(event)))
 
-#sys.path.append('./bindings/python');
+session_stopped_cb = SessionEventCallback(lambda event:
+    _print('In session_stopped callback: {}'.format(event)))
 
+intermediate_result_cb = SpeechRecognitionEventCallback(lambda event:
+        _print('In intermediate_result callback: {}'.format(event)))
 
-import carbon_py
+final_result_cb = SpeechRecognitionEventCallback(lambda event:
+        _print('In final_result callback: {}'.format(event)))
 
-dir(carbon_py)
+no_match_cb = SpeechRecognitionEventCallback(lambda event:
+        _print('In no_match callback: {}'.format(event)))
 
-reco = carbon_py.RecognizerFactory.create_speech_recognizer()
+canceled_cb = SpeechRecognitionEventCallback(lambda event:
+        _print('In Canceled callback'))
 
-future = reco.recognize_async()
-result = future.get() # this is a blocking call
-print()
-print(result.text)
+def test_recognize(filename):
+    result = recognize(filename)
+    assert result
+    assert result.text
+
+def test_recognize_async(filename):
+    result = recognize(filename, True)
+    assert result
+    assert result.text
+
+def _print(x): 
+    new_line_x_3 = '\n'*3
+    horizonal_line = '=' * 100
+    sys.stdout.write('{0}{1}\n{2}\n{1}{0}'.format(new_line_x_3, horizonal_line, x))
+
+def recognize(filename=None, async=False):
+    reco = RecognizerFactory.create_speech_recognizer(filename)
+
+    reco.session_started.connect(session_started_cb)
+    reco.session_stopped.connect(session_stopped_cb)
+    reco.intermediate_result.connect(intermediate_result_cb)
+    reco.final_result.connect(final_result_cb)
+    reco.no_match.connect(no_match_cb)
+    reco.canceled.connect(canceled_cb)
+
+    if not async:
+        _print('Calling recognize()...')
+        return reco.recognize()
+    else:
+        _print('Calling recognize_async()...')
+        future = reco.recognize_async()
+        _print('...recognize_async() in progress...')
+        return future.get();
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--filename')
+    parser.add_argument('--async', action="store_true")
+    args = parser.parse_args()
+
+    result = recognize(args.filename, args.async)
+    _print('Recognition complete: {}'.format(result))

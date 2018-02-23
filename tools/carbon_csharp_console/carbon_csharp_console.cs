@@ -19,7 +19,7 @@ namespace CarbonSamples
                 Environment.Exit(1);
             }
 
-            var speechRecognizer = RecognizerFactory.CreateSpeechRecognizerWithFileInput(args[0]);
+            var speechRecognizer = Carbon.RecognizerFactory.CreateSpeechRecognizerWithFileInput(args[0]);
 
             var result = speechRecognizer.Recognize();
 

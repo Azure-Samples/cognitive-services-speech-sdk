@@ -14,16 +14,16 @@ elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
      set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -Wno-unused-parameter -fPIC")
 endif()
 
-set(CSHARP_BINDING ${PROJECT_NAME}_binding)
+set(CSHARP_BINDINGS ${PROJECT_NAME}_bindings)
 
-set(SWIG_MODULE_${CSHARP_BINDING}_EXTRA_DEPS
+set(SWIG_MODULE_${CSHARP_BINDINGS}_EXTRA_DEPS
     ${SWIG_INTERFACE}
     "${SRC_DIR}/carbon_csharp.i"
     ${SPEECH_C_API_HEADERS}
     ${SPEECH_CXX_API_HEADERS})
 
 # ${SWIG_INTERFACE} should resolve to {repo/root}/bindings/carbon.i
-set(CMAKE_SWIG_FLAGS "")
+set(CMAKE_SWIG_FLAGS -namespace Carbon)
 set_source_files_properties("${SRC_DIR}/carbon_csharp.i" PROPERTIES
     CPLUSPLUS ON)
 
@@ -39,10 +39,10 @@ include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
 include_directories("${SRC_DIR}/..")
 
-swig_add_library(${CSHARP_BINDING} LANGUAGE csharp SOURCES ${SOURCES})
-swig_link_libraries(${CSHARP_BINDING} carbon)
-set_target_properties(${SWIG_MODULE_${CSHARP_BINDING}_REAL_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-set_target_properties(${SWIG_MODULE_${CSHARP_BINDING}_REAL_NAME} PROPERTIES
+swig_add_library(${CSHARP_BINDINGS} LANGUAGE csharp SOURCES ${SOURCES})
+swig_link_libraries(${CSHARP_BINDINGS} carbon)
+set_target_properties(${SWIG_MODULE_${CSHARP_BINDINGS}_REAL_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set_target_properties(${SWIG_MODULE_${CSHARP_BINDINGS}_REAL_NAME} PROPERTIES
     FOLDER bindings/csharp
 )
 
@@ -50,11 +50,11 @@ set_target_properties(${SWIG_MODULE_${CSHARP_BINDING}_REAL_NAME} PROPERTIES
 set(SWIG_CS_SOURCES ${CSHARP_SOURCE_DIRECTORY}/*.cs)
 SET_SOURCE_FILES_PROPERTIES(${SWIG_CS_SOURCES} PROPERTIES GENERATED TRUE)
 
-set(CSHARP_LIB ${PROJECT_NAME}_lib)
+set(CSHARP_LIB ${PROJECT_NAME}_lib CACHE INTERNAL "")
 
 enable_language(CSharp)
 add_library(${CSHARP_LIB} SHARED ${SWIG_CS_SOURCES})
-add_dependencies(${CSHARP_LIB} ${SWIG_MODULE_${CSHARP_BINDING}_REAL_NAME})
+add_dependencies(${CSHARP_LIB} ${CSHARP_BINDINGS} ${SWIG_MODULE_${CSHARP_BINDINGS}_REAL_NAME})
 set_target_properties(${CSHARP_LIB} PROPERTIES
     FOLDER bindings/csharp
 )

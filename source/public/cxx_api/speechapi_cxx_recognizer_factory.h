@@ -14,9 +14,6 @@
 #include <speechapi_c_recognizer_factory.h>
 
 
-using namespace CARBON_NAMESPACE_ROOT::Recognition::Speech;
-using namespace CARBON_NAMESPACE_ROOT::Recognition::Intent;
-
 namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
 
@@ -24,7 +21,7 @@ class RecognizerFactory
 {
 public:
 
-    static std::shared_ptr<SpeechRecognizer> CreateSpeechRecognizer()
+    static std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer()
     {
         SPX_INIT_HR(hr);
 
@@ -36,13 +33,13 @@ public:
 
         SPX_THROW_ON_FAIL(hr);
 
-        return std::make_shared<SpeechRecognizer>(hreco); 
+        return std::make_shared<Speech::SpeechRecognizer>(hreco); 
     }
 
-    static std::shared_ptr<SpeechRecognizer> CreateSpeechRecognizer(bool passiveListeningEnaled) { UNUSED(passiveListeningEnaled); throw nullptr; }
-    static std::shared_ptr<SpeechRecognizer> CreateSpeechRecognizer(const std::wstring& language) { UNUSED(language); throw nullptr; };
+    static std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer(bool passiveListeningEnaled) { UNUSED(passiveListeningEnaled); throw nullptr; }
+    static std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer(const std::wstring& language) { UNUSED(language); throw nullptr; };
 
-    static std::shared_ptr<SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName)
+    static std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName)
     {
         SPX_INIT_HR(hr);
 
@@ -54,23 +51,23 @@ public:
 
         SPX_THROW_ON_FAIL(hr);
 
-        return std::make_shared<SpeechRecognizer>(hreco);
+        return std::make_shared<Speech::SpeechRecognizer>(hreco);
     };
 
-    static std::shared_ptr<SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { UNUSED(fileName); UNUSED(language); throw nullptr; };
+    static std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { UNUSED(fileName); UNUSED(language); throw nullptr; };
 
-    static std::shared_ptr<SpeechRecognizer> CreateDictationRecognizer() { return std::make_shared<SpeechRecognizer>(); }
-    static std::shared_ptr<SpeechRecognizer> CreateDictationRecognizer(bool passiveListeningEnaled) { UNUSED(passiveListeningEnaled); throw nullptr; }
-    static std::shared_ptr<SpeechRecognizer> CreateDictationRecognizer(const std::wstring& language) { UNUSED(language); throw nullptr; };
-    static std::shared_ptr<SpeechRecognizer> CreateDictationRecognizerWithFileInput(const std::wstring& fileName) { UNUSED(fileName); throw nullptr; };
-    static std::shared_ptr<SpeechRecognizer> CreateDictationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { UNUSED(fileName); UNUSED(language); throw nullptr; };
+    static std::shared_ptr<Speech::SpeechRecognizer> CreateDictationRecognizer() { return std::make_shared<Speech::SpeechRecognizer>(); }
+    static std::shared_ptr<Speech::SpeechRecognizer> CreateDictationRecognizer(bool passiveListeningEnaled) { UNUSED(passiveListeningEnaled); throw nullptr; }
+    static std::shared_ptr<Speech::SpeechRecognizer> CreateDictationRecognizer(const std::wstring& language) { UNUSED(language); throw nullptr; };
+    static std::shared_ptr<Speech::SpeechRecognizer> CreateDictationRecognizerWithFileInput(const std::wstring& fileName) { UNUSED(fileName); throw nullptr; };
+    static std::shared_ptr<Speech::SpeechRecognizer> CreateDictationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { UNUSED(fileName); UNUSED(language); throw nullptr; };
 
-    static std::shared_ptr<CARBON_NAMESPACE_ROOT::Recognition::Translation::TranslationRecognizer> CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
+    static std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
     {
-        return std::make_shared<CARBON_NAMESPACE_ROOT::Recognition::Translation::TranslationRecognizer>(sourceLanguage, targetLanguage);
+        return std::make_shared<Translation::TranslationRecognizer>(sourceLanguage, targetLanguage);
     }
 
-    static std::shared_ptr<CARBON_NAMESPACE_ROOT::Recognition::Translation::TranslationRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
+    static std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
     {
         UNUSED(fileName);
         UNUSED(sourceLanguage);
@@ -78,11 +75,11 @@ public:
         throw nullptr;
     }
 
-    static std::shared_ptr<IntentRecognizer> CreateIntentRecognizer() { return std::make_shared<IntentRecognizer>(); }
-    static std::shared_ptr<IntentRecognizer> CreateIntentRecognizer(bool passiveListeningEnaled) { UNUSED(passiveListeningEnaled); throw nullptr; }
-    static std::shared_ptr<IntentRecognizer> CreateIntentRecognizer(const std::wstring& language) { UNUSED(language); throw nullptr; };
-    static std::shared_ptr<IntentRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName) { UNUSED(fileName);  throw nullptr; };
-    static std::shared_ptr<IntentRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { UNUSED(fileName); UNUSED(language); throw nullptr; };
+    static std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizer() { return std::make_shared<Intent::IntentRecognizer>(); }
+    static std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizer(bool passiveListeningEnaled) { UNUSED(passiveListeningEnaled); throw nullptr; }
+    static std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizer(const std::wstring& language) { UNUSED(language); throw nullptr; };
+    static std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName) { UNUSED(fileName);  throw nullptr; };
+    static std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { UNUSED(fileName); UNUSED(language); throw nullptr; };
 
 
 private:
