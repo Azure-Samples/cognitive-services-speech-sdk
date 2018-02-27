@@ -431,6 +431,14 @@ public:
 };
 
 
+class ISpxSessionFromRecognizer : public ISpxInterfaceBaseFor<ISpxSessionFromRecognizer>
+{
+public:
+
+    virtual std::shared_ptr<ISpxSession> GetDefaultSession() = 0;
+};
+
+
 class ISpxRecoEngineAdapter : public ISpxAudioProcessor, public ISpxInterfaceBaseFor<ISpxRecoEngineAdapter>
 {
 };
@@ -497,6 +505,24 @@ public:
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) = 0;
+};
+
+
+class ISpxNamedProperties : public ISpxInterfaceBaseFor<ISpxNamedProperties>
+{
+public:
+
+    virtual std::wstring GetStringValue(const wchar_t* name, const wchar_t* defaultValue = L"") = 0;
+    virtual void SetStringValue(const wchar_t* name, const wchar_t* value) = 0;
+    virtual bool HasStringValue(const wchar_t* name) = 0;
+
+    virtual double GetNumberValue(const wchar_t* name, double defaultValue = 0) = 0;
+    virtual void SetNumberValue(const wchar_t* name, double value) = 0;
+    virtual bool HasNumberValue(const wchar_t* name) = 0;
+
+    virtual bool GetBooleanValue(const wchar_t* name, bool defaultValue = false) = 0;
+    virtual void SetBooleanValue(const wchar_t* name, bool value) = 0;
+    virtual bool HasBooleanValue(const wchar_t* name) = 0;
 };
 
 

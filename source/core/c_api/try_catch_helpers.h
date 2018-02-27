@@ -10,18 +10,33 @@
 #include <speechapi_c_common.h>
 
 
-#define SPXAPI_INIT_TRY(hr)                         \
-{                                                   \
-    SPX_INIT_HR(hr);                                \
+#define SPXAPI_INIT_HR_TRY(hr)                              \
+{                                                           \
+    SPX_INIT_HR(hr);                                        \
     try
-#define SPXAPI_CATCH_AND_RETURN(hr)                 \
-    catch (SPXHR hr)                                \
-    {                                               \
-        SPX_RETURN_HR(hr);                          \
-    }                                               \
-    catch (std::exception ex)                       \
-    {                                               \
-        SPX_RETURN_HR(SPXERR_UNHANDLED_EXCEPTION);  \
-    }                                               \
-    SPX_RETURN_HR(hr);                              \
+
+#define SPXAPI_TRY()                                        \
+{                                                           \
+    try
+
+#define SPXAPI_CATCH(x)                                     \
+    catch (SPXHR hrx)                                       \
+    {                                                       \
+        SPX_REPORT_ON_FAIL(hrx);                            \
+        return x;                                           \
+    }                                                       \
+    catch (std::exception ex)                               \
+    {                                                       \
+        SPX_REPORT_ON_FAIL(SPXERR_UNHANDLED_EXCEPTION);     \
+        return x;                                           \
+    }
+
+#define SPXAPI_CATCH_AND_RETURN_HR(hr)                      \
+    SPXAPI_CATCH(hr);                                       \
+    SPX_RETURN_HR(hr);                                      \
+}
+
+#define SPXAPI_CATCH_AND_RETURN(x)                          \
+    SPXAPI_CATCH(x);                                        \
+    return x;                                               \
 }

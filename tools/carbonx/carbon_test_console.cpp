@@ -2,13 +2,14 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// carbon_test_console.h: Definitions for the CarbonTestConsole tool C++ class
+// carbon_test_console.cpp: Definitions for the CarbonTestConsole tool C++ class
 //
 
 #include "stdafx.h"
 #include "carbon_test_console.h"
 #include "speechapi_c.h"
 #include <chrono>
+#include <string>
 #include <string_utils.h>
 #include <file_utils.h>
 #include <platform.h>
@@ -337,6 +338,10 @@ void CarbonTestConsole::ProcessConsoleInput(const wchar_t* psz)
     {
         ConsoleInput_IntentRecognizer(psz + wcslen(L"intent "), m_intentRecognizer);
     }
+    else if (PAL::wcsnicmp(psz, L"session ", wcslen(L"session ")) == 0)
+    {
+        ConsoleInput_Session(psz + wcslen(L"session "));
+    }
     else if (PAL::wcsnicmp(psz, L"commandsystem ", wcslen(L"commandsystem ")) == 0)
     {
         ConsoleInput_CommandSystem(psz + wcslen(L"commandsystem "));
@@ -355,6 +360,7 @@ void CarbonTestConsole::ConsoleInput_Help()
     ConsoleWriteLine(L"    intent           Access methods/properties/events on the base RECOGNIZER object.");
     ConsoleWriteLine(L"    speech           Access methods/properties/events on the SPEECH recognizer object.");
     ConsoleWriteLine(L"    intent           Access methods/properties/events on the INTENT recognizer object.");
+    ConsoleWriteLine(L"    session          Access methods/properties/events on the SESSION object.");
     ConsoleWriteLine(L"    commandsystem    Access methods/properties/events on the COMMAND SYSTEM object.");
     ConsoleWriteLine(L"    sample {name}    Run the sample named 'NAME'.");
     ConsoleWriteLine(L"    help {command}   Get help w/ 'recognizer', 'speech', 'intent', or 'commandsystem' commands.");
@@ -375,6 +381,10 @@ void CarbonTestConsole::ConsoleInput_HelpOn(const wchar_t* psz)
     else if (PAL::wcsicmp(psz, L"intent") == 0)
     {
         ConsoleInput_HelpOnIntent();
+    }
+    else if (PAL::wcsicmp(psz, L"session") == 0)
+    {
+        ConsoleInput_HelpOnSession();
     }
     else if (PAL::wcsicmp(psz, L"commandsystem") == 0)
     {
@@ -423,6 +433,12 @@ void CarbonTestConsole::ConsoleInput_HelpOnSpeech()
     ConsoleWriteLine(L"    StartContinuous");
     ConsoleWriteLine(L"    StopContinuous");
     ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"    set string         {name} {value}");
+    ConsoleWriteLine(L"    get string         {name}");
+    ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"    set value          {name} {value}");
+    ConsoleWriteLine(L"    get value          {name}");
+    ConsoleWriteLine(L"");
     ConsoleWriteLine(L"  Events: ");
     ConsoleWriteLine(L"");
     ConsoleWriteLine(L"    SessionStarted     {Connect | Disconnect | DisconnectAll}");
@@ -460,6 +476,22 @@ void CarbonTestConsole::ConsoleInput_HelpOnIntent()
     ConsoleWriteLine(L"    FinalResult        {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    NoMatch            {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    Canceled           {Connect | Disconnect | DisconnectAll}");
+    ConsoleWriteLine(L"");
+}
+
+void CarbonTestConsole::ConsoleInput_HelpOnSession()
+{
+    ConsoleWriteLine(L"SESSION {method_command}");
+    ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"  Methods:");
+    ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"    from speech");
+    ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"    set string     {name} {value}");
+    ConsoleWriteLine(L"    get string     {name}");
+    ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"    set value      {name} {value}");
+    ConsoleWriteLine(L"    get value      {name}");
     ConsoleWriteLine(L"");
 }
 
@@ -615,6 +647,30 @@ void CarbonTestConsole::ConsoleInput_SpeechRecognizer(const wchar_t* psz, std::s
         auto fn = std::bind(&CarbonTestConsole::SpeechRecognizer_CanceledHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"canceled "), m_speechRecognizer->Canceled, fn);
     }
+    else if (PAL::wcsnicmp(psz, L"set string ", wcslen(L"set string ")) == 0)
+    {
+        Parameters_SetString(m_speechRecognizer, psz + wcslen(L"set string "));
+    }
+    else if (PAL::wcsnicmp(psz, L"get string ", wcslen(L"get string ")) == 0)
+    {
+        Parameters_GetString(m_speechRecognizer, psz + wcslen(L"get string "));
+    }
+    else if (PAL::wcsnicmp(psz, L"set number ", wcslen(L"set number ")) == 0)
+    {
+        Parameters_SetNumber(m_speechRecognizer, psz + wcslen(L"set number "));
+    }
+    else if (PAL::wcsnicmp(psz, L"get number ", wcslen(L"get number ")) == 0)
+    {
+        Parameters_GetNumber(m_speechRecognizer, psz + wcslen(L"get number "));
+    }
+    else if (PAL::wcsnicmp(psz, L"set bool ", wcslen(L"set bool ")) == 0)
+    {
+        Parameters_SetBool(m_speechRecognizer, psz + wcslen(L"set bool "));
+    }
+    else if (PAL::wcsnicmp(psz, L"get bool ", wcslen(L"get bool ")) == 0)
+    {
+        Parameters_GetBool(m_speechRecognizer, psz + wcslen(L"get bool "));
+    }
     else
     {
         ConsoleWriteLine(L"\nUnknown method/event: '%ls'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
@@ -704,7 +760,7 @@ void CarbonTestConsole::Recognizer_IsEnabled(std::shared_ptr<T>& recognizer)
     auto name = PAL::ToWString(PAL::GetTypeName(*recognizer.get()));
     ConsoleWrite(L"\n%ls.IsEnabled == ", name.c_str());
     bool enabled = recognizer->IsEnabled();
-    ConsoleWriteLine(L"%ls\n", enabled ? L"true" : L"false");
+    ConsoleWriteLine(L"%ls\n", ToString(enabled).c_str());
 }
 
 template <class T>
@@ -716,7 +772,7 @@ void CarbonTestConsole::Recognizer_Enable(std::shared_ptr<T>& recognizer)
     ConsoleWriteLine(L"Enabling %ls... Done!\n", name.c_str());
 
     bool enabled = recognizer->IsEnabled();
-    ConsoleWriteLine(L"%ls.IsEnabled == %ls\n", name.c_str(), enabled ? L"true" : L"false");
+    ConsoleWriteLine(L"%ls.IsEnabled == %ls\n", name.c_str(), ToString(enabled).c_str());
 }
 
 template <class T>
@@ -728,7 +784,7 @@ void CarbonTestConsole::Recognizer_Disable(std::shared_ptr<T>& recognizer)
     ConsoleWriteLine(L"Disabling %ls... Done!\n", name.c_str());
 
     bool enabled = recognizer->IsEnabled();
-    ConsoleWriteLine(L"%ls.IsEnabled == %ls\n", name.c_str(), enabled ? L"true" : L"false");
+    ConsoleWriteLine(L"%ls.IsEnabled == %ls\n", name.c_str(), ToString(enabled).c_str());
 }
 
 template <class T>
@@ -812,6 +868,134 @@ void CarbonTestConsole::Recognizer_Event(const wchar_t* psz, EventSignal<T>& rec
     {
         ConsoleWriteLine(L"\nUnknown event method: '%ls'.\n\nUse 'HELP' for a list of valid commands.", psz);
     }
+}
+
+void CarbonTestConsole::ConsoleInput_Session(const wchar_t* psz)
+{
+    if (PAL::wcsicmp(psz, L"from speech") == 0)
+    {
+        Session_FromSpeechRecognizer();
+    }
+    else if (PAL::wcsnicmp(psz, L"set string ", wcslen(L"set string ")) == 0)
+    {
+        Parameters_SetString(m_session, psz + wcslen(L"set string "));
+    }
+    else if (PAL::wcsnicmp(psz, L"get string ", wcslen(L"get string ")) == 0)
+    {
+        Parameters_GetString(m_session, psz + wcslen(L"get string "));
+    }
+    else if (PAL::wcsnicmp(psz, L"set number ", wcslen(L"set number ")) == 0)
+    {
+        Parameters_SetNumber(m_session, psz + wcslen(L"set number "));
+    }
+    else if (PAL::wcsnicmp(psz, L"get number ", wcslen(L"get number ")) == 0)
+    {
+        Parameters_GetNumber(m_session, psz + wcslen(L"get number "));
+    }
+    else if (PAL::wcsnicmp(psz, L"set bool ", wcslen(L"set bool ")) == 0)
+    {
+        Parameters_SetBool(m_session, psz + wcslen(L"set bool "));
+    }
+    else if (PAL::wcsnicmp(psz, L"get bool ", wcslen(L"get bool ")) == 0)
+    {
+        Parameters_GetBool(m_session, psz + wcslen(L"get bool "));
+    }
+    else
+    {
+        ConsoleWriteLine(L"\nUnknown method/event: '%ls'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
+    }
+}
+
+void CarbonTestConsole::Session_FromSpeechRecognizer()
+{
+    auto name = PAL::ToWString(PAL::GetTypeName(*m_speechRecognizer.get()));
+    ConsoleWriteLine(L"\nGetting Session from %ls...", name.c_str());
+    m_session = Session::FromRecognizer(m_speechRecognizer);
+    ConsoleWriteLine(L"Getting Session from %ls... Done!\n", name.c_str());
+}
+
+template <class T>
+void CarbonTestConsole::Parameters_SetString(std::shared_ptr<T> thingWithParameters, const wchar_t* psz)
+{
+    std::wstring parameters(psz);
+    auto iSpace = parameters.find(L' ');
+    if (iSpace != std::wstring::npos && psz[iSpace + 1] != L'\0')
+    {
+        std::wstring name(psz, iSpace);
+        thingWithParameters->Parameters[name.c_str()] = psz + iSpace + 1;
+        ConsoleWriteLine(L"Set string '%ls' to '%ls'!\n", name.c_str(), psz + iSpace + 1);
+    }
+    else
+    {
+        ConsoleWriteLine(L"\nInvalid usage: '%ls'.\n\nUse 'HELP' for valid usage.\n", psz);
+    }
+}
+
+template <class T>
+void CarbonTestConsole::Parameters_GetString(std::shared_ptr<T> thingWithParameters, const wchar_t* psz)
+{
+    auto value = thingWithParameters->Parameters[psz].GetString();
+    ConsoleWriteLine(L"Get string '%ls' : '%ls'\n", psz, value.c_str());
+}
+
+template <class T>
+void CarbonTestConsole::Parameters_SetNumber(std::shared_ptr<T> thingWithParameters, const wchar_t* psz)
+{
+    std::wstring parameters(psz);
+    auto iSpace = parameters.find(L' ');
+    if (iSpace != std::wstring::npos)
+    {
+        std::wstring name(psz, iSpace);
+        thingWithParameters->Parameters[name.c_str()] = std::stoi(psz + iSpace + 1);
+        ConsoleWriteLine(L"Set number '%ls' to '%ls'!\n", name.c_str(), psz + iSpace + 1);
+    }
+    else
+    {
+        ConsoleWriteLine(L"\nInvalid usage: '%ls'.\n\nUse 'HELP' for valid usage.\n", psz);
+    }
+}
+
+template <class T>
+void CarbonTestConsole::Parameters_GetBool(std::shared_ptr<T> thingWithParameters, const wchar_t* psz)
+{
+    auto value = thingWithParameters->Parameters[psz].GetBool();
+    ConsoleWriteLine(L"Get bool '%ls' : %s\n", psz, ToString(value).c_str());
+}
+
+template <class T>
+void CarbonTestConsole::Parameters_SetBool(std::shared_ptr<T> thingWithParameters, const wchar_t* psz)
+{
+    std::wstring parameters(psz);
+    auto iSpace = parameters.find(L' ');
+    if (iSpace != std::wstring::npos)
+    {
+        std::wstring name(psz, iSpace);
+        bool value = ToBool(psz + iSpace + 1);
+
+        thingWithParameters->Parameters[name.c_str()] = value;
+        ConsoleWriteLine(L"Set number '%ls' to '%ls'!\n", name.c_str(), psz + iSpace + 1);
+    }
+    else
+    {
+        ConsoleWriteLine(L"\nInvalid usage: '%ls'.\n\nUse 'HELP' for valid usage.\n", psz);
+    }
+}
+
+template <class T>
+void CarbonTestConsole::Parameters_GetNumber(std::shared_ptr<T> thingWithParameters, const wchar_t* psz)
+{
+    auto value = thingWithParameters->Parameters[psz].GetNumber();
+    ConsoleWriteLine(L"Get number '%ls' : %d\n", psz, value);
+}
+
+bool CarbonTestConsole::ToBool(const wchar_t* psz)
+{
+    return PAL::wcsicmp(psz, L"true") == 0 || PAL::wcsicmp(psz, L"1") == 0;
+}
+
+std::wstring CarbonTestConsole::ToString(bool f)
+{
+    return f ? L"true" : L"false";
 }
 
 std::wstring CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
@@ -948,6 +1132,7 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
         m_speechRecognizer->IntermediateResult.Connect(fn2);
 
         m_recognizer = BaseAsyncRecognizer::From(m_speechRecognizer);
+        m_session = Session::FromRecognizer(m_speechRecognizer);
     }
     else if (recognizerType == PAL::GetTypeName<TranslationRecognizer>())
     {

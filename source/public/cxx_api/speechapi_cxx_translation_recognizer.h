@@ -128,7 +128,6 @@ public:
     * @param requireVoiceOutput: The translation result includes translated audio of the final translation text.
     */
     TranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage) :
-        AsyncRecognizer(m_speechRecoParameters),
         OnTranslationAudioResult(m_onTranslationAudioResult),
         OnTranslationError(m_onTranslationError)
     {
@@ -202,8 +201,6 @@ private:
 
     EventSignal<const TranslationEventArgs<AudioResult>&> m_onTranslationAudioResult;
     EventSignal<const TranslationEventArgs<TranslationResult>&> m_onTranslationError;
-
-    RecognizerParameters m_speechRecoParameters;
 };
 
 

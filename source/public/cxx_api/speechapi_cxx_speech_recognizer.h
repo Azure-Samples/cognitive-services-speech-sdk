@@ -15,9 +15,14 @@
 #include <speechapi_cxx_recognition_async_recognizer.h>
 #include <speechapi_cxx_speech_recognition_eventargs.h>
 #include <speechapi_cxx_speech_recognition_result.h>
+#include <speechapi_cxx_recognizer_parameter_collection.h>
 
 
 namespace CARBON_NAMESPACE_ROOT {
+
+class Session;
+
+
 namespace Recognition {
 namespace Speech {
 
@@ -27,7 +32,7 @@ class SpeechRecognizer final : virtual public AsyncRecognizer<SpeechRecognitionR
 public:
 
     SpeechRecognizer() : 
-        AsyncRecognizer(m_recoParameters),
+        Parameters(SPXHANDLE_INVALID),
         m_hreco(SPXHANDLE_INVALID),
         m_hasyncRecognize(SPXHANDLE_INVALID),
         m_hasyncStartContinuous(SPXHANDLE_INVALID),
@@ -37,7 +42,7 @@ public:
     };
 
     SpeechRecognizer(const std::wstring& language) : 
-        AsyncRecognizer(m_recoParameters),
+        Parameters(SPXHANDLE_INVALID),
         m_hreco(SPXHANDLE_INVALID),
         m_hasyncRecognize(SPXHANDLE_INVALID),
         m_hasyncStartContinuous(SPXHANDLE_INVALID),
@@ -48,7 +53,7 @@ public:
     };
 
     SpeechRecognizer(SPXRECOHANDLE hreco) :
-        AsyncRecognizer(m_recoParameters),
+        Parameters(hreco),
         m_hreco(hreco),
         m_hasyncRecognize(SPXHANDLE_INVALID),
         m_hasyncStartContinuous(SPXHANDLE_INVALID),
@@ -148,6 +153,8 @@ public:
 
         return future;
     };
+
+    CARBON_NAMESPACE_ROOT::Recognition::RecognizerParameterCollection Parameters;
 
 
 protected:
@@ -254,12 +261,12 @@ private:
 
     SpeechRecognizer& operator=(const SpeechRecognizer&) = delete;
 
+    friend class CARBON_NAMESPACE_ROOT::Session;
+
     SPXRECOHANDLE m_hreco;
     SPXASYNCHANDLE m_hasyncRecognize;
     SPXASYNCHANDLE m_hasyncStartContinuous;
     SPXASYNCHANDLE m_hasyncStopContinuous;
-
-    RecognizerParameters m_recoParameters; 
 };
 
 

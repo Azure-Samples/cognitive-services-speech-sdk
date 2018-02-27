@@ -4,6 +4,7 @@
 #include <memory>
 #include "asyncop.h"
 #include "ispxinterfaces.h"
+#include "named_properties_impl.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -12,6 +13,8 @@ namespace CARBON_IMPL_NAMESPACE() {
 class CSpxRecognizer :
     public ISpxRecognizer,
     public ISpxRecognizerEvents,
+    public ISpxNamedPropertiesImpl,
+    public ISpxSessionFromRecognizer,
     public ISpxObjectWithSiteInitImpl<ISpxRecognizerSite>
 {
 public:
@@ -32,6 +35,10 @@ public:
     CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync() override;
     CSpxAsyncOp<void> StartContinuousRecognitionAsync() override;
     CSpxAsyncOp<void> StopContinuousRecognitionAsync() override;
+
+    // --- ISpxSessionFromRecognizer
+
+    std::shared_ptr<ISpxSession> GetDefaultSession() override;
 
     // --- ISpxRecognizerEvents
 

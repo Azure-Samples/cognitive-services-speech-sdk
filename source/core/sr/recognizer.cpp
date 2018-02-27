@@ -63,6 +63,12 @@ CSpxAsyncOp<void> CSpxRecognizer::StopContinuousRecognitionAsync()
     return m_defaultSession->StopContinuousRecognitionAsync();
 }
 
+std::shared_ptr<ISpxSession> CSpxRecognizer::GetDefaultSession()
+{
+    EnsureDefaultSession();
+    return m_defaultSession;
+}
+
 void CSpxRecognizer::FireSessionStarted(const std::wstring& sessionId)
 {
     SPX_DBG_ASSERT(GetSite());

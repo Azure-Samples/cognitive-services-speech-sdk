@@ -48,8 +48,7 @@ void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
 
     m_audioPump = std::dynamic_pointer_cast<ISpxAudioPump>(pumpInit);
 
-    // And finally ... init the reco engine adapter
-    InitRecoEngineAdapter();
+    // Defer calling InitRecoEngineAdapter() until later ... (see ::EnsureInitRecoEngineAdapter())
 }
 
 void CSpxAudioStreamSession::InitFromMicrophone()
@@ -59,12 +58,13 @@ void CSpxAudioStreamSession::InitFromMicrophone()
     // Create the microphone pump
     m_audioPump = Microphone::Create();
 
-    // And finally ... init the reco engine adapter
-    InitRecoEngineAdapter();
+    // Defer calling InitRecoEngineAdapter() until later ... (see ::EnsureInitRecoEngineAdapter())
 }
 
 void CSpxAudioStreamSession::SetFormat(WAVEFORMATEX* pformat)
 {
+    EnsureInitRecoEngineAdapter();
+
     SPX_DBG_TRACE_VERBOSE_IF(pformat == nullptr, "%s - pformat == nullptr", __FUNCTION__);
     SPX_DBG_TRACE_VERBOSE_IF(pformat != nullptr, "%s\n  wFormatTag:      %s\n  nChannels:       %d\n  nSamplesPerSec:  %d\n  nAvgBytesPerSec: %d\n  nBlockAlign:     %d\n  wBitsPerSample:  %d\n  cbSize:          %d",
         __FUNCTION__,
@@ -110,6 +110,8 @@ void CSpxAudioStreamSession::SetFormat(WAVEFORMATEX* pformat)
 
 void CSpxAudioStreamSession::ProcessAudio(AudioData_Type data, uint32_t size)
 {
+    SPX_DBG_ASSERT(m_adapter != nullptr);
+
     if (IsState(SessionState::ProcessingAudio))
     {
         // SPX_DBG_TRACE_VERBOSE("%s - size=%d", __FUNCTION__, size);
@@ -319,6 +321,15 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateNoMatchResu
     initResult->InitNoMatch();
 
     return result;
+}
+
+void CSpxAudioStreamSession::EnsureInitRecoEngineAdapter()
+{
+    if (m_adapter == nullptr)
+    {
+        std::unique_lock<std::mutex> lock(m_mutex);
+        InitRecoEngineAdapter();
+    }
 }
 
 void CSpxAudioStreamSession::InitRecoEngineAdapter()

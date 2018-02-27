@@ -56,6 +56,7 @@ set(SPEECH_C_API_HEADERS
     "${CARBON_C_API}/speechapi_c_recognizer.h"
     "${CARBON_C_API}/speechapi_c_recognizer_factory.h"
     "${CARBON_C_API}/speechapi_c_result.h"
+    "${CARBON_C_API}/speechapi_c_session.h"
     "${CARBON_C_API}/spxdebug.h"
     "${CARBON_C_API}/spxerror.h"
     )
@@ -65,12 +66,16 @@ set(SPEECH_CXX_API_HEADERS
     "${CARBON_CXX_API}/speechapi_cxx_common.h"
     "${CARBON_CXX_API}/speechapi_cxx_eventargs.h"
     "${CARBON_CXX_API}/speechapi_cxx_eventsignal.h"
+    "${CARBON_CXX_API}/speechapi_cxx_parameter.h"
     "${CARBON_CXX_API}/speechapi_cxx_recognition_async_recognizer.h"
     "${CARBON_CXX_API}/speechapi_cxx_recognition_base_async_recognizer.h"
     "${CARBON_CXX_API}/speechapi_cxx_recognition_eventargs.h"
     "${CARBON_CXX_API}/speechapi_cxx_recognition_result.h"
+    "${CARBON_CXX_API}/speechapi_cxx_recognizer_parameter_collection.h"
     "${CARBON_CXX_API}/speechapi_cxx_recognizer.h"
     "${CARBON_CXX_API}/speechapi_cxx_recognizer_factory.h"
+    "${CARBON_CXX_API}/speechapi_cxx_session_parameter_collection.h"
+    "${CARBON_CXX_API}/speechapi_cxx_session.h"
     "${CARBON_CXX_API}/speechapi_cxx_session_eventargs.h"
     "${CARBON_CXX_API}/speechapi_cxx_speech_recognition_eventargs.h"
     "${CARBON_CXX_API}/speechapi_cxx_speech_recognition_result.h"
@@ -81,7 +86,6 @@ set(SPEECH_CXX_API_HEADERS
     "${CARBON_CXX_API}/speechapi_cxx_todo.h"
     "${CARBON_CXX_API}/speechapi_cxx_todo_intent.h"
     "${CARBON_CXX_API}/speechapi_cxx_todo_recognition.h"
-    "${CARBON_CXX_API}/speechapi_cxx_todo_session.h"
     )
 
 

@@ -1,3 +1,10 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// speechapi_c_recognizer_factory.cpp: Definitions for RecognizerFactory related C methods
+//
+
 #include "stdafx.h"
 
 
@@ -6,14 +13,14 @@ using namespace CARBON_IMPL_NAMESPACE();
 
 SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_Defaults(SPXRECOHANDLE* phreco)
 {
-    SPXAPI_INIT_TRY(hr)
+    SPXAPI_INIT_HR_TRY(hr)
     {
         *phreco = SPXHANDLE_INVALID;
         auto recognizer = CSpxRecognizerFactory::CreateSpeechRecognizer();
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }
-    SPXAPI_CATCH_AND_RETURN(hr);
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_Language(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage)
@@ -25,14 +32,14 @@ SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_Language(SPXRECOHANDLE* phr
 
 SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_FileInput(SPXRECOHANDLE* phreco, const wchar_t* pszFileName)
 {
-    SPXAPI_INIT_TRY(hr)
+    SPXAPI_INIT_HR_TRY(hr)
     {
         *phreco = SPXHANDLE_INVALID;
         auto recognizer = CSpxRecognizerFactory::CreateSpeechRecognizerWithFileInput(pszFileName);
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }
-    SPXAPI_CATCH_AND_RETURN(hr);
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_PassiveListening(SPXRECOHANDLE* phreco, bool passive)

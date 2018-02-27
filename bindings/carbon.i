@@ -151,6 +151,7 @@
 // Process symbols in header
 %include <speechapi_cxx_eventargs.h>
 %include <speechapi_cxx_eventsignal.h>
+%include <speechapi_cxx_parameter.h>
 
 %include <speechapi_cxx_session_eventargs.h>
 
@@ -163,6 +164,7 @@
 %template(SessionEventSignal) Carbon::EventSignal<const Carbon::SessionEventArgs&>;
 %template(RecognitionEventSignal) Carbon::EventSignal<const Carbon::Recognition::RecognitionEventArgs&>;
 
+%include <speechapi_cxx_recognizer_parameter_collection.h>
 %include <speechapi_cxx_recognizer.h>
 %include <speechapi_cxx_recognition_async_recognizer.h>
 
@@ -187,7 +189,9 @@
 %ignore Carbon::Recognition::RecognizerFactory::CreateTranslationRecognizerWithFileInput;
 %include <speechapi_cxx_recognizer_factory.h>
 
-%include <speechapi_cxx_todo_session.h>
+%include <speechapi_cxx_session_parameter_collection.h>
+%include <speechapi_cxx_session.h>
+
 %include <speechapi_cxx_todo_recognition.h>
 
 //%include <speechapi_cxx_translation_eventargs.h>

@@ -57,3 +57,4 @@ ipch/
 # external serialport and macro_util_h_generator obj directorys
 external/azure-c-shared-utility/testtools/SerialPort/SerialPort/obj/**/*
 external/azure-c-shared-utility/tools/macro_utils_h_generator/obj/**/*
+build**/*

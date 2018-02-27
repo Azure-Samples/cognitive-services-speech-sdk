@@ -10,7 +10,8 @@
 typedef unsigned int SPXHR;
 
 #define SPX_NOERROR                 0x00000000
-#define SPX_INIT_HR(hr)             SPXHR hr = SPX_NOERROR
+#define SPX_INIT_HR(hr)             SPXHR hr = SPX_NOERROR; \
+                                    (void)(hr)
 
 #define SPX_SUCCEEDED(x)            ((x & 0x80000000) == 0)
 #define SPX_FAILED(x)               (!SPX_SUCCEEDED(x))   

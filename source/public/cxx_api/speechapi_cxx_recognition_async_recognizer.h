@@ -23,8 +23,7 @@ class AsyncRecognizer : public Recognizer
 {
 public:
 
-    AsyncRecognizer(RecognizerParameters& parameters) throw() :
-        Recognizer(parameters),
+    AsyncRecognizer() throw() :
         SessionStarted(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
         SessionStopped(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
         SoundStarted(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
@@ -54,8 +53,6 @@ public:
     EventSignal<const RecoEventArgs&> Canceled;
 
 protected:
-
-    AsyncRecognizer() {};
 
     virtual void RecoEventConnectionsChanged(const EventSignal<const RecoEventArgs&>& recoEvent) { UNUSED(recoEvent); };
     virtual void SessionEventConnectionsChanged(const EventSignal<const SessionEventArgs&>& sessionEvent) { UNUSED(sessionEvent); };

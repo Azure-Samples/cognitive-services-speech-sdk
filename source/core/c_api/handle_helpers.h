@@ -17,34 +17,24 @@ template<class handle_type, class ptr_type>
 bool Handle_IsValid(handle_type handle)
 {
     bool fIsValid = false;
-    
-    try
+    SPXAPI_TRY()
     {
         auto handletable = CSpxSharedPtrHandleTableManager::Get<ptr_type, handle_type>();
         fIsValid = handletable->IsTracked(handle);
     }
-    catch (SPXHR hr)
-    {
-        SPX_REPORT_ON_FAIL(hr);
-    }
-    catch (std::exception ex)
-    {
-        SPX_REPORT_ON_FAIL(SPXERR_UNHANDLED_EXCEPTION);
-    }
-
-    return fIsValid;
+    SPXAPI_CATCH_AND_RETURN(fIsValid);
 }
 
 
 template<class handle_type, class ptr_type>
 SPXHR Handle_Close(handle_type handle)
 {
-    SPXAPI_INIT_TRY(hr)
+    SPXAPI_INIT_HR_TRY(hr)
     {
         auto handletable = CSpxSharedPtrHandleTableManager::Get<ptr_type, handle_type>();
         handletable->StopTracking(handle);
     }
-    SPXAPI_CATCH_AND_RETURN(hr);
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 

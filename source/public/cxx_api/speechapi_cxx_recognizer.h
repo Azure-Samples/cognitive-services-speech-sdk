@@ -19,18 +19,12 @@ class Recognizer
 {
 public:
 
-    virtual ~Recognizer() {};
-
-    RecognizerParameters& Parameters;
+    Recognizer() {}
+    virtual ~Recognizer() {}
 
     virtual bool IsEnabled() = 0;
     virtual void Enable() = 0;
     virtual void Disable() = 0;
-
-
-protected:
-
-    Recognizer(RecognizerParameters &parameters) : Parameters(parameters) {};
 
 
 private:
@@ -39,6 +33,7 @@ private:
     Recognizer(const Recognizer&&) = delete;
 
     Recognizer& operator=(const Recognizer&) = delete;
+    Recognizer& operator=(const Recognizer&&) = delete;
 };
 
 

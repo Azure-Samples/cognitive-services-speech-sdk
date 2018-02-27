@@ -23,8 +23,12 @@ EXPORTS
 	Recognizer_EventHandle_Close
 	Recognizer_EventHandle_IsValid
 	Recognizer_FinalResult_SetEventCallback
+	Recognizer_GetParameter_Bool
+	Recognizer_HasParameter_Bool
 	Recognizer_GetParameter_Int32
+	Recognizer_HasParameter_Int32
 	Recognizer_GetParameter_String
+	Recognizer_HasParameter_String
 	Recognizer_Handle_Close
 	Recognizer_IntermediateResult_SetEventCallback
 	Recognizer_IsEnabled
@@ -38,6 +42,7 @@ EXPORTS
 	Recognizer_SessionEvent_GetSessionId
 	Recognizer_SessionStarted_SetEventCallback
 	Recognizer_SessionStopped_SetEventCallback
+	Recognizer_SetParameter_Bool
 	Recognizer_SetParameter_Int32
 	Recognizer_SetParameter_String
 	Recognizer_SoundStarted_SetEventCallback
@@ -67,3 +72,15 @@ EXPORTS
 	Result_Payload_TryGetByIndex_String
 	Result_Payload_TryGetByName_Int32
 	Result_Payload_TryGetByName_String
+	Session_From_Recognizer
+	Session_Handle_IsValid
+	Session_Handle_Close
+	Session_SetParameter_String
+	Session_GetParameter_String
+	Session_HasParameter_String
+	Session_SetParameter_Int32
+	Session_GetParameter_Int32
+	Session_HasParameter_Int32
+	Session_SetParameter_Bool
+	Session_GetParameter_Bool
+	Session_HasParameter_Bool

@@ -18,7 +18,7 @@ class IntentRecognizer : virtual public AsyncRecognizer<int, int>
 {
 public:
 
-    IntentRecognizer() : AsyncRecognizer(m_parameters) { throw nullptr; };
+    IntentRecognizer() : AsyncRecognizer() { throw nullptr; };
     virtual ~IntentRecognizer() = default;
 
     bool IsEnabled() override { throw nullptr; }
@@ -28,10 +28,6 @@ public:
     std::future<std::shared_ptr<int>> RecognizeAsync() override { throw nullptr; };
     std::future<void> StartContinuousRecognitionAsync() override { throw nullptr; };
     std::future<void> StopContinuousRecognitionAsync() override { throw nullptr; };
-
-private:
-
-    RecognizerParameters m_parameters;
 };
 
 

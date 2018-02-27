@@ -7,6 +7,7 @@
 
 #pragma once
 #include "spxcore_common.h"
+#include "named_properties_impl.h"
 #include "service_helpers.h"
 #include "session.h"
 
@@ -22,7 +23,8 @@ class CSpxAudioStreamSession : public CSpxSession,
     public ISpxRecoResultFactory,
     public ISpxEventArgsFactory,
     public ISpxAudioStreamSessionInit, 
-    public ISpxAudioProcessor
+    public ISpxAudioProcessor,
+    public ISpxNamedPropertiesImpl
 {
 public:
 
@@ -95,6 +97,7 @@ private:
 
     CSpxAudioStreamSession& operator=(const CSpxAudioStreamSession&) = delete;
 
+    void EnsureInitRecoEngineAdapter();
     void InitRecoEngineAdapter();
 
     enum SessionState { Idle, StartingPump, ProcessingAudio, StoppingPump, WaitingForAdapterDone };

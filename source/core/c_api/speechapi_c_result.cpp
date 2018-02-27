@@ -1,3 +1,10 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// speechapi_c_result.cpp: Public API definitions for Result related C methods
+//
+
 #include "stdafx.h"
 #include "string_utils.h"
 
@@ -9,7 +16,7 @@ SPXAPI Result_GetResultId(SPXRESULTHANDLE hresult, wchar_t* pszResultId, uint32_
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, cchResultId == 0);
 
-    SPXAPI_INIT_TRY(hr)
+    SPXAPI_INIT_HR_TRY(hr)
     {
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
@@ -18,7 +25,7 @@ SPXAPI Result_GetResultId(SPXRESULTHANDLE hresult, wchar_t* pszResultId, uint32_
         auto pszActual = strActual.c_str();
         PAL::wcscpy(pszResultId, cchResultId, pszActual, strActual.size(), true);
     }
-    SPXAPI_CATCH_AND_RETURN(hr);
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 SPXAPI Result_GetRecognitionReason(SPXRESULTHANDLE hresult, Result_RecognitionReason* preason)
@@ -31,20 +38,20 @@ SPXAPI Result_GetRecognitionReason(SPXRESULTHANDLE hresult, Result_RecognitionRe
 
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, preason == nullptr);
 
-    SPXAPI_INIT_TRY(hr)    
+    SPXAPI_INIT_HR_TRY(hr)    
     {
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
         *preason = (Result_RecognitionReason)result->GetReason();
     }
-    SPXAPI_CATCH_AND_RETURN(hr);
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 SPXAPI Result_GetText(SPXRESULTHANDLE hresult, wchar_t* pszText, uint32_t cchText)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, cchText == 0);
 
-    SPXAPI_INIT_TRY(hr)    
+    SPXAPI_INIT_HR_TRY(hr)    
     {
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
@@ -53,7 +60,7 @@ SPXAPI Result_GetText(SPXRESULTHANDLE hresult, wchar_t* pszText, uint32_t cchTex
         auto pszActual = strActual.c_str();
         PAL::wcscpy(pszText, cchText, pszActual, strActual.size(), true);
     }
-    SPXAPI_CATCH_AND_RETURN(hr);
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 SPXAPI Result_Payload_GetCount(SPXRESULTHANDLE hresult, uint32_t* pcount)

@@ -7,11 +7,13 @@
 
 #pragma once
 
+
 using namespace CARBON_NAMESPACE_ROOT;
 using namespace CARBON_NAMESPACE_ROOT::Recognition;
 using namespace CARBON_NAMESPACE_ROOT::Recognition::Speech;
 using namespace CARBON_NAMESPACE_ROOT::Recognition::Intent;
 using namespace CARBON_NAMESPACE_ROOT::Recognition::Translation;
+
 
 class CarbonTestConsole
 {
@@ -68,6 +70,7 @@ private:
     void ConsoleInput_HelpOnRecognizer();
     void ConsoleInput_HelpOnSpeech();
     void ConsoleInput_HelpOnIntent();
+    void ConsoleInput_HelpOnSession();
     void ConsoleInput_HelpOnCommandSystem();
 
     void ConsoleInput_Recognizer(const wchar_t* psz, std::shared_ptr<BaseAsyncRecognizer>& recognizer);
@@ -122,10 +125,35 @@ private:
     void IntentRecognizer_NoMatchHandler(const int& e) { UNUSED(e); };
     void IntentRecognizer_CanceledHandler(const int& e) { UNUSED(e); };
 
+    bool ToBool(const wchar_t* psz);
+
+    std::wstring ToString(bool f);
     std::wstring ToString(const SpeechRecognitionEventArgs& e);
     std::wstring ToString(const TranslationEventArgs<TranslationTextResult>& e);
     std::wstring ToString(const TranslationEventArgs<AudioResult>& e);
     std::wstring ToString(const TranslationEventArgs<TranslationResult>& e);
+
+    void ConsoleInput_Session(const wchar_t*);
+
+    void Session_FromSpeechRecognizer();
+
+    template <class T>
+    void Parameters_SetString(std::shared_ptr<T> thingWithParameters, const wchar_t* psz);
+
+    template <class T>
+    void Parameters_GetString(std::shared_ptr<T> thingWithParameters, const wchar_t* psz);
+
+    template <class T>
+    void Parameters_SetNumber(std::shared_ptr<T> thingWithParameters, const wchar_t* psz);
+
+    template <class T>
+    void Parameters_GetNumber(std::shared_ptr<T> thingWithParameters, const wchar_t* psz);
+
+    template <class T>
+    void Parameters_SetBool(std::shared_ptr<T> thingWithParameters, const wchar_t* psz);
+
+    template <class T>
+    void Parameters_GetBool(std::shared_ptr<T> thingWithParameters, const wchar_t* psz);
 
     void ConsoleInput_CommandSystem(const wchar_t* psz);
 
@@ -157,5 +185,6 @@ private:
     std::shared_ptr<SpeechRecognizer> m_speechRecognizer;
     std::shared_ptr<TranslationRecognizer> m_translationRecognizer;
     std::shared_ptr<IntentRecognizer> m_intentRecognizer;
+    std::shared_ptr<Session> m_session;
     void* m_commandSystem = nullptr;
 };

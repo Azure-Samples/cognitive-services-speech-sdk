@@ -21,6 +21,7 @@ set(SOURCES
     "${SRC_DIR}/speechapi_c_recognizer.cpp"
     "${SRC_DIR}/speechapi_c_recognizer_factory.cpp"
     "${SRC_DIR}/speechapi_c_result.cpp"
+    "${SRC_DIR}/speechapi_c_session.cpp"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})

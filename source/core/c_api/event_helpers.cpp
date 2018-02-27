@@ -7,7 +7,7 @@ namespace CARBON_IMPL_NAMESPACE() {
 
 SPXAPI_PRIVATE Recognizer_SessionEvent_SetCallback(ISpxRecognizerEvents::SessionEvent_Type ISpxRecognizerEvents::*psessionEvent, SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext)
 {
-    SPXAPI_INIT_TRY(hr)
+    SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         auto recognizer = (*recohandles)[hreco];
@@ -26,12 +26,12 @@ SPXAPI_PRIVATE Recognizer_SessionEvent_SetCallback(ISpxRecognizerEvents::Session
             (pISpxRecognizerEvents->*psessionEvent).Connect(pfn);
         }
     }
-    SPXAPI_CATCH_AND_RETURN(hr);
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 SPXAPI_PRIVATE Recognizer_RecoEvent_SetCallback(ISpxRecognizerEvents::RecoEvent_Type ISpxRecognizerEvents::*precoEvent, SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext)
 {
-    SPXAPI_INIT_TRY(hr)
+    SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         auto recognizer = (*recohandles)[hreco];
@@ -50,7 +50,7 @@ SPXAPI_PRIVATE Recognizer_RecoEvent_SetCallback(ISpxRecognizerEvents::RecoEvent_
             (pISpxRecognizerEvents->*precoEvent).Connect(pfn);
         }
     }
-    SPXAPI_CATCH_AND_RETURN(hr);
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 

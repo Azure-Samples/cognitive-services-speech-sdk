@@ -14,6 +14,7 @@ set(HEADERS
     "${INC_DIR}/factory_helpers.h"
     "${INC_DIR}/guid_utils.h"
     "${INC_DIR}/handle_table.h"
+    "${INC_DIR}/named_properties_impl.h"
     "${INC_DIR}/resource_manager.h"
     "${INC_DIR}/service_helpers.h"
     "${INC_DIR}/service_provider_impl.h"
