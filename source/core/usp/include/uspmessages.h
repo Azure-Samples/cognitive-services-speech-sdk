@@ -10,6 +10,7 @@
 extern "C" {
 #endif
 
+#include "iobuffer.h"
 #include <stdint.h>
 #include <wchar.h>
 
@@ -75,6 +76,17 @@ typedef struct _UspMsgSpeechEndDetected
 {
     UspOffsetType offset;
 } UspMsgSpeechEndDetected;
+
+/**
+ * Represents that the start of an audio stream has been received.
+ */
+typedef struct _UspMsgAudioStreamStart
+{
+    // Whenever a chunk in the audio stream is received, it is appended to this ioBuffer.
+    // Reading in a data chunk of size 0, or checking the ioBuffer->hasCompleted flag indicates
+    // that the buffer has finished receiving new data.
+    IOBUFFER* ioBuffer;
+} UspMsgAudioStreamStart;
 
 /**
  * Represents turn.start message

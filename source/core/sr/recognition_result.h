@@ -17,9 +17,9 @@ public:
 
     // --- ISpxRecognitionResult
 
-    std::wstring GetResultId();
-    std::wstring GetText();
-    enum Reason GetReason();
+    std::wstring GetResultId() override;
+    std::wstring GetText() override;
+    enum Reason GetReason() override;
 
     // --- ISpxRecognitionResultInit
 

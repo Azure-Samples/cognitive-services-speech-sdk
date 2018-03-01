@@ -206,7 +206,6 @@ typedef enum incomingMsgType
     speechHypothesis,
     speechEndDetected,
     speechPhrase,
-    response,
     audio,
     turnEnd,
     countOfMsgTypes

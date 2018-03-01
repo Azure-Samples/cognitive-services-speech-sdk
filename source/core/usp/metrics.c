@@ -96,7 +96,6 @@ static void initialize_message_name_array()
     speechMsgNames[speechHypothesis] = g_messagePathSpeechHypothesis;
     speechMsgNames[speechEndDetected] = g_messagePathSpeechEndDetected;
     speechMsgNames[speechPhrase] = g_messagePathSpeechPhrase;
-    speechMsgNames[response] = g_messagePathResponse;
     speechMsgNames[audio] = kRcvd_msg_audio_key;
     speechMsgNames[turnEnd] = g_messagePathTurnEnd;
 }
@@ -203,10 +202,6 @@ static PROPERTYBAG_HANDLE getReceivedMsgJsonArray(const char *arrayName)
     if (!strcmp(arrayName, g_messagePathSpeechPhrase))
     {
         return initialize_jsonArray(&current_telemetry_object->receivedMsgsJsonArray[speechPhrase]);
-    }
-    if (!strcmp(arrayName, g_messagePathResponse))
-    {
-        return initialize_jsonArray(&current_telemetry_object->receivedMsgsJsonArray[response]);
     }
     if (!strcmp(arrayName, kRcvd_msg_audio_key))
     {

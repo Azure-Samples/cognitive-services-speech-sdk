@@ -435,7 +435,7 @@ static int OnStreamChunk(TransportStream* stream, const uint8_t* buffer, size_t 
     }
     else if (stream->bufferSize > 0 && NULL != stream->contentType)
     {
-        IoBufferWrite(stream->ioBuffer, 0, 0, 0); // mark buffer completed
+        IoBufferWrite(stream->ioBuffer, NULL, 0, 0); // mark buffer completed
         IoBufferDelete(stream->ioBuffer);
         stream->ioBuffer = 0;
         stream->bufferSize = 0;

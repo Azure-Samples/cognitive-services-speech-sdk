@@ -10,6 +10,9 @@
 #include <string.h>
 
 #include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/lock.h"
+#include "azure_c_shared_utility/condition.h"
+#include "azure_c_shared_utility/buffer_.h"
 #include "iobuffer.h"
 
 IOBUFFER* IoBufferNew()
@@ -75,7 +78,7 @@ void IoBufferReset(IOBUFFER* buffer)
     {
         buffer->readBytes = 0;
         buffer->hasNewCome = 1;
-        buffer->completedBytes = 1;
+        buffer->hasCompleted = 1;
         buffer->totalBytes = 0;
         Condition_Post(buffer->dataConditionHandle);
         while (buffer->activeReaders > 0)
@@ -88,7 +91,7 @@ void IoBufferReset(IOBUFFER* buffer)
     }
 
     buffer->readBytes = 0;
-    buffer->completedBytes = 0;
+    buffer->hasCompleted = 0;
     buffer->totalBytes = 0;
     buffer->hasNewCome = 0;
     Unlock(buffer->lockerHandle);
@@ -98,7 +101,7 @@ int IoBufferGetTotalBytes(IOBUFFER* buffer)
 {
     int ret = 0;
     Lock(buffer->lockerHandle);
-    ret = buffer->completedBytes ? buffer->totalBytes : -1;
+    ret = buffer->hasCompleted ? buffer->totalBytes : -1;
     Unlock(buffer->lockerHandle);
     return ret;
 }
@@ -133,7 +136,7 @@ static int IoBufferReadInternal(IOBUFFER* buffer, void* targetBuffer, int offset
     COND_RESULT waitret = COND_OK;
     Lock(buffer->lockerHandle);
     ++buffer->activeReaders;
-    while (waitret == COND_OK && buffer->totalBytes < buffer->readBytes + bytesToRead && !buffer->completedBytes)
+    while (waitret == COND_OK && buffer->totalBytes < buffer->readBytes + bytesToRead && !buffer->hasCompleted)
     {
         waitret = Condition_Wait(buffer->dataConditionHandle, buffer->lockerHandle, timeout);
     }
@@ -175,7 +178,7 @@ int IoBufferWrite(IOBUFFER* buffer, const void* sourceBuffer, int offset, int by
     Lock(buffer->lockerHandle);
     if (sourceBuffer == NULL)
     {
-        buffer->completedBytes = 1;
+        buffer->hasCompleted = 1;
     }
     else
     {

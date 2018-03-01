@@ -22,13 +22,13 @@ set(HEADERS
     "${INC_DIR}/usp.h"
     "${INC_DIR}/usperror.h"
     "${INC_DIR}/uspmessages.h"
+    "${INC_DIR}/iobuffer.h"
     )
 
 set(HEADERS_PRIVATE
     "${SRC_DIR}/uspcommon.h"
     "${SRC_DIR}/uspinternal.h"
     "${SRC_DIR}/dnscache.h"
-    "${SRC_DIR}/iobuffer.h"
     "${SRC_DIR}/metricids.h"
     "${SRC_DIR}/metrics.h"
     "${SRC_DIR}/propbag.h"

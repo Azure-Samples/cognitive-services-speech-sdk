@@ -13,7 +13,7 @@ CRIS_MODEL_ID=3ae61ac26c534775b2606a61acd052bd
 
 echo -e "\n Testing usp lib: \n"
 
-ARGS="audio $AUDIO_FILE $SPEECH_SUB_KEY speech"
+ARGS="audio $AUDIO_FILE false $SPEECH_SUB_KEY speech"
 
 echo "Launching: "
 (set -x; $USPCONSOLE $ARGS interactive)
@@ -28,7 +28,7 @@ echo "Launching: "
 echo -e "\n\n\n"
 
 echo "Launching: "
-(set -x; $USPCONSOLE audio $AUDIO_FILE $CRIS_SUB_KEY cris interactive $CRIS_MODEL_ID)
+(set -x; $USPCONSOLE audio $AUDIO_FILE false $CRIS_SUB_KEY cris interactive $CRIS_MODEL_ID)
 echo -e "\n\n\n"
 
 echo -e "\n Done\n"

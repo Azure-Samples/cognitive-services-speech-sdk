@@ -8,6 +8,7 @@
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
 #include <windows.h>
+#include <mmsystem.h>
 #endif
 
 #include <stdio.h>
@@ -15,11 +16,13 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/audio_sys.h"
 #include "usp.h"
 
 #define UNUSED(x) (void)(x)
 
 bool turnEnd = false;
+THREAD_HANDLE ttsThreadHandle;
 
 char* recognitionStatusToText[] =
 {
@@ -105,6 +108,88 @@ void OnUserMessage(UspHandle uspHandle, const char* path, const char* contentTyp
     printf("Response: User defined message. Path: %s, contentType: %s, size: %zu, content: %s.\n", path, contentType, size, buffer);
 }
 
+// TODO: MSFT 1135317 Move TTS to own source file
+// We receive the audio response chunk by chunk (for example from TTS) and store it into a file. 
+// Once the entire response is received, we play out the audio file using the audio system of the OS.
+static int TTSRenderLoop(void* ptr)
+{
+    UspMsgAudioStreamStart* msg = (UspMsgAudioStreamStart*)ptr;
+    IoBufferAddRef(msg->ioBuffer);
+
+    FILE* pFile = fopen("test.wav","wb");
+    int maxSize = 0;
+    uint8_t* buffer = NULL;
+    AUDIO_SYS_HANDLE hAudio;
+
+    while (IoBufferWaitForNewBytes(msg->ioBuffer, 500) == 0)
+    {
+        int size = IoBufferGetUnReadBytes(msg->ioBuffer);
+        if (size == 0)
+        {
+            printf("Response: Final Audio Chunk received.\n");
+            break;
+        }
+        if (maxSize == 0)
+        {
+            buffer = malloc(size);
+            maxSize = size;
+        }
+        else if (size > maxSize)
+        {
+            buffer = realloc(buffer, size);
+            maxSize = size;
+        }
+        IoBufferRead(msg->ioBuffer, buffer, 0, size, 100);
+        fwrite(buffer, size, 1, pFile);
+    }
+    long fileSize = ftell(pFile);
+
+    fclose(pFile);
+    free(buffer);
+
+    printf("Response: Playing TTS Audio...\n");
+
+#ifdef __MACH__
+    // TODO: merge 182438c675f0459f91a4c4f53ad5fd1cbba63ef0 from CortanaSDK
+    printf("ERROR: audio system is not yet supported on OSX.");
+#else
+    hAudio = audio_create();
+    audio_output_set_volume(hAudio, 50);
+    if (hAudio == NULL)
+    {
+        printf("WARNING: No audio device");
+        return -1;
+    }
+    audio_playwavfile(hAudio, "test.wav");
+
+    // HACK: Rather than sleeping for the length of the audio...
+    // we should modify audio_playwavfile to have a callback to be called when the audio is done playing. 
+    long numMilliSeconds = (fileSize * 8) / (256);
+    ThreadAPI_Sleep(numMilliSeconds);
+#endif
+
+    IoBufferDelete(msg->ioBuffer);
+
+    free(msg);
+    return 1;
+}
+
+void OnAudioStreamStart(UspHandle uspHandle, void* context, const UspMsgAudioStreamStart* message)
+{
+    UNUSED(uspHandle);
+    UNUSED(context);
+
+    UspMsgAudioStreamStart* msgCopy = (UspMsgAudioStreamStart*)malloc(sizeof(UspMsgAudioStreamStart));
+    memcpy(msgCopy, message, sizeof(UspMsgAudioStreamStart));
+    
+    printf("Response: First Audio Chunk received.\n");
+
+    if (ThreadAPI_Create(&ttsThreadHandle, TTSRenderLoop, msgCopy) != THREADAPI_OK)
+    {
+        printf("Failed to start audio render thread.\n");
+    }
+}
+
 #define AUDIO_BYTES_PER_SECOND (16000*2) //16KHz, 16bit PCM
 
 int main(int argc, char* argv[])
@@ -131,9 +216,9 @@ int main(int argc, char* argv[])
     testCallbacks.onTurnEnd = OnTurnEnd;
     testCallbacks.onTurnStart = OnTurnStart;
 
-    if (argc < 3)
+    if (argc < 4)
     {
-        printf("Usage: uspclientconsole message_type(audio/message:[path]) file authentication endpoint_type(speech/cris/cdsdk/url) mode(interactive/conversation/dictation) language output(simple/detailed) user-defined-messages");
+        printf("Usage: uspclientconsole message_type(audio/message:[path]) file tts(true/false) authentication endpoint_type(speech/cris/cdsdk/url) mode(interactive/conversation/dictation) language output(simple/detailed) user-defined-messages");
         exit(1);
     }
 
@@ -170,6 +255,12 @@ int main(int argc, char* argv[])
     {
         printf("Error: open file %s failed", argv[curArg]);
         exit(1);
+    }
+
+    curArg++;
+    if (strcmp(argv[curArg], "true") == 0)
+    {
+        testCallbacks.onAudioStreamStart = OnAudioStreamStart;
     }
 
     curArg++;
@@ -419,6 +510,11 @@ int main(int argc, char* argv[])
     }
 
     UspClose(handle);
+
+    if (ttsThreadHandle != NULL)
+    {
+        ThreadAPI_Join(ttsThreadHandle, NULL);
+    }
 
     free(buffer);
     fclose(data);

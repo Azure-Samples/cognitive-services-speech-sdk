@@ -10,10 +10,11 @@
 #endif
 
 #include "propbag.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 #include "uspinternal.h"
 
 /**
-* Defines the callback function of asynchrnous complete during content handling.
+* Defines the callback function of asynchronous complete during content handling.
 * @param context The context provided by the application.
 */
 typedef void(*CONTENT_ASYNCCOMPLETE_CALLBACK)(void* context);
@@ -38,6 +39,7 @@ typedef UspResult(*CONTENT_HANDLER_CALLBACK)(
     CONTENT_ASYNCCOMPLETE_CALLBACK asyncCompleteCallback,
     void* asyncCompleteContext);
 
+UspResult AudioResponseHandler(void* context, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK callback, void* asyncContext);
 UspResult JsonResponseHandler(void* context, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK callback, void* asyncContext);
 UspResult TextResponseHandler(void* context, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK callback, void* asyncContext);
 
@@ -58,7 +60,10 @@ struct CONTENT_HANDLER
     CONTENT_HANDLER_CALLBACK handler;
 } g_ContentHandlers[] =
 {
-    // ordered by frequency of responses.
+    // ordered by frequency of responses
+    // to-do: This is not necessarily true anymore now that mutliple endpoints use the same contentHandler
+    { "audio/SILK", AudioResponseHandler },
+    { "audio/x-wav", AudioResponseHandler},
     { "application/json; charset=utf-8", JsonResponseHandler },
     { "text/plain; charset=utf-8", TextResponseHandler }
 };
@@ -124,16 +129,6 @@ typedef struct _DeserializeContext
     const char* responseJson;
     void* context;
 } DeserializeContext;
-
-// handles "response" API path
-static int HandleJsonIntentResponse(PROPERTYBAG_HANDLE  propertyHandle, void* context)
-{
-    // Todo: do we need to handle "response" message?
-    (void)propertyHandle;
-
-    USP_RETURN_ERROR_IF_CONTEXT_NULL(context);
-    USP_RETURN_NOT_IMPLEMENTED();
-}
 
 // handles "speech.phrase" API path
 static int HandleJsonSpeechPhrase(PROPERTYBAG_HANDLE propertyHandle, void* context)
@@ -354,7 +349,6 @@ const struct JSON_CONTENT_HANDLER
     PPROPERTYBAG_OBJECT_CALLBACK    handler;
 } g_jsonContentHandlers[] =
 {
-    { g_messagePathResponse, HandleJsonIntentResponse },
     { g_messagePathSpeechPhrase, HandleJsonSpeechPhrase },
     { g_messagePathSpeechHypothesis, HandleJsonSpeechPhrase },
     { g_messagePathSpeechFragment, HandleJsonSpeechFragment },
@@ -406,6 +400,8 @@ UspResult JsonResponseHandler(void* context, const char* path, uint8_t* buffer, 
 
     int ret = PropertybagDeserializeJson((const char*)buffer, bufferSize, ch->handler, &deserializeContext);
 
+    //TODO: MSFT 1099211: Memory caused because callback not invoked
+    
     if (ret)
     {
         LogError("Propertybagdeserialize_json failed, path=%s, ret=%d", path, ret);
@@ -440,6 +436,51 @@ UspResult TextResponseHandler(void* context, const char* path, uint8_t* buffer, 
     (void)buffer;
     (void)bufferSize;
 
+    //TODO: MSFT 1099211: Memory caused because callback not invoked
     USP_RETURN_NOT_IMPLEMENTED();
+}
+
+/**
+* Handles audio responses (e.g., TTS scenarios).
+* @param context The content context.
+* @param path The content path.
+* @param buffer The content buffer.
+* @param bufferSize The size of the buffer.
+* @param ioBuffer The pointer to ioBuffer.
+* @param asyncCompleteCallback The callback when handling is complete.
+* @param asyncCompleteContext The context parameter that is passed when the asyncCompleteCallback is invoked.
+* @return A UspResult indicating success or error.
+*/
+UspResult AudioResponseHandler(void* context, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK callback, void* asyncContext)
+{
+    (void)path;
+    (void)buffer;
+    (void)bufferSize;
+    (void)callback;
+    (void)asyncContext;
+
+    UspMsgAudioStreamStart *msg;
+    UspContext* uspContext = (UspContext*)context;
+
+    if (uspContext->callbacks->onAudioStreamStart == NULL)
+    {
+        LogInfo("No user callback defined for callbacks->onAudioStreamStart.");
+        return USP_SUCCESS;
+    }
+
+    msg = (UspMsgAudioStreamStart*)malloc(sizeof(UspMsgAudioStreamStart));
+    if (msg == NULL)
+    {
+        return USP_OUT_OF_MEMORY;
+    }
+
+    msg->ioBuffer = ioBuffer;
+
+    uspContext->callbacks->onAudioStreamStart(uspContext, uspContext->callbackContext, msg);
+
+    free(msg);
+
+    //TODO: MSFT 1099211: Memory caused because callback not invoked
+    return USP_SUCCESS;
 }
 

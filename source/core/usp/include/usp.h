@@ -95,6 +95,14 @@ typedef void(*UspOnTurnStart)(UspHandle uspHandle, void* context, UspMsgTurnStar
 typedef void(*UspOnTurnEnd)(UspHandle uspHandle, void* context, UspMsgTurnEnd *message);
 
 /**
+* A callback function that will be called when the first chunk in an audio stream is received from the service.
+* @param uspHandle The UspHandle.
+* @param context A pointer to the application-defined callback context.
+* @param error an error code.
+*/
+typedef void(*UspOnAudioStreamStart)(UspHandle uspHandle, void* context, const UspMsgAudioStreamStart *message);
+
+/**
 * A callback function that will be called when an error occurs in handling communication with service.
 * @param uspHandle The UspHandle.
 * @param context A pointer to the application-defined callback context.
@@ -128,6 +136,7 @@ typedef struct _UspCallbacks
     UspOnSpeechHypothesis onSpeechHypothesis;
     UspOnSpeechPhrase onSpeechPhrase;
     UspOnSpeechFragment onSpeechFragment;
+    UspOnAudioStreamStart onAudioStreamStart;
     UspOnTurnStart onTurnStart;
     UspOnTurnEnd onTurnEnd;
     UspOnError OnError;

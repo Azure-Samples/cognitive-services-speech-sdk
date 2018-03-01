@@ -9,13 +9,13 @@
 
 #include <stdint.h>
 
-#include "azure_c_shared_utility/lock.h"
-#include "azure_c_shared_utility/condition.h"
-#include "azure_c_shared_utility/buffer_.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef void* LOCK_HANDLE;
+typedef void* COND_HANDLE;
+typedef struct BUFFER_TAG* BUFFER_HANDLE;
 
 /**
 * Defines IOBUFFER which is used for communication with the service.
@@ -27,7 +27,7 @@ typedef struct _IOBUFFER
     BUFFER_HANDLE bufferHandle;
     int readBytes;
     int totalBytes;
-    int completedBytes;
+    int hasCompleted; // indicates that the IOBuffer is done receiving new data
     int hasNewCome; // indicates that IoBufferWrite() was called and new data is available
     int refCount; // reference count for this IOBUFFER.  The buffer is released when the count hits 0.
     int activeReaders;  // number of threads currently waiting on hDataCondition

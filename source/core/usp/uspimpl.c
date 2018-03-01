@@ -34,7 +34,6 @@ const char g_messagePathTurnStart[] = "turn.start";
 const char g_messagePathTurnEnd[] = "turn.end";
 const char g_messagePathSpeechStartDetected[] = "speech.startDetected";
 const char g_messagePathSpeechEndDetected[] = "speech.endDetected";
-const char g_messagePathResponse[] = "response";
 //Todo: Figure out what to do about user agent build hash and version number
 const char g_userAgent[] = "CortanaSDK (Windows;Win32;DeviceType=Near;SpeechClient=2.0.4)";
 
@@ -42,6 +41,7 @@ const char g_requestHeaderUserAgent[] = "User-Agent";
 const char g_requestHeaderOcpApimSubscriptionKey[] = "Ocp-Apim-Subscription-Key";
 const char g_requestHeaderAuthorization[] = "Authorization";
 const char g_requestHeaderSearchDelegationRPSToken[] = "X-Search-DelegationRPSToken";
+const char g_requestHeaderAudioResponseFormat[] = "X-Output-AudioCodec";
 
 #ifdef WIN32
 uint64_t g_perfCounterFrequency;
@@ -406,7 +406,6 @@ const struct _PathHandler
     { g_messagePathSpeechHypothesis, ContentPathHandler },
     { g_messagePathSpeechPhrase, ContentPathHandler },
     { g_messagePathSpeechFragment, ContentPathHandler },
-    { g_messagePathResponse, ContentPathHandler },
 };
 
 // Callback for data available on tranport
@@ -554,6 +553,8 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
 
     if (uspContext->type == USP_ENDPOINT_CDSDK)
     {
+        // TODO: MSFT: 1135317 Allow for configurable audio format
+        TransportRequestAddRequestHeader(transportHandle, g_requestHeaderAudioResponseFormat, "riff-16khz-16bit-mono-pcm");
         TransportRequestAddRequestHeader(uspContext->transportRequest, g_requestHeaderUserAgent, g_userAgent);
     }
     // Hackhack: Because Carbon API does not support authentication yet, use a default subscription key if no authentication is set.
