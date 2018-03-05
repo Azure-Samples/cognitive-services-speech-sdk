@@ -126,10 +126,6 @@ if(CMAKE_CL_64)
 endif()
 add_subdirectory(${CARBONX})
 
-if(MSVC)
-    include(swig)
-endif()
-
 add_subdirectory(${CARBON_BINDINGS})
 add_subdirectory(${CARBON_CSHARP_CONSOLE})
 

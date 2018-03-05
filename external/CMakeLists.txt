@@ -22,5 +22,10 @@ if (UNIX)
     endif()
 endif()
 
+
 set(AZURE_SHARED_UTIL_INCLUDE ${SHARED_UTIL_INC_FOLDER} PARENT_SCOPE)
 set(AZURE_SHARED_LIB ${AZURE_SHARED_LIB} PARENT_SCOPE)
+
+if(WIN32)
+    add_subdirectory(swig EXCLUDE_FROM_ALL)
+endif()
