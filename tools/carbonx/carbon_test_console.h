@@ -67,15 +67,19 @@ private:
 
     void ConsoleInput_Help();
     void ConsoleInput_HelpOn(const wchar_t* psz);
+    void ConsoleInput_HelpOnFactory();
     void ConsoleInput_HelpOnRecognizer();
     void ConsoleInput_HelpOnSpeech();
     void ConsoleInput_HelpOnIntent();
     void ConsoleInput_HelpOnSession();
     void ConsoleInput_HelpOnCommandSystem();
 
+    void ConsoleInput_Factory(const wchar_t* psz);
     void ConsoleInput_Recognizer(const wchar_t* psz, std::shared_ptr<BaseAsyncRecognizer>& recognizer);
     void ConsoleInput_SpeechRecognizer(const wchar_t* psz, std::shared_ptr<SpeechRecognizer>& speechRecognizer);
     void ConsoleInput_IntentRecognizer(const wchar_t* psz, std::shared_ptr<IntentRecognizer>& intentRecognizer);
+
+    void Factory_CreateSpeechRecognizer(const wchar_t* psz);
 
     template <class T>
     void Recognizer_IsEnabled(std::shared_ptr<T>& recognizer);

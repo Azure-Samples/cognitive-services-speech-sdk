@@ -21,9 +21,18 @@ namespace CARBON_IMPL_NAMESPACE() {
 #define SPX_FACTORY_MAP_ENTRY(x, y)                                             \
     if (PAL::stricmp(className, #x) == 0)                                       \
     {                                                                           \
-        if (PAL::stricmp(interfaceName, PAL::GetTypeName<y>().c_str()) == 0)   \
+        if (PAL::stricmp(interfaceName, PAL::GetTypeName<y>().c_str()) == 0)    \
         {                                                                       \
             return SpxFactoryEntryCreateObject<x, y>();                         \
+        }                                                                       \
+    }
+
+#define SPX_FACTORY_MAP_ENTRY_FUNC(x)                                           \
+    {                                                                           \
+        auto factory = x(className, interfaceName);                             \
+        if (factory != nullptr)                                                 \
+        {                                                                       \
+            return factory;                                                     \
         }                                                                       \
     }
 

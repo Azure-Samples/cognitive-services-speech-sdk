@@ -18,6 +18,7 @@ namespace CARBON_IMPL_NAMESPACE() {
 
 
 CSpxWavFileReader::CSpxWavFileReader() :
+    m_firstSeekDataChunkPos(0),
     m_dataChunkBytesLeft(0)
 {
 }
@@ -53,11 +54,7 @@ void CSpxWavFileReader::Close()
     }
 
     m_fileName.clear();
-
-    if (m_waveformat.get() != nullptr)
-    {
-        m_waveformat.release();
-    }
+    m_waveformat = nullptr;
 }
 
 bool CSpxWavFileReader::IsOpen() const
@@ -95,6 +92,19 @@ uint32_t CSpxWavFileReader::Read(uint8_t* pbuffer, uint32_t cbBuffer)
     {
         EnsureDataChunk();
         cbRead += ReadFromDataChunk(&pbuffer, &cbBuffer);
+    }
+
+    if (cbBuffer > 0 && cbRead == 0 && m_iterativeAudioLoop)
+    {
+        SPX_DBG_TRACE_VERBOSE("ITERATIVE AUDIO LOOP: Auto-rewinding...");
+        m_file->clear();
+        m_file->seekg(m_firstSeekDataChunkPos, WavFile_Type::beg);
+    }
+
+    if (m_simulateRealtimePercentage > 0)
+    {
+        auto milliseconds = cbRead * 1000 / m_waveformat->nAvgBytesPerSec * m_simulateRealtimePercentage / 100;
+        std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
     }
 
     return cbRead;
@@ -135,10 +145,10 @@ void CSpxWavFileReader::FindFormatAndDataChunks()
     SPX_IFTRUE_THROW_HR(0 != std::memcmp(chunkType, "WAVE", 4), SPXERR_INVALID_HEADER);
 
     // Initialize the first data chunk seek position to zero
-    std::streamoff seekDataChunkPos = 0;
+    m_firstSeekDataChunkPos = 0;
     
     // Read chunks until we've read the WAVEFORMAT and found the 'data' chunk position
-    while ((m_waveformat.get() == nullptr || seekDataChunkPos == 0) && ReadChunkTypeAndSize(chunkType, &chunkSize))
+    while ((m_waveformat.get() == nullptr || m_firstSeekDataChunkPos == 0) && ReadChunkTypeAndSize(chunkType, &chunkSize))
     {
         if (0 == std::memcmp(chunkType, "fmt ", cbChunkType)) // Is this the format chunk?
         {
@@ -146,8 +156,8 @@ void CSpxWavFileReader::FindFormatAndDataChunks()
         }
         else if (0 == std::memcmp(chunkType, "data", cbChunkType)) // Is this a 'data' chunk?
         {
-            seekDataChunkPos = m_file->tellg();
-            seekDataChunkPos -= sizeof(chunkType) + sizeof(chunkSizeBuffer); // account for bytes read w/ReadChunkTypeAndSize()
+            m_firstSeekDataChunkPos = m_file->tellg();
+            m_firstSeekDataChunkPos -= sizeof(chunkType) + sizeof(chunkSizeBuffer); // account for bytes read w/ReadChunkTypeAndSize()
         }
         else // We don't care about this chunk; let's ignore it and move to the next...
         {
@@ -156,10 +166,10 @@ void CSpxWavFileReader::FindFormatAndDataChunks()
     }
 
     // Did we find everything we needed? 
-    SPX_IFTRUE_THROW_HR(m_waveformat.get() == nullptr || seekDataChunkPos == 0, SPXERR_UNEXPECTED_EOF);
+    SPX_IFTRUE_THROW_HR(m_waveformat.get() == nullptr || m_firstSeekDataChunkPos == 0, SPXERR_UNEXPECTED_EOF);
 
     // Finally, move back to the very beginning of the 'data' chunk...
-    m_file->seekg(seekDataChunkPos, WavFile_Type::beg);
+    m_file->seekg(m_firstSeekDataChunkPos, WavFile_Type::beg);
 }
 
 bool CSpxWavFileReader::ReadChunkTypeAndSize(uint8_t* pchunkType, uint32_t* pchunkSize)
@@ -194,7 +204,7 @@ void CSpxWavFileReader::ReadFormatChunk(uint32_t chunkSize)
     SPX_IFTRUE_THROW_HR(chunkSize < sizeof(WAVEFORMATEX) && chunkSize != sizeof(WAVEFORMAT), SPXERR_INVALID_HEADER);
     
     auto cbAllocate = std::max((size_t)chunkSize, sizeof(WAVEFORMATEX)); // allocate space for EX structure, no matter what
-    std::unique_ptr<WAVEFORMATEX> waveformat((WAVEFORMATEX*)new uint8_t[cbAllocate]);
+    auto waveformat = SpxAllocWAVEFORMATEX(cbAllocate);
     waveformat->cbSize = 0;
     
     // Read the WAVEFORMAT/WAVEFORMATEX
@@ -202,7 +212,7 @@ void CSpxWavFileReader::ReadFormatChunk(uint32_t chunkSize)
     SPX_DBG_TRACE_VERBOSE_IF(m_file->eof(), "It's very uncommon, but possible, to hit EOF after reading WAVEFORMAT/WAVEFORMATEX");
 
     // Finally, store the format
-    m_waveformat = std::move(waveformat);
+    m_waveformat = waveformat;
 }
 
 void CSpxWavFileReader::EnsureDataChunk()
@@ -222,6 +232,12 @@ void CSpxWavFileReader::EnsureDataChunk()
             {
                 m_file->seekg(chunkSize, WavFile_Type::cur);
             }
+        }
+        else if (m_file->eof() && m_continuousAudioLoop)
+        {
+            SPX_DBG_TRACE_VERBOSE("CONTINUOUS AUDIO LOOP: Auto-rewinding...");
+            m_file->clear();
+            m_file->seekg(m_firstSeekDataChunkPos, WavFile_Type::beg);
         }
     }
 }

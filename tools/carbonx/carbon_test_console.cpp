@@ -326,6 +326,10 @@ void CarbonTestConsole::ProcessConsoleInput(const wchar_t* psz)
     {
         RunSample(psz + wcslen(L"sample "));
     }
+    else if (PAL::wcsnicmp(psz, L"factory ", wcslen(L"factory ")) == 0)
+    {
+        ConsoleInput_Factory(psz + wcslen(L"factory "));
+    }
     else if (PAL::wcsnicmp(psz, L"recognizer ", wcslen(L"recognizer ")) == 0)
     {
         ConsoleInput_Recognizer(psz + wcslen(L"recognizer "), m_recognizer);
@@ -357,6 +361,7 @@ void CarbonTestConsole::ConsoleInput_Help()
     ConsoleWriteLine(L"");
     ConsoleWriteLine(L"COMMANDs: ");
     ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"    factory          Access methods/properties/events on the RECOGNIZER FACTORY object.");
     ConsoleWriteLine(L"    intent           Access methods/properties/events on the base RECOGNIZER object.");
     ConsoleWriteLine(L"    speech           Access methods/properties/events on the SPEECH recognizer object.");
     ConsoleWriteLine(L"    intent           Access methods/properties/events on the INTENT recognizer object.");
@@ -370,7 +375,11 @@ void CarbonTestConsole::ConsoleInput_Help()
 
 void CarbonTestConsole::ConsoleInput_HelpOn(const wchar_t* psz)
 {
-    if (PAL::wcsicmp(psz, L"recognizer") == 0)
+    if (PAL::wcsicmp(psz, L"factory") == 0)
+    {
+        ConsoleInput_HelpOnFactory();
+    }
+    else if (PAL::wcsicmp(psz, L"recognizer") == 0)
     {
         ConsoleInput_HelpOnRecognizer();
     }
@@ -390,6 +399,16 @@ void CarbonTestConsole::ConsoleInput_HelpOn(const wchar_t* psz)
     {
         ConsoleInput_HelpOnCommandSystem();
     }
+}
+
+void CarbonTestConsole::ConsoleInput_HelpOnFactory()
+{
+    ConsoleWriteLine(L"FACTORY {method_command}");
+    ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"  Methods:");
+    ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"    Create Speech Recognizer");
+    ConsoleWriteLine(L"");
 }
 
 void CarbonTestConsole::ConsoleInput_HelpOnRecognizer()
@@ -509,6 +528,18 @@ void CarbonTestConsole::ConsoleInput_HelpOnCommandSystem()
     ConsoleWriteLine(L"");
 }
 
+void CarbonTestConsole::ConsoleInput_Factory(const wchar_t* psz)
+{
+    if (PAL::wcsnicmp(psz, L"create speech recognizer", wcslen(L"create speech recognizer")) == 0)
+    {
+        Factory_CreateSpeechRecognizer(psz + wcslen(L"create speech recognizer"));
+    }
+    else
+    {
+        ConsoleWriteLine(L"\nUnknown method/event: '%ls'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
+    }
+}
+        
 void CarbonTestConsole::ConsoleInput_Recognizer(const wchar_t* psz, std::shared_ptr<BaseAsyncRecognizer>& recognizer)
 {
      if (PAL::wcsicmp(psz, L"isenabled") == 0)
@@ -752,6 +783,26 @@ void CarbonTestConsole::ConsoleInput_IntentRecognizer(const wchar_t* psz, std::s
 void CarbonTestConsole::ConsoleInput_CommandSystem(const wchar_t*)
 {
     // TODO: ROBCH: Implement CarbonTestConsole::ConsoleInput_CommandSystem
+}
+
+void CarbonTestConsole::Factory_CreateSpeechRecognizer(const wchar_t* psz)
+{
+    m_speechRecognizer = nullptr;
+    m_recognizer = nullptr;
+    m_session = nullptr;
+
+    m_speechRecognizer = *psz == L'\0'
+        ? RecognizerFactory::CreateSpeechRecognizer() 
+        : RecognizerFactory::CreateSpeechRecognizerWithFileInput(psz + 1);
+
+    auto fn1 = std::bind(&CarbonTestConsole::SpeechRecognizer_FinalResultHandler, this, std::placeholders::_1);
+    m_speechRecognizer->FinalResult.Connect(fn1);
+
+    auto fn2 = std::bind(&CarbonTestConsole::SpeechRecognizer_IntermediateResultHandler, this, std::placeholders::_1);
+    m_speechRecognizer->IntermediateResult.Connect(fn2);
+
+    m_recognizer = BaseAsyncRecognizer::From(m_speechRecognizer);
+    m_session = Session::FromRecognizer(m_speechRecognizer);
 }
 
 template <class T>

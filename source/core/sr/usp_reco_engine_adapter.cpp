@@ -101,7 +101,7 @@ void CSpxUspRecoEngineAdapter::UspWriteFormat(UspHandle handle, WAVEFORMATEX* pf
         cbChunkType + cbChunkSize;  // 'data' #size_of_data#
 
     // Allocate the buffer, and create a ptr we'll use to advance thru the buffer as we're writing stuff into it
-    std::unique_ptr<uint8_t> buffer(new uint8_t[cbHeader]);
+    std::unique_ptr<uint8_t[]> buffer(new uint8_t[cbHeader]);
     auto ptr = buffer.get();
 
     // The 'RIFF' header (consists of 'RIFF' followed by size of paylaod that folows)
@@ -155,10 +155,7 @@ void CSpxUspRecoEngineAdapter::UspWrite_Buffered(UspHandle handle, const uint8_t
 
     if (m_buffer.get() == nullptr)
     {
-        auto ptr = new uint8_t[m_servicePreferedBufferSize];
-        std::unique_ptr<uint8_t> tmp(ptr);
-
-        m_buffer = std::move(tmp);
+        m_buffer = SpxAllocSharedUint8Buffer(m_servicePreferedBufferSize);
         m_bytesInBuffer = m_servicePreferedBufferSize;
 
         m_ptrIntoBuffer = m_buffer.get();

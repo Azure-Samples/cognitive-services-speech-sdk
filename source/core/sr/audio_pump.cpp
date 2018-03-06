@@ -58,7 +58,7 @@ void CSpxAudioPump::StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProc
     std::unique_lock<std::mutex> lock(m_mutex);
     SPX_IFTRUE_THROW_HR(m_audioReader.get() == nullptr, SPXERR_UNINITIALIZED);
     SPX_IFTRUE_THROW_HR(m_thread.joinable(), SPXERR_AUDIO_IS_PUMPING);
-    SPX_IFTRUE_THROW_HR(m_state == State::NoInput, SPXERR_UNINITIALIZED);
+    SPX_IFTRUE_THROW_HR(m_state == State::NoInput, SPXERR_NO_AUDIO_INPUT);
     SPX_IFTRUE_THROW_HR(m_state == State::Processing, SPXERR_AUDIO_IS_PUMPING);
     SPX_IFTRUE_THROW_HR(m_state == State::Paused, SPXERR_NOT_IMPL); // TODO: FUTURE: Implement PausePump
     SPX_DBG_ASSERT_WITH_MESSAGE(m_state == State::Idle, 
@@ -112,7 +112,7 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
 
     // Get the format from the reader and give it to the processor
     auto cbFormat = m_audioReader->GetFormat(nullptr, 0);
-    std::unique_ptr<WAVEFORMATEX> waveformat = std::make_unique<WAVEFORMATEX>(*(WAVEFORMATEX*)new uint8_t[cbFormat]);
+    auto waveformat = SpxAllocWAVEFORMATEX(cbFormat);
     
     m_audioReader->GetFormat(waveformat.get(), cbFormat);
     pISpxAudioProcessor->SetFormat(waveformat.get());
@@ -124,7 +124,7 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
     auto framesPerSec = 10;
 
     auto bytesPerFrame = samplesPerSec / framesPerSec * bytesPerSample;
-    auto data = ISpxAudioProcessor::AudioData_Type(new uint8_t[bytesPerFrame]);
+    auto data = SpxAllocSharedAudioBuffer(bytesPerFrame);
 
     // When the pump is pumping, m_state is only changed in this lambda
     auto checkAndChangeState = [&]() {
@@ -136,7 +136,13 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
             m_cv.notify_all();
         }
 
-        return m_state == State::Processing;
+        if (m_state == State::Processing)
+        {
+            return true;
+        }
+
+        m_thread.detach();
+        return false;
     };
 
     // Continue to loop while we're in the 'Processing' state...
@@ -145,19 +151,19 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
         // Ensure we have an unencumbered data buffer to use for this Read/ProcessAudio iteration
         if (data.use_count() > 1)
         {
-            data = ISpxAudioProcessor::AudioData_Type(new uint8_t[bytesPerFrame]);
+            data = SpxAllocSharedAudioBuffer(bytesPerFrame);
         }
 
         // Read the buffer, and send it to the processor
         auto cbRead = m_audioReader->Read(data.get(), bytesPerFrame);
         pISpxAudioProcessor->ProcessAudio(data, cbRead);
 
-        // If we didn't read any data, move to the 'NoInput' state
+        // If we didn't read any data, move to the 'Idle' state
         if (cbRead == 0)
         {
             SPX_DBG_TRACE_INFO("m_audioReader->Read() read ZERO (0) bytes... Indicating end of stream based input.");
             std::unique_lock<std::mutex> lock(m_mutex);
-            m_stateRequested = State::NoInput;
+            m_stateRequested = State::Idle;
         }
     }
 

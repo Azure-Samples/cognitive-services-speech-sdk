@@ -88,7 +88,7 @@ private:
 
 private:
 
-    std::unique_ptr<WAVEFORMATEX> m_format;
+    SpxWAVEFORMATEX_Type m_format;
     std::unique_ptr<CSpxUnidecConfig> m_config;
     std::unique_ptr<IUnidecSearchGraphCombo, std::function<void(IUnidecSearchGraphCombo*)>> m_graphs;
     std::unique_ptr<IUnidecEngine, std::function<void(IUnidecEngine*)>> m_unidecEngine;

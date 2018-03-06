@@ -138,14 +138,9 @@ SPXHR SampleHandler::Process(IMFSample* sample)
     SPX_EXITFN_ON_FAIL(hr = mediaBuffer->Lock(&audioData, NULL, &numBytes));
 
     if (audioData != nullptr) {
-        // Is this really a good idea to create a copy of the audio data
-        // here? It seems, the sink should be capable of creating a copy if it 
-        // needs to.
-        // TODO: maybe change the ISpxAudioProcessor::ProcessAudio signature to
-        // take a const ptr?
-        ISpxAudioProcessor::AudioData_Type copy(new uint8_t[numBytes]);
-        memcpy(copy.get(), audioData, numBytes);
-        sink->ProcessAudio(copy, numBytes);
+        auto sharedBuffer = SpxAllocSharedAudioBuffer(numBytes);
+        memcpy(sharedBuffer.get(), audioData, numBytes);
+        sink->ProcessAudio(sharedBuffer, numBytes);
     }
 
 SPX_EXITFN_CLEANUP:

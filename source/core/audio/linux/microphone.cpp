@@ -118,14 +118,9 @@ int MicrophonePump::Process(uint8_t* pBuffer, size_t size)
 
     if (pBuffer != nullptr) 
     {
-        // Is this really a good idea to create a copy of the audio data
-        // here? It seems, the sink should be capable of creating a copy if it 
-        // needs to.
-        // TODO: maybe change the ISpxAudioProcessor::ProcessAudio signature to
-        // take a const ptr?
-        ISpxAudioProcessor::AudioData_Type copy(new uint8_t[size]);
-        memcpy(copy.get(), pBuffer, size);
-        m_sink->ProcessAudio(copy, size);
+        auto sharedBuffer = SpxAllocSharedAudioBuffer(size);
+        memcpy(sharedBuffer.get(), pBuffer, size);
+        m_sink->ProcessAudio(sharedBuffer, size);
     }
 
     return result;

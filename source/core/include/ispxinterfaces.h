@@ -12,6 +12,7 @@
 #include "asyncop.h"
 #include "speechapi_cxx_common.h"
 #include "speechapi_cxx_eventsignal.h"
+#include "shared_ptr_helpers.h"
 
 
 using namespace CARBON_NAMESPACE_ROOT;
@@ -231,6 +232,19 @@ struct WAVEFORMATEX
 #define WAVE_FORMAT_PCM 0x0001 // wFormatTag value for PCM data
 
 
+using SpxWAVEFORMATEX_Type = std::shared_ptr<WAVEFORMATEX>;
+inline SpxWAVEFORMATEX_Type SpxAllocWAVEFORMATEX(size_t sizeInBytes)
+{
+    return SpxAllocSharedBuffer<WAVEFORMATEX>(sizeInBytes);
+}
+
+using SpxSharedAudioBuffer_Type = SpxSharedUint8Buffer_Type;
+inline SpxSharedAudioBuffer_Type SpxAllocSharedAudioBuffer(size_t sizeInBytes)
+{
+    return SpxAllocSharedUint8Buffer(sizeInBytes);
+}
+
+
 class ISpxAudioFile : public ISpxInterfaceBaseFor<ISpxAudioFile>
 {
 public:
@@ -256,7 +270,7 @@ class ISpxAudioWriter : public ISpxInterfaceBaseFor<ISpxAudioWriter>
 {
 public:
 
-    using AudioData_Type = std::shared_ptr<uint8_t>;
+    using AudioData_Type = SpxSharedAudioBuffer_Type;
     
     virtual void SetFormat(WAVEFORMATEX* pformat) = 0;
     virtual void Write(AudioData_Type data, uint32_t cbData) = 0;
@@ -268,7 +282,7 @@ class ISpxAudioProcessor : public ISpxInterfaceBaseFor<ISpxAudioProcessor>
 {
 public:
 
-    using AudioData_Type = std::shared_ptr<uint8_t>;
+    using AudioData_Type = SpxSharedAudioBuffer_Type;
 
     virtual void SetFormat(WAVEFORMATEX* pformat) = 0;
     virtual void ProcessAudio(AudioData_Type data, uint32_t cbData) = 0;

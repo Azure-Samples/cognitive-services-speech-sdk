@@ -115,10 +115,8 @@ void CSpxUnidecRecoEngineAdapter::InitFormat(WAVEFORMATEX* pformat)
     SPX_IFTRUE_THROW_HR(HasFormat(), SPXERR_ALREADY_INITIALIZED);
 
     auto sizeOfFormat = sizeof(WAVEFORMATEX) + pformat->cbSize;
-    auto ptr = new uint8_t[sizeOfFormat];
-    memcpy(ptr, pformat, sizeOfFormat);
-
-    m_format = std::make_unique<WAVEFORMATEX>(*reinterpret_cast<WAVEFORMATEX*>(ptr));
+    m_format = SpxAllocWAVEFORMATEX(sizeOfFormat);
+    memcpy(m_format.get(), pformat, sizeOfFormat);
 }
 
 void CSpxUnidecRecoEngineAdapter::TermFormat()

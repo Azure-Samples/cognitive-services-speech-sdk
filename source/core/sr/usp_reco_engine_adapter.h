@@ -149,7 +149,7 @@ private:
 
     const bool m_fUseBufferedImplementation = true;
     
-    std::unique_ptr<uint8_t> m_buffer;
+    std::shared_ptr<uint8_t> m_buffer;
     size_t m_bytesInBuffer;
 
     uint8_t* m_ptrIntoBuffer;

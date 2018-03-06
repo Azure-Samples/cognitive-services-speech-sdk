@@ -138,3 +138,9 @@ typedef unsigned int SPXHR;
 *   An error in the audio-capturing system.
 */
 #define SPXERR_MIC_ERROR            __SPX_ERRCODE_FAILED(0x014)
+
+/*** SPXERR_NO_AUDIO_INPUT
+*   The requested operation cannot be performed; there is no audio input
+*/
+#define SPXERR_NO_AUDIO_INPUT       __SPX_ERRCODE_FAILED(0x015)
+

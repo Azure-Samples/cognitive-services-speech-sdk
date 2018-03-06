@@ -38,7 +38,7 @@
 # Visual Studio + build folders
 *.vs
 *.vscode
-build/**/*
+build*/**/*
 
 # Visual C++ cache files
 ipch/

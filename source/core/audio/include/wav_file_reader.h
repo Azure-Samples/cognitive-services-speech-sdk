@@ -56,7 +56,18 @@ private:
     
     std::wstring m_fileName;
     std::unique_ptr<WavFile_Type> m_file;
-    std::unique_ptr<WAVEFORMATEX> m_waveformat;
+    SpxWAVEFORMATEX_Type m_waveformat;
+
+    const bool m_continuousAudioLoop = false;           // Continuously loop thru the audio from the .WAV file; Essentially, .WAV is a ring buffer for infinite audio data source
+
+    const bool m_iterativeAudioLoop = false;            // Iteratively loop thru the audio data from the .WAV file; 3000 byte audio file calling Read, repeatedly, will return 
+                                                        // 2000 bytes, then 1000 bytes, then 0 bytes, then 2000 bytes, then 1000 bytes, then 0 bytes ... over and over again
+
+    const uint8_t m_simulateRealtimePercentage = 10;    // 0 == as fast as possible; 100 == real time. E.g. If .WAV file is 12 seconds long, it will take 12 seconds to read all 
+                                                        // the data when percentage==100; it'll take 1.2 seconds if set to 10; it'll go as fast as possible at 0; and it'll
+                                                        // take 24 seconds if set to 200.
+
+    std::streamoff m_firstSeekDataChunkPos;
 
     uint32_t m_dataChunkBytesLeft;
 };
