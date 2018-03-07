@@ -253,6 +253,10 @@ public:
     virtual void Close() = 0;
 
     virtual bool IsOpen() const = 0;
+
+    virtual void SetContinuousLoop(bool value) = 0;
+    virtual void SetIterativeLoop(bool value) = 0;
+    virtual void SetRealTimePercentage(uint8_t percentage) = 0;
 };
 
 

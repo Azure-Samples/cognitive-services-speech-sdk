@@ -6,7 +6,7 @@
 //
 
 #pragma once
-#include <resource_manager.h>
+#include "service_helpers.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -25,10 +25,8 @@ inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, ISpxSit
 template <class I>
 inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, std::shared_ptr<ISpxSite> site)
 {
-    auto factoryFromSite = SpxQueryService<ISpxObjectFactory>(site);
-    
     // create the object
-    auto factory = factoryFromSite != nullptr ? factoryFromSite : CSpxResourceManager::GetObjectFactory();
+    auto factory = SpxQueryService<ISpxObjectFactory>(site);
     auto ptr = factory->CreateObject<I>(className);
 
     // set its site if appropriate

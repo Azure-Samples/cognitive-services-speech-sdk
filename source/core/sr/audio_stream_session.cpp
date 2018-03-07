@@ -12,7 +12,6 @@
 #include <fstream>
 #include <thread>
 #include "create_object_helpers.h"
-#include "microphone.h"
 #include "site_helpers.h"
 
 
@@ -30,23 +29,22 @@ CSpxAudioStreamSession::~CSpxAudioStreamSession()
     if (ptr.get() != nullptr)
     {
         ptr->Term();
+        ptr = nullptr;
     }
+
+    m_adapter = nullptr;    
 }
 
 void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
 {
     SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_audioPump.get() != nullptr);
 
-    // Create the reader and open the file
-    auto audioFile = SpxCreateObjectWithSite<ISpxAudioFile>("CSpxWavFileReader", this);
-    auto fileAsReader = std::dynamic_pointer_cast<ISpxAudioReader>(audioFile);
-    audioFile->Open(pszFileName);
-    
-    // Create the pump, and set the reader
-    auto pumpInit = SpxCreateObjectWithSite<ISpxAudioPumpReaderInit>("CSpxAudioPump", this);
-    pumpInit->SetAudioReader(fileAsReader);
+    // Create the wav file pump
+    auto audioFilePump = SpxCreateObjectWithSite<ISpxAudioFile>("CSpxWavFilePump", this);
+    m_audioPump = std::dynamic_pointer_cast<ISpxAudioPump>(audioFilePump);
 
-    m_audioPump = std::dynamic_pointer_cast<ISpxAudioPump>(pumpInit);
+    // Open the WAV file
+    audioFilePump->Open(pszFileName);
 
     // Defer calling InitRecoEngineAdapter() until later ... (see ::EnsureInitRecoEngineAdapter())
 }
@@ -56,7 +54,7 @@ void CSpxAudioStreamSession::InitFromMicrophone()
     SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_audioPump.get() != nullptr);
 
     // Create the microphone pump
-    m_audioPump = Microphone::Create();
+    m_audioPump = SpxCreateObjectWithSite<ISpxAudioPump>("CSpxInteractiveMicrophone", this);
 
     // Defer calling InitRecoEngineAdapter() until later ... (see ::EnsureInitRecoEngineAdapter())
 }
@@ -334,23 +332,44 @@ void CSpxAudioStreamSession::EnsureInitRecoEngineAdapter()
 
 void CSpxAudioStreamSession::InitRecoEngineAdapter()
 {
-    // try creating the hybrid reco engine adapter
-    if (m_adapter == nullptr)
+    // determine which type (or types) of reco engine adapters we should try creating...
+    bool tryHybrid = GetBooleanValue(L"__useHybridRecoEngine", false);
+    bool tryUnidec = GetBooleanValue(L"__useUnidecRecoEngine", false);
+    bool tryMock = GetBooleanValue(L"__useMockRecoEngine", false);
+    bool tryUsp = GetBooleanValue(L"__useUspRecoEngine", false);
+
+    // if nobody specified which type(s) of reco engine adapters this session should use, we'll use the USP
+    if (!tryHybrid && !tryUnidec && !tryMock && !tryUsp)
+    {
+        tryUsp = true;
+    }
+
+    // try to creat the hybrid adapter...
+    if (m_adapter == nullptr && tryHybrid)
     {
         m_adapter = SpxCreateObjectWithSite<ISpxRecoEngineAdapter>("CSpxHybridRecoEngineAdapter", this);
     }
 
-    // try creating the unidec reco engine adapter, if we couldn't create/find the hybrid adapter
-    if (m_adapter == nullptr)
+    // try to create the Unidec adapter... 
+    if (m_adapter == nullptr && tryUnidec)
     {
         m_adapter = SpxCreateObjectWithSite<ISpxRecoEngineAdapter>("CSpxUnidecRecoEngineAdapter", this);
     }
 
-    // try creating the USP reco engine adapter, if we couldn't create/find the other adapters
-    if (m_adapter == nullptr)
+    // try to create the Usp adapter... 
+    if (m_adapter == nullptr && tryUsp)
     {
         m_adapter = SpxCreateObjectWithSite<ISpxRecoEngineAdapter>("CSpxUspRecoEngineAdapter", this);
     }
+
+    // try to create the mock reco engine adapter...
+    if (m_adapter == nullptr && tryMock)
+    {
+        m_adapter = SpxCreateObjectWithSite<ISpxRecoEngineAdapter>("CSpxMockRecoEngineAdapter", this);
+    }
+
+    // if we still don't have an adapter... that's an exception
+    SPX_IFTRUE_THROW_HR(m_adapter == nullptr, SPXERR_NOT_FOUND);
 }
 
 bool CSpxAudioStreamSession::IsState(SessionState state)
@@ -373,5 +392,9 @@ bool CSpxAudioStreamSession::ChangeState(SessionState from, SessionState to)
     return false;
 }
 
+std::shared_ptr<ISpxNamedProperties> CSpxAudioStreamSession::GetParentProperties()
+{
+    return SpxQueryService<ISpxNamedProperties>(GetSite());
+}
 
 } // CARBON_IMPL_NAMESPACE

@@ -93,6 +93,27 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
             pstrNextArg = &pconsoleArgs->m_strInput;
             fNextArgRequired = true;
         }
+        else if (PAL::wcsicmp(pszArg, L"--unidec") == 0)
+        {
+            fShowOptions = pconsoleArgs->m_strUseRecoEngineProperty.length() > 0 || fNextArgRequired;
+            pconsoleArgs->m_strUseRecoEngineProperty = L"__useUnidecRecoEngine";
+            pstrNextArg = nullptr;
+            fNextArgRequired = false;
+        }
+        else if (PAL::wcsicmp(pszArg, L"--usp") == 0)
+        {
+            fShowOptions = pconsoleArgs->m_strUseRecoEngineProperty.length() > 0 || fNextArgRequired;
+            pconsoleArgs->m_strUseRecoEngineProperty = L"__useUspRecoEngine";
+            pstrNextArg = nullptr;
+            fNextArgRequired = false;
+        }
+        else if (PAL::wcsicmp(pszArg, L"--mockengine") == 0)
+        {
+            fShowOptions = pconsoleArgs->m_strUseRecoEngineProperty.length() > 0 || fNextArgRequired;
+            pconsoleArgs->m_strUseRecoEngineProperty = L"__useMockRecoEngine";
+            pstrNextArg = nullptr;
+            fNextArgRequired = false;
+        }
         else if (PAL::wcsnicmp(pszArg, L"--endpoint", wcslen(L"--endpoint")) == 0)
         {
             fShowOptions = pconsoleArgs->m_strEndpointUri.length() > 0 || fNextArgRequired;
@@ -326,6 +347,10 @@ void CarbonTestConsole::ProcessConsoleInput(const wchar_t* psz)
     {
         RunSample(psz + wcslen(L"sample "));
     }
+    else if (PAL::wcsnicmp(psz, L"global ", wcslen(L"global ")) == 0)
+    {
+        ConsoleInput_Global(psz + wcslen(L"global "));
+    }
     else if (PAL::wcsnicmp(psz, L"factory ", wcslen(L"factory ")) == 0)
     {
         ConsoleInput_Factory(psz + wcslen(L"factory "));
@@ -361,6 +386,7 @@ void CarbonTestConsole::ConsoleInput_Help()
     ConsoleWriteLine(L"");
     ConsoleWriteLine(L"COMMANDs: ");
     ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"    global           Access methods/properties/events on the GLOBAL PARAMETERS object.");
     ConsoleWriteLine(L"    factory          Access methods/properties/events on the RECOGNIZER FACTORY object.");
     ConsoleWriteLine(L"    intent           Access methods/properties/events on the base RECOGNIZER object.");
     ConsoleWriteLine(L"    speech           Access methods/properties/events on the SPEECH recognizer object.");
@@ -375,7 +401,11 @@ void CarbonTestConsole::ConsoleInput_Help()
 
 void CarbonTestConsole::ConsoleInput_HelpOn(const wchar_t* psz)
 {
-    if (PAL::wcsicmp(psz, L"factory") == 0)
+    if (PAL::wcsicmp(psz, L"global") == 0)
+    {
+        ConsoleInput_HelpOnGlobal();
+    }
+    else if (PAL::wcsicmp(psz, L"factory") == 0)
     {
         ConsoleInput_HelpOnFactory();
     }
@@ -399,6 +429,23 @@ void CarbonTestConsole::ConsoleInput_HelpOn(const wchar_t* psz)
     {
         ConsoleInput_HelpOnCommandSystem();
     }
+}
+
+void CarbonTestConsole::ConsoleInput_HelpOnGlobal()
+{
+    ConsoleWriteLine(L"GLOBAL {method_command}");
+    ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"  Methods:");
+    ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"    set string         {name} {value}");
+    ConsoleWriteLine(L"    get string         {name}");
+    ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"    set value          {name} {value}");
+    ConsoleWriteLine(L"    get value          {name}");
+    ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"    set bool           {name} {value}");
+    ConsoleWriteLine(L"    get bool           {name}");
+    ConsoleWriteLine(L"");
 }
 
 void CarbonTestConsole::ConsoleInput_HelpOnFactory()
@@ -458,6 +505,9 @@ void CarbonTestConsole::ConsoleInput_HelpOnSpeech()
     ConsoleWriteLine(L"    set value          {name} {value}");
     ConsoleWriteLine(L"    get value          {name}");
     ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"    set bool           {name} {value}");
+    ConsoleWriteLine(L"    get bool           {name}");
+    ConsoleWriteLine(L"");
     ConsoleWriteLine(L"  Events: ");
     ConsoleWriteLine(L"");
     ConsoleWriteLine(L"    SessionStarted     {Connect | Disconnect | DisconnectAll}");
@@ -509,8 +559,11 @@ void CarbonTestConsole::ConsoleInput_HelpOnSession()
     ConsoleWriteLine(L"    set string     {name} {value}");
     ConsoleWriteLine(L"    get string     {name}");
     ConsoleWriteLine(L"");
-    ConsoleWriteLine(L"    set value      {name} {value}");
-    ConsoleWriteLine(L"    get value      {name}");
+    ConsoleWriteLine(L"    set number     {name} {value}");
+    ConsoleWriteLine(L"    get number     {name}");
+    ConsoleWriteLine(L"");
+    ConsoleWriteLine(L"    set bool       {name} {value}");
+    ConsoleWriteLine(L"    get bool       {name}");
     ConsoleWriteLine(L"");
 }
 
@@ -528,6 +581,38 @@ void CarbonTestConsole::ConsoleInput_HelpOnCommandSystem()
     ConsoleWriteLine(L"");
 }
 
+void CarbonTestConsole::ConsoleInput_Global(const wchar_t* psz)
+{
+    if (PAL::wcsnicmp(psz, L"set string ", wcslen(L"set string ")) == 0)
+    {
+        Parameters_SetString(GlobalParameters::Get(), psz + wcslen(L"set string "));
+    }
+    else if (PAL::wcsnicmp(psz, L"get string ", wcslen(L"get string ")) == 0)
+    {
+        Parameters_GetString(GlobalParameters::Get(), psz + wcslen(L"get string "));
+    }
+    else if (PAL::wcsnicmp(psz, L"set number ", wcslen(L"set number ")) == 0)
+    {
+        Parameters_SetNumber(GlobalParameters::Get(), psz + wcslen(L"set number "));
+    }
+    else if (PAL::wcsnicmp(psz, L"get number ", wcslen(L"get number ")) == 0)
+    {
+        Parameters_GetNumber(GlobalParameters::Get(), psz + wcslen(L"get number "));
+    }
+    else if (PAL::wcsnicmp(psz, L"set bool ", wcslen(L"set bool ")) == 0)
+    {
+        Parameters_SetBool(GlobalParameters::Get(), psz + wcslen(L"set bool "));
+    }
+    else if (PAL::wcsnicmp(psz, L"get bool ", wcslen(L"get bool ")) == 0)
+    {
+        Parameters_GetBool(GlobalParameters::Get(), psz + wcslen(L"get bool "));
+    }
+    else
+    {
+        ConsoleWriteLine(L"\nUnknown method/event: '%ls'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
+    }
+}
+        
 void CarbonTestConsole::ConsoleInput_Factory(const wchar_t* psz)
 {
     if (PAL::wcsnicmp(psz, L"create speech recognizer", wcslen(L"create speech recognizer")) == 0)
@@ -539,7 +624,7 @@ void CarbonTestConsole::ConsoleInput_Factory(const wchar_t* psz)
         ConsoleWriteLine(L"\nUnknown method/event: '%ls'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
     }
 }
-        
+
 void CarbonTestConsole::ConsoleInput_Recognizer(const wchar_t* psz, std::shared_ptr<BaseAsyncRecognizer>& recognizer)
 {
      if (PAL::wcsicmp(psz, L"isenabled") == 0)
@@ -680,27 +765,27 @@ void CarbonTestConsole::ConsoleInput_SpeechRecognizer(const wchar_t* psz, std::s
     }
     else if (PAL::wcsnicmp(psz, L"set string ", wcslen(L"set string ")) == 0)
     {
-        Parameters_SetString(m_speechRecognizer, psz + wcslen(L"set string "));
+        Parameters_SetString(m_speechRecognizer->Parameters, psz + wcslen(L"set string "));
     }
     else if (PAL::wcsnicmp(psz, L"get string ", wcslen(L"get string ")) == 0)
     {
-        Parameters_GetString(m_speechRecognizer, psz + wcslen(L"get string "));
+        Parameters_GetString(m_speechRecognizer->Parameters, psz + wcslen(L"get string "));
     }
     else if (PAL::wcsnicmp(psz, L"set number ", wcslen(L"set number ")) == 0)
     {
-        Parameters_SetNumber(m_speechRecognizer, psz + wcslen(L"set number "));
+        Parameters_SetNumber(m_speechRecognizer->Parameters, psz + wcslen(L"set number "));
     }
     else if (PAL::wcsnicmp(psz, L"get number ", wcslen(L"get number ")) == 0)
     {
-        Parameters_GetNumber(m_speechRecognizer, psz + wcslen(L"get number "));
+        Parameters_GetNumber(m_speechRecognizer->Parameters, psz + wcslen(L"get number "));
     }
     else if (PAL::wcsnicmp(psz, L"set bool ", wcslen(L"set bool ")) == 0)
     {
-        Parameters_SetBool(m_speechRecognizer, psz + wcslen(L"set bool "));
+        Parameters_SetBool(m_speechRecognizer->Parameters, psz + wcslen(L"set bool "));
     }
     else if (PAL::wcsnicmp(psz, L"get bool ", wcslen(L"get bool ")) == 0)
     {
-        Parameters_GetBool(m_speechRecognizer, psz + wcslen(L"get bool "));
+        Parameters_GetBool(m_speechRecognizer->Parameters, psz + wcslen(L"get bool "));
     }
     else
     {
@@ -929,27 +1014,27 @@ void CarbonTestConsole::ConsoleInput_Session(const wchar_t* psz)
     }
     else if (PAL::wcsnicmp(psz, L"set string ", wcslen(L"set string ")) == 0)
     {
-        Parameters_SetString(m_session, psz + wcslen(L"set string "));
+        Parameters_SetString(m_session->Parameters, psz + wcslen(L"set string "));
     }
     else if (PAL::wcsnicmp(psz, L"get string ", wcslen(L"get string ")) == 0)
     {
-        Parameters_GetString(m_session, psz + wcslen(L"get string "));
+        Parameters_GetString(m_session->Parameters, psz + wcslen(L"get string "));
     }
     else if (PAL::wcsnicmp(psz, L"set number ", wcslen(L"set number ")) == 0)
     {
-        Parameters_SetNumber(m_session, psz + wcslen(L"set number "));
+        Parameters_SetNumber(m_session->Parameters, psz + wcslen(L"set number "));
     }
     else if (PAL::wcsnicmp(psz, L"get number ", wcslen(L"get number ")) == 0)
     {
-        Parameters_GetNumber(m_session, psz + wcslen(L"get number "));
+        Parameters_GetNumber(m_session->Parameters, psz + wcslen(L"get number "));
     }
     else if (PAL::wcsnicmp(psz, L"set bool ", wcslen(L"set bool ")) == 0)
     {
-        Parameters_SetBool(m_session, psz + wcslen(L"set bool "));
+        Parameters_SetBool(m_session->Parameters, psz + wcslen(L"set bool "));
     }
     else if (PAL::wcsnicmp(psz, L"get bool ", wcslen(L"get bool ")) == 0)
     {
-        Parameters_GetBool(m_session, psz + wcslen(L"get bool "));
+        Parameters_GetBool(m_session->Parameters, psz + wcslen(L"get bool "));
     }
     else
     {
@@ -966,14 +1051,14 @@ void CarbonTestConsole::Session_FromSpeechRecognizer()
 }
 
 template <class T>
-void CarbonTestConsole::Parameters_SetString(std::shared_ptr<T> thingWithParameters, const wchar_t* psz)
+void CarbonTestConsole::Parameters_SetString(T &parameters, const wchar_t* psz)
 {
-    std::wstring parameters(psz);
-    auto iSpace = parameters.find(L' ');
+    std::wstring input(psz);
+    auto iSpace = input.find(L' ');
     if (iSpace != std::wstring::npos && psz[iSpace + 1] != L'\0')
     {
         std::wstring name(psz, iSpace);
-        thingWithParameters->Parameters[name.c_str()] = psz + iSpace + 1;
+        parameters[name.c_str()] = psz + iSpace + 1;
         ConsoleWriteLine(L"Set string '%ls' to '%ls'!\n", name.c_str(), psz + iSpace + 1);
     }
     else
@@ -983,21 +1068,21 @@ void CarbonTestConsole::Parameters_SetString(std::shared_ptr<T> thingWithParamet
 }
 
 template <class T>
-void CarbonTestConsole::Parameters_GetString(std::shared_ptr<T> thingWithParameters, const wchar_t* psz)
+void CarbonTestConsole::Parameters_GetString(T &parameters, const wchar_t* psz)
 {
-    auto value = thingWithParameters->Parameters[psz].GetString();
+    auto value = parameters[psz].GetString();
     ConsoleWriteLine(L"Get string '%ls' : '%ls'\n", psz, value.c_str());
 }
 
 template <class T>
-void CarbonTestConsole::Parameters_SetNumber(std::shared_ptr<T> thingWithParameters, const wchar_t* psz)
+void CarbonTestConsole::Parameters_SetNumber(T &parameters, const wchar_t* psz)
 {
-    std::wstring parameters(psz);
-    auto iSpace = parameters.find(L' ');
+    std::wstring input(psz);
+    auto iSpace = input.find(L' ');
     if (iSpace != std::wstring::npos)
     {
         std::wstring name(psz, iSpace);
-        thingWithParameters->Parameters[name.c_str()] = std::stoi(psz + iSpace + 1);
+        parameters[name.c_str()] = std::stoi(psz + iSpace + 1);
         ConsoleWriteLine(L"Set number '%ls' to '%ls'!\n", name.c_str(), psz + iSpace + 1);
     }
     else
@@ -1007,23 +1092,23 @@ void CarbonTestConsole::Parameters_SetNumber(std::shared_ptr<T> thingWithParamet
 }
 
 template <class T>
-void CarbonTestConsole::Parameters_GetBool(std::shared_ptr<T> thingWithParameters, const wchar_t* psz)
+void CarbonTestConsole::Parameters_GetBool(T &parameters, const wchar_t* psz)
 {
-    auto value = thingWithParameters->Parameters[psz].GetBool();
+    auto value = parameters[psz].GetBool();
     ConsoleWriteLine(L"Get bool '%ls' : %s\n", psz, ToString(value).c_str());
 }
 
 template <class T>
-void CarbonTestConsole::Parameters_SetBool(std::shared_ptr<T> thingWithParameters, const wchar_t* psz)
+void CarbonTestConsole::Parameters_SetBool(T &parameters, const wchar_t* psz)
 {
-    std::wstring parameters(psz);
-    auto iSpace = parameters.find(L' ');
+    std::wstring input(psz);
+    auto iSpace = input.find(L' ');
     if (iSpace != std::wstring::npos)
     {
         std::wstring name(psz, iSpace);
         bool value = ToBool(psz + iSpace + 1);
 
-        thingWithParameters->Parameters[name.c_str()] = value;
+        parameters[name.c_str()] = value;
         ConsoleWriteLine(L"Set number '%ls' to '%ls'!\n", name.c_str(), psz + iSpace + 1);
     }
     else
@@ -1033,9 +1118,9 @@ void CarbonTestConsole::Parameters_SetBool(std::shared_ptr<T> thingWithParameter
 }
 
 template <class T>
-void CarbonTestConsole::Parameters_GetNumber(std::shared_ptr<T> thingWithParameters, const wchar_t* psz)
+void CarbonTestConsole::Parameters_GetNumber(T &parameters, const wchar_t* psz)
 {
-    auto value = thingWithParameters->Parameters[psz].GetNumber();
+    auto value = parameters[psz].GetNumber();
     ConsoleWriteLine(L"Get number '%ls' : %d\n", psz, value);
 }
 
@@ -1159,7 +1244,7 @@ void CarbonTestConsole::InitCarbon(ConsoleArgs* pconsoleArgs)
 {
     try
     {
-        InitRecognizer(pconsoleArgs->m_strRecognizerType, pconsoleArgs->m_strInput);
+        InitRecognizer(pconsoleArgs->m_strRecognizerType, pconsoleArgs->m_strInput, pconsoleArgs->m_strUseRecoEngineProperty);
         InitCommandSystem();
     }
     catch (std::exception ex)
@@ -1168,7 +1253,7 @@ void CarbonTestConsole::InitCarbon(ConsoleArgs* pconsoleArgs)
     }
 }
 
-void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const std::wstring& wavFileName)
+void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const std::wstring& wavFileName, const std::wstring& useRecoEngineParameter)
 {
     if (recognizerType == PAL::GetTypeName<SpeechRecognizer>())
     {
@@ -1184,6 +1269,11 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
 
         m_recognizer = BaseAsyncRecognizer::From(m_speechRecognizer);
         m_session = Session::FromRecognizer(m_speechRecognizer);
+
+        if (!useRecoEngineParameter.empty())
+        {
+            GlobalParameters::Get()[useRecoEngineParameter.c_str()] = true;
+        }
     }
     else if (recognizerType == PAL::GetTypeName<TranslationRecognizer>())
     {
@@ -1305,6 +1395,21 @@ void CarbonTestConsole::RunSample(const std::wstring& strSampleName)
     {
         ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
         Sample_HelloWorld_In_C();
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"helloworld usp") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        Sample_HelloWorld_PickEngine(L"Usp");
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"helloworld unidec") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        Sample_HelloWorld_PickEngine(L"Unidec");
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"helloworld mockengine") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        Sample_HelloWorld_PickEngine(L"Mock");
     }
     else
     {

@@ -14,7 +14,7 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-class CSpxDefaultRecognizerFactory : 
+class CSpxDefaultRecognizerFactory :
     public ISpxObjectWithSiteInitImpl<ISpxSite>,
     public ISpxServiceProvider,
     public ISpxRecognizerFactory,

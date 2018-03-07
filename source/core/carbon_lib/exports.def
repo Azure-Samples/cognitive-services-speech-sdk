@@ -84,3 +84,12 @@ EXPORTS
 	Session_SetParameter_Bool
 	Session_GetParameter_Bool
 	Session_HasParameter_Bool
+	Global_SetParameter_String
+	Global_GetParameter_String
+	Global_HasParameter_String
+	Global_SetParameter_Int32
+	Global_GetParameter_Int32
+	Global_HasParameter_Int32
+	Global_SetParameter_Bool
+	Global_GetParameter_Bool
+	Global_HasParameter_Bool

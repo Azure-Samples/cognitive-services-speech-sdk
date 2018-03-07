@@ -2,6 +2,7 @@
 #include "spxcore_common.h"
 #include "create_object_helpers.h"
 #include "recognizer_factory.h"
+#include "resource_manager.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {

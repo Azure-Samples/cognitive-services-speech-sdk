@@ -76,7 +76,7 @@ void CSpxUnidecRecoEngineAdapter::InitConfig()
     std::map<std::string, std::wstring> config;
 
     config["EnableSegmentation"] = L"true";
-    config["BaseModelPath"] = L"c:\\src\\carbon\\external\\unidec\\bin\\";
+    config["BaseModelPath"] = GetBaseModelPath().c_str();
     config["FeatureName"] = L"16kHzStaticStreamE14LFB80Runtime";
     config["HCLGSpecBase"] = L"";
     config["BeamThreshold"] = L"200";
@@ -102,12 +102,23 @@ void CSpxUnidecRecoEngineAdapter::InitConfig()
         case 2:
             config["AmFileName"] = L"AI011033.am";
             config["FeFileName"] = L"c1033.fe";
-            config["LmsFileName"] = L"mini\\prune.3e-7.minhclg.lms";
-            config["HclgFileName"] = L"mini\\prune.3e-7.minhclg.hclg";
+            config["LmsFileName"] = LR"(mini\prune.3e-7.minhclg.lms)";
+            config["HclgFileName"] = LR"(mini\prune.3e-7.minhclg.hclg)";
             break;
     }
 
     m_config = std::make_unique<CSpxUnidecConfig>(config);
+}
+
+std::wstring CSpxUnidecRecoEngineAdapter::GetBaseModelPath()
+{
+    // Get the named properties service...
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_UNIDEC_SITE_FAILURE);
+
+    // Get the property value for the base model path
+    auto value = properties->GetStringValue(L"__unidecBaseModelPath", LR"(..\..\..\external\unidec\bin\)");
+    return value;
 }
 
 void CSpxUnidecRecoEngineAdapter::InitFormat(WAVEFORMATEX* pformat)

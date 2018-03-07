@@ -14,6 +14,9 @@
 #include <speechapi_cxx_eventsignal.h>
 #include <speechapi_cxx_parameter.h>
 
+#include <speechapi_cxx_global.h>
+#include <speechapi_cxx_global_parameter_collection.h>
+
 #include <speechapi_cxx_session_eventargs.h>
 
 #include <speechapi_cxx_recognition_result.h>

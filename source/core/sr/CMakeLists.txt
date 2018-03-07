@@ -9,7 +9,6 @@ include_directories(${CARBON_INCLUDE})
 
 include_directories(${INC_DIR})
 include_directories("${COMMON}/include")
-include_directories("${AUDIO}/include")
 include_directories("${USP}/include")
 
 set(HEADERS
@@ -18,8 +17,8 @@ set(HEADERS
 
 set(HEADERS_PRIVATE
     "${SRC_DIR}/stdafx.h"
-    "${SRC_DIR}/audio_pump.h"
     "${SRC_DIR}/audio_stream_session.h"
+    "${SRC_DIR}/create_module_object.h"
     "${SRC_DIR}/default_recognizer_factory.h"
     "${SRC_DIR}/recognition_event_args.h"
     "${SRC_DIR}/recognition_result.h"
@@ -31,8 +30,8 @@ set(HEADERS_PRIVATE
 
 set(SOURCES
     "${SRC_DIR}/stdafx.cpp"
-    "${SRC_DIR}/audio_pump.cpp"
     "${SRC_DIR}/audio_stream_session.cpp"
+    "${SRC_DIR}/create_module_object.cpp"
     "${SRC_DIR}/default_recognizer_factory.cpp"
     "${SRC_DIR}/recognition_event_args.cpp"
     "${SRC_DIR}/recognition_result.cpp"

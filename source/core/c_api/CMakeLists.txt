@@ -18,6 +18,7 @@ set(HEADERS_PRIVATE
 set(SOURCES
     "${SRC_DIR}/stdafx.cpp"
     "${SRC_DIR}/event_helpers.cpp"
+    "${SRC_DIR}/speechapi_c_global.cpp"
     "${SRC_DIR}/speechapi_c_recognizer.cpp"
     "${SRC_DIR}/speechapi_c_recognizer_factory.cpp"
     "${SRC_DIR}/speechapi_c_result.cpp"

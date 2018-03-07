@@ -1,26 +1,32 @@
 project(audio)
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
-set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
-include_directories(${INC_DIR})
 include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
 include_directories(${CARBON_INCLUDE})
 
 include_directories("${COMMON}/include")
 
-set(HEADERS
-    "${INC_DIR}/microphone.h"
-    "${INC_DIR}/wav_file_reader.h"
+set(HEADERS)
+
+set(HEADERS_PRIVATE
+    "${SRC_DIR}/stdafx.h"
+    "${SRC_DIR}/audio_pump.h"
+    "${SRC_DIR}/create_module_object.h"
+    "${SRC_DIR}/microphone.h"
+    "${SRC_DIR}/interactive_microphone.h"
+    "${SRC_DIR}/wav_file_reader.h"
+    "${SRC_DIR}/wav_file_pump.h"
     )
 
-set(HEADERS_PRIVATE "${SRC_DIR}/stdafx.h")
-
 set(SOURCES
-
     "${SRC_DIR}/stdafx.cpp"
+    "${SRC_DIR}/audio_pump.cpp"
+    "${SRC_DIR}/create_module_object.cpp"
+    "${SRC_DIR}/interactive_microphone.cpp"
     "${SRC_DIR}/wav_file_reader.cpp"
+    "${SRC_DIR}/wav_file_pump.cpp"
     )
 
 set(AUDIO_LIBS common)

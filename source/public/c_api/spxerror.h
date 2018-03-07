@@ -144,3 +144,12 @@ typedef unsigned int SPXHR;
 */
 #define SPXERR_NO_AUDIO_INPUT       __SPX_ERRCODE_FAILED(0x015)
 
+/*** SPXERR_UNEXPECTED_USP_SITE_FAILURE
+*   An unexpected error was encountered when trying to access the USP site
+*/
+#define SPXERR_UNEXPECTED_USP_SITE_FAILURE  __SPX_ERRCODE_FAILED(0x016)
+
+/*** SPXERR_UNEXPECTED_UNIDEC_SITE_FAILURE
+*   An unexpected error was encountered when trying to access the Unidec site
+*/
+#define SPXERR_UNEXPECTED_UNIDEC_SITE_FAILURE  __SPX_ERRCODE_FAILED(0x017)

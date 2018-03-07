@@ -2,7 +2,7 @@ project(audio_tests)
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 
-include_directories ("${AUDIO}/include")
+include_directories ("${AUDIO}")
 include_directories ("${CARBON_EXTERNAL}/Catch2")
 
 include_directories(${CARBON_C_API})

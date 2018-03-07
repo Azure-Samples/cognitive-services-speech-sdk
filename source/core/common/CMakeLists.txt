@@ -11,6 +11,8 @@ include_directories(${CARBON_INCLUDE})
 set(HEADERS
     "${SRC_DIR}/stdafx.h"
     "${INC_DIR}/create_object_helpers.h"
+    "${INC_DIR}/delegate_audio_pump_impl.h"
+    "${INC_DIR}/delegate_audio_file_impl.h"
     "${INC_DIR}/factory_helpers.h"
     "${INC_DIR}/guid_utils.h"
     "${INC_DIR}/handle_table.h"

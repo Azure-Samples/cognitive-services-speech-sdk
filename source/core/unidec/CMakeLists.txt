@@ -15,13 +15,13 @@ set(HEADERS)
 
 set(HEADERS_PRIVATE
     "${SRC_DIR}/stdafx.h"
-    "${SRC_DIR}/mock_reco_engine_adapter.h"
+    "${SRC_DIR}/create_module_object.h"
     "${SRC_DIR}/unidec_reco_engine_adapter.h"
     )
 
 set(SOURCES
     "${SRC_DIR}/stdafx.cpp"
-    "${SRC_DIR}/mock_reco_engine_adapter.cpp"
+    "${SRC_DIR}/create_module_object.cpp"
     "${SRC_DIR}/unidec_reco_engine_adapter.cpp"
     )
 

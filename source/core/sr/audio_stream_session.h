@@ -45,6 +45,7 @@ public:
     SPX_SERVICE_MAP_BEGIN()
     SPX_SERVICE_MAP_ENTRY(ISpxRecoResultFactory)
     SPX_SERVICE_MAP_ENTRY(ISpxEventArgsFactory)
+    SPX_SERVICE_MAP_ENTRY(ISpxNamedProperties)
     SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
     SPX_SERVICE_MAP_END()
 
@@ -103,6 +104,8 @@ private:
     enum SessionState { Idle, StartingPump, ProcessingAudio, StoppingPump, WaitingForAdapterDone };
     bool IsState(SessionState state);
     bool ChangeState(SessionState from, SessionState to);
+
+    std::shared_ptr<ISpxNamedProperties> GetParentProperties() override;
 
     SessionState m_state;
     std::mutex m_stateMutex;

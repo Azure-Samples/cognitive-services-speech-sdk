@@ -48,6 +48,7 @@ private:
     bool HasFormat() { return m_format.get() != nullptr; }
 
     void InitConfig();
+    std::wstring GetBaseModelPath();
 
     void InitFormat(WAVEFORMATEX* pformat);
     void TermFormat();

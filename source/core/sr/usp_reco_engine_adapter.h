@@ -50,6 +50,16 @@ private:
     bool IsUspHandleValid(UspHandle handle);
 
     void UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackContext);
+
+    UspEndpointType GetUspEndpointType();
+    std::string GetUspCustomEndpoint();
+
+    UspRecognitionMode GetUspRecoMode();
+    std::string GetUspLanguage();
+    std::string GetUspModelId();
+
+    std::string GetUspAuthenticationData(UspAuthenticationType* pauthType);
+
     void UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite);
     void UspWriteFormat(UspHandle handle, WAVEFORMATEX* pformat);
     void UspWrite_Actual(UspHandle handle, const uint8_t* buffer, size_t byteToWrite);

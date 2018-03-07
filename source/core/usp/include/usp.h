@@ -194,7 +194,7 @@ UspResult UspInitByUrl(const char *endpointUrl, UspCallbacks *callbacks, void* c
 * Sets authentication data for the specified uspHandle.
 * @param uspHandle The UspHandle.
 * @param authType The type of authentication to be used.
-* @param authData The authnetication data for the specified authentication type.
+* @param authData The authentication data for the specified authentication type.
 * @return A UspResult indicating success or error.
 */
 UspResult UspSetAuthentication(UspHandle uspHandle, UspAuthenticationType authType, const char* authData);

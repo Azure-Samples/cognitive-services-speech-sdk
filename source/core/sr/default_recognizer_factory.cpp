@@ -17,7 +17,7 @@ namespace CARBON_IMPL_NAMESPACE() {
 
 std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateSpeechRecognizer() 
 {
-    // Create the sesion
+    // Create the session
     auto factoryAsSite = SpxSiteFromThis(this);
     auto session = SpxCreateObjectWithSite<ISpxSession>("CSpxAudioStreamSession", factoryAsSite);
 

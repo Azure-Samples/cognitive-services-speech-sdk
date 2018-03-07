@@ -169,5 +169,10 @@ void CSpxRecognizer::OnIsEnabledChanged()
     // no op currently
 }
 
+std::shared_ptr<ISpxNamedProperties> CSpxRecognizer::GetParentProperties()
+{
+    return SpxQueryService<ISpxNamedProperties>(GetSite());
+}
+
 
 } // CARBON_IMPL_NAMESPACE

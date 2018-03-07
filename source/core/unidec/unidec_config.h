@@ -64,8 +64,6 @@ public:
     {
         std::wstring fronEndSpecStr = L"audio(";
         fronEndSpecStr += BaseModelPath;
-        //fronEndSpecStr += BaseModelId;
-        //fronEndSpecStr += L"\\";
         fronEndSpecStr += FeFileName;
         fronEndSpecStr += L",";
         fronEndSpecStr += FeatureName;
@@ -78,8 +76,6 @@ public:
     {
         std::wstring dnnSpecStr = InDnnSpecPrefix;
         dnnSpecStr += BaseModelPath;
-        //dnnSpecStr += BaseModelId;
-        //dnnSpecStr += L"\\";
         dnnSpecStr += AmFileName;
         dnnSpecStr += InDnnSpecPostfix;
 

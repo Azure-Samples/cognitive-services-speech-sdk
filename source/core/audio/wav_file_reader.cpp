@@ -62,6 +62,21 @@ bool CSpxWavFileReader::IsOpen() const
     return m_file.get() != nullptr;
 }
 
+void CSpxWavFileReader::SetContinuousLoop(bool value)
+{
+    m_continuousAudioLoop = value;
+}
+
+void CSpxWavFileReader::SetIterativeLoop(bool value)
+{
+    m_iterativeAudioLoop = value;
+}
+
+void CSpxWavFileReader::SetRealTimePercentage(uint8_t percentage)
+{
+    m_simulateRealtimePercentage = percentage;
+}
+
 uint16_t CSpxWavFileReader::GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat)
 {
     SPX_IFTRUE_THROW_HR(!IsOpen(), SPXERR_UNINITIALIZED);

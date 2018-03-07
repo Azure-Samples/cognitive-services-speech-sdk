@@ -65,6 +65,7 @@
 //
 
 #pragma once
+#include "named_properties_impl.h"
 #include "service_helpers.h"
 #include "service_provider_impl.h"
 #include "shared_ptr_helpers.h"
@@ -83,6 +84,7 @@ class CSpxResourceManager :
     private CSpxSingleton<CSpxResourceManager, ISpxObjectFactory>,
     public ISpxServiceProviderImpl,
     public ISpxObjectFactory,
+    public ISpxNamedPropertiesImpl,
     public ISpxSite
 {
 public:
@@ -113,6 +115,7 @@ public:
     SPX_SERVICE_MAP_BEGIN()
     SPX_SERVICE_MAP_ENTRY(ISpxObjectFactory)
     SPX_SERVICE_MAP_ENTRY(ISpxAddServiceProvider)
+    SPX_SERVICE_MAP_ENTRY(ISpxNamedProperties)
     SPX_SERVICE_MAP_ENTRY_FUNC(InternalQueryService)
     SPX_SERVICE_MAP_END()
 

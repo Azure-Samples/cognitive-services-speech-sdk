@@ -9,7 +9,6 @@ include_directories(${CARBON_CXX_API})
 include_directories(${CARBON_INCLUDE})
 
 include_directories("${COMMON}/include")
-include_directories("${AUDIO}/include")
 include_directories("${SR}")
 include_directories("${USP}/include")
 

@@ -31,6 +31,7 @@ private:
         bool m_fWaitForDebugger = false;
 
         std::string m_strRecognizerType;
+        std::wstring m_strUseRecoEngineProperty;
         bool m_fCommandSystem = false;
         
         bool m_fMicrophoneInput = true;
@@ -67,6 +68,7 @@ private:
 
     void ConsoleInput_Help();
     void ConsoleInput_HelpOn(const wchar_t* psz);
+    void ConsoleInput_HelpOnGlobal();
     void ConsoleInput_HelpOnFactory();
     void ConsoleInput_HelpOnRecognizer();
     void ConsoleInput_HelpOnSpeech();
@@ -74,6 +76,7 @@ private:
     void ConsoleInput_HelpOnSession();
     void ConsoleInput_HelpOnCommandSystem();
 
+    void ConsoleInput_Global(const wchar_t* psz);
     void ConsoleInput_Factory(const wchar_t* psz);
     void ConsoleInput_Recognizer(const wchar_t* psz, std::shared_ptr<BaseAsyncRecognizer>& recognizer);
     void ConsoleInput_SpeechRecognizer(const wchar_t* psz, std::shared_ptr<SpeechRecognizer>& speechRecognizer);
@@ -142,22 +145,22 @@ private:
     void Session_FromSpeechRecognizer();
 
     template <class T>
-    void Parameters_SetString(std::shared_ptr<T> thingWithParameters, const wchar_t* psz);
+    void Parameters_SetString(T &parameters, const wchar_t* psz);
 
     template <class T>
-    void Parameters_GetString(std::shared_ptr<T> thingWithParameters, const wchar_t* psz);
+    void Parameters_GetString(T &parameters, const wchar_t* psz);
 
     template <class T>
-    void Parameters_SetNumber(std::shared_ptr<T> thingWithParameters, const wchar_t* psz);
+    void Parameters_SetNumber(T &parameters, const wchar_t* psz);
 
     template <class T>
-    void Parameters_GetNumber(std::shared_ptr<T> thingWithParameters, const wchar_t* psz);
+    void Parameters_GetNumber(T &parameters, const wchar_t* psz);
 
     template <class T>
-    void Parameters_SetBool(std::shared_ptr<T> thingWithParameters, const wchar_t* psz);
+    void Parameters_SetBool(T &parameters, const wchar_t* psz);
 
     template <class T>
-    void Parameters_GetBool(std::shared_ptr<T> thingWithParameters, const wchar_t* psz);
+    void Parameters_GetBool(T &parameters, const wchar_t* psz);
 
     void ConsoleInput_CommandSystem(const wchar_t* psz);
 
@@ -167,7 +170,7 @@ private:
     void InitCarbon(ConsoleArgs* pconsoleArgs);
     void TermCarbon();
 
-    void InitRecognizer(const std::string& recognizerType, const std::wstring& wavFileName);
+    void InitRecognizer(const std::string& recognizerType, const std::wstring& wavFileName, const std::wstring& useRecoEngineProperty);
     void InitCommandSystem();
 
     void WaitForDebugger();
@@ -182,6 +185,9 @@ private:
     void Sample_HelloWorld();
     void Sample_HelloWorld_WithEvents();
     void Sample_HelloWorld_In_C();
+
+    void Sample_HelloWorld_PickEngine(const wchar_t* pszEngine);
+
 
 private:
 

@@ -57,3 +57,48 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
         recognizer.reset();
     }
 }
+
+TEST_CASE("Speech Recognizer basics", "[api][cxx]")
+{
+    GIVEN("Mocks for UspRecoEngine and Microphone...")
+    {
+        GlobalParameterCollection& globalParams = GlobalParameters::Get();
+        globalParams[L"__mockUspRecoEngine"] = true;
+        globalParams[L"__mockMicrophone"] = true;
+
+        int gotIntermediateResults = 0;
+        int gotFinalResult = 0;
+
+        auto recognizer = RecognizerFactory::CreateSpeechRecognizer();
+        REQUIRE(recognizer != nullptr);
+
+        WHEN("We we connect both IntermediateResult and FinalResult event handlers...")
+        {
+            recognizer->IntermediateResult += [&](const SpeechRecognitionEventArgs& e) {
+                UNUSED(e);
+                gotIntermediateResults++;
+            };
+            recognizer->FinalResult += [&](const SpeechRecognitionEventArgs& e) {
+                UNUSED(e);
+                gotFinalResult++;
+            };
+
+            THEN("We should be able to verify that they are connected.")
+            {
+                REQUIRE(recognizer->IntermediateResult.IsConnected());
+                REQUIRE(recognizer->FinalResult.IsConnected());
+            }
+
+            WHEN("We do a single recognition")
+            {
+                auto result = recognizer->RecognizeAsync().get();
+                THEN("We should see that we got more than one Intermediate, exactly one Final, and the call to RecoAsync returned a result")
+                {
+                    REQUIRE(gotIntermediateResults > 1);
+                    REQUIRE(gotFinalResult == 1);
+                    REQUIRE(result != nullptr);
+                }
+            }
+        }
+    }
+}

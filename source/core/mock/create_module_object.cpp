@@ -1,0 +1,52 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+// create_module_object.cpp: Implementation definitions for *CreateModuleObject* methods
+//
+
+#include "stdafx.h"
+#include "create_module_object.h"
+#include "create_object_helpers.h"
+#include "factory_helpers.h"
+#include "mock_audio_reader.h"
+#include "mock_interactive_microphone.h"
+#include "mock_reco_engine_adapter.h"
+#include "mock_wav_file_reader.h"
+#include "mock_wav_file_pump.h"
+#include "speechapi_cxx_global.h"
+
+
+namespace CARBON_IMPL_NAMESPACE() {
+
+
+bool ShouldMock(const wchar_t* psz)
+{
+    return GlobalParameters::Get()[psz].GetBool(false);
+}
+
+SPX_EXTERN_C void* Mock_CreateModuleObject(const char* className, const char* interfaceName)
+{
+    SPX_FACTORY_MAP_BEGIN();
+    SPX_FACTORY_MAP_ENTRY(CSpxMockAudioReader, ISpxAudioReader);
+    SPX_FACTORY_MAP_ENTRY(CSpxMockInteractiveMicrophone, ISpxAudioPump);
+    SPX_FACTORY_MAP_ENTRY(CSpxMockRecoEngineAdapter, ISpxRecoEngineAdapter);
+    SPX_FACTORY_MAP_ENTRY(CSpxMockWavFileReader, ISpxAudioFile);
+    SPX_FACTORY_MAP_ENTRY(CSpxMockWavFilePump, ISpxAudioFile);
+    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"__mockUspRecoEngine"), CSpxUspRecoEngineAdapter, ISpxRecoEngineAdapter, CSpxMockRecoEngineAdapter);
+    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"__mockUnidecRecoEngine"), CSpxUnidecRecoEngineAdapter, ISpxRecoEngineAdapter, CSpxMockRecoEngineAdapter);
+    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"__mockMicrophone"), CSpxInteractiveMicrophone, ISpxAudioPump, CSpxMockInteractiveMicrophone);
+    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"__mockWavFileReader"), CSpxWavFileReader, ISpxAudioFile, CSpxMockWavFileReader);
+    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"__mockWavFilePump"), CSpxWavFilePump, ISpxAudioFile, CSpxMockWavFilePump);
+    SPX_FACTORY_MAP_END();
+}
+
+SPX_EXTERN_C SPXDLL_EXPORT void* CreateModuleObject(const char* className, const char* interfaceName)
+{
+    SPX_FACTORY_MAP_BEGIN();
+    SPX_FACTORY_MAP_ENTRY_FUNC(Mock_CreateModuleObject);
+    SPX_FACTORY_MAP_END();
+}
+
+
+} // CARBON_IMPL_NAMESPACE

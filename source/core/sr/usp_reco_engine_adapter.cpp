@@ -76,10 +76,177 @@ void CSpxUspRecoEngineAdapter::UspInitialize(UspHandle* handle, UspCallbacks *ca
 {
     SPX_DBG_TRACE_VERBOSE("%s(0x%x)", __FUNCTION__, handle);
 
-    UspEndpointType type = USP_ENDPOINT_BING_SPEECH;
-    UspRecognitionMode mode = USP_RECO_MODE_INTERACTIVE;
-    SPX_IFFAILED_THROW_HR(::UspInit(type, mode, callbacks, callbackContext, handle));
+    // Before we initialize the USP, we need to know what Endpoint type we're going to use...
+    UspEndpointType type = GetUspEndpointType();
+
+    // Initialize the USP (by URL or by type)
+    SPX_IFFAILED_THROW_HR(type == USP_ENDPOINT_UNKNOWN
+        ? ::UspInitByUrl(GetUspCustomEndpoint().c_str(), callbacks, callbackContext, handle)
+        : ::UspInit(type, GetUspRecoMode(), callbacks, callbackContext, handle));
+
+    // Set the auth data, if it was provided
+    auto authType = USP_AUTHENTICATION_UNKNOWN;
+    auto authData = GetUspAuthenticationData(&authType);
+    if (authType != USP_AUTHENTICATION_UNKNOWN)
+    {
+        SPX_IFFAILED_THROW_HR(::UspSetAuthentication(*handle, authType, authData.c_str()));
+    }
+
+    // Set the language, if it was provided...
+    auto language = GetUspLanguage();
+    if (!language.empty())
+    {
+        SPX_IFFAILED_THROW_HR(::UspSetLanguage(*handle, language.c_str()));
+    }
+
+    // Set the model id if it was provided...
+    auto id = GetUspModelId();
+    if (!id.empty())
+    {
+        SPX_IFFAILED_THROW_HR(::UspSetModelId(*handle, id.c_str()));
+    }
+
+    // Finally ... Connect to the service
     SPX_IFFAILED_THROW_HR(::UspConnect(*handle));
+}
+
+UspEndpointType CSpxUspRecoEngineAdapter::GetUspEndpointType()
+{
+    // Get the named property service...
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+
+    // Get the property that indicates what endpoint to use...
+    auto value = properties->GetStringValue(L"__uspEndpoint");
+
+    // Convert that value to the appropriate UspEndpointType
+    UspEndpointType type;
+    if (value.empty() || PAL::wcsicmp(value.c_str(), L"BING") == 0)
+    {
+        type = USP_ENDPOINT_BING_SPEECH;
+    }
+    else if (PAL::wcsicmp(value.c_str(), L"CRIS") == 0)
+    {
+        type = USP_ENDPOINT_CRIS;
+    }
+    else if (PAL::wcsicmp(value.c_str(), L"CDSDK") == 0)
+    {
+        type = USP_ENDPOINT_CDSDK;
+    }
+    else
+    {
+        type = USP_ENDPOINT_UNKNOWN;
+    }
+
+    // We're done!
+    return type;
+}
+
+std::string CSpxUspRecoEngineAdapter::GetUspCustomEndpoint()
+{
+    // We should only be called here if we're using a custom endpoint (aka UNKNOWN, see GetUspEndpointType())
+    SPX_DBG_ASSERT(GetUspEndpointType() == USP_ENDPOINT_UNKNOWN);
+
+    // Get the named properties service...
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+
+    // Get the property that indicates what endpoint to use...
+    auto value = properties->GetStringValue(L"__uspEndpoint");
+    return PAL::ToString(value);
+}
+
+UspRecognitionMode CSpxUspRecoEngineAdapter::GetUspRecoMode()
+{
+    // We should only be called here if we're NOT using a custom endpoint (aka UNKNOWN, see GetUspEndpointType())
+    SPX_DBG_ASSERT(GetUspEndpointType() != USP_ENDPOINT_UNKNOWN);
+
+    // Get the named properties service...
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+
+    // Get the property that indicates what reco mode to use...
+    auto value = properties->GetStringValue(L"__uspRecoMode");
+
+    // Convert that value to the appropriate UspRecognitionMode...
+    UspRecognitionMode mode;
+    if (value.empty() || PAL::wcsicmp(value.c_str(), L"INTERACTIVE") == 0)
+    {
+        mode = USP_RECO_MODE_INTERACTIVE;
+    }
+    else if (PAL::wcsicmp(value.c_str(), L"CONVERSATION") == 0)
+    {
+        mode = USP_RECO_MODE_CONVERSATION;
+    }
+    else if (PAL::wcsicmp(value.c_str(), L"DICTATION") == 0)
+    {
+        mode = USP_RECO_MODE_DICTATION;
+    }
+    else
+    {
+        mode = USP_RECO_MODE_UNKNOWN;
+    }
+
+    // We're done!
+    return mode;
+}
+
+std::string CSpxUspRecoEngineAdapter::GetUspLanguage()
+{
+    // Get the named properties service...
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+
+    // Get the property that indicates what language to use...
+    auto value = properties->GetStringValue(L"__uspLanguage");
+    return PAL::ToString(value);
+}
+
+std::string CSpxUspRecoEngineAdapter::GetUspModelId()
+{
+    // Get the named properties service...
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+
+    // Get the property that indicates what model to use...
+    auto value = properties->GetStringValue(L"__uspModelId");
+    return PAL::ToString(value);
+}
+
+std::string CSpxUspRecoEngineAdapter::GetUspAuthenticationData(UspAuthenticationType* pauthType)
+{
+    // Get the named properties service...
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+
+    // Get the properties that indicates what endpoint to use...
+    auto uspSubscriptionKey = properties->GetStringValue(L"__uspSubscriptionKey");
+    auto uspAuthToken = properties->GetStringValue(L"__uspAuthToken");
+    auto uspRpsToken = properties->GetStringValue(L"__uspRpsToken");
+
+    // Use those properties to determine which authentication type to use
+    auto authType = USP_AUTHENTICATION_UNKNOWN;
+    std::wstring* pauthData = nullptr;
+
+    if (!uspSubscriptionKey.empty())
+    {
+        authType = USP_AUTHENTICATION_SUBSCRIPTION_KEY;
+        pauthData = &uspSubscriptionKey;
+    }
+    else if (!uspAuthToken.empty())
+    {
+        authType = USP_AUTHENTICATION_AUTHORIZATION_TOKEN;
+        pauthData = &uspAuthToken;
+    }
+    else if (!uspRpsToken.empty())
+    {
+        authType = USP_AUTHENTICATION_SEARCH_DELEGATION_RPS_TOKEN;
+        pauthData = &uspRpsToken;
+    }
+
+    // And ... We're done!
+    *pauthType = authType;
+    return pauthData == nullptr ? std::string("") : PAL::ToString(*pauthData);
 }
 
 void CSpxUspRecoEngineAdapter::UspWriteFormat(UspHandle handle, WAVEFORMATEX* pformat)
@@ -104,7 +271,7 @@ void CSpxUspRecoEngineAdapter::UspWriteFormat(UspHandle handle, WAVEFORMATEX* pf
     std::unique_ptr<uint8_t[]> buffer(new uint8_t[cbHeader]);
     auto ptr = buffer.get();
 
-    // The 'RIFF' header (consists of 'RIFF' followed by size of paylaod that folows)
+    // The 'RIFF' header (consists of 'RIFF' followed by size of payload that follows)
     ptr = FormatBufferWriteChars(ptr, "RIFF", cbTag);
     ptr = FormatBufferWriteNumber(ptr, cbRiffChunk);
 
