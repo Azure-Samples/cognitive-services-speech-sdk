@@ -13,13 +13,13 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "propbag.h"
 #include "parson.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#define NO_DASH_UUID_LEN 37
 #define TIME_STRING_MAX_SIZE 30
 #define ERROR_STRING_MAX_SIZE 50
 #define MAX_EVENT_ARRAY_SIZE 500
@@ -28,6 +28,11 @@ extern "C" {
 static const char music_session_id_arg[] = "music_session_id";
 static const char action_name_arg[] = "action_name";
 static const char buffer_session_id_arg[] = "buffer_id";
+
+typedef void* PROPERTYBAG_HANDLE;
+
+typedef struct _TELEMETRY_CONTEXT* TELEMETRY_HANDLE;
+
 /**
  * The PTELEMETRY_WRITE type represents an application-defined
  * callback function used to handle raw telemetry data.
@@ -61,44 +66,24 @@ int GetISO8601Time(char *buffer, unsigned int bufferLength);
 int GetISO8601TimeOffset(char *buffer, unsigned int bufferLength, int offset);
 
 /**
- * Sets the application defined callbacks.
- * @param pfnCallback The application defined event data callback.
- * @param pContext The application defined context.
- */
-void telemetry_setcallbacks(PTELEMETRY_WRITE pfnCallback, void* pContext);
-
-/**
  * Flushes any outstanding telemetry events.
  */
-void telemetry_flush();
+void telemetry_flush(TELEMETRY_HANDLE handle);
 
-/**
- * This must succeed before telemetry_log_event is called.
- * @param handle The Cortana handle.
- * @return Zero for success, non-zero for failure.
- */
-int telemetry_initialize();
 
-/**
- * Initializes the inband telemetry pointers and char arrays
+ /**
+ * Creates a object handle to maintain telemetry state, initializes the internal structures and
+ * sets the application defined callbacks used for uploading in-band telemetry events.
+ * @param pfnCallback The callbacks used for uploading in-band telemetry events.
+ * @param pContext The callback context.
  */
-void inband_telemetry_initialize();
+TELEMETRY_HANDLE telemetry_create(PTELEMETRY_WRITE callback, void* context);
 
 /**
  * Clears all memory. To be called at the completion of all telemetry operations
  *
  */
-void telemetry_uninitialize();
-
-/**
- * Set a property that will apply to all future Aria events.
- * @param key Property key.  This should be underscore case (e.g. my_property)
- *        by convention.
- * @param value Property value.
- */
-int telemetry_set_context_string(const char* key, const char* value);
-int telemetry_set_context_long(const char* key, long value);
-int telemetry_set_context_double(const char* key, double value);
+void telemetry_destroy(TELEMETRY_HANDLE handle);
 
 typedef enum _METRIC_ID
 {
@@ -135,69 +120,65 @@ int telemetry_log_event(METRIC_ID event_id, const char* types, ...);
 int v_telemetry_log_event(METRIC_ID event_id, const char* types, va_list args);
 
 /**
-* Function for metric events that record timestamp
-* @param pBag pointer to the property bag
-* @param eventName The name of the event to be added to the event buffer.
-* @param id The unique id of the event to be added to the event buffer.
-* @param key The key of the JSON element to be added to the event buffer.
+* Timestamps and records telemetry event.
+* @param handle A handle that captures current telemetry state.
+* @param eventName The name of the event to be recorded.
+* @param id The unique id of the event to be recorded.
+* @param key The key of the JSON element to be recorded.
+* @param value The value of the JSON element to be recorded.
 */
-void inband_event_timestamp_populate(PROPERTYBAG_HANDLE *pBag, const char *eventName, const char *id, const char *key);
+void inband_event_timestamp_populate(TELEMETRY_HANDLE handle, const char *eventName, const char *id, const char *key);
 
 /**
-* Received metric event population function
+* Received metric event population function.
+* @param handle A handle that captures current telemetry state.
 * @param receivedMsg The name of the received event from service.
 */
-void record_received_msg(const char *receivedMsg);
-
-void inband_connection_telemetry(const char *id, const char *key, void *value);
+void record_received_msg(TELEMETRY_HANDLE handle, const char *receivedMsg);
 
 /**
-* Function to handle tts events
-* @param pBag pointer to the property bag
-* @param eventName The name of the event to be added to the event buffer.
-* @param id The unique id of the event to be added to the event buffer.
-* @param key The key of the JSON element to be added to the event buffer.
-* @param value The value of the JSON element to be added to the event buffer.
+* Records connection telemetry event.
+* @param handle A handle that captures current telemetry state.
+* @param eventName The name of the event to be recorded.
+* @param id The unique id of the event to be recorded.
+* @param key The key of the JSON element to be recorded.
+* @param value The value of the JSON element to be recorded.
 */
-void inband_tts_telemetry(const char *id, const char *key, void *value);
+void inband_connection_telemetry(TELEMETRY_HANDLE handle, const char *id, const char *key, void *value);
 
 /**
-* Create the start and end events for kws
-* @param kwsStartOffset the offset in milliseconds used to determine the listening trigger start
-* @param audioStartOffset the offset in milliseconds used to determine the start of audio
+* Records tts telemetry event
+* @param handle A handle that captures current telemetry state.
+* @param id The unique id of the event to be recorded.
+* @param key The key of the JSON element to be recorded.
+* @param value The value of the JSON element to be recorded.
 */
-void inband_kws_telemetry(int kwsStartOffsetMS, int audioStartOffsetMS);
+void inband_tts_telemetry(TELEMETRY_HANDLE handle, const char *id, const char *key, void *value);
 
 /**
-* Create the events for skills
-* @param skillId the skill name
-* @param key Event key - start, end, status, error
-* @param value Event value if any - eg: error, status code
+* Creates the start and end events for kws.
+* @param handle A handle that captures current telemetry state.
+* @param kwsStartOffset the offset in milliseconds used to determine the listening trigger start.
+* @param audioStartOffset the offset in milliseconds used to determine the start of audio.
 */
-void inband_skill_telemetry(const char *skillId, const char *key, void *value);
+void inband_kws_telemetry(TELEMETRY_HANDLE handle, int kwsStartOffsetMS, int audioStartOffsetMS);
 
 /**
-* Handles the necessary changes for a requestId change event
-* @param requestId the currently active requestId
+* Handles the necessary changes for a requestId change event.
+* @param handle A handle that captures current telemetry state.
+* @param requestId the currently active requestId.
 */
-void register_requestId_change_event(const char *requestId);
+void register_requestId_change_event(TELEMETRY_HANDLE handle, const char *requestId);
 
 /**
-* Metric event key value population function
-* @param pBag pointer to the property bag
-* @param eventName The name of the event to be added to the event buffer.
-* @param id The unique id of the event to be added to the event buffer.
-* @param key The key of the JSON element to be added to the event buffer.
-* @param value The value of the JSON element to be added to the event buffer.
+* Populates and records telemetry event.
+* @param handle A handle that captures current telemetry state.
+* @param eventName The name of the event to be recorded.
+* @param id The unique id of the event to be recorded.
+* @param key The key of the JSON element to be recorded.
+* @param value The value of the JSON element to be recorded.
 */
-void inband_event_key_value_populate(PROPERTYBAG_HANDLE *pBag, const char *eventName, const char *id, const char *key, void *value);
-
-/*
-* Global JSON Event Arrays. Top level container arrays for all received message events
-* and Metric events loggged by the client.
-*/
-extern PROPERTYBAG_HANDLE evMetricArray;
-extern PROPERTYBAG_HANDLE evRcvMsgsArray;
+void inband_event_key_value_populate(TELEMETRY_HANDLE handle, const char *eventName, const char *id, const char *key, void *value);
 
 typedef enum incomingMsgType
 {
@@ -213,7 +194,7 @@ typedef enum incomingMsgType
 
 typedef struct _request_telemetry_object_data
 {
-    char requestId[37];
+    char requestId[NO_DASH_UUID_LEN];
     int bPayloadSet;
     PROPERTYBAG_HANDLE receivedMsgsJsonArray[countOfMsgTypes];
 
@@ -221,14 +202,8 @@ typedef struct _request_telemetry_object_data
     PROPERTYBAG_HANDLE audioStartJson;
     PROPERTYBAG_HANDLE microphoneJson;
     PROPERTYBAG_HANDLE listeningTriggerJson;
-    PROPERTYBAG_HANDLE skillJson;
-    PROPERTYBAG_HANDLE audioPlaybackJson;
-    PROPERTYBAG_HANDLE viewDisplayTextJson;
-    PROPERTYBAG_HANDLE viewCardJson;
+    PROPERTYBAG_HANDLE ttsJson;
 } TELEMETRY_DATA;
-
-extern TELEMETRY_DATA *current_telemetry_object;
-extern TELEMETRY_DATA *current_connection_telemetry_object;
 
 // Top level Array keys for events
 extern const char* kRcvd_msgs_key;
@@ -240,9 +215,6 @@ extern const char* kRcvd_msg_audio_key;
 
 // Metric event name keys
 extern const char* kEvent_type_audioPlayback;
-extern const char* kEvent_type_viewDisplayText;
-extern const char* kEvent_type_viewCard;
-extern const char* kEvent_type_skill;
 extern const char* kEvent_type_audioStart;
 extern const char* kEvent_type_microphone;
 extern const char* kEvent_type_listeningTrigger;
@@ -273,7 +245,6 @@ extern const char* kEvent_value;
 
 extern const char* kEvent_type_key;
 
-extern const char* kEvent_type_skill;
 extern const char* kEvent_type_device;
 extern const char* kEvent_type_notification;
 extern const char* kEvent_type_sdk;
@@ -287,20 +258,18 @@ extern const char* kEvent_cpu_key;
 extern const char* kEvent_error_key;
 extern const char* kEvent_status_key;
 
-extern const char* kEvent_type_skill_action_key;
-
 // Recieved the specified message from the service. 
-#define metrics_received_message(x) record_received_msg(x)
+#define metrics_received_message(handle, x) record_received_msg(handle, x)
 
 // Metric Events defined in telemetry spec
-#define metrics_listening_start(kwsStartTime) \
-    inband_event_key_value_populate(&current_telemetry_object->listeningTriggerJson, \
+#define metrics_listening_start(handle, kwsStartTime) \
+    inband_event_key_value_populate(handle, \
                                     kEvent_type_listeningTrigger, \
                                     NULL, \
                                     kEvent_start_key, \
                                     json_value_init_string(kwsStartTime))
-#define metrics_listening_stop() \
-    inband_event_timestamp_populate(&current_telemetry_object->listeningTriggerJson, \
+#define metrics_listening_stop(handle) \
+    inband_event_timestamp_populate(handle, \
                                     kEvent_type_listeningTrigger, \
                                     NULL, \
                                     kEvent_end_key)
@@ -311,66 +280,49 @@ extern const char* kEvent_type_skill_action_key;
                          audioStartOffset)
 
 /* Start of the audio stream event which includes the initial silence before KWS */
-#define metrics_recording_start(audioStartTime) \
-    inband_event_key_value_populate(&current_telemetry_object->audioStartJson, \
+#define metrics_recording_start(handle, audioStartTime) \
+    inband_event_key_value_populate(handle, \
                                     kEvent_type_audioStart, \
                                     NULL, \
                                     kEvent_start_key, \
                                     json_value_init_string(audioStartTime))
 
-#define metrics_skill_start(skillId) \
-    inband_skill_telemetry(skillId, \
+#define metrics_tts_start(handle, requestId) \
+    inband_tts_telemetry(handle, requestId, \
                                     kEvent_start_key, \
                                     NULL)
-#define metrics_skill_end(skillId)    \
-    inband_skill_telemetry(skillId, \
-                                    kEvent_end_key, \
-                                    NULL)
-#define metrics_skill_error(skillId, error)    \
-    inband_skill_telemetry(skillId, \
-                                    kEvent_error_key, \
-                                    json_value_init_string(error))
-#define metrics_skill_status(skillId, status) \
-    inband_skill_telemetry(skillId, \
-                                    kEvent_status_key, \
-                                    json_value_init_number(status))
-
-#define metrics_tts_start(requestId) \
-    inband_tts_telemetry(requestId, \
-                                    kEvent_start_key, \
-                                    NULL)
-#define metrics_tts_stop(requestId)    \
-    inband_tts_telemetry(requestId, \
+#define metrics_tts_stop(handle, requestId)    \
+    inband_tts_telemetry(handle, requestId, \
                                     kEvent_end_key, \
                                     NULL)
 
-#define metrics_audio_start() \
-    inband_event_timestamp_populate(&current_telemetry_object->microphoneJson, \
+#define metrics_audio_start(handle) \
+    inband_event_timestamp_populate(handle, \
                                     kEvent_type_microphone, \
                                     NULL, \
                                     kEvent_start_key)
-#define metrics_audio_end()    \
-    inband_event_timestamp_populate(&current_telemetry_object->microphoneJson, \
+#define metrics_audio_end(handle)    \
+    inband_event_timestamp_populate(handle, \
                                     kEvent_type_microphone, \
                                     NULL, \
                                     kEvent_end_key)
-#define metrics_audio_error(error)    \
-    inband_event_key_value_populate(&current_telemetry_object->microphoneJson, \
+#define metrics_audio_error(handle, error)    \
+    inband_event_key_value_populate(handle, \
                                     kEvent_type_microphone, \
                                     NULL, \
                                     kEvent_error_key, \
                                     json_value_init_string(error))
 
-#define metrics_transport_start(connectionId) \
-    inband_connection_telemetry(connectionId, \
+#define metrics_transport_start(handle, connectionId) \
+    inband_connection_telemetry(handle, connectionId, \
                                     kEvent_start_key, \
                                     NULL)
-#define metrics_transport_connected(connectionId) \
-    inband_connection_telemetry(connectionId, \
+#define metrics_transport_connected(handle, connectionId) \
+    inband_connection_telemetry(handle, connectionId, \
                                     kEvent_end_key, \
                                     NULL)
-#define metrics_transport_error(connectionId, error) \
-    inband_connection_telemetry(connectionId, \
+#define metrics_transport_error(handle, connectionId, error) \
+    inband_connection_telemetry(handle, connectionId, \
                                     kEvent_error_key, \
                                     json_value_init_number(error))
 
@@ -382,8 +334,8 @@ extern const char* kEvent_type_skill_action_key;
 #define metrics_transport_state_end(__state)    telemetry_log_event_i(METRIC_ID_xport_state_end, (int)(__state))
 
 /* Client request identifier for the current turn */
-#define metrics_transport_requestid(requestId)    \
-    register_requestId_change_event(requestId)
+#define metrics_transport_requestid(handle, requestId)    \
+    register_requestId_change_event(handle, requestId)
 
 /* Service request identifer for the current turn */
 #define metrics_transport_serviceid(__serviceId)  telemetry_log_event_s(METRIC_ID_servicetag, (__serviceId))
@@ -542,13 +494,6 @@ extern const char* kEvent_type_skill_action_key;
 
 /* The KWS model version. */
 #define metrics_kws_version(__s0)       telemetry_log_event2_s(METRIC_ID_kws, "version", __s0)
-
-/* A skill wrapper */
-#define metrics_skill(__event_id,__skill_name,__skill_action) \
-    telemetry_log_event(__event_id, "sss",\
-                        kEvent_type_key, kEvent_type_skill,\
-                        kEvent_name_key, __skill_name,\
-                        kEvent_type_skill_action_key, __skill_action)
 
 /* An incoming call */
 #define metrics_telephony_incomingcall()    telemetry_log_event_v(METRIC_ID_telephony_incomingcall)
@@ -803,8 +748,6 @@ actually fire on the client. */
 
 /* These events draw a timeline for boot */
 #define metrics_boot_phase(__phase) telemetry_log_perf_event(METRIC_ID_boot_phase, "s", "phase", __phase)
-
-#define metrics_skill_invoke(__skill, __action)         telemetry_log_event(METRIC_ID_skill_invoke, "ss", kEvent_name_key, __skill, kEvent_type_skill_action_key, __action)
 
 #define metrics_skype_outgoing_call_skypeid(__callid)   telemetry_log_event_s(METRIC_ID_skype_outgoing_call_skypeid, __callid)
 #define metrics_skype_incoming_call_skypeid(__callid)   telemetry_log_event_s(METRIC_ID_skype_incoming_call_skypeid, __callid)

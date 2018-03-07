@@ -26,15 +26,17 @@ extern "C" {
 
 #define KEYWORD_PATH "Path"
 
-typedef void* TransportHandle;
+typedef struct _TransportRequest* TransportHandle;
 
+typedef struct _TELEMETRY_CONTEXT* TELEMETRY_HANDLE;
 /**
  * Creates a new transport request.
  * @param host The host name.
  * @param context The application defined context that will be passed back during callback.
+ * @param telemetry Telemetry handle to record various transport events.
  * @return A new transport handle.
  */
-TransportHandle TransportRequestCreate(const char* host, void* context);
+TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETRY_HANDLE telemetry);
 
 /**
  * Destroys a transport request.
@@ -174,6 +176,16 @@ const char* TransportGetRequestId(TransportHandle transportHandle);
 * @param transportHandle The transport handle.
 */
 void TransportSetDnsCache(TransportHandle transportHandle, DnsCacheHandle dnsCache);
+
+/**
+ * Sends the provided buffer content as a telemetry event (using 'telemetry' message path).
+ * @param transportHandle Transport handle.
+ * @param buffer The buffer to write.
+ * @param bufferSize Size of the buffer in bytes.
+ * @param requestId Request id to tag the telemetry message with.
+ * @return A return code or zero if successful.
+ */
+void TransportWriteTelemetry(TransportHandle transportHandle, const uint8_t* buffer, size_t bytesToWrite, const char *requestId);
 
 #ifdef __cplusplus
 }

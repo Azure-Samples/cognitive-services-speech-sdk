@@ -29,7 +29,6 @@ extern const char g_messagePathTurnStart[];
 extern const char g_messagePathTurnEnd[];
 extern const char g_messagePathSpeechEndDetected[];
 extern const char g_messagePathSpeechStartDetected[];
-extern const char g_messagePathResponse[];
 
 #ifdef __cplusplus
 } // extern "C" 

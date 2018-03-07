@@ -18,6 +18,9 @@
 #include "azure_c_shared_utility/base64.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 
+#include "metrics.h"
+#include "iobuffer.h"
+#include "transport.h"
 #include "uspinternal.h"
 
 // uncomment the line below to see all non-binary protocol messages in the log
@@ -99,9 +102,6 @@ typedef struct _TransportRequest
             WSIO_CONFIG             config;
             bool                    chunksent;
             TransportStream*        streamHead;
-            BUFFER_HANDLE           metricData;
-            size_t                  metricOffset;
-            LOCK_HANDLE             metricLock;
         } _ws;
     } u1;
 
@@ -115,8 +115,8 @@ typedef struct _TransportRequest
     bool                         isOpen;
     char*                        url;
     void*                        context;
-    char                         requestId[37];
-    char                         connectionId[37];
+    char                         requestId[NO_DASH_UUID_LEN];
+    char                         connectionId[NO_DASH_UUID_LEN];
     uint8_t                      binaryRequestId[16];
     uint32_t                     streamId;
     bool                         needAuthenticationHeader;
@@ -125,6 +125,7 @@ typedef struct _TransportRequest
     DnsCacheHandle               dnsCache;
     uint64_t                     connectionTime;
     TokenStore                   tokenStore;
+    TELEMETRY_HANDLE             telemetry;
 } TransportRequest;
 
 /*
@@ -347,7 +348,7 @@ static void WsioOnOpened(void* context, IO_OPEN_RESULT open_result)
         request->state = TRANSPORT_STATE_CONNECTED;
         request->connectionTime = telemetry_gettime();
         LogInfo("Opening websocket completed. TransportRequest: 0x%x, wsio handle: 0x%x", request, request->ws.WSHandle);
-        metrics_transport_connected(request->connectionId);
+        metrics_transport_connected(request->telemetry, request->connectionId);
     }
     else
     {
@@ -360,7 +361,7 @@ static void WsioOnOpened(void* context, IO_OPEN_RESULT open_result)
 
         status = wsio_gethttpstatus(request->ws.WSHandle); 
         LogError("Wsio failed to open. wsio handle: 0x%x, status=%d, open_result=%d", request->ws.WSHandle, status, open_result);
-        metrics_transport_error(request->connectionId, status);
+        metrics_transport_error(request->telemetry, request->connectionId, status);
 
         switch (status)
         {
@@ -508,7 +509,7 @@ static void WsioOnBytesRecv(void* context, const unsigned char* buffer, size_t s
         value = HTTPHeaders_FindHeaderValue(responseHeadersHandle, KEYWORD_PATH);
         if (value)
         {
-            metrics_received_message(value);
+            metrics_received_message(request->telemetry, value);
         }
 
         // optional StreamId header
@@ -597,10 +598,8 @@ static void WSOnClose(void* context)
     request->state = TRANSPORT_STATE_CLOSED;
 }
 
-static void PrepareTelemetryPayload(void *context, const uint8_t* eventBuffer, size_t eventBufferSize, TransportPacket **pPacket, const char *requestId)
+static void PrepareTelemetryPayload(TransportHandle request, const uint8_t* eventBuffer, size_t eventBufferSize, TransportPacket **pPacket, const char *requestId)
 {
-    TransportRequest *request = (TransportRequest*)context;
-
     // serialize headers.
     size_t headerLen;
 
@@ -638,13 +637,14 @@ static void PrepareTelemetryPayload(void *context, const uint8_t* eventBuffer, s
     *pPacket = msg;
 }
 
-static void WSOnTelemetryData(const uint8_t* buffer, size_t bytesToWrite, void *context, const char *requestId)
+void TransportWriteTelemetry(TransportHandle handle, const uint8_t* buffer, size_t bytesToWrite, const char *requestId)
 {
-    TransportRequest *request = (TransportRequest*)context;
-    TransportPacket *msg = NULL;
-    PrepareTelemetryPayload(context, buffer, bytesToWrite, &msg, requestId);
-
-    WsioQueue(request, msg);
+    if (NULL != handle && handle->isWS)
+    {
+        TransportPacket *msg = NULL;
+        PrepareTelemetryPayload(handle, buffer, bytesToWrite, &msg, requestId);
+        WsioQueue(handle, msg);
+    }
 }
 
 static void TransportCreateConnectionId(TransportHandle transportHandle)
@@ -671,12 +671,10 @@ void TransportCreateRequestId(TransportHandle transportHandle)
                 ((uint8_t)hexchar_to_int(request->requestId[i]) << 4) |
                 ((uint8_t)hexchar_to_int(request->requestId[i + 1]));
         }
-        LogInfo("SessionId: '%s'", request->requestId);
-        metrics_transport_requestid(request->requestId);
 
-        // There is at most one active request at a time -- associate telemetry
-        // events with this request ID.
-        telemetry_set_context_string("request_id", request->requestId);
+        // TODO: why is this logged as session id???
+        LogInfo("SessionId: '%s'", request->requestId);
+        metrics_transport_requestid(request->telemetry, request->requestId);
 
         for (stream = request->ws.streamHead; stream != NULL; stream = stream->next)
         {
@@ -689,7 +687,7 @@ void TransportCreateRequestId(TransportHandle transportHandle)
     }
 }
 
-TransportHandle TransportRequestCreate(const char* host, void* context)
+TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETRY_HANDLE telemetry)
 {
     TransportRequest *request;
     int err = -1;
@@ -711,6 +709,7 @@ TransportHandle TransportRequestCreate(const char* host, void* context)
 
     memset(request, 0, sizeof(TransportRequest));
     request->context = context;
+    request->telemetry = telemetry;
     // disable by default, usually only websocket request will need it
     request->queue = list_create();
 
@@ -733,8 +732,6 @@ TransportHandle TransportRequestCreate(const char* host, void* context)
 
     if (request->isWS)
     {
-        request->ws.metricLock = Lock_Init();
-        telemetry_setcallbacks(WSOnTelemetryData, request);
         TransportCreateRequestId(request);
 
         l = strlen(host);
@@ -815,11 +812,15 @@ void TransportRequestDestroy(TransportHandle transportHandle)
 
     if (request->isWS)
     {
-        telemetry_setcallbacks(NULL, NULL);
         if (request->ws.WSHandle)
         {
-            if (request->isOpen)
+            if (request->isOpen || request->state == TRANSPORT_STATE_OPENING)
             {
+                // invoke close from here even when the request "officially" open
+                // (which only happens when we've received response headers from the server),
+                // otherwise the wsio_destroy will invoke it while holding a lock 
+                // needed by the internal "on ws close" callback, spin-waiting 
+                // forever waiting to hear from the said callback.
                 (void)wsio_close(request->ws.WSHandle, WSOnClose, request);
                 while (request->isOpen)
                 {
@@ -849,17 +850,6 @@ void TransportRequestDestroy(TransportHandle transportHandle)
         }
 
         metrics_transport_closed();
-
-        if (request->ws.metricData)
-        {
-            BUFFER_delete(request->ws.metricData);
-            request->ws.metricData = NULL;
-        }
-
-        if (request->ws.metricLock)
-        {
-            Lock_Deinit(request->ws.metricLock);
-        }
     }
     else
     {
@@ -996,7 +986,7 @@ static int TransportOpen(TransportRequest* request)
                 TransportCreateConnectionId(request);
                 TransportRequestAddRequestHeader(request, "X-ConnectionId", request->connectionId);
                 AddMUID(request);
-                metrics_transport_start(request->connectionId);
+                metrics_transport_start(request->telemetry, request->connectionId);
                 const int result = wsio_open(request->ws.WSHandle,
                     WsioOnOpened,
                     request,
@@ -1011,8 +1001,6 @@ static int TransportOpen(TransportRequest* request)
                 }
             }
         }
-
-        request->state = TRANSPORT_STATE_CONNECTED;
     }
     
     return 0;
@@ -1411,14 +1399,17 @@ int TransportDoWork(TransportHandle transportHandle)
                 request->state = TRANSPORT_STATE_OPENING;
             }
         }
-        return 1;
-
-    case TRANSPORT_STATE_OPENING:
         if (TransportOpen(request))
         {
+            request->state = TRANSPORT_STATE_CLOSED;
+            LogError("Failed to open transport");
             return 0;
         }
         return 1;
+
+    case TRANSPORT_STATE_OPENING:
+        // wait for the "On open" callback
+        break;
 
     case TRANSPORT_STATE_CONNECTED:
         if (!request->isWS)

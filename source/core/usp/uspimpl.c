@@ -20,8 +20,12 @@
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/base64.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/xlogging.h"
+#include "azure_c_shared_utility/condition.h"
 
 #include "uspinternal.h"
+#include "transport.h"
+#include "metrics.h"
 
 #ifdef __linux__
 #include <unistd.h>
@@ -65,6 +69,14 @@ uint64_t telemetry_gettime()
 #endif
 }
 
+static void OnTelemetryData(const uint8_t* buffer, size_t bytesToWrite, void *context, const char *requestId)
+{
+    UspContext *usp = (UspContext*)context;
+    Lock(usp->lock);
+    TransportWriteTelemetry(usp->transport, buffer, bytesToWrite, requestId);
+    Unlock(usp->lock);
+}
+
 UspResult MessageWrite(UspHandle uspHandle, const char *path, const uint8_t *data, uint32_t size)
 {
     int ret = -1;
@@ -78,12 +90,12 @@ UspResult MessageWrite(UspHandle uspHandle, const char *path, const uint8_t *dat
         return USP_INVALID_ARGUMENT;
     }
 
-    Lock(uspHandle->uspContextLock);
+    Lock(uspHandle->lock);
 
     USP_RETURN_ERROR_IF_WRONG_STATE(uspHandle, USP_STATE_CONNECTED);
-    ret = TransportMessageWrite(uspHandle->transportRequest, path, data, size);
+    ret = TransportMessageWrite(uspHandle->transport, path, data, size);
 
-    Unlock(uspHandle->uspContextLock);
+    Unlock(uspHandle->lock);
 
     if (!ret)
     {
@@ -101,7 +113,7 @@ UspResult AudioStreamWrite(UspHandle uspHandle, const void * data, uint32_t size
     const char* httpArgs = "/audio";
     int ret = -1;
 
-    LogInfo("TS:%" PRIu64 ", Write %zu bytes audio data.", USP_LIFE_TIME(uspHandle), size);
+    LogInfo("TS:%" PRIu64 ", Write %" PRIu32 " bytes audio data.", USP_LIFE_TIME(uspHandle), size);
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
     USP_RETURN_ERROR_IF_ARGUMENT_NULL(data, "data");
 
@@ -120,13 +132,13 @@ UspResult AudioStreamWrite(UspHandle uspHandle, const void * data, uint32_t size
         // be re-created here to ensure barge-in scenerios work.
         // if (!uspHandle->KWTriggered)
         // {
-        //    TransportCreateRequestId(uspHandle->transportRequest);
+        //    TransportCreateRequestId(uspHandle->transport);
         //    // cortana_reset_speech_request_id(uspHandle);
         // }
 
-        metrics_audio_start();
+        metrics_audio_start(uspHandle->telemetry);
 
-        ret = TransportStreamPrepare(uspHandle->transportRequest, httpArgs);
+        ret = TransportStreamPrepare(uspHandle->transport, httpArgs);
         if (ret != 0)
         {
             LogError("TransportStreamPrepare failed. error=%d", ret);
@@ -134,7 +146,7 @@ UspResult AudioStreamWrite(UspHandle uspHandle, const void * data, uint32_t size
         }
     }
 
-    ret = TransportStreamWrite(uspHandle->transportRequest, (uint8_t*)data, size);
+    ret = TransportStreamWrite(uspHandle->transport, (uint8_t*)data, size);
     if (ret != 0)
     {
         LogError("TransportStreamWrite failed. error=%d", ret);
@@ -170,11 +182,11 @@ UspResult AudioStreamFlush(UspHandle uspHandle)
         return USP_SUCCESS;
     }
 
-    ret = TransportStreamFlush(uspHandle->transportRequest);
+    ret = TransportStreamFlush(uspHandle->transport);
 
     uspHandle->audioOffset = 0;
     metrics_audiostream_flush();
-    metrics_audio_end();
+    metrics_audio_end(uspHandle->telemetry);
 
     if (ret == 0)
     {
@@ -321,6 +333,9 @@ static UspResult TurnEndHandler(UspContext* uspContext, const char* path, const 
     (void)buffer;
     (void)size;
 
+    // flush the telemetry before invoking the onTurnEnd callback.
+    telemetry_flush(uspContext->telemetry);
+
     USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspContext);
     if (uspContext->callbacks->onTurnEnd == NULL)
     {
@@ -336,13 +351,11 @@ static UspResult TurnEndHandler(UspContext* uspContext, const char* path, const 
         // free(msg);
     }
 
-    telemetry_flush();
-
     // Todo: need to reset request_id?
     // Todo: the caller need to flush audio buffer?
-    Lock(uspContext->uspContextLock);
-    TransportCreateRequestId(uspContext->transportRequest);
-    Unlock(uspContext->uspContextLock);
+    Lock(uspContext->lock);
+    TransportCreateRequestId(uspContext->transport);
+    Unlock(uspContext->lock);
 
     return USP_SUCCESS;
 }
@@ -461,7 +474,7 @@ static void TransportRecvResponseHandler(TransportHandle transportHandle, HTTP_H
         }
     }
 
-    Lock(uspContext->uspContextLock);
+    Lock(uspContext->lock);
     LIST_ITEM_HANDLE foundItem = list_find(uspContext->userPathHandlerList, userPathHandlerCompare, path);
     if (foundItem != NULL)
     {
@@ -471,7 +484,7 @@ static void TransportRecvResponseHandler(TransportHandle transportHandle, HTTP_H
         LogInfo("User Message: path: %s, content type: %s, size: %zu.", path, contentType, size);
         userMsgHandler = pathHandler->handler;
     }
-    Unlock(uspContext->uspContextLock);
+    Unlock(uspContext->lock);
 
     if (userMsgHandler != NULL)
     {
@@ -533,20 +546,20 @@ const char* GetCdpDeviceThumbprint()
 
 UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
 {
-    if (uspContext->transportRequest != NULL)
+    if (uspContext->transport != NULL)
     {
         LogError("TransportHandle has been initialized.");
         return USP_ALREADY_INITIALIZED_ERROR;
     }
 
-    TransportHandle transportHandle = TransportRequestCreate(endpoint, uspContext);
+    TransportHandle transportHandle = TransportRequestCreate(endpoint, uspContext, uspContext->telemetry);
     if (transportHandle == NULL)
     {
         LogError("Failed to create transport request.");
         return USP_INITIALIZATION_FAILURE;
     }
 
-    uspContext->transportRequest = transportHandle;
+    uspContext->transport = transportHandle;
 
     TransportSetDnsCache(transportHandle, uspContext->dnsCache);
     TransportSetCallbacks(transportHandle, TransportErrorHandler, TransportRecvResponseHandler);
@@ -554,8 +567,8 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
     if (uspContext->type == USP_ENDPOINT_CDSDK)
     {
         // TODO: MSFT: 1135317 Allow for configurable audio format
-        TransportRequestAddRequestHeader(transportHandle, g_requestHeaderAudioResponseFormat, "riff-16khz-16bit-mono-pcm");
-        TransportRequestAddRequestHeader(uspContext->transportRequest, g_requestHeaderUserAgent, g_userAgent);
+        TransportRequestAddRequestHeader(uspContext->transport, g_requestHeaderAudioResponseFormat, "riff-16khz-16bit-mono-pcm");
+        TransportRequestAddRequestHeader(uspContext->transport, g_requestHeaderUserAgent, g_userAgent);
     }
     // Hackhack: Because Carbon API does not support authentication yet, use a default subscription key if no authentication is set.
     // TODO: This should be removed after Carbon API is ready for authentication, and before public release!!!
@@ -619,12 +632,12 @@ UspResult TransportShutdown(UspContext* uspContext)
 {
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspContext);
 
-    if (uspContext->transportRequest != NULL)
+    if (uspContext->transport != NULL)
     {
-        TransportRequestDestroy(uspContext->transportRequest);
+        TransportRequestDestroy(uspContext->transport);
     }
 
-    uspContext->transportRequest = NULL;
+    uspContext->transport = NULL;
 
     return USP_SUCCESS;
 }
@@ -636,14 +649,14 @@ UspResult UspContextDestroy(UspContext* uspContext)
 
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspContext);
 
-    Lock(uspContext->uspContextLock);
+    Lock(uspContext->lock);
     if (uspContext->dnsCache != NULL)
     {
         DnsCacheDestroy(uspContext->dnsCache);
     }
 
-    telemetry_uninitialize();
-    PropertybagShutdown();
+    telemetry_destroy(uspContext->telemetry);
+    uspContext->telemetry = NULL;
 
     STRING_delete(uspContext->language);
     STRING_delete(uspContext->outputFormat);
@@ -660,9 +673,9 @@ UspResult UspContextDestroy(UspContext* uspContext)
     }
     list_destroy(uspContext->userPathHandlerList);
 
-    Unlock(uspContext->uspContextLock);
-    assert(uspContext->uspContextLock != NULL);
-    Lock_Deinit(uspContext->uspContextLock);
+    Unlock(uspContext->lock);
+    assert(uspContext->lock != NULL);
+    Lock_Deinit(uspContext->lock);
 
     free(uspContext);
     return USP_SUCCESS;
@@ -677,9 +690,6 @@ UspResult UspContextCreate(UspContext** contextCreated)
         return USP_OUT_OF_MEMORY;
     }
     memset(uspContext, 0, sizeof(UspContext));
-
-    PropertybagInitialize();
-    telemetry_initialize();
 
 #ifdef WIN32
     LARGE_INTEGER perfCounterFrequency;
@@ -698,10 +708,18 @@ UspResult UspContextCreate(UspContext** contextCreated)
     }
 #endif
 
-    uspContext->uspContextLock = Lock_Init();
-    if (uspContext->uspContextLock == NULL)
+    uspContext->lock = Lock_Init();    
+    uspContext->telemetry = telemetry_create(OnTelemetryData, uspContext);
+
+    if (uspContext->lock == NULL)
     {
-        LogError("Failed to initialize uspContextLock.");
+        LogError("Failed to initialize USP context lock.");
+    }
+
+    uspContext->workEvent = Condition_Init();
+    if (uspContext->workEvent == NULL)
+    {
+        LogError("Failed to initialize USP context condition.");
     }
 
     uspContext->userPathHandlerList = list_create();

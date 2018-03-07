@@ -6,7 +6,9 @@
 //
 
 #include "uspinternal.h"
+#include "transport.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/condition.h"
 
 // Todo: read from a configuration file.
 const char g_bingSpeechHostname[] = "wss://speech.platform.bing.com/speech/recognition/%s/cognitiveservices/v1";
@@ -24,27 +26,33 @@ const char g_outputSimpleStr[] = "simple";
 
 inline static void UspShutdown(UspContext* uspContext)
 {
-    Lock(uspContext->uspContextLock);
+    Lock(uspContext->lock);
     uspContext->callbacks = NULL;
     uspContext->callbackContext = NULL;
     (void)TransportShutdown(uspContext);
-    Unlock(uspContext->uspContextLock);
+    Unlock(uspContext->lock);
 
     UspContextDestroy(uspContext);
 }
 
-static int UspEventLoop(void* ptr)
+static int UspWorker(void* ptr)
 {
     UspHandle uspHandle = (UspHandle)ptr;
+    assert(NULL != uspHandle);
 
-    while (1)
+    Lock(uspHandle->lock);
+    while(uspHandle->state == USP_STATE_CONNECTED)
     {
-        if (UspRun(uspHandle) != USP_STATE_CONNECTED)
-        {
-            break;
-        }
-        ThreadAPI_Sleep(200);
-    }
+        TransportDoWork(uspHandle->transport);
+
+        COND_RESULT result = Condition_Wait(uspHandle->workEvent, uspHandle->lock, 200);
+#ifdef _DEBUG
+        assert(result != COND_INVALID_ARG && result != COND_ERROR);
+#else
+        (void)(result);
+#endif
+    };
+    Unlock(uspHandle->lock);
 
     // We're done here (somebody called UspClose),
     // since we're currently on the thread that talks to the transport 
@@ -53,6 +61,13 @@ static int UspEventLoop(void* ptr)
     UspShutdown(uspHandle);
 
     return 0;
+}
+
+void SignalWork(UspHandle handle)
+{
+    Lock(handle->lock);
+    Condition_Post(handle->workEvent);
+    Unlock(handle->lock);
 }
 
 inline static UspResult UspCreateContextAndSetCallbacks(UspCallbacks *callbacks, void* callbackContext, UspContext** uspContextReturned)
@@ -144,7 +159,7 @@ UspResult UspSetLanguage(UspHandle uspHandle, const char* language)
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
     USP_RETURN_ERROR_IF_ARGUMENT_NULL(language, "language");
 
-    Lock(uspHandle->uspContextLock);
+    Lock(uspHandle->lock);
 
     if ((ret = CheckStateAndUrl(uspHandle, USP_STATE_INITIALIZED)) == USP_SUCCESS)
     {
@@ -160,7 +175,7 @@ UspResult UspSetLanguage(UspHandle uspHandle, const char* language)
         }
     }
 
-    Unlock(uspHandle->uspContextLock);
+    Unlock(uspHandle->lock);
 
     return ret;
 }
@@ -171,7 +186,7 @@ UspResult UspSetOutputFormat(UspHandle uspHandle, UspOutputFormat format)
 
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
 
-    Lock(uspHandle->uspContextLock);
+    Lock(uspHandle->lock);
 
     if ((ret = CheckStateAndUrl(uspHandle, USP_STATE_INITIALIZED)) == USP_SUCCESS)
     {
@@ -190,7 +205,7 @@ UspResult UspSetOutputFormat(UspHandle uspHandle, UspOutputFormat format)
         }
     }
 
-    Unlock(uspHandle->uspContextLock);
+    Unlock(uspHandle->lock);
 
     return ret;
 }
@@ -202,7 +217,7 @@ UspResult UspSetModelId(UspHandle uspHandle, const char* modelId)
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
     USP_RETURN_ERROR_IF_ARGUMENT_NULL(modelId, "model ID");
 
-    Lock(uspHandle->uspContextLock);
+    Lock(uspHandle->lock);
 
     if ((ret = CheckStateAndUrl(uspHandle, USP_STATE_INITIALIZED)) == USP_SUCCESS)
     {
@@ -218,7 +233,7 @@ UspResult UspSetModelId(UspHandle uspHandle, const char* modelId)
         }
     }
 
-    Unlock(uspHandle->uspContextLock);
+    Unlock(uspHandle->lock);
 
     return ret;
 }
@@ -231,7 +246,7 @@ UspResult UspSetAuthentication(UspHandle uspHandle, UspAuthenticationType authTy
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
     USP_RETURN_ERROR_IF_ARGUMENT_NULL(authData, "authentication data");
 
-    Lock(uspHandle->uspContextLock);
+    Lock(uspHandle->lock);
 
     if (uspHandle->state != USP_STATE_INITIALIZED)
     {
@@ -257,7 +272,7 @@ UspResult UspSetAuthentication(UspHandle uspHandle, UspAuthenticationType authTy
         }
     }
 
-    Unlock(uspHandle->uspContextLock);
+    Unlock(uspHandle->lock);
 
     return ret;
 }
@@ -405,7 +420,7 @@ UspResult UspConnect(UspHandle uspHandle)
     // Callbacks must be set before initializing transport.
     USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspHandle);
 
-    Lock(uspHandle->uspContextLock);
+    Lock(uspHandle->lock);
 
     if (uspHandle->state != USP_STATE_INITIALIZED)
     {
@@ -432,7 +447,7 @@ UspResult UspConnect(UspHandle uspHandle)
         {
             LogError("Initialize transport failed");
         }
-        else if (ThreadAPI_Create(&uspHandle->workThreadHandle, UspEventLoop, uspHandle) != THREADAPI_OK)
+        else if (ThreadAPI_Create(&uspHandle->workThreadHandle, UspWorker, uspHandle) != THREADAPI_OK)
         {
             LogError("Create work thread in USP failed.");
             TransportShutdown(uspHandle);
@@ -444,7 +459,7 @@ UspResult UspConnect(UspHandle uspHandle)
         }
     }
 
-    Unlock(uspHandle->uspContextLock);
+    Unlock(uspHandle->lock);
 
     return ret;
 }
@@ -455,13 +470,13 @@ UspResult UspClose(UspHandle uspHandle)
 
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
 
-    Lock(uspHandle->uspContextLock);
+    Lock(uspHandle->lock);
     if (uspHandle->state == USP_STATE_SHUTDOWN) {
-        Unlock(uspHandle->uspContextLock);
+        Unlock(uspHandle->lock);
         return USP_SUCCESS;
     }
     uspHandle->state = USP_STATE_SHUTDOWN;
-    Unlock(uspHandle->uspContextLock);
+    Unlock(uspHandle->lock);
 
     if (uspHandle->workThreadHandle == NULL) {
         // work thread was never created, clean up the handle
@@ -474,6 +489,7 @@ UspResult UspClose(UspHandle uspHandle)
         // (whenever the callback completes), so just return from here (join is a no-op).
         // Otherwise, wait until the worker thread terminates.
         LogInfo("Wait for work thread to complete");
+        SignalWork(uspHandle);
         ThreadAPI_Join(uspHandle->workThreadHandle, NULL);
     }
 
@@ -490,7 +506,7 @@ UspResult UspWriteAudio(UspHandle uspHandle, const uint8_t* buffer, size_t bytes
 
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
 
-    Lock(uspHandle->uspContextLock);
+    Lock(uspHandle->lock);
 
     if (uspHandle->state != USP_STATE_CONNECTED)
     {
@@ -510,11 +526,12 @@ UspResult UspWriteAudio(UspHandle uspHandle, const uint8_t* buffer, size_t bytes
         }
     }
 
-    Unlock(uspHandle->uspContextLock);
+    Unlock(uspHandle->lock);
 
     if ((ret == USP_SUCCESS) && (bytesWritten != NULL))
     {
         *bytesWritten = count;
+        SignalWork(uspHandle);
     }
     return ret;
 }
@@ -522,22 +539,6 @@ UspResult UspWriteAudio(UspHandle uspHandle, const uint8_t* buffer, size_t bytes
 UspResult UspFlushAudio(UspHandle uspHandle)
 {
     return UspWriteAudio(uspHandle, NULL /* buffer */, 0 /* size */, NULL);
-}
-
-UspState UspRun(UspHandle uspHandle)
-{
-    UspState ret;
-
-    Lock(uspHandle->uspContextLock);
-
-    if (uspHandle->state == USP_STATE_CONNECTED)
-    {
-        TransportDoWork(uspHandle->transportRequest);
-    }
-    ret = uspHandle->state;
-
-    Unlock(uspHandle->uspContextLock);
-    return ret;
 }
 
 bool userPathHandlerCompare(LIST_ITEM_HANDLE item1, const void* path);
@@ -560,7 +561,7 @@ UspResult UspRegisterUserMessage(UspHandle uspHandle, const char* messagePath, U
         return USP_INVALID_ARGUMENT;
     }
 
-    Lock(uspHandle->uspContextLock);
+    Lock(uspHandle->lock);
 
     if (uspHandle->state != USP_STATE_INITIALIZED)
     {
@@ -593,7 +594,7 @@ UspResult UspRegisterUserMessage(UspHandle uspHandle, const char* messagePath, U
         }
     }
 
-    Unlock(uspHandle->uspContextLock);
+    Unlock(uspHandle->lock);
     return ret;
 }
 
@@ -613,6 +614,7 @@ UspResult UspSendMessage(UspHandle uspHandle, const char* messagePath, const uin
         return USP_SEND_USER_MESSAGE_ERROR;
     }
 
+    SignalWork(uspHandle);
     return USP_SUCCESS;
 }
 

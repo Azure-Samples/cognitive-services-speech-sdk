@@ -12,6 +12,8 @@
 #include "propbag.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "uspinternal.h"
+#include "iobuffer.h"
+#include "transport.h"
 
 /**
 * Defines the callback function of asynchronous complete during content handling.

@@ -4,9 +4,8 @@
 //
 
 #include <iostream>
-#include <fstream>
 #include "catch.hpp"
-#include "string_utils.h"
+#include "test_utils.h"
 
 #ifdef _DEBUG
 #define SPX_CONFIG_INCLUDE_ALL_DBG 1
@@ -24,9 +23,6 @@ using namespace CARBON_NAMESPACE_ROOT::Recognition::Speech;
 using namespace std;
 
 
-inline bool exists(const std::wstring& name) {
-    return ifstream(PAL::ToString(name).c_str()).good();
-}
 
 TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
 {

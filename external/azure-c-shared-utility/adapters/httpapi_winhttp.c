@@ -18,11 +18,13 @@
 #include "azure_c_shared_utility/wsio.h"
 #include "azure_c_shared_utility/list.h"
 #include "azure_c_shared_utility/lock.h"
-#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/condition.h"
 
 #define TEMP_BUFFER_SIZE 1024
 #define MESSAGE_BUFFER_SIZE 260
 #define USE_HTTP_WINHTTP
+
+#define ERROR_INTERNET_OPERATION_CANCELLED 12017
 
 #define LogErrorWinHTTPWithGetLastErrorAsString(FORMAT, ...) { \
     DWORD errorMessageID = GetLastError(); \
@@ -798,6 +800,7 @@ typedef struct _ASYNCHTTPREQUEST
     size_t rxsize;
     DWORD dwStatusCode;
     bool done;
+    int port;
 } ASYNCHTTPREQUEST;
 
 static int AsyncHttpInit(
@@ -830,7 +833,6 @@ static int AsyncHttpCloseRequest(
     if (NULL != pRequest->requestHandle)
     {
         (void)WinHttpCloseHandle(pRequest->requestHandle);
-        LogInfo("Closed http request handle: 0x%x.", pRequest->requestHandle);
         pRequest->requestHandle = NULL;
     }
 
@@ -933,6 +935,12 @@ static int AsyncHttpCreateConnection(
 )
 {
     wchar_t* wsz;
+    INTERNET_PORT port = 443;
+
+    if (pRequest->port)
+    {
+        port = (INTERNET_PORT)pRequest->port;
+    }
 
     pRequest->dwStatusCode = 0;
     pRequest->SessionHandle = WinHttpOpen(
@@ -958,7 +966,7 @@ static int AsyncHttpCreateConnection(
     pRequest->ConnectionHandle = WinHttpConnect(
         pRequest->SessionHandle,
         wsz,
-        443,
+        port,
         0);
     free(wsz);
     if (NULL == pRequest->ConnectionHandle)
@@ -1060,7 +1068,7 @@ static int SetCallbacks(HINTERNET handle, WINHTTP_STATUS_CALLBACK pfnCB, void* c
     if (WINHTTP_INVALID_STATUS_CALLBACK == WinHttpSetStatusCallback(
         handle,
         pfnCB,
-        WINHTTP_CALLBACK_FLAG_ALL_COMPLETIONS | WINHTTP_CALLBACK_FLAG_HANDLES, // It is required to handle WINHTTP_CALLBACK_FALG_HANDLES as context is used in callback.
+        WINHTTP_CALLBACK_FLAG_ALL_COMPLETIONS,
         0))
     {
         LogErrorWinHTTPWithGetLastErrorAsString("WinHttpSetStatusCallback failed (result = HTTPAPI_ERROR)");
@@ -1435,7 +1443,7 @@ static HTTP_CLIENT_RESULT SendRequest(
         NULL,
         WINHTTP_NO_REFERER,
         WINHTTP_DEFAULT_ACCEPT_TYPES,
-        WINHTTP_FLAG_SECURE);
+        (!data->request.port || data->request.port == 443) ? WINHTTP_FLAG_SECURE : 0);
 
     free(relativePathTemp);
     if (data->request.requestHandle == NULL)
@@ -1680,8 +1688,6 @@ typedef enum IO_STATE_TAG
     IO_STATE_CONNECTED,
     IO_STATE_DATA,
     IO_STATE_ERROR,
-    IO_STATE_CLOSING,
-    IO_STATE_CLOSED
 } IO_STATE;
 
 typedef struct _WSIO_INSTANCE
@@ -1695,12 +1701,12 @@ typedef struct _WSIO_INSTANCE
     ON_IO_ERROR on_io_error;
     void* on_io_error_context;
     IO_STATE io_state;
-    int port;
     char* host;
     char* relative_path;
     HTTP_HEADERS_HANDLE hHeaders;
     WSIO_MSG_TYPE rxtype;
     LOCK_HANDLE hLock;
+    COND_HANDLE fullStop;
 } WSIO_INSTANCE;
 
 #define WS_GROW_SIZE    0x1000
@@ -1728,35 +1734,17 @@ static void WSUnlock(WSIO_INSTANCE *wsio_instance)
 // The lock should be held while calling this function.
 static void WSClose(WSIO_INSTANCE* wsio_instance)
 {
-    // TODO (#1134584): This is a mess! Refactor! 
-    // Better yet, git rid completely, migrate to whatever the official azure-c-shared is using (uWS).
-    FUNC_ENTER("Close wsio_instance=0x%x, requestHandle:0x%x", wsio_instance, wsio_instance->request.requestHandle);
-    wsio_instance->io_state = IO_STATE_CLOSING;
-
-    // must check before AsyncHttpDestroy() which will set requestHandle to NULL.
-    if (wsio_instance->request.requestHandle == NULL)
+    if (NULL != wsio_instance->wsHandle)
     {
-        LogInfo("The requestHandle is already closed, no need to wait for CLOSING callback.");
-        wsio_instance->io_state = IO_STATE_CLOSED;
+        (void)WinHttpWebSocketClose(wsio_instance->wsHandle, WINHTTP_WEB_SOCKET_SUCCESS_CLOSE_STATUS, NULL, 0);
+        wsio_instance->wsHandle = NULL;
+        while (wsio_instance->io_state != IO_STATE_NOT_OPEN)
+        {
+            Condition_Wait(wsio_instance->fullStop, wsio_instance->hLock, 0);
+        }
     }
-
+   
     AsyncHttpDestroy(&wsio_instance->request);
-
-    // Wait for the CLOSING callback from WinHTTP.
-    LogInfo("Checking io_state, until it reaches IO_STATE_CLOSED. Current state: %d, wsio_instance=0x%x, requestHandle:0x%x", wsio_instance->io_state, wsio_instance, wsio_instance->request.requestHandle);
-    while (wsio_instance->io_state != IO_STATE_CLOSED)
-    {
-        Unlock(wsio_instance->hLock);
-        ThreadAPI_Sleep(20);
-        Lock(wsio_instance->hLock);
-    }
-    LogInfo("The http request handle is closed. Current state: %d, wsio_instance=0x%x, requestHandle:0x%x", wsio_instance->io_state, wsio_instance, wsio_instance->request.requestHandle);
-
-    wsio_instance->io_state = IO_STATE_NOT_OPEN;
-
-    LogInfo("Set state to IO_STATE_NOT_OPEN. wsio_instance=0x%x, request_handle: 0x%x, state: %d", wsio_instance, wsio_instance->request.requestHandle, wsio_instance->io_state);
-
-    FUNC_RETURN("");
 }
 
 static int WSQueueRead(
@@ -1793,14 +1781,19 @@ static VOID CALLBACK WSAsyncCB(
     IN DWORD dwStatusInformationLength
     )
 {
-    if (dwInternetStatus == WINHTTP_CALLBACK_STATUS_HANDLE_CREATED)
+    if (dwInternetStatus == WINHTTP_CALLBACK_STATUS_REQUEST_ERROR)
     {
-        // no need to handle. and there is no context returned.
-        return;
+        WINHTTP_ASYNC_RESULT* p = (WINHTTP_ASYNC_RESULT*)lpvStatusInformation;
+        if (p->dwError == ERROR_INTERNET_OPERATION_CANCELLED)
+        {
+            // TODO: this is still a mess. Is there any way to wait until the operation completes. 
+            // Better yet, make winhttp not raise this error if the connection/request was intentionally closed?
+            LogError("WSCB: ERROR_INTERNET_OPERATION_CANCELLED");
+            return;
+        }
     }
 
     WSIO_INSTANCE* wsio_instance = WSGetAndLock((CONCRETE_IO_HANDLE)dwContext);
-
     (void)hInternet;
     (void)dwStatusInformationLength;
 
@@ -1870,7 +1863,7 @@ static VOID CALLBACK WSAsyncCB(
     {
         DWORD *pBytesWritten = (DWORD*)lpvStatusInformation;
         if (!wsio_instance->request.pending_socket_io ||
-            wsio_instance->request.pending_socket_io->size != *pBytesWritten)
+             wsio_instance->request.pending_socket_io->size != *pBytesWritten)
         {
             LogError("Invalid size");
             WSError(wsio_instance);
@@ -1881,14 +1874,10 @@ static VOID CALLBACK WSAsyncCB(
         http_asyncio_completeio(&wsio_instance->request);
         break;
     }
-    case WINHTTP_CALLBACK_STATUS_HANDLE_CLOSING:
-    {
-        // According to https://msdn.microsoft.com/en-us/library/windows/desktop/aa384090(v=vs.85).aspx, the callback needs to deal with
-        // WINHTTP_CALLBACK_STATUS_HANDLE_CLOSING notification to gracefully close the connection.
-        LogInfo("Recevie WINHTTP_CALLBACK_STATUS_HANDLE_CLOSING for instance 0x%x. Set io_state to CLOSED (was %d before)", wsio_instance, wsio_instance->io_state);
-        wsio_instance->io_state = IO_STATE_CLOSED;
+    case WINHTTP_CALLBACK_STATUS_CLOSE_COMPLETE:
+        wsio_instance->io_state = IO_STATE_NOT_OPEN;
+        Condition_Post(wsio_instance->fullStop);
         break;
-    }
     }
 
     WSUnlock(wsio_instance);
@@ -1898,14 +1887,15 @@ static int WSOpen(
     WSIO_INSTANCE* wsio_instance)
 {
     wchar_t* relativePathTemp;
-    int result = HTTPAPI_OK;
+    int result;
 
-    // The connection should already have been created by wsio_open().
-    // Not need to call AsyncHttpCreateConnection() again. Just check the sessionsHandle and connectionHandle.
-    if ((wsio_instance->request.ConnectionHandle == NULL) || (wsio_instance->request.SessionHandle == NULL))
+    result = AsyncHttpCreateConnection(
+        &wsio_instance->request,
+        wsio_instance->host);
+
+    if (result)
     {
-        LogError("The http session or connection handle is not available.");
-        return HTTPAPI_ERROR;
+        return result;
     }
 
     relativePathTemp = AllocWide(wsio_instance->relative_path);
@@ -1923,7 +1913,7 @@ static int WSOpen(
         NULL,
         WINHTTP_NO_REFERER,
         WINHTTP_DEFAULT_ACCEPT_TYPES,
-        WINHTTP_FLAG_SECURE);
+        (!wsio_instance->request.port || wsio_instance->request.port == 443) ? WINHTTP_FLAG_SECURE : 0);
 
     free(relativePathTemp);
     if (wsio_instance->request.requestHandle == NULL)
@@ -1978,7 +1968,12 @@ static int WSOpen(
         free(headersTemp);
     }
 
-    return result;
+    if (result)
+    {
+        return result;
+    }
+
+    return HTTPAPI_OK;
 }
 
 CONCRETE_IO_HANDLE wsio_create(void* io_create_parameters)
@@ -2010,9 +2005,10 @@ CONCRETE_IO_HANDLE wsio_create(void* io_create_parameters)
     do
     {
         result->hLock = Lock_Init();
+        result->fullStop = Condition_Init();
         if (!result->hLock)
         {
-            LogError("Could not allocate wsio lock");   
+            LogError("Could not allocate wsio lock/condition");   
             break;
         }
 
@@ -2035,6 +2031,7 @@ CONCRETE_IO_HANDLE wsio_create(void* io_create_parameters)
 
         (void)strcpy_s(result->host, hostlen, ws_io_config->host);
         (void)strcpy_s(result->relative_path, pathlen, ws_io_config->relative_path);
+        result->request.port = ws_io_config->port;
         
         return result;
     } while (0);
@@ -2046,8 +2043,6 @@ CONCRETE_IO_HANDLE wsio_create(void* io_create_parameters)
 
 void wsio_destroy(CONCRETE_IO_HANDLE ws_io)
 {
-    FUNC_ENTER("Destroying wsio handle: 0x%x", ws_io);
-
     /* Codes_SRS_WSIO_01_008: [If ws_io is NULL, wsio_destroy shall do nothing.] */
     if (ws_io != NULL)
     {
@@ -2078,19 +2073,16 @@ void wsio_destroy(CONCRETE_IO_HANDLE ws_io)
         {
             Unlock(wsio_instance->hLock);
             Lock_Deinit(wsio_instance->hLock);
-            LogInfo("wiso->hLock released. wsio_instance: 0x%x", wsio_instance);
+            Condition_Deinit(wsio_instance->fullStop);
         }
 
         free(ws_io);
     }
-    FUNC_RETURN("");
 }
 
 int wsio_open(CONCRETE_IO_HANDLE ws_io, ON_IO_OPEN_COMPLETE on_io_open_complete, void* on_io_open_complete_context, ON_WSIO_BYTES_RECEIVED on_bytes_received, void* on_bytes_received_context, ON_IO_ERROR on_io_error, void* on_io_error_context)
 {
     int result = 0;
-
-    FUNC_ENTER("open the wsio handle: 0x%x", ws_io);
 
     WSIO_INSTANCE* wsio_instance = WSGetAndLock(ws_io);
     if (wsio_instance == NULL)
@@ -2136,15 +2128,12 @@ int wsio_open(CONCRETE_IO_HANDLE ws_io, ON_IO_OPEN_COMPLETE on_io_open_complete,
         WSUnlock(wsio_instance);
     }
 
-    FUNC_RETURN("result=%d", result);
     return result;
 }
 
 int wsio_close(CONCRETE_IO_HANDLE ws_io, ON_IO_CLOSE_COMPLETE on_io_close_complete, void* on_io_close_complete_context)
 {
     int result;
-
-    FUNC_ENTER("Closing the wsio handle: 0x%x", ws_io);
 
     /* Codes_SRS_WSIO_01_052: [If any of the arguments ws_io or buffer are NULL, wsio_send shall fail and return a non-zero value.] */
     WSIO_INSTANCE* wsio_instance = WSGetAndLock(ws_io);
@@ -2165,7 +2154,6 @@ int wsio_close(CONCRETE_IO_HANDLE ws_io, ON_IO_CLOSE_COMPLETE on_io_close_comple
         result = 0;
     }
 
-    FUNC_RETURN("result=%d", result);
     return result;
 }
 
@@ -2230,7 +2218,6 @@ void wsio_dowork(CONCRETE_IO_HANDLE ws_io)
         case IO_STATE_OPENING:
             if (WSOpen(wsio_instance))
             {
-                LogInfo("WSOpen() failed. wsio_instance: 0x%x", wsio_instance);
                 OpenComplete(wsio_instance, IO_OPEN_ERROR);
                 break;
             }
@@ -2264,6 +2251,7 @@ void wsio_dowork(CONCRETE_IO_HANDLE ws_io)
             }
 
             wsio_instance->wsHandle = WinHttpWebSocketCompleteUpgrade(wsio_instance->request.requestHandle, (DWORD_PTR)NULL);
+
             if (NULL == wsio_instance->wsHandle)
             {
                 LogErrorWinHTTPWithGetLastErrorAsString("WinHttpWebSocketCompleteUpgrade failed (result = HTTPAPI_ERROR)");
@@ -2275,6 +2263,9 @@ void wsio_dowork(CONCRETE_IO_HANDLE ws_io)
                 OpenComplete(wsio_instance, IO_OPEN_ERROR);
                 break;
             }
+
+            // After the upgrade, we have a handle to the active ws connection, http request handle is no longer needed. 
+            AsyncHttpCloseRequest(&wsio_instance->request);
 
             OpenComplete(wsio_instance, IO_OPEN_OK);
 
@@ -2290,15 +2281,11 @@ void wsio_dowork(CONCRETE_IO_HANDLE ws_io)
             (void)WSQueueRead(wsio_instance);
             break;
         case IO_STATE_ERROR:
+            WSClose(wsio_instance);
             if (wsio_instance->on_io_error != NULL)
             {
                 wsio_instance->on_io_error(wsio_instance->on_io_error_context);
             }
-            WSClose(wsio_instance);
-            break;
-        case IO_STATE_CLOSING:
-            break;
-        case IO_STATE_CLOSED:
             break;
         default:
             if (wsio_instance->io_state == IO_STATE_CONNECTED && !wsio_instance->request.pending_socket_io)

@@ -30,16 +30,14 @@
 #include "azure_c_shared_utility/agenttime.h"
 #include "uspcommon.h"
 #include "metrics.h"
+#include "propbag.h"
 
 
 const char* kEvent_type_key = "EventType";
 const char* kRcvd_msgs_key = "ReceivedMessages";
 const char* kMetric_events_key = "Metrics";
 
-const char* kEvent_type_skill = "skill";
 const char* kEvent_type_audioPlayback = "audio:playback";
-const char* kEvent_type_viewDisplayText = "view:displayText";
-const char* kEvent_type_viewCard = "view:card";
 const char* kEvent_type_audioStart = "AudioStart";
 const char* kEvent_type_microphone = "Microphone";
 const char* kEvent_type_listeningTrigger = "ListeningTrigger";
@@ -56,40 +54,33 @@ const char* kEvent_memory_key = "Memory";
 const char* kEvent_cpu_key = "CPU";
 const char* kEvent_error_key = "Error";
 const char* kEvent_status_key = "Status";
-const char* kEvent_type_skill_action_key = "action";
 
 const char *kRcvd_msg_audio_key = "audio";
 
 static const char *speechMsgNames[countOfMsgTypes];
-
-PROPERTYBAG_HANDLE evMetricArray;
-PROPERTYBAG_HANDLE evRcvMsgsArray;
 
 #define GOTO_EXIT_IF_NONZERO(exp) { retval = exp; if (retval != 0) { goto Exit; } }
 #define RESET(val)  val = NULL
 
 #pragma pack(push, 1)
 
-static LOCK_HANDLE metricLock;
 
-static PTELEMETRY_WRITE g_pfnCallback = NULL;
-static void*            g_pContext = NULL;
-static LIST_HANDLE inband_telemetry_queue = NULL;
-TELEMETRY_DATA *current_telemetry_object = NULL;
-TELEMETRY_DATA *current_connection_telemetry_object = NULL;
-// Flag to check if this is first request 
-static bool bSetFirstRequestId = false;
-
-static PROPERTYBAG_HANDLE current_skill_object = NULL;
-
-static void free_telemetry_global_arrays()
+typedef struct _TELEMETRY_CONTEXT
 {
-    RESET(evRcvMsgsArray);
-    RESET(evMetricArray);
-}
+    LOCK_HANDLE lock;
+    PTELEMETRY_WRITE callback;
+    void* callbackContext;
+    LIST_HANDLE inband_telemetry_queue;
+    TELEMETRY_DATA *current_connection_telemetry_object;
+    TELEMETRY_DATA *current_telemetry_object;
+} TELEMETRY_CONTEXT;
 
 static void initialize_message_name_array()
 {
+    static bool initialized = false;
+    if (initialized)
+        return;
+    initialized = true;
     // The order of this array needs to be consistent with the enum incomingMsgType
     speechMsgNames[turnStart] = g_messagePathTurnStart;
     speechMsgNames[speechStartDetected] = g_messagePathSpeechStartDetected;
@@ -98,21 +89,6 @@ static void initialize_message_name_array()
     speechMsgNames[speechPhrase] = g_messagePathSpeechPhrase;
     speechMsgNames[audio] = kRcvd_msg_audio_key;
     speechMsgNames[turnEnd] = g_messagePathTurnEnd;
-}
-
-static void initialize_telemetry_global_arrays()
-{
-    evMetricArray = json_value_init_array();
-    if (NULL == evMetricArray)
-    {
-        LogInfo("Telemetry: Unable to initialize Metrics event array\r\n");
-    }
-
-    evRcvMsgsArray = json_value_init_array();
-    if (NULL == evRcvMsgsArray)
-    {
-        LogInfo("Telemetry: Unable to initialize Received Messages array\r\n");
-    }
 }
 
 static void PropertybagAddValueToArray(PROPERTYBAG_HANDLE propertyHandle, void * value)
@@ -181,43 +157,7 @@ static PROPERTYBAG_HANDLE initialize_jsonArray(PROPERTYBAG_HANDLE *pArray)
     return *pArray == NULL ? (*pArray = json_value_init_array()) : *pArray;
 }
 
-static PROPERTYBAG_HANDLE getReceivedMsgJsonArray(const char *arrayName)
-{
-    if (!strcmp(arrayName, g_messagePathTurnStart))
-    {
-        return initialize_jsonArray(&current_telemetry_object->receivedMsgsJsonArray[turnStart]);
-    }
-    if (!strcmp(arrayName, g_messagePathSpeechStartDetected))
-    {
-        return initialize_jsonArray(&current_telemetry_object->receivedMsgsJsonArray[speechStartDetected]);
-    }
-    if (!strcmp(arrayName, g_messagePathSpeechHypothesis))
-    {
-        return initialize_jsonArray(&current_telemetry_object->receivedMsgsJsonArray[speechHypothesis]);
-    }
-    if (!strcmp(arrayName, g_messagePathSpeechEndDetected))
-    {
-        return initialize_jsonArray(&current_telemetry_object->receivedMsgsJsonArray[speechEndDetected]);
-    }
-    if (!strcmp(arrayName, g_messagePathSpeechPhrase))
-    {
-        return initialize_jsonArray(&current_telemetry_object->receivedMsgsJsonArray[speechPhrase]);
-    }
-    if (!strcmp(arrayName, kRcvd_msg_audio_key))
-    {
-        return initialize_jsonArray(&current_telemetry_object->receivedMsgsJsonArray[audio]);
-    }
-    if (!strcmp(arrayName, g_messagePathTurnEnd))
-    {
-        return initialize_jsonArray(&current_telemetry_object->receivedMsgsJsonArray[turnEnd]);
-    }
-
-    return NULL;
-}
-
-static PROPERTYBAG_HANDLE initialize_metricobject(
-    const char            *name,
-    const char            *id)
+static PROPERTYBAG_HANDLE initialize_metricobject(const char *name, const char *id)
 {
     PROPERTYBAG_HANDLE pBag = PropertybagInitializeWithKeyValue(NULL, NULL);
     if (pBag && name)
@@ -345,608 +285,493 @@ int GetISO8601Time(char *buffer, unsigned int length)
     return (int)timeStringLength;
 }
 
-void telemetry_setcallbacks(PTELEMETRY_WRITE pfnCallback, void* pContext)
+
+static int populate_event_timestamp(PROPERTYBAG_HANDLE *pBag, const char *eventName, const char *id, const char *key)
 {
-#if defined(GB_DEBUG_ALLOC)
-    json_set_allocation_functions(gballoc_malloc, gballoc_free);
-#endif
-
-    g_pfnCallback = pfnCallback;
-    g_pContext = pContext;
-
-    metricLock = Lock_Init();
-}
-
-static void telemetry_add_metricevents(TELEMETRY_DATA *telemetry_object)
-{
-    if (telemetry_object->connectionJson)
+    *pBag = get_metric_object(*pBag, eventName, id);
+    if (*pBag == NULL)
     {
-        PropertybagAddValueToArray(evMetricArray, telemetry_object->connectionJson);
-        // current_connection_telemetry_object would be the only one that would have
-        // connectionJson initialized. If connectionJson is initialized for 
-        // any TELEMETRY_DATA object, they would not contain values. 
-        // Hence no need to check other pointers and we can return here.
-        return;
-    }
-
-    if (telemetry_object->audioStartJson)
-    {
-        PropertybagAddValueToArray(evMetricArray, telemetry_object->audioStartJson);
-    }
-
-    if (telemetry_object->microphoneJson)
-    {
-        PropertybagAddValueToArray(evMetricArray, telemetry_object->microphoneJson);
-    }
-
-    if (telemetry_object->listeningTriggerJson)
-    {
-        PropertybagAddValueToArray(evMetricArray, telemetry_object->listeningTriggerJson);
-    }
-
-    if (telemetry_object->skillJson)
-    {
-        if (current_skill_object)
-        {
-            PropertybagAddValueToArray(telemetry_object->skillJson, current_skill_object);
-            current_skill_object = NULL;
-        }
-        PropertybagAddValueToArray(evMetricArray, telemetry_object->skillJson);
-    }
-
-    if (telemetry_object->audioPlaybackJson)
-    {
-        PropertybagAddValueToArray(evMetricArray, telemetry_object->audioPlaybackJson);
-    }
-
-    if (telemetry_object->viewDisplayTextJson)
-    {
-        PropertybagAddValueToArray(evMetricArray, telemetry_object->viewDisplayTextJson);
-    }
-
-    if (telemetry_object->viewCardJson)
-    {
-        PropertybagAddValueToArray(evMetricArray, telemetry_object->viewCardJson);
-    }
-}
-
-static void telemetry_add_recvmsgs(TELEMETRY_DATA *telemetry_object)
-{
-    if (telemetry_object)
-    {
-        for (int i = 0; i < countOfMsgTypes; i++)
-        {
-            PROPERTYBAG_HANDLE recvObj = NULL;
-            if (telemetry_object->receivedMsgsJsonArray[i])
-            {
-                recvObj = PropertybagInitializeWithKeyValue(speechMsgNames[i], telemetry_object->receivedMsgsJsonArray[i]);
-                PropertybagAddValueToArray(evRcvMsgsArray, recvObj);
-            }
-        }
-    }
-}
-
-int telemetry_serialize(PROPERTYBAG_HANDLE propertyHandle, void* pContext)
-{
-    TELEMETRY_DATA *telemetry_object = (TELEMETRY_DATA *)pContext;
-
-    // Create and append all received events
-    telemetry_add_recvmsgs(telemetry_object);
-
-    // append all metric events
-    telemetry_add_metricevents(telemetry_object);
-
-    // Root Object
-    if (propertyHandle)
-    {
-        PropertybagSetArrayValue(propertyHandle, kRcvd_msgs_key, evRcvMsgsArray);
-        PropertybagSetArrayValue(propertyHandle, kMetric_events_key, evMetricArray);
-    }
-    return 0;
-}
-
-int tts_serialize(PROPERTYBAG_HANDLE propertyHandle, void* pContext)
-{
-    if (pContext)
-    {
-        PropertybagAddValueToArray(evMetricArray, pContext);
-    }
-
-    // Root Object
-    if (propertyHandle)
-    {
-        PropertybagSetArrayValue(propertyHandle, kRcvd_msgs_key, evRcvMsgsArray);
-        PropertybagSetArrayValue(propertyHandle, kMetric_events_key, evMetricArray);
-    }
-    return 0;
-}
-
-static void send_serialized_telemetry(PROPERTYBAG_HANDLE pHandle, 
-    PPROPERTYBAG_OBJECT_CALLBACK fn, 
-    const char *requestId)
-{
-    STRING_HANDLE hString;
-    const char *eSerialArray;
-
-    // Serialize the received messages events and metric events.
-    hString = PropertybagSerialize(fn, pHandle);
-
-    if (hString)
-    {
-        // Serialize the received messages events and metric events.
-        eSerialArray = STRING_c_str(hString);
-        if (eSerialArray && g_pfnCallback)
-        {
-            g_pfnCallback((const uint8_t*)eSerialArray, strlen(eSerialArray), g_pContext, requestId);
-        }
-
-        STRING_delete(hString);
-    }
-}
-
-static void tts_flush(const char *eventName, const char *id, const char *key, void *value)
-{
-    // Create a JSON object that stores the telemetry events
-    PROPERTYBAG_HANDLE *pBag = initialize_metricobject(eventName, NULL);
-    if (pBag == NULL)
-    {
-        return;
-    }
-
-    // IF value is NULL, this is either a TTS_START or a TTS_END event
-    // Associate the timestamp with the event and flush it
-    if (value == NULL)
-    {
-        char timeString[TIME_STRING_MAX_SIZE];
-        if (-1 == GetISO8601Time(timeString, TIME_STRING_MAX_SIZE))
-        {
-            return;
-        }
-
-        PropertybagSetStringValue(json_object((JSON_Value*)pBag), key, timeString);
-    }
-    // Case for TTS_ERROR
-    else
-    {
-        PropertybagSetValue(pBag, key, value);
-    }
-
-    initialize_telemetry_global_arrays();
-    send_serialized_telemetry(pBag, tts_serialize, (const char*)id);
-    free_telemetry_global_arrays();
-}
-
-static void prepare_send_free(TELEMETRY_DATA *telemetry_object)
-{
-    initialize_telemetry_global_arrays();
-    // Get request ID from telemetry object if any
-    char requestId[37] = "";
-    if (!IS_STRING_NULL_OR_EMPTY(telemetry_object->requestId))
-    {
-        snprintf(requestId, 37, "%s", telemetry_object->requestId);
-    }
-    
-    send_serialized_telemetry(telemetry_object, telemetry_serialize, requestId);
-
-    if (telemetry_object != NULL)
-    {
-        free(telemetry_object);
-    }
-    free_telemetry_global_arrays();
-}
-
-void telemetry_flush()
-{    
-    Lock(metricLock);
-    // Check if events exist in queue. If yes, flush them out first.
-    if (inband_telemetry_queue)
-    {
-        TELEMETRY_DATA *telemetry_object = NULL;
-        while (NULL != (telemetry_object = (TELEMETRY_DATA *)queue_dequeue(inband_telemetry_queue)))
-        {
-            prepare_send_free(telemetry_object);
-        }
-        // Once the list is empty. Set the queue to NULL
-        list_destroy(inband_telemetry_queue);
-        inband_telemetry_queue = NULL;
-    }
-    // Once events in the queue are flushed, flush the events associated with current requestId
-    prepare_send_free(current_telemetry_object);
-    // Reallocate the current telemetry object
-    current_telemetry_object = (TELEMETRY_DATA *)calloc(1, sizeof(TELEMETRY_DATA));
-    Unlock(metricLock);
-}
-
-void record_received_msg(const char *receivedMsg)
-{
-    int ret = 0;
-
-    if (current_telemetry_object == NULL)
-    {
-        LogInfo("Telemetry: Telemetry object not initialized\r\n");
-        return;
-    }
-
-    if (IS_STRING_NULL_OR_EMPTY(receivedMsg))
-    {
-        LogInfo("Telemetry: Invalid received Message Event\r\n");
-        return;
+        return -1;
     }
 
     char timeString[TIME_STRING_MAX_SIZE];
     if (-1 == GetISO8601Time(timeString, TIME_STRING_MAX_SIZE))
     {
-        return;
+        return -1;
     }
 
-    PROPERTYBAG_HANDLE evArray = getReceivedMsgJsonArray(receivedMsg);
-    if (evArray == NULL)
-    {
-        return;
-    }
+    PropertybagSetStringValue(json_object(*pBag), key, timeString);
 
-    ret = json_array_append_string(json_array(evArray), timeString);
-    if (ret)
-    {
-        LogInfo("Telemetry: Failed to add time to received event msg: (%s).\r\n", receivedMsg);
-        return;
-    }
+    return 0;
 }
 
-void register_requestId_change_event(const char *requestId)
-{
-    if (IS_STRING_NULL_OR_EMPTY(requestId))
-    {
-        LogInfo("Telemetry: Invalid request ID change Event\r\n");
-        return;
-    }
-    // Check if current_telelmetry_object is initialized and populated
-    // Also, check if this is not the first requestId set
-    Lock(metricLock);
-    if (current_telemetry_object && 
-        !IS_STRING_NULL_OR_EMPTY(current_telemetry_object->requestId) &&
-        bSetFirstRequestId)
-    {
-        // If the telemetry queue is not yet initialized, create it and set the flag
-        if (NULL == inband_telemetry_queue)
-        {
-            inband_telemetry_queue = list_create();
-        }
-        // Insert current telemetry object into the queue
-        
-        if (current_telemetry_object->bPayloadSet)
-        {
-            queue_enqueue(inband_telemetry_queue, current_telemetry_object);
-            // Assign new memory with zeros to current telemetry object
-            current_telemetry_object = (TELEMETRY_DATA *)calloc(1, sizeof(TELEMETRY_DATA));
-        }        
-    }
-    // If this is the first requestId set, then set the flag
-    else
-    {
-        bSetFirstRequestId = true;
-    }
-
-    if (current_telemetry_object == NULL)
-    {
-        LogError("Incorrect initialization for telemetryobject.");
-        goto exit;
-    }
-    // Set the requestId element for the current telemetry object
-    strcpy_s(current_telemetry_object->requestId, 37, requestId);
-
-exit:
-    Unlock(metricLock);
-}
-
-void inband_skill_telemetry(const char *skillId, const char *key, void *value)
-{
-    if (current_telemetry_object == NULL)
-    {
-        LogInfo("Telemetry: Telemetry object not initialized\r\n");
-        return;
-    }
-
-    Lock(metricLock);
-    if (NULL == current_telemetry_object->skillJson)
-    {
-        current_telemetry_object->skillJson = json_value_init_array();
-    }
-    // If skill-start event and current_skill_object already intialized. Push the object
-    // into the skillArray and reset it to NULL
-    if (!strcmp(key, kEvent_start_key) && current_skill_object)
-    {
-        PropertybagAddValueToArray(current_telemetry_object->skillJson, current_skill_object);
-        current_skill_object = NULL;
-    }
-
-    if (value == NULL)
-    {
-        inband_event_timestamp_populate(&current_skill_object, kEvent_type_skill, skillId, key);
-    }
-    else
-    {
-        inband_event_key_value_populate(&current_skill_object, kEvent_type_skill, skillId, key, value);
-    }
-    Unlock(metricLock);
-}
-
-void inband_connection_telemetry(const char *connectionId, const char *key, void *value)
-{
-    Lock(metricLock);
-    if (current_connection_telemetry_object == NULL)
-    {
-        current_connection_telemetry_object = (TELEMETRY_DATA *)calloc(1, sizeof(TELEMETRY_DATA));
-    }
-
-    if (!strcmp(kEvent_start_key, key))
-    {
-        inband_event_timestamp_populate(&current_connection_telemetry_object->connectionJson, kEvent_type_connection, connectionId, key);
-    }
-    else
-    {
-        if (value == NULL)
-        {
-            inband_event_timestamp_populate(&current_connection_telemetry_object->connectionJson, kEvent_type_connection, connectionId, key);
-        }
-        else
-        {
-            inband_event_key_value_populate(&current_connection_telemetry_object->connectionJson, kEvent_type_connection, connectionId, key, value);
-        }
-        // Add current_telemetry_object to telemetry queue
-        if (NULL == inband_telemetry_queue)
-        {
-            inband_telemetry_queue = list_create();
-        }
-        
-        queue_enqueue(inband_telemetry_queue, current_connection_telemetry_object);
-        
-        // Assign new memory with zeros to current telemetry object
-        current_connection_telemetry_object = (TELEMETRY_DATA *)calloc(1, sizeof(TELEMETRY_DATA));
-    }
-    Unlock(metricLock);
-}
-
-void inband_tts_telemetry(const char *id, const char *key, void *value)
-{
-    Lock(metricLock);
-    // If current telemetry object is initialized and populated, 
-    // compare the current active requestId with the requestId associated with the tts event
-    // Add the tts event to the current telemetry object if the requestIds are the same
-    if (current_telemetry_object && 
-        !IS_STRING_NULL_OR_EMPTY(current_telemetry_object->requestId) &&
-        !strcmp(current_telemetry_object->requestId, id))
-    {
-        if (value == NULL)
-        {
-            inband_event_timestamp_populate(&current_telemetry_object->audioPlaybackJson, kEvent_type_audioPlayback, NULL, key);
-        }
-        else
-        {
-            inband_event_key_value_populate(&current_telemetry_object->audioPlaybackJson, kEvent_type_audioPlayback, NULL, key, value);
-        }
-    }
-    // flush the tts event as is immediately
-    else
-    {
-        tts_flush(kEvent_type_audioPlayback, id, key, value);
-    }
-    Unlock(metricLock);
-}
-
-void inband_kws_telemetry(int kwsStartOffsetMS, int audioStartOffsetMS)
-{
-    Lock(metricLock);
-    metrics_listening_stop();
-
-    char time[TIME_STRING_MAX_SIZE];
-    if (-1 == GetISO8601TimeOffset(time, TIME_STRING_MAX_SIZE, kwsStartOffsetMS))
-    {
-        goto exit;
-    }
-    metrics_listening_start(time);
-
-    if (-1 == GetISO8601TimeOffset(time, TIME_STRING_MAX_SIZE, audioStartOffsetMS))
-    {
-        goto exit;
-    }
-    metrics_recording_start(time);
-
-exit:
-    Unlock(metricLock);
-}
-
-void inband_event_key_value_populate(PROPERTYBAG_HANDLE *pBag, const char *eventName, const char *id, const char *key, void *value)
+int populate_event_key_value(PROPERTYBAG_HANDLE *pBag, const char *eventName, const char *id, const char *key, void *value)
 {
     int ret = 0;
-    
-    if (current_telemetry_object == NULL && current_connection_telemetry_object == NULL)
-    {
-        return;
-    }
-   
+
     if (IS_STRING_NULL_OR_EMPTY(eventName))
     {
-        LogInfo("Telemetry: Invalid event Name\r\n");
-        return;
+        LogError("Telemetry: event name is empty.\r\n");
+        return -1;
     }
     if (IS_STRING_NULL_OR_EMPTY(key))
     {
-        LogInfo("Telemetry: Invalid key\r\n");
-        return;
+        LogError("Telemetry: key name is empty\r\n");
+        return -1;
     }
 
-    Lock(metricLock);
     *pBag = get_metric_object(*pBag, eventName, id);
     if (*pBag == NULL)
     {
-        goto exit;
+        return -1;
     }
 
     ret = PropertybagSetValue(*pBag, key, value);
     if (ret)
     {
         LogInfo("Telemetry: Failed to add to new event object (%s) with key: %s.\r\n", eventName, key);
-        goto exit;
+        return -1;
     }
 
-    // Set the bPayloadSet flag
-    current_telemetry_object->bPayloadSet = 1;
-
-exit:
-    Unlock(metricLock);
+    return 0;
 }
 
-void inband_event_timestamp_populate(PROPERTYBAG_HANDLE *pBag, const char *eventName, const char *id, const char *key)
+static PROPERTYBAG_HANDLE telemetry_add_metricevents(TELEMETRY_DATA *telemetry_object)
 {
-    Lock(metricLock);
-    if (current_telemetry_object == NULL && current_connection_telemetry_object == NULL)
+
+    PROPERTYBAG_HANDLE json_array = json_value_init_array();
+    if (NULL == json_array)
     {
-        goto exit;
+        LogInfo("Telemetry: Unable to initialize Metrics event array\r\n");
+        return NULL;
     }
-   
-    *pBag = get_metric_object(*pBag, eventName, id);
-    if (*pBag == NULL)
+
+    if (telemetry_object->connectionJson)
     {
-        goto exit;
+        PropertybagAddValueToArray(json_array, telemetry_object->connectionJson);
+        // current_connection_telemetry_object would be the only one that would have
+        // connectionJson initialized. If connectionJson is initialized for 
+        // any TELEMETRY_DATA object, they would not contain values. 
+        // Hence no need to check other pointers and we can return here.
+        return json_array;
+    }
+
+    if (telemetry_object->audioStartJson)
+    {
+        PropertybagAddValueToArray(json_array, telemetry_object->audioStartJson);
+    }
+
+    if (telemetry_object->microphoneJson)
+    {
+        PropertybagAddValueToArray(json_array, telemetry_object->microphoneJson);
+    }
+
+    if (telemetry_object->listeningTriggerJson)
+    {
+        PropertybagAddValueToArray(json_array, telemetry_object->listeningTriggerJson);
+    }
+
+    if (telemetry_object->ttsJson)
+    {
+        PropertybagAddValueToArray(json_array, telemetry_object->ttsJson);
+    }
+
+    if (telemetry_object->ttsJson)
+    {
+        PropertybagAddValueToArray(json_array, telemetry_object->ttsJson);
+    }
+
+    return json_array;
+}
+
+static PROPERTYBAG_HANDLE telemetry_add_recvmsgs(TELEMETRY_DATA *telemetry_object)
+{
+    if (NULL == telemetry_object)
+        return NULL;
+
+    PROPERTYBAG_HANDLE json_array = json_value_init_array();
+    if (NULL == json_array)
+    {
+        LogInfo("Telemetry: Unable to initialize Received Messages array\r\n");
+        return NULL;
+    }
+
+    for (int i = 0; i < countOfMsgTypes; i++)
+    {
+        PROPERTYBAG_HANDLE recvObj = NULL;
+        if (telemetry_object->receivedMsgsJsonArray[i])
+        {
+            recvObj = PropertybagInitializeWithKeyValue(speechMsgNames[i], telemetry_object->receivedMsgsJsonArray[i]);
+            PropertybagAddValueToArray(json_array, recvObj);
+        }
+    }
+    return json_array;
+}
+
+int telemetry_serialize(PROPERTYBAG_HANDLE root, void* pContext)
+{
+    if (!root) {
+        return -1;
+    }
+
+    TELEMETRY_DATA *telemetry_object = (TELEMETRY_DATA *)pContext;
+    // Root Object
+    // Create and append all received events
+    PROPERTYBAG_HANDLE received_msg_array = telemetry_add_recvmsgs(telemetry_object);
+    PropertybagSetArrayValue(root, kRcvd_msgs_key, received_msg_array);
+
+    // append all metric events
+    PROPERTYBAG_HANDLE metric_array = telemetry_add_metricevents(telemetry_object);
+    PropertybagSetArrayValue(root, kMetric_events_key, metric_array);
+    return 0;
+}
+
+int tts_serialize(PROPERTYBAG_HANDLE root, void* pContext)
+{
+    if (!root || !pContext) {
+        return -1;
+    }
+
+    PROPERTYBAG_HANDLE json_array = json_value_init_array();
+    if (NULL == json_array)
+    {
+        LogError("Telemetry: Unable to create json array\r\n");
+        return -1;
+    }
+
+    PropertybagAddValueToArray(json_array, pContext);
+    PropertybagSetArrayValue(root, kRcvd_msgs_key, json_value_init_array());
+    PropertybagSetArrayValue(root, kMetric_events_key, json_array);
+
+    return 0;
+}
+
+static void send_serialized_telemetry(TELEMETRY_HANDLE handle, STRING_HANDLE string,
+    const char *requestId)
+{
+    if (string)
+    {
+        // Serialize the received messages events and metric events.
+        const char * c_str = STRING_c_str(string);
+        if (c_str && handle->callback)
+        {
+            handle->callback((const uint8_t*)c_str, strlen(c_str), handle->callbackContext, requestId);
+        }
+    }
+}
+
+static void tts_flush(TELEMETRY_HANDLE handle, const char *eventName, const char *id, const char *key, void *value)
+{
+    // Create a JSON object that stores the telemetry events
+    PROPERTYBAG_HANDLE *pBag = NULL;
+
+    // IF value is NULL, this is either a TTS_START or a TTS_END event
+    // Associate the timestamp with the event and flush it
+    int ret;
+    if (value == NULL)
+    {
+        ret = populate_event_timestamp(pBag, eventName, id, key);
+    }
+    // Case for TTS_ERROR
+    else
+    {
+        ret = populate_event_key_value(pBag, eventName, id, key, value);
+    }
+
+    if (ret == 0) 
+    {
+        // Serialize the received messages events and metric events.
+        STRING_HANDLE string = PropertybagSerialize(tts_serialize, pBag);
+        send_serialized_telemetry(handle, string, (const char*)id);
+    }
+}
+
+static void prepare_send_free(TELEMETRY_HANDLE handle, TELEMETRY_DATA *telemetry_object)
+{
+    // Get request ID from telemetry object if any
+    char requestId[NO_DASH_UUID_LEN] = "";
+    if (!IS_STRING_NULL_OR_EMPTY(telemetry_object->requestId))
+    {
+        snprintf(requestId, NO_DASH_UUID_LEN, "%s", telemetry_object->requestId);
+    }
+    
+    STRING_HANDLE serialized = PropertybagSerialize(telemetry_serialize, telemetry_object);
+    if (serialized) 
+    {
+        send_serialized_telemetry(handle, serialized, requestId);
+        STRING_delete(serialized);
+    }
+
+    if (telemetry_object != NULL)
+    {
+        free(telemetry_object);
+    }
+}
+
+static PROPERTYBAG_HANDLE * getJsonForEvent(TELEMETRY_HANDLE handle, const char *eventName)
+{
+    if (strcmp(eventName, kEvent_type_audioStart) == 0)
+        return &handle->current_telemetry_object->audioStartJson;
+    if (strcmp(eventName, kEvent_type_microphone) == 0)
+        return &handle->current_telemetry_object->microphoneJson;
+    if (strcmp(eventName, kEvent_type_audioPlayback) == 0)
+        return &handle->current_telemetry_object->ttsJson;
+
+    LogError("Telemetry: invalid event name (%s),\r\n", eventName);
+    return NULL;
+}
+
+void telemetry_flush(TELEMETRY_HANDLE handle)
+{    
+    Lock(handle->lock);
+    // Check if events exist in queue. If yes, flush them out first.
+    TELEMETRY_DATA *telemetry_object = NULL;
+    while (NULL != (telemetry_object = (TELEMETRY_DATA *)queue_dequeue(handle->inband_telemetry_queue)))
+    {
+        prepare_send_free(handle, telemetry_object);
+    }
+    // Once events in the queue are flushed, flush the events associated with current requestId
+    prepare_send_free(handle, handle->current_telemetry_object);
+    // Reallocate the current telemetry object
+    handle->current_telemetry_object = (TELEMETRY_DATA *)calloc(1, sizeof(TELEMETRY_DATA));
+    Unlock(handle->lock);
+}
+
+void record_received_msg(TELEMETRY_HANDLE handle, const char *receivedMsg)
+{
+    int ret = 0;
+
+    if (IS_STRING_NULL_OR_EMPTY(receivedMsg))
+    {
+        LogError("Telemetry: received an empty message.\r\n");
+        return;
     }
 
     char timeString[TIME_STRING_MAX_SIZE];
     if (-1 == GetISO8601Time(timeString, TIME_STRING_MAX_SIZE))
     {
-        goto exit;
+        return;
+    }
+    INCOMING_MSG_TYPE msgType = countOfMsgTypes;
+
+    if (!strcmp(receivedMsg, g_messagePathTurnStart))
+        msgType = turnStart;
+    else if (!strcmp(receivedMsg, g_messagePathSpeechStartDetected))
+        msgType = speechStartDetected;
+    else if (!strcmp(receivedMsg, g_messagePathSpeechHypothesis))
+        msgType = speechHypothesis;
+    else if (!strcmp(receivedMsg, g_messagePathSpeechEndDetected))
+        msgType = speechEndDetected;
+    else if (!strcmp(receivedMsg, g_messagePathSpeechPhrase))
+        msgType = speechPhrase;
+    else if (!strcmp(receivedMsg, kRcvd_msg_audio_key))
+        msgType = audio;
+    else if (!strcmp(receivedMsg, g_messagePathTurnEnd))
+        msgType = turnEnd;
+
+    if (msgType == countOfMsgTypes) 
+    {
+        LogError("Telemetry: received unexpected msg: (%s).\r\n", receivedMsg);
+        return;
     }
 
-    PropertybagSetStringValue(json_object(*pBag), key, timeString);
+    Lock(handle->lock);
 
-    // Set the bPayloadSet flag
-    current_telemetry_object->bPayloadSet = 1;
+    TELEMETRY_DATA * telemetry_data = handle->current_telemetry_object;
+    PROPERTYBAG_HANDLE evArray = initialize_jsonArray(&telemetry_data->receivedMsgsJsonArray[msgType]);
+    ret = json_array_append_string(json_array(evArray), timeString);
+    if (ret)
+    {
+        LogError("Telemetry: Failed to add time to received event msg: (%s).\r\n", receivedMsg);
+    }
+
+    Unlock(handle->lock);
+}
+
+void register_requestId_change_event(TELEMETRY_HANDLE handle, const char *requestId)
+{
+    if (IS_STRING_NULL_OR_EMPTY(requestId))
+    {
+        LogError("Telemetry: empty request id\r\n");
+        return;
+    }
+    // Check if current_telelmetry_object is initialized and populated
+    // Also, check if this is not the first requestId set
+    Lock(handle->lock);
+    TELEMETRY_DATA* telemetry_data = handle->current_telemetry_object;
+    if (!IS_STRING_NULL_OR_EMPTY(telemetry_data->requestId) && 
+        telemetry_data->bPayloadSet)
+    {
+        // Insert current telemetry object into the queue
+        queue_enqueue(handle->inband_telemetry_queue, telemetry_data);
+        // Assign new memory with zeros to current telemetry object
+        handle->current_telemetry_object = (TELEMETRY_DATA *)calloc(1, sizeof(TELEMETRY_DATA));
+    }
+
+    // Set the requestId element for the current telemetry object
+    strcpy_s(handle->current_telemetry_object->requestId, NO_DASH_UUID_LEN, requestId);
+
+    Unlock(handle->lock);
+}
+
+void inband_connection_telemetry(TELEMETRY_HANDLE handle, const char *connectionId, const char *key, void *value)
+{
+    Lock(handle->lock);
+    TELEMETRY_DATA* connection_data = handle->current_connection_telemetry_object;
+    PROPERTYBAG_HANDLE *connectionJson = &connection_data->connectionJson;
+    const char* eventName = kEvent_type_connection;
+    int ret = 0;
+    if (strcmp(kEvent_start_key, key) == 0)
+    {
+        ret = populate_event_timestamp(connectionJson, eventName, connectionId, kEvent_start_key);
+        connection_data->bPayloadSet = (ret == 0);
+    }
+    else
+    {
+        if (value == NULL)
+        {
+            ret = populate_event_timestamp(connectionJson, eventName, connectionId, key);
+        }
+        else
+        {
+            ret = populate_event_key_value(connectionJson, eventName, connectionId, key, value);
+        }
+
+        connection_data->bPayloadSet &= (ret == 0);
+
+        if (connection_data->bPayloadSet) 
+        {
+            queue_enqueue(handle->inband_telemetry_queue, connection_data);
+        }
+        else 
+        {
+            free(connection_data);
+        }
+
+        // Assign new memory with zeros to current telemetry object
+        handle->current_connection_telemetry_object = (TELEMETRY_DATA *)calloc(1, sizeof(TELEMETRY_DATA));
+    }
+    Unlock(handle->lock);
+}
+
+void inband_tts_telemetry(TELEMETRY_HANDLE handle, const char *id, const char *key, void *value)
+{
+    // NOTE: Cortana relic, this function is not currently used anywhere.
+    Lock(handle->lock);
+    // If current telemetry object is initialized and populated, 
+    // compare the current active requestId with the requestId associated with the tts event
+    // Add the tts event to the current telemetry object if the requestIds are the same
+    
+    // NOTE: IMPORTANT! this logic is no loger sound!!!
+    
+    if (!IS_STRING_NULL_OR_EMPTY(handle->current_telemetry_object->requestId) &&
+        strcmp(handle->current_telemetry_object->requestId, id) == 0)
+    {
+        PROPERTYBAG_HANDLE* ttsJson = &handle->current_telemetry_object->ttsJson;
+        if (value == NULL)
+        {
+            populate_event_timestamp(ttsJson, kEvent_type_audioPlayback, NULL, key);
+        }
+        else
+        {
+            populate_event_key_value(ttsJson, kEvent_type_audioPlayback, NULL, key, value);
+        }
+    }
+    // flush the tts event as is immediately
+    else
+    {
+        tts_flush(handle, kEvent_type_audioPlayback, id, key, value);
+    }
+    Unlock(handle->lock);
+}
+
+void inband_kws_telemetry(TELEMETRY_HANDLE handle, int kwsStartOffsetMS, int audioStartOffsetMS)
+{
+    // TODO: this function is not currently used anywhere.
+    Lock(handle->lock);
+    metrics_listening_stop(handle);
+
+    char time[TIME_STRING_MAX_SIZE];
+    if (-1 == GetISO8601TimeOffset(time, TIME_STRING_MAX_SIZE, kwsStartOffsetMS))
+    {
+        goto exit;
+    }
+    metrics_listening_start(handle, time);
+
+    if (-1 == GetISO8601TimeOffset(time, TIME_STRING_MAX_SIZE, audioStartOffsetMS))
+    {
+        goto exit;
+    }
+    metrics_recording_start(handle, time);
 
 exit:
-    Unlock(metricLock);
+    Unlock(handle->lock);
+}
+
+void inband_event_key_value_populate(TELEMETRY_HANDLE handle, const char *eventName, const char *id, const char *key, void *value)
+{
+    Lock(handle->lock);
+    PROPERTYBAG_HANDLE *pBag = getJsonForEvent(handle, eventName);
+    if (pBag == NULL) 
+    {
+        return;
+    }
+    int ret = populate_event_key_value(pBag, eventName, id, key, value);
+    // Set the bPayloadSet flag
+    handle->current_telemetry_object->bPayloadSet |= (ret == 0);
+
+    Unlock(handle->lock);
+}
+
+void inband_event_timestamp_populate(TELEMETRY_HANDLE handle, const char *eventName, const char *id, const char *key)
+{
+    Lock(handle->lock);
+    PROPERTYBAG_HANDLE *pBag = getJsonForEvent(handle, eventName);
+    if (pBag == NULL) 
+    {
+        return;
+    }
+    int ret = populate_event_timestamp(pBag, eventName, id, key);
+    // Set the bPayloadSet flag
+    handle->current_telemetry_object->bPayloadSet |= (ret == 0);
+    Unlock(handle->lock);
 }
 
 #pragma pack(pop)
 
-
-void telemetry_uninitialize()
+TELEMETRY_HANDLE telemetry_create(PTELEMETRY_WRITE callback, void* context)
 {
-    if (current_telemetry_object != NULL)
-    {
-        free(current_telemetry_object);
-        current_telemetry_object = NULL;
-    }
-    if (current_connection_telemetry_object != NULL)
-    {
-        free(current_connection_telemetry_object);
-        current_connection_telemetry_object = NULL;
-    }
-    if (inband_telemetry_queue != NULL)
-    {
-        list_destroy(inband_telemetry_queue);
-        inband_telemetry_queue = NULL;
-    }
-
-#ifdef USE_ARIA
-    if (gAriaLogger != NULL)
-        gAriaLogger = NULL;
-
-    skype_library_shutdown();
-#endif
-}
-
-void inband_telemetry_initialize()
-{
-    if (current_telemetry_object != NULL)
-    {
-        LogError("Incorrect initialization of inband telemetry.");
-    }
-    current_telemetry_object = (TELEMETRY_DATA *)calloc(1, sizeof(TELEMETRY_DATA));
+    PropertybagInitialize();
     initialize_message_name_array();
+    TELEMETRY_CONTEXT* ctx = (TELEMETRY_CONTEXT *)calloc(1, sizeof(TELEMETRY_CONTEXT));
+    ctx->current_telemetry_object = (TELEMETRY_DATA *)calloc(1, sizeof(TELEMETRY_DATA));
+    // as 
+    ctx->current_connection_telemetry_object = (TELEMETRY_DATA *)calloc(1, sizeof(TELEMETRY_DATA));
+    ctx->lock = Lock_Init();
+    ctx->callback = callback;
+    ctx->callbackContext = context;
+    ctx->inband_telemetry_queue = list_create();
+    return ctx;
 }
 
-int telemetry_initialize()
+void telemetry_destroy(TELEMETRY_HANDLE handle)
 {
-    inband_telemetry_initialize();
-#ifndef USE_ARIA
-    // No op for all Aria APIs.
-    return 0;
-#else // ifndef USE_ARIA
-    int retval = skype_library_init();
-
-    if (retval != 0)
+    if (handle->current_telemetry_object != NULL)
     {
-        LogError("Skype library init failed");
+        free(handle->current_telemetry_object);
+        handle->current_telemetry_object = NULL;
     }
-
-    GOTO_EXIT_IF_NONZERO(aria_get_logger(
-        ARIA_TENANT_TOKEN,
-        "CortanaSDK",
-        &gAriaLogger));
-
-    // Make a best effort to set the SDK version that identifies this build.
-    telemetry_set_context_string("sdk_version", get_cortana_sdk_version());
-
-    telemetry_set_context_long("metrics_version", METRICS_VERSION);
-
-    // N.B.: Aria has a common property called EventInfo.InitId that can be
-    //       used to identify this instance of Cortana.
-
-Exit:
-    return retval;
-#endif // ifndef USE_ARIA else
-}
-
-
-int telemetry_set_context_string(const char* key, const char* value)
-{
-#ifndef USE_ARIA
-    (void)key;
-    (void)value;
-    return 0;
-#else // ifndef USE_ARIA
-    if (gAriaLogger == NULL)
+    if (handle->current_connection_telemetry_object != NULL)
     {
-        LogError("Aria not initialized. Dropping context '%s', val:%s", key, value);
-        return -1;
+        free(handle->current_connection_telemetry_object);
+        handle->current_connection_telemetry_object = NULL;
     }
-
-    return aria_set_logger_context_string(gAriaLogger, key, value ? value : "");
-#endif // ifndef USE_ARIA else
-}
-
-int telemetry_set_context_double(const char* key, double value)
-{
-#ifndef USE_ARIA
-    (void)key;
-    (void)value;
-    return 0;
-#else // ifndef USE_ARIA
-    if (gAriaLogger == NULL)
+    if (handle->inband_telemetry_queue != NULL)
     {
-        LogError("Aria not initialized. Dropping context '%s', val:%lf", key, value);
-        return -1;
+        list_destroy(handle->inband_telemetry_queue);
+        handle->inband_telemetry_queue = NULL;
     }
-
-    return aria_set_logger_context_double(gAriaLogger, key, value);
-#endif // ifndef USE_ARIA else
-}
-
-int telemetry_set_context_long(const char* key, long value)
-{
-#ifndef USE_ARIA
-    (void)key;
-    (void)value;
-    return 0;
-#else // ifndef USE_ARIA
-    if (gAriaLogger == NULL)
-    {
-        LogError("Aria not initialized. Dropping context '%s', val:%ld", key, value);
-        return -1;
-    }
-
-    return aria_set_logger_context_long(gAriaLogger, key, value);
-#endif // ifndef USE_ARIA else
+    PropertybagShutdown();
 }
 
 #if defined(PRINT_TELEMETRY_EVENTS) || defined(USE_ARIA)

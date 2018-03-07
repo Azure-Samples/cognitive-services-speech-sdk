@@ -28,9 +28,7 @@
 #include "azure_c_shared_utility/list.h"
 #include "usp.h"
 #include "uspcommon.h"
-#include "metrics.h"
 #include "iobuffer.h"
-#include "transport.h"
 #include "tokenstore.h"
 #include "dnscache.h"
 
@@ -49,6 +47,10 @@ extern "C" {
 #define scanf_s scanf
 #define sscanf_s sscanf
 #endif
+
+
+typedef struct _TransportRequest* TransportHandle;
+typedef struct _TELEMETRY_CONTEXT* TELEMETRY_HANDLE;
 
 #define USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle) \
     do { \
@@ -170,13 +172,16 @@ typedef struct _UspContext
     THREAD_HANDLE workThreadHandle;
 
     size_t audioOffset;
-    LOCK_HANDLE uspContextLock;
-    TransportHandle transportRequest;
+    LOCK_HANDLE lock;
+    COND_HANDLE workEvent;
+    TransportHandle transport;
     DnsCacheHandle dnsCache;
 
     // This tick count is set when the UspContext is created.  It is used
     // for metrics.
     uint64_t creationTime;
+
+    TELEMETRY_HANDLE telemetry;
 } UspContext;
 
 /**
