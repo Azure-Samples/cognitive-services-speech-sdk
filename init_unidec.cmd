@@ -17,15 +17,15 @@ rem -- copy unidec executable binaries in place
 set _UNIDEC_VERSION=Richland.Speech.UnidecRuntime.18.1.5.24286743
 
 echo .  -  Updating headers/libraries ...
-xcopy /D %~dp0\packages\%_UNIDEC_VERSION%\build\native\*.h %~dp0\external\unidec\include >nul
-xcopy /D %~dp0\packages\%_UNIDEC_VERSION%\build\native\*.lib %~dp0\external\unidec\lib >nul
+xcopy /D %~dp0\packages\%_UNIDEC_VERSION%\build\native\*.h %~dp0\external\unidec\include 
+xcopy /D %~dp0\packages\%_UNIDEC_VERSION%\build\native\*.lib %~dp0\external\unidec\lib 
 
 echo .  -  Updating headers/executables ...
-xcopy /Y /D %~dp0\packages\%_UNIDEC_VERSION%\build\native\*.dll %~dp0\build\bin\%_BUILD_FLAVOR% >nul
-xcopy /Y /D %~dp0\packages\%_UNIDEC_VERSION%\build\native\*.pdb %~dp0\build\bin\%_BUILD_FLAVOR% >nul
-xcopy /Y /D %~dp0\packages\%_UNIDEC_VERSION%\build\native\*.exe %~dp0\build\bin\%_BUILD_FLAVOR% >nul
-xcopy /Y /D %~dp0\packages\%_UNIDEC_VERSION%\lib\net\*.dll %~dp0\build\bin\%_BUILD_FLAVOR% >nul
-xcopy /Y /D %~dp0\packages\%_UNIDEC_VERSION%\lib\net\*.pdb %~dp0\build\bin\%_BUILD_FLAVOR% >nul
+xcopy /Y /D %~dp0\packages\%_UNIDEC_VERSION%\build\native\*.dll %~dp0\build\bin\%_BUILD_FLAVOR% 
+xcopy /Y /D %~dp0\packages\%_UNIDEC_VERSION%\build\native\*.pdb %~dp0\build\bin\%_BUILD_FLAVOR% 
+xcopy /Y /D %~dp0\packages\%_UNIDEC_VERSION%\build\native\*.exe %~dp0\build\bin\%_BUILD_FLAVOR% 
+xcopy /Y /D %~dp0\packages\%_UNIDEC_VERSION%\lib\net\*.dll %~dp0\build\bin\%_BUILD_FLAVOR% 
+xcopy /Y /D %~dp0\packages\%_UNIDEC_VERSION%\lib\net\*.pdb %~dp0\build\bin\%_BUILD_FLAVOR% 
 
 echo .  -  Updating models (this might take several minutes) ...
-xcopy /Y /D \\ccpsofslm\speechshare\USR\carbon\richland\models %~dp0\external\unidec\bin /S >nul
+xcopy /Y /D \\ccpsofslm\speechshare\USR\carbon\richland\models %~dp0\external\unidec\bin /S 

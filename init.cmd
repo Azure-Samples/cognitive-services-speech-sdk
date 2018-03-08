@@ -12,7 +12,7 @@ echo .  Welcome to Carbon!
 rem -- restore nuget packages
 echo -
 echo .  Installing Carbon dependent packages...
-%~dp0\external\nuget\nuget.exe restore %~dp0\packages\packages.config -PackagesDirectory %~dp0\packages -Verbosity quiet
+%~dp0\external\nuget\nuget.exe restore %~dp0\packages\packages.config -PackagesDirectory %~dp0\packages 
 echo .  Done!
 
 rem -- special handling for Unidec

@@ -20,6 +20,13 @@ if(WIN32)
     endif()
 endif()
 
+if(WIN32)
+    option(BUILD_JAVA "Build Java/Android SWIG module" ON)
+    if(BUILD_JAVA)
+        add_subdirectory(java)
+    endif()
+endif()
+
 # Dummy target to make this CMakeLists file appear 
 # in the generated VS solution.
 add_custom_target(swig 
