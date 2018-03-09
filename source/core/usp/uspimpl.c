@@ -69,12 +69,11 @@ uint64_t telemetry_gettime()
 #endif
 }
 
+// This is called from telemetry_flush, invoked on a worker thread in turn-end. 
 static void OnTelemetryData(const uint8_t* buffer, size_t bytesToWrite, void *context, const char *requestId)
 {
     UspContext *usp = (UspContext*)context;
-    Lock(usp->lock);
     TransportWriteTelemetry(usp->transport, buffer, bytesToWrite, requestId);
-    Unlock(usp->lock);
 }
 
 UspResult MessageWrite(UspHandle uspHandle, const char *path, const uint8_t *data, uint32_t size)
@@ -128,14 +127,6 @@ UspResult AudioStreamWrite(UspHandle uspHandle, const void * data, uint32_t size
     if (!uspHandle->audioOffset)
     {
         metrics_audiostream_init();
-        // user initiated listening and multi-turn require the request id to 
-        // be re-created here to ensure barge-in scenerios work.
-        // if (!uspHandle->KWTriggered)
-        // {
-        //    TransportCreateRequestId(uspHandle->transport);
-        //    // cortana_reset_speech_request_id(uspHandle);
-        // }
-
         metrics_audio_start(uspHandle->telemetry);
 
         ret = TransportStreamPrepare(uspHandle->transport, httpArgs);
@@ -319,7 +310,8 @@ static UspResult SpeechEndHandler(UspContext* uspContext, const char* path, cons
     return USP_SUCCESS;
 }
 
-// callback for turn.end
+// This is a callback for "turn.end" messages invoked by the transport layer.
+// This is called on the worker thread, from inside the critical section (see UspWorker), no need to acquire a lock here.
 static UspResult TurnEndHandler(UspContext* uspContext, const char* path, const char* mime, const unsigned char* buffer, size_t size)
 {
     assert(uspContext != NULL);
@@ -334,6 +326,7 @@ static UspResult TurnEndHandler(UspContext* uspContext, const char* path, const 
     (void)size;
 
     // flush the telemetry before invoking the onTurnEnd callback.
+    // TODO: 1164154
     telemetry_flush(uspContext->telemetry);
 
     USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspContext);
@@ -353,10 +346,7 @@ static UspResult TurnEndHandler(UspContext* uspContext, const char* path, const 
 
     // Todo: need to reset request_id?
     // Todo: the caller need to flush audio buffer?
-    Lock(uspContext->lock);
     TransportCreateRequestId(uspContext->transport);
-    Unlock(uspContext->lock);
-
     return USP_SUCCESS;
 }
 
@@ -397,7 +387,7 @@ static UspResult ContentPathHandler(UspContext* uspContext, const char* path, co
 
 bool userPathHandlerCompare(LIST_ITEM_HANDLE item1, const void* path)
 {
-    UserPathHandler* value1 = (UserPathHandler*)list_item_get_value(item1);
+    UserPathHandler* value1 = (UserPathHandler*)singlylinkedlist_item_get_value(item1);
     return (strcmp(value1->path, path) == 0);
 }
 
@@ -475,10 +465,10 @@ static void TransportRecvResponseHandler(TransportHandle transportHandle, HTTP_H
     }
 
     Lock(uspContext->lock);
-    LIST_ITEM_HANDLE foundItem = list_find(uspContext->userPathHandlerList, userPathHandlerCompare, path);
+    LIST_ITEM_HANDLE foundItem = singlylinkedlist_find(uspContext->userPathHandlerList, userPathHandlerCompare, path);
     if (foundItem != NULL)
     {
-        UserPathHandler* pathHandler = (UserPathHandler*)list_item_get_value(foundItem);
+        UserPathHandler* pathHandler = (UserPathHandler*)singlylinkedlist_item_get_value(foundItem);
         assert(pathHandler->handler != NULL);
         assert(strcmp(pathHandler->path, path) == 0);
         LogInfo("User Message: path: %s, content type: %s, size: %zu.", path, contentType, size);
@@ -497,53 +487,6 @@ static void TransportRecvResponseHandler(TransportHandle transportHandle, HTTP_H
     }
 }
 
-
-// Device thumbprint doesn't change when user account switch.
-// First, try to hit memory cache.
-// If fails, try to read from local storage.
-// If fails, require it from CDP API.
-// If fails, leave it empty.
-const char* GetCdpDeviceThumbprint()
-{
-#if !defined(ThumbprintBufferSize)
-#define ThumbprintBufferSize 50
-#endif
-
-    static char thumbprint[ThumbprintBufferSize] = { 0 };
-
-    // if memory cache is empty, try to generate one?
-    // Todo: how to get device thumbprint
-    if (*thumbprint == 0)
-    {
-        int result = -1;
-        // generate one.
-        uint8_t bThumbPrint[32];
-        for (unsigned int i = 0; i < sizeof(bThumbPrint); i++)
-        {
-            bThumbPrint[i] = (unsigned char)rand();
-        }
-
-        STRING_HANDLE b64 = Base64_Encode_Bytes(bThumbPrint, sizeof(bThumbPrint));
-        if (b64)
-        {
-            if (STRING_length(b64) < sizeof(thumbprint))
-            {
-                strcpy_s(thumbprint, sizeof(thumbprint), STRING_c_str(b64));
-                result = 0;
-            }
-
-            STRING_delete(b64);
-        }
-
-        if (result == 0)
-        {
-            LogInfo("result from GetDeviceThumbprint: %s", thumbprint);
-        }
-    }
-
-    return thumbprint;
-}
-
 UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
 {
     if (uspContext->transport != NULL)
@@ -552,23 +495,19 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
         return USP_ALREADY_INITIALIZED_ERROR;
     }
 
-    TransportHandle transportHandle = TransportRequestCreate(endpoint, uspContext, uspContext->telemetry);
-    if (transportHandle == NULL)
+    HTTP_HEADERS_HANDLE connectionHeaders = HTTPHeaders_Alloc();
+
+    if (connectionHeaders == NULL)
     {
-        LogError("Failed to create transport request.");
+        LogError("Failed to create connection headers.");
         return USP_INITIALIZATION_FAILURE;
     }
-
-    uspContext->transport = transportHandle;
-
-    TransportSetDnsCache(transportHandle, uspContext->dnsCache);
-    TransportSetCallbacks(transportHandle, TransportErrorHandler, TransportRecvResponseHandler);
 
     if (uspContext->type == USP_ENDPOINT_CDSDK)
     {
         // TODO: MSFT: 1135317 Allow for configurable audio format
-        TransportRequestAddRequestHeader(uspContext->transport, g_requestHeaderAudioResponseFormat, "riff-16khz-16bit-mono-pcm");
-        TransportRequestAddRequestHeader(uspContext->transport, g_requestHeaderUserAgent, g_userAgent);
+        HTTPHeaders_ReplaceHeaderNameValuePair(connectionHeaders, g_requestHeaderAudioResponseFormat, "riff-16khz-16bit-mono-pcm");
+        HTTPHeaders_ReplaceHeaderNameValuePair(connectionHeaders, g_requestHeaderUserAgent, g_userAgent);
     }
     // Hackhack: Because Carbon API does not support authentication yet, use a default subscription key if no authentication is set.
     // TODO: This should be removed after Carbon API is ready for authentication, and before public release!!!
@@ -581,7 +520,7 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
     switch (uspContext->authType)
     {
     case USP_AUTHENTICATION_SUBSCRIPTION_KEY:
-        if (TransportRequestAddRequestHeader(transportHandle, g_requestHeaderOcpApimSubscriptionKey, STRING_c_str(uspContext->authData)) != 0)
+        if (HTTPHeaders_ReplaceHeaderNameValuePair(connectionHeaders, g_requestHeaderOcpApimSubscriptionKey, STRING_c_str(uspContext->authData)) != 0)
         {
             LogError("Failed to set authentication using subscription key.");
             return USP_INITIALIZATION_FAILURE;
@@ -601,7 +540,7 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
                 return USP_OUT_OF_MEMORY;
             }
             snprintf(tokenStr, tokenStrSize, "%s %s", bearerHeader, tokenValue);
-            if (TransportRequestAddRequestHeader(transportHandle, g_requestHeaderAuthorization, tokenStr) != 0)
+            if (HTTPHeaders_ReplaceHeaderNameValuePair(connectionHeaders, g_requestHeaderAuthorization, tokenStr) != 0)
             {
                 LogError("Failed to set authentication using authorization token.");
                 ret = USP_INITIALIZATION_FAILURE;
@@ -612,7 +551,7 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
 
     // TODO(1126805): url builder + auth interfaces
     case USP_AUTHENTICATION_SEARCH_DELEGATION_RPS_TOKEN:
-        if (TransportRequestAddRequestHeader(transportHandle, g_requestHeaderSearchDelegationRPSToken, STRING_c_str(uspContext->authData)) != 0)
+        if (HTTPHeaders_ReplaceHeaderNameValuePair(connectionHeaders, g_requestHeaderSearchDelegationRPSToken, STRING_c_str(uspContext->authData)) != 0)
         {
             LogError("Failed to set authentication using Search-DelegationRPSToken.");
             return USP_INITIALIZATION_FAILURE;
@@ -624,6 +563,20 @@ UspResult TransportInitialize(UspContext* uspContext, const char* endpoint)
         LogError("Unsupported authentication type %d.", uspContext->authType);
         return USP_INITIALIZATION_FAILURE;
     }
+
+    TransportHandle transportHandle = TransportRequestCreate(endpoint, uspContext, uspContext->telemetry, connectionHeaders);
+    if (transportHandle == NULL)
+    {
+        LogError("Failed to create transport request.");
+        return USP_INITIALIZATION_FAILURE;
+    }
+
+    uspContext->transport = transportHandle;
+
+    TransportSetDnsCache(transportHandle, uspContext->dnsCache);
+    TransportSetCallbacks(transportHandle, TransportErrorHandler, TransportRecvResponseHandler);
+
+    HTTPHeaders_Free(connectionHeaders);
 
     return USP_SUCCESS;
 }
@@ -664,14 +617,14 @@ UspResult UspContextDestroy(UspContext* uspContext)
     STRING_delete(uspContext->authData);
     STRING_delete(uspContext->endpointUrl);
 
-    while ((userPathHandlerItem = list_get_head_item(uspContext->userPathHandlerList)) != NULL)
+    while ((userPathHandlerItem = singlylinkedlist_get_head_item(uspContext->userPathHandlerList)) != NULL)
     {
-        pathHandler = (UserPathHandler*)list_item_get_value(userPathHandlerItem);
-        list_remove(uspContext->userPathHandlerList, userPathHandlerItem);
+        pathHandler = (UserPathHandler*)singlylinkedlist_item_get_value(userPathHandlerItem);
+        singlylinkedlist_remove(uspContext->userPathHandlerList, userPathHandlerItem);
         free(pathHandler->path);
         free(pathHandler);
     }
-    list_destroy(uspContext->userPathHandlerList);
+    singlylinkedlist_destroy(uspContext->userPathHandlerList);
 
     Unlock(uspContext->lock);
     assert(uspContext->lock != NULL);
@@ -722,7 +675,7 @@ UspResult UspContextCreate(UspContext** contextCreated)
         LogError("Failed to initialize USP context condition.");
     }
 
-    uspContext->userPathHandlerList = list_create();
+    uspContext->userPathHandlerList = singlylinkedlist_create();
     uspContext->creationTime = telemetry_gettime();
     uspContext->dnsCache = DnsCacheCreate();
     if (uspContext->dnsCache == NULL)

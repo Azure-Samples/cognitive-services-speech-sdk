@@ -10,10 +10,9 @@
 #include <stdbool.h>
 
 #include "azure_c_shared_utility/httpheaders.h"
-#include "azure_c_shared_utility/uhttp.h"
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/wsio.h"
-#include "azure_c_shared_utility/list.h"
+#include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/lock.h"
 
@@ -34,9 +33,10 @@ typedef struct _TELEMETRY_CONTEXT* TELEMETRY_HANDLE;
  * @param host The host name.
  * @param context The application defined context that will be passed back during callback.
  * @param telemetry Telemetry handle to record various transport events.
+ * @param connectionHeaders A handle to headers that will be used to establish a connection.
  * @return A new transport handle.
  */
-TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETRY_HANDLE telemetry);
+TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETRY_HANDLE telemetry, HTTP_HEADERS_HANDLE connectionHeaders);
 
 /**
  * Destroys a transport request.
@@ -60,15 +60,6 @@ int TransportRequestExecute(TransportHandle transportHandle, const char* path, u
  * @return A return code or zero if successful.
  */
 int TransportRequestPrepare(TransportHandle transportHandle);
-
-/**
- * Adds a request header to be used in the transport request.
- * @param transportHandle The request to prepare.
- * @param name The name of the header.
- * @param value The value of the header.
- * @return A return code or zero if successful.
- */
-int TransportRequestAddRequestHeader(TransportHandle transportHandle, const char *name, const char *value);
 
 /**
  * Prepares the start of a new transport stream.
@@ -108,9 +99,8 @@ int TransportStreamFlush(TransportHandle transportHandle);
 /**
  * Processes any outstanding operations that need attention.
  * @param tranportHandle The request to process.
- * @return Returns zero when the request has completed, or non-zero if there is still pending I/O.
  */
-int TransportDoWork(TransportHandle transportHandle);
+void TransportDoWork(TransportHandle transportHandle);
 
 typedef enum _TransportError
 {

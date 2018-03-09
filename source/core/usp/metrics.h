@@ -185,6 +185,7 @@ typedef enum incomingMsgType
     turnStart,
     speechStartDetected,
     speechHypothesis,
+    speechFragment,
     speechEndDetected,
     speechPhrase,
     audio,

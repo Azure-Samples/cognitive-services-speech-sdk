@@ -21,10 +21,9 @@
 #include <stdarg.h>
 #include <stdint.h>
 
-#include "azure_c_shared_utility/list.h"
+#include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/xlogging.h"
-#include "azure_c_shared_utility/queue.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/tickcounter.h"
 #include "azure_c_shared_utility/agenttime.h"
@@ -70,7 +69,7 @@ typedef struct _TELEMETRY_CONTEXT
     LOCK_HANDLE lock;
     PTELEMETRY_WRITE callback;
     void* callbackContext;
-    LIST_HANDLE inband_telemetry_queue;
+    SINGLYLINKEDLIST_HANDLE inband_telemetry_queue;
     TELEMETRY_DATA *current_connection_telemetry_object;
     TELEMETRY_DATA *current_telemetry_object;
 } TELEMETRY_CONTEXT;
@@ -85,6 +84,7 @@ static void initialize_message_name_array()
     speechMsgNames[turnStart] = g_messagePathTurnStart;
     speechMsgNames[speechStartDetected] = g_messagePathSpeechStartDetected;
     speechMsgNames[speechHypothesis] = g_messagePathSpeechHypothesis;
+    speechMsgNames[speechFragment] = g_messagePathSpeechFragment;
     speechMsgNames[speechEndDetected] = g_messagePathSpeechEndDetected;
     speechMsgNames[speechPhrase] = g_messagePathSpeechPhrase;
     speechMsgNames[audio] = kRcvd_msg_audio_key;
@@ -218,7 +218,7 @@ int GetISO8601TimeOffset(char *buffer, unsigned int length, int offset)
     TICK_COUNTER_HANDLE tickHandle = tickcounter_create();
 
     int result;
-    uint64_t current_ms;
+    tickcounter_ms_t current_ms;
     result = tickcounter_get_current_ms(tickHandle, &current_ms);
 
     tickcounter_destroy(tickHandle);
@@ -525,10 +525,12 @@ void telemetry_flush(TELEMETRY_HANDLE handle)
 {    
     Lock(handle->lock);
     // Check if events exist in queue. If yes, flush them out first.
-    TELEMETRY_DATA *telemetry_object = NULL;
-    while (NULL != (telemetry_object = (TELEMETRY_DATA *)queue_dequeue(handle->inband_telemetry_queue)))
+    LIST_ITEM_HANDLE queue_item = NULL;
+    while (NULL != (queue_item = singlylinkedlist_get_head_item(handle->inband_telemetry_queue)))
     {
-        prepare_send_free(handle, telemetry_object);
+        TELEMETRY_DATA* telemetry_data = (TELEMETRY_DATA*)singlylinkedlist_item_get_value(queue_item);
+        prepare_send_free(handle, telemetry_data);
+        singlylinkedlist_remove(handle->inband_telemetry_queue, queue_item);
     }
     // Once events in the queue are flushed, flush the events associated with current requestId
     prepare_send_free(handle, handle->current_telemetry_object);
@@ -560,6 +562,8 @@ void record_received_msg(TELEMETRY_HANDLE handle, const char *receivedMsg)
         msgType = speechStartDetected;
     else if (!strcmp(receivedMsg, g_messagePathSpeechHypothesis))
         msgType = speechHypothesis;
+    else if (!strcmp(receivedMsg, g_messagePathSpeechFragment))
+        msgType = speechFragment;
     else if (!strcmp(receivedMsg, g_messagePathSpeechEndDetected))
         msgType = speechEndDetected;
     else if (!strcmp(receivedMsg, g_messagePathSpeechPhrase))
@@ -603,7 +607,7 @@ void register_requestId_change_event(TELEMETRY_HANDLE handle, const char *reques
         telemetry_data->bPayloadSet)
     {
         // Insert current telemetry object into the queue
-        queue_enqueue(handle->inband_telemetry_queue, telemetry_data);
+        (void)singlylinkedlist_add(handle->inband_telemetry_queue, telemetry_data);
         // Assign new memory with zeros to current telemetry object
         handle->current_telemetry_object = (TELEMETRY_DATA *)calloc(1, sizeof(TELEMETRY_DATA));
     }
@@ -641,7 +645,7 @@ void inband_connection_telemetry(TELEMETRY_HANDLE handle, const char *connection
 
         if (connection_data->bPayloadSet) 
         {
-            queue_enqueue(handle->inband_telemetry_queue, connection_data);
+            (void)singlylinkedlist_add(handle->inband_telemetry_queue, connection_data);
         }
         else 
         {
@@ -750,7 +754,7 @@ TELEMETRY_HANDLE telemetry_create(PTELEMETRY_WRITE callback, void* context)
     ctx->lock = Lock_Init();
     ctx->callback = callback;
     ctx->callbackContext = context;
-    ctx->inband_telemetry_queue = list_create();
+    ctx->inband_telemetry_queue = singlylinkedlist_create();
     return ctx;
 }
 
@@ -768,7 +772,7 @@ void telemetry_destroy(TELEMETRY_HANDLE handle)
     }
     if (handle->inband_telemetry_queue != NULL)
     {
-        list_destroy(handle->inband_telemetry_queue);
+        singlylinkedlist_destroy(handle->inband_telemetry_queue);
         handle->inband_telemetry_queue = NULL;
     }
     PropertybagShutdown();

@@ -15,8 +15,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <inttypes.h>
+#include "audio_sys.h"
 #include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/audio_sys.h"
+
+// #include "azure_c_shared_utility/audio_sys.h"
+
 #include "usp.h"
 
 #define UNUSED(x) (void)(x)
@@ -99,6 +102,7 @@ void OnError(UspHandle handle, void* context, const UspError* error)
     UNUSED(context);
     printf("Response: On Error: 0x%x (%s).\n", error->errorCode, error->description);
     turnEnd = true;
+    exit(1);
 }
 
 void OnUserMessage(UspHandle uspHandle, const char* path, const char* contentType, const unsigned char* buffer, size_t size, void* context)
@@ -115,7 +119,6 @@ static int TTSRenderLoop(void* ptr)
 {
     UspMsgAudioStreamStart* msg = (UspMsgAudioStreamStart*)ptr;
     IoBufferAddRef(msg->ioBuffer);
-
     FILE* pFile = fopen("test.wav","wb");
     int maxSize = 0;
     uint8_t* buffer = NULL;
@@ -171,6 +174,7 @@ static int TTSRenderLoop(void* ptr)
     IoBufferDelete(msg->ioBuffer);
 
     free(msg);
+
     return 1;
 }
 

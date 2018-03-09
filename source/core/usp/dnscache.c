@@ -20,11 +20,9 @@
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/condition.h"
-#include "azure_c_shared_utility/list.h"
-#include "azure_c_shared_utility/queue.h"
+#include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "dnscache.h"
-
 
 void DnsCacheResultFree(DNS_RESULT_HANDLE handle)
 {
@@ -68,8 +66,8 @@ typedef struct _DNS_CONTEXT
 {
     THREAD_HANDLE thread;
     LOCK_HANDLE   entryLock;
-    LIST_HANDLE   entryList;
-    LIST_HANDLE   completeList;
+    SINGLYLINKEDLIST_HANDLE   entryList;
+    SINGLYLINKEDLIST_HANDLE   completeList;
     COND_HANDLE   workEvent;
     DNS_REQUEST*  currentRequest;
     int           flags;
@@ -88,14 +86,14 @@ static void dns_cache_free_request(DNS_REQUEST* request)
 static int DnsWorker(void *args)
 {
     DNS_CONTEXT* ctx = (DNS_CONTEXT*)args;
-    DNS_REQUEST* req;
 
     Lock(ctx->entryLock);
     do
     {
-        req = (DNS_REQUEST*)queue_dequeue(ctx->entryList);
-        while (req != NULL)
+        LIST_ITEM_HANDLE list_item;
+        while (NULL != (list_item = singlylinkedlist_get_head_item(ctx->entryList)))
         {
+            DNS_REQUEST* req = (DNS_REQUEST*)singlylinkedlist_item_get_value(list_item);
             // This is the only thread that sets the current request.
             assert(ctx->currentRequest == NULL);
             ctx->currentRequest = req;
@@ -111,14 +109,14 @@ static int DnsWorker(void *args)
                 assert(ctx->currentRequest == req);
                 ctx->currentRequest = NULL;
 
-                queue_enqueue(ctx->completeList, req);
+                singlylinkedlist_add(ctx->completeList, req);
             }
             else
             {
                 dns_cache_free_request(req);
             }
 
-            req = (DNS_REQUEST*)queue_dequeue(ctx->entryList);
+            singlylinkedlist_remove(ctx->entryList, list_item);
         }
 
         if (ctx->flags & DNS_CTX_FLAG_SHUTDOWN)
@@ -147,8 +145,8 @@ DnsCacheHandle DnsCacheCreate()
 
     memset(ctx, 0, sizeof(DNS_CONTEXT));
 
-    ctx->entryList = list_create();
-    ctx->completeList = list_create();
+    ctx->entryList = singlylinkedlist_create();
+    ctx->completeList = singlylinkedlist_create();
     ctx->entryLock = Lock_Init();
     ctx->workEvent = Condition_Init();
 
@@ -184,12 +182,12 @@ void DnsCacheDestroy(DnsCacheHandle handle)
 
     if (NULL != ctx->completeList)
     {
-        list_destroy(ctx->completeList);
+        singlylinkedlist_destroy(ctx->completeList);
     }
 
     if (NULL != ctx->entryList)
     {
-        list_destroy(ctx->entryList);
+        singlylinkedlist_destroy(ctx->entryList);
     }
 
     if (NULL != ctx->workEvent)
@@ -233,7 +231,7 @@ int DnsCacheGetAddr(DnsCacheHandle handle, const char* host, DNS_CACHE_NAMERESOL
 
     // queue it up
     Lock(ctx->entryLock);
-    queue_enqueue(ctx->entryList, req);
+    singlylinkedlist_add(ctx->entryList, req);
     Unlock(ctx->entryLock);
 
     // tell the worker to get started on it.
@@ -245,21 +243,21 @@ int DnsCacheGetAddr(DnsCacheHandle handle, const char* host, DNS_CACHE_NAMERESOL
 static bool dns_cache_dequeue_context_match_callback(LIST_ITEM_HANDLE item, const void* context)
 {
     const DNS_REQUEST* const request =
-        (const DNS_REQUEST*)list_item_get_value(item);
+        (const DNS_REQUEST*)singlylinkedlist_item_get_value(item);
     return request->context == context;
 }
 
-static DNS_REQUEST* dns_cache_dequeue_context_match(LIST_HANDLE list, void* context)
+static DNS_REQUEST* dns_cache_dequeue_context_match(SINGLYLINKEDLIST_HANDLE list, void* context)
 {
     DNS_REQUEST* req = NULL;
     const LIST_ITEM_HANDLE item =
-        list_find(list, dns_cache_dequeue_context_match_callback, context);
+        singlylinkedlist_find(list, dns_cache_dequeue_context_match_callback, context);
 
     if (item != NULL)
     {
-        req = (DNS_REQUEST*)list_item_get_value(item);
+        req = (DNS_REQUEST*)singlylinkedlist_item_get_value(item);
 
-        list_remove(list, item);
+        singlylinkedlist_remove(list, item);
     }
     return req;
 }
@@ -297,20 +295,20 @@ void DnsCacheDoWork(DnsCacheHandle handle, void* contextToMatch)
     }
 }
 
-static void remove_all_context_matches_from_list(LIST_HANDLE list, void* context)
+static void remove_all_context_matches_from_list(SINGLYLINKEDLIST_HANDLE list, void* context)
 {
-    LIST_ITEM_HANDLE current = list_get_head_item(list);
+    LIST_ITEM_HANDLE current = singlylinkedlist_get_head_item(list);
 
     while (current != NULL)
     {
         // Cache the next pointer now because we may remove current from the
         // list.
-        const LIST_ITEM_HANDLE next = list_get_next_item(current);
+        const LIST_ITEM_HANDLE next = singlylinkedlist_get_next_item(current);
 
-        DNS_REQUEST* const req = (DNS_REQUEST*)list_item_get_value(current);
+        DNS_REQUEST* const req = (DNS_REQUEST*)singlylinkedlist_item_get_value(current);
         if (req->context == context)
         {
-            list_remove(list, current);
+            singlylinkedlist_remove(list, current);
 
             dns_cache_free_request(req);
         }

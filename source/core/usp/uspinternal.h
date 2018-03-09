@@ -25,7 +25,7 @@
 #include <assert.h>
 
 #include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/list.h"
+#include "azure_c_shared_utility/singlylinkedlist.h"
 #include "usp.h"
 #include "uspcommon.h"
 #include "iobuffer.h"
@@ -51,6 +51,9 @@ extern "C" {
 
 typedef struct _TransportRequest* TransportHandle;
 typedef struct _TELEMETRY_CONTEXT* TELEMETRY_HANDLE;
+#define FUNC_ENTER(FORMAT, ...) do { LOG(AZ_LOG_INFO, LOG_LINE, "Info: Enter %s(): " FORMAT, __FUNCTION__, ##__VA_ARGS__); } while(0)
+#define FUNC_RETURN(FORMAT, ...) do { LOG(AZ_LOG_INFO, LOG_LINE, "Info: Leave %s(): " FORMAT, __FUNCTION__, ##__VA_ARGS__); } while(0)
+
 
 #define USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle) \
     do { \
@@ -166,7 +169,7 @@ typedef struct _UspContext
 
     UspState state;
 
-    LIST_HANDLE userPathHandlerList;
+    SINGLYLINKEDLIST_HANDLE userPathHandlerList;
 
     // Todo: can multiple UspContexts share the work thread?
     THREAD_HANDLE workThreadHandle;
@@ -183,14 +186,6 @@ typedef struct _UspContext
 
     TELEMETRY_HANDLE telemetry;
 } UspContext;
-
-/**
-* Runs the event loop.
-* @param uspHandle The uspHandle.
-* @return the current state of the uspHandle.
-*
-*/
-UspState UspRun(UspHandle uspHandle);
 
 /**
 * Creates a new UspContext.
@@ -247,11 +242,6 @@ UspResult ContentDispatch(
     IOBUFFER* ioBuffer,
     BUFFER_HANDLE responseContent,
     size_t responseSize);
-
-/**
-* Return device thumbprint generated from CDP
-*/
-const char* GetCdpDeviceThumbprint();
 
 /**
 * Writes an audio segment to the service.

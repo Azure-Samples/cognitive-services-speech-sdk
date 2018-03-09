@@ -8,7 +8,7 @@ USPCONSOLE=$BINARY_DIR/uspclientconsole
 AUDIO_FILE=whatstheweatherlike.wav
 SPEECH_SUB_KEY=$2
 CRIS_SUB_KEY=$3
-CRIS_MODEL_ID=3ae61ac26c534775b2606a61acd052bd
+CRIS_MODEL_ID=77b4662f533f433bad8f7184f8107a1f
 
 
 echo -e "\n Testing usp lib: \n"

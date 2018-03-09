@@ -1,20 +1,21 @@
-set(LIBWEBSOCKETS_DIR "${CMAKE_CURRENT_LIST_DIR}/libwebsockets")
-if(NOT EXISTS ${LIBWEBSOCKETS_DIR} OR NOT EXISTS ${LIBWEBSOCKETS_DIR}/CMakeLists.txt)
+set(AZURE_SHARED_LIB_DIR "${CMAKE_CURRENT_LIST_DIR}/azure-c-shared-utility")
+if(NOT EXISTS ${AZURE_SHARED_LIB_DIR} OR NOT EXISTS ${AZURE_SHARED_LIB_DIR}/CMakeLists.txt)
     execute_process(COMMAND git submodule update --init)
 endif()
 
-if(UNIX)
-    add_subdirectory(${LIBWEBSOCKETS_DIR} libwebsockets EXCLUDE_FROM_ALL)
-    include_directories (${LIBWEBSOCKETS_INCLUDE_DIRS})
+if(APPLE)
+    # apple-based tlsio (tlsio_appleios.c) seem to be buggy
+    # (it spouts a ton of "Cannot accept bytes" to stderr)
+    set(use_openssl ON CACHE BOOL "Using openssl-based TLS")
 endif()
-
-add_subdirectory("azure-c-shared-utility" azure_c_shared_utility EXCLUDE_FROM_ALL)
+add_subdirectory(${AZURE_SHARED_LIB_DIR} azure_c_shared_utility EXCLUDE_FROM_ALL)
 
 set(AZURE_SHARED_LIB aziotsharedutil)
 set_target_properties(${AZURE_SHARED_LIB} PROPERTIES FOLDER external_libs)
 
 if (UNIX)
-    set_target_properties(${AZURE_SHARED_LIB} PROPERTIES COMPILE_FLAGS "-Wno-error=unused-variable")
+    set_target_properties(${AZURE_SHARED_LIB} PROPERTIES COMPILE_FLAGS 
+    "-Wno-error=unused-variable -Wno-error=int-conversion -Wno-error=implicit-function-declaration")
     if (APPLE)
         # Apple deprecated OpenSSL:
         # https://stackoverflow.com/questions/7406946/why-is-apple-deprecating-openssl-in-macos-10-7-lion

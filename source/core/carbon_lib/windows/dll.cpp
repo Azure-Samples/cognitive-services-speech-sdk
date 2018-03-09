@@ -10,8 +10,11 @@ void InitLogging()
 {
 #ifndef _DEBUG
 
-    LOGGER_LOG tracelog = [](LOG_CATEGORY log_category, unsigned int options, const char* format, ...) {
+    LOGGER_LOG tracelog = [](LOG_CATEGORY log_category, const char* file, const char* func, int line, unsigned int options, const char* format, ...) {
         UNUSED(log_category);
+        UNUSED(file);
+        UNUSED(func);
+        UNUSED(line);
         UNUSED(options);
         UNUSED(format);
     };

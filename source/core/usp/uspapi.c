@@ -10,6 +10,12 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/condition.h"
 
+#ifndef MSVC
+#define _strdup strdup
+#endif
+
+extern int platform_init(void);
+
 // Todo: read from a configuration file.
 const char g_bingSpeechHostname[] = "wss://speech.platform.bing.com/speech/recognition/%s/cognitiveservices/v1";
 const char g_CRISHostname[] = "wss://%s.api.cris.ai/speech/recognition/%s/cognitiveservices/v1";
@@ -105,6 +111,15 @@ UspResult UspInit(UspEndpointType type, UspRecognitionMode mode, UspCallbacks *c
     UspResult ret;
 
     USP_RETURN_ERROR_IF_ARGUMENT_NULL(uspHandle, "uspHandle");
+    // TODO: rewrite this with std::call_once, as soon as we migrate usp to cpp.
+    static bool platform_initialized = false;
+    if (!platform_initialized) 
+    {
+        platform_initialized = true;
+        if (platform_init() != 0) {
+            return USP_INITIALIZATION_FAILURE;
+        }
+    }
 
     if ((ret = UspCreateContextAndSetCallbacks(callbacks, callbackContext, &uspContext)) != USP_SUCCESS)
     {
@@ -571,10 +586,10 @@ UspResult UspRegisterUserMessage(UspHandle uspHandle, const char* messagePath, U
     else
     {
         assert(uspHandle->userPathHandlerList != NULL);
-        LIST_ITEM_HANDLE foundItem = list_find(uspHandle->userPathHandlerList, userPathHandlerCompare, messagePath);
+        LIST_ITEM_HANDLE foundItem = singlylinkedlist_find(uspHandle->userPathHandlerList, userPathHandlerCompare, messagePath);
         if (foundItem != NULL)
         {
-            UserPathHandler* existingHandler = (UserPathHandler*)list_item_get_value(foundItem);
+            UserPathHandler* existingHandler = (UserPathHandler*)singlylinkedlist_item_get_value(foundItem);
             existingHandler->handler = messageHandler;
         }
         else
@@ -589,7 +604,7 @@ UspResult UspRegisterUserMessage(UspHandle uspHandle, const char* messagePath, U
             {
                 newHandler->handler = messageHandler;
                 newHandler->path = _strdup(messagePath);
-                list_add(uspHandle->userPathHandlerList, newHandler);
+                singlylinkedlist_add(uspHandle->userPathHandlerList, newHandler);
             }
         }
     }

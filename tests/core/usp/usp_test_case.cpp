@@ -10,7 +10,6 @@
 #include "test_utils.h"
 #include "usp.h"
 
-
 using namespace std;
 
 #define REQUIRE_SUCESS(x) REQUIRE((x) == USP_SUCCESS)
@@ -28,7 +27,10 @@ public:
         m_callbacks.onTurnEnd = NULL;
         m_callbacks.version = USP_CALLBACK_VERSION;
         m_callbacks.size = sizeof(UspCallbacks);
-        m_callbacks.OnError = [](UspHandle, void*, const UspError* error) { FAIL(string(error->description)); };
+        m_callbacks.OnError = [](UspHandle, void*, const UspError* error) 
+        { 
+            FAIL(string(error->description)); 
+        };
         REQUIRE_SUCESS(UspInit(endpoint, mode, &m_callbacks, NULL, &m_handle));
         REQUIRE_SUCESS(UspConnect(m_handle));
     }
@@ -47,9 +49,8 @@ private:
     UspHandle m_handle;
 };
 
-
 TEST_CASE("USP is properly functioning", "[usp]")
-{    
+{
     SECTION("usp can be initialized, connected and closed")
     {
         UspClient client;
@@ -103,7 +104,6 @@ TEST_CASE("USP is properly functioning", "[usp]")
 
     SECTION("several usp clients can coexist peacefully")
     {
-        // TODO: 1117295 (this test fails on linux).
         int num_handles = 10;
         vector<UspClient> clients(num_handles);
 

@@ -3,7 +3,7 @@
 #include "microphone.h"
 #include "ispxinterfaces.h"
 
-#include "azure_c_shared_utility_audio_sys_wrapper.h"
+#include "audio_sys.h"
 
 
 //#define FRAME_COUNT (snd_pcm_uframes_t) 232

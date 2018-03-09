@@ -32,7 +32,6 @@ set(HEADERS
 set(HEADERS_PRIVATE   
     "${INC_DIR}/azure_c_shared_utility_uniqueid_wrapper.h"
     "${INC_DIR}/azure_c_shared_utility_strings_wrapper.h"
-    "${INC_DIR}/azure_c_shared_utility_audio_sys_wrapper.h"
     )
 
 set(SOURCES

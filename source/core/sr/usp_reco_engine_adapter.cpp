@@ -13,7 +13,6 @@
 #include <cstring>
 #include "service_helpers.h"
 
-
 #define INVALID_USP_HANDLE ((UspHandle)-1)
 
 

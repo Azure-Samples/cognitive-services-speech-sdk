@@ -1,14 +1,16 @@
 project(audio)
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
+set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
+include_directories(${INC_DIR})
 include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
 include_directories(${CARBON_INCLUDE})
 
 include_directories("${COMMON}/include")
 
-set(HEADERS)
+set(HEADERS "${INC_DIR}/audio_sys.h")
 
 set(HEADERS_PRIVATE
     "${SRC_DIR}/stdafx.h"
@@ -43,6 +45,7 @@ if(WIN32)
         "${SRC_DIR}/windows/audio_sample_handler.cpp"
         "${SRC_DIR}/windows/microphone.cpp"
         "${SRC_DIR}/windows/sample_handler.cpp"
+        "${SRC_DIR}/windows/audio_sys.cpp"
     )
     list(APPEND AUDIO_LIBS
         mf.lib
@@ -57,7 +60,11 @@ elseif(APPLE)
 else()
     list(APPEND SOURCES
         "${SRC_DIR}/linux/microphone.cpp"
+        "${SRC_DIR}/linux/audio_sys.c"
     )
+    if (NOT (CMAKE_SYSTEM_NAME STREQUAL "Android"))
+        list(APPEND AUDIO_LIBS asound)
+    endif()
 endif()
 
 source_group("Header Files (public)" FILES ${HEADERS})

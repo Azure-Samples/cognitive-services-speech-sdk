@@ -1,6 +1,6 @@
-[submodule "external/libwebsockets"]
-	path = external/libwebsockets
-	url = https://github.com/warmcat/libwebsockets
 [submodule "external/parson"]
-	path = external/parson
-	url = https://github.com/kgabis/parson
+    path = external/parson
+    url = https://github.com/kgabis/parson
+[submodule "external/azure-c-shared-utility"]
+    path = external/azure-c-shared-utility
+    url = https://github.com/raaaar/azure-c-shared-utility
