@@ -185,6 +185,7 @@ typedef struct _UspContext
     uint64_t creationTime;
 
     TELEMETRY_HANDLE telemetry;
+    bool inCallback;
 } UspContext;
 
 /**

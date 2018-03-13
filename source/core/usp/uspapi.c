@@ -49,7 +49,9 @@ static int UspWorker(void* ptr)
     Lock(uspHandle->lock);
     while(uspHandle->state == USP_STATE_CONNECTED)
     {
+        uspHandle->inCallback = true;
         TransportDoWork(uspHandle->transport);
+        uspHandle->inCallback = false;
 
         COND_RESULT result = Condition_Wait(uspHandle->workEvent, uspHandle->lock, 200);
 #ifdef _DEBUG
@@ -101,6 +103,7 @@ inline static UspResult UspCreateContextAndSetCallbacks(UspCallbacks *callbacks,
     }
 
     uspContext->state = USP_STATE_INITIALIZED;
+    uspContext->inCallback = false;
     *uspContextReturned = uspContext;
     return USP_SUCCESS;
 }
@@ -484,6 +487,16 @@ UspResult UspClose(UspHandle uspHandle)
     FUNC_ENTER("");
 
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
+
+    if (uspHandle->inCallback) 
+    {
+        // Locks in azure-c-shared are no longer reentrant, acquiring a lock held by the 
+        // current thread leads to a deadlock. What's more, joining current thread also 
+        // deadlocks. Checking a flag when this is invoked in a callback on the worker thread,
+        // helps to get around those both issues.
+        uspHandle->state = USP_STATE_SHUTDOWN;
+        return USP_SUCCESS;
+    }
 
     Lock(uspHandle->lock);
     if (uspHandle->state == USP_STATE_SHUTDOWN) {

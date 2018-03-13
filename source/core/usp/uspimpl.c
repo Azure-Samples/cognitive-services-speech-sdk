@@ -329,6 +329,15 @@ static UspResult TurnEndHandler(UspContext* uspContext, const char* path, const 
     // TODO: 1164154
     telemetry_flush(uspContext->telemetry);
 
+    // pytests fail becase by the time we get here, UspClose has already been 
+    // invoked (from CSpxUspRecoEngineAdapter's Term function) and all the callbacks 
+    // are already destroyed (while uspContext->callbacks->onTurnEnd is not NULL, trying to 
+    // invoke it will fail). 
+    if (uspContext->state == USP_STATE_SHUTDOWN)
+    {
+        return USP_SUCCESS;
+    }
+
     USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspContext);
     if (uspContext->callbacks->onTurnEnd == NULL)
     {
