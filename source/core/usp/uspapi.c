@@ -10,7 +10,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/condition.h"
 
-#ifndef MSVC
+#ifndef _MSC_VER
 #define _strdup strdup
 #endif
 

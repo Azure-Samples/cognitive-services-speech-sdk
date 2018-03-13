@@ -116,16 +116,15 @@ SPXAPI Recognizer_GetParameter_String(SPXRECOHANDLE hreco, const wchar_t* name, 
 
 SPXAPI_(bool) Recognizer_HasParameter_String(SPXRECOHANDLE hreco, const wchar_t* name)
 {
-    bool hasParameter = false;
-    SPXAPI_TRY()
+    SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         auto precognizer = (*recohandles)[hreco];
 
         auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(precognizer);
-        hasParameter = namedProperties->HasStringValue(name);
+        return namedProperties->HasStringValue(name);
     }
-    SPXAPI_CATCH_AND_RETURN(hasParameter);
+    SPXAPI_CATCH_AND_RETURN(hr, false)
 }
 
 SPXAPI Recognizer_SetParameter_Int32(SPXRECOHANDLE hreco, const wchar_t* name, int32_t value)
@@ -158,16 +157,15 @@ SPXAPI Recognizer_GetParameter_Int32(SPXRECOHANDLE hreco, const wchar_t* name, i
 
 SPXAPI_(bool) Recognizer_HasParameter_Int32(SPXRECOHANDLE hreco, const wchar_t* name)
 {
-    bool hasParameter = false;
-    SPXAPI_TRY()
+    SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         auto precognizer = (*recohandles)[hreco];
 
         auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(precognizer);
-        hasParameter = namedProperties->HasNumberValue(name);
+        return namedProperties->HasNumberValue(name);
     }
-    SPXAPI_CATCH_AND_RETURN(hasParameter);
+    SPXAPI_CATCH_AND_RETURN(hr, false)
 }
 
 SPXAPI Recognizer_SetParameter_Bool(SPXRECOHANDLE hreco, const wchar_t* name, bool value)
@@ -200,16 +198,15 @@ SPXAPI Recognizer_GetParameter_Bool(SPXRECOHANDLE hreco, const wchar_t* name, bo
 
 SPXAPI_(bool) Recognizer_HasParameter_Bool(SPXRECOHANDLE hreco, const wchar_t* name)
 {
-    bool hasParameter = false;
-    SPXAPI_TRY()
+    SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         auto precognizer = (*recohandles)[hreco];
 
         auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(precognizer);
-        hasParameter = namedProperties->HasBooleanValue(name);
+        return namedProperties->HasBooleanValue(name);
     }
-    SPXAPI_CATCH_AND_RETURN(hasParameter);
+    SPXAPI_CATCH_AND_RETURN(hr, false)
 }
 
 SPXAPI Recognizer_Recognize(SPXRECOHANDLE hreco, SPXRESULTHANDLE* phresult)

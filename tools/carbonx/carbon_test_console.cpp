@@ -1453,12 +1453,12 @@ int /*__cdecl*/ wmain(int argc, const wchar_t* argv[])
     catch (std::exception e)
     {
         SPX_TRACE_ERROR("CarbonX: Unhandled exception on main thread! what=%s", e.what());
-        exit(0);
+        exit(-1);
     }
     catch (...)
     {
         SPX_TRACE_ERROR("CarbonX: Unhandled exception on main thread!");
-        exit(0);
+        exit(-1);
     }
 }
 

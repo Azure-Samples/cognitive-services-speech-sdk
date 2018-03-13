@@ -23,12 +23,12 @@
     catch (SPXHR hrx)                                       \
     {                                                       \
         SPX_REPORT_ON_FAIL(hrx);                            \
-        return x;                                           \
+        x = hrx;                                            \
     }                                                       \
     catch (std::exception ex)                               \
     {                                                       \
         SPX_REPORT_ON_FAIL(SPXERR_UNHANDLED_EXCEPTION);     \
-        return x;                                           \
+        x = SPXERR_UNHANDLED_EXCEPTION;                     \
     }
 
 #define SPXAPI_CATCH_AND_RETURN_HR(hr)                      \
@@ -36,7 +36,7 @@
     SPX_RETURN_HR(hr);                                      \
 }
 
-#define SPXAPI_CATCH_AND_RETURN(x)                          \
-    SPXAPI_CATCH(x);                                        \
+#define SPXAPI_CATCH_AND_RETURN(hr, x)                      \
+    SPXAPI_CATCH(hr);                                       \
     return x;                                               \
 }

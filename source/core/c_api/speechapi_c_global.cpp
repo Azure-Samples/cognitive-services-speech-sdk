@@ -35,13 +35,12 @@ SPXAPI Global_GetParameter_String(const wchar_t* name, wchar_t* value, uint32_t 
 
 SPXAPI_(bool) Global_HasParameter_String(const wchar_t* name)
 {
-    bool hasParameter = false;
-    SPXAPI_TRY()
+    SPXAPI_INIT_HR_TRY(hr)
     {
         auto namedProperties = SpxQueryService<ISpxNamedProperties>(CSpxResourceManager::GetObjectFactory());
-        hasParameter = namedProperties->HasStringValue(name);
+        return namedProperties->HasStringValue(name);
     }
-    SPXAPI_CATCH_AND_RETURN(hasParameter);
+    SPXAPI_CATCH_AND_RETURN(hr, false)
 }
 
 SPXAPI Global_SetParameter_Int32(const wchar_t* name, int32_t value)
@@ -67,13 +66,12 @@ SPXAPI Global_GetParameter_Int32(const wchar_t* name, int32_t* pvalue, int32_t d
 
 SPXAPI_(bool) Global_HasParameter_Int32(const wchar_t* name)
 {
-    bool hasParameter = false;
-    SPXAPI_TRY()
+    SPXAPI_INIT_HR_TRY(hr)
     {
         auto namedProperties = SpxQueryService<ISpxNamedProperties>(CSpxResourceManager::GetObjectFactory());
-        hasParameter = namedProperties->HasNumberValue(name);
+        return namedProperties->HasNumberValue(name);
     }
-    SPXAPI_CATCH_AND_RETURN(hasParameter);
+    SPXAPI_CATCH_AND_RETURN(hr, false)
 }
 
 SPXAPI Global_SetParameter_Bool(const wchar_t* name, bool value)
@@ -99,11 +97,10 @@ SPXAPI Global_GetParameter_Bool(const wchar_t* name, bool* pvalue, bool defaultV
 
 SPXAPI_(bool) Global_HasParameter_Bool(const wchar_t* name)
 {
-    bool hasParameter = false;
-    SPXAPI_TRY()
+    SPXAPI_INIT_HR_TRY(hr)
     {
         auto namedProperties = SpxQueryService<ISpxNamedProperties>(CSpxResourceManager::GetObjectFactory());
-        hasParameter = namedProperties->HasBooleanValue(name);
+        return namedProperties->HasBooleanValue(name);
     }
-    SPXAPI_CATCH_AND_RETURN(hasParameter);
+    SPXAPI_CATCH_AND_RETURN(hr, false)
 }

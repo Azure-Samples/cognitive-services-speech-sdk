@@ -72,16 +72,15 @@ SPXAPI Session_GetParameter_String(SPXSESSIONHANDLE hsession, const wchar_t* nam
 
 SPXAPI_(bool) Session_HasParameter_String(SPXSESSIONHANDLE hsession, const wchar_t* name)
 {
-    bool hasParameter = false;
-    SPXAPI_TRY()
+    SPXAPI_INIT_HR_TRY(hr)
     {
         auto sessionHandles = CSpxSharedPtrHandleTableManager::Get<ISpxSession, SPXSESSIONHANDLE>();
         auto session = (*sessionHandles)[hsession];
 
         auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(session);
-        hasParameter = namedProperties->HasStringValue(name);
+        return namedProperties->HasStringValue(name);
     }
-    SPXAPI_CATCH_AND_RETURN(hasParameter);
+    SPXAPI_CATCH_AND_RETURN(hr, false)
 }
 
 SPXAPI Session_SetParameter_Int32(SPXSESSIONHANDLE hsession, const wchar_t* name, int32_t value)
@@ -114,16 +113,15 @@ SPXAPI Session_GetParameter_Int32(SPXSESSIONHANDLE hsession, const wchar_t* name
 
 SPXAPI_(bool) Session_HasParameter_Int32(SPXSESSIONHANDLE hsession, const wchar_t* name)
 {
-    bool hasParameter = false;
-    SPXAPI_TRY()
+    SPXAPI_INIT_HR_TRY(hr)
     {
         auto sessionHandles = CSpxSharedPtrHandleTableManager::Get<ISpxSession, SPXSESSIONHANDLE>();
         auto session = (*sessionHandles)[hsession];
 
         auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(session);
-        hasParameter = namedProperties->HasNumberValue(name);
+        return namedProperties->HasNumberValue(name);
     }
-    SPXAPI_CATCH_AND_RETURN(hasParameter);
+    SPXAPI_CATCH_AND_RETURN(hr, false)
 }
 
 SPXAPI Session_SetParameter_Bool(SPXSESSIONHANDLE hsession, const wchar_t* name, bool value)
@@ -156,14 +154,13 @@ SPXAPI Session_GetParameter_Bool(SPXSESSIONHANDLE hsession, const wchar_t* name,
 
 SPXAPI_(bool) Session_HasParameter_Bool(SPXSESSIONHANDLE hsession, const wchar_t* name)
 {
-    bool hasParameter = false;
-    SPXAPI_TRY()
+    SPXAPI_INIT_HR_TRY(hr)
     {
         auto sessionHandles = CSpxSharedPtrHandleTableManager::Get<ISpxSession, SPXSESSIONHANDLE>();
         auto session = (*sessionHandles)[hsession];
 
         auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(session);
-        hasParameter = namedProperties->HasBooleanValue(name);
+        return namedProperties->HasBooleanValue(name);
     }
-    SPXAPI_CATCH_AND_RETURN(hasParameter);
+    SPXAPI_CATCH_AND_RETURN(hr, false)
 }

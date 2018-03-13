@@ -16,13 +16,12 @@ namespace CARBON_IMPL_NAMESPACE() {
 template<class handle_type, class ptr_type>
 bool Handle_IsValid(handle_type handle)
 {
-    bool fIsValid = false;
-    SPXAPI_TRY()
+    SPXAPI_INIT_HR_TRY(hr)
     {
         auto handletable = CSpxSharedPtrHandleTableManager::Get<ptr_type, handle_type>();
-        fIsValid = handletable->IsTracked(handle);
+        return handletable->IsTracked(handle);
     }
-    SPXAPI_CATCH_AND_RETURN(fIsValid);
+    SPXAPI_CATCH_AND_RETURN(hr, false);
 }
 
 
