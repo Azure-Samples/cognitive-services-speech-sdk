@@ -26,12 +26,20 @@ template<class T>
 class CallbackWrapper
 {
 public:
+#ifdef SWIGJAVA
+    virtual void Execute(T eventArgs) const = 0;
+#else
     virtual void operator()(T eventArgs) const = 0;
+#endif
 
     virtual ~CallbackWrapper() = default;
 
     std::function<void(T eventArgs)> GetFunction() 
     {
+#ifdef SWIGJAVA
+        return std::bind(&CallbackWrapper::Execute, this, std::placeholders::_1);
+#else
         return std::bind(&CallbackWrapper::operator(), this, std::placeholders::_1);
+#endif
     }
-}; 
+};

@@ -121,12 +121,24 @@
 
 %extend Carbon::EventSignal {
 
+#ifdef SWIGPYTHON
     void _Connect(CallbackWrapper<T>& callback)
+#elif defined(SWIGJAVA)
+    void AddEventListener(CallbackWrapper<T>& callback)
+#else
+    void Connect(CallbackWrapper<T>& callback)
+#endif
     {
         ($self)->Connect(callback.GetFunction());
     };
 
+#ifdef SWIGPYTHON
     void _Disconnect(CallbackWrapper<T>& callback)
+#elif defined(SWIGJAVA)
+    void RemoveEventListener(CallbackWrapper<T>& callback)
+#else
+    void Disconnect(CallbackWrapper<T>& callback)
+#endif
     {
         ($self)->Disconnect(callback.GetFunction());
     };
@@ -159,8 +171,17 @@
 %include <speechapi_cxx_recognition_result.h>
 %include <speechapi_cxx_recognition_eventargs.h>
 
+#ifdef SWIGPYTHON
 %template(_SessionEventCallback) CallbackWrapper<const Carbon::SessionEventArgs&>;
 %template(_RecognitionEventCallback) CallbackWrapper<const Carbon::Recognition::RecognitionEventArgs&>;
+#elif defined(SWIGJAVA)
+%template(SessionEventListener) CallbackWrapper<const Carbon::SessionEventArgs&>;
+%template(RecognitionEventListener) CallbackWrapper<const Carbon::Recognition::RecognitionEventArgs&>;
+#else
+%template(SessionEventListener) CallbackWrapper<const Carbon::SessionEventArgs&>;
+%template(RecognitionEventListener) CallbackWrapper<const Carbon::Recognition::RecognitionEventArgs&>;
+#endif
+
 %template(SessionEventSignal) Carbon::EventSignal<const Carbon::SessionEventArgs&>;
 %template(RecognitionEventSignal) Carbon::EventSignal<const Carbon::Recognition::RecognitionEventArgs&>;
 
@@ -175,12 +196,26 @@
 %include <speechapi_cxx_speech_recognition_result.h>
 %include <speechapi_cxx_speech_recognition_eventargs.h>
 
+#ifdef SWIGPYTHON
 %template(_SpeechRecognitionEventCallback) CallbackWrapper<const Carbon::Recognition::Speech::SpeechRecognitionEventArgs&>;
+#elif defined(SWIGJAVA)
+%template(SpeechRecognitionEventListener) CallbackWrapper<const Carbon::Recognition::Speech::SpeechRecognitionEventArgs&>;
+#else
+%template(SpeechRecognitionEventListener) CallbackWrapper<const Carbon::Recognition::Speech::SpeechRecognitionEventArgs&>;
+#endif
+
 %template(SpeechRecognitionEventSignal) Carbon::EventSignal<const Carbon::Recognition::Speech::SpeechRecognitionEventArgs&>;
 %template(SpeechRecognizerBase) Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::Speech::SpeechRecognitionResult, Carbon::Recognition::Speech::SpeechRecognitionEventArgs>;
 %include <speechapi_cxx_speech_recognizer.h>
 
+#ifdef SWIGPYTHON
 %template(_IntentEventCallback) CallbackWrapper<const int&>;
+#elif defined(SWIGJAVA)
+%template(IntentEventListener) CallbackWrapper<const int&>;
+#else
+%template(IntentEventListener) CallbackWrapper<const int&>;
+#endif
+
 %template(IntentEventSignal) Carbon::EventSignal<const int&>;
 %template(IntentRecognizerBase) Carbon::Recognition::AsyncRecognizer<int, int>;
 %include <speechapi_cxx_todo_intent.h>

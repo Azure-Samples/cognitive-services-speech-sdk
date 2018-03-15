@@ -57,52 +57,53 @@ set_target_properties(${SWIG_MODULE_${JAVA_BINDINGS}_REAL_NAME} PROPERTIES FOLDE
 # Build the Java code into ${JAVA_LIB}.jar
 set(JAVA_LIB ${PROJECT_NAME}_lib)
 
+# TODO this should be a wildcard, not an explicit list as these files are generated
 #set(SWIG_JAVA_SOURCES ${JAVA_SOURCE_DIRECTORY}/*.java)
 #file(GLOB SWIG_JAVA_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/swig-generated/*.java")
 set(SWIG_JAVA_SOURCES
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/_IntentEventCallback.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/_RecognitionEventCallback.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/_SessionEventCallback.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/_SpeechRecognitionEventCallback.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/BaseAsyncRecognizer.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/BaseRecognizerBase.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/carbon_java.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/carbon_javaJNI.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/EventArgs.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntentEventSignal.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntentRecognizer.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntentRecognizerBase.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntPtrFuture.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/Parameter.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/PayloadItems.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/Reason.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognitionEventArgs.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognitionEventSignal.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognitionResult.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/Recognizer.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerFactory.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerParameter.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerParameterCollection.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/Session.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionEventArgs.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionEventSignal.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionParameter.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionParameterCollection.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognitionEventArgs.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognitionEventSignal.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognitionResult.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognitionResultPtrFuture.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognizer.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognizerBase.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_int32_t.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXEVENTHANDLE.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXRECOHANDLE.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXRESULTHANDLE.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXSESSIONHANDLE.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__shared_ptrT_Carbon__Session_t.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__shared_ptrT_int_t.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_wchar_t.java
-	${CMAKE_CURRENT_BINARY_DIR}/swig-generated/VoidFuture.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntentEventListener.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognitionEventListener.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionEventListener.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognitionEventListener.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/BaseAsyncRecognizer.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/BaseRecognizerBase.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/carbon_java.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/carbon_javaJNI.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/EventArgs.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntentEventSignal.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntentRecognizer.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntentRecognizerBase.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntPtrFuture.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/Parameter.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/PayloadItems.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/Reason.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognitionEventArgs.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognitionEventSignal.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognitionResult.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/Recognizer.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerFactory.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerParameter.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerParameterCollection.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/Session.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionEventArgs.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionEventSignal.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionParameter.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionParameterCollection.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognitionEventArgs.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognitionEventSignal.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognitionResult.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognitionResultPtrFuture.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognizer.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognizerBase.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_int32_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXEVENTHANDLE.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXRECOHANDLE.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXRESULTHANDLE.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXSESSIONHANDLE.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__shared_ptrT_Carbon__Session_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__shared_ptrT_int_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_wchar_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/VoidFuture.java
 )
 
 
