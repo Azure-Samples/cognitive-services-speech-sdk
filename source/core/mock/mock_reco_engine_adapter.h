@@ -46,6 +46,7 @@ private:
 
     void InitFormat(WAVEFORMATEX* pformat);
     void TermFormat();
+    void End();
 
     void FireIntermediateResult();
     void FireFinalResult();

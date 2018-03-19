@@ -1,7 +1,6 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "stdafx.h"
-#include "azure_c_shared_utility\xlogging.h"
-
+#include "azure_c_shared_utility_xlogging_wrapper.h"
 
 using namespace CARBON_IMPL_NAMESPACE();
 
@@ -9,17 +8,6 @@ using namespace CARBON_IMPL_NAMESPACE();
 void InitLogging()
 {
 #ifndef _DEBUG
-
-    LOGGER_LOG tracelog = [](LOG_CATEGORY log_category, const char* file, const char* func, int line, unsigned int options, const char* format, ...) {
-        UNUSED(log_category);
-        UNUSED(file);
-        UNUSED(func);
-        UNUSED(line);
-        UNUSED(options);
-        UNUSED(format);
-    };
-
-    UNUSED(tracelog);
 
     xlogging_set_log_function(nullptr);
 
@@ -56,6 +44,9 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 
 __attribute__((constructor)) static void LibLoad(int argc, char** argv, char** envp)
 {
+    UNUSED(argc);
+    UNUSED(argv);
+    UNUSED(envp);
     InitLogging();
 }
 

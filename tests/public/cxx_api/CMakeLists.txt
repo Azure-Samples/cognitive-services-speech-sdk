@@ -18,12 +18,14 @@ set(SOURCES
 source_group("Source Files" FILES ${SOURCES})
 
 add_executable(${PROJECT_NAME} ${SOURCES})
-target_link_libraries(${PROJECT_NAME} common carbon)
+target_link_libraries(${PROJECT_NAME} common libcarbon)
 
 if (NOT WIN32)
     find_package (Threads)
     target_link_libraries (${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 endif()
+
+add_dependencies(${PROJECT_NAME} mock)
 
 set_target_properties (${PROJECT_NAME} PROPERTIES
     FOLDER tests/api

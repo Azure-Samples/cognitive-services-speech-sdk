@@ -43,7 +43,7 @@ include_directories(${CARBON_CXX_API})
 include_directories("${SRC_DIR}/..")
 
 swig_add_library(${CSHARP_BINDINGS} LANGUAGE csharp SOURCES ${SOURCES})
-swig_link_libraries(${CSHARP_BINDINGS} carbon)
+swig_link_libraries(${CSHARP_BINDINGS} libcarbon)
 set_target_properties(${SWIG_MODULE_${CSHARP_BINDINGS}_REAL_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 set_target_properties(${SWIG_MODULE_${CSHARP_BINDINGS}_REAL_NAME} PROPERTIES
     FOLDER bindings/csharp

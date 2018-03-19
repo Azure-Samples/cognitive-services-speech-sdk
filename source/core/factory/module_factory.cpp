@@ -58,7 +58,13 @@ void* CSpxModuleFactory::CreateObject(const char* className, const char* interfa
 
 CSpxModuleFactory::PCREATE_MODULE_OBJECT_FUNC CSpxModuleFactory::GetCreateModuleObjectFunctionPointer(const std::string& filename)
 {
-    UNUSED(filename);
+    if (filename == "carbon") 
+    {
+        // "carbon" is magic value which means that we don't need to load anything 
+        // (this code is already a part of a carbon lib linked to an executable that
+        // uses carbon API).
+        return CreateModuleObject;
+    }
 
     #if _MSC_VER
 
@@ -80,7 +86,7 @@ CSpxModuleFactory::PCREATE_MODULE_OBJECT_FUNC CSpxModuleFactory::GetCreateModule
         SPX_DBG_TRACE_VERBOSE_IF(pfn != NULL, "dlsym('CreateModuleObject') returned non-NULL");
         SPX_DBG_TRACE_VERBOSE_IF(pfn == nullptr, "dlsym('CreateModuleObject') returned NULL: %s",  dlerror());
 
-        if (pfn == nullptr && filename != "carbon")
+        if (pfn == nullptr)
         {
             SPX_DBG_TRACE_VERBOSE("dlsym('CreateModuleObject') returned NULL: ... thus ... using libcarbon.so!CreateModuleObject directly");
             pfn = CreateModuleObject;

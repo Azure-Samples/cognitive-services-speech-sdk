@@ -43,4 +43,4 @@ set_target_properties (mock PROPERTIES
     FOLDER carbon_libs
 )
 
-target_link_libraries(mock PRIVATE common carbon)
+target_link_libraries(mock PRIVATE common libcarbon)

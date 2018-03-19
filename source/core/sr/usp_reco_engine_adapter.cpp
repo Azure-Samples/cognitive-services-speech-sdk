@@ -18,6 +18,7 @@
 
 namespace CARBON_IMPL_NAMESPACE() {
 
+int CSpxUspRecoEngineAdapter::m_instanceCounter = 0;
 
 CSpxUspRecoEngineAdapter::CSpxUspRecoEngineAdapter() :
     m_handle(INVALID_USP_HANDLE),
@@ -26,6 +27,7 @@ CSpxUspRecoEngineAdapter::CSpxUspRecoEngineAdapter() :
     m_ptrIntoBuffer(nullptr),
     m_bytesLeftInBuffer(0)
 {
+    m_instanceCounter++;
     InitCallbacks(&m_callbacks);
 }
 
@@ -486,7 +488,12 @@ void CSpxUspRecoEngineAdapter::UspOnError(const UspError* error)
 
 void CSpxUspRecoEngineAdapter::DumpFileInit()
 {
-    PAL::fopen_s(&m_hfile, "uspaudiodump.wav", "wb");
+    // TODO: is this audio dumping some debugging cruft, is it still needed?
+    // on Windows, this fopen returns null if the same file was already opened,
+    // as a result writing segfaults. Adding a counter the filename, so that
+    // each recognizer will get its own dumpfile.
+    std::string filename = "uspaudiodump_" + std::to_string(m_instanceCounter) + ".wav";
+    PAL::fopen_s(&m_hfile, filename.c_str(), "wb");
 }
 
 void CSpxUspRecoEngineAdapter::DumpFileWrite(const uint8_t* buffer, size_t bytesToWrite)

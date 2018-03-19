@@ -50,7 +50,7 @@ add_executable(carbon_test_console
     ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES}
     )
  
-target_link_libraries(carbon_test_console common carbon)
+target_link_libraries(carbon_test_console common libcarbon)
 
 set_target_properties (carbon_test_console PROPERTIES
     FOLDER tools

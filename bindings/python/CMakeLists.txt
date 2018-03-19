@@ -65,7 +65,7 @@ else()
     swig_add_module(${PROJECT_NAME} python ${SOURCES})
 endif()
 
-swig_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARIES} carbon)
+swig_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARIES} libcarbon)
 
 # Copied from https://www.vlam3d.com/2016/09/14/swig-monologues-part-1-getting-started-with-cmake/?lang=en,
 # TODO: check to make sure this is really needed.

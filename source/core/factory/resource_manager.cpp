@@ -26,15 +26,13 @@ CSpxResourceManager::CSpxResourceManager()
 
 #ifdef __linux__
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-mock.so"));
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon.so"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
 #elif __MACH__
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-mock.dylib"));
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon.dylib"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
 #else
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-mock"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
-    // TODO: what's carbonx?
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbonx"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-unidec"));
 #endif
 }

@@ -49,6 +49,7 @@ void CSpxMockRecoEngineAdapter::SetFormat(WAVEFORMATEX* pformat)
     {
         EnsureFireFinalResult();
         TermFormat();
+        End();
     }
 }
 
@@ -87,6 +88,12 @@ void CSpxMockRecoEngineAdapter::InitFormat(WAVEFORMATEX* pformat)
 void CSpxMockRecoEngineAdapter::TermFormat()
 {
     m_format = nullptr;
+}
+
+void CSpxMockRecoEngineAdapter::End()
+{
+    SPX_DBG_ASSERT(GetSite());
+    GetSite()->DoneProcessingAudio(this);
 }
 
 void CSpxMockRecoEngineAdapter::FireIntermediateResult()

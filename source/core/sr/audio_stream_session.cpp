@@ -167,6 +167,8 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::WaitForRecognitio
     m_cv.wait_for(lock, std::chrono::seconds(m_recoAsyncTimeout), [&] { return !m_recoAsyncWaiting; });
     SPX_DBG_TRACE_VERBOSE("Waiting for Recognition... Done!");
 
+    // TODO: Why do we need this condition?
+    // Shouldn't the pump be stopped whenever the recognition is done (wether or not we have a result)?
     if (!m_recoAsyncResult)
     {
         if (ChangeState(SessionState::ProcessingAudio, SessionState::StoppingPump))
@@ -177,8 +179,8 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::WaitForRecognitio
         }
 
         SPX_DBG_TRACE_VERBOSE("Waiting for AdapterDone...");
-        m_cv.wait_for(lock, std::chrono::seconds(m_waitForDoneTimeout), [&] {
-            return !this->IsState(SessionState::StoppingPump) && !this->IsState(SessionState::WaitingForAdapterDone);
+        m_cv.wait_for(lock, std::chrono::seconds(m_waitForDoneTimeout), [this] {
+            return m_state != SessionState::StoppingPump && m_state != SessionState::WaitingForAdapterDone;
         });
         SPX_DBG_TRACE_VERBOSE("Waiting for AdapterDone... Done!!");
     }
@@ -374,6 +376,8 @@ void CSpxAudioStreamSession::InitRecoEngineAdapter()
 
 bool CSpxAudioStreamSession::IsState(SessionState state)
 {
+    std::unique_lock<std::mutex> lock(m_stateMutex);
+
     return m_state == state;
 }
 

@@ -1,4 +1,4 @@
-import sys, argparse, time
+import sys, argparse, time, os.path
 
 lib_dir = '${CMAKE_LIBRARY_OUTPUT_DIRECTORY}'
 bin_dir = '${CMAKE_RUNTIME_OUTPUT_DIRECTORY}'
@@ -13,23 +13,26 @@ else:
 
 from carbon_py import RecognizerFactory, SessionEventCallback, SpeechRecognitionEventCallback
 # TODO: #1137487
-session_started_cb = SessionEventCallback(lambda event: 
-    _print('In session_started callback: {}'.format(event)))
+callbacks = {
+  'session_started' : SessionEventCallback(lambda event:
+      _print('In session_started callback: {}'.format(event))),
 
-session_stopped_cb = SessionEventCallback(lambda event:
-    _print('In session_stopped callback: {}'.format(event)))
+ 'session_stopped' : SessionEventCallback(lambda event:
+      _print('In session_stopped callback: {}'.format(event))),
 
-intermediate_result_cb = SpeechRecognitionEventCallback(lambda event:
-        _print('In intermediate_result callback: {}'.format(event)))
+  'intermediate_result' : SpeechRecognitionEventCallback(lambda event:
+          _print('In intermediate_result callback: {}'.format(event))),
 
-final_result_cb = SpeechRecognitionEventCallback(lambda event:
-        _print('In final_result callback: {}'.format(event)))
+  'final_result' : SpeechRecognitionEventCallback(lambda event:
+        _print('In final_result callback: {}'.format(event))),
 
-no_match_cb = SpeechRecognitionEventCallback(lambda event:
-        _print('In no_match callback: {}'.format(event)))
+  'no_match' : SpeechRecognitionEventCallback(lambda event:
+        _print('In no_match callback: {}'.format(event))),
 
-canceled_cb = SpeechRecognitionEventCallback(lambda event:
-        _print('In Canceled callback'))
+  'canceled' : SpeechRecognitionEventCallback(lambda event:
+          _print('In Canceled callback')),
+}
+
 
 def test_recognize(filename):
     result = recognize(filename)
@@ -46,24 +49,37 @@ def _print(x):
     horizonal_line = '=' * 100
     sys.stdout.write('{0}{1}\n{2}\n{1}{0}'.format(new_line_x_3, horizonal_line, x))
 
+def _connect(reco):
+    for cb_name in callbacks:
+        getattr(reco, cb_name).connect(callbacks[cb_name])
+
+def _disconnect(reco):
+    # BUGBUG #1180542
+    # disconnect deadlocks, sleep instead:
+    import time
+    time.sleep(1)
+    return
+    for cb_name in callbacks:
+        getattr(reco, cb_name).disconnect(callbacks[cb_name])
+
 def recognize(filename=None, async=False):
+    if filename is not None:
+        os.path.isfile(filename)
     reco = RecognizerFactory.create_speech_recognizer(filename)
 
-    reco.session_started.connect(session_started_cb)
-    reco.session_stopped.connect(session_stopped_cb)
-    reco.intermediate_result.connect(intermediate_result_cb)
-    reco.final_result.connect(final_result_cb)
-    reco.no_match.connect(no_match_cb)
-    reco.canceled.connect(canceled_cb)
+    _connect(reco)
 
-    if not async:
-        _print('Calling recognize()...')
-        return reco.recognize()
-    else:
-        _print('Calling recognize_async()...')
-        future = reco.recognize_async()
-        _print('...recognize_async() in progress...')
-        return future.get();
+    try:
+        if not async:
+            _print('Calling recognize()...')
+            return reco.recognize()
+        else:
+            _print('Calling recognize_async()...')
+            future = reco.recognize_async()
+            _print('...recognize_async() in progress...')
+            return future.get()
+    finally:
+        _disconnect(reco)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

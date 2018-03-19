@@ -166,6 +166,8 @@ private:
     size_t m_bytesLeftInBuffer;
 
     FILE* m_hfile = 0;
+
+    int static m_instanceCounter;
 };
 
 

@@ -3,4 +3,4 @@
     url = https://github.com/kgabis/parson
 [submodule "external/azure-c-shared-utility"]
     path = external/azure-c-shared-utility
-    url = https://github.com/raaaar/azure-c-shared-utility
+    url = https://github.com/Azure/azure-c-shared-utility

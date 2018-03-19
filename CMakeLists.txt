@@ -50,50 +50,15 @@ set(CARBON_C_API "${CARBON_PUBLIC}/c_api")
 set(CARBON_CXX_API "${CARBON_PUBLIC}/cxx_api")
 set(CARBON_INCLUDE "${CARBON_CORE}/include")
 
-set(SPEECH_C_API_HEADERS
-    "${CARBON_C_API}/speechapi_c.h"
-    "${CARBON_C_API}/speechapi_c_common.h"
-    "${CARBON_C_API}/speechapi_c_recognizer.h"
-    "${CARBON_C_API}/speechapi_c_recognizer_factory.h"
-    "${CARBON_C_API}/speechapi_c_result.h"
-    "${CARBON_C_API}/speechapi_c_session.h"
-    "${CARBON_C_API}/spxdebug.h"
-    "${CARBON_C_API}/spxerror.h"
-    )
-
-set(SPEECH_CXX_API_HEADERS
-    "${CARBON_CXX_API}/speechapi_cxx.h"
-    "${CARBON_CXX_API}/speechapi_cxx_common.h"
-    "${CARBON_CXX_API}/speechapi_cxx_eventargs.h"
-    "${CARBON_CXX_API}/speechapi_cxx_eventsignal.h"
-    "${CARBON_CXX_API}/speechapi_cxx_parameter.h"
-    "${CARBON_CXX_API}/speechapi_cxx_recognition_async_recognizer.h"
-    "${CARBON_CXX_API}/speechapi_cxx_recognition_base_async_recognizer.h"
-    "${CARBON_CXX_API}/speechapi_cxx_recognition_eventargs.h"
-    "${CARBON_CXX_API}/speechapi_cxx_recognition_result.h"
-    "${CARBON_CXX_API}/speechapi_cxx_recognizer_parameter_collection.h"
-    "${CARBON_CXX_API}/speechapi_cxx_recognizer.h"
-    "${CARBON_CXX_API}/speechapi_cxx_recognizer_factory.h"
-    "${CARBON_CXX_API}/speechapi_cxx_session_parameter_collection.h"
-    "${CARBON_CXX_API}/speechapi_cxx_session.h"
-    "${CARBON_CXX_API}/speechapi_cxx_session_eventargs.h"
-    "${CARBON_CXX_API}/speechapi_cxx_speech_recognition_eventargs.h"
-    "${CARBON_CXX_API}/speechapi_cxx_speech_recognition_result.h"
-    "${CARBON_CXX_API}/speechapi_cxx_speech_recognizer.h"
-    "${CARBON_CXX_API}/speechapi_cxx_translation_eventargs.h"
-    "${CARBON_CXX_API}/speechapi_cxx_translation_result.h"
-    "${CARBON_CXX_API}/speechapi_cxx_translation_recognizer.h"
-    "${CARBON_CXX_API}/speechapi_cxx_todo.h"
-    "${CARBON_CXX_API}/speechapi_cxx_todo_intent.h"
-    "${CARBON_CXX_API}/speechapi_cxx_todo_recognition.h"
-    )
+FILE(GLOB SPEECH_C_API_HEADERS "${CARBON_C_API}/*.h")
+FILE(GLOB SPEECH_CXX_API_HEADERS "${CARBON_CXX_API}/*.h")
 
 
 # individual components
 set(COMMON "${CARBON_CORE}/common")
 set(FACTORY "${CARBON_CORE}/factory")
 set(SR "${CARBON_CORE}/sr")
-set(CARBON_LIB "${CARBON_CORE}/carbon_lib")
+set(LIBCARBON "${CARBON_CORE}/libcarbon")
 set(C_API "${CARBON_CORE}/c_api")
 set(AUDIO "${CARBON_CORE}/audio")
 set(USP "${CARBON_CORE}/usp")
@@ -122,7 +87,7 @@ add_subdirectory(${TESTS})
 add_subdirectory(${C_API})
 add_subdirectory(${SR})
 add_subdirectory(${MOCK})
-add_subdirectory(${CARBON_LIB})
+add_subdirectory(${LIBCARBON})
 if(CMAKE_CL_64)
     add_subdirectory(${UNIDEC})
 endif()

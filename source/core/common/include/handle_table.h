@@ -130,6 +130,11 @@ public:
 
     static void Term()
     {
+        if (s_termFns == nullptr) 
+        {
+            return;
+        }
+
         for (auto termFn : *s_termFns.get())
         {
             termFn();
@@ -142,9 +147,12 @@ public:
 
 private:
 
+    template<typename T>
+    using deleted_unique_ptr = std::unique_ptr<T, std::function<void(T*)>>;
+
     // TODO: replace const char* with std::type_index?
     static std::unique_ptr<std::map<const char*, void*>> s_tables;
-    static std::unique_ptr<std::list<std::function<void(void)>>> s_termFns;
+    static deleted_unique_ptr<std::list<std::function<void(void)>>> s_termFns;
 };
 
 

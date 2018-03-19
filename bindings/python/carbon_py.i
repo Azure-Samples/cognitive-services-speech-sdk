@@ -15,6 +15,11 @@
 %threadallow Carbon::Recognition::Speech::SpeechRecognizer::~SpeechRecognizer;
 // * when waiting on a future.
 %threadallow FutureWrapper::Get;
+// * when invoking disconnect (which involves acquiring an event signal lock) to
+// avoid a deadlock (in-progress callback waiting for GIL might be holding 
+// the event signal lock).
+%threadallow Carbon::EventSignal::_Disconnect;
+%threadallow Carbon::EventSignal::DisconnectAll;
 
 %extend Carbon::Recognition::RecognitionResult {
     %pythoncode %{
