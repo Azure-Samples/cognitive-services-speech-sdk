@@ -1,5 +1,8 @@
 project(carbon_csharp)
 
+find_package(SWIG REQUIRED)
+include(UseSWIG)
+
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 

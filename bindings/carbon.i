@@ -147,8 +147,8 @@
 %ignore Carbon::EventSignal::EventSignal;
 %ignore Carbon::EventSignal::CallbackFunction;
 %ignore Carbon::EventSignal::Signal;
-%ignore Carbon::EventSignal::Connect;
-%ignore Carbon::EventSignal::Disconnect;
+%ignore Carbon::EventSignal::Connect(CallbackFunction callback);
+%ignore Carbon::EventSignal::Disconnect(CallbackFunction callback);
 %ignore Carbon::EventSignal::operator+=;
 %ignore Carbon::EventSignal::operator-=;
 

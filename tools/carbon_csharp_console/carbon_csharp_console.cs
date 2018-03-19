@@ -21,9 +21,22 @@ namespace CarbonSamples
 
             var speechRecognizer = Carbon.RecognizerFactory.CreateSpeechRecognizerWithFileInput(args[0]);
 
+            var eventHandler = new IntermediateResultHandler();
+
+            speechRecognizer.IntermediateResult.Connect(eventHandler);
+
             var result = speechRecognizer.Recognize();
 
             Console.WriteLine("Result: Id:" + result.ResultId + "Reason: " + result.Reason + "Text: " + result.Text);
         }
     }
+
+    class IntermediateResultHandler : Carbon.SpeechRecognitionEventListener
+    {
+        public override void Execute(Carbon.SpeechRecognitionEventArgs eventArgs)
+        {
+            Console.WriteLine("INtermediateResult received: " + eventArgs.Result.Text);
+        }
+    }
+
 }

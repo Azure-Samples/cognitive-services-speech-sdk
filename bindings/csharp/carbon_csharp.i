@@ -1,7 +1,3 @@
-%module carbon_csharp
-
-// TODO: #1137570
-%ignore CallbackWrapper;
-%ignore Carbon::EventSignal::operator();
+%module(directors="1") carbon_csharp
 
 %include "carbon.i"
