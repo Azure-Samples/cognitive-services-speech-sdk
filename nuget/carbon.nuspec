@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>Microsoft.ClientSpeech</id>
-    <version>0.0.0.1</version>
+    <version>$BuildNumber$</version>
     <title>Microsoft Client Speech SDK</title>
     <authors>Microsoft</authors>
     <owners>Microsoft, Speech Services</owners>
@@ -20,48 +20,21 @@
   <files>
     <!-- target file(s) -->
     <file src="build\native\Microsoft.ClientSpeech.targets" target="build\native\Microsoft.ClientSpeech.targets" />
+    <file src="build\net45\Microsoft.ClientSpeech.targets" target="build\net45\Microsoft.ClientSpeech.targets" />
 
     <!-- C++ header files -->
-    <file src="..\source\public\cxx_api\speechapi_cxx.h" target="build\native\include\cxx_api\speechapi_cxx.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_common.h" target="build\native\include\cxx_api\speechapi_cxx_common.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_eventargs.h" target="build\native\include\cxx_api\speechapi_cxx_eventargs.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_eventsignal.h" target="build\native\include\cxx_api\speechapi_cxx_eventsignal.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_global.h" target="build\native\include\cxx_api\speechapi_cxx_global.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_global_parameter_collection.h" target="build\native\include\cxx_api\speechapi_cxx_global_parameter_collection.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_parameter.h" target="build\native\include\cxx_api\speechapi_cxx_parameter.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_recognition_async_recognizer.h" target="build\native\include\cxx_api\speechapi_cxx_recognition_async_recognizer.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_recognition_base_async_recognizer.h" target="build\native\include\cxx_api\speechapi_cxx_recognition_base_async_recognizer.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_recognition_eventargs.h" target="build\native\include\cxx_api\speechapi_cxx_recognition_eventargs.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_recognition_result.h" target="build\native\include\cxx_api\speechapi_cxx_recognition_result.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_recognizer.h" target="build\native\include\cxx_api\speechapi_cxx_recognizer.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_recognizer_factory.h" target="build\native\include\cxx_api\speechapi_cxx_recognizer_factory.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_recognizer_parameter_collection.h" target="build\native\include\cxx_api\speechapi_cxx_recognizer_parameter_collection.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_session.h" target="build\native\include\cxx_api\speechapi_cxx_session.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_session_eventargs.h" target="build\native\include\cxx_api\speechapi_cxx_session_eventargs.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_session_parameter_collection.h" target="build\native\include\cxx_api\speechapi_cxx_session_parameter_collection.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_speech_recognition_eventargs.h" target="build\native\include\cxx_api\speechapi_cxx_speech_recognition_eventargs.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_speech_recognition_result.h" target="build\native\include\cxx_api\speechapi_cxx_speech_recognition_result.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_speech_recognizer.h" target="build\native\include\cxx_api\speechapi_cxx_speech_recognizer.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_todo.h" target="build\native\include\cxx_api\speechapi_cxx_todo.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_todo_intent.h" target="build\native\include\cxx_api\speechapi_cxx_todo_intent.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_todo_recognition.h" target="build\native\include\cxx_api\speechapi_cxx_todo_recognition.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_translation_eventargs.h" target="build\native\include\cxx_api\speechapi_cxx_translation_eventargs.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_translation_recognizer.h" target="build\native\include\cxx_api\speechapi_cxx_translation_recognizer.h" />
-    <file src="..\source\public\cxx_api\speechapi_cxx_translation_result.h" target="build\native\include\cxx_api\speechapi_cxx_translation_result.h" />
+    <file src="..\source\public\cxx_api\*" target="build\native\include\cxx_api\" />
 
     <!-- C header files -->
-    <file src="..\source\public\c_api\spxdebug.h" target="build\native\include\c_api\spxdebug.h" />
-    <file src="..\source\public\c_api\spxerror.h" target="build\native\include\c_api\spxerror.h" />
-    <file src="..\source\public\c_api\speechapi_c.h" target="build\native\include\c_api\speechapi_c.h" />
-    <file src="..\source\public\c_api\speechapi_c_common.h" target="build\native\include\c_api\speechapi_c_common.h" />
-    <file src="..\source\public\c_api\speechapi_c_global.h" target="build\native\include\c_api\speechapi_c_global.h" />
-    <file src="..\source\public\c_api\speechapi_c_recognizer.h" target="build\native\include\c_api\speechapi_c_recognizer.h" />
-    <file src="..\source\public\c_api\speechapi_c_result.h" target="build\native\include\c_api\speechapi_c_result.h" />
-    <file src="..\source\public\c_api\speechapi_c_session.h" target="build\native\include\c_api\speechapi_c_session.h" />
-    <file src="..\source\public\c_api\speechapi_c_recognizer_factory.h" target="build\native\include\c_api\speechapi_c_recognizer_factory.h" />
+    <file src="..\source\public\c_api\*" target="build\native\include\c_api\" />
    
-    <!-- dll and lib files -->
-    <file src="..\build\lib\Release\carbon.lib" target="build\native\x64\Release\carbon.lib" />
-    <file src="..\build\bin\Release\carbon.dll" target="build\native\x64\Release\carbon.dll" />
+    <!-- native dll and lib files -->
+    <file src="..\build\$Platform$\lib\$Configuration$\carbon.lib" target="build\native\$Platform$\$Configuration$\carbon.lib" />
+    <file src="..\build\$Platform$\bin\$Configuration$\carbon.dll" target="build\native\$Platform$\$Configuration$\carbon.dll" />
+
+    <!-- .NET dlls -->
+    <file src="..\build\$Platform$\bin\$Configuration$\carbon_csharp_bindings.dll" target="build\native\$Platform$\$Configuration$\carbon_csharp_bindings.dll" />
+    <file src="..\build\$Platform$\bin\$Configuration$\carbon_csharp_lib.dll" target="lib\net45\$Platform$\carbon_csharp_lib.dll" />
+
   </files>
 </package>
