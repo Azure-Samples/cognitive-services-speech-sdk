@@ -49,6 +49,13 @@ namespace CARBON_IMPL_NAMESPACE() {
             return SpxSharedPtrFromThis<x>((x*)this);                                   \
         }
 
+#define SPX_SERVICE_MAP_ENTRY_OBJECT(x, y)                                              \
+        if (PAL::stricmp(PAL::GetTypeName<x>().c_str(), serviceName) == 0)              \
+        {                                                                               \
+            SPX_DBG_TRACE_SERVICE_MAP_FOUND_IT();                                       \
+            return std::dynamic_pointer_cast<x>(y);                                     \
+        }
+
 #define SPX_SERVICE_MAP_ENTRY_FUNC(x)                                                   \
         {                                                                               \
             auto service = x(serviceName);                                              \

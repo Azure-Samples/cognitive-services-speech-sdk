@@ -16,7 +16,7 @@ SPXAPI Global_SetParameter_String(const wchar_t* name, const wchar_t* value)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(CSpxResourceManager::GetObjectFactory());
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(SpxGetRootSite());
         namedProperties->SetStringValue(name, value);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
@@ -26,7 +26,7 @@ SPXAPI Global_GetParameter_String(const wchar_t* name, wchar_t* value, uint32_t 
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(CSpxResourceManager::GetObjectFactory());
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(SpxGetRootSite());
         auto tempValue = namedProperties->GetStringValue(name, defaultValue);
         PAL::wcscpy(value, cchValue, tempValue.c_str(), tempValue.size(), true);
     }
@@ -37,7 +37,7 @@ SPXAPI_(bool) Global_HasParameter_String(const wchar_t* name)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(CSpxResourceManager::GetObjectFactory());
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(SpxGetRootSite());
         return namedProperties->HasStringValue(name);
     }
     SPXAPI_CATCH_AND_RETURN(hr, false)
@@ -47,7 +47,7 @@ SPXAPI Global_SetParameter_Int32(const wchar_t* name, int32_t value)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(CSpxResourceManager::GetObjectFactory());
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(SpxGetRootSite());
         namedProperties->SetNumberValue(name, value);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
@@ -57,7 +57,7 @@ SPXAPI Global_GetParameter_Int32(const wchar_t* name, int32_t* pvalue, int32_t d
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(CSpxResourceManager::GetObjectFactory());
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(SpxGetRootSite());
         auto tempValue = namedProperties->GetNumberValue(name, defaultValue);
         *pvalue = (int32_t)tempValue;
     }
@@ -68,7 +68,7 @@ SPXAPI_(bool) Global_HasParameter_Int32(const wchar_t* name)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(CSpxResourceManager::GetObjectFactory());
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(SpxGetRootSite());
         return namedProperties->HasNumberValue(name);
     }
     SPXAPI_CATCH_AND_RETURN(hr, false)
@@ -78,7 +78,7 @@ SPXAPI Global_SetParameter_Bool(const wchar_t* name, bool value)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(CSpxResourceManager::GetObjectFactory());
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(SpxGetRootSite());
         namedProperties->SetBooleanValue(name, value);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
@@ -88,7 +88,7 @@ SPXAPI Global_GetParameter_Bool(const wchar_t* name, bool* pvalue, bool defaultV
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(CSpxResourceManager::GetObjectFactory());
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(SpxGetRootSite());
         auto tempValue = namedProperties->GetBooleanValue(name, defaultValue);
         *pvalue = tempValue;
     }
@@ -99,7 +99,7 @@ SPXAPI_(bool) Global_HasParameter_Bool(const wchar_t* name)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(CSpxResourceManager::GetObjectFactory());
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(SpxGetRootSite());
         return namedProperties->HasBooleanValue(name);
     }
     SPXAPI_CATCH_AND_RETURN(hr, false)

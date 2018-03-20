@@ -29,11 +29,22 @@ public:
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName) override;
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) override { UNUSED(fileName); UNUSED(language); throw SPXERR_NOT_IMPL; }
 
+    std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer() override;
+    std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer(bool passiveListeningEnabled) override { UNUSED(passiveListeningEnabled); throw SPXERR_NOT_IMPL; }
+    std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer(const std::wstring& language) override { UNUSED(language); throw SPXERR_NOT_IMPL; };
+    std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName) override;
+    std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) override { UNUSED(fileName); UNUSED(language); throw SPXERR_NOT_IMPL; }
+
     // --- IServiceProvider
     SPX_SERVICE_MAP_BEGIN()
     SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
     SPX_SERVICE_MAP_END()
 
+
+protected:
+
+    std::shared_ptr<ISpxRecognizer> CreateRecognizerInternal(const char* sessionClassName, const char* recognizerClassName);
+    std::shared_ptr<ISpxRecognizer> CreateRecognizerWithFileInputInternal(const std::wstring& fileName, const char* sessionClassName, const char* recognizerClassName);
 };
 
 

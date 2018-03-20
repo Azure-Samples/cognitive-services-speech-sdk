@@ -8,13 +8,13 @@
 #pragma once
 #include <speechapi_c_common.h>
 #include <speechapi_c_global.h>
-#include <speechapi_cxx_parameter.h>
+#include <speechapi_cxx_value.h>
 
 
 namespace CARBON_NAMESPACE_ROOT {
 
 
-class GlobalParameter : public Parameter
+class GlobalParameter : public Value
 {
 public:
 
@@ -23,17 +23,17 @@ public:
     {
     }
 
-    // --- Parameter virtual overrides ---
+    // --- Value virtual overrides ---
 
-    bool HasString() override { return HasString(m_name.c_str()); }
+    bool IsString() override { return IsString(m_name.c_str()); }
     std::wstring GetString(const wchar_t* defaultValue) override { return GetString(m_name.c_str(), defaultValue); }
     void SetString(const wchar_t* value) override { return SetString(m_name.c_str(), value); }
 
-    bool HasNumber() override { return HasNumber(m_name.c_str()); }
+    bool IsNumber() override { return IsNumber(m_name.c_str()); }
     int32_t GetNumber(int32_t defaultValue) override { return GetNumber(m_name.c_str(), defaultValue); }
     void SetNumber(int32_t value) override { SetNumber(m_name.c_str(), value); }
 
-    bool HasBool() override { return HasBool(m_name.c_str()); }
+    bool IsBool() override { return IsBool(m_name.c_str()); }
     bool GetBool(bool defaultValue) override { return GetBool(m_name.c_str(), defaultValue); }
     void SetBool(bool value) override { SetBool(m_name.c_str(), value); }
 
@@ -76,34 +76,37 @@ public:
         SPX_THROW_ON_FAIL(Global_SetParameter_Bool(name, value));
     }
 
-    static bool HasString(const wchar_t* name)
+    static bool IsString(const wchar_t* name)
     {
         return Global_HasParameter_String(name);
     }
 
-    static bool HasNumber(const wchar_t* name)
+    static bool IsNumber(const wchar_t* name)
     {
         return Global_HasParameter_Int32(name);
     }
 
-    static bool HasBool(const wchar_t* name)
+    static bool IsBool(const wchar_t* name)
     {
         return Global_HasParameter_Bool(name);
     }
 
 private:
 
+    GlobalParameter(GlobalParameter&&) = delete;
+    GlobalParameter(const GlobalParameter&) = delete;
+    GlobalParameter& operator=(GlobalParameter&&) = delete;
+    GlobalParameter& operator=(const GlobalParameter&) = delete;
+    
     std::wstring m_name;
 };
 
 
-class GlobalParameterCollection : public ParameterCollection<SPXRECOHANDLE, GlobalParameter>
+class GlobalParameterCollection : public ValueCollection<SPXRECOHANDLE, GlobalParameter>
 {
 public:
 
-    GlobalParameterCollection() : ParameterCollection(nullptr)
-    {
-    }
+    GlobalParameterCollection() = default;
 
 
 private:

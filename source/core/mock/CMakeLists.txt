@@ -17,6 +17,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/mock_audio_reader.h"
     "${SRC_DIR}/mock_audio_reader_impl.h"
     "${SRC_DIR}/mock_interactive_microphone.h"
+    "${SRC_DIR}/mock_lu_engine_adapter.h"
     "${SRC_DIR}/mock_reco_engine_adapter.h"
     "${SRC_DIR}/mock_wav_file_reader.h"
     "${SRC_DIR}/mock_wav_file_pump.h"
@@ -27,6 +28,7 @@ set(SOURCES
     "${SRC_DIR}/create_module_object.cpp"
     "${SRC_DIR}/mock_audio_reader_impl.cpp"
     "${SRC_DIR}/mock_interactive_microphone.cpp"
+    "${SRC_DIR}/mock_lu_engine_adapter.cpp"
     "${SRC_DIR}/mock_reco_engine_adapter.cpp"
     "${SRC_DIR}/mock_wav_file_pump.cpp"
     )

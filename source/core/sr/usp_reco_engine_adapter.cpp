@@ -42,6 +42,8 @@ void CSpxUspRecoEngineAdapter::Init()
 
 void CSpxUspRecoEngineAdapter::Term()
 {
+    SPX_DBG_TRACE_SCOPE("Terminating CSpxUspRecoEngineAdapter...", "Terminating CSpxUspRecoEngineAdapter... Done!");
+    
     UspShutdown(m_handle);
     m_handle = INVALID_USP_HANDLE;
 
@@ -441,7 +443,7 @@ void CSpxUspRecoEngineAdapter::UspOnSpeechHypothesis(UspMsgSpeechHypothesis *mes
     auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
     auto result = factory->CreateIntermediateResult(nullptr, message->text);
 
-    GetSite()->IntermediateResult(this, message->offset, result);
+    GetSite()->IntermediateRecoResult(this, message->offset, result);
 }
 
 void CSpxUspRecoEngineAdapter::UspOnSpeechFragment(UspMsgSpeechFragment *message)
@@ -453,7 +455,7 @@ void CSpxUspRecoEngineAdapter::UspOnSpeechFragment(UspMsgSpeechFragment *message
 
     auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
     auto result = factory->CreateIntermediateResult(nullptr, message->text);
-    GetSite()->IntermediateResult(this, message->offset, result);
+    GetSite()->IntermediateRecoResult(this, message->offset, result);
 }
 
 void CSpxUspRecoEngineAdapter::UspOnSpeechPhrase(UspMsgSpeechPhrase *message)
@@ -464,7 +466,7 @@ void CSpxUspRecoEngineAdapter::UspOnSpeechPhrase(UspMsgSpeechPhrase *message)
     auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
     auto result = factory->CreateFinalResult(nullptr, message->displayText);
 
-    GetSite()->FinalResult(this, message->offset, result);
+    GetSite()->FinalRecoResult(this, message->offset, result);
 }
 
 void CSpxUspRecoEngineAdapter::UspOnTurnStart(UspMsgTurnStart *message)

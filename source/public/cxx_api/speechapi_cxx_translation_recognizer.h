@@ -128,6 +128,7 @@ public:
     * @param requireVoiceOutput: The translation result includes translated audio of the final translation text.
     */
     TranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage) :
+        AsyncRecognizer(SPXHANDLE_INVALID),
         OnTranslationAudioResult(m_onTranslationAudioResult),
         OnTranslationError(m_onTranslationError)
     {
@@ -194,9 +195,10 @@ public:
 
 private:
 
+    TranslationRecognizer() = delete;
+    TranslationRecognizer(TranslationRecognizer&&) = delete;
     TranslationRecognizer(const TranslationRecognizer&) = delete;
-    TranslationRecognizer(const TranslationRecognizer&&) = delete;
-
+    TranslationRecognizer& operator=(TranslationRecognizer&&) = delete;
     TranslationRecognizer& operator=(const TranslationRecognizer&) = delete;
 
     EventSignal<const TranslationEventArgs<AudioResult>&> m_onTranslationAudioResult;

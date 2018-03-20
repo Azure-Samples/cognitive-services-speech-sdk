@@ -41,9 +41,10 @@ public:
 
 private:
 
+    TranslationTextResult() = delete;
+    TranslationTextResult(TranslationTextResult&&) = delete;
     TranslationTextResult(const TranslationTextResult&) = delete;
-    TranslationTextResult(const TranslationTextResult&&) = delete;
-
+    TranslationTextResult& operator=(TranslationTextResult&&) = delete;
     TranslationTextResult& operator=(const TranslationTextResult&) = delete;
 
     SPXRESULTHANDLE m_hresult;

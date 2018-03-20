@@ -63,5 +63,19 @@ void CSpxRecognitionResult::InitNoMatch()
     m_reason = Reason::NoMatch;
 }
 
+std::wstring CSpxRecognitionResult::GetIntentId()
+{
+    return m_intentId;
+}
+
+void CSpxRecognitionResult::InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload)
+{
+    m_intentId = intentId != nullptr
+        ? intentId
+        : L"";
+
+    SetStringValue(L"json", jsonPayload);
+}
+
 
 } // CARBON_IMPL_NAMESPACE

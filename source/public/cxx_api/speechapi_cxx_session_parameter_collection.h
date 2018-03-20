@@ -6,13 +6,13 @@
 //
 
 #pragma once
-#include <speechapi_cxx_parameter.h>
+#include <speechapi_cxx_value.h>
 
 
 namespace CARBON_NAMESPACE_ROOT {
 
 
-class SessionParameter : public Parameter
+class SessionParameter : public Value
 {
 public:
 
@@ -22,17 +22,17 @@ public:
     {
     }
 
-    // --- Parameter virtual overrides ---
+    // --- Value virtual overrides ---
 
-    bool HasString() override { return HasString(m_hsession, m_name.c_str()); }
+    bool IsString() override { return HasString(m_hsession, m_name.c_str()); }
     std::wstring GetString(const wchar_t* defaultValue) override { return GetString(m_hsession, m_name.c_str(), defaultValue); }
     void SetString(const wchar_t* value) override { return SetString(m_hsession, m_name.c_str(), value); }
 
-    bool HasNumber() override { return HasNumber(m_hsession, m_name.c_str()); }
+    bool IsNumber() override { return HasNumber(m_hsession, m_name.c_str()); }
     int32_t GetNumber(int32_t defaultValue) override { return GetNumber(m_hsession, m_name.c_str(), defaultValue); }
     void SetNumber(int32_t value) override { SetNumber(m_hsession, m_name.c_str(), value); }
 
-    bool HasBool() override { return HasBool(m_hsession, m_name.c_str()); }
+    bool IsBool() override { return HasBool(m_hsession, m_name.c_str()); }
     bool GetBool(bool defaultValue) override { return GetBool(m_hsession, m_name.c_str(), defaultValue); }
     void SetBool(bool value) override { SetBool(m_hsession, m_name.c_str(), value); }
 
@@ -97,12 +97,12 @@ private:
 };
 
 
-class SessionParameterCollection : public ParameterCollection<SPXSESSIONHANDLE, SessionParameter>
+class SessionParameterCollection : public ValueCollection<SPXSESSIONHANDLE, SessionParameter>
 {
 public:
 
     SessionParameterCollection(SPXSESSIONHANDLE hsession) :
-        ParameterCollection(hsession)
+        ValueCollection(hsession)
     {
     }
 };

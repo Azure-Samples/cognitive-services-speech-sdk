@@ -20,6 +20,18 @@ std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateSpeechRecognizerWit
     return factory->CreateSpeechRecognizerWithFileInput(fileName);
 }
 
+std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateIntentRecognizer() 
+{
+    auto factory = GetDefaultFactory();
+    return factory->CreateIntentRecognizer();
+}
+
+std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateIntentRecognizerWithFileInput(const std::wstring& fileName)
+{
+    auto factory = GetDefaultFactory();
+    return factory->CreateIntentRecognizerWithFileInput(fileName);
+}
+
 std::shared_ptr<ISpxRecognizerFactory> CSpxRecognizerFactory::GetDefaultFactory()
 {
     auto factory = CSpxResourceManager::InitService<ISpxRecognizerFactory>("CSpxDefaultRecognizerFactory");

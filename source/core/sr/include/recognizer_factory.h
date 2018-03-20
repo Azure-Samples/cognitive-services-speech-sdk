@@ -22,10 +22,10 @@ public:
     static std::shared_ptr<ISpxRecognizer> CreateDictationRecognizerWithFileInput(const std::wstring& fileName) { UNUSED(fileName); throw SPXERR_NOT_IMPL; }
     static std::shared_ptr<ISpxRecognizer> CreateDictationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { UNUSED(fileName); UNUSED(language); throw SPXERR_NOT_IMPL; }
 
-    static std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer() { throw SPXERR_NOT_IMPL; }
+    static std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer();
     static std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer(bool passiveListeningEnabled) { UNUSED(passiveListeningEnabled); throw SPXERR_NOT_IMPL; }
     static std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer(const std::wstring& language) { UNUSED(language);  throw SPXERR_NOT_IMPL; }
-    static std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName) { UNUSED(fileName);  throw SPXERR_NOT_IMPL; }
+    static std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName);
     static std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { UNUSED(fileName); UNUSED(language); throw SPXERR_NOT_IMPL; }
 
 

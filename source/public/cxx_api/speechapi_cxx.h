@@ -12,7 +12,7 @@
 
 #include <speechapi_cxx_eventargs.h>
 #include <speechapi_cxx_eventsignal.h>
-#include <speechapi_cxx_parameter.h>
+#include <speechapi_cxx_value.h>
 
 #include <speechapi_cxx_global.h>
 #include <speechapi_cxx_global_parameter_collection.h>
@@ -31,6 +31,12 @@
 #include <speechapi_cxx_speech_recognition_eventargs.h>
 #include <speechapi_cxx_speech_recognizer.h>
 
+#include <speechapi_cxx_intent_recognition_result.h>
+#include <speechapi_cxx_intent_recognition_eventargs.h>
+#include <speechapi_cxx_intent_recognizer.h>
+#include <speechapi_cxx_intent_trigger.h>
+#include <speechapi_cxx_luis_model.h>
+
 #include <speechapi_cxx_translation_result.h>
 #include <speechapi_cxx_translation_eventargs.h>
 #include <speechapi_cxx_translation_recognizer.h>
@@ -39,6 +45,3 @@
 
 #include <speechapi_cxx_session_parameter_collection.h>
 #include <speechapi_cxx_session.h>
-
-#include <speechapi_cxx_todo_recognition.h>
-#include <speechapi_cxx_todo_intent.h>

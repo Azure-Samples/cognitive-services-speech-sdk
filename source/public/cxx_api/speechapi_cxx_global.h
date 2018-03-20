@@ -26,7 +26,7 @@ public:
         static std::shared_ptr<GlobalParameterCollection> parameters;
         if (parameters.get() == nullptr)
         {
-            SPX_TRACE_SCOPE("Making the GlobalParameterCollection", "Done");
+            SPX_DBG_TRACE_SCOPE("Making the GlobalParameterCollection", "Done");
             parameters = std::make_shared<GlobalParameterCollection>();
         }
 

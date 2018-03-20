@@ -63,127 +63,86 @@ SPXAPI Result_GetText(SPXRESULTHANDLE hresult, wchar_t* pszText, uint32_t cchTex
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI Result_Payload_GetCount(SPXRESULTHANDLE hresult, uint32_t* pcount)
+SPXAPI Result_GetValue_String(SPXRESULTHANDLE hresult, const wchar_t* name, wchar_t* value, uint32_t cchValue, const wchar_t* defaultValue)
 {
-    UNUSED(hresult);
-    UNUSED(pcount);
-    return SPXERR_NOT_IMPL;
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
+        auto result = (*resulthandles)[hresult];
+
+        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(result);
+        auto tempValue = namedProperties->GetStringValue(name, defaultValue);
+
+        PAL::wcscpy(value, cchValue, tempValue.c_str(), tempValue.size(), true);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI Result_Payload_GetKey(SPXRESULTHANDLE hresult, uint32_t index, wchar_t* pkey, uint32_t cchKey)
+SPXAPI_(bool) Result_HasValue_String(SPXRESULTHANDLE hresult, const wchar_t* name)
 {
-    UNUSED(hresult);
-    UNUSED(index);
-    UNUSED(pkey);
-    UNUSED(cchKey);
-    return SPXERR_NOT_IMPL;
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
+        auto result = (*resulthandles)[hresult];
+
+        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(result);
+        return namedProperties->HasStringValue(name);
+    }
+    SPXAPI_CATCH_AND_RETURN(hr, false);
 }
 
-SPXAPI Result_Payload_GetByIndex_String(SPXRESULTHANDLE hresult, uint32_t index, wchar_t* pvalue, uint32_t cchValue)
+SPXAPI Result_GetValue_Int32(SPXRESULTHANDLE hresult, const wchar_t* name, int32_t* pvalue, int32_t defaultValue)
 {
-    UNUSED(hresult);
-    UNUSED(index);
-    UNUSED(pvalue);
-    UNUSED(cchValue);
-    return SPXERR_NOT_IMPL;
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
+        auto result = (*resulthandles)[hresult];
+
+        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(result);
+        auto tempValue = namedProperties->GetNumberValue(name, defaultValue);
+
+        *pvalue = (int32_t)tempValue;
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI Result_Payload_GetByIndex_Int32(SPXRESULTHANDLE hresult, uint32_t index, uint32_t* pvalue)
+SPXAPI_(bool) Result_HasValue_Int32(SPXRESULTHANDLE hresult, const wchar_t* name)
 {
-    UNUSED(hresult);
-    UNUSED(index);
-    UNUSED(pvalue);
-    return SPXERR_NOT_IMPL;
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
+        auto result = (*resulthandles)[hresult];
+
+        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(result);
+        return namedProperties->HasNumberValue(name);
+    }
+    SPXAPI_CATCH_AND_RETURN(hr, false);
 }
 
-SPXAPI_(bool) Result_Payload_TryGetByIndex_String(SPXRESULTHANDLE hresult, uint32_t index, wchar_t* pvalue, uint32_t cchValue)
+SPXAPI Result_GetValue_Bool(SPXRESULTHANDLE hresult, const wchar_t* name, bool* pvalue, bool defaultValue)
 {
-    UNUSED(hresult);
-    UNUSED(index);
-    UNUSED(pvalue);
-    UNUSED(cchValue);
-    return false;
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
+        auto result = (*resulthandles)[hresult];
+
+        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(result);
+        auto tempValue = namedProperties->GetBooleanValue(name, defaultValue);
+
+        *pvalue = !!tempValue;
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_(bool) Result_Payload_TryGetByIndex_Int32(SPXRESULTHANDLE hresult, uint32_t index, uint32_t* pvalue)
+SPXAPI_(bool) Result_HasValue_Bool(SPXRESULTHANDLE hresult, const wchar_t* name)
 {
-    UNUSED(hresult);
-    UNUSED(index);
-    UNUSED(pvalue);
-    return false;
-}
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
+        auto result = (*resulthandles)[hresult];
 
-SPXAPI Result_Payload_ContainsKey(SPXRESULTHANDLE hresult, const wchar_t* name)
-{
-    UNUSED(hresult);
-    UNUSED(name);
-    return SPXERR_NOT_IMPL;
-}
-
-SPXAPI Result_Payload_GetByName_String(SPXRESULTHANDLE hresult, const wchar_t* name, wchar_t* pvalue, uint32_t cchValue)
-{
-    UNUSED(hresult);
-    UNUSED(name);
-    UNUSED(pvalue);
-    UNUSED(cchValue);
-    return SPXERR_NOT_IMPL;
-}
-
-SPXAPI Result_Payload_GetByName_Int32(SPXRESULTHANDLE hresult, const wchar_t* name, uint32_t* pvalue)
-{
-    UNUSED(hresult);
-    UNUSED(name);
-    UNUSED(pvalue);
-    return SPXERR_NOT_IMPL;
-}
-
-SPXAPI_(bool) Result_Payload_TryGetByName_String(SPXRESULTHANDLE hresult, const wchar_t* name, wchar_t* pvalue, uint32_t cchValue)
-{
-    UNUSED(hresult);
-    UNUSED(name);
-    UNUSED(pvalue);
-    UNUSED(cchValue);
-    return false;
-}
-
-SPXAPI_(bool) Result_Payload_TryGetByName_Int32(SPXRESULTHANDLE hresult, const wchar_t* name, uint32_t* pvalue)
-{
-    UNUSED(hresult);
-    UNUSED(name);
-    UNUSED(pvalue);
-    return false;
-}
-
-SPXAPI Result_Payload_GetByEnum_String(SPXRESULTHANDLE hresult, Payload_Item item, wchar_t* pvalue, uint32_t cchValue)
-{
-    UNUSED(hresult);
-    UNUSED(item);
-    UNUSED(pvalue);
-    UNUSED(cchValue);
-    return SPXERR_NOT_IMPL;
-}
-
-SPXAPI Result_Payload_GetByEnum_Int32(SPXRESULTHANDLE hresult, Payload_Item item, uint32_t* pvalue)
-{
-    UNUSED(hresult);
-    UNUSED(item);
-    UNUSED(pvalue);
-    return SPXERR_NOT_IMPL;
-}
-
-SPXAPI_(bool) Result_Payload_TryGetByEnum_String(SPXRESULTHANDLE hresult, Payload_Item item, wchar_t* pvalue, uint32_t cchValue)
-{
-    UNUSED(hresult);
-    UNUSED(item);
-    UNUSED(pvalue);
-    UNUSED(cchValue);
-    return false;
-}
-
-SPXAPI_(bool) Result_Payload_TryGetByEnum_Int32(SPXRESULTHANDLE hresult, Payload_Item item, uint32_t* pvalue)
-{
-    UNUSED(hresult);
-    UNUSED(item);
-    UNUSED(pvalue);
-    return false;
+        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(result);
+        return namedProperties->HasBooleanValue(name);
+    }
+    SPXAPI_CATCH_AND_RETURN(hr, false);
 }

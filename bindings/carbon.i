@@ -24,7 +24,8 @@
 %shared_ptr(Carbon::Recognition::Speech::SpeechRecognitionResult)
 %shared_ptr(Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::Speech::SpeechRecognitionResult, Carbon::Recognition::Speech::SpeechRecognitionEventArgs>);
 %shared_ptr(Carbon::Recognition::Speech::SpeechRecognizer)
-%shared_ptr(Carbon::Recognition::AsyncRecognizer<int, int>)
+%shared_ptr(Carbon::Recognition::Intent::IntentRecognitionResult)
+%shared_ptr(Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::Intent::IntentRecognitionResult, Carbon::Recognition::Intent::IntentRecognitionEventArgs>)
 %shared_ptr(Carbon::Recognition::Intent::IntentRecognizer)
 
 %ignore CallbackWrapper::GetFunction();
@@ -42,10 +43,11 @@
 
 %inline %{
     typedef std::shared_ptr<Carbon::Recognition::Speech::SpeechRecognitionResult> SpeechRecognitionResultPtr;
+    typedef std::shared_ptr<Carbon::Recognition::Intent::IntentRecognitionResult> IntentRecognitionResultPtr;
 %}
 
 %template(SpeechRecognitionResultPtrFuture) FutureWrapper<SpeechRecognitionResultPtr>;
-%template(IntPtrFuture) FutureWrapper<std::shared_ptr<int>>;
+%template(IntentRecognitionResultPtrFuture) FutureWrapper<IntentRecognitionResultPtr>;
 %template(VoidFuture) FutureWrapper<void>;
 
 // %extend need to come first, before the %ignore for the same method (RecognizeAsync, etc.)
@@ -85,7 +87,7 @@
 
 %extend Carbon::Recognition::Intent::IntentRecognizer {
 
-    std::shared_ptr<int> Recognize() {
+    IntentRecognitionResultPtr Recognize() {
         return ($self)->RecognizeAsync().get();
     }
 
@@ -99,9 +101,9 @@
         ($self)->StopContinuousRecognitionAsync().get();
     }
 
-    FutureWrapper<std::shared_ptr<int>> RecognizeAsync() {
+    FutureWrapper<IntentRecognitionResultPtr> RecognizeAsync() {
         auto future = ($self)->RecognizeAsync();
-        return FutureWrapper<std::shared_ptr<int>>(std::move(future));
+        return FutureWrapper<IntentRecognitionResultPtr>(std::move(future));
     }
 
     FutureWrapper<void> StartContinuousRecognitionAsync()
@@ -163,11 +165,10 @@
 // Process symbols in header
 %include <speechapi_cxx_eventargs.h>
 %include <speechapi_cxx_eventsignal.h>
-%include <speechapi_cxx_parameter.h>
+%include <speechapi_cxx_value.h>
 
 %include <speechapi_cxx_session_eventargs.h>
 
-%include <speechapi_cxx_todo_recognition.h>
 %include <speechapi_cxx_recognition_result.h>
 %include <speechapi_cxx_recognition_eventargs.h>
 
@@ -208,17 +209,22 @@
 %template(SpeechRecognizerBase) Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::Speech::SpeechRecognitionResult, Carbon::Recognition::Speech::SpeechRecognitionEventArgs>;
 %include <speechapi_cxx_speech_recognizer.h>
 
+%include <speechapi_cxx_intent_recognition_result.h>
+%include <speechapi_cxx_intent_recognition_eventargs.h>
+%include <speechapi_cxx_luis_model.h>
+%include <speechapi_cxx_intent_trigger.h>
+
 #ifdef SWIGPYTHON
-%template(_IntentEventCallback) CallbackWrapper<const int&>;
+%template(_IntentEventCallback) CallbackWrapper<const Carbon::Recognition::Intent::IntentRecognitionEventArgs&>;
 #elif defined(SWIGJAVA)
-%template(IntentEventListener) CallbackWrapper<const int&>;
+%template(IntentEventListener) CallbackWrapper<const Carbon::Recognition::Intent::IntentRecognitionEventArgs&>;
 #else
-%template(IntentEventListener) CallbackWrapper<const int&>;
+%template(IntentEventListener) CallbackWrapper<const Carbon::Recognition::Intent::IntentRecognitionEventArgs&>;
 #endif
 
-%template(IntentEventSignal) Carbon::EventSignal<const int&>;
-%template(IntentRecognizerBase) Carbon::Recognition::AsyncRecognizer<int, int>;
-%include <speechapi_cxx_todo_intent.h>
+%template(IntentEventSignal) Carbon::EventSignal<const Carbon::Recognition::Intent::IntentRecognitionEventArgs&>;
+%template(IntentRecognizerBase) Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::Intent::IntentRecognitionResult, Carbon::Recognition::Intent::IntentRecognitionEventArgs>;
+%include <speechapi_cxx_intent_recognizer.h>
 
 %ignore Carbon::Recognition::RecognizerFactory::CreateTranslationRecognizer;
 %ignore Carbon::Recognition::RecognizerFactory::CreateTranslationRecognizerWithFileInput;
@@ -226,8 +232,6 @@
 
 %include <speechapi_cxx_session_parameter_collection.h>
 %include <speechapi_cxx_session.h>
-
-%include <speechapi_cxx_todo_recognition.h>
 
 //%include <speechapi_cxx_translation_eventargs.h>
 //%include <speechapi_cxx_translation_result.h>

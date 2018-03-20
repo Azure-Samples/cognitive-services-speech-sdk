@@ -19,4 +19,7 @@ inline std::shared_ptr<ISpxSite> SpxSiteFromThis(T* ptr)
 }
 
 
+std::shared_ptr<ISpxSite> SpxGetRootSite();
+
+
 } // CARBON_IMPL_NAMESPACE

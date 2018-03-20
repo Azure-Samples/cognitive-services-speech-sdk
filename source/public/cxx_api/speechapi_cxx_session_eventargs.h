@@ -44,9 +44,10 @@ protected:
 
 private:
 
+    SessionEventArgs() = delete;
+    SessionEventArgs(SessionEventArgs&&) = delete;
     SessionEventArgs(const SessionEventArgs&) = delete;
-    SessionEventArgs(const SessionEventArgs&&) = delete;
-
+    SessionEventArgs& operator=(SessionEventArgs&&) = delete;
     SessionEventArgs& operator=(const SessionEventArgs&) = delete;
 
     std::wstring m_sessionId;

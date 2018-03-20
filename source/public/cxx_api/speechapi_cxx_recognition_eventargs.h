@@ -18,22 +18,17 @@ class RecognitionEventArgs : public SessionEventArgs
 {
 public:
 
-    virtual ~RecognitionEventArgs() {}
-
-
-protected:
-
-    RecognitionEventArgs(SPXEVENTHANDLE hevent) :
+    RecognitionEventArgs(SPXEVENTHANDLE hevent = SPXHANDLE_INVALID) :
         SessionEventArgs(hevent)
     {
     };
 
 
-private:
+public:
 
+    RecognitionEventArgs(RecognitionEventArgs&&) = delete;
     RecognitionEventArgs(const RecognitionEventArgs&) = delete;
-    RecognitionEventArgs(const RecognitionEventArgs&&) = delete;
-
+    RecognitionEventArgs& operator=(RecognitionEventArgs&&) = delete;
     RecognitionEventArgs& operator=(const RecognitionEventArgs&) = delete;
 };
 

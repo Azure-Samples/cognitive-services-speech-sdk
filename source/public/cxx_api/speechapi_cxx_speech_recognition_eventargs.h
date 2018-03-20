@@ -46,9 +46,10 @@ public:
 
 private:
 
-    SpeechRecognitionEventArgs(const SpeechRecognitionEventArgs&) = delete;
+    SpeechRecognitionEventArgs() = delete;
+    SpeechRecognitionEventArgs(SpeechRecognitionEventArgs&&) = delete;
     SpeechRecognitionEventArgs(const SpeechRecognitionEventArgs&&) = delete;
-
+    SpeechRecognitionEventArgs& operator=(SpeechRecognitionEventArgs&&) = delete;
     SpeechRecognitionEventArgs& operator=(const SpeechRecognitionEventArgs&) = delete;
 
     SPXRESULTHANDLE ResultHandleFromEventHandle(SPXEVENTHANDLE hevent)

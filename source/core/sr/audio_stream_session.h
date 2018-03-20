@@ -18,6 +18,7 @@ namespace CARBON_IMPL_NAMESPACE() {
 class CSpxAudioStreamSession : public CSpxSession, 
     public ISpxObjectWithSiteInitImpl<ISpxSite>,
     public ISpxServiceProvider,
+    public ISpxLuEngineAdapterSite,
     public ISpxRecoEngineAdapterSite,
     public ISpxRecognizerSite,
     public ISpxRecoResultFactory,
@@ -43,6 +44,7 @@ public:
 
     // --- IServiceProvider
     SPX_SERVICE_MAP_BEGIN()
+    SPX_SERVICE_MAP_ENTRY_OBJECT(ISpxIntentTriggerService, GetLuEngineAdapter())
     SPX_SERVICE_MAP_ENTRY(ISpxRecoResultFactory)
     SPX_SERVICE_MAP_ENTRY(ISpxEventArgsFactory)
     SPX_SERVICE_MAP_ENTRY(ISpxNamedProperties)
@@ -67,8 +69,8 @@ private:
     void SoundStartDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
     void SoundEndDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
 
-    void IntermediateResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
-    void FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
+    void IntermediateRecoResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
+    void FinalRecoResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
 
     void DoneProcessingAudio(ISpxRecoEngineAdapter* adapter) override;
 
@@ -105,13 +107,19 @@ private:
     bool IsState(SessionState state);
     bool ChangeState(SessionState from, SessionState to);
 
+    void EnsureInitLuEngineAdapter();
+    void InitLuEngineAdapter();
+
+    std::shared_ptr<ISpxLuEngineAdapter> GetLuEngineAdapter();
+
     std::shared_ptr<ISpxNamedProperties> GetParentProperties() override;
 
     SessionState m_state;
     std::mutex m_stateMutex;
 
     std::shared_ptr<ISpxAudioPump> m_audioPump;
-    std::shared_ptr<ISpxRecoEngineAdapter> m_adapter;
+    std::shared_ptr<ISpxRecoEngineAdapter> m_recoAdapter;
+    std::shared_ptr<ISpxLuEngineAdapter> m_luAdapter;
 };
 
 

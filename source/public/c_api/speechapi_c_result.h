@@ -15,27 +15,11 @@ SPXAPI Result_GetRecognitionReason(SPXRESULTHANDLE hresult, Result_RecognitionRe
 
 SPXAPI Result_GetText(SPXRESULTHANDLE hresult, wchar_t* pszText, uint32_t cchText);
 
-SPXAPI Result_Payload_GetCount(SPXRESULTHANDLE hresult, uint32_t* pcount);
-SPXAPI Result_Payload_GetKey(SPXRESULTHANDLE hresult, uint32_t i, wchar_t* pkey, uint32_t cchKey);
+SPXAPI Result_GetValue_String(SPXRESULTHANDLE hresult, const wchar_t* name, wchar_t* value, uint32_t cchValue, const wchar_t* defaultValue);
+SPXAPI_(bool) Result_HasValue_String(SPXRESULTHANDLE hresult, const wchar_t* name);
 
-SPXAPI Result_Payload_GetByIndex_String(SPXRESULTHANDLE hresult, uint32_t index, wchar_t* pvalue, uint32_t cchValue);
-SPXAPI Result_Payload_GetByIndex_Int32(SPXRESULTHANDLE hresult, uint32_t index, uint32_t* pvalue);
+SPXAPI Result_GetValue_Int32(SPXRESULTHANDLE hresult, const wchar_t* name, int32_t* pvalue, int32_t defaultValue);
+SPXAPI_(bool) Result_HasValue_Int32(SPXRESULTHANDLE hresult, const wchar_t* name);
 
-SPXAPI_(bool) Result_Payload_TryGetByIndex_String(SPXRESULTHANDLE hresult, uint32_t index, wchar_t* pvalue, uint32_t cchValue);
-SPXAPI_(bool) Result_Payload_TryGetByIndex_Int32(SPXRESULTHANDLE hresult, uint32_t index, uint32_t* pvalue);
-
-SPXAPI Result_Payload_ContainsKey(SPXRESULTHANDLE hresult, const wchar_t* name);
-
-SPXAPI Result_Payload_GetByName_String(SPXRESULTHANDLE hresult, const wchar_t* name, wchar_t* pvalue, uint32_t cchValue);
-SPXAPI Result_Payload_GetByName_Int32(SPXRESULTHANDLE hresult, const wchar_t* name, uint32_t* pvalue);
-
-SPXAPI_(bool) Result_Payload_TryGetByName_String(SPXRESULTHANDLE hresult, const wchar_t* name, wchar_t* pvalue, uint32_t cchValue);
-SPXAPI_(bool) Result_Payload_TryGetByName_Int32(SPXRESULTHANDLE hresult, const wchar_t* name, uint32_t* pvalue);
-
-enum Payload_Item { Payload_NormalizedText, Payload_InverseNormalizedText, Payload_DictationSpacingBefore, Payload_DictationSpacingAfter, Payload_SpeakerId, Payload_LanguageId };
-
-SPXAPI Result_Payload_GetByEnum_String(SPXRESULTHANDLE hresult, Payload_Item item, wchar_t* pvalue, uint32_t cchValue);
-SPXAPI Result_Payload_GetByEnum_Int32(SPXRESULTHANDLE hresult, Payload_Item item, uint32_t* pvalue);
-
-SPXAPI_(bool) Result_Payload_TryGetByEnum_String(SPXRESULTHANDLE hresult, Payload_Item item, wchar_t* pvalue, uint32_t cchValue);
-SPXAPI_(bool) Result_Payload_TryGetByEnum_Int32(SPXRESULTHANDLE hresult, Payload_Item item, uint32_t* pvalue);
+SPXAPI Result_GetValue_Bool(SPXRESULTHANDLE hresult, const wchar_t* name, bool* pvalue, bool defaultValue);
+SPXAPI_(bool) Result_HasValue_Bool(SPXRESULTHANDLE hresult, const wchar_t* name);

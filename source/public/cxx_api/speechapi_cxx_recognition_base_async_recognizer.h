@@ -22,8 +22,15 @@ class BaseAsyncRecognizer : public AsyncRecognizer<RecognitionResult, Recognitio
 {
 public:
 
+    using BaseType = AsyncRecognizer<RecognitionResult, RecognitionEventArgs>;
+    
+    BaseAsyncRecognizer(SPXRECOHANDLE hreco) :
+        BaseType(hreco)
+    {
+    }
+
     template <class T>
-    static std::shared_ptr<BaseAsyncRecognizer> From(const std::shared_ptr<T> &recognizer) 
+    static std::shared_ptr<BaseAsyncRecognizer> FromRecognizer(const std::shared_ptr<T> &recognizer) 
     {
         UNUSED(recognizer);
         SPX_STATIC_ASSERT_IS_BASE_OF(Recognizer, T);
@@ -31,7 +38,12 @@ public:
     }
 
 protected:
+
     BaseAsyncRecognizer() = default;
+    BaseAsyncRecognizer(BaseAsyncRecognizer&&) = delete;
+    BaseAsyncRecognizer(const BaseAsyncRecognizer&) = delete;
+    BaseAsyncRecognizer& operator=(BaseAsyncRecognizer&&) = delete;
+    BaseAsyncRecognizer& operator=(const BaseAsyncRecognizer&) = delete;
 };
 
 

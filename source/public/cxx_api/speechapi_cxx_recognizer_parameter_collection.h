@@ -6,14 +6,14 @@
 //
 
 #pragma once
-#include <speechapi_cxx_parameter.h>
+#include <speechapi_cxx_value.h>
 
 
 namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
 
 
-class RecognizerParameter : public Parameter
+class RecognizerParameter : public Value
 {
 public:
 
@@ -23,17 +23,17 @@ public:
     {
     }
 
-    // --- Parameter virtual overrides ---
+    // --- Value virtual overrides ---
 
-    bool HasString() override { return HasString(m_hreco, m_name.c_str()); }
+    bool IsString() override { return HasString(m_hreco, m_name.c_str()); }
     std::wstring GetString(const wchar_t* defaultValue) override { return GetString(m_hreco, m_name.c_str(), defaultValue); }
     void SetString(const wchar_t* value) override { return SetString(m_hreco, m_name.c_str(), value); }
 
-    bool HasNumber() override { return HasNumber(m_hreco, m_name.c_str()); }
+    bool IsNumber() override { return HasNumber(m_hreco, m_name.c_str()); }
     int32_t GetNumber(int32_t defaultValue) override { return GetNumber(m_hreco, m_name.c_str(), defaultValue); }
     void SetNumber(int32_t value) override { SetNumber(m_hreco, m_name.c_str(), value); }
 
-    bool HasBool() override { return HasBool(m_hreco, m_name.c_str()); }
+    bool IsBool() override { return HasBool(m_hreco, m_name.c_str()); }
     bool GetBool(bool defaultValue) override { return GetBool(m_hreco, m_name.c_str(), defaultValue); }
     void SetBool(bool value) override { SetBool(m_hreco, m_name.c_str(), value); }
 
@@ -98,12 +98,12 @@ private:
 };
 
 
-class RecognizerParameterCollection : public ParameterCollection<SPXRECOHANDLE, RecognizerParameter>
+class RecognizerParameterCollection : public ValueCollection<SPXRECOHANDLE, RecognizerParameter>
 {
 public:
 
     RecognizerParameterCollection(SPXRECOHANDLE hreco) :
-        ParameterCollection(hreco)
+        ValueCollection(hreco)
     {
     }
 
@@ -113,9 +113,9 @@ public:
     //
     RecognizerParameterCollection() { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
     RecognizerParameterCollection(RecognizerParameterCollection&&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
-    RecognizerParameterCollection(const RecognizerParameterCollection&) : ParameterCollection(*this) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
+    RecognizerParameterCollection(const RecognizerParameterCollection&) : ValueCollection(*this) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
     RecognizerParameterCollection& operator=(RecognizerParameterCollection&&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
-    const RecognizerParameterCollection& operator=(const RecognizerParameterCollection&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
+    RecognizerParameterCollection& operator=(const RecognizerParameterCollection&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
 
 
 private:
@@ -127,7 +127,7 @@ private:
     // RecognizerParameterCollection(RecognizerParameterCollection&&) = delete;
     // RecognizerParameterCollection(const RecognizerParameterCollection&) = delete;
     // RecognizerParameterCollection& operator=(RecognizerParameterCollection&&) = delete;
-    // const RecognizerParameterCollection& operator=(const RecognizerParameterCollection&) = delete;
+    // RecognizerParameterCollection& operator=(const RecognizerParameterCollection&) = delete;
 };
 
 

@@ -38,9 +38,10 @@ public:
 
 private:
 
+    TranslationEventArgs() = delete;
+    TranslationEventArgs(TranslationEventArgs&&) = delete;
     TranslationEventArgs(const TranslationEventArgs&) = delete;
-    TranslationEventArgs(const TranslationEventArgs&&) = delete;
-
+    TranslationEventArgs& operator=(TranslationEventArgs&&) = delete;
     TranslationEventArgs& operator=(const TranslationEventArgs&) = delete;
 
     SPXEVENTHANDLE m_hevent;

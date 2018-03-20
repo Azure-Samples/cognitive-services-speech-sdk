@@ -8,8 +8,12 @@
 #pragma once
 
 #include <speechapi_c_common.h>
+#include <speechapi_c_global.h>
+#include <speechapi_c_intent_result.h>
+#include <speechapi_c_intent_trigger.h>
+#include <speechapi_c_intent_recognizer.h>
+#include <speechapi_c_luis_model.h>
 #include <speechapi_c_recognizer_factory.h>
 #include <speechapi_c_recognizer.h>
 #include <speechapi_c_result.h>
 #include <speechapi_c_session.h>
-#include <speechapi_c_global.h>

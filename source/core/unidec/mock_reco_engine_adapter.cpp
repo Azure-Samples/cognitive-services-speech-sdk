@@ -99,7 +99,7 @@ void CSpxMockRecoEngineAdapter::FireIntermediateResult()
     auto result = factory->CreateIntermediateResult(nullptr,  m_mockResultText.c_str());
 
     auto offset = (uint32_t)m_cbLastIntermediateFired;
-    GetSite()->IntermediateResult(this, offset, result);
+    GetSite()->IntermediateRecoResult(this, offset, result);
 }
 
 void CSpxMockRecoEngineAdapter::FireFinalResult()
@@ -111,7 +111,7 @@ void CSpxMockRecoEngineAdapter::FireFinalResult()
     auto result = factory->CreateFinalResult(nullptr, m_mockResultText.c_str());
 
     auto offset = (uint32_t)m_cbLastIntermediateFired;
-    GetSite()->FinalResult(this, offset, result);
+    GetSite()->FinalRecoResult(this, offset, result);
 
     m_mockResultText = L"";
 }

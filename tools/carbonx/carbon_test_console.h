@@ -32,6 +32,7 @@ private:
 
         std::string m_strRecognizerType;
         std::wstring m_strUseRecoEngineProperty;
+        std::wstring m_strUseLuEngineProperty;
         bool m_fCommandSystem = false;
         
         bool m_fMicrophoneInput = true;
@@ -83,6 +84,8 @@ private:
     void ConsoleInput_IntentRecognizer(const wchar_t* psz, std::shared_ptr<IntentRecognizer>& intentRecognizer);
 
     void Factory_CreateSpeechRecognizer(const wchar_t* psz);
+    // TODO: RobCh: Intent: Extend CarbonX Factory console method to be able to create intent recognizer
+    // void Factory_CreateIntentRecognizer(const wchar_t* psz);
 
     template <class T>
     void Recognizer_IsEnabled(std::shared_ptr<T>& recognizer);
@@ -96,6 +99,7 @@ private:
     template <class T>
     void Recognizer_Recognize(std::shared_ptr<T>& recognizer);
     void Recognizer_Recognize(std::shared_ptr<SpeechRecognizer>& recognizer);
+    void Recognizer_Recognize(std::shared_ptr<IntentRecognizer>& recognizer);
     void Recognizer_Recognize(std::shared_ptr<TranslationRecognizer>& recognizer);
 
     template <class T>
@@ -120,22 +124,23 @@ private:
     void SpeechRecognizer_IntermediateResultHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"IntermediateResultHandler: %ls", ToString(e).c_str()); };
     void SpeechRecognizer_FinalResultHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"FinalResultHandler: %ls", ToString(e).c_str());}
     void SpeechRecognizer_NoMatchHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"NoMatchHandler: %ls", ToString(e).c_str()); }
-    void SpeechRecognizer_CanceledHandler(const SpeechRecognitionEventArgs& e) { UNUSED(e); ConsoleWriteLine(L"SpeechRecognizer_CanceledHandler!!!"); };
+    void SpeechRecognizer_CanceledHandler(const SpeechRecognitionEventArgs& e) { UNUSED(e); ConsoleWriteLine(L"CanceledHandler!!!"); };
 
     void TranslationRecognizer_IntermediateResultHandler(const TranslationEventArgs<TranslationTextResult>& e) { ConsoleWriteLine(L"Translation IntermediateResultHandler: %ls", ToString(e).c_str()); };
     void TranslationRecognizer_FinalResultHandler(const TranslationEventArgs<TranslationTextResult>& e) { ConsoleWriteLine(L"Translation FinalResultHandler: %ls", ToString(e).c_str()); }
     void TranslationRecognizer_AudioResultHandler(const TranslationEventArgs<AudioResult>& e) { ConsoleWriteLine(L"Translation AudioResultHandler: %ls", ToString(e).c_str()); }
     void TranslationRecognizer_ErrorHandler(const TranslationEventArgs<TranslationResult>& e) { ConsoleWriteLine(L"Translation ErrorHandler: %ls", ToString(e).c_str()); }
 
-    void IntentRecognizer_IntermediateResultHandler(const int& e) { UNUSED(e); };
-    void IntentRecognizer_FinalResultHandler(const int& e) { UNUSED(e); };
-    void IntentRecognizer_NoMatchHandler(const int& e) { UNUSED(e); };
-    void IntentRecognizer_CanceledHandler(const int& e) { UNUSED(e); };
+    void IntentRecognizer_IntermediateResultHandler(const IntentRecognitionEventArgs& e) { ConsoleWriteLine(L"IntermediateResultHandler: %ls", ToString(e).c_str()); };
+    void IntentRecognizer_FinalResultHandler(const IntentRecognitionEventArgs& e)  { ConsoleWriteLine(L"FinalResultHandler: %ls", ToString(e).c_str()); }
+    void IntentRecognizer_NoMatchHandler(const IntentRecognitionEventArgs& e) { ConsoleWriteLine(L"NoMatchHandler: %ls", ToString(e).c_str()); }
+    void IntentRecognizer_CanceledHandler(const IntentRecognitionEventArgs& e) { UNUSED(e); ConsoleWriteLine(L"CanceledHandler!!!"); };
 
     bool ToBool(const wchar_t* psz);
 
     std::wstring ToString(bool f);
     std::wstring ToString(const SpeechRecognitionEventArgs& e);
+    std::wstring ToString(const IntentRecognitionEventArgs& e);
     std::wstring ToString(const TranslationEventArgs<TranslationTextResult>& e);
     std::wstring ToString(const TranslationEventArgs<AudioResult>& e);
     std::wstring ToString(const TranslationEventArgs<TranslationResult>& e);
@@ -143,6 +148,8 @@ private:
     void ConsoleInput_Session(const wchar_t*);
 
     void Session_FromSpeechRecognizer();
+    // TODO: RobCh: Intent: Extend CarbonX session capability to come from intent recognizer
+    // void Session_FromIntentRecognizer();
 
     template <class T>
     void Parameters_SetString(T &parameters, const wchar_t* psz);
@@ -164,13 +171,15 @@ private:
 
     void ConsoleInput_CommandSystem(const wchar_t* psz);
 
+    void InitGlobalParameters(ConsoleArgs* pconsoleArgs);
+
     bool ShouldInitCarbon() { return m_recognizer == nullptr; }
     void EnsureInitCarbon(ConsoleArgs* pconsoleArgs);
 
     void InitCarbon(ConsoleArgs* pconsoleArgs);
     void TermCarbon();
 
-    void InitRecognizer(const std::string& recognizerType, const std::wstring& wavFileName, const std::wstring& useRecoEngineProperty);
+    void InitRecognizer(const std::string& recognizerType, const std::wstring& wavFileName);
     void InitCommandSystem();
 
     void WaitForDebugger();
@@ -187,6 +196,9 @@ private:
     void Sample_HelloWorld_In_C();
 
     void Sample_HelloWorld_PickEngine(const wchar_t* pszEngine);
+
+    void Sample_HelloWorld_Intent();
+    void Sample_HelloWorld_Intent(const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId);
 
 
 private:

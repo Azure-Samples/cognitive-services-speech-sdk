@@ -107,10 +107,24 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
             pstrNextArg = nullptr;
             fNextArgRequired = false;
         }
-        else if (PAL::wcsicmp(pszArg, L"--mockengine") == 0)
+        else if (PAL::wcsicmp(pszArg, L"--mockrecoengine") == 0)
         {
             fShowOptions = pconsoleArgs->m_strUseRecoEngineProperty.length() > 0 || fNextArgRequired;
             pconsoleArgs->m_strUseRecoEngineProperty = L"__useMockRecoEngine";
+            pstrNextArg = nullptr;
+            fNextArgRequired = false;
+        }
+        else if (PAL::wcsicmp(pszArg, L"--luisdirect") == 0)
+        {
+            fShowOptions = pconsoleArgs->m_strUseLuEngineProperty.length() > 0 || fNextArgRequired;
+            pconsoleArgs->m_strUseLuEngineProperty = L"__useLuisDirectLuEngine";
+            pstrNextArg = nullptr;
+            fNextArgRequired = false;
+        }
+        else if (PAL::wcsicmp(pszArg, L"--mockluengine") == 0)
+        {
+            fShowOptions = pconsoleArgs->m_strUseLuEngineProperty.length() > 0 || fNextArgRequired;
+            pconsoleArgs->m_strUseLuEngineProperty = L"__useMockLuEngine";
             pstrNextArg = nullptr;
             fNextArgRequired = false;
         }
@@ -227,6 +241,8 @@ bool CarbonTestConsole::ValidateConsoleArgs(ConsoleArgs* pconsoleArgs)
 
 void CarbonTestConsole::ProcessConsoleArgs(ConsoleArgs* pconsoleArgs)
 {
+    InitGlobalParameters(pconsoleArgs);
+
     if (pconsoleArgs->m_strRunSampleName.length() > 0)
     {
         RunSample(pconsoleArgs->m_strRunSampleName);
@@ -388,7 +404,7 @@ void CarbonTestConsole::ConsoleInput_Help()
     ConsoleWriteLine(L"");
     ConsoleWriteLine(L"    global           Access methods/properties/events on the GLOBAL PARAMETERS object.");
     ConsoleWriteLine(L"    factory          Access methods/properties/events on the RECOGNIZER FACTORY object.");
-    ConsoleWriteLine(L"    intent           Access methods/properties/events on the base RECOGNIZER object.");
+    ConsoleWriteLine(L"    recognizer       Access methods/properties/events on the base RECOGNIZER object.");
     ConsoleWriteLine(L"    speech           Access methods/properties/events on the SPEECH recognizer object.");
     ConsoleWriteLine(L"    intent           Access methods/properties/events on the INTENT recognizer object.");
     ConsoleWriteLine(L"    session          Access methods/properties/events on the SESSION object.");
@@ -859,6 +875,31 @@ void CarbonTestConsole::ConsoleInput_IntentRecognizer(const wchar_t* psz, std::s
         auto fn = std::bind(&CarbonTestConsole::IntentRecognizer_CanceledHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"canceled "), m_intentRecognizer->Canceled, fn);
     }
+    // TODO: RobCh: Intent: Add ParametersCollection to IntentRecognizer
+    // else if (PAL::wcsnicmp(psz, L"set string ", wcslen(L"set string ")) == 0)
+    // {
+    //     Parameters_SetString(m_intentRecognizer->Parameters, psz + wcslen(L"set string "));
+    // }
+    // else if (PAL::wcsnicmp(psz, L"get string ", wcslen(L"get string ")) == 0)
+    // {
+    //     Parameters_GetString(m_intentRecognizer->Parameters, psz + wcslen(L"get string "));
+    // }
+    // else if (PAL::wcsnicmp(psz, L"set number ", wcslen(L"set number ")) == 0)
+    // {
+    //     Parameters_SetNumber(m_intentRecognizer->Parameters, psz + wcslen(L"set number "));
+    // }
+    // else if (PAL::wcsnicmp(psz, L"get number ", wcslen(L"get number ")) == 0)
+    // {
+    //     Parameters_GetNumber(m_intentRecognizer->Parameters, psz + wcslen(L"get number "));
+    // }
+    // else if (PAL::wcsnicmp(psz, L"set bool ", wcslen(L"set bool ")) == 0)
+    // {
+    //     Parameters_SetBool(m_intentRecognizer->Parameters, psz + wcslen(L"set bool "));
+    // }
+    // else if (PAL::wcsnicmp(psz, L"get bool ", wcslen(L"get bool ")) == 0)
+    // {
+    //     Parameters_GetBool(m_intentRecognizer->Parameters, psz + wcslen(L"get bool "));
+    // }
     else
     {
         ConsoleWriteLine(L"\nUnknown method/event: '%ls'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
@@ -886,7 +927,7 @@ void CarbonTestConsole::Factory_CreateSpeechRecognizer(const wchar_t* psz)
     auto fn2 = std::bind(&CarbonTestConsole::SpeechRecognizer_IntermediateResultHandler, this, std::placeholders::_1);
     m_speechRecognizer->IntermediateResult.Connect(fn2);
 
-    m_recognizer = BaseAsyncRecognizer::From(m_speechRecognizer);
+    m_recognizer = BaseAsyncRecognizer::FromRecognizer(m_speechRecognizer);
     m_session = Session::FromRecognizer(m_speechRecognizer);
 }
 
@@ -944,6 +985,18 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<SpeechRecognizer>& 
     ConsoleWriteLine(L"RecognizeAsync %ls... Waiting... Done!\n", name.c_str());
 
     ConsoleWriteLine(L"SpeechRecognitionResult: ResultId=%d; Reason=%d; Text=%ls", result->ResultId.c_str(), result->Reason, result->Text.c_str());
+}
+
+void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<IntentRecognizer>& recognizer)
+{
+    auto name = PAL::ToWString(PAL::GetTypeName(*recognizer.get()));
+    ConsoleWriteLine(L"\nRecognizeAsync %ls...", name.c_str());
+    auto future = recognizer->RecognizeAsync();
+    ConsoleWriteLine(L"RecognizeAsync %ls... Waiting...", name.c_str());
+    auto result = future.get();
+    ConsoleWriteLine(L"RecognizeAsync %ls... Waiting... Done!\n", name.c_str());
+
+    ConsoleWriteLine(L"IntentRecognitionResult: ResultId=%d; Reason=%d; Text=%ls, IntentId=%ls, Json=%ls", result->ResultId.c_str(), result->Reason, result->Text.c_str(), result->IntentId.c_str(), result->Values[L"json"].GetString().c_str());
 }
 
 void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<TranslationRecognizer>& recognizer)
@@ -1012,6 +1065,10 @@ void CarbonTestConsole::ConsoleInput_Session(const wchar_t* psz)
     {
         Session_FromSpeechRecognizer();
     }
+    // else if (PAL::wcsicmp(psz, L"from intent") == 0)
+    // {
+    //     Session_FromIntentRecognizer();
+    // }
     else if (PAL::wcsnicmp(psz, L"set string ", wcslen(L"set string ")) == 0)
     {
         Parameters_SetString(m_session->Parameters, psz + wcslen(L"set string "));
@@ -1163,6 +1220,35 @@ std::wstring CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
     return str;
 }
 
+std::wstring CarbonTestConsole::ToString(const IntentRecognitionEventArgs& e)
+{
+    static_assert(0 == (int)Reason::Recognized, "Reason::* enum values changed!");
+    static_assert(1 == (int)Reason::IntermediateResult, "Reason::* enum values changed!");
+    static_assert(2 == (int)Reason::NoMatch, "Reason::* enum values changed!");
+    static_assert(3 == (int)Reason::Canceled, "Reason::* enum values changed!");
+    static_assert(4 == (int)Reason::OtherRecognizer, "Reason::* enum values changed!");
+
+    std::wstring reasons[] = {
+        L"Recognized",
+        L"IntermediateResult",
+        L"NoMatch",
+        L"Canceled",
+        L"OtherRecognizer"
+    };
+
+    std::wstring str;
+    str += L"IntentRecognitionEventArgs = { \n";
+    str += L"  SessionId = '" + e.SessionId + L"'\n";
+    str += L"  Result = {\n";
+    str += L"    ResultId = '" + e.Result.ResultId + L"'\n";
+    str += L"    Reason = Reason::" + reasons[(int)e.Result.Reason] + L"\n";
+    str += L"    Text = '" + e.Result.Text + L"'\n";
+    str += L"  } \n";
+    str += L"} \n";
+
+    return str;
+}
+
 std::wstring CarbonTestConsole::ToString(const TranslationEventArgs<TranslationTextResult>& e)
 {
     std::wstring str;
@@ -1222,6 +1308,24 @@ std::wstring CarbonTestConsole::ToString(const TranslationEventArgs<TranslationR
     return str;
 }
 
+void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
+{
+    if (!pconsoleArgs->m_strEndpointUri.empty())
+    {
+        GlobalParameters::Get()[L"__uspEndpoint"] = pconsoleArgs->m_strEndpointUri.c_str();
+    }
+
+    if (!pconsoleArgs->m_strUseRecoEngineProperty.empty())
+    {
+        GlobalParameters::Get()[pconsoleArgs->m_strUseRecoEngineProperty.c_str()] = true;
+    }
+
+    if (!pconsoleArgs->m_strUseLuEngineProperty.empty())
+    {
+        GlobalParameters::Get()[pconsoleArgs->m_strUseLuEngineProperty.c_str()] = true;
+    }
+}
+
 void CarbonTestConsole::EnsureInitCarbon(ConsoleArgs* pconsoleArgs)
 {
     if (ShouldInitCarbon())
@@ -1244,7 +1348,7 @@ void CarbonTestConsole::InitCarbon(ConsoleArgs* pconsoleArgs)
 {
     try
     {
-        InitRecognizer(pconsoleArgs->m_strRecognizerType, pconsoleArgs->m_strInput, pconsoleArgs->m_strUseRecoEngineProperty);
+        InitRecognizer(pconsoleArgs->m_strRecognizerType, pconsoleArgs->m_strInput);
         InitCommandSystem();
     }
     catch (std::exception ex)
@@ -1253,7 +1357,7 @@ void CarbonTestConsole::InitCarbon(ConsoleArgs* pconsoleArgs)
     }
 }
 
-void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const std::wstring& wavFileName, const std::wstring& useRecoEngineParameter)
+void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const std::wstring& wavFileName)
 {
     if (recognizerType == PAL::GetTypeName<SpeechRecognizer>())
     {
@@ -1267,13 +1371,8 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
         auto fn2 = std::bind(&CarbonTestConsole::SpeechRecognizer_IntermediateResultHandler, this, std::placeholders::_1);
         m_speechRecognizer->IntermediateResult.Connect(fn2);
 
-        m_recognizer = BaseAsyncRecognizer::From(m_speechRecognizer);
+        m_recognizer = BaseAsyncRecognizer::FromRecognizer(m_speechRecognizer);
         m_session = Session::FromRecognizer(m_speechRecognizer);
-
-        if (!useRecoEngineParameter.empty())
-        {
-            GlobalParameters::Get()[useRecoEngineParameter.c_str()] = true;
-        }
     }
     else if (recognizerType == PAL::GetTypeName<TranslationRecognizer>())
     {
@@ -1301,7 +1400,19 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
         m_intentRecognizer = wavFileName.length() == 0
             ? RecognizerFactory::CreateIntentRecognizer()
             : RecognizerFactory::CreateIntentRecognizerWithFileInput(wavFileName);
-        m_recognizer = BaseAsyncRecognizer::From(m_intentRecognizer);
+
+        auto fn1 = std::bind(&CarbonTestConsole::IntentRecognizer_FinalResultHandler, this, std::placeholders::_1);
+        m_intentRecognizer->FinalResult.Connect(fn1);
+
+        auto fn2 = std::bind(&CarbonTestConsole::IntentRecognizer_IntermediateResultHandler, this, std::placeholders::_1);
+        m_intentRecognizer->IntermediateResult.Connect(fn2);
+
+        m_recognizer = BaseAsyncRecognizer::FromRecognizer(m_intentRecognizer);
+        m_session = Session::FromRecognizer(m_intentRecognizer);
+
+        m_recognizer = BaseAsyncRecognizer::FromRecognizer(m_intentRecognizer);
+        // TODO: RobCh: Intent: Hook up Session::FromRecognizer
+        // m_session = Session::FromRecognizer(m_speechRecognizer);
     }
 }
 
@@ -1410,6 +1521,11 @@ void CarbonTestConsole::RunSample(const std::wstring& strSampleName)
     {
         ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
         Sample_HelloWorld_PickEngine(L"Mock");
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"helloworld intent") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        Sample_HelloWorld_Intent();
     }
     else
     {

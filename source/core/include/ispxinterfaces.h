@@ -371,7 +371,9 @@ public:
 };
 
 
-class ISpxRecognitionEventArgs : public ISpxSessionEventArgs, public ISpxInterfaceBaseFor<ISpxRecognitionEventArgs>
+class ISpxRecognitionEventArgs :
+    public ISpxSessionEventArgs,
+    public ISpxInterfaceBaseFor<ISpxRecognitionEventArgs>
 {
 public:
 
@@ -457,7 +459,9 @@ public:
 };
 
 
-class ISpxRecoEngineAdapter : public ISpxAudioProcessor, public ISpxInterfaceBaseFor<ISpxRecoEngineAdapter>
+class ISpxRecoEngineAdapter : 
+    public ISpxAudioProcessor, 
+    public ISpxInterfaceBaseFor<ISpxRecoEngineAdapter>
 {
 };
 
@@ -476,8 +480,8 @@ public:
     virtual void SoundStartDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) = 0;
     virtual void SoundEndDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) = 0;
 
-    virtual void IntermediateResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, ResultPayload_Type payload) = 0;
-    virtual void FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, ResultPayload_Type payload) = 0;
+    virtual void IntermediateRecoResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, ResultPayload_Type payload) = 0;
+    virtual void FinalRecoResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, ResultPayload_Type payload) = 0;
 
     virtual void DoneProcessingAudio(ISpxRecoEngineAdapter* adapter) = 0;
 
@@ -523,6 +527,12 @@ public:
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) = 0;
+
+    virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer() = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer(bool passiveListeningEnaled) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer(const std::wstring& language) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) = 0;
 };
 
 
@@ -541,6 +551,89 @@ public:
     virtual bool GetBooleanValue(const wchar_t* name, bool defaultValue = false) = 0;
     virtual void SetBooleanValue(const wchar_t* name, bool value) = 0;
     virtual bool HasBooleanValue(const wchar_t* name) = 0;
+};
+
+
+class ISpxIntentRecognitionResult : public ISpxInterfaceBaseFor<ISpxIntentRecognitionResult>
+{
+public:
+
+    virtual std::wstring GetIntentId() = 0;
+};
+
+
+class ISpxIntentRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxIntentRecognitionResultInit>
+{
+public:
+
+    virtual void InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload) = 0;
+};
+
+
+class ISpxLuisModel : public ISpxInterfaceBaseFor<ISpxLuisModel>
+{
+public:
+
+    virtual void InitEndpoint(const wchar_t* uri) = 0;
+    virtual void InitSubscriptionInfo(const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId) = 0;
+
+    virtual std::wstring GetEndpoint() const = 0;
+
+    virtual std::wstring GetHostName() const = 0;
+    virtual std::wstring GetSubscriptionKey() const = 0;
+    virtual std::wstring GetAppId() const = 0;
+};
+
+
+class ISpxTrigger : public ISpxInterfaceBaseFor<ISpxTrigger>
+{
+public:
+
+    virtual void InitPhraseTrigger(const wchar_t* phrase) = 0;
+    virtual void InitLuisModelTrigger(std::shared_ptr<ISpxLuisModel> model, const wchar_t* intentName) = 0;
+
+    virtual std::wstring GetPhrase() const = 0;
+
+    virtual std::shared_ptr<ISpxLuisModel> GetModel() const = 0;
+    virtual std::wstring GetModelIntentName() const = 0;
+};
+
+
+class ISpxIntentTriggerService : public ISpxInterfaceBaseFor<ISpxIntentTriggerService>
+{
+public:
+
+    virtual void AddIntentTrigger(const wchar_t* id, std::shared_ptr<ISpxTrigger> trigger) = 0;
+};
+
+
+class ISpxIntentRecognizer : public ISpxInterfaceBaseFor<ISpxIntentRecognizer>
+{
+public:
+
+    virtual void AddIntentTrigger(const wchar_t* intentId, std::shared_ptr<ISpxTrigger> trigger) = 0;
+
+    // TODO: RobCh: Add additional methods required... 
+};
+
+
+class ISpxRecognitionResultProcessor : public ISpxInterfaceBaseFor<ISpxRecognitionResultProcessor>
+{
+public:
+
+    virtual void ProcessResult(std::shared_ptr<ISpxRecognitionResult> result) = 0;
+};
+
+
+class ISpxLuEngineAdapter :
+    public ISpxRecognitionResultProcessor,
+    public ISpxInterfaceBaseFor<ISpxLuEngineAdapter>
+{
+};
+
+
+class ISpxLuEngineAdapterSite : virtual public ISpxSite
+{
 };
 
 

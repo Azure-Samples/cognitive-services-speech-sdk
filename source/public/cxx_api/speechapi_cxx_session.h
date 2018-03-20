@@ -22,7 +22,8 @@ class Session
 {
 public:
 
-    static std::shared_ptr<Session> FromRecognizer(std::shared_ptr<Recognition::Speech::SpeechRecognizer> recognizer)
+    template <class T>
+    static std::shared_ptr<Session> FromRecognizer(std::shared_ptr<T> recognizer)
     {
         SPX_INIT_HR(hr);
 

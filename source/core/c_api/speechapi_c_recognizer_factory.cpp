@@ -96,8 +96,14 @@ SPXAPI RecognizerFactory_CreateDictationRecognizer(SPXRECOHANDLE* phreco, const 
 
 SPXAPI RecognizerFactory_CreateIntentRecognizer_With_Defaults(SPXRECOHANDLE* phreco)
 {
-    UNUSED(phreco);
-    return SPXERR_NOT_IMPL;
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *phreco = SPXHANDLE_INVALID;
+        auto recognizer = CSpxRecognizerFactory::CreateIntentRecognizer();
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        *phreco = recohandles->TrackHandle(recognizer);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 SPXAPI RecognizerFactory_CreateIntentRecognizer_With_Language(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage)
@@ -109,9 +115,14 @@ SPXAPI RecognizerFactory_CreateIntentRecognizer_With_Language(SPXRECOHANDLE* phr
 
 SPXAPI RecognizerFactory_CreateIntentRecognizer_With_FileInput(SPXRECOHANDLE* phreco, const wchar_t* pszFileName)
 {
-    UNUSED(phreco);
-    UNUSED(pszFileName);
-    return SPXERR_NOT_IMPL;
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *phreco = SPXHANDLE_INVALID;
+        auto recognizer = CSpxRecognizerFactory::CreateIntentRecognizerWithFileInput(pszFileName);
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        *phreco = recohandles->TrackHandle(recognizer);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 SPXAPI RecognizerFactory_CreateIntentRecognizer_With_PassiveListening(SPXRECOHANDLE* phreco, bool passive)

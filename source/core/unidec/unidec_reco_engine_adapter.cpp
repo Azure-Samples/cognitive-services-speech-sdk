@@ -299,7 +299,7 @@ void CSpxUnidecRecoEngineAdapter::Intermediate(const wchar_t* wavId, size_t sent
     auto result = factory->CreateIntermediateResult(nullptr, text.c_str());
 
     auto offset = (uint32_t)framePos.SentenceStartIndex;
-    GetSite()->IntermediateResult(this, offset, result);
+    GetSite()->IntermediateRecoResult(this, offset, result);
 }
 
 void CSpxUnidecRecoEngineAdapter::Sentence(const wchar_t* wavId, size_t sentenceIndex, const UnidecFramePosition& framePos, const IUnidecNBestList* nbest)
@@ -344,7 +344,7 @@ void CSpxUnidecRecoEngineAdapter::Sentence(const wchar_t* wavId, size_t sentence
     if (finalResult != nullptr)
     {
         SPX_DBG_ASSERT(GetSite());
-        GetSite()->FinalResult(this, offset, finalResult);
+        GetSite()->FinalRecoResult(this, offset, finalResult);
     }
 }
 

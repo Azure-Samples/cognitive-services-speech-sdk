@@ -41,5 +41,17 @@ inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, std::sh
     return ptr;
 }
 
+template <class T>
+inline void SpxTermAndClear(std::shared_ptr<T>& ptr)
+{
+    auto term = std::dynamic_pointer_cast<ISpxObjectInit>(ptr);
+    if (term != nullptr)
+    {
+        term->Term();
+    }
+    
+    ptr = nullptr;
+}
+
 
 } // CARBON_IMPL_NAMESPACE

@@ -7,10 +7,6 @@
 
 #include "stdafx.h"
 #include "audio_stream_session.h"
-#include <iostream>
-#include <istream>
-#include <fstream>
-#include <thread>
 #include "create_object_helpers.h"
 #include "site_helpers.h"
 
@@ -25,14 +21,8 @@ CSpxAudioStreamSession::CSpxAudioStreamSession() :
 
 CSpxAudioStreamSession::~CSpxAudioStreamSession()
 {
-    auto ptr = std::dynamic_pointer_cast<ISpxObjectInit>(m_adapter);
-    if (ptr.get() != nullptr)
-    {
-        ptr->Term();
-        ptr = nullptr;
-    }
-
-    m_adapter = nullptr;    
+    SpxTermAndClear(m_recoAdapter);
+    SpxTermAndClear(m_luAdapter);
 }
 
 void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
@@ -78,19 +68,19 @@ void CSpxAudioStreamSession::SetFormat(WAVEFORMATEX* pformat)
     {
         // The pump started successfully, we have a live running session now!
         FireSessionStartedEvent();
-        m_adapter->SetFormat(pformat);
+        m_recoAdapter->SetFormat(pformat);
     }
     else if (pformat == nullptr && ChangeState(SessionState::StoppingPump, SessionState::WaitingForAdapterDone))
     {
         // Our stop pump request has been satisfied... Let's wait for the adapter to finish...
-        m_adapter->ProcessAudio(nullptr, 0);
+        m_recoAdapter->ProcessAudio(nullptr, 0);
         SPX_DBG_TRACE_VERBOSE("%s: ProcessingAudio - size=%d", __FUNCTION__, 0);
-        m_adapter->SetFormat(pformat);
+        m_recoAdapter->SetFormat(pformat);
     }
     else if (pformat == nullptr && ChangeState(SessionState::ProcessingAudio, SessionState::WaitingForAdapterDone))
     {
         // The pump stopped itself... That's possible when WAV files reach EOS. Let's wait for the adapter to finish...
-        m_adapter->SetFormat(pformat);
+        m_recoAdapter->SetFormat(pformat);
     }
     else
     {
@@ -108,12 +98,12 @@ void CSpxAudioStreamSession::SetFormat(WAVEFORMATEX* pformat)
 
 void CSpxAudioStreamSession::ProcessAudio(AudioData_Type data, uint32_t size)
 {
-    SPX_DBG_ASSERT(m_adapter != nullptr);
+    SPX_DBG_ASSERT(m_recoAdapter != nullptr);
 
     if (IsState(SessionState::ProcessingAudio))
     {
         // SPX_DBG_TRACE_VERBOSE("%s - size=%d", __FUNCTION__, size);
-        m_adapter->ProcessAudio(data, size);
+        m_recoAdapter->ProcessAudio(data, size);
     }
     else if (IsState(SessionState::StoppingPump))
     {
@@ -167,8 +157,6 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::WaitForRecognitio
     m_cv.wait_for(lock, std::chrono::seconds(m_recoAsyncTimeout), [&] { return !m_recoAsyncWaiting; });
     SPX_DBG_TRACE_VERBOSE("Waiting for Recognition... Done!");
 
-    // TODO: Why do we need this condition?
-    // Shouldn't the pump be stopped whenever the recognition is done (wether or not we have a result)?
     if (!m_recoAsyncResult)
     {
         if (ChangeState(SessionState::ProcessingAudio, SessionState::StoppingPump))
@@ -179,8 +167,8 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::WaitForRecognitio
         }
 
         SPX_DBG_TRACE_VERBOSE("Waiting for AdapterDone...");
-        m_cv.wait_for(lock, std::chrono::seconds(m_waitForDoneTimeout), [this] {
-            return m_state != SessionState::StoppingPump && m_state != SessionState::WaitingForAdapterDone;
+        m_cv.wait_for(lock, std::chrono::seconds(m_waitForDoneTimeout), [&] {
+            return !this->IsState(SessionState::StoppingPump) && !this->IsState(SessionState::WaitingForAdapterDone);
         });
         SPX_DBG_TRACE_VERBOSE("Waiting for AdapterDone... Done!!");
     }
@@ -241,22 +229,28 @@ std::shared_ptr<ISpxRecognitionEventArgs> CSpxAudioStreamSession::CreateRecognit
     return recoEvent;
 }
 
-void CSpxAudioStreamSession::IntermediateResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result)
+void CSpxAudioStreamSession::IntermediateRecoResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result)
 {
     UNUSED(adapter);
     UNUSED(offset);
-    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::Idle), "ERROR! IntermediateResult was called with SessionState==Idle");
-    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::StartingPump), "ERROR! IntermediateResult was called with SessionState==StartingPump");
+    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::Idle), "ERROR! IntermediateRecoResult was called with SessionState==Idle");
+    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::StartingPump), "ERROR! IntermediateRecoResult was called with SessionState==StartingPump");
 
     FireResultEvent(GetSessionId(), result);
 }
 
-void CSpxAudioStreamSession::FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result)
+void CSpxAudioStreamSession::FinalRecoResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result)
 {
     UNUSED(adapter);
     UNUSED(offset);
-    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::Idle), "ERROR! FinalResult was called with SessionState==Idle");
-    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::StartingPump), "ERROR! FinalResult was called with SessionState==StartingPump");
+    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::Idle), "ERROR! FinalRecoResult was called with SessionState==Idle");
+    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::StartingPump), "ERROR! FinalRecoResult was called with SessionState==StartingPump");
+
+    // Only try and process the result with the LU Adapter if we have one (we won't have one, if nobody every added an IntentTrigger)
+    if (m_luAdapter != nullptr)
+    {
+        m_luAdapter->ProcessResult(result);
+    }
 
     WaitForRecognition_Complete(result);
 }
@@ -325,9 +319,9 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateNoMatchResu
 
 void CSpxAudioStreamSession::EnsureInitRecoEngineAdapter()
 {
-    if (m_adapter == nullptr)
+    std::unique_lock<std::mutex> lock(m_mutex);
+    if (m_recoAdapter == nullptr)
     {
-        std::unique_lock<std::mutex> lock(m_mutex);
         InitRecoEngineAdapter();
     }
 }
@@ -346,38 +340,36 @@ void CSpxAudioStreamSession::InitRecoEngineAdapter()
         tryUsp = true;
     }
 
-    // try to creat the hybrid adapter...
-    if (m_adapter == nullptr && tryHybrid)
+    // try to create the hybrid adapter...
+    if (m_recoAdapter == nullptr && tryHybrid)
     {
-        m_adapter = SpxCreateObjectWithSite<ISpxRecoEngineAdapter>("CSpxHybridRecoEngineAdapter", this);
+        m_recoAdapter = SpxCreateObjectWithSite<ISpxRecoEngineAdapter>("CSpxHybridRecoEngineAdapter", this);
     }
 
     // try to create the Unidec adapter... 
-    if (m_adapter == nullptr && tryUnidec)
+    if (m_recoAdapter == nullptr && tryUnidec)
     {
-        m_adapter = SpxCreateObjectWithSite<ISpxRecoEngineAdapter>("CSpxUnidecRecoEngineAdapter", this);
+        m_recoAdapter = SpxCreateObjectWithSite<ISpxRecoEngineAdapter>("CSpxUnidecRecoEngineAdapter", this);
     }
 
     // try to create the Usp adapter... 
-    if (m_adapter == nullptr && tryUsp)
+    if (m_recoAdapter == nullptr && tryUsp)
     {
-        m_adapter = SpxCreateObjectWithSite<ISpxRecoEngineAdapter>("CSpxUspRecoEngineAdapter", this);
+        m_recoAdapter = SpxCreateObjectWithSite<ISpxRecoEngineAdapter>("CSpxUspRecoEngineAdapter", this);
     }
 
     // try to create the mock reco engine adapter...
-    if (m_adapter == nullptr && tryMock)
+    if (m_recoAdapter == nullptr && tryMock)
     {
-        m_adapter = SpxCreateObjectWithSite<ISpxRecoEngineAdapter>("CSpxMockRecoEngineAdapter", this);
+        m_recoAdapter = SpxCreateObjectWithSite<ISpxRecoEngineAdapter>("CSpxMockRecoEngineAdapter", this);
     }
 
     // if we still don't have an adapter... that's an exception
-    SPX_IFTRUE_THROW_HR(m_adapter == nullptr, SPXERR_NOT_FOUND);
+    SPX_IFTRUE_THROW_HR(m_recoAdapter == nullptr, SPXERR_NOT_FOUND);
 }
 
 bool CSpxAudioStreamSession::IsState(SessionState state)
 {
-    std::unique_lock<std::mutex> lock(m_stateMutex);
-
     return m_state == state;
 }
 
@@ -394,6 +386,65 @@ bool CSpxAudioStreamSession::ChangeState(SessionState from, SessionState to)
     }
 
     return false;
+}
+
+void CSpxAudioStreamSession::EnsureInitLuEngineAdapter()
+{
+    std::unique_lock<std::mutex> lock(m_mutex);
+    if (m_luAdapter == nullptr)
+    {
+        InitLuEngineAdapter();
+    }
+}
+
+void CSpxAudioStreamSession::InitLuEngineAdapter()
+{
+    SPX_IFTRUE_THROW_HR(m_luAdapter != nullptr, SPXERR_ALREADY_INITIALIZED);
+
+    // determine which type (or types) of reco engine adapters we should try creating...
+    bool tryLuisDirect = GetBooleanValue(L"__useLuisDirectLuEngine", false);
+    bool tryLuisIndirect = GetBooleanValue(L"__useLuisIndirectLuEngine", false);
+    bool trySimple = GetBooleanValue(L"__useSimpleLuEngine", false);
+    bool tryMock = GetBooleanValue(L"__useMockLuEngine", false);
+
+    // if nobody specified which type(s) of LU engine adapters this session should use, we'll use LuisDirect
+    if (!tryLuisDirect && !tryLuisIndirect && !trySimple && !tryMock)
+    {
+        tryLuisDirect = true;
+    }
+
+    // try to create the Luis Direct adapter
+    if (m_luAdapter == nullptr && tryLuisDirect)
+    {
+        m_luAdapter = SpxCreateObjectWithSite<ISpxLuEngineAdapter>("CSpxLuisDirectEngineAdapter", this);
+    }
+
+    // try to create the Luis Indirect adapter
+    if (m_luAdapter == nullptr && tryLuisIndirect)
+    {
+        m_luAdapter = SpxCreateObjectWithSite<ISpxLuEngineAdapter>("CSpxLuisIndirectEngineAdapter", this);
+    }
+
+    // try to create the Simple Intent adapter... 
+    if (m_luAdapter == nullptr && trySimple)
+    {
+        m_luAdapter = SpxCreateObjectWithSite<ISpxLuEngineAdapter>("CSpxSimpleIntentEngineAdapter", this);
+    }
+
+    // try to create the mock adapter...
+    if (m_luAdapter == nullptr && tryMock)
+    {
+        m_luAdapter = SpxCreateObjectWithSite<ISpxLuEngineAdapter>("CSpxMockLuEngineAdapter", this);
+    }
+
+    // if we still don't have an adapter... that's an exception
+    SPX_IFTRUE_THROW_HR(m_luAdapter == nullptr, SPXERR_NOT_FOUND);
+}
+
+std::shared_ptr<ISpxLuEngineAdapter> CSpxAudioStreamSession::GetLuEngineAdapter()
+{
+    EnsureInitLuEngineAdapter();
+    return m_luAdapter;
 }
 
 std::shared_ptr<ISpxNamedProperties> CSpxAudioStreamSession::GetParentProperties()
