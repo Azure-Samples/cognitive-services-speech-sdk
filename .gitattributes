@@ -1,0 +1,83 @@
+*.ini text
+
+.gitattributes text
+.gitignore text
+.gitmodules text
+
+.clang-format text
+
+*.md text
+*.txt text
+*.TXT text
+*.html text
+*.lyx text
+*.bib text
+*.json text
+.gitkeep text
+Readme text
+
+*.bat text
+*.cmd text
+*.py text
+*.py.ini text
+*.ipynb text
+*.pl text
+*.ps1 text
+*.psm1 text
+*.ps text
+*.i text
+
+*.sh text eol=lf
+*.awk text eol=lf
+build-and-test text eol=lf
+configure text eol=lf
+
+Makefile text
+*.sln text
+*.pyproj text
+*.vcxproj text
+*.vcxproj.filters text
+*.vssettings text
+*.csproj text
+*.props text
+*.asax text
+
+*.h text
+*.hpp text
+*.c
+*.cpp text
+*.cc text
+*.proto text
+
+*.cs text
+*.java text
+*.yml text
+*.yml.bak text
+
+*.config text
+*.xml text
+*.m text
+*.mlf text
+*.scp text
+*.list text
+
+*.log text
+*.prototxt text
+
+*.xaml text
+*.appxmanifest text
+
+# Binary extensions:
+*.ark binary
+*.chunk binary
+*.cmf binary
+*.docx binary
+*.jpg binary
+*.pdf binary
+*.png binary
+*.pptx binary
+*.snk binary
+*.vsdm binary
+*.zip binary
+*.exe binary
+*.pdf binary
