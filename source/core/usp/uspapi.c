@@ -14,6 +14,12 @@
 #define _strdup strdup
 #endif
 
+#ifdef _MSC_VER
+#define thread_local __declspec(thread)
+#else
+#define thread_local _Thread_local
+#endif
+
 extern int platform_init(void);
 
 // Todo: read from a configuration file.
@@ -29,6 +35,8 @@ const char g_formatQueryStr[] = "format=%s";
 const char g_defaultLangValue[] = "en-us";
 const char g_outputDetailedStr[] = "detailed";
 const char g_outputSimpleStr[] = "simple";
+
+thread_local static bool inCallback = false;
 
 inline static void UspShutdown(UspContext* uspContext)
 {
@@ -49,9 +57,9 @@ static int UspWorker(void* ptr)
     Lock(uspHandle->lock);
     while(uspHandle->state == USP_STATE_CONNECTED)
     {
-        uspHandle->inCallback = true;
+        inCallback = true;
         TransportDoWork(uspHandle->transport);
-        uspHandle->inCallback = false;
+        inCallback = false;
 
         COND_RESULT result = Condition_Wait(uspHandle->workEvent, uspHandle->lock, 200);
 #ifdef _DEBUG
@@ -103,7 +111,6 @@ inline static UspResult UspCreateContextAndSetCallbacks(UspCallbacks *callbacks,
     }
 
     uspContext->state = USP_STATE_INITIALIZED;
-    uspContext->inCallback = false;
     *uspContextReturned = uspContext;
     return USP_SUCCESS;
 }
@@ -488,7 +495,7 @@ UspResult UspClose(UspHandle uspHandle)
 
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
 
-    if (uspHandle->inCallback) 
+    if (inCallback) 
     {
         // Locks in azure-c-shared are no longer reentrant, acquiring a lock held by the 
         // current thread leads to a deadlock. What's more, joining current thread also 

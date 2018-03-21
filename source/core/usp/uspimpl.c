@@ -199,6 +199,7 @@ static void TransportErrorHandler(TransportHandle transportHandle, TransportErro
     LogInfo("TS:%" PRIu64 ", TransportError: uspContext:0x%x, reason=%d.", USP_LIFE_TIME(uspContext), uspContext, reason);
 
     assert(uspContext != NULL);
+    USP_RETURN_IF_SHUTTING_DOWN(uspContext);
     USP_RETURN_VOID_IF_CALLBACKS_NULL(uspContext);
 
     if (uspContext->callbacks->OnError == NULL)
@@ -261,6 +262,7 @@ static UspResult SpeechStartHandler(UspContext* uspContext, const char* path, co
     (void)buffer;
     (void)size;
 
+    USP_RETURN_SUCCESS_IF_SHUTTING_DOWN(uspContext);
     USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspContext);
     if (uspContext->callbacks->onSpeechStartDetected == NULL)
     {
@@ -293,7 +295,8 @@ static UspResult SpeechEndHandler(UspContext* uspContext, const char* path, cons
     (void)buffer;
     (void)size;
 
-     USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspContext);
+    USP_RETURN_SUCCESS_IF_SHUTTING_DOWN(uspContext);
+    USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspContext);
     if (uspContext->callbacks->onSpeechEndDetected == NULL)
     {
         LogInfo("No user callback is defined for callbacks->onSpeechEndDetected.");
@@ -333,10 +336,7 @@ static UspResult TurnEndHandler(UspContext* uspContext, const char* path, const 
     // invoked (from CSpxUspRecoEngineAdapter's Term function) and all the callbacks 
     // are already destroyed (while uspContext->callbacks->onTurnEnd is not NULL, trying to 
     // invoke it will fail). 
-    if (uspContext->state == USP_STATE_SHUTDOWN)
-    {
-        return USP_SUCCESS;
-    }
+    USP_RETURN_SUCCESS_IF_SHUTTING_DOWN(uspContext);
 
     USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspContext);
     if (uspContext->callbacks->onTurnEnd == NULL)

@@ -109,6 +109,18 @@ typedef struct _TELEMETRY_CONTEXT* TELEMETRY_HANDLE;
         } \
     } while (0)
 
+#define USP_RETURN_IF_SHUTTING_DOWN(context) \
+    if (context->state == USP_STATE_SHUTDOWN) \
+    { \
+        return; \
+    }
+
+#define USP_RETURN_SUCCESS_IF_SHUTTING_DOWN(context) \
+    if (context->state == USP_STATE_SHUTDOWN) \
+    { \
+        return USP_SUCCESS; \
+    }
+
 #define USP_RETURN_VOID_IF_CALLBACKS_NULL(context) \
     do { \
         if (context->callbacks == NULL) \

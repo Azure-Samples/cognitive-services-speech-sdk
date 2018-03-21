@@ -140,6 +140,7 @@ static int HandleJsonSpeechPhrase(PROPERTYBAG_HANDLE propertyHandle, void* conte
     DeserializeContext* deserializeContext = (DeserializeContext*)context;
 
     UspContext* uspContext = (UspContext*)deserializeContext->context;
+    USP_RETURN_SUCCESS_IF_SHUTTING_DOWN(uspContext);
     USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspContext);
 
     // Zhou: why not differentiae by "Path", but just by "DisplayText" or "Text"??
@@ -261,6 +262,8 @@ static int HandleJsonSpeechFragment(PROPERTYBAG_HANDLE  propertyHandle, void* co
     DeserializeContext* deserializeContext = (DeserializeContext*)context;
 
     UspContext* uspContext = (UspContext*)deserializeContext->context;
+
+    USP_RETURN_SUCCESS_IF_SHUTTING_DOWN(uspContext);
     USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspContext);
 
     if (uspContext->callbacks->onSpeechFragment == NULL)
@@ -320,6 +323,8 @@ static int HandleJsonTurnStart(PROPERTYBAG_HANDLE  propertyHandle, void* context
 
     // USP handling
     UspContext* uspContext = (UspContext *)(deserializeContext->context);
+
+    USP_RETURN_SUCCESS_IF_SHUTTING_DOWN(uspContext);
     USP_RETURN_ERROR_IF_CALLBACKS_NULL(uspContext);
 
     if (uspContext->callbacks->onTurnStart == NULL)
@@ -463,6 +468,8 @@ UspResult AudioResponseHandler(void* context, const char* path, uint8_t* buffer,
 
     UspMsgAudioStreamStart *msg;
     UspContext* uspContext = (UspContext*)context;
+
+    USP_RETURN_SUCCESS_IF_SHUTTING_DOWN(uspContext);
 
     if (uspContext->callbacks->onAudioStreamStart == NULL)
     {
