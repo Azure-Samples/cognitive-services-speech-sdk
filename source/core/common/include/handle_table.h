@@ -31,6 +31,7 @@ public:
 
     Handle TrackHandle(std::shared_ptr<T> t)
     {
+        std::unique_lock<std::mutex> lock(m_mutex);
         // SPX_DBG_TRACE_VERBOSE("%s 0x%8x", __FUNCTION__, t.get());
         Handle handle = SPXHANDLE_INVALID;
 
@@ -47,16 +48,19 @@ public:
 
     bool IsTracked(Handle handle)
     {
+        std::unique_lock<std::mutex> lock(m_mutex);
         return m_handleMap.find(handle) != m_handleMap.end();
     }
 
     bool IsTracked(T* ptr)
     {
+        std::unique_lock<std::mutex> lock(m_mutex);
         return m_ptrMap.find(ptr) != m_ptrMap.end();
     }
 
     std::shared_ptr<T> operator[](Handle handle)
     {
+        std::unique_lock<std::mutex> lock(m_mutex);
         auto item = m_handleMap.find(handle);
         SPX_THROW_HR_IF(SPXERR_INVALID_ARG, item == m_handleMap.end());
         return item->second;
@@ -64,6 +68,7 @@ public:
 
     Handle operator[](T* ptr)
     {
+        std::unique_lock<std::mutex> lock(m_mutex);
         auto item = m_ptrMap.find(ptr);
         SPX_IFTRUE_THROW_HR(item == m_ptrMap.end(), SPXERR_INVALID_ARG);
         return item->second;
@@ -71,32 +76,36 @@ public:
 
     void StopTracking(Handle handle)
     {
-        if (IsTracked(handle))
+        auto iterHandleMap = m_handleMap.find(handle);
+        if (iterHandleMap == m_handleMap.end()) 
         {
-            auto iterHandleMap = m_handleMap.find(handle);
-            auto ptr = iterHandleMap->second.get();
-            auto iterPtrMap = m_ptrMap.find(ptr);
-
-            m_handleMap.erase(iterHandleMap);
-            m_ptrMap.erase(iterPtrMap);
+            return; // handle is not tracked.
         }
+        auto ptr = iterHandleMap->second.get();
+        auto iterPtrMap = m_ptrMap.find(ptr);
+
+        m_handleMap.erase(iterHandleMap);
+        m_ptrMap.erase(iterPtrMap);
     }
 
     void StopTracking(T* ptr)
     {
-        if (IsTracked(ptr))
+        std::unique_lock<std::mutex> lock(m_mutex);
+        auto iterPtrMap = m_ptrMap.find(ptr);
+        if (iterPtrMap == m_ptrMap.end())
         {
-            auto iterPtrMap = m_ptrMap.find(ptr);
-            auto handle = iterPtrMap->second;
-            auto iterHandleMap = m_handleMap.find(handle);
-
-            m_ptrMap.erase(iterPtrMap);
-            m_handleMap.erase(iterHandleMap);
+            return; // ptr is not tracked.
         }
+        auto handle = iterPtrMap->second;
+        auto iterHandleMap = m_handleMap.find(handle);
+
+        m_ptrMap.erase(iterPtrMap);
+        m_handleMap.erase(iterHandleMap);
     }
 
     void Term()
     {
+        std::unique_lock<std::mutex> lock(m_mutex);
         m_handleMap.clear();
         m_ptrMap.clear();
     }
@@ -105,6 +114,7 @@ private:
 
     std::unordered_multimap<Handle, std::shared_ptr<T>> m_handleMap;
     std::unordered_multimap<T*, Handle> m_ptrMap;
+    std::mutex m_mutex;
 };
 
 class CSpxSharedPtrHandleTableManager

@@ -25,6 +25,22 @@ CSpxAudioStreamSession::~CSpxAudioStreamSession()
     SpxTermAndClear(m_luAdapter);
 }
 
+void CSpxAudioStreamSession::Init() 
+{
+    // no-op.
+}
+
+void CSpxAudioStreamSession::Term()
+{
+    // adapters need to be terminated before the destructor is invoked,
+    // otherwise, if destructor is in progress (waiting for an adapter callback to finish), 
+    // GetSite() inside that adapter callbacks returns null.
+    // TODO: this whole init/term shebang totally looks like a buggy version of RAII.
+    // See https://en.wikipedia.org/wiki/Inner-platform_effect for more details.
+    SpxTermAndClear(m_recoAdapter);
+    SpxTermAndClear(m_luAdapter);
+}
+
 void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
 {
     SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_audioPump.get() != nullptr);

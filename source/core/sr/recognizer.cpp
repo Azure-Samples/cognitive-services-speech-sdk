@@ -3,6 +3,7 @@
 #include <future>
 #include "handle_table.h"
 #include "service_helpers.h"
+#include "create_object_helpers.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -162,6 +163,7 @@ void CSpxRecognizer::TermDefaultSession()
     {
         m_defaultSession->RemoveRecognizer(this);
     }
+    SpxTermAndClear(m_defaultSession);
 }
 
 void CSpxRecognizer::OnIsEnabledChanged()

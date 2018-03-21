@@ -68,7 +68,7 @@ void CSpxAudioPump::StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProc
 
     auto pump = ((ISpxAudioPump*)this);
     auto keepAliveForThread = std::dynamic_pointer_cast<CSpxAudioPump>(pump->shared_from_this());
-    m_thread = std::move(std::thread(&CSpxAudioPump::PumpThread, this, std::move(keepAliveForThread), pISpxAudioProcessor));
+    m_thread = std::thread(&CSpxAudioPump::PumpThread, this, std::move(keepAliveForThread), pISpxAudioProcessor);
 
     m_stateRequested = State::Processing; // it's ok we set the requested state after we 'start' the thread; PumpThread will wait for the lock
     m_cv.notify_all();

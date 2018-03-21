@@ -7,6 +7,7 @@
 
 #pragma once
 #include <spxerror.h>
+#include <assert.h>
 
 #ifndef _MSC_VER
 // macros in this header generate a bunch of
@@ -163,8 +164,11 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 #define __SPX_EXPR_AS_STRING(_String) ___SPX_EXPR_AS_STRING(_String)
 
 #define __SPX_TRACE_HR(title, hr, x)             __SPX_TRACE_ERROR(title, __SPX_EXPR_AS_STRING(hr) " = 0x%0x", x)
-#define __SPX_TRACE_ASSERT(title, expr)          __SPX_TRACE_ERROR_IF(!(expr), title, __SPX_EXPR_AS_STRING(expr) " = false")
-#define __SPX_TRACE_ASSERT_MSG(title, expr, ...) __SPX_TRACE_ERROR_IF(!(expr), title, __SPX_EXPR_AS_STRING(expr) " = false; " __VA_ARGS__)
+#define __SPX_TRACE_ASSERT(title, expr)          __SPX_TRACE_ERROR_IF(!(expr), title, __SPX_EXPR_AS_STRING(expr) " = false"); \
+    if(!(expr)) abort()
+
+#define __SPX_TRACE_ASSERT_MSG(title, expr, ...) __SPX_TRACE_ERROR_IF(!(expr), title, __SPX_EXPR_AS_STRING(expr) " = false; " __VA_ARGS__); \
+    if(!(expr)) abort()
 
 //-------------------------------------------------------
 //  SPX_ macro definitions

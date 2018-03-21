@@ -52,6 +52,10 @@ public:
     SPX_SERVICE_MAP_END()
 
 
+    virtual void Init() override;
+    virtual void Term() override;
+
+
 protected:
 
     void StartRecognizing() override;

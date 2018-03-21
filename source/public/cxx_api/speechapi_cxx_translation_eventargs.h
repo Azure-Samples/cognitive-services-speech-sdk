@@ -22,12 +22,16 @@ namespace Translation {
 template <class ResultT>
 class TranslationEventArgs final : public SessionEventArgs
 {
+    SPXEVENTHANDLE m_hevent;
+    std::shared_ptr<ResultT> m_result;
+
 public:
 
     TranslationEventArgs(SPXEVENTHANDLE hevent) :
         SessionEventArgs(hevent),
-        Result(*m_result.get()),
-        m_hevent(hevent)
+        m_hevent(hevent),
+        m_result(nullptr),
+        Result(*m_result.get())
     {
         SPX_THROW_ON_FAIL(SPXERR_NOT_IMPL);
     };
@@ -43,9 +47,6 @@ private:
     TranslationEventArgs(const TranslationEventArgs&) = delete;
     TranslationEventArgs& operator=(TranslationEventArgs&&) = delete;
     TranslationEventArgs& operator=(const TranslationEventArgs&) = delete;
-
-    SPXEVENTHANDLE m_hevent;
-    std::shared_ptr<ResultT> m_result;
 };
 
 

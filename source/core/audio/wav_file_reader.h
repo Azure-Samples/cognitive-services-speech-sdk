@@ -23,19 +23,19 @@ public:
 
     // --- ISpxAudioFile
 
-    void Open(const wchar_t* fileName);
-    void Close();
+    void Open(const wchar_t* fileName) override;
+    void Close() override;
 
-    bool IsOpen() const;
+    bool IsOpen() const override;
 
     void SetContinuousLoop(bool value) override;
     void SetIterativeLoop(bool value) override;
-    void SetRealTimePercentage(uint8_t percentage);
+    void SetRealTimePercentage(uint8_t percentage) override;
 
     // --- ISpxAudioReader
 
-    uint16_t GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat);
-    uint32_t Read(uint8_t* pbuffer, uint32_t cbBuffer);
+    uint16_t GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat) override;
+    uint32_t Read(uint8_t* pbuffer, uint32_t cbBuffer) override;
 
 
 private:
