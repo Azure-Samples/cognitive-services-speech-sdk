@@ -48,62 +48,62 @@ typedef unsigned int SPXHR;
 /*** SPXERR_INVALID_ARG
 *   One or more arguments are not valid.
 */
-#define SPXERR_INVALID_ARG          __SPX_ERRCODE_FAILED(0x004)
+#define SPXERR_INVALID_ARG          __SPX_ERRCODE_FAILED(0x005)
 
 /*** SPXERR_TIMEOUT
 *   The specified timeout value has ellapsed.
 */
-#define SPXERR_TIMEOUT              __SPX_ERRCODE_FAILED(0x005)
+#define SPXERR_TIMEOUT              __SPX_ERRCODE_FAILED(0x006)
 
 /*** SPXERR_ALREADY_IN_PROGRESS
 *   The asynchronous operation is already in progress.
 */
-#define SPXERR_ALREADY_IN_PROGRESS  __SPX_ERRCODE_FAILED(0x006)
+#define SPXERR_ALREADY_IN_PROGRESS  __SPX_ERRCODE_FAILED(0x007)
 
 /*** SPXERR_FILE_OPEN_FAILED
 *   The attempt to open the file failed.
 */
-#define SPXERR_FILE_OPEN_FAILED     __SPX_ERRCODE_FAILED(0x007)
+#define SPXERR_FILE_OPEN_FAILED     __SPX_ERRCODE_FAILED(0x008)
 
 /*** SPXERR_UNEXPECTED_EOF
 *   The end of the file was reached unexpectedly.
 */
-#define SPXERR_UNEXPECTED_EOF       __SPX_ERRCODE_FAILED(0x008)
+#define SPXERR_UNEXPECTED_EOF       __SPX_ERRCODE_FAILED(0x009)
 
 /*** SPXERR_INVALID_HEADER
 *   One or more arguments are not valid.
 */
-#define SPXERR_INVALID_HEADER       __SPX_ERRCODE_FAILED(0x009)
+#define SPXERR_INVALID_HEADER       __SPX_ERRCODE_FAILED(0x00a)
 
 /*** SPXERR_AUDIO_IS_PUMPING
 *   The requested operation cannot be performed while audio is pumping
 */
-#define SPXERR_AUDIO_IS_PUMPING     __SPX_ERRCODE_FAILED(0x00a)
+#define SPXERR_AUDIO_IS_PUMPING     __SPX_ERRCODE_FAILED(0x00b)
 
 /*** SPXERR_UNSUPPORTED_FORMAT
 *   The requested operation cannot be performed while audio is pumping
 */
-#define SPXERR_UNSUPPORTED_FORMAT   __SPX_ERRCODE_FAILED(0x00b)
+#define SPXERR_UNSUPPORTED_FORMAT   __SPX_ERRCODE_FAILED(0x00c)
 
 /*** SPXERR_ABORT
 *   Operation aborted.
 */
-#define SPXERR_ABORT                __SPX_ERRCODE_FAILED(0x00c)
+#define SPXERR_ABORT                __SPX_ERRCODE_FAILED(0x00d)
 
 /*** SPXERR_MIC_NOT_AVAILABLE
 *   Microphone is not available.
 */
-#define SPXERR_MIC_NOT_AVAILABLE    __SPX_ERRCODE_FAILED(0x00d)
+#define SPXERR_MIC_NOT_AVAILABLE    __SPX_ERRCODE_FAILED(0x00e)
 
 /*** SPXERR_INVALID_STATE
 *   An invalid state was encountered.
 */
-#define SPXERR_INVALID_STATE        __SPX_ERRCODE_FAILED(0x00e)
+#define SPXERR_INVALID_STATE        __SPX_ERRCODE_FAILED(0x00f)
 
 /*** SPXERR_UUID_CREATE_FAILED
 *   Attempting to create a UUID failed.
 */
-#define SPXERR_UUID_CREATE_FAILED   __SPX_ERRCODE_FAILED(0x00f)
+#define SPXERR_UUID_CREATE_FAILED   __SPX_ERRCODE_FAILED(0x010)
 
 /*** SPXERR_SETFORMAT_UNEXPECTED_STATE_TRANSITION
 *   An unexpected session state transition was encountered when setting the session audio format. Valid transitions are:
@@ -112,7 +112,7 @@ typedef unsigned int SPXHR;
 *   - ProcessingAudio --> WaitingForAdapterDone (when the stream runs out of data)
 *   NOTE: All other state transitions are invalid
 */
-#define SPXERR_SETFORMAT_UNEXPECTED_STATE_TRANSITION __SPX_ERRCODE_FAILED(0x010)
+#define SPXERR_SETFORMAT_UNEXPECTED_STATE_TRANSITION __SPX_ERRCODE_FAILED(0x011)
 
 /*** SPXERR_PROCESS_AUDIO_INVALID_STATE
 *   An unexpected session state was encountered in while processing audio. Valid states to encounter are:
@@ -120,36 +120,36 @@ typedef unsigned int SPXHR;
 *   - StoppingPump: We're allowed to be called to process audio, but we'll ignore the data passed in while we're attempting to stop the pump
 *   NOTE: All other states are invalid while processing audio.
 */
-#define SPXERR_PROCESS_AUDIO_INVALID_STATE __SPX_ERRCODE_FAILED(0x011)
+#define SPXERR_PROCESS_AUDIO_INVALID_STATE __SPX_ERRCODE_FAILED(0x012)
 
 /*** SPXERR_START_RECOGNIZING_INVALID_STATE_TRANSITION
 *   An unexpected state transition was encountered while attempting to start recognizing. Valid state transitions are:
 *   - Idle --> StartingPump
 *   NOTE: All other state transitions are invalid when attempting to start recognizing
 */
-#define SPXERR_START_RECOGNIZING_INVALID_STATE_TRANSITION __SPX_ERRCODE_FAILED(0x012)
+#define SPXERR_START_RECOGNIZING_INVALID_STATE_TRANSITION __SPX_ERRCODE_FAILED(0x013)
 
 /*** SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE
 *   An unexpected error was encountered when trying to create an internal object.
 */
-#define SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE  __SPX_ERRCODE_FAILED(0x013)
+#define SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE  __SPX_ERRCODE_FAILED(0x014)
 
 /*** SPXERR_MIC_ERROR
 *   An error in the audio-capturing system.
 */
-#define SPXERR_MIC_ERROR            __SPX_ERRCODE_FAILED(0x014)
+#define SPXERR_MIC_ERROR            __SPX_ERRCODE_FAILED(0x015)
 
 /*** SPXERR_NO_AUDIO_INPUT
 *   The requested operation cannot be performed; there is no audio input
 */
-#define SPXERR_NO_AUDIO_INPUT       __SPX_ERRCODE_FAILED(0x015)
+#define SPXERR_NO_AUDIO_INPUT       __SPX_ERRCODE_FAILED(0x016)
 
 /*** SPXERR_UNEXPECTED_USP_SITE_FAILURE
 *   An unexpected error was encountered when trying to access the USP site
 */
-#define SPXERR_UNEXPECTED_USP_SITE_FAILURE  __SPX_ERRCODE_FAILED(0x016)
+#define SPXERR_UNEXPECTED_USP_SITE_FAILURE  __SPX_ERRCODE_FAILED(0x017)
 
 /*** SPXERR_UNEXPECTED_UNIDEC_SITE_FAILURE
 *   An unexpected error was encountered when trying to access the Unidec site
 */
-#define SPXERR_UNEXPECTED_UNIDEC_SITE_FAILURE  __SPX_ERRCODE_FAILED(0x017)
+#define SPXERR_UNEXPECTED_UNIDEC_SITE_FAILURE  __SPX_ERRCODE_FAILED(0x018)

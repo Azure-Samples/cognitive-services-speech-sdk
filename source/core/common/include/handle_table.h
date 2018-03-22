@@ -124,6 +124,7 @@ public:
     template<class T, class Handle>
     static CSpxHandleTable<T, Handle>* Get()
     {
+        std::unique_lock<std::mutex> lock(s_mutex);
         auto name = typeid(T).name();
 
         if (s_tables->find(name) == s_tables->end())
@@ -140,10 +141,17 @@ public:
 
     static void Term()
     {
+        // TODO: on OSX statics are destroyed before LibUnload is invoked,
+        // so Term() should be called from the s_termFns delete first.
+        // Second time, when it's called from LibUnload, bail out if statics 
+        // are already deleted.
+        // Is there a cleaner way to do the shut-down?
         if (s_termFns == nullptr) 
         {
             return;
         }
+
+        std::unique_lock<std::mutex> lock(s_mutex);
 
         for (auto termFn : *s_termFns.get())
         {
@@ -159,6 +167,8 @@ private:
 
     template<typename T>
     using deleted_unique_ptr = std::unique_ptr<T, std::function<void(T*)>>;
+
+    static std::mutex s_mutex;
 
     // TODO: replace const char* with std::type_index?
     static std::unique_ptr<std::map<const char*, void*>> s_tables;

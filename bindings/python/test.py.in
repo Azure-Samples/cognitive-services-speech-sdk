@@ -64,7 +64,8 @@ def _disconnect(reco):
 
 def recognize(filename=None, async=False):
     if filename is not None:
-        os.path.isfile(filename)
+        assert os.path.isfile(filename)
+
     reco = RecognizerFactory.create_speech_recognizer(filename)
 
     _connect(reco)
