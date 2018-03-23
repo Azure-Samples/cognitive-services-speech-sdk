@@ -114,11 +114,9 @@ std::shared_ptr<ISpxRecognitionResult> CSpxSession::WaitForRecognition()
     m_recoAsyncWaiting = true;
     m_cv.wait_for(lock, std::chrono::seconds(m_recoAsyncTimeout), [&] { return !m_recoAsyncWaiting; });
 
-    if (!m_recoAsyncResult) // If we don't have a result, make a 'NoMatch' result
-    {
-        lock.unlock();
-        EnsureFireResultEvent();
-    }
+    // We only get here if somebody invoked WaitForRecognition_Complete (and set the result value).
+
+    SPX_DBG_ASSERT(m_recoAsyncResult != nullptr);
 
     return std::move(m_recoAsyncResult);
 }
@@ -126,6 +124,13 @@ std::shared_ptr<ISpxRecognitionResult> CSpxSession::WaitForRecognition()
 void CSpxSession::WaitForRecognition_Complete(std::shared_ptr<ISpxRecognitionResult> result)
 {
     std::unique_lock<std::mutex> lock(m_mutex);
+
+    if (!m_recoAsyncWaiting) 
+    {
+        // WaitForRecognition_Complete already completed.
+        return;
+    }
+
     m_recoAsyncWaiting = false;
     m_recoAsyncResult = result;
 
@@ -199,12 +204,9 @@ void CSpxSession::FireResultEvent(const std::wstring& sessionId, std::shared_ptr
 
 void CSpxSession::EnsureFireResultEvent()
 {
-    if (m_recoAsyncWaiting)
-    {
-        auto factory = SpxQueryService<ISpxRecoResultFactory>(this);
-        auto noMatchResult = factory->CreateNoMatchResult();
-        WaitForRecognition_Complete(noMatchResult);
-    }
+    auto factory = SpxQueryService<ISpxRecoResultFactory>(this);
+    auto noMatchResult = factory->CreateNoMatchResult();
+    WaitForRecognition_Complete(noMatchResult);
 }
 
 

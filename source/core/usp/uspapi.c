@@ -36,7 +36,13 @@ const char g_defaultLangValue[] = "en-us";
 const char g_outputDetailedStr[] = "detailed";
 const char g_outputSimpleStr[] = "simple";
 
+// this is set to true by the worker thread, to 
+// avoid double-locking in UspClose
 thread_local static bool inCallback = false;
+
+// this is set by the thread that called UspClose,
+// so that shutdown is performed on the same thread.
+thread_local static bool executeShutdown = false;
 
 inline static void UspShutdown(UspContext* uspContext)
 {
@@ -70,11 +76,14 @@ static int UspWorker(void* ptr)
     };
     Unlock(uspHandle->lock);
 
-    // We're done here (somebody called UspClose),
-    // since we're currently on the thread that talks to the transport 
-    // and invoke callbacks (both of which only happens in the while loop above),
-    // it's now safe to close the transport and clean up all resources needed by USP.
-    UspShutdown(uspHandle);
+    if (executeShutdown) 
+    {
+        // A callback on the worker thread requested a shutdown (called UspClose).
+        // Since we're currently on the thread that talks to the transport 
+        // and invoke callbacks (both of which only happens in the while loop above),
+        // it's now safe to close the transport and clean up all resources needed by USP,
+        UspShutdown(uspHandle);
+    }
 
     return 0;
 }
@@ -495,6 +504,8 @@ UspResult UspClose(UspHandle uspHandle)
 
     USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle);
 
+    executeShutdown = true;
+
     if (inCallback) 
     {
         // Locks in azure-c-shared are no longer reentrant, acquiring a lock held by the 
@@ -526,6 +537,13 @@ UspResult UspClose(UspHandle uspHandle)
         LogInfo("Wait for work thread to complete");
         SignalWork(uspHandle);
         ThreadAPI_Join(uspHandle->workThreadHandle, NULL);
+
+        if (executeShutdown) 
+        {
+            // non-worker thread requested a shutdown, after having joined the worker,
+            // it's now safe to release and destroy all resources.
+            UspShutdown(uspHandle);
+        }
     }
 
     FUNC_RETURN("");
