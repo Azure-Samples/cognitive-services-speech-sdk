@@ -190,7 +190,6 @@
 %include <speechapi_cxx_recognizer.h>
 %include <speechapi_cxx_recognition_async_recognizer.h>
 
-
 %template(BaseRecognizerBase) Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::RecognitionResult, Carbon::Recognition::RecognitionEventArgs>;
 %include <speechapi_cxx_recognition_base_async_recognizer.h>
 

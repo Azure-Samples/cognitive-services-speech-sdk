@@ -26,7 +26,7 @@ set(SWIG_MODULE_${CSHARP_BINDINGS}_EXTRA_DEPS
     ${SPEECH_CXX_API_HEADERS})
 
 # ${SWIG_INTERFACE} should resolve to {repo/root}/bindings/carbon.i
-set(CMAKE_SWIG_FLAGS -namespace Carbon)
+set(CMAKE_SWIG_FLAGS -namespace Carbon.Internal)
 set_source_files_properties("${SRC_DIR}/carbon_csharp.i" PROPERTIES
     CPLUSPLUS ON)
 
@@ -55,11 +55,26 @@ SET_SOURCE_FILES_PROPERTIES(${SWIG_CS_SOURCES} PROPERTIES GENERATED TRUE)
 
 set(CSHARP_LIB ${PROJECT_NAME}_lib CACHE INTERNAL "")
 
+set(CSHARP_LIB_WRAPPER_SOURCES
+    "${SRC_DIR}/session_event_args.cs"
+    "${SRC_DIR}/recognizer_factory.cs"
+    "${SRC_DIR}/recognizer.cs"    
+    "${SRC_DIR}/speech_recognizer.cs"
+    "${SRC_DIR}/speech_recognition_reason.cs"
+    "${SRC_DIR}/speech_recognition_result.cs"
+    "${SRC_DIR}/speech_recognition_result_event_args.cs"
+    "${SRC_DIR}/speech_recognition_error_event_args.cs"
+    )
+
 enable_language(CSharp)
-add_library(${CSHARP_LIB} SHARED ${SWIG_CS_SOURCES})
+add_library(${CSHARP_LIB} SHARED ${SWIG_CS_SOURCES} ${CSHARP_LIB_WRAPPER_SOURCES})
 add_dependencies(${CSHARP_LIB} ${CSHARP_BINDINGS} ${SWIG_MODULE_${CSHARP_BINDINGS}_REAL_NAME})
 set_target_properties(${CSHARP_LIB} PROPERTIES
     FOLDER bindings/csharp
 )
+set_target_properties(${CSHARP_LIB} PROPERTIES
+   VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.6.1"
+)
+target_compile_options(${CSHARP_LIB} PRIVATE "/langversion:6")
 
 set_property(DIRECTORY ${CMAKE_SOURCE_DIR} APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${SWIG_INTERFACE})
