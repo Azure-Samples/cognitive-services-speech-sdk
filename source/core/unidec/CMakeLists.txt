@@ -20,9 +20,9 @@ set(HEADERS_PRIVATE
     )
 
 set(SOURCES
-    "${SRC_DIR}/stdafx.cpp"
     "${SRC_DIR}/create_module_object.cpp"
     "${SRC_DIR}/unidec_reco_engine_adapter.cpp"
+    "${SRC_DIR}/stdafx.cpp"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})

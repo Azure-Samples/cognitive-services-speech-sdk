@@ -16,7 +16,6 @@ set(HEADERS_PRIVATE
     )
 
 set(SOURCES
-    "${SRC_DIR}/stdafx.cpp"
     "${SRC_DIR}/event_helpers.cpp"
     "${SRC_DIR}/speechapi_c_global.cpp"
     "${SRC_DIR}/speechapi_c_intent_recognizer.cpp"
@@ -27,6 +26,7 @@ set(SOURCES
     "${SRC_DIR}/speechapi_c_recognizer_factory.cpp"
     "${SRC_DIR}/speechapi_c_result.cpp"
     "${SRC_DIR}/speechapi_c_session.cpp"
+    "${SRC_DIR}/stdafx.cpp"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})

@@ -40,7 +40,6 @@ set(HEADERS_PRIVATE
     )
 
 set(SOURCES
-    "${SRC_DIR}/stdafx.cpp"
     "${SRC_DIR}/handle_table.cpp"
     "${SRC_DIR}/http_helpers.cpp"
     "${SRC_DIR}/trace_message.cpp"
@@ -49,6 +48,7 @@ set(SOURCES
     "${SRC_DIR}/guid_utils.cpp"
     "${SRC_DIR}/platform.cpp"
     "${SRC_DIR}/site_helpers.cpp"
+    "${SRC_DIR}/stdafx.cpp"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})

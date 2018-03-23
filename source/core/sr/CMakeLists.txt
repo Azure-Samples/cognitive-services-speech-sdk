@@ -6,6 +6,7 @@ set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
 include_directories(${CARBON_INCLUDE})
+include_directories("${CARBON_EXTERNAL}/json")
 
 include_directories(${INC_DIR})
 include_directories("${COMMON}/include")
@@ -33,7 +34,6 @@ set(HEADERS_PRIVATE
     )
 
 set(SOURCES
-    "${SRC_DIR}/stdafx.cpp"
     "${SRC_DIR}/audio_stream_session.cpp"
     "${SRC_DIR}/create_module_object.cpp"
     "${SRC_DIR}/default_recognizer_factory.cpp"
@@ -48,6 +48,7 @@ set(SOURCES
     "${SRC_DIR}/session.cpp"
     "${SRC_DIR}/session_event_args.cpp"
     "${SRC_DIR}/usp_reco_engine_adapter.cpp"
+    "${SRC_DIR}/stdafx.cpp"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})

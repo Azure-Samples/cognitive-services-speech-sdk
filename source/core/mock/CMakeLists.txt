@@ -24,13 +24,13 @@ set(HEADERS_PRIVATE
     )
 
 set(SOURCES
-    "${SRC_DIR}/stdafx.cpp"
     "${SRC_DIR}/create_module_object.cpp"
     "${SRC_DIR}/mock_audio_reader_impl.cpp"
     "${SRC_DIR}/mock_interactive_microphone.cpp"
     "${SRC_DIR}/mock_lu_engine_adapter.cpp"
     "${SRC_DIR}/mock_reco_engine_adapter.cpp"
     "${SRC_DIR}/mock_wav_file_pump.cpp"
+    "${SRC_DIR}/stdafx.cpp"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})

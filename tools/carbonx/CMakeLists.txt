@@ -16,10 +16,10 @@ set(HEADERS_PRIVATE
 )
 
 set(SOURCES 
-    "${SRC_DIR}/stdafx.cpp"
     "${SRC_DIR}/carbon_test_console.cpp"
     "${SRC_DIR}/hello_world.cpp"
     "${SRC_DIR}/hello_world_c.cpp"
+    "${SRC_DIR}/stdafx.cpp"
 )
 
 include_directories("${SRC_DIR}")

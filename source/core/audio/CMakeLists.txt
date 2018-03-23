@@ -23,7 +23,6 @@ set(HEADERS_PRIVATE
     )
 
 set(SOURCES
-    "${SRC_DIR}/stdafx.cpp"
     "${SRC_DIR}/audio_pump.cpp"
     "${SRC_DIR}/create_module_object.cpp"
     "${SRC_DIR}/interactive_microphone.cpp"
@@ -66,6 +65,10 @@ else()
         list(APPEND AUDIO_LIBS asound)
     endif()
 endif()
+
+list(APPEND SOURCES
+    "${SRC_DIR}/stdafx.cpp"
+)
 
 source_group("Header Files (public)" FILES ${HEADERS})
 source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})

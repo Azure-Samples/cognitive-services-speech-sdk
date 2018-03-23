@@ -277,8 +277,8 @@ static char* ConstructHeadersString(HTTP_HEADERS_HANDLE httpHeadersHandle)
                     }
                     else
                     {
-                        (void)strcat(result, temp);
-                        (void)strcat(result, "\r\n");
+                        (void)strcat_s(result, toAlloc+1, temp);
+                        (void)strcat_s(result, toAlloc+1, "\r\n");
                         free(temp);
                     }
                 }

@@ -13,8 +13,8 @@ set(HEADERS)
 set(HEADERS_PRIVATE "${SRC_DIR}/stdafx.h")
 
 set(SOURCES 
-    "${SRC_DIR}/stdafx.cpp"
     "${SRC_DIR}/dll.cpp"
+    "${SRC_DIR}/stdafx.cpp"
 )
 
 if(WIN32)

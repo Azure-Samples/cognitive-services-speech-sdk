@@ -18,10 +18,10 @@ set(HEADERS
     )
 
 set(SOURCES
-    "${SRC_DIR}/stdafx.cpp"
     "${SRC_DIR}/create_module_object.cpp"
     "${SRC_DIR}/module_factory.cpp"
     "${SRC_DIR}/resource_manager.cpp"
+    "${SRC_DIR}/stdafx.cpp"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})
