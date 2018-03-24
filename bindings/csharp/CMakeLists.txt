@@ -55,16 +55,7 @@ SET_SOURCE_FILES_PROPERTIES(${SWIG_CS_SOURCES} PROPERTIES GENERATED TRUE)
 
 set(CSHARP_LIB ${PROJECT_NAME}_lib CACHE INTERNAL "")
 
-set(CSHARP_LIB_WRAPPER_SOURCES
-    "${SRC_DIR}/session_event_args.cs"
-    "${SRC_DIR}/recognizer_factory.cs"
-    "${SRC_DIR}/recognizer.cs"    
-    "${SRC_DIR}/speech_recognizer.cs"
-    "${SRC_DIR}/speech_recognition_reason.cs"
-    "${SRC_DIR}/speech_recognition_result.cs"
-    "${SRC_DIR}/speech_recognition_result_event_args.cs"
-    "${SRC_DIR}/speech_recognition_error_event_args.cs"
-    )
+FILE(GLOB CSHARP_LIB_WRAPPER_SOURCES "${SRC_DIR}/*.cs")
 
 enable_language(CSharp)
 add_library(${CSHARP_LIB} SHARED ${SWIG_CS_SOURCES} ${CSHARP_LIB_WRAPPER_SOURCES})
@@ -75,6 +66,9 @@ set_target_properties(${CSHARP_LIB} PROPERTIES
 set_target_properties(${CSHARP_LIB} PROPERTIES
    VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.6.1"
 )
+set_target_properties(${CSHARP_LIB} PROPERTIES
+   VS_DOTNET_REFERENCES "System")
+
 target_compile_options(${CSHARP_LIB} PRIVATE "/langversion:6")
 
 set_property(DIRECTORY ${CMAKE_SOURCE_DIR} APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${SWIG_INTERFACE})

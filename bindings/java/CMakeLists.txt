@@ -107,8 +107,6 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXRESULTHANDLE.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXSESSIONHANDLE.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXTRIGGERHANDLE.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__shared_ptrT_Carbon__Recognition__Intent__IntentTrigger_t.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__shared_ptrT_Carbon__Recognition__Intent__LuisModel_t.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_wchar_t.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/VoidFuture.java
 )

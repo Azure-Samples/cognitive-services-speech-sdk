@@ -130,5 +130,4 @@ private:
     // RecognizerParameterCollection& operator=(const RecognizerParameterCollection&) = delete;
 };
 
-
 } } // CARBON_NAMESPACE_ROOT :: Recognition

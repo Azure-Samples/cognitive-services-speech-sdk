@@ -8,36 +8,36 @@ using System.Threading;
 using System.Threading.Tasks;
 using Carbon;
 
-namespace Carbon.Recognition.Speech
+namespace Carbon.Recognition.Intent
 {
     /// <summary>
-    /// Defines the speech recognizer class containing both methods and events for speech recognition.
+    /// Defines the intent recognizer class containing both methods and events for intent recognition.
     /// </summary>
-    public class SpeechRecognizer : Recognition.Recognizer
+    public class IntentRecognizer : Recognition.Recognizer
     {
         /// <summary>
-        /// Defines event handler for the event when an intermediate recognition result is recevied.
+        /// Defines event handler for the intermediate recognition result event.
         /// </summary>
-        public event EventHandler<SpeechRecognitionResultEventArgs> OnIntermediateResult;
+        public event EventHandler<IntentRecognitionResultEventArgs> OnIntermediateResult;
 
         /// <summary>
-        /// Defines event handler for the event when the final recognition result is recevied.
+        /// Defines event handler for the final recognition result event.
         /// </summary>
-        public event EventHandler<SpeechRecognitionResultEventArgs> OnFinalResult;
+        public event EventHandler<IntentRecognitionResultEventArgs> OnFinalResult;
 
         /// <summary>
-        /// Defines event handler for the event when an error is occured during recognition.
+        /// Defines event handler for the recognition error event.
         /// </summary>
         public event EventHandler<RecognitionErrorEventArgs> OnRecognitionError;
 
-        internal SpeechRecognizer(Internal.SpeechRecognizer recoImpl)
+        internal IntentRecognizer(Internal.IntentRecognizer recoImpl)
         {
             this.recoImpl = recoImpl;
 
-            intermediateResultHandler = new ResultHandlerImpl(this, isFinalResultHandler: false);
+            intermediateResultHandler = new IntentHandlerImpl(this, isFinalResultHandler: false);
             recoImpl.IntermediateResult.Connect(intermediateResultHandler);
 
-            finalResultHandler = new ResultHandlerImpl(this, isFinalResultHandler: true);
+            finalResultHandler = new IntentHandlerImpl(this, isFinalResultHandler: true);
             recoImpl.FinalResult.Connect(finalResultHandler);
 
             errorHandler = new ErrorHandlerImpl(this);
@@ -50,7 +50,7 @@ namespace Carbon.Recognition.Speech
             recoImpl.SoundStopped.Connect(soundStoppedHandler);
         }
 
-        ~SpeechRecognizer()
+        ~IntentRecognizer()
         {
             // BUG: we get exception when doing Disconnect().
 
@@ -65,38 +65,60 @@ namespace Carbon.Recognition.Speech
         }
 
         /// <summary>
-        /// The target language for the recognition.
+        /// A string in BCP 47 format that represents target language of the recognition.
         /// </summary>
         public string Language { get; }
 
         /// <summary>
-        /// Starts speech recognition
+        /// Starts intent recognition
         /// </summary>
         /// <returns>A task representing the recognition operation.</returns>
-        public Task<SpeechRecognitionResult> RecognizeAsync()
+        public Task<IntentRecognitionResult> RecognizeAsync()
         {
-            return Task.Run(() => { return new SpeechRecognitionResult(this.recoImpl.Recognize()); });
+            return Task.Run(() => { return new IntentRecognitionResult(this.recoImpl.Recognize()); });
         }
 
-        private Internal.SpeechRecognizer recoImpl;
-        private ResultHandlerImpl intermediateResultHandler;
-        private ResultHandlerImpl finalResultHandler;
+        /// <summary>
+        /// Adds an intent to be recognized.
+        /// </summary>
+        /// <param name="intentId">A string that represents the identifier of the intent to be added.</param>
+        /// <param name="phrase">A string that specifies the phrase representing the intent.</param>
+        public void AddIntent(string intentId, string phrase)
+        {
+            recoImpl.AddIntent(intentId, phrase);
+        }
+
+        /// <summary>
+        /// Adds an intent to be recognized.
+        /// </summary>
+        /// <param name="intentId">A string that represents the identifier of the intent to be added.</param>
+        /// <param name="model">The LUIS model used for intent recognition.</param>
+        /// <param name="intentName">The name of intent that should be recognized. If it is null, all intent names defined in the LUIS model will be recognized.</param>
+        public void AddIntent(string intentId, LuisModel model, string intentName = null)
+        {
+            var trigger = Carbon.Internal.IntentTrigger.From(model.ModelImpl, intentName);
+            recoImpl.AddIntent(intentId, trigger);
+        }
+
+        private Internal.IntentRecognizer recoImpl;
+        private IntentHandlerImpl intermediateResultHandler;
+        private IntentHandlerImpl finalResultHandler;
         private ErrorHandlerImpl errorHandler;
 
         /// <summary>
         /// Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         /// </summary>
-        private class ResultHandlerImpl : Internal.SpeechRecognitionEventListener
+        private class IntentHandlerImpl : Internal.IntentEventListener
         {
-            public ResultHandlerImpl(SpeechRecognizer recognizer, bool isFinalResultHandler)
+            public IntentHandlerImpl(IntentRecognizer recognizer, bool isFinalResultHandler)
             {
                 this.recognizer = recognizer;
                 this.isFinalResultHandler = isFinalResultHandler;
             }
 
-            public override void Execute(Internal.SpeechRecognitionEventArgs eventArgs)
+            public override void Execute(Internal.IntentRecognitionEventArgs eventArgs)
             {
-                var resultEventArg = new SpeechRecognitionResultEventArgs(eventArgs);
+                var resultEventArg = new IntentRecognitionResultEventArgs(eventArgs);
                 var handler = isFinalResultHandler ? recognizer.OnFinalResult : recognizer.OnIntermediateResult;
                 if (handler != null)
                 {
@@ -104,21 +126,21 @@ namespace Carbon.Recognition.Speech
                 }
             }
 
-            private SpeechRecognizer recognizer;
+            private IntentRecognizer recognizer;
             private bool isFinalResultHandler;
         }
 
         /// <summary>
         /// Defines an internal class to raise a C# event for error during recognition when a corresponding callback is invoked by the native layer.
         /// </summary>
-        private class ErrorHandlerImpl : Internal.SpeechRecognitionEventListener
+        private class ErrorHandlerImpl : Internal.IntentEventListener
         {
-            public ErrorHandlerImpl(SpeechRecognizer recognizer)
+            public ErrorHandlerImpl(IntentRecognizer recognizer)
             {
                 this.recognizer = recognizer;
             }
 
-            public override void Execute(Carbon.Internal.SpeechRecognitionEventArgs eventArgs)
+            public override void Execute(Carbon.Internal.IntentRecognitionEventArgs eventArgs)
             {
                 var resultEventArg = new RecognitionErrorEventArgs(eventArgs.SessionId, eventArgs.Result.Reason);
                 var handler = this.recognizer.OnRecognitionError;
@@ -129,7 +151,7 @@ namespace Carbon.Recognition.Speech
                 }
             }
 
-            private SpeechRecognizer recognizer;
+            private IntentRecognizer recognizer;
         }
     }
 

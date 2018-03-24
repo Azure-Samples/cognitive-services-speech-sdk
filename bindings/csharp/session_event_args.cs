@@ -3,8 +3,6 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-using System;
-
 namespace Carbon
 {
     /// <summary>
@@ -12,14 +10,29 @@ namespace Carbon
     /// </summary>
     public class SessionEventArgs : System.EventArgs
     {
-        internal SessionEventArgs(Internal.SessionEventArgs arg)
+        internal SessionEventArgs(SessionEventType type,  Internal.SessionEventArgs arg)
         {
             this.SessionId = arg.SessionId;
+            this.EventType = type;
         }
 
         /// <summary>
-        /// Specified the seesion identifier.
+        /// Represents the event type.
+        /// </summary>
+        public SessionEventType EventType { get; }
+
+        /// <summary>
+        /// Represents the seesion identifier.
         /// </summary>
         public string SessionId { get; }
+
+        /// <summary>
+        /// Returns a string that represents the session event.
+        /// </summary>
+        /// <returns>A string that represents the session event.</returns>
+        public override string ToString()
+        {
+            return string.Format("EventType: {0} SessionId: {1}.", EventType, SessionId);
+        }
     }
 }

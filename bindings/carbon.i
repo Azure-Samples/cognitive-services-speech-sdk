@@ -27,6 +27,8 @@
 %shared_ptr(Carbon::Recognition::Intent::IntentRecognitionResult)
 %shared_ptr(Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::Intent::IntentRecognitionResult, Carbon::Recognition::Intent::IntentRecognitionEventArgs>)
 %shared_ptr(Carbon::Recognition::Intent::IntentRecognizer)
+%shared_ptr(Carbon::Recognition::Intent::IntentTrigger)
+%shared_ptr(Carbon::Recognition::Intent::LuisModel)
 
 %ignore CallbackWrapper::GetFunction();
 %ignore FutureWrapper::FutureWrapper;

@@ -6,7 +6,12 @@ set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 set(SOURCES "${SRC_DIR}/carbon_csharp_console.cs")
 source_group("Source Files" FILES ${SOURCES})
 
-add_executable(${PROJECT_NAME} carbon_csharp_console.cs)
+add_executable(${PROJECT_NAME} 
+    carbon_csharp_console.cs
+    csharp_intent_reco_sample.cs
+    csharp_speech_reco_sample.cs
+)
+
 target_compile_options(${PROJECT_NAME} PRIVATE "/langversion:6")
 target_link_libraries(${PROJECT_NAME} ${CSHARP_LIB})
 add_dependencies(${PROJECT_NAME} ${CSHARP_LIB})
