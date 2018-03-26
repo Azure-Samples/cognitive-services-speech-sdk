@@ -10,6 +10,8 @@
 #include "speechapi_cxx_session.h"
 #include "speechapi_cxx_intent_recognizer.h"
 
+constexpr auto g_speechSubscriptionKey = LR"(093bc1e6d0004dff88677a4f0bba3da1)";
+
 
 void CarbonTestConsole::Sample_HelloWorld()
 {
@@ -74,3 +76,15 @@ void CarbonTestConsole::Sample_HelloWorld_Intent(const wchar_t* hostName, const 
     auto result = recognizer->RecognizeAsync().get();
     ConsoleWriteLine(L"text = '%ls'; intentId = '%ls'; json='%ls'", result->Text.c_str(), result->IntentId.c_str(), result->Values[L"json"].GetString().c_str());
 }
+
+void CarbonTestConsole::Sample_HelloWorld_Subscription()
+{
+    RecognizerFactory::Parameters::SetString(L"SPEECH-SubscriptionKey", g_speechSubscriptionKey);
+    auto recognizer = RecognizerFactory::CreateSpeechRecognizer();
+
+    ConsoleWriteLine(L"Say something...");
+    auto result = recognizer->RecognizeAsync().get();
+
+    ConsoleWriteLine(L"You said:\n\n    '%ls'", result->Text.c_str());
+}
+

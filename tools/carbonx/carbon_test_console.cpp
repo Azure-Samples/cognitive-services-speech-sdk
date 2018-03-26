@@ -96,35 +96,35 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
         else if (PAL::wcsicmp(pszArg, L"--unidec") == 0)
         {
             fShowOptions = pconsoleArgs->m_strUseRecoEngineProperty.length() > 0 || fNextArgRequired;
-            pconsoleArgs->m_strUseRecoEngineProperty = L"__useUnidecRecoEngine";
-            pstrNextArg = nullptr;
-            fNextArgRequired = false;
-        }
-        else if (PAL::wcsicmp(pszArg, L"--usp") == 0)
-        {
-            fShowOptions = pconsoleArgs->m_strUseRecoEngineProperty.length() > 0 || fNextArgRequired;
-            pconsoleArgs->m_strUseRecoEngineProperty = L"__useUspRecoEngine";
+            pconsoleArgs->m_strUseRecoEngineProperty = L"CARBON-INTERNAL-UseRecoEngine-Unidec";
             pstrNextArg = nullptr;
             fNextArgRequired = false;
         }
         else if (PAL::wcsicmp(pszArg, L"--mockrecoengine") == 0)
         {
             fShowOptions = pconsoleArgs->m_strUseRecoEngineProperty.length() > 0 || fNextArgRequired;
-            pconsoleArgs->m_strUseRecoEngineProperty = L"__useMockRecoEngine";
+            pconsoleArgs->m_strUseRecoEngineProperty = L"CARBON-INTERNAL-UseRecoEngine-Mock";
+            pstrNextArg = nullptr;
+            fNextArgRequired = false;
+        }
+        else if (PAL::wcsicmp(pszArg, L"--usp") == 0)
+        {
+            fShowOptions = pconsoleArgs->m_strUseRecoEngineProperty.length() > 0 || fNextArgRequired;
+            pconsoleArgs->m_strUseRecoEngineProperty = L"CARBON-INTERNAL-UseRecoEngine-Usp";
             pstrNextArg = nullptr;
             fNextArgRequired = false;
         }
         else if (PAL::wcsicmp(pszArg, L"--luisdirect") == 0)
         {
             fShowOptions = pconsoleArgs->m_strUseLuEngineProperty.length() > 0 || fNextArgRequired;
-            pconsoleArgs->m_strUseLuEngineProperty = L"__useLuisDirectLuEngine";
+            pconsoleArgs->m_strUseLuEngineProperty = L"CARBON-INTERNAL-UseLuEngine-LuisDirect";
             pstrNextArg = nullptr;
             fNextArgRequired = false;
         }
         else if (PAL::wcsicmp(pszArg, L"--mockluengine") == 0)
         {
             fShowOptions = pconsoleArgs->m_strUseLuEngineProperty.length() > 0 || fNextArgRequired;
-            pconsoleArgs->m_strUseLuEngineProperty = L"__useMockLuEngine";
+            pconsoleArgs->m_strUseLuEngineProperty = L"CARBON-INTERNAL-UseLuEngine-Mock";
             pstrNextArg = nullptr;
             fNextArgRequired = false;
         }
@@ -363,10 +363,6 @@ void CarbonTestConsole::ProcessConsoleInput(const wchar_t* psz)
     {
         RunSample(psz + wcslen(L"sample "));
     }
-    else if (PAL::wcsnicmp(psz, L"global ", wcslen(L"global ")) == 0)
-    {
-        ConsoleInput_Global(psz + wcslen(L"global "));
-    }
     else if (PAL::wcsnicmp(psz, L"factory ", wcslen(L"factory ")) == 0)
     {
         ConsoleInput_Factory(psz + wcslen(L"factory "));
@@ -597,38 +593,6 @@ void CarbonTestConsole::ConsoleInput_HelpOnCommandSystem()
     ConsoleWriteLine(L"");
 }
 
-void CarbonTestConsole::ConsoleInput_Global(const wchar_t* psz)
-{
-    if (PAL::wcsnicmp(psz, L"set string ", wcslen(L"set string ")) == 0)
-    {
-        Parameters_SetString(GlobalParameters::Get(), psz + wcslen(L"set string "));
-    }
-    else if (PAL::wcsnicmp(psz, L"get string ", wcslen(L"get string ")) == 0)
-    {
-        Parameters_GetString(GlobalParameters::Get(), psz + wcslen(L"get string "));
-    }
-    else if (PAL::wcsnicmp(psz, L"set number ", wcslen(L"set number ")) == 0)
-    {
-        Parameters_SetNumber(GlobalParameters::Get(), psz + wcslen(L"set number "));
-    }
-    else if (PAL::wcsnicmp(psz, L"get number ", wcslen(L"get number ")) == 0)
-    {
-        Parameters_GetNumber(GlobalParameters::Get(), psz + wcslen(L"get number "));
-    }
-    else if (PAL::wcsnicmp(psz, L"set bool ", wcslen(L"set bool ")) == 0)
-    {
-        Parameters_SetBool(GlobalParameters::Get(), psz + wcslen(L"set bool "));
-    }
-    else if (PAL::wcsnicmp(psz, L"get bool ", wcslen(L"get bool ")) == 0)
-    {
-        Parameters_GetBool(GlobalParameters::Get(), psz + wcslen(L"get bool "));
-    }
-    else
-    {
-        ConsoleWriteLine(L"\nUnknown method/event: '%ls'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
-    }
-}
-        
 void CarbonTestConsole::ConsoleInput_Factory(const wchar_t* psz)
 {
     if (PAL::wcsnicmp(psz, L"create speech recognizer", wcslen(L"create speech recognizer")) == 0)
@@ -1312,17 +1276,17 @@ void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
 {
     if (!pconsoleArgs->m_strEndpointUri.empty())
     {
-        GlobalParameters::Get()[L"__uspEndpoint"] = pconsoleArgs->m_strEndpointUri.c_str();
+        RecognizerFactory::Parameters::SetString(LR"(SPEECH-Endpoint)", pconsoleArgs->m_strEndpointUri.c_str());
     }
 
     if (!pconsoleArgs->m_strUseRecoEngineProperty.empty())
     {
-        GlobalParameters::Get()[pconsoleArgs->m_strUseRecoEngineProperty.c_str()] = true;
+        RecognizerFactory::Parameters::SetBool(pconsoleArgs->m_strUseRecoEngineProperty.c_str(), true);
     }
 
     if (!pconsoleArgs->m_strUseLuEngineProperty.empty())
     {
-        GlobalParameters::Get()[pconsoleArgs->m_strUseLuEngineProperty.c_str()] = true;
+        RecognizerFactory::Parameters::SetBool(pconsoleArgs->m_strUseLuEngineProperty.c_str(), true);
     }
 }
 
@@ -1526,6 +1490,11 @@ void CarbonTestConsole::RunSample(const std::wstring& strSampleName)
     {
         ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
         Sample_HelloWorld_Intent();
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"helloworld subscription") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        Sample_HelloWorld_Subscription();
     }
     else
     {

@@ -6,6 +6,8 @@
 //
 
 #include "stdafx.h"
+#include "service_helpers.h"
+#include "site_helpers.h"
 
 
 using namespace CARBON_IMPL_NAMESPACE();
@@ -42,55 +44,11 @@ SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_FileInput(SPXRECOHANDLE* ph
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_PassiveListening(SPXRECOHANDLE* phreco, bool passive)
-{
-    UNUSED(phreco);
-    UNUSED(passive);
-    return SPXERR_NOT_IMPL;
-}
-
-SPXAPI RecognizerFactory_CreateSpeechRecognizer(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName, bool passive)
+SPXAPI RecognizerFactory_CreateSpeechRecognizer(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName)
 {
     UNUSED(phreco);
     UNUSED(pszLanguage);
     UNUSED(pszFileName);
-    UNUSED(passive);
-    return SPXERR_NOT_IMPL;
-}
-
-SPXAPI RecognizerFactory_CreateDictationRecognizer_With_Defaults(SPXRECOHANDLE* phreco)
-{
-    UNUSED(phreco);
-    return SPXERR_NOT_IMPL;
-}
-
-SPXAPI RecognizerFactory_CreateDictationRecognizer_With_Language(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage)
-{
-    UNUSED(phreco);
-    UNUSED(pszLanguage);
-    return SPXERR_NOT_IMPL;
-}
-
-SPXAPI RecognizerFactory_CreateDictationRecognizer_With_FileInput(SPXRECOHANDLE* phreco, const wchar_t* pszFileName)
-{
-    UNUSED(phreco);
-    UNUSED(pszFileName);
-    return SPXERR_NOT_IMPL;
-}
-
-SPXAPI RecognizerFactory_CreateDictationRecognizer_With_PassiveListening(SPXRECOHANDLE* phreco, bool passive)
-{
-    UNUSED(phreco);
-    UNUSED(passive);
-    return SPXERR_NOT_IMPL;
-}
-
-SPXAPI RecognizerFactory_CreateDictationRecognizer(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName, bool passive)
-{
-    UNUSED(phreco);
-    UNUSED(pszLanguage);
-    UNUSED(pszFileName);
-    UNUSED(passive);
     return SPXERR_NOT_IMPL;
 }
 
@@ -125,18 +83,103 @@ SPXAPI RecognizerFactory_CreateIntentRecognizer_With_FileInput(SPXRECOHANDLE* ph
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI RecognizerFactory_CreateIntentRecognizer_With_PassiveListening(SPXRECOHANDLE* phreco, bool passive)
-{
-    UNUSED(phreco);
-    UNUSED(passive);
-    return SPXERR_NOT_IMPL;
-}
-
-SPXAPI RecognizerFactory_CreateIntentRecognizer(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName, bool passive)
+SPXAPI RecognizerFactory_CreateIntentRecognizer(SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName)
 {
     UNUSED(phreco);
     UNUSED(pszLanguage);
     UNUSED(pszFileName);
-    UNUSED(passive);
     return SPXERR_NOT_IMPL;
+}
+
+SPXAPI RecognizerFactory_SetParameter_String(const wchar_t* name, const wchar_t* value)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(SpxGetRootSite());
+        namedProperties->SetStringValue(name, value);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI RecognizerFactory_GetParameter_String(const wchar_t* name, wchar_t* value, uint32_t cchValue, const wchar_t* defaultValue)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(SpxGetRootSite());
+        auto tempValue = namedProperties->GetStringValue(name, defaultValue);
+        PAL::wcscpy(value, cchValue, tempValue.c_str(), tempValue.size(), true);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI_(bool) RecognizerFactory_HasParameter_String(const wchar_t* name)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(SpxGetRootSite());
+        return namedProperties->HasStringValue(name);
+    }
+    SPXAPI_CATCH_AND_RETURN(hr, false)
+}
+
+SPXAPI RecognizerFactory_SetParameter_Int32(const wchar_t* name, int32_t value)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(SpxGetRootSite());
+        namedProperties->SetNumberValue(name, value);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI RecognizerFactory_GetParameter_Int32(const wchar_t* name, int32_t* pvalue, int32_t defaultValue)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(SpxGetRootSite());
+        auto tempValue = namedProperties->GetNumberValue(name, defaultValue);
+        *pvalue = (int32_t)tempValue;
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI_(bool) RecognizerFactory_HasParameter_Int32(const wchar_t* name)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(SpxGetRootSite());
+        return namedProperties->HasNumberValue(name);
+    }
+    SPXAPI_CATCH_AND_RETURN(hr, false)
+}
+
+SPXAPI RecognizerFactory_SetParameter_Bool(const wchar_t* name, bool value)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(SpxGetRootSite());
+        namedProperties->SetBooleanValue(name, value);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI RecognizerFactory_GetParameter_Bool(const wchar_t* name, bool* pvalue, bool defaultValue)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(SpxGetRootSite());
+        auto tempValue = namedProperties->GetBooleanValue(name, defaultValue);
+        *pvalue = tempValue;
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI_(bool) RecognizerFactory_HasParameter_Bool(const wchar_t* name)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(SpxGetRootSite());
+        return namedProperties->HasBooleanValue(name);
+    }
+    SPXAPI_CATCH_AND_RETURN(hr, false)
 }

@@ -15,15 +15,16 @@
 #include "mock_reco_engine_adapter.h"
 #include "mock_wav_file_reader.h"
 #include "mock_wav_file_pump.h"
-#include "speechapi_cxx_global.h"
+#include "speechapi_cxx_recognizer_factory.h"
 
 
+using namespace CARBON_NAMESPACE_ROOT::Recognition;
 namespace CARBON_IMPL_NAMESPACE() {
 
 
 bool ShouldMock(const wchar_t* psz)
 {
-    return GlobalParameters::Get()[psz].GetBool(false);
+    return RecognizerFactory::Parameters::GetBool(psz, false);
 }
 
 SPX_EXTERN_C void* Mock_CreateModuleObject(const char* className, const char* interfaceName)
@@ -35,12 +36,12 @@ SPX_EXTERN_C void* Mock_CreateModuleObject(const char* className, const char* in
     SPX_FACTORY_MAP_ENTRY(CSpxMockWavFileReader, ISpxAudioFile);
     SPX_FACTORY_MAP_ENTRY(CSpxMockWavFilePump, ISpxAudioFile);
     SPX_FACTORY_MAP_ENTRY(CSpxMockLuEngineAdapter, ISpxLuEngineAdapter);
-    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"__mockUspRecoEngine"), CSpxUspRecoEngineAdapter, ISpxRecoEngineAdapter, CSpxMockRecoEngineAdapter);
-    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"__mockUnidecRecoEngine"), CSpxUnidecRecoEngineAdapter, ISpxRecoEngineAdapter, CSpxMockRecoEngineAdapter);
-    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"__mockMicrophone"), CSpxInteractiveMicrophone, ISpxAudioPump, CSpxMockInteractiveMicrophone);
-    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"__mockWavFileReader"), CSpxWavFileReader, ISpxAudioFile, CSpxMockWavFileReader);
-    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"__mockWavFilePump"), CSpxWavFilePump, ISpxAudioFile, CSpxMockWavFilePump);
-    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"__mockLuisDirectEngine"), CSpxLuisDirectEngineAdapter, ISpxLuEngineAdapter, CSpxMockLuEngineAdapter);
+    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-UspRecoEngine"), CSpxUspRecoEngineAdapter, ISpxRecoEngineAdapter, CSpxMockRecoEngineAdapter);
+    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-UnidecRecoEngine"), CSpxUnidecRecoEngineAdapter, ISpxRecoEngineAdapter, CSpxMockRecoEngineAdapter);
+    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-Microphone"), CSpxInteractiveMicrophone, ISpxAudioPump, CSpxMockInteractiveMicrophone);
+    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-WavFileReader"), CSpxWavFileReader, ISpxAudioFile, CSpxMockWavFileReader);
+    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-WavFilePump"), CSpxWavFilePump, ISpxAudioFile, CSpxMockWavFilePump);
+    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-LuisDirectEngine"), CSpxLuisDirectEngineAdapter, ISpxLuEngineAdapter, CSpxMockLuEngineAdapter);
     SPX_FACTORY_MAP_END();
 }
 

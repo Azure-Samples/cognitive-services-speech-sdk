@@ -9,6 +9,7 @@
 #include <string>
 #include <speechapi_c.h>
 #include <speechapi_cxx_common.h>
+#include <speechapi_cxx_recognition_result.h>
 
 
 namespace CARBON_NAMESPACE_ROOT {

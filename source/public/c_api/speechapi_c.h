@@ -8,7 +8,6 @@
 #pragma once
 
 #include <speechapi_c_common.h>
-#include <speechapi_c_global.h>
 #include <speechapi_c_intent_result.h>
 #include <speechapi_c_intent_trigger.h>
 #include <speechapi_c_intent_recognizer.h>

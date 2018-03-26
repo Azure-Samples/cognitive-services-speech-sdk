@@ -51,12 +51,12 @@ void CSpxMockLuEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionResul
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_NOT_FOUND);
 
     // Are we supposed to process this result?
-    auto mockIntent = properties->HasStringValue(L"__mockIntentId");
+    auto mockIntent = properties->HasStringValue(L"CARBON-INTERNAL-MOCK-IntentId");
     if (mockIntent)
     {
         // What's the intentId and json payload?
-        auto intentId = properties->GetStringValue(L"__mockIntentId");
-        auto json = properties->GetStringValue(L"__mockIntentJson");
+        auto intentId = properties->GetStringValue(L"CARBON-INTERNAL-MOCK-IntentId");
+        auto json = properties->GetStringValue(L"CARBON-INTERNAL-MOCK-IntentJson");
 
         // OK... Now let's initialize the intent result
         auto initIntentResult = std::dynamic_pointer_cast<ISpxIntentRecognitionResultInit>(result);

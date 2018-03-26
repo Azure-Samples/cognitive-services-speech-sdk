@@ -45,7 +45,7 @@ void CSpxMockInteractiveMicrophone::InitAudioPump()
 
     // Try to get the filename from our site's property collection
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
-    auto fileName = properties->GetStringValue(L"__mockWavFileAudio");
+    auto fileName = properties->GetStringValue(L"CARBON-INTERNAL-MOCK-WavFileAudio");
 
     // Create the wav file pump if we have a filename, otherwise create the mock audio pump
     fileName.empty() ? InitMockAudioPump() : InitWavFilePump(fileName);
@@ -74,9 +74,9 @@ void CSpxMockInteractiveMicrophone::InitWavFilePump(const std::wstring& fileName
 
     // Set other various properties that control the mock
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
-    audioFilePump->SetContinuousLoop(properties->GetBooleanValue(L"__mockContinuousAudio"));
-    audioFilePump->SetIterativeLoop(properties->GetBooleanValue(L"__mockIterativeAudio"));
-    audioFilePump->SetRealTimePercentage((uint8_t)properties->GetNumberValue(L"__mockRealTimeAudioPercentage"));
+    audioFilePump->SetContinuousLoop(properties->GetBooleanValue(L"CARBON-INTERNAL-MOCK-ContinuousAudio"));
+    audioFilePump->SetIterativeLoop(properties->GetBooleanValue(L"CARBON-INTERNAL-MOCK-IterativeAudio"));
+    audioFilePump->SetRealTimePercentage((uint8_t)properties->GetNumberValue(L"CARBON-INTERNAL-MOCK-RealTimeAudioPercentage"));
 
     // and ... We're finished
     m_delegateToAudioPump = std::dynamic_pointer_cast<ISpxAudioPump>(audioFilePump);

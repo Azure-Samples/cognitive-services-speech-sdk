@@ -119,26 +119,27 @@ UspEndpointType CSpxUspRecoEngineAdapter::GetUspEndpointType()
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
-    // Get the property that indicates what endpoint to use...
-    auto value = properties->GetStringValue(L"__uspEndpoint");
+    // Get the properties that indicates what endpoint type to use...
+    auto endpoint = properties->GetStringValue(LR"(SPEECH-Endpoint)");
+    auto subscriptionKey = properties->GetStringValue(LR"(SPEECH-SubscriptionKey)");
+    auto customSpeechModelId = properties->GetStringValue(LR"(CUSTOMSPEECH-modelId)");
 
-    // Convert that value to the appropriate UspEndpointType
     UspEndpointType type;
-    if (value.empty() || PAL::wcsicmp(value.c_str(), L"BING") == 0)
-    {
-        type = USP_ENDPOINT_BING_SPEECH;
-    }
-    else if (PAL::wcsicmp(value.c_str(), L"CRIS") == 0)
+    if (!customSpeechModelId.empty())                           // Use the Custom Recognition Intelligent Service
     {
         type = USP_ENDPOINT_CRIS;
     }
-    else if (PAL::wcsicmp(value.c_str(), L"CDSDK") == 0)
+    else if (PAL::wcsicmp(endpoint.c_str(), L"CORTANA") == 0)   // Use the CORTANA SDK endpoint
     {
         type = USP_ENDPOINT_CDSDK;
     }
-    else
+    else if (!endpoint.empty())                                 // Use the SPECIFIED endpoint
     {
         type = USP_ENDPOINT_UNKNOWN;
+    }
+    else                                                        // Otherwise ... Use the default SPEECH endpoints
+    {
+        type = USP_ENDPOINT_BING_SPEECH;
     }
 
     // We're done!
@@ -155,7 +156,7 @@ std::string CSpxUspRecoEngineAdapter::GetUspCustomEndpoint()
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
     // Get the property that indicates what endpoint to use...
-    auto value = properties->GetStringValue(L"__uspEndpoint");
+    auto value = properties->GetStringValue(LR"(SPEECH-Endpoint)");
     return PAL::ToString(value);
 }
 
@@ -169,7 +170,7 @@ UspRecognitionMode CSpxUspRecoEngineAdapter::GetUspRecoMode()
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
     // Get the property that indicates what reco mode to use...
-    auto value = properties->GetStringValue(L"__uspRecoMode");
+    auto value = properties->GetStringValue(LR"(SPEECH-RecoMode)");
 
     // Convert that value to the appropriate UspRecognitionMode...
     UspRecognitionMode mode;
@@ -201,7 +202,7 @@ std::string CSpxUspRecoEngineAdapter::GetUspLanguage()
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
     // Get the property that indicates what language to use...
-    auto value = properties->GetStringValue(L"__uspLanguage");
+    auto value = properties->GetStringValue(LR"(SPEECH-RecoLanguage)");
     return PAL::ToString(value);
 }
 
@@ -212,7 +213,7 @@ std::string CSpxUspRecoEngineAdapter::GetUspModelId()
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
     // Get the property that indicates what model to use...
-    auto value = properties->GetStringValue(L"__uspModelId");
+    auto value = properties->GetStringValue(LR"(CUSTOMSPEECH-ModelId)");
     return PAL::ToString(value);
 }
 
@@ -223,9 +224,9 @@ std::string CSpxUspRecoEngineAdapter::GetUspAuthenticationData(UspAuthentication
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
     // Get the properties that indicates what endpoint to use...
-    auto uspSubscriptionKey = properties->GetStringValue(L"__uspSubscriptionKey");
-    auto uspAuthToken = properties->GetStringValue(L"__uspAuthToken");
-    auto uspRpsToken = properties->GetStringValue(L"__uspRpsToken");
+    auto uspSubscriptionKey = properties->GetStringValue(L"SPEECH-SubscriptionKey");
+    auto uspAuthToken = properties->GetStringValue(L"SPEECH-AuthToken");
+    auto uspRpsToken = properties->GetStringValue(L"SPEECH-RpsToken");
 
     // Use those properties to determine which authentication type to use
     auto authType = USP_AUTHENTICATION_UNKNOWN;

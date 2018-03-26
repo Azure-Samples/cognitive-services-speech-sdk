@@ -124,9 +124,8 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
     GIVEN("Mocks for UspRecoEngine and Microphone...")
     {
-        GlobalParameterCollection& globalParams = GlobalParameters::Get();
-        globalParams[L"__mockUspRecoEngine"] = true;
-        globalParams[L"__mockMicrophone"] = true;
+        RecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-MOCK-UspRecoEngine", true);
+        RecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-MOCK-Microphone", true);
 
         int gotIntermediateResults = 0;
         int gotFinalResult = 0;

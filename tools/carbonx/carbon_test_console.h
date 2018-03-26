@@ -77,7 +77,6 @@ private:
     void ConsoleInput_HelpOnSession();
     void ConsoleInput_HelpOnCommandSystem();
 
-    void ConsoleInput_Global(const wchar_t* psz);
     void ConsoleInput_Factory(const wchar_t* psz);
     void ConsoleInput_Recognizer(const wchar_t* psz, std::shared_ptr<BaseAsyncRecognizer>& recognizer);
     void ConsoleInput_SpeechRecognizer(const wchar_t* psz, std::shared_ptr<SpeechRecognizer>& speechRecognizer);
@@ -199,6 +198,7 @@ private:
 
     void Sample_HelloWorld_Intent();
     void Sample_HelloWorld_Intent(const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId);
+    void Sample_HelloWorld_Subscription();
 
 
 private:

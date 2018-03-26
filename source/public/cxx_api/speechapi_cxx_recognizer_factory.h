@@ -10,17 +10,36 @@
 #include <speechapi_c_common.h>
 #include <speechapi_cxx_common.h>
 #include <speechapi_cxx_speech_recognizer.h>
-#include <speechapi_cxx_translation_recognizer.h>
 #include <speechapi_cxx_intent_recognizer.h>
+#include <speechapi_cxx_translation_recognizer.h>
+#include <speechapi_cxx_recognizer_factory_parameter.h>
 #include <speechapi_c_recognizer_factory.h>
 
 
 namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
 
+
 class RecognizerFactory
 {
 public:
+
+    class Parameters
+    {
+    public:
+
+        static bool IsString(const wchar_t* name) { return RecognizerFactoryParameter(name).IsString(); }
+        static void SetString(const wchar_t* name, const wchar_t* value) { RecognizerFactoryParameter(name).SetString(value); }
+        static std::wstring GetString(const wchar_t* name, const wchar_t* defaultValue = L"") { return RecognizerFactoryParameter(name).GetString(defaultValue); }
+
+        static bool IsNumber(const wchar_t* name) { return RecognizerFactoryParameter(name).IsNumber(); }
+        static void SetNumber(const wchar_t* name, int32_t value) { RecognizerFactoryParameter(name).SetNumber(value); }
+        static int32_t GetNumber(const wchar_t* name, int32_t defaultValue = 0) { return RecognizerFactoryParameter(name).GetNumber(defaultValue); }
+
+        static bool IsBool(const wchar_t* name) { return RecognizerFactoryParameter(name).IsBool(); }
+        static void SetBool(const wchar_t* name, bool value) { RecognizerFactoryParameter(name).SetBool(value); }
+        static bool GetBool(const wchar_t* name, bool defaultValue = false) { return RecognizerFactoryParameter(name).GetBool(defaultValue); }
+    };
 
     static std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer()
     {
@@ -29,7 +48,6 @@ public:
         return std::make_shared<Speech::SpeechRecognizer>(hreco); 
     }
 
-    static std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer(bool passiveListeningEnaled) { UNUSED(passiveListeningEnaled); throw nullptr; }
     static std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer(const std::wstring& language) { UNUSED(language); throw nullptr; };
 
     static std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName)
@@ -40,12 +58,6 @@ public:
     };
 
     static std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { UNUSED(fileName); UNUSED(language); throw nullptr; };
-
-    static std::shared_ptr<Speech::SpeechRecognizer> CreateDictationRecognizer() { throw nullptr; return CreateSpeechRecognizer(); }
-    static std::shared_ptr<Speech::SpeechRecognizer> CreateDictationRecognizer(bool passiveListeningEnaled) { UNUSED(passiveListeningEnaled); throw nullptr; }
-    static std::shared_ptr<Speech::SpeechRecognizer> CreateDictationRecognizer(const std::wstring& language) { UNUSED(language); throw nullptr; };
-    static std::shared_ptr<Speech::SpeechRecognizer> CreateDictationRecognizerWithFileInput(const std::wstring& fileName) { UNUSED(fileName); throw nullptr; };
-    static std::shared_ptr<Speech::SpeechRecognizer> CreateDictationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { UNUSED(fileName); UNUSED(language); throw nullptr; };
 
     static std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
     {
@@ -67,7 +79,6 @@ public:
         return std::make_shared<Intent::IntentRecognizer>(hreco); 
     }
 
-    static std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizer(bool passiveListeningEnaled) { UNUSED(passiveListeningEnaled); throw nullptr; }
     static std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizer(const std::wstring& language) { UNUSED(language); throw nullptr; };
 
     static std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName)

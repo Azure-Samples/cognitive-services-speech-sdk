@@ -345,21 +345,14 @@ void CSpxAudioStreamSession::EnsureInitRecoEngineAdapter()
 void CSpxAudioStreamSession::InitRecoEngineAdapter()
 {
     // determine which type (or types) of reco engine adapters we should try creating...
-    bool tryHybrid = GetBooleanValue(L"__useHybridRecoEngine", false);
-    bool tryUnidec = GetBooleanValue(L"__useUnidecRecoEngine", false);
-    bool tryMock = GetBooleanValue(L"__useMockRecoEngine", false);
-    bool tryUsp = GetBooleanValue(L"__useUspRecoEngine", false);
+    bool tryUnidec = GetBooleanValue(L"CARBON-INTERNAL-UseRecoEngine-Unidec", false);
+    bool tryMock = GetBooleanValue(L"CARBON-INTERNAL-UseRecoEngine-Mock", false);
+    bool tryUsp = GetBooleanValue(L"CARBON-INTERNAL-UseRecoEngine-Usp", false);
 
     // if nobody specified which type(s) of reco engine adapters this session should use, we'll use the USP
-    if (!tryHybrid && !tryUnidec && !tryMock && !tryUsp)
+    if (!tryUnidec && !tryMock && !tryUsp)
     {
         tryUsp = true;
-    }
-
-    // try to create the hybrid adapter...
-    if (m_recoAdapter == nullptr && tryHybrid)
-    {
-        m_recoAdapter = SpxCreateObjectWithSite<ISpxRecoEngineAdapter>("CSpxHybridRecoEngineAdapter", this);
     }
 
     // try to create the Unidec adapter... 
@@ -418,13 +411,11 @@ void CSpxAudioStreamSession::InitLuEngineAdapter()
     SPX_IFTRUE_THROW_HR(m_luAdapter != nullptr, SPXERR_ALREADY_INITIALIZED);
 
     // determine which type (or types) of reco engine adapters we should try creating...
-    bool tryLuisDirect = GetBooleanValue(L"__useLuisDirectLuEngine", false);
-    bool tryLuisIndirect = GetBooleanValue(L"__useLuisIndirectLuEngine", false);
-    bool trySimple = GetBooleanValue(L"__useSimpleLuEngine", false);
-    bool tryMock = GetBooleanValue(L"__useMockLuEngine", false);
+    bool tryLuisDirect = GetBooleanValue(L"CARBON-INTERNAL-UseLuEngine-LuisDirect", false);
+    bool tryMock = GetBooleanValue(L"CARBON-INTERNAL-UseLuEngine-Mock", false);
 
     // if nobody specified which type(s) of LU engine adapters this session should use, we'll use LuisDirect
-    if (!tryLuisDirect && !tryLuisIndirect && !trySimple && !tryMock)
+    if (!tryLuisDirect && !tryMock)
     {
         tryLuisDirect = true;
     }
@@ -433,18 +424,6 @@ void CSpxAudioStreamSession::InitLuEngineAdapter()
     if (m_luAdapter == nullptr && tryLuisDirect)
     {
         m_luAdapter = SpxCreateObjectWithSite<ISpxLuEngineAdapter>("CSpxLuisDirectEngineAdapter", this);
-    }
-
-    // try to create the Luis Indirect adapter
-    if (m_luAdapter == nullptr && tryLuisIndirect)
-    {
-        m_luAdapter = SpxCreateObjectWithSite<ISpxLuEngineAdapter>("CSpxLuisIndirectEngineAdapter", this);
-    }
-
-    // try to create the Simple Intent adapter... 
-    if (m_luAdapter == nullptr && trySimple)
-    {
-        m_luAdapter = SpxCreateObjectWithSite<ISpxLuEngineAdapter>("CSpxSimpleIntentEngineAdapter", this);
     }
 
     // try to create the mock adapter...
