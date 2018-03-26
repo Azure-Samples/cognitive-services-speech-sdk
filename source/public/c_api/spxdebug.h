@@ -373,7 +373,7 @@ inline void __spx_throw_hr_impl(SPXHR hr)
 #endif
 
 #if defined(SPX_CONFIG_TRACE_RETURN_ON_FAIL) || defined(SPX_CONFIG_INCLUDE_ALL) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
-#define SPX_RETURN_HR(hr)                						\
+#define SPX_RETURN_HR(hr)                                       \
     do {                                                        \
         SPXHR x = hr;                                           \
         if (SPX_FAILED(x)) {                                    \
@@ -381,7 +381,7 @@ inline void __spx_throw_hr_impl(SPXHR hr)
         }                                                       \
         return x;                                               \
     } while (0)
-#define SPX_RETURN_HR_IF(hr, cond)								\
+#define SPX_RETURN_HR_IF(hr, cond)                              \
     do {                                                        \
         int fCond = (cond);                                     \
         if (fCond) {                                            \
@@ -408,7 +408,7 @@ inline void __spx_throw_hr_impl(SPXHR hr)
     } } } while (0)
 #else
 #define SPX_RETURN_HR(hr) return hr
-#define SPX_RETURN_HR_IF(hr, cond)								\
+#define SPX_RETURN_HR_IF(hr, cond)                              \
     do {                                                        \
         int fCond = (cond);                                     \
         if (fCond) {                                            \
@@ -430,7 +430,7 @@ inline void __spx_throw_hr_impl(SPXHR hr)
 #endif
 
 #if defined(SPX_CONFIG_TRACE_EXITFN_ON_FAIL) || defined(SPX_CONFIG_INCLUDE_ALL) || defined(SPX_CONFIG_INCLUDE_ALL_DBG)
-#define SPX_EXITFN_HR(hr)                						\
+#define SPX_EXITFN_HR(hr)                                       \
     do {                                                        \
         SPXHR x = hr;                                           \
         if (SPX_FAILED(x)) {                                    \
@@ -438,7 +438,7 @@ inline void __spx_throw_hr_impl(SPXHR hr)
         }                                                       \
         goto SPX_EXITFN_CLEANUP;                                \
     } while (0)
-#define SPX_EXITFN_HR_IF(hr, cond)								\
+#define SPX_EXITFN_HR_IF(hr, cond)                              \
     do {                                                        \
         int fCond = (cond);                                     \
         if (fCond) {                                            \
@@ -464,12 +464,12 @@ inline void __spx_throw_hr_impl(SPXHR hr)
                 goto SPX_EXITFN_CLEANUP;                        \
     } } } while (0)
 #else
-#define SPX_EXITFN_HR(hr)                						\
+#define SPX_EXITFN_HR(hr)                                       \
     do {                                                        \
         SPXHR x = hr;                                           \
         goto SPX_EXITFN_CLEANUP;                                \
     } while (0)
-#define SPX_EXITFN_HR_IF(hr, cond)								\
+#define SPX_EXITFN_HR_IF(hr, cond)                              \
     do {                                                        \
         int fCond = (cond);                                     \
         if (fCond) {                                            \

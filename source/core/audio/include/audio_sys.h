@@ -18,7 +18,7 @@ AUDIO_RESULT_INVALID_STATE,     \
 AUDIO_RESULT_ERROR              \
 
 /** @brief Enumeration specifying the possible return values for the APIs in
-*		   this module.
+*          this module.
 */
 DEFINE_ENUM(AUDIO_RESULT, AUDIO_RESULT_VALUES)
 
@@ -44,12 +44,12 @@ typedef void* AUDIO_BUFFER;
 
 typedef struct _AUDIO_WAVEFORMAT
 {
-	uint16_t  wFormatTag;
-	uint16_t  nChannels;
-	uint32_t  nSamplesPerSec;
-	uint32_t  nAvgBytesPerSec;
-	uint16_t  nBlockAlign;
-	uint16_t  wBitsPerSample;
+    uint16_t  wFormatTag;
+    uint16_t  nChannels;
+    uint32_t  nSamplesPerSec;
+    uint32_t  nAvgBytesPerSec;
+    uint16_t  nBlockAlign;
+    uint16_t  wBitsPerSample;
 } AUDIO_WAVEFORMAT;
 
 typedef void(*ON_AUDIOERROR_CALLBACK)(void* pContext, AUDIO_ERROR error);

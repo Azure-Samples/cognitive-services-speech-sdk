@@ -58,16 +58,16 @@ typedef struct AUDIO_SYS_DATA_TAG
     //Audio Input Context
     IAudioClient*                   pAudioInputClient;
     HANDLE                          hBufferReady;
-	HANDLE                          hCaptureThreadShouldExit;
-	HANDLE                          hCaptureThread;
-	WAVEFORMATEX                    audioInFormat;
+    HANDLE                          hCaptureThreadShouldExit;
+    HANDLE                          hCaptureThread;
+    WAVEFORMATEX                    audioInFormat;
     //bool                          waveDataDirty;
 
     //Audio Output Context
     IMMDevice*                      pAudioOutputDevice;
     HANDLE                          hRenderThreadShouldExit;
-	HANDLE                          hRenderThreadDidExit;
-	BOOL                            output_canceled;
+    HANDLE                          hRenderThreadDidExit;
+    BOOL                            output_canceled;
 
     ON_AUDIOERROR_CALLBACK          error_cb;
     ON_AUDIOOUTPUT_STATE_CALLBACK   output_state_cb;
@@ -79,7 +79,7 @@ typedef struct AUDIO_SYS_DATA_TAG
     void                            *user_errorctx;
     AUDIO_STATE                     current_output_state;
     AUDIO_STATE                     current_input_state;
-	STRING_HANDLE					hDeviceName;
+    STRING_HANDLE                   hDeviceName;
     size_t                          inputFrameCnt;
 } AUDIO_SYS_DATA;
 
@@ -141,7 +141,7 @@ DWORD WINAPI PlayAudio(
     int ret;
     WORD nBlockAlign = pRender->audioOutFormat.nBlockAlign;
     HANDLE events[2];
-	BOOL audioStarted = FALSE;
+    BOOL audioStarted = FALSE;
 
     events[0] = CreateEventEx(NULL, NULL, 0, EVENT_ALL_ACCESS);
     events[1] = pAudio->hRenderThreadShouldExit;
@@ -163,7 +163,7 @@ DWORD WINAPI PlayAudio(
         0,
         &pRender->audioOutFormat,
         NULL);
-	EXIT_ON_ERROR(hr);
+    EXIT_ON_ERROR(hr);
 
     hr = pAudioClient->SetEventHandle(events[0]);
     EXIT_ON_ERROR(hr);
@@ -178,7 +178,7 @@ DWORD WINAPI PlayAudio(
 
     hr = pAudioClient->Start();  // Start playing.
     EXIT_ON_ERROR(hr);
-	audioStarted = TRUE;
+    audioStarted = TRUE;
 
     // Render Audio Buffer
     offset = 0;
@@ -256,10 +256,10 @@ DWORD WINAPI PlayAudio(
 
 Exit:
     pAudio->output_canceled = FALSE;
-	if (audioStarted)
-	{
-		pAudioClient->Stop();  // Stop playing.
-	}
+    if (audioStarted)
+    {
+        pAudioClient->Stop();  // Stop playing.
+    }
 
     if (pRender->hOutputBuffer)
     {
@@ -277,12 +277,12 @@ Exit:
         pAudio->output_state_cb(pAudio->user_outputctx, AUDIO_STATE_STOPPED);
     }
 
-	SAFE_CLOSE_HANDLE(events[0]);
+    SAFE_CLOSE_HANDLE(events[0]);
 
     SAFE_RELEASE(pAudioClient);
     SAFE_RELEASE(pRenderClient);
 
-	SetEvent(pAudio->hRenderThreadDidExit);
+    SetEvent(pAudio->hRenderThreadDidExit);
 
     return 0;
 }
@@ -344,16 +344,16 @@ static AUDIO_RESULT write_audio_stream(
         pAudio->waveoutHdr.lpData = (LPSTR)BUFFER_u_char(pAudio->hOutputBuffer);
         pAudio->waveoutHdr.dwBufferLength = (DWORD)length;
     }
-	
+
     ResetEvent(audioData->hRenderThreadShouldExit);
     ResetEvent(audioData->hRenderThreadDidExit);
 
     //Notify Start Rendering
-	audioData->current_output_state = AUDIO_STATE_RUNNING;
-	if (audioData->output_state_cb)
-	{
-		audioData->output_state_cb(audioData->user_outputctx, AUDIO_STATE_RUNNING);
-	}
+    audioData->current_output_state = AUDIO_STATE_RUNNING;
+    if (audioData->output_state_cb)
+    {
+        audioData->output_state_cb(audioData->user_outputctx, AUDIO_STATE_RUNNING);
+    }
     HANDLE hRenderThread = CreateThread(0, 0, renderThreadProc, pAudio, 0, nullptr);
     CloseHandle(hRenderThread);  // we don't need the handle, release so it doesn't leak
 
@@ -439,8 +439,8 @@ AUDIO_SYS_HANDLE audio_create()
         result->hRenderThreadShouldExit = CreateEvent(0, FALSE, FALSE, nullptr);
         if (nullptr == result->hRenderThreadShouldExit) { hr = E_FAIL; goto Exit; }
 
-		result->hRenderThreadDidExit = CreateEvent(0, FALSE, TRUE, nullptr); // n.b. starts signaled so force_render_thread_to_exit_and_wait will work even if audio was never played
-		if (nullptr == result->hRenderThreadDidExit) { hr = E_FAIL; goto Exit; }
+        result->hRenderThreadDidExit = CreateEvent(0, FALSE, TRUE, nullptr); // n.b. starts signaled so force_render_thread_to_exit_and_wait will work even if audio was never played
+        if (nullptr == result->hRenderThreadDidExit) { hr = E_FAIL; goto Exit; }
     }
 
 Exit:
@@ -452,11 +452,11 @@ Exit:
     {
         SAFE_RELEASE(result->pAudioInputClient);
         SAFE_CLOSE_HANDLE(result->hBufferReady);
-		SAFE_CLOSE_HANDLE(result->hCaptureThreadShouldExit);
+        SAFE_CLOSE_HANDLE(result->hCaptureThreadShouldExit);
 
         SAFE_RELEASE(result->pAudioOutputDevice);
-		SAFE_CLOSE_HANDLE(result->hRenderThreadShouldExit);
-		SAFE_CLOSE_HANDLE(result->hRenderThreadDidExit);
+        SAFE_CLOSE_HANDLE(result->hRenderThreadShouldExit);
+        SAFE_CLOSE_HANDLE(result->hRenderThreadDidExit);
 
         if (result)
         {
@@ -497,10 +497,10 @@ void audio_destroy(AUDIO_SYS_HANDLE handle)
         SAFE_CLOSE_HANDLE(audioData->hRenderThreadShouldExit);
         SAFE_CLOSE_HANDLE(audioData->hRenderThreadDidExit);
 
-		if (audioData->hDeviceName)
-		{
-			STRING_delete(audioData->hDeviceName);
-		}
+        if (audioData->hDeviceName)
+        {
+            STRING_delete(audioData->hDeviceName);
+        }
 
         free(audioData);
         CoUninitialize();
@@ -865,34 +865,34 @@ AUDIO_RESULT audio_set_options(AUDIO_SYS_HANDLE handle, const char* optionName, 
 
         if (strcmp("buff_frame_cnt", optionName) == 0)
         {
-			if (value)
-				audioData->inputFrameCnt = (size_t)*((int*)value);
-			else
-				audioData->inputFrameCnt = 0;
+            if (value)
+                audioData->inputFrameCnt = (size_t)*((int*)value);
+            else
+                audioData->inputFrameCnt = 0;
             return AUDIO_RESULT_OK;
         }
-		if (strcmp(AUDIO_OPTION_DEVICENAME, optionName) == 0)
-		{
-			if (!audioData->hDeviceName)
-			{
-				if(value)
-					audioData->hDeviceName = STRING_construct((char*)value);
-				else
-					audioData->hDeviceName = STRING_construct("");
-			}
-			else
-			{
-				if (value)
-					STRING_copy(audioData->hDeviceName, (char*)value);
-				else
-					STRING_copy(audioData->hDeviceName, "");
-			}
+        if (strcmp(AUDIO_OPTION_DEVICENAME, optionName) == 0)
+        {
+            if (!audioData->hDeviceName)
+            {
+                if(value)
+                    audioData->hDeviceName = STRING_construct((char*)value);
+                else
+                    audioData->hDeviceName = STRING_construct("");
+            }
+            else
+            {
+                if (value)
+                    STRING_copy(audioData->hDeviceName, (char*)value);
+                else
+                    STRING_copy(audioData->hDeviceName, "");
+            }
 
-			if (audioData->hDeviceName)
-			{
-				return AUDIO_RESULT_OK;
-			}
-		}
+            if (audioData->hDeviceName)
+            {
+                return AUDIO_RESULT_OK;
+            }
+        }
     }
     return AUDIO_RESULT_INVALID_ARG;
 
@@ -1002,15 +1002,15 @@ Exit:
 
 STRING_HANDLE audio_output_get_name(AUDIO_SYS_HANDLE handle)
 {
-	AUDIO_SYS_DATA* audioData = (AUDIO_SYS_DATA*)handle;
+    AUDIO_SYS_DATA* audioData = (AUDIO_SYS_DATA*)handle;
 
-	if (handle)
-	{
-		if (audioData->hDeviceName)
-		{
-			return STRING_clone(audioData->hDeviceName);
-		}
-	}
+    if (handle)
+    {
+        if (audioData->hDeviceName)
+        {
+            return STRING_clone(audioData->hDeviceName);
+        }
+    }
 
-	return NULL;
+    return NULL;
 }
