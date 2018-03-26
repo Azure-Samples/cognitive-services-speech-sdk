@@ -80,15 +80,15 @@ public:
 
     Value operator[](const wchar_t* name) { return Value(new T(m_handle, name)); }
 
-    bool HasString(const wchar_t* name) { return T(m_handle, name).HasString(); }
+    bool HasString(const wchar_t* name) { return T(m_handle, name).IsString(); }
     void SetString(const wchar_t* name, const wchar_t* value) { T(m_handle, name).SetString(value); }
     std::wstring GetString(const wchar_t* name, const wchar_t* defaultValue = L"") { return T(m_handle, name).GetString(defaultValue); }
 
-    bool HasNumber(const wchar_t* name) { return T(m_handle, name).HasNumber(); }
+    bool HasNumber(const wchar_t* name) { return T(m_handle, name).IsNumber(); }
     void SetNumber(const wchar_t* name, int32_t value) { T(m_handle, name).SetNumber(value); }
     int32_t GetNumber(const wchar_t* name, int32_t defaultValue = 0) { return T(m_handle, name).GetNumber(defaultValue); }
 
-    bool HasBool(const wchar_t* name) { return T(m_handle, name).HasBool(); }
+    bool HasBool(const wchar_t* name) { return T(m_handle, name).IsBool(); }
     void SetBool(const wchar_t* name, bool value) { T(m_handle, name).SetBool(value); }
     bool GetBool(const wchar_t* name, bool defaultValue = false) { return T(m_handle, name).GetBool(defaultValue); }
 
@@ -96,10 +96,10 @@ public:
     // TODO: Fix SWIG such that we don't need to expose the default methods below... 
     //       And then... once fixed ... delete the next 5 lines of code:
     //
-    ValueCollection(ValueCollection&&) { SPX_THROW_HR(SPXERR_NOT_IMPL); }
+    /*ValueCollection(ValueCollection&&) { SPX_THROW_HR(SPXERR_NOT_IMPL); }
     ValueCollection(const ValueCollection&) { SPX_THROW_HR(SPXERR_NOT_IMPL); }
     ValueCollection& operator=(ValueCollection&&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
-    const ValueCollection& operator=(const ValueCollection&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
+    const ValueCollection& operator=(const ValueCollection&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }*/
 
 
 private:

@@ -37,7 +37,8 @@ namespace CarbonSamples
 
         public static async Task IntentRecognitionAsync(string audioFile)
         {
-            var reco = RecognizerFactory.CreateIntentRecognizerWithFileInput(audioFile);
+            var factory = new RecognizerFactory();
+            var reco = factory.CreateIntentRecognizerWithFileInput(audioFile);
             // var reco = RecognizerFactory.CreateIntentRecognizer();
 
             // Subscribes to events.

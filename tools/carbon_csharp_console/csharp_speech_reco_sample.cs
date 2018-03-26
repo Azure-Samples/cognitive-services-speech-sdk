@@ -37,7 +37,8 @@ namespace CarbonSamples
 
         public static async Task SpeechRecognitionAsync(string audioFile)
         {
-            var reco = RecognizerFactory.CreateSpeechRecognizerWithFileInput(audioFile);
+            var factory = new RecognizerFactory();
+            var reco = factory.CreateSpeechRecognizerWithFileInput(audioFile);
             // var reco = RecognizerFactory.CreateSpeechRecognizer();
 
             // Subscribes to events.

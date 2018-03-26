@@ -47,7 +47,7 @@ include_directories(${JAVA_INCLUDE_PATH})
 include_directories(${JNI_INCLUDE_DIRS})
 include_directories("${SRC_DIR}/..")
 
-# Build the C++ code into a dynamic library: example.dll (on Windows) or libexample.so (on Linux)
+# Build the C++ code start into a dynamic library: example.dll (on Windows) or libexample.so (on Linux)
 swig_add_library(${JAVA_BINDINGS} LANGUAGE java SOURCES ${SOURCES})
 swig_link_libraries(${JAVA_BINDINGS} libcarbon)
 set_target_properties(${SWIG_MODULE_${JAVA_BINDINGS}_REAL_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
@@ -58,8 +58,10 @@ set_target_properties(${SWIG_MODULE_${JAVA_BINDINGS}_REAL_NAME} PROPERTIES FOLDE
 set(JAVA_LIB ${PROJECT_NAME}_lib)
 
 # TODO this should be a wildcard, not an explicit list as these files are generated
-#set(SWIG_JAVA_SOURCES ${JAVA_SOURCE_DIRECTORY}/*.java)
+# set(SWIG_JAVA_SOURCES ${JAVA_SOURCE_DIRECTORY}/*.java)
+# SET_SOURCE_FILES_PROPERTIES(${SWIG_JAVA_SOURCES} PROPERTIES GENERATED TRUE)
 #file(GLOB SWIG_JAVA_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/swig-generated/*.java")
+
 set(SWIG_JAVA_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntentEventListener.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognitionEventListener.java
@@ -100,7 +102,6 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognitionResultPtrFuture.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognizer.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognizerBase.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_int32_t.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXEVENTHANDLE.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXLUISHANDLE.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXRECOHANDLE.java
@@ -109,6 +110,9 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXTRIGGERHANDLE.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_wchar_t.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/VoidFuture.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerFactoryParameter.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/ValueCollectionRecognizerParameter.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/Value.java
 )
 
 

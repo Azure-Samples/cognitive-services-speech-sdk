@@ -53,7 +53,7 @@ namespace Carbon.Recognition
 
                 if (handler != null)
                 {
-                    handler(this, arg);
+                    handler(this.recognizer, arg);
                 }
             }
 

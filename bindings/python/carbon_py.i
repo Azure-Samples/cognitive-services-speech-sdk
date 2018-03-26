@@ -84,8 +84,8 @@ class RecognizerFactory:
     @staticmethod
     def create_speech_recognizer(filename=None):
         if not filename:
-            return _RecognizerFactory.create_speech_recognizer()
-        return _RecognizerFactory.create_speech_recognizer_with_file_input(filename)
+            return recognizer_factory().create_speech_recognizer()
+        return recognizer_factory().create_speech_recognizer_with_file_input(filename)
 %}
 
 

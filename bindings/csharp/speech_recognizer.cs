@@ -16,6 +16,16 @@ namespace Carbon.Recognition.Speech
     public class SpeechRecognizer : Recognition.Recognizer
     {
         /// <summary>
+        /// The name of parameter `language`.
+        /// </summary>
+        public const string LanguageParameterName = "lang";
+
+        /// <summary>
+        /// The name of parameter `mode`.
+        /// </summary>
+        public const string ModeParameterName = "mode";
+
+        /// <summary>
         /// Defines event handler for the event when an intermediate recognition result is recevied.
         /// </summary>
         public event EventHandler<SpeechRecognitionResultEventArgs> OnIntermediateResult;
@@ -48,6 +58,8 @@ namespace Carbon.Recognition.Speech
             recoImpl.SessionStopped.Connect(sessionStoppedHandler);
             recoImpl.SoundStarted.Connect(soundStartedHandler);
             recoImpl.SoundStopped.Connect(soundStoppedHandler);
+
+            Parameters = new ParameterCollection<SpeechRecognizer>(this);
         }
 
         ~SpeechRecognizer()
@@ -64,10 +76,47 @@ namespace Carbon.Recognition.Speech
             //recoImpl.SoundStopped.Disconnect(soundStoppedHandler);
         }
 
+
         /// <summary>
-        /// The target language for the recognition.
+        /// The property represents the target language for the recognition.
         /// </summary>
-        public string Language { get; }
+        public string Language
+        {
+            get
+            {
+                // return Parameters.GetString(LanguageParameterName);
+                return Parameters[LanguageParameterName].AsString();
+            }
+
+            set
+            {
+                // Parameters.SetString(LanguageParameterName, value);
+                Parameters[LanguageParameterName] = new Carbon.Value(value);
+            }
+        }
+
+        /// <summary>
+        /// The property represents the recognition mode.
+        /// </summary>
+        public string Mode
+        {
+            get
+            {
+                // return Parameters.GetString(ModeParameterName);
+                return Parameters[ModeParameterName].AsString();
+            }
+
+            set
+            {
+                // Parameters.SetString(ModeParameterName, value);
+                Parameters[ModeParameterName] = new Carbon.Value(value);
+            }
+        }
+
+        /// <summary>
+        /// The property that represents the collection of parameters and their values.
+        /// </summary>
+        public ParameterCollection<SpeechRecognizer> Parameters { get;  }
 
         /// <summary>
         /// Starts speech recognition
@@ -78,7 +127,7 @@ namespace Carbon.Recognition.Speech
             return Task.Run(() => { return new SpeechRecognitionResult(this.recoImpl.Recognize()); });
         }
 
-        private Internal.SpeechRecognizer recoImpl;
+        internal Internal.SpeechRecognizer recoImpl;
         private ResultHandlerImpl intermediateResultHandler;
         private ResultHandlerImpl finalResultHandler;
         private ErrorHandlerImpl errorHandler;
@@ -100,7 +149,7 @@ namespace Carbon.Recognition.Speech
                 var handler = isFinalResultHandler ? recognizer.OnFinalResult : recognizer.OnIntermediateResult;
                 if (handler != null)
                 {
-                    handler(this, resultEventArg);
+                    handler(this.recognizer, resultEventArg);
                 }
             }
 
@@ -125,7 +174,7 @@ namespace Carbon.Recognition.Speech
 
                 if (handler != null)
                 {
-                    handler(this, resultEventArg);
+                    handler(this.recognizer, resultEventArg);
                 }
             }
 

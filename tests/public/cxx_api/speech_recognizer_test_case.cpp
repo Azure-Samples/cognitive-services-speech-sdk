@@ -37,7 +37,8 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
     SECTION("Check for race conditions in destructor.")
     {
         bool callback_invoked = false;
-        auto recognizer = RecognizerFactory::CreateSpeechRecognizerWithFileInput(input_file);
+        auto factory = new RecognizerFactory();
+        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
         recognizer->FinalResult.Connect(
             [&](const SpeechRecognitionEventArgs& args) 
         {
@@ -83,7 +84,8 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
         for (int i = 0; i < numLoops; i++)
         {
-            auto recognizer = RecognizerFactory::CreateSpeechRecognizerWithFileInput(input_file);
+            auto factory = new RecognizerFactory();
+            auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
 
             REQUIRE(recognizer != nullptr);
 
@@ -130,7 +132,8 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         int gotIntermediateResults = 0;
         int gotFinalResult = 0;
 
-        auto recognizer = RecognizerFactory::CreateSpeechRecognizer();
+        auto factory = new RecognizerFactory();
+        auto recognizer = factory->CreateSpeechRecognizer();
         REQUIRE(recognizer != nullptr);
 
         WHEN("We we connect both IntermediateResult and FinalResult event handlers...")

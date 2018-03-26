@@ -15,7 +15,8 @@ constexpr auto g_speechSubscriptionKey = LR"(093bc1e6d0004dff88677a4f0bba3da1)";
 
 void CarbonTestConsole::Sample_HelloWorld()
 {
-    auto recognizer = RecognizerFactory::CreateSpeechRecognizer();
+    auto factory = new RecognizerFactory();
+    auto recognizer = factory->CreateSpeechRecognizer();
 
     ConsoleWriteLine(L"Say something...");
     auto result = recognizer->RecognizeAsync().get();
@@ -25,7 +26,8 @@ void CarbonTestConsole::Sample_HelloWorld()
 
 void CarbonTestConsole::Sample_HelloWorld_WithEvents()
 {
-    auto recognizer = RecognizerFactory::CreateSpeechRecognizer();
+    auto factory = new RecognizerFactory();
+    auto recognizer = factory->CreateSpeechRecognizer();
 
     recognizer->IntermediateResult += [&](const SpeechRecognitionEventArgs& e) {
         ConsoleWriteLine(L"IntermediateResult: text=%ls", e.Result.Text.c_str());
@@ -39,7 +41,8 @@ void CarbonTestConsole::Sample_HelloWorld_WithEvents()
 
 void CarbonTestConsole::Sample_HelloWorld_PickEngine(const wchar_t* pszEngine) // L"Usp", L"Unidec", or L"Mock"
 {
-    auto recognizer = RecognizerFactory::CreateSpeechRecognizer();
+    auto factory = new RecognizerFactory();
+    auto recognizer = factory->CreateSpeechRecognizer();
     auto session = Session::FromRecognizer(recognizer);
 
     std::wstring propertyName = std::wstring(L"__use") + std::wstring(pszEngine) + std::wstring(L"RecoEngine");
@@ -68,7 +71,8 @@ void CarbonTestConsole::Sample_HelloWorld_Intent(const wchar_t* hostName, const 
 {
     auto model = LuisModel::From(hostName, subscriptionKey, appId);
 
-    auto recognizer = RecognizerFactory::CreateIntentRecognizer();
+    auto factory = new RecognizerFactory();
+    auto recognizer = factory->CreateIntentRecognizer();
     recognizer->AddIntent(L"GoBack", L"go back");
     recognizer->AddIntent(L"add to calendar", IntentTrigger::From(model, L"Calendar.Add"));
     recognizer->AddIntent(L"Bar", IntentTrigger::From(model, L"bar"));
@@ -80,7 +84,8 @@ void CarbonTestConsole::Sample_HelloWorld_Intent(const wchar_t* hostName, const 
 void CarbonTestConsole::Sample_HelloWorld_Subscription()
 {
     RecognizerFactory::Parameters::SetString(L"SPEECH-SubscriptionKey", g_speechSubscriptionKey);
-    auto recognizer = RecognizerFactory::CreateSpeechRecognizer();
+    auto factory = new RecognizerFactory();
+    auto recognizer = factory->CreateSpeechRecognizer();
 
     ConsoleWriteLine(L"Say something...");
     auto result = recognizer->RecognizeAsync().get();

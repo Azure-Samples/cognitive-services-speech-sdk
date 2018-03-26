@@ -23,7 +23,6 @@ namespace Recognition {
 class RecognizerFactory
 {
 public:
-
     class Parameters
     {
     public:
@@ -41,30 +40,43 @@ public:
         static bool GetBool(const wchar_t* name, bool defaultValue = false) { return RecognizerFactoryParameter(name).GetBool(defaultValue); }
     };
 
-    static std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer()
+    RecognizerFactory()
+    {
+    }
+
+    //RecognizerFactory(const std::wstring& subscriptionKey)
+    //{
+    //    
+    //}
+
+    //RecognizerFactory(const std::wstring& subscriptionKey, const std::wstring& region)
+    //{
+    //}
+
+    std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer()
     {
         SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
         SPX_THROW_ON_FAIL(::RecognizerFactory_CreateSpeechRecognizer_With_Defaults(&hreco));
         return std::make_shared<Speech::SpeechRecognizer>(hreco); 
     }
 
-    static std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer(const std::wstring& language) { UNUSED(language); throw nullptr; };
+    std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer(const std::wstring& language) { UNUSED(language); throw nullptr; };
 
-    static std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName)
+    std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName)
     {
         SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
         SPX_THROW_ON_FAIL(::RecognizerFactory_CreateSpeechRecognizer_With_FileInput(&hreco, fileName.c_str()));
         return std::make_shared<Speech::SpeechRecognizer>(hreco);
     };
 
-    static std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { UNUSED(fileName); UNUSED(language); throw nullptr; };
+    std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { UNUSED(fileName); UNUSED(language); throw nullptr; };
 
-    static std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
+    std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
     {
         return std::make_shared<Translation::TranslationRecognizer>(sourceLanguage, targetLanguage);
     }
 
-    static std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
+    std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
     {
         UNUSED(fileName);
         UNUSED(sourceLanguage);
@@ -72,28 +84,27 @@ public:
         throw nullptr;
     }
 
-    static std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizer()
+    std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizer()
     {
         SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
         SPX_THROW_ON_FAIL(::RecognizerFactory_CreateIntentRecognizer_With_Defaults(&hreco));
         return std::make_shared<Intent::IntentRecognizer>(hreco); 
     }
 
-    static std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizer(const std::wstring& language) { UNUSED(language); throw nullptr; };
+    std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizer(const std::wstring& language) { UNUSED(language); throw nullptr; };
 
-    static std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName)
+    std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName)
     {
         SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
         SPX_THROW_ON_FAIL(::RecognizerFactory_CreateIntentRecognizer_With_FileInput(&hreco, fileName.c_str()));
         return std::make_shared<Intent::IntentRecognizer>(hreco);
     }
 
-    static std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { UNUSED(fileName); UNUSED(language); throw nullptr; };
+    std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { UNUSED(fileName); UNUSED(language); throw nullptr; };
 
 
 private:
 
-    RecognizerFactory() = delete;
     RecognizerFactory(RecognizerFactory&&) = delete;
     RecognizerFactory(const RecognizerFactory&) = delete;
     RecognizerFactory& operator=(RecognizerFactory&&) = delete;

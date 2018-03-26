@@ -16,6 +16,7 @@
 %include <std_except.i>
 %include <std_shared_ptr.i>
 %include <std_wstring.i>
+%include <stdint.i>
 
 %shared_ptr(Carbon::Recognition::Recognizer)
 %shared_ptr(Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::RecognitionResult, Carbon::Recognition::RecognitionEventArgs>)
@@ -37,7 +38,13 @@
 %include <speechapi_cxx_common.h>
 
 %ignore Carbon::NotYetImplementedException;
+
+%ignore Carbon::ValueCollection::ValueCollection();
+%ignore Carbon::ValueCollection::ValueCollection(Handle handle);
 %include <speechapi_cxx_todo.h>
+%include <speechapi_cxx_value.h>
+
+%template(ValueCollectionRecognizerParameter) Carbon::ValueCollection<SPXRECOHANDLE, Carbon::Recognition::RecognizerParameter>;
 
 %ignore Carbon::Recognition::AsyncRecognizer::RecognizeAsync();
 %ignore Carbon::Recognition::AsyncRecognizer::StartContinuousRecognitionAsync();
@@ -229,6 +236,7 @@
 
 %ignore Carbon::Recognition::RecognizerFactory::CreateTranslationRecognizer;
 %ignore Carbon::Recognition::RecognizerFactory::CreateTranslationRecognizerWithFileInput;
+%include <speechapi_cxx_recognizer_factory_parameter.h>
 %include <speechapi_cxx_recognizer_factory.h>
 
 %include <speechapi_cxx_session_parameter_collection.h>

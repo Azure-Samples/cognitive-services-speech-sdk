@@ -17,7 +17,6 @@
 
 namespace CARBON_NAMESPACE_ROOT {
 
-
 class Session
 {
 public:
