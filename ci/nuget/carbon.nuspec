@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Microsoft.ClientSpeech</id>
+    <version>$BuildNumber$</version>
+    <title>Microsoft Client Speech SDK</title>
+    <authors>Microsoft</authors>
+    <owners>Microsoft, Speech Services</owners>
+    <copyright>© Microsoft Corporation. All rights reserved</copyright>
+    <projectUrl>https://NEED_URL_TODO</projectUrl>
+    <licenseUrl>https://NEED_URL_TODO</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <iconUrl>https://NEED_URL_TODO</iconUrl>
+    <description>Microsoft Client Speeck SDK</description>
+    <summary>This NuGet package provides native and managed libraries to use the Microsoft Cognitive Services speech functionality. It requires Visual Studio 2017. The API documentation is available at https://NEED_URL_TODO</summary>
+    <tags>Microsoft Speech Cognitive Services native C++</tags>
+    <releaseNotes>This is build $BuildNumber$</releaseNotes>
+    <dependencies />
+  </metadata>
+  <files>
+    <!-- target file(s) -->
+    <file src="build\native\Microsoft.ClientSpeech.targets" target="build\native\Microsoft.ClientSpeech.targets" />
+    <file src="build\net45\Microsoft.ClientSpeech.targets" target="build\net45\Microsoft.ClientSpeech.targets" />
+
+    <!-- C++ header files -->
+    <file src="..\..\source\public\cxx_api\*" target="build\native\include\cxx_api\" />
+
+    <!-- C header files -->
+    <file src="..\..\source\public\c_api\*" target="build\native\include\c_api\" />
+   
+    <!-- native dll and lib files -->
+    <file src="..\..\build\$Platform$\lib\$Configuration$\carbon.lib" target="build\native\$Platform$\$Configuration$\carbon.lib" />
+    <file src="..\..\build\$Platform$\bin\$Configuration$\carbon.dll" target="build\native\$Platform$\$Configuration$\carbon.dll" />
+
+    <!-- .NET dlls -->
+    <file src="..\..\build\$Platform$\bin\$Configuration$\carbon_csharp_bindings.dll" target="build\native\$Platform$\$Configuration$\carbon_csharp_bindings.dll" />
+    <file src="..\..\build\$Platform$\bin\$Configuration$\carbon_csharp_lib.dll" target="lib\net45\$Platform$\carbon_csharp_lib.dll" />
+
+  </files>
+</package>
