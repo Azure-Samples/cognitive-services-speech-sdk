@@ -114,7 +114,11 @@ std::shared_ptr<ISpxRecognitionResult> CSpxSession::WaitForRecognition()
     m_recoAsyncWaiting = true;
     m_cv.wait_for(lock, std::chrono::seconds(m_recoAsyncTimeout), [&] { return !m_recoAsyncWaiting; });
 
-    // We only get here if somebody invoked WaitForRecognition_Complete (and set the result value).
+    if (m_recoAsyncResult == nullptr) // If we don't have a result, make a 'NoMatch' result
+    {
+        lock.unlock();
+        EnsureFireResultEvent();
+    }
 
     SPX_DBG_ASSERT(m_recoAsyncResult != nullptr);
 
@@ -204,9 +208,14 @@ void CSpxSession::FireResultEvent(const std::wstring& sessionId, std::shared_ptr
 
 void CSpxSession::EnsureFireResultEvent()
 {
-    auto factory = SpxQueryService<ISpxRecoResultFactory>(this);
-    auto noMatchResult = factory->CreateNoMatchResult();
-    WaitForRecognition_Complete(noMatchResult);
+    // Since we're not holding a lock throughout this "ensure" method, a race is still possible.
+    // That said, the race is benign, in the worst case we just created a throw away no-match result.
+    if (m_recoAsyncWaiting)
+    {
+        auto factory = SpxQueryService<ISpxRecoResultFactory>(this);
+        auto noMatchResult = factory->CreateNoMatchResult();
+        WaitForRecognition_Complete(noMatchResult);
+    }
 }
 
 

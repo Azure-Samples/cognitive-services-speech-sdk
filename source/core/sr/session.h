@@ -6,7 +6,6 @@
 //
 
 #pragma once
-#include <atomic>
 #include <future>
 #include <memory>
 #include <list>
@@ -16,7 +15,6 @@
 
 
 namespace CARBON_IMPL_NAMESPACE() {
-    
 
 class CSpxSession : public ISpxSession
 {

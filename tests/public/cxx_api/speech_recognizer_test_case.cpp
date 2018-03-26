@@ -4,6 +4,8 @@
 //
 
 #include <iostream>
+#include <atomic>
+#include <map>
 #include "catch.hpp"
 #include "test_utils.h"
 
@@ -52,7 +54,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
 
         {
             unique_lock<mutex> lock(mtx);
-            cv.wait(lock, [&callback_invoked] { return callback_invoked; });
+            cv.wait(lock, [&] { return callback_invoked; });
         }
         recognizer.reset();
     }
@@ -60,6 +62,66 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
 
 TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 {
+
+     wstring input_file(L"whatstheweatherlike.wav");
+    REQUIRE(exists(input_file));
+
+    mutex mtx;
+    condition_variable cv;
+
+    enum class Callbacks { final_result, no_match, session_started, session_stopped };
+
+    SECTION("Make sure callbacks are invoked correctly.")
+    {
+        std::map<Callbacks, atomic_int> callbackCounts; 
+        callbackCounts[Callbacks::final_result] = 0;
+        callbackCounts[Callbacks::no_match] = 0;
+        callbackCounts[Callbacks::session_started] = 0;
+        callbackCounts[Callbacks::session_stopped] = 0;
+
+        const int numLoops = 5;
+
+        for (int i = 0; i < numLoops; i++)
+        {
+            auto recognizer = RecognizerFactory::CreateSpeechRecognizerWithFileInput(input_file);
+
+            REQUIRE(recognizer != nullptr);
+
+            bool sessionEnded = false;
+
+            recognizer->FinalResult.Connect(
+                [&](const SpeechRecognitionEventArgs&) { callbackCounts[Callbacks::final_result]++; });
+            recognizer->NoMatch.Connect(
+                [&](const SpeechRecognitionEventArgs&) { callbackCounts[Callbacks::no_match]++; });
+            recognizer->SessionStarted.Connect(
+                [&](const SessionEventArgs&) { callbackCounts[Callbacks::session_started]++; });
+            recognizer->SessionStopped.Connect(
+                [&](const SessionEventArgs&) 
+            { 
+                callbackCounts[Callbacks::session_stopped]++; 
+                unique_lock<mutex> lock(mtx);
+                sessionEnded = true;
+                cv.notify_one();
+            });
+
+            auto result = recognizer->RecognizeAsync().get();
+            
+            CHECK(result != nullptr);
+            
+            {
+                unique_lock<mutex> lock(mtx);
+                cv.wait(lock, [&] { return sessionEnded; });
+            }
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        }
+
+        CHECK(callbackCounts[Callbacks::session_started] == numLoops);
+        CHECK(callbackCounts[Callbacks::session_stopped] == numLoops);
+        CHECK(callbackCounts[Callbacks::final_result] == numLoops);
+        CHECK(callbackCounts[Callbacks::no_match] == 0);
+    }
+
     GIVEN("Mocks for UspRecoEngine and Microphone...")
     {
         GlobalParameterCollection& globalParams = GlobalParameters::Get();
