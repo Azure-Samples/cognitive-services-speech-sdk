@@ -1,0 +1,1 @@
+docfx --intermediateFolder ..\..\build\docfx

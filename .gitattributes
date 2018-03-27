@@ -26,3 +26,4 @@
 *.exe binary
 *.lib binary
 *.zip binary
+*.png binary
