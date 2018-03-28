@@ -16,16 +16,6 @@ namespace Carbon.Recognition.Speech
     public class SpeechRecognizer : Recognition.Recognizer
     {
         /// <summary>
-        /// The name of parameter `language`.
-        /// </summary>
-        public const string LanguageParameterName = "lang";
-
-        /// <summary>
-        /// The name of parameter `mode`.
-        /// </summary>
-        public const string ModeParameterName = "mode";
-
-        /// <summary>
         /// Defines event handler for the event when an intermediate recognition result is recevied.
         /// </summary>
         public event EventHandler<SpeechRecognitionResultEventArgs> OnIntermediateResult;
@@ -76,6 +66,28 @@ namespace Carbon.Recognition.Speech
             //recoImpl.SoundStopped.Disconnect(soundStoppedHandler);
         }
 
+        /// <summary>
+        /// The property represents the subscription key being used.
+        /// </summary>
+        public string SubscriptionKey
+        {
+            get
+            {
+                //return Parameters.GetString(SubscriptionKey);
+                return Parameters.Get<string>(ParameterNames.SubscriptionKey);
+            }
+        }
+
+        /// <summary>
+        /// The property represents the region being used.
+        /// </summary>
+        public string Region
+        {
+            get
+            {
+                return Parameters.Get<string>(ParameterNames.Region);
+            }
+        }
 
         /// <summary>
         /// The property represents the target language for the recognition.
@@ -84,36 +96,36 @@ namespace Carbon.Recognition.Speech
         {
             get
             {
-                return Parameters.Get<string>(LanguageParameterName);
-            }
-
-            set
-            {
-                Parameters.Set(LanguageParameterName, value);
-
+                return Parameters.Get<string>(ParameterNames.Language);
             }
         }
 
         /// <summary>
         /// The property represents the recognition mode.
         /// </summary>
-        public string Mode
+        public string RecognitionMode
         {
             get
             {
-                return Parameters.Get<string>(ModeParameterName);
+                return Parameters.Get<string>(ParameterNames.RecognitionMode);
             }
+        }
 
-            set
+        /// <summary>
+        /// The property represents the intput file name.
+        /// </summary>
+        public string InputFile
+        {
+            get
             {
-                Parameters.Set(ModeParameterName, value);
+                return Parameters.Get<string>(ParameterNames.InputFile);
             }
         }
 
         /// <summary>
         /// The property that represents the collection of parameters and their values.
         /// </summary>
-        public ParameterCollection<SpeechRecognizer> Parameters { get;  }
+        internal ParameterCollection<SpeechRecognizer> Parameters { get; }
 
         /// <summary>
         /// Starts speech recognition

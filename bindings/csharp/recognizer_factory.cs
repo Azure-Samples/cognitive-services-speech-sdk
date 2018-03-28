@@ -8,21 +8,11 @@ using Carbon.Recognition.Intent;
 
 namespace Carbon.Recognition
 {
-    /// <summary>
-    /// Defines factory methods to create recognizers.
-    /// </summary>
-    public class RecognizerFactory
-    {
-        /// <summary>
-        /// The name of parameter "SubscriptionKey"
-        /// </summary>
-        public const string SubscriptionKeyParameterName = "SubscriptionKey";
-
-        /// <summary>
-        /// The name of parameter "Region"
-        /// </summary>
-        public const string RegionParameterName = "Region";
-
+     /// <summary>
+     /// Defines factory methods to create recognizers.
+     /// </summary>
+     public class RecognizerFactory
+     {
         /// <summary>
         /// Creates a recognizer factory.
         /// </summary>
@@ -53,12 +43,12 @@ namespace Carbon.Recognition
         {
             get
             {
-                return Parameters.Get<string>(SubscriptionKeyParameterName);
+                return Parameters.Get<string>(ParameterNames.SubscriptionKey);
             }
 
             set
             {
-                Parameters.Set(SubscriptionKeyParameterName, value);
+                Parameters.Set(ParameterNames.SubscriptionKey, value);
             }
         }
 
@@ -69,12 +59,60 @@ namespace Carbon.Recognition
         {
             get
             {
-                return Parameters.Get<string>(RegionParameterName);
+                return Parameters.Get<string>(ParameterNames.Region);
             }
 
             set
             {
-                Parameters.Set(RegionParameterName, value);
+                Parameters.Set(ParameterNames.Region, value);
+            }
+        }
+
+        /// <summary>
+        /// The property represents the target language for the recognition.
+        /// </summary>
+        public string Language
+        {
+            get
+            {
+                return Parameters.Get<string>(ParameterNames.Language);
+            }
+
+            set
+            {
+                Parameters.Set(ParameterNames.Language, value);
+            }
+        }
+
+        /// <summary>
+        /// The property represents the recognition mode.
+        /// </summary>
+        public string RecognitionMode
+        {
+            get
+            {
+                return Parameters.Get<string>(ParameterNames.RecognitionMode);
+            }
+
+            set
+            {
+                Parameters.Set(ParameterNames.RecognitionMode, value);
+            }
+        }
+
+        /// <summary>
+        /// The property represents the intput file name.
+        /// </summary>
+        public string InputFile
+        {
+            get
+            {
+                return Parameters.Get<string>(ParameterNames.InputFile);
+            }
+
+            set
+            {
+                Parameters.Set(ParameterNames.InputFile, value);
             }
         }
 
@@ -101,12 +139,45 @@ namespace Carbon.Recognition
         }
 
         /// <summary>
+        /// Sets the language parameter. It follows the builder pattern.
+        /// </summary>
+        /// <param name="lang">The input language name in BCP47 format.</param>
+        /// <returns>The current instance.</returns>
+        public RecognizerFactory SetLanguage(string lang)
+        {
+            Language = lang;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the recognition mode. It follows the builder pattern.
+        /// </summary>
+        /// <param name="mode">The recognition mode.</param>
+        /// <returns>The current instance.</returns>
+        public RecognizerFactory SetRecognitionMode(string mode)
+        {
+            RecognitionMode = mode;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the input file name. It follows the builder pattern.
+        /// </summary>
+        /// <param name="mode">The input file name.</param>
+        /// <returns>The current instance.</returns>
+        public RecognizerFactory SetInputFile(string fileName)
+        {
+            InputFile = fileName;
+            return this;
+        }
+
+        /// <summary>
         /// The property represents the collections of defined parameters and their values.
         /// </summary>
         public ParameterCollection<RecognizerFactory> Parameters { get; }
 
         /// <summary>
-        /// Creates a speech recognizer using default settings. The audio input is from the default microphone device.
+        /// Creates a speech recognizer.
         /// </summary>
         /// <returns>A speech recognizer instance</returns>
         public SpeechRecognizer CreateSpeechRecognizer()
@@ -117,87 +188,13 @@ namespace Carbon.Recognition
         }
 
         /// <summary>
-        /// Creates a speech recognizer using the specified language. The audio input is from the default microphone device.
-        /// </summary>
-        /// <param name="language">The language of audio input. It must be in BCP 47 format.</param>
-        /// <returns>A speech recognizer instance</returns>
-        public SpeechRecognizer CreateSpeechRecognizer(string language)
-        {
-            var factory = new Internal.RecognizerFactory();
-            var recoImpl = factory.CreateSpeechRecognizer(language);
-            return new SpeechRecognizer(recoImpl);
-        }
-
-        /// <summary>
-        /// Creates a speech recognizer using default settings. The audio input is from the specified file.
-        /// </summary>
-        /// <param name="fileName">The file name of audio input.</param>
-        /// <returns>A speech recognizer instance</returns>
-        public SpeechRecognizer CreateSpeechRecognizerWithFileInput(string fileName)
-        {
-            var factory = new Internal.RecognizerFactory();
-            var recoImpl = factory.CreateSpeechRecognizerWithFileInput(fileName);
-            return new SpeechRecognizer(recoImpl);
-        }
-
-        /// <summary>
-        /// Creates a speech recognizer using specific language. The audio input is from the specified file.
-        /// </summary>
-        /// <param name="fileName">The file name of audio input.</param>
-        /// <param name="language">The language in BCP 47 format that the audio speaks.</param>
-        /// <returns>A speech recognizer instance</returns>
-        public SpeechRecognizer CreateSpeechRecognizerWithFileInput(string fileName, string language)
-        {
-            var factory = new Internal.RecognizerFactory();
-            var recoImpl = factory.CreateSpeechRecognizerWithFileInput(fileName, language);
-            return new SpeechRecognizer(recoImpl);
-        }
-
-        /// <summary>
-        /// Creates a intent recognizer using default settings. The audio input is from the default microphone device.
+        /// Creates a intent recognizer.
         /// </summary>
         /// <returns>A intent recognizer instance</returns>
         public IntentRecognizer CreateIntentRecognizer()
         {
             var factory = new Internal.RecognizerFactory();
             var recoImpl = factory.CreateIntentRecognizer();
-            return new IntentRecognizer(recoImpl);
-        }
-
-        /// <summary>
-        /// Creates a intent recognizer using the specified language. The audio input is from the default microphone device.
-        /// </summary>
-        /// <param name="language">The audio input language. It must be in BCP 47 format.</param>
-        /// <returns>A intent recognizer instance</returns>
-        public IntentRecognizer CreateIntentRecognizer(string language)
-        {
-            var factory = new Internal.RecognizerFactory();
-            var recoImpl = factory.CreateIntentRecognizer(language);
-            return new IntentRecognizer(recoImpl);
-        }
-
-        /// <summary>
-        /// Creates a intent recognizer using default settings. The audio input is from the specified file.
-        /// </summary>
-        /// <param name="fileName">The file name of audio input.</param>
-        /// <returns>A intent recognizer instance</returns>
-        public IntentRecognizer CreateIntentRecognizerWithFileInput(string fileName)
-        {
-            var factory = new Internal.RecognizerFactory();
-            var recoImpl = factory.CreateIntentRecognizerWithFileInput(fileName);
-            return new IntentRecognizer(recoImpl);
-        }
-
-        /// <summary>
-        /// Creates a intent recognizer using specific language. The audio input is from the specified file.
-        /// </summary>
-        /// <param name="fileName">The file name of audio input.</param>
-        /// <param name="language">The audio input language in BCP 47 format.</param>
-        /// <returns>A intent recognizer instance</returns>
-        public IntentRecognizer CreateIntentRecognizerWithFileInput(string fileName, string language)
-        {
-            var factory = new Internal.RecognizerFactory();
-            var recoImpl = factory.CreateIntentRecognizerWithFileInput(fileName, language);
             return new IntentRecognizer(recoImpl);
         }
     }
