@@ -9,13 +9,6 @@
 
 #include <stdbool.h>
 
-#include "azure_c_shared_utility/httpheaders.h"
-#include "azure_c_shared_utility/tlsio.h"
-#include "azure_c_shared_utility/wsio.h"
-#include "azure_c_shared_utility/singlylinkedlist.h"
-#include "azure_c_shared_utility/buffer_.h"
-#include "azure_c_shared_utility/lock.h"
-
 #include "tokenstore.h"
 #include "dnscache.h"
 
@@ -28,6 +21,9 @@ extern "C" {
 typedef struct _TransportRequest* TransportHandle;
 
 typedef struct _TELEMETRY_CONTEXT* TELEMETRY_HANDLE;
+
+typedef struct HTTP_HEADERS_HANDLE_DATA_TAG* HTTP_HEADERS_HANDLE;
+
 /**
  * Creates a new transport request.
  * @param host The host name.

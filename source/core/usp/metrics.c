@@ -21,6 +21,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 
+#include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/xlogging.h"
@@ -95,7 +96,7 @@ static void PropertybagAddValueToArray(PROPERTYBAG_HANDLE propertyHandle, void *
 {
     if (propertyHandle && value)
     {
-        json_array_append_value(json_array(propertyHandle), (JSON_Value *)value);
+        json_array_append_value(json_array((JSON_Value*)propertyHandle), (JSON_Value *)value);
     }
 }
 
@@ -115,22 +116,22 @@ static int PropertybagSetValue(PROPERTYBAG_HANDLE propertyHandle, const char* na
         {
         case JSONNumber:
         {
-            PropertybagSetNumberValue(json_object(propertyHandle), name, json_value_get_number((JSON_Value*)value));
+            PropertybagSetNumberValue(json_object((JSON_Value*)propertyHandle), name, json_value_get_number((JSON_Value*)value));
             return 0;
         }
         case JSONBoolean:
         {
-            PropertybagSetBooleanValue(json_object(propertyHandle), name, json_value_get_boolean((JSON_Value*)value));
+            PropertybagSetBooleanValue(json_object((JSON_Value*)propertyHandle), name, json_value_get_boolean((JSON_Value*)value));
             return 0;
         }
         case JSONString:
         {
-            PropertybagSetStringValue(json_object(propertyHandle), name, json_value_get_string((JSON_Value*)value));
+            PropertybagSetStringValue(json_object((JSON_Value*)propertyHandle), name, json_value_get_string((JSON_Value*)value));
             return 0;
         }
         case JSONArray:
         {
-            PropertybagSetArrayValue(json_object(propertyHandle), name, (JSON_Value*)value);
+            PropertybagSetArrayValue(json_object((JSON_Value*)propertyHandle), name, (JSON_Value*)value);
             return 0;
         }
         default:
@@ -162,10 +163,10 @@ static PROPERTYBAG_HANDLE initialize_metricobject(const char *name, const char *
     PROPERTYBAG_HANDLE pBag = PropertybagInitializeWithKeyValue(NULL, NULL);
     if (pBag && name)
     {
-        PropertybagSetStringValue(json_object(pBag), "Name", name);
+        PropertybagSetStringValue(json_object((JSON_Value*)pBag), "Name", name);
         if (id)
         {
-            PropertybagSetStringValue(json_object(pBag), "Id", id);
+            PropertybagSetStringValue(json_object((JSON_Value*)pBag), "Id", id);
         }
     }
 
@@ -300,7 +301,7 @@ static int populate_event_timestamp(PROPERTYBAG_HANDLE *pBag, const char *eventN
         return -1;
     }
 
-    PropertybagSetStringValue(json_object(*pBag), key, timeString);
+    PropertybagSetStringValue(json_object((JSON_Value*)*pBag), key, timeString);
 
     return 0;
 }
@@ -583,7 +584,7 @@ void record_received_msg(TELEMETRY_HANDLE handle, const char *receivedMsg)
 
     TELEMETRY_DATA * telemetry_data = handle->current_telemetry_object;
     PROPERTYBAG_HANDLE evArray = initialize_jsonArray(&telemetry_data->receivedMsgsJsonArray[msgType]);
-    ret = json_array_append_string(json_array(evArray), timeString);
+    ret = json_array_append_string(json_array((JSON_Value*)evArray), timeString);
     if (ret)
     {
         LogError("Telemetry: Failed to add time to received event msg: (%s).\r\n", receivedMsg);

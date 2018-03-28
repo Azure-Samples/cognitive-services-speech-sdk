@@ -5,6 +5,7 @@
 // propbag.c: functions for handling property bag.
 //
 
+#include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "propbag.h"
 #include "parson.h"

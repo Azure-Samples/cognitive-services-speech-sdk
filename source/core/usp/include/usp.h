@@ -8,271 +8,269 @@
 #pragma once
 
 #include <stdint.h>
+#include <stddef.h>
+
+#include <string>
+#include <memory>
+#include <functional>
 
 #include "uspmessages.h"
-#include "usperror.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#define USP_CALLBACK_VERSION 1
-
-/**
- * The UspHandle represents an opaque handle used by usplib.
- */
-typedef struct _UspContext* UspHandle;
-
-/**
- * The UspResult represents the result of a function call of usplib.
-*/
-typedef unsigned int UspResult;
-
-/**
-* The UspError defines a type that is used as an argument in the OnError callback to communicate 
-* errors in the protocol stack to the subscribed clients.
-*/
-typedef struct _UspError
+namespace USP 
 {
-    UspResult errorCode;
-    char* description;
-} UspError;
 
 /**
- * A callback function that will be called when a speech.startDetected message is received from service.
- * @param uspHandle The UspHandle.
- * @param context A pointer to the application-defined callback context.
- * @param message A pointer to the speech.startDetected message.
-*/
-typedef void(*UspOnSpeechStartDetected)(UspHandle uspHandle, void* context, UspMsgSpeechStartDetected *message);
-
-/**
-* A callback function that will be called when a speech.endDetected message is received from service.
-* @param uspHandle The UspHandle.
-* @param context A pointer to the application-defined callback context.
-* @param message A pointer to the speech.endDetected message.
-*/
-typedef void(*UspOnSpeechEndDetected)(UspHandle uspHandle, void* context, UspMsgSpeechEndDetected *message);
-
-/**
-* A callback function that will be called when a speech.hypothesis message is received from service.
-* @param uspHandle The UspHandle.
-* @param context A pointer to the application-defined callback context.
-* @param message A pointer to the speech.hypothesis message.
-*/
-typedef void(*UspOnSpeechHypothesis)(UspHandle uspHandle, void* context, UspMsgSpeechHypothesis *message);
-
-/**
-* A callback function that will be called when a speech.phrase message is received from service.
-* @param uspHandle The UspHandle.
-* @param context A pointer to the application-defined callback context.
-* @param message A pointer to the speech.phrase message.
-*/
-typedef void(*UspOnSpeechPhrase)(UspHandle uspHandle, void* context, UspMsgSpeechPhrase *message);
-
-/**
-* A callback function that will be called when a speech.fragment message is received from service.
-* @param uspHandle The UspHandle.
-* @param context A pointer to the application-defined callback context.
-* @param message A pointer to the speech.hypothesis message.
-*/
-typedef void(*UspOnSpeechFragment)(UspHandle handle, void* context, UspMsgSpeechFragment *message);
-
-/**
-* A callback function that will be called when a turn.start message is received from service.
-* @param uspHandle The UspHandle.
-* @param context A pointer to the application-defined callback context.
-* @param message A pointer to the turn.start message.
-*/
-typedef void(*UspOnTurnStart)(UspHandle uspHandle, void* context, UspMsgTurnStart *message);
-
-/**
-* A callback function that will be called when a turn.end message is received from service.
-* @param uspHandle The UspHandle.
-* @param context A pointer to the application-defined callback context.
-* @param message A pointer to the turn.end message.
-*/
-typedef void(*UspOnTurnEnd)(UspHandle uspHandle, void* context, UspMsgTurnEnd *message);
-
-/**
-* A callback function that will be called when the first chunk in an audio stream is received from the service.
-* @param uspHandle The UspHandle.
-* @param context A pointer to the application-defined callback context.
-* @param error an error code.
-*/
-typedef void(*UspOnAudioStreamStart)(UspHandle uspHandle, void* context, const UspMsgAudioStreamStart *message);
-
-/**
-* A callback function that will be called when an error occurs in handling communication with service.
-* @param uspHandle The UspHandle.
-* @param context A pointer to the application-defined callback context.
-* @param error A pointer to instance of UspError, containing both the error code
-* and a human-readable description.
-*/
-typedef void(*UspOnError)(UspHandle uspHandle, void* context, const UspError* error);
-
-/**
-* A callback function that will be called when a message having a path defined by user is received from service.
-* @param uspHandle The UspHandle.
-* @param path The message path.
-* @param contentType The content type of the message.
-* @param buffer The message buffer.
-* @param context A pointer to the application-defined callback context.
-*/
-typedef void(*UspOnUserMessage)(UspHandle uspHandle, const char* path, const char* contentType, const unsigned char* buffer, size_t size, void* context);
-
-
-/**
-* The UspCallbacks type represents an application-defined structure used to register callbcks for USP events.
+* The Callbacks type represents an application-defined structure used to register callbacks for USP events.
 * The callbacks are invoked during the processing of the request, an application should spend as little time as possible
 * in the callback function.
 */
-typedef struct _UspCallbacks
+struct Callbacks
 {
-    uint16_t size;
-    uint16_t version;
-    UspOnSpeechStartDetected onSpeechStartDetected;
-    UspOnSpeechEndDetected onSpeechEndDetected;
-    UspOnSpeechHypothesis onSpeechHypothesis;
-    UspOnSpeechPhrase onSpeechPhrase;
-    UspOnSpeechFragment onSpeechFragment;
-    UspOnAudioStreamStart onAudioStreamStart;
-    UspOnTurnStart onTurnStart;
-    UspOnTurnEnd onTurnEnd;
-    UspOnError OnError;
-} UspCallbacks;
+    /**
+     * A callback function that will be invoked when a speech.startDetected message is received from service.
+    */
+    virtual void OnSpeechStartDetected(const SpeechStartDetectedMsg&) {}
 
-typedef enum {
-    USP_ENDPOINT_UNKNOWN,
-    USP_ENDPOINT_BING_SPEECH,
-    USP_ENDPOINT_CRIS,
-    USP_ENDPOINT_CDSDK
-} UspEndpointType;
+    /**
+    * A callback function that will be invoked when a speech.endDetected message is received from service.
+    */
+    virtual void OnSpeechEndDetected(const SpeechEndDetectedMsg&) {}
 
-typedef enum {
-    USP_RECO_MODE_UNKNOWN,
-    USP_RECO_MODE_INTERACTIVE,
-    USP_RECO_MODE_CONVERSATION,
-    USP_RECO_MODE_DICTATION
-} UspRecognitionMode;
+    /**
+    * A callback function that will be invoked when a speech.hypothesis message is received from service.
+    */
+    virtual void OnSpeechHypothesis(const SpeechHypothesisMsg&) {}
 
-typedef enum {
-    USP_OUTPUT_SIMPLE,
-    USP_OUTPUT_DETAILED
-} UspOutputFormat;
+    /**
+    * A callback function that will be invoked when a speech.phrase message is received from service.
+    */
+    virtual void OnSpeechPhrase(const SpeechPhraseMsg&) {}
 
-typedef enum {
-    USP_AUTHENTICATION_UNKNOWN,
-    USP_AUTHENTICATION_SUBSCRIPTION_KEY,
-    USP_AUTHENTICATION_AUTHORIZATION_TOKEN,
-    USP_AUTHENTICATION_SEARCH_DELEGATION_RPS_TOKEN
-} UspAuthenticationType;
+    /**
+    * A callback function that will be invoked when a speech.fragment message is received from service.
+    */
+    virtual void OnSpeechFragment(const SpeechFragmentMsg&) {}
 
-/**
-* Creates a UspHandle based on speech type and recognition mode.
-* @param type  The speech service to be used, e.g. USP_ENDPOINT_BING_SPEECH, USP_ENDPOINT_CRIS.
-* @param mode  The recognition mode to be used, e.g. USP_RECO_MODE_INTERACTIVE, USP_RECO_MODE_CONVERSATION, and USP_RECO_MODE_DICTATION.
-* @param callbacks The struct defines callback functions that will be called when various USP events occur.
-* @param callbackContext A pointer to the caller provided data, which will be passed as parameter when the callback function is invoked.
-* @param uspHandle The pointer to UspHandle. If the function returns USP_SUCCESS, the value pointered by uspHandle is the initialzed UspHandle that is ready for use.
-* @return A UspResult indicating success or error.
-*/
-UspResult UspInit(UspEndpointType type, UspRecognitionMode mode, UspCallbacks *callbacks, void* callbackContext, UspHandle* uspHandle);
+    /**
+    * A callback function that will be invoked when a turn.start message is received from service.
+    */
+    virtual void OnTurnStart(const TurnStartMsg&) {}
 
-/**
-* Creates a UspHandle by specifying the URL of the service endpoint.
-* @param endpointUrl The URL of the service endpoint. It should contain the host name, resoure path and all query parameters needed. The URL cannot be changed after initialization.
-* @param callbacks The struct defines callback functions that will be called when various USP events occur.
-* @param callbackContext A pointer to the caller provided data, which will be passed as parameter when the callback function is invoked.
-* @param uspHandle The pointer to UspHandle. If the function returns USP_SUCCESS, the value pointered by uspHandle is the initialzed UspHandle that is ready for use.
-* @return A UspResult indicating success or error.
-*/
-UspResult UspInitByUrl(const char *endpointUrl, UspCallbacks *callbacks, void* callbackContext, UspHandle* uspHandle);
+    /**
+    * A callback function that will be invoked when a turn.end message is received from service.
+    */
+    virtual void OnTurnEnd(const TurnEndMsg&) {}
+
+    /**
+    * A callback function that will be invoked when an error occurs in handling communication with service.
+    */
+    virtual void OnError(const std::string& /*error*/) {}
+
+    /**
+    * A callback function that will be invoked when the first chunk in an audio stream is received from the service.
+    */
+    virtual void OnAudioStreamStart(const AudioStreamStartMsg&) {}
+
+    /**
+    * A callback function that will be invoked when a message having a path defined by user is received from service.
+    * @param path The message path.
+    * @param contentType The content type of the message.
+    * @param buffer The message buffer.
+    */
+    virtual void OnUserMessage(const std::string& /*path*/, const std::string& /*contentType*/, const uint8_t* /*buffer*/, size_t /*size*/) {}
+};
+
+enum class EndpointType { Custom, BingSpeech, Cris, CDSDK };
+
+enum class RecognitionMode : unsigned int { Interactive = 0, Conversation = 1, Dictation = 2 };
+
+enum class OutputFormat : unsigned int { Simple = 0, Detailed = 1 };
+
+enum class AuthenticationType { SubscriptionKey, AuthorizationToken, SearchDelegationRPSToken };
+
+template<typename T>
+using deleted_unique_ptr = std::unique_ptr<T, std::function<void(T*)>>;
+
+class Client;
+
+class Connection
+{
+public:
+    /**
+    * Sends data to the USP client.
+    * @param buffer The buffer contains data to be sent.
+    * @param size The amount of data in bytes to be sent.
+    */
+    void WriteAudio(const uint8_t* buffer, size_t size);
+
+    /**
+    * Finalizes sending audio data to indicate the end of audio.
+    * @return A UspResult indicating success or error.
+    */
+    void FlushAudio();
+
+    /**
+    * Sends a user defined message.
+    * @param messagePath The path of the user-defined message.
+    * @param buffer The message payload.
+    * @param size The length of the message in bytes.
+    */
+    void SendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size);
+
+    /**
+    * Closes the USP connection.
+    */
+    ~Connection();
+
+private:
+
+    friend class Client;
+
+    Connection(const Client&);
+
+    class Impl;
+
+    std::shared_ptr<Impl> m_impl;
+};
 
 
-/**
-* Sets authentication data for the specified uspHandle.
-* @param uspHandle The UspHandle.
-* @param authType The type of authentication to be used.
-* @param authData The authentication data for the specified authentication type.
-* @return A UspResult indicating success or error.
-*/
-UspResult UspSetAuthentication(UspHandle uspHandle, UspAuthenticationType authType, const char* authData);
+using ConnectionPtr = std::unique_ptr<Connection>;
 
-/**
-* Sets language that the audio is targeted for. It must be set before establishing connection to service.
-* @param uspHandle The UspHandle.
-* @param language The language to be set. It uses the IETF language tag BCP 47 (https://en.wikipedia.org/wiki/IETF_language_tag), and must be one of the languages that are supported.
-* @return A UspResult indicating success or error.
-*/
-UspResult UspSetLanguage(UspHandle uspHandle, const char* language);
+class Client
+{
+    static constexpr auto s_defaultLanguage = "en-us";
+public:
+    /**
+    * Creates a USP client.
+    * @param callbacks The struct defines callback functions that will be invoked when various USP events occur.
+    * @param type  The speech service to be used, BingSpeech, Chris, etc.
+    */
+    Client(Callbacks& callbacks, EndpointType endpoint):
+        Client(callbacks)
+    {
+        SetEndpointType(endpoint);
+    }
 
-/**
-* Sets the output format. It must be set before establishing connection to service.
-* @param uspHandle The UspHandle.
-* @param format The output format, can be either USP_OUTPUT_DETAILED or USP_OUTPUT_SIMPLE.
-* @return A UspResult indicating success or error.
-*/
-UspResult UspSetOutputFormat(UspHandle uspHandle, UspOutputFormat format);
+    /**
+    * Creates a USP client.
+    * @param callbacks The struct defines callback functions that will be invoked when various USP events occur.
+    * @param endpointUrl The URL of the service endpoint. It should contain the host name, resoure path and all query parameters needed.
+    */
+    Client(Callbacks& callbacks, const std::string& endpointUrl) :
+        Client(callbacks)
+    {
+        SetEndpointUrl(endpointUrl);
+    }
 
-/**
-* Sets the model id if a customized speech model is used. It must be set before establishing connection to service.
-* @param uspHandle The UspHandle.
-* @param modelId The model id for the customized speech model.
-* @return A UspResult indicating success or error.
-*/
-UspResult UspSetModelId(UspHandle uspHandle, const char* modelId);
+    /**
+    * Sets the URL of the service endpoint. It should contain the host name, resoure path and all query parameters needed.
+    */
+    Client& SetEndpointUrl(const std::string& endpointUrl) 
+    {
+        m_endpointUrl = endpointUrl;
+        m_endpoint = EndpointType::Custom;
+        return *this;
+    }
 
-/**
-* Registers a callback for a user-defined message.
-* @param uspHandle The UspHandle.
-* @param messagePath The path of the user-defined message.
-* @param callback The callback function will be invoked on receiving the specified message.
-* @return A UspResult indicating success or error.
-*/
-UspResult UspRegisterUserMessage(UspHandle uspHandle, const char* messagePath, UspOnUserMessage callback);
+    /**
+    * Sets the speech service type, e.g. BingSpeech, Cris, CDSDK.
+    */
+    Client& SetEndpointType(EndpointType type) 
+    {
+        m_endpoint = type;
+        m_endpointUrl.clear();
+        return *this;
+    }
 
-/**
-* Establish connection to the service.
-* @param uspHandle The UspHandle.
-* @return A UspResult indicating success or error.
-*/
-UspResult UspConnect(UspHandle uspHandle);
+    /**
+    * Sets the recognition mode, e.g. Interactive, Conversation, Dictation.
+    */
+    Client& SetRecognitionMode(RecognitionMode mode) 
+    {
+        m_recoMode = mode;
+        return *this;
+    }
 
-/**
-* Sends data to the uspHandle.
-* @param uspHandle The UspHandle to which the data is sent.
-* @param buffer The buffer contains data to be sent.
-* @param bytesToWrite The amount of data in bytes to be sent.
-* @param bytesWritten On a successful return, the number of bytes have been sent is returned.
-* @return A UspResult indicating success or error.
-*/
-UspResult UspWriteAudio(UspHandle uspHandle, const uint8_t* buffer, size_t bytesToWrite, size_t* bytesWritten);
+    /**
+    * Sets authentication parameters.
+    * @param authType The type of authentication to be used.
+    * @param authData The authentication data for the specified authentication type.
+    */
+    Client& SetAuthentication(AuthenticationType authType, const std::string& authData)
+    {
+        m_authType = authType;
+        m_authData = authData;
+        return *this;
+    }
 
-/**
-* Finalizes sending audio data to indicate the end of audio.
-* @param uspHandle The UspHandle to which the data is sent.
-* @return A UspResult indicating success or error.
-*/
-UspResult UspFlushAudio(UspHandle uspHandle);
+    /**
+    * Sets the source audio language, which must be one of the supported languages specified using 
+    * an IETF language tag BCP 47 (https://en.wikipedia.org/wiki/IETF_language_tag).
+    */
+    Client& SetLanguage(const std::string& language) 
+    {
+        m_language = language;
+        return *this;
+    }
 
-/**
-* Closes the uspHandle.
-* The uspHandle becomes invalid after return. The behavior is undefined if the same handle is closed more than once.
-* @param uspHandle The uspHandle to be closed.
-* @return A UspResult indicating success or error.
-*/
-UspResult UspClose(UspHandle uspHandle);
+    /**
+    * Sets the output format, can be either Simple or Detailed.
+    */
+    Client& SetOutputFormat(OutputFormat format) 
+    {
+        m_outputFormat = format;
+        return *this;
+    }
 
-/**
-* Sends a user defined message. 
-* @param uspHandle The UspHandle.
-* @param messagePath The path of the user-defined message.
-* @param buffer The message payload.
-* @param bytesToWrite The length of the message in bytes.
-*/
-UspResult UspSendMessage(UspHandle uspHandle, const char* messagePath, const uint8_t* buffer, size_t bytesToWrite);
+    /**
+    * Sets the custom speech model id.
+    */
+    Client& SetModelId(const std::string& modelId) 
+    {
+        m_modelId = modelId;
+        return *this;
+    }
 
-#ifdef __cplusplus
+    /**
+    * Establishes connection to the service.
+    */
+    ConnectionPtr Connect();
+
+    // TODO: add other getters if/as needed.
+    const EndpointType& GetEndpointType()
+    {
+        return m_endpoint;
+    }
+
+    Client(const Client&) = default;
+    ~Client() = default;
+
+private:
+
+    friend class Connection::Impl;
+
+    Client(Callbacks& callbacks) :
+        m_callbacks(callbacks),
+        m_endpoint(EndpointType::Custom),
+        m_recoMode(RecognitionMode::Interactive),
+        m_outputFormat(OutputFormat::Simple),
+        m_language(s_defaultLanguage),
+        m_authType(AuthenticationType::SubscriptionKey)
+    {
+    }
+
+    Callbacks& m_callbacks;
+
+    EndpointType m_endpoint;
+    RecognitionMode m_recoMode;
+    std::string m_endpointUrl;
+
+    OutputFormat m_outputFormat;
+    std::string m_language;
+    std::string m_modelId;
+
+    AuthenticationType m_authType;
+    std::string m_authData;
+};
+
 }
-#endif

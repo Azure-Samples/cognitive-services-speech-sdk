@@ -7,13 +7,12 @@
 
 #pragma once
 
-#include <ctype.h>
-
-#include "azure_c_shared_utility/strings.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef struct STRING_TAG* STRING_HANDLE;
 
 typedef void* PROPERTYBAG_HANDLE;
 

@@ -12,6 +12,11 @@
 extern "C" {
 #endif
 
+/**
+* The UspResult represents the result of a function call of usplib.
+*/
+typedef unsigned int UspResult;
+
 #define USP_SUCCESS ((UspResult)0)
 
 #define USP_ERRCODE(x) ((UspResult)(0x800f6000 | (x & 0x0fff)))

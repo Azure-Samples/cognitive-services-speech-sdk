@@ -17,7 +17,7 @@
 
 IOBUFFER* IoBufferNew()
 {
-    IOBUFFER* buffer = malloc(sizeof(IOBUFFER));
+    IOBUFFER* buffer = (IOBUFFER*) malloc(sizeof(IOBUFFER));
     if (buffer)
     {
         memset(buffer, 0, sizeof(IOBUFFER));

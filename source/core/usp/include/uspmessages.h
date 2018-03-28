@@ -6,102 +6,93 @@
 //
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "iobuffer.h"
 #include <stdint.h>
-#include <wchar.h>
+#include <string>
 
-typedef uint64_t UspOffsetType;
-typedef uint64_t UspDurationType;
+namespace USP {
+
+typedef uint64_t OffsetType;
+typedef uint64_t DurationType;
 
 /**
  * Represents recognition status in speech phrase.
  */
-typedef enum _UspRecognitionStatus
+enum class RecognitionStatus : int
 {
-    USP_RECOGNITON_SUCCESS,
-    USP_RECOGNITION_NO_MATCH,
-    USP_RECOGNITION_INITIAL_SILENCE_TIMEOUT,
-    USP_RECOGNITION_BABBLE_TIMEOUT,
-    USP_RECOGNITION_ERROR,
-    USP_RECOGNITION_END_OF_DICTATION
-} UspRecognitionStatus;
+    Success, NoMatch, InitialSilenceTimeout, BabbleTimeout, Error, EndOfDictation
+};
 
 /**
  * Represents speech.startDectected message
  */
-typedef struct _UspMsgSpeechStartDetected
+struct SpeechStartDetectedMsg
 {
-    UspOffsetType offset;
-} UspMsgSpeechStartDetected;
+    OffsetType offset;
+};
 
 /**
  * Represents speech.hypothesis message
  */
-typedef struct _UspMsgSpeechHypothesis
+struct SpeechHypothesisMsg
 {
-    wchar_t* text;
-    UspOffsetType offset;
-    UspDurationType duration;
-} UspMsgSpeechHypothesis;
+    std::wstring text;
+    OffsetType offset;
+    DurationType duration;
+};
 
 /**
  * Represents speech.phrase message
  */
-typedef struct _UspMsgSpeechPhrase
+struct SpeechPhraseMsg
 {
-    UspRecognitionStatus recognitionStatus;
-    wchar_t* displayText;
-    UspOffsetType offset;
-    UspDurationType duration;
-} UspMsgSpeechPhrase;
+    RecognitionStatus recognitionStatus;
+    std::wstring displayText;
+    OffsetType offset;
+    DurationType duration;
+};
 
 /**
 * Represents speech.fragment message
 */
-typedef struct _UspMsgSpeechFragment
+struct SpeechFragmentMsg
 {
-    wchar_t* text;
-    UspOffsetType offset;
-    UspDurationType duration;
-} UspMsgSpeechFragment;
+    std::wstring text;
+    OffsetType offset;
+    DurationType duration;
+};
 
 /**
  * Represents speech.endDetected message
  */
-typedef struct _UspMsgSpeechEndDetected
+struct SpeechEndDetectedMsg
 {
-    UspOffsetType offset;
-} UspMsgSpeechEndDetected;
+    OffsetType offset;
+};
 
 /**
  * Represents that the start of an audio stream has been received.
  */
-typedef struct _UspMsgAudioStreamStart
+struct AudioStreamStartMsg
 {
     // Whenever a chunk in the audio stream is received, it is appended to this ioBuffer.
     // Reading in a data chunk of size 0, or checking the ioBuffer->hasCompleted flag indicates
     // that the buffer has finished receiving new data.
     IOBUFFER* ioBuffer;
-} UspMsgAudioStreamStart;
+};
 
 /**
  * Represents turn.start message
  */
-typedef struct _UspMsgTurnStart
+struct TurnStartMsg
 {
-    wchar_t* contextServiceTag;
-} UspMsgTurnStart;
+    std::string contextServiceTag;
+};
 
 /**
  * Represents turn.end message
  * Note: Body is empty.
  */
-typedef struct _UspMsgTurnEnd UspMsgTurnEnd;
+struct TurnEndMsg {};
 
-#ifdef __cplusplus
 }
-#endif

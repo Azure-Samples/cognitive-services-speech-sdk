@@ -8,9 +8,16 @@
 #pragma once
 
 #include <stdint.h>
-#if defined(__unix__) || defined(TARGET_OS_IPHONE) || defined (TARGET_OS_MAC)
-#include <stddef.h> // for size_t
-#endif
+#include <stddef.h>
+
+#include <string>
+#include <mutex>
+#include <thread>
+#include <condition_variable>
+#include <map>
+#include <memory>
+#include <chrono>
+#include <utility>
 
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
@@ -23,19 +30,10 @@
 #endif
 
 #include <assert.h>
+#include <sstream>
 
-#include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/singlylinkedlist.h"
 #include "usp.h"
-#include "uspcommon.h"
-#include "iobuffer.h"
-#include "tokenstore.h"
-#include "dnscache.h"
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "transport.h"
 
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(__a) (sizeof(__a) / sizeof(__a[0]))
@@ -48,240 +46,100 @@ extern "C" {
 #define sscanf_s sscanf
 #endif
 
-
+typedef struct _DNS_CONTEXT* DnsCacheHandle;
 typedef struct _TransportRequest* TransportHandle;
 typedef struct _TELEMETRY_CONTEXT* TELEMETRY_HANDLE;
-#define FUNC_ENTER(FORMAT, ...) do { LOG(AZ_LOG_INFO, LOG_LINE, "Info: Enter %s(): " FORMAT, __FUNCTION__, ##__VA_ARGS__); } while(0)
-#define FUNC_RETURN(FORMAT, ...) do { LOG(AZ_LOG_INFO, LOG_LINE, "Info: Leave %s(): " FORMAT, __FUNCTION__, ##__VA_ARGS__); } while(0)
+typedef struct HTTP_HEADERS_HANDLE_DATA_TAG* HTTP_HEADERS_HANDLE;
 
+namespace USP {
 
-#define USP_RETURN_ERROR_IF_HANDLE_NULL(uspHandle) \
-    do { \
-        if (uspHandle == NULL) \
-        { \
-            LogError("The UspHandle is null."); \
-            return USP_INVALID_HANDLE; \
-        } \
-    } while (0)
-
-#define USP_RETURN_ERROR_IF_WRONG_STATE(uspHandle, expectedState) \
-    do { \
-        if (uspHandle->state != expectedState) \
-        { \
-            LogError("The USP was expected to be in state %d, but its current state is %d.", expectedState, uspHandle->state); \
-            return USP_WRONG_STATE; \
-        } \
-    } while (0)
-
-#define USP_RETURN_ERROR_IF_ARGUMENT_NULL(argument, argumentName) \
-    do { \
-        if (argument == NULL) \
-        { \
-            LogError("The argument '%s' is null.", argumentName); \
-            return USP_INVALID_ARGUMENT; \
-        } \
-    } while (0)
-
-#define USP_RETURN_ERROR_IF_CONTEXT_NULL(context) \
-    do { \
-        if (context == NULL) \
-        { \
-            LogError("Context is null."); \
-            return USP_INVALID_ARGUMENT; \
-        } \
-    } while (0)
-
-#define USP_RETURN_ERROR_IF_CALLBACKS_NULL(context) \
-    do { \
-        if (context->callbacks == NULL) \
-        { \
-            LogError("User callbacks are null."); \
-            return USP_CALLBACKS_NOT_SET; \
-        } \
-    } while (0)
-
-#define USP_RETURN_VOID_IF_CONTEXT_NULL(context) \
-    do { \
-        if (context == NULL) \
-        { \
-            LogError("Context is null."); \
-            return; \
-        } \
-    } while (0)
-
-#define USP_RETURN_IF_SHUTTING_DOWN(context) \
-    if (context->state == USP_STATE_SHUTDOWN) \
-    { \
-        return; \
-    }
-
-#define USP_RETURN_SUCCESS_IF_SHUTTING_DOWN(context) \
-    if (context->state == USP_STATE_SHUTDOWN) \
-    { \
-        return USP_SUCCESS; \
-    }
-
-#define USP_RETURN_VOID_IF_CALLBACKS_NULL(context) \
-    do { \
-        if (context->callbacks == NULL) \
-        { \
-            LogError("User callbacks are null."); \
-            return; \
-        } \
-    } while (0)
-
-#define USP_RETURN_NOT_IMPLEMENTED() \
-    do { \
-        LogError("Not implemented"); \
-        return USP_NOT_IMPLEMENTED; \
-    } while (0)
-
-#ifdef WIN32
-// Convert performance counter to microseconds. First coverting to microsecond before dividing
-#define USP_LIFE_TIME(uspContext) ((telemetry_gettime() - uspContext->creationTime)*1000000/g_perfCounterFrequency)
-#else
-#define USP_LIFE_TIME(uspContext) (telemetry_gettime() - uspContext->creationTime)
-#endif
-
-typedef struct _UserPathHandler
+class Connection::Impl : public std::enable_shared_from_this<Connection::Impl>
 {
-    char* path;
-    UspOnUserMessage handler;
-} UserPathHandler;
 
-/**
-* The UspState represents the state of UspHandle.
-*/
-typedef enum _USP_STATE
-{
-    USP_STATE_NOT_INITIALIZED,
-    USP_STATE_INITIALIZED,
-    USP_STATE_CONNECTED,
-    USP_STATE_SHUTDOWN
-} UspState;
+public:
+    /**
+    * Creates a new Impl instance.
+    * @param config Specifies USP client configuration parameters (including an instance of the Callbacks class).
+    */
+    Impl(const Client& config);
 
-/**
-* The UspContext represents the context data related to a USP client.
-*/
-typedef struct _UspContext
-{
-    UspCallbacks* callbacks;
-    void* callbackContext;
+    /**
+    * Establishes a new connection to the service, launches a worker thread
+    * to process incoming/outgoing requests.
+    */
+    void Connect();
 
-    UspEndpointType type;
-    UspRecognitionMode mode;
-    STRING_HANDLE outputFormat;
-    STRING_HANDLE language;
-    STRING_HANDLE modelId;
+    /**
+    * Adds an audio segment to the outgoing queue.
+    * @param data The audio data to be sent. Audio data must be aligned on the audio sample boundary.
+    * @param size The length of the audio data, in bytes.
+    */
+    void QueueAudioSegment(const uint8_t* data, size_t size);
 
-    STRING_HANDLE endpointUrl;
+    /**
+    * Adds an empty audio sigment to the outgoing queue, which serves as a singnal to the service that the audio 
+    * stream has ended (i.e., has been uploaded completely).
+    * @param uspHandle the UspHandle for sending the audio.
+    */
+    void QueueAudioEnd();
 
-    UspAuthenticationType authType;
-    STRING_HANDLE authData;
+    /**
+    * Adds a message to the outgoing queue.
+    * @param path The path associated with the message being sent.
+    * @param data The message payload.
+    * @param size The length of the message in bytes.
+    */
+    void QueueMessage(const std::string& path, const uint8_t* data, size_t size);
 
-    UspState state;
+    /**
+    * Requests the connection to service to be shut down.
+    * @param uspContext A pointer to the UspContext.
+    * @return A UspResult indicating success or error.
+    */
+    void Shutdown();
 
-    SINGLYLINKEDLIST_HANDLE userPathHandlerList;
+private:
+
+    using DnsCachePtr = deleted_unique_ptr<std::remove_pointer<DnsCacheHandle>::type>;
+
+    using TelemetryPtr = deleted_unique_ptr<std::remove_pointer<TELEMETRY_HANDLE>::type>;
+
+    using TransportPtr = deleted_unique_ptr<std::remove_pointer<TransportHandle>::type>;
+
+    void Validate();
+
+    static void WorkThread(std::weak_ptr<Connection::Impl> ptr);
+
+    void SignalWork();
+    void SignalConnected();
+
+    std::string ConstructConnectionUrl();
+
+    Client m_config;
+
+    bool m_connected;
 
     // Todo: can multiple UspContexts share the work thread?
-    THREAD_HANDLE workThreadHandle;
+    bool m_haveWork;
 
-    size_t audioOffset;
-    LOCK_HANDLE lock;
-    COND_HANDLE workEvent;
-    TransportHandle transport;
-    DnsCacheHandle dnsCache;
+    std::recursive_mutex m_mutex;
+    std::condition_variable_any m_cv;
 
-    // This tick count is set when the UspContext is created.  It is used
-    // for metrics.
-    uint64_t creationTime;
+    size_t m_audioOffset;
 
-    TELEMETRY_HANDLE telemetry;
-} UspContext;
+    DnsCachePtr m_dnsCache;
+    TelemetryPtr m_telemetry;
+    TransportPtr m_transport;
 
-/**
-* Creates a new UspContext.
-* @param contextCreated The pointer that points to the pointer of the created UspContext on return.
-* @return A UspResult indicating success or error.
-*/
-UspResult UspContextCreate(UspContext** contextCreated);
+    const uint64_t m_creationTime;
 
-/**
-* Destroys the specified UspContext.
-* @param uspContext A pointer to the UspContext to be destroyed.
-* @return A UspResult indicating success or error.
-*/
-UspResult UspContextDestroy(UspContext* uspContext);
+    static void OnTelemetryData(const uint8_t* buffer, size_t bytesToWrite, void *context, const char *requestId);
 
-/**
-* Sets the callback table in the specified UspContext.
-* @param uspContext A pointer to the UspContext.
-* @param callbacks A pointer to the callback table.
-* @param callbackContext The context that will be passed as parameter when one of callbacks is invoked.
-* @return A UspResult indicating success or error.
-*/
-UspResult UspSetCallbacks(UspContext* uspContext, UspCallbacks* callbacks, void* callbackContext);
+    static void OnTransportError(TransportHandle transportHandle, TransportError reason, void* context);
 
-/**
-* Initializes transport connection to service.
-* @param uspContext A pointer to the UspContext.
-* @param endpoint The endpoint URL.
-* @return A UspResult indicating success or error.
-*/
-UspResult TransportInitialize(UspContext* uspContext, const char* endpoint);
+    static void OnTransportData(TransportHandle transportHandle, HTTP_HEADERS_HANDLE responseHeader, const unsigned char* buffer, size_t size, unsigned int errorCode, void* context);
 
-/**
-* Tears down transport connection to service.
-* @param uspContext A pointer to the UspContext.
-* @return A UspResult indicating success or error.
-*/
-UspResult TransportShutdown(UspContext* uspContext);
+    uint64_t getTimestamp();
+};
 
-/**
-* Handles response messages from service based on content type.
-* @param context The content context.
-* @param path The content path.
-* @param mime The content type.
-* @param ioBuffer The pointer to ioBuffer.
-* @param responseContent The content buffer of the response.
-* @param responseSize The size of responseContent.
-* @return A UspResult indicating success or error.
-*/
-UspResult ContentDispatch(
-    void* context,
-    const char* path,
-    const char* mime,
-    IOBUFFER* ioBuffer,
-    BUFFER_HANDLE responseContent,
-    size_t responseSize);
-
-/**
-* Writes an audio segment to the service.
-* @param uspHandle the UspHandle for sending the audio.
-* @param data The audio data to be sent. Audio data must be aligned on the audio sample boundary.
-* @param size The length of the audio data, in bytes.
-* @param bytesWritten A returned pointer to the amount of data that was sent to the service.
-* @return A UspResult indicating success or error.
-*/
-UspResult AudioStreamWrite(UspHandle uspHandle, const void* data, uint32_t size, uint32_t* bytesWritten);
-
-/**
-* Writes a message to the service.
-* @param uspHandle the UspHandle for sending the message.
-* @param path The path associated with the message being sent.
-* @param data The message payload.
-* @param size The length of the message in bytes.
-* @return A UspResult indicating success or error.
-*/
-UspResult MessageWrite(UspHandle uspHandle, const char* path, const uint8_t* data, uint32_t size);
-
-/**
-* Flushes any pending audio to be sent to the service.
-* @param uspHandle the UspHandle for sending the audio.
-* @return A UspResult indicating success or error.
-*/
-UspResult AudioStreamFlush(UspHandle uspHandle);
-
-#ifdef __cplusplus
-} // extern "C" 
-#endif
+}

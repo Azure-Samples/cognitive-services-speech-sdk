@@ -13,30 +13,25 @@
 #include <cstring>
 #include "service_helpers.h"
 
-#define INVALID_USP_HANDLE ((UspHandle)-1)
-
-
 namespace CARBON_IMPL_NAMESPACE() {
 
 int CSpxUspRecoEngineAdapter::m_instanceCounter = 0;
 
 CSpxUspRecoEngineAdapter::CSpxUspRecoEngineAdapter() :
-    m_handle(INVALID_USP_HANDLE),
     m_servicePreferedBufferSize(0),
     m_bytesInBuffer(0),
     m_ptrIntoBuffer(nullptr),
     m_bytesLeftInBuffer(0)
 {
     m_instanceCounter++;
-    InitCallbacks(&m_callbacks);
 }
 
 void CSpxUspRecoEngineAdapter::Init()
 {
     SPX_IFTRUE_THROW_HR(GetSite() == nullptr, SPXERR_UNINITIALIZED);
-    SPX_IFTRUE_THROW_HR(IsUspHandleValid(m_handle), SPXERR_ALREADY_INITIALIZED);
+    SPX_IFTRUE_THROW_HR(m_handle != nullptr, SPXERR_ALREADY_INITIALIZED);
 
-    UspInitialize(&m_handle, &m_callbacks, static_cast<void*>(this));
+    UspInitialize();
     DumpFileInit();
 }
 
@@ -44,127 +39,81 @@ void CSpxUspRecoEngineAdapter::Term()
 {
     SPX_DBG_TRACE_SCOPE("Terminating CSpxUspRecoEngineAdapter...", "Terminating CSpxUspRecoEngineAdapter... Done!");
     
-    UspShutdown(m_handle);
-    m_handle = INVALID_USP_HANDLE;
+    SPX_DBG_TRACE_VERBOSE("%s(0x%x)", __FUNCTION__, m_handle.get());
+    m_handle.reset();
 
     DumpFileClose();
 }
 
 void CSpxUspRecoEngineAdapter::SetFormat(WAVEFORMATEX* pformat)
 {
-    SPX_IFTRUE_THROW_HR(!IsUspHandleValid(m_handle), SPXERR_UNINITIALIZED);
+    SPX_IFTRUE_THROW_HR(m_handle == nullptr, SPXERR_UNINITIALIZED);
 
     if (pformat != nullptr)
     {
-        UspWriteFormat(m_handle, pformat);
+        UspWriteFormat(pformat);
         m_servicePreferedBufferSize = (size_t)pformat->nSamplesPerSec * pformat->nBlockAlign * m_servicePreferedMilliseconds / 1000;
     }
     else
     {
-        UspWrite_Flush(m_handle);
+        UspWrite_Flush();
     }
 }
 
 void CSpxUspRecoEngineAdapter::ProcessAudio(AudioData_Type data, uint32_t size)
 {
-    UspWrite(m_handle, data.get(), size);
+    UspWrite(data.get(), size);
 }
 
-bool CSpxUspRecoEngineAdapter::IsUspHandleValid(UspHandle handle)
+void CSpxUspRecoEngineAdapter::UspInitialize()
 {
-    return handle != INVALID_USP_HANDLE;
-}
+    SPX_DBG_TRACE_VERBOSE("%s(0x%x)", __FUNCTION__, m_handle.get());
+    
+    USP::Client clientConfig(*this, USP::EndpointType::BingSpeech);
 
-void CSpxUspRecoEngineAdapter::UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackContext)
-{
-    SPX_DBG_TRACE_VERBOSE("%s(0x%x)", __FUNCTION__, handle);
-
-    // Before we initialize the USP, we need to know what Endpoint type we're going to use...
-    UspEndpointType type = GetUspEndpointType();
-
-    // Initialize the USP (by URL or by type)
-    SPX_IFFAILED_THROW_HR(type == USP_ENDPOINT_UNKNOWN
-        ? ::UspInitByUrl(GetUspCustomEndpoint().c_str(), callbacks, callbackContext, handle)
-        : ::UspInit(type, GetUspRecoMode(), callbacks, callbackContext, handle));
-
-    // Set the auth data, if it was provided
-    auto authType = USP_AUTHENTICATION_UNKNOWN;
-    auto authData = GetUspAuthenticationData(&authType);
-    if (authType != USP_AUTHENTICATION_UNKNOWN)
-    {
-        SPX_IFFAILED_THROW_HR(::UspSetAuthentication(*handle, authType, authData.c_str()));
-    }
-
-    // Set the language, if it was provided...
-    auto language = GetUspLanguage();
-    if (!language.empty())
-    {
-        SPX_IFFAILED_THROW_HR(::UspSetLanguage(*handle, language.c_str()));
-    }
-
-    // Set the model id if it was provided...
-    auto id = GetUspModelId();
-    if (!id.empty())
-    {
-        SPX_IFFAILED_THROW_HR(::UspSetModelId(*handle, id.c_str()));
+    for (auto f : { 
+            &CSpxUspRecoEngineAdapter::SetUspEndpoint,
+            &CSpxUspRecoEngineAdapter::SetUspRecoMode,
+            &CSpxUspRecoEngineAdapter::SetUspLanguage,
+            &CSpxUspRecoEngineAdapter::SetUspModelId,
+            &CSpxUspRecoEngineAdapter::SetUspAuthentication
+        }) {
+        (this->*f)(clientConfig);
     }
 
     // Finally ... Connect to the service
-    SPX_IFFAILED_THROW_HR(::UspConnect(*handle));
+    m_handle = clientConfig.Connect();
 }
 
-UspEndpointType CSpxUspRecoEngineAdapter::GetUspEndpointType()
+USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(USP::Client& client)
 {
     // Get the named property service...
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
-    // Get the properties that indicates what endpoint type to use...
-    auto endpoint = properties->GetStringValue(LR"(SPEECH-Endpoint)");
-    auto subscriptionKey = properties->GetStringValue(LR"(SPEECH-SubscriptionKey)");
     auto customSpeechModelId = properties->GetStringValue(LR"(CUSTOMSPEECH-modelId)");
-
-    UspEndpointType type;
     if (!customSpeechModelId.empty())                           // Use the Custom Recognition Intelligent Service
     {
-        type = USP_ENDPOINT_CRIS;
-    }
-    else if (PAL::wcsicmp(endpoint.c_str(), L"CORTANA") == 0)   // Use the CORTANA SDK endpoint
-    {
-        type = USP_ENDPOINT_CDSDK;
-    }
-    else if (!endpoint.empty())                                 // Use the SPECIFIED endpoint
-    {
-        type = USP_ENDPOINT_UNKNOWN;
-    }
-    else                                                        // Otherwise ... Use the default SPEECH endpoints
-    {
-        type = USP_ENDPOINT_BING_SPEECH;
+        return client.SetEndpointType(USP::EndpointType::Cris);
     }
 
-    // We're done!
-    return type;
+    auto endpoint = properties->GetStringValue(LR"(SPEECH-Endpoint)");
+    if (PAL::wcsicmp(endpoint.c_str(), L"CORTANA") == 0)   // Use the CORTANA SDK endpoint
+    {
+        return client.SetEndpointType(USP::EndpointType::CDSDK);
+    }
+
+    if (!endpoint.empty())                                 // Use the SPECIFIED endpoint
+    {
+        return client.SetEndpointUrl(PAL::ToString(endpoint));
+    }
+    
+     // Otherwise ... Use the default SPEECH endpoints
+    return client.SetEndpointType(USP::EndpointType::BingSpeech);
 }
 
-std::string CSpxUspRecoEngineAdapter::GetUspCustomEndpoint()
+USP::Client& CSpxUspRecoEngineAdapter::SetUspRecoMode(USP::Client& client)
 {
-    // We should only be called here if we're using a custom endpoint (aka UNKNOWN, see GetUspEndpointType())
-    SPX_DBG_ASSERT(GetUspEndpointType() == USP_ENDPOINT_UNKNOWN);
-
-    // Get the named properties service...
-    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
-    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
-
-    // Get the property that indicates what endpoint to use...
-    auto value = properties->GetStringValue(LR"(SPEECH-Endpoint)");
-    return PAL::ToString(value);
-}
-
-UspRecognitionMode CSpxUspRecoEngineAdapter::GetUspRecoMode()
-{
-    // We should only be called here if we're NOT using a custom endpoint (aka UNKNOWN, see GetUspEndpointType())
-    SPX_DBG_ASSERT(GetUspEndpointType() != USP_ENDPOINT_UNKNOWN);
-
     // Get the named properties service...
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
@@ -173,51 +122,59 @@ UspRecognitionMode CSpxUspRecoEngineAdapter::GetUspRecoMode()
     auto value = properties->GetStringValue(LR"(SPEECH-RecoMode)");
 
     // Convert that value to the appropriate UspRecognitionMode...
-    UspRecognitionMode mode;
     if (value.empty() || PAL::wcsicmp(value.c_str(), L"INTERACTIVE") == 0)
     {
-        mode = USP_RECO_MODE_INTERACTIVE;
-    }
-    else if (PAL::wcsicmp(value.c_str(), L"CONVERSATION") == 0)
-    {
-        mode = USP_RECO_MODE_CONVERSATION;
-    }
-    else if (PAL::wcsicmp(value.c_str(), L"DICTATION") == 0)
-    {
-        mode = USP_RECO_MODE_DICTATION;
-    }
-    else
-    {
-        mode = USP_RECO_MODE_UNKNOWN;
+        return client.SetRecognitionMode(USP::RecognitionMode::Interactive);
     }
 
-    // We're done!
-    return mode;
+    if (PAL::wcsicmp(value.c_str(), L"CONVERSATION") == 0)
+    {
+        return client.SetRecognitionMode(USP::RecognitionMode::Conversation);
+    }
+
+    if (PAL::wcsicmp(value.c_str(), L"DICTATION") == 0)
+    {
+        return client.SetRecognitionMode(USP::RecognitionMode::Dictation);
+    }
+
+    SPX_DBG_ASSERT_WITH_MESSAGE(false, "Did someone add a new value to the USP::RecognitionMode enumeration?");
+
+    throw std::runtime_error("Unknown RecognitionMode value " + PAL::ToString(value));
 }
 
-std::string CSpxUspRecoEngineAdapter::GetUspLanguage()
+USP::Client& CSpxUspRecoEngineAdapter::SetUspLanguage(USP::Client& client)
 {
     // Get the named properties service...
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
+
+    if (!properties->HasStringValue(LR"(SPEECH-RecoLanguage)"))
+    {
+        return client;
+    }
 
     // Get the property that indicates what language to use...
     auto value = properties->GetStringValue(LR"(SPEECH-RecoLanguage)");
-    return PAL::ToString(value);
+    return client.SetLanguage(PAL::ToString(value));
 }
 
-std::string CSpxUspRecoEngineAdapter::GetUspModelId()
+USP::Client&  CSpxUspRecoEngineAdapter::SetUspModelId(USP::Client& client)
 {
     // Get the named properties service...
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
+    if (!properties->HasStringValue(LR"(CUSTOMSPEECH-ModelId)"))
+    {
+        return client;
+    }
+
     // Get the property that indicates what model to use...
     auto value = properties->GetStringValue(LR"(CUSTOMSPEECH-ModelId)");
-    return PAL::ToString(value);
+    return client.SetModelId(PAL::ToString(value));
 }
 
-std::string CSpxUspRecoEngineAdapter::GetUspAuthenticationData(UspAuthenticationType* pauthType)
+USP::Client&  CSpxUspRecoEngineAdapter::SetUspAuthentication(USP::Client& client)
 {
     // Get the named properties service...
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
@@ -229,33 +186,27 @@ std::string CSpxUspRecoEngineAdapter::GetUspAuthenticationData(UspAuthentication
     auto uspRpsToken = properties->GetStringValue(L"SPEECH-RpsToken");
 
     // Use those properties to determine which authentication type to use
-    auto authType = USP_AUTHENTICATION_UNKNOWN;
-    std::wstring* pauthData = nullptr;
-
     if (!uspSubscriptionKey.empty())
     {
-        authType = USP_AUTHENTICATION_SUBSCRIPTION_KEY;
-        pauthData = &uspSubscriptionKey;
+        return client.SetAuthentication(USP::AuthenticationType::SubscriptionKey, PAL::ToString(uspSubscriptionKey));
     }
-    else if (!uspAuthToken.empty())
+    if (!uspAuthToken.empty())
     {
-        authType = USP_AUTHENTICATION_AUTHORIZATION_TOKEN;
-        pauthData = &uspAuthToken;
+        return client.SetAuthentication(USP::AuthenticationType::AuthorizationToken, PAL::ToString(uspAuthToken));
     }
-    else if (!uspRpsToken.empty())
+    if (!uspRpsToken.empty())
     {
-        authType = USP_AUTHENTICATION_SEARCH_DELEGATION_RPS_TOKEN;
-        pauthData = &uspRpsToken;
+        return client.SetAuthentication(USP::AuthenticationType::SearchDelegationRPSToken, PAL::ToString(uspRpsToken));
     }
 
-    // And ... We're done!
-    *pauthType = authType;
-    return pauthData == nullptr ? std::string("") : PAL::ToString(*pauthData);
+    return client.SetAuthentication(USP::AuthenticationType::SubscriptionKey, "92069ee289b84e5594a9564ab77ed2ba");;
+
+    //TODO:
+    //throw std::runtime_error("No Authentication parameters were specified.");
 }
 
-void CSpxUspRecoEngineAdapter::UspWriteFormat(UspHandle handle, WAVEFORMATEX* pformat)
+void CSpxUspRecoEngineAdapter::UspWriteFormat(WAVEFORMATEX* pformat)
 {
-    UNUSED(handle);
     static const uint16_t cbTag = 4;
     static const uint16_t cbChunkType = 4;
     static const uint16_t cbChunkSize = 4;
@@ -293,10 +244,10 @@ void CSpxUspRecoEngineAdapter::UspWriteFormat(UspHandle handle, WAVEFORMATEX* pf
 
     // Now that we've prepared the header/buffer, send it along to Truman/Newman/Skyman via UspWrite
     SPX_DBG_ASSERT(cbHeader == size_t(ptr - buffer.get()));
-    UspWrite(m_handle, buffer.get(), cbHeader);
+    UspWrite(buffer.get(), cbHeader);
 }
 
-void CSpxUspRecoEngineAdapter::UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite)
+void CSpxUspRecoEngineAdapter::UspWrite(const uint8_t* buffer, size_t byteToWrite)
 {
     SPX_DBG_TRACE_VERBOSE_IF(byteToWrite == 0, "%s(..., %d)", __FUNCTION__, byteToWrite);
 
@@ -304,23 +255,17 @@ void CSpxUspRecoEngineAdapter::UspWrite(UspHandle handle, const uint8_t* buffer,
         ? &CSpxUspRecoEngineAdapter::UspWrite_Actual
         : &CSpxUspRecoEngineAdapter::UspWrite_Buffered;
 
-    (this->*fn)(handle, buffer, byteToWrite);
+    (this->*fn)(buffer, byteToWrite);
 }
 
-void CSpxUspRecoEngineAdapter::UspWrite_Actual(UspHandle handle, const uint8_t* buffer, size_t byteToWrite)
+void CSpxUspRecoEngineAdapter::UspWrite_Actual(const uint8_t* buffer, size_t byteToWrite)
 {
-    SPX_INIT_HR(hr);
     SPX_DBG_TRACE_VERBOSE("%s(..., %d)", __FUNCTION__, byteToWrite);
-
-    hr = ::UspWriteAudio(handle, buffer, byteToWrite, NULL);
-    hr = (byteToWrite == 0 && hr == USP_WRITE_AUDIO_ERROR) ? SPX_NOERROR : hr; // ::UspWriteAudio currently returns USP_WRITE_AUDIO_ERROR on zero bytes, but there's no other way to flush buffer...
-
+    m_handle->WriteAudio(buffer, byteToWrite);
     DumpFileWrite(buffer, byteToWrite);
-
-    SPX_IFFAILED_THROW_HR(hr);
 }
 
-void CSpxUspRecoEngineAdapter::UspWrite_Buffered(UspHandle handle, const uint8_t* buffer, size_t bytesToWrite)
+void CSpxUspRecoEngineAdapter::UspWrite_Buffered(const uint8_t* buffer, size_t bytesToWrite)
 {
     bool flushBuffer = bytesToWrite == 0;
 
@@ -338,7 +283,7 @@ void CSpxUspRecoEngineAdapter::UspWrite_Buffered(UspHandle handle, const uint8_t
         if (flushBuffer || (m_bytesInBuffer > 0 && m_bytesLeftInBuffer == 0))
         {
             auto bytesToFlush = m_bytesInBuffer - m_bytesLeftInBuffer;
-            UspWrite_Actual(handle, m_buffer.get(), bytesToFlush);
+            UspWrite_Actual(m_buffer.get(), bytesToFlush);
 
             m_bytesLeftInBuffer = m_bytesInBuffer;
             m_ptrIntoBuffer = m_buffer.get();
@@ -366,127 +311,85 @@ void CSpxUspRecoEngineAdapter::UspWrite_Buffered(UspHandle handle, const uint8_t
     }
 }
 
-void CSpxUspRecoEngineAdapter::UspWrite_Flush(UspHandle handle)
+void CSpxUspRecoEngineAdapter::UspWrite_Flush()
 {
-    UspWrite_Buffered(handle, nullptr, 0);
+    m_handle->FlushAudio();
 }
 
-void CSpxUspRecoEngineAdapter::UspShutdown(UspHandle handle)
+
+void CSpxUspRecoEngineAdapter::OnSpeechStartDetected(const USP::SpeechStartDetectedMsg& message)
 {
-    SPX_DBG_TRACE_VERBOSE("%s(0x%x)", __FUNCTION__, handle);
-
-    SPX_IFFAILED_THROW_HR(::UspClose(handle));
-}
-
-void CSpxUspRecoEngineAdapter::InitCallbacks(UspCallbacks* pcallbacks)
-{
-    pcallbacks->size = sizeof(UspCallbacks);
-    pcallbacks->version = (uint16_t)USP_CALLBACK_VERSION;
-
-    pcallbacks->onSpeechStartDetected = [](UspHandle handle, void* context, UspMsgSpeechStartDetected *message) {
-        SPX_DBG_TRACE_VERBOSE("Response: Speech.StartDetected message. Speech starts at offset %" PRIu64 " (100ns).\n", message->offset);
-        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechStartDetected(message);
-    };
-
-    pcallbacks->onSpeechEndDetected = [](UspHandle handle, void* context, UspMsgSpeechEndDetected *message) {
-        SPX_DBG_TRACE_VERBOSE("Response: Speech.EndDetected message. Speech ends at offset %" PRIu64 " (100ns)\n", message->offset);
-        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechEndDetected(message);
-    };
-
-    pcallbacks->onSpeechHypothesis = [](UspHandle handle, void* context, UspMsgSpeechHypothesis *message) {
-        SPX_DBG_TRACE_VERBOSE("Response: Speech.Hypothesis message. Starts at offset %" PRIu64 ", with duration %" PRIu64 " (100ns). Text: %ls\n", message->offset, message->duration, message->text);
-        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechHypothesis(message);
-    };
-
-    pcallbacks->onSpeechFragment = [](UspHandle handle, void* context, UspMsgSpeechFragment *message) {
-        SPX_DBG_TRACE_VERBOSE("Response: Speech.Fragment message. Starts at offset %" PRIu64 ", with duration %" PRIu64 " (100ns). Text: %ls\n", message->offset, message->duration, message->text);
-        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechFragment(message);
-    };
-
-    pcallbacks->onSpeechPhrase = [](UspHandle handle, void* context, UspMsgSpeechPhrase *message) {
-        SPX_DBG_TRACE_VERBOSE("Response: Speech.Phrase message. Status: %d, Text: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n", message->recognitionStatus, message->displayText, message->offset, message->duration);
-        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnSpeechPhrase(message);
-    };
-
-    pcallbacks->onTurnStart = [](UspHandle handle, void* context, UspMsgTurnStart *message) {
-        SPX_DBG_TRACE_VERBOSE("Response: Turn.Start message. Context.ServiceTag: %ls\n", message->contextServiceTag);
-        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnTurnStart(message);
-    };
-
-    pcallbacks->onTurnEnd = [](UspHandle handle, void* context, UspMsgTurnEnd *message) {
-        SPX_DBG_TRACE_VERBOSE("Response: Turn.End message.\n");
-        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnTurnEnd(message);
-    };
-
-    pcallbacks->OnError = [](UspHandle handle, void* context, const UspError* error) {
-        SPX_DBG_TRACE_VERBOSE("Response: On Error: 0x%x (%s).\n", error->errorCode, error->description);
-        CSpxUspRecoEngineAdapter::From(handle, context)->UspOnError(error);
-    };
-}
-
-void CSpxUspRecoEngineAdapter::UspOnSpeechStartDetected(UspMsgSpeechStartDetected *message)
-{
+    SPX_DBG_TRACE_VERBOSE("Response: Speech.StartDetected message. Speech starts at offset %" PRIu64 " (100ns).\n", message.offset);
     SPX_DBG_ASSERT(GetSite());
-    GetSite()->SpeechStartDetected(this, message->offset);
+    GetSite()->SpeechStartDetected(this, message.offset);
 }
 
-void CSpxUspRecoEngineAdapter::UspOnSpeechEndDetected(UspMsgSpeechEndDetected *message)
+void CSpxUspRecoEngineAdapter::OnSpeechEndDetected(const USP::SpeechEndDetectedMsg& message)
 {
+    SPX_DBG_TRACE_VERBOSE("Response: Speech.EndDetected message. Speech ends at offset %" PRIu64 " (100ns)\n", message.offset);
     SPX_DBG_ASSERT(GetSite());
-    GetSite()->SpeechEndDetected(this, message->offset);
+    GetSite()->SpeechEndDetected(this, message.offset);
 }
 
-void CSpxUspRecoEngineAdapter::UspOnSpeechHypothesis(UspMsgSpeechHypothesis *message)
+void CSpxUspRecoEngineAdapter::OnSpeechHypothesis(const USP::SpeechHypothesisMsg& message)
 {
+    SPX_DBG_TRACE_VERBOSE("Response: Speech.Hypothesis message. Starts at offset %" PRIu64 ", with duration %" PRIu64 " (100ns). Text: %ls\n", message.offset, message.duration, message.text.c_str());
     SPX_DBG_ASSERT(GetSite());
 
     // TODO: RobCh: Do something with the other fields in UspMsgSpeechHypothesis
     auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateIntermediateResult(nullptr, message->text);
+    auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str());
 
-    GetSite()->IntermediateRecoResult(this, message->offset, result);
+    GetSite()->IntermediateRecoResult(this, message.offset, result);
 }
 
-void CSpxUspRecoEngineAdapter::UspOnSpeechFragment(UspMsgSpeechFragment *message)
+void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& message)
 {
+    SPX_DBG_TRACE_VERBOSE("Response: Speech.Fragment message. Starts at offset %" PRIu64 ", with duration %" PRIu64 " (100ns). Text: %ls\n", message.offset, message.duration, message.text.c_str());
     SPX_DBG_ASSERT(GetSite());
 
     // TODO: RobCh: Do something with the other fields in UspMsgSpeechHypothesis
     // TODO: Rob: do we want to treate speech.fragment message different than speech.hypothesis message at this level?
 
     auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateIntermediateResult(nullptr, message->text);
-    GetSite()->IntermediateRecoResult(this, message->offset, result);
+    auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str());
+    GetSite()->IntermediateRecoResult(this, message.offset, result);
 }
 
-void CSpxUspRecoEngineAdapter::UspOnSpeechPhrase(UspMsgSpeechPhrase *message)
+void CSpxUspRecoEngineAdapter::OnSpeechPhrase(const USP::SpeechPhraseMsg& message)
 {
+    SPX_DBG_TRACE_VERBOSE("Response: Speech.Phrase message. Status: %d, Text: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n", message.recognitionStatus, message.displayText.c_str(), message.offset, message.duration);
     SPX_DBG_ASSERT(GetSite());
 
     // TODO: RobCh: Do something with the other fields in UspMsgSpeechPhrase
     auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateFinalResult(nullptr, message->displayText);
+    auto result = factory->CreateFinalResult(nullptr, message.displayText.c_str());
 
-    GetSite()->FinalRecoResult(this, message->offset, result);
+    GetSite()->FinalRecoResult(this, message.offset, result);
 }
 
-void CSpxUspRecoEngineAdapter::UspOnTurnStart(UspMsgTurnStart *message)
+void CSpxUspRecoEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
 {
+    SPX_DBG_TRACE_VERBOSE("Response: Turn.Start message. Context.ServiceTag: %s\n", message.contextServiceTag.c_str());
     SPX_DBG_ASSERT(GetSite());
     GetSite()->AdditionalMessage(this, 0, AdditionalMessagePayloadFrom(message));
 }
 
-void CSpxUspRecoEngineAdapter::UspOnTurnEnd(UspMsgTurnEnd *message)
+void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
 {
+    SPX_DBG_TRACE_VERBOSE("Response: Turn.End message.\n");
     UNUSED(message);
     SPX_DBG_ASSERT(GetSite());
     GetSite()->DoneProcessingAudio(this);
 }
 
-void CSpxUspRecoEngineAdapter::UspOnError(const UspError* error)
+void CSpxUspRecoEngineAdapter::OnError(const std::string& error)
 {
+    SPX_DBG_TRACE_VERBOSE("Response: On Error: %s.\n", error.c_str());
     SPX_DBG_ASSERT(GetSite());
-    GetSite()->Error(this, ErrorPayloadFrom(error));
+    auto site = GetSite();
+    site->Error(this, ErrorPayloadFrom(error));
+    site->DoneProcessingAudio(this);
 }
 
 void CSpxUspRecoEngineAdapter::DumpFileInit()

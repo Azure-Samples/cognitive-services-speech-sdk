@@ -11,4 +11,4 @@
 #pragma GCC system_header
 #endif
 
-#include "azure_c_shared_utility/xlogging.h"
+#include "azure_c_shared_utility/platform.h"

@@ -5,6 +5,10 @@
 // tranpsort.c: handling tranport requests to the service.
 //
 
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <assert.h>
 #include <stdint.h>
 
@@ -18,11 +22,16 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/uws_client.h"
 #include "azure_c_shared_utility/uws_frame_encoder.h"
+#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/httpheaders.h"
+#include "azure_c_shared_utility/singlylinkedlist.h"
+#include "azure_c_shared_utility/buffer_.h"
+#include "azure_c_shared_utility/lock.h"
 
 #include "metrics.h"
 #include "iobuffer.h"
 #include "transport.h"
-#include "uspinternal.h"
+#include "uspcommon.h"
 
 // uncomment the line below to see all non-binary protocol messages in the log
 // #define LOG_TEXT_MESSAGES
@@ -96,7 +105,7 @@ typedef struct _TransportRequest
 
         struct
         {
-            CONCRETE_IO_HANDLE      WSHandle;
+            UWS_CLIENT_HANDLE       WSHandle;
             size_t                  pathLen;
             WSIO_CONFIG             config;
             bool                    chunksent;
@@ -821,7 +830,7 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
     int err = -1;
     const char* src;
     char* dst;
-    size_t l;
+
     bool use_ssl = false;
 
     if (!host)
@@ -867,7 +876,7 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
         char* headers = ConstructHeadersString(connectionHeaders);
         const char* proto = "USP\r\n";
         size_t len = strlen(proto) + strlen(headers) -2 /*(minus extra '\r\n')*/ + 1;
-        char* str = malloc(len);
+        char* str = (char*)malloc(len);
         if (str == NULL)
         {
             LogError("Failed to allocate memory for connection headers string.");
@@ -878,7 +887,7 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
         // workaround until we migrate to something more decent.
         request->ws.config.protocol = str;
 
-        l = strlen(host);
+        size_t l = strlen(host);
         request->url = (char*)malloc(l + 2); // 2=2 x NULL
         if (request->url != NULL)
         {

@@ -11,19 +11,16 @@
 #include "ispxinterfaces.h"
 #include "recognition_result.h"
 #include "service_helpers.h"
+#include "usp.h"
 
-extern "C"
-{
-    #include "usp.h"
-}
 
 
 namespace CARBON_IMPL_NAMESPACE() {
 
-
 class CSpxUspRecoEngineAdapter :
     public ISpxObjectWithSiteInitImpl<ISpxRecoEngineAdapterSite>,
-    public ISpxRecoEngineAdapter
+    public ISpxRecoEngineAdapter,
+    protected USP::Callbacks
 {
 public:
 
@@ -39,6 +36,16 @@ public:
     void SetFormat(WAVEFORMATEX* pformat) override;
     void ProcessAudio(AudioData_Type data, uint32_t size) override;
 
+protected:
+    // --- USP::Callbacks
+    virtual void OnSpeechStartDetected(const USP::SpeechStartDetectedMsg& message) override;
+    virtual void OnSpeechEndDetected(const USP::SpeechEndDetectedMsg& message) override;
+    virtual void OnSpeechHypothesis(const USP::SpeechHypothesisMsg& message) override;
+    virtual void OnSpeechFragment(const USP::SpeechFragmentMsg& message) override;
+    virtual void OnSpeechPhrase(const USP::SpeechPhraseMsg& message) override;
+    virtual void OnTurnStart(const USP::TurnStartMsg& message) override;
+    virtual void OnTurnEnd(const USP::TurnEndMsg& message) override;
+    virtual void OnError(const std::string& error) override;
 
 private:
 
@@ -47,88 +54,46 @@ private:
 
     CSpxUspRecoEngineAdapter& operator=(const CSpxUspRecoEngineAdapter&) = delete;
 
-    bool IsUspHandleValid(UspHandle handle);
+    void UspInitialize();
 
-    void UspInitialize(UspHandle* handle, UspCallbacks *callbacks, void* callbackContext);
+    USP::Client& SetUspEndpoint(USP::Client& client);
+    USP::Client& SetUspRecoMode(USP::Client& client);
+    USP::Client& SetUspModelId(USP::Client& client);
+    USP::Client& SetUspLanguage(USP::Client& client);
+    USP::Client& SetUspAuthentication(USP::Client& client);
 
-    UspEndpointType GetUspEndpointType();
-    std::string GetUspCustomEndpoint();
+    void UspWrite(const uint8_t* buffer, size_t byteToWrite);
+    void UspWriteFormat(WAVEFORMATEX* pformat);
+    void UspWrite_Actual(const uint8_t* buffer, size_t byteToWrite);
+    void UspWrite_Buffered(const uint8_t* buffer, size_t byteToWrite);
+    void UspWrite_Flush();
 
-    UspRecognitionMode GetUspRecoMode();
-    std::string GetUspLanguage();
-    std::string GetUspModelId();
-
-    std::string GetUspAuthenticationData(UspAuthenticationType* pauthType);
-
-    void UspWrite(UspHandle handle, const uint8_t* buffer, size_t byteToWrite);
-    void UspWriteFormat(UspHandle handle, WAVEFORMATEX* pformat);
-    void UspWrite_Actual(UspHandle handle, const uint8_t* buffer, size_t byteToWrite);
-    void UspWrite_Buffered(UspHandle handle, const uint8_t* buffer, size_t byteToWrite);
-    void UspWrite_Flush(UspHandle handle);
-    void UspShutdown(UspHandle handle);
-
-    static std::shared_ptr<CSpxUspRecoEngineAdapter> From(UspHandle handle, void* callbackContext)
-    {
-        UNUSED(handle);
-        auto ptrClass = static_cast<CSpxUspRecoEngineAdapter*>(callbackContext);
-        auto ptrProcessor = ((ISpxAudioProcessor*)ptrClass);
-        auto shared = std::dynamic_pointer_cast<CSpxUspRecoEngineAdapter>(ptrProcessor->shared_from_this());
-        return shared;
-    }
-
-    void InitCallbacks(UspCallbacks* pcallbacks);
-
-    void UspOnSpeechStartDetected(UspMsgSpeechStartDetected *message);
-    void UspOnSpeechEndDetected(UspMsgSpeechEndDetected *message);
-    void UspOnSpeechHypothesis(UspMsgSpeechHypothesis *message);
-    void UspOnSpeechFragment(UspMsgSpeechFragment *message);
-    void UspOnSpeechPhrase(UspMsgSpeechPhrase *message);
-    void UspOnTurnStart(UspMsgTurnStart *message);
-    void UspOnTurnEnd(UspMsgTurnEnd *message);
-    void UspOnError(const UspError* error);
-
-    ISpxRecoEngineAdapterSite::ResultPayload_Type ResultPayloadFrom(UspMsgSpeechPhrase* message)
+    ISpxRecoEngineAdapterSite::ResultPayload_Type ResultPayloadFrom(const USP::SpeechPhraseMsg& message)
     {
         SPX_DBG_ASSERT(GetSite());
         auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
 
-        // TODO: RobCh: Do something with the other fields in UspMsgSpeechPhrase
-        ISpxRecoEngineAdapterSite::ResultPayload_Type payload;
-        if (message->recognitionStatus == USP_RECOGNITON_SUCCESS)
+        // TODO: RobCh: Do something with the other fields in USP::SpeechPhrase
+        switch (message.recognitionStatus)
         {
-            payload = factory->CreateFinalResult(nullptr, message->displayText);
-        }
-        else if (message->recognitionStatus == USP_RECOGNITION_NO_MATCH)
-        {
-            payload = factory->CreateNoMatchResult();
-        }
-        else if (message->recognitionStatus == USP_RECOGNITION_INITIAL_SILENCE_TIMEOUT)
-        {
+        case USP::RecognitionStatus::Success:
+            return factory->CreateFinalResult(nullptr, message.displayText.c_str());
+        case USP::RecognitionStatus::NoMatch:
+        case USP::RecognitionStatus::BabbleTimeout:
+        case USP::RecognitionStatus::InitialSilenceTimeout:
+        case USP::RecognitionStatus::Error:
             // TODO: RobCh: Construct appropriate result
-            payload = factory->CreateNoMatchResult();
+            return factory->CreateNoMatchResult();
+        default:
+            SPX_DBG_ASSERT_WITH_MESSAGE(false, "Did someone add a new value to the USP::RecognitionStatus enumeration?");
         }
-        else if (message->recognitionStatus == USP_RECOGNITION_BABBLE_TIMEOUT)
-        {
-            // TODO: RobCh: Construct appropriate result
-            payload = factory->CreateNoMatchResult();
-        }
-        else if (message->recognitionStatus == USP_RECOGNITION_ERROR)
-        {
-            // TODO: RobCh: Construct appropriate result
-            payload = factory->CreateNoMatchResult();
-        }
-        else
-        {
-            SPX_DBG_ASSERT_WITH_MESSAGE(false, "Did someone add a new RECOGNITION_* value to the UspRecognitionStatus enumeration?");
-        }
-
-        return payload;
+        return nullptr;
     }
 
-    ISpxRecoEngineAdapterSite::AdditionalMessagePayload_Type AdditionalMessagePayloadFrom(UspMsgTurnStart* message) { UNUSED(message); return nullptr; } // TODO: RobCh: Implement this
-    ISpxRecoEngineAdapterSite::AdditionalMessagePayload_Type AdditionalMessagePayloadFrom(UspMsgTurnEnd* message) { UNUSED(message); return nullptr; } // TODO: RobCh: Implement this
+    ISpxRecoEngineAdapterSite::AdditionalMessagePayload_Type AdditionalMessagePayloadFrom(const USP::TurnStartMsg& message) { UNUSED(message); return nullptr; } // TODO: RobCh: Implement this
+    ISpxRecoEngineAdapterSite::AdditionalMessagePayload_Type AdditionalMessagePayloadFrom(const USP::TurnEndMsg& message) { UNUSED(message); return nullptr; } // TODO: RobCh: Implement this
 
-    ISpxRecoEngineAdapterSite::ErrorPayload_Type ErrorPayloadFrom(const UspError* error) { return error->errorCode; } // TODO: RobCh: Implement this
+    ISpxRecoEngineAdapterSite::ErrorPayload_Type ErrorPayloadFrom(const std::string& error) { UNUSED(error); return SPXERR_NOT_IMPL; } // TODO: RobCh: Implement this
 
     uint8_t* FormatBufferWriteBytes(uint8_t* buffer, const uint8_t* source, size_t bytes);
 
@@ -151,8 +116,7 @@ private:
 
 private:
 
-    UspHandle m_handle;
-    UspCallbacks m_callbacks; // TODO: ZhouWang: When I call UspInitialize(..., &m_callbacks, ...), if I give you a stack based variable, it doesn't work. you're not making a copy? So ... for now I'll just keep this as a member variable
+    USP::ConnectionPtr m_handle;
 
     const size_t m_servicePreferedMilliseconds = 600;
     size_t m_servicePreferedBufferSize;

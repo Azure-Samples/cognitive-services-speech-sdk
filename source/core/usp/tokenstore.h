@@ -7,9 +7,6 @@
 
 #include <time.h>
 
-#include "azure_c_shared_utility/strings.h"
-#include "azure_c_shared_utility/urlencode.h"
-
 
 #ifdef __cplusplus
 extern "C" {

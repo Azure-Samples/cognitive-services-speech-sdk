@@ -5,6 +5,7 @@ set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
 include_directories(${INC_DIR})
 include_directories ("${CARBON_EXTERNAL}/parson")
+include_directories ("${COMMON}/include")
 
 add_library(parson STATIC "${CARBON_ROOT}/external/parson/parson.c")
 
@@ -41,10 +42,10 @@ set(SOURCES
     "${SRC_DIR}/iobuffer.c"
     "${SRC_DIR}/metrics.c"
     "${SRC_DIR}/propbag.c"
-    "${SRC_DIR}/responses.c"
+    "${SRC_DIR}/responses.cpp"
     "${SRC_DIR}/transport.c"
-    "${SRC_DIR}/uspapi.c"
-    "${SRC_DIR}/uspimpl.c"
+    "${SRC_DIR}/usp.cpp"
+    "${SRC_DIR}/uspimpl.cpp"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})
@@ -57,12 +58,6 @@ set(USP_LIBS ${AZURE_SHARED_LIB} parson)
 
 if(WIN32)
     list(APPEND USP_LIBS rpcrt4.lib)
-endif()
-
-if(UNIX)
-  set_target_properties (usp PROPERTIES
-      COMPILE_FLAGS "-Wall -Werror -Wextra -Wno-long-long" # TODO:  -Wpedantic
-  )
 endif()
 
 set_target_properties (usp PROPERTIES
