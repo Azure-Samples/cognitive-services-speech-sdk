@@ -11,16 +11,16 @@ namespace Carbon
     /// <summary>
     /// Represents collection of parameters and their values.
     /// </summary>
-    public class ParameterCollection<T>
+    public class ParameterCollection<OwnerType>
     {
-        internal ParameterCollection(T owner)
+        internal ParameterCollection(OwnerType owner)
         {
-            if (typeof(T) == typeof(Carbon.Recognition.RecognizerFactory))
+            if (typeof(OwnerType) == typeof(Carbon.Recognition.RecognizerFactory))
             {
                 isFactoryParameter = true;
                 speechParameters = null;
             }
-            if (typeof(T) == typeof(Carbon.Recognition.Speech.SpeechRecognizer))
+            if (typeof(OwnerType) == typeof(Carbon.Recognition.Speech.SpeechRecognizer))
             {
                 isFactoryParameter = false;
                 var speechRecognizer = owner as Carbon.Recognition.Speech.SpeechRecognizer;
@@ -28,7 +28,7 @@ namespace Carbon
             }
             else
             {
-                throw new NotImplementedException("ParameterCollection: Unsupported type: " + typeof(T));
+                throw new NotImplementedException("ParameterCollection: Unsupported type: " + typeof(OwnerType));
             }
         }
 
@@ -37,20 +37,92 @@ namespace Carbon
         /// </summary>
         /// <param name="name">The parameter name.</param>
         /// <returns>true if the parameter has a string value, and false otherwise.</returns>
-        public bool IsString(string name)
+        public bool Is<T>(string name)
         {
-            return isFactoryParameter ? Carbon.Internal.RecognizerFactory.Parameters.IsString(name) : speechParameters.HasString(name);
+            if (typeof(T) == typeof(string))
+            {
+                return isFactoryParameter ? Carbon.Internal.RecognizerFactory.Parameters.IsString(name) : speechParameters.IsString(name);
+            }
+            else if (typeof(T) == typeof(int))
+            {
+                return isFactoryParameter ? Carbon.Internal.RecognizerFactory.Parameters.IsNumber(name) : speechParameters.IsNumber(name);
+            }
+            else if (typeof(T) == typeof(bool))
+            {
+                return isFactoryParameter ? Carbon.Internal.RecognizerFactory.Parameters.IsBool(name) : speechParameters.IsBool(name);
+            }
+            else
+            {
+                throw new NotImplementedException("ParameterCollection: Unsupported value type: " + typeof(T));
+            }
         }
 
         /// <summary>
-        /// Returns the value of parameter specified by name as string. If the name is not available, the default value is returned.
+        /// Returns the parameter value in type <typeparamref name="T"/>. The parameter must have the same type as <typeparamref name="T"/>.
+        /// Currently only string, int and bool are allowed.
+        /// If the name is not available, it returns an empty string if the parameter is a string, 0 if the parameter is int, 
+        /// and false if the parameter is bool.
         /// </summary>
+        /// <typeparam name="T">The type of parameter. only string, int and bool are supported.</typeparam>
         /// <param name="name">The parameter name.</param>
         /// <param name="defaultValue">The default value which is returned if the parameter is not available in the collection.</param>
         /// <returns>value of the parameter.</returns>
-        public string GetString(string name, string defaultValue = null)
+        public T Get<T>(string name)
         {
-            return isFactoryParameter ? Carbon.Internal.RecognizerFactory.Parameters.GetString(name, defaultValue) : speechParameters.GetString(name, defaultValue);
+            T defaultT;
+            if (typeof(T) == typeof(string))
+            {
+                defaultT = (T)Convert.ChangeType(string.Empty, typeof(T));
+            }
+            else if (typeof(T) == typeof(int))
+            {
+                defaultT = (T)Convert.ChangeType(0, typeof(T));
+            }
+            else if (typeof(T) == typeof(bool))
+            {
+                defaultT = (T)Convert.ChangeType(false, typeof(T));
+            }
+            else
+            {
+                throw new NotImplementedException("ParameterCollection: Unsupported value type: " + typeof(T));
+            }
+
+            return Get<T>(name, defaultT);
+        }
+
+        /// <summary>
+        /// Returns the parameter value in type <typeparamref name="T"/>. The parameter must have the same type as <typeparamref name="T"/>.
+        /// Currently only string, int and bool are allowed.
+        /// If the name is not available, the specified defaultValue is returned.
+        /// </summary>
+        /// <typeparam name="T">The type of parameter. only string, int and bool are supported.</typeparam>
+        /// <param name="name">The parameter name.</param>
+        /// <param name="defaultValue">The default value which is returned if the parameter is not available in the collection.</param>
+        /// <returns>value of the parameter.</returns>
+        public T Get<T>(string name, T defaultValue)
+        {
+            if (typeof(T) == typeof(string))
+            {
+                var defaultInT = (string)Convert.ChangeType(defaultValue, typeof(string));
+                var ret = isFactoryParameter ? Carbon.Internal.RecognizerFactory.Parameters.GetString(name, defaultInT) : speechParameters.GetString(name, defaultInT);
+                return (T)Convert.ChangeType(ret, typeof(T));
+            }
+            else if (typeof(T) == typeof(int))
+            {
+                var defaultInT = (int)Convert.ChangeType(defaultValue, typeof(int));
+                var ret = isFactoryParameter ? Carbon.Internal.RecognizerFactory.Parameters.GetNumber(name, defaultInT) : speechParameters.GetNumber(name, defaultInT);
+                return (T)Convert.ChangeType(ret, typeof(T));
+            }
+            else if (typeof(T) == typeof(bool))
+            {
+                var defaultInT = (bool)Convert.ChangeType(defaultValue, typeof(bool));
+                var ret = isFactoryParameter ? Carbon.Internal.RecognizerFactory.Parameters.GetBool(name, defaultInT) : speechParameters.GetBool(name, defaultInT);
+                return (T)Convert.ChangeType(ret, typeof(T));
+            }
+            else
+            {
+                throw new NotImplementedException("ParameterCollection: Unsupported value type: " + typeof(T));
+            }
         }
 
         /// <summary>
@@ -58,7 +130,7 @@ namespace Carbon
         /// </summary>
         /// <param name="name">The parameter name.</param>
         /// <param name="value">The value of the parameter.</param>
-        public void SetString(string name, string value)
+        public void Set(string name, string value)
         {
             if (isFactoryParameter)
             {
@@ -71,32 +143,11 @@ namespace Carbon
         }
 
         /// <summary>
-        /// Checks whether the parameter specified by name has a integer value. 
-        /// </summary>
-        /// <param name="name">The parameter name.</param>
-        /// <returns>true if the parameter has an int value, and false otherwise.</returns>
-        public bool IsNumber(string name)
-        {
-            return isFactoryParameter? Carbon.Internal.RecognizerFactory.Parameters.IsNumber(name) : speechParameters.HasNumber(name);
-        }
-
-        /// <summary>
-        /// Returns the value of parameter specified by name as integer. If the name is not available, the default value is returned.
-        /// </summary>
-        /// <param name="name">The parameter name.</param>
-        /// <param name="defaultValue">The default value which is returned if the parameter is not available in the collection.</param>
-        /// <returns>value of the parameter.</returns>
-        public int GetNumber(string name, int defaultValue = 0)
-        {
-            return isFactoryParameter ? Carbon.Internal.RecognizerFactory.Parameters.GetNumber(name, defaultValue) : speechParameters.GetNumber(name, defaultValue);
-        }
-
-        /// <summary>
         /// Sets the integer value of the parameter specified by name.
         /// </summary>
         /// <param name="name">The parameter name.</param>
         /// <param name="value">The value of the parameter.</param>
-        public void SetNumber(string name, int value)
+        public void Set(string name, int value)
         {
             if (isFactoryParameter)
             {
@@ -109,32 +160,11 @@ namespace Carbon
         }
 
         /// <summary>
-        /// Checks whether the parameter specified by name has a boolean value. 
-        /// </summary>
-        /// <param name="name">The parameter name.</param>
-        /// <returns>true if the parameter has an boolean value, and false otherwise.</returns>
-        public bool IsBool(string name)
-        {
-            return isFactoryParameter ? Carbon.Internal.RecognizerFactory.Parameters.IsBool(name) : speechParameters.HasBool(name);
-        }
-
-        /// <summary>
-        /// Returns the value of parameter specified by name as boolean. If the name is not available, the default value is returned.
-        /// </summary>
-        /// <param name="name">The parameter name.</param>
-        /// <param name="defaultValue">The default value which is returned if the parameter is not available in the collection.</param>
-        /// <returns>value of the parameter.</returns>
-        public bool GetBool(string name, bool defaultValue = false)
-        {
-            return isFactoryParameter ? Carbon.Internal.RecognizerFactory.Parameters.GetBool(name, defaultValue) : speechParameters.GetBool(name, defaultValue);
-        }
-
-        /// <summary>
         /// Sets the boolean value of the parameter specified by name.
         /// </summary>
         /// <param name="name">The parameter name.</param>
         /// <param name="value">The value of the parameter.</param>
-        public void SetBool(string name, bool value)
+        public void Set(string name, bool value)
         {
             if (isFactoryParameter)
             {
@@ -143,49 +173,6 @@ namespace Carbon
             else
             {
                 speechParameters.SetBool(name, value);
-            }
-        }
-
-        /// <summary>
-        /// Indexer operator to get and set parameter value.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public Value this[string name]
-        {
-            get
-            {
-                var count = 0;
-                count += IsString(name) ? 1 : 0;
-                count += IsBool(name) ? 1 : 0;
-                count += IsNumber(name) ? 1 : 0;
-                if (count == 0)
-                {
-                    throw new KeyNotFoundException("Name: " + name + "not found in the collection.");
-                }
-                else if (count > 1)
-                {
-                    throw new InvalidOperationException("Name " + name + "duplicated in the collection.");
-                }
-                
-                return IsString(name) ? new Value(GetString(name)) : IsNumber(name) ? new Value(GetNumber(name)) : new Value(GetBool(name));
-            }
-
-            set
-            {
-                if (value.ValueType == typeof(int))
-                {
-                    SetNumber(name, value.AsInt());
-                }
-                else if (value.ValueType == typeof(string))
-                {
-                    SetString(name, value.AsString());
-                }
-                else if (value.ValueType == typeof(bool))
-                {
-                    SetBool(name, value.AsBoolean());
-                }
-
             }
         }
 

@@ -25,15 +25,15 @@ public:
 
     // --- Value virtual overrides ---
 
-    bool IsString() override { return HasString(m_hreco, m_name.c_str()); }
+    bool IsString() override { return IsString(m_hreco, m_name.c_str()); }
     std::wstring GetString(const wchar_t* defaultValue) override { return GetString(m_hreco, m_name.c_str(), defaultValue); }
     void SetString(const wchar_t* value) override { return SetString(m_hreco, m_name.c_str(), value); }
 
-    bool IsNumber() override { return HasNumber(m_hreco, m_name.c_str()); }
+    bool IsNumber() override { return IsNumber(m_hreco, m_name.c_str()); }
     int32_t GetNumber(int32_t defaultValue) override { return GetNumber(m_hreco, m_name.c_str(), defaultValue); }
     void SetNumber(int32_t value) override { SetNumber(m_hreco, m_name.c_str(), value); }
 
-    bool IsBool() override { return HasBool(m_hreco, m_name.c_str()); }
+    bool IsBool() override { return IsBool(m_hreco, m_name.c_str()); }
     bool GetBool(bool defaultValue) override { return GetBool(m_hreco, m_name.c_str(), defaultValue); }
     void SetBool(bool value) override { SetBool(m_hreco, m_name.c_str(), value); }
 
@@ -76,17 +76,17 @@ public:
         SPX_THROW_ON_FAIL(Recognizer_SetParameter_Bool(hreco, name, value));
     }
 
-    static bool HasString(SPXRECOHANDLE hreco, const wchar_t* name)
+    static bool IsString(SPXRECOHANDLE hreco, const wchar_t* name)
     {
         return Recognizer_HasParameter_String(hreco, name);
     }
 
-    static bool HasNumber(SPXRECOHANDLE hreco, const wchar_t* name)
+    static bool IsNumber(SPXRECOHANDLE hreco, const wchar_t* name)
     {
         return Recognizer_HasParameter_Int32(hreco, name);
     }
 
-    static bool HasBool(SPXRECOHANDLE hreco, const wchar_t* name)
+    static bool IsBool(SPXRECOHANDLE hreco, const wchar_t* name)
     {
         return Recognizer_HasParameter_Bool(hreco, name);
     }

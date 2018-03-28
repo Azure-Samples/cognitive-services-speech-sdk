@@ -31,15 +31,15 @@ public:
 
     // --- Value virtual overrides ---
 
-    bool IsString() override { return HasString(m_hresult, m_name.c_str()); }
+    bool IsString() override { return IsString(m_hresult, m_name.c_str()); }
     std::wstring GetString(const wchar_t* defaultValue) override { return GetString(m_hresult, m_name.c_str(), defaultValue); }
     void SetString(const wchar_t* value) override { UNUSED(value); SPX_THROW_HR(SPXERR_NOT_IMPL); }
 
-    bool IsNumber() override { return HasNumber(m_hresult, m_name.c_str()); }
+    bool IsNumber() override { return IsNumber(m_hresult, m_name.c_str()); }
     int32_t GetNumber(int32_t defaultValue) override { return GetNumber(m_hresult, m_name.c_str(), defaultValue); }
     void SetNumber(int32_t value) override { UNUSED(value); SPX_THROW_HR(SPXERR_NOT_IMPL); }
 
-    bool IsBool() override { return HasBool(m_hresult, m_name.c_str()); }
+    bool IsBool() override { return IsBool(m_hresult, m_name.c_str()); }
     bool GetBool(bool defaultValue) override { return GetBool(m_hresult, m_name.c_str(), defaultValue); }
     void SetBool(bool value) override { UNUSED(value); SPX_THROW_HR(SPXERR_NOT_IMPL); }
 
@@ -67,17 +67,17 @@ public:
         return !!value;
     }
 
-    static bool HasString(SPXRESULTHANDLE hresult, const wchar_t* name)
+    static bool IsString(SPXRESULTHANDLE hresult, const wchar_t* name)
     {
         return Result_HasValue_String(hresult, name);
     }
 
-    static bool HasNumber(SPXRESULTHANDLE hresult, const wchar_t* name)
+    static bool IsNumber(SPXRESULTHANDLE hresult, const wchar_t* name)
     {
         return Result_HasValue_Int32(hresult, name);
     }
 
-    static bool HasBool(SPXRESULTHANDLE hresult, const wchar_t* name)
+    static bool IsBool(SPXRESULTHANDLE hresult, const wchar_t* name)
     {
         return Result_HasValue_Bool(hresult, name);
     }

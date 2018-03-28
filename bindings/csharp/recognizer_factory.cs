@@ -53,14 +53,12 @@ namespace Carbon.Recognition
         {
             get
             {
-                //return Parameters.GetString(SubscriptionKeyParameterName);
-                return Parameters[SubscriptionKeyParameterName].AsString();
+                return Parameters.Get<string>(SubscriptionKeyParameterName);
             }
 
             set
             {
-                //Parameters.SetString(SubscriptionKeyParameterName, key);
-                Parameters[SubscriptionKeyParameterName] = new Carbon.Value(value);
+                Parameters.Set(SubscriptionKeyParameterName, value);
             }
         }
 
@@ -71,14 +69,12 @@ namespace Carbon.Recognition
         {
             get
             {
-                //return Parameters.GetString(RegionParameterName);
-                return Parameters[RegionParameterName].AsString();
+                return Parameters.Get<string>(RegionParameterName);
             }
 
             set
             {
-                //Parameters.SetString(RegionParameterName, key);
-                Parameters[RegionParameterName] = new Carbon.Value(value);
+                Parameters.Set(RegionParameterName, value);
             }
         }
 

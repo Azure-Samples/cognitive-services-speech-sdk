@@ -22,15 +22,15 @@ public:
 
     RecognizerFactoryParameter(const wchar_t* name) : m_name(name) { }
 
-    bool IsString() override { return HasString(m_name.c_str()); }
+    bool IsString() override { return IsString(m_name.c_str()); }
     std::wstring GetString(const wchar_t* defaultValue) override { return GetString(m_name.c_str(), defaultValue); }
     void SetString(const wchar_t* value) override { return SetString(m_name.c_str(), value); }
 
-    bool IsNumber() override { return HasNumber(m_name.c_str()); }
+    bool IsNumber() override { return IsNumber(m_name.c_str()); }
     int32_t GetNumber(int32_t defaultValue) override { return GetNumber(m_name.c_str(), defaultValue); }
     void SetNumber(int32_t value) override { SetNumber(m_name.c_str(), value); }
 
-    bool IsBool() override { return HasBool(m_name.c_str()); }
+    bool IsBool() override { return IsBool(m_name.c_str()); }
     bool GetBool(bool defaultValue) override { return GetBool(m_name.c_str(), defaultValue); }
     void SetBool(bool value) override { SetBool(m_name.c_str(), value); }
 
@@ -78,17 +78,17 @@ private:
         SPX_THROW_ON_FAIL(RecognizerFactory_SetParameter_Bool(name, value));
     }
 
-    static bool HasString(const wchar_t* name)
+    static bool IsString(const wchar_t* name)
     {
         return RecognizerFactory_HasParameter_String(name);
     }
 
-    static bool HasNumber(const wchar_t* name)
+    static bool IsNumber(const wchar_t* name)
     {
         return RecognizerFactory_HasParameter_Int32(name);
     }
 
-    static bool HasBool(const wchar_t* name)
+    static bool IsBool(const wchar_t* name)
     {
         return RecognizerFactory_HasParameter_Bool(name);
     }

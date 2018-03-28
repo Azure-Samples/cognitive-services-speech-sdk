@@ -84,14 +84,13 @@ namespace Carbon.Recognition.Speech
         {
             get
             {
-                // return Parameters.GetString(LanguageParameterName);
-                return Parameters[LanguageParameterName].AsString();
+                return Parameters.Get<string>(LanguageParameterName);
             }
 
             set
             {
-                // Parameters.SetString(LanguageParameterName, value);
-                Parameters[LanguageParameterName] = new Carbon.Value(value);
+                Parameters.Set(LanguageParameterName, value);
+
             }
         }
 
@@ -102,14 +101,12 @@ namespace Carbon.Recognition.Speech
         {
             get
             {
-                // return Parameters.GetString(ModeParameterName);
-                return Parameters[ModeParameterName].AsString();
+                return Parameters.Get<string>(ModeParameterName);
             }
 
             set
             {
-                // Parameters.SetString(ModeParameterName, value);
-                Parameters[ModeParameterName] = new Carbon.Value(value);
+                Parameters.Set(ModeParameterName, value);
             }
         }
 
