@@ -1,4 +1,9 @@
-cmake_minimum_required(VERSION 3.5)
+if(WIN32)
+  # Version >= 3.7.x is required for generating VS 2017 solutions.
+  cmake_minimum_required(VERSION 3.7)
+else()
+  cmake_minimum_required(VERSION 3.5)
+endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 

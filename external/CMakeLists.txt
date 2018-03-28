@@ -1,5 +1,6 @@
 set(AZURE_SHARED_LIB_DIR "${CMAKE_CURRENT_LIST_DIR}/azure-c-shared-utility")
 if(NOT EXISTS ${AZURE_SHARED_LIB_DIR} OR NOT EXISTS ${AZURE_SHARED_LIB_DIR}/CMakeLists.txt)
+    # Note: we do not need recursive Git submodule init as of now.
     execute_process(COMMAND git submodule update --init)
 endif()
 

@@ -47,7 +47,7 @@ include_directories(${JAVA_INCLUDE_PATH})
 include_directories(${JNI_INCLUDE_DIRS})
 include_directories("${SRC_DIR}/..")
 
-# Build the C++ code start into a dynamic library: example.dll (on Windows) or libexample.so (on Linux)
+# Build the C++ code start into a dynamic library: carbon.dll (on Windows) or libcarbon.so (on Linux)
 swig_add_library(${JAVA_BINDINGS} LANGUAGE java SOURCES ${SOURCES})
 swig_link_libraries(${JAVA_BINDINGS} libcarbon)
 set_target_properties(${SWIG_MODULE_${JAVA_BINDINGS}_REAL_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

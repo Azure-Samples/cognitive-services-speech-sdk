@@ -5,8 +5,9 @@ This is the initial working project repository for the Client Speech SDK aka Car
 # Cloning the repo
 
 * `git clone https://msasg.visualstudio.com/DefaultCollection/Skyman/_git/Carbon`
-* `git submodule init`
-* `git submodule update --recursive`
+* `git submodule update --init`
+
+> Note: currently recursive Git submodule (`--recursive`) initialization is not required.
 
 # Building Carbon
 
