@@ -8,7 +8,7 @@ AUDIO_FILE=whatstheweatherlike.wav
 
 echo -e "\n Testing carbon: \n"
 
-ARGS="--speech --input $AUDIO_FILE"
+ARGS="--speech --subscription:$2 --input $AUDIO_FILE"
 
 echo "Launching: "
 (set -x; $CARBONX $ARGS)

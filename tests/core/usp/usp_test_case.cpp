@@ -6,11 +6,18 @@
 #include <chrono>
 #include <thread>
 #include <random>
+#include <string>
+
 #include "catch.hpp"
 #include "test_utils.h"
 #include "usp.h"
 
 using namespace std;
+
+std::string g_keySpeech;
+std::string g_keyCRIS;
+std::string g_keyLUIS;
+std::string g_keySkyman;
 
 class UspClient : public USP::Callbacks {
 public:
@@ -19,7 +26,7 @@ public:
     {
         m_connection = USP::Client(*this, endpoint)
             .SetRecognitionMode(mode)
-            .SetAuthentication(USP::AuthenticationType::SubscriptionKey, "92069ee289b84e5594a9564ab77ed2ba")
+            .SetAuthentication(USP::AuthenticationType::SubscriptionKey, g_keySpeech)
             .Connect();
     }
 
@@ -41,6 +48,7 @@ public:
 private:
     USP::ConnectionPtr m_connection;
 };
+
 
 TEST_CASE("USP is properly functioning", "[usp]")
 {
@@ -116,5 +124,5 @@ TEST_CASE("USP is properly functioning", "[usp]")
             std::this_thread::sleep_for(std::chrono::milliseconds(rnd() % 100));
         }
     }
-
 }
+
