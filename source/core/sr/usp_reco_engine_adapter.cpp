@@ -12,10 +12,14 @@
 #include <inttypes.h>
 #include <cstring>
 #include "service_helpers.h"
+#include "named_properties_constants.h"
+
 
 namespace CARBON_IMPL_NAMESPACE() {
 
+
 int CSpxUspRecoEngineAdapter::m_instanceCounter = 0;
+
 
 CSpxUspRecoEngineAdapter::CSpxUspRecoEngineAdapter() :
     m_servicePreferedBufferSize(0),
@@ -91,19 +95,19 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(USP::Client& client)
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
-    auto customSpeechModelId = properties->GetStringValue(LR"(CUSTOMSPEECH-modelId)");
-    if (!customSpeechModelId.empty())                           // Use the Custom Recognition Intelligent Service
+    auto customSpeechModelId = properties->GetStringValue(g_SPEECH_ModelId);
+    if (!customSpeechModelId.empty())                       // Use the Custom Recognition Intelligent Service
     {
         return client.SetEndpointType(USP::EndpointType::Cris);
     }
 
-    auto endpoint = properties->GetStringValue(LR"(SPEECH-Endpoint)");
-    if (PAL::wcsicmp(endpoint.c_str(), L"CORTANA") == 0)   // Use the CORTANA SDK endpoint
+    auto endpoint = properties->GetStringValue(g_SPEECH_Endpoint);
+    if (PAL::wcsicmp(endpoint.c_str(), L"CORTANA") == 0)    // Use the CORTANA SDK endpoint
     {
         return client.SetEndpointType(USP::EndpointType::CDSDK);
     }
 
-    if (!endpoint.empty())                                 // Use the SPECIFIED endpoint
+    if (!endpoint.empty())                                  // Use the SPECIFIED endpoint
     {
         return client.SetEndpointUrl(PAL::ToString(endpoint));
     }
@@ -119,7 +123,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspRecoMode(USP::Client& client)
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
     // Get the property that indicates what reco mode to use...
-    auto value = properties->GetStringValue(LR"(SPEECH-RecoMode)");
+    auto value = properties->GetStringValue(g_SPEECH_RecoMode);
 
     // Convert that value to the appropriate UspRecognitionMode...
     if (value.empty() || PAL::wcsicmp(value.c_str(), L"INTERACTIVE") == 0)
@@ -148,13 +152,13 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspLanguage(USP::Client& client)
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
-    if (!properties->HasStringValue(LR"(SPEECH-RecoLanguage)"))
+    if (!properties->HasStringValue(g_SPEECH_RecoLanguage))
     {
         return client;
     }
 
     // Get the property that indicates what language to use...
-    auto value = properties->GetStringValue(LR"(SPEECH-RecoLanguage)");
+    auto value = properties->GetStringValue(g_SPEECH_RecoLanguage);
     return client.SetLanguage(PAL::ToString(value));
 }
 
@@ -164,13 +168,13 @@ USP::Client&  CSpxUspRecoEngineAdapter::SetUspModelId(USP::Client& client)
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
-    if (!properties->HasStringValue(LR"(CUSTOMSPEECH-ModelId)"))
+    if (!properties->HasStringValue(g_SPEECH_ModelId))
     {
         return client;
     }
 
     // Get the property that indicates what model to use...
-    auto value = properties->GetStringValue(LR"(CUSTOMSPEECH-ModelId)");
+    auto value = properties->GetStringValue(g_SPEECH_ModelId);
     return client.SetModelId(PAL::ToString(value));
 }
 
@@ -181,9 +185,9 @@ USP::Client&  CSpxUspRecoEngineAdapter::SetUspAuthentication(USP::Client& client
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
     // Get the properties that indicates what endpoint to use...
-    auto uspSubscriptionKey = properties->GetStringValue(L"SPEECH-SubscriptionKey");
-    auto uspAuthToken = properties->GetStringValue(L"SPEECH-AuthToken");
-    auto uspRpsToken = properties->GetStringValue(L"SPEECH-RpsToken");
+    auto uspSubscriptionKey = properties->GetStringValue(g_SPEECH_SubscriptionKey);
+    auto uspAuthToken = properties->GetStringValue(g_SPEECH_AuthToken);
+    auto uspRpsToken = properties->GetStringValue(g_SPEECH_RpsToken);
 
     // Use those properties to determine which authentication type to use
     if (!uspSubscriptionKey.empty())

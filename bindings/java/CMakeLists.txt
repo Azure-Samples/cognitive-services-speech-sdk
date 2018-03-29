@@ -69,9 +69,11 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognitionEventListener.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/BaseAsyncRecognizer.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/BaseRecognizerBase.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/BaseValueCollection.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/carbon_java.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/carbon_javaJNI.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/EventArgs.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/DefaultRecognizerFactory.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntentEventSignal.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntentRecognizer.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntentRecognizerBase.java
@@ -85,17 +87,25 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognitionEventArgs.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognitionEventSignal.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognitionResult.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognitionResultValue.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognitionResultValueCollection.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/ResultProperty.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/ResultPropertyValue.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/ResultPropertyValueCollection.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/Recognizer.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IRecognizerFactory.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IDefaultRecognizerFactory.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerFactory.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/FactoryParameter.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerFactoryParameterValue.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerFactoryParameterCollection.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerParameter.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerParameterCollection.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerParameterValue.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerParameterValueCollection.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/Session.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionEventArgs.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionEventSignal.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionParameter.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionParameterCollection.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionParameterValue.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionParameterValueCollection.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognitionEventArgs.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognitionEventSignal.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognitionResult.java
@@ -105,12 +115,13 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXEVENTHANDLE.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXLUISHANDLE.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXRECOHANDLE.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXRECOFACTORYHANDLE.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXRESULTHANDLE.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXSESSIONHANDLE.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXTRIGGERHANDLE.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__shared_ptrT_Carbon__Recognition__IDefaultRecognizerFactory_t.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_wchar_t.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/VoidFuture.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerFactoryParameter.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/ValueCollectionRecognizerParameter.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/Value.java
 )

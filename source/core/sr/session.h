@@ -16,6 +16,7 @@
 
 namespace CARBON_IMPL_NAMESPACE() {
 
+
 class CSpxSession : public ISpxSession
 {
 public:

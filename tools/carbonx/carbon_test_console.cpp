@@ -134,6 +134,12 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
             pstrNextArg = &pconsoleArgs->m_strEndpointUri;
             fNextArgRequired = true;
         }
+        else if (PAL::wcsnicmp(pszArg, L"--customSpeechModelId", wcslen(L"--customSpeechModelId")) == 0)
+        {
+            fShowOptions = pconsoleArgs->m_strCustomSpeechModelId.length() > 0 || fNextArgRequired;
+            pstrNextArg = &pconsoleArgs->m_strCustomSpeechModelId;
+            fNextArgRequired = true;
+        }
         else if (PAL::wcsnicmp(pszArg, L"--subscription", wcslen(L"--subscription")) == 0)
         {
             fShowOptions = pconsoleArgs->m_strSubscriptionKey.length() > 0 || fNextArgRequired;
@@ -280,10 +286,11 @@ void CarbonTestConsole::DisplayConsoleUsage()
     ConsoleWriteLine(L"       --input:microphone      Use the default microphone for audio input.");
     ConsoleWriteLine(L"       --input:{waveFileName}  Use WAV file for audio input.");
     ConsoleWriteLine(L"");
-    ConsoleWriteLine(L"     Authentication:");
+    ConsoleWriteLine(L"     Authentication and Service:");
     ConsoleWriteLine(L"");
-    ConsoleWriteLine(L"       --endpoint:{uri}        Use {uri} as the USP endpoint.");
-    ConsoleWriteLine(L"       --subscription:{key}    Use {key} as the subscription key.");
+    ConsoleWriteLine(L"       --endpoint:{uri}              Use {uri} as the USP endpoint.");
+    ConsoleWriteLine(L"       --subscription:{key}          Use {key} as the subscription key.");
+    ConsoleWriteLine(L"       --customSpeechModelId:{id}    Use {id} as the Custom Speech Model ID.");
     ConsoleWriteLine(L"");
     ConsoleWriteLine(L"     Additional:");
     ConsoleWriteLine(L"");
@@ -881,11 +888,9 @@ void CarbonTestConsole::Factory_CreateSpeechRecognizer(const wchar_t* psz)
     m_recognizer = nullptr;
     m_session = nullptr;
 
-    auto factory = new RecognizerFactory();
-
     m_speechRecognizer = *psz == L'\0'
-        ? factory->CreateSpeechRecognizer()
-        : factory->CreateSpeechRecognizerWithFileInput(psz + 1);
+        ? DefaultRecognizerFactory::CreateSpeechRecognizer() 
+        : DefaultRecognizerFactory::CreateSpeechRecognizerWithFileInput(psz + 1);
 
     auto fn1 = std::bind(&CarbonTestConsole::SpeechRecognizer_FinalResultHandler, this, std::placeholders::_1);
     m_speechRecognizer->FinalResult.Connect(fn1);
@@ -962,7 +967,14 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<IntentRecognizer>& 
     auto result = future.get();
     ConsoleWriteLine(L"RecognizeAsync %ls... Waiting... Done!\n", name.c_str());
 
-    ConsoleWriteLine(L"IntentRecognitionResult: ResultId=%d; Reason=%d; Text=%ls, IntentId=%ls, Json=%ls", result->ResultId.c_str(), result->Reason, result->Text.c_str(), result->IntentId.c_str(), result->Values[L"json"].GetString().c_str());
+    auto resultId = result->ResultId;
+    auto reason = result->Reason;
+    auto text = result->Text;
+
+    auto intentId = result->IntentId;
+    auto luisJson = result->Properties[ResultProperty::LuisJson].GetString();
+
+    ConsoleWriteLine(L"IntentRecognitionResult: ResultId=%d; Reason=%d; Text=%ls, IntentId=%ls, Json=%ls", resultId.c_str(), reason, text.c_str(), intentId.c_str(), luisJson.c_str());
 }
 
 void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<TranslationRecognizer>& recognizer)
@@ -1278,17 +1290,27 @@ void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
 {
     if (!pconsoleArgs->m_strEndpointUri.empty())
     {
-        RecognizerFactory::Parameters::SetString(LR"(SPEECH-Endpoint)", pconsoleArgs->m_strEndpointUri.c_str());
+        DefaultRecognizerFactory::SetSpeechEndpoint(pconsoleArgs->m_strEndpointUri.c_str());
+    }
+
+    if (!pconsoleArgs->m_strCustomSpeechModelId.empty())
+    {
+        DefaultRecognizerFactory::Parameters::SetString(LR"(CUSTOMSPEECH-ModelId)", pconsoleArgs->m_strCustomSpeechModelId.c_str());
+    }
+
+    if (!pconsoleArgs->m_strSubscriptionKey.empty())
+    {
+        DefaultRecognizerFactory::SetSubscriptionKey(pconsoleArgs->m_strSubscriptionKey.c_str());
     }
 
     if (!pconsoleArgs->m_strUseRecoEngineProperty.empty())
     {
-        RecognizerFactory::Parameters::SetBool(pconsoleArgs->m_strUseRecoEngineProperty.c_str(), true);
+        DefaultRecognizerFactory::Parameters::SetBool(pconsoleArgs->m_strUseRecoEngineProperty.c_str(), true);
     }
 
     if (!pconsoleArgs->m_strUseLuEngineProperty.empty())
     {
-        RecognizerFactory::Parameters::SetBool(pconsoleArgs->m_strUseLuEngineProperty.c_str(), true);
+        DefaultRecognizerFactory::Parameters::SetBool(pconsoleArgs->m_strUseLuEngineProperty.c_str(), true);
     }
 }
 
@@ -1325,13 +1347,11 @@ void CarbonTestConsole::InitCarbon(ConsoleArgs* pconsoleArgs)
 
 void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const std::wstring& wavFileName)
 {
-    auto factory = new RecognizerFactory();
-
     if (recognizerType == PAL::GetTypeName<SpeechRecognizer>())
     {
         m_speechRecognizer = wavFileName.length() == 0
-            ? factory->CreateSpeechRecognizer()
-            : factory->CreateSpeechRecognizerWithFileInput(wavFileName);
+            ? DefaultRecognizerFactory::CreateSpeechRecognizer() 
+            : DefaultRecognizerFactory::CreateSpeechRecognizerWithFileInput(wavFileName);
 
         auto fn1 = std::bind(&CarbonTestConsole::SpeechRecognizer_FinalResultHandler, this, std::placeholders::_1);
         m_speechRecognizer->FinalResult.Connect(fn1);
@@ -1349,7 +1369,7 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
             L"en-us");
         (void)availableLanguages;
 
-        m_translationRecognizer = factory->CreateTranslationRecognizer(L"en-us", L"zh-cn");
+        m_translationRecognizer = DefaultRecognizerFactory::CreateTranslationRecognizer(L"en-us", L"zh-cn");
 
         auto fn1 = std::bind(&CarbonTestConsole::TranslationRecognizer_FinalResultHandler, this, std::placeholders::_1);
         m_translationRecognizer->FinalResult.Connect(fn1);
@@ -1366,8 +1386,8 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
     else if (recognizerType == PAL::GetTypeName<IntentRecognizer>())
     {
         m_intentRecognizer = wavFileName.length() == 0
-            ? factory->CreateIntentRecognizer()
-            : factory->CreateIntentRecognizerWithFileInput(wavFileName);
+            ? DefaultRecognizerFactory::CreateIntentRecognizer()
+            : DefaultRecognizerFactory::CreateIntentRecognizerWithFileInput(wavFileName);
 
         auto fn1 = std::bind(&CarbonTestConsole::IntentRecognizer_FinalResultHandler, this, std::placeholders::_1);
         m_intentRecognizer->FinalResult.Connect(fn1);
@@ -1499,6 +1519,11 @@ void CarbonTestConsole::RunSample(const std::wstring& strSampleName)
     {
         ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
         Sample_HelloWorld_Subscription();
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"helloworld subscription with cris") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        Sample_HelloWorld_Subscription_With_CRIS();
     }
     else
     {

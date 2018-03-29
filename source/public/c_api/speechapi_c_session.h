@@ -13,14 +13,17 @@ SPXAPI Session_From_Recognizer(SPXRECOHANDLE hreco, SPXSESSIONHANDLE* phsession)
 SPXAPI_(bool) Session_Handle_IsValid(SPXSESSIONHANDLE hsession);
 SPXAPI Session_Handle_Close(SPXSESSIONHANDLE hsession);
 
+enum Session_Parameter { SessionParameter_SpeechSubscriptionKey = 1, SessionParameter_SpeechEndpoint = 2 };
+SPXAPI Session_GetParameter_Name(Session_Parameter parameter, wchar_t* name, uint32_t cchName);
+
 SPXAPI Session_SetParameter_String(SPXSESSIONHANDLE hsession, const wchar_t* name, const wchar_t* value);
 SPXAPI Session_GetParameter_String(SPXSESSIONHANDLE hsession, const wchar_t* name, wchar_t* value, uint32_t cchValue, const wchar_t* defaultValue);
-SPXAPI_(bool) Session_HasParameter_String(SPXSESSIONHANDLE hsession, const wchar_t* name);
+SPXAPI_(bool) Session_ContainsParameter_String(SPXSESSIONHANDLE hsession, const wchar_t* name);
 
 SPXAPI Session_SetParameter_Int32(SPXSESSIONHANDLE hsession, const wchar_t* name, int32_t value);
 SPXAPI Session_GetParameter_Int32(SPXSESSIONHANDLE hsession, const wchar_t* name, int32_t* pvalue, int32_t defaultValue);
-SPXAPI_(bool) Session_HasParameter_Int32(SPXSESSIONHANDLE hsession, const wchar_t* name);
+SPXAPI_(bool) Session_ContainsParameter_Int32(SPXSESSIONHANDLE hsession, const wchar_t* name);
 
 SPXAPI Session_SetParameter_Bool(SPXSESSIONHANDLE hsession, const wchar_t* name, bool value);
 SPXAPI Session_GetParameter_Bool(SPXSESSIONHANDLE hsession, const wchar_t* name, bool* pvalue, bool defaultValue);
-SPXAPI_(bool) Session_HasParameter_Bool(SPXSESSIONHANDLE hsession, const wchar_t* name);
+SPXAPI_(bool) Session_ContainsParameter_Bool(SPXSESSIONHANDLE hsession, const wchar_t* name);

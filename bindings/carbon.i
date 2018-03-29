@@ -44,7 +44,7 @@
 %include <speechapi_cxx_todo.h>
 %include <speechapi_cxx_value.h>
 
-%template(ValueCollectionRecognizerParameter) Carbon::ValueCollection<SPXRECOHANDLE, Carbon::Recognition::RecognizerParameter>;
+%template(ValueCollectionRecognizerParameter) Carbon::HandleValueCollection<SPXRECOHANDLE, Carbon::Recognition::RecognizerParameterValue>;
 
 %ignore Carbon::Recognition::AsyncRecognizer::RecognizeAsync();
 %ignore Carbon::Recognition::AsyncRecognizer::StartContinuousRecognitionAsync();
@@ -163,6 +163,8 @@
 %ignore Carbon::EventSignal::operator+=;
 %ignore Carbon::EventSignal::operator-=;
 
+%ignore Carbon::Recognition::ResultPropertyValue::ResultPropertyValue(SPXRESULTHANDLE, enum ResultProperty);
+
 %ignore Carbon::Recognition::Speech::SpeechRecognizer::RecognizeAsync();
 %ignore Carbon::Recognition::Speech::SpeechRecognizer::StartContinuousRecognitionAsync();
 %ignore Carbon::Recognition::Speech::SpeechRecognizer::StopContinuousRecognitionAsync();
@@ -234,8 +236,14 @@
 %template(IntentRecognizerBase) Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::Intent::IntentRecognitionResult, Carbon::Recognition::Intent::IntentRecognitionEventArgs>;
 %include <speechapi_cxx_intent_recognizer.h>
 
-%ignore Carbon::Recognition::RecognizerFactory::CreateTranslationRecognizer;
-%ignore Carbon::Recognition::RecognizerFactory::CreateTranslationRecognizerWithFileInput;
+%ignore Carbon::Recognition::RecognizerFactoryParameterValue::RecognizerFactoryParameterValue(SPXRECOFACTORYHANDLE, enum FactoryParameter);
+%ignore Carbon::Recognition::IDefaultRecognizerFactory::CreateTranslationRecognizer;
+%ignore Carbon::Recognition::IDefaultRecognizerFactory::CreateTranslationRecognizerWithFileInput;
+%ignore Carbon::Recognition::RecognizerFactory::InternalDefaultRecognizerFactory::CreateTranslationRecognizer;
+%ignore Carbon::Recognition::RecognizerFactory::InternalDefaultRecognizerFactory::CreateTranslationRecognizerWithFileInput;
+%ignore Carbon::Recognition::DefaultRecognizerFactory::CreateTranslationRecognizer;
+%ignore Carbon::Recognition::DefaultRecognizerFactory::CreateTranslationRecognizerWithFileInput;
+
 %include <speechapi_cxx_recognizer_factory_parameter.h>
 %include <speechapi_cxx_recognizer_factory.h>
 

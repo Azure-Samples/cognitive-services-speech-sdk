@@ -9,6 +9,7 @@
 #include "event_helpers.h"
 #include "handle_helpers.h"
 #include "string_utils.h"
+#include "named_properties_constants.h"
 
 
 using namespace CARBON_IMPL_NAMESPACE();
@@ -42,6 +43,31 @@ SPXAPI Session_Handle_Close(SPXSESSIONHANDLE hsession)
     return Handle_Close<SPXSESSIONHANDLE, ISpxSession>(hsession);
 }
 
+SPXAPI Session_GetParameter_Name(Session_Parameter parameter, wchar_t* name, uint32_t cchName)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        const wchar_t* parameterName = L"";
+        switch (parameter)
+        {
+            case SessionParameter_SpeechSubscriptionKey:
+                parameterName = g_SPEECH_SubscriptionKey;
+                break;
+
+            case SessionParameter_SpeechEndpoint:
+                parameterName = g_SPEECH_Endpoint;
+                break;
+
+            default:
+                hr = SPXERR_INVALID_ARG;
+                break;
+        }
+
+        PAL::wcscpy(name, cchName, parameterName, wcslen(parameterName), true);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
 SPXAPI Session_SetParameter_String(SPXSESSIONHANDLE hsession, const wchar_t* name, const wchar_t* value)
 {
     SPXAPI_INIT_HR_TRY(hr)
@@ -70,7 +96,7 @@ SPXAPI Session_GetParameter_String(SPXSESSIONHANDLE hsession, const wchar_t* nam
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_(bool) Session_HasParameter_String(SPXSESSIONHANDLE hsession, const wchar_t* name)
+SPXAPI_(bool) Session_ContainsParameter_String(SPXSESSIONHANDLE hsession, const wchar_t* name)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -111,7 +137,7 @@ SPXAPI Session_GetParameter_Int32(SPXSESSIONHANDLE hsession, const wchar_t* name
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_(bool) Session_HasParameter_Int32(SPXSESSIONHANDLE hsession, const wchar_t* name)
+SPXAPI_(bool) Session_ContainsParameter_Int32(SPXSESSIONHANDLE hsession, const wchar_t* name)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -152,7 +178,7 @@ SPXAPI Session_GetParameter_Bool(SPXSESSIONHANDLE hsession, const wchar_t* name,
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_(bool) Session_HasParameter_Bool(SPXSESSIONHANDLE hsession, const wchar_t* name)
+SPXAPI_(bool) Session_ContainsParameter_Bool(SPXSESSIONHANDLE hsession, const wchar_t* name)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {

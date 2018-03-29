@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// speechapi_cxx_recognizer_parameter_collection.h: Public API declarations for RecognizerParameterCollection C++ class
+// speechapi_cxx_recognizer_parameter_collection.h: Public API declarations for RecognizerParameterValueCollection C++ class
 //
 
 #pragma once
@@ -13,37 +13,48 @@ namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
 
 
-class RecognizerParameter : public Value
+enum class RecognizerParameter { CustomSpeechModelId = 1 };
+
+
+class RecognizerParameterValue : public Value
 {
 public:
 
-    RecognizerParameter(SPXRECOHANDLE hreco, const wchar_t* name) :
-        m_hreco(hreco),
-        m_name(name)
-    {
-    }
+    RecognizerParameterValue(SPXRECOHANDLE hreco, const wchar_t* name) : m_hreco(hreco), m_name(name) { }
+    RecognizerParameterValue(SPXRECOHANDLE hreco, RecognizerParameter parameter) : m_hreco(hreco), m_name(ParameterNameFromEnum(parameter)) { }
 
     // --- Value virtual overrides ---
 
-    bool IsString() override { return IsString(m_hreco, m_name.c_str()); }
+    bool IsString() override { return ContainsString(m_hreco, m_name.c_str()); }
     std::wstring GetString(const wchar_t* defaultValue) override { return GetString(m_hreco, m_name.c_str(), defaultValue); }
     void SetString(const wchar_t* value) override { return SetString(m_hreco, m_name.c_str(), value); }
 
-    bool IsNumber() override { return IsNumber(m_hreco, m_name.c_str()); }
+    bool IsNumber() override { return ContainsNumber(m_hreco, m_name.c_str()); }
     int32_t GetNumber(int32_t defaultValue) override { return GetNumber(m_hreco, m_name.c_str(), defaultValue); }
     void SetNumber(int32_t value) override { SetNumber(m_hreco, m_name.c_str(), value); }
 
-    bool IsBool() override { return IsBool(m_hreco, m_name.c_str()); }
+    bool IsBool() override { return ContainsBool(m_hreco, m_name.c_str()); }
     bool GetBool(bool defaultValue) override { return GetBool(m_hreco, m_name.c_str(), defaultValue); }
     void SetBool(bool value) override { SetBool(m_hreco, m_name.c_str(), value); }
 
-    // --- Static helpers ---
-    
+
+private:
+
+    std::wstring ParameterNameFromEnum(RecognizerParameter parameter)
+    {
+        static_assert((int)RecognizerParameter_CustomSpeechModelId == (int)RecognizerParameter::CustomSpeechModelId, "RecognizerParameter_* enum values == RecognizerParameter::* enum values");
+
+        const size_t maxCharCount = 4096;
+        wchar_t sz[maxCharCount+1];
+        SPX_THROW_ON_FAIL(Recognizer_GetParameter_Name(static_cast<Recognizer_Parameter>(parameter), sz, maxCharCount));
+        return sz;
+    }
+
     static std::wstring GetString(SPXRECOHANDLE hreco, const wchar_t* name, const wchar_t* defaultValue)
     {
-        const size_t cch = 1024;
-        wchar_t sz[cch+1];
-        SPX_THROW_ON_FAIL(Recognizer_GetParameter_String(hreco, name, sz, cch, defaultValue));
+        const size_t maxCharCount = 1024;
+        wchar_t sz[maxCharCount+1];
+        SPX_THROW_ON_FAIL(Recognizer_GetParameter_String(hreco, name, sz, maxCharCount, defaultValue));
         return sz;
     }
 
@@ -76,19 +87,19 @@ public:
         SPX_THROW_ON_FAIL(Recognizer_SetParameter_Bool(hreco, name, value));
     }
 
-    static bool IsString(SPXRECOHANDLE hreco, const wchar_t* name)
+    static bool ContainsString(SPXRECOHANDLE hreco, const wchar_t* name)
     {
-        return Recognizer_HasParameter_String(hreco, name);
+        return Recognizer_ContainsParameter_String(hreco, name);
     }
 
-    static bool IsNumber(SPXRECOHANDLE hreco, const wchar_t* name)
+    static bool ContainsNumber(SPXRECOHANDLE hreco, const wchar_t* name)
     {
-        return Recognizer_HasParameter_Int32(hreco, name);
+        return Recognizer_ContainsParameter_Int32(hreco, name);
     }
 
-    static bool IsBool(SPXRECOHANDLE hreco, const wchar_t* name)
+    static bool ContainsBool(SPXRECOHANDLE hreco, const wchar_t* name)
     {
-        return Recognizer_HasParameter_Bool(hreco, name);
+        return Recognizer_ContainsParameter_Bool(hreco, name);
     }
 
 private:
@@ -98,24 +109,28 @@ private:
 };
 
 
-class RecognizerParameterCollection : public ValueCollection<SPXRECOHANDLE, RecognizerParameter>
+class RecognizerParameterValueCollection : public HandleValueCollection<SPXRECOHANDLE, RecognizerParameterValue>
 {
 public:
 
-    RecognizerParameterCollection(SPXRECOHANDLE hreco) :
-        ValueCollection(hreco)
+    RecognizerParameterValueCollection(SPXRECOHANDLE hreco) :
+        HandleValueCollection(hreco)
     {
     }
 
+    ~RecognizerParameterValueCollection() { }
+
+    Value operator[](const wchar_t* name) override { return Value(new RecognizerParameterValue(m_handle, name)); }
+    Value operator[](enum RecognizerParameter parameter) { return Value(new RecognizerParameterValue(m_handle, parameter)); }
 
     // TODO: Fix SWIG such that we don't need to expose the default methods below... 
     //       And then... once fixed ... delete the next 5 lines of code:
     //
-    RecognizerParameterCollection() { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
-    RecognizerParameterCollection(RecognizerParameterCollection&&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
-    RecognizerParameterCollection(const RecognizerParameterCollection&) : ValueCollection(*this) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
-    RecognizerParameterCollection& operator=(RecognizerParameterCollection&&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
-    RecognizerParameterCollection& operator=(const RecognizerParameterCollection&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
+    RecognizerParameterValueCollection() { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
+    RecognizerParameterValueCollection(RecognizerParameterValueCollection&&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
+    RecognizerParameterValueCollection(const RecognizerParameterValueCollection&) : HandleValueCollection(*this) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
+    RecognizerParameterValueCollection& operator=(RecognizerParameterValueCollection&&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
+    RecognizerParameterValueCollection& operator=(const RecognizerParameterValueCollection&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
 
 
 private:
@@ -123,11 +138,12 @@ private:
     // TODO: Fix SWIG such that we don't need to expose the default methods below... 
     //       And then... once fixed ... Uncomment the next 5 lines of code:
     //    
-    // RecognizerParameterCollection() = delete;
-    // RecognizerParameterCollection(RecognizerParameterCollection&&) = delete;
-    // RecognizerParameterCollection(const RecognizerParameterCollection&) = delete;
-    // RecognizerParameterCollection& operator=(RecognizerParameterCollection&&) = delete;
-    // RecognizerParameterCollection& operator=(const RecognizerParameterCollection&) = delete;
+    // RecognizerParameterValueCollection() = delete;
+    // RecognizerParameterValueCollection(RecognizerParameterValueCollection&&) = delete;
+    // RecognizerParameterValueCollection(const RecognizerParameterValueCollection&) = delete;
+    // RecognizerParameterValueCollection& operator=(RecognizerParameterValueCollection&&) = delete;
+    // RecognizerParameterValueCollection& operator=(const RecognizerParameterValueCollection&) = delete;
 };
+
 
 } } // CARBON_NAMESPACE_ROOT :: Recognition

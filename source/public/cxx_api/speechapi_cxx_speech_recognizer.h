@@ -40,7 +40,9 @@ public:
     std::future<void> StartContinuousRecognitionAsync() override { return BaseType::StartContinuousRecognitionAsyncInternal(); }
     std::future<void> StopContinuousRecognitionAsync() override { return BaseType::StopContinuousRecognitionAsyncInternal(); }
 
-    RecognizerParameterCollection Parameters;
+    RecognizerParameterValueCollection Parameters;
+
+    void SetCustomSpeechModel(const wchar_t* modelId) { Parameters[RecognizerParameter::CustomSpeechModelId] = modelId; }
 
 
 private:

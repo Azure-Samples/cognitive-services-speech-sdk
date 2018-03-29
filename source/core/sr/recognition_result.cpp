@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "recognition_result.h"
 #include "guid_utils.h"
+#include "named_properties_constants.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -74,7 +75,7 @@ void CSpxRecognitionResult::InitIntentResult(const wchar_t* intentId, const wcha
         ? intentId
         : L"";
 
-    SetStringValue(L"json", jsonPayload);
+    SetStringValue(g_RESULT_LuisJson, jsonPayload);
 }
 
 

@@ -53,12 +53,12 @@ protected:
     {
         SPX_INIT_HR(hr);
         
-        const size_t cch = 1024;
-        wchar_t sz[cch+1];
+        const size_t maxCharCount = 1024;
+        wchar_t sz[maxCharCount+1];
 
         if (pintentId != nullptr)
         {
-            SPX_THROW_ON_FAIL(hr = IntentResult_GetIntentId(hresult, sz, cch));
+            SPX_THROW_ON_FAIL(hr = IntentResult_GetIntentId(hresult, sz, maxCharCount));
             *pintentId = sz;
         }
     }

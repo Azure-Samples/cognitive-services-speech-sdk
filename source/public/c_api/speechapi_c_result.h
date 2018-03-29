@@ -15,11 +15,14 @@ SPXAPI Result_GetRecognitionReason(SPXRESULTHANDLE hresult, Result_RecognitionRe
 
 SPXAPI Result_GetText(SPXRESULTHANDLE hresult, wchar_t* pszText, uint32_t cchText);
 
-SPXAPI Result_GetValue_String(SPXRESULTHANDLE hresult, const wchar_t* name, wchar_t* value, uint32_t cchValue, const wchar_t* defaultValue);
-SPXAPI_(bool) Result_HasValue_String(SPXRESULTHANDLE hresult, const wchar_t* name);
+enum Result_Property { ResultProperty_LuisJson = 1 };
+SPXAPI Result_GetProperty_Name(Result_Property property, wchar_t* name, uint32_t cchName);
 
-SPXAPI Result_GetValue_Int32(SPXRESULTHANDLE hresult, const wchar_t* name, int32_t* pvalue, int32_t defaultValue);
-SPXAPI_(bool) Result_HasValue_Int32(SPXRESULTHANDLE hresult, const wchar_t* name);
+SPXAPI Result_GetProperty_String(SPXRESULTHANDLE hresult, const wchar_t* name, wchar_t* value, uint32_t cchValue, const wchar_t* defaultValue);
+SPXAPI_(bool) Result_ContainsProperty_String(SPXRESULTHANDLE hresult, const wchar_t* name);
 
-SPXAPI Result_GetValue_Bool(SPXRESULTHANDLE hresult, const wchar_t* name, bool* pvalue, bool defaultValue);
-SPXAPI_(bool) Result_HasValue_Bool(SPXRESULTHANDLE hresult, const wchar_t* name);
+SPXAPI Result_GetProperty_Int32(SPXRESULTHANDLE hresult, const wchar_t* name, int32_t* pvalue, int32_t defaultValue);
+SPXAPI_(bool) Result_ContainsProperty_Int32(SPXRESULTHANDLE hresult, const wchar_t* name);
+
+SPXAPI Result_GetProperty_Bool(SPXRESULTHANDLE hresult, const wchar_t* name, bool* pvalue, bool defaultValue);
+SPXAPI_(bool) Result_ContainsProperty_Bool(SPXRESULTHANDLE hresult, const wchar_t* name);

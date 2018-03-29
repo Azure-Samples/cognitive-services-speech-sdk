@@ -70,50 +70,106 @@ private:
 };
 
 
-template<class Handle, class T>
-class ValueCollection
+class BaseValueCollection
 {
 public:
 
-    ValueCollection() : m_handle(SPXHANDLE_INVALID) { }
-    ValueCollection(Handle handle) : m_handle(handle) { }
+    BaseValueCollection() { }
+    virtual ~BaseValueCollection() { }
 
-    Value operator[](const wchar_t* name) { return Value(new T(m_handle, name)); }
+    virtual Value operator[](const wchar_t* name) = 0;
 
-    bool IsString(const wchar_t* name) { return T(m_handle, name).IsString(); }
-    void SetString(const wchar_t* name, const wchar_t* value) { T(m_handle, name).SetString(value); }
-    std::wstring GetString(const wchar_t* name, const wchar_t* defaultValue = L"") { return T(m_handle, name).GetString(defaultValue); }
+    virtual bool ContainsString(const wchar_t* name) = 0;
+    virtual void SetString(const wchar_t* name, const wchar_t* value) = 0;
+    virtual std::wstring GetString(const wchar_t* name, const wchar_t* defaultValue = L"") = 0;
 
-    bool IsNumber(const wchar_t* name) { return T(m_handle, name).IsNumber(); }
-    void SetNumber(const wchar_t* name, int32_t value) { T(m_handle, name).SetNumber(value); }
-    int32_t GetNumber(const wchar_t* name, int32_t defaultValue = 0) { return T(m_handle, name).GetNumber(defaultValue); }
+    virtual bool ContainsNumber(const wchar_t* name) = 0;
+    virtual void SetNumber(const wchar_t* name, int32_t value) = 0;
+    virtual int32_t GetNumber(const wchar_t* name, int32_t defaultValue = 0) = 0;
 
-    bool IsBool(const wchar_t* name) { return T(m_handle, name).IsBool(); }
-    void SetBool(const wchar_t* name, bool value) { T(m_handle, name).SetBool(value); }
-    bool GetBool(const wchar_t* name, bool defaultValue = false) { return T(m_handle, name).GetBool(defaultValue); }
+    virtual bool ContainsBool(const wchar_t* name) = 0;
+    virtual void SetBool(const wchar_t* name, bool value) = 0;
+    virtual bool GetBool(const wchar_t* name, bool defaultValue = false) = 0;
+};
+
+
+template<class T>
+class ValueCollection : public BaseValueCollection
+{
+public:
+
+    ValueCollection() { }
+    ~ValueCollection() { }
+
+    Value operator[](const wchar_t* name) override { return Value(new T(name)); }
+
+    bool ContainsString(const wchar_t* name) override { return T(name).IsString(); }
+    void SetString(const wchar_t* name, const wchar_t* value) override { T(name).SetString(value); }
+    std::wstring GetString(const wchar_t* name, const wchar_t* defaultValue = L"") override { return T(name).GetString(defaultValue); }
+
+    bool ContainsNumber(const wchar_t* name) override { return T(name).IsNumber(); }
+    void SetNumber(const wchar_t* name, int32_t value) override { T(name).SetNumber(value); }
+    int32_t GetNumber(const wchar_t* name, int32_t defaultValue = 0) override { return T(name).GetNumber(defaultValue); }
+
+    bool ContainsBool(const wchar_t* name) override { return T(name).IsBool(); }
+    void SetBool(const wchar_t* name, bool value) override { T(name).SetBool(value); }
+    bool GetBool(const wchar_t* name, bool defaultValue = false) override { return T(name).GetBool(defaultValue); }
+
+    ValueCollection(ValueCollection&&) = delete;
+    ValueCollection(const ValueCollection&) = delete;
+    ValueCollection& operator=(ValueCollection&&) = delete;
+    const ValueCollection& operator=(const ValueCollection&) = delete;
+};
+
+
+template<class Handle, class T>
+class HandleValueCollection : public BaseValueCollection
+{
+public:
+
+    HandleValueCollection() : m_handle(SPXHANDLE_INVALID) { }
+    HandleValueCollection(Handle handle) : m_handle(handle) { }
+    ~HandleValueCollection() { }
+
+    Value operator[](const wchar_t* name) override { return Value(new T(m_handle, name)); }
+
+    bool ContainsString(const wchar_t* name) override { return T(m_handle, name).IsString(); }
+    void SetString(const wchar_t* name, const wchar_t* value) override { T(m_handle, name).SetString(value); }
+    std::wstring GetString(const wchar_t* name, const wchar_t* defaultValue = L"") override { return T(m_handle, name).GetString(defaultValue); }
+
+    bool ContainsNumber(const wchar_t* name) override { return T(m_handle, name).IsNumber(); }
+    void SetNumber(const wchar_t* name, int32_t value) override { T(m_handle, name).SetNumber(value); }
+    int32_t GetNumber(const wchar_t* name, int32_t defaultValue = 0) override { return T(m_handle, name).GetNumber(defaultValue); }
+
+    bool ContainsBool(const wchar_t* name) override { return T(m_handle, name).IsBool(); }
+    void SetBool(const wchar_t* name, bool value) override { T(m_handle, name).SetBool(value); }
+    bool GetBool(const wchar_t* name, bool defaultValue = false) override { return T(m_handle, name).GetBool(defaultValue); }
 
 
     // TODO: Fix SWIG such that we don't need to expose the default methods below... 
     //       And then... once fixed ... delete the next 5 lines of code:
     //
-    /*ValueCollection(ValueCollection&&) { SPX_THROW_HR(SPXERR_NOT_IMPL); }
-    ValueCollection(const ValueCollection&) { SPX_THROW_HR(SPXERR_NOT_IMPL); }
-    ValueCollection& operator=(ValueCollection&&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
-    const ValueCollection& operator=(const ValueCollection&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }*/
+    HandleValueCollection(HandleValueCollection&&) { SPX_THROW_HR(SPXERR_NOT_IMPL); }
+    HandleValueCollection(const HandleValueCollection&) { SPX_THROW_HR(SPXERR_NOT_IMPL); }
+    HandleValueCollection& operator=(HandleValueCollection&&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
+    const HandleValueCollection& operator=(const HandleValueCollection&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
 
+
+protected:
+
+    Handle m_handle;
 
 private:
 
     // TODO: Fix SWIG such that we don't need to expose the default methods below... 
     //       And then... once fixed ... Uncomment the next 5 lines of code:
     //    
-    // ValueCollection() = delete;
-    // ValueCollection(ValueCollection&&) = delete;
-    // ValueCollection(const ValueCollection&) = delete;
-    // ValueCollection& operator=(ValueCollection&&) = delete;
-    // const ValueCollection& operator=(const ValueCollection&) = delete;
+    // HandleValueCollection() = delete;
+    // HandleValueCollection(HandleValueCollection&&) = delete;
+    // HandleValueCollection(const HandleValueCollection&) = delete;
+    // HandleValueCollection& operator=(HandleValueCollection&&) = delete;
+    // const HandleValueCollection& operator=(const HandleValueCollection&) = delete;
 
-    Handle m_handle;
 };
 
 

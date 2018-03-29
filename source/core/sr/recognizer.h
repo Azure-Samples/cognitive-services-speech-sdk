@@ -26,6 +26,9 @@ public:
 
     void Init() override;
 
+    // --- ISpxNamedProperties (overrides)
+    void SetStringValue(const wchar_t* name, const wchar_t* value) override;
+
     // --- ISpxRecognizer
 
     bool IsEnabled() override;

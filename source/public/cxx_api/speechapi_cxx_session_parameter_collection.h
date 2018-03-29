@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// speechapi_cxx_session_parameter_collection.h: Public API declarations for SessionParameterCollection C++ class
+// speechapi_cxx_session_parameter_collection.h: Public API declarations for SessionParameterValueCollection C++ class
 //
 
 #pragma once
@@ -12,37 +12,49 @@
 namespace CARBON_NAMESPACE_ROOT {
 
 
-class SessionParameter : public Value
+enum class SessionParameter { SpeechSubscriptionKey = 1, SpeechEndpoint = 2 };
+
+
+class SessionParameterValue : public Value
 {
 public:
 
-    SessionParameter(SPXSESSIONHANDLE hsession, const wchar_t* name) :
-        m_hsession(hsession),
-        m_name(name)
-    {
-    }
+    SessionParameterValue(SPXSESSIONHANDLE hsession, const wchar_t* name) : m_hsession(hsession), m_name(name) { }
+    SessionParameterValue(SPXSESSIONHANDLE hsession, SessionParameter parameter) : m_hsession(hsession), m_name(ParameterNameFromEnum(parameter)) { }
 
     // --- Value virtual overrides ---
 
-    bool IsString() override { return IsString(m_hsession, m_name.c_str()); }
+    bool IsString() override { return ContainsString(m_hsession, m_name.c_str()); }
     std::wstring GetString(const wchar_t* defaultValue) override { return GetString(m_hsession, m_name.c_str(), defaultValue); }
     void SetString(const wchar_t* value) override { return SetString(m_hsession, m_name.c_str(), value); }
 
-    bool IsNumber() override { return IsNumber(m_hsession, m_name.c_str()); }
+    bool IsNumber() override { return ContainsNumber(m_hsession, m_name.c_str()); }
     int32_t GetNumber(int32_t defaultValue) override { return GetNumber(m_hsession, m_name.c_str(), defaultValue); }
     void SetNumber(int32_t value) override { SetNumber(m_hsession, m_name.c_str(), value); }
 
-    bool IsBool() override { return IsBool(m_hsession, m_name.c_str()); }
+    bool IsBool() override { return ContainsBool(m_hsession, m_name.c_str()); }
     bool GetBool(bool defaultValue) override { return GetBool(m_hsession, m_name.c_str(), defaultValue); }
     void SetBool(bool value) override { SetBool(m_hsession, m_name.c_str(), value); }
 
-    // --- Static helpers ---
-    
+
+private:
+
+    std::wstring ParameterNameFromEnum(SessionParameter parameter)
+    {
+        static_assert((int)SessionParameter_SpeechSubscriptionKey == (int)SessionParameter::SpeechSubscriptionKey, "SessionParameter_* enum values == SessionParameter::* enum values");
+        static_assert((int)SessionParameter_SpeechEndpoint == (int)SessionParameter::SpeechEndpoint, "SessionParameter_* enum values == SessionParameter::* enum values");
+
+        const size_t maxCharCount = 4096;
+        wchar_t sz[maxCharCount+1];
+        SPX_THROW_ON_FAIL(Session_GetParameter_Name(static_cast<Session_Parameter>(parameter), sz, maxCharCount));
+        return sz;
+    }
+
     static std::wstring GetString(SPXSESSIONHANDLE hsession, const wchar_t* name, const wchar_t* defaultValue)
     {
-        const size_t cch = 1024;
-        wchar_t sz[cch+1];
-        SPX_THROW_ON_FAIL(Session_GetParameter_String(hsession, name, sz, cch, defaultValue));
+        const size_t maxCharCount = 1024;
+        wchar_t sz[maxCharCount+1];
+        SPX_THROW_ON_FAIL(Session_GetParameter_String(hsession, name, sz, maxCharCount, defaultValue));
         return sz;
     }
 
@@ -75,19 +87,19 @@ public:
         SPX_THROW_ON_FAIL(Session_SetParameter_Bool(hsession, name, value));
     }
 
-    static bool IsString(SPXSESSIONHANDLE hsession, const wchar_t* name)
+    static bool ContainsString(SPXSESSIONHANDLE hsession, const wchar_t* name)
     {
-        return Session_HasParameter_String(hsession, name);
+        return Session_ContainsParameter_String(hsession, name);
     }
 
-    static bool IsNumber(SPXSESSIONHANDLE hsession, const wchar_t* name)
+    static bool ContainsNumber(SPXSESSIONHANDLE hsession, const wchar_t* name)
     {
-        return Session_HasParameter_Int32(hsession, name);
+        return Session_ContainsParameter_Int32(hsession, name);
     }
 
-    static bool IsBool(SPXSESSIONHANDLE hsession, const wchar_t* name)
+    static bool ContainsBool(SPXSESSIONHANDLE hsession, const wchar_t* name)
     {
-        return Session_HasParameter_Bool(hsession, name);
+        return Session_ContainsParameter_Bool(hsession, name);
     }
 
 private:
@@ -97,14 +109,17 @@ private:
 };
 
 
-class SessionParameterCollection : public ValueCollection<SPXSESSIONHANDLE, SessionParameter>
+class SessionParameterValueCollection : public HandleValueCollection<SPXSESSIONHANDLE, SessionParameterValue>
 {
 public:
 
-    SessionParameterCollection(SPXSESSIONHANDLE hsession) :
-        ValueCollection(hsession)
+    SessionParameterValueCollection(SPXSESSIONHANDLE hsession) :
+        HandleValueCollection(hsession)
     {
     }
+
+    Value operator[](const wchar_t* name) override { return Value(new SessionParameterValue(m_handle, name)); }
+    Value operator[](enum SessionParameter parameter) { return Value(new SessionParameterValue(m_handle, parameter)); }
 };
 
 

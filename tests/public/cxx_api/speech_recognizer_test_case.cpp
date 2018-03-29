@@ -37,8 +37,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
     SECTION("Check for race conditions in destructor.")
     {
         bool callback_invoked = false;
-        auto factory = new RecognizerFactory();
-        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
+        auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizerWithFileInput(input_file);
         recognizer->FinalResult.Connect(
             [&](const SpeechRecognitionEventArgs& args) 
         {
@@ -84,8 +83,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
         for (int i = 0; i < numLoops; i++)
         {
-            auto factory = new RecognizerFactory();
-            auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
+            auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizerWithFileInput(input_file);
 
             REQUIRE(recognizer != nullptr);
 
@@ -126,14 +124,13 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
     GIVEN("Mocks for UspRecoEngine and Microphone...")
     {
-        RecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-MOCK-UspRecoEngine", true);
-        RecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-MOCK-Microphone", true);
+        DefaultRecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-MOCK-UspRecoEngine", true);
+        DefaultRecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-MOCK-Microphone", true);
 
         int gotIntermediateResults = 0;
         int gotFinalResult = 0;
 
-        auto factory = new RecognizerFactory();
-        auto recognizer = factory->CreateSpeechRecognizer();
+        auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizer();
         REQUIRE(recognizer != nullptr);
 
         WHEN("We we connect both IntermediateResult and FinalResult event handlers...")

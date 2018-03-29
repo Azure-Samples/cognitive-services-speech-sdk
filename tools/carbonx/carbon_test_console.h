@@ -39,6 +39,7 @@ private:
         std::wstring m_strInput;
 
         std::wstring m_strEndpointUri;
+        std::wstring m_strCustomSpeechModelId;
         std::wstring m_strSubscriptionKey;
 
         bool m_fRecognizeAsync = false;
@@ -199,6 +200,7 @@ private:
     void Sample_HelloWorld_Intent();
     void Sample_HelloWorld_Intent(const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId);
     void Sample_HelloWorld_Subscription();
+    void Sample_HelloWorld_Subscription_With_CRIS();
 
 
 private:

@@ -4,6 +4,7 @@
 #include "handle_table.h"
 #include "service_helpers.h"
 #include "create_object_helpers.h"
+#include "named_properties_constants.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -26,6 +27,23 @@ void CSpxRecognizer::Init()
 {
     SPX_IFTRUE_THROW_HR(GetSite() == nullptr, SPXERR_UNINITIALIZED);
     EnsureDefaultSession();
+}
+
+void CSpxRecognizer::SetStringValue(const wchar_t* name, const wchar_t* value)
+{
+    // Check to see if the caller is trying to set the CUSTOM SPEECH Model ID...
+    if (wcscmp(name, g_SPEECH_ModelId) == 0)
+    {
+        // For now, we can only have one Recognizer per Session, so, we'll 
+        // just pass this over to the default session...
+
+        EnsureDefaultSession();
+
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(m_defaultSession);
+        SPX_IFTRUE_THROW_HR(namedProperties->HasStringValue(name), SPXERR_ALREADY_INITIALIZED); // throw if it's already been set
+
+        namedProperties->SetStringValue(name, value);
+    }
 }
 
 bool CSpxRecognizer::IsEnabled()

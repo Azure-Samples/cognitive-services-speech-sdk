@@ -182,8 +182,7 @@ namespace Carbon.Recognition
         /// <returns>A speech recognizer instance</returns>
         public SpeechRecognizer CreateSpeechRecognizer()
         {
-            var factory = new Internal.RecognizerFactory();
-            var recoImpl = factory.CreateSpeechRecognizer();
+            var recoImpl = Internal.DefaultRecognizerFactory.CreateSpeechRecognizer();
             return new SpeechRecognizer(recoImpl);
         }
 
@@ -193,8 +192,7 @@ namespace Carbon.Recognition
         /// <returns>A intent recognizer instance</returns>
         public IntentRecognizer CreateIntentRecognizer()
         {
-            var factory = new Internal.RecognizerFactory();
-            var recoImpl = factory.CreateIntentRecognizer();
+            var recoImpl = Internal.DefaultRecognizerFactory.CreateIntentRecognizer();
             return new IntentRecognizer(recoImpl);
         }
     }

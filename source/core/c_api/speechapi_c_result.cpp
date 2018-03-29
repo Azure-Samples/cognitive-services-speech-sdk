@@ -7,6 +7,7 @@
 
 #include "stdafx.h"
 #include "string_utils.h"
+#include "named_properties_constants.h"
 
 
 using namespace CARBON_IMPL_NAMESPACE();
@@ -63,7 +64,28 @@ SPXAPI Result_GetText(SPXRESULTHANDLE hresult, wchar_t* pszText, uint32_t cchTex
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI Result_GetValue_String(SPXRESULTHANDLE hresult, const wchar_t* name, wchar_t* value, uint32_t cchValue, const wchar_t* defaultValue)
+SPXAPI Result_GetProperty_Name(Result_Property property, wchar_t* name, uint32_t cchName)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        const wchar_t* propertyName = L"";
+        switch (property)
+        {
+            case ResultProperty_LuisJson:
+                propertyName = g_RESULT_LuisJson;
+                break;
+
+            default:
+                hr = SPXERR_INVALID_ARG;
+                break;
+        }
+
+        PAL::wcscpy(name, cchName, propertyName, wcslen(propertyName), true);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI Result_GetProperty_String(SPXRESULTHANDLE hresult, const wchar_t* name, wchar_t* value, uint32_t cchValue, const wchar_t* defaultValue)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -78,7 +100,7 @@ SPXAPI Result_GetValue_String(SPXRESULTHANDLE hresult, const wchar_t* name, wcha
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_(bool) Result_HasValue_String(SPXRESULTHANDLE hresult, const wchar_t* name)
+SPXAPI_(bool) Result_ContainsProperty_String(SPXRESULTHANDLE hresult, const wchar_t* name)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -91,7 +113,7 @@ SPXAPI_(bool) Result_HasValue_String(SPXRESULTHANDLE hresult, const wchar_t* nam
     SPXAPI_CATCH_AND_RETURN(hr, false);
 }
 
-SPXAPI Result_GetValue_Int32(SPXRESULTHANDLE hresult, const wchar_t* name, int32_t* pvalue, int32_t defaultValue)
+SPXAPI Result_GetProperty_Int32(SPXRESULTHANDLE hresult, const wchar_t* name, int32_t* pvalue, int32_t defaultValue)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -106,7 +128,7 @@ SPXAPI Result_GetValue_Int32(SPXRESULTHANDLE hresult, const wchar_t* name, int32
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_(bool) Result_HasValue_Int32(SPXRESULTHANDLE hresult, const wchar_t* name)
+SPXAPI_(bool) Result_ContainsProperty_Int32(SPXRESULTHANDLE hresult, const wchar_t* name)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -119,7 +141,7 @@ SPXAPI_(bool) Result_HasValue_Int32(SPXRESULTHANDLE hresult, const wchar_t* name
     SPXAPI_CATCH_AND_RETURN(hr, false);
 }
 
-SPXAPI Result_GetValue_Bool(SPXRESULTHANDLE hresult, const wchar_t* name, bool* pvalue, bool defaultValue)
+SPXAPI Result_GetProperty_Bool(SPXRESULTHANDLE hresult, const wchar_t* name, bool* pvalue, bool defaultValue)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -134,7 +156,7 @@ SPXAPI Result_GetValue_Bool(SPXRESULTHANDLE hresult, const wchar_t* name, bool* 
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_(bool) Result_HasValue_Bool(SPXRESULTHANDLE hresult, const wchar_t* name)
+SPXAPI_(bool) Result_ContainsProperty_Bool(SPXRESULTHANDLE hresult, const wchar_t* name)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {

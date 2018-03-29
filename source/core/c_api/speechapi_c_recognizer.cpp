@@ -7,7 +7,9 @@
 #include "stdafx.h"
 #include "event_helpers.h"
 #include "handle_helpers.h"
+#include "platform.h"
 #include "string_utils.h"
+#include "named_properties_constants.h"
 
 
 using namespace CARBON_IMPL_NAMESPACE();
@@ -58,8 +60,8 @@ SPXAPI Recognizer_Enable(SPXRECOHANDLE hreco)
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        auto precognizer = (*recohandles)[hreco];
-        precognizer->Enable();
+        auto recognizer = (*recohandles)[hreco];
+        recognizer->Enable();
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -69,8 +71,8 @@ SPXAPI Recognizer_Disable(SPXRECOHANDLE hreco)
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        auto precognizer = (*recohandles)[hreco];
-        precognizer->Disable();
+        auto recognizer = (*recohandles)[hreco];
+        recognizer->Disable();
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -80,8 +82,29 @@ SPXAPI Recognizer_IsEnabled(SPXRECOHANDLE hreco, bool* pfEnabled)
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        auto precognizer = (*recohandles)[hreco];
-        *pfEnabled = precognizer->IsEnabled();
+        auto recognizer = (*recohandles)[hreco];
+        *pfEnabled = recognizer->IsEnabled();
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI Recognizer_GetParameter_Name(Recognizer_Parameter parameter, wchar_t* name, uint32_t cchName)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        const wchar_t* parameterName = L"";
+        switch (parameter)
+        {
+            case RecognizerParameter_CustomSpeechModelId:
+                parameterName = g_SPEECH_ModelId;
+                break;
+
+            default:
+                hr = SPXERR_INVALID_ARG;
+                break;
+        }
+
+        PAL::wcscpy(name, cchName, parameterName, wcslen(parameterName), true);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -91,9 +114,15 @@ SPXAPI Recognizer_SetParameter_String(SPXRECOHANDLE hreco, const wchar_t* name, 
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        auto precognizer = (*recohandles)[hreco];
+        auto recognizer = (*recohandles)[hreco];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(precognizer);
+        // We do NOT support CRIS Model IDs for Intent Recognizers (yet)... 
+        SPX_IFTRUE_THROW_HR(
+            wcscmp(g_SPEECH_ModelId, name) == 0 && 
+            PAL::GetTypeName(*recognizer.get()).find("CSpxIntentRecognizer") != std::string::npos,
+            SPXERR_INVALID_ARG);
+
+        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(recognizer);
         namedProperties->SetStringValue(name, value);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
@@ -104,9 +133,9 @@ SPXAPI Recognizer_GetParameter_String(SPXRECOHANDLE hreco, const wchar_t* name, 
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        auto precognizer = (*recohandles)[hreco];
+        auto recognizer = (*recohandles)[hreco];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(precognizer);
+        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(recognizer);
         auto tempValue = namedProperties->GetStringValue(name, defaultValue);
 
         PAL::wcscpy(value, cchValue, tempValue.c_str(), tempValue.size(), true);
@@ -114,14 +143,14 @@ SPXAPI Recognizer_GetParameter_String(SPXRECOHANDLE hreco, const wchar_t* name, 
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_(bool) Recognizer_HasParameter_String(SPXRECOHANDLE hreco, const wchar_t* name)
+SPXAPI_(bool) Recognizer_ContainsParameter_String(SPXRECOHANDLE hreco, const wchar_t* name)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        auto precognizer = (*recohandles)[hreco];
+        auto recognizer = (*recohandles)[hreco];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(precognizer);
+        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(recognizer);
         return namedProperties->HasStringValue(name);
     }
     SPXAPI_CATCH_AND_RETURN(hr, false)
@@ -132,9 +161,9 @@ SPXAPI Recognizer_SetParameter_Int32(SPXRECOHANDLE hreco, const wchar_t* name, i
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        auto precognizer = (*recohandles)[hreco];
+        auto recognizer = (*recohandles)[hreco];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(precognizer);
+        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(recognizer);
         namedProperties->SetNumberValue(name, value);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
@@ -145,9 +174,9 @@ SPXAPI Recognizer_GetParameter_Int32(SPXRECOHANDLE hreco, const wchar_t* name, i
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        auto precognizer = (*recohandles)[hreco];
+        auto recognizer = (*recohandles)[hreco];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(precognizer);
+        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(recognizer);
         auto tempValue = namedProperties->GetNumberValue(name, defaultValue);
 
         *pvalue = (int32_t)tempValue;
@@ -155,14 +184,14 @@ SPXAPI Recognizer_GetParameter_Int32(SPXRECOHANDLE hreco, const wchar_t* name, i
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_(bool) Recognizer_HasParameter_Int32(SPXRECOHANDLE hreco, const wchar_t* name)
+SPXAPI_(bool) Recognizer_ContainsParameter_Int32(SPXRECOHANDLE hreco, const wchar_t* name)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        auto precognizer = (*recohandles)[hreco];
+        auto recognizer = (*recohandles)[hreco];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(precognizer);
+        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(recognizer);
         return namedProperties->HasNumberValue(name);
     }
     SPXAPI_CATCH_AND_RETURN(hr, false)
@@ -173,9 +202,9 @@ SPXAPI Recognizer_SetParameter_Bool(SPXRECOHANDLE hreco, const wchar_t* name, bo
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        auto precognizer = (*recohandles)[hreco];
+        auto recognizer = (*recohandles)[hreco];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(precognizer);
+        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(recognizer);
         namedProperties->SetBooleanValue(name, value);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
@@ -186,9 +215,9 @@ SPXAPI Recognizer_GetParameter_Bool(SPXRECOHANDLE hreco, const wchar_t* name, bo
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        auto precognizer = (*recohandles)[hreco];
+        auto recognizer = (*recohandles)[hreco];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(precognizer);
+        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(recognizer);
         auto tempValue = namedProperties->GetBooleanValue(name, defaultValue);
 
         *pvalue = !!tempValue;
@@ -196,14 +225,14 @@ SPXAPI Recognizer_GetParameter_Bool(SPXRECOHANDLE hreco, const wchar_t* name, bo
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_(bool) Recognizer_HasParameter_Bool(SPXRECOHANDLE hreco, const wchar_t* name)
+SPXAPI_(bool) Recognizer_ContainsParameter_Bool(SPXRECOHANDLE hreco, const wchar_t* name)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        auto precognizer = (*recohandles)[hreco];
+        auto recognizer = (*recohandles)[hreco];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(precognizer);
+        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(recognizer);
         return namedProperties->HasBooleanValue(name);
     }
     SPXAPI_CATCH_AND_RETURN(hr, false)
@@ -242,9 +271,9 @@ SPXAPI Recognizer_RecognizeAsync(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync)
         *phasync = SPXHANDLE_INVALID;
 
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        auto precognizer = (*recohandles)[hreco];
+        auto recognizer = (*recohandles)[hreco];
 
-        auto asyncop = precognizer->RecognizeAsync();
+        auto asyncop = recognizer->RecognizeAsync();
         auto ptr = std::make_shared<CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>>>(std::move(asyncop));
 
         auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>>, SPXASYNCHANDLE>();
@@ -308,9 +337,9 @@ SPXAPI Recognizer_StartContinuousRecognitionAsync(SPXRECOHANDLE hreco, SPXASYNCH
         *phasync = SPXHANDLE_INVALID;
 
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        auto precognizer = (*recohandles)[hreco];
+        auto recognizer = (*recohandles)[hreco];
 
-        auto asyncop = precognizer->StartContinuousRecognitionAsync();
+        auto asyncop = recognizer->StartContinuousRecognitionAsync();
         auto ptr = std::make_shared<CSpxAsyncOp<void>>(std::move(asyncop));
 
         auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
@@ -364,9 +393,9 @@ SPXAPI Recognizer_StopContinuousRecognitionAsync(SPXRECOHANDLE hreco, SPXASYNCHA
         *phasync = SPXHANDLE_INVALID;
 
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
-        auto precognizer = (*recohandles)[hreco];
+        auto recognizer = (*recohandles)[hreco];
 
-        auto asyncop = precognizer->StopContinuousRecognitionAsync();
+        auto asyncop = recognizer->StopContinuousRecognitionAsync();
         auto ptr = std::make_shared<CSpxAsyncOp<void>>(std::move(asyncop));
 
         auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();

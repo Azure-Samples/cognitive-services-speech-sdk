@@ -17,6 +17,7 @@
 
 namespace CARBON_NAMESPACE_ROOT {
 
+
 class Session
 {
 public:
@@ -57,7 +58,7 @@ public:
         }
     }
 
-    SessionParameterCollection Parameters;
+    SessionParameterValueCollection Parameters;
 
 
 private:

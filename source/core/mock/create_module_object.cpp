@@ -24,7 +24,7 @@ namespace CARBON_IMPL_NAMESPACE() {
 
 bool ShouldMock(const wchar_t* psz)
 {
-    return RecognizerFactory::Parameters::GetBool(psz, false);
+    return DefaultRecognizerFactory::Parameters::GetBool(psz, false);
 }
 
 SPX_EXTERN_C void* Mock_CreateModuleObject(const char* className, const char* interfaceName)

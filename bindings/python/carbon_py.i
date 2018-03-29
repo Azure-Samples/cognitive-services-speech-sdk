@@ -42,7 +42,7 @@
     %}
 }
 
-%rename(_RecognizerFactory)Carbon::Recognition::RecognizerFactory;
+%rename(_DefaultRecognizerFactory)Carbon::Recognition::DefaultRecognizerFactory;
 
 %include "carbon.i"
 
@@ -84,8 +84,8 @@ class RecognizerFactory:
     @staticmethod
     def create_speech_recognizer(filename=None):
         if not filename:
-            return recognizer_factory().create_speech_recognizer()
-        return recognizer_factory().create_speech_recognizer_with_file_input(filename)
+            return _DefaultRecognizerFactory.create_speech_recognizer()
+        return _DefaultRecognizerFactory.create_speech_recognizer_with_file_input(filename)
 %}
 
 
