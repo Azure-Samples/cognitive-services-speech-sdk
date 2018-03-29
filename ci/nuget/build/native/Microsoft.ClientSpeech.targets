@@ -11,10 +11,11 @@
       <AdditionalIncludeDirectories>$(SpeechPackageRoot)build\native\include\cxx_api;$(SpeechPackageRoot)build\native\include\c_api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>$(SpeechPackageRoot)build\native\$Platform$\$Configuration$\carbon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <!-- Always link against Release version libraries, regardless of user's Configuration -->
+      <AdditionalDependencies>$(SpeechPackageRoot)build\native\$(Platform)\Release\carbon.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Target Name="SpeechRedistAfterBuild" AfterTargets="AfterBuild" >
-    <Copy SourceFiles="$(SpeechPackageRoot)build\native\$Platform$\$Configuration$\carbon.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(SpeechPackageRoot)build\native\$(Platform)\Release\carbon.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
   </Target>
 </Project>

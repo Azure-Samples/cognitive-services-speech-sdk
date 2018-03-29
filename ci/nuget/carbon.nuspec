@@ -29,6 +29,7 @@
     <file src="..\..\source\public\c_api\*" target="build\native\include\c_api\" />
    
     <!-- native dll and lib files -->
+    <!-- (Note: we are only building Win32\Release and x64\Release as (separate) NuGet packages currently) -->
     <file src="..\..\build\$Platform$\lib\$Configuration$\carbon.lib" target="build\native\$Platform$\$Configuration$\carbon.lib" />
     <file src="..\..\build\$Platform$\bin\$Configuration$\carbon.dll" target="build\native\$Platform$\$Configuration$\carbon.dll" />
 

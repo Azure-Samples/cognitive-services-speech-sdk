@@ -4,11 +4,11 @@
     <SpeechPackageRoot>$(MSBuildThisFileDirectory)..\..\</SpeechPackageRoot>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="$(SpeechPackageRoot)build\native\$Platform$\$Configuration$\carbon.dll">
+    <None Include="$(SpeechPackageRoot)build\native\$(Platform)\Release\carbon.dll">
       <Link>carbon.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="$(SpeechPackageRoot)build\native\$Platform$\$Configuration$\carbon_csharp_bindings.dll">
+    <None Include="$(SpeechPackageRoot)build\native\$(Platform)\Release\carbon_csharp_bindings.dll">
       <Link>carbon_csharp_bindings.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
