@@ -203,10 +203,7 @@ USP::Client&  CSpxUspRecoEngineAdapter::SetUspAuthentication(USP::Client& client
         return client.SetAuthentication(USP::AuthenticationType::SearchDelegationRPSToken, PAL::ToString(uspRpsToken));
     }
 
-    return client.SetAuthentication(USP::AuthenticationType::SubscriptionKey, "92069ee289b84e5594a9564ab77ed2ba");;
-
-    //TODO:
-    //throw std::runtime_error("No Authentication parameters were specified.");
+    throw std::runtime_error("No Authentication parameters were specified.");
 }
 
 void CSpxUspRecoEngineAdapter::UspWriteFormat(WAVEFORMATEX* pformat)
