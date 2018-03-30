@@ -399,13 +399,18 @@ void CSpxUspRecoEngineAdapter::DumpFileInit()
     // on Windows, this fopen returns null if the same file was already opened,
     // as a result writing segfaults. Adding a counter the filename, so that
     // each recognizer will get its own dumpfile.
+    // On Android, this fails even because the default location might not be writeable
+    // for the app package.
     std::string filename = "uspaudiodump_" + std::to_string(m_instanceCounter) + ".wav";
     PAL::fopen_s(&m_hfile, filename.c_str(), "wb");
 }
 
 void CSpxUspRecoEngineAdapter::DumpFileWrite(const uint8_t* buffer, size_t bytesToWrite)
 {
-    fwrite(buffer, 1, bytesToWrite, m_hfile);
+    if (m_hfile != nullptr)
+    {
+        fwrite(buffer, 1, bytesToWrite, m_hfile);
+    }
 }
 
 void CSpxUspRecoEngineAdapter::DumpFileClose()

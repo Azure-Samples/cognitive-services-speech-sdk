@@ -65,6 +65,21 @@ void CSpxAudioStreamSession::InitFromMicrophone()
     // Defer calling InitRecoEngineAdapter() until later ... (see ::EnsureInitRecoEngineAdapter())
 }
 
+void CSpxAudioStreamSession::InitFromStream(AudioInputStream* audioInputStream)
+{
+    SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_audioPump.get() != nullptr);
+
+    // Create the stream pump
+    auto audioStreamPump = SpxCreateObjectWithSite<ISpxStreamPumpReaderInit>("CSpxStreamPump", this);
+    m_audioPump = std::dynamic_pointer_cast<ISpxAudioPump>(audioStreamPump);
+
+    // Attach the stream to the pump
+    audioStreamPump->SetAudioStream(audioInputStream);
+
+    // Defer calling InitRecoEngineAdapter() until later ... (see ::EnsureInitRecoEngineAdapter())
+}
+
+
 void CSpxAudioStreamSession::SetFormat(WAVEFORMATEX* pformat)
 {
     EnsureInitRecoEngineAdapter();

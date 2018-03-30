@@ -36,6 +36,7 @@ public:
     
     void InitFromFile(const wchar_t* pszFileName) override;
     void InitFromMicrophone() override;
+    void InitFromStream(AudioInputStream* audioInputStream) override;
 
     // --- ISpxAudioProcessor
 

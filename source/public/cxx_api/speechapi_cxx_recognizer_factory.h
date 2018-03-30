@@ -13,6 +13,7 @@
 #include <speechapi_cxx_intent_recognizer.h>
 #include <speechapi_cxx_translation_recognizer.h>
 #include <speechapi_cxx_recognizer_factory_parameter.h>
+#include <speechapi_cxx_audioinputstream.h>
 #include <speechapi_c_recognizer_factory.h>
 
 
@@ -52,6 +53,8 @@ public:
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer(const std::wstring& language) = 0;
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName) = 0;
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) = 0;
+
+    virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithAudioInputStream(AudioInputStream* audioInputStream) = 0;
 
     virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizer() = 0;
     virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizer(const std::wstring& language) = 0;
@@ -139,6 +142,67 @@ private:
             SPX_THROW_ON_FAIL(::RecognizerFactory_CreateSpeechRecognizer_With_FileInput(SPXHANDLE_DEFAULT, &hreco, fileName.c_str()));
             return std::make_shared<Speech::SpeechRecognizer>(hreco);
         }
+
+        typedef struct _SpeechApi_AudioInputStreamAdapter
+        {
+            // must be first;
+            ::SpeechApi_AudioInputStream functionParams;
+            AudioInputStream * m_audioInputStream;
+        } SpeechApi_AudioInputStreamAdapter;
+
+
+        static void InitSpeechApi_AudioInputStreamAdapterFromAudioInputStream(SpeechApi_AudioInputStreamAdapter* adapter, AudioInputStream* audioInputStream)
+        {
+            adapter->m_audioInputStream = audioInputStream;
+            adapter->functionParams.Close = Wrap_Close;
+            adapter->functionParams.GetFormat = Wrap_GetFormat;
+            adapter->functionParams.Read = Wrap_Read;
+        }
+
+        static unsigned short Wrap_GetFormat(::SpeechApi_AudioInputStream* context, ::AudioInputStreamFormat* pformat, unsigned short cbFormat)
+        {
+            unsigned short retValue = 0;
+
+            if (pformat)
+            {
+                AudioInputStreamFormat pFormat2;
+                retValue = ((SpeechApi_AudioInputStreamAdapter*)context)->m_audioInputStream->GetFormat(&pFormat2, cbFormat);
+
+                pformat->cbSize = pFormat2.cbSize;
+                pformat->nAvgBytesPerSec = pFormat2.nAvgBytesPerSec;
+                pformat->nBlockAlign = pFormat2.nBlockAlign;
+                pformat->nChannels = pFormat2.nChannels;
+                pformat->nSamplesPerSec = pFormat2.nSamplesPerSec;
+                pformat->wBitsPerSample = pFormat2.wBitsPerSample;
+                pformat->wFormatTag = pFormat2.wFormatTag;
+            }
+            else
+            {
+                retValue = ((SpeechApi_AudioInputStreamAdapter*)context)->m_audioInputStream->GetFormat(nullptr, cbFormat);
+            }
+
+            return retValue;
+        }
+
+        static unsigned int Wrap_Read(::SpeechApi_AudioInputStream* context, unsigned char* pbuffer, unsigned int cbBuffer)
+        {
+            return ((SpeechApi_AudioInputStreamAdapter*)context)->m_audioInputStream->Read((char*)pbuffer, cbBuffer);
+        }
+
+        static void Wrap_Close(::SpeechApi_AudioInputStream* context)
+        {
+            ((SpeechApi_AudioInputStreamAdapter*)context)->m_audioInputStream->Close();
+        }
+
+        virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithAudioInputStream(AudioInputStream* audioInputStream)
+        {
+            SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
+            SpeechApi_AudioInputStreamAdapter *audioInputStream2 = new SpeechApi_AudioInputStreamAdapter();
+            InitSpeechApi_AudioInputStreamAdapterFromAudioInputStream(audioInputStream2, audioInputStream);
+
+            SPX_THROW_ON_FAIL(::RecognizerFactory_CreateSpeechRecognizer_With_Stream(SPXHANDLE_DEFAULT, &hreco, (::SpeechApi_AudioInputStream*)audioInputStream2));
+            return std::make_shared<Speech::SpeechRecognizer>(hreco);
+        };
 
         virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language)
         {
@@ -233,6 +297,14 @@ public:
         auto factory = RecognizerFactory::GetDefault();
         return factory->CreateSpeechRecognizerWithFileInput(fileName);
     }
+
+    static std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithAudioInputStream(AudioInputStream* audioInputStream)
+    {
+        auto factory = RecognizerFactory::GetDefault();
+        return factory->CreateSpeechRecognizerWithAudioInputStream(audioInputStream);
+    };
+
+
 
     static std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language)
     {

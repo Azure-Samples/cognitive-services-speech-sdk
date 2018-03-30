@@ -44,6 +44,10 @@ elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 endif()
 
+if(ANDROID)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+endif()
+
 set(CARBON_ROOT ${PROJECT_SOURCE_DIR})
 set(CARBON_SOURCE "${CARBON_ROOT}/source")
 set(CARBON_PUBLIC "${CARBON_SOURCE}/public")
@@ -87,19 +91,28 @@ add_subdirectory(${COMMON})
 add_subdirectory(${FACTORY})
 add_subdirectory(${AUDIO})
 add_subdirectory(${USP})
-add_subdirectory(${USP_CONSOLE})
-add_subdirectory(${TESTS})
+
+if(NOT ANDROID)
+  add_subdirectory(${USP_CONSOLE})
+  add_subdirectory(${TESTS})
+endif()
+
 add_subdirectory(${C_API})
 add_subdirectory(${SR})
 add_subdirectory(${MOCK})
 add_subdirectory(${LIBCARBON})
+
 if(CMAKE_CL_64)
     add_subdirectory(${UNIDEC})
 endif()
+
 add_subdirectory(${CARBONX})
 
 add_subdirectory(${CARBON_BINDINGS})
-add_subdirectory(${CARBON_CSHARP_CONSOLE})
+
+if(NOT ANDROID)
+  add_subdirectory(${CARBON_CSHARP_CONSOLE})
+endif()
 
 # Dummy targets to make API header appear
 # in the generated VS solution.

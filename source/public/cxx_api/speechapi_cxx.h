@@ -10,6 +10,7 @@
 #include <speechapi_cxx_common.h>
 #include <speechapi_cxx_todo.h>
 
+#include <speechapi_cxx_audioinputstream.h>
 #include <speechapi_cxx_eventargs.h>
 #include <speechapi_cxx_eventsignal.h>
 #include <speechapi_cxx_value.h>

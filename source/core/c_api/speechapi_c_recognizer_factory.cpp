@@ -10,7 +10,6 @@
 #include "site_helpers.h"
 #include "named_properties_constants.h"
 
-
 using namespace CARBON_IMPL_NAMESPACE();
 
 
@@ -22,6 +21,70 @@ SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_Defaults(SPXRECOFACTORYHAND
         *phreco = SPXHANDLE_INVALID;
 
         auto recognizer = CSpxRecognizerFactory::CreateSpeechRecognizer();
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        *phreco = recohandles->TrackHandle(recognizer);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+class SpeechApiAudioInputStreamWrapper : public AudioInputStream
+{
+public:
+    SpeechApiAudioInputStreamWrapper(SpeechApi_AudioInputStream *pstream) :
+        m_pstream(pstream)
+    {
+    }
+
+    virtual unsigned short GetFormat(Carbon::AudioInputStreamFormat* pformat, unsigned short cbFormat) override
+    {
+        struct tAudioInputStreamFormatC format;
+
+        unsigned short retValue = 0;
+
+        if (pformat)
+        {
+            retValue = m_pstream->GetFormat(m_pstream, &format, cbFormat);
+            pformat->cbSize = format.cbSize;
+            pformat->nAvgBytesPerSec = format.nAvgBytesPerSec;
+            pformat->nBlockAlign = format.nBlockAlign;
+            pformat->nChannels = format.nChannels;
+            pformat->nSamplesPerSec = format.nSamplesPerSec;
+            pformat->wBitsPerSample = format.wBitsPerSample;
+            pformat->wFormatTag = format.wFormatTag;
+        }
+        else
+        {
+            retValue = m_pstream->GetFormat(m_pstream, nullptr, cbFormat);
+        }
+
+        return retValue;
+    }
+
+    virtual unsigned int Read(char* pbuffer, unsigned int cbBuffer) override
+    {
+        return m_pstream->Read(m_pstream, (unsigned char*)pbuffer, cbBuffer);
+    }
+
+    virtual void Close() override
+    {
+        m_pstream->Close(m_pstream);
+    }
+
+
+private:
+    SpeechApi_AudioInputStream * m_pstream;
+};
+
+SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_Stream(SPXRECOFACTORYHANDLE hrecofactory, SPXRECOHANDLE* phreco, SpeechApi_AudioInputStream *pstream)
+{
+    UNUSED(hrecofactory);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        SpeechApiAudioInputStreamWrapper* stream = new SpeechApiAudioInputStreamWrapper(pstream);
+
+        *phreco = SPXHANDLE_INVALID;
+        auto recognizer = CSpxRecognizerFactory::CreateSpeechRecognizerWithStream(stream);
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }

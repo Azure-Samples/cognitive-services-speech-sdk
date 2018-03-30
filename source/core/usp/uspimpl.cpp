@@ -297,7 +297,7 @@ void Connection::Impl::Connect()
     }
 
     m_dnsCache = DnsCachePtr(DnsCacheCreate(), DnsCacheDestroy);
-    if (m_dnsCache == NULL)
+    if (!m_dnsCache)
     {
         throw runtime_error("Failed to create DNS cache.");
     }

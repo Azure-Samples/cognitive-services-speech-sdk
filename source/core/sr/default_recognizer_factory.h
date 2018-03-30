@@ -9,6 +9,7 @@
 #include <spxdebug.h>
 #include <spxerror.h>
 #include "service_helpers.h"
+#include <speechapi_cxx_audioinputstream.h>
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -24,6 +25,7 @@ public:
 
     // --- ISpxRecognizerFactory
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer() override;
+    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream*audioInputStream) override;
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(bool passiveListeningEnabled) override { UNUSED(passiveListeningEnabled); throw SPXERR_NOT_IMPL; }
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language) override { UNUSED(language);  throw SPXERR_NOT_IMPL; }
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName) override;

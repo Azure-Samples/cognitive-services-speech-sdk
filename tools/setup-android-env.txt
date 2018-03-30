@@ -1,0 +1,101 @@
+@echo off
+
+
+rem download NDK from https://developer.android.com/ndk/guides/standalone_toolchain.html
+rem note we need both, ndk for windows (carbon) and ndk for linux (openssl)
+
+rem download ssl (using linux x86 build environment)
+rem NOTE be sure to UNSET CROSS_COMPILE and other env variables, like CC, CXX, etc.
+cd \carbon\external
+
+export ANDROID_NDK=/mnt/a/android-ndk-linux
+export PATH=$PATH:/mnt/a/android-ndk-linux/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/
+git clone https://github.com/openssl/openssl
+cd openssl
+rem Tell configure what flags Android requires.
+set CFLAGS=-fPIE -fPIC
+set LDFLAGS=-pie
+./Configure android-arm --prefix=/mnt/a/Carbon/external/openssl/_install --openssldir=/data/ssl
+make
+
+
+rem download curl
+cd \carbon\external
+
+git clone https://github.com/curl/curl
+cd curl
+sudo apt-get install autoconf
+sudo apt-get install libtool
+declare -x ANDROID_NDK="/mnt/a/android-ndk-linux"
+declare -x AR="arm-linux-androideabi-ar"
+declare -x AS="arm-linux-androideabi-as"
+declare -x CC="arm-linux-androideabi-gcc"
+declare -x CFLAGS="-fPIE -fPIC --sysroot=/mnt/a/android-ndk-linux/platforms/android-26/arch-arm/"
+declare -x CPPFLAGS="-I/mnt/a/android-ndk-linux/sysroot/usr/include/"
+declare -x CROSS_COMPILE="arm-linux-androideabi"
+declare -x LD="arm-linux-androideabi-ld"
+declare -x LDFLAGS="-pie --sysroot=/mnt/a/android-ndk-linux/platforms/android-26/arch-arm/ -L/mnt/a/android-ndk-linux/sysroot/usr/include"
+declare -x NM="arm-linux-androideabi-nm"
+export PATH=$PATH:/mnt/a/android-ndk-r16b/toolchains/arm-linux-androideabi-4.9/prebuilt/windows-x86_64/bin:/mnt/a/android-ndk-linux/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/
+./buildconf
+./configure --host=${CROSS_COMPILE} --with-ssl=/mnt/a/Carbon/external/openssl/_install --with-zlib --disable-ftp --disable-gopher --disable-file --disable-imap --disable-ldap --disable-ldaps --disable-pop3 --disable-proxy --disable-rtsp --disable-smtp --disable-telnet --disable-tftp --without-gnutls --without-libidn --without-librtmp --disable-dict --prefix=/mnt/a/Carbon/external/curl/_install
+make
+
+
+rem you need the libs from the roobo device for later linking 
+
+rem create makefiles for carbon
+rem TODO: might need to switch ABI to 'armeabi-v7a'
+md \carbon\build
+cd \carbon\build
+
+"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
+cmake  -G "NMake Makefiles" -DCMAKE_SYSTEM_NAME=Android  -DCMAKE_ANDROID_NDK=a:/android-ndk-r16b    -DCMAKE_SYSTEM_VERSION=26 .. -DCMAKE_ANDROID_STL_TYPE=c++_shared -DOPENSSL_ROOT_DIR=a:\Carbon\external\openssl\_install  -DCURL_LIBRARY=a:\Carbon\external\curl\_install\lib\libcurl.so -DCURL_INCLUDE_DIR=a:\Carbon\external\curl\_install\include
+
+
+rem apply a patch on azure-c-shared-utility with roobo changes
+(cd ..\external\azure-c-shared-utility&&git apply ..\..\roobo.azure-c-shared-utility.patch)
+
+rem now, go ahead and build carbon
+nmake
+
+
+rem Add the standalone toolchain to the search path.
+rem Tell configure what tools to use.
+rem set target_host=arm-linux-androideabi
+rem set AR=%target_host%-ar
+rem set AS=%target_host%-clang
+rem set CC=%target_host%-clang
+rem set CXX=%target_host%-clang++
+rem set LD=%target_host%-ld
+rem set STRIP=%target_host%-strip
+
+rem Tell configure what flags Android requires.
+rem set CFLAGS=-fPIE -fPIC
+rem set LDFLAGS=-pie
+
+rem https://developer.android.com/ndk/downloads/index.html
+rem https://developer.android.com/ndk/guides/standalone_toolchain.html#windows_support
+
+rem java and jni environment
+rem set JAVA_HOME=c:\Program Files\Java\jdk1.8.0_161\bin\
+
+rem setup vs2017
+rem %comspec% /k "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
+rem md build&&cd build
+rem cmake -G "NMake Makefiles" ..
+
+rem setup ndk compile of Carbon
+cmake  -G "NMake Makefiles" -DCMAKE_SYSTEM_NAME=Android  -DCMAKE_ANDROID_NDK=a:/android-ndk-r16b    -DCMAKE_SYSTEM_VERSION=26 .. -DCMAKE_ANDROID_STL_TYPE=c++_shared -DJAVA_AWT_LIBRARY=a:\android-ndk-r16b\sysroot\usr\include\  -DOPENSSL_ROOT_DIR=a:\Carbon\external\openssl\_install  -DCURL_LIBRARY=a:\Carbon\external\curl\_install\lib\libcurl.so -DCURL_INCLUDE_DIR=a:\Carbon\external\curl\_install\include
+nmake
+
+
+rem copy files to device
+adb push bin/carbonx                       /data/carbon
+adb push bindings/java/carbon_java_lib.jar /data/carbon
+adb push bin/libcarbon_java_bindings.so    /data/carbon
+adb push lib/libcarbon.so                  /data/carbon
+adb push \android-ndk-r16b/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a/libc++_shared.so /data/carbon
+
+
+echo done.

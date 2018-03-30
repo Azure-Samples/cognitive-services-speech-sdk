@@ -20,6 +20,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/interactive_microphone.h"
     "${SRC_DIR}/wav_file_reader.h"
     "${SRC_DIR}/wav_file_pump.h"
+    "${SRC_DIR}/stream_pump.h"
     )
 
 set(SOURCES
@@ -28,6 +29,7 @@ set(SOURCES
     "${SRC_DIR}/interactive_microphone.cpp"
     "${SRC_DIR}/wav_file_reader.cpp"
     "${SRC_DIR}/wav_file_pump.cpp"
+    "${SRC_DIR}/stream_pump.cpp"
     )
 
 set(AUDIO_LIBS common)
@@ -57,12 +59,16 @@ elseif(APPLE)
         "${SRC_DIR}/osx/microphone.cpp"
     )
 else()
-    list(APPEND SOURCES
-        "${SRC_DIR}/linux/microphone.cpp"
-        "${SRC_DIR}/linux/audio_sys.c"
-    )
     if (NOT (CMAKE_SYSTEM_NAME STREQUAL "Android"))
+        list(APPEND SOURCES
+            "${SRC_DIR}/linux/microphone.cpp"
+            "${SRC_DIR}/linux/audio_sys.c"
+        )
         list(APPEND AUDIO_LIBS asound)
+    else()
+        list(APPEND SOURCES
+            "${SRC_DIR}/linux/microphone_none.cpp"
+        )
     endif()
 endif()
 

@@ -56,6 +56,27 @@ std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateRecognizerIn
     return recognizer;
 }
 
+std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream)
+{
+    // Create the session
+    auto factoryAsSite = SpxSiteFromThis(this);
+    auto session = SpxCreateObjectWithSite<ISpxSession>("CSpxAudioStreamSession", factoryAsSite);
+
+    // Initialize the session
+    auto sessionInit = std::dynamic_pointer_cast<ISpxAudioStreamSessionInit>(session);
+    sessionInit->InitFromStream(audioInputStream);
+
+    // Create the recognizer
+    auto sessionAsSite = std::dynamic_pointer_cast<ISpxSite>(session);
+    auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>("CSpxRecognizer", sessionAsSite);
+
+    // Add the recognizer to the session
+    session->AddRecognizer(recognizer);
+
+    // We're done!
+    return recognizer;
+}
+
 std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateRecognizerWithFileInputInternal(const std::wstring& fileName, const char* sessionClassName, const char* recognizerClassName)
 {
     // Create the session

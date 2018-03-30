@@ -30,6 +30,8 @@
 %shared_ptr(Carbon::Recognition::Intent::IntentRecognizer)
 %shared_ptr(Carbon::Recognition::Intent::IntentTrigger)
 %shared_ptr(Carbon::Recognition::Intent::LuisModel)
+%shared_ptr(Carbon::Recognition::IRecognizerFactory)
+%shared_ptr(Carbon::Recognition::IDefaultRecognizerFactory)
 
 %ignore CallbackWrapper::GetFunction();
 %ignore FutureWrapper::FutureWrapper;
@@ -45,6 +47,9 @@
 %include <speechapi_cxx_value.h>
 
 %template(ValueCollectionRecognizerParameter) Carbon::HandleValueCollection<SPXRECOHANDLE, Carbon::Recognition::RecognizerParameterValue>;
+#%template(ValueCollectionResultProperty) Carbon::HandleValueCollection<SPXRESULTHANDLE, Carbon::Recognition::ResultPropertyValue>;
+%ignore Carbon::HandleValueCollection<SPXRECOFACTORYHANDLE, Carbon::Recognition::RecognizerFactoryParameterValue>;
+%ignore Carbon::HandleValueCollection<SPXSESSIONHANDLE, Carbon::SessionParameterValue>;
 
 %ignore Carbon::Recognition::AsyncRecognizer::RecognizeAsync();
 %ignore Carbon::Recognition::AsyncRecognizer::StartContinuousRecognitionAsync();
@@ -130,6 +135,8 @@
 
 %feature("director") CallbackWrapper;
 
+%feature("director") AudioInputStream;
+
 %extend Carbon::EventSignal {
 
 #ifdef SWIGPYTHON
@@ -174,6 +181,7 @@
 %ignore Carbon::Recognition::Intent::IntentRecognizer::StopContinuousRecognitionAsync();
 
 // Process symbols in header
+%include <speechapi_cxx_audioinputstream.h>
 %include <speechapi_cxx_eventargs.h>
 %include <speechapi_cxx_eventsignal.h>
 %include <speechapi_cxx_value.h>

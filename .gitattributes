@@ -21,9 +21,16 @@
 
 # Bash only like Unix line endings
 *.sh text eol=lf
+*.bat binary
 
 # Binary extensions:
 *.exe binary
 *.lib binary
 *.zip binary
 *.png binary
+*.patch binary
+
+
+# externals are ignored
+external/curl/**/* binary
+external/openssl/**/* binary

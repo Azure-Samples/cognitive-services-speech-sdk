@@ -77,10 +77,10 @@ typedef struct _TELEMETRY_CONTEXT
 
 static void initialize_message_name_array()
 {
-    static bool initialized = false;
+    static int initialized = 0;
     if (initialized)
         return;
-    initialized = true;
+    initialized = 1;
     // The order of this array needs to be consistent with the enum incomingMsgType
     speechMsgNames[turnStart] = g_messagePathTurnStart;
     speechMsgNames[speechStartDetected] = g_messagePathSpeechStartDetected;

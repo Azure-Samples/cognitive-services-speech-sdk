@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "handle_table.h"
 #include "platform.h"
-
+#include <memory>
 
 namespace CARBON_IMPL_NAMESPACE() {
 

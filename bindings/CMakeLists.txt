@@ -20,7 +20,7 @@ if(WIN32)
     endif()
 endif()
 
-if(WIN32)
+if(WIN32 OR ANDROID)
     option(BUILD_JAVA "Build Java/Android SWIG module" ON)
     if(BUILD_JAVA)
         add_subdirectory(java)

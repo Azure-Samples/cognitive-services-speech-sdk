@@ -13,6 +13,7 @@
 #include "speechapi_cxx_common.h"
 #include "speechapi_cxx_eventsignal.h"
 #include "shared_ptr_helpers.h"
+#include "speechapi_cxx_audioinputstream.h"
 
 
 using namespace CARBON_NAMESPACE_ROOT;
@@ -316,6 +317,13 @@ public:
     virtual void SetAudioReader(std::shared_ptr<ISpxAudioReader>& reader) = 0;
 };
 
+class ISpxStreamPumpReaderInit : public ISpxInterfaceBaseFor<ISpxStreamPumpReaderInit>
+{
+public:
+
+    virtual void SetAudioStream(AudioInputStream* reader) = 0;
+};
+
 
 enum class Reason { Recognized, IntermediateResult, NoMatch, Canceled, OtherRecognizer };
 
@@ -448,6 +456,7 @@ public:
 
     virtual void InitFromFile(const wchar_t* pszFileName) = 0;
     virtual void InitFromMicrophone() = 0;
+    virtual void InitFromStream(AudioInputStream* audioInputStream) = 0;
 };
 
 
@@ -523,6 +532,7 @@ class ISpxRecognizerFactory : public ISpxInterfaceBaseFor<ISpxRecognizerFactory>
 public:
 
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer() = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream*) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(bool passiveListeningEnaled) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName) = 0;

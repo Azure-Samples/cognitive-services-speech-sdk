@@ -32,6 +32,12 @@ std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateIntentRecognizerWit
     return factory->CreateIntentRecognizerWithFileInput(fileName);
 }
 
+std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream)
+{
+    auto factory = GetDefaultFactory();
+    return factory->CreateSpeechRecognizerWithStream(audioInputStream);
+}
+
 std::shared_ptr<ISpxRecognizerFactory> CSpxRecognizerFactory::GetDefaultFactory()
 {
     auto factory = CSpxResourceManager::InitService<ISpxRecognizerFactory>("CSpxDefaultRecognizerFactory");

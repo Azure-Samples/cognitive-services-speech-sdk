@@ -8,11 +8,13 @@
 #pragma once
 #include <spxdebug.h>
 #include <speechapi_c_common.h>
+#include <speechapi_c_audioinputstream.h>
 
 SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_Defaults(SPXRECOFACTORYHANDLE hrecofactory, SPXRECOHANDLE* phreco);
 SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_Language(SPXRECOFACTORYHANDLE hrecofactory, SPXRECOHANDLE* phreco, const wchar_t* pszLanguage);
 SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_FileInput(SPXRECOFACTORYHANDLE hrecofactory, SPXRECOHANDLE* phreco, const wchar_t* pszFileName);
 SPXAPI RecognizerFactory_CreateSpeechRecognizer(SPXRECOFACTORYHANDLE hrecofactory, SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName);
+SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_Stream(SPXRECOFACTORYHANDLE hrecofactory, SPXRECOHANDLE* phreco, SpeechApi_AudioInputStream *stream);
 
 SPXAPI RecognizerFactory_CreateIntentRecognizer_With_Defaults(SPXRECOFACTORYHANDLE hrecofactory, SPXRECOHANDLE* phreco);
 SPXAPI RecognizerFactory_CreateIntentRecognizer_With_Language(SPXRECOFACTORYHANDLE hrecofactory, SPXRECOHANDLE* phreco, const wchar_t* pszLanguage);
