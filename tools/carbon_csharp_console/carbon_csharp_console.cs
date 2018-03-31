@@ -17,15 +17,15 @@ namespace CarbonSamples
     {
         static void Main(string[] args)
         {
-            if (args.Length <= 0)
+            if (args.Length != 2)
             {
-                Console.WriteLine("Usage: carbon_csharp_console wavfile");
+                Console.WriteLine("Usage: carbon_csharp_console speechKey audio|wavfile");
                 Environment.Exit(1);
             }
 
-            SpeechRecognitionSamples.SpeechRecognitionAsync(args[0]).Wait();
+            SpeechRecognitionSamples.SpeechRecognitionAsync(args).Wait();
 
-            IntentRecognitionSamples.IntentRecognitionAsync(args[0]).Wait();
+            IntentRecognitionSamples.IntentRecognitionAsync(args).Wait();
         }
     }
 

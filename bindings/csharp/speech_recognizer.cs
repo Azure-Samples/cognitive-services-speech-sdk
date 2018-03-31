@@ -74,7 +74,7 @@ namespace Carbon.Recognition.Speech
             get
             {
                 //return Parameters.GetString(SubscriptionKey);
-                return Parameters.Get<string>(ParameterNames.SubscriptionKey);
+                return Parameters.Get<string>(ParameterNames.SpeechSubscriptionKey);
             }
         }
 
@@ -96,7 +96,7 @@ namespace Carbon.Recognition.Speech
         {
             get
             {
-                return Parameters.Get<string>(ParameterNames.Language);
+                return Parameters.Get<string>(ParameterNames.SpeechRecoLanguage);
             }
         }
 
@@ -107,7 +107,7 @@ namespace Carbon.Recognition.Speech
         {
             get
             {
-                return Parameters.Get<string>(ParameterNames.RecognitionMode);
+                return Parameters.Get<string>(ParameterNames.SpeechRecognitionMode);
             }
         }
 

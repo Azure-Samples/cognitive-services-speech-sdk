@@ -20,7 +20,7 @@ namespace Carbon
                 isFactoryParameter = true;
                 speechParameters = null;
             }
-            if (typeof(OwnerType) == typeof(Carbon.Recognition.Speech.SpeechRecognizer))
+            else if (typeof(OwnerType) == typeof(Carbon.Recognition.Speech.SpeechRecognizer))
             {
                 isFactoryParameter = false;
                 var speechRecognizer = owner as Carbon.Recognition.Speech.SpeechRecognizer;

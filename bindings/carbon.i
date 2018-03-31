@@ -18,6 +18,7 @@
 %include <std_wstring.i>
 %include <stdint.i>
 
+%shared_ptr(Carbon::Recognition::IDefaultRecognizerFactory)
 %shared_ptr(Carbon::Recognition::Recognizer)
 %shared_ptr(Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::RecognitionResult, Carbon::Recognition::RecognitionEventArgs>)
 %shared_ptr(Carbon::Recognition::BaseAsyncRecognizer)

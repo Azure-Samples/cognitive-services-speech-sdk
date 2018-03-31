@@ -13,7 +13,7 @@ namespace Carbon.Recognition
         /// <summary>
         /// The name of parameter `SubscriptionKey`
         /// </summary>
-        public const string SubscriptionKey = "SubscriptionKey";
+        public const string SpeechSubscriptionKey = "SPEECH-SubscriptionKey";
 
         /// <summary>
         /// The name of parameter `Region`
@@ -23,12 +23,12 @@ namespace Carbon.Recognition
         /// <summary>
         /// The name of parameter `Language`.
         /// </summary>
-        public const string Language = "Language";
+        public const string SpeechRecoLanguage = "SPEECH-RecoLanguage";
 
         /// <summary>
         /// The name of parameter `RecognitionMode`.
         /// </summary>
-        public const string RecognitionMode = "RecognitionMode";
+        public const string SpeechRecognitionMode = "SPEECH-RecoMode";
 
         /// <summary>
         /// The name of parameter `InputFile`.

@@ -35,12 +35,22 @@ namespace CarbonSamples
             Console.WriteLine(String.Format("Intent recognition: Session event: {0}.", e.ToString()));
         }
 
-        public static async Task IntentRecognitionAsync(string audioFile)
+        public static async Task IntentRecognitionAsync(string[] args)
         {
+            var keySpeech = args[0];
+
             var factory = new RecognizerFactory();
-            var reco = factory.SetInputFile(audioFile)
-                              .CreateIntentRecognizer();
-            // var reco = RecognizerFactory.CreateIntentRecognizer();
+            factory.SubscriptionKey = keySpeech;
+
+            IntentRecognizer reco;
+            if (string.Compare(args[1], "mic", true) == 0)
+            {
+                reco = factory.CreateIntentRecognizer();
+            }
+            else
+            {
+                reco = factory.CreateIntentRecognizer(args[1]);
+            }
 
             // Subscribes to events.
             reco.OnIntermediateResult += MyIntermediateResultEventHandler;

@@ -35,11 +35,22 @@ namespace CarbonSamples
             Console.WriteLine(String.Format("Speech recogniton: Session event: {0}.", e.ToString()));
         }
 
-        public static async Task SpeechRecognitionAsync(string audioFile)
+        public static async Task SpeechRecognitionAsync(string[] args)
         {
+            var keySpeech = args[0];
+
             var factory = new RecognizerFactory();
-            var reco = factory.SetInputFile(audioFile).CreateSpeechRecognizer();
-            // var reco = RecognizerFactory.CreateSpeechRecognizer();
+            factory.SubscriptionKey = keySpeech;
+
+            SpeechRecognizer reco;
+            if (string.Compare(args[1], "mic", true) == 0)
+            {
+                reco = factory.CreateSpeechRecognizer();
+            }
+            else
+            {
+                reco = factory.CreateSpeechRecognizer(args[1]);
+            }
 
             // Subscribes to events.
             reco.OnIntermediateResult += MyIntermediateResultEventHandler;

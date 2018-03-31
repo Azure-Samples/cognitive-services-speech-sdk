@@ -30,6 +30,11 @@ public:
 
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer() = 0;
     virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizer() = 0;
+    virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName) = 0;
+    virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName) = 0;
+
+    virtual void SetSubscriptionKey(const wchar_t* value) = 0;
+    virtual void SetSpeechEndpoint(const wchar_t* value) = 0;
 
     RecognizerFactoryParameterCollection& Parameters;
 
