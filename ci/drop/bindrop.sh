@@ -99,7 +99,8 @@ fi
 [[ -e $SRCJARBINDING ]] && cp $CPOPT "$SRCJARBINDING" "$DESTPUBLIB"
 
 # copy carbonx if available
-[[ -e $SRCCARBONX ]] && cp $CPOPT "$SRCCARBONX" "$DESTPUBBIN"
+[[ -e $SRCCARBONX ]] && mkdir -p "$DESTPUBBIN" && cp $CPOPT "$SRCCARBONX" "$DESTPUBBIN"
+
 
 # N.B. no long option for -R (recursive) on OSX.
 cp $CPOPT -R "$SRCINC"* "$DESTPUBINC"
