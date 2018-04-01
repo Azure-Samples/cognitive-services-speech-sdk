@@ -11,9 +11,24 @@ namespace Carbon.Recognition
     public static class ParameterNames
     {
         /// <summary>
-        /// The name of parameter `SubscriptionKey`
+        /// The name of parameter `SpeechSubscriptionKey`
         /// </summary>
         public const string SpeechSubscriptionKey = "SPEECH-SubscriptionKey";
+
+        /// <summary>
+        /// The name of parameter `SpeechAuthToken`
+        /// </summary>
+        public const string SpeechAuthToken = "SPEECH-AuthToken";
+
+        /// <summary>
+        /// The name of parameter `SpeechRpsToken`
+        /// </summary>
+        public const string SpeechRpsToken = "SPEECH-RpsToken";
+
+        /// <summary>
+        /// The name of parameter `SpeechModelId`
+        /// </summary>
+        public const string SpeechModelId = "SPEECH-ModelId";
 
         /// <summary>
         /// The name of parameter `Region`
@@ -23,7 +38,7 @@ namespace Carbon.Recognition
         /// <summary>
         /// The name of parameter `Language`.
         /// </summary>
-        public const string SpeechRecoLanguage = "SPEECH-RecoLanguage";
+        public const string SpeechRecognitionLanguage = "SPEECH-RecoLanguage";
 
         /// <summary>
         /// The name of parameter `RecognitionMode`.
@@ -31,8 +46,8 @@ namespace Carbon.Recognition
         public const string SpeechRecognitionMode = "SPEECH-RecoMode";
 
         /// <summary>
-        /// The name of parameter `InputFile`.
+        /// The name of parameter `SpeechEndpoint`.
         /// </summary>
-        public const string InputFile = "InputFile";
+        public const string SpeechEndpoint = "SPEECH-Endpoint";
     }
 }

@@ -71,18 +71,34 @@ namespace Carbon.Recognition
         }
 
         /// <summary>
-        /// The property represents the target language for the recognition.
+        /// The property represents the model id used for speech recognition.
+        /// </summary>
+        public string ModelId
+        {
+            get
+            {
+                return Parameters.Get<string>(ParameterNames.SpeechModelId);
+            }
+
+            set
+            {
+                Parameters.Set(ParameterNames.SpeechModelId, value);
+            }
+        }
+
+        /// <summary>
+        /// The property represents the recognition language of audio.
         /// </summary>
         public string Language
         {
             get
             {
-                return Parameters.Get<string>(ParameterNames.SpeechRecoLanguage);
+                return Parameters.Get<string>(ParameterNames.SpeechRecognitionLanguage);
             }
 
             set
             {
-                Parameters.Set(ParameterNames.SpeechRecoLanguage, value);
+                Parameters.Set(ParameterNames.SpeechRecognitionLanguage, value);
             }
         }
 
@@ -99,6 +115,23 @@ namespace Carbon.Recognition
             set
             {
                 Parameters.Set(ParameterNames.SpeechRecognitionMode, value);
+            }
+        }
+
+        /// <summary>
+        /// The property represents the endpoint of speech service being used.
+        /// </summary>
+        public string Endpoint
+        {
+            get
+            {
+                return Parameters.Get<string>(ParameterNames.SpeechEndpoint);
+            }
+
+            set
+            {
+                // factoryImpl.SetSubscriptionKey(value);
+                Parameters.Set(ParameterNames.SpeechEndpoint, value);
             }
         }
 

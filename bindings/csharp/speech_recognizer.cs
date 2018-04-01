@@ -96,7 +96,7 @@ namespace Carbon.Recognition.Speech
         {
             get
             {
-                return Parameters.Get<string>(ParameterNames.SpeechRecoLanguage);
+                return Parameters.Get<string>(ParameterNames.SpeechRecognitionLanguage);
             }
         }
 
@@ -108,17 +108,6 @@ namespace Carbon.Recognition.Speech
             get
             {
                 return Parameters.Get<string>(ParameterNames.SpeechRecognitionMode);
-            }
-        }
-
-        /// <summary>
-        /// The property represents the intput file name.
-        /// </summary>
-        public string InputFile
-        {
-            get
-            {
-                return Parameters.Get<string>(ParameterNames.InputFile);
             }
         }
 

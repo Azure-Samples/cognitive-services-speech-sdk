@@ -35,21 +35,39 @@ namespace CarbonSamples
             Console.WriteLine(String.Format("Speech recogniton: Session event: {0}.", e.ToString()));
         }
 
-        public static async Task SpeechRecognitionAsync(string[] args)
+        public static async Task SpeechRecognitionBaseModelAsync(string keySpeech, string fileName)
         {
-            var keySpeech = args[0];
-
             var factory = new RecognizerFactory();
+
+            Console.WriteLine("Speech Recognition using base model.");
+
             factory.SubscriptionKey = keySpeech;
 
+            await DoSpeechRecognitionAsync(factory, fileName);
+        }
+
+        public static async Task SpeechRecognitionCustomizedModelAsync(string keySpeech, string modelId, string fileName)
+        {
+            var factory = new RecognizerFactory();
+
+            Console.WriteLine(String.Format("Speech Recognition using customized model:{0}.", modelId));
+
+            factory.SubscriptionKey = keySpeech;
+            factory.ModelId = modelId;
+
+            await DoSpeechRecognitionAsync(factory, fileName);
+        }
+
+        public static async Task DoSpeechRecognitionAsync(RecognizerFactory factory, string fileName)
+        {
             SpeechRecognizer reco;
-            if (string.Compare(args[1], "mic", true) == 0)
+            if (fileName == null)
             {
                 reco = factory.CreateSpeechRecognizer();
             }
             else
             {
-                reco = factory.CreateSpeechRecognizer(args[1]);
+                reco = factory.CreateSpeechRecognizer(fileName);
             }
 
             // Subscribes to events.
@@ -70,5 +88,4 @@ namespace CarbonSamples
             reco.OnSessionEvent -= MySessionEventHandler;
         }
     }
-
 }
