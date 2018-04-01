@@ -1295,7 +1295,9 @@ void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
 
     if (!pconsoleArgs->m_strCustomSpeechModelId.empty())
     {
-        DefaultRecognizerFactory::Parameters::SetString(LR"(CUSTOMSPEECH-ModelId)", pconsoleArgs->m_strCustomSpeechModelId.c_str());
+        // BUG: Need to expose the parameter names in API, or add an API method which sets model id. (Both in C and C++).
+        // https://msasg.visualstudio.com/Skyman/Carbon%20Team/_workitems/edit/1197958
+        DefaultRecognizerFactory::Parameters::SetString(LR"(SPEECH-ModelId)", pconsoleArgs->m_strCustomSpeechModelId.c_str());
     }
 
     if (!pconsoleArgs->m_strSubscriptionKey.empty())
