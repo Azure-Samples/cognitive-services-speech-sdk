@@ -58,6 +58,18 @@ namespace CarbonSamples
             await DoIntentRecognitionAsync(factory, fileName);
         }
 
+        public static async Task IntentRecognitionByEndpointAsync(string keySpeech, string endpoint, string fileName)
+        {
+            var factory = new RecognizerFactory();
+
+            Console.WriteLine(String.Format("Intent Recognition using endpoint:{0}.", endpoint));
+
+            factory.SubscriptionKey = keySpeech;
+            factory.Endpoint = endpoint;
+
+            await DoIntentRecognitionAsync(factory, fileName);
+        }
+
         public static async Task DoIntentRecognitionAsync(RecognizerFactory factory, string fileName)
         {
              IntentRecognizer reco;

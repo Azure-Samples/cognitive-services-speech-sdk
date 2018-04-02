@@ -58,6 +58,18 @@ namespace CarbonSamples
             await DoSpeechRecognitionAsync(factory, fileName);
         }
 
+        public static async Task SpeechRecognitionByEndpointAsync(string keySpeech, string endpoint, string fileName)
+        {
+            var factory = new RecognizerFactory();
+
+            Console.WriteLine(String.Format("Speech Recognition using endopoint:{0}.", endpoint));
+
+            factory.SubscriptionKey = keySpeech;
+            factory.Endpoint = endpoint;
+
+            await DoSpeechRecognitionAsync(factory, fileName);
+        }
+
         public static async Task DoSpeechRecognitionAsync(RecognizerFactory factory, string fileName)
         {
             SpeechRecognizer reco;

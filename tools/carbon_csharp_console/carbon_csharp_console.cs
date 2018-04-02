@@ -23,8 +23,10 @@ namespace CarbonSamples
             var keySpeech = args[0];
             string fileName = null;
             bool useBaseModel = true;
+            bool useEndpoint = false;
             string lang = null;
             string modelId = null;
+            string endpoint = null;
 
             if (args.Length >= 2)
             {
@@ -68,28 +70,52 @@ namespace CarbonSamples
                         throw new IndexOutOfRangeException("no model is specified.");
                     }
                 }
+                else if (args[2].ToLower().StartsWith("endpoint:"))
+                {
+                    useEndpoint = true;
+                    var index = args[2].IndexOf(':');
+                    if (index == -1)
+                    {
+                        throw new IndexOutOfRangeException("no endpoint is specified.");
+                    }
+                    endpoint = args[2].Substring(index + 1);
+                    if (String.IsNullOrEmpty(endpoint))
+                    {
+                        throw new IndexOutOfRangeException("no endpoint is specified.");
+                    }
+                }
                 else
                 {
-                    throw new InvalidOperationException("Only lang:language or model:modleId is allowed.");
+                    throw new InvalidOperationException("Only the following value is allowed: lang:languageor, model:modleId, endpoint:url.");
                 }
             }
 
-
-            if (useBaseModel)
+            if (useEndpoint)
             {
-                Console.WriteLine("=============== Run speech recognition samples using base model. ===============");
-                SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(keySpeech, fileName).Wait();
+                Console.WriteLine("=============== Run speech recognoition samples by specifying endpoint. ===============");
+                SpeechRecognitionSamples.SpeechRecognitionByEndpointAsync(keySpeech, endpoint, fileName).Wait();
 
-                Console.WriteLine("=============== Run intent recognoition samples using base speech model. ===============");
-                IntentRecognitionSamples.IntentRecognitionBaseModelAsync(keySpeech, fileName).Wait();
+                Console.WriteLine("=============== Run intent recognoition samples by specifying endpoint. ===============");
+                IntentRecognitionSamples.IntentRecognitionByEndpointAsync(keySpeech, endpoint, fileName).Wait();
             }
             else
             {
-                Console.WriteLine("=============== Run speech recognition samples using customized model. ===============");
-                SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(keySpeech, modelId, fileName).Wait();
+                if (useBaseModel)
+                {
+                    Console.WriteLine("=============== Run speech recognition samples using base model. ===============");
+                    SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(keySpeech, fileName).Wait();
 
-                Console.WriteLine("=============== Run intent recognoition samples using customozed speech model. ===============");
-                IntentRecognitionSamples.IntentRecognitionCustomizedModelAsync(keySpeech, modelId, fileName).Wait();
+                    Console.WriteLine("=============== Run intent recognoition samples using base speech model. ===============");
+                    IntentRecognitionSamples.IntentRecognitionBaseModelAsync(keySpeech, fileName).Wait();
+                }
+                else
+                {
+                    Console.WriteLine("=============== Run speech recognition samples using customized model. ===============");
+                    SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(keySpeech, modelId, fileName).Wait();
+
+                    Console.WriteLine("=============== Run intent recognoition samples using customozed speech model. ===============");
+                    IntentRecognitionSamples.IntentRecognitionCustomizedModelAsync(keySpeech, modelId, fileName).Wait();
+                }
             }
         }
     }

@@ -184,19 +184,19 @@ void Connection::Impl::Validate()
 string Connection::Impl::ConstructConnectionUrl() 
 {
     auto recoMode = static_cast<underlying_type_t<RecognitionMode>>(m_config.m_recoMode);
-
     ostringstream oss;
+
     oss << g_protocol;
     switch (m_config.m_endpoint) 
     {
     case EndpointType::BingSpeech:
-        oss << g_bingSpeechHostname 
+        oss << g_bingSpeechHostname
             << g_pathPrefix 
             << g_recoModeStrings[recoMode]
             << g_pathSuffix;
         break;
     case EndpointType::Cris:
-        oss << m_config.m_modelId 
+        oss << m_config.m_modelId
             << g_CRISHostname 
             << g_pathPrefix 
             << g_recoModeStrings[recoMode] 
@@ -206,7 +206,8 @@ string Connection::Impl::ConstructConnectionUrl()
         oss << g_CDSDKEndpoint;
         break;
     case EndpointType::Custom:
-        oss << m_config.m_endpointUrl;
+        // Just returns what user passes.
+        return m_config.m_endpointUrl;
         break;
     default:
         throw invalid_argument("Unknown endpoint type.");
