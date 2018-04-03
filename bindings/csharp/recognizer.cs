@@ -16,6 +16,29 @@ namespace Carbon.Recognition
         /// <summary>
         /// Defines event handler for session events, e.g. SessionStarted/Stopped, SoundStarted/Stopped.
         /// </summary>
+        /// <example>
+        /// Create a speech recognizer, setup an event handler for session events
+        /// <code>
+        /// static void MySessionEventHandler(object sender, SpeechSessionEventArgs e)
+        /// {
+        ///    Console.WriteLine(String.Format("Speech recogniton: session event: {0} ", e.ToString()));
+        /// }
+        ///
+        /// static void SpeechRecognizerSample()
+        /// {
+        ///   SpeechRecognizer reco = factory.CreateSpeechRecognizer("audioFileName");
+        ///
+        ///   reco.OnSessionEvent += MySessionEventHandler;
+        ///
+        ///   // Starts recognition.
+        ///   var result = await reco.RecognizeAsync();
+        ///
+        ///   reco.OnSessionEvent -= MySessionEventHandler;
+        ///  
+        ///   Console.WriteLine("Speech Recognition: Recognition result: " + result);
+        /// }
+        /// </code>
+        /// </example>
         public event EventHandler<SessionEventArgs> OnSessionEvent;
 
         internal Recognizer()
