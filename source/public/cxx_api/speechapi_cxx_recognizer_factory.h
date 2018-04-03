@@ -125,6 +125,13 @@ private:
             return std::make_shared<Speech::SpeechRecognizer>(hreco); 
         }
 
+        virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer(const std::wstring& language) override
+        {
+            SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
+            SPX_THROW_ON_FAIL(::RecognizerFactory_CreateSpeechRecognizer_With_Language(SPXHANDLE_DEFAULT, &hreco, language.c_str()));
+            return std::make_shared<Speech::SpeechRecognizer>(hreco);
+        }
+
         virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizer() override
         {
             SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
@@ -135,16 +142,17 @@ private:
 
         // --- IDefaultRecognizerFactory overrides ---
 
-        virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer(const std::wstring& language)
-        {
-            UNUSED(language);
-            throw SPXERR_NOT_IMPL;
-        }
-
         virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName)
         {
             SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
             SPX_THROW_ON_FAIL(::RecognizerFactory_CreateSpeechRecognizer_With_FileInput(SPXHANDLE_DEFAULT, &hreco, fileName.c_str()));
+            return std::make_shared<Speech::SpeechRecognizer>(hreco);
+        }
+
+        virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language)
+        {
+            SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
+            SPX_THROW_ON_FAIL(::RecognizerFactory_CreateSpeechRecognizer_With_FileInputAndLanguage(SPXHANDLE_DEFAULT, &hreco, language.c_str(), fileName.c_str()));
             return std::make_shared<Speech::SpeechRecognizer>(hreco);
         }
 
@@ -208,13 +216,6 @@ private:
             SPX_THROW_ON_FAIL(::RecognizerFactory_CreateSpeechRecognizer_With_Stream(SPXHANDLE_DEFAULT, &hreco, (::SpeechApi_AudioInputStream*)audioInputStream2));
             return std::make_shared<Speech::SpeechRecognizer>(hreco);
         };
-
-        virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language)
-        {
-            UNUSED(language);
-            UNUSED(fileName);
-            throw SPXERR_NOT_IMPL;
-        }
 
         virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizer(const std::wstring& language)
         {

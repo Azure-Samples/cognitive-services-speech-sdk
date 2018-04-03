@@ -25,11 +25,11 @@ public:
 
     // --- ISpxRecognizerFactory
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer() override;
-    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream*audioInputStream) override;
+    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream) override;
+    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language) override;
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(bool passiveListeningEnabled) override { UNUSED(passiveListeningEnabled); throw SPXERR_NOT_IMPL; }
-    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language) override { UNUSED(language);  throw SPXERR_NOT_IMPL; }
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName) override;
-    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) override { UNUSED(fileName); UNUSED(language); throw SPXERR_NOT_IMPL; }
+    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) override;
 
     std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer() override;
     std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer(bool passiveListeningEnabled) override { UNUSED(passiveListeningEnabled); throw SPXERR_NOT_IMPL; }
@@ -45,8 +45,7 @@ public:
 
 protected:
 
-    std::shared_ptr<ISpxRecognizer> CreateRecognizerInternal(const char* sessionClassName, const char* recognizerClassName);
-    std::shared_ptr<ISpxRecognizer> CreateRecognizerWithFileInputInternal(const std::wstring& fileName, const char* sessionClassName, const char* recognizerClassName);
+    std::shared_ptr<ISpxRecognizer> CreateRecognizerInternal(const char* sessionClassName, const char* recognizerClassName, wchar_t const* fileName = nullptr, wchar_t const* language = nullptr);
 };
 
 

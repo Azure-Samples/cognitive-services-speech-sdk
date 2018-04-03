@@ -1527,6 +1527,11 @@ void CarbonTestConsole::RunSample(const std::wstring& strSampleName)
         ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
         Sample_HelloWorld_Subscription_With_CRIS();
     }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"helloworld french") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        Sample_HelloWorld_Language(L"fr-fr");
+    }
     else
     {
         ConsoleWriteLine(L"\nUnknown sample: '%ls'.\n", strSampleName.c_str());

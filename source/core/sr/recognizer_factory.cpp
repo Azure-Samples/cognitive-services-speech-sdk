@@ -14,10 +14,22 @@ std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateSpeechRecognizer()
     return factory->CreateSpeechRecognizer();
 }
 
+std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateSpeechRecognizer(const std::wstring& language)
+{
+    auto factory = GetDefaultFactory();
+    return factory->CreateSpeechRecognizer(language);
+}
+
 std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateSpeechRecognizerWithFileInput(const std::wstring& fileName)
 {
     auto factory = GetDefaultFactory();
     return factory->CreateSpeechRecognizerWithFileInput(fileName);
+}
+
+std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language)
+{
+    auto factory = GetDefaultFactory();
+    return factory->CreateSpeechRecognizerWithFileInput(fileName, language);
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateIntentRecognizer() 

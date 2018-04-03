@@ -123,3 +123,13 @@ void CarbonTestConsole::Sample_HelloWorld_Subscription_With_CRIS()
         ConsoleWriteLine(L"You said:\n\n    '%ls'", result->Text.c_str());
     }
 }
+
+void CarbonTestConsole::Sample_HelloWorld_Language(const wchar_t* language)
+{
+    auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizer(language);
+
+    ConsoleWriteLine(L"Say something...");
+    auto result = recognizer->RecognizeAsync().get();
+
+    ConsoleWriteLine(L"You said:\n\n    '%ls'", result->Text.c_str());
+}

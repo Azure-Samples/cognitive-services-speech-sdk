@@ -13,11 +13,10 @@ public:
 
     static std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer();
     static std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream *stream);
-    static std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(bool passiveListeningEnabled) { UNUSED(passiveListeningEnabled); throw SPXERR_NOT_IMPL; }
-    static std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language) { UNUSED(language); throw SPXERR_NOT_IMPL; }
+    static std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language);
     static std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName);
-    static std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) { UNUSED(fileName); UNUSED(language); throw SPXERR_NOT_IMPL; }
-
+    static std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language);
+    
     static std::shared_ptr<ISpxRecognizer> CreateDictationRecognizer() { throw SPXERR_NOT_IMPL; }
     static std::shared_ptr<ISpxRecognizer> CreateDictationRecognizer(bool passiveListeningEnabled) { UNUSED(passiveListeningEnabled);  throw SPXERR_NOT_IMPL; }
     static std::shared_ptr<ISpxRecognizer> CreateDictationRecognizer(const std::wstring& language) { UNUSED(language); throw SPXERR_NOT_IMPL; }

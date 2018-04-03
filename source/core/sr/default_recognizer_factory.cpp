@@ -10,6 +10,7 @@
 #include "create_object_helpers.h"
 #include "default_recognizer_factory.h"
 #include "site_helpers.h"
+#include "named_properties_constants.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -20,9 +21,19 @@ std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateSpeechRecogn
     return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxRecognizer");
 }
 
+std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateSpeechRecognizer(const std::wstring& language)
+{
+    return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxRecognizer", nullptr, language.c_str());
+}
+
 std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateSpeechRecognizerWithFileInput(const std::wstring& fileName)
 {
-    return CreateRecognizerWithFileInputInternal(fileName, "CSpxAudioStreamSession", "CSpxRecognizer");
+    return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxRecognizer", fileName.c_str());
+}
+
+std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language)
+{
+    return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxRecognizer", fileName.c_str(), language.c_str());
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateIntentRecognizer()
@@ -32,28 +43,7 @@ std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateIntentRecogn
 
 std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateIntentRecognizerWithFileInput(const std::wstring& fileName)
 {
-    return CreateRecognizerWithFileInputInternal(fileName, "CSpxAudioStreamSession", "CSpxIntentRecognizer");
-}
-
-std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateRecognizerInternal(const char* sessionClassName, const char* recognizerClassName)
-{
-    // Create the session
-    auto factoryAsSite = SpxSiteFromThis(this);
-    auto session = SpxCreateObjectWithSite<ISpxSession>(sessionClassName, factoryAsSite);
-
-    // Initialize the session
-    auto sessionInit = std::dynamic_pointer_cast<ISpxAudioStreamSessionInit>(session);
-    sessionInit->InitFromMicrophone();
-
-    // Create the recognizer
-    auto sessionAsSite = std::dynamic_pointer_cast<ISpxSite>(session);
-    auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>(recognizerClassName, sessionAsSite);
-
-    // Add the recognizer to the session
-    session->AddRecognizer(recognizer);
-
-    // We're done!
-    return recognizer;
+    return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxIntentRecognizer", fileName.c_str());
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream)
@@ -77,7 +67,10 @@ std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateSpeechRecogn
     return recognizer;
 }
 
-std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateRecognizerWithFileInputInternal(const std::wstring& fileName, const char* sessionClassName, const char* recognizerClassName)
+std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateRecognizerInternal(const char* sessionClassName, 
+    const char* recognizerClassName, 
+    wchar_t const* fileName,
+    wchar_t const* language)
 {
     // Create the session
     auto factoryAsSite = SpxSiteFromThis(this);
@@ -85,11 +78,25 @@ std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateRecognizerWi
 
     // Initialize the session
     auto sessionInit = std::dynamic_pointer_cast<ISpxAudioStreamSessionInit>(session);
-    sessionInit->InitFromFile(fileName.c_str());
+    if (fileName != nullptr)
+    {
+        sessionInit->InitFromFile(fileName);
+    }
+    else
+    {
+        sessionInit->InitFromMicrophone();
+    }
 
     // Create the recognizer
     auto sessionAsSite = std::dynamic_pointer_cast<ISpxSite>(session);
     auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>(recognizerClassName, sessionAsSite);
+
+    // Set language if we have one. Default will be set to en-US
+    if (language != nullptr)
+    {
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(sessionAsSite);
+        namedProperties->SetStringValue(g_SPEECH_RecoLanguage, language);
+    }
 
     // Add the recognizer to the session
     session->AddRecognizer(recognizer);

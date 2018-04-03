@@ -93,11 +93,16 @@ SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_Stream(SPXRECOFACTORYHANDLE
 
 SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_Language(SPXRECOFACTORYHANDLE hrecofactory, SPXRECOHANDLE* phreco, const wchar_t* pszLanguage)
 {
-    SPX_IFTRUE_RETURN_HR(hrecofactory != SPXHANDLE_DEFAULT, SPXERR_INVALID_ARG);
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        SPX_IFTRUE_THROW_HR(hrecofactory != SPXHANDLE_DEFAULT, SPXERR_INVALID_ARG);
+        *phreco = SPXHANDLE_INVALID;
 
-    UNUSED(phreco);
-    UNUSED(pszLanguage);
-    return SPXERR_NOT_IMPL;
+        auto recognizer = CSpxRecognizerFactory::CreateSpeechRecognizer(pszLanguage);
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        *phreco = recohandles->TrackHandle(recognizer);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_FileInput(SPXRECOFACTORYHANDLE hrecofactory, SPXRECOHANDLE* phreco, const wchar_t* pszFileName)
@@ -114,14 +119,18 @@ SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_FileInput(SPXRECOFACTORYHAN
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI RecognizerFactory_CreateSpeechRecognizer(SPXRECOFACTORYHANDLE hrecofactory, SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName)
+SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_FileInputAndLanguage(SPXRECOFACTORYHANDLE hrecofactory, SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName)
 {
-    SPX_IFTRUE_RETURN_HR(hrecofactory != SPXHANDLE_DEFAULT, SPXERR_INVALID_ARG);
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        SPX_IFTRUE_THROW_HR(hrecofactory != SPXHANDLE_DEFAULT, SPXERR_INVALID_ARG);
+        *phreco = SPXHANDLE_INVALID;
 
-    UNUSED(phreco);
-    UNUSED(pszLanguage);
-    UNUSED(pszFileName);
-    return SPXERR_NOT_IMPL;
+        auto recognizer = CSpxRecognizerFactory::CreateSpeechRecognizerWithFileInput(pszFileName, pszLanguage);
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        *phreco = recohandles->TrackHandle(recognizer);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 SPXAPI RecognizerFactory_CreateIntentRecognizer_With_Defaults(SPXRECOFACTORYHANDLE hrecofactory, SPXRECOHANDLE* phreco)

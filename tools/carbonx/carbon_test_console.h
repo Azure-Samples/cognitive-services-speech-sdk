@@ -201,6 +201,7 @@ private:
     void Sample_HelloWorld_Intent(const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId);
     void Sample_HelloWorld_Subscription();
     void Sample_HelloWorld_Subscription_With_CRIS();
+    void Sample_HelloWorld_Language(const wchar_t* language);
 
 
 private:
