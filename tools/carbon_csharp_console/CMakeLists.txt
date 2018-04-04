@@ -21,7 +21,8 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     FOLDER tools
 )
-set_target_properties(${CSHARP_LIB} PROPERTIES
-   VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.6.1"
-)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+   VS_DOTNET_REFERENCES "System")
+
 endif()

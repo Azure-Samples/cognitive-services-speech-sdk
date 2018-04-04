@@ -6,6 +6,7 @@
 //
 
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace CarbonSamples
@@ -14,71 +15,98 @@ namespace CarbonSamples
     {
         static void Main(string[] args)
         {
-            if (args.Length < 1)
+            if (args.Length < 2)
             {
-                Console.WriteLine("Usage: carbon_csharp_console speechKey mic|file model:modelId|lang:language");
+                Console.WriteLine("Usage: carbon_csharp_console mode(speech|intent) key audioinput(mic|filename) model:modelId|lang:language|endpoint:url");
                 Environment.Exit(1);
             }
 
-            var keySpeech = args[0];
+            string keySpeech = null;
             string fileName = null;
             bool useBaseModel = true;
             bool useEndpoint = false;
+            bool isSpeechReco = false;
+            bool isIntentReco = false;
             string lang = null;
             string modelId = null;
             string endpoint = null;
 
             if (args.Length >= 2)
             {
-                if (string.Compare(args[1], "mic", true) == 0)
+                var modeStr = args[0];
+                if (string.Compare(modeStr, "speech", true) == 0)
+                {
+                    isSpeechReco = true;
+                }
+                else if (string.Compare(modeStr, "intent", true) == 0)
+                {
+                    isIntentReco = true;
+                }
+                else
+                {
+                    throw new InvalidOperationException("The specified mode is not supported: " + modeStr);
+                }
+
+                keySpeech = args[1];
+            }
+
+            Debug.Assert(isSpeechReco || isIntentReco);
+            Debug.Assert(keySpeech != null);
+
+            if (args.Length >= 3)
+            {
+                var audioInputStr = args[2];
+
+                if (string.Compare(audioInputStr, "mic", true) == 0)
                 {
                     fileName = null;
                 }
                 else
                 {
-                    fileName = args[1];
+                    fileName = audioInputStr;
                 }
             }
 
-            if (args.Length >= 3)
+            if (args.Length >= 4)
             {
-                if (args[2].ToLower().StartsWith("lang:"))
+                var paraStr = args[3];
+                if (paraStr.ToLower().StartsWith("lang:"))
                 {
                     useBaseModel = true;
-                    var index = args[2].IndexOf(':');
+                    var index = paraStr.IndexOf(':');
                     if (index == -1)
                     {
                         throw new IndexOutOfRangeException("no language is specified.");
                     }
-                    lang = args[2].Substring(index + 1);
+                    lang = paraStr.Substring(index + 1);
                     if (String.IsNullOrEmpty(lang))
                     {
                         throw new IndexOutOfRangeException("no language is specified.");
                     }
                 }
-                else if (args[2].ToLower().StartsWith("model:"))
+                else if (paraStr.ToLower().StartsWith("model:"))
                 {
                     useBaseModel = false;
-                    var index = args[2].IndexOf(':');
+                    var index = paraStr.IndexOf(':');
                     if (index == -1)
                     {
                         throw new IndexOutOfRangeException("no model is specified.");
                     }
-                    modelId = args[2].Substring(index + 1);
+                    modelId = paraStr.Substring(index + 1);
                     if (String.IsNullOrEmpty(modelId))
                     {
                         throw new IndexOutOfRangeException("no model is specified.");
                     }
                 }
-                else if (args[2].ToLower().StartsWith("endpoint:"))
+                else if (paraStr.ToLower().StartsWith("endpoint:"))
                 {
                     useEndpoint = true;
-                    var index = args[2].IndexOf(':');
+                    var index = paraStr.IndexOf(':');
                     if (index == -1)
                     {
                         throw new IndexOutOfRangeException("no endpoint is specified.");
                     }
-                    endpoint = args[2].Substring(index + 1);
+                    endpoint = paraStr.Substring(index + 1);
                     if (String.IsNullOrEmpty(endpoint))
                     {
                         throw new IndexOutOfRangeException("no endpoint is specified.");
@@ -90,31 +118,46 @@ namespace CarbonSamples
                 }
             }
 
-            if (useEndpoint)
+            if (isSpeechReco)
             {
-                Console.WriteLine("=============== Run speech recognoition samples by specifying endpoint. ===============");
-                SpeechRecognitionSamples.SpeechRecognitionByEndpointAsync(keySpeech, endpoint, fileName).Wait();
-
-                Console.WriteLine("=============== Run intent recognoition samples by specifying endpoint. ===============");
-                IntentRecognitionSamples.IntentRecognitionByEndpointAsync(keySpeech, endpoint, fileName).Wait();
-            }
-            else
-            {
-                if (useBaseModel)
+                if (useEndpoint)
                 {
-                    Console.WriteLine("=============== Run speech recognition samples using base model. ===============");
-                    SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(keySpeech, fileName).Wait();
-
-                    Console.WriteLine("=============== Run intent recognoition samples using base speech model. ===============");
-                    IntentRecognitionSamples.IntentRecognitionBaseModelAsync(keySpeech, fileName).Wait();
+                    Console.WriteLine("=============== Run speech recognoition samples by specifying endpoint. ===============");
+                    SpeechRecognitionSamples.SpeechRecognitionByEndpointAsync(keySpeech, endpoint, fileName).Wait();
                 }
                 else
                 {
-                    Console.WriteLine("=============== Run speech recognition samples using customized model. ===============");
-                    SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(keySpeech, modelId, fileName).Wait();
-
-                    Console.WriteLine("=============== Run intent recognoition samples using customozed speech model. ===============");
-                    IntentRecognitionSamples.IntentRecognitionCustomizedModelAsync(keySpeech, modelId, fileName).Wait();
+                    if (useBaseModel)
+                    {
+                        Console.WriteLine("=============== Run speech recognition samples using base model. ===============");
+                        SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(keySpeech, fileName).Wait();
+                    }
+                    else
+                    {
+                        Console.WriteLine("=============== Run speech recognition samples using customized model. ===============");
+                        SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(keySpeech, modelId, fileName).Wait();
+                    }
+                }
+            }
+            else if (isIntentReco)
+            {
+                if (useEndpoint)
+                {
+                    Console.WriteLine("=============== Run intent recognoition samples by specifying endpoint. ===============");
+                    IntentRecognitionSamples.IntentRecognitionByEndpointAsync(keySpeech, endpoint, fileName).Wait();
+                }
+                else
+                {
+                    if (useBaseModel)
+                    {
+                        Console.WriteLine("=============== Run intent recognoition samples using base speech model. ===============");
+                        IntentRecognitionSamples.IntentRecognitionBaseModelAsync(keySpeech, fileName).Wait();
+                    }
+                    else
+                    {
+                        Console.WriteLine("=============== Run intent recognoition samples using customozed speech model. ===============");
+                        IntentRecognitionSamples.IntentRecognitionCustomizedModelAsync(keySpeech, modelId, fileName).Wait();
+                    }
                 }
             }
         }
