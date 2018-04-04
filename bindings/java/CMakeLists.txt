@@ -21,7 +21,7 @@ if(MSVC)
      # Force to always compile with W4
      set(CMAKE_CXX_FLAGS "/W3")
 elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-     set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -Wno-unused-parameter -Wno-strict-aliasing -fPIC")
+     set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -fno-strict-aliasing -fPIC")
 endif()
 
 set(JAVA_BINDINGS ${PROJECT_NAME}_bindings)

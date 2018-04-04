@@ -50,7 +50,7 @@ md \carbon\build
 cd \carbon\build
 
 "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
-cmake  -G "NMake Makefiles" -DCMAKE_SYSTEM_NAME=Android  -DCMAKE_ANDROID_NDK=a:/android-ndk-r16b    -DCMAKE_SYSTEM_VERSION=26 .. -DCMAKE_ANDROID_STL_TYPE=c++_shared -DOPENSSL_ROOT_DIR=a:\Carbon\external\openssl\_install  -DCURL_LIBRARY=a:\Carbon\external\curl\_install\lib\libcurl.so -DCURL_INCLUDE_DIR=a:\Carbon\external\curl\_install\include
+cmake  -G "NMake Makefiles" -Duse_default_uuid=ON  -DCMAKE_SYSTEM_NAME=Android  -DCMAKE_ANDROID_NDK=a:/android-ndk-r16b    -DCMAKE_SYSTEM_VERSION=26 .. -DCMAKE_ANDROID_STL_TYPE=c++_shared -DOPENSSL_ROOT_DIR=a:\Carbon\external\openssl\_install  -DCURL_LIBRARY=a:\Carbon\external\curl\_install\lib\libcurl.so -DCURL_INCLUDE_DIR=a:\Carbon\external\curl\_install\include
 
 
 rem apply a patch on azure-c-shared-utility with roobo changes
@@ -86,7 +86,7 @@ rem md build&&cd build
 rem cmake -G "NMake Makefiles" ..
 
 rem setup ndk compile of Carbon
-cmake  -G "NMake Makefiles" -DCMAKE_SYSTEM_NAME=Android  -DCMAKE_ANDROID_NDK=a:/android-ndk-r16b    -DCMAKE_SYSTEM_VERSION=26 .. -DCMAKE_ANDROID_STL_TYPE=c++_shared -DJAVA_AWT_LIBRARY=a:\android-ndk-r16b\sysroot\usr\include\  -DOPENSSL_ROOT_DIR=a:\Carbon\external\openssl\_install  -DCURL_LIBRARY=a:\Carbon\external\curl\_install\lib\libcurl.so -DCURL_INCLUDE_DIR=a:\Carbon\external\curl\_install\include
+cmake  -G "NMake Makefiles" -Duse_default_uuid=ON  -DCMAKE_SYSTEM_NAME=Android  -DCMAKE_ANDROID_NDK=a:/android-ndk-r16b    -DCMAKE_SYSTEM_VERSION=26 .. -DCMAKE_ANDROID_STL_TYPE=c++_shared -DJAVA_AWT_LIBRARY=a:\android-ndk-r16b\sysroot\usr\include\  -DOPENSSL_ROOT_DIR=a:\Carbon\external\openssl\_install  -DCURL_LIBRARY=a:\Carbon\external\curl\_install\lib\libcurl.so -DCURL_INCLUDE_DIR=a:\Carbon\external\curl\_install\include
 nmake
 
 

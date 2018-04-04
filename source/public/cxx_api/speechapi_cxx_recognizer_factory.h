@@ -33,8 +33,8 @@ public:
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName) = 0;
     virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName) = 0;
 
-    virtual void SetSubscriptionKey(const wchar_t* value) = 0;
-    virtual void SetSpeechEndpoint(const wchar_t* value) = 0;
+    virtual void SetSubscriptionKey(const std::wstring& value) = 0;
+    virtual void SetSpeechEndpoint(const std::wstring& value) = 0;
 
     RecognizerFactoryParameterCollection& Parameters;
 
@@ -69,8 +69,8 @@ public:
     virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage) = 0;
     virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::wstring& targetLanguage) = 0;
 
-    virtual void SetSubscriptionKey(const wchar_t* value) = 0;
-    virtual void SetSpeechEndpoint(const wchar_t* value) = 0;
+    virtual void SetSubscriptionKey(const std::wstring& value) = 0;
+    virtual void SetSpeechEndpoint(const std::wstring& value) = 0;
 
 
 private:
@@ -252,16 +252,15 @@ private:
             throw SPXERR_NOT_IMPL;
         }
 
-        virtual void SetSubscriptionKey(const wchar_t* value)
+        virtual void SetSubscriptionKey(const std::wstring& value)
         {
-            Parameters[FactoryParameter::SpeechSubscriptionKey] = value;
+            Parameters[FactoryParameter::SpeechSubscriptionKey] = value.c_str();
         }
 
-        virtual void SetSpeechEndpoint(const wchar_t* value)
+        virtual void SetSpeechEndpoint(const std::wstring& value)
         {
-            Parameters[FactoryParameter::SpeechEndpoint] = value;
+            Parameters[FactoryParameter::SpeechEndpoint] = value.c_str();
         }
-
 
     private:
 
@@ -392,14 +391,14 @@ public:
         static bool GetBool(enum FactoryParameter parameter, bool defaultValue = false) { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, parameter).GetBool(defaultValue); }
     };
 
-    static void SetSubscriptionKey(const wchar_t* value)
+    static void SetSubscriptionKey(const std::wstring& value)
     {
-        Parameters::SetString(FactoryParameter::SpeechSubscriptionKey, value);
+        Parameters::SetString(FactoryParameter::SpeechSubscriptionKey, value.c_str());
     }
 
-    static void SetSpeechEndpoint(const wchar_t* value)
+    static void SetSpeechEndpoint(const std::wstring& value)
     {
-        Parameters::SetString(FactoryParameter::SpeechEndpoint, value);
+        Parameters::SetString(FactoryParameter::SpeechEndpoint, value.c_str());
     }
 
     DefaultRecognizerFactory() = delete;

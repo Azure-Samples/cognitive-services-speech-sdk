@@ -5,6 +5,10 @@
 // carbon_test_console.cpp: Definitions for the CarbonTestConsole tool C++ class
 //
 
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include "stdafx.h"
 #include "carbon_test_console.h"
 #include "speechapi_c.h"
@@ -1302,7 +1306,7 @@ void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
 
     if (!pconsoleArgs->m_strSubscriptionKey.empty())
     {
-        DefaultRecognizerFactory::SetSubscriptionKey(pconsoleArgs->m_strSubscriptionKey.c_str());
+        DefaultRecognizerFactory::SetSubscriptionKey(pconsoleArgs->m_strSubscriptionKey);
     }
 
     if (!pconsoleArgs->m_strUseRecoEngineProperty.empty())
