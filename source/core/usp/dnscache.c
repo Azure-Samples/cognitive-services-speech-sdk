@@ -94,6 +94,7 @@ static int DnsWorker(void *args)
         while (NULL != (list_item = singlylinkedlist_get_head_item(ctx->entryList)))
         {
             DNS_REQUEST* req = (DNS_REQUEST*)singlylinkedlist_item_get_value(list_item);
+            singlylinkedlist_remove(ctx->entryList, list_item);
             // This is the only thread that sets the current request.
             assert(ctx->currentRequest == NULL);
             ctx->currentRequest = req;
@@ -116,7 +117,6 @@ static int DnsWorker(void *args)
                 dns_cache_free_request(req);
             }
 
-            singlylinkedlist_remove(ctx->entryList, list_item);
         }
 
         if (ctx->flags & DNS_CTX_FLAG_SHUTDOWN)

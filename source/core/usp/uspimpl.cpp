@@ -90,6 +90,7 @@ void Connection::Impl::OnTelemetryData(const uint8_t* buffer, size_t bytesToWrit
 Connection::Impl::Impl(const Client& config)
     : m_config(config),
     m_connected(false),
+    m_haveWork(false),
     m_audioOffset(0),
     m_creationTime(telemetry_gettime())
 {
