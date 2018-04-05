@@ -20,9 +20,6 @@ function run_cxx_api_tests {
 
 set -e
 
-echo $# 
-echo $*
-
 [ $# -ne 6 ] && die "Usage: unit_tests binary_dir action(all|usp_tests|cxx_api_tests) keySpeech keyCris keyLuis keySkyman"
 
 BINARY_DIR=$1
