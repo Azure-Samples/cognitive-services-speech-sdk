@@ -8,42 +8,49 @@ function die {
 
 function run_test {
     echo "$1 recongition using base model:"
-    (set -x; $CARBON_CSHARP $1 "$KeySpeech" $AUDIO_FILE) || exit $?
+    (set -x; $CARBON_CSHARP $1 "$UserKeySpeech" $TEST_AUDIO_FILE) || exit $?
     echo -e "\n"
     
     echo "$1 recongition using CRIS model:"
-    (set -x; $CARBON_CSHARP $1 "$KeyCris" $AUDIO_FILE model:$MODEL_ID) || exit $?
+    (set -x; $CARBON_CSHARP $1 "$UserKeyCris" $TEST_AUDIO_FILE model:$TEST_MODEL_ID) || exit $?
     echo -e "\n"
 
     echo "$1 recongition using speech endpoint:"
-    (set -x; $CARBON_CSHARP $1 "$KeySpeech" $AUDIO_FILE endpoint:"$SPEECH_ENDPOINT") || exit $?
+    (set -x; $CARBON_CSHARP $1 "$UserKeySpeech" $TEST_AUDIO_FILE endpoint:"$TEST_SPEECH_ENDPOINT") || exit $?
     echo -e "\n"
     
     echo "$1 recongition using CRIS endpoint:"
-    (set -x; $CARBON_CSHARP $1 "$KeyCris" $AUDIO_FILE endpoint:"$CRIS_ENDPOINT") || exit $?
+    (set -x; $CARBON_CSHARP $1 "$UserKeyCris" $TEST_AUDIO_FILE endpoint:"$TEST_CRIS_ENDPOINT") || exit $?
     echo -e "\n"
 }
 
 set -e
 
+[ $# -ne 6 ] && die "Usage: e2e_carbon_csharp binary_dir action(all|speech|intent) keySpeech keyCris keyLuis keySkyman"
+
 BINARY_DIR=$1
-CARBON_CSHARP=$BINARY_DIR/carbon_csharp_console.exe
+CARBON_CSHARP=$BINARY_DIR/carbon_csharp_console
 
-[ "$AUDIO_FILE" = "" ] && die "No audio input file specified."
-[ "$MODEL_ID" = "" ] && die "No CRIS Model ID is specified."
-[ "$SPEECH_ENDPOINT" = "" ] && die "No endpoint is specified."
-[ "$CRIS_ENDPOINT" = "" ] && die "No endpoint is specified."
+[ "$TEST_AUDIO_FILE" = "" ] && die "No audio input file specified."
+[ "$TEST_MODEL_ID" = "" ] && die "No CRIS Model ID is specified."
+[ "$TEST_SPEECH_ENDPOINT" = "" ] && die "No endpoint is specified."
+[ "$TEST_CRIS_ENDPOINT" = "" ] && die "No endpoint is specified."
 
-KeySpeech=$3
-KeyCris=$4
-KeyLuis=$5
-KeySkyman=$6
+Action=$2
+UserKeySpeech=$3
+UserKeyCris=$4
+UserKeyLuis=$5
+UserKeySkyman=$6
 
-if [ "$2" = "all" ]; then
+if [ "$Action" = "all" ]; then
  run_test speech
  run_test intent
+elif [ "$Action" = "speech" ]; then
+ run_test speech
+elif [ "$Action" = "intent" ]; then
+ run_test intent
 else
- run_test $2
+    die "Unknow action: $Action"
 fi
 
 echo -e "\nDone\n"

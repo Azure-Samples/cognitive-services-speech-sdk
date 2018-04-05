@@ -2,33 +2,58 @@
 
 set -e
 
+[ $# -ne 5 ] && echo -e "Usage: e2e_uspconsole binary_dir keySpeech keyCris keyLuis keySkyman" && exit 1
+
 # TODO: use cmake (configure_file) to automatically configure bin dir.
 BINARY_DIR=$1
 USPCONSOLE=$BINARY_DIR/uspclientconsole
-AUDIO_FILE=whatstheweatherlike.wav
-SPEECH_SUB_KEY=$2
-CRIS_SUB_KEY=$3
-CRIS_MODEL_ID=77b4662f533f433bad8f7184f8107a1f
+
+[ "$TEST_AUDIO_FILE" = "" ] && die "No audio input file specified."
+[ "$TEST_MODEL_ID" = "" ] && die "No CRIS Model ID is specified."
+[ "$TEST_SPEECH_ENDPOINT" = "" ] && die "No endpoint is specified."
+[ "$TEST_CRIS_ENDPOINT" = "" ] && die "No endpoint is specified."
+
+UserKeySpeech=$2
+UserKeyCris=$3
+UserKeyLuis=$4
+UserKeySkyman=$5
 
 
 echo -e "\n Testing usp lib: \n"
 
-ARGS="audio $AUDIO_FILE false $SPEECH_SUB_KEY speech"
+ARGS="audio $TEST_AUDIO_FILE false"
 
-echo "Launching: "
-(set -x; $USPCONSOLE $ARGS interactive)
-echo -e "\n\n\n"
+echo "Testing speech base model in interactive mode:"
+(set -x; $USPCONSOLE $ARGS $UserKeySpeech speech interactive)
+echo -e "\n"
 
-echo "Launching: "
-(set -x; $USPCONSOLE $ARGS conversation en-us)
-echo -e "\n\n\n"
+echo "Testing speech base model in conversation mode:"
+(set -x; $USPCONSOLE $ARGS $UserKeySpeech speech conversation)
+echo -e "\n"
 
-echo "Launching: "
-(set -x; $USPCONSOLE $ARGS dictation en-us simple)
-echo -e "\n\n\n"
+echo "Testing speech base model in dictation mode:"
+(set -x; $USPCONSOLE $ARGS $UserKeySpeech speech dictation)
+echo -e "\n"
 
-echo "Launching: "
-(set -x; $USPCONSOLE audio $AUDIO_FILE false $CRIS_SUB_KEY cris interactive $CRIS_MODEL_ID)
-echo -e "\n\n\n"
+echo "Testing CRIS model in interactive mode:"
+(set -x; $USPCONSOLE $ARGS $UserKeyCris cris interactive $TEST_MODEL_ID)
+echo -e "\n"
+
+echo "Testing CRIS model in conversation mode:"
+(set -x; $USPCONSOLE $ARGS $UserKeyCris cris conversation $TEST_MODEL_ID)
+echo -e "\n"
+
+echo "Testing CRIS model in dictation mode:"
+(set -x; $USPCONSOLE $ARGS $UserKeyCris cris dictation $TEST_MODEL_ID)
+echo -e "\n"
+
+echo "Testing endpoint for speech model:"
+(set -x; $USPCONSOLE $ARGS $UserKeySpeech url $TEST_SPEECH_ENDPOINT)
+echo -e "\n"
+
+echo "Testing endpoint for CRIS model:"
+(set -x; $USPCONSOLE $ARGS $UserKeyCris url $TEST_CRIS_ENDPOINT)
+echo -e "\n"
+
 
 echo -e "\n Done\n"

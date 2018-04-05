@@ -1,0 +1,54 @@
+#!/bin/bash
+
+function die {
+    set +x
+    echo -e $1
+    exit 1
+}
+
+function run_usp_tests {
+    echo "Run usp tests."
+    (set -x; $USP_TESTS_EXE --keySpeech $UserKeySpeech || $USP_TESTS_EXE --keySpeech $UserKeySpeech || $USP_TESTS_EXE --keySpeech $UserKeySpeech)
+    echo -e "\n"
+}
+
+function run_cxx_api_tests {
+    echo "Run cxx_api tests"
+    (set -x; $CXX_API_TESTS_EXE --keySpeech $UserKeySpeech || $CXX_API_TESTS_EXE --keySpeech $UserKeySpeech || $CXX_API_TESTS_EXE --keySpeech $UserKeySpeech)
+    echo -e "\n"
+}
+
+set -e
+
+echo $# 
+echo $*
+
+[ $# -ne 6 ] && die "Usage: unit_tests binary_dir action(all|usp_tests|cxx_api_tests) keySpeech keyCris keyLuis keySkyman"
+
+BINARY_DIR=$1
+USP_TESTS_EXE=$BINARY_DIR/usp_tests
+CXX_API_TESTS_EXE=$BINARY_DIR/cxx_api_tests
+
+[ "$TEST_AUDIO_FILE" = "" ] && die "No audio input file specified."
+[ "$TEST_MODEL_ID" = "" ] && die "No CRIS Model ID is specified."
+[ "$TEST_SPEECH_ENDPOINT" = "" ] && die "No endpoint is specified."
+[ "$TEST_CRIS_ENDPOINT" = "" ] && die "No endpoint is specified."
+
+Action=$2
+UserKeySpeech=$3
+UserKeyCris=$4
+UserKeyLuis=$5
+UserKeySkyman=$6
+
+if [ "$Action" = "all" ]; then 
+    run_usp_tests
+    run_cxx_api_tests
+elif [ "$Action" = "usp_tests" ]; then
+    run_usp_tests
+elif [ "$Action" = "cxx_api_tests" ]; then
+    run_cxx_api_tests
+else 
+    die "Unknow action: $Action"
+fi
+
+echo -e "\nDone\n"
