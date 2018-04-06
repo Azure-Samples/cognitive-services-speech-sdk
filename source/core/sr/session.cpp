@@ -44,9 +44,14 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxSession::RecognizeAsync(
 
     std::packaged_task<std::shared_ptr<ISpxRecognitionResult>()> taskHack([=](){
 
+        // set the async waiting flag up-front, so that if there's an error callback invoked right after 
+        // the StartRecognizing() it would unset the flag, so that we don't have to wait for the timeout.
+        m_recoAsyncWaiting = true;
+
         this->StartRecognizing();
 
         auto result = this->WaitForRecognition();
+
         this->StopRecognizing();
 
         return result;
@@ -110,8 +115,6 @@ void CSpxSession::StopRecognizing()
 std::shared_ptr<ISpxRecognitionResult> CSpxSession::WaitForRecognition()
 {
     std::unique_lock<std::mutex> lock(m_mutex);
-
-    m_recoAsyncWaiting = true;
     m_cv.wait_for(lock, std::chrono::seconds(m_recoAsyncTimeout), [&] { return !m_recoAsyncWaiting; });
 
     if (m_recoAsyncResult == nullptr) // If we don't have a result, make a 'NoMatch' result

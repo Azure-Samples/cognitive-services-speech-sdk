@@ -52,7 +52,7 @@ SPXAPI_(bool) Recognizer_EventHandle_IsValid(SPXEVENTHANDLE hevent)
 
 SPXAPI Recognizer_EventHandle_Close(SPXEVENTHANDLE hevent)
 {
-    return Handle_IsValid<SPXEVENTHANDLE, ISpxRecognitionEventArgs>(hevent);
+    return Handle_Close<SPXEVENTHANDLE, ISpxRecognitionEventArgs>(hevent);
 }
 
 SPXAPI Recognizer_Enable(SPXRECOHANDLE hreco)

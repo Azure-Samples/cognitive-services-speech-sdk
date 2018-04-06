@@ -376,7 +376,8 @@ UspResult AudioResponseHandler(void* context, const char* path, uint8_t* buffer,
     (void)callback;
     (void)asyncContext;
 
-    USP::AudioStreamStartMsg msg = { ioBuffer };
+    USP::AudioStreamStartMsg msg;
+    msg.ioBuffer = ioBuffer;
     USP::Callbacks* uspContext = (USP::Callbacks*)context;
     uspContext->OnAudioStreamStart(msg);
 

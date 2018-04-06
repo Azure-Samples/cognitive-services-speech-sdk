@@ -48,23 +48,27 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
         DefaultRecognizerFactory::SetSubscriptionKey(keyW.c_str());
 
         auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizerWithFileInput(input_file);
-        recognizer->FinalResult.Connect(
-            [&](const SpeechRecognitionEventArgs& args) 
+
+        auto callback = [&](const SpeechRecognitionEventArgs& args)
         {
-                {
-                    UNUSED(args);
-                    unique_lock<mutex> lock(mtx);
-                    callback_invoked = true;
-                    cv.notify_one();
-                }
-                std::this_thread::sleep_for(std::chrono::milliseconds(300));
-        });
+            {
+                UNUSED(args);
+                unique_lock<mutex> lock(mtx);
+                callback_invoked = true;
+                cv.notify_one();
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        };
+
+        recognizer->FinalResult.Connect(callback);
+        recognizer->Canceled.Connect(callback); // Canceled is called if there are connection issues.
 
         auto result = recognizer->RecognizeAsync().get();
 
         {
             unique_lock<mutex> lock(mtx);
-            cv.wait(lock, [&] { return callback_invoked; });
+            cv.wait_for(lock, std::chrono::seconds(10), [&] { return callback_invoked; });
+            REQUIRE(callback_invoked);
         }
         recognizer.reset();
     }
@@ -72,8 +76,10 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
 
 TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 {
+    DefaultRecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-MOCK-UspRecoEngine", true);
+    DefaultRecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-MOCK-Microphone", true);
 
-     wstring input_file(L"whatstheweatherlike.wav");
+    wstring input_file(L"whatstheweatherlike.wav");
     REQUIRE(exists(input_file));
 
     mutex mtx;
@@ -135,9 +141,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         CHECK(callbackCounts[Callbacks::no_match] == 0);
     }
 
-    // The following tests failed in VSO Linux tests, disable it for now. 
-    // Logged as bug: https://msasg.visualstudio.com/Skyman/_workitems/edit/1195505
-    /*GIVEN("Mocks for UspRecoEngine and Microphone...")
+    GIVEN("Mocks for UspRecoEngine and Microphone...")
     {
         DefaultRecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-MOCK-UspRecoEngine", true);
         DefaultRecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-MOCK-Microphone", true);
@@ -176,5 +180,5 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
                 }
             }
         }
-    }*/
+    }
 }

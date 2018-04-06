@@ -28,6 +28,7 @@ public:
     void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text) override;
     void InitFinalResult(const wchar_t* resultId, const wchar_t* text) override;
     void InitNoMatch() override;
+    void InitError(const wchar_t* text) override;
 
     // --- ISpxIntentRecognitionResult ---
     std::wstring GetIntentId() override;

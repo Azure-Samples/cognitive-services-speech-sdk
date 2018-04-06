@@ -22,29 +22,19 @@ class SpeechRecognitionResult final : public RecognitionResult
 public:
 
     SpeechRecognitionResult(SPXRESULTHANDLE hresult) :
-        RecognitionResult(hresult, m_resultId, m_reason, m_text)
+        RecognitionResult(hresult)
     {
-        PopulateResultFields(hresult, &m_resultId, &m_reason, &m_text);
-        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%S; reason=0x%x; text=%S", __FUNCTION__, this, m_hresult, m_resultId.c_str(), m_reason, m_text.c_str());
-    };
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%S; reason=0x%x; text=%S", __FUNCTION__, this, Handle, ResultId.c_str(), Reason, Text.c_str());
+    }
 
     virtual ~SpeechRecognitionResult()
     {
-        SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hresult);
-    };
+        SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, Handle);
+    }
 
 
 private:
-
-    SpeechRecognitionResult() = delete;
-    SpeechRecognitionResult(SpeechRecognitionResult&&) = delete;
-    SpeechRecognitionResult(const SpeechRecognitionResult&) = delete;
-    SpeechRecognitionResult& operator=( SpeechRecognitionResult&&) = delete;
-    SpeechRecognitionResult& operator=(const SpeechRecognitionResult&) = delete;
-
-    std::wstring m_resultId;
-    enum Reason m_reason;
-    std::wstring m_text;
+    DISABLE_DEFAULT_CTORS(SpeechRecognitionResult);
 };
 
 

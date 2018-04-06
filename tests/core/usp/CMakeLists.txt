@@ -10,13 +10,13 @@ include_directories(${TEST_INCLUDE})
 set(SOURCES
     "${SRC_DIR}/main.cpp"
     "${SRC_DIR}/usp_test_case.cpp"
-    ${TEST_HEADERS}
     )
 
 source_group("Source Files" FILES ${SOURCES})
+source_group("Header Files" FILES ${TEST_HEADERS})
 
-add_executable(${PROJECT_NAME} ${SOURCES})
-target_link_libraries(${PROJECT_NAME} usp common)
+add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS})
+target_link_libraries(${PROJECT_NAME} usp common ${TEST_LIBS})
 
 if (NOT WIN32)
     find_package (Threads)

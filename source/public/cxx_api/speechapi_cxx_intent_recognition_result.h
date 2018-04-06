@@ -21,33 +21,22 @@ class IntentRecognitionResult final : public RecognitionResult
 public:
 
     IntentRecognitionResult(SPXRESULTHANDLE hresult) :
-        RecognitionResult(hresult, m_resultId, m_reason, m_text),
-        IntentId(m_intentId),
-        m_hresult(hresult)
+        RecognitionResult(hresult),
+        IntentId(m_intentId)
     {
-        PopulateResultFields(hresult, &m_resultId, &m_reason, &m_text);
         PopulateIntentFields(hresult, &m_intentId);
-        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%S; reason=0x%x; text=%S", __FUNCTION__, this, m_hresult, m_resultId.c_str(), m_reason, m_text.c_str());
-    };
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%S; reason=0x%x; text=%S", __FUNCTION__, this, Handle, ResultId.c_str(), Reason, Text.c_str());
+    }
 
     ~IntentRecognitionResult()
     {
-        SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hresult);
-
-        ::Recognizer_ResultHandle_Close(m_hresult);
-        m_hresult = SPXHANDLE_INVALID;
-    };
+        SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, Handle);
+    }
 
     const std::wstring& IntentId;
 
-
-protected:
-
-    IntentRecognitionResult() = delete;
-    IntentRecognitionResult(IntentRecognitionResult&&) = delete;
-    IntentRecognitionResult(const IntentRecognitionResult&) = delete;
-    IntentRecognitionResult& operator=(IntentRecognitionResult&&) = delete;
-    IntentRecognitionResult& operator=(const IntentRecognitionResult&) = delete;
+private:
+    DISABLE_DEFAULT_CTORS(IntentRecognitionResult);
 
     void PopulateIntentFields(SPXRESULTHANDLE hresult, std::wstring* pintentId)
     {
@@ -62,12 +51,6 @@ protected:
             *pintentId = sz;
         }
     }
-
-    SPXRESULTHANDLE m_hresult;
-
-    std::wstring m_resultId;
-    enum Reason m_reason;
-    std::wstring m_text;
 
     std::wstring m_intentId;
 };

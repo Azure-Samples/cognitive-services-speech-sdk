@@ -14,6 +14,15 @@ endforeach()
 
 set(TEST_HEADERS "${TEST_INCLUDE}/test_utils.h")
 
+set(TEST_LIBS)
+
+if(WIN32)
+    list(APPEND TEST_LIBS
+        Dbghelp.lib
+    )
+endif()
+
+
 add_subdirectory("${SRC_DIR}/core/audio")
 add_subdirectory("${SRC_DIR}/core/usp")
 add_subdirectory("${SRC_DIR}/public/cxx_api")

@@ -76,6 +76,7 @@ public:
 
     void StopTracking(Handle handle)
     {
+        std::unique_lock<std::mutex> lock(m_mutex);
         auto iterHandleMap = m_handleMap.find(handle);
         if (iterHandleMap == m_handleMap.end()) 
         {

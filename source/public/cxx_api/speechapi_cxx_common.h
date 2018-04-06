@@ -12,3 +12,14 @@
 #endif
 
 #define CARBON_NAMESPACE_ROOT   Carbon
+
+#define DISABLE_COPY_AND_MOVE(T)     \
+    T(const T&) = delete;            \
+    T& operator=(const T&) = delete; \
+    T(T&&) = delete;                 \
+    T& operator=(T&&) = delete
+
+#define DISABLE_DEFAULT_CTORS(T)     \
+    T() = delete;                    \
+    DISABLE_COPY_AND_MOVE(T)
+

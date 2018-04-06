@@ -8,6 +8,7 @@
 
 #define CATCH_CONFIG_RUNNER
 #include "catch.hpp"
+#include "test_utils.h"
 
 extern std::string g_keySpeech;
 extern std::string g_keyCRIS;
@@ -42,6 +43,8 @@ int main(int argc, char* argv[])
     int returnCode = session.applyCommandLine(argc, argv);
     if (returnCode != 0) // Indicates a command line error
         return returnCode;
+
+    add_signal_handlers();
 
     return session.run();
 }

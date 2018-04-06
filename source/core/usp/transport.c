@@ -462,26 +462,35 @@ static void OnWSOpened(void* context, WS_OPEN_RESULT open_result)
         request->state = TRANSPORT_STATE_CLOSED;
         metrics_transport_dropped();
 
-        // TODO: this whole thing is broken. HTTP status is not longer exposed outside of uws_client.
-        status = 0;
-        LogError("Wsio failed to open. wsio handle: 0x%x, status=%d, open_result=%d", request->ws.WSHandle, status, open_result);
-        metrics_transport_error(request->telemetry, request->connectionId, status);
-
-        switch (status)
+        if (open_result == WS_OPEN_ERROR_BAD_RESPONSE_STATUS)
         {
-        case 0: // no http response, assume general connection failure
-            err = TRANSPORT_ERROR_CONNECTION_FAILURE;
-            break;
+            // upgrade failed with a non-101 response code (which could be pretty much anything)
+            // and we don't have any way of figuring out the actual response code, pass it on as is.
+            err = TRANSPORT_ERROR_WS_OPEN_FAILED_WITH_BAD_RESPONSE_STATUS;
+        }
+        else 
+        {
+            // TODO: this whole thing is broken. HTTP status is not longer exposed outside of uws_client.
+            status = 0;
+            LogError("Wsio failed to open. wsio handle: 0x%x, status=%d, open_result=%d", request->ws.WSHandle, status, open_result);
+            metrics_transport_error(request->telemetry, request->connectionId, status);
 
-        case 401:
-        case 403:
-            err = TRANSPORT_ERROR_AUTHENTICATION;
-            break;
+            switch (status)
+            {
+            case 0: // no http response, assume general connection failure
+                err = TRANSPORT_ERROR_CONNECTION_FAILURE;
+                break;
 
-        default:
-            // TODO: Add socket level detection
-            err = TRANSPORT_ERROR_NONE;
-            break;
+            case 401:
+            case 403:
+                err = TRANSPORT_ERROR_AUTHENTICATION;
+                break;
+
+            default:
+                // TODO: Add socket level detection
+                err = TRANSPORT_ERROR_NONE;
+                break;
+            }
         }
 
         if (request->onTransportError)

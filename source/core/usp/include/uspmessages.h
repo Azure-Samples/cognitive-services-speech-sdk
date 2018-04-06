@@ -28,7 +28,7 @@ enum class RecognitionStatus : int
  */
 struct SpeechStartDetectedMsg
 {
-    OffsetType offset;
+    OffsetType offset { 0 };
 };
 
 /**
@@ -37,8 +37,8 @@ struct SpeechStartDetectedMsg
 struct SpeechHypothesisMsg
 {
     std::wstring text;
-    OffsetType offset;
-    DurationType duration;
+    OffsetType offset { 0 };
+    DurationType duration { 0 };
 };
 
 /**
@@ -46,10 +46,10 @@ struct SpeechHypothesisMsg
  */
 struct SpeechPhraseMsg
 {
-    RecognitionStatus recognitionStatus;
+    RecognitionStatus recognitionStatus { RecognitionStatus::Error };
     std::wstring displayText;
-    OffsetType offset;
-    DurationType duration;
+    OffsetType offset { 0 };
+    DurationType duration { 0 };
 };
 
 /**
@@ -58,8 +58,8 @@ struct SpeechPhraseMsg
 struct SpeechFragmentMsg
 {
     std::wstring text;
-    OffsetType offset;
-    DurationType duration;
+    OffsetType offset { 0 };
+    DurationType duration { 0 };
 };
 
 /**
@@ -67,7 +67,7 @@ struct SpeechFragmentMsg
  */
 struct SpeechEndDetectedMsg
 {
-    OffsetType offset;
+    OffsetType offset { 0 };
 };
 
 /**
@@ -78,7 +78,7 @@ struct AudioStreamStartMsg
     // Whenever a chunk in the audio stream is received, it is appended to this ioBuffer.
     // Reading in a data chunk of size 0, or checking the ioBuffer->hasCompleted flag indicates
     // that the buffer has finished receiving new data.
-    IOBUFFER* ioBuffer;
+    IOBUFFER* ioBuffer { nullptr };
 };
 
 /**

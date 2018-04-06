@@ -121,15 +121,9 @@ public:
 class RecognitionResult
 {
 private:
-
-    RecognitionResult() = delete;
-    RecognitionResult(RecognitionResult&&) = delete;
-    RecognitionResult(const RecognitionResult&) = delete;
-    RecognitionResult& operator=(RecognitionResult&&) = delete;
-    RecognitionResult& operator=(const RecognitionResult&) = delete;
+    DISABLE_DEFAULT_CTORS(RecognitionResult);
 
     ResultPropertyValueCollection m_properties;
-
 
 public:
 
@@ -141,7 +135,6 @@ public:
 
     const std::wstring& ResultId;
     const enum Reason& Reason;
-    
     const std::wstring& Text;
 
     ResultPropertyValueCollection& Properties;
@@ -149,14 +142,21 @@ public:
 
 protected:
 
-    RecognitionResult(SPXRESULTHANDLE hresult, const std::wstring& resultId, const enum Reason& reason, const std::wstring& text) :
+    RecognitionResult(SPXRESULTHANDLE hresult) :
         m_properties(hresult),
-        ResultId(resultId),
-        Reason(reason),
-        Text(text),
-        Properties(m_properties)
+        ResultId(m_resultId),
+        Reason(m_reason),
+        Text(m_text),
+        Properties(m_properties),
+        Handle(m_hresult),
+        m_hresult(hresult)
     {
-    };
+        PopulateResultFields(hresult, &m_resultId, &m_reason, &m_text);
+    }
+
+    const SPXRESULTHANDLE& Handle;
+
+private:
 
     void PopulateResultFields(SPXRESULTHANDLE hresult, std::wstring *presultId, enum Reason* preason, std::wstring* ptext)
     {
@@ -197,6 +197,10 @@ protected:
     };
 
     SPXRESULTHANDLE m_hresult;
+
+    std::wstring m_resultId;
+    enum Reason m_reason;
+    std::wstring m_text;
 };
 
 

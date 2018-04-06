@@ -90,6 +90,7 @@ private:
     std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text) override;
     std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, const wchar_t* text) override;
     std::shared_ptr<ISpxRecognitionResult> CreateNoMatchResult() override;
+    std::shared_ptr<ISpxRecognitionResult> CreateErrorResult(const wchar_t* text) override;
 
     // -- ISpxEventArgsFactory
     std::shared_ptr<ISpxSessionEventArgs> CreateSessionEventArgs(const std::wstring& sessionId) override;

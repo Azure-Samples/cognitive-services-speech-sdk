@@ -425,6 +425,10 @@ void Connection::Impl::OnTransportError(TransportHandle transportHandle, Transpo
         callbacks.OnError("Authentication error (401/403).");
         break;
 
+    case TRANSPORT_ERROR_WS_OPEN_FAILED_WITH_BAD_RESPONSE_STATUS:
+        callbacks.OnError("WebSocket Upgrade failed with a bad response status.");
+        break;
+
     case TRANSPORT_ERROR_CONNECTION_FAILURE:
         callbacks.OnError("Connection failed (no connection to the remote host).");
         break;

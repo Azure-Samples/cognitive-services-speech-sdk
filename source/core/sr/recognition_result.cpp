@@ -64,6 +64,13 @@ void CSpxRecognitionResult::InitNoMatch()
     m_reason = Reason::NoMatch;
 }
 
+void CSpxRecognitionResult::InitError(const wchar_t* text)
+{
+    SPX_DBG_TRACE_FUNCTION();
+    m_reason = Reason::Canceled;
+    m_text = (text == nullptr) ? L"" : text;
+}
+
 std::wstring CSpxRecognitionResult::GetIntentId()
 {
     return m_intentId;

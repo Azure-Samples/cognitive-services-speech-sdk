@@ -93,8 +93,6 @@ private:
     ISpxRecoEngineAdapterSite::AdditionalMessagePayload_Type AdditionalMessagePayloadFrom(const USP::TurnStartMsg& message) { UNUSED(message); return nullptr; } // TODO: RobCh: Implement this
     ISpxRecoEngineAdapterSite::AdditionalMessagePayload_Type AdditionalMessagePayloadFrom(const USP::TurnEndMsg& message) { UNUSED(message); return nullptr; } // TODO: RobCh: Implement this
 
-    ISpxRecoEngineAdapterSite::ErrorPayload_Type ErrorPayloadFrom(const std::string& error) { UNUSED(error); return SPXERR_NOT_IMPL; } // TODO: RobCh: Implement this
-
     uint8_t* FormatBufferWriteBytes(uint8_t* buffer, const uint8_t* source, size_t bytes);
 
     uint8_t* FormatBufferWriteNumber(uint8_t* buffer, uint32_t number);

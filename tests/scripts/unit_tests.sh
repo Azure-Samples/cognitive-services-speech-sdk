@@ -8,13 +8,13 @@ function die {
 
 function run_usp_tests {
     echo "Run usp tests."
-    (set -x; $USP_TESTS_EXE --keySpeech $UserKeySpeech || $USP_TESTS_EXE --keySpeech $UserKeySpeech || $USP_TESTS_EXE --keySpeech $UserKeySpeech)
+    (set -x; $USP_TESTS_EXE --keySpeech $UserKeySpeech)
     echo -e "\n"
 }
 
 function run_cxx_api_tests {
     echo "Run cxx_api tests"
-    (set -x; $CXX_API_TESTS_EXE --keySpeech $UserKeySpeech || $CXX_API_TESTS_EXE --keySpeech $UserKeySpeech || $CXX_API_TESTS_EXE --keySpeech $UserKeySpeech)
+    (set -x; $CXX_API_TESTS_EXE --keySpeech $UserKeySpeech)
     echo -e "\n"
 }
 

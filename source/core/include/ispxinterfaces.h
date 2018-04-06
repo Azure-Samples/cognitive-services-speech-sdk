@@ -346,6 +346,7 @@ public:
     virtual void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text) = 0;
     virtual void InitFinalResult(const wchar_t* resultId, const wchar_t* text) = 0;
     virtual void InitNoMatch() = 0;
+    virtual void InitError(const wchar_t* text) = 0;
 };
 
 
@@ -481,8 +482,8 @@ public:
 
     using ResultPayload_Type = std::shared_ptr<ISpxRecognitionResult>;
     using AdditionalMessagePayload_Type = void*;
-    using ErrorPayload_Type = SPXHR;
-    
+    using ErrorPayload_Type = const std::string&;
+
     virtual void SpeechStartDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) = 0;
     virtual void SpeechEndDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) = 0;
 
@@ -507,6 +508,7 @@ public:
     virtual std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text) = 0;
     virtual std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, const wchar_t* text) = 0;
     virtual std::shared_ptr<ISpxRecognitionResult> CreateNoMatchResult() = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateErrorResult(const wchar_t* text) = 0;
 };
 
 

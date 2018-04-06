@@ -184,7 +184,6 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::WaitForRecognitio
     std::unique_lock<std::mutex> lock(m_mutex);
 
     SPX_DBG_TRACE_VERBOSE("Waiting for Recognition...");
-    m_recoAsyncWaiting = true;
     m_cv.wait_for(lock, std::chrono::seconds(m_recoAsyncTimeout), [&] { return !m_recoAsyncWaiting; });
     SPX_DBG_TRACE_VERBOSE("Waiting for Recognition... Done!");
 
@@ -308,9 +307,12 @@ void CSpxAudioStreamSession::AdditionalMessage(ISpxRecoEngineAdapter* adapter, u
 void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload)
 {
     UNUSED(adapter);
-    UNUSED(payload);
-    // TODO: RobCh: Next: Implement
-    // SPX_THROW_HR(SPXERR_NOT_IMPL);
+    if (m_recoAsyncWaiting)
+    {
+        auto factory = SpxQueryService<ISpxRecoResultFactory>(this);
+        auto error = factory->CreateErrorResult(PAL::ToWString(payload).c_str());
+        WaitForRecognition_Complete(error);
+    }
 }
 
 std::shared_ptr<ISpxSession> CSpxAudioStreamSession::GetDefaultSession()
@@ -344,6 +346,15 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateNoMatchResu
 
     auto initResult = std::dynamic_pointer_cast<ISpxRecognitionResultInit>(result);
     initResult->InitNoMatch();
+
+    return result;
+}
+
+std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateErrorResult(const wchar_t* text)
+{
+    auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
+
+    std::dynamic_pointer_cast<ISpxRecognitionResultInit>(result)->InitError(text);
 
     return result;
 }

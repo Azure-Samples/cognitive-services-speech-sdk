@@ -389,7 +389,7 @@ void CSpxUspRecoEngineAdapter::OnError(const std::string& error)
     SPX_DBG_TRACE_VERBOSE("Response: On Error: %s.\n", error.c_str());
     SPX_DBG_ASSERT(GetSite());
     auto site = GetSite();
-    site->Error(this, ErrorPayloadFrom(error));
+    site->Error(this, error);
     site->DoneProcessingAudio(this);
 }
 
