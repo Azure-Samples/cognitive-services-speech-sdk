@@ -69,17 +69,19 @@ fi
 
 SRCINC="$SOURCE_ROOT/source/public"
 SRCPRIVINC="$SOURCE_ROOT/source/core/include"
+SRCPRIVINC2="$SOURCE_ROOT/source/core/common/include"
 
 DESTPUBLIB="$DEST/public/lib"
 DESTPUBBIN="$DEST/public/bin"
 DESTPUBINC="$DEST/public/include"
 DESTPRIVLIB="$DEST/private/lib"
 DESTPRIVINC="$DEST/private/include"
+DESTPRIVINC2="$DEST/private/include.common"
 
 printf "\nCopying files to drop location\n"
 
 # N.B. no long option for -p (parents) on OSX.
-mkdir -p "$DESTPUBLIB" "$(dirname "$DESTPUBINC")" "$DESTPRIVLIB" "$(dirname "$DESTPRIVINC")" "$DESTPUBLIB"
+mkdir -p "$DESTPUBLIB" "$(dirname "$DESTPUBINC")" "$DESTPRIVLIB" "$(dirname "$DESTPRIVINC")" "$(dirname "$DESTPRIVINC2")"  "$DESTPUBLIB"
 
 # N.B. no long option for -v (verbose) and -p (preserve) on OSX.
 CPOPT="-v -p"
@@ -111,3 +113,4 @@ find "$SRCLIB" -type f -name \*$STATLIBSUFFIX -not -name $LIBPREFIX\* -print0 |
   xargs -n 1 -0 -I % cp % "$DESTPRIVLIB"
 
 cp $CPOPT -R "$SRCPRIVINC" "$DESTPRIVINC"
+cp $CPOPT -R "$SRCPRIVINC2" "$DESTPRIVINC2"

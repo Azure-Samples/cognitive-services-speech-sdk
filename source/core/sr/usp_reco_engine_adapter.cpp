@@ -415,7 +415,8 @@ void CSpxUspRecoEngineAdapter::DumpFileWrite(const uint8_t* buffer, size_t bytes
 
 void CSpxUspRecoEngineAdapter::DumpFileClose()
 {
-    fclose(m_hfile);
+    if (m_hfile != nullptr)
+        fclose(m_hfile);
     m_hfile = nullptr;
 }
 

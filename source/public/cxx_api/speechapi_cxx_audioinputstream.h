@@ -31,7 +31,7 @@ public:
     virtual ~AudioInputStream() {}
 
     virtual unsigned short GetFormat(AudioInputStreamFormat* pformat, unsigned short cbFormat) = 0;
-    virtual unsigned int Read(char* pbuffer, unsigned int cbBuffer) = 0;
+    virtual unsigned int Read(char* dataBuffer, unsigned int size) = 0;
     virtual void Close() = 0;
 
 protected:

@@ -136,8 +136,6 @@
 
 %feature("director") CallbackWrapper;
 
-%feature("director") AudioInputStream;
-
 %extend Carbon::EventSignal {
 
 #ifdef SWIGPYTHON
