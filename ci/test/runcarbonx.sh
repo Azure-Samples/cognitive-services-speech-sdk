@@ -21,13 +21,16 @@ pretty_print "ENTERING runcarbonx.sh"
 pretty_print "Running carbonx *speech*"
 ./tests/e2e_carbonx.sh $BINARY_DIR speech $UserKeySpeech $UserKeyCris $UserKeyLuis $UserKeySkyman
 
-if [ "${AGENT_OS}" == "Darwin" ]; then
-   pretty_print "Running carbonx *intent* DISABLED - bug 1203375"
-else
-  if [ "${AGENT_OS}" == "Windows_NT" ] && [ "${BUILDPLATFORM}" == "Win32" ]; then
-    pretty_print "Running carbonx *intent* DISABLED - Fix bug 1203729"
-  else
-    pretty_print "Running carbonx *speech*"
-    ./tests/e2e_carbonx.sh $BINARY_DIR intent $UserKeySpeech $UserKeyCris $UserKeyLuis $UserKeySkyman
-  fi
-fi
+pretty_print "Running carbonx *intent*"
+./tests/e2e_carbonx.sh $BINARY_DIR intent $UserKeySpeech $UserKeyCris $UserKeyLuis $UserKeySkyman
+
+#if [ "${AGENT_OS}" == "Darwin" ]; then
+#   pretty_print "Running carbonx *intent* DISABLED - bug 1203375"
+#else
+#  if [ "${AGENT_OS}" == "Windows_NT" ] && [ "${BUILDPLATFORM}" == "Win32" ]; then
+#    pretty_print "Running carbonx *intent* DISABLED - Fix bug 1203729"
+#  else
+#    pretty_print "Running carbonx *intent*"
+#    ./tests/e2e_carbonx.sh $BINARY_DIR intent $UserKeySpeech $UserKeyCris $UserKeyLuis $UserKeySkyman
+#  fi
+#fi

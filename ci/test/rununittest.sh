@@ -18,7 +18,11 @@ pretty_print() {
 
 pretty_print "ENTERING rununittest.sh"
 
-./tests/unit_tests.sh $BINARY_DIR all $UserKeySpeech $UserKeyCris $UserKeyLuis $UserKeySkyman
+pretty_print "Running usp_tests"
+./tests/unit_tests.sh $BINARY_DIR usp_tests $UserKeySpeech $UserKeyCris $UserKeyLuis $UserKeySkyman
+
+pretty_print "Running cxx_api_tests"
+./tests/unit_tests.sh $BINARY_DIR cxx_api_tests $UserKeySpeech $UserKeyCris $UserKeyLuis $UserKeySkyman
 
 pretty_print "Python test currently disabled"
 #pretty_print "Running Python tests"
