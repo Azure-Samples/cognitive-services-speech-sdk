@@ -14,17 +14,15 @@ public:
     CSpxRecognitionEventArgs();
 
     // --- ISpxRecognitionEventArgs
-    
     virtual const std::wstring& GetSessionId() override;
     virtual std::shared_ptr<ISpxRecognitionResult> GetResult() override;
 
     // --- ISpxRecognitionEventArgsInit
-
     virtual void Init(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) override;
 
 
 private:
-    
+
     CSpxRecognitionEventArgs(const CSpxRecognitionEventArgs&) = delete;
     CSpxRecognitionEventArgs(const CSpxRecognitionEventArgs&&) = delete;
 

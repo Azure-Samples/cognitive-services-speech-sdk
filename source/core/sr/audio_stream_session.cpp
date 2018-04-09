@@ -269,6 +269,15 @@ void CSpxAudioStreamSession::IntermediateRecoResult(ISpxRecoEngineAdapter* adapt
     FireResultEvent(GetSessionId(), result);
 }
 
+void CSpxAudioStreamSession::TranslationSynthesisResult(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxRecognitionResult> result)
+{
+    UNUSED(adapter);
+    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::Idle), "ERROR! TranslationSynthesisResult was called with SessionState==Idle");
+    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::StartingPump), "ERROR! TranslationSynthesisResult was called with SessionState==StartingPump");
+
+    FireResultEvent(GetSessionId(), result);
+}
+
 void CSpxAudioStreamSession::FinalRecoResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result)
 {
     UNUSED(adapter);
@@ -282,6 +291,9 @@ void CSpxAudioStreamSession::FinalRecoResult(ISpxRecoEngineAdapter* adapter, uin
         m_luAdapter->ProcessResult(result);
     }
 
+    // Todo: For translation, this means that RecognizeAsync() only returns text result, but no audio result. Audio result
+    // has to be received via callbacks.
+    // Waiting for Rob's change for direct LUIS integration, which introduces a state machine in usp_reco_engine.
     WaitForRecognition_Complete(result);
 }
 
@@ -320,32 +332,33 @@ std::shared_ptr<ISpxSession> CSpxAudioStreamSession::GetDefaultSession()
     return SpxSharedPtrFromThis<ISpxSession>(this);
 }
 
-std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text)
+std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type)
 {
     auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
 
     auto initResult = std::dynamic_pointer_cast<ISpxRecognitionResultInit>(result);
-    initResult->InitIntermediateResult(resultId, text);
+    initResult->InitIntermediateResult(resultId, text, type);
 
     return result;
 }
 
-std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateFinalResult(const wchar_t* resultId, const wchar_t* text)
+std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateFinalResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type)
 {
     auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
 
     auto initResult = std::dynamic_pointer_cast<ISpxRecognitionResultInit>(result);
-    initResult->InitFinalResult(resultId, text);
+    initResult->InitFinalResult(resultId, text, type);
 
     return result;
 }
 
-std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateNoMatchResult()
+
+std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateNoMatchResult(enum ResultType type)
 {
     auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
 
     auto initResult = std::dynamic_pointer_cast<ISpxRecognitionResultInit>(result);
-    initResult->InitNoMatch();
+    initResult->InitNoMatch(type);
 
     return result;
 }

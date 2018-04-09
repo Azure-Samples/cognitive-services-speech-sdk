@@ -72,6 +72,21 @@ struct Callbacks
     virtual void OnAudioStreamStart(const AudioStreamStartMsg&) {}
 
     /**
+    * A callback function that will be invoked when a translation.hypothesis message is received from service.
+    */
+    virtual void OnTranslationHypothesis(const TranslationHypothesisMsg&) {}
+
+    /**
+    * A callback function that will be invoked when a translation.phrase message is received from service.
+    */
+    virtual void OnTranslationPhrase(const TranslationPhraseMsg&) {}
+
+    /**
+    * A callback function that will be invoked when a translation.synthesis message is received from service.
+    */
+    virtual void OnTranslationSynthesis(const TranslationSynthesisMsg&) {}
+
+    /**
     * A callback function that will be invoked when a message having a path defined by user is received from service.
     * @param path The message path.
     * @param contentType The content type of the message.

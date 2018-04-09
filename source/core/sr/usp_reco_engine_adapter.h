@@ -46,6 +46,11 @@ protected:
     virtual void OnTurnStart(const USP::TurnStartMsg& message) override;
     virtual void OnTurnEnd(const USP::TurnEndMsg& message) override;
     virtual void OnError(const std::string& error) override;
+    // Todo: translaton messages should be in a spearate class than UspRecoEngineAdapter. This will
+    // be done at a later time during refactoring and adding TTS support.
+    virtual void OnTranslationHypothesis(const USP::TranslationHypothesisMsg& message) override;
+    virtual void OnTranslationPhrase(const USP::TranslationPhraseMsg& message) override;
+    virtual void OnTranslationSynthesis(const USP::TranslationSynthesisMsg& message) override;
 
 private:
 
@@ -67,28 +72,6 @@ private:
     void UspWrite_Actual(const uint8_t* buffer, size_t byteToWrite);
     void UspWrite_Buffered(const uint8_t* buffer, size_t byteToWrite);
     void UspWrite_Flush();
-
-    ISpxRecoEngineAdapterSite::ResultPayload_Type ResultPayloadFrom(const USP::SpeechPhraseMsg& message)
-    {
-        SPX_DBG_ASSERT(GetSite());
-        auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-
-        // TODO: RobCh: Do something with the other fields in USP::SpeechPhrase
-        switch (message.recognitionStatus)
-        {
-        case USP::RecognitionStatus::Success:
-            return factory->CreateFinalResult(nullptr, message.displayText.c_str());
-        case USP::RecognitionStatus::NoMatch:
-        case USP::RecognitionStatus::BabbleTimeout:
-        case USP::RecognitionStatus::InitialSilenceTimeout:
-        case USP::RecognitionStatus::Error:
-            // TODO: RobCh: Construct appropriate result
-            return factory->CreateNoMatchResult();
-        default:
-            SPX_DBG_ASSERT_WITH_MESSAGE(false, "Did someone add a new value to the USP::RecognitionStatus enumeration?");
-        }
-        return nullptr;
-    }
 
     ISpxRecoEngineAdapterSite::AdditionalMessagePayload_Type AdditionalMessagePayloadFrom(const USP::TurnStartMsg& message) { UNUSED(message); return nullptr; } // TODO: RobCh: Implement this
     ISpxRecoEngineAdapterSite::AdditionalMessagePayload_Type AdditionalMessagePayloadFrom(const USP::TurnEndMsg& message) { UNUSED(message); return nullptr; } // TODO: RobCh: Implement this

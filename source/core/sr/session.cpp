@@ -198,6 +198,8 @@ void CSpxSession::FireResultEvent(const std::wstring& sessionId, std::shared_ptr
     decltype(m_recognizers) weakRecognizers(m_recognizers.begin(), m_recognizers.end());
     lock.unlock();
 
+    // BUG: why a result from a particualr recognizer needs to be fired on all recognizers in the session??
+    // Why the adapter info is ignored in CSpxAudioStreamSession::FinalRecoResult??
     for (auto weakRecognizer : weakRecognizers)
     {
         auto recognizer = weakRecognizer.lock();
@@ -216,7 +218,7 @@ void CSpxSession::EnsureFireResultEvent()
     if (m_recoAsyncWaiting)
     {
         auto factory = SpxQueryService<ISpxRecoResultFactory>(this);
-        auto noMatchResult = factory->CreateNoMatchResult();
+        auto noMatchResult = factory->CreateNoMatchResult(ResultType::Speech);
         WaitForRecognition_Complete(noMatchResult);
     }
 }

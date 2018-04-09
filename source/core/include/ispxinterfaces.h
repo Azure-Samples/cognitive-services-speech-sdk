@@ -7,6 +7,7 @@
 
 #pragma once
 #include <memory>
+#include <vector>
 #include "spxcore_common.h"
 #include "platform.h"
 #include "asyncop.h"
@@ -327,6 +328,7 @@ public:
 
 enum class Reason { Recognized, IntermediateResult, NoMatch, Canceled, OtherRecognizer };
 
+enum class ResultType { Unknown, Speech, TranslationText, TranslationSynthesis };
 
 class ISpxRecognitionResult : public ISpxInterfaceBaseFor<ISpxRecognitionResult>
 {
@@ -336,6 +338,8 @@ public:
     virtual std::wstring GetText() = 0;
 
     virtual enum Reason GetReason() = 0;
+
+    virtual enum ResultType GetType() = 0;
 };
 
 
@@ -343,9 +347,9 @@ class ISpxRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxRecognitionRes
 {
 public:
 
-    virtual void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text) = 0;
-    virtual void InitFinalResult(const wchar_t* resultId, const wchar_t* text) = 0;
-    virtual void InitNoMatch() = 0;
+    virtual void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type) = 0;
+    virtual void InitFinalResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type) = 0;
+    virtual void InitNoMatch(enum ResultType type) = 0;
     virtual void InitError(const wchar_t* text) = 0;
 };
 
@@ -417,7 +421,7 @@ public:
     RecoEvent_Type FinalResult;
     RecoEvent_Type NoMatch;
     RecoEvent_Type Canceled;
-
+    RecoEvent_Type TranslationSynthesisResult;
 
 protected:
 
@@ -492,6 +496,7 @@ public:
 
     virtual void IntermediateRecoResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, ResultPayload_Type payload) = 0;
     virtual void FinalRecoResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, ResultPayload_Type payload) = 0;
+    virtual void TranslationSynthesisResult(ISpxRecoEngineAdapter* adapter, ResultPayload_Type payload) = 0;
 
     virtual void DoneProcessingAudio(ISpxRecoEngineAdapter* adapter) = 0;
 
@@ -505,9 +510,9 @@ class ISpxRecoResultFactory : public ISpxInterfaceBaseFor<ISpxRecoResultFactory>
 {
 public:
 
-    virtual std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text) = 0;
-    virtual std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, const wchar_t* text) = 0;
-    virtual std::shared_ptr<ISpxRecognitionResult> CreateNoMatchResult() = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type) = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type) = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateNoMatchResult(enum ResultType type) = 0;
     virtual std::shared_ptr<ISpxRecognitionResult> CreateErrorResult(const wchar_t* text) = 0;
 };
 
@@ -545,6 +550,11 @@ public:
     virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer(const std::wstring& language) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) = 0;
+
+    virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizer(const std::wstring& sourcelanguage, const std::wstring& targetLanguage) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourcelanguae, const std::wstring& targetLanguage) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerWithStream(AudioInputStream *stream, const std::wstring& sourcelanguage, const std::wstring& targetLanguage) = 0;
+
 };
 
 
@@ -581,6 +591,40 @@ public:
     virtual void InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload) = 0;
 };
 
+
+class ISpxTranslationTextResult : public ISpxInterfaceBaseFor<ISpxTranslationTextResult>
+{
+public:
+
+    virtual std::wstring GetTranslatedText() = 0;
+    // Todo: check whether we need return a vector of wstring for multiple languages.
+    virtual std::wstring GetSourceLanguage() = 0;
+    virtual std::wstring GetTargetLanguage() = 0;
+};
+
+class ISpxTranslationTextResultInit : public ISpxInterfaceBaseFor<ISpxTranslationTextResultInit>
+{
+public:
+
+    virtual void InitTranslationTextResult(const std::wstring& sourceLanguage, const std::wstring& targetLanguage, const std::wstring& translatedText) = 0;
+};
+
+
+class ISpxTranslationSynthesisResult : public ISpxInterfaceBaseFor<ISpxTranslationSynthesisResult>
+{
+public:
+    // Todo: check we need to incldue text that represents the audio data.
+    virtual const std::shared_ptr<const uint8_t[]> GetAudioBuffer() const = 0;
+    virtual size_t GetAudioLength() const = 0;
+    virtual const std::wstring GetAudioText() const = 0;
+};
+
+class ISpxTranslationSynthesisResultInit : public ISpxInterfaceBaseFor<ISpxTranslationSynthesisResultInit>
+{
+public:
+
+    virtual void InitTranslationSynthesisResult(const std::shared_ptr<const uint8_t[]> audioData, size_t audioLength, const std::wstring& text) = 0;
+};
 
 class ISpxLuisModel : public ISpxInterfaceBaseFor<ISpxLuisModel>
 {
@@ -626,6 +670,11 @@ public:
     virtual void AddIntentTrigger(const wchar_t* intentId, std::shared_ptr<ISpxTrigger> trigger) = 0;
 
     // TODO: RobCh: Add additional methods required... 
+};
+
+class ISpxTranslationRecognizer : public ISpxInterfaceBaseFor<ISpxTranslationRecognizer>
+{
+
 };
 
 

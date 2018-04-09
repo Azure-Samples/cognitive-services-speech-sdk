@@ -9,6 +9,7 @@
 #include "iobuffer.h"
 #include <stdint.h>
 #include <string>
+#include <vector>
 
 namespace USP {
 
@@ -22,6 +23,15 @@ enum class RecognitionStatus : int
 {
     Success, NoMatch, InitialSilenceTimeout, BabbleTimeout, Error, EndOfDictation
 };
+
+/**
+* Represents translation status in translation phrase.
+*/
+enum class TranslationStatus : int
+{
+    Success, NoMatch, Error, EndOfDictation
+};
+
 
 /**
  * Represents speech.startDectected message
@@ -95,4 +105,43 @@ struct TurnStartMsg
  */
 struct TurnEndMsg {};
 
+/**
+* Represents translation.hypothesis message
+*/
+struct TranslationHypothesisMsg
+{
+    std::wstring sourceLanguage;
+    std::wstring targetLanguage;
+    std::wstring recognitionText;
+    std::wstring translationText;
+    OffsetType offset;
+    DurationType duration;
+};
+
+/**
+* Represents translation.phrase message
+*/
+struct TranslationPhraseMsg
+{
+    std::wstring sourceLanguage;
+    std::wstring targetLanguage;
+    std::wstring recognitionText;
+    std::wstring translationText;
+    OffsetType offset;
+    DurationType duration;
+    RecognitionStatus recognitionStatus;
+    TranslationStatus translationStatus;
+};
+
+/**
+* Represents translation.synthesis message
+*/
+struct TranslationSynthesisMsg
+{
+    std::shared_ptr<const uint8_t[]> audioBuffer;
+    size_t audioLength;
+    std::wstring text;
+};
+
 }
+

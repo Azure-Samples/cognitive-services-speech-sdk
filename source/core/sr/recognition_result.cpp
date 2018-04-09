@@ -32,10 +32,16 @@ Reason CSpxRecognitionResult::GetReason()
     return m_reason;
 }
 
-void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* resultId, const wchar_t* text)
+ResultType CSpxRecognitionResult::GetType()
+{
+    return m_type;
+}
+
+void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type)
 {
     SPX_DBG_TRACE_FUNCTION();
     m_reason = Reason::IntermediateResult;
+    m_type = type;
 
     m_resultId = resultId == nullptr
         ? PAL::CreateGuid()
@@ -44,10 +50,11 @@ void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* resultId, cons
     m_text = text;
 }
 
-void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, const wchar_t* text)
+void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type)
 {
     SPX_DBG_TRACE_FUNCTION();
     m_reason = Reason::Recognized;
+    m_type = type;
 
     m_resultId = resultId == nullptr
         ? PAL::CreateGuid()
@@ -58,10 +65,11 @@ void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, const wchar
         : text;
 }
 
-void CSpxRecognitionResult::InitNoMatch()
+void CSpxRecognitionResult::InitNoMatch(enum ResultType type)
 {
     SPX_DBG_TRACE_FUNCTION();
     m_reason = Reason::NoMatch;
+    m_type = type;
 }
 
 void CSpxRecognitionResult::InitError(const wchar_t* text)
@@ -83,6 +91,52 @@ void CSpxRecognitionResult::InitIntentResult(const wchar_t* intentId, const wcha
         : L"";
 
     SetStringValue(g_RESULT_LuisJson, jsonPayload);
+}
+
+std::wstring CSpxRecognitionResult::GetTranslatedText()
+{
+    return m_translationText;
+}
+
+std::wstring CSpxRecognitionResult::GetSourceLanguage()
+{
+    return m_sourceLanguage;
+}
+
+std::wstring CSpxRecognitionResult::GetTargetLanguage()
+{
+    return m_targetLanguage;
+}
+
+void CSpxRecognitionResult::InitTranslationTextResult(const std::wstring& sourceLangauge, const std::wstring& targetLanguage, const std::wstring& translatedText)
+{
+    m_sourceLanguage = sourceLangauge;
+    m_targetLanguage = targetLanguage;
+    m_translationText = translatedText;
+}
+
+const std::shared_ptr<const uint8_t[]> CSpxRecognitionResult::GetAudioBuffer() const
+{
+    return m_audioBuffer;
+}
+
+size_t CSpxRecognitionResult::GetAudioLength() const
+{
+    return m_audioLength;
+}
+
+const std::wstring CSpxRecognitionResult::GetAudioText() const
+{
+    return m_audioText;
+}
+
+
+// ISpxTranslationSynthesisResultInit
+void CSpxRecognitionResult::InitTranslationSynthesisResult(const std::shared_ptr<const uint8_t[]> audioData, size_t audioLength, const std::wstring& text)
+{
+    m_audioBuffer = audioData;
+    m_audioLength = audioLength;
+    m_audioText = text;
 }
 
 

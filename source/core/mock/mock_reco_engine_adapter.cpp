@@ -103,7 +103,7 @@ void CSpxMockRecoEngineAdapter::FireIntermediateResult()
     m_cbLastIntermediateFired = m_cbAudioProcessed;
 
     auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateIntermediateResult(nullptr,  m_mockResultText.c_str());
+    auto result = factory->CreateIntermediateResult(nullptr,  m_mockResultText.c_str(), ResultType::Speech);
 
     auto offset = (uint32_t)m_cbLastIntermediateFired;
     GetSite()->IntermediateRecoResult(this, offset, result);
@@ -115,7 +115,7 @@ void CSpxMockRecoEngineAdapter::FireFinalResult()
     m_cbLastIntermediateFired = m_cbAudioProcessed;
 
     auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateFinalResult(nullptr, m_mockResultText.c_str());
+    auto result = factory->CreateFinalResult(nullptr, m_mockResultText.c_str(), ResultType::Speech);
 
     auto offset = (uint32_t)m_cbLastIntermediateFired;
     GetSite()->FinalRecoResult(this, offset, result);

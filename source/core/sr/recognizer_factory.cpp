@@ -56,5 +56,35 @@ std::shared_ptr<ISpxRecognizerFactory> CSpxRecognizerFactory::GetDefaultFactory(
     return factory;
 }
 
+std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
+{
+    UNUSED(sourceLanguage);
+    UNUSED(targetLanguage);
+    SPX_THROW_HR(SPXERR_NOT_IMPL);
+    auto factory = GetDefaultFactory();
+    return  nullptr; //factory->CreateSpeechRecognizer(language);
+
+}
+
+std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
+{
+    UNUSED(fileName);
+    UNUSED(sourceLanguage);
+    UNUSED(targetLanguage);
+    SPX_THROW_HR(SPXERR_NOT_IMPL);
+    auto factory = GetDefaultFactory();
+    return nullptr; // factory->CreateSpeechRecognizerWithFileInput(fileName);
+}
+
+std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerWithStream(AudioInputStream *stream, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
+{
+    UNUSED(sourceLanguage);
+    UNUSED(targetLanguage);
+    UNUSED(stream);
+    SPX_THROW_HR(SPXERR_NOT_IMPL);
+    return nullptr;
+}
+
+
 
 } // CARBON_IMPL_NAMESPACE

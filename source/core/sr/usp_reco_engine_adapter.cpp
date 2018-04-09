@@ -339,8 +339,9 @@ void CSpxUspRecoEngineAdapter::OnSpeechHypothesis(const USP::SpeechHypothesisMsg
 
     // TODO: RobCh: Do something with the other fields in UspMsgSpeechHypothesis
     auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str());
+    auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), ResultType::Speech);
 
+    // Todo: offset (and duration) should be part of result. Now, offset is autaully ignored by the following function.
     GetSite()->IntermediateRecoResult(this, message.offset, result);
 }
 
@@ -353,7 +354,9 @@ void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& me
     // TODO: Rob: do we want to treate speech.fragment message different than speech.hypothesis message at this level?
 
     auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str());
+    auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), ResultType::Speech);
+
+    // Todo: offset (and duration) should be part of result. Now, offset is actually ignored by the following function.
     GetSite()->IntermediateRecoResult(this, message.offset, result);
 }
 
@@ -364,9 +367,71 @@ void CSpxUspRecoEngineAdapter::OnSpeechPhrase(const USP::SpeechPhraseMsg& messag
 
     // TODO: RobCh: Do something with the other fields in UspMsgSpeechPhrase
     auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateFinalResult(nullptr, message.displayText.c_str());
+    auto result = factory->CreateFinalResult(nullptr, message.displayText.c_str(), ResultType::Speech);
 
+    // Todo: offset (and duration) should be part of result. Now, offset is autaully ignored by the following function.
     GetSite()->FinalRecoResult(this, message.offset, result);
+}
+
+void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHypothesisMsg& message)
+{
+    SPX_DBG_TRACE_VERBOSE("Response: Translation.Hypothesis message. RecoText: %ls, TranslatedText: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n",
+        message.recognitionText.c_str(), message.translationText.c_str(),
+        message.offset, message.duration);
+    SPX_DBG_ASSERT(GetSite());
+
+    // TODO: RobCh: Do something with the other fields in UspMsgSpeechHypothesis
+    auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
+    auto result = factory->CreateIntermediateResult(nullptr, message.recognitionText.c_str(), ResultType::TranslationText);
+
+    // Update our result to be an "TranslationText" result.
+    auto initTranslationResult = std::dynamic_pointer_cast<ISpxTranslationTextResultInit>(result);
+    initTranslationResult->InitTranslationTextResult(message.sourceLanguage, message.targetLanguage, message.translationText);
+    
+    // Todo: offset (and duration) should be part of result. Now, offset is autaully ignored by the following function.
+    GetSite()->IntermediateRecoResult(this, message.offset, result);
+}
+
+void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseMsg& message)
+{
+    SPX_DBG_TRACE_VERBOSE("Response: Translation.Phrase message. RecoStatus: %d, TranslationStatus: %d, RecoText: %ls, TranslatedText: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n",
+        message.recognitionStatus, message.translationStatus,
+        message.recognitionText.c_str(), message.translationText.c_str(),
+        message.offset, message.duration);
+    SPX_DBG_ASSERT(GetSite());
+
+    // TODO: RobCh: Do something with the other fields in UspMsgSpeechPhrase
+    auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
+    auto result = factory->CreateFinalResult(nullptr, message.recognitionText.c_str(), ResultType::TranslationText);
+
+    // Update our result to be an "TranslationText" result.
+    auto initTranslationResult = std::dynamic_pointer_cast<ISpxTranslationTextResultInit>(result);
+    initTranslationResult->InitTranslationTextResult(message.sourceLanguage, message.targetLanguage, message.translationText);
+    
+    // Todo: offset (and duration) should be part of result. Now, offset is autaully ignored by the following function.
+    // Todo: This will trigger stopRecognizing (in single shot mode), and won't include any audio output message in final result.
+    // We need to delay firing final result in single shot mode if audio output is desired.
+    // Waiting for Rob's change for direct LUIS integration, which introduces a state machine in usp_reco_engine.
+    GetSite()->FinalRecoResult(this, message.offset, result);
+}
+
+void CSpxUspRecoEngineAdapter::OnTranslationSynthesis(const USP::TranslationSynthesisMsg& message)
+{
+    SPX_DBG_TRACE_VERBOSE("Response: Translation.Synthesis message. Audio data size: \n", message.audioLength);
+    SPX_DBG_ASSERT(GetSite());
+
+    // TODO: RobCh: Do something with the other fields in UspMsgSpeechPhrase
+    auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
+    auto result = factory->CreateFinalResult(nullptr, L"", ResultType::TranslationSynthesis);
+
+    // Update our result to be an "TranslationSynthesis" result.
+    auto initTranslationResult = std::dynamic_pointer_cast<ISpxTranslationSynthesisResultInit>(result);
+    initTranslationResult->InitTranslationSynthesisResult(message.audioBuffer, message.audioLength, message.text);
+    
+    // Todo: offset (and duration) should be part of result. Now, offset is autaully ignored by the following function.
+    // Todo: need to differentiate whether this is the last audio or not, in order to trigger FinalRecoResult if needed.
+    // Waiting for Rob's change for direct LUIS integration, which introduces a state machine in usp_reco_engine.
+    GetSite()->TranslationSynthesisResult(this, result);
 }
 
 void CSpxUspRecoEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
@@ -437,6 +502,5 @@ uint8_t* CSpxUspRecoEngineAdapter::FormatBufferWriteChars(uint8_t* buffer, const
     std::memcpy(buffer, psz, cch);
     return buffer + cch;
 }
-
 
 } // CARBON_IMPL_NAMESPACE

@@ -37,6 +37,10 @@ public:
     std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName) override;
     std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) override { UNUSED(fileName); UNUSED(language); throw SPXERR_NOT_IMPL; }
 
+    std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage) override;
+    std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::wstring& targetLanguage) override;
+    std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerWithStream(AudioInputStream *stream, const std::wstring& sourceLanguage, const std::wstring& targetLanguage) override;
+
     // --- IServiceProvider
     SPX_SERVICE_MAP_BEGIN()
     SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
@@ -46,6 +50,11 @@ public:
 protected:
 
     std::shared_ptr<ISpxRecognizer> CreateRecognizerInternal(const char* sessionClassName, const char* recognizerClassName, wchar_t const* fileName = nullptr, wchar_t const* language = nullptr);
+
+private:
+
+    std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerInternal(wchar_t const* fileNameStr, const std::wstring& sourceLanguage, const std::wstring& targetLanguage);
+
 };
 
 

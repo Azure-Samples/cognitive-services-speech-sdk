@@ -118,9 +118,16 @@ void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_
 {
     ISpxRecognizerEvents::RecoEvent_Type* pevent = nullptr;
 
-    auto reason = result->GetReason();
-    switch (reason)
+    if (result->GetType() == ResultType::TranslationSynthesis)
     {
+        pevent = &TranslationSynthesisResult;
+    }
+    else
+    {
+        // Speech recognition result, intent recognition result, or translation text result.
+        auto reason = result->GetReason();
+        switch (reason)
+        {
         case Reason::Recognized:
             pevent = &FinalResult;
             break;
@@ -143,13 +150,14 @@ void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_
 
         default:
             SPX_DBG_ASSERT_WITH_MESSAGE(
-                reason != Reason::Recognized && 
+                reason != Reason::Recognized &&
                 reason != Reason::IntermediateResult &&
                 reason != Reason::NoMatch &&
-                reason != Reason::Canceled && 
+                reason != Reason::Canceled &&
                 reason != Reason::OtherRecognizer,
                 "The reason found in the result was unexpected.");
             break;
+        }
     }
 
     if (pevent != nullptr && pevent->IsConnected())
