@@ -9,6 +9,8 @@
 #include "http_helpers.h"
 #include "luis_direct_lu_engine_adapter.h"
 #include "string_utils.h"
+#include "service_helpers.h"
+#include "named_properties_constants.h"
 
 #include "json.hpp"
 using json = nlohmann::json;
@@ -41,37 +43,124 @@ void CSpxLuisDirectEngineAdapter::AddIntentTrigger(const wchar_t* id, std::share
     }
 }
 
+std::list<std::string> CSpxLuisDirectEngineAdapter::GetListenForList()
+{
+    std::list<std::string> listenForList;
+
+    // Let's loop thru each trigger we have...
+    std::unique_lock<std::mutex> lock(m_mutex);
+    for (auto item : m_triggerMap)
+    {
+        auto trigger = item.second;
+
+        // If it's a simple phrase trigger, add it 'naked' as a ListenFor element
+        auto phrase = trigger->GetPhrase();
+        if (!phrase.empty())
+        {
+            std::string listenFor = PAL::ToString(phrase);
+            listenForList.push_back(listenFor);
+        }
+
+        // If it's a LUIS model...
+        auto model = trigger->GetModel();
+        if (model != nullptr)
+        {
+            // Get the app id and the intent name...
+            auto appId = model->GetAppId();
+            auto intentName = trigger->GetModelIntentName();
+
+            // Format the ListenFor element...
+            std::string listenFor;
+            listenFor += "{luis:";
+            listenFor += PAL::ToString(appId);
+            if (!intentName.empty())
+            {
+                listenFor += "#";
+                listenFor += PAL::ToString(intentName);
+            }
+            listenFor += "}";
+
+            // And add it to the list...
+            listenForList.push_back(listenFor);
+        }
+    }
+
+    return listenForList;
+}
+
+void CSpxLuisDirectEngineAdapter::GetIntentInfo(std::string& provider, std::string& id, std::string& key)
+{
+    std::unique_lock<std::mutex> lock(m_mutex);
+    for (auto item : m_triggerMap)
+    {
+        auto trigger = item.second;
+        auto model = trigger->GetModel();
+        if (model != nullptr)
+        {
+            auto str = PAL::ToString(model->GetAppId());
+            SPX_IFTRUE_THROW_HR(!str.empty() && !id.empty() && str != id, SPXERR_ABORT);
+            id = str;
+
+            str = PAL::ToString(model->GetSubscriptionKey());
+            SPX_IFTRUE_THROW_HR(!str.empty() && !key.empty() && str != key, SPXERR_ABORT);
+            key = str;
+        }
+    }
+
+    if (!id.empty() && !key.empty())
+    {
+        provider = "LUIS";
+    }
+}
+
 void CSpxLuisDirectEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionResult> result)
 {
     SPX_DBG_TRACE_FUNCTION();
-    std::string query = PAL::ToString(result->GetText().c_str());
 
-    // Get the connection information for this ONE (1!!) LUIS model reference
-    std::string hostName, relativePath;
-    GetConnectionInfo(query, &hostName, &relativePath);
-
-    // If we found a set of connection information...
-    if (!hostName.empty() && !relativePath.empty())
+    // We only need to process the result when the user actually said something...
+    std::string resultText = PAL::ToString(result->GetText().c_str());
+    SPX_DBG_TRACE_VERBOSE("%s: text='%s'", __FUNCTION__, resultText.c_str());
+    if (!resultText.empty())
     {
-        // Contact LUIS, asking it to return the JSON response for the LUIS model specified
-        auto json = SpxHttpDownloadString(hostName.c_str(), relativePath.c_str());
-        SPX_DBG_TRACE_VERBOSE("LUIS said this: '%s'", json.c_str());
+        // Check to see if we already have the JSON payload (from the speech service)
+        auto properties = std::dynamic_pointer_cast<ISpxNamedProperties>(result);
+        auto json = PAL::ToString(properties->GetStringValue(g_RESULT_LuisJson));
+        SPX_DBG_TRACE_VERBOSE("%s: text='%s'; already-existing-luisJson='%s'", __FUNCTION__, resultText.c_str(), json.c_str());
 
-        // Extract the intent from the JSON payload
-        auto intentName = ExtractIntent(json);
-        SPX_DBG_TRACE_VERBOSE("LUIS intent == '%S'", intentName.c_str());
-
-        // Map the LUIS intent name in that payload to the specified "IntentId" specified when the devleoper-user called AddIntent("IntentId", ...)
-        auto intentId = IntentIdFromIntentName(intentName);
-        SPX_DBG_TRACE_VERBOSE("IntentRecognitionResult::IntentId == '%S'", intentId.c_str());
-
-        // If we have a valid IntentId...
-        bool validIntentResult = !intentId.empty() || (m_emptyIntentNameOk && !json.empty());
-        if (validIntentResult)
+        // If we don't already have the LUIS json, fetch it from LUIS now...
+        if (json.empty())
         {
-            // Update our result to be an "Intent" result, with the appropriate ID and JSON payload
-            auto initIntentResult = std::dynamic_pointer_cast<ISpxIntentRecognitionResultInit>(result);
-            initIntentResult->InitIntentResult(intentId.c_str(), PAL::ToWString(json).c_str());
+            // Get the connection information for this ONE (1!!) LUIS model reference
+            std::string hostName, relativePath;
+            GetConnectionInfo(resultText, &hostName, &relativePath);
+
+            // If we found a set of connection information...
+            if (!hostName.empty() && !relativePath.empty())
+            {
+                // Contact LUIS, asking it to return the JSON response for the LUIS model specified
+                json = SpxHttpDownloadString(hostName.c_str(), relativePath.c_str());
+                SPX_DBG_TRACE_VERBOSE("LUIS said this: '%s'", json.c_str());
+            }
+        }
+
+        if (!json.empty())
+        {
+            // Extract the intent from the JSON payload
+            auto intentName = ExtractIntent(json);
+            SPX_DBG_TRACE_VERBOSE("LUIS intent == '%S'", intentName.c_str());
+
+            // Map the LUIS intent name in that payload to the specified "IntentId" specified when the devleoper-user called AddIntent("IntentId", ...)
+            auto intentId = IntentIdFromIntentName(intentName);
+            SPX_DBG_TRACE_VERBOSE("IntentRecognitionResult::IntentId == '%S'", intentId.c_str());
+
+            // If we have a valid IntentId...
+            bool validIntentResult = !intentId.empty() || (m_emptyIntentNameOk && !json.empty());
+            if (validIntentResult)
+            {
+                // Update our result to be an "Intent" result, with the appropriate ID and JSON payload
+                auto initIntentResult = std::dynamic_pointer_cast<ISpxIntentRecognitionResultInit>(result);
+                initIntentResult->InitIntentResult(intentId.c_str(), PAL::ToWString(json).c_str());
+            }
         }
     }
 }
@@ -130,16 +219,6 @@ void CSpxLuisDirectEngineAdapter::GetConnectionInfo(const std::string& endpoint,
     {
         GetSubscriptionConnectionInfo(host, key, appId, query, phostName, prelativePath);
     }
-    else
-    {
-        GetDefaultConnectionInfo(query, phostName, prelativePath);
-    }
-}
-
-void CSpxLuisDirectEngineAdapter::GetDefaultConnectionInfo(const std::string& query, std::string* phostName, std::string* prelativePath)
-{
-    // Get the default connection info, by having the overloaded GetSubscriptionConnectionInfo see "" strings and find the right defaults... 
-    return GetSubscriptionConnectionInfo("", "", "", query, phostName, prelativePath);
 }
 
 void CSpxLuisDirectEngineAdapter::GetEndpointConnectionInfo(const std::string& endpoint, const std::string& query, std::string* phostName, std::string* prelativePath)
@@ -156,19 +235,13 @@ void CSpxLuisDirectEngineAdapter::GetEndpointConnectionInfo(const std::string& e
 
 void CSpxLuisDirectEngineAdapter::GetSubscriptionConnectionInfo(const std::string& host, const std::string& key, const std::string& appId, const std::string& query, std::string* phostName, std::string* prelativePath)
 {
-    // exampleUrl = R"(https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/6ad2c77d-180b-45a2-88aa-8c442538c090?subscription-key=0415470b4d0d4ed7b736a7ccac71fa5d&verbose=true&timezoneOffset=0&q=what%20time%20is%20it%20in%20cincinnati)";
-    // relativePath == R("/luis/v2.0/apps/{{{{app-id}}}}?subscription-key={{{{subscription-key}}}}&verbose=true&q={{{{query}}}}");
-    // exampleHostName = R"(westus.api.cognitive.microsoft.com");
-
-    constexpr auto pszDefaultHostName = R"(westus.api.cognitive.microsoft.com)";
-    constexpr auto pszDefaultAppId = R"(52d44b10-3973-4b78-b5b5-4b2da0eaa6f5)";
-    constexpr auto pszDefaultKey = R"(0415470b4d0d4ed7b736a7ccac71fa5d)";
+    constexpr auto pszDefaultHostName = R"(westus2.api.cognitive.microsoft.com)";
 
     std::string relativePath { R"(/luis/v2.0/apps/)" };
-    relativePath += !appId.empty() ? appId.c_str() : pszDefaultAppId;
+    relativePath += appId;
     relativePath += R"(?subscription-key=)";
-    relativePath += !key.empty() ? key.c_str() : pszDefaultKey;
-    relativePath += R"(&verbose=true&q=)";
+    relativePath += key;
+    relativePath += R"(&q=)";
     relativePath += query;
 
     *phostName = !host.empty() ? host.c_str() : pszDefaultHostName;

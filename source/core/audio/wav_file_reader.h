@@ -12,7 +12,7 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-class CSpxWavFileReader : public ISpxAudioFile, public ISpxAudioReader
+class CSpxWavFileReader : public ISpxAudioFile, public ISpxAudioReader, public ISpxAudioReaderRealTime
 {
 public:
 

@@ -23,8 +23,8 @@ public:
     virtual ~CSpxRecognizer();
 
     // --- ISpxObjectWithSiteInit
-
     void Init() override;
+    void Term() override;
 
     // --- ISpxNamedProperties (overrides)
     void SetStringValue(const wchar_t* name, const wchar_t* value) override;
@@ -38,6 +38,9 @@ public:
     CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync() override;
     CSpxAsyncOp<void> StartContinuousRecognitionAsync() override;
     CSpxAsyncOp<void> StopContinuousRecognitionAsync() override;
+
+    CSpxAsyncOp<void> StartKeywordRecognitionAsync(const wchar_t* keyword) override;
+    CSpxAsyncOp<void> StopKeywordRecognitionAsync() override;
 
     // --- ISpxSessionFromRecognizer
 

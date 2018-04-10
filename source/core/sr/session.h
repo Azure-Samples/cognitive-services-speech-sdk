@@ -31,15 +31,22 @@ public:
     void AddRecognizer(std::shared_ptr<ISpxRecognizer> recognizer);
     void RemoveRecognizer(ISpxRecognizer* recognizer);
 
-    CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync();
-    CSpxAsyncOp<void> StartContinuousRecognitionAsync();
-    CSpxAsyncOp<void> StopContinuousRecognitionAsync();
+    CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync() override;
+    CSpxAsyncOp<void> StartContinuousRecognitionAsync() override;
+    CSpxAsyncOp<void> StopContinuousRecognitionAsync() override;
+
+    CSpxAsyncOp<void> StartKeywordRecognitionAsync(const wchar_t* keyword) override;
+    CSpxAsyncOp<void> StopKeywordRecognitionAsync() override;
 
 
 protected:
 
-    virtual void StartRecognizing();
-    virtual void StopRecognizing();
+    enum RecognitionKind { Idle = 0, Keyword = 1, KwsSingleShot = 2, SingleShot = 3, Continuous = 4 };
+    virtual CSpxAsyncOp<void> StartRecognitionAsync(RecognitionKind startKind, std::wstring keyword = L"");
+    virtual CSpxAsyncOp<void> StopRecognitionAsync(RecognitionKind stopKind);
+
+    virtual void StartRecognizing(RecognitionKind startKind, std::wstring keyword = L"");
+    virtual void StopRecognizing(RecognitionKind stopKind);
 
     virtual std::shared_ptr<ISpxRecognitionResult> WaitForRecognition();
     virtual void WaitForRecognition_Complete(std::shared_ptr<ISpxRecognitionResult> result);

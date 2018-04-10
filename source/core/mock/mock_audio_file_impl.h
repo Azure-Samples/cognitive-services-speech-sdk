@@ -13,7 +13,7 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-class ISpxMockAudioFileImpl : public ISpxAudioFile
+class ISpxMockAudioFileImpl : public ISpxAudioFile, public ISpxAudioReaderRealTime
 {
 public:
 

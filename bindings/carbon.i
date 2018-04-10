@@ -55,6 +55,8 @@
 %ignore Carbon::Recognition::AsyncRecognizer::RecognizeAsync();
 %ignore Carbon::Recognition::AsyncRecognizer::StartContinuousRecognitionAsync();
 %ignore Carbon::Recognition::AsyncRecognizer::StopContinuousRecognitionAsync();
+%ignore Carbon::Recognition::AsyncRecognizer::StartKeywordRecognitionAsync(const wchar_t*);
+%ignore Carbon::Recognition::AsyncRecognizer::StopKeywordRecognitionAsync();
 
 %inline %{
     typedef std::shared_ptr<Carbon::Recognition::Speech::SpeechRecognitionResult> SpeechRecognitionResultPtr;
@@ -82,6 +84,16 @@
         ($self)->StopContinuousRecognitionAsync().get();
     }
 
+    void StartKeywordRecognition(const wchar_t* keyword)
+    {
+        ($self)->StartKeywordRecognitionAsync(keyword).get();
+    }
+
+    void StopKeywordRecognition()
+    {
+        ($self)->StopKeywordRecognitionAsync().get();
+    }
+
     FutureWrapper<SpeechRecognitionResultPtr> RecognizeAsync() {
         auto future = ($self)->RecognizeAsync();
         return FutureWrapper<SpeechRecognitionResultPtr>(std::move(future));
@@ -96,6 +108,18 @@
     FutureWrapper<void> StopContinuousRecognitionAsync()
     {
         auto future = ($self)->StopContinuousRecognitionAsync();
+        return FutureWrapper<void>(std::move(future));
+    }
+
+    FutureWrapper<void> StartKeywordRecognitionAsync(const wchar_t* keyword)
+    {
+        auto future = ($self)->StartKeywordRecognitionAsync(keyword);
+        return FutureWrapper<void>(std::move(future));
+    }
+
+    FutureWrapper<void> StopKeywordRecognitionAsync()
+    {
+        auto future = ($self)->StopKeywordRecognitionAsync();
         return FutureWrapper<void>(std::move(future));
     }
 }
@@ -116,6 +140,16 @@
         ($self)->StopContinuousRecognitionAsync().get();
     }
 
+    void StartKeywordRecognition(const wchar_t* keyword)
+    {
+        ($self)->StartKeywordRecognitionAsync(keyword).get();
+    }
+
+    void StopKeywordRecognition()
+    {
+        ($self)->StopKeywordRecognitionAsync().get();
+    }
+
     FutureWrapper<IntentRecognitionResultPtr> RecognizeAsync() {
         auto future = ($self)->RecognizeAsync();
         return FutureWrapper<IntentRecognitionResultPtr>(std::move(future));
@@ -130,6 +164,18 @@
     FutureWrapper<void> StopContinuousRecognitionAsync()
     {
         auto future = ($self)->StopContinuousRecognitionAsync();
+        return FutureWrapper<void>(std::move(future));
+    }
+
+    FutureWrapper<void> StartKeywordRecognitionAsync(const wchar_t* keyword)
+    {
+        auto future = ($self)->StartKeywordRecognitionAsync(keyword);
+        return FutureWrapper<void>(std::move(future));
+    }
+
+    FutureWrapper<void> StopKeywordRecognitionAsync()
+    {
+        auto future = ($self)->StopKeywordRecognitionAsync();
         return FutureWrapper<void>(std::move(future));
     }
 }
@@ -174,10 +220,14 @@
 %ignore Carbon::Recognition::Speech::SpeechRecognizer::RecognizeAsync();
 %ignore Carbon::Recognition::Speech::SpeechRecognizer::StartContinuousRecognitionAsync();
 %ignore Carbon::Recognition::Speech::SpeechRecognizer::StopContinuousRecognitionAsync();
+%ignore Carbon::Recognition::Speech::SpeechRecognizer::StartKeywordRecognitionAsync();
+%ignore Carbon::Recognition::Speech::SpeechRecognizer::StopKeywordRecognitionAsync();
 
 %ignore Carbon::Recognition::Intent::IntentRecognizer::RecognizeAsync();
 %ignore Carbon::Recognition::Intent::IntentRecognizer::StartContinuousRecognitionAsync();
 %ignore Carbon::Recognition::Intent::IntentRecognizer::StopContinuousRecognitionAsync();
+%ignore Carbon::Recognition::Intent::IntentRecognizer::StartKeywordRecognitionAsync();
+%ignore Carbon::Recognition::Intent::IntentRecognizer::StopKeywordRecognitionAsync();
 
 // Process symbols in header
 %include <speechapi_cxx_audioinputstream.h>

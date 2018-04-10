@@ -56,6 +56,7 @@ void CSpxAudioPump::SetFormat(const WAVEFORMATEX* pformat, uint16_t cbFormat)
 void CSpxAudioPump::StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor)
 {
     std::unique_lock<std::mutex> lock(m_mutex);
+
     SPX_IFTRUE_THROW_HR(m_audioReader.get() == nullptr, SPXERR_UNINITIALIZED);
     SPX_IFTRUE_THROW_HR(m_thread.joinable(), SPXERR_AUDIO_IS_PUMPING);
     SPX_IFTRUE_THROW_HR(m_state == State::NoInput, SPXERR_NO_AUDIO_INPUT);
@@ -71,8 +72,7 @@ void CSpxAudioPump::StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProc
     m_thread = std::thread(&CSpxAudioPump::PumpThread, this, std::move(keepAliveForThread), pISpxAudioProcessor);
 
     m_stateRequested = State::Processing; // it's ok we set the requested state after we 'start' the thread; PumpThread will wait for the lock
-    m_cv.notify_all();
-    m_cv.wait(lock, [&] { return m_state == State::Processing || m_stateRequested != State::Processing; });
+    WaitForPumpStart(lock);
 }
 
 void CSpxAudioPump::PausePump()
@@ -82,7 +82,11 @@ void CSpxAudioPump::PausePump()
 
 void CSpxAudioPump::StopPump()
 {
+    SPX_DBG_TRACE_SCOPE("CSpxAudioPump::StopPump() ...", "CSpxAudioPump::StopPump ... Done!");
+
     std::unique_lock<std::mutex> lock(m_mutex);
+    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::StopPump() ... mutex LOCKED");
+
     switch (m_state)
     {
     case State::NoInput:
@@ -93,8 +97,7 @@ void CSpxAudioPump::StopPump()
     case State::Paused:
     case State::Processing:
         m_stateRequested = State::Idle;
-        m_cv.notify_all();
-        m_cv.wait(lock, [&] { return m_state == State::Idle || m_stateRequested != State::Idle; });
+        WaitForPumpIdle(lock);
         break;
     }
 }
@@ -108,7 +111,7 @@ ISpxAudioPump::State CSpxAudioPump::GetState()
 void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor)
 {
     UNUSED(keepAlive);
-    SPX_DBG_TRACE_SCOPE("AudioPumpThread started!", "AudioPumpThread stopped!");
+    SPX_DBG_TRACE_SCOPE("*** AudioPump THREAD started! ***", "*** AudioPump THREAD stopped! ***");
 
     // Get the format from the reader and give it to the processor
     auto cbFormat = m_audioReader->GetFormat(nullptr, 0);
@@ -126,22 +129,33 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
     auto bytesPerFrame = samplesPerSec / framesPerSec * bytesPerSample;
     auto data = SpxAllocSharedAudioBuffer(bytesPerFrame);
 
-    // When the pump is pumping, m_state is only changed in this lambda
+    // When the pump is pumping, m_state is only changed in this lambda, on the background thread
     auto checkAndChangeState = [&]() {
         std::unique_lock<std::mutex> lock(m_mutex);
 
+        // If we actually need to change the state, do so, and signal to waiters that we did
         if (m_stateRequested != m_state)
         {
+            SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(), checkAndChangeState: changing states as requested: %d => %d", m_state, m_stateRequested);
             m_state = m_stateRequested;
             m_cv.notify_all();
         }
 
+        // If we're still in the processing state, we can go ahead return true (indicating to the while() loop below
+        // that we should keep processing audio...)
         if (m_state == State::Processing)
         {
             return true;
         }
 
+        // If we're not still processing, then we should detach the thread, and return false (to the while() loop below);
+        // Doing so will cause that while() loop to exit, and then the thread will exit. We need to detach the thread
+        // because the dtor (see above) will m_thread.join() so that when the last reference is released (which may be the keep
+        // alive refernce in this thread proc), we won't deadlock. 
+        SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(), checkAndChangeState: state (%d) != State::Processing (%d); detaching thread, returning false...", m_state, State::Processing);
         m_thread.detach();
+
+        // Returning true will cause the while() loop (see below) to exit, thus exiting the thread
         return false;
     };
 
@@ -168,8 +182,32 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
     }
 
     // Let the Processor know we're done for now...
+    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(): exited while loop, pre-SetFormat(nullptr)");
     pISpxAudioProcessor->SetFormat(nullptr);
+    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(): exited while loop, post-SetFormat(nullptr)");
 }
 
+void CSpxAudioPump::WaitForPumpStart(std::unique_lock<std::mutex>& lock)
+{
+    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpStart() ... pre notify_all()");
+    m_cv.notify_all();
+
+    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpStart() ... post notify_all(), pre m_cv.wait_for()");
+    m_cv.wait_for(lock, std::chrono::milliseconds(m_waitMsStartPumpRequestTimeout), [&] { return m_state == State::Processing || m_stateRequested != State::Processing; });
+
+    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpStart() ... post m_cv.wait_for(); state=%d (requestedState=%d)", m_state, m_stateRequested);
+}
+
+void CSpxAudioPump::WaitForPumpIdle(std::unique_lock<std::mutex>& lock)
+{
+    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpIdle() ... pre notify_all()");
+    m_cv.notify_all();
+
+    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpIdle() ... post notify_all(), pre m_cv.wait_for()");
+    m_cv.wait_for(lock, std::chrono::milliseconds(m_waitMsStopPumpRequestTimeout), [&] { return m_state == State::Idle || m_stateRequested != State::Idle; });
+
+    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpIdle() ... post m_cv.wait_for(); state=%d (requestedState=%d)", m_state, m_stateRequested);
+    SPX_TRACE_WARNING_IF(m_state != State::Idle, "CSpxAudioPump::WaitForPumpIdle(): Unexpected: state != State::Idle; state=%d", m_state);
+}
 
 } // CARBON_IMPL_NAMESPACE

@@ -93,8 +93,21 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
         }
         else if (PAL::wcsnicmp(pszArg, L"--input", wcslen(L"--input")) == 0)
         {
-            fShowOptions = pconsoleArgs->m_strInput.length() > 0 || fNextArgRequired;
-            pstrNextArg = &pconsoleArgs->m_strInput;
+            fShowOptions = pconsoleArgs->m_audioInput.length() > 0 || fNextArgRequired;
+            pstrNextArg = &pconsoleArgs->m_audioInput;
+            fNextArgRequired = true;
+        }
+        else if (PAL::wcsicmp(pszArg, L"--mockmicrophone") == 0)
+        {
+            fShowOptions = pconsoleArgs->m_audioInput.length() > 0 || fNextArgRequired;
+            pconsoleArgs->m_audioInput = L"mockmicrophone";
+            pstrNextArg = &pconsoleArgs->m_strMockMicrophoneRealTimePercentage;
+            fNextArgRequired = false;
+        }
+        else if (PAL::wcsicmp(pszArg, L"--mockwavfile") == 0)
+        {
+            fShowOptions = pconsoleArgs->m_mockWavFileName.length() > 0 || fNextArgRequired;
+            pstrNextArg = &pconsoleArgs->m_mockWavFileName;
             fNextArgRequired = true;
         }
         else if (PAL::wcsicmp(pszArg, L"--unidec") == 0)
@@ -216,15 +229,25 @@ bool CarbonTestConsole::ValidateConsoleArgs(ConsoleArgs* pconsoleArgs)
 {
     auto fValid = true;
 
-    if (pconsoleArgs->m_strInput.length() > 0 && PAL::wcsicmp(pconsoleArgs->m_strInput.c_str(), L"microphone") == 0)
+    if (pconsoleArgs->m_audioInput.empty() || PAL::wcsicmp(pconsoleArgs->m_audioInput.c_str(), L"microphone") == 0)
     {
-        pconsoleArgs->m_fMicrophoneInput = true;
-        pconsoleArgs->m_strInput.clear();
+        pconsoleArgs->m_useInteractiveMicrophone = true;
+        pconsoleArgs->m_audioInput.clear();
     }
-
-    if (pconsoleArgs->m_strInput.length() > 0 && PAL::waccess(pconsoleArgs->m_strInput.c_str(), 0) != 0)
+    else if (PAL::wcsicmp(pconsoleArgs->m_audioInput.c_str(), L"mockmicrophone") == 0)
     {
-        SPX_DBG_TRACE_ERROR("File does not exist: %ls", pconsoleArgs->m_strInput.c_str());
+        pconsoleArgs->m_useMockMicrophone = true;
+        pconsoleArgs->m_audioInput.clear();
+
+        if (!pconsoleArgs->m_strMockMicrophoneRealTimePercentage.empty())
+        {
+            pconsoleArgs->m_mockMicrophoneRealTimePercentage = (int16_t)atoi(PAL::ToString(pconsoleArgs->m_strMockMicrophoneRealTimePercentage).c_str());
+            fValid = pconsoleArgs->m_mockMicrophoneRealTimePercentage >= 0 && pconsoleArgs->m_mockMicrophoneRealTimePercentage <= 200;
+        }
+    }
+    else if (PAL::waccess(pconsoleArgs->m_audioInput.c_str(), 0) != 0)
+    {
+        SPX_DBG_TRACE_ERROR("File does not exist: %ls", pconsoleArgs->m_audioInput.c_str());
         fValid = false;
     }
 
@@ -494,6 +517,8 @@ void CarbonTestConsole::ConsoleInput_HelpOnRecognizer()
     ConsoleWriteLine(L"    Recognize");
     ConsoleWriteLine(L"    StartContinuous");
     ConsoleWriteLine(L"    StopContinuous");
+    ConsoleWriteLine(L"    StartKeyword");
+    ConsoleWriteLine(L"    StopKeyword");
     ConsoleWriteLine(L"");
     ConsoleWriteLine(L"  Events: ");
     ConsoleWriteLine(L"");
@@ -521,6 +546,8 @@ void CarbonTestConsole::ConsoleInput_HelpOnSpeech()
     ConsoleWriteLine(L"    Recognize");
     ConsoleWriteLine(L"    StartContinuous");
     ConsoleWriteLine(L"    StopContinuous");
+    ConsoleWriteLine(L"    StartKeyword");
+    ConsoleWriteLine(L"    StopKeyword");
     ConsoleWriteLine(L"");
     ConsoleWriteLine(L"    set string         {name} {value}");
     ConsoleWriteLine(L"    get string         {name}");
@@ -557,6 +584,8 @@ void CarbonTestConsole::ConsoleInput_HelpOnIntent()
     ConsoleWriteLine(L"    Recognize");
     ConsoleWriteLine(L"    StartContinuous");
     ConsoleWriteLine(L"    StopContinuous");
+    ConsoleWriteLine(L"    StartKeyword");
+    ConsoleWriteLine(L"    StopKeyword");
     ConsoleWriteLine(L"");
     ConsoleWriteLine(L"  Events: ");
     ConsoleWriteLine(L"");
@@ -642,6 +671,14 @@ void CarbonTestConsole::ConsoleInput_Recognizer(const wchar_t* psz, std::shared_
      {
          Recognizer_StopContinuousRecognition(recognizer);
      }
+     else if (PAL::wcsicmp(psz, L"startkeyword") == 0)
+     {
+         Recognizer_StartKeywordRecognition(recognizer);
+     }
+     else if (PAL::wcsicmp(psz, L"stopkeyword ") == 0)
+     {
+         Recognizer_StopKeywordRecognition(recognizer);
+     }
      else if (PAL::wcsnicmp(psz, L"sessionstarted ", wcslen(L"sessionstarted ")) == 0)
      {
          auto fn = std::bind(&CarbonTestConsole::Recognizer_SessionStartedHandler, this, std::placeholders::_1);
@@ -713,6 +750,14 @@ void CarbonTestConsole::ConsoleInput_SpeechRecognizer(const wchar_t* psz, std::s
     else if (PAL::wcsicmp(psz, L"stopcontinuous") == 0)
     {
         Recognizer_StopContinuousRecognition(speechRecognizer);
+    }
+    else if (PAL::wcsicmp(psz, L"startkeyword") == 0)
+    {
+        Recognizer_StartKeywordRecognition(speechRecognizer);
+    }
+    else if (PAL::wcsicmp(psz, L"stopkeyword") == 0)
+    {
+        Recognizer_StopKeywordRecognition(speechRecognizer);
     }
     else if (PAL::wcsnicmp(psz, L"sessionstarted ", wcslen(L"sessionstarted ")) == 0)
     {
@@ -809,6 +854,14 @@ void CarbonTestConsole::ConsoleInput_IntentRecognizer(const wchar_t* psz, std::s
     else if (PAL::wcsicmp(psz, L"stopcontinuous") == 0)
     {
         Recognizer_StopContinuousRecognition(intentRecognizer);
+    }
+    else if (PAL::wcsicmp(psz, L"startkeyword") == 0)
+    {
+        Recognizer_StartKeywordRecognition(intentRecognizer);
+    }
+    else if (PAL::wcsicmp(psz, L"stopkeyword") == 0)
+    {
+        Recognizer_StopKeywordRecognition(intentRecognizer);
     }
     else if (PAL::wcsnicmp(psz, L"sessionstarted ", wcslen(L"sessionstarted ")) == 0)
     {
@@ -1018,6 +1071,28 @@ void CarbonTestConsole::Recognizer_StopContinuousRecognition(std::shared_ptr<T>&
     ConsoleWriteLine(L"StopContinuousRecognitionAsync %ls... Waiting...", name.c_str());
     future.get();
     ConsoleWriteLine(L"StopContinuousRecognitionAsync %ls... Waiting... Done!\n", name.c_str());
+}
+
+template <class T>
+void CarbonTestConsole::Recognizer_StartKeywordRecognition(std::shared_ptr<T>& recognizer)
+{
+    auto name = PAL::ToWString(PAL::GetTypeName(*recognizer.get()));
+    ConsoleWriteLine(L"\nStartKeywordRecognitionAsync %ls...", name.c_str());
+    auto future = recognizer->StartKeywordRecognitionAsync(L"Hey Cortana");
+    ConsoleWriteLine(L"StartKeywordRecognitionAsync %ls... Waiting...", name.c_str());
+    future.get();
+    ConsoleWriteLine(L"StartKeywordRecognitionAsync %ls... Waiting... Done!\n", name.c_str());
+}
+
+template <class T>
+void CarbonTestConsole::Recognizer_StopKeywordRecognition(std::shared_ptr<T>& recognizer)
+{
+    auto name = PAL::ToWString(PAL::GetTypeName(*recognizer.get()));
+    ConsoleWriteLine(L"\nStopKeywordRecognitionAsync %ls...", name.c_str());
+    auto future = recognizer->StopKeywordRecognitionAsync();
+    ConsoleWriteLine(L"StopKeywordRecognitionAsync %ls... Waiting...", name.c_str());
+    future.get();
+    ConsoleWriteLine(L"StopKeywordRecognitionAsync %ls... Waiting... Done!\n", name.c_str());
 }
 
 template <class T>
@@ -1292,6 +1367,16 @@ std::wstring CarbonTestConsole::ToString(const TranslationEventArgs<TranslationR
 
 void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
 {
+    if (pconsoleArgs->m_useMockMicrophone)
+    {
+        DefaultRecognizerFactory::Parameters::SetBool(LR"(CARBON-INTERNAL-MOCK-Microphone)", true);
+        DefaultRecognizerFactory::Parameters::SetNumber(LR"(CARBON-INTERNAL-MOCK-RealTimeAudioPercentage)", pconsoleArgs->m_mockMicrophoneRealTimePercentage);
+        if (!pconsoleArgs->m_mockWavFileName.empty())
+        {
+            DefaultRecognizerFactory::Parameters::SetString(LR"(CARBON-INTERNAL-MOCK-WavFileAudio)", pconsoleArgs->m_mockWavFileName.c_str());
+        }
+    }
+
     if (!pconsoleArgs->m_strEndpointUri.empty())
     {
         DefaultRecognizerFactory::SetSpeechEndpoint(pconsoleArgs->m_strEndpointUri.c_str());
@@ -1299,8 +1384,6 @@ void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
 
     if (!pconsoleArgs->m_strCustomSpeechModelId.empty())
     {
-        // BUG: Need to expose the parameter names in API, or add an API method which sets model id. (Both in C and C++).
-        // https://msasg.visualstudio.com/Skyman/Carbon%20Team/_workitems/edit/1197958
         DefaultRecognizerFactory::Parameters::SetString(LR"(SPEECH-ModelId)", pconsoleArgs->m_strCustomSpeechModelId.c_str());
     }
 
@@ -1342,7 +1425,7 @@ void CarbonTestConsole::InitCarbon(ConsoleArgs* pconsoleArgs)
 {
     try
     {
-        InitRecognizer(pconsoleArgs->m_strRecognizerType, pconsoleArgs->m_strInput);
+        InitRecognizer(pconsoleArgs->m_strRecognizerType, pconsoleArgs->m_audioInput);
         InitCommandSystem();
     }
     catch (std::exception ex)
@@ -1530,6 +1613,11 @@ void CarbonTestConsole::RunSample(const std::wstring& strSampleName)
     {
         ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
         Sample_HelloWorld_Subscription_With_CRIS();
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"helloworld kws") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        Sample_HelloWorld_Kws();
     }
     else if (PAL::wcsicmp(strSampleName.c_str(), L"helloworld french") == 0)
     {

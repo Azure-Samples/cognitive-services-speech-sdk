@@ -39,7 +39,6 @@ ResultType CSpxRecognitionResult::GetType()
 
 void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type)
 {
-    SPX_DBG_TRACE_FUNCTION();
     m_reason = Reason::IntermediateResult;
     m_type = type;
 
@@ -48,11 +47,12 @@ void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* resultId, cons
         : resultId;
 
     m_text = text;
+
+    SPX_DBG_TRACE_VERBOSE("%s: resultId=%S", __FUNCTION__, m_resultId.c_str());
 }
 
 void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type)
 {
-    SPX_DBG_TRACE_FUNCTION();
     m_reason = Reason::Recognized;
     m_type = type;
 
@@ -63,6 +63,8 @@ void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, const wchar
     m_text = text == nullptr
         ? L""
         : text;
+
+    SPX_DBG_TRACE_VERBOSE("%s: resultId=%S", __FUNCTION__, m_resultId.c_str());
 }
 
 void CSpxRecognitionResult::InitNoMatch(enum ResultType type)
@@ -76,7 +78,9 @@ void CSpxRecognitionResult::InitError(const wchar_t* text)
 {
     SPX_DBG_TRACE_FUNCTION();
     m_reason = Reason::Canceled;
-    m_text = (text == nullptr) ? L"" : text;
+    m_text = (text == nullptr)
+         ? L""
+         : text;
 }
 
 std::wstring CSpxRecognitionResult::GetIntentId()

@@ -12,15 +12,16 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-class ISpxMockAudioReaderImpl : public ISpxAudioReader
+class ISpxMockAudioReaderImpl : public ISpxAudioReader, public ISpxAudioReaderRealTime
 {
 public:
 
     ISpxMockAudioReaderImpl() = default;
 
+    // --- ISpxAudioReaderRealTime ---
+    void SetRealTimePercentage(uint8_t percentage);
 
     // --- ISpxAudioReader ---
-
     uint16_t GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat);
     uint32_t Read(uint8_t* pbuffer, uint32_t cbBuffer);
     void Close() { }
@@ -32,6 +33,8 @@ private:
     ISpxMockAudioReaderImpl(const ISpxMockAudioReaderImpl&) = delete;
     ISpxMockAudioReaderImpl& operator=(ISpxMockAudioReaderImpl&&) = delete;
     ISpxMockAudioReaderImpl& operator=(const ISpxMockAudioReaderImpl&) = delete;
+
+    uint8_t m_simulateRealtimePercentage = 0;     // 0 == as fast as possible; 100 == real time; 200 == 2x slower than real time
 };
 
 

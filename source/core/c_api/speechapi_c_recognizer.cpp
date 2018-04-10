@@ -417,6 +417,118 @@ SPXAPI Recognizer_StopContinuousRecognitionAsync_WaitFor(SPXASYNCHANDLE hasync, 
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+SPXAPI Recognizer_StartKeywordRecognition(SPXRECOHANDLE hreco, const wchar_t* keyword)
+{
+    SPX_INIT_HR(hr);   
+
+    SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
+    if (SPX_SUCCEEDED(hr))
+    {
+        SPX_REPORT_ON_FAIL(hr = Recognizer_StartKeywordRecognitionAsync(hreco, keyword, &hasync));
+    }
+
+    if (SPX_SUCCEEDED(hr))
+    {
+        SPX_REPORT_ON_FAIL(hr = Recognizer_StartKeywordRecognitionAsync_WaitFor(hasync, UINT32_MAX));
+    }
+
+    if (hasync != SPXHANDLE_INVALID)
+    {
+        // Don't overwrite error code from earlier function calls when cleaning up async handles
+        SPX_REPORT_ON_FAIL(/* hr = */ Recognizer_AsyncHandle_Close(hasync));
+        hasync = SPXHANDLE_INVALID;
+    }
+
+    SPX_RETURN_HR(hr);
+}
+
+SPXAPI Recognizer_StartKeywordRecognitionAsync(SPXRECOHANDLE hreco, const wchar_t* keyword, SPXASYNCHANDLE* phasync)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *phasync = SPXHANDLE_INVALID;
+
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        auto recognizer = (*recohandles)[hreco];
+
+        auto asyncop = recognizer->StartKeywordRecognitionAsync(keyword);
+        auto ptr = std::make_shared<CSpxAsyncOp<void>>(std::move(asyncop));
+
+        auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
+        *phasync = asynchandles->TrackHandle(ptr);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI Recognizer_StartKeywordRecognitionAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t milliseconds)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
+        auto asyncop = (*asynchandles)[hasync];
+
+        auto completed = asyncop->WaitFor(milliseconds);
+        hr = completed ? SPX_NOERROR : SPXERR_TIMEOUT;
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI Recognizer_StopKeywordRecognition(SPXRECOHANDLE hreco)
+{
+    SPX_INIT_HR(hr);
+
+    SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
+    if (SPX_SUCCEEDED(hr))
+    {
+        SPX_REPORT_ON_FAIL(hr = Recognizer_StopKeywordRecognitionAsync(hreco, &hasync));
+    }
+
+    if (SPX_SUCCEEDED(hr))
+    {
+        SPX_REPORT_ON_FAIL(hr = Recognizer_StopKeywordRecognitionAsync_WaitFor(hasync, UINT32_MAX));
+    }
+
+    if (hasync != SPXHANDLE_INVALID)
+    {
+        // Don't overwrite error code from earlier function calls when cleaning up async handles
+        SPX_REPORT_ON_FAIL(/* hr = */ Recognizer_AsyncHandle_Close(hasync));
+        hasync = SPXHANDLE_INVALID;
+    }
+
+    SPX_RETURN_HR(hr);
+}
+
+SPXAPI Recognizer_StopKeywordRecognitionAsync(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *phasync = SPXHANDLE_INVALID;
+
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        auto recognizer = (*recohandles)[hreco];
+
+        auto asyncop = recognizer->StopKeywordRecognitionAsync();
+        auto ptr = std::make_shared<CSpxAsyncOp<void>>(std::move(asyncop));
+
+        auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
+        *phasync = asynchandles->TrackHandle(ptr);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI Recognizer_StopKeywordRecognitionAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t milliseconds)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();
+        auto asyncop = (*asynchandles)[hasync];
+
+        auto completed = asyncop->WaitFor(milliseconds);
+        hr = completed ? SPX_NOERROR : SPXERR_TIMEOUT;
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
 SPXAPI Recognizer_SessionStarted_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext)
 {
     return Recognizer_SessionEvent_SetCallback(&ISpxRecognizerEvents::SessionStarted, hreco, pCallback, pvContext);

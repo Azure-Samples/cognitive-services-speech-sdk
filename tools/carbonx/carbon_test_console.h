@@ -35,8 +35,14 @@ private:
         std::wstring m_strUseLuEngineProperty;
         bool m_fCommandSystem = false;
         
-        bool m_fMicrophoneInput = true;
-        std::wstring m_strInput;
+        std::wstring m_audioInput;
+        bool m_useInteractiveMicrophone = false;
+        bool m_useMockMicrophone = false;
+
+        std::wstring m_strMockMicrophoneRealTimePercentage;
+        int16_t m_mockMicrophoneRealTimePercentage = 100;
+
+        std::wstring m_mockWavFileName;
 
         std::wstring m_strEndpointUri;
         std::wstring m_strCustomSpeechModelId;
@@ -107,6 +113,12 @@ private:
 
     template <class T>
     void Recognizer_StopContinuousRecognition(std::shared_ptr<T>& recognizer);
+
+    template <class T>
+    void Recognizer_StartKeywordRecognition(std::shared_ptr<T>& recognizer);
+
+    template <class T>
+    void Recognizer_StopKeywordRecognition(std::shared_ptr<T>& recognizer);
 
     template <class T>
     void Recognizer_Event(const wchar_t* psz, EventSignal<T>& recognizerEvent, typename::EventSignal<T>::CallbackFunction callback);
@@ -202,6 +214,8 @@ private:
     void Sample_HelloWorld_Subscription();
     void Sample_HelloWorld_Subscription_With_CRIS();
     void Sample_HelloWorld_Language(const wchar_t* language);
+
+    void Sample_HelloWorld_Kws();
 
 
 private:

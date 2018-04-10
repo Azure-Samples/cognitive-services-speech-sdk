@@ -99,7 +99,7 @@ SPXHR SampleHandler::QueueRead()
 
     if (!SUCCEEDED(hr))
     {
-        SPX_TRACE_VERBOSE("%s: ReadSample failed", __FUNCTION__);
+        SPX_TRACE_WARNING("%s: ReadSample failed", __FUNCTION__);
         unique_lock<mutex> lock(m_mutex);
         // In case, read failed, unset the sink, so that the next call to Start 
         // won't fail without an explicit call to Stop.

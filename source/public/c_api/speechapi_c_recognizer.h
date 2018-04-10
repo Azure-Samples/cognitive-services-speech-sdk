@@ -52,6 +52,14 @@ SPXAPI Recognizer_StopContinuousRecognition(SPXRECOHANDLE hreco);
 SPXAPI Recognizer_StopContinuousRecognitionAsync(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync);
 SPXAPI Recognizer_StopContinuousRecognitionAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t milliseconds);
 
+SPXAPI Recognizer_StartKeywordRecognition(SPXRECOHANDLE hreco, const wchar_t* keyword);
+SPXAPI Recognizer_StartKeywordRecognitionAsync(SPXRECOHANDLE hreco, const wchar_t* keyword, SPXASYNCHANDLE* phasync);
+SPXAPI Recognizer_StartKeywordRecognitionAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t milliseconds);
+
+SPXAPI Recognizer_StopKeywordRecognition(SPXRECOHANDLE hreco);
+SPXAPI Recognizer_StopKeywordRecognitionAsync(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync);
+SPXAPI Recognizer_StopKeywordRecognitionAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t milliseconds);
+
 typedef void (*PSESSION_CALLBACK_FUNC)(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext);
 SPXAPI Recognizer_SessionStarted_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext);
 SPXAPI Recognizer_SessionStopped_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext);

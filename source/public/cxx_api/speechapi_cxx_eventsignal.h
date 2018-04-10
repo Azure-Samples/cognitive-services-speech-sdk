@@ -37,6 +37,8 @@ public:
 
     virtual ~EventSignal()
     {
+        m_connectedCallback = nullptr;
+        m_disconnectedCallback = nullptr;
         DisconnectAll();
     };
 

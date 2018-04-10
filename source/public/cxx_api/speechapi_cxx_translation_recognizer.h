@@ -184,6 +184,26 @@ public:
         return future;
     };
 
+    std::future<void> StartKeywordRecognitionAsync(const wchar_t* keyword) override
+    {
+        UNUSED(keyword);
+        auto future = std::async(std::launch::async, [=]() -> void {
+            SPX_THROW_ON_FAIL(SPXERR_NOT_IMPL);
+        });
+
+        return future;
+    };
+
+    std::future<void> StopKeywordRecognitionAsync() override
+    {
+        auto future = std::async(std::launch::async, [=]() -> void {
+            SPX_THROW_ON_FAIL(SPXERR_NOT_IMPL);
+        });
+
+        return future;
+    };
+
+
     /*
     * Defines translation specific events.
     * TODO: Currently, AsyncRecognizer defines events for speech recognitions. Some of events in AsyncRecognizer

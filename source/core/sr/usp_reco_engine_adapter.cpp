@@ -18,16 +18,17 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-int CSpxUspRecoEngineAdapter::m_instanceCounter = 0;
+int CSpxUspRecoEngineAdapter::m_saveToWavCounter = 0;
 
 
 CSpxUspRecoEngineAdapter::CSpxUspRecoEngineAdapter() :
+    m_audioState(AudioState::Idle),
+    m_uspState(UspState::Idle),
     m_servicePreferedBufferSize(0),
     m_bytesInBuffer(0),
     m_ptrIntoBuffer(nullptr),
     m_bytesLeftInBuffer(0)
 {
-    m_instanceCounter++;
 }
 
 void CSpxUspRecoEngineAdapter::Init()
@@ -35,38 +36,114 @@ void CSpxUspRecoEngineAdapter::Init()
     SPX_IFTRUE_THROW_HR(GetSite() == nullptr, SPXERR_UNINITIALIZED);
     SPX_IFTRUE_THROW_HR(m_handle != nullptr, SPXERR_ALREADY_INITIALIZED);
 
-    UspInitialize();
-    DumpFileInit();
+    WriteLock_Type writeLock(m_stateMutex);
+    if (ChangeState(AudioState::Idle, UspState::Idle, AudioState::Idle, UspState::ReadyForFormat))
+    {
+        writeLock.unlock();
+
+        UspInitialize();
+        SaveToWavInit();
+    }
+    else
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_TRACE_WARNING("%s: Unexpected USP State transition (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
 }
 
 void CSpxUspRecoEngineAdapter::Term()
 {
     SPX_DBG_TRACE_SCOPE("Terminating CSpxUspRecoEngineAdapter...", "Terminating CSpxUspRecoEngineAdapter... Done!");
-    
-    SPX_DBG_TRACE_VERBOSE("%s(0x%x)", __FUNCTION__, m_handle.get());
-    m_handle.reset();
 
-    DumpFileClose();
+    WriteLock_Type writeLock(m_stateMutex);
+    if (ChangeState(UspState::Terminating))
+    {
+        writeLock.unlock();
+
+        SPX_DBG_TRACE_VERBOSE("%s(0x%x)", __FUNCTION__, m_handle.get());
+        m_handle.reset();
+        SaveToWavClose();
+
+        writeLock.lock();
+        ChangeState(UspState::Zombie);
+    }
+    else
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_TRACE_WARNING("%s: Unexpected USP State transition (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
 }
 
 void CSpxUspRecoEngineAdapter::SetFormat(WAVEFORMATEX* pformat)
 {
+    SPX_DBG_TRACE_VERBOSE_IF(pformat == nullptr, "%s - pformat == nullptr", __FUNCTION__);
+    SPX_DBG_TRACE_VERBOSE_IF(pformat != nullptr, "%s\n  wFormatTag:      %s\n  nChannels:       %d\n  nSamplesPerSec:  %d\n  nAvgBytesPerSec: %d\n  nBlockAlign:     %d\n  wBitsPerSample:  %d\n  cbSize:          %d",
+        __FUNCTION__,
+        pformat->wFormatTag == WAVE_FORMAT_PCM ? "PCM" : std::to_string(pformat->wFormatTag).c_str(),
+        pformat->nChannels,
+        pformat->nSamplesPerSec,
+        pformat->nAvgBytesPerSec,
+        pformat->nBlockAlign,
+        pformat->wBitsPerSample,
+        pformat->cbSize);
     SPX_IFTRUE_THROW_HR(m_handle == nullptr, SPXERR_UNINITIALIZED);
 
-    if (pformat != nullptr)
+    WriteLock_Type writeLock(m_stateMutex);
+    if (IsState(UspState::Error) || IsState(UspState::Terminating) || IsState(UspState::Zombie))
     {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_DBG_TRACE_VERBOSE("%s: IGNORING (Err/Terminating/Zombie)... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
+    else if (pformat != nullptr && ChangeState(AudioState::Idle, UspState::ReadyForFormat, AudioState::ReadyToProcess, UspState::SendingAudioData))
+    {
+        writeLock.unlock();
+
+        UspSendSpeechContext();
         UspWriteFormat(pformat);
         m_servicePreferedBufferSize = (size_t)pformat->nSamplesPerSec * pformat->nBlockAlign * m_servicePreferedMilliseconds / 1000;
     }
+    else if (pformat == nullptr && 
+             (ChangeState(AudioState::ProcessingAudio, AudioState::WaitingForDone) ||
+              ChangeState(AudioState::Paused, AudioState::WaitingForDone)))
+    {
+        writeLock.unlock();
+
+        UspWrite_Flush();
+        m_servicePreferedBufferSize = 0;
+    }
     else
     {
-        UspWrite_Flush();
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_TRACE_WARNING("%s: Unexpected USP State transition (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
     }
 }
 
 void CSpxUspRecoEngineAdapter::ProcessAudio(AudioData_Type data, uint32_t size)
 {
-    UspWrite(data.get(), size);
+    SPX_DBG_TRACE_VERBOSE_IF(0, "%s: size=%d", __FUNCTION__, size);
+
+    WriteLock_Type writeLock(m_stateMutex);
+    if (IsState(UspState::Error) || IsState(UspState::Terminating) || IsState(UspState::Zombie))
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_DBG_TRACE_VERBOSE("%s: IGNORING (Err/Terminating/Zombie)... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
+    else if (IsState(AudioState::ProcessingAudio) || ChangeState(AudioState::ReadyToProcess, AudioState::ProcessingAudio))
+    {
+        writeLock.unlock();
+        UspWrite(data.get(), size);
+    }
+    else if (IsState(AudioState::Paused))
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_DBG_TRACE_VERBOSE("%s: Ignoring audio (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+        // TODO: RobCh: Deal with paused correctly (store the data until we need it, and then when we transition to ProcessingAudio, send it)
+    }
+    else
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_TRACE_WARNING("%s: Ignoring audio (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
 }
 
 void CSpxUspRecoEngineAdapter::UspInitialize()
@@ -109,6 +186,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(USP::Client& client)
 
     if (!endpoint.empty())                                  // Use the SPECIFIED endpoint
     {
+        SPX_DBG_TRACE_VERBOSE("Using Custom URL: %ls", endpoint.c_str());
         return client.SetEndpointUrl(PAL::ToString(endpoint));
     }
     
@@ -206,6 +284,41 @@ USP::Client&  CSpxUspRecoEngineAdapter::SetUspAuthentication(USP::Client& client
     throw std::runtime_error("No Authentication parameters were specified.");
 }
 
+void CSpxUspRecoEngineAdapter::UspSendSpeechContext()
+{
+    // Get the Dgi json payload
+    std::list<std::string> listenForList = GetListenForListFromSite();
+    auto listenForJson = GetDgiJsonFromListenForList(listenForList);
+
+    // Get the intent payload
+    std::string provider, id, key;
+    GetIntentInfoFromSite(provider, id, key);
+    auto intentJson = GetIntentJsonFromIntentInfo(provider, id, key);
+
+    // Do we expect to receive an intent payload from the service?
+    m_expectIntentResponse = !intentJson.empty();
+
+    // Take the json payload and the intent payload, and create the speech context json
+    auto speechContext = GetSpeechContextJson(listenForJson, intentJson);
+    if (!speechContext.empty())
+    {
+        // Since it's not empty, we'll send it (empty means we don't have either dgi or intent payload)
+        std::string messagePath = "speech.context";
+        UspSendMessage(messagePath, speechContext);
+    }
+}
+
+void CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, const std::string &buffer)
+{
+    SPX_DBG_TRACE_VERBOSE("%s='%s'", messagePath.c_str(), buffer.c_str());
+    UspSendMessage(messagePath, (const uint8_t*)buffer.c_str(), buffer.length());
+}
+
+void CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size)
+{
+    m_handle->SendMessage(messagePath, buffer, size);
+}
+
 void CSpxUspRecoEngineAdapter::UspWriteFormat(WAVEFORMATEX* pformat)
 {
     static const uint16_t cbTag = 4;
@@ -263,7 +376,7 @@ void CSpxUspRecoEngineAdapter::UspWrite_Actual(const uint8_t* buffer, size_t byt
 {
     SPX_DBG_TRACE_VERBOSE("%s(..., %d)", __FUNCTION__, byteToWrite);
     m_handle->WriteAudio(buffer, byteToWrite);
-    DumpFileWrite(buffer, byteToWrite);
+    SaveToWavWrite(buffer, byteToWrite);
 }
 
 void CSpxUspRecoEngineAdapter::UspWrite_Buffered(const uint8_t* buffer, size_t bytesToWrite)
@@ -317,60 +430,140 @@ void CSpxUspRecoEngineAdapter::UspWrite_Flush()
     m_handle->FlushAudio();
 }
 
-
 void CSpxUspRecoEngineAdapter::OnSpeechStartDetected(const USP::SpeechStartDetectedMsg& message)
 {
     SPX_DBG_TRACE_VERBOSE("Response: Speech.StartDetected message. Speech starts at offset %" PRIu64 " (100ns).\n", message.offset);
-    SPX_DBG_ASSERT(GetSite());
-    GetSite()->SpeechStartDetected(this, message.offset);
+
+    WriteLock_Type writeLock(m_stateMutex);
+    if (IsState(UspState::Error) || IsState(UspState::Terminating) || IsState(UspState::Zombie))
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_DBG_TRACE_VERBOSE("%s: IGNORING (Err/Terminating/Zombie)... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
+    else if (ChangeState(AudioState::ProcessingAudio, UspState::TurnStarted, AudioState::ProcessingAudio, UspState::SpeechStarted) ||
+             ChangeState(AudioState::WaitingForDone, UspState::TurnStarted, AudioState::WaitingForDone, UspState::SpeechStarted))
+    {
+        writeLock.unlock();
+
+        SPX_DBG_ASSERT(GetSite());
+        GetSite()->SpeechStartDetected(this, message.offset);
+    }
+    else
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_TRACE_WARNING("%s: Unexpected USP State transition (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
 }
 
 void CSpxUspRecoEngineAdapter::OnSpeechEndDetected(const USP::SpeechEndDetectedMsg& message)
 {
     SPX_DBG_TRACE_VERBOSE("Response: Speech.EndDetected message. Speech ends at offset %" PRIu64 " (100ns)\n", message.offset);
-    SPX_DBG_ASSERT(GetSite());
-    GetSite()->SpeechEndDetected(this, message.offset);
+
+    WriteLock_Type writeLock(m_stateMutex);
+    if (IsState(UspState::Error) || IsState(UspState::Terminating) || IsState(UspState::Zombie))
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_DBG_TRACE_VERBOSE("%s: IGNORING (Err/Terminating/Zombie)... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
+    else if (ChangeState(UspState::SpeechEnded))
+    {
+        writeLock.unlock();
+
+        SPX_DBG_ASSERT(GetSite());
+        GetSite()->SpeechEndDetected(this, message.offset);
+    }
+    else
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_TRACE_WARNING("%s: Unexpected USP State transition (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
 }
 
 void CSpxUspRecoEngineAdapter::OnSpeechHypothesis(const USP::SpeechHypothesisMsg& message)
 {
     SPX_DBG_TRACE_VERBOSE("Response: Speech.Hypothesis message. Starts at offset %" PRIu64 ", with duration %" PRIu64 " (100ns). Text: %ls\n", message.offset, message.duration, message.text.c_str());
-    SPX_DBG_ASSERT(GetSite());
 
-    // TODO: RobCh: Do something with the other fields in UspMsgSpeechHypothesis
-    auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), ResultType::Speech);
+    WriteLock_Type writeLock(m_stateMutex);
+    if (IsState(UspState::Error) || IsState(UspState::Terminating) || IsState(UspState::Zombie))
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_DBG_TRACE_VERBOSE("%s: IGNORING (Err/Terminating/Zombie)... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
+    else if (IsState(UspState::SpeechHypothesis) || ChangeState(UspState::SpeechStarted, UspState::SpeechHypothesis))
+    {
+        writeLock.unlock();
 
-    // Todo: offset (and duration) should be part of result. Now, offset is autaully ignored by the following function.
-    GetSite()->IntermediateRecoResult(this, message.offset, result);
+        SPX_DBG_ASSERT(GetSite());
+        auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
+
+        auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), ResultType::Speech);
+        GetSite()->IntermediateRecoResult(this, message.offset, result);
+    }
+    else
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_TRACE_WARNING("%s: Unexpected USP State transition (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
 }
 
 void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& message)
 {
     SPX_DBG_TRACE_VERBOSE("Response: Speech.Fragment message. Starts at offset %" PRIu64 ", with duration %" PRIu64 " (100ns). Text: %ls\n", message.offset, message.duration, message.text.c_str());
-    SPX_DBG_ASSERT(GetSite());
 
-    // TODO: RobCh: Do something with the other fields in UspMsgSpeechHypothesis
-    // TODO: Rob: do we want to treate speech.fragment message different than speech.hypothesis message at this level?
+    WriteLock_Type writeLock(m_stateMutex);
+    if (IsState(UspState::Error) || IsState(UspState::Terminating) || IsState(UspState::Zombie))
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_DBG_TRACE_VERBOSE("%s: IGNORING (Err/Terminating/Zombie)... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
+    else if (IsState(UspState::SpeechHypothesis) || ChangeState(UspState::SpeechStarted, UspState::SpeechHypothesis))
+    {
+        writeLock.unlock();
 
-    auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), ResultType::Speech);
+        SPX_DBG_ASSERT(GetSite());
+        auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
 
-    // Todo: offset (and duration) should be part of result. Now, offset is actually ignored by the following function.
-    GetSite()->IntermediateRecoResult(this, message.offset, result);
+        auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), ResultType::Speech);
+        GetSite()->IntermediateRecoResult(this, message.offset, result);
+    }
+    else
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_TRACE_WARNING("%s: Unexpected USP State transition (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
 }
 
 void CSpxUspRecoEngineAdapter::OnSpeechPhrase(const USP::SpeechPhraseMsg& message)
 {
     SPX_DBG_TRACE_VERBOSE("Response: Speech.Phrase message. Status: %d, Text: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n", message.recognitionStatus, message.displayText.c_str(), message.offset, message.duration);
-    SPX_DBG_ASSERT(GetSite());
 
-    // TODO: RobCh: Do something with the other fields in UspMsgSpeechPhrase
-    auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateFinalResult(nullptr, message.displayText.c_str(), ResultType::Speech);
+    WriteLock_Type writeLock(m_stateMutex);
+    if (IsState(UspState::Error) || IsState(UspState::Terminating) || IsState(UspState::Zombie))
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_DBG_TRACE_VERBOSE("%s: IGNORING (Err/Terminating/Zombie)... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
+    else if (ChangeState(UspState::SpeechEnded, UspState::ReceivedSpeechResult))
+    {
+        writeLock.unlock();
 
-    // Todo: offset (and duration) should be part of result. Now, offset is autaully ignored by the following function.
-    GetSite()->FinalRecoResult(this, message.offset, result);
+        // If we expect an intent response and we've received a successful speech recognition message...
+        if (m_expectIntentResponse && message.recognitionStatus == USP::RecognitionStatus::Success)
+        {
+            // Let's wait for the intent response (we'll fire the final result once we receive it)
+            FireFinalResultLater(message);
+        }
+        else
+        {
+            // Otherwise, we'll fire it right now
+            FireFinalResultNow(message);
+        }
+    }
+    else
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for warning trace
+        SPX_TRACE_WARNING("%s: Unexpected USP State transition (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
 }
 
 void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHypothesisMsg& message)
@@ -437,52 +630,133 @@ void CSpxUspRecoEngineAdapter::OnTranslationSynthesis(const USP::TranslationSynt
 void CSpxUspRecoEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
 {
     SPX_DBG_TRACE_VERBOSE("Response: Turn.Start message. Context.ServiceTag: %s\n", message.contextServiceTag.c_str());
-    SPX_DBG_ASSERT(GetSite());
-    GetSite()->AdditionalMessage(this, 0, AdditionalMessagePayloadFrom(message));
+
+    WriteLock_Type writeLock(m_stateMutex);
+    if (IsState(UspState::Error) || IsState(UspState::Terminating) || IsState(UspState::Zombie))
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_DBG_TRACE_VERBOSE("%s: IGNORING (Err/Terminating/Zombie)... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
+    else if (ChangeState(AudioState::ProcessingAudio, UspState::SendingAudioData, AudioState::ProcessingAudio, UspState::TurnStarted) ||
+             ChangeState(AudioState::WaitingForDone, UspState::SendingAudioData, AudioState::WaitingForDone, UspState::TurnStarted))
+    {
+        writeLock.unlock();
+
+        SPX_DBG_ASSERT(GetSite());
+        GetSite()->AdditionalMessage(this, 0, AdditionalMessagePayloadFrom(message));
+    }
+    else
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_TRACE_WARNING("%s: Unexpected USP State transition (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
 }
 
 void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
 {
-    SPX_DBG_TRACE_VERBOSE("Response: Turn.End message.\n");
     UNUSED(message);
-    SPX_DBG_ASSERT(GetSite());
-    GetSite()->DoneProcessingAudio(this);
+    SPX_DBG_TRACE_VERBOSE("Response: Turn.End message.\n");
+
+    WriteLock_Type writeLock(m_stateMutex);
+    if (IsState(UspState::Error) || IsState(UspState::Terminating) || IsState(UspState::Zombie))
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_DBG_TRACE_VERBOSE("%s: IGNORING (Err/Terminating/Zombie)... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
+    else if (ChangeState(AudioState::ProcessingAudio, UspState::FiredFinalResult, AudioState::ProcessingAudio, UspState::SendingAudioData))
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for the trace statement
+        SPX_DBG_TRACE_VERBOSE("%s: Resuming ProcessingAudio; audioState/uspState=%d/%d", __FUNCTION__, m_audioState, m_uspState);
+    }
+    else if (IsState(UspState::WaitingForIntent))
+    {
+        writeLock.unlock();
+        SPX_DBG_TRACE_VERBOSE("%s: Intent never came from service!! ... complete the delayed fire final result", __FUNCTION__);
+        FireFinalResultLater_WaitingForIntentComplete();
+    }
+    else if (ChangeState(AudioState::WaitingForDone, UspState::FiredFinalResult, AudioState::Idle, UspState::ReadyForFormat))
+    {
+        writeLock.unlock();
+        SPX_DBG_ASSERT(GetSite());
+        GetSite()->DoneProcessingAudio(this);
+    }
+    else if (ChangeState(AudioState::WaitingForDone, UspState::WaitingForIntent, AudioState::ProcessingAudio, UspState::SendingAudioData))
+    {
+        writeLock.unlock();
+        FireFinalResultLater_WaitingForIntentComplete();
+
+        SPX_DBG_ASSERT(GetSite());
+        GetSite()->DoneProcessingAudio(this);
+    }
+    else if (ChangeState(AudioState::Paused, UspState::FiredFinalResult, AudioState::ProcessingAudio, UspState::SendingAudioData))
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for the trace statement
+        SPX_DBG_TRACE_VERBOSE("%s: Resuming ProcessingAudio; audioState/uspState=%d/%d", __FUNCTION__, m_audioState, m_uspState);
+    }
+    else
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_TRACE_WARNING("%s: Unexpected USP State transition (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
 }
 
 void CSpxUspRecoEngineAdapter::OnError(const std::string& error)
 {
     SPX_DBG_TRACE_VERBOSE("Response: On Error: %s.\n", error.c_str());
-    SPX_DBG_ASSERT(GetSite());
-    auto site = GetSite();
-    site->Error(this, error);
-    site->DoneProcessingAudio(this);
-}
 
-void CSpxUspRecoEngineAdapter::DumpFileInit()
-{
-    // TODO: is this audio dumping some debugging cruft, is it still needed?
-    // on Windows, this fopen returns null if the same file was already opened,
-    // as a result writing segfaults. Adding a counter the filename, so that
-    // each recognizer will get its own dumpfile.
-    // On Android, this fails even because the default location might not be writeable
-    // for the app package.
-    std::string filename = "uspaudiodump_" + std::to_string(m_instanceCounter) + ".wav";
-    PAL::fopen_s(&m_hfile, filename.c_str(), "wb");
-}
-
-void CSpxUspRecoEngineAdapter::DumpFileWrite(const uint8_t* buffer, size_t bytesToWrite)
-{
-    if (m_hfile != nullptr)
+    WriteLock_Type writeLock(m_stateMutex);
+    if (IsState(UspState::Error) || IsState(UspState::Terminating) || IsState(UspState::Zombie))
     {
-        fwrite(buffer, 1, bytesToWrite, m_hfile);
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_DBG_TRACE_VERBOSE("%s: IGNORING (Err/Terminating/Zombie)... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
+    else if (ChangeState(UspState::Error))
+    {
+        auto site = GetSite();
+
+        writeLock.unlock();
+        site->Error(this, error);
+        writeLock.lock();
+
+        if (ChangeState(AudioState::ReadyToProcess, AudioState::Idle) ||
+            ChangeState(AudioState::ProcessingAudio, AudioState::Idle))
+        {
+            writeLock.unlock();
+            site->DoneProcessingAudio(this);
+        }
+    }
+    else
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_TRACE_WARNING("%s: Unexpected USP State transition (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
     }
 }
 
-void CSpxUspRecoEngineAdapter::DumpFileClose()
+void CSpxUspRecoEngineAdapter::OnUserMessage(const std::string& path, const std::string& contentType, const uint8_t* buffer, size_t size)
 {
-    if (m_hfile != nullptr)
-        fclose(m_hfile);
-    m_hfile = nullptr;
+    UNUSED(contentType);
+    UNUSED(buffer);
+    UNUSED(size);
+    SPX_DBG_TRACE_VERBOSE("Response: Usp User Message: %s, content-type=%s", path.c_str(), contentType.c_str());
+
+    if (path == "response")
+    {
+        WriteLock_Type writeLock(m_stateMutex);
+        if (IsState(UspState::WaitingForIntent))
+        {
+            writeLock.unlock();
+
+            std::string luisJson((const char*)buffer, size);
+            SPX_DBG_TRACE_VERBOSE("USP User Message: response; luisJson='%s'", luisJson.c_str());
+
+            FireFinalResultLater_WaitingForIntentComplete(luisJson);
+        }
+        else
+        {
+            SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+            SPX_TRACE_WARNING("%s: Unexpected USP State transition (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+        }
+    }
 }
 
 uint8_t* CSpxUspRecoEngineAdapter::FormatBufferWriteBytes(uint8_t* buffer, const uint8_t* source, size_t bytes)
@@ -502,5 +776,255 @@ uint8_t* CSpxUspRecoEngineAdapter::FormatBufferWriteChars(uint8_t* buffer, const
     std::memcpy(buffer, psz, cch);
     return buffer + cch;
 }
+
+std::list<std::string> CSpxUspRecoEngineAdapter::GetListenForListFromSite()
+{
+    SPX_DBG_ASSERT(GetSite() != nullptr);
+    return GetSite()->GetListenForList();
+}
+
+std::string CSpxUspRecoEngineAdapter::GetDgiJsonFromListenForList(std::list<std::string>& listenForList)
+{
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    auto noDGI = properties->GetBooleanValue(L"CARBON-INTERNAL-USP-NoDGI", false);
+
+    std::string dgiJson;
+
+    std::list<std::string> grammars;
+    std::list<std::string> genericItems;
+
+    for (auto listenFor : listenForList)
+    {
+        if (listenFor.length() > 3 && 
+            listenFor[0] == '{' && listenFor[listenFor.length() - 1] == '}' && 
+            listenFor.find(':') != std::string::npos)
+        {
+            std::string ref = listenFor.substr(1, listenFor.length() - 2);
+            ref.replace(ref.find(':'), 1, "/");
+            grammars.push_back(std::move(ref));
+        }
+        else
+        {
+            genericItems.push_back(std::move(listenFor));
+        }
+    }
+
+    if (grammars.size() > 0 || genericItems.size() > 0)
+    {
+        bool appendComma = false;
+
+        dgiJson = "{";  // start object
+
+        if (genericItems.size() > 0)
+        {
+            dgiJson += R"("Groups": [)";  // start "Group" array
+            dgiJson += R"({"Type":"Generic","Items":[)"; // start Generic Items array
+
+            appendComma = false;
+            for (auto item : genericItems)
+            {
+                dgiJson += appendComma ? "," : "";
+                dgiJson += R"({"Text":")";
+                dgiJson += item;
+                dgiJson += R"("})";
+                appendComma = true;
+            }
+
+            dgiJson += "]}"; // close Generic Items array
+            dgiJson += "]";  // close "Group" array
+
+            appendComma = true;
+        }
+
+        if (grammars.size() > 0)
+        {
+            dgiJson += appendComma ? "," : "";
+            dgiJson += R"("ReferenceGrammars": [)";
+
+            appendComma = false;
+            for (auto grammar : grammars)
+            {
+                // deal with commas
+                dgiJson += appendComma ? "," : "";
+                dgiJson += "\"";
+                dgiJson += grammar;
+                dgiJson += "\"";
+                appendComma = true;
+            }
+
+            dgiJson += "]";
+            appendComma = true;
+        }
+
+        dgiJson += "}";  // close object
+    }
+
+    return noDGI ? "" : dgiJson;
+}
+
+void CSpxUspRecoEngineAdapter::GetIntentInfoFromSite(std::string& provider, std::string& id, std::string& key)
+{
+    SPX_DBG_ASSERT(GetSite() != nullptr);
+    GetSite()->GetIntentInfo(provider, id, key);
+}
+
+std::string CSpxUspRecoEngineAdapter::GetIntentJsonFromIntentInfo(const std::string& provider, const std::string& id, const std::string& key)
+{
+    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
+    auto noIntentJson = properties->GetBooleanValue(L"CARBON-INTERNAL-USP-NoIntentJson", false);
+
+    std::string intentJson;
+    if (!provider.empty() && !id.empty() && !key.empty())
+    {
+        intentJson = "{"; // start object
+
+        intentJson += R"("provider":")";
+        intentJson += provider + R"(",)";
+
+        intentJson += R"("id":")";
+        intentJson += id + R"(",)";
+
+        intentJson += R"("key":")";
+        intentJson += key + R"(")";
+
+        intentJson += "}"; // end object
+    }
+
+    return noIntentJson ? "" : intentJson;
+}
+
+std::string CSpxUspRecoEngineAdapter::GetSpeechContextJson(const std::string& dgiJson, const std::string& intentJson)
+{
+    std::string contextJson;
+
+    if (!dgiJson.empty() || !intentJson.empty())
+    {
+        bool appendComma = false;
+        contextJson += "{";
+
+        if (!dgiJson.empty())
+        {
+            contextJson += appendComma ? "," : "";
+            contextJson += R"("dgi":)";
+            contextJson += dgiJson;
+            appendComma = true;
+        }
+
+        if (!intentJson.empty())
+        {
+            contextJson += appendComma ? "," : "";
+            contextJson += R"("intent":)";
+            contextJson += intentJson;
+            appendComma = true;
+        }
+
+        contextJson += "}";
+    }
+
+    return contextJson;
+}
+
+void CSpxUspRecoEngineAdapter::FireFinalResultNow(const USP::SpeechPhraseMsg& message, const std::string& luisJson)
+{
+    WriteLock_Type writeLock(m_stateMutex);
+    if (IsState(UspState::Error) || IsState(UspState::Terminating) || IsState(UspState::Zombie))
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_DBG_TRACE_VERBOSE("%s: IGNORING (Err/Terminating/Zombie)... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
+    else if (ChangeState(UspState::FiredFinalResult))
+    {
+        SPX_DBG_TRACE_SCOPE("FireFinalResultNow: Creating Result", "FireFinalResultNow: GetSite()->FinalRecoResult()  complete!");
+
+        // Create the result
+        auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
+        auto result = factory->CreateFinalResult(nullptr, message.displayText.c_str(), ResultType::Speech);
+
+        // Do we already have the LUIS json payload from the service (1-hop)
+        if (!luisJson.empty())
+        {
+            auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(result);
+            namedProperties->SetStringValue(g_RESULT_LuisJson, PAL::ToWString(luisJson).c_str());
+        }
+
+        // Fire the result
+        writeLock.unlock();
+        SPX_ASSERT(GetSite() != nullptr);
+        GetSite()->FinalRecoResult(this, message.offset, result);
+    }
+    else
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_TRACE_WARNING("%s: Unexpected USP State transition (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
+}
+
+void CSpxUspRecoEngineAdapter::FireFinalResultLater(const USP::SpeechPhraseMsg& message)
+{
+    WriteLock_Type writeLock(m_stateMutex);
+    if (IsState(UspState::Error) || IsState(UspState::Terminating) || IsState(UspState::Zombie))
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_DBG_TRACE_VERBOSE("%s: IGNORING (Err/Terminating/Zombie)... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
+    else if (ChangeState(UspState::ReceivedSpeechResult, UspState::WaitingForIntent))
+    {
+        m_finalResultMessageToFireLater = message;
+    }
+    else
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_TRACE_WARNING("%s: Unexpected USP State transition (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
+}
+
+void CSpxUspRecoEngineAdapter::FireFinalResultLater_WaitingForIntentComplete(const std::string& luisJson)
+{
+    SPX_DBG_ASSERT(m_expectIntentResponse);
+    FireFinalResultNow(m_finalResultMessageToFireLater, luisJson);
+}
+
+bool CSpxUspRecoEngineAdapter::ChangeState(UspState newState)
+{
+    return ChangeState(m_audioState, m_uspState, m_audioState, newState);
+}
+
+bool CSpxUspRecoEngineAdapter::ChangeState(UspState fromState, UspState toState)
+{
+    return ChangeState(m_audioState, fromState, m_audioState, toState);
+}
+
+bool CSpxUspRecoEngineAdapter::ChangeState(AudioState newState)
+{
+    return ChangeState(m_audioState, m_uspState, newState, m_uspState);
+}
+
+bool CSpxUspRecoEngineAdapter::ChangeState(AudioState fromState, AudioState toState)
+{
+    return ChangeState(fromState, m_uspState, toState, m_uspState);
+}
+
+bool CSpxUspRecoEngineAdapter::ChangeState(AudioState fromAudioState, UspState fromUspState, AudioState toAudioState, UspState toUspState)
+{
+    if (fromAudioState == m_audioState &&       // are we in correct audio state, and ...
+        fromUspState == m_uspState &&           // are we in correct usp state? ... if so great! but ...
+        ((fromUspState != UspState::Error &&        // don't allow transit from Error
+          fromUspState != UspState::Zombie &&       // don't allow transit from Zombie
+          fromUspState != UspState::Terminating) || // don't allow transit from Terminating ...
+         ((fromUspState == toUspState) ||           // unless we're staying in that same usp state
+          (fromUspState == UspState::Error &&           // or we're going from Error to Terminating
+           toUspState == UspState::Terminating) ||
+          (fromUspState == UspState::Terminating &&     // or we're going from Terminating to Zombie
+           toUspState == UspState::Zombie))))
+    {
+        SPX_DBG_TRACE_VERBOSE("%s; audioState/uspState: %d/%d => %d/%d", __FUNCTION__, fromAudioState, fromUspState, toAudioState, toUspState);
+        m_audioState = toAudioState;
+        m_uspState = toUspState;
+        return true;
+    }
+
+    return false;
+}
+
 
 } // CARBON_IMPL_NAMESPACE

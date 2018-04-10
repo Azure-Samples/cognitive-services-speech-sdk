@@ -13,6 +13,10 @@
 #include <string>
 
 
+#define SPX_CONFIG_INCLUDE_TRACE_THREAD_ID      1
+#define SPX_CONFIG_INCLUDE_TRACE_HIRES_CLOCK    1
+
+
 decltype(std::chrono::high_resolution_clock::now()) __g_spx_trace_message_time0 = std::chrono::high_resolution_clock::now();
 
 
@@ -24,10 +28,21 @@ void SpxTraceMessage(int level, const char* pszTitle, const char* pszFormat, ...
         va_list argptr;
         va_start(argptr, pszFormat);
 
-        auto now = std::chrono::high_resolution_clock::now();
-        unsigned long delta = (unsigned long)std::chrono::duration_cast<std::chrono::milliseconds>(now - __g_spx_trace_message_time0).count();
+        std::string format;
 
-        std::string format(std::to_string(delta)+ "ms ");
+        if (SPX_CONFIG_INCLUDE_TRACE_THREAD_ID)
+        {
+            auto threadHash = std::hash<std::thread::id>{}(std::this_thread::get_id());
+            format += "(" + std::to_string(threadHash % 1000) + "): ";
+        }
+
+        if (SPX_CONFIG_INCLUDE_TRACE_HIRES_CLOCK)
+        {
+            auto now = std::chrono::high_resolution_clock::now();
+            unsigned long delta = (unsigned long)std::chrono::duration_cast<std::chrono::milliseconds>(now - __g_spx_trace_message_time0).count();
+            format += std::to_string(delta) + "ms ";
+        }
+
         while (*pszFormat == '\n' || *pszFormat == '\r')
         {
             if (*pszFormat == '\r')

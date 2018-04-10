@@ -41,6 +41,20 @@ void CSpxMockLuEngineAdapter::AddIntentTrigger(const wchar_t* id, std::shared_pt
     m_triggerMap.emplace(id, trigger);
 }
 
+std::list<std::string> CSpxMockLuEngineAdapter::GetListenForList()
+{
+    // TODO: DGI
+    return std::list<std::string>();
+}
+
+void CSpxMockLuEngineAdapter::GetIntentInfo(std::string& provider, std::string& id, std::string& key)
+{
+    // TODO: DGI
+    UNUSED(provider);
+    UNUSED(id);
+    UNUSED(key);
+}
+
 void CSpxMockLuEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionResult> result)
 {
     SPX_IFTRUE_THROW_HR(result == nullptr, SPXERR_INVALID_ARG);

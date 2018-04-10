@@ -49,6 +49,16 @@ void CSpxUnidecRecoEngineAdapter::Term()
 
 void CSpxUnidecRecoEngineAdapter::SetFormat(WAVEFORMATEX* pformat)
 {
+    SPX_DBG_TRACE_VERBOSE_IF(pformat == nullptr, "%s - pformat == nullptr", __FUNCTION__);
+    SPX_DBG_TRACE_VERBOSE_IF(pformat != nullptr, "%s\n  wFormatTag:      %s\n  nChannels:       %d\n  nSamplesPerSec:  %d\n  nAvgBytesPerSec: %d\n  nBlockAlign:     %d\n  wBitsPerSample:  %d\n  cbSize:          %d",
+        __FUNCTION__,
+        pformat->wFormatTag == WAVE_FORMAT_PCM ? "PCM" : std::to_string(pformat->wFormatTag).c_str(),
+        pformat->nChannels,
+        pformat->nSamplesPerSec,
+        pformat->nAvgBytesPerSec,
+        pformat->nBlockAlign,
+        pformat->wBitsPerSample,
+        pformat->cbSize);
     SPX_IFTRUE_THROW_HR(!IsInit(), SPXERR_UNINITIALIZED);
 
     if (pformat != nullptr)
@@ -66,6 +76,7 @@ void CSpxUnidecRecoEngineAdapter::SetFormat(WAVEFORMATEX* pformat)
 
 void CSpxUnidecRecoEngineAdapter::ProcessAudio(AudioData_Type data, uint32_t size)
 {
+    SPX_DBG_TRACE_VERBOSE_IF(0, "%s(..., size=%d)", __FUNCTION__, size);
     SPX_IFTRUE_THROW_HR(!HasFormat(), SPXERR_UNINITIALIZED);
 
     AudioBufferWrite(data, size);

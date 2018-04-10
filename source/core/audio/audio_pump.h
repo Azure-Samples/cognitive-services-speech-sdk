@@ -45,7 +45,9 @@ private:
     CSpxAudioPump& operator=(const CSpxAudioPump&&) = delete;
 
     void PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor);
-    
+    void WaitForPumpStart(std::unique_lock<std::mutex>& lock);
+    void WaitForPumpIdle(std::unique_lock<std::mutex>& lock);
+
     std::mutex m_mutex;
     std::condition_variable m_cv;
 
@@ -53,6 +55,8 @@ private:
 
     enum State m_state;
     enum State m_stateRequested;
+    const int m_waitMsStartPumpRequestTimeout = 5000;
+    const int m_waitMsStopPumpRequestTimeout = 5000;
 
     std::thread m_thread;
 };

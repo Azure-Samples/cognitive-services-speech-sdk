@@ -24,7 +24,7 @@ std::string SpxHttpDownloadString(const char* httpHostName, const char* httpRela
     //      Similarly we could cache the connection to httpHostName ...
     //      We could make this into a service available to sites via CSpxResourceManager ... 
 
-    SPX_DBG_TRACE_FUNCTION();
+    SPX_DBG_TRACE_VERBOSE("%s: %s%s", __FUNCTION__, httpHostName, httpRelativePath);
     SPX_INIT_HR(hr);
 
     std::string downloadedString;

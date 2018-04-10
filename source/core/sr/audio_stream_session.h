@@ -11,6 +11,10 @@
 #include "service_helpers.h"
 #include "session.h"
 
+#ifdef _MSC_VER
+#include <shared_mutex>
+#endif // _MSC_VER
+
 
 namespace CARBON_IMPL_NAMESPACE() {
 
@@ -19,6 +23,7 @@ class CSpxAudioStreamSession : public CSpxSession,
     public ISpxObjectWithSiteInitImpl<ISpxSite>,
     public ISpxServiceProvider,
     public ISpxLuEngineAdapterSite,
+    public ISpxKwsEngineAdapterSite,
     public ISpxRecoEngineAdapterSite,
     public ISpxRecognizerSite,
     public ISpxRecoResultFactory,
@@ -59,15 +64,23 @@ public:
 
 protected:
 
-    void StartRecognizing() override;
-    void StopRecognizing() override;
+    // ISpxSession (overrides)
+    void StartRecognizing(RecognitionKind startKind, std::wstring keyword) override;
+    void StopRecognizing(RecognitionKind stopKind) override;
 
     std::shared_ptr<ISpxRecognitionResult> WaitForRecognition() override;
 
 
 private:
 
+    // --- ISpxKwsEngineAdapterSite
+    void KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset) override;
+    void DoneProcessingAudio(ISpxKwsEngineAdapter* adapter) override;
+
     // --- ISpxRecoEngineAdapterSite
+    std::list<std::string> GetListenForList() override;
+    void GetIntentInfo(std::string& provider, std::string& id, std::string& key) override;
+
     void SpeechStartDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
     void SpeechEndDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
 
@@ -107,26 +120,79 @@ private:
 
     CSpxAudioStreamSession& operator=(const CSpxAudioStreamSession&) = delete;
 
-    void EnsureInitRecoEngineAdapter();
+    std::shared_ptr<ISpxRecoEngineAdapter> EnsureInitRecoEngineAdapter();
     void InitRecoEngineAdapter();
 
-    enum SessionState { Idle, StartingPump, ProcessingAudio, StoppingPump, WaitingForAdapterDone };
+    std::shared_ptr<ISpxKwsEngineAdapter> EnsureInitKwsEngineAdapter(const std::wstring& keyword);
+    void InitKwsEngineAdapter(const std::wstring& keyword);
+    void HotSwapToKwsSingleShotWhilePaused();
+    void WaitForKwsSingleShotRecognition();
+
+    void StartAudioPump(RecognitionKind startKind, const std::wstring& keyword);
+    void HotSwapAdaptersWhilePaused(RecognitionKind startKind, const std::wstring& keyword = L"");
+
+    enum SessionState { Idle, StartingPump, ProcessingAudio, Paused, StoppingPump, WaitingForAdapterDone };
+
+    void InformAdapterStartingProcessingAudio(WAVEFORMATEX* format);
+    void InformAdapterWaitingForDone(SessionState comingFromState);
+
+    enum AdapterDoneProcessingAudio { Keyword, Speech };
+    void DoneProcessingAudio(AdapterDoneProcessingAudio doneAdapter);
+
+    bool IsKind(RecognitionKind kind);
     bool IsState(SessionState state);
-    bool ChangeState(SessionState from, SessionState to);
+    bool ChangeState(SessionState sessionStateFrom, SessionState sessionStateTo);
+    bool ChangeState(SessionState sessionStateFrom, RecognitionKind recoKindTo, SessionState sessionStateTo);
+    bool ChangeState(RecognitionKind recoKindFrom, SessionState sessionStateFrom, RecognitionKind recoKindTo, SessionState sessionStateTo);
 
     void EnsureInitLuEngineAdapter();
     void InitLuEngineAdapter();
 
-    std::shared_ptr<ISpxLuEngineAdapter> GetLuEngineAdapter();
+    std::list<std::string> GetListenForListFromLuEngineAdapter();
+    void GetIntentInfoFromLuEngineAdapter(std::string& provider, std::string& id, std::string& key);
 
+    std::shared_ptr<ISpxLuEngineAdapter> GetLuEngineAdapter();
     std::shared_ptr<ISpxNamedProperties> GetParentProperties() override;
 
-    SessionState m_state;
-    std::mutex m_stateMutex;
+
+private:
+
+    #ifdef _MSC_VER
+    using ReadWriteMutex_Type = std::shared_mutex;
+    using WriteLock_Type = std::unique_lock<std::shared_mutex>;
+    using ReadLock_Type = std::shared_lock<std::shared_mutex>;
+    #else
+    using ReadWriteMutex_Type = std::mutex;
+    using WriteLock_Type = std::unique_lock<std::mutex>;
+    using ReadLock_Type = std::unique_lock<std::mutex>;
+    #endif
+
+    //  To orchestrate the conversion of "Audio Data" into "Results" and "Events", we'll use utilize
+    //  one "Audio Pump" and multiple "Adapters"
 
     std::shared_ptr<ISpxAudioPump> m_audioPump;
+
+    std::wstring m_keyword;
+    std::shared_ptr<ISpxKwsEngineAdapter> m_kwsAdapter;
     std::shared_ptr<ISpxRecoEngineAdapter> m_recoAdapter;
     std::shared_ptr<ISpxLuEngineAdapter> m_luAdapter;
+
+    //  Our current "state" is kept in two parts, both protected by a reader/writer lock
+    //
+    //      1.) RecognitionKind (m_recoKind): Keeps track of what kind of recognition we're doing
+    //      2.) SessionState (m_sessionState): Keeps track of what we're doing with Audio data
+    //
+    ReadWriteMutex_Type m_stateMutex;
+    RecognitionKind m_recoKind;
+    SessionState m_sessionState;
+
+    //  When we're in the SessionState::ProcessingAudio, we'll relay "Audio Data" to from the Pump
+    //  to exactly one (and only one) of the engine adapters via it's ISpxAudioProcessor interface
+    //  
+    //  Using or changing the Adapter (as ISpxAudioProcessor) requires locking/unlocking the reader writer lock
+    //
+    ReadWriteMutex_Type m_combinedAdapterAndStateMutex;
+    std::shared_ptr<ISpxAudioProcessor> m_audioProcessor;
 };
 
 

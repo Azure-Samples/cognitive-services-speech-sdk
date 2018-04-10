@@ -12,7 +12,7 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-class ISpxDelegateAudioFileImpl : public ISpxAudioFile
+class ISpxDelegateAudioFileImpl : public ISpxAudioFile, public ISpxAudioReaderRealTime
 {
     // --- ISpxAudioFile
 

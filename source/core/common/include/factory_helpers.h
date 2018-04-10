@@ -51,7 +51,7 @@ namespace CARBON_IMPL_NAMESPACE() {
 template <class T, class I>
 void* SpxFactoryEntryCreateObject()
 {
-    SPX_DBG_TRACE_VERBOSE("Creating object via %s: %s as %s", __FUNCTION__, PAL::GetTypeName<T>().c_str(), PAL::GetTypeName<I>().c_str());
+    SPX_DBG_TRACE_VERBOSE_IF(1, "Creating object via %s: %s as %s", __FUNCTION__, PAL::GetTypeName<T>().c_str(), PAL::GetTypeName<I>().c_str());
     auto ptr = new T();
     auto interface = static_cast<I*>(ptr);
     return interface;

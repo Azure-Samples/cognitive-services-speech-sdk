@@ -12,6 +12,11 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
 
+void ISpxMockAudioReaderImpl::SetRealTimePercentage(uint8_t percentage)
+{
+    m_simulateRealtimePercentage = percentage;
+}
+
 uint16_t ISpxMockAudioReaderImpl::GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat)
 {
     uint16_t cbFormatRequired = sizeof(WAVEFORMATEX);
@@ -36,6 +41,13 @@ uint16_t ISpxMockAudioReaderImpl::GetFormat(WAVEFORMATEX* pformat, uint16_t cbFo
 
 uint32_t ISpxMockAudioReaderImpl::Read(uint8_t* pbuffer, uint32_t cbBuffer)
 {
+    if (m_simulateRealtimePercentage > 0)
+    {
+        auto nAvgBytesPerSec = 16000 * 2;
+        auto milliseconds = cbBuffer * 1000 / nAvgBytesPerSec * m_simulateRealtimePercentage / 100;
+        std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+    }
+
     memset(pbuffer, 0, cbBuffer);
     return cbBuffer;
 }

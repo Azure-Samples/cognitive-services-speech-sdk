@@ -28,6 +28,9 @@ public:
     // --- ISpxIntentTriggerService ---
     void AddIntentTrigger(const wchar_t* id, std::shared_ptr<ISpxTrigger> trigger) override;
 
+    std::list<std::string> GetListenForList() override;
+    void GetIntentInfo(std::string& provider, std::string& id, std::string& key) override;
+
     // --- ISpxLuEngineAdapter / ISpxRecoResultProcessor ---
     void ProcessResult(std::shared_ptr<ISpxRecognitionResult> result) override;
 
@@ -43,7 +46,6 @@ private:
     void GetConnectionInfoFromTriggers(const std::string& query, std::string* phostName, std::string* prelativePath);
 
     void GetConnectionInfo(const std::string& endpoint, const std::string& host, const std::string& key, const std::string& appId, const std::string& query, std::string* phostName, std::string* prelativePath);
-    void GetDefaultConnectionInfo(const std::string& query, std::string* phostName, std::string* prelativePath);
     void GetEndpointConnectionInfo(const std::string& endpoint, const std::string& query, std::string* phostName, std::string* prelativePath);
     void GetSubscriptionConnectionInfo(const std::string& host, const std::string& key, const std::string& appId, const std::string& query, std::string* phostName, std::string* prelativePath);
 

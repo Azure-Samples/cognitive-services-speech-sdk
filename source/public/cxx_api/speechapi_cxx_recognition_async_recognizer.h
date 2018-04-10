@@ -37,15 +37,18 @@ public:
         Canceled(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback()),
         m_hasyncRecognize(SPXHANDLE_INVALID),
         m_hasyncStartContinuous(SPXHANDLE_INVALID),
-        m_hasyncStopContinuous(SPXHANDLE_INVALID)
+        m_hasyncStopContinuous(SPXHANDLE_INVALID),
+        m_hasyncStartKeyword(SPXHANDLE_INVALID),
+        m_hasyncStopKeyword(SPXHANDLE_INVALID)
     {
     };
 
     virtual ~AsyncRecognizer()
     {
+        SPX_DBG_TRACE_SCOPE("~AsyncRecognizer start", "~AsyncRecognizerEnd");
         for (auto handle : { &m_hasyncRecognize, &m_hasyncStartContinuous, &m_hasyncStopContinuous }) 
         {
-            if (*handle != SPXHANDLE_INVALID)
+            if (*handle != SPXHANDLE_INVALID && ::Recognizer_AsyncHandle_IsValid(*handle))
             {
                 ::Recognizer_AsyncHandle_Close(*handle);
                 *handle = SPXHANDLE_INVALID;
@@ -56,6 +59,9 @@ public:
     virtual std::future<std::shared_ptr<RecoResult>> RecognizeAsync() = 0;
     virtual std::future<void> StartContinuousRecognitionAsync() = 0;
     virtual std::future<void> StopContinuousRecognitionAsync() = 0;
+
+    virtual std::future<void> StartKeywordRecognitionAsync(const wchar_t* keyword) = 0;
+    virtual std::future<void> StopKeywordRecognitionAsync() = 0;
 
     EventSignal<const SessionEventArgs&> SessionStarted;
     EventSignal<const SessionEventArgs&> SessionStopped;
@@ -115,6 +121,44 @@ protected:
             SPX_EXITFN_CLEANUP:
             SPX_REPORT_ON_FAIL(/* hr = */ Recognizer_AsyncHandle_Close(m_hasyncStopContinuous)); // don't overwrite HR on cleanup
             m_hasyncStartContinuous = SPXHANDLE_INVALID;
+
+            SPX_THROW_ON_FAIL(hr);
+        });
+
+        return future;
+    };
+
+    std::future<void> StartKeywordRecognitionAsyncInternal(const wchar_t* keyword)
+    {
+        auto future = std::async(std::launch::async, [=]() -> void {
+            SPX_INIT_HR(hr);
+            SPX_THROW_ON_FAIL(hr = Recognizer_AsyncHandle_Close(m_hasyncStartKeyword)); // close any unfinished previous attempt
+
+            SPX_EXITFN_ON_FAIL(hr = Recognizer_StartKeywordRecognitionAsync(m_hreco, keyword, &m_hasyncStartKeyword));
+            SPX_EXITFN_ON_FAIL(hr = Recognizer_StartKeywordRecognitionAsync_WaitFor(m_hasyncStartKeyword, UINT32_MAX));
+
+            SPX_EXITFN_CLEANUP:
+            SPX_REPORT_ON_FAIL(/* hr = */ Recognizer_AsyncHandle_Close(m_hasyncStartKeyword)); // don't overwrite HR on cleanup
+            m_hasyncStartKeyword = SPXHANDLE_INVALID;
+
+            SPX_THROW_ON_FAIL(hr);
+        });
+
+        return future;
+    };
+
+    std::future<void> StopKeywordRecognitionAsyncInternal()
+    {
+        auto future = std::async(std::launch::async, [=]() -> void {
+            SPX_INIT_HR(hr);
+            SPX_THROW_ON_FAIL(hr = Recognizer_AsyncHandle_Close(m_hasyncStopKeyword)); // close any unfinished previous attempt
+
+            SPX_EXITFN_ON_FAIL(hr = Recognizer_StopKeywordRecognitionAsync(m_hreco, &m_hasyncStopKeyword));
+            SPX_EXITFN_ON_FAIL(hr = Recognizer_StopKeywordRecognitionAsync_WaitFor(m_hasyncStopKeyword, UINT32_MAX));
+
+            SPX_EXITFN_CLEANUP:
+            SPX_REPORT_ON_FAIL(/* hr = */ Recognizer_AsyncHandle_Close(m_hasyncStopKeyword)); // don't overwrite HR on cleanup
+            m_hasyncStartKeyword = SPXHANDLE_INVALID;
 
             SPX_THROW_ON_FAIL(hr);
         });
@@ -221,6 +265,8 @@ protected:
     SPXASYNCHANDLE m_hasyncRecognize;
     SPXASYNCHANDLE m_hasyncStartContinuous;
     SPXASYNCHANDLE m_hasyncStopContinuous;
+    SPXASYNCHANDLE m_hasyncStartKeyword;
+    SPXASYNCHANDLE m_hasyncStopKeyword;
 
 private:
 

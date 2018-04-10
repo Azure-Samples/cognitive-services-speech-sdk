@@ -285,6 +285,7 @@ void Connection::Impl::Connect()
     }
 
     auto connectionUrl = ConstructConnectionUrl();
+    LogInfo("connectionUrl=%s", connectionUrl.c_str());
 
     m_telemetry = TelemetryPtr(telemetry_create(Connection::Impl::OnTelemetryData, this), telemetry_destroy);
     if (m_telemetry == nullptr)

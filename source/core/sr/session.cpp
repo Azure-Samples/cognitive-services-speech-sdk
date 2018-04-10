@@ -42,72 +42,99 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxSession::RecognizeAsync(
 {
     SPX_DBG_TRACE_FUNCTION();
 
-    std::packaged_task<std::shared_ptr<ISpxRecognitionResult>()> taskHack([=](){
+    std::packaged_task<std::shared_ptr<ISpxRecognitionResult>()> task([=](){
 
-        // set the async waiting flag up-front, so that if there's an error callback invoked right after 
-        // the StartRecognizing() it would unset the flag, so that we don't have to wait for the timeout.
+        SPX_DBG_TRACE_SCOPE("*** CSpxSession::RecognizeAsync kicked-off THREAD started ***", "*** CSpxSession::RecognizeAsync kicked-off THREAD stopped ***");
+
+        // Keep track of the fact that we have a thread hanging out waiting to hear
+        // what the final recognition result is, and then stop recognizing...
         m_recoAsyncWaiting = true;
+        this->StartRecognizing(RecognitionKind::SingleShot);
 
-        this->StartRecognizing();
-
+        // Wait for the recognition result, and then stop recognizing
         auto result = this->WaitForRecognition();
+        this->StopRecognizing(RecognitionKind::SingleShot);
 
-        this->StopRecognizing();
-
+        // Return our result back to the future/caller
         return result;
     });
 
-    auto futureHack = taskHack.get_future();
-    std::thread task_td_hack(std::move(taskHack));
-    task_td_hack.detach();
+    auto taskFuture = task.get_future();
+    std::thread taskThread(std::move(task));
+    taskThread.detach();
 
     return CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>>(
-        std::forward<std::future<std::shared_ptr<ISpxRecognitionResult>>>(futureHack),
+        std::forward<std::future<std::shared_ptr<ISpxRecognitionResult>>>(taskFuture),
         AOS_Started);
 }
 
 CSpxAsyncOp<void> CSpxSession::StartContinuousRecognitionAsync()
 {
-    SPX_DBG_TRACE_FUNCTION();
-    
-    std::packaged_task<void()> taskHack([=](){
-        this->StartRecognizing();
-    });
-
-    auto futureHack = taskHack.get_future();
-    std::thread task_td_hack(std::move(taskHack));
-    task_td_hack.detach();
-
-    return CSpxAsyncOp<void>(
-        std::forward<std::future<void>>(futureHack),
-        AOS_Started);    
+    return StartRecognitionAsync(RecognitionKind::Continuous);
 }
 
 CSpxAsyncOp<void> CSpxSession::StopContinuousRecognitionAsync()
 {
+    return StopRecognitionAsync(RecognitionKind::Continuous);
+}
+
+CSpxAsyncOp<void> CSpxSession::StartKeywordRecognitionAsync(const wchar_t* keyword)
+{
+    return StartRecognitionAsync(RecognitionKind::Keyword, keyword);
+}
+
+CSpxAsyncOp<void> CSpxSession::StopKeywordRecognitionAsync()
+{
+    return StopRecognitionAsync(RecognitionKind::Keyword);
+}
+
+CSpxAsyncOp<void> CSpxSession::StartRecognitionAsync(RecognitionKind startKind, std::wstring keyword)
+{
     SPX_DBG_TRACE_FUNCTION();
-    
-    std::packaged_task<void()> taskHack([=](){
-        this->StopRecognizing();
+
+    std::packaged_task<void()> task([=](){
+        SPX_DBG_TRACE_SCOPE("*** CSpxSession::StartRecognitionAsync kicked-off THREAD started ***", "*** CSpxSession::StartRecognitionAsync kicked-off THREAD stopped ***");
+        this->StartRecognizing(startKind, keyword);
     });
 
-    auto futureHack = taskHack.get_future();
-    std::thread task_td_hack(std::move(taskHack));
-    task_td_hack.detach();
+    auto taskFuture = task.get_future();
+    std::thread taskThread(std::move(task));
+    taskThread.detach();
 
     return CSpxAsyncOp<void>(
-        std::forward<std::future<void>>(futureHack),
+        std::forward<std::future<void>>(taskFuture),
         AOS_Started);    
 }
 
-void CSpxSession::StartRecognizing()
+CSpxAsyncOp<void> CSpxSession::StopRecognitionAsync(RecognitionKind stopKind)
 {
+    SPX_DBG_TRACE_FUNCTION();
+
+    std::packaged_task<void()> task([=](){
+        SPX_DBG_TRACE_SCOPE("*** CSpxSession::StopRecognitionAsync kicked-off THREAD started ***", "*** CSpxSession::StopRecognitionAsync kicked-off THREAD stopped ***");
+        this->StopRecognizing(stopKind);
+    });
+
+    auto taskFuture = task.get_future();
+    std::thread taskThread(std::move(task));
+    taskThread.detach();
+
+    return CSpxAsyncOp<void>(
+        std::forward<std::future<void>>(taskFuture),
+        AOS_Started);    
+}
+
+void CSpxSession::StartRecognizing(RecognitionKind startKind, std::wstring keyword)
+{
+    UNUSED(startKind);
+    UNUSED(keyword);
     SPX_DBG_TRACE_SCOPE("Sleeping for 500ms...", "Sleeping for 500ms... Done!");
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }
 
-void CSpxSession::StopRecognizing()
+void CSpxSession::StopRecognizing(RecognitionKind stopKind)
 {
+    UNUSED(stopKind);
     SPX_DBG_TRACE_SCOPE("Sleeping for 1000ms...", "Sleeping for 1000ms... Done!");
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 }
@@ -132,23 +159,22 @@ void CSpxSession::WaitForRecognition_Complete(std::shared_ptr<ISpxRecognitionRes
 {
     std::unique_lock<std::mutex> lock(m_mutex);
 
-    if (!m_recoAsyncWaiting) 
+    if (m_recoAsyncWaiting)
     {
-        // WaitForRecognition_Complete already completed.
-        return;
+        m_recoAsyncWaiting = false;
+        m_recoAsyncResult = result;
+
+        m_cv.notify_all();
     }
 
-    m_recoAsyncWaiting = false;
-    m_recoAsyncResult = result;
-
-    m_cv.notify_all();
     lock.unlock();
-
     FireResultEvent(GetSessionId(), result);
 }
 
 void CSpxSession::FireSessionStartedEvent()
 {
+    SPX_DBG_TRACE_FUNCTION();
+
     // Make a copy of the recognizers (under lock), to use to send events; 
     // otherwise the underlying list could be modified while we're sending events...
 
@@ -169,6 +195,7 @@ void CSpxSession::FireSessionStartedEvent()
 
 void CSpxSession::FireSessionStoppedEvent()
 {
+    SPX_DBG_TRACE_FUNCTION();
     EnsureFireResultEvent();
 
     // Make a copy of the recognizers (under lock), to use to send events; 

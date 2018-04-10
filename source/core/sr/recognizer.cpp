@@ -25,8 +25,14 @@ CSpxRecognizer::~CSpxRecognizer()
 
 void CSpxRecognizer::Init()
 {
+    SPX_DBG_TRACE_FUNCTION();
     SPX_IFTRUE_THROW_HR(GetSite() == nullptr, SPXERR_UNINITIALIZED);
     EnsureDefaultSession();
+}
+
+void CSpxRecognizer::Term()
+{
+    SPX_DBG_TRACE_FUNCTION();
 }
 
 void CSpxRecognizer::SetStringValue(const wchar_t* name, const wchar_t* value)
@@ -80,6 +86,16 @@ CSpxAsyncOp<void> CSpxRecognizer::StartContinuousRecognitionAsync()
 CSpxAsyncOp<void> CSpxRecognizer::StopContinuousRecognitionAsync()
 {
     return m_defaultSession->StopContinuousRecognitionAsync();
+}
+
+CSpxAsyncOp<void> CSpxRecognizer::StartKeywordRecognitionAsync(const wchar_t* keyword)
+{
+    return m_defaultSession->StartKeywordRecognitionAsync(keyword);
+}
+
+CSpxAsyncOp<void> CSpxRecognizer::StopKeywordRecognitionAsync()
+{
+    return m_defaultSession->StopKeywordRecognitionAsync();
 }
 
 std::shared_ptr<ISpxSession> CSpxRecognizer::GetDefaultSession()

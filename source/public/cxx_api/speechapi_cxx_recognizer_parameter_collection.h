@@ -118,7 +118,7 @@ public:
     {
     }
 
-    ~RecognizerParameterValueCollection() { }
+    ~RecognizerParameterValueCollection() { SPX_DBG_TRACE_FUNCTION(); }
 
     Value operator[](const wchar_t* name) override { return Value(new RecognizerParameterValue(m_handle, name)); }
     Value operator[](enum RecognizerParameter parameter) { return Value(new RecognizerParameterValue(m_handle, parameter)); }

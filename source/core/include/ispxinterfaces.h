@@ -247,21 +247,6 @@ inline SpxSharedAudioBuffer_Type SpxAllocSharedAudioBuffer(size_t sizeInBytes)
 }
 
 
-class ISpxAudioFile : public ISpxInterfaceBaseFor<ISpxAudioFile>
-{
-public:
-
-    virtual void Open(const wchar_t* pszFileName) = 0;
-    virtual void Close() = 0;
-
-    virtual bool IsOpen() const = 0;
-
-    virtual void SetContinuousLoop(bool value) = 0;
-    virtual void SetIterativeLoop(bool value) = 0;
-    virtual void SetRealTimePercentage(uint8_t percentage) = 0;
-};
-
-
 class ISpxAudioReader : public ISpxInterfaceBaseFor<ISpxAudioReader>
 {
 public:
@@ -269,6 +254,14 @@ public:
     virtual uint16_t GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
     virtual uint32_t Read(uint8_t* pbuffer, uint32_t cbBuffer) = 0;
     virtual void Close() = 0;
+};
+
+
+class ISpxAudioReaderRealTime : public ISpxInterfaceBaseFor<ISpxAudioReaderRealTime>
+{
+public:
+
+    virtual void SetRealTimePercentage(uint8_t percentage) = 0;
 };
 
 
@@ -281,6 +274,21 @@ public:
     virtual void SetFormat(WAVEFORMATEX* pformat) = 0;
     virtual void Write(AudioData_Type data, uint32_t cbData) = 0;
     virtual void Close() = 0;
+};
+
+
+class ISpxAudioFile : public ISpxInterfaceBaseFor<ISpxAudioFile>
+{
+public:
+
+    virtual void Open(const wchar_t* pszFileName) = 0;
+    virtual void Close() = 0;
+
+    virtual bool IsOpen() const = 0;
+
+    virtual void SetContinuousLoop(bool value) = 0;
+    virtual void SetIterativeLoop(bool value) = 0;
+    virtual void SetRealTimePercentage(uint8_t percentage) = 0;
 };
 
 
@@ -365,6 +373,9 @@ public:
     virtual CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync() = 0;
     virtual CSpxAsyncOp<void> StartContinuousRecognitionAsync() = 0;
     virtual CSpxAsyncOp<void> StopContinuousRecognitionAsync() = 0;
+
+    virtual CSpxAsyncOp<void> StartKeywordRecognitionAsync(const wchar_t* keyword) = 0;
+    virtual CSpxAsyncOp<void> StopKeywordRecognitionAsync() = 0;
 };
 
 
@@ -452,6 +463,9 @@ public:
     virtual CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync() = 0;
     virtual CSpxAsyncOp<void> StartContinuousRecognitionAsync() = 0;
     virtual CSpxAsyncOp<void> StopContinuousRecognitionAsync() = 0;
+
+    virtual CSpxAsyncOp<void> StartKeywordRecognitionAsync(const wchar_t* keyword) = 0;
+    virtual CSpxAsyncOp<void> StopKeywordRecognitionAsync() = 0;
 };
 
 
@@ -488,6 +502,9 @@ public:
     using AdditionalMessagePayload_Type = void*;
     using ErrorPayload_Type = const std::string&;
 
+    virtual std::list<std::string> GetListenForList() = 0;
+    virtual void GetIntentInfo(std::string& provider, std::string& id, std::string& key) = 0;
+
     virtual void SpeechStartDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) = 0;
     virtual void SpeechEndDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) = 0;
 
@@ -503,6 +520,22 @@ public:
     virtual void AdditionalMessage(ISpxRecoEngineAdapter* adapter, uint64_t offset, AdditionalMessagePayload_Type payload) = 0;
 
     virtual void Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload) = 0;
+};
+
+
+class ISpxKwsEngineAdapter : 
+    public ISpxAudioProcessor, 
+    public ISpxInterfaceBaseFor<ISpxKwsEngineAdapter>
+{
+};
+
+
+class ISpxKwsEngineAdapterSite : virtual public ISpxSite
+{
+public:
+
+    virtual void KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset) = 0;
+    virtual void DoneProcessingAudio(ISpxKwsEngineAdapter* adapter) = 0;
 };
 
 
@@ -660,6 +693,9 @@ class ISpxIntentTriggerService : public ISpxInterfaceBaseFor<ISpxIntentTriggerSe
 public:
 
     virtual void AddIntentTrigger(const wchar_t* id, std::shared_ptr<ISpxTrigger> trigger) = 0;
+
+    virtual std::list<std::string> GetListenForList() = 0;
+    virtual void GetIntentInfo(std::string& provider, std::string& id, std::string& key) = 0;
 };
 
 

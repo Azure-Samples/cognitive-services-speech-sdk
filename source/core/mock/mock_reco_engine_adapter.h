@@ -58,11 +58,22 @@ private:
 
     SpxWAVEFORMATEX_Type m_format;
 
+    const std::wstring m_firstMockWord = L"mock";
+    const std::wstring m_eachIntermediateAddsMockWord = L" mock";
+    
     std::wstring m_mockResultText;
 
+    const uint64_t m_numMsBeforeVeryFirstIntermediate = 500;
+    const uint64_t m_numMsBetweenFirstIntermediateAndFinal = 800;
+    const uint64_t m_numMsBetweenFinalAndNextIntermediate = 2000;
+    const uint64_t m_numMsBetweenIntermediates = 250;
+
     uint64_t m_cbAudioProcessed;
-    uint64_t m_cbLastIntermediateFired;
-    uint64_t m_cbLastFinalResultFired;
+    uint64_t m_cbFireNextIntermediate;
+    uint64_t m_cbFireNextFinalResult;
+
+    uint64_t m_cbFiredLastIntermediate;
+    uint64_t m_cbFiredLastFinal;
 };
 
 

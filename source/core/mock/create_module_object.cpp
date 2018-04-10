@@ -11,6 +11,7 @@
 #include "factory_helpers.h"
 #include "mock_audio_reader.h"
 #include "mock_interactive_microphone.h"
+#include "mock_kws_engine_adapter.h"
 #include "mock_lu_engine_adapter.h"
 #include "mock_reco_engine_adapter.h"
 #include "mock_wav_file_reader.h"
@@ -32,10 +33,12 @@ SPX_EXTERN_C void* Mock_CreateModuleObject(const char* className, const char* in
     SPX_FACTORY_MAP_BEGIN();
     SPX_FACTORY_MAP_ENTRY(CSpxMockAudioReader, ISpxAudioReader);
     SPX_FACTORY_MAP_ENTRY(CSpxMockInteractiveMicrophone, ISpxAudioPump);
+    SPX_FACTORY_MAP_ENTRY(CSpxMockKwsEngineAdapter, ISpxKwsEngineAdapter);
     SPX_FACTORY_MAP_ENTRY(CSpxMockRecoEngineAdapter, ISpxRecoEngineAdapter);
     SPX_FACTORY_MAP_ENTRY(CSpxMockWavFileReader, ISpxAudioFile);
     SPX_FACTORY_MAP_ENTRY(CSpxMockWavFilePump, ISpxAudioFile);
     SPX_FACTORY_MAP_ENTRY(CSpxMockLuEngineAdapter, ISpxLuEngineAdapter);
+    SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-SdkKwsEngine"), CSpxSdkKwsEngineAdapter, ISpxKwsEngineAdapter, CSpxMockKwsEngineAdapter);
     SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-UspRecoEngine"), CSpxUspRecoEngineAdapter, ISpxRecoEngineAdapter, CSpxMockRecoEngineAdapter);
     SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-UnidecRecoEngine"), CSpxUnidecRecoEngineAdapter, ISpxRecoEngineAdapter, CSpxMockRecoEngineAdapter);
     SPX_FACTORY_MAP_ENTRY_IF(ShouldMock(L"CARBON-INTERNAL-MOCK-Microphone"), CSpxInteractiveMicrophone, ISpxAudioPump, CSpxMockInteractiveMicrophone);

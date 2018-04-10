@@ -96,9 +96,10 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         callbackCounts[Callbacks::session_stopped] = 0;
 
         const int numLoops = 5;
-
         for (int i = 0; i < numLoops; i++)
         {
+            SPX_TRACE_VERBOSE("%s: Make sure callbacks are invoked correctly; START of loop #%d", __FUNCTION__, i);
+
             // Assuming subscription key contains only single-byte characters.
             auto keyW = std::wstring(g_keySpeech.begin(), g_keySpeech.end());
             DefaultRecognizerFactory::SetSubscriptionKey(keyW.c_str());
@@ -108,77 +109,96 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
             bool sessionEnded = false;
 
-            recognizer->FinalResult.Connect(
-                [&](const SpeechRecognitionEventArgs&) { callbackCounts[Callbacks::final_result]++; });
-            recognizer->NoMatch.Connect(
-                [&](const SpeechRecognitionEventArgs&) { callbackCounts[Callbacks::no_match]++; });
-            recognizer->SessionStarted.Connect(
-                [&](const SessionEventArgs&) { callbackCounts[Callbacks::session_started]++; });
-            recognizer->SessionStopped.Connect(
-                [&](const SessionEventArgs&)
-            {
+            recognizer->FinalResult.Connect([&](const SpeechRecognitionEventArgs&) {
+                callbackCounts[Callbacks::final_result]++; 
+                SPX_TRACE_VERBOSE("callbackCounts[Callbacks::final_result]=%d", callbackCounts[Callbacks::final_result].load());
+            });
+            recognizer->NoMatch.Connect([&](const SpeechRecognitionEventArgs&) {
+                callbackCounts[Callbacks::no_match]++; 
+                SPX_TRACE_VERBOSE("callbackCounts[Callbacks::no_match]=%d", callbackCounts[Callbacks::no_match].load());
+            });
+            recognizer->SessionStarted.Connect([&](const SessionEventArgs&) {
+                callbackCounts[Callbacks::session_started]++;
+                SPX_TRACE_VERBOSE("callbackCounts[Callbacks::session_started]=%d", callbackCounts[Callbacks::session_started].load());
+            });
+            recognizer->SessionStopped.Connect([&](const SessionEventArgs&) {
                 callbackCounts[Callbacks::session_stopped]++;
+                SPX_TRACE_VERBOSE("callbackCounts[Callbacks::session_stopped]=%d", callbackCounts[Callbacks::session_stopped].load());
                 unique_lock<mutex> lock(mtx);
                 sessionEnded = true;
                 cv.notify_one();
             });
 
             auto result = recognizer->RecognizeAsync().get();
-
             CHECK(result != nullptr);
 
-            {
-                unique_lock<mutex> lock(mtx);
-                cv.wait(lock, [&] { return sessionEnded; });
-            }
+            SPX_TRACE_VERBOSE("%s: Wait for session end (loop #%d)", __FUNCTION__, i);
+            unique_lock<mutex> lock(mtx);
+            cv.wait(lock, [&] { return sessionEnded; });
+            lock.unlock();
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(300));
+            SPX_TRACE_VERBOSE("%s: Wait some more (loop #%d)", __FUNCTION__, i);
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+            SPX_TRACE_VERBOSE("%s: Make sure callbacks are invoked correctly; END of loop #%d", __FUNCTION__, i);
         }
+
+        SPX_TRACE_VERBOSE("%s: Checking callback counts ...", __FUNCTION__);
 
         CHECK(callbackCounts[Callbacks::session_started] == numLoops);
         CHECK(callbackCounts[Callbacks::session_stopped] == numLoops);
         CHECK(callbackCounts[Callbacks::final_result] == numLoops);
         CHECK(callbackCounts[Callbacks::no_match] == 0);
     }
+}
 
-    GIVEN("Mocks for UspRecoEngine and Microphone...")
+TEST_CASE("KWS basics", "[api][cxx]")
+{
+    GIVEN("Mocks for USP, KWS, and the Microphone...")
     {
         DefaultRecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-MOCK-UspRecoEngine", true);
         DefaultRecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-MOCK-Microphone", true);
+        DefaultRecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-MOCK-SdkKwsEngine", true);
 
-        int gotIntermediateResults = 0;
+        mutex mtx;
+        condition_variable cv;
+
         int gotFinalResult = 0;
+        int gotSessionStopped = 0;
 
-        auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizer();
-        REQUIRE(recognizer != nullptr);
-
-        WHEN("We we connect both IntermediateResult and FinalResult event handlers...")
+        WHEN("We do a keyword recognition with a speech recognizer")
         {
-            recognizer->IntermediateResult += [&](const SpeechRecognitionEventArgs& e) {
-                UNUSED(e);
-                gotIntermediateResults++;
-            };
-            recognizer->FinalResult += [&](const SpeechRecognitionEventArgs& e) {
-                UNUSED(e);
+            auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizer();
+            REQUIRE(recognizer != nullptr);
+
+            recognizer->FinalResult += [&](const SpeechRecognitionEventArgs& /* e */) {
+                std::unique_lock<std::mutex> lock(mtx);
                 gotFinalResult++;
+                SPX_TRACE_VERBOSE("gotFinalResult=%d", gotFinalResult);
             };
 
-            THEN("We should be able to verify that they are connected.")
-            {
-                REQUIRE(recognizer->IntermediateResult.IsConnected());
-                REQUIRE(recognizer->FinalResult.IsConnected());
-            }
+            recognizer->SessionStopped += [&](const SessionEventArgs& /* e */) {
+                std::unique_lock<std::mutex> lock(mtx);
+                gotSessionStopped++;
+                cv.notify_all();
+            };
 
-            WHEN("We do a single recognition")
+            recognizer->StartKeywordRecognitionAsync(L"mock");
+
+            THEN("We wait up to 30 seconds for a KwsSingleShot recognition and it's accompanying SessionStopped")
             {
-                auto result = recognizer->RecognizeAsync().get();
-                THEN("We should see that we got more than one Intermediate, exactly one Final, and the call to RecoAsync returned a result")
+                std::unique_lock<std::mutex> lock(mtx);
+                cv.wait_for(lock, std::chrono::seconds(30), [&] { return gotFinalResult >= 1 && gotSessionStopped >= 1; });
+
+                recognizer->StopKeywordRecognitionAsync().get();
+
+                THEN("We should see that we got at least 1 FinalResult and the same number of SessionStopped events")
                 {
-                    REQUIRE(gotIntermediateResults > 1);
-                    REQUIRE(gotFinalResult == 1);
-                    REQUIRE(result != nullptr);
+                    REQUIRE(gotFinalResult >= 1);
                 }
             }
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(300));
         }
     }
 }

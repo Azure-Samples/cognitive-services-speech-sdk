@@ -45,7 +45,7 @@ private:
         const size_t maxCharCount = 1024;
         wchar_t sz[maxCharCount+1];
 
-        if (pintentId != nullptr)
+        if (pintentId != nullptr && Recognizer_ResultHandle_IsValid(hresult))
         {
             SPX_THROW_ON_FAIL(hr = IntentResult_GetIntentId(hresult, sz, maxCharCount));
             *pintentId = sz;
