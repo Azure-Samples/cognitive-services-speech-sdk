@@ -114,13 +114,20 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
     SPX_DBG_TRACE_SCOPE("*** AudioPump THREAD started! ***", "*** AudioPump THREAD stopped! ***");
 
     // Get the format from the reader and give it to the processor
+    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(): getting format from reader...");
+    SPX_DBG_ASSERT_WITH_MESSAGE(m_audioReader != nullptr, "m_audioReader != null ASSERT failed !!! Unexpected !!");
+
     auto cbFormat = m_audioReader->GetFormat(nullptr, 0);
     auto waveformat = SpxAllocWAVEFORMATEX(cbFormat);
-    
     m_audioReader->GetFormat(waveformat.get(), cbFormat);
+
+    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(): setting format on processor...");
+    SPX_DBG_ASSERT(pISpxAudioProcessor != nullptr);
     pISpxAudioProcessor->SetFormat(waveformat.get());
 
     // Calculate size of the buffer to read from the reader and send to the processor; and allocate it
+    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(): allocating our first buffer");
+    SPX_DBG_ASSERT(waveformat != nullptr);
     SPX_IFTRUE_THROW_HR(waveformat->wBitsPerSample % 8 != 0, SPXERR_UNSUPPORTED_FORMAT); // we only support 8bit multiples for sample size
     auto bytesPerSample = waveformat->wBitsPerSample / 8;
     auto samplesPerSec = waveformat->nSamplesPerSec;
@@ -160,6 +167,7 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
     };
 
     // Continue to loop while we're in the 'Processing' state...
+    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(): starting loop ...");
     while (checkAndChangeState())
     {
         // Ensure we have an unencumbered data buffer to use for this Read/ProcessAudio iteration
