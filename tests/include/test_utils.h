@@ -7,6 +7,8 @@
 
 #include <string>
 #include <fstream>
+#include <sstream>
+#include <iomanip>
 #include <random>
 #include <signal.h>
 #include "string_utils.h"
@@ -200,56 +202,38 @@ inline void CollectCallStack(size_t skipLevels, bool makeFunctionNamesStandOut, 
 
     for (size_t i = skipLevels; i < numFrames; i++)
     {
-        char* beginName = NULL;
-        char* beginOffset = NULL;
-        char* beginAddress = NULL;
-
         // Find parentheses and +address offset surrounding the mangled name
-        for (char* p = symbolList[i]; *p; ++p)
-        {
-            if (*p == '(')      // function name begins here
-                beginName = p;
-            else if (*p == '+') // relative address ofset
-                beginOffset = p;
-            else if ((*p == ')') && (beginOffset || beginName)) // absolute address
-                beginAddress = p;
-        }
-        const int buf_size = 1024;
-        char buffer[buf_size];
 
-        if (beginName && beginAddress && (beginName < beginAddress))
+        std::string current(symbolList[i]);
+
+        auto beginName = current.find('(');
+        auto beginOffset = current.find('+');
+        auto endOffset = current.find(')');
+
+        std::ostringstream buffer;
+
+        if (beginName != std::string::npos && beginOffset != std::string::npos && endOffset != std::string::npos && (beginName < beginOffset))
         {
-            *beginName++ = '\0';
-            *beginAddress++ = '\0';
-            if (beginOffset) // has relative address
-                *beginOffset++ = '\0';
+            auto mangled_name = current.substr(beginName + 1, beginOffset);
+            auto offset = current.substr(beginOffset + 1, endOffset);
 
             // Mangled name is now in [beginName, beginOffset) and caller offset in [beginOffset, beginAddress).
             int status = 0;
-            const unsigned int MAX_FUNCNAME_SIZE = 4096;
-            size_t funcNameSize = MAX_FUNCNAME_SIZE;
-            char funcName[MAX_FUNCNAME_SIZE]; // working buffer
-            const char* ret = abi::__cxa_demangle(beginName, funcName, &funcNameSize, &status);
-            std::string fName;
+            char* ret = abi::__cxa_demangle(mangled_name.c_str(), NULL, NULL, &status);
+            std::string fName(mangled_name);
             if (status == 0)
                 fName = makeFunctionNamesStandOut ? MakeFunctionNameStandOut(ret) : ret; // make it a bit more readable
-            else
-                fName = beginName; // failed: fall back
+            
+            free(ret);
 
-                                   // name of source file--not printing since it is not super-useful
-                                   //string sourceFile = symbolList[i];
-                                   //static const size_t sourceFileWidth = 20;
-                                   //if (sourceFile.size() > sourceFileWidth)
-                                   //    sourceFile = "..." + sourceFile.substr(sourceFile.size() - (sourceFileWidth-3));
-            while (*beginAddress == ' ') // eat unnecessary space
-                beginAddress++;
-            std::string pcOffset = beginOffset ? std::string(" + ") + beginOffset : std::string();
-            snprintf(buffer, buf_size, "%-20s%-50s%s\n", beginAddress, fName.c_str(), pcOffset.c_str());
+            buffer << std::setw(20) << std::left << current.substr(endOffset + 1)
+                << std::setw(50) << std::left << fName
+                << "+" << offset;
         }
         else // Couldn't parse the line. Print the whole line as it came.
-            snprintf(buffer, buf_size, "%s\n", symbolList[i]);
+            buffer << current;
 
-        write(buffer);
+        write(buffer.str());
     }
 
     free(symbolList);
@@ -259,10 +243,13 @@ inline void CollectCallStack(size_t skipLevels, bool makeFunctionNamesStandOut, 
 
 inline void signal_handler()
 {
-    CollectCallStack(1/*skip this function*/, false, [](std::string stack)
+    std::ostringstream buffer;
+    CollectCallStack(1/*skip this function*/, false, [&](std::string stack)
     {
-        std::cerr << stack;
+        buffer << stack;
     });
+
+    std::cerr << buffer.str();
 
     exit(1);
 }

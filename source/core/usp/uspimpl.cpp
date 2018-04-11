@@ -422,12 +422,12 @@ void Connection::Impl::OnTransportError(TransportHandle transportHandle, Transpo
         callbacks.OnError("Unknown transport error.");
         break;
 
-    case TRANSPORT_ERROR_AUTHENTICATION:
-        callbacks.OnError("Authentication error (401/403).");
+    case TRANSPORT_ERROR_HTTP_UNAUTHORIZED:
+        callbacks.OnError("WebSocket Upgrade failed with an authentication error (401).");
         break;
 
-    case TRANSPORT_ERROR_WS_OPEN_FAILED_WITH_BAD_RESPONSE_STATUS:
-        callbacks.OnError("WebSocket Upgrade failed with a bad response status.");
+    case TRANSPORT_ERROR_HTTP_FORBIDDEN:
+        callbacks.OnError("WebSocket Upgrade failed with an authentication error (403).");
         break;
 
     case TRANSPORT_ERROR_CONNECTION_FAILURE:
@@ -443,7 +443,7 @@ void Connection::Impl::OnTransportError(TransportHandle transportHandle, Transpo
         break;
 
     default:
-        throw runtime_error("Unknown TransportError enum value.");
+        callbacks.OnError("Communication Error. Error code: " + to_string(reason));
         break;
     }
 }
