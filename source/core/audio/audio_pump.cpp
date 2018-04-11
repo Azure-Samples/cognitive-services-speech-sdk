@@ -115,19 +115,22 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
 
     // Get the format from the reader and give it to the processor
     SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(): getting format from reader...");
-    SPX_DBG_ASSERT_WITH_MESSAGE(m_audioReader != nullptr, "m_audioReader != null ASSERT failed !!! Unexpected !!");
 
+    SPX_TRACE_ERROR_IF(m_audioReader == nullptr, "CSpxAudioPump::PumpThread(): m_audioReader == nullptr !!! Unexpected !!");
     auto cbFormat = m_audioReader->GetFormat(nullptr, 0);
+    SPX_TRACE_ERROR_IF(cbFormat == 0, "CSpxAudioPump::PumpThread(): cbFormat == 0 !!! Unexpected !!");
+
     auto waveformat = SpxAllocWAVEFORMATEX(cbFormat);
+    SPX_TRACE_ERROR_IF(waveformat == nullptr, "CSpxAudioPump::PumpThread(): SpxAllocWAVEFORMATEX(cbFormat) == nullptr !!! Unexpected !!");
     m_audioReader->GetFormat(waveformat.get(), cbFormat);
 
     SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(): setting format on processor...");
-    SPX_DBG_ASSERT(pISpxAudioProcessor != nullptr);
+    SPX_TRACE_ERROR_IF(pISpxAudioProcessor == nullptr, "CSpxAudioPump::PumpThread(): pISpxAudioProcessor == nullptr !!! Unexpected !!");
     pISpxAudioProcessor->SetFormat(waveformat.get());
 
     // Calculate size of the buffer to read from the reader and send to the processor; and allocate it
     SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(): allocating our first buffer");
-    SPX_DBG_ASSERT(waveformat != nullptr);
+    SPX_TRACE_ERROR_IF(waveformat == nullptr, "CSpxAudioPump::PumpThread(): waveformat == nullptr !!! Unexpected !!");
     SPX_IFTRUE_THROW_HR(waveformat->wBitsPerSample % 8 != 0, SPXERR_UNSUPPORTED_FORMAT); // we only support 8bit multiples for sample size
     auto bytesPerSample = waveformat->wBitsPerSample / 8;
     auto samplesPerSec = waveformat->nSamplesPerSec;
@@ -197,10 +200,7 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
 
 void CSpxAudioPump::WaitForPumpStart(std::unique_lock<std::mutex>& lock)
 {
-    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpStart() ... pre notify_all()");
-    m_cv.notify_all();
-
-    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpStart() ... post notify_all(), pre m_cv.wait_for()");
+    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpStart() ... pre m_cv.wait_for()");
     m_cv.wait_for(lock, std::chrono::milliseconds(m_waitMsStartPumpRequestTimeout), [&] { return m_state == State::Processing || m_stateRequested != State::Processing; });
 
     SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpStart() ... post m_cv.wait_for(); state=%d (requestedState=%d)", m_state, m_stateRequested);
@@ -208,10 +208,7 @@ void CSpxAudioPump::WaitForPumpStart(std::unique_lock<std::mutex>& lock)
 
 void CSpxAudioPump::WaitForPumpIdle(std::unique_lock<std::mutex>& lock)
 {
-    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpIdle() ... pre notify_all()");
-    m_cv.notify_all();
-
-    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpIdle() ... post notify_all(), pre m_cv.wait_for()");
+    SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpIdle() ... pre m_cv.wait_for()");
     m_cv.wait_for(lock, std::chrono::milliseconds(m_waitMsStopPumpRequestTimeout), [&] { return m_state == State::Idle || m_stateRequested != State::Idle; });
 
     SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpIdle() ... post m_cv.wait_for(); state=%d (requestedState=%d)", m_state, m_stateRequested);

@@ -125,13 +125,13 @@ void CSpxMockRecoEngineAdapter::FireIntermediateResult()
     auto offset = (uint32_t)m_cbAudioProcessed;
     SPX_DBG_TRACE_VERBOSE("%s: text='%s', offset=%d", __FUNCTION__, resultText.c_str(), offset);
 
+    m_cbFiredLastIntermediate = offset;
     m_cbFireNextIntermediate += m_numMsBetweenIntermediates * m_format->nAvgBytesPerSec / 1000;
 
     auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
     auto result = factory->CreateIntermediateResult(nullptr,  resultText.c_str(), ResultType::Speech);
 
     GetSite()->IntermediateRecoResult(this, offset, result);
-    m_cbFiredLastIntermediate = offset;
 }
 
 void CSpxMockRecoEngineAdapter::FireFinalResult()
@@ -143,6 +143,9 @@ void CSpxMockRecoEngineAdapter::FireFinalResult()
     auto offset = (uint32_t)m_cbAudioProcessed;
     SPX_DBG_TRACE_VERBOSE("%s: text='%s', offset=%d", __FUNCTION__, resultText.c_str(), offset);
 
+    m_cbFiredLastIntermediate = offset;
+    m_cbFiredLastFinal = offset;
+
     m_cbFireNextIntermediate = offset + m_numMsBetweenFinalAndNextIntermediate * m_format->nAvgBytesPerSec / 1000;
     m_cbFireNextFinalResult = m_cbFireNextIntermediate + m_numMsBetweenFirstIntermediateAndFinal * m_format->nAvgBytesPerSec / 1000;
     m_mockResultText.clear();
@@ -151,7 +154,6 @@ void CSpxMockRecoEngineAdapter::FireFinalResult()
     auto result = factory->CreateFinalResult(nullptr, resultText.c_str(), ResultType::Speech);
 
     GetSite()->FinalRecoResult(this, offset, result);
-    m_cbFiredLastFinal = offset;
 }
 
 void CSpxMockRecoEngineAdapter::EnsureFireFinalResult()
