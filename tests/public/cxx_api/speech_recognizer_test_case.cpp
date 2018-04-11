@@ -30,10 +30,10 @@ std::string g_keyCRIS;
 std::string g_keyLUIS;
 std::string g_keySkyman;
 
+static wstring input_file(L"tests/input/whatstheweatherlike.wav");
 
 TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
 {
-    wstring input_file(L"whatstheweatherlike.wav");
     REQUIRE(exists(input_file));
 
     mutex mtx;
@@ -79,7 +79,6 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
     DefaultRecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-MOCK-UspRecoEngine", true);
     DefaultRecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-MOCK-Microphone", true);
 
-    wstring input_file(L"whatstheweatherlike.wav");
     REQUIRE(exists(input_file));
 
     mutex mtx;

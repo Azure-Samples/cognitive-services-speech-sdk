@@ -214,8 +214,8 @@ inline void CollectCallStack(size_t skipLevels, bool makeFunctionNamesStandOut, 
 
         if (beginName != std::string::npos && beginOffset != std::string::npos && endOffset != std::string::npos && (beginName < beginOffset))
         {
-            auto mangled_name = current.substr(beginName + 1, beginOffset);
-            auto offset = current.substr(beginOffset + 1, endOffset);
+            auto mangled_name = current.substr(beginName + 1, beginOffset- beginName - 1);
+            auto offset = current.substr(beginOffset + 1, endOffset - beginOffset - 1);
 
             // Mangled name is now in [beginName, beginOffset) and caller offset in [beginOffset, beginAddress).
             int status = 0;
@@ -246,7 +246,7 @@ inline void signal_handler()
     std::ostringstream buffer;
     CollectCallStack(1/*skip this function*/, false, [&](std::string stack)
     {
-        buffer << stack;
+        buffer << stack << std::endl;
     });
 
     std::cerr << buffer.str();

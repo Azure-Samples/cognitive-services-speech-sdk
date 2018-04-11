@@ -4,3 +4,6 @@
 [submodule "external/azure-c-shared-utility"]
     path = external/azure-c-shared-utility
     url = https://github.com/raaaar/azure-c-shared-utility
+[submodule "tests/input"]
+    path = tests/input
+    url = https://msasg.visualstudio.com/Skyman/_git/CarbonTest

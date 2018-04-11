@@ -58,7 +58,7 @@ TEST_CASE("USP is properly functioning", "[usp]")
         (void)(client);
     }
 
-    wstring input_file(L"whatstheweatherlike.wav");
+    wstring input_file(L"tests/input/whatstheweatherlike.wav");
     REQUIRE(exists(input_file));
 
     SECTION("usp can be used to upload binary data")
