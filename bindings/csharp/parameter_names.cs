@@ -49,5 +49,16 @@ namespace Carbon.Recognition
         /// The name of parameter `SpeechEndpoint`.
         /// </summary>
         public const string SpeechEndpoint = "SPEECH-Endpoint";
+
+        /// <summary>
+        /// The name of parameter `TRANSLATION-FromLanguage` which describes the source language of audio.
+        /// </summary>
+        public const string TranslationFromLanguage = "TRANSLATION-FromLanguage";
+
+        /// <summary>
+        /// The name of parameter `TRANSLATION-ToLanguage` which describes target languages for translation.
+        /// </summary>
+        public const string TranslationToLanguage = "TRANSLATION-ToLanguage";
+
     }
 }
