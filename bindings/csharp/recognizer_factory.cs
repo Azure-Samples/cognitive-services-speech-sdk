@@ -6,16 +6,16 @@
 using System;
 using Carbon.Recognition.Speech;
 using Carbon.Recognition.Intent;
+using Carbon.Recognition.Translation;
 
 namespace Carbon.Recognition
 {
      /// <summary>
-     /// Defines factory methods to create recognizers.
-     /// </summary>
+     /// Factory methods to create recognizers.
      public sealed class RecognizerFactory : IDisposable
      {
         /// <summary>
-        /// Creates a recognizer factory.
+        /// Creates an instance of recognizer factory.
         /// </summary>
         public RecognizerFactory()
         {
@@ -23,7 +23,7 @@ namespace Carbon.Recognition
         }
 
         /// <summary>
-        /// Creates a recognizer factory with specified subscription key and region (optional).
+        /// Creates an instance of recognizer factory with specified subscription key and region (optional).
         /// </summary>
         /// <param name="subscriptionKey">The subscription key.</param>
         /// <param name="region">The region name.</param>
@@ -38,7 +38,7 @@ namespace Carbon.Recognition
         }
 
         /// <summary>
-        /// Gets/Sets the subscription key being used.
+        /// Gets/sets the subscription key.
         /// </summary>
         public string SubscriptionKey
         {
@@ -55,7 +55,7 @@ namespace Carbon.Recognition
         }
 
         /// <summary>
-        /// Gets/Sets the authorization token being used.
+        /// Gets/sets the authorization token.
         /// If this is set, subscription key is ignored.
         /// User needs to make sure the provided authrization token is valid and not expired.
         /// </summary>
@@ -74,7 +74,7 @@ namespace Carbon.Recognition
         }
 
         /// <summary>
-        /// The property represents the region being used.
+        /// Gets/sets the region name of the service to be connected.
         /// </summary>
         public string Region
         {
@@ -90,7 +90,7 @@ namespace Carbon.Recognition
         }
 
         /// <summary>
-        /// The property represents the endpoint of speech service being used.
+        /// Gets/sets the service endpoint.
         /// </summary>
         public string Endpoint
         {
@@ -107,33 +107,43 @@ namespace Carbon.Recognition
         }
 
         /// <summary>
-        /// The property represents the collections of defined parameters and their values.
+        /// The collection of parameters and their values defined for this <see cref="RecognizerFactory"/>.
         /// </summary>
         public ParameterCollection<RecognizerFactory> Parameters { get; private set; }
 
         /// <summary>
-        /// Creates a speech recognizer, using the default microphone input.
+        /// Creates a translation recognizer, using the default microphone input.
         /// </summary>
-        /// <returns>A speech recognizer instance</returns>
+        /// <returns>A translation recognizer instance.</returns>
         public SpeechRecognizer CreateSpeechRecognizer()
         {
             return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizer());
         }
 
         /// <summary>
-        /// Creates a speech recognizer, using the specified file as audio input.
+        /// Creates a translation recognizer, using the specified file as audio input.
         /// </summary>
         /// <param name="audioFile">Specifies the audio input file.</param>
-        /// <returns>A speech recognizer instance</returns>
+        /// <returns>A translation recognizer instance.</returns>
         public SpeechRecognizer CreateSpeechRecognizer(string audioFile)
         {
             return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithFileInput(audioFile));
         }
 
         /// <summary>
-        /// Creates a intent recognizer.
+        /// Creates a translation recognizer, using the specified input stream as audio input.
         /// </summary>
-        /// <returns>An intent recognizer instance</returns>
+        /// <param name="audioStream">Specifies the audio input stream.</param>
+        /// <returns>A translation recognizer instance.</returns>
+        public SpeechRecognizer CreateSpeechRecognizer(AudioInputStream audioStream)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Creates an intent recognizer, using the specified file as audio input.
+        /// </summary>
+        /// <returns>An intent recognizer instance.</returns>
         public IntentRecognizer CreateIntentRecognizer()
         {
             return new IntentRecognizer(factoryImpl.CreateIntentRecognizer());
@@ -147,6 +157,45 @@ namespace Carbon.Recognition
         public IntentRecognizer CreateIntentRecognizer(string audioFile)
         {
             return new IntentRecognizer(factoryImpl.CreateIntentRecognizerWithFileInput(audioFile));
+        }
+
+        /// <summary>
+        /// Creates an intent recognizer, using the specified input stream as audio input.
+        /// </summary>
+        /// <param name="audioStream">Specifies the audio input stream.</param>
+        /// <returns>An intent recognizer instance.</returns>
+        public IntentRecognizer CreateIntentRecognizer(AudioInputStream audioStream)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Creates a translation recognizer, using the default microphone input.
+        /// </summary>
+        /// <returns>A translation recognizer instance.</returns>
+        public TranslationRecognizer CreateTranslationRecognizer()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Creates a translation recognizer, using the specified file as audio input.
+        /// </summary>
+        /// <param name="audioFile">Specifies the audio input file.</param>
+        /// <returns>A translation recognizer instance.</returns>
+        public TranslationRecognizer CreateTranslationRecognizer(string audioFile)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Creates a translation recognizer, using the specified input stream as audio input.
+        /// </summary>
+        /// <param name="audioStream">Specifies the audio input stream.</param>
+        /// <returns>A translation recognizer instance.</returns>
+        public TranslationRecognizer CreateTranslationRecognizer(AudioInputStream audioStream)
+        {
+            throw new NotImplementedException();
         }
 
         public void Dispose()

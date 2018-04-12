@@ -82,9 +82,9 @@ namespace CarbonSamples
             }
 
             // Subscribes to events.
-            reco.OnIntermediateResult += MyIntermediateResultEventHandler;
-            reco.OnFinalResult += MyFinalResultEventHandler;
-            reco.OnRecognitionError += MyErrorEventHandler;
+            reco.IntermediateResultReceived += MyIntermediateResultEventHandler;
+            reco.FinalResultReceived += MyFinalResultEventHandler;
+            reco.RecognitionErrorRaised += MyErrorEventHandler;
             reco.OnSessionEvent += MySessionEventHandler;
 
             // Starts recognition.
@@ -93,9 +93,9 @@ namespace CarbonSamples
             Console.WriteLine("Speech Recognition: Recognition result: " + result);
 
             // Unsubscribe to events.
-            reco.OnIntermediateResult -= MyIntermediateResultEventHandler;
-            reco.OnFinalResult -= MyFinalResultEventHandler;
-            reco.OnRecognitionError -= MyErrorEventHandler;
+            reco.IntermediateResultReceived -= MyIntermediateResultEventHandler;
+            reco.FinalResultReceived -= MyFinalResultEventHandler;
+            reco.RecognitionErrorRaised -= MyErrorEventHandler;
             reco.OnSessionEvent -= MySessionEventHandler;
         }
     }

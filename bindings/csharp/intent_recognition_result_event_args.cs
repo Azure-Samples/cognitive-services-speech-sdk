@@ -27,7 +27,7 @@ namespace Carbon.Recognition.Intent
         public string SessionId { get; }
 
         /// <summary>
-        /// Returns a string that represents the intent recognition result event.
+        /// Returns a string that represents the session id and the intent recognition result event.
         /// </summary>
         /// <returns>A string that represents the intent recognition result event.</returns>
         public override string ToString()

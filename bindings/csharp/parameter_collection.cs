@@ -33,10 +33,10 @@ namespace Carbon
         }
 
         /// <summary>
-        /// Checks whether the parameter specified by name has a string value. 
+        /// Checks whether the parameter specified by name has a <typeparamref name="T"/> value. 
         /// </summary>
         /// <param name="name">The parameter name.</param>
-        /// <returns>true if the parameter has a string value, and false otherwise.</returns>
+        /// <returns>true if the parameter has a <typeparamref name="T"/> value, and false otherwise.</returns>
         public bool Is<T>(string name)
         {
             if (typeof(T) == typeof(string))
@@ -65,7 +65,6 @@ namespace Carbon
         /// </summary>
         /// <typeparam name="T">The type of parameter. only string, int and bool are supported.</typeparam>
         /// <param name="name">The parameter name.</param>
-        /// <param name="defaultValue">The default value which is returned if the parameter is not available in the collection.</param>
         /// <returns>value of the parameter.</returns>
         public T Get<T>(string name)
         {

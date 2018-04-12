@@ -11,24 +11,24 @@ using Carbon;
 namespace Carbon.Recognition.Intent
 {
     /// <summary>
-    /// Defines the intent recognizer class containing both methods and events for intent recognition.
+    /// Perform intent recognition on the speech input. It returns both recognized text and recognized intent.
     /// </summary>
     public sealed class IntentRecognizer : Recognition.Recognizer
     {
         /// <summary>
-        /// Defines event handler for the intermediate recognition result event.
+        /// The event <see cref="IntermediateResultReceived"/> signals that an intermediate recongition result is received.
         /// </summary>
-        public event EventHandler<IntentRecognitionResultEventArgs> OnIntermediateResult;
+        public event EventHandler<IntentRecognitionResultEventArgs> IntermediateResultReceived;
 
         /// <summary>
-        /// Defines event handler for the final recognition result event.
+        /// The event <see cref="FinalResultReceived"/> signals that a final recognition result is received.
         /// </summary>
-        public event EventHandler<IntentRecognitionResultEventArgs> OnFinalResult;
+        public event EventHandler<IntentRecognitionResultEventArgs> FinalResultReceived;
 
         /// <summary>
-        /// Defines event handler for the recognition error event.
+        /// The event <see cref="RecognitionErrorRaised"/> signals that an error occured during recognition.
         /// </summary>
-        public event EventHandler<RecognitionErrorEventArgs> OnRecognitionError;
+        public event EventHandler<RecognitionErrorEventArgs> RecognitionErrorRaised;
 
         internal IntentRecognizer(Internal.IntentRecognizer recoImpl)
         {
@@ -51,7 +51,7 @@ namespace Carbon.Recognition.Intent
         }
 
         /// <summary>
-        /// Sets/Gets the spoken language of audio.
+        /// Gets/sets the spoken language of recognition.
         /// </summary>
         public string Language
         {
@@ -67,17 +67,22 @@ namespace Carbon.Recognition.Intent
         }
 
         /// <summary>
-        /// Starts intent recognition
+        /// The collection of parameters and their values defined for this <see cref="IntentRecognizer"/>.
         /// </summary>
-        /// <returns>A task representing the recognition operation.</returns>
+        public ParameterCollection<IntentRecognizer> Parameters { get; }
+
+        /// <summary>
+        /// Starts intent recognition, and stops after the first utterance is recognized. The task returns the recognition text and intent as result.
+        /// </summary>
+        /// <returns>A task representing the recognition operation. The task returns a value of <see cref="IntentRecognitionResult"/></returns>
         public Task<IntentRecognitionResult> RecognizeAsync()
         {
             return Task.Run(() => { return new IntentRecognitionResult(this.recoImpl.Recognize()); });
         }
 
         /// <summary>
-        /// Starts continuous intent recognition, until user calls StopContinuousRecognitionAsync(). User must subscribe to 
-        /// result events to receive recognition results.
+        /// Starts speech recognition on a continous audio stream, until StopContinuousRecognitionAsync() is called.
+        /// User must subscribe to events to receive recognition results.
         /// </summary>
         /// <returns>A task representing the asynchronous operation that starts the recognition.</returns>
         public Task StartContinuousRecognitionAsync()
@@ -95,9 +100,9 @@ namespace Carbon.Recognition.Intent
         }
 
         /// <summary>
-        /// Adds an intent to be recognized.
+        /// Adds a phrase that should be recognized as intent.
         /// </summary>
-        /// <param name="intentId">A string that represents the identifier of the intent to be added.</param>
+        /// <param name="intentId">A string that represents the identifier of the intent to be recognized.</param>
         /// <param name="phrase">A string that specifies the phrase representing the intent.</param>
         public void AddIntent(string intentId, string phrase)
         {
@@ -105,22 +110,17 @@ namespace Carbon.Recognition.Intent
         }
 
         /// <summary>
-        /// Adds an intent to be recognized.
+        /// Adds an intent from Language Understanding service for recognition.
         /// </summary>
-        /// <param name="intentId">A string that represents the identifier of the intent to be added.</param>
-        /// <param name="model">The LUIS model used for intent recognition.</param>
-        /// <param name="intentName">The name of intent that should be recognized. If it is null, all intent names defined in the LUIS model will be recognized.</param>
-        public void AddIntent(string intentId, LuisModel model, string intentName = null)
+        /// <param name="intentId">A string that represents the identifier of the intent to be recognized.</param>
+        /// <param name="model">The intent model from Language Understanding service.</param>
+        /// <param name="intentName">The intent name defined in the intent model. If it is null, all intent names defined in the model will be added.</param>
+        public void AddIntent(string intentId, IntentModel model, string intentName = null)
         {
             var trigger = Carbon.Internal.IntentTrigger.From(model.modelImpl, intentName);
             recoImpl.AddIntent(intentId, trigger);
         }
-
-        /// <summary>
-        /// Represents the collection of parameters and their values defined for this <see cref="IntentRecognizer"/>.
-        /// </summary>
-        public ParameterCollection<IntentRecognizer> Parameters { get; }
-
+        
         protected override void Dispose(bool disposing)
         {
             if (disposed)
@@ -155,9 +155,7 @@ namespace Carbon.Recognition.Intent
         private IntentHandlerImpl finalResultHandler;
         private ErrorHandlerImpl errorHandler;
 
-        /// <summary>
-        /// Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
-        /// </summary>
+        // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         private class IntentHandlerImpl : Internal.IntentEventListener
         {
             public IntentHandlerImpl(IntentRecognizer recognizer, bool isFinalResultHandler)
@@ -169,7 +167,7 @@ namespace Carbon.Recognition.Intent
             public override void Execute(Internal.IntentRecognitionEventArgs eventArgs)
             {
                 var resultEventArg = new IntentRecognitionResultEventArgs(eventArgs);
-                var handler = isFinalResultHandler ? recognizer.OnFinalResult : recognizer.OnIntermediateResult;
+                var handler = isFinalResultHandler ? recognizer.FinalResultReceived : recognizer.IntermediateResultReceived;
                 if (handler != null)
                 {
                     handler(this, resultEventArg);
@@ -180,9 +178,7 @@ namespace Carbon.Recognition.Intent
             private bool isFinalResultHandler;
         }
 
-        /// <summary>
-        /// Defines an internal class to raise a C# event for error during recognition when a corresponding callback is invoked by the native layer.
-        /// </summary>
+        // Defines an internal class to raise a C# event for error during recognition when a corresponding callback is invoked by the native layer.
         private class ErrorHandlerImpl : Internal.IntentEventListener
         {
             public ErrorHandlerImpl(IntentRecognizer recognizer)
@@ -193,7 +189,7 @@ namespace Carbon.Recognition.Intent
             public override void Execute(Carbon.Internal.IntentRecognitionEventArgs eventArgs)
             {
                 var resultEventArg = new RecognitionErrorEventArgs(eventArgs.SessionId, eventArgs.Result.Reason);
-                var handler = this.recognizer.OnRecognitionError;
+                var handler = this.recognizer.RecognitionErrorRaised;
 
                 if (handler != null)
                 {

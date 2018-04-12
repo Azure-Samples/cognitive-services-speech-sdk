@@ -83,9 +83,9 @@ namespace CarbonSamples
             }
 
             // Subscribes to events.
-            reco.OnIntermediateResult += MyIntermediateResultEventHandler;
-            reco.OnFinalResult += MyFinalResultEventHandler;
-            reco.OnRecognitionError += MyErrorEventHandler;
+            reco.IntermediateResultReceived += MyIntermediateResultEventHandler;
+            reco.FinalResultReceived += MyFinalResultEventHandler;
+            reco.RecognitionErrorRaised += MyErrorEventHandler;
             reco.OnSessionEvent += MySessionEventHandler;
 
             // Todo: Add LUIS intent.
@@ -97,9 +97,9 @@ namespace CarbonSamples
             Console.WriteLine("Intent Recognition: recognition result: " + result);
 
             // Unsubscribe to events.
-            reco.OnIntermediateResult -= MyIntermediateResultEventHandler;
-            reco.OnFinalResult -= MyFinalResultEventHandler;
-            reco.OnRecognitionError -= MyErrorEventHandler;
+            reco.IntermediateResultReceived -= MyIntermediateResultEventHandler;
+            reco.FinalResultReceived -= MyFinalResultEventHandler;
+            reco.RecognitionErrorRaised -= MyErrorEventHandler;
             reco.OnSessionEvent -= MySessionEventHandler;
         }
 
