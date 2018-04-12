@@ -422,11 +422,18 @@ public:
 
     virtual void FireSessionStarted(const std::wstring& sessionId) = 0;
     virtual void FireSessionStopped(const std::wstring& sessionId) = 0;
+
+    virtual void FireSpeechStartDetected(const std::wstring& sessionId) = 0;
+    virtual void FireSpeechEndDetected(const std::wstring& sessionId) = 0;
     
     virtual void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) = 0;
 
     SessionEvent_Type SessionStarted;
     SessionEvent_Type SessionStopped;
+
+    //TODO: Change this to Control_Type event.
+    SessionEvent_Type SpeechStartDetected;
+    SessionEvent_Type SpeechEndDetected;
 
     RecoEvent_Type IntermediateResult;
     RecoEvent_Type FinalResult;

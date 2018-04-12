@@ -50,6 +50,8 @@ private:
 
     void FireIntermediateResult();
     void FireFinalResult();
+    void FireSpeechStartDetected();
+    void FireSpeechEndDetected();
     
     void EnsureFireFinalResult();
 

@@ -524,8 +524,8 @@ void CarbonTestConsole::ConsoleInput_HelpOnRecognizer()
     ConsoleWriteLine(L"");
     ConsoleWriteLine(L"    SessionStarted     {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    SessionStopped     {Connect | Disconnect | DisconnectAll}");
-    ConsoleWriteLine(L"    SoundStarted       {Connect | Disconnect | DisconnectAll}");
-    ConsoleWriteLine(L"    SoundStopped       {Connect | Disconnect | DisconnectAll}");
+    ConsoleWriteLine(L"    SpeechStartDetected       {Connect | Disconnect | DisconnectAll}");
+    ConsoleWriteLine(L"    SpeechEndDetected       {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    IntermediateResult {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    FinalResult        {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    NoMatch            {Connect | Disconnect | DisconnectAll}");
@@ -562,8 +562,8 @@ void CarbonTestConsole::ConsoleInput_HelpOnSpeech()
     ConsoleWriteLine(L"");
     ConsoleWriteLine(L"    SessionStarted     {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    SessionStopped     {Connect | Disconnect | DisconnectAll}");
-    ConsoleWriteLine(L"    SoundStarted       {Connect | Disconnect | DisconnectAll}");
-    ConsoleWriteLine(L"    SoundStopped       {Connect | Disconnect | DisconnectAll}");
+    ConsoleWriteLine(L"    SpeechStartDetected       {Connect | Disconnect | DisconnectAll}");
+    ConsoleWriteLine(L"    SpeechEndDetected       {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    IntermediateResult {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    FinalResult        {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    NoMatch            {Connect | Disconnect | DisconnectAll}");
@@ -591,8 +591,8 @@ void CarbonTestConsole::ConsoleInput_HelpOnIntent()
     ConsoleWriteLine(L"");
     ConsoleWriteLine(L"    SessionStarted     {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    SessionStopped     {Connect | Disconnect | DisconnectAll}");
-    ConsoleWriteLine(L"    SoundStarted       {Connect | Disconnect | DisconnectAll}");
-    ConsoleWriteLine(L"    SoundStopped       {Connect | Disconnect | DisconnectAll}");
+    ConsoleWriteLine(L"    SpeechStartDetected       {Connect | Disconnect | DisconnectAll}");
+    ConsoleWriteLine(L"    SpeechEndDetected       {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    IntermediateResult {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    FinalResult        {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    NoMatch            {Connect | Disconnect | DisconnectAll}");
@@ -689,15 +689,15 @@ void CarbonTestConsole::ConsoleInput_Recognizer(const wchar_t* psz, std::shared_
          auto fn = std::bind(&CarbonTestConsole::Recognizer_SessionStoppedHandler, this, std::placeholders::_1);
          Recognizer_Event(psz + wcslen(L"sessionstopped "), m_recognizer->SessionStopped, fn);
      }
-     else if (PAL::wcsnicmp(psz, L"soundstarted ", wcslen(L"soundstarted ")) == 0)
+     else if (PAL::wcsnicmp(psz, L"speechstartdetected ", wcslen(L"speechstartdetected ")) == 0)
      {
-         auto fn = std::bind(&CarbonTestConsole::Recognizer_SoundStartedHandler, this, std::placeholders::_1);
-         Recognizer_Event(psz + wcslen(L"soundstarted "), m_recognizer->SoundStarted, fn);
+         auto fn = std::bind(&CarbonTestConsole::Recognizer_SpeechStartDetectedHandler, this, std::placeholders::_1);
+         Recognizer_Event(psz + wcslen(L"speechstartdetected "), m_recognizer->SpeechStartDetected, fn);
      }
-     else if (PAL::wcsnicmp(psz, L"soundstopped ", wcslen(L"soundstopped ")) == 0)
+     else if (PAL::wcsnicmp(psz, L"speechenddetected ", wcslen(L"speechenddetected ")) == 0)
      {
-         auto fn = std::bind(&CarbonTestConsole::Recognizer_SoundStoppedHandler, this, std::placeholders::_1);
-         Recognizer_Event(psz + wcslen(L"soundstopped "), m_recognizer->SoundStopped, fn);
+         auto fn = std::bind(&CarbonTestConsole::Recognizer_SpeechEndDetectedHandler, this, std::placeholders::_1);
+         Recognizer_Event(psz + wcslen(L"speechenddetected "), m_recognizer->SpeechEndDetected, fn);
      }
      else if (PAL::wcsnicmp(psz, L"intermediateresult ", wcslen(L"intermediateresult ")) == 0)
      {
@@ -769,15 +769,15 @@ void CarbonTestConsole::ConsoleInput_SpeechRecognizer(const wchar_t* psz, std::s
         auto fn = std::bind(&CarbonTestConsole::Recognizer_SessionStoppedHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"sessionstopped "), m_speechRecognizer->SessionStopped, fn);
     }
-    else if (PAL::wcsnicmp(psz, L"soundstarted ", wcslen(L"soundstarted ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"speechstartdetected ", wcslen(L"speechstartdetected ")) == 0)
     {
-        auto fn = std::bind(&CarbonTestConsole::Recognizer_SoundStartedHandler, this, std::placeholders::_1);
-        Recognizer_Event(psz + wcslen(L"soundstarted "), m_speechRecognizer->SoundStarted, fn);
+        auto fn = std::bind(&CarbonTestConsole::Recognizer_SpeechStartDetectedHandler, this, std::placeholders::_1);
+        Recognizer_Event(psz + wcslen(L"speechstartdetected "), m_speechRecognizer->SpeechStartDetected, fn);
     }
-    else if (PAL::wcsnicmp(psz, L"soundstopped ", wcslen(L"soundstopped ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"speechenddetected ", wcslen(L"speechenddetected ")) == 0)
     {
-        auto fn = std::bind(&CarbonTestConsole::Recognizer_SoundStoppedHandler, this, std::placeholders::_1);
-        Recognizer_Event(psz + wcslen(L"soundstopped "), m_speechRecognizer->SoundStopped, fn);
+        auto fn = std::bind(&CarbonTestConsole::Recognizer_SpeechEndDetectedHandler, this, std::placeholders::_1);
+        Recognizer_Event(psz + wcslen(L"speechenddetected "), m_speechRecognizer->SpeechEndDetected, fn);
     }
     else if (PAL::wcsnicmp(psz, L"intermediateresult ", wcslen(L"intermediateresult ")) == 0)
     {
@@ -873,15 +873,15 @@ void CarbonTestConsole::ConsoleInput_IntentRecognizer(const wchar_t* psz, std::s
         auto fn = std::bind(&CarbonTestConsole::Recognizer_SessionStoppedHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"sessionstopped "), m_intentRecognizer->SessionStopped, fn);
     }
-    else if (PAL::wcsnicmp(psz, L"soundstarted ", wcslen(L"soundstarted ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"speechstartdetected ", wcslen(L"speechstartdetected ")) == 0)
     {
-        auto fn = std::bind(&CarbonTestConsole::Recognizer_SoundStartedHandler, this, std::placeholders::_1);
-        Recognizer_Event(psz + wcslen(L"soundstarted "), m_intentRecognizer->SoundStarted, fn);
+        auto fn = std::bind(&CarbonTestConsole::Recognizer_SpeechStartDetectedHandler, this, std::placeholders::_1);
+        Recognizer_Event(psz + wcslen(L"speechstartdetected "), m_intentRecognizer->SpeechStartDetected, fn);
     }
-    else if (PAL::wcsnicmp(psz, L"soundstopped ", wcslen(L"soundstopped ")) == 0)
+    else if (PAL::wcsnicmp(psz, L"speechenddetected ", wcslen(L"speechenddetected ")) == 0)
     {
-        auto fn = std::bind(&CarbonTestConsole::Recognizer_SoundStoppedHandler, this, std::placeholders::_1);
-        Recognizer_Event(psz + wcslen(L"soundstopped "), m_intentRecognizer->SoundStopped, fn);
+        auto fn = std::bind(&CarbonTestConsole::Recognizer_SpeechEndDetectedHandler, this, std::placeholders::_1);
+        Recognizer_Event(psz + wcslen(L"speechenddetected "), m_intentRecognizer->SpeechEndDetected, fn);
     }
     else if (PAL::wcsnicmp(psz, L"intermediateresult ", wcslen(L"intermediateresult ")) == 0)
     {

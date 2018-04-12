@@ -29,8 +29,8 @@ public:
         Recognizer(hreco),
         SessionStarted(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
         SessionStopped(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
-        SoundStarted(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
-        SoundStopped(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
+        SpeechStartDetected(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
+        SpeechEndDetected(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
         IntermediateResult(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback()),
         FinalResult(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback()),
         NoMatch(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback()),
@@ -66,8 +66,8 @@ public:
     EventSignal<const SessionEventArgs&> SessionStarted;
     EventSignal<const SessionEventArgs&> SessionStopped;
 
-    EventSignal<const SessionEventArgs&> SoundStarted;
-    EventSignal<const SessionEventArgs&> SoundStopped;
+    EventSignal<const SessionEventArgs&> SpeechStartDetected;
+    EventSignal<const SessionEventArgs&> SpeechEndDetected;
 
     EventSignal<const RecoEventArgs&> IntermediateResult;
     EventSignal<const RecoEventArgs&> FinalResult;
@@ -196,13 +196,13 @@ protected:
         {
             Recognizer_SessionStopped_SetEventCallback(m_hreco, SessionStopped.IsConnected() ? AsyncRecognizer::FireEvent_SessionStopped : nullptr, this);
         }
-        else if (&sessionEvent == &SoundStarted)
+        else if (&sessionEvent == &SpeechStartDetected)
         {
-            //Recognizer_SoundStarted_SetEventCallback(m_hreco, SoundStarted.IsConnected() ? AsyncRecognizer::FireEvent_SoundStarted: nullptr, this);
+            Recognizer_SpeechStartDetected_SetEventCallback(m_hreco, SpeechStartDetected.IsConnected() ? AsyncRecognizer::FireEvent_SpeechStartDetected: nullptr, this);
         }
-        else if (&sessionEvent == &SoundStopped)
+        else if (&sessionEvent == &SpeechEndDetected)
         {
-            //Recognizer_SoundStopped_SetEventCallback(m_hreco, SoundStopped.IsConnected() ? AsyncRecognizer::FireEvent_SoundStopped: nullptr, this);
+            Recognizer_SpeechEndDetected_SetEventCallback(m_hreco, SpeechEndDetected.IsConnected() ? AsyncRecognizer::FireEvent_SpeechEndDetected: nullptr, this);
         }
     }
 
@@ -222,6 +222,24 @@ protected:
 
         auto pThis = static_cast<AsyncRecognizer*>(pvContext);
         pThis->SessionStopped.Signal(*sessionEvent.get());
+    }
+
+    static void FireEvent_SpeechStartDetected(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
+    {
+        UNUSED(hreco);
+        std::unique_ptr<SessionEventArgs> sessionEvent{ new SessionEventArgs(hevent) };
+
+        auto pThis = static_cast<AsyncRecognizer*>(pvContext);
+        pThis->SpeechStartDetected.Signal(*sessionEvent.get());
+    }
+
+    static void FireEvent_SpeechEndDetected(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
+    {
+        UNUSED(hreco);
+        std::unique_ptr<SessionEventArgs> sessionEvent{ new SessionEventArgs(hevent) };
+
+        auto pThis = static_cast<AsyncRecognizer*>(pvContext);
+        pThis->SpeechEndDetected.Signal(*sessionEvent.get());
     }
 
     static void FireEvent_IntermediateResult(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)

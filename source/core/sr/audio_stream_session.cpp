@@ -570,16 +570,16 @@ void CSpxAudioStreamSession::SpeechStartDetected(ISpxRecoEngineAdapter* adapter,
 {
     UNUSED(adapter);
     UNUSED(offset);
-    // TODO: RobCh: Next: Implement
-    // SPX_THROW_HR(SPXERR_NOT_IMPL);
+    
+    FireSpeechStartDetectedEvent();
 }
 
 void CSpxAudioStreamSession::SpeechEndDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset)
 {
     UNUSED(adapter);
     UNUSED(offset);
-    // TODO: RobCh: Next: Implement
-    // SPX_THROW_HR(SPXERR_NOT_IMPL);
+
+    FireSpeechEndDetectedEvent();
 }
 
 void CSpxAudioStreamSession::SoundStartDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset)

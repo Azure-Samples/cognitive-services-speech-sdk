@@ -539,22 +539,14 @@ SPXAPI Recognizer_SessionStopped_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_
     return Recognizer_SessionEvent_SetCallback(&ISpxRecognizerEvents::SessionStopped, hreco, pCallback, pvContext);
 }
 
-SPXAPI Recognizer_SoundStarted_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext)
+SPXAPI Recognizer_SpeechStartDetected_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext)
 {
-    UNUSED(hreco);
-    UNUSED(pCallback);
-    UNUSED(pvContext);
-    // TODO: RobCh: Next: Implement
-    return SPXERR_NOT_IMPL;
+    return Recognizer_SessionEvent_SetCallback(&ISpxRecognizerEvents::SpeechStartDetected, hreco, pCallback, pvContext);
 }
 
-SPXAPI Recognizer_SoundStopped_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext)
+SPXAPI Recognizer_SpeechEndDetected_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext)
 {
-    UNUSED(hreco);
-    UNUSED(pCallback);
-    UNUSED(pvContext);
-    // TODO: RobCh: Next: Implement
-    return SPXERR_NOT_IMPL;
+    return Recognizer_SessionEvent_SetCallback(&ISpxRecognizerEvents::SpeechEndDetected, hreco, pCallback, pvContext);
 }
 
 SPXAPI Recognizer_IntermediateResult_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext)

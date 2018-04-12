@@ -14,7 +14,7 @@ namespace Carbon.Recognition
     public class Recognizer : IDisposable
     {
         /// <summary>
-        /// Defines event handler for session events, e.g. SessionStarted/Stopped, SoundStarted/Stopped.
+        /// Defines event handler for session events, e.g. SessionStarted/Stopped, SpeechStartDetected / StopDetected
         /// </summary>
         /// <example>
         /// Create a speech recognizer, setup an event handler for session events
@@ -45,8 +45,8 @@ namespace Carbon.Recognition
         {
             sessionStartedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStartedEvent);
             sessionStoppedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStoppedEvent);
-            soundStartedHandler = new SessionEventHandlerImpl(this, SessionEventType.SoundStartedEvent);
-            soundStoppedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStoppedEvent);
+            speechStartDetectedHandler = new SessionEventHandlerImpl(this, SessionEventType.SpeechStartDetectedEvent);
+            speechEndDetectedHandler = new SessionEventHandlerImpl(this, SessionEventType.SpeechEndDetectedEvent);
         }
 
         public void Dispose()
@@ -67,8 +67,8 @@ namespace Carbon.Recognition
                 // disconnect
                 sessionStartedHandler.Dispose();
                 sessionStoppedHandler.Dispose();
-                soundStartedHandler.Dispose();
-                soundStoppedHandler.Dispose();
+                speechStartDetectedHandler.Dispose();
+                speechEndDetectedHandler.Dispose();
             }
 
             disposed = true;
@@ -76,8 +76,8 @@ namespace Carbon.Recognition
 
         internal SessionEventHandlerImpl sessionStartedHandler;
         internal SessionEventHandlerImpl sessionStoppedHandler;
-        internal SessionEventHandlerImpl soundStartedHandler;
-        internal SessionEventHandlerImpl soundStoppedHandler;
+        internal SessionEventHandlerImpl speechStartDetectedHandler;
+        internal SessionEventHandlerImpl speechEndDetectedHandler;
         private bool disposed = false;
 
         /// <summary>

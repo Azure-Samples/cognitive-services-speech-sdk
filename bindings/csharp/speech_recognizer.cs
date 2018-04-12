@@ -90,8 +90,8 @@ namespace Carbon.Recognition.Speech
 
             recoImpl.SessionStarted.Connect(sessionStartedHandler);
             recoImpl.SessionStopped.Connect(sessionStoppedHandler);
-            recoImpl.SoundStarted.Connect(soundStartedHandler);
-            recoImpl.SoundStopped.Connect(soundStoppedHandler);
+            recoImpl.SpeechStartDetected.Connect(speechStartDetectedHandler);
+            recoImpl.SpeechEndDetected.Connect(speechEndDetectedHandler);
 
             Parameters = new ParameterCollection<SpeechRecognizer>(this);
         }
@@ -190,8 +190,8 @@ namespace Carbon.Recognition.Speech
                 recoImpl.Canceled.Disconnect(errorHandler);
                 recoImpl.SessionStarted.Disconnect(sessionStartedHandler);
                 recoImpl.SessionStopped.Disconnect(sessionStoppedHandler);
-                recoImpl.SoundStarted.Disconnect(soundStartedHandler);
-                recoImpl.SoundStopped.Disconnect(soundStoppedHandler);
+                recoImpl.SpeechStartDetected.Disconnect(speechStartDetectedHandler);
+                recoImpl.SpeechEndDetected.Disconnect(speechEndDetectedHandler);
 
                 intermediateResultHandler.Dispose();
                 finalResultHandler.Dispose();

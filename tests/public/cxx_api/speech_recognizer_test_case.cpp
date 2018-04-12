@@ -48,8 +48,8 @@ void UseMockUsp(bool value)
 bool IsUsingMocks(bool uspMockRequired = true)
 {
     return DefaultRecognizerFactory::Parameters::GetBool(L"CARBON-INTERNAL-MOCK-Microphone") &&
-           DefaultRecognizerFactory::Parameters::GetBool(L"CARBON-INTERNAL-MOCK-SdkKwsEngine") &&
-           (DefaultRecognizerFactory::Parameters::GetBool(L"CARBON-INTERNAL-MOCK-UspRecoEngine") || !uspMockRequired);
+        DefaultRecognizerFactory::Parameters::GetBool(L"CARBON-INTERNAL-MOCK-SdkKwsEngine") &&
+        (DefaultRecognizerFactory::Parameters::GetBool(L"CARBON-INTERNAL-MOCK-UspRecoEngine") || !uspMockRequired);
 }
 
 void SetMockRealTimeSpeed(int value)
@@ -72,7 +72,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         mutex mtx;
         condition_variable cv;
 
-        enum class Callbacks { final_result, no_match, session_started, session_stopped };
+        enum class Callbacks { final_result, no_match, session_started, session_stopped, speech_start_detected, speech_end_detected};
 
         WHEN("We checking to make sure callback counts are correct (checking multiple times, and multiple speeds times) ...")
         {
@@ -81,6 +81,8 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             callbackCounts[Callbacks::no_match] = 0;
             callbackCounts[Callbacks::session_started] = 0;
             callbackCounts[Callbacks::session_stopped] = 0;
+            callbackCounts[Callbacks::speech_start_detected] = 0;
+            callbackCounts[Callbacks::speech_end_detected] = 0;
 
             // We're going to loop thru 11 times... The first 10, we'll use mocks. The last time we'll use the USP
             const int numLoops = 11;
@@ -100,16 +102,24 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
                 bool sessionEnded = false;
 
                 recognizer->FinalResult.Connect([&](const SpeechRecognitionEventArgs&) {
-                    callbackCounts[Callbacks::final_result]++; 
+                    callbackCounts[Callbacks::final_result]++;
                     SPX_TRACE_VERBOSE("callbackCounts[Callbacks::final_result]=%d", callbackCounts[Callbacks::final_result].load());
                 });
                 recognizer->NoMatch.Connect([&](const SpeechRecognitionEventArgs&) {
-                    callbackCounts[Callbacks::no_match]++; 
+                    callbackCounts[Callbacks::no_match]++;
                     SPX_TRACE_VERBOSE("callbackCounts[Callbacks::no_match]=%d", callbackCounts[Callbacks::no_match].load());
                 });
                 recognizer->SessionStarted.Connect([&](const SessionEventArgs&) {
                     callbackCounts[Callbacks::session_started]++;
                     SPX_TRACE_VERBOSE("callbackCounts[Callbacks::session_started]=%d", callbackCounts[Callbacks::session_started].load());
+                });
+                recognizer->SpeechStartDetected.Connect([&](const SessionEventArgs&) {
+                    callbackCounts[Callbacks::speech_start_detected]++;
+                    SPX_TRACE_VERBOSE("callbackCounts[Callbacks::speech_start_detected]=%d", callbackCounts[Callbacks::speech_start_detected].load());
+                });
+                recognizer->SpeechEndDetected.Connect([&](const SessionEventArgs&) {
+                    callbackCounts[Callbacks::speech_end_detected]++;
+                    SPX_TRACE_VERBOSE("callbackCounts[Callbacks::speech_end_detected]=%d", callbackCounts[Callbacks::speech_end_detected].load());
                 });
                 recognizer->SessionStopped.Connect([&](const SessionEventArgs&) {
                     callbackCounts[Callbacks::session_stopped]++;
@@ -138,6 +148,8 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             CHECK(callbackCounts[Callbacks::session_started] == numLoops);
             CHECK(callbackCounts[Callbacks::session_stopped] == numLoops);
             CHECK(callbackCounts[Callbacks::final_result] == numLoops);
+            CHECK(callbackCounts[Callbacks::speech_start_detected] == numLoops);
+            CHECK(callbackCounts[Callbacks::speech_end_detected] == numLoops);
             CHECK(callbackCounts[Callbacks::no_match] == 0);
         }
 

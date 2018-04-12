@@ -120,6 +120,32 @@ void CSpxRecognizer::FireSessionStopped(const std::wstring& sessionId)
     SessionStopped.Signal(sessionEvent);
 }
 
+void CSpxRecognizer::FireSpeechStartDetected(const std::wstring& sessionId)
+{
+    SPX_DBG_ASSERT(GetSite());
+    auto factory = SpxQueryService<ISpxEventArgsFactory>(GetSite());
+    auto sessionEvent = factory->CreateSessionEventArgs(sessionId); // TODO: We must have a different Argument other than Session Type for Speech Start / End
+
+    auto handletable = CSpxSharedPtrHandleTableManager::Get<ISpxSessionEventArgs, SPXEVENTHANDLE>();
+    auto hevent = handletable->TrackHandle(sessionEvent);
+
+    SpeechStartDetected.Signal(sessionEvent);
+    handletable->StopTracking(hevent);
+}
+
+void CSpxRecognizer::FireSpeechEndDetected(const std::wstring& sessionId)
+{
+    SPX_DBG_ASSERT(GetSite());
+    auto factory = SpxQueryService<ISpxEventArgsFactory>(GetSite());
+    auto sessionEvent = factory->CreateSessionEventArgs(sessionId); // TODO: We must have a different Argument other than Session Type for Speech Start / End
+
+    auto handletable = CSpxSharedPtrHandleTableManager::Get<ISpxSessionEventArgs, SPXEVENTHANDLE>();
+    auto hevent = handletable->TrackHandle(sessionEvent);
+
+    SpeechEndDetected.Signal(sessionEvent);
+    handletable->StopTracking(hevent);
+}
+
 void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result)
 {
     ISpxRecognizerEvents::RecoEvent_Type* pevent = nullptr;

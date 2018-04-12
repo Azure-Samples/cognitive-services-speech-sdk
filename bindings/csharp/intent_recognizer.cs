@@ -46,8 +46,8 @@ namespace Carbon.Recognition.Intent
 
             recoImpl.SessionStarted.Connect(sessionStartedHandler);
             recoImpl.SessionStopped.Connect(sessionStoppedHandler);
-            recoImpl.SoundStarted.Connect(soundStartedHandler);
-            recoImpl.SoundStopped.Connect(soundStoppedHandler);
+            recoImpl.SpeechStartDetected.Connect(speechStartDetectedHandler);
+            recoImpl.SpeechEndDetected.Connect(speechEndDetectedHandler);
         }
 
         /// <summary>
@@ -136,8 +136,8 @@ namespace Carbon.Recognition.Intent
                 recoImpl.Canceled.Disconnect(errorHandler);
                 recoImpl.SessionStarted.Disconnect(sessionStartedHandler);
                 recoImpl.SessionStopped.Disconnect(sessionStoppedHandler);
-                recoImpl.SoundStarted.Disconnect(soundStartedHandler);
-                recoImpl.SoundStopped.Disconnect(soundStoppedHandler);
+                recoImpl.SpeechStartDetected.Disconnect(speechStartDetectedHandler);
+                recoImpl.SpeechEndDetected.Disconnect(speechEndDetectedHandler);
 
                 intermediateResultHandler.Dispose();
                 finalResultHandler.Dispose();

@@ -125,8 +125,8 @@ private:
 
     void Recognizer_SessionStartedHandler(const SessionEventArgs& e) { ConsoleWriteLine(L"SessionStartedHandler: %ls", e.SessionId.c_str()); };
     void Recognizer_SessionStoppedHandler(const SessionEventArgs& e) { ConsoleWriteLine(L"SessionStoppedHandler: %ls", e.SessionId.c_str()); };
-    void Recognizer_SoundStartedHandler(const SessionEventArgs& e) { UNUSED(e); };
-    void Recognizer_SoundStoppedHandler(const SessionEventArgs& e) { UNUSED(e); };
+    void Recognizer_SpeechStartDetectedHandler(const SessionEventArgs& e) { ConsoleWriteLine(L"SpeechStartDetectedHandler: %ls", e.SessionId.c_str()); };
+    void Recognizer_SpeechEndDetectedHandler(const SessionEventArgs& e) { ConsoleWriteLine(L"SpeechEndDetectedHandler: %ls", e.SessionId.c_str()); };
 
     void Recognizer_IntermediateResultHandler(const RecognitionEventArgs& e) { UNUSED(e); };
     void Recognizer_FinalResultHandler(const RecognitionEventArgs& e) { UNUSED(e); };

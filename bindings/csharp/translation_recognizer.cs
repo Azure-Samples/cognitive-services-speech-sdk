@@ -191,8 +191,6 @@ namespace Carbon.Recognition.Translation
                 recoImpl.Canceled.Disconnect(errorHandler);
                 recoImpl.SessionStarted.Disconnect(sessionStartedHandler);
                 recoImpl.SessionStopped.Disconnect(sessionStoppedHandler);
-                recoImpl.SoundStarted.Disconnect(soundStartedHandler);
-                recoImpl.SoundStopped.Disconnect(soundStoppedHandler);
 
                 intermediateResultHandler.Dispose();
                 finalResultHandler.Dispose();

@@ -13,8 +13,8 @@ namespace Carbon
     {
         SessionStartedEvent,
         SessionStoppedEvent,
-        SoundStartedEvent,
-        SoundStoppedEvent
+        SpeechStartDetectedEvent,
+        SpeechEndDetectedEvent
     }
 
 }

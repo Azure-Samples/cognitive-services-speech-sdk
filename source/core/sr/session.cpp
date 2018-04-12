@@ -185,22 +185,7 @@ void CSpxSession::FireSessionStartedEvent()
 {
     SPX_DBG_TRACE_FUNCTION();
 
-    // Make a copy of the recognizers (under lock), to use to send events; 
-    // otherwise the underlying list could be modified while we're sending events...
-
-    std::unique_lock<std::mutex> lock(m_mutex);
-    decltype(m_recognizers) weakRecognizers(m_recognizers.begin(), m_recognizers.end());
-    lock.unlock();
-
-    for (auto weakRecognizer : weakRecognizers)
-    {
-        auto recognizer = weakRecognizer.lock();
-        auto ptr = std::dynamic_pointer_cast<ISpxRecognizerEvents>(recognizer);
-        if (recognizer)
-        {
-            ptr->FireSessionStarted(m_sessionId);
-        }
-    }
+    FireSessionEvent(SesssionEventType::SessionStart);
 }
 
 void CSpxSession::FireSessionStoppedEvent()
@@ -208,9 +193,28 @@ void CSpxSession::FireSessionStoppedEvent()
     SPX_DBG_TRACE_FUNCTION();
     EnsureFireResultEvent();
 
+    FireSessionEvent(SesssionEventType::SessionStop);
+}
+
+void CSpxSession::FireSpeechStartDetectedEvent()
+{
+    SPX_DBG_TRACE_FUNCTION();
+
+    FireSessionEvent(SesssionEventType::SpeechStart);
+}
+
+void CSpxSession::FireSpeechEndDetectedEvent()
+{
+    SPX_DBG_TRACE_FUNCTION();
+
+    FireSessionEvent(SesssionEventType::SpeechEnd);
+}
+
+void CSpxSession::FireSessionEvent(SesssionEventType sessionType)
+{
     // Make a copy of the recognizers (under lock), to use to send events; 
     // otherwise the underlying list could be modified while we're sending events...
-
+    
     std::unique_lock<std::mutex> lock(m_mutex);
     decltype(m_recognizers) weakRecognizers(m_recognizers.begin(), m_recognizers.end());
     lock.unlock();
@@ -219,9 +223,27 @@ void CSpxSession::FireSessionStoppedEvent()
     {
         auto recognizer = weakRecognizer.lock();
         auto ptr = std::dynamic_pointer_cast<ISpxRecognizerEvents>(recognizer);
+
         if (recognizer)
         {
-            ptr->FireSessionStopped(m_sessionId);
+            switch (sessionType)
+            {
+                case SesssionEventType::SessionStart:
+                    ptr->FireSessionStarted(m_sessionId);
+                break;
+
+                case SesssionEventType::SessionStop:
+                    ptr->FireSessionStopped(m_sessionId);
+                break;
+
+                case SesssionEventType::SpeechStart:
+                    ptr->FireSpeechStartDetected(m_sessionId);
+                break;
+
+                case SesssionEventType::SpeechEnd:
+                    ptr->FireSpeechEndDetected(m_sessionId);
+                break;
+            }
         }
     }
 }

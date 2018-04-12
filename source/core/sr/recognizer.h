@@ -51,6 +51,9 @@ public:
     void FireSessionStarted(const std::wstring& sessionId) override;
     void FireSessionStopped(const std::wstring& sessionId) override;
 
+    void FireSpeechStartDetected(const std::wstring& sessionId) override;
+    void FireSpeechEndDetected(const std::wstring& sessionId) override;
+
     void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) override;
 
 
