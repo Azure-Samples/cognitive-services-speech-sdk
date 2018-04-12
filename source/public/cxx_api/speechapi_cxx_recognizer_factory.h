@@ -28,16 +28,23 @@ public:
     IRecognizerFactory(RecognizerFactoryParameterCollection& parameters) : Parameters(parameters) { }
     virtual ~IRecognizerFactory() { }
 
+    // Speech recognizer factory methods.
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer() = 0;
-    virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizer() = 0;
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName) = 0;
+
+    // Intent recognizer factory methods
+    virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizer() = 0;
     virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName) = 0;
 
+    // Translation recognizer factory methods.
+    virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage) = 0;
+    virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::wstring& targetLanguage) = 0;
+
+    // Parameter setting methods
     virtual void SetSubscriptionKey(const std::wstring& value) = 0;
     virtual void SetSpeechEndpoint(const std::wstring& value) = 0;
 
     RecognizerFactoryParameterCollection& Parameters;
-
 
 private:
 
@@ -58,8 +65,7 @@ public:
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer(const std::wstring& language) = 0;
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName) = 0;
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) = 0;
-
-    virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithAudioInputStream(AudioInputStream* audioInputStream) = 0;
+    virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream) = 0;
 
     virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizer() = 0;
     virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizer(const std::wstring& language) = 0;
@@ -68,6 +74,8 @@ public:
 
     virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage) = 0;
     virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::wstring& targetLanguage) = 0;
+    // Todo: AudioInputStream* or const AudioInputStream&??
+    virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& sourceLanguage, const std::wstring& targetLanguage) = 0;
 
     virtual void SetSubscriptionKey(const std::wstring& value) = 0;
     virtual void SetSpeechEndpoint(const std::wstring& value) = 0;
@@ -83,7 +91,6 @@ private:
 
 
 // TODO: Should we have handles for the RecognizerFactory_C_APIs? 
-
 class RecognizerFactory
 {
 public:
@@ -207,7 +214,7 @@ private:
             ((SpeechApi_AudioInputStreamAdapter*)context)->m_audioInputStream->Close();
         }
 
-        virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithAudioInputStream(AudioInputStream* audioInputStream)
+        virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream)
         {
             SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
             SpeechApi_AudioInputStreamAdapter *audioInputStream2 = new SpeechApi_AudioInputStreamAdapter();
@@ -239,18 +246,27 @@ private:
 
         virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
         {
-            UNUSED(sourceLanguage);
-            UNUSED(targetLanguage);
-            throw SPXERR_NOT_IMPL;
+            SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
+            SPX_THROW_ON_FAIL(::RecognizerFactory_CreateTranslationRecognizer(SPXHANDLE_DEFAULT, &hreco, sourceLanguage.c_str(), targetLanguage.c_str()));
+            return std::make_shared<Translation::TranslationRecognizer>(hreco);
         }
 
         virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
         {
-            UNUSED(sourceLanguage);
-            UNUSED(targetLanguage);
-            UNUSED(fileName);
-            throw SPXERR_NOT_IMPL;
+            SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
+            SPX_THROW_ON_FAIL(::RecognizerFactory_CreateTranslationRecognizer_With_FileInput(SPXHANDLE_DEFAULT, &hreco, sourceLanguage.c_str(), targetLanguage.c_str(), fileName.c_str()));
+            return std::make_shared<Translation::TranslationRecognizer>(hreco);
         }
+
+        virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
+        {
+            SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
+            SpeechApi_AudioInputStreamAdapter *audioInputStreamAdapter = new SpeechApi_AudioInputStreamAdapter();
+            InitSpeechApi_AudioInputStreamAdapterFromAudioInputStream(audioInputStreamAdapter, audioInputStream);
+
+            SPX_THROW_ON_FAIL(::RecognizerFactory_CreateTranslationRecognizer_With_Stream(SPXHANDLE_DEFAULT, &hreco, sourceLanguage.c_str(), targetLanguage.c_str(), (::SpeechApi_AudioInputStream*)audioInputStreamAdapter));
+            return std::make_shared<Translation::TranslationRecognizer>(hreco);
+        };
 
         virtual void SetSubscriptionKey(const std::wstring& value)
         {
@@ -303,13 +319,11 @@ public:
         return factory->CreateSpeechRecognizerWithFileInput(fileName);
     }
 
-    static std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithAudioInputStream(AudioInputStream* audioInputStream)
+    static std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream)
     {
         auto factory = RecognizerFactory::GetDefault();
-        return factory->CreateSpeechRecognizerWithAudioInputStream(audioInputStream);
+        return factory->CreateSpeechRecognizerWithStream(audioInputStream);
     };
-
-
 
     static std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language)
     {
@@ -359,6 +373,11 @@ public:
         return factory->CreateTranslationRecognizerWithFileInput(fileName, sourceLanguage, targetLanguage);
     }
 
+    static std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
+    {
+        auto factory = RecognizerFactory::GetDefault();
+        return factory->CreateTranslationRecognizerWithStream(audioInputStream, sourceLanguage, targetLanguage);
+    }
 
     // --- Static accessors to RecognizerFactoryParameters ---
 

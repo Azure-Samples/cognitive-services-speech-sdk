@@ -180,6 +180,51 @@ SPXAPI RecognizerFactory_CreateIntentRecognizer(SPXRECOFACTORYHANDLE hrecofactor
     return SPXERR_NOT_IMPL;
 }
 
+SPXAPI RecognizerFactory_CreateTranslationRecognizer(SPXRECOFACTORYHANDLE factory, SPXRECOHANDLE* recoHandlePointer, const wchar_t* sourceLanguage, const wchar_t* targetLanguage)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        SPX_IFTRUE_THROW_HR(factory != SPXHANDLE_DEFAULT, SPXERR_INVALID_ARG);
+        *recoHandlePointer = SPXHANDLE_INVALID;
+
+        auto recognizer = CSpxRecognizerFactory::CreateTranslationRecognizer(sourceLanguage, targetLanguage);
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        *recoHandlePointer = recohandles->TrackHandle(recognizer);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI RecognizerFactory_CreateTranslationRecognizer_With_FileInput(SPXRECOFACTORYHANDLE factory, SPXRECOHANDLE* recoHandlePointer, const wchar_t* sourceLanguage, const wchar_t* targetLanguage, const wchar_t* fileName)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        SPX_IFTRUE_THROW_HR(factory != SPXHANDLE_DEFAULT, SPXERR_INVALID_ARG);
+        *recoHandlePointer = SPXHANDLE_INVALID;
+
+        auto recognizer = CSpxRecognizerFactory::CreateTranslationRecognizerWithFileInput(fileName, sourceLanguage, targetLanguage);
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        *recoHandlePointer = recohandles->TrackHandle(recognizer);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI RecognizerFactory_CreateTranslationRecognizer_With_Stream(SPXRECOFACTORYHANDLE factory, SPXRECOHANDLE* recoHandlePointer, const wchar_t* sourceLanguage, const wchar_t* targetLanguage, SpeechApi_AudioInputStream *stream)
+{
+    UNUSED(factory);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        SpeechApiAudioInputStreamWrapper* streamWrapper = new SpeechApiAudioInputStreamWrapper(stream);
+
+        *recoHandlePointer = SPXHANDLE_INVALID;
+        auto recognizer = CSpxRecognizerFactory::CreateTranslationRecognizerWithStream(streamWrapper, sourceLanguage, targetLanguage);
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        *recoHandlePointer = recohandles->TrackHandle(recognizer);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+
 SPXAPI RecognizerFactory_GetParameter_Name(Factory_Parameter parameter, wchar_t* name, uint32_t cchName)
 {
     SPXAPI_INIT_HR_TRY(hr)

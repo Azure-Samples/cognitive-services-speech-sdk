@@ -21,6 +21,10 @@ SPXAPI RecognizerFactory_CreateIntentRecognizer_With_Language(SPXRECOFACTORYHAND
 SPXAPI RecognizerFactory_CreateIntentRecognizer_With_FileInput(SPXRECOFACTORYHANDLE hrecofactory, SPXRECOHANDLE* phreco, const wchar_t* pszFileName);
 SPXAPI RecognizerFactory_CreateIntentRecognizer(SPXRECOFACTORYHANDLE hrecofactory, SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName);
 
+SPXAPI RecognizerFactory_CreateTranslationRecognizer(SPXRECOFACTORYHANDLE hrecofactory, SPXRECOHANDLE* phreco, const wchar_t* sourceLanguage, const wchar_t* targetLanguage);
+SPXAPI RecognizerFactory_CreateTranslationRecognizer_With_FileInput(SPXRECOFACTORYHANDLE hrecofactory, SPXRECOHANDLE* phreco, const wchar_t* sourceLanguage, const wchar_t* targetLanguage, const wchar_t* pszFileName);
+SPXAPI RecognizerFactory_CreateTranslationRecognizer_With_Stream(SPXRECOFACTORYHANDLE hrecofactory, SPXRECOHANDLE* phreco, const wchar_t* sourceLanguage, const wchar_t* targetLanguage, SpeechApi_AudioInputStream *stream);
+
 enum Factory_Parameter { FactoryParameter_SpeechSubscriptionKey = 1, FactoryParameter_SpeechEndpoint = 2 };
 SPXAPI RecognizerFactory_GetParameter_Name(Factory_Parameter parameter, wchar_t* name, uint32_t cchName);
 

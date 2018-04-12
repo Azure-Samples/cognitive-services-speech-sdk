@@ -42,7 +42,8 @@ public:
     void InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload) override;
 
     // -- ISpxTranslationTextResult ---
-    std::wstring GetTranslatedText() override;
+    std::wstring GetTranslationText() override;
+
     // Todo: check whether we need return a vector of wstring for multiple languages.
     std::wstring GetSourceLanguage() override;
     std::wstring GetTargetLanguage() override;

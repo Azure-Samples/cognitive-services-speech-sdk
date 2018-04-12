@@ -21,6 +21,8 @@ set(SOURCES
     "${SRC_DIR}/speechapi_c_intent_result.cpp"
     "${SRC_DIR}/speechapi_c_intent_trigger.cpp"
     "${SRC_DIR}/speechapi_c_luis_model.cpp"
+    "${SRC_DIR}/speechapi_c_translation_recognizer.cpp"
+    "${SRC_DIR}/speechapi_c_translation_result.cpp"
     "${SRC_DIR}/speechapi_c_recognizer.cpp"
     "${SRC_DIR}/speechapi_c_recognizer_factory.cpp"
     "${SRC_DIR}/speechapi_c_result.cpp"

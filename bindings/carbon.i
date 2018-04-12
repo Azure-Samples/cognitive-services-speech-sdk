@@ -24,13 +24,16 @@
 %shared_ptr(Carbon::Recognition::BaseAsyncRecognizer)
 %shared_ptr(Carbon::Recognition::RecognitionResult)
 %shared_ptr(Carbon::Recognition::Speech::SpeechRecognitionResult)
-%shared_ptr(Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::Speech::SpeechRecognitionResult, Carbon::Recognition::Speech::SpeechRecognitionEventArgs>);
+%shared_ptr(Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::Speech::SpeechRecognitionResult, Carbon::Recognition::Speech::SpeechRecognitionEventArgs>)
 %shared_ptr(Carbon::Recognition::Speech::SpeechRecognizer)
 %shared_ptr(Carbon::Recognition::Intent::IntentRecognitionResult)
 %shared_ptr(Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::Intent::IntentRecognitionResult, Carbon::Recognition::Intent::IntentRecognitionEventArgs>)
 %shared_ptr(Carbon::Recognition::Intent::IntentRecognizer)
 %shared_ptr(Carbon::Recognition::Intent::IntentTrigger)
 %shared_ptr(Carbon::Recognition::Intent::LuisModel)
+%shared_ptr(Carbon::Recognition::Translation::TranslationResult)
+%shared_ptr(Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::Translation::TranslationResult, Carbon::Recognition::Translation::TranslationTextResultEventArgs>)
+%shared_ptr(Carbon::Recognition::Translation::TranslationRecognizer)
 %shared_ptr(Carbon::Recognition::IRecognizerFactory)
 %shared_ptr(Carbon::Recognition::IDefaultRecognizerFactory)
 
@@ -61,10 +64,12 @@
 %inline %{
     typedef std::shared_ptr<Carbon::Recognition::Speech::SpeechRecognitionResult> SpeechRecognitionResultPtr;
     typedef std::shared_ptr<Carbon::Recognition::Intent::IntentRecognitionResult> IntentRecognitionResultPtr;
+    typedef std::shared_ptr<Carbon::Recognition::Translation::TranslationResult> TranslationResultPtr;
 %}
 
 %template(SpeechRecognitionResultPtrFuture) FutureWrapper<SpeechRecognitionResultPtr>;
 %template(IntentRecognitionResultPtrFuture) FutureWrapper<IntentRecognitionResultPtr>;
+%template(TranslationResultPtrFuture) FutureWrapper<TranslationResultPtr>;
 %template(VoidFuture) FutureWrapper<void>;
 
 // %extend need to come first, before the %ignore for the same method (RecognizeAsync, etc.)
@@ -180,6 +185,52 @@
     }
 }
 
+%extend Carbon::Recognition::Translation::TranslationRecognizer {
+
+    TranslationResultPtr Recognize() {
+        return ($self)->RecognizeAsync().get();
+    }
+
+    void StartContinuousRecognition()
+    {
+        ($self)->StartContinuousRecognitionAsync().get();
+    }
+
+    void StopContinuousRecognition()
+    {
+        ($self)->StopContinuousRecognitionAsync().get();
+    }
+
+    FutureWrapper<TranslationResultPtr> RecognizeAsync() {
+        auto future = ($self)->RecognizeAsync();
+        return FutureWrapper<TranslationResultPtr>(std::move(future));
+    }
+
+    FutureWrapper<void> StartContinuousRecognitionAsync()
+    {
+        auto future = ($self)->StartContinuousRecognitionAsync();
+        return FutureWrapper<void>(std::move(future));
+    }
+
+    FutureWrapper<void> StopContinuousRecognitionAsync()
+    {
+        auto future = ($self)->StopContinuousRecognitionAsync();
+        return FutureWrapper<void>(std::move(future));
+    }
+
+    FutureWrapper<void> StartKeywordRecognitionAsync(const wchar_t* keyword)
+    {
+        auto future = ($self)->StartKeywordRecognitionAsync(keyword);
+        return FutureWrapper<void>(std::move(future));
+    }
+
+    FutureWrapper<void> StopKeywordRecognitionAsync()
+    {
+        auto future = ($self)->StopKeywordRecognitionAsync();
+        return FutureWrapper<void>(std::move(future));
+    }
+}
+
 %feature("director") CallbackWrapper;
 
 %extend Carbon::EventSignal {
@@ -228,6 +279,12 @@
 %ignore Carbon::Recognition::Intent::IntentRecognizer::StopContinuousRecognitionAsync();
 %ignore Carbon::Recognition::Intent::IntentRecognizer::StartKeywordRecognitionAsync();
 %ignore Carbon::Recognition::Intent::IntentRecognizer::StopKeywordRecognitionAsync();
+
+%ignore Carbon::Recognition::Translation::TranslationRecognizer::RecognizeAsync();
+%ignore Carbon::Recognition::Translation::TranslationRecognizer::StartContinuousRecognitionAsync();
+%ignore Carbon::Recognition::Translation::TranslationRecognizer::StopContinuousRecognitionAsync();
+%ignore Carbon::Recognition::Translation::TranslationRecognizer::StartKeywordRecognitionAsync();
+%ignore Carbon::Recognition::Translation::TranslationRecognizer::StopKeywordRecognitionAsync();
 
 // Process symbols in header
 %include <speechapi_cxx_audioinputstream.h>
@@ -291,15 +348,31 @@
 
 %template(IntentEventSignal) Carbon::EventSignal<const Carbon::Recognition::Intent::IntentRecognitionEventArgs&>;
 %template(IntentRecognizerBase) Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::Intent::IntentRecognitionResult, Carbon::Recognition::Intent::IntentRecognitionEventArgs>;
+
 %include <speechapi_cxx_intent_recognizer.h>
 
 %ignore Carbon::Recognition::RecognizerFactoryParameterValue::RecognizerFactoryParameterValue(SPXRECOFACTORYHANDLE, enum FactoryParameter);
-%ignore Carbon::Recognition::IDefaultRecognizerFactory::CreateTranslationRecognizer;
-%ignore Carbon::Recognition::IDefaultRecognizerFactory::CreateTranslationRecognizerWithFileInput;
-%ignore Carbon::Recognition::RecognizerFactory::InternalDefaultRecognizerFactory::CreateTranslationRecognizer;
-%ignore Carbon::Recognition::RecognizerFactory::InternalDefaultRecognizerFactory::CreateTranslationRecognizerWithFileInput;
-%ignore Carbon::Recognition::DefaultRecognizerFactory::CreateTranslationRecognizer;
-%ignore Carbon::Recognition::DefaultRecognizerFactory::CreateTranslationRecognizerWithFileInput;
+%ignore GetLanguageResource(LanguageResourceScope scopes, ::std::wstring acceptLanguage);
+
+%include <speechapi_cxx_translation_result.h>
+%include <speechapi_cxx_translation_eventargs.h>
+
+#ifdef SWIGPYTHON
+%template(_TranslationTextEventCallback) CallbackWrapper<const Carbon::Recognition::Translation::TranslationTextResultEventArgs&>;
+%template(_TranslationSynthesisEventCallback) CallbackWrapper<const Carbon::Recognition::Translation::TranslationSynthesisResultEventArgs&>;
+#elif defined(SWIGJAVA)
+%template(TranslationTexEventListener) CallbackWrapper<const Carbon::Recognition::Translation::TranslationTextResultEventArgs&>;
+%template(TranslationSynthesisEventListener) CallbackWrapper<const Carbon::Recognition::Translation::TranslationSynthesisResultEventArgs&>;
+#else
+%template(TranslationTextEventListener) CallbackWrapper<const Carbon::Recognition::Translation::TranslationTextResultEventArgs&>;
+%template(TranslationSynthesisEventListener) CallbackWrapper<const Carbon::Recognition::Translation::TranslationSynthesisResultEventArgs&>;
+#endif
+
+%template(TranslationTextEventSignal) Carbon::EventSignal<const Carbon::Recognition::Translation::TranslationTextResultEventArgs&>;
+%template(TranslationSynthesisEventSignal) Carbon::EventSignal<const Carbon::Recognition::Translation::TranslationSynthesisResultEventArgs&>;
+%template(TranslationRecognizerBase) Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::Translation::TranslationResult, Carbon::Recognition::Translation::TranslationTextResultEventArgs>;
+
+%include <speechapi_cxx_translation_recognizer.h>
 
 %include <speechapi_cxx_recognizer_factory_parameter.h>
 %include <speechapi_cxx_recognizer_factory.h>
@@ -307,6 +380,4 @@
 %include <speechapi_cxx_session_parameter_collection.h>
 %include <speechapi_cxx_session.h>
 
-//%include <speechapi_cxx_translation_eventargs.h>
-//%include <speechapi_cxx_translation_result.h>
-//%include <speechapi_cxx_translation_recognizer.h>
+

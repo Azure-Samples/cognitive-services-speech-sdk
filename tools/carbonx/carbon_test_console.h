@@ -138,10 +138,10 @@ private:
     void SpeechRecognizer_NoMatchHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"NoMatchHandler: %ls", ToString(e).c_str()); }
     void SpeechRecognizer_CanceledHandler(const SpeechRecognitionEventArgs& e) { UNUSED(e); ConsoleWriteLine(L"CanceledHandler!!!"); };
 
-    void TranslationRecognizer_IntermediateResultHandler(const TranslationEventArgs<TranslationTextResult>& e) { ConsoleWriteLine(L"Translation IntermediateResultHandler: %ls", ToString(e).c_str()); };
-    void TranslationRecognizer_FinalResultHandler(const TranslationEventArgs<TranslationTextResult>& e) { ConsoleWriteLine(L"Translation FinalResultHandler: %ls", ToString(e).c_str()); }
-    void TranslationRecognizer_AudioResultHandler(const TranslationEventArgs<AudioResult>& e) { ConsoleWriteLine(L"Translation AudioResultHandler: %ls", ToString(e).c_str()); }
-    void TranslationRecognizer_ErrorHandler(const TranslationEventArgs<TranslationResult>& e) { ConsoleWriteLine(L"Translation ErrorHandler: %ls", ToString(e).c_str()); }
+    void TranslationRecognizer_IntermediateResultHandler(const TranslationTextResultEventArgs& e) { ConsoleWriteLine(L"Translation IntermediateResultHandler: %ls", ToString(e).c_str()); };
+    void TranslationRecognizer_FinalResultHandler(const TranslationTextResultEventArgs& e) { ConsoleWriteLine(L"Translation FinalResultHandler: %ls", ToString(e).c_str()); }
+    void TranslationRecognizer_SynthesisResultHandler(const TranslationSynthesisResultEventArgs& e) { ConsoleWriteLine(L"Translation SynthesisResultHandler: %ls", ToString(e).c_str()); }
+    void TranslationRecognizer_ErrorHandler(const TranslationSynthesisResultEventArgs& e) { ConsoleWriteLine(L"Translation ErrorHandler: %ls", ToString(e).c_str()); }
 
     void IntentRecognizer_IntermediateResultHandler(const IntentRecognitionEventArgs& e) { ConsoleWriteLine(L"IntermediateResultHandler: %ls", ToString(e).c_str()); };
     void IntentRecognizer_FinalResultHandler(const IntentRecognitionEventArgs& e)  { ConsoleWriteLine(L"FinalResultHandler: %ls", ToString(e).c_str()); }
@@ -153,9 +153,8 @@ private:
     std::wstring ToString(bool f);
     std::wstring ToString(const SpeechRecognitionEventArgs& e);
     std::wstring ToString(const IntentRecognitionEventArgs& e);
-    std::wstring ToString(const TranslationEventArgs<TranslationTextResult>& e);
-    std::wstring ToString(const TranslationEventArgs<AudioResult>& e);
-    std::wstring ToString(const TranslationEventArgs<TranslationResult>& e);
+    std::wstring ToString(const TranslationTextResultEventArgs& e);
+    std::wstring ToString(const TranslationSynthesisResultEventArgs& e);
 
     void ConsoleInput_Session(const wchar_t*);
 

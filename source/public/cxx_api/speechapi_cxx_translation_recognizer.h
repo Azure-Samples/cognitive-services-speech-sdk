@@ -14,8 +14,8 @@
 #include <speechapi_c.h>
 #include <speechapi_cxx_common.h>
 #include <speechapi_cxx_recognition_async_recognizer.h>
-#include <speechapi_cxx_translation_eventargs.h>
 #include <speechapi_cxx_translation_result.h>
+#include <speechapi_cxx_translation_eventargs.h>
 
 
 namespace CARBON_NAMESPACE_ROOT {
@@ -115,74 +115,41 @@ inline TranslationLanguageResource GetLanguageResource(LanguageResourceScope sco
 * TODO: We might want to have 2 TranslationRecognizer: one is TranslationRecoginizerText for text-only translation result, and the 
 * other is TranslationRecognizer for both text and audio results. See work item  <1127978>.
 */
-class TranslationRecognizer final : virtual public AsyncRecognizer<TranslationResult, TranslationEventArgs<TranslationTextResult>>
+class TranslationRecognizer final : virtual public AsyncRecognizer<TranslationResult, TranslationTextResultEventArgs>
 {
 public:
 
-    /*
-    * Constructs a translation recognizer.
-    * TODO: Other configuration options should be added either as constructor parameters or as separate options. Needs to be aligned with
-    * that in Carbon speech recognition API.
-    * @param sourceLanguage: Specifies the language of the incoming speech. The value must be one of the keys of TranslationLanguageResource.speechResource. 
-    * @param targetlanguage: Specifies the language to translate the transcribed text into. The value must be one of the keys of TranslationLanguageResource.textResource.
-    * @param requireVoiceOutput: The translation result includes translated audio of the final translation text.
-    */
-    TranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage) :
-        AsyncRecognizer(SPXHANDLE_INVALID),
-        OnTranslationAudioResult(m_onTranslationAudioResult),
-        OnTranslationError(m_onTranslationError)
-    {
-        UNUSED(sourceLanguage);
-        UNUSED(targetLanguage);
-        SPX_THROW_ON_FAIL(SPXERR_NOT_IMPL);
-    };
+    // The AsyncRecognizer only deals with events for translation text result. The audio output event
+    // is managed by OnTranslationSynthesisResult.
+    using BaseType = AsyncRecognizer<TranslationResult, TranslationTextResultEventArgs>;
 
-    ~TranslationRecognizer() { };
-
-    bool IsEnabled() override
+    TranslationRecognizer(SPXRECOHANDLE hreco) :
+        BaseType(hreco),
+        // Todo: OnTranslationError(m_onTranslationError),
+        Parameters(hreco),
+        OnTranslationSynthesisResult(GetTranslationAudioEventConnectionsChangedCallback(), GetTranslationAudioEventConnectionsChangedCallback())
     {
-        SPX_THROW_ON_FAIL(SPXERR_NOT_IMPL);
-        return false;
-    };
+        SPX_DBG_TRACE_FUNCTION();
+    }
 
-    void Enable() override
+    ~TranslationRecognizer()
     {
-        SPX_THROW_ON_FAIL(SPXERR_NOT_IMPL);
-    };
-
-    void Disable() override
-    {
-        SPX_THROW_ON_FAIL(SPXERR_NOT_IMPL);
-    };
+        SPX_DBG_TRACE_FUNCTION();
+    }
 
     std::future<std::shared_ptr<TranslationResult>> RecognizeAsync() override
     {
-        auto future = std::async(std::launch::async, [=]() -> std::shared_ptr<TranslationResult> {
-            SPX_THROW_ON_FAIL(SPXERR_NOT_IMPL);
-
-            return std::make_shared<TranslationResult>(nullptr);
-        });
-
-        return future;
-    };
+        return BaseType::RecognizeAsyncInternal();
+    }
 
     std::future<void> StartContinuousRecognitionAsync() override
-    {
-        auto future = std::async(std::launch::async, [=]() -> void {
-            SPX_THROW_ON_FAIL(SPXERR_NOT_IMPL);
-        });
+    { 
+        return BaseType::StartContinuousRecognitionAsyncInternal();
+    }
+    
+    std::future<void> StopContinuousRecognitionAsync() override { return BaseType::StopContinuousRecognitionAsyncInternal(); }
 
-        return future;
-    };
-
-    std::future<void> StopContinuousRecognitionAsync() override
-    {
-        auto future = std::async(std::launch::async, [=]() -> void {
-            SPX_THROW_ON_FAIL(SPXERR_NOT_IMPL);
-        });
-
-        return future;
-    };
+    RecognizerParameterValueCollection Parameters;
 
     std::future<void> StartKeywordRecognitionAsync(const wchar_t* keyword) override
     {
@@ -210,8 +177,9 @@ public:
     * is indeed not related to translation or other services like TTS. The AsyncRecognizer should be refactored 
     * to only include common events.
     */
-    EventSignal<const TranslationEventArgs<AudioResult>&>& OnTranslationAudioResult;
-    EventSignal<const TranslationEventArgs<TranslationResult>&>& OnTranslationError;
+    EventSignal<const TranslationSynthesisResultEventArgs&> OnTranslationSynthesisResult;
+    // Todo: how to expose the error event of translation. Need to align with what speech does.
+    // EventSignal<const TranslationEventArgs<TranslationTextResult>&>& OnTranslationError;
 
 private:
 
@@ -221,8 +189,26 @@ private:
     TranslationRecognizer& operator=(TranslationRecognizer&&) = delete;
     TranslationRecognizer& operator=(const TranslationRecognizer&) = delete;
 
-    EventSignal<const TranslationEventArgs<AudioResult>&> m_onTranslationAudioResult;
-    EventSignal<const TranslationEventArgs<TranslationResult>&> m_onTranslationError;
+    friend class CARBON_NAMESPACE_ROOT::Session;
+
+    std::function<void(const EventSignal<const TranslationSynthesisResultEventArgs&>&)> GetTranslationAudioEventConnectionsChangedCallback()
+    {
+        return [=](const EventSignal<const TranslationSynthesisResultEventArgs&>& audioEvent) {
+            if (&audioEvent == &OnTranslationSynthesisResult)
+            {
+                TranslationRecognizer_TranslationSynthesis_SetEventCallback(m_hreco, OnTranslationSynthesisResult.IsConnected() ? FireEvent_TranslationSynthesisResult : nullptr, this);
+            }
+        };
+    }
+
+    static void FireEvent_TranslationSynthesisResult(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
+    {
+        UNUSED(hreco);
+        std::unique_ptr<TranslationSynthesisResultEventArgs> recoEvent{ new TranslationSynthesisResultEventArgs(hevent) };
+
+        auto pThis = static_cast<TranslationRecognizer*>(pvContext);
+        pThis->OnTranslationSynthesisResult.Signal(*recoEvent.get());
+    }
 };
 
 

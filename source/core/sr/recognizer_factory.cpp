@@ -58,31 +58,20 @@ std::shared_ptr<ISpxRecognizerFactory> CSpxRecognizerFactory::GetDefaultFactory(
 
 std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
 {
-    UNUSED(sourceLanguage);
-    UNUSED(targetLanguage);
-    SPX_THROW_HR(SPXERR_NOT_IMPL);
     auto factory = GetDefaultFactory();
-    return  nullptr; //factory->CreateSpeechRecognizer(language);
-
+    return factory->CreateTranslationRecognizer(sourceLanguage, targetLanguage);
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
 {
-    UNUSED(fileName);
-    UNUSED(sourceLanguage);
-    UNUSED(targetLanguage);
-    SPX_THROW_HR(SPXERR_NOT_IMPL);
     auto factory = GetDefaultFactory();
-    return nullptr; // factory->CreateSpeechRecognizerWithFileInput(fileName);
+    return factory->CreateTranslationRecognizerWithFileInput(fileName, sourceLanguage, targetLanguage);
 }
 
-std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerWithStream(AudioInputStream *stream, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
+std::shared_ptr<ISpxRecognizer> CSpxRecognizerFactory::CreateTranslationRecognizerWithStream(AudioInputStream *stream, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
 {
-    UNUSED(sourceLanguage);
-    UNUSED(targetLanguage);
-    UNUSED(stream);
-    SPX_THROW_HR(SPXERR_NOT_IMPL);
-    return nullptr;
+    auto factory = GetDefaultFactory();
+    return factory->CreateTranslationRecognizerWithStream(stream, sourceLanguage, targetLanguage);
 }
 
 

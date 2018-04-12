@@ -1046,7 +1046,7 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<TranslationRecogniz
     ConsoleWriteLine(L"TranslationResult: ResultId=%d, TranslationStatus=%d, RecognizedText=%ls, TranslationText=%ls, TranslationAudio size=%d",
         result->TranslationTextResult::ResultId.c_str(),
         result->ResultStatus,
-        result->RecognizedText.c_str(),
+        result->RecognitionText.c_str(),
         result->TranslationText.c_str(),
         (int)result->AudioData.size());
 }
@@ -1306,14 +1306,14 @@ std::wstring CarbonTestConsole::ToString(const IntentRecognitionEventArgs& e)
     return str;
 }
 
-std::wstring CarbonTestConsole::ToString(const TranslationEventArgs<TranslationTextResult>& e)
+std::wstring CarbonTestConsole::ToString(const TranslationTextResultEventArgs& e)
 {
     std::wstring str;
     str += L"TranslationEventArgs<TranslationTextResult> = { \n";
     str += L"  SessionId = '" + e.SessionId + L"'\n";
     str += L"  Result = {\n";
     str += L"    ResultId = '" + e.Result.ResultId + L"'\n";
-    str += L"    RecognizedText = '" + e.Result.RecognizedText + L"'\n";
+    str += L"    RecognizedText = '" + e.Result.RecognitionText + L"'\n";
     str += L"    TranslationText = '" + e.Result.TranslationText + L"'\n";
     str += L"  } \n";
     str += L"} \n";
@@ -1321,44 +1321,14 @@ std::wstring CarbonTestConsole::ToString(const TranslationEventArgs<TranslationT
     return str;
 }
 
-std::wstring CarbonTestConsole::ToString(const TranslationEventArgs<AudioResult>& e)
+std::wstring CarbonTestConsole::ToString(const TranslationSynthesisResultEventArgs& e)
 {
     std::wstring str;
-    str += L"TranslationEventArgs<AudioResult> = { \n";
+    str += L"TranslationEventArgs<TranslationSynthesisResult> = { \n";
     str += L"  SessionId = '" + e.SessionId + L"'\n";
     str += L"  Result = {\n";
     str += L"    ResultId = '" + e.Result.ResultId + L"'\n";
     str += L"    SizeOfAudioData = " + std::to_wstring(e.Result.AudioData.size()) + L"\n";
-    str += L"  } \n";
-    str += L"} \n";
-
-    return str;
-}
-
-std::wstring CarbonTestConsole::ToString(const TranslationEventArgs<TranslationResult>& e)
-{
-    static_assert(0 == (int)TranslationStatus::Success, "Reason::* enum values changed!");
-    static_assert(1 == (int)TranslationStatus::SpeechNotRecognized, "Reason::* enum values changed!");
-    static_assert(2 == (int)TranslationStatus::TranslationNoMatch, "Reason::* enum values changed!");
-    static_assert(3 == (int)TranslationStatus::VoiceSynthesisError, "Reason::* enum values changed!");
-    static_assert(4 == (int)TranslationStatus::Error, "Reason::* enum values changed!");
-    static_assert(5 == (int)TranslationStatus::Cancelled, "Reason::* enum values changed!");
-
-    std::wstring translationStatusString[] = {
-        L"Success",
-        L"SpeechNotRecognized",
-        L"TranslationNoMatch",
-        L"VoiceSynthesisError",
-        L"Error",
-        L"Cancelled"
-    };
-
-    std::wstring str;
-    str += L"TranslationEventArgs<TranslationResult> = { \n";
-    str += L"  SessionId = '" + e.SessionId + L"'\n";
-    str += L"  Result = {\n";
-    str += L"    ResultId = '" + e.Result.TranslationTextResult::ResultId + L"'\n";
-    str += L"    Status = TranslationStatus::" + translationStatusString[(int)e.Result.ResultStatus] + L"\n";
     str += L"  } \n";
     str += L"} \n";
 
@@ -1466,11 +1436,12 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
         auto fn2 = std::bind(&CarbonTestConsole::TranslationRecognizer_IntermediateResultHandler, this, std::placeholders::_1);
         m_translationRecognizer->IntermediateResult.Connect(fn2);
 
-        auto fn3 = std::bind(&CarbonTestConsole::TranslationRecognizer_AudioResultHandler, this, std::placeholders::_1);
-        m_translationRecognizer->OnTranslationAudioResult.Connect(fn3);
+        auto fn3 = std::bind(&CarbonTestConsole::TranslationRecognizer_SynthesisResultHandler, this, std::placeholders::_1);
+        m_translationRecognizer->OnTranslationSynthesisResult.Connect(fn3);
 
-        auto fn4 = std::bind(&CarbonTestConsole::TranslationRecognizer_ErrorHandler, this, std::placeholders::_1);
-        m_translationRecognizer->OnTranslationError.Connect(fn4);
+        // Todo: add error handler
+        //auto fn4 = std::bind(&CarbonTestConsole::TranslationRecognizer_ErrorHandler, this, std::placeholders::_1);
+        //m_translationRecognizer->OnTranslationError.Connect(fn4);
     }
     else if (recognizerType == PAL::GetTypeName<IntentRecognizer>())
     {

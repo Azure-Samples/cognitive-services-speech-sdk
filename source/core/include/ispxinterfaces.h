@@ -629,7 +629,7 @@ class ISpxTranslationTextResult : public ISpxInterfaceBaseFor<ISpxTranslationTex
 {
 public:
 
-    virtual std::wstring GetTranslatedText() = 0;
+    virtual std::wstring GetTranslationText() = 0;
     // Todo: check whether we need return a vector of wstring for multiple languages.
     virtual std::wstring GetSourceLanguage() = 0;
     virtual std::wstring GetTargetLanguage() = 0;

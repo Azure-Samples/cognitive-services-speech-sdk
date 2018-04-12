@@ -22,24 +22,55 @@ namespace Translation {
 class TranslationTextResult
 {
 public:
-    TranslationTextResult(SPXRESULTHANDLE hresult) :
+    TranslationTextResult(SPXRESULTHANDLE resultHandle) :
         ResultId(m_resultId),
-        RecognizedText(m_recognizedText),
+        RecognitionText(m_recognizedText),
         TranslationText(m_translationText),
-        IsFinalResult(m_isFinalResult),
-        m_hresult(hresult)
+        SourceLanguage(m_sourceLanguage),
+        TargetLanguage(m_targetLanguage),
+        m_hresult(resultHandle)
     {
-        // Todo: retrieves results from the hresult handle.
+        PopulateResultFields(resultHandle, m_resultId, m_recognizedText, m_translationText, m_sourceLanguage, m_targetLanguage);
     };
 
     virtual ~TranslationTextResult() { };
 
     const std::wstring& ResultId;
-    const std::wstring& RecognizedText;
+    const std::wstring& RecognitionText;
     const std::wstring& TranslationText;
-    const bool& IsFinalResult;
+    const std::wstring& SourceLanguage;
+    const std::wstring& TargetLanguage;
 
 private:
+
+    void PopulateResultFields(
+        SPXRESULTHANDLE resultHandle,
+        std::wstring& resultId,
+        std::wstring& recognitionText,
+        std::wstring& translationText,
+        std::wstring& sourceLanguage,
+        std::wstring& targetLanguage)
+    {
+        SPX_INIT_HR(hr);
+
+        const size_t maxCharCount = 1024;
+        wchar_t sz[maxCharCount + 1];
+
+        SPX_THROW_ON_FAIL(hr = Result_GetResultId(resultHandle, sz, maxCharCount));
+        resultId = sz;
+
+        SPX_THROW_ON_FAIL(hr = Result_GetText(resultHandle, sz, maxCharCount));
+        recognitionText = sz;
+
+        SPX_THROW_ON_FAIL(hr = TranslationResult_GetTranslationText(resultHandle, sz, maxCharCount));
+        translationText = sz;
+
+        SPX_THROW_ON_FAIL(hr = TranslationResult_GetSourceLanguage(resultHandle, sz, maxCharCount));
+        sourceLanguage = sz;
+
+        SPX_THROW_ON_FAIL(hr = TranslationResult_GetTargetLanguage(resultHandle, sz, maxCharCount));
+        targetLanguage = sz;
+    };
 
     TranslationTextResult() = delete;
     TranslationTextResult(TranslationTextResult&&) = delete;
@@ -52,6 +83,8 @@ private:
     std::wstring m_resultId;
     std::wstring m_recognizedText;
     std::wstring m_translationText;
+    std::wstring m_sourceLanguage;
+    std::wstring m_targetLanguage;
     bool m_isFinalResult;
 };
 
@@ -59,28 +92,36 @@ private:
 * Represents synthesized audio data returned as result from service.
 * TODO: This might be unified with the TTS response.
 */
-class AudioResult
+class TranslationSynthesisResult
 {
 public:
-    AudioResult(SPXRESULTHANDLE hresult) :
+    TranslationSynthesisResult(SPXRESULTHANDLE resultHandle) :
         ResultId(m_resultId),
         AudioData(m_audioData),
-        m_hresult(hresult)
+        m_hresult(resultHandle)
     {
-        // Todo: retrieves results from the hresult handle.
+        SPX_INIT_HR(hr);
+
+        const size_t maxCharCount = 1024;
+        wchar_t sz[maxCharCount + 1];
+
+        SPX_THROW_ON_FAIL(hr = Result_GetResultId(resultHandle, sz, maxCharCount));
+        m_resultId = sz;
+
+        // Todo: get audio data from result.
     };
 
-    virtual ~AudioResult() { };
+    virtual ~TranslationSynthesisResult() { };
 
     const std::wstring& ResultId;
     const std::vector<uint8_t>& AudioData;
 
 private:
 
-    AudioResult(const AudioResult&) = delete;
-    AudioResult(const AudioResult&&) = delete;
+    TranslationSynthesisResult(const TranslationSynthesisResult&) = delete;
+    TranslationSynthesisResult(const TranslationSynthesisResult&&) = delete;
 
-    AudioResult& operator=(const AudioResult&) = delete;
+    TranslationSynthesisResult& operator=(const TranslationSynthesisResult&) = delete;
 
     SPXRESULTHANDLE m_hresult;
 
@@ -104,16 +145,21 @@ enum class TranslationStatus {
 /*
 * Represents the translation result containing both text and audio
 */
-class TranslationResult final : public TranslationTextResult, public AudioResult
+class TranslationResult final : public TranslationTextResult, public TranslationSynthesisResult
 {
 public:
     TranslationResult(SPXRESULTHANDLE hresult) :
         TranslationTextResult(hresult),
-        AudioResult(hresult),
+        TranslationSynthesisResult(hresult),
         ResultStatus(m_resultStatus),
         m_hresult(hresult)
     {
-        // Todo: retrieves results from the hresult handle.
+        // Todo: get result status from hresult
+        m_resultStatus = TranslationStatus::Success;
+
+        // Todo: resolve both TranslationTextResult and TranslationSynthesisResult have ResultId. Check whether they are same.
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%S; recogniton text='%S' translation text='%S'",
+            __FUNCTION__, this, m_hresult, TranslationTextResult::ResultId.c_str(), RecognitionText.c_str(), TranslationText.c_str());
     };
 
     virtual ~TranslationResult() { };

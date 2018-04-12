@@ -50,7 +50,7 @@ public:
     operator bool() { return GetBool(); }
 
 
-    // TODO: Fix SWIG such that we don't need to expose the default methods below... 
+    // TODO: Fix SWIG such that we don't need to expose the default methods below...
     //       And then... once fixed ... delete the next 3 lines of code:
     //
     Value(const Value&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
@@ -60,7 +60,7 @@ public:
 
 private:
 
-    // TODO: Fix SWIG such that we don't need to expose the default methods below... 
+    // TODO: Fix SWIG such that we don't need to expose the default methods below...
     //       And then... once fixed ... Uncomment the next 3 lines of code:
     //
     // Value(const Value&) = delete;
@@ -116,6 +116,9 @@ public:
     void SetBool(const wchar_t* name, bool value) override { T(name).SetBool(value); }
     bool GetBool(const wchar_t* name, bool defaultValue = false) override { return T(name).GetBool(defaultValue); }
 
+    // TODO: Fix SWIG such that we don't need to expose the default methods below... 
+    //       And then... once fixed ... delete the next 3 lines of code:
+    //
     ValueCollection(ValueCollection&&) = delete;
     ValueCollection(const ValueCollection&) = delete;
     ValueCollection& operator=(ValueCollection&&) = delete;
