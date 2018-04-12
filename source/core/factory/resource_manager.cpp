@@ -16,6 +16,12 @@ namespace CARBON_IMPL_NAMESPACE() {
 
 CSpxResourceManager::CSpxResourceManager()
 {
+    // TODO: This list should not be compiled into carbon as it breaks the extensibility model
+    //       by requiring to recompile carbon for every new extension dll that is to be supported.
+    //
+    // At least we should add some generic name that allows to add ONE extension lib without changing
+    // the core implementation (e.g., take an environment variable).
+    //
     // **IMPORTANT**: Do NOT change the order in which module factories are added here!!!
     //
     //   They will be searched in order for objects to create (See ::CreateObject).
@@ -26,12 +32,15 @@ CSpxResourceManager::CSpxResourceManager()
 
 #ifdef __linux__
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-mock.so"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-pmakws.so"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
 #elif __MACH__
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-mock.dylib"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-pmakws.so"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
 #else
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-mock"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-pmakws"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-unidec"));
 #endif
