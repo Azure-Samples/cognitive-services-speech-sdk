@@ -7,6 +7,7 @@
 
 #pragma once
 #include <speechapi_c.h>
+#include <speechapi_cxx_common.h>
 
 
 namespace CARBON_NAMESPACE_ROOT {

@@ -1,6 +1,10 @@
 # Prerequisites
 *.d
 
+# Temp Files
+*.temp
+*.tmp
+
 # User-specific files
 *.suo
 *.user
@@ -57,6 +61,9 @@ ipch/
 #docfx related files
 ci/docfx/obj*/**/*
 bindings/csharp/obj*/**/*
+
+#doxygen related files
+ci/doxygen/*html*/**/*
 
 # external serialport and macro_util_h_generator obj directorys
 external/azure-c-shared-utility/testtools/SerialPort/SerialPort/obj/**/*

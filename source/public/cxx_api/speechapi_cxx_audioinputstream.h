@@ -21,7 +21,7 @@ typedef struct tAudioInputStreamFormat
     unsigned short nBlockAlign;        /* block size of data */
     unsigned short wBitsPerSample;     /* number of bits per sample of mono data */
     unsigned short cbSize;             /* the count in bytes of the size of */
-                                        /* extra information (after cbSize) */
+                                       /* extra information (after cbSize) */
 } AudioInputStreamFormat, *PAudioInputStreamFormat;
 
 class AudioInputStream

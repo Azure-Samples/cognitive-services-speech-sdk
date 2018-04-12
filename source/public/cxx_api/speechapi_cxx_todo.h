@@ -7,9 +7,10 @@
 
 #pragma once
 #include <stdexcept>
+#include <speechapi_cxx_common.h>
 
 
-namespace CARBON_NAMESPACE_ROOT { // ----------------------------------------
+namespace CARBON_NAMESPACE_ROOT {
 
 
 class NotYetImplementedException : public std::runtime_error
