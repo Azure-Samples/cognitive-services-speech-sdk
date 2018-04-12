@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <SpeechPackageRoot>$(MSBuildThisFileDirectory)..\..\</SpeechPackageRoot>
-  </PropertyGroup>
+  <Import Project="$(MSBuildThisFileDirectory)\..\Microsoft.CognitiveServices.Speech.props" />
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>$(SpeechPackageRoot)build\native\include\cxx_api;$(SpeechPackageRoot)build\native\include\c_api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -11,11 +9,10 @@
       <AdditionalIncludeDirectories>$(SpeechPackageRoot)build\native\include\cxx_api;$(SpeechPackageRoot)build\native\include\c_api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <!-- Always link against Release version libraries, regardless of user's Configuration -->
-      <AdditionalDependencies>$(SpeechPackageRoot)build\native\$(Platform)\Release\carbon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SpeechNativeLibDir)\carbon.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Target Name="SpeechRedistAfterBuild" AfterTargets="AfterBuild" >
-    <Copy SourceFiles="$(SpeechPackageRoot)build\native\$(Platform)\Release\carbon.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(SpeechNativeLibDir)\carbon.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
   </Target>
 </Project>

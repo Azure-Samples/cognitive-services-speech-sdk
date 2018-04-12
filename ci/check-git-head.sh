@@ -51,13 +51,14 @@ checkEmptyStdout \
     grep -v 'diff: unset' |
     grep -v 'merge: unset' |
     grep -v 'text: unset' |
-    cut -d: -f1" \
+    cut -d: -f1 |
+    sort -u" \
   "files that are neither marked as binary nor text, please extend .gitattributes"
 
 # Note: we rely on binary files being identified correctly (cf. above)
 # TODO limit to specific extensions if necessary
 checkEmptyStdout \
-  "git grep -I -l \$'\t' $gitTree | cut -d: -f2- | grep -v ^external/" \
+  "git grep -I -l \$'\t' $gitTree | cut -d: -f2- | grep -v ^external/ | grep -v \.sln$" \
   "text file(s) with hard tabs encountered"
 
 checkEmptyStdout \

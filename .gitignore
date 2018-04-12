@@ -72,3 +72,11 @@ build**/*
 /packages/Richland.Speech.UnidecRuntime.18.1.5.24286743/build
 /packages/Richland.Speech.UnidecRuntime.18.1.5.24286743
 /external/unidec/bin
+
+samples/CxxHelloWorld/packages
+samples/CxxHelloWorld/x64
+samples/CxxHelloWorld/CxxHelloWorld/x64
+samples/CxxHelloWorld/Debug
+samples/CxxHelloWorld/CxxHelloWorld/Debug
+samples/CxxHelloWorld/Release
+samples/CxxHelloWorld/CxxHelloWorld/Release

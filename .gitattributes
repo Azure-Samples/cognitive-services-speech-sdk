@@ -15,12 +15,19 @@
 *.json text
 *.md text
 *.nuspec text
+*.patch text
+*.props text
 *.py text
+*.sln text
 *.targets text
 *.txt text
+*.vcxproj text
+*.vcxproj.filters text
+*.vcxproj.user text
 
 # Bash only like Unix line endings
 *.sh text eol=lf
+# TODO wrong:
 *.bat binary
 
 # Binary extensions:
@@ -28,8 +35,6 @@
 *.lib binary
 *.zip binary
 *.png binary
-*.patch binary
-
 
 # externals are ignored
 external/curl/**/* binary

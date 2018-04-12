@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <SpeechPackageRoot>$(MSBuildThisFileDirectory)..\..\</SpeechPackageRoot>
-  </PropertyGroup>
+  <Import Project="$(MSBuildThisFileDirectory)\..\Microsoft.CognitiveServices.Speech.props" />
   <ItemGroup>
-    <None Include="$(SpeechPackageRoot)build\native\$(Platform)\Release\carbon.dll">
+    <None Include="$(SpeechNativeLibDir)\carbon.dll">
       <Link>carbon.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="$(SpeechPackageRoot)build\native\$(Platform)\Release\carbon_csharp_bindings.dll">
+    <None Include="$(SpeechNativeLibDir)\carbon_csharp_bindings.dll">
+      <!-- TODO or: $(SpeechPackageRoot)build\native\$(Platform)\Release\carbon_csharp_bindings.dll -->
       <Link>carbon_csharp_bindings.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

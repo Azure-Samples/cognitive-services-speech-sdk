@@ -326,6 +326,12 @@ inline void __spx_throw_hr_impl(SPXHR hr)
         __SPX_THROW_HR(x);                                      \
     } while (0)
 #else
+#define SPX_THROW_ON_FAIL(hr)                                   \
+    do {                                                        \
+        SPXHR x = hr;                                           \
+        if (SPX_FAILED(x)) {                                    \
+            __SPX_THROW_HR(x);                                  \
+    } } while (0)
 #define SPX_THROW_ON_FAIL_IF_NOT(hr, hrNot)                     \
     do {                                                        \
         SPXHR x = hr;                                           \
