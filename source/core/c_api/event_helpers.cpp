@@ -14,7 +14,7 @@ SPXAPI_PRIVATE Recognizer_SessionEvent_SetCallback(ISpxRecognizerEvents::Session
 
         auto pfn = [=](std::shared_ptr<ISpxSessionEventArgs> e) {
             auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSessionEventArgs, SPXEVENTHANDLE>();
-            auto hevent = (*eventhandles)[e.get()];
+            auto hevent = eventhandles->TrackHandle(e);
             (*pCallback)(hreco, hevent, pvContext);
         };
 
@@ -38,7 +38,7 @@ SPXAPI_PRIVATE Recognizer_RecoEvent_SetCallback(ISpxRecognizerEvents::RecoEvent_
 
         auto pfn = [=](std::shared_ptr<ISpxRecognitionEventArgs> e) {
             auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
-            auto hevent = (*eventhandles)[e.get()];
+            auto hevent = eventhandles->TrackHandle(e);
             (*pCallback)(hreco, hevent, pvContext);
         };
 

@@ -827,9 +827,11 @@ void CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused()
 {
     // We need to do all this work on a background thread, because we can't guarantee it's safe
     // to spend any significant amount of time blocking this the KWS or Audio threads...
+    std::shared_ptr<ISpxSession> keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
     std::packaged_task<void()> task([=](){
 
         SPX_DBG_TRACE_SCOPE("*** CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused kicked-off THREAD started ***", "*** CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused kicked-off THREAD stopped ***");
+        auto keepAliveCopy = keepAlive;
 
         // Keep track of the fact that we have a thread hanging out waiting the the single
         // shot recognition to complete (so it can call StopRecognizing(KwsSingleShot)) and
@@ -951,19 +953,22 @@ void CSpxAudioStreamSession::InformAdapterWaitingForDone(SessionState comingFrom
     SPX_DBG_ASSERT(comingFromState == SessionState::ProcessingAudio || comingFromState == SessionState::StoppingPump);
     if (comingFromState == SessionState::StoppingPump)
     {
-        m_audioProcessor->ProcessAudio(nullptr, 0);
         SPX_DBG_TRACE_VERBOSE("%s: ProcessingAudio - size=%d", __FUNCTION__, 0);
+        m_audioProcessor->ProcessAudio(nullptr, 0);
     }
 
     // Then we can finally tell it we're done, by sending a nullptr WAVEFORMAT
+    SPX_DBG_TRACE_VERBOSE("%s: SetFormat(nullptr)", __FUNCTION__);
     m_audioProcessor->SetFormat(nullptr);
 }
 
 void CSpxAudioStreamSession::DoneProcessingAudio(AdapterDoneProcessingAudio doneAdapter)
 {
-    std::packaged_task<void()> task([=](){
+    std::shared_ptr<ISpxSession> keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
+    std::packaged_task<void()> task([=]() mutable {
 
         SPX_DBG_TRACE_SCOPE("*** CSpxAudioStreamSession::DoneProcessingAudio kicked-off THREAD started ***", "*** CSpxAudioStreamSession::DoneProcessingAudio kicked-off THREAD stopped ***");
+        auto keepAliveCopy = keepAlive;
 
         // Since we're checking the RecoKind and SessionState multiple times, take a read lock
         ReadLock_Type readLock(m_combinedAdapterAndStateMutex);

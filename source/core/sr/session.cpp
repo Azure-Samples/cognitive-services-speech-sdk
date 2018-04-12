@@ -42,9 +42,11 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxSession::RecognizeAsync(
 {
     SPX_DBG_TRACE_FUNCTION();
 
+    std::shared_ptr<ISpxSession> keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
     std::packaged_task<std::shared_ptr<ISpxRecognitionResult>()> task([=](){
 
         SPX_DBG_TRACE_SCOPE("*** CSpxSession::RecognizeAsync kicked-off THREAD started ***", "*** CSpxSession::RecognizeAsync kicked-off THREAD stopped ***");
+        auto keepAliveCopy = keepAlive;
 
         // Keep track of the fact that we have a thread hanging out waiting to hear
         // what the final recognition result is, and then stop recognizing...
@@ -92,8 +94,12 @@ CSpxAsyncOp<void> CSpxSession::StartRecognitionAsync(RecognitionKind startKind, 
 {
     SPX_DBG_TRACE_FUNCTION();
 
+    std::shared_ptr<ISpxSession> keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
     std::packaged_task<void()> task([=](){
+
         SPX_DBG_TRACE_SCOPE("*** CSpxSession::StartRecognitionAsync kicked-off THREAD started ***", "*** CSpxSession::StartRecognitionAsync kicked-off THREAD stopped ***");
+        auto keepAliveCopy = keepAlive;
+
         this->StartRecognizing(startKind, keyword);
     });
 
@@ -110,8 +116,12 @@ CSpxAsyncOp<void> CSpxSession::StopRecognitionAsync(RecognitionKind stopKind)
 {
     SPX_DBG_TRACE_FUNCTION();
 
+    std::shared_ptr<ISpxSession> keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
     std::packaged_task<void()> task([=](){
+        
         SPX_DBG_TRACE_SCOPE("*** CSpxSession::StopRecognitionAsync kicked-off THREAD started ***", "*** CSpxSession::StopRecognitionAsync kicked-off THREAD stopped ***");
+        auto keepAliveCopy = keepAlive;
+
         this->StopRecognizing(stopKind);
     });
 

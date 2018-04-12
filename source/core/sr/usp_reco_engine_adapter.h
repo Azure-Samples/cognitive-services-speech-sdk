@@ -202,6 +202,7 @@ private:
 
     bool IsState(AudioState state) const { return m_audioState == state; }
     bool IsState(UspState state) const { return m_uspState == state; }
+    bool IsStateBetween(UspState state1, UspState state2) const { return m_uspState > state1 && m_uspState < state2; }
 
     bool ChangeState(UspState state);
     bool ChangeState(UspState fromState, UspState toState);

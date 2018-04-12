@@ -109,12 +109,7 @@ void CSpxRecognizer::FireSessionStarted(const std::wstring& sessionId)
     SPX_DBG_ASSERT(GetSite());
     auto factory = SpxQueryService<ISpxEventArgsFactory>(GetSite());
     auto sessionEvent = factory->CreateSessionEventArgs(sessionId);
-
-    auto handletable = CSpxSharedPtrHandleTableManager::Get<ISpxSessionEventArgs, SPXEVENTHANDLE>();
-    auto hevent = handletable->TrackHandle(sessionEvent);
-
     SessionStarted.Signal(sessionEvent);
-    handletable->StopTracking(hevent);
 }
 
 void CSpxRecognizer::FireSessionStopped(const std::wstring& sessionId)
@@ -122,12 +117,7 @@ void CSpxRecognizer::FireSessionStopped(const std::wstring& sessionId)
     SPX_DBG_ASSERT(GetSite());
     auto factory = SpxQueryService<ISpxEventArgsFactory>(GetSite());
     auto sessionEvent = factory->CreateSessionEventArgs(sessionId);
-
-    auto handletable = CSpxSharedPtrHandleTableManager::Get<ISpxSessionEventArgs, SPXEVENTHANDLE>();
-    auto hevent = handletable->TrackHandle(sessionEvent);
-
     SessionStopped.Signal(sessionEvent);
-    handletable->StopTracking(hevent);
 }
 
 void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result)
@@ -181,12 +171,7 @@ void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_
         SPX_DBG_ASSERT(GetSite());
         auto factory = SpxQueryService<ISpxEventArgsFactory>(GetSite());
         auto recoEvent = factory->CreateRecognitionEventArgs(sessionId, result);
-
-        auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
-        auto hevent = eventhandles->TrackHandle(recoEvent);
-
         pevent->Signal(recoEvent);
-        eventhandles->StopTracking(hevent);
     }
 }
 

@@ -105,7 +105,9 @@ void CSpxMockKwsEngineAdapter::FireKeywordDetected()
     auto offset = (uint32_t)m_cbLastKeywordFired;
     auto site = GetSite();
 
+    std::shared_ptr<ISpxAudioProcessor> keepAlive = SpxSharedPtrFromThis<ISpxAudioProcessor>(this);
     std::packaged_task<void()> task([=](){
+        auto keepAliveCopy = keepAlive;
         site->KeywordDetected(this, offset);
     });
 
