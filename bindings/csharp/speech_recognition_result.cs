@@ -16,7 +16,7 @@ namespace Carbon.Recognition.Speech
         {
             this.ResultId = result.ResultId;
             this.RecognizedText = result.Text;
-            this.Status = (RecognitionStatus)((int)result.Reason);
+            this.Reason = (RecognitionStatus)((int)result.Reason);
         }
 
         /// <summary>
@@ -27,14 +27,12 @@ namespace Carbon.Recognition.Speech
         /// <summary>
         /// Specifies status of the result.
         /// </summary>
-        public RecognitionStatus Status { get; }
+        public RecognitionStatus Reason { get; }
 
         /// <summary>
         /// Presents the recognized text in the result.
         /// </summary>
         public string RecognizedText { get; }
-
-        // public PayloadItems Payload { get; }
 
         /// <summary>
         /// Returns a string that represents the speech recognition result.
@@ -42,7 +40,7 @@ namespace Carbon.Recognition.Speech
         /// <returns>A string that represents the speech recognition result.</returns>
         public override string ToString()
         {
-            return string.Format("ResultId:{0} Status:{1} Recognized text:<{2}>.", ResultId, Status, RecognizedText);
+            return string.Format("ResultId:{0} Status:{1} Recognized text:<{2}>.", ResultId, Reason, RecognizedText);
         }
     }
 }

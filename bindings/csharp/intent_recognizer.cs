@@ -13,7 +13,7 @@ namespace Carbon.Recognition.Intent
     /// <summary>
     /// Defines the intent recognizer class containing both methods and events for intent recognition.
     /// </summary>
-    public class IntentRecognizer : Recognition.Recognizer
+    public sealed class IntentRecognizer : Recognition.Recognizer
     {
         /// <summary>
         /// Defines event handler for the intermediate recognition result event.
@@ -50,24 +50,21 @@ namespace Carbon.Recognition.Intent
             recoImpl.SoundStopped.Connect(soundStoppedHandler);
         }
 
-        ~IntentRecognizer()
-        {
-            // BUG: we get exception when doing Disconnect().
-
-            //recoImpl.IntermediateResult.Disconnect(intermediateResultHandler);
-            //recoImpl.FinalResult.Disconnect(finalResultHandler);
-            //recoImpl.NoMatch.Disconnect(errorHandler);
-            //recoImpl.Canceled.Disconnect(errorHandler);
-            //recoImpl.SessionStarted.Disconnect(sessionStartedHandler);
-            //recoImpl.SessionStopped.Disconnect(sessionStoppedHandler);
-            //recoImpl.SoundStarted.Disconnect(soundStartedHandler);
-            //recoImpl.SoundStopped.Disconnect(soundStoppedHandler);
-        }
-
         /// <summary>
-        /// A string in BCP 47 format that represents target language of the recognition.
+        /// Sets/Gets the spoken language of audio.
         /// </summary>
-        public string Language { get; }
+        public string Language
+        {
+            get
+            {
+                return Parameters.Get<string>(ParameterNames.SpeechRecognitionLanguage);
+            }
+
+            set
+            {
+                Parameters.Set(ParameterNames.SpeechRecognitionLanguage, value);
+            }
+        }
 
         /// <summary>
         /// Starts intent recognition
@@ -76,6 +73,25 @@ namespace Carbon.Recognition.Intent
         public Task<IntentRecognitionResult> RecognizeAsync()
         {
             return Task.Run(() => { return new IntentRecognitionResult(this.recoImpl.Recognize()); });
+        }
+
+        /// <summary>
+        /// Starts continuous intent recognition, until user calls StopContinuousRecognitionAsync(). User must subscribe to 
+        /// result events to receive recognition results.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation that starts the recognition.</returns>
+        public Task StartContinuousRecognitionAsync()
+        {
+            return Task.Run(() => { this.recoImpl.StartContinuousRecognition(); });
+        }
+
+        /// <summary>
+        /// Stops continuous intent recognition.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation that stops the recognition.</returns>
+        public Task StopContinuousRecognitionAsync()
+        {
+            return Task.Run(() => { this.recoImpl.StopContinuousRecognition(); });
         }
 
         /// <summary>
@@ -96,10 +112,44 @@ namespace Carbon.Recognition.Intent
         /// <param name="intentName">The name of intent that should be recognized. If it is null, all intent names defined in the LUIS model will be recognized.</param>
         public void AddIntent(string intentId, LuisModel model, string intentName = null)
         {
-            var trigger = Carbon.Internal.IntentTrigger.From(model.ModelImpl, intentName);
+            var trigger = Carbon.Internal.IntentTrigger.From(model.modelImpl, intentName);
             recoImpl.AddIntent(intentId, trigger);
         }
 
+        /// <summary>
+        /// Represents the collection of parameters and their values defined for this <see cref="IntentRecognizer"/>.
+        /// </summary>
+        public ParameterCollection<IntentRecognizer> Parameters { get; }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                recoImpl.IntermediateResult.Disconnect(intermediateResultHandler);
+                recoImpl.FinalResult.Disconnect(finalResultHandler);
+                recoImpl.NoMatch.Disconnect(errorHandler);
+                recoImpl.Canceled.Disconnect(errorHandler);
+                recoImpl.SessionStarted.Disconnect(sessionStartedHandler);
+                recoImpl.SessionStopped.Disconnect(sessionStoppedHandler);
+                recoImpl.SoundStarted.Disconnect(soundStartedHandler);
+                recoImpl.SoundStopped.Disconnect(soundStoppedHandler);
+
+                intermediateResultHandler.Dispose();
+                finalResultHandler.Dispose();
+                errorHandler.Dispose();
+                recoImpl.Dispose();
+                Parameters.Dispose();
+                disposed = true;
+                base.Dispose(disposing);
+            }
+        }
+
+        private bool disposed = false;
         private Internal.IntentRecognizer recoImpl;
         private IntentHandlerImpl intermediateResultHandler;
         private IntentHandlerImpl finalResultHandler;

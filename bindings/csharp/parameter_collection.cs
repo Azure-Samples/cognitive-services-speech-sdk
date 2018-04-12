@@ -11,7 +11,7 @@ namespace Carbon
     /// <summary>
     /// Represents collection of parameters and their values.
     /// </summary>
-    public class ParameterCollection<OwnerType>
+    public sealed class ParameterCollection<OwnerType> : IDisposable
     {
         internal ParameterCollection(OwnerType owner)
         {
@@ -176,6 +176,18 @@ namespace Carbon
             }
         }
 
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            speechParameters.Dispose();
+            disposed = true;
+        }
+
+        private bool disposed = false;
         private bool isFactoryParameter = false;
         private Carbon.Internal.RecognizerParameterValueCollection speechParameters;
     }

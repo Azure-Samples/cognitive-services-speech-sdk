@@ -46,17 +46,16 @@ namespace CarbonSamples
             await DoSpeechRecognitionAsync(factory, fileName);
         }
 
-        public static async Task SpeechRecognitionCustomizedModelAsync(string keySpeech, string modelId, string fileName)
-        {
-            var factory = new RecognizerFactory();
+        //public static async Task SpeechRecognitionCustomizedModelAsync(string keySpeech, string modelId, string fileName)
+        //{
+        //    var factory = new RecognizerFactory();
 
-            Console.WriteLine(String.Format("Speech Recognition using customized model:{0}.", modelId));
+        //    Console.WriteLine(String.Format("Speech Recognition using customized model:{0}.", modelId));
 
-            factory.SubscriptionKey = keySpeech;
-            factory.ModelId = modelId;
+        //    factory.SubscriptionKey = keySpeech;
 
-            await DoSpeechRecognitionAsync(factory, fileName);
-        }
+        //    await DoSpeechRecognitionAsync(factory, fileName);
+        //}
 
         public static async Task SpeechRecognitionByEndpointAsync(string keySpeech, string endpoint, string fileName)
         {

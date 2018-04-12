@@ -1,13 +1,14 @@
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+using System;
 
 namespace Carbon.Recognition.Intent
 {
     /// <summary>
     /// Represents LUIS model used for intent recognition.
     /// </summary>
-    public class LuisModel
+    public sealed class LuisModel : IDisposable
     { 
         /// <summary>
         /// Creates a LUIS model using the specified endpoint.
@@ -42,12 +43,26 @@ namespace Carbon.Recognition.Intent
             return new LuisModel(Carbon.Internal.LuisModel.From(hostName, subscriptionKey, appId));
         }
 
-        internal LuisModel(Carbon.Internal.LuisModel model)
+        public void Dispose()
         {
-            ModelImpl = model;
+            if (disposed)
+            {
+                return;
+            }
+
+            modelImpl.Dispose();
+            disposed = true;
         }
 
-        internal Carbon.Internal.LuisModel ModelImpl { get; }
+        private bool disposed = false;
+
+
+        internal LuisModel(Carbon.Internal.LuisModel model)
+        {
+            modelImpl = model;
+        }
+
+        internal Carbon.Internal.LuisModel modelImpl { get; }
     }
 
     

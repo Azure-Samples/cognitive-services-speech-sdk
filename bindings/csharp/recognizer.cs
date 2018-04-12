@@ -11,7 +11,7 @@ namespace Carbon.Recognition
     /// <summary>
     /// Defines the base class Recognizer which mainly contains common event handlers.
     /// </summary>
-    public class Recognizer
+    public class Recognizer : IDisposable
     {
         /// <summary>
         /// Defines event handler for session events, e.g. SessionStarted/Stopped, SoundStarted/Stopped.
@@ -49,14 +49,36 @@ namespace Carbon.Recognition
             soundStoppedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStoppedEvent);
         }
 
-        ~Recognizer()
+        public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                // disconnect
+                sessionStartedHandler.Dispose();
+                sessionStoppedHandler.Dispose();
+                soundStartedHandler.Dispose();
+                soundStoppedHandler.Dispose();
+            }
+
+            disposed = true;
         }
 
         internal SessionEventHandlerImpl sessionStartedHandler;
         internal SessionEventHandlerImpl sessionStoppedHandler;
         internal SessionEventHandlerImpl soundStartedHandler;
         internal SessionEventHandlerImpl soundStoppedHandler;
+        private bool disposed = false;
 
         /// <summary>
         /// Define an internal class which raise a C# event when a corresponding callback is invoked from the native layer. 
@@ -71,6 +93,11 @@ namespace Carbon.Recognition
 
             public override void Execute(Internal.SessionEventArgs eventArgs)
             {
+                if (recognizer.disposed)
+                {
+                    return;
+                }
+
                 var arg = new SessionEventArgs(eventType, eventArgs);
                 var handler = this.recognizer.OnSessionEvent;
 

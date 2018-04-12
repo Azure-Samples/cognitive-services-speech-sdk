@@ -32,7 +32,7 @@ namespace Carbon.Recognition.Speech
         /// <returns>A string that represents the speech recognition result event.</returns>
         public override string ToString()
         {
-            return string.Format("SessionId:{0} ResultId:{1} Status:{2} Recognized text:<{3}>.", SessionId, Result.ResultId, Result.Status, Result.RecognizedText);
+            return string.Format("SessionId:{0} ResultId:{1} Status:{2} Recognized text:<{3}>.", SessionId, Result.ResultId, Result.Reason, Result.RecognizedText);
         }
     }
 }

@@ -57,7 +57,7 @@ namespace Carbon.Recognition.Speech
     /// }
     /// </code>
     /// </example>
-    public class SpeechRecognizer : Recognition.Recognizer
+    public sealed class SpeechRecognizer : Recognition.Recognizer
     {
         /// <summary>
         /// Defines event handler callend once intermediate recognition result are recevied.
@@ -96,45 +96,24 @@ namespace Carbon.Recognition.Speech
             Parameters = new ParameterCollection<SpeechRecognizer>(this);
         }
 
-        ~SpeechRecognizer()
-        {
-            // BUG: we get exception when doing Disconnect().
-
-            //recoImpl.IntermediateResult.Disconnect(intermediateResultHandler);
-            //recoImpl.FinalResult.Disconnect(finalResultHandler);
-            //recoImpl.NoMatch.Disconnect(errorHandler);
-            //recoImpl.Canceled.Disconnect(errorHandler);
-            //recoImpl.SessionStarted.Disconnect(sessionStartedHandler);
-            //recoImpl.SessionStopped.Disconnect(sessionStoppedHandler);
-            //recoImpl.SoundStarted.Disconnect(soundStartedHandler);
-            //recoImpl.SoundStopped.Disconnect(soundStoppedHandler);
-        }
-
         /// <summary>
-        /// The property represents the subscription key being used.
+        /// Gets/Sets deployment id used for speech recognition.
         /// </summary>
-        public string SubscriptionKey
+        public string DeploymentId
         {
             get
             {
-                //return Parameters.GetString(SubscriptionKey);
-                return Parameters.Get<string>(ParameterNames.SpeechSubscriptionKey);
+                return Parameters.Get<string>(ParameterNames.SpeechModelId);
+            }
+
+            set
+            {
+                Parameters.Set(ParameterNames.SpeechModelId, value);
             }
         }
 
         /// <summary>
-        /// The property represents the region being used.
-        /// </summary>
-        public string Region
-        {
-            get
-            {
-                return Parameters.Get<string>(ParameterNames.Region);
-            }
-        }
-
-        /// <summary>
-        /// The property represents the target language for the recognition.
+        /// Sets/Gets the spoken language of audio.
         /// </summary>
         public string Language
         {
@@ -142,28 +121,22 @@ namespace Carbon.Recognition.Speech
             {
                 return Parameters.Get<string>(ParameterNames.SpeechRecognitionLanguage);
             }
-        }
 
-        /// <summary>
-        /// The property represents the recognition mode.
-        /// </summary>
-        public string RecognitionMode
-        {
-            get
+            set
             {
-                return Parameters.Get<string>(ParameterNames.SpeechRecognitionMode);
+                Parameters.Set(ParameterNames.SpeechRecognitionLanguage, value);
             }
         }
 
         /// <summary>
-        /// The property that represents the collection of parameters and their values.
+        /// Represents the collection of parameters and their values defined for this <see cref="SpeechRecognizer"/>.
         /// </summary>
-        internal ParameterCollection<SpeechRecognizer> Parameters { get; }
+        public ParameterCollection<SpeechRecognizer> Parameters { get; }
 
         /// <summary>
-        /// Starts speech recognition
+        /// Starts speech recognition, and stops after the first utterance is recognized. The recognition result is returned.
         /// </summary>
-        /// <returns>A task representing the recognition operation.</returns>
+        /// <returns>A task representing the recognition operation. The task returns a value of <see cref="SpeechRecognitionResult"/> </returns>
         /// <example>
         /// Create a speech recognizer, get and print the recognition result
         /// <code>
@@ -185,10 +158,58 @@ namespace Carbon.Recognition.Speech
             return Task.Run(() => { return new SpeechRecognitionResult(this.recoImpl.Recognize()); });
         }
 
+        /// <summary>
+        /// Starts continuous speech recognition, until user calls StopContinuousRecognitionAsync(). User must subscribe to 
+        /// result events to receive recognition results.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation that starts the recognition.</returns>
+        public Task StartContinuousRecognitionAsync()
+        {
+            return Task.Run(() => { this.recoImpl.StartContinuousRecognition(); });
+        }
+
+        /// <summary>
+        /// Stops continuous speech recognition.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation that stops the recognition.</returns>
+        public Task StopContinuousRecognitionAsync()
+        {
+            return Task.Run(() => { this.recoImpl.StopContinuousRecognition(); });
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                recoImpl.IntermediateResult.Disconnect(intermediateResultHandler);
+                recoImpl.FinalResult.Disconnect(finalResultHandler);
+                recoImpl.NoMatch.Disconnect(errorHandler);
+                recoImpl.Canceled.Disconnect(errorHandler);
+                recoImpl.SessionStarted.Disconnect(sessionStartedHandler);
+                recoImpl.SessionStopped.Disconnect(sessionStoppedHandler);
+                recoImpl.SoundStarted.Disconnect(soundStartedHandler);
+                recoImpl.SoundStopped.Disconnect(soundStoppedHandler);
+
+                intermediateResultHandler.Dispose();
+                finalResultHandler.Dispose();
+                errorHandler.Dispose();
+                recoImpl.Dispose();
+                Parameters.Dispose();
+                disposed = true;
+                base.Dispose(disposing);
+            }
+        }
+
         internal Internal.SpeechRecognizer recoImpl;
         private ResultHandlerImpl intermediateResultHandler;
         private ResultHandlerImpl finalResultHandler;
         private ErrorHandlerImpl errorHandler;
+        private bool disposed = false;
 
         /// <summary>
         /// Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
@@ -203,6 +224,11 @@ namespace Carbon.Recognition.Speech
 
             public override void Execute(Internal.SpeechRecognitionEventArgs eventArgs)
             {
+                if (recognizer.disposed)
+                {
+                    return;
+                }
+
                 var resultEventArg = new SpeechRecognitionResultEventArgs(eventArgs);
                 var handler = isFinalResultHandler ? recognizer.OnFinalResult : recognizer.OnIntermediateResult;
                 if (handler != null)
@@ -227,6 +253,11 @@ namespace Carbon.Recognition.Speech
 
             public override void Execute(Carbon.Internal.SpeechRecognitionEventArgs eventArgs)
             {
+                if (recognizer.disposed)
+                {
+                    return;
+                }
+
                 var resultEventArg = new RecognitionErrorEventArgs(eventArgs.SessionId, eventArgs.Result.Reason);
                 var handler = this.recognizer.OnRecognitionError;
 

@@ -12,7 +12,7 @@ namespace Carbon.Recognition
      /// <summary>
      /// Defines factory methods to create recognizers.
      /// </summary>
-     public class RecognizerFactory
+     public sealed class RecognizerFactory : IDisposable
      {
         /// <summary>
         /// Creates a recognizer factory.
@@ -38,7 +38,7 @@ namespace Carbon.Recognition
         }
 
         /// <summary>
-        /// The property represents the subscription key being used.
+        /// Gets/Sets the subscription key being used.
         /// </summary>
         public string SubscriptionKey
         {
@@ -55,6 +55,25 @@ namespace Carbon.Recognition
         }
 
         /// <summary>
+        /// Gets/Sets the authorization token being used.
+        /// If this is set, subscription key is ignored.
+        /// User needs to make sure the provided authrization token is valid and not expired.
+        /// </summary>
+        public string AuthorizationToken
+        {
+            get
+            {
+                return Parameters.Get<string>(ParameterNames.SpeechAuthToken);
+            }
+
+            set
+            {
+                // factoryImpl.SetSubscriptionKey(value);
+                Parameters.Set(ParameterNames.SpeechAuthToken, value);
+            }
+        }
+
+        /// <summary>
         /// The property represents the region being used.
         /// </summary>
         public string Region
@@ -67,54 +86,6 @@ namespace Carbon.Recognition
             set
             {
                 Parameters.Set(ParameterNames.Region, value);
-            }
-        }
-
-        /// <summary>
-        /// The property represents the model id used for speech recognition.
-        /// </summary>
-        public string ModelId
-        {
-            get
-            {
-                return Parameters.Get<string>(ParameterNames.SpeechModelId);
-            }
-
-            set
-            {
-                Parameters.Set(ParameterNames.SpeechModelId, value);
-            }
-        }
-
-        /// <summary>
-        /// The property represents the recognition language of audio.
-        /// </summary>
-        public string Language
-        {
-            get
-            {
-                return Parameters.Get<string>(ParameterNames.SpeechRecognitionLanguage);
-            }
-
-            set
-            {
-                Parameters.Set(ParameterNames.SpeechRecognitionLanguage, value);
-            }
-        }
-
-        /// <summary>
-        /// The property represents the recognition mode.
-        /// </summary>
-        public string RecognitionMode
-        {
-            get
-            {
-                return Parameters.Get<string>(ParameterNames.SpeechRecognitionMode);
-            }
-
-            set
-            {
-                Parameters.Set(ParameterNames.SpeechRecognitionMode, value);
             }
         }
 
@@ -178,7 +149,20 @@ namespace Carbon.Recognition
             return new IntentRecognizer(factoryImpl.CreateIntentRecognizerWithFileInput(audioFile));
         }
 
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            Parameters.Dispose();
+            factoryImpl.Dispose();
+            disposed = true;
+        }
+
         private Carbon.Internal.IRecognizerFactory factoryImpl;
+        private bool disposed = false;
 
         private void InitInternal()
         {

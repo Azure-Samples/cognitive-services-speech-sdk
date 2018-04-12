@@ -134,8 +134,9 @@ namespace CarbonSamples
                     }
                     else
                     {
-                        Console.WriteLine("=============== Run speech recognition samples using customized model. ===============");
-                        SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(keySpeech, modelId, fileName).Wait();
+                        Console.WriteLine("=============== Skip CRIS model for now. =======");
+                        //Console.WriteLine("=============== Run speech recognition samples using customized model. ===============");
+                        //SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(keySpeech, modelId, fileName).Wait();
                     }
                 }
             }
@@ -155,8 +156,9 @@ namespace CarbonSamples
                     }
                     else
                     {
-                        Console.WriteLine("=============== Run intent recognoition samples using customozed speech model. ===============");
-                        IntentRecognitionSamples.IntentRecognitionCustomizedModelAsync(keySpeech, modelId, fileName).Wait();
+                        Console.WriteLine("=============== Skip CRIS model for now. =======");
+                        //Console.WriteLine("=============== Run intent recognoition samples using customozed speech model. ===============");
+                        //IntentRecognitionSamples.IntentRecognitionCustomizedModelAsync(keySpeech, modelId, fileName).Wait();
                     }
                 }
             }
