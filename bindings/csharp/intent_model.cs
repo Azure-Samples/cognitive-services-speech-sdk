@@ -32,7 +32,7 @@ namespace Carbon.Recognition.Intent
         }
 
         /// <summary>
-        /// Creates a intent model using hostname, subscription key and application id of Language Understanding service.
+        /// Creates an intent model using hostname, subscription key and application id of Language Understanding service.
         /// </summary>
         /// <param name="hostName">A string that represents the host name of of Language Understanding service.</param>
         /// <param name="subscriptionKey">A string that represents the subscription key of Language Understanding service.</param>
@@ -43,6 +43,9 @@ namespace Carbon.Recognition.Intent
             return new IntentModel(Carbon.Internal.LuisModel.From(hostName, subscriptionKey, appId));
         }
 
+        /// <summary>
+        /// Dispose of associated resources.
+        /// </summary>
         public void Dispose()
         {
             if (disposed)

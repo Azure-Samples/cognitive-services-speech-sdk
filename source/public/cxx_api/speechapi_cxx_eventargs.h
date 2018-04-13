@@ -12,7 +12,10 @@
 
 namespace CARBON_NAMESPACE_ROOT {
 
-    
+
+/// <summary>
+/// Base class for event arguments.
+/// </summary>
 class EventArgs
 {
 public:

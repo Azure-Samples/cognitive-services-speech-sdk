@@ -12,6 +12,7 @@ namespace Carbon.Recognition
 {
      /// <summary>
      /// Factory methods to create recognizers.
+     /// </summary>
      public sealed class RecognizerFactory : IDisposable
      {
         /// <summary>
@@ -57,7 +58,7 @@ namespace Carbon.Recognition
         /// <summary>
         /// Gets/sets the authorization token.
         /// If this is set, subscription key is ignored.
-        /// User needs to make sure the provided authrization token is valid and not expired.
+        /// User needs to make sure the provided authorization token is valid and not expired.
         /// </summary>
         public string AuthorizationToken
         {
@@ -198,6 +199,9 @@ namespace Carbon.Recognition
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Dispose of associated resources.
+        /// </summary>
         public void Dispose()
         {
             if (disposed)

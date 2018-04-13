@@ -17,7 +17,7 @@ namespace Carbon.Recognition
         /// Reads data from audio input stream into the data buffer. The maximal number of bytes to be read is determined by the size of dataBuffer.
         /// </summary>
         /// <param name="dataBuffer">The byte array to store the read data.</param>
-        /// <returns> the number of bytes have been read.</returns>
+        /// <returns>the number of bytes have been read.</returns>
         public int Read(byte[] dataBuffer)
         {
             throw new NotImplementedException();

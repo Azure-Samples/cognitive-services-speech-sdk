@@ -6,7 +6,7 @@
 namespace Carbon.Recognition
 {
     /// <summary>
-    /// Defines constants used in speech recognition.
+    /// Defines constants used in speech recognition and translation.
     /// </summary>
     public static class ParameterNames
     {

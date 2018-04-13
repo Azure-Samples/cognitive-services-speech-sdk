@@ -21,7 +21,7 @@ namespace Carbon.Recognition
         /// <code>
         /// static void MySessionEventHandler(object sender, SpeechSessionEventArgs e)
         /// {
-        ///    Console.WriteLine(String.Format("Speech recogniton: session event: {0} ", e.ToString()));
+        ///    Console.WriteLine(String.Format("Speech recognition: session event: {0} ", e.ToString()));
         /// }
         ///
         /// static void SpeechRecognizerSample()
@@ -49,12 +49,21 @@ namespace Carbon.Recognition
             speechEndDetectedHandler = new SessionEventHandlerImpl(this, SessionEventType.SpeechEndDetectedEvent);
         }
 
+        /// <summary>
+        /// Dispose of associated resources.
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// This method performs cleanup of resources.
+        /// The Boolean parameter <paramref name="disposing"/> indicates whether the method is called from <see cref="IDisposable.Dispose"/> (if <paramref name="disposing"/> is true) or from the finalizer (if <paramref name="disposing"/> is false).
+        /// Derived classes should override this method to dispose resource if needed.
+        /// </summary>
+        /// <param name="disposing">Flag to request disposal.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (disposed)
@@ -111,6 +120,4 @@ namespace Carbon.Recognition
             private SessionEventType eventType;
         }
     }
-
-    
 }

@@ -33,7 +33,7 @@ namespace Carbon
         }
 
         /// <summary>
-        /// Checks whether the parameter specified by name has a <typeparamref name="T"/> value. 
+        /// Checks whether the parameter specified by name has a <typeparamref name="T"/> value.
         /// </summary>
         /// <param name="name">The parameter name.</param>
         /// <returns>true if the parameter has a <typeparamref name="T"/> value, and false otherwise.</returns>
@@ -175,6 +175,9 @@ namespace Carbon
             }
         }
 
+        /// <summary>
+        /// Dispose of the associated parameter value collection.
+        /// </summary>
         public void Dispose()
         {
             if (disposed)
@@ -182,7 +185,7 @@ namespace Carbon
                 return;
             }
 
-            speechParameters.Dispose();
+            speechParameters?.Dispose();
             disposed = true;
         }
 

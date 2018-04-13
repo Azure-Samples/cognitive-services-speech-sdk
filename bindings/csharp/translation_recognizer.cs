@@ -19,22 +19,22 @@ namespace Carbon.Recognition.Translation
     /// <code>
     /// static void MySessionEventHandler(object sender, SessionEventArgs e)
     /// {
-    ///    Console.WriteLine(String.Format("Translation recogniton: Session event: {0} ", e.ToString()));
+    ///    Console.WriteLine(String.Format("Translation recognition: Session event: {0} ", e.ToString()));
     /// }
     ///
     /// static void MyIntermediateResultEventHandler(object sender, TranslatioTextResultEventArgs e)
     /// {
-    ///    Console.WriteLine(String.Format("Translation recogniton: Intermediate result: {0} ", e.ToString()));
+    ///    Console.WriteLine(String.Format("Translation recognition: Intermediate result: {0} ", e.ToString()));
     /// }
     ///
     /// static void MyFinalResultEventHandler(object sender, TranslationTextResultEventArgs e)
     /// {
-    ///    Console.WriteLine(String.Format("Translation recogniton: Final result: {0} ", e.ToString()));
+    ///    Console.WriteLine(String.Format("Translation recognition: Final result: {0} ", e.ToString()));
     /// }
     ///
     /// static void MyErrorHandler(object sender, RecognitionErrorEventArgs e)
     /// {
-    ///    Console.WriteLine(String.Format("Translation recogniton: Error information: {0} ", e.ToString()));
+    ///    Console.WriteLine(String.Format("Translation recognition: Error information: {0} ", e.ToString()));
     /// }
     ///
     /// static void TranslationRecognizerSample()
@@ -71,7 +71,7 @@ namespace Carbon.Recognition.Translation
         public event EventHandler<TranslationTextResultEventArgs> FinalResultReceived;
 
         /// <summary>
-        /// The event <see cref="RecognitionErrorRaised"/> signals that an error occured during recognition.
+        /// The event <see cref="RecognitionErrorRaised"/> signals that an error occurred during recognition.
         /// </summary>
         public event EventHandler<RecognitionErrorEventArgs> RecognitionErrorRaised;
 

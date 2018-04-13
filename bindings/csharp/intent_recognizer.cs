@@ -16,7 +16,7 @@ namespace Carbon.Recognition.Intent
     public sealed class IntentRecognizer : Recognition.Recognizer
     {
         /// <summary>
-        /// The event <see cref="IntermediateResultReceived"/> signals that an intermediate recongition result is received.
+        /// The event <see cref="IntermediateResultReceived"/> signals that an intermediate recognition result is received.
         /// </summary>
         public event EventHandler<IntentRecognitionResultEventArgs> IntermediateResultReceived;
 
@@ -26,7 +26,7 @@ namespace Carbon.Recognition.Intent
         public event EventHandler<IntentRecognitionResultEventArgs> FinalResultReceived;
 
         /// <summary>
-        /// The event <see cref="RecognitionErrorRaised"/> signals that an error occured during recognition.
+        /// The event <see cref="RecognitionErrorRaised"/> signals that an error occurred during recognition.
         /// </summary>
         public event EventHandler<RecognitionErrorEventArgs> RecognitionErrorRaised;
 
