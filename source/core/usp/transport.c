@@ -817,12 +817,41 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
     int err = -1;
     const char* src;
     char* dst;
+    int port = -1;
+    char* localHost = NULL;
 
     bool use_ssl = false;
 
     if (!host)
     {
         return NULL;
+    }
+
+    // parse port number from localhost if it is specified in the url
+    if ((localHost = strstr(host, "localhost:")) != NULL)
+    {
+        char* front = strchr(localHost, ':');
+        char* back = strchr(front, '/');
+        if (back == NULL)
+        {
+            back = front + strlen(front) + 1;
+        }
+        size_t length = back - front;
+        char* portStr = (char*)malloc(length);
+        if (portStr == NULL)
+        {
+            LogError("Failed to allocate memory for port string.");
+            return NULL;
+        }
+        memcpy(portStr, ++front, length);
+        portStr[length - 1] = '\0';
+        port = atoi(portStr);
+        free(portStr);
+        if (port == 0)
+        {
+            LogError("Failed to parse port string.");
+            return NULL;
+        }
     }
 
     request = (TransportRequest*)malloc(sizeof(TransportRequest));
@@ -840,13 +869,13 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
     if (strstr(host, g_keywordWSS) == host)
     {
         request->isWS = true;
-        request->ws.config.port = 443;
+        request->ws.config.port = port == -1 ? 443 : port;
         use_ssl = true;
     }
     else if(strstr(host, g_keywordWS) == host)
     {
         request->isWS = true;
-        request->ws.config.port = 8080;
+        request->ws.config.port = port == -1 ? 80 : port;
         
         use_ssl = false;
     }
@@ -879,7 +908,8 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
         if (request->url != NULL)
         {
             host += strlen(use_ssl ? g_keywordWSS : g_keywordWS);
-            request->ws.config.hostname = dst = request->url;
+            dst = request->url;
+            request->ws.config.hostname = port == -1 ? dst : "localhost";
 
             // split up host + path
             src = strchr(host, '/');
@@ -891,7 +921,7 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
                 *dst = 0; dst++;
                 request->ws.config.resource_name = dst;
                 strcpy_s(dst, l + 2 - (dst - request->url), src);
-                
+
                 WSIO_CONFIG cfg = request->ws.config;
                 WS_PROTOCOL ws_proto;
                 ws_proto.protocol = cfg.protocol;

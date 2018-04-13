@@ -56,6 +56,7 @@ const char* kEvent_error_key = "Error";
 const char* kEvent_status_key = "Status";
 
 const char *kRcvd_msg_audio_key = "audio";
+const char *kRcvd_msg_response_key = "response";
 
 static const char *speechMsgNames[countOfMsgTypes];
 
@@ -573,6 +574,8 @@ void record_received_msg(TELEMETRY_HANDLE handle, const char *receivedMsg)
         msgType = audio;
     else if (!strcmp(receivedMsg, g_messagePathTurnEnd))
         msgType = turnEnd;
+    else if (!strcmp(receivedMsg, kRcvd_msg_response_key))
+        msgType = response;
 
     if (msgType == countOfMsgTypes) 
     {
@@ -717,14 +720,12 @@ void inband_event_key_value_populate(TELEMETRY_HANDLE handle, const char *eventN
 {
     Lock(handle->lock);
     PROPERTYBAG_HANDLE *pBag = getJsonForEvent(handle, eventName);
-    if (pBag == NULL) 
+    if (pBag != NULL)
     {
-        return;
+        int ret = populate_event_key_value(pBag, eventName, id, key, value);
+        // Set the bPayloadSet flag
+        handle->current_telemetry_object->bPayloadSet |= (ret == 0);
     }
-    int ret = populate_event_key_value(pBag, eventName, id, key, value);
-    // Set the bPayloadSet flag
-    handle->current_telemetry_object->bPayloadSet |= (ret == 0);
-
     Unlock(handle->lock);
 }
 
@@ -732,13 +733,12 @@ void inband_event_timestamp_populate(TELEMETRY_HANDLE handle, const char *eventN
 {
     Lock(handle->lock);
     PROPERTYBAG_HANDLE *pBag = getJsonForEvent(handle, eventName);
-    if (pBag == NULL) 
+    if (pBag != NULL)
     {
-        return;
+        int ret = populate_event_timestamp(pBag, eventName, id, key);
+        // Set the bPayloadSet flag
+        handle->current_telemetry_object->bPayloadSet |= (ret == 0);
     }
-    int ret = populate_event_timestamp(pBag, eventName, id, key);
-    // Set the bPayloadSet flag
-    handle->current_telemetry_object->bPayloadSet |= (ret == 0);
     Unlock(handle->lock);
 }
 

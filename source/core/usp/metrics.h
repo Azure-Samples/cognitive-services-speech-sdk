@@ -190,6 +190,7 @@ typedef enum incomingMsgType
     speechPhrase,
     audio,
     turnEnd,
+    response,
     countOfMsgTypes
 }INCOMING_MSG_TYPE;
 
