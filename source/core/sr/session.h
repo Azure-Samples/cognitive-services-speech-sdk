@@ -35,7 +35,7 @@ public:
     CSpxAsyncOp<void> StartContinuousRecognitionAsync() override;
     CSpxAsyncOp<void> StopContinuousRecognitionAsync() override;
 
-    CSpxAsyncOp<void> StartKeywordRecognitionAsync(const wchar_t* keyword) override;
+    CSpxAsyncOp<void> StartKeywordRecognitionAsync(const std::wstring& keyword) override;
     CSpxAsyncOp<void> StopKeywordRecognitionAsync() override;
 
 

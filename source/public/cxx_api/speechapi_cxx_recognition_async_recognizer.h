@@ -60,7 +60,7 @@ public:
     virtual std::future<void> StartContinuousRecognitionAsync() = 0;
     virtual std::future<void> StopContinuousRecognitionAsync() = 0;
 
-    virtual std::future<void> StartKeywordRecognitionAsync(const wchar_t* keyword) = 0;
+    virtual std::future<void> StartKeywordRecognitionAsync(const std::wstring& keyword) = 0;
     virtual std::future<void> StopKeywordRecognitionAsync() = 0;
 
     EventSignal<const SessionEventArgs&> SessionStarted;
@@ -128,7 +128,7 @@ protected:
         return future;
     };
 
-    std::future<void> StartKeywordRecognitionAsyncInternal(const wchar_t* keyword)
+    std::future<void> StartKeywordRecognitionAsyncInternal(const std::wstring& keyword)
     {
         auto future = std::async(std::launch::async, [=]() -> void {
             SPX_INIT_HR(hr);

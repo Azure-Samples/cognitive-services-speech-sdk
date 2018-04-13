@@ -58,7 +58,7 @@
 %ignore Carbon::Recognition::AsyncRecognizer::RecognizeAsync();
 %ignore Carbon::Recognition::AsyncRecognizer::StartContinuousRecognitionAsync();
 %ignore Carbon::Recognition::AsyncRecognizer::StopContinuousRecognitionAsync();
-%ignore Carbon::Recognition::AsyncRecognizer::StartKeywordRecognitionAsync(const wchar_t*);
+%ignore Carbon::Recognition::AsyncRecognizer::StartKeywordRecognitionAsync(const std::wstring&);
 %ignore Carbon::Recognition::AsyncRecognizer::StopKeywordRecognitionAsync();
 
 %inline %{
@@ -89,7 +89,7 @@
         ($self)->StopContinuousRecognitionAsync().get();
     }
 
-    void StartKeywordRecognition(const wchar_t* keyword)
+    void StartKeywordRecognition(const std::wstring& keyword)
     {
         ($self)->StartKeywordRecognitionAsync(keyword).get();
     }
@@ -116,7 +116,7 @@
         return FutureWrapper<void>(std::move(future));
     }
 
-    FutureWrapper<void> StartKeywordRecognitionAsync(const wchar_t* keyword)
+    FutureWrapper<void> StartKeywordRecognitionAsync(const std::wstring& keyword)
     {
         auto future = ($self)->StartKeywordRecognitionAsync(keyword);
         return FutureWrapper<void>(std::move(future));
@@ -145,7 +145,7 @@
         ($self)->StopContinuousRecognitionAsync().get();
     }
 
-    void StartKeywordRecognition(const wchar_t* keyword)
+    void StartKeywordRecognition(const std::wstring& keyword)
     {
         ($self)->StartKeywordRecognitionAsync(keyword).get();
     }
@@ -172,7 +172,7 @@
         return FutureWrapper<void>(std::move(future));
     }
 
-    FutureWrapper<void> StartKeywordRecognitionAsync(const wchar_t* keyword)
+    FutureWrapper<void> StartKeywordRecognitionAsync(const std::wstring& keyword)
     {
         auto future = ($self)->StartKeywordRecognitionAsync(keyword);
         return FutureWrapper<void>(std::move(future));
@@ -218,7 +218,7 @@
         return FutureWrapper<void>(std::move(future));
     }
 
-    FutureWrapper<void> StartKeywordRecognitionAsync(const wchar_t* keyword)
+    FutureWrapper<void> StartKeywordRecognitionAsync(const std::wstring& keyword)
     {
         auto future = ($self)->StartKeywordRecognitionAsync(keyword);
         return FutureWrapper<void>(std::move(future));

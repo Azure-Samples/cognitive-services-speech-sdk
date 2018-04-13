@@ -374,7 +374,7 @@ public:
     virtual CSpxAsyncOp<void> StartContinuousRecognitionAsync() = 0;
     virtual CSpxAsyncOp<void> StopContinuousRecognitionAsync() = 0;
 
-    virtual CSpxAsyncOp<void> StartKeywordRecognitionAsync(const wchar_t* keyword) = 0;
+    virtual CSpxAsyncOp<void> StartKeywordRecognitionAsync(const std::wstring& keyword) = 0;
     virtual CSpxAsyncOp<void> StopKeywordRecognitionAsync() = 0;
 };
 
@@ -471,7 +471,7 @@ public:
     virtual CSpxAsyncOp<void> StartContinuousRecognitionAsync() = 0;
     virtual CSpxAsyncOp<void> StopContinuousRecognitionAsync() = 0;
 
-    virtual CSpxAsyncOp<void> StartKeywordRecognitionAsync(const wchar_t* keyword) = 0;
+    virtual CSpxAsyncOp<void> StartKeywordRecognitionAsync(const std::wstring& keyword) = 0;
     virtual CSpxAsyncOp<void> StopKeywordRecognitionAsync() = 0;
 };
 

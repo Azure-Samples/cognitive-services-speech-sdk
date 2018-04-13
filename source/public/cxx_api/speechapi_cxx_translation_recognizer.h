@@ -151,7 +151,7 @@ public:
 
     RecognizerParameterValueCollection Parameters;
 
-    std::future<void> StartKeywordRecognitionAsync(const wchar_t* keyword) override
+    std::future<void> StartKeywordRecognitionAsync(const std::wstring& keyword) override
     {
         UNUSED(keyword);
         auto future = std::async(std::launch::async, [=]() -> void {

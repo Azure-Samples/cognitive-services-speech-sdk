@@ -88,7 +88,7 @@ CSpxAsyncOp<void> CSpxRecognizer::StopContinuousRecognitionAsync()
     return m_defaultSession->StopContinuousRecognitionAsync();
 }
 
-CSpxAsyncOp<void> CSpxRecognizer::StartKeywordRecognitionAsync(const wchar_t* keyword)
+CSpxAsyncOp<void> CSpxRecognizer::StartKeywordRecognitionAsync(const std::wstring& keyword)
 {
     return m_defaultSession->StartKeywordRecognitionAsync(keyword);
 }
