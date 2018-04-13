@@ -134,7 +134,7 @@ protected:
             SPX_INIT_HR(hr);
             SPX_THROW_ON_FAIL(hr = Recognizer_AsyncHandle_Close(m_hasyncStartKeyword)); // close any unfinished previous attempt
 
-            SPX_EXITFN_ON_FAIL(hr = Recognizer_StartKeywordRecognitionAsync(m_hreco, keyword, &m_hasyncStartKeyword));
+            SPX_EXITFN_ON_FAIL(hr = Recognizer_StartKeywordRecognitionAsync(m_hreco, keyword.c_str(), &m_hasyncStartKeyword));
             SPX_EXITFN_ON_FAIL(hr = Recognizer_StartKeywordRecognitionAsync_WaitFor(m_hasyncStartKeyword, UINT32_MAX));
 
             SPX_EXITFN_CLEANUP:
