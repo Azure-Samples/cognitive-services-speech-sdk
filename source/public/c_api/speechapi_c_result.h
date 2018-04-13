@@ -11,11 +11,13 @@
 SPXAPI Result_GetResultId(SPXRESULTHANDLE hresult, wchar_t* pszResultId, uint32_t cchResultId);
 
 enum Result_RecognitionReason { Reason_Recognized, Reason_IntermediateResult, Reason_NoMatch, Reason_Canceled, Reason_OtherRecognizer };
+typedef enum Result_RecognitionReason Result_RecognitionReason;
 SPXAPI Result_GetRecognitionReason(SPXRESULTHANDLE hresult, Result_RecognitionReason* preason);
 
 SPXAPI Result_GetText(SPXRESULTHANDLE hresult, wchar_t* pszText, uint32_t cchText);
 
 enum Result_Property { ResultProperty_LuisJson = 1 };
+typedef enum Result_Property Result_Property;
 SPXAPI Result_GetProperty_Name(Result_Property property, wchar_t* name, uint32_t cchName);
 
 SPXAPI Result_GetProperty_String(SPXRESULTHANDLE hresult, const wchar_t* name, wchar_t* value, uint32_t cchValue, const wchar_t* defaultValue);

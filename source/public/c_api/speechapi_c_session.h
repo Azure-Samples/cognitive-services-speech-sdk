@@ -14,6 +14,7 @@ SPXAPI_(bool) Session_Handle_IsValid(SPXSESSIONHANDLE hsession);
 SPXAPI Session_Handle_Close(SPXSESSIONHANDLE hsession);
 
 enum Session_Parameter { SessionParameter_SpeechSubscriptionKey = 1, SessionParameter_SpeechEndpoint = 2 };
+typedef enum Session_Parameter Session_Parameter;
 SPXAPI Session_GetParameter_Name(Session_Parameter parameter, wchar_t* name, uint32_t cchName);
 
 SPXAPI Session_SetParameter_String(SPXSESSIONHANDLE hsession, const wchar_t* name, const wchar_t* value);

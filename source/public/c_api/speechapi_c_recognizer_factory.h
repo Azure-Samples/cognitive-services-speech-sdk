@@ -26,6 +26,7 @@ SPXAPI RecognizerFactory_CreateTranslationRecognizer_With_FileInput(SPXRECOFACTO
 SPXAPI RecognizerFactory_CreateTranslationRecognizer_With_Stream(SPXRECOFACTORYHANDLE hrecofactory, SPXRECOHANDLE* phreco, const wchar_t* sourceLanguage, const wchar_t* targetLanguage, SpeechApi_AudioInputStream *stream);
 
 enum Factory_Parameter { FactoryParameter_SpeechSubscriptionKey = 1, FactoryParameter_SpeechEndpoint = 2 };
+typedef enum Factory_Parameter Factory_Parameter;
 SPXAPI RecognizerFactory_GetParameter_Name(Factory_Parameter parameter, wchar_t* name, uint32_t cchName);
 
 SPXAPI RecognizerFactory_SetParameter_String(SPXRECOFACTORYHANDLE hrecofactory, const wchar_t* name, const wchar_t* value);

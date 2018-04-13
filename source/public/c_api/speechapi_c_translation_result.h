@@ -8,6 +8,7 @@
 
 
 enum Result_TranslationStatus { Result_TranslationSuccess, Result_TranslationError };
+typedef enum Result_TranslationStatus Result_TranslationStatus;
 
 SPXAPI TranslationResult_GetTranslationText(SPXRESULTHANDLE handle, wchar_t* textBuffer, uint32_t length);
 SPXAPI TranslationResult_GetSourceLanguage(SPXRESULTHANDLE handle, wchar_t* sourceLanguageBuffer, uint32_t length);

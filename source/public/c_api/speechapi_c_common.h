@@ -70,7 +70,7 @@
 #define SPXAPI_PRIVATE_(type)   SPX_EXTERN_C type SPXAPI_NOTHROW SPXAPI_CALLTYPE 
 
 struct _spx_empty {};
-typedef _spx_empty* _spxhandle;
+typedef struct _spx_empty* _spxhandle;
 typedef _spxhandle SPXHANDLE;
 
 typedef SPXHANDLE SPXASYNCHANDLE;
