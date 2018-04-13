@@ -14,13 +14,30 @@
 namespace CARBON_NAMESPACE_ROOT {
 
 
+/// <summary>
+/// Base class for values returned by the parameter collection.
+/// A value may represent a string, a number (32-bit integer), or a Boolean.
+/// </summary>
 class Value
 {
 public:
 
-    Value(Value *ptr = nullptr) : m_delegatePtr(ptr) { }
+
+    /// <summary>
+    /// Construct a value from a raw value pointer.
+    /// </summary>
+    /// <param name="ptr">Value pointer.</param>
+    Value(Value* ptr = nullptr) : m_delegatePtr(ptr) { }
+
+    /// <summary>
+    /// Move constructor.
+    /// </summary>
+    /// <param name="other">Value to construct from.</param>
     Value(Value&& other) : m_delegatePtr(std::move(other.m_delegatePtr)) { }
 
+    /// <summary>
+    /// Destructor.
+    /// </summary>
     virtual ~Value()
     {
         if (m_delegatePtr != nullptr)
@@ -29,34 +46,124 @@ public:
         }
     }
 
+    /// <summary>
+    /// Checks if the value represents a string.
+    /// </summary>
+    /// <returns>true if value represents a string</returns>
     virtual bool IsString() { return m_delegatePtr->IsString(); }
+
+    /// <summary>
+    /// If the value represents a string, sets its value.
+    /// </summary>
+    /// <param name="value">Value to set</param>
     virtual void SetString(const wchar_t* value) { m_delegatePtr->SetString(value); }
+
+    /// <summary>
+    /// If the value represents a string, gets its value.
+    /// Otherwise, return the specified default value, <paramref="defaultValue"/>.
+    /// </summary>
+    /// <param name="defaultValue">Value to return if value type is not string (defaults to empty string).</param>
+    /// <returns>string value or default</returns>
     virtual std::wstring GetString(const wchar_t* defaultValue = L"") { return m_delegatePtr->GetString(defaultValue); }
 
+    /// <summary>
+    /// Checks if the value represents a number (32-bit integer).
+    /// </summary>
+    /// <returns>true if value represents a number</returns>
     virtual bool IsNumber() { return m_delegatePtr->IsNumber(); }
+
+    /// <summary>
+    /// If the value represents a number (32-bit integer), sets its value.
+    /// </summary>
+    /// <param name="value">Value to set</param>
     virtual void SetNumber(int32_t value) { m_delegatePtr->SetNumber(value); }
+
+    /// <summary>
+    /// If the value represents a number (32-bit integer), gets its value.
+    /// Otherwise, return the specified default value, <paramref="defaultValue"/>.
+    /// </summary>
+    /// <param name="defaultValue">Value to return if value type is not number (defaults to zero).</param>
+    /// <returns>number value or default</returns>
     virtual int32_t GetNumber(int32_t defaultValue = 0) { return m_delegatePtr->GetNumber(defaultValue); }
 
+    /// <summary>
+    /// Checks if the value represents a Boolean.
+    /// </summary>
+    /// <returns>true if value represents a Boolean</returns>
     virtual bool IsBool() { return m_delegatePtr->IsBool(); }
+
+    /// <summary>
+    /// If the value represents a Boolean, sets its value.
+    /// </summary>
+    /// <param name="value">Value to set</param>
     virtual void SetBool(bool value) { m_delegatePtr->SetBool(value); }
+
+    /// <summary>
+    /// If the value represents a Boolean, gets its value.
+    /// Otherwise, return the specified default value, <paramref="defaultValue"/>.
+    /// </summary>
+    /// <param name="defaultValue">Value to return if value type is not Boolean (defaults to false).</param>
+    /// <returns>Boolean value or default</returns>
     virtual bool GetBool(bool defaultValue = false) { return m_delegatePtr->GetBool(defaultValue); }
 
+    /// <summary>
+    /// Assignment operator for a value that represents a string.
+    /// </summary>
+    /// <param name="value">Value to set</param>
+    /// <returns>the value that was set</returns>
     const wchar_t* operator=(const wchar_t* value) { SetString(value); return value; }
+
+    /// <summary>
+    /// Assignment operator for a value that represents a number (32-bit integer).
+    /// </summary>
+    /// <param name="value">Value to set</param>
+    /// <returns>the value that was set</returns>
     int32_t operator=(int32_t value) { SetNumber(value); return value; }
+
+    /// <summary>
+    /// Assignment operator for a value that represents a Boolean.
+    /// </summary>
+    /// <param name="value">Value to set</param>
+    /// <returns>the value that was set</returns>
     bool operator=(bool value) { SetBool(value); return value; }
 
+    /// <summary>
+    /// Conversion operator for value that represent a string.
+    /// <summary>
+    /// <returns>string value or empty string</returns>
     operator const std::wstring() { return GetString(); }
+
+    /// <summary>
+    /// Conversion operator for value that represent a number (32-bit integer).
+    /// <summary>
+    /// <returns>number value or 0</returns>
     operator int32_t() { return GetNumber(); }
+
+    /// <summary>
+    /// Conversion operator for value that represent a Boolean
+    /// <summary>
+    /// <returns>Boolean value or false</returns>
     operator bool() { return GetBool(); }
 
 
     // TODO: Fix SWIG such that we don't need to expose the default methods below...
     //       And then... once fixed ... delete the next 3 lines of code:
     //
-    Value(const Value&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
-    Value& operator=(Value&&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
-    const Value& operator=(const Value&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
 
+    /// <summary>
+    /// Copy constructor. Do not rely on it; will be removed.
+    /// </summary>
+    Value(const Value&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
+
+    /// <summary>
+    /// Move assignment operator. Do not rely on it; will be removed.
+    /// </summary>
+    Value& operator=(Value&&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
+
+    /// <summary>
+    /// Assignment operator. Do not rely on it; will be removed.
+    /// </summary>
+    const Value& operator=(const Value&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
 
 private:
 

@@ -18,29 +18,75 @@ namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
 namespace Intent {
 
-
+/// <summary>
+/// In addition to performing speech-to-text recognition, the IntentRecognizer extracts structured information
+/// about the intent of the speaker, which can be used to drive further actions using dedicated intent triggers
+/// (see IntentTrigger).
+/// </summary>
 class IntentRecognizer : virtual public AsyncRecognizer<IntentRecognitionResult, IntentRecognitionEventArgs>
 {
 public:
 
     using BaseType = AsyncRecognizer<IntentRecognitionResult, IntentRecognitionEventArgs>;
 
+    /// <summary>
+    /// Internal constructor. Creates a new instance using the provided handle.
+    /// </summary>
     IntentRecognizer(SPXRECOHANDLE hreco = SPXHANDLE_INVALID) : BaseType(hreco) { SPX_DBG_TRACE_FUNCTION(); }
+
+    /// <summary>
+    /// Deconstructor.
+    /// </summary>
     ~IntentRecognizer() { SPX_DBG_TRACE_FUNCTION(); }
 
+    /// <summary>
+    /// Performs intent recognition in a non-blocking (asynchronous) mode.
+    /// </summary>
+    /// <returns>Future containing result value (a shared pointer to IntentRecognitionResult)
+    /// of the asynchronous intent recognition.
+    /// </returns>
     std::future<std::shared_ptr<IntentRecognitionResult>> RecognizeAsync() override { return BaseType::RecognizeAsyncInternal(); }
+
+    /// <summary>
+    /// Asynchronously initiates continuous intent recognition operation.
+    /// </summary>
+    /// <returns>An empty future.</returns>
     std::future<void> StartContinuousRecognitionAsync() override { return BaseType::StartContinuousRecognitionAsyncInternal(); }
+
+    /// <summary>
+    /// Asynchronously terminates ongoing continuous intent recognition operation.
+    /// </summary>
+    /// <returns>An empty future.</returns>
     std::future<void> StopContinuousRecognitionAsync() override { return BaseType::StopContinuousRecognitionAsyncInternal(); }
 
+    /// <summary>
+    /// Asynchronously initiates keyword recognition operation.
+    /// </summary>
+    /// <returns>An empty future.</returns>
     std::future<void> StartKeywordRecognitionAsync(const std::wstring& keyword) override { return BaseType::StartKeywordRecognitionAsyncInternal(keyword); }
+
+    /// <summary>
+    /// Asynchronously terminates keyword recognition operation.
+    /// </summary>
+    /// <returns>An empty future.</returns>
     std::future<void> StopKeywordRecognitionAsync() override { return BaseType::StopKeywordRecognitionAsyncInternal(); }
 
+    /// <summary>
+    /// Adds a phrase that should be recognized as intent with the specified id.
+    /// </summary>
+    /// <param name="intentId">Id of the intent.</param>
+    /// <param name="phrase">The phrase corresponding to the intent.</param>
     void AddIntent(const wchar_t* intentId, const wchar_t* simplePhrase)
     {
         auto trigger = IntentTrigger::From(simplePhrase);
         return AddIntent(intentId, trigger);
     }
 
+    /// <summary>
+    /// Adds an IntentTrigger that should be recognized as intent with the specified id.
+    /// </summary>
+    /// <param name="intentId">Id of the intent.</param>
+    /// <param name="trigger">The IntentTrigger corresponding to the intent.</param>
     void AddIntent(const wchar_t* intentId, std::shared_ptr<IntentTrigger> trigger)
     {
         SPX_THROW_ON_FAIL(IntentRecognizer_AddIntent(m_hreco, intentId, (SPXTRIGGERHANDLE)(*trigger.get())));
@@ -48,11 +94,8 @@ public:
 
 
 private:
-
-    IntentRecognizer(IntentRecognizer&&) = delete;
-    IntentRecognizer(const IntentRecognizer&) = delete;
-    IntentRecognizer& operator=(IntentRecognizer&&) = delete;
-    IntentRecognizer& operator=(const IntentRecognizer&) = delete;
+    DISABLE_COPY_AND_MOVE(IntentRecognizer);
+    //DISABLE_DEFAULT_CTORS(IntentRecognizer);
 
     friend class CARBON_NAMESPACE_ROOT::Session;
 };

@@ -26,10 +26,10 @@ namespace Carbon.Recognition.Translation
         public RecognitionStatus TranslationStatus { get; }
 
         /// <summary>
-        /// Presents the translation results. Each item in the list is a key value pair, where key is the language name in BCP-47 format,
-        /// and value is the translation text in the specified language.
+        /// Presents the translation results. Each item in the dictionary represents translation result in one of target languages, where the key 
+        /// is the name of the target language, in BCP-47 format, and the value is the translation text in the specified language.
         /// </summary>
-        public IReadOnlyList<KeyValuePair<string, string>> Translations { get; }
+        public IReadOnlyDictionary<string, string> Translations { get; }
 
         /// <summary>
         /// Returns a string that represents the speech recognition result.

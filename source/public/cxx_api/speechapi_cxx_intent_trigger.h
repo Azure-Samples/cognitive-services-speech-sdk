@@ -15,11 +15,18 @@ namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
 namespace Intent {
 
-
+/// <summary>
+/// Represents an intent trigger.
+/// </summary>
 class IntentTrigger
 {
 public:
 
+    /// <summary>
+    /// Creates an intent trigger using the specified phrase.
+    /// </summary>
+    /// <param name="simplePhrase">The simple phrase to create an intent trigger for.</param>
+    /// <returns>A shared pointer to an intent trigger.</returns>
     static std::shared_ptr<IntentTrigger> From(const wchar_t* simplePhrase)
     {
         SPXTRIGGERHANDLE htrigger = SPXHANDLE_INVALID;
@@ -27,6 +34,11 @@ public:
         return std::make_shared<IntentTrigger>(htrigger);
     }
 
+    /// <summary>
+    /// Creates an intent trigger using the specified LuisModel.
+    /// </summary>
+    /// <param name="model">The LuisModel to create an intent trigger for.</param>
+    /// <returns>A shared pointer to an intent trigger.</returns>
     static std::shared_ptr<IntentTrigger> From(std::shared_ptr<LuisModel> model)
     {
         SPXTRIGGERHANDLE htrigger = SPXHANDLE_INVALID;
@@ -34,6 +46,12 @@ public:
         return std::make_shared<IntentTrigger>(htrigger);
     }
 
+    /// <summary>
+    /// Creates an intent trigger using the specified LuisModel and an intent name.
+    /// </summary>
+    /// <param name="model">The LuisModel to create an intent trigger for.</param>
+    /// <param name="model">The intent name to create an intent trigger for.</param>
+    /// <returns>A shared pointer to an intent trigger.</returns>
     static std::shared_ptr<IntentTrigger> From(std::shared_ptr<LuisModel> model, const wchar_t* intentName)
     {
         SPXTRIGGERHANDLE htrigger = SPXHANDLE_INVALID;
@@ -41,19 +59,23 @@ public:
         return std::make_shared<IntentTrigger>(htrigger);
     }
 
-    IntentTrigger(SPXTRIGGERHANDLE htrigger) : m_htrigger(htrigger) { };
+    /// <summary>
+    /// Virtual destructor
+    /// </summary>
     virtual ~IntentTrigger() { IntentTrigger_Handle_Close(m_htrigger); m_htrigger = SPXHANDLE_INVALID; }
 
+    /// <summary>
+    /// Internal constructor. Creates a new instance using the provided handle.
+    /// </summary>
+    IntentTrigger(SPXTRIGGERHANDLE htrigger) : m_htrigger(htrigger) { };
+
+    /// <summary>
+    /// Internal. Explicit conversion operator.
+    /// </summary>
     explicit operator SPXTRIGGERHANDLE() { return m_htrigger; }
 
-
 private:
-
-    IntentTrigger() = delete;
-    IntentTrigger(IntentTrigger&&) = delete;
-    IntentTrigger(const IntentTrigger&) = delete;
-    IntentTrigger& operator=(IntentTrigger&&) = delete;
-    IntentTrigger& operator=(const IntentTrigger&) = delete;
+    DISABLE_DEFAULT_CTORS(IntentTrigger);
 
     SPXTRIGGERHANDLE m_htrigger;
 };

@@ -17,7 +17,7 @@ namespace Recognition {
 namespace Speech {
 
 
-class SpeechRecognitionResult final : public RecognitionResult
+class SpeechRecognitionResult : public RecognitionResult
 {
 public:
 

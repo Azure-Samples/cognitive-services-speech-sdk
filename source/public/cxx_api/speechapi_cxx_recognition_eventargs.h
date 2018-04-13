@@ -13,30 +13,24 @@
 namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
 
-
 /// <summary>
-/// Base class for recognition event arguments.
+/// Provides data for the RecognitionEvent.
 /// </summary>
 class RecognitionEventArgs : public SessionEventArgs
 {
 public:
 
     /// <summary>
-    /// Constructor.
+    /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
-    /// <param name="hevent">Event handle</param>
     RecognitionEventArgs(SPXEVENTHANDLE hevent = SPXHANDLE_INVALID) :
         SessionEventArgs(hevent)
     {
     };
 
-
+    // Todo: make it private after passing SWIG
 public:
-
-    RecognitionEventArgs(RecognitionEventArgs&&) = delete;
-    RecognitionEventArgs(const RecognitionEventArgs&) = delete;
-    RecognitionEventArgs& operator=(RecognitionEventArgs&&) = delete;
-    RecognitionEventArgs& operator=(const RecognitionEventArgs&) = delete;
+    DISABLE_COPY_AND_MOVE(RecognitionEventArgs);
 };
 
 

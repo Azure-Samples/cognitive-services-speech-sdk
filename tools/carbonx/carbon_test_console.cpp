@@ -1043,12 +1043,11 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<TranslationRecogniz
     auto result = future.get();
     ConsoleWriteLine(L"RecognizeAsync %ls... Waiting... Done!\n", name.c_str());
 
-    ConsoleWriteLine(L"TranslationResult: ResultId=%d, TranslationStatus=%d, RecognizedText=%ls, TranslationText=%ls, TranslationAudio size=%d",
+    ConsoleWriteLine(L"TranslationTextResult: ResultId=%d, RecognizedText=%ls, TranslationText(in %ls):%ls",
         result->TranslationTextResult::ResultId.c_str(),
-        result->ResultStatus,
-        result->RecognitionText.c_str(),
-        result->TranslationText.c_str(),
-        (int)result->AudioData.size());
+        result->Text.c_str(),
+        result->Translations.begin(0)->first.c_str(),
+        result->Translations.begin(0)->second.c_str());
 }
 
 template <class T>
@@ -1313,8 +1312,8 @@ std::wstring CarbonTestConsole::ToString(const TranslationTextResultEventArgs& e
     str += L"  SessionId = '" + e.SessionId + L"'\n";
     str += L"  Result = {\n";
     str += L"    ResultId = '" + e.Result.ResultId + L"'\n";
-    str += L"    RecognizedText = '" + e.Result.RecognitionText + L"'\n";
-    str += L"    TranslationText = '" + e.Result.TranslationText + L"'\n";
+    str += L"    RecognizedText = '" + e.Result.Text + L"'\n";
+    str += L"    TranslationText = '" + e.Result.Translations.begin(0)->first + L"'\n";
     str += L"  } \n";
     str += L"} \n";
 
@@ -1327,7 +1326,6 @@ std::wstring CarbonTestConsole::ToString(const TranslationSynthesisResultEventAr
     str += L"TranslationEventArgs<TranslationSynthesisResult> = { \n";
     str += L"  SessionId = '" + e.SessionId + L"'\n";
     str += L"  Result = {\n";
-    str += L"    ResultId = '" + e.Result.ResultId + L"'\n";
     str += L"    SizeOfAudioData = " + std::to_wstring(e.Result.AudioData.size()) + L"\n";
     str += L"  } \n";
     str += L"} \n";
@@ -1428,7 +1426,7 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
             L"en-us");
         (void)availableLanguages;
 
-        m_translationRecognizer = DefaultRecognizerFactory::CreateTranslationRecognizer(L"en-us", L"zh-cn");
+        m_translationRecognizer = DefaultRecognizerFactory::CreateTranslationRecognizer(L"en-us", std::vector<std::wstring>{L"zh-cn"});
 
         auto fn1 = std::bind(&CarbonTestConsole::TranslationRecognizer_FinalResultHandler, this, std::placeholders::_1);
         m_translationRecognizer->FinalResult.Connect(fn1);
@@ -1437,7 +1435,7 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
         m_translationRecognizer->IntermediateResult.Connect(fn2);
 
         auto fn3 = std::bind(&CarbonTestConsole::TranslationRecognizer_SynthesisResultHandler, this, std::placeholders::_1);
-        m_translationRecognizer->OnTranslationSynthesisResult.Connect(fn3);
+        m_translationRecognizer->TranslationSynthesisResultEvent.Connect(fn3);
 
         // Todo: add error handler
         //auto fn4 = std::bind(&CarbonTestConsole::TranslationRecognizer_ErrorHandler, this, std::placeholders::_1);

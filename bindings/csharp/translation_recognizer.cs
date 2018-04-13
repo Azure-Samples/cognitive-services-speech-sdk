@@ -135,7 +135,7 @@ namespace Carbon.Recognition.Translation
         public ParameterCollection<TranslationRecognizer> Parameters { get; }
 
         /// <summary>
-        /// Starts translation recognition, and stops after the first utterance is recognized. The task returns the translation text as result.
+        /// Starts recognition and translation, and stops after the first utterance is recognized. The task returns the translation text as result.
         /// </summary>
         /// <returns>A task representing the recognition operation. The task returns a value of <see cref="TranslationTextResult"/> </returns>
         /// <example>
@@ -158,8 +158,8 @@ namespace Carbon.Recognition.Translation
         }
 
         /// <summary>
-        /// Starts translation on a continous audio stream, until StopContinuousRecognitionAsync() is called.
-        /// User must subscribe to events to receive recognition results.
+        /// Starts recognition and translation on a continous audio stream, until StopContinuousRecognitionAsync() is called.
+        /// User must subscribe to events to receive translation results.
         /// </summary>
         /// <returns>A task representing the asynchronous operation that starts the recognition.</returns>
         public Task StartContinuousRecognitionAsync()
@@ -168,9 +168,9 @@ namespace Carbon.Recognition.Translation
         }
 
         /// <summary>
-        /// Stops continuous translation.
+        /// Stops continuous recognition and translation.
         /// </summary>
-        /// <returns>A task representing the asynchronous operation that stops the recognition.</returns>
+        /// <returns>A task representing the asynchronous operation that stops the translation.</returns>
         public Task StopContinuousRecognitionAsync()
         {
             return Task.Run(() => { this.recoImpl.StopContinuousRecognition(); });

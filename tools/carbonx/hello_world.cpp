@@ -7,6 +7,7 @@
 
 #include "stdafx.h"
 #include "carbon_test_console.h"
+#include "speechapi_cxx_luis_model.h"
 #include "speechapi_cxx_session.h"
 #include "speechapi_cxx_intent_recognizer.h"
 

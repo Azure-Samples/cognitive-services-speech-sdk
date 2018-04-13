@@ -10,7 +10,7 @@ using Carbon.Recognition;
 namespace Carbon.Recognition.Translation
 {
     /// <summary>
-    /// Defines translation synthesis result.
+    /// Defines translation synthesis result, i.e. the voice output of the translated text in the target language.
     /// </summary>
     public class TranslationSynthesisResult
     {
@@ -21,7 +21,7 @@ namespace Carbon.Recognition.Translation
         }
 
         /// <summary>
-        /// The audio data.
+        /// translated text in the target language.
         /// </summary>
         public byte[] AudioData { get; }
 

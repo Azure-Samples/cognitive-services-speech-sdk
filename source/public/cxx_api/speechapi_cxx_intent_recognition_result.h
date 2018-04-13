@@ -15,11 +15,16 @@ namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
 namespace Intent {
 
-
+/// <summary>
+/// Represents the result of an intent recognition.
+/// </summary>
 class IntentRecognitionResult final : public RecognitionResult
 {
 public:
 
+    /// <summary>
+    /// Internal constructor. Creates a new instance using the provided handle.
+    /// </summary>
     IntentRecognitionResult(SPXRESULTHANDLE hresult) :
         RecognitionResult(hresult),
         IntentId(m_intentId)
@@ -28,11 +33,17 @@ public:
         SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%S; reason=0x%x; text=%S", __FUNCTION__, this, Handle, ResultId.c_str(), Reason, Text.c_str());
     }
 
+    /// <summary>
+    /// Destructor.
+    /// </summary>
     ~IntentRecognitionResult()
     {
         SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, Handle);
     }
 
+    /// <summary>
+    /// Unique intent id.
+    /// </summary>
     const std::wstring& IntentId;
 
 private:

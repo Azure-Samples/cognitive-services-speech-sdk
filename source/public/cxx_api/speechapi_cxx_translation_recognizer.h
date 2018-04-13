@@ -17,90 +17,97 @@
 #include <speechapi_cxx_translation_result.h>
 #include <speechapi_cxx_translation_eventargs.h>
 
-
 namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
 namespace Translation {
 
-// Defines scopes for requesting language resources.
-// Clients use the scope define which sets of languages they are interested in.
-//    TRANSLATION_LANGUAGE_RESOURCE_SCOPE_SPEECH: retrieves the set of languages available to transcribe speech into text.
-//    TRANSLATION_LANGUAGE_RESOURCE_SCOPE_TEXT: retrieves the set of languages available to translate transcribed text.
-//    TRANSLATION_LANGUAGE_RESOURCE_SCOPE_TTS: retrieves the set of languages and voices available to synthesize translated text back into speech.
-// Clients can retrieve multiple sets simultaneously by setting one or more values via bit-or.
+/*
+   Defines scopes for language resources.
+   Clients use the scope define which sets of languages they are interested in.
+     TRANSLATION_LANGUAGE_RESOURCE_SCOPE_SPEECH: Languages available to transcribe speech into text.
+     TRANSLATION_LANGUAGE_RESOURCE_SCOPE_TEXT: languages available to translate transcribed text.
+     TRANSLATION_LANGUAGE_RESOURCE_SCOPE_TTS: languages and voices available to synthesize translated text back into speech.
+   Scopes can be combined via bit-or.
+*/
 typedef unsigned int LanguageResourceScope;
 #define TRANSLATION_LANGUAGE_RESOURCE_SCOPE_SPEECH 0x01
 #define TRANSLATION_LANGUAGE_RESOURCE_SCOPE_TEXT 0x02
 #define TRANSLATION_LANGUAGE_RESOURCE_SCOPE_TTS 0x04
 
-/*
-* Defines the format of resource value for the scope TRANSLATION_LANGUAGE_RESOURCE_SCOPE_SPEECH.
-*    name: Display name of the language.
-*    language: Language tag of the associated written language.
-*/
+/// <summary>
+///  Resource value defined for the TRANSLATION_LANGUAGE_RESOURCE_SCOPE_SPEECH scope.
+/// </summary>
 typedef struct _SpeechScopeResourceValue
 {
+    /// <summary> name represents display name of the language.</summary>
     ::std::wstring name;
+    /// <summary> language is the language tag in BCP-47 format of the associated written language.</summary>
     ::std::wstring language;
 } SpeechScopeResourceValue;
 
-/*
-* Defines the format of resource value for the scope TRANSLATION_LANGUAGE_RESOURCE_SCOPE_TEXT.
-*     name: Display name of the language.
-**    dir: Directionality which is "rtl" for right-to-left languages, or "ltr" for left-to-right languages.
-*/
+/// <summary>
+/// Resource value defined for the TRANSLATION_LANGUAGE_RESOURCE_SCOPE_TEXT scope.
+/// </summary>
 typedef struct _TextScopeResourceValue
 {
+    /// <summary> name is the display name of the written language.</summary>
     ::std::wstring name;
+    /// <summary> dir represents the irectionality which is "rtl" for right-to-left languages, or "ltr" for left-to-right languages.</summary>
     ::std::wstring dir;
 } TextScopeResourceValue;
 
-/*
-* Defines the format of resource value for the scope TRANSLATION_LANGUAGE_RESOURCE_SCOPE_TTS
-*   displayName: Display name for the voice.
-*   gender : Gender of the voice(male or female).
-*   locale : Language tag of the voice with primary language subtag and region subtag.
-*   language : Language tag of the associated written language.
-*   languageName : Display name of the language.
-*   regionName : Display name of the region for this language.
-*/
+/// <summary>
+/// Resource value defined for the TRANSLATION_LANGUAGE_RESOURCE_SCOPE_TTS scope.
+/// </summary>
+
 typedef struct _SynthesisScopeResourceValue
 {
+    /// <summary>displayName is the display name of the voice.</summary>
     ::std::wstring displayName;
+    /// <summary>gender describes gender of the voice(male or female).</summary>
     ::std::wstring gender;
+    /// <summary>locale is the language tag of the voice with primary language subtag and region subtag. </summary>
     ::std::wstring locale;
+    /// <summary>languageName is the display name of the language.</summary>
     ::std::wstring languageName;
+    /// <summary>regionName is the display name of the region for this language.</summary>
     ::std::wstring regionName;
+    /// <summary>language represents the language tag of the associated written language.</summary>
     ::std::wstring language;
 } SynthesisScopeResourceValue;
 
-/*
-* Defines language resources that are supported by the translation service.
-* See https://docs.microsofttranslator.com/speech-translate.html for details.
-*/
+/// <summary>
+/// Language resources that are supported by the translation service.
+/// See https://docs.microsofttranslator.com/speech-translate.html for details.
+/// </summary>
 typedef struct _TranslationLanguageResource
 {
-    // Represents language resources associated with the speech-to-text property. It is a dictionary of (key, value) pairs.
-    // Each key identifies a language supported for speech-to- text. The key is the identifier that client passes to the API.
-    // The value associated with the key is of type SpeechScopeResourceValue.
+    /// <summary>
+    /// speechResources contains languages supported by speech-to-text. It is a dictionary of (key, value) pairs.
+    /// Each key identifies a language supported by speech-to-text. The value associated with the key is of type <see cref="SpeechScopeResourceValue"/>.
+    /// </summary>
     ::std::unordered_map<::std::wstring, SpeechScopeResourceValue> speechResources;
 
-    // Represents language resources associated with the text property. It is also a dictionary where each key identifies a language
-    // supported for text translation. The value associated with the key is of type TextScopeResourceValue.
+    /// <summary>
+    /// textResoruces contains languages supported by text translation. It is also a dictionary where each key identifies a language
+    /// supported by text translation. The value associated with the key is of type <see cref="TextScopeResourceValue"/>.
+    /// </summary>
     ::std::unordered_map<::std::wstring, TextScopeResourceValue> textResources;
 
-    // Represents language resources associated with the text-to-speech property. It is a dictionary where each key identifies a
-    // supported voice. The value associated with the key is of type SynthesisScopeResourceValue.
+    /// <summary>
+    /// voiceResources contains languages supported by text-to-speech. It is a dictionary where key is the lagnuage tag that supports voice output. 
+    /// The value associated with each key is of type <see cref="SynthesisScopeResourceValue"/>.
+    /// </summary>
     ::std::unordered_map<::std::wstring, SynthesisScopeResourceValue> voiceResources;
 
 } TranslationLanguageResource;
 
-/*
-* Gets available language resources supported by the translation service.
-* @param scopes: specifies which language scopes to query. Combing each scope (bitwise OR) is supported. See https://docs.microsofttranslator.com/speech-translate.html for details.
-* @param acceptLanguage: specifies the language (BCP 47 language tag), in which names of languages and regions are returned.
-* @return Supported translation language resources.
-*/
+/// <summary>
+/// Gets available language resources supported by the translation service.
+/// </summary>
+/// <param name=scopes>Specifies which language scopes to query. Combining scopes via bitwise OR is supported. See https://docs.microsofttranslator.com/speech-translate.html for details. </param>
+/// <param name=acceptLanguage>Specifies the language tag in BCP 47 format, in which names of languages and regions are returned.</param>
+/// <returnns> Supported translation language resources.</returns>
 inline TranslationLanguageResource GetLanguageResource(LanguageResourceScope scopes, ::std::wstring acceptLanguage)
 {
     TranslationLanguageResource discoveredResources{ {},{},{} };
@@ -110,47 +117,77 @@ inline TranslationLanguageResource GetLanguageResource(LanguageResourceScope sco
     return discoveredResources;
 }
 
-/*
-* The translation recognizer.
-* TODO: We might want to have 2 TranslationRecognizer: one is TranslationRecoginizerText for text-only translation result, and the 
-* other is TranslationRecognizer for both text and audio results. See work item  <1127978>.
-*/
-class TranslationRecognizer final : virtual public AsyncRecognizer<TranslationResult, TranslationTextResultEventArgs>
+/// <summary>
+/// Performs translation on the speech input.
+/// </summary>
+class TranslationRecognizer final : virtual public AsyncRecognizer<TranslationTextResult, TranslationTextResultEventArgs>
 {
 public:
 
     // The AsyncRecognizer only deals with events for translation text result. The audio output event
     // is managed by OnTranslationSynthesisResult.
-    using BaseType = AsyncRecognizer<TranslationResult, TranslationTextResultEventArgs>;
+    using BaseType = AsyncRecognizer<TranslationTextResult, TranslationTextResultEventArgs>;
 
+    /// <summary>
+    /// It is intended for internal use only. It creates an instance of <see cref="TranslationRecognizer">. 
+    /// </summary>
+    /// <remarks>
+    /// It is recommended to use RecognizerFactory to create an instance of <see cref="TranslationRecognizer">. This method is mainly
+    /// used in case where a recognizer handle has been created by methods via C-API like RecognizerFactory_CreateTranslationRecognizer().
+    /// </remarks>
+    /// <param name="hreco">The handle of the recognizer that is returned by RecognizerFactory_CreateTranslationRecognizer().</param>
     TranslationRecognizer(SPXRECOHANDLE hreco) :
         BaseType(hreco),
         // Todo: OnTranslationError(m_onTranslationError),
         Parameters(hreco),
-        OnTranslationSynthesisResult(GetTranslationAudioEventConnectionsChangedCallback(), GetTranslationAudioEventConnectionsChangedCallback())
+        TranslationSynthesisResultEvent(GetTranslationAudioEventConnectionsChangedCallback(), GetTranslationAudioEventConnectionsChangedCallback())
     {
         SPX_DBG_TRACE_FUNCTION();
     }
 
+    /// <summary>
+    /// Deconstructs the instance.
+    /// </summary>
     ~TranslationRecognizer()
     {
         SPX_DBG_TRACE_FUNCTION();
     }
 
-    std::future<std::shared_ptr<TranslationResult>> RecognizeAsync() override
+    /// <summary>
+    /// Starts translation recognition as an asynchronous operation, and stops after the first utterance is recognized. The asynchronous operation returns <see creaf="TranslationTextResult"/> as result.
+    /// </summary>
+    /// <returns>An asynchronous operation representing the recognition. It returns a value of <see cref="TranslationTextResult"/> as result.</returns>
+    std::future<std::shared_ptr<TranslationTextResult>> RecognizeAsync() override
     {
         return BaseType::RecognizeAsyncInternal();
     }
 
+    /// <summary>
+    /// Starts translation on a continous audio stream, until StopContinuousRecognitionAsync() is called.
+    /// User must subscribe to events to receive recognition results.
+    /// </summary>
+    /// <returns>An asynchronous operation that starts the translation.</returns>
     std::future<void> StartContinuousRecognitionAsync() override
     { 
         return BaseType::StartContinuousRecognitionAsyncInternal();
     }
-    
+
+    /// <summary>
+    /// Stops continuous translation.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation that stops the translation.</returns>
     std::future<void> StopContinuousRecognitionAsync() override { return BaseType::StopContinuousRecognitionAsyncInternal(); }
 
+    /// <summary>
+    /// The collection of parameters and their values defined for this <see cref="TranslationRecognizer"/>.
+    /// </summary>
     RecognizerParameterValueCollection Parameters;
 
+    /// <summary>
+    /// Note: NOT implemented. Starts keyword recognition on a continous audio stream, until StopKeywordRecognitionAsync() is called.
+    /// </summary>
+    /// <param name="keyword">Specifies the keyword phrase to be recognized.</param>
+    /// <returns>An asynchronous operation that starts the keyword recognition.</returns>
     std::future<void> StartKeywordRecognitionAsync(const std::wstring& keyword) override
     {
         UNUSED(keyword);
@@ -161,6 +198,10 @@ public:
         return future;
     };
 
+    /// <summary>
+    /// Note: NOT implemented. Stops continuous keyword recognition.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation that stops the keyword recognition.</returns>
     std::future<void> StopKeywordRecognitionAsync() override
     {
         auto future = std::async(std::launch::async, [=]() -> void {
@@ -171,15 +212,13 @@ public:
     };
 
 
-    /*
-    * Defines translation specific events.
-    * TODO: Currently, AsyncRecognizer defines events for speech recognitions. Some of events in AsyncRecognizer
-    * is indeed not related to translation or other services like TTS. The AsyncRecognizer should be refactored 
-    * to only include common events.
-    */
-    EventSignal<const TranslationSynthesisResultEventArgs&> OnTranslationSynthesisResult;
+    /// <summary>
+    /// The event signals that a translation synthesis result is received.
+    /// </summary>
+    EventSignal<const TranslationSynthesisResultEventArgs&> TranslationSynthesisResultEvent;
     // Todo: how to expose the error event of translation. Need to align with what speech does.
     // EventSignal<const TranslationEventArgs<TranslationTextResult>&>& OnTranslationError;
+
 
 private:
 
@@ -194,9 +233,9 @@ private:
     std::function<void(const EventSignal<const TranslationSynthesisResultEventArgs&>&)> GetTranslationAudioEventConnectionsChangedCallback()
     {
         return [=](const EventSignal<const TranslationSynthesisResultEventArgs&>& audioEvent) {
-            if (&audioEvent == &OnTranslationSynthesisResult)
+            if (&audioEvent == &TranslationSynthesisResultEvent)
             {
-                TranslationRecognizer_TranslationSynthesis_SetEventCallback(m_hreco, OnTranslationSynthesisResult.IsConnected() ? FireEvent_TranslationSynthesisResult : nullptr, this);
+                TranslationRecognizer_TranslationSynthesis_SetEventCallback(m_hreco, TranslationSynthesisResultEvent.IsConnected() ? FireEvent_TranslationSynthesisResult : nullptr, this);
             }
         };
     }
@@ -207,7 +246,7 @@ private:
         std::unique_ptr<TranslationSynthesisResultEventArgs> recoEvent{ new TranslationSynthesisResultEventArgs(hevent) };
 
         auto pThis = static_cast<TranslationRecognizer*>(pvContext);
-        pThis->OnTranslationSynthesisResult.Signal(*recoEvent.get());
+        pThis->TranslationSynthesisResultEvent.Signal(*recoEvent.get());
     }
 };
 

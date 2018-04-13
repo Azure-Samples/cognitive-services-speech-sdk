@@ -17,18 +17,27 @@
 namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
 
-
+/// <summary>
+/// BaseAsyncRecognizer class.
+/// </summary>
 class BaseAsyncRecognizer : public AsyncRecognizer<RecognitionResult, RecognitionEventArgs>
 {
 public:
 
     using BaseType = AsyncRecognizer<RecognitionResult, RecognitionEventArgs>;
     
+    /// <summary>
+    /// Internal constructor. Creates a new instance using the provided handle.
+    /// </summary>
     BaseAsyncRecognizer(SPXRECOHANDLE hreco) :
         BaseType(hreco)
     {
     }
 
+    /// <summary>
+    /// Extracts a shared pointer to BaseAsyncRecognizer from the provided recognizer shared pointer.
+    /// </summary>
+    /// <returns>A shared pointer to BaseAsyncRecognizer.</returns>
     template <class T>
     static std::shared_ptr<BaseAsyncRecognizer> FromRecognizer(const std::shared_ptr<T> &recognizer) 
     {
@@ -39,11 +48,7 @@ public:
 
 protected:
 
-    BaseAsyncRecognizer() = default;
-    BaseAsyncRecognizer(BaseAsyncRecognizer&&) = delete;
-    BaseAsyncRecognizer(const BaseAsyncRecognizer&) = delete;
-    BaseAsyncRecognizer& operator=(BaseAsyncRecognizer&&) = delete;
-    BaseAsyncRecognizer& operator=(const BaseAsyncRecognizer&) = delete;
+    DISABLE_DEFAULT_CTORS(BaseAsyncRecognizer);
 };
 
 

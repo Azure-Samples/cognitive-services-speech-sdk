@@ -14,11 +14,18 @@ namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
 namespace Intent {
 
-
+/// <summary>
+/// Represents LUIS model used for intent recognition.
+/// </summary>
 class LuisModel
 {
 public:
 
+    /// <summary>
+    /// Creates a LUIS model using the specified endpoint url.
+    /// </summary>
+    /// <param name="uri">The endpoint url of a LUIS model.</param>
+    /// <returns>A shared pointer to LUIS model.</returns>
     static std::shared_ptr<LuisModel> From(const wchar_t* uri)
     {
         SPXLUISHANDLE hluis = SPXHANDLE_INVALID;
@@ -26,6 +33,12 @@ public:
         return std::make_shared<LuisModel>(hluis);
     }
 
+    /// <summary>
+    /// Creates a LUIS model using the specified subscription key and application id.
+    /// </summary>
+    /// <param name="subscriptionKey">Subscription key.</param>
+    /// <param name="appId">Application id.</param>
+    /// <returns>A shared pointer to LUIS model.</returns>
     static std::shared_ptr<LuisModel> From(const wchar_t* subscriptionKey, const wchar_t* appId)
     {
         SPXLUISHANDLE hluis = SPXHANDLE_INVALID;
@@ -33,6 +46,13 @@ public:
         return std::make_shared<LuisModel>(hluis);
     }
 
+    /// <summary>
+    /// Creates a LUIS model using the specified hostname, subscription key and application id.
+    /// </summary>
+    /// <param name="hostName">Hostname.</param>
+    /// <param name="subscriptionKey">Subscription key.</param>
+    /// <param name="appId">Application id.</param>
+    /// <returns>A shared pointer to LUIS model.</returns>
     static std::shared_ptr<LuisModel> From(const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId)
     {
         SPXLUISHANDLE hluis = SPXHANDLE_INVALID;
@@ -40,18 +60,24 @@ public:
         return std::make_shared<LuisModel>(hluis);
     }
 
+    /// <summary>
+    /// Internal constructor. Creates a new instance using the provided handle.
+    /// </summary>
     LuisModel(SPXLUISHANDLE hluis = SPXHANDLE_INVALID) : m_hluis(hluis) { }
+    
+    /// <summary>
+    /// Virtual destructor.
+    /// </summary>
     virtual ~LuisModel() { LuisModel_Handle_Close(m_hluis); }
 
+    /// <summary>
+    /// Internal. Explicit conversion operator.
+    /// </summary>
     explicit operator SPXLUISHANDLE() { return m_hluis; }
-    
 
 private:
-
-    LuisModel(LuisModel&&) = delete;
-    LuisModel(const LuisModel&) = delete;
-    LuisModel& operator=(LuisModel&&) = delete;
-    LuisModel& operator=(const LuisModel&) = delete;
+    DISABLE_COPY_AND_MOVE(LuisModel);
+    // DISABLE_DEFAULT_CTORS(LuisModel);
 
     SPXLUISHANDLE m_hluis;
 };

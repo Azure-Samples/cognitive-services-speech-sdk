@@ -15,38 +15,87 @@
 namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
 
-
+/// <summary>
+/// Specifies the possible reasons a recognition result might be generated.
+/// </summary>
 enum class Reason { Recognized, IntermediateResult, NoMatch, Canceled, OtherRecognizer };
+
+/// <summary>
+/// Specifies properties that can be retrieved from a RecognitionResult.
+/// </summary>
 enum class ResultProperty { LuisJson = 1 };
 
-
+/// <summary>
+/// Represents the value of a RecognitionResult property returned by the subscript operator.
+/// </summary>
 class ResultPropertyValue : public Value
 {
 public:
 
+    /// <summary>
+    /// Internal constructor. Creates a new instance using the provided handle and a property name.
+    /// </summary>
     ResultPropertyValue(SPXRESULTHANDLE hresult, const wchar_t* name) : m_hresult(hresult), m_name(name) { }
+
+    /// <summary>
+    /// Internal constructor. Creates a new instance using the provided handle and a ResultProperty value.
+    /// </summary>
     ResultPropertyValue(SPXRESULTHANDLE hresult, enum ResultProperty property) : m_hresult(hresult), m_name(PropertyNameFromEnum(property)) { }
 
+    /// <summary>
+    /// Returns true if the encapsulated value has a string type.
+    /// </summary>
     bool IsString() override { return ContainsString(m_hresult, m_name.c_str()); }
+
+    /// <summary>
+    /// Returns the content of this ResultPropertyValue as a string.
+    /// </summary>
+    /// <param name="defaultValue">Default value to return if this ResultPropertyValue instance corresponds
+    /// to a non-existing property. </param>
     std::wstring GetString(const wchar_t* defaultValue) override { return GetString(m_hresult, m_name.c_str(), defaultValue); }
+
+    /// <summary>
+    /// Stores the specified string inside the encapsulated value.
+    /// </summary>
     void SetString(const wchar_t* value) override { UNUSED(value); SPX_THROW_HR(SPXERR_NOT_IMPL); }
 
+    /// <summary>
+    /// Returns true if the encapsulated value has a number type.
+    /// </summary>
     bool IsNumber() override { return ContainsNumber(m_hresult, m_name.c_str()); }
+
+    /// <summary>
+    /// Returns the content of this ResultPropertyValue as a number.
+    /// </summary>
+    /// <param name="defaultValue">Default value to return if this ResultPropertyValue instance corresponds
+    /// to a non-existing property. </param>
     int32_t GetNumber(int32_t defaultValue) override { return GetNumber(m_hresult, m_name.c_str(), defaultValue); }
+
+    /// <summary>
+    /// Stores the specified number inside the encapsulated value.
+    /// </summary>
     void SetNumber(int32_t value) override { UNUSED(value); SPX_THROW_HR(SPXERR_NOT_IMPL); }
 
+    /// <summary>
+    /// Returns true if the encapsulated value has a boolean type.
+    /// </summary>
     bool IsBool() override { return ContainsBool(m_hresult, m_name.c_str()); }
-    bool GetBool(bool defaultValue) override { return GetBool(m_hresult, m_name.c_str(), defaultValue); }
-    void SetBool(bool value) override { UNUSED(value); SPX_THROW_HR(SPXERR_NOT_IMPL); }
 
+    /// <summary>
+    /// Returns the content of this ResultPropertyValue as a boolean.
+    /// </summary>
+    /// <param name="defaultValue">Default value to return if this ResultPropertyValue instance corresponds
+    /// to a non-existing property. </param>
+    bool GetBool(bool defaultValue) override { return GetBool(m_hresult, m_name.c_str(), defaultValue); }
+
+    /// <summary>
+    /// Stores the specified boolean inside the encapsulated value.
+    /// </summary>
+    void SetBool(bool value) override { UNUSED(value); SPX_THROW_HR(SPXERR_NOT_IMPL); }
 
 private:
 
-    ResultPropertyValue() = delete;
-    ResultPropertyValue(ResultPropertyValue&&) = delete;
-    ResultPropertyValue(const ResultPropertyValue&) = delete;
-    ResultPropertyValue& operator=(ResultPropertyValue&&) = delete;
-    ResultPropertyValue& operator=(const ResultPropertyValue&) = delete;
+    DISABLE_DEFAULT_CTORS(ResultPropertyValue);
 
     std::wstring PropertyNameFromEnum(ResultProperty property)
     {
@@ -101,23 +150,44 @@ private:
     std::wstring m_name;
 };
 
-
+/// <summary>
+/// Represents a collection of named RecognitionResult properties.
+/// </summary>
 class ResultPropertyValueCollection : public HandleValueCollection<SPXRESULTHANDLE, ResultPropertyValue>
 {
 public:
 
+    /// <summary>
+    /// Internal constructor. Creates a new instance using the provided handle.
+    /// </summary>
     ResultPropertyValueCollection(SPXRESULTHANDLE hresult) :
         HandleValueCollection(hresult)
     {
     }
 
+    /// <summary>
+    /// Destructor.
+    /// </summary>
     ~ResultPropertyValueCollection() { }
 
+    /// <summary>
+    /// Subscript operator.
+    /// </summary>
+    /// <param name="name">String name of the requested value.</param>
+    /// <returns>Value object mapped to the specified name.</returns>
     Value operator[](const wchar_t* name) override { return Value(new ResultPropertyValue(m_handle, name)); }
+
+    /// <summary>
+    /// Subscript operator.
+    /// </summary>
+    /// <param name="index">One of the ResultProperty values.</param>
+    /// <returns>Value object mapped to the specified ResultProperty enum.</returns>
     Value operator[](enum ResultProperty index) { return Value(new ResultPropertyValue(m_handle, index)); }
 };
 
-
+/// <summary>
+/// Contains detailed information about result of a recognition operation.
+/// </summary>
 class RecognitionResult
 {
 private:
@@ -127,16 +197,35 @@ private:
 
 public:
 
+    /// <summary>
+    /// Virtual destructor.
+    /// </summary>
     virtual ~RecognitionResult()
     {
         ::Recognizer_ResultHandle_Close(m_hresult);
         m_hresult = SPXHANDLE_INVALID;
     };
 
+    /// <summary>
+    /// Unique result id.
+    /// </summary>
     const std::wstring& ResultId;
+
+    /// <summary>
+    /// Recognition status.
+    /// </summary>
     const enum Reason& Reason;
+
+    /// <summary>
+    /// Normalized text generated by a speech recognition engine from recognized input. 
+    /// If recognition was canceled as a result of a transport or a protocol failure, 
+    /// it contains the detail failure information.
+    /// </summary>
     const std::wstring& Text;
 
+    /// <summary>
+    /// Collection of additional RecognitionResult properties.
+    /// </summary>
     ResultPropertyValueCollection& Properties;
 
 

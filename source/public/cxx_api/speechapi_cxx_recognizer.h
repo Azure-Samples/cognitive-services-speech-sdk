@@ -6,18 +6,49 @@
 //
 
 #pragma once
-#include <future>
-#include <memory>
 #include <speechapi_cxx_common.h>
 
 
 namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
 
-
+/// <summary>
+/// Recognizer base class.
+/// </summary>
 class Recognizer
 {
 public:
+
+    /// <summary>
+    /// Returns true if the recognizer is enabled.
+    /// </summary>
+    virtual bool IsEnabled()
+    {
+        bool enabled = false;
+        SPX_INIT_HR(hr);
+        SPX_THROW_ON_FAIL(hr = Recognizer_IsEnabled(m_hreco, &enabled));
+        return enabled;
+    };
+
+    /// <summary>
+    /// Enables the recognizer.
+    /// </summary>
+    virtual void Enable()
+    {
+        SPX_INIT_HR(hr);
+        SPX_THROW_ON_FAIL(hr = Recognizer_Enable(m_hreco));
+    };
+
+    /// <summary>
+    /// Disables the recognizer.
+    /// </summary>
+    virtual void Disable()
+    {
+        SPX_INIT_HR(hr);
+        SPX_THROW_ON_FAIL(hr = Recognizer_Disable(m_hreco));
+    };
+
+protected:
 
     Recognizer(SPXRECOHANDLE hreco) :
         m_hreco(hreco)
@@ -36,39 +67,11 @@ public:
         }
     }
 
-    virtual bool IsEnabled()
-    {
-        bool enabled = false;
-        SPX_INIT_HR(hr);
-        SPX_THROW_ON_FAIL(hr = Recognizer_IsEnabled(m_hreco, &enabled));
-        return enabled;
-    };
-
-    virtual void Enable()
-    {
-        SPX_INIT_HR(hr);
-        SPX_THROW_ON_FAIL(hr = Recognizer_Enable(m_hreco));
-    };
-
-    virtual void Disable()
-    {
-        SPX_INIT_HR(hr);
-        SPX_THROW_ON_FAIL(hr = Recognizer_Disable(m_hreco));
-    };
-
-
-protected:
-
     SPXRECOHANDLE m_hreco;
-
 
 private:
 
-    Recognizer() = delete;
-    Recognizer(Recognizer&&) = delete;
-    Recognizer(const Recognizer&) = delete;
-    Recognizer& operator=(Recognizer&&) = delete;
-    Recognizer& operator=(const Recognizer&) = delete;
+    DISABLE_DEFAULT_CTORS(Recognizer);
 };
 
 

@@ -6,10 +6,8 @@
 //
 
 #pragma once
-#include <exception>
 #include <future>
 #include <memory>
-#include <string>
 #include <speechapi_cxx_common.h>
 #include <speechapi_cxx_eventsignal.h>
 #include <speechapi_cxx_recognizer.h>
@@ -19,11 +17,91 @@
 namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
 
-
+/// <summary>
+/// AsyncRecognizer abstract base class.
+/// </summary>
 template <class RecoResult, class RecoEventArgs>
 class AsyncRecognizer : public Recognizer
 {
 public:
+
+    /// <summary>
+    /// Performs recognition in a non-blocking (asynchronous) mode.
+    /// </summary>
+    /// <returns>Future containing result value (a shared pointer to RecoResult)
+    /// of the asynchronous recognition.
+    /// </returns>
+    virtual std::future<std::shared_ptr<RecoResult>> RecognizeAsync() = 0;
+
+    /// <summary>
+    /// Asynchronously initiates continuous recognition operation.
+    /// </summary>
+    /// <returns>An empty future.</returns>
+    virtual std::future<void> StartContinuousRecognitionAsync() = 0;
+
+    /// <summary>
+    /// Asynchronously terminates ongoing continuous recognition operation.
+    /// </summary>
+    /// <returns>An empty future.</returns>
+    virtual std::future<void> StopContinuousRecognitionAsync() = 0;
+
+    /// <summary>
+    /// Asynchronously initiates keyword recognition operation.
+    /// </summary>
+    /// <returns>An empty future.</returns>
+    virtual std::future<void> StartKeywordRecognitionAsync(const std::wstring& keyword) = 0;
+
+    /// <summary>
+    /// Asynchronously terminates ongoing keyword recognition operation.
+    /// </summary>
+    /// <returns>An empty future.</returns>
+    virtual std::future<void> StopKeywordRecognitionAsync() = 0;
+
+    /// <summary>
+    /// Signal for events indicating the start of a recognition session (operation).
+    /// </summary>
+    EventSignal<const SessionEventArgs&> SessionStarted;
+
+    /// <summary>
+    /// Signal for events indicating the end of a recognition session (operation).
+    /// </summary>
+    EventSignal<const SessionEventArgs&> SessionStopped;
+
+    /// <summary>
+    /// Signal for events indicating the start of speech.
+    /// </summary>
+    EventSignal<const SessionEventArgs&> SpeechStartDetected;
+
+    /// <summary>
+    /// Signal for events indicating the end of speech.
+    /// </summary>
+    EventSignal<const SessionEventArgs&> SpeechEndDetected;
+
+    /// <summary>
+    /// Signal for events containing intermediate recognition results.
+    /// </summary>
+    EventSignal<const RecoEventArgs&> IntermediateResult;
+
+    /// <summary>
+    /// Signal for events containing final recognition results.
+    /// (indicating a successful recognition attempt).
+    /// </summary>
+    EventSignal<const RecoEventArgs&> FinalResult;
+
+    /// <summary>
+    /// Signal for events containing no-match recognition results 
+    /// (indicating an successful recognition attempt).
+    /// </summary>
+    EventSignal<const RecoEventArgs&> NoMatch;
+
+    /// <summary>
+    /// Signal for events containing canceled recognition results
+    /// (indicating a recognition attempt that was canceled as a result or a direct cancellation request 
+    /// or, alternatively, a transport or protocol failure).
+    /// </summary>
+    EventSignal<const RecoEventArgs&> Canceled;
+
+protected:
 
     AsyncRecognizer(SPXRECOHANDLE hreco) throw() :
         Recognizer(hreco),
@@ -46,7 +124,7 @@ public:
     virtual ~AsyncRecognizer()
     {
         SPX_DBG_TRACE_SCOPE("~AsyncRecognizer start", "~AsyncRecognizerEnd");
-        for (auto handle : { &m_hasyncRecognize, &m_hasyncStartContinuous, &m_hasyncStopContinuous }) 
+        for (auto handle : { &m_hasyncRecognize, &m_hasyncStartContinuous, &m_hasyncStopContinuous })
         {
             if (*handle != SPXHANDLE_INVALID && ::Recognizer_AsyncHandle_IsValid(*handle))
             {
@@ -55,26 +133,6 @@ public:
             }
         }
     };
-
-    virtual std::future<std::shared_ptr<RecoResult>> RecognizeAsync() = 0;
-    virtual std::future<void> StartContinuousRecognitionAsync() = 0;
-    virtual std::future<void> StopContinuousRecognitionAsync() = 0;
-
-    virtual std::future<void> StartKeywordRecognitionAsync(const std::wstring& keyword) = 0;
-    virtual std::future<void> StopKeywordRecognitionAsync() = 0;
-
-    EventSignal<const SessionEventArgs&> SessionStarted;
-    EventSignal<const SessionEventArgs&> SessionStopped;
-
-    EventSignal<const SessionEventArgs&> SpeechStartDetected;
-    EventSignal<const SessionEventArgs&> SpeechEndDetected;
-
-    EventSignal<const RecoEventArgs&> IntermediateResult;
-    EventSignal<const RecoEventArgs&> FinalResult;
-    EventSignal<const RecoEventArgs&> NoMatch;
-    EventSignal<const RecoEventArgs&> Canceled;
-
-protected:
 
     std::future<std::shared_ptr<RecoResult>> RecognizeAsyncInternal()
     {
@@ -288,11 +346,7 @@ protected:
 
 private:
 
-    AsyncRecognizer() = delete;
-    AsyncRecognizer(AsyncRecognizer&&) = delete;
-    AsyncRecognizer(const AsyncRecognizer&) = delete;
-    AsyncRecognizer& operator=(AsyncRecognizer&&) = delete;
-    AsyncRecognizer& operator=(const AsyncRecognizer&) = delete;
+    DISABLE_DEFAULT_CTORS(AsyncRecognizer);
 
     inline std::function<void(const EventSignal<const SessionEventArgs&>&)> GetSessionEventConnectionsChangedCallback()
     {

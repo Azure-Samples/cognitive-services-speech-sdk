@@ -16,9 +16,9 @@ namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
 namespace Translation {
 
-/*
-* Defines the arguments passed with translation text result events.
-*/
+/// <summary>
+/// Defines payload that is sent with the event <see cref="IntermediateResult"> or <see cref="FinalResult">.
+/// </summary>
 class TranslationTextResultEventArgs final : public SessionEventArgs
 {
 private:
@@ -26,7 +26,10 @@ private:
     std::shared_ptr<TranslationTextResult> m_result;
 
 public:
-
+    /// <summary>
+    /// It is intended for internal use only. It creates an instance of <see cref="TranslationTextResultEventArgs">.
+    /// </summary>
+    /// <param name="resultHandle">The handle returned by recognizer in C-API.</param>
     TranslationTextResultEventArgs(SPXEVENTHANDLE hevent) :
         SessionEventArgs(hevent),
         m_hevent(hevent),
@@ -36,8 +39,14 @@ public:
         SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hevent);
     };
 
+    /// <summary>
+    /// Destructs the instance.
+    /// </summary>
     virtual ~TranslationTextResultEventArgs() { };
 
+    /// <summary>
+    /// Contains the translation text result.
+    /// </summary>
     const TranslationTextResult& Result;
 
 private:
@@ -56,9 +65,9 @@ private:
 };
 
 
-/*
-* Defines the arguments passed with translation synthesis result events.
-*/
+/// <summary>
+/// Defines payload that is sent with the event <see cref="TranslationSynthesisResultEvent">.
+/// </summary>
 class TranslationSynthesisResultEventArgs final : public SessionEventArgs
 {
 private:
@@ -67,18 +76,28 @@ private:
     std::shared_ptr<TranslationSynthesisResult> m_result;
 
 public:
-
+    /// <summary>
+    /// It is intended for internal use only. It creates an instance of <see cref="TranslationSynthesisResultEventArgs">.
+    /// </summary>
+    /// <param name="resultHandle">The handle returned by recognizer in C-API.</param>
     TranslationSynthesisResultEventArgs(SPXEVENTHANDLE hevent) :
         SessionEventArgs(hevent),
         m_hevent(hevent),
-        m_result(std::make_shared<TranslationSynthesisResult>(ResultHandleFromEventHandle(hevent))),
+        //m_result(std::make_shared<TranslationSynthesisResult>(ResultHandleFromEventHandle(hevent))),
+        m_result(std::make_shared<TranslationSynthesisResult>(nullptr)),
         Result(*m_result.get())
     {
         SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hevent);
     };
 
+    /// <summary>
+    /// Destructs the instance.
+    /// </summary>
     virtual ~TranslationSynthesisResultEventArgs() { };
 
+    /// <summary>
+    /// Contains the translation synthesis result.
+    /// </summary>
     const TranslationSynthesisResult& Result;
 
 private:

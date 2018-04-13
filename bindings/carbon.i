@@ -31,8 +31,8 @@
 %shared_ptr(Carbon::Recognition::Intent::IntentRecognizer)
 %shared_ptr(Carbon::Recognition::Intent::IntentTrigger)
 %shared_ptr(Carbon::Recognition::Intent::LuisModel)
-%shared_ptr(Carbon::Recognition::Translation::TranslationResult)
-%shared_ptr(Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::Translation::TranslationResult, Carbon::Recognition::Translation::TranslationTextResultEventArgs>)
+%shared_ptr(Carbon::Recognition::Translation::TranslationTextResult)
+%shared_ptr(Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::Translation::TranslationTextResult, Carbon::Recognition::Translation::TranslationTextResultEventArgs>)
 %shared_ptr(Carbon::Recognition::Translation::TranslationRecognizer)
 %shared_ptr(Carbon::Recognition::IRecognizerFactory)
 %shared_ptr(Carbon::Recognition::IDefaultRecognizerFactory)
@@ -64,12 +64,12 @@
 %inline %{
     typedef std::shared_ptr<Carbon::Recognition::Speech::SpeechRecognitionResult> SpeechRecognitionResultPtr;
     typedef std::shared_ptr<Carbon::Recognition::Intent::IntentRecognitionResult> IntentRecognitionResultPtr;
-    typedef std::shared_ptr<Carbon::Recognition::Translation::TranslationResult> TranslationResultPtr;
+    typedef std::shared_ptr<Carbon::Recognition::Translation::TranslationTextResult> TranslationTextResultPtr;
 %}
 
 %template(SpeechRecognitionResultPtrFuture) FutureWrapper<SpeechRecognitionResultPtr>;
 %template(IntentRecognitionResultPtrFuture) FutureWrapper<IntentRecognitionResultPtr>;
-%template(TranslationResultPtrFuture) FutureWrapper<TranslationResultPtr>;
+%template(TranslationTextResultPtrFuture) FutureWrapper<TranslationTextResultPtr>;
 %template(VoidFuture) FutureWrapper<void>;
 
 // %extend need to come first, before the %ignore for the same method (RecognizeAsync, etc.)
@@ -187,7 +187,7 @@
 
 %extend Carbon::Recognition::Translation::TranslationRecognizer {
 
-    TranslationResultPtr Recognize() {
+    TranslationTextResultPtr Recognize() {
         return ($self)->RecognizeAsync().get();
     }
 
@@ -201,9 +201,9 @@
         ($self)->StopContinuousRecognitionAsync().get();
     }
 
-    FutureWrapper<TranslationResultPtr> RecognizeAsync() {
+    FutureWrapper<TranslationTextResultPtr> RecognizeAsync() {
         auto future = ($self)->RecognizeAsync();
-        return FutureWrapper<TranslationResultPtr>(std::move(future));
+        return FutureWrapper<TranslationTextResultPtr>(std::move(future));
     }
 
     FutureWrapper<void> StartContinuousRecognitionAsync()
@@ -370,7 +370,7 @@
 
 %template(TranslationTextEventSignal) Carbon::EventSignal<const Carbon::Recognition::Translation::TranslationTextResultEventArgs&>;
 %template(TranslationSynthesisEventSignal) Carbon::EventSignal<const Carbon::Recognition::Translation::TranslationSynthesisResultEventArgs&>;
-%template(TranslationRecognizerBase) Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::Translation::TranslationResult, Carbon::Recognition::Translation::TranslationTextResultEventArgs>;
+%template(TranslationRecognizerBase) Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::Translation::TranslationTextResult, Carbon::Recognition::Translation::TranslationTextResultEventArgs>;
 
 %include <speechapi_cxx_translation_recognizer.h>
 

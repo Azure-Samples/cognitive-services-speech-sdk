@@ -13,10 +13,16 @@
 namespace CARBON_NAMESPACE_ROOT {
 
 
+/// <summary>
+/// Class that defines the type of objects thrown as exception if a feature is not implemented yet.
+/// </summary>
 class NotYetImplementedException : public std::runtime_error
 {
 public:
 
+    /// <summary>
+    /// Constructor.
+    /// </summary>
     NotYetImplementedException() : std::runtime_error("CARBON: not yet implemented"){};
 };
 

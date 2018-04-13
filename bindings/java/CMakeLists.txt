@@ -128,8 +128,6 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationLanguageResource.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationRecognizer.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationRecognizerBase.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationResult.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationResultPtrFuture.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationStatus.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationSynthesisEventListener.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationSynthesisEventSignal.java
@@ -138,10 +136,13 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationTexEventListener.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationTextEventSignal.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationTextResult.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationTextResultPtrFuture.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationTextResultEventArgs.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SynthesisScopeResourceValue.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TextScopeResourceValue.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechScopeResourceValue.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring___std__wstring_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__vectorT_std__wstring_t.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_Carbon__Recognition__Translation___SpeechScopeResourceValue_t.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_Carbon__Recognition__Translation___SynthesisScopeResourceValue_t.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_Carbon__Recognition__Translation___TextScopeResourceValue_t.java
