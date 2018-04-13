@@ -18,6 +18,9 @@ namespace Recognition {
 namespace Speech {
 
 
+/// <summary>
+/// Class for speech recognition event arguments.
+/// </summary>
 class SpeechRecognitionEventArgs final : public RecognitionEventArgs
 {
 private:
@@ -25,9 +28,12 @@ private:
     SPXEVENTHANDLE m_hevent;
     std::shared_ptr<SpeechRecognitionResult> m_result;
 
-
 public:
 
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    /// <param name="hevent">Event handle</param>
     SpeechRecognitionEventArgs(SPXEVENTHANDLE hevent) :
         RecognitionEventArgs(hevent),
         m_hevent(hevent),
@@ -37,12 +43,16 @@ public:
         SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hevent);
     };
 
+    /// <inheritdoc/>
     virtual ~SpeechRecognitionEventArgs()
     {
         SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hevent);
         SPX_THROW_ON_FAIL(Recognizer_EventHandle_Close(m_hevent));
     };
 
+    /// <summary>
+    /// Speech recognition event result.
+    /// </summary>
     const SpeechRecognitionResult& Result;
 
 private:

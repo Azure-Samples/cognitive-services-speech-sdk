@@ -14,10 +14,17 @@ namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
 
 
+/// <summary>
+/// Base class for recognition event arguments.
+/// </summary>
 class RecognitionEventArgs : public SessionEventArgs
 {
 public:
 
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    /// <param name="hevent">Event handle</param>
     RecognitionEventArgs(SPXEVENTHANDLE hevent = SPXHANDLE_INVALID) :
         SessionEventArgs(hevent)
     {

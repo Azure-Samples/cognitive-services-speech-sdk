@@ -20,10 +20,16 @@ class EventArgs
 {
 public:
 
+    /// <summary>
+    /// Destructor.
+    /// </summary>
     virtual ~EventArgs() {}
 
 protected:
 
+    /// <summary>
+    /// Constructor.
+    /// </summary>
     EventArgs() {};
 
 

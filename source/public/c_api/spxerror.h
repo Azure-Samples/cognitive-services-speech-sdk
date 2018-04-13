@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 /// \file spxerror.h
-/// \brief Public API definitions for global SPX errors and related #define macros.
+/// \brief Public API definitions for global SPX errors and related preprocessor macros.
 
 #pragma once
 

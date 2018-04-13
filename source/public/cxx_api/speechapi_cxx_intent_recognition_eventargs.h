@@ -17,6 +17,9 @@ namespace Recognition {
 namespace Intent {
 
 
+/// <summary>
+/// Class for intent recognition event arguments.
+/// </summary>
 class IntentRecognitionEventArgs final : public RecognitionEventArgs
 {
 private:
@@ -27,6 +30,10 @@ private:
 
 public:
 
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    /// <param name="hevent">Event handle</param>
     IntentRecognitionEventArgs(SPXEVENTHANDLE hevent) :
         RecognitionEventArgs(hevent),
         m_hevent(hevent),
@@ -36,12 +43,16 @@ public:
         SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hevent);
     };
 
+    /// <inheritdoc/>
     virtual ~IntentRecognitionEventArgs()
     {
         SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hevent);
         SPX_THROW_ON_FAIL(Recognizer_EventHandle_Close(m_hevent));
     };
 
+    /// <summary>
+    /// Intent recognition event result.
+    /// </summary>
     const IntentRecognitionResult& Result;
 
 private:

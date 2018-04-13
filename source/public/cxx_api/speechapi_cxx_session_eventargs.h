@@ -15,23 +15,37 @@
 namespace CARBON_NAMESPACE_ROOT {
    
     
+/// <summary>
+/// Base class for session event arguments.
+/// </summary>
 class SessionEventArgs : public EventArgs
 {
 public:
 
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    /// <param name="hevent">Event handle</param>
     SessionEventArgs(SPXEVENTHANDLE hevent) :
         SessionId(m_sessionId),
         m_sessionId(GetSessionId(hevent))
     {
     };
 
+    /// <inheritdoc/>
     virtual ~SessionEventArgs() {}
 
+    /// <summary>
+    /// Session identifier (a GUID in string format).
+    /// </summary>
     const std::wstring& SessionId;
 
 
 protected:
 
+    /// <summary>
+    /// Extract session identifier from given event handle <paramref name="hevent"/>
+    /// </summary>
     static const std::wstring GetSessionId(SPXEVENTHANDLE hevent)
     {
         static const auto cchMaxUUID = 36;
