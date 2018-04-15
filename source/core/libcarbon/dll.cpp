@@ -4,6 +4,16 @@
 
 using namespace CARBON_IMPL_NAMESPACE();
 
+
+void InitLogging()
+{
+    #ifndef _DEBUG
+        xlogging_set_log_function(nullptr);
+    #else
+        xlogging_set_log_function(SpxConsoleLogger_Log);
+    #endif // DEBUG
+}
+
 #ifdef _MSC_VER
 
 BOOL APIENTRY DllMain(HMODULE hModule,
@@ -15,6 +25,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
     switch (ul_reason_for_call)
     {
         case DLL_PROCESS_ATTACH:
+            InitLogging();
             Debug::HookSignalHandlers();
             break;
 
@@ -37,6 +48,7 @@ __attribute__((constructor)) static void LibLoad(int argc, char** argv, char** e
     UNUSED(argc);
     UNUSED(argv);
     UNUSED(envp);
+    InitLogging();
     Debug::HookSignalHandlers();
 }
 

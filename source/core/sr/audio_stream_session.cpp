@@ -339,24 +339,24 @@ void CSpxAudioStreamSession::SetFormat(WAVEFORMATEX* pformat)
 
 void CSpxAudioStreamSession::ProcessAudio(AudioData_Type data, uint32_t size)
 {
-    // Lock the Audio Processor mutex, since we'll be sending audio data to the Audio Processor
-    ReadLock_Type readLock(m_combinedAdapterAndStateMutex);
+    // NOTE: Don't hold the m_combinedAdapterAndStateMutex here...
+    ReadLock_Type readStateLock(m_stateMutex);
+    auto sessionState = m_sessionState;
+    readStateLock.unlock();
 
-    if (IsState(SessionState::ProcessingAudio))
+    if (sessionState == SessionState::ProcessingAudio)
     {
-        readLock.unlock(); // don't hold the lock here... ProcessAudio may result in a call back to this object... 
-
         // Go ahead and process the audio data
         SPX_DBG_TRACE_VERBOSE_IF(0, "%s - size=%d", __FUNCTION__, size);
         m_audioProcessor->ProcessAudio(data, size);
     }
-    else if (IsState(SessionState::Paused))
+    else if (sessionState == SessionState::Paused)
     {
         // Don't process this data, if we're paused... 
         SPX_DBG_TRACE_VERBOSE_IF(1, "%s - size=%d -- Ignoring (state == Paused)", __FUNCTION__, size);
         // TODO: RobCh: Actually do something with this paused audio data ... 
     }
-    else if (IsState(SessionState::StoppingPump))
+    else if (sessionState == SessionState::StoppingPump)
     {
         // Don't process this data if we're actively stopping...
         SPX_DBG_TRACE_VERBOSE_IF(1, "%s - size=%d -- Ignoring (state == StoppingPump)", __FUNCTION__, size);
@@ -371,7 +371,7 @@ void CSpxAudioStreamSession::ProcessAudio(AudioData_Type data, uint32_t size)
         //
         // NOTE: All other states are invalid inside ISpxAudioProcessor::ProcessAudio.
 
-        SPX_TRACE_WARNING("%s: Unexpected SessionState: recoKind %d; sessionState %d", __FUNCTION__, m_recoKind, m_sessionState);
+        SPX_TRACE_WARNING("%s: Unexpected SessionState: recoKind %d; sessionState %d", __FUNCTION__, m_recoKind, sessionState);
     }
 }
 

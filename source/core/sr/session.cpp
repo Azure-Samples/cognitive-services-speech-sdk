@@ -256,8 +256,9 @@ void CSpxSession::FireResultEvent(const std::wstring& sessionId, std::shared_ptr
     decltype(m_recognizers) weakRecognizers(m_recognizers.begin(), m_recognizers.end());
     lock.unlock();
 
-    // BUG: why a result from a particualr recognizer needs to be fired on all recognizers in the session??
-    // Why the adapter info is ignored in CSpxAudioStreamSession::FinalRecoResult??
+    // Fire the result on all recognizers (currently we only support one recognizer, but we will support multiple in the future)
+    // NOTE: When that happens, we'll need to change this to fire all non-FinalResult events (NoMatch, etc) to everyone, but
+    // only fire the FinalResult to the one recognizer that should receive it
     for (auto weakRecognizer : weakRecognizers)
     {
         auto recognizer = weakRecognizer.lock();

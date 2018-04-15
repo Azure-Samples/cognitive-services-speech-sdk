@@ -83,7 +83,7 @@ uint16_t CSpxWavFileReader::GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat)
     SPX_IFTRUE_THROW_HR(!IsOpen(), SPXERR_UNINITIALIZED);
 
     EnsureGetFormat();
-    SPX_DBG_TRACE_ERROR_IF(m_waveformat.get() != nullptr, "IsOpen() returned true; EnsureGetFormat() didn't throw; we should have a WAVEFORMAT now...");
+    SPX_DBG_TRACE_ERROR_IF(m_waveformat.get() == nullptr, "IsOpen() returned true; EnsureGetFormat() didn't throw; we should have a WAVEFORMAT now...");
     SPX_IFTRUE_THROW_HR(m_waveformat.get() == nullptr, SPXERR_UNSUPPORTED_FORMAT);
 
     uint16_t cbFormatRequired = sizeof(WAVEFORMATEX) + m_waveformat->cbSize;
