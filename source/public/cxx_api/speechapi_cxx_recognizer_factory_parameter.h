@@ -7,8 +7,8 @@
 
 #pragma once
 #include <memory>
-#include <speechapi_c_common.h>
 #include <speechapi_cxx_common.h>
+#include <speechapi_c_common.h>
 #include <speechapi_cxx_value.h>
 
 

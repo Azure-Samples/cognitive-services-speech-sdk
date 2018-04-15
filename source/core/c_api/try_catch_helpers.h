@@ -8,7 +8,9 @@
 
 #pragma once
 #include <speechapi_c_common.h>
+#include <exception.h>
 
+using CARBON_IMPL_NAMESPACE()::StoreException;
 
 #define SPXAPI_INIT_HR_TRY(hr)                              \
 {                                                           \
@@ -25,7 +27,11 @@
         SPX_REPORT_ON_FAIL(hrx);                            \
         x = hrx;                                            \
     }                                                       \
-    catch (std::exception ex)                               \
+    catch (ExceptionWithCallStack ex)                       \
+    {                                                       \
+       x = StoreException(std::move(ex));                   \
+    }                                                       \
+    catch (...)                                             \
     {                                                       \
         SPX_REPORT_ON_FAIL(SPXERR_UNHANDLED_EXCEPTION);     \
         x = SPXERR_UNHANDLED_EXCEPTION;                     \

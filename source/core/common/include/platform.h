@@ -10,11 +10,6 @@
 #include <string>
 #include <typeinfo>
 
-#ifndef _MSC_VER
-#include <cstring>
-#include <cstdlib>
-#endif
-
 namespace PAL {
 
 std::string demangle(const char* name);

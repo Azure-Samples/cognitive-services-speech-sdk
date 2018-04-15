@@ -9,6 +9,10 @@
 #include <cstring>
 #include <numeric>
 #include <functional>
+
+#include "exception.h"
+#define __SPX_THROW_HR_IMPL(hr) CARBON_IMPL_NAMESPACE()::ThrowWithCallstack(hr)
+
 #include "ispxinterfaces.h"
 
 using namespace CARBON_IMPL_NAMESPACE();

@@ -12,7 +12,12 @@
 #include "windows/targetver.h"
 #endif
 
-#include "speechapi_c.h"
-#include "spxcore_common.h"
 #include "trace_message.h"
+#define __SPX_DO_TRACE_IMPL SpxTraceMessage
+
+#include "spx_namespace.h"
+#include "exception.h"
+#define __SPX_THROW_HR_IMPL(hr) CARBON_IMPL_NAMESPACE()::ThrowWithCallstack(hr)
+
+#include "speechapi_c.h"
 #include "handle_table.h"

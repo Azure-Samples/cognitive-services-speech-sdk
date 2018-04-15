@@ -7,10 +7,12 @@
 
 #pragma once
 
+#include <stdint.h>
+
 /// <summary>
 /// Type definition for SPX result codes.
 /// </summary>
-typedef unsigned int SPXHR;
+typedef uintptr_t SPXHR;
 
 /// <summary>
 /// Default result code indicating no error.

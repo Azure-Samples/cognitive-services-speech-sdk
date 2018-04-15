@@ -17,6 +17,7 @@ set(HEADERS_PRIVATE
 
 set(SOURCES
     "${SRC_DIR}/event_helpers.cpp"
+    "${SRC_DIR}/speechapi_c_error.cpp"
     "${SRC_DIR}/speechapi_c_intent_recognizer.cpp"
     "${SRC_DIR}/speechapi_c_intent_result.cpp"
     "${SRC_DIR}/speechapi_c_intent_trigger.cpp"

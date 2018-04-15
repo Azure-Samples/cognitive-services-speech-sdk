@@ -6,6 +6,7 @@
 //
 
 #include "stdafx.h"
+#include <cstring>
 #include "mock_audio_reader_impl.h"
 
 

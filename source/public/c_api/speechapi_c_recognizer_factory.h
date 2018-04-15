@@ -6,7 +6,6 @@
 //
 
 #pragma once
-#include <spxdebug.h>
 #include <speechapi_c_common.h>
 #include <speechapi_c_audioinputstream.h>
 

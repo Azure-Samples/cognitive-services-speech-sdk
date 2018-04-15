@@ -10,8 +10,8 @@
 #include <future>
 #include <memory>
 #include <string>
-#include <speechapi_c.h>
 #include <speechapi_cxx_common.h>
+#include <speechapi_c.h>
 #include <speechapi_cxx_recognition_async_recognizer.h>
 #include <speechapi_cxx_speech_recognition_eventargs.h>
 #include <speechapi_cxx_speech_recognition_result.h>

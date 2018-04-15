@@ -11,6 +11,8 @@
 #include <map>
 #include <memory>
 #include <unordered_map>
+#include <spxdebug.h>
+#include <mutex>
 
 #ifdef _MSC_VER
 #include <shared_mutex>

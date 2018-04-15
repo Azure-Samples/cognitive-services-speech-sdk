@@ -7,7 +7,6 @@
 
 #pragma once
 #include <spxerror.h>
-#include <assert.h>
 
 #ifndef _MSC_VER
 // macros in this header generate a bunch of
@@ -18,6 +17,9 @@
 #pragma GCC system_header
 #endif
 
+#ifndef __cplusplus
+#define static_assert _Static_assert
+#endif 
 
 #define UNUSED(x) (void)(x)
 
@@ -278,11 +280,7 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 
 #ifdef __cplusplus
 #ifndef __SPX_THROW_HR_IMPL
-inline void __spx_throw_hr_impl(SPXHR hr)
-{
-    throw hr;
-}
-#define __SPX_THROW_HR_IMPL(hr) __spx_throw_hr_impl(hr)
+#define __SPX_THROW_HR_IMPL(hr) static_assert(false, "__SPX_THROW_HR_IMPL should be defined elsewhere!")
 #endif
 #ifndef __SPX_THROW_HR
 #define __SPX_THROW_HR(hr) __SPX_THROW_HR_IMPL(hr)

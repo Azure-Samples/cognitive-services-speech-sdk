@@ -2,12 +2,11 @@
 
 #include <memory>
 #include <spxerror.h>
+#include <stdlib.h>
 #include <spxdebug.h>
 #include <speechapi_c_common.h>
 
-
-#define CARBON_IMPL_NAMESPACE() CarbonIMPL
-
+#include <spx_namespace.h>
 
 #include "ispxinterfaces.h"
 

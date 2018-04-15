@@ -18,8 +18,8 @@
 #define SPX_CONFIG_INCLUDE_ALL 1
 #endif
 
-#include <spxdebug.h>
-
 #include <speechapi_cxx.h>
+
+#include <spxdebug.h>
 
 #include "carbonx_pal.h"

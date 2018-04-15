@@ -34,7 +34,7 @@ HRESULT SampleHandler::OnReadSample(
 {
     Process(pSample);
     QueueRead();
-    SPX_RETURN_HR(SPX_NOERROR);
+    return 0;
 }
 
 SPXHR SampleHandler::Start(const Sink_Type& sink)

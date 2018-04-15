@@ -7,6 +7,7 @@
 #include  <wchar.h>
 #include "file_utils.h"
 #include "platform.h"
+#include <cstring> 
 
 namespace PAL {
 

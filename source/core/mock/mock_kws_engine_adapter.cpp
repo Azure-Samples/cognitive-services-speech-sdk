@@ -6,6 +6,7 @@
 //
 
 #include "stdafx.h"
+#include <cstring>
 #include "mock_kws_engine_adapter.h"
 #include "service_helpers.h"
 

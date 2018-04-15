@@ -8,13 +8,13 @@
 #pragma once
 #include <memory>
 #include <vector>
-#include <speechapi_c_common.h>
 #include <speechapi_cxx_common.h>
 #include <speechapi_cxx_speech_recognizer.h>
 #include <speechapi_cxx_intent_recognizer.h>
 #include <speechapi_cxx_translation_recognizer.h>
 #include <speechapi_cxx_recognizer_factory_parameter.h>
 #include <speechapi_cxx_audioinputstream.h>
+#include <speechapi_c_common.h>
 #include <speechapi_c_recognizer_factory.h>
 
 

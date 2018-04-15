@@ -11,7 +11,7 @@
 #include "azure_c_shared_utility_buffer_wrapper.h"
 #include "azure_c_shared_utility_httpapi_wrapper.h"
 #include "azure_c_shared_utility_httpapiex_wrapper.h"
-
+#include <cstdlib>
 
 namespace CARBON_IMPL_NAMESPACE() {
 

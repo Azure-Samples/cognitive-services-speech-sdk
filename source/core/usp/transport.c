@@ -398,7 +398,12 @@ static void OnTransportError(TransportRequest* request, TransportError err)
 
 static void OnWSError(void* context, WS_ERROR errorCode)
 {
+#ifdef NO_LOGGING
+    UNUSED(errorCode);
+#endif
+
     LogError("WS operation failed with error code=%d", errorCode);
+
     TransportRequest* request = (TransportRequest*)context;
     if (request)
     {

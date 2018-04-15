@@ -31,6 +31,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D_DEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 
+# In Release mode, set Azure-c-shared xlogging level to the minimum.
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DNO_LOGGING")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNO_LOGGING")
+
 if(MSVC)
   # Force to always compile with W4
   # first remove all possible warning settings to avoid warning D9025
@@ -44,8 +48,12 @@ elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 endif()
 
+# Android build complains about 
+# <built-in>: In function 'float abs(float)':
+# <built-in>: warning: conflicts with previous declaration here [-Wattributes]
+# Added -Wno-attributes to suppress it.
 if(ANDROID)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wno-attributes")
 endif()
 
 set(CARBON_ROOT ${PROJECT_SOURCE_DIR})
@@ -116,9 +124,9 @@ endif()
 
 # Dummy targets to make API header appear
 # in the generated VS solution.
-add_custom_target(c_header
+add_custom_target(c_headers
     SOURCES ${SPEECH_C_API_HEADERS})
-set_target_properties(c_header PROPERTIES FOLDER api)
+set_target_properties(c_headers PROPERTIES FOLDER api)
 
 add_custom_target(cxx_headers
     SOURCES ${SPEECH_CXX_API_HEADERS})

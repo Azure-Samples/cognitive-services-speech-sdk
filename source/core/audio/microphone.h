@@ -4,7 +4,9 @@
 //
 
 #pragma once
-#include "spxcore_common.h"
+
+#include <memory>
+#include "spx_namespace.h"
 
 namespace CARBON_IMPL_NAMESPACE() {
 

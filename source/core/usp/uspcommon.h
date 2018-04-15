@@ -10,6 +10,8 @@
 #include <stddef.h>
 #include "usperror.h"
 
+#define UNUSED(x) (void)(x)
+
 #ifdef __cplusplus
 extern "C" {
 #endif

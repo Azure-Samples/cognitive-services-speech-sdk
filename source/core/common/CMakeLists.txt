@@ -10,7 +10,9 @@ include_directories(${CARBON_INCLUDE})
 
 set(HEADERS
     "${SRC_DIR}/stdafx.h"
+    "${INC_DIR}/exception.h"
     "${INC_DIR}/create_object_helpers.h"
+    "${INC_DIR}/debug_utils.h"
     "${INC_DIR}/delegate_audio_pump_impl.h"
     "${INC_DIR}/delegate_audio_file_impl.h"
     "${INC_DIR}/factory_helpers.h"
@@ -41,6 +43,8 @@ set(HEADERS_PRIVATE
     )
 
 set(SOURCES
+    "${SRC_DIR}/exception.cpp"
+    "${SRC_DIR}/debug_utils.cpp"
     "${SRC_DIR}/handle_table.cpp"
     "${SRC_DIR}/http_helpers.cpp"
     "${SRC_DIR}/trace_message.cpp"
@@ -62,3 +66,7 @@ set_target_properties (common PROPERTIES
     FOLDER carbon_libs
 )
 target_link_libraries(common ${AZURE_SHARED_LIB})
+
+if(WIN32)
+    target_link_libraries(common Dbghelp.lib)
+endif()

@@ -24,10 +24,6 @@
 %feature("director") AudioInputStream;
 %apply (char *STRING, int LENGTH) { (char* dataBuffer, unsigned int size) };
 
-%include <speechapi_cxx_common.h>
-%include <speechapi_cxx_todo.h>
-%include "speechapi_cxx_audioinputstream.h"
-
 
 %include "carbon.i"
 

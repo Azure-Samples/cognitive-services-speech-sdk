@@ -15,4 +15,7 @@
 #include "trace_message.h"
 #define __SPX_DO_TRACE_IMPL SpxTraceMessage
 
+#include "exception.h"
+#define __SPX_THROW_HR_IMPL(hr) CARBON_IMPL_NAMESPACE()::ThrowWithCallstack(hr)
+
 #include "spxcore_common.h"

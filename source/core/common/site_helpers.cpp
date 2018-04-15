@@ -5,6 +5,7 @@
 // site_helpers.cpp: Implementation definitions for Spx*Site helper methods
 //
 
+#include "stdafx.h"
 #include "site_helpers.h"
 #include "resource_manager.h"
 

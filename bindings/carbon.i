@@ -18,6 +18,8 @@
 %include <std_wstring.i>
 %include <stdint.i>
 
+%ignore __spx_rethrow(SPXHR);
+
 %shared_ptr(Carbon::Recognition::IDefaultRecognizerFactory)
 %shared_ptr(Carbon::Recognition::Recognizer)
 %shared_ptr(Carbon::Recognition::AsyncRecognizer<Carbon::Recognition::RecognitionResult, Carbon::Recognition::RecognitionEventArgs>)

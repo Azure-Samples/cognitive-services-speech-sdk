@@ -10,8 +10,8 @@
 #include <future>
 #include <memory>
 #include <string>
-#include <speechapi_c.h>
 #include <speechapi_cxx_common.h>
+#include <speechapi_c.h>
 #include <speechapi_cxx_session_parameter_collection.h>
 
 

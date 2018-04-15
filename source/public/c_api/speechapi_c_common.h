@@ -8,7 +8,7 @@
 #pragma once
 
 #include <stdbool.h>
-#include <spxdebug.h>
+#include <spxerror.h>
 
 #ifdef __cplusplus
 #define SPX_EXTERN_C        extern "C"
@@ -81,6 +81,8 @@ typedef SPXHANDLE SPXEVENTHANDLE;
 typedef SPXHANDLE SPXSESSIONHANDLE;
 typedef SPXHANDLE SPXTRIGGERHANDLE;
 typedef SPXHANDLE SPXLUISHANDLE;
+typedef SPXHANDLE SPXERRORHANDLE;
+
 
 #define SPXHANDLE_INVALID   ((SPXHANDLE)-1)
 #define SPXHANDLE_DEFAULT   ((SPXHANDLE)+1)

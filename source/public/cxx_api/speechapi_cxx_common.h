@@ -7,6 +7,10 @@
 
 #pragma once
 
+#include <string>
+#include <stdexcept>
+#include <speechapi_c_error.h>
+
 #ifdef SWIG
 #define final
 #endif
@@ -23,3 +27,18 @@
     T() = delete;                    \
     DISABLE_COPY_AND_MOVE(T)
 
+inline void __spx_rethrow(SPXHR hr)
+{
+    auto handle = reinterpret_cast<SPXERRORHANDLE>(hr);
+    auto error = Error_GetCode(handle);
+    if (error == SPX_NOERROR) 
+    {
+        throw hr;
+    }
+    auto callstack = Error_GetCallStack(handle);
+    throw std::runtime_error("Exception with error code: " + std::to_string(error) + (callstack == nullptr ? "" : std::string(callstack)));
+}
+
+#ifndef __SPX_THROW_HR_IMPL
+#define __SPX_THROW_HR_IMPL(hr) __spx_rethrow(hr)
+#endif

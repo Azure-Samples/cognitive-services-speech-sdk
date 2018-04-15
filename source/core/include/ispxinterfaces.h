@@ -11,7 +11,6 @@
 #include "spxcore_common.h"
 #include "platform.h"
 #include "asyncop.h"
-#include "speechapi_cxx_common.h"
 #include "speechapi_cxx_eventsignal.h"
 #include "shared_ptr_helpers.h"
 #include "speechapi_cxx_audioinputstream.h"
@@ -788,6 +787,5 @@ class ISpxLuEngineAdapter :
 class ISpxLuEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxLuEngineAdapterSite>
 {
 };
-
 
 } // CARBON_IMPL_NAMESPACE

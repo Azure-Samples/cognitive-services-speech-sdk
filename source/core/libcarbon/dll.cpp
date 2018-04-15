@@ -1,18 +1,8 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "stdafx.h"
-#include "azure_c_shared_utility_xlogging_wrapper.h"
+#include "debug_utils.h"
 
 using namespace CARBON_IMPL_NAMESPACE();
-
-
-void InitLogging()
-{
-#ifndef _DEBUG
-
-    xlogging_set_log_function(nullptr);
-
-#endif // DEBUG
-}
 
 #ifdef _MSC_VER
 
@@ -25,7 +15,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
     switch (ul_reason_for_call)
     {
         case DLL_PROCESS_ATTACH:
-            InitLogging();
+            Debug::HookSignalHandlers();
             break;
 
         case DLL_THREAD_ATTACH:
@@ -47,7 +37,7 @@ __attribute__((constructor)) static void LibLoad(int argc, char** argv, char** e
     UNUSED(argc);
     UNUSED(argv);
     UNUSED(envp);
-    InitLogging();
+    Debug::HookSignalHandlers();
 }
 
 __attribute__((destructor)) static void LibUnload()

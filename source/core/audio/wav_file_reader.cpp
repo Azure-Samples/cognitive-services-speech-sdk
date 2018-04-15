@@ -9,6 +9,7 @@
 #include <iostream>
 #include <istream>
 #include <fstream>
+#include <cstring>
 #include "platform.h"
 #include "file_utils.h"
 #include "wav_file_reader.h"
