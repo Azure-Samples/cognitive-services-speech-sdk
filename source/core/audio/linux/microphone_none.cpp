@@ -2,6 +2,7 @@
 
 #include "microphone.h"
 #include "ispxinterfaces.h"
+#include "interface_helpers.h"
 
 
 // FIXME TODO fmegen ANDROID! ROOBO ssl lib version issue
@@ -25,6 +26,10 @@ public:
 
     MicrophonePump() {}
     ~MicrophonePump() {}
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioPump)
+    SPX_INTERFACE_MAP_END()
 
     virtual uint16_t GetFormat(WAVEFORMATEX* format, uint16_t size) override
     {

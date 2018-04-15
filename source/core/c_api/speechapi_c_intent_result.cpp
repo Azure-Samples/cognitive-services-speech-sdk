@@ -21,7 +21,7 @@ SPXAPI IntentResult_GetIntentId(SPXRESULTHANDLE hresult, wchar_t* pszIntentId, u
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
 
-        auto intentResult = std::dynamic_pointer_cast<ISpxIntentRecognitionResult>(result);
+        auto intentResult = SpxQueryInterface<ISpxIntentRecognitionResult>(result);
 
         auto strActual = intentResult->GetIntentId();
         auto pszActual = strActual.c_str();

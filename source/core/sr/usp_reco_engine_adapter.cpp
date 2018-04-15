@@ -31,6 +31,11 @@ CSpxUspRecoEngineAdapter::CSpxUspRecoEngineAdapter() :
 {
 }
 
+CSpxUspRecoEngineAdapter::~CSpxUspRecoEngineAdapter()
+{
+    SPX_DBG_TRACE_FUNCTION();
+}
+
 void CSpxUspRecoEngineAdapter::Init()
 {
     SPX_IFTRUE_THROW_HR(GetSite() == nullptr, SPXERR_UNINITIALIZED);
@@ -602,7 +607,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHyp
     auto result = factory->CreateIntermediateResult(nullptr, message.recognitionText.c_str(), ResultType::TranslationText);
 
     // Update our result to be an "TranslationText" result.
-    auto initTranslationResult = std::dynamic_pointer_cast<ISpxTranslationTextResultInit>(result);
+    auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
     initTranslationResult->InitTranslationTextResult(message.sourceLanguage, message.targetLanguage, message.translationText);
     
     // Todo: offset (and duration) should be part of result. Now, offset is autaully ignored by the following function.
@@ -622,7 +627,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
     auto result = factory->CreateFinalResult(nullptr, message.recognitionText.c_str(), ResultType::TranslationText);
 
     // Update our result to be an "TranslationText" result.
-    auto initTranslationResult = std::dynamic_pointer_cast<ISpxTranslationTextResultInit>(result);
+    auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
     initTranslationResult->InitTranslationTextResult(message.sourceLanguage, message.targetLanguage, message.translationText);
     
     // Todo: offset (and duration) should be part of result. Now, offset is autaully ignored by the following function.
@@ -642,7 +647,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationSynthesis(const USP::TranslationSynt
     auto result = factory->CreateFinalResult(nullptr, L"", ResultType::TranslationSynthesis);
 
     // Update our result to be an "TranslationSynthesis" result.
-    auto initTranslationResult = std::dynamic_pointer_cast<ISpxTranslationSynthesisResultInit>(result);
+    auto initTranslationResult = SpxQueryInterface<ISpxTranslationSynthesisResultInit>(result);
     initTranslationResult->InitTranslationSynthesisResult(message.audioBuffer, message.audioLength, message.text);
     
     // Todo: offset (and duration) should be part of result. Now, offset is autaully ignored by the following function.
@@ -979,7 +984,7 @@ void CSpxUspRecoEngineAdapter::FireFinalResultNow(const USP::SpeechPhraseMsg& me
         // Do we already have the LUIS json payload from the service (1-hop)
         if (!luisJson.empty())
         {
-            auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(result);
+            auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
             namedProperties->SetStringValue(g_RESULT_LuisJson, PAL::ToWString(luisJson).c_str());
         }
 

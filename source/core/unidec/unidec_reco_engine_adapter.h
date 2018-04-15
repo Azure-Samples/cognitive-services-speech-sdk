@@ -10,6 +10,7 @@
 #include <queue>
 #include "spxcore_common.h"
 #include "ispxinterfaces.h"
+#include "interface_helpers.h"
 #include "UnidecRuntime.h"
 #include "unidec_config.h"
 
@@ -25,6 +26,14 @@ public:
 
     CSpxUnidecRecoEngineAdapter();
     virtual ~CSpxUnidecRecoEngineAdapter();
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxRecoEngineAdapter)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioProcessor)
+    SPX_INTERFACE_MAP_END()
+
 
     // --- ISpxObject
 

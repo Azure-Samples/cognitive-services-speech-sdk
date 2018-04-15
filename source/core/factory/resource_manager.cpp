@@ -10,18 +10,13 @@
 #include "module_factory.h"
 #include "factory_helpers.h"
 
-
 namespace CARBON_IMPL_NAMESPACE() {
 
 
 CSpxResourceManager::CSpxResourceManager()
 {
-    // TODO: This list should not be compiled into carbon as it breaks the extensibility model
-    //       by requiring to recompile carbon for every new extension dll that is to be supported.
-    //
-    // At least we should add some generic name that allows to add ONE extension lib without changing
-    // the core implementation (e.g., take an environment variable).
-    //
+    SPX_DBG_TRACE_FUNCTION();
+
     // **IMPORTANT**: Do NOT change the order in which module factories are added here!!!
     //
     //   They will be searched in order for objects to create (See ::CreateObject).
@@ -44,6 +39,11 @@ CSpxResourceManager::CSpxResourceManager()
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-unidec"));
 #endif
+}
+
+CSpxResourceManager::~CSpxResourceManager()
+{
+    SPX_DBG_TRACE_FUNCTION();
 }
 
 void* CSpxResourceManager::CreateObject(const char* className, const char* interfaceName)

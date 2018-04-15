@@ -18,7 +18,7 @@ SPXAPI_PRIVATE Recognizer_SessionEvent_SetCallback(ISpxRecognizerEvents::Session
             (*pCallback)(hreco, hevent, pvContext);
         };
 
-        auto pISpxRecognizerEvents = std::dynamic_pointer_cast<ISpxRecognizerEvents>(recognizer).get();
+        auto pISpxRecognizerEvents = SpxQueryInterface<ISpxRecognizerEvents>(recognizer).get();
         (pISpxRecognizerEvents->*psessionEvent).Disconnect(pfn);
 
         if (pCallback != nullptr)
@@ -42,7 +42,7 @@ SPXAPI_PRIVATE Recognizer_RecoEvent_SetCallback(ISpxRecognizerEvents::RecoEvent_
             (*pCallback)(hreco, hevent, pvContext);
         };
 
-        auto pISpxRecognizerEvents = std::dynamic_pointer_cast<ISpxRecognizerEvents>(recognizer).get();
+        auto pISpxRecognizerEvents = SpxQueryInterface<ISpxRecognizerEvents>(recognizer).get();
         (pISpxRecognizerEvents->*precoEvent).Disconnect(pfn);
 
         if (pCallback != nullptr)

@@ -27,7 +27,6 @@
 
 namespace CARBON_IMPL_NAMESPACE() {
 
-
 SPX_EXTERN_C void* Mock_CreateModuleObject(const char* className, const char* interfaceName);
 
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "ispxinterfaces.h"
+#include "interface_helpers.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -12,6 +13,11 @@ class CSpxRecognitionEventArgs :
 public:
 
     CSpxRecognitionEventArgs();
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxRecognitionEventArgs)
+        SPX_INTERFACE_MAP_ENTRY(ISpxRecognitionEventArgsInit)
+    SPX_INTERFACE_MAP_END()
 
     // --- ISpxRecognitionEventArgs
     virtual const std::wstring& GetSessionId() override;

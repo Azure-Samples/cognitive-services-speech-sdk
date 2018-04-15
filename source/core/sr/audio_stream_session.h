@@ -7,6 +7,7 @@
 
 #pragma once
 #include "spxcore_common.h"
+#include "interface_helpers.h"
 #include "named_properties_impl.h"
 #include "service_helpers.h"
 #include "session.h"
@@ -20,12 +21,13 @@ namespace CARBON_IMPL_NAMESPACE() {
 
 
 class CSpxAudioStreamSession : public CSpxSession, 
-    public ISpxObjectWithSiteInitImpl<ISpxSite>,
+    public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
     public ISpxServiceProvider,
+    public ISpxGenericSite,
+    public ISpxRecognizerSite,
     public ISpxLuEngineAdapterSite,
     public ISpxKwsEngineAdapterSite,
     public ISpxRecoEngineAdapterSite,
-    public ISpxRecognizerSite,
     public ISpxRecoResultFactory,
     public ISpxEventArgsFactory,
     public ISpxAudioStreamSessionInit, 
@@ -36,6 +38,22 @@ public:
 
     CSpxAudioStreamSession();
     virtual ~CSpxAudioStreamSession();
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
+        SPX_INTERFACE_MAP_ENTRY(ISpxGenericSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxRecognizerSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxLuEngineAdapterSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxKwsEngineAdapterSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxRecoEngineAdapterSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxRecoResultFactory)
+        SPX_INTERFACE_MAP_ENTRY(ISpxEventArgsFactory)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamSessionInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioProcessor)
+        SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
+    SPX_INTERFACE_MAP_END()
 
     // --- ISpxAudioStreamSessionInit
     

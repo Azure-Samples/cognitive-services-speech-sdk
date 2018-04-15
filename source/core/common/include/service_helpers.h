@@ -53,7 +53,7 @@ namespace CARBON_IMPL_NAMESPACE() {
         if (PAL::stricmp(PAL::GetTypeName<x>().c_str(), serviceName) == 0)              \
         {                                                                               \
             SPX_DBG_TRACE_SERVICE_MAP_FOUND_IT();                                       \
-            return std::dynamic_pointer_cast<x>(y);                                     \
+            return SpxQueryInterface<x>(y);                                     \
         }
 
 #define SPX_SERVICE_MAP_ENTRY_FUNC(x)                                                   \
@@ -80,30 +80,33 @@ namespace CARBON_IMPL_NAMESPACE() {
         return nullptr;                                                                 \
     };
 
+
 template <class I>
-std::shared_ptr<I> SpxQueryService(ISpxInterfaceBase* serviceProvider, const char* serviceName)
+std::shared_ptr<I> SpxQueryService(std::shared_ptr<ISpxInterfaceBase> serviceProvider, const char* serviceName)
 {
-    auto provider = dynamic_cast<ISpxServiceProvider*>(serviceProvider);
+    auto provider = SpxQueryInterface<ISpxServiceProvider>(serviceProvider);
     if (provider != nullptr)
     {
         auto service = provider->QueryService(serviceName);
-        auto it = std::dynamic_pointer_cast<I>(service);
+        auto it = SpxQueryInterface<I>(service);
         return it;
     }
 
     return nullptr;
 }
 
-template <class I>
-inline std::shared_ptr<I> SpxQueryService(ISpxInterfaceBase* serviceProvider)
-{
-    return SpxQueryService<I>(serviceProvider, PAL::GetTypeName<I>().c_str());
-}
-
 template <class I, class T>
 inline std::shared_ptr<I> SpxQueryService(std::shared_ptr<T> serviceProvider, const char* serviceName)
 {
-    return SpxQueryService<I>(serviceProvider.get(), serviceName);
+    auto provider = SpxQueryInterface<ISpxServiceProvider>(serviceProvider);
+    if (provider != nullptr)
+    {
+        auto service = provider->QueryService(serviceName);
+        auto it = SpxQueryInterface<I>(service);
+        return it;
+    }
+
+    return nullptr;
 }
 
 template <class I, class T>

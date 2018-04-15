@@ -8,6 +8,7 @@
 #pragma once
 #include "stdafx.h"
 #include "ispxinterfaces.h"
+#include "interface_helpers.h"
 #include "mock_audio_file_impl.h"
 #include "mock_audio_reader_impl.h"
 
@@ -22,6 +23,11 @@ class CSpxMockWavFileReader :
 public:
 
     CSpxMockWavFileReader() = default;
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioReader)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioFile)
+    SPX_INTERFACE_MAP_END()
 
 
 private:

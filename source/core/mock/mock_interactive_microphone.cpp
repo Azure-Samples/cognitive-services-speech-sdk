@@ -32,6 +32,8 @@ void CSpxMockInteractiveMicrophone::StartPump(std::shared_ptr<ISpxAudioProcessor
 
 void CSpxMockInteractiveMicrophone::EnsureAudioPump()
 {
+    SPX_DBG_TRACE_FUNCTION();
+
     if (m_delegateToAudioPump == nullptr)
     {
         InitAudioPump();
@@ -40,6 +42,7 @@ void CSpxMockInteractiveMicrophone::EnsureAudioPump()
 
 void CSpxMockInteractiveMicrophone::InitAudioPump()
 {
+    SPX_DBG_TRACE_FUNCTION();
     SPX_IFTRUE_THROW_HR(GetSite() == nullptr, SPXERR_UNINITIALIZED);
     SPX_IFTRUE_THROW_HR(m_delegateToAudioPump != nullptr, SPXERR_ALREADY_INITIALIZED);
 
@@ -53,6 +56,8 @@ void CSpxMockInteractiveMicrophone::InitAudioPump()
 
 void CSpxMockInteractiveMicrophone::InitMockAudioPump()
 {
+    SPX_DBG_TRACE_FUNCTION();
+
     // Create the mock reader...
     auto reader = SpxCreateObjectWithSite<ISpxAudioReader>("CSpxMockAudioReader", GetSite());
 
@@ -61,16 +66,18 @@ void CSpxMockInteractiveMicrophone::InitMockAudioPump()
     pumpInit->SetAudioReader(reader);
 
     // Set other various properties that control the mock
-    auto realtimeReader = std::dynamic_pointer_cast<ISpxAudioReaderRealTime>(reader);
+    auto realtimeReader = SpxQueryInterface<ISpxAudioReaderRealTime>(reader);
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     realtimeReader->SetRealTimePercentage((uint8_t)properties->GetNumberValue(L"CARBON-INTERNAL-MOCK-RealTimeAudioPercentage", 100));
 
     // And ... We're finished
-    m_delegateToAudioPump = std::dynamic_pointer_cast<ISpxAudioPump>(pumpInit);
+    m_delegateToAudioPump = SpxQueryInterface<ISpxAudioPump>(pumpInit);
 }
 
 void CSpxMockInteractiveMicrophone::InitWavFilePump(const std::wstring& fileName)
 {
+    SPX_DBG_TRACE_FUNCTION();
+
     // Create the wav file pump
     auto audioFilePump = SpxCreateObjectWithSite<ISpxAudioFile>("CSpxWavFilePump", GetSite());
 
@@ -84,7 +91,7 @@ void CSpxMockInteractiveMicrophone::InitWavFilePump(const std::wstring& fileName
     audioFilePump->SetRealTimePercentage((uint8_t)properties->GetNumberValue(L"CARBON-INTERNAL-MOCK-RealTimeAudioPercentage", 100));
 
     // and ... We're finished
-    m_delegateToAudioPump = std::dynamic_pointer_cast<ISpxAudioPump>(audioFilePump);
+    m_delegateToAudioPump = SpxQueryInterface<ISpxAudioPump>(audioFilePump);
 }
 
 

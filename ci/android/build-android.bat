@@ -3,5 +3,5 @@ rem set SOURCE_ROOT=%~dp0
 set SOURCE_ROOT="%CD%"
 mkdir build && ^
 cd build && ^
-cmake -G "NMake Makefiles" -Duse_default_uuid=ON -DCMAKE_SYSTEM_NAME=Android -DCMAKE_SYSTEM_VERSION=26 %SOURCE_ROOT% -DCMAKE_ANDROID_STL_TYPE=c++_shared -DOPENSSL_ROOT_DIR=%SOURCE_ROOT%\external\openssl\_install  -DCURL_LIBRARY=%SOURCE_ROOT%\external\curl\_install\lib\libcurl.so -DCURL_INCLUDE_DIR=%SOURCE_ROOT%\external\curl\_install\include && ^
+cmake -G "NMake Makefiles" -Duse_default_uuid=ON -DCMAKE_SYSTEM_NAME=Android -DCMAKE_SYSTEM_VERSION=26 %SOURCE_ROOT% -DCMAKE_ANDROID_STL_TYPE=c++_shared -DOPENSSL_ROOT_DIR=%SOURCE_ROOT%\external\openssl\_install  -DCURL_LIBRARY=%SOURCE_ROOT%\external\curl\_install\lib\libcurl.so -DCURL_INCLUDE_DIR=%SOURCE_ROOT%\external\curl\_install\include -DCMAKE_BUILD_TYPE=Debug && ^
 cmake --build .

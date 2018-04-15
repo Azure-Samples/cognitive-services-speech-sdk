@@ -7,6 +7,7 @@
 
 #pragma once
 #include "spxcore_common.h"
+#include "interface_helpers.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -20,6 +21,12 @@ public:
 
     CSpxWavFileReader();
     ~CSpxWavFileReader();
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioFile)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioReader)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioReaderRealTime)
+    SPX_INTERFACE_MAP_END()
 
     // --- ISpxAudioFile
 

@@ -30,6 +30,8 @@ bool ShouldMock(const wchar_t* psz)
 
 SPX_EXTERN_C void* Mock_CreateModuleObject(const char* className, const char* interfaceName)
 {
+    SPX_DBG_TRACE_VERBOSE("%s trying to create %s, %s.", __FUNCTION__, className, interfaceName);
+
     SPX_FACTORY_MAP_BEGIN();
     SPX_FACTORY_MAP_ENTRY(CSpxMockAudioReader, ISpxAudioReader);
     SPX_FACTORY_MAP_ENTRY(CSpxMockInteractiveMicrophone, ISpxAudioPump);

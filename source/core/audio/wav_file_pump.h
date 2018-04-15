@@ -10,13 +10,14 @@
 #include "ispxinterfaces.h"
 #include "delegate_audio_pump_impl.h"
 #include "delegate_audio_file_impl.h"
+#include "interface_helpers.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
 
 
 class CSpxWavFilePump :
-    public ISpxObjectWithSiteInitImpl<ISpxSite>,
+    public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
     public ISpxDelegateAudioPumpImpl, 
     public ISpxDelegateAudioFileImpl
 {
@@ -24,6 +25,14 @@ public:
 
     // Default ctor
     CSpxWavFilePump();
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioPump)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioFile)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioReaderRealTime)
+    SPX_INTERFACE_MAP_END()
 
     // --- ISpxAudioFile overrides ---
     void Open(const wchar_t* pszFileName) override;

@@ -42,7 +42,7 @@ void CSpxMockWavFilePump::InitAudioPump()
     pumpInit->SetAudioReader(reader);
 
     // And ... We're finished
-    m_delegateToAudioPump = std::dynamic_pointer_cast<ISpxAudioPump>(pumpInit);
+    m_delegateToAudioPump = SpxQueryInterface<ISpxAudioPump>(pumpInit);
 }
 
 

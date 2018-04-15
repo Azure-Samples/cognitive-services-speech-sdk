@@ -123,7 +123,7 @@ void CSpxLuisDirectEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionR
     if (!resultText.empty())
     {
         // Check to see if we already have the JSON payload (from the speech service)
-        auto properties = std::dynamic_pointer_cast<ISpxNamedProperties>(result);
+        auto properties = SpxQueryInterface<ISpxNamedProperties>(result);
         auto json = PAL::ToString(properties->GetStringValue(g_RESULT_LuisJson));
         SPX_DBG_TRACE_VERBOSE("%s: text='%s'; already-existing-luisJson='%s'", __FUNCTION__, resultText.c_str(), json.c_str());
 
@@ -158,7 +158,7 @@ void CSpxLuisDirectEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionR
             if (validIntentResult)
             {
                 // Update our result to be an "Intent" result, with the appropriate ID and JSON payload
-                auto initIntentResult = std::dynamic_pointer_cast<ISpxIntentRecognitionResultInit>(result);
+                auto initIntentResult = SpxQueryInterface<ISpxIntentRecognitionResultInit>(result);
                 initIntentResult->InitIntentResult(intentId.c_str(), PAL::ToWString(json).c_str());
             }
         }

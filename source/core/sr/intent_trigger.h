@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "ispxinterfaces.h"
+#include "interface_helpers.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -9,6 +10,10 @@ namespace CARBON_IMPL_NAMESPACE() {
 class CSpxIntentTrigger : public ISpxTrigger
 {
 public:
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxTrigger)
+    SPX_INTERFACE_MAP_END()
 
     // --- ISpxTrigger ---
     void InitPhraseTrigger(const wchar_t* phrase) override;

@@ -35,7 +35,7 @@ protected:
     std::shared_ptr<I> InternalQueryService()
     {
         auto service = InternalQueryService(PAL::GetTypeName<I>().c_str());
-        return std::dynamic_pointer_cast<I>(service);
+        return SpxQueryInterface<I>(service);
     }
 
     std::shared_ptr<ISpxInterfaceBase> InternalQueryService(const char* serviceName)
@@ -55,7 +55,7 @@ protected:
     void InternalAddService(std::shared_ptr<T> service)
     {
         SPX_IFTRUE_THROW_HR(service == nullptr, SPXERR_INVALID_ARG);
-        InternalAddService(PAL::GetTypeName<T>().c_str(), std::dynamic_pointer_cast<ISpxInterfaceBase>(service));
+        InternalAddService(PAL::GetTypeName<T>().c_str(), SpxQueryInterface<ISpxInterfaceBase>(service));
     }
 
     void InternalAddService(const char* serviceName, std::shared_ptr<ISpxInterfaceBase> service)

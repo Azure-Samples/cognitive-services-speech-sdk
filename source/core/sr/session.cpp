@@ -188,19 +188,19 @@ void CSpxSession::FireSessionStartedEvent()
     FireSessionEvent(SesssionEventType::SessionStart);
 }
 
+void CSpxSession::FireSpeechStartDetectedEvent()
+{
+    SPX_DBG_TRACE_FUNCTION();
+
+    FireSessionEvent(SesssionEventType::SpeechStart);
+}
+
 void CSpxSession::FireSessionStoppedEvent()
 {
     SPX_DBG_TRACE_FUNCTION();
     EnsureFireResultEvent();
 
     FireSessionEvent(SesssionEventType::SessionStop);
-}
-
-void CSpxSession::FireSpeechStartDetectedEvent()
-{
-    SPX_DBG_TRACE_FUNCTION();
-
-    FireSessionEvent(SesssionEventType::SpeechStart);
 }
 
 void CSpxSession::FireSpeechEndDetectedEvent()
@@ -222,8 +222,7 @@ void CSpxSession::FireSessionEvent(SesssionEventType sessionType)
     for (auto weakRecognizer : weakRecognizers)
     {
         auto recognizer = weakRecognizer.lock();
-        auto ptr = std::dynamic_pointer_cast<ISpxRecognizerEvents>(recognizer);
-
+        auto ptr = SpxQueryInterface<ISpxRecognizerEvents>(recognizer);
         if (recognizer)
         {
             switch (sessionType)
@@ -262,7 +261,7 @@ void CSpxSession::FireResultEvent(const std::wstring& sessionId, std::shared_ptr
     for (auto weakRecognizer : weakRecognizers)
     {
         auto recognizer = weakRecognizer.lock();
-        auto ptr = std::dynamic_pointer_cast<ISpxRecognizerEvents>(recognizer);
+        auto ptr = SpxQueryInterface<ISpxRecognizerEvents>(recognizer);
         if (recognizer)
         {
             ptr->FireResultEvent(sessionId, result);
@@ -276,7 +275,7 @@ void CSpxSession::EnsureFireResultEvent()
     // That said, the race is benign, in the worst case we just created a throw away no-match result.
     if (m_recoAsyncWaiting)
     {
-        auto factory = SpxQueryService<ISpxRecoResultFactory>(this);
+        auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
         auto noMatchResult = factory->CreateNoMatchResult(ResultType::Speech);
         WaitForRecognition_Complete(noMatchResult);
     }

@@ -8,16 +8,25 @@
 #pragma once
 #include "spxcore_common.h"
 #include "delegate_audio_pump_impl.h"
+#include "interface_helpers.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-class CSpxInteractiveMicrophone : public ISpxDelegateAudioPumpImpl
+class CSpxInteractiveMicrophone :
+    public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
+    public ISpxDelegateAudioPumpImpl
 {
 public:
 
     CSpxInteractiveMicrophone();
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioPump)
+    SPX_INTERFACE_MAP_END()
 };
 
 

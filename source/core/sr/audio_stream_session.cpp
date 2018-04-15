@@ -258,7 +258,7 @@ void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
 
     // Create the wav file pump
     auto audioFilePump = SpxCreateObjectWithSite<ISpxAudioFile>("CSpxWavFilePump", this);
-    m_audioPump = std::dynamic_pointer_cast<ISpxAudioPump>(audioFilePump);
+    m_audioPump = SpxQueryInterface<ISpxAudioPump>(audioFilePump);
 
     // Open the WAV file
     audioFilePump->Open(pszFileName);
@@ -286,7 +286,7 @@ void CSpxAudioStreamSession::InitFromStream(AudioInputStream* audioInputStream)
 
     // Create the stream pump
     auto audioStreamPump = SpxCreateObjectWithSite<ISpxStreamPumpReaderInit>("CSpxStreamPump", this);
-    m_audioPump = std::dynamic_pointer_cast<ISpxAudioPump>(audioStreamPump);
+    m_audioPump = SpxQueryInterface<ISpxAudioPump>(audioStreamPump);
 
     // Attach the stream to the pump
     audioStreamPump->SetAudioStream(audioInputStream);
@@ -602,7 +602,7 @@ std::shared_ptr<ISpxSessionEventArgs> CSpxAudioStreamSession::CreateSessionEvent
 {
     auto sessionEvent = SpxCreateObjectWithSite<ISpxSessionEventArgs>("CSpxSessionEventArgs", this);
 
-    auto argsInit = std::dynamic_pointer_cast<ISpxSessionEventArgsInit>(sessionEvent);
+    auto argsInit = SpxQueryInterface<ISpxSessionEventArgsInit>(sessionEvent);
     argsInit->Init(sessionId);
 
     return sessionEvent;
@@ -613,7 +613,7 @@ std::shared_ptr<ISpxRecognitionEventArgs> CSpxAudioStreamSession::CreateRecognit
     auto site = SpxSiteFromThis(this);
     auto recoEvent = SpxCreateObjectWithSite<ISpxRecognitionEventArgs>("CSpxRecognitionEventArgs", site);
 
-    auto argsInit = std::dynamic_pointer_cast<ISpxRecognitionEventArgsInit>(recoEvent);
+    auto argsInit = SpxQueryInterface<ISpxRecognitionEventArgsInit>(recoEvent);
     argsInit->Init(sessionId, result);
 
     return recoEvent;
@@ -677,7 +677,7 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
     UNUSED(adapter);
     if (m_recoAsyncWaiting)
     {
-        auto factory = SpxQueryService<ISpxRecoResultFactory>(this);
+        auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
         auto error = factory->CreateErrorResult(PAL::ToWString(payload).c_str());
         WaitForRecognition_Complete(error);
     }
@@ -692,7 +692,7 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateIntermediat
 {
     auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
 
-    auto initResult = std::dynamic_pointer_cast<ISpxRecognitionResultInit>(result);
+    auto initResult = SpxQueryInterface<ISpxRecognitionResultInit>(result);
     initResult->InitIntermediateResult(resultId, text, type);
 
     return result;
@@ -702,7 +702,7 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateFinalResult
 {
     auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
 
-    auto initResult = std::dynamic_pointer_cast<ISpxRecognitionResultInit>(result);
+    auto initResult = SpxQueryInterface<ISpxRecognitionResultInit>(result);
     initResult->InitFinalResult(resultId, text, type);
 
     return result;
@@ -713,7 +713,7 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateNoMatchResu
 {
     auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
 
-    auto initResult = std::dynamic_pointer_cast<ISpxRecognitionResultInit>(result);
+    auto initResult = SpxQueryInterface<ISpxRecognitionResultInit>(result);
     initResult->InitNoMatch(type);
 
     return result;
@@ -723,7 +723,7 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateErrorResult
 {
     auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
 
-    std::dynamic_pointer_cast<ISpxRecognitionResultInit>(result)->InitError(text);
+    SpxQueryInterface<ISpxRecognitionResultInit>(result)->InitError(text);
 
     return result;
 }
@@ -887,8 +887,8 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, const std
 
     // Depending on the startKind, we'll either use the Kws Engine Adapter or the Reco Engine Adapter
     m_audioProcessor = startKind == RecognitionKind::Keyword
-        ? std::dynamic_pointer_cast<ISpxAudioProcessor>(EnsureInitKwsEngineAdapter(keyword))
-        : std::dynamic_pointer_cast<ISpxAudioProcessor>(EnsureInitRecoEngineAdapter());
+        ? SpxQueryInterface<ISpxAudioProcessor>(EnsureInitKwsEngineAdapter(keyword))
+        : SpxQueryInterface<ISpxAudioProcessor>(EnsureInitRecoEngineAdapter());
 
     writeLock.unlock(); // DON'T HOLD THE LOCK any longer than here. 
     // The StartPump() call (see below) will instigate a call to this::SetFormat, which will try to acquire the reader lock from a different thread...
@@ -912,8 +912,8 @@ void CSpxAudioStreamSession::HotSwapAdaptersWhilePaused(RecognitionKind startKin
 
     // Depending on the startKind, we'll either switch to the Kws Engine Adapter or the Reco Engine Adapter
     m_audioProcessor = startKind == RecognitionKind::Keyword
-        ? std::dynamic_pointer_cast<ISpxAudioProcessor>(EnsureInitKwsEngineAdapter(keyword))
-        : std::dynamic_pointer_cast<ISpxAudioProcessor>(EnsureInitRecoEngineAdapter());
+        ? SpxQueryInterface<ISpxAudioProcessor>(EnsureInitKwsEngineAdapter(keyword))
+        : SpxQueryInterface<ISpxAudioProcessor>(EnsureInitRecoEngineAdapter());
 
     // Tell the old Audio Processor that we've sent the last bit of audio data we're going to send
     SPX_DBG_TRACE_VERBOSE_IF(1, "%s: ProcessingAudio - size=%d", __FUNCTION__, 0);
@@ -1110,14 +1110,14 @@ void CSpxAudioStreamSession::InitLuEngineAdapter()
 std::list<std::string> CSpxAudioStreamSession::GetListenForListFromLuEngineAdapter()
 {
     SPX_DBG_ASSERT(m_luAdapter != nullptr);
-    auto triggerService = std::dynamic_pointer_cast<ISpxIntentTriggerService>(m_luAdapter);
+    auto triggerService = SpxQueryInterface<ISpxIntentTriggerService>(m_luAdapter);
     return triggerService->GetListenForList();
 }
 
 void CSpxAudioStreamSession::GetIntentInfoFromLuEngineAdapter(std::string& provider, std::string& id, std::string& key)
 {
     SPX_DBG_ASSERT(GetLuEngineAdapter() != nullptr);
-    auto triggerService = std::dynamic_pointer_cast<ISpxIntentTriggerService>(m_luAdapter);
+    auto triggerService = SpxQueryInterface<ISpxIntentTriggerService>(m_luAdapter);
     return triggerService->GetIntentInfo(provider, id, key);
 }
 

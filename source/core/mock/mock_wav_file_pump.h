@@ -8,6 +8,7 @@
 #pragma once
 #include "stdafx.h"
 #include "ispxinterfaces.h"
+#include "interface_helpers.h"
 #include "mock_audio_file_impl.h"
 #include "mock_audio_reader_impl.h"
 #include "delegate_audio_pump_impl.h"
@@ -17,13 +18,21 @@ namespace CARBON_IMPL_NAMESPACE() {
 
 
 class CSpxMockWavFilePump : 
-    public ISpxObjectWithSiteInitImpl<ISpxSite>,
+    public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
     public ISpxMockAudioFileImpl,
     public ISpxDelegateAudioPumpImpl
 {
 public:
 
     CSpxMockWavFilePump() = default;
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioPump)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioFile)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioReaderRealTime)
+    SPX_INTERFACE_MAP_END()
 
     // --- ISpxAudioPump (overrides) ---
     void StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor) override;

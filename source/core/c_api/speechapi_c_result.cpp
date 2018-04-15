@@ -92,7 +92,7 @@ SPXAPI Result_GetProperty_String(SPXRESULTHANDLE hresult, const wchar_t* name, w
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(result);
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
         auto tempValue = namedProperties->GetStringValue(name, defaultValue);
 
         PAL::wcscpy(value, cchValue, tempValue.c_str(), tempValue.size(), true);
@@ -107,7 +107,7 @@ SPXAPI_(bool) Result_ContainsProperty_String(SPXRESULTHANDLE hresult, const wcha
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(result);
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
         return namedProperties->HasStringValue(name);
     }
     SPXAPI_CATCH_AND_RETURN(hr, false);
@@ -120,7 +120,7 @@ SPXAPI Result_GetProperty_Int32(SPXRESULTHANDLE hresult, const wchar_t* name, in
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(result);
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
         auto tempValue = namedProperties->GetNumberValue(name, defaultValue);
 
         *pvalue = (int32_t)tempValue;
@@ -135,7 +135,7 @@ SPXAPI_(bool) Result_ContainsProperty_Int32(SPXRESULTHANDLE hresult, const wchar
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(result);
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
         return namedProperties->HasNumberValue(name);
     }
     SPXAPI_CATCH_AND_RETURN(hr, false);
@@ -148,7 +148,7 @@ SPXAPI Result_GetProperty_Bool(SPXRESULTHANDLE hresult, const wchar_t* name, boo
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(result);
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
         auto tempValue = namedProperties->GetBooleanValue(name, defaultValue);
 
         *pvalue = !!tempValue;
@@ -163,7 +163,7 @@ SPXAPI_(bool) Result_ContainsProperty_Bool(SPXRESULTHANDLE hresult, const wchar_
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(result);
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
         return namedProperties->HasBooleanValue(name);
     }
     SPXAPI_CATCH_AND_RETURN(hr, false);

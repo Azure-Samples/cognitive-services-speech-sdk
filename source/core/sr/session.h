@@ -12,6 +12,7 @@
 #include "spxcore_common.h"
 #include "asyncop.h"
 #include "ispxinterfaces.h"
+#include "interface_helpers.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -23,6 +24,10 @@ public:
 
     CSpxSession();
     virtual ~CSpxSession();
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxSession)
+    SPX_INTERFACE_MAP_END()
 
     // --- ISpxSession
 

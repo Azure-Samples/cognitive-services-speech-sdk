@@ -10,6 +10,7 @@
 #include <queue>
 #include "spxcore_common.h"
 #include "ispxinterfaces.h"
+#include "interface_helpers.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -23,6 +24,13 @@ public:
 
     CSpxMockKwsEngineAdapter();
     virtual ~CSpxMockKwsEngineAdapter();
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxKwsEngineAdapter)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioProcessor)
+    SPX_INTERFACE_MAP_END()
 
     // --- ISpxObject
 

@@ -8,18 +8,25 @@
 #include "stdafx.h"
 #include "ispxinterfaces.h"
 #include "delegate_audio_pump_impl.h"
+#include "interface_helpers.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
 
 
 class CSpxMockInteractiveMicrophone :
-    public ISpxObjectWithSiteInitImpl<ISpxSite>,
+    public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
     public ISpxDelegateAudioPumpImpl
 {
 public:
 
     CSpxMockInteractiveMicrophone();
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioPump)
+    SPX_INTERFACE_MAP_END()
 
     // --- ISpxAudioPump (overrides) ---
     void StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor) override;

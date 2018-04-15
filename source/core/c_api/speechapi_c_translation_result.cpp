@@ -18,7 +18,7 @@ SPXAPI TranslationResult_GetTranslationText(SPXRESULTHANDLE handle, wchar_t* tex
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[handle];
 
-        auto textResult = std::dynamic_pointer_cast<ISpxTranslationTextResult>(result);
+        auto textResult = SpxQueryInterface<ISpxTranslationTextResult>(result);
 
         auto translationText = textResult->GetTranslationText();
         auto textStr = translationText.c_str();
@@ -36,7 +36,7 @@ SPXAPI TranslationResult_GetSourceLanguage(SPXRESULTHANDLE handle, wchar_t* sour
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[handle];
 
-        auto textResult = std::dynamic_pointer_cast<ISpxTranslationTextResult>(result);
+        auto textResult = SpxQueryInterface<ISpxTranslationTextResult>(result);
 
         auto lang = textResult->GetSourceLanguage();
         auto langStr = lang.c_str();
@@ -54,7 +54,7 @@ SPXAPI TranslationResult_GetTargetLanguage(SPXRESULTHANDLE handle, wchar_t* targ
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[handle];
 
-        auto textResult = std::dynamic_pointer_cast<ISpxTranslationTextResult>(result);
+        auto textResult = SpxQueryInterface<ISpxTranslationTextResult>(result);
 
         auto lang = textResult->GetTargetLanguage();
         auto langStr = lang.c_str();

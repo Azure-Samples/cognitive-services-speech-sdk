@@ -7,6 +7,7 @@
 
 #pragma once
 #include "spxcore_common.h"
+#include "interface_helpers.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -17,6 +18,10 @@ class CSpxModuleFactory : public ISpxObjectFactory
 public:
 
     static std::shared_ptr<ISpxObjectFactory> Get(const std::string& filename);
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectFactory)
+    SPX_INTERFACE_MAP_END()
 
 
 private:

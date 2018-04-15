@@ -13,7 +13,7 @@
 //
 //      Adding to the interface based implementation approach, Carbon also uses "object" and "site" relationships. From one
 //      object's point of view, it's isolated from all other "objects" in the implementation. When it's initialized, it's given
-//      a "site" object/interface (e.g. ISpxSite), which it will use for everything it needs. That site may support some specific
+//      a "site" object/interface (e.g. ISpxGenericSite), which it will use for everything it needs. That site may support some specific
 //      interfaces by contract. It can obtain those interfaces, using standard C++ dynamic_pointer_casts.
 //
 //      Adding to the object/site concept, Carbon also uses the "service provider" model. Again, from a specific isolated object's
@@ -66,6 +66,7 @@
 
 #pragma once
 #include "named_properties_impl.h"
+#include "interface_helpers.h"
 #include "service_helpers.h"
 #include "service_provider_impl.h"
 #include "shared_ptr_helpers.h"
@@ -77,7 +78,7 @@ namespace CARBON_IMPL_NAMESPACE() {
 
 
 template <class I>
-inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, std::shared_ptr<ISpxSite> site);
+inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, std::shared_ptr<ISpxGenericSite> site);
 
 
 class CSpxResourceManager : 
@@ -85,9 +86,19 @@ class CSpxResourceManager :
     public ISpxServiceProviderImpl,
     public ISpxObjectFactory,
     public ISpxNamedPropertiesImpl,
-    public ISpxSite
+    public ISpxGenericSite
 {
 public:
+
+    ~CSpxResourceManager();
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxInterfaceBase)
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectFactory)
+        SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
+        SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
+        SPX_INTERFACE_MAP_ENTRY(ISpxGenericSite)
+    SPX_INTERFACE_MAP_END()
 
     // NOTE:  This GetObjectFactory() method SHOULD NOT be used by functions/methods other than the 
     //        SpxCreateObjectWithSite() method. If you are an object running in the "Carbon" system

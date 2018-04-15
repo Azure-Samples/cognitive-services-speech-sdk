@@ -12,14 +12,14 @@
 namespace CARBON_IMPL_NAMESPACE() {
 
 
-std::shared_ptr<ISpxSite> SpxGetRootSite()
+std::shared_ptr<ISpxGenericSite> SpxGetRootSite()
 {
     // Inside our Carbon implementation, the Resource Manager is a central figure, and is the root of 
     // several things, most notably object factories... Also, it's the root "site" object ... 
     // For a description of what a "site" is, and how it works within the service provider design pattern
     // see the comments inside resource_manager.h. 
 
-    return std::dynamic_pointer_cast<ISpxSite>(CSpxResourceManager::GetObjectFactory());
+    return SpxQueryInterface<ISpxGenericSite>(CSpxResourceManager::GetObjectFactory());
 }
 
 

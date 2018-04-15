@@ -1,5 +1,6 @@
 #pragma once
 #include "ispxinterfaces.h"
+#include "interface_helpers.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -12,6 +13,12 @@ class CSpxSessionEventArgs :
 public:
 
     CSpxSessionEventArgs();
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxSessionEventArgs)
+        SPX_INTERFACE_MAP_ENTRY(ISpxSessionEventArgsInit)
+    SPX_INTERFACE_MAP_END()
+
 
     // --- ISpxSessionEventArgs
     

@@ -24,7 +24,7 @@ SPXAPI Session_From_Recognizer(SPXRECOHANDLE hreco, SPXSESSIONHANDLE* phsession)
         auto recoHandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         auto recognizer = (*recoHandles)[hreco];
 
-        auto precognizer = std::dynamic_pointer_cast<ISpxSessionFromRecognizer>(recognizer);
+        auto precognizer = SpxQueryInterface<ISpxSessionFromRecognizer>(recognizer);
         auto psession = precognizer->GetDefaultSession();
 
         auto sessionHandles = CSpxSharedPtrHandleTableManager::Get<ISpxSession, SPXSESSIONHANDLE>();
@@ -75,7 +75,7 @@ SPXAPI Session_SetParameter_String(SPXSESSIONHANDLE hsession, const wchar_t* nam
         auto sessionHandles = CSpxSharedPtrHandleTableManager::Get<ISpxSession, SPXSESSIONHANDLE>();
         auto session = (*sessionHandles)[hsession];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(session);
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(session);
         namedProperties->SetStringValue(name, value);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
@@ -88,7 +88,7 @@ SPXAPI Session_GetParameter_String(SPXSESSIONHANDLE hsession, const wchar_t* nam
         auto sessionHandles = CSpxSharedPtrHandleTableManager::Get<ISpxSession, SPXSESSIONHANDLE>();
         auto session = (*sessionHandles)[hsession];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(session);
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(session);
         auto tempValue = namedProperties->GetStringValue(name, defaultValue);
 
         PAL::wcscpy(value, cchValue, tempValue.c_str(), tempValue.size(), true);
@@ -103,7 +103,7 @@ SPXAPI_(bool) Session_ContainsParameter_String(SPXSESSIONHANDLE hsession, const 
         auto sessionHandles = CSpxSharedPtrHandleTableManager::Get<ISpxSession, SPXSESSIONHANDLE>();
         auto session = (*sessionHandles)[hsession];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(session);
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(session);
         return namedProperties->HasStringValue(name);
     }
     SPXAPI_CATCH_AND_RETURN(hr, false)
@@ -116,7 +116,7 @@ SPXAPI Session_SetParameter_Int32(SPXSESSIONHANDLE hsession, const wchar_t* name
         auto sessionHandles = CSpxSharedPtrHandleTableManager::Get<ISpxSession, SPXSESSIONHANDLE>();
         auto session = (*sessionHandles)[hsession];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(session);
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(session);
         namedProperties->SetNumberValue(name, value);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
@@ -129,7 +129,7 @@ SPXAPI Session_GetParameter_Int32(SPXSESSIONHANDLE hsession, const wchar_t* name
         auto sessionHandles = CSpxSharedPtrHandleTableManager::Get<ISpxSession, SPXSESSIONHANDLE>();
         auto session = (*sessionHandles)[hsession];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(session);
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(session);
         auto tempValue = namedProperties->GetNumberValue(name, defaultValue);
 
         *pvalue = (int32_t)tempValue;
@@ -144,7 +144,7 @@ SPXAPI_(bool) Session_ContainsParameter_Int32(SPXSESSIONHANDLE hsession, const w
         auto sessionHandles = CSpxSharedPtrHandleTableManager::Get<ISpxSession, SPXSESSIONHANDLE>();
         auto session = (*sessionHandles)[hsession];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(session);
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(session);
         return namedProperties->HasNumberValue(name);
     }
     SPXAPI_CATCH_AND_RETURN(hr, false)
@@ -157,7 +157,7 @@ SPXAPI Session_SetParameter_Bool(SPXSESSIONHANDLE hsession, const wchar_t* name,
         auto sessionHandles = CSpxSharedPtrHandleTableManager::Get<ISpxSession, SPXSESSIONHANDLE>();
         auto session = (*sessionHandles)[hsession];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(session);
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(session);
         namedProperties->SetBooleanValue(name, value);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
@@ -170,7 +170,7 @@ SPXAPI Session_GetParameter_Bool(SPXSESSIONHANDLE hsession, const wchar_t* name,
         auto sessionHandles = CSpxSharedPtrHandleTableManager::Get<ISpxSession, SPXSESSIONHANDLE>();
         auto session = (*sessionHandles)[hsession];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(session);
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(session);
         auto tempValue = namedProperties->GetBooleanValue(name, defaultValue);
 
         *pvalue = tempValue;
@@ -185,7 +185,7 @@ SPXAPI_(bool) Session_ContainsParameter_Bool(SPXSESSIONHANDLE hsession, const wc
         auto sessionHandles = CSpxSharedPtrHandleTableManager::Get<ISpxSession, SPXSESSIONHANDLE>();
         auto session = (*sessionHandles)[hsession];
 
-        auto namedProperties = std::dynamic_pointer_cast<ISpxNamedProperties>(session);
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(session);
         return namedProperties->HasBooleanValue(name);
     }
     SPXAPI_CATCH_AND_RETURN(hr, false)

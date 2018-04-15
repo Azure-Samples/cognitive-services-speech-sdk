@@ -48,11 +48,11 @@ void CSpxWavFilePump::EnsurePump()
     auto pumpInit = SpxCreateObjectWithSite<ISpxAudioPumpReaderInit>("CSpxAudioPump", GetSite());
 
     // Set the reader...
-    auto fileAsReader = std::dynamic_pointer_cast<ISpxAudioReader>(m_delegateToAudioFile);
+    auto fileAsReader = SpxQueryInterface<ISpxAudioReader>(m_delegateToAudioFile);
     pumpInit->SetAudioReader(fileAsReader);
 
     // And ... We're finished
-    m_delegateToAudioPump = std::dynamic_pointer_cast<ISpxAudioPump>(pumpInit);
+    m_delegateToAudioPump = SpxQueryInterface<ISpxAudioPump>(pumpInit);
 }
 
 

@@ -8,6 +8,7 @@
 #pragma once
 #include "spxcore_common.h"
 #include "ispxinterfaces.h"
+#include "interface_helpers.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -19,6 +20,11 @@ public:
 
     CSpxAudioPump();
     ~CSpxAudioPump();
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioPumpReaderInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioPump)
+    SPX_INTERFACE_MAP_END()
 
     // --- ISpxAudioPumpReaderInit
 

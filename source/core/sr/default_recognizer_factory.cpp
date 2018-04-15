@@ -53,11 +53,11 @@ std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateSpeechRecogn
     auto session = SpxCreateObjectWithSite<ISpxSession>("CSpxAudioStreamSession", factoryAsSite);
 
     // Initialize the session
-    auto sessionInit = std::dynamic_pointer_cast<ISpxAudioStreamSessionInit>(session);
+    auto sessionInit = SpxQueryInterface<ISpxAudioStreamSessionInit>(session);
     sessionInit->InitFromStream(audioInputStream);
 
     // Create the recognizer
-    auto sessionAsSite = std::dynamic_pointer_cast<ISpxSite>(session);
+    auto sessionAsSite = SpxQueryInterface<ISpxGenericSite>(session);
     auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>("CSpxRecognizer", sessionAsSite);
 
     // Add the recognizer to the session
@@ -85,7 +85,7 @@ std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateTranslationR
 
     // Initialize the session
     SPX_THROW_HR_IF(SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE, session == nullptr);
-    auto sessionInit = std::dynamic_pointer_cast<ISpxAudioStreamSessionInit>(session);
+    auto sessionInit = SpxQueryInterface<ISpxAudioStreamSessionInit>(session);
     if (fileNameStr != nullptr)
     {
         sessionInit->InitFromFile(fileNameStr);
@@ -96,7 +96,7 @@ std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateTranslationR
     }
 
     // Create the recognizer
-    auto sessionAsSite = std::dynamic_pointer_cast<ISpxSite>(session);
+    auto sessionAsSite = SpxQueryInterface<ISpxGenericSite>(session);
     auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>("CSpxTranslationRecognizer", sessionAsSite);
 
     // Todo handle source and target lanugage settings.
@@ -125,11 +125,11 @@ std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateTranslationR
 
     // Initialize the session
     SPX_THROW_HR_IF(SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE, session == nullptr);
-    auto sessionInit = std::dynamic_pointer_cast<ISpxAudioStreamSessionInit>(session);
+    auto sessionInit = SpxQueryInterface<ISpxAudioStreamSessionInit>(session);
     sessionInit->InitFromStream(stream);
 
     // Create the recognizer
-    auto sessionAsSite = std::dynamic_pointer_cast<ISpxSite>(session);
+    auto sessionAsSite = SpxQueryInterface<ISpxGenericSite>(session);
     auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>("CSpxTranslationRecognizer", sessionAsSite);
 
     // Add the recognizer to the session
@@ -153,7 +153,7 @@ std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateRecognizerIn
     auto session = SpxCreateObjectWithSite<ISpxSession>(sessionClassName, factoryAsSite);
 
     // Initialize the session
-    auto sessionInit = std::dynamic_pointer_cast<ISpxAudioStreamSessionInit>(session);
+    auto sessionInit = SpxQueryInterface<ISpxAudioStreamSessionInit>(session);
     if (fileName != nullptr)
     {
         sessionInit->InitFromFile(fileName);
@@ -164,7 +164,7 @@ std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateRecognizerIn
     }
 
     // Create the recognizer
-    auto sessionAsSite = std::dynamic_pointer_cast<ISpxSite>(session);
+    auto sessionAsSite = SpxQueryInterface<ISpxGenericSite>(session);
     auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>(recognizerClassName, sessionAsSite);
 
     // Set language if we have one. Default will be set to en-US

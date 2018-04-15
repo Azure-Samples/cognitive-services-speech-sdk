@@ -8,6 +8,7 @@
 #pragma once
 #include "spxcore_common.h"
 #include "ispxinterfaces.h"
+#include "interface_helpers.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
@@ -21,6 +22,14 @@ class CSpxLuisDirectEngineAdapter :
 public:
 
     CSpxLuisDirectEngineAdapter() : m_emptyIntentNameOk(false) { }
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxIntentTriggerService)
+        SPX_INTERFACE_MAP_ENTRY(ISpxLuEngineAdapter)
+        SPX_INTERFACE_MAP_ENTRY(ISpxRecognitionResultProcessor)
+    SPX_INTERFACE_MAP_END()
 
     // --- ISpxObjectInit overrides ---
     void Term() override;

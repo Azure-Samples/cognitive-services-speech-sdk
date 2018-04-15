@@ -29,8 +29,31 @@ public:
 
     virtual ~ISpxInterfaceBase() = default;
 
+    template <class I>
+    std::shared_ptr<I> QueryInterface()
+    {
+        return QueryInterfaceInternal<I>();
+    }
+
 
 protected:
+
+    template <class I>
+    std::shared_ptr<I> QueryInterfaceInternal()
+    {
+        // try to query for the interface via our virtual method... 
+        auto ptr = QueryInterface(PAL::GetTypeName<I>().c_str());
+        if (ptr != nullptr)
+        {
+            auto interfacePtr = reinterpret_cast<I*>(ptr);
+            return interfacePtr->shared_from_this();
+        }
+
+        // if that fails, let the caller know
+        return nullptr;
+    }
+
+    virtual void* QueryInterface(const char* /*interfaceName*/) { return nullptr; }
 
     typedef std::enable_shared_from_this<ISpxInterfaceBase> base_type;
 
@@ -39,6 +62,31 @@ protected:
         return base_type::shared_from_this();
     }
 };
+
+
+template <class I>
+std::shared_ptr<I> SpxQueryInterface(std::shared_ptr<ISpxInterfaceBase> from)
+{
+    if (from != nullptr)
+    {
+        #if defined(_MSC_VER) && defined(_DEBUG)
+            std::shared_ptr<I> ptr1 = std::dynamic_pointer_cast<I>(from);
+            std::shared_ptr<I> ptr2 = from->QueryInterface<I>();
+            SPX_TRACE_ERROR_IF(ptr1 != nullptr && ptr2 == nullptr, "dynamic_pointer_cast() and QueryInterface() do not agree!! UNEXPECTED!");
+            SPX_TRACE_ERROR_IF(ptr1 == nullptr && ptr2 != nullptr, "dynamic_pointer_cast() and QueryInterface() do not agree!! UNEXPECTED!");
+            SPX_IFTRUE_THROW_HR(ptr1 != nullptr && ptr2 == nullptr, SPXERR_ABORT);
+            SPX_IFTRUE_THROW_HR(ptr1 == nullptr && ptr2 != nullptr, SPXERR_ABORT);
+            return ptr1;
+        #elif defined(_MSC_VER)
+            std::shared_ptr<I> ptr = std::dynamic_pointer_cast<I>(from);
+            return ptr != nullptr ? ptr : from->QueryInterface<I>();
+        #else
+            std::shared_ptr<I> ptr = from->QueryInterface<I>();
+            return ptr != nullptr ? ptr : std::dynamic_pointer_cast<I>(from);
+        #endif
+    }
+    return nullptr;
+}
 
 
 template<typename T>
@@ -61,7 +109,7 @@ private:
 
     ISpxInterfaceBaseFor&& operator =(const ISpxInterfaceBaseFor&&) = delete;
 };
-    
+
 
 class ISpxObjectInit : public ISpxInterfaceBaseFor<ISpxObjectInit>
 {
@@ -72,7 +120,7 @@ public:
 };
 
 
-class ISpxSite : public ISpxInterfaceBaseFor<ISpxSite>
+class ISpxGenericSite : public ISpxInterfaceBaseFor<ISpxGenericSite>
 {
 };
 
@@ -81,7 +129,7 @@ class ISpxObjectWithSite : public ISpxInterfaceBaseFor<ISpxObjectWithSite>
 {
 public:
 
-    virtual void SetSite(std::weak_ptr<ISpxSite> site) = 0;
+    virtual void SetSite(std::weak_ptr<ISpxGenericSite> site) = 0;
 };
 
 
@@ -93,6 +141,7 @@ inline std::shared_ptr<I> SpxCreateObjectInternal(Types&&... Args)
     auto it = std::dynamic_pointer_cast<I>(ptr);
     return it;
 }
+
 
 class ISpxObjectFactory : public ISpxInterfaceBaseFor<ISpxObjectFactory>
 {
@@ -137,10 +186,10 @@ public:
 
     // --- ISpxObjectWithSite
 
-    void SetSite(std::weak_ptr<ISpxSite> site) override
+    void SetSite(std::weak_ptr<ISpxGenericSite> site) override
     {
         auto shared = site.lock();
-        auto ptr = std::dynamic_pointer_cast<T>(shared);
+        auto ptr = SpxQueryInterface<T>(shared);
         SPX_IFFALSE_THROW_HR((bool)ptr == (bool)shared, SPXERR_INVALID_ARG);
 
         if (m_hasSite)
@@ -501,7 +550,7 @@ class ISpxRecoEngineAdapter :
 };
 
 
-class ISpxRecoEngineAdapterSite : virtual public ISpxSite
+class ISpxRecoEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxRecoEngineAdapterSite>
 {
 public:
 
@@ -537,7 +586,7 @@ class ISpxKwsEngineAdapter :
 };
 
 
-class ISpxKwsEngineAdapterSite : virtual public ISpxSite
+class ISpxKwsEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxKwsEngineAdapterSite>
 {
 public:
 
@@ -566,7 +615,7 @@ public:
 };
 
 
-class ISpxRecognizerSite : virtual public ISpxSite
+class ISpxRecognizerSite : public ISpxInterfaceBaseFor<ISpxRecognizerSite>
 {
 public:
 
@@ -736,7 +785,7 @@ class ISpxLuEngineAdapter :
 };
 
 
-class ISpxLuEngineAdapterSite : virtual public ISpxSite
+class ISpxLuEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxLuEngineAdapterSite>
 {
 };
 

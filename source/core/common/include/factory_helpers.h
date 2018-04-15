@@ -13,7 +13,6 @@
 
 namespace CARBON_IMPL_NAMESPACE() {
 
-
 #define SPX_FACTORY_MAP_BEGIN()         \
     UNUSED(className);                  \
     UNUSED(interfaceName);

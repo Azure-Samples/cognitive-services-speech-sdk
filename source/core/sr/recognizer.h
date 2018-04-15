@@ -4,6 +4,7 @@
 #include <memory>
 #include "asyncop.h"
 #include "ispxinterfaces.h"
+#include "interface_helpers.h"
 #include "named_properties_impl.h"
 
 
@@ -21,6 +22,15 @@ public:
 
     CSpxRecognizer();
     virtual ~CSpxRecognizer();
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxSessionFromRecognizer)
+        SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
+        SPX_INTERFACE_MAP_ENTRY(ISpxRecognizerEvents)
+        SPX_INTERFACE_MAP_ENTRY(ISpxRecognizer)
+    SPX_INTERFACE_MAP_END()
 
     // --- ISpxObjectWithSiteInit
     void Init() override;

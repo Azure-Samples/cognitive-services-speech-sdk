@@ -6,6 +6,7 @@
 //
 
 #pragma once
+#include "interface_helpers.h"
 #include "service_helpers.h"
 
 
@@ -13,7 +14,7 @@ namespace CARBON_IMPL_NAMESPACE() {
 
 
 template <class I>
-inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, ISpxSite* site)
+inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, ISpxGenericSite* site)
 {
     // convert the argument to a shared pointer to the base site interafce
     auto sharedSitePtr = site->shared_from_this();
@@ -23,19 +24,23 @@ inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, ISpxSit
 }
 
 template <class I>
-inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, std::shared_ptr<ISpxSite> site)
+inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, std::shared_ptr<ISpxGenericSite> site)
 {
     // create the object
     auto factory = SpxQueryService<ISpxObjectFactory>(site);
     auto ptr = factory->CreateObject<I>(className);
 
     // set its site if appropriate
-    auto wsite = std::dynamic_pointer_cast<ISpxObjectWithSite>(ptr);
-    SPX_IFTRUE_THROW_HR(wsite && !site, SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE);
-
-    if (wsite != nullptr && site != nullptr)
+    auto objectWithSite = SpxQueryInterface<ISpxObjectWithSite>(ptr);
+    if (objectWithSite != nullptr && site != nullptr)
     {
-        wsite->SetSite(site);
+        objectWithSite->SetSite(site);
+    }
+    else
+    {
+        SPX_DBG_TRACE_VERBOSE_IF(site != nullptr && objectWithSite == nullptr, "%s: Attempted SetSite, objectWithSite==nullptr", __FUNCTION__);
+        SPX_DBG_TRACE_WARNING_IF(site == nullptr && objectWithSite != nullptr, "%s: Object Expects Site; No Site provided! UNEXPECTED!", __FUNCTION__);
+        SPX_IFTRUE_THROW_HR(site == nullptr && objectWithSite != nullptr, SPXERR_UNEXPECTED_CREATE_OBJECT_FAILURE);
     }
 
     return ptr;
@@ -44,7 +49,7 @@ inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, std::sh
 template <class T>
 inline void SpxTermAndClear(std::shared_ptr<T>& ptr)
 {
-    auto term = std::dynamic_pointer_cast<ISpxObjectInit>(ptr);
+    auto term = SpxQueryInterface<ISpxObjectInit>(ptr);
     if (term != nullptr)
     {
         term->Term();

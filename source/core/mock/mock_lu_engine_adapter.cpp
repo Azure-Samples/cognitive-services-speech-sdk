@@ -73,7 +73,7 @@ void CSpxMockLuEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionResul
         auto json = properties->GetStringValue(L"CARBON-INTERNAL-MOCK-IntentJson");
 
         // OK... Now let's initialize the intent result
-        auto initIntentResult = std::dynamic_pointer_cast<ISpxIntentRecognitionResultInit>(result);
+        auto initIntentResult = SpxQueryInterface<ISpxIntentRecognitionResultInit>(result);
         initIntentResult->InitIntentResult(intentId.c_str(), json.c_str());
     }
 }

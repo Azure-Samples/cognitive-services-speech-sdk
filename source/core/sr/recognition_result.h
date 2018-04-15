@@ -1,12 +1,13 @@
 #pragma once
 #include <string>
 #include "ispxinterfaces.h"
+#include "interface_helpers.h"
 #include "named_properties_impl.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
 
-    
+
 class CSpxRecognitionResult :
     public ISpxRecognitionResult,
     public ISpxRecognitionResultInit,
@@ -22,6 +23,18 @@ public:
 
     CSpxRecognitionResult();
     virtual ~CSpxRecognitionResult();
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxRecognitionResult)
+        SPX_INTERFACE_MAP_ENTRY(ISpxRecognitionResultInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxIntentRecognitionResult)
+        SPX_INTERFACE_MAP_ENTRY(ISpxIntentRecognitionResultInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxTranslationTextResult)
+        SPX_INTERFACE_MAP_ENTRY(ISpxTranslationTextResultInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxTranslationSynthesisResult)
+        SPX_INTERFACE_MAP_ENTRY(ISpxTranslationSynthesisResultInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
+    SPX_INTERFACE_MAP_END()
 
     // --- ISpxRecognitionResult ---
     std::wstring GetResultId() override;

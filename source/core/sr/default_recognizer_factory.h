@@ -10,18 +10,28 @@
 #include <spxerror.h>
 #include "service_helpers.h"
 #include <speechapi_cxx_audioinputstream.h>
+#include "interface_helpers.h"
 
 
 namespace CARBON_IMPL_NAMESPACE() {
 
 
 class CSpxDefaultRecognizerFactory :
-    public ISpxObjectWithSiteInitImpl<ISpxSite>,
+    public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
     public ISpxServiceProvider,
     public ISpxRecognizerFactory,
-    public ISpxSite
+    public ISpxGenericSite
 {
 public:
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxInterfaceBase)
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
+        SPX_INTERFACE_MAP_ENTRY(ISpxRecognizerFactory)
+        SPX_INTERFACE_MAP_ENTRY(ISpxGenericSite)
+    SPX_INTERFACE_MAP_END()
 
     // --- ISpxRecognizerFactory
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer() override;
