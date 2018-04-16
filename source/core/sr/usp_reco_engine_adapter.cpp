@@ -597,39 +597,40 @@ void CSpxUspRecoEngineAdapter::OnSpeechPhrase(const USP::SpeechPhraseMsg& messag
 
 void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHypothesisMsg& message)
 {
-    SPX_DBG_TRACE_VERBOSE("Response: Translation.Hypothesis message. RecoText: %ls, TranslatedText: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n",
-        message.recognitionText.c_str(), message.translationText.c_str(),
-        message.offset, message.duration);
+   /* SPX_DBG_TRACE_VERBOSE("Response: Translation.Hypothesis message. RecoText: %ls, TranslatedText: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n",
+        message.text.c_str(), message.translationText.c_str(),
+        message.offset, message.duration);*/
     SPX_DBG_ASSERT(GetSite());
 
     // TODO: RobCh: Do something with the other fields in UspMsgSpeechHypothesis
     auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateIntermediateResult(nullptr, message.recognitionText.c_str(), ResultType::TranslationText);
+    auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), ResultType::TranslationText);
 
     // Update our result to be an "TranslationText" result.
-    auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
-    initTranslationResult->InitTranslationTextResult(message.sourceLanguage, message.targetLanguage, message.translationText);
-    
+    /*auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
+    initTranslationResult->InitTranslationTextResult(message.translation.translationStatus, message.translation.translationStatus);
+    */
+
     // Todo: offset (and duration) should be part of result. Now, offset is autaully ignored by the following function.
     GetSite()->IntermediateRecoResult(this, message.offset, result);
 }
 
 void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseMsg& message)
 {
-    SPX_DBG_TRACE_VERBOSE("Response: Translation.Phrase message. RecoStatus: %d, TranslationStatus: %d, RecoText: %ls, TranslatedText: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n",
+    /*SPX_DBG_TRACE_VERBOSE("Response: Translation.Phrase message. RecoStatus: %d, TranslationStatus: %d, RecoText: %ls, TranslatedText: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n",
         message.recognitionStatus, message.translationStatus,
-        message.recognitionText.c_str(), message.translationText.c_str(),
-        message.offset, message.duration);
+        message.text.c_str(), message.translationText.c_str(),
+        message.offset, message.duration);*/
     SPX_DBG_ASSERT(GetSite());
 
     // TODO: RobCh: Do something with the other fields in UspMsgSpeechPhrase
     auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateFinalResult(nullptr, message.recognitionText.c_str(), ResultType::TranslationText);
+    auto result = factory->CreateFinalResult(nullptr, message.text.c_str(), ResultType::TranslationText);
 
     // Update our result to be an "TranslationText" result.
-    auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
-    initTranslationResult->InitTranslationTextResult(message.sourceLanguage, message.targetLanguage, message.translationText);
-    
+    /*auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
+    initTranslationResult->InitTranslationTextResult(message.sourceLanguage, message.targetLanguage, message.translationText);*/
+
     // Todo: offset (and duration) should be part of result. Now, offset is autaully ignored by the following function.
     // Todo: This will trigger stopRecognizing (in single shot mode), and won't include any audio output message in final result.
     // We need to delay firing final result in single shot mode if audio output is desired.
@@ -647,9 +648,10 @@ void CSpxUspRecoEngineAdapter::OnTranslationSynthesis(const USP::TranslationSynt
     auto result = factory->CreateFinalResult(nullptr, L"", ResultType::TranslationSynthesis);
 
     // Update our result to be an "TranslationSynthesis" result.
-    auto initTranslationResult = SpxQueryInterface<ISpxTranslationSynthesisResultInit>(result);
-    initTranslationResult->InitTranslationSynthesisResult(message.audioBuffer, message.audioLength, message.text);
-    
+    // auto initTranslationResult = SpxQueryInterface<ISpxTranslationSynthesisResultInit>(result);
+    // initTranslationResult->InitTranslationSynthesisResult(message.audioBuffer, message.audioLength, message.text);
+
+    (void)message;
     // Todo: offset (and duration) should be part of result. Now, offset is autaully ignored by the following function.
     // Todo: need to differentiate whether this is the last audio or not, in order to trigger FinalRecoResult if needed.
     // Waiting for Rob's change for direct LUIS integration, which introduces a state machine in usp_reco_engine.

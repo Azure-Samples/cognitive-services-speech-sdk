@@ -41,6 +41,9 @@ const char* g_messagePathTurnStart = "turn.start";
 const char* g_messagePathTurnEnd = "turn.end";
 const char* g_messagePathSpeechStartDetected = "speech.startDetected";
 const char* g_messagePathSpeechEndDetected = "speech.endDetected";
+const char* g_messagePathTranslationHypothesis = "translation.hypothesis";
+const char* g_messagePathTranslationPhrase = "translation.phrase";
+const char* g_messagePathTranslationSynthesis = "translation.synthesis";
 //Todo: Figure out what to do about user agent build hash and version number
 const auto g_userAgent = "CortanaSDK (Windows;Win32;DeviceType=Near;SpeechClient=2.0.4)";
 
@@ -77,7 +80,14 @@ const auto g_langQueryParam = "language=";
 const vector<string> g_recoModeStrings = { "interactive", "conversation", "dictation" };
 const vector<string> g_outFormatStrings = { "format=simple", "format=detailed" };
 
-const set<string> contentPaths = { g_messagePathTurnStart, g_messagePathSpeechHypothesis, g_messagePathSpeechPhrase, g_messagePathSpeechFragment };
+const set<string> contentPaths = {
+    g_messagePathTurnStart,
+    g_messagePathSpeechHypothesis,
+    g_messagePathSpeechPhrase,
+    g_messagePathSpeechFragment,
+    g_messagePathTranslationHypothesis,
+    g_messagePathTranslationPhrase
+};
 
 // This is called from telemetry_flush, invoked on a worker thread in turn-end. 
 void Connection::Impl::OnTelemetryData(const uint8_t* buffer, size_t bytesToWrite, void *context, const char *requestId)
@@ -125,11 +135,32 @@ void Connection::Impl::WorkThread(weak_ptr<Connection::Impl> ptr)
             return;
         }
         unique_lock<recursive_mutex> lock(connection->m_mutex);
+
+// #define MOCK_FOR_TRANSLATION
+#ifdef MOCK_FOR_TRANSLATION
+        // For testing only.
+        typedef void(*CONTENT_ASYNCCOMPLETE_CALLBACK)(void* context);
+        extern UspResult JsonResponseHandler(void* context, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK callback, void* asyncContext);
+
+        const char* path = "translation.phrase";
+        struct _DeText
+        {
+            const char* path;
+            void* context;
+        } deserializeContext;
+        deserializeContext.path = path;
+        deserializeContext.context = (void *)&(connection->m_config.m_callbacks);
+
+        const char* buffer = R"({"Reason":"Success","Offset": 100,"Duration":2000,"Text":"What is the wether","Translation":{"TranslationStatus":"Success","Translations":[{"Language":"en - us","Text":"what is the weather"},{"Language":"de - de","Text":"wie ist das Wetter"}]}})";
+        JsonResponseHandler(&deserializeContext, path, (uint8_t*)buffer, strlen(buffer), nullptr, nullptr, nullptr);
+
+#endif
         TransportDoWork(connection->m_transport.get());
         if (!connection->m_connected) 
         {
             return;
         }
+
         connection->m_cv.wait_for(lock, chrono::milliseconds(200), [&] {return connection->m_haveWork; });
         connection->m_haveWork = false;
     }

@@ -95,7 +95,7 @@ struct Callbacks
     virtual void OnUserMessage(const std::string& /*path*/, const std::string& /*contentType*/, const uint8_t* /*buffer*/, size_t /*size*/) {}
 };
 
-enum class EndpointType { Custom, BingSpeech, Cris, CDSDK };
+enum class EndpointType { Custom, BingSpeech, Cris, CDSDK, Translation };
 
 enum class RecognitionMode : unsigned int { Interactive = 0, Conversation = 1, Dictation = 2 };
 
@@ -286,6 +286,7 @@ private:
 
     AuthenticationType m_authType;
     std::string m_authData;
+
 };
 
 }

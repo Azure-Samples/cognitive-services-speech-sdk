@@ -13,6 +13,8 @@
 #include "azure_c_shared_utility_buffer_wrapper.h"
 #include "azure_c_shared_utility_xlogging_wrapper.h"
 
+using namespace std;
+
 /**
 * Defines the callback function of asynchronous complete during content handling.
 * @param context The context provided by the application.
@@ -124,110 +126,130 @@ extern "C" UspResult ContentDispatch(void* context, const char* path, const char
 
 typedef struct _DeserializeContext
 {
-    const char* responseJson;
+    const char* path;
     void* context;
 } DeserializeContext;
 
-// handles "speech.phrase" API path
-static int HandleJsonSpeechPhrase(PROPERTYBAG_HANDLE propertyHandle, void* context)
+
+UspResult ToRecognitionStatus(const char* statusPtr, USP::RecognitionStatus& recognitionStatus)
+{
+    if (statusPtr == nullptr)
+    {
+        LogError("RecognitionStatus contains a null value.");
+        return USP_INVALID_RESPONSE;
+    }
+
+    string statusStr(statusPtr);
+    if (statusStr == "Success")
+    {
+       recognitionStatus = USP::RecognitionStatus::Success;
+    }
+    else if (statusStr == "NoMatch")
+    {
+        recognitionStatus = USP::RecognitionStatus::NoMatch;
+    }
+    else if (statusStr == "InitialSilenceTimeout")
+    {
+        recognitionStatus = USP::RecognitionStatus::InitialSilenceTimeout;
+    }
+    else if (statusStr == "BabbleTimeout")
+    {
+        recognitionStatus = USP::RecognitionStatus::BabbleTimeout;
+    }
+    else if (statusStr == "Error")
+    {
+        recognitionStatus = USP::RecognitionStatus::Error;
+    }
+    else if (statusStr == "EndOfDictation")
+    {
+        recognitionStatus = USP::RecognitionStatus::EndOfDictation;
+    }
+    else
+    {
+        LogInfo("Unknown RecognitionStatus: %s", statusPtr);
+        recognitionStatus = USP::RecognitionStatus::Unknown;
+    }
+    return USP_SUCCESS;
+}
+
+
+UspResult ToTranslationStatus(const char* statusPtr, USP::TranslationStatus& translationStatus)
+{
+    string statusStr(statusPtr);
+
+    if (statusPtr == nullptr)
+    {
+        LogError("TranslationStatus contains a null value.");
+        return USP_INVALID_RESPONSE;
+    }
+
+    if (statusStr == "Success")
+    {
+        translationStatus = USP::TranslationStatus::Success;
+    }
+    else if (statusStr == "Error")
+    {
+        translationStatus = USP::TranslationStatus::Error;
+    }
+    else
+    {
+        LogInfo("Unknown TranslationStatus: %s", statusPtr);
+        translationStatus = USP::TranslationStatus::Unknown;
+    }
+    return USP_SUCCESS;
+}
+
+std::wstring UspSetString(PROPERTYBAG_HANDLE propertyHandle, const char* fieldName)
+{
+    auto textStr = PropertybagGetStringValue(propertyHandle, fieldName);
+    return (textStr != nullptr) ? wstring(textStr, textStr + strlen(textStr)) : wstring();
+}
+
+// handles "speech.phrase/hypothesis/fragment" API path
+static int HandleJsonSpeechResult(PROPERTYBAG_HANDLE propertyHandle, void* context)
 {
     USP_RETURN_ERROR_IF_CONTEXT_NULL(context);
-    DeserializeContext* deserializeContext = (DeserializeContext*)context;
-    USP::Callbacks* uspContext = (USP::Callbacks*)deserializeContext->context;
+    DeserializeContext* deserializeContext = reinterpret_cast<DeserializeContext*>(context);
+    USP::Callbacks* uspContext = reinterpret_cast<USP::Callbacks*>(deserializeContext->context);
 
-    // Zhou: why not differentiae by "Path", but just by "DisplayText" or "Text"??
-    // Todo: better handling of char to wchar
-    auto textPtr = PropertybagGetStringValue(propertyHandle, "Text");
-    if (textPtr != NULL)
+    auto offset = static_cast<USP::OffsetType>(PropertybagGetNumberValue(propertyHandle, "Offset"));
+    auto duration = static_cast<USP::OffsetType>(PropertybagGetNumberValue(propertyHandle, "Duration"));
+
+    if (!strcmp(deserializeContext->path, g_messagePathSpeechHypothesis))
     {
-        // V2 of the speech protocol for partial results
+        // Speech.hypothesis message.
         USP::SpeechHypothesisMsg msg;
-        // Todo: add more field;
-        msg.text = std::wstring(textPtr, textPtr + strlen(textPtr));
-        msg.offset = (USP::OffsetType)PropertybagGetNumberValue(propertyHandle, "Offset");
-        msg.duration = (USP::OffsetType)PropertybagGetNumberValue(propertyHandle, "Duration");
-
+        msg.text = UspSetString(propertyHandle, "Text");
+        msg.offset = offset;
+        msg.duration = duration;
         uspContext->OnSpeechHypothesis(msg);
+    }
+    else if (!strcmp(deserializeContext->path, g_messagePathSpeechFragment))
+    {
+        // speech.Fragment message
+        USP::SpeechFragmentMsg msg;
+        msg.text = UspSetString(propertyHandle, "Text");
+        msg.offset = offset;
+        msg.duration = duration;
+        uspContext->OnSpeechFragment(msg);
     }
     else
     {
         // Speech.Phrase message
-        const char* statusPtr = PropertybagGetStringValue(propertyHandle, "RecognitionStatus");
-        if (statusPtr == NULL)
-        {
-            LogError("Incorrect RecognitionStatus in Speech.Phrase.");
-            return USP_INVALID_RESPONSE;
-        }
-
-        std::string statusStr(statusPtr);
+        assert(!strcmp(deserializeContext->path, g_messagePathSpeechPhrase));
 
         USP::SpeechPhraseMsg msg;
-        if (statusStr == "Success")
+        msg.displayText = UspSetString(propertyHandle, "DisplayText");
+        const char* statusPtr = PropertybagGetStringValue(propertyHandle, "RecognitionStatus");
+        if (ToRecognitionStatus(statusPtr, msg.recognitionStatus) != USP_SUCCESS)
         {
-            msg.recognitionStatus = USP::RecognitionStatus::Success;
-        }
-        else if (statusStr == "NoMatch")
-        {
-            msg.recognitionStatus = USP::RecognitionStatus::NoMatch;
-        }
-        else if (statusStr == "InitialSilenceTimeout")
-        {
-            msg.recognitionStatus = USP::RecognitionStatus::InitialSilenceTimeout;
-        }
-        else if (statusStr == "BabbleTimeout")
-        {
-            msg.recognitionStatus = USP::RecognitionStatus::BabbleTimeout;
-        }
-        else if (statusStr == "Error")
-        {
-            msg.recognitionStatus = USP::RecognitionStatus::Error;
-        }
-        else if (statusStr == "EndOfDictation")
-        {
-            msg.recognitionStatus = USP::RecognitionStatus::EndOfDictation;
-        }
-        else
-        {
-            LogError("Unknown RecognitionStatus: %s", statusPtr);
+            LogError("Invalid recognition status in speech.phrase message.");
             return USP_INVALID_RESPONSE;
-        }
-
-        msg.offset = (USP::OffsetType)PropertybagGetNumberValue(propertyHandle, "Offset");
-        msg.duration = (USP::OffsetType)PropertybagGetNumberValue(propertyHandle, "Duration");
-
-        textPtr = PropertybagGetStringValue(propertyHandle, "DisplayText");
-        if (textPtr != NULL)
-        {
-            // Todo: add more field;
-            msg.displayText = std::wstring(textPtr, textPtr + strlen(textPtr));
-        }
-
+        } 
+        msg.offset = offset;
+        msg.duration = duration;
         uspContext->OnSpeechPhrase(msg);
     }
-
-
-    return USP_SUCCESS;
-}
-
-// handles "speech.fragment" API path
-static int HandleJsonSpeechFragment(PROPERTYBAG_HANDLE  propertyHandle, void* context)
-{
-    USP_RETURN_ERROR_IF_CONTEXT_NULL(context);
-    DeserializeContext* deserializeContext = (DeserializeContext*)context;
-    USP::Callbacks* uspContext = (USP::Callbacks*)deserializeContext->context;
-
-    USP::SpeechFragmentMsg msg;
-    auto textPtr = PropertybagGetStringValue(propertyHandle, "Text");
-    if (textPtr != NULL)
-    {
-        msg.text = std::wstring(textPtr, textPtr + strlen(textPtr));
-    }
-
-    msg.offset = (USP::OffsetType)PropertybagGetNumberValue(propertyHandle, "Offset");
-    msg.duration = (USP::OffsetType)PropertybagGetNumberValue(propertyHandle, "Duration");
-
-    uspContext->OnSpeechFragment(msg);
-
     return USP_SUCCESS;
 }
 
@@ -236,7 +258,7 @@ static int HandleTurnStartContext(PROPERTYBAG_HANDLE propertyHandle, void* conte
     const char* serviceTag = PropertybagGetStringValue(propertyHandle, "serviceTag");
     USP::TurnStartMsg *msg = (USP::TurnStartMsg *)context;
     // Todo: add more field;
-    msg->contextServiceTag = std::string(serviceTag);
+    msg->contextServiceTag = string(serviceTag);
     return 0;
 }
 
@@ -244,8 +266,8 @@ static int HandleTurnStartContext(PROPERTYBAG_HANDLE propertyHandle, void* conte
 static int HandleJsonTurnStart(PROPERTYBAG_HANDLE  propertyHandle, void* context)
 {
     USP_RETURN_ERROR_IF_CONTEXT_NULL(context);
-    DeserializeContext* deserializeContext = (DeserializeContext*)context;
-    USP::Callbacks* uspContext = (USP::Callbacks *)(deserializeContext->context);
+    DeserializeContext* deserializeContext = reinterpret_cast<DeserializeContext*>(context);
+    USP::Callbacks* uspContext = reinterpret_cast<USP::Callbacks *>(deserializeContext->context);
 
     USP::TurnStartMsg msg;
 
@@ -260,16 +282,132 @@ static int HandleJsonTurnStart(PROPERTYBAG_HANDLE  propertyHandle, void* context
     return USP_SUCCESS;
 }
 
+static int HandleTranslationsText(PROPERTYBAG_HANDLE propertyHandle, void* context)
+{
+    USP::TranslationResult* result = reinterpret_cast<USP::TranslationResult *>(context);
+
+    auto lang = UspSetString(propertyHandle, "Language");
+    auto text = UspSetString(propertyHandle, "Text");
+
+    if (lang.empty() && text.empty())
+    {
+        LogError("emtpy language and text field in translations text.");
+        return USP_INVALID_RESPONSE;
+    }
+    else
+    {
+        result->translations[lang] = text;
+    }
+    return USP_SUCCESS;
+}
+
+static int HandleTranslationBlock(PROPERTYBAG_HANDLE propertyHandle, void* context)
+{
+    UspResult ret = USP_SUCCESS;
+
+    USP::TranslationResult* result = reinterpret_cast<USP::TranslationResult *>(context);
+    if (propertyHandle == nullptr)
+    {
+        LogInfo("No Translation block in the message.");
+        result->translationStatus = USP::TranslationStatus::Unknown;
+        result->translations.clear();
+    }
+    else
+    {
+        const char* statusPtr = PropertybagGetStringValue(propertyHandle, "TranslationStatus");
+        if (ToTranslationStatus(statusPtr, result->translationStatus) != USP_SUCCESS)
+        {
+            LogError("Invalid translation status in translation response message.");
+            result->translationStatus = USP::TranslationStatus::Unknown;
+        }
+
+        PropertybagEnumarray(propertyHandle, "Translations", HandleTranslationsText, context);
+
+        if ((result->translationStatus == USP::TranslationStatus::Success) && (result->translations.size() == 0))
+        {
+            LogError("No Translations text block in the message, but TranslationStatus is succcess.");
+            ret = USP_INVALID_RESPONSE;
+        }
+    }
+
+    return ret;
+}
+
+// handles "Translation.Hypothesis/Phrase" API path
+static int HandleJsonTranslationResponse(PROPERTYBAG_HANDLE propertyHandle, void* context)
+{
+    USP_RETURN_ERROR_IF_CONTEXT_NULL(context);
+    DeserializeContext* deserializeContext = reinterpret_cast<DeserializeContext*>(context);
+    USP::Callbacks* uspContext = reinterpret_cast<USP::Callbacks*>(deserializeContext->context);
+
+    // Todo: refactor to share message structure.
+    // handle common fields for hypothesis and phrase
+    auto offset = static_cast<USP::OffsetType>(PropertybagGetNumberValue(propertyHandle, "Offset"));
+    auto duration = static_cast<USP::OffsetType>(PropertybagGetNumberValue(propertyHandle, "Duration"));
+
+    if (!strcmp(deserializeContext->path, g_messagePathTranslationHypothesis))
+    {
+        // Translation.hypothesis message.
+        USP::TranslationHypothesisMsg msg;
+        msg.text = UspSetString(propertyHandle, "Text");
+
+        (void)PropertybagGetChildValue(
+            propertyHandle,
+            "Translation",
+            HandleTranslationBlock,
+            &msg.translation);
+
+        msg.offset = offset;
+        msg.duration = duration;
+        uspContext->OnTranslationHypothesis(msg);
+    }
+    else
+    {
+        // Translation.Phrase message
+        if (strcmp(deserializeContext->path, g_messagePathTranslationPhrase))
+        {
+            LogError("Unexpected message path: %s", deserializeContext->path);
+            USP_THROW_RUNTIME_ERROR("Unexpected message path.");
+        }
+
+        USP::TranslationPhraseMsg msg;
+        msg.text = UspSetString(propertyHandle, "Text");
+        (void)PropertybagGetChildValue(
+            propertyHandle,
+            "Translation",
+            HandleTranslationBlock,
+            &msg.translation);
+        msg.offset = offset;
+        msg.duration = duration;
+
+        auto recoStatusPtr = PropertybagGetStringValue(propertyHandle, "RecognitionStatus");
+        if (ToRecognitionStatus(recoStatusPtr, msg.recognitionStatus) != USP_SUCCESS)
+        {
+            LogError("Invalid recognition status in translation.phrase message.");
+            return USP_INVALID_RESPONSE;
+        }
+
+        uspContext->OnTranslationPhrase(msg);
+    }
+
+    return USP_SUCCESS;
+}
+
 const struct JSON_CONTENT_HANDLER
 {
     const char*                     path;
     PPROPERTYBAG_OBJECT_CALLBACK    handler;
 } g_jsonContentHandlers[] =
 {
-    { g_messagePathSpeechPhrase, HandleJsonSpeechPhrase },
-    { g_messagePathSpeechHypothesis, HandleJsonSpeechPhrase },
-    { g_messagePathSpeechFragment, HandleJsonSpeechFragment },
+    { g_messagePathSpeechPhrase, HandleJsonSpeechResult },
+    { g_messagePathSpeechHypothesis, HandleJsonSpeechResult },
+    // For testing with CRIS Dev.
+    // { g_messagePathSpeechPhrase, HandleJsonTranslationResponse },
+    // { g_messagePathSpeechHypothesis, HandleJsonTranslationResponse },
+    { g_messagePathSpeechFragment, HandleJsonSpeechResult },
     { g_messagePathTurnStart, HandleJsonTurnStart },
+    { g_messagePathTranslationHypothesis, HandleJsonTranslationResponse },
+    { g_messagePathTranslationPhrase, HandleJsonTranslationResponse },
     { NULL, NULL } // terminator
 };
 
@@ -313,12 +451,10 @@ UspResult JsonResponseHandler(void* context, const char* path, uint8_t* buffer, 
 
     DeserializeContext deserializeContext;
     deserializeContext.context = (void *)context;
-    deserializeContext.responseJson = (const char*)buffer;
+    deserializeContext.path = path;
 
     int ret = PropertybagDeserializeJson((const char*)buffer, bufferSize, ch->handler, &deserializeContext);
 
-    //TODO: MSFT 1099211: Memory caused because callback not invoked
-    
     if (ret)
     {
         LogError("Propertybagdeserialize_json failed, path=%s, ret=%d", path, ret);

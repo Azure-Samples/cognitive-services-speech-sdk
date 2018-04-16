@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 namespace USP {
 
@@ -21,7 +22,7 @@ typedef uint64_t DurationType;
  */
 enum class RecognitionStatus : int
 {
-    Success, NoMatch, InitialSilenceTimeout, BabbleTimeout, Error, EndOfDictation
+    Success, NoMatch, InitialSilenceTimeout, BabbleTimeout, Error, EndOfDictation, Unknown
 };
 
 /**
@@ -29,7 +30,7 @@ enum class RecognitionStatus : int
 */
 enum class TranslationStatus : int
 {
-    Success, NoMatch, Error, EndOfDictation
+    Success, Error, Unknown
 };
 
 
@@ -106,16 +107,23 @@ struct TurnStartMsg
 struct TurnEndMsg {};
 
 /**
+* Represents translation results.
+*/
+struct TranslationResult
+{
+    TranslationStatus translationStatus;
+    // An array of value pair <targetLanguage, translationText>.
+    std::unordered_map<std::wstring, std::wstring> translations;
+};
+/**
 * Represents translation.hypothesis message
 */
 struct TranslationHypothesisMsg
 {
-    std::wstring sourceLanguage;
-    std::wstring targetLanguage;
-    std::wstring recognitionText;
-    std::wstring translationText;
-    OffsetType offset;
-    DurationType duration;
+    OffsetType offset { 0 };
+    DurationType duration { 0 };
+    std::wstring text;
+    TranslationResult translation;
 };
 
 /**
@@ -123,14 +131,11 @@ struct TranslationHypothesisMsg
 */
 struct TranslationPhraseMsg
 {
-    std::wstring sourceLanguage;
-    std::wstring targetLanguage;
-    std::wstring recognitionText;
-    std::wstring translationText;
-    OffsetType offset;
-    DurationType duration;
     RecognitionStatus recognitionStatus;
-    TranslationStatus translationStatus;
+    OffsetType offset {0};
+    DurationType duration {0};
+    std::wstring text;
+    struct TranslationResult translation;
 };
 
 /**
@@ -139,8 +144,7 @@ struct TranslationPhraseMsg
 struct TranslationSynthesisMsg
 {
     std::shared_ptr<const uint8_t[]> audioBuffer;
-    size_t audioLength;
-    std::wstring text;
+    size_t audioLength { 0 };
 };
 
 }
