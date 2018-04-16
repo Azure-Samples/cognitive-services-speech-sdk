@@ -16,25 +16,50 @@
 namespace CARBON_NAMESPACE_ROOT {
 
 
+/// <summary>
+/// Event signal class, templatized over the event arguments <typeparamref name="T"/>.
+/// Clients can connect to the event signal to receive events, or disconnect from the event signal to stop receiving events.
+/// At construction time, connect and disconnect callbacks can be provided that are called when
+/// the number of connected clients changes from zero to one or one to zero, respectively.
+/// <summary>
+// <typeparam name="T">
 template <class T>
 class EventSignal
 {
 public:
 
+    /// <summary>
+    /// Type for callbacks used when any client connects to the signal (the number of connected clients changes from zero to one) or
+    /// the last client disconnects from the signal (the number of connected clients changes from one to zero).
+    /// </summary>
     using NotifyCallback_Type = std::function<void(EventSignal<T>&)>;
 
+    /// <summary>
+    /// Constructs an event signal with empty register and disconnect callbacks.
+    /// <summary>
     EventSignal() :
         m_connectedCallback(nullptr),
         m_disconnectedCallback(nullptr)
     {
     };
 
+    /// <summary>
+    /// Constructor.
+    /// <summary>
+    /// <param name="connected">Callback to invoke if the number of connected clients changes from zero to one.</param>
+    /// <param name="disconnected">Callback to invoke if the number of connected clients changes from one to zero.</param>
     EventSignal(NotifyCallback_Type connected, NotifyCallback_Type disconnected) :
         m_connectedCallback(connected),
         m_disconnectedCallback(disconnected)
     {
     };
 
+    /// <summary>
+    /// Destructor.
+    /// <summary>
+    /// <remarks>
+    /// No disconnect callback will be called.
+    /// <remarks>
     virtual ~EventSignal()
     {
         m_connectedCallback = nullptr;
@@ -42,25 +67,50 @@ public:
         DisconnectAll();
     };
 
+    /// <summary>
+    /// Callback type that is used for signalling the event to connected clients.
+    /// </summary>
     using CallbackFunction = std::function<void(T eventArgs)>;
 
+    /// <summary>
+    /// Addition assignment operator overload.
+    /// Connects the provided callback <paramref name="callback"/> to the event signal, see also <see cref="Connect"/>.
+    /// </summary>
+    /// <param name="callback">Callback to connect.</param>
     EventSignal<T>& operator+=(CallbackFunction callback)
     {
         Connect(callback);
         return *this;
     };
 
+    /// <summary>
+    /// Subtraction assignment operator overload.
+    /// Disconnects the provided callback <paramref name="callback"/> from the event signal, see also <see cref="Disconnect"/>.
+    /// </summary>
+    /// <param name="callback">Callback to disconnect.</param>
     EventSignal<T>& operator-=(CallbackFunction callback)
     {
         Disconnect(callback);
         return *this;
     };
 
+    /// <summary>
+    /// Function call operator.
+    /// Signals the event with given arguments <paramref name="t"/> to connected clients, see also <see cref="Signal"/>.
+    /// </summary>
+    /// <param name="t">Event arguments to signal.</param>
     void operator()(T t)
     {
         Signal(t);
     }
 
+    /// <summary>
+    /// Connects given callback function to the event signal, to be invoked when the event is signalled.
+    /// </summary>
+    /// <remark>
+    /// When the number of connected clients changes from zero to one, the connect callback will be called, if provided.
+    /// </remark>
+    /// <param name="callback">Callback to connect.</param>
     void Connect(CallbackFunction callback)
     {
         std::unique_lock<std::mutex> lock(m_mutex);
@@ -72,6 +122,12 @@ public:
         }
     };
 
+    /// <summary>
+    /// Disconnects given callback.
+    /// <summary>
+    /// <remark>
+    /// When the number of connected clients changes from one to zero, the disconnect callback will be called, if provided.
+    /// </remark>
     void Disconnect(CallbackFunction callback)
     {
         std::unique_lock<std::mutex> lock(m_mutex);
@@ -87,6 +143,9 @@ public:
         }
     };
 
+    /// <summary>
+    /// Disconnects all registered callbacks.
+    /// <summary>
     void DisconnectAll()
     {
         std::unique_lock<std::mutex> lock(m_mutex);
@@ -100,6 +159,10 @@ public:
         }
     };
 
+    /// <summary>
+    /// Signals the event with given arguments <paramref name="t"/> to all connected callbacks.
+    /// <summary>
+    /// <param name="t">Event arguments to signal.</param>
     void Signal(T t)
     {
         std::unique_lock<std::mutex> lock(m_mutex);
@@ -109,6 +172,10 @@ public:
         }
     };
 
+    /// <summary>
+    /// Checks if a callback is connected.
+    /// <summary>
+    /// <returns>true if a callback is connected</returns>
     bool IsConnected() const 
     {
         return !m_callbacks.empty();
