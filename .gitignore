@@ -80,3 +80,7 @@ samples/CxxHelloWorld/Debug
 samples/CxxHelloWorld/CxxHelloWorld/Debug
 samples/CxxHelloWorld/Release
 samples/CxxHelloWorld/CxxHelloWorld/Release
+
+samples/CsharpHelloWorld/CsharpHelloWorld/bin/
+samples/CsharpHelloWorld/CsharpHelloWorld/obj/
+samples/CsharpHelloWorld/packages/

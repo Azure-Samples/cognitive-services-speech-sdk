@@ -17,22 +17,22 @@ namespace CarbonSamples
     {
         private static void MyIntermediateResultEventHandler(object sender, SpeechRecognitionResultEventArgs e)
         {
-            Console.WriteLine(String.Format("Speech recogniton: intermediate result: {0} ", e.ToString()));
+            Console.WriteLine(String.Format("Speech recognition: intermediate result: {0} ", e.ToString()));
         }
 
         private static void MyFinalResultEventHandler(object sender, SpeechRecognitionResultEventArgs e)
         {
-            Console.WriteLine(String.Format("Speech recogniton:  final result: {0} ", e.ToString()));
+            Console.WriteLine(String.Format("Speech recognition: final result: {0} ", e.ToString()));
         }
 
         private static void MyErrorEventHandler(object sender, RecognitionErrorEventArgs e)
         {
-            Console.WriteLine(String.Format("Speech recogniton: error occured. SessionId: {0}, Reason: {1}", e.SessionId, e.Status));
+            Console.WriteLine(String.Format("Speech recognition: error occurred. SessionId: {0}, Reason: {1}", e.SessionId, e.Status));
         }
 
         private static void MySessionEventHandler(object sender, SessionEventArgs e)
         {
-            Console.WriteLine(String.Format("Speech recogniton: Session event: {0}.", e.ToString()));
+            Console.WriteLine(String.Format("Speech recognition: Session event: {0}.", e.ToString()));
         }
 
         public static async Task SpeechRecognitionBaseModelAsync(string keySpeech, string fileName)

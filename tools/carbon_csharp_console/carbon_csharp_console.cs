@@ -114,7 +114,7 @@ namespace CarbonSamples
                 }
                 else
                 {
-                    throw new InvalidOperationException("Only the following value is allowed: lang:languageor, model:modleId, endpoint:url.");
+                    throw new InvalidOperationException("Only the following values are allowed: lang:language, model:modelId, endpoint:url.");
                 }
             }
 
@@ -122,7 +122,7 @@ namespace CarbonSamples
             {
                 if (useEndpoint)
                 {
-                    Console.WriteLine("=============== Run speech recognoition samples by specifying endpoint. ===============");
+                    Console.WriteLine("=============== Run speech recognition samples by specifying endpoint. ===============");
                     SpeechRecognitionSamples.SpeechRecognitionByEndpointAsync(keySpeech, endpoint, fileName).Wait();
                 }
                 else
@@ -144,20 +144,20 @@ namespace CarbonSamples
             {
                 if (useEndpoint)
                 {
-                    Console.WriteLine("=============== Run intent recognoition samples by specifying endpoint. ===============");
+                    Console.WriteLine("=============== Run intent recognition samples by specifying endpoint. ===============");
                     IntentRecognitionSamples.IntentRecognitionByEndpointAsync(keySpeech, endpoint, fileName).Wait();
                 }
                 else
                 {
                     if (useBaseModel)
                     {
-                        Console.WriteLine("=============== Run intent recognoition samples using base speech model. ===============");
+                        Console.WriteLine("=============== Run intent recognition samples using base speech model. ===============");
                         IntentRecognitionSamples.IntentRecognitionBaseModelAsync(keySpeech, fileName).Wait();
                     }
                     else
                     {
                         Console.WriteLine("=============== Skip CRIS model for now. =======");
-                        //Console.WriteLine("=============== Run intent recognoition samples using customozed speech model. ===============");
+                        //Console.WriteLine("=============== Run intent recognition samples using customozed speech model. ===============");
                         //IntentRecognitionSamples.IntentRecognitionCustomizedModelAsync(keySpeech, modelId, fileName).Wait();
                     }
                 }

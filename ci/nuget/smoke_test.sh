@@ -8,6 +8,26 @@ function getUniqueMatch {
   echo "$1"
 }
 
+function patchPackageVersion {
+  local PACKAGE_NAME PACKAGE_VERSION PACKAGES_CONFIG
+
+  PACKAGE_NAME="$1"
+  PACKAGE_VERSION="$2"
+  PACKAGES_CONFIG="$3"
+
+  # Patch Speech SDK Version into packages.config file
+  powershell -NoProfile -NoLogo -ExecutionPolicy Bypass -NonInteractive -Command - <<PATCHPACKAGEVERSION
+\$ErrorActionPreference = 'Stop'
+\$cfgPath = Resolve-Path '$PACKAGES_CONFIG'
+\$cfg = [xml](Get-Content \$cfgPath)
+\$exitCode = 1
+\$cfg.packages.package | Where-Object id -eq '$PACKAGE_NAME' | ForEach-Object { \$_.version = '$PACKAGE_VERSION'; \$exitCode = 0 }
+\$cfg.Save(\$cfgPath)
+Write-Host \$exitCode
+exit \$exitCode
+PATCHPACKAGEVERSION
+}
+
 SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
 
@@ -44,44 +64,57 @@ echo Determined version as $PACKAGE_VERSION.
 cd "$SCRIPT_DIR/../.."
 
 MSBUILD15="/c/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/MSBuild/15.0/bin/msbuild.exe"
-DOWNLOAD_AUDIO=tests/scripts/download_audio.sh
-PACKAGES_CONFIG=samples/CxxHelloWorld/CxxHelloWorld/packages.config
 
 # Check for dependencies
 type $NUGETEXETOOLPATH
 [[ -x $MSBUILD15 ]]
-[[ -x $DOWNLOAD_AUDIO ]]
-[[ -e $PACKAGES_CONFIG ]]
 
-# Download audio (test dependency)
-"$DOWNLOAD_AUDIO"
+WAV_PATH=tests/input/audio/whatstheweatherlike.wav
+[[ -e $WAV_PATH ]]
 
-# Patch Speech SDK Version into packages.config file
-powershell -NoProfile -NoLogo -ExecutionPolicy Bypass -NonInteractive -Command - <<PATCHPACKAGEVERSION
-\$ErrorActionPreference = 'Stop'
-\$cfgPath = Resolve-Path '$PACKAGES_CONFIG'
-\$cfg = [xml](Get-Content \$cfgPath)
-\$exitCode = 1
-\$cfg.packages.package | Where-Object id -eq '$PACKAGE_NAME' | ForEach-Object { \$_.version = '$PACKAGE_VERSION'; \$exitCode = 0 }
-\$cfg.Save(\$cfgPath)
-Write-Host \$exitCode
-exit \$exitCode
-PATCHPACKAGEVERSION
+# Native sample build and test
 
-$NUGETEXETOOLPATH restore -noninteractive "$PACKAGES_CONFIG" -packagesdirectory samples/CxxHelloWorld/packages -nocache -source "$(dirname "$PACKAGE_PATH")"
+NATIVE_SAMPLE_PACKAGES_DIR=samples/CxxHelloWorld/packages 
+NATIVE_SAMPLE_PACKAGES_CONFIG=samples/CxxHelloWorld/CxxHelloWorld/packages.config
+[[ -e $NATIVE_SAMPLE_PACKAGES_CONFIG ]]
 
-# TODO more samples, and C#
-SOLUTION=samples/CxxHelloWorld/CxxHelloWorld.sln
+patchPackageVersion "$PACKAGE_NAME" "$PACKAGE_VERSION" "$NATIVE_SAMPLE_PACKAGES_CONFIG"
+
+$NUGETEXETOOLPATH restore -noninteractive "$NATIVE_SAMPLE_PACKAGES_CONFIG" -packagesdirectory "$NATIVE_SAMPLE_PACKAGES_DIR" -nocache -source "$(dirname "$PACKAGE_PATH")"
+
+NATIVE_SAMPLE_SLN=samples/CxxHelloWorld/CxxHelloWorld.sln
 
 # Build and test all configurations
 for configuration in Debug Release; do
 for platform in x86 x64; do
 for useDebugLibs in 1 0; do
-  MSYS_NO_PATHCONV=1 "$MSBUILD15" /m /p:Platform=$platform /p:Configuration=$configuration /p:SpeechSdkUseDebugLibs=$useDebugLibs /p:SpeechSdkVersion=$PACKAGE_VERSION $SOLUTION
+  MSYS_NO_PATHCONV=1 "$MSBUILD15" /m /p:Platform=$platform /p:Configuration=$configuration /p:SpeechSdkUseDebugLibs=$useDebugLibs /p:SpeechSdkVersion=$PACKAGE_VERSION $NATIVE_SAMPLE_SLN
   BINROOT=
   [[ $platform == x64 ]] && BINROOT=/$platform
-  MSYS_NO_PATHCONV=1 ./samples/CxxHelloWorld$BINROOT/$configuration/CxxHelloWorld.exe $SPEECH_SUBSCRIPTION_KEY whatstheweatherlike.wav
+  ./samples/CxxHelloWorld$BINROOT/$configuration/CxxHelloWorld.exe $SPEECH_SUBSCRIPTION_KEY $WAV_PATH
 done
+done
+done
+
+# Managed sample build and test
+
+# TODO WIP
+
+MANAGED_SAMPLE_SLN=samples/CsharpHelloWorld/CsharpHelloWorld.sln
+MANAGED_SAMPLE_PACKAGES_DIR=samples/CsharpHelloWorld/packages
+MANAGED_SAMPLE_PACKAGES_CONFIG=samples/CsharpHelloWorld/CsharpHelloWorld/packages.config
+[[ -e $MANAGED_SAMPLE_PACKAGES_CONFIG ]]
+
+patchPackageVersion "$PACKAGE_NAME" "$PACKAGE_VERSION" "$MANAGED_SAMPLE_PACKAGES_CONFIG"
+$NUGETEXETOOLPATH restore -noninteractive "$MANAGED_SAMPLE_PACKAGES_CONFIG" -packagesdirectory "$MANAGED_SAMPLE_PACKAGES_DIR" -nocache -source "$(dirname "$PACKAGE_PATH")"
+
+# Build and test all configurations
+for configuration in Debug Release; do
+for platform in x86 x64; do
+#for useDebugLibs in 1 0; do
+  MSYS_NO_PATHCONV=1 "$MSBUILD15" /m /p:Platform=$platform /p:Configuration=$configuration /p:SpeechSdkUseDebugLibs=$useDebugLibs /p:SpeechSdkVersion=$PACKAGE_VERSION $MANAGED_SAMPLE_SLN
+  ./samples/CsharpHelloWorld/CsharpHelloWorld/bin/$platform/$configuration/CsharpHelloWorld.exe $SPEECH_SUBSCRIPTION_KEY $WAV_PATH
+#done
 done
 done
 
