@@ -51,7 +51,7 @@ public:
     /// Returns the content of this ResultPropertyValue as a string.
     /// </summary>
     /// <param name="defaultValue">Default value to return if this ResultPropertyValue instance corresponds
-    /// to a non-existing property. </param>
+    /// to a non-existing string property. </param>
     std::wstring GetString(const wchar_t* defaultValue) override { return GetString(m_hresult, m_name.c_str(), defaultValue); }
 
     /// <summary>
@@ -68,7 +68,7 @@ public:
     /// Returns the content of this ResultPropertyValue as a number.
     /// </summary>
     /// <param name="defaultValue">Default value to return if this ResultPropertyValue instance corresponds
-    /// to a non-existing property. </param>
+    /// to a non-existing number property. </param>
     int32_t GetNumber(int32_t defaultValue) override { return GetNumber(m_hresult, m_name.c_str(), defaultValue); }
 
     /// <summary>
@@ -77,19 +77,19 @@ public:
     void SetNumber(int32_t value) override { UNUSED(value); SPX_THROW_HR(SPXERR_NOT_IMPL); }
 
     /// <summary>
-    /// Returns true if the encapsulated value has a boolean type.
+    /// Returns true if the encapsulated value has a Boolean type.
     /// </summary>
     bool IsBool() override { return ContainsBool(m_hresult, m_name.c_str()); }
 
     /// <summary>
-    /// Returns the content of this ResultPropertyValue as a boolean.
+    /// Returns the content of this ResultPropertyValue as a Boolean.
     /// </summary>
     /// <param name="defaultValue">Default value to return if this ResultPropertyValue instance corresponds
-    /// to a non-existing property. </param>
+    /// to a non-existing Boolean property. </param>
     bool GetBool(bool defaultValue) override { return GetBool(m_hresult, m_name.c_str(), defaultValue); }
 
     /// <summary>
-    /// Stores the specified boolean inside the encapsulated value.
+    /// Stores the specified Boolean inside the encapsulated value.
     /// </summary>
     void SetBool(bool value) override { UNUSED(value); SPX_THROW_HR(SPXERR_NOT_IMPL); }
 

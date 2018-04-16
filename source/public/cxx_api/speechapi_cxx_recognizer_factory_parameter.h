@@ -15,33 +15,81 @@
 namespace CARBON_NAMESPACE_ROOT {
 namespace Recognition {
 
-
+/// <summary>
+/// Enumerates parameters that can be used to configure a recognizer factory.
+/// </summary>
 enum class FactoryParameter { SpeechSubscriptionKey = 1, SpeechEndpoint = 2 };
 
-
+/// <summary>
+/// Represents the value of a recognizer factory parameter returned by the subscript operator
+/// on the corresponding parameter value collection.
+/// </summary>
 class RecognizerFactoryParameterValue : public Value
 {
 public:
 
+    /// <summary>
+    /// Internal constructor. Creates a new instance using the provided handle and a parameter name.
+    /// </summary>
     RecognizerFactoryParameterValue(SPXRECOFACTORYHANDLE hrecofactory, const wchar_t* name) : m_hrecofactory(hrecofactory), m_name(name) { }
+
+    /// <summary>
+    /// Internal constructor. Creates a new instance using the provided handle and a FactoryParameter value.
+    /// </summary>
     RecognizerFactoryParameterValue(SPXRECOFACTORYHANDLE hrecofactory, enum FactoryParameter parameter) : m_hrecofactory(hrecofactory), m_name(ParameterNameFromEnum(parameter)) { }
 
+    /// <summary>
+    /// Returns true if the encapsulated value has a string type.
+    /// </summary>
     bool IsString() override { return ContainsString(m_hrecofactory, m_name.c_str()); }
+
+    /// <summary>
+    /// Returns the content of this RecognizerFactoryParameterValue as a string.
+    /// </summary>
+    /// <param name="defaultValue">Default value to return if this RecognizerFactoryParameterValue instance corresponds
+    /// to a non-existing string parameter. </param>
     std::wstring GetString(const wchar_t* defaultValue) override { return GetString(m_hrecofactory, m_name.c_str(), defaultValue); }
+
+    /// <summary>
+    /// Stores the specified string inside the encapsulated value.
+    /// </summary>
     void SetString(const wchar_t* value) override { return SetString(m_hrecofactory, m_name.c_str(), value); }
 
+    /// <summary>
+    /// Returns true if the encapsulated value has a number type.
+    /// </summary>
     bool IsNumber() override { return ContainsNumber(m_hrecofactory, m_name.c_str()); }
+
+    /// <summary>
+    /// Returns the content of this RecognizerFactoryParameterValue as a number.
+    /// </summary>
+    /// <param name="defaultValue">Default value to return if this RecognizerFactoryParameterValue instance corresponds
+    /// to a non-existing number parameter. </param>
     int32_t GetNumber(int32_t defaultValue) override { return GetNumber(m_hrecofactory, m_name.c_str(), defaultValue); }
+
+    /// <summary>
+    /// Stores the specified number inside the encapsulated value.
+    /// </summary>
     void SetNumber(int32_t value) override { SetNumber(m_hrecofactory, m_name.c_str(), value); }
 
+    /// <summary>
+    /// Returns true if the encapsulated value has a Boolean type.
+    /// </summary>
     bool IsBool() override { return ContainsBool(m_hrecofactory, m_name.c_str()); }
+
+    /// <summary>
+    /// Returns the content of this RecognizerFactoryParameterValue as a Boolean.
+    /// </summary>
+    /// <param name="defaultValue">Default value to return if this RecognizerFactoryParameterValue instance corresponds
+    /// to a non-existing parameter. </param>
     bool GetBool(bool defaultValue) override { return GetBool(m_hrecofactory, m_name.c_str(), defaultValue); }
+
+    /// <summary>
+    /// Stores the specified Boolean inside the encapsulated value.
+    /// </summary>
     void SetBool(bool value) override { SetBool(m_hrecofactory, m_name.c_str(), value); }
 
-    RecognizerFactoryParameterValue(RecognizerFactoryParameterValue&&) = delete;
-    RecognizerFactoryParameterValue(const RecognizerFactoryParameterValue&) = delete;
-    RecognizerFactoryParameterValue& operator=(RecognizerFactoryParameterValue&&) = delete;
-    RecognizerFactoryParameterValue& operator=(const RecognizerFactoryParameterValue&) = delete;
+    DISABLE_COPY_AND_MOVE(RecognizerFactoryParameterValue);
 
 private: 
 
@@ -114,14 +162,30 @@ private:
     std::wstring m_name;
 };
 
-
+/// <summary>
+/// Represents a collection of named recognizer factory parameters.
+/// </summary>
 class RecognizerFactoryParameterCollection : public HandleValueCollection<SPXRECOFACTORYHANDLE, RecognizerFactoryParameterValue>
 {
 public:
 
+    /// <summary>
+    /// Internal constructor. Creates a new instance using the provided handle.
+    /// </summary>
     RecognizerFactoryParameterCollection(SPXRECOFACTORYHANDLE hrecofactory = SPXHANDLE_DEFAULT) : HandleValueCollection(hrecofactory) { }
 
+    /// <summary>
+    /// Subscript operator.
+    /// </summary>
+    /// <param name="name">String name of the requested parameter value.</param>
+    /// <returns>Value object mapped to the specified name.</returns>
     Value operator[](const wchar_t* name) override { return Value(new RecognizerFactoryParameterValue(m_handle, name)); }
+
+    /// <summary>
+    /// Subscript operator.
+    /// </summary>
+    /// <param name="index">One of the FactoryParameter values.</param>
+    /// <returns>Value object mapped to the specified FactoryParameter enum.</returns>
     Value operator[](enum FactoryParameter parameter) { return Value(new RecognizerFactoryParameterValue(m_handle, parameter)); }
 };
 

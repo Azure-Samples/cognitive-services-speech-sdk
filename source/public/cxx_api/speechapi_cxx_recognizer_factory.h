@@ -544,17 +544,17 @@ public:
         static int32_t GetNumber(const wchar_t* name, int32_t defaultValue = 0) { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).GetNumber(defaultValue); }
 
         /// <summary>
-        /// Returns true if default factory contains a global parameter of a boolean type with the corresponding name.
+        /// Returns true if default factory contains a global parameter of a Boolean type with the corresponding name.
         /// </summary>
         static bool ContainsBool(const wchar_t* name) { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).IsBool(); }
 
         /// <summary>
-        /// Stores the specified boolean value as a default factory global parameter mapped to the specified name.
+        /// Stores the specified Boolean value as a default factory global parameter mapped to the specified name.
         /// </summary>
         static void SetBool(const wchar_t* name, bool value) { RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).SetBool(value); }
         
         /// <summary>
-        /// Returns boolean value of the default factory global parameter mapped to the specified name.
+        /// Returns Boolean value of the default factory global parameter mapped to the specified name.
         /// </summary>
         /// <param name="defaultValue">Default value to return if the mapping does not exist. </param>
         static bool GetBool(const wchar_t* name, bool defaultValue = false) { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).GetBool(defaultValue); }
@@ -592,17 +592,17 @@ public:
         static int32_t GetNumber(enum FactoryParameter parameter, int32_t defaultValue = 0) { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, parameter).GetNumber(defaultValue); }
 
         /// <summary>
-        /// Returns true if the provided FactoryParameter enum value corresponds to a default factory global parameter of a boolean type.
+        /// Returns true if the provided FactoryParameter enum value corresponds to a default factory global parameter of a Boolean type.
         /// </summary>
         static bool ContainsBool(enum FactoryParameter parameter) { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, parameter).IsBool(); }
 
         /// <summary>
-        /// Stores the specified boolean value as a default factory global parameter corresponding to the provided FactoryParameter enum value.
+        /// Stores the specified Boolean value as a default factory global parameter corresponding to the provided FactoryParameter enum value.
         /// </summary>
         static void SetBool(enum FactoryParameter parameter, bool value) { RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, parameter).SetBool(value); }
 
         /// <summary>
-        /// Returns boolean value of the default factory global parameter corresponding to the provided FactoryParameter enum value.
+        /// Returns Boolean value of the default factory global parameter corresponding to the provided FactoryParameter enum value.
         /// </summary>
         /// <param name="defaultValue">Default value to return if the corresponding parameter does not exist</param>
         static bool GetBool(enum FactoryParameter parameter, bool defaultValue = false) { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, parameter).GetBool(defaultValue); }
