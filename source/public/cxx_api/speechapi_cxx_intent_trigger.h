@@ -28,10 +28,10 @@ public:
     /// </summary>
     /// <param name="simplePhrase">The simple phrase to create an intent trigger for.</param>
     /// <returns>A shared pointer to an intent trigger.</returns>
-    static std::shared_ptr<IntentTrigger> From(const wchar_t* simplePhrase)
+    static std::shared_ptr<IntentTrigger> From(const std::wstring& simplePhrase)
     {
         SPXTRIGGERHANDLE htrigger = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(IntentTrigger_Create_From_Phrase(simplePhrase, &htrigger));
+        SPX_THROW_ON_FAIL(IntentTrigger_Create_From_Phrase(simplePhrase.c_str(), &htrigger));
         return std::make_shared<IntentTrigger>(htrigger);
     }
 
@@ -53,10 +53,10 @@ public:
     /// <param name="model">The LuisModel to create an intent trigger for.</param>
     /// <param name="model">The intent name to create an intent trigger for.</param>
     /// <returns>A shared pointer to an intent trigger.</returns>
-    static std::shared_ptr<IntentTrigger> From(std::shared_ptr<LuisModel> model, const wchar_t* intentName)
+    static std::shared_ptr<IntentTrigger> From(std::shared_ptr<LuisModel> model, const std::wstring& intentName)
     {
         SPXTRIGGERHANDLE htrigger = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(IntentTrigger_Create_From_LuisModel_Intent((SPXLUISHANDLE)(*model.get()), intentName, &htrigger));
+        SPX_THROW_ON_FAIL(IntentTrigger_Create_From_LuisModel_Intent((SPXLUISHANDLE)(*model.get()), intentName.c_str(), &htrigger));
         return std::make_shared<IntentTrigger>(htrigger);
     }
 

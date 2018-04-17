@@ -45,7 +45,7 @@ public:
 
     RecognizerParameterValueCollection Parameters;
 
-    void SetCustomSpeechModel(const wchar_t* modelId) { Parameters[RecognizerParameter::CustomSpeechModelId] = modelId; }
+    void SetCustomSpeechModel(const std::wstring& modelId) { Parameters[RecognizerParameter::CustomSpeechModelId] = modelId.c_str(); }
 
 
 private:

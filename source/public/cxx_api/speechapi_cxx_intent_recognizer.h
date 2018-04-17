@@ -77,7 +77,7 @@ public:
     /// </summary>
     /// <param name="intentId">Id of the intent.</param>
     /// <param name="phrase">The phrase corresponding to the intent.</param>
-    void AddIntent(const wchar_t* intentId, const wchar_t* simplePhrase)
+    void AddIntent(const std::wstring& intentId, const std::wstring& simplePhrase)
     {
         auto trigger = IntentTrigger::From(simplePhrase);
         return AddIntent(intentId, trigger);
@@ -88,9 +88,9 @@ public:
     /// </summary>
     /// <param name="intentId">Id of the intent.</param>
     /// <param name="trigger">The IntentTrigger corresponding to the intent.</param>
-    void AddIntent(const wchar_t* intentId, std::shared_ptr<IntentTrigger> trigger)
+    void AddIntent(const std::wstring& intentId, std::shared_ptr<IntentTrigger> trigger)
     {
-        SPX_THROW_ON_FAIL(IntentRecognizer_AddIntent(m_hreco, intentId, (SPXTRIGGERHANDLE)(*trigger.get())));
+        SPX_THROW_ON_FAIL(IntentRecognizer_AddIntent(m_hreco, intentId.c_str(), (SPXTRIGGERHANDLE)(*trigger.get())));
     }
 
 

@@ -27,10 +27,10 @@ public:
     /// </summary>
     /// <param name="uri">The endpoint url of a LUIS model.</param>
     /// <returns>A shared pointer to LUIS model.</returns>
-    static std::shared_ptr<LuisModel> From(const wchar_t* uri)
+    static std::shared_ptr<LuisModel> From(const std::wstring& uri)
     {
         SPXLUISHANDLE hluis = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(LuisModel_Create_From_Uri(uri, &hluis));
+        SPX_THROW_ON_FAIL(LuisModel_Create_From_Uri(uri.c_str(), &hluis));
         return std::make_shared<LuisModel>(hluis);
     }
 
@@ -40,10 +40,10 @@ public:
     /// <param name="subscriptionKey">Subscription key.</param>
     /// <param name="appId">Application id.</param>
     /// <returns>A shared pointer to LUIS model.</returns>
-    static std::shared_ptr<LuisModel> From(const wchar_t* subscriptionKey, const wchar_t* appId)
+    static std::shared_ptr<LuisModel> From(const std::wstring& subscriptionKey, const std::wstring& appId)
     {
         SPXLUISHANDLE hluis = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(LuisModel_Create_From_Subscription(nullptr, subscriptionKey, appId, &hluis));
+        SPX_THROW_ON_FAIL(LuisModel_Create_From_Subscription(nullptr, subscriptionKey.c_str(), appId.c_str(), &hluis));
         return std::make_shared<LuisModel>(hluis);
     }
 
@@ -54,10 +54,10 @@ public:
     /// <param name="subscriptionKey">Subscription key.</param>
     /// <param name="appId">Application id.</param>
     /// <returns>A shared pointer to LUIS model.</returns>
-    static std::shared_ptr<LuisModel> From(const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId)
+    static std::shared_ptr<LuisModel> From(const std::wstring& hostName, const std::wstring& subscriptionKey, const std::wstring& appId)
     {
         SPXLUISHANDLE hluis = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(LuisModel_Create_From_Subscription(hostName, subscriptionKey, appId, &hluis));
+        SPX_THROW_ON_FAIL(LuisModel_Create_From_Subscription(hostName.c_str(), subscriptionKey.c_str(), appId.c_str(), &hluis));
         return std::make_shared<LuisModel>(hluis);
     }
 

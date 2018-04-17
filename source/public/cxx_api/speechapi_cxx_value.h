@@ -57,7 +57,7 @@ public:
     /// If the value represents a string, sets its value.
     /// </summary>
     /// <param name="value">Value to set</param>
-    virtual void SetString(const wchar_t* value) { m_delegatePtr->SetString(value); }
+    virtual void SetString(const std::wstring& value) { m_delegatePtr->SetString(value); }
 
     /// <summary>
     /// If the value represents a string, gets its value.
@@ -65,7 +65,7 @@ public:
     /// </summary>
     /// <param name="defaultValue">Value to return if value type is not string (defaults to empty string).</param>
     /// <returns>string value or default</returns>
-    virtual std::wstring GetString(const wchar_t* defaultValue = L"") { return m_delegatePtr->GetString(defaultValue); }
+    virtual std::wstring GetString(const std::wstring& defaultValue = L"") { return m_delegatePtr->GetString(defaultValue); }
 
     /// <summary>
     /// Checks if the value represents a number (32-bit integer).
@@ -112,7 +112,7 @@ public:
     /// </summary>
     /// <param name="value">Value to set</param>
     /// <returns>the value that was set</returns>
-    const wchar_t* operator=(const wchar_t* value) { SetString(value); return value; }
+    const std::wstring& operator=(const std::wstring& value) { SetString(value); return value; }
 
     /// <summary>
     /// Assignment operator for a value that represents a number (32-bit integer).
@@ -186,19 +186,19 @@ public:
     BaseValueCollection() { }
     virtual ~BaseValueCollection() { }
 
-    virtual Value operator[](const wchar_t* name) = 0;
+    virtual Value operator[](const std::wstring& name) = 0;
 
-    virtual bool ContainsString(const wchar_t* name) = 0;
-    virtual void SetString(const wchar_t* name, const wchar_t* value) = 0;
-    virtual std::wstring GetString(const wchar_t* name, const wchar_t* defaultValue = L"") = 0;
+    virtual bool ContainsString(const std::wstring& name) = 0;
+    virtual void SetString(const std::wstring& name, const std::wstring& value) = 0;
+    virtual std::wstring GetString(const std::wstring& name, const std::wstring& defaultValue = L"") = 0;
 
-    virtual bool ContainsNumber(const wchar_t* name) = 0;
-    virtual void SetNumber(const wchar_t* name, int32_t value) = 0;
-    virtual int32_t GetNumber(const wchar_t* name, int32_t defaultValue = 0) = 0;
+    virtual bool ContainsNumber(const std::wstring& name) = 0;
+    virtual void SetNumber(const std::wstring& name, int32_t value) = 0;
+    virtual int32_t GetNumber(const std::wstring& name, int32_t defaultValue = 0) = 0;
 
-    virtual bool ContainsBool(const wchar_t* name) = 0;
-    virtual void SetBool(const wchar_t* name, bool value) = 0;
-    virtual bool GetBool(const wchar_t* name, bool defaultValue = false) = 0;
+    virtual bool ContainsBool(const std::wstring& name) = 0;
+    virtual void SetBool(const std::wstring& name, bool value) = 0;
+    virtual bool GetBool(const std::wstring& name, bool defaultValue = false) = 0;
 };
 
 
@@ -210,19 +210,19 @@ public:
     ValueCollection() { }
     ~ValueCollection() { }
 
-    Value operator[](const wchar_t* name) override { return Value(new T(name)); }
+    Value operator[](const std::wstring& name) override { return Value(new T(name)); }
 
-    bool ContainsString(const wchar_t* name) override { return T(name).IsString(); }
-    void SetString(const wchar_t* name, const wchar_t* value) override { T(name).SetString(value); }
-    std::wstring GetString(const wchar_t* name, const wchar_t* defaultValue = L"") override { return T(name).GetString(defaultValue); }
+    bool ContainsString(const std::wstring& name) override { return T(name).IsString(); }
+    void SetString(const std::wstring& name, const std::wstring& value) override { T(name).SetString(value); }
+    std::wstring GetString(const std::wstring& name, const std::wstring& defaultValue = L"") override { return T(name).GetString(defaultValue); }
 
-    bool ContainsNumber(const wchar_t* name) override { return T(name).IsNumber(); }
-    void SetNumber(const wchar_t* name, int32_t value) override { T(name).SetNumber(value); }
-    int32_t GetNumber(const wchar_t* name, int32_t defaultValue = 0) override { return T(name).GetNumber(defaultValue); }
+    bool ContainsNumber(const std::wstring& name) override { return T(name).IsNumber(); }
+    void SetNumber(const std::wstring& name, int32_t value) override { T(name).SetNumber(value); }
+    int32_t GetNumber(const std::wstring& name, int32_t defaultValue = 0) override { return T(name).GetNumber(defaultValue); }
 
-    bool ContainsBool(const wchar_t* name) override { return T(name).IsBool(); }
-    void SetBool(const wchar_t* name, bool value) override { T(name).SetBool(value); }
-    bool GetBool(const wchar_t* name, bool defaultValue = false) override { return T(name).GetBool(defaultValue); }
+    bool ContainsBool(const std::wstring& name) override { return T(name).IsBool(); }
+    void SetBool(const std::wstring& name, bool value) override { T(name).SetBool(value); }
+    bool GetBool(const std::wstring& name, bool defaultValue = false) override { return T(name).GetBool(defaultValue); }
 
     // TODO: Fix SWIG such that we don't need to expose the default methods below... 
     //       And then... once fixed ... delete the next 3 lines of code:
@@ -243,19 +243,19 @@ public:
     HandleValueCollection(Handle handle) : m_handle(handle) { }
     ~HandleValueCollection() { }
 
-    Value operator[](const wchar_t* name) override { return Value(new T(m_handle, name)); }
+    Value operator[](const std::wstring& name) override { return Value(new T(m_handle, name)); }
 
-    bool ContainsString(const wchar_t* name) override { return T(m_handle, name).IsString(); }
-    void SetString(const wchar_t* name, const wchar_t* value) override { T(m_handle, name).SetString(value); }
-    std::wstring GetString(const wchar_t* name, const wchar_t* defaultValue = L"") override { return T(m_handle, name).GetString(defaultValue); }
+    bool ContainsString(const std::wstring& name) override { return T(m_handle, name).IsString(); }
+    void SetString(const std::wstring& name, const std::wstring& value) override { T(m_handle, name).SetString(value); }
+    std::wstring GetString(const std::wstring& name, const std::wstring& defaultValue = L"") override { return T(m_handle, name).GetString(defaultValue); }
 
-    bool ContainsNumber(const wchar_t* name) override { return T(m_handle, name).IsNumber(); }
-    void SetNumber(const wchar_t* name, int32_t value) override { T(m_handle, name).SetNumber(value); }
-    int32_t GetNumber(const wchar_t* name, int32_t defaultValue = 0) override { return T(m_handle, name).GetNumber(defaultValue); }
+    bool ContainsNumber(const std::wstring& name) override { return T(m_handle, name).IsNumber(); }
+    void SetNumber(const std::wstring& name, int32_t value) override { T(m_handle, name).SetNumber(value); }
+    int32_t GetNumber(const std::wstring& name, int32_t defaultValue = 0) override { return T(m_handle, name).GetNumber(defaultValue); }
 
-    bool ContainsBool(const wchar_t* name) override { return T(m_handle, name).IsBool(); }
-    void SetBool(const wchar_t* name, bool value) override { T(m_handle, name).SetBool(value); }
-    bool GetBool(const wchar_t* name, bool defaultValue = false) override { return T(m_handle, name).GetBool(defaultValue); }
+    bool ContainsBool(const std::wstring& name) override { return T(m_handle, name).IsBool(); }
+    void SetBool(const std::wstring& name, bool value) override { T(m_handle, name).SetBool(value); }
+    bool GetBool(const std::wstring& name, bool defaultValue = false) override { return T(m_handle, name).GetBool(defaultValue); }
 
 
     // TODO: Fix SWIG such that we don't need to expose the default methods below... 

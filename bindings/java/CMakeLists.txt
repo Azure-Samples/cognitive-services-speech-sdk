@@ -33,7 +33,7 @@ set(SWIG_MODULE_${JAVA_BINDINGS}_EXTRA_DEPS
     ${SPEECH_CXX_API_HEADERS})
 
 # ${SWIG_INTERFACE} should resolve to {repo/root}/bindings/carbon.i
-set(CMAKE_SWIG_FLAGS -w401,516,503 -package Carbon)
+set(CMAKE_SWIG_FLAGS -w401,516,503 -package "Carbon.Internal")
 set_source_files_properties("${SRC_DIR}/carbon_java.i" PROPERTIES CPLUSPLUS ON)
 
 # Make sure the nested directory structure exists
@@ -69,6 +69,33 @@ set(JAVA_LIB ${PROJECT_NAME}_lib)
 # set(SWIG_JAVA_SOURCES ${JAVA_SOURCE_DIRECTORY}/*.java)
 # SET_SOURCE_FILES_PROPERTIES(${SWIG_JAVA_SOURCES} PROPERTIES GENERATED TRUE)
 #file(GLOB SWIG_JAVA_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/swig-generated/*.java")
+set(JAVA_SOURCES
+    Carbon/ParameterCollection.java
+    Carbon/SessionEventArgs.java
+    Carbon/SessionEventType.java
+    Carbon/Recognition/AudioInputStream.java
+    Carbon/Recognition/IntentModel.java
+    Carbon/Recognition/ParameterNames.java
+    Carbon/Recognition/RecognitionErrorEventArgs.java
+    Carbon/Recognition/RecognitionStatus.java
+    Carbon/Recognition/Recognizer.java
+    Carbon/Recognition/RecognizerFactory.java
+    Carbon/Recognition/TranslationRecognizer.java
+    Carbon/Recognition/Intent/IntentRecognitionResult.java
+    Carbon/Recognition/Intent/IntentRecognitionResultEventArgs.java
+    Carbon/Recognition/Intent/IntentRecognizer.java
+    Carbon/Recognition/Speech/SpeechRecognitionReason.java
+    Carbon/Recognition/Speech/SpeechRecognitionResult.java
+    Carbon/Recognition/Speech/SpeechRecognitionResultEventArgs.java
+    Carbon/Recognition/Speech/SpeechRecognizer.java
+    Carbon/Recognition/Translation/TranslationSynthesisResult.java
+    Carbon/Recognition/Translation/TranslationSynthesisResultEventArgs.java
+    Carbon/Recognition/Translation/TranslationTextResult.java
+    Carbon/Recognition/Translation/TranslationTextResultEventArgs.java
+    Carbon/Util/EventHandler.java
+    Carbon/Util/EventHandlerImpl.java
+    Carbon/Util/Task.java
+)
 
 set(SWIG_JAVA_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/AudioInputStream.java
@@ -157,7 +184,6 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXSESSIONHANDLE.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXTRIGGERHANDLE.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IDefaultRecognizerFactory.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_wchar_t.java
 
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/Value.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/ValueCollectionRecognizerParameter.java
@@ -172,7 +198,7 @@ SET_SOURCE_FILES_PROPERTIES(${SWIG_JAVA_SOURCES} PROPERTIES GENERATED TRUE)
 
 
 enable_language(Java)
-add_jar(${JAVA_LIB} SOURCES ${SWIG_JAVA_SOURCES})
+add_jar(${JAVA_LIB} SOURCES ${SWIG_JAVA_SOURCES} ${JAVA_SOURCES})
 add_dependencies(${JAVA_LIB} ${JAVA_BINDINGS} ${SWIG_MODULE_${JAVA_BINDINGS}_REAL_NAME})
 
 set_target_properties(${SWIG_MODULE_${JAVA_LIB}_REAL_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

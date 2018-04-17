@@ -514,50 +514,50 @@ public:
         /// <summary>
         /// Returns true if default factory contains a global parameter of type string with the corresponding name.
         /// </summary>
-        static bool ContainsString(const wchar_t* name) { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).IsString(); }
+        static bool ContainsString(const std::wstring& name) { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).IsString(); }
 
         /// <summary>
         /// Stores the specified string value as a default factory global parameter mapped to the specified name.
         /// </summary>
-        static void SetString(const wchar_t* name, const wchar_t* value) { RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).SetString(value); }
+        static void SetString(const std::wstring& name, const std::wstring& value) { RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).SetString(value); }
 
         /// <summary>
         /// Returns string value of the default factory global parameter mapped to the specified name.
         /// </summary>
         /// <param name="defaultValue">Default value to return if the mapping does not exist. </param>
-        static std::wstring GetString(const wchar_t* name, const wchar_t* defaultValue = L"") { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).GetString(defaultValue); }
+        static std::wstring GetString(const std::wstring& name, const std::wstring& defaultValue = L"") { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).GetString(defaultValue); }
 
         /// <summary>
         /// Returns true if default factory contains a global parameter of a number type with the corresponding name.
         /// </summary>
-        static bool ContainsNumber(const wchar_t* name) { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).IsNumber(); }
+        static bool ContainsNumber(const std::wstring& name) { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).IsNumber(); }
 
         /// <summary>
         /// Stores the specified number value as a default factory global parameter mapped to the specified name.
         /// </summary>
-        static void SetNumber(const wchar_t* name, int32_t value) { RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).SetNumber(value); }
+        static void SetNumber(const std::wstring& name, int32_t value) { RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).SetNumber(value); }
 
         /// <summary>
         /// Returns number value of the default factory global parameter mapped to the specified name.
         /// </summary>
         /// <param name="defaultValue">Default value to return if the mapping does not exist. </param>
-        static int32_t GetNumber(const wchar_t* name, int32_t defaultValue = 0) { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).GetNumber(defaultValue); }
+        static int32_t GetNumber(const std::wstring& name, int32_t defaultValue = 0) { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).GetNumber(defaultValue); }
 
         /// <summary>
         /// Returns true if default factory contains a global parameter of a Boolean type with the corresponding name.
         /// </summary>
-        static bool ContainsBool(const wchar_t* name) { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).IsBool(); }
+        static bool ContainsBool(const std::wstring& name) { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).IsBool(); }
 
         /// <summary>
         /// Stores the specified Boolean value as a default factory global parameter mapped to the specified name.
         /// </summary>
-        static void SetBool(const wchar_t* name, bool value) { RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).SetBool(value); }
+        static void SetBool(const std::wstring& name, bool value) { RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).SetBool(value); }
         
         /// <summary>
         /// Returns Boolean value of the default factory global parameter mapped to the specified name.
         /// </summary>
         /// <param name="defaultValue">Default value to return if the mapping does not exist. </param>
-        static bool GetBool(const wchar_t* name, bool defaultValue = false) { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).GetBool(defaultValue); }
+        static bool GetBool(const std::wstring& name, bool defaultValue = false) { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, name).GetBool(defaultValue); }
 
         /// <summary>
         /// Returns true if the provided FactoryParameter enum value corresponds to a default factory global parameter of type string.
@@ -567,13 +567,13 @@ public:
         /// <summary>
         /// Stores the specified string value as a default factory global parameter corresponding to the provided FactoryParameter enum value.
         /// </summary>
-        static void SetString(enum FactoryParameter parameter, const wchar_t* value) { RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, parameter).SetString(value); }
+        static void SetString(enum FactoryParameter parameter, const std::wstring& value) { RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, parameter).SetString(value); }
 
         /// <summary>
         /// Returns string value of the default factory global parameter corresponding to the provided FactoryParameter enum value.
         /// </summary>
         /// <param name="defaultValue">Default value to return if the corresponding parameter does not exist</param>
-        static std::wstring GetString(enum FactoryParameter parameter, const wchar_t* defaultValue = L"") { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, parameter).GetString(defaultValue); }
+        static std::wstring GetString(enum FactoryParameter parameter, const std::wstring& defaultValue = L"") { return RecognizerFactoryParameterValue(SPXHANDLE_DEFAULT, parameter).GetString(defaultValue); }
 
         /// <summary>
         /// Returns true if the provided FactoryParameter enum value corresponds to a default factory global parameter of a number type.
