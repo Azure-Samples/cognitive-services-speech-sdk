@@ -118,7 +118,8 @@ void CSpxUspRecoEngineAdapter::SetFormat(WAVEFORMATEX* pformat)
         SPX_DBG_TRACE_VERBOSE("%s: Already Idle; Waiting for uspStates to complete ... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
     }
     else if (pformat == nullptr &&
-             (ChangeState(AudioState::ProcessingAudio, AudioState::WaitingForDone) ||
+             (ChangeState(AudioState::ReadyToProcess, AudioState::WaitingForDone) ||
+              ChangeState(AudioState::ProcessingAudio, AudioState::WaitingForDone) ||
               ChangeState(AudioState::Paused, AudioState::WaitingForDone)))
     {
         writeLock.unlock();

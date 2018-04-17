@@ -801,7 +801,8 @@ void CSpxAudioStreamSession::InitKwsEngineAdapter(const std::wstring& keyword)
     // if nobody specified which type(s) of reco engine adapters this session should use, we'll use the SDK KWS engine
     if (!tryCortana && !tryMock && !trySdk)
     {
-        tryMock = true; // TODO: RobCh: Switch this to use the SDK KWS engine by default
+        trySdk = true;
+        tryMock = true;
     }
 
     // try to create the Cortana adapter... 
