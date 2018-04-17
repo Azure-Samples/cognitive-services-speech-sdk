@@ -1421,11 +1421,6 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
     }
     else if (recognizerType == PAL::GetTypeName<TranslationRecognizer>())
     {
-        TranslationLanguageResource availableLanguages = GetLanguageResource(
-            TRANSLATION_LANGUAGE_RESOURCE_SCOPE_SPEECH | TRANSLATION_LANGUAGE_RESOURCE_SCOPE_TEXT | TRANSLATION_LANGUAGE_RESOURCE_SCOPE_TTS,
-            L"en-us");
-        (void)availableLanguages;
-
         m_translationRecognizer = DefaultRecognizerFactory::CreateTranslationRecognizer(L"en-us", std::vector<std::wstring>{L"zh-cn"});
 
         auto fn1 = std::bind(&CarbonTestConsole::TranslationRecognizer_FinalResultHandler, this, std::placeholders::_1);

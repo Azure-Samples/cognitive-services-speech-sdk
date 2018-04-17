@@ -17,6 +17,7 @@
 %include <std_shared_ptr.i>
 %include <std_wstring.i>
 %include <stdint.i>
+%include <std_vector.i>
 
 %ignore __spx_rethrow(SPXHR);
 
@@ -38,6 +39,14 @@
 %shared_ptr(Carbon::Recognition::Translation::TranslationRecognizer)
 %shared_ptr(Carbon::Recognition::IRecognizerFactory)
 %shared_ptr(Carbon::Recognition::IDefaultRecognizerFactory)
+
+#ifdef SWIGCSHARP
+SWIG_STD_VECTOR_ENHANCED(std::vector<wstring>)
+%template(UnorderedMapWStringWStrig) std::unordered_map<std::wstring, std::wstring>;
+%shared_ptr(std::unordered_map<std::wstring, std::wstring>)
+#endif 
+
+%template(WstringVector) std::vector<std::wstring>;
 
 %ignore CallbackWrapper::GetFunction();
 %ignore FutureWrapper::FutureWrapper;

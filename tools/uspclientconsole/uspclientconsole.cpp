@@ -150,6 +150,27 @@ virtual void OnAudioStreamStart(const USP::AudioStreamStartMsg& msg) override
     ttsThread = std::thread(TTSRenderLoop, msg.ioBuffer);
 }
 
+virtual void OnTranslationHypothesis(const USP::TranslationHypothesisMsg& message) override
+{
+    printf("Response: Translation.Hypothesis message. Text: %ls, starts at offset %" PRIu64 ", with duration %" PRIu64 ".\n", message.text.c_str(), message.offset, message.duration);
+    auto resultMap = message.translation.translations; 
+    for (auto it = resultMap.begin(); it != resultMap.end(); ++it)
+    {
+        printf("          , tranlated to %ls: %ls,\n", it->first.c_str(), it->second.c_str());
+    }
+}
+
+virtual void OnTranslationPhrase(const USP::TranslationPhraseMsg& message) override
+{
+    printf("Response: Speech.Phrase message. Status: %s, Text: %ls, starts at %" PRIu64 ", with duration %" PRIu64 ", Translation status: %d.\n", 
+        recognitionStatusToText[message.recognitionStatus].c_str(), message.text.c_str(), message.offset, message.duration, (int)message.translation.translationStatus);
+    auto resultMap = message.translation.translations;
+    for (auto it = resultMap.begin(); it != resultMap.end(); ++it)
+    {
+        printf("          , tranlated to %ls: %ls,\n", it->first.c_str(), it->second.c_str());
+    }
+}
+
 };
 
 #define AUDIO_BYTES_PER_SECOND (16000*2) //16KHz, 16bit PCM

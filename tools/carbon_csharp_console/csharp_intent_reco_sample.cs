@@ -43,7 +43,7 @@ namespace CarbonSamples
 
             factory.SubscriptionKey = keySpeech;
 
-            await DoIntentRecognitionAsync(factory, fileName);
+            await DoIntentRecognitionAsync(factory, fileName).ConfigureAwait(false);
         }
 
         //public static async Task IntentRecognitionCustomizedModelAsync(string keySpeech, string modelId, string fileName)
@@ -55,7 +55,7 @@ namespace CarbonSamples
         //    factory.SubscriptionKey = keySpeech;
         //    factory.ModelId = modelId;
 
-        //    await DoIntentRecognitionAsync(factory, fileName);
+        //    await DoIntentRecognitionAsync(factory, fileName).ConfigureAwait(false);
         //}
 
         public static async Task IntentRecognitionByEndpointAsync(string keySpeech, string endpoint, string fileName)
@@ -67,7 +67,7 @@ namespace CarbonSamples
             factory.SubscriptionKey = keySpeech;
             factory.Endpoint = endpoint;
 
-            await DoIntentRecognitionAsync(factory, fileName);
+            await DoIntentRecognitionAsync(factory, fileName).ConfigureAwait(false);
         }
 
         public static async Task DoIntentRecognitionAsync(RecognizerFactory factory, string fileName)
@@ -92,7 +92,7 @@ namespace CarbonSamples
             reco.AddIntent("WeatherIntent", "weather");
 
             // Starts recognition.
-            var result = await reco.RecognizeAsync();
+            var result = await reco.RecognizeAsync().ConfigureAwait(false);
 
             Console.WriteLine("Intent Recognition: recognition result: " + result);
 

@@ -3,13 +3,11 @@ project(carbon_csharp_console)
 if(WIN32)
 enable_language(CSharp)
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
-set(SOURCES "${SRC_DIR}/carbon_csharp_console.cs")
-source_group("Source Files" FILES ${SOURCES})
+FILE(GLOB CARBON_CSHARP_CONSOLE_SOURCES "${SRC_DIR}/*.cs")
+source_group("Source Files" FILES ${CARBON_CSHARP_CONSOLE_SOURCES})
 
 add_executable(${PROJECT_NAME} 
-    carbon_csharp_console.cs
-    csharp_intent_reco_sample.cs
-    csharp_speech_reco_sample.cs
+    ${CARBON_CSHARP_CONSOLE_SOURCES}
 )
 
 target_compile_options(${PROJECT_NAME} PRIVATE "/langversion:6")

@@ -11,6 +11,7 @@
 #include "factory_helpers.h"
 #include "intent_recognizer.h"
 #include "intent_trigger.h"
+#include "translation_recognizer.h"
 #include "luis_direct_lu_engine_adapter.h"
 #include "luis_model.h"
 #include "recognition_event_args.h"
@@ -33,6 +34,7 @@ SPX_EXTERN_C void* SRLib_CreateModuleObject(const char* className, const char* i
     SPX_FACTORY_MAP_ENTRY(CSpxIntentRecognizer, ISpxRecognizer);
     SPX_FACTORY_MAP_ENTRY(CSpxIntentTrigger, ISpxTrigger);
     SPX_FACTORY_MAP_ENTRY(CSpxLuisModel, ISpxLuisModel);
+    SPX_FACTORY_MAP_ENTRY(CSpxTranslationRecognizer, ISpxRecognizer);
     SPX_FACTORY_MAP_ENTRY(CSpxSessionEventArgs, ISpxSessionEventArgs);
     SPX_FACTORY_MAP_ENTRY(CSpxUspRecoEngineAdapter, ISpxRecoEngineAdapter);
     SPX_FACTORY_MAP_ENTRY(CSpxLuisDirectEngineAdapter, ISpxLuEngineAdapter);

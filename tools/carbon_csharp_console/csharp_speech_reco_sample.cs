@@ -43,7 +43,7 @@ namespace CarbonSamples
 
             factory.SubscriptionKey = keySpeech;
 
-            await DoSpeechRecognitionAsync(factory, fileName);
+            await DoSpeechRecognitionAsync(factory, fileName).ConfigureAwait(false);
         }
 
         //public static async Task SpeechRecognitionCustomizedModelAsync(string keySpeech, string modelId, string fileName)
@@ -54,7 +54,7 @@ namespace CarbonSamples
 
         //    factory.SubscriptionKey = keySpeech;
 
-        //    await DoSpeechRecognitionAsync(factory, fileName);
+        //    await DoSpeechRecognitionAsync(factory, fileName).ConfigureAwait(false);
         //}
 
         public static async Task SpeechRecognitionByEndpointAsync(string keySpeech, string endpoint, string fileName)
@@ -66,7 +66,7 @@ namespace CarbonSamples
             factory.SubscriptionKey = keySpeech;
             factory.Endpoint = endpoint;
 
-            await DoSpeechRecognitionAsync(factory, fileName);
+            await DoSpeechRecognitionAsync(factory, fileName).ConfigureAwait(false);
         }
 
         public static async Task DoSpeechRecognitionAsync(RecognizerFactory factory, string fileName)
@@ -88,7 +88,7 @@ namespace CarbonSamples
             reco.OnSessionEvent += MySessionEventHandler;
 
             // Starts recognition.
-            var result = await reco.RecognizeAsync();
+            var result = await reco.RecognizeAsync().ConfigureAwait(false);
 
             Console.WriteLine("Speech Recognition: Recognition result: " + result);
 

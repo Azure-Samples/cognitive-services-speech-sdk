@@ -12,12 +12,18 @@ namespace Carbon.Recognition.Translation
     /// <summary>
     /// Defines tranlsation result.
     /// </summary>
-    public class TranslationTextResult : Speech.SpeechRecognitionResult
+    public sealed class TranslationTextResult : Speech.SpeechRecognitionResult
     {
         // BUG: this is hack for making documentation going.
-        internal TranslationTextResult(Internal.TranslationTextResult result) : base(null)
+        internal TranslationTextResult(Internal.TranslationTextResult result) : base(result)
         {
-
+            translationTextResultMap = new Dictionary<string, string>();
+            // Todo: add translation result
+            // var map = result.Translations;
+            // foreach (var element in map)
+            // {
+            //    translationTextResultMap.Add(element.Key, element.Value);
+            // }
         }
 
         /// <summary>
@@ -29,7 +35,7 @@ namespace Carbon.Recognition.Translation
         /// Presents the translation results. Each item in the dictionary represents translation result in one of target languages, where the key 
         /// is the name of the target language, in BCP-47 format, and the value is the translation text in the specified language.
         /// </summary>
-        public IReadOnlyDictionary<string, string> Translations { get; }
+        public IReadOnlyDictionary<string, string> Translations { get { return translationTextResultMap; } }
 
         /// <summary>
         /// Returns a string that represents the speech recognition result.
@@ -39,5 +45,7 @@ namespace Carbon.Recognition.Translation
         {
             throw new NotImplementedException();
         }
+
+        private Dictionary<string, string> translationTextResultMap;
     }
 }

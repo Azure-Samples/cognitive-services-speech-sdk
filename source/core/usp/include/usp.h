@@ -261,7 +261,6 @@ public:
     ~Client() = default;
 
 private:
-
     friend class Connection::Impl;
 
     Client(Callbacks& callbacks) :

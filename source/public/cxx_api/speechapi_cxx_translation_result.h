@@ -61,7 +61,7 @@ class TranslationTextResult final : public CARBON_NAMESPACE_ROOT::Recognition::S
 
 private:
     enum TranslationStatus m_translationStatus;
-    ::std::unordered_map<::std::wstring, ::std::wstring> m_translations;
+    std::unordered_map<::std::wstring, ::std::wstring> m_translations;
 
 public:
 
@@ -91,14 +91,18 @@ public:
     /// Presents the translation results. Each item in the map is a key value pair, where key is the language tag of the translated text,
     /// and value is the translation text in that language.
     /// </summary>
-    const ::std::unordered_map<::std::wstring, ::std::wstring>& Translations;
+    const std::unordered_map<std::wstring, std::wstring>& Translations;
 
 private:
 
     void PopulateResultFields(SPXRESULTHANDLE resultHandle)
     {
         (void)resultHandle;
-        SPX_THROW_ON_FAIL(SPXERR_NOT_IMPL);
+        //Todo: get translation results from resultHandle
+        //SPX_THROW_ON_FAIL(SPXERR_NOT_IMPL);
+        // Hack for now
+        m_translationStatus = ::Carbon::Recognition::Translation::TranslationStatus::Success;
+        m_translations[L"en-us"] = L"Test Test";
     };
 
     TranslationTextResult() = delete;

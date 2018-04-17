@@ -617,25 +617,73 @@ void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHyp
 
 void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseMsg& message)
 {
-    /*SPX_DBG_TRACE_VERBOSE("Response: Translation.Phrase message. RecoStatus: %d, TranslationStatus: %d, RecoText: %ls, TranslatedText: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n",
-        message.recognitionStatus, message.translationStatus,
-        message.text.c_str(), message.translationText.c_str(),
-        message.offset, message.duration);*/
-    SPX_DBG_ASSERT(GetSite());
+    SPX_DBG_TRACE_VERBOSE("Response: Translation.Phrase message. RecoStatus: %d, TranslationStatus: %d, RecoText: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n",
+        message.recognitionStatus, message.translation.translationStatus,
+        message.text.c_str(), message.offset, message.duration);
+    auto resultMap = message.translation.translations;
+    for (auto it = resultMap.begin(); it != resultMap.end(); ++it)
+    {
+        SPX_DBG_TRACE_VERBOSE("          , tranlated to %ls: %ls,\n", it->first.c_str(), it->second.c_str());
+    }
 
-    // TODO: RobCh: Do something with the other fields in UspMsgSpeechPhrase
-    auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateFinalResult(nullptr, message.text.c_str(), ResultType::TranslationText);
+    WriteLock_Type writeLock(m_stateMutex);
+    if (IsState(UspState::Error) || IsState(UspState::Terminating) || IsState(UspState::Zombie))
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+        SPX_DBG_TRACE_VERBOSE("%s: IGNORING (Err/Terminating/Zombie)... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
+    else if (ChangeState(AudioState::ProcessingAudio, UspState::SpeechEnded, AudioState::ProcessingAudio, UspState::ReceivedSpeechResult) ||
+        ChangeState(AudioState::WaitingForDone, UspState::SpeechEnded, AudioState::WaitingForDone, UspState::ReceivedSpeechResult) ||
+        ChangeState(AudioState::Idle, UspState::SpeechEnded, AudioState::Idle, UspState::ReceivedSpeechResult))
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace statement
+        SPX_DBG_TRACE_VERBOSE_IF(IsState(AudioState::Idle), "%s: Already Idle; Waiting for uspStates to complete ... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
 
-    // Update our result to be an "TranslationText" result.
-    /*auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
-    initTranslationResult->InitTranslationTextResult(message.sourceLanguage, message.targetLanguage, message.translationText);*/
+        if (IsState(AudioState::Idle) && ChangeState(UspState::FiredFinalResult))
+        {
+            SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+            SPX_DBG_TRACE_VERBOSE("%s: Already Idle; Waiting for uspStates to complete ... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+        }
+        else if (ChangeState(UspState::FiredFinalResult))
+        {
+            SPX_DBG_TRACE_SCOPE("Fire final translation result: Creating Result", "FireFinalResul: GetSite()->FinalRecoResult()  complete!");
 
-    // Todo: offset (and duration) should be part of result. Now, offset is autaully ignored by the following function.
-    // Todo: This will trigger stopRecognizing (in single shot mode), and won't include any audio output message in final result.
-    // We need to delay firing final result in single shot mode if audio output is desired.
-    // Waiting for Rob's change for direct LUIS integration, which introduces a state machine in usp_reco_engine.
-    GetSite()->FinalRecoResult(this, message.offset, result);
+            // Create the result
+            auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
+            auto result = factory->CreateFinalResult(nullptr, message.text.c_str(), ResultType::TranslationText);
+
+            // Update our result to be an "TranslationText" result.
+            auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
+            // Todo: better convert translation status
+            ISpxTranslationStatus status;
+            switch (message.translation.translationStatus)
+            {
+            case ::USP::TranslationStatus::Success:
+                status = ISpxTranslationStatus::Success;
+                break;
+            default:
+                status = ISpxTranslationStatus::Error;
+                break;
+            }
+
+            initTranslationResult->InitTranslationTextResult(status, message.translation.translations);
+
+            // Fire the result
+            writeLock.unlock();
+            SPX_ASSERT(GetSite() != nullptr);
+            GetSite()->FinalRecoResult(this, message.offset, result);
+        }
+        else
+        {
+            SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
+            SPX_TRACE_WARNING("%s: Unexpected USP State transition (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+        }
+    }
+    else
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for warning trace
+        SPX_TRACE_WARNING("%s: Unexpected USP State transition (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+    }
 }
 
 void CSpxUspRecoEngineAdapter::OnTranslationSynthesis(const USP::TranslationSynthesisMsg& message)

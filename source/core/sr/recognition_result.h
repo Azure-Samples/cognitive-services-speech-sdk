@@ -4,9 +4,7 @@
 #include "interface_helpers.h"
 #include "named_properties_impl.h"
 
-
 namespace CARBON_IMPL_NAMESPACE() {
-
 
 class CSpxRecognitionResult :
     public ISpxRecognitionResult,
@@ -55,14 +53,10 @@ public:
     void InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload) override;
 
     // -- ISpxTranslationTextResult ---
-    std::wstring GetTranslationText() override;
-
-    // Todo: check whether we need return a vector of wstring for multiple languages.
-    std::wstring GetSourceLanguage() override;
-    std::wstring GetTargetLanguage() override;
+    const std::unordered_map<std::wstring, std::wstring>& GetTranslationText() override;
 
     // -- ISpxTranslationTextResulInit --
-    void InitTranslationTextResult(const std::wstring& sourceLangauge, const std::wstring& targetLanguage, const std::wstring& translatedText) override;
+    void InitTranslationTextResult(ISpxTranslationStatus status, const std::unordered_map<std::wstring, std::wstring>& translations) override;
 
     // -- ISpxTranslationSynthesisResult ---
     // Todo: check we need to include text that represents the audio data.
@@ -87,9 +81,8 @@ private:
 
     std::wstring m_intentId;
 
-    std::wstring m_sourceLanguage;
-    std::wstring m_targetLanguage;
-    std::wstring m_translationText;
+    std::unordered_map<std::wstring, std::wstring> m_translations;
+    ISpxTranslationStatus m_translationStatus;
 
     std::shared_ptr<const uint8_t[]> m_audioBuffer;
     size_t m_audioLength;

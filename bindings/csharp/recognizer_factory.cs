@@ -4,17 +4,18 @@
 //
 
 using System;
+using System.Collections.Generic;
 using Carbon.Recognition.Speech;
 using Carbon.Recognition.Intent;
 using Carbon.Recognition.Translation;
 
 namespace Carbon.Recognition
 {
-     /// <summary>
-     /// Factory methods to create recognizers.
-     /// </summary>
-     public sealed class RecognizerFactory : IDisposable
-     {
+    /// <summary>
+    /// Factory methods to create recognizers.
+    /// </summary>
+    public sealed class RecognizerFactory : IDisposable
+    {
         /// <summary>
         /// Creates an instance of recognizer factory.
         /// </summary>
@@ -173,28 +174,34 @@ namespace Carbon.Recognition
         /// <summary>
         /// Creates a translation recognizer, using the default microphone input.
         /// </summary>
+        /// <param name="sourceLanguage">The spoken language that needs to be translated.</param>
+        /// <param name="targetLanguages">The target languages of translation.</param>
         /// <returns>A translation recognizer instance.</returns>
-        public TranslationRecognizer CreateTranslationRecognizer()
+        public TranslationRecognizer CreateTranslationRecognizer(string sourceLanguage, IEnumerable<string> targetLanguages)
         {
-            throw new NotImplementedException();
+            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizer(sourceLanguage, AsWStringVector(targetLanguages)));
         }
 
         /// <summary>
         /// Creates a translation recognizer, using the specified file as audio input.
         /// </summary>
         /// <param name="audioFile">Specifies the audio input file.</param>
+        /// <param name="sourceLanguage">The spoken language that needs to be translated.</param>
+        /// <param name="targetLanguages">The target languages of translation.</param>
         /// <returns>A translation recognizer instance.</returns>
-        public TranslationRecognizer CreateTranslationRecognizer(string audioFile)
+        public TranslationRecognizer CreateTranslationRecognizer(string audioFile, string sourceLanguage, IEnumerable<string> targetLanguages)
         {
-            throw new NotImplementedException();
+            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerWithFileInput(audioFile, sourceLanguage, AsWStringVector(targetLanguages)));
         }
 
         /// <summary>
         /// Creates a translation recognizer, using the specified input stream as audio input.
         /// </summary>
         /// <param name="audioStream">Specifies the audio input stream.</param>
+        /// <param name="sourceLanguage">The spoken language that needs to be translated.</param>
+        /// <param name="targetLanguages">The target languages of translation.</param>
         /// <returns>A translation recognizer instance.</returns>
-        public TranslationRecognizer CreateTranslationRecognizer(AudioInputStream audioStream)
+        public TranslationRecognizer CreateTranslationRecognizer(AudioInputStream audioStream, string sourceLanguage, IEnumerable<string> targetLanguages)
         {
             throw new NotImplementedException();
         }
@@ -221,6 +228,16 @@ namespace Carbon.Recognition
         {
             Parameters = new ParameterCollection<RecognizerFactory>(this);
             factoryImpl = Carbon.Internal.RecognizerFactory.GetDefault();
+        }
+
+        private static Internal.WstringVector AsWStringVector(IEnumerable<string> input)
+        {
+            var inputVector = new Internal.WstringVector();
+            foreach (var element in input)
+            {
+                inputVector.Add(element);
+            }
+            return inputVector;
         }
     }
 }

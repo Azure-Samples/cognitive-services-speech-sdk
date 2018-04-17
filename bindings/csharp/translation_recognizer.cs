@@ -82,24 +82,26 @@ namespace Carbon.Recognition.Translation
 
         internal TranslationRecognizer(Internal.TranslationRecognizer recoImpl)
         {
-            //this.recoImpl = recoImpl;
+            this.recoImpl = recoImpl;
 
-            //intermediateResultHandler = new ResultHandlerImpl(this, isFinalResultHandler: false);
-            //recoImpl.IntermediateResult.Connect(intermediateResultHandler);
+            intermediateResultHandler = new ResultHandlerImpl(this, isFinalResultHandler: false);
+            recoImpl.IntermediateResult.Connect(intermediateResultHandler);
 
-            //finalResultHandler = new ResultHandlerImpl(this, isFinalResultHandler: true);
-            //recoImpl.FinalResult.Connect(finalResultHandler);
+            finalResultHandler = new ResultHandlerImpl(this, isFinalResultHandler: true);
+            recoImpl.FinalResult.Connect(finalResultHandler);
 
-            //errorHandler = new ErrorHandlerImpl(this);
-            //recoImpl.NoMatch.Connect(errorHandler);
-            //recoImpl.Canceled.Connect(errorHandler);
+            errorHandler = new ErrorHandlerImpl(this);
+            recoImpl.NoMatch.Connect(errorHandler);
+            recoImpl.Canceled.Connect(errorHandler);
 
-            //recoImpl.SessionStarted.Connect(sessionStartedHandler);
-            //recoImpl.SessionStopped.Connect(sessionStoppedHandler);
-            //recoImpl.SoundStarted.Connect(soundStartedHandler);
-            //recoImpl.SoundStopped.Connect(soundStoppedHandler);
+            recoImpl.SessionStarted.Connect(sessionStartedHandler);
+            recoImpl.SessionStopped.Connect(sessionStoppedHandler);
+            // Todo: change to use SpeechStartDetected.
+            // recoImpl.SoundStarted.Connect(soundStartedHandler);
+            // recoImpl.SoundStopped.Connect(soundStoppedHandler);
 
-            //Parameters = new ParameterCollection<TranslationRecognizer>(this);
+            // Todo: enable parameter collection
+            // Parameters = new ParameterCollection<TranslationRecognizer>(this);
         }
 
         /// <summary>
@@ -224,7 +226,7 @@ namespace Carbon.Recognition.Translation
                     return;
                 }
 
-                TranslationTextResultEventArgs resultEventArg = null; // = new TranslationTextResultEventArgs(eventArgs);
+                TranslationTextResultEventArgs resultEventArg = new TranslationTextResultEventArgs(eventArgs);
                 var handler = isFinalResultHandler ? recognizer.FinalResultReceived : recognizer.IntermediateResultReceived;
                 if (handler != null)
                 {

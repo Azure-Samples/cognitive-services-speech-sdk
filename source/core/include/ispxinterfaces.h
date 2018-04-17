@@ -8,6 +8,7 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include <unordered_map>
 #include "spxcore_common.h"
 #include "platform.h"
 #include "asyncop.h"
@@ -679,22 +680,21 @@ public:
     virtual void InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload) = 0;
 };
 
+// Todo: add more status.
+enum class ISpxTranslationStatus { Success, Error };
 
 class ISpxTranslationTextResult : public ISpxInterfaceBaseFor<ISpxTranslationTextResult>
 {
 public:
 
-    virtual std::wstring GetTranslationText() = 0;
-    // Todo: check whether we need return a vector of wstring for multiple languages.
-    virtual std::wstring GetSourceLanguage() = 0;
-    virtual std::wstring GetTargetLanguage() = 0;
+    virtual const std::unordered_map<std::wstring, std::wstring>& GetTranslationText() = 0;
 };
 
 class ISpxTranslationTextResultInit : public ISpxInterfaceBaseFor<ISpxTranslationTextResultInit>
 {
 public:
 
-    virtual void InitTranslationTextResult(const std::wstring& sourceLanguage, const std::wstring& targetLanguage, const std::wstring& translatedText) = 0;
+    virtual void InitTranslationTextResult(ISpxTranslationStatus status, const std::unordered_map<std::wstring, std::wstring>& translations) = 0;
 };
 
 

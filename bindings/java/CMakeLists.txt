@@ -141,11 +141,11 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SynthesisScopeResourceValue.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TextScopeResourceValue.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechScopeResourceValue.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring___std__wstring_t.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__vectorT_std__wstring_t.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_Carbon__Recognition__Translation___SpeechScopeResourceValue_t.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_Carbon__Recognition__Translation___SynthesisScopeResourceValue_t.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_Carbon__Recognition__Translation___TextScopeResourceValue_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/WstringVector.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_std__wstring_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_Carbon__Recognition__Translation__SpeechScopeResourceValue_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_Carbon__Recognition__Translation__SynthesisScopeResourceValue_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_Carbon__Recognition__Translation__TextScopeResourceValue_t.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__vectorT_unsigned_char_t.java
 
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/carbon_javaConstants.java

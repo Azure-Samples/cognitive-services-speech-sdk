@@ -135,26 +135,6 @@ void Connection::Impl::WorkThread(weak_ptr<Connection::Impl> ptr)
             return;
         }
         unique_lock<recursive_mutex> lock(connection->m_mutex);
-
-// #define MOCK_FOR_TRANSLATION
-#ifdef MOCK_FOR_TRANSLATION
-        // For testing only.
-        typedef void(*CONTENT_ASYNCCOMPLETE_CALLBACK)(void* context);
-        extern UspResult JsonResponseHandler(void* context, const char* path, uint8_t* buffer, size_t bufferSize, IOBUFFER* ioBuffer, CONTENT_ASYNCCOMPLETE_CALLBACK callback, void* asyncContext);
-
-        const char* path = "translation.phrase";
-        struct _DeText
-        {
-            const char* path;
-            void* context;
-        } deserializeContext;
-        deserializeContext.path = path;
-        deserializeContext.context = (void *)&(connection->m_config.m_callbacks);
-
-        const char* buffer = R"({"Reason":"Success","Offset": 100,"Duration":2000,"Text":"What is the wether","Translation":{"TranslationStatus":"Success","Translations":[{"Language":"en - us","Text":"what is the weather"},{"Language":"de - de","Text":"wie ist das Wetter"}]}})";
-        JsonResponseHandler(&deserializeContext, path, (uint8_t*)buffer, strlen(buffer), nullptr, nullptr, nullptr);
-
-#endif
         TransportDoWork(connection->m_transport.get());
         if (!connection->m_connected) 
         {

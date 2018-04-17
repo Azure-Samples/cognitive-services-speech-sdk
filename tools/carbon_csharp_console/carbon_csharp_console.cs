@@ -17,7 +17,7 @@ namespace CarbonSamples
         {
             if (args.Length < 2)
             {
-                Console.WriteLine("Usage: carbon_csharp_console mode(speech|intent) key audioinput(mic|filename) model:modelId|lang:language|endpoint:url");
+                Console.WriteLine("Usage: carbon_csharp_console mode(speech|intent|translation) key audioinput(mic|filename) model:modelId|lang:language|endpoint:url");
                 Environment.Exit(1);
             }
 
@@ -27,6 +27,7 @@ namespace CarbonSamples
             bool useEndpoint = false;
             bool isSpeechReco = false;
             bool isIntentReco = false;
+            bool isTranslation = false;
             string lang = null;
             string modelId = null;
             string endpoint = null;
@@ -42,6 +43,10 @@ namespace CarbonSamples
                 {
                     isIntentReco = true;
                 }
+                else if (string.Compare(modeStr, "translation", true) == 0)
+                {
+                    isTranslation = true;
+                }
                 else
                 {
                     throw new InvalidOperationException("The specified mode is not supported: " + modeStr);
@@ -50,7 +55,7 @@ namespace CarbonSamples
                 keySpeech = args[1];
             }
 
-            Debug.Assert(isSpeechReco || isIntentReco);
+            Debug.Assert(isSpeechReco || isIntentReco || isTranslation);
             Debug.Assert(keySpeech != null);
 
             if (args.Length >= 3)
@@ -159,6 +164,28 @@ namespace CarbonSamples
                         Console.WriteLine("=============== Skip CRIS model for now. =======");
                         //Console.WriteLine("=============== Run intent recognition samples using customozed speech model. ===============");
                         //IntentRecognitionSamples.IntentRecognitionCustomizedModelAsync(keySpeech, modelId, fileName).Wait();
+                    }
+                }
+            }
+            else if (isTranslation)
+            {
+                if (useEndpoint)
+                {
+                    Console.WriteLine("=============== Run translation samples by specifying endpoint. ===============");
+                    TranslationSamples.TranslationByEndpointAsync(keySpeech, endpoint, fileName).Wait();
+                }
+                else
+                {
+                    if (useBaseModel)
+                    {
+                        Console.WriteLine("=============== Run translationsamples using base speech model. ===============");
+                        TranslationSamples.TranslationBaseModelAsync(keySpeech, fileName).Wait();
+                    }
+                    else
+                    {
+                        Console.WriteLine("=============== Skip CRIS model for now. =======");
+                        //Console.WriteLine("=============== Run intent recognoition samples using customozed speech model. ===============");
+                        //TranslationSamples.TranslationCustomizedModelAsync(keySpeech, modelId, fileName).Wait();
                     }
                 }
             }

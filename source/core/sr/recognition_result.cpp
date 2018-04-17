@@ -97,26 +97,16 @@ void CSpxRecognitionResult::InitIntentResult(const wchar_t* intentId, const wcha
     SetStringValue(g_RESULT_LuisJson, jsonPayload);
 }
 
-std::wstring CSpxRecognitionResult::GetTranslationText()
+const std::unordered_map<std::wstring, std::wstring>& CSpxRecognitionResult::GetTranslationText()
 {
-    return m_translationText;
+    return m_translations;
 }
 
-std::wstring CSpxRecognitionResult::GetSourceLanguage()
-{
-    return m_sourceLanguage;
-}
 
-std::wstring CSpxRecognitionResult::GetTargetLanguage()
+void CSpxRecognitionResult::InitTranslationTextResult(ISpxTranslationStatus status, const std::unordered_map<std::wstring, std::wstring>& translations)
 {
-    return m_targetLanguage;
-}
-
-void CSpxRecognitionResult::InitTranslationTextResult(const std::wstring& sourceLangauge, const std::wstring& targetLanguage, const std::wstring& translatedText)
-{
-    m_sourceLanguage = sourceLangauge;
-    m_targetLanguage = targetLanguage;
-    m_translationText = translatedText;
+    m_translations = translations;
+    m_translationStatus = status;
 }
 
 const std::shared_ptr<const uint8_t[]> CSpxRecognitionResult::GetAudioBuffer() const
