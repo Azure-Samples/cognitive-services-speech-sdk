@@ -18,7 +18,7 @@
 #include <file_utils.h>
 #include <platform.h>
 
-using namespace CARBON_NAMESPACE_ROOT::Recognition::Translation;
+using namespace Microsoft::CognitiveServices::Speech::Recognition::Translation;
 
 CarbonTestConsole::CarbonTestConsole()
 {

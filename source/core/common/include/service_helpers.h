@@ -11,7 +11,10 @@
 #include "string_utils.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 // SERVICE_MAP_* macros...
@@ -116,4 +119,4 @@ inline std::shared_ptr<I> SpxQueryService(std::shared_ptr<T> serviceProvider)
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

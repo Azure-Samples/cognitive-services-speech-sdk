@@ -13,7 +13,9 @@
 #include <speechapi_cxx_speech_recognition_result.h>
 
 
-namespace CARBON_NAMESPACE_ROOT { 
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
 namespace Recognition {
 namespace Speech {
 
@@ -72,4 +74,4 @@ private:
 };
 
 
-} } } // CARBON_NAMESPACE_ROOT :: Recognition :: Speech
+} } } } } // Microsoft::CognitiveServices::Speech::Recognition::Speech

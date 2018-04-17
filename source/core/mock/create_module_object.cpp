@@ -19,8 +19,11 @@
 #include "speechapi_cxx_recognizer_factory.h"
 
 
-using namespace CARBON_NAMESPACE_ROOT::Recognition;
-namespace CARBON_IMPL_NAMESPACE() {
+using namespace Microsoft::CognitiveServices::Speech::Recognition;
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 bool ShouldMock(const wchar_t* psz)
@@ -58,4 +61,4 @@ SPX_EXTERN_C SPXDLL_EXPORT void* CreateModuleObject(const char* className, const
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

@@ -11,7 +11,10 @@
 #include "string_utils.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 #ifdef SPX_CONFIG_TRACE_INTERFACE_MAP
@@ -39,4 +42,4 @@ namespace CARBON_IMPL_NAMESPACE() {
     };
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

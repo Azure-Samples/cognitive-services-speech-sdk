@@ -11,7 +11,7 @@
 #include "string_utils.h"
 
 
-using namespace CARBON_IMPL_NAMESPACE();
+using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 
 SPXAPI TranslationRecognizer_TranslationSynthesis_SetEventCallback(SPXRECOHANDLE hreco, PTRANSLATIONSYNTHESIS_CALLBACK_FUNC pCallback, void* pvContext)

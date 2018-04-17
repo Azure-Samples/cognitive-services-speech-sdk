@@ -9,7 +9,7 @@
 #include "string_utils.h"
 
 
-using namespace CARBON_IMPL_NAMESPACE();
+using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 
 SPXAPI IntentResult_GetIntentId(SPXRESULTHANDLE hresult, wchar_t* pszIntentId, uint32_t cchIntentId)

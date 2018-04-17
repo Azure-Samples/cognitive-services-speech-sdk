@@ -7,7 +7,10 @@
 #include "named_properties_constants.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 CSpxRecognizer::CSpxRecognizer() :
@@ -230,4 +233,4 @@ std::shared_ptr<ISpxNamedProperties> CSpxRecognizer::GetParentProperties()
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

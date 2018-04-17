@@ -3,9 +3,9 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-using Carbon.Recognition;
+using Microsoft.CognitiveServices.Speech.Recognition;
 
-namespace Carbon.Recognition.Speech
+namespace Microsoft.CognitiveServices.Speech.Recognition.Speech
 {
     /// <summary>
     /// Defines result of speech recognition.

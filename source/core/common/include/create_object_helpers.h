@@ -10,7 +10,10 @@
 #include "service_helpers.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 template <class I>
@@ -59,4 +62,4 @@ inline void SpxTermAndClear(std::shared_ptr<T>& ptr)
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

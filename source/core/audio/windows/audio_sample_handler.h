@@ -2,7 +2,10 @@
 #include "sample_handler.h"
 #include "ispxinterfaces.h"
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 class AudioSampleHandler : public SampleHandler
 {
@@ -19,4 +22,4 @@ private:
 };
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

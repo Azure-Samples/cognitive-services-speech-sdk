@@ -1,6 +1,6 @@
 # Introduction 
 
-This is the initial working project repository for the Client Speech SDK aka Carbon
+This is the initial working project repository for the Microsoft Cognitive Services Speech SDK aka Carbon.
 
 # Cloning the repo
 

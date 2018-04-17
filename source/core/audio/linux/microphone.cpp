@@ -15,7 +15,10 @@
 #define BLOCK_ALIGN            (BITS_PER_SAMPLE>>3)*CHANNELS
 #define AVG_BYTES_PER_SECOND   BLOCK_ALIGN*SAMPLES_PER_SECOND
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 using namespace std;
 
@@ -213,4 +216,4 @@ void MicrophonePump::UpdateState(AUDIO_STATE state)
     }
 }
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

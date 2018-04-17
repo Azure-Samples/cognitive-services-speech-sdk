@@ -11,7 +11,10 @@
 #include "service_helpers.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 CSpxMockKwsEngineAdapter::CSpxMockKwsEngineAdapter() :
@@ -118,4 +121,4 @@ void CSpxMockKwsEngineAdapter::FireKeywordDetected()
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

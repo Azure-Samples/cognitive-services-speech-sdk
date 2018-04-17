@@ -12,7 +12,9 @@
 #include <speechapi_cxx_eventargs.h>
 
 
-namespace CARBON_NAMESPACE_ROOT {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
    
     
 /// <summary>
@@ -69,4 +71,4 @@ private:
 };
 
 
-} // CARBON_NAMESPACE_ROOT
+} } } // Microsoft::CognitiveServices::Speech

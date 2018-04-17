@@ -12,7 +12,10 @@
 #include "wav_file_pump.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 CSpxWavFilePump::CSpxWavFilePump()
@@ -56,4 +59,4 @@ void CSpxWavFilePump::EnsurePump()
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

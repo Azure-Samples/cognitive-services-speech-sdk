@@ -5,7 +5,10 @@
 #include "recognizer.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 class CSpxTranslationRecognizer : public CSpxRecognizer, public ISpxTranslationRecognizer
@@ -37,4 +40,4 @@ private:
 };
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

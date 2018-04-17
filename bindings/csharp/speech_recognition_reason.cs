@@ -5,7 +5,7 @@
 
 using System;
 
-namespace Carbon.Recognition.Speech
+namespace Microsoft.CognitiveServices.Speech.Recognition.Speech
 {
     /// <summary>
     /// Defines speech recognition status.

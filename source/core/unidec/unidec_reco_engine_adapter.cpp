@@ -15,7 +15,10 @@
 #define SPX_DBG_TRACE_UNIDEC_AUDIO 0
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 CSpxUnidecRecoEngineAdapter::CSpxUnidecRecoEngineAdapter() :
@@ -493,4 +496,4 @@ std::wstring CSpxUnidecRecoEngineAdapter::TrimWords(std::vector<const wchar_t*>&
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

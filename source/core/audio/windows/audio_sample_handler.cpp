@@ -13,7 +13,10 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 AudioSampleHandler::AudioSampleHandler()
@@ -31,4 +34,4 @@ AudioSampleHandler::AudioSampleHandler(const WAVEFORMATEX& format, GUID subType)
 {
 }
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

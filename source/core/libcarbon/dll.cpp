@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "debug_utils.h"
 
-using namespace CARBON_IMPL_NAMESPACE();
+using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 
 void InitLogging()

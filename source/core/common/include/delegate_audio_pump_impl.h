@@ -9,7 +9,10 @@
 #include "spxcore_common.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 class ISpxDelegateAudioPumpImpl : public ISpxAudioPump
@@ -42,4 +45,4 @@ protected:
 };
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

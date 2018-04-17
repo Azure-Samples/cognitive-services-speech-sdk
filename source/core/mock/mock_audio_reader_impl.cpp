@@ -10,7 +10,10 @@
 #include "mock_audio_reader_impl.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 void ISpxMockAudioReaderImpl::SetRealTimePercentage(uint8_t percentage)
@@ -54,4 +57,4 @@ uint32_t ISpxMockAudioReaderImpl::Read(uint8_t* pbuffer, uint32_t cbBuffer)
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

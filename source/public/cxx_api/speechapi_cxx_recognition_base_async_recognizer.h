@@ -14,7 +14,9 @@
 #include <speechapi_cxx_recognition_base_async_recognizer.h>
 
 
-namespace CARBON_NAMESPACE_ROOT {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
 namespace Recognition {
 
 /// <summary>
@@ -52,4 +54,4 @@ protected:
 };
 
 
-} } // CARBON_NAMESPACE_ROOT :: Recognition
+} } } } // Microsoft::CognitiveServices::Speech::Recognition

@@ -3,12 +3,12 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-namespace Carbon.Recognition.Intent
+namespace Microsoft.CognitiveServices.Speech.Recognition.Intent
 {
     /// <summary>
     /// Defines result of intent recognition.
     /// </summary>
-    public class IntentRecognitionResult : Carbon.Recognition.Speech.SpeechRecognitionResult
+    public class IntentRecognitionResult : Microsoft.CognitiveServices.Speech.Recognition.Speech.SpeechRecognitionResult
     {
         internal IntentRecognitionResult(Internal.IntentRecognitionResult result)
             : base(result)

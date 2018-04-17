@@ -3,7 +3,10 @@
 #include <memory>
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 enum AsyncOpState { AOS_Started, AOS_Completed, AOS_Canceled, AOS_Error };
@@ -52,4 +55,4 @@ public:
 };
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

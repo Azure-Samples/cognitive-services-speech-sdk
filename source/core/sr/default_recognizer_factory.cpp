@@ -13,7 +13,10 @@
 #include "named_properties_constants.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateSpeechRecognizer() 
@@ -182,4 +185,4 @@ std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateRecognizerIn
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

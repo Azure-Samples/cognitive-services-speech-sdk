@@ -15,7 +15,9 @@
 #include <speechapi_cxx_intent_trigger.h>
 
 
-namespace CARBON_NAMESPACE_ROOT {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
 namespace Recognition {
 namespace Intent {
 
@@ -98,8 +100,8 @@ private:
     DISABLE_COPY_AND_MOVE(IntentRecognizer);
     //DISABLE_DEFAULT_CTORS(IntentRecognizer);
 
-    friend class CARBON_NAMESPACE_ROOT::Session;
+    friend class Microsoft::CognitiveServices::Speech::Session;
 };
 
 
-} } } // CARBON_NAMESPACE_ROOT :: Recognition :: Intent
+} } } } } // Microsoft::CognitiveServices::Speech::Recognition::Intent

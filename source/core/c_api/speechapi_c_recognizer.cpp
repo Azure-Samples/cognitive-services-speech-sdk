@@ -12,7 +12,7 @@
 #include "named_properties_constants.h"
 
 
-using namespace CARBON_IMPL_NAMESPACE();
+using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 
 SPXAPI_(bool) Recognizer_Handle_IsValid(SPXRECOHANDLE hreco)

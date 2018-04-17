@@ -13,7 +13,9 @@
 #include <speechapi_c.h>
 #include <speechapi_cxx_recognition_result.h>
 
-namespace CARBON_NAMESPACE_ROOT {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
 namespace Recognition {
 namespace Translation {
 
@@ -56,7 +58,7 @@ enum class TranslationStatus {
 /// <summary> 
 /// Defines the translation text result.
 /// </summary>
-class TranslationTextResult final : public CARBON_NAMESPACE_ROOT::Recognition::Speech::SpeechRecognitionResult
+class TranslationTextResult final : public Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognitionResult
 {
 
 private:
@@ -101,7 +103,7 @@ private:
         //Todo: get translation results from resultHandle
         //SPX_THROW_ON_FAIL(SPXERR_NOT_IMPL);
         // Hack for now
-        m_translationStatus = ::Carbon::Recognition::Translation::TranslationStatus::Success;
+        m_translationStatus = ::Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationStatus::Success;
         m_translations[L"en-us"] = L"Test Test";
     };
 
@@ -155,4 +157,4 @@ private:
 };
 
 
-} } } // CARBON_NAMESPACE_ROOT::Recognition::Translation
+} } } } } // Microsoft::CognitiveServices::Speech::Recognition::Translation

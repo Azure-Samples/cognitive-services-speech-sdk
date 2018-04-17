@@ -11,10 +11,13 @@
 #include "spxcore_common.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 std::string SpxHttpDownloadString(const char* httpHostName, const char* httpRelativePath, unsigned int* pstatusCode = nullptr, std::map<std::string, std::string>* presponseHeaders = nullptr);
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

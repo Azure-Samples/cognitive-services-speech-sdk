@@ -11,11 +11,11 @@
 #include <functional>
 
 #include "exception.h"
-#define __SPX_THROW_HR_IMPL(hr) CARBON_IMPL_NAMESPACE()::ThrowWithCallstack(hr)
+#define __SPX_THROW_HR_IMPL(hr) Microsoft::CognitiveServices::Speech::Impl::ThrowWithCallstack(hr)
 
 #include "ispxinterfaces.h"
 
-using namespace CARBON_IMPL_NAMESPACE();
+using namespace Microsoft::CognitiveServices::Speech::Impl;
 using namespace std;
 
 class AudioTestSink final : public ISpxAudioProcessor

@@ -3,14 +3,14 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-namespace Carbon.Recognition.Speech
+namespace Microsoft.CognitiveServices.Speech.Recognition.Speech
 {
     /// <summary>
     /// Define payload of speech intermediate/final result events.
     /// </summary>
     public class SpeechRecognitionResultEventArgs : System.EventArgs
     {
-        internal SpeechRecognitionResultEventArgs(Carbon.Internal.SpeechRecognitionEventArgs e)
+        internal SpeechRecognitionResultEventArgs(Microsoft.CognitiveServices.Speech.Internal.SpeechRecognitionEventArgs e)
         {
             this.Result = new SpeechRecognitionResult(e.Result);
             this.SessionId = e.SessionId;

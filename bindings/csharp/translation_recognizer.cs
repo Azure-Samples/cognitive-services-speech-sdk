@@ -7,9 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Carbon;
+using Microsoft.CognitiveServices.Speech;
 
-namespace Carbon.Recognition.Translation
+namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
 {
     /// <summary>
     /// Performs translation on the speech input.
@@ -246,7 +246,7 @@ namespace Carbon.Recognition.Translation
                 this.recognizer = recognizer;
             }
 
-            public override void Execute(Carbon.Internal.TranslationTextResultEventArgs eventArgs)
+            public override void Execute(Microsoft.CognitiveServices.Speech.Internal.TranslationTextResultEventArgs eventArgs)
             {
                 if (recognizer.disposed)
                 {

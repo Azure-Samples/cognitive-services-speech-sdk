@@ -8,7 +8,10 @@
 #include <memory>
 #include "spx_namespace.h"
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 class ISpxAudioPump;
 
@@ -22,4 +25,4 @@ private:
     Microphone() = delete;
 };
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

@@ -3,7 +3,10 @@
 #include "platform.h"
 #include <memory>
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 using typeMap = std::map<const char*, void*>;
 using termFnList = std::list<std::function<void(void)>>;
@@ -19,5 +22,5 @@ CSpxSharedPtrHandleTableManager::deleted_unique_ptr<termFnList> CSpxSharedPtrHan
     delete list;
 });
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl
 

@@ -5,9 +5,9 @@
 
 using System;
 using System.Collections.Generic;
-using Carbon.Recognition;
+using Microsoft.CognitiveServices.Speech.Recognition;
 
-namespace Carbon.Recognition.Translation
+namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
 {
     /// <summary>
     /// Defines translation synthesis result, i.e. the voice output of the translated text in the target language.

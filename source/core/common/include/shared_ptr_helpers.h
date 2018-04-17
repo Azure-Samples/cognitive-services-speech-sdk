@@ -9,7 +9,10 @@
 #include "spxcore_common.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 template <class T>
@@ -37,4 +40,4 @@ inline SpxSharedUint8Buffer_Type SpxAllocSharedUint8Buffer(size_t sizeInBytes)
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

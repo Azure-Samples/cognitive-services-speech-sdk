@@ -17,7 +17,9 @@
 #include <speechapi_cxx_translation_result.h>
 #include <speechapi_cxx_translation_eventargs.h>
 
-namespace CARBON_NAMESPACE_ROOT {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
 namespace Recognition {
 namespace Translation {
 
@@ -222,7 +224,7 @@ private:
     TranslationRecognizer& operator=(TranslationRecognizer&&) = delete;
     TranslationRecognizer& operator=(const TranslationRecognizer&) = delete;
 
-    friend class CARBON_NAMESPACE_ROOT::Session;
+    friend class Microsoft::CognitiveServices::Speech::Session;
 
     std::function<void(const EventSignal<const TranslationSynthesisResultEventArgs&>&)> GetTranslationAudioEventConnectionsChangedCallback()
     {
@@ -245,4 +247,4 @@ private:
 };
 
 
-} } } // CARBON_NAMESPACE_ROOT::Recognition::Translation
+} } } } } // Microsoft::CognitiveServices::Speech::Recognition::Translation

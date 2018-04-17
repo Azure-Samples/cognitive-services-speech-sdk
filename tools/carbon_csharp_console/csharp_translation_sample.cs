@@ -8,9 +8,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Carbon;
-using Carbon.Recognition;
-using Carbon.Recognition.Translation;
+using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Recognition;
+using Microsoft.CognitiveServices.Speech.Recognition.Translation;
 
 namespace CarbonSamples
 {

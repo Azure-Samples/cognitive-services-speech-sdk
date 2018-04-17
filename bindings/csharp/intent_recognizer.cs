@@ -6,9 +6,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Carbon;
+using Microsoft.CognitiveServices.Speech;
 
-namespace Carbon.Recognition.Intent
+namespace Microsoft.CognitiveServices.Speech.Recognition.Intent
 {
     /// <summary>
     /// Perform intent recognition on the speech input. It returns both recognized text and recognized intent.
@@ -117,7 +117,7 @@ namespace Carbon.Recognition.Intent
         /// <param name="intentName">The intent name defined in the intent model. If it is null, all intent names defined in the model will be added.</param>
         public void AddIntent(string intentId, IntentModel model, string intentName = null)
         {
-            var trigger = Carbon.Internal.IntentTrigger.From(model.modelImpl, intentName);
+            var trigger = Microsoft.CognitiveServices.Speech.Internal.IntentTrigger.From(model.modelImpl, intentName);
             recoImpl.AddIntent(intentId, trigger);
         }
         
@@ -186,7 +186,7 @@ namespace Carbon.Recognition.Intent
                 this.recognizer = recognizer;
             }
 
-            public override void Execute(Carbon.Internal.IntentRecognitionEventArgs eventArgs)
+            public override void Execute(Microsoft.CognitiveServices.Speech.Internal.IntentRecognitionEventArgs eventArgs)
             {
                 var resultEventArg = new RecognitionErrorEventArgs(eventArgs.SessionId, eventArgs.Result.Reason);
                 var handler = this.recognizer.RecognitionErrorRaised;

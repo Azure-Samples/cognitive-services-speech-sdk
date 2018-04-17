@@ -5,7 +5,7 @@
 
 using System.Diagnostics;
 
-namespace Carbon.Recognition
+namespace Microsoft.CognitiveServices.Speech.Recognition
 {
     /// <summary>
     /// Defines payload of RecognitionErrorEvent. 
@@ -18,7 +18,7 @@ namespace Carbon.Recognition
             this.SessionId = sessionId;
         }
 
-        internal RecognitionErrorEventArgs(string sessionId, Carbon.Internal.Reason reason)
+        internal RecognitionErrorEventArgs(string sessionId, Microsoft.CognitiveServices.Speech.Internal.Reason reason)
         {
             Debug.Assert((int)Internal.Reason.Recognized == (int)RecognitionStatus.Success);
             Debug.Assert((int)Internal.Reason.IntermediateResult == (int)RecognitionStatus.IntermediateResult);

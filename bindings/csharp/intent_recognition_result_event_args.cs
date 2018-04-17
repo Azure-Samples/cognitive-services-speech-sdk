@@ -3,14 +3,14 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-namespace Carbon.Recognition.Intent
+namespace Microsoft.CognitiveServices.Speech.Recognition.Intent
 {
     /// <summary>
     /// Define payload of intent intermediate/final result events.
     /// </summary>
     public class IntentRecognitionResultEventArgs : System.EventArgs
     {
-        internal IntentRecognitionResultEventArgs(Carbon.Internal.IntentRecognitionEventArgs e)
+        internal IntentRecognitionResultEventArgs(Microsoft.CognitiveServices.Speech.Internal.IntentRecognitionEventArgs e)
         {
             this.Result = new IntentRecognitionResult(e.Result);
             this.SessionId = e.SessionId;

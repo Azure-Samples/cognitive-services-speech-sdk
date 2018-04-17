@@ -4,7 +4,10 @@
 #include "site_helpers.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 CSpxTranslationRecognizer::CSpxTranslationRecognizer()
@@ -22,4 +25,4 @@ void CSpxTranslationRecognizer::Init()
     CSpxRecognizer::Init();
 }
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

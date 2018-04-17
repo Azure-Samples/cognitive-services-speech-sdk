@@ -7,7 +7,10 @@
 #undef WAVE_FORMAT_PCM // already defined in mmeapi.h
 #include "ispxinterfaces.h"
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
     using namespace std;
 
@@ -225,4 +228,4 @@ HRESULT SampleHandler::OnEvent(
     return E_NOTIMPL;
 }
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

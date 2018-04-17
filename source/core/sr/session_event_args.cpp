@@ -2,7 +2,10 @@
 #include "session_event_args.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 CSpxSessionEventArgs::CSpxSessionEventArgs()
@@ -22,4 +25,4 @@ void CSpxSessionEventArgs::Init(const std::wstring& sessionId)
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

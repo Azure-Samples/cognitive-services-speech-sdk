@@ -10,7 +10,10 @@
 #include <spxerror.h>
 #include <spx_namespace.h>
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 class ExceptionWithCallStack : public std::runtime_error
 {
@@ -28,4 +31,4 @@ void ThrowWithCallstack(SPXHR hr);
 
 SPXHR StoreException(ExceptionWithCallStack&& ex);
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

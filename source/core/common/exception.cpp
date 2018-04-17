@@ -10,7 +10,10 @@
 #include "debug_utils.h"
 #include "handle_table.h"
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
     static std::string hexify(SPXHR hr)
     {
@@ -50,4 +53,4 @@ namespace CARBON_IMPL_NAMESPACE() {
         return reinterpret_cast<SPXHR>(errorHandles->TrackHandle(handle));
     }
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

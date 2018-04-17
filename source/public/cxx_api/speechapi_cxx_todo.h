@@ -10,7 +10,9 @@
 #include <speechapi_cxx_common.h>
 
 
-namespace CARBON_NAMESPACE_ROOT {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
 
 
 /// <summary>
@@ -23,8 +25,8 @@ public:
     /// <summary>
     /// Constructor.
     /// </summary>
-    NotYetImplementedException() : std::runtime_error("CARBON: not yet implemented"){};
+    NotYetImplementedException() : std::runtime_error("Microsoft.CognitiveServices.Speech: not yet implemented"){};
 };
 
 
-} // CARBON_NAMESPACE_ROOT
+} } } // Microsoft::CognitiveServices::Speech

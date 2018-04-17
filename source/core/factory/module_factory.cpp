@@ -19,7 +19,10 @@
 SPX_EXTERN_C SPXDLL_EXPORT void* CreateModuleObject(const char* className, const char* interfaceName);
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 std::unique_ptr<CSpxModuleFactory::MapType> CSpxModuleFactory::m_factoryMap = std::make_unique<CSpxModuleFactory::MapType>();
@@ -101,4 +104,4 @@ CSpxModuleFactory::PCREATE_MODULE_OBJECT_FUNC CSpxModuleFactory::GetCreateModule
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

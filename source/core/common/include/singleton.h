@@ -10,7 +10,10 @@
 #include "spxcore_common.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 template <class T, class I>
@@ -49,4 +52,4 @@ template <class T, class I>
 std::shared_ptr<T> CSpxSingleton<T, I>::m_sharedPtr;
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

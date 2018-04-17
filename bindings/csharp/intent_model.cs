@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 using System;
 
-namespace Carbon.Recognition.Intent
+namespace Microsoft.CognitiveServices.Speech.Recognition.Intent
 {
     /// <summary>
     /// Represents intent model used for intent recognition.
@@ -17,7 +17,7 @@ namespace Carbon.Recognition.Intent
         /// <returns>The intent model being created.</returns>
         public static IntentModel From(string uri)
         {
-            return new IntentModel(Carbon.Internal.LuisModel.From(uri));
+            return new IntentModel(Microsoft.CognitiveServices.Speech.Internal.LuisModel.From(uri));
         }
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace Carbon.Recognition.Intent
         /// <returns>The intent model being created.</returns>
         public static IntentModel From(string subscriptionKey, string appId)
         {
-            return new IntentModel(Carbon.Internal.LuisModel.From(subscriptionKey, appId));
+            return new IntentModel(Microsoft.CognitiveServices.Speech.Internal.LuisModel.From(subscriptionKey, appId));
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace Carbon.Recognition.Intent
         /// <returns>The intent model being created.</returns>
         public static IntentModel From(string hostName, string subscriptionKey, string appId)
         {
-            return new IntentModel(Carbon.Internal.LuisModel.From(hostName, subscriptionKey, appId));
+            return new IntentModel(Microsoft.CognitiveServices.Speech.Internal.LuisModel.From(hostName, subscriptionKey, appId));
         }
 
         /// <summary>
@@ -60,12 +60,12 @@ namespace Carbon.Recognition.Intent
         private bool disposed = false;
 
 
-        internal IntentModel(Carbon.Internal.LuisModel model)
+        internal IntentModel(Microsoft.CognitiveServices.Speech.Internal.LuisModel model)
         {
             modelImpl = model;
         }
 
-        internal Carbon.Internal.LuisModel modelImpl { get; }
+        internal Microsoft.CognitiveServices.Speech.Internal.LuisModel modelImpl { get; }
     }
 
     

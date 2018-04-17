@@ -14,7 +14,10 @@ extern "C" int FIPS_mode_set(int r)
 }
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 using namespace std;
 
@@ -72,4 +75,4 @@ shared_ptr<ISpxAudioPump> Microphone::Create()
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

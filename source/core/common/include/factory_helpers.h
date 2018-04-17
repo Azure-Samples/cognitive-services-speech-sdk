@@ -11,7 +11,10 @@
 #include "string_utils.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 #define SPX_FACTORY_MAP_BEGIN()         \
     UNUSED(className);                  \
@@ -57,4 +60,4 @@ void* SpxFactoryEntryCreateObject()
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

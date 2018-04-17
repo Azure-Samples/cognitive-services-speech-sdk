@@ -19,7 +19,10 @@
 // from mmdeviceapi.h - eCommunications
 #define MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_AUDCAP_ROLE_ECommunications  2
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 using namespace std;
 
@@ -221,6 +224,6 @@ void MicrophonePump::StopPump()
     m_sampleHandler->Stop();
 }
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl
 
 

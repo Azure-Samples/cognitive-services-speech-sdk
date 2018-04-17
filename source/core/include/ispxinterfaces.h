@@ -17,10 +17,13 @@
 #include "speechapi_cxx_audioinputstream.h"
 
 
-using namespace CARBON_NAMESPACE_ROOT;
+using namespace Microsoft::CognitiveServices::Speech;
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 class ISpxInterfaceBase : public std::enable_shared_from_this<ISpxInterfaceBase>
@@ -788,4 +791,4 @@ class ISpxLuEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxLuEngineAdapterS
 {
 };
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

@@ -11,7 +11,10 @@
 #include "service_helpers.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 void CSpxMockWavFilePump::StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor)
@@ -46,4 +49,4 @@ void CSpxMockWavFilePump::InitAudioPump()
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

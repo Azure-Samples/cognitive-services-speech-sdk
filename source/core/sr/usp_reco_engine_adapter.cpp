@@ -15,7 +15,10 @@
 #include "named_properties_constants.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 int CSpxUspRecoEngineAdapter::m_saveToWavCounter = 0;
@@ -1125,4 +1128,4 @@ bool CSpxUspRecoEngineAdapter::ChangeState(AudioState fromAudioState, UspState f
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

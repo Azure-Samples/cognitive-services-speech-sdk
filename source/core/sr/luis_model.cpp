@@ -2,7 +2,10 @@
 #include "luis_model.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 void CSpxLuisModel::InitEndpoint(const wchar_t* uri)
@@ -22,4 +25,4 @@ void CSpxLuisModel::InitSubscriptionInfo(const wchar_t* hostName, const wchar_t*
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

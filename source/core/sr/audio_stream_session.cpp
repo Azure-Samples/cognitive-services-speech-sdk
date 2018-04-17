@@ -219,7 +219,10 @@
 #include "site_helpers.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 CSpxAudioStreamSession::CSpxAudioStreamSession() :
@@ -1132,4 +1135,4 @@ std::shared_ptr<ISpxNamedProperties> CSpxAudioStreamSession::GetParentProperties
     return SpxQueryService<ISpxNamedProperties>(GetSite());
 }
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

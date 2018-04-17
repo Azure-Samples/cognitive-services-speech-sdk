@@ -10,7 +10,10 @@
 #include "module_factory.h"
 #include "factory_helpers.h"
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 CSpxResourceManager::CSpxResourceManager()
@@ -68,4 +71,4 @@ void* CSpxResourceManager::CreateObject(const char* className, const char* inter
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

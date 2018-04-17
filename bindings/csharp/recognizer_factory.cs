@@ -5,11 +5,11 @@
 
 using System;
 using System.Collections.Generic;
-using Carbon.Recognition.Speech;
-using Carbon.Recognition.Intent;
-using Carbon.Recognition.Translation;
+using Microsoft.CognitiveServices.Speech.Recognition.Speech;
+using Microsoft.CognitiveServices.Speech.Recognition.Intent;
+using Microsoft.CognitiveServices.Speech.Recognition.Translation;
 
-namespace Carbon.Recognition
+namespace Microsoft.CognitiveServices.Speech.Recognition
 {
     /// <summary>
     /// Factory methods to create recognizers.
@@ -221,13 +221,13 @@ namespace Carbon.Recognition
             disposed = true;
         }
 
-        private Carbon.Internal.IRecognizerFactory factoryImpl;
+        private Microsoft.CognitiveServices.Speech.Internal.IRecognizerFactory factoryImpl;
         private bool disposed = false;
 
         private void InitInternal()
         {
             Parameters = new ParameterCollection<RecognizerFactory>(this);
-            factoryImpl = Carbon.Internal.RecognizerFactory.GetDefault();
+            factoryImpl = Microsoft.CognitiveServices.Speech.Internal.RecognizerFactory.GetDefault();
         }
 
         private static Internal.WstringVector AsWStringVector(IEnumerable<string> input)

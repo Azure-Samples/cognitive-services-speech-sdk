@@ -13,7 +13,10 @@
 #include "audio_pump.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 CSpxAudioPump::CSpxAudioPump() :
@@ -215,4 +218,4 @@ void CSpxAudioPump::WaitForPumpIdle(std::unique_lock<std::mutex>& lock)
     SPX_TRACE_WARNING_IF(m_state != State::Idle, "CSpxAudioPump::WaitForPumpIdle(): Unexpected: state != State::Idle; state=%d", m_state);
 }
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

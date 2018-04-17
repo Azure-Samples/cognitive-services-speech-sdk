@@ -5,7 +5,10 @@
 #include <atlbase.h>
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 class ISpxAudioProcessor;
 struct WAVEFORMATEX;
@@ -51,4 +54,4 @@ private:
 
 };
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

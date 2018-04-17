@@ -11,7 +11,10 @@
 #include "factory_helpers.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 SPX_EXTERN_C void* AudioLib_CreateModuleObject(const char* className, const char* interfaceName);
@@ -33,4 +36,4 @@ SPX_EXTERN_C SPXDLL_EXPORT void* CreateModuleObject(const char* className, const
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

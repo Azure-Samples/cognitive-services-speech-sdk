@@ -4,7 +4,10 @@
 #include <speechapi_cxx_audioinputstream.h>
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 class CSpxRecognizerFactory
@@ -43,4 +46,4 @@ private:
 };
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

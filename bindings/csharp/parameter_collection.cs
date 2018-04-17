@@ -6,7 +6,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Carbon
+namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
     /// Represents collection of parameters and their values.
@@ -15,15 +15,15 @@ namespace Carbon
     {
         internal ParameterCollection(OwnerType owner)
         {
-            if (typeof(OwnerType) == typeof(Carbon.Recognition.RecognizerFactory))
+            if (typeof(OwnerType) == typeof(Microsoft.CognitiveServices.Speech.Recognition.RecognizerFactory))
             {
                 isFactoryParameter = true;
                 speechParameters = null;
             }
-            else if (typeof(OwnerType) == typeof(Carbon.Recognition.Speech.SpeechRecognizer))
+            else if (typeof(OwnerType) == typeof(Microsoft.CognitiveServices.Speech.Recognition.Speech.SpeechRecognizer))
             {
                 isFactoryParameter = false;
-                var speechRecognizer = owner as Carbon.Recognition.Speech.SpeechRecognizer;
+                var speechRecognizer = owner as Microsoft.CognitiveServices.Speech.Recognition.Speech.SpeechRecognizer;
                 speechParameters = speechRecognizer.recoImpl.Parameters;
             }
             else
@@ -41,15 +41,15 @@ namespace Carbon
         {
             if (typeof(T) == typeof(string))
             {
-                return isFactoryParameter ? Carbon.Internal.DefaultRecognizerFactory.Parameters.ContainsString(name) : speechParameters.ContainsString(name);
+                return isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.ContainsString(name) : speechParameters.ContainsString(name);
             }
             else if (typeof(T) == typeof(int))
             {
-                return isFactoryParameter ? Carbon.Internal.DefaultRecognizerFactory.Parameters.ContainsNumber(name) : speechParameters.ContainsNumber(name);
+                return isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.ContainsNumber(name) : speechParameters.ContainsNumber(name);
             }
             else if (typeof(T) == typeof(bool))
             {
-                return isFactoryParameter ? Carbon.Internal.DefaultRecognizerFactory.Parameters.ContainsBool(name) : speechParameters.ContainsBool(name);
+                return isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.ContainsBool(name) : speechParameters.ContainsBool(name);
             }
             else
             {
@@ -103,19 +103,19 @@ namespace Carbon
             if (typeof(T) == typeof(string))
             {
                 var defaultInT = (string)Convert.ChangeType(defaultValue, typeof(string));
-                var ret = isFactoryParameter ? Carbon.Internal.DefaultRecognizerFactory.Parameters.GetString(name, defaultInT) : speechParameters.GetString(name, defaultInT);
+                var ret = isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.GetString(name, defaultInT) : speechParameters.GetString(name, defaultInT);
                 return (T)Convert.ChangeType(ret, typeof(T));
             }
             else if (typeof(T) == typeof(int))
             {
                 var defaultInT = (int)Convert.ChangeType(defaultValue, typeof(int));
-                var ret = isFactoryParameter ? Carbon.Internal.DefaultRecognizerFactory.Parameters.GetNumber(name, defaultInT) : speechParameters.GetNumber(name, defaultInT);
+                var ret = isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.GetNumber(name, defaultInT) : speechParameters.GetNumber(name, defaultInT);
                 return (T)Convert.ChangeType(ret, typeof(T));
             }
             else if (typeof(T) == typeof(bool))
             {
                 var defaultInT = (bool)Convert.ChangeType(defaultValue, typeof(bool));
-                var ret = isFactoryParameter ? Carbon.Internal.DefaultRecognizerFactory.Parameters.GetBool(name, defaultInT) : speechParameters.GetBool(name, defaultInT);
+                var ret = isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.GetBool(name, defaultInT) : speechParameters.GetBool(name, defaultInT);
                 return (T)Convert.ChangeType(ret, typeof(T));
             }
             else
@@ -133,7 +133,7 @@ namespace Carbon
         {
             if (isFactoryParameter)
             {
-                Carbon.Internal.DefaultRecognizerFactory.Parameters.SetString(name, value);
+                Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.SetString(name, value);
             }
             else
             {
@@ -150,7 +150,7 @@ namespace Carbon
         {
             if (isFactoryParameter)
             {
-                Carbon.Internal.DefaultRecognizerFactory.Parameters.SetNumber(name, value);
+                Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.SetNumber(name, value);
             }
             else
             {
@@ -167,7 +167,7 @@ namespace Carbon
         {
             if (isFactoryParameter)
             {
-                Carbon.Internal.DefaultRecognizerFactory.Parameters.SetBool(name, value);
+                Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.SetBool(name, value);
             }
             else
             {
@@ -191,6 +191,6 @@ namespace Carbon
 
         private bool disposed = false;
         private bool isFactoryParameter = false;
-        private Carbon.Internal.RecognizerParameterValueCollection speechParameters;
+        private Microsoft.CognitiveServices.Speech.Internal.RecognizerParameterValueCollection speechParameters;
     }
 }

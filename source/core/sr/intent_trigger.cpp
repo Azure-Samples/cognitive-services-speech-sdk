@@ -2,7 +2,10 @@
 #include "intent_trigger.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 void CSpxIntentTrigger::InitPhraseTrigger(const wchar_t* phrase)
@@ -21,4 +24,4 @@ void CSpxIntentTrigger::InitLuisModelTrigger(std::shared_ptr<ISpxLuisModel> mode
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

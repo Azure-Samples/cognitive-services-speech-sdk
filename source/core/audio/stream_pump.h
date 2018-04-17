@@ -11,7 +11,10 @@
 #include "interface_helpers.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
     class CSpxStreamPump : public ISpxAudioPump, public ISpxStreamPumpReaderInit
@@ -64,4 +67,4 @@ namespace CARBON_IMPL_NAMESPACE() {
     };
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

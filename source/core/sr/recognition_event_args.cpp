@@ -2,7 +2,10 @@
 #include "recognition_event_args.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 CSpxRecognitionEventArgs::CSpxRecognitionEventArgs()
@@ -31,4 +34,4 @@ void CSpxRecognitionEventArgs::Init(const std::wstring& sessionId, std::shared_p
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

@@ -21,7 +21,10 @@
 #include "usp_reco_engine_adapter.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 SPX_EXTERN_C void* SRLib_CreateModuleObject(const char* className, const char* interfaceName)
@@ -42,4 +45,4 @@ SPX_EXTERN_C void* SRLib_CreateModuleObject(const char* className, const char* i
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

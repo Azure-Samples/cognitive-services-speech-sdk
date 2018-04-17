@@ -11,7 +11,7 @@
 #include "resource_manager.h"
 
 
-using namespace CARBON_IMPL_NAMESPACE();
+using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 
 SPXAPI_(bool) LuisModel_Handle_IsValid(SPXLUISHANDLE hluis)

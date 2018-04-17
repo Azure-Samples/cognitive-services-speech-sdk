@@ -10,7 +10,10 @@
 #include "service_helpers.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 CSpxMockLuEngineAdapter::CSpxMockLuEngineAdapter()
@@ -79,4 +82,4 @@ void CSpxMockLuEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionResul
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

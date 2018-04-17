@@ -12,7 +12,9 @@
 #include <speechapi_cxx_translation_result.h>
 
 
-namespace CARBON_NAMESPACE_ROOT {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
 namespace Recognition {
 namespace Translation {
 
@@ -117,4 +119,4 @@ private:
 
 };
 
-} } } // CARBON_NAMESPACE_ROOT::Recognition::Translation
+} } } } } // Microsoft::CognitiveServices::Speech::Recognition::Translation

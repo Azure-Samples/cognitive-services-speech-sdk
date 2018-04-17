@@ -15,8 +15,6 @@
 #define final
 #endif
 
-#define CARBON_NAMESPACE_ROOT   Carbon
-
 #define DISABLE_COPY_AND_MOVE(T)     \
     T(const T&) = delete;            \
     T& operator=(const T&) = delete; \

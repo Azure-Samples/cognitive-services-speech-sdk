@@ -6,9 +6,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Carbon;
+using Microsoft.CognitiveServices.Speech;
 
-namespace Carbon.Recognition.Speech
+namespace Microsoft.CognitiveServices.Speech.Recognition.Speech
 {
     /// <summary>
     /// Performs speech recognition from microphone, file, or other audio input streams, and gets transcribed text as result.
@@ -245,7 +245,7 @@ namespace Carbon.Recognition.Speech
                 this.recognizer = recognizer;
             }
 
-            public override void Execute(Carbon.Internal.SpeechRecognitionEventArgs eventArgs)
+            public override void Execute(Microsoft.CognitiveServices.Speech.Internal.SpeechRecognitionEventArgs eventArgs)
             {
                 if (recognizer.disposed)
                 {

@@ -10,7 +10,9 @@
 #include <speechapi_cxx_value.h>
 
 
-namespace CARBON_NAMESPACE_ROOT {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
 
 
 enum class SessionParameter { SpeechSubscriptionKey = 1, SpeechEndpoint = 2 };
@@ -124,4 +126,4 @@ public:
 };
 
 
-} // CARBON_NAMESPACE_ROOT
+} } } // Microsoft::CognitiveServices::Speech

@@ -10,7 +10,10 @@
 #include "resource_manager.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 std::shared_ptr<ISpxGenericSite> SpxGetRootSite()
@@ -24,4 +27,4 @@ std::shared_ptr<ISpxGenericSite> SpxGetRootSite()
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

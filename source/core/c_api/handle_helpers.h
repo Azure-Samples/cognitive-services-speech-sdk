@@ -10,7 +10,10 @@
 #include "try_catch_helpers.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 template<class handle_type, class ptr_type>
@@ -37,4 +40,4 @@ SPXHR Handle_Close(handle_type handle)
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

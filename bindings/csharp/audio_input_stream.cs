@@ -6,7 +6,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Carbon.Recognition
+namespace Microsoft.CognitiveServices.Speech.Recognition
 {
     /// <summary>
     /// Defines audio input stream.

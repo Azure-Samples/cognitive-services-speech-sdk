@@ -10,7 +10,7 @@
 #include <speechapi_c_common.h>
 #include <exception.h>
 
-using CARBON_IMPL_NAMESPACE()::StoreException;
+using Microsoft::CognitiveServices::Speech::Impl::StoreException;
 
 #define SPXAPI_INIT_HR_TRY(hr)                              \
 {                                                           \

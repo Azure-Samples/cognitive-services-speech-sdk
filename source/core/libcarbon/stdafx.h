@@ -17,7 +17,7 @@
 
 #include "spx_namespace.h"
 #include "exception.h"
-#define __SPX_THROW_HR_IMPL(hr) CARBON_IMPL_NAMESPACE()::ThrowWithCallstack(hr)
+#define __SPX_THROW_HR_IMPL(hr) Microsoft::CognitiveServices::Speech::Impl::ThrowWithCallstack(hr)
 
 #include "speechapi_c.h"
 #include "handle_table.h"

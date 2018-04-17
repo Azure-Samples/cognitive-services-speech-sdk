@@ -1,5 +1,5 @@
-using Carbon.Recognition;
-using Carbon.Recognition.Speech;
+using Microsoft.CognitiveServices.Speech.Recognition;
+using Microsoft.CognitiveServices.Speech.Recognition.Speech;
 using System;
 using System.Collections.Generic;
 using System.Linq;

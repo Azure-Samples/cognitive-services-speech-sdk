@@ -10,7 +10,7 @@
 #include "site_helpers.h"
 #include "named_properties_constants.h"
 
-using namespace CARBON_IMPL_NAMESPACE();
+using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 
 SPXAPI RecognizerFactory_CreateSpeechRecognizer_With_Defaults(SPXRECOFACTORYHANDLE hrecofactory, SPXRECOHANDLE* phreco)
@@ -35,7 +35,7 @@ public:
     {
     }
 
-    virtual unsigned short GetFormat(Carbon::AudioInputStreamFormat* pformat, unsigned short cbFormat) override
+    virtual unsigned short GetFormat(Microsoft::CognitiveServices::Speech::AudioInputStreamFormat* pformat, unsigned short cbFormat) override
     {
         struct tAudioInputStreamFormatC format;
 

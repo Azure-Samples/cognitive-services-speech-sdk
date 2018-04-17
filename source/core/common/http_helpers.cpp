@@ -13,7 +13,10 @@
 #include "azure_c_shared_utility_httpapiex_wrapper.h"
 #include <cstdlib>
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 std::string SpxHttpDownloadString(const char* httpHostName, const char* httpRelativePath, unsigned int* pstatusCode, std::map<std::string, std::string>* presponseHeaders)
@@ -176,4 +179,4 @@ std::string SpxHttpDownloadString(const char* httpHostName, const char* httpRela
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

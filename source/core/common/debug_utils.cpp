@@ -274,4 +274,4 @@ void HookSignalHandlers()
     std::set_terminate(SignalHandler);
 }
 
-} // CARBON_IMPL_NAMESPACE
+}

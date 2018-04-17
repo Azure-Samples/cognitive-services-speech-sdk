@@ -33,7 +33,7 @@ set(SWIG_MODULE_${JAVA_BINDINGS}_EXTRA_DEPS
     ${SPEECH_CXX_API_HEADERS})
 
 # ${SWIG_INTERFACE} should resolve to {repo/root}/bindings/carbon.i
-set(CMAKE_SWIG_FLAGS -w401,516,503 -package "Carbon.Internal")
+set(CMAKE_SWIG_FLAGS -w401,516,503 -package "com.microsoft.cognitiveservices.speech.internal")
 set_source_files_properties("${SRC_DIR}/carbon_java.i" PROPERTIES CPLUSPLUS ON)
 
 # Make sure the nested directory structure exists
@@ -70,31 +70,32 @@ set(JAVA_LIB ${PROJECT_NAME}_lib)
 # SET_SOURCE_FILES_PROPERTIES(${SWIG_JAVA_SOURCES} PROPERTIES GENERATED TRUE)
 #file(GLOB SWIG_JAVA_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/swig-generated/*.java")
 set(JAVA_SOURCES
-    Carbon/ParameterCollection.java
-    Carbon/SessionEventArgs.java
-    Carbon/SessionEventType.java
-    Carbon/Recognition/AudioInputStream.java
-    Carbon/Recognition/IntentModel.java
-    Carbon/Recognition/ParameterNames.java
-    Carbon/Recognition/RecognitionErrorEventArgs.java
-    Carbon/Recognition/RecognitionStatus.java
-    Carbon/Recognition/Recognizer.java
-    Carbon/Recognition/RecognizerFactory.java
-    Carbon/Recognition/TranslationRecognizer.java
-    Carbon/Recognition/Intent/IntentRecognitionResult.java
-    Carbon/Recognition/Intent/IntentRecognitionResultEventArgs.java
-    Carbon/Recognition/Intent/IntentRecognizer.java
-    Carbon/Recognition/Speech/SpeechRecognitionReason.java
-    Carbon/Recognition/Speech/SpeechRecognitionResult.java
-    Carbon/Recognition/Speech/SpeechRecognitionResultEventArgs.java
-    Carbon/Recognition/Speech/SpeechRecognizer.java
-    Carbon/Recognition/Translation/TranslationSynthesisResult.java
-    Carbon/Recognition/Translation/TranslationSynthesisResultEventArgs.java
-    Carbon/Recognition/Translation/TranslationTextResult.java
-    Carbon/Recognition/Translation/TranslationTextResultEventArgs.java
-    Carbon/Util/EventHandler.java
-    Carbon/Util/EventHandlerImpl.java
-    Carbon/Util/Task.java
+    com/microsoft/cognitiveservices/speech/ParameterCollection.java
+    com/microsoft/cognitiveservices/speech/SessionEventArgs.java
+    com/microsoft/cognitiveservices/speech/SessionEventType.java
+    com/microsoft/cognitiveservices/speech/recognition/AudioInputStream.java
+    com/microsoft/cognitiveservices/speech/recognition/IntentModel.java
+    com/microsoft/cognitiveservices/speech/recognition/ParameterNames.java
+    com/microsoft/cognitiveservices/speech/recognition/RecognitionErrorEventArgs.java
+    com/microsoft/cognitiveservices/speech/recognition/RecognitionStatus.java
+    com/microsoft/cognitiveservices/speech/recognition/Recognizer.java
+    com/microsoft/cognitiveservices/speech/recognition/RecognizerFactory.java
+    com/microsoft/cognitiveservices/speech/recognition/TranslationRecognizer.java
+    com/microsoft/cognitiveservices/speech/recognition/intent/IntentRecognitionResult.java
+    com/microsoft/cognitiveservices/speech/recognition/intent/IntentRecognitionResultEventArgs.java
+    com/microsoft/cognitiveservices/speech/recognition/intent/IntentRecognizer.java
+    com/microsoft/cognitiveservices/speech/recognition/speech/SpeechRecognitionReason.java
+    com/microsoft/cognitiveservices/speech/recognition/speech/SpeechRecognitionResult.java
+    com/microsoft/cognitiveservices/speech/recognition/speech/SpeechRecognitionResultEventArgs.java
+    com/microsoft/cognitiveservices/speech/recognition/speech/SpeechRecognizer.java
+    com/microsoft/cognitiveservices/speech/recognition/translation/TranslationSynthesisResult.java
+    com/microsoft/cognitiveservices/speech/recognition/translation/TranslationSynthesisResultEventArgs.java
+    com/microsoft/cognitiveservices/speech/recognition/translation/TranslationTextResult.java
+    com/microsoft/cognitiveservices/speech/recognition/translation/TranslationTextResultEventArgs.java
+    com/microsoft/cognitiveservices/speech/util/EventHandler.java
+    com/microsoft/cognitiveservices/speech/util/EventHandlerImpl.java
+    com/microsoft/cognitiveservices/speech/util/Task.java
+    com/microsoft/cognitiveservices/speech/util/TaskRunner.java
 )
 
 set(SWIG_JAVA_SOURCES
@@ -170,9 +171,9 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechScopeResourceValue.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/WstringVector.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_std__wstring_t.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_Carbon__Recognition__Translation__SpeechScopeResourceValue_t.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_Carbon__Recognition__Translation__SynthesisScopeResourceValue_t.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_Carbon__Recognition__Translation__TextScopeResourceValue_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_Microsoft__CognitiveServices__Speech__Recognition__Translation__SpeechScopeResourceValue_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_Microsoft__CognitiveServices__Speech__Recognition__Translation__SynthesisScopeResourceValue_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_Microsoft__CognitiveServices__Speech__Recognition__Translation__TextScopeResourceValue_t.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__vectorT_unsigned_char_t.java
 
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/carbon_javaConstants.java

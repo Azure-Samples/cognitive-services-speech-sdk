@@ -11,7 +11,10 @@
 #include "service_helpers.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 CSpxMockInteractiveMicrophone::CSpxMockInteractiveMicrophone() :
@@ -95,4 +98,4 @@ void CSpxMockInteractiveMicrophone::InitWavFilePump(const std::wstring& fileName
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

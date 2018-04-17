@@ -16,7 +16,10 @@
 using json = nlohmann::json;
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 void CSpxLuisDirectEngineAdapter::Term()
@@ -274,4 +277,4 @@ std::wstring CSpxLuisDirectEngineAdapter::IntentIdFromIntentName(const std::wstr
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

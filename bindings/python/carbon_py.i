@@ -9,40 +9,40 @@
 
 // Release GIL:
 // * when invoking a blocking Recognize.
-%threadallow Carbon::Recognition::Speech::SpeechRecognizer::Recognize;
+%threadallow Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognizer::Recognize;
 // * when invoking SpeechRecognizer dtor (otherwise there might be a deadlock if a 
 //   callback is concurrently invoked from the speech client.)
-%threadallow Carbon::Recognition::Speech::SpeechRecognizer::~SpeechRecognizer;
+%threadallow Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognizer::~SpeechRecognizer;
 // * when waiting on a future.
 %threadallow FutureWrapper::Get;
 // * when invoking disconnect (which involves acquiring an event signal lock) to
 // avoid a deadlock (in-progress callback waiting for GIL might be holding 
 // the event signal lock).
-%threadallow Carbon::EventSignal::_Disconnect;
-%threadallow Carbon::EventSignal::DisconnectAll;
+%threadallow Microsoft::CognitiveServices::Speech::EventSignal::_Disconnect;
+%threadallow Microsoft::CognitiveServices::Speech::EventSignal::DisconnectAll;
 
-%extend Carbon::Recognition::RecognitionResult {
+%extend Microsoft::CognitiveServices::Speech::Recognition::RecognitionResult {
     %pythoncode %{
     def __str__(self):
         return '{}:(result_id={}, reason={}, text={})'.format(type(self), self.result_id, self.reason, self.text)
     %}
 }
 
-%extend Carbon::SessionEventArgs {
+%extend Microsoft::CognitiveServices::Speech::SessionEventArgs {
     %pythoncode %{
     def __str__(self):
         return '{}:(session_id={})'.format(type(self), self.session_id)
     %}
 }
 
-%extend Carbon::Recognition::Speech::SpeechRecognitionEventArgs {
+%extend Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognitionEventArgs {
     %pythoncode %{
     def __str__(self):
         return '{}:(session_id={}, result={})'.format(type(self), self.session_id, self.result)
     %}
 }
 
-%rename(_DefaultRecognizerFactory)Carbon::Recognition::DefaultRecognizerFactory;
+%rename(_DefaultRecognizerFactory)Microsoft::CognitiveServices::Speech::Recognition::DefaultRecognizerFactory;
 
 %include "carbon.i"
 

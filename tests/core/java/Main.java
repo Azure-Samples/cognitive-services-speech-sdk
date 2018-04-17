@@ -4,9 +4,9 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import Carbon.SessionEventArgs;
-import Carbon.SpeechRecognitionResult;
-import Carbon.SessionEventListener;
+import com.microsoft.cognitiveservices.speech.SessionEventArgs;
+import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
+import com.microsoft.cognitiveservices.speech.SessionEventListener;
 
 class SpeechRecognizer {
 
@@ -18,7 +18,7 @@ class SpeechRecognizer {
     @Test
     void test()
     {
-        Carbon.SpeechRecognizer reco = Carbon.RecognizerFactory.createSpeechRecognizerWithFileInput("whatstheweatherlike.wav");
+        com.microsoft.cognitiveservices.speech.SpeechRecognizer reco = com.microsoft.cognitiveservices.speech.RecognizerFactory.createSpeechRecognizerWithFileInput("whatstheweatherlike.wav");
 
         MySessionEventListener listener = new MySessionEventListener();
         assertFalse(listener.listenerFired, "callback?");

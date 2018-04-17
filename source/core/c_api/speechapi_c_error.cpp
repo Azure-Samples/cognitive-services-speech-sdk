@@ -9,7 +9,7 @@
 #include "string_utils.h"
 
 
-using namespace CARBON_IMPL_NAMESPACE();
+using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 SPXAPI_(const_char_ptr) Error_GetCallStack(SPXERRORHANDLE errorHandle)
 {

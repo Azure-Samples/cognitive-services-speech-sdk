@@ -15,7 +15,9 @@
 #include <speechapi_cxx_session_parameter_collection.h>
 
 
-namespace CARBON_NAMESPACE_ROOT {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
 
 
 class Session
@@ -72,4 +74,4 @@ private:
 };
 
 
-} // CARBON_NAMESPACE_ROOT
+} } } // Microsoft::CognitiveServices::Speech

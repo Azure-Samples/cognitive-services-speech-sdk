@@ -4,7 +4,10 @@
 #include "site_helpers.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 CSpxIntentRecognizer::CSpxIntentRecognizer()
@@ -36,4 +39,4 @@ void CSpxIntentRecognizer::InitTriggerService()
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

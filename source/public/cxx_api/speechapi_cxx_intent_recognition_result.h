@@ -11,7 +11,9 @@
 #include <speechapi_c.h>
 
 
-namespace CARBON_NAMESPACE_ROOT {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
 namespace Recognition {
 namespace Intent {
 
@@ -67,4 +69,4 @@ private:
 };
 
 
-} } } // CARBON_NAMESPACE_ROOT :: Recognition :: Intent
+} } } } } // Microsoft::CognitiveServices::Speech::Recognition::Intent

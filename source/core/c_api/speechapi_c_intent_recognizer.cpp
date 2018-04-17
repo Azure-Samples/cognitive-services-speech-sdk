@@ -11,7 +11,7 @@
 #include "string_utils.h"
 
 
-using namespace CARBON_IMPL_NAMESPACE();
+using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 
 SPXAPI IntentRecognizer_AddIntent(SPXRECOHANDLE hreco, const wchar_t* intentId, SPXTRIGGERHANDLE htrigger)

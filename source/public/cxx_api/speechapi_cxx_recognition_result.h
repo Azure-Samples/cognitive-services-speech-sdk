@@ -12,7 +12,9 @@
 #include <speechapi_cxx_value.h>
 
 
-namespace CARBON_NAMESPACE_ROOT {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
 namespace Recognition {
 
 /// <summary>
@@ -249,15 +251,15 @@ private:
 
     void PopulateResultFields(SPXRESULTHANDLE hresult, std::wstring *presultId, enum Reason* preason, std::wstring* ptext)
     {
-        static_assert((int)Reason_NoMatch == (int)CARBON_NAMESPACE_ROOT::Recognition::Reason::NoMatch, 
+        static_assert((int)Reason_NoMatch == (int)Microsoft::CognitiveServices::Speech::Recognition::Reason::NoMatch, 
             "Reason_* enum values == Reason::* enum values");
-        static_assert((int)Reason_Canceled == (int)CARBON_NAMESPACE_ROOT::Recognition::Reason::Canceled, 
+        static_assert((int)Reason_Canceled == (int)Microsoft::CognitiveServices::Speech::Recognition::Reason::Canceled, 
             "Reason_* enum values == Reason::* enum values");
-        static_assert((int)Reason_Recognized == (int)CARBON_NAMESPACE_ROOT::Recognition::Reason::Recognized, 
+        static_assert((int)Reason_Recognized == (int)Microsoft::CognitiveServices::Speech::Recognition::Reason::Recognized, 
             "Reason_* enum values == Reason::* enum values");
-        static_assert((int)Reason_OtherRecognizer == (int)CARBON_NAMESPACE_ROOT::Recognition::Reason::OtherRecognizer, 
+        static_assert((int)Reason_OtherRecognizer == (int)Microsoft::CognitiveServices::Speech::Recognition::Reason::OtherRecognizer, 
             "Reason_* enum values == Reason::* enum values");
-        static_assert((int)Reason_IntermediateResult == (int)CARBON_NAMESPACE_ROOT::Recognition::Reason::IntermediateResult, 
+        static_assert((int)Reason_IntermediateResult == (int)Microsoft::CognitiveServices::Speech::Recognition::Reason::IntermediateResult, 
             "Reason_* enum values == Reason::* enum values");
 
         SPX_INIT_HR(hr);
@@ -293,4 +295,4 @@ private:
 };
 
 
-} } // CARBON_NAMESPACE_ROOT :: Recognition
+} } } } // Microsoft::CognitiveServices::Speech::Recognition

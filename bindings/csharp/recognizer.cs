@@ -4,9 +4,9 @@
 //
 
 using System;
-using Carbon;
+using Microsoft.CognitiveServices.Speech;
 
-namespace Carbon.Recognition
+namespace Microsoft.CognitiveServices.Speech.Recognition
 {
     /// <summary>
     /// Defines the base class Recognizer which mainly contains common event handlers.

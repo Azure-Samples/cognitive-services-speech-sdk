@@ -5,14 +5,14 @@
 
 using System;
 
-namespace Carbon.Recognition.Translation
+namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
 {
     /// <summary>
     /// Define payload of translation synthesis result events.
     /// </summary>
     public class TranslationSynthesisResultEventArgs : System.EventArgs
     {
-        internal TranslationSynthesisResultEventArgs(Carbon.Internal.TranslationSynthesisResultEventArgs e)
+        internal TranslationSynthesisResultEventArgs(Microsoft.CognitiveServices.Speech.Internal.TranslationSynthesisResultEventArgs e)
         {
             this.Result = new TranslationSynthesisResult(e.Result);
             this.SessionId = e.SessionId;

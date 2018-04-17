@@ -18,7 +18,9 @@
 #include <speechapi_cxx_recognizer_parameter_collection.h>
 
 
-namespace CARBON_NAMESPACE_ROOT {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
 
 class Session;
 
@@ -56,8 +58,8 @@ private:
     SpeechRecognizer& operator=(SpeechRecognizer&&) = delete;
     SpeechRecognizer& operator=(const SpeechRecognizer&) = delete;
 
-    friend class CARBON_NAMESPACE_ROOT::Session;
+    friend class Microsoft::CognitiveServices::Speech::Session;
 };
 
 
-} } } // CARBON_NAMESPACE_ROOT :: Recognition :: Speech
+} } } } } // Microsoft::CognitiveServices::Speech::Recognition::Speech

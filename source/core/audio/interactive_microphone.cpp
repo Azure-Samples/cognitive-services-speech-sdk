@@ -10,7 +10,10 @@
 #include "interactive_microphone.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 CSpxInteractiveMicrophone::CSpxInteractiveMicrophone() :
@@ -19,4 +22,4 @@ CSpxInteractiveMicrophone::CSpxInteractiveMicrophone() :
 }
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl

@@ -35,7 +35,7 @@ int wmain(int argc, wchar_t **argv)
         filename = wstring(argv[2]);
     }
 
-    auto factory = Carbon::Recognition::RecognizerFactory::GetDefault();
+    auto factory = Microsoft::CognitiveServices::Speech::Recognition::RecognizerFactory::GetDefault();
     factory->SetSubscriptionKey(subscriptionKey);
 
     auto recognizeFromFile = !filename.empty();
@@ -47,7 +47,7 @@ int wmain(int argc, wchar_t **argv)
 
     int exitCode = 0;
 
-    if (result->Reason != Carbon::Recognition::Reason::Recognized) {
+    if (result->Reason != Microsoft::CognitiveServices::Speech::Recognition::Reason::Recognized) {
         exitCode = 1;
         wcout << L"There was an error, reason " << int(result->Reason) << L" - " << result->Text << '\n';
     }

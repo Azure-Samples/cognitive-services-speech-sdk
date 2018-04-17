@@ -7,9 +7,9 @@
 
 using System;
 using System.Threading.Tasks;
-using Carbon;
-using Carbon.Recognition;
-using Carbon.Recognition.Intent;
+using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Recognition;
+using Microsoft.CognitiveServices.Speech.Recognition.Intent;
 
 namespace CarbonSamples
 {

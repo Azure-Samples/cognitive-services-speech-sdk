@@ -9,7 +9,10 @@
 #include "spxcore_common.h"
 
 
-namespace CARBON_IMPL_NAMESPACE() {
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace Impl {
 
 
 template <class T>
@@ -22,4 +25,4 @@ inline std::shared_ptr<ISpxGenericSite> SpxSiteFromThis(T* ptr)
 std::shared_ptr<ISpxGenericSite> SpxGetRootSite();
 
 
-} // CARBON_IMPL_NAMESPACE
+} } } } // Microsoft::CognitiveServices::Speech::Impl
