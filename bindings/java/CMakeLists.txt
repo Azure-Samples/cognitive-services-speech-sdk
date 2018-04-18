@@ -170,10 +170,10 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TextScopeResourceValue.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechScopeResourceValue.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/WstringVector.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_std__wstring_t.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_Microsoft__CognitiveServices__Speech__Recognition__Translation__SpeechScopeResourceValue_t.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_Microsoft__CognitiveServices__Speech__Recognition__Translation__SynthesisScopeResourceValue_t.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__unordered_mapT_std__wstring_Microsoft__CognitiveServices__Speech__Recognition__Translation__TextScopeResourceValue_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__mapT_std__wstring_std__wstring_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Recognition__Translation__SpeechScopeResourceValue_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Recognition__Translation__SynthesisScopeResourceValue_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Recognition__Translation__TextScopeResourceValue_t.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__vectorT_unsigned_char_t.java
 
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/carbon_javaConstants.java

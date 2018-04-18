@@ -10,7 +10,7 @@
 #include <future>
 #include <memory>
 #include <string>
-#include <unordered_map>
+#include <map>
 #include <speechapi_cxx_common.h>
 #include <speechapi_c.h>
 #include <speechapi_cxx_recognition_async_recognizer.h>
@@ -97,19 +97,19 @@ public:
     /// speechResources contains languages supported by speech-to-text. It is a dictionary of (key, value) pairs.
     /// Each key identifies a language supported by speech-to-text. The value associated with the key is of type <see cref="SpeechScopeResourceValue"/>.
     /// </summary>
-    std::unordered_map<std::wstring, SpeechScopeResourceValue> speechResources;
+    std::map<std::wstring, SpeechScopeResourceValue> speechResources;
 
     /// <summary>
     /// textResoruces contains languages supported by text translation. It is also a dictionary where each key identifies a language
     /// supported by text translation. The value associated with the key is of type <see cref="TextScopeResourceValue"/>.
     /// </summary>
-    std::unordered_map<std::wstring, TextScopeResourceValue> textResources;
+    std::map<std::wstring, TextScopeResourceValue> textResources;
 
     /// <summary>
     /// voiceResources contains languages supported by text-to-speech. It is a dictionary where key is the lagnuage tag that supports voice output. 
     /// The value associated with each key is of type <see cref="SynthesisScopeResourceValue"/>.
     /// </summary>
-    std::unordered_map<std::wstring, SynthesisScopeResourceValue> voiceResources;
+    std::map<std::wstring, SynthesisScopeResourceValue> voiceResources;
 };
 
 /// <summary>

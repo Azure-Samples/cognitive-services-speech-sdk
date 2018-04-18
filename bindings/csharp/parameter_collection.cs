@@ -11,24 +11,30 @@ namespace Microsoft.CognitiveServices.Speech
     /// <summary>
     /// Represents collection of parameters and their values.
     /// </summary>
-    public sealed class ParameterCollection<OwnerType> : IDisposable
+    public sealed class ParameterCollection<Owner> : IDisposable
     {
-        internal ParameterCollection(OwnerType owner)
+        internal ParameterCollection(Owner owner)
         {
-            if (typeof(OwnerType) == typeof(Microsoft.CognitiveServices.Speech.Recognition.RecognizerFactory))
+            if (typeof(Owner) == typeof(Recognition.RecognizerFactory))
             {
                 isFactoryParameter = true;
-                speechParameters = null;
+                recognizerParameters = null;
             }
-            else if (typeof(OwnerType) == typeof(Microsoft.CognitiveServices.Speech.Recognition.Speech.SpeechRecognizer))
+            else if (typeof(Owner) == typeof(Recognition.Speech.SpeechRecognizer))
             {
                 isFactoryParameter = false;
-                var speechRecognizer = owner as Microsoft.CognitiveServices.Speech.Recognition.Speech.SpeechRecognizer;
-                speechParameters = speechRecognizer.recoImpl.Parameters;
+                var recognizer = owner as Recognition.Speech.SpeechRecognizer;
+                recognizerParameters = recognizer.recoImpl.Parameters;
+            }
+            else if (typeof(Owner) == typeof(Recognition.Translation.TranslationRecognizer))
+            {
+                isFactoryParameter = false;
+                var recognizer = owner as Recognition.Translation.TranslationRecognizer;
+                recognizerParameters = recognizer.recoImpl.Parameters;
             }
             else
             {
-                throw new NotImplementedException("ParameterCollection: Unsupported type: " + typeof(OwnerType));
+                throw new NotImplementedException("ParameterCollection: Unsupported type: " + typeof(Owner));
             }
         }
 
@@ -41,15 +47,15 @@ namespace Microsoft.CognitiveServices.Speech
         {
             if (typeof(T) == typeof(string))
             {
-                return isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.ContainsString(name) : speechParameters.ContainsString(name);
+                return isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.ContainsString(name) : recognizerParameters.ContainsString(name);
             }
             else if (typeof(T) == typeof(int))
             {
-                return isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.ContainsNumber(name) : speechParameters.ContainsNumber(name);
+                return isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.ContainsNumber(name) : recognizerParameters.ContainsNumber(name);
             }
             else if (typeof(T) == typeof(bool))
             {
-                return isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.ContainsBool(name) : speechParameters.ContainsBool(name);
+                return isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.ContainsBool(name) : recognizerParameters.ContainsBool(name);
             }
             else
             {
@@ -103,19 +109,19 @@ namespace Microsoft.CognitiveServices.Speech
             if (typeof(T) == typeof(string))
             {
                 var defaultInT = (string)Convert.ChangeType(defaultValue, typeof(string));
-                var ret = isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.GetString(name, defaultInT) : speechParameters.GetString(name, defaultInT);
+                var ret = isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.GetString(name, defaultInT) : recognizerParameters.GetString(name, defaultInT);
                 return (T)Convert.ChangeType(ret, typeof(T));
             }
             else if (typeof(T) == typeof(int))
             {
                 var defaultInT = (int)Convert.ChangeType(defaultValue, typeof(int));
-                var ret = isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.GetNumber(name, defaultInT) : speechParameters.GetNumber(name, defaultInT);
+                var ret = isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.GetNumber(name, defaultInT) : recognizerParameters.GetNumber(name, defaultInT);
                 return (T)Convert.ChangeType(ret, typeof(T));
             }
             else if (typeof(T) == typeof(bool))
             {
                 var defaultInT = (bool)Convert.ChangeType(defaultValue, typeof(bool));
-                var ret = isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.GetBool(name, defaultInT) : speechParameters.GetBool(name, defaultInT);
+                var ret = isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.GetBool(name, defaultInT) : recognizerParameters.GetBool(name, defaultInT);
                 return (T)Convert.ChangeType(ret, typeof(T));
             }
             else
@@ -137,7 +143,7 @@ namespace Microsoft.CognitiveServices.Speech
             }
             else
             {
-                speechParameters.SetString(name, value);
+                recognizerParameters.SetString(name, value);
             }
         }
 
@@ -154,7 +160,7 @@ namespace Microsoft.CognitiveServices.Speech
             }
             else
             {
-                speechParameters.SetNumber(name, value);
+                recognizerParameters.SetNumber(name, value);
             }
         }
 
@@ -171,7 +177,7 @@ namespace Microsoft.CognitiveServices.Speech
             }
             else
             {
-                speechParameters.SetBool(name, value);
+                recognizerParameters.SetBool(name, value);
             }
         }
 
@@ -185,12 +191,12 @@ namespace Microsoft.CognitiveServices.Speech
                 return;
             }
 
-            speechParameters?.Dispose();
+            recognizerParameters?.Dispose();
             disposed = true;
         }
 
-        private bool disposed = false;
         private bool isFactoryParameter = false;
-        private Microsoft.CognitiveServices.Speech.Internal.RecognizerParameterValueCollection speechParameters;
+        private bool disposed = false;
+        private Microsoft.CognitiveServices.Speech.Internal.RecognizerParameterValueCollection recognizerParameters;
     }
 }

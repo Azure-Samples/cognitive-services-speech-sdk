@@ -10,7 +10,7 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
-#include <unordered_map>
+#include <map>
 
 namespace USP {
 
@@ -113,7 +113,7 @@ struct TranslationResult
 {
     TranslationStatus translationStatus;
     // An array of value pair <targetLanguage, translationText>.
-    std::unordered_map<std::wstring, std::wstring> translations;
+    std::map<std::wstring, std::wstring> translations;
 };
 /**
 * Represents translation.hypothesis message

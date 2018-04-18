@@ -18,6 +18,7 @@
 %include <std_wstring.i>
 %include <stdint.i>
 %include <std_vector.i>
+%include <std_map.i>
 
 %ignore __spx_rethrow(SPXHR);
 
@@ -42,7 +43,7 @@
 
 #ifdef SWIGCSHARP
 SWIG_STD_VECTOR_ENHANCED(std::vector<std::wstring>)
-%template(UnorderedMapWStringWStrig) std::unordered_map<std::wstring, std::wstring>;
+%template(StdMapWStringWString) std::map<std::wstring, std::wstring>;
 #endif 
 
 %template(WstringVector) std::vector<std::wstring>;

@@ -31,7 +31,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
         /// <returns>A string that represents the speech recognition result.</returns>
         public override string ToString()
         {
-            throw new NotImplementedException();
+            return $"Audio size:{AudioData.Length}";
         }
     }
 }

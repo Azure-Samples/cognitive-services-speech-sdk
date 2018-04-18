@@ -96,12 +96,10 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
 
             recoImpl.SessionStarted.Connect(sessionStartedHandler);
             recoImpl.SessionStopped.Connect(sessionStoppedHandler);
-            // Todo: change to use SpeechStartDetected.
-            // recoImpl.SoundStarted.Connect(soundStartedHandler);
-            // recoImpl.SoundStopped.Connect(soundStoppedHandler);
+            recoImpl.SpeechStartDetected.Connect(speechStartDetectedHandler);
+            recoImpl.SpeechEndDetected.Connect(speechEndDetectedHandler);
 
-            // Todo: enable parameter collection
-            // Parameters = new ParameterCollection<TranslationRecognizer>(this);
+            Parameters = new ParameterCollection<TranslationRecognizer>(this);
         }
 
         /// <summary>
@@ -193,6 +191,8 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
                 recoImpl.Canceled.Disconnect(errorHandler);
                 recoImpl.SessionStarted.Disconnect(sessionStartedHandler);
                 recoImpl.SessionStopped.Disconnect(sessionStoppedHandler);
+                recoImpl.SpeechStartDetected.Disconnect(speechStartDetectedHandler);
+                recoImpl.SpeechEndDetected.Disconnect(speechEndDetectedHandler);
 
                 intermediateResultHandler?.Dispose();
                 finalResultHandler?.Dispose();

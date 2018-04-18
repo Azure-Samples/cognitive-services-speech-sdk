@@ -100,13 +100,13 @@ void CSpxRecognitionResult::InitIntentResult(const wchar_t* intentId, const wcha
     SetStringValue(g_RESULT_LuisJson, jsonPayload);
 }
 
-const std::unordered_map<std::wstring, std::wstring>& CSpxRecognitionResult::GetTranslationText()
+const std::map<std::wstring, std::wstring>& CSpxRecognitionResult::GetTranslationText()
 {
     return m_translations;
 }
 
 
-void CSpxRecognitionResult::InitTranslationTextResult(ISpxTranslationStatus status, const std::unordered_map<std::wstring, std::wstring>& translations)
+void CSpxRecognitionResult::InitTranslationTextResult(ISpxTranslationStatus status, const std::map<std::wstring, std::wstring>& translations)
 {
     m_translations = translations;
     m_translationStatus = status;

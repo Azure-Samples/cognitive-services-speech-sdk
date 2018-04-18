@@ -154,9 +154,9 @@ virtual void OnTranslationHypothesis(const USP::TranslationHypothesisMsg& messag
 {
     printf("Response: Translation.Hypothesis message. Text: %ls, starts at offset %" PRIu64 ", with duration %" PRIu64 ".\n", message.text.c_str(), message.offset, message.duration);
     auto resultMap = message.translation.translations; 
-    for (auto it = resultMap.begin(); it != resultMap.end(); ++it)
+    for (const auto& it : resultMap)
     {
-        printf("          , tranlated to %ls: %ls,\n", it->first.c_str(), it->second.c_str());
+        printf("          , tranlated to %ls: %ls,\n", it.first.c_str(), it.second.c_str());
     }
 }
 
@@ -165,9 +165,9 @@ virtual void OnTranslationPhrase(const USP::TranslationPhraseMsg& message) overr
     printf("Response: Speech.Phrase message. Status: %s, Text: %ls, starts at %" PRIu64 ", with duration %" PRIu64 ", Translation status: %d.\n", 
         recognitionStatusToText[message.recognitionStatus].c_str(), message.text.c_str(), message.offset, message.duration, (int)message.translation.translationStatus);
     auto resultMap = message.translation.translations;
-    for (auto it = resultMap.begin(); it != resultMap.end(); ++it)
+    for (const auto& it : resultMap)
     {
-        printf("          , tranlated to %ls: %ls,\n", it->first.c_str(), it->second.c_str());
+        printf("          , tranlated to %ls: %ls,\n", it.first.c_str(), it.second.c_str());
     }
 }
 

@@ -1043,11 +1043,12 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<TranslationRecogniz
     auto result = future.get();
     ConsoleWriteLine(L"RecognizeAsync %ls... Waiting... Done!\n", name.c_str());
 
-    ConsoleWriteLine(L"TranslationTextResult: ResultId=%d, RecognizedText=%ls, TranslationText(in %ls):%ls",
-        result->TranslationTextResult::ResultId.c_str(),
-        result->Text.c_str(),
-        result->Translations.begin(0)->first.c_str(),
-        result->Translations.begin(0)->second.c_str());
+    ConsoleWriteLine(L"TranslationTextResult: ResultId=%d, RecognizedText=%ls, TranslationsStatus=%d",
+        result->TranslationTextResult::ResultId.c_str(), result->Text.c_str(), (int)result->TranslationStatus);
+    for (auto it : result->Translations)
+    {
+        ConsoleWriteLine(L"                Translation to %ls: %ls", it.first.c_str(), it.second.c_str());
+    }
 }
 
 template <class T>
@@ -1313,7 +1314,10 @@ std::wstring CarbonTestConsole::ToString(const TranslationTextResultEventArgs& e
     str += L"  Result = {\n";
     str += L"    ResultId = '" + e.Result.ResultId + L"'\n";
     str += L"    RecognizedText = '" + e.Result.Text + L"'\n";
-    str += L"    TranslationText = '" + e.Result.Translations.begin(0)->first + L"'\n";
+    for (auto it : e.Result.Translations)
+    {
+        str += L"    Translation to " + it.first + L": " + it.second + L".";
+    }
     str += L"  } \n";
     str += L"} \n";
 

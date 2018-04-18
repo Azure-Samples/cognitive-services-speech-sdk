@@ -8,7 +8,7 @@
 #pragma once
 #include <memory>
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include "spxcore_common.h"
 #include "platform.h"
 #include "asyncop.h"
@@ -688,14 +688,14 @@ class ISpxTranslationTextResult : public ISpxInterfaceBaseFor<ISpxTranslationTex
 {
 public:
 
-    virtual const std::unordered_map<std::wstring, std::wstring>& GetTranslationText() = 0;
+    virtual const std::map<std::wstring, std::wstring>& GetTranslationText() = 0;
 };
 
 class ISpxTranslationTextResultInit : public ISpxInterfaceBaseFor<ISpxTranslationTextResultInit>
 {
 public:
 
-    virtual void InitTranslationTextResult(ISpxTranslationStatus status, const std::unordered_map<std::wstring, std::wstring>& translations) = 0;
+    virtual void InitTranslationTextResult(ISpxTranslationStatus status, const std::map<std::wstring, std::wstring>& translations) = 0;
 };
 
 

@@ -150,7 +150,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Intent
         }
 
         private bool disposed = false;
-        private Internal.IntentRecognizer recoImpl;
+        internal Internal.IntentRecognizer recoImpl;
         private IntentHandlerImpl intermediateResultHandler;
         private IntentHandlerImpl finalResultHandler;
         private ErrorHandlerImpl errorHandler;

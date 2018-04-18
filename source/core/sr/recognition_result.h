@@ -56,10 +56,10 @@ public:
     void InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload) override;
 
     // -- ISpxTranslationTextResult ---
-    const std::unordered_map<std::wstring, std::wstring>& GetTranslationText() override;
+    const std::map<std::wstring, std::wstring>& GetTranslationText() override;
 
     // -- ISpxTranslationTextResulInit --
-    void InitTranslationTextResult(ISpxTranslationStatus status, const std::unordered_map<std::wstring, std::wstring>& translations) override;
+    void InitTranslationTextResult(ISpxTranslationStatus status, const std::map<std::wstring, std::wstring>& translations) override;
 
     // -- ISpxTranslationSynthesisResult ---
     // Todo: check we need to include text that represents the audio data.
@@ -84,7 +84,7 @@ private:
 
     std::wstring m_intentId;
 
-    std::unordered_map<std::wstring, std::wstring> m_translations;
+    std::map<std::wstring, std::wstring> m_translations;
     ISpxTranslationStatus m_translationStatus;
 
     std::shared_ptr<const uint8_t[]> m_audioBuffer;

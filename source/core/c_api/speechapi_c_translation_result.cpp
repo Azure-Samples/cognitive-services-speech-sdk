@@ -24,9 +24,9 @@ SPXAPI TranslationResult_GetTranslationText(SPXRESULTHANDLE handle, Result_Trans
 
         size_t entries = translationPhrases.size();
         size_t sizeInBytes = sizeof(Result_TranslationTextBufferHeader) + sizeof(wchar_t *) * entries * 2; /* space for targetLanguages and translationTexts array*/
-        for (auto it = translationPhrases.begin(); it != translationPhrases.end(); ++it)
+        for (const auto& it : translationPhrases)
         {
-            sizeInBytes += (it->first.size() + 1 + it->second.size() + 1) * sizeof(wchar_t);
+            sizeInBytes += (it.first.size() + 1 + it.second.size() + 1) * sizeof(wchar_t);
         }
 
         if ((textBuffer == nullptr) || (*lengthPointer < sizeInBytes))
@@ -41,7 +41,7 @@ SPXAPI TranslationResult_GetTranslationText(SPXRESULTHANDLE handle, Result_Trans
         textBuffer->translationTexts = textBuffer->targetLanguages + entries;
         auto data = reinterpret_cast<wchar_t *>(textBuffer->translationTexts + entries);
         size_t index = 0;
-        for (auto it : translationPhrases)
+        for (const auto& it : translationPhrases)
         {
             std::wstring lang, text;
             std::tie(lang, text) = it;

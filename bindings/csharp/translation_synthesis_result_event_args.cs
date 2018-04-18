@@ -34,7 +34,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
         /// <returns>A string that represents the speech recognition result event.</returns>
         public override string ToString()
         {
-            throw new NotImplementedException();
+            return $"SessionId:{SessionId} Result:{Result.ToString()}.";
         }
     }
 }

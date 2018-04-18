@@ -43,7 +43,12 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
         /// <returns>A string that represents the speech recognition result.</returns>
         public override string ToString()
         {
-            throw new NotImplementedException();
+            var text = $"ResultId:{ResultId} RecognitionStatus:{Reason}, TranslationStatus: {TranslationStatus}, Recognized text:<{RecognizedText}>.\n";
+            foreach (var element in Translations)
+            {
+                text += $"    Translation in {element.Key}: <{element.Value}>.\n";
+            }
+            return text;
         }
 
         private Dictionary<string, string> translationTextResultMap;

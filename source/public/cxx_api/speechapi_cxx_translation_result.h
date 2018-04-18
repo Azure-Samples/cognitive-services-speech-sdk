@@ -8,7 +8,7 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include <new>
 #include <speechapi_cxx_common.h>
 #include <speechapi_c.h>
@@ -64,7 +64,7 @@ class TranslationTextResult final : public Microsoft::CognitiveServices::Speech:
 
 private:
     enum TranslationStatus m_translationStatus;
-    std::unordered_map<std::wstring, std::wstring> m_translations;
+    std::map<std::wstring, std::wstring> m_translations;
 
 public:
 
@@ -94,7 +94,7 @@ public:
     /// Presents the translation results. Each item in the map is a key value pair, where key is the language tag of the translated text,
     /// and value is the translation text in that language.
     /// </summary>
-    const std::unordered_map<std::wstring, std::wstring>& Translations;
+    const std::map<std::wstring, std::wstring>& Translations;
 
 private:
 
@@ -126,7 +126,7 @@ private:
 
         SPX_TRACE_VERBOSE("Translation phrases: numberentries: %d", (int)m_translations.size());
 #ifdef _DEBUG
-        for (auto cf : m_translations)
+        for (const auto& cf : m_translations)
         {
             SPX_TRACE_VERBOSE(" phrase for %ls: %ls", cf.first.c_str(), cf.second.c_str());
         }
