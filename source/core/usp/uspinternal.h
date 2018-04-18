@@ -123,6 +123,7 @@ private:
 
     std::recursive_mutex m_mutex;
     std::condition_variable_any m_cv;
+    std::thread m_worker;
 
     size_t m_audioOffset;
 

@@ -14,10 +14,13 @@ using namespace Microsoft::CognitiveServices::Speech::Impl;
 SPXAPI_(const_char_ptr) Error_GetCallStack(SPXERRORHANDLE errorHandle)
 {
     auto errorHandles = CSpxSharedPtrHandleTableManager::Get<ExceptionWithCallStack, SPXERRORHANDLE>();
-    auto error = (*errorHandles)[errorHandle];
-    if (error != nullptr)
+    if (errorHandles->IsTracked(errorHandle))
     {
-        return error->GetCallStack();
+        auto error = (*errorHandles)[errorHandle];
+        if (error != nullptr)
+        {
+            return error->GetCallStack();
+        }
     }
     return nullptr;
 }
@@ -25,10 +28,28 @@ SPXAPI_(const_char_ptr) Error_GetCallStack(SPXERRORHANDLE errorHandle)
 SPXAPI Error_GetCode(SPXERRORHANDLE errorHandle) 
 {
     auto errorHandles = CSpxSharedPtrHandleTableManager::Get<ExceptionWithCallStack, SPXERRORHANDLE>();
-    auto error = (*errorHandles)[errorHandle];
-    if (error != nullptr)
+    if (errorHandles->IsTracked(errorHandle)) 
     {
-        return error->GetErrorCode();
+        auto error = (*errorHandles)[errorHandle];
+        if (error != nullptr)
+        {
+            return error->GetErrorCode();
+        }
     }
+    
     return SPX_NOERROR;
+}
+
+SPXAPI_(const_char_ptr) Error_GetMessage(SPXERRORHANDLE errorHandle)
+{
+    auto errorHandles = CSpxSharedPtrHandleTableManager::Get<ExceptionWithCallStack, SPXERRORHANDLE>();
+    if (errorHandles->IsTracked(errorHandle))
+    {
+        auto error = (*errorHandles)[errorHandle];
+        if (error != nullptr)
+        {
+            return error->what();
+        }
+    }
+    return nullptr;
 }

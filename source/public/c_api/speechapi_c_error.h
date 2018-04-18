@@ -9,6 +9,8 @@
 
 typedef const char * const_char_ptr;
 
+SPXAPI_(const_char_ptr) Error_GetMessage(SPXERRORHANDLE errorHandle);
+
 SPXAPI_(const_char_ptr) Error_GetCallStack(SPXERRORHANDLE errorHandle);
 
 SPXAPI Error_GetCode(SPXERRORHANDLE errorHandle);

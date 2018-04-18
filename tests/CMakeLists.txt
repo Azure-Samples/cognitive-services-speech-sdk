@@ -5,7 +5,7 @@ set(TEST_INCLUDE "${PROJECT_SOURCE_DIR}/include")
 set(SCRIPTS_DIR "${SRC_DIR}/scripts/")
 set(INPUT_DIR "${SRC_DIR}/input/")
 
-file(GLOB SCRIPTS ${SCRIPTS_DIR}/*.sh)
+file(GLOB SCRIPTS ${SCRIPTS_DIR}/*)
 foreach(script_file ${SCRIPTS})
     file(COPY ${script_file}
         DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

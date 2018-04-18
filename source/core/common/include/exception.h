@@ -19,6 +19,7 @@ class ExceptionWithCallStack : public std::runtime_error
 {
 public:
     ExceptionWithCallStack(SPXHR error, size_t skipLevels = 0);
+    ExceptionWithCallStack(const std::string& message, SPXHR error = SPXERR_UNHANDLED_EXCEPTION, size_t skipLevels = 0);
     const char* GetCallStack() const;
     SPXHR GetErrorCode() const;
 
@@ -27,7 +28,11 @@ private:
     SPXHR m_error;
 };
 
-void ThrowWithCallstack(SPXHR hr);
+void ThrowWithCallstack(SPXHR hr, size_t skipLevels = 0);
+
+void ThrowRuntimeError(const std::string& msg, size_t skipLevels = 0);
+void ThrowInvalidArgumentException(const std::string& msg, size_t skipLevels = 0);
+void ThrowLogicError(const std::string& msg, size_t skipLevels = 0);
 
 SPXHR StoreException(ExceptionWithCallStack&& ex);
 

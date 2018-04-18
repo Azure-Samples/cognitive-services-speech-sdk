@@ -13,6 +13,7 @@
 *.i text
 *.in text
 *.java text
+*.js text
 *.json text
 *.md text
 *.nuspec text

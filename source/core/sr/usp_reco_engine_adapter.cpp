@@ -13,6 +13,7 @@
 #include <cstring>
 #include "service_helpers.h"
 #include "named_properties_constants.h"
+#include "exception.h"
 
 
 namespace Microsoft {
@@ -242,7 +243,9 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspRecoMode(USP::Client& client)
 
     SPX_DBG_ASSERT_WITH_MESSAGE(false, "Did someone add a new value to the USP::RecognitionMode enumeration?");
 
-    throw std::runtime_error("Unknown RecognitionMode value " + PAL::ToString(value));
+    ThrowInvalidArgumentException("Unknown RecognitionMode value " + PAL::ToString(value));
+
+    return client; // to make compiler happy.
 }
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspLanguage(USP::Client& client)
@@ -302,7 +305,9 @@ USP::Client&  CSpxUspRecoEngineAdapter::SetUspAuthentication(USP::Client& client
         return client.SetAuthentication(USP::AuthenticationType::SearchDelegationRPSToken, PAL::ToString(uspRpsToken));
     }
 
-    throw std::runtime_error("No Authentication parameters were specified.");
+    ThrowInvalidArgumentException("No Authentication parameters were specified.");
+    
+    return client; // fixes "not all control paths return a value"
 }
 
 void CSpxUspRecoEngineAdapter::UspSendSpeechContext()

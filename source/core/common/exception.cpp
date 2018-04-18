@@ -29,6 +29,13 @@ namespace Impl {
     {
     }
 
+    ExceptionWithCallStack::ExceptionWithCallStack(const std::string& message, SPXHR error/* = SPXERR_UNHANDLED_EXCEPTION*/, size_t skipLevels /*= 0*/) :
+        std::runtime_error(message),
+        m_callstack(Debug::GetCallStack(skipLevels + 1, /*makeFunctionNamesStandOut=*/true)),
+        m_error(error)
+    {
+    }
+
     const char* ExceptionWithCallStack::GetCallStack() const
     {
         return m_callstack.c_str();
@@ -39,9 +46,30 @@ namespace Impl {
         return m_error;
     }
 
-    void ThrowWithCallstack(SPXHR hr)
+    void ThrowWithCallstack(SPXHR hr, size_t skipLevels/* = 0*/)
     {
-        ExceptionWithCallStack ex(hr, /*skipLevels=*/1);
+        ExceptionWithCallStack ex(hr, skipLevels + 1);
+        SPX_DBG_TRACE_VERBOSE("About to throw %s %s", ex.what(), ex.GetCallStack());
+        throw ex;
+    }
+
+    void ThrowRuntimeError(const std::string& msg, size_t skipLevels/* = 0*/)
+    {
+        ExceptionWithCallStack ex("Runtime error: " + std::string(msg), SPXERR_INVALID_ARG, skipLevels + 1);
+        SPX_DBG_TRACE_VERBOSE("About to throw %s %s", ex.what(), ex.GetCallStack());
+        throw ex;
+    }
+
+    void ThrowInvalidArgumentException(const std::string& msg, size_t skipLevels/* = 0*/)
+    {
+        ExceptionWithCallStack ex("Invalid argument exception: " + std::string(msg), SPXERR_INVALID_ARG, skipLevels + 1);
+        SPX_DBG_TRACE_VERBOSE("About to throw %s %s", ex.what(), ex.GetCallStack());
+        throw ex;
+    }
+
+    void ThrowLogicError(const std::string& msg, size_t skipLevels/* = 0*/)
+    {
+        ExceptionWithCallStack ex("Logic error: " + std::string(msg), SPXERR_INVALID_ARG, skipLevels + 1);
         SPX_DBG_TRACE_VERBOSE("About to throw %s %s", ex.what(), ex.GetCallStack());
         throw ex;
     }

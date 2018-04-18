@@ -35,20 +35,6 @@ extern const char* g_messagePathSpeechStartDetected;
 extern const char* g_messagePathTranslationHypothesis;
 extern const char* g_messagePathTranslationPhrase;
 
-#define USP_THROW_IF_ARGUMENT_NULL(argument) \
-        if (argument == NULL) \
-        { \
-            std::ostringstream ss; \
-            ss << "The argument '" << #argument << "' is null."; \
-            throw std::invalid_argument(ss.str()); \
-        }
-
-#define USP_THROW_RUNTIME_ERROR(message) \
-        do \
-        { \
-           throw std::runtime_error(message); \
-        } while (0)
-
 #define USP_RETURN_ERROR_IF_CONTEXT_NULL(context) \
     do { \
         if (context == NULL) \

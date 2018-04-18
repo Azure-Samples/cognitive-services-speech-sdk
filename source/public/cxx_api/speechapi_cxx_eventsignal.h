@@ -64,8 +64,11 @@ public:
     /// <remarks>
     virtual ~EventSignal()
     {
-        m_connectedCallback = nullptr;
-        m_disconnectedCallback = nullptr;
+        {
+            std::unique_lock<std::mutex> lock(m_mutex);
+            m_connectedCallback = nullptr;
+            m_disconnectedCallback = nullptr;
+        }
         DisconnectAll();
     };
 

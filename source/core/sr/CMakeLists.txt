@@ -63,4 +63,4 @@ set_target_properties (sr PROPERTIES
     FOLDER carbon_libs
 )
 
-target_link_libraries(sr factory)
+target_link_libraries(sr PRIVATE factory common)

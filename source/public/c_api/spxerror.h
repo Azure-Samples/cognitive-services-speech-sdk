@@ -17,7 +17,7 @@ typedef uintptr_t SPXHR;
 /// <summary>
 /// Default result code indicating no error.
 /// </summary>
-#define SPX_NOERROR                 0x00000000
+#define SPX_NOERROR                 0
 
 /// <summary>
 /// Declare and initialize result code variable.
@@ -28,15 +28,14 @@ typedef uintptr_t SPXHR;
 /// <summary>
 /// Check if result code indicates success.
 /// </summary>
-#define SPX_SUCCEEDED(x)            (((x) & 0x80000000) == 0)
+#define SPX_SUCCEEDED(x)            ((x) == SPX_NOERROR)
 
 /// <summary>
 /// Check if result code indicates error.
 /// </summary>
 #define SPX_FAILED(x)               (!SPX_SUCCEEDED(x))
 
-#define __SPX_ERRCODE_SUCCEEDED(x)  (0x000f5000 | ((x) & 0x0fff))
-#define __SPX_ERRCODE_FAILED(x)     (0x800f5000 | ((x) & 0x0fff))
+#define __SPX_ERRCODE_FAILED(x)     (x)
 
 /// <summary>
 /// The function is not implemented.

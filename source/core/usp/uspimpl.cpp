@@ -29,6 +29,8 @@
 #include "dnscache.h"
 #include "metrics.h"
 
+#include "exception.h"
+
 #ifdef __linux__
 #include <unistd.h>
 #endif
@@ -64,6 +66,16 @@ uint64_t telemetry_gettime()
 namespace USP {
 
 using namespace std;
+using namespace Microsoft::CognitiveServices::Speech::Impl;
+
+template <class T>
+static void throw_if_null(T* ptr, const std::string name)
+{
+    if (ptr == NULL)
+    { 
+        ThrowInvalidArgumentException("The argument '" + name +"' is null."); \
+    }
+}
 
 // Todo: read from a configuration file.
 const auto g_protocol = "wss://";
@@ -108,7 +120,7 @@ Connection::Impl::Impl(const Client& config)
 
     call_once(initOnce, [] {
         if (platform_init() != 0) {
-            throw runtime_error("Failed to initialize platform (azure-c-shared)");
+            ThrowRuntimeError("Failed to initialize platform (azure-c-shared)");
         }
     });
 
@@ -165,7 +177,6 @@ void Connection::Impl::Shutdown()
     unique_lock<recursive_mutex> lock(m_mutex);
     m_connected = false;
     SignalWork();
-    lock.unlock();
 }
 
 void Connection::Impl::Validate()
@@ -184,12 +195,12 @@ void Connection::Impl::Validate()
 
     if (m_config.m_endpoint == EndpointType::Custom && m_config.m_endpointUrl.empty())
     {
-        throw invalid_argument("No valid endpoint was specified.");
+        ThrowInvalidArgumentException("No valid endpoint was specified.");
     }
 
     if (m_config.m_authData.empty())
     {
-        throw invalid_argument("No valid authentication mechanism was specified.");
+        ThrowInvalidArgumentException("No valid authentication mechanism was specified.");
     }
 }
 
@@ -222,7 +233,7 @@ string Connection::Impl::ConstructConnectionUrl()
         return m_config.m_endpointUrl;
         break;
     default:
-        throw invalid_argument("Unknown endpoint type.");
+        ThrowInvalidArgumentException("Unknown endpoint type.");
     }
     
     auto format = static_cast<underlying_type_t<OutputFormat>>(m_config.m_outputFormat);
@@ -240,7 +251,7 @@ void Connection::Impl::Connect()
 {
     if (m_transport != nullptr || m_connected)
     {
-        throw logic_error("USP connection already created.");
+        ThrowLogicError("USP connection already created.");
     }
 
     using HeadersPtr = deleted_unique_ptr<remove_pointer<HTTP_HEADERS_HANDLE>::type>;
@@ -249,7 +260,7 @@ void Connection::Impl::Connect()
 
     if (connectionHeaders == nullptr)
     {
-        throw runtime_error("Failed to create connection headers.");
+        ThrowRuntimeError("Failed to create connection headers.");
     }
 
     auto headersPtr = connectionHeaders.get();
@@ -268,7 +279,7 @@ void Connection::Impl::Connect()
     case AuthenticationType::SubscriptionKey:
         if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, g_requestHeaderOcpApimSubscriptionKey, m_config.m_authData.c_str()) != 0)
         {
-            throw runtime_error("Failed to set authentication using subscription key.");
+            ThrowRuntimeError("Failed to set authentication using subscription key.");
         }
         break;
 
@@ -279,7 +290,7 @@ void Connection::Impl::Connect()
         auto token = oss.str();
         if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, g_requestHeaderAuthorization, token.c_str()) != 0)
         {
-            throw runtime_error("Failed to set authentication using authorization token.");
+            ThrowRuntimeError("Failed to set authentication using authorization token.");
         }
     }
 
@@ -287,12 +298,12 @@ void Connection::Impl::Connect()
     case AuthenticationType::SearchDelegationRPSToken:
         if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, g_requestHeaderSearchDelegationRPSToken, m_config.m_authData.c_str()) != 0)
         {
-            throw runtime_error("Failed to set authentication using Search-DelegationRPSToken.");
+            ThrowRuntimeError("Failed to set authentication using Search-DelegationRPSToken.");
         }
         break;
 
     default:
-        throw runtime_error(string("Unsupported authentication type"));
+        ThrowRuntimeError("Unsupported authentication type");
     }
 
     auto connectionUrl = ConstructConnectionUrl();
@@ -301,19 +312,19 @@ void Connection::Impl::Connect()
     m_telemetry = TelemetryPtr(telemetry_create(Connection::Impl::OnTelemetryData, this), telemetry_destroy);
     if (m_telemetry == nullptr)
     {
-        throw runtime_error("Failed to create telemetry instance.");
+        ThrowRuntimeError("Failed to create telemetry instance.");
     }
 
     m_transport = TransportPtr(TransportRequestCreate(connectionUrl.c_str(), this, m_telemetry.get(), headersPtr), TransportRequestDestroy);
     if (m_transport == nullptr)
     {
-        throw runtime_error("Failed to create transport request.");
+        ThrowRuntimeError("Failed to create transport request.");
     }
 
     m_dnsCache = DnsCachePtr(DnsCacheCreate(), DnsCacheDestroy);
     if (!m_dnsCache)
     {
-        throw runtime_error("Failed to create DNS cache.");
+        ThrowRuntimeError("Failed to create DNS cache.");
     }
 
     TransportSetDnsCache(m_transport.get(), m_dnsCache.get());
@@ -329,11 +340,11 @@ void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, siz
 {
     unique_lock<recursive_mutex> lock(m_mutex);
 
-    USP_THROW_IF_ARGUMENT_NULL(data);
+    throw_if_null(data, "data");
 
     if (path.empty())
     {
-        throw invalid_argument("The path is null or empty.");
+        ThrowInvalidArgumentException("The path is null or empty.");
     }
 
     if (m_connected) 
@@ -356,7 +367,7 @@ void Connection::Impl::QueueAudioSegment(const uint8_t* data, size_t size)
 
     LogInfo("TS:%" PRIu64 ", Write %" PRIu32 " bytes audio data.", getTimestamp(), size);
 
-    USP_THROW_IF_ARGUMENT_NULL(data);
+    throw_if_null(data, "data");
 
     if (!m_connected)
     {
@@ -375,14 +386,14 @@ void Connection::Impl::QueueAudioSegment(const uint8_t* data, size_t size)
         ret = TransportStreamPrepare(m_transport.get(), "/audio");
         if (ret != 0)
         {
-            throw runtime_error("TransportStreamPrepare failed. error=" + to_string(ret));
+            ThrowRuntimeError("TransportStreamPrepare failed. error=" + to_string(ret));
         }
     }
 
     ret = TransportStreamWrite(m_transport.get(), data, size);
     if (ret != 0)
     {
-        throw runtime_error("TransportStreamWrite failed. error=" + to_string(ret));
+        ThrowRuntimeError("TransportStreamWrite failed. error=" + to_string(ret));
     }
 
     m_audioOffset += size;
@@ -407,7 +418,7 @@ void Connection::Impl::QueueAudioEnd()
 
     if (ret != 0)
     {
-        throw runtime_error("Returns failure, reason: TransportStreamFlush returned " + to_string(ret));
+        ThrowRuntimeError("Returns failure, reason: TransportStreamFlush returned " + to_string(ret));
     }
     SignalWork();
 }
@@ -416,7 +427,7 @@ void Connection::Impl::QueueAudioEnd()
 void Connection::Impl::OnTransportError(TransportHandle transportHandle, TransportError reason, void* context)
 {
     (void)transportHandle;
-    USP_THROW_IF_ARGUMENT_NULL(context);
+    throw_if_null(context, "context");
 
     Connection::Impl *connection = static_cast<Connection::Impl*>(context);
     LogInfo("TS:%" PRIu64 ", TransportError: connection:0x%x, reason=%d.", connection->getTimestamp(), connection, reason);
@@ -463,10 +474,9 @@ void Connection::Impl::OnTransportError(TransportHandle transportHandle, Transpo
 void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEADERS_HANDLE responseHeader, const unsigned char* buffer, size_t size, unsigned int errorCode, void* context)
 {
     (void)transportHandle;
-    USP_THROW_IF_ARGUMENT_NULL(context);
+    throw_if_null(context, "context");
 
     Connection::Impl *connection = static_cast<Connection::Impl*>(context);
-
 
     if (errorCode != 0)
     {

@@ -13,7 +13,10 @@
 #include "azure_c_shared_utility_buffer_wrapper.h"
 #include "azure_c_shared_utility_xlogging_wrapper.h"
 
+#include "exception.h"
+
 using namespace std;
+using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 /**
 * Defines the callback function of asynchronous complete during content handling.
@@ -367,7 +370,7 @@ static int HandleJsonTranslationResponse(PROPERTYBAG_HANDLE propertyHandle, void
         if (strcmp(deserializeContext->path, g_messagePathTranslationPhrase))
         {
             LogError("Unexpected message path: %s", deserializeContext->path);
-            USP_THROW_RUNTIME_ERROR("Unexpected message path.");
+            throw ExceptionWithCallStack("Unexpected message path.");
         }
 
         USP::TranslationPhraseMsg msg;
