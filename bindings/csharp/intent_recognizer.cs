@@ -139,11 +139,11 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Intent
                 recoImpl.SpeechStartDetected.Disconnect(speechStartDetectedHandler);
                 recoImpl.SpeechEndDetected.Disconnect(speechEndDetectedHandler);
 
-                intermediateResultHandler.Dispose();
-                finalResultHandler.Dispose();
-                errorHandler.Dispose();
-                recoImpl.Dispose();
-                Parameters.Dispose();
+                intermediateResultHandler?.Dispose();
+                finalResultHandler?.Dispose();
+                errorHandler?.Dispose();
+                recoImpl?.Dispose();
+                Parameters?.Dispose();
                 disposed = true;
                 base.Dispose(disposing);
             }

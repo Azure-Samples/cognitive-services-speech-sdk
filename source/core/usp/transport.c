@@ -519,7 +519,7 @@ static void OnWSFrameReceived(void* context, unsigned char frame_type, const uns
         {
         case WS_FRAME_TYPE_TEXT:
 #ifdef LOG_TEXT_MESSAGES
-            LogInfo("Message received:\n<<<<<<<<<<\n%.*s\n<<<<<<<<<<", size, buffer);
+            LogInfo("Message received:%.*s", size, buffer);
 #endif
             offset = ParseHttpHeaders(responseHeadersHandle, buffer, size);
             break;

@@ -216,8 +216,8 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
                 return;
             }
 
-            Parameters.Dispose();
-            factoryImpl.Dispose();
+            Parameters?.Dispose();
+            factoryImpl?.Dispose();
             disposed = true;
         }
 

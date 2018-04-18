@@ -41,9 +41,8 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::IDefaultRecognizerFactory)
 
 #ifdef SWIGCSHARP
-SWIG_STD_VECTOR_ENHANCED(std::vector<wstring>)
+SWIG_STD_VECTOR_ENHANCED(std::vector<std::wstring>)
 %template(UnorderedMapWStringWStrig) std::unordered_map<std::wstring, std::wstring>;
-%shared_ptr(std::unordered_map<std::wstring, std::wstring>)
 #endif 
 
 %template(WstringVector) std::vector<std::wstring>;
@@ -363,7 +362,7 @@ SWIG_STD_VECTOR_ENHANCED(std::vector<wstring>)
 %include <speechapi_cxx_intent_recognizer.h>
 
 %ignore Microsoft::CognitiveServices::Speech::Recognition::RecognizerFactoryParameterValue::RecognizerFactoryParameterValue(SPXRECOFACTORYHANDLE, enum FactoryParameter);
-%ignore GetLanguageResource(LanguageResourceScope scopes, ::std::wstring acceptLanguage);
+%ignore GetLanguageResource(LanguageResourceScope scopes, std::wstring acceptLanguage);
 
 %include <speechapi_cxx_translation_result.h>
 %include <speechapi_cxx_translation_eventargs.h>

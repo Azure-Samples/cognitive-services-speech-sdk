@@ -194,11 +194,11 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
                 recoImpl.SessionStarted.Disconnect(sessionStartedHandler);
                 recoImpl.SessionStopped.Disconnect(sessionStoppedHandler);
 
-                intermediateResultHandler.Dispose();
-                finalResultHandler.Dispose();
-                errorHandler.Dispose();
-                recoImpl.Dispose();
-                Parameters.Dispose();
+                intermediateResultHandler?.Dispose();
+                finalResultHandler?.Dispose();
+                errorHandler?.Dispose();
+                recoImpl?.Dispose();
+                Parameters?.Dispose();
                 disposed = true;
                 base.Dispose(disposing);
             }

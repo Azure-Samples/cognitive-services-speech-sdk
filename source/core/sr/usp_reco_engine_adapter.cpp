@@ -648,6 +648,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
         SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace statement
         SPX_DBG_TRACE_VERBOSE_IF(IsState(AudioState::Idle), "%s: Already Idle; Waiting for uspStates to complete ... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
 
+        // Todo: deal with nomatch event? failed events?
         if (IsState(AudioState::Idle) && ChangeState(UspState::FiredFinalResult))
         {
             SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning

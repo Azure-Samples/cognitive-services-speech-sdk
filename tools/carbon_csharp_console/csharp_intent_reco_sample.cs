@@ -37,13 +37,28 @@ namespace CarbonSamples
 
         public static async Task IntentRecognitionBaseModelAsync(string keySpeech, string fileName)
         {
-            var factory = new RecognizerFactory();
+            using (var factory = new RecognizerFactory())
+            {
 
-            Console.WriteLine("Intent Recognition using base speech model.");
+                Console.WriteLine("Intent Recognition using base speech model.");
 
-            factory.SubscriptionKey = keySpeech;
+                factory.SubscriptionKey = keySpeech;
 
-            await DoIntentRecognitionAsync(factory, fileName).ConfigureAwait(false);
+                if (fileName == null)
+                {
+                    using (var reco = factory.CreateIntentRecognizer())
+                    {
+                        await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    using (var reco = factory.CreateIntentRecognizer(fileName))
+                    {
+                        await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
+                    }
+                }
+            }
         }
 
         //public static async Task IntentRecognitionCustomizedModelAsync(string keySpeech, string modelId, string fileName)
@@ -60,28 +75,33 @@ namespace CarbonSamples
 
         public static async Task IntentRecognitionByEndpointAsync(string keySpeech, string endpoint, string fileName)
         {
-            var factory = new RecognizerFactory();
+            using (var factory = new RecognizerFactory())
+            {
 
-            Console.WriteLine(String.Format("Intent Recognition using endpoint:{0}.", endpoint));
+                Console.WriteLine(String.Format("Intent Recognition using endpoint:{0}.", endpoint));
 
-            factory.SubscriptionKey = keySpeech;
-            factory.Endpoint = endpoint;
+                factory.SubscriptionKey = keySpeech;
+                factory.Endpoint = endpoint;
 
-            await DoIntentRecognitionAsync(factory, fileName).ConfigureAwait(false);
+                if (fileName == null)
+                {
+                    using (var reco = factory.CreateIntentRecognizer())
+                    {
+                        await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    using (var reco = factory.CreateIntentRecognizer(fileName))
+                    {
+                        await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
+                    }
+                }
+            }
         }
 
-        public static async Task DoIntentRecognitionAsync(RecognizerFactory factory, string fileName)
+        public static async Task DoIntentRecognitionAsync(IntentRecognizer reco)
         {
-             IntentRecognizer reco;
-            if (fileName == null)
-            {
-                reco = factory.CreateIntentRecognizer();
-            }
-            else
-            {
-                reco = factory.CreateIntentRecognizer(fileName);
-            }
-
             // Subscribes to events.
             reco.IntermediateResultReceived += MyIntermediateResultEventHandler;
             reco.FinalResultReceived += MyFinalResultEventHandler;

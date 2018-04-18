@@ -38,13 +38,26 @@ namespace CarbonSamples
 
         public static async Task TranslationBaseModelAsync(string keyTranslation, string fileName)
         {
-            var factory = new RecognizerFactory();
+            using (var factory = new RecognizerFactory())
+            {
+                Console.WriteLine("Translation using base model.");
+                factory.SubscriptionKey = keyTranslation;
 
-            Console.WriteLine("Translation using base model.");
-
-            factory.SubscriptionKey = keyTranslation;
-
-            await DoTranslationAsync(factory, fileName).ConfigureAwait(false); ;
+                if (fileName == null)
+                {
+                    using (var reco = factory.CreateTranslationRecognizer(FromLang, ToLangs))
+                    {
+                        await DoTranslationAsync(reco).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    using (var reco = factory.CreateTranslationRecognizer(FromLang, ToLangs))
+                    {
+                        await DoTranslationAsync(reco).ConfigureAwait(false);
+                    }
+                }
+            }
         }
 
         //public static async Task TranslationCustomizedModelAsync(string keyTranslation string modelId, string fileName)
@@ -60,28 +73,30 @@ namespace CarbonSamples
 
         public static async Task TranslationByEndpointAsync(string keyTranslation, string endpoint, string fileName)
         {
-            var factory = new RecognizerFactory();
-
-            Console.WriteLine(String.Format("Translation using endopoint:{0}.", endpoint));
-
-            factory.SubscriptionKey = keyTranslation;
-            factory.Endpoint = endpoint;
-
-            await DoTranslationAsync(factory, fileName).ConfigureAwait(false);
+            using (var factory = new RecognizerFactory())
+            {
+                Console.WriteLine(String.Format("Translation using endopoint:{0}.", endpoint));
+                factory.SubscriptionKey = keyTranslation;
+                factory.Endpoint = endpoint;
+                if (fileName == null)
+                {
+                    using (var reco = factory.CreateTranslationRecognizer(FromLang, ToLangs))
+                    {
+                        await DoTranslationAsync(reco).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    using (var reco = factory.CreateTranslationRecognizer(fileName, FromLang, ToLangs))
+                    {
+                        await DoTranslationAsync(reco).ConfigureAwait(false);
+                    }
+                }
+            }
         }
 
-        public static async Task DoTranslationAsync(RecognizerFactory factory, string fileName)
+        public static async Task DoTranslationAsync(TranslationRecognizer reco)
         {
-            TranslationRecognizer reco;
-            if (fileName == null)
-            {
-                reco = factory.CreateTranslationRecognizer("en-us", new List<string>() { "de-de" });
-            }
-            else
-            {
-                reco = factory.CreateTranslationRecognizer(fileName, "en-us", new List<string>() { "de-de" });
-            }
-
             // Subscribes to events.
             reco.IntermediateResultReceived += MyIntermediateResultEventHandler;
             reco.FinalResultReceived += MyFinalResultEventHandler;
@@ -99,5 +114,8 @@ namespace CarbonSamples
             reco.RecognitionErrorRaised -= MyErrorEventHandler;
             reco.OnSessionEvent -= MySessionEventHandler;
         }
+
+        private static string FromLang = "en-us";
+        private static List<string> ToLangs = new List<string>(){"de-de"};
     }
 }

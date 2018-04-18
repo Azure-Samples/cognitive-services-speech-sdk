@@ -99,6 +99,7 @@ public:
     void Shutdown();
 
 private:
+
     using DnsCachePtr = deleted_unique_ptr<std::remove_pointer<DnsCacheHandle>::type>;
 
     using TelemetryPtr = deleted_unique_ptr<std::remove_pointer<TELEMETRY_HANDLE>::type>;

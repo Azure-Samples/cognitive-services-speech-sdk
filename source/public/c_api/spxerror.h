@@ -179,3 +179,18 @@ typedef uintptr_t SPXHR;
 /// An unexpected error was encountered when trying to access the Unidec site.
 /// </summary>
 #define SPXERR_UNEXPECTED_UNIDEC_SITE_FAILURE  __SPX_ERRCODE_FAILED(0x018)
+
+/// <summary>
+/// The buffer is too small.
+/// </summary>
+#define SPXERR_BUFFER_TOO_SMALL  __SPX_ERRCODE_FAILED(0x019)
+
+/// <summary>
+/// A method failed to allocate memory.
+/// </summary>
+#define SPXERR_OUT_OF_MEMORY  __SPX_ERRCODE_FAILED(0x01A)
+
+/// <summary>
+/// An unexpected runtime error occurred.
+/// </summary>
+#define SPXERR_RUNTIME_ERROR  __SPX_ERRCODE_FAILED(0x01B)

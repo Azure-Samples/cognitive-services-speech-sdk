@@ -37,13 +37,27 @@ namespace CarbonSamples
 
         public static async Task SpeechRecognitionBaseModelAsync(string keySpeech, string fileName)
         {
-            var factory = new RecognizerFactory();
+            using (var factory = new RecognizerFactory())
+            {
+                Console.WriteLine("Speech Recognition using base model.");
 
-            Console.WriteLine("Speech Recognition using base model.");
+                factory.SubscriptionKey = keySpeech;
 
-            factory.SubscriptionKey = keySpeech;
-
-            await DoSpeechRecognitionAsync(factory, fileName).ConfigureAwait(false);
+                if (fileName == null)
+                {
+                    using (var reco = factory.CreateSpeechRecognizer())
+                    {
+                        await DoSpeechRecognitionAsync(reco).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    using (var reco = factory.CreateSpeechRecognizer(fileName))
+                    {
+                        await DoSpeechRecognitionAsync(reco).ConfigureAwait(false);
+                    }
+                }
+            }
         }
 
         //public static async Task SpeechRecognitionCustomizedModelAsync(string keySpeech, string modelId, string fileName)
@@ -59,28 +73,32 @@ namespace CarbonSamples
 
         public static async Task SpeechRecognitionByEndpointAsync(string keySpeech, string endpoint, string fileName)
         {
-            var factory = new RecognizerFactory();
+            using (var factory = new RecognizerFactory())
+            {
+                Console.WriteLine(String.Format("Speech Recognition using endopoint:{0}.", endpoint));
 
-            Console.WriteLine(String.Format("Speech Recognition using endopoint:{0}.", endpoint));
+                factory.SubscriptionKey = keySpeech;
+                factory.Endpoint = endpoint;
 
-            factory.SubscriptionKey = keySpeech;
-            factory.Endpoint = endpoint;
-
-            await DoSpeechRecognitionAsync(factory, fileName).ConfigureAwait(false);
+                if (fileName == null)
+                {
+                    using (var reco = factory.CreateSpeechRecognizer())
+                    {
+                        await DoSpeechRecognitionAsync(reco).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    using (var reco = factory.CreateSpeechRecognizer(fileName))
+                    {
+                        await DoSpeechRecognitionAsync(reco).ConfigureAwait(false);
+                    }
+                }
+            }
         }
 
-        public static async Task DoSpeechRecognitionAsync(RecognizerFactory factory, string fileName)
+        public static async Task DoSpeechRecognitionAsync(SpeechRecognizer reco)
         {
-            SpeechRecognizer reco;
-            if (fileName == null)
-            {
-                reco = factory.CreateSpeechRecognizer();
-            }
-            else
-            {
-                reco = factory.CreateSpeechRecognizer(fileName);
-            }
-
             // Subscribes to events.
             reco.IntermediateResultReceived += MyIntermediateResultEventHandler;
             reco.FinalResultReceived += MyFinalResultEventHandler;

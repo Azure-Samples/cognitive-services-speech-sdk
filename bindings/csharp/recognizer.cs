@@ -74,10 +74,10 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
             if (disposing)
             {
                 // disconnect
-                sessionStartedHandler.Dispose();
-                sessionStoppedHandler.Dispose();
-                speechStartDetectedHandler.Dispose();
-                speechEndDetectedHandler.Dispose();
+                sessionStartedHandler?.Dispose();
+                sessionStoppedHandler?.Dispose();
+                speechStartDetectedHandler?.Dispose();
+                speechEndDetectedHandler?.Dispose();
             }
 
             disposed = true;

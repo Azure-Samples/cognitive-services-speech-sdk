@@ -18,12 +18,12 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
         internal TranslationTextResult(Internal.TranslationTextResult result) : base(result)
         {
             translationTextResultMap = new Dictionary<string, string>();
-            // Todo: add translation result
-            // var map = result.Translations;
-            // foreach (var element in map)
-            // {
-            //    translationTextResultMap.Add(element.Key, element.Value);
-            // }
+            //Todo: add translation result
+            var map = result.Translations;
+            foreach (var element in map)
+            {
+                translationTextResultMap.Add(element.Key, element.Value);
+            }
         }
 
         /// <summary>

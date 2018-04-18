@@ -19,12 +19,10 @@
 
 using namespace Microsoft::CognitiveServices::Speech;
 
-
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
-
 
 class ISpxInterfaceBase : public std::enable_shared_from_this<ISpxInterfaceBase>
 {

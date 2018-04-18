@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <new>
 #include <speechapi_cxx_common.h>
 #include <speechapi_c.h>
 #include <speechapi_cxx_recognition_result.h>
@@ -63,7 +64,7 @@ class TranslationTextResult final : public Microsoft::CognitiveServices::Speech:
 
 private:
     enum TranslationStatus m_translationStatus;
-    std::unordered_map<::std::wstring, ::std::wstring> m_translations;
+    std::unordered_map<std::wstring, std::wstring> m_translations;
 
 public:
 
@@ -99,12 +100,37 @@ private:
 
     void PopulateResultFields(SPXRESULTHANDLE resultHandle)
     {
-        (void)resultHandle;
-        //Todo: get translation results from resultHandle
-        //SPX_THROW_ON_FAIL(SPXERR_NOT_IMPL);
-        // Hack for now
-        m_translationStatus = ::Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationStatus::Success;
-        m_translations[L"en-us"] = L"Test Test";
+        m_translationStatus = ::Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationStatus::SpeechNotRecognized;
+
+        size_t bufLen = 0;
+        std::unique_ptr<Result_TranslationTextBufferHeader> phraseBuffer;
+
+        // retrieve the required buffer size first.
+        auto hr = TranslationResult_GetTranslationText(resultHandle, nullptr, &bufLen);
+        if (hr == SPXERR_BUFFER_TOO_SMALL)
+        {
+            phraseBuffer = std::move(std::unique_ptr<Result_TranslationTextBufferHeader>((Result_TranslationTextBufferHeader *)(new char[bufLen])));
+            hr = TranslationResult_GetTranslationText(resultHandle, phraseBuffer.get(), &bufLen);
+        }
+        SPX_THROW_ON_FAIL(hr);
+
+        if (phraseBuffer->bufferSize > bufLen)
+        {
+            SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
+        }
+
+        for (size_t i = 0; i < phraseBuffer->numberEntries; i++)
+        {
+            m_translations[std::wstring(phraseBuffer->targetLanguages[i])] = std::wstring(phraseBuffer->translationTexts[i]);
+        }
+
+        SPX_TRACE_VERBOSE("Translation phrases: numberentries: %d", (int)m_translations.size());
+#ifdef _DEBUG
+        for (auto cf : m_translations)
+        {
+            SPX_TRACE_VERBOSE(" phrase for %ls: %ls", cf.first.c_str(), cf.second.c_str());
+        }
+#endif
     };
 
     TranslationTextResult() = delete;
