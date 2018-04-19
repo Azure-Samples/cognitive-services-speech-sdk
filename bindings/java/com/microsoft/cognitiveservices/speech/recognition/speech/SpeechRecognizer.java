@@ -213,6 +213,49 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         
         return t;
     }
+
+    /// <summary>
+    /// Starts speech recognition on a continous audio stream with keyword spotting, until StopKeywordRecognitionAsync() is called.
+    /// User must subscribe to events to receive recognition results.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation that starts the recognition.</returns>
+    public Task<?> startKeywordRecognitionAsync(String keyword)
+    {
+        Task<?> t = new Task(new TaskRunner() {
+
+            @Override
+            public void run() {
+                recoImpl.startKeywordRecognition(keyword);
+            }
+
+            @Override
+            public Object result() {
+                return null;
+            }});
+        
+        return t;
+    }
+
+    /// <summary>
+    /// Stops continuous speech recognition.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation that stops the recognition.</returns>
+    public Task<?> stopKeywordRecognitionAsync()
+    {
+        Task<?> t = new Task(new TaskRunner() {
+
+            @Override
+            public void run() {
+                recoImpl.stopKeywordRecognition();
+            }
+
+            @Override
+            public Object result() {
+                return null;
+            }});
+        
+        return t;
+    }
     
     @Override
     protected void dispose(boolean disposing) throws IOException
