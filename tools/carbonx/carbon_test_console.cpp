@@ -1330,7 +1330,7 @@ std::wstring CarbonTestConsole::ToString(const TranslationSynthesisResultEventAr
     str += L"TranslationEventArgs<TranslationSynthesisResult> = { \n";
     str += L"  SessionId = '" + e.SessionId + L"'\n";
     str += L"  Result = {\n";
-    str += L"    SizeOfAudioData = " + std::to_wstring(e.Result.AudioData.size()) + L"\n";
+    str += L"    SizeOfAudioData = " + std::to_wstring(e.Result.Audio.size()) + L"\n";
     str += L"  } \n";
     str += L"} \n";
 

@@ -212,7 +212,7 @@ struct TranslationPhraseMsg : public TranslationHypothesisMsg
 */
 struct TranslationSynthesisMsg
 {
-    std::shared_ptr<const uint8_t[]> audioBuffer;
+    const uint8_t* audioBuffer;
     size_t audioLength { 0 };
 };
 

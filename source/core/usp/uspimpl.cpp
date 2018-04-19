@@ -33,7 +33,6 @@
 #include <unistd.h>
 #endif
 
-
 #include "string_utils.h"
 #include "json.hpp"
 
@@ -604,6 +603,13 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
                 });
         }
 
+    }
+    else if (pathStr == path::translationSynthesis)
+    {
+        USP::TranslationSynthesisMsg msg;
+        msg.audioBuffer = (uint8_t *)buffer;
+        msg.audioLength = size;
+        callbacks.OnTranslationSynthesis(msg);
     }
     else if (path == path::speechPhrase)
     {

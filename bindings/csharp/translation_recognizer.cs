@@ -90,6 +90,9 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
             finalResultHandler = new ResultHandlerImpl(this, isFinalResultHandler: true);
             recoImpl.FinalResult.Connect(finalResultHandler);
 
+            synthesisResultHandler = new SynthesisHandlerImpl(this);
+            recoImpl.TranslationSynthesisResultEvent.Connect(synthesisResultHandler);
+
             errorHandler = new ErrorHandlerImpl(this);
             recoImpl.NoMatch.Connect(errorHandler);
             recoImpl.Canceled.Connect(errorHandler);
@@ -193,6 +196,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
                 recoImpl.SessionStopped.Disconnect(sessionStoppedHandler);
                 recoImpl.SpeechStartDetected.Disconnect(speechStartDetectedHandler);
                 recoImpl.SpeechEndDetected.Disconnect(speechEndDetectedHandler);
+                recoImpl.TranslationSynthesisResultEvent.Disconnect(synthesisResultHandler);
 
                 intermediateResultHandler?.Dispose();
                 finalResultHandler?.Dispose();
@@ -207,6 +211,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
         internal Internal.TranslationRecognizer recoImpl;
         private ResultHandlerImpl intermediateResultHandler;
         private ResultHandlerImpl finalResultHandler;
+        private SynthesisHandlerImpl synthesisResultHandler;
         private ErrorHandlerImpl errorHandler;
         private bool disposed = false;
 
@@ -256,6 +261,33 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
                 RecognitionErrorEventArgs resultEventArg = null; // new RecognitionErrorEventArgs(eventArgs.SessionId, eventArgs.Result.Reason);
                 var handler = this.recognizer.RecognitionErrorRaised;
 
+                if (handler != null)
+                {
+                    handler(this.recognizer, resultEventArg);
+                }
+            }
+
+            private TranslationRecognizer recognizer;
+        }
+
+        // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
+        private class SynthesisHandlerImpl : Internal.TranslationSynthesisEventListener
+        {
+            public SynthesisHandlerImpl(TranslationRecognizer recognizer)
+            {
+                this.recognizer = recognizer;
+            }
+
+                
+            public override void Execute(Internal.TranslationSynthesisResultEventArgs eventArgs)
+            {
+                if (recognizer.disposed)
+                {
+                    return;
+                }
+
+                var resultEventArg = new TranslationSynthesisResultEventArgs(eventArgs);
+                var handler = recognizer.SynthesisResultReceived;
                 if (handler != null)
                 {
                     handler(this.recognizer, resultEventArg);

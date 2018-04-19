@@ -172,10 +172,12 @@ UspResult AudioResponseHandler(void* context, const char* path, uint8_t* buffer,
     (void)callback;
     (void)asyncContext;
 
+    //Handle stream audio
     USP::AudioStreamStartMsg msg;
     msg.ioBuffer = ioBuffer;
     USP::Callbacks* uspContext = (USP::Callbacks*)context;
     uspContext->OnAudioStreamStart(msg);
+  
 
     //TODO: MSFT 1099211: Memory caused because callback not invoked
     return USP_SUCCESS;

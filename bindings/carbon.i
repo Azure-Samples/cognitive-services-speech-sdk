@@ -43,6 +43,7 @@
 
 #ifdef SWIGCSHARP
 SWIG_STD_VECTOR_ENHANCED(std::vector<std::wstring>)
+%template(UnsignedCharVector) std::vector<unsigned char>;
 %template(StdMapWStringWString) std::map<std::wstring, std::wstring>;
 #endif 
 

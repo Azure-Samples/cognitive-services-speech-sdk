@@ -63,12 +63,11 @@ public:
 
     // -- ISpxTranslationSynthesisResult ---
     // Todo: check we need to include text that represents the audio data.
-    const std::shared_ptr<const uint8_t[]> GetAudioBuffer() const override;
-    size_t GetAudioLength() const override;
-    const std::wstring GetAudioText() const override;
+    const uint8_t* GetAudio() const override;
+    size_t GetLength() const override;
 
     // ISpxTranslationSynthesisResultInit
-    void InitTranslationSynthesisResult(const std::shared_ptr<const uint8_t[]> audioData, size_t audioLength, const std::wstring& text) override;
+    void InitTranslationSynthesisResult(const uint8_t* audioData, size_t audioLength) override;
 
 private:
 
@@ -87,9 +86,8 @@ private:
     std::map<std::wstring, std::wstring> m_translations;
     ISpxTranslationStatus m_translationStatus;
 
-    std::shared_ptr<const uint8_t[]> m_audioBuffer;
+    const uint8_t* m_audioBuffer;
     size_t m_audioLength;
-    std::wstring m_audioText;
 };
 
 

@@ -85,7 +85,6 @@ public:
     TranslationSynthesisResultEventArgs(SPXEVENTHANDLE hevent) :
         SessionEventArgs(hevent),
         m_hevent(hevent),
-        //m_result(std::make_shared<TranslationSynthesisResult>(ResultHandleFromEventHandle(hevent))),
         m_result(std::make_shared<TranslationSynthesisResult>(nullptr)),
         Result(*m_result.get())
     {
@@ -103,13 +102,6 @@ public:
     const TranslationSynthesisResult& Result;
 
 private:
-
-    SPXRESULTHANDLE ResultHandleFromEventHandle(SPXEVENTHANDLE hevent)
-    {
-        SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(Recognizer_RecognitionEvent_GetResult(hevent, &hresult));
-        return hresult;
-    }
 
     TranslationSynthesisResultEventArgs() = delete;
     TranslationSynthesisResultEventArgs(TranslationSynthesisResultEventArgs&&) = delete;

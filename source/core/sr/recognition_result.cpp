@@ -112,28 +112,21 @@ void CSpxRecognitionResult::InitTranslationTextResult(ISpxTranslationStatus stat
     m_translationStatus = status;
 }
 
-const std::shared_ptr<const uint8_t[]> CSpxRecognitionResult::GetAudioBuffer() const
+const uint8_t* CSpxRecognitionResult::GetAudio() const
 {
     return m_audioBuffer;
 }
 
-size_t CSpxRecognitionResult::GetAudioLength() const
+size_t CSpxRecognitionResult::GetLength() const
 {
     return m_audioLength;
 }
 
-const std::wstring CSpxRecognitionResult::GetAudioText() const
-{
-    return m_audioText;
-}
-
-
 // ISpxTranslationSynthesisResultInit
-void CSpxRecognitionResult::InitTranslationSynthesisResult(const std::shared_ptr<const uint8_t[]> audioData, size_t audioLength, const std::wstring& text)
+void CSpxRecognitionResult::InitTranslationSynthesisResult(const uint8_t* audioData, size_t audioLength)
 {
     m_audioBuffer = audioData;
     m_audioLength = audioLength;
-    m_audioText = text;
 }
 
 

@@ -158,10 +158,10 @@ public:
     /// </summary>
     /// <param name="resultHandle">The handle of the result returned by recognizer in C-API.</param>
     TranslationSynthesisResult(SPXRESULTHANDLE resultHandle) :
-        AudioData(m_audioData),
+        Audio(m_audioData),
         m_hresult(resultHandle)
     {
-        // Todo: get audio data from result.
+        PopulateResultFields(resultHandle);
     };
 
     /// <summary>
@@ -171,9 +171,26 @@ public:
 
     /// <summary>
     /// The voice output of the translated text in the target language.
-    const std::vector<uint8_t>& AudioData;
+    /// </summary>
+    const std::vector<uint8_t>& Audio;
 
 private:
+
+    void PopulateResultFields(SPXRESULTHANDLE resultHandle)
+    {
+        size_t bufLen = 0;
+
+        // retrieve the required buffer size first.
+        auto hr = TranslationResult_GetTranslationText(resultHandle, nullptr, &bufLen);
+        if (hr == SPXERR_BUFFER_TOO_SMALL)
+        {
+            m_audioData.resize(bufLen);
+            hr = TranslationResult_GetTranslationSynthesisData(resultHandle, m_audioData.data(), &bufLen);
+        }
+        SPX_THROW_ON_FAIL(hr);
+
+        SPX_TRACE_VERBOSE("Translation synthesis: audio length: %d, verctor size:", bufLen, m_audioData.size());
+    };
 
     TranslationSynthesisResult(const TranslationSynthesisResult&) = delete;
     TranslationSynthesisResult(const TranslationSynthesisResult&&) = delete;

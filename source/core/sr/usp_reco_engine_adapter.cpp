@@ -766,13 +766,11 @@ void CSpxUspRecoEngineAdapter::OnTranslationSynthesis(const USP::TranslationSynt
     auto result = factory->CreateFinalResult(nullptr, L"", ResultType::TranslationSynthesis);
 
     // Update our result to be an "TranslationSynthesis" result.
-    // auto initTranslationResult = SpxQueryInterface<ISpxTranslationSynthesisResultInit>(result);
-    // initTranslationResult->InitTranslationSynthesisResult(message.audioBuffer, message.audioLength, message.text);
+    auto initTranslationResult = SpxQueryInterface<ISpxTranslationSynthesisResultInit>(result);
+    initTranslationResult->InitTranslationSynthesisResult(message.audioBuffer, message.audioLength);
 
     (void)message;
     // Todo: offset (and duration) should be part of result. Now, offset is autaully ignored by the following function.
-    // Todo: need to differentiate whether this is the last audio or not, in order to trigger FinalRecoResult if needed.
-    // Waiting for Rob's change for direct LUIS integration, which introduces a state machine in usp_reco_engine.
     GetSite()->TranslationSynthesisResult(this, result);
 }
 

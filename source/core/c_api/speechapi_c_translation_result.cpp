@@ -4,6 +4,7 @@
 //
 
 #include <assert.h>
+#include <cstring>
 #include "stdafx.h"
 #include "string_utils.h"
 
@@ -58,6 +59,31 @@ SPXAPI TranslationResult_GetTranslationText(SPXRESULTHANDLE handle, Result_Trans
         {
             SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
         }
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+
+SPXAPI TranslationResult_GetTranslationSynthesisData(SPXRESULTHANDLE handle, uint8_t* audioBuffer, size_t* lengthPointer)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, lengthPointer == nullptr);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto resulthandle = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
+        auto result = (*resulthandle)[handle];
+
+        auto audioResult = SpxQueryInterface<ISpxTranslationSynthesisResult>(result);
+        auto audioLength = audioResult->GetLength();
+    
+        if ((audioBuffer == nullptr) || (*lengthPointer < audioLength))
+        {
+            *lengthPointer = audioLength;
+            SPX_RETURN_HR(SPXERR_BUFFER_TOO_SMALL);
+        }
+
+        std::memcpy(audioBuffer, audioResult->GetAudio(), audioLength);
+        *lengthPointer = audioLength;
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

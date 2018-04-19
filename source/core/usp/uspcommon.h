@@ -61,6 +61,7 @@ namespace USP {
         const std::string translationHypothesis = "translation.hypothesis";
         const std::string translationPhrase = "translation.phrase";
         const std::string translationSynthesis = "translation.synthesis";
+        const std::string translationSynthesisEnd = "translation.synthesis.end";
     }
     //Todo: Figure out what to do about user agent build hash and version number
     const auto g_userAgent = "CortanaSDK (Windows;Win32;DeviceType=Near;SpeechClient=2.0.4)";

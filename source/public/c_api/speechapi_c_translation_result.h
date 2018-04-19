@@ -29,8 +29,9 @@ typedef struct _Result_TranslationTextBufferHeader {
 // the size required, the function returns SPXERR_BUFFER_TOO_SMALL.
 SPXAPI TranslationResult_GetTranslationText(SPXRESULTHANDLE handle, Result_TranslationTextBufferHeader *textBuffer, size_t* lengthPointer);
 
-
 // Todo: check how to expose translation status after it is defined in core.
 // SPXAPI TranslationResult_GetTranslationStatus(SPXRESULTHANDLE handle, Result_TranslationStatus* statusPointer);
 
-// Todo: API to get audio output.
+// audioBuffer: point to the header for storing synthesis audio data. The parameter lengthPointer points to the variable saving the size of buffer. On return, *lengthPointer is set to the size of the buffer returned. 
+// If textBuffer is nullptr or the length is smaller than the size required, the function returns SPXERR_BUFFER_TOO_SMALL.
+SPXAPI TranslationResult_GetTranslationSynthesisData(SPXRESULTHANDLE handle, uint8_t* audioBuffer, size_t* lengthPointer);

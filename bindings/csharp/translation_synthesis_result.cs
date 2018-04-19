@@ -17,21 +17,21 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
         // BUG: this is hack for making documentation going.
         internal TranslationSynthesisResult(Internal.TranslationSynthesisResult result)
         {
-
+            result.Audio.CopyTo(Audio);
         }
 
         /// <summary>
         /// translated text in the target language.
         /// </summary>
-        public byte[] AudioData { get; }
+        public byte[] Audio { get; }
 
         /// <summary>
-        /// Returns a string that represents the speech recognition result.
+        /// Returns a string that represents the synthesis result.
         /// </summary>
-        /// <returns>A string that represents the speech recognition result.</returns>
+        /// <returns>A string that represents the synthesis result.</returns>
         public override string ToString()
         {
-            return $"Audio size:{AudioData.Length}";
+            return $"Audio size:{Audio.Length}";
         }
     }
 }
