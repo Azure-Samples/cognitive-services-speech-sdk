@@ -334,12 +334,12 @@ private:
 
         virtual void SetSubscriptionKey(const std::wstring& value)
         {
-            Parameters[FactoryParameter::SpeechSubscriptionKey] = value.c_str();
+            Parameters[FactoryParameter::SpeechSubscriptionKey] = value;
         }
 
         virtual void SetSpeechEndpoint(const std::wstring& value)
         {
-            Parameters[FactoryParameter::SpeechEndpoint] = value.c_str();
+            Parameters[FactoryParameter::SpeechEndpoint] = value;
         }
 
     private:
@@ -616,7 +616,7 @@ public:
     /// <param name="value">A subscription key.</param>
     static void SetSubscriptionKey(const std::wstring& value)
     {
-        Parameters::SetString(FactoryParameter::SpeechSubscriptionKey, value.c_str());
+        Parameters::SetString(FactoryParameter::SpeechSubscriptionKey, value);
     }
 
     /// <summary>
@@ -625,7 +625,7 @@ public:
     /// <param name="value">A speech service endpoint (url).</param>
     static void SetSpeechEndpoint(const std::wstring& value)
     {
-        Parameters::SetString(FactoryParameter::SpeechEndpoint, value.c_str());
+        Parameters::SetString(FactoryParameter::SpeechEndpoint, value);
     }
 
     DISABLE_DEFAULT_CTORS(DefaultRecognizerFactory);

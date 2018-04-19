@@ -87,10 +87,12 @@ NATIVE_SAMPLE_SLN=samples/CxxHelloWorld/CxxHelloWorld.sln
 # Build and test all configurations
 for configuration in Debug Release; do
 for platform in x86 x64; do
-for useDebugLibs in 1 0; do
+# N.B. run non-debug first. Debug (for now) may trigger pop-up windows and time-out
+for useDebugLibs in 0 1; do
   MSYS_NO_PATHCONV=1 "$MSBUILD15" /m /p:Platform=$platform /p:Configuration=$configuration /p:SpeechSdkUseDebugLibs=$useDebugLibs /p:SpeechSdkVersion=$PACKAGE_VERSION $NATIVE_SAMPLE_SLN
   BINROOT=
   [[ $platform == x64 ]] && BINROOT=/$platform
+  [[ $useDebugLibs == 1 ]] && echo ::: Running with debug libraries - if this hangs there may be a debug assertion with a pop-up window that causes a timeout.
   ./samples/CxxHelloWorld$BINROOT/$configuration/CxxHelloWorld.exe $SPEECH_SUBSCRIPTION_KEY $WAV_PATH
 done
 done
