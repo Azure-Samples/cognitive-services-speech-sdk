@@ -25,7 +25,7 @@ enum class Reason { Recognized, IntermediateResult, NoMatch, Canceled, OtherReco
 /// <summary>
 /// Specifies properties that can be retrieved from a RecognitionResult.
 /// </summary>
-enum class ResultProperty { LuisJson = 1 };
+enum class ResultProperty { Json = 1, LuisJson = 2 };
 
 /// <summary>
 /// Represents the value of a RecognitionResult property returned by the subscript operator.
@@ -101,6 +101,7 @@ private:
 
     std::wstring PropertyNameFromEnum(ResultProperty property)
     {
+        static_assert((int)ResultProperty_Json == (int)ResultProperty::Json, "ResultProperty_* enum values == ResultProperty::* enum values");
         static_assert((int)ResultProperty_LuisJson == (int)ResultProperty::LuisJson, "ResultProperty_* enum values == ResultProperty::* enum values");
 
         const size_t maxCharCount = 4096;
@@ -229,7 +230,6 @@ public:
     /// Collection of additional RecognitionResult properties.
     /// </summary>
     ResultPropertyValueCollection& Properties;
-
 
 protected:
 

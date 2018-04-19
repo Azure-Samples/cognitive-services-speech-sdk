@@ -9,6 +9,9 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#include <stdint.h>
+#include <stddef.h>
+
 #include <assert.h>
 #include <stdint.h>
 

@@ -14,6 +14,7 @@ extern std::string g_keySpeech;
 extern std::string g_keyCRIS;
 extern std::string g_keyLUIS;
 extern std::string g_keySkyman;
+extern std::string g_endpoint;
 
 int main(int argc, char* argv[])
 {
@@ -34,7 +35,10 @@ int main(int argc, char* argv[])
     ("The subscription key for LUIS")        // description string for the help output
         | Opt(g_keySkyman, "SkymanSubscriptionKey") // bind variable to a new option, with a hint string
         ["--keySkyman"]    // the option names it will respond to
-    ("The subscription key for skyman");
+    ("The subscription key for skyman")
+        | Opt(g_endpoint, "endpoint") // bind variable to a new option, with a hint string
+        ["--endpoint"]    // the option names it will respond to
+    ("The endpoint url to test againts.");
 
     // Now pass the new composite back to Catch so it uses that
     session.cli(cli);

@@ -19,12 +19,10 @@
 #include "azure_c_shared_utility_xlogging_wrapper.h"
 #include "azure_c_shared_utility_httpheaders_wrapper.h"
 #include "azure_c_shared_utility_platform_wrapper.h"
-#include "azure_c_shared_utility_buffer_wrapper.h"
 
 #include "uspcommon.h"
 #include "uspinternal.h"
 
-#include "iobuffer.h"
 #include "transport.h"
 #include "dnscache.h"
 #include "metrics.h"
@@ -35,26 +33,9 @@
 #include <unistd.h>
 #endif
 
-const char* g_keywordContentType = "Content-Type";
-const char* g_messagePathSpeechHypothesis = "speech.hypothesis";
-const char* g_messagePathSpeechPhrase = "speech.phrase";
-const char* g_messagePathSpeechFragment = "speech.fragment";
-const char* g_messagePathTurnStart = "turn.start";
-const char* g_messagePathTurnEnd = "turn.end";
-const char* g_messagePathSpeechStartDetected = "speech.startDetected";
-const char* g_messagePathSpeechEndDetected = "speech.endDetected";
-const char* g_messagePathTranslationHypothesis = "translation.hypothesis";
-const char* g_messagePathTranslationPhrase = "translation.phrase";
-const char* g_messagePathTranslationSynthesis = "translation.synthesis";
-//Todo: Figure out what to do about user agent build hash and version number
-const auto g_userAgent = "CortanaSDK (Windows;Win32;DeviceType=Near;SpeechClient=2.0.4)";
 
-const auto g_requestHeaderUserAgent = "User-Agent";
-const auto g_requestHeaderOcpApimSubscriptionKey = "Ocp-Apim-Subscription-Key";
-const auto g_requestHeaderAuthorization = "Authorization";
-const auto g_requestHeaderSearchDelegationRPSToken = "X-Search-DelegationRPSToken";
-const auto g_requestHeaderAudioResponseFormat = "X-Output-AudioCodec";
-
+#include "string_utils.h"
+#include "json.hpp"
 
 uint64_t telemetry_gettime()
 {
@@ -63,6 +44,9 @@ uint64_t telemetry_gettime()
     return ms.count();
 }
 
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
 namespace USP {
 
 using namespace std;
@@ -77,29 +61,24 @@ static void throw_if_null(T* ptr, const std::string name)
     }
 }
 
-// Todo: read from a configuration file.
-const auto g_protocol = "wss://";
-const auto g_bingSpeechHostname = "speech.platform.bing.com";
-const auto g_CRISHostname = ".api.cris.ai";
-const auto g_pathPrefix = "/speech/recognition/";
-const auto g_pathSuffix = "/cognitiveservices/v1?";
-
 // Todo(1126805) url builder + auth interfaces
-const auto g_CDSDKEndpoint = "speech.platform.bing.com/cortana/api/v1?environment=Home&";
-
-const auto g_langQueryParam = "language=";
 
 const vector<string> g_recoModeStrings = { "interactive", "conversation", "dictation" };
 const vector<string> g_outFormatStrings = { "format=simple", "format=detailed" };
 
-const set<string> contentPaths = {
-    g_messagePathTurnStart,
-    g_messagePathSpeechHypothesis,
-    g_messagePathSpeechPhrase,
-    g_messagePathSpeechFragment,
-    g_messagePathTranslationHypothesis,
-    g_messagePathTranslationPhrase
-};
+
+// TODO: remove this as soon as metrics.c is re-written in cpp.
+extern "C" {
+    const char* g_keywordContentType = headers::contentType;
+    const char* g_messagePathSpeechHypothesis = path::speechHypothesis.c_str();
+    const char* g_messagePathSpeechPhrase = path::speechPhrase.c_str();
+    const char* g_messagePathSpeechFragment = path::speechFragment.c_str();
+    const char* g_messagePathTurnStart = path::turnStart.c_str();
+    const char* g_messagePathTurnEnd = path::turnEnd.c_str();
+    const char* g_messagePathSpeechEndDetected = path::speechEndDetected.c_str();
+    const char* g_messagePathSpeechStartDetected = path::speechStartDetected.c_str();
+}
+
 
 // This is called from telemetry_flush, invoked on a worker thread in turn-end. 
 void Connection::Impl::OnTelemetryData(const uint8_t* buffer, size_t bytesToWrite, void *context, const char *requestId)
@@ -147,7 +126,19 @@ void Connection::Impl::WorkThread(weak_ptr<Connection::Impl> ptr)
             return;
         }
         unique_lock<recursive_mutex> lock(connection->m_mutex);
-        TransportDoWork(connection->m_transport.get());
+        try 
+        {
+            TransportDoWork(connection->m_transport.get());
+        }
+        catch (const exception& e)
+        {
+            connection->m_config.m_callbacks.OnError(e.what());
+        }
+        catch (...)
+        {
+            connection->m_config.m_callbacks.OnError("Unhandled exception in the USP layer.");
+        }
+
         if (!connection->m_connected) 
         {
             return;
@@ -209,24 +200,24 @@ string Connection::Impl::ConstructConnectionUrl()
     auto recoMode = static_cast<underlying_type_t<RecognitionMode>>(m_config.m_recoMode);
     ostringstream oss;
 
-    oss << g_protocol;
+    oss << endpoint::protocol;
     switch (m_config.m_endpoint) 
     {
     case EndpointType::BingSpeech:
-        oss << g_bingSpeechHostname
-            << g_pathPrefix 
+        oss << endpoint::hostname::bingSpeech
+            << endpoint::pathPrefix
             << g_recoModeStrings[recoMode]
-            << g_pathSuffix;
+            << endpoint::pathSuffix;
         break;
     case EndpointType::Cris:
         oss << m_config.m_modelId
-            << g_CRISHostname 
-            << g_pathPrefix 
+            << endpoint::hostname::CRIS
+            << endpoint::pathPrefix
             << g_recoModeStrings[recoMode] 
-            << g_pathSuffix;
+            << endpoint::pathSuffix;
         break;
     case EndpointType::CDSDK:
-        oss << g_CDSDKEndpoint;
+        oss << endpoint::hostname::CDSDK;
         break;
     case EndpointType::Custom:
         // Just returns what user passes.
@@ -241,7 +232,7 @@ string Connection::Impl::ConstructConnectionUrl()
 
     if (!m_config.m_language.empty()) 
     {
-        oss << '&' << g_langQueryParam << m_config.m_language;
+        oss << '&' << endpoint::langQueryParam << m_config.m_language;
     }
 
     return oss.str();
@@ -268,8 +259,8 @@ void Connection::Impl::Connect()
     if (m_config.m_endpoint == EndpointType::CDSDK)
     {
         // TODO: MSFT: 1135317 Allow for configurable audio format
-        HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, g_requestHeaderAudioResponseFormat, "riff-16khz-16bit-mono-pcm");
-        HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, g_requestHeaderUserAgent, g_userAgent);
+        HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::audioResponseFormat, "riff-16khz-16bit-mono-pcm");
+        HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::userAgent, g_userAgent);
     }
     
     assert(!m_config.m_authData.empty());
@@ -277,7 +268,7 @@ void Connection::Impl::Connect()
     switch (m_config.m_authType)
     {
     case AuthenticationType::SubscriptionKey:
-        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, g_requestHeaderOcpApimSubscriptionKey, m_config.m_authData.c_str()) != 0)
+        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::ocpApimSubscriptionKey, m_config.m_authData.c_str()) != 0)
         {
             ThrowRuntimeError("Failed to set authentication using subscription key.");
         }
@@ -288,7 +279,7 @@ void Connection::Impl::Connect()
         ostringstream oss;
         oss << "Bearer " << m_config.m_authData;
         auto token = oss.str();
-        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, g_requestHeaderAuthorization, token.c_str()) != 0)
+        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::authorization, token.c_str()) != 0)
         {
             ThrowRuntimeError("Failed to set authentication using authorization token.");
         }
@@ -296,7 +287,7 @@ void Connection::Impl::Connect()
 
     // TODO(1126805): url builder + auth interfaces
     case AuthenticationType::SearchDelegationRPSToken:
-        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, g_requestHeaderSearchDelegationRPSToken, m_config.m_authData.c_str()) != 0)
+        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::searchDelegationRPSToken, m_config.m_authData.c_str()) != 0)
         {
             ThrowRuntimeError("Failed to set authentication using Search-DelegationRPSToken.");
         }
@@ -470,6 +461,44 @@ void Connection::Impl::OnTransportError(TransportHandle transportHandle, Transpo
     }
 }
 
+static RecognitionStatus ToRecognitionStatus(const string& str)
+{
+    const static map<string, USP::RecognitionStatus> statusMap = {
+        { "Success", USP::RecognitionStatus::Success },
+        { "NoMatch", USP::RecognitionStatus::NoMatch },
+        { "InitialSilenceTimeout", USP::RecognitionStatus::InitialSilenceTimeout },
+        { "BabbleTimeout", USP::RecognitionStatus::BabbleTimeout },
+        { "Error", USP::RecognitionStatus::Error },
+        { "EndOfDictation", USP::RecognitionStatus::EndOfDictation },
+    };
+
+    auto result = statusMap.find(str);
+
+    if (result == statusMap.end())
+    {
+        LogInfo("Unknown RecognitionStatus: %s", str.c_str());
+        return USP::RecognitionStatus::Unknown;
+    }
+    return result->second;
+}
+
+static TranslationStatus ToTranslationStatus(const string& str)
+{
+    const static map<string, USP::TranslationStatus> statusMap = {
+        { "Success", USP::TranslationStatus::Success },
+        { "Error", USP::TranslationStatus::Error },
+    };
+
+    auto result = statusMap.find(str);
+
+    if (result == statusMap.end())
+    {
+        LogInfo("Unknown TranslationStatus: %s", str.c_str());
+        return USP::TranslationStatus::Unknown;
+    }
+    return result->second;
+}
+
 // Callback for data available on tranport
 void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEADERS_HANDLE responseHeader, const unsigned char* buffer, size_t size, unsigned int errorCode, void* context)
 {
@@ -500,7 +529,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
     const char* contentType = NULL;
     if (size != 0)
     {
-        contentType = HTTPHeaders_FindHeaderValue(responseHeader, g_keywordContentType);
+        contentType = HTTPHeaders_FindHeaderValue(responseHeader, headers::contentType);
         if (contentType == NULL)
         {
             PROTOCOL_VIOLATION("response '%s' contains body with no content-type", path);
@@ -517,52 +546,156 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
     }
 
     string pathStr(path);
+
+    auto json = (size > 0) ? nlohmann::json::parse(buffer, buffer + size) : nlohmann::json();
+
     auto& callbacks = connection->m_config.m_callbacks;
 
-    if (pathStr == g_messagePathSpeechStartDetected)
+    if (pathStr == path::speechStartDetected || path == path::speechEndDetected)
     {
-        SpeechStartDetectedMsg msg;
-        callbacks.OnSpeechStartDetected(msg);
+        auto offsetObj = json[json_properties::offset];
+        // For whatever reason, offset is sometimes missing on the end detected message.
+        auto offset = offsetObj.is_null() ? 0 : offsetObj.get<OffsetType>();
+
+        if (path == path::speechStartDetected) {
+            callbacks.OnSpeechStartDetected({ PAL::ToWString(json.dump()), offset });
+        }
+        else 
+        {
+            callbacks.OnSpeechEndDetected({ PAL::ToWString(json.dump()), offset });
+        }
     }
-    else if (pathStr == g_messagePathSpeechEndDetected)
+    else if (pathStr == path::turnStart)
     {
-        SpeechEndDetectedMsg msg;
-        callbacks.OnSpeechEndDetected(msg);
+        auto tag = json[json_properties::context][json_properties::tag].get<std::string>();
+        callbacks.OnTurnStart({ PAL::ToWString(json.dump()), tag });
     }
-    else if (pathStr == g_messagePathTurnEnd)
+    else if (pathStr == path::turnEnd)
     {
         // flush the telemetry before invoking the onTurnEnd callback.
         // TODO: 1164154
         telemetry_flush(connection->m_telemetry.get());
         TransportCreateRequestId(connection->m_transport.get());
-
-        TurnEndMsg msg;
-        callbacks.OnTurnEnd(msg);
+        
+        callbacks.OnTurnEnd({});
     }
-    else if (contentPaths.find(pathStr) != contentPaths.end()) 
+    else if (path == path::speechHypothesis || path == path::speechFragment)
     {
-        if (size == 0)
+        auto offset = json[json_properties::offset].get<OffsetType>();
+        auto duration = json[json_properties::duration].get<DurationType>();
+        auto text = json[json_properties::text].get<std::string>();
+
+        if (path == path::speechHypothesis)
         {
-            PROTOCOL_VIOLATION("response content size == %zu", size);
+            callbacks.OnSpeechHypothesis({
+                PAL::ToWString(json.dump()),
+                offset, 
+                duration,
+                PAL::ToWString(text)
+                });
+        }
+        else
+        {
+            callbacks.OnSpeechFragment({
+                PAL::ToWString(json.dump()),
+                offset,
+                duration,
+                PAL::ToWString(text)
+                });
         }
 
-        BUFFER_HANDLE responseContentHandle = BUFFER_create(
-            (unsigned char*)buffer,
-            size + 1);
-        if (!responseContentHandle)
+    }
+    else if (path == path::speechPhrase)
+    {
+        auto offset = json[json_properties::offset].get<OffsetType>();
+        auto duration = json[json_properties::duration].get<DurationType>();
+        auto status = ToRecognitionStatus(json[json_properties::recoStatus].get<std::string>());
+        
+        std::string text;
+        if (status == USP::RecognitionStatus::Success) 
         {
-            LogError("BUFFER_create failed.");
+            // The DisplayText field will be present only if the RecognitionStatus field has the value Success.
+            text = json[json_properties::displayText].get<std::string>();
         }
 
-        BUFFER_u_char(responseContentHandle)[size] = 0;
+        if (status == USP::RecognitionStatus::Unknown)
+        {
+            LogError("Invalid recognition status in speech.phrase message.");
+            return;
+        }
 
-#ifdef _DEBUG
-        LogInfo("TS:%" PRIu64 ", Content Message: path: %s, content type: %s, size: %zu, buffer: %s", 
-            connection->getTimestamp(), path, contentType, size, (char *)BUFFER_u_char(responseContentHandle));
-#endif
-        (void)ContentDispatch((void*)&(callbacks), path, contentType, nullptr, responseContentHandle, size);
+        callbacks.OnSpeechPhrase({
+            PAL::ToWString(json.dump()),
+            offset,
+            duration,
+            status,
+            PAL::ToWString(text)
+            });
+    }
+    else if (path == path::translationHypothesis || path == path::translationPhrase)
+    {
+        auto offset = json[json_properties::offset].get<OffsetType>();
+        auto duration = json[json_properties::duration].get<DurationType>();
+        auto text = json[json_properties::text].get<std::string>();
 
-        BUFFER_delete(responseContentHandle);
+        auto translation = json[json_properties::translation];
+
+        TranslationResult result;
+        result.translationStatus = ToTranslationStatus(translation[json_properties::translationStatus].get<std::string>());
+        if (result.translationStatus == USP::TranslationStatus::Unknown)
+        {
+            LogError("Invalid translation status in translation response message.");
+            return;
+        }
+
+        auto translations = translation[json_properties::translations];
+        for (const auto& object : translations) 
+        {
+            auto lang = object[json_properties::lang].get<std::string>();
+            auto txt = object[json_properties::text].get<std::string>();
+            if (lang.empty() && txt.empty())
+            {
+                LogError("emtpy language and text field in translations text.");
+                continue;
+            }
+            result.translations[PAL::ToWString(lang)] = PAL::ToWString(txt);
+        }
+
+        if ((result.translationStatus == USP::TranslationStatus::Success) && (result.translations.size() == 0))
+        {
+            LogError("No Translations text block in the message, but TranslationStatus is succcess.");
+        }
+
+        if (path == path::translationHypothesis) 
+        {
+            callbacks.OnTranslationHypothesis({
+                PAL::ToWString(json.dump()),
+                offset,
+                duration,
+                PAL::ToWString(text),
+                std::move(result)
+                });
+        }
+        else 
+        {
+            auto status = ToRecognitionStatus(json[json_properties::recoStatus].get<std::string>());
+
+            if (status == USP::RecognitionStatus::Unknown)
+            {
+                LogError("Invalid translation status in translation response message.");
+                return;
+            }
+
+            callbacks.OnTranslationPhrase({
+                PAL::ToWString(json.dump()),
+                offset,
+                duration,
+                PAL::ToWString(text),
+                std::move(result),
+                status
+                });
+        }
+
     }
     else
     {
@@ -570,4 +703,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
     }
 }
 
+}
+}
+}
 }

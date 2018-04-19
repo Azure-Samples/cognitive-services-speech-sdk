@@ -527,6 +527,9 @@ void CSpxUspRecoEngineAdapter::OnSpeechHypothesis(const USP::SpeechHypothesisMsg
         auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
 
         auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), ResultType::Speech);
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
+        namedProperties->SetStringValue(g_RESULT_Json, message.json.c_str());
+
         GetSite()->IntermediateRecoResult(this, message.offset, result);
     }
     else
@@ -557,6 +560,9 @@ void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& me
         auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
 
         auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), ResultType::Speech);
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
+        namedProperties->SetStringValue(g_RESULT_Json, message.json.c_str());
+
         GetSite()->IntermediateRecoResult(this, message.offset, result);
     }
     else
@@ -636,6 +642,9 @@ void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHyp
             auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
             auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), ResultType::TranslationText);
 
+            auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
+            namedProperties->SetStringValue(g_RESULT_Json, message.json.c_str());
+
             // Update our result to be an "TranslationText" result.
             auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
             // Todo: better convert translation status
@@ -710,6 +719,9 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
             // Create the result
             auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
             auto result = factory->CreateFinalResult(nullptr, message.text.c_str(), ResultType::TranslationText);
+            
+            auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
+            namedProperties->SetStringValue(g_RESULT_Json, message.json.c_str());
 
             // Update our result to be an "TranslationText" result.
             auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
@@ -1088,11 +1100,12 @@ void CSpxUspRecoEngineAdapter::FireFinalResultNow(const USP::SpeechPhraseMsg& me
         // Create the result
         auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
         auto result = factory->CreateFinalResult(nullptr, message.displayText.c_str(), ResultType::Speech);
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
+        namedProperties->SetStringValue(g_RESULT_Json, message.json.c_str());
 
         // Do we already have the LUIS json payload from the service (1-hop)
         if (!luisJson.empty())
         {
-            auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
             namedProperties->SetStringValue(g_RESULT_LuisJson, PAL::ToWString(luisJson).c_str());
         }
 

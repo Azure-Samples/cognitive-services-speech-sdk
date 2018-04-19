@@ -188,14 +188,14 @@ void CSpxSession::FireSessionStartedEvent()
 {
     SPX_DBG_TRACE_FUNCTION();
 
-    FireSessionEvent(SesssionEventType::SessionStart);
+    FireSessionEvent(SessionEventType::SessionStart);
 }
 
 void CSpxSession::FireSpeechStartDetectedEvent()
 {
     SPX_DBG_TRACE_FUNCTION();
 
-    FireSessionEvent(SesssionEventType::SpeechStart);
+    FireSessionEvent(SessionEventType::SpeechStart);
 }
 
 void CSpxSession::FireSessionStoppedEvent()
@@ -203,17 +203,17 @@ void CSpxSession::FireSessionStoppedEvent()
     SPX_DBG_TRACE_FUNCTION();
     EnsureFireResultEvent();
 
-    FireSessionEvent(SesssionEventType::SessionStop);
+    FireSessionEvent(SessionEventType::SessionStop);
 }
 
 void CSpxSession::FireSpeechEndDetectedEvent()
 {
     SPX_DBG_TRACE_FUNCTION();
 
-    FireSessionEvent(SesssionEventType::SpeechEnd);
+    FireSessionEvent(SessionEventType::SpeechEnd);
 }
 
-void CSpxSession::FireSessionEvent(SesssionEventType sessionType)
+void CSpxSession::FireSessionEvent(SessionEventType sessionType)
 {
     // Make a copy of the recognizers (under lock), to use to send events; 
     // otherwise the underlying list could be modified while we're sending events...
@@ -230,19 +230,19 @@ void CSpxSession::FireSessionEvent(SesssionEventType sessionType)
         {
             switch (sessionType)
             {
-                case SesssionEventType::SessionStart:
+                case SessionEventType::SessionStart:
                     ptr->FireSessionStarted(m_sessionId);
                 break;
 
-                case SesssionEventType::SessionStop:
+                case SessionEventType::SessionStop:
                     ptr->FireSessionStopped(m_sessionId);
                 break;
 
-                case SesssionEventType::SpeechStart:
+                case SessionEventType::SpeechStart:
                     ptr->FireSpeechStartDetected(m_sessionId);
                 break;
 
-                case SesssionEventType::SpeechEnd:
+                case SessionEventType::SpeechEnd:
                     ptr->FireSpeechEndDetected(m_sessionId);
                 break;
             }

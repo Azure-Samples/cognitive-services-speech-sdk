@@ -13,6 +13,7 @@
 #include "usp.h"
 
 using namespace std;
+using namespace Microsoft::CognitiveServices::Speech;
 
 std::string g_keySpeech;
 std::string g_keyCRIS;

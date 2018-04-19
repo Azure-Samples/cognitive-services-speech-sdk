@@ -51,6 +51,9 @@ typedef struct _TransportRequest* TransportHandle;
 typedef struct _TELEMETRY_CONTEXT* TELEMETRY_HANDLE;
 typedef struct HTTP_HEADERS_HANDLE_DATA_TAG* HTTP_HEADERS_HANDLE;
 
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
 namespace USP {
 
 class Connection::Impl : public std::enable_shared_from_this<Connection::Impl>
@@ -142,4 +145,7 @@ private:
     uint64_t getTimestamp();
 };
 
+}
+}
+}
 }

@@ -88,8 +88,8 @@ private:
     const std::wstring m_sessionId;
     std::list<std::weak_ptr<ISpxRecognizer>> m_recognizers;
 
-    enum SesssionEventType {SessionStart, SessionStop, SpeechStart, SpeechEnd};
-    void FireSessionEvent(SesssionEventType sessionType);
+    enum SessionEventType {SessionStart, SessionStop, SpeechStart, SpeechEnd};
+    void FireSessionEvent(SessionEventType sessionType);
 };
 
 

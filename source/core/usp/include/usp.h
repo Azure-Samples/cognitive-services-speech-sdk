@@ -7,16 +7,15 @@
 
 #pragma once
 
-#include <stdint.h>
-#include <stddef.h>
-#include <string>
 #include <memory>
 #include <functional>
 
 #include "uspmessages.h"
 
-namespace USP 
-{
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
+namespace USP {
 
 /**
 * The Callbacks type represents an application-defined structure used to register callbacks for USP events.
@@ -288,4 +287,7 @@ private:
 
 };
 
+}
+}
+}
 }

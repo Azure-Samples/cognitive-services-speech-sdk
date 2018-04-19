@@ -7,6 +7,7 @@
 
 #pragma once
 
+constexpr const wchar_t* g_RESULT_Json = LR"(RESULT-Json)";
 constexpr const wchar_t* g_RESULT_LuisJson = LR"(RESULT-LuisJson)";
 
 constexpr const wchar_t* g_SPEECH_SubscriptionKey = LR"(SPEECH-SubscriptionKey)";

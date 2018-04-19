@@ -21,6 +21,8 @@
 
 #define UNUSED(x) (void)(x)
 
+using namespace Microsoft::CognitiveServices::Speech;
+
 bool turnEnd = false;
 std::thread ttsThread;
 

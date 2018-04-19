@@ -6,6 +6,9 @@
 #include "usp.h"
 #include "uspinternal.h"
 
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
 namespace USP {
 
 ConnectionPtr Client::Connect()
@@ -39,4 +42,7 @@ void Connection::SendMessage(const std::string& messagePath, const uint8_t* buff
     m_impl->QueueMessage(messagePath, buffer, size);
 }
 
+}
+}
+}
 }

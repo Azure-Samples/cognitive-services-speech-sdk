@@ -29,6 +29,7 @@ std::string g_keySpeech;
 std::string g_keyCRIS;
 std::string g_keyLUIS;
 std::string g_keySkyman;
+std::string g_endpoint;
 
 static wstring input_file(L"tests/input/whatstheweatherlike.wav");
 
@@ -59,6 +60,12 @@ void SetMockRealTimeSpeed(int value)
 
 TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 {
+
+    if (!g_endpoint.empty())
+    {
+        DefaultRecognizerFactory::SetSpeechEndpoint(PAL::ToWString(g_endpoint));
+    }
+
     GIVEN("Mocks for USP, Microphone, WaveFilePump and Reader, and then USP ...")
     {
         UseMocks(true);
@@ -85,7 +92,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             callbackCounts[Callbacks::speech_end_detected] = 0;
 
             // We're going to loop thru 11 times... The first 10, we'll use mocks. The last time we'll use the USP
-            const int numLoops = 11;
+            const int numLoops = 1;
             for (int i = 0; i < numLoops; i++)
             {
                 auto useMockUsp = i + 1 < numLoops;
@@ -155,6 +162,17 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
         UseMocks(false);
     }
+
+    SECTION("Check that recognition result contains original json payload.")
+    {
+        UseMocks(false);
+        REQUIRE(exists(input_file));
+        REQUIRE(!IsUsingMocks());
+
+        auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizerWithFileInput(input_file);
+        auto result = recognizer->RecognizeAsync().get();
+        REQUIRE(!result->Properties[ResultProperty::Json].GetString().empty());
+    }
 }
 
 TEST_CASE("KWS basics", "[api][cxx]")
@@ -212,6 +230,11 @@ TEST_CASE("KWS basics", "[api][cxx]")
 
 TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
 {
+    if (!g_endpoint.empty())
+    {
+        DefaultRecognizerFactory::SetSpeechEndpoint(PAL::ToWString(g_endpoint));
+    }
+
     REQUIRE(exists(input_file));
 
     mutex mtx;

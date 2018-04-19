@@ -71,6 +71,10 @@ SPXAPI Result_GetProperty_Name(Result_Property property, wchar_t* name, uint32_t
         const wchar_t* propertyName = L"";
         switch (property)
         {
+            case ResultProperty_Json:
+                propertyName = g_RESULT_Json;
+                break;
+            
             case ResultProperty_LuisJson:
                 propertyName = g_RESULT_LuisJson;
                 break;

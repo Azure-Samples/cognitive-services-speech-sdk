@@ -6,12 +6,17 @@
 //
 #pragma once
 
-#include "iobuffer.h"
 #include <stdint.h>
+#include <stddef.h>
 #include <string>
 #include <vector>
 #include <map>
 
+#include "iobuffer.h"
+
+namespace Microsoft {
+namespace CognitiveServices {
+namespace Speech {
 namespace USP {
 
 typedef uint64_t OffsetType;
@@ -33,52 +38,127 @@ enum class TranslationStatus : int
     Success, Error, Unknown
 };
 
+struct JsonMsg {
+
+    JsonMsg() = default;
+    JsonMsg(const JsonMsg&) = default;
+
+    std::wstring json;
+
+protected:
+    JsonMsg(std::wstring&& content) :
+        json(std::move(content))
+    {}
+};
 
 /**
  * Represents speech.startDectected message
  */
-struct SpeechStartDetectedMsg
+struct SpeechStartDetectedMsg : public JsonMsg
 {
+    SpeechStartDetectedMsg(std::wstring&& content, OffsetType offset) :
+        JsonMsg(std::move(content)),
+        offset(offset)
+    {}
+
     OffsetType offset { 0 };
+};
+
+/**
+* Represents speech.endDetected message
+*/
+struct SpeechEndDetectedMsg : public JsonMsg
+{
+    SpeechEndDetectedMsg(std::wstring&& content, OffsetType offset) :
+        JsonMsg(std::move(content)),
+        offset(offset)
+    {}
+
+    OffsetType offset{ 0 };
+};
+
+/**
+* Represents turn.start message
+*/
+struct TurnStartMsg : public JsonMsg
+{
+    TurnStartMsg(std::wstring&& content, const std::string& tag) :
+        JsonMsg(std::move(content)),
+        contextServiceTag(tag)
+    {
+    }
+
+    std::string contextServiceTag;
+};
+
+/**
+* Represents turn.end message
+* Note: Body is empty.
+*/
+struct TurnEndMsg : JsonMsg
+{
+    TurnEndMsg() :
+        JsonMsg(std::wstring())
+    {
+    }
+};
+
+struct SpeechMsg : public JsonMsg
+{
+    SpeechMsg() = default;
+    SpeechMsg(const SpeechMsg&) = default;
+    SpeechMsg(std::wstring&& content, OffsetType offset, DurationType duration) :
+        JsonMsg(std::move(content)),
+        offset(offset),
+        duration(duration)
+    {}
+
+    OffsetType offset{ 0 };
+    DurationType duration{ 0 };
 };
 
 /**
  * Represents speech.hypothesis message
  */
-struct SpeechHypothesisMsg
+struct SpeechHypothesisMsg : public SpeechMsg
 {
-    std::wstring text;
-    OffsetType offset { 0 };
-    DurationType duration { 0 };
-};
+    SpeechHypothesisMsg(std::wstring&& content, OffsetType offset, DurationType duration, std::wstring&& text) :
+        SpeechMsg(std::move(content), offset, duration),
+        text(std::move(text))
+    {}
 
-/**
- * Represents speech.phrase message
- */
-struct SpeechPhraseMsg
-{
-    RecognitionStatus recognitionStatus { RecognitionStatus::Error };
-    std::wstring displayText;
-    OffsetType offset { 0 };
-    DurationType duration { 0 };
+    std::wstring text;
 };
 
 /**
 * Represents speech.fragment message
 */
-struct SpeechFragmentMsg
+struct SpeechFragmentMsg : public SpeechMsg
 {
+    SpeechFragmentMsg(std::wstring&& content, OffsetType offset, DurationType duration, std::wstring&& text) :
+        SpeechMsg(std::move(content), offset, duration),
+        text(std::move(text))
+    {}
+
     std::wstring text;
-    OffsetType offset { 0 };
-    DurationType duration { 0 };
 };
 
 /**
- * Represents speech.endDetected message
+ * Represents speech.phrase message
  */
-struct SpeechEndDetectedMsg
+struct SpeechPhraseMsg : public SpeechMsg
 {
-    OffsetType offset { 0 };
+    SpeechPhraseMsg() = default;
+    SpeechPhraseMsg(const SpeechPhraseMsg&) = default;
+
+    SpeechPhraseMsg(std::wstring&& content, OffsetType offset, DurationType duration, RecognitionStatus status, std::wstring&& text) :
+        SpeechMsg(std::move(content), offset, duration),
+        recognitionStatus(status),
+        displayText(std::move(text))
+    {}
+
+    RecognitionStatus recognitionStatus { RecognitionStatus::Unknown };
+    std::wstring displayText;
 };
 
 /**
@@ -93,49 +173,38 @@ struct AudioStreamStartMsg
 };
 
 /**
- * Represents turn.start message
- */
-struct TurnStartMsg
-{
-    std::string contextServiceTag;
-};
-
-/**
- * Represents turn.end message
- * Note: Body is empty.
- */
-struct TurnEndMsg {};
-
-/**
 * Represents translation results.
 */
 struct TranslationResult
 {
-    TranslationStatus translationStatus;
+    TranslationStatus translationStatus { TranslationStatus::Unknown };
     // An array of value pair <targetLanguage, translationText>.
     std::map<std::wstring, std::wstring> translations;
 };
 /**
 * Represents translation.hypothesis message
 */
-struct TranslationHypothesisMsg
+struct TranslationHypothesisMsg : public SpeechHypothesisMsg
 {
-    OffsetType offset { 0 };
-    DurationType duration { 0 };
-    std::wstring text;
+    TranslationHypothesisMsg(std::wstring&& content, OffsetType offset, DurationType duration, std::wstring&& text, TranslationResult&& translation) :
+        SpeechHypothesisMsg(std::move(content), offset, duration, std::move(text)),
+        translation(translation)
+    {}
+
     TranslationResult translation;
 };
 
 /**
 * Represents translation.phrase message
 */
-struct TranslationPhraseMsg
+struct TranslationPhraseMsg : public TranslationHypothesisMsg
 {
+    TranslationPhraseMsg(std::wstring&& content, OffsetType offset, DurationType duration, std::wstring&& text, TranslationResult&& translation, RecognitionStatus status) :
+        TranslationHypothesisMsg(std::move(content), offset, duration, std::move(text), std::move(translation)),
+        recognitionStatus(status)
+    {}
+
     RecognitionStatus recognitionStatus;
-    OffsetType offset {0};
-    DurationType duration {0};
-    std::wstring text;
-    struct TranslationResult translation;
 };
 
 /**
@@ -148,4 +217,6 @@ struct TranslationSynthesisMsg
 };
 
 }
-
+}
+}
+}

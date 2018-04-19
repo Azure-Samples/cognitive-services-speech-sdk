@@ -68,7 +68,7 @@ wss.on('connection', function connection(ws, req) {
         (function reply() {
           if (i == replies.length) {
             // https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
-            ws.close(4999, 'Client must close the connection');
+            ws.close(4999, JSON.stringify({error:'Client must close the connection'}));
             return;
           }
           if (replies[i] == speech.hypothesis && rnd(2) == 0) i--;
