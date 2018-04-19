@@ -15,6 +15,11 @@ import com.microsoft.cognitiveservices.speech.recognition.speech.SpeechRecognize
  /// </summary>
  public final class RecognizerFactory implements Closeable //: IDisposable
  {
+     // load the native library.
+    static {
+        System.loadLibrary("carbon_java_bindings");
+    }
+
     /// <summary>
     /// Creates an instance of recognizer factory.
     /// </summary>
