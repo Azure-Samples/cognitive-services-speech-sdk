@@ -25,17 +25,17 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     /// <summary>
     /// The event <see cref="IntermediateResultReceived"/> signals that an intermediate recognition result is received.
     /// </summary>
-    public EventHandlerImpl<IntentRecognitionResultEventArgs> IntermediateResultReceived;
+    final public EventHandlerImpl<IntentRecognitionResultEventArgs> IntermediateResultReceived = new EventHandlerImpl<IntentRecognitionResultEventArgs>();
 
     /// <summary>
     /// The event <see cref="FinalResultReceived"/> signals that a final recognition result is received.
     /// </summary>
-    public EventHandlerImpl<IntentRecognitionResultEventArgs> FinalResultReceived;
+    final public EventHandlerImpl<IntentRecognitionResultEventArgs> FinalResultReceived = new EventHandlerImpl<IntentRecognitionResultEventArgs>();
 
     /// <summary>
     /// The event <see cref="RecognitionErrorRaised"/> signals that an error occurred during recognition.
     /// </summary>
-    public EventHandlerImpl<RecognitionErrorEventArgs> RecognitionErrorRaised;
+    final public EventHandlerImpl<RecognitionErrorEventArgs> RecognitionErrorRaised = new EventHandlerImpl<RecognitionErrorEventArgs>();
 
     public IntentRecognizer(com.microsoft.cognitiveservices.speech.internal.IntentRecognizer recoImpl)
     {

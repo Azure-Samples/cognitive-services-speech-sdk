@@ -43,7 +43,7 @@ public class Recognizer implements Closeable
     /// }
     /// </code>
     /// </example>
-    public EventHandlerImpl<SessionEventArgs> SessionEvent;
+    final public EventHandlerImpl<SessionEventArgs> SessionEvent = new EventHandlerImpl<SessionEventArgs>();
 
     protected Recognizer()
     {

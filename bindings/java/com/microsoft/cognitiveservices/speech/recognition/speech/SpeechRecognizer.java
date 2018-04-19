@@ -67,17 +67,17 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     /// <summary>
     /// The event <see cref="IntermediateResultReceived"/> signals that an intermediate recognition result is received.
     /// </summary>
-    public EventHandlerImpl<SpeechRecognitionResultEventArgs> IntermediateResultReceived;
+    final public EventHandlerImpl<SpeechRecognitionResultEventArgs> IntermediateResultReceived = new EventHandlerImpl<SpeechRecognitionResultEventArgs>();
 
     /// <summary>
     /// The event <see cref="FinalResultReceived"/> signals that a final recognition result is received.
     /// </summary>
-    public EventHandlerImpl<SpeechRecognitionResultEventArgs> FinalResultReceived;
+    final public EventHandlerImpl<SpeechRecognitionResultEventArgs> FinalResultReceived = new EventHandlerImpl<SpeechRecognitionResultEventArgs>();
 
     /// <summary>
     /// The event <see cref="RecognitionErrorRaised"/> signals that an error occurred during recognition.
     /// </summary>
-    public EventHandlerImpl<RecognitionErrorEventArgs> RecognitionErrorRaised;
+    final public EventHandlerImpl<RecognitionErrorEventArgs> RecognitionErrorRaised = new EventHandlerImpl<RecognitionErrorEventArgs>();
 
     public SpeechRecognizer(com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer recoImpl) throws UnsupportedOperationException
     {
