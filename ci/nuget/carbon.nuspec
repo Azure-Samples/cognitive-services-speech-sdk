@@ -7,11 +7,11 @@
     <authors>Microsoft</authors>
     <owners>Microsoft, Speech Services</owners>
     <copyright>© Microsoft Corporation. All rights reserved</copyright>
-    <projectUrl>https://azure.microsoft.com/en-us/services/cognitive-services/speech/</projectUrl>
-    <licenseUrl>https://NEED_URL_TODO</licenseUrl>
+    <projectUrl>https://aka.ms/csspeech</projectUrl>
+    <licenseUrl>https://aka.ms/csspeech/license</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>Microsoft Cognitive Services Speech SDK</description>
-    <summary>This NuGet package provides native and managed libraries to use the Microsoft Cognitive Services Speech functionality. It requires Visual Studio 2017. The API documentation is available at https://azure.microsoft.com/en-us/services/cognitive-services/speech/sdk/</summary>
+    <summary>This NuGet package provides native and managed libraries to use the Microsoft Cognitive Services Speech functionality. It requires Visual Studio 2017. Documentation is available at https://aka.ms/csspeech</summary>
     <tags>Microsoft Speech Cognitive Services native C++ C# .Net</tags>
     <releaseNotes>This is build $BuildNumber$.</releaseNotes>
     <dependencies />
@@ -40,10 +40,10 @@
     <file src="$DropDir$\x64\Release\public\lib\carbon.dll" target="build\native\x64\Release\carbon.dll" />
 
     <!-- .NET dlls -->
-    <file src="$DropDir$\Win32\Release\public\lib\carbon_csharp_lib.dll" target="lib\net45\Win32\carbon_csharp_lib.dll" />
+    <!-- The carbon_csharp_lib.dll needs to be changed to an AnyCPU assembly using corflags -->
+    <file src="$DropDir$\Win32\Release\public\lib\carbon_csharp_lib.dll" target="lib\net45\carbon_csharp_lib.dll" />
     <file src="$DropDir$\Win32\Debug\public\lib\carbon_csharp_bindings.dll" target="build\native\Win32\Debug\carbon_csharp_bindings.dll" />
     <file src="$DropDir$\Win32\Release\public\lib\carbon_csharp_bindings.dll" target="build\native\Win32\Release\carbon_csharp_bindings.dll" />
-    <file src="$DropDir$\x64\Release\public\lib\carbon_csharp_lib.dll" target="lib\net45\x64\carbon_csharp_lib.dll" />
     <file src="$DropDir$\x64\Debug\public\lib\carbon_csharp_bindings.dll" target="build\native\x64\Debug\carbon_csharp_bindings.dll" />
     <file src="$DropDir$\x64\Release\public\lib\carbon_csharp_bindings.dll" target="build\native\x64\Release\carbon_csharp_bindings.dll" />
 

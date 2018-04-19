@@ -2,6 +2,7 @@
 .gitignore text
 .gitmodules text
 
+*.bat text
 *.c text
 *.cmd text
 *.config text
@@ -30,7 +31,6 @@
 # Bash only like Unix line endings
 *.sh text eol=lf
 # TODO wrong:
-*.bat binary
 
 # Binary extensions:
 *.exe binary
