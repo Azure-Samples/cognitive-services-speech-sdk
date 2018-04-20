@@ -1,0 +1,7 @@
+from-ubuntu16-arm32v7
+
+copy-qemu-arm-static
+
+deps
+
+builduser

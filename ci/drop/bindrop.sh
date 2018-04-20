@@ -12,7 +12,7 @@ echo "CONFIG = $CONFIG"
 echo "DEST = $DEST"
 echo "TARGET = $TARGET"
 
-set -e -x
+set -e -x -o pipefail
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 

@@ -1,0 +1,18 @@
+# TODO minimize
+RUN apt-get update && \
+    apt-get --yes install \
+        build-essential \
+        cmake \
+        pkg-config \
+        uuid-dev \
+        zlib1g-dev \
+        libssl-dev \
+        libcurl4-openssl-dev \
+        alsa \
+        libasound2-dev \
+        swig \
+        python \
+        python-dev \
+        default-jre-headless \
+        default-jdk-headless \
+        curl
