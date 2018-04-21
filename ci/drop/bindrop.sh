@@ -25,7 +25,8 @@ fi
 SOURCE_ROOT="$SCRIPT_DIR/../.."
 BUILD_ROOT="$SOURCE_ROOT/build/$PLATFORM"
 
-SRCJAR="$BUILD_ROOT/bindings/java/carbon_java_lib.jar"
+SRCJAR="$BUILD_ROOT/lib/carbon_java_lib.jar"
+SRCJARSRC="$BUILD_ROOT/lib/carbon_java_lib-src.zip"
 SRCJARBINDING="$BUILD_ROOT/bin/libcarbon_java_bindings.so"
 SRCCARBONX="$BUILD_ROOT/bin/carbonx"
 
@@ -98,6 +99,7 @@ fi
 
 # Copy .jar if available
 [[ -e $SRCJAR ]] && cp $CPOPT "$SRCJAR" "$DESTPUBLIB"
+[[ -e $SRCJARSRC ]] && cp $CPOPT "$SRCJARSRC" "$DESTPUBLIB"
 [[ -e $SRCJARBINDING ]] && cp $CPOPT "$SRCJARBINDING" "$DESTPUBLIB"
 
 # copy carbonx if available
