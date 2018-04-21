@@ -85,10 +85,10 @@ $NUGETEXETOOLPATH restore -noninteractive "$NATIVE_SAMPLE_PACKAGES_CONFIG" -pack
 NATIVE_SAMPLE_SLN=samples/CxxHelloWorld/CxxHelloWorld.sln
 
 # Build and test all configurations
-for configuration in Debug Release; do
+for configuration in Release; do # TODO add-back Debug
 for platform in x86 x64; do
 # N.B. run non-debug first. Debug (for now) may trigger pop-up windows and time-out
-for useDebugLibs in 0 1; do
+for useDebugLibs in 0; do # TODO add back 1
   MSYS_NO_PATHCONV=1 "$MSBUILD15" /m /p:Platform=$platform /p:Configuration=$configuration /p:SpeechSdkUseDebugLibs=$useDebugLibs /p:SpeechSdkVersion=$PACKAGE_VERSION $NATIVE_SAMPLE_SLN
   BINROOT=
   [[ $platform == x64 ]] && BINROOT=/$platform
@@ -111,7 +111,7 @@ patchPackageVersion "$PACKAGE_NAME" "$PACKAGE_VERSION" "$MANAGED_SAMPLE_PACKAGES
 $NUGETEXETOOLPATH restore -noninteractive "$MANAGED_SAMPLE_PACKAGES_CONFIG" -packagesdirectory "$MANAGED_SAMPLE_PACKAGES_DIR" -nocache -source "$(dirname "$PACKAGE_PATH")"
 
 # Build and test all configurations
-for configuration in Debug Release; do
+for configuration in Release; do # TODO add back Debug
 for platform in x86 x64; do
 #for useDebugLibs in 1 0; do
   MSYS_NO_PATHCONV=1 "$MSBUILD15" /m /p:Platform=$platform /p:Configuration=$configuration /p:SpeechSdkUseDebugLibs=$useDebugLibs /p:SpeechSdkVersion=$PACKAGE_VERSION $MANAGED_SAMPLE_SLN
