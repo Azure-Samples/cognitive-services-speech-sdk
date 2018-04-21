@@ -11,7 +11,7 @@ using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Recognition;
 using Microsoft.CognitiveServices.Speech.Recognition.Intent;
 
-namespace CarbonSamples
+namespace MicrosoftSpeechSDKSamples
 {
     public class IntentRecognitionSamples
     {

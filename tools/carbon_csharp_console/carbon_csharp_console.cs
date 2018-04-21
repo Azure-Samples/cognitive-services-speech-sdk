@@ -9,7 +9,7 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-namespace CarbonSamples
+namespace MicrosoftSpeechSDKSamples
 {
     class Program
     {

@@ -12,7 +12,7 @@ using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Recognition;
 using Microsoft.CognitiveServices.Speech.Recognition.Translation;
 
-namespace CarbonSamples
+namespace MicrosoftSpeechSDKSamples
 {
     public class TranslationSamples
     {
