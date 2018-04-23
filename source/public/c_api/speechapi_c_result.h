@@ -16,7 +16,7 @@ SPXAPI Result_GetRecognitionReason(SPXRESULTHANDLE hresult, Result_RecognitionRe
 
 SPXAPI Result_GetText(SPXRESULTHANDLE hresult, wchar_t* pszText, uint32_t cchText);
 
-enum Result_Property { ResultProperty_Json = 1,  ResultProperty_LuisJson = 2 };
+enum Result_Property { ResultProperty_Json = 1,  ResultProperty_LanguageUnderstandingJson = 2 };
 typedef enum Result_Property Result_Property;
 SPXAPI Result_GetProperty_Name(Result_Property property, wchar_t* name, uint32_t cchName);
 

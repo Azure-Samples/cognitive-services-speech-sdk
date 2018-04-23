@@ -13,7 +13,7 @@
 #include "intent_trigger.h"
 #include "translation_recognizer.h"
 #include "luis_direct_lu_engine_adapter.h"
-#include "luis_model.h"
+#include "language_understanding_model.h"
 #include "recognition_event_args.h"
 #include "recognition_result.h"
 #include "recognizer.h"
@@ -36,7 +36,7 @@ SPX_EXTERN_C void* SRLib_CreateModuleObject(const char* className, const char* i
     SPX_FACTORY_MAP_ENTRY(CSpxRecognizer, ISpxRecognizer);
     SPX_FACTORY_MAP_ENTRY(CSpxIntentRecognizer, ISpxRecognizer);
     SPX_FACTORY_MAP_ENTRY(CSpxIntentTrigger, ISpxTrigger);
-    SPX_FACTORY_MAP_ENTRY(CSpxLuisModel, ISpxLuisModel);
+    SPX_FACTORY_MAP_ENTRY(CSpxLanguageUnderstandingModel, ISpxLanguageUnderstandingModel);
     SPX_FACTORY_MAP_ENTRY(CSpxTranslationRecognizer, ISpxRecognizer);
     SPX_FACTORY_MAP_ENTRY(CSpxSessionEventArgs, ISpxSessionEventArgs);
     SPX_FACTORY_MAP_ENTRY(CSpxUspRecoEngineAdapter, ISpxRecoEngineAdapter);

@@ -19,7 +19,7 @@ namespace Recognition {
 /// <summary>
 /// Enumerates parameters that can be used to configure a recognizer.
 /// </summary>
-enum class RecognizerParameter { CustomSpeechModelId = 1 };
+enum class RecognizerParameter { DeploymentId = 1 };
 
 /// <summary>
 /// Represents the value of a recognizer parameter returned by the subscript operator
@@ -97,7 +97,7 @@ private:
 
     std::wstring ParameterNameFromEnum(RecognizerParameter parameter)
     {
-        static_assert((int)RecognizerParameter_CustomSpeechModelId == (int)RecognizerParameter::CustomSpeechModelId, "RecognizerParameter_* enum values == RecognizerParameter::* enum values");
+        static_assert((int)RecognizerParameter_DeploymentId == (int)RecognizerParameter::DeploymentId, "RecognizerParameter_* enum values == RecognizerParameter::* enum values");
 
         const size_t maxCharCount = 4096;
         wchar_t sz[maxCharCount+1];

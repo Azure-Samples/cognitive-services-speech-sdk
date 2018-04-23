@@ -1,46 +1,47 @@
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+
 using System;
 
 namespace Microsoft.CognitiveServices.Speech.Recognition.Intent
 {
     /// <summary>
-    /// Represents intent model used for intent recognition.
+    /// Represents language understanding model used for intent recognition.
     /// </summary>
-    public sealed class IntentModel : IDisposable
+    public sealed class LanguageUnderstandingModel : IDisposable
     { 
         /// <summary>
-        /// Creates an intent model using the specified endpoint.
+        /// Creates an language understanding model using the specified endpoint.
         /// </summary>
-        /// <param name="uri">A string that represents the endpoint of the intent model.</param>
-        /// <returns>The intent model being created.</returns>
-        public static IntentModel From(string uri)
+        /// <param name="uri">A string that represents the endpoint of the language understanding model.</param>
+        /// <returns>The language understanding model being created.</returns>
+        public static LanguageUnderstandingModel From(string uri)
         {
-            return new IntentModel(Microsoft.CognitiveServices.Speech.Internal.LuisModel.From(uri));
+            return new LanguageUnderstandingModel(Microsoft.CognitiveServices.Speech.Internal.LanguageUnderstandingModel.From(uri));
         }
 
         /// <summary>
-        /// Creates an intent model using subscription key and application id of Language Understanding service.
+        /// Creates an language understanding model using subscription key and application id of Language Understanding service.
         /// </summary>
         /// <param name="subscriptionKey">A string that represents the subscription key.</param>
         /// <param name="appId">A string that represents the application id of Language Understanding service.</param>
-        /// <returns>The intent model being created.</returns>
-        public static IntentModel From(string subscriptionKey, string appId)
+        /// <returns>The language understanding model being created.</returns>
+        public static LanguageUnderstandingModel From(string subscriptionKey, string appId)
         {
-            return new IntentModel(Microsoft.CognitiveServices.Speech.Internal.LuisModel.From(subscriptionKey, appId));
+            return new LanguageUnderstandingModel(Microsoft.CognitiveServices.Speech.Internal.LanguageUnderstandingModel.From(subscriptionKey, appId));
         }
 
         /// <summary>
-        /// Creates an intent model using hostname, subscription key and application id of Language Understanding service.
+        /// Creates an language understanding model using hostname, subscription key and application id of Language Understanding service.
         /// </summary>
         /// <param name="hostName">A string that represents the host name of of Language Understanding service.</param>
         /// <param name="subscriptionKey">A string that represents the subscription key of Language Understanding service.</param>
         /// <param name="appId">A string that represents the application id of Language Understanding service.</param>
-        /// <returns>The intent model being created.</returns>
-        public static IntentModel From(string hostName, string subscriptionKey, string appId)
+        /// <returns>The language understanding model being created.</returns>
+        public static LanguageUnderstandingModel From(string hostName, string subscriptionKey, string appId)
         {
-            return new IntentModel(Microsoft.CognitiveServices.Speech.Internal.LuisModel.From(hostName, subscriptionKey, appId));
+            return new LanguageUnderstandingModel(Microsoft.CognitiveServices.Speech.Internal.LanguageUnderstandingModel.From(hostName, subscriptionKey, appId));
         }
 
         /// <summary>
@@ -60,12 +61,12 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Intent
         private bool disposed = false;
 
 
-        internal IntentModel(Microsoft.CognitiveServices.Speech.Internal.LuisModel model)
+        internal LanguageUnderstandingModel(Microsoft.CognitiveServices.Speech.Internal.LanguageUnderstandingModel model)
         {
             modelImpl = model;
         }
 
-        internal Microsoft.CognitiveServices.Speech.Internal.LuisModel modelImpl { get; }
+        internal Microsoft.CognitiveServices.Speech.Internal.LanguageUnderstandingModel modelImpl { get; }
     }
 
     

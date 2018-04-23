@@ -26,7 +26,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
         ///
         /// static void SpeechRecognizerSample()
         /// {
-        ///   SpeechRecognizer reco = factory.CreateSpeechRecognizer("audioFileName");
+        ///   SpeechRecognizer reco = factory.CreateSpeechRecognizerWithFileInput("audioFileName");
         ///
         ///   reco.OnSessionEvent += MySessionEventHandler;
         ///
@@ -34,7 +34,6 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
         ///   var result = await reco.RecognizeAsync();
         ///
         ///   reco.OnSessionEvent -= MySessionEventHandler;
-        ///  
         ///   Console.WriteLine("Speech Recognition: Recognition result: " + result);
         /// }
         /// </code>

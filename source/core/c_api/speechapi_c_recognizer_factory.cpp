@@ -232,11 +232,19 @@ SPXAPI RecognizerFactory_GetParameter_Name(Factory_Parameter parameter, wchar_t*
         const wchar_t* parameterName = L"";
         switch (parameter)
         {
-            case FactoryParameter_SpeechSubscriptionKey:
+            case FactoryParameter_SubscriptionKey:
                 parameterName = g_SPEECH_SubscriptionKey;
                 break;
 
-            case FactoryParameter_SpeechEndpoint:
+            case FactoryParameter_AuthorizationToken:
+                parameterName = g_SPEECH_AuthToken;
+                break;
+
+            case FactoryParameter_Region:
+                parameterName = g_SPEECH_Region;
+                break;
+
+            case FactoryParameter_Endpoint:
                 parameterName = g_SPEECH_Endpoint;
                 break;
 

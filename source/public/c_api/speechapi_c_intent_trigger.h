@@ -13,5 +13,5 @@ SPXAPI_(bool) IntentTrigger_Handle_IsValid(SPXTRIGGERHANDLE htrigger);
 SPXAPI IntentTrigger_Handle_Close(SPXTRIGGERHANDLE htrigger);
 
 SPXAPI IntentTrigger_Create_From_Phrase(const wchar_t* phrase, SPXTRIGGERHANDLE* phtrigger);
-SPXAPI IntentTrigger_Create_From_LuisModel(SPXLUISHANDLE hluis, SPXTRIGGERHANDLE* phtrigger);
-SPXAPI IntentTrigger_Create_From_LuisModel_Intent(SPXLUISHANDLE hluis, const wchar_t* intentName, SPXTRIGGERHANDLE* phtrigger);
+SPXAPI IntentTrigger_Create_From_LanguageUnderstandingModel(SPXLUMODELHANDLE hlumodel, SPXTRIGGERHANDLE* phtrigger);
+SPXAPI IntentTrigger_Create_From_LanguageUnderstandingModel_Intent(SPXLUMODELHANDLE hlumodel, const wchar_t* intentName, SPXTRIGGERHANDLE* phtrigger);

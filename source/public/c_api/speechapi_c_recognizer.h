@@ -25,7 +25,7 @@ SPXAPI Recognizer_Enable(SPXRECOHANDLE hreco);
 SPXAPI Recognizer_Disable(SPXRECOHANDLE hreco);
 SPXAPI Recognizer_IsEnabled(SPXRECOHANDLE hreco, bool* pfEnabled);
 
-enum Recognizer_Parameter { RecognizerParameter_CustomSpeechModelId = 1 };
+enum Recognizer_Parameter { RecognizerParameter_DeploymentId = 1 };
 typedef enum Recognizer_Parameter Recognizer_Parameter;
 SPXAPI Recognizer_GetParameter_Name(Recognizer_Parameter parameter, wchar_t* name, uint32_t cchName);
 

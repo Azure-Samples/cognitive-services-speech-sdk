@@ -26,6 +26,12 @@ namespace Microsoft.CognitiveServices.Speech
                 var recognizer = owner as Recognition.Speech.SpeechRecognizer;
                 recognizerParameters = recognizer.recoImpl.Parameters;
             }
+            else if (typeof(Owner) == typeof(Recognition.Intent.IntentRecognizer))
+            {
+                isFactoryParameter = false;
+                var recognizer = owner as Recognition.Intent.IntentRecognizer;
+                recognizerParameters = recognizer.recoImpl.Parameters;
+            }
             else if (typeof(Owner) == typeof(Recognition.Translation.TranslationRecognizer))
             {
                 isFactoryParameter = false;

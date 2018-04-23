@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import com.microsoft.cognitiveservices.speech.ParameterCollection;
 import com.microsoft.cognitiveservices.speech.internal.IntentTrigger;
-import com.microsoft.cognitiveservices.speech.recognition.IntentModel;
+import com.microsoft.cognitiveservices.speech.recognition.LanguageUnderstandingModel;
 import com.microsoft.cognitiveservices.speech.recognition.ParameterNames;
 import com.microsoft.cognitiveservices.speech.recognition.RecognitionErrorEventArgs;
 import com.microsoft.cognitiveservices.speech.recognition.translation.TranslationTextResult;
@@ -170,7 +170,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       * @param model The intent model from Language Understanding service.
       * @param intentName The intent name defined in the intent model. If it is null, all intent names defined in the model will be added.
       */
-    public void addIntent(String intentId, IntentModel model, String intentName)
+    public void addIntent(String intentId, LanguageUnderstandingModel model, String intentName)
     {
         IntentTrigger trigger = com.microsoft.cognitiveservices.speech.internal.IntentTrigger.from(model.modelImpl, intentName);
         recoImpl.addIntent(intentId, trigger);

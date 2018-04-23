@@ -74,7 +74,7 @@ set(JAVA_SOURCES
     com/microsoft/cognitiveservices/speech/SessionEventArgs.java
     com/microsoft/cognitiveservices/speech/SessionEventType.java
     com/microsoft/cognitiveservices/speech/recognition/AudioInputStream.java
-    com/microsoft/cognitiveservices/speech/recognition/IntentModel.java
+    com/microsoft/cognitiveservices/speech/recognition/LanguageUnderstandingModel.java
     com/microsoft/cognitiveservices/speech/recognition/ParameterNames.java
     com/microsoft/cognitiveservices/speech/recognition/RecognitionErrorEventArgs.java
     com/microsoft/cognitiveservices/speech/recognition/RecognitionStatus.java
@@ -120,7 +120,7 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/IntentTrigger.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/IRecognizerFactory.java
 
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/LuisModel.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/LanguageUnderstandingModel.java
 
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/Reason.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/RecognitionEventArgs.java
@@ -178,7 +178,7 @@ set(SWIG_JAVA_SOURCES
 
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/carbon_javaConstants.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_SPXEVENTHANDLE.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_SPXLUISHANDLE.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_SPXLUMODELHANDLE.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_SPXRECOFACTORYHANDLE.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_SPXRECOHANDLE.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_SPXRESULTHANDLE.java
@@ -192,6 +192,7 @@ set(SWIG_JAVA_SOURCES
 #    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/ValueCollectionRecognizerFactoryParameter.java
 #    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/ValueCollectionSessionParameter.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/VoidFuture.java
+
 )
 
 

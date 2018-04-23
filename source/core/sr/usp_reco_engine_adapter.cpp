@@ -319,7 +319,7 @@ void CSpxUspRecoEngineAdapter::UspSendSpeechContext()
     // Get the intent payload
     std::string provider, id, key;
     GetIntentInfoFromSite(provider, id, key);
-    auto intentJson = GetIntentJsonFromIntentInfo(provider, id, key);
+    auto intentJson = GetLanguageUnderstandingJsonFromIntentInfo(provider, id, key);
 
     // Do we expect to receive an intent payload from the service?
     m_expectIntentResponse = !intentJson.empty();
@@ -1022,7 +1022,7 @@ void CSpxUspRecoEngineAdapter::GetIntentInfoFromSite(std::string& provider, std:
     GetSite()->GetIntentInfo(provider, id, key);
 }
 
-std::string CSpxUspRecoEngineAdapter::GetIntentJsonFromIntentInfo(const std::string& provider, const std::string& id, const std::string& key)
+std::string CSpxUspRecoEngineAdapter::GetLanguageUnderstandingJsonFromIntentInfo(const std::string& provider, const std::string& id, const std::string& key)
 {
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     auto noIntentJson = properties->GetBooleanValue(L"CARBON-INTERNAL-USP-NoIntentJson", false);
@@ -1104,7 +1104,7 @@ void CSpxUspRecoEngineAdapter::FireFinalResultNow(const USP::SpeechPhraseMsg& me
         // Do we already have the LUIS json payload from the service (1-hop)
         if (!luisJson.empty())
         {
-            namedProperties->SetStringValue(g_RESULT_LuisJson, PAL::ToWString(luisJson).c_str());
+            namedProperties->SetStringValue(g_RESULT_LanguageUnderstandingJson, PAL::ToWString(luisJson).c_str());
         }
 
         // Fire the result

@@ -1029,9 +1029,9 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<IntentRecognizer>& 
     auto text = result->Text;
 
     auto intentId = result->IntentId;
-    auto luisJson = result->Properties[ResultProperty::LuisJson].GetString();
+    auto intentJson = result->Properties[ResultProperty::LanguageUnderstandingJson].GetString();
 
-    ConsoleWriteLine(L"IntentRecognitionResult: ResultId=%d; Reason=%d; Text=%ls, IntentId=%ls, Json=%ls", resultId.c_str(), reason, text.c_str(), intentId.c_str(), luisJson.c_str());
+    ConsoleWriteLine(L"IntentRecognitionResult: ResultId=%d; Reason=%d; Text=%ls, IntentId=%ls, Json=%ls", resultId.c_str(), reason, text.c_str(), intentId.c_str(), intentJson.c_str());
 }
 
 void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<TranslationRecognizer>& recognizer)
@@ -1351,7 +1351,7 @@ void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
 
     if (!pconsoleArgs->m_strEndpointUri.empty())
     {
-        DefaultRecognizerFactory::SetSpeechEndpoint(pconsoleArgs->m_strEndpointUri.c_str());
+        DefaultRecognizerFactory::SetEndpointUrl(pconsoleArgs->m_strEndpointUri.c_str());
     }
 
     if (!pconsoleArgs->m_strCustomSpeechModelId.empty())

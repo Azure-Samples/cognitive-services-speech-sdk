@@ -33,7 +33,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
         /// <summary>
         /// The name of parameter `Region`
         /// </summary>
-        public const string Region = "Region";
+        public const string Region = "SPEECH-Region";
 
         /// <summary>
         /// The name of parameter `Language`.
@@ -58,7 +58,12 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
         /// <summary>
         /// The name of parameter `TRANSLATION-ToLanguage` which describes target languages for translation.
         /// </summary>
-        public const string TranslationToLanguage = "TRANSLATION-ToLanguage";
+        public const string TranslationToLanguages = "TRANSLATION-ToLanguages";
+
+        /// <summary>
+        /// The name of parameter `TRANSLATION-RequireVoiceOutput` which describes whether a synthesized voice ouput of the translated text is required.
+        /// </summary>
+        public const string TranslationRequireVoiceOutput = "TRANSLATION-RequireVoiceOutput";
 
     }
 }

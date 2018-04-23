@@ -35,12 +35,18 @@ public:
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
-    IntentRecognizer(SPXRECOHANDLE hreco = SPXHANDLE_INVALID) : BaseType(hreco) { SPX_DBG_TRACE_FUNCTION(); }
+    IntentRecognizer(SPXRECOHANDLE hreco = SPXHANDLE_INVALID) : BaseType(hreco), Parameters(hreco)
+    {
+        SPX_DBG_TRACE_FUNCTION();
+    }
 
     /// <summary>
     /// Deconstructor.
     /// </summary>
-    ~IntentRecognizer() { SPX_DBG_TRACE_FUNCTION(); }
+    ~IntentRecognizer()
+    {
+        SPX_DBG_TRACE_FUNCTION();
+    }
 
     /// <summary>
     /// Performs intent recognition in a non-blocking (asynchronous) mode.
@@ -48,31 +54,51 @@ public:
     /// <returns>Future containing result value (a shared pointer to IntentRecognitionResult)
     /// of the asynchronous intent recognition.
     /// </returns>
-    std::future<std::shared_ptr<IntentRecognitionResult>> RecognizeAsync() override { return BaseType::RecognizeAsyncInternal(); }
+    std::future<std::shared_ptr<IntentRecognitionResult>> RecognizeAsync() override
+    {
+        return BaseType::RecognizeAsyncInternal();
+    }
 
     /// <summary>
     /// Asynchronously initiates continuous intent recognition operation.
     /// </summary>
     /// <returns>An empty future.</returns>
-    std::future<void> StartContinuousRecognitionAsync() override { return BaseType::StartContinuousRecognitionAsyncInternal(); }
+    std::future<void> StartContinuousRecognitionAsync() override 
+    {
+        return BaseType::StartContinuousRecognitionAsyncInternal();
+    }
 
     /// <summary>
     /// Asynchronously terminates ongoing continuous intent recognition operation.
     /// </summary>
     /// <returns>An empty future.</returns>
-    std::future<void> StopContinuousRecognitionAsync() override { return BaseType::StopContinuousRecognitionAsyncInternal(); }
+    std::future<void> StopContinuousRecognitionAsync() override
+    {
+        return BaseType::StopContinuousRecognitionAsyncInternal();
+    }
 
     /// <summary>
     /// Asynchronously initiates keyword recognition operation.
     /// </summary>
     /// <returns>An empty future.</returns>
-    std::future<void> StartKeywordRecognitionAsync(const std::wstring& keyword) override { return BaseType::StartKeywordRecognitionAsyncInternal(keyword); }
+    std::future<void> StartKeywordRecognitionAsync(const std::wstring& keyword) override
+    {
+        return BaseType::StartKeywordRecognitionAsyncInternal(keyword);
+    }
 
     /// <summary>
     /// Asynchronously terminates keyword recognition operation.
     /// </summary>
     /// <returns>An empty future.</returns>
-    std::future<void> StopKeywordRecognitionAsync() override { return BaseType::StopKeywordRecognitionAsyncInternal(); }
+    std::future<void> StopKeywordRecognitionAsync() override
+    {
+        return BaseType::StopKeywordRecognitionAsyncInternal();
+    }
+
+    /// <summary>
+    /// A collection of parameter names and their values.
+    /// </summary>
+    RecognizerParameterValueCollection Parameters;
 
     /// <summary>
     /// Adds a phrase that should be recognized as intent with the specified id.
@@ -94,7 +120,6 @@ public:
     {
         SPX_THROW_ON_FAIL(IntentRecognizer_AddIntent(m_hreco, intentId.c_str(), (SPXTRIGGERHANDLE)(*trigger.get())));
     }
-
 
 private:
     DISABLE_COPY_AND_MOVE(IntentRecognizer);

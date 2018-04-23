@@ -50,12 +50,12 @@ SPXAPI Session_GetParameter_Name(Session_Parameter parameter, wchar_t* name, uin
         const wchar_t* parameterName = L"";
         switch (parameter)
         {
-            case SessionParameter_SpeechSubscriptionKey:
+            case SessionParameter_SubscriptionKey:
                 parameterName = g_SPEECH_SubscriptionKey;
                 break;
 
-            case SessionParameter_SpeechEndpoint:
-                parameterName = g_SPEECH_Endpoint;
+            case SessionParameter_AuthorizationToken:
+                parameterName = g_SPEECH_AuthToken;
                 break;
 
             default:

@@ -38,7 +38,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Speech
     ///
     /// static void SpeechRecognizerSample()
     /// {
-    ///   SpeechRecognizer reco = factory.CreateSpeechRecognizer("audioFileName");
+    ///   SpeechRecognizer reco = factory.CreateSpeechRecognizerWithFileInput("audioFileName");
     ///
     ///   reco.OnSessionEvent += MySessionEventHandler;
     ///   reco.FinalResultReceived += MyFinalResultEventHandler;
@@ -108,23 +108,18 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Speech
 
             set
             {
-                Parameters.Set(ParameterNames.SpeechModelId, value);
+                recoImpl.SetDeploymentId(value);
             }
         }
 
         /// <summary>
-        /// Gets/sets the spoken language of recognition.
+        /// Gets the language name that was set when the recognizer was created.
         /// </summary>
         public string Language
         {
             get
             {
                 return Parameters.Get<string>(ParameterNames.SpeechRecognitionLanguage);
-            }
-
-            set
-            {
-                Parameters.Set(ParameterNames.SpeechRecognitionLanguage, value);
             }
         }
 
@@ -142,7 +137,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Speech
         /// <code>
         /// static void SpeechRecognizerSample()
         /// {
-        ///   SpeechRecognizer reco = factory.CreateSpeechRecognizer("audioFileName");
+        ///   SpeechRecognizer reco = factory.CreateSpeechRecognizerWithFileInput("audioFileName");
         ///
         ///   // Starts recognition.
         ///   var result = await reco.RecognizeAsync();

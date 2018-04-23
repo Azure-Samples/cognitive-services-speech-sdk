@@ -60,10 +60,9 @@ void SetMockRealTimeSpeed(int value)
 
 TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 {
-
     if (!g_endpoint.empty())
     {
-        DefaultRecognizerFactory::SetSpeechEndpoint(PAL::ToWString(g_endpoint));
+        DefaultRecognizerFactory::SetEndpointUrl(PAL::ToWString(g_endpoint));
     }
 
     GIVEN("Mocks for USP, Microphone, WaveFilePump and Reader, and then USP ...")
@@ -232,7 +231,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
 {
     if (!g_endpoint.empty())
     {
-        DefaultRecognizerFactory::SetSpeechEndpoint(PAL::ToWString(g_endpoint));
+        DefaultRecognizerFactory::SetEndpointUrl(PAL::ToWString(g_endpoint));
     }
 
     REQUIRE(exists(input_file));

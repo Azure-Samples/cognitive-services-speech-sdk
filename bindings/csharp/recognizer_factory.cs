@@ -14,29 +14,34 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
     /// <summary>
     /// Factory methods to create recognizers.
     /// </summary>
-    public sealed class RecognizerFactory : IDisposable
+    public sealed class RecognizerFactory
     {
         /// <summary>
-        /// Creates an instance of recognizer factory.
+        /// Creates an instance of recognizer factory. Currently as private method.
         /// </summary>
-        public RecognizerFactory()
+        private RecognizerFactory()
         {
             InitInternal();
         }
 
         /// <summary>
-        /// Creates an instance of recognizer factory with specified subscription key and region (optional).
+        /// Creates an instance of recognizer factory with specified subscription key and region (optional). Currently as private method.
         /// </summary>
         /// <param name="subscriptionKey">The subscription key.</param>
         /// <param name="region">The region name.</param>
-        public RecognizerFactory(string subscriptionKey, string region = null)
+        private RecognizerFactory(string subscriptionKey, string region)
         {
             InitInternal();
             SubscriptionKey = subscriptionKey;
-            if (region != null)
-            {
-                Region = region;
-            }
+            Region = region;
+        }
+
+        /// <summary>
+        /// Gets the default recognizer factory.
+        /// </summary>
+        public static RecognizerFactory Instance
+        {
+            get { return instanceLazy.Value; }
         }
 
         /// <summary>
@@ -51,8 +56,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
 
             set
             {
-                // factoryImpl.SetSubscriptionKey(value);
-                Parameters.Set(ParameterNames.SpeechSubscriptionKey, value);
+                factoryImpl.SetSubscriptionKey(value);
             }
         }
 
@@ -70,8 +74,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
 
             set
             {
-                // factoryImpl.SetSubscriptionKey(value);
-                Parameters.Set(ParameterNames.SpeechAuthToken, value);
+                factoryImpl.SetAuthorizationToken(value);
             }
         }
 
@@ -87,14 +90,14 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
 
             set
             {
-                Parameters.Set(ParameterNames.Region, value);
+                factoryImpl.SetRegion(value);
             }
         }
 
         /// <summary>
-        /// Gets/sets the service endpoint.
+        /// Gets/Sets the service endpoint when connecting to the service.
         /// </summary>
-        public string Endpoint
+        public string EndpointURL
         {
             get
             {
@@ -103,8 +106,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
 
             set
             {
-                // factoryImpl.SetSubscriptionKey(value);
-                Parameters.Set(ParameterNames.SpeechEndpoint, value);
+                factoryImpl.SetEndpointUrl(value);
             }
         }
 
@@ -114,7 +116,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
         public ParameterCollection<RecognizerFactory> Parameters { get; private set; }
 
         /// <summary>
-        /// Creates a translation recognizer, using the default microphone input.
+        /// Creates a speech recognizer, using the default microphone input.
         /// </summary>
         /// <returns>A translation recognizer instance.</returns>
         public SpeechRecognizer CreateSpeechRecognizer()
@@ -123,27 +125,59 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
         }
 
         /// <summary>
-        /// Creates a translation recognizer, using the specified file as audio input.
+        /// Creates a speech recognizer, using the default microphone input.
+        /// </summary>
+        /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
+        /// <returns>A translation recognizer instance.</returns>
+        public SpeechRecognizer CreateSpeechRecognizer(string language)
+        {
+            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizer(language));
+        }
+
+        /// <summary>
+        /// Creates a speech recognizer, using the specified file as audio input.
         /// </summary>
         /// <param name="audioFile">Specifies the audio input file.</param>
         /// <returns>A translation recognizer instance.</returns>
-        public SpeechRecognizer CreateSpeechRecognizer(string audioFile)
+        public SpeechRecognizer CreateSpeechRecognizerWithFileInput(string audioFile)
         {
             return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithFileInput(audioFile));
         }
 
         /// <summary>
-        /// Creates a translation recognizer, using the specified input stream as audio input.
+        /// Creates a speech recognizer, using the specified file as audio input.
+        /// </summary>
+        /// <param name="audioFile">Specifies the audio input file.</param>
+        /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
+        /// <returns>A translation recognizer instance.</returns>
+        public SpeechRecognizer CreateSpeechRecognizerWithFileInput(string audioFile, string language)
+        {
+            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithFileInput(audioFile, language));
+        }
+
+        /// <summary>
+        /// Creates a speech recognizer, using the specified input stream as audio input.
         /// </summary>
         /// <param name="audioStream">Specifies the audio input stream.</param>
         /// <returns>A translation recognizer instance.</returns>
-        public SpeechRecognizer CreateSpeechRecognizer(AudioInputStream audioStream)
+        public SpeechRecognizer CreateSpeechRecognizerWithAudioStream(AudioInputStream audioStream)
         {
             throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Creates an intent recognizer, using the specified file as audio input.
+        /// Creates a speech recognizer, using the specified input stream as audio input.
+        /// </summary>
+        /// <param name="audioStream">Specifies the audio input stream.</param>
+        /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
+        /// <returns>A translation recognizer instance.</returns>
+        public SpeechRecognizer CreateSpeechRecognizerWithAudioStream(AudioInputStream audioStream, string language)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Creates an intent recognizer, using the default microphone input.
         /// </summary>
         /// <returns>An intent recognizer instance.</returns>
         public IntentRecognizer CreateIntentRecognizer()
@@ -152,13 +186,34 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
         }
 
         /// <summary>
+        /// Creates an intent recognizer, using the default microphone input.
+        /// </summary>
+        /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
+        /// <returns>An intent recognizer instance.</returns>
+        public IntentRecognizer CreateIntentRecognizer(string language)
+        {
+            return new IntentRecognizer(factoryImpl.CreateIntentRecognizer(language));
+        }
+
+        /// <summary>
         /// Creates an intent recognizer, using the specified file as audio input.
         /// </summary>
         /// <param name="audioFile">Specifies the audio input file.</param>
         /// <returns>An intent recognizer instance</returns>
-        public IntentRecognizer CreateIntentRecognizer(string audioFile)
+        public IntentRecognizer CreateIntentRecognizerWithFileInput(string audioFile)
         {
             return new IntentRecognizer(factoryImpl.CreateIntentRecognizerWithFileInput(audioFile));
+        }
+
+        /// <summary>
+        /// Creates an intent recognizer, using the specified file as audio input.
+        /// </summary>
+        /// <param name="audioFile">Specifies the audio input file.</param>
+        /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
+        /// <returns>An intent recognizer instance</returns>
+        public IntentRecognizer CreateIntentRecognizerWithFileInput(string audioFile, string language)
+        {
+            return new IntentRecognizer(factoryImpl.CreateIntentRecognizerWithFileInput(audioFile, language));
         }
 
         /// <summary>
@@ -166,7 +221,19 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
         /// </summary>
         /// <param name="audioStream">Specifies the audio input stream.</param>
         /// <returns>An intent recognizer instance.</returns>
-        public IntentRecognizer CreateIntentRecognizer(AudioInputStream audioStream)
+        public IntentRecognizer CreateIntentRecognizerWithStream(AudioInputStream audioStream)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        /// <summary>
+        /// Creates an intent recognizer, using the specified input stream as audio input.
+        /// </summary>
+        /// <param name="audioStream">Specifies the audio input stream.</param>
+        /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
+        /// <returns>An intent recognizer instance.</returns>
+        public IntentRecognizer CreateIntentRecognizerWithStream(AudioInputStream audioStream, string language)
         {
             throw new NotImplementedException();
         }
@@ -189,7 +256,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
         /// <param name="sourceLanguage">The spoken language that needs to be translated.</param>
         /// <param name="targetLanguages">The target languages of translation.</param>
         /// <returns>A translation recognizer instance.</returns>
-        public TranslationRecognizer CreateTranslationRecognizer(string audioFile, string sourceLanguage, IEnumerable<string> targetLanguages)
+        public TranslationRecognizer CreateTranslationRecognizerWithFileInput(string audioFile, string sourceLanguage, IEnumerable<string> targetLanguages)
         {
             return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerWithFileInput(audioFile, sourceLanguage, AsWStringVector(targetLanguages)));
         }
@@ -201,28 +268,15 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
         /// <param name="sourceLanguage">The spoken language that needs to be translated.</param>
         /// <param name="targetLanguages">The target languages of translation.</param>
         /// <returns>A translation recognizer instance.</returns>
-        public TranslationRecognizer CreateTranslationRecognizer(AudioInputStream audioStream, string sourceLanguage, IEnumerable<string> targetLanguages)
+        public TranslationRecognizer CreateTranslationRecognizerWithStream(AudioInputStream audioStream, string sourceLanguage, IEnumerable<string> targetLanguages)
         {
             throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Dispose of associated resources.
-        /// </summary>
-        public void Dispose()
-        {
-            if (disposed)
-            {
-                return;
-            }
-
-            Parameters?.Dispose();
-            factoryImpl?.Dispose();
-            disposed = true;
-        }
+        private static readonly Lazy<RecognizerFactory> instanceLazy = 
+            new Lazy<RecognizerFactory>(() => new RecognizerFactory(), true);
 
         private Microsoft.CognitiveServices.Speech.Internal.IRecognizerFactory factoryImpl;
-        private bool disposed = false;
 
         private void InitInternal()
         {

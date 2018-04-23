@@ -714,7 +714,7 @@ public:
     virtual void InitTranslationSynthesisResult(const uint8_t* audioData, size_t audioLength) = 0;
 };
 
-class ISpxLuisModel : public ISpxInterfaceBaseFor<ISpxLuisModel>
+class ISpxLanguageUnderstandingModel : public ISpxInterfaceBaseFor<ISpxLanguageUnderstandingModel>
 {
 public:
 
@@ -734,11 +734,11 @@ class ISpxTrigger : public ISpxInterfaceBaseFor<ISpxTrigger>
 public:
 
     virtual void InitPhraseTrigger(const wchar_t* phrase) = 0;
-    virtual void InitLuisModelTrigger(std::shared_ptr<ISpxLuisModel> model, const wchar_t* intentName) = 0;
+    virtual void InitLanguageUnderstandingModelTrigger(std::shared_ptr<ISpxLanguageUnderstandingModel> model, const wchar_t* intentName) = 0;
 
     virtual std::wstring GetPhrase() const = 0;
 
-    virtual std::shared_ptr<ISpxLuisModel> GetModel() const = 0;
+    virtual std::shared_ptr<ISpxLanguageUnderstandingModel> GetModel() const = 0;
     virtual std::wstring GetModelIntentName() const = 0;
 };
 

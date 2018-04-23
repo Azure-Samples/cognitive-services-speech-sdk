@@ -95,7 +95,7 @@ SPXAPI Recognizer_GetParameter_Name(Recognizer_Parameter parameter, wchar_t* nam
         const wchar_t* parameterName = L"";
         switch (parameter)
         {
-            case RecognizerParameter_CustomSpeechModelId:
+            case RecognizerParameter_DeploymentId:
                 parameterName = g_SPEECH_ModelId;
                 break;
 

@@ -106,7 +106,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
         }
 
         /// <summary>
-        /// Gets/sets the spoken language of audio input.
+        /// Gets the language name that was set when the recognizer was created.
         /// </summary>
         public string SourceLanguage
         {
@@ -114,18 +114,13 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
             {
                 return Parameters.Get<string>(ParameterNames.TranslationFromLanguage);
             }
-
-            set
-            {
-                Parameters.Set(ParameterNames.TranslationFromLanguage, value);
-            }
         }
 
         /// <summary>
-        /// Gets/sets target languages for translation. The language is specified in BCP-47 format.
-        /// The translation will provide translated text for each of language in the specified list.
+        /// Gets target languages for translation that were set when the recognizer was created.
+        /// The language is specified in BCP-47 format. The translation will provide translated text for each of language.
         /// </summary>
-        public IReadOnlyList<string> TargetLanguages { get; set; }
+        public IReadOnlyList<string> TargetLanguages { get; }
 
         /// <summary>
         /// Gets/sets a boolean value which indicates whether a voice output of the translated text is desired.

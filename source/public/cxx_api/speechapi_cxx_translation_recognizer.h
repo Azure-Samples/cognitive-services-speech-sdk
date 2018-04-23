@@ -174,11 +174,6 @@ public:
     std::future<void> StopContinuousRecognitionAsync() override { return BaseType::StopContinuousRecognitionAsyncInternal(); }
 
     /// <summary>
-    /// The collection of parameters and their values defined for this <see cref="TranslationRecognizer"/>.
-    /// </summary>
-    RecognizerParameterValueCollection Parameters;
-
-    /// <summary>
     /// Note: NOT implemented. Starts keyword recognition on a continous audio stream, until StopKeywordRecognitionAsync() is called.
     /// </summary>
     /// <param name="keyword">Specifies the keyword phrase to be recognized.</param>
@@ -206,14 +201,15 @@ public:
         return future;
     };
 
+    /// <summary>
+    /// The collection of parameters and their values defined for this <see cref="TranslationRecognizer"/>.
+    /// </summary>
+    RecognizerParameterValueCollection Parameters;
 
     /// <summary>
     /// The event signals that a translation synthesis result is received.
     /// </summary>
     EventSignal<const TranslationSynthesisResultEventArgs&> TranslationSynthesisResultEvent;
-    // Todo: how to expose the error event of translation. Need to align with what speech does.
-    // EventSignal<const TranslationEventArgs<TranslationTextResult>&>& OnTranslationError;
-
 
 private:
 

@@ -98,7 +98,6 @@ protected:
     /// </summary>
     AudioInputStream() {};
 
-
 private:
     AudioInputStream(const AudioInputStream&) = delete;
     AudioInputStream(const AudioInputStream&&) = delete;

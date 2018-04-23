@@ -39,22 +39,22 @@ SPXAPI IntentTrigger_Create_From_Phrase(const wchar_t* phrase, SPXTRIGGERHANDLE*
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI IntentTrigger_Create_From_LuisModel(SPXLUISHANDLE hluis, SPXTRIGGERHANDLE* phtrigger)
+SPXAPI IntentTrigger_Create_From_LanguageUnderstandingModel(SPXLUMODELHANDLE hlumodel, SPXTRIGGERHANDLE* phtrigger)
 {
-    return IntentTrigger_Create_From_LuisModel_Intent(hluis, nullptr, phtrigger);
+    return IntentTrigger_Create_From_LanguageUnderstandingModel_Intent(hlumodel, nullptr, phtrigger);
 }
 
-SPXAPI IntentTrigger_Create_From_LuisModel_Intent(SPXLUISHANDLE hluis, const wchar_t* intentName, SPXTRIGGERHANDLE* phtrigger)
+SPXAPI IntentTrigger_Create_From_LanguageUnderstandingModel_Intent(SPXLUMODELHANDLE hlumodel, const wchar_t* intentName, SPXTRIGGERHANDLE* phtrigger)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phtrigger = SPXHANDLE_INVALID;
 
-        auto luishandles = CSpxSharedPtrHandleTableManager::Get<ISpxLuisModel, SPXLUISHANDLE>();
-        auto model = (*luishandles)[hluis];
+        auto languageUnderstandingModelHandles = CSpxSharedPtrHandleTableManager::Get<ISpxLanguageUnderstandingModel, SPXLUMODELHANDLE>();
+        auto model = (*languageUnderstandingModelHandles)[hlumodel];
 
         auto trigger = SpxCreateObjectWithSite<ISpxTrigger>("CSpxIntentTrigger", SpxGetRootSite());
-        trigger->InitLuisModelTrigger(model, intentName);
+        trigger->InitLanguageUnderstandingModelTrigger(model, intentName);
 
         auto triggerhandles = CSpxSharedPtrHandleTableManager::Get<ISpxTrigger, SPXTRIGGERHANDLE>();
         *phtrigger = triggerhandles->TrackHandle(trigger);

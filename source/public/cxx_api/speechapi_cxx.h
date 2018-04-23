@@ -33,7 +33,7 @@
 #include <speechapi_cxx_intent_recognition_eventargs.h>
 #include <speechapi_cxx_intent_recognizer.h>
 #include <speechapi_cxx_intent_trigger.h>
-#include <speechapi_cxx_luis_model.h>
+#include <speechapi_cxx_language_understanding_model.h>
 
 #include <speechapi_cxx_translation_result.h>
 #include <speechapi_cxx_translation_eventargs.h>

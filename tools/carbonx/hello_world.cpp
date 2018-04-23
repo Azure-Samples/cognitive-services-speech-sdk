@@ -7,7 +7,7 @@
 
 #include "stdafx.h"
 #include "carbon_test_console.h"
-#include "speechapi_cxx_luis_model.h"
+#include "speechapi_cxx_language_understanding_model.h"
 #include "speechapi_cxx_session.h"
 #include "speechapi_cxx_intent_recognizer.h"
 
@@ -78,10 +78,10 @@ void CarbonTestConsole::Sample_HelloWorld_Intent(const wchar_t* hostName, const 
     // DefaultRecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-USP-NoIntentJson", true);
 
     // DefaultRecognizerFactory::SetSpeechEndpoint(LR"(wss://speech.platform.bing.com/ppe/speech/recognition/interactive/cognitiveservices/v1?setflight=cognitiveservicesintent&format=simple&language=en-us)");
-    DefaultRecognizerFactory::SetSpeechEndpoint(LR"(wss://speech.platform.bing.com/speech/recognition/interactive/cognitiveservices/v1?setflight=cognitiveservicesintent&format=simple&language=en-us)");
+    DefaultRecognizerFactory::SetEndpointUrl(LR"(wss://speech.platform.bing.com/speech/recognition/interactive/cognitiveservices/v1?setflight=cognitiveservicesintent&format=simple&language=en-us)");
     auto recognizer = DefaultRecognizerFactory::CreateIntentRecognizer();
 
-    auto model = LuisModel::From(hostName, subscriptionKey, appId);
+    auto model = LanguageUnderstandingModel::From(hostName, subscriptionKey, appId);
     recognizer->AddIntent(L"add to calendar", IntentTrigger::From(model, L"Calendar.Add"));
     recognizer->AddIntent(L"send email", IntentTrigger::From(model, L"Communication.SendEmail"));
 
@@ -89,9 +89,9 @@ void CarbonTestConsole::Sample_HelloWorld_Intent(const wchar_t* hostName, const 
     auto text = result->Text;
 
     auto intentId = result->IntentId;
-    auto luisJson = result->Properties[ResultProperty::LuisJson].GetString();
+    auto intentJson = result->Properties[ResultProperty::LanguageUnderstandingJson].GetString();
 
-    ConsoleWriteLine(L"text = '%ls'; intentId = '%ls'; json='%ls'", text.c_str(), intentId.c_str(), luisJson.c_str());
+    ConsoleWriteLine(L"text = '%ls'; intentId = '%ls'; json='%ls'", text.c_str(), intentId.c_str(), intentJson.c_str());
 }
 
 void CarbonTestConsole::Sample_HelloWorld_Subscription()
@@ -112,7 +112,7 @@ void CarbonTestConsole::Sample_HelloWorld_Subscription_With_CRIS()
         RecognizerFactory::GetDefault()->SetSubscriptionKey(g_customSpeechSubscriptionKey);
 
         auto recognizer = RecognizerFactory::GetDefault()->CreateSpeechRecognizer();
-        recognizer->SetCustomSpeechModel(g_customSpeechModelId);
+        recognizer->SetDeploymentId(g_customSpeechModelId);
 
         ConsoleWriteLine(L"Say something...");
         auto result = recognizer->RecognizeAsync().get();
@@ -124,7 +124,7 @@ void CarbonTestConsole::Sample_HelloWorld_Subscription_With_CRIS()
         DefaultRecognizerFactory::SetSubscriptionKey(g_customSpeechSubscriptionKey);
 
         auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizer();
-        recognizer->SetCustomSpeechModel(g_customSpeechModelId);
+        recognizer->SetDeploymentId(g_customSpeechModelId);
 
         ConsoleWriteLine(L"Say something...");
         auto result = recognizer->RecognizeAsync().get();

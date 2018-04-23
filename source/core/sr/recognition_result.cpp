@@ -97,7 +97,7 @@ void CSpxRecognitionResult::InitIntentResult(const wchar_t* intentId, const wcha
         ? intentId
         : L"";
 
-    SetStringValue(g_RESULT_LuisJson, jsonPayload);
+    SetStringValue(g_RESULT_LanguageUnderstandingJson, jsonPayload);
 }
 
 const std::map<std::wstring, std::wstring>& CSpxRecognitionResult::GetTranslationText()

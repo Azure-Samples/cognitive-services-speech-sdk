@@ -38,31 +38,29 @@ namespace MicrosoftSpeechSDKSamples
 
         public static async Task TranslationBaseModelAsync(string keyTranslation, string fileName)
         {
-            using (var factory = new RecognizerFactory())
-            {
-                Console.WriteLine("Translation using base model.");
-                factory.SubscriptionKey = keyTranslation;
+            var factory = RecognizerFactory.Instance;
+            Console.WriteLine("Translation using base model.");
+            factory.SubscriptionKey = keyTranslation;
 
-                if (fileName == null)
+            if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
+            {
+                using (var reco = factory.CreateTranslationRecognizer(FromLang, ToLangs))
                 {
-                    using (var reco = factory.CreateTranslationRecognizer(FromLang, ToLangs))
-                    {
-                        await DoTranslationAsync(reco).ConfigureAwait(false);
-                    }
+                    await DoTranslationAsync(reco).ConfigureAwait(false);
                 }
-                else
+            }
+            else
+            {
+                using (var reco = factory.CreateTranslationRecognizerWithFileInput(fileName, FromLang, ToLangs))
                 {
-                    using (var reco = factory.CreateTranslationRecognizer(FromLang, ToLangs))
-                    {
-                        await DoTranslationAsync(reco).ConfigureAwait(false);
-                    }
+                    await DoTranslationAsync(reco).ConfigureAwait(false);
                 }
             }
         }
 
         //public static async Task TranslationCustomizedModelAsync(string keyTranslation string modelId, string fileName)
         //{
-        //    var factory = new RecognizerFactory();
+        //    var factory = RecognizerFactory.Instance;
 
         //    Console.WriteLine(String.Format("Translation using customized model:{0}.", modelId));
 
@@ -73,24 +71,23 @@ namespace MicrosoftSpeechSDKSamples
 
         public static async Task TranslationByEndpointAsync(string keyTranslation, string endpoint, string fileName)
         {
-            using (var factory = new RecognizerFactory())
+            var factory = RecognizerFactory.Instance;
+            factory.EndpointURL = endpoint;
+
+            Console.WriteLine(String.Format("Translation using endopoint:{0}.", endpoint));
+            factory.SubscriptionKey = keyTranslation;
+            if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {
-                Console.WriteLine(String.Format("Translation using endopoint:{0}.", endpoint));
-                factory.SubscriptionKey = keyTranslation;
-                factory.Endpoint = endpoint;
-                if (fileName == null)
+                using (var reco = factory.CreateTranslationRecognizer(FromLang, ToLangs))
                 {
-                    using (var reco = factory.CreateTranslationRecognizer(FromLang, ToLangs))
-                    {
-                        await DoTranslationAsync(reco).ConfigureAwait(false);
-                    }
+                    await DoTranslationAsync(reco).ConfigureAwait(false);
                 }
-                else
+            }
+            else
+            {
+                using (var reco = factory.CreateTranslationRecognizerWithFileInput(fileName, FromLang, ToLangs))
                 {
-                    using (var reco = factory.CreateTranslationRecognizer(fileName, FromLang, ToLangs))
-                    {
-                        await DoTranslationAsync(reco).ConfigureAwait(false);
-                    }
+                    await DoTranslationAsync(reco).ConfigureAwait(false);
                 }
             }
         }

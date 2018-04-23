@@ -20,7 +20,7 @@ namespace Recognition {
 /// <summary>
 /// Enumerates parameters that can be used to configure a recognizer factory.
 /// </summary>
-enum class FactoryParameter { SpeechSubscriptionKey = 1, SpeechEndpoint = 2 };
+enum class FactoryParameter { Region = 1, SubscriptionKey = 2, AuthorizationToken = 3, Endpoint = 4};
 
 /// <summary>
 /// Represents the value of a recognizer factory parameter returned by the subscript operator
@@ -97,8 +97,10 @@ private:
 
     std::wstring ParameterNameFromEnum(FactoryParameter parameter)
     {
-        static_assert((int)FactoryParameter_SpeechSubscriptionKey == (int)FactoryParameter::SpeechSubscriptionKey, "FactoryParameter_* enum values == FactoryParameter::* enum values");
-        static_assert((int)FactoryParameter_SpeechEndpoint == (int)FactoryParameter::SpeechEndpoint, "FactoryParameter_* enum values == FactoryParameter::* enum values");
+        static_assert((int)FactoryParameter_Region == (int)FactoryParameter::Region, "FactoryParameter_* enum values == FactoryParameter::* enum values");
+        static_assert((int)FactoryParameter_SubscriptionKey == (int)FactoryParameter::SubscriptionKey, "FactoryParameter_* enum values == FactoryParameter::* enum values");
+        static_assert((int)FactoryParameter_AuthorizationToken == (int)FactoryParameter::AuthorizationToken, "FactoryParameter_* enum values == FactoryParameter::* enum values");
+        static_assert((int)FactoryParameter_Endpoint == (int)FactoryParameter::Endpoint, "FactoryParameter_* enum values == FactoryParameter::* enum values");
 
         const size_t maxCharCount = 4096;
         wchar_t sz[maxCharCount+1];

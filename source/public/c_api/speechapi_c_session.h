@@ -13,7 +13,7 @@ SPXAPI Session_From_Recognizer(SPXRECOHANDLE hreco, SPXSESSIONHANDLE* phsession)
 SPXAPI_(bool) Session_Handle_IsValid(SPXSESSIONHANDLE hsession);
 SPXAPI Session_Handle_Close(SPXSESSIONHANDLE hsession);
 
-enum Session_Parameter { SessionParameter_SpeechSubscriptionKey = 1, SessionParameter_SpeechEndpoint = 2 };
+enum Session_Parameter { SessionParameter_SubscriptionKey = 1, SessionParameter_AuthorizationToken = 2 };
 typedef enum Session_Parameter Session_Parameter;
 SPXAPI Session_GetParameter_Name(Session_Parameter parameter, wchar_t* name, uint32_t cchName);
 

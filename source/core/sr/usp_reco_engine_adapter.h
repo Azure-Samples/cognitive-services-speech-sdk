@@ -142,9 +142,9 @@ private:
     std::string GetDgiJsonFromListenForList(std::list<std::string>& listenForList);
 
     void GetIntentInfoFromSite(std::string& provider, std::string& id, std::string& key);
-    std::string GetIntentJsonFromIntentInfo(const std::string& provider, const std::string& id, const std::string& key);
+    std::string GetLanguageUnderstandingJsonFromIntentInfo(const std::string& provider, const std::string& id, const std::string& key);
 
-    std::string GetSpeechContextJson(const std::string& dgiJson, const std::string& intentJson);
+    std::string GetSpeechContextJson(const std::string& dgiJson, const std::string& LanguageUnderstandingJson);
     void SendSpeechContextMessage(std::string& speechContextMessage);
 
     void FireFinalResultNow(const USP::SpeechPhraseMsg& message, const std::string& luisJson = "");

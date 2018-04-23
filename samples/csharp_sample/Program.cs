@@ -15,7 +15,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionWithMicrophoneAsync()
         {
             // Creates recognizer factory.
-            var factory = new RecognizerFactory();
+            var factory = RecognizerFactory.Instance;
 
             // Sets subscription key.
             // Replaces the key with your own key.
@@ -46,7 +46,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionWithFileAsync()
         {
             // Creates recognizer factory.
-            var factory = new RecognizerFactory();
+            var factory = RecognizerFactory.Instance;
 
             // Sets subscription key.
             // Replaces the key with your own key.
@@ -75,7 +75,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionUsingCustomizedModelAsync()
         {
             // Creates a recognizer factory.
-            var factory = new RecognizerFactory();
+            var factory = RecognizerFactory.Instance;
 
             // Sets subscription key.
             // Replaces the key with your own key.
@@ -107,7 +107,7 @@ namespace MicrosoftSpeechSDKSamples
         // Speech recognition with events
         public static async Task ContinuousRecognitionAsync()
         {
-            var factory = new RecognizerFactory();
+            var factory = RecognizerFactory.Instance;
 
             // Replaces the key with your own key.
             factory.SubscriptionKey = "YourSubscriptionKey";

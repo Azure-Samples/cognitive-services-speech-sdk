@@ -1,3 +1,8 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+
 #pragma once
 #include <string>
 #include "ispxinterfaces.h"
@@ -10,15 +15,15 @@ namespace Speech {
 namespace Impl {
 
 
-class CSpxLuisModel : public ISpxLuisModel
+class CSpxLanguageUnderstandingModel : public ISpxLanguageUnderstandingModel
 {
 public:
 
     SPX_INTERFACE_MAP_BEGIN()
-        SPX_INTERFACE_MAP_ENTRY(ISpxLuisModel)
+        SPX_INTERFACE_MAP_ENTRY(ISpxLanguageUnderstandingModel)
     SPX_INTERFACE_MAP_END()
 
-    // --- ISpxLuisModel ---
+    // --- ISpxLanguageUnderstandingModel ---
     void InitEndpoint(const wchar_t* uri) override;
     void InitSubscriptionInfo(const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId) override;
 

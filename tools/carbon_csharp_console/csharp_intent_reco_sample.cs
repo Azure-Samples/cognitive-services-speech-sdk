@@ -37,33 +37,30 @@ namespace MicrosoftSpeechSDKSamples
 
         public static async Task IntentRecognitionBaseModelAsync(string keySpeech, string fileName)
         {
-            using (var factory = new RecognizerFactory())
+            Console.WriteLine("Intent Recognition using base speech model.");
+
+            var factory = RecognizerFactory.Instance;
+            factory.SubscriptionKey = keySpeech;
+
+            if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {
-
-                Console.WriteLine("Intent Recognition using base speech model.");
-
-                factory.SubscriptionKey = keySpeech;
-
-                if (fileName == null)
+                using (var reco = factory.CreateIntentRecognizer())
                 {
-                    using (var reco = factory.CreateIntentRecognizer())
-                    {
-                        await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
-                    }
+                    await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
                 }
-                else
+            }
+            else
+            {
+                using (var reco = factory.CreateIntentRecognizerWithFileInput(fileName))
                 {
-                    using (var reco = factory.CreateIntentRecognizer(fileName))
-                    {
-                        await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
-                    }
+                    await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
                 }
             }
         }
 
         //public static async Task IntentRecognitionCustomizedModelAsync(string keySpeech, string modelId, string fileName)
         //{
-        //    var factory = new RecognizerFactory();
+        //    var factory = RecognizerFactory.Instance;
 
         //    Console.WriteLine(String.Format("Intent Recognition using customized speech model:{0}.", modelId));
 
@@ -75,27 +72,26 @@ namespace MicrosoftSpeechSDKSamples
 
         public static async Task IntentRecognitionByEndpointAsync(string keySpeech, string endpoint, string fileName)
         {
-            using (var factory = new RecognizerFactory())
+            var factory = RecognizerFactory.Instance;
+            factory.EndpointURL = endpoint;
+
+            Console.WriteLine(String.Format("Intent Recognition using endpoint:{0}.", endpoint));
+
+            factory.SubscriptionKey = keySpeech;
+
+
+            if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {
-
-                Console.WriteLine(String.Format("Intent Recognition using endpoint:{0}.", endpoint));
-
-                factory.SubscriptionKey = keySpeech;
-                factory.Endpoint = endpoint;
-
-                if (fileName == null)
+                using (var reco = factory.CreateIntentRecognizer())
                 {
-                    using (var reco = factory.CreateIntentRecognizer())
-                    {
-                        await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
-                    }
+                    await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
                 }
-                else
+            }
+            else
+            {
+                using (var reco = factory.CreateIntentRecognizerWithFileInput(fileName))
                 {
-                    using (var reco = factory.CreateIntentRecognizer(fileName))
-                    {
-                        await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
-                    }
+                    await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
                 }
             }
         }

@@ -51,18 +51,13 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Intent
         }
 
         /// <summary>
-        /// Gets/sets the spoken language of recognition.
+        /// Gets the language name that was set when the recognizer was created.
         /// </summary>
         public string Language
         {
             get
             {
                 return Parameters.Get<string>(ParameterNames.SpeechRecognitionLanguage);
-            }
-
-            set
-            {
-                Parameters.Set(ParameterNames.SpeechRecognitionLanguage, value);
             }
         }
 
@@ -113,9 +108,9 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Intent
         /// Adds an intent from Language Understanding service for recognition.
         /// </summary>
         /// <param name="intentId">A string that represents the identifier of the intent to be recognized.</param>
-        /// <param name="model">The intent model from Language Understanding service.</param>
-        /// <param name="intentName">The intent name defined in the intent model. If it is null, all intent names defined in the model will be added.</param>
-        public void AddIntent(string intentId, IntentModel model, string intentName = null)
+        /// <param name="model">The language understanding model from Language Understanding service.</param>
+        /// <param name="intentName">The intent name defined in the language understanding model. If it is null, all intent names defined in the model will be added.</param>
+        public void AddIntent(string intentId, LanguageUnderstandingModel model, string intentName = null)
         {
             var trigger = Microsoft.CognitiveServices.Speech.Internal.IntentTrigger.From(model.modelImpl, intentName);
             recoImpl.AddIntent(intentId, trigger);

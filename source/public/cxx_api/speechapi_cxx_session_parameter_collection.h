@@ -15,8 +15,7 @@ namespace CognitiveServices {
 namespace Speech {
 
 
-enum class SessionParameter { SpeechSubscriptionKey = 1, SpeechEndpoint = 2 };
-
+enum class SessionParameter { SubscriptionKey = 1, AuthorizationToken = 2 };
 
 class SessionParameterValue : public Value
 {
@@ -44,8 +43,8 @@ private:
 
     std::wstring ParameterNameFromEnum(SessionParameter parameter)
     {
-        static_assert((int)SessionParameter_SpeechSubscriptionKey == (int)SessionParameter::SpeechSubscriptionKey, "SessionParameter_* enum values == SessionParameter::* enum values");
-        static_assert((int)SessionParameter_SpeechEndpoint == (int)SessionParameter::SpeechEndpoint, "SessionParameter_* enum values == SessionParameter::* enum values");
+        static_assert((int)SessionParameter_SubscriptionKey == (int)SessionParameter::SubscriptionKey, "SessionParameter_* enum values == SessionParameter::* enum values");
+        static_assert((int)SessionParameter_AuthorizationToken == (int)SessionParameter::AuthorizationToken, "SessionParameter_* enum values == SessionParameter::* enum values");
 
         const size_t maxCharCount = 4096;
         wchar_t sz[maxCharCount+1];

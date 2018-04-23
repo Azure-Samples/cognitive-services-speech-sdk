@@ -64,7 +64,7 @@ std::list<std::string> CSpxLuisDirectEngineAdapter::GetListenForList()
             listenForList.push_back(listenFor);
         }
 
-        // If it's a LUIS model...
+        // If it's a language understanding model...
         auto model = trigger->GetModel();
         if (model != nullptr)
         {
@@ -127,20 +127,20 @@ void CSpxLuisDirectEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionR
     {
         // Check to see if we already have the JSON payload (from the speech service)
         auto properties = SpxQueryInterface<ISpxNamedProperties>(result);
-        auto json = PAL::ToString(properties->GetStringValue(g_RESULT_LuisJson));
-        SPX_DBG_TRACE_VERBOSE("%s: text='%s'; already-existing-luisJson='%s'", __FUNCTION__, resultText.c_str(), json.c_str());
+        auto json = PAL::ToString(properties->GetStringValue(g_RESULT_LanguageUnderstandingJson));
+        SPX_DBG_TRACE_VERBOSE("%s: text='%s'; already-existing-IntentResultJson='%s'", __FUNCTION__, resultText.c_str(), json.c_str());
 
         // If we don't already have the LUIS json, fetch it from LUIS now...
         if (json.empty())
         {
-            // Get the connection information for this ONE (1!!) LUIS model reference
+            // Get the connection information for this ONE (1!!) language understanding model reference
             std::string hostName, relativePath;
             GetConnectionInfo(resultText, &hostName, &relativePath);
 
             // If we found a set of connection information...
             if (!hostName.empty() && !relativePath.empty())
             {
-                // Contact LUIS, asking it to return the JSON response for the LUIS model specified
+                // Contact LUIS, asking it to return the JSON response for the language understanding model specified
                 json = SpxHttpDownloadString(hostName.c_str(), relativePath.c_str());
                 SPX_DBG_TRACE_VERBOSE("LUIS said this: '%s'", json.c_str());
             }
@@ -175,11 +175,11 @@ void CSpxLuisDirectEngineAdapter::GetConnectionInfo(const std::string& query, st
 
 void CSpxLuisDirectEngineAdapter::GetConnectionInfoFromTriggers(const std::string& query, std::string* phostName, std::string* prelativePath)
 {
-    // The LUIS Direct LU Engine Adapter currently only allows for a single (1 !!!) LUIS model to be used. If the API developer-user specifies
-    // more than a single LUIS model via AddIntent(), we'll fail this call with SPXERR_ABORT. However, specifying more than one intent, where
-    // all of those intents are from teh same LUIS model, is supported. The code below iterates thru all the triggers, finding the 
+    // The LUIS Direct LU Engine Adapter currently only allows for a single (1 !!!) language understanding model to be used. If the API developer-user specifies
+    // more than a single language understanding model via AddIntent(), we'll fail this call with SPXERR_ABORT. However, specifying more than one intent, where
+    // all of those intents are from teh same language understanding model, is supported. The code below iterates thru all the triggers, finding the 
     // "endpoint/hostname/subscription key/app id" ... It stores the first one it finds. It then continues iterating thru the triggers, ensuring
-    // that all the other triggers have data that links them to the same LUIS model found initially... 
+    // that all the other triggers have data that links them to the same language understanding model found initially... 
 
     std::string endpoint, host, key, appId;
 

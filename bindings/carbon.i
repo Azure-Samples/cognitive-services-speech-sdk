@@ -34,7 +34,7 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentRecognitionResult, Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentRecognitionEventArgs>)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentRecognizer)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentTrigger)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::Intent::LuisModel)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::Intent::LanguageUnderstandingModel)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationTextResult)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationTextResult, Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationTextResultEventArgs>)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationRecognizer)
@@ -347,7 +347,7 @@ SWIG_STD_VECTOR_ENHANCED(std::vector<std::wstring>)
 
 %include <speechapi_cxx_intent_recognition_result.h>
 %include <speechapi_cxx_intent_recognition_eventargs.h>
-%include <speechapi_cxx_luis_model.h>
+%include <speechapi_cxx_language_understanding_model.h>
 %include <speechapi_cxx_intent_trigger.h>
 
 #ifdef SWIGPYTHON
