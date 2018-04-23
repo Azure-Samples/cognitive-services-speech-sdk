@@ -16,12 +16,17 @@
 #endif
 
 #define DISABLE_COPY_AND_MOVE(T)     \
+    /** \brief Disable copy constructor */ \
     T(const T&) = delete;            \
+    /** \brief Disable copy assignment */ \
     T& operator=(const T&) = delete; \
+    /** \brief Disable move constructor */ \
     T(T&&) = delete;                 \
+    /** \brief Disable move assignment */ \
     T& operator=(T&&) = delete
 
 #define DISABLE_DEFAULT_CTORS(T)     \
+    /** \brief Disable default constructor */ \
     T() = delete;                    \
     DISABLE_COPY_AND_MOVE(T)
 
