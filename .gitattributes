@@ -2,6 +2,7 @@
 .gitignore text
 .gitmodules text
 
+Makefile text
 Dockerfile text
 .dockerignore text
 
