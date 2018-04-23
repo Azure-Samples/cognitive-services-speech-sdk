@@ -31,7 +31,14 @@ public:
     WMFInitializer() {
         unique_lock<mutex> lock(s_mutex);
         if (s_count++ == 0) {
-            SPX_THROW_ON_FAIL_IF_NOT(CoInitializeEx(0, COINIT_APARTMENTTHREADED), RPC_E_CHANGED_MODE);
+            auto res = CoInitializeEx(0, COINIT_APARTMENTTHREADED);
+            if (res != S_FALSE && 
+                res != S_OK && 
+                res != RPC_E_CHANGED_MODE)
+            {
+                SPX_THROW_ON_FAIL(res);
+            }
+
             SPX_THROW_ON_FAIL(MFStartup(MF_VERSION, MFSTARTUP_FULL));
         }
     }
