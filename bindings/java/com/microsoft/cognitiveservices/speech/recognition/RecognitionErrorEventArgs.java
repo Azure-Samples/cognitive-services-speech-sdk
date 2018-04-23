@@ -4,9 +4,9 @@ package com.microsoft.cognitiveservices.speech.recognition;
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-/// <summary>
-/// Defines payload of RecognitionErrorEvent. 
-/// </summary>
+/**
+  * Defines payload of RecognitionErrorEvent. 
+  */
 public class RecognitionErrorEventArgs //extends System.EventArgs
 {
     public RecognitionErrorEventArgs(String sessionId, RecognitionStatus status)
@@ -27,20 +27,20 @@ public class RecognitionErrorEventArgs //extends System.EventArgs
         this.sessionId = sessionId;
     }
 
-    /// <summary>
-    /// Specifies the error reason.
-    /// </summary>
+    /**
+      * Specifies the error reason.
+      */
     public final RecognitionStatus status;// { get; }
 
-    /// <summary>
-    /// Specifies the session identifier.
-    /// </summary>
+    /**
+      * Specifies the session identifier.
+      */
     public final String sessionId; // { get;  }
 
-    /// <summary>
-    /// Returns a String that represents the recognition error event.
-    /// </summary>
-    /// <returns>A String that represents the recognition error event.</returns>
+    /**
+      * Returns a String that represents the recognition error event.
+      * @return A String that represents the recognition error event.
+      */
     @Override
     public String toString()
     {

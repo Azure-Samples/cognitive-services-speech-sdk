@@ -3,59 +3,59 @@ package com.microsoft.cognitiveservices.speech.recognition;
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-/// <summary>
-/// Defines constants used in speech recognition and translation.
-/// </summary>
+/**
+  * Defines constants used in speech recognition and translation.
+  */
 public class ParameterNames
 {
-    /// <summary>
-    /// The name of parameter `SpeechSubscriptionKey`
-    /// </summary>
+    /**
+      * The name of parameter `SpeechSubscriptionKey`
+      */
     public static final String SpeechSubscriptionKey = "SPEECH-SubscriptionKey";
 
-    /// <summary>
-    /// The name of parameter `SpeechAuthToken`
-    /// </summary>
+    /**
+      * The name of parameter `SpeechAuthToken`
+      */
     public static final  String SpeechAuthToken = "SPEECH-AuthToken";
 
-    /// <summary>
-    /// The name of parameter `SpeechRpsToken`
-    /// </summary>
+    /**
+      * The name of parameter `SpeechRpsToken`
+      */
     public static final  String SpeechRpsToken = "SPEECH-RpsToken";
 
-    /// <summary>
-    /// The name of parameter `SpeechModelId`
-    /// </summary>
+    /**
+      * The name of parameter `SpeechModelId`
+      */
     public static final  String SpeechModelId = "SPEECH-ModelId";
 
-    /// <summary>
-    /// The name of parameter `Region`
-    /// </summary>
+    /**
+      * The name of parameter `Region`
+      */
     public static final  String Region = "Region";
 
-    /// <summary>
-    /// The name of parameter `Language`.
-    /// </summary>
+    /**
+      * The name of parameter `Language`.
+      */
     public static final  String SpeechRecognitionLanguage = "SPEECH-RecoLanguage";
 
-    /// <summary>
-    /// The name of parameter `RecognitionMode`.
-    /// </summary>
+    /**
+      * The name of parameter `RecognitionMode`.
+      */
     public static final  String SpeechRecognitionMode = "SPEECH-RecoMode";
 
-    /// <summary>
-    /// The name of parameter `SpeechEndpoint`.
-    /// </summary>
+    /**
+      * The name of parameter `SpeechEndpoint`.
+      */
     public static final  String SpeechEndpoint = "SPEECH-Endpoint";
 
-    /// <summary>
-    /// The name of parameter `TRANSLATION-FromLanguage` which describes the source language of audio.
-    /// </summary>
+    /**
+      * The name of parameter `TRANSLATION-FromLanguage` which describes the source language of audio.
+      */
     public static final  String TranslationFromLanguage = "TRANSLATION-FromLanguage";
 
-    /// <summary>
-    /// The name of parameter `TRANSLATION-ToLanguage` which describes target languages for translation.
-    /// </summary>
+    /**
+      * The name of parameter `TRANSLATION-ToLanguage` which describes target languages for translation.
+      */
     public static final  String TranslationToLanguage = "TRANSLATION-ToLanguage";
 
 }

@@ -37,7 +37,7 @@ set(CMAKE_SWIG_FLAGS -w401,516,503 -package "com.microsoft.cognitiveservices.spe
 set_source_files_properties("${SRC_DIR}/carbon_java.i" PROPERTIES CPLUSPLUS ON)
 
 # Make sure the nested directory structure exists
-set(JAVA_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/swig-generated CACHE INTERNAL "")
+set(JAVA_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal CACHE INTERNAL "")
 file(REMOVE_RECURSE ${JAVA_SOURCE_DIRECTORY})
 file(MAKE_DIRECTORY ${JAVA_SOURCE_DIRECTORY})
 
@@ -68,7 +68,7 @@ set(JAVA_LIB ${PROJECT_NAME}_lib)
 # TODO this should be a wildcard, not an explicit list as these files are generated
 # set(SWIG_JAVA_SOURCES ${JAVA_SOURCE_DIRECTORY}/*.java)
 # SET_SOURCE_FILES_PROPERTIES(${SWIG_JAVA_SOURCES} PROPERTIES GENERATED TRUE)
-#file(GLOB SWIG_JAVA_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/swig-generated/*.java")
+#file(GLOB SWIG_JAVA_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/*.java")
 set(JAVA_SOURCES
     com/microsoft/cognitiveservices/speech/ParameterCollection.java
     com/microsoft/cognitiveservices/speech/SessionEventArgs.java
@@ -99,99 +99,99 @@ set(JAVA_SOURCES
 )
 
 set(SWIG_JAVA_SOURCES
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/AudioInputStream.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/AudioInputStreamFormat.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/BaseAsyncRecognizer.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/BaseRecognizerBase.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/BaseValueCollection.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/carbon_java.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/carbon_javaJNI.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/DefaultRecognizerFactory.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/EventArgs.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/FactoryParameter.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IDefaultRecognizerFactory.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntentEventListener.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntentEventSignal.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntentRecognitionEventArgs.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntentRecognitionResult.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntentRecognitionResultPtrFuture.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntentRecognizer.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntentRecognizerBase.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IntentTrigger.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IRecognizerFactory.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/AudioInputStream.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/AudioInputStreamFormat.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/BaseAsyncRecognizer.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/BaseRecognizerBase.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/BaseValueCollection.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/carbon_java.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/carbon_javaJNI.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/DefaultRecognizerFactory.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/EventArgs.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/FactoryParameter.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/IDefaultRecognizerFactory.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/IntentEventListener.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/IntentEventSignal.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/IntentRecognitionEventArgs.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/IntentRecognitionResult.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/IntentRecognitionResultPtrFuture.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/IntentRecognizer.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/IntentRecognizerBase.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/IntentTrigger.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/IRecognizerFactory.java
 
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/LuisModel.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/LuisModel.java
 
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/Reason.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognitionEventArgs.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognitionEventListener.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognitionEventSignal.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognitionResult.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/Recognizer.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerFactory.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerFactoryParameterCollection.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerFactoryParameterValue.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerParameter.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerParameterValue.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/RecognizerParameterValueCollection.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/ResultProperty.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/ResultPropertyValue.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/ResultPropertyValueCollection.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/Reason.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/RecognitionEventArgs.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/RecognitionEventListener.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/RecognitionEventSignal.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/RecognitionResult.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/Recognizer.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/RecognizerFactory.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/RecognizerFactoryParameterCollection.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/RecognizerFactoryParameterValue.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/RecognizerParameter.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/RecognizerParameterValue.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/RecognizerParameterValueCollection.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/ResultProperty.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/ResultPropertyValue.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/ResultPropertyValueCollection.java
 
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/Session.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionEventArgs.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionEventListener.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionEventSignal.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionParameter.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionParameterValue.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SessionParameterValueCollection.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognitionEventArgs.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognitionEventListener.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognitionEventSignal.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognitionResult.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognitionResultPtrFuture.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognizer.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechRecognizerBase.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/Session.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SessionEventArgs.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SessionEventListener.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SessionEventSignal.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SessionParameter.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SessionParameterValue.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SessionParameterValueCollection.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SpeechRecognitionEventArgs.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SpeechRecognitionEventListener.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SpeechRecognitionEventSignal.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SpeechRecognitionResult.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SpeechRecognitionResultPtrFuture.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SpeechRecognizer.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SpeechRecognizerBase.java
 
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationLanguageResource.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationRecognizer.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationRecognizerBase.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationStatus.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationSynthesisEventListener.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationSynthesisEventSignal.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationSynthesisResult.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationSynthesisResultEventArgs.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationTexEventListener.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationTextEventSignal.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationTextResult.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationTextResultPtrFuture.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TranslationTextResultEventArgs.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SynthesisScopeResourceValue.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/TextScopeResourceValue.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SpeechScopeResourceValue.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/WstringVector.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__mapT_std__wstring_std__wstring_t.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Recognition__Translation__SpeechScopeResourceValue_t.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Recognition__Translation__SynthesisScopeResourceValue_t.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Recognition__Translation__TextScopeResourceValue_t.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_std__vectorT_unsigned_char_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/TranslationLanguageResource.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/TranslationRecognizer.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/TranslationRecognizerBase.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/TranslationStatus.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/TranslationSynthesisEventListener.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/TranslationSynthesisEventSignal.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/TranslationSynthesisResult.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/TranslationSynthesisResultEventArgs.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/TranslationTexEventListener.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/TranslationTextEventSignal.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/TranslationTextResult.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/TranslationTextResultPtrFuture.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/TranslationTextResultEventArgs.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SynthesisScopeResourceValue.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/TextScopeResourceValue.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SpeechScopeResourceValue.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/WstringVector.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_std__mapT_std__wstring_std__wstring_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Recognition__Translation__SpeechScopeResourceValue_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Recognition__Translation__SynthesisScopeResourceValue_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Recognition__Translation__TextScopeResourceValue_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_std__vectorT_unsigned_char_t.java
 
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/carbon_javaConstants.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXEVENTHANDLE.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXLUISHANDLE.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXRECOFACTORYHANDLE.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXRECOHANDLE.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXRESULTHANDLE.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXSESSIONHANDLE.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/SWIGTYPE_p_SPXTRIGGERHANDLE.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/IDefaultRecognizerFactory.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/carbon_javaConstants.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_SPXEVENTHANDLE.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_SPXLUISHANDLE.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_SPXRECOFACTORYHANDLE.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_SPXRECOHANDLE.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_SPXRESULTHANDLE.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_SPXSESSIONHANDLE.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_SPXTRIGGERHANDLE.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/IDefaultRecognizerFactory.java
 
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/Value.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/ValueCollectionRecognizerParameter.java
-#    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/ValueCollectionRecognizerProperty.java
-#    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/ValueCollectionRecognizerFactoryParameter.java
-#    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/ValueCollectionSessionParameter.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/VoidFuture.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/Value.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/ValueCollectionRecognizerParameter.java
+#    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/ValueCollectionRecognizerProperty.java
+#    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/ValueCollectionRecognizerFactoryParameter.java
+#    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/ValueCollectionSessionParameter.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/VoidFuture.java
 )
 
 
@@ -212,3 +212,27 @@ add_custom_command(TARGET ${JAVA_LIB}
                    COMMAND  ${CMAKE_COMMAND} -E tar cvf "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${JAVA_LIB}-src.zip" --format=zip com
                    WORKING_DIRECTORY "${SRC_DIR}"
                    COMMENT "Generating src package including javadoc information")
+
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/SessionEventArgs.java
+                   COMMAND  ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/com ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com
+                   COMMENT "Copying v2 api files to output directory")
+
+add_custom_target(copy-over-api-files
+                  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/SessionEventArgs.java)
+add_dependencies(${PROJECT_NAME}_bindings copy-over-api-files)
+
+set(JAVA_LIB_JAVADOC "${JAVA_LIB}-doc")
+create_javadoc(copy-over-api-files
+  PACKAGES com.microsoft.cognitiveservices.speech
+           com.microsoft.cognitiveservices.speech.util
+           com.microsoft.cognitiveservices.speech.recognition
+           com.microsoft.cognitiveservices.speech.recognition.translation
+           com.microsoft.cognitiveservices.speech.recognition.speech
+           com.microsoft.cognitiveservices.speech.recognition.intent
+  SOURCEPATH "${CMAKE_CURRENT_BINARY_DIR}/swig-generated"
+  WINDOWTITLE "Speech DDK"
+  DOCTITLE "<h1>Speech DDK</h1>"
+  INSTALLPATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${JAVA_LIB_JAVADOC}"
+  AUTHOR TRUE
+  USE TRUE
+  VERSION TRUE)

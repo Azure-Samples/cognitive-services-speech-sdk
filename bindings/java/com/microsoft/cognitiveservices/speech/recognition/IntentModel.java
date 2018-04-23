@@ -3,47 +3,47 @@ package com.microsoft.cognitiveservices.speech.recognition;
 import java.io.Closeable;
 
 
-/// <summary>
-/// Represents intent model used for intent recognition.
-/// </summary>
+/**
+  * Represents intent model used for intent recognition.
+  */
 public class IntentModel implements Closeable
 { 
-    /// <summary>
-    /// Creates an intent model using the specified endpoint.
-    /// </summary>
-    /// <param name="uri">A String that represents the endpoint of the intent model.</param>
-    /// <returns>The intent model being created.</returns>
+    /**
+      * Creates an intent model using the specified endpoint.
+      * @param uri A String that represents the endpoint of the intent model.
+      * @return The intent model being created.
+      */
     public static IntentModel from(String uri)
     {
         return new IntentModel(com.microsoft.cognitiveservices.speech.internal.LuisModel.from(uri));
     }
 
-    /// <summary>
-    /// Creates an intent model using subscription key and application id of Language Understanding service.
-    /// </summary>
-    /// <param name="subscriptionKey">A String that represents the subscription key.</param>
-    /// <param name="appId">A String that represents the application id of Language Understanding service.</param>
-    /// <returns>The intent model being created.</returns>
+    /**
+      * Creates an intent model using subscription key and application id of Language Understanding service.
+      * @param subscriptionKey A String that represents the subscription key.
+      * @param appId A String that represents the application id of Language Understanding service.
+      * @return The intent model being created.
+      */
     public static IntentModel from(String subscriptionKey, String appId)
     {
         return new IntentModel(com.microsoft.cognitiveservices.speech.internal.LuisModel.from(subscriptionKey, appId));
     }
 
-    /// <summary>
-    /// Creates an intent model using hostname, subscription key and application id of Language Understanding service.
-    /// </summary>
-    /// <param name="hostName">A String that represents the host name of of Language Understanding service.</param>
-    /// <param name="subscriptionKey">A String that represents the subscription key of Language Understanding service.</param>
-    /// <param name="appId">A String that represents the application id of Language Understanding service.</param>
-    /// <returns>The intent model being created.</returns>
+    /**
+      * Creates an intent model using hostname, subscription key and application id of Language Understanding service.
+      * @param hostName A String that represents the host name of of Language Understanding service.
+      * @param subscriptionKey A String that represents the subscription key of Language Understanding service.
+      * @param appId A String that represents the application id of Language Understanding service.
+      * @return The intent model being created.
+      */
     public static IntentModel from(String hostName, String subscriptionKey, String appId)
     {
         return new IntentModel(com.microsoft.cognitiveservices.speech.internal.LuisModel.from(hostName, subscriptionKey, appId));
     }
 
-    /// <summary>
-    /// Dispose of associated resources.
-    /// </summary>
+    /**
+      * Dispose of associated resources.
+      */
     public void close()
     {
         if (disposed)
@@ -55,7 +55,6 @@ public class IntentModel implements Closeable
     }
 
     private boolean disposed = false;
-
 
     IntentModel(com.microsoft.cognitiveservices.speech.internal.LuisModel model)
     {

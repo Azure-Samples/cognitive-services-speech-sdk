@@ -10,9 +10,9 @@ import com.microsoft.cognitiveservices.speech.recognition.RecognitionStatus;
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-/// <summary>
-/// Defines tranlsation result.
-/// </summary>
+/**
+  * Defines tranlsation result.
+  */
 public class TranslationTextResult extends com.microsoft.cognitiveservices.speech.recognition.speech.SpeechRecognitionResult
 {
     // BUG: this is hack for making documentation going.
@@ -32,28 +32,31 @@ public class TranslationTextResult extends com.microsoft.cognitiveservices.speec
         _Translations = new HashMap<String, String>();
     }
 
-    /// <summary>
-    /// Specifies translation status.
-    /// </summary>
+    /**
+      * Specifies translation status.
+      * @return the translation status.
+      */
     public final RecognitionStatus getTranslationStatus()
     {
         return _TranslationStatus;
     }// { get; }
     private RecognitionStatus _TranslationStatus;
 
-    /// <summary>
-    /// Presents the translation results. Each item in the dictionary represents translation result in one of target languages, where the key 
-    /// is the name of the target language, in BCP-47 format, and the value is the translation text in the specified language.
-    /// </summary>
-    public final Map<String, String> getTranslations(){
+    /**
+      * Presents the translation results. Each item in the dictionary represents translation result in one of target languages, where the key 
+      * is the name of the target language, in BCP-47 format, and the value is the translation text in the specified language.
+      * @return the current translation map.
+      */
+    public final Map<String, String> getTranslations()
+    {
         return _Translations;
     }// { get; }
     private Map<String, String> _Translations;
     
-    /// <summary>
-    /// Returns a String that represents the speech recognition result.
-    /// </summary>
-    /// <returns>A String that represents the speech recognition result.</returns>
+    /**
+      * Returns a String that represents the speech recognition result.
+      * @return A String that represents the speech recognition result.
+      */
     @Override
     public String toString()
     {

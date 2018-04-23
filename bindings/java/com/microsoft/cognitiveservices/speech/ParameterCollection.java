@@ -8,10 +8,9 @@ import java.io.Closeable;
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-
-/// <summary>
-/// Represents collection of parameters and their values.
-/// </summary>
+/**
+ * Represents collection of parameters and their values.
+ */
 public final class ParameterCollection<OwnerType> implements Closeable
 {
     public ParameterCollection(OwnerType owner) throws UnsupportedOperationException
@@ -33,33 +32,48 @@ public final class ParameterCollection<OwnerType> implements Closeable
         }
     }
 
-    /// <summary>
-    /// Checks whether the parameter specified by name has a <typeparamref name="T"/> value.
-    /// </summary>
-    /// <param name="name">The parameter name.</param>
-    /// <returns>true if the parameter has a <typeparamref name="T"/> value, and false otherwise.</returns>
+    /**
+      * Checks whether the parameter specified by name has a String value.
+      *
+      * @param name The parameter name.
+      * @return true if the parameter has a value, and false otherwise.
+      */
     public boolean isString(String name)
     {
-        return false; //isFactoryParameter ? com.microsoft.cognitiveservices.speech.internal.DefaultRecognizerFactory.Parameters.containsString(name) : speechParameters.containsString(name);
-    }
-    public boolean isInt(String name)
-    {
-        return false; //isFactoryParameter ? com.microsoft.cognitiveservices.speech.internal.DefaultRecognizerFactory.Parameters.containsNumber(name) : speechParameters.containsNumber(name);
-    }
-    public boolean isBool(String name)
-    {
-        return false; //isFactoryParameter ? com.microsoft.cognitiveservices.speech.internal.DefaultRecognizerFactory.Parameters.containsBool(name) : speechParameters.containsBool(name);
+        return isFactoryParameter ? com.microsoft.cognitiveservices.speech.internal.DefaultRecognizerFactory.Parameters.containsString(name) : speechParameters.containsString(name);
     }
 
-    /// <summary>
-    /// Returns the parameter value in type <typeparamref name="T"/>. The parameter must have the same type as <typeparamref name="T"/>.
-    /// Currently only String, int and bool are allowed.
-    /// If the name is not available, it returns an empty String if the parameter is a String, 0 if the parameter is int, 
-    /// and false if the parameter is bool.
-    /// </summary>
-    /// <typeparam name="T">The type of parameter. only String, int and bool are supported.</typeparam>
-    /// <param name="name">The parameter name.</param>
-    /// <returns>value of the parameter.</returns>
+    /**
+      * Checks whether the parameter specified by name has an Int value.
+      *
+      * @param name The parameter name.
+      * @return true if the parameter has a value, and false otherwise.
+      */
+    public boolean isInt(String name)
+    {
+        return isFactoryParameter ? com.microsoft.cognitiveservices.speech.internal.DefaultRecognizerFactory.Parameters.containsNumber(name) : speechParameters.containsNumber(name);
+    }
+
+    /**
+      * Checks whether the parameter specified by name has a Boolean value.
+      *
+      * @param name The parameter name.
+      * @return true if the parameter has a value, and false otherwise.
+      */
+    public boolean isBool(String name)
+    {
+        return isFactoryParameter ? com.microsoft.cognitiveservices.speech.internal.DefaultRecognizerFactory.Parameters.containsBool(name) : speechParameters.containsBool(name);
+    }
+
+    /**
+      * Returns the parameter value in type String. The parameter must have the same type as String.
+      * Currently only String, int and bool are allowed.
+      * If the name is not available, it returns an empty String if the parameter is a String, 0 if the parameter is int, 
+      * and false if the parameter is bool.
+      *
+      * @param name The parameter name.
+      * @return value of the parameter.
+      */
     public String getString(String name)
     {
         return getString(name, "");
@@ -74,36 +88,57 @@ public final class ParameterCollection<OwnerType> implements Closeable
         return getBool(name, false);
     }
     
-    /// <summary>
-    /// Returns the parameter value in type <typeparamref name="T"/>. The parameter must have the same type as <typeparamref name="T"/>.
-    /// Currently only String, int and bool are allowed.
-    /// If the name is not available, the specified defaultValue is returned.
-    /// </summary>
-    /// <typeparam name="T">The type of parameter. only String, int and bool are supported.</typeparam>
-    /// <param name="name">The parameter name.</param>
-    /// <param name="defaultValue">The default value which is returned if the parameter is not available in the collection.</param>
-    /// <returns>value of the parameter.</returns>
+    /**
+      * Returns the parameter value in type String. The parameter must have the same type as String.
+      * Currently only String, int and bool are allowed.
+      * If the name is not available, the specified defaultValue is returned.
+      *
+      * @param name The parameter name.
+      * @param defaultValue The default value which is returned if the parameter is not available in the collection.
+      * @return value of the parameter.
+      */
     public String getString(String name, String defaultValue)
     {
         String ret = isFactoryParameter ? com.microsoft.cognitiveservices.speech.internal.DefaultRecognizerFactory.Parameters.getString(name, defaultValue) : speechParameters.getString(name, defaultValue);
         return ret;
     }
+
+    /**
+      * Returns the parameter value in type int. The parameter must have the same type as int.
+      * Currently only String, int and bool are allowed.
+      * If the name is not available, the specified defaultValue is returned.
+      *
+      * @param name The parameter name.
+      * @param defaultValue The default value which is returned if the parameter is not available in the collection.
+      * @return value of the parameter.
+      */
     public int getInt(String name, int defaultValue)
     {
         int ret = isFactoryParameter ? com.microsoft.cognitiveservices.speech.internal.DefaultRecognizerFactory.Parameters.getNumber(name, defaultValue) : speechParameters.getNumber(name, defaultValue);
         return ret;
     }
+
+    /**
+      * Returns the parameter value in type boolean. The parameter must have the same type as boolean.
+      * Currently only String, int and bool are allowed.
+      * If the name is not available, the specified defaultValue is returned.
+      *
+      * @param name The parameter name.
+      * @param defaultValue The default value which is returned if the parameter is not available in the collection.
+      * @return value of the parameter.
+      */
     public boolean getBool(String name, boolean defaultValue)
     {
         boolean ret = isFactoryParameter ? com.microsoft.cognitiveservices.speech.internal.DefaultRecognizerFactory.Parameters.getBool(name, defaultValue) : speechParameters.getBool(name, defaultValue);
         return ret;
     }
 
-    /// <summary>
-    /// Sets the String value of the parameter specified by name.
-    /// </summary>
-    /// <param name="name">The parameter name.</param>
-    /// <param name="value">The value of the parameter.</param>
+    /**
+      * Sets the String value of the parameter specified by name.
+      *
+      * @param name The parameter name.
+      * @param value The value of the parameter.
+      */
     public void set(String name, String value)
     {
         if (isFactoryParameter)
@@ -116,11 +151,12 @@ public final class ParameterCollection<OwnerType> implements Closeable
         }
     }
 
-    /// <summary>
-    /// Sets the integer value of the parameter specified by name.
-    /// </summary>
-    /// <param name="name">The parameter name.</param>
-    /// <param name="value">The value of the parameter.</param>
+    /**
+      * Sets the integer value of the parameter specified by name.
+      *
+      * @param name The parameter name.
+      * @param value The value of the parameter.
+      */
     public void set(String name, int value)
     {
         if (isFactoryParameter)
@@ -133,11 +169,12 @@ public final class ParameterCollection<OwnerType> implements Closeable
         }
     }
 
-    /// <summary>
-    /// Sets the boolean value of the parameter specified by name.
-    /// </summary>
-    /// <param name="name">The parameter name.</param>
-    /// <param name="value">The value of the parameter.</param>
+    /**
+      * Sets the Boolean value of the parameter specified by name.
+      *
+      * @param name The parameter name.
+      * @param value The value of the parameter.
+      */
     public void set(String name, boolean value)
     {
         if (isFactoryParameter)
@@ -150,9 +187,10 @@ public final class ParameterCollection<OwnerType> implements Closeable
         }
     }
 
-    /// <summary>
-    /// Dispose of the associated parameter value collection.
-    /// </summary>
+    /**
+      * Dispose of the associated parameter value collection.
+      *
+      */
     public void close()
     {
         if (disposed)

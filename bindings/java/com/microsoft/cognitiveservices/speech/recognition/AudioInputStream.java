@@ -5,24 +5,24 @@ package com.microsoft.cognitiveservices.speech.recognition;
 //
 
 
-/// <summary>
-/// Defines audio input stream.
-/// </summary>
+/**
+  * Defines audio input stream.
+  */
 public class AudioInputStream
 {
-    /// <summary>
-/// Reads data from audio input stream into the data buffer. The maximal number of bytes to be read is determined by the size of dataBuffer.
-/// </summary>
-/// <param name="dataBuffer">The byte array to store the read data.</param>
-/// <returns>the number of bytes have been read.</returns>
-public int Read(byte[] dataBuffer)
-{
-    throw new UnsupportedOperationException();
-}
+    /**
+     * Reads data from audio input stream into the data buffer. The maximal number of bytes to be read is determined by the size of dataBuffer.
+     * @param dataBuffer The byte array to store the read data.
+     * @return the number of bytes have been read.
+     */
+    public int Read(byte[] dataBuffer)
+    {
+        throw new UnsupportedOperationException();
+    }
 
-/// <summary>
-/// Closes the audio input stream.
-/// </summary>
+    /**
+      * Closes the audio input stream.
+      */
     public void Close()
     {
         throw new UnsupportedOperationException();

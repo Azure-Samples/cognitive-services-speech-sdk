@@ -4,9 +4,9 @@ package com.microsoft.cognitiveservices.speech.recognition.translation;
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-/// <summary>
-/// Define payload of translation synthesis result events.
-/// </summary>
+/**
+  * Define payload of translation synthesis result events.
+  */
 public class TranslationSynthesisResultEventArgs //: System.EventArgs
 {
     TranslationSynthesisResultEventArgs(com.microsoft.cognitiveservices.speech.recognition.translation.TranslationSynthesisResultEventArgs e)
@@ -15,27 +15,29 @@ public class TranslationSynthesisResultEventArgs //: System.EventArgs
         this._sessionId = e.getSessionId();
     }
 
-    /// <summary>
-    /// Specifies the translation synthesis result.
-    /// </summary>
+    /**
+      * Specifies the translation synthesis result.
+      * @return Specifies the translation synthesis result.
+      */
     public final TranslationSynthesisResult getResult() {
         return _Result;
     }// { get; }
     private TranslationSynthesisResult _Result;
 
-    /// <summary>
-    /// Specifies the session identifier.
-    /// </summary>
+    /**
+      * Specifies the session identifier.
+      * @return Specifies the session identifier.
+      */
     public final String getSessionId()
     {
         return _sessionId;
     }// { get; }
     private String _sessionId;
 
-    /// <summary>
-    /// Returns a String that represents the speech recognition result event.
-    /// </summary>
-    /// <returns>A String that represents the speech recognition result event.</returns>
+    /**
+      * Returns a String that represents the speech recognition result event.
+      * @return A String that represents the speech recognition result event.
+      */
     @Override
     public String toString()
     {

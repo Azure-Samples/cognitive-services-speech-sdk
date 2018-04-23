@@ -9,6 +9,11 @@ package com.microsoft.cognitiveservices.speech;
  */
 public class SessionEventArgs // extends EventArgs
 {
+    /**
+      * Constructs a SessionEcentArgs.
+      * @param type the SessionEventType
+      * @param arg The native SessionEventArgs
+      */
     public SessionEventArgs(SessionEventType type,  com.microsoft.cognitiveservices.speech.internal.SessionEventArgs arg)
     {
         this.sessionId = arg.getSessionId();
@@ -27,6 +32,7 @@ public class SessionEventArgs // extends EventArgs
 
     /**
      * Returns a String that represents the session event.
+     * @return a String that represents the session event.
      */
     @Override
     public String toString() {

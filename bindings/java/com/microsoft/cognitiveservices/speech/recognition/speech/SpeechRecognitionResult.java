@@ -6,9 +6,9 @@ package com.microsoft.cognitiveservices.speech.recognition.speech;
 
 import com.microsoft.cognitiveservices.speech.recognition.RecognitionStatus;
 
-/// <summary>
-/// Defines result of speech recognition.
-/// </summary>
+/**
+  * Defines result of speech recognition.
+  */
 public class SpeechRecognitionResult 
 {
     protected SpeechRecognitionResult(com.microsoft.cognitiveservices.speech.internal.RecognitionResult result)
@@ -18,36 +18,39 @@ public class SpeechRecognitionResult
         this._Reason = RecognitionStatus.values()[result.getReason().swigValue()];
     }
 
-    /// <summary>
-    /// Specifies the result identifier.
-    /// </summary>
+    /**
+      * Specifies the result identifier.
+      * @return Specifies the result identifier.
+      */
     public String getResultId()
     {
         return _ResultId;
     }// { get; }
     private String _ResultId;
 
-    /// <summary>
-    /// Specifies status of the result.
-    /// </summary>
+    /**
+      * Specifies status of the result.
+      * @return Specifies status of the result.
+      */
     public RecognitionStatus getReason() // { get; }
     {
         return _Reason;
     }
     private RecognitionStatus _Reason;
 
-    /// <summary>
-    /// Presents the recognized text in the result.
-    /// </summary>
+    /**
+      * Presents the recognized text in the result.
+      * @return Presents the recognized text in the result.
+      */
     public String getRecognizedText() {
         return _RecognizedText;
     } // { get; }
     private String _RecognizedText;
 
-    /// <summary>
-    /// Returns a String that represents the speech recognition result.
-    /// </summary>
-    /// <returns>A String that represents the speech recognition result.</returns>
+    /**
+      * Returns a String that represents the speech recognition result.
+      * @return A String that represents the speech recognition result.
+      */
     @Override
     public String toString()
     {

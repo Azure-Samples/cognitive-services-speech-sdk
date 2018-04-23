@@ -17,26 +17,30 @@ import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Task;
 import com.microsoft.cognitiveservices.speech.util.TaskRunner;
 
-/// <summary>
-/// Perform intent recognition on the speech input. It returns both recognized text and recognized intent.
-/// </summary>
+/**
+  * Perform intent recognition on the speech input. It returns both recognized text and recognized intent.
+  */
 public final class IntentRecognizer extends com.microsoft.cognitiveservices.speech.recognition.Recognizer
 {
-    /// <summary>
-    /// The event <see cref="IntermediateResultReceived"/> signals that an intermediate recognition result is received.
-    /// </summary>
+    /**
+      * The event IntermediateResultReceived signals that an intermediate recognition result is received.
+      */
     final public EventHandlerImpl<IntentRecognitionResultEventArgs> IntermediateResultReceived = new EventHandlerImpl<IntentRecognitionResultEventArgs>();
 
-    /// <summary>
-    /// The event <see cref="FinalResultReceived"/> signals that a final recognition result is received.
-    /// </summary>
+    /**
+      * The event FinalResultReceived signals that a final recognition result is received.
+      */
     final public EventHandlerImpl<IntentRecognitionResultEventArgs> FinalResultReceived = new EventHandlerImpl<IntentRecognitionResultEventArgs>();
 
-    /// <summary>
-    /// The event <see cref="RecognitionErrorRaised"/> signals that an error occurred during recognition.
-    /// </summary>
+    /**
+      * The event RecognitionErrorRaised signals that an error occurred during recognition.
+      */
     final public EventHandlerImpl<RecognitionErrorEventArgs> RecognitionErrorRaised = new EventHandlerImpl<RecognitionErrorEventArgs>();
 
+    /**
+      * Initializes an instance of the IntentRecognizer.
+      * @param recoImpl The internal recognizer implementation.
+      */
     public IntentRecognizer(com.microsoft.cognitiveservices.speech.internal.IntentRecognizer recoImpl)
     {
         this.recoImpl = recoImpl;
@@ -57,32 +61,38 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         recoImpl.getSpeechEndDetected().addEventListener(speechEndDetectedHandler);
     }
 
-    /// <summary>
-    /// Gets/sets the spoken language of recognition.
-    /// </summary>
+    /**
+      * Gets the spoken language of recognition.
+      * @return the spoken language of recognition.
+      */
     public String getLanguage()
     {
             return _Parameters.getString(ParameterNames.SpeechRecognitionLanguage);
-        }
+    }
 
+    /**
+      * Sets the spoken language of recognition.
+      * @param value the spoken language of recognition.
+      */
     public void setLanguage(String value)
     {
             _Parameters.set(ParameterNames.SpeechRecognitionLanguage, value);
     }
 
-    /// <summary>
-    /// The collection of parameters and their values defined for this <see cref="IntentRecognizer"/>.
-    /// </summary>
+    /**
+      * The collection of parameters and their values defined for this IntentRecognizer.
+      * @return The collection of parameters and their values defined for this IntentRecognizer.
+      */
     public ParameterCollection<IntentRecognizer> getParameters()
     {
         return _Parameters;
     }// { get; }
     private ParameterCollection<IntentRecognizer> _Parameters;
 
-    /// <summary>
-    /// Starts intent recognition, and stops after the first utterance is recognized. The task returns the recognition text and intent as result.
-    /// </summary>
-    /// <returns>A task representing the recognition operation. The task returns a value of <see cref="IntentRecognitionResult"/></returns>
+    /**
+      * Starts intent recognition, and stops after the first utterance is recognized. The task returns the recognition text and intent as result.
+      * @return A task representing the recognition operation. The task returns a value of IntentRecognitionResult
+      */
     public Task<IntentRecognitionResult> recognizeAsync()
     {
         Task<IntentRecognitionResult> t = new Task<IntentRecognitionResult>(new TaskRunner<IntentRecognitionResult>() {
@@ -101,11 +111,11 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         return t;
     }
 
-    /// <summary>
-    /// Starts speech recognition on a continous audio stream, until StopContinuousRecognitionAsync() is called.
-    /// User must subscribe to events to receive recognition results.
-    /// </summary>
-    /// <returns>A task representing the asynchronous operation that starts the recognition.</returns>
+    /**
+      * Starts speech recognition on a continous audio stream, until stopContinuousRecognitionAsync() is called.
+      * User must subscribe to events to receive recognition results.
+      * @return A task representing the asynchronous operation that starts the recognition.
+      */
     public Task<?> startContinuousRecognitionAsync()
     {
         Task<?> t = new Task(new TaskRunner() {
@@ -123,10 +133,10 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         return t;
     }
 
-    /// <summary>
-    /// Stops continuous intent recognition.
-    /// </summary>
-    /// <returns>A task representing the asynchronous operation that stops the recognition.</returns>
+    /**
+      * Stops continuous intent recognition.
+      * @return A task representing the asynchronous operation that stops the recognition.
+      */
     public Task<?> stopContinuousRecognitionAsync()
     {
         Task<?> t = new Task(new TaskRunner() {
@@ -144,22 +154,22 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         return t;
     }
 
-    /// <summary>
-    /// Adds a phrase that should be recognized as intent.
-    /// </summary>
-    /// <param name="intentId">A String that represents the identifier of the intent to be recognized.</param>
-    /// <param name="phrase">A String that specifies the phrase representing the intent.</param>
+    /**
+      * Adds a phrase that should be recognized as intent.
+      * @param intentId A String that represents the identifier of the intent to be recognized.
+      * @param phrase A String that specifies the phrase representing the intent.
+      */
     public void addIntent(String intentId, String phrase)
     {
         recoImpl.addIntent(intentId, phrase);
     }
 
-    /// <summary>
-    /// Adds an intent from Language Understanding service for recognition.
-    /// </summary>
-    /// <param name="intentId">A String that represents the identifier of the intent to be recognized.</param>
-    /// <param name="model">The intent model from Language Understanding service.</param>
-    /// <param name="intentName">The intent name defined in the intent model. If it is null, all intent names defined in the model will be added.</param>
+    /**
+      * Adds an intent from Language Understanding service for recognition.
+      * @param intentId A String that represents the identifier of the intent to be recognized.
+      * @param model The intent model from Language Understanding service.
+      * @param intentName The intent name defined in the intent model. If it is null, all intent names defined in the model will be added.
+      */
     public void addIntent(String intentId, IntentModel model, String intentName)
     {
         IntentTrigger trigger = com.microsoft.cognitiveservices.speech.internal.IntentTrigger.from(model.modelImpl, intentName);
@@ -201,7 +211,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     private IntentHandlerImpl finalResultHandler;
     private ErrorHandlerImpl errorHandler;
 
-    // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
+    // Defines an internal class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
     private class IntentHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.IntentEventListener
     {
         public IntentHandlerImpl(IntentRecognizer recognizer, boolean isFinalResultHandler)
@@ -225,7 +235,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         private boolean isFinalResultHandler;
     }
 
-    // Defines an internal class to raise a C# event for error during recognition when a corresponding callback is invoked by the native layer.
+    // Defines an internal class to raise an event for error during recognition when a corresponding callback is invoked by the native layer.
     private class ErrorHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.IntentEventListener
     {
         public ErrorHandlerImpl(IntentRecognizer recognizer)

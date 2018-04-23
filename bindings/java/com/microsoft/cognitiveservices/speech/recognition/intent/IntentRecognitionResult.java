@@ -4,9 +4,9 @@ package com.microsoft.cognitiveservices.speech.recognition.intent;
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-/// <summary>
-/// Defines result of intent recognition.
-/// </summary>
+/**
+  * Defines result of intent recognition.
+  */
 public class IntentRecognitionResult extends com.microsoft.cognitiveservices.speech.recognition.speech.SpeechRecognitionResult
 {
     IntentRecognitionResult(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionResult result)
@@ -15,19 +15,20 @@ public class IntentRecognitionResult extends com.microsoft.cognitiveservices.spe
         this._intentId = result.getIntentId();
     }
 
-    /// <summary>
-    /// A String that represents the intent identifier being recognized.
-    /// </summary>
+    /**
+      * A String that represents the intent identifier being recognized.
+      * @return A String that represents the intent identifier being recognized.
+      */
     public String getIntentId() // { get; }
     {
         return _intentId;
     }
     private String _intentId;
 
-    /// <summary>
-    /// Returns a String that represents the intent recognition result.
-    /// </summary>
-    /// <returns>A String that represents the intent recognition result.</returns>
+    /**
+      * Returns a String that represents the intent recognition result.
+      * @return A String that represents the intent recognition result.
+      */
     @Override
     public String toString()
     {

@@ -12,37 +12,16 @@ import com.microsoft.cognitiveservices.speech.SessionEventType;
 import com.microsoft.cognitiveservices.speech.util.EventHandler;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 
-/// <summary>
-/// Defines the base class Recognizer which mainly contains common event handlers.
-/// </summary>
+/**
+  * Defines the base class Recognizer which mainly contains common event handlers.
+  */
 public class Recognizer implements Closeable
 {
-    /// <summary>
-    /// Defines event handler for session events, e.g. SessionStarted/Stopped, SpeechStartDetected / StopDetected
-    /// </summary>
-    /// <example>
-    /// Create a speech recognizer, setup an event handler for session events
-    /// <code>
-    /// static void MySessionEventHandler(object sender, SpeechSessionEventArgs e)
-    /// {
-    ///    Console.WriteLine(String.Format("Speech recognition: session event: {0} ", e.ToString()));
-    /// }
-    ///
-    /// static void SpeechRecognizerSample()
-    /// {
-    ///   SpeechRecognizer reco = factory.CreateSpeechRecognizer("audioFileName");
-    ///
-    ///   reco.OnSessionEvent += MySessionEventHandler;
-    ///
-    ///   // Starts recognition.
-    ///   var result = await reco.RecognizeAsync();
-    ///
-    ///   reco.OnSessionEvent -= MySessionEventHandler;
-    ///  
-    ///   Console.WriteLine("Speech Recognition: Recognition result: " + result);
-    /// }
-    /// </code>
-    /// </example>
+    /**
+      * Defines event handler for session events, e.g. sessionStarted/Stopped, speechStartDetected / stopDetected
+      * 
+      * Create a speech recognizer, setup an event handler for session events
+      */
     final public EventHandlerImpl<SessionEventArgs> SessionEvent = new EventHandlerImpl<SessionEventArgs>();
 
     protected Recognizer()
@@ -53,9 +32,9 @@ public class Recognizer implements Closeable
         speechEndDetectedHandler = new SessionEventHandlerImpl(this, SessionEventType.SpeechEndDetectedEvent);
     }
 
-    /// <summary>
-    /// Dispose of associated resources.
-    /// </summary>
+    /**
+      * Dispose of associated resources.
+      */
     public void close()
     {
         try {
@@ -65,12 +44,13 @@ public class Recognizer implements Closeable
         }
     }
 
-    /// <summary>
-    /// This method performs cleanup of resources.
-    /// The Boolean parameter <paramref name="disposing"/> indicates whether the method is called from <see cref="IDisposable.Dispose"/> (if <paramref name="disposing"/> is true) or from the finalizer (if <paramref name="disposing"/> is false).
-    /// Derived classes should override this method to dispose resource if needed.
-    /// </summary>
-    /// <param name="disposing">Flag to request disposal.</param>
+    /**
+      * This method performs cleanup of resources.
+      * The Boolean parameter disposing indicates whether the method is called from Dispose (if disposing is true) or from the finalizer (if disposing is false).
+      * Derived classes should override this method to dispose resource if needed.
+      * @param disposing Flag to request disposal.
+      * @throws java.io.IOException is native resource could not be disposed.
+      */
     protected void dispose(boolean disposing) throws IOException
     {
         if (disposed)
@@ -96,9 +76,9 @@ public class Recognizer implements Closeable
     protected SessionEventHandlerImpl speechEndDetectedHandler;
     private boolean disposed = false;
 
-    /// <summary>
-    /// Define an internal class which raise a C# event when a corresponding callback is invoked from the native layer. 
-    /// </summary>
+    /**
+      * Define an internal class which raise an event when a corresponding callback is invoked from the native layer. 
+      */
     class SessionEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SessionEventListener
     {
         public SessionEventHandlerImpl(Recognizer recognizer, SessionEventType eventType)
