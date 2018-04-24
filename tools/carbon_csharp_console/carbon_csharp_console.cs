@@ -6,8 +6,10 @@
 //
 
 using System;
+using System.Net.Http;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Microsoft.CognitiveServices.Speech.Recognition;
 
 namespace MicrosoftSpeechSDKSamples
 {
@@ -21,7 +23,8 @@ namespace MicrosoftSpeechSDKSamples
                 Environment.Exit(1);
             }
 
-            string keySpeech = null;
+            string subKey = null;
+            bool useToken = false;
             string fileName = null;
             bool useBaseModel = true;
             bool useEndpoint = false;
@@ -31,6 +34,7 @@ namespace MicrosoftSpeechSDKSamples
             string lang = null;
             string modelId = null;
             string endpoint = null;
+            string token = null;
 
             if (args.Length >= 2)
             {
@@ -52,140 +56,186 @@ namespace MicrosoftSpeechSDKSamples
                     throw new InvalidOperationException("The specified mode is not supported: " + modeStr);
                 }
 
-                keySpeech = args[1];
-            }
-
-            Debug.Assert(isSpeechReco || isIntentReco || isTranslation);
-            Debug.Assert(keySpeech != null);
-
-            if (args.Length >= 3)
-            {
-                var audioInputStr = args[2];
-
-                if (string.Compare(audioInputStr, "mic", true) == 0)
+                if (args[1].ToLower().StartsWith("token:"))
                 {
-                    fileName = null;
+                    var index = args[1].IndexOf(':');
+                    if (index == -1)
+                    {
+                        throw new IndexOutOfRangeException("no key is specified.");
+                    }
+                    useToken = true;
+                    subKey = args[1].Substring(index + 1);
                 }
                 else
                 {
-                    fileName = audioInputStr;
+                    subKey = args[1];
                 }
-            }
 
-            if (args.Length >= 4)
-            {
-                var paraStr = args[3];
-                if (paraStr.ToLower().StartsWith("lang:"))
-                {
-                    useBaseModel = true;
-                    var index = paraStr.IndexOf(':');
-                    if (index == -1)
-                    {
-                        throw new IndexOutOfRangeException("no language is specified.");
-                    }
-                    lang = paraStr.Substring(index + 1);
-                    if (String.IsNullOrEmpty(lang))
-                    {
-                        throw new IndexOutOfRangeException("no language is specified.");
-                    }
-                }
-                else if (paraStr.ToLower().StartsWith("model:"))
-                {
-                    useBaseModel = false;
-                    var index = paraStr.IndexOf(':');
-                    if (index == -1)
-                    {
-                        throw new IndexOutOfRangeException("no model is specified.");
-                    }
-                    modelId = paraStr.Substring(index + 1);
-                    if (String.IsNullOrEmpty(modelId))
-                    {
-                        throw new IndexOutOfRangeException("no model is specified.");
-                    }
-                }
-                else if (paraStr.ToLower().StartsWith("endpoint:"))
-                {
-                    useEndpoint = true;
-                    var index = paraStr.IndexOf(':');
-                    if (index == -1)
-                    {
-                        throw new IndexOutOfRangeException("no endpoint is specified.");
-                    }
-                    endpoint = paraStr.Substring(index + 1);
-                    if (String.IsNullOrEmpty(endpoint))
-                    {
-                        throw new IndexOutOfRangeException("no endpoint is specified.");
-                    }
-                }
-                else
-                {
-                    throw new InvalidOperationException("Only the following values are allowed: lang:language, model:modelId, endpoint:url.");
-                }
-            }
+                Debug.Assert(isSpeechReco || isIntentReco || isTranslation);
+                Debug.Assert(subKey != null);
 
-            if (isSpeechReco)
-            {
-                if (useEndpoint)
+                if (args.Length >= 3)
                 {
-                    Console.WriteLine("=============== Run speech recognition samples by specifying endpoint. ===============");
-                    SpeechRecognitionSamples.SpeechRecognitionByEndpointAsync(keySpeech, endpoint, fileName).Wait();
-                }
-                else
-                {
-                    if (useBaseModel)
+                    var audioInputStr = args[2];
+
+                    if (string.Compare(audioInputStr, "mic", true) == 0)
                     {
-                        Console.WriteLine("=============== Run speech recognition samples using base model. ===============");
-                        SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(keySpeech, fileName).Wait();
+                        fileName = null;
                     }
                     else
                     {
-                        Console.WriteLine("=============== Skip CRIS model for now. =======");
-                        //Console.WriteLine("=============== Run speech recognition samples using customized model. ===============");
-                        //SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(keySpeech, modelId, fileName).Wait();
+                        fileName = audioInputStr;
                     }
                 }
-            }
-            else if (isIntentReco)
-            {
-                if (useEndpoint)
+
+                if (args.Length >= 4)
                 {
-                    Console.WriteLine("=============== Run intent recognition samples by specifying endpoint. ===============");
-                    IntentRecognitionSamples.IntentRecognitionByEndpointAsync(keySpeech, endpoint, fileName).Wait();
-                }
-                else
-                {
-                    if (useBaseModel)
+                    var paraStr = args[3];
+                    if (paraStr.ToLower().StartsWith("lang:"))
                     {
-                        Console.WriteLine("=============== Run intent recognition samples using base speech model. ===============");
-                        IntentRecognitionSamples.IntentRecognitionBaseModelAsync(keySpeech, fileName).Wait();
+                        useBaseModel = true;
+                        var index = paraStr.IndexOf(':');
+                        if (index == -1)
+                        {
+                            throw new IndexOutOfRangeException("no language is specified.");
+                        }
+                        lang = paraStr.Substring(index + 1);
+                        if (String.IsNullOrEmpty(lang))
+                        {
+                            throw new IndexOutOfRangeException("no language is specified.");
+                        }
+                    }
+                    else if (paraStr.ToLower().StartsWith("model:"))
+                    {
+                        useBaseModel = false;
+                        var index = paraStr.IndexOf(':');
+                        if (index == -1)
+                        {
+                            throw new IndexOutOfRangeException("no model is specified.");
+                        }
+                        modelId = paraStr.Substring(index + 1);
+                        if (String.IsNullOrEmpty(modelId))
+                        {
+                            throw new IndexOutOfRangeException("no model is specified.");
+                        }
+                    }
+                    else if (paraStr.ToLower().StartsWith("endpoint:"))
+                    {
+                        useEndpoint = true;
+                        var index = paraStr.IndexOf(':');
+                        if (index == -1)
+                        {
+                            throw new IndexOutOfRangeException("no endpoint is specified.");
+                        }
+                        endpoint = paraStr.Substring(index + 1);
+                        if (String.IsNullOrEmpty(endpoint))
+                        {
+                            throw new IndexOutOfRangeException("no endpoint is specified.");
+                        }
                     }
                     else
                     {
-                        Console.WriteLine("=============== Skip CRIS model for now. =======");
-                        //Console.WriteLine("=============== Run intent recognition samples using customozed speech model. ===============");
-                        //IntentRecognitionSamples.IntentRecognitionCustomizedModelAsync(keySpeech, modelId, fileName).Wait();
+                        throw new InvalidOperationException("Only the following values are allowed: lang:language, model:modelId, endpoint:url.");
                     }
                 }
-            }
-            else if (isTranslation)
-            {
-                if (useEndpoint)
+
+                var factory = RecognizerFactory.Instance;
+                if (useToken)
                 {
-                    Console.WriteLine("=============== Run translation samples by specifying endpoint. ===============");
-                    TranslationSamples.TranslationByEndpointAsync(keySpeech, endpoint, fileName).Wait();
+                    token = GetToken(subKey).Result;
+                    factory.AuthorizationToken = token;
+                    Console.WriteLine("Use authorization token.");
                 }
                 else
                 {
-                    if (useBaseModel)
+                    factory.SubscriptionKey = subKey;
+                    Console.WriteLine("Use subscription key.");
+                }
+
+                if (isSpeechReco)
+                {
+                    if (useEndpoint)
                     {
-                        Console.WriteLine("=============== Run translationsamples using base speech model. ===============");
-                        TranslationSamples.TranslationBaseModelAsync(keySpeech, fileName).Wait();
+                        Console.WriteLine("=============== Run speech recognition samples by specifying endpoint. ===============");
+                        SpeechRecognitionSamples.SpeechRecognitionByEndpointAsync(factory, endpoint, fileName).Wait();
                     }
                     else
                     {
-                        Console.WriteLine("=============== Skip CRIS model for now. =======");
-                        //Console.WriteLine("=============== Run intent recognoition samples using customozed speech model. ===============");
-                        //TranslationSamples.TranslationCustomizedModelAsync(keySpeech, modelId, fileName).Wait();
+                        if (useBaseModel)
+                        {
+                            Console.WriteLine("=============== Run speech recognition samples using base model. ===============");
+                            SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(factory, fileName).Wait();
+                        }
+                        else
+                        {
+                            Console.WriteLine("=============== Run speech recognition samples using customized model. ===============");
+                            SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(factory, modelId, fileName).Wait();
+                        }
+                    }
+                }
+                else if (isIntentReco)
+                {
+                    if (useEndpoint)
+                    {
+                        Console.WriteLine("=============== Run intent recognition samples by specifying endpoint. ===============");
+                        IntentRecognitionSamples.IntentRecognitionByEndpointAsync(factory, endpoint, fileName).Wait();
+                    }
+                    else
+                    {
+                        if (useBaseModel)
+                        {
+                            Console.WriteLine("=============== Run intent recognition samples using base speech model. ===============");
+                            IntentRecognitionSamples.IntentRecognitionBaseModelAsync(factory, fileName).Wait();
+                        }
+                        else
+                        {
+                            Console.WriteLine("=============== Intent recognition with CRIS model is not supported yet. ===============");
+                        }
+                    }
+                }
+                else if (isTranslation)
+                {
+                    if (useEndpoint)
+                    {
+                        Console.WriteLine("=============== Run translation samples by specifying endpoint. ===============");
+                        TranslationSamples.TranslationByEndpointAsync(factory, endpoint, fileName).Wait();
+                    }
+                    else
+                    {
+                        if (useBaseModel)
+                        {
+                            Console.WriteLine("=============== Run translationsamples using base speech model. ===============");
+                            TranslationSamples.TranslationBaseModelAsync(factory, fileName).Wait();
+                        }
+                        else
+                        {
+                            Console.WriteLine("=============== Translation using CRIS model is not supported yet. ===============");
+                        }
+                    }
+                }
+            }
+        }
+
+        static async Task<string> GetToken(string key)
+        {
+            string fetchTokenUri = "https://api.cognitive.microsoft.com/sts/v1.0";
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", key);
+                UriBuilder uriBuilder = new UriBuilder(fetchTokenUri);
+                uriBuilder.Path += "/issueToken";
+
+                using (var result = await client.PostAsync(uriBuilder.Uri.AbsoluteUri, null))
+                {
+                    Console.WriteLine("Token Uri: {0}", uriBuilder.Uri.AbsoluteUri);
+                    if (result.IsSuccessStatusCode)
+                    {
+                        return await result.Content.ReadAsStringAsync();
+                    }
+                    else
+                    {
+                        throw new HttpRequestException($"Cannot get token from {fetchTokenUri}. Error: {result.StatusCode}");
                     }
                 }
             }

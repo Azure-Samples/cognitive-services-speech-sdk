@@ -274,15 +274,16 @@ void Connection::Impl::Connect()
         break;
 
     case AuthenticationType::AuthorizationToken:
-    {
-        ostringstream oss;
-        oss << "Bearer " << m_config.m_authData;
-        auto token = oss.str();
-        if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::authorization, token.c_str()) != 0)
         {
-            ThrowRuntimeError("Failed to set authentication using authorization token.");
+            ostringstream oss;
+            oss << "Bearer " << m_config.m_authData;
+            auto token = oss.str();
+            if (HTTPHeaders_ReplaceHeaderNameValuePair(headersPtr, headers::authorization, token.c_str()) != 0)
+            {
+                ThrowRuntimeError("Failed to set authentication using authorization token.");
+            }
         }
-    }
+        break;
 
     // TODO(1126805): url builder + auth interfaces
     case AuthenticationType::SearchDelegationRPSToken:

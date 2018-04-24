@@ -10,7 +10,7 @@ function run_test {
     echo "$1 recongition using base model:"
     (set -x; $CARBON_CSHARP $1 "$UserKeySpeech" $TEST_AUDIO_FILE) || exit $?
     echo -e "\n"
-    
+
     echo "$1 recongition using CRIS model:"
     (set -x; $CARBON_CSHARP $1 "$UserKeyCris" $TEST_AUDIO_FILE model:$TEST_MODEL_ID) || exit $?
     echo -e "\n"
@@ -21,6 +21,14 @@ function run_test {
     
     echo "$1 recongition using CRIS endpoint:"
     (set -x; $CARBON_CSHARP $1 "$UserKeyCris" $TEST_AUDIO_FILE endpoint:"$TEST_CRIS_ENDPOINT") || exit $?
+    echo -e "\n"
+    
+    echo "Test AuthToken: $1 recongition using base model:"
+    (set -x; $CARBON_CSHARP $1 token:"$UserKeySpeech" $TEST_AUDIO_FILE) || exit $?
+    echo -e "\n"
+
+    echo "Test AuthToken: $1 recongition using speech endpoint:"
+    (set -x; $CARBON_CSHARP $1 token:"$UserKeySpeech" $TEST_AUDIO_FILE endpoint:"$TEST_SPEECH_ENDPOINT") || exit $?
     echo -e "\n"
 }
 

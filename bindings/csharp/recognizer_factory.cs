@@ -97,16 +97,17 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
         /// <summary>
         /// Gets/Sets the service endpoint when connecting to the service.
         /// </summary>
-        public string EndpointURL
+        public Uri EndpointURL
         {
             get
             {
-                return Parameters.Get<string>(ParameterNames.SpeechEndpoint);
+                var endpointStr = Parameters.Get<string>(ParameterNames.SpeechEndpoint);
+                return new Uri(endpointStr);
             }
 
             set
             {
-                factoryImpl.SetEndpointUrl(value);
+                factoryImpl.SetEndpointUrl(value.AbsoluteUri);
             }
         }
 

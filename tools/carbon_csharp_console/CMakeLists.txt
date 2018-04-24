@@ -21,6 +21,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
-   VS_DOTNET_REFERENCES "System")
+   VS_DOTNET_REFERENCES "System;System.Net.Http")
 
 endif()

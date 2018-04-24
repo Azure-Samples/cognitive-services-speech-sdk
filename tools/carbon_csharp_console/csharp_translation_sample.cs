@@ -36,12 +36,9 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine(String.Format("Translation: Session event: {0}.", e.ToString()));
         }
 
-        public static async Task TranslationBaseModelAsync(string keyTranslation, string fileName)
+        public static async Task TranslationBaseModelAsync(RecognizerFactory factory, string fileName)
         {
-            var factory = RecognizerFactory.Instance;
             Console.WriteLine("Translation using base model.");
-            factory.SubscriptionKey = keyTranslation;
-
             if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {
                 using (var reco = factory.CreateTranslationRecognizer(FromLang, ToLangs))
@@ -58,24 +55,12 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
-        //public static async Task TranslationCustomizedModelAsync(string keyTranslation string modelId, string fileName)
-        //{
-        //    var factory = RecognizerFactory.Instance;
-
-        //    Console.WriteLine(String.Format("Translation using customized model:{0}.", modelId));
-
-        //    factory.SubscriptionKey = keyTranslation;
-
-        //    await DoTranslationAsync(factory, fileName).ConfigureAwait(false);
-        //}
-
-        public static async Task TranslationByEndpointAsync(string keyTranslation, string endpoint, string fileName)
+        public static async Task TranslationByEndpointAsync(RecognizerFactory factory, string endpoint, string fileName)
         {
-            var factory = RecognizerFactory.Instance;
-            factory.EndpointURL = endpoint;
-
             Console.WriteLine(String.Format("Translation using endopoint:{0}.", endpoint));
-            factory.SubscriptionKey = keyTranslation;
+
+            factory.EndpointURL = new Uri(endpoint);
+
             if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {
                 using (var reco = factory.CreateTranslationRecognizer(FromLang, ToLangs))
