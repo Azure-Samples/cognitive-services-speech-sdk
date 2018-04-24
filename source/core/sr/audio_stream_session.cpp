@@ -521,9 +521,11 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::WaitForRecognitio
             lock.lock();
         }
 
+        /*
         lock.unlock();
         EnsureFireResultEvent();
         lock.lock();
+        */
 
         SPX_DBG_TRACE_VERBOSE("Waiting for AdapterDone...");
         m_cv.wait_for(lock, std::chrono::seconds(m_waitForDoneTimeout), [&] {
