@@ -16,6 +16,7 @@ namespace Speech {
 
 /// <summary>
 /// A structure that describes the audio format.
+/// Currently, only PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.
 /// </summary>
 typedef struct tAudioInputStreamFormat
 {
@@ -50,7 +51,7 @@ typedef struct tAudioInputStreamFormat
     unsigned short wBitsPerSample;
 
     /// <summary>
-    /// The size of this structure. valid values: sizeof(AudioInputStreamFormat).
+    /// The size of this structure, valid values: sizeof(AudioInputStreamFormat).
     /// </summary>
     unsigned short cbSize;
 } AudioInputStreamFormat, *PAudioInputStreamFormat;
