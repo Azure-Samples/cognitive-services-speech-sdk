@@ -38,45 +38,42 @@ namespace CsharpHelloWorld
                 filename = args[1];
             }
 
-            using (var factory = new RecognizerFactory())
+            var factory = RecognizerFactory.Instance;
+            factory.SubscriptionKey = subscriptionKey;
+            var recognizeFromFile = !string.IsNullOrEmpty(filename);
+
+            SpeechRecognizer recognizer = null;
+
+            try
             {
-                factory.SubscriptionKey = subscriptionKey;
-                var recognizeFromFile = !string.IsNullOrEmpty(filename);
-
-                SpeechRecognizer recognizer = null;
-
-                try
+                if (recognizeFromFile)
                 {
-                    if (recognizeFromFile)
-                    {
-                        recognizer = factory.CreateSpeechRecognizer(filename);
-                        Console.WriteLine("Recognizing from file...");
-                    }
-                    else
-                    {
-                        // TODO currently crashing for microphone input.
-                        recognizer = factory.CreateSpeechRecognizer();
-                        Console.WriteLine("Say something...");
-                    }
-
-                    var result = recognizer.RecognizeAsync().GetAwaiter().GetResult();
-
-                    if (result.Reason != RecognitionStatus.Success)
-                    {
-                        Console.WriteLine($"There was an error, reason {result.Reason} - {result.RecognizedText}");
-                        Environment.Exit(1);
-                    }
-                    else
-                    {
-                        Console.WriteLine($"We recognized: {result.RecognizedText}");
-
-                    }
+                    recognizer = factory.CreateSpeechRecognizer(filename);
+                    Console.WriteLine("Recognizing from file...");
                 }
-                finally
+                else
                 {
-                    // Dispose the recognizer if one was created.
-                    recognizer?.Dispose();
+                    recognizer = factory.CreateSpeechRecognizer();
+                    Console.WriteLine("Say something...");
                 }
+
+                var result = recognizer.RecognizeAsync().GetAwaiter().GetResult();
+
+                if (result.Reason != RecognitionStatus.Success)
+                {
+                    Console.WriteLine($"There was an error, reason {result.Reason} - {result.RecognizedText}");
+                    Environment.Exit(1);
+                }
+                else
+                {
+                    Console.WriteLine($"We recognized: {result.RecognizedText}");
+
+                }
+            }
+            finally
+            {
+                // Dispose the recognizer if one was created.
+                recognizer?.Dispose();
             }
         }
     }

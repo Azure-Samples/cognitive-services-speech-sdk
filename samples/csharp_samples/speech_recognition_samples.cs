@@ -9,16 +9,17 @@ using Microsoft.CognitiveServices.Speech.Recognition;
 
 namespace MicrosoftSpeechSDKSamples
 {
-    class Program
+    public class SpeechRecognitionSamples
     {
         // Speech recognition from microphone.
         public static async Task RecognitionWithMicrophoneAsync()
         {
-            // Creates recognizer factory.
+            // <recognitionWithMicrophone>
+            // Gets recognizer factory.
             var factory = RecognizerFactory.Instance;
 
             // Sets subscription key.
-            // Replaces the key with your own key.
+            // Replace the key with your own key.
             factory.SubscriptionKey = "YourSubscriptionKey";
 
             // Creates a speech recognizer using microphone as audio input.
@@ -40,21 +41,23 @@ namespace MicrosoftSpeechSDKSamples
                     Console.WriteLine($"We recognized: {result.RecognizedText}");
                 }
             }
+            // </recognitionWithMicrophone>
         }
 
         // Speech recognition from file.
         public static async Task RecognitionWithFileAsync()
         {
-            // Creates recognizer factory.
+            // <recognitionFromFile>
+            // Gets recognizer factory.
             var factory = RecognizerFactory.Instance;
 
             // Sets subscription key.
-            // Replaces the key with your own key.
+            // Replace the key with your own key.
             factory.SubscriptionKey = "YourSubscriptionKey";
 
             // Creates a speech recognizer using file as audio input.
-            // Replaces with your own audio file name.
-            using (var recognizer = factory.CreateSpeechRecognizer(@"YourOwnAudioFile"))
+            // Replace with your own audio file name.
+            using (var recognizer = factory.CreateSpeechRecognizer(@"YourAudioFileName"))
             {
                 // Starts recognition. It returns when the first utterance is recognized.
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
@@ -69,8 +72,10 @@ namespace MicrosoftSpeechSDKSamples
                     Console.WriteLine($"We recognized: {result.RecognizedText}");
                 }
             }
+            // </recognitionFromFile>
         }
 
+        // <recognitionCustomized>
         // Speech recognition using a customized model.
         public static async Task RecognitionUsingCustomizedModelAsync()
         {
@@ -78,13 +83,13 @@ namespace MicrosoftSpeechSDKSamples
             var factory = RecognizerFactory.Instance;
 
             // Sets subscription key.
-            // Replaces the key with your own key.
+            // Replace with your own subscription key from https://www.cris.ai.
             factory.SubscriptionKey = "YourSubscriptionKey";
 
             // Creates a speech recognizer using microphone as audio input.
             using (var recognizer = factory.CreateSpeechRecognizer())
             {
-                // Replaces with the deployment id of your customized model.
+                // Replace with the CRIS deployment id of your customized model.
                 recognizer.DeploymentId = "YourDeploymentId";
 
                 Console.WriteLine("Say something...");
@@ -103,7 +108,9 @@ namespace MicrosoftSpeechSDKSamples
                 }
             }
         }
+        // </recognitionCustomized>
 
+        // <recognitionContinuous>
         // Speech recognition with events
         public static async Task ContinuousRecognitionAsync()
         {
@@ -135,43 +142,6 @@ namespace MicrosoftSpeechSDKSamples
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
             }
         }
-
-        static void Main(string[] args)
-        {
-
-            Console.WriteLine("1. Recognition with microphone input.");
-            Console.WriteLine("2. Recognition with file input.");
-            Console.WriteLine("3. Using Customized model for recognition.");
-            Console.WriteLine("4. Continuous Recognition using events.");
-            Console.Write("Your choice: (0: Stop.) ");
-
-            ConsoleKeyInfo x;
-            do
-            {
-                x = Console.ReadKey();
-                switch (x.Key)
-                {
-                    case ConsoleKey.D1:
-                        RecognitionWithMicrophoneAsync().Wait();
-                        break;
-                    case ConsoleKey.D2:
-                        RecognitionWithFileAsync().Wait();
-                        break;
-                    case ConsoleKey.D3:
-                        RecognitionUsingCustomizedModelAsync().Wait();
-                        break;
-                    case ConsoleKey.D4:
-                        ContinuousRecognitionAsync().Wait();
-                        break;
-                    case ConsoleKey.D0:
-                        Console.WriteLine("Exiting...");
-                        break;
-                    default:
-                        Console.WriteLine("Invalid input.");
-                        break;
-                }
-                Console.WriteLine("Recognition done. Your Choice:");
-            } while (x.Key != ConsoleKey.D0);
-        }
+        // </recognitionContinuous>
     }
 }

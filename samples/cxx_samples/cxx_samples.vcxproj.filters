@@ -26,7 +26,13 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cxx_sample.cpp">
+    <ClCompile Include="speech_recognition.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cxx_samples.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="translation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
