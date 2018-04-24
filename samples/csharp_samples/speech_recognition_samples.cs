@@ -57,7 +57,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // Creates a speech recognizer using file as audio input.
             // Replace with your own audio file name.
-            using (var recognizer = factory.CreateSpeechRecognizer(@"YourAudioFileName"))
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(@"YourAudioFileName"))
             {
                 // Starts recognition. It returns when the first utterance is recognized.
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);

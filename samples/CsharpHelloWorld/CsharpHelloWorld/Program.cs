@@ -48,7 +48,7 @@ namespace CsharpHelloWorld
             {
                 if (recognizeFromFile)
                 {
-                    recognizer = factory.CreateSpeechRecognizer(filename);
+                    recognizer = factory.CreateSpeechRecognizerWithFileInput(filename);
                     Console.WriteLine("Recognizing from file...");
                 }
                 else
