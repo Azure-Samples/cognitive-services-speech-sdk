@@ -89,9 +89,13 @@ CPOPT="-v -p"
 
 cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*$DYNLIBSUFFIX "$DESTPUBLIB"
 # On Windows and not Android, copy import libraries
+#   (On Debug, also copy PDBs)
 if [[ $OS = "Windows_NT" ]]; then
   if [[ $TARGET != "ANDROID" ]]; then
     cp $CPOPT "$SRCLIB"/$LIBPREFIX*.lib "$DESTPUBLIB"
+    if [[ $CONFIG == "Debug" ]]; then
+      cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*.pdb "$DESTPUBLIB"
+    fi
   else
     cp $CPOPT "$ANDROID_NDK/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a/libc++_shared.so" "$DESTPUBLIB"
   fi
