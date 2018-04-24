@@ -112,6 +112,29 @@ public:
     }
 
     /// <summary>
+    /// Adds all intents from Language Understanding service for recognition that will be recognized as intent with the specified id.
+    /// </summary>
+    /// <param name="intentId">A string that represents the identifier for model to be recognized.</param>
+    /// <param name="model">The language understanding model from Language Understanding service.</param>
+    void AddIntent(const std::wstring& intentId, std::shared_ptr<LanguageUnderstandingModel> model)
+    {
+        auto trigger = IntentTrigger::From(model);
+        AddIntent(intentId, trigger);
+    }
+
+    /// <summary>
+    /// Adds an intent from Language Understanding service for recognition that will be recognized as intent with the specified id.
+    /// </summary>
+    /// <param name="intentId">A string that represents the identifier of the intent to be recognized.</param>
+    /// <param name="model">The language understanding model from Language Understanding service.</param>
+    /// <param name="intentName">The intent name defined in the language understanding model.</param>
+    void AddIntent(const std::wstring& intentId, std::shared_ptr<LanguageUnderstandingModel> model, const std::wstring& intentName)
+    {
+        auto trigger = IntentTrigger::From(model, intentName);
+        AddIntent(intentId, trigger);
+    }
+
+    /// <summary>
     /// Adds an IntentTrigger that should be recognized as intent with the specified id.
     /// </summary>
     /// <param name="intentId">Id of the intent.</param>
@@ -120,6 +143,8 @@ public:
     {
         SPX_THROW_ON_FAIL(IntentRecognizer_AddIntent(m_hreco, intentId.c_str(), (SPXTRIGGERHANDLE)(*trigger.get())));
     }
+
+
 
 private:
     DISABLE_COPY_AND_MOVE(IntentRecognizer);

@@ -12,7 +12,7 @@
 #include "speechapi_cxx_intent_recognizer.h"
 
 
-constexpr auto g_speechSubscriptionKey = LR"(093bc1e6d0004dff88677a4f0bba3da1)";
+constexpr auto g_speechSubscriptionKey = LR"(1f30c291f2474d39acfdf1d3bdf847c3)";
 constexpr auto g_customSpeechSubscriptionKey = LR"(82f1f909b993459d88384a53891f98d3)";
 constexpr auto g_customSpeechModelId = LR"(eb29f6e4-e97b-4157-8d3c-9d64a7b21a58)";
 
@@ -70,28 +70,59 @@ void CarbonTestConsole::Sample_HelloWorld_Intent()
 
 void CarbonTestConsole::Sample_HelloWorld_Intent(const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId)
 {
-    UNUSED(hostName);
-    UNUSED(subscriptionKey);
-    UNUSED(appId);
-
     // DefaultRecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-USP-NoDGI", true);
     // DefaultRecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-USP-NoIntentJson", true);
 
-    // DefaultRecognizerFactory::SetSpeechEndpoint(LR"(wss://speech.platform.bing.com/ppe/speech/recognition/interactive/cognitiveservices/v1?setflight=cognitiveservicesintent&format=simple&language=en-us)");
-    DefaultRecognizerFactory::SetEndpointUrl(LR"(wss://speech.platform.bing.com/speech/recognition/interactive/cognitiveservices/v1?setflight=cognitiveservicesintent&format=simple&language=en-us)");
-    auto recognizer = DefaultRecognizerFactory::CreateIntentRecognizer();
+    // Create a speech factory associated with your speech subscription
+    auto speechSubscriptionKey = L"YourSpeechSubscriptionKey"; speechSubscriptionKey = g_speechSubscriptionKey;
+    //auto factory = SpeechFactory::FromSubscription(speechSubscriptionKey);
+    auto factory = RecognizerFactory::GetDefault();
+    DefaultRecognizerFactory::SetSubscriptionKey(speechSubscriptionKey);
 
-    auto model = LanguageUnderstandingModel::From(hostName, subscriptionKey, appId);
-    recognizer->AddIntent(L"add to calendar", IntentTrigger::From(model, L"Calendar.Add"));
-    recognizer->AddIntent(L"send email", IntentTrigger::From(model, L"Communication.SendEmail"));
+    // Create an intent recognizer using microphone as audio input.
+    auto recognizer = factory->CreateIntentRecognizer();
 
+    // Create a LanguageUnderstandingModel associated with your LU application
+    auto luisSubscriptionKey = L"YourLuisSubscriptionKey"; luisSubscriptionKey = subscriptionKey;
+    auto luisEndpoint = L"YourLuisEndpoint"; luisEndpoint = hostName;
+    auto luisAppId = L"YourLuisAppId"; luisAppId = appId;
+    // auto model = LanguageUnderstandingModel::FromSubscription(luisEndpoint, luisSubscriptionKey, luisAppId);
+    auto model = LanguageUnderstandingModel::From(luisEndpoint, luisSubscriptionKey, luisAppId);
+
+    // Add each intent you wish to recognize to the intent recognizer
+    auto intentName1 = L"IntentNameFromLuisPortal"; intentName1 = L"Calendar.Add";
+    auto intentName2 = L"IntentNameFromLuisPortal"; intentName2 = L"Communication.SendEmail";
+
+    recognizer->AddIntent(L"1", model, intentName1);
+    recognizer->AddIntent(L"some other id", model, intentName2);
+
+    // Prompt the user to speak
+    // wcout << L"Say something...\n";
+    ConsoleWriteLine(L"Say something...");
+
+    // Start recognition; will return the first result recognized
     auto result = recognizer->RecognizeAsync().get();
-    auto text = result->Text;
 
-    auto intentId = result->IntentId;
-    auto intentJson = result->Properties[ResultProperty::LanguageUnderstandingJson].GetString();
-
-    ConsoleWriteLine(L"text = '%ls'; intentId = '%ls'; json='%ls'", text.c_str(), intentId.c_str(), intentJson.c_str());
+    // Check the reason returned
+    if (result->Reason == Reason::Recognized)
+    {
+        // wcout << L"We recognized: " << result->Text << '\n';
+        // wcout << L"IntentId=" << result->IntentId << '\n';
+        // wcout << L"json=" << result->Properties[ResultProperty::LanguageUnderstandingJson].GetString();
+        ConsoleWriteLine(L"We recognized: %s", result->Text.c_str());
+        ConsoleWriteLine(L"IntentId='%s'", result->IntentId.c_str());
+        ConsoleWriteLine(L"json='%s'", result->Properties[ResultProperty::LanguageUnderstandingJson].GetString().c_str());
+    }
+    else if (result->Reason == Reason::NoMatch)
+    {
+        // wcout << L"We didn't hear anything" << '\n';
+        ConsoleWriteLine(L"We didn't hear anything");
+    }
+    else if (result->Reason == Reason::Canceled)
+    {
+        // wcout << L"There was an error, reason " << int(result->Reason) << L"-" << result->Text << '\n';
+        ConsoleWriteLine(L"There was an error, reason=%d - %s", int(result->Reason), result->Text.c_str());
+    }
 }
 
 void CarbonTestConsole::Sample_HelloWorld_Subscription()
@@ -160,3 +191,4 @@ void CarbonTestConsole::Sample_HelloWorld_Language(const wchar_t* language)
 
     ConsoleWriteLine(L"You said:\n\n    '%ls'", result->Text.c_str());
 }
+
