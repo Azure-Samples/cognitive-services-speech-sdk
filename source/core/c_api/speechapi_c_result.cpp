@@ -79,6 +79,10 @@ SPXAPI Result_GetProperty_Name(Result_Property property, wchar_t* name, uint32_t
                 propertyName = g_RESULT_LanguageUnderstandingJson;
                 break;
 
+            case ResultProperty_ErrorDetails:
+                propertyName = g_RESULT_ErrorDetails;
+                break;
+
             default:
                 hr = SPXERR_INVALID_ARG;
                 break;

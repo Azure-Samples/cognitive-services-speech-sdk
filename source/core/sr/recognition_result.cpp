@@ -81,9 +81,10 @@ void CSpxRecognitionResult::InitError(const wchar_t* text)
 {
     SPX_DBG_TRACE_FUNCTION();
     m_reason = Reason::Canceled;
-    m_text = (text == nullptr)
-         ? L""
-         : text;
+    if (text != nullptr) 
+    {
+        SetStringValue(g_RESULT_ErrorDetails, text);
+    }
 }
 
 std::wstring CSpxRecognitionResult::GetIntentId()

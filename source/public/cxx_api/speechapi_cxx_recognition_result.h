@@ -25,7 +25,7 @@ enum class Reason { Recognized, IntermediateResult, NoMatch, Canceled, OtherReco
 /// <summary>
 /// Specifies properties that can be retrieved from a RecognitionResult.
 /// </summary>
-enum class ResultProperty { Json = 1, LanguageUnderstandingJson = 2 };
+enum class ResultProperty { Json = 1, LanguageUnderstandingJson = 2, ErrorDetails = 3 };
 
 /// <summary>
 /// Represents the value of a RecognitionResult property returned by the subscript operator.
@@ -103,6 +103,7 @@ private:
     {
         static_assert((int)ResultProperty_Json == (int)ResultProperty::Json, "ResultProperty_* enum values == ResultProperty::* enum values");
         static_assert((int)ResultProperty_LanguageUnderstandingJson == (int)ResultProperty::LanguageUnderstandingJson, "ResultProperty_* enum values == ResultProperty::* enum values");
+        static_assert((int)ResultProperty_ErrorDetails == (int)ResultProperty::ErrorDetails, "ResultProperty_* enum values == ResultProperty::* enum values");
 
         const size_t maxCharCount = 4096;
         wchar_t sz[maxCharCount+1];
@@ -231,6 +232,12 @@ public:
     /// </summary>
     ResultPropertyValueCollection& Properties;
 
+    /// <summary>
+    /// In case of an unsuccessful recognition, provides a brief description of an occured error.
+    /// This field is only filled-out if the recognition status (<see cref="Reason"/>) is set to Canceled.
+    /// </summary>
+    const std::wstring ErrorDetails;
+
 protected:
 
     RecognitionResult(SPXRESULTHANDLE hresult) :
@@ -239,6 +246,7 @@ protected:
         Reason(m_reason),
         Text(m_text),
         Properties(m_properties),
+        ErrorDetails(Properties[ResultProperty::ErrorDetails].GetString()),
         Handle(m_hresult),
         m_hresult(hresult)
     {

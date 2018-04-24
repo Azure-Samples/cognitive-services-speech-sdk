@@ -509,7 +509,7 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::WaitForRecognitio
 
     if (!m_recoAsyncResult) // Deal with the timeout condition...
     {
-        SPX_DBG_TRACE_VERBOSE("%s: Timedout waiting for recognition... ", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("%s: Timed out waiting for recognition... ", __FUNCTION__);
 
         // We'll need to stop the pump ourselves...
         if (ChangeState(SessionState::ProcessingAudio, SessionState::StoppingPump))
@@ -520,6 +520,10 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::WaitForRecognitio
             m_audioPump->StopPump();
             lock.lock();
         }
+
+        lock.unlock();
+        EnsureFireResultEvent();
+        lock.lock();
 
         SPX_DBG_TRACE_VERBOSE("Waiting for AdapterDone...");
         m_cv.wait_for(lock, std::chrono::seconds(m_waitForDoneTimeout), [&] {

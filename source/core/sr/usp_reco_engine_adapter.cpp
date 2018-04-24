@@ -874,7 +874,8 @@ void CSpxUspRecoEngineAdapter::OnError(const std::string& error)
         writeLock.lock();
 
         if (ChangeState(AudioState::ReadyToProcess, AudioState::Idle) ||
-            ChangeState(AudioState::ProcessingAudio, AudioState::Idle))
+            ChangeState(AudioState::ProcessingAudio, AudioState::Idle) ||
+            ChangeState(AudioState::WaitingForDone, AudioState::Idle))
         {
             writeLock.unlock();
             site->DoneProcessingAudio(this);

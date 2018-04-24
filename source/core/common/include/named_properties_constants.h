@@ -9,6 +9,7 @@
 
 constexpr const wchar_t* g_RESULT_Json = LR"(RESULT-Json)";
 constexpr const wchar_t* g_RESULT_LanguageUnderstandingJson = LR"(RESULT-LanguageUnderstandingJson)";
+constexpr const wchar_t* g_RESULT_ErrorDetails = LR"(RESULT-ErrorDetails)";
 
 constexpr const wchar_t* g_SPEECH_Region = LR"(SPEECH-Region)";
 

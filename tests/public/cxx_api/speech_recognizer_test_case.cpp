@@ -172,6 +172,27 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         auto result = recognizer->RecognizeAsync().get();
         REQUIRE(!result->Properties[ResultProperty::Json].GetString().empty());
     }
+
+    SECTION("Check that recognition result contains error details.")
+    {
+        UseMocks(false);
+        REQUIRE(exists(input_file));
+        REQUIRE(!IsUsingMocks());
+
+        auto key = DefaultRecognizerFactory::Parameters::GetString(FactoryParameter::SubscriptionKey);
+        DefaultRecognizerFactory::SetSubscriptionKey(L"invalid_key");
+
+        auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizerWithFileInput(input_file);
+        auto result = recognizer->RecognizeAsync().get();
+
+        if (!key.empty())
+        {
+            DefaultRecognizerFactory::SetSubscriptionKey(key);
+        }
+
+        REQUIRE(result->Reason == Reason::Canceled);
+        REQUIRE(!result->ErrorDetails.empty());
+    }
 }
 
 TEST_CASE("KWS basics", "[api][cxx]")
