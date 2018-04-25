@@ -61,7 +61,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
     public sealed class TranslationRecognizer : Recognition.Recognizer
     {
         /// <summary>
-        /// The event <see cref="IntermediateResultReceived"/> signals that an intermediate recongition result is received.
+        /// The event <see cref="IntermediateResultReceived"/> signals that an intermediate recognition result is received.
         /// </summary>
         public event EventHandler<TranslationTextResultEventArgs> IntermediateResultReceived;
 

@@ -29,7 +29,7 @@ namespace MicrosoftSpeechSDKSamples
 
         private static void MyErrorEventHandler(object sender, RecognitionErrorEventArgs e)
         {
-            Console.WriteLine(String.Format("Translation: error occured. SessionId: {0}, Reason: {1}", e.SessionId, e.Status));
+            Console.WriteLine(String.Format("Translation: error occurred. SessionId: {0}, Reason: {1}", e.SessionId, e.Status));
         }
 
         private static void MySessionEventHandler(object sender, SessionEventArgs e)

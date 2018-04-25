@@ -1012,7 +1012,7 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<SpeechRecognizer>& 
     auto result = future.get();
     ConsoleWriteLine(L"RecognizeAsync %ls... Waiting... Done!\n", name.c_str());
 
-    ConsoleWriteLine(L"SpeechRecognitionResult: ResultId=%d; Reason=%d; Text=%ls", result->ResultId.c_str(), result->Reason, result->Text.c_str());
+    ConsoleWriteLine(L"SpeechRecognitionResult: ResultId=%d; Reason=%d; ErrorDetails=%ls; Text=%ls", result->ResultId.c_str(), result->Reason, result->ErrorDetails.c_str(), result->Text.c_str());
 }
 
 void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<IntentRecognizer>& recognizer)
@@ -1027,11 +1027,12 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<IntentRecognizer>& 
     auto resultId = result->ResultId;
     auto reason = result->Reason;
     auto text = result->Text;
+    auto errorDetails = result->ErrorDetails;
 
     auto intentId = result->IntentId;
     auto intentJson = result->Properties[ResultProperty::LanguageUnderstandingJson].GetString();
 
-    ConsoleWriteLine(L"IntentRecognitionResult: ResultId=%d; Reason=%d; Text=%ls, IntentId=%ls, Json=%ls", resultId.c_str(), reason, text.c_str(), intentId.c_str(), intentJson.c_str());
+    ConsoleWriteLine(L"IntentRecognitionResult: ResultId=%d; Reason=%d; Text=%ls, ErrorDetails=%ls, IntentId=%ls, Json=%ls", resultId.c_str(), reason, errorDetails.c_str(), text.c_str(), intentId.c_str(), intentJson.c_str());
 }
 
 void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<TranslationRecognizer>& recognizer)
@@ -1043,8 +1044,8 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<TranslationRecogniz
     auto result = future.get();
     ConsoleWriteLine(L"RecognizeAsync %ls... Waiting... Done!\n", name.c_str());
 
-    ConsoleWriteLine(L"TranslationTextResult: ResultId=%d, RecognizedText=%ls, TranslationsStatus=%d",
-        result->TranslationTextResult::ResultId.c_str(), result->Text.c_str(), (int)result->TranslationStatus);
+    ConsoleWriteLine(L"TranslationTextResult: ResultId=%d, ErrorDetails=%ls, RecognizedText=%ls, TranslationsStatus=%d",
+        result->TranslationTextResult::ResultId.c_str(), result->ErrorDetails.c_str(), result->Text.c_str(), (int)result->TranslationStatus);
     for (auto it : result->Translations)
     {
         ConsoleWriteLine(L"                Translation to %ls: %ls", it.first.c_str(), it.second.c_str());
@@ -1270,6 +1271,7 @@ std::wstring CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
     str += L"  Result = {\n";
     str += L"    ResultId = '" + e.Result.ResultId + L"'\n";
     str += L"    Reason = Reason::" + reasons[(int)e.Result.Reason] + L"\n";
+    str += L"    ErrorDetails = '" + e.Result.ErrorDetails + L"'\n";
     str += L"    Text = '" + e.Result.Text + L"'\n";
     str += L"  } \n";
     str += L"} \n";
@@ -1299,6 +1301,7 @@ std::wstring CarbonTestConsole::ToString(const IntentRecognitionEventArgs& e)
     str += L"  Result = {\n";
     str += L"    ResultId = '" + e.Result.ResultId + L"'\n";
     str += L"    Reason = Reason::" + reasons[(int)e.Result.Reason] + L"\n";
+    str += L"    ErrorDetails = '" + e.Result.ErrorDetails + L"'\n";
     str += L"    Text = '" + e.Result.Text + L"'\n";
     str += L"  } \n";
     str += L"} \n";
@@ -1314,12 +1317,14 @@ std::wstring CarbonTestConsole::ToString(const TranslationTextResultEventArgs& e
     str += L"  Result = {\n";
     str += L"    ResultId = '" + e.Result.ResultId + L"'\n";
     str += L"    RecognizedText = '" + e.Result.Text + L"'\n";
+    str += L"    ErrorDetails = '" + e.Result.ErrorDetails + L"'\n";
     for (auto it : e.Result.Translations)
     {
         str += L"    Translation to " + it.first + L": " + it.second + L".";
     }
     str += L"  } \n";
     str += L"} \n";
+
 
     return str;
 }

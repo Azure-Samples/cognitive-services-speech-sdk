@@ -45,7 +45,7 @@ elif [ "$Action" = "usp_tests" ]; then
 elif [ "$Action" = "cxx_api_tests" ]; then
     run_cxx_api_tests
 else 
-    die "Unknow action: $Action"
+    die "Unknown action: $Action"
 fi
 
 echo -e "\nDone\n"

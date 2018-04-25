@@ -7,19 +7,19 @@ function die {
 }
 
 function run_test {
-    echo "$1 recongition using base model:"
+    echo "$1 recognition using base model:"
     (set -x; $CARBONX --$1 --subscription:$UserKeySpeech --input $TEST_AUDIO_FILE $2) || exit $?
     echo -e "\n"
 
-    echo "$1 recongition using CRIS model:"
+    echo "$1 recognition using CRIS model:"
     (set -x; $CARBONX --$1 --subscription:$UserKeyCris --input $TEST_AUDIO_FILE  --customSpeechModelId:$TEST_MODEL_ID $2) || exit $?
     echo -e "\n"
 
-    echo "$1 recongition using speech endpoint:"
+    echo "$1 recognition using speech endpoint:"
     (set -x; $CARBONX --$1 --subscription:$UserKeySpeech --input $TEST_AUDIO_FILE --endpoint:"$TEST_SPEECH_ENDPOINT" $2) || exit $?
     echo -e "\n"
 
-    echo "$1 recongition using CRIS endpoint:"
+    echo "$1 recognition using CRIS endpoint:"
     (set -x; $CARBONX --$1 --subscription:$UserKeyCris --input $TEST_AUDIO_FILE --endpoint:"$TEST_CRIS_ENDPOINT" $2) || exit $?
     echo -e "\n"
 }
@@ -62,7 +62,7 @@ elif [ "$Action" = "intent" ]; then
     run_test intent --single
     run_test intent --continuous:10
 else
-    die "Unknow action: $Action"
+    die "Unknown action: $Action"
 fi
 
 echo -e "\nDone\n"
