@@ -4,6 +4,7 @@
 //
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using Microsoft.CognitiveServices.Speech.Recognition;
 
@@ -31,7 +32,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
         /// <returns>A string that represents the synthesis result.</returns>
         public override string ToString()
         {
-            return $"Audio size:{Audio.Length}";
+            return string.Format(CultureInfo.InvariantCulture, "AudioSize:{0}.", Audio.Length);
         }
     }
 }

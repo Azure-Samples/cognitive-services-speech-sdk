@@ -469,8 +469,8 @@ Exit:
 
 
 // Returns 1 on success.
-// Note: There are so many race conditions here (and not just here!) since we 
-// don't lock the audio structure at all.  If we experience real problems we 
+// Note: There are so many conflicting or competing conditions here (and not just here!) since we 
+// don't lock the audio structure at all. If we experience real problems we 
 // should go back and add proper locking.
 static int force_render_thread_to_exit_and_wait(AUDIO_SYS_DATA *audioData, int timeout)
 {

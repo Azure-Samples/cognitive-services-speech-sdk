@@ -4,6 +4,7 @@
 //
 
 using System;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
@@ -18,22 +19,22 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Speech
     /// <code>
     /// static void MySessionEventHandler(object sender, SessionEventArgs e)
     /// {
-    ///    Console.WriteLine(String.Format("Speech recognition: Session event: {0} ", e.ToString()));
+    ///    Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Speech recognition: Session event: {0} ", e.ToString()));
     /// }
     ///
     /// static void MyIntermediateResultEventHandler(object sender, SpeechRecognitionResultEventArgs e)
     /// {
-    ///    Console.WriteLine(String.Format("Speech recognition: Intermediate result: {0} ", e.ToString()));
+    ///    Console.WriteLine(String.Forstring.Format(CultureInfo.InvariantCulture,"mat("Speech recognition: Intermediate result: {0} ", e.ToString()));
     /// }
     ///
     /// static void MyFinalResultEventHandler(object sender, SpeechRecognitionResultEventArgs e)
     /// {
-    ///    Console.WriteLine(String.Format("Speech recognition: Final result: {0} ", e.ToString()));
+    ///    Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Speech recognition: Final result: {0} ", e.ToString()));
     /// }
     ///
     /// static void MyErrorHandler(object sender, RecognitionErrorEventArgs e)
     /// {
-    ///    Console.WriteLine(String.Format("Speech recognition: Error information: {0} ", e.ToString()));
+    ///    Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Speech recognition: Error information: {0} ", e.ToString()));
     /// }
     ///
     /// static void SpeechRecognizerSample()

@@ -6,6 +6,7 @@
 //
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
@@ -57,7 +58,7 @@ namespace MicrosoftSpeechSDKSamples
 
         public static async Task TranslationByEndpointAsync(RecognizerFactory factory, string endpoint, string fileName)
         {
-            Console.WriteLine(String.Format("Translation using endopoint:{0}.", endpoint));
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Translation using endopoint:{0}.", endpoint));
 
             factory.EndpointURL = new Uri(endpoint);
 

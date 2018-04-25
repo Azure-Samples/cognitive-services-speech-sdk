@@ -42,10 +42,10 @@
 //      If a "student" needs a "apple", or a "pencil", or a "marker", the student can assume the "teacher" implements the "I can
 //      create objects for you" interface (e.g. ISpxObjectFactory). They simply cast the "I am a teacher" interface to the "I can
 //      create objects for you" interface, and then call "CreateObject", specifying what kind of object they want, and what
-//      that object must be able to do (e.g., "I'm an apple" which has a "Eat me" method, or "I'm a writing device" which has a
+//      that object must be able to do (e.g., "I'm an apple" which has a "consume me" method, or "I'm a writing device" which has a
 //      "you can apply pressure to me on a piece of paper, and I'll make marks on it" method on it).
 //
-//      The student doesn't know if the "apple" is a "Fuji", "Red Delicious", or "Granny Smith" apple. They know they can eat it,
+//      The student doesn't know if the "apple" is a "Fuji", "Red Delicious", or "Granny Smith" apple. They know they can consume it,
 //      and it'll generally taste like an apple. Similarly, they don't know if the "pencil" is a "Mead", "3M", or some other brand.
 //      And the "marker" could be "red" marker, or a "green" marker. Doesn't matter. It's a marker. 
 //

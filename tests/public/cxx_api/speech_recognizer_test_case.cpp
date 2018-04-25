@@ -260,7 +260,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
     mutex mtx;
     condition_variable cv;
 
-    SECTION("Check for race conditions in destructor.")
+    SECTION("Check for competing or conflicting conditions in destructor.")
     {
         bool callback_invoked = false;
 

@@ -51,7 +51,7 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxSession::RecognizeAsync(
         SPX_DBG_TRACE_SCOPE("*** CSpxSession::RecognizeAsync kicked-off THREAD started ***", "*** CSpxSession::RecognizeAsync kicked-off THREAD stopped ***");
         auto keepAliveCopy = keepAlive;
 
-        // Keep track of the fact that we have a thread hanging out waiting to hear
+        // Keep track of the fact that we have a thread pending waiting to hear
         // what the final recognition result is, and then stop recognizing...
         m_recoAsyncWaiting = true;
         this->StartRecognizing(RecognitionKind::SingleShot);
@@ -275,8 +275,8 @@ void CSpxSession::FireResultEvent(const std::wstring& sessionId, std::shared_ptr
 
 void CSpxSession::EnsureFireResultEvent()
 {
-    // Since we're not holding a lock throughout this "ensure" method, a race is still possible.
-    // That said, the race is benign, in the worst case we just created a throw away no-match result.
+    // Since we're not holding a lock throughout this "ensure" method, a conflict is still possible.
+    // That said, the conflict is benign, in the worst case we just created a throw away no-match result.
     if (m_recoAsyncWaiting)
     {
         auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));

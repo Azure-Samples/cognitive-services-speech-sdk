@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-
+using System.Globalization;
 namespace Microsoft.CognitiveServices.Speech.Recognition.Speech
 {
     /// <summary>
@@ -32,7 +32,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Speech
         /// <returns>A string that represents the speech recognition result event.</returns>
         public override string ToString()
         {
-            return string.Format("SessionId:{0} ResultId:{1} Status:{2} Recognized text:<{3}>.", SessionId, Result.ResultId, Result.Reason, Result.RecognizedText);
+            return string.Format(CultureInfo.InvariantCulture,"SessionId:{0} ResultId:{1} Status:{2} Recognized text:<{3}>.", SessionId, Result.ResultId, Result.Reason, Result.RecognizedText);
         }
     }
 }

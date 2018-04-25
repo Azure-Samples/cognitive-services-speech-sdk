@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+using System.Globalization;
 
 namespace Microsoft.CognitiveServices.Speech
 {
@@ -32,7 +33,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A string that represents the session event.</returns>
         public override string ToString()
         {
-            return string.Format("EventType: {0} SessionId: {1}.", EventType, SessionId);
+            return string.Format(CultureInfo.InvariantCulture, "EventType: {0} SessionId: {1}.", EventType, SessionId);
         }
     }
 }

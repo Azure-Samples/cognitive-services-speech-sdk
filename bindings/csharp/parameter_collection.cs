@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Microsoft.CognitiveServices.Speech
 {
@@ -83,15 +84,15 @@ namespace Microsoft.CognitiveServices.Speech
             T defaultT;
             if (typeof(T) == typeof(string))
             {
-                defaultT = (T)Convert.ChangeType(string.Empty, typeof(T));
+                defaultT = (T)Convert.ChangeType(string.Empty, typeof(T), CultureInfo.InvariantCulture);
             }
             else if (typeof(T) == typeof(int))
             {
-                defaultT = (T)Convert.ChangeType(0, typeof(T));
+                defaultT = (T)Convert.ChangeType(0, typeof(T), CultureInfo.InvariantCulture);
             }
             else if (typeof(T) == typeof(bool))
             {
-                defaultT = (T)Convert.ChangeType(false, typeof(T));
+                defaultT = (T)Convert.ChangeType(false, typeof(T), CultureInfo.InvariantCulture);
             }
             else
             {
@@ -114,21 +115,21 @@ namespace Microsoft.CognitiveServices.Speech
         {
             if (typeof(T) == typeof(string))
             {
-                var defaultInT = (string)Convert.ChangeType(defaultValue, typeof(string));
+                var defaultInT = (string)Convert.ChangeType(defaultValue, typeof(string), CultureInfo.InvariantCulture);
                 var ret = isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.GetString(name, defaultInT) : recognizerParameters.GetString(name, defaultInT);
-                return (T)Convert.ChangeType(ret, typeof(T));
+                return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
             }
             else if (typeof(T) == typeof(int))
             {
-                var defaultInT = (int)Convert.ChangeType(defaultValue, typeof(int));
+                var defaultInT = (int)Convert.ChangeType(defaultValue, typeof(int), CultureInfo.InvariantCulture);
                 var ret = isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.GetNumber(name, defaultInT) : recognizerParameters.GetNumber(name, defaultInT);
-                return (T)Convert.ChangeType(ret, typeof(T));
+                return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
             }
             else if (typeof(T) == typeof(bool))
             {
-                var defaultInT = (bool)Convert.ChangeType(defaultValue, typeof(bool));
+                var defaultInT = (bool)Convert.ChangeType(defaultValue, typeof(bool), CultureInfo.InvariantCulture);
                 var ret = isFactoryParameter ? Microsoft.CognitiveServices.Speech.Internal.DefaultRecognizerFactory.Parameters.GetBool(name, defaultInT) : recognizerParameters.GetBool(name, defaultInT);
-                return (T)Convert.ChangeType(ret, typeof(T));
+                return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
             }
             else
             {

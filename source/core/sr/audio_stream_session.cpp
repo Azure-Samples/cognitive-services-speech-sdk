@@ -843,7 +843,7 @@ void CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused()
         SPX_DBG_TRACE_SCOPE("*** CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused kicked-off THREAD started ***", "*** CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused kicked-off THREAD stopped ***");
         auto keepAliveCopy = keepAlive;
 
-        // Keep track of the fact that we have a thread hanging out waiting the the single
+        // Keep track of the fact that we have a thread pending waiting for the single
         // shot recognition to complete (so it can call StopRecognizing(KwsSingleShot)) and
         // then wait for done... 
         m_recoAsyncWaiting = true;

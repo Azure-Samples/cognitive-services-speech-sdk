@@ -4,6 +4,8 @@
 //
 
 using System;
+using System.Globalization;
+using System.Collections.Generic;
 
 namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
 {
@@ -34,7 +36,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
         /// <returns>A string that represents the speech recognition result event.</returns>
         public override string ToString()
         {
-            return $"SessionId:{SessionId} Result:{Result.ToString()}.";
+            return string.Format(CultureInfo.InvariantCulture,"SessionId:{0} Result:{1}.", SessionId, Result.ToString());
         }
     }
 }

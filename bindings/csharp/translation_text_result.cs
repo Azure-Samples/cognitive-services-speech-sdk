@@ -4,6 +4,7 @@
 //
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using Microsoft.CognitiveServices.Speech.Recognition;
 
@@ -43,10 +44,12 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
         /// <returns>A string that represents the speech recognition result.</returns>
         public override string ToString()
         {
-            var text = $"ResultId:{ResultId} RecognitionStatus:{Reason}, TranslationStatus: {TranslationStatus}, Recognized text:<{RecognizedText}>.\n";
+            var text = string.Format(CultureInfo.InvariantCulture,
+                "ResultId:{0} RecognitionStatus:{1}, TranslationStatus: {2}, Recognized text:<{3}>.\n", 
+                ResultId, Reason, TranslationStatus, RecognizedText);
             foreach (var element in Translations)
             {
-                text += $"    Translation in {element.Key}: <{element.Value}>.\n";
+                text += string.Format(CultureInfo.InvariantCulture, "    Translation in {0}: <{1}>.\n", element.Key, element.Value);
             }
             return text;
         }

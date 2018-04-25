@@ -21,7 +21,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
         /// <code>
         /// static void MySessionEventHandler(object sender, SpeechSessionEventArgs e)
         /// {
-        ///    Console.WriteLine(String.Format("Speech recognition: session event: {0} ", e.ToString()));
+        ///    Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Speech recognition: session event: {0} ", e.ToString()));
         /// }
         ///
         /// static void SpeechRecognizerSample()

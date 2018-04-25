@@ -6,6 +6,7 @@
 //
 
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Recognition;
@@ -17,22 +18,22 @@ namespace MicrosoftSpeechSDKSamples
     {
         private static void MyIntermediateResultEventHandler(object sender, SpeechRecognitionResultEventArgs e)
         {
-            Console.WriteLine(String.Format("Speech recognition: intermediate result: {0} ", e.ToString()));
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Speech recognition: intermediate result: {0} ", e.ToString()));
         }
 
         private static void MyFinalResultEventHandler(object sender, SpeechRecognitionResultEventArgs e)
         {
-            Console.WriteLine(String.Format("Speech recognition: final result: {0} ", e.ToString()));
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Speech recognition: final result: {0} ", e.ToString()));
         }
 
         private static void MyErrorEventHandler(object sender, RecognitionErrorEventArgs e)
         {
-            Console.WriteLine(String.Format("Speech recognition: error occurred. SessionId: {0}, Reason: {1}", e.SessionId, e.Status));
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Speech recognition: error occurred. SessionId: {0}, Reason: {1}", e.SessionId, e.Status));
         }
 
         private static void MySessionEventHandler(object sender, SessionEventArgs e)
         {
-            Console.WriteLine(String.Format("Speech recognition: Session event: {0}.", e.ToString()));
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Speech recognition: Session event: {0}.", e.ToString()));
         }
 
         public static async Task SpeechRecognitionBaseModelAsync(RecognizerFactory factory, string fileName)
@@ -56,7 +57,7 @@ namespace MicrosoftSpeechSDKSamples
 
         public static async Task SpeechRecognitionCustomizedModelAsync(RecognizerFactory factory, string modelId, string fileName)
         {
-            Console.WriteLine(String.Format("Speech Recognition using customized model:{0}.", modelId));
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Speech Recognition using customized model:{0}.", modelId));
             if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {
                 using (var reco = factory.CreateSpeechRecognizer())
@@ -77,7 +78,7 @@ namespace MicrosoftSpeechSDKSamples
 
         public static async Task SpeechRecognitionByEndpointAsync(RecognizerFactory factory, string endpoint, string fileName)
         {
-            Console.WriteLine(String.Format("Speech Recognition using endopoint:{0}.", endpoint));
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Speech Recognition using endopoint:{0}.", endpoint));
 
             factory.EndpointURL = new Uri(endpoint);
 

@@ -24,17 +24,17 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
     ///
     /// static void MyIntermediateResultEventHandler(object sender, TranslatioTextResultEventArgs e)
     /// {
-    ///    Console.WriteLine(String.Format("Translation recognition: Intermediate result: {0} ", e.ToString()));
+    ///    Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Translation recognition: Intermediate result: {0} ", e.ToString()));
     /// }
     ///
     /// static void MyFinalResultEventHandler(object sender, TranslationTextResultEventArgs e)
     /// {
-    ///    Console.WriteLine(String.Format("Translation recognition: Final result: {0} ", e.ToString()));
+    ///    Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Translation recognition: Final result: {0} ", e.ToString()));
     /// }
     ///
     /// static void MyErrorHandler(object sender, RecognitionErrorEventArgs e)
     /// {
-    ///    Console.WriteLine(String.Format("Translation recognition: Error information: {0} ", e.ToString()));
+    ///    Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Translation recognition: Error information: {0} ", e.ToString()));
     /// }
     ///
     /// static void TranslationRecognizerSample()

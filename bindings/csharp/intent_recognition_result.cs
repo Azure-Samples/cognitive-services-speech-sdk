@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-
+using System.Globalization;
 namespace Microsoft.CognitiveServices.Speech.Recognition.Intent
 {
     /// <summary>
@@ -27,7 +27,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Intent
         /// <returns>A string that represents the intent recognition result.</returns>
         public override string ToString()
         {
-            return string.Format("ResultId:{0} Status:{1} IntentId:<{2}> Recognized text:<{3}>.", ResultId, Reason, IntentId, RecognizedText);
+            return string.Format(CultureInfo.InvariantCulture, "ResultId:{0} Status:{1} IntentId:<{2}> Recognized text:<{3}>.", ResultId, Reason, IntentId, RecognizedText);
         }
     }
 }

@@ -4,6 +4,7 @@
 //
 
 using System.Diagnostics;
+using System.Globalization;
 
 namespace Microsoft.CognitiveServices.Speech.Recognition
 {
@@ -46,7 +47,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
         /// <returns>A string that represents the recognition error event.</returns>
         public override string ToString()
         {
-            return string.Format("SessionId: {0} Status: {1}.", SessionId, Status); 
+            return string.Format(CultureInfo.InvariantCulture, "SessionId: {0} Status: {1}.", SessionId, Status); 
         }
     }
 }
