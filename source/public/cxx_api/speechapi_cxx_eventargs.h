@@ -37,10 +37,7 @@ protected:
 
 private:
 
-    EventArgs(EventArgs&&) = delete;
-    EventArgs(const EventArgs&) = delete;
-    EventArgs& operator=(EventArgs&&) = delete;
-    EventArgs& operator=(const EventArgs&) = delete;
+    DISABLE_COPY_AND_MOVE(EventArgs);
 };
 
 

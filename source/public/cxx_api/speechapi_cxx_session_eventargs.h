@@ -28,7 +28,7 @@ public:
     /// Constructor.
     /// </summary>
     /// <param name="hevent">Event handle</param>
-    SessionEventArgs(SPXEVENTHANDLE hevent) :
+    explicit SessionEventArgs(SPXEVENTHANDLE hevent) :
         SessionId(m_sessionId),
         m_sessionId(GetSessionId(hevent))
     {
@@ -61,11 +61,7 @@ protected:
 
 private:
 
-    SessionEventArgs() = delete;
-    SessionEventArgs(SessionEventArgs&&) = delete;
-    SessionEventArgs(const SessionEventArgs&) = delete;
-    SessionEventArgs& operator=(SessionEventArgs&&) = delete;
-    SessionEventArgs& operator=(const SessionEventArgs&) = delete;
+    DISABLE_DEFAULT_CTORS(SessionEventArgs);
 
     std::wstring m_sessionId;
 };

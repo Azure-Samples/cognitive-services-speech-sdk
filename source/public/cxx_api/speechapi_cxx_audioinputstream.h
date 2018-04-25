@@ -100,9 +100,7 @@ protected:
     AudioInputStream() {};
 
 private:
-    AudioInputStream(const AudioInputStream&) = delete;
-    AudioInputStream(const AudioInputStream&&) = delete;
-    AudioInputStream& operator=(const AudioInputStream&) = delete;
+    DISABLE_COPY_AND_MOVE(AudioInputStream);
 };
 
 

@@ -22,6 +22,9 @@ namespace Speech {
 
 class Session
 {
+private:
+    SessionParameterValueCollection m_parameters;
+
 public:
 
     template <class T>
@@ -35,15 +38,9 @@ public:
         return std::make_shared<Session>(hsession);
     }
 
-    Session() :
-        Parameters(SPXHANDLE_INVALID),
-        m_hsession(SPXHANDLE_INVALID)
-    {
-        SPX_THROW_HR(SPXERR_NOT_IMPL);
-    }
-
-    Session(SPXSESSIONHANDLE hsession) :
-        Parameters(hsession),
+    explicit Session(SPXSESSIONHANDLE hsession) :
+        m_parameters(hsession),
+        Parameters(m_parameters),
         m_hsession(hsession)
     {
         SPX_DBG_TRACE_FUNCTION();
@@ -60,15 +57,11 @@ public:
         }
     }
 
-    SessionParameterValueCollection Parameters;
-
+    SessionParameterValueCollection& Parameters;
 
 private:
 
-    Session(const Session&) = delete;
-    Session(const Session&&) = delete;
-    const Session& operator=(const Session&) = delete;
-    const Session& operator=(const Session&&) = delete;
+    DISABLE_COPY_AND_MOVE(Session);
 
     SPXSESSIONHANDLE m_hsession;
 };

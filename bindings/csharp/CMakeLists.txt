@@ -10,13 +10,6 @@ set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
 set(SOURCES "${SRC_DIR}/carbon_csharp.i")
 
-if(MSVC)
-     # Force to always compile with W4
-     set(CMAKE_CXX_FLAGS "/W3")
-elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-     set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -Wno-unused-parameter -fPIC")
-endif()
-
 set(CSHARP_BINDINGS ${PROJECT_NAME}_bindings)
 
 set(SWIG_MODULE_${CSHARP_BINDINGS}_EXTRA_DEPS

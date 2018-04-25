@@ -164,7 +164,7 @@ public:
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
-    ResultPropertyValueCollection(SPXRESULTHANDLE hresult) :
+    explicit ResultPropertyValueCollection(SPXRESULTHANDLE hresult) :
         HandleValueCollection(hresult)
     {
     }
@@ -186,7 +186,7 @@ public:
     /// </summary>
     /// <param name="index">One of the ResultProperty values.</param>
     /// <returns>Value object mapped to the specified ResultProperty enum.</returns>
-    Value operator[](enum ResultProperty index) { return Value(new ResultPropertyValue(m_handle, index)); }
+    Value operator[](ResultProperty index) { return Value(new ResultPropertyValue(m_handle, index)); }
 };
 
 /// <summary>
@@ -240,7 +240,7 @@ public:
 
 protected:
 
-    RecognitionResult(SPXRESULTHANDLE hresult) :
+    explicit RecognitionResult(SPXRESULTHANDLE hresult) :
         m_properties(hresult),
         ResultId(m_resultId),
         Reason(m_reason),

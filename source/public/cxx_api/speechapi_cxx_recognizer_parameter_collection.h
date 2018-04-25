@@ -175,7 +175,7 @@ public:
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
-    RecognizerParameterValueCollection(SPXRECOHANDLE hreco) :
+    explicit RecognizerParameterValueCollection(SPXRECOHANDLE hreco) :
         HandleValueCollection(hreco)
     {
     }
@@ -197,7 +197,7 @@ public:
     /// </summary>
     /// <param name="index">One of the RecognizerParameter values.</param>
     /// <returns>Value object mapped to the specified RecognizerParameter enum.</returns>
-    Value operator[](enum RecognizerParameter parameter) { return Value(new RecognizerParameterValue(m_handle, parameter)); }
+    Value operator[](RecognizerParameter parameter) { return Value(new RecognizerParameterValue(m_handle, parameter)); }
 
 private:
 

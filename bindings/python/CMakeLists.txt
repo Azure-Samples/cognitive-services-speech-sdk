@@ -16,12 +16,7 @@ set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 if(MSVC)
     # Don't try to link pythonXY_d.lib, use release version of python.lib instead.
      add_definitions(-DSWIG_PYTHON_INTERPRETER_NO_DEBUG)
-
      add_definitions(-D_ITERATOR_DEBUG_LEVEL=0)
-     # Compile with W3, too many warning in SWIG-generated code with /W4
-     set(CMAKE_CXX_FLAGS "/W3")
-elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-     set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -Wno-unused-parameter -fPIC")
 endif()
 
 

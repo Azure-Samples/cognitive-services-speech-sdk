@@ -36,7 +36,7 @@ public:
     /// Constructor.
     /// </summary>
     /// <param name="hevent">Event handle</param>
-    IntentRecognitionEventArgs(SPXEVENTHANDLE hevent) :
+    explicit IntentRecognitionEventArgs(SPXEVENTHANDLE hevent) :
         RecognitionEventArgs(hevent),
         m_hevent(hevent),
         m_result(std::make_shared<IntentRecognitionResult>(IntentResultHandleFromEventHandle(hevent))),
@@ -59,11 +59,7 @@ public:
 
 private:
 
-    IntentRecognitionEventArgs() = delete;
-    IntentRecognitionEventArgs(IntentRecognitionEventArgs&&) = delete;
-    IntentRecognitionEventArgs(const IntentRecognitionEventArgs&) = delete;
-    IntentRecognitionEventArgs& operator=(IntentRecognitionEventArgs&&) = delete;
-    IntentRecognitionEventArgs& operator=(const IntentRecognitionEventArgs&) = delete;
+    DISABLE_DEFAULT_CTORS(IntentRecognitionEventArgs);
 
     SPXRESULTHANDLE IntentResultHandleFromEventHandle(SPXEVENTHANDLE hevent)
     {

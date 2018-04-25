@@ -17,11 +17,8 @@ set( CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_BINARY_DIR} )
 
 set(SOURCES "${SRC_DIR}/carbon_java.i")
 
-if(MSVC)
-     # Force to always compile with W4
-     set(CMAKE_CXX_FLAGS "/W3")
-elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-     set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -fno-strict-aliasing -fPIC")
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS "-Wno-unused-function -fno-strict-aliasing")
 endif()
 
 set(JAVA_BINDINGS ${PROJECT_NAME}_bindings)
@@ -187,12 +184,15 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/IDefaultRecognizerFactory.java
 
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/Value.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/ValueCollectionRecognizerParameter.java
 #    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/ValueCollectionRecognizerProperty.java
 #    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/ValueCollectionRecognizerFactoryParameter.java
 #    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/ValueCollectionSessionParameter.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/VoidFuture.java
 
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/RecognizerParameterValueCollectionBase.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/ResultPropertyValueCollectionBase.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/RecognizerFactoryParameterCollectionBase.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SessionParameterValueCollectionBase.java
 )
 
 

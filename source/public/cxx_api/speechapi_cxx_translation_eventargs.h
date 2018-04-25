@@ -32,7 +32,7 @@ public:
     /// It is intended for internal use only. It creates an instance of <see cref="TranslationTextResultEventArgs">.
     /// </summary>
     /// <param name="resultHandle">The handle returned by recognizer in C-API.</param>
-    TranslationTextResultEventArgs(SPXEVENTHANDLE hevent) :
+    explicit TranslationTextResultEventArgs(SPXEVENTHANDLE hevent) :
         SessionEventArgs(hevent),
         m_hevent(hevent),
         m_result(std::make_shared<TranslationTextResult>(ResultHandleFromEventHandle(hevent))),
@@ -52,11 +52,7 @@ public:
     const TranslationTextResult& Result;
 
 private:
-    TranslationTextResultEventArgs() = delete;
-    TranslationTextResultEventArgs(TranslationTextResultEventArgs&&) = delete;
-    TranslationTextResultEventArgs(const TranslationTextResultEventArgs&) = delete;
-    TranslationTextResultEventArgs& operator=(TranslationTextResultEventArgs&&) = delete;
-    TranslationTextResultEventArgs& operator=(const TranslationTextResultEventArgs&) = delete;
+    DISABLE_DEFAULT_CTORS(TranslationTextResultEventArgs);
 
     SPXRESULTHANDLE ResultHandleFromEventHandle(SPXEVENTHANDLE hevent)
     {
@@ -82,7 +78,7 @@ public:
     /// It is intended for internal use only. It creates an instance of <see cref="TranslationSynthesisResultEventArgs">.
     /// </summary>
     /// <param name="resultHandle">The handle returned by recognizer in C-API.</param>
-    TranslationSynthesisResultEventArgs(SPXEVENTHANDLE hevent) :
+    explicit TranslationSynthesisResultEventArgs(SPXEVENTHANDLE hevent) :
         SessionEventArgs(hevent),
         m_hevent(hevent),
         m_result(std::make_shared<TranslationSynthesisResult>(ResultHandleFromEventHandle(hevent))),
@@ -103,11 +99,7 @@ public:
 
 private:
 
-    TranslationSynthesisResultEventArgs() = delete;
-    TranslationSynthesisResultEventArgs(TranslationSynthesisResultEventArgs&&) = delete;
-    TranslationSynthesisResultEventArgs(const TranslationSynthesisResultEventArgs&) = delete;
-    TranslationSynthesisResultEventArgs& operator=(TranslationSynthesisResultEventArgs&&) = delete;
-    TranslationSynthesisResultEventArgs& operator=(const TranslationSynthesisResultEventArgs&) = delete;
+    DISABLE_DEFAULT_CTORS(TranslationSynthesisResultEventArgs);
 
     SPXRESULTHANDLE ResultHandleFromEventHandle(SPXEVENTHANDLE hevent)
     {

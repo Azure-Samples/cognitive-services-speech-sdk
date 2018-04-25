@@ -34,13 +34,13 @@ callbacks = {
 }
 
 
-def test_recognize(filename):
-    result = recognize(filename)
+def test_recognize(subscription, filename):
+    result = recognize(subscription, filename)
     assert result
     assert result.text
 
-def test_recognize_async(filename):
-    result = recognize(filename, True)
+def test_recognize_async(subscription, filename):
+    result = recognize(subscription, filename, True)
     assert result
     assert result.text
 
@@ -62,11 +62,11 @@ def _disconnect(reco):
     for cb_name in callbacks:
         getattr(reco, cb_name).disconnect(callbacks[cb_name])
 
-def recognize(filename=None, async=False):
+def recognize(subscription, filename=None, async=False):
     if filename is not None:
         assert os.path.isfile(filename)
 
-    reco = RecognizerFactory().create_speech_recognizer(filename)
+    reco = RecognizerFactory(subscription).create_speech_recognizer(filename)
 
     _connect(reco)
 
@@ -85,8 +85,9 @@ def recognize(filename=None, async=False):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--filename')
+    parser.add_argument('--subscription')
     parser.add_argument('--async', action="store_true")
     args = parser.parse_args()
 
-    result = recognize(args.filename, args.async)
+    result = recognize(args.subscription, args.filename, args.async)
     _print('Recognition complete: {}'.format(result))

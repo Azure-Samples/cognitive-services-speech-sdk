@@ -24,13 +24,11 @@ namespace Speech {
 class Value
 {
 public:
-
-
     /// <summary>
     /// Construct a value from a raw value pointer.
     /// </summary>
     /// <param name="ptr">Value pointer.</param>
-    Value(Value* ptr = nullptr) : m_delegatePtr(ptr) { }
+    explicit Value(Value* ptr = nullptr) : m_delegatePtr(ptr) { }
 
     /// <summary>
     /// Move constructor.
@@ -148,34 +146,11 @@ public:
     /// <returns>Boolean value or false</returns>
     operator bool() { return GetBool(); }
 
-
-    // TODO: Fix SWIG such that we don't need to expose the default methods below...
-    //       And then... once fixed ... delete the next 3 lines of code:
-    //
-
-    /// <summary>
-    /// Copy constructor. Do not rely on it; will be removed.
-    /// </summary>
-    Value(const Value&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
-
-    /// <summary>
-    /// Move assignment operator. Do not rely on it; will be removed.
-    /// </summary>
-    Value& operator=(Value&&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
-
-    /// <summary>
-    /// Assignment operator. Do not rely on it; will be removed.
-    /// </summary>
-    const Value& operator=(const Value&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
-
 private:
 
-    // TODO: Fix SWIG such that we don't need to expose the default methods below...
-    //       And then... once fixed ... Uncomment the next 3 lines of code:
-    //
-    // Value(const Value&) = delete;
-    // Value& operator=(Value&&) = delete;
-    // const Value& operator=(const Value&) = delete;
+    Value(const Value&) = delete;
+    Value& operator=(const Value&) = delete;
+    Value& operator=(Value&&) = delete;
 
     Value* m_delegatePtr;
 };
@@ -185,8 +160,7 @@ class BaseValueCollection
 {
 public:
 
-    BaseValueCollection() { }
-    virtual ~BaseValueCollection() { }
+    virtual ~BaseValueCollection() = default;
 
     virtual Value operator[](const std::wstring& name) = 0;
 
@@ -201,38 +175,14 @@ public:
     virtual bool ContainsBool(const std::wstring& name) = 0;
     virtual void SetBool(const std::wstring& name, bool value) = 0;
     virtual bool GetBool(const std::wstring& name, bool defaultValue = false) = 0;
-};
 
+protected:
 
-template<class T>
-class ValueCollection : public BaseValueCollection
-{
-public:
+    BaseValueCollection() = default;
 
-    ValueCollection() { }
-    ~ValueCollection() { }
+private:
 
-    Value operator[](const std::wstring& name) override { return Value(new T(name)); }
-
-    bool ContainsString(const std::wstring& name) override { return T(name).IsString(); }
-    void SetString(const std::wstring& name, const std::wstring& value) override { T(name).SetString(value); }
-    std::wstring GetString(const std::wstring& name, const std::wstring& defaultValue = L"") override { return T(name).GetString(defaultValue); }
-
-    bool ContainsNumber(const std::wstring& name) override { return T(name).IsNumber(); }
-    void SetNumber(const std::wstring& name, int32_t value) override { T(name).SetNumber(value); }
-    int32_t GetNumber(const std::wstring& name, int32_t defaultValue = 0) override { return T(name).GetNumber(defaultValue); }
-
-    bool ContainsBool(const std::wstring& name) override { return T(name).IsBool(); }
-    void SetBool(const std::wstring& name, bool value) override { T(name).SetBool(value); }
-    bool GetBool(const std::wstring& name, bool defaultValue = false) override { return T(name).GetBool(defaultValue); }
-
-    // TODO: Fix SWIG such that we don't need to expose the default methods below... 
-    //       And then... once fixed ... delete the next 3 lines of code:
-    //
-    ValueCollection(ValueCollection&&) = delete;
-    ValueCollection(const ValueCollection&) = delete;
-    ValueCollection& operator=(ValueCollection&&) = delete;
-    const ValueCollection& operator=(const ValueCollection&) = delete;
+    DISABLE_COPY_AND_MOVE(BaseValueCollection);
 };
 
 
@@ -240,10 +190,7 @@ template<class Handle, class T>
 class HandleValueCollection : public BaseValueCollection
 {
 public:
-
-    HandleValueCollection() : m_handle(SPXHANDLE_INVALID) { }
-    HandleValueCollection(Handle handle) : m_handle(handle) { }
-    ~HandleValueCollection() { }
+    virtual ~HandleValueCollection() = default;
 
     Value operator[](const std::wstring& name) override { return Value(new T(m_handle, name)); }
 
@@ -259,31 +206,15 @@ public:
     void SetBool(const std::wstring& name, bool value) override { T(m_handle, name).SetBool(value); }
     bool GetBool(const std::wstring& name, bool defaultValue = false) override { return T(m_handle, name).GetBool(defaultValue); }
 
-
-    // TODO: Fix SWIG such that we don't need to expose the default methods below... 
-    //       And then... once fixed ... delete the next 5 lines of code:
-    //
-    HandleValueCollection(HandleValueCollection&&) { SPX_THROW_HR(SPXERR_NOT_IMPL); }
-    HandleValueCollection(const HandleValueCollection&) { SPX_THROW_HR(SPXERR_NOT_IMPL); }
-    HandleValueCollection& operator=(HandleValueCollection&&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
-    const HandleValueCollection& operator=(const HandleValueCollection&) { SPX_REPORT_ON_FAIL(SPXERR_NOT_IMPL); throw SPXERR_NOT_IMPL; }
-
-
 protected:
+
+    explicit HandleValueCollection(Handle handle) : m_handle(handle) { }
 
     Handle m_handle;
 
 private:
 
-    // TODO: Fix SWIG such that we don't need to expose the default methods below... 
-    //       And then... once fixed ... Uncomment the next 5 lines of code:
-    //    
-    // HandleValueCollection() = delete;
-    // HandleValueCollection(HandleValueCollection&&) = delete;
-    // HandleValueCollection(const HandleValueCollection&) = delete;
-    // HandleValueCollection& operator=(HandleValueCollection&&) = delete;
-    // const HandleValueCollection& operator=(const HandleValueCollection&) = delete;
-
+    DISABLE_DEFAULT_CTORS(HandleValueCollection);
 };
 
 

@@ -115,13 +115,18 @@ class SessionParameterValueCollection : public HandleValueCollection<SPXSESSIONH
 {
 public:
 
+    Value operator[](const std::wstring& name) override { return Value(new SessionParameterValue(m_handle, name)); }
+    Value operator[](SessionParameter parameter) { return Value(new SessionParameterValue(m_handle, parameter)); }
+
+private:
+
     SessionParameterValueCollection(SPXSESSIONHANDLE hsession) :
         HandleValueCollection(hsession)
     {
     }
 
-    Value operator[](const std::wstring& name) override { return Value(new SessionParameterValue(m_handle, name)); }
-    Value operator[](enum SessionParameter parameter) { return Value(new SessionParameterValue(m_handle, parameter)); }
+    friend class Session;
+
 };
 
 

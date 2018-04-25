@@ -25,7 +25,7 @@ public:
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
-    RecognitionEventArgs(SPXEVENTHANDLE hevent = SPXHANDLE_INVALID) :
+    explicit RecognitionEventArgs(SPXEVENTHANDLE hevent = SPXHANDLE_INVALID) :
         SessionEventArgs(hevent)
     {
     };

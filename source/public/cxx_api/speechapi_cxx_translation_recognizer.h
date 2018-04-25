@@ -131,7 +131,7 @@ public:
     /// used in case where a recognizer handle has been created by methods via C-API like RecognizerFactory_CreateTranslationRecognizer().
     /// </remarks>
     /// <param name="hreco">The handle of the recognizer that is returned by RecognizerFactory_CreateTranslationRecognizer().</param>
-    TranslationRecognizer(SPXRECOHANDLE hreco) :
+    explicit TranslationRecognizer(SPXRECOHANDLE hreco) :
         BaseType(hreco),
         // Todo: OnTranslationError(m_onTranslationError),
         Parameters(hreco),
@@ -213,11 +213,7 @@ public:
 
 private:
 
-    TranslationRecognizer() = delete;
-    TranslationRecognizer(TranslationRecognizer&&) = delete;
-    TranslationRecognizer(const TranslationRecognizer&) = delete;
-    TranslationRecognizer& operator=(TranslationRecognizer&&) = delete;
-    TranslationRecognizer& operator=(const TranslationRecognizer&) = delete;
+    DISABLE_DEFAULT_CTORS(TranslationRecognizer);
 
     friend class Microsoft::CognitiveServices::Speech::Session;
 

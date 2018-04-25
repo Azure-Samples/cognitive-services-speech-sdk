@@ -35,7 +35,7 @@ public:
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
-    IntentRecognizer(SPXRECOHANDLE hreco = SPXHANDLE_INVALID) : BaseType(hreco), Parameters(hreco)
+    explicit IntentRecognizer(SPXRECOHANDLE hreco = SPXHANDLE_INVALID) : BaseType(hreco), Parameters(hreco)
     {
         SPX_DBG_TRACE_FUNCTION();
     }

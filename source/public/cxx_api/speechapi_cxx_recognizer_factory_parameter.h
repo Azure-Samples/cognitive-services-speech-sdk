@@ -176,7 +176,7 @@ public:
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
-    RecognizerFactoryParameterCollection(SPXRECOFACTORYHANDLE hrecofactory = SPXHANDLE_DEFAULT) : HandleValueCollection(hrecofactory) { }
+    explicit RecognizerFactoryParameterCollection(SPXRECOFACTORYHANDLE hrecofactory = SPXHANDLE_DEFAULT) : HandleValueCollection(hrecofactory) { }
 
     /// <summary>
     /// Subscript operator.
@@ -190,7 +190,7 @@ public:
     /// </summary>
     /// <param name="index">One of the FactoryParameter values.</param>
     /// <returns>Value object mapped to the specified FactoryParameter enum.</returns>
-    Value operator[](enum FactoryParameter parameter) { return Value(new RecognizerFactoryParameterValue(m_handle, parameter)); }
+    Value operator[](FactoryParameter parameter) { return Value(new RecognizerFactoryParameterValue(m_handle, parameter)); }
 };
 
 

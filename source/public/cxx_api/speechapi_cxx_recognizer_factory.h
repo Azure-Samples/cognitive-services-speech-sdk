@@ -33,7 +33,7 @@ public:
     /// <summary>
     /// Creates a new factory instance parametrized with an instance of RecognizerFactoryParameterCollection.
     /// </summary>
-    IRecognizerFactory(RecognizerFactoryParameterCollection& parameters) : Parameters(parameters) { }
+    explicit IRecognizerFactory(RecognizerFactoryParameterCollection& parameters) : Parameters(parameters) { }
 
     /// <summary>
     /// Virtual destructor.
@@ -198,7 +198,7 @@ public:
     /// <summary>
     /// Creates a new factory instance parametrized with an instance of RecognizerFactoryParameterCollection.
     /// </summary>
-    IDefaultRecognizerFactory(RecognizerFactoryParameterCollection& parameters) : IRecognizerFactory(parameters) { }
+    explicit IDefaultRecognizerFactory(RecognizerFactoryParameterCollection& parameters) : IRecognizerFactory(parameters) { }
 
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer() = 0;
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer(const std::wstring& language) = 0;

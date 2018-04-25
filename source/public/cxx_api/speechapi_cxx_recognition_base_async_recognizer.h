@@ -26,16 +26,6 @@ class BaseAsyncRecognizer : public AsyncRecognizer<RecognitionResult, Recognitio
 {
 public:
 
-    using BaseType = AsyncRecognizer<RecognitionResult, RecognitionEventArgs>;
-    
-    /// <summary>
-    /// Internal constructor. Creates a new instance using the provided handle.
-    /// </summary>
-    BaseAsyncRecognizer(SPXRECOHANDLE hreco) :
-        BaseType(hreco)
-    {
-    }
-
     /// <summary>
     /// Extracts a shared pointer to BaseAsyncRecognizer from the provided recognizer shared pointer.
     /// </summary>
@@ -49,6 +39,16 @@ public:
     }
 
 protected:
+
+    using BaseType = AsyncRecognizer<RecognitionResult, RecognitionEventArgs>;
+
+    /// <summary>
+    /// Internal constructor. Creates a new instance using the provided handle.
+    /// </summary>
+    explicit BaseAsyncRecognizer(SPXRECOHANDLE hreco) :
+        BaseType(hreco)
+    {
+    }
 
     DISABLE_DEFAULT_CTORS(BaseAsyncRecognizer);
 };

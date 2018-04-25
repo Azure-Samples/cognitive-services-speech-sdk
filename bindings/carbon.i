@@ -13,6 +13,7 @@
 #include <speechapi_cxx.h>
 %}
 
+%include <exception.i>
 %include <std_except.i>
 %include <std_shared_ptr.i>
 %include <std_wstring.i>
@@ -21,6 +22,13 @@
 %include <std_map.i>
 
 %ignore __spx_rethrow(SPXHR);
+
+%exception {
+    try { $action }
+    catch (const Swig::DirectorException &e1) { SWIG_exception(SWIG_RuntimeError, e1.what()); }
+    catch (const std::exception &e2) { SWIG_exception(SWIG_RuntimeError, e2.what()); }
+    catch (...) { SWIG_exception(SWIG_UnknownError,"Runtime exception"); }
+}
 
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::IDefaultRecognizerFactory)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::Recognizer)
@@ -41,12 +49,6 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::IRecognizerFactory)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::IDefaultRecognizerFactory)
 
-#ifdef SWIGCSHARP
-SWIG_STD_VECTOR_ENHANCED(std::vector<std::wstring>)
-%template(UnsignedCharVector) std::vector<unsigned char>;
-%template(StdMapWStringWString) std::map<std::wstring, std::wstring>;
-#endif 
-
 %template(WstringVector) std::vector<std::wstring>;
 
 %ignore CallbackWrapper::GetFunction();
@@ -56,22 +58,14 @@ SWIG_STD_VECTOR_ENHANCED(std::vector<std::wstring>)
 %include <speechapi_cxx_common.h>
 
 %ignore Microsoft::CognitiveServices::Speech::NotYetImplementedException;
-
-%ignore Microsoft::CognitiveServices::Speech::ValueCollection::ValueCollection();
-%ignore Microsoft::CognitiveServices::Speech::ValueCollection::ValueCollection(Handle handle);
 %include <speechapi_cxx_todo.h>
-%include <speechapi_cxx_value.h>
 
-%template(ValueCollectionRecognizerParameter) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXRECOHANDLE, Microsoft::CognitiveServices::Speech::Recognition::RecognizerParameterValue>;
-#%template(ValueCollectionResultProperty) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXRESULTHANDLE, Microsoft::CognitiveServices::Speech::Recognition::ResultPropertyValue>;
-%ignore Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXRECOFACTORYHANDLE, Microsoft::CognitiveServices::Speech::Recognition::RecognizerFactoryParameterValue>;
-%ignore Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXSESSIONHANDLE, Microsoft::CognitiveServices::Speech::SessionParameterValue>;
-
-%ignore Microsoft::CognitiveServices::Speech::Recognition::AsyncRecognizer::RecognizeAsync();
-%ignore Microsoft::CognitiveServices::Speech::Recognition::AsyncRecognizer::StartContinuousRecognitionAsync();
-%ignore Microsoft::CognitiveServices::Speech::Recognition::AsyncRecognizer::StopContinuousRecognitionAsync();
-%ignore Microsoft::CognitiveServices::Speech::Recognition::AsyncRecognizer::StartKeywordRecognitionAsync(const std::wstring&);
-%ignore Microsoft::CognitiveServices::Speech::Recognition::AsyncRecognizer::StopKeywordRecognitionAsync();
+%ignore operator=;
+%ignore operator[];
+%ignore operator const std::wstring;
+%ignore operator int32_t;
+%ignore operator SPXLUISHANDLE;
+%ignore operator SPXTRIGGERHANDLE;
 
 %inline %{
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognitionResult> SpeechRecognitionResultPtr;
@@ -270,6 +264,39 @@ SWIG_STD_VECTOR_ENHANCED(std::vector<std::wstring>)
     };
 }
 
+%extend Microsoft::CognitiveServices::Speech::Value {
+
+    const std::wstring& __setitem__(const std::wstring& value) {
+        return ($self)->operator=(value);
+    }
+
+    int32_t __setitem__(int32_t value) {
+        return ($self)->operator=(value);
+    }
+
+    bool __setitem__(bool value) {
+        return ($self)->operator=(value);
+    }
+}
+
+%define add_subscript_operator(Type, Enum)
+%extend Microsoft::CognitiveServices::Speech::Type {
+
+    Value&& __getitem__(const std::wstring& name) {
+        return ($self)->operator[](name);
+    }
+
+    Value&& __getitem__(Microsoft::CognitiveServices::Speech::Enum index) {
+        return std::move(($self)->operator[](index));
+    }
+}
+%enddef
+
+%add_subscript_operator(Recognition::ResultPropertyValueCollection, Recognition::ResultProperty);
+%add_subscript_operator(Recognition::RecognizerFactoryParameterCollection, Recognition::FactoryParameter);
+%add_subscript_operator(Recognition::RecognizerParameterValueCollection, Recognition::RecognizerParameter);
+%add_subscript_operator(SessionParameterValueCollection, SessionParameter);
+
 %ignore Microsoft::CognitiveServices::Speech::EventSignal::EventSignal;
 %ignore Microsoft::CognitiveServices::Speech::EventSignal::CallbackFunction;
 %ignore Microsoft::CognitiveServices::Speech::EventSignal::Signal;
@@ -278,34 +305,30 @@ SWIG_STD_VECTOR_ENHANCED(std::vector<std::wstring>)
 %ignore Microsoft::CognitiveServices::Speech::EventSignal::operator+=;
 %ignore Microsoft::CognitiveServices::Speech::EventSignal::operator-=;
 
+%ignore RecognizeAsync;
+%ignore StartContinuousRecognitionAsync;
+%ignore StopContinuousRecognitionAsync;
+%ignore StartKeywordRecognitionAsync;
+%ignore StopKeywordRecognitionAsync;
+
 %ignore Microsoft::CognitiveServices::Speech::Recognition::ResultPropertyValue::ResultPropertyValue(SPXRESULTHANDLE, enum ResultProperty);
 
-%ignore Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognizer::RecognizeAsync();
-%ignore Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognizer::StartContinuousRecognitionAsync();
-%ignore Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognizer::StopContinuousRecognitionAsync();
-%ignore Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognizer::StartKeywordRecognitionAsync();
-%ignore Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognizer::StopKeywordRecognitionAsync();
+%ignore Microsoft::CognitiveServices::Speech::Value::Value;
 
-%ignore Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentRecognizer::RecognizeAsync();
-%ignore Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentRecognizer::StartContinuousRecognitionAsync();
-%ignore Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentRecognizer::StopContinuousRecognitionAsync();
-%ignore Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentRecognizer::StartKeywordRecognitionAsync();
-%ignore Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentRecognizer::StopKeywordRecognitionAsync();
+%include <speechapi_cxx_value.h>
 
-%ignore Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationRecognizer::RecognizeAsync();
-%ignore Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationRecognizer::StartContinuousRecognitionAsync();
-%ignore Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationRecognizer::StopContinuousRecognitionAsync();
-%ignore Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationRecognizer::StartKeywordRecognitionAsync();
-%ignore Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationRecognizer::StopKeywordRecognitionAsync();
+%template(RecognizerParameterValueCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXRECOHANDLE, Microsoft::CognitiveServices::Speech::Recognition::RecognizerParameterValue>;
+%template(ResultPropertyValueCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXRESULTHANDLE, Microsoft::CognitiveServices::Speech::Recognition::ResultPropertyValue>;
+%template(RecognizerFactoryParameterCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXRECOFACTORYHANDLE, Microsoft::CognitiveServices::Speech::Recognition::RecognizerFactoryParameterValue>;
+%template(SessionParameterValueCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXSESSIONHANDLE, Microsoft::CognitiveServices::Speech::SessionParameterValue>;
 
-// Process symbols in header
 %include <speechapi_cxx_audioinputstream.h>
 %include <speechapi_cxx_eventargs.h>
 %include <speechapi_cxx_eventsignal.h>
-%include <speechapi_cxx_value.h>
 
 %include <speechapi_cxx_session_eventargs.h>
 
+%immutable Microsoft::CognitiveServices::Speech::Recognition::RecognitionResult::Properties;
 %include <speechapi_cxx_recognition_result.h>
 %include <speechapi_cxx_recognition_eventargs.h>
 
@@ -386,9 +409,12 @@ SWIG_STD_VECTOR_ENHANCED(std::vector<std::wstring>)
 
 %include <speechapi_cxx_translation_recognizer.h>
 
+%immutable Microsoft::CognitiveServices::Speech::Recognition::IRecognizerFactory::Parameters;
+
 %include <speechapi_cxx_recognizer_factory_parameter.h>
 %include <speechapi_cxx_recognizer_factory.h>
 
+%immutable Microsoft::CognitiveServices::Speech::Session::Parameters;
 %include <speechapi_cxx_session_parameter_collection.h>
 %include <speechapi_cxx_session.h>
 

@@ -36,7 +36,7 @@ public:
     /// Constructor.
     /// </summary>
     /// <param name="hevent">Event handle</param>
-    SpeechRecognitionEventArgs(SPXEVENTHANDLE hevent) :
+    explicit SpeechRecognitionEventArgs(SPXEVENTHANDLE hevent) :
         RecognitionEventArgs(hevent),
         m_hevent(hevent),
         m_result(std::make_shared<SpeechRecognitionResult>(ResultHandleFromEventHandle(hevent))),
@@ -59,12 +59,8 @@ public:
 
 private:
 
-    SpeechRecognitionEventArgs() = delete;
-    SpeechRecognitionEventArgs(SpeechRecognitionEventArgs&&) = delete;
-    SpeechRecognitionEventArgs(const SpeechRecognitionEventArgs&&) = delete;
-    SpeechRecognitionEventArgs& operator=(SpeechRecognitionEventArgs&&) = delete;
-    SpeechRecognitionEventArgs& operator=(const SpeechRecognitionEventArgs&) = delete;
-
+    DISABLE_DEFAULT_CTORS(SpeechRecognitionEventArgs);
+    
     SPXRESULTHANDLE ResultHandleFromEventHandle(SPXEVENTHANDLE hevent)
     {
         SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;

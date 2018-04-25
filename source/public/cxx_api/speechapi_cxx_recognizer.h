@@ -52,7 +52,7 @@ public:
 
 protected:
 
-    Recognizer(SPXRECOHANDLE hreco) :
+    explicit Recognizer(SPXRECOHANDLE hreco) :
         m_hreco(hreco)
     {
         SPX_DBG_TRACE_FUNCTION();

@@ -38,7 +38,7 @@ public:
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
-    SpeechRecognizer(SPXRECOHANDLE hreco) : BaseType(hreco), Parameters(hreco)
+    explicit SpeechRecognizer(SPXRECOHANDLE hreco) : BaseType(hreco), Parameters(hreco)
     {
         SPX_DBG_TRACE_FUNCTION();
     }
@@ -112,11 +112,7 @@ public:
 
 private:
 
-    SpeechRecognizer() = delete;
-    SpeechRecognizer(SpeechRecognizer&&) = delete;
-    SpeechRecognizer(const SpeechRecognizer&) = delete;
-    SpeechRecognizer& operator=(SpeechRecognizer&&) = delete;
-    SpeechRecognizer& operator=(const SpeechRecognizer&) = delete;
+    DISABLE_DEFAULT_CTORS(SpeechRecognizer);
 
     friend class Microsoft::CognitiveServices::Speech::Session;
 };

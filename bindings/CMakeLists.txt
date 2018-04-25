@@ -5,6 +5,13 @@ include(UseSWIG)
 set(SWIG_INTERFACE "${PROJECT_SOURCE_DIR}/bindings/carbon.i")
 set(SWIG_WRAPPERS "${PROJECT_SOURCE_DIR}/bindings/wrappers.h")
 
+if(MSVC)
+     # Force to always compile with W4
+     set(CMAKE_CXX_FLAGS "/W3 /EHsc")
+elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+     set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -Wno-unused-parameter -fPIC")
+endif()
+
 # Add subdirectories for each language if desired
 option(BUILD_PYTHON "Build Python SWIG module" ON)
 if(BUILD_PYTHON)

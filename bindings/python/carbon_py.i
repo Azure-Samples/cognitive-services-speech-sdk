@@ -44,6 +44,8 @@
 
 %rename(_DefaultRecognizerFactory)Microsoft::CognitiveServices::Speech::Recognition::DefaultRecognizerFactory;
 
+%ignore Microsoft::CognitiveServices::Speech::Recognition::DefaultRecognizerFactory::Parameters;
+
 %include "carbon.i"
 
 
@@ -81,8 +83,11 @@ T ## Signal.connect, T ## Signal.disconnect = _generate_signal_methods(T ## Call
 
 %pythoncode %{
 class RecognizerFactory:
-    @staticmethod
-    def create_speech_recognizer(filename=None):
+
+    def __init__(self, subscription):
+        _DefaultRecognizerFactory.set_subscription_key(subscription)
+
+    def create_speech_recognizer(self, filename=None):
         if not filename:
             return _DefaultRecognizerFactory.create_speech_recognizer()
         return _DefaultRecognizerFactory.create_speech_recognizer_with_file_input(filename)

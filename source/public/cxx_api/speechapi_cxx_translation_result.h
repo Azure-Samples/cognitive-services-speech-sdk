@@ -72,7 +72,7 @@ public:
     /// It is intended for internal use only. It creates an instance of <see cref="TranslationTextResult">.
     /// </summary>
     /// <param name="resultHandle">The handle of the result returned by recognizer in C-API.</param>
-    TranslationTextResult(SPXRESULTHANDLE resultHandle) :
+    explicit TranslationTextResult(SPXRESULTHANDLE resultHandle) :
         SpeechRecognitionResult(resultHandle),
         TranslationStatus(m_translationStatus),
         Translations(m_translations)
@@ -134,11 +134,7 @@ private:
 #endif
     };
 
-    TranslationTextResult() = delete;
-    TranslationTextResult(TranslationTextResult&&) = delete;
-    TranslationTextResult(const TranslationTextResult&) = delete;
-    TranslationTextResult& operator=(TranslationTextResult&&) = delete;
-    TranslationTextResult& operator=(const TranslationTextResult&) = delete;
+    DISABLE_DEFAULT_CTORS(TranslationTextResult);
 
     SPXRESULTHANDLE m_hresult;
     bool m_isFinalResult;
@@ -157,7 +153,7 @@ public:
     /// It is intended for internal use only. It creates an instance of <see cref="TranslationSynthesisResult">
     /// </summary>
     /// <param name="resultHandle">The handle of the result returned by recognizer in C-API.</param>
-    TranslationSynthesisResult(SPXRESULTHANDLE resultHandle) :
+    explicit TranslationSynthesisResult(SPXRESULTHANDLE resultHandle) :
         Audio(m_audioData),
         m_hresult(resultHandle)
     {
@@ -192,9 +188,7 @@ private:
         SPX_TRACE_VERBOSE("Translation synthesis: audio length: %d, verctor size:", bufLen, m_audioData.size());
     };
 
-    TranslationSynthesisResult(const TranslationSynthesisResult&) = delete;
-    TranslationSynthesisResult(const TranslationSynthesisResult&&) = delete;
-    TranslationSynthesisResult& operator=(const TranslationSynthesisResult&) = delete;
+    DISABLE_DEFAULT_CTORS(TranslationSynthesisResult);
 
     SPXRESULTHANDLE m_hresult;
 

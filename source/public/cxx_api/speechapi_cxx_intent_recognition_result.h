@@ -27,7 +27,7 @@ public:
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
-    IntentRecognitionResult(SPXRESULTHANDLE hresult) :
+    explicit IntentRecognitionResult(SPXRESULTHANDLE hresult) :
         RecognitionResult(hresult),
         IntentId(m_intentId)
     {

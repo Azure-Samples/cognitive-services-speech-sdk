@@ -105,7 +105,7 @@ public:
 
 protected:
 
-    AsyncRecognizer(SPXRECOHANDLE hreco) throw() :
+    explicit AsyncRecognizer(SPXRECOHANDLE hreco) throw() :
         Recognizer(hreco),
         SessionStarted(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
         SessionStopped(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),

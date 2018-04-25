@@ -70,7 +70,7 @@ public:
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
-    IntentTrigger(SPXTRIGGERHANDLE htrigger) : m_htrigger(htrigger) { };
+    explicit IntentTrigger(SPXTRIGGERHANDLE htrigger) : m_htrigger(htrigger) { };
 
     /// <summary>
     /// Internal. Explicit conversion operator.
