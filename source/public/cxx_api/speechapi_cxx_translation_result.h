@@ -181,7 +181,7 @@ private:
         size_t bufLen = 0;
 
         // retrieve the required buffer size first.
-        auto hr = TranslationResult_GetTranslationText(resultHandle, nullptr, &bufLen);
+        auto hr = TranslationResult_GetTranslationSynthesisData(resultHandle, nullptr, &bufLen);
         if (hr == SPXERR_BUFFER_TOO_SMALL)
         {
             m_audioData.resize(bufLen);

@@ -694,23 +694,23 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
         SPX_DBG_TRACE_VERBOSE("%s: IGNORING (Err/Terminating/Zombie)... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
     }
     else if (
-        ChangeState(AudioState::ProcessingAudio, UspState::SpeechHypothesis, AudioState::ProcessingAudio, UspState::ReceivedSpeechResult) ||
-        ChangeState(AudioState::WaitingForDone, UspState::SpeechHypothesis, AudioState::WaitingForDone, UspState::ReceivedSpeechResult) ||
-        ChangeState(AudioState::Idle, UspState::SpeechHypothesis, AudioState::Idle, UspState::ReceivedSpeechResult) ||
-        ChangeState(AudioState::ProcessingAudio, UspState::SpeechEnded, AudioState::ProcessingAudio, UspState::ReceivedSpeechResult) ||
-        ChangeState(AudioState::WaitingForDone, UspState::SpeechEnded, AudioState::WaitingForDone, UspState::ReceivedSpeechResult) ||
-        ChangeState(AudioState::Idle, UspState::SpeechEnded, AudioState::Idle, UspState::ReceivedSpeechResult))
+        ChangeState(AudioState::ProcessingAudio, UspState::SpeechHypothesis, AudioState::ProcessingAudio, UspState::SpeechHypothesis) ||
+        ChangeState(AudioState::WaitingForDone, UspState::SpeechHypothesis, AudioState::WaitingForDone, UspState::SpeechHypothesis) ||
+        ChangeState(AudioState::Idle, UspState::SpeechHypothesis, AudioState::Idle, UspState::SpeechHypothesis) ||
+        ChangeState(AudioState::ProcessingAudio, UspState::SpeechEnded, AudioState::ProcessingAudio, UspState::SpeechHypothesis) ||
+        ChangeState(AudioState::WaitingForDone, UspState::SpeechEnded, AudioState::WaitingForDone, UspState::SpeechHypothesis) ||
+        ChangeState(AudioState::Idle, UspState::SpeechEnded, AudioState::Idle, UspState::SpeechHypothesis))
     {
         SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace statement
         SPX_DBG_TRACE_VERBOSE_IF(IsState(AudioState::Idle), "%s: Already Idle; Waiting for uspStates to complete ... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
 
         // Todo: deal with nomatch event? failed events?
-        if (IsState(AudioState::Idle) && ChangeState(UspState::FiredFinalResult))
+        if (IsState(AudioState::Idle) && ChangeState(UspState::SpeechHypothesis))
         {
             SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
             SPX_DBG_TRACE_VERBOSE("%s: Already Idle; Waiting for uspStates to complete ... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
         }
-        else if (ChangeState(UspState::FiredFinalResult))
+        else if (ChangeState(UspState::SpeechHypothesis))
         {
             writeLock.unlock();
 

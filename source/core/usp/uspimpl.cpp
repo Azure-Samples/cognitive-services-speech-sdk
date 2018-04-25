@@ -499,6 +499,46 @@ static TranslationStatus ToTranslationStatus(const string& str)
     return result->second;
 }
 
+
+static SpeechHypothesisMsg RetrieveSpeechResult(const nlohmann::json& json)
+{
+    auto offset = json.at(json_properties::offset).get<OffsetType>();
+    auto duration = json.at(json_properties::duration).get<DurationType>();
+    auto text = json.at(json_properties::text).get<std::string>();
+    return SpeechHypothesisMsg(PAL::ToWString(json.dump()), offset, duration, PAL::ToWString(text));
+}
+
+static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, bool expectStatus)
+{
+    auto translation = json[json_properties::translation];
+
+    TranslationResult result;
+    auto translations = translation.at(json_properties::translations);
+    for (const auto& object : translations)
+    {
+        auto lang = object.at(json_properties::lang).get<std::string>();
+        auto txt = object.at(json_properties::text).get<std::string>();
+        if (lang.empty() && txt.empty())
+        {
+            LogError("emtpy language and text field in translations text.");
+            continue;
+        }
+
+        result.translations[PAL::ToWString(lang)] = PAL::ToWString(txt);
+    }
+
+    if (expectStatus)
+    {
+        result.translationStatus = ToTranslationStatus(translation.at(json_properties::translationStatus).get<std::string>());
+        if ((result.translationStatus == USP::TranslationStatus::Success) && (result.translations.size() == 0))
+        {
+            LogError("No Translations text block in the message, but TranslationStatus is succcess.");
+        }
+    }
+
+    return result;
+}
+
 // Callback for data available on tranport
 void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEADERS_HANDLE responseHeader, const unsigned char* buffer, size_t size, unsigned int errorCode, void* context)
 {
@@ -546,11 +586,19 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
     }
 
     string pathStr(path);
-
-    auto json = (size > 0) ? nlohmann::json::parse(buffer, buffer + size) : nlohmann::json();
-
     auto& callbacks = connection->m_config.m_callbacks;
 
+    // TODO: Check if path is expected to be binary, there should be some form of mapping per message.
+    if (pathStr == path::translationSynthesis)
+    {
+        USP::TranslationSynthesisMsg msg;
+        msg.audioBuffer = (uint8_t *)buffer;
+        msg.audioLength = size;
+        callbacks.OnTranslationSynthesis(msg);
+        return;
+    }
+
+    auto json = (size > 0) ? nlohmann::json::parse(buffer, buffer + size) : nlohmann::json();
     if (pathStr == path::speechStartDetected || path == path::speechEndDetected)
     {
         auto offsetObj = json[json_properties::offset];
@@ -605,13 +653,6 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         }
 
     }
-    else if (pathStr == path::translationSynthesis)
-    {
-        USP::TranslationSynthesisMsg msg;
-        msg.audioBuffer = (uint8_t *)buffer;
-        msg.audioLength = size;
-        callbacks.OnTranslationSynthesis(msg);
-    }
     else if (path == path::speechPhrase)
     {
         auto offset = json[json_properties::offset].get<OffsetType>();
@@ -639,70 +680,49 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
             PAL::ToWString(text)
             });
     }
-    else if (path == path::translationHypothesis || path == path::translationPhrase)
+    else if (path == path::translationHypothesis)
     {
-        auto offset = json[json_properties::offset].get<OffsetType>();
-        auto duration = json[json_properties::duration].get<DurationType>();
-        auto text = json[json_properties::text].get<std::string>();
+        auto speechResult = RetrieveSpeechResult(json);
+        auto translationResult = RetrieveTranslationResult(json, false);
+        callbacks.OnTranslationHypothesis({
+            std::move(speechResult.json),
+            speechResult.offset,
+            speechResult.duration,
+            std::move(speechResult.text),
+            std::move(translationResult)
+            });
+    }
+    else if (path == path::translationPhrase)
+    {
+        auto status = ToRecognitionStatus(json.at(json_properties::recoStatus));
+        if (status == USP::RecognitionStatus::Unknown)
+        {
+            LogError("Invalid recognition status in translation response message.");
+            return;
+        }
 
-        auto translation = json[json_properties::translation];
+        if (status == USP::RecognitionStatus::EndOfDictation)
+        {
+            // Currently we do not communicate and of dictation to the user.
+            return;
+        }
 
-        TranslationResult result;
-        result.translationStatus = ToTranslationStatus(translation[json_properties::translationStatus].get<std::string>());
-        if (result.translationStatus == USP::TranslationStatus::Unknown)
+        auto speechResult = RetrieveSpeechResult(json);
+        auto translationResult = RetrieveTranslationResult(json, true);
+        if (translationResult.translationStatus == USP::TranslationStatus::Unknown)
         {
             LogError("Invalid translation status in translation response message.");
             return;
         }
 
-        auto translations = translation[json_properties::translations];
-        for (const auto& object : translations) 
-        {
-            auto lang = object[json_properties::lang].get<std::string>();
-            auto txt = object[json_properties::text].get<std::string>();
-            if (lang.empty() && txt.empty())
-            {
-                LogError("emtpy language and text field in translations text.");
-                continue;
-            }
-            result.translations[PAL::ToWString(lang)] = PAL::ToWString(txt);
-        }
-
-        if ((result.translationStatus == USP::TranslationStatus::Success) && (result.translations.size() == 0))
-        {
-            LogError("No Translations text block in the message, but TranslationStatus is succcess.");
-        }
-
-        if (path == path::translationHypothesis) 
-        {
-            callbacks.OnTranslationHypothesis({
-                PAL::ToWString(json.dump()),
-                offset,
-                duration,
-                PAL::ToWString(text),
-                std::move(result)
-                });
-        }
-        else 
-        {
-            auto status = ToRecognitionStatus(json[json_properties::recoStatus].get<std::string>());
-
-            if (status == USP::RecognitionStatus::Unknown)
-            {
-                LogError("Invalid translation status in translation response message.");
-                return;
-            }
-
-            callbacks.OnTranslationPhrase({
-                PAL::ToWString(json.dump()),
-                offset,
-                duration,
-                PAL::ToWString(text),
-                std::move(result),
-                status
-                });
-        }
-
+        callbacks.OnTranslationPhrase({
+            std::move(speechResult.json),
+            speechResult.offset,
+            speechResult.duration,
+            std::move(speechResult.text),
+            std::move(translationResult),
+            status
+            });
     }
     else
     {
@@ -710,7 +730,4 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
     }
 }
 
-}
-}
-}
-}
+}}}}

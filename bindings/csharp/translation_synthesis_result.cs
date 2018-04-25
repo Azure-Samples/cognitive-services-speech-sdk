@@ -18,6 +18,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
         // BUG: this is hack for making documentation going.
         internal TranslationSynthesisResult(Internal.TranslationSynthesisResult result)
         {
+            Audio = new byte[result.Audio.Count];
             result.Audio.CopyTo(Audio);
         }
 
