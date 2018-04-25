@@ -39,7 +39,7 @@
 #include <speechapi_cxx_translation_eventargs.h>
 #include <speechapi_cxx_translation_recognizer.h>
 
-#include <speechapi_cxx_recognizer_factory.h>
+#include <speechapi_cxx_factory.h>
 
 #include <speechapi_cxx_session_parameter_collection.h>
 #include <speechapi_cxx_session.h>

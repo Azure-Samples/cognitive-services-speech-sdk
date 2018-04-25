@@ -94,8 +94,6 @@ if [[ $OS = "Windows_NT" ]]; then
   if [[ $TARGET != "ANDROID" ]]; then
     cp $CPOPT "$SRCLIB"/$LIBPREFIX*.lib "$DESTPUBLIB"
     cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*.pdb "$DESTPUBLIB"
-  else
-    cp $CPOPT "$ANDROID_NDK/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a/libc++_shared.so" "$DESTPUBLIB"
   fi
 fi
 

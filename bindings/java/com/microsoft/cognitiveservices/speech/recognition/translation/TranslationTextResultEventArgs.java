@@ -11,7 +11,7 @@ package com.microsoft.cognitiveservices.speech.recognition.translation;
   */
 public class TranslationTextResultEventArgs //: System.EventArgs
 {
-    TranslationTextResultEventArgs(com.microsoft.cognitiveservices.speech.recognition.translation.TranslationTextResultEventArgs e)
+    TranslationTextResultEventArgs(com.microsoft.cognitiveservices.speech.internal.TranslationTextResultEventArgs e)
     {
         this._Result = new TranslationTextResult(e.getResult());
         this._SessionId = e.getSessionId();

@@ -11,7 +11,7 @@ else:
     import os
     os.environ['PATH'] = bin_dir + '/Debug;' + bin_dir + '/Release;' + ';' + os.environ['PATH']
 
-from carbon_py import RecognizerFactory, SessionEventCallback, SpeechRecognitionEventCallback
+from carbon_py import SpeechFactory, SessionEventCallback, SpeechRecognitionEventCallback
 # TODO: #1137487
 callbacks = {
   'session_started' : SessionEventCallback(lambda event:

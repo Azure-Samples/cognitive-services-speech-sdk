@@ -624,7 +624,7 @@ public:
 };
 
 
-class ISpxRecognizerFactory : public ISpxInterfaceBaseFor<ISpxRecognizerFactory>
+class ISpxSpeechApiFactory : public ISpxInterfaceBaseFor<ISpxSpeechApiFactory>
 {
 public:
 

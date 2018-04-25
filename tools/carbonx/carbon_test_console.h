@@ -224,5 +224,9 @@ private:
     std::shared_ptr<TranslationRecognizer> m_translationRecognizer;
     std::shared_ptr<IntentRecognizer> m_intentRecognizer;
     std::shared_ptr<Session> m_session;
+
+    std::wstring m_subscriptionKey;
+    std::wstring m_endpointUri;
+
     void* m_commandSystem = nullptr;
 };

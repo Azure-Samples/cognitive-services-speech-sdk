@@ -10,6 +10,7 @@
 #include "module_factory.h"
 #include "factory_helpers.h"
 
+
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {

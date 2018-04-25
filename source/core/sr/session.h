@@ -34,10 +34,10 @@ public:
 
     // --- ISpxSession
 
-    const std::wstring& GetSessionId() const;
+    virtual const std::wstring& GetSessionId() const override;
 
-    void AddRecognizer(std::shared_ptr<ISpxRecognizer> recognizer);
-    void RemoveRecognizer(ISpxRecognizer* recognizer);
+    virtual void AddRecognizer(std::shared_ptr<ISpxRecognizer> recognizer) override;
+    virtual void RemoveRecognizer(ISpxRecognizer* recognizer) override;
 
     CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync() override;
     CSpxAsyncOp<void> StartContinuousRecognitionAsync() override;

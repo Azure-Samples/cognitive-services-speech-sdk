@@ -109,7 +109,7 @@ private:
         auto hr = TranslationResult_GetTranslationText(resultHandle, nullptr, &bufLen);
         if (hr == SPXERR_BUFFER_TOO_SMALL)
         {
-            phraseBuffer = std::move(std::unique_ptr<Result_TranslationTextBufferHeader>((Result_TranslationTextBufferHeader *)(new char[bufLen])));
+            phraseBuffer = std::unique_ptr<Result_TranslationTextBufferHeader>((Result_TranslationTextBufferHeader *)(new char[bufLen]));
             hr = TranslationResult_GetTranslationText(resultHandle, phraseBuffer.get(), &bufLen);
         }
         SPX_THROW_ON_FAIL(hr);
@@ -135,9 +135,6 @@ private:
     };
 
     DISABLE_DEFAULT_CTORS(TranslationTextResult);
-
-    SPXRESULTHANDLE m_hresult;
-    bool m_isFinalResult;
 };
 
 /// <summary>
@@ -154,9 +151,9 @@ public:
     /// </summary>
     /// <param name="resultHandle">The handle of the result returned by recognizer in C-API.</param>
     explicit TranslationSynthesisResult(SPXRESULTHANDLE resultHandle) :
-        Audio(m_audioData),
-        m_hresult(resultHandle)
+        Audio(m_audioData) //, m_hresult(resultHandle)
     {
+        (void)(resultHandle);
         PopulateResultFields(resultHandle);
     };
 
@@ -189,9 +186,6 @@ private:
     };
 
     DISABLE_DEFAULT_CTORS(TranslationSynthesisResult);
-
-    SPXRESULTHANDLE m_hresult;
-
 };
 
 

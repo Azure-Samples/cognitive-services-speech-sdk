@@ -9,37 +9,43 @@ import java.io.Closeable;
 import com.microsoft.cognitiveservices.speech.ParameterCollection;
 import com.microsoft.cognitiveservices.speech.recognition.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.recognition.speech.SpeechRecognizer;
+import com.microsoft.cognitiveservices.speech.recognition.translation.TranslationRecognizer;
 
  /**
    * Factory methods to create recognizers.
    */
- public final class RecognizerFactory implements Closeable //: IDisposable
+ public final class SpeechFactory implements Closeable
  {
      // load the native library.
-    static {
+    static
+    {
         System.loadLibrary("carbon_java_bindings");
     }
 
     /**
       * Creates an instance of recognizer factory.
       */
-    public RecognizerFactory() throws UnsupportedOperationException
+    private SpeechFactory() throws UnsupportedOperationException
     {
-        Parameters = new ParameterCollection<RecognizerFactory>(this);
-        factoryImpl = com.microsoft.cognitiveservices.speech.internal.RecognizerFactory.getDefault();
+        com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromSubscription("illegal-subscription-key");
+        Parameters = new ParameterCollection<SpeechFactory>(this);
     }
 
     /**
-      * Creates an instance of recognizer factory with specified subscription key and region (optional).
-      * @param subscriptionKey The subscription key.
-      * @param region The region name.
+      * Creates an instance of recognizer factory with specified subscription key or authentication token and region (optional).
+      * @param isSubscription If true, authenticates via the subscriptionKey. If false, authenticates via the authorizationToken.
+      * @param subscriptionKeyOrAuthorizationToken The subscription key or authenticationToken based on the isSubscription flag.
+      * @param region The region name. Pass null if not used.
       */
-    public RecognizerFactory(String subscriptionKey, String region) throws UnsupportedOperationException
+    private SpeechFactory(boolean isSubscription, String subscriptionKeyOrAuthorizationToken, String region)
     {
-        Parameters = new ParameterCollection<RecognizerFactory>(this);
-        factoryImpl = com.microsoft.cognitiveservices.speech.internal.RecognizerFactory.getDefault();
+        factoryImpl = isSubscription ? 
+            com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromSubscription(subscriptionKeyOrAuthorizationToken) :
+            com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromAuthorizationToken(subscriptionKeyOrAuthorizationToken);
 
-        setSubscriptionKey(subscriptionKey);
+        // connect the native properties with the swig layer.
+        Parameters = new ParameterCollection<SpeechFactory>(this);
+
         if (region != null)
         {
             setRegion(region);
@@ -47,23 +53,35 @@ import com.microsoft.cognitiveservices.speech.recognition.speech.SpeechRecognize
     }
 
     /**
+      * Static instance of SpeechFactory returned by passing subscriptionKey 
+      * @param subscriptionKey The subscription key.
+      * @param region The region name. Pass null if not used.
+      * @return The speech factory
+      */
+    public static SpeechFactory fromSubscription(String subscriptionKey, String region)
+    {
+        return new SpeechFactory(true, subscriptionKey, region);
+    }    
+
+    /**
+      * Static instance of SpeechFactory returned by passing authorization token.
+      * @param authorizationToken The authorization token.
+      * @param region The region name. Pass null if not used.
+      * @return The speech factory
+      */
+    public static SpeechFactory fromAuthentication(String authorizationToken, String region)
+    {
+        return new SpeechFactory(false, authorizationToken, region);
+    }  
+    
+    /**
       * Gets the subscription key.
       * @return the subscription key.
       */
     public String getSubscriptionKey()
     {
-            return Parameters.getString(ParameterNames.SpeechSubscriptionKey);
+        return Parameters.getString(ParameterNames.SpeechSubscriptionKey);
     }
-
-    /**
-      * Sets the subscription key.
-      * @param value the subscription key.
-      */
-    public void setSubscriptionKey(String value)
-        {
-            // factoryImpl.SetSubscriptionKey(value);
-            Parameters.set(ParameterNames.SpeechSubscriptionKey, value);
-        }
 
     /**
       * Gets the authorization token.
@@ -73,7 +91,7 @@ import com.microsoft.cognitiveservices.speech.recognition.speech.SpeechRecognize
       */
     public String getAuthorizationToken()
     {
-            return Parameters.getString(ParameterNames.SpeechAuthToken);
+        return Parameters.getString(ParameterNames.SpeechAuthToken);
     }
 
     /**
@@ -83,10 +101,9 @@ import com.microsoft.cognitiveservices.speech.recognition.speech.SpeechRecognize
       * @param value the authorization token.
       */
     public void setAuthorizationToken(String value)
-        {
-            // factoryImpl.SetSubscriptionKey(value);
-            Parameters.set(ParameterNames.SpeechAuthToken, value);
-        }
+    {
+        Parameters.set(ParameterNames.SpeechAuthToken, value);
+    }
 
     /**
       * Gets the region name of the service to be connected.
@@ -94,17 +111,17 @@ import com.microsoft.cognitiveservices.speech.recognition.speech.SpeechRecognize
       */
     public String getRegion()
     {
-            return Parameters.getString(ParameterNames.Region);
-        }
+        return Parameters.getString(ParameterNames.Region);
+    }
 
     /**
       * Sets the region name of the service to be connected.
       * @param value the region name of the service to be connected.
       */
     public void setRegion(String value)
-        {
-            Parameters.set(ParameterNames.Region, value);
-        }
+    {
+        Parameters.set(ParameterNames.Region, value);
+    }
 
     /**
       * Gets the service endpoint.
@@ -112,7 +129,7 @@ import com.microsoft.cognitiveservices.speech.recognition.speech.SpeechRecognize
       */
     public String getEndpoint()
     {
-            return Parameters.getString(ParameterNames.SpeechEndpoint);
+        return Parameters.getString(ParameterNames.SpeechEndpoint);
     }
 
     /**
@@ -128,7 +145,7 @@ import com.microsoft.cognitiveservices.speech.recognition.speech.SpeechRecognize
     /**
       * The collection of parameters and their values defined for this RecognizerFactory.
       */
-    public final ParameterCollection<RecognizerFactory> Parameters;// { get; private set; }
+    public final ParameterCollection<SpeechFactory> Parameters;// { get; private set; }
 
     /**
       * Creates a translation recognizer, using the default microphone input.
@@ -232,6 +249,12 @@ import com.microsoft.cognitiveservices.speech.recognition.speech.SpeechRecognize
         disposed = true;
     }
 
-    private com.microsoft.cognitiveservices.speech.internal.IRecognizerFactory factoryImpl;
+    public com.microsoft.cognitiveservices.speech.internal.ICognitiveServicesSpeechFactory getFactoryImpl()
+    {
+        return factoryImpl;
+    }
+
+
+    private com.microsoft.cognitiveservices.speech.internal.ICognitiveServicesSpeechFactory factoryImpl;
     private boolean disposed = false;
 }

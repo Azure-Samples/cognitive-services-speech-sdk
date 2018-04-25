@@ -57,7 +57,10 @@ public:
     {
     }
 
-    virtual State GetState() { return m_state.load(); }
+    virtual State GetState() override
+    {
+        return m_state.load();
+    }
 
     virtual void PausePump() override {
         // TODO: remove from the interface. Not needed.

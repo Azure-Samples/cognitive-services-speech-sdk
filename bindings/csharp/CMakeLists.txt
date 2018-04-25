@@ -19,7 +19,8 @@ set(SWIG_MODULE_${CSHARP_BINDINGS}_EXTRA_DEPS
     ${SPEECH_CXX_API_HEADERS})
 
 # ${SWIG_INTERFACE} should resolve to {repo/root}/bindings/carbon.i
-set(CMAKE_SWIG_FLAGS -namespace Microsoft.CognitiveServices.Speech.Internal)
+# warning 302: identifier redifined by ...
+set(CMAKE_SWIG_FLAGS -w401,516,503,302 -namespace Microsoft.CognitiveServices.Speech.Internal)
 set_source_files_properties("${SRC_DIR}/carbon_csharp.i" PROPERTIES
     CPLUSPLUS ON)
 

@@ -16,10 +16,10 @@ constexpr auto g_speechSubscriptionKey = LR"(1f30c291f2474d39acfdf1d3bdf847c3)";
 constexpr auto g_customSpeechSubscriptionKey = LR"(82f1f909b993459d88384a53891f98d3)";
 constexpr auto g_customSpeechModelId = LR"(eb29f6e4-e97b-4157-8d3c-9d64a7b21a58)";
 
-
 void CarbonTestConsole::Sample_HelloWorld()
 {
-    auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizer();
+    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey);
+    auto recognizer = factory->CreateSpeechRecognizer();
 
     ConsoleWriteLine(L"Say something...");
     auto result = recognizer->RecognizeAsync().get();
@@ -29,7 +29,8 @@ void CarbonTestConsole::Sample_HelloWorld()
 
 void CarbonTestConsole::Sample_HelloWorld_WithEvents()
 {
-    auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizer();
+    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey);
+    auto recognizer = factory->CreateSpeechRecognizer();
 
     recognizer->IntermediateResult += [&](const SpeechRecognitionEventArgs& e) {
         ConsoleWriteLine(L"IntermediateResult: text=%ls", e.Result.Text.c_str());
@@ -43,7 +44,8 @@ void CarbonTestConsole::Sample_HelloWorld_WithEvents()
 
 void CarbonTestConsole::Sample_HelloWorld_PickEngine(const wchar_t* pszEngine) // L"Usp", L"Unidec", or L"Mock"
 {
-    auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizer();
+    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey);
+    auto recognizer = factory->CreateSpeechRecognizer();
     auto session = Session::FromRecognizer(recognizer);
 
     std::wstring propertyName = std::wstring(L"__use") + std::wstring(pszEngine) + std::wstring(L"RecoEngine");
@@ -70,14 +72,8 @@ void CarbonTestConsole::Sample_HelloWorld_Intent()
 
 void CarbonTestConsole::Sample_HelloWorld_Intent(const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId)
 {
-    // DefaultRecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-USP-NoDGI", true);
-    // DefaultRecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-USP-NoIntentJson", true);
-
-    // Create a speech factory associated with your speech subscription
-    auto speechSubscriptionKey = L"YourSpeechSubscriptionKey"; speechSubscriptionKey = g_speechSubscriptionKey;
-    //auto factory = SpeechFactory::FromSubscription(speechSubscriptionKey);
-    auto factory = RecognizerFactory::GetDefault();
-    DefaultRecognizerFactory::SetSubscriptionKey(speechSubscriptionKey);
+    auto endpoint = LR"(wss://speech.platform.bing.com/speech/recognition/interactive/cognitiveservices/v1?setflight=cognitiveservicesintent&format=simple&language=en-us)";
+    auto factory = SpeechFactory::FromEndpoint(endpoint, g_speechSubscriptionKey);
 
     // Create an intent recognizer using microphone as audio input.
     auto recognizer = factory->CreateIntentRecognizer();
@@ -127,8 +123,8 @@ void CarbonTestConsole::Sample_HelloWorld_Intent(const wchar_t* hostName, const 
 
 void CarbonTestConsole::Sample_HelloWorld_Subscription()
 {
-    DefaultRecognizerFactory::SetSubscriptionKey(g_speechSubscriptionKey);
-    auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizer();
+    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey);
+    auto recognizer = factory->CreateSpeechRecognizer();
 
     ConsoleWriteLine(L"Say something...");
     auto result = recognizer->RecognizeAsync().get();
@@ -138,35 +134,22 @@ void CarbonTestConsole::Sample_HelloWorld_Subscription()
 
 void CarbonTestConsole::Sample_HelloWorld_Subscription_With_CRIS()
 {
-    if (0)
-    {
-        RecognizerFactory::GetDefault()->SetSubscriptionKey(g_customSpeechSubscriptionKey);
+    auto factory = SpeechFactory::FromSubscription(g_customSpeechSubscriptionKey);
+    auto recognizer = factory->CreateSpeechRecognizer();
 
-        auto recognizer = RecognizerFactory::GetDefault()->CreateSpeechRecognizer();
-        recognizer->SetDeploymentId(g_customSpeechModelId);
+    recognizer->SetDeploymentId(g_customSpeechModelId);
 
-        ConsoleWriteLine(L"Say something...");
-        auto result = recognizer->RecognizeAsync().get();
+    ConsoleWriteLine(L"Say something...");
+    auto result = recognizer->RecognizeAsync().get();
 
-        ConsoleWriteLine(L"You said:\n\n    '%ls'", result->Text.c_str());
-    }
-    else if (1)
-    {
-        DefaultRecognizerFactory::SetSubscriptionKey(g_customSpeechSubscriptionKey);
-
-        auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizer();
-        recognizer->SetDeploymentId(g_customSpeechModelId);
-
-        ConsoleWriteLine(L"Say something...");
-        auto result = recognizer->RecognizeAsync().get();
-
-        ConsoleWriteLine(L"You said:\n\n    '%ls'", result->Text.c_str());
-    }
+    ConsoleWriteLine(L"You said:\n\n    '%ls'", result->Text.c_str());
 }
 
 void CarbonTestConsole::Sample_HelloWorld_Kws()
 {
-    auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizer();
+    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey);
+    auto recognizer = factory->CreateSpeechRecognizer();
+
 
     recognizer->IntermediateResult += [&](const SpeechRecognitionEventArgs& e) {
         ConsoleWriteLine(L"IntermediateResult: text=%ls", e.Result.Text.c_str());
@@ -184,7 +167,8 @@ void CarbonTestConsole::Sample_HelloWorld_Kws()
 
 void CarbonTestConsole::Sample_HelloWorld_Language(const wchar_t* language)
 {
-    auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizer(language);
+    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey);
+    auto recognizer = factory->CreateSpeechRecognizer(language);
 
     ConsoleWriteLine(L"Say something...");
     auto result = recognizer->RecognizeAsync().get();

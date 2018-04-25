@@ -35,9 +35,12 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine(String.Format("Intent recognition: Session event: {0}.", e.ToString()));
         }
 
-        public static async Task IntentRecognitionBaseModelAsync(RecognizerFactory factory, string fileName)
+        public static async Task IntentRecognitionBaseModelAsync(string keySpeech, string fileName)
         {
             Console.WriteLine("Intent Recognition using base speech model.");
+
+            var factory = SpeechFactory.FromSubscription(keySpeech, "");
+
             if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {
                 using (var reco = factory.CreateIntentRecognizer())
@@ -54,11 +57,23 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
-        public static async Task IntentRecognitionByEndpointAsync(RecognizerFactory factory, string endpoint, string fileName)
-        {
-            Console.WriteLine(String.Format("Intent Recognition using endpoint:{0}.", endpoint));
+        //public static async Task IntentRecognitionCustomizedModelAsync(string keySpeech, string modelId, string fileName)
+        //{
+        //    var factory = SpeechFactory.Instance;
 
-            factory.EndpointURL = new Uri(endpoint);
+        //    Console.WriteLine(String.Format("Intent Recognition using customized speech model:{0}.", modelId));
+
+        //    factory.SubscriptionKey = keySpeech;
+        //    factory.ModelId = modelId;
+
+        //    await DoIntentRecognitionAsync(factory, fileName).ConfigureAwait(false);
+        //}
+
+        public static async Task IntentRecognitionByEndpointAsync(string subKey, string endpoint, string fileName)
+        {
+            var factory = SpeechFactory.FromEndPoint(new Uri(endpoint), subKey);
+
+            Console.WriteLine(String.Format("Intent Recognition using endpoint:{0}.", endpoint));
 
             if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {

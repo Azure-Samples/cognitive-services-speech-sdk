@@ -13,14 +13,13 @@ include_directories("${COMMON}/include")
 include_directories("${USP}/include")
 
 set(HEADERS
-    "${INC_DIR}/recognizer_factory.h"
     )
 
 set(HEADERS_PRIVATE
     "${SRC_DIR}/stdafx.h"
     "${SRC_DIR}/audio_stream_session.h"
     "${SRC_DIR}/create_module_object.h"
-    "${SRC_DIR}/default_recognizer_factory.h"
+    "${SRC_DIR}/speech_api_factory.h"
     "${SRC_DIR}/intent_recognizer.h"
     "${SRC_DIR}/intent_trigger.h"
     "${SRC_DIR}/luis_direct_lu_engine_adapter.h"
@@ -37,7 +36,7 @@ set(HEADERS_PRIVATE
 set(SOURCES
     "${SRC_DIR}/audio_stream_session.cpp"
     "${SRC_DIR}/create_module_object.cpp"
-    "${SRC_DIR}/default_recognizer_factory.cpp"
+    "${SRC_DIR}/speech_api_factory.cpp"
     "${SRC_DIR}/intent_recognizer.cpp"
     "${SRC_DIR}/intent_trigger.cpp"
     "${SRC_DIR}/luis_direct_lu_engine_adapter.cpp"
@@ -45,7 +44,6 @@ set(SOURCES
     "${SRC_DIR}/recognition_event_args.cpp"
     "${SRC_DIR}/recognition_result.cpp"
     "${SRC_DIR}/recognizer.cpp"
-    "${SRC_DIR}/recognizer_factory.cpp"
     "${SRC_DIR}/session.cpp"
     "${SRC_DIR}/session_event_args.cpp"
     "${SRC_DIR}/usp_reco_engine_adapter.cpp"

@@ -9,7 +9,7 @@ package com.microsoft.cognitiveservices.speech.recognition.translation;
   */
 public class TranslationSynthesisResultEventArgs //: System.EventArgs
 {
-    TranslationSynthesisResultEventArgs(com.microsoft.cognitiveservices.speech.recognition.translation.TranslationSynthesisResultEventArgs e)
+    TranslationSynthesisResultEventArgs(com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResultEventArgs e)
     {
         this._Result = new TranslationSynthesisResult(e.getResult());
         this._sessionId = e.getSessionId();

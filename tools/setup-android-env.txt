@@ -98,4 +98,9 @@ adb push lib/libcarbon.so                  /data/carbon
 adb push \android-ndk-r16b/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a/libc++_shared.so /data/carbon
 
 
+# CLANG SETUP DEBUG
+cmake  -G "NMake Makefiles" -Duse_default_uuid=ON  -DCMAKE_SYSTEM_NAME=Android -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang  -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a -DCMAKE_ANDROID_NDK=/android-ndk-r16b    -DCMAKE_SYSTEM_VERSION=26 -DCMAKE_ANDROID_STL_TYPE=c++_static  -DOPENSSL_ROOT_DIR=\Carbon\external\openssl\_install  -DCURL_LIBRARY=\Carbon\external\curl\_install\lib\libcurl.so -DCURL_INCLUDE_DIR=\Carbon\external\curl\_install\include -DCMAKE_BUILD_TYPE=Debug ..
+
+# CLANG SETUP RELEASE
+cmake  -G "NMake Makefiles" -Duse_default_uuid=ON  -DCMAKE_SYSTEM_NAME=Android -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang  -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a -DCMAKE_ANDROID_NDK=/android-ndk-r16b    -DCMAKE_SYSTEM_VERSION=26 -DCMAKE_ANDROID_STL_TYPE=c++_static  -DOPENSSL_ROOT_DIR=\Carbon\external\openssl\_install  -DCURL_LIBRARY=\Carbon\external\curl\_install\lib\libcurl.so -DCURL_INCLUDE_DIR=\Carbon\external\curl\_install\include -DCMAKE_BUILD_TYPE=Release ..
 echo done.

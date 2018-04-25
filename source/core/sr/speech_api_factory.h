@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// default_recognizer_factory.h: Implementation declarations for CSpxDefaultRecognizerFactory C++ class
+// speech_api_factory.h: Implementation declarations for CSpxSpeechApiFactory C++ class
 //
 
 #pragma once
@@ -11,6 +11,7 @@
 #include "service_helpers.h"
 #include <speechapi_cxx_audioinputstream.h>
 #include "interface_helpers.h"
+#include "named_properties_impl.h"
 
 
 namespace Microsoft {
@@ -19,11 +20,12 @@ namespace Speech {
 namespace Impl {
 
 
-class CSpxDefaultRecognizerFactory :
+class CSpxSpeechApiFactory :
     public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
     public ISpxServiceProvider,
-    public ISpxRecognizerFactory,
-    public ISpxGenericSite
+    public ISpxSpeechApiFactory,
+    public ISpxGenericSite,
+    public ISpxNamedPropertiesImpl
 {
 public:
 
@@ -32,11 +34,12 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
-        SPX_INTERFACE_MAP_ENTRY(ISpxRecognizerFactory)
+        SPX_INTERFACE_MAP_ENTRY(ISpxSpeechApiFactory)
         SPX_INTERFACE_MAP_ENTRY(ISpxGenericSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxNamedPropertiesImpl)
     SPX_INTERFACE_MAP_END()
 
-    // --- ISpxRecognizerFactory
+    // --- ISpxSpeechApiFactory
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer() override;
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream) override;
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language) override;
@@ -63,6 +66,7 @@ public:
 protected:
 
     std::shared_ptr<ISpxRecognizer> CreateRecognizerInternal(const char* sessionClassName, const char* recognizerClassName, wchar_t const* fileName = nullptr, wchar_t const* language = nullptr);
+    std::shared_ptr<ISpxNamedProperties> GetParentProperties() override { return SpxQueryService<ISpxNamedProperties>(GetSite()); }
 
 private:
 

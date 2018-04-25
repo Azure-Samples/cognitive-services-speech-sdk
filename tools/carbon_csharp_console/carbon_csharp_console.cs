@@ -139,6 +139,7 @@ namespace MicrosoftSpeechSDKSamples
                     }
                 }
 
+#if false
                 var factory = RecognizerFactory.Instance;
                 if (useToken)
                 {
@@ -151,25 +152,25 @@ namespace MicrosoftSpeechSDKSamples
                     factory.SubscriptionKey = subKey;
                     Console.WriteLine("Use subscription key.");
                 }
+#endif
 
                 if (isSpeechReco)
                 {
                     if (useEndpoint)
                     {
                         Console.WriteLine("=============== Run speech recognition samples by specifying endpoint. ===============");
-                        SpeechRecognitionSamples.SpeechRecognitionByEndpointAsync(factory, endpoint, fileName).Wait();
+                        SpeechRecognitionSamples.SpeechRecognitionByEndpointAsync(subKey, endpoint, fileName).Wait();
                     }
                     else
                     {
                         if (useBaseModel)
                         {
                             Console.WriteLine("=============== Run speech recognition samples using base model. ===============");
-                            SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(factory, fileName).Wait();
+                            SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(subKey, fileName).Wait();
                         }
                         else
                         {
-                            Console.WriteLine("=============== Run speech recognition samples using customized model. ===============");
-                            SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(factory, modelId, fileName).Wait();
+                            Console.WriteLine("=============== Speech recognition with CRIS model is not supported yet. ===============");
                         }
                     }
                 }
@@ -178,14 +179,14 @@ namespace MicrosoftSpeechSDKSamples
                     if (useEndpoint)
                     {
                         Console.WriteLine("=============== Run intent recognition samples by specifying endpoint. ===============");
-                        IntentRecognitionSamples.IntentRecognitionByEndpointAsync(factory, endpoint, fileName).Wait();
+                        IntentRecognitionSamples.IntentRecognitionByEndpointAsync(subKey, endpoint, fileName).Wait();
                     }
                     else
                     {
                         if (useBaseModel)
                         {
                             Console.WriteLine("=============== Run intent recognition samples using base speech model. ===============");
-                            IntentRecognitionSamples.IntentRecognitionBaseModelAsync(factory, fileName).Wait();
+                            IntentRecognitionSamples.IntentRecognitionBaseModelAsync(subKey, fileName).Wait();
                         }
                         else
                         {
@@ -198,14 +199,14 @@ namespace MicrosoftSpeechSDKSamples
                     if (useEndpoint)
                     {
                         Console.WriteLine("=============== Run translation samples by specifying endpoint. ===============");
-                        TranslationSamples.TranslationByEndpointAsync(factory, endpoint, fileName).Wait();
+                        TranslationSamples.TranslationByEndpointAsync(subKey, endpoint, fileName).Wait();
                     }
                     else
                     {
                         if (useBaseModel)
                         {
                             Console.WriteLine("=============== Run translationsamples using base speech model. ===============");
-                            TranslationSamples.TranslationBaseModelAsync(factory, fileName).Wait();
+                            TranslationSamples.TranslationBaseModelAsync(subKey, fileName).Wait();
                         }
                         else
                         {

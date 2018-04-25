@@ -46,8 +46,8 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationTextResult)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationTextResult, Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationTextResultEventArgs>)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationRecognizer)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::IRecognizerFactory)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::IDefaultRecognizerFactory)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::ISpeechFactory)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::ICognitiveServicesSpeechFactory)
 
 %template(WstringVector) std::vector<std::wstring>;
 
@@ -319,7 +319,7 @@
 
 %template(RecognizerParameterValueCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXRECOHANDLE, Microsoft::CognitiveServices::Speech::Recognition::RecognizerParameterValue>;
 %template(ResultPropertyValueCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXRESULTHANDLE, Microsoft::CognitiveServices::Speech::Recognition::ResultPropertyValue>;
-%template(RecognizerFactoryParameterCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXRECOFACTORYHANDLE, Microsoft::CognitiveServices::Speech::Recognition::RecognizerFactoryParameterValue>;
+%template(RecognizerFactoryParameterCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXFACTORYHANDLE, Microsoft::CognitiveServices::Speech::Recognition::FactoryParameterValue>;
 %template(SessionParameterValueCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXSESSIONHANDLE, Microsoft::CognitiveServices::Speech::SessionParameterValue>;
 
 %include <speechapi_cxx_audioinputstream.h>
@@ -386,7 +386,7 @@
 
 %include <speechapi_cxx_intent_recognizer.h>
 
-%ignore Microsoft::CognitiveServices::Speech::Recognition::RecognizerFactoryParameterValue::RecognizerFactoryParameterValue(SPXRECOFACTORYHANDLE, enum FactoryParameter);
+%ignore Microsoft::CognitiveServices::Speech::Recognition::FactoryParameterValue::FactoryParameterValue(SPXFACTORYHANDLE, enum FactoryParameter);
 %ignore GetLanguageResource(LanguageResourceScope scopes, std::wstring acceptLanguage);
 
 %include <speechapi_cxx_translation_result.h>
@@ -411,8 +411,8 @@
 
 %immutable Microsoft::CognitiveServices::Speech::Recognition::IRecognizerFactory::Parameters;
 
-%include <speechapi_cxx_recognizer_factory_parameter.h>
-%include <speechapi_cxx_recognizer_factory.h>
+%include <speechapi_cxx_factory_parameter.h>
+%include <speechapi_cxx_factory.h>
 
 %immutable Microsoft::CognitiveServices::Speech::Session::Parameters;
 %include <speechapi_cxx_session_parameter_collection.h>

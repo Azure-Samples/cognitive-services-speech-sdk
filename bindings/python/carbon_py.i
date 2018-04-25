@@ -48,7 +48,6 @@
 
 %include "carbon.i"
 
-
 // TODO (#1137487): monkey patch event signals to keep the callbacks alive, 
 // until they are disconnected. 
 %define %py_wrap_callbacks(T)
@@ -89,8 +88,8 @@ class RecognizerFactory:
 
     def create_speech_recognizer(self, filename=None):
         if not filename:
-            return _DefaultRecognizerFactory.create_speech_recognizer()
-        return _DefaultRecognizerFactory.create_speech_recognizer_with_file_input(filename)
+            return factory.create_speech_recognizer()
+        return factory.create_speech_recognizer_with_file_input(filename)
 %}
 
 

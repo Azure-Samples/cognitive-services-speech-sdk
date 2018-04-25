@@ -14,34 +14,59 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
     /// <summary>
     /// Factory methods to create recognizers.
     /// </summary>
-    public sealed class RecognizerFactory
+    public sealed class SpeechFactory
     {
         /// <summary>
-        /// Creates an instance of recognizer factory. Currently as private method.
-        /// </summary>
-        private RecognizerFactory()
-        {
-            InitInternal();
-        }
-
-        /// <summary>
-        /// Creates an instance of recognizer factory with specified subscription key and region (optional). Currently as private method.
+        /// Creates an instance of the speech factory with specified subscription key and region (optional). Currently as private method.
         /// </summary>
         /// <param name="subscriptionKey">The subscription key.</param>
         /// <param name="region">The region name.</param>
-        private RecognizerFactory(string subscriptionKey, string region)
+        private SpeechFactory(string subscriptionKey, string region)
         {
-            InitInternal();
-            SubscriptionKey = subscriptionKey;
-            Region = region;
+            this.factoryImpl = Microsoft.CognitiveServices.Speech.Internal.SpeechFactory.FromSubscription(subscriptionKey, region);
+            Parameters = new ParameterCollection<SpeechFactory>(this);
         }
 
         /// <summary>
-        /// Gets the default recognizer factory.
+        /// Creates an instance of the speech factory with specified endpoint and subscription key (optional). Currently as private method.
         /// </summary>
-        public static RecognizerFactory Instance
+        /// <param name="endpoint">The service endpoint to connect to.</param>
+        /// <param name="subscriptionKey">The subscription key.</param>
+        private SpeechFactory(Uri endpoint, string subscriptionKey)
         {
-            get { return instanceLazy.Value; }
+            this.factoryImpl = Microsoft.CognitiveServices.Speech.Internal.SpeechFactory.FromEndpoint(endpoint.ToString(), subscriptionKey);
+            Parameters = new ParameterCollection<SpeechFactory>(this);
+        }
+
+        /// <summary>
+        /// The defaut ctor.
+        /// </summary>
+        private SpeechFactory()
+        {
+            Parameters = new ParameterCollection<SpeechFactory>(this);
+        }
+
+        /// <summary>
+        /// Creates an instance of the speech factory with specified subscription key and region (optional).
+        /// </summary>
+        /// <param name="subscriptionKey">The subscription key.</param>
+        /// <param name="region">The region name.</param>
+        public static SpeechFactory FromSubscription(string subsciptionKey, string region)
+        {
+            SpeechFactory factory = new SpeechFactory(subsciptionKey, region);
+            return factory;
+        }
+
+        /// <summary>
+        /// Creates an instance of the speech factory with specified endpoint and subscription key (optional).
+        /// </summary>
+        /// <param name="endpoint">The service endpoint to connect to.</param>
+        /// <param name="subsciptionKey"></param>
+        /// <returns></returns>
+        public static SpeechFactory FromEndPoint(Uri endpoint, string subscriptionKey)
+        {
+            SpeechFactory factory = new SpeechFactory(endpoint, subscriptionKey);
+            return factory;
         }
 
         /// <summary>
@@ -54,9 +79,9 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
                 return Parameters.Get<string>(ParameterNames.SpeechSubscriptionKey);
             }
 
-            set
+            private set
             {
-                factoryImpl.SetSubscriptionKey(value);
+                Parameters.Set(ParameterNames.SpeechSubscriptionKey, value);
             }
         }
 
@@ -74,7 +99,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
 
             set
             {
-                factoryImpl.SetAuthorizationToken(value);
+                Parameters.Set(ParameterNames.SpeechAuthToken, value);
             }
         }
 
@@ -88,9 +113,9 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
                 return Parameters.Get<string>(ParameterNames.Region);
             }
 
-            set
+            private set
             {
-                factoryImpl.SetRegion(value);
+                Parameters.Set(ParameterNames.Region, value);
             }
         }
 
@@ -105,16 +130,16 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
                 return new Uri(endpointStr);
             }
 
-            set
+            private set
             {
-                factoryImpl.SetEndpointUrl(value.AbsoluteUri);
+                Parameters.Set(ParameterNames.SpeechEndpoint, value.ToString());
             }
         }
 
         /// <summary>
-        /// The collection of parameters and their values defined for this <see cref="RecognizerFactory"/>.
+        /// The collection of parameters and their values defined for this <see cref="SpeechFactory"/>.
         /// </summary>
-        public ParameterCollection<RecognizerFactory> Parameters { get; private set; }
+        public ParameterCollection<SpeechFactory> Parameters { get; set; }
 
         /// <summary>
         /// Creates a speech recognizer, using the default microphone input.
@@ -187,16 +212,6 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
         }
 
         /// <summary>
-        /// Creates an intent recognizer, using the default microphone input.
-        /// </summary>
-        /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
-        /// <returns>An intent recognizer instance.</returns>
-        public IntentRecognizer CreateIntentRecognizer(string language)
-        {
-            return new IntentRecognizer(factoryImpl.CreateIntentRecognizer(language));
-        }
-
-        /// <summary>
         /// Creates an intent recognizer, using the specified file as audio input.
         /// </summary>
         /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.</param>
@@ -204,17 +219,6 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
         public IntentRecognizer CreateIntentRecognizerWithFileInput(string audioFile)
         {
             return new IntentRecognizer(factoryImpl.CreateIntentRecognizerWithFileInput(audioFile));
-        }
-
-        /// <summary>
-        /// Creates an intent recognizer, using the specified file as audio input.
-        /// </summary>
-        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.</param>
-        /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
-        /// <returns>An intent recognizer instance</returns>
-        public IntentRecognizer CreateIntentRecognizerWithFileInput(string audioFile, string language)
-        {
-            return new IntentRecognizer(factoryImpl.CreateIntentRecognizerWithFileInput(audioFile, language));
         }
 
         /// <summary>
@@ -274,16 +278,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
             throw new NotImplementedException();
         }
 
-        private static readonly Lazy<RecognizerFactory> instanceLazy = 
-            new Lazy<RecognizerFactory>(() => new RecognizerFactory(), true);
-
-        private Microsoft.CognitiveServices.Speech.Internal.IRecognizerFactory factoryImpl;
-
-        private void InitInternal()
-        {
-            Parameters = new ParameterCollection<RecognizerFactory>(this);
-            factoryImpl = Microsoft.CognitiveServices.Speech.Internal.RecognizerFactory.GetDefault();
-        }
+        internal Microsoft.CognitiveServices.Speech.Internal.ICognitiveServicesSpeechFactory factoryImpl;
 
         private static Internal.WstringVector AsWStringVector(IEnumerable<string> input)
         {

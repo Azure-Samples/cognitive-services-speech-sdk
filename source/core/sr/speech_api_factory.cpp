@@ -2,13 +2,13 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// default_recognizer_factory.cpp: Implementation definitions for CSpxDefaultRecognizerFactory C++ class
+// speech_api_factory.cpp: Implementation definitions for CSpxSpeechApiFactory C++ class
 //
 
 #include "stdafx.h"
 #include "spxcore_common.h"
 #include "create_object_helpers.h"
-#include "default_recognizer_factory.h"
+#include "speech_api_factory.h"
 #include "site_helpers.h"
 #include "named_properties_constants.h"
 
@@ -19,37 +19,37 @@ namespace Speech {
 namespace Impl {
 
 
-std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateSpeechRecognizer() 
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizer() 
 {
     return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxRecognizer");
 }
 
-std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateSpeechRecognizer(const std::wstring& language)
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizer(const std::wstring& language)
 {
     return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxRecognizer", nullptr, language.c_str());
 }
 
-std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateSpeechRecognizerWithFileInput(const std::wstring& fileName)
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerWithFileInput(const std::wstring& fileName)
 {
     return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxRecognizer", fileName.c_str());
 }
 
-std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language)
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language)
 {
     return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxRecognizer", fileName.c_str(), language.c_str());
 }
 
-std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateIntentRecognizer()
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateIntentRecognizer()
 {
     return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxIntentRecognizer");
 }
 
-std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateIntentRecognizerWithFileInput(const std::wstring& fileName)
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateIntentRecognizerWithFileInput(const std::wstring& fileName)
 {
     return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxIntentRecognizer", fileName.c_str());
 }
 
-std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream)
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream)
 {
     // Create the session
     auto factoryAsSite = SpxSiteFromThis(this);
@@ -70,17 +70,17 @@ std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateSpeechRecogn
     return recognizer;
 }
 
-std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
 {
     return CreateTranslationRecognizerInternal(nullptr, sourceLanguage, targetLanguage);
 }
 
-std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
 {
     return CreateTranslationRecognizerInternal(fileName.c_str(), sourceLanguage, targetLanguage);
 }
 
-std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateTranslationRecognizerInternal(wchar_t const* fileNameStr, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognizerInternal(wchar_t const* fileNameStr, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
 {
     // Create the session
     auto factoryAsSite = SpxSiteFromThis(this);
@@ -120,7 +120,7 @@ std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateTranslationR
     return recognizer;
 }
 
-std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateTranslationRecognizerWithStream(AudioInputStream *stream, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognizerWithStream(AudioInputStream *stream, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
 {
     // Create the session
     auto factoryAsSite = SpxSiteFromThis(this);
@@ -146,7 +146,7 @@ std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateTranslationR
 }
 
 
-std::shared_ptr<ISpxRecognizer> CSpxDefaultRecognizerFactory::CreateRecognizerInternal(const char* sessionClassName, 
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateRecognizerInternal(const char* sessionClassName, 
     const char* recognizerClassName, 
     wchar_t const* fileName,
     wchar_t const* language)

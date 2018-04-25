@@ -9,6 +9,8 @@
 #include <string>
 #include "catch.hpp"
 #include "test_utils.h"
+#include "mock_controller.h"
+
 
 #ifdef _DEBUG
 #define SPX_CONFIG_INCLUDE_ALL_DBG 1
@@ -19,6 +21,8 @@
 
 #include "speechapi_cxx.h"
 
+
+using namespace Microsoft::CognitiveServices::Speech::Impl; // for mocks
 
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Recognition;
@@ -36,42 +40,39 @@ static wstring input_file(L"tests/input/whatstheweatherlike.wav");
 
 void UseMocks(bool value)
 {
-    DefaultRecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-MOCK-UspRecoEngine", value);
-    DefaultRecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-MOCK-Microphone", value);
-    DefaultRecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-MOCK-SdkKwsEngine", value);
+    SpxSetMockParameterBool(L"CARBON-INTERNAL-MOCK-UspRecoEngine", value);
+    SpxSetMockParameterBool(L"CARBON-INTERNAL-MOCK-Microphone", value);
+    SpxSetMockParameterBool(L"CARBON-INTERNAL-MOCK-SdkKwsEngine", value);
 }
 
 void UseMockUsp(bool value)
 {
-    DefaultRecognizerFactory::Parameters::SetBool(L"CARBON-INTERNAL-MOCK-UspRecoEngine", value);
+    SpxSetMockParameterBool(L"CARBON-INTERNAL-MOCK-UspRecoEngine", value);
 }
 
 bool IsUsingMocks(bool uspMockRequired = true)
 {
-    return DefaultRecognizerFactory::Parameters::GetBool(L"CARBON-INTERNAL-MOCK-Microphone") &&
-        DefaultRecognizerFactory::Parameters::GetBool(L"CARBON-INTERNAL-MOCK-SdkKwsEngine") &&
-        (DefaultRecognizerFactory::Parameters::GetBool(L"CARBON-INTERNAL-MOCK-UspRecoEngine") || !uspMockRequired);
+    return SpxGetMockParameterBool(L"CARBON-INTERNAL-MOCK-Microphone") &&
+           SpxGetMockParameterBool(L"CARBON-INTERNAL-MOCK-SdkKwsEngine") &&
+           (SpxGetMockParameterBool(L"CARBON-INTERNAL-MOCK-UspRecoEngine") || !uspMockRequired);
 }
 
 void SetMockRealTimeSpeed(int value)
 {
-    DefaultRecognizerFactory::Parameters::SetNumber(L"CARBON-INTERNAL-MOCK-RealTimeAudioPercentage", value);
+    SpxSetMockParameterNumber(L"CARBON-INTERNAL-MOCK-RealTimeAudioPercentage", value);
 }
 
 TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 {
-    if (!g_endpoint.empty())
-    {
-        DefaultRecognizerFactory::SetEndpointUrl(PAL::ToWString(g_endpoint));
-    }
+    // Assuming subscription key contains only single-byte characters.
+    auto key = std::wstring(g_keySpeech.begin(), g_keySpeech.end());
+    auto factory = !g_endpoint.empty()
+        ? SpeechFactory::FromEndpoint(PAL::ToWString(g_endpoint), key)
+        : SpeechFactory::FromSubscription(key.c_str());
 
     GIVEN("Mocks for USP, Microphone, WaveFilePump and Reader, and then USP ...")
     {
         UseMocks(true);
-
-        // Assuming subscription key contains only single-byte characters.
-        auto keyW = std::wstring(g_keySpeech.begin(), g_keySpeech.end());
-        DefaultRecognizerFactory::SetSubscriptionKey(keyW.c_str());
 
         REQUIRE(exists(input_file));
 
@@ -101,7 +102,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
                 SPX_TRACE_VERBOSE("%s: START of loop #%d; mockUsp=%d; realtime=%d", __FUNCTION__, i, useMockUsp, realTimeRate);
 
-                auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizerWithFileInput(input_file);
+                auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
                 REQUIRE(recognizer != nullptr);
                 REQUIRE(IsUsingMocks(useMockUsp));
 
@@ -168,7 +169,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         REQUIRE(exists(input_file));
         REQUIRE(!IsUsingMocks());
 
-        auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizerWithFileInput(input_file);
+        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
         auto result = recognizer->RecognizeAsync().get();
         REQUIRE(!result->Properties[ResultProperty::Json].GetString().empty());
     }
@@ -179,16 +180,9 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         REQUIRE(exists(input_file));
         REQUIRE(!IsUsingMocks());
 
-        auto key = DefaultRecognizerFactory::Parameters::GetString(FactoryParameter::SubscriptionKey);
-        DefaultRecognizerFactory::SetSubscriptionKey(L"invalid_key");
-
-        auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizerWithFileInput(input_file);
+        auto badKeyFactory = SpeechFactory::FromSubscription(L"invalid_key");
+        auto recognizer = badKeyFactory->CreateSpeechRecognizerWithFileInput(input_file);
         auto result = recognizer->RecognizeAsync().get();
-
-        if (!key.empty())
-        {
-            DefaultRecognizerFactory::SetSubscriptionKey(key);
-        }
 
         REQUIRE(result->Reason == Reason::Canceled);
         REQUIRE(!result->ErrorDetails.empty());
@@ -197,6 +191,12 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
 TEST_CASE("KWS basics", "[api][cxx]")
 {
+    // Assuming subscription key contains only single-byte characters.
+    auto key = std::wstring(g_keySpeech.begin(), g_keySpeech.end());
+    auto factory = !g_endpoint.empty()
+        ? SpeechFactory::FromEndpoint(PAL::ToWString(g_endpoint), key)
+        : SpeechFactory::FromSubscription(key.c_str());
+
     GIVEN("Mocks for USP, KWS, and the Microphone...")
     {
         UseMocks(true);
@@ -209,7 +209,7 @@ TEST_CASE("KWS basics", "[api][cxx]")
 
         WHEN("We do a keyword recognition with a speech recognizer")
         {
-            auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizer();
+            auto recognizer = factory->CreateSpeechRecognizer();
             REQUIRE(recognizer != nullptr);
             REQUIRE(IsUsingMocks(true));
 
@@ -250,10 +250,11 @@ TEST_CASE("KWS basics", "[api][cxx]")
 
 TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
 {
-    if (!g_endpoint.empty())
-    {
-        DefaultRecognizerFactory::SetEndpointUrl(PAL::ToWString(g_endpoint));
-    }
+    // Assuming subscription key contains only single-byte characters.
+    auto key = std::wstring(g_keySpeech.begin(), g_keySpeech.end());
+    auto factory = !g_endpoint.empty()
+        ? SpeechFactory::FromEndpoint(PAL::ToWString(g_endpoint), key)
+        : SpeechFactory::FromSubscription(key.c_str());
 
     REQUIRE(exists(input_file));
 
@@ -264,12 +265,8 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
     {
         bool callback_invoked = false;
 
-        // Assuming subscription key contains only single-byte characters.
-        auto keyW = std::wstring(g_keySpeech.begin(), g_keySpeech.end());
-        DefaultRecognizerFactory::SetSubscriptionKey(keyW.c_str());
-
         REQUIRE(!IsUsingMocks());
-        auto recognizer = DefaultRecognizerFactory::CreateSpeechRecognizerWithFileInput(input_file);
+        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
 
         auto callback = [&](const SpeechRecognitionEventArgs& args)
         {

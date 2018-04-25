@@ -72,16 +72,13 @@
 #include "shared_ptr_helpers.h"
 #include "singleton.h"
 #include "site_helpers.h"
+#include "create_object_helpers.h"
 
 
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
-
-
-template <class I>
-inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, std::shared_ptr<ISpxGenericSite> site);
 
 
 class CSpxResourceManager : 

@@ -16,7 +16,6 @@
 #include "spxcore_common.h"
 #include "handle_table.h"
 
-#include "recognizer_factory.h"
 #include "try_catch_helpers.h"
 
 #include <speechapi_c.h>

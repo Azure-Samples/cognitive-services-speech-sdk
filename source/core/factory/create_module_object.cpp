@@ -7,7 +7,7 @@
 
 #include "stdafx.h"
 
-#include "default_recognizer_factory.h"
+#include "speech_api_factory.h"
 #include "factory_helpers.h"
 
 
@@ -26,7 +26,7 @@ SPX_EXTERN_C void* PrimaryCarbon_CreateModuleObject(const char* className, const
     SPX_FACTORY_MAP_BEGIN();
     SPX_FACTORY_MAP_ENTRY_FUNC(AudioLib_CreateModuleObject);
     SPX_FACTORY_MAP_ENTRY_FUNC(SRLib_CreateModuleObject);
-    SPX_FACTORY_MAP_ENTRY(CSpxDefaultRecognizerFactory, ISpxRecognizerFactory);
+    SPX_FACTORY_MAP_ENTRY(CSpxSpeechApiFactory, ISpxSpeechApiFactory);
     SPX_FACTORY_MAP_END();
 }
 

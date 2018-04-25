@@ -15,16 +15,25 @@ public final class ParameterCollection<OwnerType> implements Closeable
 {
     public ParameterCollection(OwnerType owner) throws UnsupportedOperationException
     {
-        if (owner.getClass().equals(com.microsoft.cognitiveservices.speech.recognition.RecognizerFactory.class))
+        if (owner.getClass().equals(com.microsoft.cognitiveservices.speech.recognition.SpeechFactory.class))
         {
-            isFactoryParameter = true;
-            speechParameters = null;
+        com.microsoft.cognitiveservices.speech.recognition.SpeechFactory speechFactory = (com.microsoft.cognitiveservices.speech.recognition.SpeechFactory)owner;
+            factoryParameters = speechFactory.getFactoryImpl().getParameters();
         }
         else if (owner.getClass().equals(com.microsoft.cognitiveservices.speech.recognition.speech.SpeechRecognizer.class))
         {
-            isFactoryParameter = false;
             com.microsoft.cognitiveservices.speech.recognition.speech.SpeechRecognizer speechRecognizer = (com.microsoft.cognitiveservices.speech.recognition.speech.SpeechRecognizer)owner;
-            speechParameters = speechRecognizer.getRecoImpl().getParameters();
+            recognizerParameters = speechRecognizer.getRecoImpl().getParameters();
+        }
+        else if (owner.getClass().equals(com.microsoft.cognitiveservices.speech.recognition.intent.IntentRecognizer.class))
+        {
+            com.microsoft.cognitiveservices.speech.recognition.intent.IntentRecognizer intentRecognizer = (com.microsoft.cognitiveservices.speech.recognition.intent.IntentRecognizer)owner;
+            recognizerParameters = intentRecognizer.getRecoImpl().getParameters();
+        }
+        else if (owner.getClass().equals(com.microsoft.cognitiveservices.speech.recognition.translation.TranslationRecognizer.class))
+        {
+            com.microsoft.cognitiveservices.speech.recognition.translation.TranslationRecognizer translateRecognizer = (com.microsoft.cognitiveservices.speech.recognition.translation.TranslationRecognizer)owner;
+            recognizerParameters = translateRecognizer.getRecoImpl().getParameters();
         }
         else
         {
@@ -40,7 +49,14 @@ public final class ParameterCollection<OwnerType> implements Closeable
       */
     public boolean isString(String name)
     {
-        return isFactoryParameter ? com.microsoft.cognitiveservices.speech.internal.DefaultRecognizerFactory.Parameters.containsString(name) : speechParameters.containsString(name);
+        if(factoryParameters != null)
+        {
+            return factoryParameters.containsString(name);
+        }
+        else
+        {
+            return recognizerParameters.containsString(name);
+        }
     }
 
     /**
@@ -51,7 +67,14 @@ public final class ParameterCollection<OwnerType> implements Closeable
       */
     public boolean isInt(String name)
     {
-        return isFactoryParameter ? com.microsoft.cognitiveservices.speech.internal.DefaultRecognizerFactory.Parameters.containsNumber(name) : speechParameters.containsNumber(name);
+        if(factoryParameters != null)
+        {
+            return factoryParameters.containsNumber(name);
+        }
+        else
+        {
+            return recognizerParameters.containsNumber(name);
+        }
     }
 
     /**
@@ -62,7 +85,14 @@ public final class ParameterCollection<OwnerType> implements Closeable
       */
     public boolean isBool(String name)
     {
-        return isFactoryParameter ? com.microsoft.cognitiveservices.speech.internal.DefaultRecognizerFactory.Parameters.containsBool(name) : speechParameters.containsBool(name);
+        if(factoryParameters != null)
+        {
+            return factoryParameters.containsBool(name);
+        }
+        else
+        {
+            return recognizerParameters.containsBool(name);
+        }
     }
 
     /**
@@ -99,8 +129,16 @@ public final class ParameterCollection<OwnerType> implements Closeable
       */
     public String getString(String name, String defaultValue)
     {
-        String ret = isFactoryParameter ? com.microsoft.cognitiveservices.speech.internal.DefaultRecognizerFactory.Parameters.getString(name, defaultValue) : speechParameters.getString(name, defaultValue);
-        return ret;
+        if(factoryParameters != null)
+        {
+            String ret = factoryParameters.getString(name, defaultValue);
+            return ret;
+        }
+        else
+        {
+            String ret = recognizerParameters.getString(name, defaultValue);
+            return ret;
+        }
     }
 
     /**
@@ -114,8 +152,16 @@ public final class ParameterCollection<OwnerType> implements Closeable
       */
     public int getInt(String name, int defaultValue)
     {
-        int ret = isFactoryParameter ? com.microsoft.cognitiveservices.speech.internal.DefaultRecognizerFactory.Parameters.getNumber(name, defaultValue) : speechParameters.getNumber(name, defaultValue);
-        return ret;
+        if(factoryParameters != null)
+        {
+            int ret = factoryParameters.getNumber(name, defaultValue);
+            return ret;
+        }
+        else
+        {
+            int ret = recognizerParameters.getNumber(name, defaultValue);
+            return ret;
+        }
     }
 
     /**
@@ -129,8 +175,16 @@ public final class ParameterCollection<OwnerType> implements Closeable
       */
     public boolean getBool(String name, boolean defaultValue)
     {
-        boolean ret = isFactoryParameter ? com.microsoft.cognitiveservices.speech.internal.DefaultRecognizerFactory.Parameters.getBool(name, defaultValue) : speechParameters.getBool(name, defaultValue);
-        return ret;
+        if(factoryParameters != null)
+        {
+            boolean ret = factoryParameters.getBool(name, defaultValue);
+            return ret;
+        }
+        else
+        {
+            boolean ret = recognizerParameters.getBool(name, defaultValue);
+            return ret;
+        }
     }
 
     /**
@@ -141,13 +195,13 @@ public final class ParameterCollection<OwnerType> implements Closeable
       */
     public void set(String name, String value)
     {
-        if (isFactoryParameter)
+        if(factoryParameters != null)
         {
-            com.microsoft.cognitiveservices.speech.internal.DefaultRecognizerFactory.Parameters.setString(name, value);
+            factoryParameters.setString(name, value);
         }
         else
         {
-            speechParameters.setString(name, value);
+            recognizerParameters.setString(name, value);
         }
     }
 
@@ -159,13 +213,13 @@ public final class ParameterCollection<OwnerType> implements Closeable
       */
     public void set(String name, int value)
     {
-        if (isFactoryParameter)
+        if(factoryParameters != null)
         {
-            com.microsoft.cognitiveservices.speech.internal.DefaultRecognizerFactory.Parameters.setNumber(name, value);
+            factoryParameters.setNumber(name, value);
         }
         else
         {
-            speechParameters.setNumber(name, value);
+            recognizerParameters.setNumber(name, value);
         }
     }
 
@@ -177,13 +231,13 @@ public final class ParameterCollection<OwnerType> implements Closeable
       */
     public void set(String name, boolean value)
     {
-        if (isFactoryParameter)
+        if(factoryParameters != null)
         {
-            com.microsoft.cognitiveservices.speech.internal.DefaultRecognizerFactory.Parameters.setBool(name, value);
+            factoryParameters.setBool(name, value);
         }
         else
         {
-            speechParameters.setBool(name, value);
+            recognizerParameters.setBool(name, value);
         }
     }
 
@@ -198,12 +252,15 @@ public final class ParameterCollection<OwnerType> implements Closeable
             return;
         }
 
-        if(speechParameters != null)
-            speechParameters.delete();
+        if(recognizerParameters != null)
+            recognizerParameters.delete();
+        if(factoryParameters != null)
+            factoryParameters.delete();
         disposed = true;
     }
 
-    private com.microsoft.cognitiveservices.speech.internal.RecognizerParameterValueCollection speechParameters;
+    private com.microsoft.cognitiveservices.speech.internal.RecognizerParameterValueCollection recognizerParameters;
+    private com.microsoft.cognitiveservices.speech.internal.FactoryParameterCollection factoryParameters;
     private boolean disposed = false;
     private boolean isFactoryParameter = false;
 }

@@ -18,7 +18,7 @@ class SpeechRecognizer {
     @Test
     void test()
     {
-        com.microsoft.cognitiveservices.speech.SpeechRecognizer reco = com.microsoft.cognitiveservices.speech.RecognizerFactory.createSpeechRecognizerWithFileInput("whatstheweatherlike.wav");
+        com.microsoft.cognitiveservices.speech.SpeechRecognizer reco = com.microsoft.cognitiveservices.speech.SpeechFactory.createSpeechRecognizerWithFileInput("whatstheweatherlike.wav");
 
         MySessionEventListener listener = new MySessionEventListener();
         assertFalse(listener.listenerFired, "callback?");

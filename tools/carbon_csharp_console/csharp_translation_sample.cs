@@ -37,9 +37,12 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine(String.Format("Translation: Session event: {0}.", e.ToString()));
         }
 
-        public static async Task TranslationBaseModelAsync(RecognizerFactory factory, string fileName)
+        public static async Task TranslationBaseModelAsync(string keyTranslation, string fileName)
         {
+            var factory = SpeechFactory.FromSubscription(keyTranslation, "");
             Console.WriteLine("Translation using base model.");
+
+
             if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {
                 using (var reco = factory.CreateTranslationRecognizer(FromLang, ToLangs))
@@ -56,11 +59,11 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
-        public static async Task TranslationByEndpointAsync(RecognizerFactory factory, string endpoint, string fileName)
+        public static async Task TranslationByEndpointAsync(string subKey, string endpoint, string fileName)
         {
             Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Translation using endopoint:{0}.", endpoint));
 
-            factory.EndpointURL = new Uri(endpoint);
+            SpeechFactory factory = SpeechFactory.FromEndPoint(new Uri(endpoint), subKey);
 
             if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {

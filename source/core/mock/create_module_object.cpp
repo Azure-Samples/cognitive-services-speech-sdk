@@ -16,10 +16,9 @@
 #include "mock_reco_engine_adapter.h"
 #include "mock_wav_file_reader.h"
 #include "mock_wav_file_pump.h"
-#include "speechapi_cxx_recognizer_factory.h"
+#include "mock_controller.h"
 
 
-using namespace Microsoft::CognitiveServices::Speech::Recognition;
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -28,7 +27,7 @@ namespace Impl {
 
 bool ShouldMock(const wchar_t* psz)
 {
-    return DefaultRecognizerFactory::Parameters::GetBool(psz, false);
+    return SpxGetMockParameterBool(psz, false);
 }
 
 SPX_EXTERN_C void* Mock_CreateModuleObject(const char* className, const char* interfaceName)

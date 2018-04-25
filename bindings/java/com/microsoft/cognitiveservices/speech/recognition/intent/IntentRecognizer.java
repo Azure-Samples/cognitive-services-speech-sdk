@@ -118,7 +118,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       */
     public Task<?> startContinuousRecognitionAsync()
     {
-        Task<?> t = new Task(new TaskRunner() {
+        Task<Object> t = new Task<Object>(new TaskRunner<Object>() {
 
             @Override
             public void run() {
@@ -139,7 +139,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       */
     public Task<?> stopContinuousRecognitionAsync()
     {
-        Task<?> t = new Task(new TaskRunner() {
+        Task<Object> t = new Task<Object>(new TaskRunner<Object>() {
 
             @Override
             public void run() {
@@ -205,6 +205,11 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         }
     }
 
+    
+    public com.microsoft.cognitiveservices.speech.internal.IntentRecognizer getRecoImpl() {
+        return recoImpl;
+    }
+     
     private boolean disposed = false;
     private final com.microsoft.cognitiveservices.speech.internal.IntentRecognizer recoImpl;
     private IntentHandlerImpl intermediateResultHandler;

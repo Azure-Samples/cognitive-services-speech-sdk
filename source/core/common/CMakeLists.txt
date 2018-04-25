@@ -19,6 +19,7 @@ set(HEADERS
     "${INC_DIR}/guid_utils.h"
     "${INC_DIR}/handle_table.h"
     "${INC_DIR}/http_helpers.h"
+    "${INC_DIR}/mock_controller.h"
     "${INC_DIR}/named_properties_constants.h"
     "${INC_DIR}/named_properties_impl.h"
     "${INC_DIR}/resource_manager.h"
@@ -47,6 +48,7 @@ set(SOURCES
     "${SRC_DIR}/debug_utils.cpp"
     "${SRC_DIR}/handle_table.cpp"
     "${SRC_DIR}/http_helpers.cpp"
+    "${SRC_DIR}/mock_controller.cpp"
     "${SRC_DIR}/trace_message.cpp"
     "${SRC_DIR}/string_utils.cpp"
     "${SRC_DIR}/file_utils.cpp"
@@ -69,4 +71,9 @@ target_link_libraries(common ${AZURE_SHARED_LIB})
 
 if(WIN32)
     target_link_libraries(common Dbghelp.lib)
+endif()
+
+# Adding logcat logging
+if(ANDROID)
+    target_link_libraries(common log)
 endif()
