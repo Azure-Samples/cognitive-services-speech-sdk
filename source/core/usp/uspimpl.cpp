@@ -504,7 +504,12 @@ static SpeechHypothesisMsg RetrieveSpeechResult(const nlohmann::json& json)
 {
     auto offset = json.at(json_properties::offset).get<OffsetType>();
     auto duration = json.at(json_properties::duration).get<DurationType>();
-    auto text = json.at(json_properties::text).get<std::string>();
+    auto textObj = json.find(json_properties::text);
+    string text;
+    if (textObj != json.end())
+    {
+        text = json.at(json_properties::text).get<std::string>();
+    }
     return SpeechHypothesisMsg(PAL::ToWString(json.dump()), offset, duration, PAL::ToWString(text));
 }
 
@@ -708,11 +713,17 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         }
 
         auto speechResult = RetrieveSpeechResult(json);
-        auto translationResult = RetrieveTranslationResult(json, true);
-        if (translationResult.translationStatus == USP::TranslationStatus::Unknown)
+
+        // Retrieve translation only if the status is successful.
+        TranslationResult translationResult;
+        if (status == USP::RecognitionStatus::Success)
         {
-            LogError("Invalid translation status in translation response message.");
-            return;
+            translationResult = RetrieveTranslationResult(json, true);
+            if (translationResult.translationStatus == USP::TranslationStatus::Unknown)
+            {
+                LogError("Invalid translation status in translation response message.");
+                return;
+            }
         }
 
         callbacks.OnTranslationPhrase({
