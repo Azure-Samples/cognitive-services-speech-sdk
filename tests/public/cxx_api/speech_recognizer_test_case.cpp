@@ -34,6 +34,7 @@ std::string g_keyCRIS;
 std::string g_keyLUIS;
 std::string g_keySkyman;
 std::string g_endpoint;
+std::string g_regionId;
 
 static wstring input_file(L"tests/input/whatstheweatherlike.wav");
 
@@ -66,9 +67,10 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 {
     // Assuming subscription key contains only single-byte characters.
     auto key = std::wstring(g_keySpeech.begin(), g_keySpeech.end());
+    auto region = std::wstring(g_regionId.begin(), g_regionId.end());
     auto factory = !g_endpoint.empty()
         ? SpeechFactory::FromEndpoint(PAL::ToWString(g_endpoint), key)
-        : SpeechFactory::FromSubscription(key.c_str());
+        : SpeechFactory::FromSubscription(key.c_str(), region.c_str());
 
     GIVEN("Mocks for USP, Microphone, WaveFilePump and Reader, and then USP ...")
     {
@@ -180,7 +182,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         REQUIRE(exists(input_file));
         REQUIRE(!IsUsingMocks());
 
-        auto badKeyFactory = SpeechFactory::FromSubscription(L"invalid_key");
+        auto badKeyFactory = SpeechFactory::FromSubscription(L"invalid_key", L"invalid_region");
         auto recognizer = badKeyFactory->CreateSpeechRecognizerWithFileInput(input_file);
         auto result = recognizer->RecognizeAsync().get();
 
@@ -193,9 +195,10 @@ TEST_CASE("KWS basics", "[api][cxx]")
 {
     // Assuming subscription key contains only single-byte characters.
     auto key = std::wstring(g_keySpeech.begin(), g_keySpeech.end());
+    auto regionId = std::wstring(g_regionId.begin(), g_regionId.end());
     auto factory = !g_endpoint.empty()
         ? SpeechFactory::FromEndpoint(PAL::ToWString(g_endpoint), key)
-        : SpeechFactory::FromSubscription(key.c_str());
+        : SpeechFactory::FromSubscription(key.c_str(), regionId.c_str());
 
     GIVEN("Mocks for USP, KWS, and the Microphone...")
     {
@@ -252,9 +255,10 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
 {
     // Assuming subscription key contains only single-byte characters.
     auto key = std::wstring(g_keySpeech.begin(), g_keySpeech.end());
+    auto regionId = std::wstring(g_regionId.begin(), g_regionId.end());
     auto factory = !g_endpoint.empty()
         ? SpeechFactory::FromEndpoint(PAL::ToWString(g_endpoint), key)
-        : SpeechFactory::FromSubscription(key.c_str());
+        : SpeechFactory::FromSubscription(key.c_str(), regionId.c_str());
 
     REQUIRE(exists(input_file));
 

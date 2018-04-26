@@ -26,7 +26,34 @@
 #include "DbgHelp.h"
 #pragma warning(pop)
 #undef min
-#elif !defined(ANDROID) && !defined(__ANDROID__) // execinfo.h not available on Android.
+#elif defined(ANDROID) || defined(__ANDROID__) // execinfo.h not available on Android.
+#include <iostream>
+#include <iomanip>
+#include <unwind.h>
+#include <dlfcn.h>
+
+struct AndroidStackFrame
+{
+    void** current;
+    void** end;
+    };
+
+static _Unwind_Reason_Code AndroidUnwindCallback(struct _Unwind_Context* context, void* arg)
+{
+    AndroidStackFrame* state = static_cast<AndroidStackFrame*>(arg);
+    uintptr_t pc = _Unwind_GetIP(context);
+    if (pc) {
+        if (state->current == state->end) {
+            return _URC_END_OF_STACK;
+        }
+        else {
+            *state->current++ = reinterpret_cast<void*>(pc);
+        }
+    }
+    return _URC_NO_REASON;
+}
+
+#else
 #include <execinfo.h>
 #include <cxxabi.h>
 #endif
@@ -231,7 +258,28 @@ static void CollectCallStack(size_t skipLevels, bool makeFunctionNamesStandOut, 
 #else
     UNUSED(skipLevels);
     UNUSED(makeFunctionNamesStandOut);
-    write("... not available ...");
+
+    void *androidStackFrames[32];
+    AndroidStackFrame state = { &androidStackFrames[0], &androidStackFrames [31] };
+    _Unwind_Backtrace(AndroidUnwindCallback, &state);
+
+    std::ostringstream os;
+    size_t numStackFramesValid = state.current - androidStackFrames;
+
+    for (size_t idx = skipLevels; idx < numStackFramesValid; ++idx)
+    {
+        const void* addr = androidStackFrames[idx];
+        const char* symbol = "???";
+
+        Dl_info info;
+        if (dladdr(addr, &info) && info.dli_sname)
+        {
+            symbol = info.dli_sname;
+        }
+
+        os << "  #" << std::setw(2) << (idx - skipLevels) << ": " << addr << "  " << symbol << "\n";
+    }
+    write(os.str().c_str());
 #endif
 }
 

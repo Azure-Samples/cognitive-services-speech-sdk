@@ -198,21 +198,6 @@ class SpeechFactory
 public:
 
     /// <summary>
-    /// Creates an instance of the speech factory with specified subscription key.
-    /// </summary>
-    /// <param name="subscription">The subscription key.</param>
-    static std::shared_ptr<ICognitiveServicesSpeechFactory> FromSubscription(const std::wstring& subscription)
-    {
-        SPXFACTORYHANDLE hfactory;
-        SpeechFactory_FromSubscription(subscription.c_str(), nullptr, &hfactory);
-
-        auto ptr = new InternalCognitiveServicesSpeechFactory(hfactory);
-        auto factory = std::shared_ptr<ICognitiveServicesSpeechFactory>(ptr);
-
-        return factory;
-    }
-
-    /// <summary>
     /// Creates an instance of the speech factory with specified subscription key and region.
     /// </summary>
     /// <param name="subscription">The subscription key.</param>
@@ -228,20 +213,6 @@ public:
     }
 
     /// <summary>
-    /// Creates an instance of the speech factory with specified authorization token.
-    /// </summary>
-    /// <param name="authorizationToken">The authorization token.</param>
-    static std::shared_ptr<ICognitiveServicesSpeechFactory> FromAuthorizationToken(const std::wstring& authToken)
-    {
-        SPXFACTORYHANDLE hfactory;
-        SpeechFactory_FromAuthorizationToken(authToken.c_str(), nullptr, &hfactory);
-
-        auto ptr = new InternalCognitiveServicesSpeechFactory(hfactory);
-        auto factory = std::shared_ptr<ICognitiveServicesSpeechFactory>(ptr);
-        return factory;
-    }
-
-    /// <summary>
     /// Creates an instance of the speech factory with specified authorization token and region.
     /// </summary>
     /// <param name="authorizationToken">The authorization token.</param>
@@ -250,20 +221,6 @@ public:
     {
         SPXFACTORYHANDLE hfactory;
         SpeechFactory_FromAuthorizationToken(authToken.c_str(), region.c_str(), &hfactory);
-
-        auto ptr = new InternalCognitiveServicesSpeechFactory(hfactory);
-        auto factory = std::shared_ptr<ICognitiveServicesSpeechFactory>(ptr);
-        return factory;
-    }
-
-    /// <summary>
-    /// Creates an instance of the speech factory with specified endpoint.
-    /// </summary>
-    /// <param name="endpoint">The service endpoint to connect to.</param>
-    static std::shared_ptr<ICognitiveServicesSpeechFactory> FromEndpoint(const std::wstring& endpoint)
-    {
-        SPXFACTORYHANDLE hfactory;
-        SpeechFactory_FromEndpoint(endpoint.c_str(), nullptr, &hfactory);
 
         auto ptr = new InternalCognitiveServicesSpeechFactory(hfactory);
         auto factory = std::shared_ptr<ICognitiveServicesSpeechFactory>(ptr);

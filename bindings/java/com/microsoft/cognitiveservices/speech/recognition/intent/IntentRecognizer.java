@@ -122,7 +122,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
 
             @Override
             public void run() {
-                recoImpl.startContinuousRecognition();
+                recoImpl.startContinuousRecognitionAsync();
             }
 
             @Override
@@ -143,7 +143,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
 
             @Override
             public void run() {
-                recoImpl.stopContinuousRecognition();
+                recoImpl.stopContinuousRecognitionAsync();
             }
 
             @Override
@@ -176,6 +176,50 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         recoImpl.addIntent(intentId, trigger);
     }
    
+    /**
+      * Starts speech recognition on a continous audio stream with keyword spotting, until stopKeywordRecognitionAsync() is called.
+      * User must subscribe to events to receive recognition results.
+      * @param keyword The keyword to recognize.
+      * @return A task representing the asynchronous operation that starts the recognition.
+      */
+    public Task<?> startKeywordRecognitionAsync(String keyword)
+    {
+        Task<?> t = new Task(new TaskRunner() {
+
+            @Override
+            public void run() {
+                recoImpl.startKeywordRecognition(keyword);
+            }
+
+            @Override
+            public Object result() {
+                return null;
+            }});
+        
+        return t;
+    }
+
+    /**
+      * Stops continuous speech recognition.
+      * @return A task representing the asynchronous operation that stops the recognition.
+      */
+    public Task<?> stopKeywordRecognitionAsync()
+    {
+        Task<?> t = new Task(new TaskRunner() {
+
+            @Override
+            public void run() {
+                recoImpl.stopKeywordRecognition();
+            }
+
+            @Override
+            public Object result() {
+                return null;
+            }});
+        
+        return t;
+    }
+
     @Override
     protected void dispose(boolean disposing) throws IOException
     {

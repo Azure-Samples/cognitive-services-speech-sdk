@@ -27,7 +27,7 @@ import com.microsoft.cognitiveservices.speech.recognition.translation.Translatio
       */
     private SpeechFactory() throws UnsupportedOperationException
     {
-        com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromSubscription("illegal-subscription-key");
+        com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromSubscription("illegal-subscription-key", "illegal region");
         Parameters = new ParameterCollection<SpeechFactory>(this);
     }
 
@@ -40,8 +40,8 @@ import com.microsoft.cognitiveservices.speech.recognition.translation.Translatio
     private SpeechFactory(boolean isSubscription, String subscriptionKeyOrAuthorizationToken, String region)
     {
         factoryImpl = isSubscription ? 
-            com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromSubscription(subscriptionKeyOrAuthorizationToken) :
-            com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromAuthorizationToken(subscriptionKeyOrAuthorizationToken);
+            com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromSubscription(subscriptionKeyOrAuthorizationToken, region) :
+            com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromAuthorizationToken(subscriptionKeyOrAuthorizationToken, region);
 
         // connect the native properties with the swig layer.
         Parameters = new ParameterCollection<SpeechFactory>(this);

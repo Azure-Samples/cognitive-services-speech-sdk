@@ -7,6 +7,7 @@
 
 #include "stdafx.h"
 #include "http_helpers.h"
+#include "urlencode_helpers.h"
 #include "luis_direct_lu_engine_adapter.h"
 #include "string_utils.h"
 #include "service_helpers.h"
@@ -245,7 +246,7 @@ void CSpxLuisDirectEngineAdapter::GetSubscriptionConnectionInfo(const std::strin
     relativePath += R"(?subscription-key=)";
     relativePath += key;
     relativePath += R"(&q=)";
-    relativePath += query;
+    relativePath += Impl::UrlEncode(query);
 
     *phostName = !host.empty() ? host.c_str() : pszDefaultHostName;
     *prelativePath = std::move(relativePath);
@@ -273,7 +274,7 @@ std::wstring CSpxLuisDirectEngineAdapter::IntentIdFromIntentName(const std::wstr
     {
         return m_intentNameToIdMap[intentName];
     }
-    return L"";
+    return L"X-" + intentName;
 }
 
 

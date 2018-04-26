@@ -132,7 +132,7 @@ public:
     /// </summary>
     /// <param name="resultHandle">The handle of the result returned by recognizer in C-API.</param>
     explicit TranslationSynthesisResult(SPXRESULTHANDLE resultHandle) :
-        Audio(m_audioData) //, m_hresult(resultHandle)
+        Audio(m_audioData)
     {
         (void)(resultHandle);
         PopulateResultFields(resultHandle);

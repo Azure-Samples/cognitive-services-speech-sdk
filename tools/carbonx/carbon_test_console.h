@@ -226,6 +226,7 @@ private:
     std::shared_ptr<Session> m_session;
 
     std::wstring m_subscriptionKey;
+    std::wstring m_region;
     std::wstring m_endpointUri;
 
     void* m_commandSystem = nullptr;

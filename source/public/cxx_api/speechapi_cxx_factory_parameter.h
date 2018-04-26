@@ -205,9 +205,6 @@ public:
     bool GetBool(const std::wstring& name, bool defaultValue = false) override { return base_type::GetBool(name, defaultValue); }
 
 private:
-    // TODO : Fix this in SWIG such that we dont have to expose this default ctor.
-    //private:
-    //
     DISABLE_DEFAULT_CTORS(FactoryParameterCollection);
 };
 

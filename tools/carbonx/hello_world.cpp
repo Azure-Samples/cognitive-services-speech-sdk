@@ -15,10 +15,11 @@
 constexpr auto g_speechSubscriptionKey = LR"(1f30c291f2474d39acfdf1d3bdf847c3)";
 constexpr auto g_customSpeechSubscriptionKey = LR"(82f1f909b993459d88384a53891f98d3)";
 constexpr auto g_customSpeechModelId = LR"(eb29f6e4-e97b-4157-8d3c-9d64a7b21a58)";
+constexpr auto g_regionId = LR"(west-us)";
 
 void CarbonTestConsole::Sample_HelloWorld()
 {
-    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey);
+    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey, g_regionId);
     auto recognizer = factory->CreateSpeechRecognizer();
 
     ConsoleWriteLine(L"Say something...");
@@ -29,7 +30,7 @@ void CarbonTestConsole::Sample_HelloWorld()
 
 void CarbonTestConsole::Sample_HelloWorld_WithEvents()
 {
-    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey);
+    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey, g_regionId);
     auto recognizer = factory->CreateSpeechRecognizer();
 
     recognizer->IntermediateResult += [&](const SpeechRecognitionEventArgs& e) {
@@ -44,7 +45,7 @@ void CarbonTestConsole::Sample_HelloWorld_WithEvents()
 
 void CarbonTestConsole::Sample_HelloWorld_PickEngine(const wchar_t* pszEngine) // L"Usp", L"Unidec", or L"Mock"
 {
-    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey);
+    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey, g_regionId);
     auto recognizer = factory->CreateSpeechRecognizer();
     auto session = Session::FromRecognizer(recognizer);
 
@@ -123,7 +124,7 @@ void CarbonTestConsole::Sample_HelloWorld_Intent(const wchar_t* hostName, const 
 
 void CarbonTestConsole::Sample_HelloWorld_Subscription()
 {
-    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey);
+    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, m_region);
     auto recognizer = factory->CreateSpeechRecognizer();
 
     ConsoleWriteLine(L"Say something...");
@@ -134,7 +135,7 @@ void CarbonTestConsole::Sample_HelloWorld_Subscription()
 
 void CarbonTestConsole::Sample_HelloWorld_Subscription_With_CRIS()
 {
-    auto factory = SpeechFactory::FromSubscription(g_customSpeechSubscriptionKey);
+    auto factory = SpeechFactory::FromSubscription(g_customSpeechSubscriptionKey, g_regionId);
     auto recognizer = factory->CreateSpeechRecognizer();
 
     recognizer->SetDeploymentId(g_customSpeechModelId);
@@ -147,7 +148,7 @@ void CarbonTestConsole::Sample_HelloWorld_Subscription_With_CRIS()
 
 void CarbonTestConsole::Sample_HelloWorld_Kws()
 {
-    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey);
+    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey, g_regionId);
     auto recognizer = factory->CreateSpeechRecognizer();
 
 
@@ -167,7 +168,7 @@ void CarbonTestConsole::Sample_HelloWorld_Kws()
 
 void CarbonTestConsole::Sample_HelloWorld_Language(const wchar_t* language)
 {
-    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey);
+    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey, g_regionId);
     auto recognizer = factory->CreateSpeechRecognizer(language);
 
     ConsoleWriteLine(L"Say something...");

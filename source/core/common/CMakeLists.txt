@@ -19,6 +19,7 @@ set(HEADERS
     "${INC_DIR}/guid_utils.h"
     "${INC_DIR}/handle_table.h"
     "${INC_DIR}/http_helpers.h"
+    "${INC_DIR}/urlencode_helpers.h"
     "${INC_DIR}/mock_controller.h"
     "${INC_DIR}/named_properties_constants.h"
     "${INC_DIR}/named_properties_impl.h"
@@ -35,6 +36,7 @@ set(HEADERS
     )
 
 set(HEADERS_PRIVATE   
+    "${INC_DIR}/azure_c_shared_utility_urlencode_wrapper.h"
     "${INC_DIR}/azure_c_shared_utility_buffer_wrapper.h"
     "${INC_DIR}/azure_c_shared_utility_httpapi_wrapper.h"
     "${INC_DIR}/azure_c_shared_utility_httpapiex_wrapper.h"
@@ -48,6 +50,7 @@ set(SOURCES
     "${SRC_DIR}/debug_utils.cpp"
     "${SRC_DIR}/handle_table.cpp"
     "${SRC_DIR}/http_helpers.cpp"
+    "${SRC_DIR}/urlencode_helpers.cpp"
     "${SRC_DIR}/mock_controller.cpp"
     "${SRC_DIR}/trace_message.cpp"
     "${SRC_DIR}/string_utils.cpp"

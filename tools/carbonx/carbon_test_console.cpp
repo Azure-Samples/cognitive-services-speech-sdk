@@ -956,7 +956,7 @@ void CarbonTestConsole::Factory_CreateSpeechRecognizer(const wchar_t* psz)
 
     auto factory = !m_endpointUri.empty()
         ? SpeechFactory::FromEndpoint(m_endpointUri, m_subscriptionKey)
-        : SpeechFactory::FromSubscription(m_subscriptionKey);
+        : SpeechFactory::FromSubscription(m_subscriptionKey, m_region);
 
     m_speechRecognizer = *psz == L'\0'
         ? factory->CreateSpeechRecognizer() 
@@ -1428,7 +1428,7 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
 {
     auto factory = !m_endpointUri.empty()
         ? SpeechFactory::FromEndpoint(m_endpointUri, m_subscriptionKey)
-        : SpeechFactory::FromSubscription(m_subscriptionKey);
+        : SpeechFactory::FromSubscription(m_subscriptionKey, m_region);
 
     if (recognizerType == PAL::GetTypeName<SpeechRecognizer>())
     {

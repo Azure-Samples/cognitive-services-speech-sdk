@@ -23,7 +23,7 @@ public class SpeechRecognitionResult {
         resultId = result.getResultId();
         recognizedText = result.getText();
         reason = RecognitionStatus.values()[result.getReason().swigValue()];
-        properties = result.properties;
+        properties = result.getProperties();
     }
 
     /**

@@ -81,7 +81,7 @@ def recognize(subscription, endpoint=None, filename=None, async=False):
     if endpoint is not None:
         factory = SpeechFactory.from_endpoint(endpoint, subscription)
     else:
-        factory = SpeechFactory.from_subscription(subscription)
+        factory = SpeechFactory.from_subscription(subscription, "")
 
     reco = factory.create_speech_recognizer(filename)
 

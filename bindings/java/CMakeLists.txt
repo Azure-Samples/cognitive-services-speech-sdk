@@ -66,7 +66,38 @@ set_target_properties(${SWIG_MODULE_${JAVA_BINDINGS}_REAL_NAME} PROPERTIES FOLDE
 # Build the Java code into ${JAVA_LIB}.jar
 set(JAVA_LIB ${PROJECT_NAME}_lib)
 
-FILE(GLOB JAVA_SOURCES "${SRC_DIR}/**/*.java")
+# TODO this should be a wildcard, not an explicit list as these files are generated
+# set(SWIG_JAVA_SOURCES ${JAVA_SOURCE_DIRECTORY}/*.java)
+# SET_SOURCE_FILES_PROPERTIES(${SWIG_JAVA_SOURCES} PROPERTIES GENERATED TRUE)
+#file(GLOB SWIG_JAVA_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/*.java")
+set(JAVA_SOURCES
+    com/microsoft/cognitiveservices/speech/ParameterCollection.java
+    com/microsoft/cognitiveservices/speech/SessionEventArgs.java
+    com/microsoft/cognitiveservices/speech/SessionEventType.java
+    com/microsoft/cognitiveservices/speech/recognition/AudioInputStream.java
+    com/microsoft/cognitiveservices/speech/recognition/LanguageUnderstandingModel.java
+    com/microsoft/cognitiveservices/speech/recognition/ParameterNames.java
+    com/microsoft/cognitiveservices/speech/recognition/RecognitionErrorEventArgs.java
+    com/microsoft/cognitiveservices/speech/recognition/RecognitionStatus.java
+    com/microsoft/cognitiveservices/speech/recognition/Recognizer.java
+    com/microsoft/cognitiveservices/speech/recognition/SpeechFactory.java
+    com/microsoft/cognitiveservices/speech/recognition/intent/IntentRecognitionResult.java
+    com/microsoft/cognitiveservices/speech/recognition/intent/IntentRecognitionResultEventArgs.java
+    com/microsoft/cognitiveservices/speech/recognition/intent/IntentRecognizer.java
+    com/microsoft/cognitiveservices/speech/recognition/speech/SpeechRecognitionReason.java
+    com/microsoft/cognitiveservices/speech/recognition/speech/SpeechRecognitionResult.java
+    com/microsoft/cognitiveservices/speech/recognition/speech/SpeechRecognitionResultEventArgs.java
+    com/microsoft/cognitiveservices/speech/recognition/speech/SpeechRecognizer.java
+    com/microsoft/cognitiveservices/speech/recognition/translation/TranslationRecognizer.java
+    com/microsoft/cognitiveservices/speech/recognition/translation/TranslationSynthesisResult.java
+    com/microsoft/cognitiveservices/speech/recognition/translation/TranslationSynthesisResultEventArgs.java
+    com/microsoft/cognitiveservices/speech/recognition/translation/TranslationTextResult.java
+    com/microsoft/cognitiveservices/speech/recognition/translation/TranslationTextResultEventArgs.java
+    com/microsoft/cognitiveservices/speech/util/EventHandler.java
+    com/microsoft/cognitiveservices/speech/util/EventHandlerImpl.java
+    com/microsoft/cognitiveservices/speech/util/Task.java
+    com/microsoft/cognitiveservices/speech/util/TaskRunner.java
+)
 
 set(SWIG_JAVA_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/AudioInputStream.java

@@ -141,7 +141,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
 
             @Override
             public void run() {
-                recoImpl.startContinuousRecognition();
+                recoImpl.startContinuousRecognitionAsync();
             }
 
             @Override
@@ -162,7 +162,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
 
             @Override
             public void run() {
-                recoImpl.stopContinuousRecognition();
+                recoImpl.stopContinuousRecognitionAsync();
             }
 
             @Override
@@ -174,7 +174,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     }
 
     /**
-      * Starts speech recognition on a continous audio stream with keyword spotting, until StopKeywordRecognitionAsync() is called.
+      * Starts speech recognition on a continous audio stream with keyword spotting, until stopKeywordRecognitionAsync() is called.
       * User must subscribe to events to receive recognition results.
       * @param keyword The keyword to recognize.
       * @return A task representing the asynchronous operation that starts the recognition.

@@ -19,6 +19,7 @@ std::string g_keySpeech;
 std::string g_keyCRIS;
 std::string g_keyLUIS;
 std::string g_keySkyman;
+std::string g_regionId;
 
 class UspClient : public USP::Callbacks {
 public:
