@@ -3,10 +3,12 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+// <toplevel>
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech.Recognition;
+// </toplevel>
 
 namespace MicrosoftSpeechSDKSamples
 {
@@ -16,12 +18,9 @@ namespace MicrosoftSpeechSDKSamples
         // <TranslationWithMicrophoneAsync>
         public static async Task TranslationWithMicrophoneAsync()
         {
-            // Creates recognizer factory.
-            var factory = RecognizerFactory.Instance;
-
-            // Sets subscription key.
-            // Replace the key with your own key.
-            factory.SubscriptionKey = "YourSubscriptionKey";
+            // Creates an instance of a speech factory with specified
+            // subscription key.
+            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "");
 
             // Sets source and target languages
             string fromLanguage = "en-US";
@@ -60,12 +59,9 @@ namespace MicrosoftSpeechSDKSamples
         // <TranslationWithFileAsync>
         public static async Task TranslationWithFileAsync()
         {
-            // Creates recognizer factory.
-            var factory = RecognizerFactory.Instance;
-
-            // Sets subscription key.
-            // Replace the key with your own key.
-            factory.SubscriptionKey = "YourSubscriptionKey";
+            // Creates an instance of a speech factory with specified
+            // subscription key.
+            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "");
 
             // Sets source and target languages
             string fromLanguage = "en-US";
@@ -103,10 +99,9 @@ namespace MicrosoftSpeechSDKSamples
         // <TranslationContinuousRecognitionAsync>
         public static async Task TranslationContinuousRecognitionAsync()
         {
-            var factory = RecognizerFactory.Instance;
-
-            // Replace the key with your own key.
-            factory.SubscriptionKey = "YourSubscriptionKey";
+            // Creates an instance of a speech factory with specified
+            // subscription key.
+            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "");
 
             // Sets source and target languages
             string fromLanguage = "en-US";

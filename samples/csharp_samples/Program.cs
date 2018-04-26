@@ -22,12 +22,13 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine("6. Translation with file input.");
             Console.WriteLine("7. Translation continuous Recognition using events.");
 
-            Console.Write("Your choice: (0: Stop.) ");
+            Console.Write("Your choice (0: Stop.): ");
 
             ConsoleKeyInfo x;
             do
             {
                 x = Console.ReadKey();
+                Console.WriteLine("");
                 switch (x.Key)
                 {
                     case ConsoleKey.D1:
@@ -58,7 +59,7 @@ namespace MicrosoftSpeechSDKSamples
                         Console.WriteLine("Invalid input.");
                         break;
                 }
-                Console.WriteLine("Recognition done. Your Choice:");
+                Console.WriteLine("\nRecognition done. Your Choice (0: Stop): ");
             } while (x.Key != ConsoleKey.D0);
         }
     }

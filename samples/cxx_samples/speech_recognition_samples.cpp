@@ -4,23 +4,22 @@
 //
 
 #include "stdafx.h"
+
+// <toplevel>
 #include <speechapi_cxx.h>
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech::Recognition;
 using namespace Microsoft::CognitiveServices::Speech::Recognition::Speech;
-
+// </toplevel>
 
 // Speech recognition using microphone.
 // <SpeechRecognitionWithMicrophone>
 void SpeechRecognitionWithMicrophone()
 {
-    // Gets recognizer factory.
-    auto factory = RecognizerFactory::GetDefault();
-
-    // Sets subscription key
-    // Replace with your own subscription key.
-    factory->SetSubscriptionKey(L"YourSubscriptionKey");
+    // Creates an instance of a speech factory with specified
+    // subscription key. Replace with your own subscription key.
+    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey");
 
     // Creates a speech recognizer using microphone as audio input.
     auto recognizer = factory->CreateSpeechRecognizer();
@@ -45,12 +44,9 @@ void SpeechRecognitionWithMicrophone()
 // <SpeechRecognitionWithFile>
 void SpeechRecognitionWithFile()
 {
-    // Gets recognizer factory.
-    auto factory = RecognizerFactory::GetDefault();
-
-    // Set subscription key
-    // Replace with your own subscription key.
-    factory->SetSubscriptionKey(L"YourSubscriptionKey");
+    // Creates an instance of a speech factory with specified
+    // subscription key. Replace with your own subscription key.
+    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey");
 
     // Creates a speech recognizer using file as audio input.
     // Replace with your own audio file name.
@@ -75,12 +71,10 @@ void SpeechRecognitionWithFile()
 // <SpeechRecognitionUsingCustomizedModel>
 void SpeechRecognitionUsingCustomizedModel()
 {
-    // Gets recognizer factory.
-    auto factory = RecognizerFactory::GetDefault();
-
-    // Sets subscription key
-    // Replace with your own subscription key from https://www.cris.ai/
-    factory->SetSubscriptionKey(L"YourSubscriptionKey");
+    // Creates an instance of a speech factory with specified
+    // subscription key. Replace with your own subscription key from
+    // https://www.cris.ai/.
+    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey");
 
     // Creates a speech recognizer using microphone as audio input.
     auto recognizer = factory->CreateSpeechRecognizer();
@@ -117,8 +111,8 @@ static void OnFinalResult(const SpeechRecognitionEventArgs& e)
     wcout << L"FinalResult: status:" << (int)e.Result.Reason << L". Text: " << e.Result.Text << '\n';
 }
 
-static void OnNoMatch(const SpeechRecognitionEventArgs& e) 
-{ 
+static void OnNoMatch(const SpeechRecognitionEventArgs& e)
+{
     wcout << L"NoMatch:" << (int)e.Result.Reason << '\n';
 }
 
@@ -130,12 +124,9 @@ static void OnCanceled(const SpeechRecognitionEventArgs& e)
 // Continuous speech recognition.
 void SpeechContinuousRecognitionUsingEvents()
 {
-    // Gets recognizer factory.
-    auto factory = RecognizerFactory::GetDefault();
-
-    // Sets subscription key
-    // Replace with your own subscription key.
-    factory->SetSubscriptionKey(L"YourSubscriptionKey");
+    // Creates an instance of a speech factory with specified
+    // subscription key. Replace with your own subscription key.
+    auto factory = SpeechFactory::FromSubscription(L"92069ee289b84e5594a9564ab77ed2ba");
 
     // Creates a speech recognizer using microphone as audio input.
     auto recognizer = factory->CreateSpeechRecognizer();
@@ -165,4 +156,3 @@ void SpeechContinuousRecognitionUsingEvents()
     recognizer->NoMatch.Disconnect(&OnNoMatch);
 }
 // </SpeechContinuousRecognitionUsingEvents>
-

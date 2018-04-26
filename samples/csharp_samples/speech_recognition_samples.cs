@@ -3,9 +3,11 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+// <toplevel>
 using System;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech.Recognition;
+// </toplevel>
 
 namespace MicrosoftSpeechSDKSamples
 {
@@ -15,12 +17,9 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionWithMicrophoneAsync()
         {
             // <recognitionWithMicrophone>
-            // Gets recognizer factory.
-            var factory = RecognizerFactory.Instance;
-
-            // Sets subscription key.
-            // Replace the key with your own key.
-            factory.SubscriptionKey = "YourSubscriptionKey";
+            // Creates an instance of a speech factory with specified
+            // subscription key.
+            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "");
 
             // Creates a speech recognizer using microphone as audio input.
             using (var recognizer = factory.CreateSpeechRecognizer())
@@ -48,12 +47,9 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionWithFileAsync()
         {
             // <recognitionFromFile>
-            // Gets recognizer factory.
-            var factory = RecognizerFactory.Instance;
-
-            // Sets subscription key.
-            // Replace the key with your own key.
-            factory.SubscriptionKey = "YourSubscriptionKey";
+            // Creates an instance of a speech factory with specified
+            // subscription key.
+            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "");
 
             // Creates a speech recognizer using file as audio input.
             // Replace with your own audio file name.
@@ -79,12 +75,9 @@ namespace MicrosoftSpeechSDKSamples
         // Speech recognition using a customized model.
         public static async Task RecognitionUsingCustomizedModelAsync()
         {
-            // Creates a recognizer factory.
-            var factory = RecognizerFactory.Instance;
-
-            // Sets subscription key.
-            // Replace with your own subscription key from https://www.cris.ai.
-            factory.SubscriptionKey = "YourSubscriptionKey";
+            // Creates an instance of a speech factory with specified
+            // subscription key (for https://www.cris.ai/!).
+            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "");
 
             // Creates a speech recognizer using microphone as audio input.
             using (var recognizer = factory.CreateSpeechRecognizer())
@@ -114,10 +107,9 @@ namespace MicrosoftSpeechSDKSamples
         // Speech recognition with events
         public static async Task ContinuousRecognitionAsync()
         {
-            var factory = RecognizerFactory.Instance;
-
-            // Replaces the key with your own key.
-            factory.SubscriptionKey = "YourSubscriptionKey";
+            // Creates an instance of a speech factory with specified
+            // subscription key.
+            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "");
 
             // Creates a speech recognizer using microphone as audio input.
             using (var recognizer = factory.CreateSpeechRecognizer())

@@ -32,6 +32,7 @@ Dockerfile text
 *.vcxproj text
 *.vcxproj.filters text
 *.vcxproj.user text
+*.yml text
 
 # Bash only like Unix line endings
 *.sh text eol=lf

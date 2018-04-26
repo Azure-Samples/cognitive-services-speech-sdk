@@ -4,27 +4,25 @@
 //
 
 #include "stdafx.h"
+
+// <toplevel>
 #include <string>
 #include <vector>
-
 #include <speechapi_cxx.h>
-
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech::Recognition;
 using namespace Microsoft::CognitiveServices::Speech::Recognition::Translation;
+// </toplevel>
 
 
 // Translation with microphone input.
 // <TranslationWithMicrophone>
 void TranslationWithMicrophone()
 {
-    // Gets recognizer factory.
-    auto factory = RecognizerFactory::GetDefault();
-
-    // Sets subscription key
-    // Replaces with your own subscription key.
-    factory->SetSubscriptionKey(L"YourSubscriptionKey");
+    // Creates an instance of a speech factory with specified
+    // subscription key. Replace with your own subscription key.
+    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey");
 
     // Sets source and target languages
     auto fromLanguage = L"en-US";
@@ -61,12 +59,9 @@ void TranslationWithMicrophone()
 // <TranslationWithFile>
 void TranslationWithFile()
 {
-    // Gets recognizer factory.
-    auto factory = RecognizerFactory::GetDefault();
-
-    // Sets subscription key
-    // Replaces with your own subscription key.
-    factory->SetSubscriptionKey(L"YourSubscriptionKey");
+    // Creates an instance of a speech factory with specified
+    // subscription key. Replace with your own subscription key.
+    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey");
 
     // Sets source and target languages
     auto fromLanguage = L"en-US";
@@ -137,12 +132,9 @@ static void OnCanceled(const TranslationTextResultEventArgs& e)
 // Continuous translation.
 void TranslationContinuousRecognitionUsingEvents()
 {
-    // Gets recognizer factory.
-    auto factory = RecognizerFactory::GetDefault();
-
-    // Sets subscription key
-    // Replaces with your own subscription key.
-    factory->SetSubscriptionKey(L"YourSubscriptionKey");
+    // Creates an instance of a speech factory with specified
+    // subscription key. Replace with your own subscription key.
+    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey");
 
     // Sets source and target languages
     auto fromLanguage = L"en-US";

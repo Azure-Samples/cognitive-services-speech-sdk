@@ -51,9 +51,9 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
         /// </summary>
         /// <param name="subscriptionKey">The subscription key.</param>
         /// <param name="region">The region name.</param>
-        public static SpeechFactory FromSubscription(string subsciptionKey, string region)
+        public static SpeechFactory FromSubscription(string subscriptionKey, string region)
         {
-            SpeechFactory factory = new SpeechFactory(subsciptionKey, region);
+            SpeechFactory factory = new SpeechFactory(subscriptionKey, region);
             return factory;
         }
 
@@ -61,8 +61,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
         /// Creates an instance of the speech factory with specified endpoint and subscription key (optional).
         /// </summary>
         /// <param name="endpoint">The service endpoint to connect to.</param>
-        /// <param name="subsciptionKey"></param>
-        /// <returns></returns>
+        /// <param name="subscriptionKey">The subscription key.</param>
         public static SpeechFactory FromEndPoint(Uri endpoint, string subscriptionKey)
         {
             SpeechFactory factory = new SpeechFactory(endpoint, subscriptionKey);

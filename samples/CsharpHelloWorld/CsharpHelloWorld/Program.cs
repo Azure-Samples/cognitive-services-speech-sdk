@@ -38,8 +38,7 @@ namespace CsharpHelloWorld
                 filename = args[1];
             }
 
-            var factory = RecognizerFactory.Instance;
-            factory.SubscriptionKey = subscriptionKey;
+            var factory = SpeechFactory.FromSubscription(subscriptionKey, "");
             var recognizeFromFile = !string.IsNullOrEmpty(filename);
 
             SpeechRecognizer recognizer = null;

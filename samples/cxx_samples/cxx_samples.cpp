@@ -25,7 +25,7 @@ int wmain(int argc, wchar_t **argv)
     cout << "5. Translation with microphone input.\n";
     cout << "6. Translation with file input.\n";
     cout << "7. Translation continuous recognition using events.\n";
-    cout << "Your choice: (0. Exit.) ";
+    cout << "Your choice (0. Exit.): ";
 
     string input;
     do
@@ -60,6 +60,6 @@ int wmain(int argc, wchar_t **argv)
             cout << "\nStop recognition";
             break;
         }
-        cout << "\nRecognition done. Your Choice:";
+        cout << "\nRecognition done. Your Choice (0. Exit): ";
     } while (input[0] != '0');
 }

@@ -35,8 +35,7 @@ int wmain(int argc, wchar_t **argv)
         filename = wstring(argv[2]);
     }
 
-    auto factory = Microsoft::CognitiveServices::Speech::Recognition::RecognizerFactory::GetDefault();
-    factory->SetSubscriptionKey(subscriptionKey);
+    auto factory = Microsoft::CognitiveServices::Speech::Recognition::SpeechFactory::FromSubscription(subscriptionKey);
 
     auto recognizeFromFile = !filename.empty();
 
