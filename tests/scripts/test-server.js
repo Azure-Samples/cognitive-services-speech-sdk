@@ -1,16 +1,18 @@
-const WebSocket = require('ws');
-const httpHeaders = require('http-headers');
-const util = require('util');
-const wss = new WebSocket.Server({ port: 8080});
+'use strict';
 
-const prefix = 'Path:%s\r\nContent-Type: application/json; charset=utf-8\r\nX-RequestId:%s\r\n\r\n%j';
+WebSocket = require('ws');
+httpHeaders = require('http-headers');
+util = require('util');
+wss = new WebSocket.Server({ port: 8080});
+
+prefix = 'Path:%s\r\nContent-Type: application/json; charset=utf-8\r\nX-RequestId:%s\r\n\r\n%j';
 
 
 function rnd(max) {
   return Math.floor(Math.random() * Math.floor(max));
 }
 
-const speech = {
+speech = {
 
   start : util.format(prefix, 'speech.startDetected', '%s', { Offset: 0 }),
 
@@ -31,7 +33,7 @@ const speech = {
 };
 
 
-const turn = {
+turn = {
 
   start : util.format(prefix, 'turn.start', '%s', { 
     context: { 
@@ -42,7 +44,7 @@ const turn = {
   end : 'Path:turn.end\r\nX-RequestId:%s\r\n\r\n',
 };
 
-const replies = [turn.start, speech.start, speech.hypothesis, speech.end, speech.phrase, turn.end];
+replies = [turn.start, speech.start, speech.hypothesis, speech.end, speech.phrase, turn.end];
 
 wss.on('connection', function connection(ws, req) {
     console.log('Incoming connection for url '+ req.url + '\n HEADERS:\n' + JSON.stringify(req.headers));
