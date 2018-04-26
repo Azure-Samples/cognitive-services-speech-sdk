@@ -24,27 +24,23 @@
 %extend Microsoft::CognitiveServices::Speech::Recognition::RecognitionResult {
     %pythoncode %{
     def __str__(self):
-        return '{}:(result_id={}, reason={}, text={})'.format(type(self), self.result_id, self.reason, self.text)
+        return u'{}:(result_id={}, reason={}, text={})'.format(type(self), self.result_id, self.reason, self.text)
     %}
 }
 
 %extend Microsoft::CognitiveServices::Speech::SessionEventArgs {
     %pythoncode %{
     def __str__(self):
-        return '{}:(session_id={})'.format(type(self), self.session_id)
+        return u'{}:(session_id={})'.format(type(self), self.session_id)
     %}
 }
 
 %extend Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognitionEventArgs {
     %pythoncode %{
     def __str__(self):
-        return '{}:(session_id={}, result={})'.format(type(self), self.session_id, self.result)
+        return u'{}:(session_id={}, result={})'.format(type(self), self.session_id, self.result)
     %}
 }
-
-%rename(_DefaultRecognizerFactory)Microsoft::CognitiveServices::Speech::Recognition::DefaultRecognizerFactory;
-
-%ignore Microsoft::CognitiveServices::Speech::Recognition::DefaultRecognizerFactory::Parameters;
 
 %include "carbon.i"
 
@@ -80,17 +76,23 @@ T ## Signal.connect, T ## Signal.disconnect = _generate_signal_methods(T ## Call
 %}
 %enddef
 
-%pythoncode %{
-class RecognizerFactory:
 
-    def __init__(self, subscription):
-        _DefaultRecognizerFactory.set_subscription_key(subscription)
-
+%extend Microsoft::CognitiveServices::Speech::Recognition::ICognitiveServicesSpeechFactory {
+    %pythoncode %{
     def create_speech_recognizer(self, filename=None):
         if not filename:
-            return factory.create_speech_recognizer()
-        return factory.create_speech_recognizer_with_file_input(filename)
-%}
+            return self.create_speech_recognizer()
+        return self.create_speech_recognizer_with_file_input(filename)
+    %}
+}
+
+%extend Microsoft::CognitiveServices::Speech::Recognition::RecognitionResult {
+    %pythoncode %{
+    @property
+    def json(self):
+        return self.properties[ResultProperty_Json].get_string()
+    %}
+}
 
 
 %py_wrap_callbacks(SessionEvent)

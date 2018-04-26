@@ -30,7 +30,6 @@
     catch (...) { SWIG_exception(SWIG_UnknownError,"Runtime exception"); }
 }
 
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::IDefaultRecognizerFactory)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::Recognizer)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Recognition::RecognitionResult, Microsoft::CognitiveServices::Speech::Recognition::RecognitionEventArgs>)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::BaseAsyncRecognizer)
@@ -48,6 +47,7 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationRecognizer)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::ISpeechFactory)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::ICognitiveServicesSpeechFactory)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Value)
 
 %template(WstringVector) std::vector<std::wstring>;
 
@@ -279,23 +279,44 @@
     }
 }
 
-%define add_subscript_operator(Type, Enum)
+
+%inline %{
+    typedef Microsoft::CognitiveServices::Speech::Value Value;
+    typedef std::shared_ptr<Value> ValuePtr;
+%}
+
+#ifdef SWIGPYTHON
+
+%define %add_subscript_operator(Type, Enum)
 %extend Microsoft::CognitiveServices::Speech::Type {
-
-    Value&& __getitem__(const std::wstring& name) {
-        return ($self)->operator[](name);
+    ValuePtr __getitem__(const std::wstring& name) {
+        return std::make_shared<Value>(std::move(($self)->operator[](name)));
     }
-
-    Value&& __getitem__(Microsoft::CognitiveServices::Speech::Enum index) {
-        return std::move(($self)->operator[](index));
+    ValuePtr __getitem__(Microsoft::CognitiveServices::Speech::Enum index) {
+        return std::make_shared<Value>(std::move(($self)->operator[](index)));
     }
 }
 %enddef
 
-%add_subscript_operator(Recognition::ResultPropertyValueCollection, Recognition::ResultProperty);
-%add_subscript_operator(Recognition::RecognizerFactoryParameterCollection, Recognition::FactoryParameter);
-%add_subscript_operator(Recognition::RecognizerParameterValueCollection, Recognition::RecognizerParameter);
-%add_subscript_operator(SessionParameterValueCollection, SessionParameter);
+#else
+
+%define %add_subscript_operator(Type, Enum)
+%extend Microsoft::CognitiveServices::Speech::Type {
+    ValuePtr Get(const std::wstring& name) {
+        return std::make_shared<Value>(std::move(($self)->operator[](name)));
+    }
+    ValuePtr Get(Microsoft::CognitiveServices::Speech::Enum index) {
+        return std::make_shared<Value>(std::move(($self)->operator[](index)));
+    }
+}
+%enddef
+
+#endif
+
+%add_subscript_operator(Recognition::ResultPropertyValueCollection, Recognition::ResultProperty)
+%add_subscript_operator(Recognition::FactoryParameterCollection, Recognition::FactoryParameter)
+%add_subscript_operator(Recognition::RecognizerParameterValueCollection, Recognition::RecognizerParameter)
+%add_subscript_operator(SessionParameterValueCollection, SessionParameter)
 
 %ignore Microsoft::CognitiveServices::Speech::EventSignal::EventSignal;
 %ignore Microsoft::CognitiveServices::Speech::EventSignal::CallbackFunction;
@@ -311,15 +332,17 @@
 %ignore StartKeywordRecognitionAsync;
 %ignore StopKeywordRecognitionAsync;
 
-%ignore Microsoft::CognitiveServices::Speech::Recognition::ResultPropertyValue::ResultPropertyValue(SPXRESULTHANDLE, enum ResultProperty);
-
 %ignore Microsoft::CognitiveServices::Speech::Value::Value;
+%ignore Microsoft::CognitiveServices::Speech::SessionParameterValue;
+%ignore Microsoft::CognitiveServices::Speech::Recognition::ResultPropertyValue;
+%ignore Microsoft::CognitiveServices::Speech::Recognition::RecognizerParameterValue;
+%ignore Microsoft::CognitiveServices::Speech::Recognition::FactoryParameterValue;
 
 %include <speechapi_cxx_value.h>
 
 %template(RecognizerParameterValueCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXRECOHANDLE, Microsoft::CognitiveServices::Speech::Recognition::RecognizerParameterValue>;
 %template(ResultPropertyValueCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXRESULTHANDLE, Microsoft::CognitiveServices::Speech::Recognition::ResultPropertyValue>;
-%template(RecognizerFactoryParameterCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXFACTORYHANDLE, Microsoft::CognitiveServices::Speech::Recognition::FactoryParameterValue>;
+%template(FactoryParameterCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXFACTORYHANDLE, Microsoft::CognitiveServices::Speech::Recognition::FactoryParameterValue>;
 %template(SessionParameterValueCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXSESSIONHANDLE, Microsoft::CognitiveServices::Speech::SessionParameterValue>;
 
 %include <speechapi_cxx_audioinputstream.h>
@@ -408,9 +431,6 @@
 %template(TranslationRecognizerBase) Microsoft::CognitiveServices::Speech::Recognition::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationTextResult, Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationTextResultEventArgs>;
 
 %include <speechapi_cxx_translation_recognizer.h>
-
-%immutable Microsoft::CognitiveServices::Speech::Recognition::IRecognizerFactory::Parameters;
-
 %include <speechapi_cxx_factory_parameter.h>
 %include <speechapi_cxx_factory.h>
 

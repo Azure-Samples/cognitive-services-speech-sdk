@@ -13,36 +13,46 @@ else:
 
 from carbon_py import SpeechFactory, SessionEventCallback, SpeechRecognitionEventCallback
 # TODO: #1137487
+
+class _TestCallback(SessionEventCallback, SpeechRecognitionEventCallback):
+    def __init__(self, msg):
+        SessionEventCallback.__init__(self, self)
+        SpeechRecognitionEventCallback.__init__(self, self)
+        self.msg = msg
+        self.num_calls = 0
+    
+    def __call__(self, event):
+        self.num_calls += 1
+        _print('{}: {}'.format(self.msg, event))
+
+    def reset(self):
+        self.num_calls = 0
+
 callbacks = {
-  'session_started' : SessionEventCallback(lambda event:
-      _print('In session_started callback: {}'.format(event))),
-
- 'session_stopped' : SessionEventCallback(lambda event:
-      _print('In session_stopped callback: {}'.format(event))),
-
-  'intermediate_result' : SpeechRecognitionEventCallback(lambda event:
-          _print('In intermediate_result callback: {}'.format(event))),
-
-  'final_result' : SpeechRecognitionEventCallback(lambda event:
-        _print('In final_result callback: {}'.format(event))),
-
-  'no_match' : SpeechRecognitionEventCallback(lambda event:
-        _print('In no_match callback: {}'.format(event))),
-
-  'canceled' : SpeechRecognitionEventCallback(lambda event:
-          _print('In Canceled callback')),
+  'session_started' : _TestCallback('In session_started callback'),
+  'session_stopped' : _TestCallback('In session_stopped callback'),
+  'intermediate_result' : _TestCallback('In intermediate_result callback'),
+  'final_result' : _TestCallback('In final_result callback'),
+  'no_match' : _TestCallback('In no_match callback'),
+  'canceled' : _TestCallback('In Canceled callback'),
 }
 
-
-def test_recognize(subscription, filename):
-    result = recognize(subscription, filename)
+def _assert(result):
     assert result
     assert result.text
+    assert result.json
+    assert callbacks['session_started'].num_calls == 1
+    assert callbacks['session_stopped'].num_calls == 1
+    assert callbacks['intermediate_result'].num_calls >= 1
+    assert callbacks['final_result'].num_calls == 1
 
-def test_recognize_async(subscription, filename):
-    result = recognize(subscription, filename, True)
-    assert result
-    assert result.text
+def test_recognize(subscription, filename, endpoint):
+    result = recognize(subscription, filename=filename, endpoint=endpoint)
+    _assert(result)
+
+def test_recognize_async(subscription, filename, endpoint):
+    result = recognize(subscription, endpoint=endpoint, filename=filename, async=True)
+    _assert(result)
 
 def _print(x): 
     new_line_x_3 = '\n'*3
@@ -51,7 +61,9 @@ def _print(x):
 
 def _connect(reco):
     for cb_name in callbacks:
-        getattr(reco, cb_name).connect(callbacks[cb_name])
+        callback = callbacks[cb_name]
+        callback.reset()
+        getattr(reco, cb_name).connect(callback)
 
 def _disconnect(reco):
     # BUGBUG #1180542
@@ -62,11 +74,16 @@ def _disconnect(reco):
     for cb_name in callbacks:
         getattr(reco, cb_name).disconnect(callbacks[cb_name])
 
-def recognize(subscription, filename=None, async=False):
+def recognize(subscription, endpoint=None, filename=None, async=False):
     if filename is not None:
         assert os.path.isfile(filename)
 
-    reco = RecognizerFactory(subscription).create_speech_recognizer(filename)
+    if endpoint is not None:
+        factory = SpeechFactory.from_endpoint(endpoint, subscription)
+    else:
+        factory = SpeechFactory.from_subscription(subscription)
+
+    reco = factory.create_speech_recognizer(filename)
 
     _connect(reco)
 
@@ -86,8 +103,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--filename')
     parser.add_argument('--subscription')
+    parser.add_argument('--endpoint')
     parser.add_argument('--async', action="store_true")
     args = parser.parse_args()
 
-    result = recognize(args.subscription, args.filename, args.async)
-    _print('Recognition complete: {}'.format(result))
+    result = recognize(args.subscription, filename=args.filename, async=args.async, endpoint=args.endpoint)
+    _print('Recognition complete: {}, (JSON: {})'.format(result, result.json))

@@ -28,13 +28,20 @@ public:
     /// Construct a value from a raw value pointer.
     /// </summary>
     /// <param name="ptr">Value pointer.</param>
-    explicit Value(Value* ptr = nullptr) : m_delegatePtr(ptr) { }
+    explicit Value(Value* ptr = nullptr) 
+        : m_delegatePtr(ptr)
+    {
+    }
 
     /// <summary>
     /// Move constructor.
     /// </summary>
     /// <param name="other">Value to construct from.</param>
-    Value(Value&& other) : m_delegatePtr(std::move(other.m_delegatePtr)) { }
+    Value(Value&& other) 
+        : m_delegatePtr(std::move(other.m_delegatePtr)) 
+    {
+        other.m_delegatePtr = nullptr;
+    }
 
     /// <summary>
     /// Destructor.

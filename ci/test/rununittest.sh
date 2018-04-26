@@ -24,6 +24,9 @@ pretty_print "Running usp_tests"
 pretty_print "Running cxx_api_tests"
 ./tests/unit_tests.sh $BINARY_DIR cxx_api_tests $UserKeySpeech $UserKeyCris $UserKeyLuis $UserKeySkyman
 
-pretty_print "Python test currently disabled"
-#pretty_print "Running Python tests"
-#py.test -s ./bindings/python/test.py --filename whatstheweatherlike.wav
+if [ "${AGENT_OS}" == "Windows_NT" ] && [ "${BUILDPLATFORM}" == "Win32" ]; then
+    : # we don't build python bindings on Win32
+else
+    pretty_print "Running Python tests"
+    py.test -s ./bindings/python/test.py --filename ./tests/input/whatstheweatherlike.wav --subscription $UserKeySpeech
+fi
