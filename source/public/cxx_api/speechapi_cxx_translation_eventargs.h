@@ -81,7 +81,7 @@ public:
     explicit TranslationSynthesisResultEventArgs(SPXEVENTHANDLE hevent) :
         SessionEventArgs(hevent),
         m_hevent(hevent),
-        m_result(std::make_shared<TranslationSynthesisResult>(ResultHandleFromEventHandle(hevent))),
+        m_result(std::make_shared<TranslationSynthesisResult>(SynthesisResultHandleFromEventHandle(hevent))),
         Result(*m_result.get())
     {
         SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hevent);
@@ -101,13 +101,12 @@ private:
 
     DISABLE_DEFAULT_CTORS(TranslationSynthesisResultEventArgs);
 
-    SPXRESULTHANDLE ResultHandleFromEventHandle(SPXEVENTHANDLE hevent)
+    SPXRESULTHANDLE SynthesisResultHandleFromEventHandle(SPXEVENTHANDLE hevent)
     {
         SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
         SPX_THROW_ON_FAIL(Recognizer_RecognitionEvent_GetResult(hevent, &hresult));
         return hresult;
     }
-
 };
 
 } } } } } // Microsoft::CognitiveServices::Speech::Recognition::Translation

@@ -61,9 +61,13 @@ namespace Microsoft.CognitiveServices.Speech.Recognition
         public const string TranslationToLanguages = "TRANSLATION-ToLanguages";
 
         /// <summary>
-        /// The name of parameter `TRANSLATION-RequireVoiceOutput` which describes whether a synthesized voice ouput of the translated text is required.
+        /// The name of parameter `TRANSLATION-Features` describes which features are desired for translation.
         /// </summary>
-        public const string TranslationRequireVoiceOutput = "TRANSLATION-RequireVoiceOutput";
+        public const string TranslationFeatures = "TRANSLATION-Features";
 
+        /// <summary>
+        /// The name of parameter `TRANSLATION-Voice` describes which voice is used for text-to-speech.
+        /// </summary>
+        public const string TranslationVoice = "TRANSLATION-Voice";
     }
 }

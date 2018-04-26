@@ -153,8 +153,9 @@ public:
     /// </summary>
     /// <param name="sourceLanguage">The spoken language of the audio input in BCP-47 format.</param>
     /// <param name="targetLanguages">A list of target languages of translation in BCP-47 format.</param>
+    /// <param name="voice">Optional. Specifies the name of voice tag if a synthesized audio output is desired.</param>
     /// <returns>A shared pointer to TranslationRecognizer</returns>
-    virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages) = 0;
+    virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") = 0;
 
     /// <summary>
     /// Creates a TranslationRecognizer, using the specified audio stream as input and the pair of source/target languages.
@@ -162,8 +163,9 @@ public:
     /// <param name="fileName">Specifies the input audio file.</param>
     /// <param name="sourceLanguage">The spoken language of the audio input in BCP-47 format.</param>
     /// <param name="targetLanguages">A list of target languages of translation in BCP-47 format.</param>
+    /// <param name="voice">Optional. Specifies the name of voice tag if a synthesized audio output is desired.</param>
     /// <returns>A shared pointer to TranslationRecognizer</returns>
-    virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages) = 0;
+    virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") = 0;
 
     /// <summary>
     /// Creates a TranslationRecognizer, using the specified audio file as input and the pair of source/target languages.
@@ -171,9 +173,10 @@ public:
     /// <param name="audioInputStream">A pointer to the input audio stream.</param>
     /// <param name="sourceLanguage">The spoken language of the audio input in BCP-47 format.</param>
     /// <param name="targetLanguages">A list of target languages of translation in BCP-47 format.</param>
+    /// <param name="voice">Optional. Specifies the name of voice tag if a synthesized audio output is desired.</param>
     /// <returns>A shared pointer to TranslationRecognizer</returns>
-    virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages) = 0;
-
+    virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") = 0;
+    
     /// <summary>
     /// Sets an authorization token that will be used for all recognizers created by the factory when connecting to the service.
     /// The caller needs to ensure that the token is valid and sets a new token if the current one is expired.
@@ -432,33 +435,48 @@ private:
             throw SPXERR_NOT_IMPL;
         }
 
-        virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages) override
+        virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") override
         {
             SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
-            // Hack use only one target language.
-            auto lang = targetLanguages.at(0);
-            SPX_THROW_ON_FAIL(::SpeechFactory_CreateTranslationRecognizer(m_hfactory, &hreco, sourceLanguage.c_str(), lang.c_str()));
+            auto targetLangBuffer = std::make_unique<const wchar_t*[]>(targetLanguages.size());
+            size_t num = 0;
+            for (const auto& lang : targetLanguages)
+            {
+                targetLangBuffer[num++] = lang.c_str();
+            }
+
+            SPX_THROW_ON_FAIL(::SpeechFactory_CreateTranslationRecognizer(m_hfactory, &hreco, sourceLanguage.c_str(), targetLangBuffer.get(), num, voice.c_str()));
             return std::make_shared<Translation::TranslationRecognizer>(hreco);
         }
 
-        virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages) override
+
+        virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") override
         {
             SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
-            // Hack use only one target language.
-            auto lang = targetLanguages.at(0);
-            SPX_THROW_ON_FAIL(::SpeechFactory_CreateTranslationRecognizer_With_FileInput(m_hfactory, &hreco, sourceLanguage.c_str(), lang.c_str(), fileName.c_str()));
+
+            auto targetLangBuffer = std::make_unique<const wchar_t*[]>(targetLanguages.size());
+            size_t num = 0;
+            for (const auto& lang : targetLanguages)
+            {
+                targetLangBuffer[num++] = lang.c_str();
+            }
+            SPX_THROW_ON_FAIL(::SpeechFactory_CreateTranslationRecognizer_With_FileInput(m_hfactory, &hreco, sourceLanguage.c_str(), targetLangBuffer.get(), num, voice.c_str(), fileName.c_str()));
             return std::make_shared<Translation::TranslationRecognizer>(hreco);
         }
 
-        virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages) override
+        virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") override
         {
             SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
             SpeechApi_AudioInputStreamAdapter *audioInputStreamAdapter = new SpeechApi_AudioInputStreamAdapter();
             InitSpeechApi_AudioInputStreamAdapterFromAudioInputStream(audioInputStreamAdapter, audioInputStream);
 
-            auto lang = targetLanguages.at(0);
-            // Hack use only one target language.
-            SPX_THROW_ON_FAIL(::SpeechFactory_CreateTranslationRecognizer_With_Stream(m_hfactory, &hreco, sourceLanguage.c_str(), lang.c_str(), (::SpeechApi_AudioInputStream*)audioInputStreamAdapter));
+            auto targetLangBuffer = std::make_unique<const wchar_t*[]>(targetLanguages.size());
+            size_t num = 0;
+            for (const auto& lang : targetLanguages)
+            {
+                targetLangBuffer[num++] = lang.c_str();
+            }
+            SPX_THROW_ON_FAIL(::SpeechFactory_CreateTranslationRecognizer_With_Stream(m_hfactory, &hreco, sourceLanguage.c_str(), targetLangBuffer.get(), num, voice.c_str(), (::SpeechApi_AudioInputStream*)audioInputStreamAdapter));
             return std::make_shared<Translation::TranslationRecognizer>(hreco);
         };
 

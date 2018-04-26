@@ -5,6 +5,9 @@
 // speechapi_c_factory.cpp: Definitions for SpeechFactory related C methods
 //
 
+#include <string>
+#include <vector>
+
 #include "stdafx.h"
 #include "service_helpers.h"
 #include "site_helpers.h"
@@ -17,7 +20,7 @@
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
-
+using namespace std;
 
 std::shared_ptr<ISpxNamedProperties> GetNamedPropertiesFromFactoryHandle(SPXFACTORYHANDLE hfactory)
 {
@@ -217,7 +220,21 @@ SPXAPI SpeechFactory_CreateIntentRecognizer(SPXFACTORYHANDLE hfactory, SPXRECOHA
     return SPXERR_NOT_IMPL;
 }
 
-SPXAPI SpeechFactory_CreateTranslationRecognizer(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* recoHandlePointer, const wchar_t* sourceLanguage, const wchar_t* targetLanguage)
+inline vector<wstring> GetVectorFromBuffer(const wchar_t* buffer[], size_t entries)
+{
+    vector<wstring> result;
+    if (buffer != nullptr)
+    {
+        for (size_t i = 0; i < entries; i++)
+        {
+            result.push_back(buffer[i]);
+        }
+    }
+
+    return result;
+}
+
+SPXAPI SpeechFactory_CreateTranslationRecognizer(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* recoHandlePointer, const wchar_t* sourceLanguage, const wchar_t* targetLanguages[], size_t numberOfTargetLanguages, const wchar_t* voice)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -225,14 +242,15 @@ SPXAPI SpeechFactory_CreateTranslationRecognizer(SPXFACTORYHANDLE hfactory, SPXR
         auto factory = (*factoryhandles)[hfactory];
         *recoHandlePointer = SPXHANDLE_INVALID;
 
-        auto recognizer = factory->CreateTranslationRecognizer(sourceLanguage, targetLanguage);
+        auto toLangs = GetVectorFromBuffer(targetLanguages, numberOfTargetLanguages);
+        auto recognizer = factory->CreateTranslationRecognizer(sourceLanguage, toLangs, voice);
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *recoHandlePointer = recohandles->TrackHandle(recognizer);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI SpeechFactory_CreateTranslationRecognizer_With_FileInput(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* recoHandlePointer, const wchar_t* sourceLanguage, const wchar_t* targetLanguage, const wchar_t* fileName)
+SPXAPI SpeechFactory_CreateTranslationRecognizer_With_FileInput(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* recoHandlePointer, const wchar_t* sourceLanguage, const wchar_t* targetLanguages[], size_t numberOfTargetLanguages, const wchar_t* voice, const wchar_t* fileName)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -240,14 +258,15 @@ SPXAPI SpeechFactory_CreateTranslationRecognizer_With_FileInput(SPXFACTORYHANDLE
         auto factory = (*factoryhandles)[hfactory];
         *recoHandlePointer = SPXHANDLE_INVALID;
 
-        auto recognizer = factory->CreateTranslationRecognizerWithFileInput(fileName, sourceLanguage, targetLanguage);
+        auto toLangs = GetVectorFromBuffer(targetLanguages, numberOfTargetLanguages);
+        auto recognizer = factory->CreateTranslationRecognizerWithFileInput(fileName, sourceLanguage, toLangs, voice);
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *recoHandlePointer = recohandles->TrackHandle(recognizer);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI SpeechFactory_CreateTranslationRecognizer_With_Stream(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* recoHandlePointer, const wchar_t* sourceLanguage, const wchar_t* targetLanguage, SpeechApi_AudioInputStream *stream)
+SPXAPI SpeechFactory_CreateTranslationRecognizer_With_Stream(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* recoHandlePointer, const wchar_t* sourceLanguage, const wchar_t* targetLanguages[], size_t numberOfTargetLanguages, const wchar_t* voice, SpeechApi_AudioInputStream *stream)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -256,7 +275,8 @@ SPXAPI SpeechFactory_CreateTranslationRecognizer_With_Stream(SPXFACTORYHANDLE hf
         SpeechApiAudioInputStreamWrapper* streamWrapper = new SpeechApiAudioInputStreamWrapper(stream);
 
         *recoHandlePointer = SPXHANDLE_INVALID;
-        auto recognizer = factory->CreateTranslationRecognizerWithStream(streamWrapper, sourceLanguage, targetLanguage);
+        auto toLangs = GetVectorFromBuffer(targetLanguages, numberOfTargetLanguages);
+        auto recognizer = factory->CreateTranslationRecognizerWithStream(streamWrapper, sourceLanguage, toLangs, voice);
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *recoHandlePointer = recohandles->TrackHandle(recognizer);
     }

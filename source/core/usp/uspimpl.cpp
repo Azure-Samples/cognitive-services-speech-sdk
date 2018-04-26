@@ -212,8 +212,12 @@ string Connection::Impl::ConstructConnectionUrl()
         oss << m_config.m_modelId
             << endpoint::hostname::CRIS
             << endpoint::pathPrefix
-            << g_recoModeStrings[recoMode] 
+            << g_recoModeStrings[recoMode]
             << endpoint::pathSuffix;
+        break;
+    case EndpointType::Translation:
+        oss << endpoint::hostname::Translation
+            << endpoint::translation::path;
         break;
     case EndpointType::CDSDK:
         oss << endpoint::hostname::CDSDK;
@@ -225,16 +229,54 @@ string Connection::Impl::ConstructConnectionUrl()
     default:
         ThrowInvalidArgumentException("Unknown endpoint type.");
     }
-    
+
+    // The first query parameter does not require '&'.
     auto format = static_cast<underlying_type_t<OutputFormat>>(m_config.m_outputFormat);
     oss << g_outFormatStrings[format];
 
-    if (!m_config.m_language.empty()) 
+    if (m_config.m_endpoint == EndpointType::Translation)
     {
+        oss << '&' << endpoint::translation::from << m_config.m_translationSourceLanguage;
+        size_t start = 0;
+        auto delim = ',';
+        size_t end = m_config.m_translationTargetLanguages.find_first_of(delim);
+        while (end != string::npos)
+        {
+            oss << '&' << endpoint::translation::to << m_config.m_translationTargetLanguages.substr(start, end - start);
+            start = end + 1;
+            end = m_config.m_translationTargetLanguages.find_first_of(delim, start);
+        }
+        oss << '&' << endpoint::translation::to << m_config.m_translationTargetLanguages.substr(start, end);
+
+        if (!m_config.m_translationVoice.empty())
+        {
+            oss << '&' << endpoint::translation::features << endpoint::translation::requireVoice;
+            oss << '&' << endpoint::translation::voice << m_config.m_translationVoice;
+        }
+        // Need to provide cid for now.
+        oss << '&' << "cid=" << m_config.m_modelId;
+    }
+    else if (!m_config.m_language.empty())
+    {
+        // Set language for non-translation recognizer.
         oss << '&' << endpoint::langQueryParam << m_config.m_language;
     }
 
-    return oss.str();
+    // Todo: use libcurl for encoding.
+    ostringstream encodedStrOut;
+    encodedStrOut << setbase(16);
+    for (const auto ch : oss.str())
+    {
+        if (ch != ' ')
+        {
+            encodedStrOut << ch;
+        }
+        else
+        {
+            encodedStrOut << "%20";
+        }
+    }
+    return encodedStrOut.str();
 }
 
 void Connection::Impl::Connect()
@@ -593,7 +635,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
     string pathStr(path);
     auto& callbacks = connection->m_config.m_callbacks;
 
-    // TODO: Check if path is expected to be binary, there should be some form of mapping per message.
+    // TODO: pass the frame type (binary/text) so that we can check frame type before calling json::parse.
     if (pathStr == path::translationSynthesis)
     {
         USP::TranslationSynthesisMsg msg;
@@ -656,7 +698,6 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
                 PAL::ToWString(text)
                 });
         }
-
     }
     else if (path == path::speechPhrase)
     {

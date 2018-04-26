@@ -641,9 +641,9 @@ public:
     virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) = 0;
 
-    virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizer(const std::wstring& sourcelanguage, const std::wstring& targetLanguage) = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourcelanguae, const std::wstring& targetLanguage) = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerWithStream(AudioInputStream *stream, const std::wstring& sourcelanguage, const std::wstring& targetLanguage) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizer(const std::wstring& sourcelanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourcelanguae, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerWithStream(AudioInputStream *stream, const std::wstring& sourcelanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") = 0;
 
 };
 

@@ -42,10 +42,22 @@ namespace USP {
         const std::string pathSuffix = "/cognitiveservices/v1?";
         const std::string langQueryParam = "language=";
 
+        namespace translation
+        {
+            const std::string path = "/speech/translation/cognitiveservices/v1?";
+            const std::string from = "from=";
+            const std::string to = "to=";
+            const std::string voice = "voice=";
+            const std::string features = "features=";
+            const std::string requireVoice = "texttospeech";
+        }
+
         namespace hostname 
         {
+            // Todo: update all hostnames with new unified speech hosts.
             const std::string bingSpeech = "speech.platform.bing.com";
             const std::string CRIS = ".api.cris.ai";
+            const std::string Translation = "fedev.develop2.cris.ai";
             const std::string CDSDK = "speech.platform.bing.com/cortana/api/v1?environment=Home&";
         }
     }

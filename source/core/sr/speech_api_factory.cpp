@@ -70,17 +70,40 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerWith
     return recognizer;
 }
 
-std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice)
 {
-    return CreateTranslationRecognizerInternal(nullptr, sourceLanguage, targetLanguage);
+    return CreateTranslationRecognizerInternal(nullptr, sourceLanguage, targetLanguages, voice);
 }
 
-std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice)
 {
-    return CreateTranslationRecognizerInternal(fileName.c_str(), sourceLanguage, targetLanguage);
+    return CreateTranslationRecognizerInternal(fileName.c_str(), sourceLanguage, targetLanguages, voice);
 }
 
-std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognizerInternal(wchar_t const* fileNameStr, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
+void CSpxSpeechApiFactory::SetTranslationParameter(const std::shared_ptr<ISpxNamedProperties> namedProperties, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice)
+{
+    SPX_THROW_HR_IF(SPXERR_INVALID_ARG, sourceLanguage.empty());
+
+    namedProperties->SetStringValue(g_TRANSLATION_FromLanguage, sourceLanguage.c_str());
+    std::wstring plainStr;
+    // The target languages are in BCP-47 format, and should not contain the character ','.
+    SPX_THROW_HR_IF(SPXERR_INVALID_ARG, targetLanguages.size() == 0);
+    SPX_THROW_HR_IF(SPXERR_INVALID_ARG, targetLanguages[0].empty());
+    plainStr = targetLanguages.at(0);
+    for (auto lang = targetLanguages.begin() + 1; lang != targetLanguages.end(); ++lang)
+    {
+        SPX_THROW_HR_IF(SPXERR_INVALID_ARG, lang->empty());
+        plainStr += L"," + *lang;
+    }
+    SPX_THROW_HR_IF(SPXERR_INVALID_ARG, plainStr.empty());
+    namedProperties->SetStringValue(g_TRANSLATION_ToLanguages, plainStr.c_str());
+    namedProperties->SetStringValue(g_TRANSLATION_Voice, voice.c_str());
+
+    // Set mode to conversation for translation
+    namedProperties->SetStringValue(g_SPEECH_RecoMode, g_SPEECH_RecoMode_Conversation);
+}
+
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognizerInternal(wchar_t const* fileNameStr, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice)
 {
     // Create the session
     auto factoryAsSite = SpxSiteFromThis(this);
@@ -102,25 +125,18 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognize
     auto sessionAsSite = SpxQueryInterface<ISpxGenericSite>(session);
     auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>("CSpxTranslationRecognizer", sessionAsSite);
 
-    // Todo handle source and target lanugage settings.
-    // Set language if we have one. Default will be set to en-US
-    // if (language != nullptr)
-    // {
-    //    auto namedProperties = SpxQueryService<ISpxNamedProperties>(sessionAsSite);
-    //    namedProperties->SetStringValue(g_SPEECH_RecoLanguage, language);
-    //}
+    // Set translation parameters.
+    auto namedProperties = SpxQueryService<ISpxNamedProperties>(sessionAsSite);
+    SetTranslationParameter(namedProperties, sourceLanguage, targetLanguages, voice);
 
     // Add the recognizer to the session
     session->AddRecognizer(recognizer);
-
-    UNUSED(sourceLanguage);
-    UNUSED(targetLanguage);
 
     //// We're done!
     return recognizer;
 }
 
-std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognizerWithStream(AudioInputStream *stream, const std::wstring& sourceLanguage, const std::wstring& targetLanguage)
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognizerWithStream(AudioInputStream *stream, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice)
 {
     // Create the session
     auto factoryAsSite = SpxSiteFromThis(this);
@@ -135,12 +151,13 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognize
     auto sessionAsSite = SpxQueryInterface<ISpxGenericSite>(session);
     auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>("CSpxTranslationRecognizer", sessionAsSite);
 
+    // Set translation parameters.
+    auto namedProperties = SpxQueryService<ISpxNamedProperties>(sessionAsSite);
+    SetTranslationParameter(namedProperties, sourceLanguage, targetLanguages, voice);
+
     // Add the recognizer to the session
     session->AddRecognizer(recognizer);
 
-    // Todo: set languages.
-    UNUSED(sourceLanguage);
-    UNUSED(targetLanguage);
     // We're done!
     return recognizer;
 }

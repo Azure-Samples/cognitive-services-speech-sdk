@@ -18,6 +18,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
         // BUG: this is hack for making documentation going.
         internal TranslationTextResult(Internal.TranslationTextResult result) : base(result)
         {
+            TranslationStatus = result.TranslationStatus == Internal.TranslationStatus.Success ? TranslationStatus.Success : TranslationStatus.Error;
             translationTextResultMap = new Dictionary<string, string>();
             //Todo: add translation result
             var map = result.Translations;
@@ -30,7 +31,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
         /// <summary>
         /// Specifies translation status.
         /// </summary>
-        public RecognitionStatus TranslationStatus { get; }
+        public TranslationStatus TranslationStatus { get; }
 
         /// <summary>
         /// Presents the translation results. Each item in the dictionary represents translation result in one of target languages, where the key 

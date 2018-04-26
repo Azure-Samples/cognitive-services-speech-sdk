@@ -30,29 +30,9 @@ enum class TranslationStatus {
     Success,
 
     /// <summary>
-    /// Cannot get recognized text from speech.
-    /// </summary>
-    SpeechNotRecognized, 
-
-    /// <summary>
-    /// Cannot create translated text from the recognized text.
-    /// </summary>
-    TranslationNoMatch,
-
-    /// <summary>
-    /// Cannot generate voice output from the transcribed text.
-    /// </summary>
-    VoiceSynthesisError,
-
-    /// <summary>
     /// An error occurred during translation.
     /// </summary>
-    Error, 
-
-    /// <summary>
-    /// The translation request has been cancelled.
-    /// </summary>
-    Cancelled
+    Error
 };
 
 
@@ -100,7 +80,8 @@ private:
 
     void PopulateResultFields(SPXRESULTHANDLE resultHandle)
     {
-        m_translationStatus = ::Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationStatus::SpeechNotRecognized;
+        // Hack: populate status correctly to API.
+        m_translationStatus = ::Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationStatus::Success;
 
         size_t bufLen = 0;
         std::unique_ptr<Result_TranslationTextBufferHeader> phraseBuffer;

@@ -177,8 +177,6 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
     for (auto f : { 
             &CSpxUspRecoEngineAdapter::SetUspEndpoint,
             &CSpxUspRecoEngineAdapter::SetUspRecoMode,
-            &CSpxUspRecoEngineAdapter::SetUspLanguage,
-            &CSpxUspRecoEngineAdapter::SetUspModelId,
             &CSpxUspRecoEngineAdapter::SetUspAuthentication
         }) {
         (this->*f)(clientConfig);
@@ -194,12 +192,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(USP::Client& client)
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
-    auto customSpeechModelId = properties->GetStringValue(g_SPEECH_ModelId);
-    if (!customSpeechModelId.empty())                       // Use the Custom Recognition Intelligent Service
-    {
-        return client.SetEndpointType(USP::EndpointType::Cris);
-    }
-
+    // First check endpoint
     auto endpoint = properties->GetStringValue(g_SPEECH_Endpoint);
     if (PAL::wcsicmp(endpoint.c_str(), L"CORTANA") == 0)    // Use the CORTANA SDK endpoint
     {
@@ -211,9 +204,43 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(USP::Client& client)
         SPX_DBG_TRACE_VERBOSE("Using Custom URL: %ls", endpoint.c_str());
         return client.SetEndpointUrl(PAL::ToString(endpoint));
     }
-    
+
+    // Then check translation
+    auto fromLang = properties->GetStringValue(g_TRANSLATION_FromLanguage);
+    if (!fromLang.empty())
+    {
+        auto toLangs = properties->GetStringValue(g_TRANSLATION_ToLanguages);
+        SPX_IFTRUE_THROW_HR(toLangs.empty(), SPXERR_INVALID_ARG);
+        auto voice = properties->GetStringValue(g_TRANSLATION_Voice);
+        // Before unified service, we need modelId to run translation.
+        auto customSpeechModelId = properties->GetStringValue(g_SPEECH_ModelId);
+
+        return client.SetEndpointType(USP::EndpointType::Translation)
+            .SetTranslationSourceLanguage(PAL::ToString(fromLang))
+            .SetTranslationTargetLanguages(PAL::ToString(toLangs))
+            .SetTranslationVoice(PAL::ToString(voice))
+            // Todo: remove this when switch to unified service.
+            .SetModelId(PAL::ToString(customSpeechModelId));
+    }
+
+    // Then check CRIS
+    auto customSpeechModelId = properties->GetStringValue(g_SPEECH_ModelId);
+    if (!customSpeechModelId.empty())                       // Use the Custom Speech Intelligent Service
+    {
+        return client.SetEndpointType(USP::EndpointType::Cris).SetModelId(PAL::ToString(customSpeechModelId));
+    }
+
      // Otherwise ... Use the default SPEECH endpoints
-    return client.SetEndpointType(USP::EndpointType::BingSpeech);
+    if (properties->HasStringValue(g_SPEECH_RecoLanguage))
+    {
+        // Get the property that indicates what language to use...
+        auto value = properties->GetStringValue(g_SPEECH_RecoLanguage);
+        return client.SetEndpointType(USP::EndpointType::BingSpeech).SetLanguage(PAL::ToString(value));
+    }
+    else 
+    {
+        return client.SetEndpointType(USP::EndpointType::BingSpeech);
+    }
 }
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspRecoMode(USP::Client& client)
@@ -226,17 +253,17 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspRecoMode(USP::Client& client)
     auto value = properties->GetStringValue(g_SPEECH_RecoMode);
 
     // Convert that value to the appropriate UspRecognitionMode...
-    if (value.empty() || PAL::wcsicmp(value.c_str(), L"INTERACTIVE") == 0)
+    if (value.empty() || PAL::wcsicmp(value.c_str(), g_SPEECH_RecoMode_Interactive) == 0)
     {
         return client.SetRecognitionMode(USP::RecognitionMode::Interactive);
     }
 
-    if (PAL::wcsicmp(value.c_str(), L"CONVERSATION") == 0)
+    if (PAL::wcsicmp(value.c_str(), g_SPEECH_RecoMode_Conversation) == 0)
     {
         return client.SetRecognitionMode(USP::RecognitionMode::Conversation);
     }
 
-    if (PAL::wcsicmp(value.c_str(), L"DICTATION") == 0)
+    if (PAL::wcsicmp(value.c_str(), g_SPEECH_RecoMode_Dictation) == 0)
     {
         return client.SetRecognitionMode(USP::RecognitionMode::Dictation);
     }
@@ -246,38 +273,6 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspRecoMode(USP::Client& client)
     ThrowInvalidArgumentException("Unknown RecognitionMode value " + PAL::ToString(value));
 
     return client; // to make compiler happy.
-}
-
-USP::Client& CSpxUspRecoEngineAdapter::SetUspLanguage(USP::Client& client)
-{
-    // Get the named properties service...
-    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
-    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
-
-    if (!properties->HasStringValue(g_SPEECH_RecoLanguage))
-    {
-        return client;
-    }
-
-    // Get the property that indicates what language to use...
-    auto value = properties->GetStringValue(g_SPEECH_RecoLanguage);
-    return client.SetLanguage(PAL::ToString(value));
-}
-
-USP::Client&  CSpxUspRecoEngineAdapter::SetUspModelId(USP::Client& client)
-{
-    // Get the named properties service...
-    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
-    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
-
-    if (!properties->HasStringValue(g_SPEECH_ModelId))
-    {
-        return client;
-    }
-
-    // Get the property that indicates what model to use...
-    auto value = properties->GetStringValue(g_SPEECH_ModelId);
-    return client.SetModelId(PAL::ToString(value));
 }
 
 USP::Client&  CSpxUspRecoEngineAdapter::SetUspAuthentication(USP::Client& client)
@@ -309,6 +304,7 @@ USP::Client&  CSpxUspRecoEngineAdapter::SetUspAuthentication(USP::Client& client
     
     return client; // fixes "not all control paths return a value"
 }
+
 
 void CSpxUspRecoEngineAdapter::UspSendSpeechContext()
 {

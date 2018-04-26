@@ -245,6 +245,33 @@ public:
     }
 
     /**
+    * Sets the source language of translation.
+    */
+    Client& SetTranslationSourceLanguage(const std::string& lang)
+    {
+        m_translationSourceLanguage = lang;
+        return *this;
+    }
+
+    /**
+    * Sets the target languages of translation.
+    */
+    Client& SetTranslationTargetLanguages(const std::string& langs)
+    {
+        m_translationTargetLanguages = langs;
+        return *this;
+    }
+
+    /**
+    * Sets the voice that is desired in translation.
+    */
+    Client& SetTranslationVoice(const std::string& voice)
+    {
+        m_translationVoice = voice;
+        return *this;
+    }
+
+    /**
     * Establishes connection to the service.
     */
     ConnectionPtr Connect();
@@ -281,6 +308,10 @@ private:
     OutputFormat m_outputFormat;
     std::string m_language;
     std::string m_modelId;
+
+    std::string m_translationSourceLanguage;
+    std::string m_translationTargetLanguages;
+    std::string m_translationVoice;
 
     AuthenticationType m_authType;
     std::string m_authData;
