@@ -24,6 +24,7 @@ Dockerfile text
 *.nuspec text
 *.patch text
 *.props text
+*.pl text
 *.py text
 *.sln text
 *.targets text
