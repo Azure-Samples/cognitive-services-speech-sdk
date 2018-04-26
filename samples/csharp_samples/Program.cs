@@ -20,7 +20,6 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine("4. Speech continuous Recognition using events.");
             Console.WriteLine("5. Translation with microphone input.");
             Console.WriteLine("6. Translation with file input.");
-            Console.WriteLine("7. Translation continuous Recognition using events.");
 
             Console.Write("Your choice (0: Stop.): ");
 
@@ -48,9 +47,6 @@ namespace MicrosoftSpeechSDKSamples
                         break;
                     case ConsoleKey.D6:
                         TranslationSamples.TranslationWithFileAsync().Wait();
-                        break;
-                    case ConsoleKey.D7:
-                        TranslationSamples.TranslationContinuousRecognitionAsync().Wait();
                         break;
                     case ConsoleKey.D0:
                         Console.WriteLine("Exiting...");

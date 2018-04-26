@@ -120,7 +120,7 @@ namespace MicrosoftSpeechSDKSamples
                 recognizer.FinalResultReceived += (s, e) =>
                         { Console.WriteLine($"\n    Final result: Status: {e.Result.Reason}, Text: {e.Result.RecognizedText}."); };
                 recognizer.RecognitionErrorRaised += (s, e) =>
-                        { Console.WriteLine($"\n    Sorry, error occurred. Reason: {e.Status.ToString()}"); };
+                        { Console.WriteLine($"\n    An error occurred. Reason: {e.Status.ToString()}"); };
                 recognizer.OnSessionEvent += (s, e) =>
                         { Console.WriteLine($"\n    Session event. Event: {e.EventType.ToString()}."); };
 
