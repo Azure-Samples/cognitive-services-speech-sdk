@@ -44,6 +44,9 @@ if(MSVC)
   # disable precompiled headers (for now) to allow build in IDE environment
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Y-")
 
+  # add control flow guard
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /guard:cf")
+
   # make sure we generate pdbs for release as well
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
   set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")

@@ -683,11 +683,11 @@ actually fire on the client. */
  /* tts last chunk */
 #define metrics_tts_last_chunk() telemetry_log_event_v(METRIC_ID_tts_last_chunk)
 
-/* A hang was detected -- the process will likely be terminated */
+/* A conflict was detected -- the process will likely be terminated */
 #define metrics_hang_detected(__type, __duration) \
     telemetry_log_event(METRIC_ID_hang_detected, "sl", "type", __type, "duration_ms", (long)(__duration))
 
-/* A stall was detected -- a "stall" happens at a lower threshold than a "hang" */
+/* A stall was detected -- a "stall" happens at a lower threshold than a "h*ng" */
 #define metrics_stall(__type, __duration) \
     telemetry_log_event(METRIC_ID_stall, "sl", "type", __type, "duration_ms", (long)(__duration))
 
