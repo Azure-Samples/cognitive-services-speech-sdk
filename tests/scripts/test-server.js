@@ -22,6 +22,12 @@ speech = {
       Duration: 23600000
     }),
 
+  hypothesis_unicode : util.format(prefix, 'speech.hypothesis', '%s', {
+      Text: "Найдётся всё. Например, когда появился интернет",
+      Offset: 0,
+      Duration: 26300000
+    }),
+
   phrase : util.format(prefix, 'speech.phrase', '%s', { 
       RecognitionStatus: "Success", 
       DisplayText: "Remind me to buy 5 iPhones.", 
@@ -44,7 +50,7 @@ turn = {
   end : 'Path:turn.end\r\nX-RequestId:%s\r\n\r\n',
 };
 
-replies = [turn.start, speech.start, speech.hypothesis, speech.end, speech.phrase, turn.end];
+replies = [turn.start, speech.start, speech.hypothesis, speech.hypothesis_unicode, speech.end, speech.phrase, turn.end];
 
 wss.on('connection', function connection(ws, req) {
     console.log('Incoming connection for url '+ req.url + '\n HEADERS:\n' + JSON.stringify(req.headers));

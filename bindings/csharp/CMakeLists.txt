@@ -54,16 +54,16 @@ FILE(GLOB CSHARP_LIB_WRAPPER_SOURCES "${SRC_DIR}/*.cs")
 enable_language(CSharp)
 add_library(${CSHARP_LIB} SHARED ${SWIG_CS_SOURCES} ${CSHARP_LIB_WRAPPER_SOURCES})
 add_dependencies(${CSHARP_LIB} ${CSHARP_BINDINGS} ${SWIG_MODULE_${CSHARP_BINDINGS}_REAL_NAME})
-set_target_properties(${CSHARP_LIB} PROPERTIES
-    FOLDER bindings/csharp
-)
+
 set_target_properties(${CSHARP_LIB} PROPERTIES
    VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.6.1"
+   FOLDER bindings/csharp
+   VS_DOTNET_REFERENCES "System"
 )
-set_target_properties(${CSHARP_LIB} PROPERTIES
-   VS_DOTNET_REFERENCES "System")
 
-target_compile_options(${CSHARP_LIB} PRIVATE "/langversion:6")
+target_compile_options(${CSHARP_LIB} 
+    PRIVATE "/langversion:6"
+)
 
 set_property(DIRECTORY ${CMAKE_SOURCE_DIR} APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${SWIG_INTERFACE})
 
