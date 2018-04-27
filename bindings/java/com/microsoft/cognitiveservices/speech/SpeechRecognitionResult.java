@@ -41,7 +41,6 @@ public class SpeechRecognitionResult {
     public RecognitionStatus getReason() {
         return reason;
     }
-    
 
     /**
       * Presents the recognized text in the result.
@@ -74,6 +73,9 @@ public class SpeechRecognitionResult {
       */
     @Override
     public String toString() {
-        return "ResultId:" + resultId + " Status:" + reason + " Recognized text:<" + recognizedText + ">.";
+        return "ResultId:" + resultId +
+               " Status:" + reason +
+               " Recognized text:<" + recognizedText +
+               ">.";
     }
 }

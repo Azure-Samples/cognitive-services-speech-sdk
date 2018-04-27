@@ -5,7 +5,7 @@ package com.microsoft.cognitiveservices.speech.intent;
 //
 
 /**
-  * Define payload of intent intermediate/final result events.
+  * Defines content of an intent intermediate/final result events.
   */
 public class IntentRecognitionResultEventArgs // : System.EventArgs
 {
@@ -43,6 +43,11 @@ public class IntentRecognitionResultEventArgs // : System.EventArgs
     @Override
     public String toString()
     {
-        return "SessionId:" + _SessionId + " ResultId:" + _Result.getResultId() + " Status:" + _Result.getReason() + " IntentId:<" + _Result.getIntentId() + "> Recognized text:<" + _Result.getRecognizedText() + ">."; 
+        return "SessionId:" + _SessionId +
+               " ResultId:" + _Result.getResultId() +
+               " Status:" + _Result.getReason() +
+               " IntentId:<" + _Result.getIntentId() +
+               "> Recognized text:<" + _Result.getRecognizedText() +
+               ">."; 
     }
 }

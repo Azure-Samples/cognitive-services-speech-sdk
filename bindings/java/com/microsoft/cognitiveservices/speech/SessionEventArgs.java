@@ -5,7 +5,7 @@ package com.microsoft.cognitiveservices.speech;
 //
 
 /**
- * Defines payload for session events like SessionStarted/Stopped, SoundStarted/Stopped.
+ * Defines content for session events like SessionStarted/Stopped, SoundStarted/Stopped.
  */
 public class SessionEventArgs // extends EventArgs
 {
@@ -14,21 +14,28 @@ public class SessionEventArgs // extends EventArgs
       * @param type the SessionEventType
       * @param arg The native SessionEventArgs
       */
-    public SessionEventArgs(SessionEventType type,  com.microsoft.cognitiveservices.speech.internal.SessionEventArgs arg)
-    {
-        this.sessionId = arg.getSessionId();
-        this.eventType = type;
+    public SessionEventArgs(SessionEventType type, com.microsoft.cognitiveservices.speech.internal.SessionEventArgs arg) {
+        this._sessionId = arg.getSessionId();
+        this._eventType = type;
     }
 
     /**
       * Represents the event type.
+      * @return Represents the event type.
       */
-    public final SessionEventType eventType;// { get; }
+    public SessionEventType getEventType() {
+        return _eventType;
+    }// { get; }
+    private final SessionEventType _eventType;// { get; }
 
     /**
-      * Represents the seesion identifier.
+      * Represents the session identifier.
+      * @return Represents the session identifier.
       */
-    public final String sessionId; // { get; }
+    public String getSessionId() {
+        return _sessionId;
+    } // { get; }
+    private final String _sessionId;
 
     /**
      * Returns a String that represents the session event.
@@ -36,6 +43,8 @@ public class SessionEventArgs // extends EventArgs
      */
     @Override
     public String toString() {
-        return "EventType: " + eventType.toString() + " SessionId: " + sessionId.toString() + ".";
+        return "EventType: " + _eventType.toString() +
+               " SessionId: " + _sessionId.toString() +
+               ".";
     }
 }

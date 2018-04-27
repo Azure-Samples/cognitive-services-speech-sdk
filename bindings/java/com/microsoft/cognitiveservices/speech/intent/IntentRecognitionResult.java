@@ -7,10 +7,9 @@ package com.microsoft.cognitiveservices.speech.intent;
 /**
   * Defines result of intent recognition.
   */
-public class IntentRecognitionResult extends com.microsoft.cognitiveservices.speech.SpeechRecognitionResult
-{
-    IntentRecognitionResult(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionResult result)
-    {
+public class IntentRecognitionResult extends com.microsoft.cognitiveservices.speech.SpeechRecognitionResult {
+    
+    IntentRecognitionResult(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionResult result) {
         super(result);
         this._intentId = result.getIntentId();
     }
@@ -19,10 +18,9 @@ public class IntentRecognitionResult extends com.microsoft.cognitiveservices.spe
       * A String that represents the intent identifier being recognized.
       * @return A String that represents the intent identifier being recognized.
       */
-    public String getIntentId() // { get; }
-    {
+    public String getIntentId() {
         return _intentId;
-    }
+    } // { get; }
     private String _intentId;
 
     /**
@@ -30,8 +28,11 @@ public class IntentRecognitionResult extends com.microsoft.cognitiveservices.spe
       * @return A String that represents the intent recognition result.
       */
     @Override
-    public String toString()
-    {
-        return "ResultId:" + getResultId() + " Status:" + getReason() + " IntentId:<" + _intentId + "> Recognized text:<" + getRecognizedText() + ">.";
+    public String toString() {
+        return "ResultId:" + getResultId() +
+               " Status:" + getReason() +
+               " IntentId:<" + _intentId +
+               "> Recognized text:<" + getRecognizedText() +
+               ">.";
     }
 }

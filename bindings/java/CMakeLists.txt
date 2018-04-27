@@ -75,12 +75,12 @@ set(JAVA_SOURCES
     com/microsoft/cognitiveservices/speech/SessionEventArgs.java
     com/microsoft/cognitiveservices/speech/SessionEventType.java
     com/microsoft/cognitiveservices/speech/AudioInputStream.java
-    com/microsoft/cognitiveservices/speech/LanguageUnderstandingModel.java
     com/microsoft/cognitiveservices/speech/ParameterNames.java
     com/microsoft/cognitiveservices/speech/RecognitionErrorEventArgs.java
     com/microsoft/cognitiveservices/speech/RecognitionStatus.java
     com/microsoft/cognitiveservices/speech/Recognizer.java
     com/microsoft/cognitiveservices/speech/SpeechFactory.java
+    com/microsoft/cognitiveservices/speech/intent/LanguageUnderstandingModel.java
     com/microsoft/cognitiveservices/speech/intent/IntentRecognitionResult.java
     com/microsoft/cognitiveservices/speech/intent/IntentRecognitionResultEventArgs.java
     com/microsoft/cognitiveservices/speech/intent/IntentRecognizer.java

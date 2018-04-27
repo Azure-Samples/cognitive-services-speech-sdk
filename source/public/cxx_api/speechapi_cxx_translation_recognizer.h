@@ -175,6 +175,7 @@ public:
     /// <summary>
     /// Note: NOT implemented. Starts keyword recognition on a continous audio stream, until StopKeywordRecognitionAsync() is called.
     /// </summary>
+    /// Note: Key word spotting functionality is only available on the Cognitive Services Device SDK.This functionality is currently not included in the SDK itself.
     /// <param name="keyword">Specifies the keyword phrase to be recognized.</param>
     /// <returns>An asynchronous operation that starts the keyword recognition.</returns>
     std::future<void> StartKeywordRecognitionAsync(const std::wstring& keyword) override
@@ -190,6 +191,7 @@ public:
     /// <summary>
     /// Note: NOT implemented. Stops continuous keyword recognition.
     /// </summary>
+    /// Note: Key word spotting functionality is only available on the Cognitive Services Device SDK.This functionality is currently not included in the SDK itself.
     /// <returns>A task representing the asynchronous operation that stops the keyword recognition.</returns>
     std::future<void> StopKeywordRecognitionAsync() override
     {

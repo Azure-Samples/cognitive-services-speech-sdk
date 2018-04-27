@@ -3,7 +3,6 @@
  */
 package com.microsoft.cognitiveservices.speech.translation;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import com.microsoft.cognitiveservices.speech.ParameterCollection;
@@ -44,8 +43,7 @@ import com.microsoft.cognitiveservices.speech.util.TaskRunner;
        */
      public final EventHandlerImpl<TranslationSynthesisResultEventArgs> SynthesisResultReceived = new EventHandlerImpl<TranslationSynthesisResultEventArgs>();
 
-     TranslationRecognizer(com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer recoImpl)
-     {
+     public TranslationRecognizer(com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer recoImpl) {
          this.recoImpl = recoImpl;
 
          intermediateResultHandler = new ResultHandlerImpl(this, /*isFinalResultHandler:*/ false);
@@ -73,8 +71,7 @@ import com.microsoft.cognitiveservices.speech.util.TaskRunner;
        * Gets the language name that was set when the recognizer was created.
        * @return Gets the language name that was set when the recognizer was created.
        */
-     public String getSourceLanguage()
-     {
+     public String getSourceLanguage() {
          return _Parameters.getString(ParameterNames.TranslationFromLanguage);
      }
 
@@ -83,7 +80,7 @@ import com.microsoft.cognitiveservices.speech.util.TaskRunner;
        * The language is specified in BCP-47 format. The translation will provide translated text for each of language.
        * @return Gets target languages for translation that were set when the recognizer was created.
        */
-     public ArrayList<String> TargetLanguages() {
+     public ArrayList<String> getTargetLanguages() {
          return new ArrayList<String>(_TargetLanguages);
      }     // { get; }
      ArrayList<String> _TargetLanguages = new ArrayList<String>();
@@ -92,7 +89,7 @@ import com.microsoft.cognitiveservices.speech.util.TaskRunner;
        * Gets a boolean value which indicates whether a voice output of the translated text is desired.
        * @return Gets a boolean value which indicates whether a voice output of the translated text is desired.
        */
-     public boolean getIsVoiceOutputDesired() {
+     public boolean isVoiceOutputDesired() {
          return _IsVoiceOutputDesired;
      }//     { get; set; }
      
@@ -100,7 +97,7 @@ import com.microsoft.cognitiveservices.speech.util.TaskRunner;
       * Sets a boolean value which indicates whether a voice output of the translated text is desired.
       * @param value The new value for the voice flag.
       */
-     public void setIsVoiceOutputDesired(boolean value) {
+     public void isVoiceOutputDesired(boolean value) {
          _IsVoiceOutputDesired = value;
      }//     { get; set; }
      private boolean _IsVoiceOutputDesired;
@@ -118,8 +115,7 @@ import com.microsoft.cognitiveservices.speech.util.TaskRunner;
        * Starts recognition and translation, and stops after the first utterance is recognized. The task returns the translation text as result.
        * @return A task representing the recognition operation. The task returns a value of TranslationTextResult.
        */
-     public Task<TranslationTextResult> RecognizeAsync()
-     {
+     public Task<TranslationTextResult> RecognizeAsync() {
          Task<TranslationTextResult> t = new Task<TranslationTextResult>(new TaskRunner<TranslationTextResult>() {
              TranslationTextResult result;
              
@@ -141,8 +137,7 @@ import com.microsoft.cognitiveservices.speech.util.TaskRunner;
        * User must subscribe to events to receive translation results.
        * @return A task representing the asynchronous operation that starts the recognition.
        */
-     public Task<?> StartContinuousRecognitionAsync()
-     {
+     public Task<?> StartContinuousRecognitionAsync() {
          Task<Object> t = new Task<Object>(new TaskRunner<Object>() {
              IntentRecognitionResult result;
              
@@ -163,8 +158,7 @@ import com.microsoft.cognitiveservices.speech.util.TaskRunner;
        * Stops continuous recognition and translation.
        * @return A task representing the asynchronous operation that stops the translation.
        */
-     public Task<?> StopContinuousRecognitionAsync()
-     {
+     public Task<?> StopContinuousRecognitionAsync() {
          Task<Object> t = new Task<Object>(new TaskRunner<Object>() {
              IntentRecognitionResult result;
              
@@ -184,12 +178,12 @@ import com.microsoft.cognitiveservices.speech.util.TaskRunner;
     /**
       * Starts speech recognition on a continous audio stream with keyword spotting, until stopKeywordRecognitionAsync() is called.
       * User must subscribe to events to receive recognition results.
+      * Note: Key word spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
       * @param keyword The keyword to recognize.
       * @return A task representing the asynchronous operation that starts the recognition.
       */
-    public Task<?> startKeywordRecognitionAsync(String keyword)
-    {
-        Task<?> t = new Task(new TaskRunner() {
+    public Task<?> startKeywordRecognitionAsync(String keyword) {
+        Task<?> t = new Task<Object>(new TaskRunner<Object>() {
 
             @Override
             public void run() {
@@ -206,11 +200,11 @@ import com.microsoft.cognitiveservices.speech.util.TaskRunner;
 
     /**
       * Stops continuous speech recognition.
+      * Note: Key word spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
       * @return A task representing the asynchronous operation that stops the recognition.
       */
-    public Task<?> stopKeywordRecognitionAsync()
-    {
-        Task<?> t = new Task(new TaskRunner() {
+    public Task<?> stopKeywordRecognitionAsync() {
+        Task<?> t = new Task<Object>(new TaskRunner<Object>() {
 
             @Override
             public void run() {
@@ -226,7 +220,7 @@ import com.microsoft.cognitiveservices.speech.util.TaskRunner;
     }
 
      @Override
-     protected void dispose(boolean disposing) throws IOException
+     protected void dispose(boolean disposing)
      {
          if (disposed)
          {
@@ -255,6 +249,7 @@ import com.microsoft.cognitiveservices.speech.util.TaskRunner;
          }
      }
 
+     // TODO should only be visible to parameter collection
      public com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer getRecoImpl() {
          return recoImpl;
      }

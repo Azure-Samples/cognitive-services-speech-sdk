@@ -79,6 +79,7 @@ public:
     /// <summary>
     /// Asynchronously initiates keyword recognition operation.
     /// </summary>
+    /// Note: Key word spotting functionality is only available on the Cognitive Services Device SDK.This functionality is currently not included in the SDK itself.
     /// <returns>An empty future.</returns>
     std::future<void> StartKeywordRecognitionAsync(const std::wstring& keyword) override
     {
@@ -88,6 +89,7 @@ public:
     /// <summary>
     /// Asynchronously terminates keyword recognition operation.
     /// </summary>
+    /// Note: Key word spotting functionality is only available on the Cognitive Services Device SDK.This functionality is currently not included in the SDK itself.
     /// <returns>An empty future.</returns>
     std::future<void> StopKeywordRecognitionAsync() override
     {

@@ -3,32 +3,22 @@ package com.microsoft.cognitiveservices.speech.translation;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.microsoft.cognitiveservices.speech.RecognitionStatus;
-
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
 /**
-  * Defines tranlsation result.
+  * Defines TranslationText result.
   */
 public class TranslationTextResult extends com.microsoft.cognitiveservices.speech.SpeechRecognitionResult
 {
     // BUG: this is hack for making documentation going.
     public TranslationTextResult(com.microsoft.cognitiveservices.speech.internal.TranslationTextResult result)
     {
-        super(null);
+        super(result);
         
-        // @TODO why?
-        _TranslationStatus = RecognitionStatus.Canceled;
-        _Translations = new HashMap<String, String>();
-    }
-
-    TranslationTextResult(TranslationTextResult result) {
-        super(null);
-        // @TODO why?
-        _TranslationStatus = RecognitionStatus.Canceled;
+        _TranslationStatus = result.getTranslationStatus() == com.microsoft.cognitiveservices.speech.internal.TranslationStatus.Success ? TranslationStatus.Success : TranslationStatus.Error;
         _Translations = new HashMap<String, String>();
     }
 
@@ -36,11 +26,11 @@ public class TranslationTextResult extends com.microsoft.cognitiveservices.speec
       * Specifies translation status.
       * @return the translation status.
       */
-    public final RecognitionStatus getTranslationStatus()
+    public final TranslationStatus getTranslationStatus()
     {
         return _TranslationStatus;
     }// { get; }
-    private RecognitionStatus _TranslationStatus;
+    private TranslationStatus _TranslationStatus;
 
     /**
       * Presents the translation results. Each item in the dictionary represents translation result in one of target languages, where the key 
@@ -60,6 +50,16 @@ public class TranslationTextResult extends com.microsoft.cognitiveservices.speec
     @Override
     public String toString()
     {
-        return "Translations<<>>";
+        String text = "ResultId:" + getResultId() +
+                      " RecognitionStatus:" + getReason()  +
+                      ", TranslationStatus: " + _TranslationStatus.name() +
+                      ", Recognized text:<" + getRecognizedText() +
+                      ">.\n"; 
+                
+            for(String key : _Translations.keySet())
+            {
+                text += "    Translation in " + key + ": <" + _Translations.get(key) + ">.\n";
+            }
+            return text;
     }
 }

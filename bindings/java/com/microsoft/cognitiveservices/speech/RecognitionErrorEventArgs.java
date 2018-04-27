@@ -5,14 +5,14 @@ package com.microsoft.cognitiveservices.speech;
 //
 
 /**
-  * Defines payload of RecognitionErrorEvent. 
+  * Defines content of a RecognitionErrorEvent. 
   */
 public class RecognitionErrorEventArgs //extends System.EventArgs
 {
     public RecognitionErrorEventArgs(String sessionId, RecognitionStatus status)
     {
-        this.status = status;
-        this.sessionId = sessionId;
+        this._status = status;
+        this._sessionId = sessionId;
     }
 
     public RecognitionErrorEventArgs(String sessionId, com.microsoft.cognitiveservices.speech.internal.Reason reason)
@@ -23,19 +23,27 @@ public class RecognitionErrorEventArgs //extends System.EventArgs
 //        Debug.Assert((int)Internal.Reason.Canceled == (int)RecognitionStatus.Canceled);
 //        Debug.Assert((int)Internal.Reason.OtherRecognizer == (int)RecognitionStatus.OtherRecognizer);
 
-        this.status = RecognitionStatus.values()[(int)reason.swigValue()];
-        this.sessionId = sessionId;
+        this._status = RecognitionStatus.values()[(int)reason.swigValue()];
+        this._sessionId = sessionId;
     }
 
     /**
       * Specifies the error reason.
+      * @return Specifies the error reason.
       */
-    public final RecognitionStatus status;// { get; }
+    public RecognitionStatus getStatus() {
+        return _status;
+    }// { get; }
+    private RecognitionStatus _status;// { get; }
 
     /**
       * Specifies the session identifier.
+      * @return Specifies the session identifier.
       */
-    public final String sessionId; // { get;  }
+    public String sessionId() {
+        return _sessionId;
+    } // { get;  }
+    private String _sessionId;
 
     /**
       * Returns a String that represents the recognition error event.
@@ -44,6 +52,6 @@ public class RecognitionErrorEventArgs //extends System.EventArgs
     @Override
     public String toString()
     {
-        return "SessionId: " + sessionId + " Status: " + status + "."; 
+        return "SessionId: " + _sessionId + " Status: " + _status + "."; 
     }
 }

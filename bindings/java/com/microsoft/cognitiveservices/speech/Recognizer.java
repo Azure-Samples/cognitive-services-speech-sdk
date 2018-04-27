@@ -5,11 +5,7 @@ package com.microsoft.cognitiveservices.speech;
 //
 
 import java.io.Closeable;
-import java.io.IOException;
 
-import com.microsoft.cognitiveservices.speech.SessionEventArgs;
-import com.microsoft.cognitiveservices.speech.SessionEventType;
-import com.microsoft.cognitiveservices.speech.util.EventHandler;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 
 /**
@@ -24,8 +20,7 @@ public class Recognizer implements Closeable
       */
     final public EventHandlerImpl<SessionEventArgs> SessionEvent = new EventHandlerImpl<SessionEventArgs>();
 
-    protected Recognizer()
-    {
+    protected Recognizer() {
         sessionStartedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStartedEvent);
         sessionStoppedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStoppedEvent);
         speechStartDetectedHandler = new SessionEventHandlerImpl(this, SessionEventType.SpeechStartDetectedEvent);
@@ -35,13 +30,8 @@ public class Recognizer implements Closeable
     /**
       * Dispose of associated resources.
       */
-    public void close()
-    {
-        try {
-            dispose(true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void close() {
+        dispose(true);
     }
 
     /**
@@ -49,17 +39,13 @@ public class Recognizer implements Closeable
       * The Boolean parameter disposing indicates whether the method is called from Dispose (if disposing is true) or from the finalizer (if disposing is false).
       * Derived classes should override this method to dispose resource if needed.
       * @param disposing Flag to request disposal.
-      * @throws java.io.IOException is native resource could not be disposed.
       */
-    protected void dispose(boolean disposing) throws IOException
-    {
-        if (disposed)
-        {
+    protected void dispose(boolean disposing) {
+        if (disposed) {
             return;
         }
 
-        if (disposing)
-        {
+        if (disposing) {
             // disconnect
             sessionStartedHandler.delete();
             sessionStoppedHandler.delete();
@@ -79,27 +65,24 @@ public class Recognizer implements Closeable
     /**
       * Define an internal class which raise an event when a corresponding callback is invoked from the native layer. 
       */
-    class SessionEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SessionEventListener
-    {
-        public SessionEventHandlerImpl(Recognizer recognizer, SessionEventType eventType)
-        {
+    class SessionEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SessionEventListener {
+        
+        public SessionEventHandlerImpl(Recognizer recognizer, SessionEventType eventType) {
             this.recognizer = recognizer;
             this.eventType = eventType;
         }
 
         @Override
-        public void execute(com.microsoft.cognitiveservices.speech.internal.SessionEventArgs eventArgs)
-        {
-            if (recognizer.disposed)
-            {
+        public void execute(com.microsoft.cognitiveservices.speech.internal.SessionEventArgs eventArgs) {
+            
+            if (recognizer.disposed) {
                 return;
             }
 
             SessionEventArgs arg = new SessionEventArgs(eventType, eventArgs);
             EventHandlerImpl<SessionEventArgs>  handler = this.recognizer.SessionEvent;
 
-            if (handler != null)
-            {
+            if (handler != null) {
                 handler.fireEvent(this.recognizer, arg);
             }
         }

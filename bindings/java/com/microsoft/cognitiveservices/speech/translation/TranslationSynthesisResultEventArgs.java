@@ -5,7 +5,7 @@ package com.microsoft.cognitiveservices.speech.translation;
 //
 
 /**
-  * Define payload of translation synthesis result events.
+  * Defines the content of translation synthesis result event.
   */
 public class TranslationSynthesisResultEventArgs //: System.EventArgs
 {
@@ -41,6 +41,6 @@ public class TranslationSynthesisResultEventArgs //: System.EventArgs
     @Override
     public String toString()
     {
-        return "TranslationSynthesisResult";
+        return "SessionId:" + _sessionId + " Result:" + _Result.toString()  + ".";
     }
 }
