@@ -57,9 +57,19 @@ var requests = new Set();
 wss.on('connection', function connection(ws, req) {
     console.log('Incoming connection for url '+ req.url + '\n HEADERS:\n' + JSON.stringify(req.headers));
 
-    if (req.headers['ocp-apim-subscription-key'] == 'invalid_key') {
+    var sub_key = req.headers['ocp-apim-subscription-key'];
+    if (sub_key == 'invalid_key') {
       ws.close();
       return;
+    }
+
+    var max_timeout = 100;
+
+    try {
+        var piggyback = JSON.parse(sub_key);
+        max_timeout = piggyback['max_timeout']
+    } catch (e) {
+      // oh, well, sub key is not a json, just go with it.
     }
 
     ws.on('message', function incoming(message) {
@@ -87,7 +97,7 @@ wss.on('connection', function connection(ws, req) {
           }
           if (replies[i] == speech.hypothesis && rnd(2) == 0) i--;
           var response = util.format(replies[i++], id);
-          var timeout = (i != replies.length) ? rnd(100) : 10000;
+          var timeout = (i != replies.length) ? rnd(max_timeout) : 10000;
           console.log('replying with: %s\n', response);
           ws.send(response, {}, function() {
             setTimeout(function(){reply(id)}, timeout) ;

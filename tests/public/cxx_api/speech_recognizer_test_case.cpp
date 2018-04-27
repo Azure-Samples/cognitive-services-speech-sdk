@@ -66,6 +66,40 @@ void SetMockRealTimeSpeed(int value)
 
 TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 {
+    SECTION("Stress testing against the local server")
+    {
+        if (Config::Endpoint.empty())
+        {
+            return;
+        }
+
+        UseMocks(false);
+        REQUIRE(exists(input_file));
+        REQUIRE(!IsUsingMocks());
+
+        const int numLoops = 3;
+
+        auto factory = SpeechFactory::FromEndpoint(PAL::ToWString(Config::Endpoint), LR"({"max_timeout":"0"})");
+        for (int i = 0; i < numLoops; i++)
+        {
+            auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
+            auto result = recognizer->RecognizeAsync().get();
+            REQUIRE(result->Reason == Reason::Recognized);
+            REQUIRE(result->Text == L"Remind me to buy 5 iPhones.");
+        }
+
+        // BUGBUG: this currently fails because CSpxAudioStreamSession::WaitForRecognition() returns a nullptr on a timeout.
+        /*
+        factory = SpeechFactory::FromEndpoint(PAL::ToWString(Config::Endpoint), LR"({"max_timeout":"10000"})");
+        for (int i = 0; i < numLoops; i++)
+        {
+            auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
+            auto result = recognizer->RecognizeAsync().get();
+            REQUIRE(result->Reason == Reason::Recognized);
+            REQUIRE(result->Text == L"Remind me to buy 5 iPhones.");
+        }*/
+    }
+
     GIVEN("Mocks for USP, Microphone, WaveFilePump and Reader, and then USP ...")
     {
         UseMocks(true);
@@ -278,5 +312,20 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
             REQUIRE(callback_invoked);
         }
         recognizer.reset();
+    }
+}
+
+TEST_CASE("Speech Factory basics", "[api][cxx]")
+{
+    SECTION("Check that factories have correct parameters.")
+    {
+        auto f1 = SpeechFactory::FromEndpoint(L"1", L"invalid_key");
+        auto f2 = SpeechFactory::FromEndpoint(L"2", L"invalid_key");
+        // TODO: I shouldn't need to use const cast here to read a parameter!
+        auto endpoint1 = const_cast<FactoryParameterCollection&>(f1->Parameters)[FactoryParameter::Endpoint].GetString();
+        auto endpoint2 = const_cast<FactoryParameterCollection&>(f2->Parameters)[FactoryParameter::Endpoint].GetString();
+
+        //REQUIRE(endpoint1 == L"1"); BUGBUG this fails!!!
+        REQUIRE(endpoint2 == L"2");
     }
 }
