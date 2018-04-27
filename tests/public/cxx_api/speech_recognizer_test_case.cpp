@@ -7,7 +7,6 @@
 #include <atomic>
 #include <map>
 #include <string>
-#include "catch.hpp"
 #include "test_utils.h"
 #include "mock_controller.h"
 
@@ -27,15 +26,19 @@ using namespace Microsoft::CognitiveServices::Speech::Impl; // for mocks
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace std;
 
-std::string g_keySpeech;
-std::string g_keyCRIS;
-std::string g_keyLUIS;
-std::string g_keySkyman;
-std::string g_endpoint;
-std::string g_regionId;
-
 static wstring input_file(L"tests/input/whatstheweatherlike.wav");
 
+
+
+static std::shared_ptr<ICognitiveServicesSpeechFactory> GetFactory()
+{
+    // Assuming subscription key contains only single-byte characters.
+    static std::shared_ptr<ICognitiveServicesSpeechFactory> factory = !Config::Endpoint.empty()
+        ? SpeechFactory::FromEndpoint(PAL::ToWString(Config::Endpoint), PAL::ToWString(Keys::Speech))
+        : SpeechFactory::FromSubscription(PAL::ToWString(Keys::Speech), PAL::ToWString(Config::Region));
+
+    return factory;
+}
 
 void UseMocks(bool value)
 {
@@ -63,13 +66,6 @@ void SetMockRealTimeSpeed(int value)
 
 TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 {
-    // Assuming subscription key contains only single-byte characters.
-    auto key = std::wstring(g_keySpeech.begin(), g_keySpeech.end());
-    auto region = std::wstring(g_regionId.begin(), g_regionId.end());
-    auto factory = !g_endpoint.empty()
-        ? SpeechFactory::FromEndpoint(PAL::ToWString(g_endpoint), key)
-        : SpeechFactory::FromSubscription(key.c_str(), region.c_str());
-
     GIVEN("Mocks for USP, Microphone, WaveFilePump and Reader, and then USP ...")
     {
         UseMocks(true);
@@ -91,8 +87,8 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             callbackCounts[Callbacks::speech_start_detected] = 0;
             callbackCounts[Callbacks::speech_end_detected] = 0;
 
-            // We're going to loop thru 11 times... The first 10, we'll use mocks. The last time we'll use the USP
-            const int numLoops = 1;
+            // We're going to loop thru 3 times... The first 3 we'll use mocks. The last time we'll use the USP
+            const int numLoops = 3;
             for (int i = 0; i < numLoops; i++)
             {
                 auto useMockUsp = i + 1 < numLoops;
@@ -102,7 +98,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
                 SPX_TRACE_VERBOSE("%s: START of loop #%d; mockUsp=%d; realtime=%d", __FUNCTION__, i, useMockUsp, realTimeRate);
 
-                auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
+                auto recognizer = GetFactory()->CreateSpeechRecognizerWithFileInput(input_file);
                 REQUIRE(recognizer != nullptr);
                 REQUIRE(IsUsingMocks(useMockUsp));
 
@@ -141,7 +137,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
                 SPX_TRACE_VERBOSE("%s: Wait for session end (loop #%d)", __FUNCTION__, i);
                 unique_lock<mutex> lock(mtx);
-                cv.wait(lock, [&] { return sessionEnded; });
+                cv.wait_for(lock, std::chrono::seconds(30), [&] { return sessionEnded; });
                 lock.unlock();
 
                 SPX_TRACE_VERBOSE("%s: Wait some more (loop #%d)", __FUNCTION__, i);
@@ -169,7 +165,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         REQUIRE(exists(input_file));
         REQUIRE(!IsUsingMocks());
 
-        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
+        auto recognizer = GetFactory()->CreateSpeechRecognizerWithFileInput(input_file);
         auto result = recognizer->RecognizeAsync().get();
         REQUIRE(!result->Properties[ResultProperty::Json].GetString().empty());
     }
@@ -179,25 +175,22 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         UseMocks(false);
         REQUIRE(exists(input_file));
         REQUIRE(!IsUsingMocks());
-
         auto badKeyFactory = SpeechFactory::FromSubscription(L"invalid_key", L"invalid_region");
         auto recognizer = badKeyFactory->CreateSpeechRecognizerWithFileInput(input_file);
         auto result = recognizer->RecognizeAsync().get();
 
         REQUIRE(result->Reason == Reason::Canceled);
         REQUIRE(!result->ErrorDetails.empty());
+
+        // TODO: there's a data race in the audio_pump thread when it tries to
+        // pISpxAudioProcessor->SetFormat(nullptr); after exiting the loop.
+        // Comment out the next line to see for yourself (repros on Linux build machines).
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
     }
 }
 
 TEST_CASE("KWS basics", "[api][cxx]")
 {
-    // Assuming subscription key contains only single-byte characters.
-    auto key = std::wstring(g_keySpeech.begin(), g_keySpeech.end());
-    auto regionId = std::wstring(g_regionId.begin(), g_regionId.end());
-    auto factory = !g_endpoint.empty()
-        ? SpeechFactory::FromEndpoint(PAL::ToWString(g_endpoint), key)
-        : SpeechFactory::FromSubscription(key.c_str(), regionId.c_str());
-
     GIVEN("Mocks for USP, KWS, and the Microphone...")
     {
         UseMocks(true);
@@ -210,7 +203,7 @@ TEST_CASE("KWS basics", "[api][cxx]")
 
         WHEN("We do a keyword recognition with a speech recognizer")
         {
-            auto recognizer = factory->CreateSpeechRecognizer();
+            auto recognizer = GetFactory()->CreateSpeechRecognizer();
             REQUIRE(recognizer != nullptr);
             REQUIRE(IsUsingMocks(true));
 
@@ -251,13 +244,6 @@ TEST_CASE("KWS basics", "[api][cxx]")
 
 TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
 {
-    // Assuming subscription key contains only single-byte characters.
-    auto key = std::wstring(g_keySpeech.begin(), g_keySpeech.end());
-    auto regionId = std::wstring(g_regionId.begin(), g_regionId.end());
-    auto factory = !g_endpoint.empty()
-        ? SpeechFactory::FromEndpoint(PAL::ToWString(g_endpoint), key)
-        : SpeechFactory::FromSubscription(key.c_str(), regionId.c_str());
-
     REQUIRE(exists(input_file));
 
     mutex mtx;
@@ -268,7 +254,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
         bool callback_invoked = false;
 
         REQUIRE(!IsUsingMocks());
-        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
+        auto recognizer = GetFactory()->CreateSpeechRecognizerWithFileInput(input_file);
 
         auto callback = [&](const SpeechRecognitionEventArgs& args)
         {

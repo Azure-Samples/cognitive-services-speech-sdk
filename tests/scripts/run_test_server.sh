@@ -2,4 +2,4 @@
 
 set -e
 
-npm install ws http-headers && node test-server.js
+npm install && npm start

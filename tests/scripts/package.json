@@ -1,0 +1,11 @@
+{
+  "name": "test-ws-server",
+  "version": "0.0.1",
+  "devDependencies": {
+    "ws": "^5.1.1",
+    "http-headers": "^3.0.2"
+  },
+  "scripts": {
+    "start": "node test-server.js"
+  }
+}

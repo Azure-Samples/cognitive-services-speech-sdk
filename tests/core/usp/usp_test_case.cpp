@@ -8,28 +8,26 @@
 #include <random>
 #include <string>
 
-#include "catch.hpp"
 #include "test_utils.h"
 #include "usp.h"
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 
-std::string g_keySpeech;
-std::string g_keyCRIS;
-std::string g_keyLUIS;
-std::string g_keySkyman;
-std::string g_regionId;
-
 class UspClient : public USP::Callbacks {
 public:
     UspClient(USP::EndpointType endpoint = USP::EndpointType::BingSpeech, 
         USP::RecognitionMode mode = USP::RecognitionMode::Interactive)
     {
-        m_connection = USP::Client(*this, endpoint)
+        auto client = USP::Client(*this, endpoint)
             .SetRecognitionMode(mode)
-            .SetAuthentication(USP::AuthenticationType::SubscriptionKey, g_keySpeech)
-            .Connect();
+            .SetAuthentication(USP::AuthenticationType::SubscriptionKey, Keys::Speech);
+        if (!Config::Endpoint.empty()) 
+        {
+            client.SetEndpointType(USP::EndpointType::Custom).SetEndpointUrl(Config::Endpoint);
+        }
+
+        m_connection = client.Connect();
     }
 
     virtual void OnError(const std::string& error) override

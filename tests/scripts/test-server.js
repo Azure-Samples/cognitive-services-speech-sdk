@@ -1,18 +1,18 @@
 'use strict';
 
-WebSocket = require('ws');
-httpHeaders = require('http-headers');
-util = require('util');
-wss = new WebSocket.Server({ port: 8080});
+var WebSocket = require('ws');
+var httpHeaders = require('http-headers');
+var util = require('util');
+var wss = new WebSocket.Server({ port: 8080});
 
-prefix = 'Path:%s\r\nContent-Type: application/json; charset=utf-8\r\nX-RequestId:%s\r\n\r\n%j';
+var prefix = 'Path:%s\r\nContent-Type: application/json; charset=utf-8\r\nX-RequestId:%s\r\n\r\n%j';
 
 
 function rnd(max) {
   return Math.floor(Math.random() * Math.floor(max));
 }
 
-speech = {
+var speech = {
 
   start : util.format(prefix, 'speech.startDetected', '%s', { Offset: 0 }),
 
@@ -39,7 +39,7 @@ speech = {
 };
 
 
-turn = {
+var turn = {
 
   start : util.format(prefix, 'turn.start', '%s', { 
     context: { 
@@ -50,43 +50,49 @@ turn = {
   end : 'Path:turn.end\r\nX-RequestId:%s\r\n\r\n',
 };
 
-replies = [turn.start, speech.start, speech.hypothesis, speech.hypothesis_unicode, speech.end, speech.phrase, turn.end];
+var replies = [turn.start, speech.start, speech.hypothesis, speech.hypothesis_unicode, speech.end, speech.phrase, turn.end];
+
+var requests = new Set();
 
 wss.on('connection', function connection(ws, req) {
     console.log('Incoming connection for url '+ req.url + '\n HEADERS:\n' + JSON.stringify(req.headers));
 
-    requests = new Set();
+    if (req.headers['ocp-apim-subscription-key'] == 'invalid_key') {
+      ws.close();
+      return;
+    }
 
     ws.on('message', function incoming(message) {
 
       if (typeof message === 'string') {  
-       console.log('received: %s', message);
+       console.log('received message: %s', message);
       } else {
         console.log('received binary message');
       }
 
-      headers = httpHeaders(message);
-      id = headers['x-requestid']
+      var headers = httpHeaders(message);
+      var id = headers['x-requestid'].substring(0,32)
+
       if (!(requests.has(id))) {
 
         console.log('Incoming request with id: %s', id); 
 
         requests.add(id);
         var i = 0;
-        (function reply() {
+        (function reply(id) {
           if (i == replies.length) {
             // https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
             ws.close(4999, JSON.stringify({error:'Client must close the connection'}));
             return;
           }
           if (replies[i] == speech.hypothesis && rnd(2) == 0) i--;
-          response = util.format(replies[i++], id);
-          timeout = (i != replies.length) ? rnd(100) : 1000;
-          console.log('replying with: %s', response);
+          var response = util.format(replies[i++], id);
+          var timeout = (i != replies.length) ? rnd(100) : 10000;
+          console.log('replying with: %s\n', response);
           ws.send(response, {}, function() {
-            setTimeout(reply, timeout) ;
+            setTimeout(function(){reply(id)}, timeout) ;
           });
-        })();
+        })(id);
       }
 
     });
