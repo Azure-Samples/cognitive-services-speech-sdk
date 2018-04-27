@@ -123,30 +123,14 @@ void CSpxRecognizer::FireSessionStopped(const std::wstring& sessionId)
     SessionStopped.Signal(sessionEvent);
 }
 
-void CSpxRecognizer::FireSpeechStartDetected(const std::wstring& sessionId)
-{
-    SPX_DBG_ASSERT(GetSite());
-    auto factory = SpxQueryService<ISpxEventArgsFactory>(GetSite());
-    auto sessionEvent = factory->CreateSessionEventArgs(sessionId); // TODO: We must have a different Argument other than Session Type for Speech Start / End
-
-    auto handletable = CSpxSharedPtrHandleTableManager::Get<ISpxSessionEventArgs, SPXEVENTHANDLE>();
-    auto hevent = handletable->TrackHandle(sessionEvent);
-
-    SpeechStartDetected.Signal(sessionEvent);
-    handletable->StopTracking(hevent);
+void CSpxRecognizer::FireSpeechStartDetected(const std::wstring& sessionId, uint64_t offset)
+{   
+    FireRecoEvent(&SpeechStartDetected, sessionId, nullptr, offset);
 }
 
-void CSpxRecognizer::FireSpeechEndDetected(const std::wstring& sessionId)
+void CSpxRecognizer::FireSpeechEndDetected(const std::wstring& sessionId, uint64_t offset)
 {
-    SPX_DBG_ASSERT(GetSite());
-    auto factory = SpxQueryService<ISpxEventArgsFactory>(GetSite());
-    auto sessionEvent = factory->CreateSessionEventArgs(sessionId); // TODO: We must have a different Argument other than Session Type for Speech Start / End
-
-    auto handletable = CSpxSharedPtrHandleTableManager::Get<ISpxSessionEventArgs, SPXEVENTHANDLE>();
-    auto hevent = handletable->TrackHandle(sessionEvent);
-
-    SpeechEndDetected.Signal(sessionEvent);
-    handletable->StopTracking(hevent);
+    FireRecoEvent(&SpeechEndDetected, sessionId, nullptr, offset);
 }
 
 void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result)
@@ -198,11 +182,16 @@ void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_
         }
     }
 
+    FireRecoEvent(pevent, sessionId, result);
+}
+
+void CSpxRecognizer::FireRecoEvent(ISpxRecognizerEvents::RecoEvent_Type* pevent, const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result, uint64_t offset)
+{
     if (pevent != nullptr && pevent->IsConnected())
     {
         SPX_DBG_ASSERT(GetSite());
         auto factory = SpxQueryService<ISpxEventArgsFactory>(GetSite());
-        auto recoEvent = factory->CreateRecognitionEventArgs(sessionId, result);
+        auto recoEvent = (result != nullptr) ? factory->CreateRecognitionEventArgs(sessionId, result) : factory->CreateRecognitionEventArgsWithOffset(sessionId, offset);
         pevent->Signal(recoEvent);
     }
 }

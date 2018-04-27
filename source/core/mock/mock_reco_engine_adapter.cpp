@@ -180,18 +180,16 @@ void CSpxMockRecoEngineAdapter::EnsureFireFinalResult()
 
 void CSpxMockRecoEngineAdapter::FireSpeechStartDetected()
 {
-    auto offset = (uint32_t)m_cbAudioProcessed;
-    SPX_DBG_TRACE_VERBOSE("%s: offset=%d", __FUNCTION__, offset);
+    SPX_DBG_TRACE_VERBOSE("%s: offset=%llu", __FUNCTION__, m_cbAudioProcessed);
 
-    GetSite()->AdapterDetectedSpeechStart(this, offset);
+    GetSite()->AdapterDetectedSpeechStart(this, m_cbAudioProcessed);
 }
 
 void CSpxMockRecoEngineAdapter::FireSpeechEndDetected()
 {
-    auto offset = (uint32_t)m_cbAudioProcessed;
-    SPX_DBG_TRACE_VERBOSE("%s: offset=%d", __FUNCTION__, offset);
+    SPX_DBG_TRACE_VERBOSE("%s: offset=%llu", __FUNCTION__, m_cbAudioProcessed);
 
-    GetSite()->AdapterDetectedSpeechEnd(this, offset);
+    GetSite()->AdapterDetectedSpeechEnd(this, m_cbAudioProcessed);
 }
 
 

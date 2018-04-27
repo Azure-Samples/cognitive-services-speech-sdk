@@ -64,8 +64,8 @@ public:
     void FireSessionStarted(const std::wstring& sessionId) override;
     void FireSessionStopped(const std::wstring& sessionId) override;
 
-    void FireSpeechStartDetected(const std::wstring& sessionId) override;
-    void FireSpeechEndDetected(const std::wstring& sessionId) override;
+    void FireSpeechStartDetected(const std::wstring& sessionId, uint64_t offset) override;
+    void FireSpeechEndDetected(const std::wstring& sessionId, uint64_t offset) override;
 
     void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) override;
 
@@ -89,6 +89,8 @@ private:
 
     std::shared_ptr<ISpxSession> m_defaultSession;
     std::atomic_bool m_fEnabled;
+
+    void FireRecoEvent(ISpxRecognizerEvents::RecoEvent_Type* pevent, const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result, uint64_t offset = 0);
 };
 
 

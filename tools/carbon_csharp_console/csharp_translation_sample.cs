@@ -43,10 +43,10 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine(String.Format("Translation: error occurred. SessionId: {0}, Reason: {1}", e.SessionId, e.Status));
         }
 
-        private static void MySessionEventHandler(object sender, SessionEventArgs e)
+        private static void MySpeechEndDetectedHandler(object sender, RecogntionEventArgs e)
         {
             Console.WriteLine(String.Format("Translation: Session event: {0}.", e.ToString()));
-            if (e.EventType == SessionEventType.SpeechEndDetectedEvent)
+            if (e.EventType == RecognitionEventType.SpeechEndDetectedEvent)
             {
                 translationEndTaskCompletionSource.TrySetResult(0);
             }
@@ -125,7 +125,7 @@ namespace MicrosoftSpeechSDKSamples
             reco.FinalResultReceived += MyFinalResultEventHandler;
             reco.SynthesisResultReceived += MySynthesisEventHandler;
             reco.RecognitionErrorRaised += MyErrorEventHandler;
-            reco.OnSessionEvent += MySessionEventHandler;
+            reco.OnSpeechDetectectedEvent += MySpeechEndDetectedHandler;
             reco.Parameters.Set(ParameterNames.SpeechModelId, "d4501bd5-a593-45bf-82a6-36ffc59d80a5");
 
             translationEndTaskCompletionSource = new TaskCompletionSource<int>();

@@ -25,9 +25,11 @@ public:
     // --- ISpxRecognitionEventArgs
     virtual const std::wstring& GetSessionId() override;
     virtual std::shared_ptr<ISpxRecognitionResult> GetResult() override;
+    virtual const uint64_t& GetOffset() override;
 
     // --- ISpxRecognitionEventArgsInit
     virtual void Init(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) override;
+    virtual void Init(const std::wstring& sessionId, uint64_t offset) override;
 
 
 private:
@@ -39,6 +41,7 @@ private:
 
     std::wstring m_sessionId;
     std::shared_ptr<ISpxRecognitionResult> m_result;
+    uint64_t m_offset;
 };
 
 

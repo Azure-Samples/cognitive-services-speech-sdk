@@ -4,11 +4,11 @@ package com.microsoft.cognitiveservices.speech;
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-/**
-  * Define session event types.
-  */
-public enum SessionEventType
+/** 
+* Define RecognitionEventType event types.
+*/
+public enum RecognitionEventType
 {
-    SessionStartedEvent,
-    SessionStoppedEvent
+    SpeechStartDetectedEvent,
+    SpeechEndDetectedEvent
 }

@@ -369,17 +369,15 @@ void CSpxAudioStreamSession::AdapterStoppedTurn(ISpxRecoEngineAdapter* /* adapte
 void CSpxAudioStreamSession::AdapterDetectedSpeechStart(ISpxRecoEngineAdapter* adapter, uint64_t offset)
 {
     UNUSED(adapter);
-    UNUSED(offset);
     
-    FireSpeechStartDetectedEvent();
+    FireSpeechStartDetectedEvent(offset);
 }
 
 void CSpxAudioStreamSession::AdapterDetectedSpeechEnd(ISpxRecoEngineAdapter* adapter, uint64_t offset)
 {
     UNUSED(adapter);
-    UNUSED(offset);
 
-    FireSpeechEndDetectedEvent();
+    FireSpeechEndDetectedEvent(offset);
 }
 
 void CSpxAudioStreamSession::AdapterDetectedSoundStart(ISpxRecoEngineAdapter* adapter, uint64_t offset)
@@ -415,6 +413,17 @@ std::shared_ptr<ISpxRecognitionEventArgs> CSpxAudioStreamSession::CreateRecognit
 
     auto argsInit = SpxQueryInterface<ISpxRecognitionEventArgsInit>(recoEvent);
     argsInit->Init(sessionId, result);
+
+    return recoEvent;
+}
+
+std::shared_ptr<ISpxRecognitionEventArgs> CSpxAudioStreamSession::CreateRecognitionEventArgsWithOffset(const std::wstring& sessionId, uint64_t offset)
+{
+    auto site = SpxSiteFromThis(this);
+    auto recoEvent = SpxCreateObjectWithSite<ISpxRecognitionEventArgs>("CSpxRecognitionEventArgs", site);
+
+    auto argsInit = SpxQueryInterface<ISpxRecognitionEventArgsInit>(recoEvent);
+    argsInit->Init(sessionId, offset);
 
     return recoEvent;
 }

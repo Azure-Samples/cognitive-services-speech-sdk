@@ -155,14 +155,21 @@ void CSpxSession::FireSessionStartedEvent()
 {
     SPX_DBG_TRACE_FUNCTION();
 
-    FireSessionEvent(SessionEventType::SessionStart);
+    FireEvent(EventType::SessionStart);
 }
 
-void CSpxSession::FireSpeechStartDetectedEvent()
+void CSpxSession::FireSpeechStartDetectedEvent(uint64_t offset)
+{
+    SPX_DBG_TRACE_FUNCTION();
+    
+    FireEvent(EventType::SpeechStart, nullptr, nullptr, offset);
+}
+
+void CSpxSession::FireSpeechEndDetectedEvent(uint64_t offset)
 {
     SPX_DBG_TRACE_FUNCTION();
 
-    FireSessionEvent(SessionEventType::SpeechStart);
+    FireEvent(EventType::SpeechEnd, nullptr, nullptr, offset);
 }
 
 void CSpxSession::FireSessionStoppedEvent()
@@ -170,17 +177,17 @@ void CSpxSession::FireSessionStoppedEvent()
     SPX_DBG_TRACE_FUNCTION();
     EnsureFireResultEvent();
 
-    FireSessionEvent(SessionEventType::SessionStop);
+    FireEvent(EventType::SessionStop);
 }
 
-void CSpxSession::FireSpeechEndDetectedEvent()
+void CSpxSession::FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result)
 {
     SPX_DBG_TRACE_FUNCTION();
 
-    FireSessionEvent(SessionEventType::SpeechEnd);
+    FireEvent(EventType::RecoResultEvent, result, const_cast<wchar_t*>(sessionId.c_str()));
 }
 
-void CSpxSession::FireSessionEvent(SessionEventType sessionType)
+void CSpxSession::FireEvent(EventType sessionType, std::shared_ptr<ISpxRecognitionResult> result, wchar_t* sessionId, uint64_t offset)
 {
     // Make a copy of the recognizers (under lock), to use to send events; 
     // otherwise the underlying list could be modified while we're sending events...
@@ -188,6 +195,8 @@ void CSpxSession::FireSessionEvent(SessionEventType sessionType)
     std::unique_lock<std::mutex> lock(m_mutex);
     decltype(m_recognizers) weakRecognizers(m_recognizers.begin(), m_recognizers.end());
     lock.unlock();
+
+    auto sessionId_local = (sessionId != nullptr) ? sessionId : m_sessionId;
 
     for (auto weakRecognizer : weakRecognizers)
     {
@@ -197,47 +206,26 @@ void CSpxSession::FireSessionEvent(SessionEventType sessionType)
         {
             switch (sessionType)
             {
-                case SessionEventType::SessionStart:
-                    ptr->FireSessionStarted(m_sessionId);
+                case EventType::SessionStart:
+                    ptr->FireSessionStarted(sessionId_local);
                 break;
 
-                case SessionEventType::SessionStop:
-                    ptr->FireSessionStopped(m_sessionId);
+                case EventType::SessionStop:
+                    ptr->FireSessionStopped(sessionId_local);
                 break;
 
-                case SessionEventType::SpeechStart:
-                    ptr->FireSpeechStartDetected(m_sessionId);
+                case EventType::SpeechStart:
+                    ptr->FireSpeechStartDetected(sessionId_local, offset);
                 break;
 
-                case SessionEventType::SpeechEnd:
-                    ptr->FireSpeechEndDetected(m_sessionId);
+                case EventType::SpeechEnd:
+                    ptr->FireSpeechEndDetected(sessionId_local, offset);
+                break;
+
+                case EventType::RecoResultEvent:
+                    ptr->FireResultEvent(sessionId_local, result);
                 break;
             }
-        }
-    }
-}
-
-void CSpxSession::FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result)
-{
-    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    
-    // Make a copy of the recognizers (under lock), to use to send events; 
-    // otherwise the underlying list could be modified while we're sending events...
-
-    std::unique_lock<std::mutex> lock(m_mutex);
-    decltype(m_recognizers) weakRecognizers(m_recognizers.begin(), m_recognizers.end());
-    lock.unlock();
-
-    // Fire the result on all recognizers (currently we only support one recognizer, but we will support multiple in the future)
-    // NOTE: When that happens, we'll need to change this to fire all non-FinalResult events (NoMatch, etc) to everyone, but
-    // only fire the FinalResult to the one recognizer that should receive it
-    for (auto weakRecognizer : weakRecognizers)
-    {
-        auto recognizer = weakRecognizer.lock();
-        auto ptr = SpxQueryInterface<ISpxRecognizerEvents>(recognizer);
-        if (recognizer)
-        {
-            ptr->FireResultEvent(sessionId, result);
         }
     }
 }

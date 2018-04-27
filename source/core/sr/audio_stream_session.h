@@ -136,6 +136,7 @@ private:
 
     // -- ISpxEventArgsFactory
     std::shared_ptr<ISpxSessionEventArgs> CreateSessionEventArgs(const std::wstring& sessionId) override;
+    std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgsWithOffset(const std::wstring& sessionId, uint64_t offset) override;
     std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) override;
 
     

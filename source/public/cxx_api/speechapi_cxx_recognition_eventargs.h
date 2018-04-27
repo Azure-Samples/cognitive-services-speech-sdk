@@ -22,16 +22,42 @@ class RecognitionEventArgs : public SessionEventArgs
 public:
 
     /// <summary>
-    /// Internal constructor. Creates a new instance using the provided handle.
+    /// Constructor. Creates a new instance using the provided handle.
     /// </summary>
-    explicit RecognitionEventArgs(SPXEVENTHANDLE hevent = SPXHANDLE_INVALID) :
-        SessionEventArgs(hevent)
+    explicit RecognitionEventArgs(SPXEVENTHANDLE hevent) :
+        SessionEventArgs(hevent),
+        Offset(m_offset),
+        m_offset(GetOffset(hevent))
     {
+        if (hevent == nullptr)
+            hevent = SPXHANDLE_INVALID;
     };
 
+    /// <inheritdoc/>
+    virtual ~RecognitionEventArgs() {}
+
+    /// <summary>
+    /// The offset of recognition event
+    /// </summary>
+    const uint64_t& Offset;
+
+protected:
+
+    /// <summary>
+    /// Extract offset from given event handle <paramref name="hevent"/>
+    /// </summary>
+    static uint64_t GetOffset(SPXEVENTHANDLE hevent)
+    {
+        uint64_t offset = 0;
+        SPX_THROW_ON_FAIL(Recognizer_RecognitionEvent_GetOffset(hevent, &offset));
+        return offset;
+    }
+
     // Todo: make it private after passing SWIG
-public:
+private:
+
     DISABLE_COPY_AND_MOVE(RecognitionEventArgs);
+    uint64_t m_offset;
 };
 
 

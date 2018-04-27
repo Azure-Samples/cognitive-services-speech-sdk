@@ -4,7 +4,6 @@
 //
 
 using System;
-using Microsoft.CognitiveServices.Speech;
 
 namespace Microsoft.CognitiveServices.Speech
 {
@@ -40,12 +39,14 @@ namespace Microsoft.CognitiveServices.Speech
         /// </example>
         public event EventHandler<SessionEventArgs> OnSessionEvent;
 
+        public event EventHandler<RecogntionEventArgs> OnSpeechDetectectedEvent;
+
         internal Recognizer()
         {
             sessionStartedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStartedEvent);
             sessionStoppedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStoppedEvent);
-            speechStartDetectedHandler = new SessionEventHandlerImpl(this, SessionEventType.SpeechStartDetectedEvent);
-            speechEndDetectedHandler = new SessionEventHandlerImpl(this, SessionEventType.SpeechEndDetectedEvent);
+            speechStartDetectedHandler = new RecognitionEventHandlerImpl(this, RecognitionEventType.SpeechStartDetectedEvent);
+            speechEndDetectedHandler = new RecognitionEventHandlerImpl(this, RecognitionEventType.SpeechEndDetectedEvent);
         }
 
         /// <summary>
@@ -84,8 +85,8 @@ namespace Microsoft.CognitiveServices.Speech
 
         internal SessionEventHandlerImpl sessionStartedHandler;
         internal SessionEventHandlerImpl sessionStoppedHandler;
-        internal SessionEventHandlerImpl speechStartDetectedHandler;
-        internal SessionEventHandlerImpl speechEndDetectedHandler;
+        internal RecognitionEventHandlerImpl speechStartDetectedHandler;
+        internal RecognitionEventHandlerImpl speechEndDetectedHandler;
         private bool disposed = false;
 
         /// <summary>
@@ -117,6 +118,37 @@ namespace Microsoft.CognitiveServices.Speech
 
             private Recognizer recognizer;
             private SessionEventType eventType;
+        }
+
+        /// <summary>
+        /// Define an internal class which raises a C# event when a corresponding callback is invoked from the native layer. 
+        /// </summary>
+        internal class RecognitionEventHandlerImpl : Internal.RecognitionEventListener
+        {
+            public RecognitionEventHandlerImpl(Recognizer recognizer, RecognitionEventType eventType)
+            {
+                this.recognizer = recognizer;
+                this.eventType = eventType;
+            }
+
+            public override void Execute(Internal.RecognitionEventArgs eventArgs)
+            {
+                if (recognizer.disposed)
+                {
+                    return;
+                }
+
+                var arg = new RecogntionEventArgs(eventType, eventArgs);
+                var handler = this.recognizer.OnSpeechDetectectedEvent;
+
+                if (handler != null)
+                {
+                    handler(this.recognizer, arg);
+                }
+            }
+
+            private Recognizer recognizer;
+            private RecognitionEventType eventType;
         }
     }
 }

@@ -14,17 +14,24 @@ import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 public class Recognizer implements Closeable
 {
     /**
-      * Defines event handler for session events, e.g. sessionStarted/Stopped, speechStartDetected / stopDetected
+      * Defines event handler for session events, e.g. sessionStarted/Stopped
       * 
       * Create a speech recognizer, setup an event handler for session events
       */
     final public EventHandlerImpl<SessionEventArgs> SessionEvent = new EventHandlerImpl<SessionEventArgs>();
 
+    /**
+      * Defines event handler for recognition events, speechStartDetected / stopDetected
+      * 
+      * Create a speech recognizer, setup an event handler for reocgnition events
+      */
+    final public EventHandlerImpl<RecognitionEventArgs> RecognitionEvent = new EventHandlerImpl<RecognitionEventArgs>();
+
     protected Recognizer() {
         sessionStartedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStartedEvent);
         sessionStoppedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStoppedEvent);
-        speechStartDetectedHandler = new SessionEventHandlerImpl(this, SessionEventType.SpeechStartDetectedEvent);
-        speechEndDetectedHandler = new SessionEventHandlerImpl(this, SessionEventType.SpeechEndDetectedEvent);
+        speechStartDetectedHandler = new RecognitionEventHandlerImpl(this, RecognitionEventType.SpeechStartDetectedEvent);
+        speechEndDetectedHandler = new RecognitionEventHandlerImpl(this, RecognitionEventType.SpeechEndDetectedEvent);
     }
 
     /**
@@ -58,8 +65,8 @@ public class Recognizer implements Closeable
 
     protected SessionEventHandlerImpl sessionStartedHandler;
     protected SessionEventHandlerImpl sessionStoppedHandler;
-    protected SessionEventHandlerImpl speechStartDetectedHandler;
-    protected SessionEventHandlerImpl speechEndDetectedHandler;
+    protected RecognitionEventHandlerImpl speechStartDetectedHandler;
+    protected RecognitionEventHandlerImpl speechEndDetectedHandler;
     private boolean disposed = false;
 
     /**
@@ -89,6 +96,39 @@ public class Recognizer implements Closeable
 
         private Recognizer recognizer;
         private SessionEventType eventType;
+        
+    }
+
+    /**
+      * Define an internal class which raise an event when a corresponding callback is invoked from the native layer. 
+      */
+    class RecognitionEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.RecognitionEventListener
+    {
+        public RecognitionEventHandlerImpl(Recognizer recognizer, RecognitionEventType eventType)
+        {
+            this.recognizer = recognizer;
+            this.eventType = eventType;
+        }
+
+        @Override
+        public void execute(com.microsoft.cognitiveservices.speech.internal.RecognitionEventArgs eventArgs)
+        {
+            if (recognizer.disposed)
+            {
+                return;
+            }
+
+            RecognitionEventArgs arg = new RecognitionEventArgs(eventType, eventArgs);
+            EventHandlerImpl<RecognitionEventArgs>  handler = this.recognizer.RecognitionEvent;
+
+            if (handler != null)
+            {
+                handler.fireEvent(this.recognizer, arg);
+            }
+        }
+
+        private Recognizer recognizer;
+        private RecognitionEventType eventType;
         
     }
 }

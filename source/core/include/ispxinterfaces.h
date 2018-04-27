@@ -451,6 +451,7 @@ class ISpxRecognitionEventArgs :
 {
 public:
 
+    virtual const uint64_t& GetOffset() = 0;
     virtual std::shared_ptr<ISpxRecognitionResult> GetResult() = 0;
 };
 
@@ -460,6 +461,7 @@ class ISpxRecognitionEventArgsInit : public ISpxInterfaceBaseFor<ISpxRecognition
 public:
 
     virtual void Init(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) = 0;
+    virtual void Init(const std::wstring& sessionId, uint64_t offset) = 0;
 };
 
 
@@ -473,17 +475,16 @@ public:
     virtual void FireSessionStarted(const std::wstring& sessionId) = 0;
     virtual void FireSessionStopped(const std::wstring& sessionId) = 0;
 
-    virtual void FireSpeechStartDetected(const std::wstring& sessionId) = 0;
-    virtual void FireSpeechEndDetected(const std::wstring& sessionId) = 0;
+    virtual void FireSpeechStartDetected(const std::wstring& sessionId, uint64_t offset) = 0;
+    virtual void FireSpeechEndDetected(const std::wstring& sessionId, uint64_t offset) = 0;
     
     virtual void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) = 0;
 
     SessionEvent_Type SessionStarted;
     SessionEvent_Type SessionStopped;
 
-    //TODO: Change this to Control_Type event.
-    SessionEvent_Type SpeechStartDetected;
-    SessionEvent_Type SpeechEndDetected;
+    RecoEvent_Type SpeechStartDetected;
+    RecoEvent_Type SpeechEndDetected;
 
     RecoEvent_Type IntermediateResult;
     RecoEvent_Type FinalResult;
@@ -494,6 +495,8 @@ public:
 protected:
 
     ISpxRecognizerEvents(RecoEvent_Type::NotifyCallback_Type connectedCallback, RecoEvent_Type::NotifyCallback_Type disconnectedCallback) :
+        SpeechStartDetected(connectedCallback, disconnectedCallback),
+        SpeechEndDetected(connectedCallback, disconnectedCallback),
         IntermediateResult(connectedCallback, disconnectedCallback),
         FinalResult(connectedCallback, disconnectedCallback),
         NoMatch(connectedCallback, disconnectedCallback),
@@ -620,6 +623,7 @@ class ISpxEventArgsFactory : public ISpxInterfaceBaseFor<ISpxEventArgsFactory>
 public:
 
     virtual std::shared_ptr<ISpxSessionEventArgs> CreateSessionEventArgs(const std::wstring& sessionId) = 0;
+    virtual std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgsWithOffset(const std::wstring& sessionId, uint64_t offset) = 0;
     virtual std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) = 0;
 };
 

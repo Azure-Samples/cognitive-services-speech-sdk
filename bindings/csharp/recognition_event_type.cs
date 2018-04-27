@@ -5,14 +5,13 @@
 
 namespace Microsoft.CognitiveServices.Speech
 {
-
     /// <summary>
-    /// Define session event types.
+    /// Define recogntion event types.
     /// </summary>
-    public enum SessionEventType
+    public enum RecognitionEventType
     {
-        SessionStartedEvent,
-        SessionStoppedEvent
+        SpeechStartDetectedEvent,
+        SpeechEndDetectedEvent
     }
 
 }

@@ -541,12 +541,12 @@ SPXAPI Recognizer_SessionStopped_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_
 
 SPXAPI Recognizer_SpeechStartDetected_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext)
 {
-    return Recognizer_SessionEvent_SetCallback(&ISpxRecognizerEvents::SpeechStartDetected, hreco, pCallback, pvContext);
+    return Recognizer_RecoEvent_SetCallback(&ISpxRecognizerEvents::SpeechStartDetected, hreco, pCallback, pvContext);
 }
 
 SPXAPI Recognizer_SpeechEndDetected_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext)
 {
-    return Recognizer_SessionEvent_SetCallback(&ISpxRecognizerEvents::SpeechEndDetected, hreco, pCallback, pvContext);
+    return Recognizer_RecoEvent_SetCallback(&ISpxRecognizerEvents::SpeechEndDetected, hreco, pCallback, pvContext);
 }
 
 SPXAPI Recognizer_IntermediateResult_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext)
@@ -581,6 +581,22 @@ SPXAPI Recognizer_SessionEvent_GetSessionId(SPXEVENTHANDLE hevent, wchar_t* pszS
 
         auto sessionId = recoEvent->GetSessionId();
         PAL::wcscpy(pszSessionId, cchSessionId, sessionId.c_str(), sessionId.size(), true);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI Recognizer_RecognitionEvent_GetOffset(SPXEVENTHANDLE hevent, uint64_t* offset)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        if (offset != nullptr)
+        {
+            auto eventhandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionEventArgs, SPXEVENTHANDLE>();
+            auto recoEvent = (*eventhandles)[hevent];
+
+            auto local_offset = recoEvent->GetOffset();
+            *offset = local_offset;
+        }
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

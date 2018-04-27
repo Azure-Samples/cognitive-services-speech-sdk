@@ -151,11 +151,11 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
                     callbackCounts[Callbacks::session_started]++;
                     SPX_TRACE_VERBOSE("callbackCounts[Callbacks::session_started]=%d", callbackCounts[Callbacks::session_started].load());
                 });
-                recognizer->SpeechStartDetected.Connect([&](const SessionEventArgs&) {
+                recognizer->SpeechStartDetected.Connect([&](const RecognitionEventArgs&) {
                     callbackCounts[Callbacks::speech_start_detected]++;
                     SPX_TRACE_VERBOSE("callbackCounts[Callbacks::speech_start_detected]=%d", callbackCounts[Callbacks::speech_start_detected].load());
                 });
-                recognizer->SpeechEndDetected.Connect([&](const SessionEventArgs&) {
+                recognizer->SpeechEndDetected.Connect([&](const RecognitionEventArgs&) {
                     callbackCounts[Callbacks::speech_end_detected]++;
                     SPX_TRACE_VERBOSE("callbackCounts[Callbacks::speech_end_detected]=%d", callbackCounts[Callbacks::speech_end_detected].load());
                 });

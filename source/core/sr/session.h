@@ -62,8 +62,8 @@ protected:
     virtual void FireSessionStartedEvent();
     virtual void FireSessionStoppedEvent();
 
-    virtual void FireSpeechStartDetectedEvent();
-    virtual void FireSpeechEndDetectedEvent();
+    virtual void FireSpeechStartDetectedEvent(uint64_t offset);
+    virtual void FireSpeechEndDetectedEvent(uint64_t offset);
 
     virtual void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result);
     virtual void EnsureFireResultEvent();
@@ -88,8 +88,8 @@ private:
     const std::wstring m_sessionId;
     std::list<std::weak_ptr<ISpxRecognizer>> m_recognizers;
 
-    enum SessionEventType {SessionStart, SessionStop, SpeechStart, SpeechEnd};
-    void FireSessionEvent(SessionEventType sessionType);
+    enum EventType {SessionStart, SessionStop, SpeechStart, SpeechEnd, RecoResultEvent};
+    void FireEvent(EventType sessionType, std::shared_ptr<ISpxRecognitionResult> result = nullptr, wchar_t* sessionId = nullptr, uint64_t offset = 0);
 };
 
 

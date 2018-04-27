@@ -12,6 +12,7 @@
 #include <speechapi_cxx_eventsignal.h>
 #include <speechapi_cxx_recognizer.h>
 #include <speechapi_cxx_session_eventargs.h>
+#include <speechapi_cxx_recognition_eventargs.h>
 
 
 namespace Microsoft {
@@ -71,12 +72,12 @@ public:
     /// <summary>
     /// Signal for events indicating the start of speech.
     /// </summary>
-    EventSignal<const SessionEventArgs&> SpeechStartDetected;
+    EventSignal<const RecognitionEventArgs&> SpeechStartDetected;
 
     /// <summary>
     /// Signal for events indicating the end of speech.
     /// </summary>
-    EventSignal<const SessionEventArgs&> SpeechEndDetected;
+    EventSignal<const RecognitionEventArgs&> SpeechEndDetected;
 
     /// <summary>
     /// Signal for events containing intermediate recognition results.
@@ -108,8 +109,8 @@ protected:
         Recognizer(hreco),
         SessionStarted(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
         SessionStopped(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
-        SpeechStartDetected(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
-        SpeechEndDetected(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
+        SpeechStartDetected(GetRecognitionEventConnectionsChangedCallback(), GetRecognitionEventConnectionsChangedCallback()),
+        SpeechEndDetected(GetRecognitionEventConnectionsChangedCallback(), GetRecognitionEventConnectionsChangedCallback()),
         IntermediateResult(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback()),
         FinalResult(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback()),
         NoMatch(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback()),
@@ -273,6 +274,24 @@ protected:
         }
     }
 
+    virtual void RecogntionEventConnectionsChanged(const EventSignal<const RecognitionEventArgs&>& recognitionEvent)
+    {
+        if (m_hreco != SPXHANDLE_INVALID)
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8x", __FUNCTION__, m_hreco);
+            SPX_DBG_TRACE_VERBOSE_IF(!::Recognizer_Handle_IsValid(m_hreco), "%s: m_hreco is INVALID!!!", __FUNCTION__);
+
+            if (&recognitionEvent == &SpeechStartDetected)
+            {
+                Recognizer_SpeechStartDetected_SetEventCallback(m_hreco, SpeechStartDetected.IsConnected() ? AsyncRecognizer::FireEvent_SpeechStartDetected : nullptr, this);
+            }
+            else if (&recognitionEvent == &SpeechEndDetected)
+            {
+                Recognizer_SpeechEndDetected_SetEventCallback(m_hreco, SpeechEndDetected.IsConnected() ? AsyncRecognizer::FireEvent_SpeechEndDetected : nullptr, this);
+            }
+        }
+    }
+
     virtual void SessionEventConnectionsChanged(const EventSignal<const SessionEventArgs&>& sessionEvent)
     {
         if (m_hreco != SPXHANDLE_INVALID)
@@ -287,14 +306,6 @@ protected:
             else if (&sessionEvent == &SessionStopped)
             {
                 Recognizer_SessionStopped_SetEventCallback(m_hreco, SessionStopped.IsConnected() ? AsyncRecognizer::FireEvent_SessionStopped : nullptr, this);
-            }
-            else if (&sessionEvent == &SpeechStartDetected)
-            {
-                Recognizer_SpeechStartDetected_SetEventCallback(m_hreco, SpeechStartDetected.IsConnected() ? AsyncRecognizer::FireEvent_SpeechStartDetected: nullptr, this);
-            }
-            else if (&sessionEvent == &SpeechEndDetected)
-            {
-                Recognizer_SpeechEndDetected_SetEventCallback(m_hreco, SpeechEndDetected.IsConnected() ? AsyncRecognizer::FireEvent_SpeechEndDetected: nullptr, this);
             }
         }
     }
@@ -320,19 +331,19 @@ protected:
     static void FireEvent_SpeechStartDetected(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
     {
         UNUSED(hreco);
-        std::unique_ptr<SessionEventArgs> sessionEvent{ new SessionEventArgs(hevent) };
+        std::unique_ptr<RecognitionEventArgs> recoEvent{ new RecognitionEventArgs(hevent) };
 
         auto pThis = static_cast<AsyncRecognizer*>(pvContext);
-        pThis->SpeechStartDetected.Signal(*sessionEvent.get());
+        pThis->SpeechStartDetected.Signal(*recoEvent.get());
     }
 
     static void FireEvent_SpeechEndDetected(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
     {
         UNUSED(hreco);
-        std::unique_ptr<SessionEventArgs> sessionEvent{ new SessionEventArgs(hevent) };
+        std::unique_ptr<RecognitionEventArgs> recoEvent{ new RecognitionEventArgs(hevent) };
 
         auto pThis = static_cast<AsyncRecognizer*>(pvContext);
-        pThis->SpeechEndDetected.Signal(*sessionEvent.get());
+        pThis->SpeechEndDetected.Signal(*recoEvent.get());
     }
 
     static void FireEvent_IntermediateResult(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
@@ -391,6 +402,11 @@ private:
     inline std::function<void(const EventSignal<const RecoEventArgs&>&)> GetRecoEventConnectionsChangedCallback()
     {
         return [=](const EventSignal<const RecoEventArgs&>& recoEvent) { this->RecoEventConnectionsChanged(recoEvent); };
+    }
+
+    inline std::function<void(const EventSignal<const RecognitionEventArgs&>&)> GetRecognitionEventConnectionsChangedCallback()
+    {
+        return [=](const EventSignal<const RecognitionEventArgs&>& recoEvent) { this->RecogntionEventConnectionsChanged(recoEvent); };
     }
 };
 
