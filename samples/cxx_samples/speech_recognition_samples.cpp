@@ -9,8 +9,7 @@
 #include <speechapi_cxx.h>
 
 using namespace std;
-using namespace Microsoft::CognitiveServices::Speech::Recognition;
-using namespace Microsoft::CognitiveServices::Speech::Recognition::Speech;
+using namespace Microsoft::CognitiveServices::Speech;
 // </toplevel>
 
 // Speech recognition using microphone.

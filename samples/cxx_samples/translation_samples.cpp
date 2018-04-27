@@ -11,8 +11,8 @@
 #include <speechapi_cxx.h>
 
 using namespace std;
-using namespace Microsoft::CognitiveServices::Speech::Recognition;
-using namespace Microsoft::CognitiveServices::Speech::Recognition::Translation;
+using namespace Microsoft::CognitiveServices::Speech;
+using namespace Microsoft::CognitiveServices::Speech::Translation;
 // </toplevel>
 
 
