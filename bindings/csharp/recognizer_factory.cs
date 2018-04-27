@@ -50,6 +50,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="subscriptionKey">The subscription key.</param>
         /// <param name="region">The region name.</param>
+        /// <returns>A speech factory instance.</returns>
         public static SpeechFactory FromSubscription(string subscriptionKey, string region)
         {
             SpeechFactory factory = new SpeechFactory(subscriptionKey, region);
@@ -61,6 +62,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="endpoint">The service endpoint to connect to.</param>
         /// <param name="subscriptionKey">The subscription key.</param>
+        /// <returns>A speech factory instance.</returns>
         public static SpeechFactory FromEndPoint(Uri endpoint, string subscriptionKey)
         {
             SpeechFactory factory = new SpeechFactory(endpoint, subscriptionKey);
@@ -142,7 +144,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Creates a speech recognizer, using the default microphone input.
         /// </summary>
-        /// <returns>A translation recognizer instance.</returns>
+        /// <returns>A speech recognizer instance.</returns>
         public SpeechRecognizer CreateSpeechRecognizer()
         {
             return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizer());
@@ -152,7 +154,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// Creates a speech recognizer using the default microphone input.
         /// </summary>
         /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
-        /// <returns>A translation recognizer instance.</returns>
+        /// <returns>A speech recognizer instance.</returns>
         public SpeechRecognizer CreateSpeechRecognizer(string language)
         {
             return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizer(language));
@@ -162,7 +164,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// Creates a speech recognizer using the specified file as audio input.
         /// </summary>
         /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.</param>
-        /// <returns>A translation recognizer instance.</returns>
+        /// <returns>A speech recognizer instance.</returns>
         public SpeechRecognizer CreateSpeechRecognizerWithFileInput(string audioFile)
         {
             return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithFileInput(audioFile));
@@ -173,7 +175,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.</param>
         /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
-        /// <returns>A translation recognizer instance.</returns>
+        /// <returns>A speech recognizer instance.</returns>
         public SpeechRecognizer CreateSpeechRecognizerWithFileInput(string audioFile, string language)
         {
             return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithFileInput(audioFile, language));
@@ -183,7 +185,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// Creates a speech recognizer using the specified input stream as audio input.
         /// </summary>
         /// <param name="audioStream">Specifies the audio input stream.</param>
-        /// <returns>A translation recognizer instance.</returns>
+        /// <returns>A speech recognizer instance.</returns>
         public SpeechRecognizer CreateSpeechRecognizerWithAudioStream(AudioInputStream audioStream)
         {
             throw new NotImplementedException();
@@ -194,7 +196,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="audioStream">Specifies the audio input stream.</param>
         /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
-        /// <returns>A translation recognizer instance.</returns>
+        /// <returns>A speech recognizer instance.</returns>
         public SpeechRecognizer CreateSpeechRecognizerWithAudioStream(AudioInputStream audioStream, string language)
         {
             throw new NotImplementedException();
