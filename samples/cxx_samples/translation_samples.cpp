@@ -22,7 +22,7 @@ void TranslationWithMicrophone()
 {
     // Creates an instance of a speech factory with specified
     // subscription key. Replace with your own subscription key.
-    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey");
+    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"");
 
     // Sets source and target languages
     auto fromLanguage = L"en-US";
@@ -61,7 +61,7 @@ void TranslationWithFile()
 {
     // Creates an instance of a speech factory with specified
     // subscription key. Replace with your own subscription key.
-    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey");
+    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"");
 
     // Sets source and target languages
     auto fromLanguage = L"en-US";
@@ -134,7 +134,7 @@ void TranslationContinuousRecognitionUsingEvents()
 {
     // Creates an instance of a speech factory with specified
     // subscription key. Replace with your own subscription key.
-    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey");
+    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"");
 
     // Sets source and target languages
     auto fromLanguage = L"en-US";

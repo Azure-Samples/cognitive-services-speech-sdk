@@ -18,7 +18,7 @@ void SpeechRecognitionWithMicrophone()
 {
     // Creates an instance of a speech factory with specified
     // subscription key. Replace with your own subscription key.
-    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey");
+    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"");
 
     // Creates a speech recognizer using microphone as audio input.
     auto recognizer = factory->CreateSpeechRecognizer();
@@ -45,7 +45,7 @@ void SpeechRecognitionWithFile()
 {
     // Creates an instance of a speech factory with specified
     // subscription key. Replace with your own subscription key.
-    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey");
+    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"");
 
     // Creates a speech recognizer using file as audio input.
     // Replace with your own audio file name.
@@ -73,7 +73,7 @@ void SpeechRecognitionUsingCustomizedModel()
     // Creates an instance of a speech factory with specified
     // subscription key. Replace with your own subscription key from
     // https://www.cris.ai/.
-    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey");
+    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"");
 
     // Creates a speech recognizer using microphone as audio input.
     auto recognizer = factory->CreateSpeechRecognizer();
@@ -125,7 +125,7 @@ void SpeechContinuousRecognitionUsingEvents()
 {
     // Creates an instance of a speech factory with specified
     // subscription key. Replace with your own subscription key.
-    auto factory = SpeechFactory::FromSubscription(L"92069ee289b84e5594a9564ab77ed2ba");
+    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"");
 
     // Creates a speech recognizer using microphone as audio input.
     auto recognizer = factory->CreateSpeechRecognizer();
