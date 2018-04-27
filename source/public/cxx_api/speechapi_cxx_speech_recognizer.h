@@ -25,10 +25,6 @@ namespace Speech {
 class Session;
 
 
-namespace Recognition {
-namespace Speech {
-
-
 class SpeechRecognizer final : virtual public AsyncRecognizer<SpeechRecognitionResult, SpeechRecognitionEventArgs>
 {
 public:
@@ -118,4 +114,4 @@ private:
 };
 
 
-} } } } } // Microsoft::CognitiveServices::Speech::Recognition::Speech
+} } } // Microsoft::CognitiveServices::Speech

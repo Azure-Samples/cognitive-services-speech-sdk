@@ -1,15 +1,15 @@
 /**
  * 
  */
-package com.microsoft.cognitiveservices.speech.recognition.translation;
+package com.microsoft.cognitiveservices.speech.translation;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
 import com.microsoft.cognitiveservices.speech.ParameterCollection;
-import com.microsoft.cognitiveservices.speech.recognition.ParameterNames;
-import com.microsoft.cognitiveservices.speech.recognition.RecognitionErrorEventArgs;
-import com.microsoft.cognitiveservices.speech.recognition.intent.IntentRecognitionResult;
+import com.microsoft.cognitiveservices.speech.ParameterNames;
+import com.microsoft.cognitiveservices.speech.RecognitionErrorEventArgs;
+import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Task;
 import com.microsoft.cognitiveservices.speech.util.TaskRunner;
@@ -22,7 +22,7 @@ import com.microsoft.cognitiveservices.speech.util.TaskRunner;
  /**
    * Performs translation on the speech input.
    */
- public final class TranslationRecognizer extends com.microsoft.cognitiveservices.speech.recognition.Recognizer
+ public final class TranslationRecognizer extends com.microsoft.cognitiveservices.speech.Recognizer
  {
      /**
        * The event IntermediateResultReceived signals that an intermediate recognition result is received.

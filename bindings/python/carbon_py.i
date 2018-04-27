@@ -9,10 +9,10 @@
 
 // Release GIL:
 // * when invoking a blocking Recognize.
-%threadallow Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognizer::Recognize;
+%threadallow Microsoft::CognitiveServices::Speech::SpeechRecognizer::Recognize;
 // * when invoking SpeechRecognizer dtor (otherwise there might be a deadlock if a 
 //   callback is concurrently invoked from the speech client.)
-%threadallow Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognizer::~SpeechRecognizer;
+%threadallow Microsoft::CognitiveServices::Speech::SpeechRecognizer::~SpeechRecognizer;
 // * when waiting on a future.
 %threadallow FutureWrapper::Get;
 // * when invoking disconnect (which involves acquiring an event signal lock) to
@@ -35,7 +35,7 @@
     %}
 }
 
-%extend Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognitionEventArgs {
+%extend Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs {
     %pythoncode %{
     def __str__(self):
         return u'{}:(session_id={}, result={})'.format(type(self), self.session_id, self.result)
@@ -77,7 +77,7 @@ T ## Signal.connect, T ## Signal.disconnect = _generate_signal_methods(T ## Call
 %enddef
 
 
-%extend Microsoft::CognitiveServices::Speech::Recognition::ICognitiveServicesSpeechFactory {
+%extend Microsoft::CognitiveServices::Speech::ICognitiveServicesSpeechFactory {
     %pythoncode %{
     def create_speech_recognizer(self, filename=None):
         if not filename:
@@ -86,7 +86,7 @@ T ## Signal.connect, T ## Signal.disconnect = _generate_signal_methods(T ## Call
     %}
 }
 
-%extend Microsoft::CognitiveServices::Speech::Recognition::RecognitionResult {
+%extend Microsoft::CognitiveServices::Speech::RecognitionResult {
     %pythoncode %{
     @property
     def json(self):

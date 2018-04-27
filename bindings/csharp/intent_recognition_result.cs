@@ -3,12 +3,14 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 using System.Globalization;
-namespace Microsoft.CognitiveServices.Speech.Recognition.Intent
+using Microsoft.CognitiveServices.Speech;
+
+namespace Microsoft.CognitiveServices.Speech.Intent
 {
     /// <summary>
     /// Defines result of intent recognition.
     /// </summary>
-    public class IntentRecognitionResult : Microsoft.CognitiveServices.Speech.Recognition.Speech.SpeechRecognitionResult
+    public class IntentRecognitionResult : SpeechRecognitionResult
     {
         internal IntentRecognitionResult(Internal.IntentRecognitionResult result)
             : base(result)

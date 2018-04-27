@@ -20,7 +20,6 @@
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
-namespace Recognition {
 
 /// <summary>
 /// ISpeechFactory interface, defines a number of factory methods for creating various recognizers.
@@ -455,4 +454,4 @@ private:
 };
 
 
-} } } } // Microsoft::CognitiveServices::Speech::Recognition
+} } } // Microsoft::CognitiveServices::Speech

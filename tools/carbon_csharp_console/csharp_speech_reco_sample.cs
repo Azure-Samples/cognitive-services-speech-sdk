@@ -9,8 +9,6 @@ using System;
 using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
-using Microsoft.CognitiveServices.Speech.Recognition;
-using Microsoft.CognitiveServices.Speech.Recognition.Speech;
 
 namespace MicrosoftSpeechSDKSamples
 {

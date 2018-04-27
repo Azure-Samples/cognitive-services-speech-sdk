@@ -1,9 +1,9 @@
-package com.microsoft.cognitiveservices.speech.recognition.translation;
+package com.microsoft.cognitiveservices.speech.translation;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.microsoft.cognitiveservices.speech.recognition.RecognitionStatus;
+import com.microsoft.cognitiveservices.speech.RecognitionStatus;
 
 //
 // Copyright (c) Microsoft. All rights reserved.
@@ -13,7 +13,7 @@ import com.microsoft.cognitiveservices.speech.recognition.RecognitionStatus;
 /**
   * Defines tranlsation result.
   */
-public class TranslationTextResult extends com.microsoft.cognitiveservices.speech.recognition.speech.SpeechRecognitionResult
+public class TranslationTextResult extends com.microsoft.cognitiveservices.speech.SpeechRecognitionResult
 {
     // BUG: this is hack for making documentation going.
     public TranslationTextResult(com.microsoft.cognitiveservices.speech.internal.TranslationTextResult result)

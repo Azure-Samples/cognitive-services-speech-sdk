@@ -6,7 +6,7 @@
 using System.Diagnostics;
 using System.Globalization;
 
-namespace Microsoft.CognitiveServices.Speech.Recognition
+namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
     /// Defines payload of RecognitionErrorEvent. 

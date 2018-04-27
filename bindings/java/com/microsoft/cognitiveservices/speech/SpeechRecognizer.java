@@ -1,4 +1,4 @@
-package com.microsoft.cognitiveservices.speech.recognition.speech;
+package com.microsoft.cognitiveservices.speech;
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
@@ -7,9 +7,9 @@ package com.microsoft.cognitiveservices.speech.recognition.speech;
 import java.io.IOException;
 
 import com.microsoft.cognitiveservices.speech.ParameterCollection;
-import com.microsoft.cognitiveservices.speech.recognition.ParameterNames;
-import com.microsoft.cognitiveservices.speech.recognition.RecognitionErrorEventArgs;
-import com.microsoft.cognitiveservices.speech.recognition.translation.TranslationTextResult;
+import com.microsoft.cognitiveservices.speech.ParameterNames;
+import com.microsoft.cognitiveservices.speech.RecognitionErrorEventArgs;
+import com.microsoft.cognitiveservices.speech.translation.TranslationTextResult;
 import com.microsoft.cognitiveservices.speech.util.EventHandler;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Task;
@@ -19,7 +19,7 @@ import com.microsoft.cognitiveservices.speech.util.TaskRunner;
   * Performs speech recognition from microphone, file, or other audio input streams, and gets transcribed text as result.
   * 
   */
-public final class SpeechRecognizer extends com.microsoft.cognitiveservices.speech.recognition.Recognizer
+public final class SpeechRecognizer extends com.microsoft.cognitiveservices.speech.Recognizer
 {
     /**
       * The event IntermediateResultReceived signals that an intermediate recognition result is received.

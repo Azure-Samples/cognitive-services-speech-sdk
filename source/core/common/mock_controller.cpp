@@ -11,7 +11,7 @@
 #include "speechapi_cxx_factory_parameter.h"
 
 
-using namespace Microsoft::CognitiveServices::Speech::Recognition;
+using namespace Microsoft::CognitiveServices::Speech;
 
 
 namespace Microsoft {

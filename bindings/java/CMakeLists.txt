@@ -74,25 +74,25 @@ set(JAVA_SOURCES
     com/microsoft/cognitiveservices/speech/ParameterCollection.java
     com/microsoft/cognitiveservices/speech/SessionEventArgs.java
     com/microsoft/cognitiveservices/speech/SessionEventType.java
-    com/microsoft/cognitiveservices/speech/recognition/AudioInputStream.java
-    com/microsoft/cognitiveservices/speech/recognition/LanguageUnderstandingModel.java
-    com/microsoft/cognitiveservices/speech/recognition/ParameterNames.java
-    com/microsoft/cognitiveservices/speech/recognition/RecognitionErrorEventArgs.java
-    com/microsoft/cognitiveservices/speech/recognition/RecognitionStatus.java
-    com/microsoft/cognitiveservices/speech/recognition/Recognizer.java
-    com/microsoft/cognitiveservices/speech/recognition/SpeechFactory.java
-    com/microsoft/cognitiveservices/speech/recognition/intent/IntentRecognitionResult.java
-    com/microsoft/cognitiveservices/speech/recognition/intent/IntentRecognitionResultEventArgs.java
-    com/microsoft/cognitiveservices/speech/recognition/intent/IntentRecognizer.java
-    com/microsoft/cognitiveservices/speech/recognition/speech/SpeechRecognitionReason.java
-    com/microsoft/cognitiveservices/speech/recognition/speech/SpeechRecognitionResult.java
-    com/microsoft/cognitiveservices/speech/recognition/speech/SpeechRecognitionResultEventArgs.java
-    com/microsoft/cognitiveservices/speech/recognition/speech/SpeechRecognizer.java
-    com/microsoft/cognitiveservices/speech/recognition/translation/TranslationRecognizer.java
-    com/microsoft/cognitiveservices/speech/recognition/translation/TranslationSynthesisResult.java
-    com/microsoft/cognitiveservices/speech/recognition/translation/TranslationSynthesisResultEventArgs.java
-    com/microsoft/cognitiveservices/speech/recognition/translation/TranslationTextResult.java
-    com/microsoft/cognitiveservices/speech/recognition/translation/TranslationTextResultEventArgs.java
+    com/microsoft/cognitiveservices/speech/AudioInputStream.java
+    com/microsoft/cognitiveservices/speech/LanguageUnderstandingModel.java
+    com/microsoft/cognitiveservices/speech/ParameterNames.java
+    com/microsoft/cognitiveservices/speech/RecognitionErrorEventArgs.java
+    com/microsoft/cognitiveservices/speech/RecognitionStatus.java
+    com/microsoft/cognitiveservices/speech/Recognizer.java
+    com/microsoft/cognitiveservices/speech/SpeechFactory.java
+    com/microsoft/cognitiveservices/speech/intent/IntentRecognitionResult.java
+    com/microsoft/cognitiveservices/speech/intent/IntentRecognitionResultEventArgs.java
+    com/microsoft/cognitiveservices/speech/intent/IntentRecognizer.java
+    com/microsoft/cognitiveservices/speech/SpeechRecognitionReason.java
+    com/microsoft/cognitiveservices/speech/SpeechRecognitionResult.java
+    com/microsoft/cognitiveservices/speech/SpeechRecognitionResultEventArgs.java
+    com/microsoft/cognitiveservices/speech/SpeechRecognizer.java
+    com/microsoft/cognitiveservices/speech/translation/TranslationRecognizer.java
+    com/microsoft/cognitiveservices/speech/translation/TranslationSynthesisResult.java
+    com/microsoft/cognitiveservices/speech/translation/TranslationSynthesisResultEventArgs.java
+    com/microsoft/cognitiveservices/speech/translation/TranslationTextResult.java
+    com/microsoft/cognitiveservices/speech/translation/TranslationTextResultEventArgs.java
     com/microsoft/cognitiveservices/speech/util/EventHandler.java
     com/microsoft/cognitiveservices/speech/util/EventHandlerImpl.java
     com/microsoft/cognitiveservices/speech/util/Task.java
@@ -172,9 +172,9 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/TranslationTextResultPtrFuture.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SynthesisScopeResourceValue.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/WstringVector.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Recognition__Translation__SpeechScopeResourceValue_t.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Recognition__Translation__SynthesisScopeResourceValue_t.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Recognition__Translation__TextScopeResourceValue_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Translation__SpeechScopeResourceValue_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Translation__SynthesisScopeResourceValue_t.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Translation__TextScopeResourceValue_t.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_std__mapT_std__wstring_std__wstring_t.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_std__vectorT_unsigned_char_t.java
 
@@ -224,10 +224,8 @@ set(JAVA_LIB_JAVADOC "${JAVA_LIB}-doc")
 create_javadoc(copy-over-api-files
   PACKAGES com.microsoft.cognitiveservices.speech
            com.microsoft.cognitiveservices.speech.util
-           com.microsoft.cognitiveservices.speech.recognition
-           com.microsoft.cognitiveservices.speech.recognition.translation
-           com.microsoft.cognitiveservices.speech.recognition.speech
-           com.microsoft.cognitiveservices.speech.recognition.intent
+           com.microsoft.cognitiveservices.speech.translation
+           com.microsoft.cognitiveservices.speech.intent
   SOURCEPATH "${CMAKE_CURRENT_BINARY_DIR}/swig-generated"
   WINDOWTITLE "Speech DDK"
   DOCTITLE "<h1>Speech DDK</h1>"

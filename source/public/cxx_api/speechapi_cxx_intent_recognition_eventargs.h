@@ -15,7 +15,6 @@
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
-namespace Recognition {
 namespace Intent {
 
 
@@ -70,4 +69,4 @@ private:
 };
 
 
-} } } } } // Microsoft::CognitiveServices::Speech::Recognition::Intent
+} } } } // Microsoft::CognitiveServices::Speech::Intent

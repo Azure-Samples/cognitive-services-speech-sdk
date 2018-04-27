@@ -15,7 +15,6 @@
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
-namespace Recognition {
 
 /// <summary>
 /// Specifies the possible reasons a recognition result might be generated.
@@ -258,15 +257,15 @@ private:
 
     void PopulateResultFields(SPXRESULTHANDLE hresult, std::wstring *presultId, enum Reason* preason, std::wstring* ptext)
     {
-        static_assert((int)Reason_NoMatch == (int)Microsoft::CognitiveServices::Speech::Recognition::Reason::NoMatch, 
+        static_assert((int)Reason_NoMatch == (int)Microsoft::CognitiveServices::Speech::Reason::NoMatch, 
             "Reason_* enum values == Reason::* enum values");
-        static_assert((int)Reason_Canceled == (int)Microsoft::CognitiveServices::Speech::Recognition::Reason::Canceled, 
+        static_assert((int)Reason_Canceled == (int)Microsoft::CognitiveServices::Speech::Reason::Canceled, 
             "Reason_* enum values == Reason::* enum values");
-        static_assert((int)Reason_Recognized == (int)Microsoft::CognitiveServices::Speech::Recognition::Reason::Recognized, 
+        static_assert((int)Reason_Recognized == (int)Microsoft::CognitiveServices::Speech::Reason::Recognized, 
             "Reason_* enum values == Reason::* enum values");
-        static_assert((int)Reason_OtherRecognizer == (int)Microsoft::CognitiveServices::Speech::Recognition::Reason::OtherRecognizer, 
+        static_assert((int)Reason_OtherRecognizer == (int)Microsoft::CognitiveServices::Speech::Reason::OtherRecognizer, 
             "Reason_* enum values == Reason::* enum values");
-        static_assert((int)Reason_IntermediateResult == (int)Microsoft::CognitiveServices::Speech::Recognition::Reason::IntermediateResult, 
+        static_assert((int)Reason_IntermediateResult == (int)Microsoft::CognitiveServices::Speech::Reason::IntermediateResult, 
             "Reason_* enum values == Reason::* enum values");
 
         SPX_INIT_HR(hr);
@@ -302,4 +301,4 @@ private:
 };
 
 
-} } } } // Microsoft::CognitiveServices::Speech::Recognition
+} } } // Microsoft::CognitiveServices::Speech

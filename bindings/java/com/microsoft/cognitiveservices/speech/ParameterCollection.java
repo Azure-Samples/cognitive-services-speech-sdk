@@ -15,24 +15,24 @@ public final class ParameterCollection<OwnerType> implements Closeable
 {
     public ParameterCollection(OwnerType owner) throws UnsupportedOperationException
     {
-        if (owner.getClass().equals(com.microsoft.cognitiveservices.speech.recognition.SpeechFactory.class))
+        if (owner.getClass().equals(com.microsoft.cognitiveservices.speech.SpeechFactory.class))
         {
-        com.microsoft.cognitiveservices.speech.recognition.SpeechFactory speechFactory = (com.microsoft.cognitiveservices.speech.recognition.SpeechFactory)owner;
+        com.microsoft.cognitiveservices.speech.SpeechFactory speechFactory = (com.microsoft.cognitiveservices.speech.SpeechFactory)owner;
             factoryParameters = speechFactory.getFactoryImpl().getParameters();
         }
-        else if (owner.getClass().equals(com.microsoft.cognitiveservices.speech.recognition.speech.SpeechRecognizer.class))
+        else if (owner.getClass().equals(com.microsoft.cognitiveservices.speech.SpeechRecognizer.class))
         {
-            com.microsoft.cognitiveservices.speech.recognition.speech.SpeechRecognizer speechRecognizer = (com.microsoft.cognitiveservices.speech.recognition.speech.SpeechRecognizer)owner;
+            com.microsoft.cognitiveservices.speech.SpeechRecognizer speechRecognizer = (com.microsoft.cognitiveservices.speech.SpeechRecognizer)owner;
             recognizerParameters = speechRecognizer.getRecoImpl().getParameters();
         }
-        else if (owner.getClass().equals(com.microsoft.cognitiveservices.speech.recognition.intent.IntentRecognizer.class))
+        else if (owner.getClass().equals(com.microsoft.cognitiveservices.speech.intent.IntentRecognizer.class))
         {
-            com.microsoft.cognitiveservices.speech.recognition.intent.IntentRecognizer intentRecognizer = (com.microsoft.cognitiveservices.speech.recognition.intent.IntentRecognizer)owner;
+            com.microsoft.cognitiveservices.speech.intent.IntentRecognizer intentRecognizer = (com.microsoft.cognitiveservices.speech.intent.IntentRecognizer)owner;
             recognizerParameters = intentRecognizer.getRecoImpl().getParameters();
         }
-        else if (owner.getClass().equals(com.microsoft.cognitiveservices.speech.recognition.translation.TranslationRecognizer.class))
+        else if (owner.getClass().equals(com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer.class))
         {
-            com.microsoft.cognitiveservices.speech.recognition.translation.TranslationRecognizer translateRecognizer = (com.microsoft.cognitiveservices.speech.recognition.translation.TranslationRecognizer)owner;
+            com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer translateRecognizer = (com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer)owner;
             recognizerParameters = translateRecognizer.getRecoImpl().getParameters();
         }
         else

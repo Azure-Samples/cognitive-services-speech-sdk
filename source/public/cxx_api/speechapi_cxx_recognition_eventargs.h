@@ -13,7 +13,6 @@
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
-namespace Recognition {
 
 /// <summary>
 /// Provides data for the RecognitionEvent.
@@ -36,4 +35,4 @@ public:
 };
 
 
-} } } } // Microsoft::CognitiveServices::Speech::Recognition
+} } } // Microsoft::CognitiveServices::Speech

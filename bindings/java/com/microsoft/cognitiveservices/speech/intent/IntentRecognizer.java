@@ -1,4 +1,4 @@
-package com.microsoft.cognitiveservices.speech.recognition.intent;
+package com.microsoft.cognitiveservices.speech.intent;
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
@@ -8,10 +8,10 @@ import java.io.IOException;
 
 import com.microsoft.cognitiveservices.speech.ParameterCollection;
 import com.microsoft.cognitiveservices.speech.internal.IntentTrigger;
-import com.microsoft.cognitiveservices.speech.recognition.LanguageUnderstandingModel;
-import com.microsoft.cognitiveservices.speech.recognition.ParameterNames;
-import com.microsoft.cognitiveservices.speech.recognition.RecognitionErrorEventArgs;
-import com.microsoft.cognitiveservices.speech.recognition.translation.TranslationTextResult;
+import com.microsoft.cognitiveservices.speech.LanguageUnderstandingModel;
+import com.microsoft.cognitiveservices.speech.ParameterNames;
+import com.microsoft.cognitiveservices.speech.RecognitionErrorEventArgs;
+import com.microsoft.cognitiveservices.speech.translation.TranslationTextResult;
 import com.microsoft.cognitiveservices.speech.util.EventHandler;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Task;
@@ -20,7 +20,7 @@ import com.microsoft.cognitiveservices.speech.util.TaskRunner;
 /**
   * Perform intent recognition on the speech input. It returns both recognized text and recognized intent.
   */
-public final class IntentRecognizer extends com.microsoft.cognitiveservices.speech.recognition.Recognizer
+public final class IntentRecognizer extends com.microsoft.cognitiveservices.speech.Recognizer
 {
     /**
       * The event IntermediateResultReceived signals that an intermediate recognition result is received.

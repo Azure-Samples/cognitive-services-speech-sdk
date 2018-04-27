@@ -17,7 +17,6 @@
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
-namespace Recognition {
 
 /// <summary>
 /// BaseAsyncRecognizer class.
@@ -54,4 +53,4 @@ protected:
 };
 
 
-} } } } // Microsoft::CognitiveServices::Speech::Recognition
+} } } // Microsoft::CognitiveServices::Speech

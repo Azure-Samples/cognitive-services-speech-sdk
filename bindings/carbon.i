@@ -30,23 +30,23 @@
     catch (...) { SWIG_exception(SWIG_UnknownError,"Runtime exception"); }
 }
 
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::Recognizer)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Recognition::RecognitionResult, Microsoft::CognitiveServices::Speech::Recognition::RecognitionEventArgs>)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::BaseAsyncRecognizer)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::RecognitionResult)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognitionResult)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognitionResult, Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognitionEventArgs>)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognizer)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentRecognitionResult)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentRecognitionResult, Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentRecognitionEventArgs>)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentRecognizer)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentTrigger)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::Intent::LanguageUnderstandingModel)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationTextResult)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationTextResult, Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationTextResultEventArgs>)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationRecognizer)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::ISpeechFactory)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Recognition::ICognitiveServicesSpeechFactory)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Recognizer)
+%shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::RecognitionResult, Microsoft::CognitiveServices::Speech::RecognitionEventArgs>)
+%shared_ptr(Microsoft::CognitiveServices::Speech::BaseAsyncRecognizer)
+%shared_ptr(Microsoft::CognitiveServices::Speech::RecognitionResult)
+%shared_ptr(Microsoft::CognitiveServices::Speech::SpeechRecognitionResult)
+%shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::SpeechRecognitionResult, Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs>)
+%shared_ptr(Microsoft::CognitiveServices::Speech::SpeechRecognizer)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult)
+%shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult, Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionEventArgs>)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Intent::IntentTrigger)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Intent::LanguageUnderstandingModel)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Translation::TranslationTextResult)
+%shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationTextResult, Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultEventArgs>)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer)
+%shared_ptr(Microsoft::CognitiveServices::Speech::ISpeechFactory)
+%shared_ptr(Microsoft::CognitiveServices::Speech::ICognitiveServicesSpeechFactory)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Value)
 
 %template(WstringVector) std::vector<std::wstring>;
@@ -68,9 +68,9 @@
 %ignore operator SPXTRIGGERHANDLE;
 
 %inline %{
-    typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognitionResult> SpeechRecognitionResultPtr;
-    typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentRecognitionResult> IntentRecognitionResultPtr;
-    typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationTextResult> TranslationTextResultPtr;
+    typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechRecognitionResult> SpeechRecognitionResultPtr;
+    typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult> IntentRecognitionResultPtr;
+    typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Translation::TranslationTextResult> TranslationTextResultPtr;
 %}
 
 %template(SpeechRecognitionResultPtrFuture) FutureWrapper<SpeechRecognitionResultPtr>;
@@ -79,7 +79,7 @@
 %template(VoidFuture) FutureWrapper<void>;
 
 // %extend need to come first, before the %ignore for the same method (RecognizeAsync, etc.)
-%extend Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognizer {
+%extend Microsoft::CognitiveServices::Speech::SpeechRecognizer {
 
     SpeechRecognitionResultPtr Recognize() {
         return ($self)->RecognizeAsync().get();
@@ -135,7 +135,7 @@
     }
 }
 
-%extend Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentRecognizer {
+%extend Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer {
 
     IntentRecognitionResultPtr Recognize() {
         return ($self)->RecognizeAsync().get();
@@ -191,7 +191,7 @@
     }
 }
 
-%extend Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationRecognizer {
+%extend Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer {
 
     TranslationTextResultPtr Recognize() {
         return ($self)->RecognizeAsync().get();
@@ -313,9 +313,9 @@
 
 #endif
 
-%add_subscript_operator(Recognition::ResultPropertyValueCollection, Recognition::ResultProperty)
-%add_subscript_operator(Recognition::FactoryParameterCollection, Recognition::FactoryParameter)
-%add_subscript_operator(Recognition::RecognizerParameterValueCollection, Recognition::RecognizerParameter)
+%add_subscript_operator(ResultPropertyValueCollection, ResultProperty)
+%add_subscript_operator(FactoryParameterCollection, FactoryParameter)
+%add_subscript_operator(RecognizerParameterValueCollection, RecognizerParameter)
 %add_subscript_operator(SessionParameterValueCollection, SessionParameter)
 
 %ignore Microsoft::CognitiveServices::Speech::EventSignal::EventSignal;
@@ -334,15 +334,15 @@
 
 %ignore Microsoft::CognitiveServices::Speech::Value::Value;
 %ignore Microsoft::CognitiveServices::Speech::SessionParameterValue;
-%ignore Microsoft::CognitiveServices::Speech::Recognition::ResultPropertyValue;
-%ignore Microsoft::CognitiveServices::Speech::Recognition::RecognizerParameterValue;
-%ignore Microsoft::CognitiveServices::Speech::Recognition::FactoryParameterValue;
+%ignore Microsoft::CognitiveServices::Speech::ResultPropertyValue;
+%ignore Microsoft::CognitiveServices::Speech::RecognizerParameterValue;
+%ignore Microsoft::CognitiveServices::Speech::FactoryParameterValue;
 
 %include <speechapi_cxx_value.h>
 
-%template(RecognizerParameterValueCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXRECOHANDLE, Microsoft::CognitiveServices::Speech::Recognition::RecognizerParameterValue>;
-%template(ResultPropertyValueCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXRESULTHANDLE, Microsoft::CognitiveServices::Speech::Recognition::ResultPropertyValue>;
-%template(FactoryParameterCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXFACTORYHANDLE, Microsoft::CognitiveServices::Speech::Recognition::FactoryParameterValue>;
+%template(RecognizerParameterValueCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXRECOHANDLE, Microsoft::CognitiveServices::Speech::RecognizerParameterValue>;
+%template(ResultPropertyValueCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXRESULTHANDLE, Microsoft::CognitiveServices::Speech::ResultPropertyValue>;
+%template(FactoryParameterCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXFACTORYHANDLE, Microsoft::CognitiveServices::Speech::FactoryParameterValue>;
 %template(SessionParameterValueCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXSESSIONHANDLE, Microsoft::CognitiveServices::Speech::SessionParameterValue>;
 
 %include <speechapi_cxx_audioinputstream.h>
@@ -351,44 +351,44 @@
 
 %include <speechapi_cxx_session_eventargs.h>
 
-%immutable Microsoft::CognitiveServices::Speech::Recognition::RecognitionResult::Properties;
+%immutable Microsoft::CognitiveServices::Speech::RecognitionResult::Properties;
 %include <speechapi_cxx_recognition_result.h>
 %include <speechapi_cxx_recognition_eventargs.h>
 
 #ifdef SWIGPYTHON
 %template(_SessionEventCallback) CallbackWrapper<const Microsoft::CognitiveServices::Speech::SessionEventArgs&>;
-%template(_RecognitionEventCallback) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Recognition::RecognitionEventArgs&>;
+%template(_RecognitionEventCallback) CallbackWrapper<const Microsoft::CognitiveServices::Speech::RecognitionEventArgs&>;
 #elif defined(SWIGJAVA)
 %template(SessionEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::SessionEventArgs&>;
-%template(RecognitionEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Recognition::RecognitionEventArgs&>;
+%template(RecognitionEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::RecognitionEventArgs&>;
 #else
 %template(SessionEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::SessionEventArgs&>;
-%template(RecognitionEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Recognition::RecognitionEventArgs&>;
+%template(RecognitionEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::RecognitionEventArgs&>;
 #endif
 
 %template(SessionEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::SessionEventArgs&>;
-%template(RecognitionEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Recognition::RecognitionEventArgs&>;
+%template(RecognitionEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::RecognitionEventArgs&>;
 
 %include <speechapi_cxx_recognizer_parameter_collection.h>
 %include <speechapi_cxx_recognizer.h>
 %include <speechapi_cxx_recognition_async_recognizer.h>
 
-%template(BaseRecognizerBase) Microsoft::CognitiveServices::Speech::Recognition::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Recognition::RecognitionResult, Microsoft::CognitiveServices::Speech::Recognition::RecognitionEventArgs>;
+%template(BaseRecognizerBase) Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::RecognitionResult, Microsoft::CognitiveServices::Speech::RecognitionEventArgs>;
 %include <speechapi_cxx_recognition_base_async_recognizer.h>
 
 %include <speechapi_cxx_speech_recognition_result.h>
 %include <speechapi_cxx_speech_recognition_eventargs.h>
 
 #ifdef SWIGPYTHON
-%template(_SpeechRecognitionEventCallback) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognitionEventArgs&>;
+%template(_SpeechRecognitionEventCallback) CallbackWrapper<const Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs&>;
 #elif defined(SWIGJAVA)
-%template(SpeechRecognitionEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognitionEventArgs&>;
+%template(SpeechRecognitionEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs&>;
 #else
-%template(SpeechRecognitionEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognitionEventArgs&>;
+%template(SpeechRecognitionEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs&>;
 #endif
 
-%template(SpeechRecognitionEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognitionEventArgs&>;
-%template(SpeechRecognizerBase) Microsoft::CognitiveServices::Speech::Recognition::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognitionResult, Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognitionEventArgs>;
+%template(SpeechRecognitionEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs&>;
+%template(SpeechRecognizerBase) Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::SpeechRecognitionResult, Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs>;
 %include <speechapi_cxx_speech_recognizer.h>
 
 %include <speechapi_cxx_intent_recognition_result.h>
@@ -397,38 +397,38 @@
 %include <speechapi_cxx_intent_trigger.h>
 
 #ifdef SWIGPYTHON
-%template(_IntentEventCallback) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentRecognitionEventArgs&>;
+%template(_IntentEventCallback) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionEventArgs&>;
 #elif defined(SWIGJAVA)
-%template(IntentEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentRecognitionEventArgs&>;
+%template(IntentEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionEventArgs&>;
 #else
-%template(IntentEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentRecognitionEventArgs&>;
+%template(IntentEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionEventArgs&>;
 #endif
 
-%template(IntentEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentRecognitionEventArgs&>;
-%template(IntentRecognizerBase) Microsoft::CognitiveServices::Speech::Recognition::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentRecognitionResult, Microsoft::CognitiveServices::Speech::Recognition::Intent::IntentRecognitionEventArgs>;
+%template(IntentEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionEventArgs&>;
+%template(IntentRecognizerBase) Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult, Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionEventArgs>;
 
 %include <speechapi_cxx_intent_recognizer.h>
 
-%ignore Microsoft::CognitiveServices::Speech::Recognition::FactoryParameterValue::FactoryParameterValue(SPXFACTORYHANDLE, enum FactoryParameter);
+%ignore Microsoft::CognitiveServices::Speech::FactoryParameterValue::FactoryParameterValue(SPXFACTORYHANDLE, enum FactoryParameter);
 %ignore GetLanguageResource(LanguageResourceScope scopes, std::wstring acceptLanguage);
 
 %include <speechapi_cxx_translation_result.h>
 %include <speechapi_cxx_translation_eventargs.h>
 
 #ifdef SWIGPYTHON
-%template(_TranslationTextEventCallback) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationTextResultEventArgs&>;
-%template(_TranslationSynthesisEventCallback) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationSynthesisResultEventArgs&>;
+%template(_TranslationTextEventCallback) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultEventArgs&>;
+%template(_TranslationSynthesisEventCallback) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResultEventArgs&>;
 #elif defined(SWIGJAVA)
-%template(TranslationTexEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationTextResultEventArgs&>;
-%template(TranslationSynthesisEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationSynthesisResultEventArgs&>;
+%template(TranslationTexEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultEventArgs&>;
+%template(TranslationSynthesisEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResultEventArgs&>;
 #else
-%template(TranslationTextEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationTextResultEventArgs&>;
-%template(TranslationSynthesisEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationSynthesisResultEventArgs&>;
+%template(TranslationTextEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultEventArgs&>;
+%template(TranslationSynthesisEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResultEventArgs&>;
 #endif
 
-%template(TranslationTextEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationTextResultEventArgs&>;
-%template(TranslationSynthesisEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationSynthesisResultEventArgs&>;
-%template(TranslationRecognizerBase) Microsoft::CognitiveServices::Speech::Recognition::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationTextResult, Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationTextResultEventArgs>;
+%template(TranslationTextEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultEventArgs&>;
+%template(TranslationSynthesisEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResultEventArgs&>;
+%template(TranslationRecognizerBase) Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationTextResult, Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultEventArgs>;
 
 %include <speechapi_cxx_translation_recognizer.h>
 %include <speechapi_cxx_factory_parameter.h>

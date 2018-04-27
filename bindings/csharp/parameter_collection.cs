@@ -16,24 +16,24 @@ namespace Microsoft.CognitiveServices.Speech
     {
         internal ParameterCollection(Owner owner)
         {
-            if (typeof(Owner) == typeof(Recognition.SpeechFactory))
+            if (typeof(Owner) == typeof(SpeechFactory))
             {
-                var speechFactory = owner as Recognition.SpeechFactory;
+                var speechFactory = owner as SpeechFactory;
                 factoryParameters = speechFactory.factoryImpl.Parameters;
             }
-            else if (typeof(Owner) == typeof(Recognition.Speech.SpeechRecognizer))
+            else if (typeof(Owner) == typeof(SpeechRecognizer))
             {
-                var recognizer = owner as Recognition.Speech.SpeechRecognizer;
+                var recognizer = owner as SpeechRecognizer;
                 recognizerParameters = recognizer.recoImpl.Parameters;
             }
-            else if (typeof(Owner) == typeof(Recognition.Intent.IntentRecognizer))
+            else if (typeof(Owner) == typeof(Intent.IntentRecognizer))
             {
-                var recognizer = owner as Recognition.Intent.IntentRecognizer;
+                var recognizer = owner as Intent.IntentRecognizer;
                 recognizerParameters = recognizer.recoImpl.Parameters;
             }
-            else if (typeof(Owner) == typeof(Recognition.Translation.TranslationRecognizer))
+            else if (typeof(Owner) == typeof(Translation.TranslationRecognizer))
             {
-                var recognizer = owner as Recognition.Translation.TranslationRecognizer;
+                var recognizer = owner as Translation.TranslationRecognizer;
                 recognizerParameters = recognizer.recoImpl.Parameters;
             }
             else

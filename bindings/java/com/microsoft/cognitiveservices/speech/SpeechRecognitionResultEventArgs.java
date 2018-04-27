@@ -1,19 +1,17 @@
-package com.microsoft.cognitiveservices.speech.recognition.translation;
-
+package com.microsoft.cognitiveservices.speech;
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-
 /**
-  * Define payload of translation intermediate/final result events.
+  * Define payload of speech intermediate/final result events.
   */
-public class TranslationTextResultEventArgs //: System.EventArgs
+public class SpeechRecognitionResultEventArgs //: System.EventArgs
 {
-    TranslationTextResultEventArgs(com.microsoft.cognitiveservices.speech.internal.TranslationTextResultEventArgs e)
+    SpeechRecognitionResultEventArgs(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventArgs e)
     {
-        this._Result = new TranslationTextResult(e.getResult());
+        this._Result = new SpeechRecognitionResult(e.getResult());
         this._SessionId = e.getSessionId();
     }
 
@@ -21,11 +19,11 @@ public class TranslationTextResultEventArgs //: System.EventArgs
       * Specifies the recognition result.
       * @return the recognition result.
       */
-    public final TranslationTextResult getResult() // { get; }
+    public SpeechRecognitionResult getResult()
     {
         return _Result;
-    }
-    private TranslationTextResult _Result;
+    }// { get; }
+    private SpeechRecognitionResult _Result;
 
     /**
       * Specifies the session identifier.
@@ -44,6 +42,6 @@ public class TranslationTextResultEventArgs //: System.EventArgs
     @Override
     public String toString()
     {
-        return "TranslationTextResult";
+        return "SessionId:" + _SessionId + " ResultId:" + _Result.getResultId() + " Status:" + _Result.getReason() + " Recognized text:<" + _Result.getRecognizedText() + ">.";
     }
 }

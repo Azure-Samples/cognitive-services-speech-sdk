@@ -6,7 +6,7 @@
 using System;
 using Microsoft.CognitiveServices.Speech;
 
-namespace Microsoft.CognitiveServices.Speech.Recognition
+namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
     /// Defines the base class Recognizer which mainly contains common event handlers.

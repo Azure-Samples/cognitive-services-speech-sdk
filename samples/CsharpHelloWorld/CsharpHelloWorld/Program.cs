@@ -1,5 +1,4 @@
-using Microsoft.CognitiveServices.Speech.Recognition;
-using Microsoft.CognitiveServices.Speech.Recognition.Speech;
+using Microsoft.CognitiveServices.Speech;
 using System;
 using System.Collections.Generic;
 using System.Linq;

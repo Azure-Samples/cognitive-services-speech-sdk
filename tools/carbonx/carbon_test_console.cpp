@@ -20,7 +20,7 @@
 #include <platform.h>
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
-using namespace Microsoft::CognitiveServices::Speech::Recognition::Translation;
+using namespace Microsoft::CognitiveServices::Speech::Translation;
 
 CarbonTestConsole::CarbonTestConsole()
 {

@@ -9,7 +9,7 @@ using System;
 using System.Net.Http;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Microsoft.CognitiveServices.Speech.Recognition;
+using Microsoft.CognitiveServices.Speech;
 
 namespace MicrosoftSpeechSDKSamples
 {

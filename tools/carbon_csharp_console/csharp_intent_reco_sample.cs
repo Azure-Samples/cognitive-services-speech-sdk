@@ -8,8 +8,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
-using Microsoft.CognitiveServices.Speech.Recognition;
-using Microsoft.CognitiveServices.Speech.Recognition.Intent;
+using Microsoft.CognitiveServices.Speech.Intent;
 
 namespace MicrosoftSpeechSDKSamples
 {

@@ -9,7 +9,6 @@ using System.Media;
 using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.CognitiveServices.Speech.Recognition;
 using Microsoft.CognitiveServices.Speech;
 // </toplevel>
 

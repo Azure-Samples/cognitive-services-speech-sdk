@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.CognitiveServices.Speech.Recognition.Intent
+namespace Microsoft.CognitiveServices.Speech.Intent
 {
     /// <summary>
     /// Represents language understanding model used for intent recognition.

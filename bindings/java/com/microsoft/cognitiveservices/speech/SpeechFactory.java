@@ -1,4 +1,4 @@
-package com.microsoft.cognitiveservices.speech.recognition;
+package com.microsoft.cognitiveservices.speech;
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
@@ -7,9 +7,9 @@ package com.microsoft.cognitiveservices.speech.recognition;
 import java.io.Closeable;
 
 import com.microsoft.cognitiveservices.speech.ParameterCollection;
-import com.microsoft.cognitiveservices.speech.recognition.intent.IntentRecognizer;
-import com.microsoft.cognitiveservices.speech.recognition.speech.SpeechRecognizer;
-import com.microsoft.cognitiveservices.speech.recognition.translation.TranslationRecognizer;
+import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
+import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
+import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 
  /**
    * Factory methods to create recognizers.

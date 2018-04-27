@@ -25,8 +25,6 @@
 using namespace Microsoft::CognitiveServices::Speech::Impl; // for mocks
 
 using namespace Microsoft::CognitiveServices::Speech;
-using namespace Microsoft::CognitiveServices::Speech::Recognition;
-using namespace Microsoft::CognitiveServices::Speech::Recognition::Speech;
 using namespace std;
 
 std::string g_keySpeech;

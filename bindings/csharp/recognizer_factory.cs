@@ -5,11 +5,10 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.CognitiveServices.Speech.Recognition.Speech;
-using Microsoft.CognitiveServices.Speech.Recognition.Intent;
-using Microsoft.CognitiveServices.Speech.Recognition.Translation;
+using Microsoft.CognitiveServices.Speech.Intent;
+using Microsoft.CognitiveServices.Speech.Translation;
 
-namespace Microsoft.CognitiveServices.Speech.Recognition
+namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
     /// Factory methods to create recognizers.

@@ -6,7 +6,7 @@
 using System;
 using System.Globalization;
 
-namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
+namespace Microsoft.CognitiveServices.Speech.Translation
 {
     /// <summary>
     /// Define payload of translation synthesis result events.

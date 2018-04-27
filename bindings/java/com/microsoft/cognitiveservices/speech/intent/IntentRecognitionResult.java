@@ -1,4 +1,4 @@
-package com.microsoft.cognitiveservices.speech.recognition.intent;
+package com.microsoft.cognitiveservices.speech.intent;
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
@@ -7,7 +7,7 @@ package com.microsoft.cognitiveservices.speech.recognition.intent;
 /**
   * Defines result of intent recognition.
   */
-public class IntentRecognitionResult extends com.microsoft.cognitiveservices.speech.recognition.speech.SpeechRecognitionResult
+public class IntentRecognitionResult extends com.microsoft.cognitiveservices.speech.SpeechRecognitionResult
 {
     IntentRecognitionResult(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionResult result)
     {

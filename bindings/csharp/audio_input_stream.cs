@@ -6,7 +6,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.CognitiveServices.Speech.Recognition
+namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
     /// Defines audio input stream.

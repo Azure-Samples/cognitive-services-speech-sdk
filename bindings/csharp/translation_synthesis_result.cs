@@ -6,9 +6,9 @@
 using System;
 using System.Globalization;
 using System.Collections.Generic;
-using Microsoft.CognitiveServices.Speech.Recognition;
+using Microsoft.CognitiveServices.Speech;
 
-namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
+namespace Microsoft.CognitiveServices.Speech.Translation
 {
     /// <summary>
     /// Defines translation synthesis result, i.e. the voice output of the translated text in the target language.

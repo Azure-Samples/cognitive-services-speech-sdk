@@ -1,4 +1,4 @@
-package com.microsoft.cognitiveservices.speech.recognition;
+package com.microsoft.cognitiveservices.speech;
 
 import java.io.Closeable;
 

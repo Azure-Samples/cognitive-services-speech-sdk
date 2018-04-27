@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
 
-namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
+namespace Microsoft.CognitiveServices.Speech.Translation
 {
     /// <summary>
     /// Performs translation on the speech input.
@@ -58,7 +58,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
     /// }
     /// </code>
     /// </example>
-    public sealed class TranslationRecognizer : Recognition.Recognizer
+    public sealed class TranslationRecognizer : Recognizer
     {
         /// <summary>
         /// The event <see cref="IntermediateResultReceived"/> signals that an intermediate recognition result is received.

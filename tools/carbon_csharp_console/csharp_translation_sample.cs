@@ -12,8 +12,7 @@ using System.IO;
 using System.Media;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
-using Microsoft.CognitiveServices.Speech.Recognition;
-using Microsoft.CognitiveServices.Speech.Recognition.Translation;
+using Microsoft.CognitiveServices.Speech.Translation;
 
 namespace MicrosoftSpeechSDKSamples
 {

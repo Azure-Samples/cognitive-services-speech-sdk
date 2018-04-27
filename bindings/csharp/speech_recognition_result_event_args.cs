@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 using System.Globalization;
-namespace Microsoft.CognitiveServices.Speech.Recognition.Speech
+namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
     /// Define payload of speech intermediate/final result events.

@@ -8,12 +8,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
 
-namespace Microsoft.CognitiveServices.Speech.Recognition.Intent
+namespace Microsoft.CognitiveServices.Speech.Intent
 {
     /// <summary>
     /// Perform intent recognition on the speech input. It returns both recognized text and recognized intent.
     /// </summary>
-    public sealed class IntentRecognizer : Recognition.Recognizer
+    public sealed class IntentRecognizer : Recognizer
     {
         /// <summary>
         /// The event <see cref="IntermediateResultReceived"/> signals that an intermediate recognition result is received.

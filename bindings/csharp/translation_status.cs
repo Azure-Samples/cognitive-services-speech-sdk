@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
+namespace Microsoft.CognitiveServices.Speech.Translation
 {
     /// <summary>
     /// Defines translation status.

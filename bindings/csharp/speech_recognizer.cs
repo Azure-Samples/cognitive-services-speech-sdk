@@ -7,9 +7,8 @@ using System;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.CognitiveServices.Speech;
 
-namespace Microsoft.CognitiveServices.Speech.Recognition.Speech
+namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
     /// Performs speech recognition from microphone, file, or other audio input streams, and gets transcribed text as result.
@@ -58,7 +57,7 @@ namespace Microsoft.CognitiveServices.Speech.Recognition.Speech
     /// }
     /// </code>
     /// </example>
-    public sealed class SpeechRecognizer : Recognition.Recognizer
+    public sealed class SpeechRecognizer : Recognizer
     {
         /// <summary>
         /// The event <see cref="IntermediateResultReceived"/> signals that an intermediate recognition result is received.

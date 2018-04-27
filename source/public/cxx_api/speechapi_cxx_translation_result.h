@@ -17,7 +17,6 @@
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
-namespace Recognition {
 namespace Translation {
 
 /// <summary>
@@ -39,7 +38,7 @@ enum class TranslationStatus {
 /// <summary> 
 /// Defines the translation text result.
 /// </summary>
-class TranslationTextResult final : public Microsoft::CognitiveServices::Speech::Recognition::Speech::SpeechRecognitionResult
+class TranslationTextResult final : public Microsoft::CognitiveServices::Speech::SpeechRecognitionResult
 {
 
 private:
@@ -81,7 +80,7 @@ private:
     void PopulateResultFields(SPXRESULTHANDLE resultHandle)
     {
         // Hack: populate status correctly to API.
-        m_translationStatus = ::Microsoft::CognitiveServices::Speech::Recognition::Translation::TranslationStatus::Success;
+        m_translationStatus = ::Microsoft::CognitiveServices::Speech::Translation::TranslationStatus::Success;
 
         size_t bufLen = 0;
         std::unique_ptr<Result_TranslationTextBufferHeader> phraseBuffer;
@@ -170,4 +169,4 @@ private:
 };
 
 
-} } } } } // Microsoft::CognitiveServices::Speech::Recognition::Translation
+} } } } // Microsoft::CognitiveServices::Speech::Translation

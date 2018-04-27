@@ -16,8 +16,6 @@
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
-namespace Recognition {
-namespace Speech {
 
 
 /// <summary>
@@ -70,4 +68,4 @@ private:
 };
 
 
-} } } } } // Microsoft::CognitiveServices::Speech::Recognition::Speech
+} } } // Microsoft::CognitiveServices::Speech

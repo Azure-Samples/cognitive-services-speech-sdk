@@ -6,14 +6,14 @@
 using System;
 using System.Globalization;
 using System.Collections.Generic;
-using Microsoft.CognitiveServices.Speech.Recognition;
+using Microsoft.CognitiveServices.Speech;
 
-namespace Microsoft.CognitiveServices.Speech.Recognition.Translation
+namespace Microsoft.CognitiveServices.Speech.Translation
 {
     /// <summary>
     /// Defines tranlsation result.
     /// </summary>
-    public sealed class TranslationTextResult : Speech.SpeechRecognitionResult
+    public sealed class TranslationTextResult : SpeechRecognitionResult
     {
         // BUG: this is hack for making documentation going.
         internal TranslationTextResult(Internal.TranslationTextResult result) : base(result)
