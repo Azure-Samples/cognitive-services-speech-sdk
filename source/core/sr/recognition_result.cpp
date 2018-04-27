@@ -51,7 +51,7 @@ void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* resultId, cons
 
     m_text = text;
 
-    SPX_DBG_TRACE_VERBOSE("%s: resultId=%S", __FUNCTION__, m_resultId.c_str());
+    SPX_DBG_TRACE_VERBOSE("%s: resultId=%ls", __FUNCTION__, m_resultId.c_str());
 }
 
 void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type)
@@ -67,7 +67,7 @@ void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, const wchar
         ? L""
         : text;
 
-    SPX_DBG_TRACE_VERBOSE("%s: resultId=%S", __FUNCTION__, m_resultId.c_str());
+    SPX_DBG_TRACE_VERBOSE("%s: resultId=%ls", __FUNCTION__, m_resultId.c_str());
 }
 
 void CSpxRecognitionResult::InitNoMatch(enum ResultType type)

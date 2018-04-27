@@ -151,6 +151,8 @@ void CSpxRecognizer::FireSpeechEndDetected(const std::wstring& sessionId)
 
 void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result)
 {
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
     ISpxRecognizerEvents::RecoEvent_Type* pevent = nullptr;
 
     if (result->GetType() == ResultType::TranslationSynthesis)
@@ -165,6 +167,7 @@ void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_
         {
         case Reason::Recognized:
             pevent = &FinalResult;
+            SPX_DBG_TRACE_VERBOSE_IF(!pevent->IsConnected(), "%s: No FinalResult event signal connected!! nobody listening...", __FUNCTION__);
             break;
 
         case Reason::IntermediateResult:

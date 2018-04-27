@@ -47,6 +47,13 @@ protected:
     explicit BaseAsyncRecognizer(SPXRECOHANDLE hreco) :
         BaseType(hreco)
     {
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    }
+
+    ~BaseAsyncRecognizer()
+    {
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+        TermRecognizer();
     }
 
     DISABLE_DEFAULT_CTORS(BaseAsyncRecognizer);

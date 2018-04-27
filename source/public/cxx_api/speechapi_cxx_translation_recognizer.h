@@ -136,7 +136,7 @@ public:
         Parameters(hreco),
         TranslationSynthesisResultEvent(GetTranslationAudioEventConnectionsChangedCallback(), GetTranslationAudioEventConnectionsChangedCallback())
     {
-        SPX_DBG_TRACE_FUNCTION();
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     }
 
     /// <summary>
@@ -144,7 +144,8 @@ public:
     /// </summary>
     ~TranslationRecognizer()
     {
-        SPX_DBG_TRACE_FUNCTION();
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+        TermRecognizer();
     }
 
     /// <summary>

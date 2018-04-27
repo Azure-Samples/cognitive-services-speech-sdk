@@ -4,214 +4,6 @@
 //
 // audio_stream_session.cpp: Implementation definitions for CSpxAudioStreamSession C++ class
 //
-//  Typical CSpxAudioStreamSession initialization call flow:
-//
-//      [caller thread] 1.) ctor
-//      [caller thread] 2.) base::SetSite()
-//      [caller thread] 3.) this::Init()
-//      [caller thread] 4.) this::InitFromFile() or this::InitFromMicrophone()
-//
-//  Typical CSpxAudioStreamSession::RecognizeAsync() call flow ('SingleShot'):
-//
-//      [caller thread]        1.) base::RecognizeAsync()
-//      [caller thread]        2.)   returns std::future after starting [bg task thread] (see #3)
-//      [bg task thread]       3.) this::StartRecognizing(SingleShot)
-//      [bg task thread]       4.)   this::ChangeState(Idle ==> StartingPump)
-//      [bg task thread]       5.)   this::StartAudioPump(startStop=Speech, keyword="")
-//      [bg task thread]       6.)     this::FireSessionStartedEvent()
-//      [bg task thread]       7.)     audioPump::StartPump() (kicks off audio bg thread, see #9)
-//      [bg task thread]       8.) base::WaitForRecognition() ... BLOCKs [bg task thread] UNTIL !m_recoAsyncWaiting (or timeout)
-//      [audio bg thread]      9.) this::SetFormat()
-//      [audio bg thread]     10.)   this::ChangeState(StartingPump ==> ProcessingAudio))
-//      [audio bg thread]     11.)   this::InformAdapterStartingProcessingAudio()
-//      [audio bg thread]     12.)     recoAdapter(as ISpxAudioProcessor)->SetFormat()
-//      [audio bg thread]     13.) this::ProcessAudio(), one or more times
-//      [audio bg thread]     14.)   recoAdapter(as ISpxAudioProcessor)->ProcessAudio(), one or more times
-//                            <-- SOME TIME LATER -->
-//      [reco adapter thread] 15.) this::FinalRecoResult
-//      [reco adapter thread] 16.)   base::WaitForRecognition_Complete (sets m_recoAsyncWaiting=false, UNBLOCKING [bg task thread], see #18)
-//      [reco adapter thread] 17.)     base::FireResultEvent
-//      [bg task thread]      18.) base::WaitForRecognition UNBLOCKS
-//      [bg task thread]      19.)   this::StopRecognizing(SingleShot)
-//      [bg task thread]      20.)     this::ChangeState(ProcessingAudio ==> StoppingPump)
-//      [bg task thread]      21.)     audioPump::StopPump() (which instigates [audio bg thread] shutdown, see #22)
-//      [audio bg thread]     22.) this::ProcessAudio(nullptr, 0)
-//      [audio bg thread]     23.) this::SetFormat(nullptr)
-//      [audio bg thread]     24.)   this::InformAdapterWaitingForDone(==>StoppingPump)
-//      [audio bg thread]     25.)     recoAdapter(as ISpxAudioProcessor)->ProcessAudio(nullptr, 0)
-//      [audio bg thread]     26.)     recoAdapter(as ISpxAudioProcessor)->SetFormat(nullptr)
-//      [audio bg thread]     27.) audioPump::ThreadProc exits
-//                            <-- SHORT TIME LATER -->
-//      [reco adapter thread] 28.) this::DoneProcessingAudio, then this::DoneProcessingAudio(Speech)
-//      [reco adapter thread] 29.) this::ChangeState(WaitingForAdapterDone ==> Idle)
-//      [reco adapter thread] 30.) this::FireSessionStoppedEvent
-//
-
-
-/*
-
-
-+--------------------------------------------------------------
-|   Just single shot
-+--------------------------------------------------------------
- 1  RecognizeAsync()
- 2  _lambda WaitForRecognition/StopRecognizing
-    -----------------------------------------------------------
- 1  []/None/Idle                            ==>     []/SingleShot/StartingPump              (see this::StartRecognizing())
- 1  []/SingleShot/StartingPump              ==>     []/SingleShot/ProcessingAudio           (see this::SetFormat(!nullptr))
- 2  []/SingleShot/ProcessingAudio           ==>     []/SingleShot/StoppingPump              (see this::StopRecognizing)
- 2  []/SingleShot/StoppingPump              ==>     []/SingleShot/WaitingForAdapterDone     (see this::SetFormat(nullptr))
- 2  []/SingleShot/WaitingForAdapterDone     ==>     []/None/Idle                            (see this::DoneProcessingAudio())
-
-
-
-+--------------------------------------------------------------
-|   Just Continuous
-+--------------------------------------------------------------
- 3  StartContinuousRecognitionAsync()
- 4  StopContinuousRecognitionAsync()
-    -----------------------------------------------------------
- 3  []/None/Idle                            ==>     []/Continuous/StartingPump              (see this::StartRecognizing())
- 3  []/Continuous/StartingPump              ==>     []/Continuous/ProcessingAudio           (see this::SetFormat(!nullptr))
- 4  []/Continuous/ProcessingAudio           ==>     []/Continuous/StoppingPump              (see this::StopRecognizing)
- 4  []/Continuous/StoppingPump              ==>     []/Continuous/WaitingForAdapterDone     (see this::SetFormat(nullptr))
- 4  []/Continuous/WaitingForAdapterDone     ==>     []/None/Idle                            (see this::DoneProcessingAudio())
-
-
-
-+--------------------------------------------------------------
-|   Just Keyword Spotting
-+--------------------------------------------------------------
- 5  StartKeywordRecognition()
- 6  StopKeywordRecognition()
-    -----------------------------------------------------------
- 5  []/None/Idle                            ==>     [kw]/Keyword/StartingPump               (see this::StartRecognizing())
- 5  [kw]/Keyword/StartingPump               ==>     [kw]/Keyword/ProcessingAudio            (see this::SetFormat(!nullptr))
- 6  [kw]/Keyword/ProcessingAudio            ==>     []/Keyword/StoppingPump                 (see this::StopRecognizing)
- 6  []/Keyword/StoppingPump                 ==>     []/Keyword/WaitingForAdapterDone        (see this::SetFormat(nullptr))
- 6  []/Keyword/WaitingForAdapterDone        ==>     []/None/Idle                            (see this::DoneProcessingAudio())
-
-
-
-+--------------------------------------------------------------
-|   Keyword Spotting all the time, Manual SingleShot in the middle
-+--------------------------------------------------------------
- 5  StartKeywordRecognition()
- 1  RecognizeAsync()
- 2  _lambda WaitForRecognition/StopRecognizing
- 6  StopKeywordRecognition()
-    -----------------------------------------------------------
- 5  []/None/Idle                            ==>     [kw]/Keyword/StartingPump               (see this::StartRecognizing(Keyword))
- 5  [kw]/Keyword/StartingPump               ==>     [kw]/Keyword/ProcessingAudio            (see this::SetFormat(!nullptr))
- 1  [kw]/Keyword/ProcessingAudio            ==>     [kw]/SingleShot/Paused                  (see this::StartRecognizing(SingleShot))
- 1  [kw]/SingleShot/Paused                  ==>     [kw]/SingleShot/ProcessingAudio         (see this::DoneProcessingAudio(Keyword))
- 2  [kw]/SingleShot/ProcessingAudio         ==>     [kw]/Keyword/Paused                     (see this::StopRecognizing(SingleShot))
- 2  [kw]/Keyword/Paused                     ==>     [kw]/Keyword/ProcessingAudio            (see this::DoneProcessingAudio(SingleShot))
- 6  [kw]/Keyword/ProcessingAudio            ==>     []/Keyword/StoppingPump                 (see this::StopRecognizing(Keyword))
- 6  []/Keyword/StoppingPump                 ==>     []Keyword/WaitingForAdapterDone         (see this::SetFormat(nullptr))
- 6  []/Keyword/WaitingForAdapterDone        ==>     []None/Idle                             (see this::DoneProcessingAudio(Keyword))
-
-
-+--------------------------------------------------------------
-|   Keyword Spotting all the time, KeywordDetected SingleShot in the middle
-+--------------------------------------------------------------
- 5  StartKeywordRecognition()
- 7  KeywordDetected()
- 8  _lambda WaitForRecognition/StopRecognizing
- 6  StopKeywordRecognition()
-    -----------------------------------------------------------
- 5  []/None/Idle                            ==>     [kw]/Keyword/StartingPump               (see this::StartRecognizing(Keyword))
- 5  [kw]/Keyword/StartingPump               ==>     [kw]/Keyword/ProcessingAudio            (see this::SetFormat(!nullptr))
- 7  [kw]/Keyword/ProcessingAudio            ==>     [kw]/KwsSingleShot/Paused               (see this::KeywordDetected())
- 7  [kw]/KwsSingleShot/Paused               ==>     [kw]/KwsSingleShot/ProcessingAudio      (see this::DoneProcessingAudio(Keyword))
- 8  [kw]/KwsSingleShot/ProcessingAudio      ==>     [kw]/Keyword/WaitingForAdapterDone      (see this::StopRecognizing(KwsSingleShot))
- 8  [kw]/Keyword/Paused                     ==>     [kw]/Keyword/ProcessingAudio            (see this::DoneProcessingAudio(KwsSingleShot))
- 6  [kw]/Keyword/WaitingForAdapterDone      ==>     []/Keyword/StoppingPump                 (see this::StopRecognizing(Keyword))
- 6  []/Keyword/StoppingPump                 ==>     []Keyword/WaitingForAdapterDone         (see this::SetFormat(nullptr))
- 6  []/Keyword/WaitingForAdapterDone        ==>     []None/Idle                             (see this::DoneProcessingAudio(Keyword))
-
-
-
-+--------------------------------------------------------------
-|   Keyword Spotting all the time, Continuous in the middle
-+--------------------------------------------------------------
- 5  StartKeywordRecognition()
- 3  StartContinuousRecognitionAsync()
- 4  StopContinuousRecognitionAsync()
- 6  StopKeywordRecognition()
-    -----------------------------------------------------------
- 5  []/None/Idle                            ==>     [kw]/Keyword/StartingPump               (see this::StartRecognizing(Keyword))
- 5  [kw]/Keyword/StartingPump               ==>     [kw]/Keyword/ProcessingAudio            (see this::SetFormat(!nullptr))
- 3  [kw]/Keyword/ProcessingAudio            ==>     [kw]/Continuous/Paused                  (see this::StartRecognizing(Continuous))
- 3  [kw]/Continuous/Paused                  ==>     [kw]/Continuous/ProcessingAudio         (see this::DoneProcessingAudio(Keyword))
- 4  [kw]/Continuous/ProcessingAudio         ==>     [kw]/Keyword/Paused                     (see this::StopRecognizing(Continuous)
- 4  [kw]/Keyword/Paused                     ==>     [kw]/Keyword/ProcessingAudio            (see this::DoneProcessingAudio(Continuous))
- 6  [kw]/Keyword/ProcessingAudio            ==>     []/Keyword/StoppingPump                 (see this::StopRecognizing(Keyword))
- 6  []/Keyword/StoppingPump                 ==>     []Keyword/WaitingForAdapterDone         (see this::SetFormat(nullptr))
- 6  []/Keyword/WaitingForAdapterDone        ==>     []None/Idle                             (see this::DoneProcessingAudio(Keyword))
-
-
-
-+--------------------------------------------------------------
-|   Continuous all the time, Keyword Spotting in the middle
-+--------------------------------------------------------------
- 3  StartContinuousRecognitionAsync()
- 5  StartKeywordRecognition()
- 6  StopKeywordRecognition()
- 4  StopContinuousRecognitionAsync()
-    -----------------------------------------------------------
- 3  []/None/Idle                            ==>     []/Continuous/StartingPump              (see this::StartRecognizing(Continuous))
- 3  []/Continuous/StartingPump              ==>     []/Continuous/ProcessingAudio           (see this::SetFormat(!nullptr))
- 5  []/Continuous/ProcessingAudio           ==>     [kw]/Continuous/ProcessingAudio         (see this::StartRecognizing(Keyword))
- 6  [kw]/Continuous/ProcessingAudio         ==>     []/Continuous/ProcessingAudio           (see this::StopRecognizing(Keyword))
- 4  []/Continuous/ProcessingAudio           ==>     []/Continuous/StoppingPump              (see this::StopRecognizing(Continuous))
- 4  []/Continuous/StoppingPump              ==>     []/Continuous/WaitingForAdapterDone     (see this::SetFormat(nullptr))
- 4  []/Continuous/WaitingForAdapterDone     ==>     []/None/Idle                            (see this::DoneProcessingAudio())
-
-
-
-+--------------------------------------------------------------
-|   Staggered, start with Continuous
-+--------------------------------------------------------------
- 3  StartContinuousRecognitionAsync()
- 5  StartKeywordRecognition()
- 4  StopContinuousRecognitionAsync()
- 6  StopKeywordRecognition()
-    -----------------------------------------------------------
- 3  []/None/Idle                            ==>     []/Continuous/StartingPump              (see this::StartRecognizing(Continuous))
- 3  []/Continuous/StartingPump              ==>     []/Continuous/ProcessingAudio           (see this::SetFormat(!nullptr))
- 5  []/Continuous/ProcessingAudio           ==>     [kw]/Continuous/ProcessingAudio         (see this::StartRecognizing(Keyword))
- 4  [kw]/Continuous/ProcessingAudio         ==>     [kw]/Keyword/Paused                     (see this::StopRecognizing(Continuous))
- 4  [kw]/Keyword/Paused                     ==>     [kw]/Keyword/ProcessingAudio            (see this::DoneProcessingAudio(Continuous))
- 6  [kw]/Keyword/ProcessingAudio            ==>     []/Keyword/StoppingPump                 (see this::StopRecognizing(Keyword))
- 6  []/Keyword/StoppingPump                 ==>     []Keyword/WaitingForAdapterDone         (see this::SetFormat(nullptr))
- 6  []/Keyword/WaitingForAdapterDone        ==>     []None/Idle                             (see this::DoneProcessingAudio(Keyword))
-
-
-
-+--------------------------------------------------------------
-|   Staggered, start with Keyword Spotting
-+--------------------------------------------------------------
- 5  StartKeywordRecognition()
- 3  StartContinuousRecognitionAsync()
- 6  StopKeywordRecognition()
- 4  StopContinuousRecognitionAsync()
-    -----------------------------------------------------------
- 5  []/None/Idle                            ==>     [kw]/Keyword/StartingPump               (see this::StartRecognizing(Keyword))
- 5  [kw]/Keyword/StartingPump               ==>     [kw]/Keyword/ProcessingAudio            (see this::SetFormat(!nullptr))
- 3  [kw]/Keyword/ProcessingAudio            ==>     [kw]/Continuous/Paused                  (see this::StartRecognizing(Continuous))
- 3  [kw]/Continuous/Paused                  ==>     [kw]/Continuous/ProcessingAudio         (see this::DoneProcessingAudio(Keyword))
- 6  [kw]/Continuous/ProcessingAudio         ==>     []/Continuous/ProcessingAudio           (see this::StopRecognizing(Keyword))
- 4  []/Continuous/ProcessingAudio           ==>     []/Continuous/StoppingPump              (see this::StopRecognizing)
- 4  []/Continuous/StoppingPump              ==>     []/Continuous/WaitingForAdapterDone     (see this::SetFormat(nullptr))
- 4  []/Continuous/WaitingForAdapterDone     ==>     []/None/Idle                            (see this::DoneProcessingAudio(Continuous))
-
-
-
-*/
-
-
-
 
 #include "stdafx.h"
 #include "audio_stream_session.h"
@@ -227,7 +19,9 @@ namespace Impl {
 
 CSpxAudioStreamSession::CSpxAudioStreamSession() :
     m_recoKind(RecognitionKind::Idle),
-    m_sessionState(SessionState::Idle)
+    m_sessionState(SessionState::Idle),
+    m_expectAdapterStartedTurn(false),
+    m_expectAdapterStoppedTurn(false)
 {
 }
 
@@ -245,6 +39,8 @@ void CSpxAudioStreamSession::Init()
 
 void CSpxAudioStreamSession::Term()
 {
+    m_taskHelper.RunAsyncWaitAndClear();
+
     // adapters need to be terminated before the destructor is invoked,
     // otherwise, if destructor is in progress (waiting for an adapter callback to finish), 
     // GetSite() inside that adapter callbacks returns null.
@@ -302,40 +98,32 @@ void CSpxAudioStreamSession::SetFormat(WAVEFORMATEX* pformat)
     // Since we're checking the RecoKind and SessionState multiple times, take a read lock
     ReadLock_Type readLock(m_combinedAdapterAndStateMutex);
 
-    if (pformat != nullptr && ChangeState(SessionState::StartingPump, SessionState::ProcessingAudio))
+    if (pformat != nullptr && ChangeState(SessionState::WaitForPumpSetFormatStart, SessionState::ProcessingAudio))
     {
         // The pump started successfully, we have a live running session now!
         SPX_DBG_TRACE_VERBOSE("%s: Now ProcessingAudio ...", __FUNCTION__);
 
-        SPX_DBG_ASSERT(readLock.owns_lock()); // Keep the lock to call InformAdapterStartingProcessingAudio()...
-        InformAdapterStartingProcessingAudio(pformat);
+        SPX_DBG_ASSERT(readLock.owns_lock()); // Keep the lock to call InformAdapterSetFormatStarting()...
+        InformAdapterSetFormatStarting(pformat);
     }
-    else if (pformat == nullptr && ChangeState(SessionState::StoppingPump, SessionState::WaitingForAdapterDone))
+    else if (pformat == nullptr && ChangeState(SessionState::StoppingPump, SessionState::WaitForAdapterCompletedSetFormatStop))
     {
         // Our stop pump request has been satisfied... Let's wait for the adapter to finish...
-        SPX_DBG_TRACE_VERBOSE("%s: Now WaitingForAdapterDone (from StoppingPump)...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("%s: Now WaitForAdapterCompletedSetFormatStop (from StoppingPump)...", __FUNCTION__);
 
-        SPX_DBG_ASSERT(readLock.owns_lock()); // Keep the lock to call InformAdapterWaitingForDone()...
-        InformAdapterWaitingForDone(SessionState::StoppingPump);
+        SPX_DBG_ASSERT(readLock.owns_lock()); // Keep the lock to call InformAdapterSetFormatStopping()...
+        InformAdapterSetFormatStopping(SessionState::StoppingPump);
     }
-    else if (pformat == nullptr && ChangeState(SessionState::ProcessingAudio, SessionState::WaitingForAdapterDone))
+    else if (pformat == nullptr && ChangeState(SessionState::ProcessingAudio, SessionState::WaitForAdapterCompletedSetFormatStop))
     {
         // The pump stopped itself... That's possible when WAV files reach EOS. Let's wait for the adapter to finish...
-        SPX_DBG_TRACE_VERBOSE("%s: Now WaitingForAdapterDone (from ProcessingAudio) ...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("%s: Now WaitForAdapterCompletedSetFormatStop (from ProcessingAudio) ...", __FUNCTION__);
 
-        SPX_DBG_ASSERT(readLock.owns_lock()); // Keep the lock to call InformAdapterWaitingForDone()...
-        InformAdapterWaitingForDone(SessionState::ProcessingAudio);
+        SPX_DBG_ASSERT(readLock.owns_lock()); // Keep the lock to call InformAdapterSetFormatStopping()...
+        InformAdapterSetFormatStopping(SessionState::ProcessingAudio);
     }
     else
     {
-        // Valid transitions are:
-        //
-        //   StartingPump --> ProcessingAudio (when pformat != nullptr, signifying beginning of stream)
-        //   StoppingPump --> WaitingForAdapterDone (when pformat == nullptr, signifying we will get no more data)
-        //   ProcessingAudio --> WaitingForAdapterDone (this can happen when the pump runs dry of audio data itself)
-        //
-        //   NOTE: All other state transitions are invalid inside ISpxAudioProcessor::SetFormat.
-        
         SPX_THROW_HR(SPXERR_SETFORMAT_UNEXPECTED_STATE_TRANSITION);
     }
 }
@@ -353,7 +141,7 @@ void CSpxAudioStreamSession::ProcessAudio(AudioData_Type data, uint32_t size)
         SPX_DBG_TRACE_VERBOSE_IF(0, "%s - size=%d", __FUNCTION__, size);
         m_audioProcessor->ProcessAudio(data, size);
     }
-    else if (sessionState == SessionState::Paused)
+    else if (sessionState == SessionState::HotSwapPaused)
     {
         // Don't process this data, if we're paused... 
         SPX_DBG_TRACE_VERBOSE_IF(1, "%s - size=%d -- Ignoring (state == Paused)", __FUNCTION__, size);
@@ -366,14 +154,6 @@ void CSpxAudioStreamSession::ProcessAudio(AudioData_Type data, uint32_t size)
     }
     else
     {
-        // Valid states to encounter are:
-        //
-        // - ProcessingAudio: We're allowed to process audio while in this state
-        // - StoppingPump: We're allowed to be called to process audio, but we'll ignore the data passed in while we're attempting to stop the pump
-        // - Paused: We're allowed to be called to process audio, but we'll ignore that data (when we un-pause, we'll pick back up at the appropriate location)
-        //
-        // NOTE: All other states are invalid inside ISpxAudioProcessor::ProcessAudio.
-
         SPX_TRACE_WARNING("%s: Unexpected SessionState: recoKind %d; sessionState %d", __FUNCTION__, m_recoKind, sessionState);
     }
 }
@@ -383,33 +163,27 @@ void CSpxAudioStreamSession::StartRecognizing(RecognitionKind startKind, std::ws
     // Since we're checking the RecoKind and SessionState multiple times, take a read lock
     ReadLock_Type readLock(m_combinedAdapterAndStateMutex);
 
-    if (ChangeState(RecognitionKind::Idle, SessionState::Idle, startKind, SessionState::StartingPump))
+    if (ChangeState(RecognitionKind::Idle, SessionState::Idle, startKind, SessionState::WaitForPumpSetFormatStart))
     {
         // We're starting from idle!! Let's get the Audio Pump running
-        SPX_DBG_TRACE_VERBOSE("%s: Now StartingPump ...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("%s: Now WaitForPumpSetFormatStart ...", __FUNCTION__);
 
         readLock.unlock(); // StartAudioPump() will take a write lock, so we need to clear our read lock
         StartAudioPump(startKind, keyword);
-
-        // Calling StartAudioPump(), ultimately initiates a call to this::SetFormat(waveformat) which is
-        // where we'll complete the state transition to startKind/ProcessingAudio
     }
-    else if (ChangeState(RecognitionKind::Keyword, SessionState::ProcessingAudio, startKind, SessionState::Paused))
+    else if (ChangeState(RecognitionKind::Keyword, SessionState::ProcessingAudio, startKind, SessionState::HotSwapPaused))
     {
         // We're moving from Keyword/ProcessingAudio to startKind/Paused... 
         SPX_DBG_TRACE_VERBOSE("%s: Now Paused ...", __FUNCTION__);
 
-        readLock.unlock(); // HotSwapAdaptersWhilePaused() will take a write lock, so we need to clear our read lock
+        readLock.unlock(); // HotSwap* will take a write lock, so we need to clear our read lock
         HotSwapAdaptersWhilePaused(startKind, keyword);
-
-        // Calling HotSwapAdaptersWhilePaused() will instigate a call to this::DoneProcessingAudio(Keyword) which
-        // is where we'll complete changing state to startKind/ProcessingAudio
     }
     else if (startKind == RecognitionKind::Keyword && !IsKind(RecognitionKind::Keyword) && IsState(SessionState::ProcessingAudio))
     {
         // We're already doing something other than keyword spotting, but, someone wants to change/update the keyword ...
         // So ... let's update it
-        SPX_DBG_TRACE_VERBOSE("%s: Changing keyword to '%S' ... nothing else...", __FUNCTION__, keyword.c_str());
+        SPX_DBG_TRACE_VERBOSE("%s: Changing keyword to '%ls' ... nothing else...", __FUNCTION__, keyword.c_str());
         m_keyword = keyword;
     }
     else
@@ -427,7 +201,7 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
     SPX_DBG_ASSERT(stopKind != RecognitionKind::Idle);
 
     if (!m_keyword.empty() && stopKind != RecognitionKind::Keyword && IsState(SessionState::ProcessingAudio) &&
-        ChangeState(stopKind, SessionState::ProcessingAudio, RecognitionKind::Keyword, SessionState::Paused))
+        ChangeState(stopKind, SessionState::ProcessingAudio, RecognitionKind::Keyword, SessionState::HotSwapPaused))
     {
         // We've got a keyword, we're not trying to stop keyword spotting, and we're currently procesing audio...
         // So ... We should hot swap over to the keyword spotter (which will stop the current adapter doing whatever its doing)
@@ -439,9 +213,6 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
         {
             FireSessionStoppedEvent();
         }
-
-        // Calling HotSwapAdaptersWhilePaused() will instigate a call to this::DoneProcessingAudio(Speech), 
-        // where we'll complete changing state to Keyword/ProcessingAudio
     }
     else if (stopKind == RecognitionKind::Keyword && IsKind(RecognitionKind::Keyword) &&
              ChangeState(stopKind, SessionState::ProcessingAudio, stopKind, SessionState::StoppingPump))
@@ -454,9 +225,6 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
         // And we'll stop the pump
         SPX_DBG_TRACE_VERBOSE("%s: Now StoppingPump ...", __FUNCTION__);
         m_audioPump->StopPump();
-
-        // Calling StopPump() will instigate a call to this::DoneProcessingAudio(Keyword), where
-        // we'll complete the changing state to Idle/Idle
     }
     else if (stopKind == RecognitionKind::Keyword && !IsKind(RecognitionKind::Keyword))
     {
@@ -465,13 +233,18 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
         SPX_DBG_TRACE_VERBOSE("%s: Changing keyword to '' ... nothing else...", __FUNCTION__);
         m_keyword.clear();
     }
+    else if (stopKind == RecognitionKind::KwsSingleShot && !IsKind(RecognitionKind::KwsSingleShot))
+    {
+        // We've been asked to stop KwsSingleShot, but we've already stopped that, and have switched back to Keyword, or Idle
+        SPX_DBG_TRACE_VERBOSE("%s: Already stopped KwsSingleShot ... recoKind %d; sessionState %d", __FUNCTION__, m_recoKind, m_sessionState);
+    }
     else if (stopKind == RecognitionKind::KwsSingleShot && IsKind(RecognitionKind::KwsSingleShot) &&
-             ChangeState(stopKind, SessionState::ProcessingAudio, stopKind, SessionState::WaitingForAdapterDone))
+             ChangeState(stopKind, SessionState::ProcessingAudio, stopKind, SessionState::WaitForAdapterCompletedSetFormatStop))
     {
         // TODO: RobCh: Is this ever called?!! How does it not get eaten by the first if statement above?!!
 
         // We're going to wait for done ... (which will flip us back to wherever we need to go...)
-        SPX_DBG_TRACE_VERBOSE("%s: Now KwsSingleShot/WaitingForAdapterDone ...", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("%s: Now KwsSingleShot/WaitForAdapterCompletedSetFormatStop ...", __FUNCTION__);
     }
     else if (ChangeState(SessionState::ProcessingAudio, SessionState::StoppingPump))
     {
@@ -479,14 +252,11 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
         // So ... Let's stop the pump
         SPX_DBG_TRACE_VERBOSE("%s: Now StoppingPump ...", __FUNCTION__);
         m_audioPump->StopPump();
-
-        // Calling StopPump() will instigate a call to this::DoneProcessingAudio(), where
-        // we'll complete the changing state to Idle/Idle
     }
-    else if (IsState(SessionState::WaitingForAdapterDone))
+    else if (IsState(SessionState::WaitForAdapterCompletedSetFormatStop))
     {
-        // If we're already in the WaitingForAdapterDone state... That's fine ... We'll eventually transit to Idle once DoneProcessingAudio() is called...
-        SPX_DBG_TRACE_VERBOSE("%s: Now (still) WaitingForDone ...", __FUNCTION__);
+        // If we're already in the WaitForAdapterCompletedSetFormatStop state... That's fine ... We'll eventually transit to Idle once AdapterCompletedSetFormatStop() is called...
+        SPX_DBG_TRACE_VERBOSE("%s: Now (still) WaitForAdapterCompletedSetFormatStop ...", __FUNCTION__);
     }
     else if (IsKind(RecognitionKind::Idle) && IsState(SessionState::Idle))
     {
@@ -529,7 +299,7 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::WaitForRecognitio
 
         SPX_DBG_TRACE_VERBOSE("Waiting for AdapterDone...");
         m_cv.wait_for(lock, std::chrono::seconds(m_waitForDoneTimeout), [&] {
-            return !this->IsState(SessionState::StoppingPump) && !this->IsState(SessionState::WaitingForAdapterDone);
+            return !this->IsState(SessionState::StoppingPump) && !this->IsState(SessionState::WaitForAdapterCompletedSetFormatStop);
         });
         SPX_DBG_TRACE_VERBOSE("Waiting for AdapterDone... Done!!");
     }
@@ -543,21 +313,12 @@ void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint
     UNUSED(offset);
 
     SPX_DBG_TRACE_VERBOSE("Keyword detected!! Starting KwsSingleShot recognition...");
-    if (ChangeState(RecognitionKind::Keyword, SessionState::ProcessingAudio, RecognitionKind::KwsSingleShot, SessionState::Paused))
+    if (ChangeState(RecognitionKind::Keyword, SessionState::ProcessingAudio, RecognitionKind::KwsSingleShot, SessionState::HotSwapPaused))
     {
         // We've been told a keyword was recognized... Start KwsSingleShot recognition!!
         SPX_DBG_TRACE_VERBOSE("%s: Now KwsSingleShot/Paused ...", __FUNCTION__);
         HotSwapToKwsSingleShotWhilePaused();
-
-        // Calling StartRecognizingKwsSingleShot() will instigate a call to HotSwapAdaptersWhilePaused(), which will
-        // instigate a call to DoneProcessingAudio(Keyword) where we'll complete changing state to KwsSingleShot/ProcessingAudio
     }
-}
-
-void CSpxAudioStreamSession::DoneProcessingAudio(ISpxKwsEngineAdapter* adapter)
-{
-    UNUSED(adapter);
-    DoneProcessingAudio(AdapterDoneProcessingAudio::Keyword);
 }
 
 std::list<std::string> CSpxAudioStreamSession::GetListenForList()
@@ -575,7 +336,37 @@ void CSpxAudioStreamSession::GetIntentInfo(std::string& provider, std::string& i
     }
 }
 
-void CSpxAudioStreamSession::SpeechStartDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset)
+void CSpxAudioStreamSession::AdapterStartingTurn(ISpxRecoEngineAdapter* /* adapter */)
+{
+    SPX_DBG_ASSERT(!m_expectAdapterStartedTurn);
+    m_expectAdapterStartedTurn = true;
+}
+
+void CSpxAudioStreamSession::AdapterStartedTurn(ISpxRecoEngineAdapter* /* adapter */, const std::string& /* id */)
+{
+    SPX_DBG_ASSERT(!m_expectAdapterStoppedTurn);
+    m_expectAdapterStoppedTurn = true;
+    m_expectAdapterStartedTurn = false;
+}
+
+void CSpxAudioStreamSession::AdapterStoppedTurn(ISpxRecoEngineAdapter* /* adapter */)
+{
+    SPX_DBG_ASSERT(m_expectAdapterStoppedTurn);
+    m_expectAdapterStoppedTurn = false;
+
+    // Since we're checking the SessionState, take a read-lock
+    ReadLock_Type readLock(m_combinedAdapterAndStateMutex);
+    if (IsState(SessionState::WaitForAdapterCompletedSetFormatStop))
+    {
+        // We are waiting for the adapter to confirm it got the SetFormat(nullptr), but we haven't sent the request yet... 
+        SPX_DBG_TRACE_VERBOSE("%s: Still WaitForAdapterCompletedSetFormatStop, calling ->SetFormat(nullptr) ...", __FUNCTION__);
+
+        SPX_DBG_ASSERT(readLock.owns_lock()); // Keep the lock to call InformAdapterSetFormatStopping()...
+        InformAdapterSetFormatStopping(SessionState::WaitForAdapterCompletedSetFormatStop);
+    }
+}
+
+void CSpxAudioStreamSession::AdapterDetectedSpeechStart(ISpxRecoEngineAdapter* adapter, uint64_t offset)
 {
     UNUSED(adapter);
     UNUSED(offset);
@@ -583,7 +374,7 @@ void CSpxAudioStreamSession::SpeechStartDetected(ISpxRecoEngineAdapter* adapter,
     FireSpeechStartDetectedEvent();
 }
 
-void CSpxAudioStreamSession::SpeechEndDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset)
+void CSpxAudioStreamSession::AdapterDetectedSpeechEnd(ISpxRecoEngineAdapter* adapter, uint64_t offset)
 {
     UNUSED(adapter);
     UNUSED(offset);
@@ -591,7 +382,7 @@ void CSpxAudioStreamSession::SpeechEndDetected(ISpxRecoEngineAdapter* adapter, u
     FireSpeechEndDetectedEvent();
 }
 
-void CSpxAudioStreamSession::SoundStartDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset)
+void CSpxAudioStreamSession::AdapterDetectedSoundStart(ISpxRecoEngineAdapter* adapter, uint64_t offset)
 {
     UNUSED(adapter);
     UNUSED(offset);
@@ -599,7 +390,7 @@ void CSpxAudioStreamSession::SoundStartDetected(ISpxRecoEngineAdapter* adapter, 
     // SPX_THROW_HR(SPXERR_NOT_IMPL);
 }
 
-void CSpxAudioStreamSession::SoundEndDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset)
+void CSpxAudioStreamSession::AdapterDetectedSoundEnd(ISpxRecoEngineAdapter* adapter, uint64_t offset)
 {
     UNUSED(adapter);
     UNUSED(offset);
@@ -628,31 +419,28 @@ std::shared_ptr<ISpxRecognitionEventArgs> CSpxAudioStreamSession::CreateRecognit
     return recoEvent;
 }
 
-void CSpxAudioStreamSession::IntermediateRecoResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result)
+void CSpxAudioStreamSession::FireAdapterResult_Intermediate(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result)
 {
     UNUSED(adapter);
     UNUSED(offset);
-    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::Idle), "ERROR! IntermediateRecoResult was called with SessionState==Idle");
-    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::StartingPump), "ERROR! IntermediateRecoResult was called with SessionState==StartingPump");
+    SPX_DBG_ASSERT(!IsState(SessionState::WaitForPumpSetFormatStart));
 
     FireResultEvent(GetSessionId(), result);
 }
 
-void CSpxAudioStreamSession::TranslationSynthesisResult(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxRecognitionResult> result)
+void CSpxAudioStreamSession::FireAdapterResult_TranslationSynthesis(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxRecognitionResult> result)
 {
     UNUSED(adapter);
-    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::Idle), "ERROR! TranslationSynthesisResult was called with SessionState==Idle");
-    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::StartingPump), "ERROR! TranslationSynthesisResult was called with SessionState==StartingPump");
+    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::WaitForPumpSetFormatStart));
 
     FireResultEvent(GetSessionId(), result);
 }
 
-void CSpxAudioStreamSession::FinalRecoResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result)
+void CSpxAudioStreamSession::FireAdapterResult_FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result)
 {
     UNUSED(adapter);
     UNUSED(offset);
-    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::Idle), "ERROR! FinalRecoResult was called with SessionState==Idle");
-    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::StartingPump), "ERROR! FinalRecoResult was called with SessionState==StartingPump");
+    SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::WaitForPumpSetFormatStart), "ERROR! FireAdapterResult_FinalResult was called with SessionState==WaitForPumpSetFormatStart");
 
     // Only try and process the result with the LU Adapter if we have one (we won't have one, if nobody every added an IntentTrigger)
     if (m_luAdapter != nullptr)
@@ -664,12 +452,6 @@ void CSpxAudioStreamSession::FinalRecoResult(ISpxRecoEngineAdapter* adapter, uin
     // has to be received via callbacks.
     // Waiting for Rob's change for direct LUIS integration, which introduces a state machine in usp_reco_engine.
     WaitForRecognition_Complete(result);
-}
-
-void CSpxAudioStreamSession::DoneProcessingAudio(ISpxRecoEngineAdapter* adapter)
-{
-    UNUSED(adapter);
-    DoneProcessingAudio(AdapterDoneProcessingAudio::Speech);
 }
 
 void CSpxAudioStreamSession::AdditionalMessage(ISpxRecoEngineAdapter* adapter, uint64_t offset, AdditionalMessagePayload_Type payload)
@@ -838,7 +620,7 @@ void CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused()
     // We need to do all this work on a background thread, because we can't guarantee it's safe
     // to spend any significant amount of time blocking this the KWS or Audio threads...
     std::shared_ptr<ISpxSession> keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
-    std::packaged_task<void()> task([=](){
+    std::packaged_task<void()> task([=]() mutable {
 
         SPX_DBG_TRACE_SCOPE("*** CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused kicked-off THREAD started ***", "*** CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused kicked-off THREAD stopped ***");
         auto keepAliveCopy = keepAlive;
@@ -848,18 +630,13 @@ void CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused()
         // then wait for done... 
         m_recoAsyncWaiting = true;
 
-        SPX_DBG_ASSERT(IsKind(RecognitionKind::KwsSingleShot) && IsState(SessionState::Paused));
+        SPX_DBG_ASSERT(IsKind(RecognitionKind::KwsSingleShot) && IsState(SessionState::HotSwapPaused));
         this->HotSwapAdaptersWhilePaused(RecognitionKind::KwsSingleShot);
-
-        // Calling HotSwapAdaptersWhilePaused() will instigate a call to this::DoneProcessingAudio(), 
-        // where we'll complete changing state to KwsSingleShot/ProcessingAudio
 
         this->WaitForKwsSingleShotRecognition();
     });
 
-    auto taskFuture = task.get_future();
-    std::thread taskThread(std::move(task));
-    taskThread.detach();
+    m_taskHelper.RunAsync(std::move(task));
 }
 
 void CSpxAudioStreamSession::WaitForKwsSingleShotRecognition()
@@ -877,14 +654,14 @@ void CSpxAudioStreamSession::WaitForKwsSingleShotRecognition()
     if (!m_recoAsyncResult) // Deal with the timeout condition...
     {
         SPX_DBG_TRACE_VERBOSE("KwsSingleShot Waiting for AdapterDone...");
-        m_cv.wait_for(lock, std::chrono::seconds(m_waitForDoneTimeout), [&] { return !this->IsState(SessionState::WaitingForAdapterDone); });
+        m_cv.wait_for(lock, std::chrono::seconds(m_waitForDoneTimeout), [&] { return !this->IsState(SessionState::WaitForAdapterCompletedSetFormatStop); });
         SPX_DBG_TRACE_VERBOSE("KwsSingleShot Waiting for AdapterDone... Done!!");
     }
 }
 
 void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, const std::wstring& keyword)
 {
-    SPX_DBG_ASSERT(IsState(SessionState::StartingPump));
+    SPX_DBG_ASSERT(IsState(SessionState::WaitForPumpSetFormatStart));
 
     // Tell everyone we're starting...
     if (startKind != RecognitionKind::Keyword)
@@ -913,7 +690,7 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, const std
 
 void CSpxAudioStreamSession::HotSwapAdaptersWhilePaused(RecognitionKind startKind, const std::wstring& keyword)
 {
-    SPX_DBG_ASSERT(IsKind(startKind) && IsState(SessionState::Paused));
+    SPX_DBG_ASSERT(IsKind(startKind) && IsState(SessionState::HotSwapPaused));
     SPX_DBG_ASSERT(m_audioProcessor != nullptr);
 
     // Lock the Audio Processor mutex, since we're switching which one we'll be using...
@@ -939,28 +716,35 @@ void CSpxAudioStreamSession::HotSwapAdaptersWhilePaused(RecognitionKind startKin
 
     // Inform the Audio Processor that we're starting...
     SPX_DBG_ASSERT(writeLock.owns_lock());
-    InformAdapterStartingProcessingAudio(waveformat.get());
+    InformAdapterSetFormatStarting(waveformat.get());
 
-    // The call to ProcessAudio(nullptr, 0) and SetFormat(nullptr) will instigate a call from that Adapter to this::DoneProcessingAudio(adapter) shortly...
+    // The call to ProcessAudio(nullptr, 0) and SetFormat(nullptr) will instigate a call from that Adapter to this::AdapterCompletedSetFormatStop(adapter) shortly...
 }
 
-void CSpxAudioStreamSession::InformAdapterStartingProcessingAudio(WAVEFORMATEX* format)
+void CSpxAudioStreamSession::InformAdapterSetFormatStarting(WAVEFORMATEX* format)
 {
     // NOTE: Callers will have already taken a reader or writer lock... Do NOT take a lock here ourselves!
     // ReadLock_Type readerLock(m_combinedAdapterAndStateMutex);
+
+    if (m_recoAdapter != nullptr)
+    {
+        m_recoAdapter->SetAdapterMode(!IsKind(RecognitionKind::Continuous));
+    }
 
     SPX_DBG_ASSERT(format != nullptr);
     m_audioProcessor->SetFormat(format);
 }
 
-void CSpxAudioStreamSession::InformAdapterWaitingForDone(SessionState comingFromState)
+void CSpxAudioStreamSession::InformAdapterSetFormatStopping(SessionState comingFromState)
 {
     // NOTE: Callers will have already taken a reader or writer lock... Do NOT take a lock here ourselves!
     // ReadLock_Type readerLock(m_combinedAdapterAndStateMutex);
 
-    // If we transitioned --> WaitingForAdapterDone state because this Session was trying to stop the pump...
+    // If we transitioned --> WaitForAdapterCompletedSetFormatStop state because this Session was trying to stop the pump...
     // We need to tell the audio processor that we've sent the last bit of audio we're planning on sending
-    SPX_DBG_ASSERT(comingFromState == SessionState::ProcessingAudio || comingFromState == SessionState::StoppingPump);
+    SPX_DBG_ASSERT(comingFromState == SessionState::ProcessingAudio ||
+                   comingFromState == SessionState::StoppingPump ||
+                   comingFromState == SessionState::WaitForAdapterCompletedSetFormatStop);
     if (comingFromState == SessionState::StoppingPump)
     {
         SPX_DBG_TRACE_VERBOSE("%s: ProcessingAudio - size=%d", __FUNCTION__, 0);
@@ -968,29 +752,32 @@ void CSpxAudioStreamSession::InformAdapterWaitingForDone(SessionState comingFrom
     }
 
     // Then we can finally tell it we're done, by sending a nullptr WAVEFORMAT
-    SPX_DBG_TRACE_VERBOSE("%s: SetFormat(nullptr)", __FUNCTION__);
-    m_audioProcessor->SetFormat(nullptr);
+    if (!m_expectAdapterStartedTurn && !m_expectAdapterStoppedTurn)
+    {
+        SPX_DBG_TRACE_VERBOSE("%s: SetFormat(nullptr)", __FUNCTION__);
+        m_audioProcessor->SetFormat(nullptr);
+    }
 }
 
-void CSpxAudioStreamSession::DoneProcessingAudio(AdapterDoneProcessingAudio doneAdapter)
+void CSpxAudioStreamSession::AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio doneAdapter)
 {
     std::shared_ptr<ISpxSession> keepAlive = SpxSharedPtrFromThis<ISpxSession>(this);
     std::packaged_task<void()> task([=]() mutable {
 
-        SPX_DBG_TRACE_SCOPE("*** CSpxAudioStreamSession::DoneProcessingAudio kicked-off THREAD started ***", "*** CSpxAudioStreamSession::DoneProcessingAudio kicked-off THREAD stopped ***");
+        SPX_DBG_TRACE_SCOPE("*** CSpxAudioStreamSession::AdapterCompletedSetFormatStop kicked-off THREAD started ***", "*** CSpxAudioStreamSession::AdapterCompletedSetFormatStop kicked-off THREAD stopped ***");
         auto keepAliveCopy = keepAlive;
 
         // Since we're checking the RecoKind and SessionState multiple times, take a read lock
         ReadLock_Type readLock(m_combinedAdapterAndStateMutex);
 
-        if (ChangeState(RecognitionKind::KwsSingleShot, SessionState::WaitingForAdapterDone, RecognitionKind::Keyword, SessionState::ProcessingAudio))
+        if (ChangeState(RecognitionKind::KwsSingleShot, SessionState::WaitForAdapterCompletedSetFormatStop, RecognitionKind::Keyword, SessionState::ProcessingAudio))
         {
             SPX_DBG_TRACE_VERBOSE("KwsSingleShot Waiting for done ... Done!! Switching back to Keyword/Processing");
             SPX_DBG_TRACE_VERBOSE("%s: Now Keyword/ProcessingAudio ...", __FUNCTION__);
 
             FireSessionStoppedEvent();
         }
-        else if (ChangeState(SessionState::Paused, SessionState::ProcessingAudio))
+        else if (ChangeState(SessionState::HotSwapPaused, SessionState::ProcessingAudio))
         {
             SPX_DBG_TRACE_VERBOSE("Previous Adapter is done processing audio ... resuming Processing with the new adapter...");
             SPX_DBG_TRACE_VERBOSE("%s: Now ProcessingAudio ...", __FUNCTION__);
@@ -1003,7 +790,7 @@ void CSpxAudioStreamSession::DoneProcessingAudio(AdapterDoneProcessingAudio done
             // TODO: RobCh: How should we get the audio from the kws and give it to other adapter? 
             // TODO: RobCh: Similarly, how should we  rewind the audio when the USP reco adatper finishes, and we want to restart kws?
         }
-        else if (ChangeState(SessionState::WaitingForAdapterDone, RecognitionKind::Idle, SessionState::Idle))
+        else if (ChangeState(SessionState::WaitForAdapterCompletedSetFormatStop, RecognitionKind::Idle, SessionState::Idle))
         {
             if (doneAdapter == AdapterDoneProcessingAudio::Speech)
             {
@@ -1011,10 +798,10 @@ void CSpxAudioStreamSession::DoneProcessingAudio(AdapterDoneProcessingAudio done
                 FireSessionStoppedEvent();
 
                 // Restart the keyword spotter if necessary...
-                if (!m_keyword.empty() && ChangeState(SessionState::Idle, RecognitionKind::Keyword, SessionState::StartingPump))
+                if (!m_keyword.empty() && ChangeState(SessionState::Idle, RecognitionKind::Keyword, SessionState::WaitForPumpSetFormatStart))
                 {
                     // Go ahead re-start the pump
-                    SPX_DBG_TRACE_VERBOSE("%s: Now StartingPump ...", __FUNCTION__);
+                    SPX_DBG_TRACE_VERBOSE("%s: Now WaitForPumpSetFormatStart ...", __FUNCTION__);
 
                     readLock.unlock(); // StartAudioPump() will take a write lock, so we need to clear our read lock
                     StartAudioPump(RecognitionKind::Keyword, m_keyword);
@@ -1027,9 +814,34 @@ void CSpxAudioStreamSession::DoneProcessingAudio(AdapterDoneProcessingAudio done
         }
     });
 
-    auto taskFuture = task.get_future();
-    std::thread taskThread(std::move(task));
-    taskThread.detach();
+    m_taskHelper.RunAsync(std::move(task));
+}
+
+void CSpxAudioStreamSession::AdapterRequestingAudioIdle(ISpxRecoEngineAdapter* /* adapter */)
+{
+    // Since we're checking the RecoKind and SessionState multiple times, take a read lock
+    ReadLock_Type readLock(m_combinedAdapterAndStateMutex);
+
+    if (IsState(SessionState::ProcessingAudio) && IsKind(RecognitionKind::SingleShot))
+    {
+        // The adapter is letting us know that it wants us to stop sending it audio data for this single shot utterance
+        SPX_DBG_TRACE_VERBOSE("%s: ->StopRecognizing(SingleShot) ...", __FUNCTION__);
+
+        readLock.unlock(); // StopRecognizing will take a lock, so we'll release ours
+        StopRecognizing(RecognitionKind::SingleShot);
+    }
+    else if (IsState(SessionState::ProcessingAudio) && IsKind(RecognitionKind::KwsSingleShot))
+    {
+        // The adapter is letting us know that it wants us to stop sending it audio data for this single shot utterance
+        SPX_DBG_TRACE_VERBOSE("%s: ->StopRecognizing(SingleShot) ...", __FUNCTION__);
+
+        readLock.unlock(); // StopRecognizing will take a lock, so we'll release ours
+        StopRecognizing(RecognitionKind::KwsSingleShot);
+    }
+    else
+    {
+        SPX_DBG_TRACE_WARNING("%s: Is this OK? recoKind/sessionState: %d/%d", __FUNCTION__, m_recoKind, m_sessionState);
+    }
 }
 
 bool CSpxAudioStreamSession::IsKind(RecognitionKind kind)

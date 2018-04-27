@@ -53,10 +53,10 @@ protected:
     virtual CSpxAsyncOp<void> StartRecognitionAsync(RecognitionKind startKind, std::wstring keyword = L"");
     virtual CSpxAsyncOp<void> StopRecognitionAsync(RecognitionKind stopKind);
 
-    virtual void StartRecognizing(RecognitionKind startKind, std::wstring keyword = L"");
-    virtual void StopRecognizing(RecognitionKind stopKind);
+    virtual void StartRecognizing(RecognitionKind startKind, std::wstring keyword = L"") = 0;
+    virtual void StopRecognizing(RecognitionKind stopKind) = 0;
 
-    virtual std::shared_ptr<ISpxRecognitionResult> WaitForRecognition();
+    virtual std::shared_ptr<ISpxRecognitionResult> WaitForRecognition() = 0;
     virtual void WaitForRecognition_Complete(std::shared_ptr<ISpxRecognitionResult> result);
 
     virtual void FireSessionStartedEvent();
@@ -71,7 +71,7 @@ protected:
     std::mutex m_mutex;
     std::condition_variable m_cv;
 
-    const int m_recoAsyncTimeout = 5;
+    const int m_recoAsyncTimeout = 10;
     const int m_waitForDoneTimeout = 20;
 
     bool m_recoAsyncWaiting;

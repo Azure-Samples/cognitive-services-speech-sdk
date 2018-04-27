@@ -44,12 +44,12 @@ public:
         WriteLock_Type writeLock(m_mutex);
 
         T* ptr = t.get();
-        SPX_DBG_TRACE_VERBOSE_IF(1, "%s ptr=0x%8x", __FUNCTION__, ptr);
+        SPX_DBG_TRACE_VERBOSE_IF(0, "%s ptr=0x%8x", __FUNCTION__, ptr);
 
         if (ptr != nullptr)
         {
             handle = reinterpret_cast<Handle>(ptr);
-            SPX_DBG_TRACE_VERBOSE_IF(1, "%s handle=0x%8x, ptr=0x%8x", __FUNCTION__, handle, ptr);
+            SPX_DBG_TRACE_VERBOSE_IF(0, "%s handle=0x%8x, ptr=0x%8x", __FUNCTION__, handle, ptr);
 
             m_handleMap.emplace(handle, t);
             m_ptrMap.emplace(ptr, handle);
@@ -88,7 +88,7 @@ public:
 
     void StopTracking(Handle handle)
     {
-        SPX_DBG_TRACE_VERBOSE_IF(1, "%s handle=0x%8x", __FUNCTION__, handle);
+        SPX_DBG_TRACE_VERBOSE_IF(0, "%s handle=0x%8x", __FUNCTION__, handle);
         if (IsTracked(handle))
         {
             WriteLock_Type writeLock(m_mutex);
@@ -98,7 +98,7 @@ public:
                 auto sharedPtr = iterHandleMap->second;
                 auto iterPtrMap = m_ptrMap.find(sharedPtr.get());
 
-                SPX_DBG_TRACE_VERBOSE_IF(1, "%s handle=0x%8x, ptr=0x%8x", __FUNCTION__, handle, sharedPtr.get());
+                SPX_DBG_TRACE_VERBOSE_IF(0, "%s handle=0x%8x, ptr=0x%8x", __FUNCTION__, handle, sharedPtr.get());
 
                 m_handleMap.erase(iterHandleMap);
                 m_ptrMap.erase(iterPtrMap);
@@ -117,7 +117,7 @@ public:
 
     void StopTracking(T* ptr)
     {
-        SPX_DBG_TRACE_VERBOSE_IF(1, "%s ptr=0x%8x", __FUNCTION__, ptr);
+        SPX_DBG_TRACE_VERBOSE_IF(0, "%s ptr=0x%8x", __FUNCTION__, ptr);
         if (IsTracked(ptr))
         {
             WriteLock_Type writeLock(m_mutex);
@@ -128,7 +128,7 @@ public:
                 auto iterHandleMap = m_handleMap.find(handle);
                 auto sharedPtr = iterHandleMap->second;
 
-                SPX_DBG_TRACE_VERBOSE_IF(1, "%s handle=0x%8x, ptr=0x%8x", __FUNCTION__, handle, sharedPtr.get());
+                SPX_DBG_TRACE_VERBOSE_IF(0, "%s handle=0x%8x, ptr=0x%8x", __FUNCTION__, handle, sharedPtr.get());
 
                 m_ptrMap.erase(iterPtrMap);
                 m_handleMap.erase(iterHandleMap);

@@ -120,11 +120,33 @@ protected:
         m_hasyncStartKeyword(SPXHANDLE_INVALID),
         m_hasyncStopKeyword(SPXHANDLE_INVALID)
     {
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     };
 
     virtual ~AsyncRecognizer()
     {
-        SPX_DBG_TRACE_SCOPE("~AsyncRecognizer start", "~AsyncRecognizerEnd");
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+        TermRecognizer();
+    };
+
+    virtual void TermRecognizer() override
+    {
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+        // Ask the base to term first, thus avoiding deadlocks in up/down vs down/up lock order
+        Recognizer::TermRecognizer();
+
+        // Disconnect the event signals in reverse construction order
+        Canceled.DisconnectAll();
+        NoMatch.DisconnectAll();
+        FinalResult.DisconnectAll();
+        IntermediateResult.DisconnectAll();
+        SpeechEndDetected.DisconnectAll();
+        SpeechStartDetected.DisconnectAll();
+        SessionStopped.DisconnectAll();
+        SessionStarted.DisconnectAll();
+
+        // Close the async handles we have open for Recognize, StartContinuous, and StopContinuous
         for (auto handle : { &m_hasyncRecognize, &m_hasyncStartContinuous, &m_hasyncStopContinuous })
         {
             if (*handle != SPXHANDLE_INVALID && ::Recognizer_AsyncHandle_IsValid(*handle))
@@ -133,7 +155,7 @@ protected:
                 *handle = SPXHANDLE_INVALID;
             }
         }
-    };
+    }
 
     std::future<std::shared_ptr<RecoResult>> RecognizeAsyncInternal()
     {
@@ -227,41 +249,53 @@ protected:
 
     virtual void RecoEventConnectionsChanged(const EventSignal<const RecoEventArgs&>& recoEvent)
     {
-        if (&recoEvent == &IntermediateResult)
+        if (m_hreco != SPXHANDLE_INVALID)
         {
-            Recognizer_IntermediateResult_SetEventCallback(m_hreco, IntermediateResult.IsConnected() ? AsyncRecognizer::FireEvent_IntermediateResult: nullptr, this);
-        }
-        else if (&recoEvent == &FinalResult)
-        {
-            Recognizer_FinalResult_SetEventCallback(m_hreco, FinalResult.IsConnected() ? AsyncRecognizer::FireEvent_FinalResult: nullptr, this);
-        }
-        else if (&recoEvent == &NoMatch)
-        {
-            Recognizer_NoMatch_SetEventCallback(m_hreco, NoMatch.IsConnected() ? AsyncRecognizer::FireEvent_NoMatch : nullptr, this);
-        }
-        else if (&recoEvent == &Canceled)
-        {
-            Recognizer_Canceled_SetEventCallback(m_hreco, Canceled.IsConnected() ? AsyncRecognizer::FireEvent_Canceled : nullptr, this);
+            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8x", __FUNCTION__, m_hreco);
+            SPX_DBG_TRACE_VERBOSE_IF(!::Recognizer_Handle_IsValid(m_hreco), "%s: m_hreco is INVALID!!!", __FUNCTION__);
+
+            if (&recoEvent == &IntermediateResult)
+            {
+                Recognizer_IntermediateResult_SetEventCallback(m_hreco, IntermediateResult.IsConnected() ? AsyncRecognizer::FireEvent_IntermediateResult: nullptr, this);
+            }
+            else if (&recoEvent == &FinalResult)
+            {
+                Recognizer_FinalResult_SetEventCallback(m_hreco, FinalResult.IsConnected() ? AsyncRecognizer::FireEvent_FinalResult: nullptr, this);
+            }
+            else if (&recoEvent == &NoMatch)
+            {
+                Recognizer_NoMatch_SetEventCallback(m_hreco, NoMatch.IsConnected() ? AsyncRecognizer::FireEvent_NoMatch : nullptr, this);
+            }
+            else if (&recoEvent == &Canceled)
+            {
+                Recognizer_Canceled_SetEventCallback(m_hreco, Canceled.IsConnected() ? AsyncRecognizer::FireEvent_Canceled : nullptr, this);
+            }
         }
     }
 
     virtual void SessionEventConnectionsChanged(const EventSignal<const SessionEventArgs&>& sessionEvent)
     {
-        if (&sessionEvent == &SessionStarted)
+        if (m_hreco != SPXHANDLE_INVALID)
         {
-            Recognizer_SessionStarted_SetEventCallback(m_hreco, SessionStarted.IsConnected() ? AsyncRecognizer::FireEvent_SessionStarted: nullptr, this);
-        }
-        else if (&sessionEvent == &SessionStopped)
-        {
-            Recognizer_SessionStopped_SetEventCallback(m_hreco, SessionStopped.IsConnected() ? AsyncRecognizer::FireEvent_SessionStopped : nullptr, this);
-        }
-        else if (&sessionEvent == &SpeechStartDetected)
-        {
-            Recognizer_SpeechStartDetected_SetEventCallback(m_hreco, SpeechStartDetected.IsConnected() ? AsyncRecognizer::FireEvent_SpeechStartDetected: nullptr, this);
-        }
-        else if (&sessionEvent == &SpeechEndDetected)
-        {
-            Recognizer_SpeechEndDetected_SetEventCallback(m_hreco, SpeechEndDetected.IsConnected() ? AsyncRecognizer::FireEvent_SpeechEndDetected: nullptr, this);
+            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8x", __FUNCTION__, m_hreco);
+            SPX_DBG_TRACE_VERBOSE_IF(!::Recognizer_Handle_IsValid(m_hreco), "%s: m_hreco is INVALID!!!", __FUNCTION__);
+
+            if (&sessionEvent == &SessionStarted)
+            {
+                Recognizer_SessionStarted_SetEventCallback(m_hreco, SessionStarted.IsConnected() ? AsyncRecognizer::FireEvent_SessionStarted: nullptr, this);
+            }
+            else if (&sessionEvent == &SessionStopped)
+            {
+                Recognizer_SessionStopped_SetEventCallback(m_hreco, SessionStopped.IsConnected() ? AsyncRecognizer::FireEvent_SessionStopped : nullptr, this);
+            }
+            else if (&sessionEvent == &SpeechStartDetected)
+            {
+                Recognizer_SpeechStartDetected_SetEventCallback(m_hreco, SpeechStartDetected.IsConnected() ? AsyncRecognizer::FireEvent_SpeechStartDetected: nullptr, this);
+            }
+            else if (&sessionEvent == &SpeechEndDetected)
+            {
+                Recognizer_SpeechEndDetected_SetEventCallback(m_hreco, SpeechEndDetected.IsConnected() ? AsyncRecognizer::FireEvent_SpeechEndDetected: nullptr, this);
+            }
         }
     }
 

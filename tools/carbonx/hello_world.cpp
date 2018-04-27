@@ -15,11 +15,10 @@
 constexpr auto g_speechSubscriptionKey = LR"(1f30c291f2474d39acfdf1d3bdf847c3)";
 constexpr auto g_customSpeechSubscriptionKey = LR"(82f1f909b993459d88384a53891f98d3)";
 constexpr auto g_customSpeechModelId = LR"(eb29f6e4-e97b-4157-8d3c-9d64a7b21a58)";
-constexpr auto g_regionId = LR"(west-us)";
 
 void CarbonTestConsole::Sample_HelloWorld()
 {
-    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey, g_regionId);
+    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey, m_regionId);
     auto recognizer = factory->CreateSpeechRecognizer();
 
     ConsoleWriteLine(L"Say something...");
@@ -30,7 +29,7 @@ void CarbonTestConsole::Sample_HelloWorld()
 
 void CarbonTestConsole::Sample_HelloWorld_WithEvents()
 {
-    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey, g_regionId);
+    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey, m_regionId);
     auto recognizer = factory->CreateSpeechRecognizer();
 
     recognizer->IntermediateResult += [&](const SpeechRecognitionEventArgs& e) {
@@ -45,7 +44,7 @@ void CarbonTestConsole::Sample_HelloWorld_WithEvents()
 
 void CarbonTestConsole::Sample_HelloWorld_PickEngine(const wchar_t* pszEngine) // L"Usp", L"Unidec", or L"Mock"
 {
-    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey, g_regionId);
+    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey, m_regionId);
     auto recognizer = factory->CreateSpeechRecognizer();
     auto session = Session::FromRecognizer(recognizer);
 
@@ -124,7 +123,7 @@ void CarbonTestConsole::Sample_HelloWorld_Intent(const wchar_t* hostName, const 
 
 void CarbonTestConsole::Sample_HelloWorld_Subscription()
 {
-    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, m_region);
+    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
     auto recognizer = factory->CreateSpeechRecognizer();
 
     ConsoleWriteLine(L"Say something...");
@@ -135,7 +134,7 @@ void CarbonTestConsole::Sample_HelloWorld_Subscription()
 
 void CarbonTestConsole::Sample_HelloWorld_Subscription_With_CRIS()
 {
-    auto factory = SpeechFactory::FromSubscription(g_customSpeechSubscriptionKey, g_regionId);
+    auto factory = SpeechFactory::FromSubscription(g_customSpeechSubscriptionKey, m_regionId);
     auto recognizer = factory->CreateSpeechRecognizer();
 
     recognizer->SetDeploymentId(g_customSpeechModelId);
@@ -148,7 +147,7 @@ void CarbonTestConsole::Sample_HelloWorld_Subscription_With_CRIS()
 
 void CarbonTestConsole::Sample_HelloWorld_Kws()
 {
-    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey, g_regionId);
+    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey, m_regionId);
     auto recognizer = factory->CreateSpeechRecognizer();
 
 
@@ -168,12 +167,128 @@ void CarbonTestConsole::Sample_HelloWorld_Kws()
 
 void CarbonTestConsole::Sample_HelloWorld_Language(const wchar_t* language)
 {
-    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey, g_regionId);
+    auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey, m_regionId);
     auto recognizer = factory->CreateSpeechRecognizer(language);
 
     ConsoleWriteLine(L"Say something...");
     auto result = recognizer->RecognizeAsync().get();
 
     ConsoleWriteLine(L"You said:\n\n    '%ls'", result->Text.c_str());
+}
+
+int CarbonTestConsole::Sample_Do_Speech(bool continuous)
+{
+    // auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey);
+    auto factory = !m_endpointUri.empty()
+        ? SpeechFactory::FromEndpoint(m_endpointUri, m_subscriptionKey)
+        : SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
+
+    auto recognizer = factory->CreateSpeechRecognizer();
+
+    recognizer->IntermediateResult += [](const SpeechRecognitionEventArgs& e) {
+        printf("INTERMEDIATE: %ls ...\n", e.Result.Text.c_str());
+    };
+
+    recognizer->FinalResult += [](const SpeechRecognitionEventArgs& e) {
+        printf("FINAL RESULT: '%ls'\n", e.Result.Text.c_str());
+    };
+
+    if (continuous)
+    {
+        recognizer->StartContinuousRecognitionAsync();
+        printf("Say something... (press ENTER to quit) \n");
+        getchar();
+        recognizer->StopContinuousRecognitionAsync();
+    }
+    else
+    {
+        printf("Say something... \n");
+        recognizer->RecognizeAsync().get();
+    }
+
+    return 0;
+}
+
+int CarbonTestConsole::Sample_Do_Intent(bool continuous, const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId)
+{
+    // auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey); 
+    auto factory = !m_endpointUri.empty()
+        ? SpeechFactory::FromEndpoint(m_endpointUri, m_subscriptionKey)
+        : SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
+    auto recognizer = factory->CreateIntentRecognizer();
+
+    recognizer->IntermediateResult += [](const IntentRecognitionEventArgs& e) {
+        printf("INTERMEDIATE: %ls ...\n", e.Result.Text.c_str());
+    };
+
+    recognizer->FinalResult += [](const IntentRecognitionEventArgs& e) {
+        printf("FINAL RESULT: '%ls'\n", e.Result.Text.c_str());
+        printf("   INTENT ID: '%ls'\n", e.Result.IntentId.c_str());
+        printf("   LUIS JSON: '%ls'\n", e.Result.Properties[ResultProperty::LanguageUnderstandingJson].GetString().c_str());
+    };
+
+    auto model = LanguageUnderstandingModel::From(hostName, subscriptionKey, appId);
+    recognizer->AddIntent(L"all intents", IntentTrigger::From(model, L"TV.ChangeChannel"));
+
+    if (continuous)
+    {
+        recognizer->StartContinuousRecognitionAsync();
+        printf("Say something... (press ENTER to quit) \n");
+        getchar();
+        recognizer->StopContinuousRecognitionAsync();
+    }
+    else
+    {
+        printf("Say something... \n");
+        recognizer->RecognizeAsync().get();
+    }
+
+    return 0;
+}
+
+int CarbonTestConsole::Sample_Do_Intent(bool continuous)
+{
+    constexpr auto hostName = LR"(westus2.api.cognitive.microsoft.com)";
+    constexpr auto subscriptionKey = LR"(ee52996d8f814c0aa77f7a415f81bd4c)";
+    constexpr auto appId = LR"(6ad2c77d180b45a288aa8c442538c090)";
+    // constexpr auto hostName = LR"(westus.api.cognitive.microsoft.com)";
+    // constexpr auto subscriptionKey = LR"(0415470b4d0d4ed7b736a7ccac71fa5d)";
+    // constexpr auto appId = LR"(52d44b1039734b78b5b54b2da0eaa6f5)";
+    return Sample_Do_Intent(continuous, hostName, subscriptionKey, appId);
+}
+
+int CarbonTestConsole::Sample_Do_Intent_Kws(const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId)
+{
+    // auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey);
+    auto factory = !m_endpointUri.empty()
+        ? SpeechFactory::FromEndpoint(m_endpointUri, m_subscriptionKey)
+        : SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
+    auto recognizer = factory->CreateIntentRecognizer();
+
+    recognizer->IntermediateResult += [](const IntentRecognitionEventArgs& e) {
+        printf("INTERMEDIATE: %ls ...\n", e.Result.Text.c_str());
+    };
+
+    recognizer->FinalResult += [](const IntentRecognitionEventArgs& e) {
+        printf("FINAL RESULT: '%ls'\n", e.Result.Text.c_str());
+    };
+
+    auto model = LanguageUnderstandingModel::From(hostName, subscriptionKey, appId);
+    recognizer->AddIntent(L"all intents", IntentTrigger::From(model, L"TV.ChangeChannel"));
+
+    recognizer->StartKeywordRecognitionAsync(L"Hey Cortana");
+
+    printf("Say 'Hey Cortana ... something' ... (press ENTER to quit) \n");
+    getchar();
+
+    return 0;
+}
+
+int CarbonTestConsole::Sample_Do_Intent_Kws()
+{
+    constexpr auto hostName = LR"(westus.api.cognitive.microsoft.com)";
+    constexpr auto subscriptionKey = LR"(0415470b4d0d4ed7b736a7ccac71fa5d)";
+    constexpr auto appId = LR"(52d44b1039734b78b5b54b2da0eaa6f5)";
+    return Sample_Do_Intent_Kws(hostName, subscriptionKey, appId);
 }
 

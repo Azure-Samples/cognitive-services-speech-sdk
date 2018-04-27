@@ -24,7 +24,7 @@ public:
     explicit SpeechRecognitionResult(SPXRESULTHANDLE hresult) :
         RecognitionResult(hresult)
     {
-        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%S; reason=0x%x; text=%S", __FUNCTION__, this, Handle, ResultId.c_str(), Reason, Text.c_str());
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%ls; reason=0x%x; text=%ls", __FUNCTION__, this, Handle, ResultId.c_str(), Reason, Text.c_str());
     }
 
     virtual ~SpeechRecognitionResult()

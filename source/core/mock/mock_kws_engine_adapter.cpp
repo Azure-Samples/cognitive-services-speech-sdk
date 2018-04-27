@@ -98,7 +98,7 @@ void CSpxMockKwsEngineAdapter::TermFormat()
 void CSpxMockKwsEngineAdapter::End()
 {
     SPX_DBG_ASSERT(GetSite());
-    GetSite()->DoneProcessingAudio(this);
+    GetSite()->AdapterCompletedSetFormatStop(this);
 }
 
 void CSpxMockKwsEngineAdapter::FireKeywordDetected()

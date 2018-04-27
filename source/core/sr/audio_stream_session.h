@@ -9,6 +9,7 @@
 #include "spxcore_common.h"
 #include "interface_helpers.h"
 #include "named_properties_impl.h"
+#include "packaged_task_helpers.h"
 #include "service_helpers.h"
 #include "session.h"
 
@@ -96,23 +97,29 @@ private:
 
     // --- ISpxKwsEngineAdapterSite
     void KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset) override;
-    void DoneProcessingAudio(ISpxKwsEngineAdapter* adapter) override;
+    void AdapterCompletedSetFormatStop(ISpxKwsEngineAdapter* /* adapter */) override { AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio::Keyword); }
 
     // --- ISpxRecoEngineAdapterSite
     std::list<std::string> GetListenForList() override;
     void GetIntentInfo(std::string& provider, std::string& id, std::string& key) override;
 
-    void SpeechStartDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
-    void SpeechEndDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
+    void AdapterStartingTurn(ISpxRecoEngineAdapter* adapter) override;
+    void AdapterStartedTurn(ISpxRecoEngineAdapter* adapter, const std::string& id) override;
+    void AdapterStoppedTurn(ISpxRecoEngineAdapter* adapter) override;
 
-    void SoundStartDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
-    void SoundEndDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
+    void AdapterDetectedSpeechStart(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
+    void AdapterDetectedSpeechEnd(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
 
-    void IntermediateRecoResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
-    void FinalRecoResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
-    void TranslationSynthesisResult(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxRecognitionResult> result) override;
+    void AdapterDetectedSoundStart(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
+    void AdapterDetectedSoundEnd(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
 
-    void DoneProcessingAudio(ISpxRecoEngineAdapter* adapter) override;
+    void FireAdapterResult_Intermediate(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
+    void FireAdapterResult_FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
+    void FireAdapterResult_TranslationSynthesis(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxRecognitionResult> result) override;
+
+    void AdapterCompletedSetFormatStop(ISpxRecoEngineAdapter* /* adapter */) override { AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio::Speech); }
+
+    void AdapterRequestingAudioIdle(ISpxRecoEngineAdapter* adapter) override;
 
     void AdditionalMessage(ISpxRecoEngineAdapter* adapter, uint64_t offset, AdditionalMessagePayload_Type payload) override;
 
@@ -152,13 +159,20 @@ private:
     void StartAudioPump(RecognitionKind startKind, const std::wstring& keyword);
     void HotSwapAdaptersWhilePaused(RecognitionKind startKind, const std::wstring& keyword = L"");
 
-    enum SessionState { Idle, StartingPump, ProcessingAudio, Paused, StoppingPump, WaitingForAdapterDone };
+    enum SessionState {
+        Idle = 0,
+        WaitForPumpSetFormatStart = 1,
+        ProcessingAudio = 2,
+        HotSwapPaused = 3,
+        StoppingPump = 4,
+        WaitForAdapterCompletedSetFormatStop = 5
+    };
 
-    void InformAdapterStartingProcessingAudio(WAVEFORMATEX* format);
-    void InformAdapterWaitingForDone(SessionState comingFromState);
+    void InformAdapterSetFormatStarting(WAVEFORMATEX* format);
+    void InformAdapterSetFormatStopping(SessionState comingFromState);
 
     enum AdapterDoneProcessingAudio { Keyword, Speech };
-    void DoneProcessingAudio(AdapterDoneProcessingAudio doneAdapter);
+    void AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio doneAdapter);
 
     bool IsKind(RecognitionKind kind);
     bool IsState(SessionState state);
@@ -188,6 +202,8 @@ private:
     using ReadLock_Type = std::unique_lock<std::mutex>;
     #endif
 
+    CSpxPackagedTaskHelper m_taskHelper;
+
     //  To orchestrate the conversion of "Audio Data" into "Results" and "Events", we'll use utilize
     //  one "Audio Pump" and multiple "Adapters"
 
@@ -206,6 +222,8 @@ private:
     ReadWriteMutex_Type m_stateMutex;
     RecognitionKind m_recoKind;
     SessionState m_sessionState;
+    bool m_expectAdapterStartedTurn;
+    bool m_expectAdapterStoppedTurn;
 
     //  When we're in the SessionState::ProcessingAudio, we'll relay "Audio Data" to from the Pump
     //  to exactly one (and only one) of the engine adapters via it's ISpxAudioProcessor interface

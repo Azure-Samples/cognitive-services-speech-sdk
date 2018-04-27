@@ -180,6 +180,13 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
             pstrNextArg = &pconsoleArgs->m_strContinuousRecognitionSeconds;
             fNextArgRequired = false;
         }
+        else if (PAL::wcsnicmp(pszArg, L"--times", wcslen(L"--times")) == 0)
+        {
+            fShowOptions = fNextArgRequired;
+            pconsoleArgs->m_runHowManyTimes = 1;
+            pstrNextArg = &pconsoleArgs->m_strHowManyTimes;
+            fNextArgRequired = true;
+        }
         else if (PAL::wcsnicmp(pszArg, L"--sample", wcslen(L"--sample")) == 0)
         {
             fShowOptions = pconsoleArgs->m_strRunSampleName.length() > 0 || fNextArgRequired;
@@ -244,7 +251,7 @@ bool CarbonTestConsole::ValidateConsoleArgs(ConsoleArgs* pconsoleArgs)
         if (!pconsoleArgs->m_strMockMicrophoneRealTimePercentage.empty())
         {
             pconsoleArgs->m_mockMicrophoneRealTimePercentage = (int16_t)atoi(PAL::ToString(pconsoleArgs->m_strMockMicrophoneRealTimePercentage).c_str());
-            fValid = pconsoleArgs->m_mockMicrophoneRealTimePercentage >= 0 && pconsoleArgs->m_mockMicrophoneRealTimePercentage <= 200;
+            fValid = pconsoleArgs->m_mockMicrophoneRealTimePercentage >= 0 && pconsoleArgs->m_mockMicrophoneRealTimePercentage <= 400;
         }
     }
     else if (PAL::waccess(pconsoleArgs->m_audioInput.c_str(), 0) != 0)
@@ -271,6 +278,11 @@ bool CarbonTestConsole::ValidateConsoleArgs(ConsoleArgs* pconsoleArgs)
         pconsoleArgs->m_fRecognizeAsync = !pconsoleArgs->m_fCommandSystem && !pconsoleArgs->m_fInteractivePrompt;
     }
 
+    if (!pconsoleArgs->m_strHowManyTimes.empty())
+    {
+        pconsoleArgs->m_runHowManyTimes = (int16_t)atoi(PAL::ToString(pconsoleArgs->m_strHowManyTimes).c_str());
+    }
+
     return fValid;
 }
 
@@ -280,14 +292,24 @@ void CarbonTestConsole::ProcessConsoleArgs(ConsoleArgs* pconsoleArgs)
 
     if (pconsoleArgs->m_strRunSampleName.length() > 0)
     {
-        RunSample(pconsoleArgs->m_strRunSampleName);
+        auto count = pconsoleArgs->m_runHowManyTimes;
+        while (count-- > 0)
+        {
+            RunSample(pconsoleArgs->m_strRunSampleName);
+            ConsoleWrite(count > 0 ? L"\n" : L"");
+        }
     }
 
     EnsureInitCarbon(pconsoleArgs);
 
     if (pconsoleArgs->m_fRecognizeAsync)
     {
-        RecognizeAsync();
+        auto count = pconsoleArgs->m_runHowManyTimes;
+        while (count-- > 0)
+        {
+            RecognizeAsync();
+            ConsoleWrite(count > 0 ? L"\n" : L"");
+        }
     }
 
     if (pconsoleArgs->m_fContinuousRecognition)
@@ -956,7 +978,7 @@ void CarbonTestConsole::Factory_CreateSpeechRecognizer(const wchar_t* psz)
 
     auto factory = !m_endpointUri.empty()
         ? SpeechFactory::FromEndpoint(m_endpointUri, m_subscriptionKey)
-        : SpeechFactory::FromSubscription(m_subscriptionKey, m_region);
+        : SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
 
     m_speechRecognizer = *psz == L'\0'
         ? factory->CreateSpeechRecognizer() 
@@ -1357,6 +1379,8 @@ std::wstring CarbonTestConsole::ToString(const TranslationSynthesisResultEventAr
 
 void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
 {
+    m_regionId = LR"(west-us)";
+
     if (pconsoleArgs->m_useMockMicrophone)
     {
         SpxSetMockParameterBool(LR"(CARBON-INTERNAL-MOCK-Microphone)", true);
@@ -1364,6 +1388,7 @@ void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
         if (!pconsoleArgs->m_mockWavFileName.empty())
         {
             SpxSetMockParameterString(LR"(CARBON-INTERNAL-MOCK-WavFileAudio)", pconsoleArgs->m_mockWavFileName.c_str());
+            SpxSetMockParameterBool(LR"(CARBON-INTERNAL-MOCK-ContinuousAudio)", true);
         }
     }
 
@@ -1428,7 +1453,7 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
 {
     auto factory = !m_endpointUri.empty()
         ? SpeechFactory::FromEndpoint(m_endpointUri, m_subscriptionKey)
-        : SpeechFactory::FromSubscription(m_subscriptionKey, m_region);
+        : SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
 
     if (recognizerType == PAL::GetTypeName<SpeechRecognizer>())
     {
@@ -1593,6 +1618,31 @@ void CarbonTestConsole::RunSample(const std::wstring& strSampleName)
     {
         ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
         Sample_HelloWorld_Intent();
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"Sample_Do_Speech") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        Sample_Do_Speech(false);
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"Sample_Do_Speech_continuous") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        Sample_Do_Speech(true);
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"Sample_Do_Intent") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        Sample_Do_Intent(false);
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"Sample_Do_Intent_continuous") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        Sample_Do_Intent(true);
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"Sample_Do_Intent_Kws") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        Sample_Do_Intent_Kws();
     }
     else if (PAL::wcsicmp(strSampleName.c_str(), L"helloworld subscription") == 0)
     {

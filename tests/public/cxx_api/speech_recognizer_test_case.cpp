@@ -121,8 +121,9 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             callbackCounts[Callbacks::speech_start_detected] = 0;
             callbackCounts[Callbacks::speech_end_detected] = 0;
 
-            // We're going to loop thru 3 times... The first 3 we'll use mocks. The last time we'll use the USP
-            const int numLoops = 3;
+            // We're going to loop thru 11 times... The first 10, we'll use mocks. The last time we'll use the USP
+            // NOTE: Please keep this at 11... It tests various "race"/"speed" configurations of the core system... 
+            const int numLoops = 11;
             for (int i = 0; i < numLoops; i++)
             {
                 auto useMockUsp = i + 1 < numLoops;
@@ -216,10 +217,11 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         REQUIRE(result->Reason == Reason::Canceled);
         REQUIRE(!result->ErrorDetails.empty());
 
+        // NOTE: I think we don't need this now ... 
         // TODO: there's a data race in the audio_pump thread when it tries to
         // pISpxAudioProcessor->SetFormat(nullptr); after exiting the loop.
         // Comment out the next line to see for yourself (repros on Linux build machines).
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        // std::this_thread::sleep_for(std::chrono::milliseconds(300));
     }
 }
 

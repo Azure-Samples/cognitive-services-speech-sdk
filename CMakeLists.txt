@@ -95,6 +95,7 @@ set(USP "${CARBON_CORE}/usp")
 set(MOCK "${CARBON_CORE}/mock")
 if(CMAKE_CL_64)
     set(UNIDEC "${CARBON_CORE}/unidec")
+    set(KWS "${CARBON_CORE}/kws")
 endif()
 
 set(TESTS "${CARBON_ROOT}/tests")
@@ -125,6 +126,7 @@ add_subdirectory(${LIBCARBON})
 
 if(CMAKE_CL_64)
     add_subdirectory(${UNIDEC})
+    add_subdirectory(${KWS})
 endif()
 
 add_subdirectory(${CARBONX})

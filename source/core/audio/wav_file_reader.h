@@ -75,7 +75,7 @@ private:
     bool m_iterativeAudioLoop = false;            // Iteratively loop thru the audio data from the .WAV file; 3000 byte audio file calling Read, repeatedly, will return 
                                                   // 2000 bytes, then 1000 bytes, then 0 bytes, then 2000 bytes, then 1000 bytes, then 0 bytes ... over and over again
 
-    uint8_t m_simulateRealtimePercentage = 0;     // 0 == as fast as possible; 100 == real time. E.g. If .WAV file is 12 seconds long, it will take 12 seconds to read all 
+    uint8_t m_simulateRealtimePercentage = 1;     // 0 == as fast as possible; 100 == real time. E.g. If .WAV file is 12 seconds long, it will take 12 seconds to read all 
                                                   // the data when percentage==100; it'll take 1.2 seconds if set to 10; it'll go as fast as possible at 0; and it'll
                                                   // take 24 seconds if set to 200.
 

@@ -151,11 +151,11 @@ void CSpxLuisDirectEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionR
         {
             // Extract the intent from the JSON payload
             auto intentName = ExtractIntent(json);
-            SPX_DBG_TRACE_VERBOSE("LUIS intent == '%S'", intentName.c_str());
+            SPX_DBG_TRACE_VERBOSE("LUIS intent == '%ls'", intentName.c_str());
 
             // Map the LUIS intent name in that payload to the specified "IntentId" specified when the devleoper-user called AddIntent("IntentId", ...)
             auto intentId = IntentIdFromIntentName(intentName);
-            SPX_DBG_TRACE_VERBOSE("IntentRecognitionResult::IntentId == '%S'", intentId.c_str());
+            SPX_DBG_TRACE_VERBOSE("IntentRecognitionResult::IntentId == '%ls'", intentId.c_str());
 
             // If we have a valid IntentId...
             bool validIntentResult = !intentId.empty() || (m_emptyIntentNameOk && !json.empty());

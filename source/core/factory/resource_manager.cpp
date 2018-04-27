@@ -40,6 +40,7 @@ CSpxResourceManager::CSpxResourceManager()
 #else
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-mock"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-pmakws"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-kws"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-unidec"));
 #endif

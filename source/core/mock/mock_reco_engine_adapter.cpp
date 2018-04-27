@@ -43,6 +43,11 @@ void CSpxMockRecoEngineAdapter::Term()
     SPX_DBG_TRACE_FUNCTION();
 }
 
+void CSpxMockRecoEngineAdapter::SetAdapterMode(bool singleShot)
+{
+    m_singleShot = singleShot;
+}
+
 void CSpxMockRecoEngineAdapter::SetFormat(WAVEFORMATEX* pformat)
 {
     SPX_DBG_TRACE_VERBOSE_IF(pformat == nullptr, "%s - pformat == nullptr", __FUNCTION__);
@@ -118,7 +123,7 @@ void CSpxMockRecoEngineAdapter::TermFormat()
 void CSpxMockRecoEngineAdapter::End()
 {
     SPX_DBG_ASSERT(GetSite());
-    GetSite()->DoneProcessingAudio(this);
+    GetSite()->AdapterCompletedSetFormatStop(this);
 }
 
 void CSpxMockRecoEngineAdapter::FireIntermediateResult()
@@ -137,7 +142,7 @@ void CSpxMockRecoEngineAdapter::FireIntermediateResult()
     auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
     auto result = factory->CreateIntermediateResult(nullptr,  resultText.c_str(), ResultType::Speech);
 
-    GetSite()->IntermediateRecoResult(this, offset, result);
+    GetSite()->FireAdapterResult_Intermediate(this, offset, result);
 }
 
 void CSpxMockRecoEngineAdapter::FireFinalResult()
@@ -161,7 +166,7 @@ void CSpxMockRecoEngineAdapter::FireFinalResult()
     auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
     auto result = factory->CreateFinalResult(nullptr, resultText.c_str(), ResultType::Speech);
 
-    GetSite()->FinalRecoResult(this, offset, result);
+    GetSite()->FireAdapterResult_FinalResult(this, offset, result);
 }
 
 void CSpxMockRecoEngineAdapter::EnsureFireFinalResult()
@@ -178,7 +183,7 @@ void CSpxMockRecoEngineAdapter::FireSpeechStartDetected()
     auto offset = (uint32_t)m_cbAudioProcessed;
     SPX_DBG_TRACE_VERBOSE("%s: offset=%d", __FUNCTION__, offset);
 
-    GetSite()->SpeechStartDetected(this, offset);
+    GetSite()->AdapterDetectedSpeechStart(this, offset);
 }
 
 void CSpxMockRecoEngineAdapter::FireSpeechEndDetected()
@@ -186,7 +191,7 @@ void CSpxMockRecoEngineAdapter::FireSpeechEndDetected()
     auto offset = (uint32_t)m_cbAudioProcessed;
     SPX_DBG_TRACE_VERBOSE("%s: offset=%d", __FUNCTION__, offset);
 
-    GetSite()->SpeechEndDetected(this, offset);
+    GetSite()->AdapterDetectedSpeechEnd(this, offset);
 }
 
 

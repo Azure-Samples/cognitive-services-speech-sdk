@@ -54,17 +54,25 @@ protected:
     explicit Recognizer(SPXRECOHANDLE hreco) :
         m_hreco(hreco)
     {
-        SPX_DBG_TRACE_FUNCTION();
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8x", __FUNCTION__, m_hreco);
     }
 
     virtual ~Recognizer()
     {
-        SPX_DBG_TRACE_FUNCTION();
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+        TermRecognizer();
+    }
+
+    virtual void TermRecognizer()
+    {
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
         if (m_hreco != SPXHANDLE_INVALID)
         {
             ::Recognizer_Handle_Close(m_hreco);
             m_hreco = SPXHANDLE_INVALID;
+            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8x", __FUNCTION__, m_hreco);
         }
     }
 

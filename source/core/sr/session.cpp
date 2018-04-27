@@ -137,41 +137,11 @@ CSpxAsyncOp<void> CSpxSession::StopRecognitionAsync(RecognitionKind stopKind)
         AOS_Started);    
 }
 
-void CSpxSession::StartRecognizing(RecognitionKind startKind, std::wstring keyword)
-{
-    UNUSED(startKind);
-    UNUSED(keyword);
-    SPX_DBG_TRACE_SCOPE("Sleeping for 500ms...", "Sleeping for 500ms... Done!");
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-}
-
-void CSpxSession::StopRecognizing(RecognitionKind stopKind)
-{
-    UNUSED(stopKind);
-    SPX_DBG_TRACE_SCOPE("Sleeping for 1000ms...", "Sleeping for 1000ms... Done!");
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-}
-
-std::shared_ptr<ISpxRecognitionResult> CSpxSession::WaitForRecognition()
-{
-    std::unique_lock<std::mutex> lock(m_mutex);
-    m_cv.wait_for(lock, std::chrono::seconds(m_recoAsyncTimeout), [&] { return !m_recoAsyncWaiting; });
-
-    if (m_recoAsyncResult == nullptr) // If we don't have a result, make a 'NoMatch' result
-    {
-        lock.unlock();
-        EnsureFireResultEvent();
-    }
-
-    SPX_DBG_ASSERT(m_recoAsyncResult != nullptr);
-
-    return std::move(m_recoAsyncResult);
-}
-
 void CSpxSession::WaitForRecognition_Complete(std::shared_ptr<ISpxRecognitionResult> result)
 {
-    std::unique_lock<std::mutex> lock(m_mutex);
+    FireResultEvent(GetSessionId(), result);
 
+    std::unique_lock<std::mutex> lock(m_mutex);
     if (m_recoAsyncWaiting)
     {
         m_recoAsyncWaiting = false;
@@ -179,9 +149,6 @@ void CSpxSession::WaitForRecognition_Complete(std::shared_ptr<ISpxRecognitionRes
 
         m_cv.notify_all();
     }
-
-    lock.unlock();
-    FireResultEvent(GetSessionId(), result);
 }
 
 void CSpxSession::FireSessionStartedEvent()
@@ -252,6 +219,8 @@ void CSpxSession::FireSessionEvent(SessionEventType sessionType)
 
 void CSpxSession::FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result)
 {
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    
     // Make a copy of the recognizers (under lock), to use to send events; 
     // otherwise the underlying list could be modified while we're sending events...
 

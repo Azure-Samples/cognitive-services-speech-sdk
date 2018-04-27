@@ -44,12 +44,13 @@ public:
 
 
     // --- ISpxObject
-
     void Init() override;
     void Term() override;
 
-    // --- ISpxAudioProcessor
+    // --- ISpxRecoEngineAdapter
+    void SetAdapterMode(bool singleShot) override;
 
+    // --- ISpxAudioProcessor
     void SetFormat(WAVEFORMATEX* pformat) override;
     void ProcessAudio(AudioData_Type data, uint32_t size) override;
 
@@ -64,7 +65,6 @@ protected:
     virtual void OnTurnStart(const USP::TurnStartMsg& message) override;
     virtual void OnTurnEnd(const USP::TurnEndMsg& message) override;
     virtual void OnError(const std::string& error) override;
-
     virtual void OnUserMessage(const std::string& path, const std::string& contentType, const uint8_t* buffer, size_t size) override;
 
     // Todo: translaton messages should be in a spearate class than UspRecoEngineAdapter. This will
@@ -81,13 +81,14 @@ private:
 
     CSpxUspRecoEngineAdapter& operator=(const CSpxUspRecoEngineAdapter&) = delete;
 
+    void EnsureUspInit();
     void UspInitialize();
 
-    USP::Client& SetUspEndpoint(USP::Client& client);
-    USP::Client& SetUspRecoMode(USP::Client& client);
-    USP::Client& SetUspModelId(USP::Client& client);
-    USP::Client& SetUspLanguage(USP::Client& client);
-    USP::Client& SetUspAuthentication(USP::Client& client);
+    USP::Client& SetUspEndpoint(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspRecoMode(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+    USP::Client& SetUspAuthentication(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
+
+    USP::RecognitionMode GetRecoModeFromEndpoint(const std::wstring& endpoint);
 
     void UspWrite(const uint8_t* buffer, size_t byteToWrite);
     void UspSendSpeechContext();
@@ -115,29 +116,6 @@ private:
                ((uint32_t)(number & 0xff000000) >> 24);
     }
 
-    inline void SaveToWavInit()
-    {
-        // std::string filename = "uspaudiodump_" + std::to_string(m_saveToWavCounter++) + ".wav";
-        // PAL::fopen_s(&m_saveToWavAudioFile, filename.c_str(), "wb");
-    }
-
-    inline void SaveToWavWrite(const uint8_t* /* buffer */, size_t /* bytesToWrite */)
-    {
-        // if (m_saveToWavAudioFile != nullptr)
-        // {
-        //     fwrite(buffer, 1, bytesToWrite, m_saveToWavAudioFile);
-        // }
-    }
-
-    inline void SaveToWavClose()
-    {
-        // if (m_hfile != nullptr)
-        // {
-        //     fclose(m_saveToWavAudioFile);
-        //     m_saveToWavAudioFile = nullptr;
-        // }
-    }
-
     std::list<std::string> GetListenForListFromSite();
     std::string GetDgiJsonFromListenForList(std::list<std::string>& listenForList);
 
@@ -147,86 +125,55 @@ private:
     std::string GetSpeechContextJson(const std::string& dgiJson, const std::string& LanguageUnderstandingJson);
     void SendSpeechContextMessage(std::string& speechContextMessage);
 
+    void FireFinalResultNowOrLater(const USP::SpeechPhraseMsg& message);
     void FireFinalResultNow(const USP::SpeechPhraseMsg& message, const std::string& luisJson = "");
-    void FireFinalResultLater(const USP::SpeechPhraseMsg& message);
-    void FireFinalResultLater_WaitingForIntentComplete(const std::string& luisJson = "");
 
-    enum class AudioState { Idle = 0, ReadyToProcess = 1, ProcessingAudio = 2, Paused = 3, WaitingForDone = 4 };
+    void FireFinalResultLater(const USP::SpeechPhraseMsg& message);
+    void FireFinalResultLater_WaitingForIntentComplete(const std::  string& luisJson = "");
+
+    bool IsInteractiveMode() const { return m_recoMode == USP::RecognitionMode::Interactive; }
+
+    enum class AudioState { Idle = 0, Ready = 1, Sending = 2, Stopping = 9 };
 
     enum class UspState {
         Error = -1,
         Idle = 0,
-        ReadyForFormat = 1,
-        SendingAudioData = 999,
-        TurnStarted = 1000,
-        SpeechStarted = 1200,
-        SpeechHypothesis = 1250,
-        SpeechEnded = 1299,
-        ReceivedSpeechResult = 2000,
-        WaitingForIntent = 2500,
-        FiredFinalResult = 2999,
-        TurnEnded = 9900,
+        WaitingForTurnStart = 1000,
+        WaitingForPhrase = 1200,
+        WaitingForIntent = 1250,
+        WaitingForIntent2 = 1299,
+        WaitingForTurnEnd = 2999,
         Terminating = 9998,
         Zombie = 9999
     };
 
-    // --------------------------------------------------------------------------------------------------------------
-    //
-    //      NOTE: The following table is not intended to be complete. It is for example purposes only.
-    //
-    // --------------------------------------------------------------------------------------------------------------
-
-    // Idle/Idle                               ==> Init()                      ==> Idle/ReadyForFormat
-
-    // ANYTHING/ANYTHING(not Zombie)           ==> Term()                      ==> ANYTHING/Terminating
-    //                                                                         ==> ANYTHING/Zombie
-
-    // Idle/ReadyForFormat                     ==> SetFormat(!nullptr)         ==> ReadyToProcess/SendingAudioData
-    // ReadyToProcess/SendingAudioData         ==> ProcessAudio(..., !0)       ==> ProcessingAudio/SendingAudioData
-    // ANYTHING/ANYTHING(not Zombie)           ==> SetFormat(nullptr)          ==> WaitingForDone/ANYTHING
-
-    // ProcessingAudio/SendingAudioData        ==> OnTurnStart()               ==> ProcessingAudio/TurnStarted
-    // ProcessingAudio/TurnStarted             ==> OnSpeechStartDetected()     ==> ProcessingAudio/SpeechStarted
-    // ProcessingAudio/SpeechStarted           ==> OnSpeechHypothesis()        ==> ProcessingAudio/SpeechHypothesis
-
-    // ProcessingAudio/SendingAudioData        ==> OnSpeechEndDetected()       ==> Paused/SpeechEnded
-    // ProcessingAudio/TurnStarted             ==> OnSpeechEndDetected()       ==> Paused/SpeechEnded
-    // ProcessingAudio/SpeechStarted           ==> OnSpeechEndDetected()       ==> Paused/SpeechEnded
-    // ProcessingAudio/SpeechHypothesis        ==> OnSpeechEndDetected()       ==> Paused/SpeechEnded
-
-    // WaitingForDone/SendingAudioData         ==> OnSpeechEndDetected()       ==> WaitingForDone/SpeechEnded
-    // WaitingForDone/TurnStarted              ==> OnSpeechEndDetected()       ==> WaitingForDone/SpeechEnded
-    // WaitingForDone/SpeechStarted            ==> OnSpeechEndDetected()       ==> WaitingForDone/SpeechEnded
-    // WaitingForDone/SpeechHypothesis         ==> OnSpeechEndDetected()       ==> WaitingForDone/SpeechEnded
-
-    // Paused/SpeechEnded                      ==> OnSpeechPhrase()            ==> Paused/ReceivedSpeechResult
-    // Paused/ReceivedSpeechResult             --> FireFinalResultNow()        ==> Paused/FiredFinalResult
-    // Paused/ReceivedSpeechResult             --> FireFinalResultLater()      ==> Paused/WaitingForIntent
-    // Paused/WaitingForIntent                 ==> OnUserMessage('response')
-    //                                         ==> FireFinalResultNow()        ==> Paused/FiredFinalResult
-    // Paused/FiredFinalResult                 ==> OnTurnEnd()                 ==> ProcessingAudio/SendingAudioData
-
-    // WaitingForDone/SpeechEnded              ==> OnSpeechPhrase()            ==> WaitingForDone/ReceivedSpeechResult
-    // WaitingForDone/ReceivedSpeechResult     --> FireFinalResultNow()        ==> WaitingForDone/FiredFinalResult
-    // WaitingForDone/ReceivedSpeechResult     --> FireFinalResultLater()      ==> WaitingForDone/WaitingForIntent
-    // WaitingForDone/WaitingForIntent         ==> OnUserMessage('response')
-    //                                         ==> FireFinalResultNow()        ==> WaitingForDone/FiredFinalResult
-    // WaitingForDone/FiredFinalResult         ==> OnTurnEnd()                 ==> Idle/ReadyForFormat
-
+    bool IsBadState() const { return IsState(UspState::Error) || IsState(UspState::Terminating) || IsState(UspState::Zombie); }
     bool IsState(AudioState state) const { return m_audioState == state; }
     bool IsState(UspState state) const { return m_uspState == state; }
+    bool IsState(AudioState audioState, UspState uspState) const { return IsState(audioState) && IsState(uspState); }
     bool IsStateBetween(UspState state1, UspState state2) const { return m_uspState > state1 && m_uspState < state2; }
+    bool IsStateBetweenIncluding(UspState state1, UspState state2) const { return m_uspState >= state1 && m_uspState < state2; }
 
-    bool ChangeState(UspState state);
-    bool ChangeState(UspState fromState, UspState toState);
-    bool ChangeState(AudioState state);
-    bool ChangeState(AudioState from, AudioState to);
+    bool ChangeState(UspState toUspState) { return ChangeState(m_audioState, m_uspState, m_audioState, toUspState); }
+    bool ChangeState(UspState fromUspState, UspState toUspState) { return ChangeState(m_audioState, fromUspState, m_audioState, toUspState); }
+    bool ChangeState(AudioState toAudioState) { return ChangeState(m_audioState, m_uspState, toAudioState, m_uspState); }
+    bool ChangeState(AudioState fromAudioState, AudioState toAudioState) { return ChangeState(fromAudioState, m_uspState, toAudioState, m_uspState); }
+    bool ChangeState(AudioState toAudioState, UspState toUspState) { return ChangeState(m_audioState, m_uspState, toAudioState, toUspState); }
     bool ChangeState(AudioState fromAudioState, UspState fromUspState, AudioState toAudioState, UspState toUspState);
+
+    void PrepareFirstAudioReadyState(WAVEFORMATEX* format);
+    void PrepareAudioReadyState();
+    void SendPreAudioMessages();
+
+    bool ShouldResetAfterError();
+    void ResetAfterError();
 
 
 private:
 
     USP::ConnectionPtr m_handle;
+    USP::RecognitionMode m_recoMode = USP::RecognitionMode::Interactive;
+    bool m_customEndpoint = false;
 
     #ifdef _MSC_VER
     using ReadWriteMutex_Type = std::shared_mutex;
@@ -238,21 +185,20 @@ private:
     using ReadLock_Type = std::unique_lock<std::mutex>;
     #endif
 
+    bool m_singleShot = false;
+    SpxWAVEFORMATEX_Type m_format;
     ReadWriteMutex_Type m_stateMutex;
     AudioState m_audioState;
     UspState m_uspState;
 
     const size_t m_servicePreferedMilliseconds = 600;
-    size_t m_servicePreferedBufferSize;
+    size_t m_servicePreferedBufferSizeSendingNow;
 
     const bool m_fUseBufferedImplementation = true;
     std::shared_ptr<uint8_t> m_buffer;
     size_t m_bytesInBuffer;
     uint8_t* m_ptrIntoBuffer;
     size_t m_bytesLeftInBuffer;
-
-    FILE* m_saveToWavAudioFile = nullptr;
-    int static m_saveToWavCounter;
 
     bool m_expectIntentResponse = true;
     USP::SpeechPhraseMsg m_finalResultMessageToFireLater;

@@ -127,9 +127,9 @@ typedef uintptr_t SPXHR;
 /// </summary>
 /// <remarks>
 /// Valid transitions are:
-/// * StartingPump --> ProcessingAudio (at the beginning of stream)
-/// * StoppingPump --> WaitingForAdapterDone (at the end of stream)
-/// * ProcessingAudio --> WaitingForAdapterDone (when the stream runs out of data)
+/// * WaitForPumpSetFormatStart --> ProcessingAudio (at the beginning of stream)
+/// * StoppingPump --> WaitForAdapterCompletedSetFormatStop (at the end of stream)
+/// * ProcessingAudio --> WaitForAdapterCompletedSetFormatStop (when the stream runs out of data)
 /// All other state transitions are invalid.
 /// </remarks>
 #define SPXERR_SETFORMAT_UNEXPECTED_STATE_TRANSITION __SPX_ERRCODE_FAILED(0x011)
@@ -150,7 +150,7 @@ typedef uintptr_t SPXHR;
 /// </summary>
 /// <remarks>
 /// A valid transition is:
-/// * Idle --> StartingPump
+/// * Idle --> WaitForPumpSetFormatStart
 /// All other state transitions are invalid when attempting to start recognizing
 /// </remarks>
 #define SPXERR_START_RECOGNIZING_INVALID_STATE_TRANSITION __SPX_ERRCODE_FAILED(0x013)

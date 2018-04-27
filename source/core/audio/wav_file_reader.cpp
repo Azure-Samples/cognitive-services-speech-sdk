@@ -36,7 +36,7 @@ void CSpxWavFileReader::Open(const wchar_t* fileName)
 {
     m_fileName = fileName;
 
-    SPX_DBG_TRACE_VERBOSE("Opening WAV file '%S'", fileName);
+    SPX_DBG_TRACE_VERBOSE("Opening WAV file '%ls'", fileName);
 
     auto file = std::make_unique<WavFile_Type>();
     PAL::OpenStream(*file.get(), fileName, true);

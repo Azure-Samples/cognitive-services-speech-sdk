@@ -36,7 +36,7 @@ public:
     /// </summary>
     explicit SpeechRecognizer(SPXRECOHANDLE hreco) : BaseType(hreco), Parameters(hreco)
     {
-        SPX_DBG_TRACE_FUNCTION();
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     }
 
     /// <summary>
@@ -44,7 +44,8 @@ public:
     /// </summary>
     ~SpeechRecognizer()
     {
-        SPX_DBG_TRACE_FUNCTION();
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+        TermRecognizer();
     }
 
     /// <summary>

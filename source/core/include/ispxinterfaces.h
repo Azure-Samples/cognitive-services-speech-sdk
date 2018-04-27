@@ -548,6 +548,9 @@ class ISpxRecoEngineAdapter :
     public ISpxAudioProcessor, 
     public ISpxInterfaceBaseFor<ISpxRecoEngineAdapter>
 {
+public:
+
+    virtual void SetAdapterMode(bool singleShot) = 0;
 };
 
 
@@ -562,17 +565,22 @@ public:
     virtual std::list<std::string> GetListenForList() = 0;
     virtual void GetIntentInfo(std::string& provider, std::string& id, std::string& key) = 0;
 
-    virtual void SpeechStartDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) = 0;
-    virtual void SpeechEndDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) = 0;
+    virtual void AdapterStartingTurn(ISpxRecoEngineAdapter* adapter) = 0;
+    virtual void AdapterStartedTurn(ISpxRecoEngineAdapter* adapter, const std::string& id) = 0;
+    virtual void AdapterStoppedTurn(ISpxRecoEngineAdapter* adapter) = 0;
 
-    virtual void SoundStartDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) = 0;
-    virtual void SoundEndDetected(ISpxRecoEngineAdapter* adapter, uint64_t offset) = 0;
+    virtual void AdapterDetectedSpeechStart(ISpxRecoEngineAdapter* adapter, uint64_t offset) = 0;
+    virtual void AdapterDetectedSpeechEnd(ISpxRecoEngineAdapter* adapter, uint64_t offset) = 0;
 
-    virtual void IntermediateRecoResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, ResultPayload_Type payload) = 0;
-    virtual void FinalRecoResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, ResultPayload_Type payload) = 0;
-    virtual void TranslationSynthesisResult(ISpxRecoEngineAdapter* adapter, ResultPayload_Type payload) = 0;
+    virtual void AdapterDetectedSoundStart(ISpxRecoEngineAdapter* adapter, uint64_t offset) = 0;
+    virtual void AdapterDetectedSoundEnd(ISpxRecoEngineAdapter* adapter, uint64_t offset) = 0;
 
-    virtual void DoneProcessingAudio(ISpxRecoEngineAdapter* adapter) = 0;
+    virtual void FireAdapterResult_Intermediate(ISpxRecoEngineAdapter* adapter, uint64_t offset, ResultPayload_Type payload) = 0;
+    virtual void FireAdapterResult_FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, ResultPayload_Type payload) = 0;
+    virtual void FireAdapterResult_TranslationSynthesis(ISpxRecoEngineAdapter* adapter, ResultPayload_Type payload) = 0;
+
+    virtual void AdapterRequestingAudioIdle(ISpxRecoEngineAdapter* adapter) = 0;
+    virtual void AdapterCompletedSetFormatStop(ISpxRecoEngineAdapter* adapter) = 0;
 
     virtual void AdditionalMessage(ISpxRecoEngineAdapter* adapter, uint64_t offset, AdditionalMessagePayload_Type payload) = 0;
 
@@ -592,7 +600,7 @@ class ISpxKwsEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxKwsEngineAdapte
 public:
 
     virtual void KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset) = 0;
-    virtual void DoneProcessingAudio(ISpxKwsEngineAdapter* adapter) = 0;
+    virtual void AdapterCompletedSetFormatStop(ISpxKwsEngineAdapter* adapter) = 0;
 };
 
 

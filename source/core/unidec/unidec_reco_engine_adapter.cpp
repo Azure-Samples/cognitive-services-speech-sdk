@@ -50,6 +50,11 @@ void CSpxUnidecRecoEngineAdapter::Term()
     StopEngine();
 }
 
+void CSpxUnidecRecoEngineAdapter::SetAdapterMode(bool singleShot)
+{
+    m_singleShot = singleShot;
+}
+
 void CSpxUnidecRecoEngineAdapter::SetFormat(WAVEFORMATEX* pformat)
 {
     SPX_DBG_TRACE_VERBOSE_IF(pformat == nullptr, "%s - pformat == nullptr", __FUNCTION__);
@@ -313,7 +318,7 @@ void CSpxUnidecRecoEngineAdapter::Intermediate(const wchar_t* wavId, size_t sent
     auto result = factory->CreateIntermediateResult(nullptr, text.c_str(), ResultType::Speech);
 
     auto offset = (uint32_t)framePos.SentenceStartIndex;
-    GetSite()->IntermediateRecoResult(this, offset, result);
+    GetSite()->FireAdapterResult_Intermediate(this, offset, result);
 }
 
 void CSpxUnidecRecoEngineAdapter::Sentence(const wchar_t* wavId, size_t sentenceIndex, const UnidecFramePosition& framePos, const IUnidecNBestList* nbest)
@@ -358,7 +363,7 @@ void CSpxUnidecRecoEngineAdapter::Sentence(const wchar_t* wavId, size_t sentence
     if (finalResult != nullptr)
     {
         SPX_DBG_ASSERT(GetSite());
-        GetSite()->FinalRecoResult(this, offset, finalResult);
+        GetSite()->FireAdapterResult_FinalResult(this, offset, finalResult);
     }
 }
 
@@ -368,7 +373,7 @@ void CSpxUnidecRecoEngineAdapter::End(const wchar_t* wavId, UnidecEndReason reas
     UNUSED(reason);
 
     SPX_DBG_ASSERT(GetSite());
-    GetSite()->DoneProcessingAudio(this);
+    GetSite()->AdapterCompletedSetFormatStop(this);
 }
 
 size_t CSpxUnidecRecoEngineAdapter::AudioStreamRead(AudioStreamDescriptor* pAudioStream, void *pBuffer, size_t maxSize)

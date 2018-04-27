@@ -53,6 +53,8 @@ private:
         uint16_t m_continuousRecognitionSeconds = 0;
 
         std::wstring m_strRunSampleName;
+        std::wstring m_strHowManyTimes;
+        uint16_t m_runHowManyTimes = 1;
 
         bool m_fInteractivePrompt = false;
     };
@@ -131,20 +133,20 @@ private:
     void Recognizer_NoMatchHandler(const RecognitionEventArgs& e) { UNUSED(e); };
     void Recognizer_CanceledHandler(const RecognitionEventArgs& e) { UNUSED(e); };
 
-    void SpeechRecognizer_IntermediateResultHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"IntermediateResultHandler: %ls", ToString(e).c_str()); };
-    void SpeechRecognizer_FinalResultHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"FinalResultHandler: %ls", ToString(e).c_str());}
-    void SpeechRecognizer_NoMatchHandler(const SpeechRecognitionEventArgs& e) { ConsoleWriteLine(L"NoMatchHandler: %ls", ToString(e).c_str()); }
-    void SpeechRecognizer_CanceledHandler(const SpeechRecognitionEventArgs& e) { UNUSED(e); ConsoleWriteLine(L"CanceledHandler!!!"); };
+    void SpeechRecognizer_IntermediateResultHandler(const SpeechRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"IntermediateResultHandler: %ls", ToString(e).c_str()); };
+    void SpeechRecognizer_FinalResultHandler(const SpeechRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"FinalResultHandler: %ls", ToString(e).c_str());}
+    void SpeechRecognizer_NoMatchHandler(const SpeechRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"NoMatchHandler: %ls", ToString(e).c_str()); }
+    void SpeechRecognizer_CanceledHandler(const SpeechRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"CanceledHandler: %ls", ToString(e).c_str()); };
 
-    void TranslationRecognizer_IntermediateResultHandler(const TranslationTextResultEventArgs& e) { ConsoleWriteLine(L"Translation IntermediateResultHandler: %ls", ToString(e).c_str()); };
-    void TranslationRecognizer_FinalResultHandler(const TranslationTextResultEventArgs& e) { ConsoleWriteLine(L"Translation FinalResultHandler: %ls", ToString(e).c_str()); }
-    void TranslationRecognizer_SynthesisResultHandler(const TranslationSynthesisResultEventArgs& e) { ConsoleWriteLine(L"Translation SynthesisResultHandler: %ls", ToString(e).c_str()); }
-    void TranslationRecognizer_ErrorHandler(const TranslationSynthesisResultEventArgs& e) { ConsoleWriteLine(L"Translation ErrorHandler: %ls", ToString(e).c_str()); }
+    void TranslationRecognizer_IntermediateResultHandler(const TranslationTextResultEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"Translation IntermediateResultHandler: %ls", ToString(e).c_str()); };
+    void TranslationRecognizer_FinalResultHandler(const TranslationTextResultEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"Translation FinalResultHandler: %ls", ToString(e).c_str()); }
+    void TranslationRecognizer_SynthesisResultHandler(const TranslationSynthesisResultEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"Translation SynthesisResultHandler: %ls", ToString(e).c_str()); }
+    void TranslationRecognizer_ErrorHandler(const TranslationSynthesisResultEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"Translation ErrorHandler: %ls", ToString(e).c_str()); }
 
-    void IntentRecognizer_IntermediateResultHandler(const IntentRecognitionEventArgs& e) { ConsoleWriteLine(L"IntermediateResultHandler: %ls", ToString(e).c_str()); };
-    void IntentRecognizer_FinalResultHandler(const IntentRecognitionEventArgs& e)  { ConsoleWriteLine(L"FinalResultHandler: %ls", ToString(e).c_str()); }
-    void IntentRecognizer_NoMatchHandler(const IntentRecognitionEventArgs& e) { ConsoleWriteLine(L"NoMatchHandler: %ls", ToString(e).c_str()); }
-    void IntentRecognizer_CanceledHandler(const IntentRecognitionEventArgs& e) { UNUSED(e); ConsoleWriteLine(L"CanceledHandler!!!"); };
+    void IntentRecognizer_IntermediateResultHandler(const IntentRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"IntermediateResultHandler: %ls", ToString(e).c_str()); };
+    void IntentRecognizer_FinalResultHandler(const IntentRecognitionEventArgs& e)  { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"FinalResultHandler: %ls", ToString(e).c_str()); }
+    void IntentRecognizer_NoMatchHandler(const IntentRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"NoMatchHandler: %ls", ToString(e).c_str()); }
+    void IntentRecognizer_CanceledHandler(const IntentRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"CanceledHandler: %ls", ToString(e).c_str()); };
 
     bool ToBool(const wchar_t* psz);
 
@@ -214,6 +216,12 @@ private:
 
     void Sample_HelloWorld_Kws();
 
+    int Sample_Do_Speech(bool continuous);
+    int Sample_Do_Intent(bool continuous, const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId);
+    int Sample_Do_Intent(bool continuous);
+    int Sample_Do_Intent_Kws(const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId);
+    int Sample_Do_Intent_Kws();
+
 
 private:
 
@@ -224,7 +232,7 @@ private:
     std::shared_ptr<Session> m_session;
 
     std::wstring m_subscriptionKey;
-    std::wstring m_region;
+    std::wstring m_regionId;
     std::wstring m_endpointUri;
 
     void* m_commandSystem = nullptr;

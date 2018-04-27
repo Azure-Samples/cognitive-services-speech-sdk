@@ -39,12 +39,13 @@ public:
 
 
     // --- ISpxObject
-
     void Init() override;
     void Term() override;
 
-    // --- ISpxAudioProcessor
+    // --- ISpxRecoEngineAdapter
+    void SetAdapterMode(bool singleShot) override;
 
+    // --- ISpxAudioProcessor
     void SetFormat(WAVEFORMATEX* pformat) override;
     void ProcessAudio(AudioData_Type data, uint32_t size) override;
 
@@ -100,6 +101,8 @@ private:
 
 
 private:
+
+    bool m_singleShot = false;
 
     SpxWAVEFORMATEX_Type m_format;
     std::unique_ptr<CSpxUnidecConfig> m_config;
