@@ -30,7 +30,7 @@ redirectRe=(
   # Archive (.tar.gz) for latest Linux binaries
   ["csspeech/linuxbinary"]=".*/csspeech-$VERSIONRE\.tar\.gz"
   # Archive (.tar.gz) for latest Linux samples and tutorials
-  ["csspeech/linuxsample"]=".*/SpeechSDK-LinuxSamples\.tar\.gz"
+  ["csspeech/linuxsample"]=".*/SpeechSDK-LinuxSamples-$VERSIONRE\.tar\.gz"
   # Archive (.tar.gz) for latest Linux symbols matching the latest Linux binaries
   ["csspeech/linuxsymbols"]=".*TODO.*"
   # Landing page for package on nuget.org

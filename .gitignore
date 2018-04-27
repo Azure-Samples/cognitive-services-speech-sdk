@@ -62,8 +62,9 @@ ipch/
 ci/docfx/obj*/**/*
 bindings/csharp/obj*/**/*
 
-#doxygen related files
-ci/doxygen/*html*/**/*
+# Doxygen
+ci/doxygen/*html
+ci/doxygen/*xml
 
 # external serialport and macro_util_h_generator obj directorys
 external/azure-c-shared-utility/testtools/SerialPort/SerialPort/obj/**/*

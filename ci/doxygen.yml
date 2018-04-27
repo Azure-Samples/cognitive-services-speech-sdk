@@ -1,0 +1,35 @@
+# Variables:
+#   Version - version number to use
+resources:
+- repo: self
+queue:
+  name: Hosted macOS Preview
+  demands: sh
+steps:
+- task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  inputs:
+    type: InlineScript
+    script: |
+       set -e -o pipefail -x
+       brew install doxygen
+       npm install moxygen -g
+       cd ci/doxygen
+       mkdir "$(Build.ArtifactStagingDirectory)/Doxygen"
+       for lang in c cpp csharp java; do
+         (
+           cat ${lang}_doxygen.txt;
+           echo PROJECT_NUMBER=$(Version);
+           echo 'WARN_FORMAT="##''vso[task.logissue type=warning;sourcepath=$file;linenumber=$line;columnnumber=1]$text"';
+           echo OUTPUT_DIRECTORY=$(Build.ArtifactStagingDirectory)/Doxygen
+         ) | doxygen -
+       done
+       moxygen -o cppapi.md -t ./moxygen_template/cpp -a $(Build.ArtifactStagingDirectory)/Doxygen/cppxml
+       powershell -NoProfile -NoLogo -ExecutionPolicy Bypass -NonInteractive doxmox2docs.ps1 \
+         -DoxygenIndexXml $(Build.ArtifactStagingDirectory)/Doxygen/cppxml/index.xml \
+         -MoxygenApiMd cppapi.md \
+         -OutputDir $(Build.ArtifactStagingDirectory)/Doxygen/cppmd
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/Doxygen'
+    ArtifactName: Doxygen
+    publishLocation: Container
