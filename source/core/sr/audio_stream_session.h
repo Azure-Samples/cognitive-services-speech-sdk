@@ -6,12 +6,13 @@
 //
 
 #pragma once
+#include <queue>
 #include "spxcore_common.h"
 #include "interface_helpers.h"
 #include "named_properties_impl.h"
 #include "packaged_task_helpers.h"
 #include "service_helpers.h"
-#include "session.h"
+#include "save_to_wav.h"
 
 #ifdef _MSC_VER
 #include <shared_mutex>
@@ -24,9 +25,12 @@ namespace Speech {
 namespace Impl {
 
 
-class CSpxAudioStreamSession : public CSpxSession, 
+class CSpxAudioStreamSession :
     public ISpxObjectWithSiteInitImpl<ISpxGenericSite>,
+    public ISpxAudioStreamSessionInit, 
+    public ISpxAudioProcessor,
     public ISpxServiceProvider,
+    public ISpxSession,
     public ISpxGenericSite,
     public ISpxRecognizerSite,
     public ISpxLuEngineAdapterSite,
@@ -34,8 +38,6 @@ class CSpxAudioStreamSession : public CSpxSession,
     public ISpxRecoEngineAdapterSite,
     public ISpxRecoResultFactory,
     public ISpxEventArgsFactory,
-    public ISpxAudioStreamSessionInit, 
-    public ISpxAudioProcessor,
     public ISpxNamedPropertiesImpl
 {
 public:
@@ -44,6 +46,7 @@ public:
     virtual ~CSpxAudioStreamSession();
 
     SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxSession)
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
@@ -59,6 +62,11 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
     SPX_INTERFACE_MAP_END()
 
+    // --- ISpxObjectInit
+
+    void Init() override;
+    void Term() override;
+
     // --- ISpxAudioStreamSessionInit
     
     void InitFromFile(const wchar_t* pszFileName) override;
@@ -70,7 +78,8 @@ public:
     void SetFormat(WAVEFORMATEX* pformat) override;
     void ProcessAudio(AudioData_Type data, uint32_t size) override;
 
-    // --- IServiceProvider
+    // --- IServiceProvider ---
+
     SPX_SERVICE_MAP_BEGIN()
     SPX_SERVICE_MAP_ENTRY_OBJECT(ISpxIntentTriggerService, GetLuEngineAdapter())
     SPX_SERVICE_MAP_ENTRY(ISpxRecoResultFactory)
@@ -79,88 +88,33 @@ public:
     SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
     SPX_SERVICE_MAP_END()
 
+    // --- ISpxSession ---
 
-    virtual void Init() override;
-    virtual void Term() override;
+    const std::wstring& GetSessionId() const override;
+
+    void AddRecognizer(std::shared_ptr<ISpxRecognizer> recognizer) override;
+    void RemoveRecognizer(ISpxRecognizer* recognizer) override;
+
+    CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> RecognizeAsync() override;
+    CSpxAsyncOp<void> StartContinuousRecognitionAsync() override;
+    CSpxAsyncOp<void> StopContinuousRecognitionAsync() override;
+
+    CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) override;
+    CSpxAsyncOp<void> StopKeywordRecognitionAsync() override;
 
 
-protected:
+private: 
 
-    // ISpxSession (overrides)
-    void StartRecognizing(RecognitionKind startKind, std::wstring keyword) override;
-    void StopRecognizing(RecognitionKind stopKind) override;
+    DISABLE_COPY_AND_MOVE(CSpxAudioStreamSession);
 
-    std::shared_ptr<ISpxRecognitionResult> WaitForRecognition() override;
+    enum class RecognitionKind {
+        Idle = 0,
+        Keyword = 1,
+        KwsSingleShot = 2,
+        SingleShot = 3,
+        Continuous = 4 };
 
-
-private:
-
-    // --- ISpxKwsEngineAdapterSite
-    void KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset) override;
-    void AdapterCompletedSetFormatStop(ISpxKwsEngineAdapter* /* adapter */) override { AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio::Keyword); }
-
-    // --- ISpxRecoEngineAdapterSite
-    std::list<std::string> GetListenForList() override;
-    void GetIntentInfo(std::string& provider, std::string& id, std::string& key) override;
-
-    void AdapterStartingTurn(ISpxRecoEngineAdapter* adapter) override;
-    void AdapterStartedTurn(ISpxRecoEngineAdapter* adapter, const std::string& id) override;
-    void AdapterStoppedTurn(ISpxRecoEngineAdapter* adapter) override;
-
-    void AdapterDetectedSpeechStart(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
-    void AdapterDetectedSpeechEnd(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
-
-    void AdapterDetectedSoundStart(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
-    void AdapterDetectedSoundEnd(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
-
-    void FireAdapterResult_Intermediate(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
-    void FireAdapterResult_FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
-    void FireAdapterResult_TranslationSynthesis(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxRecognitionResult> result) override;
-
-    void AdapterCompletedSetFormatStop(ISpxRecoEngineAdapter* /* adapter */) override { AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio::Speech); }
-
-    void AdapterRequestingAudioIdle(ISpxRecoEngineAdapter* adapter) override;
-
-    void AdditionalMessage(ISpxRecoEngineAdapter* adapter, uint64_t offset, AdditionalMessagePayload_Type payload) override;
-
-    void Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload) override;
-
-    // --- ISpxRecognizerSite
-    std::shared_ptr<ISpxSession> GetDefaultSession() override;
-
-    // --- ISpxRecoResultFactory
-    std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, ResultType type = ResultType::Speech) override;
-    std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, const wchar_t* text, ResultType type = ResultType::Speech) override;
-    std::shared_ptr<ISpxRecognitionResult> CreateNoMatchResult(ResultType type = ResultType::Speech) override;
-    std::shared_ptr<ISpxRecognitionResult> CreateErrorResult(const wchar_t* text, ResultType type = ResultType::Speech) override;
-
-    // -- ISpxEventArgsFactory
-    std::shared_ptr<ISpxSessionEventArgs> CreateSessionEventArgs(const std::wstring& sessionId) override;
-    std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgsWithOffset(const std::wstring& sessionId, uint64_t offset) override;
-    std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) override;
-
-    
-private:
-
-    using Base_Type = CSpxSession;
-
-    CSpxAudioStreamSession(const CSpxAudioStreamSession&) = delete;
-    CSpxAudioStreamSession(const CSpxAudioStreamSession&&) = delete;
-
-    CSpxAudioStreamSession& operator=(const CSpxAudioStreamSession&) = delete;
-
-    std::shared_ptr<ISpxRecoEngineAdapter> EnsureInitRecoEngineAdapter();
-    void InitRecoEngineAdapter();
-
-    std::shared_ptr<ISpxKwsEngineAdapter> EnsureInitKwsEngineAdapter(const std::wstring& keyword);
-    void InitKwsEngineAdapter(const std::wstring& keyword);
-    void HotSwapToKwsSingleShotWhilePaused();
-    void WaitForKwsSingleShotRecognition();
-
-    void StartAudioPump(RecognitionKind startKind, const std::wstring& keyword);
-    void HotSwapAdaptersWhilePaused(RecognitionKind startKind, const std::wstring& keyword = L"");
-
-    enum SessionState {
+    enum class SessionState {
         Idle = 0,
         WaitForPumpSetFormatStart = 1,
         ProcessingAudio = 2,
@@ -168,6 +122,95 @@ private:
         StoppingPump = 4,
         WaitForAdapterCompletedSetFormatStop = 5
     };
+
+    CSpxAsyncOp<void> StartRecognitionAsync(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model = nullptr);
+    CSpxAsyncOp<void> StopRecognitionAsync(RecognitionKind stopKind);
+
+    void StartRecognizing(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model = nullptr);
+    void StopRecognizing(RecognitionKind stopKind);
+
+    std::shared_ptr<ISpxRecognitionResult> WaitForRecognition();
+    void WaitForRecognition_Complete(std::shared_ptr<ISpxRecognitionResult> result);
+
+    void FireSessionStartedEvent();
+    void FireSessionStoppedEvent();
+
+    void FireSpeechStartDetectedEvent(uint64_t offset);
+    void FireSpeechEndDetectedEvent(uint64_t offset);
+
+    void EnsureFireResultEvent();
+    void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result);
+
+    enum EventType {SessionStart, SessionStop, SpeechStart, SpeechEnd, RecoResultEvent};
+    void FireEvent(EventType sessionType, std::shared_ptr<ISpxRecognitionResult> result = nullptr, wchar_t* sessionId = nullptr, uint64_t offset = 0);
+
+
+public:
+
+    // --- ISpxKwsEngineAdapterSite
+    void KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset, uint32_t size, AudioData_Type audioData) override;
+    void AdapterCompletedSetFormatStop(ISpxKwsEngineAdapter* /* adapter */) override { AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio::Keyword); }
+
+    // --- ISpxRecoEngineAdapterSite (first part...)
+    std::list<std::string> GetListenForList() override;
+    void GetIntentInfo(std::string& provider, std::string& id, std::string& key) override;
+
+    void AdapterStartingTurn(ISpxRecoEngineAdapter* adapter) override;
+    void AdapterStartedTurn(ISpxRecoEngineAdapter* adapter, const std::string& id) override;
+    void AdapterStoppedTurn(ISpxRecoEngineAdapter* adapter) override;
+    void AdapterDetectedSpeechStart(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
+    void AdapterDetectedSpeechEnd(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
+    void AdapterDetectedSoundStart(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
+    void AdapterDetectedSoundEnd(ISpxRecoEngineAdapter* adapter, uint64_t offset) override;
+
+    // -- ISpxEventArgsFactory
+    std::shared_ptr<ISpxSessionEventArgs> CreateSessionEventArgs(const std::wstring& sessionId) override;
+    std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, uint64_t offset) override;
+    std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) override;
+
+    // --- ISpxRecoResultFactory
+    std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type = ResultType::Speech) override;
+    std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type = ResultType::Speech) override;
+    std::shared_ptr<ISpxRecognitionResult> CreateNoMatchResult(enum ResultType type = ResultType::Speech) override;
+    std::shared_ptr<ISpxRecognitionResult> CreateErrorResult(const wchar_t* text, ResultType type = ResultType::Speech) override;
+
+    // --- ISpxRecoEngineAdapterSite (second part...)
+    void FireAdapterResult_Intermediate(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
+    void FireAdapterResult_FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;
+    void FireAdapterResult_TranslationSynthesis(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxRecognitionResult> result) override;
+
+    void AdapterCompletedSetFormatStop(ISpxRecoEngineAdapter* /* adapter */) override { AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio::Speech); }
+    void AdapterRequestingAudioIdle(ISpxRecoEngineAdapter* adapter) override;
+
+    void AdditionalMessage(ISpxRecoEngineAdapter* adapter, uint64_t offset, AdditionalMessagePayload_Type payload) override;
+    void Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload) override;
+
+    // --- ISpxRecognizerSite
+    std::shared_ptr<ISpxSession> GetDefaultSession() override;
+
+    // --- ISpxNamedProperties (overrides)
+    std::wstring GetStringValue(const wchar_t* name, const wchar_t* defaultValue) override;
+
+
+private:
+
+    std::shared_ptr<ISpxRecoEngineAdapter> EnsureInitRecoEngineAdapter();
+    void InitRecoEngineAdapter();
+
+    std::shared_ptr<ISpxKwsEngineAdapter> EnsureInitKwsEngineAdapter(std::shared_ptr<ISpxKwsModel> model);
+    void InitKwsEngineAdapter(std::shared_ptr<ISpxKwsModel> model);
+
+    void ProcessAudioDataNow(AudioData_Type data, uint32_t size);
+
+    void ProcessAudioDataLater(AudioData_Type audio, uint32_t size);
+    void ProcessAudioDataLater_Complete();
+    void ProcessAudioDataLater_Clear();
+
+    void HotSwapToKwsSingleShotWhilePaused();
+    void WaitForKwsSingleShotRecognition();
+
+    void StartAudioPump(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model);
+    void HotSwapAdaptersWhilePaused(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model = nullptr);
 
     void InformAdapterSetFormatStarting(WAVEFORMATEX* format);
     void InformAdapterSetFormatStopping(SessionState comingFromState);
@@ -193,6 +236,8 @@ private:
 
 private:
 
+    const std::wstring m_sessionId;
+
     #ifdef _MSC_VER
     using ReadWriteMutex_Type = std::shared_mutex;
     using WriteLock_Type = std::unique_lock<std::shared_mutex>;
@@ -203,15 +248,15 @@ private:
     using ReadLock_Type = std::unique_lock<std::mutex>;
     #endif
 
-    CSpxPackagedTaskHelper m_taskHelper;
-
     //  To orchestrate the conversion of "Audio Data" into "Results" and "Events", we'll use utilize
     //  one "Audio Pump" and multiple "Adapters"
 
+    SpxWAVEFORMATEX_Type m_format;
     std::shared_ptr<ISpxAudioPump> m_audioPump;
-
-    std::wstring m_keyword;
+    
     std::shared_ptr<ISpxKwsEngineAdapter> m_kwsAdapter;
+    std::shared_ptr<ISpxKwsModel> m_kwsModel;
+
     std::shared_ptr<ISpxRecoEngineAdapter> m_recoAdapter;
     std::shared_ptr<ISpxLuEngineAdapter> m_luAdapter;
 
@@ -223,8 +268,12 @@ private:
     ReadWriteMutex_Type m_stateMutex;
     RecognitionKind m_recoKind;
     SessionState m_sessionState;
+
     bool m_expectAdapterStartedTurn;
     bool m_expectAdapterStoppedTurn;
+    bool m_adapterRequestedIdle;
+    RecognitionKind m_turnEndStopKind;
+
 
     //  When we're in the SessionState::ProcessingAudio, we'll relay "Audio Data" to from the Pump
     //  to exactly one (and only one) of the engine adapters via it's ISpxAudioProcessor interface
@@ -233,6 +282,29 @@ private:
     //
     ReadWriteMutex_Type m_combinedAdapterAndStateMutex;
     std::shared_ptr<ISpxAudioProcessor> m_audioProcessor;
+
+    // Other member data ...
+
+    const int m_maxMsStashedBeforeSimulateRealtime = 300;
+
+    std::mutex m_processAudioLaterMutex;
+    std::queue<std::pair<AudioData_Type, uint32_t>> m_processAudioLater;
+    uint64_t m_sizeProcessAudioLater;
+    CSpxSaveToWavFile m_saveToWav;
+    CSpxSaveToWavFile m_saveOriginalAudio;
+
+    std::mutex m_mutex;
+    std::condition_variable m_cv;
+
+    const int m_recoAsyncTimeout = 10;
+    const int m_waitForAdatperCompletedSetFormatStopTimeout = 20;
+    const int m_shutdownTimeoutInMs = 500;
+
+    bool m_recoAsyncWaiting;
+    std::shared_ptr<ISpxRecognitionResult> m_recoAsyncResult;
+
+    CSpxPackagedTaskHelper m_taskHelper;
+    std::list<std::weak_ptr<ISpxRecognizer>> m_recognizers;
 };
 
 

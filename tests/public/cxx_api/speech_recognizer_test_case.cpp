@@ -7,9 +7,6 @@
 #include <atomic>
 #include <map>
 #include <string>
-#include "test_utils.h"
-#include "mock_controller.h"
-
 
 #ifdef _DEBUG
 #define SPX_CONFIG_INCLUDE_ALL_DBG 1
@@ -18,7 +15,12 @@
 #define SPX_CONFIG_INCLUDE_ALL 1
 #endif
 
+#include "trace_message.h"
+#define __SPX_DO_TRACE_IMPL SpxTraceMessage
+
 #include "speechapi_cxx.h"
+#include "mock_controller.h"
+#include "test_utils.h"
 
 
 using namespace Microsoft::CognitiveServices::Speech::Impl; // for mocks
@@ -27,7 +29,6 @@ using namespace Microsoft::CognitiveServices::Speech;
 using namespace std;
 
 static wstring input_file(L"tests/input/whatstheweatherlike.wav");
-
 
 
 static std::shared_ptr<ICognitiveServicesSpeechFactory> GetFactory()
@@ -66,42 +67,11 @@ void SetMockRealTimeSpeed(int value)
 
 TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 {
-    SECTION("Stress testing against the local server")
-    {
-        if (Config::Endpoint.empty())
-        {
-            return;
-        }
-
-        UseMocks(false);
-        REQUIRE(exists(input_file));
-        REQUIRE(!IsUsingMocks());
-
-        const int numLoops = 3;
-
-        auto factory = SpeechFactory::FromEndpoint(PAL::ToWString(Config::Endpoint), LR"({"max_timeout":"0"})");
-        for (int i = 0; i < numLoops; i++)
-        {
-            auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
-            auto result = recognizer->RecognizeAsync().get();
-            REQUIRE(result->Reason == Reason::Recognized);
-            REQUIRE(result->Text == L"Remind me to buy 5 iPhones.");
-        }
-
-        // BUGBUG: this currently fails because CSpxAudioStreamSession::WaitForRecognition() returns a nullptr on a timeout.
-        /*
-        factory = SpeechFactory::FromEndpoint(PAL::ToWString(Config::Endpoint), LR"({"max_timeout":"10000"})");
-        for (int i = 0; i < numLoops; i++)
-        {
-            auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
-            auto result = recognizer->RecognizeAsync().get();
-            REQUIRE(result->Reason == Reason::Recognized);
-            REQUIRE(result->Text == L"Remind me to buy 5 iPhones.");
-        }*/
-    }
-
+    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     GIVEN("Mocks for USP, Microphone, WaveFilePump and Reader, and then USP ...")
     {
+        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
+
         UseMocks(true);
 
         REQUIRE(exists(input_file));
@@ -109,7 +79,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         mutex mtx;
         condition_variable cv;
 
-        enum class Callbacks { final_result, no_match, session_started, session_stopped, speech_start_detected, speech_end_detected};
+        enum class Callbacks { final_result, no_match, session_started, session_stopped, speech_start_detected, speech_end_detected };
 
         WHEN("We checking to make sure callback counts are correct (checking multiple times, and multiple speeds times) ...")
         {
@@ -175,9 +145,6 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
                 cv.wait_for(lock, std::chrono::seconds(30), [&] { return sessionEnded; });
                 lock.unlock();
 
-                SPX_TRACE_VERBOSE("%s: Wait some more (loop #%d)", __FUNCTION__, i);
-                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
                 SPX_TRACE_VERBOSE("%s: Make sure callbacks are invoked correctly; END of loop #%d", __FUNCTION__, i);
             }
 
@@ -196,6 +163,8 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
     SECTION("Check that recognition result contains original json payload.")
     {
+        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
+
         UseMocks(false);
         REQUIRE(exists(input_file));
         REQUIRE(!IsUsingMocks());
@@ -207,6 +176,8 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
     SECTION("Check that recognition result contains error details.")
     {
+        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
+
         UseMocks(false);
         REQUIRE(exists(input_file));
         REQUIRE(!IsUsingMocks());
@@ -216,19 +187,56 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
         REQUIRE(result->Reason == Reason::Canceled);
         REQUIRE(!result->ErrorDetails.empty());
+    }
+}
 
-        // NOTE: I think we don't need this now ... 
-        // TODO: there's a data race in the audio_pump thread when it tries to
-        // pISpxAudioProcessor->SetFormat(nullptr); after exiting the loop.
-        // Comment out the next line to see for yourself (repros on Linux build machines).
-        // std::this_thread::sleep_for(std::chrono::milliseconds(300));
+TEST_CASE("Speech on local server", "[api][cxx]")
+{
+    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    SECTION("Stress testing against the local server")
+    {
+        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
+
+        if (Config::Endpoint.empty())
+        {
+            return;
+        }
+
+        UseMocks(false);
+        REQUIRE(exists(input_file));
+        REQUIRE(!IsUsingMocks());
+
+        const int numLoops = 3;
+
+        auto factory = SpeechFactory::FromEndpoint(PAL::ToWString(Config::Endpoint), LR"({"max_timeout":"0"})");
+        for (int i = 0; i < numLoops; i++)
+        {
+            auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
+            auto result = recognizer->RecognizeAsync().get();
+            REQUIRE(result->Reason == Reason::Recognized);
+            REQUIRE(result->Text == L"Remind me to buy 5 iPhones.");
+        }
+
+        // BUGBUG: this currently fails because CSpxAudioStreamSession::WaitForRecognition() returns a nullptr on a timeout.
+        /*
+        factory = SpeechFactory::FromEndpoint(PAL::ToWString(Config::Endpoint), LR"({"max_timeout":"10000"})");
+        for (int i = 0; i < numLoops; i++)
+        {
+        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
+        auto result = recognizer->RecognizeAsync().get();
+        REQUIRE(result->Reason == Reason::Recognized);
+        REQUIRE(result->Text == L"Remind me to buy 5 iPhones.");
+        }*/
     }
 }
 
 TEST_CASE("KWS basics", "[api][cxx]")
 {
+    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     GIVEN("Mocks for USP, KWS, and the Microphone...")
     {
+        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
+
         UseMocks(true);
 
         mutex mtx;
@@ -239,6 +247,8 @@ TEST_CASE("KWS basics", "[api][cxx]")
 
         WHEN("We do a keyword recognition with a speech recognizer")
         {
+            SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
+
             auto recognizer = GetFactory()->CreateSpeechRecognizer();
             REQUIRE(recognizer != nullptr);
             REQUIRE(IsUsingMocks(true));
@@ -256,10 +266,13 @@ TEST_CASE("KWS basics", "[api][cxx]")
                 cv.notify_all();
             };
 
-            recognizer->StartKeywordRecognitionAsync(L"mock");
+            auto model = KeywordRecognitionModel::FromFile(L"tests/input/heycortana_en-US.table");
+            recognizer->StartKeywordRecognitionAsync(model);
 
             THEN("We wait up to 30 seconds for a KwsSingleShot recognition and it's accompanying SessionStopped")
             {
+                SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
+
                 std::unique_lock<std::mutex> lock(mtx);
                 cv.wait_for(lock, std::chrono::seconds(30), [&] { return gotFinalResult >= 1 && gotSessionStopped >= 1; });
 
@@ -271,7 +284,7 @@ TEST_CASE("KWS basics", "[api][cxx]")
                 }
             }
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(300));
+            // std::this_thread::sleep_for(std::chrono::milliseconds(300));
         }
 
         UseMocks(false);
@@ -280,6 +293,8 @@ TEST_CASE("KWS basics", "[api][cxx]")
 
 TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
 {
+    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
     REQUIRE(exists(input_file));
 
     mutex mtx;
@@ -287,6 +302,8 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
 
     SECTION("Check for competing or conflicting conditions in destructor.")
     {
+        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
+
         bool callback_invoked = false;
 
         REQUIRE(!IsUsingMocks());
@@ -321,6 +338,8 @@ TEST_CASE("Speech Factory basics", "[api][cxx]")
 {
     SECTION("Check that factories have correct parameters.")
     {
+        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
+
         auto f1 = SpeechFactory::FromEndpoint(L"1", L"invalid_key");
         auto f2 = SpeechFactory::FromEndpoint(L"2", L"invalid_key");
         // TODO: I shouldn't need to use const cast here to read a parameter!

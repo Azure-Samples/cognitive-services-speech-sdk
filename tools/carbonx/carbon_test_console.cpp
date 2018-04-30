@@ -112,6 +112,12 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
             pstrNextArg = &pconsoleArgs->m_mockWavFileName;
             fNextArgRequired = true;
         }
+        else if (PAL::wcsicmp(pszArg, L"--mockkws") == 0)
+        {
+            fShowOptions = pconsoleArgs->m_useMockKws || fNextArgRequired;
+            pconsoleArgs->m_useMockKws = true;
+            fNextArgRequired = false;
+        }
         else if (PAL::wcsicmp(pszArg, L"--unidec") == 0)
         {
             fShowOptions = pconsoleArgs->m_strUseRecoEngineProperty.length() > 0 || fNextArgRequired;
@@ -1114,7 +1120,10 @@ void CarbonTestConsole::Recognizer_StartKeywordRecognition(std::shared_ptr<T>& r
 {
     auto name = PAL::ToWString(PAL::GetTypeName(*recognizer.get()));
     ConsoleWriteLine(L"\nStartKeywordRecognitionAsync %ls...", name.c_str());
-    auto future = recognizer->StartKeywordRecognitionAsync(L"Hey Cortana");
+
+    auto model = KeywordRecognitionModel::FromFile(L"heycortana_en-US.table");
+    auto future = recognizer->StartKeywordRecognitionAsync(model);
+    
     ConsoleWriteLine(L"StartKeywordRecognitionAsync %ls... Waiting...", name.c_str());
     future.get();
     ConsoleWriteLine(L"StartKeywordRecognitionAsync %ls... Waiting... Done!\n", name.c_str());
@@ -1392,6 +1401,11 @@ void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
         }
     }
 
+    if (pconsoleArgs->m_useMockKws)
+    {
+        SpxSetMockParameterBool(LR"(CARBON-INTERNAL-MOCK-SdkKwsEngine)", true);
+    }
+
     if (!pconsoleArgs->m_strCustomSpeechModelId.empty())
     {
         SpxSetMockParameterString(LR"(SPEECH-ModelId)", pconsoleArgs->m_strCustomSpeechModelId.c_str());
@@ -1618,6 +1632,11 @@ void CarbonTestConsole::RunSample(const std::wstring& strSampleName)
     {
         ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
         Sample_HelloWorld_Intent();
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"channel9") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        Sample_Do_Channel9();
     }
     else if (PAL::wcsicmp(strSampleName.c_str(), L"Sample_Do_Speech") == 0)
     {

@@ -150,7 +150,6 @@ void CarbonTestConsole::Sample_HelloWorld_Kws()
     auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey, m_regionId);
     auto recognizer = factory->CreateSpeechRecognizer();
 
-
     recognizer->IntermediateResult += [&](const SpeechRecognitionEventArgs& e) {
         ConsoleWriteLine(L"IntermediateResult: text=%ls", e.Result.Text.c_str());
     };
@@ -159,7 +158,9 @@ void CarbonTestConsole::Sample_HelloWorld_Kws()
     };
 
     ConsoleWriteLine(L"Say something starting with \"Hey Cortana\", or press ENTER to quit.");
-    recognizer->StartKeywordRecognitionAsync(L"Hey Cortana");
+
+    auto model = KeywordRecognitionModel::FromFile(L"heycortana_en-US.table");
+    recognizer->StartKeywordRecognitionAsync(model);
 
     std::wstring input;
     ConsoleReadLine(input);
@@ -276,7 +277,8 @@ int CarbonTestConsole::Sample_Do_Intent_Kws(const wchar_t* hostName, const wchar
     auto model = LanguageUnderstandingModel::From(hostName, subscriptionKey, appId);
     recognizer->AddIntent(L"all intents", IntentTrigger::From(model, L"TV.ChangeChannel"));
 
-    recognizer->StartKeywordRecognitionAsync(L"Hey Cortana");
+    auto keywordModel = KeywordRecognitionModel::FromFile(L"heycortana_en-US.table");
+    recognizer->StartKeywordRecognitionAsync(keywordModel);
 
     printf("Say 'Hey Cortana ... something' ... (press ENTER to quit) \n");
     UNUSED(getchar());
@@ -292,3 +294,9 @@ int CarbonTestConsole::Sample_Do_Intent_Kws()
     return Sample_Do_Intent_Kws(hostName, subscriptionKey, appId);
 }
 
+int channel9();
+
+int CarbonTestConsole::Sample_Do_Channel9()
+{
+    return channel9();
+}

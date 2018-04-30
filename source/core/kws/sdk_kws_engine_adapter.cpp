@@ -48,6 +48,16 @@ public:
     SpxWAVEFORMATEX_Type m_format;
     uint64_t m_cbAudioProcessed;
 
+    Impl()
+    {
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    }
+
+    ~Impl()
+    {
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    }
+
     void InitFormat(WAVEFORMATEX* pformat)
     {
         SPX_IFTRUE_THROW_HR(HasFormat(), SPXERR_ALREADY_INITIALIZED);
@@ -67,6 +77,7 @@ public:
 
     void TermFormat()
     {
+        SPX_DBG_TRACE_FUNCTION();
         m_format = nullptr;
     }
 
@@ -78,7 +89,7 @@ private:
 
 CSpxSdkKwsEngineAdapter::CSpxSdkKwsEngineAdapter()
 {
-    SPX_DBG_TRACE_FUNCTION();
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     p_impl = new CSpxSdkKwsEngineAdapter::Impl();
     p_impl->m_cbAudioProcessed = 0;
 
@@ -88,22 +99,28 @@ CSpxSdkKwsEngineAdapter::CSpxSdkKwsEngineAdapter()
 
 CSpxSdkKwsEngineAdapter::~CSpxSdkKwsEngineAdapter()
 {
-    SPX_DBG_TRACE_FUNCTION();
-
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     delete p_impl;
 }
 
 void CSpxSdkKwsEngineAdapter::Init()
 {
-    SPX_DBG_TRACE_FUNCTION();
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     SPX_IFTRUE_THROW_HR(GetSite() == nullptr, SPXERR_UNINITIALIZED);
 
     // TODO: can we call this several times?
     keyword_spotter_initialize();
 
+
+    // Get the parameters needed for initialization
+    auto namedProperties = SpxQueryService<ISpxNamedProperties>(GetSite());
+
+    auto kwsModelPathW = namedProperties->GetStringValue(L"KWSModelPath", L"/data/carbon/heycortana_en-US.table");
+    auto kwsModelPath = std::string(kwsModelPathW.begin(), kwsModelPathW.end());
+
     // TODO: handle bad return values
     //       missing definitions in header file.
-    keyword_spotter_open(&p_impl->m_speechHandle, "/data/carbon/heycortana_en-US.table");
+    keyword_spotter_open(&p_impl->m_speechHandle, kwsModelPath.c_str());
 
     // Initializing the callbacks of the KWS
     p_impl->m_speechCallbacks.size = sizeof(p_impl->m_speechCallbacks);
@@ -121,12 +138,13 @@ void CSpxSdkKwsEngineAdapter::Init()
 
 void CSpxSdkKwsEngineAdapter::Term()
 {
-    SPX_DBG_TRACE_FUNCTION();
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     keyword_spotter_close(p_impl->m_speechHandle);
 }
 
 void CSpxSdkKwsEngineAdapter::SetFormat(WAVEFORMATEX* pformat)
 {
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     SPX_DBG_TRACE_VERBOSE_IF(pformat == nullptr, "%s - pformat == nullptr", __FUNCTION__);
     SPX_DBG_TRACE_VERBOSE_IF(pformat != nullptr, "%s\n  wFormatTag:      %s\n  nChannels:       %d\n  nSamplesPerSec:  %d\n  nAvgBytesPerSec: %d\n  nBlockAlign:     %d\n  wBitsPerSample:  %d\n  cbSize:          %d",
         __FUNCTION__,
@@ -176,16 +194,24 @@ void CSpxSdkKwsEngineAdapter::FireKeywordDetectedEvent()
 {
     SPX_DBG_TRACE_FUNCTION();
 
-    auto offset = (uint32_t)p_impl->m_cbAudioProcessed;
-    auto site = GetSite();
+    // get the data we need to fire the event to our site (including a copy of the audio data)
+    auto offset = p_impl->m_cbAudioProcessed;
+    auto size = p_impl->m_sampleLengthInBytes;
 
-    // reset the flag
+    auto audioData = SpxAllocSharedAudioBuffer(size);
+    memcpy(audioData.get(), p_impl->m_detectionBuffer, size);
+
+    // reset the flag now that we have the data
     p_impl->m_keywordDetected = false;
+
+    // now ... tell our site we found it ...
+    auto site = GetSite();
 
     std::shared_ptr<ISpxAudioProcessor> keepAlive = SpxSharedPtrFromThis<ISpxAudioProcessor>(this);
     std::packaged_task<void()> task([=](){
+
         auto keepAliveCopy = keepAlive;
-        site->KeywordDetected(this, offset);
+        site->KeywordDetected(this, offset, size, audioData);
     });
 
     auto taskFuture = task.get_future();
@@ -213,7 +239,7 @@ void CSpxSdkKwsEngineAdapter::FireKeywordDetectedEvent()
     {
         pimpl->m_detectionBuffer = (char *)pStatus->detectionBuffer;
         pimpl->m_startSampleOffsetInBytes = pStatus->startSampleOffset * sizeof(uint16_t);
-        pimpl->m_sampleLengthInBytes = (pStatus->endSampleOffset - pStatus->startSampleOffset) * sizeof(uint16_t);
+        pimpl->m_sampleLengthInBytes = (unsigned int)pStatus->detectionBufferSize;
 
         // set the flag
         pimpl->m_keywordDetected = true;

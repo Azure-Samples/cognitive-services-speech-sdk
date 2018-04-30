@@ -174,14 +174,14 @@ public:
     std::future<void> StopContinuousRecognitionAsync() override { return BaseType::StopContinuousRecognitionAsyncInternal(); }
 
     /// <summary>
-    /// Note: NOT implemented. Starts keyword recognition on a continous audio stream, until StopKeywordRecognitionAsync() is called.
+    /// Note: NOT implemented. Starts keyword recognition on a continuous audio stream, until StopKeywordRecognitionAsync() is called.
     /// </summary>
     /// Note: Key word spotting functionality is only available on the Cognitive Services Device SDK.This functionality is currently not included in the SDK itself.
-    /// <param name="keyword">Specifies the keyword phrase to be recognized.</param>
+    /// <param name="model">Specifies the keyword model to be used.</param>
     /// <returns>An asynchronous operation that starts the keyword recognition.</returns>
-    std::future<void> StartKeywordRecognitionAsync(const std::wstring& keyword) override
+    std::future<void> StartKeywordRecognitionAsync(std::shared_ptr<KeywordRecognitionModel> model) override
     {
-        UNUSED(keyword);
+        UNUSED(model);
         auto future = std::async(std::launch::async, [=]() -> void {
             SPX_THROW_ON_FAIL(SPXERR_NOT_IMPL);
         });

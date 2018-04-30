@@ -12,12 +12,12 @@ namespace Impl {
 
 CSpxIntentRecognizer::CSpxIntentRecognizer()
 {
-    SPX_DBG_TRACE_FUNCTION();
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 }
 
 CSpxIntentRecognizer::~CSpxIntentRecognizer()
 {
-    SPX_DBG_TRACE_FUNCTION();
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 }
 
 void CSpxIntentRecognizer::Init()

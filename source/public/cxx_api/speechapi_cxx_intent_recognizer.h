@@ -81,10 +81,11 @@ public:
     /// Asynchronously initiates keyword recognition operation.
     /// </summary>
     /// Note: Key word spotting functionality is only available on the Cognitive Services Device SDK.This functionality is currently not included in the SDK itself.
+    /// <param name="model">Specifies the keyword model to be used.</param>
     /// <returns>An empty future.</returns>
-    std::future<void> StartKeywordRecognitionAsync(const std::wstring& keyword) override
+    std::future<void> StartKeywordRecognitionAsync(std::shared_ptr<KeywordRecognitionModel> model) override
     {
-        return BaseType::StartKeywordRecognitionAsyncInternal(keyword);
+        return BaseType::StartKeywordRecognitionAsyncInternal(model);
     }
 
     /// <summary>

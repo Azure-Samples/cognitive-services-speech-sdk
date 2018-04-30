@@ -37,6 +37,8 @@ private:
         bool m_useInteractiveMicrophone = false;
         bool m_useMockMicrophone = false;
 
+        bool m_useMockKws = false;
+
         std::wstring m_strMockMicrophoneRealTimePercentage;
         int16_t m_mockMicrophoneRealTimePercentage = 100;
 
@@ -222,6 +224,8 @@ private:
     int Sample_Do_Intent_Kws(const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId);
     int Sample_Do_Intent_Kws();
 
+    int Sample_Do_Channel9();
+    
 
 private:
 

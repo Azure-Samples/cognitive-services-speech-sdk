@@ -17,6 +17,7 @@ set(HEADERS_PRIVATE
 
 set(SOURCES 
     "${SRC_DIR}/carbon_test_console.cpp"
+    "${SRC_DIR}/channel9.cpp"
     "${SRC_DIR}/hello_world.cpp"
     "${SRC_DIR}/hello_world_c.cpp"
     "${SRC_DIR}/stdafx.cpp"

@@ -19,6 +19,7 @@ namespace Impl {
 
 CSpxMockKwsEngineAdapter::CSpxMockKwsEngineAdapter() :
     m_cbAudioProcessed(0),
+    m_cbFireNextKeyword(0),
     m_cbLastKeywordFired(0)
 {
     SPX_DBG_TRACE_FUNCTION();
@@ -66,15 +67,16 @@ void CSpxMockKwsEngineAdapter::SetFormat(WAVEFORMATEX* pformat)
     }
 }
 
-void CSpxMockKwsEngineAdapter::ProcessAudio(AudioData_Type /* data */, uint32_t size)
+void CSpxMockKwsEngineAdapter::ProcessAudio(AudioData_Type data, uint32_t size)
 {
     SPX_DBG_TRACE_VERBOSE_IF(0, "%s(..., size=%d)", __FUNCTION__, size);
     SPX_IFTRUE_THROW_HR(!HasFormat(), SPXERR_UNINITIALIZED);
 
     m_cbAudioProcessed += size;
-    if (m_cbAudioProcessed > m_cbLastKeywordFired + m_format->nAvgBytesPerSec * 10)
+    if (m_cbAudioProcessed > m_cbFireNextKeyword)
     {
-        FireKeywordDetected();
+        // we'll pretend that the most recent packet of data is the keyword data...
+        FireKeywordDetected(data, size);
     }
 }
 
@@ -88,6 +90,8 @@ void CSpxMockKwsEngineAdapter::InitFormat(WAVEFORMATEX* pformat)
 
     m_cbAudioProcessed = 0;
     m_cbLastKeywordFired = 0;
+
+    m_cbFireNextKeyword = m_numMsBeforeVeryFirstKeyword * m_format->nAvgBytesPerSec / 1000;
 }
 
 void CSpxMockKwsEngineAdapter::TermFormat()
@@ -101,18 +105,21 @@ void CSpxMockKwsEngineAdapter::End()
     GetSite()->AdapterCompletedSetFormatStop(this);
 }
 
-void CSpxMockKwsEngineAdapter::FireKeywordDetected()
+void CSpxMockKwsEngineAdapter::FireKeywordDetected(AudioData_Type data, uint32_t size)
 {
     SPX_DBG_TRACE_FUNCTION();
     
     m_cbLastKeywordFired = m_cbAudioProcessed;
+    m_cbFireNextKeyword += m_numMsBetweenKeywords * m_format->nAvgBytesPerSec / 1000;
+
     auto offset = (uint32_t)m_cbLastKeywordFired;
     auto site = GetSite();
 
     std::shared_ptr<ISpxAudioProcessor> keepAlive = SpxSharedPtrFromThis<ISpxAudioProcessor>(this);
     std::packaged_task<void()> task([=](){
+
         auto keepAliveCopy = keepAlive;
-        site->KeywordDetected(this, offset);
+        site->KeywordDetected(this, offset, size, data);
     });
 
     auto taskFuture = task.get_future();

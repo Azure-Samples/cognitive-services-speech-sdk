@@ -414,14 +414,14 @@ SPXAPI Recognizer_StopContinuousRecognitionAsync_WaitFor(SPXASYNCHANDLE hasync, 
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI Recognizer_StartKeywordRecognition(SPXRECOHANDLE hreco, const wchar_t* keyword)
+SPXAPI Recognizer_StartKeywordRecognition(SPXRECOHANDLE hreco, SPXKEYWORDHANDLE hkeyword)
 {
     SPX_INIT_HR(hr);   
 
     SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
     if (SPX_SUCCEEDED(hr))
     {
-        SPX_REPORT_ON_FAIL(hr = Recognizer_StartKeywordRecognitionAsync(hreco, keyword, &hasync));
+        SPX_REPORT_ON_FAIL(hr = Recognizer_StartKeywordRecognitionAsync(hreco, hkeyword, &hasync));
     }
 
     if (SPX_SUCCEEDED(hr))
@@ -439,7 +439,7 @@ SPXAPI Recognizer_StartKeywordRecognition(SPXRECOHANDLE hreco, const wchar_t* ke
     SPX_RETURN_HR(hr);
 }
 
-SPXAPI Recognizer_StartKeywordRecognitionAsync(SPXRECOHANDLE hreco, const wchar_t* keyword, SPXASYNCHANDLE* phasync)
+SPXAPI Recognizer_StartKeywordRecognitionAsync(SPXRECOHANDLE hreco, SPXKEYWORDHANDLE hkeyword, SPXASYNCHANDLE* phasync)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -448,7 +448,10 @@ SPXAPI Recognizer_StartKeywordRecognitionAsync(SPXRECOHANDLE hreco, const wchar_
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         auto recognizer = (*recohandles)[hreco];
 
-        auto asyncop = recognizer->StartKeywordRecognitionAsync(keyword);
+        auto keywordhandles =  CSpxSharedPtrHandleTableManager::Get<ISpxKwsModel, SPXKEYWORDHANDLE>();
+        auto model = (*keywordhandles)[hkeyword];
+
+        auto asyncop = recognizer->StartKeywordRecognitionAsync(model);
         auto ptr = std::make_shared<CSpxAsyncOp<void>>(std::move(asyncop));
 
         auto asynchandles = CSpxSharedPtrHandleTableManager::Get<CSpxAsyncOp<void>, SPXASYNCHANDLE>();

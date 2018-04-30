@@ -384,6 +384,15 @@ public:
 };
 
 
+class ISpxKwsModel : public ISpxInterfaceBaseFor<ISpxKwsModel>
+{
+public:
+
+    virtual void InitFromFile(const wchar_t* fileName) = 0;
+    virtual std::wstring GetFileName() const = 0;
+};
+
+
 enum class Reason { Recognized, IntermediateResult, NoMatch, Canceled, OtherRecognizer };
 
 enum class ResultType { Unknown, Speech, TranslationText, TranslationSynthesis };
@@ -422,7 +431,7 @@ public:
     virtual CSpxAsyncOp<void> StartContinuousRecognitionAsync() = 0;
     virtual CSpxAsyncOp<void> StopContinuousRecognitionAsync() = 0;
 
-    virtual CSpxAsyncOp<void> StartKeywordRecognitionAsync(const std::wstring& keyword) = 0;
+    virtual CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) = 0;
     virtual CSpxAsyncOp<void> StopKeywordRecognitionAsync() = 0;
 };
 
@@ -522,7 +531,7 @@ public:
     virtual CSpxAsyncOp<void> StartContinuousRecognitionAsync() = 0;
     virtual CSpxAsyncOp<void> StopContinuousRecognitionAsync() = 0;
 
-    virtual CSpxAsyncOp<void> StartKeywordRecognitionAsync(const std::wstring& keyword) = 0;
+    virtual CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) = 0;
     virtual CSpxAsyncOp<void> StopKeywordRecognitionAsync() = 0;
 };
 
@@ -600,7 +609,7 @@ class ISpxKwsEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxKwsEngineAdapte
 {
 public:
 
-    virtual void KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t offset) = 0;
+    virtual void KeywordDetected(ISpxKwsEngineAdapter* adapter, uint64_t startOffset, uint32_t size, SpxSharedAudioBuffer_Type audioBuffer) = 0;
     virtual void AdapterCompletedSetFormatStop(ISpxKwsEngineAdapter* adapter) = 0;
 };
 
@@ -621,7 +630,7 @@ class ISpxEventArgsFactory : public ISpxInterfaceBaseFor<ISpxEventArgsFactory>
 public:
 
     virtual std::shared_ptr<ISpxSessionEventArgs> CreateSessionEventArgs(const std::wstring& sessionId) = 0;
-    virtual std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgsWithOffset(const std::wstring& sessionId, uint64_t offset) = 0;
+    virtual std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, uint64_t offset) = 0;
     virtual std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) = 0;
 };
 

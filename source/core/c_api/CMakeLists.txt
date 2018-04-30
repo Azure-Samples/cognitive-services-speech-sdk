@@ -23,6 +23,7 @@ set(SOURCES
     "${SRC_DIR}/speechapi_c_intent_result.cpp"
     "${SRC_DIR}/speechapi_c_intent_trigger.cpp"
     "${SRC_DIR}/speechapi_c_language_understanding_model.cpp"
+    "${SRC_DIR}/speechapi_c_keyword_recognition_model.cpp"
     "${SRC_DIR}/speechapi_c_translation_recognizer.cpp"
     "${SRC_DIR}/speechapi_c_translation_result.cpp"
     "${SRC_DIR}/speechapi_c_recognizer.cpp"

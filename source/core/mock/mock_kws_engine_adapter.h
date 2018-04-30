@@ -59,13 +59,18 @@ private:
     void TermFormat();
     void End();
 
-    void FireKeywordDetected();
+    void FireKeywordDetected(AudioData_Type data, uint32_t size);
 
 
 private:
 
+    const uint64_t m_numMsBeforeVeryFirstKeyword = 200;
+    const uint64_t m_numMsBetweenKeywords = 5000;
+
     SpxWAVEFORMATEX_Type m_format;
     uint64_t m_cbAudioProcessed;
+
+    uint64_t m_cbFireNextKeyword;
     uint64_t m_cbLastKeywordFired;
 };
 

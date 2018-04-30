@@ -53,8 +53,8 @@ SPXAPI Recognizer_StopContinuousRecognition(SPXRECOHANDLE hreco);
 SPXAPI Recognizer_StopContinuousRecognitionAsync(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync);
 SPXAPI Recognizer_StopContinuousRecognitionAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t milliseconds);
 
-SPXAPI Recognizer_StartKeywordRecognition(SPXRECOHANDLE hreco, const wchar_t* keyword);
-SPXAPI Recognizer_StartKeywordRecognitionAsync(SPXRECOHANDLE hreco, const wchar_t* keyword, SPXASYNCHANDLE* phasync);
+SPXAPI Recognizer_StartKeywordRecognition(SPXRECOHANDLE hreco, SPXKEYWORDHANDLE hkeyword);
+SPXAPI Recognizer_StartKeywordRecognitionAsync(SPXRECOHANDLE hreco, SPXKEYWORDHANDLE hkeyword, SPXASYNCHANDLE* phasync);
 SPXAPI Recognizer_StartKeywordRecognitionAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t milliseconds);
 
 SPXAPI Recognizer_StopKeywordRecognition(SPXRECOHANDLE hreco);

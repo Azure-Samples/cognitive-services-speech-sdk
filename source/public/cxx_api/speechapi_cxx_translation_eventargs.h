@@ -37,6 +37,7 @@ public:
         m_result(std::make_shared<TranslationTextResult>(ResultHandleFromEventHandle(hevent))),
         Result(*m_result.get())
     {
+        UNUSED(m_hevent);
         SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hevent);
     };
 
@@ -83,6 +84,7 @@ public:
         m_result(std::make_shared<TranslationSynthesisResult>(SynthesisResultHandleFromEventHandle(hevent))),
         Result(*m_result.get())
     {
+        UNUSED(m_hevent);
         SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hevent);
     };
 

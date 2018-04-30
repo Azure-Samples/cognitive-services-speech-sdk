@@ -119,6 +119,13 @@ public:
     /// </summary>
     /// <param name="value">Value to set</param>
     /// <returns>the value that was set</returns>
+    const wchar_t* operator=(const wchar_t* value) { SetString(value); return value; }
+
+    /// <summary>
+    /// Assignment operator for a value that represents a string.
+    /// </summary>
+    /// <param name="value">Value to set</param>
+    /// <returns>the value that was set</returns>
     const std::wstring& operator=(const std::wstring& value) { SetString(value); return value; }
 
     /// <summary>

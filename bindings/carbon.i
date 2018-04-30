@@ -42,6 +42,7 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Intent::IntentTrigger)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Intent::LanguageUnderstandingModel)
+%shared_ptr(Microsoft::CognitiveServices::Speech::KeywordRecognitionModel)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Translation::TranslationTextResult)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationTextResult, Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultEventArgs>)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer)
@@ -97,9 +98,9 @@
         ($self)->StopContinuousRecognitionAsync().get();
     }
 
-    void StartKeywordRecognition(const std::wstring& keyword)
+    void StartKeywordRecognition(std::shared_ptr<KeywordRecognitionModel> model)
     {
-        ($self)->StartKeywordRecognitionAsync(keyword).get();
+        ($self)->StartKeywordRecognitionAsync(model).get();
     }
 
     void StopKeywordRecognition()
@@ -124,9 +125,9 @@
         return FutureWrapper<void>(std::move(future));
     }
 
-    FutureWrapper<void> StartKeywordRecognitionAsync(const std::wstring& keyword)
+    FutureWrapper<void> StartKeywordRecognitionAsync(std::shared_ptr<KeywordRecognitionModel> model)
     {
-        auto future = ($self)->StartKeywordRecognitionAsync(keyword);
+        auto future = ($self)->StartKeywordRecognitionAsync(model);
         return FutureWrapper<void>(std::move(future));
     }
 
@@ -153,9 +154,9 @@
         ($self)->StopContinuousRecognitionAsync().get();
     }
 
-    void StartKeywordRecognition(const std::wstring& keyword)
+    void StartKeywordRecognition(std::shared_ptr<KeywordRecognitionModel> model)
     {
-        ($self)->StartKeywordRecognitionAsync(keyword).get();
+        ($self)->StartKeywordRecognitionAsync(model).get();
     }
 
     void StopKeywordRecognition()
@@ -180,9 +181,9 @@
         return FutureWrapper<void>(std::move(future));
     }
 
-    FutureWrapper<void> StartKeywordRecognitionAsync(const std::wstring& keyword)
+    FutureWrapper<void> StartKeywordRecognitionAsync(std::shared_ptr<KeywordRecognitionModel> model)
     {
-        auto future = ($self)->StartKeywordRecognitionAsync(keyword);
+        auto future = ($self)->StartKeywordRecognitionAsync(model);
         return FutureWrapper<void>(std::move(future));
     }
 
@@ -209,6 +210,16 @@
         ($self)->StopContinuousRecognitionAsync().get();
     }
 
+    void StartKeywordRecognition(std::shared_ptr<KeywordRecognitionModel> model)
+    {
+        ($self)->StartKeywordRecognitionAsync(model).get();
+    }
+
+    void StopKeywordRecognition()
+    {
+        ($self)->StopKeywordRecognitionAsync().get();
+    }
+
     FutureWrapper<TranslationTextResultPtr> RecognizeAsync() {
         auto future = ($self)->RecognizeAsync();
         return FutureWrapper<TranslationTextResultPtr>(std::move(future));
@@ -226,9 +237,9 @@
         return FutureWrapper<void>(std::move(future));
     }
 
-    FutureWrapper<void> StartKeywordRecognitionAsync(const std::wstring& keyword)
+    FutureWrapper<void> StartKeywordRecognitionAsync(std::shared_ptr<KeywordRecognitionModel> model)
     {
-        auto future = ($self)->StartKeywordRecognitionAsync(keyword);
+        auto future = ($self)->StartKeywordRecognitionAsync(model);
         return FutureWrapper<void>(std::move(future));
     }
 
@@ -348,6 +359,8 @@
 %template(SessionParameterValueCollectionBase) Microsoft::CognitiveServices::Speech::HandleValueCollection<SPXSESSIONHANDLE, Microsoft::CognitiveServices::Speech::SessionParameterValue>;
 
 %include <speechapi_cxx_audioinputstream.h>
+%include <speechapi_cxx_keyword_recognition_model.h>
+
 %include <speechapi_cxx_eventargs.h>
 %include <speechapi_cxx_eventsignal.h>
 

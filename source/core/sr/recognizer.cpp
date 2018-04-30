@@ -16,12 +16,12 @@ CSpxRecognizer::CSpxRecognizer() :
     ISpxRecognizerEvents(nullptr, nullptr),
     m_fEnabled(true)
 {
-    SPX_DBG_TRACE_FUNCTION();
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 }
 
 CSpxRecognizer::~CSpxRecognizer()
 {
-    SPX_DBG_TRACE_FUNCTION();
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     TermDefaultSession();
 }
 
@@ -90,9 +90,9 @@ CSpxAsyncOp<void> CSpxRecognizer::StopContinuousRecognitionAsync()
     return m_defaultSession->StopContinuousRecognitionAsync();
 }
 
-CSpxAsyncOp<void> CSpxRecognizer::StartKeywordRecognitionAsync(const std::wstring& keyword)
+CSpxAsyncOp<void> CSpxRecognizer::StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model)
 {
-    return m_defaultSession->StartKeywordRecognitionAsync(keyword);
+    return m_defaultSession->StartKeywordRecognitionAsync(model);
 }
 
 CSpxAsyncOp<void> CSpxRecognizer::StopKeywordRecognitionAsync()
@@ -190,7 +190,9 @@ void CSpxRecognizer::FireRecoEvent(ISpxRecognizerEvents::RecoEvent_Type* pevent,
     {
         SPX_DBG_ASSERT(GetSite());
         auto factory = SpxQueryService<ISpxEventArgsFactory>(GetSite());
-        auto recoEvent = (result != nullptr) ? factory->CreateRecognitionEventArgs(sessionId, result) : factory->CreateRecognitionEventArgsWithOffset(sessionId, offset);
+        auto recoEvent = (result != nullptr) 
+            ? factory->CreateRecognitionEventArgs(sessionId, result) 
+            : factory->CreateRecognitionEventArgs(sessionId, offset);
         pevent->Signal(recoEvent);
     }
 }
@@ -206,6 +208,7 @@ void CSpxRecognizer::EnsureDefaultSession()
 
 void CSpxRecognizer::TermDefaultSession()
 {
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     if (m_defaultSession != nullptr)
     {
         m_defaultSession->RemoveRecognizer(this);

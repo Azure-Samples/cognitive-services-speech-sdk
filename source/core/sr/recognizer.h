@@ -52,7 +52,7 @@ public:
     CSpxAsyncOp<void> StartContinuousRecognitionAsync() override;
     CSpxAsyncOp<void> StopContinuousRecognitionAsync() override;
 
-    CSpxAsyncOp<void> StartKeywordRecognitionAsync(const std::wstring& keyword) override;
+    CSpxAsyncOp<void> StartKeywordRecognitionAsync(std::shared_ptr<ISpxKwsModel> model) override;
     CSpxAsyncOp<void> StopKeywordRecognitionAsync() override;
 
     // --- ISpxSessionFromRecognizer

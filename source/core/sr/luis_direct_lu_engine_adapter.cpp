@@ -83,7 +83,7 @@ std::list<std::string> CSpxLuisDirectEngineAdapter::GetListenForList()
             // Format the ListenFor element...
             std::string listenFor;
             listenFor += "{luis:";
-            listenFor += PAL::ToString(appId);
+            listenFor += PAL::ToString(appId) + "-PRODUCTION";
             if (!intentName.empty())
             {
                 listenFor += "#";

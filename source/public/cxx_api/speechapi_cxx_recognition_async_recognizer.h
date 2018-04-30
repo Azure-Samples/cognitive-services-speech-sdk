@@ -13,6 +13,7 @@
 #include <speechapi_cxx_recognizer.h>
 #include <speechapi_cxx_session_eventargs.h>
 #include <speechapi_cxx_recognition_eventargs.h>
+#include <speechapi_cxx_keyword_recognition_model.h>
 
 
 namespace Microsoft {
@@ -50,8 +51,10 @@ public:
     /// <summary>
     /// Asynchronously initiates keyword recognition operation.
     /// </summary>
-    /// <returns>An empty future.</returns>
-    virtual std::future<void> StartKeywordRecognitionAsync(const std::wstring& keyword) = 0;
+    /// Note: Key word spotting functionality is only available on the Cognitive Services Device SDK.This functionality is currently not included in the SDK itself.
+    /// <param name="model">The keyword recognition model that specifies the keyword to be recognized.</param>
+    /// <returns>An asynchronous operation that starts the keyword recognition.</returns>
+    virtual std::future<void> StartKeywordRecognitionAsync(std::shared_ptr<KeywordRecognitionModel> model) = 0;
 
     /// <summary>
     /// Asynchronously terminates ongoing keyword recognition operation.
@@ -212,13 +215,14 @@ protected:
         return future;
     };
 
-    std::future<void> StartKeywordRecognitionAsyncInternal(const std::wstring& keyword)
+    std::future<void> StartKeywordRecognitionAsyncInternal(std::shared_ptr<KeywordRecognitionModel> model)
     {
         auto future = std::async(std::launch::async, [=]() -> void {
             SPX_INIT_HR(hr);
             SPX_THROW_ON_FAIL(hr = Recognizer_AsyncHandle_Close(m_hasyncStartKeyword)); // close any unfinished previous attempt
 
-            SPX_EXITFN_ON_FAIL(hr = Recognizer_StartKeywordRecognitionAsync(m_hreco, keyword.c_str(), &m_hasyncStartKeyword));
+            auto hkeyword = (SPXKEYWORDHANDLE)(*model.get());
+            SPX_EXITFN_ON_FAIL(hr = Recognizer_StartKeywordRecognitionAsync(m_hreco, hkeyword, &m_hasyncStartKeyword));
             SPX_EXITFN_ON_FAIL(hr = Recognizer_StartKeywordRecognitionAsync_WaitFor(m_hasyncStartKeyword, UINT32_MAX));
 
             SPX_EXITFN_CLEANUP:
