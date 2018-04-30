@@ -18,10 +18,12 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     {
         internal TranslationTextResult(Internal.TranslationTextResult result) : base(result)
         {
+            resultImpl = result;
+
             Trace.Assert((int)TranslationTextStatus.Success == (int)Internal.TranslationTextStatus.Success);
             Trace.Assert((int)TranslationTextStatus.Error == (int)Internal.TranslationTextStatus.Error);
-
             TextStatus = (TranslationTextStatus)(result.TextStatus);
+
             translationTextResultMap = new Dictionary<string, string>();
             //Todo: add translation result
             var map = result.Translations;
@@ -67,6 +69,9 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             }
             return text;
         }
+
+        // Hold the refernce
+        private Internal.TranslationTextResult resultImpl;
 
         private Dictionary<string, string> translationTextResultMap;
     }

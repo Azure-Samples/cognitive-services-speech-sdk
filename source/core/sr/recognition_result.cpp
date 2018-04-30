@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "recognition_result.h"
 #include "guid_utils.h"
-#include "named_properties_constants.h"
 
 using namespace std;
 

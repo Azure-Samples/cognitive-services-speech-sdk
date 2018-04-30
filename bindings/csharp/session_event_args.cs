@@ -9,12 +9,13 @@ namespace Microsoft.CognitiveServices.Speech
     /// <summary>
     /// Defines payload for session events like SessionStarted/Stopped, SoundStarted/Stopped.
     /// </summary>
-    public class SessionEventArgs : System.EventArgs
+    public sealed class SessionEventArgs : System.EventArgs
     {
         internal SessionEventArgs(SessionEventType type,  Internal.SessionEventArgs arg)
         {
-            this.SessionId = arg.SessionId;
-            this.EventType = type;
+            eventArgImpl = arg;
+            SessionId = arg.SessionId;
+            EventType = type;
         }
 
         /// <summary>
@@ -35,5 +36,8 @@ namespace Microsoft.CognitiveServices.Speech
         {
             return string.Format(CultureInfo.InvariantCulture, "EventType: {0} SessionId: {1}.", EventType, SessionId);
         }
+
+        // Hold the reference
+        Internal.SessionEventArgs eventArgImpl;
     }
 }

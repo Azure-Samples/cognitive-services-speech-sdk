@@ -4,6 +4,7 @@
 //
 
 using System;
+using System.Globalization;
 
 namespace Microsoft.CognitiveServices.Speech
 {
@@ -152,6 +153,184 @@ namespace Microsoft.CognitiveServices.Speech
 
             private Recognizer recognizer;
             private RecognitionEventType eventType;
+        }
+
+        internal class RecognizerParametersImpl : IRecognizerParameters
+        {
+            private Internal.RecognizerParameterValueCollection recognizerParameterImpl;
+
+            public RecognizerParametersImpl(Internal.RecognizerParameterValueCollection internalRecognizerParameters)
+            {
+                recognizerParameterImpl = internalRecognizerParameters;
+            }
+
+            public bool Is<T>(RecognizerParameterKind propertyKind)
+            {
+                if (typeof(T) == typeof(string))
+                {
+                    return recognizerParameterImpl.Get((Internal.RecognizerParameter)propertyKind).IsString();
+                }
+                else if (typeof(T) == typeof(int))
+                {
+                    return recognizerParameterImpl.Get((Internal.RecognizerParameter)propertyKind).IsNumber();
+                }
+                else if (typeof(T) == typeof(bool))
+                {
+                    return recognizerParameterImpl.Get((Internal.RecognizerParameter)propertyKind).IsBool();
+                }
+                else
+                {
+                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
+                }
+            }
+
+            public bool Is<T>(string propertyName)
+            {
+                if (typeof(T) == typeof(string))
+                {
+                    return recognizerParameterImpl.Get(propertyName).IsString();
+                }
+                else if (typeof(T) == typeof(int))
+                {
+                    return recognizerParameterImpl.Get(propertyName).IsNumber();
+                }
+                else if (typeof(T) == typeof(bool))
+                {
+                    return recognizerParameterImpl.Get(propertyName).IsBool();
+                }
+                else
+                {
+                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
+                }
+            }
+
+            public T Get<T>(RecognizerParameterKind propertyKind)
+            {
+                T defaultT;
+                if (typeof(T) == typeof(string))
+                {
+                    defaultT = (T)Convert.ChangeType(string.Empty, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(int))
+                {
+                    defaultT = (T)Convert.ChangeType(0, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(bool))
+                {
+                    defaultT = (T)Convert.ChangeType(false, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
+                }
+
+                return Get<T>(propertyKind, defaultT);
+            }
+
+            public T Get<T>(string propertyName)
+            {
+                T defaultT;
+                if (typeof(T) == typeof(string))
+                {
+                    defaultT = (T)Convert.ChangeType(string.Empty, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(int))
+                {
+                    defaultT = (T)Convert.ChangeType(0, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(bool))
+                {
+                    defaultT = (T)Convert.ChangeType(false, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
+                }
+
+                return Get<T>(propertyName, defaultT);
+            }
+
+            public T Get<T>(RecognizerParameterKind propertyKind, T defaultValue)
+            {
+                if (typeof(T) == typeof(string))
+                {
+                    var defaultInT = (string)Convert.ChangeType(defaultValue, typeof(string), CultureInfo.InvariantCulture);
+                    var ret = recognizerParameterImpl.Get((Internal.RecognizerParameter)propertyKind).GetString(defaultInT);
+                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(int))
+                {
+                    var defaultInT = (int)Convert.ChangeType(defaultValue, typeof(int), CultureInfo.InvariantCulture);
+                    var ret = recognizerParameterImpl.Get((Internal.RecognizerParameter)propertyKind).GetNumber(defaultInT);
+                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(bool))
+                {
+                    var defaultInT = (bool)Convert.ChangeType(defaultValue, typeof(bool), CultureInfo.InvariantCulture);
+                    var ret = recognizerParameterImpl.Get((Internal.RecognizerParameter)propertyKind).GetBool(defaultInT);
+                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
+                }
+            }
+
+            public T Get<T>(string propertyName, T defaultValue)
+            {
+                if (typeof(T) == typeof(string))
+                {
+                    var defaultInT = (string)Convert.ChangeType(defaultValue, typeof(string), CultureInfo.InvariantCulture);
+                    var ret = recognizerParameterImpl.Get(propertyName).GetString(defaultInT);
+                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(int))
+                {
+                    var defaultInT = (int)Convert.ChangeType(defaultValue, typeof(int), CultureInfo.InvariantCulture);
+                    var ret = recognizerParameterImpl.Get(propertyName).GetNumber(defaultInT);
+                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(bool))
+                {
+                    var defaultInT = (bool)Convert.ChangeType(defaultValue, typeof(bool), CultureInfo.InvariantCulture);
+                    var ret = recognizerParameterImpl.Get(propertyName).GetBool(defaultInT);
+                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
+                }
+            }
+
+            public void Set(RecognizerParameterKind propertyKind, string value)
+            {
+                recognizerParameterImpl.Get((Internal.RecognizerParameter)propertyKind).SetString(value);
+            }
+
+            public void Set(string propertyName, string value)
+            {
+                recognizerParameterImpl.Get(propertyName).SetString(value);
+            }
+
+            public void Set(RecognizerParameterKind propertyKind, int value)
+            {
+                recognizerParameterImpl.Get((Internal.RecognizerParameter)propertyKind).SetNumber(value);
+            }
+
+            public void Set(string propertyName, int value)
+            {
+                recognizerParameterImpl.Get(propertyName).SetNumber(value);
+            }
+
+            public void Set(RecognizerParameterKind propertyKind, bool value)
+            {
+                recognizerParameterImpl.Get((Internal.RecognizerParameter)propertyKind).SetBool(value);
+            }
+
+            public void Set(string propertyName, bool value)
+            {
+                recognizerParameterImpl.Get(propertyName).SetBool(value);
+            }
         }
     }
 }

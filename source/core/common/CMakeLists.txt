@@ -21,7 +21,6 @@ set(HEADERS
     "${INC_DIR}/http_helpers.h"
     "${INC_DIR}/urlencode_helpers.h"
     "${INC_DIR}/mock_controller.h"
-    "${INC_DIR}/named_properties_constants.h"
     "${INC_DIR}/named_properties_impl.h"
     "${INC_DIR}/resource_manager.h"
     "${INC_DIR}/service_helpers.h"

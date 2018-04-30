@@ -16,6 +16,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     {
         internal TranslationTextResultEventArgs(Microsoft.CognitiveServices.Speech.Internal.TranslationTextResultEventArgs e)
         {
+            eventArgImpl = e;
             Result = new TranslationTextResult(e.Result);
             SessionId = e.SessionId;
         }
@@ -38,5 +39,8 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         {
             return string.Format(CultureInfo.InvariantCulture,"SessionId:{0} Result:{1}.", SessionId, Result.ToString());
         }
+
+        // Hold the reference
+        Microsoft.CognitiveServices.Speech.Internal.TranslationTextResultEventArgs eventArgImpl;
     }
 }

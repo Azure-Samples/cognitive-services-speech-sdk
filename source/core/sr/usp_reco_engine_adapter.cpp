@@ -12,7 +12,6 @@
 #include <inttypes.h>
 #include <cstring>
 #include "service_helpers.h"
-#include "named_properties_constants.h"
 #include "exception.h"
 
 

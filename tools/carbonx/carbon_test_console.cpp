@@ -1682,9 +1682,9 @@ void CarbonTestConsole::RunInteractivePrompt()
         {
             ProcessConsoleInput(strInput.c_str());
         }
-        catch (NotYetImplementedException e)
+        catch (std::exception ex)
         {
-            SPX_TRACE_ERROR("CarbonX: Not Yet Implemented!!");
+            SPX_TRACE_ERROR("CarbonX: Exception caught: %s!", ex.what());
         }
     }
 }

@@ -129,7 +129,7 @@ namespace MicrosoftSpeechSDKSamples
             reco.SynthesisResultReceived += MySynthesisEventHandler;
             reco.RecognitionErrorRaised += MyErrorEventHandler;
             reco.OnSpeechDetectectedEvent += MySpeechEndDetectedHandler;
-            reco.Parameters.Set(ParameterNames.SpeechModelId, "d4501bd5-a593-45bf-82a6-36ffc59d80a5");
+            reco.Parameters.Set(SpeechParameterNames.DeploymentId, "d4501bd5-a593-45bf-82a6-36ffc59d80a5");
 
             translationEndTaskCompletionSource = new TaskCompletionSource<int>();
 

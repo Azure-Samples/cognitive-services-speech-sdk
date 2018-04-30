@@ -9,11 +9,8 @@
 #include "handle_helpers.h"
 #include "platform.h"
 #include "string_utils.h"
-#include "named_properties_constants.h"
-
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
-
 
 SPXAPI_(bool) Recognizer_Handle_IsValid(SPXRECOHANDLE hreco)
 {

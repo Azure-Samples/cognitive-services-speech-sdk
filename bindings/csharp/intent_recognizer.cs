@@ -48,6 +48,8 @@ namespace Microsoft.CognitiveServices.Speech.Intent
             recoImpl.SessionStopped.Connect(sessionStoppedHandler);
             recoImpl.SpeechStartDetected.Connect(speechStartDetectedHandler);
             recoImpl.SpeechEndDetected.Connect(speechEndDetectedHandler);
+
+            Parameters = new RecognizerParametersImpl(recoImpl.Parameters);
         }
 
         /// <summary>
@@ -57,14 +59,14 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         {
             get
             {
-                return Parameters.Get<string>(ParameterNames.SpeechRecognitionLanguage);
+                return Parameters.Get<string>(SpeechParameterNames.RecognitionLanguage);
             }
         }
 
         /// <summary>
         /// The collection of parameters and their values defined for this <see cref="IntentRecognizer"/>.
         /// </summary>
-        public ParameterCollection<IntentRecognizer> Parameters { get; }
+        public IRecognizerParameters Parameters { get; }
 
         /// <summary>
         /// Starts intent recognition, and stops after the first utterance is recognized. The task returns the recognition text and intent as result.
@@ -138,7 +140,6 @@ namespace Microsoft.CognitiveServices.Speech.Intent
                 finalResultHandler?.Dispose();
                 errorHandler?.Dispose();
                 recoImpl?.Dispose();
-                Parameters?.Dispose();
                 disposed = true;
                 base.Dispose(disposing);
             }

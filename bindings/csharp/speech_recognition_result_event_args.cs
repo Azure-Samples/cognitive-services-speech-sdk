@@ -8,12 +8,13 @@ namespace Microsoft.CognitiveServices.Speech
     /// <summary>
     /// Define payload of speech intermediate/final result events.
     /// </summary>
-    public class SpeechRecognitionResultEventArgs : System.EventArgs
+    public sealed class SpeechRecognitionResultEventArgs : System.EventArgs
     {
-        internal SpeechRecognitionResultEventArgs(Microsoft.CognitiveServices.Speech.Internal.SpeechRecognitionEventArgs e)
+        internal SpeechRecognitionResultEventArgs(Internal.SpeechRecognitionEventArgs e)
         {
-            this.Result = new SpeechRecognitionResult(e.Result);
-            this.SessionId = e.SessionId;
+            evenArgImpl = e;
+            Result = new SpeechRecognitionResult(e.Result);
+            SessionId = e.SessionId;
         }
 
         /// <summary>
@@ -34,5 +35,8 @@ namespace Microsoft.CognitiveServices.Speech
         {
             return string.Format(CultureInfo.InvariantCulture,"SessionId:{0} ResultId:{1} Status:{2} Recognized text:<{3}>.", SessionId, Result.ResultId, Result.RecognitionStatus, Result.RecognizedText);
         }
+
+        // Hold the reference
+        private Internal.SpeechRecognitionEventArgs evenArgImpl;
     }
 }

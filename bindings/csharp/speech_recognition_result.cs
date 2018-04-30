@@ -2,6 +2,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+
+using System;
 using System.Diagnostics;
 using System.Globalization;
 
@@ -14,16 +16,21 @@ namespace Microsoft.CognitiveServices.Speech
     {
         internal SpeechRecognitionResult(Internal.RecognitionResult result)
         {
+            Trace.Assert((int)ResultPropertyKind.Json == (int)Internal.ResultProperty.Json);
+            Trace.Assert((int)ResultPropertyKind.LanguageUnderstandingJson == (int)Internal.ResultProperty.LanguageUnderstandingJson);
+            Trace.Assert((int)ResultPropertyKind.ErrorDetails == (int)Internal.ResultProperty.ErrorDetails);
+
             Trace.Assert((int)SpeechRecognitionStatus.Recognized == (int)Internal.Reason.Recognized);
             Trace.Assert((int)SpeechRecognitionStatus.IntermediateResult == (int)Internal.Reason.IntermediateResult);
             Trace.Assert((int)SpeechRecognitionStatus.NoMatch == (int)Internal.Reason.NoMatch);
             Trace.Assert((int)SpeechRecognitionStatus.Canceled == (int)Internal.Reason.Canceled);
             Trace.Assert((int)SpeechRecognitionStatus.OtherRecognizer == (int)Internal.Reason.OtherRecognizer);
 
-            this.ResultId = result.ResultId;
-            this.RecognizedText = result.Text;
+            resultImpl = result;
+            ResultId = result.ResultId;
+            RecognizedText = result.Text;
             this.RecognitionStatus = (SpeechRecognitionStatus)((int)result.Reason);
-            this.properties = result.Properties;
+            Properties = new ResultPropertiesImpl(result.Properties);
         }
 
         /// <summary>
@@ -45,12 +52,12 @@ namespace Microsoft.CognitiveServices.Speech
         /// In case of an unsuccessful recognition, provides a brief description of an occurred error.
         /// This field is only filled-out if the recognition status (<see cref="RecognitionStatus"/>) is set to Canceled.
         /// </summary>
-        public string RecognitionFailureReason { get { return properties.Get(Internal.ResultProperty.ErrorDetails).GetString(); } }
+        public string RecognitionFailureReason { get { return Properties.Get<string>(ResultPropertyKind.ErrorDetails); } }
 
         /// <summary>
-        /// A string containing Json serialized recognition result as it was received from the service.
+        /// Contains properties of the results.
         /// </summary>
-        public string Json { get { return properties.Get(Internal.ResultProperty.Json).GetString(); } }
+        public IResultProperties Properties;
 
         /// <summary>
         /// Returns a string that represents the speech recognition result.
@@ -58,9 +65,160 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A string that represents the speech recognition result.</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture,"ResultId:{0} Status:{1} Recognized text:<{2}>.", ResultId, RecognitionStatus, RecognizedText);
+            return string.Format(CultureInfo.InvariantCulture,"ResultId:{0} Status:{1} Recognized text:<{2}>. Json:{3}", 
+                ResultId, RecognitionStatus, RecognizedText, Properties.Get<string>(ResultPropertyKind.Json));
         }
 
-        private Internal.ResultPropertyValueCollection properties;
+        // Hold the reference.
+        private Internal.RecognitionResult resultImpl;
+
+        private class ResultPropertiesImpl : IResultProperties
+        {
+            private Internal.ResultPropertyValueCollection resultPropertyImpl;
+
+            public ResultPropertiesImpl(Internal.ResultPropertyValueCollection internalProperty)
+            {
+                resultPropertyImpl = internalProperty; 
+            }
+
+            public bool Is<T>(ResultPropertyKind propertyKind)
+            {
+                if (typeof(T) == typeof(string))
+                {
+                    return resultPropertyImpl.Get((Internal.ResultProperty)propertyKind).IsString();
+                }
+                else if (typeof(T) == typeof(int))
+                {
+                    return resultPropertyImpl.Get((Internal.ResultProperty)propertyKind).IsNumber();
+                }
+                else if (typeof(T) == typeof(bool))
+                {
+                    return resultPropertyImpl.Get((Internal.ResultProperty)propertyKind).IsBool();
+                }
+                else
+                {
+                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
+                }
+            }
+
+            public bool Is<T>(string propertyName)
+            {
+                if (typeof(T) == typeof(string))
+                {
+                    return resultPropertyImpl.Get(propertyName).IsString();
+                }
+                else if (typeof(T) == typeof(int))
+                {
+                    return resultPropertyImpl.Get(propertyName).IsNumber();
+                }
+                else if (typeof(T) == typeof(bool))
+                {
+                    return resultPropertyImpl.Get(propertyName).IsBool();
+                }
+                else
+                {
+                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
+                }
+            }
+
+            public T Get<T>(ResultPropertyKind propertyKind)
+            {
+                T defaultT;
+                if (typeof(T) == typeof(string))
+                {
+                    defaultT = (T)Convert.ChangeType(string.Empty, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(int))
+                {
+                    defaultT = (T)Convert.ChangeType(0, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(bool))
+                {
+                    defaultT = (T)Convert.ChangeType(false, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
+                }
+
+                return Get<T>(propertyKind, defaultT);
+            }
+
+            public T Get<T>(string propertyName)
+            {
+                T defaultT;
+                if (typeof(T) == typeof(string))
+                {
+                    defaultT = (T)Convert.ChangeType(string.Empty, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(int))
+                {
+                    defaultT = (T)Convert.ChangeType(0, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(bool))
+                {
+                    defaultT = (T)Convert.ChangeType(false, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
+                }
+
+                return Get<T>(propertyName, defaultT);
+            }
+
+            public T Get<T>(ResultPropertyKind propertyKind, T defaultValue)
+            {
+                if (typeof(T) == typeof(string))
+                {
+                    var defaultInT = (string)Convert.ChangeType(defaultValue, typeof(string), CultureInfo.InvariantCulture);
+                    var ret = resultPropertyImpl.Get((Internal.ResultProperty)propertyKind).GetString(defaultInT);
+                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(int))
+                {
+                    var defaultInT = (int)Convert.ChangeType(defaultValue, typeof(int), CultureInfo.InvariantCulture);
+                    var ret = resultPropertyImpl.Get((Internal.ResultProperty)propertyKind).GetNumber(defaultInT);
+                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(bool))
+                {
+                    var defaultInT = (bool)Convert.ChangeType(defaultValue, typeof(bool), CultureInfo.InvariantCulture);
+                    var ret = resultPropertyImpl.Get((Internal.ResultProperty)propertyKind).GetBool(defaultInT);
+                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
+                }
+            }
+
+            public T Get<T>(string propertyName, T defaultValue)
+            {
+                if (typeof(T) == typeof(string))
+                {
+                    var defaultInT = (string)Convert.ChangeType(defaultValue, typeof(string), CultureInfo.InvariantCulture);
+                    var ret = resultPropertyImpl.Get(propertyName).GetString(defaultInT);
+                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(int))
+                {
+                    var defaultInT = (int)Convert.ChangeType(defaultValue, typeof(int), CultureInfo.InvariantCulture);
+                    var ret = resultPropertyImpl.Get(propertyName).GetNumber(defaultInT);
+                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(bool))
+                {
+                    var defaultInT = (bool)Convert.ChangeType(defaultValue, typeof(bool), CultureInfo.InvariantCulture);
+                    var ret = resultPropertyImpl.Get(propertyName).GetBool(defaultInT);
+                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
+                }
+            }
+
+        }
     }
 }

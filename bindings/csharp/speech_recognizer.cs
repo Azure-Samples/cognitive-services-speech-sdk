@@ -93,7 +93,7 @@ namespace Microsoft.CognitiveServices.Speech
             recoImpl.SpeechStartDetected.Connect(speechStartDetectedHandler);
             recoImpl.SpeechEndDetected.Connect(speechEndDetectedHandler);
 
-            Parameters = new ParameterCollection<SpeechRecognizer>(this);
+            Parameters = new RecognizerParametersImpl(recoImpl.Parameters);
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return Parameters.Get<string>(ParameterNames.SpeechModelId);
+                return Parameters.Get<string>(SpeechParameterNames.DeploymentId);
             }
 
             set
@@ -119,14 +119,14 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return Parameters.Get<string>(ParameterNames.SpeechRecognitionLanguage);
+                return Parameters.Get<string>(SpeechParameterNames.RecognitionLanguage);
             }
         }
 
         /// <summary>
         /// The collection of parameters and their values defined for this <see cref="SpeechRecognizer"/>.
         /// </summary>
-        public ParameterCollection<SpeechRecognizer> Parameters { get; }
+        public IRecognizerParameters Parameters { get; }
 
         /// <summary>
         /// Starts speech recognition, and stops after the first utterance is recognized. The task returns the recognition text as result.
@@ -192,7 +192,6 @@ namespace Microsoft.CognitiveServices.Speech
                 finalResultHandler?.Dispose();
                 errorHandler?.Dispose();
                 recoImpl?.Dispose();
-                Parameters?.Dispose();
                 disposed = true;
                 base.Dispose(disposing);
             }

@@ -29,6 +29,7 @@ set(SOURCES
     "${SRC_DIR}/speechapi_c_factory.cpp"
     "${SRC_DIR}/speechapi_c_result.cpp"
     "${SRC_DIR}/speechapi_c_session.cpp"
+    "${SRC_DIR}/speechapi_c_property_names.cpp"
     "${SRC_DIR}/stdafx.cpp"
     )
 

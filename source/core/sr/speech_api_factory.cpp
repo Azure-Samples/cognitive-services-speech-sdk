@@ -10,7 +10,6 @@
 #include "create_object_helpers.h"
 #include "speech_api_factory.h"
 #include "site_helpers.h"
-#include "named_properties_constants.h"
 
 
 namespace Microsoft {

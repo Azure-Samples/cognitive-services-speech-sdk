@@ -4,12 +4,14 @@
 
 using System;
 
+using Microsoft.CognitiveServices.Speech;
+
 namespace Microsoft.CognitiveServices.Speech.Intent
 {
     /// <summary>
     /// Represents language understanding model used for intent recognition.
     /// </summary>
-    public sealed class LanguageUnderstandingModel : IDisposable
+    public sealed class LanguageUnderstandingModel
     { 
         /// <summary>
         /// Creates an language understanding model using the specified endpoint.
@@ -18,7 +20,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <returns>The language understanding model being created.</returns>
         public static LanguageUnderstandingModel From(string uri)
         {
-            return new LanguageUnderstandingModel(Microsoft.CognitiveServices.Speech.Internal.LanguageUnderstandingModel.From(uri));
+            return new LanguageUnderstandingModel(Internal.LanguageUnderstandingModel.From(uri));
         }
 
         /// <summary>
@@ -29,7 +31,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <returns>The language understanding model being created.</returns>
         public static LanguageUnderstandingModel From(string subscriptionKey, string appId)
         {
-            return new LanguageUnderstandingModel(Microsoft.CognitiveServices.Speech.Internal.LanguageUnderstandingModel.From(subscriptionKey, appId));
+            return new LanguageUnderstandingModel(Internal.LanguageUnderstandingModel.From(subscriptionKey, appId));
         }
 
         /// <summary>
@@ -41,31 +43,16 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <returns>The language understanding model being created.</returns>
         public static LanguageUnderstandingModel From(string hostName, string subscriptionKey, string appId)
         {
-            return new LanguageUnderstandingModel(Microsoft.CognitiveServices.Speech.Internal.LanguageUnderstandingModel.From(hostName, subscriptionKey, appId));
+            return new LanguageUnderstandingModel(Internal.LanguageUnderstandingModel.From(hostName, subscriptionKey, appId));
         }
 
-        /// <summary>
-        /// Dispose of associated resources.
-        /// </summary>
-        public void Dispose()
-        {
-            if (disposed)
-            {
-                return;
-            }
-
-            modelImpl.Dispose();
-            disposed = true;
-        }
-
-        private bool disposed = false;
-
-
-        internal LanguageUnderstandingModel(Microsoft.CognitiveServices.Speech.Internal.LanguageUnderstandingModel model)
+        internal LanguageUnderstandingModel(Internal.LanguageUnderstandingModel model)
         {
             modelImpl = model;
         }
 
+
+        // Hold the reference.
         internal Microsoft.CognitiveServices.Speech.Internal.LanguageUnderstandingModel modelImpl { get; }
     }
 

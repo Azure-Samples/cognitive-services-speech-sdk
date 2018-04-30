@@ -10,12 +10,13 @@ namespace Microsoft.CognitiveServices.Speech.Intent
     /// <summary>
     /// Defines result of intent recognition.
     /// </summary>
-    public class IntentRecognitionResult : SpeechRecognitionResult
+    public sealed class IntentRecognitionResult : SpeechRecognitionResult
     {
         internal IntentRecognitionResult(Internal.IntentRecognitionResult result)
             : base(result)
         {
-            this.IntentId = result.IntentId;
+            resultImpl = result;
+            IntentId = result.IntentId;
         }
 
         /// <summary>
@@ -29,7 +30,11 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <returns>A string that represents the intent recognition result.</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "ResultId:{0} Status:{1} IntentId:<{2}> Recognized text:<{3}>.", ResultId, RecognitionStatus, IntentId, RecognizedText);
+            return string.Format(CultureInfo.InvariantCulture, "ResultId:{0} Status:{1} IntentId:<{2}> Recognized text:<{3}> Recognized Json:{4}. LanguageUnderstandingJson:{5}",
+                ResultId, RecognitionStatus, IntentId, RecognizedText, Properties.Get<string>(ResultPropertyKind.Json), Properties.Get<string>(ResultPropertyKind.LanguageUnderstandingJson));
         }
+
+        // Hold the reference
+        Internal.IntentRecognitionResult resultImpl;
     }
 }

@@ -11,12 +11,12 @@ namespace Microsoft.CognitiveServices.Speech
     /// <summary>
     /// Defines payload of RecognitionErrorEvent. 
     /// </summary>
-    public class RecognitionErrorEventArgs : System.EventArgs
+    public sealed class RecognitionErrorEventArgs : System.EventArgs
     {
         internal RecognitionErrorEventArgs(string sessionId, SpeechRecognitionStatus status)
         {
-            this.Status = status;
-            this.SessionId = sessionId;
+            Status = status;
+            SessionId = sessionId;
         }
 
         internal RecognitionErrorEventArgs(string sessionId, Microsoft.CognitiveServices.Speech.Internal.Reason reason)
@@ -27,8 +27,8 @@ namespace Microsoft.CognitiveServices.Speech
             Trace.Assert((int)Internal.Reason.Canceled == (int)SpeechRecognitionStatus.Canceled);
             Trace.Assert((int)Internal.Reason.OtherRecognizer == (int)SpeechRecognitionStatus.OtherRecognizer);
 
-            this.Status = (SpeechRecognitionStatus)((int)reason);
-            this.SessionId = sessionId;
+            Status = (SpeechRecognitionStatus)((int)reason);
+            SessionId = sessionId;
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Specifies the session identifier.
         /// </summary>
-        public string SessionId { get;  }
+        public string SessionId { get; }
 
         /// <summary>
         /// Returns a string that represents the recognition error event.

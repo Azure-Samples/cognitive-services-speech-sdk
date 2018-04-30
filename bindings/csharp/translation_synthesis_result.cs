@@ -14,16 +14,18 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     /// <summary>
     /// Defines translation synthesis result, i.e. the voice output of the translated text in the target language.
     /// </summary>
-    public class TranslationSynthesisResult
+    public sealed class TranslationSynthesisResult
     {
         internal TranslationSynthesisResult(Internal.TranslationSynthesisResult result)
         {
+            resultImpl = result;
+
             Trace.Assert((int)TranslationSynthesisStatus.Success == (int)Internal.TranslationSynthesisStatus.Success);
             Trace.Assert((int)TranslationSynthesisStatus.SynthesisEnd == (int)Internal.TranslationSynthesisStatus.SynthesisEnd);
             Trace.Assert((int)TranslationSynthesisStatus.Error == (int)Internal.TranslationSynthesisStatus.Error);
-
             SynthesisStatus = (TranslationSynthesisStatus)result.SynthesisStatus;
             FailureReason = result.FailureReason;
+
             Audio = new byte[result.Audio.Count];
             result.Audio.CopyTo(Audio);
         }
@@ -65,5 +67,8 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             }
             return text;
         }
+
+        // Hold the referece.
+        private Internal.TranslationSynthesisResult resultImpl;
     }
 }

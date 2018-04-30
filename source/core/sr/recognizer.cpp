@@ -4,7 +4,6 @@
 #include "handle_table.h"
 #include "service_helpers.h"
 #include "create_object_helpers.h"
-#include "named_properties_constants.h"
 
 
 namespace Microsoft {

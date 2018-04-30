@@ -57,8 +57,10 @@
 
 %include <speechapi_cxx_common.h>
 
+// %include <speechapi_c_property_names.h>
+// %include <speechapi_cxx_property_names.h>
+
 %ignore Microsoft::CognitiveServices::Speech::NotYetImplementedException;
-%include <speechapi_cxx_todo.h>
 
 %ignore operator=;
 %ignore operator[];

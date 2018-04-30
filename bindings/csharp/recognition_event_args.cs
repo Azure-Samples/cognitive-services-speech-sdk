@@ -8,13 +8,14 @@ namespace Microsoft.CognitiveServices.Speech
     /// <summary>
     /// Defines payload for recognition events like Speech Start / End Detected
     /// </summary>
-    public class RecognitionEventArgs : System.EventArgs
+    public sealed class RecognitionEventArgs : System.EventArgs
     {
         internal RecognitionEventArgs(RecognitionEventType type, Internal.RecognitionEventArgs arg)
         {
-            this.SessionId = arg.SessionId;
-            this.EventType = type;
-            this.Offset = arg.Offset;
+            eventArgsImpl = arg;
+            SessionId = arg.SessionId;
+            EventType = type;
+            Offset = arg.Offset;
         }
 
         /// <summary>
@@ -40,5 +41,8 @@ namespace Microsoft.CognitiveServices.Speech
         {
             return string.Format("EventType: {0} SessionId: {1} Offset: {2}", EventType, SessionId, Offset);
         }
+
+        // hold the reference
+        private Internal.RecognitionEventArgs eventArgsImpl;
     }
 }

@@ -102,7 +102,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             recoImpl.SpeechStartDetected.Connect(speechStartDetectedHandler);
             recoImpl.SpeechEndDetected.Connect(speechEndDetectedHandler);
 
-            Parameters = new ParameterCollection<TranslationRecognizer>(this);
+            Parameters = new RecognizerParametersImpl(recoImpl.Parameters);
         }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         {
             get
             {
-                return Parameters.Get<string>(ParameterNames.TranslationFromLanguage);
+                return Parameters.Get<string>(TranslationParameterNames.SourceLanguage);
             }
         }
 
@@ -120,7 +120,14 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// Gets target languages for translation that were set when the recognizer was created.
         /// The language is specified in BCP-47 format. The translation will provide translated text for each of language.
         /// </summary>
-        public IReadOnlyList<string> TargetLanguages { get; }
+        public string[] TargetLanguages
+        {
+            get
+            {
+                var plainStr = Parameters.Get<string>(TranslationParameterNames.TargetLanguages);
+                return plainStr.Split(',');
+            }
+        }
 
         /// <summary>
         /// Gets/sets a boolean value which indicates whether a voice output of the translated text is desired.
@@ -130,7 +137,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// <summary>
         /// The collection of parameters and their values defined for this <see cref="TranslationRecognizer"/>.
         /// </summary>
-        public ParameterCollection<TranslationRecognizer> Parameters { get; }
+        public IRecognizerParameters Parameters { get; }
 
         /// <summary>
         /// Starts recognition and translation, and stops after the first utterance is recognized. The task returns the translation text as result.
@@ -197,7 +204,6 @@ namespace Microsoft.CognitiveServices.Speech.Translation
                 finalResultHandler?.Dispose();
                 errorHandler?.Dispose();
                 recoImpl?.Dispose();
-                Parameters?.Dispose();
                 disposed = true;
                 base.Dispose(disposing);
             }

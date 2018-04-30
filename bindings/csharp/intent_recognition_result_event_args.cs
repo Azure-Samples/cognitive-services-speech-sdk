@@ -8,12 +8,13 @@ namespace Microsoft.CognitiveServices.Speech.Intent
     /// <summary>
     /// Define payload of intent intermediate/final result events.
     /// </summary>
-    public class IntentRecognitionResultEventArgs : System.EventArgs
+    public sealed class IntentRecognitionResultEventArgs : System.EventArgs
     {
-        internal IntentRecognitionResultEventArgs(Microsoft.CognitiveServices.Speech.Internal.IntentRecognitionEventArgs e)
+        internal IntentRecognitionResultEventArgs(Internal.IntentRecognitionEventArgs e)
         {
-            this.Result = new IntentRecognitionResult(e.Result);
-            this.SessionId = e.SessionId;
+            eventArgImpl = e;
+            Result = new IntentRecognitionResult(e.Result);
+            SessionId = e.SessionId;
         }
 
         /// <summary>
@@ -35,5 +36,8 @@ namespace Microsoft.CognitiveServices.Speech.Intent
             return string.Format(CultureInfo.InvariantCulture, "SessionId:{0} ResultId:{1} Status:{2} IntentId:<{3}> Recognized text:<{4}>.", 
                 SessionId, Result.ResultId, Result.RecognitionStatus, Result.IntentId, Result.RecognizedText);
         }
+
+        // Hold the reference.
+        private Internal.IntentRecognitionEventArgs eventArgImpl;
     }
 }

@@ -12,7 +12,6 @@
 #include "service_helpers.h"
 #include "site_helpers.h"
 #include "handle_helpers.h"
-#include "named_properties_constants.h"
 #include "resource_manager.h"
 #include "mock_controller.h"
 

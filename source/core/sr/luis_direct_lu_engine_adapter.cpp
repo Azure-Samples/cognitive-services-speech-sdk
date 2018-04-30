@@ -11,7 +11,6 @@
 #include "luis_direct_lu_engine_adapter.h"
 #include "string_utils.h"
 #include "service_helpers.h"
-#include "named_properties_constants.h"
 
 #ifdef _MSC_VER
 #pragma warning( push )

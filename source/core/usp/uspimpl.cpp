@@ -606,7 +606,7 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
         }
         else
         {
-            PROTOCOL_VIOLATION("No TranslationStatus is provided. Jason: %s", translation.dump().c_str());
+            PROTOCOL_VIOLATION("No TranslationStatus is provided. Json: %s", translation.dump().c_str());
         }
 
         auto failure = translation.find(json_properties::translationFailureReason);
@@ -617,7 +617,7 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
 
         if ((result.translationStatus == TranslationStatus::Success) && (result.translations.size() == 0))
         {
-            PROTOCOL_VIOLATION("No Translations text block in the message, but TranslationStatus is succcess. Jason:", translation.dump().c_str());
+            PROTOCOL_VIOLATION("No Translations text block in the message, but TranslationStatus is succcess. Json:", translation.dump().c_str());
         }
     }
 

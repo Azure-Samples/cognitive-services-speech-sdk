@@ -9,11 +9,8 @@
 #include "event_helpers.h"
 #include "handle_helpers.h"
 #include "string_utils.h"
-#include "named_properties_constants.h"
-
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
-
 
 SPXAPI Session_From_Recognizer(SPXRECOHANDLE hreco, SPXSESSIONHANDLE* phsession)
 {

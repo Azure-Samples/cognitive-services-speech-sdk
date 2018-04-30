@@ -5,6 +5,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Intent;
 using Microsoft.CognitiveServices.Speech.Translation;
@@ -16,36 +18,6 @@ namespace Microsoft.CognitiveServices.Speech
     /// </summary>
     public sealed class SpeechFactory
     {
-        /// <summary>
-        /// Creates an instance of the speech factory with specified subscription key and region (optional). Currently as private method.
-        /// </summary>
-        /// <param name="subscriptionKey">The subscription key.</param>
-        /// <param name="region">The region name.</param>
-        private SpeechFactory(string subscriptionKey, string region)
-        {
-            this.factoryImpl = Internal.SpeechFactory.FromSubscription(subscriptionKey, region);
-            Parameters = new ParameterCollection<SpeechFactory>(this);
-        }
-
-        /// <summary>
-        /// Creates an instance of the speech factory with specified endpoint and subscription key (optional). Currently as private method.
-        /// </summary>
-        /// <param name="endpoint">The service endpoint to connect to.</param>
-        /// <param name="subscriptionKey">The subscription key.</param>
-        private SpeechFactory(Uri endpoint, string subscriptionKey)
-        {
-            this.factoryImpl = Internal.SpeechFactory.FromEndpoint(endpoint.AbsoluteUri, subscriptionKey);
-            Parameters = new ParameterCollection<SpeechFactory>(this);
-        }
-
-        /// <summary>
-        /// The defaut ctor.
-        /// </summary>
-        private SpeechFactory()
-        {
-            Parameters = new ParameterCollection<SpeechFactory>(this);
-        }
-
         /// <summary>
         /// Creates an instance of the speech factory with specified subscription key and region (optional).
         /// </summary>
@@ -77,12 +49,12 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return Parameters.Get<string>(ParameterNames.SpeechSubscriptionKey);
+                return Parameters.Get<string>(FactoryParameterNames.SubscriptionKey);
             }
 
             private set
             {
-                Parameters.Set(ParameterNames.SpeechSubscriptionKey, value);
+                Parameters.Set(FactoryParameterNames.SubscriptionKey, value);
             }
         }
 
@@ -95,12 +67,12 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return Parameters.Get<string>(ParameterNames.SpeechAuthToken);
+                return Parameters.Get<string>(FactoryParameterNames.AuthorizationToken);
             }
 
             set
             {
-                Parameters.Set(ParameterNames.SpeechAuthToken, value);
+                Parameters.Set(FactoryParameterNames.AuthorizationToken, value);
             }
         }
 
@@ -111,12 +83,12 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return Parameters.Get<string>(ParameterNames.Region);
+                return Parameters.Get<string>(FactoryParameterNames.Region);
             }
 
             private set
             {
-                Parameters.Set(ParameterNames.Region, value);
+                Parameters.Set(FactoryParameterNames.Region, value);
             }
         }
 
@@ -127,20 +99,20 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                var endpointStr = Parameters.Get<string>(ParameterNames.SpeechEndpoint);
+                var endpointStr = Parameters.Get<string>(FactoryParameterNames.Endpoint);
                 return new Uri(endpointStr);
             }
 
             private set
             {
-                Parameters.Set(ParameterNames.SpeechEndpoint, value.ToString());
+                Parameters.Set(FactoryParameterNames.Endpoint, value.AbsoluteUri);
             }
         }
 
         /// <summary>
         /// The collection of parameters and their values defined for this <see cref="SpeechFactory"/>.
         /// </summary>
-        public ParameterCollection<SpeechFactory> Parameters { get; set; }
+        public IFactoryParameters Parameters { get; private set; }
 
         /// <summary>
         /// Creates a speech recognizer, using the default microphone input.
@@ -317,6 +289,34 @@ namespace Microsoft.CognitiveServices.Speech
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Creates an instance of the speech factory with specified subscription key and region (optional). Currently as private method.
+        /// </summary>
+        /// <param name="subscriptionKey">The subscription key.</param>
+        /// <param name="region">The region name.</param>
+        private SpeechFactory(string subscriptionKey, string region)
+        {
+            factoryImpl = Internal.SpeechFactory.FromSubscription(subscriptionKey, region);
+            InitParameters();
+        }
+
+        /// <summary>
+        /// Creates an instance of the speech factory with specified endpoint and subscription key (optional). Currently as private method.
+        /// </summary>
+        /// <param name="endpoint">The service endpoint to connect to.</param>
+        /// <param name="subscriptionKey">The subscription key.</param>
+        private SpeechFactory(Uri endpoint, string subscriptionKey)
+        {
+            factoryImpl = Internal.SpeechFactory.FromEndpoint(endpoint.ToString(), subscriptionKey);
+            InitParameters();
+        }
+
+        private void InitParameters()
+        {
+            Parameters = new FactoryParametersImpl(factoryImpl.Parameters);
+        }
+
+        // Hold the reference.
         internal Internal.ICognitiveServicesSpeechFactory factoryImpl;
 
         private static Internal.WstringVector AsWStringVector(IEnumerable<string> input)
@@ -328,5 +328,184 @@ namespace Microsoft.CognitiveServices.Speech
             }
             return inputVector;
         }
+
+        private class FactoryParametersImpl : IFactoryParameters
+        {
+            private Internal.FactoryParameterCollection factoryParameterImpl;
+
+            public FactoryParametersImpl(Internal.FactoryParameterCollection internalFactoryParameters)
+            {
+                factoryParameterImpl = internalFactoryParameters;
+            }
+
+            public bool Is<T>(FactoryParameterKind propertyKind)
+            {
+                if (typeof(T) == typeof(string))
+                {
+                    return factoryParameterImpl.Get((Internal.FactoryParameter)propertyKind).IsString();
+                }
+                else if (typeof(T) == typeof(int))
+                {
+                    return factoryParameterImpl.Get((Internal.FactoryParameter)propertyKind).IsNumber();
+                }
+                else if (typeof(T) == typeof(bool))
+                {
+                    return factoryParameterImpl.Get((Internal.FactoryParameter)propertyKind).IsBool();
+                }
+                else
+                {
+                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
+                }
+            }
+
+            public bool Is<T>(string propertyName)
+            {
+                if (typeof(T) == typeof(string))
+                {
+                    return factoryParameterImpl.Get(propertyName).IsString();
+                }
+                else if (typeof(T) == typeof(int))
+                {
+                    return factoryParameterImpl.Get(propertyName).IsNumber();
+                }
+                else if (typeof(T) == typeof(bool))
+                {
+                    return factoryParameterImpl.Get(propertyName).IsBool();
+                }
+                else
+                {
+                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
+                }
+            }
+
+            public T Get<T>(FactoryParameterKind propertyKind)
+            {
+                T defaultT;
+                if (typeof(T) == typeof(string))
+                {
+                    defaultT = (T)Convert.ChangeType(string.Empty, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(int))
+                {
+                    defaultT = (T)Convert.ChangeType(0, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(bool))
+                {
+                    defaultT = (T)Convert.ChangeType(false, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
+                }
+
+                return Get<T>(propertyKind, defaultT);
+            }
+
+            public T Get<T>(string propertyName)
+            {
+                T defaultT;
+                if (typeof(T) == typeof(string))
+                {
+                    defaultT = (T)Convert.ChangeType(string.Empty, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(int))
+                {
+                    defaultT = (T)Convert.ChangeType(0, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(bool))
+                {
+                    defaultT = (T)Convert.ChangeType(false, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
+                }
+
+                return Get<T>(propertyName, defaultT);
+            }
+
+            public T Get<T>(FactoryParameterKind propertyKind, T defaultValue)
+            {
+                if (typeof(T) == typeof(string))
+                {
+                    var defaultInT = (string)Convert.ChangeType(defaultValue, typeof(string), CultureInfo.InvariantCulture);
+                    var ret = factoryParameterImpl.Get((Internal.FactoryParameter)propertyKind).GetString(defaultInT);
+                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(int))
+                {
+                    var defaultInT = (int)Convert.ChangeType(defaultValue, typeof(int), CultureInfo.InvariantCulture);
+                    var ret = factoryParameterImpl.Get((Internal.FactoryParameter)propertyKind).GetNumber(defaultInT);
+                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(bool))
+                {
+                    var defaultInT = (bool)Convert.ChangeType(defaultValue, typeof(bool), CultureInfo.InvariantCulture);
+                    var ret = factoryParameterImpl.Get((Internal.FactoryParameter)propertyKind).GetBool(defaultInT);
+                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
+                }
+            }
+
+            public T Get<T>(string propertyName, T defaultValue)
+            {
+                if (typeof(T) == typeof(string))
+                {
+                    var defaultInT = (string)Convert.ChangeType(defaultValue, typeof(string), CultureInfo.InvariantCulture);
+                    var ret = factoryParameterImpl.Get(propertyName).GetString(defaultInT);
+                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(int))
+                {
+                    var defaultInT = (int)Convert.ChangeType(defaultValue, typeof(int), CultureInfo.InvariantCulture);
+                    var ret = factoryParameterImpl.Get(propertyName).GetNumber(defaultInT);
+                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else if (typeof(T) == typeof(bool))
+                {
+                    var defaultInT = (bool)Convert.ChangeType(defaultValue, typeof(bool), CultureInfo.InvariantCulture);
+                    var ret = factoryParameterImpl.Get(propertyName).GetBool(defaultInT);
+                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
+                }
+            }
+
+            public void Set(FactoryParameterKind propertyKind, string value)
+            {
+                factoryParameterImpl.Get((Internal.FactoryParameter)propertyKind).SetString(value);
+            }
+
+            public void Set(string propertyName, string value)
+            {
+                factoryParameterImpl.Get(propertyName).SetString(value);
+            }
+
+            public void Set(FactoryParameterKind propertyKind, int value)
+            {
+                factoryParameterImpl.Get((Internal.FactoryParameter)propertyKind).SetNumber(value);
+            }
+
+            public void Set(string propertyName, int value)
+            {
+                factoryParameterImpl.Get(propertyName).SetNumber(value);
+            }
+
+            public void Set(FactoryParameterKind propertyKind, bool value)
+            {
+                factoryParameterImpl.Get((Internal.FactoryParameter)propertyKind).SetBool(value);
+            }
+
+            public void Set(string propertyName, bool value)
+            {
+                factoryParameterImpl.Get(propertyName).SetBool(value);
+            }
+        }
+
     }
 }
