@@ -13,7 +13,7 @@ namespace Microsoft.CognitiveServices.Speech
     public class Recognizer : IDisposable
     {
         /// <summary>
-        /// Defines event handler for session events, e.g. SessionStarted/Stopped, SpeechStartDetected / StopDetected
+        /// Defines event handler for session events, e.g., SessionStartedEvent and SessionStoppedEvent.
         /// </summary>
         /// <example>
         /// Create a speech recognizer, setup an event handler for session events
@@ -39,7 +39,10 @@ namespace Microsoft.CognitiveServices.Speech
         /// </example>
         public event EventHandler<SessionEventArgs> OnSessionEvent;
 
-        public event EventHandler<RecogntionEventArgs> OnSpeechDetectectedEvent;
+        /// <summary>
+        /// Defines event handler for session events, e.g., SpeechStartDetectedEvent and SpeechEndDetectedEvent.
+        /// </summary>
+        public event EventHandler<RecognitionEventArgs> OnSpeechDetectectedEvent;
 
         internal Recognizer()
         {
@@ -138,7 +141,7 @@ namespace Microsoft.CognitiveServices.Speech
                     return;
                 }
 
-                var arg = new RecogntionEventArgs(eventType, eventArgs);
+                var arg = new RecognitionEventArgs(eventType, eventArgs);
                 var handler = this.recognizer.OnSpeechDetectectedEvent;
 
                 if (handler != null)

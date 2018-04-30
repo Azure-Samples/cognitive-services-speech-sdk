@@ -14,16 +14,12 @@ import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 public class Recognizer implements Closeable
 {
     /**
-      * Defines event handler for session events, e.g. sessionStarted/Stopped
-      * 
-      * Create a speech recognizer, setup an event handler for session events
+      * Defines event handler for session events, e.g., SessionStartedEvent and SessionStoppedEvent.
       */
     final public EventHandlerImpl<SessionEventArgs> SessionEvent = new EventHandlerImpl<SessionEventArgs>();
 
     /**
-      * Defines event handler for recognition events, speechStartDetected / stopDetected
-      * 
-      * Create a speech recognizer, setup an event handler for reocgnition events
+      * Defines event handler for session events, e.g., SpeechStartDetectedEvent and SpeechEndDetectedEvent.
       */
     final public EventHandlerImpl<RecognitionEventArgs> RecognitionEvent = new EventHandlerImpl<RecognitionEventArgs>();
 

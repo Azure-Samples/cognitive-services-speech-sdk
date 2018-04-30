@@ -43,7 +43,7 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine(String.Format("Translation: error occurred. SessionId: {0}, Reason: {1}", e.SessionId, e.Status));
         }
 
-        private static void MySpeechEndDetectedHandler(object sender, RecogntionEventArgs e)
+        private static void MySpeechEndDetectedHandler(object sender, RecognitionEventArgs e)
         {
             Console.WriteLine(String.Format("Translation: Session event: {0}.", e.ToString()));
             if (e.EventType == RecognitionEventType.SpeechEndDetectedEvent)
