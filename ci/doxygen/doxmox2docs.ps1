@@ -19,7 +19,9 @@
 
 $ErrorActionPreference = 'Stop'
 
-New-Item -Type Directory $OutputDir
+New-Item -Type Directory $OutputDir | Out-Null
+
+$OutputDirAbsolute = Resolve-Path $OutputDir
 
 $index = [xml](Get-Content $DoxygenIndexXml)
 
@@ -27,6 +29,7 @@ $namespaceRoot = 'Microsoft::CognitiveServices::Speech'
 
 # TODO check for clashes?
 # TODO generate TOC; class by namespace?
+# TODO see also links
 
 function getFilename($compound) {
   if ($compound.kind -eq 'namespace') {
@@ -36,18 +39,55 @@ function getFilename($compound) {
   }
 }
 
+# TODO friends?
+
+function getIndexEntryForFile($compound) {
+  $kind = $compound.kind;
+  $name = $compound.name;
+  if ($compound.kind -eq 'namespace') {
+    $file = ($compound.name.ToLower() -replace '::', '-') + '-namespace.md'
+    $level = 1
+    $namespace = $compound.name
+  } else { # struct or class
+    $file = ($compound.name.Substring($namespaceRoot.Length + 2).ToLower() -replace '::', '-') + '.md'
+    $level = 2
+    $compound.name -match '^(.*)::' | Out-Null
+    $namespace = $matches[1]
+  }
+  $compound.name -match '([^:]*)$' | Out-Null
+  $lastName = $matches[1]
+
+  [pscustomobject]@{
+    Anchor = $null
+    File = $file
+    Kind = $kind
+    Level = $level
+    Namespace = $namespace
+    Name = $name
+    LastName = $lastName
+  }
+}
+
 # Dictionary: refid -> markdown
-$linkTarget = @{}
+$ourIndex = @{indexref = [pscustomobject]@{
+  Anchor = $null
+  File = 'index.md'
+  Kind = 'index'
+  Level = -1
+  Name = 'index'
+  Namespace = ''
+}}
 
 foreach ($compound in $index.doxygenindex.compound) {
   switch -Regex ($compound.kind) {
     "^(?:class|namespace|struct)$" {
       if (($compound.name -like "$namespaceRoot::*") -or
         ($compound.kind -eq 'namespace' -and $compound.name -eq $namespaceRoot)) {
-        $link = getFilename $compound
-        Write-Debug ("refid {0} - {1} {2} -> {3}" -f $compound.refid, $compound.kind, $compound.name, $link)
-        $linkTarget.Add($compound.refid, $link)
 
+        $indexEntry = getIndexEntryForFile $compound
+        Write-Debug ("refid {0} - {1} {2} -> {3}" -f $compound.refid, $compound.kind, $compound.name, $link)
+        # TODO check for clashes. anchors for special names (operator overloads etc.)
+        $ourIndex.Add($compound.refid, $indexEntry)
         foreach ($member in $compound.member) {
           switch -Regex ($member.kind) {
             "class" { }
@@ -57,14 +97,23 @@ foreach ($compound in $index.doxygenindex.compound) {
               #     friend function typedef variable
               #   For namespace:
               #     enum enumvalue typedef
-              if ($member.refid -like "$($compound.refid)_*") {
+              if (($member.refid -like "$($compound.refid)_*") -or
+                  ($compound.kind -eq 'namespace' -and $member.kind -eq 'enum')) {
                 # TODO implement refid shortening
-                $linkTarget.Add($member.refid, $link + '#' + $member.refid)
+                $memberIndexEntry = $indexEntry.PsObject.Copy()
+                #$ourIndex.Add($member.refid, $link + '#' + $member.refid)
+                #$memberIndexEntry.Anchor = '#' + $member.refid
+                $memberIndexEntry.Anchor = '#' + $member.name.ToLower()
+                $memberIndexEntry.Level++
+                $memberIndexEntry.Kind = $member.kind
+                $ourIndex.Add($member.refid, $memberIndexEntry)
               } elseif ($member.refid -like "dummy_*") {
                 # Ignore.
+              } elseif ($member.kind -eq "typedef") {
+                # Ignore.
               } else {
-                # TODO only if INLINE_INHERITED_MEMB = YES ?
-                #Write-Warning "Unexpected ref ID $($member.refid) within ref ID $($compound.refid)"
+                # TODO many more if INLINE_INHERITED_MEMB = YES
+                Write-Warning "Unexpected ref ID $($member.refid) within ref ID $($compound.refid)"
               }
             }
             default { Write-Warning "Unhandled member kind $($member.kind)" }
@@ -75,7 +124,7 @@ foreach ($compound in $index.doxygenindex.compound) {
       }
     }
     "^(?:file|page)$" {
-      if ($compound.member -eq $null) {
+      if ($compound.member -ne $null) {
         Write-Warning "Ignoring non-empty $($compound.kind) compound $($compound.name)"
       }
     }
@@ -83,10 +132,10 @@ foreach ($compound in $index.doxygenindex.compound) {
   }
 }
 
-function fixLinks($line) {
+function fixLinks($line, $file) {
   $stringBuilder = New-Object System.Text.StringBuilder
 
-  $pattern = "{#(?<def>[^)}]+)}|\(#(?<ref>[^)}]+)\)"
+  $pattern = "{#(?<def>[^)}]+)}|\[(?<refText>.*?)\]\(#(?<refTarget>[^)}]+)\)"
   $m = [regex]::Match($line, $pattern)
   $lastPos = 0
 
@@ -94,21 +143,45 @@ function fixLinks($line) {
     # Append the non-matching portion
     $stringBuilder.Append($line.Substring($lastPos, $m.Index - $lastPos)) | Out-Null
 
-    if ($m.Groups['ref'].Success) {
-      $ref = $m.Groups['ref'].Value
-      $stringBuilder.Append('(') | Out-Null
-      if (-not $linkTarget.ContainsKey($ref)) {
-        Write-Warning "Unknown ref $ref"
-        $stringBuilder.Append("unknow-REF") | Out-Null
+    if ($m.Groups['refTarget'].Success) {
+      $refTarget = $m.Groups['refTarget'].Value
+
+      if ($ourIndex.ContainsKey($refTarget)) {
+        $indexEntry = $ourIndex[$refTarget]
+        $removeLink = ($indexEntry.File -eq $file) -and -not $indexEntry.Anchor
       } else {
-        $stringBuilder.Append($linkTarget[$ref]) | Out-Null
+        $removeLink = $true
+        Write-Warning "Unknown reference to $refTarget in file $file"
       }
-      $stringBuilder.Append(')') | Out-Null
+      if ($removeLink) {
+        $stringBuilder.Append($m.Groups['refText']) | Out-Null
+      } else {
+        $stringBuilder.Append('[') | Out-Null
+        $stringBuilder.Append($m.Groups['refText']) | Out-Null
+        $stringBuilder.Append(']') | Out-Null
+        $stringBuilder.Append('(') | Out-Null
+        if ($indexEntry.File -ne $file) {
+          $stringBuilder.Append($indexEntry.File) | Out-Null
+        }
+        if ($indexEntry.Anchor) {
+          $stringBuilder.Append($indexEntry.Anchor) | Out-Null
+        }
+        $stringBuilder.Append(')') | Out-Null
+      }
     } else {
       $def = $m.Groups['def'].Value
-      $stringBuilder.Append('<a name="') | Out-Null
-      $stringBuilder.Append($def) | Out-Null
-      $stringBuilder.Append('"></a>') | Out-Null
+
+      if (-not $ourIndex.ContainsKey($def)) {
+        Write-Error "Unexpected reference definition for $refTarget from file $file"
+      } else {
+        $indexEntry = $ourIndex[$def]
+        if ($indexEntry.Anchor) {
+          $stringBuilder.Append('<a name="') | Out-Null
+          # (Skip the initial hash-tag)
+          $stringBuilder.Append($indexEntry.Anchor.Substring(1)) | Out-Null
+          $stringBuilder.Append('"></a>') | Out-Null
+        }
+      }
     }
     $lastPos = $m.Index + $m.Value.Length
     $m = $m.NextMatch()
@@ -132,12 +205,12 @@ try {
           Write-Error "Unexpected $line"
         }
         $currentRefId = $matches.refid
-        if (-not ($linkTarget.Contains($currentRefId))) {
+        if (-not ($ourIndex.Contains($currentRefId))) {
           Write-Error "Unknown ref ID $currentRefId"
         }
-        $file = $linkTarget[$currentRefId]
+        $file = $ourIndex[$currentRefId].File
         # TODO open file etc.
-        $stream = [System.IO.StreamWriter] (Join-Path $OutputDir $file)
+        $stream = [System.IO.StreamWriter] (Join-Path $OutputDirAbsolute $file)
       }
       "^MOXYGENEND {#(?<refid>.*)}" {
         if ($matches.refid -ne $currentRefId) {
@@ -148,14 +221,46 @@ try {
       }
       default {
         if ($currentRefId -ne $null) {
-          #$line = $line -replace '{#(\S*)}', '<a name="${1}"></a>'
-          #$line = $line -replace '{#(\S*)}', '<a name="${1}"></a>'
-          #"{0} - {1}" -f $file, $line
-          $stream.WriteLine((fixLinks $_))
+          #$line = $line -replace "`r$", "";
+          $line = fixLinks $_ $file;
+          # TODO hacky
+          if ($line -notmatch "namespace $namespaceRoot::") {
+            $line = $line -replace "$namespaceRoot::", '';
+          }
+          $stream.WriteLine($line)
         }
       }
     }
   }
+} finally {
+  if ($stream -ne $null) {
+    $stream.close()
+  }
+}
+
+# Generate TOC
+$stream = $null
+try {
+  $stream = [System.IO.StreamWriter] (Join-Path $OutputDirAbsolute 'TOC.md')
+
+  $header = @'
+# [Speech SDK for C++ Reference](index.md)
+'@
+  $stream.WriteLine($header)
+  $ourIndex.Values |
+    Sort-Object Namespace, Level, Name |
+    Where-Object Level -lt 3 |
+    Where-Object Level -gt 0 |
+    Where-Object Kind -ne 'enum' |
+    ForEach-Object {
+      $stream.WriteLine(
+        ('{0} [{1} {2}]({3})' -f
+          ('#' * ($_.Level + 1)),
+          $_.LastName,
+          $_.Kind,
+          $_.File))
+      Write-Debug $_
+    }
 } finally {
   if ($stream -ne $null) {
     $stream.close()

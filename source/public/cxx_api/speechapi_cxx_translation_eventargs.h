@@ -18,7 +18,7 @@ namespace Speech {
 namespace Translation {
 
 /// <summary>
-/// Defines payload that is sent with the event <see cref="IntermediateResult"> or <see cref="FinalResult">.
+/// Defines payload that is sent with the event <see cref="IntermediateResult"/> or <see cref="FinalResult"/>.
 /// </summary>
 class TranslationTextResultEventArgs final : public SessionEventArgs
 {
@@ -28,7 +28,7 @@ private:
 
 public:
     /// <summary>
-    /// It is intended for internal use only. It creates an instance of <see cref="TranslationTextResultEventArgs">.
+    /// It is intended for internal use only. It creates an instance of <see cref="TranslationTextResultEventArgs"/>.
     /// </summary>
     /// <param name="resultHandle">The handle returned by recognizer in C-API.</param>
     explicit TranslationTextResultEventArgs(SPXEVENTHANDLE hevent) :
@@ -63,7 +63,7 @@ private:
 
 
 /// <summary>
-/// Defines payload that is sent with the event <see cref="TranslationSynthesisResultEvent">.
+/// Defines payload that is sent with the event <see cref="TranslationSynthesisResultEvent"/>.
 /// </summary>
 class TranslationSynthesisResultEventArgs final : public SessionEventArgs
 {
@@ -74,7 +74,7 @@ private:
 
 public:
     /// <summary>
-    /// It is intended for internal use only. It creates an instance of <see cref="TranslationSynthesisResultEventArgs">.
+    /// It is intended for internal use only. It creates an instance of <see cref="TranslationSynthesisResultEventArgs"/>.
     /// </summary>
     /// <param name="resultHandle">The handle returned by recognizer in C-API.</param>
     explicit TranslationSynthesisResultEventArgs(SPXEVENTHANDLE hevent) :

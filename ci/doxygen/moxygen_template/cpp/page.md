@@ -1,3 +1,10 @@
+---
+ms.service: cognitive-services
+ms.technology: Speech
+ms.topic: reference
+ms.date: 05/07/2018
+ms.author: wolfma
+---
 {{anchor refid}}
 # {{kind}} `{{name}}`
 
@@ -11,15 +18,15 @@
 
  Members                        | Descriptions
 --------------------------------|---------------------------------------------
-{{#each filtered.members}}{{cell proto}}            | {{cell summary}}
-{{/each}}{{#each filtered.compounds}}{{cell proto}} | {{cell summary}}
+{{#each filtered.members}}[{{kind}} {{name}}](#{{refid}})            | {{cell summary}}
+{{/each}}{{#each filtered.compounds}}[{{kind}} {{name}}](#{{refid}}) | {{cell summary}}
 {{/each}}
 
 ## Members
 
 {{#each filtered.members}}
 {{anchor refid}}
-#### {{title proto}}
+#### {{kind}} {{name}}
 
 {{#if enumvalue}}
  Values                         | Descriptions

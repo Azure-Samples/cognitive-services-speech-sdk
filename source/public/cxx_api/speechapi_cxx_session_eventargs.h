@@ -45,6 +45,8 @@ public:
 
 protected:
 
+    /*! \cond PROTECTED */
+
     /// <summary>
     /// Extract session identifier from given event handle <paramref name="hevent"/>
     /// </summary>
@@ -58,6 +60,7 @@ protected:
         return std::wstring(sessionId);
     };
 
+    /*! \endcond */
 
 private:
 

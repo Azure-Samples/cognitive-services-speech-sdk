@@ -19,11 +19,12 @@ namespace Speech {
 
 
 /// <summary>
-/// Event signal class, templatized over the event arguments <typeparamref name="T"/>.
 /// Clients can connect to the event signal to receive events, or disconnect from the event signal to stop receiving events.
+/// </summary>
+/// <remarks>
 /// At construction time, connect and disconnect callbacks can be provided that are called when
 /// the number of connected clients changes from zero to one or one to zero, respectively.
-/// <summary>
+/// </remarks>
 // <typeparam name="T">
 template <class T>
 class EventSignal

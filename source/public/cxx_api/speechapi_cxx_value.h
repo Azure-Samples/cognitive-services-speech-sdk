@@ -185,7 +185,11 @@ public:
 
 protected:
 
+    /*! \cond PROTECTED */
+
     BaseValueCollection() = default;
+
+    /*! \endcond */
 
 private:
 
@@ -215,9 +219,13 @@ public:
 
 protected:
 
+    /*! \cond PROTECTED */
+
     explicit HandleValueCollection(Handle handle) : m_handle(handle) { }
 
     Handle m_handle;
+
+    /*! \endcond */
 
 private:
 

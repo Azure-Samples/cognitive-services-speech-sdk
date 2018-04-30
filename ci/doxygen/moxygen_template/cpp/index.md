@@ -1,10 +1,17 @@
-MOXYGENBEGIN dummy-index-ref
+MOXYGENBEGIN {#indexref}
+---
+ms.service: cognitive-services
+ms.technology: Speech
+ms.topic: reference
+ms.date: 05/07/2018
+ms.author: wolfma
+---
 # Summary
 
  Members                        | Descriptions
 --------------------------------|---------------------------------------------
-{{#each filtered.members}}{{cell proto}}            | {{cell summary}}
-{{/each}}{{#each filtered.compounds}}{{cell proto}} | {{cell summary}}
+{{#each filtered.members}}[{{kind}} {{name}}](#{{refid}})            | {{cell summary}}
+{{/each}}{{#each filtered.compounds}}[{{kind}} {{name}}](#{{refid}}) | {{cell summary}}
 {{/each}}
 
 {{#if filtered.members}}
@@ -12,7 +19,7 @@ MOXYGENBEGIN dummy-index-ref
 
 {{#each filtered.members}}
 {{anchor refid}}
-#### {{title proto}}
+#### {{kind}} {{name}}
 
 {{briefdescription}}
 
@@ -27,4 +34,4 @@ MOXYGENBEGIN dummy-index-ref
 
 {{/each}}
 {{/if}}
-MOXYGENEND dummy-index-ref
+MOXYGENEND {#indexref}

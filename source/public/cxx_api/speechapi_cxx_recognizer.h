@@ -51,6 +51,8 @@ public:
 
 protected:
 
+    /*! \cond PROTECTED */
+
     explicit Recognizer(SPXRECOHANDLE hreco) :
         m_hreco(hreco)
     {
@@ -77,6 +79,8 @@ protected:
     }
 
     SPXRECOHANDLE m_hreco;
+
+    /*! \endcond */
 
 private:
 

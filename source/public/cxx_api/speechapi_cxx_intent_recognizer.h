@@ -23,7 +23,7 @@ namespace Intent {
 /// <summary>
 /// In addition to performing speech-to-text recognition, the IntentRecognizer extracts structured information
 /// about the intent of the speaker, which can be used to drive further actions using dedicated intent triggers
-/// (see IntentTrigger).
+/// (see <see cref="IntentTrigger"/>).
 /// </summary>
 class IntentRecognizer : virtual public AsyncRecognizer<IntentRecognitionResult, IntentRecognitionEventArgs>
 {

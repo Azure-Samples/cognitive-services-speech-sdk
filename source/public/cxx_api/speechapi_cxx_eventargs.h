@@ -29,11 +29,14 @@ public:
 
 protected:
 
+    /*! \cond PROTECTED */
+
     /// <summary>
     /// Constructor.
     /// </summary>
     EventArgs() {};
 
+    /*! \endcond */
 
 private:
 

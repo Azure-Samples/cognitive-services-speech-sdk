@@ -10,9 +10,8 @@ steps:
   inputs:
     type: InlineScript
     script: |
-       set -e -o pipefail -x
+       set -e -o pipefail
        brew install doxygen
-       npm install moxygen -g
        cd ci/doxygen
        mkdir "$(Build.ArtifactStagingDirectory)/Doxygen"
        for lang in c cpp csharp java; do
@@ -23,7 +22,13 @@ steps:
            echo OUTPUT_DIRECTORY=$(Build.ArtifactStagingDirectory)/Doxygen
          ) | doxygen -
        done
-       moxygen -o cppapi.md -t ./moxygen_template/cpp -a $(Build.ArtifactStagingDirectory)/Doxygen/cppxml
+       git clone https://github.com/sourcey/moxygen.git
+       cd moxygen
+       git checkout c00d16803a6dfc40796cd4b76271c481ed865243
+       git apply ../0001-Provide-shortname-provide-plain.patch
+       npm install
+       cd ..
+       node moxygen/bin/moxygen.js -o cppapi.md -t ./moxygen_template/cpp -a $(Build.ArtifactStagingDirectory)/Doxygen/cppxml
        powershell -NoProfile -NoLogo -ExecutionPolicy Bypass -NonInteractive doxmox2docs.ps1 \
          -DoxygenIndexXml $(Build.ArtifactStagingDirectory)/Doxygen/cppxml/index.xml \
          -MoxygenApiMd cppapi.md \

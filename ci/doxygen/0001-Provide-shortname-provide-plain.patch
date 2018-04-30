@@ -1,0 +1,67 @@
+From 945491559c59877a97b758a8c84730bdcfe2e397 Mon Sep 17 00:00:00 2001
+From: Mark Hillebrand <mahilleb@microsoft.com>
+Date: Mon, 30 Apr 2018 11:14:17 +0200
+Subject: [PATCH] Provide shortname, provide 'plain'
+
+---
+ src/helpers.js | 14 ++++++++++++++
+ src/parser.js  |  4 ++++
+ 2 files changed, 18 insertions(+)
+
+diff --git a/src/helpers.js b/src/helpers.js
+index af99c5b..4332691 100644
+--- a/src/helpers.js
++++ b/src/helpers.js
+@@ -14,6 +14,20 @@ var handlebars = require('handlebars');
+ 
+ module.exports = {
+ 
++  plain: function(code) {
++    if (Array.isArray(code)) {
++      var refs, s = '';
++      s = code.join(' ');
++      s = s.replace(/\[(.*?)\]\(.*?\)/g, function myReplace(str, group1) { return group1 });
++      s = s.replace(/\s\s+/g, ' ');
++      s = s.replace(/^\s+|\s+$/g, '');
++      return s;
++    }
++    else {
++      return code;
++    }
++  },
++
+   inline: function(code) {
+     if (Array.isArray(code)) {
+       var refs, s = '', isInline = false;
+diff --git a/src/parser.js b/src/parser.js
+index 8d2e30f..1de1d91 100644
+--- a/src/parser.js
++++ b/src/parser.js
+@@ -198,6 +198,8 @@ module.exports = {
+ 
+       case 'function':
+         m = m.concat(memberdef.$.prot, ' '); // public, private, ...
++        copy(member, 'definition', memberdef);
++        copy(member, 'argsstring', memberdef);
+         if (memberdef.templateparamlist) {
+           m.push('template<');
+           if (memberdef.templateparamlist.length > 0 && memberdef.templateparamlist.param) {
+@@ -271,6 +273,7 @@ module.exports = {
+     }
+ 
+     member.proto = helpers.inline(m);
++    member.plain = helpers.plain(m);
+   },
+ 
+   assignToNamespace: function (compound, child) {
+@@ -377,6 +380,7 @@ module.exports = {
+ 
+         // set namespace reference
+         var nsp = compound.name.split('::');
++        compound.shortname = nsp[nsp.length - 1];
+         compound.namespace = nsp.splice(0, nsp.length - 1).join('::');
+         break;
+ 
+-- 
+2.14.1.windows.1
+

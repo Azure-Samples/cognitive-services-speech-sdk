@@ -22,7 +22,6 @@ Dockerfile text
 *.json text
 *.md text
 *.nuspec text
-*.patch text
 *.props text
 *.pl text
 *.ps1 text
@@ -35,9 +34,9 @@ Dockerfile text
 *.vcxproj.user text
 *.yml text
 
-# Bash only like Unix line endings
+# Bash and "git apply" only like Unix line endings
 *.sh text eol=lf
-# TODO wrong:
+*.patch text eol=lf
 
 # Binary extensions:
 *.exe binary

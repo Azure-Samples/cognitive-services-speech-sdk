@@ -58,7 +58,7 @@ typedef struct tAudioInputStreamFormat
 
 
 /// <summary>
-/// A Interface that defines an AudioInputStream.
+/// An interface that defines an audio input stream.
 /// </summary>
 /// <remarks>
 /// Derive from this class and implement its function to provide your own
@@ -73,7 +73,7 @@ public:
     virtual ~AudioInputStream() {}
 
     /// <summary>
-    /// The Function being called to get the format of the audio stream.
+    /// This function is called to get the format of the audio stream.
     /// </summary>
     /// <param name="pformat">The pointer to the AudioInputStreamFormat buffer, or null if querying the size of the structure.</param>
     /// <param name="cbFormat">The size of the AudioInputStreamFormat buffer being passed, or 0 if querying the size of the structure.</param>
@@ -81,7 +81,7 @@ public:
     virtual unsigned short GetFormat(AudioInputStreamFormat* pformat, unsigned short cbFormat) = 0;
 
     /// <summary>
-    /// The Function being called to get the data from the audio stream.
+    /// This function is called to get data from the audio stream.
     /// </summary>
     /// <param name="dataBuffer">The pointer to the buffer to which to copy the audio data.</param>
     /// <param name="size">The size of the buffer.</param>
@@ -89,15 +89,20 @@ public:
     virtual unsigned int Read(char* dataBuffer, unsigned int size) = 0;
 
     /// <summary>
-    /// The Function being called to close the audio stream.
+    /// This function is called to close the audio stream.
     /// </summary>
     virtual void Close() = 0;
 
 protected:
+
+    /*! \cond PROTECTED */
+
     /// <summary>
     /// Constructor, does nothing.
     /// </summary>
     AudioInputStream() {};
+
+    /*! \endcond */
 
 private:
     DISABLE_COPY_AND_MOVE(AudioInputStream);

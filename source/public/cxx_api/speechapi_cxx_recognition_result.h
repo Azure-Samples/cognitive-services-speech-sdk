@@ -238,6 +238,8 @@ public:
 
 protected:
 
+    /*! \cond PROTECTED */
+
     explicit RecognitionResult(SPXRESULTHANDLE hresult) :
         m_properties(hresult),
         ResultId(m_resultId),
@@ -252,6 +254,8 @@ protected:
     }
 
     const SPXRESULTHANDLE& Handle;
+
+    /*! \endcond */
 
 private:
 

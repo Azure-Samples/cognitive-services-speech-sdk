@@ -39,6 +39,8 @@ public:
 
 protected:
 
+    /*! \cond PROTECTED */
+
     using BaseType = AsyncRecognizer<RecognitionResult, RecognitionEventArgs>;
 
     /// <summary>
@@ -57,6 +59,8 @@ protected:
     }
 
     DISABLE_DEFAULT_CTORS(BaseAsyncRecognizer);
+
+    /*! \endcond */
 };
 
 

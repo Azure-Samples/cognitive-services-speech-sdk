@@ -105,6 +105,8 @@ public:
 
 protected:
 
+    /*! \cond PROTECTED */
+
     explicit AsyncRecognizer(SPXRECOHANDLE hreco) throw() :
         Recognizer(hreco),
         SessionStarted(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback()),
@@ -389,6 +391,8 @@ protected:
     SPXASYNCHANDLE m_hasyncStopContinuous;
     SPXASYNCHANDLE m_hasyncStartKeyword;
     SPXASYNCHANDLE m_hasyncStopKeyword;
+
+    /*! \endcond */
 
 private:
 

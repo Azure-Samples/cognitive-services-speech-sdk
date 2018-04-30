@@ -49,7 +49,7 @@ private:
 public:
 
     /// <summary>
-    /// It is intended for internal use only. It creates an instance of <see cref="TranslationTextResult">.
+    /// It is intended for internal use only. It creates an instance of <see cref="TranslationTextResult"/>.
     /// </summary>
     /// <param name="resultHandle">The handle of the result returned by recognizer in C-API.</param>
     explicit TranslationTextResult(SPXRESULTHANDLE resultHandle) :
@@ -179,7 +179,7 @@ private:
 
 public:
     /// <summary>
-    /// It is intended for internal use only. It creates an instance of <see cref="TranslationSynthesisResult">
+    /// It is intended for internal use only. It creates an instance of <see cref="TranslationSynthesisResult"/>
     /// </summary>
     /// <param name="resultHandle">The handle of the result returned by recognizer in C-API.</param>
     explicit TranslationSynthesisResult(SPXRESULTHANDLE resultHandle) :

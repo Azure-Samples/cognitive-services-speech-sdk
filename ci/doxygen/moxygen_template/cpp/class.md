@@ -1,6 +1,13 @@
 MOXYGENBEGIN {{anchor refid}}
+---
+ms.service: cognitive-services
+ms.technology: Speech
+ms.topic: reference
+ms.date: 05/07/2018
+ms.author: wolfma
+---
 {{anchor refid}}
-# {{kind}} `{{name}}`
+# {{kind}} {{name}}
 
 {{#if basecompoundref}}
 ```
@@ -15,19 +22,13 @@ MOXYGENBEGIN {{anchor refid}}
 
 {{detaileddescription}}
 
-## Summary
-
- Members                        | Descriptions
---------------------------------|---------------------------------------------
-{{#each filtered.compounds}}{{cell proto}}        | {{cell summary}}
-{{/each}}{{#each filtered.members}}{{cell proto}} | {{cell summary}}
-{{/each}}
-
 ## Members
 
 {{#each filtered.compounds}}
 {{anchor refid}}
-#### {{title proto}}
+#### {{name}}
+
+Syntax: `{{plain}}`
 
 {{briefdescription}}
 
@@ -36,7 +37,9 @@ MOXYGENBEGIN {{anchor refid}}
 
 {{#each filtered.members}}
 {{anchor refid}}
-#### {{title proto}}
+#### {{name}}
+
+Syntax: `{{plain}};`
 
 {{#if enumvalue}}
  Values                         | Descriptions

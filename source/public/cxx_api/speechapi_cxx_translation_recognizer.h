@@ -123,10 +123,10 @@ public:
     using BaseType = AsyncRecognizer<TranslationTextResult, TranslationTextResultEventArgs>;
 
     /// <summary>
-    /// It is intended for internal use only. It creates an instance of <see cref="TranslationRecognizer">. 
+    /// It is intended for internal use only. It creates an instance of <see cref="TranslationRecognizer"/>. 
     /// </summary>
     /// <remarks>
-    /// It is recommended to use SpeechFactory to create an instance of <see cref="TranslationRecognizer">. This method is mainly
+    /// It is recommended to use SpeechFactory to create an instance of <see cref="TranslationRecognizer"/>. This method is mainly
     /// used in case where a recognizer handle has been created by methods via C-API like RecognizerFactory_CreateTranslationRecognizer().
     /// </remarks>
     /// <param name="hreco">The handle of the recognizer that is returned by RecognizerFactory_CreateTranslationRecognizer().</param>
