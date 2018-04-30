@@ -44,10 +44,11 @@ protected:
 
     std::shared_ptr<ISpxInterfaceBase> InternalQueryService(const char* serviceName)
     {
-        // For SDL check.
         if (serviceName == nullptr)
         {
             SPX_THROW_HR(SPXERR_INVALID_ARG);
+            // return here to make SDL happy
+            return nullptr;
         }
 
         auto item = m_services.find(std::string(serviceName));

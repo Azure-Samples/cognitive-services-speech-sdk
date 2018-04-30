@@ -162,7 +162,11 @@ static void CollectCallStack(size_t skipLevels, bool makeFunctionNamesStandOut, 
 
     // RtlCaptureStackBackTrace() is a kernel API without default binding, we must manually determine its function pointer.
     typedef USHORT(WINAPI * CaptureStackBackTraceType)(__in ULONG, __in ULONG, __out PVOID*, __out_opt PULONG);
-    CaptureStackBackTraceType RtlCaptureStackBackTrace = (CaptureStackBackTraceType)(GetProcAddress(LoadLibrary("kernel32.dll"), "RtlCaptureStackBackTrace"));
+    auto kernelLib = LoadLibrary("kernel32.dll");
+    CaptureStackBackTraceType RtlCaptureStackBackTrace = nullptr;
+    if (kernelLib != NULL) {
+        RtlCaptureStackBackTrace = (CaptureStackBackTraceType)(GetProcAddress(kernelLib, "RtlCaptureStackBackTrace"));
+    }
     if (RtlCaptureStackBackTrace == nullptr) // failed somehow
         return write("Failed to generate CALL STACK. GetProcAddress(\"RtlCaptureStackBackTrace\") failed with error " + FormatWin32Error(GetLastError()) + "\n");
 
@@ -176,6 +180,9 @@ static void CollectCallStack(size_t skipLevels, bool makeFunctionNamesStandOut, 
     frames = RtlCaptureStackBackTrace(0, MAX_CALLERS, callStack, nullptr);
 
     SYMBOL_INFO* symbolInfo = (SYMBOL_INFO*)calloc(sizeof(SYMBOL_INFO) + 256 * sizeof(char), 1); // this is a variable-length structure, can't use vector easily
+    if (symbolInfo == nullptr) // failed somehow
+        return write("Failed to allocated SYMBOL_INFO struct.\n");
+
     symbolInfo->MaxNameLen = 255;
     symbolInfo->SizeOfStruct = sizeof(SYMBOL_INFO);
     frames = std::min(frames, MAX_CALL_STACK_DEPTH);

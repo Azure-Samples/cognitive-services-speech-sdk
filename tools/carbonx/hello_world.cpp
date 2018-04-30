@@ -197,8 +197,7 @@ int CarbonTestConsole::Sample_Do_Speech(bool continuous)
     {
         recognizer->StartContinuousRecognitionAsync();
         printf("Say something... (press ENTER to quit) \n");
-        // For SDL check
-        (void)getchar();
+        UNUSED(getchar());
         recognizer->StopContinuousRecognitionAsync();
     }
     else
@@ -235,8 +234,7 @@ int CarbonTestConsole::Sample_Do_Intent(bool continuous, const wchar_t* hostName
     {
         recognizer->StartContinuousRecognitionAsync();
         printf("Say something... (press ENTER to quit) \n");
-        // For SDL check
-        (void)getchar();
+        UNUSED(getchar());
         recognizer->StopContinuousRecognitionAsync();
     }
     else
@@ -281,8 +279,7 @@ int CarbonTestConsole::Sample_Do_Intent_Kws(const wchar_t* hostName, const wchar
     recognizer->StartKeywordRecognitionAsync(L"Hey Cortana");
 
     printf("Say 'Hey Cortana ... something' ... (press ENTER to quit) \n");
-    // For SDL check
-    (void)getchar();
+    UNUSED(getchar());
 
     return 0;
 }

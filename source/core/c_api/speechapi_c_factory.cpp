@@ -136,7 +136,7 @@ SPXAPI SpeechFactory_CreateSpeechRecognizer_With_Language(SPXFACTORYHANDLE hfact
         auto factory = (*factoryhandles)[hfactory];
         *phreco = SPXHANDLE_INVALID;
 
-        auto recognizer = factory->CreateSpeechRecognizer(pszLanguage);
+        auto recognizer = factory->CreateSpeechRecognizer(std::wstring(pszLanguage));
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }

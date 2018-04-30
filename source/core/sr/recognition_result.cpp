@@ -11,7 +11,8 @@ namespace Speech {
 namespace Impl {
 
 
-CSpxRecognitionResult::CSpxRecognitionResult()
+CSpxRecognitionResult::CSpxRecognitionResult():
+    m_type { ResultType::Unknown}
 {
     SPX_DBG_TRACE_FUNCTION();
 }
@@ -41,7 +42,7 @@ ResultType CSpxRecognitionResult::GetType()
     return m_type;
 }
 
-void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type)
+void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, ResultType type)
 {
     m_reason = Reason::IntermediateResult;
     m_type = type;
@@ -55,7 +56,7 @@ void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* resultId, cons
     SPX_DBG_TRACE_VERBOSE("%s: resultId=%ls", __FUNCTION__, m_resultId.c_str());
 }
 
-void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type)
+void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, const wchar_t* text, ResultType type)
 {
     m_reason = Reason::Recognized;
     m_type = type;
@@ -71,17 +72,18 @@ void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, const wchar
     SPX_DBG_TRACE_VERBOSE("%s: resultId=%ls", __FUNCTION__, m_resultId.c_str());
 }
 
-void CSpxRecognitionResult::InitNoMatch(enum ResultType type)
+void CSpxRecognitionResult::InitNoMatch(ResultType type)
 {
     SPX_DBG_TRACE_FUNCTION();
     m_reason = Reason::NoMatch;
     m_type = type;
 }
 
-void CSpxRecognitionResult::InitError(const wchar_t* text)
+void CSpxRecognitionResult::InitError(const wchar_t* text, ResultType type)
 {
     SPX_DBG_TRACE_FUNCTION();
     m_reason = Reason::Canceled;
+    m_type = type;
     if (text != nullptr) 
     {
         SetStringValue(g_RESULT_ErrorDetails, text);

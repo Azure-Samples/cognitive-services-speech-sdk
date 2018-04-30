@@ -11,7 +11,16 @@
 #include <fstream>
 #include "string_utils.h"
 #include "debug_utils.h"
+
+#ifdef _MSC_VER
+#pragma warning( push )
+// disable: (9754,94): error 6330:  : 'const char' passed as _Param_(1) when 'unsigned char' is required in call to 'isalnum'.
+#pragma warning( disable : 6030 )
 #include "catch.hpp"
+#pragma warning( pop )
+#else
+#include "catch.hpp"
+#endif
 
 #if !defined(CATCH_CONFIG_RUNNER)
 #define EXTERN extern

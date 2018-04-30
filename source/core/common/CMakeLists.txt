@@ -33,6 +33,7 @@ set(HEADERS
     "${INC_DIR}/platform.h"
     "${INC_DIR}/string_utils.h"
     "${INC_DIR}/file_utils.h"
+    "${CARBON_INCLUDE}/ispxinterfaces.h"
     )
 
 set(HEADERS_PRIVATE   

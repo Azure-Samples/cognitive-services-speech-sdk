@@ -37,7 +37,6 @@ public:
 
     ~UspClient() {
         m_connection.reset();
-        REQUIRE(m_connection == nullptr);
     }
     
     template <class T>

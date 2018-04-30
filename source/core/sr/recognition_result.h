@@ -40,14 +40,14 @@ public:
     // --- ISpxRecognitionResult ---
     std::wstring GetResultId() override;
     std::wstring GetText() override;
-    enum Reason GetReason() override;
-    enum ResultType GetType() override;
+    Reason GetReason() override;
+    ResultType GetType() override;
 
     // --- ISpxRecognitionResultInit ---
-    void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type) override;
-    void InitFinalResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type) override;
-    void InitNoMatch(enum ResultType type) override;
-    void InitError(const wchar_t* text) override;
+    void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, ResultType type) override;
+    void InitFinalResult(const wchar_t* resultId, const wchar_t* text, ResultType type) override;
+    void InitNoMatch(ResultType type) override;
+    void InitError(const wchar_t* text, ResultType type) override;
 
     // --- ISpxIntentRecognitionResult ---
     std::wstring GetIntentId() override;
@@ -81,8 +81,8 @@ private:
 
     std::wstring m_resultId;
     std::wstring m_text;
-    enum Reason m_reason;
-    enum ResultType m_type;
+    Reason m_reason;
+    ResultType m_type;
 
     std::wstring m_intentId;
 

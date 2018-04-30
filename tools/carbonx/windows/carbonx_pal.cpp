@@ -9,7 +9,7 @@ void PAL_WaitForDebugger()
     uint16_t msSleepPeriod = 100;
     bool fDebugBreak = false;
 
-    for(DWORD dwTickStart = GetTickCount(); GetTickCount() - dwTickStart < msWaitForDebugger; Sleep(msSleepPeriod))
+    for(auto dwTickStart = GetTickCount64(); GetTickCount64() - dwTickStart < msWaitForDebugger; Sleep(msSleepPeriod))
     {
        if (PAL_IsDebuggerPresent())
        {

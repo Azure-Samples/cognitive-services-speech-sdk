@@ -60,8 +60,8 @@ namespace Impl {
 
         AudioInputStream* m_streamReader;
 
-        enum State m_state;
-        enum State m_stateRequested;
+        State m_state;
+        State m_stateRequested;
 
         std::thread m_thread;
     };

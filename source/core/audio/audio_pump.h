@@ -62,8 +62,8 @@ private:
 
     std::shared_ptr<ISpxAudioReader> m_audioReader;
 
-    enum State m_state;
-    enum State m_stateRequested;
+    State m_state;
+    State m_stateRequested;
     const int m_waitMsStartPumpRequestTimeout = 5000;
     const int m_waitMsStopPumpRequestTimeout = 5000;
 

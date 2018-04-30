@@ -394,8 +394,8 @@ public:
 
     virtual std::wstring GetResultId() = 0;
     virtual std::wstring GetText() = 0;
-    virtual enum Reason GetReason() = 0;
-    virtual enum ResultType GetType() = 0;
+    virtual Reason GetReason() = 0;
+    virtual ResultType GetType() = 0;
 };
 
 
@@ -403,10 +403,10 @@ class ISpxRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxRecognitionRes
 {
 public:
 
-    virtual void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type) = 0;
-    virtual void InitFinalResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type) = 0;
-    virtual void InitNoMatch(enum ResultType type) = 0;
-    virtual void InitError(const wchar_t* text) = 0;
+    virtual void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, ResultType type) = 0;
+    virtual void InitFinalResult(const wchar_t* resultId, const wchar_t* text, ResultType type) = 0;
+    virtual void InitNoMatch(ResultType type) = 0;
+    virtual void InitError(const wchar_t* text, ResultType type) = 0;
 };
 
 
@@ -609,10 +609,10 @@ class ISpxRecoResultFactory : public ISpxInterfaceBaseFor<ISpxRecoResultFactory>
 {
 public:
 
-    virtual std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type) = 0;
-    virtual std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type) = 0;
-    virtual std::shared_ptr<ISpxRecognitionResult> CreateNoMatchResult(enum ResultType type) = 0;
-    virtual std::shared_ptr<ISpxRecognitionResult> CreateErrorResult(const wchar_t* text) = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, ResultType type) = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, const wchar_t* text, ResultType type) = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateNoMatchResult(ResultType type) = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateErrorResult(const wchar_t* text, ResultType type) = 0;
 };
 
 

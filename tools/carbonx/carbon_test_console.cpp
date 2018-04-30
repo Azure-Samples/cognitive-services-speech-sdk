@@ -1208,7 +1208,7 @@ void CarbonTestConsole::Parameters_SetString(T &parameters, const wchar_t* psz)
     if (iSpace != std::wstring::npos && psz[iSpace + 1] != L'\0')
     {
         std::wstring name(psz, iSpace);
-        parameters[name.c_str()] = psz + iSpace + 1;
+        parameters[name.c_str()] = std::wstring(psz + iSpace + 1);
         ConsoleWriteLine(L"Set string '%ls' to '%ls'!\n", name.c_str(), psz + iSpace + 1);
     }
     else

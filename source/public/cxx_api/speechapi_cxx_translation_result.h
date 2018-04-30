@@ -42,7 +42,7 @@ class TranslationTextResult final : public Microsoft::CognitiveServices::Speech:
 {
 
 private:
-    enum TranslationTextStatus m_translationStatus;
+    TranslationTextStatus m_translationStatus;
     std::map<std::wstring, std::wstring> m_translations;
     std::wstring m_failureReason;
 
@@ -73,7 +73,7 @@ public:
     /// <summary>
     /// Describes the status of translation result.
     /// </summary>
-    const enum TranslationTextStatus& TextStatus;
+    const TranslationTextStatus& TextStatus;
 
     /// <summary>
     /// Presents the translation results. Each item in the map is a key value pair, where key is the language tag of the translated text,

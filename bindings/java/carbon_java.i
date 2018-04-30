@@ -14,6 +14,13 @@
     (jenv)->GetByteArrayRegion($input, 0, $2, (jbyte *)$1);
 %}
 
+%{
+#ifdef _MSC_VER
+#pragma warning(disable : 4267) //warning C4267: 'initializing': conversion from 'size_t' to 'jsize', possible loss of data
+// disable: error 6011:  : Dereferencing NULL pointer 'arg1'.
+#pragma warning( disable : 6011 )
+#endif
+%}
 
 %{
 #include <speechapi_cxx_common.h>
@@ -23,7 +30,6 @@
 
 %feature("director") AudioInputStream;
 %apply (char *STRING, int LENGTH) { (char* dataBuffer, unsigned int size) };
-
 
 %include "carbon.i"
 

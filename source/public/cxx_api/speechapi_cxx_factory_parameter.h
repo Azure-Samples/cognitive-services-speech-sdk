@@ -37,7 +37,7 @@ public:
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle and a FactoryParameter value.
     /// </summary>
-    FactoryParameterValue(SPXFACTORYHANDLE hfactory, enum FactoryParameter parameter) : m_hfactory(hfactory), m_name(ParameterNameFromEnum(parameter)) { }
+    FactoryParameterValue(SPXFACTORYHANDLE hfactory, FactoryParameter parameter) : m_hfactory(hfactory), m_name(ParameterNameFromEnum(parameter)) { }
 
     /// <summary>
     /// Returns true if the encapsulated value has a string type.
