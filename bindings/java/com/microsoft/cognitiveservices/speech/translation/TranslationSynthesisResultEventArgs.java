@@ -7,7 +7,7 @@ package com.microsoft.cognitiveservices.speech.translation;
 /**
   * Defines the content of translation synthesis result event.
   */
-public class TranslationSynthesisResultEventArgs //: System.EventArgs
+public final class TranslationSynthesisResultEventArgs //: System.EventArgs
 {
     TranslationSynthesisResultEventArgs(com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResultEventArgs e)
     {

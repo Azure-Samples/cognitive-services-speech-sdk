@@ -11,7 +11,7 @@ import java.util.Map;
 /**
   * Defines TranslationText result.
   */
-public class TranslationTextResult extends com.microsoft.cognitiveservices.speech.SpeechRecognitionResult
+public final class TranslationTextResult extends com.microsoft.cognitiveservices.speech.SpeechRecognitionResult
 {
     // BUG: this is hack for making documentation going.
     public TranslationTextResult(com.microsoft.cognitiveservices.speech.internal.TranslationTextResult result)

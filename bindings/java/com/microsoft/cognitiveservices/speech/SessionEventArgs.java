@@ -7,7 +7,7 @@ package com.microsoft.cognitiveservices.speech;
 /**
  * Defines content for session events like SessionStarted/Stopped, SoundStarted/Stopped.
  */
-public class SessionEventArgs // extends EventArgs
+public final class SessionEventArgs // extends EventArgs
 {
     /**
       * Constructs a SessionEcentArgs.

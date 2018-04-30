@@ -4,13 +4,18 @@ package com.microsoft.cognitiveservices.speech.intent;
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+import com.microsoft.cognitiveservices.speech.ResultParameterNames;
+import com.microsoft.cognitiveservices.speech.internal.IntentRecognitionEventArgs;
+import com.microsoft.cognitiveservices.speech.internal.ResultPropertyValueCollection;
+
 /**
   * Defines content of an intent intermediate/final result events.
   */
-public class IntentRecognitionResultEventArgs // : System.EventArgs
+public final class IntentRecognitionResultEventArgs // : System.EventArgs
 {
     IntentRecognitionResultEventArgs(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionEventArgs e)
     {
+        this.eventArgImpl = e;
         this._Result = new IntentRecognitionResult(e.getResult());
         this._SessionId = e.getSessionId();
     }
@@ -35,6 +40,11 @@ public class IntentRecognitionResultEventArgs // : System.EventArgs
     }
     // { get; }
     private String _SessionId;
+    
+    public ResultPropertyValueCollection getProperties()
+    {
+        return eventArgImpl.getResult().getProperties();
+    }
 
     /**
       * Returns a String that represents the session id and the intent recognition result event.
@@ -48,6 +58,11 @@ public class IntentRecognitionResultEventArgs // : System.EventArgs
                " Status:" + _Result.getReason() +
                " IntentId:<" + _Result.getIntentId() +
                "> Recognized text:<" + _Result.getRecognizedText() +
-               ">."; 
+               "> Recognized json:<" + getProperties().getString(ResultParameterNames.Json) +
+               "> LanguageUnderstandingJson <" + getProperties().getString(ResultParameterNames.LanguageUnderstandingJson) +
+                ">.";
     }
+    
+    // Hold the reference.
+    private IntentRecognitionEventArgs eventArgImpl;
 }

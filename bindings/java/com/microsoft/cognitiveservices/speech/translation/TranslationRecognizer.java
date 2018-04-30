@@ -6,8 +6,8 @@ package com.microsoft.cognitiveservices.speech.translation;
 import java.util.ArrayList;
 
 import com.microsoft.cognitiveservices.speech.ParameterCollection;
-import com.microsoft.cognitiveservices.speech.ParameterNames;
 import com.microsoft.cognitiveservices.speech.RecognitionErrorEventArgs;
+import com.microsoft.cognitiveservices.speech.RecognizerParameterNames;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Task;
@@ -72,7 +72,7 @@ import com.microsoft.cognitiveservices.speech.util.TaskRunner;
        * @return Gets the language name that was set when the recognizer was created.
        */
      public String getSourceLanguage() {
-         return _Parameters.getString(ParameterNames.TranslationFromLanguage);
+         return _Parameters.getString(RecognizerParameterNames.TranslationFromLanguage);
      }
 
      /**

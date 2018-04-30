@@ -5,6 +5,7 @@ package com.microsoft.cognitiveservices.speech;
 //
 
 import java.io.Closeable;
+import java.net.URI;
 import java.util.ArrayList;
 
 import com.microsoft.cognitiveservices.speech.ParameterCollection;
@@ -67,7 +68,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return the subscription key.
       */
     public String getSubscriptionKey() {
-        return _Parameters.getString(ParameterNames.SpeechSubscriptionKey);
+        return _Parameters.getString(FactoryParameterNames.SubscriptionKey);
     }
 
     /**
@@ -77,7 +78,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return Gets the authorization token.
       */
     public String getAuthorizationToken() {
-        return _Parameters.getString(ParameterNames.SpeechAuthToken);
+        return _Parameters.getString(FactoryParameterNames.AuthorizationToken);
     }
 
     /**
@@ -87,7 +88,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @param value the authorization token.
       */
     public void setAuthorizationToken(String value) {
-        _Parameters.set(ParameterNames.SpeechAuthToken, value);
+        _Parameters.set(FactoryParameterNames.AuthorizationToken, value);
     }
 
     /**
@@ -95,7 +96,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return the region name of the service to be connected.
       */
     public String getRegion() {
-        return _Parameters.getString(ParameterNames.Region);
+        return _Parameters.getString(FactoryParameterNames.Region);
     }
 
     /**
@@ -103,24 +104,23 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @param value the region name of the service to be connected.
       */
     public void setRegion(String value) {
-        _Parameters.set(ParameterNames.Region, value);
+        _Parameters.set(FactoryParameterNames.Region, value);
     }
 
     /**
       * Gets the service endpoint.
       * @return the service endpoint.
       */
-    public String getEndpoint() {
-        return _Parameters.getString(ParameterNames.SpeechEndpoint);
+    public URI getEndpoint() {
+        return URI.create(_Parameters.getString(FactoryParameterNames.Endpoint));
     }
 
     /**
       * Sets the service endpoint.
       * @param value the service endpoint.
       */
-    public void setEndpoint(String value) {
-        // factoryImpl.SetSubscriptionKey(value);
-        _Parameters.set(ParameterNames.SpeechEndpoint, value);
+    public void setEndpoint(URI value) {
+        _Parameters.set(FactoryParameterNames.Endpoint, value.toString());
     }
 
     /**

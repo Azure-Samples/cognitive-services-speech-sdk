@@ -59,7 +59,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       * @return the deployment id of a customized speech model that is used for speech recognition.
       */
     public String getDeploymentId() {
-        return _Parameters.getString(ParameterNames.SpeechModelId);
+        return _Parameters.getString(RecognizerParameterNames.SpeechModelId);
     }
     
     /**
@@ -67,7 +67,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       * @param value The deployment id of a customized speech model that is used for speech recognition.
       */
     public void setDeploymentId(String value) {
-        _Parameters.set(ParameterNames.SpeechModelId, value);
+        _Parameters.set(RecognizerParameterNames.SpeechModelId, value);
     }
 
     /**
@@ -75,7 +75,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       * @return The spoken language of recognition.
       */
     public String getLanguage() {
-        return _Parameters.getString(ParameterNames.SpeechRecognitionLanguage);
+        return _Parameters.getString(RecognizerParameterNames.SpeechRecognitionLanguage);
     }
 
     /**
@@ -83,7 +83,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       * @param value The spoken language of recognition.
       */
     public void setLanguage(String value) {
-        _Parameters.set(ParameterNames.SpeechRecognitionLanguage, value);
+        _Parameters.set(RecognizerParameterNames.SpeechRecognitionLanguage, value);
     }
 
     /**

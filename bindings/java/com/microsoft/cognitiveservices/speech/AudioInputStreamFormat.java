@@ -1,6 +1,6 @@
 package com.microsoft.cognitiveservices.speech;
 
-public class AudioInputStreamFormat {
+public final class AudioInputStreamFormat {
     /**
      * The format of the audio, valid values: 1 (PCM)
      */

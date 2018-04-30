@@ -9,7 +9,7 @@ package com.microsoft.cognitiveservices.speech.translation;
 /**
   * Define payload of translation intermediate/final result events.
   */
-public class TranslationTextResultEventArgs //: System.EventArgs
+public final class TranslationTextResultEventArgs //: System.EventArgs
 {
     TranslationTextResultEventArgs(com.microsoft.cognitiveservices.speech.internal.TranslationTextResultEventArgs e)
     {

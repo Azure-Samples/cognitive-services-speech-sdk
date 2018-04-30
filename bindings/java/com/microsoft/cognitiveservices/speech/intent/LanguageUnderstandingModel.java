@@ -1,12 +1,10 @@
 package com.microsoft.cognitiveservices.speech.intent;
 
-import java.io.Closeable;
-
 
 /**
   * Represents language understanding model used for intent recognition.
   */
-public class LanguageUnderstandingModel implements Closeable
+public final class LanguageUnderstandingModel
 { 
     /**
       * Creates an language understanding model using the specified endpoint.
@@ -40,21 +38,6 @@ public class LanguageUnderstandingModel implements Closeable
     {
         return new LanguageUnderstandingModel(com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel.from(hostName, subscriptionKey, appId));
     }
-
-    /**
-      * Dispose of associated resources.
-      */
-    public void close()
-    {
-        if (disposed)
-        {
-            return;
-        }
-
-        disposed = true;
-    }
-
-    private boolean disposed = false;
 
     LanguageUnderstandingModel(com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel model)
     {

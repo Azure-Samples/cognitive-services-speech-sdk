@@ -7,7 +7,7 @@ package com.microsoft.cognitiveservices.speech;
 /**
   * Defines contents of speech intermediate/final result event.
   */
-public class SpeechRecognitionResultEventArgs {
+public final class SpeechRecognitionResultEventArgs {
     
     SpeechRecognitionResultEventArgs(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventArgs e) {
         this._Result = new SpeechRecognitionResult(e.getResult());

@@ -9,7 +9,7 @@ import java.math.*;
 /**
  * Defines payload for session events like Speech Start/End Detected
  */
-public class RecognitionEventArgs // extends EventArgs
+public final class RecognitionEventArgs // extends EventArgs
 {
     public RecognitionEventArgs(RecognitionEventType type, com.microsoft.cognitiveservices.speech.internal.RecognitionEventArgs arg)
     {

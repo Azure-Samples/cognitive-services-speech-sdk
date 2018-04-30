@@ -16,8 +16,7 @@ public class AudioInputStream extends com.microsoft.cognitiveservices.speech.int
      * @return the number of bytes have been read.
      */
     @Override
-    public long read(byte[] dataBuffer)
-    {
+    public long read(byte[] dataBuffer) {
         throw new UnsupportedOperationException();
     }
 
@@ -33,8 +32,7 @@ public class AudioInputStream extends com.microsoft.cognitiveservices.speech.int
       * Closes the audio input stream.
       */
     @Override
-    public void close()
-    {
+    public void close() {
         throw new UnsupportedOperationException();
     }
 

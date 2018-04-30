@@ -5,7 +5,7 @@ package com.microsoft.cognitiveservices.speech.intent;
 //
 
 import com.microsoft.cognitiveservices.speech.ParameterCollection;
-import com.microsoft.cognitiveservices.speech.ParameterNames;
+import com.microsoft.cognitiveservices.speech.RecognizerParameterNames;
 import com.microsoft.cognitiveservices.speech.RecognitionErrorEventArgs;
 import com.microsoft.cognitiveservices.speech.internal.IntentTrigger;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
@@ -62,7 +62,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       * @return the spoken language of recognition.
       */
     public String getLanguage() {
-            return _Parameters.getString(ParameterNames.SpeechRecognitionLanguage);
+            return _Parameters.getString(RecognizerParameterNames.SpeechRecognitionLanguage);
     }
 
     /**
@@ -70,7 +70,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       * @param value the spoken language of recognition.
       */
     public void setLanguage(String value) {
-            _Parameters.set(ParameterNames.SpeechRecognitionLanguage, value);
+            _Parameters.set(RecognizerParameterNames.SpeechRecognitionLanguage, value);
     }
 
     /**

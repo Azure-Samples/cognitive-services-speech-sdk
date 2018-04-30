@@ -8,7 +8,7 @@ package com.microsoft.cognitiveservices.speech.translation;
 /**
   * Defines translation synthesis result, i.e. the voice output of the translated text in the target language.
   */
-public class TranslationSynthesisResult
+public final class TranslationSynthesisResult
 {
     // BUG: this is hack for making documentation going.
     TranslationSynthesisResult(com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResult result)

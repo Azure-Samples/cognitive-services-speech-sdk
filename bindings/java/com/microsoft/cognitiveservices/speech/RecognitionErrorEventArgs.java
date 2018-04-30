@@ -7,7 +7,7 @@ package com.microsoft.cognitiveservices.speech;
 /**
   * Defines content of a RecognitionErrorEvent. 
   */
-public class RecognitionErrorEventArgs //extends System.EventArgs
+public final class RecognitionErrorEventArgs //extends System.EventArgs
 {
     public RecognitionErrorEventArgs(String sessionId, RecognitionStatus status)
     {

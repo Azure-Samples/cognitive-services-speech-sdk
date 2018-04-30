@@ -71,28 +71,37 @@ set(JAVA_LIB ${PROJECT_NAME}_lib)
 # SET_SOURCE_FILES_PROPERTIES(${SWIG_JAVA_SOURCES} PROPERTIES GENERATED TRUE)
 #file(GLOB SWIG_JAVA_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/*.java")
 set(JAVA_SOURCES
-    com/microsoft/cognitiveservices/speech/ParameterCollection.java
-    com/microsoft/cognitiveservices/speech/SessionEventArgs.java
-    com/microsoft/cognitiveservices/speech/SessionEventType.java
     com/microsoft/cognitiveservices/speech/AudioInputStream.java
-    com/microsoft/cognitiveservices/speech/ParameterNames.java
+    com/microsoft/cognitiveservices/speech/AudioInputStreamFormat.java
+    com/microsoft/cognitiveservices/speech/FactoryParameterNames.java
+    com/microsoft/cognitiveservices/speech/ParameterCollection.java
     com/microsoft/cognitiveservices/speech/RecognitionErrorEventArgs.java
+    com/microsoft/cognitiveservices/speech/RecognitionEventArgs.java
+    com/microsoft/cognitiveservices/speech/RecognitionEventType.java
     com/microsoft/cognitiveservices/speech/RecognitionStatus.java
     com/microsoft/cognitiveservices/speech/Recognizer.java
+    com/microsoft/cognitiveservices/speech/RecognizerParameterNames.java
+    com/microsoft/cognitiveservices/speech/ResultParameterNames.java
+    com/microsoft/cognitiveservices/speech/SessionEventArgs.java
+    com/microsoft/cognitiveservices/speech/SessionEventType.java
     com/microsoft/cognitiveservices/speech/SpeechFactory.java
-    com/microsoft/cognitiveservices/speech/intent/LanguageUnderstandingModel.java
-    com/microsoft/cognitiveservices/speech/intent/IntentRecognitionResult.java
-    com/microsoft/cognitiveservices/speech/intent/IntentRecognitionResultEventArgs.java
-    com/microsoft/cognitiveservices/speech/intent/IntentRecognizer.java
     com/microsoft/cognitiveservices/speech/SpeechRecognitionReason.java
     com/microsoft/cognitiveservices/speech/SpeechRecognitionResult.java
     com/microsoft/cognitiveservices/speech/SpeechRecognitionResultEventArgs.java
     com/microsoft/cognitiveservices/speech/SpeechRecognizer.java
+
+    com/microsoft/cognitiveservices/speech/intent/IntentRecognitionResult.java
+    com/microsoft/cognitiveservices/speech/intent/IntentRecognitionResultEventArgs.java
+    com/microsoft/cognitiveservices/speech/intent/IntentRecognizer.java
+    com/microsoft/cognitiveservices/speech/intent/LanguageUnderstandingModel.java
+
     com/microsoft/cognitiveservices/speech/translation/TranslationRecognizer.java
+    com/microsoft/cognitiveservices/speech/translation/TranslationStatus.java
     com/microsoft/cognitiveservices/speech/translation/TranslationSynthesisResult.java
     com/microsoft/cognitiveservices/speech/translation/TranslationSynthesisResultEventArgs.java
     com/microsoft/cognitiveservices/speech/translation/TranslationTextResult.java
     com/microsoft/cognitiveservices/speech/translation/TranslationTextResultEventArgs.java
+
     com/microsoft/cognitiveservices/speech/util/EventHandler.java
     com/microsoft/cognitiveservices/speech/util/EventHandlerImpl.java
     com/microsoft/cognitiveservices/speech/util/Task.java
