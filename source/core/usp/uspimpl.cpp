@@ -583,20 +583,6 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
     auto translation = json[json_properties::translation];
 
     TranslationResult result;
-    auto translations = translation.at(json_properties::translations);
-    for (const auto& object : translations)
-    {
-        auto lang = object.at(json_properties::lang).get<string>();
-        auto txt = object.at(json_properties::text).get<string>();
-        if (lang.empty() && txt.empty())
-        {
-            PROTOCOL_VIOLATION("emtpy language and text field in translations text. lang=%s, text=%s.", lang.c_str(), txt.c_str());
-            continue;
-        }
-
-        result.translations[PAL::ToWString(lang)] = PAL::ToWString(txt);
-    }
-
     if (expectStatus)
     {
         auto status = translation.find(json_properties::translationStatus);
@@ -607,6 +593,8 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
         else
         {
             PROTOCOL_VIOLATION("No TranslationStatus is provided. Json: %s", translation.dump().c_str());
+            result.translationStatus = TranslationStatus::Error;
+            result.failureReason = L"Status is missing in the protocol message.";
         }
 
         auto failure = translation.find(json_properties::translationFailureReason);
@@ -618,6 +606,23 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
         if ((result.translationStatus == TranslationStatus::Success) && (result.translations.size() == 0))
         {
             PROTOCOL_VIOLATION("No Translations text block in the message, but TranslationStatus is succcess. Json:", translation.dump().c_str());
+        }
+    }
+
+    if (result.translationStatus == TranslationStatus::Success)
+    {
+        auto translations = translation.at(json_properties::translations);
+        for (const auto& object : translations)
+        {
+            auto lang = object.at(json_properties::lang).get<string>();
+            auto txt = object.at(json_properties::text).get<string>();
+            if (lang.empty() && txt.empty())
+            {
+                PROTOCOL_VIOLATION("emtpy language and text field in translations text. lang=%s, text=%s.", lang.c_str(), txt.c_str());
+                continue;
+            }
+
+            result.translations[PAL::ToWString(lang)] = PAL::ToWString(txt);
         }
     }
 

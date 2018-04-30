@@ -185,7 +185,7 @@ struct AudioStreamStartMsg
 */
 struct TranslationResult
 {
-    TranslationStatus translationStatus { TranslationStatus::Unknown };
+    TranslationStatus translationStatus { TranslationStatus::Error };
     // A string indicates failure reasons in case that the translationStatus is an error.
     std::wstring failureReason;
     // An array of value pair <targetLanguage, translationText>.
