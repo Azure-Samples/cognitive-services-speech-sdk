@@ -26,9 +26,6 @@ DROP_DIR="$(cygpath --unix --absolute "$DROP_DIR")"
 
 OUTPUT_DIR="$(cygpath --windows --absolute "$OUTPUT_DIR")"
 
-CSHARP_ASSEMBLY="$DROP_DIR/Win32/Release/public/lib/carbon_csharp_lib.dll"
-[[ -e $CSHARP_ASSEMBLY ]]
-CSHARP_ASSEMBLY="$(cygpath --windows --absolute "$CSHARP_ASSEMBLY")"
 DROP_DIR="$(cygpath --windows --absolute "$DROP_DIR")"
 
 "$NUGETEXETOOLPATH" pack ./ci/nuget/carbon.nuspec -Properties "DropDir=$DROP_DIR;BuildNumber=$BUILD_ID" -OutputDirectory "$OUTPUT_DIR"

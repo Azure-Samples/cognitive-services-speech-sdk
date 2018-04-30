@@ -80,9 +80,10 @@ set(CARBON_C_API "${CARBON_PUBLIC}/c_api")
 set(CARBON_CXX_API "${CARBON_PUBLIC}/cxx_api")
 set(CARBON_INCLUDE "${CARBON_CORE}/include")
 
+set(SPEECHSDK_CORE_LIBRARY "Microsoft.CognitiveServices.Speech.core")
+
 FILE(GLOB SPEECH_C_API_HEADERS "${CARBON_C_API}/*.h")
 FILE(GLOB SPEECH_CXX_API_HEADERS "${CARBON_CXX_API}/*.h")
-
 
 # individual components
 set(COMMON "${CARBON_CORE}/common")

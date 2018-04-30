@@ -1,4 +1,4 @@
-project(libcarbon)
+project(${SPEECHSDK_CORE_LIBRARY})
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 
@@ -39,10 +39,6 @@ source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
 source_group("Source Files" FILES ${SOURCES})
 
 add_library(${PROJECT_NAME} SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES} $<TARGET_OBJECTS:c_api>)
-
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES
-    OUTPUT_NAME "carbon"
-)
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE sr

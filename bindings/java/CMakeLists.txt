@@ -1,4 +1,6 @@
-project(carbon_java)
+project(com.microsoft.cognitiveservices.speech)
+
+set(JAVA_BINDINGS Microsoft.CognitiveServices.Speech.java.bindings)
 
 find_package(SWIG REQUIRED)
 find_package(Java REQUIRED)
@@ -23,8 +25,6 @@ elseif(ANDROID)
 # Since we use CLANG, we need to set __GNUC__=4 because otherwise the generated swig bindings won't export the symbols
      set(CMAKE_CXX_FLAGS "-D__GNUC__=4 -std=c++11 -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -fno-strict-aliasing -fPIC")
 endif()
-
-set(JAVA_BINDINGS ${PROJECT_NAME}_bindings)
 
 set(SWIG_MODULE_${JAVA_BINDINGS}_EXTRA_DEPS
     ${SWIG_INTERFACE}
@@ -52,19 +52,18 @@ include_directories(${JAVA_INCLUDE_PATH})
 include_directories(${JNI_INCLUDE_DIRS})
 include_directories("${SRC_DIR}/..")
 
-# Build the C++ code start into a dynamic library: carbon.dll (on Windows) or libcarbon.so (on Linux)
 if("${CMAKE_VERSION}" VERSION_GREATER 3.8)
     swig_add_library(${JAVA_BINDINGS} LANGUAGE java SOURCES ${SOURCES})
 else()
     swig_add_module(${JAVA_BINDINGS} java ${SOURCES})
 endif()
-swig_link_libraries(${JAVA_BINDINGS} libcarbon)
+swig_link_libraries(${JAVA_BINDINGS} ${SPEECHSDK_CORE_LIBRARY})
 set_target_properties(${SWIG_MODULE_${JAVA_BINDINGS}_REAL_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 set_target_properties(${SWIG_MODULE_${JAVA_BINDINGS}_REAL_NAME} PROPERTIES FOLDER bindings/java)
 
 
 # Build the Java code into ${JAVA_LIB}.jar
-set(JAVA_LIB ${PROJECT_NAME}_lib)
+set(JAVA_LIB ${PROJECT_NAME})
 
 # TODO this should be a wildcard, not an explicit list as these files are generated
 # set(SWIG_JAVA_SOURCES ${JAVA_SOURCE_DIRECTORY}/*.java)
@@ -228,7 +227,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microso
 
 add_custom_target(copy-over-api-files
                   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/SessionEventArgs.java)
-add_dependencies(${PROJECT_NAME}_bindings copy-over-api-files)
+add_dependencies(${JAVA_BINDINGS} copy-over-api-files)
 
 set(JAVA_LIB_JAVADOC "${JAVA_LIB}-doc")
 create_javadoc(copy-over-api-files

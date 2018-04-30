@@ -47,4 +47,4 @@ set_target_properties (mock PROPERTIES
     FOLDER carbon_libs
 )
 
-target_link_libraries(mock PRIVATE common libcarbon)
+target_link_libraries(mock PRIVATE common ${SPEECHSDK_CORE_LIBRARY})

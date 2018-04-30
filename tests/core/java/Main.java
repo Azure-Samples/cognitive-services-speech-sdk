@@ -12,7 +12,7 @@ class SpeechRecognizer {
 
     @BeforeAll
     static void setUpBeforeClass() throws Exception {
-        System.loadLibrary("carbon_java_bindings");
+        System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
     }
 
     @Test

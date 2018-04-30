@@ -32,7 +32,7 @@
     ],
     "overwrite": "specs/*.md",
     "globalMetadata": {
-      "_appTitle": "docfx carbon website",
+      "_appTitle": "docfx Microsoft Cognitive Services Speech SDK website",
       "_enableSearch": true
     },
     "dest": "../../build/docfx/_site",

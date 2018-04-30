@@ -9,9 +9,9 @@
 
 SPEECHSDK_ROOT:=/change/to/point/to/extracted/SpeechSDK
 
-CHECK_FOR_SPEECHSDK := $(shell test -f $(SPEECHSDK_ROOT)/lib/x64/libcarbon.so && echo Success)
+CHECK_FOR_SPEECHSDK := $(shell test -f $(SPEECHSDK_ROOT)/lib/x64/libMicrosoft.CognitiveServices.Speech.so && echo Success)
 ifneq ("$(CHECK_FOR_SPEECHSDK)","Success")
-  $(error Please set SPEECHSDK_ROOT to point to your extracted Speech SDK, $$SPEECHSDK_ROOT/x64/libcarbon.so should exist.)
+  $(error Please set SPEECHSDK_ROOT to point to your extracted Speech SDK, $$SPEECHSDK_ROOT/x64/libMicrosoft.CognitiveServices.Speech.so should exist.)
 endif
 
 # If you'd like to build for 32-bit Linux, replace "x64" in the next line with "x86".
@@ -20,7 +20,7 @@ LIBPATH:=$(SPEECHSDK_ROOT)/lib/$(TARGET_PLATFORM)
 
 INCPATH:=$(SPEECHSDK_ROOT)/include/cxx_api $(SPEECHSDK_ROOT)/include/c_api
 
-LIBS:=-lcarbon -lpthread -l:libssl.so.1.0.0 -l:libcurl.so.4 -l:libasound.so.2
+LIBS:=-lMicrosoft.CognitiveServices.Speech -lpthread -l:libssl.so.1.0.0 -l:libcurl.so.4 -l:libasound.so.2
 
 all: quickstart-linux
 

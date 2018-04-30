@@ -1,4 +1,4 @@
-project(carbon_csharp)
+project(Microsoft.CognitiveServices.Speech.csharp)
 
 find_package(SWIG REQUIRED)
 include(UseSWIG)
@@ -10,7 +10,7 @@ set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
 set(SOURCES "${SRC_DIR}/carbon_csharp.i")
 
-set(CSHARP_BINDINGS ${PROJECT_NAME}_bindings)
+set(CSHARP_BINDINGS ${PROJECT_NAME}.bindings)
 
 set(SWIG_MODULE_${CSHARP_BINDINGS}_EXTRA_DEPS
     ${SWIG_INTERFACE}
@@ -19,8 +19,11 @@ set(SWIG_MODULE_${CSHARP_BINDINGS}_EXTRA_DEPS
     ${SPEECH_CXX_API_HEADERS})
 
 # ${SWIG_INTERFACE} should resolve to {repo/root}/bindings/carbon.i
-# warning 302: identifier redifined by ...
-set(CMAKE_SWIG_FLAGS -w401,516,503,302 -namespace Microsoft.CognitiveServices.Speech.Internal)
+# warning 302: identifier redefined by ...
+set(CMAKE_SWIG_FLAGS
+   -w401,516,503,302
+   -namespace Microsoft.CognitiveServices.Speech.Internal
+   -dllimport "${CSHARP_BINDINGS}.dll")
 set_source_files_properties("${SRC_DIR}/carbon_csharp.i" PROPERTIES
     CPLUSPLUS ON)
 
@@ -37,7 +40,7 @@ include_directories(${CARBON_CXX_API})
 include_directories("${SRC_DIR}/..")
 
 swig_add_library(${CSHARP_BINDINGS} LANGUAGE csharp SOURCES ${SOURCES})
-swig_link_libraries(${CSHARP_BINDINGS} libcarbon)
+swig_link_libraries(${CSHARP_BINDINGS} ${SPEECHSDK_CORE_LIBRARY})
 set_target_properties(${SWIG_MODULE_${CSHARP_BINDINGS}_REAL_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 set_target_properties(${SWIG_MODULE_${CSHARP_BINDINGS}_REAL_NAME} PROPERTIES
     FOLDER bindings/csharp
@@ -47,7 +50,7 @@ set_target_properties(${SWIG_MODULE_${CSHARP_BINDINGS}_REAL_NAME} PROPERTIES
 set(SWIG_CS_SOURCES ${CSHARP_SOURCE_DIRECTORY}/*.cs)
 SET_SOURCE_FILES_PROPERTIES(${SWIG_CS_SOURCES} PROPERTIES GENERATED TRUE)
 
-set(CSHARP_LIB ${PROJECT_NAME}_lib CACHE INTERNAL "")
+set(CSHARP_LIB ${PROJECT_NAME} CACHE INTERNAL "")
 
 FILE(GLOB CSHARP_LIB_WRAPPER_SOURCES "${SRC_DIR}/*.cs")
 

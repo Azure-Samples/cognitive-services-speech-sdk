@@ -12,10 +12,10 @@
       <AdditionalIncludeDirectories>$(SpeechPackageRoot)build\native\include\cxx_api;$(SpeechPackageRoot)build\native\include\c_api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>$(SpeechNativeLibDir)\carbon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SpeechNativeLibDir)\Microsoft.CognitiveServices.Speech.core.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Target Name="SpeechRedistAfterBuild" AfterTargets="AfterBuild" >
-    <Copy SourceFiles="$(SpeechNativeLibDir)\carbon.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(SpeechNativeLibDir)\Microsoft.CognitiveServices.Speech.core.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
   </Target>
 </Project>

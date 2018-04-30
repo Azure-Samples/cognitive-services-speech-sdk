@@ -19,7 +19,7 @@ source_group("Source Files" FILES ${SOURCES})
 source_group("Header Files" FILES ${TEST_HEADERS})
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS})
-target_link_libraries(${PROJECT_NAME} common libcarbon ${TEST_LIBS})
+target_link_libraries(${PROJECT_NAME} common ${SPEECHSDK_CORE_LIBRARY} ${TEST_LIBS})
 
 if (NOT WIN32)
     find_package (Threads)

@@ -25,14 +25,14 @@ fi
 SOURCE_ROOT="$SCRIPT_DIR/../.."
 BUILD_ROOT="$SOURCE_ROOT/build/$PLATFORM"
 
-SRCJAR="$BUILD_ROOT/lib/carbon_java_lib.jar"
-SRCJARSRC="$BUILD_ROOT/lib/carbon_java_lib-src.zip"
-SRCJARBINDING="$BUILD_ROOT/bin/libcarbon_java_bindings.so"
+SRCJAR="$BUILD_ROOT/lib/com.microsoft.cognitiveservices.speech.jar"
+SRCJARSRC="$BUILD_ROOT/lib/com.microsoft.cognitiveservices.speech-src.zip"
+SRCJARBINDING="$BUILD_ROOT/bin/libMicrosoft.CognitiveServices.Speech.java.bindings.so"
 SRCCARBONX="$BUILD_ROOT/bin/carbonx"
 
 if [[ $OS = "Windows_NT" ]]; then
   case $TARGET in 
-    UNKNOWN) LIBPREFIX=carbon
+    UNKNOWN) LIBPREFIX=Microsoft.CognitiveServices.Speech.
              DYNLIBSUFFIX=.dll
              STATLIBSUFFIX=.lib
 
@@ -40,7 +40,7 @@ if [[ $OS = "Windows_NT" ]]; then
              SRCLIB="$BUILD_ROOT/lib/$CONFIG"
              SRCDYNLIB="$BUILD_ROOT/bin/$CONFIG"
              ;;
-    ANDROID) LIBPREFIX=libcarbon
+    ANDROID) LIBPREFIX=libMicrosoft.CognitiveServices.Speech.
              DYNLIBSUFFIX=.so
              STATLIBSUFFIX=.a
 
@@ -53,7 +53,7 @@ if [[ $OS = "Windows_NT" ]]; then
        ;;
   esac
 else
-  LIBPREFIX=libcarbon
+  LIBPREFIX=libMicrosoft.CognitiveServices.Speech.
 
   if [[ $(uname) = Linux ]]; then
     DYNLIBSUFFIX=.so

@@ -91,7 +91,7 @@ CSpxModuleFactory::PCREATE_MODULE_OBJECT_FUNC CSpxModuleFactory::GetCreateModule
 
         if (pfn == nullptr)
         {
-            SPX_DBG_TRACE_VERBOSE("dlsym('CreateModuleObject') returned NULL: ... thus ... using libcarbon.so!CreateModuleObject directly");
+            SPX_DBG_TRACE_VERBOSE("dlsym('CreateModuleObject') returned NULL: ... thus ... using libMicrosoft.CognitiveServices.Speech.so!CreateModuleObject directly");
             pfn = CreateModuleObject;
         }
 

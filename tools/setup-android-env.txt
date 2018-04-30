@@ -91,10 +91,10 @@ nmake
 
 
 rem copy files to device
-adb push bin/carbonx                       /data/carbon
-adb push bindings/java/carbon_java_lib.jar /data/carbon
-adb push bin/libcarbon_java_bindings.so    /data/carbon
-adb push lib/libcarbon.so                  /data/carbon
+adb push bin/carbonx /data/carbon
+adb push bindings/java/com.microsoft.cognitiveservices.speech.jar /data/carbon
+adb push bin/libMicrosoft.CognitiveServices.Speech.java.bindings.so /data/carbon
+adb push lib/libMicrosoft.CognitiveServices.Speech.so /data/carbon
 adb push \android-ndk-r16b/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a/libc++_shared.so /data/carbon
 
 

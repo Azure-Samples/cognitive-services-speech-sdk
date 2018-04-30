@@ -83,8 +83,8 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="carbon_csharp_lib">
-      <HintPath>$(SpeechSdkLibDir)carbon_csharp_lib.dll</HintPath>
+    <Reference Include="Microsoft.CognitiveServices.Speech.csharp">
+      <HintPath>$(SpeechSdkLibDir)Microsoft.CognitiveServices.Speech.csharp.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
