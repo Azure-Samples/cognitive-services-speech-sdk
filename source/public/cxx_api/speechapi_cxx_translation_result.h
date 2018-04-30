@@ -22,7 +22,7 @@ namespace Translation {
 /// <summary>
 /// Defines the status code of translation result.
 /// </summary>
-enum class TranslationStatus {
+enum class TranslationTextStatus {
     /// <summary>
     /// The translation is successful.
     /// </summary>
@@ -42,8 +42,9 @@ class TranslationTextResult final : public Microsoft::CognitiveServices::Speech:
 {
 
 private:
-    enum TranslationStatus m_translationStatus;
+    enum TranslationTextStatus m_translationStatus;
     std::map<std::wstring, std::wstring> m_translations;
+    std::wstring m_failureReason;
 
 public:
 
@@ -53,21 +54,26 @@ public:
     /// <param name="resultHandle">The handle of the result returned by recognizer in C-API.</param>
     explicit TranslationTextResult(SPXRESULTHANDLE resultHandle) :
         SpeechRecognitionResult(resultHandle),
-        TranslationStatus(m_translationStatus),
-        Translations(m_translations)
+        TextStatus(m_translationStatus),
+        Translations(m_translations),
+        FailureReason(m_failureReason)
     {
         PopulateResultFields(resultHandle);
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%ls; translation status=0x%x.", __FUNCTION__, this, Handle, ResultId.c_str(), TextStatus);
     };
 
     /// <summary>
     /// Destructs the instance.
     /// </summary>
-    virtual ~TranslationTextResult() { };
+    virtual ~TranslationTextResult()
+    {
+        SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, Handle);
+    };
 
     /// <summary>
     /// Describes the status of translation result.
     /// </summary>
-    const enum TranslationStatus& TranslationStatus;
+    const enum TranslationTextStatus& TextStatus;
 
     /// <summary>
     /// Presents the translation results. Each item in the map is a key value pair, where key is the language tag of the translated text,
@@ -75,18 +81,42 @@ public:
     /// </summary>
     const std::map<std::wstring, std::wstring>& Translations;
 
+    /// <summary>
+    /// Contains failure reason if TranslationStatus indicates an error. Otherwise it is empty.
+    /// </summary>
+    const std::wstring& FailureReason;
+
 private:
 
     void PopulateResultFields(SPXRESULTHANDLE resultHandle)
     {
-        // Hack: populate status correctly to API.
-        m_translationStatus = ::Microsoft::CognitiveServices::Speech::Translation::TranslationStatus::Success;
+        static_assert((int)Result_TranslationTextSuccess == (int)TranslationTextStatus::Success, "Result_Translation* enum values == TranslationStatus::* enum values");
+        static_assert((int)Result_TranslationTextError == (int)TranslationTextStatus::Error, "Result_Translation* enum values == TranslationStatus::* enum values");
+
+        SPX_INIT_HR(hr);
+
+        Result_TranslationTextStatus status;
+        SPX_THROW_ON_FAIL(hr = TranslationResult_GetTranslationTextStatus(resultHandle, &status));
+        m_translationStatus = static_cast<TranslationTextStatus>(status);
 
         size_t bufLen = 0;
-        std::unique_ptr<Result_TranslationTextBufferHeader> phraseBuffer;
+        std::unique_ptr<wchar_t[]> reasonBuffer;
+        hr = TranslationResult_GetTranslationTextFailureReason(resultHandle, nullptr, &bufLen);
+        if (hr == SPXERR_BUFFER_TOO_SMALL)
+        {
+            reasonBuffer = std::make_unique<wchar_t[]>(bufLen);
+            hr = TranslationResult_GetTranslationTextFailureReason(resultHandle, reasonBuffer.get(), &bufLen);
+        }
+        SPX_THROW_ON_FAIL(hr);
+        if (bufLen != 0)
+        {
+            m_failureReason = std::wstring(reasonBuffer.get());
+        }
 
+        bufLen = 0;
+        std::unique_ptr<Result_TranslationTextBufferHeader> phraseBuffer;
         // retrieve the required buffer size first.
-        auto hr = TranslationResult_GetTranslationText(resultHandle, nullptr, &bufLen);
+        hr = TranslationResult_GetTranslationText(resultHandle, nullptr, &bufLen);
         if (hr == SPXERR_BUFFER_TOO_SMALL)
         {
             phraseBuffer = std::unique_ptr<Result_TranslationTextBufferHeader>((Result_TranslationTextBufferHeader *)(new char[bufLen]));
@@ -118,12 +148,34 @@ private:
 };
 
 /// <summary>
+/// Defines the status code of synthesis result.
+/// </summary>
+enum class TranslationSynthesisStatus {
+    /// <summary>
+    /// The audio data contained in the message is valid.
+    /// </summary>
+    Success,
+
+    /// <summary>
+    /// Indicates the end of audio data. No audio data is included in this message.
+    /// </summary>
+    SynthesisEnd,
+
+    /// <summary>
+    /// An error occurred during translation.
+    /// </summary>
+    Error
+};
+
+/// <summary>
 /// Defines the translation synthesis result, i.e. the voice output of the translated text in the target language.
 /// </summary>
 class TranslationSynthesisResult
 {
 private:
+    TranslationSynthesisStatus m_synthesisStatus;
     std::vector<uint8_t> m_audioData;
+    std::wstring m_failureReason;
 
 public:
     /// <summary>
@@ -131,9 +183,10 @@ public:
     /// </summary>
     /// <param name="resultHandle">The handle of the result returned by recognizer in C-API.</param>
     explicit TranslationSynthesisResult(SPXRESULTHANDLE resultHandle) :
-        Audio(m_audioData)
+        SynthesisStatus(m_synthesisStatus),
+        Audio(m_audioData),
+        FailureReason(m_failureReason)
     {
-        (void)(resultHandle);
         PopulateResultFields(resultHandle);
     };
 
@@ -143,18 +196,52 @@ public:
     virtual ~TranslationSynthesisResult() { };
 
     /// <summary>
+    /// Describes the status of translation synthesis status.
+    /// </summary>
+    const enum TranslationSynthesisStatus& SynthesisStatus;
+
+    /// <summary>
     /// The voice output of the translated text in the target language.
     /// </summary>
     const std::vector<uint8_t>& Audio;
+
+    /// <summary>
+    /// Contains failure reason if SynthesisStatus indicates an error. Otherwise it is empty.
+    /// </summary>
+    const std::wstring& FailureReason;
+
 
 private:
 
     void PopulateResultFields(SPXRESULTHANDLE resultHandle)
     {
-        size_t bufLen = 0;
+        static_assert((int)Result_TranslationSynthesisSuccess == (int)TranslationSynthesisStatus::Success, "Result_Synthesis* enum values == TranslationSynthesisStatus::* enum values");
+        static_assert((int)Result_TranslationSynthesisEnd == (int)TranslationSynthesisStatus::SynthesisEnd, "Result_Synthesis* enum values == TranslationSynthesisStatus::* enum values");
+        static_assert((int)Result_TranslationSynthesisError == (int)TranslationSynthesisStatus::Error, "Result_Synthesis* enum values == TranslationSynthesisStatus::* enum values");
 
+        SPX_INIT_HR(hr);
+
+        Result_TranslationSynthesisStatus status;
+        SPX_THROW_ON_FAIL(hr = TranslationResult_GetTranslationSynthesisStatus(resultHandle, &status));
+        m_synthesisStatus = static_cast<TranslationSynthesisStatus>(status);
+
+        size_t bufLen = 0;
+        std::unique_ptr<wchar_t[]> reasonBuffer;
+        hr = TranslationResult_GetTranslationSynthesisFailureReason(resultHandle, nullptr, &bufLen);
+        if (hr == SPXERR_BUFFER_TOO_SMALL)
+        {
+            reasonBuffer = std::make_unique<wchar_t[]>(bufLen);
+            hr = TranslationResult_GetTranslationSynthesisFailureReason(resultHandle, reasonBuffer.get(), &bufLen);
+        }
+        SPX_THROW_ON_FAIL(hr);
+        if (bufLen > 0)
+        {
+            m_failureReason = std::wstring(reasonBuffer.get());
+        }
+
+        bufLen = 0;
         // retrieve the required buffer size first.
-        auto hr = TranslationResult_GetTranslationSynthesisData(resultHandle, nullptr, &bufLen);
+        hr = TranslationResult_GetTranslationSynthesisData(resultHandle, nullptr, &bufLen);
         if (hr == SPXERR_BUFFER_TOO_SMALL)
         {
             m_audioData.resize(bufLen);

@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Intent;
 using Microsoft.CognitiveServices.Speech.Translation;
 
@@ -22,7 +23,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="region">The region name.</param>
         private SpeechFactory(string subscriptionKey, string region)
         {
-            this.factoryImpl = Microsoft.CognitiveServices.Speech.Internal.SpeechFactory.FromSubscription(subscriptionKey, region);
+            this.factoryImpl = Internal.SpeechFactory.FromSubscription(subscriptionKey, region);
             Parameters = new ParameterCollection<SpeechFactory>(this);
         }
 
@@ -33,7 +34,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="subscriptionKey">The subscription key.</param>
         private SpeechFactory(Uri endpoint, string subscriptionKey)
         {
-            this.factoryImpl = Microsoft.CognitiveServices.Speech.Internal.SpeechFactory.FromEndpoint(endpoint.ToString(), subscriptionKey);
+            this.factoryImpl = Internal.SpeechFactory.FromEndpoint(endpoint.AbsoluteUri, subscriptionKey);
             Parameters = new ParameterCollection<SpeechFactory>(this);
         }
 
@@ -316,7 +317,7 @@ namespace Microsoft.CognitiveServices.Speech
             throw new NotImplementedException();
         }
 
-        internal Microsoft.CognitiveServices.Speech.Internal.ICognitiveServicesSpeechFactory factoryImpl;
+        internal Internal.ICognitiveServicesSpeechFactory factoryImpl;
 
         private static Internal.WstringVector AsWStringVector(IEnumerable<string> input)
         {

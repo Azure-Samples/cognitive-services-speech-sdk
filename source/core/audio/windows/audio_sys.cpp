@@ -355,7 +355,10 @@ static AUDIO_RESULT write_audio_stream(
         audioData->output_state_cb(audioData->user_outputctx, AUDIO_STATE_RUNNING);
     }
     HANDLE hRenderThread = CreateThread(0, 0, renderThreadProc, pAudio, 0, nullptr);
-    CloseHandle(hRenderThread);  // we don't need the handle, release so it doesn't leak
+    if (hRenderThread != nullptr)
+    {
+        CloseHandle(hRenderThread);  // we don't need the handle, release so it doesn't leak
+    }
 
     return result;
 }

@@ -394,9 +394,7 @@ public:
 
     virtual std::wstring GetResultId() = 0;
     virtual std::wstring GetText() = 0;
-
     virtual enum Reason GetReason() = 0;
-
     virtual enum ResultType GetType() = 0;
 };
 
@@ -693,28 +691,29 @@ public:
     virtual void InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload) = 0;
 };
 
-// Todo: add more status.
-enum class ISpxTranslationStatus { Success, Error };
+enum class TranslationTextStatus { Success, Error };
 
 class ISpxTranslationTextResult : public ISpxInterfaceBaseFor<ISpxTranslationTextResult>
 {
 public:
-
+    virtual TranslationTextStatus GetTextStatus() const = 0;
+    virtual const std::wstring& GetTextFailureReason() const = 0;
     virtual const std::map<std::wstring, std::wstring>& GetTranslationText() = 0;
 };
 
 class ISpxTranslationTextResultInit : public ISpxInterfaceBaseFor<ISpxTranslationTextResultInit>
 {
 public:
-
-    virtual void InitTranslationTextResult(ISpxTranslationStatus status, const std::map<std::wstring, std::wstring>& translations) = 0;
+    virtual void InitTranslationTextResult(TranslationTextStatus status, const std::map<std::wstring, std::wstring>& translations, const std::wstring& failureReason) = 0;
 };
 
+enum class TranslationSynthesisStatus { Success, SynthesisEnd, Error };
 
 class ISpxTranslationSynthesisResult : public ISpxInterfaceBaseFor<ISpxTranslationSynthesisResult>
 {
 public:
-    // Todo: check we need to incldue text that represents the audio data.
+    virtual TranslationSynthesisStatus GetSynthesisStatus() = 0;
+    virtual const std::wstring& GetSynthesisFailureReason() = 0;
     virtual const uint8_t* GetAudio() const = 0;
     virtual size_t GetLength() const = 0;
 };
@@ -723,7 +722,7 @@ class ISpxTranslationSynthesisResultInit : public ISpxInterfaceBaseFor<ISpxTrans
 {
 public:
 
-    virtual void InitTranslationSynthesisResult(const uint8_t* audioData, size_t audioLength) = 0;
+    virtual void InitTranslationSynthesisResult(TranslationSynthesisStatus status, const uint8_t* audioData, size_t audioLength, const std::wstring& failureReason) = 0;
 };
 
 class ISpxLanguageUnderstandingModel : public ISpxInterfaceBaseFor<ISpxLanguageUnderstandingModel>

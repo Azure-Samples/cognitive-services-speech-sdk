@@ -6,9 +6,9 @@
 namespace Microsoft.CognitiveServices.Speech.Translation
 {
     /// <summary>
-    /// Defines translation status.
+    /// Defines status of translation text result.
     /// </summary>
-    public enum TranslationStatus
+    public enum TranslationTextStatus
     {
         Success,
         Error

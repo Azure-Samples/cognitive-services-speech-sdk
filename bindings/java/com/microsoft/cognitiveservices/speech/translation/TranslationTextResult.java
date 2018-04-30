@@ -18,7 +18,7 @@ public class TranslationTextResult extends com.microsoft.cognitiveservices.speec
     {
         super(result);
         
-        _TranslationStatus = result.getTranslationStatus() == com.microsoft.cognitiveservices.speech.internal.TranslationStatus.Success ? TranslationStatus.Success : TranslationStatus.Error;
+        _TranslationStatus = result.getTextStatus() == com.microsoft.cognitiveservices.speech.internal.TranslationTextStatus.Success ? TranslationStatus.Success : TranslationStatus.Error;
         _Translations = new HashMap<String, String>();
     }
 

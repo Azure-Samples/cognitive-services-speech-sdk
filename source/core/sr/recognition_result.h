@@ -56,18 +56,21 @@ public:
     void InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload) override;
 
     // -- ISpxTranslationTextResult ---
+    TranslationTextStatus GetTextStatus() const override;
+    const std::wstring& GetTextFailureReason() const override;
     const std::map<std::wstring, std::wstring>& GetTranslationText() override;
 
     // -- ISpxTranslationTextResulInit --
-    void InitTranslationTextResult(ISpxTranslationStatus status, const std::map<std::wstring, std::wstring>& translations) override;
+    void InitTranslationTextResult(TranslationTextStatus status, const std::map<std::wstring, std::wstring>& translations, const std::wstring& failureReason) override;
 
     // -- ISpxTranslationSynthesisResult ---
-    // Todo: check we need to include text that represents the audio data.
     const uint8_t* GetAudio() const override;
+    TranslationSynthesisStatus GetSynthesisStatus() override;
+    const std::wstring& GetSynthesisFailureReason() override;
     size_t GetLength() const override;
 
     // ISpxTranslationSynthesisResultInit
-    void InitTranslationSynthesisResult(const uint8_t* audioData, size_t audioLength) override;
+    void InitTranslationSynthesisResult(TranslationSynthesisStatus status, const uint8_t* audioData, size_t audioLength, const std::wstring& failureReason) override;
 
 private:
 
@@ -84,8 +87,11 @@ private:
     std::wstring m_intentId;
 
     std::map<std::wstring, std::wstring> m_translations;
-    ISpxTranslationStatus m_translationStatus;
+    TranslationTextStatus m_translationTextStatus;
+    std::wstring m_translationTextFailureReason;
 
+    TranslationSynthesisStatus m_translationSynthesisStatus;
+    std::wstring m_translationSynthesisFailureReason;
     const uint8_t* m_audioBuffer;
     size_t m_audioLength;
 };

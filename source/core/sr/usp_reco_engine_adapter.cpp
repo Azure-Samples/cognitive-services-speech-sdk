@@ -201,8 +201,6 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(std::shared_ptr<ISpxNamedP
         SPX_DBG_TRACE_VERBOSE("Using Custom URL: %ls", endpoint.c_str());
 
         m_customEndpoint = true;
-        m_recoMode = GetRecoModeFromEndpoint(endpoint);
-
         return client.SetEndpointUrl(PAL::ToString(endpoint));
     }
 
@@ -246,40 +244,27 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(std::shared_ptr<ISpxNamedP
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspRecoMode(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
 {
-    // If we're using a custom endpoint, we'll determine the reco mode from that (see above)
-    if (m_customEndpoint)
+    USP::RecognitionMode mode = USP::RecognitionMode::Interactive;
+
+    // Check mode in the property collection first.
+    auto checkHr = GetRecoModeFromProperties(properties, mode);
+    SPX_THROW_HR_IF(checkHr, SPX_FAILED(checkHr) && (checkHr != SPXERR_NOT_FOUND));
+
+    // Check mode string in the custom URL if needed.
+    if ((checkHr == SPXERR_NOT_FOUND) && m_customEndpoint)
     {
-        SPX_DBG_TRACE_VERBOSE("%s: Using Custom URL ... recoMode=%d", __FUNCTION__, m_recoMode);
-        return client;
+        SPX_DBG_TRACE_VERBOSE("%s: Check mode string in the Custom URL.", __FUNCTION__);
+
+        auto endpoint = properties->GetStringValue(g_SPEECH_Endpoint);
+        // endpoint should not be null if m_customeEndpoint is set.
+        SPX_THROW_HR_IF(SPXERR_RUNTIME_ERROR, endpoint.empty());
+
+        checkHr = GetRecoModeFromEndpoint(endpoint, mode);
+        SPX_THROW_HR_IF(checkHr, SPX_FAILED(checkHr) && (checkHr != SPXERR_NOT_FOUND));
     }
 
-    // Get the property that indicates what reco mode to use...
-    auto value = properties->GetStringValue(g_SPEECH_RecoMode);
-
-    // Convert that value to the appropriate UspRecognitionMode...
-    if (value.empty() || PAL::wcsicmp(value.c_str(), g_SPEECH_RecoMode_Interactive) == 0)
-    {
-        m_recoMode = USP::RecognitionMode::Interactive;
-        return client.SetRecognitionMode(USP::RecognitionMode::Interactive);
-    }
-
-    if (PAL::wcsicmp(value.c_str(), g_SPEECH_RecoMode_Conversation) == 0)
-    {
-        m_recoMode = USP::RecognitionMode::Conversation;
-        return client.SetRecognitionMode(USP::RecognitionMode::Conversation);
-    }
-
-    if (PAL::wcsicmp(value.c_str(), g_SPEECH_RecoMode_Dictation) == 0)
-    {
-        m_recoMode = USP::RecognitionMode::Dictation;
-        return client.SetRecognitionMode(USP::RecognitionMode::Dictation);
-    }
-
-    SPX_DBG_ASSERT_WITH_MESSAGE(false, "Did someone add a new value to the USP::RecognitionMode enumeration?");
-
-    ThrowInvalidArgumentException("Unknown RecognitionMode value " + PAL::ToString(value));
-
-    return client; // to make compiler happy.
+    m_recoMode = mode;
+    return client.SetRecognitionMode(m_recoMode);
 }
 
 USP::Client&  CSpxUspRecoEngineAdapter::SetUspAuthentication(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
@@ -308,10 +293,48 @@ USP::Client&  CSpxUspRecoEngineAdapter::SetUspAuthentication(std::shared_ptr<ISp
     return client; // fixes "not all control paths return a value"
 }
 
-USP::RecognitionMode CSpxUspRecoEngineAdapter::GetRecoModeFromEndpoint(const std::wstring& endpoint)
+SPXHR CSpxUspRecoEngineAdapter::GetRecoModeFromProperties(const std::shared_ptr<ISpxNamedProperties>& properties, USP::RecognitionMode& recoMode) const
 {
-    auto recoMode = USP::RecognitionMode::Interactive;
-    if (endpoint.find(L"/conversation/") != std::string::npos)
+     SPXHR hr = SPX_NOERROR;
+
+    // Get the property that indicates what reco mode to use...
+    auto value = properties->GetStringValue(g_SPEECH_RecoMode);
+
+    if (value.empty())
+    {
+        hr = SPXERR_NOT_FOUND;
+    }
+    else if (PAL::wcsicmp(value.c_str(), g_SPEECH_RecoMode_Interactive) == 0)
+    {
+        recoMode = USP::RecognitionMode::Interactive;
+    }
+    else if (PAL::wcsicmp(value.c_str(), g_SPEECH_RecoMode_Conversation) == 0)
+    {
+        recoMode = USP::RecognitionMode::Conversation;
+    }
+    else if (PAL::wcsicmp(value.c_str(), g_SPEECH_RecoMode_Dictation) == 0)
+    {
+        recoMode = USP::RecognitionMode::Dictation;
+    }
+    else
+    {
+        SPX_DBG_ASSERT_WITH_MESSAGE(false, "Unknown RecognitionMode in USP::RecognitionMode.");
+        LogError("Unknown RecognitionMode value %ls", value.c_str());
+        hr = SPXERR_INVALID_ARG;
+    }
+
+    return hr;
+}
+
+SPXHR CSpxUspRecoEngineAdapter::GetRecoModeFromEndpoint(const std::wstring& endpoint, USP::RecognitionMode& recoMode)
+{
+    SPXHR hr = SPX_NOERROR;
+
+    if (endpoint.find(L"/interactive/") != std::string::npos)
+    {
+        recoMode = USP::RecognitionMode::Interactive;
+    }
+    else if (endpoint.find(L"/conversation/") != std::string::npos)
     {
         recoMode = USP::RecognitionMode::Conversation;
     }
@@ -319,7 +342,12 @@ USP::RecognitionMode CSpxUspRecoEngineAdapter::GetRecoModeFromEndpoint(const std
     {
         recoMode = USP::RecognitionMode::Dictation;
     }
-    return recoMode;
+    else
+    {
+        hr = SPXERR_NOT_FOUND;
+    }
+
+    return hr;
 }
 
 void CSpxUspRecoEngineAdapter::UspSendSpeechContext()
@@ -698,19 +726,22 @@ void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHyp
 
             // Update our result to be an "TranslationText" result.
             auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
-            // Todo: better convert translation status
-            ISpxTranslationStatus status;
+            TranslationTextStatus status;
             switch (message.translation.translationStatus)
             {
             case ::USP::TranslationStatus::Success:
-                status = ISpxTranslationStatus::Success;
+                status = TranslationTextStatus::Success;
+                break;
+            case ::USP::TranslationStatus::Error:
+                status = TranslationTextStatus::Error;
                 break;
             default:
-                status = ISpxTranslationStatus::Error;
+                status = TranslationTextStatus::Error;
+                SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
                 break;
             }
 
-            initTranslationResult->InitTranslationTextResult(status, message.translation.translations);
+            initTranslationResult->InitTranslationTextResult(status, message.translation.translations, message.translation.failureReason);
 
             // Fire the result
             SPX_ASSERT(GetSite() != nullptr);
@@ -727,11 +758,16 @@ void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHyp
 
 void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseMsg& message)
 {
+    auto resultMap = message.translation.translations;
+
     SPX_DBG_TRACE_VERBOSE("Response: Translation.Phrase message. RecoStatus: %d, TranslationStatus: %d, RecoText: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n",
         message.recognitionStatus, message.translation.translationStatus,
         message.text.c_str(), message.offset, message.duration);
-    auto resultMap = message.translation.translations;
 #ifdef _DEBUG
+    if (message.translation.translationStatus != ::USP::TranslationStatus::Success)
+    {
+        SPX_DBG_TRACE_VERBOSE(" FailureReason: %ls.", message.translation.failureReason.c_str());
+    }
     for (const auto& it : resultMap)
     {
         SPX_DBG_TRACE_VERBOSE("          , tranlated to %ls: %ls,\n", it.first.c_str(), it.second.c_str());
@@ -744,8 +780,8 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
         SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
         SPX_DBG_TRACE_VERBOSE("%s: IGNORING (Err/Terminating/Zombie)... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
     }
-    else if (( IsInteractiveMode() && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd)) ||
-             (!IsInteractiveMode() && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForPhrase)))
+    else if ((IsInteractiveMode() && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd)) ||
+        (!IsInteractiveMode() && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForPhrase)))
     {
         SPX_DBG_TRACE_SCOPE("Fire final translation result: Creating Result", "FireFinalResul: GetSite()->FireAdapterResult_FinalResult()  complete!");
 
@@ -754,25 +790,28 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
         // Create the result
         auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
         auto result = factory->CreateFinalResult(nullptr, message.text.c_str(), ResultType::TranslationText);
-        
+
         auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
         namedProperties->SetStringValue(g_RESULT_Json, message.json.c_str());
 
         // Update our result to be an "TranslationText" result.
         auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
         // Todo: better convert translation status
-        ISpxTranslationStatus status;
+        TranslationTextStatus status;
         switch (message.translation.translationStatus)
         {
         case ::USP::TranslationStatus::Success:
-            status = ISpxTranslationStatus::Success;
+            status = TranslationTextStatus::Success;
+            break;
+        case ::USP::TranslationStatus::Error:
+            status = TranslationTextStatus::Error;
             break;
         default:
-            status = ISpxTranslationStatus::Error;
+            status = TranslationTextStatus::Error;
+            SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
             break;
         }
-
-        initTranslationResult->InitTranslationTextResult(status, message.translation.translations);
+        initTranslationResult->InitTranslationTextResult(status, message.translation.translations, message.translation.failureReason);
 
         // Fire the result
         SPX_ASSERT(GetSite() != nullptr);
@@ -796,10 +835,42 @@ void CSpxUspRecoEngineAdapter::OnTranslationSynthesis(const USP::TranslationSynt
 
     // Update our result to be an "TranslationSynthesis" result.
     auto initTranslationResult = SpxQueryInterface<ISpxTranslationSynthesisResultInit>(result);
-    initTranslationResult->InitTranslationSynthesisResult(message.audioBuffer, message.audioLength);
+    initTranslationResult->InitTranslationSynthesisResult(TranslationSynthesisStatus::Success, message.audioBuffer, message.audioLength, L"");
 
-    (void)message;
-    // Todo: offset (and duration) should be part of result. Now, offset is autaully ignored by the following function.
+    // Fire the result
+    SPX_ASSERT(GetSite() != nullptr);
+    GetSite()->FireAdapterResult_TranslationSynthesis(this, result);
+}
+
+void CSpxUspRecoEngineAdapter::OnTranslationSynthesisEnd(const USP::TranslationSynthesisEndMsg& message)
+{
+    SPX_DBG_TRACE_VERBOSE("Response: Translation.Synthesis.End message. Status: %d, Reason: %ls\n", (int)message.synthesisStatus, message.failureReason.c_str());
+    SPX_DBG_ASSERT(GetSite());
+
+    auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
+    auto result = factory->CreateFinalResult(nullptr, L"", ResultType::TranslationSynthesis);
+
+    // Update our result to be an "TranslationSynthesis" result.
+    auto initTranslationResult = SpxQueryInterface<ISpxTranslationSynthesisResultInit>(result);
+    TranslationSynthesisStatus status;
+    switch (message.synthesisStatus)
+    {
+    case ::USP::SynthesisStatus::Success:
+        // Indicates the end of syntheis.
+        status = TranslationSynthesisStatus::SynthesisEnd;
+        break;
+    case ::USP::SynthesisStatus::Error:
+        status = TranslationSynthesisStatus::Error;
+        break;
+    default:
+        status = TranslationSynthesisStatus::Error;
+        SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
+        break;
+    }
+    initTranslationResult->InitTranslationSynthesisResult(status, nullptr, 0, message.failureReason);
+
+    // Fire the result
+    SPX_ASSERT(GetSite() != nullptr);
     GetSite()->FireAdapterResult_TranslationSynthesis(this, result);
 }
 

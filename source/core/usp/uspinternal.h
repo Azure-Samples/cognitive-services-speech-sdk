@@ -115,7 +115,8 @@ private:
     void SignalWork();
     void SignalConnected();
 
-    std::string ConstructConnectionUrl();
+    std::string EncodeParameterString(const std::string& parameter) const;
+    std::string ConstructConnectionUrl() const;
 
     Client m_config;
 

@@ -38,6 +38,14 @@ enum class TranslationStatus : int
     Success, Error, Unknown
 };
 
+/**
+* Represents synthesis status in translation synthesis.
+*/
+enum class SynthesisStatus : int
+{
+    Success, Error, Unknown
+};
+
 struct JsonMsg {
 
     JsonMsg() = default;
@@ -178,6 +186,8 @@ struct AudioStreamStartMsg
 struct TranslationResult
 {
     TranslationStatus translationStatus { TranslationStatus::Unknown };
+    // A string indicates failure reasons in case that the translationStatus is an error.
+    std::wstring failureReason;
     // An array of value pair <targetLanguage, translationText>.
     std::map<std::wstring, std::wstring> translations;
 };
@@ -215,6 +225,17 @@ struct TranslationSynthesisMsg
     const uint8_t* audioBuffer;
     size_t audioLength { 0 };
 };
+
+/**
+* Represents translation.synthesis.end message
+*/
+struct TranslationSynthesisEndMsg
+{
+    SynthesisStatus synthesisStatus{ SynthesisStatus::Unknown };
+    // A string indicates failure reasons in case that the synthesisStatus is an error.
+    std::wstring failureReason;
+};
+
 
 }
 }

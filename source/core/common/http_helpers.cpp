@@ -109,7 +109,7 @@ std::string SpxHttpDownloadString(const char* httpHostName, const char* httpRela
 
             // find the "VALUE" part (by skipping the ':' and leading spaces before the value)
             auto valueBeginPtr = nameEndPtr + 1;
-            while (isspace(*valueBeginPtr))
+            while (isspace((unsigned char)*valueBeginPtr))
             {
                 valueBeginPtr++;
             }

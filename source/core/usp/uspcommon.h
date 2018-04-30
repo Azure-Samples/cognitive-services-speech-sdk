@@ -98,7 +98,9 @@ namespace USP {
 
         const std::string translation = "Translation";
         const std::string translationStatus = "TranslationStatus";
+        const std::string translationFailureReason = "FailureReason";
         const std::string translations = "Translations";
+        const std::string synthesisStatus = "SynthesisStatus";
         const std::string lang = "Language";
     }
 

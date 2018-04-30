@@ -31,10 +31,13 @@ namespace MicrosoftSpeechSDKSamples
         private static void MySynthesisEventHandler(object sender, TranslationSynthesisResultEventArgs e)
         {
             Console.WriteLine($"Translation: synthesis result: {e.ToString()}.");
-            using (var m = new MemoryStream(e.Result.Audio))
+            if (e.Result.SynthesisStatus == TranslationSynthesisStatus.Success)
             {
-                SoundPlayer simpleSound = new SoundPlayer(m);
-                simpleSound.PlaySync();
+                using (var m = new MemoryStream(e.Result.Audio))
+                {
+                    SoundPlayer simpleSound = new SoundPlayer(m);
+                    simpleSound.PlaySync();
+                }
             }
         }
 

@@ -3,6 +3,7 @@
 #include "guid_utils.h"
 #include "named_properties_constants.h"
 
+using namespace std;
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -20,12 +21,12 @@ CSpxRecognitionResult::~CSpxRecognitionResult()
     SPX_DBG_TRACE_FUNCTION();
 }
 
-std::wstring CSpxRecognitionResult::GetResultId()
+wstring CSpxRecognitionResult::GetResultId()
 {
     return m_resultId;
 }
 
-std::wstring CSpxRecognitionResult::GetText()
+wstring CSpxRecognitionResult::GetText()
 {
     return m_text;
 }
@@ -87,30 +88,48 @@ void CSpxRecognitionResult::InitError(const wchar_t* text)
     }
 }
 
-std::wstring CSpxRecognitionResult::GetIntentId()
+wstring CSpxRecognitionResult::GetIntentId()
 {
     return m_intentId;
 }
 
 void CSpxRecognitionResult::InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload)
 {
-    m_intentId = intentId != nullptr
-        ? intentId
-        : L"";
+    m_intentId = (intentId != nullptr) ? intentId : L"";
 
     SetStringValue(g_RESULT_LanguageUnderstandingJson, jsonPayload);
 }
 
-const std::map<std::wstring, std::wstring>& CSpxRecognitionResult::GetTranslationText()
+const map<wstring, wstring>& CSpxRecognitionResult::GetTranslationText()
 {
     return m_translations;
 }
 
+TranslationTextStatus CSpxRecognitionResult::GetTextStatus() const
+{
+    return m_translationTextStatus;
+}
 
-void CSpxRecognitionResult::InitTranslationTextResult(ISpxTranslationStatus status, const std::map<std::wstring, std::wstring>& translations)
+const wstring& CSpxRecognitionResult::GetTextFailureReason() const
+{
+    return m_translationTextFailureReason;
+}
+
+void CSpxRecognitionResult::InitTranslationTextResult(TranslationTextStatus status, const map<wstring, wstring>& translations, const wstring& failureReason)
 {
     m_translations = translations;
-    m_translationStatus = status;
+    m_translationTextStatus = status;
+    m_translationTextFailureReason = failureReason;
+}
+
+TranslationSynthesisStatus CSpxRecognitionResult::GetSynthesisStatus()
+{
+    return m_translationSynthesisStatus;
+}
+
+const wstring& CSpxRecognitionResult::GetSynthesisFailureReason()
+{
+    return m_translationSynthesisFailureReason;
 }
 
 const uint8_t* CSpxRecognitionResult::GetAudio() const
@@ -124,10 +143,12 @@ size_t CSpxRecognitionResult::GetLength() const
 }
 
 // ISpxTranslationSynthesisResultInit
-void CSpxRecognitionResult::InitTranslationSynthesisResult(const uint8_t* audioData, size_t audioLength)
+void CSpxRecognitionResult::InitTranslationSynthesisResult(TranslationSynthesisStatus status, const uint8_t* audioData, size_t audioLength, const wstring& failureReason)
 {
+    m_translationSynthesisStatus = status;
     m_audioBuffer = audioData;
     m_audioLength = audioLength;
+    m_translationSynthesisFailureReason = failureReason;
 }
 
 

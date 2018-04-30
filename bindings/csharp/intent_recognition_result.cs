@@ -29,7 +29,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <returns>A string that represents the intent recognition result.</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "ResultId:{0} Status:{1} IntentId:<{2}> Recognized text:<{3}>.", ResultId, Reason, IntentId, RecognizedText);
+            return string.Format(CultureInfo.InvariantCulture, "ResultId:{0} Status:{1} IntentId:<{2}> Recognized text:<{3}>.", ResultId, RecognitionStatus, IntentId, RecognizedText);
         }
     }
 }

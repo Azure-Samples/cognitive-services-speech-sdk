@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+using System.Diagnostics;
 using System.Globalization;
 
 namespace Microsoft.CognitiveServices.Speech
@@ -13,9 +14,15 @@ namespace Microsoft.CognitiveServices.Speech
     {
         internal SpeechRecognitionResult(Internal.RecognitionResult result)
         {
+            Trace.Assert((int)SpeechRecognitionStatus.Recognized == (int)Internal.Reason.Recognized);
+            Trace.Assert((int)SpeechRecognitionStatus.IntermediateResult == (int)Internal.Reason.IntermediateResult);
+            Trace.Assert((int)SpeechRecognitionStatus.NoMatch == (int)Internal.Reason.NoMatch);
+            Trace.Assert((int)SpeechRecognitionStatus.Canceled == (int)Internal.Reason.Canceled);
+            Trace.Assert((int)SpeechRecognitionStatus.OtherRecognizer == (int)Internal.Reason.OtherRecognizer);
+
             this.ResultId = result.ResultId;
             this.RecognizedText = result.Text;
-            this.Reason = (RecognitionStatus)((int)result.Reason);
+            this.RecognitionStatus = (SpeechRecognitionStatus)((int)result.Reason);
             this.properties = result.Properties;
         }
 
@@ -25,9 +32,9 @@ namespace Microsoft.CognitiveServices.Speech
         public string ResultId { get; }
 
         /// <summary>
-        /// Specifies status of the result.
+        /// Specifies status of speech recognition result.
         /// </summary>
-        public RecognitionStatus Reason { get; }
+        public SpeechRecognitionStatus RecognitionStatus { get; }
 
         /// <summary>
         /// Presents the recognized text in the result.
@@ -36,9 +43,9 @@ namespace Microsoft.CognitiveServices.Speech
 
         /// <summary>
         /// In case of an unsuccessful recognition, provides a brief description of an occurred error.
-        /// This field is only filled-out if the recognition status (<see cref="Reason"/>) is set to Canceled.
+        /// This field is only filled-out if the recognition status (<see cref="RecognitionStatus"/>) is set to Canceled.
         /// </summary>
-        public string ErrorDetails { get { return properties.Get(Internal.ResultProperty.ErrorDetails).GetString(); } }
+        public string RecognitionFailureReason { get { return properties.Get(Internal.ResultProperty.ErrorDetails).GetString(); } }
 
         /// <summary>
         /// A string containing Json serialized recognition result as it was received from the service.
@@ -51,7 +58,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A string that represents the speech recognition result.</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture,"ResultId:{0} Status:{1} Recognized text:<{2}>.", ResultId, Reason, RecognizedText);
+            return string.Format(CultureInfo.InvariantCulture,"ResultId:{0} Status:{1} Recognized text:<{2}>.", ResultId, RecognitionStatus, RecognizedText);
         }
 
         private Internal.ResultPropertyValueCollection properties;

@@ -67,11 +67,10 @@ protected:
     virtual void OnError(const std::string& error) override;
     virtual void OnUserMessage(const std::string& path, const std::string& contentType, const uint8_t* buffer, size_t size) override;
 
-    // Todo: translaton messages should be in a spearate class than UspRecoEngineAdapter. This will
-    // be done at a later time during refactoring and adding TTS support.
     virtual void OnTranslationHypothesis(const USP::TranslationHypothesisMsg& message) override;
     virtual void OnTranslationPhrase(const USP::TranslationPhraseMsg& message) override;
     virtual void OnTranslationSynthesis(const USP::TranslationSynthesisMsg& message) override;
+    virtual void OnTranslationSynthesisEnd(const USP::TranslationSynthesisEndMsg& message) override;
 
 
 private:
@@ -88,7 +87,8 @@ private:
     USP::Client& SetUspRecoMode(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     USP::Client& SetUspAuthentication(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
 
-    USP::RecognitionMode GetRecoModeFromEndpoint(const std::wstring& endpoint);
+    SPXHR GetRecoModeFromEndpoint(const std::wstring& endpoint, USP::RecognitionMode& mode);
+    SPXHR GetRecoModeFromProperties(const std::shared_ptr<ISpxNamedProperties>& properties, USP::RecognitionMode& recoMode) const;
 
     void UspWrite(const uint8_t* buffer, size_t byteToWrite);
     void UspSendSpeechContext();

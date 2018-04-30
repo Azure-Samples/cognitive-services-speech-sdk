@@ -33,7 +33,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         public override string ToString()
         {
             return string.Format(CultureInfo.InvariantCulture, "SessionId:{0} ResultId:{1} Status:{2} IntentId:<{3}> Recognized text:<{4}>.", 
-                SessionId, Result.ResultId, Result.Reason, Result.IntentId, Result.RecognizedText);
+                SessionId, Result.ResultId, Result.RecognitionStatus, Result.IntentId, Result.RecognizedText);
         }
     }
 }

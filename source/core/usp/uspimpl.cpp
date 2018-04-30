@@ -19,6 +19,7 @@
 #include "azure_c_shared_utility_xlogging_wrapper.h"
 #include "azure_c_shared_utility_httpheaders_wrapper.h"
 #include "azure_c_shared_utility_platform_wrapper.h"
+#include "azure_c_shared_utility_urlencode_wrapper.h"
 
 #include "uspcommon.h"
 #include "uspinternal.h"
@@ -36,10 +37,12 @@
 #include "string_utils.h"
 #include "json.hpp"
 
+using namespace std;
+
 uint64_t telemetry_gettime()
 {
-    auto now = std::chrono::high_resolution_clock::now();
-    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+    auto now = chrono::high_resolution_clock::now();
+    auto ms = chrono::duration_cast<chrono::milliseconds>(now.time_since_epoch());
     return ms.count();
 }
 
@@ -52,7 +55,7 @@ using namespace std;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 template <class T>
-static void throw_if_null(T* ptr, const std::string name)
+static void throw_if_null(const T* ptr, const string& name)
 {
     if (ptr == NULL)
     { 
@@ -194,7 +197,15 @@ void Connection::Impl::Validate()
     }
 }
 
-string Connection::Impl::ConstructConnectionUrl() 
+string Connection::Impl::EncodeParameterString(const string& parameter) const
+{
+    STRING_HANDLE encodedHandle = URL_EncodeString(parameter.c_str());
+    string encodedStr(STRING_c_str(encodedHandle));
+    STRING_delete(encodedHandle);
+    return encodedStr;
+}
+
+string Connection::Impl::ConstructConnectionUrl() const
 {
     auto recoMode = static_cast<underlying_type_t<RecognitionMode>>(m_config.m_recoMode);
     ostringstream oss;
@@ -234,24 +245,25 @@ string Connection::Impl::ConstructConnectionUrl()
     auto format = static_cast<underlying_type_t<OutputFormat>>(m_config.m_outputFormat);
     oss << g_outFormatStrings[format];
 
+    // Todo: use libcurl or another library to encode the url as whole, instead of each parameter.
     if (m_config.m_endpoint == EndpointType::Translation)
     {
-        oss << '&' << endpoint::translation::from << m_config.m_translationSourceLanguage;
+        oss << '&' << endpoint::translation::from << EncodeParameterString(m_config.m_translationSourceLanguage);
         size_t start = 0;
         auto delim = ',';
         size_t end = m_config.m_translationTargetLanguages.find_first_of(delim);
         while (end != string::npos)
         {
-            oss << '&' << endpoint::translation::to << m_config.m_translationTargetLanguages.substr(start, end - start);
+            oss << '&' << endpoint::translation::to << EncodeParameterString(m_config.m_translationTargetLanguages.substr(start, end - start));
             start = end + 1;
             end = m_config.m_translationTargetLanguages.find_first_of(delim, start);
         }
-        oss << '&' << endpoint::translation::to << m_config.m_translationTargetLanguages.substr(start, end);
+        oss << '&' << endpoint::translation::to << EncodeParameterString(m_config.m_translationTargetLanguages.substr(start, end));
 
         if (!m_config.m_translationVoice.empty())
         {
             oss << '&' << endpoint::translation::features << endpoint::translation::requireVoice;
-            oss << '&' << endpoint::translation::voice << m_config.m_translationVoice;
+            oss << '&' << endpoint::translation::voice << EncodeParameterString(m_config.m_translationVoice);
         }
         // Need to provide cid for now.
         oss << '&' << "cid=" << m_config.m_modelId;
@@ -259,24 +271,10 @@ string Connection::Impl::ConstructConnectionUrl()
     else if (!m_config.m_language.empty())
     {
         // Set language for non-translation recognizer.
-        oss << '&' << endpoint::langQueryParam << m_config.m_language;
+        oss << '&' << endpoint::langQueryParam << EncodeParameterString(m_config.m_language);
     }
 
-    // Todo: use libcurl for encoding.
-    ostringstream encodedStrOut;
-    encodedStrOut << setbase(16);
-    for (const auto ch : oss.str())
-    {
-        if (ch != ' ')
-        {
-            encodedStrOut << ch;
-        }
-        else
-        {
-            encodedStrOut << "%20";
-        }
-    }
-    return encodedStrOut.str();
+    return oss.str();
 }
 
 void Connection::Impl::Connect()
@@ -505,42 +503,58 @@ void Connection::Impl::OnTransportError(TransportHandle transportHandle, Transpo
 
 static RecognitionStatus ToRecognitionStatus(const string& str)
 {
-    const static map<string, USP::RecognitionStatus> statusMap = {
-        { "Success", USP::RecognitionStatus::Success },
-        { "NoMatch", USP::RecognitionStatus::NoMatch },
-        { "InitialSilenceTimeout", USP::RecognitionStatus::InitialSilenceTimeout },
-        { "BabbleTimeout", USP::RecognitionStatus::BabbleTimeout },
-        { "Error", USP::RecognitionStatus::Error },
-        { "EndOfDictation", USP::RecognitionStatus::EndOfDictation },
+    const static map<string, RecognitionStatus> statusMap = {
+        { "Success", RecognitionStatus::Success },
+        { "NoMatch", RecognitionStatus::NoMatch },
+        { "InitialSilenceTimeout", RecognitionStatus::InitialSilenceTimeout },
+        { "BabbleTimeout", RecognitionStatus::BabbleTimeout },
+        { "Error", RecognitionStatus::Error },
+        { "EndOfDictation", RecognitionStatus::EndOfDictation },
     };
 
     auto result = statusMap.find(str);
 
     if (result == statusMap.end())
     {
-        LogInfo("Unknown RecognitionStatus: %s", str.c_str());
-        return USP::RecognitionStatus::Unknown;
+        PROTOCOL_VIOLATION("Unknown RecognitionStatus: %s", str.c_str());
+        return RecognitionStatus::Unknown;
     }
     return result->second;
 }
 
 static TranslationStatus ToTranslationStatus(const string& str)
 {
-    const static map<string, USP::TranslationStatus> statusMap = {
-        { "Success", USP::TranslationStatus::Success },
-        { "Error", USP::TranslationStatus::Error },
+    const static map<string, TranslationStatus> statusMap = {
+        { "Success", TranslationStatus::Success },
+        { "Error", TranslationStatus::Error },
     };
 
     auto result = statusMap.find(str);
 
     if (result == statusMap.end())
     {
-        LogInfo("Unknown TranslationStatus: %s", str.c_str());
-        return USP::TranslationStatus::Unknown;
+        PROTOCOL_VIOLATION("Unknown TranslationStatus: %s", str.c_str());
+        return TranslationStatus::Unknown;
     }
     return result->second;
 }
 
+static SynthesisStatus ToSynthesisStatus(const string& str)
+{
+    const static map<string, SynthesisStatus> statusMap = {
+        { "Success", SynthesisStatus::Success },
+        { "Error", SynthesisStatus::Error },
+    };
+
+    auto result = statusMap.find(str);
+
+    if (result == statusMap.end())
+    {
+        PROTOCOL_VIOLATION("Unknown SynthesisStatus: %s", str.c_str());
+        return SynthesisStatus::Unknown;
+    }
+    return result->second;
+}
 
 static SpeechHypothesisMsg RetrieveSpeechResult(const nlohmann::json& json)
 {
@@ -550,7 +564,7 @@ static SpeechHypothesisMsg RetrieveSpeechResult(const nlohmann::json& json)
     string text;
     if (textObj != json.end())
     {
-        text = json.at(json_properties::text).get<std::string>();
+        text = json.at(json_properties::text).get<string>();
     }
     return SpeechHypothesisMsg(PAL::ToWString(json.dump()), offset, duration, PAL::ToWString(text));
 }
@@ -563,11 +577,11 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
     auto translations = translation.at(json_properties::translations);
     for (const auto& object : translations)
     {
-        auto lang = object.at(json_properties::lang).get<std::string>();
-        auto txt = object.at(json_properties::text).get<std::string>();
+        auto lang = object.at(json_properties::lang).get<string>();
+        auto txt = object.at(json_properties::text).get<string>();
         if (lang.empty() && txt.empty())
         {
-            LogError("emtpy language and text field in translations text.");
+            PROTOCOL_VIOLATION("emtpy language and text field in translations text. lang=%s, text=%s.", lang.c_str(), txt.c_str());
             continue;
         }
 
@@ -576,10 +590,25 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
 
     if (expectStatus)
     {
-        result.translationStatus = ToTranslationStatus(translation.at(json_properties::translationStatus).get<std::string>());
-        if ((result.translationStatus == USP::TranslationStatus::Success) && (result.translations.size() == 0))
+        auto status = translation.find(json_properties::translationStatus);
+        if (status != translation.end())
         {
-            LogError("No Translations text block in the message, but TranslationStatus is succcess.");
+            result.translationStatus = ToTranslationStatus(status->get<string>());
+        }
+        else
+        {
+            PROTOCOL_VIOLATION("No TranslationStatus is provided. Jason: %s", translation.dump().c_str());
+        }
+
+        auto failure = translation.find(json_properties::translationFailureReason);
+        if (failure != translation.end())
+        {
+            result.failureReason = PAL::ToWString(failure->get<string>());
+        }
+
+        if ((result.translationStatus == TranslationStatus::Success) && (result.translations.size() == 0))
+        {
+            PROTOCOL_VIOLATION("No Translations text block in the message, but TranslationStatus is succcess. Jason:", translation.dump().c_str());
         }
     }
 
@@ -638,7 +667,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
     // TODO: pass the frame type (binary/text) so that we can check frame type before calling json::parse.
     if (pathStr == path::translationSynthesis)
     {
-        USP::TranslationSynthesisMsg msg;
+        TranslationSynthesisMsg msg;
         msg.audioBuffer = (uint8_t *)buffer;
         msg.audioLength = size;
         callbacks.OnTranslationSynthesis(msg);
@@ -662,7 +691,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
     }
     else if (pathStr == path::turnStart)
     {
-        auto tag = json[json_properties::context][json_properties::tag].get<std::string>();
+        auto tag = json[json_properties::context][json_properties::tag].get<string>();
         callbacks.OnTurnStart({ PAL::ToWString(json.dump()), tag });
     }
     else if (pathStr == path::turnEnd)
@@ -678,7 +707,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
     {
         auto offset = json[json_properties::offset].get<OffsetType>();
         auto duration = json[json_properties::duration].get<DurationType>();
-        auto text = json[json_properties::text].get<std::string>();
+        auto text = json[json_properties::text].get<string>();
 
         if (path == path::speechHypothesis)
         {
@@ -703,16 +732,16 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
     {
         auto offset = json[json_properties::offset].get<OffsetType>();
         auto duration = json[json_properties::duration].get<DurationType>();
-        auto status = ToRecognitionStatus(json[json_properties::recoStatus].get<std::string>());
+        auto status = ToRecognitionStatus(json[json_properties::recoStatus].get<string>());
         
-        std::string text;
-        if (status == USP::RecognitionStatus::Success) 
+        string text;
+        if (status == RecognitionStatus::Success)
         {
             // The DisplayText field will be present only if the RecognitionStatus field has the value Success.
-            text = json[json_properties::displayText].get<std::string>();
+            text = json[json_properties::displayText].get<string>();
         }
 
-        if (status == USP::RecognitionStatus::Unknown)
+        if (status == RecognitionStatus::Unknown)
         {
             LogError("Invalid recognition status in speech.phrase message.");
             return;
@@ -730,6 +759,8 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
     {
         auto speechResult = RetrieveSpeechResult(json);
         auto translationResult = RetrieveTranslationResult(json, false);
+        // TranslationStatus is always success for translation.hypothesis
+        translationResult.translationStatus = TranslationStatus::Success;
         callbacks.OnTranslationHypothesis({
             std::move(speechResult.json),
             speechResult.offset,
@@ -740,14 +771,17 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
     }
     else if (path == path::translationPhrase)
     {
+        std::wstring localReason;
+
         auto status = ToRecognitionStatus(json.at(json_properties::recoStatus));
-        if (status == USP::RecognitionStatus::Unknown)
+        if (status == RecognitionStatus::Unknown)
         {
-            LogError("Invalid recognition status in translation response message.");
-            return;
+            localReason = L"Invalid recognition status in translation response message";
+            PROTOCOL_VIOLATION("%s. Json=%s", localReason.c_str(), json.dump().c_str());
+            status = RecognitionStatus::Error;
         }
 
-        if (status == USP::RecognitionStatus::EndOfDictation)
+        if (status == RecognitionStatus::EndOfDictation)
         {
             // Currently we do not communicate and of dictation to the user.
             return;
@@ -757,15 +791,17 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
 
         // Retrieve translation only if the status is successful.
         TranslationResult translationResult;
-        if (status == USP::RecognitionStatus::Success)
+        if (status == RecognitionStatus::Success)
         {
             translationResult = RetrieveTranslationResult(json, true);
-            if (translationResult.translationStatus == USP::TranslationStatus::Unknown)
+            if (translationResult.translationStatus == TranslationStatus::Unknown)
             {
-                LogError("Invalid translation status in translation response message.");
-                return;
+                localReason = L"Invalid translation status in translation response message.";
+                PROTOCOL_VIOLATION("%s Json=%s", localReason.c_str(), json.dump().c_str());
+                translationResult.translationStatus = TranslationStatus::Error;
             }
         }
+        translationResult.failureReason = localReason + translationResult.failureReason;
 
         callbacks.OnTranslationPhrase({
             std::move(speechResult.json),
@@ -775,6 +811,43 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
             std::move(translationResult),
             status
             });
+    }
+    else if (path == path::translationSynthesisEnd)
+    {
+        TranslationSynthesisEndMsg msg;
+        std::wstring localReason;
+
+        auto statusHandle = json.find(json_properties::synthesisStatus);
+        if (statusHandle != json.end())
+        {
+            msg.synthesisStatus = ToSynthesisStatus(statusHandle->get<string>());
+            if (msg.synthesisStatus == SynthesisStatus::Unknown)
+            {
+                PROTOCOL_VIOLATION("Invalid synthesis status in synthesis.end message. Json=%s", json.dump().c_str());
+                msg.synthesisStatus = SynthesisStatus::Error;
+                localReason = L"Invalid synthesis status in synthesis.end message.";
+            }
+        }
+        else 
+        {
+            PROTOCOL_VIOLATION("No synthesis status in synthesis.end message. Json=%s", json.dump().c_str());
+            msg.synthesisStatus = SynthesisStatus::Error;
+            localReason = L"No synthesis status in synthesis.end message.";
+        }
+
+        auto failureHandle = json.find(json_properties::translationFailureReason);
+        if (failureHandle != json.end())
+        {
+            if (msg.synthesisStatus == SynthesisStatus::Success)
+            {
+                PROTOCOL_VIOLATION("FailureReason should be empty if SynthesisStatus is success. Json=%s", json.dump().c_str());
+            }
+            msg.failureReason = PAL::ToWString(failureHandle->get<string>());
+        }
+
+        msg.failureReason = localReason + msg.failureReason;
+
+        callbacks.OnTranslationSynthesisEnd(msg);
     }
     else
     {

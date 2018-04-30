@@ -85,6 +85,11 @@ struct Callbacks
     virtual void OnTranslationSynthesis(const TranslationSynthesisMsg&) {}
 
     /**
+    * A callback function that will be invoked when a translation.synthesis.end message is received from service.
+    */
+    virtual void OnTranslationSynthesisEnd(const TranslationSynthesisEndMsg&) {}
+
+    /**
     * A callback function that will be invoked when a message having a path defined by user is received from service.
     * @param path The message path.
     * @param contentType The content type of the message.

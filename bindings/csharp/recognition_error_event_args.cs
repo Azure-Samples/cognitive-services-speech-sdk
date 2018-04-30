@@ -13,7 +13,7 @@ namespace Microsoft.CognitiveServices.Speech
     /// </summary>
     public class RecognitionErrorEventArgs : System.EventArgs
     {
-        internal RecognitionErrorEventArgs(string sessionId, RecognitionStatus status)
+        internal RecognitionErrorEventArgs(string sessionId, SpeechRecognitionStatus status)
         {
             this.Status = status;
             this.SessionId = sessionId;
@@ -21,20 +21,20 @@ namespace Microsoft.CognitiveServices.Speech
 
         internal RecognitionErrorEventArgs(string sessionId, Microsoft.CognitiveServices.Speech.Internal.Reason reason)
         {
-            Debug.Assert((int)Internal.Reason.Recognized == (int)RecognitionStatus.Success);
-            Debug.Assert((int)Internal.Reason.IntermediateResult == (int)RecognitionStatus.IntermediateResult);
-            Debug.Assert((int)Internal.Reason.NoMatch == (int)RecognitionStatus.NoMatch);
-            Debug.Assert((int)Internal.Reason.Canceled == (int)RecognitionStatus.Canceled);
-            Debug.Assert((int)Internal.Reason.OtherRecognizer == (int)RecognitionStatus.OtherRecognizer);
+            Trace.Assert((int)Internal.Reason.Recognized == (int)SpeechRecognitionStatus.Recognized);
+            Trace.Assert((int)Internal.Reason.IntermediateResult == (int)SpeechRecognitionStatus.IntermediateResult);
+            Trace.Assert((int)Internal.Reason.NoMatch == (int)SpeechRecognitionStatus.NoMatch);
+            Trace.Assert((int)Internal.Reason.Canceled == (int)SpeechRecognitionStatus.Canceled);
+            Trace.Assert((int)Internal.Reason.OtherRecognizer == (int)SpeechRecognitionStatus.OtherRecognizer);
 
-            this.Status = (RecognitionStatus)((int)reason);
+            this.Status = (SpeechRecognitionStatus)((int)reason);
             this.SessionId = sessionId;
         }
 
         /// <summary>
         /// Specifies the error reason.
         /// </summary>
-        public RecognitionStatus Status { get; }
+        public SpeechRecognitionStatus Status { get; }
 
         /// <summary>
         /// Specifies the session identifier.

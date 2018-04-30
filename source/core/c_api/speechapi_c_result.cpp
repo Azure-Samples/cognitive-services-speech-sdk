@@ -39,7 +39,7 @@ SPXAPI Result_GetRecognitionReason(SPXRESULTHANDLE hresult, Result_RecognitionRe
 
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, preason == nullptr);
 
-    SPXAPI_INIT_HR_TRY(hr)    
+    SPXAPI_INIT_HR_TRY(hr)
     {
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];

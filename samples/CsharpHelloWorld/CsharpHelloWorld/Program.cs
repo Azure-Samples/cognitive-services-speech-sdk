@@ -57,9 +57,9 @@ namespace CsharpHelloWorld
 
                 var result = recognizer.RecognizeAsync().GetAwaiter().GetResult();
 
-                if (result.Reason != RecognitionStatus.Success)
+                if (result.RecognitionStatus != SpeechRecognitionStatus.Recognized)
                 {
-                    Console.WriteLine($"There was an error, reason {result.Reason} - {result.RecognizedText}");
+                    Console.WriteLine($"There was an error, reason {result.RecognitionStatus} - {result.RecognitionFailureReason}");
                     Environment.Exit(1);
                 }
                 else

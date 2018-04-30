@@ -1080,7 +1080,7 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<TranslationRecogniz
     ConsoleWriteLine(L"RecognizeAsync %ls... Waiting... Done!\n", name.c_str());
 
     ConsoleWriteLine(L"TranslationTextResult: ResultId=%d, ErrorDetails=%ls, RecognizedText=%ls, TranslationsStatus=%d",
-        result->TranslationTextResult::ResultId.c_str(), result->ErrorDetails.c_str(), result->Text.c_str(), (int)result->TranslationStatus);
+        result->TranslationTextResult::ResultId.c_str(), result->ErrorDetails.c_str(), result->Text.c_str(), (int)result->TextStatus);
     for (auto it : result->Translations)
     {
         ConsoleWriteLine(L"                Translation to %ls: %ls", it.first.c_str(), it.second.c_str());

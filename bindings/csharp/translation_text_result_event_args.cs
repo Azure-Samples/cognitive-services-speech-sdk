@@ -4,8 +4,8 @@
 //
 
 using System;
-using System.Globalization;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Microsoft.CognitiveServices.Speech.Translation
 {
@@ -16,8 +16,8 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     {
         internal TranslationTextResultEventArgs(Microsoft.CognitiveServices.Speech.Internal.TranslationTextResultEventArgs e)
         {
-            this.Result = new TranslationTextResult(e.Result);
-            this.SessionId = e.SessionId;
+            Result = new TranslationTextResult(e.Result);
+            SessionId = e.SessionId;
         }
 
         /// <summary>
