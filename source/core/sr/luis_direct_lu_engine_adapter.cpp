@@ -143,7 +143,7 @@ void CSpxLuisDirectEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionR
         {
             // Get the connection information for this ONE (1!!) language understanding model reference
             std::string hostName, relativePath;
-            GetConnectionInfo(resultText, &hostName, &relativePath);
+            GetConnectionInfoFromTriggers(resultText, &hostName, &relativePath);
 
             // If we found a set of connection information...
             if (!hostName.empty() && !relativePath.empty())
@@ -176,20 +176,15 @@ void CSpxLuisDirectEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionR
     }
 }
 
-void CSpxLuisDirectEngineAdapter::GetConnectionInfo(const std::string& query, std::string* phostName, std::string* prelativePath)
-{
-    GetConnectionInfoFromTriggers(query, phostName, prelativePath);
-}
-
 void CSpxLuisDirectEngineAdapter::GetConnectionInfoFromTriggers(const std::string& query, std::string* phostName, std::string* prelativePath)
 {
     // The LUIS Direct LU Engine Adapter currently only allows for a single (1 !!!) language understanding model to be used. If the API developer-user specifies
     // more than a single language understanding model via AddIntent(), we'll fail this call with SPXERR_ABORT. However, specifying more than one intent, where
     // all of those intents are from teh same language understanding model, is supported. The code below iterates thru all the triggers, finding the 
-    // "endpoint/hostname/subscription key/app id" ... It stores the first one it finds. It then continues iterating thru the triggers, ensuring
+    // "hostName/relativePath" ... It stores the first one it finds. It then continues iterating thru the triggers, ensuring
     // that all the other triggers have data that links them to the same language understanding model found initially... 
 
-    std::string endpoint, host, key, appId;
+    std::string hostName, relativePath;
 
     std::unique_lock<std::mutex> lock(m_mutex);
     for (auto item : m_triggerMap)
@@ -198,65 +193,18 @@ void CSpxLuisDirectEngineAdapter::GetConnectionInfoFromTriggers(const std::strin
         auto model = trigger->GetModel();
         if (model != nullptr)
         {
-            auto str = PAL::ToString(model->GetEndpoint());
-            SPX_IFTRUE_THROW_HR(!str.empty() && !endpoint.empty() && str != endpoint, SPXERR_ABORT);
-            endpoint = str;
+            auto str = PAL::ToString(model->GetHostName());
+            SPX_IFTRUE_THROW_HR(!str.empty() && !hostName.empty() && str != hostName, SPXERR_ABORT);
+            hostName = str;
 
-            str = PAL::ToString(model->GetHostName());
-            SPX_IFTRUE_THROW_HR(!str.empty() && !host.empty() && str != host, SPXERR_ABORT);
-            host = str;
-
-            str = PAL::ToString(model->GetSubscriptionKey());
-            SPX_IFTRUE_THROW_HR(!str.empty() && !key.empty() && str != key, SPXERR_ABORT);
-            key = str;
-
-            str = PAL::ToString(model->GetAppId());
-            SPX_IFTRUE_THROW_HR(!str.empty() && !appId.empty() && str != appId, SPXERR_ABORT);
-            appId = str;
+            str = PAL::ToString(model->GetPathAndQuery());
+            SPX_IFTRUE_THROW_HR(!str.empty() && !relativePath.empty() && str != relativePath, SPXERR_ABORT);
+            relativePath = str;
         }
     }
 
-    lock.unlock();
-    GetConnectionInfo(endpoint, host, key, appId, query, phostName, prelativePath);
-}
-
-void CSpxLuisDirectEngineAdapter::GetConnectionInfo(const std::string& endpoint, const std::string& host, const std::string& key, const std::string& appId, const std::string& query, std::string* phostName, std::string* prelativePath)
-{
-    if (!endpoint.empty())
-    {
-        GetEndpointConnectionInfo(endpoint, query, phostName, prelativePath);
-    }
-    else if (!key.empty() && !appId.empty())
-    {
-        GetSubscriptionConnectionInfo(host, key, appId, query, phostName, prelativePath);
-    }
-}
-
-void CSpxLuisDirectEngineAdapter::GetEndpointConnectionInfo(const std::string& endpoint, const std::string& query, std::string* phostName, std::string* prelativePath)
-{
-    UNUSED(endpoint);
-    UNUSED(query);
-    UNUSED(phostName);
-    UNUSED(prelativePath);
-
-    // TODO: RobCh: Intent: Tease apart the hostname and the relative path from the endpoint uri provided
-
-    SPX_THROW_HR(SPXERR_NOT_IMPL);
-}
-
-void CSpxLuisDirectEngineAdapter::GetSubscriptionConnectionInfo(const std::string& host, const std::string& key, const std::string& appId, const std::string& query, std::string* phostName, std::string* prelativePath)
-{
-    constexpr auto pszDefaultHostName = R"(westus2.api.cognitive.microsoft.com)";
-
-    std::string relativePath { R"(/luis/v2.0/apps/)" };
-    relativePath += appId;
-    relativePath += R"(?subscription-key=)";
-    relativePath += key;
-    relativePath += R"(&q=)";
-    relativePath += Impl::UrlEncode(query);
-
-    *phostName = !host.empty() ? host.c_str() : pszDefaultHostName;
-    *prelativePath = std::move(relativePath);
+    *phostName = hostName;
+    *prelativePath = relativePath + Impl::UrlEncode(query);
 }
 
 std::wstring CSpxLuisDirectEngineAdapter::ExtractIntent(const std::string& str)

@@ -28,7 +28,7 @@ public:
     /// </summary>
     /// <param name="uri">The endpoint url of a language understanding model.</param>
     /// <returns>A shared pointer to language understanding model.</returns>
-    static std::shared_ptr<LanguageUnderstandingModel> From(const std::wstring& uri)
+    static std::shared_ptr<LanguageUnderstandingModel> FromEndpoint(const std::wstring& uri)
     {
         SPXLUMODELHANDLE hlumodel = SPXHANDLE_INVALID;
         SPX_THROW_ON_FAIL(LanguageUnderstandingModel_Create_From_Uri(uri.c_str(), &hlumodel));
@@ -36,29 +36,16 @@ public:
     }
 
     /// <summary>
-    /// Creates a language understanding model using the specified subscription key and application id.
-    /// </summary>
-    /// <param name="subscriptionKey">Subscription key.</param>
-    /// <param name="appId">Application id.</param>
-    /// <returns>A shared pointer to language understanding model.</returns>
-    static std::shared_ptr<LanguageUnderstandingModel> From(const std::wstring& subscriptionKey, const std::wstring& appId)
-    {
-        SPXLUMODELHANDLE hlumodel = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(LanguageUnderstandingModel_Create_From_Subscription(nullptr, subscriptionKey.c_str(), appId.c_str(), &hlumodel));
-        return std::make_shared<LanguageUnderstandingModel>(hlumodel);
-    }
-
-    /// <summary>
     /// Creates a language understanding model using the specified hostname, subscription key and application id.
     /// </summary>
-    /// <param name="hostName">Hostname.</param>
-    /// <param name="subscriptionKey">Subscription key.</param>
-    /// <param name="appId">Application id.</param>
+    /// <param name="subscriptionKey">A string that represents the subscription key of Language Understanding service.</param>
+    /// <param name="appId">A string that represents the application id of Language Understanding service.</param>
+    /// <param name="region">A String that represents the region of the Language Understanding service.</param>
     /// <returns>A shared pointer to language understanding model.</returns>
-    static std::shared_ptr<LanguageUnderstandingModel> From(const std::wstring& hostName, const std::wstring& subscriptionKey, const std::wstring& appId)
+    static std::shared_ptr<LanguageUnderstandingModel> FromSubscription(const std::wstring& subscriptionKey, const std::wstring& appId, const std::wstring& region)
     {
         SPXLUMODELHANDLE hlumodel = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(LanguageUnderstandingModel_Create_From_Subscription(hostName.c_str(), subscriptionKey.c_str(), appId.c_str(), &hlumodel));
+        SPX_THROW_ON_FAIL(LanguageUnderstandingModel_Create_From_Subscription(subscriptionKey.c_str(), appId.c_str(), region.c_str(), &hlumodel));
         return std::make_shared<LanguageUnderstandingModel>(hlumodel);
     }
 

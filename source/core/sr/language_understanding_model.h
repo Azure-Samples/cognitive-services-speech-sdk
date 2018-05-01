@@ -25,20 +25,27 @@ public:
 
     // --- ISpxLanguageUnderstandingModel ---
     void InitEndpoint(const wchar_t* uri) override;
-    void InitSubscriptionInfo(const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId) override;
+    void InitSubscription(const wchar_t* subscription, const wchar_t* appId, const wchar_t* region) override;
 
     std::wstring GetEndpoint() const override { return m_endpoint; }
-
     std::wstring GetHostName() const override { return m_hostName; }
-    std::wstring GetSubscriptionKey() const override { return m_subscriptionKey; }
+    std::wstring GetPathAndQuery() const override { return m_path; }
+
+    std::wstring GetSubscriptionKey() const override { return m_subscription; }
     std::wstring GetAppId() const override { return m_appId; }
+    std::wstring GetRegion() const override { return m_region; }
 
 private: 
 
-    std::wstring m_endpoint;
+    void ParseEndpoint();
+    void BuildEndpoint();
 
+    std::wstring m_endpoint;
     std::wstring m_hostName;
-    std::wstring m_subscriptionKey;
+    std::wstring m_path;
+
+    std::wstring m_region;
+    std::wstring m_subscription;
     std::wstring m_appId;
 };
 

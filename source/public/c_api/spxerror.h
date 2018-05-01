@@ -194,3 +194,8 @@ typedef uintptr_t SPXHR;
 /// An unexpected runtime error occurred.
 /// </summary>
 #define SPXERR_RUNTIME_ERROR  __SPX_ERRCODE_FAILED(0x01B)
+
+/// <summary>
+/// The url specified is invalid.
+/// </summary>
+#define SPXERR_INVALID_URL  __SPX_ERRCODE_FAILED(0x01C)

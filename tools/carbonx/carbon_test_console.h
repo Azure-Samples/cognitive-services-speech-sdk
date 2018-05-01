@@ -211,7 +211,7 @@ private:
     void Sample_HelloWorld_PickEngine(const wchar_t* pszEngine);
 
     void Sample_HelloWorld_Intent();
-    void Sample_HelloWorld_Intent(const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId);
+    void Sample_HelloWorld_Intent(const wchar_t* subscriptionKey, const wchar_t* appId, const wchar_t* region);
     void Sample_HelloWorld_Subscription();
     void Sample_HelloWorld_Subscription_With_CRIS();
     void Sample_HelloWorld_Language(const wchar_t* language);
@@ -219,9 +219,9 @@ private:
     void Sample_HelloWorld_Kws();
 
     int Sample_Do_Speech(bool continuous);
-    int Sample_Do_Intent(bool continuous, const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId);
+    int Sample_Do_Intent(bool continuous, const wchar_t* subscriptionKey, const wchar_t* appId, const wchar_t* region);
     int Sample_Do_Intent(bool continuous);
-    int Sample_Do_Intent_Kws(const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId);
+    int Sample_Do_Intent_Kws(const wchar_t* subscriptionKey, const wchar_t* appId, const wchar_t* region);
     int Sample_Do_Intent_Kws();
 
     int Sample_Do_Channel9();

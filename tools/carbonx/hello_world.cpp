@@ -63,14 +63,14 @@ void CarbonTestConsole::Sample_HelloWorld_PickEngine(const wchar_t* pszEngine) /
 
 void CarbonTestConsole::Sample_HelloWorld_Intent()
 {
-    constexpr auto hostName = LR"(westus2.api.cognitive.microsoft.com)";
     constexpr auto subscriptionKey = LR"(ee52996d8f814c0aa77f7a415f81bd4c)";
     constexpr auto appId = LR"(6ad2c77d180b45a288aa8c442538c090)";
+    constexpr auto region = LR"(westus2)";
 
-    Sample_HelloWorld_Intent(hostName, subscriptionKey, appId);
+    Sample_HelloWorld_Intent(subscriptionKey, appId, region);
 }
 
-void CarbonTestConsole::Sample_HelloWorld_Intent(const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId)
+void CarbonTestConsole::Sample_HelloWorld_Intent(const wchar_t* subscriptionKey, const wchar_t* appId, const wchar_t* region)
 {
     auto endpoint = LR"(wss://speech.platform.bing.com/speech/recognition/interactive/cognitiveservices/v1?setflight=cognitiveservicesintent&format=simple&language=en-us)";
     auto factory = SpeechFactory::FromEndpoint(endpoint, g_speechSubscriptionKey);
@@ -80,10 +80,9 @@ void CarbonTestConsole::Sample_HelloWorld_Intent(const wchar_t* hostName, const 
 
     // Create a LanguageUnderstandingModel associated with your LU application
     auto luisSubscriptionKey = L"YourLuisSubscriptionKey"; luisSubscriptionKey = subscriptionKey;
-    auto luisEndpoint = L"YourLuisEndpoint"; luisEndpoint = hostName;
     auto luisAppId = L"YourLuisAppId"; luisAppId = appId;
-    // auto model = LanguageUnderstandingModel::FromSubscription(luisEndpoint, luisSubscriptionKey, luisAppId);
-    auto model = LanguageUnderstandingModel::From(luisEndpoint, luisSubscriptionKey, luisAppId);
+    auto luisRegion = L"YourLuisEndpoint"; luisRegion = region;
+    auto model = LanguageUnderstandingModel::FromSubscription(luisSubscriptionKey, luisAppId, luisRegion);
 
     // Add each intent you wish to recognize to the intent recognizer
     auto intentName1 = L"IntentNameFromLuisPortal"; intentName1 = L"Calendar.Add";
@@ -210,7 +209,7 @@ int CarbonTestConsole::Sample_Do_Speech(bool continuous)
     return 0;
 }
 
-int CarbonTestConsole::Sample_Do_Intent(bool continuous, const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId)
+int CarbonTestConsole::Sample_Do_Intent(bool continuous, const wchar_t* luisSubscription, const wchar_t* appId, const wchar_t* luisRegion)
 {
     // auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey); 
     auto factory = !m_endpointUri.empty()
@@ -228,7 +227,7 @@ int CarbonTestConsole::Sample_Do_Intent(bool continuous, const wchar_t* hostName
         printf("   LUIS JSON: '%ls'\n", e.Result.Properties[ResultProperty::LanguageUnderstandingJson].GetString().c_str());
     };
 
-    auto model = LanguageUnderstandingModel::From(hostName, subscriptionKey, appId);
+    auto model = LanguageUnderstandingModel::FromSubscription(luisSubscription, appId, luisRegion);
     recognizer->AddIntent(L"all intents", IntentTrigger::From(model, L"TV.ChangeChannel"));
 
     if (continuous)
@@ -249,18 +248,14 @@ int CarbonTestConsole::Sample_Do_Intent(bool continuous, const wchar_t* hostName
 
 int CarbonTestConsole::Sample_Do_Intent(bool continuous)
 {
-    constexpr auto hostName = LR"(westus2.api.cognitive.microsoft.com)";
-    constexpr auto subscriptionKey = LR"(ee52996d8f814c0aa77f7a415f81bd4c)";
-    constexpr auto appId = LR"(6ad2c77d180b45a288aa8c442538c090)";
-    // constexpr auto hostName = LR"(westus.api.cognitive.microsoft.com)";
-    // constexpr auto subscriptionKey = LR"(0415470b4d0d4ed7b736a7ccac71fa5d)";
-    // constexpr auto appId = LR"(52d44b1039734b78b5b54b2da0eaa6f5)";
-    return Sample_Do_Intent(continuous, hostName, subscriptionKey, appId);
+    constexpr auto luisSubscription = LR"(ee52996d8f814c0aa77f7a415f81bd4c)";
+    constexpr auto luisAppId = LR"(6ad2c77d180b45a288aa8c442538c090)";
+    constexpr auto luisRegion = L"westus2";
+    return Sample_Do_Intent(continuous, luisSubscription, luisAppId, luisRegion);
 }
 
-int CarbonTestConsole::Sample_Do_Intent_Kws(const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId)
+int CarbonTestConsole::Sample_Do_Intent_Kws(const wchar_t* luisSubscription, const wchar_t* luisAppId, const wchar_t* luisRegion)
 {
-    // auto factory = SpeechFactory::FromSubscription(g_speechSubscriptionKey);
     auto factory = !m_endpointUri.empty()
         ? SpeechFactory::FromEndpoint(m_endpointUri, m_subscriptionKey)
         : SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
@@ -274,7 +269,7 @@ int CarbonTestConsole::Sample_Do_Intent_Kws(const wchar_t* hostName, const wchar
         printf("FINAL RESULT: '%ls'\n", e.Result.Text.c_str());
     };
 
-    auto model = LanguageUnderstandingModel::From(hostName, subscriptionKey, appId);
+    auto model = LanguageUnderstandingModel::FromSubscription(luisSubscription, luisAppId, luisRegion);
     recognizer->AddIntent(L"all intents", IntentTrigger::From(model, L"TV.ChangeChannel"));
 
     auto keywordModel = KeywordRecognitionModel::FromFile(L"heycortana_en-US.table");

@@ -18,32 +18,21 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// </summary>
         /// <param name="uri">A string that represents the endpoint of the language understanding model.</param>
         /// <returns>The language understanding model being created.</returns>
-        public static LanguageUnderstandingModel From(string uri)
+        public static LanguageUnderstandingModel FromEndpoint(string uri)
         {
-            return new LanguageUnderstandingModel(Internal.LanguageUnderstandingModel.From(uri));
-        }
-
-        /// <summary>
-        /// Creates an language understanding model using subscription key and application id of Language Understanding service.
-        /// </summary>
-        /// <param name="subscriptionKey">A string that represents the subscription key.</param>
-        /// <param name="appId">A string that represents the application id of Language Understanding service.</param>
-        /// <returns>The language understanding model being created.</returns>
-        public static LanguageUnderstandingModel From(string subscriptionKey, string appId)
-        {
-            return new LanguageUnderstandingModel(Internal.LanguageUnderstandingModel.From(subscriptionKey, appId));
+            return new LanguageUnderstandingModel(Internal.LanguageUnderstandingModel.FromEndpoint(uri));
         }
 
         /// <summary>
         /// Creates an language understanding model using hostname, subscription key and application id of Language Understanding service.
         /// </summary>
-        /// <param name="hostName">A string that represents the host name of of Language Understanding service.</param>
         /// <param name="subscriptionKey">A string that represents the subscription key of Language Understanding service.</param>
         /// <param name="appId">A string that represents the application id of Language Understanding service.</param>
+        /// <param name="region">A string that represents the region of the Language Understanding service.</param>
         /// <returns>The language understanding model being created.</returns>
-        public static LanguageUnderstandingModel From(string hostName, string subscriptionKey, string appId)
+        public static LanguageUnderstandingModel FromSubscription(string subscriptionKey, string appId, string region)
         {
-            return new LanguageUnderstandingModel(Internal.LanguageUnderstandingModel.From(hostName, subscriptionKey, appId));
+            return new LanguageUnderstandingModel(Internal.LanguageUnderstandingModel.FromSubscription(subscriptionKey, appId, region));
         }
 
         internal LanguageUnderstandingModel(Internal.LanguageUnderstandingModel model)

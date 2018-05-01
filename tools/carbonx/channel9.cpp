@@ -90,9 +90,9 @@ using namespace Microsoft::CognitiveServices::Speech::Translation;
 
 constexpr auto speechAndLuisRegion = L"westus2";
 constexpr auto speechSubscription = L"1f30c291f2474d39acfdf1d3bdf847c3";
-constexpr auto luisSubscription = L"ee52996d8f814c0aa77f7a415f81bd4c";
-constexpr auto luisEndpoint = L"westus2.api.cognitive.microsoft.com";
-constexpr auto luisAppId = L"6ad2c77d180b45a288aa8c442538c090";
+// constexpr auto luisSubscription = L"ee52996d8f814c0aa77f7a415f81bd4c";
+// constexpr auto luisRegion = L"westus2";
+// constexpr auto luisAppId = L"6ad2c77d180b45a288aa8c442538c090";
 
 constexpr auto translationSubscription = L"a8ddd80e37dc4c549d9bafd91dadc29a";
 constexpr auto translationDeploymentId = L"d4501bd5-a593-45bf-82a6-36ffc59d80a5";
@@ -176,7 +176,9 @@ void do_intent()
         printf("Listening... (press ENTER to exit) \n\n");
     };
 
-    auto model = LanguageUnderstandingModel::From(luisEndpoint, luisSubscription, luisAppId);
+    // auto model = LanguageUnderstandingModel::FromSubscription(luisSubscription, luisAppId, luisRegion);
+    auto model = LanguageUnderstandingModel::FromEndpoint(LR"(https://westus2.api.cognitive.microsoft.com/luis/v2.0/apps/6ad2c77d180b45a288aa8c442538c090?subscription-key=ee52996d8f814c0aa77f7a415f81bd4c)");
+
     //recognizer->AddIntent(L"all intents", IntentTrigger::From(model, L""));
     recognizer->AddIntent(L"1", IntentTrigger::From(model, L"TV.ChangeChannel"));
     recognizer->AddIntent(L"2", IntentTrigger::From(model, L"TV.WatchTV"));
@@ -213,7 +215,9 @@ void do_intent_kws()
         printf("KEYWORD SPOTTING: Say 'Hey Cortana' followed by whatever you want ...  (press ENTER to exit) \n\n");
     };
 
-    auto model = LanguageUnderstandingModel::From(luisEndpoint, luisSubscription, luisAppId);
+    // auto model = LanguageUnderstandingModel::FromSubscription(luisSubscription, luisAppId, luisRegion);
+    auto model = LanguageUnderstandingModel::FromEndpoint(LR"(https://westus2.api.cognitive.microsoft.com/luis/v2.0/apps/6ad2c77d180b45a288aa8c442538c090?subscription-key=ee52996d8f814c0aa77f7a415f81bd4c)");
+
     //recognizer->AddIntent(L"all intents", IntentTrigger::From(model, L""));
     recognizer->AddIntent(L"1", IntentTrigger::From(model, L"TV.ChangeChannel"));
     recognizer->AddIntent(L"2", IntentTrigger::From(model, L"TV.WatchTV"));

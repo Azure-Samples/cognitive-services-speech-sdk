@@ -54,12 +54,7 @@ private:
     CSpxLuisDirectEngineAdapter& operator=(CSpxLuisDirectEngineAdapter &&) = delete;
     CSpxLuisDirectEngineAdapter& operator=(const CSpxLuisDirectEngineAdapter&) = delete;
 
-    void GetConnectionInfo(const std::string& query, std::string* phostName, std::string* prelativePath);
     void GetConnectionInfoFromTriggers(const std::string& query, std::string* phostName, std::string* prelativePath);
-
-    void GetConnectionInfo(const std::string& endpoint, const std::string& host, const std::string& key, const std::string& appId, const std::string& query, std::string* phostName, std::string* prelativePath);
-    void GetEndpointConnectionInfo(const std::string& endpoint, const std::string& query, std::string* phostName, std::string* prelativePath);
-    void GetSubscriptionConnectionInfo(const std::string& host, const std::string& key, const std::string& appId, const std::string& query, std::string* phostName, std::string* prelativePath);
 
     std::wstring ExtractIntent(const std::string& json);
     std::wstring IntentIdFromIntentName(const std::wstring& intentName);

@@ -39,14 +39,14 @@ SPXAPI LanguageUnderstandingModel_Create_From_Uri(const wchar_t* uri, SPXLUMODEL
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI LanguageUnderstandingModel_Create_From_Subscription(const wchar_t* hostName, const wchar_t* subscriptionKey, const wchar_t* appId, SPXLUMODELHANDLE* phlumodel)
+SPXAPI LanguageUnderstandingModel_Create_From_Subscription(const wchar_t* subscriptionKey, const wchar_t* appId, const wchar_t* region, SPXLUMODELHANDLE* phlumodel)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phlumodel = SPXHANDLE_INVALID;
 
         auto model = SpxCreateObjectWithSite<ISpxLanguageUnderstandingModel>("CSpxLanguageUnderstandingModel", SpxGetRootSite());
-        model->InitSubscriptionInfo(hostName, subscriptionKey, appId);
+        model->InitSubscription(subscriptionKey, appId, region);
         
         auto languageUnderstandingModelHandles = CSpxSharedPtrHandleTableManager::Get<ISpxLanguageUnderstandingModel, SPXLUMODELHANDLE>();
         *phlumodel = languageUnderstandingModelHandles->TrackHandle(model);
