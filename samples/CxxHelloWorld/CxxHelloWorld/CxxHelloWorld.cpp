@@ -48,7 +48,7 @@ int wmain(int argc, wchar_t **argv)
 
     if (result->Reason != Microsoft::CognitiveServices::Speech::Reason::Recognized) {
         exitCode = 1;
-        wcout << L"There was an error, reason " << int(result->Reason) << L" - " << result->Text << '\n';
+        wcout << L"There was an error, reason " << int(result->Reason) << L" - " << result->ErrorDetails << '\n';
     }
     else {
         wcout << L"We recognized: " << result->Text << '\n';

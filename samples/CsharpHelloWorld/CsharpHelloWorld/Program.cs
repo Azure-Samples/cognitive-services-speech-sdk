@@ -1,9 +1,9 @@
-using Microsoft.CognitiveServices.Speech;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.CognitiveServices.Speech;
 
 namespace CsharpHelloWorld
 {
@@ -59,7 +59,7 @@ namespace CsharpHelloWorld
 
                 if (result.RecognitionStatus != SpeechRecognitionStatus.Recognized)
                 {
-                    Console.WriteLine($"There was an error, reason {result.RecognitionStatus} - {result.RecognitionFailureReason}");
+                    Console.WriteLine($"There was an error, status {result.RecognitionStatus}, reason {result.RecognitionFailureReason}");
                     Environment.Exit(1);
                 }
                 else

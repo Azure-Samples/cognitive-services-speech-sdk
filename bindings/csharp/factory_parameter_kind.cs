@@ -30,7 +30,7 @@ namespace Microsoft.CognitiveServices.Speech
         public const string Region = "SPEECH-Region";
 
         /// <summary>
-        /// The name of paramerter for getting/setting subscription key.
+        /// The name of parameter for getting/setting subscription key.
         /// </summary>
         public const string SubscriptionKey = "SPEECH-SubscriptionKey";
 
@@ -40,7 +40,7 @@ namespace Microsoft.CognitiveServices.Speech
         public const string AuthorizationToken = "SPEECH-AuthToken";
 
         /// <summary>
-        /// The name of paraemter for getting/setting endpoint.
+        /// The name of parameter for getting/setting endpoint.
         /// </summary>
         public const string Endpoint = "SPEECH-Endpoint";
 

@@ -24,7 +24,7 @@ namespace Microsoft.CognitiveServices.Speech
         public SessionEventType EventType { get; }
 
         /// <summary>
-        /// Represents the seesion identifier.
+        /// Represents the session identifier.
         /// </summary>
         public string SessionId { get; }
 

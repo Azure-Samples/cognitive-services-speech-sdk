@@ -34,7 +34,7 @@ namespace MicrosoftSpeechSDKSamples
             using (var recognizer = factory.CreateTranslationRecognizer(fromLanguage, toLanguages, GermanVoice))
             {
                 // This is needed for now. Should be removed when moving to production environment.
-                recognizer.Parameters.Set(ParameterNames.SpeechModelId, "d4501bd5-a593-45bf-82a6-36ffc59d80a5");
+                recognizer.Parameters.Set(SpeechParameterNames.DeploymentId, "d4501bd5-a593-45bf-82a6-36ffc59d80a5");
 
                 // Subscribes to events.
                 recognizer.IntermediateResultReceived += (s, e) => {
@@ -46,7 +46,7 @@ namespace MicrosoftSpeechSDKSamples
                 };
 
                 recognizer.FinalResultReceived += (s, e) => {
-                    Console.WriteLine($"\nFinal result: Status: {e.Result.TranslationStatus}, recognized text in {fromLanguage}: {e.Result.RecognizedText}.");
+                    Console.WriteLine($"\nFinal result: Status: {e.Result.RecognitionStatus}, recognized text in {fromLanguage}: {e.Result.RecognizedText}.");
                     foreach (var element in e.Result.Translations)
                     {
                         Console.WriteLine($"    Translated into {element.Key}: <{element.Value}>");
@@ -64,7 +64,7 @@ namespace MicrosoftSpeechSDKSamples
                 };
 
                 recognizer.RecognitionErrorRaised += (s, e) => {
-                    Console.WriteLine($"\nAn error occurred. Reason: {e.Status.ToString()}");
+                    Console.WriteLine($"\nAn error occurred. Status: {e.Status.ToString()}");
                 };
 
                 recognizer.OnSessionEvent += (s, e) => {
@@ -104,7 +104,7 @@ namespace MicrosoftSpeechSDKSamples
             using (var recognizer = factory.CreateTranslationRecognizerWithFileInput(@"YourAudioFileName", fromLanguage, toLanguages))
             {
                 // This is needed for now. Should be removed when moving to production environment.
-                recognizer.Parameters.Set(ParameterNames.SpeechModelId, "d4501bd5-a593-45bf-82a6-36ffc59d80a5");
+                recognizer.Parameters.Set(SpeechParameterNames.DeploymentId, "d4501bd5-a593-45bf-82a6-36ffc59d80a5");
 
                 // Subscribes to events.
                 recognizer.IntermediateResultReceived += (s, e) => {
@@ -116,7 +116,7 @@ namespace MicrosoftSpeechSDKSamples
                 };
 
                 recognizer.FinalResultReceived += (s, e) => {
-                    Console.WriteLine($"\nFinal result: Status: {e.Result.TranslationStatus}, recognized text in {fromLanguage}: {e.Result.RecognizedText}.");
+                    Console.WriteLine($"\nFinal result: Status: {e.Result.RecognitionStatus}, recognized text in {fromLanguage}: {e.Result.RecognizedText}.");
                     foreach (var element in e.Result.Translations)
                     {
                         Console.WriteLine($"    Translated into {element.Key}: <{element.Value}>");
@@ -124,13 +124,13 @@ namespace MicrosoftSpeechSDKSamples
                 };
 
                 recognizer.RecognitionErrorRaised += (s, e) => {
-                    Console.WriteLine($"\nAn error occurred. Reason: {e.Status.ToString()}");
+                    Console.WriteLine($"\nAn error occurred. Status: {e.Status.ToString()}");
                 };
 
-                recognizer.OnSessionEvent += (s, e) => {
-                    Console.WriteLine($"\nSession event. Event: {e.EventType.ToString()}.");
+                recognizer.OnSpeechDetectedEvent += (s, e) => {
+                    Console.WriteLine($"\nSpeech detected event. Event: {e.EventType.ToString()}.");
                     // Stops translation when speech end is detected.
-                    if (e.EventType == SessionEventType.SpeechEndDetectedEvent)
+                    if (e.EventType == RecognitionEventType.SpeechEndDetectedEvent)
                     {
                         Console.WriteLine($"\nStop translation.");
                         translationEndTaskCompletionSource.TrySetResult(0);

@@ -48,7 +48,7 @@ namespace MicrosoftSpeechSDKSamples
 
         private static void MySpeechEndDetectedHandler(object sender, RecognitionEventArgs e)
         {
-            Console.WriteLine(String.Format("Translation: Session event: {0}.", e.ToString()));
+            Console.WriteLine(String.Format("Translation: Speech detected event: {0}.", e.ToString()));
             if (e.EventType == RecognitionEventType.SpeechEndDetectedEvent)
             {
                 translationEndTaskCompletionSource.TrySetResult(0);
@@ -128,7 +128,7 @@ namespace MicrosoftSpeechSDKSamples
             reco.FinalResultReceived += MyFinalResultEventHandler;
             reco.SynthesisResultReceived += MySynthesisEventHandler;
             reco.RecognitionErrorRaised += MyErrorEventHandler;
-            reco.OnSpeechDetectectedEvent += MySpeechEndDetectedHandler;
+            reco.OnSpeechDetectedEvent += MySpeechEndDetectedHandler;
             reco.Parameters.Set(SpeechParameterNames.DeploymentId, "d4501bd5-a593-45bf-82a6-36ffc59d80a5");
 
             translationEndTaskCompletionSource = new TaskCompletionSource<int>();

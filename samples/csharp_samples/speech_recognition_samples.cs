@@ -31,9 +31,9 @@ namespace MicrosoftSpeechSDKSamples
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
 
                 // Checks result.
-                if (result.Reason != RecognitionStatus.Success)
+                if (result.RecognitionStatus != SpeechRecognitionStatus.Recognized)
                 {
-                    Console.WriteLine($"There was an error, reason {result.Reason}-{result.RecognizedText}");
+                    Console.WriteLine($"There was an error, status {result.RecognitionStatus}, reason {result.RecognitionFailureReason}");
                 }
                 else
                 {
@@ -59,9 +59,9 @@ namespace MicrosoftSpeechSDKSamples
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
 
                 // Checks result.
-                if (result.Reason != RecognitionStatus.Success)
+                if (result.RecognitionStatus != SpeechRecognitionStatus.Recognized)
                 {
-                    Console.WriteLine($"There was an error, reason {result.Reason}-{result.RecognizedText}");
+                    Console.WriteLine($"There was an error, status {result.RecognitionStatus}, reason {result.RecognitionFailureReason}");
                 }
                 else
                 {
@@ -91,9 +91,9 @@ namespace MicrosoftSpeechSDKSamples
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
 
                 // Checks results.
-                if (result.Reason != RecognitionStatus.Success)
+                if (result.RecognitionStatus != SpeechRecognitionStatus.Recognized)
                 {
-                    Console.WriteLine($"There was an error, reason {result.Reason}-{result.RecognizedText}");
+                    Console.WriteLine($"There was an error, status {result.RecognitionStatus}, reason {result.RecognitionFailureReason}");
                 }
                 else
                 {
@@ -118,9 +118,9 @@ namespace MicrosoftSpeechSDKSamples
                 recognizer.IntermediateResultReceived += (s, e) =>
                         { Console.WriteLine($"\n    Partial result: {e.Result.RecognizedText}."); };
                 recognizer.FinalResultReceived += (s, e) =>
-                        { Console.WriteLine($"\n    Final result: Status: {e.Result.Reason}, Text: {e.Result.RecognizedText}."); };
+                        { Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus}, Text: {e.Result.RecognizedText}."); };
                 recognizer.RecognitionErrorRaised += (s, e) =>
-                        { Console.WriteLine($"\n    An error occurred. Reason: {e.Status.ToString()}"); };
+                        { Console.WriteLine($"\n    An error occurred. Status: {e.Status.ToString()}"); };
                 recognizer.OnSessionEvent += (s, e) =>
                         { Console.WriteLine($"\n    Session event. Event: {e.EventType.ToString()}."); };
 

@@ -7,7 +7,6 @@
 #   UpStreamBuildDefinition - normally 4062 (main build)
 #   UpStreamBuildId - where to pick up artifacts from
 #   Version - version number to use
-#   VstsFeed - which package feed to use (e.g., 6cad1ef4-30c7-40bd-8d67-d624d756c9c8)
 #   Sign - whether to sign the .nupkg
 resources:
 - repo: self
@@ -79,6 +78,7 @@ steps:
     scriptPath: 'ci/nuget/smoke_test.sh'
     args: '$(Build.ArtifactStagingDirectory)\Windows $(KeySpeech)'
   timeoutInMinutes: 10
+  continueOnError: true
 # Cf. https://github.com/Microsoft/vsts-agent/issues/1301 wrt. ConnectedServiceName
 - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
   inputs:

@@ -30,7 +30,7 @@ void SpeechRecognitionWithMicrophone()
     // Checks result.
     if (result->Reason != Reason::Recognized)
     {
-        wcout << L"There was an error, reason " << (int)result->Reason << L"-" << result->Text << '\n';
+        wcout << L"There was an error, reason " << (int)result->Reason << L"-" << result->ErrorDetails << '\n';
     }
     else
     {
@@ -57,7 +57,7 @@ void SpeechRecognitionWithFile()
     // Checks result.
     if (result->Reason != Reason::Recognized)
     {
-        wcout << L"There was an error, reason " << (int)result->Reason << L"-" << result->Text << '\n';
+        wcout << L"There was an error, reason " << (int)result->Reason << L"-" << result->ErrorDetails << '\n';
     }
     else
     {
@@ -89,7 +89,7 @@ void SpeechRecognitionUsingCustomizedModel()
     // Checks result.
     if (result->Reason != Reason::Recognized)
     {
-        wcout << L"There was an error, reason " << (int)result->Reason << L"-" << result->Text << '\n';
+        wcout << L"There was an error, reason " << (int)result->Reason << L"-" << result->ErrorDetails << '\n';
     }
     else
     {

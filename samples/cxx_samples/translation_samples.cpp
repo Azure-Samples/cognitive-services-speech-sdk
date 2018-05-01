@@ -38,11 +38,11 @@ void TranslationWithMicrophone()
     // Checks result.
     if (result->Reason != Reason::Recognized)
     {
-        wcout << L"There was an error in speech recognition, reason " << int(result->Reason) << L"-" << result->Text << '\n';
+        wcout << L"There was an error in speech recognition, reason " << int(result->Reason) << L"-" << result->ErrorDetails << '\n';
     }
-    else if (result->TranslationStatus != TranslationStatus::Success)
+    else if (result->TextStatus != TranslationTextStatus::Success)
     {
-        wcout << L"There was an error in translation, status: " << int(result->TranslationStatus) << '\n';
+        wcout << L"There was an error in translation, status: " << int(result->TextStatus) << '\n';
     }
     else
     {
@@ -77,11 +77,11 @@ void TranslationWithFile()
     // Checks result.
     if (result->Reason != Reason::Recognized)
     {
-        wcout << L"There was an error in speech recognition, reason " << int(result->Reason) << L"-" << result->Text << '\n';
+        wcout << L"There was an error in speech recognition, reason " << int(result->Reason) << L"-" << result->ErrorDetails << '\n';
     }
-    else if (result->TranslationStatus != TranslationStatus::Success)
+    else if (result->TextStatus != TranslationTextStatus::Success)
     {
-        wcout << L"There was an error in translation, status: " << int(result->TranslationStatus) << '\n';
+        wcout << L"There was an error in translation, status: " << int(result->TextStatus) << '\n';
     }
     else
     {
@@ -107,7 +107,7 @@ static void OnPartialResult(const TranslationTextResultEventArgs& e)
 
 static void OnFinalResult(const TranslationTextResultEventArgs& e)
 {
-    wcout << L"FinalResult: status:" << (int)e.Result.TranslationStatus << L". Recognized Text: " << e.Result.Text << '\n';
+    wcout << L"FinalResult: status:" << (int)e.Result.TextStatus << L". Recognized Text: " << e.Result.Text << '\n';
     for (const auto& it : e.Result.Translations)
     {
         wcout << L"    Translated into " << it.first.c_str() << ":" << it.second.c_str();

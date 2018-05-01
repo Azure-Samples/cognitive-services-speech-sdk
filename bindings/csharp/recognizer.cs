@@ -43,7 +43,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Defines event handler for session events, e.g., SpeechStartDetectedEvent and SpeechEndDetectedEvent.
         /// </summary>
-        public event EventHandler<RecognitionEventArgs> OnSpeechDetectectedEvent;
+        public event EventHandler<RecognitionEventArgs> OnSpeechDetectedEvent;
 
         internal Recognizer()
         {
@@ -143,7 +143,7 @@ namespace Microsoft.CognitiveServices.Speech
                 }
 
                 var arg = new RecognitionEventArgs(eventType, eventArgs);
-                var handler = this.recognizer.OnSpeechDetectectedEvent;
+                var handler = this.recognizer.OnSpeechDetectedEvent;
 
                 if (handler != null)
                 {
