@@ -94,6 +94,7 @@ if [[ $OS = "Windows_NT" ]]; then
   if [[ $TARGET != "ANDROID" ]]; then
     cp $CPOPT "$SRCLIB"/$LIBPREFIX*.lib "$DESTPUBLIB"
     cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*.pdb "$DESTPUBLIB"
+    cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*.xml "$DESTPUBLIB"
   fi
 fi
 

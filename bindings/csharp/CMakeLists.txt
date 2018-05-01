@@ -58,6 +58,8 @@ enable_language(CSharp)
 add_library(${CSHARP_LIB} SHARED ${SWIG_CS_SOURCES} ${CSHARP_LIB_WRAPPER_SOURCES})
 add_dependencies(${CSHARP_LIB} ${CSHARP_BINDINGS} ${SWIG_MODULE_${CSHARP_BINDINGS}_REAL_NAME})
 
+set(CMAKE_CSharp_FLAGS "${CMAKE_CSharp_FLAGS} -doc${CSHARP_LIB}.xml")
+
 set_target_properties(${CSHARP_LIB} PROPERTIES
    VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.6.1"
    FOLDER bindings/csharp

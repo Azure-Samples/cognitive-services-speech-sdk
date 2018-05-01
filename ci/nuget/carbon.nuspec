@@ -43,6 +43,7 @@
     <!-- .NET dlls -->
     <!-- (Note: Microsoft.CognitiveServices.Speech.csharp.dll was changed to an AnyCPU assembly using corflags during build) -->
     <file src="$DropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.csharp.dll" target="lib\net45\Microsoft.CognitiveServices.Speech.csharp.dll" />
+    <file src="$DropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.csharp.xml" target="lib\net45\Microsoft.CognitiveServices.Speech.csharp.xml" />
     <file src="$DropDir$\Win32\Debug\public\lib\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" target="build\native\Win32\Debug\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" />
     <file src="$DropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" target="build\native\Win32\Release\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" />
     <file src="$DropDir$\x64\Debug\public\lib\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" target="build\native\x64\Debug\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" />
