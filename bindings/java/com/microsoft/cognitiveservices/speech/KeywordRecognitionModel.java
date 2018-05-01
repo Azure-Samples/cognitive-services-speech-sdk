@@ -8,6 +8,12 @@ import java.io.Closeable;
   */
 public class KeywordRecognitionModel implements Closeable
 { 
+    // load the native library.
+    static {
+        // TODO name of library will depend on version
+        System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
+    }
+
     /**
       * Creates an language understanding model using the specified endpoint.
       * @param fileName A string that represents file name for the keyword recognition model.

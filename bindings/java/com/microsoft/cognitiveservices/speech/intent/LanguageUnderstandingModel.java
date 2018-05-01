@@ -6,6 +6,12 @@ package com.microsoft.cognitiveservices.speech.intent;
   */
 public final class LanguageUnderstandingModel
 { 
+    // load the native library.
+    static {
+        // TODO name of library will depend on version
+        System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
+    }
+
     /**
       * Creates an language understanding model using the specified endpoint.
       * @param uri A String that represents the endpoint of the language understanding model.

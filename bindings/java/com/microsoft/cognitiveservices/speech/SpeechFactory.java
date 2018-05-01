@@ -18,7 +18,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
    */
  public final class SpeechFactory implements Closeable {
      
-     // load the native library.
+    // load the native library.
     static {
         // TODO name of library will depend on version
         System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
