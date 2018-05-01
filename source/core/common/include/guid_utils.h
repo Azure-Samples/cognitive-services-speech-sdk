@@ -11,4 +11,6 @@ namespace PAL {
 
 std::wstring CreateGuid();
 
+std::string DeviceUuid();
+
 } // PAL

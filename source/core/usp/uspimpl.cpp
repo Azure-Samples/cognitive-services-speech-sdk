@@ -35,11 +35,13 @@
 #endif
 
 #include "string_utils.h"
+#include "guid_utils.h"
 
 #ifdef _MSC_VER
 #pragma warning( push )
 // disable: (8300,27): error 28020:  : The expression '0&lt;=_Param_(1)&amp;&amp;_Param_(1)&lt;=64-1' is not true at this call.
 #pragma warning( disable : 28020 )
+
 #include "json.hpp"
 #pragma warning( pop )
 #else
@@ -354,6 +356,9 @@ void Connection::Impl::Connect()
     {
         ThrowRuntimeError("Failed to create telemetry instance.");
     }
+
+    // Log the device uuid
+    metrics_device_startup(m_telemetry.get(), PAL::DeviceUuid().c_str());
 
     m_transport = TransportPtr(TransportRequestCreate(connectionUrl.c_str(), this, m_telemetry.get(), headersPtr), TransportRequestDestroy);
     if (m_transport == nullptr)

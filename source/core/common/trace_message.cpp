@@ -64,6 +64,9 @@ void SpxTraceMessage_Internal(int level, const char* pszTitle, const char* pszFo
     }
 
 #if defined(ANDROID) || defined(__ANDROID__)
+
+// In debug mode, log everything to system log.
+#if defined(DEBUG) || defined(_DEBUG)
     int androidPrio = ANDROID_LOG_ERROR;
     switch (level)
     {
@@ -76,6 +79,14 @@ void SpxTraceMessage_Internal(int level, const char* pszTitle, const char* pszFo
 
     androidPrio = ANDROID_LOG_FATAL;
     __android_log_vprint(androidPrio, "Carbon", format.c_str(), argptr);
+// In release mode, do not log anything.
+#else
+    UNUSED(level);
+    UNUSED(pszTitle);
+    UNUSED(pszFormat);
+    UNUSED(argptr);
+#endif
+
 #else
     vfprintf(stderr, format.c_str(), argptr);
 #endif
