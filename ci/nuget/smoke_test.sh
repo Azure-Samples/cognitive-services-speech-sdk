@@ -46,7 +46,7 @@ fi
 PACKAGE_NAME=Microsoft.CognitiveServices.Speech
 
 # Check existence
-[[ -e "$PACKAGE_PATH" ]]
+[[ -e $PACKAGE_PATH ]]
 
 # If pointing to a directory, expand package inside
 if [[ -d "$PACKAGE_PATH" ]]; then

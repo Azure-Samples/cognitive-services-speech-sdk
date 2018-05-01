@@ -1,0 +1,126 @@
+# Build NuGet package and samples archive.
+# Test compilation of the samples against the local NuGet package.
+# Publish the .zip and .nupkg as a build artefact
+# (also in case of failure, to allow debugging).
+#
+# Variables:
+#   UpStreamBuildDefinition - normally 4062 (main build)
+#   UpStreamBuildId - where to pick up artifacts from
+#   Version - version number to use
+#   VstsFeed - which package feed to use (e.g., 6cad1ef4-30c7-40bd-8d67-d624d756c9c8)
+#   Sign - whether to sign the .nupkg
+resources:
+- repo: self
+queue:
+  name: Hosted VS2017
+steps:
+- task: DownloadBuildArtifacts@0
+  displayName: 'Download Windows artifact'
+  inputs:
+    buildType: specific
+    project: Skyman
+    definition: $(UpStreamBuildDefinition)
+    buildId: $(UpStreamBuildId)
+    artifactName: Windows
+    downloadPath: '$(System.ArtifactsDirectory)\Drop'
+- task: NuGetCommand@2
+  inputs:
+    command: custom
+    arguments: help
+  displayName: Set up NUGETEXETOOLPATH
+- bash: |
+       function vsts_setvar { echo "##vso[task.setvariable variable=$1]$2"; }
+       vsts_setvar ZipBasename "SpeechSDK-WindowsSamples-$(Version)"
+  displayName: 'Set ZipBasename Variable'
+- task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  inputs:
+    type: FilePath
+    scriptPath: './ci/nuget/pack.sh'
+    args: '$(System.ArtifactsDirectory)\Drop\Windows $(Version) $(Build.ArtifactStagingDirectory)\Windows'
+  displayName: Create NuGet
+- task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  inputs:
+    type: InlineScript
+    script: |
+       set -e -x -o pipefail
+       # Drop is not needed anymore
+       rm -rf "$(cygpath -au "$(System.ArtifactsDirectory)\Drop")"
+       git clean -fdx samples
+       perl ci/patch-samples.pl "$(Version)"
+       mkdir "$(ZipBasename)"
+       cp --verbose --recursive --preserve license.md ThirdPartyNotices.md samples/{cxx,csharp}_samples "$(ZipBasename)"
+       NOW=$(date -Iseconds)
+       find "$(ZipBasename)" | xargs touch --date=$NOW
+  displayName: 'Create dir for samples'
+  timeoutInMinutes: 5
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: $(ZipBasename)
+    includeRootFolder: true
+    archiveType: zip
+    archiveFile: $(Build.ArtifactStagingDirectory)//Windows/$(ZipBasename).zip
+  displayName: 'Create .zip'
+- task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  inputs:
+    type: InlineScript
+    script: |
+       ./ci/nuget/restore-from-local.sh "$(cygpath -au "$(Build.ArtifactStagingDirectory)/Windows")" samples
+  displayName: 'Test - restore packages'
+- task: VSBuild@1
+  inputs:
+    solution: 'samples/**/*.sln'
+    platform: x64
+    configuration: Release
+    maximumCpuCount: true
+  displayName: 'Test - build solutions (x64 Release only)'
+- task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  inputs:
+    type: FilePath
+    scriptPath: 'ci/nuget/smoke_test.sh'
+    args: '$(Build.ArtifactStagingDirectory)\Windows $(KeySpeech)'
+  timeoutInMinutes: 10
+# Cf. https://github.com/Microsoft/vsts-agent/issues/1301 wrt. ConnectedServiceName
+- task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  inputs:
+    ConnectedServiceName: 'Speech SDK ESRP Signing'
+    FolderPath: '$(Build.ArtifactStagingDirectory)/Windows'
+    Pattern: '*.nupkg'
+    signConfigType: inlineSignParams
+    inlineOperation: |
+      [
+        {
+          "keyCode": "CP-401405",
+          "operationSetCode": "NuGetSign",
+          "parameters": [ ],
+          "toolName": "sign",
+          "toolVersion": "1.0"
+        },
+        {
+          "keyCode": "CP-401405",
+          "operationSetCode": "NuGetVerify",
+          "parameters": [ ],
+          "toolName": "sign",
+          "toolVersion": "1.0"
+        }
+      ]
+  condition: eq(variables['Sign'], 'true')
+- task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  enabled: false
+  inputs:
+    type: InlineScript
+    script: |
+       set -e -o pipefail
+       SHA256_SUM="$(sha256sum "$(cygpath -au "$(Build.ArtifactStagingDirectory)/$(ZipBasename).zip")" | cut -f1 -d' ')"
+       # N.B. two spaces in the next line intentional
+       echo "$SHA256_SUM  $(ZipBasename).zip"
+       function vsts_setvar { echo "##vso[task.setvariable variable=$1]$2"; }
+       vsts_setvar WINSAMPLES_SHA256SUM "$SHA256_SUM"
+       # checksum is not yet used...
+  displayName: 'Compute SHA256 for .zip'
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)\Windows'
+    ArtifactName: Windows
+    publishLocation: Container
+  condition: 'succeededOrFailed()'
+  displayName: 'Publish .zip and .nupkg'
