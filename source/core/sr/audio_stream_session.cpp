@@ -142,7 +142,6 @@ void CSpxAudioStreamSession::SetFormat(WAVEFORMATEX* pformat)
     {
         // The pump started successfully, we have a live running session now!
         SPX_DBG_TRACE_VERBOSE("%s: Now ProcessingAudio ...", __FUNCTION__);
-        m_saveOriginalAudio.OpenWav("everything-audio-", pformat);
 
         SPX_DBG_ASSERT(readLock.owns_lock()); // Keep the lock to call InformAdapterSetFormatStarting()...
         InformAdapterSetFormatStarting(pformat);
@@ -151,7 +150,6 @@ void CSpxAudioStreamSession::SetFormat(WAVEFORMATEX* pformat)
     {
         // Our stop pump request has been satisfied... Let's wait for the adapter to finish...
         SPX_DBG_TRACE_VERBOSE("%s: Now WaitForAdapterCompletedSetFormatStop (from StoppingPump)...", __FUNCTION__);
-        m_saveOriginalAudio.CloseWav();
         ProcessAudioDataLater_Clear();
 
         SPX_DBG_ASSERT(readLock.owns_lock()); // Keep the lock to call InformAdapterSetFormatStopping()...
@@ -161,7 +159,6 @@ void CSpxAudioStreamSession::SetFormat(WAVEFORMATEX* pformat)
     {
         // The pump stopped itself... That's possible when WAV files reach EOS. Let's wait for the adapter to finish...
         SPX_DBG_TRACE_VERBOSE("%s: Now WaitForAdapterCompletedSetFormatStop (from ProcessingAudio) ...", __FUNCTION__);
-        m_saveOriginalAudio.CloseWav();
         ProcessAudioDataLater_Clear();
 
         SPX_DBG_ASSERT(readLock.owns_lock()); // Keep the lock to call InformAdapterSetFormatStopping()...
@@ -183,7 +180,6 @@ void CSpxAudioStreamSession::ProcessAudio(AudioData_Type data, uint32_t size)
     if (sessionState == SessionState::ProcessingAudio && !m_adapterRequestedIdle)
     {
         SPX_DBG_TRACE_VERBOSE_IF(0, "%s - size=%d", __FUNCTION__, size);
-        m_saveOriginalAudio.SaveToWav(data.get(), size);
         
         ProcessAudioDataLater_Complete();
         ProcessAudioDataNow(data, size);
@@ -579,7 +575,6 @@ void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint
     UNUSED(offset);
 
     SPX_DBG_TRACE_VERBOSE("Keyword detected!! Starting KwsSingleShot recognition... offset=%d; size=%d", offset, size);
-    CSpxSaveToWavFile::SaveToWav("kws-detected-audio-", m_format.get(), audioData.get(), size);
 
     if (ChangeState(RecognitionKind::Keyword, SessionState::ProcessingAudio, RecognitionKind::KwsSingleShot, SessionState::HotSwapPaused))
     {
@@ -939,7 +934,6 @@ void CSpxAudioStreamSession::InitKwsEngineAdapter(std::shared_ptr<ISpxKwsModel> 
 
 void CSpxAudioStreamSession::ProcessAudioDataNow(AudioData_Type data, uint32_t size)
 {
-    m_saveToWav.SaveToWav(data.get(), size);
     m_audioProcessor->ProcessAudio(data, size);
 }
 
@@ -1124,7 +1118,6 @@ void CSpxAudioStreamSession::InformAdapterSetFormatStarting(WAVEFORMATEX* format
 
     SPX_DBG_ASSERT(format != nullptr);
     m_audioProcessor->SetFormat(format);
-    m_saveToWav.OpenWav(m_recoKind == RecognitionKind::Keyword ? "kws-audio-" : "speech-audio-", format);
 }
 
 void CSpxAudioStreamSession::InformAdapterSetFormatStopping(SessionState comingFromState)

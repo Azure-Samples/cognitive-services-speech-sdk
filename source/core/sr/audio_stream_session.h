@@ -12,7 +12,6 @@
 #include "named_properties_impl.h"
 #include "packaged_task_helpers.h"
 #include "service_helpers.h"
-#include "save_to_wav.h"
 
 #ifdef _MSC_VER
 #include <shared_mutex>
@@ -290,8 +289,6 @@ private:
     std::mutex m_processAudioLaterMutex;
     std::queue<std::pair<AudioData_Type, uint32_t>> m_processAudioLater;
     uint64_t m_sizeProcessAudioLater;
-    CSpxSaveToWavFile m_saveToWav;
-    CSpxSaveToWavFile m_saveOriginalAudio;
 
     std::mutex m_mutex;
     std::condition_variable m_cv;
