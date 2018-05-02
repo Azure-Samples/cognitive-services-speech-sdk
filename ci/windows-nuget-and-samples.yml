@@ -77,7 +77,7 @@ steps:
     type: FilePath
     scriptPath: 'ci/nuget/smoke_test.sh'
     args: '$(Build.ArtifactStagingDirectory)\Windows $(KeySpeech)'
-  timeoutInMinutes: 10
+  timeoutInMinutes: 5
   continueOnError: true
 # Cf. https://github.com/Microsoft/vsts-agent/issues/1301 wrt. ConnectedServiceName
 - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
