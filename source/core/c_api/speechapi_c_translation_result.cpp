@@ -8,13 +8,12 @@
 #include "stdafx.h"
 #include "string_utils.h"
 
-
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
-SPXAPI TranslationResult_GetTranslationTextStatus(SPXRESULTHANDLE handle, Result_TranslationTextStatus* statusPointer)
+SPXAPI TranslationTextResult_GetTranslationStatus(SPXRESULTHANDLE handle, Result_TranslationStatus* statusPointer)
 {
-    static_assert((int)Result_TranslationTextSuccess == (int)TranslationTextStatus::Success, "Result_TranslationText* enum values == TranslationTextStatus::* enum values");
-    static_assert((int)Result_TranslationTextError == (int)TranslationTextStatus::Error, "Result_TranslationText* enum values == TranslationTextStatus::* enum values");
+    static_assert((int)Result_Translation_Success == (int)TranslationStatus::Success, "Result_Translation* enum values == TranslationStatus::* enum values");
+    static_assert((int)Result_Translation_Error == (int)TranslationStatus::Error, "Result_Translation* enum values == TranslationStatus::* enum values");
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, statusPointer == nullptr);
 
     SPXAPI_INIT_HR_TRY(hr)
@@ -23,7 +22,7 @@ SPXAPI TranslationResult_GetTranslationTextStatus(SPXRESULTHANDLE handle, Result
         auto result = (*resulthandles)[handle];
 
         auto textResult = SpxQueryInterface<ISpxTranslationTextResult>(result);
-        *statusPointer = static_cast<Result_TranslationTextStatus>(textResult->GetTextStatus());
+        *statusPointer = static_cast<Result_TranslationStatus>(textResult->GetTranslationStatus());
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -46,7 +45,7 @@ SPXAPI_RESULTTYPE SPXAPI_NOTHROW CheckAndCopyBuffer(const std::wstring& source, 
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI TranslationResult_GetTranslationTextFailureReason(SPXRESULTHANDLE handle, wchar_t* buffer, size_t* bufferSizePointer)
+SPXAPI TranslationTextResult_GetFailureReason(SPXRESULTHANDLE handle, wchar_t* buffer, size_t* bufferSizePointer)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, bufferSizePointer == nullptr);
 
@@ -56,15 +55,14 @@ SPXAPI TranslationResult_GetTranslationTextFailureReason(SPXRESULTHANDLE handle,
         auto result = (*resulthandles)[handle];
 
         auto textResult = SpxQueryInterface<ISpxTranslationTextResult>(result);
-        auto reason = textResult->GetTextFailureReason();
+        auto reason = textResult->GetTranslationFailureReason();
 
         hr = CheckAndCopyBuffer(reason, buffer, bufferSizePointer);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-
-SPXAPI TranslationResult_GetTranslationText(SPXRESULTHANDLE handle, Result_TranslationTextBufferHeader* textBuffer, size_t* lengthPointer)
+SPXAPI TranslationTextResult_GetTranslationText(SPXRESULTHANDLE handle, Result_TranslationTextBufferHeader* textBuffer, size_t* lengthPointer)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, lengthPointer == nullptr);
 
@@ -117,11 +115,11 @@ SPXAPI TranslationResult_GetTranslationText(SPXRESULTHANDLE handle, Result_Trans
 }
 
 
-SPXAPI TranslationResult_GetTranslationSynthesisStatus(SPXRESULTHANDLE handle, Result_TranslationSynthesisStatus* statusPointer)
+SPXAPI TranslationSynthesisResult_GetSynthesisStatus(SPXRESULTHANDLE handle, Result_SynthesisStatus* statusPointer)
 {
-    static_assert((int)Result_TranslationSynthesisSuccess == (int)TranslationSynthesisStatus::Success, "Result_TranslationSynthesis* enum values == TranslationSynthesisStatus::* enum values");
-    static_assert((int)Result_TranslationSynthesisEnd == (int)TranslationSynthesisStatus::SynthesisEnd, "Result_TranslationSynthesis* enum values == TranslationSynthesisStatus::* enum values");
-    static_assert((int)Result_TranslationSynthesisError == (int)TranslationSynthesisStatus::Error, "Result_TranslationSynthesis* enum values == TranslationSynthesisStatus::* enum values");
+    static_assert((int)Result_Synthesis_Success == (int)SynthesisStatus::Success, "Result_TranslationSynthesis* enum values == TranslationSynthesisStatus::* enum values");
+    static_assert((int)Result_Synthesis_End == (int)SynthesisStatus::SynthesisEnd, "Result_TranslationSynthesis* enum values == TranslationSynthesisStatus::* enum values");
+    static_assert((int)Result_Synthesis_Error == (int)SynthesisStatus::Error, "Result_TranslationSynthesis* enum values == TranslationSynthesisStatus::* enum values");
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, statusPointer == nullptr);
 
     SPXAPI_INIT_HR_TRY(hr)
@@ -130,12 +128,12 @@ SPXAPI TranslationResult_GetTranslationSynthesisStatus(SPXRESULTHANDLE handle, R
         auto result = (*resulthandles)[handle];
 
         auto synthesisResult = SpxQueryInterface<ISpxTranslationSynthesisResult>(result);
-        *statusPointer = static_cast<Result_TranslationSynthesisStatus>(synthesisResult->GetSynthesisStatus());
+        *statusPointer = static_cast<Result_SynthesisStatus>(synthesisResult->GetSynthesisStatus());
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI TranslationResult_GetTranslationSynthesisFailureReason(SPXRESULTHANDLE handle, wchar_t* buffer, size_t* bufferSizePointer)
+SPXAPI TranslationSynthesisResult_GetFailureReason(SPXRESULTHANDLE handle, wchar_t* buffer, size_t* bufferSizePointer)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, bufferSizePointer == nullptr);
 
@@ -152,7 +150,7 @@ SPXAPI TranslationResult_GetTranslationSynthesisFailureReason(SPXRESULTHANDLE ha
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI TranslationResult_GetTranslationSynthesisData(SPXRESULTHANDLE handle, uint8_t* audioBuffer, size_t* lengthPointer)
+SPXAPI TranslationSynthesisResult_GetSynthesisData(SPXRESULTHANDLE handle, uint8_t* audioBuffer, size_t* lengthPointer)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, lengthPointer == nullptr);
 

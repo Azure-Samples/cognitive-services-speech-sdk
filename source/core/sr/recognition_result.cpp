@@ -106,31 +106,31 @@ const map<wstring, wstring>& CSpxRecognitionResult::GetTranslationText()
     return m_translations;
 }
 
-TranslationTextStatus CSpxRecognitionResult::GetTextStatus() const
+TranslationStatus CSpxRecognitionResult::GetTranslationStatus() const
 {
-    return m_translationTextStatus;
+    return m_translationStatus;
 }
 
-const wstring& CSpxRecognitionResult::GetTextFailureReason() const
+const wstring& CSpxRecognitionResult::GetTranslationFailureReason() const
 {
-    return m_translationTextFailureReason;
+    return m_translationFailureReason;
 }
 
-void CSpxRecognitionResult::InitTranslationTextResult(TranslationTextStatus status, const map<wstring, wstring>& translations, const wstring& failureReason)
+void CSpxRecognitionResult::InitTranslationTextResult(TranslationStatus status, const map<wstring, wstring>& translations, const wstring& failureReason)
 {
     m_translations = translations;
-    m_translationTextStatus = status;
-    m_translationTextFailureReason = failureReason;
+    m_translationStatus = status;
+    m_translationFailureReason = failureReason;
 }
 
-TranslationSynthesisStatus CSpxRecognitionResult::GetSynthesisStatus()
+SynthesisStatus CSpxRecognitionResult::GetSynthesisStatus()
 {
-    return m_translationSynthesisStatus;
+    return m_synthesisStatus;
 }
 
 const wstring& CSpxRecognitionResult::GetSynthesisFailureReason()
 {
-    return m_translationSynthesisFailureReason;
+    return m_synthesisFailureReason;
 }
 
 const uint8_t* CSpxRecognitionResult::GetAudio() const
@@ -144,12 +144,12 @@ size_t CSpxRecognitionResult::GetLength() const
 }
 
 // ISpxTranslationSynthesisResultInit
-void CSpxRecognitionResult::InitTranslationSynthesisResult(TranslationSynthesisStatus status, const uint8_t* audioData, size_t audioLength, const wstring& failureReason)
+void CSpxRecognitionResult::InitTranslationSynthesisResult(SynthesisStatus status, const uint8_t* audioData, size_t audioLength, const wstring& failureReason)
 {
-    m_translationSynthesisStatus = status;
+    m_synthesisStatus = status;
     m_audioBuffer = audioData;
     m_audioLength = audioLength;
-    m_translationSynthesisFailureReason = failureReason;
+    m_synthesisFailureReason = failureReason;
 }
 
 

@@ -20,16 +20,16 @@ namespace Microsoft.CognitiveServices.Speech
             Trace.Assert((int)ResultPropertyKind.LanguageUnderstandingJson == (int)Internal.ResultProperty.LanguageUnderstandingJson);
             Trace.Assert((int)ResultPropertyKind.ErrorDetails == (int)Internal.ResultProperty.ErrorDetails);
 
-            Trace.Assert((int)SpeechRecognitionStatus.Recognized == (int)Internal.Reason.Recognized);
-            Trace.Assert((int)SpeechRecognitionStatus.IntermediateResult == (int)Internal.Reason.IntermediateResult);
-            Trace.Assert((int)SpeechRecognitionStatus.NoMatch == (int)Internal.Reason.NoMatch);
-            Trace.Assert((int)SpeechRecognitionStatus.Canceled == (int)Internal.Reason.Canceled);
-            Trace.Assert((int)SpeechRecognitionStatus.OtherRecognizer == (int)Internal.Reason.OtherRecognizer);
-
+            Trace.Assert((int)RecognitionStatus.Recognized == (int)Internal.Reason.Recognized);
+            Trace.Assert((int)RecognitionStatus.IntermediateResult == (int)Internal.Reason.IntermediateResult);
+            Trace.Assert((int)RecognitionStatus.NoMatch == (int)Internal.Reason.NoMatch);
+            Trace.Assert((int)RecognitionStatus.Canceled == (int)Internal.Reason.Canceled);
+            Trace.Assert((int)RecognitionStatus.OtherRecognizer == (int)Internal.Reason.OtherRecognizer);
+            
             resultImpl = result;
-            ResultId = result.ResultId;
-            RecognizedText = result.Text;
-            this.RecognitionStatus = (SpeechRecognitionStatus)((int)result.Reason);
+            this.ResultId = result.ResultId;
+            this.RecognizedText = result.Text;
+            this.RecognitionStatus = (RecognitionStatus)((int)result.Reason);
             Properties = new ResultPropertiesImpl(result.Properties);
         }
 
@@ -41,7 +41,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Specifies status of speech recognition result.
         /// </summary>
-        public SpeechRecognitionStatus RecognitionStatus { get; }
+        public RecognitionStatus RecognitionStatus { get; }
 
         /// <summary>
         /// Presents the recognized text in the result.

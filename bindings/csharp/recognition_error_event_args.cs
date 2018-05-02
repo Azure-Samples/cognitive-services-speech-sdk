@@ -13,7 +13,7 @@ namespace Microsoft.CognitiveServices.Speech
     /// </summary>
     public sealed class RecognitionErrorEventArgs : System.EventArgs
     {
-        internal RecognitionErrorEventArgs(string sessionId, SpeechRecognitionStatus status)
+        internal RecognitionErrorEventArgs(string sessionId, RecognitionStatus status)
         {
             Status = status;
             SessionId = sessionId;
@@ -21,20 +21,20 @@ namespace Microsoft.CognitiveServices.Speech
 
         internal RecognitionErrorEventArgs(string sessionId, Microsoft.CognitiveServices.Speech.Internal.Reason reason)
         {
-            Trace.Assert((int)Internal.Reason.Recognized == (int)SpeechRecognitionStatus.Recognized);
-            Trace.Assert((int)Internal.Reason.IntermediateResult == (int)SpeechRecognitionStatus.IntermediateResult);
-            Trace.Assert((int)Internal.Reason.NoMatch == (int)SpeechRecognitionStatus.NoMatch);
-            Trace.Assert((int)Internal.Reason.Canceled == (int)SpeechRecognitionStatus.Canceled);
-            Trace.Assert((int)Internal.Reason.OtherRecognizer == (int)SpeechRecognitionStatus.OtherRecognizer);
+            Trace.Assert((int)Internal.Reason.Recognized == (int)RecognitionStatus.Recognized);
+            Trace.Assert((int)Internal.Reason.IntermediateResult == (int)RecognitionStatus.IntermediateResult);
+            Trace.Assert((int)Internal.Reason.NoMatch == (int)RecognitionStatus.NoMatch);
+            Trace.Assert((int)Internal.Reason.Canceled == (int)RecognitionStatus.Canceled);
+            Trace.Assert((int)Internal.Reason.OtherRecognizer == (int)RecognitionStatus.OtherRecognizer);
 
-            Status = (SpeechRecognitionStatus)((int)reason);
+            Status = (RecognitionStatus)((int)reason);
             SessionId = sessionId;
         }
 
         /// <summary>
         /// Specifies the error reason.
         /// </summary>
-        public SpeechRecognitionStatus Status { get; }
+        public RecognitionStatus Status { get; }
 
         /// <summary>
         /// Specifies the session identifier.

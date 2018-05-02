@@ -27,7 +27,7 @@ typedef uint64_t DurationType;
  */
 enum class RecognitionStatus : int
 {
-    Success, NoMatch, InitialSilenceTimeout, BabbleTimeout, Error, EndOfDictation, Unknown
+    Success, NoMatch, InitialSilenceTimeout, BabbleTimeout, Error, EndOfDictation, InvalidMessage
 };
 
 /**
@@ -35,7 +35,7 @@ enum class RecognitionStatus : int
 */
 enum class TranslationStatus : int
 {
-    Success, Error, Unknown
+    Success, Error, InvalidMessage
 };
 
 /**
@@ -43,7 +43,7 @@ enum class TranslationStatus : int
 */
 enum class SynthesisStatus : int
 {
-    Success, Error, Unknown
+    Success, Error, InvalidMessage
 };
 
 struct JsonMsg {
@@ -165,7 +165,7 @@ struct SpeechPhraseMsg : public SpeechMsg
         displayText(std::move(text))
     {}
 
-    RecognitionStatus recognitionStatus { RecognitionStatus::Unknown };
+    RecognitionStatus recognitionStatus { RecognitionStatus::Error };
     std::wstring displayText;
 };
 
@@ -231,7 +231,7 @@ struct TranslationSynthesisMsg
 */
 struct TranslationSynthesisEndMsg
 {
-    SynthesisStatus synthesisStatus{ SynthesisStatus::Unknown };
+    SynthesisStatus synthesisStatus{ SynthesisStatus::Error };
     // A string indicates failure reasons in case that the synthesisStatus is an error.
     std::wstring failureReason;
 };

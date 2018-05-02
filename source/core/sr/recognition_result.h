@@ -56,21 +56,21 @@ public:
     void InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload) override;
 
     // -- ISpxTranslationTextResult ---
-    TranslationTextStatus GetTextStatus() const override;
-    const std::wstring& GetTextFailureReason() const override;
+    TranslationStatus GetTranslationStatus() const override;
+    const std::wstring& GetTranslationFailureReason() const override;
     const std::map<std::wstring, std::wstring>& GetTranslationText() override;
 
     // -- ISpxTranslationTextResulInit --
-    void InitTranslationTextResult(TranslationTextStatus status, const std::map<std::wstring, std::wstring>& translations, const std::wstring& failureReason) override;
+    void InitTranslationTextResult(TranslationStatus status, const std::map<std::wstring, std::wstring>& translations, const std::wstring& failureReason) override;
 
     // -- ISpxTranslationSynthesisResult ---
     const uint8_t* GetAudio() const override;
-    TranslationSynthesisStatus GetSynthesisStatus() override;
+    SynthesisStatus GetSynthesisStatus() override;
     const std::wstring& GetSynthesisFailureReason() override;
     size_t GetLength() const override;
 
     // ISpxTranslationSynthesisResultInit
-    void InitTranslationSynthesisResult(TranslationSynthesisStatus status, const uint8_t* audioData, size_t audioLength, const std::wstring& failureReason) override;
+    void InitTranslationSynthesisResult(SynthesisStatus status, const uint8_t* audioData, size_t audioLength, const std::wstring& failureReason) override;
 
 private:
 
@@ -87,11 +87,11 @@ private:
     std::wstring m_intentId;
 
     std::map<std::wstring, std::wstring> m_translations;
-    TranslationTextStatus m_translationTextStatus;
-    std::wstring m_translationTextFailureReason;
+    TranslationStatus m_translationStatus;
+    std::wstring m_translationFailureReason;
 
-    TranslationSynthesisStatus m_translationSynthesisStatus;
-    std::wstring m_translationSynthesisFailureReason;
+    SynthesisStatus m_synthesisStatus;
+    std::wstring m_synthesisFailureReason;
     const uint8_t* m_audioBuffer;
     size_t m_audioLength;
 };

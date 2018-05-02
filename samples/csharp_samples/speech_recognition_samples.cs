@@ -31,7 +31,7 @@ namespace MicrosoftSpeechSDKSamples
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
 
                 // Checks result.
-                if (result.RecognitionStatus != SpeechRecognitionStatus.Recognized)
+                if (result.RecognitionStatus != RecognitionStatus.Recognized)
                 {
                     Console.WriteLine($"There was an error, status {result.RecognitionStatus}, reason {result.RecognitionFailureReason}");
                 }
@@ -59,7 +59,7 @@ namespace MicrosoftSpeechSDKSamples
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
 
                 // Checks result.
-                if (result.RecognitionStatus != SpeechRecognitionStatus.Recognized)
+                if (result.RecognitionStatus != RecognitionStatus.Recognized)
                 {
                     Console.WriteLine($"There was an error, status {result.RecognitionStatus}, reason {result.RecognitionFailureReason}");
                 }
@@ -91,7 +91,7 @@ namespace MicrosoftSpeechSDKSamples
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
 
                 // Checks results.
-                if (result.RecognitionStatus != SpeechRecognitionStatus.Recognized)
+                if (result.RecognitionStatus != RecognitionStatus.Recognized)
                 {
                     Console.WriteLine($"There was an error, status {result.RecognitionStatus}, reason {result.RecognitionFailureReason}");
                 }

@@ -18,12 +18,11 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     {
         internal TranslationTextResult(Internal.TranslationTextResult result) : base(result)
         {
+            Trace.Assert((int)TranslationStatus.Success == (int)Internal.TranslationStatusCode.Success);
+            Trace.Assert((int)TranslationStatus.Error == (int)Internal.TranslationStatusCode.Error);
+
+            TranslationStatus = (TranslationStatus)(result.TranslationStatus);
             resultImpl = result;
-
-            Trace.Assert((int)TranslationTextStatus.Success == (int)Internal.TranslationTextStatus.Success);
-            Trace.Assert((int)TranslationTextStatus.Error == (int)Internal.TranslationTextStatus.Error);
-            TextStatus = (TranslationTextStatus)(result.TextStatus);
-
             translationTextResultMap = new Dictionary<string, string>();
             //Todo: add translation result
             var map = result.Translations;
@@ -37,7 +36,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// <summary>
         /// Specifies status of translation text result.
         /// </summary>
-        public TranslationTextStatus TextStatus { get; }
+        public TranslationStatus TranslationStatus { get; }
 
         /// <summary>
         /// Presents the translation results. Each item in the dictionary represents translation result in one of target languages, where the key 
@@ -58,12 +57,12 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         {
             var text = string.Format(CultureInfo.InvariantCulture,
                 "ResultId:{0} RecognitionStatus:{1}, TranslationStatus: {2}, Recognized text:<{3}>.\n", 
-                ResultId, RecognitionStatus, TextStatus, RecognizedText);
+                ResultId, RecognitionStatus, TranslationStatus, RecognizedText);
             foreach (var element in Translations)
             {
                 text += string.Format(CultureInfo.InvariantCulture, "    Translation in {0}: <{1}>.\n", element.Key, element.Value);
             }
-            if (TextStatus != TranslationTextStatus.Success)
+            if (TranslationStatus != TranslationStatus.Success)
             {
                 text += string.Format(CultureInfo.InvariantCulture, "Failure reason: {0} \n", FailureReason);
             }

@@ -40,9 +40,9 @@ void TranslationWithMicrophone()
     {
         wcout << L"There was an error in speech recognition, reason " << int(result->Reason) << L"-" << result->ErrorDetails << '\n';
     }
-    else if (result->TextStatus != TranslationTextStatus::Success)
+    else if (result->TranslationStatus != TranslationStatusCode::Success)
     {
-        wcout << L"There was an error in translation, status: " << int(result->TextStatus) << '\n';
+        wcout << L"There was an error in translation, status: " << int(result->TranslationStatus) << '\n';
     }
     else
     {
@@ -79,9 +79,9 @@ void TranslationWithFile()
     {
         wcout << L"There was an error in speech recognition, reason " << int(result->Reason) << L"-" << result->ErrorDetails << '\n';
     }
-    else if (result->TextStatus != TranslationTextStatus::Success)
+    else if (result->TranslationStatus != TranslationStatusCode::Success)
     {
-        wcout << L"There was an error in translation, status: " << int(result->TextStatus) << '\n';
+        wcout << L"There was an error in translation, status: " << int(result->TranslationStatus) << '\n';
     }
     else
     {
@@ -107,7 +107,7 @@ static void OnPartialResult(const TranslationTextResultEventArgs& e)
 
 static void OnFinalResult(const TranslationTextResultEventArgs& e)
 {
-    wcout << L"FinalResult: status:" << (int)e.Result.TextStatus << L". Recognized Text: " << e.Result.Text << '\n';
+    wcout << L"FinalResult: status:" << (int)e.Result.TranslationStatus << L". Recognized Text: " << e.Result.Text << '\n';
     for (const auto& it : e.Result.Translations)
     {
         wcout << L"    Translated into " << it.first.c_str() << ":" << it.second.c_str();

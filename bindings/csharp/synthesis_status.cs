@@ -8,7 +8,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     /// <summary>
     /// Defines status of translation synthesis message.
     /// </summary>
-    public enum TranslationSynthesisStatus
+    public enum SynthesisStatus
     {
         /// <summary>
         /// The response contains valid audio data.

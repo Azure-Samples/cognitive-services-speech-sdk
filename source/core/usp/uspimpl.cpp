@@ -551,7 +551,7 @@ static RecognitionStatus ToRecognitionStatus(const string& str)
     if (result == statusMap.end())
     {
         PROTOCOL_VIOLATION("Unknown RecognitionStatus: %s", str.c_str());
-        return RecognitionStatus::Unknown;
+        return RecognitionStatus::InvalidMessage;
     }
     return result->second;
 }
@@ -568,7 +568,7 @@ static TranslationStatus ToTranslationStatus(const string& str)
     if (result == statusMap.end())
     {
         PROTOCOL_VIOLATION("Unknown TranslationStatus: %s", str.c_str());
-        return TranslationStatus::Unknown;
+        return TranslationStatus::InvalidMessage;
     }
     return result->second;
 }
@@ -585,7 +585,7 @@ static SynthesisStatus ToSynthesisStatus(const string& str)
     if (result == statusMap.end())
     {
         PROTOCOL_VIOLATION("Unknown SynthesisStatus: %s", str.c_str());
-        return SynthesisStatus::Unknown;
+        return SynthesisStatus::InvalidMessage;
     }
     return result->second;
 }
@@ -618,14 +618,14 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
         else
         {
             PROTOCOL_VIOLATION("No TranslationStatus is provided. Json: %s", translation.dump().c_str());
-            result.translationStatus = TranslationStatus::Error;
+            result.translationStatus = TranslationStatus::InvalidMessage;
             result.failureReason = L"Status is missing in the protocol message.";
         }
 
         auto failure = translation.find(json_properties::translationFailureReason);
         if (failure != translation.end())
         {
-            result.failureReason = PAL::ToWString(failure->get<string>());
+            result.failureReason += PAL::ToWString(failure->get<string>());
         }
 
         if ((result.translationStatus == TranslationStatus::Success) && (result.translations.size() == 0))
@@ -776,12 +776,6 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
             text = json[json_properties::displayText].get<string>();
         }
 
-        if (status == RecognitionStatus::Unknown)
-        {
-            LogError("Invalid recognition status in speech.phrase message.");
-            return;
-        }
-
         connection->Invoke([&] { callbacks.OnSpeechPhrase({
             PAL::ToWString(json.dump()),
             offset,
@@ -811,12 +805,6 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         std::wstring localReason;
 
         auto status = ToRecognitionStatus(json.at(json_properties::recoStatus));
-        if (status == RecognitionStatus::Unknown)
-        {
-            localReason = L"Invalid recognition status in translation response message";
-            PROTOCOL_VIOLATION("%s. Json=%s", localReason.c_str(), json.dump().c_str());
-            status = RecognitionStatus::Error;
-        }
 
         if (status == RecognitionStatus::EndOfDictation)
         {
@@ -826,19 +814,11 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
 
         auto speechResult = RetrieveSpeechResult(json);
 
-        // Retrieve translation only if the status is successful.
         TranslationResult translationResult;
         if (status == RecognitionStatus::Success)
         {
             translationResult = RetrieveTranslationResult(json, true);
-            if (translationResult.translationStatus == TranslationStatus::Unknown)
-            {
-                localReason = L"Invalid translation status in translation response message.";
-                PROTOCOL_VIOLATION("%s Json=%s", localReason.c_str(), json.dump().c_str());
-                translationResult.translationStatus = TranslationStatus::Error;
-            }
         }
-        translationResult.failureReason = localReason + translationResult.failureReason;
 
         connection->Invoke([&] { callbacks.OnTranslationPhrase({
             std::move(speechResult.json),
@@ -859,17 +839,16 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         if (statusHandle != json.end())
         {
             msg.synthesisStatus = ToSynthesisStatus(statusHandle->get<string>());
-            if (msg.synthesisStatus == SynthesisStatus::Unknown)
+            if (msg.synthesisStatus == SynthesisStatus::InvalidMessage)
             {
                 PROTOCOL_VIOLATION("Invalid synthesis status in synthesis.end message. Json=%s", json.dump().c_str());
-                msg.synthesisStatus = SynthesisStatus::Error;
                 localReason = L"Invalid synthesis status in synthesis.end message.";
             }
         }
         else 
         {
             PROTOCOL_VIOLATION("No synthesis status in synthesis.end message. Json=%s", json.dump().c_str());
-            msg.synthesisStatus = SynthesisStatus::Error;
+            msg.synthesisStatus = SynthesisStatus::InvalidMessage;
             localReason = L"No synthesis status in synthesis.end message.";
         }
 

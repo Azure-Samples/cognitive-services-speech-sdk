@@ -18,12 +18,12 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     {
         internal TranslationSynthesisResult(Internal.TranslationSynthesisResult result)
         {
-            resultImpl = result;
+            Trace.Assert((int)SynthesisStatus.Success == (int)Internal.SynthesisStatusCode.Success);
+            Trace.Assert((int)SynthesisStatus.SynthesisEnd == (int)Internal.SynthesisStatusCode.SynthesisEnd);
+            Trace.Assert((int)SynthesisStatus.Error == (int)Internal.SynthesisStatusCode.Error);
+            Status = (SynthesisStatus)result.SynthesisStatus;
 
-            Trace.Assert((int)TranslationSynthesisStatus.Success == (int)Internal.TranslationSynthesisStatus.Success);
-            Trace.Assert((int)TranslationSynthesisStatus.SynthesisEnd == (int)Internal.TranslationSynthesisStatus.SynthesisEnd);
-            Trace.Assert((int)TranslationSynthesisStatus.Error == (int)Internal.TranslationSynthesisStatus.Error);
-            SynthesisStatus = (TranslationSynthesisStatus)result.SynthesisStatus;
+            resultImpl = result;
             FailureReason = result.FailureReason;
 
             Audio = new byte[result.Audio.Count];
@@ -33,7 +33,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// <summary>
         /// Specifies status of translation synthesis.
         /// </summary>
-        public TranslationSynthesisStatus SynthesisStatus { get; }
+        public SynthesisStatus Status { get; }
 
 
         /// <summary>
@@ -52,12 +52,12 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// <returns>A string that represents the synthesis result.</returns>
         public override string ToString()
         {
-            var text = string.Format(CultureInfo.InvariantCulture, "SynthesisStatus: {0}\n", SynthesisStatus);
-            if (SynthesisStatus == TranslationSynthesisStatus.Success)
+            var text = string.Format(CultureInfo.InvariantCulture, "SynthesisStatus: {0}\n", Status);
+            if (Status == SynthesisStatus.Success)
             {
                 string.Format(CultureInfo.InvariantCulture, "AudioSize:{0}.", Audio.Length);
             }
-            else if (SynthesisStatus == TranslationSynthesisStatus.SynthesisEnd)
+            else if (Status == SynthesisStatus.SynthesisEnd)
             {
                 string.Format(CultureInfo.InvariantCulture, "End of synthesis data.");
             }

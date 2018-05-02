@@ -8,7 +8,7 @@ namespace Microsoft.CognitiveServices.Speech
     /// <summary>
     /// Defines speech recognition status.
     /// </summary>
-    public enum SpeechRecognitionStatus
+    public enum RecognitionStatus
     {
         Recognized,
         IntermediateResult,

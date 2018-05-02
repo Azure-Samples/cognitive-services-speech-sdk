@@ -720,6 +720,27 @@ void CSpxUspRecoEngineAdapter::OnSpeechPhrase(const USP::SpeechPhraseMsg& messag
     }
 }
 
+static TranslationStatus GetTranslationStatus(::USP::TranslationStatus uspStatus)
+{
+    TranslationStatus status = TranslationStatus::Error;
+    switch (uspStatus)
+    {
+    case ::USP::TranslationStatus::Success:
+        status = TranslationStatus::Success;
+        break;
+    case ::USP::TranslationStatus::Error:
+        break;
+    case ::USP::TranslationStatus::InvalidMessage:
+        // The failureReason contains additional error messages.
+        // Todo: have better error handling for different statuses.
+        break;
+    default:
+        SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
+        break;
+    }
+    return status;
+}
+
 void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHypothesisMsg& message)
 {
     SPX_DBG_TRACE_VERBOSE("Response: Translation.Hypothesis message. RecoText: %ls, TranslationStatus: %d, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n",
@@ -754,21 +775,8 @@ void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHyp
 
             // Update our result to be an "TranslationText" result.
             auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
-            TranslationTextStatus status;
-            switch (message.translation.translationStatus)
-            {
-            case ::USP::TranslationStatus::Success:
-                status = TranslationTextStatus::Success;
-                break;
-            case ::USP::TranslationStatus::Error:
-                status = TranslationTextStatus::Error;
-                break;
-            default:
-                status = TranslationTextStatus::Error;
-                SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
-                break;
-            }
 
+            auto status = GetTranslationStatus(message.translation.translationStatus);
             initTranslationResult->InitTranslationTextResult(status, message.translation.translations, message.translation.failureReason);
 
             // Fire the result
@@ -824,21 +832,8 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
 
         // Update our result to be an "TranslationText" result.
         auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
-        // Todo: better convert translation status
-        TranslationTextStatus status;
-        switch (message.translation.translationStatus)
-        {
-        case ::USP::TranslationStatus::Success:
-            status = TranslationTextStatus::Success;
-            break;
-        case ::USP::TranslationStatus::Error:
-            status = TranslationTextStatus::Error;
-            break;
-        default:
-            status = TranslationTextStatus::Error;
-            SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
-            break;
-        }
+
+        auto status = GetTranslationStatus(message.translation.translationStatus);
         initTranslationResult->InitTranslationTextResult(status, message.translation.translations, message.translation.failureReason);
 
         // Fire the result
@@ -863,7 +858,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationSynthesis(const USP::TranslationSynt
 
     // Update our result to be an "TranslationSynthesis" result.
     auto initTranslationResult = SpxQueryInterface<ISpxTranslationSynthesisResultInit>(result);
-    initTranslationResult->InitTranslationSynthesisResult(TranslationSynthesisStatus::Success, message.audioBuffer, message.audioLength, L"");
+    initTranslationResult->InitTranslationSynthesisResult(SynthesisStatus::Success, message.audioBuffer, message.audioLength, L"");
 
     // Fire the result
     SPX_ASSERT(GetSite() != nullptr);
@@ -880,18 +875,23 @@ void CSpxUspRecoEngineAdapter::OnTranslationSynthesisEnd(const USP::TranslationS
 
     // Update our result to be an "TranslationSynthesis" result.
     auto initTranslationResult = SpxQueryInterface<ISpxTranslationSynthesisResultInit>(result);
-    TranslationSynthesisStatus status;
+    SynthesisStatus status;
     switch (message.synthesisStatus)
     {
     case ::USP::SynthesisStatus::Success:
         // Indicates the end of syntheis.
-        status = TranslationSynthesisStatus::SynthesisEnd;
+        status = SynthesisStatus::SynthesisEnd;
         break;
     case ::USP::SynthesisStatus::Error:
-        status = TranslationSynthesisStatus::Error;
+        status = SynthesisStatus::Error;
+        break;
+    case ::USP::SynthesisStatus::InvalidMessage:
+        // The failureReason contains additional error messages.
+        // Todo: have better error handling for different statuses.
+        status = SynthesisStatus::Error;
         break;
     default:
-        status = TranslationSynthesisStatus::Error;
+        status = SynthesisStatus::Error;
         SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
         break;
     }

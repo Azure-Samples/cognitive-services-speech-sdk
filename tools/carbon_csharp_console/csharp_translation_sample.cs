@@ -31,7 +31,7 @@ namespace MicrosoftSpeechSDKSamples
         private static void MySynthesisEventHandler(object sender, TranslationSynthesisResultEventArgs e)
         {
             Console.WriteLine($"Translation: synthesis result: {e.ToString()}.");
-            if (e.Result.SynthesisStatus == TranslationSynthesisStatus.Success)
+            if (e.Result.Status == SynthesisStatus.Success)
             {
                 using (var m = new MemoryStream(e.Result.Audio))
                 {
