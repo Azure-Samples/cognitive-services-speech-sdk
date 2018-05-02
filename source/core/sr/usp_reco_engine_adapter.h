@@ -65,7 +65,7 @@ protected:
     virtual void OnTurnStart(const USP::TurnStartMsg& message) override;
     virtual void OnTurnEnd(const USP::TurnEndMsg& message) override;
     virtual void OnError(const std::string& error) override;
-    virtual void OnUserMessage(const std::string& path, const std::string& contentType, const uint8_t* buffer, size_t size) override;
+    virtual void OnUserMessage(const USP::UserMsg& message) override;
 
     virtual void OnTranslationHypothesis(const USP::TranslationHypothesisMsg& message) override;
     virtual void OnTranslationPhrase(const USP::TranslationPhraseMsg& message) override;

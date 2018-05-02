@@ -41,7 +41,6 @@
 #pragma warning( push )
 // disable: (8300,27): error 28020:  : The expression '0&lt;=_Param_(1)&amp;&amp;_Param_(1)&lt;=64-1' is not true at this call.
 #pragma warning( disable : 28020 )
-
 #include "json.hpp"
 #pragma warning( pop )
 #else
@@ -104,6 +103,7 @@ void Connection::Impl::OnTelemetryData(const uint8_t* buffer, size_t bytesToWrit
 Connection::Impl::Impl(const Client& config)
     : m_config(config),
     m_connected(false),
+    m_inCallback(false),
     m_haveWork(false),
     m_audioOffset(0),
     m_creationTime(telemetry_gettime())
@@ -124,6 +124,20 @@ uint64_t Connection::Impl::getTimestamp()
     return telemetry_gettime() - m_creationTime;
 }
 
+void Connection::Impl::Invoke(std::function<void()> callback)
+{
+    if (!m_connected)
+    {
+        return;
+    }
+    m_inCallback = true;
+    m_mutex.unlock();
+    callback();
+    m_mutex.lock();
+    m_inCallback = false;
+    m_cv.notify_all();
+}
+
 void Connection::Impl::WorkThread(weak_ptr<Connection::Impl> ptr)
 {
     auto connection = ptr.lock();
@@ -139,25 +153,28 @@ void Connection::Impl::WorkThread(weak_ptr<Connection::Impl> ptr)
             return;
         }
         unique_lock<recursive_mutex> lock(connection->m_mutex);
+
+        if (!connection->m_connected)
+        {
+            return;
+        }
+
+        auto& callbacks = connection->m_config.m_callbacks;
+
         try 
         {
             TransportDoWork(connection->m_transport.get());
         }
         catch (const exception& e)
         {
-            connection->m_config.m_callbacks.OnError(e.what());
+            connection->Invoke([&] { callbacks.OnError(e.what()); });
         }
         catch (...)
         {
-            connection->m_config.m_callbacks.OnError("Unhandled exception in the USP layer.");
+            connection->Invoke([&] { callbacks.OnError("Unhandled exception in the USP layer."); });
         }
 
-        if (!connection->m_connected) 
-        {
-            return;
-        }
-
-        connection->m_cv.wait_for(lock, chrono::milliseconds(200), [&] {return connection->m_haveWork; });
+        connection->m_cv.wait_for(lock, chrono::milliseconds(200), [&] {return connection->m_haveWork || !connection->m_connected; });
         connection->m_haveWork = false;
     }
 }
@@ -181,6 +198,7 @@ void Connection::Impl::Shutdown()
     unique_lock<recursive_mutex> lock(m_mutex);
     m_connected = false;
     SignalWork();
+    m_cv.wait(lock, [&] {return !m_inCallback; });
 }
 
 void Connection::Impl::Validate()
@@ -483,34 +501,35 @@ void Connection::Impl::OnTransportError(TransportHandle transportHandle, Transpo
     }
 
     auto& callbacks = connection->m_config.m_callbacks;
+
     switch (reason)
     {
     case TRANSPORT_ERROR_NONE:
-        callbacks.OnError("Unknown transport error.");
+        connection->Invoke([&] { callbacks.OnError("Unknown transport error."); });
         break;
 
     case TRANSPORT_ERROR_HTTP_UNAUTHORIZED:
-        callbacks.OnError("WebSocket Upgrade failed with an authentication error (401).");
+        connection->Invoke([&] { callbacks.OnError("WebSocket Upgrade failed with an authentication error (401)."); });
         break;
 
     case TRANSPORT_ERROR_HTTP_FORBIDDEN:
-        callbacks.OnError("WebSocket Upgrade failed with an authentication error (403).");
+        connection->Invoke([&] { callbacks.OnError("WebSocket Upgrade failed with an authentication error (403)."); });
         break;
 
     case TRANSPORT_ERROR_CONNECTION_FAILURE:
-        callbacks.OnError("Connection failed (no connection to the remote host).");
+        connection->Invoke([&] { callbacks.OnError("Connection failed (no connection to the remote host)."); });
         break;
 
     case TRANSPORT_ERROR_DNS_FAILURE:
-        callbacks.OnError("Connection failed (the remote host did not respond).");
+        connection->Invoke([&] { callbacks.OnError("Connection failed (the remote host did not respond)."); });
         break;
 
     case TRANSPORT_ERROR_REMOTECLOSED:
-        callbacks.OnError("Connection was closed by the remote host.");
+        connection->Invoke([&] { callbacks.OnError("Connection was closed by the remote host."); });
         break;
 
     default:
-        callbacks.OnError("Communication Error. Error code: " + to_string(reason));
+        connection->Invoke([&] { callbacks.OnError("Communication Error. Error code: " + to_string(reason)); });
         break;
     }
 }
@@ -674,12 +693,6 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
 
     LogInfo("TS:%" PRIu64 " Response Message: path: %s, content type: %s, size: %zu.", connection->getTimestamp(), path, contentType, size);
 
-
-    if (!connection->m_connected)
-    {
-        return;
-    }
-
     string pathStr(path);
     auto& callbacks = connection->m_config.m_callbacks;
 
@@ -689,7 +702,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         TranslationSynthesisMsg msg;
         msg.audioBuffer = (uint8_t *)buffer;
         msg.audioLength = size;
-        callbacks.OnTranslationSynthesis(msg);
+        connection->Invoke([&] { callbacks.OnTranslationSynthesis(msg); });
         return;
     }
 
@@ -701,17 +714,17 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         auto offset = offsetObj.is_null() ? 0 : offsetObj.get<OffsetType>();
 
         if (path == path::speechStartDetected) {
-            callbacks.OnSpeechStartDetected({ PAL::ToWString(json.dump()), offset });
+            connection->Invoke([&] { callbacks.OnSpeechStartDetected({ PAL::ToWString(json.dump()), offset }); });
         }
         else 
         {
-            callbacks.OnSpeechEndDetected({ PAL::ToWString(json.dump()), offset });
+            connection->Invoke([&] { callbacks.OnSpeechEndDetected({ PAL::ToWString(json.dump()), offset }); });
         }
     }
     else if (pathStr == path::turnStart)
     {
         auto tag = json[json_properties::context][json_properties::tag].get<string>();
-        callbacks.OnTurnStart({ PAL::ToWString(json.dump()), tag });
+        connection->Invoke([&] { callbacks.OnTurnStart({ PAL::ToWString(json.dump()), tag }); });
     }
     else if (pathStr == path::turnEnd)
     {
@@ -720,7 +733,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         telemetry_flush(connection->m_telemetry.get());
         TransportCreateRequestId(connection->m_transport.get());
         
-        callbacks.OnTurnEnd({});
+        connection->Invoke([&] { callbacks.OnTurnEnd({ }); });
     }
     else if (path == path::speechHypothesis || path == path::speechFragment)
     {
@@ -730,21 +743,23 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
 
         if (path == path::speechHypothesis)
         {
-            callbacks.OnSpeechHypothesis({
+            connection->Invoke([&] { callbacks.OnSpeechHypothesis({
                 PAL::ToWString(json.dump()),
-                offset, 
+                offset,
                 duration,
                 PAL::ToWString(text)
-                });
+                }); 
+            });
         }
         else
         {
-            callbacks.OnSpeechFragment({
+            connection->Invoke([&] { callbacks.OnSpeechFragment({
                 PAL::ToWString(json.dump()),
                 offset,
                 duration,
                 PAL::ToWString(text)
                 });
+            });
         }
     }
     else if (path == path::speechPhrase)
@@ -766,13 +781,14 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
             return;
         }
 
-        callbacks.OnSpeechPhrase({
+        connection->Invoke([&] { callbacks.OnSpeechPhrase({
             PAL::ToWString(json.dump()),
             offset,
             duration,
             status,
             PAL::ToWString(text)
             });
+        });
     }
     else if (path == path::translationHypothesis)
     {
@@ -780,13 +796,14 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         auto translationResult = RetrieveTranslationResult(json, false);
         // TranslationStatus is always success for translation.hypothesis
         translationResult.translationStatus = TranslationStatus::Success;
-        callbacks.OnTranslationHypothesis({
+        connection->Invoke([&] { callbacks.OnTranslationHypothesis({
             std::move(speechResult.json),
             speechResult.offset,
             speechResult.duration,
             std::move(speechResult.text),
             std::move(translationResult)
             });
+        });
     }
     else if (path == path::translationPhrase)
     {
@@ -822,7 +839,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         }
         translationResult.failureReason = localReason + translationResult.failureReason;
 
-        callbacks.OnTranslationPhrase({
+        connection->Invoke([&] { callbacks.OnTranslationPhrase({
             std::move(speechResult.json),
             speechResult.offset,
             speechResult.duration,
@@ -830,6 +847,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
             std::move(translationResult),
             status
             });
+        });
     }
     else if (path == path::translationSynthesisEnd)
     {
@@ -866,11 +884,17 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
 
         msg.failureReason = localReason + msg.failureReason;
 
-        callbacks.OnTranslationSynthesisEnd(msg);
+        connection->Invoke([&] { callbacks.OnTranslationSynthesisEnd(msg); });
     }
     else
     {
-        connection->m_config.m_callbacks.OnUserMessage(pathStr, string(contentType == nullptr ? "" : contentType), buffer, size);
+        connection->Invoke([&] { callbacks.OnUserMessage({
+            pathStr,
+            string(contentType == nullptr ? "" : contentType),
+            buffer,
+            size
+            }); 
+        });
     }
 }
 

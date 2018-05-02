@@ -1027,19 +1027,18 @@ void CSpxUspRecoEngineAdapter::OnError(const std::string& error)
     }
 }
 
-void CSpxUspRecoEngineAdapter::OnUserMessage(const std::string& path, const std::string& contentType, const uint8_t* buffer, size_t size)
+void CSpxUspRecoEngineAdapter::OnUserMessage(const USP::UserMsg& msg)
 {
-    UNUSED(contentType);
-    SPX_DBG_TRACE_VERBOSE("Response: Usp User Message: %s, content-type=%s", path.c_str(), contentType.c_str());
+    SPX_DBG_TRACE_VERBOSE("Response: Usp User Message: %s, content-type=%s", msg.path.c_str(), msg.contentType.c_str());
 
-    if (path == "response")
+    if (msg.path == "response")
     {
         ReadLock_Type readLock(m_stateMutex);
         if (IsState(UspState::WaitingForIntent))
         {
             readLock.unlock(); // calls to site shouldn't hold locks
 
-            std::string luisJson((const char*)buffer, size);
+            std::string luisJson((const char*)msg.buffer, msg.size);
             SPX_DBG_TRACE_VERBOSE("USP User Message: response; luisJson='%s'", luisJson.c_str());
             FireFinalResultLater_WaitingForIntentComplete(luisJson);
         }

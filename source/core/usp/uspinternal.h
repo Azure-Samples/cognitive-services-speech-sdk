@@ -102,6 +102,8 @@ public:
     void Shutdown();
 
 private:
+    void Invoke(std::function<void()> callback);
+
     using DnsCachePtr = deleted_unique_ptr<std::remove_pointer<DnsCacheHandle>::type>;
 
     using TelemetryPtr = deleted_unique_ptr<std::remove_pointer<TELEMETRY_HANDLE>::type>;
@@ -121,6 +123,7 @@ private:
     Client m_config;
 
     bool m_connected;
+    bool m_inCallback;
 
     // Todo: can multiple UspContexts share the work thread?
     bool m_haveWork;
@@ -146,7 +149,4 @@ private:
     uint64_t getTimestamp();
 };
 
-}
-}
-}
-}
+}}}}

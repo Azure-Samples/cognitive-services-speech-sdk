@@ -139,9 +139,9 @@ virtual void OnError(const std::string& error) override
     exit(1);
 }
 
-virtual void OnUserMessage(const std::string& path, const std::string& contentType, const uint8_t* buffer, size_t size) override
+virtual void OnUserMessage(const USP::UserMsg& msg) override
 {
-    printf("Response: User defined message. Path: %s, contentType: %s, size: %zu, content: %s.\n", path.c_str(), contentType.c_str(), size, buffer);
+    printf("Response: User defined message. Path: %s, contentType: %s, size: %zu, content: %s.\n", msg.path.c_str(), msg.contentType.c_str(), msg.size, msg.buffer);
 }
 
 

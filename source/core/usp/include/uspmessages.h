@@ -236,8 +236,15 @@ struct TranslationSynthesisEndMsg
     std::wstring failureReason;
 };
 
+/**
+* Represents a message corresponding to a user defined path.
+*/
+struct UserMsg 
+{
+    const std::string path;
+    const std::string contentType;
+    const uint8_t* buffer;
+    size_t size;
+};
 
-}
-}
-}
-}
+}}}}

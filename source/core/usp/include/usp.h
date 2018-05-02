@@ -91,11 +91,8 @@ struct Callbacks
 
     /**
     * A callback function that will be invoked when a message having a path defined by user is received from service.
-    * @param path The message path.
-    * @param contentType The content type of the message.
-    * @param buffer The message buffer.
     */
-    virtual void OnUserMessage(const std::string& /*path*/, const std::string& /*contentType*/, const uint8_t* /*buffer*/, size_t /*size*/) {}
+    virtual void OnUserMessage(const UserMsg&) {}
 };
 
 enum class EndpointType { Custom, BingSpeech, Cris, CDSDK, Translation };
@@ -323,7 +320,4 @@ private:
 
 };
 
-}
-}
-}
-}
+}}}}
