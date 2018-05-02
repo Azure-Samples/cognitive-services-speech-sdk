@@ -18,42 +18,43 @@ namespace Microsoft.CognitiveServices.Speech
     /// <code>
     /// static void MySessionEventHandler(object sender, SessionEventArgs e)
     /// {
-    ///    Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Speech recognition: Session event: {0} ", e.ToString()));
+    ///     Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: Session event: {0} ", e.ToString()));
     /// }
     ///
     /// static void MyIntermediateResultEventHandler(object sender, SpeechRecognitionResultEventArgs e)
     /// {
-    ///    Console.WriteLine(String.Forstring.Format(CultureInfo.InvariantCulture,"mat("Speech recognition: Intermediate result: {0} ", e.ToString()));
-    /// }
+    ///     Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: Intermediate result: { 0} ", e.ToString()));
+    ///      }
     ///
     /// static void MyFinalResultEventHandler(object sender, SpeechRecognitionResultEventArgs e)
     /// {
-    ///    Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Speech recognition: Final result: {0} ", e.ToString()));
+    ///     Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: Final result: {0} ", e.ToString()));
     /// }
     ///
     /// static void MyErrorHandler(object sender, RecognitionErrorEventArgs e)
     /// {
-    ///    Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Speech recognition: Error information: {0} ", e.ToString()));
+    ///     Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: Error information: {0} ", e.ToString()));
     /// }
     ///
-    /// static void SpeechRecognizerSample()
+    /// static async Task SpeechRecognizerSample()
     /// {
-    ///   SpeechRecognizer reco = factory.CreateSpeechRecognizerWithFileInput("audioFileName");
+    ///     var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "");
+    ///     SpeechRecognizer reco = factory.CreateSpeechRecognizerWithFileInput("audioFileName");
     ///
-    ///   reco.OnSessionEvent += MySessionEventHandler;
-    ///   reco.FinalResultReceived += MyFinalResultEventHandler;
-    ///   reco.IntermediateResultReceived += MyIntermediateResultEventHandler;
-    ///   reco.RecognitionErrorRaised += MyErrorHandler;
+    ///     reco.OnSessionEvent += MySessionEventHandler;
+    ///     reco.FinalResultReceived += MyFinalResultEventHandler;
+    ///     reco.IntermediateResultReceived += MyIntermediateResultEventHandler;
+    ///     reco.RecognitionErrorRaised += MyErrorHandler;
     ///
-    ///   // Starts recognition.
-    ///   var result = await reco.RecognizeAsync();
+    ///     // Starts recognition.
+    ///     var result = await reco.RecognizeAsync();
     ///
-    ///   reco.OnSessionEvent -= MySessionEventHandler;
-    ///   reco.FinalResultReceived -= MyFinalResultEventHandler;
-    ///   reco.IntermediateResultReceived -= MyIntermediateResultEventHandler;
-    ///   reco.RecognitionErrorRaised -= MyErrorHandler;
+    ///     reco.OnSessionEvent -= MySessionEventHandler;
+    ///     reco.FinalResultReceived -= MyFinalResultEventHandler;
+    ///     reco.IntermediateResultReceived -= MyIntermediateResultEventHandler;
+    ///     reco.RecognitionErrorRaised -= MyErrorHandler;
     ///
-    ///   Console.WriteLine("Speech Recognition: Recognition result: " + result);
+    ///     Console.WriteLine("Speech Recognition: Recognition result: " + result);
     /// }
     /// </code>
     /// </example>
@@ -135,14 +136,15 @@ namespace Microsoft.CognitiveServices.Speech
         /// <example>
         /// The following example creates a speech recognizer, and then gets and prints the recognition result.
         /// <code>
-        /// static void SpeechRecognizerSample()
+        /// static async Task SpeechRecognizerSample()
         /// {
-        ///   SpeechRecognizer reco = factory.CreateSpeechRecognizerWithFileInput("audioFileName");
+        ///     var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "");
+        ///     SpeechRecognizer reco = factory.CreateSpeechRecognizerWithFileInput("audioFileName");
         ///
-        ///   // Starts recognition.
-        ///   var result = await reco.RecognizeAsync();
+        ///     // Starts recognition.
+        ///     var result = await reco.RecognizeAsync();
         ///
-        ///   Console.WriteLine("Speech Recognition: Recognition result: " + result);
+        ///     Console.WriteLine("Speech Recognition: Recognition result: " + result);
         /// }
         /// </code>
         /// </example>

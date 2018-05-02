@@ -19,22 +19,23 @@ namespace Microsoft.CognitiveServices.Speech
         /// <example>
         /// Create a speech recognizer, setup an event handler for session events
         /// <code>
-        /// static void MySessionEventHandler(object sender, SpeechSessionEventArgs e)
+        /// static void MySessionEventHandler(object sender, RecognitionEventArgs e)
         /// {
-        ///    Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Speech recognition: session event: {0} ", e.ToString()));
+        ///     Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition event: {0} ", e.ToString()));
         /// }
         ///
-        /// static void SpeechRecognizerSample()
+        /// static async Task SpeechRecognizerSample()
         /// {
-        ///   SpeechRecognizer reco = factory.CreateSpeechRecognizerWithFileInput("audioFileName");
+        ///     var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "");
+        ///     SpeechRecognizer reco = factory.CreateSpeechRecognizerWithFileInput("audioFileName");
         ///
-        ///   reco.OnSessionEvent += MySessionEventHandler;
+        ///     reco.OnSpeechDetectedEvent += MySessionEventHandler;
         ///
-        ///   // Starts recognition.
-        ///   var result = await reco.RecognizeAsync();
+        ///     // Starts recognition.
+        ///     var result = await reco.RecognizeAsync();
         ///
-        ///   reco.OnSessionEvent -= MySessionEventHandler;
-        ///   Console.WriteLine("Speech Recognition: Recognition result: " + result);
+        ///     reco.OnSpeechDetectedEvent -= MySessionEventHandler;
+        ///     Console.WriteLine("Speech Recognition: Recognition result: " + result);
         /// }
         /// </code>
         /// </example>
@@ -94,7 +95,7 @@ namespace Microsoft.CognitiveServices.Speech
         private bool disposed = false;
 
         /// <summary>
-        /// Define an internal class which raise a C# event when a corresponding callback is invoked from the native layer. 
+        /// Define an internal class which raise a C# event when a corresponding callback is invoked from the native layer.
         /// </summary>
         internal class SessionEventHandlerImpl : Internal.SessionEventListener
         {
@@ -125,7 +126,7 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Define an internal class which raises a C# event when a corresponding callback is invoked from the native layer. 
+        /// Define an internal class which raises a C# event when a corresponding callback is invoked from the native layer.
         /// </summary>
         internal class RecognitionEventHandlerImpl : Internal.RecognitionEventListener
         {
