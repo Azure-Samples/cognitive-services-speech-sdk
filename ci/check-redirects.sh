@@ -4,21 +4,26 @@ VERSIONRE="${1-.*}"
 
 declare -A redirectRe
 redirectRe=(
-  # TODO some aren't yet checked
+  # TODO on docs, we shouldn't link to specific language (en-us)
+
+  # TODO some aren't yet checked / exposed
+
   # Main entry page
-  ["csspeech"]=".*"
+  ["csspeech"]="https://review\.docs\.microsoft\.com/azure/cognitive-services/speech-service/sdk/overview\?branch=pr-en-us-36555"
+
   # API Reference for C++
-  ["csspeech/cppref"]=".*/cpp/annotated\.html"
+  ["csspeech/cppref"]="https://review\.docs\.microsoft\.com/cpp/cognitive-services/speech/index\?branch=master"
   # Reference for C++ Recognizer class
-  ["csspeech/cppref/recognizer"]=".*/cpp/.*recognizer\.html"
+  ["csspeech/cppref/recognizer"]="https://review\.docs\.microsoft\.com/cpp/cognitive-services/speech/recognizer\?branch=master"
   # Reference for C++ RecognizerFactory class
-  ["csspeech/cppref/recognizerfactory"]=".*/cpp/.*recognizer_factory\.html"
+  ["csspeech/cppref/recognizerfactory"]="https://review\.docs\.microsoft\.com/cpp/cognitive-services/speech/speechfactory\?branch=master"
   # API Reference for C#
-  ["csspeech/csharpref"]=".*/csharp/annotated\.html"
+  ["csspeech/csharpref"]="https://review\.docs\.microsoft\.com/dotnet/api/microsoft\.cognitiveservices\.speech\?view=azure-dotnet&branch=pr-en-us-607"
   # Reference for C# Recognizer class
-  ["csspeech/csharpref/recognizer"]=".*/csharp/.*recognizer\.html"
+  ["csspeech/csharpref/recognizer"]="https://review\.docs\.microsoft\.com/dotnet/api/microsoft\.cognitiveservices\.speech\.recognizer\?view=azure-dotnet&branch=pr-en-us-607"
   # Reference for C# RecognizerFactory class
-  ["csspeech/csharpref/recognizerfactory"]=".*/csharp/.*recognizer_factory\.html"
+  ["csspeech/csharpref/recognizerfactory"]="https://review\.docs\.microsoft\.com/dotnet/api/microsoft\.cognitiveservices\.speech\.speechfactory\?view=azure-dotnet&branch=pr-en-us-607"
+  # TODO Java should point to Mikki's preview
   # API Reference for Java
   ["csspeech/javaref"]=".*/java/annotated\.html"
   # Reference for Java Recognizer class
@@ -26,7 +31,7 @@ redirectRe=(
   # Reference for Java RecognizerFactory class
   ["csspeech/javaref/recognizerfactory"]=".*/java/.*recognizer_factory\.html"
   # License for (latest) binaries
-  ["csspeech/license"]=".*/license\.html"
+  ["csspeech/license"]="https://review\.docs\.microsoft\.com/azure/cognitive-services/speech-service/sdk/license\?branch=pr-en-us-36555"
   # Archive (.tar.gz) for latest Linux binaries
   ["csspeech/linuxbinary"]=".*/csspeech-$VERSIONRE\.tar\.gz"
   # Archive (.tar.gz) for latest Linux samples and tutorials
@@ -41,12 +46,16 @@ redirectRe=(
   ["csspeech/winsample"]=".*/SpeechSDK-WindowsSamples-$VERSIONRE\.zip"
   # Archive (.zip) for Windows debug symbols matching the latest Windows binaries
   ["csspeech/winsymbols"]=".*TODO.*"
+  # Privacy statement
+  ["csspeech/privacy"]="https://go.microsoft.com/fwlink/\?LinkId=521839"
+  # Language Understanding documentation
+  ["csspeech/luisdocs"]="https://review\.docs\.microsoft\.com/azure/cognitive-services/luis/\?branch=release-build-luis"
 
   # TODO later - https://csspeechstorage.blob.core.windows.net/
 )
 
 errors=0
-for shortLink in "${!redirectRe[@]}"; do
+for shortLink in $(printf "%s\n" "${!redirectRe[@]}" | sort); do
   re="${redirectRe[$shortLink]}"
   link="https://aka.ms/$shortLink"
   redirect="$(curl -s -I "https://aka.ms/$shortLink" | grep ^Location: | cut -d' ' -f2)"
@@ -67,7 +76,7 @@ for shortLink in "${!redirectRe[@]}"; do
   [[ $stat == OK ]] || ((errors++))
   printf "[%-8s] %s -> %s\n" "$stat" "$link" "$redirect"
 
-  # TODO also check target
+  # TODO also check target [currently not all are accessible without login]
 done
 
 if ((errors != 0)); then
