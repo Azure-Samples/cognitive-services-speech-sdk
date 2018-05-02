@@ -15,7 +15,7 @@
 #ifdef _MSC_VER
 #pragma warning( push )
 // disable: (9754,94): error 6330:  : 'const char' passed as _Param_(1) when 'unsigned char' is required in call to 'isalnum'.
-#pragma warning( disable : 6030 )
+#pragma warning( disable : 6330 )
 #include "catch.hpp"
 #pragma warning( pop )
 #else

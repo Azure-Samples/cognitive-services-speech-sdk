@@ -376,7 +376,8 @@ void Connection::Impl::Connect()
     }
 
     // Log the device uuid
-    metrics_device_startup(m_telemetry.get(), PAL::DeviceUuid().c_str());
+    // BUGBUG: this is broken.
+    //metrics_device_startup(m_telemetry.get(), PAL::DeviceUuid().c_str());
 
     m_transport = TransportPtr(TransportRequestCreate(connectionUrl.c_str(), this, m_telemetry.get(), headersPtr), TransportRequestDestroy);
     if (m_transport == nullptr)

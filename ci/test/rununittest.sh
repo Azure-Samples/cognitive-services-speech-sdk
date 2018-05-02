@@ -42,32 +42,32 @@ function run_tests {
 
 pretty_print "ENTERING rununittest.sh"
 
-# pushd ./tests 
-# npm install
-# nohup node test-server.js > /dev/null 2>&1 &
-# SERVER_PID=$!
-# popd
+pushd ./tests 
+npm install
+nohup node test-server.js > /dev/null 2>&1 &
+SERVER_PID=$!
+popd
 
-# trap 'kill $SERVER_PID' EXIT
+trap 'kill $SERVER_PID' EXIT
 
-# sleep 1s
+sleep 1s
 
-# if ps -p $SERVER_PID > /dev/null
-# then
-#     pretty_print "local test server is up and running (pid: $SERVER_PID)"
-#     endpoint="ws://localhost:8080/"
-# else 
-#     echo "Couldn't start the local test server"
-#     endpoint=""
-# fi
+if ps -p $SERVER_PID > /dev/null
+then
+    pretty_print "local test server is up and running (pid: $SERVER_PID)"
+    endpoint="ws://localhost:8080/"
+else 
+    echo "Couldn't start the local test server"
+    endpoint=""
+fi
 
 run_tests
 
-# kill -INT $SERVER_PID
-# trap '' EXIT
+kill -INT $SERVER_PID
+trap '' EXIT
 
-# if [ ! -z $endpoint ]; then
-#      endpoint=""
-#      run_tests
-# fi
+if [ ! -z $endpoint ]; then
+     endpoint=""
+     run_tests
+fi
 

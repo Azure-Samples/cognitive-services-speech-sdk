@@ -93,10 +93,22 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
             // We're going to loop thru 11 times... The first 10, we'll use mocks. The last time we'll use the USP
             // NOTE: Please keep this at 11... It tests various "race"/"speed" configurations of the core system... 
-            const int numLoops = 11;
+            // NOTE: When running agains the localhost, loop 20 times... Half the time, we'll use mocks, and half - the USP.
+            const int numLoops = (Config::Endpoint.empty()) ? 11 : 20;
+
             for (int i = 0; i < numLoops; i++)
             {
-                auto useMockUsp = i + 1 < numLoops;
+                auto useMockUsp = true;
+
+                if (!Config::Endpoint.empty() && i % 2 == 0)
+                {
+                    useMockUsp = false;
+                }
+                else
+                {
+                    useMockUsp = i + 1 < numLoops;
+                }
+
                 auto realTimeRate = (i + 1) * 100 / numLoops;
                 SetMockRealTimeSpeed(realTimeRate);
                 UseMockUsp(useMockUsp);
@@ -146,7 +158,16 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
                 lock.unlock();
 
                 SPX_TRACE_VERBOSE("%s: Make sure callbacks are invoked correctly; END of loop #%d", __FUNCTION__, i);
+                CHECK(callbackCounts[Callbacks::session_started] == i+1);
+                CHECK(callbackCounts[Callbacks::session_stopped] == i + 1);
+                CHECK(callbackCounts[Callbacks::final_result] == i + 1);
+                CHECK(callbackCounts[Callbacks::speech_start_detected] == i + 1);
+                CHECK(callbackCounts[Callbacks::speech_end_detected] == i + 1);
+                CHECK(callbackCounts[Callbacks::no_match] == 0);
             }
+
+            SPX_TRACE_VERBOSE("%s: Wait some more", __FUNCTION__);
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
             SPX_TRACE_VERBOSE("%s: Checking callback counts ...", __FUNCTION__);
 
@@ -187,46 +208,12 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
         REQUIRE(result->Reason == Reason::Canceled);
         REQUIRE(!result->ErrorDetails.empty());
-    }
-}
 
-TEST_CASE("Speech on local server", "[api][cxx]")
-{
-    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    SECTION("Stress testing against the local server")
-    {
-        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
-
-        if (Config::Endpoint.empty())
-        {
-            return;
-        }
-
-        UseMocks(false);
-        REQUIRE(exists(input_file));
-        REQUIRE(!IsUsingMocks());
-
-        const int numLoops = 3;
-
-        auto factory = SpeechFactory::FromEndpoint(PAL::ToWString(Config::Endpoint), LR"({"max_timeout":"0"})");
-        for (int i = 0; i < numLoops; i++)
-        {
-            auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
-            auto result = recognizer->RecognizeAsync().get();
-            REQUIRE(result->Reason == Reason::Recognized);
-            REQUIRE(result->Text == L"Remind me to buy 5 iPhones.");
-        }
-
-        // BUGBUG: this currently fails because CSpxAudioStreamSession::WaitForRecognition() returns a nullptr on a timeout.
-        /*
-        factory = SpeechFactory::FromEndpoint(PAL::ToWString(Config::Endpoint), LR"({"max_timeout":"10000"})");
-        for (int i = 0; i < numLoops; i++)
-        {
-        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
-        auto result = recognizer->RecognizeAsync().get();
-        REQUIRE(result->Reason == Reason::Recognized);
-        REQUIRE(result->Text == L"Remind me to buy 5 iPhones.");
-        }*/
+        // NOTE: Looks like we still do need this...
+        // TODO: there's a data race in the audio_pump thread when it tries to
+        // pISpxAudioProcessor->SetFormat(nullptr); after exiting the loop.
+        // Comment out the next line to see for yourself (repros on Linux build machines).
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
     }
 }
 
@@ -288,6 +275,46 @@ TEST_CASE("KWS basics", "[api][cxx]")
         }
 
         UseMocks(false);
+    }
+}
+
+TEST_CASE("Speech on local server", "[api][cxx]")
+{
+    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    SECTION("Stress testing against the local server")
+    {
+        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
+
+        if (Config::Endpoint.empty())
+        {
+            return;
+        }
+
+        UseMocks(false);
+        REQUIRE(exists(input_file));
+        REQUIRE(!IsUsingMocks());
+
+        const int numLoops = 10;
+
+        auto factory = SpeechFactory::FromEndpoint(PAL::ToWString(Config::Endpoint), LR"({"max_timeout":"0"})");
+        for (int i = 0; i < numLoops; i++)
+        {
+            auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
+            auto result = recognizer->RecognizeAsync().get();
+            REQUIRE(result->Reason == Reason::Recognized);
+            REQUIRE(result->Text == L"Remind me to buy 5 iPhones.");
+        }
+
+        // BUGBUG: this currently fails because CSpxAudioStreamSession::WaitForRecognition() returns a nullptr on a timeout.
+        /*
+        factory = SpeechFactory::FromEndpoint(PAL::ToWString(Config::Endpoint), LR"({"max_timeout":"10000"})");
+        for (int i = 0; i < numLoops; i++)
+        {
+        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
+        auto result = recognizer->RecognizeAsync().get();
+        REQUIRE(result->Reason == Reason::Recognized);
+        REQUIRE(result->Text == L"Remind me to buy 5 iPhones.");
+        }*/
     }
 }
 
