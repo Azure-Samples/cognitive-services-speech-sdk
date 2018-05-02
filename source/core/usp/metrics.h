@@ -261,10 +261,11 @@ extern const char* kEvent_error_key;
 extern const char* kEvent_status_key;
 
 #define metrics_device_startup(handle, deviceid) \
-    inband_connection_telemetry(handle,\
-                                kEvent_type_device,\
-                                deviceid, \
-                                (void*)kEvent_start_key)
+    inband_event_key_value_populate(handle,\
+                                    kEvent_type_device,\
+                                    NULL, \
+                                    kEvent_start_key, \
+                                    json_value_init_string(deviceid))
 
 // Recieved the specified message from the service. 
 #define metrics_received_message(handle, x) record_received_msg(handle, x)
