@@ -70,15 +70,19 @@ void SpxTraceMessage_Internal(int level, const char* pszTitle, const char* pszFo
     int androidPrio = ANDROID_LOG_ERROR;
     switch (level)
     {
-    case __SPX_TRACE_LEVEL_INFO: androidPrio = ANDROID_LOG_INFO; break; //Trace_Info
-    case __SPX_TRACE_LEVEL_WARNING: androidPrio = ANDROID_LOG_WARN; break; // Trace_Warning
-    case __SPX_TRACE_LEVEL_ERROR: androidPrio = ANDROID_LOG_ERROR; break; // Trace_Error
-    case __SPX_TRACE_LEVEL_VERBOSE: androidPrio = ANDROID_LOG_VERBOSE; break;// Trace_Verbose
-    default: androidPrio = ANDROID_LOG_FATAL; break;
+        case __SPX_TRACE_LEVEL_INFO:    androidPrio = ANDROID_LOG_INFO;     break; // Trace_Info
+        case __SPX_TRACE_LEVEL_WARNING: androidPrio = ANDROID_LOG_WARN;     break; // Trace_Warning
+        case __SPX_TRACE_LEVEL_ERROR:   androidPrio = ANDROID_LOG_ERROR;    break; // Trace_Error
+        case __SPX_TRACE_LEVEL_VERBOSE: androidPrio = ANDROID_LOG_VERBOSE;  break; // Trace_Verbose
+        default: androidPrio = ANDROID_LOG_FATAL; break;
     }
 
-    androidPrio = ANDROID_LOG_FATAL;
+    // TODO: roobo does not forward anything less than Error/Fatal to logcat
+    //       unless you flash the latest image to the device.
+    // androidPrio = ANDROID_LOG_FATAL;
+
     __android_log_vprint(androidPrio, "Carbon", format.c_str(), argptr);
+
 // In release mode, do not log anything.
 #else
     UNUSED(level);
