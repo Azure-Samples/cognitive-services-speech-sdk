@@ -57,7 +57,7 @@ namespace MicrosoftSpeechSDKSamples
 
         public static async Task TranslationBaseModelAsync(string keyTranslation, string fileName)
         {
-            var factory = SpeechFactory.FromSubscription(keyTranslation, "");
+            var factory = SpeechFactory.FromSubscription(keyTranslation, "westus");
             Console.WriteLine("Translation using base model.");
 
 
@@ -129,7 +129,6 @@ namespace MicrosoftSpeechSDKSamples
             reco.SynthesisResultReceived += MySynthesisEventHandler;
             reco.RecognitionErrorRaised += MyErrorEventHandler;
             reco.OnSpeechDetectedEvent += MySpeechEndDetectedHandler;
-            reco.Parameters.Set(SpeechParameterNames.DeploymentId, "d4501bd5-a593-45bf-82a6-36ffc59d80a5");
 
             translationEndTaskCompletionSource = new TaskCompletionSource<int>();
 
@@ -148,8 +147,8 @@ namespace MicrosoftSpeechSDKSamples
         private static string FromLang = "en-us";
         private static List<string> To2Langs = new List<string>(){ "de-DE", "zh-CN" };
         private static List<string> ToGerman = new List<string>() { "de-DE" };
-        private static string GermanVoice = "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)";
+        private static string GermanVoice = "de-DE-Hedda";
         private static List<string> ToChinese = new List<string>() { "zh-CN" };
-        private static string ChineseVoice = "Microsoft Server Speech Text to Speech Voice (zh-CN, Yaoyao, Apollo)";
+        private static string ChineseVoice = "zh-CN-Yaoyao";
     }
 }

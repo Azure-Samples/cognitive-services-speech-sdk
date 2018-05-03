@@ -17,8 +17,9 @@ using namespace Microsoft::CognitiveServices::Speech;
 void SpeechRecognitionWithMicrophone()
 {
     // Creates an instance of a speech factory with specified
-    // subscription key. Replace with your own subscription key.
-    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"");
+    // subscription key and service region. Replace with your own subscription key
+    // and service region (e.g., "westus").
+    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"YourServiceRegion");
 
     // Creates a speech recognizer using microphone as audio input.
     auto recognizer = factory->CreateSpeechRecognizer();
@@ -44,8 +45,9 @@ void SpeechRecognitionWithMicrophone()
 void SpeechRecognitionWithFile()
 {
     // Creates an instance of a speech factory with specified
-    // subscription key. Replace with your own subscription key.
-    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"");
+    // subscription key and service region. Replace with your own subscription key
+    // and service region (e.g., "westus").
+    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"YourServiceRegion");
 
     // Creates a speech recognizer using file as audio input.
     // Replace with your own audio file name.
@@ -71,9 +73,9 @@ void SpeechRecognitionWithFile()
 void SpeechRecognitionUsingCustomizedModel()
 {
     // Creates an instance of a speech factory with specified
-    // subscription key. Replace with your own subscription key from
-    // https://www.cris.ai/.
-    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"");
+    // subscription key and service region. Replace with your own subscription key
+    // and service region (e.g., "westus").
+    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"YourServiceRegion");
 
     // Creates a speech recognizer using microphone as audio input.
     auto recognizer = factory->CreateSpeechRecognizer();
@@ -124,8 +126,9 @@ static void OnCanceled(const SpeechRecognitionEventArgs& e)
 void SpeechContinuousRecognitionUsingEvents()
 {
     // Creates an instance of a speech factory with specified
-    // subscription key. Replace with your own subscription key.
-    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"");
+    // subscription key and service region. Replace with your own subscription key
+    // and service region (e.g., "westus").
+    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"YourServiceRegion");
 
     // Creates a speech recognizer using microphone as audio input.
     auto recognizer = factory->CreateSpeechRecognizer();

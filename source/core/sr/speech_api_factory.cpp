@@ -11,16 +11,15 @@
 #include "speech_api_factory.h"
 #include "site_helpers.h"
 
-
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
 
-std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizer() 
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizer()
 {
-    return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxRecognizer");
+    return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxRecognizer") ;
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizer(const std::wstring& language)
@@ -89,29 +88,6 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognize
     return CreateTranslationRecognizerInternal(fileName.c_str(), sourceLanguage, targetLanguages, voice);
 }
 
-void CSpxSpeechApiFactory::SetTranslationParameter(const std::shared_ptr<ISpxNamedProperties> namedProperties, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice)
-{
-    SPX_THROW_HR_IF(SPXERR_INVALID_ARG, sourceLanguage.empty());
-
-    namedProperties->SetStringValue(g_TRANSLATION_FromLanguage, sourceLanguage.c_str());
-    std::wstring plainStr;
-    // The target languages are in BCP-47 format, and should not contain the character ','.
-    SPX_THROW_HR_IF(SPXERR_INVALID_ARG, targetLanguages.size() == 0);
-    SPX_THROW_HR_IF(SPXERR_INVALID_ARG, targetLanguages[0].empty());
-    plainStr = targetLanguages.at(0);
-    for (auto lang = targetLanguages.begin() + 1; lang != targetLanguages.end(); ++lang)
-    {
-        SPX_THROW_HR_IF(SPXERR_INVALID_ARG, lang->empty());
-        plainStr += L"," + *lang;
-    }
-    SPX_THROW_HR_IF(SPXERR_INVALID_ARG, plainStr.empty());
-    namedProperties->SetStringValue(g_TRANSLATION_ToLanguages, plainStr.c_str());
-    namedProperties->SetStringValue(g_TRANSLATION_Voice, voice.c_str());
-
-    // Set mode to conversation for translation
-    namedProperties->SetStringValue(g_SPEECH_RecoMode, g_SPEECH_RecoMode_Conversation);
-}
-
 std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognizerInternal(wchar_t const* fileNameStr, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice)
 {
     // Create the session
@@ -171,11 +147,33 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateTranslationRecognize
     return recognizer;
 }
 
+void CSpxSpeechApiFactory::SetTranslationParameter(const std::shared_ptr<ISpxNamedProperties>& namedProperties, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice)
+{
+    SPX_THROW_HR_IF(SPXERR_INVALID_ARG, sourceLanguage.empty());
+
+    namedProperties->SetStringValue(g_TRANSLATION_FromLanguage, sourceLanguage.c_str());
+    std::wstring plainStr;
+    // The target languages are in BCP-47 format, and should not contain the character ','.
+    SPX_THROW_HR_IF(SPXERR_INVALID_ARG, targetLanguages.size() == 0);
+    SPX_THROW_HR_IF(SPXERR_INVALID_ARG, targetLanguages[0].empty());
+    plainStr = targetLanguages.at(0);
+    for (auto lang = targetLanguages.begin() + 1; lang != targetLanguages.end(); ++lang)
+    {
+        SPX_THROW_HR_IF(SPXERR_INVALID_ARG, lang->empty());
+        plainStr += L"," + *lang;
+    }
+    SPX_THROW_HR_IF(SPXERR_INVALID_ARG, plainStr.empty());
+    namedProperties->SetStringValue(g_TRANSLATION_ToLanguages, plainStr.c_str());
+    namedProperties->SetStringValue(g_TRANSLATION_Voice, voice.c_str());
+
+    // Set mode to conversation for translation
+    namedProperties->SetStringValue(g_SPEECH_RecoMode, g_SPEECH_RecoMode_Conversation);
+}
 
 std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateRecognizerInternal(const char* sessionClassName, 
-    const char* recognizerClassName, 
-    wchar_t const* fileName,
-    wchar_t const* language)
+    const char* recognizerClassName,
+    const wchar_t* fileName,
+    const wchar_t* language)
 {
     // Create the session
     auto factoryAsSite = SpxSiteFromThis(this);
@@ -197,9 +195,9 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateRecognizerInternal(c
     auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>(recognizerClassName, sessionAsSite);
 
     // Set language if we have one. Default will be set to en-US
+    auto namedProperties = SpxQueryService<ISpxNamedProperties>(sessionAsSite);
     if (language != nullptr)
     {
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(sessionAsSite);
         namedProperties->SetStringValue(g_SPEECH_RecoLanguage, language);
     }
 

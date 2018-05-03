@@ -15,7 +15,6 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-
 class ISpxNamedPropertiesImpl : public ISpxNamedProperties
 {
 public:

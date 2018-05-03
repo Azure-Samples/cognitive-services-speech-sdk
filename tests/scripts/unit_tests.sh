@@ -14,7 +14,7 @@ function run_usp_tests {
 
 function run_cxx_api_tests {
     echo "Run cxx_api tests"
-    (set -x; $CXX_API_TESTS_EXE $args)
+    (set -x; $CXX_API_TESTS_EXE $args --regionId uswest)
     echo -e "\n"
 }
 
@@ -33,7 +33,7 @@ UserKeyLuis=$5
 UserKeySkyman=$6
 endpoint=$7
 
-args="--keySpeech $UserKeySpeech"
+args="--keySpeech $UserKeySkyman"
 [ ! -z $endpoint ] && args+=" --endpoint $endpoint"
 
 if [ "$Action" = "all" ]; then 

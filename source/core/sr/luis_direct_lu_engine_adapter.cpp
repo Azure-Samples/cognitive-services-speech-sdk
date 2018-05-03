@@ -99,7 +99,7 @@ std::list<std::string> CSpxLuisDirectEngineAdapter::GetListenForList()
     return listenForList;
 }
 
-void CSpxLuisDirectEngineAdapter::GetIntentInfo(std::string& provider, std::string& id, std::string& key)
+void CSpxLuisDirectEngineAdapter::GetIntentInfo(std::string& provider, std::string& id, std::string& key, std::string& region)
 {
     std::unique_lock<std::mutex> lock(m_mutex);
     for (auto item : m_triggerMap)
@@ -115,10 +115,14 @@ void CSpxLuisDirectEngineAdapter::GetIntentInfo(std::string& provider, std::stri
             str = PAL::ToString(model->GetSubscriptionKey());
             SPX_IFTRUE_THROW_HR(!str.empty() && !key.empty() && str != key, SPXERR_ABORT);
             key = str;
+
+            str = PAL::ToString(model->GetRegion());
+            SPX_IFTRUE_THROW_HR(!str.empty() && !region.empty() && str != region, SPXERR_ABORT);
+            region = str;
         }
     }
 
-    if (!id.empty() && !key.empty())
+    if (!id.empty() && !key.empty() && !region.empty())
     {
         provider = "LUIS";
     }

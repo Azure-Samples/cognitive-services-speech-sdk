@@ -184,7 +184,7 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
     // Set up the client configuration...
-    USP::Client client(*this, USP::EndpointType::BingSpeech);
+    USP::Client client(*this, USP::EndpointType::Speech);
     SetUspEndpoint(properties, client);
     SetUspRecoMode(properties, client);
     SetUspAuthentication(properties, client);
@@ -196,58 +196,123 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
 {
-    m_customEndpoint = false;
+
+    SPX_DBG_ASSERT(GetSite() != nullptr);
+
+    // How many recognizers of each type do we have?
+    uint16_t countSpeech, countIntent, countTranslation;
+    GetSite()->GetScenarioCount(&countSpeech, &countIntent, &countTranslation);
+    SPX_DBG_ASSERT(countSpeech + countIntent + countTranslation == 1); // currently only support one recognizer
+
+    // now based on the endpoint, which types of recognizers, and/or the custom model id ... set up the endpoint
+    auto endpoint = properties->GetStringValue(g_SPEECH_Endpoint);
+    if (0 == PAL::wcsicmp(endpoint.c_str(), L"CORTANA"))
+    {
+        return SetUspEndpoint_Cortana(properties, client);
+    }
+    else if (!endpoint.empty())
+    {
+        return SetUspEndpoint_Custom(properties, client);
+    }
+    else if (countIntent == 1)
+    {
+        return SetUspEndpoint_Intent(properties, client);
+    }
+    else if (countTranslation == 1)
+    {
+        return SetUspEndpoint_Translation(properties, client);
+    }
+
+    return SetUspEndpoint_DefaultSpeechService(properties, client);
+}
+
+USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Cortana(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
+{
+    UNUSED(properties);
+
+    SPX_DBG_TRACE_VERBOSE("%s: Using Cortana endpoint...", __FUNCTION__);
+    m_customEndpoint = true;
+
+    return client.SetEndpointType(USP::EndpointType::CDSDK);
+}
+
+USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Custom(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
+{
+    UNUSED(properties);
 
     auto endpoint = properties->GetStringValue(g_SPEECH_Endpoint);
-    if (PAL::wcsicmp(endpoint.c_str(), L"CORTANA") == 0)    // Use the CORTANA SDK endpoint
+    m_customEndpoint = true;
+
+    SPX_DBG_TRACE_VERBOSE("%s: Using Custom URL/endpoint: %ls", __FUNCTION__, endpoint.c_str());
+    return client.SetEndpointUrl(PAL::ToString(endpoint));
+}
+
+USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Intent(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
+{
+    SPX_DBG_TRACE_VERBOSE("%s: Using Intent URL/endpoint...", __FUNCTION__);
+    m_customEndpoint = false;
+
+    auto intentRegion = properties->GetStringValue(g_INTENT_Region);
+    SPX_IFTRUE_THROW_HR(intentRegion.empty(), SPXERR_INVALID_ARG);
+
+    client.SetEndpointType(USP::EndpointType::Intent)
+          .SetIntentRegion(PAL::ToString(intentRegion));
+
+    auto language = PAL::ToString(properties->GetStringValue(g_SPEECH_RecoLanguage));
+    if (!language.empty())
     {
-        return client.SetEndpointType(USP::EndpointType::CDSDK);
+        client.SetLanguage(language);
     }
+    return client;
+}
 
-    if (!endpoint.empty())                                  // Use the SPECIFIED endpoint
-    {
-        SPX_DBG_TRACE_VERBOSE("Using Custom URL: %ls", endpoint.c_str());
+USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Translation(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
+{
+    SPX_DBG_TRACE_VERBOSE("%s: Using Translation URL/endpoint...", __FUNCTION__);
+    m_customEndpoint = false;
 
-        m_customEndpoint = true;
-        return client.SetEndpointUrl(PAL::ToString(endpoint));
-    }
+    auto region = properties->GetStringValue(g_SPEECH_Region);
+    SPX_IFTRUE_THROW_HR(region.empty(), SPXERR_INVALID_ARG);
 
-    // Then check translation
     auto fromLang = properties->GetStringValue(g_TRANSLATION_FromLanguage);
-    if (!fromLang.empty())
-    {
-        auto toLangs = properties->GetStringValue(g_TRANSLATION_ToLanguages);
-        SPX_IFTRUE_THROW_HR(toLangs.empty(), SPXERR_INVALID_ARG);
-        auto voice = properties->GetStringValue(g_TRANSLATION_Voice);
-        // Before unified service, we need modelId to run translation.
-        auto customSpeechModelId = properties->GetStringValue(g_SPEECH_ModelId);
+    auto toLangs = properties->GetStringValue(g_TRANSLATION_ToLanguages);
+    SPX_IFTRUE_THROW_HR(fromLang.empty(), SPXERR_INVALID_ARG);
+    SPX_IFTRUE_THROW_HR(toLangs.empty(), SPXERR_INVALID_ARG);
 
-        return client.SetEndpointType(USP::EndpointType::Translation)
-            .SetTranslationSourceLanguage(PAL::ToString(fromLang))
-            .SetTranslationTargetLanguages(PAL::ToString(toLangs))
-            .SetTranslationVoice(PAL::ToString(voice))
-            // Todo: remove this when switch to unified service.
-            .SetModelId(PAL::ToString(customSpeechModelId));
-    }
+    auto voice = properties->GetStringValue(g_TRANSLATION_Voice);
 
-    // Then check CRIS
+    return client.SetEndpointType(USP::EndpointType::Translation)
+        .SetRegion(PAL::ToString(region))
+        .SetTranslationSourceLanguage(PAL::ToString(fromLang))
+        .SetTranslationTargetLanguages(PAL::ToString(toLangs))
+        .SetTranslationVoice(PAL::ToString(voice));
+
+}
+
+USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_DefaultSpeechService(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
+{
+    SPX_DBG_TRACE_VERBOSE("%s: Using Default Speech URL/endpoint...", __FUNCTION__);
+    m_customEndpoint = false;
+
+    auto region = properties->GetStringValue(g_SPEECH_Region);
+    SPX_IFTRUE_THROW_HR(region.empty(), SPXERR_INVALID_ARG);
+    client.SetEndpointType(USP::EndpointType::Speech).SetRegion(PAL::ToString(region));
+
     auto customSpeechModelId = properties->GetStringValue(g_SPEECH_ModelId);
-    if (!customSpeechModelId.empty())                       // Use the Custom Speech Intelligent Service
+    if (!customSpeechModelId.empty())
     {
-        return client.SetEndpointType(USP::EndpointType::Cris).SetModelId(PAL::ToString(customSpeechModelId));
+        client.SetModelId(PAL::ToString(customSpeechModelId));
     }
+    else
+    {
+        auto lang = properties->GetStringValue(g_SPEECH_RecoLanguage);
+        if (!lang.empty())
+        {
+            client.SetLanguage(PAL::ToString(lang));
+        }
+    }
+    return client;
 
-     // Otherwise ... Use the default SPEECH endpoints
-    if (properties->HasStringValue(g_SPEECH_RecoLanguage))
-    {
-        // Get the property that indicates what language to use...
-        auto value = properties->GetStringValue(g_SPEECH_RecoLanguage);
-        return client.SetEndpointType(USP::EndpointType::BingSpeech).SetLanguage(PAL::ToString(value));
-    }
-    else 
-    {
-        return client.SetEndpointType(USP::EndpointType::BingSpeech);
-    }
 }
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspRecoMode(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
@@ -264,7 +329,6 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspRecoMode(std::shared_ptr<ISpxNamedP
         SPX_DBG_TRACE_VERBOSE("%s: Check mode string in the Custom URL.", __FUNCTION__);
 
         auto endpoint = properties->GetStringValue(g_SPEECH_Endpoint);
-        // endpoint should not be null if m_customeEndpoint is set.
         SPX_THROW_HR_IF(SPXERR_RUNTIME_ERROR, endpoint.empty());
 
         checkHr = GetRecoModeFromEndpoint(endpoint, mode);
@@ -275,7 +339,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspRecoMode(std::shared_ptr<ISpxNamedP
     return client.SetRecognitionMode(m_recoMode);
 }
 
-USP::Client&  CSpxUspRecoEngineAdapter::SetUspAuthentication(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
+USP::Client& CSpxUspRecoEngineAdapter::SetUspAuthentication(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
 {
     // Get the properties that indicates what endpoint to use...
     auto uspSubscriptionKey = properties->GetStringValue(g_SPEECH_SubscriptionKey);
@@ -365,9 +429,9 @@ void CSpxUspRecoEngineAdapter::UspSendSpeechContext()
     auto listenForJson = GetDgiJsonFromListenForList(listenForList);
 
     // Get the intent payload
-    std::string provider, id, key;
-    GetIntentInfoFromSite(provider, id, key);
-    auto intentJson = GetLanguageUnderstandingJsonFromIntentInfo(provider, id, key);
+    std::string provider, id, key, region;
+    GetIntentInfoFromSite(provider, id, key, region);
+    auto intentJson = GetLanguageUnderstandingJsonFromIntentInfo(provider, id, key, region);
 
     // Do we expect to receive an intent payload from the service?
     m_expectIntentResponse = !intentJson.empty();
@@ -817,7 +881,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
         SPX_DBG_TRACE_VERBOSE("%s: IGNORING (Err/Terminating/Zombie)... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
     }
     else if ((IsInteractiveMode() && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd)) ||
-        (!IsInteractiveMode() && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForPhrase)))
+             (!IsInteractiveMode() && ChangeState(UspState::WaitingForPhrase, UspState::WaitingForPhrase)))
     {
         SPX_DBG_TRACE_SCOPE("Fire final translation result: Creating Result", "FireFinalResul: GetSite()->FireAdapterResult_FinalResult()  complete!");
 
@@ -1033,18 +1097,21 @@ void CSpxUspRecoEngineAdapter::OnUserMessage(const USP::UserMsg& msg)
 
     if (msg.path == "response")
     {
-        ReadLock_Type readLock(m_stateMutex);
-        if (IsState(UspState::WaitingForIntent))
+        WriteLock_Type writeLock(m_stateMutex);
+        if (ChangeState(UspState::WaitingForIntent, UspState::WaitingForIntent2))
         {
-            readLock.unlock(); // calls to site shouldn't hold locks
+            writeLock.unlock(); // calls to site shouldn't hold locks
 
             std::string luisJson((const char*)msg.buffer, msg.size);
             SPX_DBG_TRACE_VERBOSE("USP User Message: response; luisJson='%s'", luisJson.c_str());
             FireFinalResultLater_WaitingForIntentComplete(luisJson);
+
+            writeLock.lock();
+            ChangeState(UspState::WaitingForIntent2, IsInteractiveMode() ? UspState::WaitingForTurnEnd : UspState::WaitingForPhrase);
         }
         else
         {
-            SPX_DBG_ASSERT(readLock.owns_lock()); // need to keep the lock for trace message
+            SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace message
             SPX_DBG_TRACE_WARNING("%s: (0x%8x) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, this, m_audioState, m_uspState);
         }
     }
@@ -1154,17 +1221,18 @@ std::string CSpxUspRecoEngineAdapter::GetDgiJsonFromListenForList(std::list<std:
     return noDGI ? "" : dgiJson;
 }
 
-void CSpxUspRecoEngineAdapter::GetIntentInfoFromSite(std::string& provider, std::string& id, std::string& key)
+void CSpxUspRecoEngineAdapter::GetIntentInfoFromSite(std::string& provider, std::string& id, std::string& key, std::string& region)
 {
     SPX_DBG_ASSERT(GetSite() != nullptr);
-    GetSite()->GetIntentInfo(provider, id, key);
+    GetSite()->GetIntentInfo(provider, id, key, region);
 }
 
-std::string CSpxUspRecoEngineAdapter::GetLanguageUnderstandingJsonFromIntentInfo(const std::string& provider, const std::string& id, const std::string& key)
+std::string CSpxUspRecoEngineAdapter::GetLanguageUnderstandingJsonFromIntentInfo(const std::string& provider, const std::string& id, const std::string& key, const std::string& region)
 {
     SPX_DBG_ASSERT(GetSite() != nullptr);
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     auto noIntentJson = properties->GetBooleanValue(L"CARBON-INTERNAL-USP-NoIntentJson", false);
+    UNUSED(region);
 
     std::string intentJson;
     if (!provider.empty() && !id.empty() && !key.empty())

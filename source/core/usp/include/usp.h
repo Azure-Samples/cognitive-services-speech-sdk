@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <functional>
+#include <string>
 
 #include "uspmessages.h"
 
@@ -95,7 +96,7 @@ struct Callbacks
     virtual void OnUserMessage(const UserMsg&) {}
 };
 
-enum class EndpointType { Custom, BingSpeech, Cris, CDSDK, Translation };
+enum class EndpointType { Speech, Intent, Translation, CDSDK };
 
 enum class RecognitionMode : unsigned int { Interactive = 0, Conversation = 1, Dictation = 2 };
 
@@ -154,27 +155,30 @@ using ConnectionPtr = std::unique_ptr<Connection>;
 class Client
 {
     static constexpr auto s_defaultLanguage = "en-us";
+
 public:
     /**
     * Creates a USP client.
     * @param callbacks The struct defines callback functions that will be invoked when various USP events occur.
-    * @param type  The speech service to be used, BingSpeech, Chris, etc.
+    * @param type  The speech service to be used, Speech, Intent, Translation, and etc.
     */
     Client(Callbacks& callbacks, EndpointType endpoint):
-        Client(callbacks)
+        m_callbacks(callbacks),
+        m_endpoint(endpoint),
+        m_recoMode(RecognitionMode::Interactive),
+        m_outputFormat(OutputFormat::Simple),
+        m_language(s_defaultLanguage),
+        m_authType(AuthenticationType::SubscriptionKey)
     {
-        SetEndpointType(endpoint);
     }
 
     /**
-    * Creates a USP client.
-    * @param callbacks The struct defines callback functions that will be invoked when various USP events occur.
-    * @param endpointUrl The URL of the service endpoint. It should contain the host name, resoure path and all query parameters needed.
+    * Sets the region of the service endpoint.
     */
-    Client(Callbacks& callbacks, const std::string& endpointUrl) :
-        Client(callbacks)
+    Client& SetRegion(const std::string& region)
     {
-        SetEndpointUrl(endpointUrl);
+        m_region = region;
+        return *this;
     }
 
     /**
@@ -182,18 +186,16 @@ public:
     */
     Client& SetEndpointUrl(const std::string& endpointUrl) 
     {
-        m_endpointUrl = endpointUrl;
-        m_endpoint = EndpointType::Custom;
+        m_customEndpointUrl = endpointUrl;
         return *this;
     }
 
     /**
-    * Sets the speech service type, e.g. BingSpeech, Cris, CDSDK.
+    * Sets the speech service type.
     */
     Client& SetEndpointType(EndpointType type) 
     {
         m_endpoint = type;
-        m_endpointUrl.clear();
         return *this;
     }
 
@@ -274,6 +276,15 @@ public:
     }
 
     /**
+    * Sets the language understanding region.
+    */
+   Client& SetIntentRegion(const std::string& region)
+   {
+       m_intentRegion = region;
+       return *this;
+   }
+
+    /**
     * Establishes connection to the service.
     */
     ConnectionPtr Connect();
@@ -291,21 +302,12 @@ private:
 
     friend class Connection::Impl;
 
-    Client(Callbacks& callbacks) :
-        m_callbacks(callbacks),
-        m_endpoint(EndpointType::Custom),
-        m_recoMode(RecognitionMode::Interactive),
-        m_outputFormat(OutputFormat::Simple),
-        m_language(s_defaultLanguage),
-        m_authType(AuthenticationType::SubscriptionKey)
-    {
-    }
-
     Callbacks& m_callbacks;
 
     EndpointType m_endpoint;
     RecognitionMode m_recoMode;
-    std::string m_endpointUrl;
+    std::string m_customEndpointUrl;
+    std::string m_region;
 
     OutputFormat m_outputFormat;
     std::string m_language;
@@ -314,6 +316,8 @@ private:
     std::string m_translationSourceLanguage;
     std::string m_translationTargetLanguages;
     std::string m_translationVoice;
+
+    std::string m_intentRegion;
 
     AuthenticationType m_authType;
     std::string m_authData;

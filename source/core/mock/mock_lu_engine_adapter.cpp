@@ -50,12 +50,13 @@ std::list<std::string> CSpxMockLuEngineAdapter::GetListenForList()
     return std::list<std::string>();
 }
 
-void CSpxMockLuEngineAdapter::GetIntentInfo(std::string& provider, std::string& id, std::string& key)
+void CSpxMockLuEngineAdapter::GetIntentInfo(std::string& provider, std::string& id, std::string& key, std::string& region)
 {
     // TODO: DGI
     UNUSED(provider);
     UNUSED(id);
     UNUSED(key);
+    UNUSED(region);
 }
 
 void CSpxMockLuEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionResult> result)

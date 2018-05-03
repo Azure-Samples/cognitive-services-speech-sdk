@@ -34,7 +34,7 @@ function run_tests {
         : # we don't build python bindings on Win32
     else
         pretty_print "Running Python tests"
-        py_args="--filename ./tests/input/whatstheweatherlike.wav --subscription $UserKeySpeech"
+        py_args="--filename ./tests/input/whatstheweatherlike.wav --subscription $UserKeySkyman"
         [ ! -z $endpoint ] && py_args+=" --endpoint $endpoint"
         py.test -s ./bindings/python/test.py $py_args
     fi

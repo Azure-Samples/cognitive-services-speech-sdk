@@ -26,7 +26,7 @@ namespace Microsoft.CognitiveServices.Speech
         ///
         /// static async Task SpeechRecognizerSample()
         /// {
-        ///     var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "");
+        ///     var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
         ///     SpeechRecognizer reco = factory.CreateSpeechRecognizerWithFileInput("audioFileName");
         ///
         ///     reco.OnSpeechDetectedEvent += MySessionEventHandler;

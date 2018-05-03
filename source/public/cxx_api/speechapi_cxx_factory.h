@@ -41,7 +41,7 @@ public:
     /// <summary>
     /// Collection of parameters used for all recognizers created by the factory.
     /// </summary>
-    const FactoryParameterCollection& Parameters;
+    FactoryParameterCollection& Parameters;
 
 private:
 

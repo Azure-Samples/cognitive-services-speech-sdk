@@ -445,6 +445,7 @@
 %template(TranslationSynthesisEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResultEventArgs&>;
 %template(TranslationRecognizerBase) Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationTextResult, Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultEventArgs>;
 
+%immutable Microsoft::CognitiveServices::Speech::ISpeechFactory::Parameters;
 %include <speechapi_cxx_translation_recognizer.h>
 %include <speechapi_cxx_factory_parameter.h>
 %include <speechapi_cxx_factory.h>

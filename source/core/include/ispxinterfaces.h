@@ -572,8 +572,10 @@ public:
     using AdditionalMessagePayload_Type = void*;
     using ErrorPayload_Type = const std::string&;
 
+    virtual void GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation) = 0;
+
     virtual std::list<std::string> GetListenForList() = 0;
-    virtual void GetIntentInfo(std::string& provider, std::string& id, std::string& key) = 0;
+    virtual void GetIntentInfo(std::string& provider, std::string& id, std::string& key, std::string& region) = 0;
 
     virtual void AdapterStartingTurn(ISpxRecoEngineAdapter* adapter) = 0;
     virtual void AdapterStartedTurn(ISpxRecoEngineAdapter* adapter, const std::string& id) = 0;
@@ -770,7 +772,7 @@ public:
     virtual void AddIntentTrigger(const wchar_t* id, std::shared_ptr<ISpxTrigger> trigger) = 0;
 
     virtual std::list<std::string> GetListenForList() = 0;
-    virtual void GetIntentInfo(std::string& provider, std::string& id, std::string& key) = 0;
+    virtual void GetIntentInfo(std::string& provider, std::string& id, std::string& key, std::string& region) = 0;
 };
 
 

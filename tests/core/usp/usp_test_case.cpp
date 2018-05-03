@@ -16,7 +16,7 @@ using namespace Microsoft::CognitiveServices::Speech;
 
 class UspClient : public USP::Callbacks {
 public:
-    UspClient(USP::EndpointType endpoint = USP::EndpointType::BingSpeech, 
+    UspClient(USP::EndpointType endpoint = USP::EndpointType::Speech,
         USP::RecognitionMode mode = USP::RecognitionMode::Interactive)
     {
         auto client = USP::Client(*this, endpoint)
@@ -24,7 +24,7 @@ public:
             .SetAuthentication(USP::AuthenticationType::SubscriptionKey, Keys::Speech);
         if (!Config::Endpoint.empty()) 
         {
-            client.SetEndpointType(USP::EndpointType::Custom).SetEndpointUrl(Config::Endpoint);
+            client.SetEndpointType(USP::EndpointType::Speech).SetEndpointUrl(Config::Endpoint);
         }
 
         m_connection = client.Connect();

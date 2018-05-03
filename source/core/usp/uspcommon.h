@@ -38,13 +38,29 @@ namespace USP {
     {
         const std::string protocol = "wss://";
 
-        const std::string pathPrefix = "/speech/recognition/";
-        const std::string pathSuffix = "/cognitiveservices/v1?";
-        const std::string langQueryParam = "language=";
+        namespace unifiedspeech
+        {
+            const std::string hostnameSuffix = ".stt.speech.microsoft.com";
+            const std::string pathPrefix = "/speech/recognition/";
+            const std::string pathSuffix = "/cognitiveservices/v1";
+            const std::string langQueryParam = "language=";
+            const std::string deploymentIdQueryParam = "cid=";
+            const std::string outputFormatQueryParam = "format=";
+            // Todo: REMOVE THIS BEFORE RELEASE
+            const std::string hostnamePPE = "fedev.develop2.cris.ai";
+        }
+
+        namespace intent
+        {
+        const std::string pathPrefix1 = "/ppe/speech/";
+        const std::string pathPrefix2 = "/recognition/";
+        const std::string flightParam = "setflight=cognitiveservicesintent&";
+        }
 
         namespace translation
         {
-            const std::string path = "/speech/translation/cognitiveservices/v1?";
+            const std::string hostnameSuffix = "s2s.speech.microsoft.com";
+            const std::string path = "/speech/translation/cognitiveservices/v1";
             const std::string from = "from=";
             const std::string to = "to=";
             const std::string voice = "voice=";
@@ -52,13 +68,22 @@ namespace USP {
             const std::string requireVoice = "texttospeech";
         }
 
-        namespace hostname 
+        namespace luis
         {
-            // Todo: update all hostnames with new unified speech hosts.
-            const std::string bingSpeech = "speech.platform.bing.com";
-            const std::string CRIS = ".api.cris.ai";
-            const std::string Translation = "fedev.develop2.cris.ai";
-            const std::string CDSDK = "speech.platform.bing.com/cortana/api/v1?environment=Home&";
+            const std::string hostname = "speech.platform.bing.com";
+            const std::string pathPrefix1 = "/speech/";
+            const std::string pathPrefix2 = "/recognition/";
+            const std::string pathSuffix = "/cognitiveservices/v1";
+            const std::string langQueryParam = "language=";
+            // Todo: REMOVE THE NEXT LINES FOR RELEASE
+            const std::string ppePathPrefix1 = "/ppe/speech/";
+            const std::string ppeFlightParam = "setflight=cognitiveservicesintent&";
+            // END REMOVE
+        }
+            
+        namespace CDSDK
+        {
+            const std::string url = "speech.platform.bing.com/cortana/api/v1?environment=Home&";
         }
     }
 

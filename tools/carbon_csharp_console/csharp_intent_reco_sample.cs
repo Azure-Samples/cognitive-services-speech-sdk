@@ -38,7 +38,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             Console.WriteLine("Intent Recognition using base speech model.");
 
-            var factory = SpeechFactory.FromSubscription(keySpeech, "");
+            var factory = SpeechFactory.FromSubscription(keySpeech, "europewest");
 
             if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {

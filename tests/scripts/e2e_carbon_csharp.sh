@@ -8,27 +8,27 @@ function die {
 
 function run_test {
     echo "$1 recognition using base model:"
-    (set -x; $CARBON_CSHARP $1 "$UserKeySpeech" $TEST_AUDIO_FILE) || exit $?
+    (set -x; $CARBON_CSHARP $1 "$UserKeySkyman" $TEST_AUDIO_FILE) || exit $?
     echo -e "\n"
 
     echo "$1 recognition using CRIS model:"
-    (set -x; $CARBON_CSHARP $1 "$UserKeyCris" $TEST_AUDIO_FILE model:$TEST_MODEL_ID) || exit $?
+    (set -x; $CARBON_CSHARP $1 "$UserKeySkyman" $TEST_AUDIO_FILE model:$TEST_MODEL_ID) || exit $?
     echo -e "\n"
 
     echo "$1 recognition using speech endpoint:"
-    (set -x; $CARBON_CSHARP $1 "$UserKeySpeech" $TEST_AUDIO_FILE endpoint:"$TEST_SPEECH_ENDPOINT") || exit $?
+    (set -x; $CARBON_CSHARP $1 "$UserKeySkyman" $TEST_AUDIO_FILE endpoint:"$TEST_SPEECH_ENDPOINT") || exit $?
     echo -e "\n"
     
     echo "$1 recognition using CRIS endpoint:"
-    (set -x; $CARBON_CSHARP $1 "$UserKeyCris" $TEST_AUDIO_FILE endpoint:"$TEST_CRIS_ENDPOINT") || exit $?
+    (set -x; $CARBON_CSHARP $1 "$UserKeySkyman" $TEST_AUDIO_FILE endpoint:"$TEST_CRIS_ENDPOINT") || exit $?
     echo -e "\n"
     
     echo "Test AuthToken: $1 recognition using base model:"
-    (set -x; $CARBON_CSHARP $1 token:"$UserKeySpeech" $TEST_AUDIO_FILE) || exit $?
+    (set -x; $CARBON_CSHARP $1 token:"$UserKeySkyman" $TEST_AUDIO_FILE) || exit $?
     echo -e "\n"
 
     echo "Test AuthToken: $1 recognition using speech endpoint:"
-    (set -x; $CARBON_CSHARP $1 token:"$UserKeySpeech" $TEST_AUDIO_FILE endpoint:"$TEST_SPEECH_ENDPOINT") || exit $?
+    (set -x; $CARBON_CSHARP $1 token:"$UserKeySkyman" $TEST_AUDIO_FILE endpoint:"$TEST_SPEECH_ENDPOINT") || exit $?
     echo -e "\n"
 }
 

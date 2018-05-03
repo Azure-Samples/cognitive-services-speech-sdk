@@ -159,18 +159,19 @@ namespace MicrosoftSpeechSDKSamples
                     if (useEndpoint)
                     {
                         Console.WriteLine("=============== Run speech recognition samples by specifying endpoint. ===============");
-                        SpeechRecognitionSamples.SpeechRecognitionByEndpointAsync(subKey, endpoint, fileName).Wait();
+                        SpeechRecognitionSamples.SpeechRecognitionByEndpointAsync(subKey, endpoint, lang:lang, model:modelId, fileName:fileName).Wait();
                     }
                     else
                     {
                         if (useBaseModel)
                         {
                             Console.WriteLine("=============== Run speech recognition samples using base model. ===============");
-                            SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(subKey, fileName).Wait();
+                            SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(subKey, lang:lang, fileName:fileName).Wait();
                         }
                         else
                         {
-                            Console.WriteLine("=============== Speech recognition with CRIS model is not supported yet. ===============");
+                            Console.WriteLine("=============== Run speech recognition samples using customized model. ===============");
+                            SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(subKey, lang, modelId, fileName).Wait();
                         }
                     }
                 }

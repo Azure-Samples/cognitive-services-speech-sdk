@@ -35,7 +35,7 @@ int wmain(int argc, wchar_t **argv)
         filename = wstring(argv[2]);
     }
 
-    auto factory = Microsoft::CognitiveServices::Speech::SpeechFactory::FromSubscription(subscriptionKey, L"");
+    auto factory = Microsoft::CognitiveServices::Speech::SpeechFactory::FromSubscription(subscriptionKey, L"westus");
 
     auto recognizeFromFile = !filename.empty();
 

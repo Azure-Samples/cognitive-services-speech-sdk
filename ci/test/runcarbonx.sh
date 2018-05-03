@@ -24,8 +24,9 @@ pretty_print "Running carbonx *speech*"
 if [ "${AGENT_OS}" == "Darwin" ]; then
    pretty_print "Running carbonx *intent* DISABLED - bug 1203375"
 else
-   pretty_print "Running carbonx *intent*"
-   ./tests/e2e_carbonx.sh $BINARY_DIR intent $UserKeySpeech $UserKeyCris $UserKeyLuis $UserKeySkyman
+   pretty_print "Running carbonx intent disabled."
+#   pretty_print "Running carbonx *intent*"
+#  ./tests/e2e_carbonx.sh $BINARY_DIR intent $UserKeySpeech $UserKeyCris $UserKeyLuis $UserKeySkyman
 fi
 
 #if [ "${AGENT_OS}" == "Darwin" ]; then

@@ -8,19 +8,19 @@ function die {
 
 function run_test {
     echo "$1 recognition using base model:"
-    (set -x; $CARBONX --$1 --subscription:$UserKeySpeech --input $TEST_AUDIO_FILE $2) || exit $?
+    (set -x; $CARBONX --$1 --subscription:$UserKeySkyman --input $TEST_AUDIO_FILE $2) || exit $?
     echo -e "\n"
 
     echo "$1 recognition using CRIS model:"
-    (set -x; $CARBONX --$1 --subscription:$UserKeyCris --input $TEST_AUDIO_FILE  --customSpeechModelId:$TEST_MODEL_ID $2) || exit $?
+    (set -x; $CARBONX --$1 --subscription:$UserKeySkyman --input $TEST_AUDIO_FILE  --customSpeechModelId:$TEST_MODEL_ID $2) || exit $?
     echo -e "\n"
 
     echo "$1 recognition using speech endpoint:"
-    (set -x; $CARBONX --$1 --subscription:$UserKeySpeech --input $TEST_AUDIO_FILE --endpoint:"$TEST_SPEECH_ENDPOINT" $2) || exit $?
+    (set -x; $CARBONX --$1 --subscription:$UserKeySkyman --input $TEST_AUDIO_FILE --endpoint:"$TEST_SPEECH_ENDPOINT" $2) || exit $?
     echo -e "\n"
 
     echo "$1 recognition using CRIS endpoint:"
-    (set -x; $CARBONX --$1 --subscription:$UserKeyCris --input $TEST_AUDIO_FILE --endpoint:"$TEST_CRIS_ENDPOINT" $2) || exit $?
+    (set -x; $CARBONX --$1 --subscription:$UserKeySkyman --input $TEST_AUDIO_FILE --endpoint:"$TEST_CRIS_ENDPOINT" $2) || exit $?
     echo -e "\n"
 }
 

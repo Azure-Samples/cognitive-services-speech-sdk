@@ -21,38 +21,36 @@ UserKeySkyman=$5
 
 echo -e "\n Testing usp lib: \n"
 
-ARGS="audio $TEST_AUDIO_FILE false"
-
 echo "Testing speech base model in interactive mode:"
-(set -x; $USPCONSOLE $ARGS $UserKeySpeech speech interactive)
+(set -x; $USPCONSOLE auth:$UserKeySkyman type:speech mode:interactive $TEST_AUDIO_FILE)
 echo -e "\n"
 
 echo "Testing speech base model in conversation mode:"
-(set -x; $USPCONSOLE $ARGS $UserKeySpeech speech conversation)
+(set -x; $USPCONSOLE auth:$UserKeySkyman type:speech mode:conversation $TEST_AUDIO_FILE)
 echo -e "\n"
 
 echo "Testing speech base model in dictation mode:"
-(set -x; $USPCONSOLE $ARGS $UserKeySpeech speech dictation)
+(set -x; $USPCONSOLE auth:$UserKeySkyman type:speech mode:dictation $TEST_AUDIO_FILE)
 echo -e "\n"
 
 echo "Testing CRIS model in interactive mode:"
-(set -x; $USPCONSOLE $ARGS $UserKeyCris cris interactive $TEST_MODEL_ID)
+(set -x; $USPCONSOLE auth:$UserKeySkyman type:speech mode:interactive model:$TEST_MODEL_ID $TEST_AUDIO_FILE)
 echo -e "\n"
 
 echo "Testing CRIS model in conversation mode:"
-(set -x; $USPCONSOLE $ARGS $UserKeyCris cris conversation $TEST_MODEL_ID)
+(set -x; $USPCONSOLE auth:$UserKeySkyman type:speech mode:conversation model:$TEST_MODEL_ID $TEST_AUDIO_FILE)
 echo -e "\n"
 
 echo "Testing CRIS model in dictation mode:"
-(set -x; $USPCONSOLE $ARGS $UserKeyCris cris dictation $TEST_MODEL_ID)
+(set -x; $USPCONSOLE auth:$UserKeySkyman type:speech mode:dictation model:$TEST_MODEL_ID $TEST_AUDIO_FILE)
 echo -e "\n"
 
 echo "Testing endpoint for speech model:"
-(set -x; $USPCONSOLE $ARGS $UserKeySpeech url $TEST_SPEECH_ENDPOINT)
+(set -x; $USPCONSOLE auth:$UserKeySkyman type:speech url:$TEST_SPEECH_ENDPOINT $TEST_AUDIO_FILE)
 echo -e "\n"
 
 echo "Testing endpoint for CRIS model:"
-(set -x; $USPCONSOLE $ARGS $UserKeyCris url $TEST_CRIS_ENDPOINT)
+(set -x; $USPCONSOLE auth:$UserKeySkyman type:speech url:$TEST_CRIS_ENDPOINT $TEST_AUDIO_FILE)
 echo -e "\n"
 
 

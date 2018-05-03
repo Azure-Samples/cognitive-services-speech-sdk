@@ -12,6 +12,7 @@
 #include <fstream>
 #include <thread>
 #include <vector>
+#include <string>
 #include <map>
 #include "audio_sys.h"
 
@@ -21,18 +22,19 @@
 
 #define UNUSED(x) (void)(x)
 
+using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 
 bool turnEnd = false;
-std::thread ttsThread;
+thread ttsThread;
 
 // TODO: MSFT 1135317 Move TTS to own source file
 // We receive the audio response chunk by chunk (for example from TTS) and store it into a file. 
 // Once the entire response is received, we play out the audio file using the audio system of the OS.
 static int TTSRenderLoop(IOBUFFER* ioBuffer)
 {
-    std::ofstream file("data2.bin", std::ios::out | std::ios::binary);
-    std::vector<char> buffer;
+    ofstream file("data2.bin", ios::out | ios::binary);
+    vector<char> buffer;
     AUDIO_SYS_HANDLE hAudio;
 
     while (IoBufferWaitForNewBytes(ioBuffer, 500) == 0)
@@ -71,14 +73,14 @@ static int TTSRenderLoop(IOBUFFER* ioBuffer)
     // HACK: Rather than sleeping for the length of the audio...
     // we should modify audio_playwavfile to have a callback to be called when the audio is done playing. 
     auto numMilliSeconds = (fileSize * 8) / (256);
-    std::this_thread::sleep_for(std::chrono::milliseconds(numMilliSeconds));
+    this_thread::sleep_for(chrono::milliseconds(numMilliSeconds));
 #endif
 
     IoBufferDelete(ioBuffer);
     return 1;
 }
 
-std::map<USP::RecognitionStatus, std::string> recognitionStatusToText =
+map<USP::RecognitionStatus, string> recognitionStatusToText =
 {
     { USP::RecognitionStatus::Success, "Success" },
     { USP::RecognitionStatus::NoMatch, "No Match" },
@@ -132,7 +134,7 @@ virtual void OnTurnEnd(const USP::TurnEndMsg&) override
     turnEnd = true;
 }
 
-virtual void OnError(const std::string& error) override
+virtual void OnError(const string& error) override
 {
     printf("Response: On Error: %s.\n", error.c_str());
     turnEnd = true;
@@ -149,7 +151,7 @@ virtual void OnAudioStreamStart(const USP::AudioStreamStartMsg& msg) override
 {
     printf("Response: First Audio Chunk received.\n");
     IoBufferAddRef(msg.ioBuffer);
-    ttsThread = std::thread(TTSRenderLoop, msg.ioBuffer);
+    ttsThread = thread(TTSRenderLoop, msg.ioBuffer);
 }
 
 virtual void OnTranslationHypothesis(const USP::TranslationHypothesisMsg& message) override
@@ -177,177 +179,215 @@ virtual void OnTranslationPhrase(const USP::TranslationPhraseMsg& message) overr
 
 #define AUDIO_BYTES_PER_SECOND (16000*2) //16KHz, 16bit PCM
 
+const map<string, USP::EndpointType> typeMap = {
+    { "speech", USP::EndpointType::Speech },
+    { "intent", USP::EndpointType::Intent },
+    { "translation", USP::EndpointType::Translation },
+    { "cdsdk", USP::EndpointType::CDSDK }
+};
+
+const map<string, USP::RecognitionMode> modeMap = {
+    { "interactive", USP::RecognitionMode::Interactive },
+    { "conversation", USP::RecognitionMode::Conversation },
+    { "dictation", USP::RecognitionMode::Dictation }
+};
+
 int main(int argc, char* argv[])
 {
     UspCallbacks testCallbacks;
-    USP::Client client(testCallbacks, USP::EndpointType::BingSpeech);
+
     bool isAudioMessage = true;
-    int curArg = 0;
-    char* authData = NULL;
-    char* messagePath = NULL;
+    string inputMessagePath;
+    string authData;
+    string endpointTypeStr;
+    string recoMode;
+    string customUrl;
+    string modelId;
+    string language;
+    string format;
+    string inputFile;
 
-    if (argc < 4)
+    if (argc < 2)
     {
-        printf("Usage: uspclientconsole message_type(audio/message:[path]) file tts(true/false) authentication endpoint_type(speech/cris/cdsdk/url) mode(interactive/conversation/dictation) language output(simple/detailed) user-defined-messages");
+        printf("Usage: uspclientconsole options inputfile");
+        printf("The following options are available:");
+        printf("      inputType:audio|message:[path]");
+        printf("      auth:key");
+        printf("      type:speech|intent|tranlsation|cdsdk");
+        printf("      mode:interactive|conversation|dictation");
+        printf("      url:endpoint");
+        printf("      lang:language");
+        printf("      model:id");
+        printf("      output:simple|detailed");
         exit(1);
     }
 
-    curArg++;
-    if (strstr(argv[curArg], "message") != NULL)
+    for (int curArg = 1; curArg < argc; curArg++)
     {
-        isAudioMessage = false;
-        char *path = strchr(argv[curArg], ':');
-        if (path == NULL)
-        {
-            //default message path if not specified
-            messagePath = (char*)"message";
-        }
-        else
-        {
-            messagePath = ++path;
-        }
+        string argStr(argv[curArg]);
+        size_t pos;
 
-    }
-    else if (strcmp(argv[curArg], "audio") == 0)
-    {
-        isAudioMessage = true;
-    }
-    else
-    {
-        printf("unknown message type: %s\n", argv[curArg]);
-        exit(1);
-    }
-
-    // Read input file.
-    curArg++;
-    std::ifstream data(argv[curArg], std::ios::in | ((isAudioMessage) ? std::ios::binary : std::ios::in));
-    if (!data.is_open() || data.fail())
-    {
-        printf("Error: open file %s failed", argv[curArg]);
-        exit(1);
-    }
-
-    curArg++;
-    if (strcmp(argv[curArg], "true") == 0)
-    {
-        // do nothing.
-    }
-
-    curArg++;
-    if (argc > curArg)
-    {
-        authData = argv[curArg];
-    }
-
-    curArg++;
-    // Set service endpoint type.
-    if (argc > curArg)
-    {
-        if (strcmp(argv[curArg], "speech") == 0)
+        if (argStr.find("inputType:") != string::npos)
         {
-            client.SetEndpointType(USP::EndpointType::BingSpeech);
-        }
-        else if (strcmp(argv[curArg], "cris") == 0)
-        {
-            client.SetEndpointType(USP::EndpointType::Cris);
-        }
-        else if (strcmp(argv[curArg], "cdsdk") == 0)
-        {
-            client.SetEndpointType(USP::EndpointType::CDSDK);
-        }
-        else if (strcmp(argv[curArg], "url") == 0)
-        {
-            client.SetEndpointType(USP::EndpointType::Custom);
-            if (argc != curArg + 2)
+            pos = argStr.find("inputType:message");
+            if (pos != string::npos)
             {
-                printf("No URL specified or too many parameters.\n");
-                exit(1);
+                isAudioMessage = false;
+                if (argStr.find("inputType:message:") == string::npos)
+                {
+                    //default message path if not specified
+                    inputMessagePath = "message";
+                }
+                else
+                {
+                    pos = argStr.rfind(':');
+                    inputMessagePath = argStr.substr(pos + 1);
+                }
             }
-        }
-        else
-        {
-            printf("unknown service endpoint type: %s\n", argv[curArg]);
-            exit(1);
-        }
-    }
-
-    curArg++;
-    // Set recognition mode.
-    if (argc > curArg)
-    {
-        if (client.GetEndpointType() != USP::EndpointType::Custom)
-        {
-            if (strcmp(argv[curArg], "interactive") == 0)
+            else if (argStr.compare("inputType:audio") == 0)
             {
-                client.SetRecognitionMode(USP::RecognitionMode::Interactive);
-            }
-            else if (strcmp(argv[curArg], "conversation") == 0)
-            {
-                client.SetRecognitionMode(USP::RecognitionMode::Conversation);
-            }
-            else if (strcmp(argv[curArg], "dictation") == 0)
-            {
-                client.SetRecognitionMode(USP::RecognitionMode::Dictation);
+                isAudioMessage = true;
             }
             else
             {
-                printf("unknown reco mode: %s\n", argv[curArg]);
+                printf("Invalid inputType: %s", argStr.c_str());
                 exit(1);
+            }
+        }
+        else if (argStr.find("auth:") != string::npos)
+        {
+            pos = argStr.find(':');
+            authData = argStr.substr(pos + 1);
+        }
+        else if (argStr.find("type:") != string::npos)
+        {
+            pos = argStr.find(':');
+            endpointTypeStr = argStr.substr(pos + 1);
+        }
+        else if (argStr.find("mode:") != string::npos)
+        {
+            pos = argStr.find(':');
+            recoMode = argStr.substr(pos + 1);
+        }
+        else if (argStr.find("url:") != string::npos)
+        {
+            pos = argStr.find(':');
+            customUrl = argStr.substr(pos + 1);
+        }
+        else if (argStr.find("lang:") != string::npos)
+        {
+            pos = argStr.find(':');
+            language = argStr.substr(pos + 1);
+        }
+        else if (argStr.find("model:") != string::npos)
+        {
+            pos = argStr.find(':');
+            modelId = argStr.substr(pos + 1);
+        }
+        else if (argStr.find("output:") != string::npos)
+        {
+            pos = argStr.find(':');
+            format = argStr.substr(pos + 1);
+        }
+        else
+        {
+            if (!inputFile.empty())
+            {
+                printf("Only one input file is allowed.");
+                exit(1);
+            } 
+            else
+            {
+                inputFile = argStr;
             }
         }
     }
 
-    // Create USP handle.
-    if (client.GetEndpointType() == USP::EndpointType::Custom)
+    USP::EndpointType endpointType;
+    if (!endpointTypeStr.empty())
     {
-        printf("Using custom URL %s.\n", argv[curArg]);
-        client.SetEndpointUrl(argv[curArg]);
-    }
-
-    // Set Authentication.
-    if (authData != NULL)
-    {
-        auto type = USP::AuthenticationType::SubscriptionKey;
-        if (client.GetEndpointType() == USP::EndpointType::CDSDK) 
+        auto it = typeMap.find(endpointTypeStr);
+        if (it == typeMap.end())
         {
-            type = USP::AuthenticationType::SearchDelegationRPSToken;
-        }
-
-        client.SetAuthentication(type, authData);
-    }
-
-    curArg++;
-    // Set language.
-    if (argc > curArg)
-    {
-        if (client.GetEndpointType() == USP::EndpointType::Cris)
-        {
-            client.SetModelId(argv[curArg]);
-        }
-        else
-        {
-            client.SetLanguage(argv[curArg]);
-        }
-    }
-
-    curArg++;
-    // Set output format if needed.
-    if (argc > curArg)
-    {
-        if (strcmp(argv[curArg], "detailed") == 0)
-        {
-            client.SetOutputFormat(USP::OutputFormat::Detailed);
-        }
-        else if (strcmp(argv[curArg], "simple") == 0)
-        {
-            client.SetOutputFormat(USP::OutputFormat::Simple);
-        }
-        else
-        {
-            printf("unknown output format: %s\n", argv[curArg]);
+            printf("Invalid endpoint type: %s", endpointTypeStr.c_str());
             exit(1);
         }
+        else
+        {
+            endpointType = it->second;
+        }
     }
+    else
+    {
+        printf("No endpoint type is provided.");
+        exit(1);
+    }
+
+    USP::Client client(testCallbacks, endpointType);
+    if (!customUrl.empty())
+    {
+        client.SetEndpointUrl(customUrl.c_str());
+    }
+
+        // Set Authentication.
+        if (!authData.empty())
+        {
+            auto type = USP::AuthenticationType::SubscriptionKey;
+            if (client.GetEndpointType() == USP::EndpointType::CDSDK)
+            {
+                type = USP::AuthenticationType::SearchDelegationRPSToken;
+            }
+
+            client.SetAuthentication(type, authData);
+        }
+
+        if (!recoMode.empty())
+        {
+            auto it = modeMap.find(recoMode);
+            if (it == modeMap.end())
+            {
+                printf("Invalid recognition mode: %s", recoMode.c_str());
+                exit(1);
+            }
+            else
+            {
+                client.SetRecognitionMode(it->second);
+            }
+        }
+
+        if (!modelId.empty())
+        {
+            client.SetModelId(modelId.c_str());
+        }
+
+        if (!language.empty())
+        {
+            client.SetLanguage(language.c_str());
+        }
+
+        if (!format.empty())
+        {
+            if (format.compare("detailed") == 0)
+            {
+                client.SetOutputFormat(USP::OutputFormat::Detailed);
+            }
+            else if (format.compare("simple") == 0)
+            {
+                client.SetOutputFormat(USP::OutputFormat::Simple);
+            }
+            else
+            {
+                printf("unknown output format: %s\n", format.c_str());
+                exit(1);
+            }
+        }
+
+        ifstream data(inputFile, ios::in | ((isAudioMessage) ? ios::binary : ios::in));
+        if (!data.is_open() || data.fail())
+        {
+            printf("Error: open file %s failed", inputFile.c_str());
+            exit(1);
+        }
 
     // Connect to service
     auto connection = client.Connect();
@@ -355,7 +395,7 @@ int main(int argc, char* argv[])
     turnEnd = false;
 
     // Send data to service
-    std::vector<char> buffer;
+    vector<char> buffer;
     size_t totalBytesWritten {0};
 
     data.seekg(0L, data.end);
@@ -373,7 +413,7 @@ int main(int argc, char* argv[])
             connection->WriteAudio(reinterpret_cast<uint8_t*>(buffer.data()), bytesToWrite);
             totalBytesWritten += (size_t) bytesToWrite;
             // Sleep to simulate real-time traffic
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            this_thread::sleep_for(chrono::milliseconds(200));
         }
 
         // Send End of Audio to service to close the session.
@@ -387,7 +427,7 @@ int main(int argc, char* argv[])
         buffer.resize(fileSize);
         data.read(buffer.data(), fileSize);
         auto bytesToWrite = static_cast<size_t>(data.gcount());
-        connection->SendMessage(messagePath, reinterpret_cast<uint8_t*>(buffer.data()), bytesToWrite);
+        connection->SendMessage(inputMessagePath.c_str(), reinterpret_cast<uint8_t*>(buffer.data()), bytesToWrite);
         totalBytesWritten += bytesToWrite;
     }
 
@@ -404,7 +444,7 @@ int main(int argc, char* argv[])
     // Wait for end of recognition.
     while (!turnEnd)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        this_thread::sleep_for(chrono::milliseconds(500));
     }
 
     connection.reset();

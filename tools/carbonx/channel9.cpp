@@ -90,9 +90,9 @@ using namespace Microsoft::CognitiveServices::Speech::Translation;
 
 constexpr auto speechAndLuisRegion = L"westus2";
 constexpr auto speechSubscription = L"1f30c291f2474d39acfdf1d3bdf847c3";
-// constexpr auto luisSubscription = L"ee52996d8f814c0aa77f7a415f81bd4c";
-// constexpr auto luisRegion = L"westus2";
-// constexpr auto luisAppId = L"6ad2c77d180b45a288aa8c442538c090";
+constexpr auto luisSubscription = L"ee52996d8f814c0aa77f7a415f81bd4c";
+constexpr auto luisRegion = L"westus2";
+constexpr auto luisAppId = L"6ad2c77d180b45a288aa8c442538c090";
 
 constexpr auto translationSubscription = L"a8ddd80e37dc4c549d9bafd91dadc29a";
 constexpr auto translationDeploymentId = L"d4501bd5-a593-45bf-82a6-36ffc59d80a5";
@@ -162,7 +162,16 @@ void do_speech_continuous()
 
 void do_intent()
 {
-    auto factory = SpeechFactory::FromSubscription(speechSubscription, speechAndLuisRegion);
+    //auto factory = SpeechFactory::FromSubscription(speechSubscription, speechAndLuisRegion);
+    //auto factory = SpeechFactory::FromEndpoint(LR"(wss://speech.platform.bing.com/speech/recognition/interactive/cognitiveservices/v1?format=simple&language=en-us)", speechSubscription);
+    //auto factory = SpeechFactory::FromEndpoint(LR"(wss://speech.platform.bing.com/ppe/speech/uswest2/recognition/interactive/cognitiveservices/v1?format=simple&language=en-us&setflight=cognitiveservicesintent)", LR"(57f994b948ec4d1aaaaa4baee160c3e2)");
+    // auto factory = SpeechFactory::FromSubscription(LR"(57f994b948ec4d1aaaaa4baee160c3e2)", L"uswest2");
+    auto factory = SpeechFactory::FromSubscription(luisSubscription, luisRegion);
+
+    
+    //factory->Parameters.SetBool(L"CARBON-INTERNAL-USP-NoDGI", true);
+    // factory->Parameters.SetBool(L"CARBON-INTERNAL-USP-NoIntentJson", true);
+
     auto recognizer = factory->CreateIntentRecognizer();
 
     recognizer->IntermediateResult += [](const IntentRecognitionEventArgs& e) {
@@ -176,8 +185,7 @@ void do_intent()
         printf("Listening... (press ENTER to exit) \n\n");
     };
 
-    // auto model = LanguageUnderstandingModel::FromSubscription(luisSubscription, luisAppId, luisRegion);
-    auto model = LanguageUnderstandingModel::FromEndpoint(LR"(https://westus2.api.cognitive.microsoft.com/luis/v2.0/apps/6ad2c77d180b45a288aa8c442538c090?subscription-key=ee52996d8f814c0aa77f7a415f81bd4c)");
+    auto model = LanguageUnderstandingModel::FromSubscription(luisSubscription, luisAppId, luisRegion);
 
     //recognizer->AddIntent(L"all intents", IntentTrigger::From(model, L""));
     recognizer->AddIntent(L"1", IntentTrigger::From(model, L"TV.ChangeChannel"));
@@ -201,7 +209,7 @@ void do_intent()
 
 void do_intent_kws()
 {
-    auto factory = SpeechFactory::FromSubscription(speechSubscription, speechAndLuisRegion);
+    auto factory = SpeechFactory::FromSubscription(luisSubscription, luisAppId);
     auto recognizer = factory->CreateIntentRecognizer();
 
     recognizer->IntermediateResult += [](const IntentRecognitionEventArgs& e) {
@@ -215,8 +223,8 @@ void do_intent_kws()
         printf("KEYWORD SPOTTING: Say 'Hey Cortana' followed by whatever you want ...  (press ENTER to exit) \n\n");
     };
 
-    // auto model = LanguageUnderstandingModel::FromSubscription(luisSubscription, luisAppId, luisRegion);
-    auto model = LanguageUnderstandingModel::FromEndpoint(LR"(https://westus2.api.cognitive.microsoft.com/luis/v2.0/apps/6ad2c77d180b45a288aa8c442538c090?subscription-key=ee52996d8f814c0aa77f7a415f81bd4c)");
+    auto model = LanguageUnderstandingModel::FromSubscription(luisSubscription, luisAppId, luisRegion);
+    // auto model = LanguageUnderstandingModel::FromEndpoint(LR"(https://westus2.api.cognitive.microsoft.com/luis/v2.0/apps/6ad2c77d180b45a288aa8c442538c090?subscription-key=ee52996d8f814c0aa77f7a415f81bd4c)");
 
     //recognizer->AddIntent(L"all intents", IntentTrigger::From(model, L""));
     recognizer->AddIntent(L"1", IntentTrigger::From(model, L"TV.ChangeChannel"));

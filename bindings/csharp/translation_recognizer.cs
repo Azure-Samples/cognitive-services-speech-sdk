@@ -39,7 +39,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     ///
     /// static async Task TranslationRecognizerSample()
     /// {
-    ///     var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "");
+    ///     var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
     ///     string fromLanguage = "en-US";
     ///     var toLanguages = new List<string>() { "de-DE" };
     ///     TranslationRecognizer reco = factory.CreateTranslationRecognizerWithFileInput("audioFileName", fromLanguage, toLanguages);
@@ -151,7 +151,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// <code>
         /// static async Task TranslationRecognizerSample()
         /// {
-        ///     var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "");
+        ///     var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
         ///     string fromLanguage = "en-US";
         ///     var toLanguages = new List<string>() { "de-DE" };
         ///     Microsoft.CognitiveServices.Speech.Translation.TranslationRecognizer reco = factory.CreateTranslationRecognizerWithFileInput("audioFileName", fromLanguage, toLanguages);

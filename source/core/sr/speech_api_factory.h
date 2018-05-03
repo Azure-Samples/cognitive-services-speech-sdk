@@ -64,13 +64,13 @@ public:
 
 protected:
 
-    std::shared_ptr<ISpxRecognizer> CreateRecognizerInternal(const char* sessionClassName, const char* recognizerClassName, wchar_t const* fileName = nullptr, wchar_t const* language = nullptr);
+    std::shared_ptr<ISpxRecognizer> CreateRecognizerInternal(const char* sessionClassName, const char* recognizerClassName, const wchar_t* fileName = nullptr, const wchar_t* language = nullptr);
     std::shared_ptr<ISpxNamedProperties> GetParentProperties() override { return SpxQueryService<ISpxNamedProperties>(GetSite()); }
 
 private:
 
     std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerInternal(wchar_t const* fileNameStr, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice);
-    void SetTranslationParameter(const std::shared_ptr<ISpxNamedProperties> namedProperties, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice);
+    void SetTranslationParameter(const std::shared_ptr<ISpxNamedProperties>& namedProperties, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice);
 
 };
 

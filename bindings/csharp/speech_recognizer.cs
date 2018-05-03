@@ -38,7 +38,7 @@ namespace Microsoft.CognitiveServices.Speech
     ///
     /// static async Task SpeechRecognizerSample()
     /// {
-    ///     var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "");
+    ///     var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
     ///     SpeechRecognizer reco = factory.CreateSpeechRecognizerWithFileInput("audioFileName");
     ///
     ///     reco.OnSessionEvent += MySessionEventHandler;
@@ -138,7 +138,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <code>
         /// static async Task SpeechRecognizerSample()
         /// {
-        ///     var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "");
+        ///     var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
         ///     SpeechRecognizer reco = factory.CreateSpeechRecognizerWithFileInput("audioFileName");
         ///
         ///     // Starts recognition.

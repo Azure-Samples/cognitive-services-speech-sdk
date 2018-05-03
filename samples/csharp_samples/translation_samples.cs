@@ -23,8 +23,9 @@ namespace MicrosoftSpeechSDKSamples
             const string GermanVoice = "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)";
 
             // Creates an instance of a speech factory with specified
-            // subscription key.
-            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "");
+            // subscription key and service region. Replace with your own subscription key
+            // and service region (e.g., "westus").
+            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             // Sets source and target languages
             string fromLanguage = "en-US";
@@ -90,8 +91,9 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task TranslationWithFileAsync()
         {
             // Creates an instance of a speech factory with specified
-            // subscription key.
-            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "");
+            // subscription key and service region. Replace with your own subscription key
+            // and service region (e.g., "westus").
+            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             // Sets source and target languages
             string fromLanguage = "en-US";

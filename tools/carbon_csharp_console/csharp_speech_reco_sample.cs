@@ -34,61 +34,137 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Speech recognition: Session event: {0}.", e.ToString()));
         }
 
-        public static async Task SpeechRecognitionBaseModelAsync(string keySpeech, string fileName)
+        public static async Task SpeechRecognitionBaseModelAsync(string keySpeech, string lang, string fileName)
         {
-            var factory = SpeechFactory.FromSubscription(keySpeech, "");
+            var factory = SpeechFactory.FromSubscription(keySpeech, "westus");
 
             Console.WriteLine("Speech Recognition using base model.");
             if (string.IsNullOrEmpty(fileName) || String.Compare(fileName, "mic", true) == 0)
             {
-                using (var reco = factory.CreateSpeechRecognizer())
+                if (string.IsNullOrEmpty(lang))
                 {
-                    await DoSpeechRecognitionAsync(reco).ConfigureAwait(false);
+                    using (var reco = factory.CreateSpeechRecognizer())
+                    {
+                        await DoSpeechRecognitionAsync(reco, null).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    using (var reco = factory.CreateSpeechRecognizer(lang))
+                    {
+                        await DoSpeechRecognitionAsync(reco, null).ConfigureAwait(false);
+                    }
                 }
             }
             else
             {
-                using (var reco = factory.CreateSpeechRecognizerWithFileInput(fileName))
+                if (string.IsNullOrEmpty(lang))
                 {
-                    await DoSpeechRecognitionAsync(reco).ConfigureAwait(false);
+                    using (var reco = factory.CreateSpeechRecognizerWithFileInput(fileName))
+                    {
+                        await DoSpeechRecognitionAsync(reco, null).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    using (var reco = factory.CreateSpeechRecognizerWithFileInput(fileName, lang))
+                    {
+                        await DoSpeechRecognitionAsync(reco, null).ConfigureAwait(false);
+                    }
                 }
             }
         }
 
-        //public static async Task SpeechRecognitionCustomizedModelAsync(string keySpeech, string modelId, string fileName)
-        //{
-        //    var factory = SpeechFactory.Instance;
+        public static async Task SpeechRecognitionCustomizedModelAsync(string keySpeech, string lang, string model, string fileName)
+        {
+            var factory = SpeechFactory.FromSubscription(keySpeech, "westus");
 
-        //    Console.WriteLine(String.Format("Speech Recognition using customized model:{0}.", modelId));
+            Console.WriteLine("Speech Recognition using customized model.");
+            if (string.IsNullOrEmpty(fileName) || String.Compare(fileName, "mic", true) == 0)
+            {
+                if (string.IsNullOrEmpty(lang))
+                {
+                    using (var reco = factory.CreateSpeechRecognizer())
+                    {
+                        await DoSpeechRecognitionAsync(reco, model).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    using (var reco = factory.CreateSpeechRecognizer(lang))
+                    {
+                        await DoSpeechRecognitionAsync(reco, model).ConfigureAwait(false);
+                    }
+                }
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(lang))
+                {
+                    using (var reco = factory.CreateSpeechRecognizerWithFileInput(fileName))
+                    {
+                        await DoSpeechRecognitionAsync(reco, model).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    using (var reco = factory.CreateSpeechRecognizerWithFileInput(fileName, lang))
+                    {
+                        await DoSpeechRecognitionAsync(reco, model).ConfigureAwait(false);
+                    }
+                }
+            }
+        }
 
-        //    factory.SubscriptionKey = keySpeech;
-
-        //    await DoSpeechRecognitionAsync(factory, fileName).ConfigureAwait(false);
-        //}
-
-        public static async Task SpeechRecognitionByEndpointAsync(string subscriptionKey, string endpoint, string fileName)
+        public static async Task SpeechRecognitionByEndpointAsync(string subscriptionKey, string endpoint, string lang, string model, string fileName)
         {
             Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Speech Recognition using endopoint:{0}.", endpoint));
             SpeechFactory factory = SpeechFactory.FromEndPoint(new Uri(endpoint), subscriptionKey);
 
-            if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
+            if ((string.IsNullOrEmpty(fileName)) || String.Compare(fileName, "mic", true) == 0)
             {
-                using (var reco = factory.CreateSpeechRecognizer())
+                if (string.IsNullOrEmpty(lang))
                 {
-                    await DoSpeechRecognitionAsync(reco).ConfigureAwait(false);
+                    using (var reco = factory.CreateSpeechRecognizer())
+                    {
+                        await DoSpeechRecognitionAsync(reco, model).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    using (var reco = factory.CreateSpeechRecognizer(lang))
+                    {
+                        await DoSpeechRecognitionAsync(reco, model).ConfigureAwait(false);
+                    }
                 }
             }
             else
             {
-                using (var reco = factory.CreateSpeechRecognizerWithFileInput(fileName))
+                if (string.IsNullOrEmpty(lang))
                 {
-                    await DoSpeechRecognitionAsync(reco).ConfigureAwait(false);
+                    using (var reco = factory.CreateSpeechRecognizerWithFileInput(fileName))
+                    {
+                        await DoSpeechRecognitionAsync(reco, model).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    using (var reco = factory.CreateSpeechRecognizerWithFileInput(fileName, lang))
+                    {
+                        await DoSpeechRecognitionAsync(reco, model).ConfigureAwait(false);
+                    }
                 }
             }
         }
 
-        public static async Task DoSpeechRecognitionAsync(SpeechRecognizer reco)
+        public static async Task DoSpeechRecognitionAsync(SpeechRecognizer reco, string modelId)
         {
+            // Sets deployment id of a customized model if needed.
+            if (!string.IsNullOrEmpty(modelId))
+            {
+                reco.DeploymentId = modelId;
+            }
+
             // Subscribes to events.
             reco.IntermediateResultReceived += MyIntermediateResultEventHandler;
             reco.FinalResultReceived += MyFinalResultEventHandler;

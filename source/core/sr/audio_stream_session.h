@@ -151,8 +151,10 @@ public:
     void AdapterCompletedSetFormatStop(ISpxKwsEngineAdapter* /* adapter */) override { AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio::Keyword); }
 
     // --- ISpxRecoEngineAdapterSite (first part...)
+    void GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation) override;
+
     std::list<std::string> GetListenForList() override;
-    void GetIntentInfo(std::string& provider, std::string& id, std::string& key) override;
+    void GetIntentInfo(std::string& provider, std::string& id, std::string& key, std::string& region) override;
 
     void AdapterStartingTurn(ISpxRecoEngineAdapter* adapter) override;
     void AdapterStartedTurn(ISpxRecoEngineAdapter* adapter, const std::string& id) override;
@@ -196,6 +198,9 @@ private:
     std::shared_ptr<ISpxRecoEngineAdapter> EnsureInitRecoEngineAdapter();
     void InitRecoEngineAdapter();
 
+    void EnsureIntentRegionSet();
+    std::string SpeechRegionFromIntentRegion(const std::string& intentRegion);
+
     std::shared_ptr<ISpxKwsEngineAdapter> EnsureInitKwsEngineAdapter(std::shared_ptr<ISpxKwsModel> model);
     void InitKwsEngineAdapter(std::shared_ptr<ISpxKwsModel> model);
 
@@ -227,7 +232,7 @@ private:
     void InitLuEngineAdapter();
 
     std::list<std::string> GetListenForListFromLuEngineAdapter();
-    void GetIntentInfoFromLuEngineAdapter(std::string& provider, std::string& id, std::string& key);
+    void GetIntentInfoFromLuEngineAdapter(std::string& provider, std::string& id, std::string& key, std::string& region);
 
     std::shared_ptr<ISpxLuEngineAdapter> GetLuEngineAdapter();
     std::shared_ptr<ISpxNamedProperties> GetParentProperties() override;

@@ -14,6 +14,7 @@
 #include "asyncop.h"
 #include "create_object_helpers.h"
 #include "guid_utils.h"
+#include "string_utils.h"
 #include "ispxinterfaces.h"
 #include "interface_helpers.h"
 #include "site_helpers.h"
@@ -56,6 +57,9 @@ void CSpxAudioStreamSession::Init()
 void CSpxAudioStreamSession::Term()
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    // To "protect" against shutdown issues...
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
     // Make sure no more async tasks are still needing to be completed... 
     m_taskHelper.RunAsyncWaitAndClear();
@@ -585,6 +589,21 @@ void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint
     }
 }
 
+void CSpxAudioStreamSession::GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation)
+{
+    SPX_DBG_ASSERT(m_recognizers.size() == 1); // we only support 1 recognizer today...
+    
+    auto recognizer = m_recognizers.front().lock();
+    auto intentRecognizer = SpxQueryInterface<ISpxIntentRecognizer>(recognizer);
+    auto translationRecognizer = SpxQueryInterface<ISpxTranslationRecognizer>(recognizer);
+
+    *countIntent = (intentRecognizer != nullptr) ? 1 : 0;
+    *countTranslation = (translationRecognizer != nullptr) ? 1 : 0;
+    *countSpeech = 1 - *countIntent - *countTranslation;
+
+    SPX_DBG_TRACE_VERBOSE("%s: countSpeech=%d; countIntent=%d; countTranslation=%d", __FUNCTION__, *countSpeech, *countIntent, *countTranslation);
+}
+
 std::list<std::string> CSpxAudioStreamSession::GetListenForList()
 {
     return m_luAdapter != nullptr
@@ -592,11 +611,11 @@ std::list<std::string> CSpxAudioStreamSession::GetListenForList()
         : std::list<std::string>();
 }
 
-void CSpxAudioStreamSession::GetIntentInfo(std::string& provider, std::string& id, std::string& key)
+void CSpxAudioStreamSession::GetIntentInfo(std::string& provider, std::string& id, std::string& key, std::string& region)
 {
     if (m_luAdapter != nullptr)
     {
-        GetIntentInfoFromLuEngineAdapter(provider, id, key);
+        GetIntentInfoFromLuEngineAdapter(provider, id, key, region);
     }
 }
 
@@ -842,6 +861,7 @@ std::shared_ptr<ISpxRecoEngineAdapter> CSpxAudioStreamSession::EnsureInitRecoEng
     if (m_recoAdapter == nullptr)
     {
         InitRecoEngineAdapter();
+        EnsureIntentRegionSet();
     }
 
     return m_recoAdapter;
@@ -892,6 +912,84 @@ std::shared_ptr<ISpxKwsEngineAdapter> CSpxAudioStreamSession::EnsureInitKwsEngin
     }
 
     return m_kwsAdapter;
+}
+
+void CSpxAudioStreamSession::EnsureIntentRegionSet()
+{
+    SPX_DBG_ASSERT(m_recognizers.size() == 1); // we only support 1 recognizer today...
+
+    auto recognizer = m_recognizers.front();
+    auto intentRecognizer = SpxQueryInterface<ISpxIntentRecognizer>(recognizer.lock());
+    if (intentRecognizer != nullptr && m_luAdapter != nullptr)
+    {
+       std::string provider, id, key, region;
+       GetIntentInfoFromLuEngineAdapter(provider, id, key, region);
+       SetStringValue(g_INTENT_Region, PAL::ToWString(SpeechRegionFromIntentRegion(region)).c_str());
+    }
+}
+
+std::string CSpxAudioStreamSession::SpeechRegionFromIntentRegion(const std::string& intentRegion)
+{
+    static std::pair<std::string, std::string> intentToSpeechRegion[] = {
+
+        std::make_pair("West US",          "uswest"),
+        std::make_pair("US West",          "uswest"),
+        std::make_pair("westus",           "uswest"),
+
+        std::make_pair("West US 2",        "uswest2"),
+        std::make_pair("US West 2",        "uswest2"),
+        std::make_pair("westus2",          "uswest2"),
+
+        std::make_pair("South Central US", "ussouthcentral"),
+        std::make_pair("US South Central", "ussouthcentral"),
+        std::make_pair("southcentralus",   "ussouthcentral"),
+
+        std::make_pair("West Central US",  "uswestcentral"),
+        std::make_pair("US West Central",  "uswestcentral"),
+        std::make_pair("westcentralus",    "uswestcentral"),
+
+        std::make_pair("East US",          "useast"),
+        std::make_pair("US East",          "useast"),
+        std::make_pair("eastus",           "useast"),
+
+        std::make_pair("East US 2",        "useast2"),
+        std::make_pair("US East 2",        "useast2"),
+        std::make_pair("eastus2",          "useast2"),
+
+        std::make_pair("West Europe",      "europewest"),
+        std::make_pair("Europe West",      "europewest"),
+        std::make_pair("westeurope",       "europewest"),
+
+        std::make_pair("North Europe",     "europenorth"),
+        std::make_pair("Europe North",     "europenorth"),
+        std::make_pair("northeurope",      "europenorth"),
+
+        std::make_pair("Brazil South",     "brazilsouth"),
+        std::make_pair("South Brazil",     "brazilsouth"),
+        std::make_pair("southbrazil",      "brazilsouth"),
+
+        std::make_pair("Australia East",   "australiaeast"),
+        std::make_pair("East Australia",   "australiaeast"),
+        std::make_pair("eastaustralia",    "australiaeast"),
+
+        std::make_pair("Southeast Asia",   "asiasoutheast"),
+        std::make_pair("Asia Southeast",   "asiasoutheast"),
+        std::make_pair("southeastasia",    "asiasoutheast"),
+
+        std::make_pair("East Asia",        "asiaeast"),
+        std::make_pair("Asia East",        "asiaeast"),
+        std::make_pair("eastasia",         "asiaeast"),
+    };
+
+    for (auto item : intentToSpeechRegion)
+    {
+        if (PAL::stricmp(item.first.c_str(), intentRegion.c_str()) == 0)
+        {
+            return item.second;
+        }
+    }
+
+    return intentRegion;
 }
 
 void CSpxAudioStreamSession::InitKwsEngineAdapter(std::shared_ptr<ISpxKwsModel> model)
@@ -1292,11 +1390,11 @@ std::list<std::string> CSpxAudioStreamSession::GetListenForListFromLuEngineAdapt
     return triggerService->GetListenForList();
 }
 
-void CSpxAudioStreamSession::GetIntentInfoFromLuEngineAdapter(std::string& provider, std::string& id, std::string& key)
+void CSpxAudioStreamSession::GetIntentInfoFromLuEngineAdapter(std::string& provider, std::string& id, std::string& key, std::string& region)
 {
-    SPX_DBG_ASSERT(GetLuEngineAdapter() != nullptr);
+    SPX_DBG_ASSERT(m_luAdapter != nullptr);
     auto triggerService = SpxQueryInterface<ISpxIntentTriggerService>(m_luAdapter);
-    return triggerService->GetIntentInfo(provider, id, key);
+    return triggerService->GetIntentInfo(provider, id, key, region);
 }
 
 std::shared_ptr<ISpxLuEngineAdapter> CSpxAudioStreamSession::GetLuEngineAdapter()

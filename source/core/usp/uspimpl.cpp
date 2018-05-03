@@ -73,10 +73,15 @@ static void throw_if_null(const T* ptr, const string& name)
     }
 }
 
+inline bool contains(const string& content, const string& name)
+{
+    return (content.find(name) != string::npos) ? true : false;
+}
+
 // Todo(1126805) url builder + auth interfaces
 
 const vector<string> g_recoModeStrings = { "interactive", "conversation", "dictation" };
-const vector<string> g_outFormatStrings = { "format=simple", "format=detailed" };
+const vector<string> g_outFormatStrings = { "simple", "detailed" };
 
 
 // TODO: remove this as soon as metrics.c is re-written in cpp.
@@ -203,23 +208,6 @@ void Connection::Impl::Shutdown()
 
 void Connection::Impl::Validate()
 {
-    if (m_config.m_endpoint == EndpointType::Cris && !m_config.m_language.empty())
-    {
-        // TODO: make this a proper warning.
-        LogInfo("WARNING: Language option for CRIS service is not yet supported and will probably be ignored.");
-    }
-
-    if (m_config.m_endpoint != EndpointType::Cris && !m_config.m_modelId.empty())
-    {
-        // TODO: make this a proper warning.
-        LogInfo("WARNING: Modeld id option can only used in combination with a CRIS endpoint and will be ignored.");
-    }
-
-    if (m_config.m_endpoint == EndpointType::Custom && m_config.m_endpointUrl.empty())
-    {
-        ThrowInvalidArgumentException("No valid endpoint was specified.");
-    }
-
     if (m_config.m_authData.empty())
     {
         ThrowInvalidArgumentException("No valid authentication mechanism was specified.");
@@ -238,69 +226,124 @@ string Connection::Impl::ConstructConnectionUrl() const
 {
     auto recoMode = static_cast<underlying_type_t<RecognitionMode>>(m_config.m_recoMode);
     ostringstream oss;
+    bool customEndpoint = false;
 
-    oss << endpoint::protocol;
-    switch (m_config.m_endpoint) 
+    // Using customized endpoint if it is defined.
+    if (!m_config.m_customEndpointUrl.empty())
     {
-    case EndpointType::BingSpeech:
-        oss << endpoint::hostname::bingSpeech
-            << endpoint::pathPrefix
-            << g_recoModeStrings[recoMode]
-            << endpoint::pathSuffix;
-        break;
-    case EndpointType::Cris:
-        oss << m_config.m_modelId
-            << endpoint::hostname::CRIS
-            << endpoint::pathPrefix
-            << g_recoModeStrings[recoMode]
-            << endpoint::pathSuffix;
-        break;
-    case EndpointType::Translation:
-        oss << endpoint::hostname::Translation
-            << endpoint::translation::path;
-        break;
-    case EndpointType::CDSDK:
-        oss << endpoint::hostname::CDSDK;
-        break;
-    case EndpointType::Custom:
-        // Just returns what user passes.
-        return m_config.m_endpointUrl;
-        break;
-    default:
-        ThrowInvalidArgumentException("Unknown endpoint type.");
+        oss << m_config.m_customEndpointUrl;
+        customEndpoint = true;
+    }
+    else
+    {
+        oss << endpoint::protocol;
+        switch (m_config.m_endpoint)
+        {
+        case EndpointType::Speech:
+            /*oss << m_config.m_region
+                << endpoint::unifiedspeech::hostnameSuffix*/
+            // Todo: REMOVE PPE BEFORE RELEASE.
+            oss << endpoint::unifiedspeech::hostnamePPE
+            // TODO DONE
+                << endpoint::unifiedspeech::pathPrefix
+                << g_recoModeStrings[recoMode]
+                << endpoint::unifiedspeech::pathSuffix;
+            break;
+        case EndpointType::Translation:
+            /*oss << m_config.m_region
+                << endpoint::translation::hostnameSuffix*/
+            // Todo: REMOVE PPE BEFORE RELEASE.
+            oss << endpoint::unifiedspeech::hostnamePPE
+            // TODO DONE
+                << endpoint::translation::path;
+            break;
+        case EndpointType::Intent:
+            oss << endpoint::luis::hostname
+                // << endpoint::luis::pathPrefix1
+                // REMOVE PPE BEFORE RELEASE
+                << endpoint::luis::ppePathPrefix1
+                << m_config.m_intentRegion
+                << endpoint::luis::pathPrefix2
+                << g_recoModeStrings[(int)RecognitionMode::Interactive]
+                << endpoint::luis::pathSuffix
+                // REMOVE PPE BEFORE RELEASE
+                << '?' << endpoint::luis::ppeFlightParam;
+            break;
+        case EndpointType::CDSDK:
+            oss << endpoint::CDSDK::url;
+            break;
+        default:
+            ThrowInvalidArgumentException("Unknown endpoint type.");
+        }
     }
 
-    // The first query parameter does not require '&'.
+    // The first query parameter.
     auto format = static_cast<underlying_type_t<OutputFormat>>(m_config.m_outputFormat);
-    oss << g_outFormatStrings[format];
+    if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::outputFormatQueryParam))
+    {
+        auto delim = (customEndpoint && (oss.str().find('?') != string::npos)) ? '&' : '?';
+        oss << delim << endpoint::unifiedspeech::outputFormatQueryParam << g_outFormatStrings[format];
+    }
 
     // Todo: use libcurl or another library to encode the url as whole, instead of each parameter.
-    if (m_config.m_endpoint == EndpointType::Translation)
+    switch(m_config.m_endpoint)
     {
-        oss << '&' << endpoint::translation::from << EncodeParameterString(m_config.m_translationSourceLanguage);
-        size_t start = 0;
-        auto delim = ',';
-        size_t end = m_config.m_translationTargetLanguages.find_first_of(delim);
-        while (end != string::npos)
+    case EndpointType::Speech:
+        if (!m_config.m_modelId.empty())
         {
-            oss << '&' << endpoint::translation::to << EncodeParameterString(m_config.m_translationTargetLanguages.substr(start, end - start));
-            start = end + 1;
-            end = m_config.m_translationTargetLanguages.find_first_of(delim, start);
+            if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::deploymentIdQueryParam))
+            {
+                oss << '&' << endpoint::unifiedspeech::deploymentIdQueryParam << m_config.m_modelId;
+            }
         }
-        oss << '&' << endpoint::translation::to << EncodeParameterString(m_config.m_translationTargetLanguages.substr(start, end));
+        else if (!m_config.m_language.empty())
+        {
+            if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::langQueryParam))
+            {
+                oss << '&' << endpoint::unifiedspeech::langQueryParam << m_config.m_language;
+            }
+        }
+        break;
+    case EndpointType::Intent:
+        if (!m_config.m_language.empty())
+        {
+            if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::langQueryParam))
+            {
+                oss << '&' << endpoint::unifiedspeech::langQueryParam << m_config.m_language;
+            }
+        }
+        break;
+    case EndpointType::Translation:
+        if (!customEndpoint || !contains(oss.str(), endpoint::translation::from))
+        {
+            oss << '&' << endpoint::translation::from << EncodeParameterString(m_config.m_translationSourceLanguage);
+        }
+        if (!customEndpoint || !contains(oss.str(), endpoint::translation::to))
+        {
+            size_t start = 0;
+            auto delim = ',';
+            size_t end = m_config.m_translationTargetLanguages.find_first_of(delim);
+            while (end != string::npos)
+            {
+                oss << '&' << endpoint::translation::to << EncodeParameterString(m_config.m_translationTargetLanguages.substr(start, end - start));
+                start = end + 1;
+                end = m_config.m_translationTargetLanguages.find_first_of(delim, start);
+            }
+            oss << '&' << endpoint::translation::to << EncodeParameterString(m_config.m_translationTargetLanguages.substr(start, end));
+        }
 
         if (!m_config.m_translationVoice.empty())
         {
-            oss << '&' << endpoint::translation::features << endpoint::translation::requireVoice;
-            oss << '&' << endpoint::translation::voice << EncodeParameterString(m_config.m_translationVoice);
+            if (!customEndpoint || !contains(oss.str(), endpoint::translation::voice))
+            {
+                oss << '&' << endpoint::translation::features << endpoint::translation::requireVoice;
+                oss << '&' << endpoint::translation::voice << EncodeParameterString(m_config.m_translationVoice);
+            }
         }
-        // Need to provide cid for now.
-        oss << '&' << "cid=" << m_config.m_modelId;
-    }
-    else if (!m_config.m_language.empty())
-    {
-        // Set language for non-translation recognizer.
-        oss << '&' << endpoint::langQueryParam << EncodeParameterString(m_config.m_language);
+        break;
+    case EndpointType::CDSDK:
+        // no query parameter needed.
+        break;
     }
 
     return oss.str();
@@ -633,7 +676,11 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
         }
     }
 
-    if (result.translationStatus == TranslationStatus::Success)
+    if (expectStatus && result.translationStatus != TranslationStatus::Success)
+    {
+        return result;
+    }
+    else
     {
         auto translations = translation.at(json_properties::translations);
         for (const auto& object : translations)
@@ -648,9 +695,8 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
 
             result.translations[PAL::ToWString(lang)] = PAL::ToWString(txt);
         }
+        return result;
     }
-
-    return result;
 }
 
 // Callback for data available on tranport
@@ -790,6 +836,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         auto translationResult = RetrieveTranslationResult(json, false);
         // TranslationStatus is always success for translation.hypothesis
         translationResult.translationStatus = TranslationStatus::Success;
+
         connection->Invoke([&] { callbacks.OnTranslationHypothesis({
             std::move(speechResult.json),
             speechResult.offset,
