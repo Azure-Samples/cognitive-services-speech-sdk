@@ -302,8 +302,9 @@ private:
 
         virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizer(const std::wstring& language) override
         {
-            UNUSED(language);
-            throw SPXERR_NOT_IMPL;
+            SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
+            SPX_THROW_ON_FAIL(::SpeechFactory_CreateIntentRecognizer_With_Language(m_hfactory, &hreco, language.c_str()));
+            return std::make_shared<Intent::IntentRecognizer>(hreco);
         }
 
         virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName) override
@@ -315,9 +316,9 @@ private:
 
         virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) override
         {
-            UNUSED(language);
-            UNUSED(fileName);
-            throw SPXERR_NOT_IMPL;
+            SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
+            SPX_THROW_ON_FAIL(::SpeechFactory_CreateIntentRecognizer_With_FileInputAndLanguage(m_hfactory, &hreco, language.c_str(), fileName.c_str()));
+            return std::make_shared<Intent::IntentRecognizer>(hreco);
         }
 
         virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") override

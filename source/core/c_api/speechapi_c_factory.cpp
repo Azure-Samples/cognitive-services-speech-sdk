@@ -189,10 +189,17 @@ SPXAPI SpeechFactory_CreateIntentRecognizer_With_Defaults(SPXFACTORYHANDLE hfact
 
 SPXAPI SpeechFactory_CreateIntentRecognizer_With_Language(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const wchar_t* pszLanguage)
 {
-    UNUSED(hfactory);
-    UNUSED(phreco);
-    UNUSED(pszLanguage);
-    return SPXERR_NOT_IMPL;
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
+        auto factory = (*factoryhandles)[hfactory];
+        *phreco = SPXHANDLE_INVALID;
+
+        auto recognizer = factory->CreateIntentRecognizer(pszLanguage);
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        *phreco = recohandles->TrackHandle(recognizer);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 SPXAPI SpeechFactory_CreateIntentRecognizer_With_FileInput(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const wchar_t* pszFileName)
@@ -210,13 +217,19 @@ SPXAPI SpeechFactory_CreateIntentRecognizer_With_FileInput(SPXFACTORYHANDLE hfac
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI SpeechFactory_CreateIntentRecognizer(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName)
+SPXAPI SpeechFactory_CreateIntentRecognizer_With_FileInputAndLanguage(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName)
 {
-    UNUSED(hfactory);
-    UNUSED(phreco);
-    UNUSED(pszLanguage);
-    UNUSED(pszFileName);
-    return SPXERR_NOT_IMPL;
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
+        auto factory = (*factoryhandles)[hfactory];
+        *phreco = SPXHANDLE_INVALID;
+
+        auto recognizer = factory->CreateIntentRecognizerWithFileInput(pszFileName, pszLanguage);
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        *phreco = recohandles->TrackHandle(recognizer);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 inline vector<wstring> GetVectorFromBuffer(const wchar_t* buffer[], size_t entries)

@@ -43,10 +43,20 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateIntentRecognizer()
     return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxIntentRecognizer");
 }
 
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateIntentRecognizer(const std::wstring& language)
+{
+    return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxIntentRecognizer",nullptr, language.c_str());
+}
+
 std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateIntentRecognizerWithFileInput(const std::wstring& fileName)
 {
     return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxIntentRecognizer", fileName.c_str());
 }
+
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language)
+{
+    return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxIntentRecognizer", fileName.c_str(), language.c_str());
+} 
 
 std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream)
 {
