@@ -11,30 +11,31 @@ namespace CsharpHelloWorld
     {
         static void Main(string[] args)
         {
-            const string usage = "Usage: CsharpHelloWorld <subscriptionKey> [<path-to-wav-file>]\n";
+            const string usage = "Usage: CsharpHelloWorld <subscriptionKey> <service-region> [<path-to-wav-file>]\n";
 
-            if (args.Length == 0)
+            if (args.Length < 2)
             {
                 // In Visual Studio, right-click the CsharpHelloWorld project in the Solution Explorer and add
                 // your subscription key to Properties > Start options > Command line options.
-                Console.WriteLine("Error: missing speech subscription key");
+                Console.WriteLine("Error: missing parameters");
                 Console.Write(usage);
                 Environment.Exit(1);
             }
 
             var subscriptionKey = args[0];
+            var region = args[1];
             string filename = string.Empty;
 
-            if (2 < args.Length)
+            if (3 < args.Length)
             {
                 Console.WriteLine("Error: too many parameters.");
                 Console.Write(usage);
                 Environment.Exit(1);
             }
 
-            if (args.Length == 2)
+            if (args.Length == 3)
             {
-                filename = args[1];
+                filename = args[2];
             }
 
             var factory = SpeechFactory.FromSubscription(subscriptionKey, "westus");

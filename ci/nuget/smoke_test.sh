@@ -31,10 +31,11 @@ PATCHPACKAGEVERSION
 SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
 
-USAGE="Usage: $0 <path-to-nuget-package-or-containing-directory> <speech-subscription-key>"
+USAGE="Usage: $0 <path-to-nuget-package-or-containing-directory> <speech-subscription-key> [<region>]"
 
 PACKAGE_PATH="${1?$USAGE}"
 SPEECH_SUBSCRIPTION_KEY="${2?$USAGE}"
+REGION="${3:-westus}"
 
 if [[ -n $NUGETEXETOOLPATH ]]; then
   NUGETEXETOOLPATH="$(cygpath --unix --absolute "$NUGETEXETOOLPATH")"
@@ -93,7 +94,7 @@ for useDebugLibs in 0; do # TODO add back 1
   BINROOT=
   [[ $platform == x64 ]] && BINROOT=/$platform
   [[ $useDebugLibs == 1 ]] && echo ::: Running with debug libraries - if this hangs there may be a debug assertion with a pop-up window that causes a timeout.
-  ./samples/CxxHelloWorld$BINROOT/$configuration/CxxHelloWorld.exe $SPEECH_SUBSCRIPTION_KEY $WAV_PATH
+  ./samples/CxxHelloWorld$BINROOT/$configuration/CxxHelloWorld.exe $SPEECH_SUBSCRIPTION_KEY $REGION $WAV_PATH
 done
 done
 done
@@ -115,7 +116,7 @@ for configuration in Release; do # TODO add back Debug
 for platform in x86 x64; do
 #for useDebugLibs in 1 0; do
   MSYS_NO_PATHCONV=1 "$MSBUILD15" /m /p:Platform=$platform /p:Configuration=$configuration /p:SpeechSdkUseDebugLibs=$useDebugLibs /p:SpeechSdkVersion=$PACKAGE_VERSION $MANAGED_SAMPLE_SLN
-  ./samples/CsharpHelloWorld/CsharpHelloWorld/bin/$platform/$configuration/CsharpHelloWorld.exe $SPEECH_SUBSCRIPTION_KEY $WAV_PATH
+  ./samples/CsharpHelloWorld/CsharpHelloWorld/bin/$platform/$configuration/CsharpHelloWorld.exe $SPEECH_SUBSCRIPTION_KEY $REGION $WAV_PATH
 #done
 done
 done

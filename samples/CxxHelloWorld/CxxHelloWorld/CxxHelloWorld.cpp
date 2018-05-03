@@ -8,34 +8,36 @@
 #include <speechapi_cxx.h>
 
 using namespace std;
+using namespace Microsoft::CognitiveServices::Speech;
 
 int wmain(int argc, wchar_t **argv)
 {
-    auto usage = L"Usage: CxxHelloWorld <subscriptionKey> [<path-to-wav-file>]\n";
+    auto usage = L"Usage: CxxHelloWorld <subscriptionKey> <service-region> [<path-to-wav-file>]\n";
 
-    if (argc < 2)
+    if (argc < 3)
     {
         // In Visual Studio, right-click the CxxHelloWorld project in the Solution Explorer and add
         // your subscription key to Properties > Debugging > Command Arguments.
-        wcout << "Error: missing speech subscription key.\n" << usage;
+        wcout << "Error: missing parameters.\n" << usage;
         exit(1);
     }
 
     wstring subscriptionKey{ argv[1] };
+    wstring region{ argv[2] };
     wstring filename;
 
-    if (3 < argc)
+    if (4 < argc)
     {
         wcout << "Error: too many parameters.\n" << usage;
         exit(1);
     }
 
-    if (argc == 3)
+    if (argc == 4)
     {
-        filename = wstring(argv[2]);
+        filename = wstring(argv[3]);
     }
 
-    auto factory = Microsoft::CognitiveServices::Speech::SpeechFactory::FromSubscription(subscriptionKey, L"westus");
+    auto factory = SpeechFactory::FromSubscription(subscriptionKey, region);
 
     auto recognizeFromFile = !filename.empty();
 
@@ -46,7 +48,7 @@ int wmain(int argc, wchar_t **argv)
 
     int exitCode = 0;
 
-    if (result->Reason != Microsoft::CognitiveServices::Speech::Reason::Recognized) {
+    if (result->Reason != Reason::Recognized) {
         exitCode = 1;
         wcout << L"There was an error, reason " << int(result->Reason) << L" - " << result->ErrorDetails << '\n';
     }

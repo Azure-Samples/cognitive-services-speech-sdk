@@ -41,7 +41,7 @@ steps:
     type: FilePath
     scriptPath: 'ci/drop/test-quickstart-linux.sh'
     args: '--smoke-test "$(Build.ArtifactStagingDirectory)/LinuxRelDrop/csspeech-$(Version).tar.gz"'
-  timeoutInMinutes: 5
+  timeoutInMinutes: 2
   continueOnError: true
   env:
     SPEECH_SUBSCRIPTION_KEY: $(KeySkyman)

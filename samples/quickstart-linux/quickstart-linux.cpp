@@ -19,12 +19,13 @@ void recognizeSpeech() {
     wstring_convert<codecvt_utf8_utf16<wchar_t>> cvt;
 
     wstring subscriptionKey{ L"YourSubscriptionKey" };
+    wstring region{ L"YourServiceRegion" };
 
 #ifdef FROM_FILE
     wstring filename = L"YourAudioFile.wav";
 #endif
 
-    auto factory = SpeechFactory::FromSubscription(subscriptionKey, L"");
+    auto factory = SpeechFactory::FromSubscription(subscriptionKey, region);
 
 #ifndef FROM_FILE
     auto recognizer = factory->CreateSpeechRecognizer();
