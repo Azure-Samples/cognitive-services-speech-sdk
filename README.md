@@ -1,57 +1,35 @@
-# Project Name
+# Sample Repository for the Cognitive Services Speech SDK
 
-(short, 1-3 sentenced, description of the project)
+This project hosts the **samples** for the Cognitive Services Speech SDK. To find out more about the Cognitive Services Speech SDK itself, please visit the [SDK documentation site](https://aks.ms/csspeech).
 
 ## Features
 
-This project framework provides the following features:
+This repository hosts samples that help you to get started with several features of the SDK:
 
-* Feature 1
-* Feature 2
-* ...
+- [Speech-To-Text](../Speech-to-Text/overview.md)
+
+- [Speech Translation](https://www.microsoft.com/en-us/translator/speech.aspx)
+
+- [Language Understanding and Intent Service](https://aka.ms/csspeech/luisdocs)
+
+In addition more complex scenarios are included to give you a head-start on using speech technology in your dapplication.
+
+We tested the samples with the latest released version of the SDK on the Windows 10 and Ubuntu 16.4 platform.
 
 ## Getting Started
 
-### Prerequisites
+The SDK documentation has extensive sections about `Getting Started`, `Setting up the SDK`, as well as the mechanism to acquire the required `subsctiption keys`. You will need subscription keys to run the samples on your machines, you therfor should follow the instructions on these pages before continuing.
 
-(ideally very short, if any)
+Once you have these keys, follow these steps:
 
-- OS
-- Library version
-- ...
+### Windows
 
-### Installation
+The sample require a working installation of the [Visual Studio 2017 IDE](https://www.visualstudio.com/) on your system (the community edition is sufficient). Then clone this sample repository onto your local machine, or download the [samples](https://aka.ms/winsample) and extract them into a local folder. For the various samples you find solution files (`*.sln`) you can open directly in Visual Studio 2017. Compile the samples inside Visual Studio,  the required Microsoft Cognitive Services Speech SDK components will automatically be downloaded from [nuget.org](https://aka.ms/nuget).
 
-(ideally very short)
+### Linux
 
-- npm install [package name]
-- mvn install
-- ...
-
-### Quickstart
-(Add steps to get up and running quickly)
-
-1. git clone [repository clone url]
-2. cd [respository name]
-3. ...
-
-
-## Demo
-
-A demo app is included to show how to use the project.
-
-To run the demo, follow these steps:
-
-(Add steps to start up the demo)
-
-1.
-2.
-3.
+to be discussed
 
 ## Resources
 
-(Any additional resources or related projects)
-
-- Link to supporting information
-- Link to similar sample
-- ...
+- [Cognitive Services Speech SDK Documentation](https://aka.ms/csspech)

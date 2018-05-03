@@ -1,13 +1,3 @@
-## [project-title] Changelog
+# Sample Repository for the Cognitive Services Speech SDK
 
-<a name="x.y.z"></a>
-# x.y.z (yyyy-mm-dd)
-
-*Features*
-* ...
-
-*Bug Fixes*
-* ...
-
-*Breaking Changes*
-* ...
+This is the initial version of the sample repository.
