@@ -11,7 +11,7 @@ namespace CsharpHelloWorld
     {
         static void Main(string[] args)
         {
-            const string usage = "Usage: CsharpHelloWorld <subscriptionKey> [<path-to-file>]\n";
+            const string usage = "Usage: CsharpHelloWorld <subscriptionKey> [<path-to-wav-file>]\n";
 
             if (args.Length == 0)
             {

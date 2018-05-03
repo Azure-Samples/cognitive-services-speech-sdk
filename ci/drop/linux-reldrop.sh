@@ -40,7 +40,7 @@ SHA256_SUM="$(sha256sum "$OUTPUT_DIR/$BASE_NAME.tar.gz" | cut -f1 -d' ')"
 set +x
 
 echo ::: Archive list of files
-tar -tzf "$OUTPUT_DIR/$BASE_NAME.tar.gz" 
+tar -tzf "$OUTPUT_DIR/$BASE_NAME.tar.gz"
 
 echo ::: Checksum
 # N.B. two spaces in the next line intentional

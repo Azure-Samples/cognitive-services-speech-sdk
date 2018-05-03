@@ -31,7 +31,7 @@ SRCJARBINDING="$BUILD_ROOT/bin/libMicrosoft.CognitiveServices.Speech.java.bindin
 SRCCARBONX="$BUILD_ROOT/bin/carbonx"
 
 if [[ $OS = "Windows_NT" ]]; then
-  case $TARGET in 
+  case $TARGET in
     UNKNOWN) LIBPREFIX=Microsoft.CognitiveServices.Speech.
              DYNLIBSUFFIX=.dll
              STATLIBSUFFIX=.lib

@@ -69,7 +69,7 @@ void TranslationWithFile()
 
     // Creates a translation recognizer using file as audio input.
     // Replaces with your own audio file name.
-    auto recognizer = factory->CreateTranslationRecognizerWithFileInput(L"YourAudioFileName", fromLanguage, toLanguages);
+    auto recognizer = factory->CreateTranslationRecognizerWithFileInput(L"YourAudioFile.wav", fromLanguage, toLanguages);
 
     // Starts translation. It returns when the first utterance has been recognized.
     auto result = recognizer->RecognizeAsync().get();

@@ -11,7 +11,7 @@ using namespace std;
 
 int wmain(int argc, wchar_t **argv)
 {
-    auto usage = L"Usage: CxxHelloWorld <subscriptionKey> [<path-to-file>]\n";
+    auto usage = L"Usage: CxxHelloWorld <subscriptionKey> [<path-to-wav-file>]\n";
 
     if (argc < 2)
     {

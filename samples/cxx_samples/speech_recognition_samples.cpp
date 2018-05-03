@@ -49,7 +49,7 @@ void SpeechRecognitionWithFile()
 
     // Creates a speech recognizer using file as audio input.
     // Replace with your own audio file name.
-    auto recognizer = factory->CreateSpeechRecognizerWithFileInput(L"YourAudioFileName");
+    auto recognizer = factory->CreateSpeechRecognizerWithFileInput(L"YourAudioFile.wav");
 
     // Starts recognition. It returns when the first utterance has been recognized.
     auto result = recognizer->RecognizeAsync().get();

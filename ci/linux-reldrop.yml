@@ -1,0 +1,54 @@
+# Variables:
+#   UpStreamBuildDefinition - normally 4062 (main build)
+#   UpStreamBuildId - normally 4062 (main build)
+#   Version - version number to use
+resources:
+- repo: self
+queue:
+  name: Hosted Linux Preview
+steps:
+- task: DownloadBuildArtifacts@0
+  inputs:
+    buildType: specific
+    project: Skyman
+    definition: $(UpStreamBuildDefinition)
+    buildId: $(UpStreamBuildId)
+    artifactName: Linux
+- task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  inputs:
+    type: FilePath
+    scriptPath: 'ci/drop/linux-reldrop.sh'
+    args: '"$(Version)" "$(Build.Repository.LocalPath)" "$(System.ArtifactsDirectory)/Linux" "$(Build.ArtifactStagingDirectory)/LinuxRelDrop"'
+  timeoutInMinutes: 5
+  displayName: Roll release drop
+- task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  inputs:
+    type: FilePath
+    scriptPath: 'ci/drop/linux-samples.sh'
+    args: '"$(Version)" "$(Build.ArtifactStagingDirectory)/LinuxRelDrop"'
+  timeoutInMinutes: 5
+  displayName: Roll samples archive
+- task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  inputs:
+    type: FilePath
+    scriptPath: 'ci/drop/test-quickstart-linux.sh'
+    args: '"$(Build.ArtifactStagingDirectory)/LinuxRelDrop/csspeech-$(Version).tar.gz"'
+  timeoutInMinutes: 5
+  displayName: Build quickstart
+# Test run is a separate task for now with continue-on-error, because of the hangs:
+- task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  inputs:
+    type: FilePath
+    scriptPath: 'ci/drop/test-quickstart-linux.sh'
+    args: '--smoke-test "$(Build.ArtifactStagingDirectory)/LinuxRelDrop/csspeech-$(Version).tar.gz"'
+  timeoutInMinutes: 5
+  continueOnError: true
+  env:
+    SPEECH_SUBSCRIPTION_KEY: $(KeySkyman)
+  displayName: Build and run quickstart
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/LinuxRelDrop'
+    ArtifactName: LinuxRelDrop
+    publishLocation: Container
+  displayName: Publish release drop

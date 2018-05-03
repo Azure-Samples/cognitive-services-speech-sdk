@@ -9,9 +9,9 @@
 
 SPEECHSDK_ROOT:=/change/to/point/to/extracted/SpeechSDK
 
-CHECK_FOR_SPEECHSDK := $(shell test -f $(SPEECHSDK_ROOT)/lib/x64/libMicrosoft.CognitiveServices.Speech.so && echo Success)
+CHECK_FOR_SPEECHSDK := $(shell test -f $(SPEECHSDK_ROOT)/lib/x64/libMicrosoft.CognitiveServices.Speech.core.so && echo Success)
 ifneq ("$(CHECK_FOR_SPEECHSDK)","Success")
-  $(error Please set SPEECHSDK_ROOT to point to your extracted Speech SDK, $$SPEECHSDK_ROOT/x64/libMicrosoft.CognitiveServices.Speech.so should exist.)
+  $(error Please set SPEECHSDK_ROOT to point to your extracted Speech SDK, $$SPEECHSDK_ROOT/lib/x64/libMicrosoft.CognitiveServices.Speech.core.so should exist.)
 endif
 
 # If you'd like to build for 32-bit Linux, replace "x64" in the next line with "x86".
@@ -20,14 +20,14 @@ LIBPATH:=$(SPEECHSDK_ROOT)/lib/$(TARGET_PLATFORM)
 
 INCPATH:=$(SPEECHSDK_ROOT)/include/cxx_api $(SPEECHSDK_ROOT)/include/c_api
 
-LIBS:=-lMicrosoft.CognitiveServices.Speech -lpthread -l:libssl.so.1.0.0 -l:libcurl.so.4 -l:libasound.so.2
+LIBS:=-lMicrosoft.CognitiveServices.Speech.core -lpthread -l:libssl.so.1.0.0 -l:libcurl.so.4 -l:libasound.so.2
 
 all: quickstart-linux
 
 # Note: to run, LD_LIBRARY_PATH should point to $LIBPATH.
 quickstart-linux: quickstart-linux.cpp
 	g++ $< -o $@ \
-	    --std=c++11 \
+	    --std=c++14 \
 	    $(patsubst %,-I%, $(INCPATH)) \
 	    $(patsubst %,-L%, $(LIBPATH)) \
 	    $(LIBS)

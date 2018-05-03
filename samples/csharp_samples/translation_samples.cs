@@ -101,7 +101,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // Creates a translation recognizer using file as audio input.
             // Replace with your own audio file name.
-            using (var recognizer = factory.CreateTranslationRecognizerWithFileInput(@"YourAudioFileName", fromLanguage, toLanguages))
+            using (var recognizer = factory.CreateTranslationRecognizerWithFileInput(@"YourAudioFile.wav", fromLanguage, toLanguages))
             {
                 // This is needed for now. Should be removed when moving to production environment.
                 recognizer.Parameters.Set(SpeechParameterNames.DeploymentId, "d4501bd5-a593-45bf-82a6-36ffc59d80a5");

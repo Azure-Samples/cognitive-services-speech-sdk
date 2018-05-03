@@ -9,21 +9,22 @@
 #include <iostream> // cin, cout
 #include <speechapi_cxx.h>
 
+// Uncomment this and recompile if you want to test file input:
+//#define FROM_FILE
+
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 
 void recognizeSpeech() {
     wstring_convert<codecvt_utf8_utf16<wchar_t>> cvt;
 
-    wstring subscriptionKey{ L"<Please replace with your subscription key>" };
+    wstring subscriptionKey{ L"YourSubscriptionKey" };
 
 #ifdef FROM_FILE
-    wstring filename = L"/path/to/inputfile.wav";
+    wstring filename = L"YourAudioFile.wav";
 #endif
 
-    auto factory = Recognition::RecognizerFactory::GetDefault();
-
-    factory->SetSubscriptionKey(subscriptionKey);
+    auto factory = SpeechFactory::FromSubscription(subscriptionKey, L"");
 
 #ifndef FROM_FILE
     auto recognizer = factory->CreateSpeechRecognizer();
@@ -36,9 +37,10 @@ void recognizeSpeech() {
     auto future = recognizer->RecognizeAsync();
     auto result = future.get();
     auto resultText = cvt.to_bytes(result->Text);
+    auto errorDetails = cvt.to_bytes(result->ErrorDetails);
 
-    if (result->Reason != Recognition::Reason::Recognized) {
-        cout << "There was an error, reason " << int(result->Reason) << " - " << resultText << '\n';
+    if (result->Reason != Reason::Recognized) {
+        cout << "There was an error, reason " << int(result->Reason) << " - " << errorDetails << '\n';
     }
     else {
         cout << "We recognized: " << resultText << '\n';
