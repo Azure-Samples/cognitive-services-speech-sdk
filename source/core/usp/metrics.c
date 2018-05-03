@@ -383,6 +383,11 @@ static PROPERTYBAG_HANDLE telemetry_add_metricevents(TELEMETRY_DATA *telemetry_o
         PropertybagAddValueToArray(json_array, telemetry_object->ttsJson);
     }
 
+    if (telemetry_object->deviceJson)
+    {
+        PropertybagAddValueToArray(json_array, telemetry_object->deviceJson);
+    }
+
     return json_array;
 }
 
@@ -518,6 +523,8 @@ static PROPERTYBAG_HANDLE * getJsonForEvent(TELEMETRY_HANDLE handle, const char 
         return &handle->current_telemetry_object->microphoneJson;
     if (strcmp(eventName, kEvent_type_audioPlayback) == 0)
         return &handle->current_telemetry_object->ttsJson;
+    if (strcmp(eventName, kEvent_type_device) == 0)
+        return &handle->current_telemetry_object->deviceJson;
 
     LogError("Telemetry: invalid event name (%s),\r\n", eventName);
     return NULL;

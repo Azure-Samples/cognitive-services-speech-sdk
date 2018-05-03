@@ -205,6 +205,7 @@ typedef struct _request_telemetry_object_data
     PROPERTYBAG_HANDLE microphoneJson;
     PROPERTYBAG_HANDLE listeningTriggerJson;
     PROPERTYBAG_HANDLE ttsJson;
+    PROPERTYBAG_HANDLE deviceJson;
 } TELEMETRY_DATA;
 
 // Top level Array keys for events

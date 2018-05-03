@@ -43,7 +43,7 @@ namespace PAL {
         if (!uuidStrValid)
         {
 #if defined(ANDROID) ||defined(_ANDROID_)
-            FILE *fp = fopen("sdk-device-uuid.bin", "r");
+            FILE *fp = fopen("/data/sdk-device-uuid.bin", "r");
             if (fp)
             {
                 size_t numRead = fread(&uuidStr[0], 1, UUID_LENGTH, fp);
@@ -59,7 +59,7 @@ namespace PAL {
                 SPX_IFTRUE_THROW_HR(result != UNIQUEID_OK, SPXERR_UUID_CREATE_FAILED);
 
 #if defined(ANDROID) ||defined(_ANDROID_)
-                fp = fopen("sdk-device-uuid.bin", "w+");
+                fp = fopen("/data/sdk-device-uuid.bin", "w+");
                 if (fp)
                 {
                     size_t numWritten = fwrite(&uuidStr[0], 1, UUID_LENGTH, fp);
