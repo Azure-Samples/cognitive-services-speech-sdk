@@ -10,7 +10,6 @@
 #endif
 
 #include "stdafx.h"
-#include "carbon_test_console.h"
 #include "speechapi_c.h"
 #include "mock_controller.h"
 #include <chrono>
@@ -1633,55 +1632,60 @@ void CarbonTestConsole::RunSample(const std::wstring& strSampleName)
         ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
         Sample_HelloWorld_Intent();
     }
-    else if (PAL::wcsicmp(strSampleName.c_str(), L"channel9") == 0)
-    {
-        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
-        Sample_Do_Channel9();
-    }
-    else if (PAL::wcsicmp(strSampleName.c_str(), L"Sample_Do_Speech") == 0)
-    {
-        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
-        Sample_Do_Speech(false);
-    }
-    else if (PAL::wcsicmp(strSampleName.c_str(), L"Sample_Do_Speech_continuous") == 0)
-    {
-        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
-        Sample_Do_Speech(true);
-    }
-    else if (PAL::wcsicmp(strSampleName.c_str(), L"Sample_Do_Intent") == 0)
-    {
-        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
-        Sample_Do_Intent(false);
-    }
-    else if (PAL::wcsicmp(strSampleName.c_str(), L"Sample_Do_Intent_continuous") == 0)
-    {
-        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
-        Sample_Do_Intent(true);
-    }
-    else if (PAL::wcsicmp(strSampleName.c_str(), L"Sample_Do_Intent_Kws") == 0)
-    {
-        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
-        Sample_Do_Intent_Kws();
-    }
-    else if (PAL::wcsicmp(strSampleName.c_str(), L"helloworld subscription") == 0)
-    {
-        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
-        Sample_HelloWorld_Subscription();
-    }
     else if (PAL::wcsicmp(strSampleName.c_str(), L"helloworld subscription with cris") == 0)
     {
         ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
         Sample_HelloWorld_Subscription_With_CRIS();
     }
-    else if (PAL::wcsicmp(strSampleName.c_str(), L"helloworld kws") == 0)
-    {
-        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
-        Sample_HelloWorld_Kws();
-    }
     else if (PAL::wcsicmp(strSampleName.c_str(), L"helloworld french") == 0)
     {
         ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
         Sample_HelloWorld_Language(L"fr-fr");
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"channel9") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        channel9();
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"do_speech") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        ch9_do_speech();
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"do_speech_intermediate") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        ch9_do_speech_intermediate();
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"do_speech_continuous") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        ch9_do_speech_continuous();
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"do_intent") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        ch9_do_intent();
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"do_intent_continuous") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        ch9_do_intent_continuous();
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"do_kws_speech") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        ch9_do_kws_speech();
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"do_kws_intent") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        ch9_do_kws_intent();
+    }
+    else if (PAL::wcsicmp(strSampleName.c_str(), L"do_translation") == 0)
+    {
+        ConsoleWriteLine(L"Running sample: %ls\n", strSampleName.c_str());
+        ch9_do_translation();
     }
     else
     {

@@ -914,16 +914,28 @@ std::shared_ptr<ISpxKwsEngineAdapter> CSpxAudioStreamSession::EnsureInitKwsEngin
 
 void CSpxAudioStreamSession::EnsureIntentRegionSet()
 {
-    SPX_DBG_ASSERT(m_recognizers.size() == 1); // we only support 1 recognizer today...
+    // Let's default the "intentRegion" to the speech region
+    auto intentRegion = PAL::ToString(this->GetStringValue(g_SPEECH_Region, L""));
 
+    // Now ... let's check to see if we have a different region specified for intent...    
+    SPX_DBG_ASSERT(m_recognizers.size() == 1); // we only support 1 recognizer today...
     auto recognizer = m_recognizers.front();
     auto intentRecognizer = SpxQueryInterface<ISpxIntentRecognizer>(recognizer.lock());
     if (intentRecognizer != nullptr && m_luAdapter != nullptr)
-    {
+    {  
+        // we have an intent recognizer... and an lu adapter (meaning someone called ->AddIntent())...
        std::string provider, id, key, region;
        GetIntentInfoFromLuEngineAdapter(provider, id, key, region);
-       SetStringValue(g_INTENT_Region, PAL::ToWString(SpeechRegionFromIntentRegion(region)).c_str());
+
+       // Let's use that region if it's not empty (could be empty if user specified only the lu appid)
+       if (!region.empty())
+       {
+           intentRegion = region;
+       }
     }
+
+    // Finally ... Let's actually store the region
+    SetStringValue(g_INTENT_Region, PAL::ToWString(SpeechRegionFromIntentRegion(intentRegion)).c_str());
 }
 
 std::string CSpxAudioStreamSession::SpeechRegionFromIntentRegion(const std::string& intentRegion)

@@ -18,14 +18,6 @@
 #include <iostream>
 using namespace::std;
 
-void do_speech();
-void do_speech_intermediate();
-void do_speech_continuous();
-
-void do_intent();
-void do_intent_kws();
-void do_translation();
-
 int channel9()
 {
     printf("Channel 9 - Microsoft Cognitive Services Speech SDK - DEMO !!\n");
@@ -39,10 +31,12 @@ int channel9()
         printf("2 - do_speech_intermediate()\n");
         printf("3 - do_speech_continuous()\n");
         printf("4 - do_intent()\n");
-        printf("5 - do_intent_kws()\n");
-        printf("6 - do_translation()\n");
+        printf("5 - do_intent_continuous()\n");
+        printf("6 - do_kws_speech()\n");
+        printf("7 - do_kws_intent()\n");
+        printf("8 - do_translation()\n");
         printf("x - exit\n");
-
+        
         printf("\nchoice: ");
 
         auto ch = getchar();
@@ -51,12 +45,18 @@ int channel9()
         printf("\n");
         switch (ch)
         {
-        case '1': do_speech(); break;
-        case '2': do_speech_intermediate(); break;
-        case '3': do_speech_continuous(); break;
-        case '4': do_intent(); break;
-        case '5': do_intent_kws(); break;
-        case '6': do_translation(); break;
+        case '1': ch9_do_speech(); break;
+        case '2': ch9_do_speech_intermediate(); break;
+        case '3': ch9_do_speech_continuous(); break;
+
+        case '4': ch9_do_intent(); break;
+        case '5': ch9_do_intent_continuous(); break;
+        
+        case '6': ch9_do_kws_speech(); break;
+        case '7': ch9_do_kws_intent(); break;
+        
+        case '8': ch9_do_translation(); break;
+        
         default: showMenu = false; break;
         }
     }
@@ -88,14 +88,16 @@ using namespace Microsoft::CognitiveServices::Speech::Translation;
 //     |____/ \__,_|_.__/|___/\___|_|  |_| .__/ \__|_|\___/|_| |_|      //
 //                                       |_|                            //
 
-constexpr auto speechAndLuisRegion = L"westus2";
-constexpr auto speechSubscription = L"1f30c291f2474d39acfdf1d3bdf847c3";
+constexpr auto speechSubscription = L"e8c934dfd8dd43cda89070ffc8fb5eee";
+constexpr auto speechRegion = L"westus2";
+
 constexpr auto luisSubscription = L"ee52996d8f814c0aa77f7a415f81bd4c";
-constexpr auto luisRegion = L"westus2";
 constexpr auto luisAppId = L"6ad2c77d180b45a288aa8c442538c090";
+constexpr auto luisRegion = L"westus2";
 
 constexpr auto translationSubscription = L"a8ddd80e37dc4c549d9bafd91dadc29a";
 constexpr auto translationDeploymentId = L"d4501bd5-a593-45bf-82a6-36ffc59d80a5";
+constexpr auto translationRegion = L"westus2";
 
 
 //      ____                       _         ____                            _ _   _                   //
@@ -105,9 +107,9 @@ constexpr auto translationDeploymentId = L"d4501bd5-a593-45bf-82a6-36ffc59d80a5"
 //     |____/| .__/ \___|\___|\___|_| |_|   |_| \_\___|\___\___/ \__, |_| |_|_|\__|_|\___/|_| |_|      //
 //           |_|                                                 |___/                                 //
 
-void do_speech()
+void ch9_do_speech()
 {
-    auto factory = SpeechFactory::FromSubscription(speechSubscription, speechAndLuisRegion);
+    auto factory = SpeechFactory::FromSubscription(speechSubscription, speechRegion);
     auto recognizer = factory->CreateSpeechRecognizer();
 
     printf("Say something...\n");
@@ -116,9 +118,9 @@ void do_speech()
     printf("FINAL RESULT: '%ls'\n", result->Text.c_str());
 }
 
-void do_speech_intermediate()
+void ch9_do_speech_intermediate()
 {
-    auto factory = SpeechFactory::FromSubscription(speechSubscription, speechAndLuisRegion);
+    auto factory = SpeechFactory::FromSubscription(speechSubscription, speechRegion);
     auto recognizer = factory->CreateSpeechRecognizer();
 
     recognizer->IntermediateResult += [](const SpeechRecognitionEventArgs& e) {
@@ -131,9 +133,9 @@ void do_speech_intermediate()
     printf("FINAL RESULT: '%ls'\n", result->Text.c_str());
 }
 
-void do_speech_continuous()
+void ch9_do_speech_continuous()
 {
-    auto factory = SpeechFactory::FromSubscription(speechSubscription, speechAndLuisRegion);
+    auto factory = SpeechFactory::FromSubscription(speechSubscription, speechRegion);
     auto recognizer = factory->CreateSpeechRecognizer();
 
     recognizer->IntermediateResult += [](const SpeechRecognitionEventArgs& e) {
@@ -160,18 +162,38 @@ void do_speech_continuous()
 //     |___|_| |_|\__\___|_| |_|\__|   |_| \_\___|\___\___/ \__, |_| |_|_|\__|_|\___/|_| |_|      //
 //                                                          |___/                                 //
 
-void do_intent()
+void ch9_do_intent()
 {
-    //auto factory = SpeechFactory::FromSubscription(speechSubscription, speechAndLuisRegion);
-    //auto factory = SpeechFactory::FromEndpoint(LR"(wss://speech.platform.bing.com/speech/recognition/interactive/cognitiveservices/v1?format=simple&language=en-us)", speechSubscription);
-    //auto factory = SpeechFactory::FromEndpoint(LR"(wss://speech.platform.bing.com/ppe/speech/uswest2/recognition/interactive/cognitiveservices/v1?format=simple&language=en-us&setflight=cognitiveservicesintent)", LR"(57f994b948ec4d1aaaaa4baee160c3e2)");
-    // auto factory = SpeechFactory::FromSubscription(LR"(57f994b948ec4d1aaaaa4baee160c3e2)", L"uswest2");
     auto factory = SpeechFactory::FromSubscription(luisSubscription, luisRegion);
-
-    
-    //factory->Parameters.SetBool(L"CARBON-INTERNAL-USP-NoDGI", true);
+    // factory->Parameters.SetBool(L"CARBON-INTERNAL-USP-NoDGI", true);
     // factory->Parameters.SetBool(L"CARBON-INTERNAL-USP-NoIntentJson", true);
 
+    auto recognizer = factory->CreateIntentRecognizer();
+
+    recognizer->IntermediateResult += [](const IntentRecognitionEventArgs& e) {
+        printf("INTERMEDIATE: %ls ...\n", e.Result.Text.c_str());
+    };
+
+    //auto model = LanguageUnderstandingModel::FromSubscription(luisSubscription, luisAppId, luisRegion);
+    auto model = LanguageUnderstandingModel::FromAppId(luisAppId);
+    recognizer->AddIntent(L"1", model, L"TV.ChangeChannel");
+    recognizer->AddIntent(L"2", model, L"TV.WatchTV");
+    recognizer->AddIntent(L"3", model, L"TV.ShowGuide");
+    //recognizer->AddIntent(L"all intents", IntentTrigger::From(model, L""));
+
+    printf("Listening...\n");
+    auto result = recognizer->RecognizeAsync().get();
+
+    printf("FINAL RESULT: '%ls'\n", result->Text.c_str());
+    printf("   INTENT ID: '%ls'\n", result->IntentId.c_str());
+    printf("   LUIS JSON: '%ls'\n\n", result->Properties[ResultProperty::LanguageUnderstandingJson].GetString().c_str());
+
+    //recognizer->StopContinuousRecognitionAsync();
+}
+
+void ch9_do_intent_continuous()
+{
+    auto factory = SpeechFactory::FromSubscription(luisSubscription, luisRegion);
     auto recognizer = factory->CreateIntentRecognizer();
 
     recognizer->IntermediateResult += [](const IntentRecognitionEventArgs& e) {
@@ -185,12 +207,10 @@ void do_intent()
         printf("Listening... (press ENTER to exit) \n\n");
     };
 
-    auto model = LanguageUnderstandingModel::FromSubscription(luisSubscription, luisAppId, luisRegion);
-
-    //recognizer->AddIntent(L"all intents", IntentTrigger::From(model, L""));
-    recognizer->AddIntent(L"1", IntentTrigger::From(model, L"TV.ChangeChannel"));
-    recognizer->AddIntent(L"2", IntentTrigger::From(model, L"TV.WatchTV"));
-    recognizer->AddIntent(L"3", IntentTrigger::From(model, L"TV.ShowGuide"));
+    auto model = LanguageUnderstandingModel::FromAppId(luisAppId);
+    recognizer->AddIntent(L"1", model, L"TV.ChangeChannel");
+    recognizer->AddIntent(L"2", model, L"TV.WatchTV");
+    recognizer->AddIntent(L"3", model, L"TV.ShowGuide");
 
     recognizer->StartContinuousRecognitionAsync();
 
@@ -207,9 +227,32 @@ void do_intent()
 //     |_|\_\___|\__, | \_/\_/ \___/|_|  \__,_|   |_| \_\___|\___\___/ \__, |_| |_|_|\__|_|\___/|_| |_|      //
 //               |___/                                                 |___/                                 //
 
-void do_intent_kws()
+void ch9_do_kws_speech()
 {
-    auto factory = SpeechFactory::FromSubscription(luisSubscription, luisAppId);
+    auto factory = SpeechFactory::FromSubscription(speechSubscription, speechRegion);
+    auto recognizer = factory->CreateSpeechRecognizer();
+
+    recognizer->IntermediateResult += [](const SpeechRecognitionEventArgs& e) {
+        printf("INTERMEDIATE: %ls ...\n", e.Result.Text.c_str());
+    };
+
+    recognizer->FinalResult += [](const SpeechRecognitionEventArgs& e) {
+        printf("FINAL RESULT: '%ls'\n", e.Result.Text.c_str());
+        printf("KEYWORD SPOTTING: Say 'Hey Cortana' followed by whatever you want ...  (press ENTER to exit) \n\n");
+    };
+
+    auto keywordModel = KeywordRecognitionModel::FromFile(L"heycortana_en-US.table");
+    recognizer->StartKeywordRecognitionAsync(keywordModel);
+
+    printf("KEYWORD SPOTTING: Say 'Hey Cortana' followed by whatever you want ...  (press ENTER to exit) \n\n");
+    while (getchar() != '\n');
+
+    // recognizer->StopKeywordRecognitionAsync().get();
+}
+
+void ch9_do_kws_intent()
+{
+    auto factory = SpeechFactory::FromSubscription(luisSubscription, luisRegion);
     auto recognizer = factory->CreateIntentRecognizer();
 
     recognizer->IntermediateResult += [](const IntentRecognitionEventArgs& e) {
@@ -223,13 +266,10 @@ void do_intent_kws()
         printf("KEYWORD SPOTTING: Say 'Hey Cortana' followed by whatever you want ...  (press ENTER to exit) \n\n");
     };
 
-    auto model = LanguageUnderstandingModel::FromSubscription(luisSubscription, luisAppId, luisRegion);
-    // auto model = LanguageUnderstandingModel::FromEndpoint(LR"(https://westus2.api.cognitive.microsoft.com/luis/v2.0/apps/6ad2c77d180b45a288aa8c442538c090?subscription-key=ee52996d8f814c0aa77f7a415f81bd4c)");
-
-    //recognizer->AddIntent(L"all intents", IntentTrigger::From(model, L""));
-    recognizer->AddIntent(L"1", IntentTrigger::From(model, L"TV.ChangeChannel"));
-    recognizer->AddIntent(L"2", IntentTrigger::From(model, L"TV.WatchTV"));
-    recognizer->AddIntent(L"3", IntentTrigger::From(model, L"TV.ShowGuide"));
+    auto model = LanguageUnderstandingModel::FromAppId(luisAppId);
+    recognizer->AddIntent(L"1", model, L"TV.ChangeChannel");
+    recognizer->AddIntent(L"2", model, L"TV.WatchTV");
+    recognizer->AddIntent(L"3", model, L"TV.ShowGuide");
 
     auto keywordModel = KeywordRecognitionModel::FromFile(L"heycortana_en-US.table");
     recognizer->StartKeywordRecognitionAsync(keywordModel);
@@ -247,9 +287,9 @@ void do_intent_kws()
 //     |_|  |_|\__,_|\___|_| |_|_|_| |_|\___|     |_||_|  \__,_|_| |_|___/_|\__,_|\__|_|\___/|_| |_|      //
 //                                                                                                        //
 
-void do_translation()
+void ch9_do_translation()
 {
-    auto factory = SpeechFactory::FromSubscription(translationSubscription, speechAndLuisRegion);
+    auto factory = SpeechFactory::FromSubscription(translationSubscription, translationRegion);
     auto recognizer = factory->CreateTranslationRecognizer(L"en-US", { L"de-DE", L"fr-FR", L"es-ES" });
     recognizer->Parameters[RecognizerParameter::DeploymentId] = translationDeploymentId;
 

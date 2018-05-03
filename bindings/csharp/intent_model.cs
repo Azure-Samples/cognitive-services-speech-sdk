@@ -24,6 +24,16 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         }
 
         /// <summary>
+        /// Creates an language understanding model using the application id of Language Understanding service.
+        /// </summary>
+        /// <param name="appId">A string that represents the application id of Language Understanding service.</param>
+        /// <returns>The language understanding model being created.</returns>
+        public static LanguageUnderstandingModel FromAppId(string appId)
+        {
+            return new LanguageUnderstandingModel(Internal.LanguageUnderstandingModel.FromAppId(appId));
+        }
+
+        /// <summary>
         /// Creates an language understanding model using hostname, subscription key and application id of Language Understanding service.
         /// </summary>
         /// <param name="subscriptionKey">A string that represents the subscription key of Language Understanding service.</param>

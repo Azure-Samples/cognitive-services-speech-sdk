@@ -199,3 +199,9 @@ typedef uintptr_t SPXHR;
 /// The url specified is invalid.
 /// </summary>
 #define SPXERR_INVALID_URL  __SPX_ERRCODE_FAILED(0x01C)
+
+/// <summary>
+/// The region specified is invalid or missing.
+/// </summary>
+#define SPXERR_INVALID_REGION  __SPX_ERRCODE_FAILED(0x01D)
+

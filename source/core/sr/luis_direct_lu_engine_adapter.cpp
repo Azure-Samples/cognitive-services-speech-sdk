@@ -122,10 +122,19 @@ void CSpxLuisDirectEngineAdapter::GetIntentInfo(std::string& provider, std::stri
         }
     }
 
+    if (region.empty() && key.empty())
+    {
+        auto properties = SpxQueryInterface<ISpxNamedProperties>(GetSite());
+        region = PAL::ToString(properties->GetStringValue(g_SPEECH_Region));
+        key = PAL::ToString(properties->GetStringValue(g_SPEECH_SubscriptionKey));
+    }
+
     if (!id.empty() && !key.empty() && !region.empty())
     {
         provider = "LUIS";
     }
+
+    SPX_DBG_TRACE_VERBOSE("%s: provider=%s; id=%s; key=%s; region=%s", __FUNCTION__, provider.c_str(), id.c_str(), key.c_str(), region.c_str());
 }
 
 void CSpxLuisDirectEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionResult> result)
@@ -198,11 +207,11 @@ void CSpxLuisDirectEngineAdapter::GetConnectionInfoFromTriggers(const std::strin
         if (model != nullptr)
         {
             auto str = PAL::ToString(model->GetHostName());
-            SPX_IFTRUE_THROW_HR(!str.empty() && !hostName.empty() && str != hostName, SPXERR_ABORT);
+            SPX_IFTRUE_THROW_HR(!str.empty() && !hostName.empty() && str != hostName, SPXERR_INVALID_URL);
             hostName = str;
 
             str = PAL::ToString(model->GetPathAndQuery());
-            SPX_IFTRUE_THROW_HR(!str.empty() && !relativePath.empty() && str != relativePath, SPXERR_ABORT);
+            SPX_IFTRUE_THROW_HR(!str.empty() && !relativePath.empty() && str != relativePath, SPXERR_INVALID_URL);
             relativePath = str;
         }
     }

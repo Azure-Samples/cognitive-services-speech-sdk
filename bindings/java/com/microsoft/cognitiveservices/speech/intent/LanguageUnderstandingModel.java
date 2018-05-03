@@ -23,6 +23,16 @@ public final class LanguageUnderstandingModel
     }
 
     /**
+      * Creates an language understanding model using the application id of Language Understanding service.
+      * @param appId A String that represents the application id of Language Understanding service.
+      * @return The language understanding model being created.
+      */
+      public static LanguageUnderstandingModel fromAppId(String appId)
+      {
+          return new LanguageUnderstandingModel(com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel.fromAppId(appId));
+      }
+
+    /**
       * Creates an language understanding model using hostname, subscription key and application id of Language Understanding service.
       * @param subscriptionKey A String that represents the subscription key of Language Understanding service.
       * @param appId A String that represents the application id of Language Understanding service.

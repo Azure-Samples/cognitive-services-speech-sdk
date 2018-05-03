@@ -24,6 +24,7 @@ public:
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxLanguageUnderstandingModel ---
+    void InitAppId(const wchar_t* appId) override;
     void InitEndpoint(const wchar_t* uri) override;
     void InitSubscription(const wchar_t* subscription, const wchar_t* appId, const wchar_t* region) override;
 

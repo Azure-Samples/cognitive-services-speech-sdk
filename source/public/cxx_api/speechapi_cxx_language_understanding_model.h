@@ -36,6 +36,18 @@ public:
     }
 
     /// <summary>
+    /// Creates a language understanding model using the specified app id.
+    /// </summary>
+    /// <param name="appId">A string that represents the application id of Language Understanding service.</param>
+    /// <returns>A shared pointer to language understanding model.</returns>
+    static std::shared_ptr<LanguageUnderstandingModel> FromAppId(const std::wstring& appId)
+    {
+        SPXLUMODELHANDLE hlumodel = SPXHANDLE_INVALID;
+        SPX_THROW_ON_FAIL(LanguageUnderstandingModel_Create_From_AppId(appId.c_str(), &hlumodel));
+        return std::make_shared<LanguageUnderstandingModel>(hlumodel);
+    }
+
+    /// <summary>
     /// Creates a language understanding model using the specified hostname, subscription key and application id.
     /// </summary>
     /// <param name="subscriptionKey">A string that represents the subscription key of Language Understanding service.</param>

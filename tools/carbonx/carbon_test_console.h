@@ -218,12 +218,6 @@ private:
 
     void Sample_HelloWorld_Kws();
 
-    int Sample_Do_Speech(bool continuous);
-    int Sample_Do_Intent(bool continuous, const wchar_t* subscriptionKey, const wchar_t* appId, const wchar_t* region);
-    int Sample_Do_Intent(bool continuous);
-    int Sample_Do_Intent_Kws(const wchar_t* subscriptionKey, const wchar_t* appId, const wchar_t* region);
-    int Sample_Do_Intent_Kws();
-
     int Sample_Do_Channel9();
     
 
@@ -241,3 +235,17 @@ private:
 
     void* m_commandSystem = nullptr;
 };
+
+int channel9();
+
+void ch9_do_speech();
+void ch9_do_speech_intermediate();
+void ch9_do_speech_continuous();
+
+void ch9_do_intent();
+void ch9_do_intent_continuous();
+
+void ch9_do_kws_speech();
+void ch9_do_kws_intent();
+
+void ch9_do_translation();

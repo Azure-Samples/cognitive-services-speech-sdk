@@ -26,3 +26,4 @@
 #include <spxdebug.h>
 
 #include "carbonx_pal.h"
+#include "carbon_test_console.h"

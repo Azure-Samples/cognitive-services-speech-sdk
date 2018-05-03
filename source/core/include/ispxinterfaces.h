@@ -738,6 +738,7 @@ class ISpxLanguageUnderstandingModel : public ISpxInterfaceBaseFor<ISpxLanguageU
 {
 public:
 
+    virtual void InitAppId(const wchar_t* appId) = 0;
     virtual void InitEndpoint(const wchar_t* uri) = 0;
     virtual void InitSubscription(const wchar_t* subscriptionKey, const wchar_t* appId, const wchar_t* region) = 0;
 

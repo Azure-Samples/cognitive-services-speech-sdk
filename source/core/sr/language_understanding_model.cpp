@@ -8,6 +8,14 @@ namespace Speech {
 namespace Impl {
 
 
+void CSpxLanguageUnderstandingModel::InitAppId(const wchar_t* appId)
+{
+    SPX_IFTRUE_THROW_HR(!m_region.empty() || !m_appId.empty() || !m_subscription.empty(), SPXERR_ALREADY_INITIALIZED);
+    SPX_IFTRUE_THROW_HR(!m_endpoint.empty(), SPXERR_ALREADY_INITIALIZED);
+
+    m_appId = appId;
+}
+
 void CSpxLanguageUnderstandingModel::InitEndpoint(const wchar_t* uri)
 {
     SPX_IFTRUE_THROW_HR(!m_region.empty() || !m_appId.empty() || !m_subscription.empty(), SPXERR_ALREADY_INITIALIZED);

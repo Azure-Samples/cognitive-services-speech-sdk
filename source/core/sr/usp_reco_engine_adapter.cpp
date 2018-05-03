@@ -196,7 +196,6 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
 {
-
     SPX_DBG_ASSERT(GetSite() != nullptr);
 
     // How many recognizers of each type do we have?
@@ -253,7 +252,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Intent(std::shared_ptr<ISp
     m_customEndpoint = false;
 
     auto intentRegion = properties->GetStringValue(g_INTENT_Region);
-    SPX_IFTRUE_THROW_HR(intentRegion.empty(), SPXERR_INVALID_ARG);
+    SPX_IFTRUE_THROW_HR(intentRegion.empty(), SPXERR_INVALID_REGION);
 
     client.SetEndpointType(USP::EndpointType::Intent)
           .SetIntentRegion(PAL::ToString(intentRegion));
@@ -272,7 +271,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Translation(std::shared_pt
     m_customEndpoint = false;
 
     auto region = properties->GetStringValue(g_SPEECH_Region);
-    SPX_IFTRUE_THROW_HR(region.empty(), SPXERR_INVALID_ARG);
+    SPX_IFTRUE_THROW_HR(region.empty(), SPXERR_INVALID_REGION);
 
     auto fromLang = properties->GetStringValue(g_TRANSLATION_FromLanguage);
     auto toLangs = properties->GetStringValue(g_TRANSLATION_ToLanguages);
@@ -295,24 +294,24 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_DefaultSpeechService(std::
     m_customEndpoint = false;
 
     auto region = properties->GetStringValue(g_SPEECH_Region);
-    SPX_IFTRUE_THROW_HR(region.empty(), SPXERR_INVALID_ARG);
-    client.SetEndpointType(USP::EndpointType::Speech).SetRegion(PAL::ToString(region));
+    SPX_IFTRUE_THROW_HR(region.empty(), SPXERR_INVALID_REGION);
+
+    client.SetEndpointType(USP::EndpointType::Speech)
+          .SetRegion(PAL::ToString(region));
 
     auto customSpeechModelId = properties->GetStringValue(g_SPEECH_ModelId);
     if (!customSpeechModelId.empty())
     {
-        client.SetModelId(PAL::ToString(customSpeechModelId));
+        return client.SetModelId(PAL::ToString(customSpeechModelId));
     }
-    else
-    {
-        auto lang = properties->GetStringValue(g_SPEECH_RecoLanguage);
-        if (!lang.empty())
-        {
-            client.SetLanguage(PAL::ToString(lang));
-        }
-    }
-    return client;
 
+    auto lang = properties->GetStringValue(g_SPEECH_RecoLanguage);
+    if (!lang.empty())
+    {
+        return client.SetLanguage(PAL::ToString(lang));
+    }
+
+    return client;
 }
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspRecoMode(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
@@ -1233,9 +1232,10 @@ std::string CSpxUspRecoEngineAdapter::GetLanguageUnderstandingJsonFromIntentInfo
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     auto noIntentJson = properties->GetBooleanValue(L"CARBON-INTERNAL-USP-NoIntentJson", false);
     UNUSED(region);
+    UNUSED(key);
 
     std::string intentJson;
-    if (!provider.empty() && !id.empty() && !key.empty())
+    if (!provider.empty() && !id.empty())
     {
         intentJson = "{"; // start object
 
@@ -1244,9 +1244,6 @@ std::string CSpxUspRecoEngineAdapter::GetLanguageUnderstandingJsonFromIntentInfo
 
         intentJson += R"("id":")";
         intentJson += id + R"(",)";
-
-        intentJson += R"("key":")";
-        intentJson += key + R"(")";
 
         intentJson += "}"; // end object
     }
