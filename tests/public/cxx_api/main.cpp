@@ -8,14 +8,14 @@
 
 int main(int argc, char* argv[])
 {
+    add_signal_handlers();
+
     Catch::Session session; // There must be exactly one instance
 
                             // Let Catch (using Clara) parse the command line
     int returnCode = parse_cli_args(session, argc, argv);
     if (returnCode != 0) // Indicates a command line error
         return returnCode;
-
-    add_signal_handlers();
 
     return session.run();
 }

@@ -10,6 +10,7 @@
 #include <list>
 #include <string>
 #include <mutex>
+#include <algorithm>
 #include <speechapi_cxx_common.h>
 
 
@@ -66,7 +67,7 @@ public:
     virtual ~EventSignal()
     {
         {
-            std::unique_lock<std::mutex> lock(m_mutex);
+            std::unique_lock<std::recursive_mutex> lock(m_mutex);
             m_connectedCallback = nullptr;
             m_disconnectedCallback = nullptr;
         }
@@ -119,7 +120,7 @@ public:
     /// <param name="callback">Callback to connect.</param>
     void Connect(CallbackFunction callback)
     {
-        std::unique_lock<std::mutex> lock(m_mutex);
+        std::unique_lock<std::recursive_mutex> lock(m_mutex);
         m_callbacks.push_back(callback);
 
         if (m_callbacks.size() == 1 && m_connectedCallback != nullptr)
@@ -136,7 +137,7 @@ public:
     /// </remark>
     void Disconnect(CallbackFunction callback)
     {
-        std::unique_lock<std::mutex> lock(m_mutex);
+        std::unique_lock<std::recursive_mutex> lock(m_mutex);
         auto prevSize = m_callbacks.size();
 
         m_callbacks.remove_if([&](CallbackFunction item) {
@@ -154,7 +155,7 @@ public:
     /// <summary>
     void DisconnectAll()
     {
-        std::unique_lock<std::mutex> lock(m_mutex);
+        std::unique_lock<std::recursive_mutex> lock(m_mutex);
         auto prevSize = m_callbacks.size();
 
         m_callbacks.clear();
@@ -171,10 +172,21 @@ public:
     /// <param name="t">Event arguments to signal.</param>
     void Signal(T t)
     {
-        std::unique_lock<std::mutex> lock(m_mutex);
-        for (auto c3 : m_callbacks)
+        std::unique_lock<std::recursive_mutex> lock(m_mutex);
+        auto copy = m_callbacks;
+        for (auto c3 : copy)
         {
-            c3(t);
+            // now, while a callback is in progress, it can disconnect itself and any other connected
+            // callback. Check to see if the next one stored in the copy container is still connected.
+            bool connected = (std::find_if(m_callbacks.begin(), m_callbacks.end(), 
+                [&](CallbackFunction item) {
+                return c3.target_type() == item.target_type();
+            }) != m_callbacks.end());
+
+            if (connected)
+            {
+                c3(t);
+            }
         }
     };
 
@@ -195,7 +207,7 @@ private:
     EventSignal& operator=(const EventSignal&) = delete;
 
     std::list<CallbackFunction> m_callbacks;
-    std::mutex m_mutex;
+    std::recursive_mutex m_mutex;
 
     NotifyCallback_Type m_connectedCallback;
     NotifyCallback_Type m_disconnectedCallback;

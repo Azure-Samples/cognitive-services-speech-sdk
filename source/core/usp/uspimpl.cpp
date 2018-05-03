@@ -538,11 +538,6 @@ void Connection::Impl::OnTransportError(TransportHandle transportHandle, Transpo
     Connection::Impl *connection = static_cast<Connection::Impl*>(context);
     LogInfo("TS:%" PRIu64 ", TransportError: connection:0x%x, reason=%d.", connection->getTimestamp(), connection, reason);
 
-    if (!connection->m_connected)
-    {
-        return;
-    }
-
     auto& callbacks = connection->m_config.m_callbacks;
 
     switch (reason)
@@ -575,6 +570,8 @@ void Connection::Impl::OnTransportError(TransportHandle transportHandle, Transpo
         connection->Invoke([&] { callbacks.OnError("Communication Error. Error code: " + to_string(reason)); });
         break;
     }
+
+    connection->m_connected = false;
 }
 
 static RecognitionStatus ToRecognitionStatus(const string& str)

@@ -12,7 +12,8 @@ include_directories(${TEST_INCLUDE})
 
 set(SOURCES
     "${SRC_DIR}/main.cpp"
-    "${SRC_DIR}/speech_recognizer_test_case.cpp"
+    "${SRC_DIR}/speech_recognizer_tests.cpp"
+    "${SRC_DIR}/speech_event_signal_tests.cpp"
     )
 
 source_group("Source Files" FILES ${SOURCES})

@@ -8,20 +8,10 @@
 #include <map>
 #include <string>
 
-#ifdef _DEBUG
-#define SPX_CONFIG_INCLUDE_ALL_DBG 1
-#define SPX_CONFIG_INCLUDE_ALL 1
-#else
-#define SPX_CONFIG_INCLUDE_ALL 1
-#endif
-
-#include "trace_message.h"
-#define __SPX_DO_TRACE_IMPL SpxTraceMessage
+#include "test_utils.h"
 
 #include "speechapi_cxx.h"
 #include "mock_controller.h"
-#include "test_utils.h"
-
 
 using namespace Microsoft::CognitiveServices::Speech::Impl; // for mocks
 
@@ -358,6 +348,55 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
             REQUIRE(callback_invoked);
         }
         recognizer.reset();
+    }
+
+    SECTION("Check for a deadlock in disconnect.")
+    {
+        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
+
+        REQUIRE(!IsUsingMocks());
+        auto recognizer = GetFactory()->CreateSpeechRecognizerWithFileInput(input_file);
+
+        auto callback1 = [&](const SpeechRecognitionEventArgs& args)
+        {
+            if (args.Result.Reason == Reason::Recognized) 
+            {
+                recognizer->Canceled.DisconnectAll();
+            }
+            else
+            {
+                recognizer->FinalResult.DisconnectAll();
+            }
+        };
+
+        recognizer->FinalResult.Connect(callback1);
+        recognizer->Canceled.Connect(callback1);
+        auto result = recognizer->RecognizeAsync().get();
+        UNUSED(result);
+
+        auto callback2 = [&](const SpeechRecognitionEventArgs&)
+        {
+            recognizer->Canceled.DisconnectAll();
+            recognizer->FinalResult.DisconnectAll();
+        };
+
+        recognizer = GetFactory()->CreateSpeechRecognizerWithFileInput(input_file);
+        recognizer->FinalResult.Connect(callback2);
+        recognizer->Canceled.Connect(callback2);
+
+        result = recognizer->RecognizeAsync().get();
+        UNUSED(result);
+
+        auto callback3 = [](const SpeechRecognitionEventArgs&)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        };
+
+        recognizer = GetFactory()->CreateSpeechRecognizerWithFileInput(input_file);
+        recognizer->FinalResult.Connect(callback3);
+        recognizer->Canceled.Connect(callback3);
+        auto future = recognizer->RecognizeAsync();
+        UNUSED(future);
     }
 }
 

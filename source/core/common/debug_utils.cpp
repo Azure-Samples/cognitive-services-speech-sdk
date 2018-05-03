@@ -314,26 +314,45 @@ std::string GetCallStack(size_t skipLevels/* = 0*/, bool makeFunctionNamesStandO
     }
 }
 
-static void SignalHandler()
+static void ErrorHandler(size_t skipLevels)
 {
-    auto callstack = Debug::GetCallStack(1, false);
+    auto callstack = Debug::GetCallStack(skipLevels + 1, false);
 
     SPX_TRACE_VERBOSE(callstack.c_str());
 
     exit(1);
 }
 
+#ifdef _WIN32
+LONG WINAPI WinSignalHandler(EXCEPTION_POINTERS * /*ExceptionInfo*/)
+{
+    ErrorHandler(1);
+#ifdef _DEBUG
+    return EXCEPTION_CONTINUE_SEARCH;
+#endif
+}
+#endif
+
 static void SignalHandler(int sig) {
     SPX_TRACE_VERBOSE("\nReceived an error signal: %d\n", sig);
-    SignalHandler();
+    ErrorHandler(2);
 }
+
 
 void HookSignalHandlers()
 {
+
+#ifdef _WIN32
+    _set_abort_behavior(0, _WRITE_ABORT_MSG);
+    SetUnhandledExceptionFilter(WinSignalHandler);
+    AddVectoredExceptionHandler(1, WinSignalHandler);
+#endif
+
     signal(SIGSEGV, SignalHandler);
     signal(SIGABRT, SignalHandler);
+    signal(SIGTERM, SignalHandler);
 
-    std::set_terminate(SignalHandler);
+    std::set_terminate([] { ErrorHandler(1); });
 }
 
 }
