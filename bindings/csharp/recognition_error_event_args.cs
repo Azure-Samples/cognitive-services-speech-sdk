@@ -13,13 +13,14 @@ namespace Microsoft.CognitiveServices.Speech
     /// </summary>
     public sealed class RecognitionErrorEventArgs : System.EventArgs
     {
-        internal RecognitionErrorEventArgs(string sessionId, RecognitionStatus status)
+        internal RecognitionErrorEventArgs(string sessionId, RecognitionStatus status, string failureReason)
         {
             Status = status;
             SessionId = sessionId;
+            FailureReason = failureReason;
         }
 
-        internal RecognitionErrorEventArgs(string sessionId, Microsoft.CognitiveServices.Speech.Internal.Reason reason)
+        internal RecognitionErrorEventArgs(string sessionId, Microsoft.CognitiveServices.Speech.Internal.Reason reason, string failureReason)
         {
             Trace.Assert((int)Internal.Reason.Recognized == (int)RecognitionStatus.Recognized);
             Trace.Assert((int)Internal.Reason.IntermediateResult == (int)RecognitionStatus.IntermediateResult);
@@ -29,6 +30,7 @@ namespace Microsoft.CognitiveServices.Speech
 
             Status = (RecognitionStatus)((int)reason);
             SessionId = sessionId;
+            FailureReason = failureReason;
         }
 
         /// <summary>
@@ -42,12 +44,17 @@ namespace Microsoft.CognitiveServices.Speech
         public string SessionId { get; }
 
         /// <summary>
+        /// Failure reason.
+        /// </summary>
+        public string FailureReason { get; private set; }
+
+        /// <summary>
         /// Returns a string that represents the recognition error event.
         /// </summary>
         /// <returns>A string that represents the recognition error event.</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "SessionId: {0} Status: {1}.", SessionId, Status); 
+            return string.Format(CultureInfo.InvariantCulture, "SessionId: '{0}', Status: '{1}', FailureReason: '{2}'.", SessionId, Status, this.FailureReason); 
         }
     }
 }

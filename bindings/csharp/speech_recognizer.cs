@@ -270,7 +270,7 @@ namespace Microsoft.CognitiveServices.Speech
                     return;
                 }
 
-                var resultEventArg = new RecognitionErrorEventArgs(eventArgs.SessionId, eventArgs.Result.Reason);
+                var resultEventArg = new RecognitionErrorEventArgs(eventArgs.SessionId, eventArgs.Result.Reason, eventArgs.Result.ErrorDetails);
                 var handler = this.recognizer.RecognitionErrorRaised;
 
                 if (handler != null)

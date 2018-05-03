@@ -513,14 +513,14 @@ void CSpxAudioStreamSession::FireSpeechEndDetectedEvent(uint64_t offset)
 
 void CSpxAudioStreamSession::EnsureFireResultEvent()
 {
-    // Since we're not holding a lock throughout this "ensure" method, a conflict is still possible.
-    // That said, the conflict is benign, in the worst case we just created a throw away no-match result.
-    if (m_recoAsyncWaiting)
-    {
-        auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
-        auto noMatchResult = factory->CreateNoMatchResult(ResultType::Speech);
-        WaitForRecognition_Complete(noMatchResult);
-    }
+     // Since we're not holding a lock throughout this "ensure" method, a conflict is still possible.
+     // That said, the conflict is benign, in the worst case we just created a throw away no-match result.
+     if (m_recoAsyncWaiting)
+     {
+         auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
+         auto noMatchResult = factory->CreateNoMatchResult(ResultType::Speech);
+         WaitForRecognition_Complete(noMatchResult);
+     }
 }
 
 void CSpxAudioStreamSession::FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result)
@@ -832,12 +832,10 @@ void CSpxAudioStreamSession::AdditionalMessage(ISpxRecoEngineAdapter* adapter, u
 void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload)
 {
     UNUSED(adapter);
-    if (m_recoAsyncWaiting)
-    {
-        auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
-        auto error = factory->CreateErrorResult(PAL::ToWString(payload).c_str(), ResultType::Speech);
-        WaitForRecognition_Complete(error);
-    }
+
+    auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
+    auto error = factory->CreateErrorResult(PAL::ToWString(payload).c_str(), ResultType::Speech);
+    WaitForRecognition_Complete(error);
 }
 
 std::shared_ptr<ISpxSession> CSpxAudioStreamSession::GetDefaultSession()
