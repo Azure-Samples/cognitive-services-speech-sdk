@@ -10,6 +10,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Translation;
 // </toplevel>
 
 namespace MicrosoftSpeechSDKSamples
@@ -20,7 +21,7 @@ namespace MicrosoftSpeechSDKSamples
         // <TranslationWithMicrophoneAsync>
         public static async Task TranslationWithMicrophoneAsync()
         {
-            const string GermanVoice = "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)";
+            const string GermanVoice = "de-DE-Hedda";
 
             // Creates an instance of a speech factory with specified
             // subscription key and service region. Replace with your own subscription key
@@ -29,14 +30,11 @@ namespace MicrosoftSpeechSDKSamples
 
             // Sets source and target languages
             string fromLanguage = "en-US";
-            List<string> toLanguages = new List<string>() { "de-DE" };
+            List<string> toLanguages = new List<string>() { "de" };
 
             // Creates a translation recognizer using microphone as audio input, and requires voice output.
             using (var recognizer = factory.CreateTranslationRecognizer(fromLanguage, toLanguages, GermanVoice))
             {
-                // This is needed for now. Should be removed when moving to production environment.
-                recognizer.Parameters.Set(SpeechParameterNames.DeploymentId, "d4501bd5-a593-45bf-82a6-36ffc59d80a5");
-
                 // Subscribes to events.
                 recognizer.IntermediateResultReceived += (s, e) => {
                     Console.WriteLine($"\nPartial result: recognized in {fromLanguage}: {e.Result.RecognizedText}.");
@@ -56,11 +54,18 @@ namespace MicrosoftSpeechSDKSamples
 
                 recognizer.SynthesisResultReceived += (s, e) =>
                 {
-                    Console.WriteLine($"Synthesis result received. Size of audio data: {e.Result.Audio.Length}");
-                    using (var m = new MemoryStream(e.Result.Audio))
+                    if (e.Result.Status == SynthesisStatus.Success)
                     {
-                        SoundPlayer simpleSound = new SoundPlayer(m);
-                        simpleSound.PlaySync();
+                        Console.WriteLine($"Synthesis result received. Size of audio data: {e.Result.Audio.Length}");
+                        using (var m = new MemoryStream(e.Result.Audio))
+                        {
+                            SoundPlayer simpleSound = new SoundPlayer(m);
+                            simpleSound.PlaySync();
+                        }
+                    }
+                    else if (e.Result.Status == SynthesisStatus.Error)
+                    {
+                        Console.WriteLine($"Synthesis error. Failure reason: {e.Result.FailureReason}");
                     }
                 };
 
@@ -97,7 +102,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // Sets source and target languages
             string fromLanguage = "en-US";
-            List<string> toLanguages = new List<string>() { "de-DE", "fr-FR" };
+            List<string> toLanguages = new List<string>() { "de", "fr" };
 
             var translationEndTaskCompletionSource = new TaskCompletionSource<int>();
 
@@ -105,9 +110,6 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own audio file name.
             using (var recognizer = factory.CreateTranslationRecognizerWithFileInput(@"YourAudioFile.wav", fromLanguage, toLanguages))
             {
-                // This is needed for now. Should be removed when moving to production environment.
-                recognizer.Parameters.Set(SpeechParameterNames.DeploymentId, "d4501bd5-a593-45bf-82a6-36ffc59d80a5");
-
                 // Subscribes to events.
                 recognizer.IntermediateResultReceived += (s, e) => {
                     Console.WriteLine($"\nPartial result: recognized in {fromLanguage}: {e.Result.RecognizedText}.");
