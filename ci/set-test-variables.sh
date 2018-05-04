@@ -4,6 +4,8 @@ function vsts_setvar {
   echo "##vso[task.setvariable variable=$1]$2"
 }
 
-vsts_setvar TEST_MODEL_ID ebe91752-a5ca-47b0-9ef8-7ddd533a34ef
-vsts_setvar TEST_SPEECH_ENDPOINT "wss://fedev.develop2.cris.ai/speech/recognition/interactive/cognitiveservices/v1?format=simple&language=en-us"
-vsts_setvar TEST_CRIS_ENDPOINT "wss://fedev.develop2.cris.ai/speech/recognition/interactive/cognitiveservices/v1?cid=ebe91752-a5ca-47b0-9ef8-7ddd533a34ef"
+vsts_setvar TEST_MODEL_ID 0f7118f0-b39c-4f28-baf0-6deebe25583a
+
+vsts_setvar TEST_SPEECH_ENDPOINT "wss://westus.stt.speech.microsoft.com/speech/recognition/interactive/cognitiveservices/v1?format=simple&language=en-us"
+
+vsts_setvar TEST_CRIS_ENDPOINT "wss://westus.stt.speech.microsoft.com/speech/recognition/interactive/cognitiveservices/v1?cid=0f7118f0-b39c-4f28-baf0-6deebe25583a"

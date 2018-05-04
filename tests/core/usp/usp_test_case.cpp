@@ -21,6 +21,7 @@ public:
     {
         auto client = USP::Client(*this, endpoint)
             .SetRecognitionMode(mode)
+            .SetRegion("westus")
             .SetAuthentication(USP::AuthenticationType::SubscriptionKey, Keys::Speech);
         if (!Config::Endpoint.empty()) 
         {

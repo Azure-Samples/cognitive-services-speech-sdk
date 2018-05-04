@@ -14,7 +14,7 @@ function run_usp_tests {
 
 function run_cxx_api_tests {
     echo "Run cxx_api tests"
-    (set -x; $CXX_API_TESTS_EXE $args --regionId uswest)
+    (set -x; $CXX_API_TESTS_EXE $args --regionId westus)
     echo -e "\n"
 }
 

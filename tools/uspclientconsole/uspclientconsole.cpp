@@ -324,6 +324,8 @@ int main(int argc, char* argv[])
     }
 
     USP::Client client(testCallbacks, endpointType);
+    // TODO: make region as parameter
+    client.SetRegion("westus");
     if (!customUrl.empty())
     {
         client.SetEndpointUrl(customUrl.c_str());

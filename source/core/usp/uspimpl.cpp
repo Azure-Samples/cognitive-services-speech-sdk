@@ -240,21 +240,15 @@ string Connection::Impl::ConstructConnectionUrl() const
         switch (m_config.m_endpoint)
         {
         case EndpointType::Speech:
-            /*oss << m_config.m_region
-                << endpoint::unifiedspeech::hostnameSuffix*/
-            // Todo: REMOVE PPE BEFORE RELEASE.
-            oss << endpoint::unifiedspeech::hostnamePPE
-            // TODO DONE
+            oss << m_config.m_region
+                << endpoint::unifiedspeech::hostnameSuffix
                 << endpoint::unifiedspeech::pathPrefix
                 << g_recoModeStrings[recoMode]
                 << endpoint::unifiedspeech::pathSuffix;
             break;
         case EndpointType::Translation:
-            /*oss << m_config.m_region
-                << endpoint::translation::hostnameSuffix*/
-            // Todo: REMOVE PPE BEFORE RELEASE.
-            oss << endpoint::unifiedspeech::hostnamePPE
-            // TODO DONE
+            oss << m_config.m_region
+                << endpoint::translation::hostnameSuffix
                 << endpoint::translation::path;
             break;
         case EndpointType::Intent:

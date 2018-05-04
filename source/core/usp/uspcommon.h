@@ -46,20 +46,18 @@ namespace USP {
             const std::string langQueryParam = "language=";
             const std::string deploymentIdQueryParam = "cid=";
             const std::string outputFormatQueryParam = "format=";
-            // Todo: REMOVE THIS BEFORE RELEASE
-            const std::string hostnamePPE = "fedev.develop2.cris.ai";
         }
 
         namespace intent
         {
-        const std::string pathPrefix1 = "/ppe/speech/";
-        const std::string pathPrefix2 = "/recognition/";
-        const std::string flightParam = "setflight=cognitiveservicesintent&";
+            const std::string pathPrefix1 = "/ppe/speech/";
+            const std::string pathPrefix2 = "/recognition/";
+            const std::string flightParam = "setflight=cognitiveservicesintent&";
         }
 
         namespace translation
         {
-            const std::string hostnameSuffix = "s2s.speech.microsoft.com";
+            const std::string hostnameSuffix = ".s2s.speech.microsoft.com";
             const std::string path = "/speech/translation/cognitiveservices/v1";
             const std::string from = "from=";
             const std::string to = "to=";
