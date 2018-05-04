@@ -108,7 +108,6 @@ void Connection::Impl::OnTelemetryData(const uint8_t* buffer, size_t bytesToWrit
 Connection::Impl::Impl(const Client& config)
     : m_config(config),
     m_connected(false),
-    m_inCallback(false),
     m_haveWork(false),
     m_audioOffset(0),
     m_creationTime(telemetry_gettime())
@@ -135,12 +134,9 @@ void Connection::Impl::Invoke(std::function<void()> callback)
     {
         return;
     }
-    m_inCallback = true;
     m_mutex.unlock();
     callback();
     m_mutex.lock();
-    m_inCallback = false;
-    m_cv.notify_all();
 }
 
 void Connection::Impl::WorkThread(weak_ptr<Connection::Impl> ptr)
@@ -200,10 +196,20 @@ void Connection::Impl::SignalConnected()
 
 void Connection::Impl::Shutdown()
 {
-    unique_lock<recursive_mutex> lock(m_mutex);
-    m_connected = false;
-    SignalWork();
-    m_cv.wait(lock, [&] {return !m_inCallback; });
+    {
+        unique_lock<recursive_mutex> lock(m_mutex);
+        m_connected = false;
+        SignalWork();
+    }
+
+    if (this_thread::get_id() == m_worker.get_id()) 
+    {
+        m_worker.detach();
+    } 
+    else if (m_worker.joinable())
+    {
+        m_worker.join();
+    }
 }
 
 void Connection::Impl::Validate()
@@ -429,10 +435,9 @@ void Connection::Impl::Connect()
     TransportSetDnsCache(m_transport.get(), m_dnsCache.get());
     TransportSetCallbacks(m_transport.get(), OnTransportError, OnTransportData);
 
-    thread worker(&Connection::Impl::WorkThread, shared_from_this());
+    m_worker = thread(&Connection::Impl::WorkThread, shared_from_this());
     unique_lock<recursive_mutex> lock(m_mutex);
     m_cv.wait(lock, [&] {return m_connected; });
-    worker.detach();
 }
 
 void Connection::Impl::QueueMessage(const string& path, const uint8_t *data, size_t size)

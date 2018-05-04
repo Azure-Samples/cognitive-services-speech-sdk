@@ -123,7 +123,6 @@ private:
     Client m_config;
 
     bool m_connected;
-    bool m_inCallback;
 
     // Todo: can multiple UspContexts share the work thread?
     bool m_haveWork;

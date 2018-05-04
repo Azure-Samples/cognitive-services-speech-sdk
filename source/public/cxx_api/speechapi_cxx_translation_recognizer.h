@@ -114,7 +114,7 @@ public:
 /// <summary>
 /// Performs translation on the speech input.
 /// </summary>
-class TranslationRecognizer final : virtual public AsyncRecognizer<TranslationTextResult, TranslationTextResultEventArgs>
+class TranslationRecognizer final : public AsyncRecognizer<TranslationTextResult, TranslationTextResultEventArgs>
 {
 public:
 
@@ -235,6 +235,7 @@ private:
         std::unique_ptr<TranslationSynthesisResultEventArgs> recoEvent{ new TranslationSynthesisResultEventArgs(hevent) };
 
         auto pThis = static_cast<TranslationRecognizer*>(pvContext);
+        auto keepAlive = pThis->shared_from_this();
         pThis->TranslationSynthesisResultEvent.Signal(*recoEvent.get());
     }
 };

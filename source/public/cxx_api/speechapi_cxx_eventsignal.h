@@ -160,7 +160,7 @@ public:
 
         m_callbacks.clear();
 
-        if (m_callbacks.empty() && prevSize > 0 && m_disconnectedCallback != nullptr)
+        if (prevSize > 0 && m_disconnectedCallback != nullptr)
         {
             m_disconnectedCallback(*this);
         }

@@ -16,7 +16,7 @@ namespace Speech {
 /// <summary>
 /// Recognizer base class.
 /// </summary>
-class Recognizer
+class Recognizer : public std::enable_shared_from_this<Recognizer>
 {
 public:
 

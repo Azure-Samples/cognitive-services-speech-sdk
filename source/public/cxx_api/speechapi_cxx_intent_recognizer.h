@@ -25,7 +25,7 @@ namespace Intent {
 /// about the intent of the speaker, which can be used to drive further actions using dedicated intent triggers
 /// (see <see cref="IntentTrigger"/>).
 /// </summary>
-class IntentRecognizer : virtual public AsyncRecognizer<IntentRecognitionResult, IntentRecognitionEventArgs>
+class IntentRecognizer : public AsyncRecognizer<IntentRecognitionResult, IntentRecognitionEventArgs>
 {
 public:
 

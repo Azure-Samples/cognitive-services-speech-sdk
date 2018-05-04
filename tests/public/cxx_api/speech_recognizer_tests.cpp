@@ -387,9 +387,10 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
         result = recognizer->RecognizeAsync().get();
         UNUSED(result);
 
-        auto callback3 = [](const SpeechRecognitionEventArgs&)
+        auto callback3 = [&](const SpeechRecognitionEventArgs&)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+            recognizer.reset();
         };
 
         recognizer = GetFactory()->CreateSpeechRecognizerWithFileInput(input_file);
@@ -408,9 +409,9 @@ TEST_CASE("Speech Factory basics", "[api][cxx]")
 
         auto f1 = SpeechFactory::FromEndpoint(L"1", L"invalid_key");
         auto f2 = SpeechFactory::FromEndpoint(L"2", L"invalid_key");
-        // TODO: I shouldn't need to use const cast here to read a parameter!
-        auto endpoint1 = const_cast<FactoryParameterCollection&>(f1->Parameters)[FactoryParameter::Endpoint].GetString();
-        auto endpoint2 = const_cast<FactoryParameterCollection&>(f2->Parameters)[FactoryParameter::Endpoint].GetString();
+
+        auto endpoint1 = f1->Parameters[FactoryParameter::Endpoint].GetString();
+        auto endpoint2 = f2->Parameters[FactoryParameter::Endpoint].GetString();
 
         //REQUIRE(endpoint1 == L"1"); BUGBUG this fails!!!
         REQUIRE(endpoint2 == L"2");

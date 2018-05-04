@@ -322,6 +322,7 @@ protected:
         std::unique_ptr<SessionEventArgs> sessionEvent { new SessionEventArgs(hevent) };
 
         auto pThis = static_cast<AsyncRecognizer*>(pvContext);
+        auto keepAlive = pThis->shared_from_this();
         pThis->SessionStarted.Signal(*sessionEvent.get());
     }
 
@@ -331,6 +332,7 @@ protected:
         std::unique_ptr<SessionEventArgs> sessionEvent { new SessionEventArgs(hevent) };
 
         auto pThis = static_cast<AsyncRecognizer*>(pvContext);
+        auto keepAlive = pThis->shared_from_this();
         pThis->SessionStopped.Signal(*sessionEvent.get());
     }
 
@@ -340,6 +342,7 @@ protected:
         std::unique_ptr<RecognitionEventArgs> recoEvent{ new RecognitionEventArgs(hevent) };
 
         auto pThis = static_cast<AsyncRecognizer*>(pvContext);
+        auto keepAlive = pThis->shared_from_this();
         pThis->SpeechStartDetected.Signal(*recoEvent.get());
     }
 
@@ -349,6 +352,7 @@ protected:
         std::unique_ptr<RecognitionEventArgs> recoEvent{ new RecognitionEventArgs(hevent) };
 
         auto pThis = static_cast<AsyncRecognizer*>(pvContext);
+        auto keepAlive = pThis->shared_from_this();
         pThis->SpeechEndDetected.Signal(*recoEvent.get());
     }
 
@@ -358,6 +362,7 @@ protected:
         std::unique_ptr<RecoEventArgs> recoEvent { new RecoEventArgs(hevent) };
 
         auto pThis = static_cast<AsyncRecognizer*>(pvContext);
+        auto keepAlive = pThis->shared_from_this();
         pThis->IntermediateResult.Signal(*recoEvent.get());
     }
 
@@ -367,6 +372,7 @@ protected:
         std::unique_ptr<RecoEventArgs> recoEvent { new RecoEventArgs(hevent) };
 
         auto pThis = static_cast<AsyncRecognizer*>(pvContext);
+        auto keepAlive = pThis->shared_from_this();
         pThis->FinalResult.Signal(*recoEvent.get());
     }
 
@@ -376,6 +382,7 @@ protected:
         std::unique_ptr<RecoEventArgs> recoEvent { new RecoEventArgs(hevent) };
 
         auto pThis = static_cast<AsyncRecognizer*>(pvContext);
+        auto keepAlive = pThis->shared_from_this();
         pThis->NoMatch.Signal(*recoEvent.get());
     }
 
@@ -387,6 +394,7 @@ protected:
         std::shared_ptr<RecoEventArgs> recoEvent(ptr);
 
         auto pThis = static_cast<AsyncRecognizer*>(pvContext);
+        auto keepAlive = pThis->shared_from_this();
         pThis->Canceled.Signal(*ptr);
     }
 

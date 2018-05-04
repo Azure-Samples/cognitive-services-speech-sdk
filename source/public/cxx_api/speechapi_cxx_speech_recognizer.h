@@ -25,7 +25,7 @@ namespace Speech {
 class Session;
 
 
-class SpeechRecognizer final : virtual public AsyncRecognizer<SpeechRecognitionResult, SpeechRecognitionEventArgs>
+class SpeechRecognizer final : public AsyncRecognizer<SpeechRecognitionResult, SpeechRecognitionEventArgs>
 {
 public:
 
