@@ -181,7 +181,7 @@ public:
     void FireAdapterResult_TranslationSynthesis(ISpxRecoEngineAdapter* adapter, std::shared_ptr<ISpxRecognitionResult> result) override;
 
     void AdapterCompletedSetFormatStop(ISpxRecoEngineAdapter* /* adapter */) override { AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio::Speech); }
-    void AdapterRequestingAudioIdle(ISpxRecoEngineAdapter* adapter) override;
+    void AdapterRequestingAudioMute(ISpxRecoEngineAdapter* adapter, bool muteAudio) override;
 
     void AdditionalMessage(ISpxRecoEngineAdapter* adapter, uint64_t offset, AdditionalMessagePayload_Type payload) override;
     void Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_Type payload) override;
@@ -196,6 +196,7 @@ public:
 private:
 
     std::shared_ptr<ISpxRecoEngineAdapter> EnsureInitRecoEngineAdapter();
+    void EnsureResetRecoEngineAdapter();
     void InitRecoEngineAdapter();
 
     void EnsureIntentRegionSet();
@@ -208,6 +209,7 @@ private:
 
     void ProcessAudioDataLater(AudioData_Type audio, uint32_t size);
     void ProcessAudioDataLater_Complete();
+    void ProcessAudioDataLater_Overflow();
     void ProcessAudioDataLater_Clear();
 
     void HotSwapToKwsSingleShotWhilePaused();
@@ -262,6 +264,8 @@ private:
     std::shared_ptr<ISpxKwsModel> m_kwsModel;
 
     std::shared_ptr<ISpxRecoEngineAdapter> m_recoAdapter;
+    std::shared_ptr<ISpxRecoEngineAdapter> m_resetRecoAdapter;
+
     std::shared_ptr<ISpxLuEngineAdapter> m_luAdapter;
 
     //  Our current "state" is kept in two parts, both protected by a reader/writer lock
@@ -275,7 +279,7 @@ private:
 
     bool m_expectAdapterStartedTurn;
     bool m_expectAdapterStoppedTurn;
-    bool m_adapterRequestedIdle;
+    bool m_adapterAudioMuted;
     RecognitionKind m_turnEndStopKind;
 
 
@@ -289,7 +293,9 @@ private:
 
     // Other member data ...
 
-    const int m_maxMsStashedBeforeSimulateRealtime = 300;
+    const int m_maxMsStashedBeforeSimulateRealtime = 500;
+    const int m_simulateRealtimePercentage = 50;
+    const int m_maxMsStashedBeforeOverflow = 5000;
 
     std::mutex m_processAudioLaterMutex;
     std::queue<std::pair<AudioData_Type, uint32_t>> m_processAudioLater;

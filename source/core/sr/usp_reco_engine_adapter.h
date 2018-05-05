@@ -140,7 +140,7 @@ private:
 
     bool IsInteractiveMode() const { return m_recoMode == USP::RecognitionMode::Interactive; }
 
-    enum class AudioState { Idle = 0, Ready = 1, Sending = 2, Stopping = 9 };
+    enum class AudioState { Idle = 0, Ready = 1, Sending = 2, Mute = 9 };
 
     enum class UspState {
         Error = -1,

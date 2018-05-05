@@ -59,7 +59,7 @@ void CSpxUspRecoEngineAdapter::Term()
     {
         writeLock.unlock();
 
-        SPX_DBG_TRACE_VERBOSE("%s: Terminating USP Connection (0x%x)", __FUNCTION__, m_handle.get());
+        SPX_DBG_TRACE_VERBOSE("%s: Terminating USP Connection (0x%8x)", __FUNCTION__, m_handle.get());
         m_handle.reset();
 
         writeLock.lock();
@@ -95,7 +95,12 @@ void CSpxUspRecoEngineAdapter::SetFormat(WAVEFORMATEX* pformat)
         pformat->cbSize);
 
     WriteLock_Type writeLock(m_stateMutex);
-    if (IsBadState() && !IsState(UspState::Terminating))
+    if (IsState(UspState::Zombie))
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace message
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d) USP-ZOMBIE", __FUNCTION__, this, m_audioState, m_uspState);
+    }
+    else if (IsBadState() && !IsState(UspState::Terminating))
     {
         SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace message
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
@@ -125,7 +130,12 @@ void CSpxUspRecoEngineAdapter::SetFormat(WAVEFORMATEX* pformat)
 void CSpxUspRecoEngineAdapter::ProcessAudio(AudioData_Type data, uint32_t size)
 {
     WriteLock_Type writeLock(m_stateMutex);
-    if (IsBadState())
+    if (IsState(UspState::Zombie) && size == 0)
+    {
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace message
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... size=0 ... (audioState/uspState=%d/%d) USP-ZOMBIE", __FUNCTION__, this, m_audioState, m_uspState);
+    }
+    else if (IsBadState())
     {
         SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace message
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
@@ -177,6 +187,7 @@ void CSpxUspRecoEngineAdapter::EnsureUspInit()
 
 void CSpxUspRecoEngineAdapter::UspInitialize()
 {
+    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x", __FUNCTION__, this);
     SPX_IFTRUE_THROW_HR(m_handle != nullptr, SPXERR_ALREADY_INITIALIZED);
 
     // Get the named property service...
@@ -529,18 +540,18 @@ void CSpxUspRecoEngineAdapter::UspWrite_Buffered(const uint8_t* buffer, size_t b
     // when we're asked to send 0 bytes... That's the contract internally in this object.
     bool flushBufferRequested = bytesToWrite == 0;
 
-    // If we don't have a buffer to use, allocate one, and set up our buffering pointers/members
-    if (m_buffer.get() == nullptr)
-    {
-        m_buffer = SpxAllocSharedUint8Buffer(m_servicePreferedBufferSizeSendingNow);
-        m_bytesInBuffer = m_servicePreferedBufferSizeSendingNow;
-
-        m_ptrIntoBuffer = m_buffer.get();
-        m_bytesLeftInBuffer = m_bytesInBuffer;
-    }
-
     for (;;)
     {
+        // If we don't have a buffer to use, allocate one, and set up our buffering pointers/members
+        if (m_buffer.get() == nullptr)
+        {
+            m_buffer = SpxAllocSharedUint8Buffer(m_servicePreferedBufferSizeSendingNow);
+            m_bytesInBuffer = m_servicePreferedBufferSizeSendingNow;
+
+            m_ptrIntoBuffer = m_buffer.get();
+            m_bytesLeftInBuffer = m_bytesInBuffer;
+        }
+
         // If we're supposed to flush our buffer, or, if we have more bytes to send than fit
         // in our buffer ... Let's flush the buffer... 
         if (flushBufferRequested || (m_bytesInBuffer > 0 && m_bytesLeftInBuffer == 0))
@@ -633,7 +644,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechEndDetected(const USP::SpeechEndDetectedM
     SPX_DBG_TRACE_VERBOSE("Response: Speech.EndDetected message. Speech ends at offset %" PRIu64 " (100ns)\n", message.offset);
 
     WriteLock_Type writeLock(m_stateMutex);
-    auto requestIdle = m_singleShot && ChangeState(AudioState::Sending, AudioState::Stopping);
+    auto requestMute = ChangeState(AudioState::Sending, AudioState::Mute);
 
     if (IsBadState())
     {
@@ -641,9 +652,8 @@ void CSpxUspRecoEngineAdapter::OnSpeechEndDetected(const USP::SpeechEndDetectedM
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
     }
     else if (IsStateBetweenIncluding(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd) &&
-             (IsState(AudioState::Idle) ||
-              IsState(AudioState::Sending) ||
-              IsState(AudioState::Stopping)))
+             (IsState(AudioState::Idle) || 
+              IsState(AudioState::Mute)))
     {
         writeLock.unlock(); // calls to site shouldn't hold locks
 
@@ -660,11 +670,11 @@ void CSpxUspRecoEngineAdapter::OnSpeechEndDetected(const USP::SpeechEndDetectedM
     SPX_DBG_TRACE_VERBOSE("%s: Flush ... (audioState/uspState=%d/%d)  USP-FLUSH", __FUNCTION__, m_audioState, m_uspState);
     UspWrite_Flush();
 
-    if (requestIdle && !IsBadState())
+    if (requestMute && !IsBadState())
     {
-        SPX_DBG_TRACE_VERBOSE("%s: site->AdapterRequestingAudioIdle() ... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+        SPX_DBG_TRACE_VERBOSE("%s: site->AdapterRequestingAudioMute(true) ... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
         SPX_DBG_ASSERT(GetSite());
-        GetSite()->AdapterRequestingAudioIdle(this);
+        GetSite()->AdapterRequestingAudioMute(this, true);
     }
 }
 
@@ -752,6 +762,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& me
 void CSpxUspRecoEngineAdapter::OnSpeechPhrase(const USP::SpeechPhraseMsg& message)
 {
     SPX_DBG_TRACE_VERBOSE("Response: Speech.Phrase message. Status: %d, Text: %ls, starts at %" PRIu64 ", with duration %" PRIu64 " (100ns).\n", message.recognitionStatus, message.displayText.c_str(), message.offset, message.duration);
+    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x", __FUNCTION__, this);
 
     WriteLock_Type writeLock(m_stateMutex);
     if (IsBadState())
@@ -968,6 +979,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationSynthesisEnd(const USP::TranslationS
 void CSpxUspRecoEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
 {
     SPX_DBG_TRACE_VERBOSE("Response: Turn.Start message. Context.ServiceTag: %s\n", message.contextServiceTag.c_str());
+    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x", __FUNCTION__, this);
 
     WriteLock_Type writeLock(m_stateMutex);
     if (IsBadState())
@@ -997,9 +1009,13 @@ void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
     UNUSED(message);
 
     WriteLock_Type writeLock(m_stateMutex);
-    auto prepareReady = !m_singleShot && ChangeState(AudioState::Sending, AudioState::Ready);
-    auto requestIdle = m_singleShot && ChangeState(AudioState::Sending, AudioState::Stopping);
     auto adapterTurnStopped = false;
+
+    auto prepareReady = !m_singleShot &&
+        (ChangeState(AudioState::Sending, AudioState::Ready) ||
+         ChangeState(AudioState::Mute, AudioState::Ready));
+         
+    auto requestMute = m_singleShot && ChangeState(AudioState::Sending, AudioState::Mute);
 
     if (IsBadState())
     {
@@ -1032,6 +1048,9 @@ void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
     {
         SPX_DBG_TRACE_VERBOSE("%s: PrepareAudioReadyState()", __FUNCTION__);
         PrepareAudioReadyState();
+
+        SPX_DBG_TRACE_VERBOSE("%s: site->AdapterRequestingAudioMute(false) ... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+        GetSite()->AdapterRequestingAudioMute(this, false);
     }
 
     writeLock.unlock(); // calls to site shouldn't hold locks
@@ -1043,14 +1062,13 @@ void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
         GetSite()->AdapterStoppedTurn(this);
     }
 
-    if (requestIdle)
+    if (requestMute)
     {
         SPX_DBG_TRACE_VERBOSE("%s: UspWrite_Flush()  USP-FLUSH", __FUNCTION__);
         UspWrite_Flush();
 
-        SPX_DBG_TRACE_VERBOSE("%s: site->AdapterRequestingAudioIdle() ... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
-        SPX_DBG_ASSERT(GetSite());
-        GetSite()->AdapterRequestingAudioIdle(this);
+        SPX_DBG_TRACE_VERBOSE("%s: site->AdapterRequestingAudioMute(true) ... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+        GetSite()->AdapterRequestingAudioMute(this, true);
     }
 }
 

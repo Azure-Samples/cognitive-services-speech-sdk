@@ -591,7 +591,7 @@ public:
     virtual void FireAdapterResult_FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, ResultPayload_Type payload) = 0;
     virtual void FireAdapterResult_TranslationSynthesis(ISpxRecoEngineAdapter* adapter, ResultPayload_Type payload) = 0;
 
-    virtual void AdapterRequestingAudioIdle(ISpxRecoEngineAdapter* adapter) = 0;
+    virtual void AdapterRequestingAudioMute(ISpxRecoEngineAdapter* adapter, bool mute) = 0;
     virtual void AdapterCompletedSetFormatStop(ISpxRecoEngineAdapter* adapter) = 0;
 
     virtual void AdditionalMessage(ISpxRecoEngineAdapter* adapter, uint64_t offset, AdditionalMessagePayload_Type payload) = 0;
