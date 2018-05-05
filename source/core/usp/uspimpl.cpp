@@ -259,9 +259,7 @@ string Connection::Impl::ConstructConnectionUrl() const
             break;
         case EndpointType::Intent:
             oss << endpoint::luis::hostname
-                // << endpoint::luis::pathPrefix1
-                // REMOVE PPE BEFORE RELEASE
-                << endpoint::luis::ppePathPrefix1
+                << endpoint::luis::pathPrefix1
                 << m_config.m_intentRegion
                 << endpoint::luis::pathPrefix2
                 << g_recoModeStrings[(int)RecognitionMode::Interactive]
@@ -303,7 +301,6 @@ string Connection::Impl::ConstructConnectionUrl() const
         }
         break;
     case EndpointType::Intent:
-        oss << '&' << endpoint::luis::ppeFlightParam; // REMOVE PPE BEFORE RELEASE
         if (!m_config.m_language.empty())
         {
             if (!customEndpoint || !contains(oss.str(), endpoint::unifiedspeech::langQueryParam))

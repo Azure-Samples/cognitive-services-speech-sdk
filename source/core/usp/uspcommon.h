@@ -48,13 +48,6 @@ namespace USP {
             const std::string outputFormatQueryParam = "format=";
         }
 
-        namespace intent
-        {
-            const std::string pathPrefix1 = "/ppe/speech/";
-            const std::string pathPrefix2 = "/recognition/";
-            const std::string flightParam = "setflight=cognitiveservicesintent&";
-        }
-
         namespace translation
         {
             const std::string hostnameSuffix = ".s2s.speech.microsoft.com";
@@ -73,10 +66,6 @@ namespace USP {
             const std::string pathPrefix2 = "/recognition/";
             const std::string pathSuffix = "/cognitiveservices/v1";
             const std::string langQueryParam = "language=";
-            // Todo: REMOVE THE NEXT LINES FOR RELEASE
-            const std::string ppePathPrefix1 = "/ppe/speech/";
-            const std::string ppeFlightParam = "setflight=cognitiveservicesintent&";
-            // END REMOVE
         }
             
         namespace CDSDK
