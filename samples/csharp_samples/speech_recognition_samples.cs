@@ -34,7 +34,7 @@ namespace MicrosoftSpeechSDKSamples
                 // Checks result.
                 if (result.RecognitionStatus != RecognitionStatus.Recognized)
                 {
-                    Console.WriteLine($"There was an error, status {result.RecognitionStatus}, reason {result.RecognitionFailureReason}");
+                    Console.WriteLine($"There was an error, status {result.RecognitionStatus.ToString()}, reason {result.RecognitionFailureReason}");
                 }
                 else
                 {
@@ -63,7 +63,7 @@ namespace MicrosoftSpeechSDKSamples
                 // Checks result.
                 if (result.RecognitionStatus != RecognitionStatus.Recognized)
                 {
-                    Console.WriteLine($"There was an error, status {result.RecognitionStatus}, reason {result.RecognitionFailureReason}");
+                    Console.WriteLine($"There was an error, status {result.RecognitionStatus.ToString()}, reason {result.RecognitionFailureReason}");
                 }
                 else
                 {
@@ -96,7 +96,7 @@ namespace MicrosoftSpeechSDKSamples
                 // Checks results.
                 if (result.RecognitionStatus != RecognitionStatus.Recognized)
                 {
-                    Console.WriteLine($"There was an error, status {result.RecognitionStatus}, reason {result.RecognitionFailureReason}");
+                    Console.WriteLine($"There was an error, status {result.RecognitionStatus.ToString()}, reason {result.RecognitionFailureReason}");
                 }
                 else
                 {
@@ -119,14 +119,28 @@ namespace MicrosoftSpeechSDKSamples
             using (var recognizer = factory.CreateSpeechRecognizer())
             {
                 // Subscribes to events.
-                recognizer.IntermediateResultReceived += (s, e) =>
-                        { Console.WriteLine($"\n    Partial result: {e.Result.RecognizedText}."); };
-                recognizer.FinalResultReceived += (s, e) =>
-                        { Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus}, Text: {e.Result.RecognizedText}."); };
-                recognizer.RecognitionErrorRaised += (s, e) =>
-                        { Console.WriteLine($"\n    An error occurred. Status: {e.Status.ToString()}"); };
-                recognizer.OnSessionEvent += (s, e) =>
-                        { Console.WriteLine($"\n    Session event. Event: {e.EventType.ToString()}."); };
+                recognizer.IntermediateResultReceived += (s, e) => {
+                    Console.WriteLine($"\n    Partial result: {e.Result.RecognizedText}.");
+                };
+
+                recognizer.FinalResultReceived += (s, e) => {
+                    if (e.Result.RecognitionStatus == RecognitionStatus.Recognized)
+                    {
+                        Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, Text: {e.Result.RecognizedText}.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, FailureReason: {e.Result.RecognitionFailureReason}.");
+                    }
+                };
+
+                recognizer.RecognitionErrorRaised += (s, e) => {
+                    Console.WriteLine($"\n    An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}");
+                };
+
+                recognizer.OnSessionEvent += (s, e) => {
+                    Console.WriteLine($"\n    Session event. Event: {e.EventType.ToString()}.");
+                };
 
                 // Starts continuos recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
                 Console.WriteLine("Say something...");

@@ -60,7 +60,7 @@ namespace CsharpHelloWorld
 
                 if (result.RecognitionStatus != RecognitionStatus.Recognized)
                 {
-                    Console.WriteLine($"There was an error, status {result.RecognitionStatus}, reason {result.RecognitionFailureReason}");
+                    Console.WriteLine($"There was an error, status {result.RecognitionStatus.ToString()}, reason {result.RecognitionFailureReason}");
                     Environment.Exit(1);
                 }
                 else

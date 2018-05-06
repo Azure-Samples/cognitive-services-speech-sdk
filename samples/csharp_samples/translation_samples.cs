@@ -38,17 +38,39 @@ namespace MicrosoftSpeechSDKSamples
                 // Subscribes to events.
                 recognizer.IntermediateResultReceived += (s, e) => {
                     Console.WriteLine($"\nPartial result: recognized in {fromLanguage}: {e.Result.RecognizedText}.");
-                    foreach (var element in e.Result.Translations)
+                    if (e.Result.TranslationStatus == TranslationStatus.Success)
                     {
-                        Console.WriteLine($"    Translated into {element.Key}: <{element.Value}>");
+                        foreach (var element in e.Result.Translations)
+                        {
+                            Console.WriteLine($"    Translated into {element.Key}: {element.Value}");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"    Translation failed. Status: {e.Result.TranslationStatus.ToString()}, FailureReason: {e.Result.FailureReason}");
                     }
                 };
 
                 recognizer.FinalResultReceived += (s, e) => {
-                    Console.WriteLine($"\nFinal result: Status: {e.Result.RecognitionStatus}, recognized text in {fromLanguage}: {e.Result.RecognizedText}.");
-                    foreach (var element in e.Result.Translations)
+                    if (e.Result.RecognitionStatus != RecognitionStatus.Recognized)
                     {
-                        Console.WriteLine($"    Translated into {element.Key}: <{element.Value}>");
+                        Console.WriteLine($"\nFinal result: Status: {e.Result.RecognitionStatus.ToString()}, FailureReason: {e.Result.RecognitionFailureReason}.");
+                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"\nFinal result: Status: {e.Result.RecognitionStatus.ToString()}, recognized text in {fromLanguage}: {e.Result.RecognizedText}.");
+                        if (e.Result.TranslationStatus == TranslationStatus.Success)
+                        {
+                            foreach (var element in e.Result.Translations)
+                            {
+                                Console.WriteLine($"    Translated into {element.Key}: {element.Value}");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"    Translation failed. Status: {e.Result.TranslationStatus.ToString()}, FailureReason: {e.Result.FailureReason}");
+                        }
                     }
                 };
 
@@ -63,9 +85,13 @@ namespace MicrosoftSpeechSDKSamples
                             simpleSound.PlaySync();
                         }
                     }
-                    else if (e.Result.Status == SynthesisStatus.Error)
+                    else if (e.Result.Status == SynthesisStatus.SynthesisEnd)
                     {
-                        Console.WriteLine($"Synthesis error. Failure reason: {e.Result.FailureReason}");
+                        Console.WriteLine($"Synthesis result: end of synthesis result.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Synthesis error. Status: {e.Result.Status.ToString()}, Failure reason: {e.Result.FailureReason}");
                     }
                 };
 
@@ -113,17 +139,39 @@ namespace MicrosoftSpeechSDKSamples
                 // Subscribes to events.
                 recognizer.IntermediateResultReceived += (s, e) => {
                     Console.WriteLine($"\nPartial result: recognized in {fromLanguage}: {e.Result.RecognizedText}.");
-                    foreach (var element in e.Result.Translations)
+                    if (e.Result.TranslationStatus == TranslationStatus.Success)
                     {
-                        Console.WriteLine($"    Translated into {element.Key}: <{element.Value}>");
+                        foreach (var element in e.Result.Translations)
+                        {
+                            Console.WriteLine($"    Translated into {element.Key}: {element.Value}");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"    Translation failed. Status: {e.Result.TranslationStatus.ToString()}, FailureReason: {e.Result.FailureReason}");
                     }
                 };
 
                 recognizer.FinalResultReceived += (s, e) => {
-                    Console.WriteLine($"\nFinal result: Status: {e.Result.RecognitionStatus}, recognized text in {fromLanguage}: {e.Result.RecognizedText}.");
-                    foreach (var element in e.Result.Translations)
+                    if (e.Result.RecognitionStatus != RecognitionStatus.Recognized)
                     {
-                        Console.WriteLine($"    Translated into {element.Key}: <{element.Value}>");
+                        Console.WriteLine($"\nFinal result: Status: {e.Result.RecognitionStatus.ToString()}, FailureReason: {e.Result.RecognitionFailureReason}.");
+                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"\nFinal result: Status: {e.Result.RecognitionStatus.ToString()}, recognized text in {fromLanguage}: {e.Result.RecognizedText}.");
+                        if (e.Result.TranslationStatus == TranslationStatus.Success)
+                        {
+                            foreach (var element in e.Result.Translations)
+                            {
+                                Console.WriteLine($"    Translated into {element.Key}: {element.Value}");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"    Translation failed. Status: {e.Result.TranslationStatus.ToString()}, FailureReason: {e.Result.FailureReason}");
+                        }
                     }
                 };
 

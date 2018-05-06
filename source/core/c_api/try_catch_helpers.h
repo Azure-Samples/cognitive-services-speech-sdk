@@ -42,6 +42,17 @@ using Microsoft::CognitiveServices::Speech::Impl::StoreException;
     SPX_RETURN_HR(hr);                                      \
 }
 
+#define SPXAPI_CATCH_AND_RETURN_HR_EXCLUDE(hr, excludeHr)   \
+    SPXAPI_CATCH(hr);                                       \
+    do {                                                    \
+        SPXHR x = hr;                                       \
+        if (SPX_FAILED(x) && (x != (excludeHr))) {          \
+            __SPX_TRACE_HR("SPX_RETURN_ON_FAIL: ", hr, x);  \
+        }                                                   \
+        return x;                                           \
+    } while (0);                                            \
+}
+
 #define SPXAPI_CATCH_AND_RETURN(hr, x)                      \
     SPXAPI_CATCH(hr);                                       \
     return x;                                               \

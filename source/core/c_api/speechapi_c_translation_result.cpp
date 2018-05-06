@@ -59,7 +59,7 @@ SPXAPI TranslationTextResult_GetFailureReason(SPXRESULTHANDLE handle, wchar_t* b
 
         hr = CheckAndCopyBuffer(reason, buffer, bufferSizePointer);
     }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    SPXAPI_CATCH_AND_RETURN_HR_EXCLUDE(hr, SPXERR_BUFFER_TOO_SMALL);
 }
 
 SPXAPI TranslationTextResult_GetTranslationText(SPXRESULTHANDLE handle, Result_TranslationTextBufferHeader* textBuffer, size_t* lengthPointer)
@@ -147,7 +147,7 @@ SPXAPI TranslationSynthesisResult_GetFailureReason(SPXRESULTHANDLE handle, wchar
 
         hr = CheckAndCopyBuffer(reason, buffer, bufferSizePointer);
     }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    SPXAPI_CATCH_AND_RETURN_HR_EXCLUDE(hr, SPXERR_BUFFER_TOO_SMALL);
 }
 
 SPXAPI TranslationSynthesisResult_GetSynthesisData(SPXRESULTHANDLE handle, uint8_t* audioBuffer, size_t* lengthPointer)

@@ -135,12 +135,12 @@ private:
             m_translations[std::wstring(phraseBuffer->targetLanguages[i])] = std::wstring(phraseBuffer->translationTexts[i]);
         }
 
-        SPX_TRACE_VERBOSE("Translation phrases: numberentries: %d", (int)m_translations.size());
+        SPX_DBG_TRACE_VERBOSE("Translation phrases: numberentries: %d", (int)m_translations.size());
 #ifdef _DEBUG
         for (const auto& cf : m_translations)
         {
             (void)(cf); // prevent warning for cf when compiling release builds
-            SPX_TRACE_VERBOSE(" phrase for %ls: %ls", cf.first.c_str(), cf.second.c_str());
+            SPX_DBG_TRACE_VERBOSE(" phrase for %ls: %ls", cf.first.c_str(), cf.second.c_str());
         }
 #endif
     };
@@ -254,7 +254,7 @@ private:
         }
         SPX_THROW_ON_FAIL(hr);
 
-        SPX_TRACE_VERBOSE("Translation synthesis: audio length: %d, verctor size:", bufLen, m_audioData.size());
+        SPX_DBG_TRACE_VERBOSE("Translation synthesis: audio length: %d, verctor size:", bufLen, m_audioData.size());
     };
 
     DISABLE_DEFAULT_CTORS(TranslationSynthesisResult);
