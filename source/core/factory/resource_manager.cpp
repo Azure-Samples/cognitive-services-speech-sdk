@@ -31,16 +31,40 @@ CSpxResourceManager::CSpxResourceManager()
 
 #ifdef __linux__
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-mock.so"));
+
+    // Note: due to new naming, removing any carbon prefix in name
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.Extension.PmaKws.so"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.Extension.Kws.so"));
+
+    // TODO remove the following line once carbon prefixes are removed
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-pmakws.so"));
+    // TODO remove the previous line once carbon prefixes are removed
+
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
 #elif __MACH__
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-mock.dylib"));
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-pmakws.so"));
+
+    // Note: due to new naming, removing any carbon prefix in name
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.Extension.PmaKws.dylib"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.Extension.Kws.dylib"));
+
+    // TODO remove the following line once carbon prefixes are removed
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-pmakws.dylib"));
+    // TODO remove the previous line once carbon prefixes are removed
+
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
 #else
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-mock"));
+
+    // Note: due to new naming, removing any carbon prefix in name
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.Extension.PmaKws"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.Extension.Kws"));
+
+    // TODO remove the following two lines once carbon prefixes are removed
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-pmakws"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-kws"));
+    // TODO remove the previous two lines once carbon prefixes are removed
+
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-unidec"));
 #endif
