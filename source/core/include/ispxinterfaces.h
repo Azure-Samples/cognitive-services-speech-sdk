@@ -229,6 +229,16 @@ protected:
         return m_site.lock();
     }
 
+    template<class F>
+    void InvokeOnSite(F f)
+    {
+        auto site = GetSite();
+        if (site != nullptr)
+        {
+            f(site);
+        }
+    }
+
 
 private:
 

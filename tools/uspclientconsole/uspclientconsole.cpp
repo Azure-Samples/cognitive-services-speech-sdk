@@ -194,7 +194,7 @@ const map<string, USP::RecognitionMode> modeMap = {
 
 int main(int argc, char* argv[])
 {
-    UspCallbacks testCallbacks;
+    auto testCallbacks = std::make_shared<UspCallbacks>();
 
     bool isAudioMessage = true;
     string inputMessagePath;

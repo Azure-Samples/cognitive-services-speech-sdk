@@ -218,20 +218,12 @@ namespace Microsoft.CognitiveServices.Speech.Translation
 
             if (disposing)
             {
-                recoImpl.IntermediateResult.Disconnect(intermediateResultHandler);
-                recoImpl.FinalResult.Disconnect(finalResultHandler);
-                recoImpl.NoMatch.Disconnect(errorHandler);
-                recoImpl.Canceled.Disconnect(errorHandler);
-                recoImpl.SessionStarted.Disconnect(sessionStartedHandler);
-                recoImpl.SessionStopped.Disconnect(sessionStoppedHandler);
-                recoImpl.SpeechStartDetected.Disconnect(speechStartDetectedHandler);
-                recoImpl.SpeechEndDetected.Disconnect(speechEndDetectedHandler);
-                recoImpl.TranslationSynthesisResultEvent.Disconnect(synthesisResultHandler);
+                recoImpl?.Dispose();
 
                 intermediateResultHandler?.Dispose();
                 finalResultHandler?.Dispose();
                 errorHandler?.Dispose();
-                recoImpl?.Dispose();
+
                 disposed = true;
                 base.Dispose(disposing);
             }
@@ -306,7 +298,6 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             {
                 this.recognizer = recognizer;
             }
-
 
             public override void Execute(Internal.TranslationSynthesisResultEventArgs eventArgs)
             {

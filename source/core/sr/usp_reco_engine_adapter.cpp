@@ -12,6 +12,7 @@
 #include <inttypes.h>
 #include <cstring>
 #include "service_helpers.h"
+#include "create_object_helpers.h"
 #include "exception.h"
 
 
@@ -37,6 +38,8 @@ CSpxUspRecoEngineAdapter::~CSpxUspRecoEngineAdapter()
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x", __FUNCTION__, this);
+    SPX_DBG_ASSERT(m_uspCallbacks == nullptr);
+    SPX_DBG_ASSERT(m_uspConnection == nullptr);
 }
 
 void CSpxUspRecoEngineAdapter::Init()
@@ -45,7 +48,8 @@ void CSpxUspRecoEngineAdapter::Init()
     SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x", __FUNCTION__, this);
 
     SPX_IFTRUE_THROW_HR(GetSite() == nullptr, SPXERR_UNINITIALIZED);
-    SPX_IFTRUE_THROW_HR(m_handle != nullptr, SPXERR_ALREADY_INITIALIZED);
+    SPX_IFTRUE_THROW_HR(m_uspConnection != nullptr, SPXERR_ALREADY_INITIALIZED);
+    SPX_IFTRUE_THROW_HR(m_uspCallbacks != nullptr, SPXERR_ALREADY_INITIALIZED);
     SPX_DBG_ASSERT(IsState(AudioState::Idle) && IsState(UspState::Idle));
 }
 
@@ -57,10 +61,9 @@ void CSpxUspRecoEngineAdapter::Term()
     WriteLock_Type writeLock(m_stateMutex);
     if (ChangeState(UspState::Terminating))
     {
+        SPX_DBG_TRACE_VERBOSE("%s: Terminating USP Connection (0x%8x)", __FUNCTION__, m_uspConnection.get());
         writeLock.unlock();
-
-        SPX_DBG_TRACE_VERBOSE("%s: Terminating USP Connection (0x%8x)", __FUNCTION__, m_handle.get());
-        m_handle.reset();
+        UspTerminate();
 
         writeLock.lock();
         ChangeState(UspState::Zombie);
@@ -179,7 +182,7 @@ void CSpxUspRecoEngineAdapter::ProcessAudio(AudioData_Type data, uint32_t size)
 
 void CSpxUspRecoEngineAdapter::EnsureUspInit()
 {
-    if (m_handle == nullptr)
+    if (m_uspConnection == nullptr)
     {
         UspInitialize();
     }
@@ -188,21 +191,36 @@ void CSpxUspRecoEngineAdapter::EnsureUspInit()
 void CSpxUspRecoEngineAdapter::UspInitialize()
 {
     SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x", __FUNCTION__, this);
-    SPX_IFTRUE_THROW_HR(m_handle != nullptr, SPXERR_ALREADY_INITIALIZED);
+    SPX_IFTRUE_THROW_HR(m_uspConnection != nullptr, SPXERR_ALREADY_INITIALIZED);
+    SPX_IFTRUE_THROW_HR(m_uspCallbacks != nullptr, SPXERR_ALREADY_INITIALIZED);
 
     // Get the named property service...
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
 
-    // Set up the client configuration...
-    USP::Client client(*this, USP::EndpointType::Speech);
+    // Create the usp client, which we'll configure and use to create the actual connection
+    auto uspCallbacks = SpxCreateObjectWithSite<ISpxUspCallbacks>("CSpxUspCallbackWrapper", this);
+    USP::Client client(uspCallbacks, USP::EndpointType::Speech);
+
+    // Set up the connection properties, and create the connection
     SetUspEndpoint(properties, client);
     SetUspRecoMode(properties, client);
     SetUspAuthentication(properties, client);
     SPX_DBG_TRACE_VERBOSE("%s: recoMode=%d", __FUNCTION__, m_recoMode);
+    auto uspConnection = client.Connect();
 
-    // Finally ... Connect to the service
-    m_handle = client.Connect();
+    // We're done!!
+    m_uspCallbacks = uspCallbacks;
+    m_uspConnection = std::move(uspConnection);
+}
+
+void CSpxUspRecoEngineAdapter::UspTerminate()
+{
+    // Term the callbacks first and then reset/release the connection
+    SpxTermAndClear(m_uspCallbacks); // After this ... we won't be called back on ISpxUspCallbacks ever again...
+
+    // NOTE: Even if we are in a callback from the USP on another thread, we won't be destoyed until those functions release their shared ptrs
+    m_uspConnection.reset(); 
 }
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
@@ -464,10 +482,10 @@ void CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, co
 
 void CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size)
 {
-    SPX_DBG_ASSERT(m_handle != nullptr || IsState(UspState::Terminating) || IsState(UspState::Zombie));
-    if (!IsState(UspState::Terminating) && !IsState(UspState::Zombie) && m_handle != nullptr)
+    SPX_DBG_ASSERT(m_uspConnection != nullptr || IsState(UspState::Terminating) || IsState(UspState::Zombie));
+    if (!IsState(UspState::Terminating) && !IsState(UspState::Zombie) && m_uspConnection != nullptr)
     {
-        m_handle->SendMessage(messagePath, buffer, size);
+        m_uspConnection->SendMessage(messagePath, buffer, size);
     }
 }
 
@@ -526,11 +544,11 @@ void CSpxUspRecoEngineAdapter::UspWrite(const uint8_t* buffer, size_t byteToWrit
 
 void CSpxUspRecoEngineAdapter::UspWrite_Actual(const uint8_t* buffer, size_t byteToWrite)
 {
-    SPX_DBG_ASSERT(m_handle != nullptr || IsState(UspState::Terminating) || IsState(UspState::Zombie));
-    if (!IsState(UspState::Terminating) && !IsState(UspState::Zombie) && m_handle != nullptr)
+    SPX_DBG_ASSERT(m_uspConnection != nullptr || IsState(UspState::Terminating) || IsState(UspState::Zombie));
+    if (!IsState(UspState::Terminating) && !IsState(UspState::Zombie) && m_uspConnection != nullptr)
     {
         SPX_DBG_TRACE_VERBOSE("%s(..., %d)", __FUNCTION__, byteToWrite);
-        m_handle->WriteAudio(buffer, byteToWrite);
+        m_uspConnection->WriteAudio(buffer, byteToWrite);
     }
 }
 
@@ -602,11 +620,11 @@ void CSpxUspRecoEngineAdapter::UspWrite_Buffered(const uint8_t* buffer, size_t b
 void CSpxUspRecoEngineAdapter::UspWrite_Flush()
 {
     // We should only ever be asked to Flush when we're in a valid state ... 
-    SPX_DBG_ASSERT(m_handle != nullptr || IsState(UspState::Terminating) || IsState(UspState::Zombie));
-    if (!IsState(UspState::Terminating) && !IsState(UspState::Zombie) && m_handle != nullptr)
+    SPX_DBG_ASSERT(m_uspConnection != nullptr || IsState(UspState::Terminating) || IsState(UspState::Zombie));
+    if (!IsState(UspState::Terminating) && !IsState(UspState::Zombie) && m_uspConnection != nullptr)
     {
         UspWrite_Buffered(nullptr, 0);
-        m_handle->FlushAudio();
+        m_uspConnection->FlushAudio();
     }
 }
 
@@ -650,6 +668,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechEndDetected(const USP::SpeechEndDetectedM
     {
         SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace message
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
+        writeLock.unlock(); // calls to site shouldn't hold locks
     }
     else if (IsStateBetweenIncluding(UspState::WaitingForPhrase, UspState::WaitingForTurnEnd) &&
              (IsState(AudioState::Idle) || 
@@ -665,11 +684,12 @@ void CSpxUspRecoEngineAdapter::OnSpeechEndDetected(const USP::SpeechEndDetectedM
     {
         SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace message
         SPX_DBG_TRACE_WARNING("%s: (0x%8x) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, this, m_audioState, m_uspState);
+        return;
     }
 
     SPX_DBG_TRACE_VERBOSE("%s: Flush ... (audioState/uspState=%d/%d)  USP-FLUSH", __FUNCTION__, m_audioState, m_uspState);
-    UspWrite_Flush();
 
+    UspWrite_Flush();
     if (requestMute && !IsBadState())
     {
         SPX_DBG_TRACE_VERBOSE("%s: site->AdapterRequestingAudioMute(true) ... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
@@ -1050,10 +1070,14 @@ void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
         PrepareAudioReadyState();
 
         SPX_DBG_TRACE_VERBOSE("%s: site->AdapterRequestingAudioMute(false) ... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+
+        writeLock.unlock(); // calls to site shouldn't hold locks
         GetSite()->AdapterRequestingAudioMute(this, false);
     }
-
-    writeLock.unlock(); // calls to site shouldn't hold locks
+    else
+    {
+        writeLock.unlock(); // calls to site shouldn't hold locks
+    }
 
     if (adapterTurnStopped)
     {
@@ -1406,8 +1430,11 @@ bool CSpxUspRecoEngineAdapter::ShouldResetAfterError()
 void CSpxUspRecoEngineAdapter::ResetAfterError()
 {
     SPX_DBG_ASSERT(ShouldResetAfterError());
-    m_handle.reset();
 
+    // Let's terminate our current usp connection and sever our callbacks
+    UspTerminate();
+
+    // Let's get ready for more audio!!!
     PrepareAudioReadyState();
 }
 

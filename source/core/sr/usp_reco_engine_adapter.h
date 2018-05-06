@@ -25,10 +25,56 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
+
+class ISpxUspCallbacks :
+    public ISpxInterfaceBaseFor<ISpxUspCallbacks>,
+    public USP::Callbacks
+{
+};
+
+class CSpxUspCallbackWrapper final :
+    public ISpxObjectWithSiteInitImpl<ISpxUspCallbacks>,
+    public ISpxUspCallbacks
+{
+public:
+
+    CSpxUspCallbackWrapper() = default;
+    ~CSpxUspCallbackWrapper() = default;
+
+    SPX_INTERFACE_MAP_BEGIN()
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxUspCallbacks)
+    SPX_INTERFACE_MAP_END()
+
+    // --- ISpxUspCallbacks (overrides)
+    void OnSpeechStartDetected(const USP::SpeechStartDetectedMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechStartDetected(m); }); }
+    void OnSpeechEndDetected(const USP::SpeechEndDetectedMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechEndDetected(m); }); }
+    void OnSpeechHypothesis(const USP::SpeechHypothesisMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechHypothesis(m); }); }
+    void OnSpeechPhrase(const USP::SpeechPhraseMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechPhrase(m); }); }
+    void OnSpeechFragment(const USP::SpeechFragmentMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechFragment(m); }); }
+    void OnTurnStart(const USP::TurnStartMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTurnStart(m); }); }
+    void OnTurnEnd(const USP::TurnEndMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTurnEnd(m); }); }
+    void OnError(const std::string& error) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnError(error); }); }
+    void OnTranslationHypothesis(const USP::TranslationHypothesisMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationHypothesis(m); }); }
+    void OnTranslationPhrase(const USP::TranslationPhraseMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationPhrase(m); }); }
+    void OnTranslationSynthesis(const USP::TranslationSynthesisMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationSynthesis(m); }); }
+    void OnTranslationSynthesisEnd(const USP::TranslationSynthesisEndMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationSynthesisEnd(m); }); }
+    void OnUserMessage(const USP::UserMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnUserMessage(m); }); }
+
+
+private:
+
+    DISABLE_COPY_AND_MOVE(CSpxUspCallbackWrapper);
+};
+
+
 class CSpxUspRecoEngineAdapter :
     public ISpxObjectWithSiteInitImpl<ISpxRecoEngineAdapterSite>,
-    public ISpxRecoEngineAdapter,
-    protected USP::Callbacks
+    public ISpxServiceProvider,
+    public ISpxGenericSite,
+    public ISpxUspCallbacks,
+    public ISpxRecoEngineAdapter
 {
 public:
 
@@ -38,6 +84,9 @@ public:
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
+        SPX_INTERFACE_MAP_ENTRY(ISpxGenericSite)
+        SPX_INTERFACE_MAP_ENTRY(ISpxUspCallbacks)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecoEngineAdapter)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioProcessor)
     SPX_INTERFACE_MAP_END()
@@ -54,34 +103,19 @@ public:
     void SetFormat(WAVEFORMATEX* pformat) override;
     void ProcessAudio(AudioData_Type data, uint32_t size) override;
 
-protected:
-
-    // --- USP::Callbacks
-    virtual void OnSpeechStartDetected(const USP::SpeechStartDetectedMsg& message) override;
-    virtual void OnSpeechEndDetected(const USP::SpeechEndDetectedMsg& message) override;
-    virtual void OnSpeechHypothesis(const USP::SpeechHypothesisMsg& message) override;
-    virtual void OnSpeechFragment(const USP::SpeechFragmentMsg& message) override;
-    virtual void OnSpeechPhrase(const USP::SpeechPhraseMsg& message) override;
-    virtual void OnTurnStart(const USP::TurnStartMsg& message) override;
-    virtual void OnTurnEnd(const USP::TurnEndMsg& message) override;
-    virtual void OnError(const std::string& error) override;
-    virtual void OnUserMessage(const USP::UserMsg& message) override;
-
-    virtual void OnTranslationHypothesis(const USP::TranslationHypothesisMsg& message) override;
-    virtual void OnTranslationPhrase(const USP::TranslationPhraseMsg& message) override;
-    virtual void OnTranslationSynthesis(const USP::TranslationSynthesisMsg& message) override;
-    virtual void OnTranslationSynthesisEnd(const USP::TranslationSynthesisEndMsg& message) override;
+    // --- IServiceProvider ---
+    SPX_SERVICE_MAP_BEGIN()
+    SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
+    SPX_SERVICE_MAP_END()
 
 
 private:
 
-    CSpxUspRecoEngineAdapter(const CSpxUspRecoEngineAdapter&) = delete;
-    CSpxUspRecoEngineAdapter(const CSpxUspRecoEngineAdapter&&) = delete;
-
-    CSpxUspRecoEngineAdapter& operator=(const CSpxUspRecoEngineAdapter&) = delete;
+    DISABLE_COPY_AND_MOVE(CSpxUspRecoEngineAdapter);
 
     void EnsureUspInit();
     void UspInitialize();
+    void UspTerminate();
 
     USP::Client& SetUspEndpoint(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client);
     
@@ -106,15 +140,24 @@ private:
     void UspWrite_Buffered(const uint8_t* buffer, size_t byteToWrite);
     void UspWrite_Flush();
 
-    ISpxRecoEngineAdapterSite::AdditionalMessagePayload_Type AdditionalMessagePayloadFrom(const USP::TurnStartMsg& message) { UNUSED(message); return nullptr; } // TODO: RobCh: Implement this
-    ISpxRecoEngineAdapterSite::AdditionalMessagePayload_Type AdditionalMessagePayloadFrom(const USP::TurnEndMsg& message) { UNUSED(message); return nullptr; } // TODO: RobCh: Implement this
+    void OnSpeechStartDetected(const USP::SpeechStartDetectedMsg&) override;
+    void OnSpeechEndDetected(const USP::SpeechEndDetectedMsg&) override;
+    void OnSpeechHypothesis(const USP::SpeechHypothesisMsg&) override;
+    void OnSpeechFragment(const USP::SpeechFragmentMsg&) override;
+    void OnSpeechPhrase(const USP::SpeechPhraseMsg&) override;
+    void OnTurnStart(const USP::TurnStartMsg&) override;
+    void OnTurnEnd(const USP::TurnEndMsg&) override;
+    void OnError(const std::string& error) override;
+    void OnUserMessage(const USP::UserMsg&) override;
+
+    void OnTranslationHypothesis(const USP::TranslationHypothesisMsg&) override;
+    void OnTranslationPhrase(const USP::TranslationPhraseMsg&) override;
+    void OnTranslationSynthesis(const USP::TranslationSynthesisMsg&) override;
+    void OnTranslationSynthesisEnd(const USP::TranslationSynthesisEndMsg&) override;
 
     uint8_t* FormatBufferWriteBytes(uint8_t* buffer, const uint8_t* source, size_t bytes);
-
     uint8_t* FormatBufferWriteNumber(uint8_t* buffer, uint32_t number);
-
     uint8_t* FormatBufferWriteChars(uint8_t* buffer, const char* psz, size_t cch);
-
     uint32_t EndianConverter(uint32_t number)
     {
         return ((uint32_t)(number & 0x000000ff) << 24) |
@@ -178,7 +221,9 @@ private:
 
 private:
 
-    USP::ConnectionPtr m_handle;
+    std::shared_ptr<ISpxUspCallbacks> m_uspCallbacks;
+    std::shared_ptr<USP::Connection> m_uspConnection;
+
     USP::RecognitionMode m_recoMode = USP::RecognitionMode::Interactive;
     bool m_customEndpoint = false;
 

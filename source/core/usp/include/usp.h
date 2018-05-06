@@ -96,6 +96,8 @@ struct Callbacks
     virtual void OnUserMessage(const UserMsg&) {}
 };
 
+using CallbacksPtr = std::shared_ptr<Callbacks>;
+
 enum class EndpointType { Speech, Intent, Translation, CDSDK };
 
 enum class RecognitionMode : unsigned int { Interactive = 0, Conversation = 1, Dictation = 2 };
@@ -162,7 +164,7 @@ public:
     * @param callbacks The struct defines callback functions that will be invoked when various USP events occur.
     * @param type  The speech service to be used, Speech, Intent, Translation, and etc.
     */
-    Client(Callbacks& callbacks, EndpointType endpoint):
+    Client(CallbacksPtr callbacks, EndpointType endpoint):
         m_callbacks(callbacks),
         m_endpoint(endpoint),
         m_recoMode(RecognitionMode::Interactive),
@@ -302,7 +304,7 @@ private:
 
     friend class Connection::Impl;
 
-    Callbacks& m_callbacks;
+    CallbacksPtr m_callbacks;
 
     EndpointType m_endpoint;
     RecognitionMode m_recoMode;
