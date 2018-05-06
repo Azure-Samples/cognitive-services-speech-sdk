@@ -76,7 +76,7 @@ steps:
   inputs:
     type: FilePath
     scriptPath: 'ci/nuget/smoke_test.sh'
-    args: '$(Build.ArtifactStagingDirectory)\Windows $(KeySpeech)'
+    args: '$(Build.ArtifactStagingDirectory)\Windows $(KeySkyman)'
   timeoutInMinutes: 2
   continueOnError: true
   displayName: Test - smoke-test
