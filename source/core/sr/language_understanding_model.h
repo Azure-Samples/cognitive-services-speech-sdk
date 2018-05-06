@@ -27,6 +27,7 @@ public:
     void InitAppId(const wchar_t* appId) override;
     void InitEndpoint(const wchar_t* uri) override;
     void InitSubscription(const wchar_t* subscription, const wchar_t* appId, const wchar_t* region) override;
+    void UpdateSubscription(const wchar_t* subscriptionKey, const wchar_t* region) override;
 
     std::wstring GetEndpoint() const override { return m_endpoint; }
     std::wstring GetHostName() const override { return m_hostName; }

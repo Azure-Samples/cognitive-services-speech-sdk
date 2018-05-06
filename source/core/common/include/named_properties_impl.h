@@ -27,7 +27,7 @@ public:
         auto item = m_stringPropertyMap.find(std::wstring(name));
         if (item != m_stringPropertyMap.end())
         {
-            SPX_DBG_TRACE_VERBOSE_IF(1, "%s: name='%ls'; value='%ls'", __FUNCTION__, name, item->second.c_str());
+            SPX_DBG_TRACE_VERBOSE_IF(1, "%s: this=0x%8x; name='%ls'; value='%ls'", __FUNCTION__, this, name, item->second.c_str());
             return item->second;
         }
 
@@ -45,7 +45,7 @@ public:
     {
         std::unique_lock<std::mutex> lock(m_mutexProperties);
         m_stringPropertyMap[std::wstring(name)] = value;
-        SPX_DBG_TRACE_VERBOSE_IF(1, "%s: name='%ls'; value='%ls'", __FUNCTION__, name, value);
+        SPX_DBG_TRACE_VERBOSE_IF(1, "%s: this=0x%8x; name='%ls'; value='%ls'", __FUNCTION__, this, name, value);
     }
 
     bool HasStringValue(const wchar_t* name) override

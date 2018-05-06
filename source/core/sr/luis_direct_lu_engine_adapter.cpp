@@ -39,8 +39,17 @@ void CSpxLuisDirectEngineAdapter::Term()
 void CSpxLuisDirectEngineAdapter::AddIntentTrigger(const wchar_t* id, std::shared_ptr<ISpxTrigger> trigger)
 {
     // Luis Direct only works with luis models ... not phrase triggers ... 
-    if (trigger->GetModel() != nullptr)
+    auto model = trigger->GetModel();
+    if (model != nullptr)
     {
+        if (model->GetSubscriptionKey().empty() && model->GetRegion().empty())
+        {
+            auto properties = SpxQueryInterface<ISpxNamedProperties>(GetSite());
+            auto region = properties->GetStringValue(g_SPEECH_Region);
+            auto key = properties->GetStringValue(g_SPEECH_SubscriptionKey);
+            model->UpdateSubscription(key.c_str(), region.c_str());
+        }
+
         std::unique_lock<std::mutex> lock(m_mutex);
         m_triggerMap.emplace(id, trigger);
 
@@ -122,13 +131,6 @@ void CSpxLuisDirectEngineAdapter::GetIntentInfo(std::string& provider, std::stri
         }
     }
 
-    if (region.empty() && key.empty())
-    {
-        auto properties = SpxQueryInterface<ISpxNamedProperties>(GetSite());
-        region = PAL::ToString(properties->GetStringValue(g_SPEECH_Region));
-        key = PAL::ToString(properties->GetStringValue(g_SPEECH_SubscriptionKey));
-    }
-
     if (!id.empty() && !key.empty() && !region.empty())
     {
         provider = "LUIS";
@@ -197,7 +199,7 @@ void CSpxLuisDirectEngineAdapter::GetConnectionInfoFromTriggers(const std::strin
     // "hostName/relativePath" ... It stores the first one it finds. It then continues iterating thru the triggers, ensuring
     // that all the other triggers have data that links them to the same language understanding model found initially... 
 
-    std::string hostName, relativePath;
+    std::string hostName, relativePath, id, key, region;
 
     std::unique_lock<std::mutex> lock(m_mutex);
     for (auto item : m_triggerMap)
@@ -206,7 +208,19 @@ void CSpxLuisDirectEngineAdapter::GetConnectionInfoFromTriggers(const std::strin
         auto model = trigger->GetModel();
         if (model != nullptr)
         {
-            auto str = PAL::ToString(model->GetHostName());
+            auto str = PAL::ToString(model->GetAppId());
+            SPX_IFTRUE_THROW_HR(!str.empty() && !id.empty() && str != id, SPXERR_ABORT);
+            id = str;
+
+            str = PAL::ToString(model->GetSubscriptionKey());
+            SPX_IFTRUE_THROW_HR(!str.empty() && !key.empty() && str != key, SPXERR_ABORT);
+            key = str;
+
+            str = PAL::ToString(model->GetRegion());
+            SPX_IFTRUE_THROW_HR(!str.empty() && !region.empty() && str != region, SPXERR_ABORT);
+            region = str;
+
+            str = PAL::ToString(model->GetHostName());
             SPX_IFTRUE_THROW_HR(!str.empty() && !hostName.empty() && str != hostName, SPXERR_INVALID_URL);
             hostName = str;
 

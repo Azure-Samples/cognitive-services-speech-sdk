@@ -424,6 +424,7 @@ SPXAPI_(bool) SpeechFactory_ContainsParameter_Bool(SPXFACTORYHANDLE hfactory, co
 
 SPXAPI SpeechFactory_FromAuthorizationToken(const wchar_t* authToken, const wchar_t* region, SPXFACTORYHANDLE* phfactory)
 {
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phfactory = SPXHANDLE_INVALID;
@@ -446,6 +447,7 @@ SPXAPI SpeechFactory_FromAuthorizationToken(const wchar_t* authToken, const wcha
 
 SPXAPI SpeechFactory_FromSubscription(const wchar_t* subscriptionKey, const wchar_t* region, SPXFACTORYHANDLE* phfactory)
 {
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phfactory = SPXHANDLE_INVALID;
@@ -468,6 +470,7 @@ SPXAPI SpeechFactory_FromSubscription(const wchar_t* subscriptionKey, const wcha
 
 SPXAPI SpeechFactory_FromEndpoint(const wchar_t* endpoint, const wchar_t* subscription, SPXFACTORYHANDLE* phfactory)
 {
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phfactory = SPXHANDLE_INVALID;

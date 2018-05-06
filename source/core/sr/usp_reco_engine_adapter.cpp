@@ -1287,6 +1287,9 @@ std::string CSpxUspRecoEngineAdapter::GetLanguageUnderstandingJsonFromIntentInfo
         intentJson += R"("id":")";
         intentJson += id + R"(",)";
 
+        intentJson += R"("key":")";
+        intentJson += key + R"(")";
+
         intentJson += "}"; // end object
     }
 

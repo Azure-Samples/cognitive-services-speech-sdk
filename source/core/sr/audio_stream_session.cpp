@@ -884,7 +884,7 @@ std::shared_ptr<ISpxRecoEngineAdapter> CSpxAudioStreamSession::EnsureInitRecoEng
     std::unique_lock<std::mutex> lock(m_mutex);
     if (m_recoAdapter == nullptr ||  m_resetRecoAdapter == m_recoAdapter)
     {
-        EnsureResetRecoEngineAdapter();
+        EnsureResetEngineEngineAdapterComplete();
         InitRecoEngineAdapter();
         EnsureIntentRegionSet();
     }
@@ -939,6 +939,36 @@ void CSpxAudioStreamSession::InitRecoEngineAdapter()
 
     // if we still don't have an adapter... that's an exception
     SPX_IFTRUE_THROW_HR(m_recoAdapter == nullptr, SPXERR_NOT_FOUND);
+}
+
+void CSpxAudioStreamSession::StartResetEngineAdapter()
+{
+    m_resetRecoAdapter = m_recoAdapter;
+    if (IsKind(RecognitionKind::Continuous))
+    {
+        // If we were continuous, let's try and restart recognition, same kind...
+        StartRecognitionAsync(m_recoKind);
+    }
+    else if (!IsKind(RecognitionKind::Idle))
+    {
+        // Otherwise... Let's stop the recognition
+        StopRecognitionAsync(m_recoKind);
+    }
+}
+
+void CSpxAudioStreamSession::EnsureResetEngineEngineAdapterComplete()
+{
+    if (m_resetRecoAdapter != nullptr && m_resetRecoAdapter == m_recoAdapter)
+    {
+        // Let's term and clear our reco adapter...
+        SPX_DBG_TRACE_VERBOSE("%s: resetting reco adapter (0x%8x)...", __FUNCTION__, m_resetRecoAdapter.get());
+        SpxTermAndClear(m_resetRecoAdapter);
+        m_expectAdapterStartedTurn = false;
+        m_expectAdapterStoppedTurn = false;
+        m_adapterAudioMuted = false;
+
+        m_recoAdapter = nullptr; // Already termed (see above)
+    }
 }
 
 std::shared_ptr<ISpxKwsEngineAdapter> CSpxAudioStreamSession::EnsureInitKwsEngineAdapter(std::shared_ptr<ISpxKwsModel> model)
@@ -1048,21 +1078,22 @@ void CSpxAudioStreamSession::InitKwsEngineAdapter(std::shared_ptr<ISpxKwsModel> 
     m_kwsModel = model;
 
     // determine which type (or types) of reco engine adapters we should try creating...
-    bool tryCortana = GetBooleanValue(L"CARBON-INTERNAL-UseKwsEngine-Cortana", false);
     bool tryMock = GetBooleanValue(L"CARBON-INTERNAL-UseKwsEngine-Mock", false);
     bool trySdk = GetBooleanValue(L"CARBON-INTERNAL-UseKwsEngine-Sdk", false);
+    bool tryDdk = GetBooleanValue(L"CARBON-INTERNAL-UseKwsEngine-Ddk", false);
 
     // if nobody specified which type(s) of reco engine adapters this session should use, we'll use the SDK KWS engine
-    if (!tryCortana && !tryMock && !trySdk)
+    if (!tryMock && !trySdk && !tryDdk)
     {
         trySdk = true;
+        tryDdk = true;
         tryMock = true;
     }
 
-    // try to create the Cortana adapter... 
-    if (m_kwsAdapter == nullptr && tryCortana)
+    // try to create the DDK adapter... 
+    if (m_kwsAdapter == nullptr && tryDdk)
     {
-        m_kwsAdapter = SpxCreateObjectWithSite<ISpxKwsEngineAdapter>("CSpxCortanaKwsEngineAdapter", this);
+        m_kwsAdapter = SpxCreateObjectWithSite<ISpxKwsEngineAdapter>("CSpxSpeechDdkKwsEngineAdapter", this);
     }
 
     // try to create the SDK adapter... 
@@ -1142,22 +1173,11 @@ void CSpxAudioStreamSession::ProcessAudioDataLater_Complete()
 void CSpxAudioStreamSession::ProcessAudioDataLater_Overflow()
 {
     SPX_DBG_TRACE_ERROR("%s - Stashed audio OVERFLOW ... (CLEARING=%d) ... recoKind %d; sessionState %d", __FUNCTION__, m_sizeProcessAudioLater, m_recoKind, m_sessionState);
-    ProcessAudioDataLater_Clear();    
+    ProcessAudioDataLater_Clear();
 
     // Send the error, and get ready to reset the adapter
     Error(m_recoAdapter.get(), "Service timed out waiting for response ... Starting Adapter Reset !!!");
-    m_resetRecoAdapter = m_recoAdapter;
-
-    if (IsKind(RecognitionKind::Continuous))
-    {
-        // If we were continuous, let's try and restart recognition, same kind...
-        StartRecognitionAsync(m_recoKind);
-    }
-    else
-    {
-        // Otherwise... Let's stop the recognition
-        StopRecognitionAsync(m_recoKind);
-    }
+    StartResetEngineAdapter();
 }
 
 void CSpxAudioStreamSession::ProcessAudioDataLater_Clear()

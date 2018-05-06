@@ -37,6 +37,16 @@ void CSpxLanguageUnderstandingModel::InitSubscription(const wchar_t* subscriptio
     BuildEndpoint();
 }
 
+void CSpxLanguageUnderstandingModel::UpdateSubscription(const wchar_t* subscription, const wchar_t* region)
+{
+    SPX_IFTRUE_THROW_HR(!m_region.empty() || m_appId.empty() || !m_subscription.empty(), SPXERR_INVALID_ARG);
+
+    m_subscription = subscription;
+    m_region = region;
+
+    BuildEndpoint();
+}
+
 void CSpxLanguageUnderstandingModel::ParseEndpoint()
 {
     // We're going to search the "endpoint" to find: region, appId, subscription key, hostname, and ... finally ... pathAndQuery

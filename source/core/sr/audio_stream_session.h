@@ -199,6 +199,9 @@ private:
     void EnsureResetRecoEngineAdapter();
     void InitRecoEngineAdapter();
 
+    void StartResetEngineAdapter();
+    void EnsureResetEngineEngineAdapterComplete();
+
     void EnsureIntentRegionSet();
     std::string SpeechRegionFromIntentRegion(const std::string& intentRegion);
 
