@@ -13,9 +13,7 @@
 #include "packaged_task_helpers.h"
 #include "service_helpers.h"
 
-#ifdef _MSC_VER
 #include <shared_mutex>
-#endif // _MSC_VER
 
 
 namespace Microsoft {
@@ -252,9 +250,9 @@ private:
     using WriteLock_Type = std::unique_lock<std::shared_mutex>;
     using ReadLock_Type = std::shared_lock<std::shared_mutex>;
     #else
-    using ReadWriteMutex_Type = std::mutex;
-    using WriteLock_Type = std::unique_lock<std::mutex>;
-    using ReadLock_Type = std::unique_lock<std::mutex>;
+    using ReadWriteMutex_Type = std::shared_timed_mutex;
+    using WriteLock_Type = std::unique_lock<std::shared_timed_mutex>;
+    using ReadLock_Type = std::shared_lock<std::shared_timed_mutex>;
     #endif
 
     //  To orchestrate the conversion of "Audio Data" into "Results" and "Events", we'll use utilize
