@@ -38,7 +38,7 @@ namespace CsharpHelloWorld
                 filename = args[2];
             }
 
-            var factory = SpeechFactory.FromSubscription(subscriptionKey, "westus");
+            var factory = SpeechFactory.FromSubscription(subscriptionKey, region);
             var recognizeFromFile = !string.IsNullOrEmpty(filename);
 
             SpeechRecognizer recognizer = null;

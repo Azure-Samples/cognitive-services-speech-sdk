@@ -9,6 +9,7 @@
 using namespace std;
 
 extern void SpeechRecognitionWithMicrophone();
+extern void SpeechRecognitionWithLanguage();
 extern void SpeechRecognitionWithFile();
 extern void SpeechRecognitionUsingCustomizedModel();
 extern void SpeechContinuousRecognitionUsingEvents();
@@ -19,12 +20,13 @@ extern void TranslationContinuousRecognitionUsingEvents();
 int wmain(int argc, wchar_t **argv)
 {
     cout << "1. Speech recognition with microphone input.\n";
-    cout << "2. Speech recognition with file input.\n";
-    cout << "3. Speech recognition using CRIS model.\n";
-    cout << "4. Speech continuous recognition using events.\n";
-    cout << "5. Translation with microphone input.\n";
-    cout << "6. Translation with file input.\n";
-    cout << "7. Translation continuous recognition using events.\n";
+    cout << "2. Speech recognition in the specified language.\n";
+    cout << "3. Speech recognition with file input.\n";
+    cout << "4. Speech recognition using CRIS model.\n";
+    cout << "5. Speech continuous recognition using events.\n";
+    cout << "6. Translation with microphone input.\n";
+    cout << "7. Translation with file input.\n";
+    cout << "8. Translation continuous recognition using events.\n";
     cout << "Your choice (0. Exit.): ";
 
     string input;
@@ -39,21 +41,24 @@ int wmain(int argc, wchar_t **argv)
             SpeechRecognitionWithMicrophone();
             break;
         case '2':
-            SpeechRecognitionWithFile();
+            SpeechRecognitionWithLanguage();
             break;
         case '3':
-            SpeechRecognitionUsingCustomizedModel();
+            SpeechRecognitionWithFile();
             break;
         case '4':
-            SpeechContinuousRecognitionUsingEvents();
+            SpeechRecognitionUsingCustomizedModel();
             break;
         case '5':
-            TranslationWithMicrophone();
+            SpeechContinuousRecognitionUsingEvents();
             break;
         case '6':
-            TranslationWithFile();
+            TranslationWithMicrophone();
             break;
         case '7':
+            TranslationWithFile();
+            break;
+        case '8':
             TranslationContinuousRecognitionUsingEvents();
             break;
         case '0':

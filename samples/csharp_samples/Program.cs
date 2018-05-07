@@ -15,11 +15,12 @@ namespace MicrosoftSpeechSDKSamples
         {
 
             Console.WriteLine("1. Speech recognition with microphone input.");
-            Console.WriteLine("2. Speech recognition with file input.");
-            Console.WriteLine("3. Speech recognition using customized model.");
-            Console.WriteLine("4. Speech continuous Recognition using events.");
-            Console.WriteLine("5. Translation with microphone input.");
-            Console.WriteLine("6. Translation with file input.");
+            Console.WriteLine("2. Speech recognition in the specified language.");
+            Console.WriteLine("3. Speech recognition with file input.");
+            Console.WriteLine("4. Speech recognition using customized model.");
+            Console.WriteLine("5. Speech continuous recognition using events.");
+            Console.WriteLine("6. Translation with microphone input.");
+            Console.WriteLine("7. Translation with file input.");
 
             Console.Write("Your choice (0: Stop.): ");
 
@@ -34,18 +35,21 @@ namespace MicrosoftSpeechSDKSamples
                         SpeechRecognitionSamples.RecognitionWithMicrophoneAsync().Wait();
                         break;
                     case ConsoleKey.D2:
-                        SpeechRecognitionSamples.RecognitionWithFileAsync().Wait();
+                        SpeechRecognitionSamples.RecognitionWithLanguageAsync().Wait();
                         break;
                     case ConsoleKey.D3:
-                        SpeechRecognitionSamples.RecognitionUsingCustomizedModelAsync().Wait();
+                        SpeechRecognitionSamples.RecognitionWithFileAsync().Wait();
                         break;
                     case ConsoleKey.D4:
-                        SpeechRecognitionSamples.ContinuousRecognitionAsync().Wait();
+                        SpeechRecognitionSamples.RecognitionUsingCustomizedModelAsync().Wait();
                         break;
                     case ConsoleKey.D5:
-                        TranslationSamples.TranslationWithMicrophoneAsync().Wait();
+                        SpeechRecognitionSamples.ContinuousRecognitionAsync().Wait();
                         break;
                     case ConsoleKey.D6:
+                        TranslationSamples.TranslationWithMicrophoneAsync().Wait();
+                        break;
+                    case ConsoleKey.D7:
                         TranslationSamples.TranslationWithFileAsync().Wait();
                         break;
                     case ConsoleKey.D0:

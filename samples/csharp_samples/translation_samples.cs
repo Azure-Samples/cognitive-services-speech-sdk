@@ -21,8 +21,6 @@ namespace MicrosoftSpeechSDKSamples
         // <TranslationWithMicrophoneAsync>
         public static async Task TranslationWithMicrophoneAsync()
         {
-            const string GermanVoice = "de-DE-Hedda";
-
             // Creates an instance of a speech factory with specified
             // subscription key and service region. Replace with your own subscription key
             // and service region (e.g., "westus").
@@ -31,6 +29,9 @@ namespace MicrosoftSpeechSDKSamples
             // Sets source and target languages
             string fromLanguage = "en-US";
             List<string> toLanguages = new List<string>() { "de" };
+
+            // Sets voice name of synthesis output.
+            const string GermanVoice = "de-DE-Hedda";
 
             // Creates a translation recognizer using microphone as audio input, and requires voice output.
             using (var recognizer = factory.CreateTranslationRecognizer(fromLanguage, toLanguages, GermanVoice))
