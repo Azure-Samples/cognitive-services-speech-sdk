@@ -855,6 +855,10 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         {
             translationResult = RetrieveTranslationResult(json, true);
         }
+        else if (status == RecognitionStatus::InitialSilenceTimeout)
+        {
+            translationResult.translationStatus = TranslationStatus::Success;
+        }
 
         connection->Invoke([&] { callbacks->OnTranslationPhrase({
             std::move(speechResult.json),
