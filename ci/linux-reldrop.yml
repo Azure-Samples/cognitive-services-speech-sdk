@@ -32,7 +32,7 @@ steps:
   inputs:
     type: FilePath
     scriptPath: 'ci/drop/test-quickstart-linux.sh'
-    args: '"$(Build.ArtifactStagingDirectory)/LinuxRelDrop/csspeech-$(Version).tar.gz"'
+    args: '"$(Build.ArtifactStagingDirectory)/LinuxRelDrop/SpeechSDK-Linux-$(Version).tar.gz"'
   timeoutInMinutes: 5
   displayName: Build quickstart
 # Test run is a separate task for now with continue-on-error, because of the hangs:
@@ -40,7 +40,7 @@ steps:
   inputs:
     type: FilePath
     scriptPath: 'ci/drop/test-quickstart-linux.sh'
-    args: '--smoke-test "$(Build.ArtifactStagingDirectory)/LinuxRelDrop/csspeech-$(Version).tar.gz"'
+    args: '--smoke-test "$(Build.ArtifactStagingDirectory)/LinuxRelDrop/SpeechSDK-Linux-$(Version).tar.gz"'
   timeoutInMinutes: 2
   continueOnError: true
   env:

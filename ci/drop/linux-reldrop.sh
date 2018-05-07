@@ -14,7 +14,7 @@ DROP_DIR="$(readlink -f "$DROP_DIR")"
 [[ -d $OUTPUT_DIR ]] || mkdir -p "$OUTPUT_DIR"
 OUTPUT_DIR="$(readlink -f "$OUTPUT_DIR")"
 
-BASE_NAME="csspeech-$VERSION"
+BASE_NAME="SpeechSDK-Linux-$VERSION"
 
 cd "$DROP_DIR"
 
