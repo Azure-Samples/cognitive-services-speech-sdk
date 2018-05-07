@@ -11,6 +11,7 @@
 #include "file_utils.h"
 #include <inttypes.h>
 #include <cstring>
+#include <chrono>
 #include "service_helpers.h"
 #include "create_object_helpers.h"
 #include "exception.h"
@@ -23,6 +24,8 @@ namespace Impl {
 
 
 CSpxUspRecoEngineAdapter::CSpxUspRecoEngineAdapter() :
+    m_resetUspAfterAudioByteCount(0),
+    m_uspAudioByteCount(0),
     m_audioState(AudioState::Idle),
     m_uspState(UspState::Idle),
     m_servicePreferedBufferSizeSendingNow(0),
@@ -209,6 +212,10 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
     SPX_DBG_TRACE_VERBOSE("%s: recoMode=%d", __FUNCTION__, m_recoMode);
     auto uspConnection = client.Connect();
 
+    // Keep track of what time we initialized (so we can reset later)
+    m_uspInitTime = std::chrono::system_clock::now();
+    m_uspResetTime = m_uspInitTime + std::chrono::seconds(m_resetUspAfterTimeSeconds);
+
     // We're done!!
     m_uspCallbacks = uspCallbacks;
     m_uspConnection = std::move(uspConnection);
@@ -220,7 +227,10 @@ void CSpxUspRecoEngineAdapter::UspTerminate()
     SpxTermAndClear(m_uspCallbacks); // After this ... we won't be called back on ISpxUspCallbacks ever again...
 
     // NOTE: Even if we are in a callback from the USP on another thread, we won't be destoyed until those functions release their shared ptrs
-    m_uspConnection.reset(); 
+    m_uspConnection.reset();
+
+    // Fix up some of our counters...
+    m_uspAudioByteCount = 0;
 }
 
 USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
@@ -534,6 +544,7 @@ void CSpxUspRecoEngineAdapter::UspWriteFormat(WAVEFORMATEX* pformat)
 void CSpxUspRecoEngineAdapter::UspWrite(const uint8_t* buffer, size_t byteToWrite)
 {
     SPX_DBG_TRACE_VERBOSE_IF(byteToWrite == 0, "%s(..., %d)", __FUNCTION__, byteToWrite);
+    m_uspAudioByteCount += byteToWrite;
 
     auto fn = !m_fUseBufferedImplementation || m_servicePreferedBufferSizeSendingNow == 0
         ? &CSpxUspRecoEngineAdapter::UspWrite_Actual
@@ -1071,28 +1082,31 @@ void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
 
         SPX_DBG_TRACE_VERBOSE("%s: site->AdapterRequestingAudioMute(false) ... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
 
-        writeLock.unlock(); // calls to site shouldn't hold locks
+        // It's safe to call AdapterRequestingAudioMute() while locked... it will not call us back... 
         GetSite()->AdapterRequestingAudioMute(this, false);
     }
-    else
+
+    if (adapterTurnStopped && ShouldResetAfterTurnStopped())
     {
-        writeLock.unlock(); // calls to site shouldn't hold locks
+        ResetAfterTurnStopped();
     }
 
-    if (adapterTurnStopped)
+    auto site = GetSite();
+    writeLock.unlock();
+
+    if (adapterTurnStopped && site != nullptr)
     {
         SPX_DBG_TRACE_VERBOSE("%s: site->AdapterStoppedTurn()", __FUNCTION__);
-        SPX_DBG_ASSERT(GetSite());
-        GetSite()->AdapterStoppedTurn(this);
+        site->AdapterStoppedTurn(this);
     }
 
-    if (requestMute)
+    if (requestMute && site != nullptr)
     {
         SPX_DBG_TRACE_VERBOSE("%s: UspWrite_Flush()  USP-FLUSH", __FUNCTION__);
         UspWrite_Flush();
 
         SPX_DBG_TRACE_VERBOSE("%s: site->AdapterRequestingAudioMute(true) ... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
-        GetSite()->AdapterRequestingAudioMute(this, true);
+        site->AdapterRequestingAudioMute(this, true);
     }
 }
 
@@ -1402,6 +1416,12 @@ void CSpxUspRecoEngineAdapter::PrepareFirstAudioReadyState(WAVEFORMATEX* format)
     m_format = SpxAllocWAVEFORMATEX(sizeOfFormat);
     memcpy(m_format.get(), format, sizeOfFormat);
 
+    m_resetUspAfterAudioByteCount = m_format->nAvgBytesPerSec * m_resetUspAfterAudioSeconds;
+    if (ShouldResetBeforeFirstAudio())
+    {
+        ResetBeforeFirstAudio();
+    }
+
     PrepareAudioReadyState();
 }
 
@@ -1424,10 +1444,7 @@ void CSpxUspRecoEngineAdapter::SendPreAudioMessages()
 
 bool CSpxUspRecoEngineAdapter::ShouldResetAfterError()
 {
-    SPX_DBG_ASSERT(GetSite() != nullptr);
-    auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
-    SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_USP_SITE_FAILURE);
-    return properties->GetBooleanValue(L"CARBON-INTERNAL-USP-ResetAfterError") && m_format != nullptr;
+    return m_allowUspResetAfterError && IsState(UspState::Idle);
 }
 
 void CSpxUspRecoEngineAdapter::ResetAfterError()
@@ -1439,6 +1456,40 @@ void CSpxUspRecoEngineAdapter::ResetAfterError()
 
     // Let's get ready for more audio!!!
     PrepareAudioReadyState();
+}
+
+bool CSpxUspRecoEngineAdapter::ShouldResetAfterTurnStopped()
+{
+    return m_allowUspResetAfterAudioByteCount && m_uspAudioByteCount > m_resetUspAfterAudioByteCount;
+}
+
+void CSpxUspRecoEngineAdapter::ResetAfterTurnStopped()
+{
+    SPX_DBG_ASSERT(ShouldResetAfterTurnStopped());
+    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x ... USP-RESET", __FUNCTION__, this);
+
+    // Let's terminate our current usp connection and sever our callbacks
+    UspTerminate();
+
+    // If we're in the ready/idle state, be sure and re-initialize the usp
+    if (IsState(AudioState::Ready, UspState::Idle))
+    {
+        UspInitialize();
+    }
+}
+
+bool CSpxUspRecoEngineAdapter::ShouldResetBeforeFirstAudio()
+{
+    return m_allowUspResetAfterTime && std::chrono::system_clock::now() > m_uspResetTime;
+}
+
+void CSpxUspRecoEngineAdapter::ResetBeforeFirstAudio()
+{
+    SPX_DBG_ASSERT(ShouldResetBeforeFirstAudio() && IsState(AudioState::Ready, UspState::Idle));
+    SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x ... USP-RESET", __FUNCTION__, this);
+
+    // Let's terminate our current usp connection and sever our callbacks
+    UspTerminate();
 }
 
 

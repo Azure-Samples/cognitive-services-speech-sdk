@@ -8,6 +8,7 @@
 #pragma once
 #include <memory>
 #include <list>
+#include <chrono>
 #include "spxcore_common.h"
 #include "ispxinterfaces.h"
 #include "interface_helpers.h"
@@ -218,6 +219,12 @@ private:
     bool ShouldResetAfterError();
     void ResetAfterError();
 
+    bool ShouldResetAfterTurnStopped();
+    void ResetAfterTurnStopped();
+
+    bool ShouldResetBeforeFirstAudio();
+    void ResetBeforeFirstAudio();
+
 
 private:
 
@@ -226,6 +233,18 @@ private:
 
     USP::RecognitionMode m_recoMode = USP::RecognitionMode::Interactive;
     bool m_customEndpoint = false;
+
+    const bool m_allowUspResetAfterAudioByteCount = true;
+    const size_t m_resetUspAfterAudioSeconds = 2 * 60; // 2 minutes
+    uint64_t m_resetUspAfterAudioByteCount;
+    uint64_t m_uspAudioByteCount;
+
+    const bool m_allowUspResetAfterTime = true;
+    const size_t m_resetUspAfterTimeSeconds = 4 * 60; // 4 minutes
+    std::chrono::system_clock::time_point m_uspInitTime;
+    std::chrono::system_clock::time_point m_uspResetTime;
+
+    const bool m_allowUspResetAfterError = true;
 
     #ifdef _MSC_VER
     using ReadWriteMutex_Type = std::shared_mutex;
