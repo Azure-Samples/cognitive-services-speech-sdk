@@ -1,0 +1,12 @@
+.gitattributes text
+.gitignore text
+
+*.config text
+*.cpp text
+*.cs text
+*.csproj text
+*.filters text
+*.h text
+*.md text
+*.sln text
+*.vcxproj text
