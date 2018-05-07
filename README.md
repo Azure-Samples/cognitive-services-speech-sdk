@@ -21,11 +21,11 @@ The sample requires a working installation of the [Visual Studio 2017 IDE](https
 
 ### Linux
 
-[Our main documentation](https://aka.ms/csspeech/linux) describes how to download and install the Speech SDK for Linux.
+[Our main documentation](https://aka.ms/csspeech) describes how to download and install the Speech SDK for Linux.
 Then clone this sample repository onto your local machine.
 Linux samples are contained in the `Linux` folder of this sample repository.
 To build edit the contained `Makefile` and run `make`.
-Please see [here](https://aka.ms/csspeech) for more information.
+Please see [here](https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/cpp-linux) for more information.
 
 ## Resources
 
