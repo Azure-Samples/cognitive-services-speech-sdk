@@ -22,7 +22,7 @@ IF SUFFICIENT INFORMATION IS NOT PROVIDED VIA THE FOLLOWING TEMPLATE THE ISSUE M
 >
 
 ### OS and Version?
-> Windows 7, 8 or 10. Linux (which distribution). macOS (Yosemite? El Capitan? Sierra?)
+> Windows 7, 8 or 10. Linux (which distribution). Other.
 
 ### Versions
 >
