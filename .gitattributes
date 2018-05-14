@@ -32,6 +32,7 @@ Dockerfile text
 *.vcxproj text
 *.vcxproj.filters text
 *.vcxproj.user text
+*.xaml text
 *.yml text
 
 # Bash and "git apply" only like Unix line endings
@@ -43,6 +44,7 @@ Dockerfile text
 *.lib binary
 *.zip binary
 *.png binary
+*.wav binary
 
 # externals are ignored
 external/curl/**/* binary

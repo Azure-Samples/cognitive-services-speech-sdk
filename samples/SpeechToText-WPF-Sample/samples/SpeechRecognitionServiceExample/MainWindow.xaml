@@ -1,0 +1,108 @@
+<Window x:Class="Microsoft.CognitiveServices.SpeechRecognition.MainWindow"
+        x:Name="mainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Microsoft.CognitiveServices.SpeechRecognition Example" Margin="5,5,5,5" MinWidth="800" FontSize="16">
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" >
+            <Label HorizontalAlignment="Left" Width="326">Cognitive Services Speech To Text Sample</Label>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="200"/>
+                <ColumnDefinition Width="*" MinWidth="200"/>
+                <ColumnDefinition x:Name="column2" Width="auto" MinWidth="100"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0" Background="Beige"  Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" MinHeight="200"></RowDefinition>
+                    <RowDefinition Height="auto" MaxHeight="330"></RowDefinition>
+                </Grid.RowDefinitions>
+                <TextBlock x:Name="bingCurrentText" Grid.Row="0" TextTrimming="WordEllipsis" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10" FontSize="20" TextWrapping="Wrap" FontFamily="Segoe UI Semibold" />
+                <Expander ExpandDirection="Up" Grid.Row="1" FontFamily="Segoe UI Semibold" Header=" Baseline Model Output" Margin="10">
+                    <TextBox FontFamily="Segoe UI" MaxHeight="250" x:Name="bingLogText" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextWrapping="Wrap" Text="" VerticalScrollBarVisibility="Visible" Margin="0, 10, 0, 10"/>
+                </Expander>
+            </Grid>
+
+            <Grid Grid.Column="1"  Background="Beige" Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" MinHeight="200"></RowDefinition>
+                    <RowDefinition Height="auto" MaxHeight="330"></RowDefinition>
+                </Grid.RowDefinitions>
+                <TextBlock x:Name="crisCurrentText" Grid.Row="0" TextTrimming="WordEllipsis"  HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10"  FontSize="20" TextWrapping="Wrap"  FontFamily="Segoe UI Semibold"/>
+                <Expander ExpandDirection="Up" Grid.Row="2" FontFamily="Segoe UI Semibold" Header=" Custom Model Output"  Margin="10">
+                    <TextBox FontFamily="Segoe UI" MaxHeight="250" x:Name="crisLogText"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextWrapping="Wrap"  VerticalScrollBarVisibility="Visible" Margin="0, 10, 0, 10"/>
+                </Expander>
+            </Grid>
+
+            <Grid Grid.Column="2" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Expander ExpandDirection="Left"  Grid.Row="0"  Margin="5">
+
+                    <Expander.Header>
+                        <TextBlock Text="Settings">
+                            <TextBlock.LayoutTransform>
+                                <RotateTransform Angle="90"/>
+                            </TextBlock.LayoutTransform>
+                        </TextBlock>
+                    </Expander.Header>
+
+                    <StackPanel x:Name="optionPanel">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"></RowDefinition>
+                                <RowDefinition Height="auto"></RowDefinition>
+                                <RowDefinition Height="auto"></RowDefinition>
+                                <RowDefinition Height="auto"></RowDefinition>
+                                <RowDefinition Height="auto"></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <Expander  Header="Choose Recognition Source"  x:Name="radioGroup" Grid.Row="0" Margin="5">
+                                <StackPanel Orientation="Vertical">
+                                    <RadioButton x:Name="micRadioButton" IsChecked="{Binding ElementName=mainWindow, Path=IsMicrophoneClient}" Margin="10, 10, 0, 0" Click="RadioButton_Click">Use Microphone</RadioButton>
+                                    <RadioButton x:Name="dataRadioButton" IsChecked="{Binding ElementName=mainWindow, Path=IsDataClient}" Margin="10, 10, 0, 0" Click="RadioButton_Click">Use wav file</RadioButton>
+                                    <StackPanel Orientation="Vertical" Grid.Row="1"  Margin="10">
+                                        <Button  x:Name="selectFileButton" Content="Select File" Margin="0,5,0,5" Click="SelectFileButton_Click" Height="35" VerticalAlignment="Top"/>
+                                        <TextBox x:Name="fileNameTextBox" MaxWidth="210" Padding="2"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Text="..\..\..\..\audio\whatstheweatherlike.wav"
+                         ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"  />
+
+                                    </StackPanel>
+                                </StackPanel>
+                            </Expander>
+                            
+                            <Expander Header="Choose Recognition Type" x:Name="selectRecoType" Grid.Row="2" Margin="5" >
+                                <StackPanel Orientation="Vertical">
+                                    <RadioButton x:Name="basicRadioButton" IsChecked="{Binding ElementName=mainWindow, Path=IsBasicReco}" Margin="10, 10, 0, 0" Click="RadioButton_Click">Baseline Model</RadioButton>
+                                    <RadioButton x:Name="customRadioButton" IsChecked="{Binding ElementName=mainWindow, Path=IsCustomReco}" Margin="10, 10, 0, 0" Click="RadioButton_Click">Custom Model</RadioButton>
+                                    <RadioButton x:Name="bothRadioButton" IsChecked="{Binding ElementName=mainWindow, Path=IsBothReco}" Margin="10, 10, 0, 0" Click="RadioButton_Click">Both</RadioButton>
+                                </StackPanel>
+                            </Expander>
+                            <Expander  Header="Change Keys"  Grid.Row="3" Grid.Column="0"  Margin="5">
+                                <StackPanel Margin="10">
+                                    <TextBlock Text="Subscription Key:" />
+                                    <TextBox VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="2" Text="{Binding ElementName=mainWindow, Path=SubscriptionKey, Mode=TwoWay}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+
+                                    <TextBlock Text="CRIS Model ID:" />
+                                    <TextBox VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="2" Text="{Binding ElementName=mainWindow, Path=CrisModelId, Mode=TwoWay}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+                                    <Button Margin="0,5,0,0" Padding="5" Height="35" VerticalAlignment="Top" Click="SaveKey_Click">Save Keys</Button>
+                                </StackPanel>
+                            </Expander>
+                            <StackPanel Orientation="Vertical" Grid.Row="4"  Margin="10" >
+                                <CheckBox x:Name="immediateResultsCheckBox" Margin="0,10" IsChecked="True">Show Immediate Results</CheckBox>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+
+                </Expander>
+                <Button x:Name="startButton" Grid.Row="1" Content="Start" Click="StartButton_Click" Margin="10" Padding="15" VerticalAlignment="Bottom"/>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

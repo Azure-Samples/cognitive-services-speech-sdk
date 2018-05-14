@@ -32,5 +32,5 @@ $ARGV =~ m(.*/(?:$reCsProj|$reVcxProj)$) && do {
   s((\Q<SpeechSdkVersion Condition="'$(SpeechSdkVersion)' == ''">\E)([^<]*)(\Q</SpeechSdkVersion>\E))($1$version$3)g;
 
   # <HintPath>...<HintPath>, <Import Project ... />, <Error ... />
-  s((["'>]packages\\$rePkgId\.)[^\\]*\\)($1$version\\)g;
+  s((["'>](?:\.\.\\)*packages\\$rePkgId\.)[^\\]*\\)($1$version\\)g;
 };
