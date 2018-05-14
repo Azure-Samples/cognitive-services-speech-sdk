@@ -96,15 +96,15 @@ constexpr auto bingSpeechEndpoint = LR"(wss://speech.platform.bing.com/speech/re
 constexpr auto bingSpeechRegion = L"uswest2";
 
 constexpr auto luisPpeSpeechEndpoint = LR"(wss://speech.platform.bing.com/ppe/speech/uswest2/recognition/interactive/cognitiveservices/v1?format=simple&setflight=cognitiveservicesintent&&language=en-us)";
-constexpr auto luisPpeSpeechSubscription = L"ee52996d8f814c0aa77f7a415f81bd4c";
+constexpr auto luisPpeSpeechSubscription = L"38680d89f2134d34837ab1389c3102df";
 constexpr auto luisPpeSpeechRegion = L"uswest2";
 
 constexpr auto luisSpeechEndpoint = LR"(wss://speech.platform.bing.com/speech/uswest2/recognition/interactive/cognitiveservices/v1?format=simple&language=en-us)";
-constexpr auto luisSpeechSubscription = L"ee52996d8f814c0aa77f7a415f81bd4c";
+constexpr auto luisSpeechSubscription = L"38680d89f2134d34837ab1389c3102df";
 constexpr auto luisSpeechRegion = L"uswest2";
 
-constexpr auto luisEndpoint = LR"(https://westus2.api.cognitive.microsoft.com/luis/v2.0/apps/6ad2c77d-180b-45a2-88aa-8c442538c090?subscription-key=ee52996d8f814c0aa77f7a415f81bd4c&verbose=true&timezoneOffset=0&q=)";
-constexpr auto luisSubscription = L"ee52996d8f814c0aa77f7a415f81bd4c";
+constexpr auto luisEndpoint = LR"(https://westus2.api.cognitive.microsoft.com/luis/v2.0/apps/6ad2c77d-180b-45a2-88aa-8c442538c090?subscription-key=38680d89f2134d34837ab1389c3102df&verbose=true&timezoneOffset=0&q=)";
+constexpr auto luisSubscription = L"38680d89f2134d34837ab1389c3102df";
 constexpr auto luisAppId = L"6ad2c77d-180b-45a2-88aa-8c442538c090";
 constexpr auto luisRegion = L"westus2";
 

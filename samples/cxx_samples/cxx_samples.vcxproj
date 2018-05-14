@@ -153,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cxx_samples.cpp" />
+    <ClCompile Include="intent_recognition_samples.cpp" />
     <ClCompile Include="speech_recognition_samples.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

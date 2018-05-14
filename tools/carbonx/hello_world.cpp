@@ -63,7 +63,7 @@ void CarbonTestConsole::Sample_HelloWorld_PickEngine(const wchar_t* pszEngine) /
 
 void CarbonTestConsole::Sample_HelloWorld_Intent()
 {
-    constexpr auto subscriptionKey = LR"(ee52996d8f814c0aa77f7a415f81bd4c)";
+    constexpr auto subscriptionKey = LR"(38680d89f2134d34837ab1389c3102df)";
     constexpr auto appId = LR"(6ad2c77d180b45a288aa8c442538c090)";
     constexpr auto region = LR"(westus2)";
 
