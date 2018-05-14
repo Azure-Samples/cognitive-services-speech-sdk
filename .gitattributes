@@ -10,8 +10,14 @@ Makefile text
 *.filters text
 *.h text
 *.md text
+*.pl text
 *.sln text
 *.vcxproj text
+*.xaml text
+*.yml text
 
 # Bash only likes Unix line endings
 *.sh text eol=lf
+
+# Binary extensions:
+*.wav binary
