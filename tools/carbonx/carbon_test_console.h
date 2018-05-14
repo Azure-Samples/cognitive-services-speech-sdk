@@ -32,7 +32,7 @@ private:
         std::wstring m_strUseRecoEngineProperty;
         std::wstring m_strUseLuEngineProperty;
         bool m_fCommandSystem = false;
-        
+
         std::wstring m_audioInput;
         bool m_useInteractiveMicrophone = false;
         bool m_useMockMicrophone = false;
@@ -47,6 +47,7 @@ private:
         std::wstring m_strEndpointUri;
         std::wstring m_strCustomSpeechModelId;
         std::wstring m_strSubscriptionKey;
+        std::wstring m_strIntentAppId;
 
         bool m_fRecognizeAsync = false;
 
@@ -136,7 +137,7 @@ private:
     void Recognizer_CanceledHandler(const RecognitionEventArgs& e) { UNUSED(e); };
 
     void SpeechRecognizer_IntermediateResultHandler(const SpeechRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"IntermediateResultHandler: %ls", ToString(e).c_str()); };
-    void SpeechRecognizer_FinalResultHandler(const SpeechRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"FinalResultHandler: %ls", ToString(e).c_str());}
+    void SpeechRecognizer_FinalResultHandler(const SpeechRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"FinalResultHandler: %ls", ToString(e).c_str()); }
     void SpeechRecognizer_NoMatchHandler(const SpeechRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"NoMatchHandler: %ls", ToString(e).c_str()); }
     void SpeechRecognizer_CanceledHandler(const SpeechRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"CanceledHandler: %ls", ToString(e).c_str()); };
 
@@ -146,7 +147,7 @@ private:
     void TranslationRecognizer_ErrorHandler(const TranslationSynthesisResultEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"Translation ErrorHandler: %ls", ToString(e).c_str()); }
 
     void IntentRecognizer_IntermediateResultHandler(const IntentRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"IntermediateResultHandler: %ls", ToString(e).c_str()); };
-    void IntentRecognizer_FinalResultHandler(const IntentRecognitionEventArgs& e)  { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"FinalResultHandler: %ls", ToString(e).c_str()); }
+    void IntentRecognizer_FinalResultHandler(const IntentRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"FinalResultHandler: %ls", ToString(e).c_str()); }
     void IntentRecognizer_NoMatchHandler(const IntentRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"NoMatchHandler: %ls", ToString(e).c_str()); }
     void IntentRecognizer_CanceledHandler(const IntentRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%ls: %ls", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine(L"CanceledHandler: %ls", ToString(e).c_str()); };
 
@@ -219,7 +220,21 @@ private:
     void Sample_HelloWorld_Kws();
 
     int Sample_Do_Channel9();
-    
+
+    int channel9();
+
+    void ch9_do_speech();
+    void ch9_do_speech_intermediate();
+    void ch9_do_speech_continuous();
+
+    void ch9_do_intent();
+    void ch9_do_intent_continuous();
+
+    void ch9_do_kws_speech();
+    void ch9_do_kws_intent();
+
+    void ch9_do_translation();
+
 
 private:
 
@@ -228,24 +243,12 @@ private:
     std::shared_ptr<TranslationRecognizer> m_translationRecognizer;
     std::shared_ptr<IntentRecognizer> m_intentRecognizer;
     std::shared_ptr<Session> m_session;
-
     std::wstring m_subscriptionKey;
     std::wstring m_regionId;
     std::wstring m_endpointUri;
+    std::wstring m_customSpeechModelId;
+    std::wstring m_intentAppId;
 
     void* m_commandSystem = nullptr;
 };
 
-int channel9();
-
-void ch9_do_speech();
-void ch9_do_speech_intermediate();
-void ch9_do_speech_continuous();
-
-void ch9_do_intent();
-void ch9_do_intent_continuous();
-
-void ch9_do_kws_speech();
-void ch9_do_kws_intent();
-
-void ch9_do_translation();

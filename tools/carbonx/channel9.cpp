@@ -18,7 +18,7 @@
 #include <iostream>
 using namespace::std;
 
-int channel9()
+int CarbonTestConsole::channel9()
 {
     printf("Channel 9 - Microsoft Cognitive Services Speech SDK - DEMO !!\n");
 
@@ -36,7 +36,7 @@ int channel9()
         printf("7 - do_kws_intent()\n");
         printf("8 - do_translation()\n");
         printf("x - exit\n");
-        
+
         printf("\nchoice: ");
 
         auto ch = getchar();
@@ -51,12 +51,12 @@ int channel9()
 
         case '4': ch9_do_intent(); break;
         case '5': ch9_do_intent_continuous(); break;
-        
+
         case '6': ch9_do_kws_speech(); break;
         case '7': ch9_do_kws_intent(); break;
-        
+
         case '8': ch9_do_translation(); break;
-        
+
         default: showMenu = false; break;
         }
     }
@@ -88,87 +88,31 @@ using namespace Microsoft::CognitiveServices::Speech::Translation;
 //     |____/ \__,_|_.__/|___/\___|_|  |_| .__/ \__|_|\___/|_| |_|      //
 //                                       |_|                            //
 
-constexpr auto speechSubscription = L"e8c934dfd8dd43cda89070ffc8fb5eee";
 constexpr auto speechRegion = L"uswest2";
-
-constexpr auto bingSpeechSubscription = L"1f30c291f2474d39acfdf1d3bdf847c3";
-constexpr auto bingSpeechEndpoint = LR"(wss://speech.platform.bing.com/speech/recognition/interactive/cognitiveservices/v1?format=simple&language=en-us)";
-constexpr auto bingSpeechRegion = L"uswest2";
-
-constexpr auto luisPpeSpeechEndpoint = LR"(wss://speech.platform.bing.com/ppe/speech/uswest2/recognition/interactive/cognitiveservices/v1?format=simple&setflight=cognitiveservicesintent&&language=en-us)";
-constexpr auto luisPpeSpeechSubscription = L"38680d89f2134d34837ab1389c3102df";
-constexpr auto luisPpeSpeechRegion = L"uswest2";
-
-constexpr auto luisSpeechEndpoint = LR"(wss://speech.platform.bing.com/speech/uswest2/recognition/interactive/cognitiveservices/v1?format=simple&language=en-us)";
-constexpr auto luisSpeechSubscription = L"38680d89f2134d34837ab1389c3102df";
-constexpr auto luisSpeechRegion = L"uswest2";
-
-constexpr auto luisEndpoint = LR"(https://westus2.api.cognitive.microsoft.com/luis/v2.0/apps/6ad2c77d-180b-45a2-88aa-8c442538c090?subscription-key=38680d89f2134d34837ab1389c3102df&verbose=true&timezoneOffset=0&q=)";
-constexpr auto luisSubscription = L"38680d89f2134d34837ab1389c3102df";
-constexpr auto luisAppId = L"6ad2c77d-180b-45a2-88aa-8c442538c090";
 constexpr auto luisRegion = L"westus2";
-
-constexpr auto translationSubscription = L"a8ddd80e37dc4c549d9bafd91dadc29a";
-constexpr auto translationDeploymentId = L"d4501bd5-a593-45bf-82a6-36ffc59d80a5";
 constexpr auto translationRegion = L"westus2";
+
+constexpr auto bingSpeechEndpoint = LR"(wss://speech.platform.bing.com/speech/recognition/interactive/cognitiveservices/v1?format=simple&language=en-us)";
+constexpr auto luisPpeSpeechEndpoint = LR"(wss://speech.platform.bing.com/ppe/speech/uswest2/recognition/interactive/cognitiveservices/v1?format=simple&setflight=cognitiveservicesintent&&language=en-us)";
+constexpr auto luisSpeechEndpoint = LR"(wss://speech.platform.bing.com/speech/uswest2/recognition/interactive/cognitiveservices/v1?format=simple&language=en-us)";
+constexpr auto luisEndpoint = LR"(https://westus2.api.cognitive.microsoft.com/luis/v2.0/apps/6ad2c77d-180b-45a2-88aa-8c442538c090?subscription-key=38680d89f2134d34837ab1389c3102df&verbose=true&timezoneOffset=0&q=)";
+
 
 void unused()
 {
-    UNUSED(speechSubscription);
     UNUSED(speechRegion);
 
-    UNUSED(bingSpeechSubscription);
     UNUSED(bingSpeechEndpoint);
-    UNUSED(bingSpeechRegion);
 
     UNUSED(luisPpeSpeechEndpoint);
-    UNUSED(luisPpeSpeechSubscription);
-    UNUSED(luisPpeSpeechRegion);
 
     UNUSED(luisSpeechEndpoint);
-    UNUSED(luisSpeechSubscription);
-    UNUSED(luisSpeechRegion);
 
     UNUSED(luisEndpoint);
-    UNUSED(luisSubscription);
-    UNUSED(luisAppId);
-    UNUSED(luisAppId);
     UNUSED(luisRegion);
 
-    UNUSED(translationSubscription);
-    UNUSED(translationDeploymentId);
     UNUSED(translationRegion);
 }
-
-std::shared_ptr<ICognitiveServicesSpeechFactory> DebugOverride_Speech(std::shared_ptr<ICognitiveServicesSpeechFactory> factory)
-{
-    // factory = SpeechFactory::FromSubscription(bingSpeechSubscription, bingSpeechRegion);
-    // factory = SpeechFactory::FromSubscription(speechSubscription, speechRegion);
-    // factory = SpeechFactory::FromSubscription(luisSubscription, luisRegion);
-    factory = SpeechFactory::FromEndpoint(bingSpeechEndpoint, bingSpeechSubscription);
-    // factory = SpeechFactory::FromEndpoint(speechEndpoint, speechSubscription);
-    // factory = SpeechFactory::FromEndpoint(luisSpeechEndpoint, luisSubscription);
-    // factory = SpeechFactory::FromEndpoint(luisPpeSpeechEndpoint, luisPpeSpeechSubscription);
-
-    return factory;
-}
-
-std::shared_ptr<ICognitiveServicesSpeechFactory> DebugOverride_Intent(std::shared_ptr<ICognitiveServicesSpeechFactory> factory)
-{
-    // factory = SpeechFactory::FromSubscription(bingSpeechSubscription, bingSpeechRegion);
-    // factory = SpeechFactory::FromSubscription(speechSubscription, speechRegion);
-    // factory = SpeechFactory::FromSubscription(luisSubscription, luisRegion);
-    // factory = SpeechFactory::FromEndpoint(bingSpeechEndpoint, bingSpeechSubscription);
-    // factory = SpeechFactory::FromEndpoint(speechEndpoint, speechSubscription);
-    factory = SpeechFactory::FromEndpoint(luisSpeechEndpoint, luisSubscription);
-    // factory = SpeechFactory::FromEndpoint(luisPpeSpeechEndpoint, luisPpeSpeechSubscription);
-
-    // factory->Parameters.SetBool(L"CARBON-INTERNAL-USP-NoDGI", true);
-    // factory->Parameters.SetBool(L"CARBON-INTERNAL-USP-NoIntentJson", true);
-
-    return factory;
-}
-
 
 //      ____                       _         ____                            _ _   _                   //
 //     / ___| _ __   ___  ___  ___| |__     |  _ \ ___  ___ ___   __ _ _ __ (_) |_(_) ___  _ __        //
@@ -177,9 +121,9 @@ std::shared_ptr<ICognitiveServicesSpeechFactory> DebugOverride_Intent(std::share
 //     |____/| .__/ \___|\___|\___|_| |_|   |_| \_\___|\___\___/ \__, |_| |_|_|\__|_|\___/|_| |_|      //
 //           |_|                                                 |___/                                 //
 
-void ch9_do_speech()
+void CarbonTestConsole::ch9_do_speech()
 {
-    auto factory = DebugOverride_Speech(SpeechFactory::FromSubscription(speechSubscription, speechRegion));
+    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, speechRegion);
     auto recognizer = factory->CreateSpeechRecognizer();
 
     printf("Say something...\n");
@@ -188,9 +132,9 @@ void ch9_do_speech()
     printf("FINAL RESULT: '%ls'\n", result->Text.c_str());
 }
 
-void ch9_do_speech_intermediate()
+void CarbonTestConsole::ch9_do_speech_intermediate()
 {
-    auto factory = DebugOverride_Speech(SpeechFactory::FromSubscription(speechSubscription, speechRegion));
+    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, speechRegion);
     auto recognizer = factory->CreateSpeechRecognizer();
 
     recognizer->IntermediateResult += [](const SpeechRecognitionEventArgs& e) {
@@ -203,9 +147,9 @@ void ch9_do_speech_intermediate()
     printf("FINAL RESULT: '%ls'\n", result->Text.c_str());
 }
 
-void ch9_do_speech_continuous()
+void CarbonTestConsole::ch9_do_speech_continuous()
 {
-    auto factory = DebugOverride_Speech(SpeechFactory::FromSubscription(speechSubscription, speechRegion));
+    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, speechRegion);
     auto recognizer = factory->CreateSpeechRecognizer();
 
     recognizer->IntermediateResult += [](const SpeechRecognitionEventArgs& e) {
@@ -232,16 +176,16 @@ void ch9_do_speech_continuous()
 //     |___|_| |_|\__\___|_| |_|\__|   |_| \_\___|\___\___/ \__, |_| |_|_|\__|_|\___/|_| |_|      //
 //                                                          |___/                                 //
 
-void ch9_do_intent()
+void CarbonTestConsole::ch9_do_intent()
 {
-    auto factory = DebugOverride_Intent(SpeechFactory::FromSubscription(luisSubscription, luisRegion));
+    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, luisRegion);
     auto recognizer = factory->CreateIntentRecognizer();
 
     recognizer->IntermediateResult += [](const IntentRecognitionEventArgs& e) {
         printf("INTERMEDIATE: %ls ...\n", e.Result.Text.c_str());
     };
 
-    auto model = LanguageUnderstandingModel::FromSubscription(luisSubscription, luisAppId, luisRegion);
+    auto model = LanguageUnderstandingModel::FromSubscription(m_subscriptionKey, m_intentAppId, luisRegion);
     // auto model = LanguageUnderstandingModel::FromEndpoint(luisEndpoint);
     // auto model = LanguageUnderstandingModel::FromAppId(luisAppId);
     recognizer->AddIntent(L"1", model, L"TV.ChangeChannel");
@@ -259,9 +203,9 @@ void ch9_do_intent()
     //recognizer->StopContinuousRecognitionAsync();
 }
 
-void ch9_do_intent_continuous()
+void CarbonTestConsole::ch9_do_intent_continuous()
 {
-    auto factory = DebugOverride_Intent(SpeechFactory::FromSubscription(luisSubscription, luisRegion));
+    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, luisRegion);
     auto recognizer = factory->CreateIntentRecognizer();
 
     recognizer->IntermediateResult += [](const IntentRecognitionEventArgs& e) {
@@ -275,7 +219,7 @@ void ch9_do_intent_continuous()
         printf("Listening... (press ENTER to exit) \n\n");
     };
 
-    auto model = LanguageUnderstandingModel::FromSubscription(luisSubscription, luisAppId, luisRegion);
+    auto model = LanguageUnderstandingModel::FromSubscription(m_subscriptionKey, m_intentAppId, luisRegion);
     // auto model = LanguageUnderstandingModel::FromEndpoint(luisEndpoint);
     // auto model = LanguageUnderstandingModel::FromAppId(luisAppId);
     recognizer->AddIntent(L"1", model, L"TV.ChangeChannel");
@@ -297,9 +241,9 @@ void ch9_do_intent_continuous()
 //     |_|\_\___|\__, | \_/\_/ \___/|_|  \__,_|   |_| \_\___|\___\___/ \__, |_| |_|_|\__|_|\___/|_| |_|      //
 //               |___/                                                 |___/                                 //
 
-void ch9_do_kws_speech()
+void CarbonTestConsole::ch9_do_kws_speech()
 {
-    auto factory = DebugOverride_Speech(SpeechFactory::FromSubscription(speechSubscription, speechRegion));
+    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, speechRegion);
     auto recognizer = factory->CreateSpeechRecognizer();
 
     recognizer->IntermediateResult += [](const SpeechRecognitionEventArgs& e) {
@@ -320,9 +264,9 @@ void ch9_do_kws_speech()
     // recognizer->StopKeywordRecognitionAsync().get();
 }
 
-void ch9_do_kws_intent()
+void CarbonTestConsole::ch9_do_kws_intent()
 {
-    auto factory = DebugOverride_Intent(SpeechFactory::FromSubscription(luisSubscription, luisRegion));
+    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, luisRegion);
     auto recognizer = factory->CreateIntentRecognizer();
 
     recognizer->IntermediateResult += [](const IntentRecognitionEventArgs& e) {
@@ -336,7 +280,7 @@ void ch9_do_kws_intent()
         printf("KEYWORD SPOTTING: Say 'Hey Cortana' followed by whatever you want ...  (press ENTER to exit) \n\n");
     };
 
-    auto model = LanguageUnderstandingModel::FromSubscription(luisSubscription, luisAppId, luisRegion);
+    auto model = LanguageUnderstandingModel::FromSubscription(m_subscriptionKey, m_intentAppId, luisRegion);
     // auto model = LanguageUnderstandingModel::FromEndpoint(luisEndpoint);
     // auto model = LanguageUnderstandingModel::FromAppId(luisAppId);
     recognizer->AddIntent(L"1", model, L"TV.ChangeChannel");
@@ -359,11 +303,10 @@ void ch9_do_kws_intent()
 //     |_|  |_|\__,_|\___|_| |_|_|_| |_|\___|     |_||_|  \__,_|_| |_|___/_|\__,_|\__|_|\___/|_| |_|      //
 //                                                                                                        //
 
-void ch9_do_translation()
+void CarbonTestConsole::ch9_do_translation()
 {
-    auto factory = SpeechFactory::FromSubscription(translationSubscription, translationRegion);
+    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, translationRegion);
     auto recognizer = factory->CreateTranslationRecognizer(L"en-US", { L"de-DE", L"fr-FR", L"es-ES" });
-    recognizer->Parameters[RecognizerParameter::DeploymentId] = translationDeploymentId;
 
     recognizer->IntermediateResult += [](const TranslationTextResultEventArgs& e) {
         printf("INTERMEDIATE: %ls ...\n", e.Result.Text.c_str());
