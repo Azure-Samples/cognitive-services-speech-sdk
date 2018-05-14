@@ -1,4 +1,10 @@
 #!/bin/bash
+
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+
+# Get some helpers
+. "$SCRIPT_DIR/../functions.sh"
+
 set -x -e -o pipefail
 USAGE="Usage: $0 version repo-dir drop-dir output-dir"
 # N.B. VERSION must not contain any magic characters for replacement.
@@ -45,9 +51,5 @@ tar -tzf "$OUTPUT_DIR/$BASE_NAME.tar.gz"
 echo ::: Checksum
 # N.B. two spaces in the next line intentional
 echo "$SHA256_SUM  $BASE_NAME.tar.gz"
-
-function vsts_setvar {
-   echo "##vso[task.setvariable variable=$1;isOutput=true]$2";
-}
 
 vsts_setvar RELEASE_SHA256SUM "$SHA256_SUM"

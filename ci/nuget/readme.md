@@ -27,11 +27,11 @@ cd ..\..
 Afterwards, the package can be created, pointing to the drop directory and specifying a build number:
 
 ```cmd
-nuget.exe pack carbon.nuspec -Properties "DropDir=..\..\build\drop;BuildNumber=<NUMBER>"
+nuget.exe pack carbon.nuspec -Properties "DropDir=..\..\build\drop;Version=<version>"
 ```
 
 For example:
 
 ```cmd
-nuget.exe pack carbon.nuspec -Properties "DropDir=..\..\build\drop;BuildNumber=0.0.0.007"
+nuget.exe pack carbon.nuspec -Properties "DropDir=..\..\build\drop;Version=0.1.2"
 ```

@@ -15,10 +15,10 @@ fi
 SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
 
-USAGE="Usage: $0 <drop-dir> <build-id> <output-directory>"
+USAGE="Usage: $0 <drop-dir> <version> <output-directory>"
 
 DROP_DIR="${1?$USAGE}"
-BUILD_ID="${2?$USAGE}"
+VERSION="${2?$USAGE}"
 OUTPUT_DIR="${3?$USAGE}"
 
 DROP_DIR="$(cygpath --unix --absolute "$DROP_DIR")"
@@ -28,4 +28,4 @@ OUTPUT_DIR="$(cygpath --windows --absolute "$OUTPUT_DIR")"
 
 DROP_DIR="$(cygpath --windows --absolute "$DROP_DIR")"
 
-"$NUGETEXETOOLPATH" pack ./ci/nuget/carbon.nuspec -Properties "DropDir=$DROP_DIR;BuildNumber=$BUILD_ID" -OutputDirectory "$OUTPUT_DIR"
+"$NUGETEXETOOLPATH" pack ./ci/nuget/carbon.nuspec -Properties "DropDir=$DROP_DIR;Version=$VERSION" -OutputDirectory "$OUTPUT_DIR"

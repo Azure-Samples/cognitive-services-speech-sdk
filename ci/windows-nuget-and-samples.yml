@@ -7,6 +7,8 @@
 #   UpStreamBuildDefinition - normally 4062 (main build)
 #   UpStreamBuildId - where to pick up artifacts from
 #   Version - version number to use
+#             N.B. if this is to be pushed to a VSTS package feed,
+#                  must not include build meta.
 #   Sign - whether to sign the .nupkg
 resources:
 - repo: self
@@ -28,9 +30,9 @@ steps:
     arguments: help
   displayName: Set up NUGETEXETOOLPATH
 - bash: |
-       function vsts_setvar { echo "##vso[task.setvariable variable=$1]$2"; }
+       . ci/functions.sh
        vsts_setvar ZipBasename "SpeechSDK-WindowsSamples-$(Version)"
-  displayName: 'Set ZipBasename Variable'
+  displayName: 'Set variables'
 - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
   inputs:
     type: FilePath
@@ -50,7 +52,7 @@ steps:
        cp --verbose --recursive --preserve license.md ThirdPartyNotices.md samples/{cxx,csharp}_samples "$(ZipBasename)"
        NOW=$(date -Iseconds)
        find "$(ZipBasename)" | xargs touch --date=$NOW
-  displayName: 'Create dir for samples'
+  displayName: 'Create directory with patched samples'
   timeoutInMinutes: 5
 - task: ArchiveFiles@2
   inputs:
@@ -110,11 +112,11 @@ steps:
   inputs:
     type: InlineScript
     script: |
+       . ci/functions.sh
        set -e -o pipefail
        SHA256_SUM="$(sha256sum "$(cygpath -au "$(Build.ArtifactStagingDirectory)/$(ZipBasename).zip")" | cut -f1 -d' ')"
        # N.B. two spaces in the next line intentional
        echo "$SHA256_SUM  $(ZipBasename).zip"
-       function vsts_setvar { echo "##vso[task.setvariable variable=$1]$2"; }
        vsts_setvar WINSAMPLES_SHA256SUM "$SHA256_SUM"
        # checksum is not yet used...
   displayName: 'Compute SHA256 for .zip'

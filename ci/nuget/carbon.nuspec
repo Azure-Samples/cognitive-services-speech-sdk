@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>Microsoft.CognitiveServices.Speech</id>
-    <version>$BuildNumber$</version>
+    <version>$Version$</version>
     <title>Microsoft Cognitive Services Speech SDK</title>
     <authors>Microsoft</authors>
     <owners>Microsoft, Speech Services</owners>
@@ -13,7 +13,7 @@
     <description>Microsoft Cognitive Services Speech SDK</description>
     <summary>This NuGet package provides native and managed libraries to use the Microsoft Cognitive Services Speech functionality. It requires Visual Studio 2017. Documentation is available at https://aka.ms/csspeech</summary>
     <tags>Microsoft Speech Cognitive Services native C++ C# .Net</tags>
-    <releaseNotes>This is build $BuildNumber$.</releaseNotes>
+    <releaseNotes>This is version $Version$.</releaseNotes>
     <dependencies />
   </metadata>
   <files>

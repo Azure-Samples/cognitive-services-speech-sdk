@@ -1,8 +1,9 @@
 #!/bin/bash
-function vsts_setvar {
-  echo "Setting $1 to $2"
-  echo "##vso[task.setvariable variable=$1]$2"
-}
+
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+
+# Get some helpers
+. "$SCRIPT_DIR/functions.sh"
 
 # Model on internal.cris.ai for Mark; Eldar's subscription for INT/PROD.
 TEST_MODEL_ID=6264ab43-c854-4d9f-84fc-5f33621935f3
