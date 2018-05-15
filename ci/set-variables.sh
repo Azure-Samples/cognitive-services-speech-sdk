@@ -92,12 +92,12 @@ if $IN_VSTS; then
 
   SPEECHSDK_MAIN_BUILD=$([[ $SYSTEM_COLLECTIONID/$SYSTEM_DEFINITIONID == $MAIN_BUILD_DEF ]] && echo true || echo false)
 
-  if [[ ! $SPEECHSDK_MAIN_BUILD ]]; then
+  if [[ $SPEECHSDK_MAIN_BUILD ]]; then
     # Non-draft build definition
 
     if [[ $BUILD_SOURCEBRANCH == refs/heads/release/* ]]; then
       SPEECHSDK_BUILD_TYPE=prod
-    elif [[ $BUILD_SOURCEBRANCH == refs/heads/master && $BUILD_REASON == Schedule ]]; then
+    elif [[ $BUILD_SOURCEBRANCH == refs/heads/master && ( $BUILD_REASON == Schedule || $BUILD_REASON == Manual ) ]]; then
       SPEECHSDK_BUILD_TYPE=int
     fi
   fi
