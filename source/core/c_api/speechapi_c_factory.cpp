@@ -71,11 +71,11 @@ public:
     {
     }
 
-    virtual unsigned short GetFormat(Microsoft::CognitiveServices::Speech::AudioInputStreamFormat* pformat, unsigned short cbFormat) override
+    virtual int GetFormat(Microsoft::CognitiveServices::Speech::AudioInputStreamFormat* pformat, int cbFormat) override
     {
         struct tAudioInputStreamFormatC format;
 
-        unsigned short retValue = 0;
+        int retValue = 0;
 
         if (pformat)
         {
@@ -96,7 +96,7 @@ public:
         return retValue;
     }
 
-    virtual unsigned int Read(char* pbuffer, unsigned int cbBuffer) override
+    virtual int Read(char* pbuffer, int cbBuffer) override
     {
         return m_pstream->Read(m_pstream, (unsigned char*)pbuffer, cbBuffer);
     }
@@ -121,6 +121,22 @@ SPXAPI SpeechFactory_CreateSpeechRecognizer_With_Stream(SPXFACTORYHANDLE hfactor
 
         *phreco = SPXHANDLE_INVALID;
         auto recognizer = factory->CreateSpeechRecognizerWithStream(stream);
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        *phreco = recohandles->TrackHandle(recognizer);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI SpeechFactory_CreateSpeechRecognizer_With_StreamAndLanguage(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, SpeechApi_AudioInputStream *pstream, const wchar_t* pszLanguage)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
+        auto factory = (*factoryhandles)[hfactory];
+        SpeechApiAudioInputStreamWrapper* stream = new SpeechApiAudioInputStreamWrapper(pstream);
+
+        *phreco = SPXHANDLE_INVALID;
+        auto recognizer = factory->CreateSpeechRecognizerWithStream(stream, pszLanguage);
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }
@@ -231,6 +247,39 @@ SPXAPI SpeechFactory_CreateIntentRecognizer_With_FileInputAndLanguage(SPXFACTORY
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
+
+SPXAPI SpeechFactory_CreateIntentRecognizer_With_Stream(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, SpeechApi_AudioInputStream *pstream)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
+        auto factory = (*factoryhandles)[hfactory];
+        SpeechApiAudioInputStreamWrapper* stream = new SpeechApiAudioInputStreamWrapper(pstream);
+
+        *phreco = SPXHANDLE_INVALID;
+        auto recognizer = factory->CreateIntentRecognizerWithStream(stream);
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        *phreco = recohandles->TrackHandle(recognizer);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI SpeechFactory_CreateIntentRecognizer_With_StreamAndLanguage(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, SpeechApi_AudioInputStream *pstream, const wchar_t* pszLanguage)
+{
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
+        auto factory = (*factoryhandles)[hfactory];
+        SpeechApiAudioInputStreamWrapper* stream = new SpeechApiAudioInputStreamWrapper(pstream);
+
+        *phreco = SPXHANDLE_INVALID;
+        auto recognizer = factory->CreateIntentRecognizerWithStream(stream, pszLanguage);
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        *phreco = recohandles->TrackHandle(recognizer);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
 
 inline vector<wstring> GetVectorFromBuffer(const wchar_t* buffer[], size_t entries)
 {

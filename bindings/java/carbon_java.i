@@ -28,7 +28,7 @@
 %}
 
 %feature("director") AudioInputStream;
-%apply (char *STRING, int LENGTH) { (char* dataBuffer, unsigned int size) };
+%apply (char *STRING, int LENGTH) { (char* dataBuffer, int size) };
 
 %include "carbon.i"
 

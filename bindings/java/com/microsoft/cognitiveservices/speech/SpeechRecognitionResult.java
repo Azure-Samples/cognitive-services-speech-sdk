@@ -67,7 +67,7 @@ public class SpeechRecognitionResult {
 
     /**
      *  The set of properties exposed in the result.
-     * @return
+     * @return The set of properties exposed in the result.
      */
     public RecognitionResultCollection getProperties() {
         return properties;

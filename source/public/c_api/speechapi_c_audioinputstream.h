@@ -17,37 +17,37 @@ typedef struct tAudioInputStreamFormatC
     /// <summary>
     /// The format of the audio, valid values: 1 (PCM)
     /// </summary>
-    unsigned short wFormatTag;
+    int32_t         wFormatTag;
 
     /// <summary>
     /// The number of channels, valid values: 1 (Mono).
     /// </summary>
-    unsigned short nChannels;
+    int32_t         nChannels;
 
     /// <summary>
     /// The sample rate, valid values: 16000.
     /// </summary>
-    unsigned int   nSamplesPerSec;
+    int32_t         nSamplesPerSec;
 
     /// <summary>
     /// Average bytes per second, usually calculated as nSamplesPerSec * nChannels * ceil(wBitsPerSample, 8).
     /// </summary>
-    unsigned int   nAvgBytesPerSec;
+    int32_t         nAvgBytesPerSec;
 
     /// <summary>
     /// The size of a single frame, valid values: nChannels * ceil(wBitsPerSample, 8).
     /// </summary>
-    unsigned short nBlockAlign;
+    int32_t         nBlockAlign;
 
     /// <summary>
     /// The bits per sample, valid values: 16
     /// </summary>
-    unsigned short wBitsPerSample;
+    int32_t         wBitsPerSample;
 
     /// <summary>
     /// The size of this structure, valid values: sizeof(AudioInputStreamFormat).
     /// </summary>
-    unsigned short cbSize;
+    int32_t         cbSize;
 } AudioInputStreamFormat, *PAudioInputStreamFormat;
 
 // forward declaration
@@ -60,7 +60,7 @@ struct _AudioInputStream;
 /// <param name="pformat">The pointer to the struct tAudioInputStreamFormatC buffer, or null if querying the size of the structure.</param>
 /// <param name="cbFormat">The size of the AudioInputStreamFormat buffer being passed, or 0 if querying the size of the structure.</param>
 /// <returns>The size of the AudioInputStreamFormat buffer required to hold the format information.</returns>
-typedef unsigned short (*PAUDIOINPUTSTREAM_GETFORMAT_CALLBACK_FUNC)(struct _AudioInputStream *context, struct tAudioInputStreamFormatC* pformat, unsigned short cbFormat);
+typedef int (*PAUDIOINPUTSTREAM_GETFORMAT_CALLBACK_FUNC)(struct _AudioInputStream *context, struct tAudioInputStreamFormatC* pformat, int cbFormat);
 
 /// <summary>
 /// Signature of a function being called to get the data from the audio stream.
@@ -69,7 +69,7 @@ typedef unsigned short (*PAUDIOINPUTSTREAM_GETFORMAT_CALLBACK_FUNC)(struct _Audi
 /// <param name="pbuffer">The pointer to the buffer to which to copy the audio data.</param>
 /// <param name="cbBuffer">The size of the buffer.</param>
 /// <returns>The number of bytes being copied to the buffer.</returns>
-typedef unsigned int (*PAUDIOINPUTSTREAM_READ_CALLBACK_FUNC)(struct _AudioInputStream *context, unsigned char* pbuffer, unsigned int cbBuffer);
+typedef int (*PAUDIOINPUTSTREAM_READ_CALLBACK_FUNC)(struct _AudioInputStream *context, unsigned char* pbuffer, int cbBuffer);
 
 /// <summary>
 /// Signature of a function being called to close the audio stream.

@@ -661,9 +661,13 @@ public:
 
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer() = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream*) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language) = 0;
+
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithStream(AudioInputStream*) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language) = 0;
 
     virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer() = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer(const std::wstring& language) = 0;

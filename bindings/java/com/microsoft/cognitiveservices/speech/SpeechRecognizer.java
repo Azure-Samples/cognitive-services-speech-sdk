@@ -4,9 +4,9 @@ package com.microsoft.cognitiveservices.speech;
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+import java.util.concurrent.Future;
+
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
-import com.microsoft.cognitiveservices.speech.util.Task;
-import com.microsoft.cognitiveservices.speech.util.TaskRunner;
 
 /**
   * Performs speech recognition from microphone, file, or other audio input streams, and gets transcribed text as result.
@@ -99,21 +99,10 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       * Starts speech recognition, and stops after the first utterance is recognized. The task returns the recognition text as result.
       * @return A task representing the recognition operation. The task returns a value of SpeechRecognitionResult
       */
-    public Task<SpeechRecognitionResult> recognizeAsync() {
-        Task<SpeechRecognitionResult> t = new Task<SpeechRecognitionResult>(new TaskRunner<SpeechRecognitionResult>() {
-            SpeechRecognitionResult result;
-            
-            @Override
-            public void run() {
-                result = new SpeechRecognitionResult(recoImpl.recognize()); 
-            }
-
-            @Override
-            public SpeechRecognitionResult result() {
-                return result;
-            }});
-        
-        return t;
+    public Future<SpeechRecognitionResult> recognizeAsync() {
+        return s_executorService.submit(() -> {
+                return new SpeechRecognitionResult(recoImpl.recognize()); 
+            });
     }
 
     /**
@@ -121,40 +110,22 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       * User must subscribe to events to receive recognition results.
       * @return A task representing the asynchronous operation that starts the recognition.
       */
-    public Task<?> startContinuousRecognitionAsync() {
-        Task<?> t = new Task<Object>(new TaskRunner<Object>() {
-
-            @Override
-            public void run() {
+    public Future<Void> startContinuousRecognitionAsync() {
+        return s_executorService.submit(() -> {
                 recoImpl.startContinuousRecognitionAsync();
-            }
-
-            @Override
-            public Object result() {
                 return null;
-            }});
-        
-        return t;
+            });
     }
 
     /**
       * Stops continuous speech recognition.
       * @return A task representing the asynchronous operation that stops the recognition.
       */
-    public Task<?> stopContinuousRecognitionAsync() {
-        Task<?> t = new Task<Object>(new TaskRunner<Object>() {
-
-            @Override
-            public void run() {
+    public Future<Void> stopContinuousRecognitionAsync() {
+        return s_executorService.submit(() -> {
                 recoImpl.stopContinuousRecognitionAsync();
-            }
-
-            @Override
-            public Object result() {
                 return null;
-            }});
-        
-        return t;
+            });
     }
 
     /**
@@ -164,20 +135,11 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       * @param model The keyword recognition model that specifies the keyword to be recognized.
       * @return A task representing the asynchronous operation that starts the recognition.
       */
-    public Task<?> startKeywordRecognitionAsync(KeywordRecognitionModel model) {
-        Task<?> t = new Task<Object>(new TaskRunner<Object>() {
-
-            @Override
-            public void run() {
-                recoImpl.startKeywordRecognition(model.modelImpl);
-            }
-
-            @Override
-            public Object result() {
+    public Future<Void> startKeywordRecognitionAsync(KeywordRecognitionModel model) {
+        return s_executorService.submit(() -> {
+                recoImpl.startKeywordRecognition(model.getModelImpl());
                 return null;
-            }});
-        
-        return t;
+            });
     }
 
     /**
@@ -185,20 +147,11 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       * Note: Key word spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
       * @return A task representing the asynchronous operation that stops the recognition.
       */
-    public Task<?> stopKeywordRecognitionAsync() {
-        Task<?> t = new Task<Object>(new TaskRunner<Object>() {
-
-            @Override
-            public void run() {
+    public Future<Void> stopKeywordRecognitionAsync() {
+        return s_executorService.submit(() -> {
                 recoImpl.stopKeywordRecognition();
-            }
-
-            @Override
-            public Object result() {
                 return null;
-            }});
-        
-        return t;
+            });
     }
     
     @Override

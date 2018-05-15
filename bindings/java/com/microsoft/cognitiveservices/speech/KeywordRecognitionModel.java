@@ -1,4 +1,8 @@
 package com.microsoft.cognitiveservices.speech;
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
 
 import java.io.Closeable;
 
@@ -11,7 +15,7 @@ public class KeywordRecognitionModel implements Closeable
     // load the native library.
     static {
         // TODO name of library will depend on version
-        System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
+        System.loadLibrary("Microsoft.CognitiveServices.Speech.Java.Bindings");
     }
 
     /**
@@ -44,8 +48,12 @@ public class KeywordRecognitionModel implements Closeable
         modelImpl = model;
     }
 
-    public com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel modelImpl;
-    com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel getmodelImpl()
+    private com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel modelImpl;
+    /**
+      * Returns the language understanding model.
+      * @return The implementation of the model.
+      */
+    public com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel getModelImpl()
     {
         return modelImpl;
     }

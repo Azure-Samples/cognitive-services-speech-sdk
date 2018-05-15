@@ -51,15 +51,15 @@ namespace Impl {
         AudioInputStreamFormat format;
         auto retValue = m_streamReader->GetFormat(&format, cbFormat);
 
-        pformat->cbSize = format.cbSize;
-        pformat->nAvgBytesPerSec = format.nAvgBytesPerSec;
-        pformat->nBlockAlign = format.nBlockAlign;
-        pformat->nChannels = format.nChannels;
-        pformat->nSamplesPerSec = format.nSamplesPerSec;
-        pformat->wBitsPerSample = format.wBitsPerSample;
-        pformat->wFormatTag = format.wFormatTag;
+        pformat->cbSize = (uint16_t)format.cbSize;
+        pformat->nAvgBytesPerSec = (uint32_t)format.nAvgBytesPerSec;
+        pformat->nBlockAlign = (uint16_t)format.nBlockAlign;
+        pformat->nChannels = (uint16_t)format.nChannels;
+        pformat->nSamplesPerSec = (uint32_t)format.nSamplesPerSec;
+        pformat->wBitsPerSample = (uint16_t)format.wBitsPerSample;
+        pformat->wFormatTag = (uint16_t)format.wFormatTag;
 
-        return retValue;
+        return (uint16_t)retValue;
     }
 
     void CSpxStreamPump::SetFormat(const WAVEFORMATEX* pformat, uint16_t cbFormat)
@@ -132,13 +132,13 @@ namespace Impl {
 
         AudioInputStreamFormat format;
         m_streamReader->GetFormat(&format, cbFormat);
-        waveformat->cbSize = format.cbSize;
-        waveformat->nAvgBytesPerSec = format.nAvgBytesPerSec;
-        waveformat->nBlockAlign = format.nBlockAlign;
-        waveformat->nChannels = format.nChannels;
-        waveformat->nSamplesPerSec = format.nSamplesPerSec;
-        waveformat->wBitsPerSample = format.wBitsPerSample;
-        waveformat->wFormatTag = format.wFormatTag;
+        waveformat->cbSize = (uint16_t)format.cbSize;
+        waveformat->nAvgBytesPerSec = (uint32_t)format.nAvgBytesPerSec;
+        waveformat->nBlockAlign = (uint16_t)format.nBlockAlign;
+        waveformat->nChannels = (uint16_t)format.nChannels;
+        waveformat->nSamplesPerSec = (uint32_t)format.nSamplesPerSec;
+        waveformat->wBitsPerSample = (uint16_t)format.wBitsPerSample;
+        waveformat->wFormatTag = (uint16_t)format.wFormatTag;
         pISpxAudioProcessor->SetFormat(waveformat.get());
 
         // Calculate size of the buffer to read from the reader and send to the processor; and allocate it

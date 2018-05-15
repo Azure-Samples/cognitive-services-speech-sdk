@@ -42,6 +42,7 @@ public:
     // --- ISpxSpeechApiFactory
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer() override;
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream) override;
+    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language) override;
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language) override;
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName) override;
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) override;
@@ -50,7 +51,8 @@ public:
     std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer(const std::wstring& language) override;
     std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName) override;
     std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) override;
-
+    std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithStream(AudioInputStream*) override;
+    std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language) override;
 
     std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") override;
     std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") override;

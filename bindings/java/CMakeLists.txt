@@ -1,6 +1,6 @@
 project(com.microsoft.cognitiveservices.speech)
 
-set(JAVA_BINDINGS Microsoft.CognitiveServices.Speech.java.bindings)
+set(JAVA_BINDINGS Microsoft.CognitiveServices.Speech.Java.Bindings)
 
 find_package(SWIG REQUIRED)
 find_package(Java REQUIRED)
@@ -104,8 +104,6 @@ set(JAVA_SOURCES
 
     com/microsoft/cognitiveservices/speech/util/EventHandler.java
     com/microsoft/cognitiveservices/speech/util/EventHandlerImpl.java
-    com/microsoft/cognitiveservices/speech/util/Task.java
-    com/microsoft/cognitiveservices/speech/util/TaskRunner.java
 )
 
 set(SWIG_JAVA_SOURCES

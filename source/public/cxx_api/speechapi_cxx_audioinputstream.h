@@ -23,37 +23,37 @@ typedef struct tAudioInputStreamFormat
     /// <summary>
     /// The format of the audio, valid values: 1 (PCM)
     /// </summary>
-    unsigned short wFormatTag;
+    int32_t         wFormatTag;
 
     /// <summary>
     /// The number of channels, valid values: 1 (Mono).
     /// </summary>
-    unsigned short nChannels;
+    int32_t         nChannels;
 
     /// <summary>
     /// The sample rate, valid values: 16000.
     /// </summary>
-    unsigned int   nSamplesPerSec;
+    int32_t         nSamplesPerSec;
 
     /// <summary>
     /// Average bytes per second, usually calculated as nSamplesPerSec * nChannels * ceil(wBitsPerSample, 8).
     /// </summary>
-    unsigned int   nAvgBytesPerSec;
+    int32_t         nAvgBytesPerSec;
 
     /// <summary>
     /// The size of a single frame, valid values: nChannels * ceil(wBitsPerSample, 8).
     /// </summary>
-    unsigned short nBlockAlign;
+    int32_t         nBlockAlign;
 
     /// <summary>
     /// The bits per sample, valid values: 16
     /// </summary>
-    unsigned short wBitsPerSample;
+    int32_t         wBitsPerSample;
 
     /// <summary>
     /// The size of this structure, valid values: sizeof(AudioInputStreamFormat).
     /// </summary>
-    unsigned short cbSize;
+    int32_t         cbSize;
 } AudioInputStreamFormat, *PAudioInputStreamFormat;
 
 
@@ -78,7 +78,7 @@ public:
     /// <param name="pformat">The pointer to the AudioInputStreamFormat buffer, or null if querying the size of the structure.</param>
     /// <param name="cbFormat">The size of the AudioInputStreamFormat buffer being passed, or 0 if querying the size of the structure.</param>
     /// <returns>The size of the AudioInputStreamFormat buffer required to hold the format information.</returns>
-    virtual unsigned short GetFormat(AudioInputStreamFormat* pformat, unsigned short cbFormat) = 0;
+    virtual int GetFormat(AudioInputStreamFormat* pformat, int cbFormat) = 0;
 
     /// <summary>
     /// This function is called to get data from the audio stream.
@@ -86,7 +86,7 @@ public:
     /// <param name="dataBuffer">The pointer to the buffer to which to copy the audio data.</param>
     /// <param name="size">The size of the buffer.</param>
     /// <returns>The number of bytes being copied to the buffer.</returns>
-    virtual unsigned int Read(char* dataBuffer, unsigned int size) = 0;
+    virtual int Read(char* dataBuffer, int size) = 0;
 
     /// <summary>
     /// This function is called to close the audio stream.

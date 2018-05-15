@@ -4,20 +4,19 @@ package com.microsoft.cognitiveservices.speech.intent;
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+import java.util.concurrent.Future;
+
 import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
 import com.microsoft.cognitiveservices.speech.ParameterCollection;
-import com.microsoft.cognitiveservices.speech.RecognizerParameterNames;
 import com.microsoft.cognitiveservices.speech.RecognitionErrorEventArgs;
+import com.microsoft.cognitiveservices.speech.RecognizerParameterNames;
 import com.microsoft.cognitiveservices.speech.internal.IntentTrigger;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
-import com.microsoft.cognitiveservices.speech.util.Task;
-import com.microsoft.cognitiveservices.speech.util.TaskRunner;
 
 /**
   * Perform intent recognition on the speech input. It returns both recognized text and recognized intent.
   */
 public final class IntentRecognizer extends com.microsoft.cognitiveservices.speech.Recognizer {
-    
     /**
       * The event IntermediateResultReceived signals that an intermediate recognition result is received.
       */
@@ -56,6 +55,8 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         recoImpl.getSessionStopped().addEventListener(sessionStoppedHandler);
         recoImpl.getSpeechStartDetected().addEventListener(speechStartDetectedHandler);
         recoImpl.getSpeechEndDetected().addEventListener(speechEndDetectedHandler);
+    
+        _Parameters = new ParameterCollection<IntentRecognizer>(this);
     }
 
     /**
@@ -87,22 +88,10 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       * Starts intent recognition, and stops after the first utterance is recognized. The task returns the recognition text and intent as result.
       * @return A task representing the recognition operation. The task returns a value of IntentRecognitionResult
       */
-    public Task<IntentRecognitionResult> recognizeAsync() {
-        
-        Task<IntentRecognitionResult> t = new Task<IntentRecognitionResult>(new TaskRunner<IntentRecognitionResult>() {
-            IntentRecognitionResult result;
-            
-            @Override
-            public void run() {
-                result = new IntentRecognitionResult(recoImpl.recognize());
-            }
-
-            @Override
-            public IntentRecognitionResult result() {
-                return result;
-            }});
-        
-        return t;
+    public Future<IntentRecognitionResult> recognizeAsync() {
+        return s_executorService.submit(() -> {
+                return  new IntentRecognitionResult(recoImpl.recognize());
+            });
     }
 
     /**
@@ -110,42 +99,22 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       * User must subscribe to events to receive recognition results.
       * @return A task representing the asynchronous operation that starts the recognition.
       */
-    public Task<?> startContinuousRecognitionAsync() {
-        
-        Task<Object> t = new Task<Object>(new TaskRunner<Object>() {
-
-            @Override
-            public void run() {
+    public Future<Void> startContinuousRecognitionAsync() {
+        return s_executorService.submit(() -> {
                 recoImpl.startContinuousRecognition();
-            }
-
-            @Override
-            public Object result() {
                 return null;
-            }});
- 
-        return t;
+            });
     }
 
     /**
       * Stops continuous intent recognition.
       * @return A task representing the asynchronous operation that stops the recognition.
       */
-    public Task<?> stopContinuousRecognitionAsync() {
-        
-        Task<Object> t = new Task<Object>(new TaskRunner<Object>() {
-
-            @Override
-            public void run() {
+    public Future<Void> stopContinuousRecognitionAsync() {
+        return s_executorService.submit(() -> {
                 recoImpl.stopContinuousRecognition();
-            }
-
-            @Override
-            public Object result() {
                 return null;
-            }});
-
-        return t;
+            });
     }
 
     /**
@@ -164,7 +133,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       * @param intentName The intent name defined in the intent model. If it is null, all intent names defined in the model will be added.
       */
     public void addIntent(String intentId, LanguageUnderstandingModel model, String intentName) {
-        IntentTrigger trigger = com.microsoft.cognitiveservices.speech.internal.IntentTrigger.from(model.modelImpl, intentName);
+        IntentTrigger trigger = com.microsoft.cognitiveservices.speech.internal.IntentTrigger.from(model.getModelImpl(), intentName);
         recoImpl.addIntent(intentId, trigger);
     }
    
@@ -175,21 +144,11 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       * @param model The keyword recognition model that specifies the keyword to be recognized.
       * @return A task representing the asynchronous operation that starts the recognition.
       */
-    public Task<?> startKeywordRecognitionAsync(KeywordRecognitionModel model) {
-        
-        Task<?> t = new Task<Object>(new TaskRunner<Object>() {
-
-            @Override
-            public void run() {
-                recoImpl.startKeywordRecognition(model.modelImpl);
-            }
-
-            @Override
-            public Object result() {
+    public Future<Void> startKeywordRecognitionAsync(KeywordRecognitionModel model) {
+        return s_executorService.submit(() -> {
+                recoImpl.startKeywordRecognition(model.getModelImpl());
                 return null;
-            }});
-        
-        return t;
+            });
     }
 
     /**
@@ -197,21 +156,11 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       * Note: Key word spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
       * @return A task representing the asynchronous operation that stops the recognition.
       */
-    public Task<?> stopKeywordRecognitionAsync() {
-        
-        Task<?> t = new Task<Object>(new TaskRunner<Object>() {
-
-            @Override
-            public void run() {
-                recoImpl.stopKeywordRecognition();
-            }
-
-            @Override
-            public Object result() {
-                return null;
-            }});
-        
-        return t;
+    public Future<Void> stopKeywordRecognitionAsync() {
+        return s_executorService.submit(() -> {
+            recoImpl.stopKeywordRecognition();
+            return null;
+        });
     }
 
     @Override

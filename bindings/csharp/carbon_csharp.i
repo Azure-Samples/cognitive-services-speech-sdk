@@ -3,6 +3,21 @@
 // make swig generated classes internal only.
 %typemap(csclassmodifiers) SWIGTYPE "internal class"
 
+
+%include "std_string.i"
+%include "arrays_csharp.i"
+CSHARP_ARRAYS(char, byte)
+%apply char INOUT[] {char *dataBuffer}
+
+
+%{
+#include <speechapi_cxx_common.h>
+#include "speechapi_cxx_audioinputstream.h"
+%}
+
+%feature("director") AudioInputStream;
+%include "speechapi_cxx_audioinputstream.h"
+
 #define SWIG_CSHARP_NO_WSTRING_HELPER
 
 %include <std_wstring.i>

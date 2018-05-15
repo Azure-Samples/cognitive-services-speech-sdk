@@ -1,4 +1,8 @@
 package com.microsoft.cognitiveservices.speech.intent;
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
 
 
 /**
@@ -9,7 +13,7 @@ public final class LanguageUnderstandingModel
     // load the native library.
     static {
         // TODO name of library will depend on version
-        System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
+        System.loadLibrary("Microsoft.CognitiveServices.Speech.Java.Bindings");
     }
 
     /**
@@ -49,8 +53,12 @@ public final class LanguageUnderstandingModel
         modelImpl = model;
     }
 
-    public com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel modelImpl;
-    com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel getmodelImpl()
+    private com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel modelImpl;
+    /**
+      * Returns the language understanding model.
+      * @return The implementation of the model.
+      */
+    public com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel getModelImpl()
     {
         return modelImpl;
     }

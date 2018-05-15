@@ -5,6 +5,8 @@ package com.microsoft.cognitiveservices.speech;
 //
 
 import java.io.Closeable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 
@@ -13,6 +15,11 @@ import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
   */
 public class Recognizer implements Closeable
 {
+    protected static ExecutorService s_executorService;
+    static {
+        s_executorService = Executors.newCachedThreadPool();
+    }
+    
     /**
       * Defines event handler for session events, e.g., SessionStartedEvent and SessionStoppedEvent.
       */

@@ -1,18 +1,17 @@
-/**
- * 
- */
 package com.microsoft.cognitiveservices.speech.translation;
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
 
 import java.util.ArrayList;
+import java.util.concurrent.Future;
 
 import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
 import com.microsoft.cognitiveservices.speech.ParameterCollection;
 import com.microsoft.cognitiveservices.speech.RecognitionErrorEventArgs;
 import com.microsoft.cognitiveservices.speech.RecognizerParameterNames;
-import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
-import com.microsoft.cognitiveservices.speech.util.Task;
-import com.microsoft.cognitiveservices.speech.util.TaskRunner;
 
 //
 //Copyright (c) Microsoft. All rights reserved.
@@ -116,21 +115,10 @@ import com.microsoft.cognitiveservices.speech.util.TaskRunner;
        * Starts recognition and translation, and stops after the first utterance is recognized. The task returns the translation text as result.
        * @return A task representing the recognition operation. The task returns a value of TranslationTextResult.
        */
-     public Task<TranslationTextResult> RecognizeAsync() {
-         Task<TranslationTextResult> t = new Task<TranslationTextResult>(new TaskRunner<TranslationTextResult>() {
-             TranslationTextResult result;
-             
-             @Override
-             public void run() {
-                 result = new TranslationTextResult(recoImpl.recognize());
-             }
-
-             @Override
-             public TranslationTextResult result() {
-                 return result;
-             }});
-         
-         return t;
+     public Future<TranslationTextResult> recognizeAsync() {
+         return s_executorService.submit(() -> {
+                 return new TranslationTextResult(recoImpl.recognize());
+             });
      }
 
      /**
@@ -138,65 +126,36 @@ import com.microsoft.cognitiveservices.speech.util.TaskRunner;
        * User must subscribe to events to receive translation results.
        * @return A task representing the asynchronous operation that starts the recognition.
        */
-     public Task<?> StartContinuousRecognitionAsync() {
-         Task<Object> t = new Task<Object>(new TaskRunner<Object>() {
-             IntentRecognitionResult result;
-             
-             @Override
-             public void run() {
+     public Future<Void> startContinuousRecognitionAsync() {
+         return s_executorService.submit(() -> {
                  recoImpl.startContinuousRecognitionAsync();
-             }
-
-             @Override
-             public Object result() {
-                 return result;
-             }});
-         
-         return t;
+                 return null;
+             });
      }
 
      /**
        * Stops continuous recognition and translation.
        * @return A task representing the asynchronous operation that stops the translation.
        */
-     public Task<?> StopContinuousRecognitionAsync() {
-         Task<Object> t = new Task<Object>(new TaskRunner<Object>() {
-             IntentRecognitionResult result;
-             
-             @Override
-             public void run() {
+     public Future<Void> stopContinuousRecognitionAsync() {
+         return s_executorService.submit(() -> {
                  recoImpl.stopContinuousRecognitionAsync();
-             }
-
-             @Override
-             public Object result() {
-                 return result;
-             }});
-         
-         return t;
+                 return null;
+             });
      }
 
     /**
-      * Starts speech recognition on a continous audio stream with keyword spotting, until stopKeywordRecognitionAsync() is called.
+      * Starts speech recognition on a continuous audio stream with keyword spotting, until stopKeywordRecognitionAsync() is called.
       * User must subscribe to events to receive recognition results.
       * Note: Key word spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
       * @param model The keyword recognition model that specifies the keyword to be recognized.
       * @return A task representing the asynchronous operation that starts the recognition.
       */
-    public Task<?> startKeywordRecognitionAsync(KeywordRecognitionModel model) {
-        Task<?> t = new Task<Object>(new TaskRunner<Object>() {
-
-            @Override
-            public void run() {
-                recoImpl.startKeywordRecognitionAsync(model.modelImpl);
-            }
-
-            @Override
-            public Object result() {
+    public Future<Void> startKeywordRecognitionAsync(KeywordRecognitionModel model) {
+        return s_executorService.submit(() -> {
+                recoImpl.startKeywordRecognitionAsync(model.getModelImpl());
                 return null;
-            }});
-        
-        return t;
+            });
     }
 
     /**
@@ -204,20 +163,11 @@ import com.microsoft.cognitiveservices.speech.util.TaskRunner;
       * Note: Key word spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
       * @return A task representing the asynchronous operation that stops the recognition.
       */
-    public Task<?> stopKeywordRecognitionAsync() {
-        Task<?> t = new Task<Object>(new TaskRunner<Object>() {
-
-            @Override
-            public void run() {
+    public Future<Void> stopKeywordRecognitionAsync() {
+        return s_executorService.submit(() -> {
                 recoImpl.stopKeywordRecognitionAsync();
-            }
-
-            @Override
-            public Object result() {
                 return null;
-            }});
-        
-        return t;
+            });
     }
 
      @Override

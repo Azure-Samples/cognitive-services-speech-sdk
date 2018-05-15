@@ -21,7 +21,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
     // load the native library.
     static {
         // TODO name of library will depend on version
-        System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
+        System.loadLibrary("Microsoft.CognitiveServices.Speech.Java.Bindings");
     }
 
     /**
@@ -133,32 +133,51 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
     private final ParameterCollection<SpeechFactory> _Parameters;
 
     /**
-      * Creates a translation recognizer, using the default microphone input.
-      * @return A translation recognizer instance.
+      * Creates a speech recognizer, using the default microphone input.
+      * @return A speech recognizer instance.
       */
     public SpeechRecognizer createSpeechRecognizer() {
         return new SpeechRecognizer(factoryImpl.createSpeechRecognizer());
     }
 
     /**
-      * Creates a translation recognizer, using the specified file as audio input.
+      * Creates a speech recognizer, using the specified file as audio input.
       * @param audioFile Specifies the audio input file.
-      * @return A translation recognizer instance.
+      * @return A speech recognizer instance.
       */
     public SpeechRecognizer createSpeechRecognizer(String audioFile) {
         return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithFileInput(audioFile));
     }
 
     /**
-     * Creates a translation recognizer, using the specified file as audio input.
+     * Creates a speech recognizer, using the specified file as audio input.
      * @param audioFile Specifies the audio input file.
      * @param language Specifies the name of spoken language to be recognized in BCP-47 format.
-     * @return A translation recognizer instance.
+     * @return A speech recognizer instance.
      */
     public SpeechRecognizer createSpeechRecognizer(String audioFile, String language) {
         return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithFileInput(audioFile, language));
     }
 
+    /**
+      * Creates a speech recognizer, using the specified input stream as audio input.
+      * @param audioStream Specifies the audio input stream.
+      * @return A speech recognizer instance.
+      */
+    public SpeechRecognizer createSpeechRecognizer(AudioInputStream audioStream) {
+        return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithStream(audioStream));
+    }
+
+    /**
+     * Creates a speech recognizer, using the specified input stream as audio input.
+     * @param audioStream Specifies the audio input stream.
+     * @param language Specifies the name of spoken language to be recognized in BCP-47 format.
+     * @return A speech recognizer instance.
+     */
+    public SpeechRecognizer createSpeechRecognizer(AudioInputStream audioStream, String language) {
+       return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithStream(audioStream, language));
+    }
+    
     /**
       * Creates an intent recognizer, using the specified file as audio input.
       * @return An intent recognizer instance.
@@ -174,6 +193,35 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       */
     public IntentRecognizer createIntentRecognizer(String audioFile) {
         return new IntentRecognizer(factoryImpl.createIntentRecognizerWithFileInput(audioFile));
+    }
+
+    /**
+      * Creates an intent recognizer, using the specified file as audio input.
+      * @param audioFile Specifies the audio input file.
+      * @param language Specifies the name of spoken language to be recognized in BCP-47 format.
+      * @return An intent recognizer instance
+      */
+    public IntentRecognizer createIntentRecognizer(String audioFile, String language) {
+        return new IntentRecognizer(factoryImpl.createIntentRecognizerWithFileInput(audioFile, language));
+    }
+
+    /**
+      * Creates an intent recognizer, using the specified input stream as audio input.
+      * @param audioStream Specifies the audio input stream.
+      * @return An intent recognizer instance.
+      */
+    public IntentRecognizer createIntentRecognizer(AudioInputStream audioStream) {
+        return new IntentRecognizer(factoryImpl.createIntentRecognizerWithStream(audioStream));
+    }
+
+    /**
+      * Creates an intent recognizer, using the specified input stream as audio input.
+      * @param audioStream Specifies the audio input stream.
+      * @param language Specifies the name of spoken language to be recognized in BCP-47 format.
+      * @return An intent recognizer instance.
+      */
+    public IntentRecognizer createIntentRecognizer(AudioInputStream audioStream, String language) {
+        return new IntentRecognizer(factoryImpl.createIntentRecognizerWithStream(audioStream, language));
     }
 
     /**
@@ -216,7 +264,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
      * @param targetLanguages The target languages of translation.
      * @return A translation recognizer instance.
      */
-   public TranslationRecognizer CreateTranslationRecognizerWithFileInput(String audioFile, String sourceLanguage, ArrayList<String> targetLanguages) {
+   public TranslationRecognizer createTranslationRecognizerWithFileInput(String audioFile, String sourceLanguage, ArrayList<String> targetLanguages) {
        com.microsoft.cognitiveservices.speech.internal.WstringVector v = new com.microsoft.cognitiveservices.speech.internal.WstringVector();
        
        for(String element : targetLanguages) {
@@ -234,7 +282,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
      * @param voice Specifies the name of voice tag if a synthesized audio output is desired.
      * @return A translation recognizer instance.
      */
-   public TranslationRecognizer CreateTranslationRecognizerWithFileInput(String audioFile, String sourceLanguage, ArrayList<String> targetLanguages, String voice) {
+   public TranslationRecognizer createTranslationRecognizerWithFileInput(String audioFile, String sourceLanguage, ArrayList<String> targetLanguages, String voice) {
        com.microsoft.cognitiveservices.speech.internal.WstringVector v = new com.microsoft.cognitiveservices.speech.internal.WstringVector();
        
        for(String element : targetLanguages) {
@@ -242,6 +290,41 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
        }
 
        return new TranslationRecognizer(factoryImpl.createTranslationRecognizerWithFileInput(audioFile, sourceLanguage, v, voice));
+   }
+
+   /**
+    * Creates a translation recognizer using the specified input stream as audio input.
+    * @param audioStream Specifies the audio input stream.
+    * @param sourceLanguage The spoken language that needs to be translated.
+    * @param targetLanguages The target languages of translation.
+    * @return A translation recognizer instance.
+    */
+   public TranslationRecognizer createTranslationRecognizerWithStream(AudioInputStream audioStream, String sourceLanguage, ArrayList<String> targetLanguages) {
+       com.microsoft.cognitiveservices.speech.internal.WstringVector v = new com.microsoft.cognitiveservices.speech.internal.WstringVector();
+       
+       for(String element : targetLanguages) {
+           v.add(element);
+       }
+
+       return new TranslationRecognizer(factoryImpl.createTranslationRecognizerWithStream(audioStream, sourceLanguage, v));
+   }
+
+   /**
+    * Creates a translation recognizer using the specified input stream as audio input.
+    * @param audioStream Specifies the audio input stream.
+    * @param sourceLanguage The spoken language that needs to be translated.
+    * @param targetLanguages The target languages of translation.
+    * @param voice Specifies the name of voice tag if a synthesized audio output is desired.
+    * @return A translation recognizer instance.
+    */
+   public TranslationRecognizer createTranslationRecognizerWithStream(AudioInputStream audioStream, String sourceLanguage, ArrayList<String> targetLanguages, String voice) {
+       com.microsoft.cognitiveservices.speech.internal.WstringVector v = new com.microsoft.cognitiveservices.speech.internal.WstringVector();
+       
+       for(String element : targetLanguages) {
+           v.add(element);
+       }
+
+       return new TranslationRecognizer(factoryImpl.createTranslationRecognizerWithStream(audioStream, sourceLanguage, v, voice));
    }
 
     /**

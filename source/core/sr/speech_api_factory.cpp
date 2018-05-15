@@ -37,6 +37,39 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerWith
     return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxRecognizer", fileName.c_str(), language.c_str());
 }
 
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream)
+{
+    return CreateSpeechRecognizerWithStream(audioInputStream, L"");
+}
+
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language)
+{
+    // Create the session
+    auto factoryAsSite = SpxSiteFromThis(this);
+    auto session = SpxCreateObjectWithSite<ISpxSession>("CSpxAudioStreamSession", factoryAsSite);
+
+    // Initialize the session
+    auto sessionInit = SpxQueryInterface<ISpxAudioStreamSessionInit>(session);
+    sessionInit->InitFromStream(audioInputStream);
+
+    // Create the recognizer
+    auto sessionAsSite = SpxQueryInterface<ISpxGenericSite>(session);
+    auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>("CSpxRecognizer", sessionAsSite);
+
+    // Set language if we have one. Default will be set to en-US
+    auto namedProperties = SpxQueryService<ISpxNamedProperties>(sessionAsSite);
+    if (!language.empty())
+    {
+        namedProperties->SetStringValue(g_SPEECH_RecoLanguage, language.c_str());
+    }
+
+    // Add the recognizer to the session
+    session->AddRecognizer(recognizer);
+
+    // We're done!
+    return recognizer;
+}
+
 std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateIntentRecognizer()
 {
     return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxIntentRecognizer");
@@ -57,7 +90,12 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateIntentRecognizerWith
     return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxIntentRecognizer", fileName.c_str(), language.c_str());
 } 
 
-std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream)
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateIntentRecognizerWithStream(AudioInputStream* audioInputStream)
+{
+    return CreateIntentRecognizerWithStream(audioInputStream, L"");
+}
+
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateIntentRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language)
 {
     // Create the session
     auto factoryAsSite = SpxSiteFromThis(this);
@@ -69,7 +107,14 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerWith
 
     // Create the recognizer
     auto sessionAsSite = SpxQueryInterface<ISpxGenericSite>(session);
-    auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>("CSpxRecognizer", sessionAsSite);
+    auto recognizer = SpxCreateObjectWithSite<ISpxRecognizer>("CSpxIntentRecognizer", sessionAsSite);
+
+    // Set language if we have one. Default will be set to en-US
+    auto namedProperties = SpxQueryService<ISpxNamedProperties>(sessionAsSite);
+    if (!language.empty())
+    {
+        namedProperties->SetStringValue(g_SPEECH_RecoLanguage, language.c_str());
+    }
 
     // Add the recognizer to the session
     session->AddRecognizer(recognizer);

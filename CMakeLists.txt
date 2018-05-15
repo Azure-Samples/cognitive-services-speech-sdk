@@ -80,7 +80,7 @@ set(CARBON_C_API "${CARBON_PUBLIC}/c_api")
 set(CARBON_CXX_API "${CARBON_PUBLIC}/cxx_api")
 set(CARBON_INCLUDE "${CARBON_CORE}/include")
 
-set(SPEECHSDK_CORE_LIBRARY "Microsoft.CognitiveServices.Speech.core")
+set(SPEECHSDK_CORE_LIBRARY "Microsoft.CognitiveServices.Speech.Core")
 
 FILE(GLOB SPEECH_C_API_HEADERS "${CARBON_C_API}/*.h")
 FILE(GLOB SPEECH_CXX_API_HEADERS "${CARBON_CXX_API}/*.h")
@@ -99,6 +99,9 @@ if(CMAKE_CL_64)
 endif()
 
 set(TESTS "${CARBON_ROOT}/tests")
+
+set(JAVA_TESTS "${TESTS}/core/java")
+set(JAVA_SAMPLES "${CARBON_ROOT}/samples/java_samples")
 
 set(USP_CONSOLE "${CARBON_ROOT}/tools/uspclientconsole")
 set(CARBONX "${CARBON_ROOT}/tools/carbonx")
@@ -134,6 +137,15 @@ add_subdirectory(${CARBON_BINDINGS})
 
 if(NOT ANDROID)
   add_subdirectory(${CARBON_CSHARP_CONSOLE})
+endif()
+
+if(WIN32)
+  add_subdirectory(${JAVA_SAMPLES})
+endif()
+
+# @wolfgang: need JNI on linux
+if(WIN32 OR ANDROID)
+  add_subdirectory(${JAVA_TESTS})
 endif()
 
 # Dummy targets to make API header appear
