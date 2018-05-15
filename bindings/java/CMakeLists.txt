@@ -1,6 +1,6 @@
 project(com.microsoft.cognitiveservices.speech)
 
-set(JAVA_BINDINGS Microsoft.CognitiveServices.Speech.Java.Bindings)
+set(JAVA_BINDINGS Microsoft.CognitiveServices.Speech.java.bindings)
 
 find_package(SWIG REQUIRED)
 find_package(Java REQUIRED)

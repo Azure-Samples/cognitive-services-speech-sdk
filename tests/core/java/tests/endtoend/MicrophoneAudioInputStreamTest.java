@@ -14,7 +14,7 @@ public class MicrophoneAudioInputStreamTest {
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
         // TODO name of library will depend on version
-        System.loadLibrary("Microsoft.CognitiveServices.Speech.Java.Bindings");
+        System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
     }
 
     @AfterClass

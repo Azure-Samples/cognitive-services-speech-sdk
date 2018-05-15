@@ -33,8 +33,8 @@ CSpxResourceManager::CSpxResourceManager()
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-mock.so"));
 
     // Note: due to new naming, removing any carbon prefix in name
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.Extension.PmaKws.so"));
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.Extension.Kws.so"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.pmakws.so"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.kws.so"));
 
     // TODO remove the following line once carbon prefixes are removed
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-pmakws.so"));
@@ -45,8 +45,8 @@ CSpxResourceManager::CSpxResourceManager()
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-mock.dylib"));
 
     // Note: due to new naming, removing any carbon prefix in name
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.Extension.PmaKws.dylib"));
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.Extension.Kws.dylib"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.pmakws.dylib"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("libMicrosoft.CognitiveServices.Speech.extension.kws.dylib"));
 
     // TODO remove the following line once carbon prefixes are removed
     m_moduleFactories.push_back(CSpxModuleFactory::Get("libcarbon-pmakws.dylib"));
@@ -57,8 +57,8 @@ CSpxResourceManager::CSpxResourceManager()
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-mock"));
 
     // Note: due to new naming, removing any carbon prefix in name
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.Extension.PmaKws"));
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.Extension.Kws"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.pmakws"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.kws"));
 
     // TODO remove the following two lines once carbon prefixes are removed
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-pmakws"));
