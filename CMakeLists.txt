@@ -117,10 +117,6 @@ add_subdirectory(${FACTORY})
 add_subdirectory(${AUDIO})
 add_subdirectory(${USP})
 
-if(NOT ANDROID)
-  add_subdirectory(${USP_CONSOLE})
-  add_subdirectory(${TESTS})
-endif()
 
 add_subdirectory(${C_API})
 add_subdirectory(${SR})
@@ -137,15 +133,20 @@ add_subdirectory(${CARBON_BINDINGS})
 
 if(NOT ANDROID)
   add_subdirectory(${CARBON_CSHARP_CONSOLE})
-endif()
-
-if(WIN32)
-  add_subdirectory(${JAVA_SAMPLES})
+  add_subdirectory(${USP_CONSOLE})
+  add_subdirectory(${TESTS})
 endif()
 
 # @wolfgang: need JNI on linux
-if(WIN32 OR ANDROID)
-  add_subdirectory(${JAVA_TESTS})
+if(BUILD_JAVA)
+  if(WIN32)
+    add_subdirectory(${JAVA_SAMPLES})
+    add_subdirectory(${JAVA_TESTS})
+  endif()
+
+  if(ANDROID)
+    add_subdirectory(${JAVA_TESTS})
+  endif()
 endif()
 
 # Dummy targets to make API header appear
