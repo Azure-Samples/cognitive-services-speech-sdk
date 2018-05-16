@@ -122,7 +122,7 @@ void CSpxUspRecoEngineAdapter::SetFormat(WAVEFORMATEX* pformat)
         writeLock.unlock(); // calls to site shouldn't hold locks
 
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) site->AdapterCompletedSetFormatStop()", __FUNCTION__, this);
-        GetSite()->AdapterCompletedSetFormatStop(this);
+        InvokeOnSite([this](const SitePtr& p) { p->AdapterCompletedSetFormatStop(this); });
 
         m_format.reset();
     }
@@ -155,7 +155,7 @@ void CSpxUspRecoEngineAdapter::ProcessAudio(AudioData_Type data, uint32_t size)
         UspWrite(data.get(), size);
 
         SPX_DBG_TRACE_VERBOSE("%s: site->AdapterStartingTurn()", __FUNCTION__);
-        GetSite()->AdapterStartingTurn(this);
+        InvokeOnSite([this](const SitePtr& p) { p->AdapterStartingTurn(this); });
     }
     else if (size > 0 && IsState(AudioState::Sending))
     {
@@ -658,8 +658,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechStartDetected(const USP::SpeechStartDetec
         writeLock.unlock(); // calls to site shouldn't hold locks
 
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) site->AdapterDetectedSpeechStart()", __FUNCTION__, this);
-        SPX_DBG_ASSERT(GetSite() != nullptr);
-        GetSite()->AdapterDetectedSpeechStart(this, message.offset);
+        InvokeOnSite([this, &message](const SitePtr& p) { p->AdapterDetectedSpeechStart(this, message.offset); });
     }
     else
     {
@@ -688,8 +687,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechEndDetected(const USP::SpeechEndDetectedM
         writeLock.unlock(); // calls to site shouldn't hold locks
 
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) site->AdapterDetectedSpeechEnd()", __FUNCTION__, this);
-        SPX_DBG_ASSERT(GetSite());
-        GetSite()->AdapterDetectedSpeechEnd(this, message.offset);
+        InvokeOnSite([this, &message](const SitePtr& p) { p->AdapterDetectedSpeechEnd(this, message.offset); });
     }
     else
     {
@@ -704,8 +702,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechEndDetected(const USP::SpeechEndDetectedM
     if (requestMute && !IsBadState())
     {
         SPX_DBG_TRACE_VERBOSE("%s: site->AdapterRequestingAudioMute(true) ... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
-        SPX_DBG_ASSERT(GetSite());
-        GetSite()->AdapterRequestingAudioMute(this, true);
+        InvokeOnSite([this](const SitePtr& p) { p->AdapterRequestingAudioMute(this, true); });
     }
 }
 
@@ -725,14 +722,14 @@ void CSpxUspRecoEngineAdapter::OnSpeechHypothesis(const USP::SpeechHypothesisMsg
 
         SPX_DBG_TRACE_VERBOSE("%s: site->FireAdapterResult_Intermediate()", __FUNCTION__);
 
-        SPX_DBG_ASSERT(GetSite());
-        auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-
-        auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), ResultType::Speech);
-        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-        namedProperties->SetStringValue(g_RESULT_Json, message.json.c_str());
-
-        GetSite()->FireAdapterResult_Intermediate(this, message.offset, result);
+        InvokeOnSite([&](const SitePtr& site)
+        {
+            auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
+            auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), ResultType::Speech);
+            auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
+            namedProperties->SetStringValue(g_RESULT_Json, message.json.c_str());
+            site->FireAdapterResult_Intermediate(this, message.offset, result);
+        });
     }
     else
     {
@@ -780,13 +777,14 @@ void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& me
         writeLock.unlock(); // calls to site shouldn't hold locks
         SPX_DBG_TRACE_VERBOSE("%s: site->FireAdapterResult_Intermediate()", __FUNCTION__);
 
-        SPX_DBG_ASSERT(GetSite());
-        auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-        auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), ResultType::Speech);
-        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-        namedProperties->SetStringValue(g_RESULT_Json, message.json.c_str());
-
-        GetSite()->FireAdapterResult_Intermediate(this, message.offset, result);
+        InvokeOnSite([&](const SitePtr& site) 
+        {
+            auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
+            auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), ResultType::Speech);
+            auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
+            namedProperties->SetStringValue(g_RESULT_Json, message.json.c_str());
+            site->FireAdapterResult_Intermediate(this, message.offset, result);
+        });
     }
 }
 
@@ -871,22 +869,24 @@ void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHyp
             writeLock.unlock();
             SPX_DBG_TRACE_SCOPE("Fire final translation result: Creating Result", "FireFinalResul: GetSite()->FireAdapterResult_FinalResult()  complete!");
 
-            // Create the result
-            auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-            auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), ResultType::TranslationText);
+            InvokeOnSite([&](const SitePtr& site) 
+            {
+                // Create the result
+                auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
+                auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), ResultType::TranslationText);
 
-            auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-            namedProperties->SetStringValue(g_RESULT_Json, message.json.c_str());
+                auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
+                namedProperties->SetStringValue(g_RESULT_Json, message.json.c_str());
 
-            // Update our result to be an "TranslationText" result.
-            auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
+                // Update our result to be an "TranslationText" result.
+                auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
 
-            auto status = GetTranslationStatus(message.translation.translationStatus);
-            initTranslationResult->InitTranslationTextResult(status, message.translation.translations, message.translation.failureReason);
+                auto status = GetTranslationStatus(message.translation.translationStatus);
+                initTranslationResult->InitTranslationTextResult(status, message.translation.translations, message.translation.failureReason);
 
-            // Fire the result
-            SPX_ASSERT(GetSite() != nullptr);
-            GetSite()->FireAdapterResult_Intermediate(this, message.offset, result);
+                // Fire the result
+                site->FireAdapterResult_Intermediate(this, message.offset, result);
+            });
         }
     }
     else
@@ -928,22 +928,24 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
 
         writeLock.unlock(); // calls to site shouldn't hold locks
 
-        // Create the result
-        auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-        auto result = factory->CreateFinalResult(nullptr, message.text.c_str(), ResultType::TranslationText);
+        InvokeOnSite([&](const SitePtr& site) 
+        {
+            // Create the result
+            auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
+            auto result = factory->CreateFinalResult(nullptr, message.text.c_str(), ResultType::TranslationText);
 
-        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-        namedProperties->SetStringValue(g_RESULT_Json, message.json.c_str());
+            auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
+            namedProperties->SetStringValue(g_RESULT_Json, message.json.c_str());
 
-        // Update our result to be an "TranslationText" result.
-        auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
+            // Update our result to be an "TranslationText" result.
+            auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
 
-        auto status = GetTranslationStatus(message.translation.translationStatus);
-        initTranslationResult->InitTranslationTextResult(status, message.translation.translations, message.translation.failureReason);
+            auto status = GetTranslationStatus(message.translation.translationStatus);
+            initTranslationResult->InitTranslationTextResult(status, message.translation.translations, message.translation.failureReason);
 
-        // Fire the result
-        SPX_ASSERT(GetSite() != nullptr);
-        GetSite()->FireAdapterResult_FinalResult(this, message.offset, result);
+            // Fire the result
+            site->FireAdapterResult_FinalResult(this, message.offset, result);
+        });
     }
     else
     {
@@ -955,27 +957,29 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
 void CSpxUspRecoEngineAdapter::OnTranslationSynthesis(const USP::TranslationSynthesisMsg& message)
 {
     SPX_DBG_TRACE_VERBOSE("Response: Translation.Synthesis message. Audio data size: \n", message.audioLength);
-    SPX_DBG_ASSERT(GetSite());
 
-    // TODO: RobCh: Do something with the other fields in UspMsgSpeechPhrase
-    auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateFinalResult(nullptr, L"", ResultType::TranslationSynthesis);
+    InvokeOnSite([this, &message](const SitePtr& site)
+    {
+        auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
+        auto result = factory->CreateFinalResult(nullptr, L"", ResultType::TranslationSynthesis);
 
-    // Update our result to be an "TranslationSynthesis" result.
-    auto initTranslationResult = SpxQueryInterface<ISpxTranslationSynthesisResultInit>(result);
-    initTranslationResult->InitTranslationSynthesisResult(SynthesisStatus::Success, message.audioBuffer, message.audioLength, L"");
+        // Update our result to be an "TranslationSynthesis" result.
+        auto initTranslationResult = SpxQueryInterface<ISpxTranslationSynthesisResultInit>(result);
+        initTranslationResult->InitTranslationSynthesisResult(SynthesisStatus::Success, message.audioBuffer, message.audioLength, L"");
 
-    // Fire the result
-    SPX_ASSERT(GetSite() != nullptr);
-    GetSite()->FireAdapterResult_TranslationSynthesis(this, result);
+        site->FireAdapterResult_TranslationSynthesis(this, result);
+    });
 }
 
 void CSpxUspRecoEngineAdapter::OnTranslationSynthesisEnd(const USP::TranslationSynthesisEndMsg& message)
 {
     SPX_DBG_TRACE_VERBOSE("Response: Translation.Synthesis.End message. Status: %d, Reason: %ls\n", (int)message.synthesisStatus, message.failureReason.c_str());
-    SPX_DBG_ASSERT(GetSite());
 
-    auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
+    auto site = GetSite();
+    if (!site)
+        return;
+
+    auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
     auto result = factory->CreateFinalResult(nullptr, L"", ResultType::TranslationSynthesis);
 
     // Update our result to be an "TranslationSynthesis" result.
@@ -1003,8 +1007,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationSynthesisEnd(const USP::TranslationS
     initTranslationResult->InitTranslationSynthesisResult(status, nullptr, 0, message.failureReason);
 
     // Fire the result
-    SPX_ASSERT(GetSite() != nullptr);
-    GetSite()->FireAdapterResult_TranslationSynthesis(this, result);
+    site->FireAdapterResult_TranslationSynthesis(this, result);
 }
 
 void CSpxUspRecoEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
@@ -1024,7 +1027,7 @@ void CSpxUspRecoEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
 
         SPX_DBG_TRACE_VERBOSE("%s: site->AdapterStartedTurn()", __FUNCTION__);
         SPX_DBG_ASSERT(GetSite());
-        GetSite()->AdapterStartedTurn(this, message.contextServiceTag);
+        InvokeOnSite([this, &message](const SitePtr& p) { p->AdapterStartedTurn(this, message.contextServiceTag); });
     }
     else
     {
@@ -1083,24 +1086,26 @@ void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
         SPX_DBG_TRACE_VERBOSE("%s: site->AdapterRequestingAudioMute(false) ... (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
 
         // It's safe to call AdapterRequestingAudioMute() while locked... it will not call us back... 
-        GetSite()->AdapterRequestingAudioMute(this, false);
+        InvokeOnSite([this](const SitePtr& p) { p->AdapterRequestingAudioMute(this, false); });
     }
 
     if (adapterTurnStopped && ShouldResetAfterTurnStopped())
     {
         ResetAfterTurnStopped();
     }
-
-    auto site = GetSite();
     writeLock.unlock();
 
-    if (adapterTurnStopped && site != nullptr)
+    auto site = GetSite();
+    if (!site)
+        return;
+
+    if (adapterTurnStopped)
     {
         SPX_DBG_TRACE_VERBOSE("%s: site->AdapterStoppedTurn()", __FUNCTION__);
         site->AdapterStoppedTurn(this);
     }
 
-    if (requestMute && site != nullptr)
+    if (requestMute)
     {
         SPX_DBG_TRACE_VERBOSE("%s: UspWrite_Flush()  USP-FLUSH", __FUNCTION__);
         UspWrite_Flush();
@@ -1126,8 +1131,7 @@ void CSpxUspRecoEngineAdapter::OnError(const std::string& error)
 
         SPX_DBG_TRACE_VERBOSE("%s: ResetAfterError!! ... error='%s'", __FUNCTION__, error.c_str());
 
-        SPX_DBG_ASSERT(GetSite() != nullptr);
-        GetSite()->Error(this, error);
+        InvokeOnSite([this, error](const SitePtr& p) { p->Error(this, error); });
 
         ResetAfterError();
     }
@@ -1136,8 +1140,7 @@ void CSpxUspRecoEngineAdapter::OnError(const std::string& error)
         writeLock.unlock(); // calls to site shouldn't hold locks
 
         SPX_DBG_TRACE_VERBOSE("%s: site->Error() ... error='%s'", __FUNCTION__, error.c_str());
-        SPX_DBG_ASSERT(GetSite() != nullptr);
-        GetSite()->Error(this, error);
+        InvokeOnSite([this, error](const SitePtr& p) { p->Error(this, error); });
     }
     else
     {
@@ -1351,22 +1354,23 @@ void CSpxUspRecoEngineAdapter::FireFinalResultNow(const USP::SpeechPhraseMsg& me
 {
     SPX_DBG_TRACE_SCOPE("FireFinalResultNow: Creating Result", "FireFinalResultNow: GetSite()->FireAdapterResult_FinalResult()  complete!");
 
-    // Create the result
-    SPX_DBG_ASSERT(GetSite() != nullptr);
-    auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateFinalResult(nullptr, message.displayText.c_str(), ResultType::Speech);
-
-    auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-    namedProperties->SetStringValue(g_RESULT_Json, message.json.c_str());
-
-    // Do we already have the LUIS json payload from the service (1-hop)
-    if (!luisJson.empty())
+    InvokeOnSite([&](const SitePtr& site)
     {
-        namedProperties->SetStringValue(g_RESULT_LanguageUnderstandingJson, PAL::ToWString(luisJson).c_str());
-    }
+        // Create the result
+        auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
+        auto result = factory->CreateFinalResult(nullptr, message.displayText.c_str(), ResultType::Speech);
 
-    SPX_ASSERT(GetSite() != nullptr);
-    GetSite()->FireAdapterResult_FinalResult(this, message.offset, result);
+        auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
+        namedProperties->SetStringValue(g_RESULT_Json, message.json.c_str());
+
+        // Do we already have the LUIS json payload from the service (1-hop)
+        if (!luisJson.empty())
+        {
+            namedProperties->SetStringValue(g_RESULT_LanguageUnderstandingJson, PAL::ToWString(luisJson).c_str());
+        }
+
+        site->FireAdapterResult_FinalResult(this, message.offset, result);
+    });
 }
 
 void CSpxUspRecoEngineAdapter::FireFinalResultLater_WaitingForIntentComplete(const std::string& luisJson)

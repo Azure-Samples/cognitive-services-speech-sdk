@@ -111,6 +111,7 @@ public:
 
 
 private:
+    using SitePtr = std::shared_ptr<ISpxRecoEngineAdapterSite>;
 
     DISABLE_COPY_AND_MOVE(CSpxUspRecoEngineAdapter);
 
