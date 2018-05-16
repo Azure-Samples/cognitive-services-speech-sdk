@@ -17,6 +17,10 @@ const wchar_t* g_SPEECH_Endpoint = LR"(SPEECH-Endpoint)";
 const wchar_t* g_SPEECH_ModelId = LR"(SPEECH-ModelId)";
 const wchar_t* g_SPEECH_RecoLanguage = LR"(SPEECH-RecoLanguage)";
 
+const wchar_t* g_SPEECH_OutputFormat = LR"(SPEECH-OutputFormat)";
+const wchar_t* g_SPEECH_OutputFormat_Simple = LR"(SIMPLE)";
+const wchar_t* g_SPEECH_OutputFormat_Detailed = LR"(DETAILED)";
+
 const wchar_t* g_INTENT_Region = LR"(INTENT-region)";
 
 const wchar_t* g_TRANSLATION_FromLanguage = LR"(TRANSLATION-FromLanguage)";

@@ -800,25 +800,39 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
     }
     else if (path == path::speechPhrase)
     {
-        auto offset = json[json_properties::offset].get<OffsetType>();
-        auto duration = json[json_properties::duration].get<DurationType>();
-        auto status = ToRecognitionStatus(json[json_properties::recoStatus].get<string>());
-        
-        string text;
-        if (status == RecognitionStatus::Success)
+        SpeechPhraseMsg result;
+        result.json = PAL::ToWString(json.dump());
+        result.offset = json[json_properties::offset].get<OffsetType>();
+        result.duration = json[json_properties::duration].get<DurationType>();
+        result.recognitionStatus = ToRecognitionStatus(json[json_properties::recoStatus].get<string>());
+
+        if (result.recognitionStatus == RecognitionStatus::Success)
         {
-            // The DisplayText field will be present only if the RecognitionStatus field has the value Success.
-            text = json[json_properties::displayText].get<string>();
+            if (json.find(json_properties::displayText) != json.end())
+            {
+                // The DisplayText field will be present only if the RecognitionStatus field has the value Success.
+                // and the format output is simple
+                result.displayText = PAL::ToWString(json[json_properties::displayText].get<string>());
+            }
+            else // Detailed
+            {
+                auto phrases  = json.at(json_properties::nbest);
+
+                double confidence = 0;
+                for (const auto& object : phrases)
+                {
+                    auto currentConfidence = object.at(json_properties::confidence).get<double>();
+                    // Picking up the result with the highest confidence.
+                    if (currentConfidence > confidence)
+                    {
+                        confidence = currentConfidence;
+                        result.displayText = PAL::ToWString(object.at(json_properties::display).get<string>());
+                    }
+                }
+            }
         }
 
-        connection->Invoke([&] { callbacks->OnSpeechPhrase({
-            PAL::ToWString(json.dump()),
-            offset,
-            duration,
-            status,
-            PAL::ToWString(text)
-            });
-        });
+        connection->Invoke([&] { callbacks->OnSpeechPhrase(result); });
     }
     else if (path == path::translationHypothesis)
     {

@@ -41,11 +41,14 @@ public:
 
     // --- ISpxSpeechApiFactory
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer() override;
-    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream) override;
-    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language) override;
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language) override;
+    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language, OutputFormat format) override;
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName) override;
     std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) override;
+    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language, OutputFormat format) override;
+    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream) override;
+    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language) override;
+    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language, OutputFormat format) override;
 
     std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer() override;
     std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer(const std::wstring& language) override;
@@ -67,8 +70,14 @@ public:
 
 protected:
 
-    std::shared_ptr<ISpxRecognizer> CreateRecognizerInternal(const char* sessionClassName, const char* recognizerClassName, const wchar_t* fileName = nullptr, const wchar_t* language = nullptr);
-    std::shared_ptr<ISpxNamedProperties> GetParentProperties() override { return SpxQueryService<ISpxNamedProperties>(GetSite()); }
+    std::shared_ptr<ISpxRecognizer> CreateRecognizerInternal(
+        const char* sessionClassName,
+        const char* recognizerClassName,
+        const wchar_t* fileName = nullptr,
+        const wchar_t* language = nullptr,
+        OutputFormat format = OutputFormat::Simple);
+
+    std::shared_ptr<ISpxNamedProperties> GetParentProperties() const override { return SpxQueryService<ISpxNamedProperties>(GetSite()); }
 
 private:
 

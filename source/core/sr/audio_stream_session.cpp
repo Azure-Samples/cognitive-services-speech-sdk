@@ -869,7 +869,7 @@ std::shared_ptr<ISpxSession> CSpxAudioStreamSession::GetDefaultSession()
     return SpxSharedPtrFromThis<ISpxSession>(this);
 }
 
-std::wstring CSpxAudioStreamSession::GetStringValue(const wchar_t* name, const wchar_t* defaultValue)
+std::wstring CSpxAudioStreamSession::GetStringValue(const wchar_t* name, const wchar_t* defaultValue) const
 {
     if (PAL::wcsicmp(name, L"KWSModelPath") == 0 && m_kwsModel != nullptr)
     {
@@ -1501,7 +1501,7 @@ std::shared_ptr<ISpxLuEngineAdapter> CSpxAudioStreamSession::GetLuEngineAdapter(
     return m_luAdapter;
 }
 
-std::shared_ptr<ISpxNamedProperties> CSpxAudioStreamSession::GetParentProperties()
+std::shared_ptr<ISpxNamedProperties> CSpxAudioStreamSession::GetParentProperties() const
 {
     return SpxQueryService<ISpxNamedProperties>(GetSite());
 }

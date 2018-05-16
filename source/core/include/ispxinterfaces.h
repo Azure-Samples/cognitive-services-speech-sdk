@@ -15,6 +15,7 @@
 #include "speechapi_cxx_eventsignal.h"
 #include "shared_ptr_helpers.h"
 #include "speechapi_cxx_audioinputstream.h"
+#include "speechapi_cxx_factory.h"
 
 
 using namespace Microsoft::CognitiveServices::Speech;
@@ -224,7 +225,7 @@ protected:
 
     ISpxObjectWithSiteInitImpl() : m_hasSite(false) {}
 
-    std::shared_ptr<T> GetSite()
+    std::shared_ptr<T> GetSite() const
     {
         return m_site.lock();
     }
@@ -243,7 +244,7 @@ protected:
 private:
 
     bool m_hasSite;
-    std::weak_ptr<T> m_site;
+    mutable std::weak_ptr<T> m_site;
 };
 
 class ISpxServiceProvider : public ISpxInterfaceBaseFor<ISpxServiceProvider>
@@ -402,8 +403,6 @@ public:
     virtual std::wstring GetFileName() const = 0;
 };
 
-
-enum class Reason { Recognized, IntermediateResult, NoMatch, Canceled, OtherRecognizer };
 
 enum class ResultType { Unknown, Speech, TranslationText, TranslationSynthesis };
 
@@ -654,25 +653,25 @@ public:
     virtual std::shared_ptr<ISpxSession> GetDefaultSession() = 0;
 };
 
-
 class ISpxSpeechApiFactory : public ISpxInterfaceBaseFor<ISpxSpeechApiFactory>
 {
 public:
-
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer() = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream*) = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language) = 0;
-
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language, OutputFormat format) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithStream(AudioInputStream*) = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language, OutputFormat format) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream*) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language, OutputFormat format) = 0;
 
     virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer() = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer(const std::wstring& language) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName) = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithStream(AudioInputStream*) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language) = 0;
 
     virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizer(const std::wstring& sourcelanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") = 0;
     virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourcelanguae, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") = 0;
@@ -685,17 +684,17 @@ class ISpxNamedProperties : public ISpxInterfaceBaseFor<ISpxNamedProperties>
 {
 public:
 
-    virtual std::wstring GetStringValue(const wchar_t* name, const wchar_t* defaultValue = L"") = 0;
+    virtual std::wstring GetStringValue(const wchar_t* name, const wchar_t* defaultValue = L"") const = 0;
     virtual void SetStringValue(const wchar_t* name, const wchar_t* value) = 0;
-    virtual bool HasStringValue(const wchar_t* name) = 0;
+    virtual bool HasStringValue(const wchar_t* name) const = 0;
 
-    virtual double GetNumberValue(const wchar_t* name, double defaultValue = 0) = 0;
+    virtual double GetNumberValue(const wchar_t* name, double defaultValue = 0) const = 0;
     virtual void SetNumberValue(const wchar_t* name, double value) = 0;
-    virtual bool HasNumberValue(const wchar_t* name) = 0;
+    virtual bool HasNumberValue(const wchar_t* name) const = 0;
 
-    virtual bool GetBooleanValue(const wchar_t* name, bool defaultValue = false) = 0;
+    virtual bool GetBooleanValue(const wchar_t* name, bool defaultValue = false) const = 0;
     virtual void SetBooleanValue(const wchar_t* name, bool value) = 0;
-    virtual bool HasBooleanValue(const wchar_t* name) = 0;
+    virtual bool HasBooleanValue(const wchar_t* name) const = 0;
 };
 
 

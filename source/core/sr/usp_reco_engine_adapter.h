@@ -132,6 +132,7 @@ private:
 
     SPXHR GetRecoModeFromEndpoint(const std::wstring& endpoint, USP::RecognitionMode& mode);
     SPXHR GetRecoModeFromProperties(const std::shared_ptr<ISpxNamedProperties>& properties, USP::RecognitionMode& recoMode) const;
+    USP::OutputFormat GetOutputFormat(const ISpxNamedProperties& properties) const;
 
     void UspWrite(const uint8_t* buffer, size_t byteToWrite);
     void UspSendSpeechContext();

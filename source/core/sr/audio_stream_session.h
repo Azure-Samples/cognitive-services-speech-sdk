@@ -188,7 +188,7 @@ public:
     std::shared_ptr<ISpxSession> GetDefaultSession() override;
 
     // --- ISpxNamedProperties (overrides)
-    std::wstring GetStringValue(const wchar_t* name, const wchar_t* defaultValue) override;
+    std::wstring GetStringValue(const wchar_t* name, const wchar_t* defaultValue) const override;
 
 
 private:
@@ -238,7 +238,7 @@ private:
     void GetIntentInfoFromLuEngineAdapter(std::string& provider, std::string& id, std::string& key, std::string& region);
 
     std::shared_ptr<ISpxLuEngineAdapter> GetLuEngineAdapter();
-    std::shared_ptr<ISpxNamedProperties> GetParentProperties() override;
+    std::shared_ptr<ISpxNamedProperties> GetParentProperties() const override;
 
 
 private:

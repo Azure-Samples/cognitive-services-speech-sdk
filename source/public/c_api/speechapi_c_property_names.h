@@ -20,6 +20,10 @@ extern SPXDLL_EXPORT const wchar_t* g_SPEECH_Endpoint;
 extern SPXDLL_EXPORT const wchar_t* g_SPEECH_ModelId;
 extern SPXDLL_EXPORT const wchar_t* g_SPEECH_RecoLanguage;
 
+extern SPXDLL_EXPORT const wchar_t* g_SPEECH_OutputFormat;
+extern SPXDLL_EXPORT const wchar_t* g_SPEECH_OutputFormat_Simple;
+extern SPXDLL_EXPORT const wchar_t* g_SPEECH_OutputFormat_Detailed;
+
 extern SPXDLL_EXPORT const wchar_t* g_INTENT_Region;
 
 extern SPXDLL_EXPORT const wchar_t* g_TRANSLATION_FromLanguage;

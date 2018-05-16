@@ -7,13 +7,13 @@ using System.Diagnostics;
 
 namespace Microsoft.CognitiveServices.Speech
 {
-
     /// <summary>
     /// Defines kind of recognizer parameters.
     /// </summary>
     public enum RecognizerParameterKind
     {
-        DeploymentId = 1
+        DeploymentId = 1,
+        OutputFormat = 2
     }
 
     /// <summary>
@@ -31,6 +31,10 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         public const string RecognitionLanguage = "SPEECH-RecoLanguage";
 
+        /// <summary>
+        /// The name of parameter for getting/setting language of recognition.
+        /// </summary>
+        public const string OutputFormat = "SPEECH-OutputFormat";
     }
 
     /// <summary>

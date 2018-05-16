@@ -132,6 +132,7 @@ set(SWIG_JAVA_SOURCES
 
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/KeywordRecognitionModel.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/LanguageUnderstandingModel.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/OutputFormat.java
 
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/Reason.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/RecognitionEventArgs.java

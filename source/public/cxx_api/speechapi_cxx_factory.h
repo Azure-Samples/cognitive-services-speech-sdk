@@ -21,6 +21,12 @@ namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 
+enum class OutputFormat
+{
+    Simple = 0,
+    Detailed = 1
+};
+
 /// <summary>
 /// ISpeechFactory interface, defines a number of factory methods for creating various recognizers.
 /// </summary>
@@ -74,6 +80,14 @@ public:
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer(const std::wstring& language) = 0;
 
     /// <summary>
+    /// Creates a SpeechRecognizer for the specified spoken language, using the default microphone as input.
+    /// </summary>
+    /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
+    /// <param name="format">Output format.</param>
+    /// <returns>A shared pointer to SpeechRecognizer</returns>
+    virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer(const std::wstring& language, OutputFormat format) = 0;
+
+    /// <summary>
     /// Creates a SpeechRecognizer, using the specified audio file as input.
     /// </summary>
     /// <param name="fileName">Specifies the input audio file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.</param>
@@ -101,6 +115,23 @@ public:
     /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
     /// <returns>A shared pointer to SpeechRecognizer</returns>
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language) = 0;
+
+    /// Creates a SpeechRecognizer for the specified spoken language, using the specified audio file as input.
+    /// </summary>
+    /// <param name="fileName">Specifies the input audio file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.</param>
+    /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
+    /// <param name="format">Output format.</param>
+    /// <returns>A shared pointer to SpeechRecognizer</returns>
+    virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language, OutputFormat format) = 0;
+
+    /// <summary>
+    /// Creates a SpeechRecognizer for the specified spoken language, using the specified audio stream as input.
+    /// </summary>
+    /// <param name="audioInputStream">A pointer to the input audio stream.</param>
+    /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
+    /// <param name="format">Output format.</param>
+    /// <returns>A shared pointer to SpeechRecognizer</returns>
+    virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language, OutputFormat format) = 0;
 
     /// <summary>
     /// Creates an IntentRecognizer, using the default microphone as input.
@@ -246,8 +277,7 @@ private:
     class InternalCognitiveServicesSpeechFactory : public ICognitiveServicesSpeechFactory
     {
     public:
-
-        InternalCognitiveServicesSpeechFactory(SPXFACTORYHANDLE hfactory) : 
+        InternalCognitiveServicesSpeechFactory(SPXFACTORYHANDLE hfactory) :
             ICognitiveServicesSpeechFactory(m_parameters), 
             m_parameters(hfactory), 
             m_hfactory(hfactory)
@@ -270,6 +300,13 @@ private:
             return std::make_shared<Speech::SpeechRecognizer>(hreco);
         }
 
+        virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizer(const std::wstring& language, OutputFormat format) override
+        {
+            SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
+            SPX_THROW_ON_FAIL(::SpeechFactory_CreateSpeechRecognizer_With_LanguageAndFormat(m_hfactory, &hreco, language.c_str(), static_cast<SpeechOutputFormat>(format)));
+            return std::make_shared<Speech::SpeechRecognizer>(hreco);
+        }
+
         virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName) override
         {
             SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
@@ -281,6 +318,13 @@ private:
         {
             SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
             SPX_THROW_ON_FAIL(::SpeechFactory_CreateSpeechRecognizer_With_FileInputAndLanguage(m_hfactory, &hreco, language.c_str(), fileName.c_str()));
+            return std::make_shared<Speech::SpeechRecognizer>(hreco);
+        }
+
+        virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language, OutputFormat format) override
+        {
+            SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
+            SPX_THROW_ON_FAIL(::SpeechFactory_CreateSpeechRecognizer_With_FileInputAndLanguageAndFormat(m_hfactory, &hreco, language.c_str(), fileName.c_str(), static_cast<SpeechOutputFormat>(format)));
             return std::make_shared<Speech::SpeechRecognizer>(hreco);
         }
 
@@ -351,6 +395,16 @@ private:
             InitSpeechApi_AudioInputStreamAdapterFromAudioInputStream(audioInputStream2, audioInputStream);
 
             SPX_THROW_ON_FAIL(::SpeechFactory_CreateSpeechRecognizer_With_StreamAndLanguage(m_hfactory, &hreco, (::SpeechApi_AudioInputStream*)audioInputStream2, language.c_str()));
+            return std::make_shared<Speech::SpeechRecognizer>(hreco);
+        }
+
+        std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language, OutputFormat format) override
+        {
+            SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
+            auto audioInputStream2 = new SpeechApi_AudioInputStreamAdapter(); // TODO: Are we leaking here and in all such cases?
+            InitSpeechApi_AudioInputStreamAdapterFromAudioInputStream(audioInputStream2, audioInputStream);
+
+            SPX_THROW_ON_FAIL(::SpeechFactory_CreateSpeechRecognizer_With_StreamAndLanguageAndFormat(m_hfactory, &hreco, (::SpeechApi_AudioInputStream*)audioInputStream2, language.c_str(), static_cast<SpeechOutputFormat>(format)));
             return std::make_shared<Speech::SpeechRecognizer>(hreco);
         }
 

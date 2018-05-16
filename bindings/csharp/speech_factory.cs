@@ -134,6 +134,18 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
+        /// Creates a speech recognizer using the default microphone input.
+        /// </summary>
+        /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
+        /// <param name="format">Output format: simple or detailed.</param>
+        /// <returns>A speech recognizer instance.</returns>
+        public SpeechRecognizer CreateSpeechRecognizer(string language, SpeechOutputFormat format)
+        {
+            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizer(language,
+                format == SpeechOutputFormat.Simple ? Internal.OutputFormat.Simple : Internal.OutputFormat.Detailed));
+        }
+
+        /// <summary>
         /// Creates a speech recognizer using the specified file as audio input.
         /// </summary>
         /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.</param>
@@ -173,6 +185,32 @@ namespace Microsoft.CognitiveServices.Speech
         public SpeechRecognizer CreateSpeechRecognizerWithStream(AudioInputStream audioStream, string language)
         {
             return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithStream(audioStream.Forwarder, language));
+        }
+
+        /// <summary>
+        /// Creates a speech recognizer using the specified file as audio input.
+        /// </summary>
+        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.</param>
+        /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
+        /// <param name="format">Output format: simple or detailed.</param>
+        /// <returns>A speech recognizer instance.</returns>
+        public SpeechRecognizer CreateSpeechRecognizerWithFileInput(string audioFile, string language, SpeechOutputFormat format)
+        {
+            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithFileInput(audioFile, language,
+                format == SpeechOutputFormat.Simple ? Internal.OutputFormat.Simple : Internal.OutputFormat.Detailed));
+        }
+
+        /// <summary>
+        /// Creates a speech recognizer using the specified input stream as audio input.
+        /// </summary>
+        /// <param name="audioStream">Specifies the audio input stream.</param>
+        /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
+        /// <param name="format">Output format: simple or detailed.</param>
+        /// <returns>A speech recognizer instance.</returns>
+        public SpeechRecognizer CreateSpeechRecognizerWithStream(AudioInputStream audioStream, string language, SpeechOutputFormat format)
+        {
+            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithStream(audioStream.Forwarder, language,
+                format == SpeechOutputFormat.Simple ? Internal.OutputFormat.Simple : Internal.OutputFormat.Detailed));
         }
 
         /// <summary>

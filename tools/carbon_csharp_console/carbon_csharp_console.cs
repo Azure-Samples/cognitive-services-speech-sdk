@@ -24,7 +24,6 @@ namespace MicrosoftSpeechSDKSamples
             }
 
             string subKey = null;
-            bool useToken = false;
             string fileName = null;
             bool useBaseModel = true;
             bool useEndpoint = false;
@@ -34,7 +33,6 @@ namespace MicrosoftSpeechSDKSamples
             string lang = null;
             string modelId = null;
             string endpoint = null;
-            string token = null;
 
             if (args.Length >= 2)
             {
@@ -63,7 +61,6 @@ namespace MicrosoftSpeechSDKSamples
                     {
                         throw new IndexOutOfRangeException("no key is specified.");
                     }
-                    useToken = true;
                     subKey = args[1].Substring(index + 1);
                 }
                 else

@@ -221,7 +221,7 @@ void CSpxRecognizer::OnIsEnabledChanged()
     // no op currently
 }
 
-std::shared_ptr<ISpxNamedProperties> CSpxRecognizer::GetParentProperties()
+std::shared_ptr<ISpxNamedProperties> CSpxRecognizer::GetParentProperties() const
 {
     return SpxQueryService<ISpxNamedProperties>(GetSite());
 }

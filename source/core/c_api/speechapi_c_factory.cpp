@@ -15,11 +15,12 @@
 #include "resource_manager.h"
 #include "mock_controller.h"
 
-
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
-
 using namespace std;
+
+static_assert((int)OutputFormat::Simple == (int)SpeechOutputFormat_Simple, "OutputFormat should match between C and C++ layers");
+static_assert((int)OutputFormat::Detailed == (int)SpeechOutputFormat_Detailed, "OutputFormat should match between C and C++ layers");
 
 std::shared_ptr<ISpxNamedProperties> GetNamedPropertiesFromFactoryHandle(SPXFACTORYHANDLE hfactory)
 {
@@ -129,14 +130,22 @@ SPXAPI SpeechFactory_CreateSpeechRecognizer_With_Stream(SPXFACTORYHANDLE hfactor
 
 SPXAPI SpeechFactory_CreateSpeechRecognizer_With_StreamAndLanguage(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, SpeechApi_AudioInputStream *pstream, const wchar_t* pszLanguage)
 {
+    return SpeechFactory_CreateSpeechRecognizer_With_StreamAndLanguageAndFormat(hfactory, phreco, pstream, pszLanguage, SpeechOutputFormat_Simple);
+}
+
+SPXAPI SpeechFactory_CreateSpeechRecognizer_With_StreamAndLanguageAndFormat(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, SpeechApi_AudioInputStream *pstream, const wchar_t* pszLanguage, SpeechOutputFormat format)
+{
+    if (pszLanguage == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
         auto factory = (*factoryhandles)[hfactory];
-        SpeechApiAudioInputStreamWrapper* stream = new SpeechApiAudioInputStreamWrapper(pstream);
+        SpeechApiAudioInputStreamWrapper* stream = new SpeechApiAudioInputStreamWrapper(pstream); // TODO: Leaking? Same in other places.
 
         *phreco = SPXHANDLE_INVALID;
-        auto recognizer = factory->CreateSpeechRecognizerWithStream(stream, pszLanguage);
+        auto recognizer = factory->CreateSpeechRecognizerWithStream(stream, pszLanguage, (OutputFormat)format);
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }
@@ -145,13 +154,21 @@ SPXAPI SpeechFactory_CreateSpeechRecognizer_With_StreamAndLanguage(SPXFACTORYHAN
 
 SPXAPI SpeechFactory_CreateSpeechRecognizer_With_Language(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const wchar_t* pszLanguage)
 {
+    return SpeechFactory_CreateSpeechRecognizer_With_LanguageAndFormat(hfactory, phreco, pszLanguage, SpeechOutputFormat_Simple);
+}
+
+SPXAPI SpeechFactory_CreateSpeechRecognizer_With_LanguageAndFormat(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, SpeechOutputFormat format)
+{
+    if (pszLanguage == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
         auto factory = (*factoryhandles)[hfactory];
         *phreco = SPXHANDLE_INVALID;
 
-        auto recognizer = factory->CreateSpeechRecognizer(std::wstring(pszLanguage));
+        auto recognizer = factory->CreateSpeechRecognizer(std::wstring(pszLanguage), (OutputFormat)format);
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }
@@ -175,13 +192,24 @@ SPXAPI SpeechFactory_CreateSpeechRecognizer_With_FileInput(SPXFACTORYHANDLE hfac
 
 SPXAPI SpeechFactory_CreateSpeechRecognizer_With_FileInputAndLanguage(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName)
 {
+    return SpeechFactory_CreateSpeechRecognizer_With_FileInputAndLanguageAndFormat(hfactory, phreco, pszLanguage, pszFileName, SpeechOutputFormat_Simple);
+}
+
+SPXAPI SpeechFactory_CreateSpeechRecognizer_With_FileInputAndLanguageAndFormat(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName, SpeechOutputFormat format)
+{
+    if (pszLanguage == nullptr)
+        return SPXERR_INVALID_ARG;
+
+    if (pszFileName == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
         auto factory = (*factoryhandles)[hfactory];
         *phreco = SPXHANDLE_INVALID;
 
-        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(pszFileName, pszLanguage);
+        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(pszFileName, pszLanguage, (OutputFormat)format);
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }
@@ -279,7 +307,6 @@ SPXAPI SpeechFactory_CreateIntentRecognizer_With_StreamAndLanguage(SPXFACTORYHAN
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
-
 
 inline vector<wstring> GetVectorFromBuffer(const wchar_t* buffer[], size_t entries)
 {

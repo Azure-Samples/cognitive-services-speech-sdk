@@ -21,7 +21,7 @@ public:
 
     // --- ISpxNamedProperties
 
-    std::wstring GetStringValue(const wchar_t* name, const wchar_t* defaultValue) override
+    std::wstring GetStringValue(const wchar_t* name, const wchar_t* defaultValue) const override
     {
         std::unique_lock<std::mutex> lock(m_mutexProperties);
         auto item = m_stringPropertyMap.find(std::wstring(name));
@@ -48,7 +48,7 @@ public:
         SPX_DBG_TRACE_VERBOSE_IF(1, "%s: this=0x%8x; name='%ls'; value='%ls'", __FUNCTION__, this, name, value);
     }
 
-    bool HasStringValue(const wchar_t* name) override
+    bool HasStringValue(const wchar_t* name) const override
     {
         std::unique_lock<std::mutex> lock(m_mutexProperties);
         if (m_stringPropertyMap.find(name) != m_stringPropertyMap.end())
@@ -66,7 +66,7 @@ public:
         return false;
     }
 
-    double GetNumberValue(const wchar_t* name, double defaultValue) override
+    double GetNumberValue(const wchar_t* name, double defaultValue) const override
     {
         std::unique_lock<std::mutex> lock(m_mutexProperties);
         auto item = m_numberPropertyMap.find(std::wstring(name));
@@ -91,7 +91,7 @@ public:
         m_numberPropertyMap[std::wstring(name)] = value;
     }
 
-    bool HasNumberValue(const wchar_t* name) override
+    bool HasNumberValue(const wchar_t* name) const override
     {
         std::unique_lock<std::mutex> lock(m_mutexProperties);
         if (m_numberPropertyMap.find(name) != m_numberPropertyMap.end())
@@ -109,7 +109,7 @@ public:
         return false;
     }
 
-    bool GetBooleanValue(const wchar_t* name, bool defaultValue) override
+    bool GetBooleanValue(const wchar_t* name, bool defaultValue) const override
     {
         std::unique_lock<std::mutex> lock(m_mutexProperties);
         auto item = m_boolPropertyMap.find(std::wstring(name));
@@ -135,7 +135,7 @@ public:
         m_boolPropertyMap[std::wstring(name)] = value;
     }
 
-    bool HasBooleanValue(const wchar_t* name) override
+    bool HasBooleanValue(const wchar_t* name) const override
     {
         std::unique_lock<std::mutex> lock(m_mutexProperties);
         if (m_boolPropertyMap.find(name) != m_boolPropertyMap.end())
@@ -157,7 +157,7 @@ public:
 
 protected:
 
-    virtual std::shared_ptr<ISpxNamedProperties> GetParentProperties()
+    virtual std::shared_ptr<ISpxNamedProperties> GetParentProperties() const
     {
         return nullptr;
     }
@@ -165,7 +165,7 @@ protected:
 
 private:
 
-    std::mutex m_mutexProperties;
+    mutable std::mutex m_mutexProperties;
 
     std::map<std::wstring, std::wstring> m_stringPropertyMap;
     std::map<std::wstring, double> m_numberPropertyMap;

@@ -27,6 +27,11 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizer(con
     return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxRecognizer", nullptr, language.c_str());
 }
 
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizer(const std::wstring& language, OutputFormat format)
+{
+    return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxRecognizer", nullptr, language.c_str(), format);
+}
+
 std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerWithFileInput(const std::wstring& fileName)
 {
     return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxRecognizer", fileName.c_str());
@@ -37,12 +42,22 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerWith
     return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxRecognizer", fileName.c_str(), language.c_str());
 }
 
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language, OutputFormat format)
+{
+    return CreateRecognizerInternal("CSpxAudioStreamSession", "CSpxRecognizer", fileName.c_str(), language.c_str(), format);
+}
+
 std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream)
 {
-    return CreateSpeechRecognizerWithStream(audioInputStream, L"");
+    return CreateSpeechRecognizerWithStream(audioInputStream, L"", OutputFormat::Simple);
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language)
+{
+    return CreateSpeechRecognizerWithStream(audioInputStream, language, OutputFormat::Simple);
+}
+
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language, OutputFormat format)
 {
     // Create the session
     auto factoryAsSite = SpxSiteFromThis(this);
@@ -62,6 +77,9 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerWith
     {
         namedProperties->SetStringValue(g_SPEECH_RecoLanguage, language.c_str());
     }
+
+    namedProperties->SetStringValue(g_SPEECH_OutputFormat,
+        format == OutputFormat::Simple ? g_SPEECH_OutputFormat_Simple : g_SPEECH_OutputFormat_Detailed);
 
     // Add the recognizer to the session
     session->AddRecognizer(recognizer);
@@ -215,10 +233,11 @@ void CSpxSpeechApiFactory::SetTranslationParameter(const std::shared_ptr<ISpxNam
     namedProperties->SetStringValue(g_SPEECH_RecoMode, g_SPEECH_RecoMode_Conversation);
 }
 
-std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateRecognizerInternal(const char* sessionClassName, 
+std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateRecognizerInternal(const char* sessionClassName,
     const char* recognizerClassName,
     const wchar_t* fileName,
-    const wchar_t* language)
+    const wchar_t* language,
+    OutputFormat format)
 {
     // Create the session
     auto factoryAsSite = SpxSiteFromThis(this);
@@ -245,6 +264,9 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateRecognizerInternal(c
     {
         namedProperties->SetStringValue(g_SPEECH_RecoLanguage, language);
     }
+
+    namedProperties->SetStringValue(g_SPEECH_OutputFormat,
+        format == OutputFormat::Simple ? g_SPEECH_OutputFormat_Simple : g_SPEECH_OutputFormat_Detailed);
 
     // Add the recognizer to the session
     session->AddRecognizer(recognizer);

@@ -77,7 +77,7 @@ protected:
     
     void OnIsEnabledChanged();
 
-    std::shared_ptr<ISpxNamedProperties> GetParentProperties() override;
+    std::shared_ptr<ISpxNamedProperties> GetParentProperties() const override;
 
 
 private:

@@ -63,7 +63,7 @@ set(CMAKE_CSharp_FLAGS "${CMAKE_CSharp_FLAGS} -doc${CSHARP_LIB}.xml")
 set_target_properties(${CSHARP_LIB} PROPERTIES
    VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.6.1"
    FOLDER bindings/csharp
-   VS_DOTNET_REFERENCES "System"
+   VS_DOTNET_REFERENCES "System;System.Runtime.Serialization;System.Xml"
 )
 
 target_compile_options(${CSHARP_LIB} 

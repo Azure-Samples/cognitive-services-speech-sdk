@@ -209,6 +209,8 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
     SetUspEndpoint(properties, client);
     SetUspRecoMode(properties, client);
     SetUspAuthentication(properties, client);
+    client.SetOutputFormat(GetOutputFormat(*properties));
+
     SPX_DBG_TRACE_VERBOSE("%s: recoMode=%d", __FUNCTION__, m_recoMode);
     auto uspConnection = client.Connect();
 
@@ -434,6 +436,26 @@ SPXHR CSpxUspRecoEngineAdapter::GetRecoModeFromProperties(const std::shared_ptr<
     }
 
     return hr;
+}
+
+USP::OutputFormat CSpxUspRecoEngineAdapter::GetOutputFormat(const ISpxNamedProperties& properties) const
+{
+    if (!properties.HasStringValue(g_SPEECH_OutputFormat))
+        return USP::OutputFormat::Simple;
+
+    auto value = properties.GetStringValue(g_SPEECH_OutputFormat);
+    if (value.empty() || PAL::wcsicmp(value.c_str(), g_SPEECH_OutputFormat_Simple) == 0)
+    {
+        return USP::OutputFormat::Simple;
+    }
+    else if (PAL::wcsicmp(value.c_str(), g_SPEECH_OutputFormat_Detailed) == 0)
+    {
+        return USP::OutputFormat::Detailed;
+    }
+
+    LogError("Unknown output format value %ls", value.c_str());
+    SPX_THROW_HR(SPXERR_INVALID_ARG);
+    return USP::OutputFormat::Simple; // Make compiler happy.
 }
 
 SPXHR CSpxUspRecoEngineAdapter::GetRecoModeFromEndpoint(const std::wstring& endpoint, USP::RecognitionMode& recoMode)
