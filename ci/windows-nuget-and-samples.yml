@@ -21,6 +21,7 @@ steps:
     buildType: specific
     project: Skyman
     definition: $(UpStreamBuildDefinition)
+    buildVersionToDownload: specific
     buildId: $(UpStreamBuildId)
     artifactName: Windows
     downloadPath: '$(System.ArtifactsDirectory)\Drop'
