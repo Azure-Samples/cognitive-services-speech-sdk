@@ -19,7 +19,7 @@ namespace Microsoft.CognitiveServices.Speech
     public sealed class SpeechFactory
     {
         /// <summary>
-        /// Creates an instance of the speech factory with specified subscription key and region (optional).
+        /// Creates an instance of the speech factory with specified subscription key and region.
         /// </summary>
         /// <param name="subscriptionKey">The subscription key.</param>
         /// <param name="region">The region name.</param>
@@ -31,7 +31,7 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Creates an instance of the speech factory with specified endpoint and subscription key (optional).
+        /// Creates an instance of the speech factory with specified endpoint and subscription key.
         /// </summary>
         /// <param name="endpoint">The service endpoint to connect to.</param>
         /// <param name="subscriptionKey">The subscription key.</param>
@@ -328,7 +328,7 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Creates an instance of the speech factory with specified subscription key and region (optional). Currently as private method.
+        /// Creates an instance of the speech factory with specified subscription key and region. Currently as private method.
         /// </summary>
         /// <param name="subscriptionKey">The subscription key.</param>
         /// <param name="region">The region name.</param>
@@ -339,7 +339,7 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Creates an instance of the speech factory with specified endpoint and subscription key (optional). Currently as private method.
+        /// Creates an instance of the speech factory with specified endpoint and subscription key. Currently as private method.
         /// </summary>
         /// <param name="endpoint">The service endpoint to connect to.</param>
         /// <param name="subscriptionKey">The subscription key.</param>

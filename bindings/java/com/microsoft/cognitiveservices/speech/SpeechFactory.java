@@ -25,10 +25,10 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
     }
 
     /**
-      * Creates an instance of recognizer factory with specified subscription key or authentication token and region (optional).
+      * Creates an instance of recognizer factory with specified subscription key or authentication token and region.
       * @param isSubscription If true, authenticates via the subscriptionKey. If false, authenticates via the authorizationToken.
       * @param subscriptionKeyOrAuthorizationToken The subscription key or authenticationToken based on the isSubscription flag.
-      * @param region The region name. Pass null if not used.
+      * @param region The region name.
       */
     private SpeechFactory(boolean isSubscription, String subscriptionKeyOrAuthorizationToken, String region) {
         factoryImpl = isSubscription ? 
@@ -36,11 +36,9 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
             com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromAuthorizationToken(subscriptionKeyOrAuthorizationToken, region);
 
         // connect the native properties with the swig layer.
-            _Parameters = new ParameterCollection<SpeechFactory>(this);
+        _Parameters = new ParameterCollection<SpeechFactory>(this);
 
-        if (region != null) {
-            setRegion(region);
-        }
+        setRegion(region);
     }
 
     /**
@@ -56,7 +54,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
     /**
       * Static instance of SpeechFactory returned by passing authorization token.
       * @param authorizationToken The authorization token.
-      * @param region The region name. Pass null if not used.
+      * @param region The region name.
       * @return The speech factory
       */
     public static SpeechFactory fromAuthorizationToken(String authorizationToken, String region) {
