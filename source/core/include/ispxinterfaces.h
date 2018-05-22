@@ -377,6 +377,7 @@ public:
 
     enum class State { NoInput, Idle, Paused, Processing };
     virtual State GetState() = 0;
+
 };
 
 
@@ -392,6 +393,9 @@ class ISpxStreamPumpReaderInit : public ISpxInterfaceBaseFor<ISpxStreamPumpReade
 public:
 
     virtual void SetAudioStream(AudioInputStream* reader) = 0;
+
+    virtual void SetRealTimePercentage(uint8_t percentage) = 0;
+
 };
 
 

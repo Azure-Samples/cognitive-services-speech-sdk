@@ -17,7 +17,7 @@ namespace Speech {
 namespace Impl {
 
 
-    class CSpxStreamPump : public ISpxAudioPump, public ISpxStreamPumpReaderInit
+    class CSpxStreamPump : public ISpxAudioPump, public ISpxStreamPumpReaderInit, public ISpxAudioReaderRealTime
     {
     public:
 
@@ -27,6 +27,7 @@ namespace Impl {
         SPX_INTERFACE_MAP_BEGIN()
             SPX_INTERFACE_MAP_ENTRY(ISpxStreamPumpReaderInit)
             SPX_INTERFACE_MAP_ENTRY(ISpxAudioPump)
+            SPX_INTERFACE_MAP_ENTRY(ISpxAudioReaderRealTime)
         SPX_INTERFACE_MAP_END()
 
         // --- ISpxStreamPumpReaderInit
@@ -44,6 +45,8 @@ namespace Impl {
 
         State GetState() override;
 
+        // -- ISpxAudioReaderRealTime
+        void SetRealTimePercentage(uint8_t percentage) override;
 
     private:
 
@@ -59,6 +62,10 @@ namespace Impl {
         std::condition_variable m_cv;
 
         AudioInputStream* m_streamReader;
+
+        uint8_t m_simulateRealtimePercentage = 100;     // 0 == as fast as possible; 100 == real time. E.g. If .WAV file is 12 seconds long, it will take 12 seconds to read all 
+                                                      // the data when percentage==100; it'll take 1.2 seconds if set to 10; it'll go as fast as possible at 0; and it'll
+                                                      // take 24 seconds if set to 200.
 
         State m_state;
         State m_stateRequested;

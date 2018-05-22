@@ -52,6 +52,7 @@ void CSpxWavFilePump::EnsurePump()
 
     // Set the reader...
     auto fileAsReader = SpxQueryInterface<ISpxAudioReader>(m_delegateToAudioFile);
+
     pumpInit->SetAudioReader(fileAsReader);
 
     // And ... We're finished

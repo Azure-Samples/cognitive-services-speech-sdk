@@ -566,6 +566,7 @@ void CSpxUspRecoEngineAdapter::UspWriteFormat(WAVEFORMATEX* pformat)
 void CSpxUspRecoEngineAdapter::UspWrite(const uint8_t* buffer, size_t byteToWrite)
 {
     SPX_DBG_TRACE_VERBOSE_IF(byteToWrite == 0, "%s(..., %d)", __FUNCTION__, byteToWrite);
+
     m_uspAudioByteCount += byteToWrite;
 
     auto fn = !m_fUseBufferedImplementation || m_servicePreferedBufferSizeSendingNow == 0

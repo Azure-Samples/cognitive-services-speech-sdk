@@ -107,6 +107,9 @@ void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
     // Open the WAV file
     audioFilePump->Open(pszFileName);
 
+    // Limit the maximal speed to 2 times of real-time streaming
+    audioFilePump->SetRealTimePercentage(50);
+
     // Defer calling InitRecoEngineAdapter() or InitKwsEngineAdapter() until later ...
 }
 
@@ -134,6 +137,9 @@ void CSpxAudioStreamSession::InitFromStream(AudioInputStream* audioInputStream)
 
     // Attach the stream to the pump
     audioStreamPump->SetAudioStream(audioInputStream);
+
+    // Limit the maximal speed to 2 times of real-time streaming
+    audioStreamPump->SetRealTimePercentage(50);
 
     // Defer calling InitRecoEngineAdapter() until later ... (see ::EnsureInitRecoEngineAdapter())
 }

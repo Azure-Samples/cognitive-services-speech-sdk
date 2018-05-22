@@ -121,6 +121,11 @@ namespace Impl {
         return m_state;
     }
 
+    void CSpxStreamPump::SetRealTimePercentage(uint8_t percentage)
+    {
+        m_simulateRealtimePercentage = percentage;
+    }
+
     void CSpxStreamPump::PumpThread(std::shared_ptr<CSpxStreamPump> keepAlive, std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor)
     {
         UNUSED(keepAlive);
@@ -169,6 +174,9 @@ namespace Impl {
             return false;
         };
 
+
+        std::chrono::steady_clock::time_point lastReadTime;
+        bool isFirstRead = true;
         // Continue to loop while we're in the 'Processing' state...
         while (checkAndChangeState())
         {
@@ -180,6 +188,28 @@ namespace Impl {
 
             // Read the buffer, and send it to the processor
             auto cbRead = m_streamReader->Read((char*)data.get(), bytesPerFrame);
+
+            if (m_simulateRealtimePercentage > 0)
+            {
+                // Slow down if needed.
+                auto now = std::chrono::steady_clock::now();
+                if (!isFirstRead)
+                {
+                    auto allowedBytes = waveformat->nAvgBytesPerSec * std::chrono::duration_cast<std::chrono::milliseconds>(now - lastReadTime).count() / 1000 * 100 / m_simulateRealtimePercentage;
+                    if (cbRead > allowedBytes)
+                    {
+                        auto sleepMilliseconds = (cbRead - allowedBytes) * 1000 / (waveformat->nAvgBytesPerSec * 100 / m_simulateRealtimePercentage);
+                        SPX_DBG_TRACE_VERBOSE("Slow down sending audio data by %d (us). Allow %d bytes in %d us, want to write %d bytes", (int)sleepMilliseconds, (int)allowedBytes, (int)(std::chrono::duration_cast<std::chrono::milliseconds>(now - lastReadTime).count()), (int)cbRead);
+                        std::this_thread::sleep_for(std::chrono::milliseconds(sleepMilliseconds));
+                    }
+                }
+                else
+                {
+                    isFirstRead = false;
+                }
+                lastReadTime = now;
+            }
+
             pISpxAudioProcessor->ProcessAudio(data, cbRead);
 
             // If we didn't read any data, move to the 'Idle' state
