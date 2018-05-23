@@ -12,6 +12,7 @@ foreach(script_file ${SCRIPTS})
 endforeach()
 
 file(GLOB TEST_INPUT ${INPUT_DIR}/**/*)
+
 list(LENGTH TEST_INPUT NUM_TEST_INPUTS)
 if(NUM_TEST_INPUTS EQUAL 0)
     execute_process(COMMAND git submodule update --init)

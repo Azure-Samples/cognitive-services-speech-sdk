@@ -55,6 +55,21 @@ void SetMockRealTimeSpeed(int value)
     SpxSetMockParameterNumber(L"CARBON-INTERNAL-MOCK-RealTimeAudioPercentage", value);
 }
 
+
+enum class Callbacks { final_result, intermediate_result, no_match, session_started, session_stopped, speech_start_detected, speech_end_detected };
+
+std::map<Callbacks, atomic_int> createCallbacksMap() {
+    std::map<Callbacks, atomic_int> newMap;
+    newMap[Callbacks::final_result] = 0;
+    newMap[Callbacks::intermediate_result] = 0;
+    newMap[Callbacks::no_match] = 0;
+    newMap[Callbacks::session_started] = 0;
+    newMap[Callbacks::speech_start_detected] = 0;
+    newMap[Callbacks::session_stopped] = 0;
+    return newMap;
+}
+
+
 TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
@@ -69,17 +84,9 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         mutex mtx;
         condition_variable cv;
 
-        enum class Callbacks { final_result, no_match, session_started, session_stopped, speech_start_detected, speech_end_detected };
-
         WHEN("We checking to make sure callback counts are correct (checking multiple times, and multiple speeds times) ...")
         {
-            std::map<Callbacks, atomic_int> callbackCounts;
-            callbackCounts[Callbacks::final_result] = 0;
-            callbackCounts[Callbacks::no_match] = 0;
-            callbackCounts[Callbacks::session_started] = 0;
-            callbackCounts[Callbacks::session_stopped] = 0;
-            callbackCounts[Callbacks::speech_start_detected] = 0;
-            callbackCounts[Callbacks::speech_end_detected] = 0;
+            std::map<Callbacks, atomic_int> callbackCounts = createCallbacksMap();
 
             // We're going to loop thru 11 times... The first 10, we'll use mocks. The last time we'll use the USP
             // NOTE: Please keep this at 11... It tests various "race"/"speed" configurations of the core system... 
@@ -205,6 +212,47 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         // Comment out the next line to see for yourself (repros on Linux build machines).
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
     }
+   
+    SECTION("Wrong Key triggers Canceled Event ")
+    {
+        REQUIRE(exists(input_file));
+        UseMocks(false);
+        mutex mtx;
+        condition_variable cv;
+
+        bool exceptionThrown = false;
+        wstring wrongKey = L"wrongKey";
+        auto factory = SpeechFactory::FromSubscription(wrongKey, L"westus");
+        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
+
+        recognizer->Canceled.Connect([&](const SpeechRecognitionEventArgs& args) {
+            {
+                REQUIRE(!args.Result.ErrorDetails.empty());
+                unique_lock<mutex> lock(mtx);
+                exceptionThrown = true;
+                cv.notify_one();
+            }
+        });
+
+        auto result = recognizer->RecognizeAsync().get();
+
+        {
+            unique_lock<mutex> lock(mtx);
+            cv.wait_for(lock, std::chrono::seconds(10));
+            REQUIRE(exceptionThrown);
+        }
+    }
+
+    SECTION("German Speech Recognition works")
+    {
+        wstring german_input_file(L"tests/input/CallTheFirstOne.wav");
+        REQUIRE(exists(german_input_file));
+        auto factory = GetFactory();
+        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(german_input_file, L"de-DE");
+        auto result = recognizer->RecognizeAsync().get();
+        REQUIRE(result != nullptr);
+        REQUIRE(!result->Text.empty());
+    }
 }
 
 TEST_CASE("KWS basics", "[api][cxx]")
@@ -304,7 +352,8 @@ TEST_CASE("Speech on local server", "[api][cxx]")
         auto result = recognizer->RecognizeAsync().get();
         REQUIRE(result->Reason == Reason::Recognized);
         REQUIRE(result->Text == L"Remind me to buy 5 iPhones.");
-        }*/
+        }
+        */
     }
 }
 
@@ -416,4 +465,10 @@ TEST_CASE("Speech Factory basics", "[api][cxx]")
         //REQUIRE(endpoint1 == L"1"); BUGBUG this fails!!!
         REQUIRE(endpoint2 == L"2");
     }
+
 }
+
+
+
+
+
