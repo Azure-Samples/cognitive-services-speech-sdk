@@ -85,7 +85,7 @@ public class SampleRecognizeIntentWithWakeWord implements Runnable, Stoppable {
             });
 
             reco.IntermediateResultReceived.addEventListener((o, intermediateResultEventArgs) -> {
-                String s = intermediateResultEventArgs.getResult().getRecognizedText();
+                String s = intermediateResultEventArgs.getResult().getText();
                 System.out.println("got an intermediate result: " + s);
                 Integer index = content.size() - 2;
                 content.set(index + 1, index.toString() + ". " + s);
@@ -93,7 +93,7 @@ public class SampleRecognizeIntentWithWakeWord implements Runnable, Stoppable {
             });
 
             reco.FinalResultReceived.addEventListener((o, finalResultEventArgs) -> {
-                String s = finalResultEventArgs.getResult().getRecognizedText();
+                String s = finalResultEventArgs.getResult().getText();
                 String intentId = finalResultEventArgs.getResult().getIntentId();
                 String intent = "";
                 if (intentIdMap.containsKey(intentId)) {

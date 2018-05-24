@@ -57,7 +57,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         {
             var text = string.Format(CultureInfo.InvariantCulture,
                 "ResultId:{0} RecognitionStatus:{1}, TranslationStatus: {2}, Recognized text:<{3}>.\n", 
-                ResultId, RecognitionStatus, TranslationStatus, RecognizedText);
+                ResultId, RecognitionStatus, TranslationStatus, Text);
             foreach (var element in Translations)
             {
                 text += string.Format(CultureInfo.InvariantCulture, "    Translation in {0}: <{1}>.\n", element.Key, element.Value);

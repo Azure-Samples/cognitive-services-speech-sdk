@@ -58,7 +58,7 @@ public final class IntentRecognitionResult extends com.microsoft.cognitiveservic
         return "ResultId:" + getResultId() +
                " Status:" + getReason() +
                " IntentId:<" + _intentId +
-               "> Recognized text:<" + getRecognizedText() +
+               "> Recognized text:<" + getText() +
                "> Recognized json:<" + getProperties().getString(ResultParameterNames.Json) +
                "> LanguageUnderstandingJson <" + getProperties().getString(ResultParameterNames.LanguageUnderstandingJson) +
                ">.";

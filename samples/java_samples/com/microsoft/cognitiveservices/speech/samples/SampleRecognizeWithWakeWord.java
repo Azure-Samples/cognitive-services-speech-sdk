@@ -73,7 +73,7 @@ public class SampleRecognizeWithWakeWord implements Runnable, Stoppable {
             });
 
             reco.IntermediateResultReceived.addEventListener((o, intermediateResultEventArgs) -> {
-                String s = intermediateResultEventArgs.getResult().getRecognizedText();
+                String s = intermediateResultEventArgs.getResult().getText();
 
                 System.out.println("got an intermediate result: " + s);
                 Integer index = content.size() - 2;
@@ -82,7 +82,7 @@ public class SampleRecognizeWithWakeWord implements Runnable, Stoppable {
             });
 
             reco.FinalResultReceived.addEventListener((o, finalResultEventArgs) -> {
-                String s = finalResultEventArgs.getResult().getRecognizedText();
+                String s = finalResultEventArgs.getResult().getText();
 
                 System.out.println("got a final result: " + s);
                 if (!s.isEmpty()) {

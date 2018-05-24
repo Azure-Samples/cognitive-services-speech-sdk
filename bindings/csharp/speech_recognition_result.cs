@@ -28,7 +28,7 @@ namespace Microsoft.CognitiveServices.Speech
             
             resultImpl = result;
             this.ResultId = result.ResultId;
-            this.RecognizedText = result.Text;
+            this.Text = result.Text;
             this.RecognitionStatus = (RecognitionStatus)((int)result.Reason);
             Properties = new ResultPropertiesImpl(result.Properties);
         }
@@ -46,7 +46,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Presents the recognized text in the result.
         /// </summary>
-        public string RecognizedText { get; }
+        public string Text { get; }
 
         /// <summary>
         /// In case of an unsuccessful recognition, provides a brief description of an occurred error.
@@ -66,7 +66,7 @@ namespace Microsoft.CognitiveServices.Speech
         public override string ToString()
         {
             return string.Format(CultureInfo.InvariantCulture,"ResultId:{0} Status:{1} Recognized text:<{2}>. Json:{3}", 
-                ResultId, RecognitionStatus, RecognizedText, Properties.Get<string>(ResultPropertyKind.Json));
+                ResultId, RecognitionStatus, Text, Properties.Get<string>(ResultPropertyKind.Json));
         }
 
         // Hold the reference.

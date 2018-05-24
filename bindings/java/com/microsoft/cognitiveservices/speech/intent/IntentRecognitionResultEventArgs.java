@@ -57,7 +57,7 @@ public final class IntentRecognitionResultEventArgs // : System.EventArgs
                " ResultId:" + _Result.getResultId() +
                " Status:" + _Result.getReason() +
                " IntentId:<" + _Result.getIntentId() +
-               "> Recognized text:<" + _Result.getRecognizedText() +
+               "> Recognized text:<" + _Result.getText() +
                "> Recognized json:<" + getProperties().getString(ResultParameterNames.Json) +
                "> LanguageUnderstandingJson <" + getProperties().getString(ResultParameterNames.LanguageUnderstandingJson) +
                 ">.";

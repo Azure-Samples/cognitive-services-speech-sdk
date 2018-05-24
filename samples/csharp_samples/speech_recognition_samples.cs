@@ -38,7 +38,7 @@ namespace MicrosoftSpeechSDKSamples
                 }
                 else
                 {
-                    Console.WriteLine($"We recognized: {result.RecognizedText}");
+                    Console.WriteLine($"We recognized: {result.Text}");
                 }
             }
             // </recognitionWithMicrophone>
@@ -70,7 +70,7 @@ namespace MicrosoftSpeechSDKSamples
                 }
                 else
                 {
-                    Console.WriteLine($"We recognized: {result.RecognizedText}");
+                    Console.WriteLine($"We recognized: {result.Text}");
                 }
             }
             // </recognitionWithLanguage>
@@ -99,7 +99,7 @@ namespace MicrosoftSpeechSDKSamples
                 }
                 else
                 {
-                    Console.WriteLine($"We recognized: {result.RecognizedText}");
+                    Console.WriteLine($"We recognized: {result.Text}");
                 }
             }
             // </recognitionFromFile>
@@ -132,7 +132,7 @@ namespace MicrosoftSpeechSDKSamples
                 }
                 else
                 {
-                    Console.WriteLine($"We recognized: {result.RecognizedText}");
+                    Console.WriteLine($"We recognized: {result.Text}");
                 }
             }
         }
@@ -152,13 +152,13 @@ namespace MicrosoftSpeechSDKSamples
             {
                 // Subscribes to events.
                 recognizer.IntermediateResultReceived += (s, e) => {
-                    Console.WriteLine($"\n    Partial result: {e.Result.RecognizedText}.");
+                    Console.WriteLine($"\n    Partial result: {e.Result.Text}.");
                 };
 
                 recognizer.FinalResultReceived += (s, e) => {
                     if (e.Result.RecognitionStatus == RecognitionStatus.Recognized)
                     {
-                        Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, Text: {e.Result.RecognizedText}.");
+                        Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, Text: {e.Result.Text}.");
                     }
                     else
                     {

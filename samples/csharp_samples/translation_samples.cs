@@ -38,7 +38,7 @@ namespace MicrosoftSpeechSDKSamples
             {
                 // Subscribes to events.
                 recognizer.IntermediateResultReceived += (s, e) => {
-                    Console.WriteLine($"\nPartial result: recognized in {fromLanguage}: {e.Result.RecognizedText}.");
+                    Console.WriteLine($"\nPartial result: recognized in {fromLanguage}: {e.Result.Text}.");
                     if (e.Result.TranslationStatus == TranslationStatus.Success)
                     {
                         foreach (var element in e.Result.Translations)
@@ -60,7 +60,7 @@ namespace MicrosoftSpeechSDKSamples
                     }
                     else
                     {
-                        Console.WriteLine($"\nFinal result: Status: {e.Result.RecognitionStatus.ToString()}, recognized text in {fromLanguage}: {e.Result.RecognizedText}.");
+                        Console.WriteLine($"\nFinal result: Status: {e.Result.RecognitionStatus.ToString()}, recognized text in {fromLanguage}: {e.Result.Text}.");
                         if (e.Result.TranslationStatus == TranslationStatus.Success)
                         {
                             foreach (var element in e.Result.Translations)
@@ -139,7 +139,7 @@ namespace MicrosoftSpeechSDKSamples
             {
                 // Subscribes to events.
                 recognizer.IntermediateResultReceived += (s, e) => {
-                    Console.WriteLine($"\nPartial result: recognized in {fromLanguage}: {e.Result.RecognizedText}.");
+                    Console.WriteLine($"\nPartial result: recognized in {fromLanguage}: {e.Result.Text}.");
                     if (e.Result.TranslationStatus == TranslationStatus.Success)
                     {
                         foreach (var element in e.Result.Translations)
@@ -161,7 +161,7 @@ namespace MicrosoftSpeechSDKSamples
                     }
                     else
                     {
-                        Console.WriteLine($"\nFinal result: Status: {e.Result.RecognitionStatus.ToString()}, recognized text in {fromLanguage}: {e.Result.RecognizedText}.");
+                        Console.WriteLine($"\nFinal result: Status: {e.Result.RecognitionStatus.ToString()}, recognized text in {fromLanguage}: {e.Result.Text}.");
                         if (e.Result.TranslationStatus == TranslationStatus.Success)
                         {
                             foreach (var element in e.Result.Translations)

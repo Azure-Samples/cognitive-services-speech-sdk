@@ -57,7 +57,7 @@ public final class TranslationTextResult extends com.microsoft.cognitiveservices
         String text = "ResultId:" + getResultId() +
                       " RecognitionStatus:" + getReason()  +
                       ", TranslationStatus: " + _TranslationStatus.name() +
-                      ", Recognized text:<" + getRecognizedText() +
+                      ", Recognized text:<" + getText() +
                       ">.\n"; 
                 
             for(String key : _Translations.keySet())

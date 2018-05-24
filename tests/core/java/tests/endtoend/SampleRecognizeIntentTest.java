@@ -39,7 +39,7 @@ public class SampleRecognizeIntentTest {
         test.run();
        
         assertNotNull(test.getResult()); // we got the final result
-        assertEquals("What's the weather like?", test.getResult().getRecognizedText());
+        assertEquals("What's the weather like?", test.getResult().getText());
         
         String s = test.getResult().getLanguageUnderstanding();
         assertNotNull(s);

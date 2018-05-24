@@ -287,7 +287,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// <param name="e">The <see cref="TranslationTextResultEventArgs"/> instance containing the event data.</param>
         private void OnPartialResponseReceivedHandler(object sender, TranslationTextResultEventArgs e)
         {
-            string text = e.Result.RecognizedText;
+            string text = e.Result.Text;
             foreach(var t in e.Result.Translations)
             {
                 text += $"\nSame in {t.Key}: {t.Value}";
@@ -303,14 +303,14 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// <param name="e">The <see cref="TranslationTextResultEventArgs"/> instance containing the event data.</param>
         private void OnFinalResponse(object sender, TranslationTextResultEventArgs e)
         {
-            if (e.Result.RecognizedText.Length == 0)
+            if (e.Result.Text.Length == 0)
             {
                 this.WriteLine(this.crisLogText, "Status: " + e.Result.RecognitionStatus);
                 this.WriteLine(this.crisLogText, "No phrase response is available.");
             }
             else
             {
-                string text = e.Result.RecognizedText;
+                string text = e.Result.Text;
                 foreach (var t in e.Result.Translations)
                 {
                     text += $"\nSame in {t.Key}: {t.Value}";

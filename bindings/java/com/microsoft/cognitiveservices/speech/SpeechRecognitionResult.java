@@ -14,12 +14,12 @@ public class SpeechRecognitionResult {
 
     private String resultId;
     private RecognitionStatus reason;
-    private String recognizedText;
+    private String text;
     private RecognitionResultCollection properties;
 
     protected SpeechRecognitionResult(RecognitionResult result) {
         resultId = result.getResultId();
-        recognizedText = result.getText();
+        text = result.getText();
         reason = RecognitionStatus.values()[result.getReason().swigValue()];
         properties = new RecognitionResultCollection(result.getProperties());
     }
@@ -44,8 +44,8 @@ public class SpeechRecognitionResult {
       * Presents the recognized text in the result.
       * @return Presents the recognized text in the result.
       */
-    public String getRecognizedText() {
-        return recognizedText;
+    public String getText() {
+        return text;
     }
 
     /**
@@ -81,7 +81,7 @@ public class SpeechRecognitionResult {
     public String toString() {
         return "ResultId:" + resultId +
                " Status:" + reason +
-               " Recognized text:<" + recognizedText +
+               " Recognized text:<" + text +
                ">.";
     }
     

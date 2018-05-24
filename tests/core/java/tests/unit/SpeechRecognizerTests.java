@@ -94,7 +94,7 @@ public class SpeechRecognizerTests {
         
         SpeechRecognitionResult res = r.recognizeAsync().get();
         assertNotNull(res);
-        assertEquals("What's the weather like?", res.getRecognizedText());
+        assertEquals("What's the weather like?", res.getText());
                 
         r.close();
         s.close();
@@ -258,7 +258,7 @@ public class SpeechRecognizerTests {
         SpeechRecognitionResult res = future.get();
         assertNotNull(res);
         assertEquals(RecognitionStatus.Success, res.getReason());
-        assertEquals("What's the weather like?", res.getRecognizedText());
+        assertEquals("What's the weather like?", res.getText());
 
         r.close();
         s.close();
@@ -307,7 +307,7 @@ public class SpeechRecognizerTests {
         assertNotNull(res);
         assertEquals(RecognitionStatus.Success, res.getReason());
         assertTrue(res.getErrorDetails().isEmpty());
-        assertEquals("What's the weather like?", res.getRecognizedText());
+        assertEquals("What's the weather like?", res.getText());
 
         // session events are first and last event
         final Integer LAST_RECORDED_EVENT_ID = _eventId.get();

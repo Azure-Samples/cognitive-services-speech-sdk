@@ -273,12 +273,12 @@ public class TranslationRecognizerTests {
         TranslationTextResult res = future.get();
         assertNotNull(res);
         assertEquals(RecognitionStatus.Success, res.getReason());
-        assertEquals("What's the weather like?", res.getRecognizedText());
+        assertEquals("What's the weather like?", res.getText());
 
         assertTrue(res.getErrorDetails().isEmpty());
         assertEquals(RecognitionStatus.Success, res.getReason());
         assertNotNull(res.getProperties());
-        assertEquals("What's the weather like?", res.getRecognizedText()); // original text
+        assertEquals("What's the weather like?", res.getText()); // original text
         assertEquals(1, res.getTranslations().size());
         assertEquals("What's the weather like?", res.getTranslations().get("en-US")); // translated text
         assertEquals(TranslationStatus.Success, res.getTranslationStatus());
@@ -332,7 +332,7 @@ public class TranslationRecognizerTests {
         TranslationTextResult res = r.recognizeAsync().get();
         assertNotNull(res);
         assertTrue(res.getErrorDetails().isEmpty());
-        assertEquals("What's the weather like?", res.getRecognizedText());
+        assertEquals("What's the weather like?", res.getText());
 
         // session events are first and last event
         final Integer LAST_RECORDED_EVENT_ID = _eventId.get();

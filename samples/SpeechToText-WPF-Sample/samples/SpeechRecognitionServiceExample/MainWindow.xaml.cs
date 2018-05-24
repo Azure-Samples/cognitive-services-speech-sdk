@@ -331,7 +331,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 log = this.crisLogText;
             }
 
-            this.WriteLine(log, "Intermediate result: {0} ", e.Result.RecognizedText);
+            this.WriteLine(log, "Intermediate result: {0} ", e.Result.Text);
         }
 
         /// <summary>
@@ -344,17 +344,17 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             if (rt == RecoType.Basic)
             {
                 log = this.bingLogText;
-                this.SetCurrentText(this.bingCurrentText, e.Result.RecognizedText);
+                this.SetCurrentText(this.bingCurrentText, e.Result.Text);
             }
             else
             {
                 log = this.crisLogText;
-                this.SetCurrentText(this.crisCurrentText, e.Result.RecognizedText);
+                this.SetCurrentText(this.crisCurrentText, e.Result.Text);
             }
 
             this.WriteLine(log);
             this.WriteLine(log, " --- Final result received --- ");
-            this.WriteLine(log,  e.Result.RecognizedText);
+            this.WriteLine(log,  e.Result.Text);
         }
 
         /// <summary>

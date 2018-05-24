@@ -41,6 +41,6 @@ public class SampleRecognizeWithIntermediateResultsTest {
        
         assertNotNull(test.getSpeechRecognitionResultEventArgs()); // there was at least on intermediate result
         assertNotNull(test.getResult()); // we got the final result
-        assertEquals("What's the weather like?", test.getResult().getRecognizedText()); // we get the text expected
+        assertEquals("What's the weather like?", test.getResult().getText()); // we get the text expected
     }
 }

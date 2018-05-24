@@ -65,7 +65,7 @@ namespace CsharpHelloWorld
                 }
                 else
                 {
-                    Console.WriteLine($"We recognized: {result.RecognizedText}");
+                    Console.WriteLine($"We recognized: {result.Text}");
 
                 }
             }

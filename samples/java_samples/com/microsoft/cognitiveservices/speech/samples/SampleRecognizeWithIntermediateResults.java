@@ -28,7 +28,7 @@ public class SampleRecognizeWithIntermediateResults implements Runnable {
 
             reco.IntermediateResultReceived.addEventListener((o, speechRecognitionResultEventArgs) -> {
                 _speechRecognitionResultEventArgs = speechRecognitionResultEventArgs;
-                String s = _speechRecognitionResultEventArgs.getResult().getRecognizedText();
+                String s = _speechRecognitionResultEventArgs.getResult().getText();
 
                 System.out.println("Intermediate result received: " + s);
             });
@@ -36,7 +36,7 @@ public class SampleRecognizeWithIntermediateResults implements Runnable {
             Future<SpeechRecognitionResult> task = reco.recognizeAsync();
 
             _result = task.get();
-            String s = _result.getRecognizedText();
+            String s = _result.getText();
             System.out.println("Recognizer returned: " + s);
             
             reco.close();

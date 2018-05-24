@@ -31,7 +31,7 @@ public class SampleSimpleRecognize implements Runnable {
             Future<SpeechRecognitionResult> task = reco.recognizeAsync();
 
             SpeechRecognitionResult result = task.get();
-            _result = result.getRecognizedText();
+            _result = result.getText();
 
             System.out.println("Recognizer returned: " + _result);
             
