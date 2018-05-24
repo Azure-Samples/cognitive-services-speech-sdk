@@ -165,7 +165,8 @@ protected:
 
     std::future<std::shared_ptr<RecoResult>> RecognizeAsyncInternal()
     {
-        auto future = std::async(std::launch::async, [=]() -> std::shared_ptr<RecoResult> {
+        auto keepAlive = this->shared_from_this();
+        auto future = std::async(std::launch::async, [keepAlive, this]() -> std::shared_ptr<RecoResult> {
             SPX_INIT_HR(hr);
 
             SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
@@ -179,7 +180,8 @@ protected:
 
     std::future<void> StartContinuousRecognitionAsyncInternal()
     {
-        auto future = std::async(std::launch::async, [=]() -> void {
+        auto keepAlive = this->shared_from_this();
+        auto future = std::async(std::launch::async, [keepAlive, this]() -> void {
             SPX_INIT_HR(hr);
             SPX_THROW_ON_FAIL(hr = Recognizer_AsyncHandle_Close(m_hasyncStartContinuous)); // close any unfinished previous attempt
 
@@ -198,7 +200,8 @@ protected:
 
     std::future<void> StopContinuousRecognitionAsyncInternal()
     {
-        auto future = std::async(std::launch::async, [=]() -> void {
+        auto keepAlive = this->shared_from_this();
+        auto future = std::async(std::launch::async, [keepAlive, this]() -> void {
             SPX_INIT_HR(hr);
             SPX_THROW_ON_FAIL(hr = Recognizer_AsyncHandle_Close(m_hasyncStopContinuous)); // close any unfinished previous attempt
 
@@ -217,7 +220,8 @@ protected:
 
     std::future<void> StartKeywordRecognitionAsyncInternal(std::shared_ptr<KeywordRecognitionModel> model)
     {
-        auto future = std::async(std::launch::async, [=]() -> void {
+        auto keepAlive = this->shared_from_this();
+        auto future = std::async(std::launch::async, [keepAlive, model, this]() -> void {
             SPX_INIT_HR(hr);
             SPX_THROW_ON_FAIL(hr = Recognizer_AsyncHandle_Close(m_hasyncStartKeyword)); // close any unfinished previous attempt
 
@@ -237,7 +241,8 @@ protected:
 
     std::future<void> StopKeywordRecognitionAsyncInternal()
     {
-        auto future = std::async(std::launch::async, [=]() -> void {
+        auto keepAlive = this->shared_from_this();
+        auto future = std::async(std::launch::async, [keepAlive, this]() -> void {
             SPX_INIT_HR(hr);
             SPX_THROW_ON_FAIL(hr = Recognizer_AsyncHandle_Close(m_hasyncStopKeyword)); // close any unfinished previous attempt
 

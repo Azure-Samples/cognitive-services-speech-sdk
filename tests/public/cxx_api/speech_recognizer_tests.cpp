@@ -73,6 +73,54 @@ std::map<Callbacks, atomic_int> createCallbacksMap() {
 TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    SECTION("Check that recognizer does not crash while async op is in progress")
+    {
+        UseMocks(true);
+        REQUIRE(IsUsingMocks());
+
+        const int numLoops = 10;
+
+        {
+            vector<std::future<std::shared_ptr<SpeechRecognitionResult>>> futures;
+            for (int i = 0; i < numLoops; i++)
+            {
+                auto recognizer = GetFactory()->CreateSpeechRecognizer();
+                REQUIRE(recognizer != nullptr);
+                futures.push_back(recognizer->RecognizeAsync());
+            }
+        }
+
+        auto model = KeywordRecognitionModel::FromFile(L"tests/input/heycortana_en-US.table");
+        REQUIRE(model != nullptr);
+
+        {
+            vector<std::future<void>> futures;
+            int numAsyncMethods = 4;
+            for (int i = 0; i < numLoops*numAsyncMethods; i++)
+            {
+                auto recognizer = GetFactory()->CreateSpeechRecognizer();
+                REQUIRE(recognizer != nullptr);
+                if (i % numAsyncMethods == 0)
+                {
+                    futures.push_back(recognizer->StartContinuousRecognitionAsync());
+                }
+                else if (i % numAsyncMethods == 1)
+                {
+                    futures.push_back(recognizer->StopContinuousRecognitionAsync());
+                }
+                else if (i % numAsyncMethods == 2)
+                {
+                    futures.push_back(recognizer->StartKeywordRecognitionAsync(model));
+                }
+                else
+                {
+                    futures.push_back(recognizer->StopKeywordRecognitionAsync());
+                }
+            }
+        }
+    }
+
     GIVEN("Mocks for USP, Microphone, WaveFilePump and Reader, and then USP ...")
     {
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
