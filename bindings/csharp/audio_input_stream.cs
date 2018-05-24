@@ -192,7 +192,8 @@ namespace Microsoft.CognitiveServices.Speech
 
             var format = _target.GetFormat();
 
-            pformat.cbSize = 44;
+            // cbSize is the block size after the field cbSize, so it should be 0.
+            pformat.cbSize = 0;
             pformat.nAvgBytesPerSec = format.AvgBytesPerSec;
             pformat.nBlockAlign = format.BlockAlign;
             pformat.nChannels = format.Channels;
