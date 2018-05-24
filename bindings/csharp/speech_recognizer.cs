@@ -97,6 +97,11 @@ namespace Microsoft.CognitiveServices.Speech
             Parameters = new RecognizerParametersImpl(recoImpl.Parameters);
         }
 
+        internal SpeechRecognizer(Internal.SpeechRecognizer recoImpl, AudioInputStream inputStream) : this(recoImpl)
+        {
+            streamInput = inputStream;
+        }
+
         /// <summary>
         /// Gets/gets the deployment id of a customized speech model that is used for speech recognition.
         /// </summary>
@@ -127,7 +132,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// The collection of parameters and their values defined for this <see cref="SpeechRecognizer"/>.
         /// </summary>
-        public IRecognizerParameters Parameters { get; }
+        public IRecognizerParameters Parameters { get; internal set; }
 
         /// <summary>
         /// Starts speech recognition, and stops after the first utterance is recognized. The task returns the recognition text as result.
@@ -221,11 +226,12 @@ namespace Microsoft.CognitiveServices.Speech
             }
         }
 
-        internal Internal.SpeechRecognizer recoImpl;
-        private ResultHandlerImpl intermediateResultHandler;
-        private ResultHandlerImpl finalResultHandler;
-        private ErrorHandlerImpl errorHandler;
+        internal readonly Internal.SpeechRecognizer recoImpl;
+        private readonly ResultHandlerImpl intermediateResultHandler;
+        private readonly ResultHandlerImpl finalResultHandler;
+        private readonly ErrorHandlerImpl errorHandler;
         private bool disposed = false;
+        private readonly AudioInputStream streamInput;
 
         // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         private class ResultHandlerImpl : Internal.SpeechRecognitionEventListener

@@ -108,6 +108,11 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             Parameters = new RecognizerParametersImpl(recoImpl.Parameters);
         }
 
+        internal TranslationRecognizer(Internal.TranslationRecognizer recoImpl, AudioInputStream stream) : this(recoImpl)
+        {
+            streamInput = stream;
+        }
+
         /// <summary>
         /// Gets the language name that was set when the recognizer was created.
         /// </summary>
@@ -140,7 +145,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// <summary>
         /// The collection of parameters and their values defined for this <see cref="TranslationRecognizer"/>.
         /// </summary>
-        public IRecognizerParameters Parameters { get; }
+        public IRecognizerParameters Parameters { get; internal set; }
 
         /// <summary>
         /// Starts recognition and translation, and stops after the first utterance is recognized. The task returns the translation text as result.
@@ -229,12 +234,13 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             }
         }
 
-        internal Internal.TranslationRecognizer recoImpl;
-        private ResultHandlerImpl intermediateResultHandler;
-        private ResultHandlerImpl finalResultHandler;
-        private SynthesisHandlerImpl synthesisResultHandler;
-        private ErrorHandlerImpl errorHandler;
+        internal readonly Internal.TranslationRecognizer recoImpl;
+        private readonly ResultHandlerImpl intermediateResultHandler;
+        private readonly ResultHandlerImpl finalResultHandler;
+        private readonly SynthesisHandlerImpl synthesisResultHandler;
+        private readonly ErrorHandlerImpl errorHandler;
         private bool disposed = false;
+        private readonly AudioInputStream streamInput;
 
         // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         private class ResultHandlerImpl : Internal.TranslationTextEventListener
