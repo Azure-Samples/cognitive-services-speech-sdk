@@ -262,79 +262,69 @@ extern const char* kEvent_error_key;
 extern const char* kEvent_status_key;
 
 #define metrics_device_startup(handle, deviceid) \
-    inband_event_key_value_populate(handle,\
-                                    kEvent_type_device,\
-                                    NULL, \
-                                    kEvent_start_key, \
-                                    json_value_init_string(deviceid))
+{ \
+    JSON_Value * value = json_value_init_string(deviceid); \
+    inband_event_key_value_populate(handle, kEvent_type_device, NULL, kEvent_start_key, value); \
+    json_value_free(value); \
+}
 
 // Recieved the specified message from the service. 
 #define metrics_received_message(handle, x) record_received_msg(handle, x)
 
 // Metric Events defined in telemetry spec
 #define metrics_listening_start(handle, kwsStartTime) \
-    inband_event_key_value_populate(handle, \
-                                    kEvent_type_listeningTrigger, \
-                                    NULL, \
-                                    kEvent_start_key, \
-                                    json_value_init_string(kwsStartTime))
+{ \
+    JSON_Value * value = json_value_init_string(kwsStartTime); \
+    inband_event_key_value_populate(handle, kEvent_type_listeningTrigger, NULL, kEvent_start_key, value); \
+    json_value_free(value); \
+}
+
 #define metrics_listening_stop(handle) \
-    inband_event_timestamp_populate(handle, \
-                                    kEvent_type_listeningTrigger, \
-                                    NULL, \
-                                    kEvent_end_key)
+    inband_event_timestamp_populate(handle, kEvent_type_listeningTrigger, NULL, kEvent_end_key)
 
 /* Key word spotter model load has been completed. */
 #define metrics_keywordspotter_acceptedkeyword(kwsStartOffset, audioStartOffset) \
-    inband_kws_telemetry(kwsStartOffset, \
-                         audioStartOffset)
+    inband_kws_telemetry(kwsStartOffset, audioStartOffset)
 
 /* Start of the audio stream event which includes the initial silence before KWS */
 #define metrics_recording_start(handle, audioStartTime) \
-    inband_event_key_value_populate(handle, \
-                                    kEvent_type_audioStart, \
-                                    NULL, \
-                                    kEvent_start_key, \
-                                    json_value_init_string(audioStartTime))
+{ \
+    JSON_Value * value = json_value_init_string(audioStartTime); \
+    inband_event_key_value_populate(handle, kEvent_type_audioStart, NULL, kEvent_start_key, value); \
+    json_value_free(value); \
+}
 
 #define metrics_tts_start(handle, requestId) \
-    inband_tts_telemetry(handle, requestId, \
-                                    kEvent_start_key, \
-                                    NULL)
+    inband_tts_telemetry(handle, requestId, kEvent_start_key, NULL)
+
 #define metrics_tts_stop(handle, requestId)    \
-    inband_tts_telemetry(handle, requestId, \
-                                    kEvent_end_key, \
-                                    NULL)
+    inband_tts_telemetry(handle, requestId, kEvent_end_key, NULL)
 
 #define metrics_audio_start(handle) \
-    inband_event_timestamp_populate(handle, \
-                                    kEvent_type_microphone, \
-                                    NULL, \
-                                    kEvent_start_key)
+    inband_event_timestamp_populate(handle, kEvent_type_microphone, NULL, kEvent_start_key)
+
 #define metrics_audio_end(handle)    \
-    inband_event_timestamp_populate(handle, \
-                                    kEvent_type_microphone, \
-                                    NULL, \
-                                    kEvent_end_key)
-#define metrics_audio_error(handle, error)    \
-    inband_event_key_value_populate(handle, \
-                                    kEvent_type_microphone, \
-                                    NULL, \
-                                    kEvent_error_key, \
-                                    json_value_init_string(error))
+    inband_event_timestamp_populate(handle, kEvent_type_microphone, NULL, kEvent_end_key)
+
+#define metrics_audio_error(handle, error) \
+{ \
+    JSON_Value *  value = json_value_init_string(error); \
+    inband_event_key_value_populate(handle, kEvent_type_microphone, NULL, kEvent_error_key, value); \
+    json_value_free(value); \
+}
 
 #define metrics_transport_start(handle, connectionId) \
-    inband_connection_telemetry(handle, connectionId, \
-                                    kEvent_start_key, \
-                                    NULL)
+    inband_connection_telemetry(handle, connectionId, kEvent_start_key, NULL)
+
 #define metrics_transport_connected(handle, connectionId) \
-    inband_connection_telemetry(handle, connectionId, \
-                                    kEvent_end_key, \
-                                    NULL)
+    inband_connection_telemetry(handle, connectionId, kEvent_end_key, NULL)
+
 #define metrics_transport_error(handle, connectionId, error) \
-    inband_connection_telemetry(handle, connectionId, \
-                                    kEvent_error_key, \
-                                    json_value_init_number(error))
+{ \
+    JSON_Value * value = json_value_init_number(error); \
+    inband_connection_telemetry(handle, connectionId, kEvent_error_key, value); \
+    json_value_free(value); \
+}
 
 // Transport metrics
 /* The transport has started a state transition. */

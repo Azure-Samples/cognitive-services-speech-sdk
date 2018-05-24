@@ -54,7 +54,7 @@ void CSpxWavFileReader::Close()
     if (m_file.get() != nullptr)
     {
         m_file->close();
-        m_file.release();
+        m_file.reset();
     }
 
     m_fileName.clear();

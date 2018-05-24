@@ -181,10 +181,10 @@ public:
 
         if (s_tables->find(name) == s_tables->end())
         {
-            auto ht = new CSpxHandleTable<T, Handle>();
-            s_tables->emplace(name, ht);
+            auto ht = std::make_shared<CSpxHandleTable<T, Handle>>();
+            s_tables->emplace(name, ht.get());
 
-            auto fn = [=]() { ht->Term(); };
+            auto fn = [ht]() { ht->Term(); };
             s_termFns->push_back(fn);
         }
 

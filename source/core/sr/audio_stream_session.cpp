@@ -84,7 +84,10 @@ void CSpxAudioStreamSession::Term()
     }
 
     // Don't need the recognizers any more...
-    m_recognizers.clear();
+    {
+        std::unique_lock<std::mutex> lock(m_mutex);
+        m_recognizers.clear();
+    }
 
     // Destroy the pump and all the adapters... (we can't hold any shared_ptr's after this function returns...)
     SpxTermAndClear(m_audioPump);
@@ -219,15 +222,17 @@ const std::wstring& CSpxAudioStreamSession::GetSessionId() const
 
 void CSpxAudioStreamSession::AddRecognizer(std::shared_ptr<ISpxRecognizer> recognizer)
 {
-     m_recognizers.push_back(recognizer);
+    std::unique_lock<std::mutex> lock(m_mutex);
+    m_recognizers.push_back(recognizer);
 }
 
 void CSpxAudioStreamSession::RemoveRecognizer(ISpxRecognizer* recognizer)
 {
-     m_recognizers.remove_if([&](std::weak_ptr<ISpxRecognizer>& item) {
-         std::shared_ptr<ISpxRecognizer> sharedPtr = item.lock();
-         return sharedPtr.get() == recognizer;
-     });
+    std::unique_lock<std::mutex> lock(m_mutex);
+    m_recognizers.remove_if([&](std::weak_ptr<ISpxRecognizer>& item) {
+        std::shared_ptr<ISpxRecognizer> sharedPtr = item.lock();
+        return sharedPtr.get() == recognizer;
+    });
 }
 
 CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxAudioStreamSession::RecognizeAsync()
@@ -610,9 +615,13 @@ void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint
 
 void CSpxAudioStreamSession::GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation)
 {
-    SPX_DBG_ASSERT(m_recognizers.size() == 1); // we only support 1 recognizer today...
-    
-    auto recognizer = m_recognizers.front().lock();
+    std::shared_ptr<ISpxRecognizer> recognizer;
+    {
+        std::unique_lock<std::mutex> lock(m_mutex);
+        SPX_DBG_ASSERT(m_recognizers.size() == 1); // we only support 1 recognizer today...
+        recognizer = m_recognizers.front().lock();
+    }
+
     auto intentRecognizer = SpxQueryInterface<ISpxIntentRecognizer>(recognizer);
     auto translationRecognizer = SpxQueryInterface<ISpxTranslationRecognizer>(recognizer);
 

@@ -784,6 +784,13 @@ void telemetry_destroy(TELEMETRY_HANDLE handle)
         handle->inband_telemetry_queue = NULL;
     }
     PropertybagShutdown();
+
+    if (handle->lock != NULL)
+    {
+        Lock_Deinit(handle->lock);
+    }
+
+    free(handle);
 }
 
 #if defined(PRINT_TELEMETRY_EVENTS) || defined(USE_ARIA)

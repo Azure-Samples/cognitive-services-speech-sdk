@@ -141,13 +141,18 @@ void Connection::Impl::Invoke(std::function<void()> callback)
 
 void Connection::Impl::WorkThread(weak_ptr<Connection::Impl> ptr)
 {
-    auto connection = ptr.lock();
-    connection->SignalConnected();
-    connection.reset();
+    {
+        auto connection = ptr.lock();
+        if (connection == nullptr) 
+        {
+            return;
+        }
+        connection->SignalConnected();
+    }
 
     while (true)
     {
-        connection = ptr.lock();
+        auto connection = ptr.lock();
         if (connection == nullptr)
         {
             // connection is destroyed, our work here is done.

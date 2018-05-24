@@ -1051,6 +1051,13 @@ void TransportRequestDestroy(TransportHandle transportHandle)
 
     if (request->queue)
     {
+        for (LIST_ITEM_HANDLE list_item = singlylinkedlist_get_head_item(request->queue);
+            list_item != NULL;
+            list_item = singlylinkedlist_get_next_item(list_item))
+        {
+            free((TransportPacket*)singlylinkedlist_item_get_value(list_item));
+        }
+
         singlylinkedlist_destroy(request->queue);
         request->queue = NULL;
     }
