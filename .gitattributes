@@ -1,6 +1,8 @@
 .gitattributes text
 .gitignore text
 
+Makefile text
+
 *.config text
 *.cpp text
 *.cs text
@@ -10,3 +12,6 @@
 *.md text
 *.sln text
 *.vcxproj text
+
+# Bash only likes Unix line endings
+*.sh text eol=lf

@@ -29,10 +29,13 @@
     <ClCompile Include="cxx_samples.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="translation_samples.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="speech_recognition_samples.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="translation_samples.cpp">
+    <ClCompile Include="intent_recognition_samples.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
