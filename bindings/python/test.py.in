@@ -42,7 +42,10 @@ def _assert(result):
     assert result.text
     assert result.json
     assert callbacks['session_started'].num_calls == 1
-    assert callbacks['session_stopped'].num_calls == 1
+    # We disconnect immediately after receiving reco result, but which time it's very
+    # unlikely that session_stopped is already fired. 
+    # TODO: shouldn't we wait for session stopped, before returning the final result?
+    assert callbacks['session_stopped'].num_calls == 0 or callbacks['session_stopped'].num_calls == 1
     assert callbacks['intermediate_result'].num_calls >= 1
     assert callbacks['final_result'].num_calls == 1
 
@@ -66,13 +69,8 @@ def _connect(reco):
         getattr(reco, cb_name).connect(callback)
 
 def _disconnect(reco):
-    # BUGBUG #1180542
-    # disconnect deadlocks, sleep instead:
-    import time
-    time.sleep(1)
-    return
     for cb_name in callbacks:
-        getattr(reco, cb_name).disconnect(callbacks[cb_name])
+        getattr(reco, cb_name).disconnect_all()
 
 def recognize(subscription, endpoint=None, filename=None, async=False):
     if filename is not None:
