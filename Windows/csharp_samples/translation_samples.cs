@@ -122,6 +122,7 @@ namespace MicrosoftSpeechSDKSamples
         // <TranslationWithFileAsync>
 
         // The TaskCompletionSrouce must be rooted.
+        // See https://blogs.msdn.microsoft.com/pfxteam/2011/10/02/keeping-async-methods-alive/ for details.
         private static TaskCompletionSource<int> endRecognitionTcs;
 
         public static async Task TranslationWithFileAsync()
