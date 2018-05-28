@@ -294,9 +294,16 @@ SPXAPI Recognizer_RecognizeAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t millise
         if (completed)
         {
             auto result = asyncop->Future.get();
-            auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
-            *phresult = resulthandles->TrackHandle(result);
-            hr = SPX_NOERROR;
+            if (result == nullptr)
+            {
+                hr = SPXERR_TIMEOUT;
+            }
+            else
+            {
+                auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
+                *phresult = resulthandles->TrackHandle(result);
+                hr = SPX_NOERROR;
+            }
         }
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);

@@ -69,6 +69,11 @@ def _connect(reco):
         getattr(reco, cb_name).connect(callback)
 
 def _disconnect(reco):
+    # BUGBUG #1180542
+    # disconnect deadlocks, sleep instead:
+    import time
+    time.sleep(1)
+    return
     for cb_name in callbacks:
         getattr(reco, cb_name).disconnect_all()
 
