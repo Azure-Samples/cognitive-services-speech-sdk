@@ -46,20 +46,6 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
     {
       
         #region Properties
-       
-        private const string CrisModelIdFileName = "CrisModelId.txt";
-        private const string SubscriptionKeyFileName = "SubscriptionKey.txt";
-   
-        /// <summary>
-        /// Gets the default locale.
-        /// </summary>
-        /// <value>
-        /// The default locale.
-        /// </value>
-        private string DefaultLocale
-        {
-            get { return "en-US"; }
-        }
 
         /// <summary>
         /// True, if audio source is mic
@@ -85,8 +71,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// Both models used for recognition
         /// </summary>
         public bool IsBothReco { get; set; }
-        
-        private string subscriptionKey;
+
         /// <summary>
         /// Gets or sets Subscription Key
         /// </summary>
@@ -104,7 +89,6 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             }
         }
 
-        private string crisModelId;
         /// <summary>
         /// Gets or sets Cris model ID
         /// </summary>
@@ -121,6 +105,17 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 this.OnPropertyChanged<string>();
             }
         }
+
+        // Private properties
+        private const string defaultLocale = "en-US";
+        private string crisModelId;
+        private string subscriptionKey;
+        private const string crisModelIdFileName = "CrisModelId.txt";
+        private const string subscriptionKeyFileName = "SubscriptionKey.txt";
+        // The TaskCompletionSource must be rooted.
+        // See https://blogs.msdn.microsoft.com/pfxteam/2011/10/02/keeping-async-methods-alive/ for details.
+        private TaskCompletionSource<int> endBasicRecognitionTaskCompletionSource;
+        private TaskCompletionSource<int> endCustomRecognitionTaskCompletionSource;
 
         #endregion
 
@@ -158,8 +153,8 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             this.dataRadioButton.IsChecked = true;
             this.bothRadioButton.IsChecked = true;
 
-            this.SubscriptionKey = this.GetValueFromIsolatedStorage(SubscriptionKeyFileName);
-            this.CrisModelId = this.GetValueFromIsolatedStorage(CrisModelIdFileName);
+            this.SubscriptionKey = this.GetValueFromIsolatedStorage(subscriptionKeyFileName);
+            this.CrisModelId = this.GetValueFromIsolatedStorage(crisModelIdFileName);
         }
 
         /// <summary>
@@ -171,108 +166,112 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
-          private void StartButton_Click(object sender, RoutedEventArgs e)
-          {
-              this.startButton.IsEnabled = false;
-              this.radioGroup.IsEnabled = false;
-              this.optionPanel.IsEnabled = false;
-              this.LogRecognitionStart(this.crisLogText, this.crisCurrentText);
-              this.LogRecognitionStart(this.bingLogText, this.bingCurrentText);
-              string wavFileName = "";
+        private void StartButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.startButton.IsEnabled = false;
+            this.radioGroup.IsEnabled = false;
+            this.optionPanel.IsEnabled = false;
+            this.LogRecognitionStart(this.crisLogText, this.crisCurrentText);
+            this.LogRecognitionStart(this.bingLogText, this.bingCurrentText);
+            string wavFileName = "";
 
-              if (!AreKeysValid())
-              {
-                  MessageBox.Show("Subscription Key or Model ID is wrong or missing!");
-                  if (this.IsBasicReco || this.IsBothReco)
-                  {
-                      this.WriteLine(this.bingLogText, "--- Error : Subscription Key or Model Key is wrong or missing! ---");
-                  }
+            if (!AreKeysValid())
+            {
+                MessageBox.Show("Subscription Key or Model ID is wrong or missing!");
+                if (this.IsBasicReco || this.IsBothReco)
+                {
+                    this.WriteLine(this.bingLogText, "--- Error : Subscription Key or Model Key is wrong or missing! ---");
+                }
 
-                  if (this.IsCustomReco || this.IsBothReco)
-                  {
-                      this.WriteLine(this.crisLogText, "--- Error : Subscription Key or Model Key is wrong or missing! ---");
-                  }
+                if (this.IsCustomReco || this.IsBothReco)
+                {
+                    this.WriteLine(this.crisLogText, "--- Error : Subscription Key or Model Key is wrong or missing! ---");
+                }
 
-                  this.EnableButtons();
-                  return;
-              }
+                this.EnableButtons();
+                return;
+            }
 
-              if (!this.IsMicrophoneClient)
-              {
-                  wavFileName = GetFile();
-                  if (wavFileName.Length <= 0) return;
-                  Task.Run(() => this.PlayAudioFile(wavFileName));
-              }
+            if (!this.IsMicrophoneClient)
+            {
+                wavFileName = GetFile();
+                if (wavFileName.Length <= 0) return;
+                Task.Run(() => this.PlayAudioFile(wavFileName));
+            }
 
-              if (this.IsCustomReco || this.IsBothReco)
-              {
-                  Task.Run(async ()=> { await CreateCustomReco(wavFileName).ConfigureAwait(false); });
-              }
+            if (this.IsCustomReco || this.IsBothReco)
+            {
+                endCustomRecognitionTaskCompletionSource = new TaskCompletionSource<int>();
+                Task.Run(async () => { await CreateCustomReco(wavFileName, endCustomRecognitionTaskCompletionSource).ConfigureAwait(false); });
+            }
 
-              if (this.IsBasicReco || this.IsBothReco)
-              {
-                  Task.Run(async() => { await CreateBasicReco(wavFileName).ConfigureAwait(false); });
-              }
-          }
+            if (this.IsBasicReco || this.IsBothReco)
+            {
+                endBasicRecognitionTaskCompletionSource = new TaskCompletionSource<int>();
+                Task.Run(async () => { await CreateBasicReco(wavFileName, endBasicRecognitionTaskCompletionSource).ConfigureAwait(false); });
+            }
+        }
 
-          /// <summary>
-          /// Creates Recognizer with baseline model:
-          /// Creates a factory with subscription key, region West US
-          /// If input source is audio file, creates recognizer with audio file otherwise with default mic
-          /// Waits on RunRecognition
-          /// </summary>
-          /// <param name="wavFileName">file</param>
-          private async Task CreateBasicReco(string wavFileName)
-          {
-              var basicFactory =  SpeechFactory.FromSubscription(this.SubscriptionKey,"westus");
-              SpeechRecognizer basicRecognizer;
+        /// <summary>
+        /// Creates Recognizer with baseline model:
+        /// Creates a factory with subscription key, region West US
+        /// If input source is audio file, creates recognizer with audio file otherwise with default mic
+        /// Waits on RunRecognition
+        /// </summary>
+        /// <param name="wavFileName">file</param>
+        private async Task CreateBasicReco(string wavFileName, TaskCompletionSource<int> source)
+        {
+            // Todo: suport users to specifiy a different region.
+            var basicFactory = SpeechFactory.FromSubscription(this.SubscriptionKey, "westus");
+            SpeechRecognizer basicRecognizer;
 
-              if (this.IsMicrophoneClient)
-              {
-                  using (basicRecognizer = basicFactory.CreateSpeechRecognizer())
-                  {
-                      await this.RunRecognizer(basicRecognizer, RecoType.Basic).ConfigureAwait(false);
-                  }
-              }
-              else
-              {
-                  using (basicRecognizer = basicFactory.CreateSpeechRecognizerWithFileInput(wavFileName))
-                  {
-                      await this.RunRecognizer(basicRecognizer, RecoType.Basic).ConfigureAwait(false);
-                  }
-              }
-          }
+            if (this.IsMicrophoneClient)
+            {
+                using (basicRecognizer = basicFactory.CreateSpeechRecognizer())
+                {
+                    await this.RunRecognizer(basicRecognizer, RecoType.Basic, source).ConfigureAwait(false);
+                }
+            }
+            else
+            {
+                using (basicRecognizer = basicFactory.CreateSpeechRecognizerWithFileInput(wavFileName))
+                {
+                    await this.RunRecognizer(basicRecognizer, RecoType.Basic, source).ConfigureAwait(false);
+                }
+            }
+        }
 
-          /// <summary>
-          /// Creates Recognizer with custom model:
-          /// Creates a factory with subscription key, region West US
-          /// If input source is audio file, creates recognizer with audio file otherwise with default mic
-          /// Waits on RunRecognition
-          /// </summary>
-          /// <param name="wavFileName">The source of the event.</param>
-          private async Task CreateCustomReco(string wavFileName)
-          {
-              var customFactory = SpeechFactory.FromSubscription(this.SubscriptionKey, "westus");
-              SpeechRecognizer customRecognizer;
+        /// <summary>
+        /// Creates Recognizer with custom model:
+        /// Creates a factory with subscription key, region West US
+        /// If input source is audio file, creates recognizer with audio file otherwise with default mic
+        /// Waits on RunRecognition
+        /// </summary>
+        /// <param name="wavFileName">The source of the event.</param>
+        private async Task CreateCustomReco(string wavFileName, TaskCompletionSource<int> source)
+        {
+            // Todo: suport users to specifiy a different region.
+            var customFactory = SpeechFactory.FromSubscription(this.SubscriptionKey, "westus");
+            SpeechRecognizer customRecognizer;
 
-              if (this.IsMicrophoneClient)
-              {
-                  using (customRecognizer = customFactory.CreateSpeechRecognizer())
-                  {
-                      customRecognizer.DeploymentId = this.CrisModelId;
-                      await this.RunRecognizer(customRecognizer, RecoType.Custom).ConfigureAwait(false);
-                  }
-              }
-              else
-              {
-                  using (customRecognizer = customFactory.CreateSpeechRecognizerWithFileInput(wavFileName))
-                  {
-                      customRecognizer.DeploymentId = this.CrisModelId;
-                      await this.RunRecognizer(customRecognizer, RecoType.Custom).ConfigureAwait(false);
-                  }
-              }
-          }
-         
+            if (this.IsMicrophoneClient)
+            {
+                using (customRecognizer = customFactory.CreateSpeechRecognizer())
+                {
+                    customRecognizer.DeploymentId = this.CrisModelId;
+                    await this.RunRecognizer(customRecognizer, RecoType.Custom, source).ConfigureAwait(false);
+                }
+            }
+            else
+            {
+                using (customRecognizer = customFactory.CreateSpeechRecognizerWithFileInput(wavFileName))
+                {
+                    customRecognizer.DeploymentId = this.CrisModelId;
+                    await this.RunRecognizer(customRecognizer, RecoType.Custom, source).ConfigureAwait(false);
+                }
+            }
+        }
+
         /// <summary>
         /// Subscribes to Recognition Events
         /// Starts the Recognition and waits until Final Result is received, then Stops recognition
@@ -282,7 +281,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         ///  <value>
         ///   <c>Basic</c> if Baseline model; otherwise, <c>Custom</c>.
         /// </value>
-        private async Task RunRecognizer(SpeechRecognizer recognizer, RecoType recoType)
+        private async Task RunRecognizer(SpeechRecognizer recognizer, RecoType recoType, TaskCompletionSource<int> source)
         {
             //subscribe to events
             bool isChecked = false;
@@ -290,17 +289,17 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             {
                 isChecked = this.immediateResultsCheckBox.IsChecked == true;
             });
-            var taskCompletionSource = new TaskCompletionSource<int>();
+
             if (isChecked)
                 recognizer.IntermediateResultReceived += (sender, e) => IntermediateResultEventHandler(e, recoType);
-            recognizer.FinalResultReceived += (sender, e) => FinalResultEventHandler(e, recoType, taskCompletionSource);
-            recognizer.RecognitionErrorRaised += (sender, e) => ErrorEventHandler(e, recoType, taskCompletionSource);
-            recognizer.OnSessionEvent += (sender, e) => SessionEventHandler(e, recoType, taskCompletionSource);
-            recognizer.OnSpeechDetectedEvent += (sender, e) => SpeechDetectedEventHandler(e, recoType, taskCompletionSource);
+            recognizer.FinalResultReceived += (sender, e) => FinalResultEventHandler(e, recoType);
+            recognizer.RecognitionErrorRaised += (sender, e) => ErrorEventHandler(e, recoType, source);
+            recognizer.OnSessionEvent += (sender, e) => SessionEventHandler(e, recoType, source);
+            recognizer.OnSpeechDetectedEvent += (sender, e) => SpeechDetectedEventHandler(e, recoType);
 
             //start,wait,stop recognition
             await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
-            await taskCompletionSource.Task.ConfigureAwait(false);
+            await source.Task.ConfigureAwait(false);
             await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
 
             this.EnableButtons();
@@ -308,10 +307,10 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             // unsubscribe from events
             if (isChecked)
                 recognizer.IntermediateResultReceived -= (sender, e) => IntermediateResultEventHandler(e, recoType);
-            recognizer.FinalResultReceived -= (sender, e) => FinalResultEventHandler(e, recoType, taskCompletionSource);
-            recognizer.RecognitionErrorRaised -= (sender, e) => ErrorEventHandler(e, recoType, taskCompletionSource);
-            recognizer.OnSessionEvent -= (sender, e) => SessionEventHandler(e, recoType, taskCompletionSource);
-            recognizer.OnSpeechDetectedEvent -= (sender, e) => SpeechDetectedEventHandler(e, recoType, taskCompletionSource);
+            recognizer.FinalResultReceived -= (sender, e) => FinalResultEventHandler(e, recoType);
+            recognizer.RecognitionErrorRaised -= (sender, e) => ErrorEventHandler(e, recoType, source);
+            recognizer.OnSessionEvent -= (sender, e) => SessionEventHandler(e, recoType, source);
+            recognizer.OnSpeechDetectedEvent -= (sender, e) => SpeechDetectedEventHandler(e, recoType);
         }
 
         #region Recognition Event Handlers
@@ -321,24 +320,15 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// </summary>
         private void IntermediateResultEventHandler(SpeechRecognitionResultEventArgs e, RecoType rt)
         {
-            TextBox log;
-            if (rt == RecoType.Basic)
-            {
-                log = this.bingLogText;
-            }
-            else
-            {
-                log = this.crisLogText;
-            }
+            var log = (rt == RecoType.Basic) ? this.bingLogText : this.crisLogText;
 
             this.WriteLine(log, "Intermediate result: {0} ", e.Result.Text);
         }
 
         /// <summary>
         /// Logs the Final result
-        /// If input source is mic: sets the TaskCompletionSource to 0, in order to trigger Recognition Stop
         /// </summary>
-        private void FinalResultEventHandler(SpeechRecognitionResultEventArgs e, RecoType rt, TaskCompletionSource<int> tcs)
+        private void FinalResultEventHandler(SpeechRecognitionResultEventArgs e, RecoType rt)
         {
             TextBox log;
             if (rt == RecoType.Basic)
@@ -361,18 +351,10 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// Logs Error events
         /// And sets the TaskCompletionSource to 0, in order to trigger Recognition Stop
         /// </summary>
-        private void ErrorEventHandler(RecognitionErrorEventArgs e, RecoType rt, TaskCompletionSource<int> tcs)
+        private void ErrorEventHandler(RecognitionErrorEventArgs e, RecoType rt, TaskCompletionSource<int> source)
         {
-            TextBox log;
-            if (rt == RecoType.Basic)
-            {
-                log = this.bingLogText;
-            }
-            else
-            {
-                log = this.crisLogText;
-            }
-            tcs.TrySetResult(0);
+            var log = (rt == RecoType.Basic) ? this.bingLogText : this.crisLogText;
+            source.TrySetResult(0);
             this.WriteLine(log, "--- Error received ---");
             this.WriteLine(log, "Reason {0}", e.Status);
             this.WriteLine(log);
@@ -381,25 +363,21 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// <summary>
         /// If SessionStoppedEvent is received, sets the TaskCompletionSource to 0, in order to trigger Recognition Stop
         /// </summary>
-        private void SessionEventHandler(SessionEventArgs e, RecoType rt, TaskCompletionSource<int> tcs)
+        private void SessionEventHandler(SessionEventArgs e, RecoType rt, TaskCompletionSource<int> source)
         {
-            if(e.EventType == SessionEventType.SessionStoppedEvent )
+            var log = (rt == RecoType.Basic) ? this.bingLogText : this.crisLogText;
+            this.WriteLine(log, String.Format("Speech recognition: Session event: {0}.", e.ToString()));
+            if (e.EventType == SessionEventType.SessionStoppedEvent)
             {
-                tcs.TrySetResult(0);
+                source.TrySetResult(0);
             }
-            Console.WriteLine(String.Format("Speech recognition: Session event: {0}.", e.ToString()));
         }
 
-
-        private void SpeechDetectedEventHandler(RecognitionEventArgs e, RecoType rt, TaskCompletionSource<int> tcs)
+        private void SpeechDetectedEventHandler(RecognitionEventArgs e, RecoType rt)
         {
-            if (this.IsMicrophoneClient && e.EventType == RecognitionEventType.SpeechEndDetectedEvent)
-            {
-                var log = (rt == RecoType.Basic) ? this.bingLogText : this.crisLogText;
-                this.WriteLine(log, "Speech end detected.");
-                tcs.TrySetResult(0);
-            }
-        } 
+            var log = (rt == RecoType.Basic) ? this.bingLogText : this.crisLogText;
+            this.WriteLine(log, String.Format("Speech recognition: Speech event: {0}.", e.ToString()));
+        }
 
         #endregion
 
@@ -461,8 +439,8 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         {
             try
             {
-                SaveKeyToIsolatedStorage(SubscriptionKeyFileName, this.SubscriptionKey);
-                SaveKeyToIsolatedStorage(CrisModelIdFileName, this.CrisModelId);
+                SaveKeyToIsolatedStorage(subscriptionKeyFileName, this.SubscriptionKey);
+                SaveKeyToIsolatedStorage(crisModelIdFileName, this.CrisModelId);
                 MessageBox.Show("Keys are saved to your disk.\nYou do not need to paste it next time.", "Keys");
             }
             catch (Exception exception)
@@ -530,7 +508,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
 
             this.SetCurrentText(currentText, string.Empty);
             log.Clear();
-            this.WriteLine(log, "\n--- Start speech recognition using " + recoSource + " in " + this.DefaultLocale + " language ----\n\n");
+            this.WriteLine(log, "\n--- Start speech recognition using " + recoSource + " in " + defaultLocale + " language ----\n\n");
         }
 
         /// <summary>
