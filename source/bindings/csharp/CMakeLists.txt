@@ -74,5 +74,5 @@ set_property(DIRECTORY ${CMAKE_SOURCE_DIR} APPEND PROPERTY CMAKE_CONFIGURE_DEPEN
 
 add_custom_command(TARGET ${CSHARP_LIB}
                    POST_BUILD
-                   COMMAND "${SRC_DIR}/override-corflags.bat" "\"$(Platform)\"" "\"$(Configuration)\"" "${CSHARP_LIB}.dll"
+                   COMMAND cmd /c "${SRC_DIR}/override-corflags.bat" "\"$(Platform)\"" "\"$(Configuration)\"" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)/${CSHARP_LIB}.dll"
                    COMMENT "Turn x86 assemblies into an AnyCPU one")

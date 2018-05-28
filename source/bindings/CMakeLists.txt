@@ -2,8 +2,8 @@
 find_package(SWIG REQUIRED)
 include(UseSWIG)
 
-set(SWIG_INTERFACE "${PROJECT_SOURCE_DIR}/bindings/carbon.i")
-set(SWIG_WRAPPERS "${PROJECT_SOURCE_DIR}/bindings/wrappers.h")
+set(SWIG_INTERFACE "${CARBON_BINDINGS}/carbon.i")
+set(SWIG_WRAPPERS "${CARBON_BINDINGS}/wrappers.h")
 
 if(MSVC)
      # Force to always compile with W4

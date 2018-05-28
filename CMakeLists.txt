@@ -73,6 +73,7 @@ set(CARBON_ROOT ${PROJECT_SOURCE_DIR})
 set(CARBON_SOURCE "${CARBON_ROOT}/source")
 set(CARBON_PUBLIC "${CARBON_SOURCE}/public")
 set(CARBON_CORE "${CARBON_SOURCE}/core")
+set(CARBON_BINDINGS "${CARBON_SOURCE}/bindings")
 set(CARBON_EXTERNAL "${CARBON_ROOT}/external")
 
 # include folders
@@ -99,14 +100,11 @@ if(CMAKE_CL_64)
 endif()
 
 set(TESTS "${CARBON_ROOT}/tests")
+set(JAVA_TESTS "${TESTS}/functional/java")
 
-set(JAVA_TESTS "${TESTS}/core/java")
-set(JAVA_SAMPLES "${CARBON_ROOT}/samples/java_samples")
+set(JAVA_SAMPLES "${CARBON_ROOT}/samples/java/quickstart")
 
-set(USP_CONSOLE "${CARBON_ROOT}/tools/uspclientconsole")
-set(CARBONX "${CARBON_ROOT}/tools/carbonx")
-set(CARBON_BINDINGS "${CARBON_ROOT}/bindings")
-set(CARBON_CSHARP_CONSOLE "${CARBON_ROOT}/tools/carbon_csharp_console")
+set(CARBONX "${TESTS}/functional/cxx/carbonx")
 
 add_subdirectory("${CARBON_EXTERNAL}")
 
@@ -132,8 +130,6 @@ add_subdirectory(${CARBONX})
 add_subdirectory(${CARBON_BINDINGS})
 
 if(NOT ANDROID)
-  add_subdirectory(${CARBON_CSHARP_CONSOLE})
-  add_subdirectory(${USP_CONSOLE})
   add_subdirectory(${TESTS})
 endif()
 

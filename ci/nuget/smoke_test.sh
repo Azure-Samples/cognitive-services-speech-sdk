@@ -75,15 +75,15 @@ WAV_PATH=tests/input/audio/whatstheweatherlike.wav
 
 # Native sample build and test
 
-NATIVE_SAMPLE_PACKAGES_DIR=samples/CxxHelloWorld/packages 
-NATIVE_SAMPLE_PACKAGES_CONFIG=samples/CxxHelloWorld/CxxHelloWorld/packages.config
+NATIVE_SAMPLE_PACKAGES_DIR=samples/cxx/windows/helloworld/packages 
+NATIVE_SAMPLE_PACKAGES_CONFIG=samples/cxx/windows/helloworld/CxxHelloWorld/packages.config
 [[ -e $NATIVE_SAMPLE_PACKAGES_CONFIG ]]
 
 patchPackageVersion "$PACKAGE_NAME" "$PACKAGE_VERSION" "$NATIVE_SAMPLE_PACKAGES_CONFIG"
 
 $NUGETEXETOOLPATH restore -noninteractive "$NATIVE_SAMPLE_PACKAGES_CONFIG" -packagesdirectory "$NATIVE_SAMPLE_PACKAGES_DIR" -nocache -source "$(dirname "$PACKAGE_PATH")"
 
-NATIVE_SAMPLE_SLN=samples/CxxHelloWorld/CxxHelloWorld.sln
+NATIVE_SAMPLE_SLN=samples/cxx/windows/helloworld/CxxHelloWorld.sln
 
 # Build and test all configurations
 for configuration in Release; do # TODO add-back Debug
@@ -94,7 +94,7 @@ for useDebugLibs in 0; do # TODO add back 1
   BINROOT=
   [[ $platform == x64 ]] && BINROOT=/$platform
   [[ $useDebugLibs == 1 ]] && echo ::: Running with debug libraries - if this hangs there may be a debug assertion with a pop-up window that causes a timeout.
-  ./samples/CxxHelloWorld$BINROOT/$configuration/CxxHelloWorld.exe $SPEECH_SUBSCRIPTION_KEY $REGION $WAV_PATH
+  ./samples/cxx/windows/helloworld$BINROOT/$configuration/CxxHelloWorld.exe $SPEECH_SUBSCRIPTION_KEY $REGION $WAV_PATH
 done
 done
 done
@@ -103,9 +103,9 @@ done
 
 # TODO WIP
 
-MANAGED_SAMPLE_SLN=samples/CsharpHelloWorld/CsharpHelloWorld.sln
-MANAGED_SAMPLE_PACKAGES_DIR=samples/CsharpHelloWorld/packages
-MANAGED_SAMPLE_PACKAGES_CONFIG=samples/CsharpHelloWorld/CsharpHelloWorld/packages.config
+MANAGED_SAMPLE_SLN=samples/csharp/helloworld/CsharpHelloWorld.sln
+MANAGED_SAMPLE_PACKAGES_DIR=samples/csharp/helloworld/packages
+MANAGED_SAMPLE_PACKAGES_CONFIG=samples/csharp/helloworld/CsharpHelloWorld/packages.config
 [[ -e $MANAGED_SAMPLE_PACKAGES_CONFIG ]]
 
 patchPackageVersion "$PACKAGE_NAME" "$PACKAGE_VERSION" "$MANAGED_SAMPLE_PACKAGES_CONFIG"
@@ -116,7 +116,7 @@ for configuration in Release; do # TODO add back Debug
 for platform in x86 x64; do
 #for useDebugLibs in 1 0; do
   MSYS_NO_PATHCONV=1 "$MSBUILD15" /m /p:Platform=$platform /p:Configuration=$configuration /p:SpeechSdkUseDebugLibs=$useDebugLibs /p:SpeechSdkVersion=$PACKAGE_VERSION $MANAGED_SAMPLE_SLN
-  ./samples/CsharpHelloWorld/CsharpHelloWorld/bin/$platform/$configuration/CsharpHelloWorld.exe $SPEECH_SUBSCRIPTION_KEY $REGION $WAV_PATH
+  ./samples/csharp/helloworld/CsharpHelloWorld/bin/$platform/$configuration/CsharpHelloWorld.exe $SPEECH_SUBSCRIPTION_KEY $REGION $WAV_PATH
 #done
 done
 done

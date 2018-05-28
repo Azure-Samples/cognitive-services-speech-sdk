@@ -36,7 +36,7 @@ function run_tests {
         pretty_print "Running Python tests"
         py_args="--filename ./tests/input/whatstheweatherlike.wav --subscription $UserKeySkyman"
         [ ! -z $endpoint ] && py_args+=" --endpoint $endpoint"
-        py.test -s ./bindings/python/test.py $py_args
+        py.test -s ./source/bindings/python/test.py $py_args
     fi
 }
 

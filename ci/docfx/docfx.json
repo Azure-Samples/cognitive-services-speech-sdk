@@ -5,7 +5,7 @@
         {
           "files": [ "**/*.cs" ],
           "exclude": [ "**/bin/**", "**/obj/**" ],
-          "src": "../../bindings/csharp"
+          "src": "../../source/bindings/csharp"
         }
       ],
       "dest": "../../build/docfx/obj/api",

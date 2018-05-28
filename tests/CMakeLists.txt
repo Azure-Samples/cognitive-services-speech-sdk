@@ -1,7 +1,7 @@
 project(tests)
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
-set(TEST_INCLUDE "${PROJECT_SOURCE_DIR}/include")
+set(TEST_INCLUDE "${PROJECT_SOURCE_DIR}/functional/cxx/include")
 set(SCRIPTS_DIR "${SRC_DIR}/scripts/")
 set(INPUT_DIR "${SRC_DIR}/input/")
 
@@ -28,7 +28,9 @@ set(TEST_HEADERS "${TEST_INCLUDE}/test_utils.h")
 
 set(TEST_LIBS)
 
-add_subdirectory("${SRC_DIR}/core/audio")
-add_subdirectory("${SRC_DIR}/core/usp")
-add_subdirectory("${SRC_DIR}/public/cxx_api")
-add_subdirectory("${SRC_DIR}/end2end/csharp")
+add_subdirectory("${SRC_DIR}/functional/cxx/core/audio")
+add_subdirectory("${SRC_DIR}/functional/cxx/core/usp")
+add_subdirectory("${SRC_DIR}/functional/cxx/api")
+add_subdirectory("${SRC_DIR}/functional/cxx/uspclientconsole")
+add_subdirectory("${SRC_DIR}/functional/csharp/end2end")
+add_subdirectory("${SRC_DIR}/functional/csharp/console")

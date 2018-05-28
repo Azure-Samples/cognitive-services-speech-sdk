@@ -21,7 +21,7 @@ OUTPUT_TAR="$OUTPUT_DIR/$BASE_NAME.tar.gz"
 mkdir "$BASE_NAME"
 cp --preserve license.md ThirdPartyNotices.md "$BASE_NAME"
 git clean -fdx samples
-cp --preserve --recursive samples/quickstart-linux "$BASE_NAME"
+cp --preserve --recursive samples/cxx/linux/quickstart "$BASE_NAME"
 
 tar \
   --verbose \
