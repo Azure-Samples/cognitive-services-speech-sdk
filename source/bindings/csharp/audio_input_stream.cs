@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Microsoft.CognitiveServices.Speech
 {
@@ -175,9 +176,16 @@ namespace Microsoft.CognitiveServices.Speech
             _target = target;
         }
 
-        override public int Read(byte[] dataBuffer, int size)
+        override public int Read(global::System.IntPtr dataBuffer, int size)
         {
-            return _target.Read(dataBuffer, size);
+            if (size < 0)
+            {
+                throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, "Invalid size: {0}. A negative value is not allowed.", size));
+            }
+            byte[] buffer = new byte[size];
+            int count = _target.Read(buffer, size);
+            System.Runtime.InteropServices.Marshal.Copy(buffer, 0, dataBuffer, count);
+            return count;
         }
 
         override public void Close()

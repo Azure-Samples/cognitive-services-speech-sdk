@@ -3,17 +3,20 @@
 // make swig generated classes internal only.
 %typemap(csclassmodifiers) SWIGTYPE "internal class"
 
-
 %include "std_string.i"
 %include "arrays_csharp.i"
-CSHARP_ARRAYS(char, byte)
-%apply char INOUT[] {char *dataBuffer}
-
 
 %{
 #include <speechapi_cxx_common.h>
 #include "speechapi_cxx_audioinputstream.h"
 %}
+
+// only apply to those named "dataBuffer"
+%typemap(imtype) char* dataBuffer "global::System.IntPtr"
+%typemap(cstype) char* dataBuffer "global::System.IntPtr"
+%typemap(in) char* dataBuffer %{ $1 = ($1_ltype)$input; %}
+%typemap(directorin) char* dataBuffer %{ $input = ($1_ltype)$1; %}
+%typemap(csin) char *dataBuffer "$csinput"
 
 %feature("director") AudioInputStream;
 %include "speechapi_cxx_audioinputstream.h"
