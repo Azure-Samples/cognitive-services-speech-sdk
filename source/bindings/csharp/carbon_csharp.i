@@ -12,8 +12,11 @@
 %}
 
 // only apply to those named "dataBuffer"
-%typemap(imtype) char* dataBuffer "global::System.IntPtr"
-%typemap(cstype) char* dataBuffer "global::System.IntPtr"
+%typemap(imtype,
+         directoroutattributes="[FIXME_NOT_NEEDED /*left in swig to fast-fail in case new code requires new marshalling*/]",
+         directorinattributes="[System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPArray, ArraySubType = System.Runtime.InteropServices.UnmanagedType.U1, SizeParamIndex = 1)][System.Runtime.InteropServices.Out][System.Runtime.InteropServices.In]"
+        ) char* dataBuffer "byte[]"
+%typemap(cstype) char* dataBuffer "byte[]"
 %typemap(in) char* dataBuffer %{ $1 = ($1_ltype)$input; %}
 %typemap(directorin) char* dataBuffer %{ $input = ($1_ltype)$1; %}
 %typemap(csin) char *dataBuffer "$csinput"

@@ -121,11 +121,21 @@ namespace Microsoft.CognitiveServices.Speech
         /// Creates and initializes an instance of the AudioStreamReader.
         /// </summary>
         /// <param name="format">The format of the underlying stream</param>
-        /// <param name="reader">The underlying stream to read the audio data from</param>
+        /// <param name="reader">The underlying stream to read the audio data from. Note: The stream contains the bare sample data, not the container (like wave header data, etc).</param>
         public BinaryAudioStreamReader(AudioInputStreamFormat format , System.IO.BinaryReader reader)
         {
             _format = format;
             _reader = reader;
+        }
+
+        /// <summary>
+        /// Creates and initializes an instance of the AudioStreamReader.
+        /// </summary>
+        /// <param name="format">The format of the underlying stream</param>
+        /// <param name="stream">The underlying stream to read the audio data from. Note: The stream contains the bare sample data, not the container (like wave header data, etc).</param>
+        public BinaryAudioStreamReader(AudioInputStreamFormat format, System.IO.Stream stream) 
+            : this(format, new System.IO.BinaryReader(stream))
+        {
         }
 
         /// <summary>
@@ -176,15 +186,14 @@ namespace Microsoft.CognitiveServices.Speech
             _target = target;
         }
 
-        override public int Read(global::System.IntPtr dataBuffer, int size)
+        override public int Read(byte[] dataBuffer, int size)
         {
             if (size < 0)
             {
                 throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, "Invalid size: {0}. A negative value is not allowed.", size));
             }
-            byte[] buffer = new byte[size];
-            int count = _target.Read(buffer, size);
-            System.Runtime.InteropServices.Marshal.Copy(buffer, 0, dataBuffer, count);
+
+            int count = _target.Read(dataBuffer, size);
             return count;
         }
 
