@@ -1394,7 +1394,7 @@ std::wstring CarbonTestConsole::ToString(const TranslationSynthesisResultEventAr
 
 void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
 {
-    m_regionId = LR"(west-us)";
+    m_regionId = LR"(westus)";
 
     if (pconsoleArgs->m_useMockMicrophone)
     {
