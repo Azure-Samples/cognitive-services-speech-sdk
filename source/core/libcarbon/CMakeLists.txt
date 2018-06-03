@@ -29,9 +29,11 @@ if(WIN32)
         # "Precompiled Header" to "Use (/Yu)"
         # "Precompiled Header File" to "stdafx.h"
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Yustdafx.h /FIstdafx.h")
-    endif()
 
+    endif()
+    
     list(APPEND HEADERS_PRIVATE "${SRC_DIR}/windows/targetver.h")
+
 endif()
 
 source_group("Header Files (public)" FILES ${HEADERS})
@@ -40,9 +42,15 @@ source_group("Source Files" FILES ${SOURCES})
 
 add_library(${PROJECT_NAME} SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES} $<TARGET_OBJECTS:c_api>)
 
+if(WIN32)
+    SET_TARGET_PROPERTIES (${PROJECT_NAME} PROPERTIES LINK_FLAGS "/DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:mf.dll")
+endif()
+
 target_link_libraries(${PROJECT_NAME}
     PRIVATE sr
     PRIVATE audio 
     PRIVATE usp
     PRIVATE common 
     PRIVATE factory)
+
+
