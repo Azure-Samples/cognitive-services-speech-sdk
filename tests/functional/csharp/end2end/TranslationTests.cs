@@ -55,6 +55,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task TranslationBatmanEntoFrAndEsFinalTextResult()
         {
             var toLanguages = new List<string>() { Language.FR, Language.ES };
@@ -83,6 +84,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task TranslationFirstOneDeToFrAndEsFinalTextResultContinuous()
         {
             var toLanguages = new List<string>() { Language.FR, Language.ES };
@@ -100,6 +102,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task TranslationBatmanEnToDeKatjaSynthesisResultContinuous()
         {
             var toLanguages = new List<string>() { Language.DE };
@@ -127,12 +130,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task TranslationWeatherEnToFrCarolineSynthesisResultContinuous()
         {
             var toLanguages = new List<string>() { Language.FR };
 
             var actualTranslations = await this.translationHelper.GetTranslationFinalResultContinuous(TestData.English.Weather.AudioFile, Language.EN, toLanguages, Voice.FR);
-            Assert.AreEqual(actualTranslations[ResultType.Synthesis].Count, 1);
+            Assert.AreEqual(1, actualTranslations[ResultType.Synthesis].Count);
 
             var expectedSynthesisByteResult = Config.GetByteArraysForFilesWithSamePrefix(synthesisDir, "fr_caroline_weather");
             var actualSynthesisByteResult = (TranslationSynthesisResultEventArgs)actualTranslations[ResultType.Synthesis].Single();
