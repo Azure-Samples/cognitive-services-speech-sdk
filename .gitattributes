@@ -47,6 +47,7 @@ Dockerfile text
 *.png binary
 *.wav binary
 *.jar binary
+*.snk binary
 
 # externals are ignored
 external/curl/**/* binary

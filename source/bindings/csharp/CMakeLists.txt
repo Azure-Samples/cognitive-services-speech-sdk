@@ -54,6 +54,8 @@ set(CSHARP_LIB ${PROJECT_NAME} CACHE INTERNAL "")
 
 FILE(GLOB CSHARP_LIB_WRAPPER_SOURCES "${SRC_DIR}/*.cs")
 
+configure_file(${SRC_DIR}/cognitive_services_speech_keypair.snk ${CMAKE_CURRENT_BINARY_DIR}/cognitive_services_speech_keypair.snk COPYONLY)
+
 enable_language(CSharp)
 add_library(${CSHARP_LIB} SHARED ${SWIG_CS_SOURCES} ${CSHARP_LIB_WRAPPER_SOURCES})
 add_dependencies(${CSHARP_LIB} ${CSHARP_BINDINGS} ${SWIG_MODULE_${CSHARP_BINDINGS}_REAL_NAME})
@@ -74,5 +76,5 @@ set_property(DIRECTORY ${CMAKE_SOURCE_DIR} APPEND PROPERTY CMAKE_CONFIGURE_DEPEN
 
 add_custom_command(TARGET ${CSHARP_LIB}
                    POST_BUILD
-                   COMMAND cmd /c "${SRC_DIR}/override-corflags.bat" "\"$(Platform)\"" "\"$(Configuration)\"" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)/${CSHARP_LIB}.dll"
+                   COMMAND cmd /c "${SRC_DIR}/override-corflags.bat" "\"$(Platform)\"" "\"$(Configuration)\"" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)/${CSHARP_LIB}.dll" "${CMAKE_CURRENT_BINARY_DIR}/cognitive_services_speech_keypair.snk"
                    COMMENT "Turn x86 assemblies into an AnyCPU one")
