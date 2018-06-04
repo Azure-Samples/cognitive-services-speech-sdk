@@ -72,15 +72,18 @@ public:
     {
     }
 
-    virtual int GetFormat(Microsoft::CognitiveServices::Speech::AudioInputStreamFormat* pformat, int cbFormat) override
+    virtual size_t GetFormat(Microsoft::CognitiveServices::Speech::AudioInputStreamFormat* pformat, size_t cbFormat) override
     {
         struct _AudioInputStreamFormatC format;
+        if ((size_t)std::numeric_limits<int>().max() < cbFormat)
+        {
+            throw std::overflow_error("cbFormat");
+        }
 
         int retValue = 0;
-
         if (pformat)
         {
-            retValue = m_pstream->GetFormat(m_pstream, &format, cbFormat);
+            retValue = m_pstream->GetFormat(m_pstream, &format, (int)cbFormat);
             pformat->AvgBytesPerSec = format.AvgBytesPerSec;
             pformat->BlockAlign = format.BlockAlign;
             pformat->Channels = format.Channels;
@@ -90,15 +93,31 @@ public:
         }
         else
         {
-            retValue = m_pstream->GetFormat(m_pstream, nullptr, cbFormat);
+            retValue = m_pstream->GetFormat(m_pstream, nullptr, (int)cbFormat);
         }
 
-        return retValue;
+        if (retValue <= 0)
+        {
+            throw std::runtime_error("Could not get data format from stream, error code" + std::to_string(retValue));
+        }
+
+        return (size_t)retValue;
     }
 
-    virtual int Read(char* pbuffer, int cbBuffer) override
+    virtual size_t Read(char* pbuffer, size_t size) override
     {
-        return m_pstream->Read(m_pstream, (unsigned char*)pbuffer, cbBuffer);
+        if ((size_t)std::numeric_limits<int>().max() < size)
+        {
+            throw std::overflow_error("size");
+        }
+
+        auto res = m_pstream->Read(m_pstream, (unsigned char*)pbuffer, (int)size);
+        if (res < 0)
+        {
+            throw std::runtime_error(("Could not read data from stream, error code" + std::to_string(res)).c_str());
+        }
+
+        return res;
     }
 
     virtual void Close() override

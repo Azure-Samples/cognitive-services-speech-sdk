@@ -163,7 +163,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return A speech recognizer instance.
       */
     public SpeechRecognizer createSpeechRecognizer(AudioInputStream audioStream) {
-        return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithStream(audioStream));
+        return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithStreamImpl(audioStream));
     }
 
     /**
@@ -173,7 +173,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
      * @return A speech recognizer instance.
      */
     public SpeechRecognizer createSpeechRecognizer(AudioInputStream audioStream, String language) {
-       return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithStream(audioStream, language));
+       return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithStreamImpl(audioStream, language));
     }
     
     /**
@@ -209,7 +209,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return An intent recognizer instance.
       */
     public IntentRecognizer createIntentRecognizer(AudioInputStream audioStream) {
-        return new IntentRecognizer(factoryImpl.createIntentRecognizerWithStream(audioStream));
+        return new IntentRecognizer(factoryImpl.createIntentRecognizerWithStreamImpl(audioStream));
     }
 
     /**
@@ -219,7 +219,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return An intent recognizer instance.
       */
     public IntentRecognizer createIntentRecognizer(AudioInputStream audioStream, String language) {
-        return new IntentRecognizer(factoryImpl.createIntentRecognizerWithStream(audioStream, language));
+        return new IntentRecognizer(factoryImpl.createIntentRecognizerWithStreamImpl(audioStream, language));
     }
 
     /**
@@ -304,7 +304,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
            v.add(element);
        }
 
-       return new TranslationRecognizer(factoryImpl.createTranslationRecognizerWithStream(audioStream, sourceLanguage, v));
+       return new TranslationRecognizer(factoryImpl.createTranslationRecognizerWithStreamImpl(audioStream, sourceLanguage, v));
    }
 
    /**
@@ -322,7 +322,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
            v.add(element);
        }
 
-       return new TranslationRecognizer(factoryImpl.createTranslationRecognizerWithStream(audioStream, sourceLanguage, v, voice));
+       return new TranslationRecognizer(factoryImpl.createTranslationRecognizerWithStreamImpl(audioStream, sourceLanguage, v, voice));
    }
 
     /**

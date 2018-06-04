@@ -102,20 +102,6 @@ public:
     /// <returns>A shared pointer to SpeechRecognizer</returns>
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) = 0;
 
-    /// <summary>
-    /// Creates a SpeechRecognizer, using the specified audio stream as input.
-    /// </summary>
-    /// <param name="audioInputStream">A pointer to the input audio stream.</param>
-    virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream) = 0;
-
-    /// <summary>
-    /// Creates a SpeechRecognizer for the specified spoken language, using the specified audio stream as input.
-    /// </summary>
-    /// <param name="audioInputStream">A pointer to the input audio stream.</param>
-    /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
-    /// <returns>A shared pointer to SpeechRecognizer</returns>
-    virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language) = 0;
-
     /// Creates a SpeechRecognizer for the specified spoken language, using the specified audio file as input.
     /// </summary>
     /// <param name="fileName">Specifies the input audio file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.</param>
@@ -123,15 +109,6 @@ public:
     /// <param name="format">Output format.</param>
     /// <returns>A shared pointer to SpeechRecognizer</returns>
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language, OutputFormat format) = 0;
-
-    /// <summary>
-    /// Creates a SpeechRecognizer for the specified spoken language, using the specified audio stream as input.
-    /// </summary>
-    /// <param name="audioInputStream">A pointer to the input audio stream.</param>
-    /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
-    /// <param name="format">Output format.</param>
-    /// <returns>A shared pointer to SpeechRecognizer</returns>
-    virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language, OutputFormat format) = 0;
 
     /// <summary>
     /// Creates an IntentRecognizer, using the default microphone as input.
@@ -162,23 +139,6 @@ public:
     virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) = 0;
 
     /// <summary>
-    /// Creates an IntentRecognizer, using the specified audio stream as input.
-    /// </summary>
-    /// <param name="audioInputStream">A pointer to the input audio stream.</param>
-    /// <returns>A shared pointer to IntentRecognizer</returns>
-
-    virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithStream(AudioInputStream* audioInputStream) = 0;
-
-    /// <summary>
-    /// Creates an IntentRecognizer for the specified spoken language, using the specified audio stream as input.
-    /// </summary>
-    /// <param name="audioInputStream">A pointer to the input audio stream.</param>
-    /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
-    /// <returns>A shared pointer to IntentRecognizer</returns>
-
-    virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language) = 0;
-
-    /// <summary>
     /// Creates a TranslationRecognizer, using the specified pair of source/target languages and the default microphone as input.
     /// </summary>
     /// <param name="sourceLanguage">The spoken language of the audio input in BCP-47 format.</param>
@@ -198,14 +158,52 @@ public:
     virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") = 0;
 
     /// <summary>
-    /// Creates a TranslationRecognizer, using the specified audio file as input and the pair of source/target languages.
+    /// Creates a SpeechRecognizer, using the specified audio stream as input.
+    /// </summary>
+    /// <param name="audioInputStream">A pointer to the input audio stream.</param>
+    virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(const std::shared_ptr<AudioInputStream>& audioInputStream) = 0;
+
+    /// <summary>
+    /// Creates a SpeechRecognizer for the specified spoken language, using the specified audio stream as input.
+    /// </summary>
+    /// <param name="audioInputStream">A pointer to the input audio stream.</param>
+    /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
+    /// <returns>A shared pointer to SpeechRecognizer</returns>
+    virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(const std::shared_ptr<AudioInputStream>& audioInputStream, const std::wstring& language) = 0;
+
+    /// <summary>
+    /// Creates a SpeechRecognizer for the specified spoken language, using the specified audio stream as input.
+    /// </summary>
+    /// <param name="audioInputStream">A pointer to the input audio stream.</param>
+    /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
+    /// <param name="format">Output format.</param>
+    /// <returns>A shared pointer to SpeechRecognizer</returns>
+    virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(const std::shared_ptr<AudioInputStream>& audioInputStream, const std::wstring& language, OutputFormat format) = 0;
+
+    /// <summary>
+    /// Creates an IntentRecognizer, using the specified audio stream as input.
+    /// </summary>
+    /// <param name="audioInputStream">A pointer to the input audio stream.</param>
+    /// <returns>A shared pointer to IntentRecognizer</returns>
+    virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithStream(const std::shared_ptr<AudioInputStream>& audioInputStream) = 0;
+
+    /// <summary>
+    /// Creates an IntentRecognizer for the specified spoken language, using the specified audio stream as input.
+    /// </summary>
+    /// <param name="audioInputStream">A pointer to the input audio stream.</param>
+    /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
+    /// <returns>A shared pointer to IntentRecognizer</returns>
+    virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithStream(const std::shared_ptr<AudioInputStream>& audioInputStream, const std::wstring& language) = 0;
+
+    /// <summary>
+    /// Creates a TranslationRecognizer, using the specified audio stream as input and the pair of source/target languages.
     /// </summary>
     /// <param name="audioInputStream">A pointer to the input audio stream.</param>
     /// <param name="sourceLanguage">The spoken language of the audio input in BCP-47 format.</param>
     /// <param name="targetLanguages">A list of target languages of translation in BCP-47 format.</param>
     /// <param name="voice">Optional. Specifies the name of voice tag if a synthesized audio output is desired.</param>
     /// <returns>A shared pointer to TranslationRecognizer</returns>
-    virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") = 0;
+    virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithStream(const std::shared_ptr<AudioInputStream>& audioInputStream, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") = 0;
 
     /// <summary>
     /// Sets an authorization token that will be used for all recognizers created by the factory when connecting to the service.
@@ -214,8 +212,17 @@ public:
     /// <param name="value">An authorization token.</param>
     virtual void SetAuthorizationToken(const std::wstring& value) = 0;
 
+#ifndef SWIG
 private:
+#endif
+    virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStreamImpl(AudioInputStream* audioInputStream) = 0;
+    virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStreamImpl(AudioInputStream* audioInputStream, const std::wstring& language) = 0;
+    virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStreamImpl(AudioInputStream* audioInputStream, const std::wstring& language, OutputFormat format) = 0;
+    virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithStreamImpl(AudioInputStream* audioInputStream) = 0;
+    virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithStreamImpl(AudioInputStream* audioInputStream, const std::wstring& language) = 0;
+    virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithStreamImpl(AudioInputStream* audioInputStream, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") = 0;
 
+private:
     DISABLE_COPY_AND_MOVE(ICognitiveServicesSpeechFactory);
 };
 
@@ -328,20 +335,23 @@ private:
             return std::make_shared<Speech::SpeechRecognizer>(hreco);
         }
 
-        typedef struct _SpeechApi_AudioInputStreamAdapter
+        struct SpeechApi_AudioInputStreamAdapter : public ::SpeechApi_AudioInputStream
         {
-            // must be first;
-            ::SpeechApi_AudioInputStream functionParams;
-            AudioInputStream * m_audioInputStream;
-        } SpeechApi_AudioInputStreamAdapter;
+            SpeechApi_AudioInputStreamAdapter(const std::shared_ptr<AudioInputStream>& ptr) : ::SpeechApi_AudioInputStream { Wrap_GetFormat, Wrap_Read, Wrap_Close }
+            {
+                m_audioInputStream = ptr;
+                m_audioInputStreamRaw = ptr.get();
+            }
 
-        static void InitSpeechApi_AudioInputStreamAdapterFromAudioInputStream(SpeechApi_AudioInputStreamAdapter* adapter, AudioInputStream* audioInputStream)
-        {
-            adapter->m_audioInputStream = audioInputStream;
-            adapter->functionParams.Close = Wrap_Close;
-            adapter->functionParams.GetFormat = Wrap_GetFormat;
-            adapter->functionParams.Read = Wrap_Read;
-        }
+            SpeechApi_AudioInputStreamAdapter(AudioInputStream* ptr) : ::SpeechApi_AudioInputStream{ Wrap_GetFormat, Wrap_Read, Wrap_Close }
+            {
+                m_audioInputStream = nullptr;
+                m_audioInputStreamRaw = ptr;
+            }
+
+            std::shared_ptr<AudioInputStream> m_audioInputStream;
+            AudioInputStream* m_audioInputStreamRaw;
+        };
 
         static int Wrap_GetFormat(::SpeechApi_AudioInputStream* context, ::AudioInputStreamFormat* pformat, int cbFormat)
         {
@@ -350,7 +360,7 @@ private:
             if (pformat)
             {
                 AudioInputStreamFormat pFormat2;
-                retValue = ((SpeechApi_AudioInputStreamAdapter*)context)->m_audioInputStream->GetFormat(&pFormat2, cbFormat);
+                retValue = (int)((SpeechApi_AudioInputStreamAdapter*)context)->m_audioInputStream->GetFormat(&pFormat2, (size_t)cbFormat);
 
                 pformat->AvgBytesPerSec = pFormat2.AvgBytesPerSec;
                 pformat->BlockAlign = pFormat2.BlockAlign;
@@ -361,7 +371,7 @@ private:
             }
             else
             {
-                retValue = ((SpeechApi_AudioInputStreamAdapter*)context)->m_audioInputStream->GetFormat(nullptr, cbFormat);
+                retValue = (int)((SpeechApi_AudioInputStreamAdapter*)context)->m_audioInputStream->GetFormat(nullptr, (size_t)cbFormat);
             }
 
             return retValue;
@@ -369,7 +379,7 @@ private:
 
         static int Wrap_Read(::SpeechApi_AudioInputStream* context, unsigned char* pbuffer, int cbBuffer)
         {
-            return ((SpeechApi_AudioInputStreamAdapter*)context)->m_audioInputStream->Read((char*)pbuffer, cbBuffer);
+            return (int)((SpeechApi_AudioInputStreamAdapter*)context)->m_audioInputStream->Read((char*)pbuffer, (size_t)cbBuffer);
         }
 
         static void Wrap_Close(::SpeechApi_AudioInputStream* context)
@@ -377,33 +387,60 @@ private:
             ((SpeechApi_AudioInputStreamAdapter*)context)->m_audioInputStream->Close();
         }
 
-        virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream) override
+        virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStreamImpl(AudioInputStream* audioInputStream) override
+        {
+            auto audioInputStream2 = new SpeechApi_AudioInputStreamAdapter(audioInputStream); // TODO: Clarify with Friedel, LEAK!!!
+            return CreateSpeechRecognizerWithStream(audioInputStream2);
+        }
+
+        virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(const std::shared_ptr<AudioInputStream>& audioInputStream) override
+        {
+            auto audioInputStream2 = new SpeechApi_AudioInputStreamAdapter(audioInputStream); // TODO: Clarify with Friedel, LEAK!!!
+            return CreateSpeechRecognizerWithStream(audioInputStream2);
+        }
+
+        std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(SpeechApi_AudioInputStreamAdapter *stream)
         {
             SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
-            SpeechApi_AudioInputStreamAdapter *audioInputStream2 = new SpeechApi_AudioInputStreamAdapter();
-            InitSpeechApi_AudioInputStreamAdapterFromAudioInputStream(audioInputStream2, audioInputStream);
-
-            SPX_THROW_ON_FAIL(::SpeechFactory_CreateSpeechRecognizer_With_Stream(m_hfactory, &hreco, (::SpeechApi_AudioInputStream*)audioInputStream2));
-            return std::make_shared<Speech::SpeechRecognizer>(hreco);
-        };
-
-        virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language) override
-        {
-            SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
-            SpeechApi_AudioInputStreamAdapter *audioInputStream2 = new SpeechApi_AudioInputStreamAdapter();
-            InitSpeechApi_AudioInputStreamAdapterFromAudioInputStream(audioInputStream2, audioInputStream);
-
-            SPX_THROW_ON_FAIL(::SpeechFactory_CreateSpeechRecognizer_With_StreamAndLanguage(m_hfactory, &hreco, (::SpeechApi_AudioInputStream*)audioInputStream2, language.c_str()));
+            SPX_THROW_ON_FAIL(::SpeechFactory_CreateSpeechRecognizer_With_Stream(m_hfactory, &hreco, stream));
             return std::make_shared<Speech::SpeechRecognizer>(hreco);
         }
 
-        std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language, OutputFormat format) override
+        virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStreamImpl(AudioInputStream* audioInputStream, const std::wstring& language) override
+        {
+            auto audioInputStream2 = new SpeechApi_AudioInputStreamAdapter(audioInputStream); // TODO: Clarify with Friedel, LEAK!!!
+            return CreateSpeechRecognizerWithStream(audioInputStream2, language);
+        }
+
+        virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(const std::shared_ptr<AudioInputStream>& audioInputStream, const std::wstring& language) override
+        {
+            auto audioInputStream2 = new SpeechApi_AudioInputStreamAdapter(audioInputStream); // TODO: Clarify with Friedel, LEAK!!!
+            return CreateSpeechRecognizerWithStream(audioInputStream2, language);
+        }
+
+        std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(SpeechApi_AudioInputStreamAdapter* audioInputStream, const std::wstring& language)
         {
             SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
-            auto audioInputStream2 = new SpeechApi_AudioInputStreamAdapter(); // TODO: Are we leaking here and in all such cases?
-            InitSpeechApi_AudioInputStreamAdapterFromAudioInputStream(audioInputStream2, audioInputStream);
+            SPX_THROW_ON_FAIL(::SpeechFactory_CreateSpeechRecognizer_With_StreamAndLanguage(m_hfactory, &hreco, audioInputStream, language.c_str()));
+            return std::make_shared<Speech::SpeechRecognizer>(hreco);
+        }
 
-            SPX_THROW_ON_FAIL(::SpeechFactory_CreateSpeechRecognizer_With_StreamAndLanguageAndFormat(m_hfactory, &hreco, (::SpeechApi_AudioInputStream*)audioInputStream2, language.c_str(), static_cast<SpeechOutputFormat>(format)));
+        std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(const std::shared_ptr<AudioInputStream>& audioInputStream, const std::wstring& language, OutputFormat format) override
+        {
+            auto audioInputStream2 = new SpeechApi_AudioInputStreamAdapter(audioInputStream); // TODO: Clarify with Friedel, LEAK!!!
+            return CreateSpeechRecognizerWithStream(audioInputStream2, language, format);
+        }
+
+        std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStreamImpl(AudioInputStream* audioInputStream, const std::wstring& language, OutputFormat format) override
+        {
+            auto audioInputStream2 = new SpeechApi_AudioInputStreamAdapter(audioInputStream); // TODO: Clarify with Friedel, LEAK!!!
+            return CreateSpeechRecognizerWithStream(audioInputStream2, language, format);
+        }
+
+        std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithStream(SpeechApi_AudioInputStreamAdapter* audioInputStream, const std::wstring& language, OutputFormat format)
+        {
+            SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
+            SPX_THROW_ON_FAIL(::SpeechFactory_CreateSpeechRecognizer_With_StreamAndLanguageAndFormat(m_hfactory, &hreco, audioInputStream, language.c_str(), static_cast<SpeechOutputFormat>(format)));
             return std::make_shared<Speech::SpeechRecognizer>(hreco);
         }
 
@@ -435,23 +472,41 @@ private:
             return std::make_shared<Intent::IntentRecognizer>(hreco);
         }
 
-        virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithStream(AudioInputStream* audioInputStream) override
+        virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithStreamImpl(AudioInputStream* audioInputStream) override
+        {
+            auto audioInputStream2 = new SpeechApi_AudioInputStreamAdapter(audioInputStream); // TODO: Clarify with Friedel, LEAK!!!
+            return CreateIntentRecognizerWithStream(audioInputStream2);
+        }
+
+        virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithStream(const std::shared_ptr<AudioInputStream>& audioInputStream) override
+        {
+            auto audioInputStream2 = new SpeechApi_AudioInputStreamAdapter(audioInputStream); // TODO: Clarify with Friedel, LEAK!!!
+            return CreateIntentRecognizerWithStream(audioInputStream2);
+        }
+
+        std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithStream(SpeechApi_AudioInputStreamAdapter* audioInputStream)
         {
             SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
-            SpeechApi_AudioInputStreamAdapter *audioInputStream2 = new SpeechApi_AudioInputStreamAdapter();
-            InitSpeechApi_AudioInputStreamAdapterFromAudioInputStream(audioInputStream2, audioInputStream);
-
-            SPX_THROW_ON_FAIL(::SpeechFactory_CreateIntentRecognizer_With_Stream(m_hfactory, &hreco, (::SpeechApi_AudioInputStream*)audioInputStream2));
+            SPX_THROW_ON_FAIL(::SpeechFactory_CreateIntentRecognizer_With_Stream(m_hfactory, &hreco, audioInputStream));
             return std::make_shared<Intent::IntentRecognizer>(hreco);
         }
 
-        virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language) override
+        virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithStream(const std::shared_ptr<AudioInputStream>& audioInputStream, const std::wstring& language) override
+        {
+            auto audioInputStream2 = new SpeechApi_AudioInputStreamAdapter(audioInputStream); // TODO: Clarify with Friedel, LEAK!!!
+            return CreateIntentRecognizerWithStream(audioInputStream2, language);
+        }
+
+        virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithStreamImpl(AudioInputStream* audioInputStream, const std::wstring& language) override
+        {
+            auto audioInputStream2 = new SpeechApi_AudioInputStreamAdapter(audioInputStream); // TODO: Clarify with Friedel, LEAK!!!
+            return CreateIntentRecognizerWithStream(audioInputStream2, language);
+        }
+
+        std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerWithStream(SpeechApi_AudioInputStreamAdapter* audioInputStream, const std::wstring& language)
         {
             SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
-            SpeechApi_AudioInputStreamAdapter *audioInputStream2 = new SpeechApi_AudioInputStreamAdapter();
-            InitSpeechApi_AudioInputStreamAdapterFromAudioInputStream(audioInputStream2, audioInputStream);
-
-            SPX_THROW_ON_FAIL(::SpeechFactory_CreateIntentRecognizer_With_StreamAndLanguage(m_hfactory, &hreco, (::SpeechApi_AudioInputStream*)audioInputStream2, language.c_str()));
+            SPX_THROW_ON_FAIL(::SpeechFactory_CreateIntentRecognizer_With_StreamAndLanguage(m_hfactory, &hreco, audioInputStream, language.c_str()));
             return std::make_shared<Intent::IntentRecognizer>(hreco);
         }
 
@@ -469,7 +524,6 @@ private:
             return std::make_shared<Translation::TranslationRecognizer>(hreco);
         }
 
-
         virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") override
         {
             SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
@@ -484,21 +538,30 @@ private:
             return std::make_shared<Translation::TranslationRecognizer>(hreco);
         }
 
-        virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") override
+        virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithStream(const std::shared_ptr<AudioInputStream>& audioInputStream, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") override
+        {
+            auto audioInputStreamAdapter = new SpeechApi_AudioInputStreamAdapter(audioInputStream); // TODO: Clarify with Friedel, LEAK!!!
+            return CreateTranslationRecognizerWithStream(audioInputStreamAdapter, sourceLanguage, targetLanguages, voice);
+        }
+
+        virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithStreamImpl(AudioInputStream* audioInputStream, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") override
+        {
+            auto audioInputStreamAdapter = new SpeechApi_AudioInputStreamAdapter(audioInputStream); // TODO: Clarify with Friedel, LEAK!!!
+            return CreateTranslationRecognizerWithStream(audioInputStreamAdapter, sourceLanguage, targetLanguages, voice);
+        }
+
+        std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithStream(SpeechApi_AudioInputStreamAdapter* audioInputStream, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"")
         {
             SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
-            SpeechApi_AudioInputStreamAdapter *audioInputStreamAdapter = new SpeechApi_AudioInputStreamAdapter();
-            InitSpeechApi_AudioInputStreamAdapterFromAudioInputStream(audioInputStreamAdapter, audioInputStream);
-
             auto targetLangBuffer = std::make_unique<const wchar_t*[]>(targetLanguages.size());
             size_t num = 0;
             for (const auto& lang : targetLanguages)
             {
                 targetLangBuffer[num++] = lang.c_str();
             }
-            SPX_THROW_ON_FAIL(::SpeechFactory_CreateTranslationRecognizer_With_Stream(m_hfactory, &hreco, sourceLanguage.c_str(), targetLangBuffer.get(), num, voice.c_str(), (::SpeechApi_AudioInputStream*)audioInputStreamAdapter));
+            SPX_THROW_ON_FAIL(::SpeechFactory_CreateTranslationRecognizer_With_Stream(m_hfactory, &hreco, sourceLanguage.c_str(), targetLangBuffer.get(), num, voice.c_str(), audioInputStream));
             return std::make_shared<Translation::TranslationRecognizer>(hreco);
-        };
+        }
 
         virtual void SetAuthorizationToken(const std::wstring& value) override
         {

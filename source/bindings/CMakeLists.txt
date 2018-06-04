@@ -5,6 +5,8 @@ include(UseSWIG)
 set(SWIG_INTERFACE "${CARBON_BINDINGS}/carbon.i")
 set(SWIG_WRAPPERS "${CARBON_BINDINGS}/wrappers.h")
 
+add_definitions(-DSWIG)
+
 if(MSVC)
      # Force to always compile with W4
      set(CMAKE_CXX_FLAGS "/W3 /EHsc")

@@ -183,11 +183,20 @@ namespace Microsoft.CognitiveServices.Speech
             _target = target;
         }
 
-        override public int Read(byte[] dataBuffer, int size)
+        override public uint Read(byte[] dataBuffer, uint size)
         {
-            Trace.Assert(dataBuffer.Length == size, "The length of dataBuffer does not match the size.");
+            if (size != dataBuffer.Length)
+            {
+                throw new ArgumentException(nameof(size));
+            }
+
             int count = _target.Read(dataBuffer);
-            return count;
+            if (count < 0)
+            {
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Invalid count: '{0}'. A negative value is not allowed.", count));
+            }
+
+            return (uint)count;
         }
 
         override public void Close()
@@ -195,7 +204,7 @@ namespace Microsoft.CognitiveServices.Speech
             _target.Close();
         }
 
-        override public int GetFormat(Internal.AudioInputStreamFormat pformat, int cbFormat)
+        override public uint GetFormat(Internal.AudioInputStreamFormat pformat, uint cbFormat)
         {
             if (pformat == null || cbFormat < 24)
                 return 24;

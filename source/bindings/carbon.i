@@ -31,6 +31,7 @@
 }
 
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognizer)
+%shared_ptr(Microsoft::CognitiveServices::Speech::AudioInputStream)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::RecognitionResult, Microsoft::CognitiveServices::Speech::RecognitionEventArgs>)
 %shared_ptr(Microsoft::CognitiveServices::Speech::BaseAsyncRecognizer)
 %shared_ptr(Microsoft::CognitiveServices::Speech::RecognitionResult)
@@ -55,6 +56,10 @@
 %ignore CallbackWrapper::GetFunction();
 %ignore FutureWrapper::FutureWrapper;
 %include <wrappers.h>
+
+%ignore Microsoft::CognitiveServices::Speech::ICognitiveServicesSpeechFactory::CreateSpeechRecognizerWithStream;
+%ignore Microsoft::CognitiveServices::Speech::ICognitiveServicesSpeechFactory::CreateIntentRecognizerWithStream;
+%ignore Microsoft::CognitiveServices::Speech::ICognitiveServicesSpeechFactory::CreateTranslationRecognizerWithStream;
 
 %include <speechapi_cxx_common.h>
 

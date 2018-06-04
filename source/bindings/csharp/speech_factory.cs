@@ -173,7 +173,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A speech recognizer instance.</returns>
         public SpeechRecognizer CreateSpeechRecognizerWithStream(AudioInputStream audioStream)
         {
-            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithStream(audioStream.Forwarder), audioStream);
+            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithStreamImpl(audioStream.Forwarder), audioStream);
         }
 
         /// <summary>
@@ -184,7 +184,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A speech recognizer instance.</returns>
         public SpeechRecognizer CreateSpeechRecognizerWithStream(AudioInputStream audioStream, string language)
         {
-            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithStream(audioStream.Forwarder, language), audioStream);
+            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithStreamImpl(audioStream.Forwarder, language), audioStream);
         }
 
         /// <summary>
@@ -209,7 +209,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A speech recognizer instance.</returns>
         public SpeechRecognizer CreateSpeechRecognizerWithStream(AudioInputStream audioStream, string language, SpeechOutputFormat format)
         {
-            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithStream(audioStream.Forwarder, language,
+            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithStreamImpl(audioStream.Forwarder, language,
                 format == SpeechOutputFormat.Simple ? Internal.OutputFormat.Simple : Internal.OutputFormat.Detailed), audioStream);
         }
 
@@ -239,7 +239,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>An intent recognizer instance.</returns>
         public IntentRecognizer CreateIntentRecognizerWithStream(AudioInputStream audioStream)
         {
-            return new IntentRecognizer(factoryImpl.CreateIntentRecognizerWithStream(audioStream.Forwarder), audioStream);
+            return new IntentRecognizer(factoryImpl.CreateIntentRecognizerWithStreamImpl(audioStream.Forwarder), audioStream);
         }
 
 
@@ -251,7 +251,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>An intent recognizer instance.</returns>
         public IntentRecognizer CreateIntentRecognizerWithStream(AudioInputStream audioStream, string language)
         {
-            return new IntentRecognizer(factoryImpl.CreateIntentRecognizerWithStream(audioStream.Forwarder, language), audioStream);
+            return new IntentRecognizer(factoryImpl.CreateIntentRecognizerWithStreamImpl(audioStream.Forwarder, language), audioStream);
         }
 
         /// <summary>
@@ -311,7 +311,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A translation recognizer instance.</returns>
         public TranslationRecognizer CreateTranslationRecognizerWithStream(AudioInputStream audioStream, string sourceLanguage, IEnumerable<string> targetLanguages)
         {
-            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerWithStream(audioStream.Forwarder, sourceLanguage, AsWStringVector(targetLanguages)), audioStream);
+            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerWithStreamImpl(audioStream.Forwarder, sourceLanguage, AsWStringVector(targetLanguages)), audioStream);
         }
 
         /// <summary>
@@ -324,7 +324,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A translation recognizer instance.</returns>
         public TranslationRecognizer CreateTranslationRecognizerWithStream(AudioInputStream audioStream, string sourceLanguage, IEnumerable<string> targetLanguages, string voice)
         {
-            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerWithStream(audioStream.Forwarder, sourceLanguage, AsWStringVector(targetLanguages), voice), audioStream);
+            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerWithStreamImpl(audioStream.Forwarder, sourceLanguage, AsWStringVector(targetLanguages), voice), audioStream);
         }
 
         /// <summary>

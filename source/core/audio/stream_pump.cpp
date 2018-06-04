@@ -186,8 +186,7 @@ namespace Impl {
             }
 
             // Read the buffer, and send it to the processor
-            auto cbRead = m_streamReader->Read((char*)data.get(), bytesPerFrame);
-
+            int cbRead = (int)m_streamReader->Read((char*)data.get(), bytesPerFrame);
             if (m_simulateRealtimePercentage > 0)
             {
                 // Slow down if needed.

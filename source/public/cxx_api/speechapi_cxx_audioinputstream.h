@@ -74,7 +74,7 @@ public:
     /// <param name="pformat">The pointer to the AudioInputStreamFormat buffer, or null if querying the size of the structure.</param>
     /// <param name="cbFormat">The size of the AudioInputStreamFormat buffer being passed, or 0 if querying the size of the structure.</param>
     /// <returns>The size of the AudioInputStreamFormat buffer required to hold the format information.</returns>
-    virtual int GetFormat(AudioInputStreamFormat* pformat, int cbFormat) = 0;
+    virtual size_t GetFormat(AudioInputStreamFormat* pformat, size_t cbFormat) = 0;
 
     /// <summary>
     /// This function is called to get data from the audio stream.
@@ -82,7 +82,7 @@ public:
     /// <param name="dataBuffer">The pointer to the buffer to which to copy the audio data.</param>
     /// <param name="size">The size of the buffer.</param>
     /// <returns>The number of bytes being copied to the buffer.</returns>
-    virtual int Read(char* dataBuffer, int size) = 0;
+    virtual size_t Read(char* dataBuffer, size_t size) = 0;
 
     /// <summary>
     /// This function is called to close the audio stream.

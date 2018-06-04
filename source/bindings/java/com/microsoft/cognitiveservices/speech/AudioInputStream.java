@@ -16,7 +16,7 @@ public abstract class AudioInputStream extends com.microsoft.cognitiveservices.s
      * @return the number of bytes have been read.
      */
     @Override
-    public abstract int read(byte[] dataBuffer);
+    public abstract long read(byte[] dataBuffer);
 
     /**
      * Returns the format of this audio stream.
@@ -37,7 +37,7 @@ public abstract class AudioInputStream extends com.microsoft.cognitiveservices.s
      * @return The size of the AudioInputStreamFormat buffer required to hold the format information.
      */
     @Override
-    public int getFormat(com.microsoft.cognitiveservices.speech.internal.AudioInputStreamFormat pformat, int cbFormat) {
+    public long getFormat(com.microsoft.cognitiveservices.speech.internal.AudioInputStreamFormat pformat, long cbFormat) {
      // Note: 24 Bytes is the size of AudioInputStreamFormat
         if(pformat == null || cbFormat < 24) {
             return 24;

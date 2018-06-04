@@ -84,7 +84,7 @@ public class WaveFileAudioInputStreamTest {
         AudioInputStreamFormat f1 = s.getFormat();
         assertNotNull(f1);
 
-        int len = s.getFormat(null, 0);
+        long len = s.getFormat(null, 0);
         assertEquals(24, len);
 
         len = s.getFormat(null, 555);
