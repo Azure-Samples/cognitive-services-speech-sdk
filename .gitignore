@@ -85,3 +85,4 @@ samples/CxxHelloWorld/CxxHelloWorld/Release
 samples/CsharpHelloWorld/CsharpHelloWorld/bin/
 samples/CsharpHelloWorld/CsharpHelloWorld/obj/
 samples/CsharpHelloWorld/packages/
+tests/end2end/csharp/TestResults

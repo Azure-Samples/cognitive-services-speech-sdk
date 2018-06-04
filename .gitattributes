@@ -34,6 +34,7 @@ Dockerfile text
 *.vcxproj.user text
 *.xaml text
 *.yml text
+*.runsettings text
 
 # Bash and "git apply" only like Unix line endings
 *.sh text eol=lf

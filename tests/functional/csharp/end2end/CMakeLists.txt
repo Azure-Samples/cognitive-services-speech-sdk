@@ -3,7 +3,7 @@ project(Microsoft.CognitiveServices.Speech.Tests.EndToEnd)
 if(WIN32)
 enable_language(CSharp)
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
-FILE(GLOB END2END_TEST_SOURCES "${SRC_DIR}/*.cs")
+FILE(GLOB END2END_TEST_SOURCES "${SRC_DIR}/*.cs" "${SRC_DIR}/**/*.cs")
 source_group("Source Files" FILES ${END2END_TEST_SOURCES})
 
 add_library(${PROJECT_NAME} SHARED ${END2END_TEST_SOURCES})

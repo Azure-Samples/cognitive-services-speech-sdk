@@ -1,0 +1,7 @@
+<RunSettings>
+    <TestRunParameters>
+        <Parameter name="UnifiedSpeechSubscriptionKey" value=" "/>
+        <Parameter name="Region" value="westus"/> 
+        <Parameter name="InputDir" value="..\..\..\tests\input\"/>  
+    </TestRunParameters>  
+</RunSettings>
