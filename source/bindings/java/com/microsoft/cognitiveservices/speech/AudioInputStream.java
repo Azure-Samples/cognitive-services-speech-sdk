@@ -51,6 +51,6 @@ public abstract class AudioInputStream extends com.microsoft.cognitiveservices.s
         pformat.setBitsPerSample(format.BitsPerSample);
         pformat.setFormatTag(format.FormatTag);
 
-        return 16;
+        return 24;
     }
 }
