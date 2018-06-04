@@ -61,12 +61,12 @@ public class WaveFileAudioInputStream extends AudioInputStream {
     @Override
     public AudioInputStreamFormat getFormat() {
         AudioInputStreamFormat  f = new AudioInputStreamFormat();
-        f.nBlockAlign = (short)(m_format.getChannels() * (m_format.getSampleSizeInBits() + 7) / 8);
-        f.nAvgBytesPerSec = f.nBlockAlign * (int)m_format.getSampleRate();
-        f.nChannels = (short) m_format.getChannels();
-        f.nSamplesPerSec = (int)m_format.getSampleRate();
-        f.wBitsPerSample = (short) m_format.getSampleSizeInBits();
-        f.wFormatTag = 1; // PCM signed (we selected this in the constructor!).
+        f.BlockAlign = (short)(m_format.getChannels() * (m_format.getSampleSizeInBits() + 7) / 8);
+        f.AvgBytesPerSec = f.BlockAlign * (int)m_format.getSampleRate();
+        f.Channels = (short) m_format.getChannels();
+        f.SamplesPerSec = (int)m_format.getSampleRate();
+        f.BitsPerSample = (short) m_format.getSampleSizeInBits();
+        f.FormatTag = 1; // PCM signed (we selected this in the constructor!).
         return f;
     }
 

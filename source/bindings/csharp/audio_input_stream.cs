@@ -197,21 +197,19 @@ namespace Microsoft.CognitiveServices.Speech
 
         override public int GetFormat(Internal.AudioInputStreamFormat pformat, int cbFormat)
         {
-            if (pformat == null || cbFormat < 44)
-                return 44;
+            if (pformat == null || cbFormat < 24)
+                return 24;
 
-            var format = _target.GetFormat();
+            var format = _target.GetFormat();            
+            
+            pformat.AvgBytesPerSec = format.AvgBytesPerSec;
+            pformat.BlockAlign = format.BlockAlign;
+            pformat.Channels = format.Channels;
+            pformat.SamplesPerSec = format.SamplesPerSec;
+            pformat.BitsPerSample = format.BitsPerSample;
+            pformat.FormatTag = format.FormatTag;
 
-            // cbSize is the block size after the field cbSize, so it should be 0.
-            pformat.cbSize = 0;
-            pformat.nAvgBytesPerSec = format.AvgBytesPerSec;
-            pformat.nBlockAlign = format.BlockAlign;
-            pformat.nChannels = format.Channels;
-            pformat.nSamplesPerSec = format.SamplesPerSec;
-            pformat.wBitsPerSample = format.BitsPerSample;
-            pformat.wFormatTag = format.FormatTag;
-
-            return 44;
+            return 24;
         }
     };
 }

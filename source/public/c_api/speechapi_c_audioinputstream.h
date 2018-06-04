@@ -12,42 +12,37 @@
 /// A structure that describes the audio format.
 /// Currently, only PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.
 /// </summary>
-typedef struct tAudioInputStreamFormatC
+typedef struct _AudioInputStreamFormatC
 {
     /// <summary>
     /// The format of the audio, valid values: 1 (PCM)
     /// </summary>
-    int32_t         wFormatTag;
+    int32_t         FormatTag;
 
     /// <summary>
     /// The number of channels, valid values: 1 (Mono).
     /// </summary>
-    int32_t         nChannels;
+    int32_t         Channels;
 
     /// <summary>
     /// The sample rate, valid values: 16000.
     /// </summary>
-    int32_t         nSamplesPerSec;
+    int32_t         SamplesPerSec;
 
     /// <summary>
     /// Average bytes per second, usually calculated as nSamplesPerSec * nChannels * ceil(wBitsPerSample, 8).
     /// </summary>
-    int32_t         nAvgBytesPerSec;
+    int32_t         AvgBytesPerSec;
 
     /// <summary>
     /// The size of a single frame, valid values: nChannels * ceil(wBitsPerSample, 8).
     /// </summary>
-    int32_t         nBlockAlign;
+    int32_t         BlockAlign;
 
     /// <summary>
     /// The bits per sample, valid values: 16
     /// </summary>
-    int32_t         wBitsPerSample;
-
-    /// <summary>
-    /// The size of this structure, valid values: sizeof(AudioInputStreamFormat).
-    /// </summary>
-    int32_t         cbSize;
+    int32_t         BitsPerSample;
 } AudioInputStreamFormat, *PAudioInputStreamFormat;
 
 // forward declaration
@@ -57,10 +52,10 @@ struct _AudioInputStream;
 /// Signature of a function being called to get the format of the audio stream.
 /// </summary>
 /// <param name="context">The pointer to the struct _AudioInputStream for which the parameter is queried.</param>
-/// <param name="pformat">The pointer to the struct tAudioInputStreamFormatC buffer, or null if querying the size of the structure.</param>
+/// <param name="pformat">The pointer to the AudioInputStreamFormat buffer, or null if querying the size of the structure.</param>
 /// <param name="cbFormat">The size of the AudioInputStreamFormat buffer being passed, or 0 if querying the size of the structure.</param>
 /// <returns>The size of the AudioInputStreamFormat buffer required to hold the format information.</returns>
-typedef int (*PAUDIOINPUTSTREAM_GETFORMAT_CALLBACK_FUNC)(struct _AudioInputStream *context, struct tAudioInputStreamFormatC* pformat, int cbFormat);
+typedef int (*PAUDIOINPUTSTREAM_GETFORMAT_CALLBACK_FUNC)(struct _AudioInputStream *context, struct _AudioInputStreamFormatC* pformat, int cbFormat);
 
 /// <summary>
 /// Signature of a function being called to get the data from the audio stream.

@@ -206,7 +206,7 @@ public:
     /// <param name="voice">Optional. Specifies the name of voice tag if a synthesized audio output is desired.</param>
     /// <returns>A shared pointer to TranslationRecognizer</returns>
     virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") = 0;
-    
+
     /// <summary>
     /// Sets an authorization token that will be used for all recognizers created by the factory when connecting to the service.
     /// The caller needs to ensure that the token is valid and sets a new token if the current one is expired.
@@ -278,8 +278,8 @@ private:
     {
     public:
         InternalCognitiveServicesSpeechFactory(SPXFACTORYHANDLE hfactory) :
-            ICognitiveServicesSpeechFactory(m_parameters), 
-            m_parameters(hfactory), 
+            ICognitiveServicesSpeechFactory(m_parameters),
+            m_parameters(hfactory),
             m_hfactory(hfactory)
         {
         }
@@ -352,13 +352,12 @@ private:
                 AudioInputStreamFormat pFormat2;
                 retValue = ((SpeechApi_AudioInputStreamAdapter*)context)->m_audioInputStream->GetFormat(&pFormat2, cbFormat);
 
-                pformat->cbSize = pFormat2.cbSize;
-                pformat->nAvgBytesPerSec = pFormat2.nAvgBytesPerSec;
-                pformat->nBlockAlign = pFormat2.nBlockAlign;
-                pformat->nChannels = pFormat2.nChannels;
-                pformat->nSamplesPerSec = pFormat2.nSamplesPerSec;
-                pformat->wBitsPerSample = pFormat2.wBitsPerSample;
-                pformat->wFormatTag = pFormat2.wFormatTag;
+                pformat->AvgBytesPerSec = pFormat2.AvgBytesPerSec;
+                pformat->BlockAlign = pFormat2.BlockAlign;
+                pformat->Channels = pFormat2.Channels;
+                pformat->SamplesPerSec = pFormat2.SamplesPerSec;
+                pformat->BitsPerSample = pFormat2.BitsPerSample;
+                pformat->FormatTag = pFormat2.FormatTag;
             }
             else
             {

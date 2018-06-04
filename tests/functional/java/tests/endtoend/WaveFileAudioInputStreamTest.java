@@ -85,10 +85,10 @@ public class WaveFileAudioInputStreamTest {
         assertNotNull(f1);
 
         int len = s.getFormat(null, 0);
-        assertEquals(44, len);
+        assertEquals(24, len);
 
         len = s.getFormat(null, 555);
-        assertEquals(44, len);
+        assertEquals(24, len);
     }
 
     @Test
@@ -98,12 +98,12 @@ public class WaveFileAudioInputStreamTest {
         
         AudioInputStreamFormat f1 = s.getFormat();
         assertNotNull(f1);
-        assertEquals(1, f1.nChannels);
-        assertEquals(16,  f1.wBitsPerSample);
-        assertEquals(2, f1.nBlockAlign);
-        assertEquals(16000, f1.nSamplesPerSec);
-        assertEquals(32000, f1.nAvgBytesPerSec);
-        assertEquals(1, f1.wFormatTag); // pcm
+        assertEquals(1, f1.Channels);
+        assertEquals(16,  f1.BitsPerSample);
+        assertEquals(2, f1.BlockAlign);
+        assertEquals(16000, f1.SamplesPerSec);
+        assertEquals(32000, f1.AvgBytesPerSec);
+        assertEquals(1, f1.FormatTag); // pcm
     }
 
 

@@ -8,30 +8,30 @@ public final class AudioInputStreamFormat {
     /**
      * The format of the audio, valid values: 1 (PCM)
      */
-    public short wFormatTag;
+    public int FormatTag;
 
     /**
      * The number of channels, valid values: 1 (Mono).
      */
-    public short nChannels;
+    public int Channels;
 
     /**
      * The sample rate, valid values: 16000.
      */
-    public int   nSamplesPerSec;
+    public int   SamplesPerSec;
 
     /**
      * Average bytes per second, usually calculated as nSamplesPerSec * nChannels * ceil(wBitsPerSample, 8).
      */
-    public int   nAvgBytesPerSec;
+    public int   AvgBytesPerSec;
 
     /**
      * The size of a single frame, valid values: nChannels * ceil(wBitsPerSample, 8).
      */
-    public short nBlockAlign;
+    public int BlockAlign;
 
     /**
      * The bits per sample, valid values: 16
      */
-    public short wBitsPerSample;
+    public int BitsPerSample;
 }

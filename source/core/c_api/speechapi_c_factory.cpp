@@ -74,20 +74,19 @@ public:
 
     virtual int GetFormat(Microsoft::CognitiveServices::Speech::AudioInputStreamFormat* pformat, int cbFormat) override
     {
-        struct tAudioInputStreamFormatC format;
+        struct _AudioInputStreamFormatC format;
 
         int retValue = 0;
 
         if (pformat)
         {
             retValue = m_pstream->GetFormat(m_pstream, &format, cbFormat);
-            pformat->cbSize = format.cbSize;
-            pformat->nAvgBytesPerSec = format.nAvgBytesPerSec;
-            pformat->nBlockAlign = format.nBlockAlign;
-            pformat->nChannels = format.nChannels;
-            pformat->nSamplesPerSec = format.nSamplesPerSec;
-            pformat->wBitsPerSample = format.wBitsPerSample;
-            pformat->wFormatTag = format.wFormatTag;
+            pformat->AvgBytesPerSec = format.AvgBytesPerSec;
+            pformat->BlockAlign = format.BlockAlign;
+            pformat->Channels = format.Channels;
+            pformat->SamplesPerSec = format.SamplesPerSec;
+            pformat->BitsPerSample = format.BitsPerSample;
+            pformat->FormatTag = format.FormatTag;
         }
         else
         {

@@ -18,42 +18,38 @@ namespace Speech {
 /// A structure that describes the audio format.
 /// Currently, only PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.
 /// </summary>
-typedef struct tAudioInputStreamFormat
+typedef struct _AudioInputStreamFormatCPP
 {
     /// <summary>
     /// The format of the audio, valid values: 1 (PCM)
     /// </summary>
-    int32_t         wFormatTag;
+    int32_t         FormatTag;
 
     /// <summary>
     /// The number of channels, valid values: 1 (Mono).
     /// </summary>
-    int32_t         nChannels;
+    int32_t         Channels;
 
     /// <summary>
     /// The sample rate, valid values: 16000.
     /// </summary>
-    int32_t         nSamplesPerSec;
+    int32_t         SamplesPerSec;
 
     /// <summary>
     /// Average bytes per second, usually calculated as nSamplesPerSec * nChannels * ceil(wBitsPerSample, 8).
     /// </summary>
-    int32_t         nAvgBytesPerSec;
+    int32_t         AvgBytesPerSec;
 
     /// <summary>
     /// The size of a single frame, valid values: nChannels * ceil(wBitsPerSample, 8).
     /// </summary>
-    int32_t         nBlockAlign;
+    int32_t         BlockAlign;
 
     /// <summary>
     /// The bits per sample, valid values: 16
     /// </summary>
-    int32_t         wBitsPerSample;
+    int32_t         BitsPerSample;
 
-    /// <summary>
-    /// The size of this structure, valid values: sizeof(AudioInputStreamFormat).
-    /// </summary>
-    int32_t         cbSize;
 } AudioInputStreamFormat, *PAudioInputStreamFormat;
 
 

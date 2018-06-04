@@ -8,7 +8,7 @@ package com.microsoft.cognitiveservices.speech;
 /**
   * Defines audio input stream.
   */
-public class AudioInputStream extends com.microsoft.cognitiveservices.speech.internal.AudioInputStream
+public abstract class AudioInputStream extends com.microsoft.cognitiveservices.speech.internal.AudioInputStream
 {
     /**
      * Reads data from audio input stream into the data buffer. The maximal number of bytes to be read is determined by the size of dataBuffer.
@@ -16,25 +16,19 @@ public class AudioInputStream extends com.microsoft.cognitiveservices.speech.int
      * @return the number of bytes have been read.
      */
     @Override
-    public int read(byte[] dataBuffer) {
-        throw new UnsupportedOperationException();
-    }
+    public abstract int read(byte[] dataBuffer);
 
     /**
      * Returns the format of this audio stream.
      * @return The format of the audio stream.
      */
-    public AudioInputStreamFormat getFormat() {
-        throw new UnsupportedOperationException();
-    }
+    public abstract AudioInputStreamFormat getFormat();
  
     /**
       * Closes the audio input stream.
       */
     @Override
-    public void close() {
-        throw new UnsupportedOperationException();
-    }
+    public abstract void close();
 
     /**
      * The Function being called to get the data from the audio stream.
@@ -44,20 +38,19 @@ public class AudioInputStream extends com.microsoft.cognitiveservices.speech.int
      */
     @Override
     public int getFormat(com.microsoft.cognitiveservices.speech.internal.AudioInputStreamFormat pformat, int cbFormat) {
-        // Note: 44 is the size of a standard WAVEFORMEX structure.
-        if(pformat == null || cbFormat < 44) {
-            return 44;
+     // Note: 24 Bytes is the size of AudioInputStreamFormat
+        if(pformat == null || cbFormat < 24) {
+            return 24;
         }
         
-        AudioInputStreamFormat format = getFormat();
-        pformat.setCbSize(44);
-        pformat.setNAvgBytesPerSec(format.nAvgBytesPerSec);
-        pformat.setNBlockAlign(format.nBlockAlign);
-        pformat.setNChannels(format.nChannels);
-        pformat.setNSamplesPerSec(format.nSamplesPerSec);
-        pformat.setWBitsPerSample(format.wBitsPerSample);
-        pformat.setWFormatTag(format.wFormatTag);
+        AudioInputStreamFormat format = getFormat();        
+        pformat.setAvgBytesPerSec(format.AvgBytesPerSec);
+        pformat.setBlockAlign(format.BlockAlign);
+        pformat.setChannels(format.Channels);
+        pformat.setSamplesPerSec(format.SamplesPerSec);
+        pformat.setBitsPerSample(format.BitsPerSample);
+        pformat.setFormatTag(format.FormatTag);
 
-        return 44;
+        return 16;
     }
 }
