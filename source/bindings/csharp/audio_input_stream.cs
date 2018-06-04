@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 
 namespace Microsoft.CognitiveServices.Speech
@@ -64,20 +65,18 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// The format of this audio stream.
+        /// Gets the format of this audio stream.
         /// </summary>
         /// <returns>Returns the format of this audio stream.</returns>
         abstract public AudioInputStreamFormat GetFormat();
 
         /// <summary>
-        /// Provides the binary data of the stream.
+        /// Reads binary data from the stream.
         /// </summary>
         /// <param name="dataBuffer">The buffer to fill</param>
-        /// <param name="size">The number of bytes to fill, always starting at offset 0.</param>
         /// <returns>The number of bytes filled, or 0 in case the stream hits its end and there is no more data available.
-        /// Please note that it is expected that the call to Read() blocks until data is available in case where there is
-        /// no immediate data available at the time of the call.</returns>
-        abstract public int Read(byte[] dataBuffer, int size);
+        /// If there is no data immediate available, Read() blocks untils the next data becomes available.</returns>
+        abstract public int Read(byte[] dataBuffer);
 
         /// <summary>
         /// Closes the audio input stream.
@@ -118,7 +117,7 @@ namespace Microsoft.CognitiveServices.Speech
         private AudioInputStreamFormat _format;
 
         /// <summary>
-        /// Creates and initializes an instance of the AudioStreamReader.
+        /// Creates and initializes an instance of BinaryAudioStreamReader.
         /// </summary>
         /// <param name="format">The format of the underlying stream</param>
         /// <param name="reader">The underlying stream to read the audio data from. Note: The stream contains the bare sample data, not the container (like wave header data, etc).</param>
@@ -129,7 +128,7 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Creates and initializes an instance of the AudioStreamReader.
+        /// Creates and initializes an instance of BinaryAudioStreamReader.
         /// </summary>
         /// <param name="format">The format of the underlying stream</param>
         /// <param name="stream">The underlying stream to read the audio data from. Note: The stream contains the bare sample data, not the container (like wave header data, etc).</param>
@@ -139,7 +138,7 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Returns the format of the stream.
+        /// Gets the format of the stream.
         /// </summary>
         /// <returns>Returns the format of the stream</returns>
         public override AudioInputStreamFormat GetFormat()
@@ -148,16 +147,14 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Provides the binary data of the stream.
+        /// Reads binary data from the stream.
         /// </summary>
         /// <param name="dataBuffer">The buffer to fill</param>
-        /// <param name="size">The number of bytes to fill, always starting at offset 0.</param>
         /// <returns>The number of bytes filled, or 0 in case the stream hits its end and there is no more data available.
-        /// Please note that it is expected that the call to Read() blocks until data is available in case where there is
-        /// no immediate data available at the time of the call.</returns>
-        public override int Read(byte[] dataBuffer, int size)
+        /// If there is no data immediate available, Read() blocks untils the next data becomes available.</returns>
+        public override int Read(byte[] dataBuffer)
         {
-            return _reader.Read(dataBuffer, 0, size);
+            return _reader.Read(dataBuffer, 0, dataBuffer.Length);
         }
 
         /// <summary>
@@ -188,12 +185,8 @@ namespace Microsoft.CognitiveServices.Speech
 
         override public int Read(byte[] dataBuffer, int size)
         {
-            if (size < 0)
-            {
-                throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, "Invalid size: {0}. A negative value is not allowed.", size));
-            }
-
-            int count = _target.Read(dataBuffer, size);
+            Trace.Assert(dataBuffer.Length == size, "The length of dataBuffer does not match the size.");
+            int count = _target.Read(dataBuffer);
             return count;
         }
 
