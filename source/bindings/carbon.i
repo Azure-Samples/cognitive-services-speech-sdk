@@ -31,7 +31,6 @@
 }
 
 %shared_ptr(Microsoft::CognitiveServices::Speech::Recognizer)
-%shared_ptr(Microsoft::CognitiveServices::Speech::AudioInputStream)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::RecognitionResult, Microsoft::CognitiveServices::Speech::RecognitionEventArgs>)
 %shared_ptr(Microsoft::CognitiveServices::Speech::BaseAsyncRecognizer)
 %shared_ptr(Microsoft::CognitiveServices::Speech::RecognitionResult)

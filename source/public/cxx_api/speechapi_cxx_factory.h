@@ -337,20 +337,22 @@ private:
 
         struct SpeechApi_AudioInputStreamAdapter : public ::SpeechApi_AudioInputStream
         {
-            SpeechApi_AudioInputStreamAdapter(const std::shared_ptr<AudioInputStream>& ptr) : ::SpeechApi_AudioInputStream { Wrap_GetFormat, Wrap_Read, Wrap_Close }
+            SpeechApi_AudioInputStreamAdapter(const std::shared_ptr<AudioInputStream>& ptr)
+                : ::SpeechApi_AudioInputStream { Wrap_GetFormat, Wrap_Read, Wrap_Close },
+                  m_audioInputStream(ptr.get()),
+                  m_audioInputStreamPtr(ptr)
             {
-                m_audioInputStream = ptr;
-                m_audioInputStreamRaw = ptr.get();
             }
 
-            SpeechApi_AudioInputStreamAdapter(AudioInputStream* ptr) : ::SpeechApi_AudioInputStream{ Wrap_GetFormat, Wrap_Read, Wrap_Close }
+            SpeechApi_AudioInputStreamAdapter(AudioInputStream* ptr)
+                : ::SpeechApi_AudioInputStream{ Wrap_GetFormat, Wrap_Read, Wrap_Close },
+                  m_audioInputStream(ptr)
             {
-                m_audioInputStream = nullptr;
-                m_audioInputStreamRaw = ptr;
             }
 
-            std::shared_ptr<AudioInputStream> m_audioInputStream;
-            AudioInputStream* m_audioInputStreamRaw;
+            AudioInputStream* m_audioInputStream;
+            private:
+                std::shared_ptr<AudioInputStream> m_audioInputStreamPtr;
         };
 
         static int Wrap_GetFormat(::SpeechApi_AudioInputStream* context, ::AudioInputStreamFormat* pformat, int cbFormat)
