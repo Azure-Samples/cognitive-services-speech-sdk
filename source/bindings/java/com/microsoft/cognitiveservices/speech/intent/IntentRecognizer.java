@@ -12,6 +12,7 @@ import com.microsoft.cognitiveservices.speech.RecognitionErrorEventArgs;
 import com.microsoft.cognitiveservices.speech.RecognizerParameterNames;
 import com.microsoft.cognitiveservices.speech.internal.IntentTrigger;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
+import com.microsoft.cognitiveservices.speech.AudioInputStream;
 
 /**
   * Perform intent recognition on the speech input. It returns both recognized text and recognized intent.
@@ -36,9 +37,10 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     /**
       * Initializes an instance of the IntentRecognizer.
       * @param recoImpl The internal recognizer implementation.
+      * @param ais An optional audio input stream associated with the recognizer
       */
-    public IntentRecognizer(com.microsoft.cognitiveservices.speech.internal.IntentRecognizer recoImpl)
-    {
+    public IntentRecognizer(com.microsoft.cognitiveservices.speech.internal.IntentRecognizer recoImpl, AudioInputStream ais) {
+        super(ais);
         this.recoImpl = recoImpl;
 
         intermediateResultHandler = new IntentHandlerImpl(this, /*isFinalResultHandler:*/ false);

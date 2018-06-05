@@ -30,7 +30,14 @@ public class Recognizer implements Closeable
       */
     final public EventHandlerImpl<RecognitionEventArgs> RecognitionEvent = new EventHandlerImpl<RecognitionEventArgs>();
 
-    protected Recognizer() {
+    private AudioInputStream audioInputStreamHolder;
+
+    /**
+     * Creates and initializes an instance of a Recognizer
+      * @param ais An optional audio input stream associated with the recognizer
+     */
+    protected Recognizer(AudioInputStream ais) {
+        audioInputStreamHolder = ais;
         sessionStartedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStartedEvent);
         sessionStoppedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStoppedEvent);
         speechStartDetectedHandler = new RecognitionEventHandlerImpl(this, RecognitionEventType.SpeechStartDetectedEvent);

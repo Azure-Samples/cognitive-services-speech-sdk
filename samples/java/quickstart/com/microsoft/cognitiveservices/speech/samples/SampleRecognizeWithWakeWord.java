@@ -1,7 +1,7 @@
 package com.microsoft.cognitiveservices.speech.samples;
 //
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//Copyright (c) Microsoft. All rights reserved.
+//Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
 import java.util.ArrayList;
@@ -23,22 +23,22 @@ public class SampleRecognizeWithWakeWord implements Runnable, Stoppable {
 
     @Override
     public void stop() {
-        if (continuousListeningStarted) {
-            if (reco != null) {
-                Future<?> task = reco.stopKeywordRecognitionAsync();
-                SampleSettings.setOnTaskCompletedListener(task, result -> {
-                    // reco.close();
-
-                    System.out.println("Continuous recognition stopped.");
-                    System.out.println(buttonText);
-
-                    continuousListeningStarted = false;
-                });
-            } else {
-                continuousListeningStarted = false;
-            }
-
+        if (!continuousListeningStarted) {
             return;
+        }
+
+        if (reco != null) {
+            Future<?> task = reco.stopKeywordRecognitionAsync();
+            SampleSettings.setOnTaskCompletedListener(task, result -> {
+                reco.close();
+
+                System.out.println("Continuous recognition stopped.");
+                System.out.println(buttonText);
+
+                continuousListeningStarted = false;
+            });
+        } else {
+            continuousListeningStarted = false;
         }
     }
 
@@ -52,13 +52,13 @@ public class SampleRecognizeWithWakeWord implements Runnable, Stoppable {
         }
 
         // create factory
-        final SpeechFactory factory = SampleSettings.getFactory();
+        SpeechFactory factory = SampleSettings.getFactory();
 
         content.clear();
         content.add("");
         try {
             // Note: to use the microphone, replace the parameter with "new MicrophoneAudioInputStream()"
-            reco = factory.createSpeechRecognizer(SampleSettings.WaveFile);
+            reco = factory.createSpeechRecognizerWithFileInput(SampleSettings.WaveFile);
 
             reco.SessionEvent.addEventListener((o, sessionEventArgs) -> {
 

@@ -1,5 +1,8 @@
 package tests.unit;
-
+//
+//Copyright (c) Microsoft. All rights reserved.
+//Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,6 +19,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.Ignore;
 
 
 import com.microsoft.cognitiveservices.speech.RecognitionEventType;
@@ -31,7 +35,7 @@ import tests.Settings;
 
 public class SpeechRecognizerTests {
     private final Integer FIRST_EVENT_ID = 1;
-    private AtomicInteger _eventId = new AtomicInteger(FIRST_EVENT_ID);
+    private AtomicInteger eventIdentifier = new AtomicInteger(FIRST_EVENT_ID);
     
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
@@ -39,26 +43,15 @@ public class SpeechRecognizerTests {
         Settings.LoadSettings();
     }
 
-    @AfterClass
-    static public void tearDownAfterClass() throws Exception {
-    }
-
-    @Before
-    public void setUp() throws Exception {
-    }
-
-    @After
-    public void tearDown() throws Exception {
-    }
-
-
     // -----------------------------------------------------------------------
     // --- 
     // -----------------------------------------------------------------------
 
+    @Ignore
     @Test
     public void testDispose() {
         // TODO: make dispose method public
+        fail("dispose not yet public");
     }
 
     // -----------------------------------------------------------------------
@@ -70,7 +63,7 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        SpeechRecognizer r = s.createSpeechRecognizer(Settings.WaveFile);
+        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -87,7 +80,7 @@ public class SpeechRecognizerTests {
         WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
         assertNotNull(ais);
         
-        SpeechRecognizer r = s.createSpeechRecognizer(ais);
+        SpeechRecognizer r = s.createSpeechRecognizerWithStream(ais);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -112,7 +105,7 @@ public class SpeechRecognizerTests {
         WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
         assertNotNull(ais);
         
-        SpeechRecognizer r = s.createSpeechRecognizer(ais);
+        SpeechRecognizer r = s.createSpeechRecognizerWithStream(ais);
         assertNotNull(r);
 
         assertNotNull(r.getDeploymentId());
@@ -129,7 +122,7 @@ public class SpeechRecognizerTests {
         WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
         assertNotNull(ais);
         
-        SpeechRecognizer r = s.createSpeechRecognizer(ais);
+        SpeechRecognizer r = s.createSpeechRecognizerWithStream(ais);
         assertNotNull(r);
 
         assertNotNull(r.getDeploymentId());
@@ -155,7 +148,7 @@ public class SpeechRecognizerTests {
         WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
         assertNotNull(ais);
         
-        SpeechRecognizer r = s.createSpeechRecognizer(ais);
+        SpeechRecognizer r = s.createSpeechRecognizerWithStream(ais);
         assertNotNull(r);
 
         assertNotNull(r.getLanguage());
@@ -173,7 +166,7 @@ public class SpeechRecognizerTests {
         assertNotNull(ais);
 
         String language = "de-DE";
-        SpeechRecognizer r = s.createSpeechRecognizer(ais, language);
+        SpeechRecognizer r = s.createSpeechRecognizerWithStream(ais, language);
         assertNotNull(r);
 
         assertNotNull(r.getLanguage());
@@ -192,7 +185,7 @@ public class SpeechRecognizerTests {
         assertNotNull(ais);
 
         String language1 = "en-US";
-        SpeechRecognizer r = s.createSpeechRecognizer(ais, language1);
+        SpeechRecognizer r = s.createSpeechRecognizerWithStream(ais, language1);
         assertNotNull(r);
 
         assertNotNull(r.getLanguage());
@@ -217,7 +210,7 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        SpeechRecognizer r = s.createSpeechRecognizer(Settings.WaveFile);
+        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
         assertNotNull(r);
 
         assertNotNull(r.getParameters());
@@ -237,7 +230,7 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        SpeechRecognizer r = s.createSpeechRecognizer(Settings.WaveFile);
+        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -269,7 +262,7 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        SpeechRecognizer r = s.createSpeechRecognizer(Settings.WaveFile);
+        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -277,28 +270,28 @@ public class SpeechRecognizerTests {
         final Map<String, Integer> eventsMap = new HashMap<String, Integer>();
         
         r.FinalResultReceived.addEventListener((o, e) -> {
-            eventsMap.put("FinalResultReceived", _eventId.getAndIncrement());
+            eventsMap.put("FinalResultReceived", eventIdentifier.getAndIncrement());
         });
 
         r.IntermediateResultReceived.addEventListener((o, e) -> {
-            int now = _eventId.getAndIncrement();
+            int now = eventIdentifier.getAndIncrement();
             eventsMap.put("IntermediateResultReceived-" + System.currentTimeMillis(), now);
             eventsMap.put("IntermediateResultReceived" , now);
         });
         
         r.RecognitionErrorRaised.addEventListener((o, e) -> {
-            eventsMap.put("RecognitionErrorRaised", _eventId.getAndIncrement());
+            eventsMap.put("RecognitionErrorRaised", eventIdentifier.getAndIncrement());
         });
 
         // TODO eventType should be renamed and be a function getEventType()
         r.RecognitionEvent.addEventListener((o, e) -> {
-            int now = _eventId.getAndIncrement();
+            int now = eventIdentifier.getAndIncrement();
             eventsMap.put(e.eventType.name() + "-" + System.currentTimeMillis(), now);
             eventsMap.put(e.eventType.name(), now);
         });
 
         r.SessionEvent.addEventListener((o, e) -> {
-            int now = _eventId.getAndIncrement();
+            int now = eventIdentifier.getAndIncrement();
             eventsMap.put(e.getEventType().name() + "-" + System.currentTimeMillis(), now);
             eventsMap.put(e.getEventType().name(), now);
         });
@@ -310,7 +303,7 @@ public class SpeechRecognizerTests {
         assertEquals("What's the weather like?", res.getText());
 
         // session events are first and last event
-        final Integer LAST_RECORDED_EVENT_ID = _eventId.get();
+        final Integer LAST_RECORDED_EVENT_ID = eventIdentifier.get();
         assertTrue(LAST_RECORDED_EVENT_ID > FIRST_EVENT_ID);
         assertEquals(FIRST_EVENT_ID, eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()));
         assertEquals(LAST_RECORDED_EVENT_ID, eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()));
@@ -343,7 +336,7 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        SpeechRecognizer r = s.createSpeechRecognizer(Settings.WaveFile);
+        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -370,7 +363,7 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        SpeechRecognizer r = s.createSpeechRecognizer(Settings.WaveFile);
+        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -414,7 +407,7 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        SpeechRecognizer r = s.createSpeechRecognizer(Settings.WaveFile);
+        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -469,27 +462,13 @@ public class SpeechRecognizerTests {
     // -----------------------------------------------------------------------
     // --- 
     // -----------------------------------------------------------------------
-/* TODO cannot test this currently.
-    @Test
-    public void testStartKeywordRecognitionAsync() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testStopKeywordRecognitionAsync() {
-        fail("Not yet implemented");
-    }
-*/
-    // -----------------------------------------------------------------------
-    // --- 
-    // -----------------------------------------------------------------------
 
     @Test
     public void testGetRecoImpl() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        SpeechRecognizer r = s.createSpeechRecognizer(Settings.WaveFile);
+        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -502,9 +481,11 @@ public class SpeechRecognizerTests {
     // --- 
     // -----------------------------------------------------------------------
 
+    @Ignore
     @Test
     public void testRecognizer() {
-        // TODO: constructor is protected, fail("Not yet implemented");
+        // TODO: constructor is protected,
+        fail("Not yet implemented");
     }
 
     @Test
@@ -512,7 +493,7 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        SpeechRecognizer r = s.createSpeechRecognizer(Settings.WaveFile);
+        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
         assertNotNull(r);
         assertTrue(r instanceof Recognizer);
                 

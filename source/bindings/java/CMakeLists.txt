@@ -244,4 +244,3 @@ create_javadoc(copy-over-api-files
   AUTHOR TRUE
   USE TRUE
   VERSION TRUE)
-

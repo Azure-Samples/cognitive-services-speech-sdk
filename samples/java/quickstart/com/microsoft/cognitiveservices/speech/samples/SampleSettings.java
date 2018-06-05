@@ -1,7 +1,7 @@
 package com.microsoft.cognitiveservices.speech.samples;
 //
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//Copyright (c) Microsoft. All rights reserved.
+//Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
 import java.util.concurrent.Future;
@@ -10,7 +10,7 @@ import java.util.concurrent.FutureTask;
 import com.microsoft.cognitiveservices.speech.SpeechFactory;
 
 public class SampleSettings {
-    private static Boolean s_isInitialized = false;
+    private static Boolean isInitialized = false;
 
     // Subscription
     public static String SpeechSubscriptionKey = "<<YOUR_SUBSCRIPTION_KEY>>";
@@ -66,14 +66,13 @@ public class SampleSettings {
     }
 
     static {
-        // TODO name of library will depend on version
         System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
        
         LoadSettings();
     };
     
     public static void LoadSettings() {
-        if(s_isInitialized)
+        if(isInitialized)
             return;
         
         SpeechAuthorizationToken = System.getProperty("SpeechAuthorizationToken", SpeechAuthorizationToken);
@@ -89,6 +88,6 @@ public class SampleSettings {
         Keyword = System.getProperty("Keyword", Keyword);
         KeywordModel = System.getProperty("KeywordModel", KeywordModel);
 
-        s_isInitialized = true;
+        isInitialized = true;
     }
 }

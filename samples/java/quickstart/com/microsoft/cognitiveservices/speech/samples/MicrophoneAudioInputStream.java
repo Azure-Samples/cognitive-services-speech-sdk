@@ -14,24 +14,26 @@ import com.microsoft.cognitiveservices.speech.AudioInputStream;
 import com.microsoft.cognitiveservices.speech.AudioInputStreamFormat;
 
 public class MicrophoneAudioInputStream extends AudioInputStream {
-    AudioFormat m_format = new AudioFormat(16000, 16, 1, /*isSigned*/true, /*isBigEndian*/false);
-    TargetDataLine m_line;
+    private AudioFormat audioFormat = new AudioFormat(16000, 16, 1, /*isSigned*/true, /*isBigEndian*/false);
+    private TargetDataLine audioLine;
     
     public MicrophoneAudioInputStream() {
-        // Obtain and open the m_line.
+        // Obtain and open the audioLine.
         try {
-            DataLine.Info info = new DataLine.Info(TargetDataLine.class, m_format);
+            DataLine.Info info = new DataLine.Info(TargetDataLine.class, audioFormat);
+
             if (!AudioSystem.isLineSupported(info)) {
                 // Handle the error ...
-                throw new RuntimeException("m_line is not supported");
+                throw new RuntimeException("audio format is not supported");
             }
         
-            m_line = (TargetDataLine) AudioSystem.getLine(info);
-            m_line.open(m_format);
-            m_line.start();
+            audioLine = (TargetDataLine) AudioSystem.getLine(info);
+            audioLine.open(audioFormat);
+            audioLine.start();
         } catch (LineUnavailableException ex) {
             // Handle the error ...
             SampleSettings.displayException(ex);
+            throw new UnsupportedOperationException("Audio format not supported: " + ex.getMessage());
         }
     }
 
@@ -45,23 +47,23 @@ public class MicrophoneAudioInputStream extends AudioInputStream {
      */
     @Override
     public int read(byte[] dataBuffer) {
-        return m_line.read(dataBuffer, 0, dataBuffer.length);
+        return audioLine.read(dataBuffer, 0, dataBuffer.length);
     }
 
     /**
-     * Returns the m_format of this audio stream.
+     * Returns the audioFormat of this audio stream.
      * 
-     * @return The m_format of the audio stream.
+     * @return The audioFormat of the audio stream.
      */
     @Override
     public AudioInputStreamFormat getFormat() {
         AudioInputStreamFormat  f = new AudioInputStreamFormat();
-        f.nBlockAlign = (short)(m_format.getChannels() * (m_format.getSampleSizeInBits() + 7) / 8);
-        f.nAvgBytesPerSec = f.nBlockAlign * (int)m_format.getSampleRate();
-        f.nChannels = (short) m_format.getChannels();
-        f.nSamplesPerSec = (int)m_format.getSampleRate();
-        f.wBitsPerSample = (short) m_format.getSampleSizeInBits();
-        f.wFormatTag = 1; // PCM signed (we selected this in the constructor!).
+        f.BlockAlign = (short)(audioFormat.getChannels() * (audioFormat.getSampleSizeInBits() + 7) / 8);
+        f.AvgBytesPerSec = f.BlockAlign * (int)audioFormat.getSampleRate();
+        f.Channels = (short) audioFormat.getChannels();
+        f.SamplesPerSec = (int)audioFormat.getSampleRate();
+        f.BitsPerSample = (short) audioFormat.getSampleSizeInBits();
+        f.FormatTag = 1; // PCM signed (we selected this in the constructor!).
         return f;
     }
 
@@ -70,7 +72,7 @@ public class MicrophoneAudioInputStream extends AudioInputStream {
      */
     @Override
     public void close() {
-        m_line.stop();
-        m_line.close();
+        audioLine.stop();
+        audioLine.close();
     }
 }

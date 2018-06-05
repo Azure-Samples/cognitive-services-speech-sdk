@@ -32,8 +32,10 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     /**
       * SpeechRecognizer constructor.
       * @param recoImpl The recognizer implementation
+      * @param ais An optional audio input stream associated with the recognizer
       */
-    public SpeechRecognizer(com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer recoImpl) {
+    public SpeechRecognizer(com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer recoImpl, AudioInputStream ais) {
+        super(ais);
         this.recoImpl = recoImpl;
 
         intermediateResultHandler = new ResultHandlerImpl(this, /*isFinalResultHandler:*/ false);

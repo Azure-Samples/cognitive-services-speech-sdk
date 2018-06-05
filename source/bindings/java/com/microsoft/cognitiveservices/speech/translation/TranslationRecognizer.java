@@ -12,6 +12,7 @@ import com.microsoft.cognitiveservices.speech.ParameterCollection;
 import com.microsoft.cognitiveservices.speech.RecognitionErrorEventArgs;
 import com.microsoft.cognitiveservices.speech.RecognizerParameterNames;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
+import com.microsoft.cognitiveservices.speech.AudioInputStream;
 
 //
 //Copyright (c) Microsoft. All rights reserved.
@@ -43,7 +44,13 @@ import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
        */
      public final EventHandlerImpl<TranslationSynthesisResultEventArgs> SynthesisResultReceived = new EventHandlerImpl<TranslationSynthesisResultEventArgs>();
 
-     public TranslationRecognizer(com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer recoImpl) {
+    /**
+      * Initializes an instance of the TranslationRecognizer.
+      * @param recoImpl The internal recognizer implementation.
+      * @param ais An optional audio input stream associated with the recognizer
+      */
+     public TranslationRecognizer(com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer recoImpl, AudioInputStream ais) {
+        super(ais);
          this.recoImpl = recoImpl;
 
          intermediateResultHandler = new ResultHandlerImpl(this, /*isFinalResultHandler:*/ false);

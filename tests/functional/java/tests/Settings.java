@@ -1,4 +1,8 @@
 package tests;
+//
+//Copyright (c) Microsoft. All rights reserved.
+//Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
 
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -24,11 +28,11 @@ public class Settings {
 
     private static SpeechFactory factory;
 
-    private static Boolean s_isInitialized = false;
+    private static Boolean isSettingsInitialized = false;
     public static Object s_settingsClassLock;
     
     static {
-        // TODO name of library will depend on version
+        // TODO name of library will depend on version once we have semantic dll names
         System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
 
         // prevent classgc from reclaiming the settings class, thus
@@ -39,7 +43,7 @@ public class Settings {
     };
 
     public static void LoadSettings() {
-        if(s_isInitialized)
+        if(isSettingsInitialized)
             return;
         
         SpeechAuthorizationToken = System.getProperty("SpeechAuthorizationToken", SpeechAuthorizationToken);
@@ -55,7 +59,7 @@ public class Settings {
         Keyword = System.getProperty("Keyword", Keyword);
         KeywordModel = System.getProperty("KeywordModel", KeywordModel);
 
-        s_isInitialized = true;
+        isSettingsInitialized = true;
     }
 
     

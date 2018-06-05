@@ -1,4 +1,8 @@
 package tests.endtoend;
+//
+//Copyright (c) Microsoft. All rights reserved.
+//Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
 
 import java.util.concurrent.Future;
 
@@ -11,15 +15,15 @@ import tests.Settings;
 
 public class SampleRecognizeWithIntermediateResults implements Runnable {
     
-    private SpeechRecognitionResult _result;
+    private SpeechRecognitionResult recognitionResult;
     public SpeechRecognitionResult getResult()
     {
-        return _result;
+        return recognitionResult;
     }
     
-    private SpeechRecognitionResultEventArgs _speechRecognitionResultEventArgs;
+    private SpeechRecognitionResultEventArgs speechRecognitionResultEventArgs2;
     public SpeechRecognitionResultEventArgs getSpeechRecognitionResultEventArgs() {
-        return _speechRecognitionResultEventArgs;
+        return speechRecognitionResultEventArgs2;
     }
     
     
@@ -27,28 +31,30 @@ public class SampleRecognizeWithIntermediateResults implements Runnable {
     // recognize with intermediate results
     ///////////////////////////////////////////////////
     public void run() {
-        // create factory
+        // Note: the factory is SHARED IN ALL END2END tests
+        //       this is on purpose, to check if the factory can be reused!
+        //       therefore, do NOT CLOSE the factory at the end of the test!
         SpeechFactory factory = Settings.getFactory();
 
         try {
             // TODO: to use the microphone, replace the parameter with "new MicrophoneAudioInputStream()"
-            SpeechRecognizer reco = factory.createSpeechRecognizer(Settings.WaveFile);
+            SpeechRecognizer reco = factory.createSpeechRecognizerWithFileInput(Settings.WaveFile);
 
             reco.IntermediateResultReceived.addEventListener((o, speechRecognitionResultEventArgs) -> {
-                _speechRecognitionResultEventArgs = speechRecognitionResultEventArgs;
-                String s = _speechRecognitionResultEventArgs.getResult().getText();
+                speechRecognitionResultEventArgs2 = speechRecognitionResultEventArgs;
+                String s = speechRecognitionResultEventArgs.getResult().getText();
 
                 System.out.println("Intermediate result received: " + s);
             });
 
             Future<SpeechRecognitionResult> task = reco.recognizeAsync();
 
-            _result = task.get();
-            String s = _result.getText();
+            recognitionResult = task.get();
+            String s = recognitionResult.getText();
             System.out.println("Recognizer returned: " + s);
-            
+
+            // Note: dont close factory as it is shared
             reco.close();
-            factory.close();
         } catch (Exception ex) {
             Settings.displayException(ex);
             

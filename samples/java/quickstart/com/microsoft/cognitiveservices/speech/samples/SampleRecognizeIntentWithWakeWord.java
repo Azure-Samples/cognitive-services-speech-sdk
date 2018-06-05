@@ -1,7 +1,7 @@
 package com.microsoft.cognitiveservices.speech.samples;
 //
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//Copyright (c) Microsoft. All rights reserved.
+//Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
 import java.util.ArrayList;
@@ -39,8 +39,6 @@ public class SampleRecognizeIntentWithWakeWord implements Runnable, Stoppable {
             } else {
                 continuousListeningStarted = false;
             }
-
-            return;
         }
 
     }
@@ -66,7 +64,7 @@ public class SampleRecognizeIntentWithWakeWord implements Runnable, Stoppable {
         content.add("");
         try {
             // Note: to use the microphone, replace the parameter with "new MicrophoneAudioInputStream()"
-            reco = factory.createIntentRecognizer(SampleSettings.WaveFile);
+            reco = factory.createIntentRecognizerWithFileInput(SampleSettings.WaveFile);
             
             LanguageUnderstandingModel intentModel = LanguageUnderstandingModel.fromSubscription(SampleSettings.LuisRegion,
                     SampleSettings.LuisSubscriptionKey, SampleSettings.LuisAppId);

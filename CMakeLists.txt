@@ -121,27 +121,19 @@ add_subdirectory(${SR})
 add_subdirectory(${MOCK})
 add_subdirectory(${LIBCARBON})
 
+add_subdirectory(${CARBON_BINDINGS})
+add_subdirectory(${TESTS})
+
 if(CMAKE_CL_64)
     add_subdirectory(${UNIDEC})
 endif()
 
 add_subdirectory(${CARBONX})
 
-add_subdirectory(${CARBON_BINDINGS})
-
-if(NOT ANDROID)
-  add_subdirectory(${TESTS})
-endif()
-
 # @wolfgang: need JNI on linux
 if(BUILD_JAVA)
   if(WIN32)
     add_subdirectory(${JAVA_SAMPLES})
-    add_subdirectory(${JAVA_TESTS})
-  endif()
-
-  if(ANDROID)
-    add_subdirectory(${JAVA_TESTS})
   endif()
 endif()
 

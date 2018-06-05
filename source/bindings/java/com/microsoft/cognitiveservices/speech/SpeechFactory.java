@@ -135,7 +135,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return A speech recognizer instance.
       */
     public SpeechRecognizer createSpeechRecognizer() {
-        return new SpeechRecognizer(factoryImpl.createSpeechRecognizer());
+        return new SpeechRecognizer(factoryImpl.createSpeechRecognizer(), null);
     }
 
     /**
@@ -143,8 +143,8 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @param audioFile Specifies the audio input file.
       * @return A speech recognizer instance.
       */
-    public SpeechRecognizer createSpeechRecognizer(String audioFile) {
-        return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithFileInput(audioFile));
+    public SpeechRecognizer createSpeechRecognizerWithFileInput(String audioFile) {
+        return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithFileInput(audioFile), null);
     }
 
     /**
@@ -153,8 +153,8 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
      * @param language Specifies the name of spoken language to be recognized in BCP-47 format.
      * @return A speech recognizer instance.
      */
-    public SpeechRecognizer createSpeechRecognizer(String audioFile, String language) {
-        return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithFileInput(audioFile, language));
+    public SpeechRecognizer createSpeechRecognizerWithFileInput(String audioFile, String language) {
+        return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithFileInput(audioFile, language), null);
     }
 
     /**
@@ -162,8 +162,8 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @param audioStream Specifies the audio input stream.
       * @return A speech recognizer instance.
       */
-    public SpeechRecognizer createSpeechRecognizer(AudioInputStream audioStream) {
-        return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithStreamImpl(audioStream));
+    public SpeechRecognizer createSpeechRecognizerWithStream(AudioInputStream audioStream) {
+        return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithStreamImpl(audioStream), audioStream);
     }
 
     /**
@@ -172,8 +172,8 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
      * @param language Specifies the name of spoken language to be recognized in BCP-47 format.
      * @return A speech recognizer instance.
      */
-    public SpeechRecognizer createSpeechRecognizer(AudioInputStream audioStream, String language) {
-       return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithStreamImpl(audioStream, language));
+    public SpeechRecognizer createSpeechRecognizerWithStream(AudioInputStream audioStream, String language) {
+       return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithStreamImpl(audioStream, language), audioStream);
     }
     
     /**
@@ -181,7 +181,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return An intent recognizer instance.
       */
     public IntentRecognizer createIntentRecognizer() {
-        return new IntentRecognizer(factoryImpl.createIntentRecognizer());
+        return new IntentRecognizer(factoryImpl.createIntentRecognizer(), null);
     }
 
     /**
@@ -189,8 +189,8 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @param audioFile Specifies the audio input file.
       * @return An intent recognizer instance
       */
-    public IntentRecognizer createIntentRecognizer(String audioFile) {
-        return new IntentRecognizer(factoryImpl.createIntentRecognizerWithFileInput(audioFile));
+    public IntentRecognizer createIntentRecognizerWithFileInput(String audioFile) {
+        return new IntentRecognizer(factoryImpl.createIntentRecognizerWithFileInput(audioFile), null);
     }
 
     /**
@@ -199,8 +199,8 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @param language Specifies the name of spoken language to be recognized in BCP-47 format.
       * @return An intent recognizer instance
       */
-    public IntentRecognizer createIntentRecognizer(String audioFile, String language) {
-        return new IntentRecognizer(factoryImpl.createIntentRecognizerWithFileInput(audioFile, language));
+    public IntentRecognizer createIntentRecognizerWithFileInput(String audioFile, String language) {
+        return new IntentRecognizer(factoryImpl.createIntentRecognizerWithFileInput(audioFile, language), null);
     }
 
     /**
@@ -208,8 +208,8 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @param audioStream Specifies the audio input stream.
       * @return An intent recognizer instance.
       */
-    public IntentRecognizer createIntentRecognizer(AudioInputStream audioStream) {
-        return new IntentRecognizer(factoryImpl.createIntentRecognizerWithStreamImpl(audioStream));
+    public IntentRecognizer createIntentRecognizerWithStream(AudioInputStream audioStream) {
+        return new IntentRecognizer(factoryImpl.createIntentRecognizerWithStreamImpl(audioStream), audioStream);
     }
 
     /**
@@ -218,8 +218,8 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @param language Specifies the name of spoken language to be recognized in BCP-47 format.
       * @return An intent recognizer instance.
       */
-    public IntentRecognizer createIntentRecognizer(AudioInputStream audioStream, String language) {
-        return new IntentRecognizer(factoryImpl.createIntentRecognizerWithStreamImpl(audioStream, language));
+    public IntentRecognizer createIntentRecognizerWithStream(AudioInputStream audioStream, String language) {
+        return new IntentRecognizer(factoryImpl.createIntentRecognizerWithStreamImpl(audioStream, language), audioStream);
     }
 
     /**
@@ -235,7 +235,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
             v.add(element);
         }
 
-        return new TranslationRecognizer(factoryImpl.createTranslationRecognizer(sourceLanguage, v));
+        return new TranslationRecognizer(factoryImpl.createTranslationRecognizer(sourceLanguage, v), null);
     }
 
     /**
@@ -252,7 +252,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
            v.add(element);
        }
 
-       return new TranslationRecognizer(factoryImpl.createTranslationRecognizer(sourceLanguage, v, voice));
+       return new TranslationRecognizer(factoryImpl.createTranslationRecognizer(sourceLanguage, v, voice), null);
    }
     
    /**
@@ -269,7 +269,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
            v.add(element);
        }
 
-       return new TranslationRecognizer(factoryImpl.createTranslationRecognizerWithFileInput(audioFile, sourceLanguage, v));
+       return new TranslationRecognizer(factoryImpl.createTranslationRecognizerWithFileInput(audioFile, sourceLanguage, v), null);
    }
 
     /**
@@ -287,7 +287,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
            v.add(element);
        }
 
-       return new TranslationRecognizer(factoryImpl.createTranslationRecognizerWithFileInput(audioFile, sourceLanguage, v, voice));
+       return new TranslationRecognizer(factoryImpl.createTranslationRecognizerWithFileInput(audioFile, sourceLanguage, v, voice), null);
    }
 
    /**
@@ -304,7 +304,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
            v.add(element);
        }
 
-       return new TranslationRecognizer(factoryImpl.createTranslationRecognizerWithStreamImpl(audioStream, sourceLanguage, v));
+       return new TranslationRecognizer(factoryImpl.createTranslationRecognizerWithStreamImpl(audioStream, sourceLanguage, v), audioStream);
    }
 
    /**
@@ -322,7 +322,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
            v.add(element);
        }
 
-       return new TranslationRecognizer(factoryImpl.createTranslationRecognizerWithStreamImpl(audioStream, sourceLanguage, v, voice));
+       return new TranslationRecognizer(factoryImpl.createTranslationRecognizerWithStreamImpl(audioStream, sourceLanguage, v, voice), audioStream);
    }
 
     /**

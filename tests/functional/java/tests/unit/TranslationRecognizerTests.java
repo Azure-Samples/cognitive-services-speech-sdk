@@ -1,9 +1,10 @@
 package tests.unit;
+//
+//Copyright (c) Microsoft. All rights reserved.
+//Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import com.microsoft.cognitiveservices.speech.RecognitionEventType;
 import com.microsoft.cognitiveservices.speech.RecognitionStatus;
@@ -32,7 +34,7 @@ import tests.Settings;
 
 public class TranslationRecognizerTests {
     private final Integer FIRST_EVENT_ID = 1;
-    private AtomicInteger _eventId = new AtomicInteger(FIRST_EVENT_ID);
+    private AtomicInteger eventIdentifier = new AtomicInteger(FIRST_EVENT_ID);
     
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
@@ -40,25 +42,15 @@ public class TranslationRecognizerTests {
         Settings.LoadSettings();
     }
 
-    @AfterClass
-    static public void tearDownAfterClass() throws Exception {
-    }
-
-    @Before
-    public void setUp() throws Exception {
-    }
-
-    @After
-    public void tearDown() throws Exception {
-    }
-
     // -----------------------------------------------------------------------
     // --- 
     // -----------------------------------------------------------------------
 
+    @Ignore
     @Test
     public void testDispose() {
         // TODO: make dispose method public
+        fail("dispose not yet public");
     }
 
     // -----------------------------------------------------------------------
@@ -303,28 +295,28 @@ public class TranslationRecognizerTests {
         final Map<String, Integer> eventsMap = new HashMap<String, Integer>();
         
         r.FinalResultReceived.addEventListener((o, e) -> {
-            eventsMap.put("FinalResultReceived", _eventId.getAndIncrement());
+            eventsMap.put("FinalResultReceived", eventIdentifier.getAndIncrement());
         });
 
         r.IntermediateResultReceived.addEventListener((o, e) -> {
-            int now = _eventId.getAndIncrement();
+            int now = eventIdentifier.getAndIncrement();
             eventsMap.put("IntermediateResultReceived-" + System.currentTimeMillis(), now);
             eventsMap.put("IntermediateResultReceived" , now);
         });
         
         r.RecognitionErrorRaised.addEventListener((o, e) -> {
-            eventsMap.put("RecognitionErrorRaised", _eventId.getAndIncrement());
+            eventsMap.put("RecognitionErrorRaised", eventIdentifier.getAndIncrement());
         });
 
         // TODO eventType should be renamed and be a function getEventType()
         r.RecognitionEvent.addEventListener((o, e) -> {
-            int now = _eventId.getAndIncrement();
+            int now = eventIdentifier.getAndIncrement();
             eventsMap.put(e.eventType.name() + "-" + System.currentTimeMillis(), now);
             eventsMap.put(e.eventType.name(), now);
         });
 
         r.SessionEvent.addEventListener((o, e) -> {
-            int now = _eventId.getAndIncrement();
+            int now = eventIdentifier.getAndIncrement();
             eventsMap.put(e.getEventType().name() + "-" + System.currentTimeMillis(), now);
             eventsMap.put(e.getEventType().name(), now);
         });
@@ -335,7 +327,7 @@ public class TranslationRecognizerTests {
         assertEquals("What's the weather like?", res.getText());
 
         // session events are first and last event
-        final Integer LAST_RECORDED_EVENT_ID = _eventId.get();
+        final Integer LAST_RECORDED_EVENT_ID = eventIdentifier.get();
         assertTrue(LAST_RECORDED_EVENT_ID > FIRST_EVENT_ID);
         assertEquals(FIRST_EVENT_ID, eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()));
         assertEquals(LAST_RECORDED_EVENT_ID, eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()));
@@ -499,20 +491,6 @@ public class TranslationRecognizerTests {
         s.close();
     }
 
-    // -----------------------------------------------------------------------
-    // --- 
-    // -----------------------------------------------------------------------
-/* TODO only available on android.
-    @Test
-    public void testStartKeywordRecognitionAsync() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testStopKeywordRecognitionAsync() {
-        fail("Not yet implemented");
-    }
-*/
     // -----------------------------------------------------------------------
     // --- 
     // -----------------------------------------------------------------------

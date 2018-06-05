@@ -1,4 +1,8 @@
 package tests.endtoend;
+//
+//Copyright (c) Microsoft. All rights reserved.
+//Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,15 +19,15 @@ import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
 import tests.Settings;
 
 public class SampleRecognizeIntent implements Runnable {
-    private IntentRecognitionResult _result;
+    private IntentRecognitionResult recognitionResult;
     public IntentRecognitionResult getResult()
     {
-        return _result;
+        return recognitionResult;
     }
     
-    private IntentRecognitionResultEventArgs _intentRecognitionResultEventArgs;
+    private IntentRecognitionResultEventArgs intentRecognitionResultEventArgs2;
     public IntentRecognitionResultEventArgs getIntermediateResult() {
-        return _intentRecognitionResultEventArgs;
+        return intentRecognitionResultEventArgs2;
     }
     
     ///////////////////////////////////////////////////
@@ -39,7 +43,7 @@ public class SampleRecognizeIntent implements Runnable {
         content.add("");
         try {
             // TODO: to use the microphone, replace the parameter with "new MicrophoneAudioInputStream()"
-            IntentRecognizer reco = factory.createIntentRecognizer(Settings.WaveFile);
+            IntentRecognizer reco = factory.createIntentRecognizerWithFileInput(Settings.WaveFile);
 
             HashMap<String, String> intentIdMap = new HashMap<>();
             intentIdMap.put("1", "play music");
@@ -53,9 +57,9 @@ public class SampleRecognizeIntent implements Runnable {
             }
 
             reco.IntermediateResultReceived.addEventListener((o, intentRecognitionResultEventArgs) -> {
-                _intentRecognitionResultEventArgs = intentRecognitionResultEventArgs;
+                intentRecognitionResultEventArgs2 = intentRecognitionResultEventArgs;
                 
-                String s = _intentRecognitionResultEventArgs.getResult().getText();
+                String s = intentRecognitionResultEventArgs.getResult().getText();
                 System.out.println("Intermediate result received: " + s);
                 content.add(s);
 
@@ -63,11 +67,11 @@ public class SampleRecognizeIntent implements Runnable {
             });
 
             Future<IntentRecognitionResult> task = reco.recognizeAsync();
-            _result = task.get();
+            recognitionResult = task.get();
             
             System.out.println("Continuous recognition stopped.");
-            String s = _result.getText();
-            String intentId = _result.getIntentId();
+            String s = recognitionResult.getText();
+            String intentId = recognitionResult.getIntentId();
             String intent = "";
             if (intentIdMap.containsKey(intentId)) {
                 intent = intentIdMap.get(intentId);

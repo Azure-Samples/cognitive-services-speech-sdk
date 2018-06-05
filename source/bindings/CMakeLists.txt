@@ -30,7 +30,7 @@ if(WIN32)
 endif()
 
 # @wolfgang: need JNI on linux
-if(WIN32 OR ANDROID)
+if(WIN32 OR CMAKE_CL_64 OR ANDROID)
     option(BUILD_JAVA "Build Java/Android SWIG module" ON)
     if(BUILD_JAVA)
         add_subdirectory(java)

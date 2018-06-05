@@ -1,4 +1,8 @@
 package tests.endtoend;
+//
+//Copyright (c) Microsoft. All rights reserved.
+//Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
 
 import java.util.concurrent.Future;
 
@@ -10,10 +14,10 @@ import tests.Settings;
 
 public class SampleSimpleRecognize implements Runnable {
 
-    private String _result;
+    private String recognitionResult;
     public String getResult()
     {
-        return _result;
+        return recognitionResult;
     }
     
     ///////////////////////////////////////////////////
@@ -21,24 +25,26 @@ public class SampleSimpleRecognize implements Runnable {
     ///////////////////////////////////////////////////
     @Override
     public void run() {
-        // create factory
+        // Note: the factory is SHARED IN ALL END2END tests
+        //       this is on purpose, to check if the factory can be reused!
+        //       therefore, do NOT CLOSE the factory at the end of the test!
         SpeechFactory factory = Settings.getFactory();
 
         try {
             // TODO: to use the microphone, replace the parameter with "new MicrophoneAudioInputStream()"
-            SpeechRecognizer reco = factory.createSpeechRecognizer(Settings.WaveFile);
+            SpeechRecognizer reco = factory.createSpeechRecognizerWithFileInput(Settings.WaveFile);
 
             Future<SpeechRecognitionResult> task = reco.recognizeAsync();
 
             SpeechRecognitionResult result = task.get();
-            _result = result.getText();
+            recognitionResult = result.getText();
 
-            System.out.println("Recognizer returned: " + _result);
+            System.out.println("Recognizer returned: " + recognitionResult);
             
+            // Note: do not close the factory as it is shared between tests.
             reco.close();
-            factory.close();
         } catch (Exception ex) {
-            _result = ex.toString();
+            recognitionResult = ex.toString();
             
             Settings.displayException(ex);
             throw new IllegalAccessError(ex.toString());

@@ -1,7 +1,7 @@
 package com.microsoft.cognitiveservices.speech.samples;
 //
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//Copyright (c) Microsoft. All rights reserved.
+//Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
 import java.io.File;
@@ -14,19 +14,19 @@ import com.microsoft.cognitiveservices.speech.AudioInputStream;
 import com.microsoft.cognitiveservices.speech.AudioInputStreamFormat;
 
 public class WaveFileAudioInputStream extends AudioInputStream {
-    AudioFormat m_format = new AudioFormat(16000, 16, 1, /*isSigned*/true, /*isBigEndian*/false);
-    javax.sound.sampled.AudioInputStream _ais;
+    AudioFormat audioFormat = new AudioFormat(16000, 16, 1, /*isSigned*/true, /*isBigEndian*/false);
+    javax.sound.sampled.AudioInputStream audioInputStream;
     
     public WaveFileAudioInputStream(String filename) {
-        // Obtain and open the m_line.
+        // Obtain and open the line.
         try {
-            _ais = AudioSystem.getAudioInputStream(new File(filename));
+            audioInputStream = AudioSystem.getAudioInputStream(new File(filename));
             
-            AudioFormat audioFormat = _ais.getFormat();
-            if(audioFormat.getChannels() != m_format.getChannels()) throw new IllegalArgumentException("channels");
-            if(audioFormat.getSampleRate() != m_format.getSampleRate()) throw new IllegalArgumentException("samplerate");
-            if(audioFormat.getEncoding() != m_format.getEncoding()) throw new IllegalArgumentException("encoding");
-            if(audioFormat.getSampleSizeInBits() != m_format.getSampleSizeInBits()) throw new IllegalArgumentException("bitspersample");
+            AudioFormat audioFormat = audioInputStream.getFormat();
+            if(audioFormat.getChannels() != audioFormat.getChannels()) throw new IllegalArgumentException("channels");
+            if(audioFormat.getSampleRate() != audioFormat.getSampleRate()) throw new IllegalArgumentException("samplerate");
+            if(audioFormat.getEncoding() != audioFormat.getEncoding()) throw new IllegalArgumentException("encoding");
+            if(audioFormat.getSampleSizeInBits() != audioFormat.getSampleSizeInBits()) throw new IllegalArgumentException("bitspersample");
         } catch (Exception ex) {
             // Handle the error ...
             throw new IllegalArgumentException(ex);
@@ -46,7 +46,7 @@ public class WaveFileAudioInputStream extends AudioInputStream {
         if(dataBuffer == null) throw new NullPointerException("dataBuffer");
         
         try {
-            int numRead = _ais.read(dataBuffer, 0, dataBuffer.length);
+            int numRead = audioInputStream.read(dataBuffer, 0, dataBuffer.length);
             return numRead > 0 ? numRead : 0;
         } catch (Exception e) {
             throw new IllegalAccessError(e.toString());
@@ -54,18 +54,18 @@ public class WaveFileAudioInputStream extends AudioInputStream {
     }
 
     /**
-     * Returns the m_format of this audio stream.
+     * Returns the audioFormat of this audio stream.
      * 
-     * @return The m_format of the audio stream.
+     * @return The audioFormat of the audio stream.
      */
     @Override
     public AudioInputStreamFormat getFormat() {
         AudioInputStreamFormat  f = new AudioInputStreamFormat();
-        f.BlockAlign = (short)(m_format.getChannels() * (m_format.getSampleSizeInBits() + 7) / 8);
-        f.AvgBytesPerSec = f.BlockAlign * (int)m_format.getSampleRate();
-        f.Channels = (short) m_format.getChannels();
-        f.SamplesPerSec = (int)m_format.getSampleRate();
-        f.BitsPerSample = (short) m_format.getSampleSizeInBits();
+        f.BlockAlign = (short)(audioFormat.getChannels() * (audioFormat.getSampleSizeInBits() + 7) / 8);
+        f.AvgBytesPerSec = f.BlockAlign * (int)audioFormat.getSampleRate();
+        f.Channels = (short) audioFormat.getChannels();
+        f.SamplesPerSec = (int)audioFormat.getSampleRate();
+        f.BitsPerSample = (short) audioFormat.getSampleSizeInBits();
         f.FormatTag = 1; // PCM signed (we selected this in the constructor!).
         return f;
     }
@@ -76,9 +76,7 @@ public class WaveFileAudioInputStream extends AudioInputStream {
     @Override
     public void close() {
         try {
-            javax.sound.sampled.AudioInputStream a = _ais;
-            _ais = null;
-            a.close();
+            audioInputStream.close();
         } catch (IOException | NullPointerException e) {
             throw new IllegalAccessError(e.toString());
         }
