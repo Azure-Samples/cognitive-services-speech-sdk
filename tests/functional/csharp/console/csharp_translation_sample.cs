@@ -55,11 +55,10 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
-        public static async Task TranslationBaseModelAsync(string keyTranslation, string fileName)
+        public static async Task TranslationBaseModelAsync(string keyTranslation, string fileName, bool useStream)
         {
             var factory = SpeechFactory.FromSubscription(keyTranslation, "westus");
             Console.WriteLine("Translation using base model.");
-
 
             if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {
@@ -78,28 +77,39 @@ namespace MicrosoftSpeechSDKSamples
             else
             {
                 Console.WriteLine($"Translation into languages: {To2Langs[0]}, and {To2Langs[1]}:");
-                using (var reco = factory.CreateTranslationRecognizerWithFileInput(fileName, FromLang, To2Langs))
+                if (useStream)
                 {
-                    await DoTranslationAsync(reco).ConfigureAwait(false);
+                    var stream = Util.OpenWaveFile(fileName);
+                    using (var reco = factory.CreateTranslationRecognizerWithStream(stream, FromLang, To2Langs))
+                    {
+                        await DoTranslationAsync(reco).ConfigureAwait(false);
+                    }
                 }
-
-                Console.WriteLine($"Translation into {ToChinese} with voice {ChineseVoice}");
-                using (var reco = factory.CreateTranslationRecognizerWithFileInput(fileName, FromLang, ToChinese, ChineseVoice))
+                else
                 {
-                    await DoTranslationAsync(reco).ConfigureAwait(false);
-                }
+                    using (var reco = factory.CreateTranslationRecognizerWithFileInput(fileName, FromLang, To2Langs))
+                    {
+                        await DoTranslationAsync(reco).ConfigureAwait(false);
+                    }
 
-                Console.WriteLine($"Translation into {ToGerman} with voice {GermanVoice}");
-                using (var reco = factory.CreateTranslationRecognizerWithFileInput(fileName, FromLang, ToGerman, GermanVoice))
-                {
-                    await DoTranslationAsync(reco).ConfigureAwait(false);
+                    Console.WriteLine($"Translation into {ToChinese} with voice {ChineseVoice}");
+                    using (var reco = factory.CreateTranslationRecognizerWithFileInput(fileName, FromLang, ToChinese, ChineseVoice))
+                    {
+                        await DoTranslationAsync(reco).ConfigureAwait(false);
+                    }
+
+                    Console.WriteLine($"Translation into {ToGerman} with voice {GermanVoice}");
+                    using (var reco = factory.CreateTranslationRecognizerWithFileInput(fileName, FromLang, ToGerman, GermanVoice))
+                    {
+                        await DoTranslationAsync(reco).ConfigureAwait(false);
+                    }
                 }
             }
         }
 
-        public static async Task TranslationByEndpointAsync(string subKey, string endpoint, string fileName)
+        public static async Task TranslationByEndpointAsync(string subKey, string endpoint, string fileName, bool useStream)
         {
-            Console.WriteLine(string.Format(CultureInfo.InvariantCulture,"Translation using endopoint:{0}.", endpoint));
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Translation using endopoint:{0}.", endpoint));
 
             SpeechFactory factory = SpeechFactory.FromEndPoint(new Uri(endpoint), subKey);
 
@@ -113,10 +123,20 @@ namespace MicrosoftSpeechSDKSamples
             }
             else
             {
-                // The language setting does not have any effect if the endpoint is specified.
-                using (var reco = factory.CreateTranslationRecognizerWithFileInput(fileName, FromLang, To2Langs))
+                if (useStream)
                 {
-                    await DoTranslationAsync(reco).ConfigureAwait(false);
+                    var stream = Util.OpenWaveFile(fileName);
+                    using (var reco = factory.CreateTranslationRecognizerWithStream(stream, FromLang, To2Langs))
+                    {
+                        await DoTranslationAsync(reco).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    using (var reco = factory.CreateTranslationRecognizerWithFileInput(fileName, FromLang, To2Langs))
+                    {
+                        await DoTranslationAsync(reco).ConfigureAwait(false);
+                    }
                 }
             }
         }
@@ -145,7 +165,7 @@ namespace MicrosoftSpeechSDKSamples
         private static TaskCompletionSource<int> translationEndTaskCompletionSource;
 
         private static string FromLang = "en-us";
-        private static List<string> To2Langs = new List<string>(){ "de-DE", "zh-CN" };
+        private static List<string> To2Langs = new List<string>() { "de-DE", "zh-CN" };
         private static List<string> ToGerman = new List<string>() { "de-DE" };
         private static string GermanVoice = "de-DE-Hedda";
         private static List<string> ToChinese = new List<string>() { "zh-CN" };

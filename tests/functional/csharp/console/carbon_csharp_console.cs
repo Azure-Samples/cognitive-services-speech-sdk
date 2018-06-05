@@ -6,10 +6,7 @@
 //
 
 using System;
-using System.Net.Http;
 using System.Diagnostics;
-using System.Threading.Tasks;
-using Microsoft.CognitiveServices.Speech;
 
 namespace MicrosoftSpeechSDKSamples
 {
@@ -33,6 +30,7 @@ namespace MicrosoftSpeechSDKSamples
             string lang = null;
             string modelId = null;
             string endpoint = null;
+            bool useStream = false;
 
             if (args.Length >= 2)
             {
@@ -68,8 +66,8 @@ namespace MicrosoftSpeechSDKSamples
                     subKey = args[1];
                 }
 
-                Debug.Assert(isSpeechReco || isIntentReco || isTranslation);
-                Debug.Assert(subKey != null);
+                Trace.Assert(isSpeechReco || isIntentReco || isTranslation);
+                Trace.Assert(subKey != null);
 
                 if (args.Length >= 3)
                 {
@@ -78,6 +76,20 @@ namespace MicrosoftSpeechSDKSamples
                     if (string.Compare(audioInputStr, "mic", true) == 0)
                     {
                         fileName = null;
+                    }
+                    else if (audioInputStr.ToLower().StartsWith("stream:"))
+                    {
+                        useStream = true;
+                        var index = audioInputStr.IndexOf(':');
+                        if (index == -1)
+                        {
+                            throw new IndexOutOfRangeException("No file name specified as stream input.");
+                        }
+                        fileName = audioInputStr.Substring(index + 1);
+                        if (String.IsNullOrEmpty(fileName))
+                        {
+                            throw new IndexOutOfRangeException("No file name specified as stream input.");
+                        }
                     }
                     else
                     {
@@ -156,19 +168,19 @@ namespace MicrosoftSpeechSDKSamples
                     if (useEndpoint)
                     {
                         Console.WriteLine("=============== Run speech recognition samples by specifying endpoint. ===============");
-                        SpeechRecognitionSamples.SpeechRecognitionByEndpointAsync(subKey, endpoint, lang:lang, model:modelId, fileName:fileName).Wait();
+                        SpeechRecognitionSamples.SpeechRecognitionByEndpointAsync(subKey, endpoint, lang: lang, model: modelId, fileName: fileName, useStream: useStream).Wait();
                     }
                     else
                     {
                         if (useBaseModel)
                         {
                             Console.WriteLine("=============== Run speech recognition samples using base model. ===============");
-                            SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(subKey, lang:lang, fileName:fileName).Wait();
+                            SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(subKey, lang: lang, fileName: fileName, useStream: useStream).Wait();
                         }
                         else
                         {
                             Console.WriteLine("=============== Run speech recognition samples using customized model. ===============");
-                            SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(subKey, lang, modelId, fileName).Wait();
+                            SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(subKey, lang, modelId, fileName, useStream: useStream).Wait();
                         }
                     }
                 }
@@ -197,44 +209,19 @@ namespace MicrosoftSpeechSDKSamples
                     if (useEndpoint)
                     {
                         Console.WriteLine("=============== Run translation samples by specifying endpoint. ===============");
-                        TranslationSamples.TranslationByEndpointAsync(subKey, endpoint, fileName).Wait();
+                        TranslationSamples.TranslationByEndpointAsync(subKey, endpoint, fileName, useStream: useStream).Wait();
                     }
                     else
                     {
                         if (useBaseModel)
                         {
                             Console.WriteLine("=============== Run translationsamples using base speech model. ===============");
-                            TranslationSamples.TranslationBaseModelAsync(subKey, fileName).Wait();
+                            TranslationSamples.TranslationBaseModelAsync(subKey, fileName, useStream: useStream).Wait();
                         }
                         else
                         {
                             Console.WriteLine("=============== Translation using CRIS model is not supported yet. ===============");
                         }
-                    }
-                }
-            }
-        }
-
-        static async Task<string> GetToken(string key)
-        {
-            string fetchTokenUri = "https://api.cognitive.microsoft.com/sts/v1.0";
-
-            using (var client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", key);
-                UriBuilder uriBuilder = new UriBuilder(fetchTokenUri);
-                uriBuilder.Path += "/issueToken";
-
-                using (var result = await client.PostAsync(uriBuilder.Uri.AbsoluteUri, null))
-                {
-                    Console.WriteLine("Token Uri: {0}", uriBuilder.Uri.AbsoluteUri);
-                    if (result.IsSuccessStatusCode)
-                    {
-                        return await result.Content.ReadAsStringAsync();
-                    }
-                    else
-                    {
-                        throw new HttpRequestException($"Cannot get token from {fetchTokenUri}. Error: {result.StatusCode}");
                     }
                 }
             }
