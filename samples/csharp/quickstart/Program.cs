@@ -19,8 +19,10 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine("3. Speech recognition with file input.");
             Console.WriteLine("4. Speech recognition using customized model.");
             Console.WriteLine("5. Speech continuous recognition using events.");
-            Console.WriteLine("6. Translation with microphone input.");
-            Console.WriteLine("7. Translation with file input.");
+            Console.WriteLine("6. Speech recognition with audio stream.");
+            Console.WriteLine("7. Translation with microphone input.");
+            Console.WriteLine("8. Translation with file input.");
+            Console.WriteLine("9. Translation with audio stream.");
 
             Console.Write("Your choice (0: Stop.): ");
 
@@ -47,10 +49,16 @@ namespace MicrosoftSpeechSDKSamples
                         SpeechRecognitionSamples.ContinuousRecognitionAsync().Wait();
                         break;
                     case ConsoleKey.D6:
-                        TranslationSamples.TranslationWithMicrophoneAsync().Wait();
+                        SpeechRecognitionSamples.RecognitionWithAudioStreamAsync().Wait();
                         break;
                     case ConsoleKey.D7:
+                        TranslationSamples.TranslationWithMicrophoneAsync().Wait();
+                        break;
+                    case ConsoleKey.D8:
                         TranslationSamples.TranslationWithFileAsync().Wait();
+                        break;
+                    case ConsoleKey.D9:
+                        TranslationSamples.TranslationWithAudioStreamAsync().Wait();
                         break;
                     case ConsoleKey.D0:
                         Console.WriteLine("Exiting...");
