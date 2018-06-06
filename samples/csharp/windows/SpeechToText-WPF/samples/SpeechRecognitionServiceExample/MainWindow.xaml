@@ -63,8 +63,9 @@
                                 <RowDefinition Height="auto"></RowDefinition>
                                 <RowDefinition Height="auto"></RowDefinition>
                                 <RowDefinition Height="auto"></RowDefinition>
+                                <RowDefinition Height="auto"></RowDefinition>
                             </Grid.RowDefinitions>
-                            <Expander  Header="Choose Recognition Source"  x:Name="radioGroup" Grid.Row="0" Margin="5">
+                            <Expander  Header="Input Source"  x:Name="radioGroup" Grid.Row="0" Margin="5">
                                 <StackPanel Orientation="Vertical">
                                     <RadioButton x:Name="micRadioButton" IsChecked="{Binding ElementName=mainWindow, Path=IsMicrophoneClient}" Margin="10, 10, 0, 0" Click="RadioButton_Click">Use Microphone</RadioButton>
                                     <RadioButton x:Name="dataRadioButton" IsChecked="{Binding ElementName=mainWindow, Path=IsDataClient}" Margin="10, 10, 0, 0" Click="RadioButton_Click">Use wav file</RadioButton>
@@ -77,14 +78,36 @@
                                 </StackPanel>
                             </Expander>
                             
-                            <Expander Header="Choose Recognition Type" x:Name="selectRecoType" Grid.Row="2" Margin="5" >
+                            <Expander Header="Recognition Type" x:Name="selectRecoType" Grid.Row="2" Margin="5" >
                                 <StackPanel Orientation="Vertical">
                                     <RadioButton x:Name="basicRadioButton" IsChecked="{Binding ElementName=mainWindow, Path=IsBasicReco}" Margin="10, 10, 0, 0" Click="RadioButton_Click">Baseline Model</RadioButton>
                                     <RadioButton x:Name="customRadioButton" IsChecked="{Binding ElementName=mainWindow, Path=IsCustomReco}" Margin="10, 10, 0, 0" Click="RadioButton_Click">Custom Model</RadioButton>
                                     <RadioButton x:Name="bothRadioButton" IsChecked="{Binding ElementName=mainWindow, Path=IsBothReco}" Margin="10, 10, 0, 0" Click="RadioButton_Click">Both</RadioButton>
                                 </StackPanel>
                             </Expander>
-                            <Expander  Header="Change Keys"  Grid.Row="3" Grid.Column="0"  Margin="5">
+                            <Expander Header="Region and Language" Grid.Row="3" Margin="5" >
+                                <StackPanel Orientation="Vertical">
+                                    <ComboBox  x:Name="regionComboBox"  Text="Select Region" Margin="10" AllowDrop="True" >
+                                        <ComboBoxItem Tag="westus" IsSelected="true">westus</ComboBoxItem>
+                                        <ComboBoxItem Tag="eastasia">eastasia</ComboBoxItem>
+                                        <ComboBoxItem Tag="northeurope">northeurope</ComboBoxItem>
+                                    </ComboBox>
+
+                                    <ComboBox  x:Name="languageComboBox" Text="Select Language"  Margin="10" AllowDrop="True">
+                                        <ComboBoxItem Tag="en-US" IsSelected="true">English</ComboBoxItem>
+                                        <ComboBoxItem Tag="ar-EG">Arabic</ComboBoxItem>
+                                        <ComboBoxItem Tag="zh-CN">Chinese (Mandarin)</ComboBoxItem>
+                                        <ComboBoxItem Tag="fr-FR">French</ComboBoxItem>
+                                        <ComboBoxItem Tag="de-DE">German</ComboBoxItem>
+                                        <ComboBoxItem Tag="It-IT">Italian</ComboBoxItem>
+                                        <ComboBoxItem Tag="ja-JP">Japanese</ComboBoxItem>
+                                        <ComboBoxItem Tag="pt-BR">Portugese</ComboBoxItem>
+                                        <ComboBoxItem Tag="ru-RU">Russian</ComboBoxItem>
+                                        <ComboBoxItem Tag="es-ES">Spanish</ComboBoxItem>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Expander>
+                            <Expander  Header="Change Keys"  Grid.Row="4" Grid.Column="0"  Margin="5">
                                 <StackPanel Margin="10">
                                     <TextBlock Text="Subscription Key:" />
                                     <TextBox VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="2" Text="{Binding ElementName=mainWindow, Path=SubscriptionKey, Mode=TwoWay}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
@@ -94,7 +117,7 @@
                                     <Button Margin="0,5,0,0" Padding="5" Height="35" VerticalAlignment="Top" Click="SaveKey_Click">Save Keys</Button>
                                 </StackPanel>
                             </Expander>
-                            <StackPanel Orientation="Vertical" Grid.Row="4"  Margin="10" >
+                            <StackPanel Orientation="Vertical" Grid.Row="5"  Margin="10" >
                                 <CheckBox x:Name="immediateResultsCheckBox" Margin="0,10" IsChecked="True">Show Immediate Results</CheckBox>
                             </StackPanel>
                         </Grid>

@@ -76,6 +76,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         public MainWindow()
         {
             this.InitializeComponent();
+            this.InitializeVoiceMap();
         }
 
         private void SetCurrentText(TextBlock textBlock, string text)
@@ -193,6 +194,25 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             return subscriptionKey;
         }
 
+        /// <summary>
+        /// Sets corresponding voice parameter for set of languages used in this app
+        /// Complete list of available voices can be found here: https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/supported-languages
+        /// </summary>
+        private void InitializeVoiceMap()
+        {
+            voiceMap = new Dictionary<string, string>();
+            voiceMap.Add("en-US", "en-US-JessaRUS");
+            voiceMap.Add("ar-EG", "ar-EG-Hoda");
+            voiceMap.Add("zh-CN", "zh-CN-Yaoyao");
+            voiceMap.Add("fr-FR", "fr-FR-Julie");
+            voiceMap.Add("de-DE", "de-DE-Hedda");
+            voiceMap.Add("it-IT", "it-IT-Cosimo");
+            voiceMap.Add("ja-JP", "ja-JP-Ayumi");
+            voiceMap.Add("pt-BR", "pt-BR-Daniel");
+            voiceMap.Add("ru-RU", "ru-RU-Irina");
+            voiceMap.Add("es-ES", "es-ES-Laura");
+        }
+    
         #endregion
 
         private TranslationRecognizer recognizer;
@@ -200,6 +220,12 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         private string subscriptionKey;
         private const string SubscriptionKeyFileName = "SubscriptionKey.txt";
         private bool started;
+        private string voice;
+        private Dictionary<string, string> voiceMap;
+
+        /// <summary>
+        /// Gets or sets Subscription Key
+        /// </summary>
         public string SubscriptionKey
         {
             get
@@ -215,7 +241,24 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         }
 
         /// <summary>
+        /// Gets or sets Region
+        /// </summary>
+        public string Region { get; set; }
+
+        /// <summary>
+        /// Gets or sets From Language
+        /// </summary>
+        public string FromLanguage { get; set; }
+
+        /// <summary>
+        /// Gets or sets To Languages
+        /// </summary>
+        public List<string> ToLanguages { get; set; }
+
+        /// <summary>
         /// Handles the Click event of the _startButton control.
+        /// Sets Region, FromLanguage and ToLanguages as specified by user input
+        /// Sets voice to use same language as the first selected TO Language
         /// Checks if Subscription Key is valid
         /// Calls CreateRecognizer()
         /// Waits on a thread which is running the recognition
@@ -225,6 +268,17 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         private async void StartButton_Click(object sender, RoutedEventArgs e)
         {
             this.SubscriptionKey = this.GetSubscriptionKeyFromFile(SubscriptionKeyFileName);
+            this.Region = ((ComboBoxItem)regionComboBox.SelectedItem).Tag.ToString();
+            this.FromLanguage = ((ComboBoxItem)fromLanguageComboBox.SelectedItem).Tag.ToString();
+            this.ToLanguages = new List<string>();
+            foreach (ListBoxItem selectedLanguage in toLanguagesListBox.SelectedItems)
+            {
+                if (this.ToLanguages.Count == 0)
+                {
+                    voice = voiceMap[selectedLanguage.Tag.ToString()];
+                }
+                this.ToLanguages.Add(selectedLanguage.Tag.ToString());
+            }
 
             if (this.subscriptionKey == null || this.subscriptionKey.Length <= 0)
             {
@@ -263,14 +317,8 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// </summary>
         private void CreateRecognizer()
         {
-            string region = "westus";
-            string fromLanguage = "en-US";
-            var toLanguages = new List<string>() { "zh", "de" };
-            var voiceChinese = "zh-CN-Yaoyao";
-
-            this.factory = SpeechFactory.FromSubscription(SubscriptionKey, region);
-
-            this.recognizer = this.factory.CreateTranslationRecognizer(fromLanguage, toLanguages, voiceChinese);
+            this.factory = SpeechFactory.FromSubscription(SubscriptionKey, Region);
+            this.recognizer = this.factory.CreateTranslationRecognizer(FromLanguage, ToLanguages, voice);
 
             this.recognizer.IntermediateResultReceived += this.OnPartialResponseReceivedHandler;
             this.recognizer.FinalResultReceived += this.OnFinalResponse;
@@ -288,7 +336,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         private void OnPartialResponseReceivedHandler(object sender, TranslationTextResultEventArgs e)
         {
             string text = e.Result.Text;
-            foreach(var t in e.Result.Translations)
+            foreach (var t in e.Result.Translations)
             {
                 text += $"\nSame in {t.Key}: {t.Value}";
             }
@@ -357,6 +405,6 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             }
         }
 
-#endregion 
+        #endregion
     }
 }

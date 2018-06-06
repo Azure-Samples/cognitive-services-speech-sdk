@@ -26,11 +26,50 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
-            <Button x:Name="_startButton" Grid.Row="0" Grid.Column="0" Content="Start _Recognition" Click="StartButton_Click"  Padding="15" HorizontalContentAlignment="Stretch" Margin="10" VerticalAlignment="Bottom"/>
-            <Button x:Name="_stopButton" Grid.Row="1" Grid.Column="0" Content="Stop _Recognition" Click="StopButton_Click"  Padding="15" HorizontalContentAlignment="Stretch"  Margin="10" VerticalAlignment="Bottom"/>
+            <Expander Header="Region and Language" Grid.Row="0" Margin="5" >
+                <StackPanel Orientation="Vertical">
+                    <Label>Specify region:</Label>
+                    <ComboBox  x:Name="regionComboBox"  Text="Select Region" Margin="10" AllowDrop="True" >
+                        <ComboBoxItem Tag="westus" IsSelected="true">westus</ComboBoxItem>
+                        <ComboBoxItem Tag="eastasia">eastasia</ComboBoxItem>
+                        <ComboBoxItem Tag="northeurope">northeurope</ComboBoxItem>
+                    </ComboBox>
+                   
+                    <Label>Specify FROM language:</Label>
+                    <ComboBox  x:Name="fromLanguageComboBox" Text="Select FROM Language"  Margin="10" AllowDrop="True">
+                        <ComboBoxItem Tag="en-US" IsSelected="true">English</ComboBoxItem>
+                        <ComboBoxItem Tag="ar-EG">Arabic</ComboBoxItem>
+                        <ComboBoxItem Tag="zh-CN">Chinese (Mandarin)</ComboBoxItem>
+                        <ComboBoxItem Tag="fr-FR">French</ComboBoxItem>
+                        <ComboBoxItem Tag="de-DE">German</ComboBoxItem>
+                        <ComboBoxItem Tag="it-IT">Italian</ComboBoxItem>
+                        <ComboBoxItem Tag="ja-JP">Japanese</ComboBoxItem>
+                        <ComboBoxItem Tag="pt-BR">Portugese</ComboBoxItem>
+                        <ComboBoxItem Tag="ru-RU">Russian</ComboBoxItem>
+                        <ComboBoxItem Tag="es-ES">Spanish</ComboBoxItem>
+                    </ComboBox>
+
+                    <Label>Select TO languages:</Label>
+                    <ListBox x:Name="toLanguagesListBox" Margin="10" SelectionMode="Multiple">
+                        <ListBoxItem Tag="en-US">English</ListBoxItem>
+                        <ListBoxItem Tag="ar-EG">Arabic</ListBoxItem>
+                        <ListBoxItem Tag="zh-CN" IsSelected="true">Chinese (Mandarin)</ListBoxItem>
+                        <ListBoxItem Tag="fr-FR">French</ListBoxItem>
+                        <ListBoxItem Tag="de-DE" IsSelected="true">German</ListBoxItem>
+                        <ListBoxItem Tag="it-IT">Italian</ListBoxItem>
+                        <ListBoxItem Tag="ja-JP">Japanese</ListBoxItem>
+                        <ListBoxItem Tag="pt-BR">Portugese</ListBoxItem>
+                        <ListBoxItem Tag="ru-RU">Russian</ListBoxItem>
+                        <ListBoxItem Tag="es-ES">Spanish</ListBoxItem>
+                    </ListBox>
+                </StackPanel>
+            </Expander>
+            <Button x:Name="_startButton" Grid.Row="1" Grid.Column="0" Content="Start _Recognition" Click="StartButton_Click"  Padding="15" HorizontalContentAlignment="Stretch" Margin="10" VerticalAlignment="Bottom"/>
+            <Button x:Name="_stopButton" Grid.Row="2" Grid.Column="0" Content="Stop _Recognition" Click="StopButton_Click"  Padding="15" HorizontalContentAlignment="Stretch"  Margin="10" VerticalAlignment="Bottom"/>
         </Grid>
-        
+
         <TextBox x:Name="crisLogText" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextWrapping="Wrap" Text="" VerticalScrollBarVisibility="Visible" Margin="0, 10, 10, 10" FontSize="22"/>
         <TextBlock x:Name="crisCurrentText" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextWrapping="Wrap" Text="" />
     </Grid>

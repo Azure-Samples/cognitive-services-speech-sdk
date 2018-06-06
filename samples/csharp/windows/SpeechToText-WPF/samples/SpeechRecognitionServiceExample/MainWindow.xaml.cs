@@ -88,6 +88,16 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 this.OnPropertyChanged<string>();
             }
         }
+        
+        /// <summary>
+        /// Gets or sets Region
+        /// </summary>
+        public string Region { get; set; }
+
+        /// <summary>
+        /// Gets or sets Language
+        /// </summary>
+        public string Language { get; set; }
 
         /// <summary>
         /// Gets or sets Cris model ID
@@ -175,6 +185,9 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             this.LogRecognitionStart(this.bingLogText, this.bingCurrentText);
             string wavFileName = "";
 
+            this.Region = ((ComboBoxItem)regionComboBox.SelectedItem).Tag.ToString();
+            this.Language = ((ComboBoxItem)languageComboBox.SelectedItem).Tag.ToString();
+
             if (!AreKeysValid())
             {
                 MessageBox.Show("Subscription Key or Model ID is wrong or missing!");
@@ -213,8 +226,8 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         }
 
         /// <summary>
-        /// Creates Recognizer with baseline model:
-        /// Creates a factory with subscription key, region West US
+        /// Creates Recognizer with baseline model and selected language:
+        /// Creates a factory with subscription key and selected region
         /// If input source is audio file, creates recognizer with audio file otherwise with default mic
         /// Waits on RunRecognition
         /// </summary>
@@ -222,19 +235,19 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         private async Task CreateBasicReco(string wavFileName, TaskCompletionSource<int> source)
         {
             // Todo: suport users to specifiy a different region.
-            var basicFactory = SpeechFactory.FromSubscription(this.SubscriptionKey, "westus");
+            var basicFactory = SpeechFactory.FromSubscription(this.SubscriptionKey, this.Region);
             SpeechRecognizer basicRecognizer;
 
             if (this.IsMicrophoneClient)
             {
-                using (basicRecognizer = basicFactory.CreateSpeechRecognizer())
+                using (basicRecognizer = basicFactory.CreateSpeechRecognizer(this.Language))
                 {
                     await this.RunRecognizer(basicRecognizer, RecoType.Basic, source).ConfigureAwait(false);
                 }
             }
             else
             {
-                using (basicRecognizer = basicFactory.CreateSpeechRecognizerWithFileInput(wavFileName))
+                using (basicRecognizer = basicFactory.CreateSpeechRecognizerWithFileInput(wavFileName, this.Language))
                 {
                     await this.RunRecognizer(basicRecognizer, RecoType.Basic, source).ConfigureAwait(false);
                 }
@@ -242,8 +255,8 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         }
 
         /// <summary>
-        /// Creates Recognizer with custom model:
-        /// Creates a factory with subscription key, region West US
+        /// Creates Recognizer with custom model and selected language:
+        /// Creates a factory with subscription key and selected region
         /// If input source is audio file, creates recognizer with audio file otherwise with default mic
         /// Waits on RunRecognition
         /// </summary>
@@ -251,12 +264,12 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         private async Task CreateCustomReco(string wavFileName, TaskCompletionSource<int> source)
         {
             // Todo: suport users to specifiy a different region.
-            var customFactory = SpeechFactory.FromSubscription(this.SubscriptionKey, "westus");
+            var customFactory = SpeechFactory.FromSubscription(this.SubscriptionKey, this.Region);
             SpeechRecognizer customRecognizer;
 
             if (this.IsMicrophoneClient)
             {
-                using (customRecognizer = customFactory.CreateSpeechRecognizer())
+                using (customRecognizer = customFactory.CreateSpeechRecognizer(this.Language))
                 {
                     customRecognizer.DeploymentId = this.CrisModelId;
                     await this.RunRecognizer(customRecognizer, RecoType.Custom, source).ConfigureAwait(false);
@@ -264,7 +277,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             }
             else
             {
-                using (customRecognizer = customFactory.CreateSpeechRecognizerWithFileInput(wavFileName))
+                using (customRecognizer = customFactory.CreateSpeechRecognizerWithFileInput(wavFileName, this.Language))
                 {
                     customRecognizer.DeploymentId = this.CrisModelId;
                     await this.RunRecognizer(customRecognizer, RecoType.Custom, source).ConfigureAwait(false);
