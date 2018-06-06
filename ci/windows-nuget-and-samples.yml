@@ -50,7 +50,9 @@ steps:
        git clean -fdx samples
        perl ci/patch-samples.pl "$(Version)"
        mkdir "$(ZipBasename)"
-       cp --verbose --recursive --preserve license.md ThirdPartyNotices.md samples/csharp/quickstart samples/cxx/windows/quickstart samples/csharp/windows/{SpeechToText,Translation}-WPF "$(ZipBasename)"
+       cp --verbose --preserve license.md ThirdPartyNotices.md "$(ZipBasename)"
+       mkdir -p "$(ZipBasename)/csharp" && cp --verbose --recursive --preserve samples/csharp/quickstart samples/csharp/windows/{SpeechToText,Translation}-WPF "$(ZipBasename)/csharp"
+       mkdir -p "$(ZipBasename)/cxx" && cp --verbose --recursive --preserve samples/cxx/windows/quickstart "$(ZipBasename)/cxx"
        NOW=$(date -Iseconds)
        find "$(ZipBasename)" | xargs touch --date=$NOW
   displayName: 'Create directory with patched samples'
