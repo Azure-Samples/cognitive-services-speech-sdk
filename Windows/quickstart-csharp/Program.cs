@@ -30,7 +30,7 @@ namespace CsharpHelloWorld
                 }
                 else
                 {
-                    Console.WriteLine($"We recognized: {result.RecognizedText}");
+                    Console.WriteLine($"We recognized: {result.Text}");
                 }
                 Console.WriteLine("Please press a key to continue.");
                 Console.ReadLine();
