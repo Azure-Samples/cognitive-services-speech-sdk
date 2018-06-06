@@ -42,6 +42,7 @@ public class KeywordRecognitionModelTests {
     // --- 
     // -----------------------------------------------------------------------
 
+    @Ignore // TODO: requires android/ARM
     @Test
     public void testFromFile() {
         KeywordRecognitionModel s = KeywordRecognitionModel.fromFile(Settings.KeywordModel);
@@ -52,6 +53,7 @@ public class KeywordRecognitionModelTests {
     // --- 
     // -----------------------------------------------------------------------
 
+    @Ignore // TODO: requires android/ARM
     @Test
     public void testClose() {
         KeywordRecognitionModel s = KeywordRecognitionModel.fromFile(Settings.KeywordModel);
@@ -67,6 +69,7 @@ public class KeywordRecognitionModelTests {
     // --- 
     // -----------------------------------------------------------------------
 
+    @Ignore // TODO: requires android/ARM
     @Test
     public void testGetmodelImpl() {
         KeywordRecognitionModel s = KeywordRecognitionModel.fromFile(Settings.KeywordModel);

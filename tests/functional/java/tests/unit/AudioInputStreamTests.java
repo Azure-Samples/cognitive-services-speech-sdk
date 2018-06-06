@@ -36,20 +36,20 @@ public class AudioInputStreamTests {
         
         long r = s.getFormat(null, 0);
         assertTrue(r > 0);
-        assertTrue(r == 44);
+        assertTrue(r == 24);
 
         r = s.getFormat(null, 128);
         assertTrue(r > 0);
-        assertTrue(r == 44);
+        assertTrue(r == 24);
         
         com.microsoft.cognitiveservices.speech.internal.AudioInputStreamFormat f = new com.microsoft.cognitiveservices.speech.internal.AudioInputStreamFormat();
         r = s.getFormat(f, 0);
         assertTrue(r > 0);
-        assertTrue(r == 44);
+        assertTrue(r == 24);
 
         r = s.getFormat(f, 128);
         assertTrue(r > 0);
-        assertTrue(r == 44);
+        assertTrue(r == 24);
         
         // check known parameters
         assertEquals(32000, f.getAvgBytesPerSec());

@@ -73,6 +73,7 @@ public class LanguageUnderstandingModelTests {
     // --- 
     // -----------------------------------------------------------------------
 
+    @Ignore // TODO implement
     @Test
     public void testLanguageUnderstandingModel() {
         fail("Not yet implemented");
