@@ -115,6 +115,11 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 
     /**
       * Sets the service endpoint.
+      * This method is intended only for users who use a non-standard service endpoint.
+      * Note: The query parameters specified in the endpoint URL are not changed, even if they are set by any other APIs.
+      * For example, if language is defined in uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
+      * the language setting in uri takes precedence, and the effective language is "de-DE".
+      * Only the parameters that are not specified in the endpoint URL can be set by other APIs.
       * @param value the service endpoint.
       */
     public void setEndpoint(URI value) {

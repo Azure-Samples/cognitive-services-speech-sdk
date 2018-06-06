@@ -266,6 +266,11 @@ public:
 
     /// <summary>
     /// Creates an instance of the speech factory with specified endpoint and subscription.
+    /// This method is intended only for users who use a non-standard service endpoint.
+    /// Note: The query parameters specified in the endpoint URL are not changed, even if they are set by any other APIs.
+    /// For example, if language is defined in uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
+    /// the language setting in uri takes precedence, and the effective language is "de-DE".
+    /// Only the parameters that are not specified in the endpoint URL can be set by other APIs.
     /// </summary>
     /// <param name="endpoint">The service endpoint to connect to.</param>
     /// <param name="subscriptionKey">The subscription key.</param>
