@@ -43,7 +43,7 @@ set(HEADERS_PRIVATE
 set(SOURCES
     "${SRC_DIR}/dnscache.c"
     "${SRC_DIR}/iobuffer.c"
-    "${SRC_DIR}/metrics.c"
+    "${SRC_DIR}/metrics.cpp"
     "${SRC_DIR}/propbag.c"
     "${SRC_DIR}/responses.cpp"
     "${SRC_DIR}/transport.c"

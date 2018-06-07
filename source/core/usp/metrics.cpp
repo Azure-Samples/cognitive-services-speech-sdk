@@ -9,6 +9,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#include <map>
+
 #if defined(_MSC_VER)
 #include <windows.h>
 #else
@@ -21,17 +23,17 @@
 #include <stdarg.h>
 #include <stdint.h>
 
-#include "azure_c_shared_utility/strings.h"
-#include "azure_c_shared_utility/singlylinkedlist.h"
-#include "azure_c_shared_utility/lock.h"
-#include "azure_c_shared_utility/xlogging.h"
-#include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/tickcounter.h"
-#include "azure_c_shared_utility/agenttime.h"
 #include "uspcommon.h"
 #include "metrics.h"
 #include "propbag.h"
 
+#include "azure_c_shared_utility_strings_wrapper.h"
+#include "azure_c_shared_utility_singlylinkedlist_wrapper.h"
+#include "azure_c_shared_utility_lock_wrapper.h"
+#include "azure_c_shared_utility_xlogging_wrapper.h"
+#include "azure_c_shared_utility_crt_abstractions_wrapper.h"
+#include "azure_c_shared_utility_tickcounter_wrapper.h"
+#include "azure_c_shared_utility_agenttime_wrapper.h"
 
 const char* kEvent_type_key = "EventType";
 const char* kRcvd_msgs_key = "ReceivedMessages";
@@ -58,13 +60,14 @@ const char* kEvent_status_key = "Status";
 const char *kRcvd_msg_audio_key = "audio";
 const char *kRcvd_msg_response_key = "response";
 
-static const char *speechMsgNames[countOfMsgTypes];
+static std::map<IncomingMsgType, std::string> messageIndexToName;
 
 #define GOTO_EXIT_IF_NONZERO(exp) { retval = exp; if (retval != 0) { goto Exit; } }
 #define RESET(val)  val = NULL
 
 #pragma pack(push, 1)
 
+using namespace Microsoft::CognitiveServices::Speech::USP;
 
 typedef struct _TELEMETRY_CONTEXT
 {
@@ -82,15 +85,23 @@ static void initialize_message_name_array()
     if (initialized)
         return;
     initialized = 1;
-    // The order of this array needs to be consistent with the enum incomingMsgType
-    speechMsgNames[turnStart] = g_messagePathTurnStart;
-    speechMsgNames[speechStartDetected] = g_messagePathSpeechStartDetected;
-    speechMsgNames[speechHypothesis] = g_messagePathSpeechHypothesis;
-    speechMsgNames[speechFragment] = g_messagePathSpeechFragment;
-    speechMsgNames[speechEndDetected] = g_messagePathSpeechEndDetected;
-    speechMsgNames[speechPhrase] = g_messagePathSpeechPhrase;
-    speechMsgNames[audio] = kRcvd_msg_audio_key;
-    speechMsgNames[turnEnd] = g_messagePathTurnEnd;
+
+    messageIndexToName = std::map<IncomingMsgType, std::string>
+    {
+        { turnStart, path::turnStart },
+        { turnEnd, path::turnEnd },
+        { speechStartDetected, path::speechStartDetected },
+        { speechEndDetected, path::speechEndDetected },
+        { speechHypothesis, path::speechHypothesis},
+        { speechFragment, path::speechFragment},
+        { speechPhrase, path::speechPhrase},
+        { translationHypothesis, path::translationHypothesis},
+        { translationPhrase, path::translationPhrase},
+        { translationSynthesis, path::translationSynthesis},
+        { translationSynthesisEnd, path::translationSynthesisEnd},
+        { audio, kRcvd_msg_audio_key},
+        { response, kRcvd_msg_response_key}
+    };
 }
 
 static void PropertybagAddValueToArray(PROPERTYBAG_HANDLE propertyHandle, void * value)
@@ -408,7 +419,7 @@ static PROPERTYBAG_HANDLE telemetry_add_recvmsgs(TELEMETRY_DATA *telemetry_objec
         PROPERTYBAG_HANDLE recvObj = NULL;
         if (telemetry_object->receivedMsgsJsonArray[i])
         {
-            recvObj = PropertybagInitializeWithKeyValue(speechMsgNames[i], telemetry_object->receivedMsgsJsonArray[i]);
+            recvObj = PropertybagInitializeWithKeyValue(messageIndexToName[(IncomingMsgType)i].c_str(), telemetry_object->receivedMsgsJsonArray[i]);
             PropertybagAddValueToArray(json_array, recvObj);
         }
     }
@@ -563,28 +574,19 @@ void record_received_msg(TELEMETRY_HANDLE handle, const char *receivedMsg)
     {
         return;
     }
-    INCOMING_MSG_TYPE msgType = countOfMsgTypes;
 
-    if (!strcmp(receivedMsg, g_messagePathTurnStart))
-        msgType = turnStart;
-    else if (!strcmp(receivedMsg, g_messagePathSpeechStartDetected))
-        msgType = speechStartDetected;
-    else if (!strcmp(receivedMsg, g_messagePathSpeechHypothesis))
-        msgType = speechHypothesis;
-    else if (!strcmp(receivedMsg, g_messagePathSpeechFragment))
-        msgType = speechFragment;
-    else if (!strcmp(receivedMsg, g_messagePathSpeechEndDetected))
-        msgType = speechEndDetected;
-    else if (!strcmp(receivedMsg, g_messagePathSpeechPhrase))
-        msgType = speechPhrase;
-    else if (!strcmp(receivedMsg, kRcvd_msg_audio_key))
-        msgType = audio;
-    else if (!strcmp(receivedMsg, g_messagePathTurnEnd))
-        msgType = turnEnd;
-    else if (!strcmp(receivedMsg, kRcvd_msg_response_key))
-        msgType = response;
+    IncomingMsgType msgType = countOfMsgTypes;
+    bool found = false;
+    for (const auto& msg : messageIndexToName)
+    {
+        if (msg.second == receivedMsg)
+        {
+            msgType = msg.first;
+            found = true;
+        }
+    }
 
-    if (msgType == countOfMsgTypes) 
+    if (!found)
     {
         LogError("Telemetry: received unexpected msg: (%s).\r\n", receivedMsg);
         return;

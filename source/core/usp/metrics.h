@@ -180,24 +180,30 @@ void register_requestId_change_event(TELEMETRY_HANDLE handle, const char *reques
 */
 void inband_event_key_value_populate(TELEMETRY_HANDLE handle, const char *eventName, const char *id, const char *key, void *value);
 
-typedef enum incomingMsgType
+enum IncomingMsgType
 {
     turnStart,
+    turnEnd,
     speechStartDetected,
+    speechEndDetected,
     speechHypothesis,
     speechFragment,
-    speechEndDetected,
     speechPhrase,
+    translationHypothesis,
+    translationPhrase,
+    translationSynthesis,
+    translationSynthesisEnd,
     audio,
-    turnEnd,
     response,
     countOfMsgTypes
-}INCOMING_MSG_TYPE;
+};
 
 typedef struct _request_telemetry_object_data
 {
     char requestId[NO_DASH_UUID_LEN];
     int bPayloadSet;
+    // TODO: This does not make sense, why telementry does not have 
+    // a proper set inside?
     PROPERTYBAG_HANDLE receivedMsgsJsonArray[countOfMsgTypes];
 
     PROPERTYBAG_HANDLE connectionJson;
