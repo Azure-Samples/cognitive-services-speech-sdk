@@ -7,7 +7,7 @@ This project hosts the **samples** for the Cognitive Services Speech SDK. To fin
 This repository hosts samples that help you to get started with several features of the SDK.
 In addition more complex scenarios are included to give you a head-start on using speech technology in your application.
 
-We tested the samples with the latest released version of the SDK (0.2.12733) on the Windows 10 and Ubuntu 16.04 platform.
+We tested the samples with the latest released version of the SDK (0.4.0) on the Windows 10 and Ubuntu 16.04 platform.
 
 ## Getting Started
 
