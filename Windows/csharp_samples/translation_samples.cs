@@ -38,7 +38,7 @@ namespace MicrosoftSpeechSDKSamples
             {
                 // Subscribes to events.
                 recognizer.IntermediateResultReceived += (s, e) => {
-                    Console.WriteLine($"\nPartial result: recognized in {fromLanguage}: {e.Result.RecognizedText}.");
+                    Console.WriteLine($"\nPartial result: recognized in {fromLanguage}: {e.Result.Text}.");
                     if (e.Result.TranslationStatus == TranslationStatus.Success)
                     {
                         foreach (var element in e.Result.Translations)
@@ -60,7 +60,7 @@ namespace MicrosoftSpeechSDKSamples
                     }
                     else
                     {
-                        Console.WriteLine($"\nFinal result: Status: {e.Result.RecognitionStatus.ToString()}, recognized text in {fromLanguage}: {e.Result.RecognizedText}.");
+                        Console.WriteLine($"\nFinal result: Status: {e.Result.RecognitionStatus.ToString()}, recognized text in {fromLanguage}: {e.Result.Text}.");
                         if (e.Result.TranslationStatus == TranslationStatus.Success)
                         {
                             foreach (var element in e.Result.Translations)
@@ -120,8 +120,15 @@ namespace MicrosoftSpeechSDKSamples
 
         // Translation using file input.
         // <TranslationWithFileAsync>
+
+        // The TaskCompletionSource must be rooted.
+        // See https://blogs.msdn.microsoft.com/pfxteam/2011/10/02/keeping-async-methods-alive/ for details.
+        private static TaskCompletionSource<int> stopTranslationWithFileTaskCompletionSource;
+
         public static async Task TranslationWithFileAsync()
         {
+            stopTranslationWithFileTaskCompletionSource = new TaskCompletionSource<int>();
+
             // Creates an instance of a speech factory with specified
             // subscription key and service region. Replace with your own subscription key
             // and service region (e.g., "westus").
@@ -131,15 +138,14 @@ namespace MicrosoftSpeechSDKSamples
             string fromLanguage = "en-US";
             List<string> toLanguages = new List<string>() { "de", "fr" };
 
-            var translationEndTaskCompletionSource = new TaskCompletionSource<int>();
-
             // Creates a translation recognizer using file as audio input.
             // Replace with your own audio file name.
             using (var recognizer = factory.CreateTranslationRecognizerWithFileInput(@"YourAudioFile.wav", fromLanguage, toLanguages))
             {
                 // Subscribes to events.
-                recognizer.IntermediateResultReceived += (s, e) => {
-                    Console.WriteLine($"\nPartial result: recognized in {fromLanguage}: {e.Result.RecognizedText}.");
+                recognizer.IntermediateResultReceived += (s, e) =>
+                {
+                    Console.WriteLine($"\nPartial result: recognized in {fromLanguage}: {e.Result.Text}.");
                     if (e.Result.TranslationStatus == TranslationStatus.Success)
                     {
                         foreach (var element in e.Result.Translations)
@@ -153,7 +159,8 @@ namespace MicrosoftSpeechSDKSamples
                     }
                 };
 
-                recognizer.FinalResultReceived += (s, e) => {
+                recognizer.FinalResultReceived += (s, e) =>
+                {
                     if (e.Result.RecognitionStatus != RecognitionStatus.Recognized)
                     {
                         Console.WriteLine($"\nFinal result: Status: {e.Result.RecognitionStatus.ToString()}, FailureReason: {e.Result.RecognitionFailureReason}.");
@@ -161,7 +168,7 @@ namespace MicrosoftSpeechSDKSamples
                     }
                     else
                     {
-                        Console.WriteLine($"\nFinal result: Status: {e.Result.RecognitionStatus.ToString()}, recognized text in {fromLanguage}: {e.Result.RecognizedText}.");
+                        Console.WriteLine($"\nFinal result: Status: {e.Result.RecognitionStatus.ToString()}, recognized text in {fromLanguage}: {e.Result.Text}.");
                         if (e.Result.TranslationStatus == TranslationStatus.Success)
                         {
                             foreach (var element in e.Result.Translations)
@@ -176,17 +183,25 @@ namespace MicrosoftSpeechSDKSamples
                     }
                 };
 
-                recognizer.RecognitionErrorRaised += (s, e) => {
+                recognizer.RecognitionErrorRaised += (s, e) =>
+                {
                     Console.WriteLine($"\nAn error occurred. Status: {e.Status.ToString()}");
+                    stopTranslationWithFileTaskCompletionSource.TrySetResult(0);
                 };
 
-                recognizer.OnSpeechDetectedEvent += (s, e) => {
+                recognizer.OnSpeechDetectedEvent += (s, e) =>
+                {
                     Console.WriteLine($"\nSpeech detected event. Event: {e.EventType.ToString()}.");
-                    // Stops translation when speech end is detected.
-                    if (e.EventType == RecognitionEventType.SpeechEndDetectedEvent)
+                };
+
+                recognizer.OnSessionEvent += (s, e) =>
+                {
+                    Console.WriteLine($"\nSession event. Event: {e.EventType.ToString()}.");
+                    // Stops translation when session stop is detected.
+                    if (e.EventType == SessionEventType.SessionStoppedEvent)
                     {
                         Console.WriteLine($"\nStop translation.");
-                        translationEndTaskCompletionSource.TrySetResult(0);
+                        stopTranslationWithFileTaskCompletionSource.TrySetResult(0);
                     }
                 };
 
@@ -195,12 +210,113 @@ namespace MicrosoftSpeechSDKSamples
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
                 // Waits for completion.
-                await translationEndTaskCompletionSource.Task.ConfigureAwait(false);
+                await stopTranslationWithFileTaskCompletionSource.Task.ConfigureAwait(false);
 
                 // Stops translation.
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
             }
-        } 
+        }
         // </TranslationWithFileAsync>
+
+        // Translation using audio stream.
+        // <TranslationWithAudioStreamAsync>
+
+        private static TaskCompletionSource<int> stopTranslationWithAudioStreamTaskCompletionSource;
+
+        public static async Task TranslationWithAudioStreamAsync()
+        {
+            stopTranslationWithAudioStreamTaskCompletionSource = new TaskCompletionSource<int>();
+
+            // Creates an instance of a speech factory with specified
+            // subscription key and service region. Replace with your own subscription key
+            // and service region (e.g., "westus").
+            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // Sets source and target languages
+            string fromLanguage = "en-US";
+            List<string> toLanguages = new List<string>() { "de", "fr" };
+
+            // Create an audio stream from a wav file.
+            // Replace with your own audio file name.
+            var stream = Helper.OpenWaveFile(@"YourAudioFile.wav");
+
+            // Creates a translation recognizer using audio stream as input.
+            using (var recognizer = factory.CreateTranslationRecognizerWithStream(stream, fromLanguage, toLanguages))
+            {
+                // Subscribes to events.
+                recognizer.IntermediateResultReceived += (s, e) =>
+                {
+                    Console.WriteLine($"\nPartial result: recognized in {fromLanguage}: {e.Result.Text}.");
+                    if (e.Result.TranslationStatus == TranslationStatus.Success)
+                    {
+                        foreach (var element in e.Result.Translations)
+                        {
+                            Console.WriteLine($"    Translated into {element.Key}: {element.Value}");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"    Translation failed. Status: {e.Result.TranslationStatus.ToString()}, FailureReason: {e.Result.FailureReason}");
+                    }
+                };
+
+                recognizer.FinalResultReceived += (s, e) =>
+                {
+                    if (e.Result.RecognitionStatus != RecognitionStatus.Recognized)
+                    {
+                        Console.WriteLine($"\nFinal result: Status: {e.Result.RecognitionStatus.ToString()}, FailureReason: {e.Result.RecognitionFailureReason}.");
+                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"\nFinal result: Status: {e.Result.RecognitionStatus.ToString()}, recognized text in {fromLanguage}: {e.Result.Text}.");
+                        if (e.Result.TranslationStatus == TranslationStatus.Success)
+                        {
+                            foreach (var element in e.Result.Translations)
+                            {
+                                Console.WriteLine($"    Translated into {element.Key}: {element.Value}");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"    Translation failed. Status: {e.Result.TranslationStatus.ToString()}, FailureReason: {e.Result.FailureReason}");
+                        }
+                    }
+                };
+
+                recognizer.RecognitionErrorRaised += (s, e) =>
+                {
+                    Console.WriteLine($"\nAn error occurred. Status: {e.Status.ToString()}");
+                    stopTranslationWithAudioStreamTaskCompletionSource.TrySetResult(0);
+                };
+
+                recognizer.OnSpeechDetectedEvent += (s, e) =>
+                {
+                    Console.WriteLine($"\nSpeech detected event. Event: {e.EventType.ToString()}.");
+                };
+
+                recognizer.OnSessionEvent += (s, e) =>
+                {
+                    Console.WriteLine($"\nSession event. Event: {e.EventType.ToString()}.");
+                    // Stops translation when session stop is detected.
+                    if (e.EventType == SessionEventType.SessionStoppedEvent)
+                    {
+                        Console.WriteLine($"\nStop translation.");
+                        stopTranslationWithAudioStreamTaskCompletionSource.TrySetResult(0);
+                    }
+                };
+
+                // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                Console.WriteLine("Start translation...");
+                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                // Waits for completion.
+                await stopTranslationWithAudioStreamTaskCompletionSource.Task.ConfigureAwait(false);
+
+                // Stops translation.
+                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+            }
+        }
+        // </TranslationWithAudioStreamAsync>
     }
 }
