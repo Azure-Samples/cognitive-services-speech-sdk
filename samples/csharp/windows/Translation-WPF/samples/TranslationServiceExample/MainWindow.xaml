@@ -18,7 +18,7 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Label>Enter Subscription Key</Label>
                 <TextBox MinWidth="200" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="2" Text="{Binding ElementName=_mainWindow, Path=SubscriptionKey, Mode=TwoWay}"/>
-                <Button  Margin="5,0,0,0" Padding="5" VerticalAlignment="Top" Click="SaveKey_Click" Height="33">Save Key</Button>
+                <Button  Margin="5,0,0,0" Padding="5" VerticalAlignment="Top" Click="SaveKeyClick" Height="33">Save Key</Button>
             </StackPanel>
         </Grid>
 
@@ -66,8 +66,8 @@
                     </ListBox>
                 </StackPanel>
             </Expander>
-            <Button x:Name="_startButton" Grid.Row="1" Grid.Column="0" Content="Start _Recognition" Click="StartButton_Click"  Padding="15" HorizontalContentAlignment="Stretch" Margin="10" VerticalAlignment="Bottom"/>
-            <Button x:Name="_stopButton" Grid.Row="2" Grid.Column="0" Content="Stop _Recognition" Click="StopButton_Click"  Padding="15" HorizontalContentAlignment="Stretch"  Margin="10" VerticalAlignment="Bottom"/>
+            <Button x:Name="_startButton" Grid.Row="1" Grid.Column="0" Content="Start _Recognition" Click="StartButtonClick"  Padding="15" HorizontalContentAlignment="Stretch" Margin="10" VerticalAlignment="Bottom"/>
+            <Button x:Name="_stopButton" Grid.Row="2" Grid.Column="0" Content="Stop _Recognition" Click="StopButtonClick"  Padding="15" HorizontalContentAlignment="Stretch"  Margin="10" VerticalAlignment="Bottom"/>
         </Grid>
 
         <TextBox x:Name="crisLogText" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextWrapping="Wrap" Text="" VerticalScrollBarVisibility="Visible" Margin="0, 10, 10, 10" FontSize="22"/>

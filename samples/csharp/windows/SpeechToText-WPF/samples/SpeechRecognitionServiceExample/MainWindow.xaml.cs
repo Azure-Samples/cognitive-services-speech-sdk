@@ -1,27 +1,7 @@
-// <copyright file="MainWindow.xaml.cs" company="Microsoft">
-// Copyright (c) Microsoft Corporation
-// Licensed under the MIT license.
 //
-// MIT License:
-// Permission is hereby granted, free of charge, to any person obtaining
-// a copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// The above copyright notice and this permission notice shall be
-// included in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-// </copyright>
 
 namespace Microsoft.CognitiveServices.SpeechRecognition
 {
@@ -44,33 +24,32 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-      
         #region Properties
 
         /// <summary>
         /// True, if audio source is mic
         /// </summary>
-        public bool IsMicrophoneClient { get; set; }
+        public bool UseMicrophone { get; set; }
 
         /// <summary>
         /// True, if audio source is audio file
         /// </summary>
-        public bool IsDataClient { get; set; }
+        public bool UseFileInput { get; set; }
 
         /// <summary>
         /// Only baseline model used for recognition
         /// </summary>
-        public bool IsBasicReco { get; set; }
+        public bool UseBaseModel { get; set; }
 
         /// <summary>
         /// Only custom model used for recognition
         /// </summary>
-        public bool IsCustomReco { get; set; }
+        public bool UseCustomModel { get; set; }
 
         /// <summary>
         /// Both models used for recognition
         /// </summary>
-        public bool IsBothReco { get; set; }
+        public bool UseBaseAndCustomModels { get; set; }
 
         /// <summary>
         /// Gets or sets Subscription Key
@@ -90,51 +69,51 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         }
         
         /// <summary>
-        /// Gets or sets Region
+        /// Gets or sets region name of the service
         /// </summary>
         public string Region { get; set; }
 
         /// <summary>
-        /// Gets or sets Language
+        /// Gets or sets recognition language
         /// </summary>
-        public string Language { get; set; }
+        public string RecognitionLanguage { get; set; }
 
         /// <summary>
-        /// Gets or sets Cris model ID
+        /// Gets or sets deployment ID of the custom model
         /// </summary>
-        public string CrisModelId
+        public string CustomModelDeploymentId
         {
             get
             {
-                return this.crisModelId;
+                return this.deploymentId;
             }
 
             set
             {
-                this.crisModelId = value?.Trim();
+                this.deploymentId = value?.Trim();
                 this.OnPropertyChanged<string>();
             }
         }
 
         // Private properties
         private const string defaultLocale = "en-US";
-        private string crisModelId;
+        private string deploymentId;
         private string subscriptionKey;
-        private const string crisModelIdFileName = "CrisModelId.txt";
+        private const string deploymentIdFileName = "CustomModelDeploymentId.txt";
         private const string subscriptionKeyFileName = "SubscriptionKey.txt";
         // The TaskCompletionSource must be rooted.
         // See https://blogs.msdn.microsoft.com/pfxteam/2011/10/02/keeping-async-methods-alive/ for details.
-        private TaskCompletionSource<int> endBasicRecognitionTaskCompletionSource;
-        private TaskCompletionSource<int> endCustomRecognitionTaskCompletionSource;
+        private TaskCompletionSource<int> stopBaseRecognitionTaskCompletionSource;
+        private TaskCompletionSource<int> stopCustomRecognitionTaskCompletionSource;
 
         #endregion
 
         /// <summary>
-        /// For this app there are two recognizers, one with the baseline model (Basic), one with CRIS model (Custom)
+        /// For this app there are two recognizers, one with the baseline model (Base), one with CRIS model (Custom)
         /// </summary>
         enum RecoType
         {
-            Basic = 1,
+            Base = 1,
             Custom = 2
         }
 
@@ -152,19 +131,19 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// </summary>
         private void Initialize()
         {
-            this.IsMicrophoneClient= false;
-            this.IsDataClient = true;
+            this.UseMicrophone= false;
+            this.UseFileInput = true;
 
-            this.IsBasicReco = false;
-            this.IsCustomReco = false;
-            this.IsBothReco = true;
+            this.UseBaseModel = false;
+            this.UseCustomModel = false;
+            this.UseBaseAndCustomModels = true;
 
             // Set the default choice for radio buttons.
-            this.dataRadioButton.IsChecked = true;
+            this.fileInputRadioButton.IsChecked = true;
             this.bothRadioButton.IsChecked = true;
 
             this.SubscriptionKey = this.GetValueFromIsolatedStorage(subscriptionKeyFileName);
-            this.CrisModelId = this.GetValueFromIsolatedStorage(crisModelIdFileName);
+            this.CustomModelDeploymentId = this.GetValueFromIsolatedStorage(deploymentIdFileName);
         }
 
         /// <summary>
@@ -181,47 +160,47 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             this.startButton.IsEnabled = false;
             this.radioGroup.IsEnabled = false;
             this.optionPanel.IsEnabled = false;
-            this.LogRecognitionStart(this.crisLogText, this.crisCurrentText);
-            this.LogRecognitionStart(this.bingLogText, this.bingCurrentText);
+            this.LogRecognitionStart(this.customModelLogText, this.customModelCurrentText);
+            this.LogRecognitionStart(this.baseModelLogText, this.baseModelCurrentText);
             string wavFileName = "";
 
             this.Region = ((ComboBoxItem)regionComboBox.SelectedItem).Tag.ToString();
-            this.Language = ((ComboBoxItem)languageComboBox.SelectedItem).Tag.ToString();
+            this.RecognitionLanguage = ((ComboBoxItem)languageComboBox.SelectedItem).Tag.ToString();
 
             if (!AreKeysValid())
             {
                 MessageBox.Show("Subscription Key or Model ID is wrong or missing!");
-                if (this.IsBasicReco || this.IsBothReco)
+                if (this.UseBaseModel || this.UseBaseAndCustomModels)
                 {
-                    this.WriteLine(this.bingLogText, "--- Error : Subscription Key or Model Key is wrong or missing! ---");
+                    this.WriteLine(this.baseModelLogText, "--- Error : Subscription Key or Model Key is wrong or missing! ---");
                 }
 
-                if (this.IsCustomReco || this.IsBothReco)
+                if (this.UseCustomModel || this.UseBaseAndCustomModels)
                 {
-                    this.WriteLine(this.crisLogText, "--- Error : Subscription Key or Model Key is wrong or missing! ---");
+                    this.WriteLine(this.customModelLogText, "--- Error : Subscription Key or Model Key is wrong or missing! ---");
                 }
 
                 this.EnableButtons();
                 return;
             }
 
-            if (!this.IsMicrophoneClient)
+            if (!this.UseMicrophone)
             {
                 wavFileName = GetFile();
                 if (wavFileName.Length <= 0) return;
                 Task.Run(() => this.PlayAudioFile(wavFileName));
             }
 
-            if (this.IsCustomReco || this.IsBothReco)
+            if (this.UseCustomModel || this.UseBaseAndCustomModels)
             {
-                endCustomRecognitionTaskCompletionSource = new TaskCompletionSource<int>();
-                Task.Run(async () => { await CreateCustomReco(wavFileName, endCustomRecognitionTaskCompletionSource).ConfigureAwait(false); });
+                stopCustomRecognitionTaskCompletionSource = new TaskCompletionSource<int>();
+                Task.Run(async () => { await CreateCustomReco(wavFileName, stopCustomRecognitionTaskCompletionSource).ConfigureAwait(false); });
             }
 
-            if (this.IsBasicReco || this.IsBothReco)
+            if (this.UseBaseModel || this.UseBaseAndCustomModels)
             {
-                endBasicRecognitionTaskCompletionSource = new TaskCompletionSource<int>();
-                Task.Run(async () => { await CreateBasicReco(wavFileName, endBasicRecognitionTaskCompletionSource).ConfigureAwait(false); });
+                stopBaseRecognitionTaskCompletionSource = new TaskCompletionSource<int>();
+                Task.Run(async () => { await CreateBaseReco(wavFileName, stopBaseRecognitionTaskCompletionSource).ConfigureAwait(false); });
             }
         }
 
@@ -232,24 +211,24 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// Waits on RunRecognition
         /// </summary>
         /// <param name="wavFileName">file</param>
-        private async Task CreateBasicReco(string wavFileName, TaskCompletionSource<int> source)
+        private async Task CreateBaseReco(string wavFileName, TaskCompletionSource<int> source)
         {
             // Todo: suport users to specifiy a different region.
             var basicFactory = SpeechFactory.FromSubscription(this.SubscriptionKey, this.Region);
             SpeechRecognizer basicRecognizer;
 
-            if (this.IsMicrophoneClient)
+            if (this.UseMicrophone)
             {
-                using (basicRecognizer = basicFactory.CreateSpeechRecognizer(this.Language))
+                using (basicRecognizer = basicFactory.CreateSpeechRecognizer(this.RecognitionLanguage))
                 {
-                    await this.RunRecognizer(basicRecognizer, RecoType.Basic, source).ConfigureAwait(false);
+                    await this.RunRecognizer(basicRecognizer, RecoType.Base, source).ConfigureAwait(false);
                 }
             }
             else
             {
-                using (basicRecognizer = basicFactory.CreateSpeechRecognizerWithFileInput(wavFileName, this.Language))
+                using (basicRecognizer = basicFactory.CreateSpeechRecognizerWithFileInput(wavFileName, this.RecognitionLanguage))
                 {
-                    await this.RunRecognizer(basicRecognizer, RecoType.Basic, source).ConfigureAwait(false);
+                    await this.RunRecognizer(basicRecognizer, RecoType.Base, source).ConfigureAwait(false);
                 }
             }
         }
@@ -267,19 +246,19 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             var customFactory = SpeechFactory.FromSubscription(this.SubscriptionKey, this.Region);
             SpeechRecognizer customRecognizer;
 
-            if (this.IsMicrophoneClient)
+            if (this.UseMicrophone)
             {
-                using (customRecognizer = customFactory.CreateSpeechRecognizer(this.Language))
+                using (customRecognizer = customFactory.CreateSpeechRecognizer(this.RecognitionLanguage))
                 {
-                    customRecognizer.DeploymentId = this.CrisModelId;
+                    customRecognizer.DeploymentId = this.CustomModelDeploymentId;
                     await this.RunRecognizer(customRecognizer, RecoType.Custom, source).ConfigureAwait(false);
                 }
             }
             else
             {
-                using (customRecognizer = customFactory.CreateSpeechRecognizerWithFileInput(wavFileName, this.Language))
+                using (customRecognizer = customFactory.CreateSpeechRecognizerWithFileInput(wavFileName, this.RecognitionLanguage))
                 {
-                    customRecognizer.DeploymentId = this.CrisModelId;
+                    customRecognizer.DeploymentId = this.CustomModelDeploymentId;
                     await this.RunRecognizer(customRecognizer, RecoType.Custom, source).ConfigureAwait(false);
                 }
             }
@@ -292,7 +271,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// <param name="recognizer">Recognizer object</param>
         /// <param name="recoType">Type of Recognizer</param>
         ///  <value>
-        ///   <c>Basic</c> if Baseline model; otherwise, <c>Custom</c>.
+        ///   <c>Base</c> if Baseline model; otherwise, <c>Custom</c>.
         /// </value>
         private async Task RunRecognizer(SpeechRecognizer recognizer, RecoType recoType, TaskCompletionSource<int> source)
         {
@@ -304,7 +283,9 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             });
 
             if (isChecked)
+            {
                 recognizer.IntermediateResultReceived += (sender, e) => IntermediateResultEventHandler(e, recoType);
+            }
             recognizer.FinalResultReceived += (sender, e) => FinalResultEventHandler(e, recoType);
             recognizer.RecognitionErrorRaised += (sender, e) => ErrorEventHandler(e, recoType, source);
             recognizer.OnSessionEvent += (sender, e) => SessionEventHandler(e, recoType, source);
@@ -319,7 +300,9 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
 
             // unsubscribe from events
             if (isChecked)
+            {
                 recognizer.IntermediateResultReceived -= (sender, e) => IntermediateResultEventHandler(e, recoType);
+            }
             recognizer.FinalResultReceived -= (sender, e) => FinalResultEventHandler(e, recoType);
             recognizer.RecognitionErrorRaised -= (sender, e) => ErrorEventHandler(e, recoType, source);
             recognizer.OnSessionEvent -= (sender, e) => SessionEventHandler(e, recoType, source);
@@ -333,8 +316,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// </summary>
         private void IntermediateResultEventHandler(SpeechRecognitionResultEventArgs e, RecoType rt)
         {
-            var log = (rt == RecoType.Basic) ? this.bingLogText : this.crisLogText;
-
+            var log = (rt == RecoType.Base) ? this.baseModelLogText : this.customModelLogText;
             this.WriteLine(log, "Intermediate result: {0} ", e.Result.Text);
         }
 
@@ -344,15 +326,15 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         private void FinalResultEventHandler(SpeechRecognitionResultEventArgs e, RecoType rt)
         {
             TextBox log;
-            if (rt == RecoType.Basic)
+            if (rt == RecoType.Base)
             {
-                log = this.bingLogText;
-                this.SetCurrentText(this.bingCurrentText, e.Result.Text);
+                log = this.baseModelLogText;
+                this.SetCurrentText(this.baseModelCurrentText, e.Result.Text);
             }
             else
             {
-                log = this.crisLogText;
-                this.SetCurrentText(this.crisCurrentText, e.Result.Text);
+                log = this.customModelLogText;
+                this.SetCurrentText(this.customModelCurrentText, e.Result.Text);
             }
 
             this.WriteLine(log);
@@ -366,7 +348,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// </summary>
         private void ErrorEventHandler(RecognitionErrorEventArgs e, RecoType rt, TaskCompletionSource<int> source)
         {
-            var log = (rt == RecoType.Basic) ? this.bingLogText : this.crisLogText;
+            var log = (rt == RecoType.Base) ? this.baseModelLogText : this.customModelLogText;
             source.TrySetResult(0);
             this.WriteLine(log, "--- Error received ---");
             this.WriteLine(log, "Reason {0}", e.Status);
@@ -378,7 +360,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// </summary>
         private void SessionEventHandler(SessionEventArgs e, RecoType rt, TaskCompletionSource<int> source)
         {
-            var log = (rt == RecoType.Basic) ? this.bingLogText : this.crisLogText;
+            var log = (rt == RecoType.Base) ? this.baseModelLogText : this.customModelLogText;
             this.WriteLine(log, String.Format("Speech recognition: Session event: {0}.", e.ToString()));
             if (e.EventType == SessionEventType.SessionStoppedEvent)
             {
@@ -388,7 +370,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
 
         private void SpeechDetectedEventHandler(RecognitionEventArgs e, RecoType rt)
         {
-            var log = (rt == RecoType.Basic) ? this.bingLogText : this.crisLogText;
+            var log = (rt == RecoType.Base) ? this.baseModelLogText : this.customModelLogText;
             this.WriteLine(log, String.Format("Speech recognition: Speech event: {0}.", e.ToString()));
         }
 
@@ -453,7 +435,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             try
             {
                 SaveKeyToIsolatedStorage(subscriptionKeyFileName, this.SubscriptionKey);
-                SaveKeyToIsolatedStorage(crisModelIdFileName, this.CrisModelId);
+                SaveKeyToIsolatedStorage(deploymentIdFileName, this.CustomModelDeploymentId);
                 MessageBox.Show("Keys are saved to your disk.\nYou do not need to paste it next time.", "Keys");
             }
             catch (Exception exception)
@@ -472,7 +454,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         private bool AreKeysValid()
         {
             if (this.subscriptionKey == null || this.subscriptionKey.Length <= 0 ||
-                ((this.IsCustomReco || this.IsBothReco) && (this.crisModelId == null || this.crisModelId.Length <= 0)))
+                ((this.UseCustomModel || this.UseBaseAndCustomModels) && (this.deploymentId == null || this.deploymentId.Length <= 0)))
             {
                 return false;
             }
@@ -493,8 +475,8 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             if (!File.Exists(wavFileName))
             {
                 MessageBox.Show("File does not exist!");
-                this.WriteLine(this.bingLogText, "--- Error : File does not exist! ---");
-                this.WriteLine(this.crisLogText, "--- Error : File does not exist! ---");
+                this.WriteLine(this.baseModelLogText, "--- Error : File does not exist! ---");
+                this.WriteLine(this.customModelLogText, "--- Error : File does not exist! ---");
                 this.EnableButtons();
                 return "";
             }
@@ -517,7 +499,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         private void LogRecognitionStart(TextBox log, TextBlock currentText)
         {
             string recoSource;
-            recoSource = this.IsMicrophoneClient ? "microphone" : "wav file";
+            recoSource = this.UseMicrophone ? "microphone" : "wav file";
 
             this.SetCurrentText(currentText, string.Empty);
             log.Clear();
