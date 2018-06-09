@@ -28,7 +28,6 @@
 
 %include <std_wstring.i>
 %include <std_vector.i>
-%include <std_map.i>
 
 %define SWIGCSHARP_IMTYPE_WSTRING(TYPENAME)
 %typemap(imtype,
@@ -86,7 +85,6 @@ SWIGCSHARP_IMTYPE_WSTRING(const wchar_t*)
 
 SWIG_STD_VECTOR_ENHANCED(std::vector<std::wstring>)
 %template(UnsignedCharVector) std::vector<unsigned char>;
-%template(StdMapWStringWString) std::map<std::wstring, std::wstring>;
 
 %ignore operator bool;
 %ignore operator();

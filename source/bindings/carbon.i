@@ -51,6 +51,7 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::Value)
 
 %template(WstringVector) std::vector<std::wstring>;
+%template(StdMapWStringWString) std::map<std::wstring, std::wstring>;
 
 %ignore CallbackWrapper::GetFunction();
 %ignore FutureWrapper::FutureWrapper;

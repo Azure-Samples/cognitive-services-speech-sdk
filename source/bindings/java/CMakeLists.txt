@@ -180,11 +180,12 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/TranslationTextResult.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/TranslationTextResultEventArgs.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/TranslationTextResultPtrFuture.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/StdMapWStringWString.java
+    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/StdMapWStringWStringMapIterator.java
 
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Translation__SpeechScopeResourceValue_t.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Translation__SynthesisScopeResourceValue_t.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Translation__TextScopeResourceValue_t.java
-    ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_std__mapT_std__wstring_std__wstring_t.java
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_std__vectorT_unsigned_char_t.java
 
     ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/internal/SWIGTYPE_p_SPXEVENTHANDLE.java

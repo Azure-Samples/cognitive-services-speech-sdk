@@ -30,7 +30,54 @@
 %feature("director") AudioInputStream;
 %apply (char *STRING, int LENGTH) { (char* dataBuffer, size_t size) };
 
+%include "std_wstring.i"
+
+%typemap(javainterfaces) StdMapWStringWStringMapIterator "java.util.Iterator<String>"
+%typemap(javacode) StdMapWStringWStringMapIterator %{
+  public void remove() throws UnsupportedOperationException {
+    throw new UnsupportedOperationException();
+  }
+
+  public String next() throws java.util.NoSuchElementException {
+    if (!hasNext()) {
+      throw new java.util.NoSuchElementException();
+    }
+
+    return nextImpl();
+  }
+%}
+
+%javamethodmodifiers StdMapWStringWStringMapIterator::nextImpl "private";
+%inline %{
+#include <map>
+  struct StdMapWStringWStringMapIterator {
+    typedef std::map<std::wstring,std::wstring> WStringWStringMap;
+    StdMapWStringWStringMapIterator(const WStringWStringMap& m) : it(m.begin()), map(m) {
+    }
+
+    bool hasNext() const {
+      return it != map.end();
+    }
+
+    const std::wstring& nextImpl() {
+      const std::pair<std::wstring,std::wstring>& ret = *it++;
+      currentKey = ret.first; //get the key
+      return currentKey;
+    }
+  private:
+    std::wstring currentKey;
+    WStringWStringMap::const_iterator it;
+    const WStringWStringMap& map;
+  };
+%}
+
+%typemap(javainterfaces) std::map<std::wstring,std::wstring> "Iterable<String>"
+
+%newobject std::map<std::wstring,std::wstring>::iterator() const;
+%extend std::map<std::wstring,std::wstring> {
+  StdMapWStringWStringMapIterator *iterator() const {
+    return new StdMapWStringWStringMapIterator(*$self);
+  }
+}
+
 %include "carbon.i"
-
-
-// cmake  -G "NMake Makefiles" -DCMAKE_SYSTEM_NAME=Android  -DCMAKE_ANDROID_NDK=a:/android-ndk-r16b    -DCMAKE_SYSTEM_VERSION=26 .. -DCMAKE_ANDROID_STL_TYPE=c++_shared -DJAVA_AWT_LIBRARY=a:\android-ndk-r16b\sysroot\usr\include\  -DOPENSSL_ROOT_DIR=a:\Carbon\external\openssl\_install  -DCURL_LIBRARY=a:\Carbon\external\curl\_install\lib\libcurl.so -DCURL_INCLUDE_DIR=a:\Carbon\external\curl\_install\include -Duse_default_uuid=ON

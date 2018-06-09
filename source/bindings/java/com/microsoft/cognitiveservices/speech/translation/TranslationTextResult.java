@@ -24,6 +24,11 @@ public final class TranslationTextResult extends com.microsoft.cognitiveservices
         
         _TranslationStatus = result.getTranslationStatus() == com.microsoft.cognitiveservices.speech.internal.TranslationStatusCode.Success ? TranslationStatus.Success : TranslationStatus.Error;
         _Translations = new HashMap<String, String>();
+
+        com.microsoft.cognitiveservices.speech.internal.StdMapWStringWString imap = result.getTranslations();
+        for (String key : imap) {
+            _Translations.put(key, imap.get(key));
+        }
     }
 
     /**
