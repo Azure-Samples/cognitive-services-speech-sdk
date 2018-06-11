@@ -7,13 +7,16 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="100"></RowDefinition>
+            <RowDefinition Height="auto" ></RowDefinition>
         </Grid.RowDefinitions>
+        
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" MinWidth="100" MaxWidth="200"/>
+            <ColumnDefinition Width="*" MinWidth="110" MaxWidth="210"/>
             <ColumnDefinition Width="*" MinWidth="200"/>
         </Grid.ColumnDefinitions>
+        
         <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" Grid.ColumnSpan="2" Margin="0,0,400,0">Cognitive Services Translation Sample</Label>
+        
         <Grid Grid.Row="0" Grid.Column="1" Margin="0,0,10,0">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Label>Enter Subscription Key</Label>
@@ -23,13 +26,8 @@
         </Grid>
 
         <Grid Grid.Row="1" Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-            </Grid.RowDefinitions>
-            <Expander Header="Region and Language" Grid.Row="0" Margin="5" >
-                <StackPanel Orientation="Vertical">
+            <Expander Header="Region and Language" Margin="5" >
+                <StackPanel x:Name ="settingsPanel" Orientation="Vertical">
                     <Label>Specify region:</Label>
                     <ComboBox  x:Name="regionComboBox"  Text="Select Region" Margin="10" AllowDrop="True" >
                         <ComboBoxItem Tag="westus" IsSelected="true">westus</ComboBoxItem>
@@ -64,12 +62,33 @@
                         <ListBoxItem Tag="ru-RU">Russian</ListBoxItem>
                         <ListBoxItem Tag="es-ES">Spanish</ListBoxItem>
                     </ListBox>
+
+                    <Label>Select Language for Voice:</Label>
+                    <ComboBox  x:Name="voiceComboBox" Text="Select Language for Voice"  Margin="10" AllowDrop="True">
+                        <ComboBoxItem Tag="en-US">English</ComboBoxItem>
+                        <ComboBoxItem Tag="ar-EG">Arabic</ComboBoxItem>
+                        <ComboBoxItem Tag="zh-CN" IsSelected="true">Chinese (Mandarin)</ComboBoxItem>
+                        <ComboBoxItem Tag="fr-FR">French</ComboBoxItem>
+                        <ComboBoxItem Tag="de-DE">German</ComboBoxItem>
+                        <ComboBoxItem Tag="it-IT">Italian</ComboBoxItem>
+                        <ComboBoxItem Tag="ja-JP">Japanese</ComboBoxItem>
+                        <ComboBoxItem Tag="pt-BR">Portugese</ComboBoxItem>
+                        <ComboBoxItem Tag="ru-RU">Russian</ComboBoxItem>
+                        <ComboBoxItem Tag="es-ES">Spanish</ComboBoxItem>
+                    </ComboBox>
                 </StackPanel>
             </Expander>
-            <Button x:Name="_startButton" Grid.Row="1" Grid.Column="0" Content="Start _Recognition" Click="StartButtonClick"  Padding="15" HorizontalContentAlignment="Stretch" Margin="10" VerticalAlignment="Bottom"/>
-            <Button x:Name="_stopButton" Grid.Row="2" Grid.Column="0" Content="Stop _Recognition" Click="StopButtonClick"  Padding="15" HorizontalContentAlignment="Stretch"  Margin="10" VerticalAlignment="Bottom"/>
         </Grid>
 
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Button x:Name="_startButton" Grid.Row="0" Grid.Column="0" Content="Start _Recognition" Click="StartButtonClick"  Padding="15" HorizontalContentAlignment="Stretch" Margin="10" VerticalAlignment="Bottom"/>
+            <Button x:Name="_stopButton" Grid.Row="1" Grid.Column="0" Content="Stop _Recognition" Click="StopButtonClick"  Padding="15" HorizontalContentAlignment="Stretch"  Margin="10" VerticalAlignment="Bottom"/>
+        </Grid>
+        
         <TextBox x:Name="crisLogText" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextWrapping="Wrap" Text="" VerticalScrollBarVisibility="Visible" Margin="0, 10, 10, 10" FontSize="22"/>
         <TextBlock x:Name="crisCurrentText" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextWrapping="Wrap" Text="" />
     </Grid>

@@ -236,9 +236,15 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         public List<string> ToLanguages { get; set; }
 
         /// <summary>
+        /// Gets or sets Voice Parameter's Language
+        /// </summary>
+        public string VoiceLanguage { get; set; }
+
+        /// <summary>
         /// Handles the Click event of the _startButton control.
-        /// Sets Region, FromLanguage and ToLanguages as specified by user input
-        /// Sets voice to use same language as the first selected TO Language
+        /// Disables UI of Language/Region settings
+        /// Sets Region, FromLanguage, ToLanguages and VoiceLanguage as specified by user input
+        /// Adds selected VoiceLanguage first to ToLanguages
         /// Checks if Subscription Key is valid
         /// Calls CreateRecognizer()
         /// Waits on a thread which is running the recognition
@@ -247,17 +253,23 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
         private async void StartButtonClick(object sender, RoutedEventArgs e)
         {
+
+            this.settingsPanel.IsEnabled = false;
             this.SubscriptionKey = this.GetSubscriptionKeyFromFile(SubscriptionKeyFileName);
             this.Region = ((ComboBoxItem)regionComboBox.SelectedItem).Tag.ToString();
             this.FromLanguage = ((ComboBoxItem)fromLanguageComboBox.SelectedItem).Tag.ToString();
             this.ToLanguages = new List<string>();
+            this.VoiceLanguage = ((ComboBoxItem)voiceComboBox.SelectedItem).Tag.ToString();
+
+            this.voice = voiceMap[this.VoiceLanguage];
+            this.ToLanguages.Add(this.VoiceLanguage);
             foreach (ListBoxItem selectedLanguage in toLanguagesListBox.SelectedItems)
             {
-                if (this.ToLanguages.Count == 0)
+                string languageCode = selectedLanguage.Tag.ToString();
+                if (!this.ToLanguages.Contains(languageCode))
                 {
-                    voice = voiceMap[selectedLanguage.Tag.ToString()];
+                    this.ToLanguages.Add(languageCode);
                 }
-                this.ToLanguages.Add(selectedLanguage.Tag.ToString());
             }
 
             if (this.subscriptionKey == null || this.subscriptionKey.Length <= 0)
@@ -284,6 +296,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         {
             if (this.started)
             {
+                this.settingsPanel.IsEnabled = true;
                 await Task.Run(async () => { await this.recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false); });
                 this.started = false;
             }
