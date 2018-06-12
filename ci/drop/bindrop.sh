@@ -73,6 +73,8 @@ SRCPRIVINC="$SOURCE_ROOT/source/core/include"
 SRCPRIVINC2="$SOURCE_ROOT/source/core/common/include"
 
 DESTPUBLIB="$DEST/public/lib"
+DESTPUBLIBNET46="$DEST/public/lib/net461"
+DESTPUBLIBNETSTANDARD20="$DEST/public/lib/netstandard2.0"
 DESTPUBBIN="$DEST/public/bin"
 DESTPUBINC="$DEST/public/include"
 DESTPRIVLIB="$DEST/private/lib"
@@ -82,7 +84,7 @@ DESTPRIVINC2="$DEST/private/include.common"
 printf "\nCopying files to drop location\n"
 
 # N.B. no long option for -p (parents) on OSX.
-mkdir -p "$DESTPUBLIB" "$(dirname "$DESTPUBINC")" "$DESTPRIVLIB" "$(dirname "$DESTPRIVINC")" "$(dirname "$DESTPRIVINC2")"  "$DESTPUBLIB"
+mkdir -p "$DESTPUBLIB" "$DESTPUBLIBNET46" "$DESTPUBLIBNETSTANDARD20" "$(dirname "$DESTPUBINC")" "$DESTPRIVLIB" "$(dirname "$DESTPRIVINC")" "$(dirname "$DESTPRIVINC2")"  "$DESTPUBLIB"
 
 # N.B. no long option for -v (verbose) and -p (preserve) on OSX.
 CPOPT="-v -p"
@@ -93,8 +95,10 @@ cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*$DYNLIBSUFFIX "$DESTPUBLIB"
 if [[ $OS = "Windows_NT" ]]; then
   if [[ $TARGET != "ANDROID" ]]; then
     cp $CPOPT "$SRCLIB"/$LIBPREFIX*.lib "$DESTPUBLIB"
-    cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*.pdb "$DESTPUBLIB"
-    cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*.xml "$DESTPUBLIB"
+    cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*.pdb "$DESTPUBLIB"    
+
+    cp $CPOPT "$SRCDYNLIB"/net461/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBNET46"
+    cp $CPOPT "$SRCDYNLIB"/netstandard2.0/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBNETSTANDARD20"    
   fi
 fi
 

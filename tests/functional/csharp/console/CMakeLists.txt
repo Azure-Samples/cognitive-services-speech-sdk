@@ -21,6 +21,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
-   VS_DOTNET_REFERENCES "System;System.Net.Http")
+   VS_DOTNET_REFERENCES "System;System.Net.Http"
+   VS_DOTNET_REFERENCE_Speech "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)/net461/${CSHARP_LIB}.dll"
+)
 
 endif()

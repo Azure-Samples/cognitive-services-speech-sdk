@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{5BDDBE11-B03D-3784-9970-94A9784428A5}</ProjectGuid>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectName>Microsoft.CognitiveServices.Speech.csharp</ProjectName>
+    <AssemblyName>Microsoft.CognitiveServices.Speech.csharp</AssemblyName>
+    <OutputType>Library</OutputType>
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    <NuGetPackageImportStamp></NuGetPackageImportStamp>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <Configurations>Debug;Release</Configurations>
+    <NoWarn>1701;1702;1705;1591</NoWarn>
+    <Version>0.0.0</Version>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OutputPath>${CMAKE_RUNTIME_OUTPUT_DIRECTORY}\$(Configuration)\</OutputPath>
+    <DocumentationFile>${CMAKE_RUNTIME_OUTPUT_DIRECTORY}\$(Configuration)\$(TargetFramework)\Microsoft.CognitiveServices.Speech.csharp.xml</DocumentationFile>
+    <IntermediateOutputPath>csharp_int\$(Configuration)\$(TargetFramework)\$(Platform)</IntermediateOutputPath>
+    <SignAssembly>true</SignAssembly>
+    <DelaySign>false</DelaySign>
+    <AssemblyOriginatorKeyFile>${SRC_DIR}/cognitive_services_speech_keypair.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="${SRC_DIR}/CMakeLists.txt">
+      <Link>CMakeLists.txt</Link>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="${CMAKE_CURRENT_BINARY_DIR}\swig-generated\*.cs" />
+    <Compile Include="${SRC_DIR}\*.cs"/>
+  </ItemGroup>
+</Project>

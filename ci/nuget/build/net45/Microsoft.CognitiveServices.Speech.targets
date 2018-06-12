@@ -10,8 +10,17 @@
       <Link>Microsoft.CognitiveServices.Speech.core.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="$(SpeechNativeLibDir)\Microsoft.CognitiveServices.Speech.csharp.bindings.dll">
-      <!-- TODO or: $(SpeechPackageRoot)build\native\$(Platform)\Release\Microsoft.CognitiveServices.Speech.csharp.bindings.dll -->
+  </ItemGroup>
+  <!-- This is to enable back compat with old nugets on Windows.
+       PackageReference takes care of this automatically for any platform. -->
+  <ItemGroup Condition="'$(TargetFramework)' == '' AND ('$(Platform)' == 'x86' OR '$(Platform)' == 'AnyCPU')">
+    <None Include="$(SpeechPackageRoot)runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.csharp.bindings.dll">
+      <Link>Microsoft.CognitiveServices.Speech.csharp.bindings.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == '' AND '$(Platform)' == 'x64'">
+    <None Include="$(SpeechPackageRoot)runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.csharp.bindings.dll">
       <Link>Microsoft.CognitiveServices.Speech.csharp.bindings.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

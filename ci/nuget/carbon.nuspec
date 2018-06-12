@@ -11,7 +11,7 @@
     <licenseUrl>https://aka.ms/csspeech/license</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>Microsoft Cognitive Services Speech SDK</description>
-    <summary>This NuGet package provides native and managed libraries to use the Microsoft Cognitive Services Speech functionality. It requires Visual Studio 2017. Documentation is available at https://aka.ms/csspeech</summary>
+    <summary>This NuGet package provides native and managed libraries for the Microsoft Cognitive Services Speech SDK. Documentation is available at https://aka.ms/csspeech</summary>
     <tags>Microsoft Speech Cognitive Services native C++ C# .Net</tags>
     <releaseNotes>This is version $Version$.</releaseNotes>
     <dependencies />
@@ -20,6 +20,7 @@
     <!-- target and property files -->
     <file src="build\native\Microsoft.CognitiveServices.Speech.targets" target="build\native\Microsoft.CognitiveServices.Speech.targets" />
     <file src="build\net45\Microsoft.CognitiveServices.Speech.targets" target="build\net45\Microsoft.CognitiveServices.Speech.targets" />
+    <file src="build\netstandard2.0\Microsoft.CognitiveServices.Speech.targets" target="build\netstandard2.0\Microsoft.CognitiveServices.Speech.targets" />
     <file src="build\Microsoft.CognitiveServices.Speech.props" target="build\Microsoft.CognitiveServices.Speech.props" />
 
     <!-- C++ header files -->
@@ -29,7 +30,6 @@
     <file src="$DropDir$\Win32\Release\public\include\c_api\*" target="build\native\include\c_api\" />
 
     <!-- native dll and lib files -->
-    <!-- TODO fix me -->
     <file src="$DropDir$\Win32\Debug\public\lib\Microsoft.CognitiveServices.Speech.core.lib" target="build\native\Win32\Debug\Microsoft.CognitiveServices.Speech.core.lib" />
     <file src="$DropDir$\Win32\Debug\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="build\native\Win32\Debug\Microsoft.CognitiveServices.Speech.core.dll" />
     <file src="$DropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.lib" target="build\native\Win32\Release\Microsoft.CognitiveServices.Speech.core.lib" />
@@ -41,13 +41,12 @@
     <file src="$DropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="build\native\x64\Release\Microsoft.CognitiveServices.Speech.core.dll" />
 
     <!-- .NET dlls -->
-    <!-- (Note: Microsoft.CognitiveServices.Speech.csharp.dll was changed to an AnyCPU assembly using corflags during build) -->
-    <file src="$DropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.csharp.dll" target="lib\net45\Microsoft.CognitiveServices.Speech.csharp.dll" />
-    <file src="$DropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.csharp.xml" target="lib\net45\Microsoft.CognitiveServices.Speech.csharp.xml" />
-    <file src="$DropDir$\Win32\Debug\public\lib\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" target="build\native\Win32\Debug\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" />
-    <file src="$DropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" target="build\native\Win32\Release\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" />
-    <file src="$DropDir$\x64\Debug\public\lib\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" target="build\native\x64\Debug\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" />
-    <file src="$DropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" target="build\native\x64\Release\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" />
+    <file src="$DropDir$\Win32\Release\public\lib\net461\Microsoft.CognitiveServices.Speech.csharp.dll" target="lib\net45\Microsoft.CognitiveServices.Speech.csharp.dll" />
+    <file src="$DropDir$\Win32\Release\public\lib\net461\Microsoft.CognitiveServices.Speech.csharp.xml" target="lib\net45\Microsoft.CognitiveServices.Speech.csharp.xml" />
+    <file src="$DropDir$\Win32\Release\public\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" />
+    <file src="$DropDir$\Win32\Release\public\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" target="lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" />
+    <file src="$DropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" target="runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" />
+    <file src="$DropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" />
 
   </files>
 </package>
