@@ -82,7 +82,7 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Gets/sets the region name of the service to be connected.
+        /// Gets the region name of the service to be connected.
         /// </summary>
         public string Region
         {
@@ -98,7 +98,7 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Gets/Sets the service endpoint when connecting to the service.
+        /// Gets the service endpoint when connecting to the service.
         /// </summary>
         public Uri EndpointURL
         {
