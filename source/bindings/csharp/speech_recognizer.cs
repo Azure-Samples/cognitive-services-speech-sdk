@@ -103,7 +103,7 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Gets/gets the deployment id of a customized speech model that is used for speech recognition.
+        /// Gets/sets the deployment id of a customized speech model that is used for speech recognition.
         /// </summary>
         public string DeploymentId
         {

@@ -48,18 +48,13 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Gets/sets the subscription key.
+        /// Gets the subscription key.
         /// </summary>
         public string SubscriptionKey
         {
             get
             {
                 return Parameters.Get<string>(FactoryParameterNames.SubscriptionKey);
-            }
-
-            private set
-            {
-                Parameters.Set(FactoryParameterNames.SubscriptionKey, value);
             }
         }
 
@@ -90,11 +85,6 @@ namespace Microsoft.CognitiveServices.Speech
             {
                 return Parameters.Get<string>(FactoryParameterNames.Region);
             }
-
-            private set
-            {
-                Parameters.Set(FactoryParameterNames.Region, value);
-            }
         }
 
         /// <summary>
@@ -106,11 +96,6 @@ namespace Microsoft.CognitiveServices.Speech
             {
                 var endpointStr = Parameters.Get<string>(FactoryParameterNames.Endpoint);
                 return new Uri(endpointStr);
-            }
-
-            private set
-            {
-                Parameters.Set(FactoryParameterNames.Endpoint, value.AbsoluteUri);
             }
         }
 
