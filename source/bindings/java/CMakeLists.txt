@@ -89,6 +89,7 @@ set(JAVA_SOURCES
     com/microsoft/cognitiveservices/speech/SpeechRecognitionResult.java
     com/microsoft/cognitiveservices/speech/SpeechRecognitionResultEventArgs.java
     com/microsoft/cognitiveservices/speech/SpeechRecognizer.java
+    com/microsoft/cognitiveservices/speech/SpeechOutputFormat.java
 
     com/microsoft/cognitiveservices/speech/intent/IntentRecognitionResult.java
     com/microsoft/cognitiveservices/speech/intent/IntentRecognitionResultEventArgs.java

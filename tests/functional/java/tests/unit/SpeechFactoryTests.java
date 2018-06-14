@@ -99,79 +99,36 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Test
-    public void testSetRegion() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
-        assertNotNull(s);
-        assertEquals(Settings.SpeechRegion, s.getRegion());
-
-        String newRegion = Settings.SpeechRegion + Settings.LuisSubscriptionKey;
-        s.setRegion(newRegion);
-        
-        assertEquals(newRegion, s.getRegion());
-        
-        s.close();
-    }
-
-
     // -----------------------------------------------------------------------
     // --- 
     // -----------------------------------------------------------------------
     
     @Test(expected = NullPointerException.class)
-    public void testFromAuthorizationToken1() {
-        SpeechFactory s = SpeechFactory.fromAuthorizationToken(null, null);
+    public void testFromEndpoint1() {
+        SpeechFactory s = SpeechFactory.fromEndPoint(null, null);
     }
 
     @Test(expected = NullPointerException.class)
-    public void testFromAuthorizationToken2() {
-        SpeechFactory s = SpeechFactory.fromAuthorizationToken(null, Settings.SpeechRegion);
+    public void testFromEndpoint2() {
+        SpeechFactory s = SpeechFactory.fromEndPoint(null, Settings.SpeechRegion);
     }
 
     @Test(expected = NullPointerException.class)
-    public void testFromAuthorizationToken3() {
-        SpeechFactory s = SpeechFactory.fromAuthorizationToken(Settings.SpeechAuthorizationToken, null);
+    public void testFromEndpoint3() {
+        SpeechFactory s = SpeechFactory.fromEndPoint(URI.create("http://www.example.com"), null);
     }
 
     @Ignore // TODO why does illegal token not fail? 
     @Test(expected = RuntimeException.class)
-    public void testFromAuthorizationToken4() {
-        SpeechFactory s = SpeechFactory.fromAuthorizationToken("illegal-token", "illegal-region");
+    public void testFromEndpoint4() {
+        SpeechFactory s = SpeechFactory.fromEndPoint(URI.create("http://www.example.com"), "illegal-subscription");
     }
     
     @Test
-    public void testFromAuthorizationTokenSuccess() {
-        SpeechFactory s = SpeechFactory.fromAuthorizationToken(Settings.SpeechAuthorizationToken, Settings.SpeechRegion);
+    public void testFromEndpointSuccess() {
+        SpeechFactory s = SpeechFactory.fromEndPoint(URI.create("http://www.example.com"), Settings.SpeechSubscriptionKey);
         
         assertNotNull(s);
-        
-        s.close();
-    }
-
-    
-    // -----------------------------------------------------------------------
-    // --- 
-    // -----------------------------------------------------------------------
-    
-    @Test
-    public void testGetAuthorizationToken() {
-        SpeechFactory s = SpeechFactory.fromAuthorizationToken(Settings.SpeechAuthorizationToken, Settings.SpeechRegion);
-
-        assertEquals(Settings.SpeechAuthorizationToken, s.getAuthorizationToken());
-        assertEquals(Settings.SpeechRegion, s.getRegion());
-        
-        s.close();
-    }
-
-    @Test
-    public void testSetAuthorizationToken() {
-        SpeechFactory s = SpeechFactory.fromAuthorizationToken(Settings.SpeechAuthorizationToken, Settings.SpeechRegion);
-
-        String newToken = "new-" + Settings.SpeechAuthorizationToken;
-        s.setAuthorizationToken(newToken);
-        
-        assertEquals(newToken, s.getAuthorizationToken());
         
         s.close();
     }
@@ -186,17 +143,6 @@ public class SpeechFactoryTests {
 
         assertNotNull(s.getEndpoint());
         
-        s.close();
-    }
-
-    @Test
-    public void testSetEndpoint() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
-        URI newEndpoint = URI.create("https://www.example.com/api/v1/");
-        s.setEndpoint(newEndpoint);
-
-        assertEquals(newEndpoint, s.getEndpoint());
         s.close();
     }
 
@@ -218,7 +164,9 @@ public class SpeechFactoryTests {
 
     @Test
     public void testGetParameters2() {
-        SpeechFactory s = SpeechFactory.fromAuthorizationToken(Settings.SpeechAuthorizationToken, Settings.SpeechRegion);
+        SpeechFactory s1 = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+
+        SpeechFactory s = SpeechFactory.fromEndPoint(s1.getEndpoint(), Settings.SpeechSubscriptionKey);
         
         assertNotNull(s.getParameters());
         assertEquals(s.getRegion(), s.getParameters().getString(FactoryParameterNames.Region));
@@ -355,6 +303,57 @@ public class SpeechFactoryTests {
         r.close();
         s.close();
     }
+
+    // -----------------------------------------------------------------------
+    // --- 
+    // -----------------------------------------------------------------------
+
+    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Test
+    public void testCreateSpeechRecognizerLanguage1() {
+        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+
+        try {
+            SpeechRecognizer r = s.createSpeechRecognizer(null);
+            fail("not expected");
+        }
+        catch(NullPointerException ex) {
+            // expected
+        }
+        
+        s.close();
+    }
+
+    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Test
+    public void testCreateSpeechRecognizerLanguage2() {
+        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+
+        try {
+            SpeechRecognizer r = s.createSpeechRecognizer("illegal-language");
+            fail("not expected");
+        }
+        catch(RuntimeException ex) {
+            // expected
+        }
+        
+        s.close();
+    }
+    
+    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Test
+    public void testCreateSpeechRecognizerLanguageSuccess() {
+        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        
+        SpeechRecognizer r = s.createSpeechRecognizer("en-US");
+        
+        assertNotNull(r);
+        assertTrue(r instanceof Recognizer);
+        
+        r.close();
+        s.close();
+    }
+
 
     // -----------------------------------------------------------------------
     // --- 
@@ -586,6 +585,53 @@ public class SpeechFactoryTests {
 
         IntentRecognizer r = s.createIntentRecognizer();
 
+        s.close();
+    }
+
+    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Test
+    public void testCreateIntentRecognizerLanguage1() {
+        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+
+        try {
+            IntentRecognizer r = s.createIntentRecognizer((String)null);
+            fail("not expected");
+        }
+        catch(RuntimeException ex) {
+            // expected
+        }
+
+        s.close();
+    }
+    
+    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Test
+    public void testCreateIntentRecognizerLanguage2() {
+        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+
+        try {
+            IntentRecognizer r = s.createIntentRecognizer("illegal-language");
+            fail("not expected");
+        }
+        catch(RuntimeException ex) {
+            // expected
+        }
+
+        s.close();
+    }
+       
+    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Test
+    public void testCreateIntentRecognizerLanguageSuccess() {
+        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+
+        IntentRecognizer r = s.createIntentRecognizer("en-US");
+        
+        assertNotNull(r);
+        assertNotNull(r.getRecoImpl());
+        assertTrue(r instanceof Recognizer);
+
+        r.close();
         s.close();
     }
 

@@ -25,20 +25,28 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
     }
 
     /**
-      * Creates an instance of recognizer factory with specified subscription key or authentication token and region.
-      * @param isSubscription If true, authenticates via the subscriptionKey. If false, authenticates via the authorizationToken.
-      * @param subscriptionKeyOrAuthorizationToken The subscription key or authenticationToken based on the isSubscription flag.
+      * Creates an instance of recognizer factory with specified subscription key and region.
+      * @param subscriptionKey The subscription key.
       * @param region The region name.
       */
-    private SpeechFactory(boolean isSubscription, String subscriptionKeyOrAuthorizationToken, String region) {
-        factoryImpl = isSubscription ? 
-            com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromSubscription(subscriptionKeyOrAuthorizationToken, region) :
-            com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromAuthorizationToken(subscriptionKeyOrAuthorizationToken, region);
+    private SpeechFactory(String subscriptionKey, String region) {
+        factoryImpl = com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromSubscription(subscriptionKey, region);
 
         // connect the native properties with the swig layer.
         _Parameters = new ParameterCollection<SpeechFactory>(this);
+    }
 
-        setRegion(region);
+    /**
+      * Creates an instance of recognizer factory with specified subscription key and endpoint.
+      * @param region The region name.
+      * @param endpoint The endpoint.
+      * @param subscriptionKey The subscription key or authenticationToken based on the isSubscription flag.
+      */
+    private SpeechFactory(java.net.URI endpoint, String subscriptionKey) {
+        factoryImpl = com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromEndpoint(endpoint.toString(), subscriptionKey);
+
+        // connect the native properties with the swig layer.
+        _Parameters = new ParameterCollection<SpeechFactory>(this);
     }
 
     /**
@@ -48,18 +56,23 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return The speech factory
       */
     public static SpeechFactory fromSubscription(String subscriptionKey, String region) {
-        return new SpeechFactory(true, subscriptionKey, region);
+        return new SpeechFactory(subscriptionKey, region);
     }    
 
     /**
-      * Static instance of SpeechFactory returned by passing authorization token.
-      * @param authorizationToken The authorization token.
-      * @param region The region name.
-      * @return The speech factory
+      * Creates an instance of the speech factory with specified endpoint and subscription key.
+      * This method is intended only for users who use a non-standard service endpoint.
+      * Note: The query parameters specified in the endpoint URL are not changed, even if they are set by any other APIs.
+      * For example, if language is defined in uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
+      * the language setting in uri takes precedence, and the effective language is "de-DE".
+      * Only the parameters that are not specified in the endpoint URL can be set by other APIs.
+      * @param endpoint The service endpoint to connect to.
+      * @param subscriptionKey The subscription key.
+      * @return A speech factory instance.
       */
-    public static SpeechFactory fromAuthorizationToken(String authorizationToken, String region) {
-        return new SpeechFactory(false, authorizationToken, region);
-    }  
+    public static SpeechFactory fromEndPoint(java.net.URI endpoint, String subscriptionKey) {
+        return new SpeechFactory(endpoint, subscriptionKey);
+    }
     
     /**
       * Gets the subscription key.
@@ -98,32 +111,11 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
     }
 
     /**
-      * Sets the region name of the service to be connected.
-      * @param value the region name of the service to be connected.
-      */
-    public void setRegion(String value) {
-        _Parameters.set(FactoryParameterNames.Region, value);
-    }
-
-    /**
       * Gets the service endpoint.
       * @return the service endpoint.
       */
     public URI getEndpoint() {
         return URI.create(_Parameters.getString(FactoryParameterNames.Endpoint));
-    }
-
-    /**
-      * Sets the service endpoint.
-      * This method is intended only for users who use a non-standard service endpoint.
-      * Note: The query parameters specified in the endpoint URL are not changed, even if they are set by any other APIs.
-      * For example, if language is defined in uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
-      * the language setting in uri takes precedence, and the effective language is "de-DE".
-      * Only the parameters that are not specified in the endpoint URL can be set by other APIs.
-      * @param value the service endpoint.
-      */
-    public void setEndpoint(URI value) {
-        _Parameters.set(FactoryParameterNames.Endpoint, value.toString());
     }
 
     /**
@@ -144,6 +136,29 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
     }
 
     /**
+      * Creates a speech recognizer, using the default microphone input.
+      * @param language Specifies the name of spoken language to be recognized in BCP-47 format.
+      * @return A speech recognizer instance.
+      */
+    public SpeechRecognizer createSpeechRecognizer(String language) {
+        return new SpeechRecognizer(factoryImpl.createSpeechRecognizer(language), null);
+    }
+
+    /**
+      * Creates a speech recognizer, using the default microphone input.
+      * @param language Specifies the name of spoken language to be recognized in BCP-47 format.
+      * @param format Output format, simple or detailed.
+      * @return A speech recognizer instance.
+      */
+    public SpeechRecognizer createSpeechRecognizer(String language, SpeechOutputFormat format) {
+        return new SpeechRecognizer(factoryImpl.createSpeechRecognizer(language,
+            format == SpeechOutputFormat.Simple ?
+                    com.microsoft.cognitiveservices.speech.internal.OutputFormat.Simple :
+                    com.microsoft.cognitiveservices.speech.internal.OutputFormat.Detailed
+                    ), null);
+    }
+
+    /**
       * Creates a speech recognizer, using the specified file as audio input.
       * @param audioFile Specifies the audio input file.
       * @return A speech recognizer instance.
@@ -160,6 +175,20 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
      */
     public SpeechRecognizer createSpeechRecognizerWithFileInput(String audioFile, String language) {
         return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithFileInput(audioFile, language), null);
+    }
+    /**
+     * Creates a speech recognizer, using the specified file as audio input.
+     * @param audioFile Specifies the audio input file.
+     * @param language Specifies the name of spoken language to be recognized in BCP-47 format.
+     * @param format. Output format, simple or detailed.
+     * @return A speech recognizer instance.
+     */
+    public SpeechRecognizer createSpeechRecognizerWithFileInput(String audioFile, String language, SpeechOutputFormat format) {
+        return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithFileInput(audioFile, language,
+                    format == SpeechOutputFormat.Simple ?
+                        com.microsoft.cognitiveservices.speech.internal.OutputFormat.Simple :
+                        com.microsoft.cognitiveservices.speech.internal.OutputFormat.Detailed
+                    ), null);
     }
 
     /**
@@ -180,6 +209,21 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
     public SpeechRecognizer createSpeechRecognizerWithStream(AudioInputStream audioStream, String language) {
        return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithStreamImpl(audioStream, language), audioStream);
     }
+
+    /**
+     * Creates a speech recognizer, using the specified input stream as audio input.
+     * @param audioStream Specifies the audio input stream.
+     * @param language Specifies the name of spoken language to be recognized in BCP-47 format.
+     * @param format. Output format, simple or detailed.
+     * @return A speech recognizer instance.
+     */
+    public SpeechRecognizer createSpeechRecognizerWithStream(AudioInputStream audioStream, String language, SpeechOutputFormat format) {
+       return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithStreamImpl(audioStream, language,
+                   format == SpeechOutputFormat.Simple ?
+                    com.microsoft.cognitiveservices.speech.internal.OutputFormat.Simple :
+                    com.microsoft.cognitiveservices.speech.internal.OutputFormat.Detailed
+                    ), audioStream);
+    }
     
     /**
       * Creates an intent recognizer, using the specified file as audio input.
@@ -187,6 +231,15 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       */
     public IntentRecognizer createIntentRecognizer() {
         return new IntentRecognizer(factoryImpl.createIntentRecognizer(), null);
+    }
+
+    /**
+      * Creates an intent recognizer, using the specified file as audio input.
+      * @param language Specifies the name of spoken language to be recognized in BCP-47 format.
+      * @return An intent recognizer instance.
+      */
+    public IntentRecognizer createIntentRecognizer(String language) {
+        return new IntentRecognizer(factoryImpl.createIntentRecognizer(language), null);
     }
 
     /**
