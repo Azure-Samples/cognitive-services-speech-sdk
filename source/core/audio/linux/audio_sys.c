@@ -86,7 +86,7 @@ typedef struct AUDIO_SYS_DATA_TAG
     // must be a multiple of inputFrameSize
     size_t                  bufferCapacity;
 
-    // current audio capture block for processing 
+    // current audio capture block for processing
     int16_t*       audioSamples;
     sem_t          audioFrameAvailable;
     LOCK_HANDLE    audioBufferLock;
@@ -202,8 +202,8 @@ static AUDIO_RESULT write_audio_stream(
     for (size_t index = 0; index < MAX_DEVICES; index++)
     {
         if ( audioData->audioDevices[index].rate == 0 ||
-            // alsa doesn't do a good job with starting a device instance with a 
-            // lower samplerate and channels (garbage audio).  Make the ALSA 
+            // alsa doesn't do a good job with starting a device instance with a
+            // lower samplerate and channels (garbage audio).  Make the ALSA
             // pool match the assigned settings before using it.
             ((audioData->audioDevices[index].rate == outputWaveFmt->nSamplesPerSec) && (audioData->audioDevices[index].nChannels == outputWaveFmt->nChannels)))
         {
@@ -449,7 +449,7 @@ static int init_alsa_pcm_device(snd_pcm_t** pcmHandle, snd_pcm_stream_t streamTy
         }
 
         if ((paramerr = snd_pcm_hw_params_malloc(&hw_params)) < 0)
-        {    
+        {
             LogError("Failure setting up malloc hardware info: %s %d:%s - %s.", STRING_c_str(audioData->hDeviceName),paramerr, snd_strerror(paramerr), (streamType == SND_PCM_STREAM_PLAYBACK) ? "playback" : "recording");
             result = __LINE__;
         }
@@ -621,12 +621,12 @@ void audio_destroy(AUDIO_SYS_HANDLE handle)
     }
 }
 
-AUDIO_RESULT audio_setcallbacks(AUDIO_SYS_HANDLE              handle, 
-                                ON_AUDIOOUTPUT_STATE_CALLBACK output_cb, 
-                                void*                         output_ctx, 
-                                ON_AUDIOINPUT_STATE_CALLBACK  input_cb, 
-                                void*                         input_ctx, 
-                                AUDIOINPUT_WRITE              audio_write_cb, 
+AUDIO_RESULT audio_setcallbacks(AUDIO_SYS_HANDLE              handle,
+                                ON_AUDIOOUTPUT_STATE_CALLBACK output_cb,
+                                void*                         output_ctx,
+                                ON_AUDIOINPUT_STATE_CALLBACK  input_cb,
+                                void*                         input_ctx,
+                                AUDIOINPUT_WRITE              audio_write_cb,
                                 void*                         audio_write_ctx,
                                 ON_AUDIOERROR_CALLBACK        error_cb,
                                 void*                         error_ctx)
@@ -1052,7 +1052,7 @@ static int CaptureAudio(void *p)
             break;
         }
 
-        if (audioData->current_input_state == AUDIO_STATE_RUNNING && 
+        if (audioData->current_input_state == AUDIO_STATE_RUNNING &&
             audioData->audio_write_cb)
         {
             Lock(audioData->audioBufferLock);
@@ -1188,6 +1188,11 @@ AUDIO_RESULT audio_input_start(AUDIO_SYS_HANDLE handle)
             }
             else
             {
+                audioData->current_input_state = AUDIO_STATE_STARTING;
+                if (audioData->input_state_cb)
+                {
+                    audioData->input_state_cb(audioData->user_inputctx, audioData->current_input_state);
+                }
                 audioData->current_input_state = AUDIO_STATE_RUNNING;
                 if (ThreadAPI_Create(&audioData->input_thread, CaptureAudio, audioData) != THREADAPI_OK)
                 {
@@ -1336,7 +1341,7 @@ AUDIO_RESULT audio_set_options(AUDIO_SYS_HANDLE handle, const char* optionName, 
         else if (strcmp("write_cb", optionName) == 0)
         {
 
-            AUDIOINPUT_WRITE write_cb = (AUDIOINPUT_WRITE)value; 
+            AUDIOINPUT_WRITE write_cb = (AUDIOINPUT_WRITE)value;
 
             if (NULL != write_cb)
             {
@@ -1408,14 +1413,14 @@ static AUDIO_RESULT audio_output_get_volume_device(
                     audioData->pMixer = mixer;
                     audioData->pMixerDevice = snd_mixer_find_selem(audioData->pMixer, sid);
 
-                    if (NULL != audioData->pMixerDevice && 
-                        snd_mixer_handle_events(mixer) >= 0 && 
+                    if (NULL != audioData->pMixerDevice &&
+                        snd_mixer_handle_events(mixer) >= 0 &&
                         snd_mixer_selem_is_active(audioData->pMixerDevice) &&
                         snd_mixer_selem_has_playback_volume(audioData->pMixerDevice))
                     {
                         snd_mixer_selem_get_playback_volume_range(
-                            audioData->pMixerDevice, 
-                            &audioData->min, 
+                            audioData->pMixerDevice,
+                            &audioData->min,
                             &audioData->max);
                         mixer = NULL;
                         ret = AUDIO_RESULT_OK;
@@ -1445,9 +1450,9 @@ AUDIO_RESULT  audio_output_set_volume(AUDIO_SYS_HANDLE handle, long volume)
     AUDIO_RESULT result = AUDIO_RESULT_ERROR;
     AUDIO_SYS_DATA* audioData = (AUDIO_SYS_DATA*)handle;
 
-    if (handle && 
-        0 == loadmixer(handle) && 
-        volume >= 0 && 
+    if (handle &&
+        0 == loadmixer(handle) &&
+        volume >= 0 &&
         volume <= 100)
     {
         long newVolume = (long)ceil(((volume / 100.0) * (audioData->max - audioData->min)) + audioData->min);

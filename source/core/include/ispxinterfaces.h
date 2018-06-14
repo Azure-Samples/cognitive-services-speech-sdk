@@ -292,7 +292,6 @@ struct WAVEFORMATEX
 };
 #pragma pack (pop)
 
-#define WAVE_FORMAT_PCM 0x0001 // wFormatTag value for PCM data
 
 
 using SpxWAVEFORMATEX_Type = std::shared_ptr<WAVEFORMATEX>;

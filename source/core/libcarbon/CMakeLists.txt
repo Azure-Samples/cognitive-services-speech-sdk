@@ -42,10 +42,6 @@ source_group("Source Files" FILES ${SOURCES})
 
 add_library(${PROJECT_NAME} SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES} $<TARGET_OBJECTS:c_api>)
 
-if(WIN32)
-    SET_TARGET_PROPERTIES (${PROJECT_NAME} PROPERTIES LINK_FLAGS "/DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:mf.dll")
-endif()
-
 if(ANDROID)
 
 target_link_libraries(${PROJECT_NAME}

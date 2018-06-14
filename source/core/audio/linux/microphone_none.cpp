@@ -16,7 +16,7 @@ class MicrophonePump : public ISpxAudioPump
 {
 public:
     
-    using Sink_Type = shared_ptr<ISpxAudioProcessor>;
+    using SinkType = shared_ptr<ISpxAudioProcessor>;
 
     MicrophonePump() {}
     ~MicrophonePump() {}
@@ -39,7 +39,7 @@ public:
         SPX_THROW_HR(SPXERR_NOT_IMPL);
     }
 
-    virtual void StartPump(Sink_Type processor) override
+    virtual void StartPump(SinkType processor) override
     {
         UNUSED(processor);
     }
@@ -64,8 +64,7 @@ private:
 
 shared_ptr<ISpxAudioPump> Microphone::Create() 
 {
-    shared_ptr<ISpxAudioPump> empty = std::make_shared<MicrophonePump>();
-    return empty;
+    return std::make_shared<MicrophonePump>();
 }
 
 

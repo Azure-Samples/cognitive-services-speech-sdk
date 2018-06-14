@@ -17,6 +17,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/audio_pump.h"
     "${SRC_DIR}/create_module_object.h"
     "${SRC_DIR}/microphone.h"
+    "${SRC_DIR}/microphone_pump_base.h"
     "${SRC_DIR}/interactive_microphone.h"
     "${SRC_DIR}/wav_file_reader.h"
     "${SRC_DIR}/wav_file_pump.h"
@@ -30,6 +31,7 @@ set(SOURCES
     "${SRC_DIR}/wav_file_reader.cpp"
     "${SRC_DIR}/wav_file_pump.cpp"
     "${SRC_DIR}/stream_pump.cpp"
+    "${SRC_DIR}/microphone_pump_base.cpp"
     )
 
 set(AUDIO_LIBS common)
@@ -38,23 +40,13 @@ include_directories(${SRC_DIR}) # for "stdafx.h"
 
 if(WIN32)
     list(APPEND HEADERS_PRIVATE
-        "${SRC_DIR}/windows/audio_sample_handler.h"
         "${SRC_DIR}/windows/iunknown.h"
-        "${SRC_DIR}/windows/sample_handler.h"
     )
     list(APPEND SOURCES
-        "${SRC_DIR}/windows/audio_sample_handler.cpp"
         "${SRC_DIR}/windows/microphone.cpp"
-        "${SRC_DIR}/windows/sample_handler.cpp"
         "${SRC_DIR}/windows/audio_sys.cpp"
-    )
-    list(APPEND AUDIO_LIBS
-        mf.lib
-        mfplat.lib
-        mfreadwrite.lib
-        mfuuid.lib
-    )
-elseif(APPLE)    
+    )    
+elseif(APPLE)
     list(APPEND SOURCES
         "${SRC_DIR}/osx/microphone.cpp"
     )

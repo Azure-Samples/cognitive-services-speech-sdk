@@ -23,6 +23,7 @@ AUDIO_RESULT_ERROR              \
 DEFINE_ENUM(AUDIO_RESULT, AUDIO_RESULT_VALUES)
 
 #define AUDIO_STATE_VALUES  \
+    AUDIO_STATE_STARTING,   \
     AUDIO_STATE_RUNNING,    \
     AUDIO_STATE_STOPPED,    \
     AUDIO_STATE_CLOSED      \
@@ -61,17 +62,19 @@ typedef void(*AUDIO_BUFFERUNDERRUN_CALLBACK)(void* pContext);
 
 extern AUDIO_SYS_HANDLE audio_create(void);
 extern void audio_destroy(AUDIO_SYS_HANDLE handle);
-AUDIO_RESULT audio_setcallbacks(AUDIO_SYS_HANDLE              handle, 
-                                ON_AUDIOOUTPUT_STATE_CALLBACK output_cb, 
-                                void*                         output_ctx,  
-                                ON_AUDIOINPUT_STATE_CALLBACK  input_cb, 
-                                void*                         input_ctx, 
-                                AUDIOINPUT_WRITE              audio_write_cb, 
-                                void*                         audio_write_ctx, 
-                                ON_AUDIOERROR_CALLBACK        error_cb, 
+AUDIO_RESULT audio_setcallbacks(AUDIO_SYS_HANDLE              handle,
+                                ON_AUDIOOUTPUT_STATE_CALLBACK output_cb,
+                                void*                         output_ctx,
+                                ON_AUDIOINPUT_STATE_CALLBACK  input_cb,
+                                void*                         input_ctx,
+                                AUDIOINPUT_WRITE              audio_write_cb,
+                                void*                         audio_write_ctx,
+                                ON_AUDIOERROR_CALLBACK        error_cb,
                                 void*                         error_ctx);
 
 #define AUDIO_OPTION_DEVICENAME "devicename"
+#define AUDIO_OPTION_INPUT_FRAME_COUNT "buff_frame_count"
+
 AUDIO_RESULT audio_set_options(AUDIO_SYS_HANDLE handle, const char* optionName, const void* value);
 
 extern AUDIO_RESULT  audio_output_startasync(
