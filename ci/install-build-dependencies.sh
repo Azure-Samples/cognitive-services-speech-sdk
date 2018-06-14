@@ -9,7 +9,7 @@ set -x -e -o pipefail
 case $SPEECHSDK_BUILD_AGENT_PLATFORM in
   Linux-x64)
     sudo apt-get update
-    sudo apt-get install --yes pkg-config zlib1g-dev libssl-dev libcurl4-openssl-dev libasound2-dev swig uuid-dev python-dev python-setuptools
+    sudo apt-get install --yes pkg-config zlib1g-dev libssl-dev libcurl4-openssl-dev libasound2-dev swig uuid-dev python-dev python-setuptools default-jdk
     pip install -U pytest
     ;;
   Windows-x64)

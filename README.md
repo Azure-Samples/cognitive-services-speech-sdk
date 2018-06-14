@@ -29,7 +29,7 @@ This is the initial working project repository for the Microsoft Cognitive Servi
 
 * Install dependencies: 
     * `sudo apt-get update`
-    * `sudo apt-get install build-essential zlib1g-dev libssl-dev libcurl4-openssl-dev swig python cmake python-dev alsa libasound2-dev pkg-config`
+    * `sudo apt-get install build-essential zlib1g-dev libssl-dev libcurl4-openssl-dev swig python cmake python-dev alsa libasound2-dev pkg-config default-jdk`
 * Run `cmake` to generate makefiles:
     * (Release build): `cmake ..` 
     * (Debug build): `cmake -DCMAKE_BUILD_TYPE=Debug ..` 

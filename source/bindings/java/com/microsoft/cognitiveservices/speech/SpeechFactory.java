@@ -22,6 +22,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
     static {
         // TODO name of library will depend on version
         System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
+        com.microsoft.cognitiveservices.speech.internal.carbon_javaJNI.setupNativeLibraries(""/*useDefaults*/);
     }
 
     /**

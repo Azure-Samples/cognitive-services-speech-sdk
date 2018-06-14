@@ -46,6 +46,18 @@ if(WIN32)
     SET_TARGET_PROPERTIES (${PROJECT_NAME} PROPERTIES LINK_FLAGS "/DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:mf.dll")
 endif()
 
+if(ANDROID)
+
+target_link_libraries(${PROJECT_NAME}
+    PRIVATE sr
+    PRIVATE audio 
+    PRIVATE usp
+    PRIVATE common 
+    PRIVATE factory
+    PRIVATE z) # libz
+
+else()
+
 target_link_libraries(${PROJECT_NAME}
     PRIVATE sr
     PRIVATE audio 
@@ -53,4 +65,4 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE common 
     PRIVATE factory)
 
-
+endif()

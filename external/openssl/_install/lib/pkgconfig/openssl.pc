@@ -1,9 +1,0 @@
-prefix=/mnt/a/Carbon/external/openssl/_install
-exec_prefix=${prefix}
-libdir=${exec_prefix}/lib
-includedir=${prefix}/include
-
-Name: OpenSSL
-Description: Secure Sockets Layer and cryptography libraries and tools
-Version: 1.1.1-pre4-dev
-Requires: libssl libcrypto

@@ -13,9 +13,9 @@ cmake -G "NMake Makefiles" ^
     -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang ^
     -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a ^
     -DCMAKE_ANDROID_STL_TYPE=c++_static ^
-    -DOPENSSL_ROOT_DIR="%SOURCE_ROOT%\external\openssl\_install" ^
-    -DCURL_LIBRARY="%SOURCE_ROOT%\external\curl\_install\lib\libcurl.so" ^
-    -DCURL_INCLUDE_DIR="%SOURCE_ROOT%\external\curl\_install\include" ^
+    -DOPENSSL_ROOT_DIR="%SOURCE_ROOT%\external\android_ssl_curl\libs\armeabi-v7a" ^
+    -DCURL_LIBRARY="%SOURCE_ROOT%\external\android_ssl_curl\libs\armeabi-v7a\lib\libcurl.a" ^
+    -DCURL_INCLUDE_DIR="%SOURCE_ROOT%\external\android_ssl_curl\libs\armeabi-v7a\include" ^
     -DCMAKE_BUILD_TYPE="%BuildConfiguration%" ^
     %SOURCE_ROOT% ^
   && ^

@@ -50,6 +50,19 @@
 %javamethodmodifiers StdMapWStringWStringMapIterator::nextImpl "private";
 %inline %{
 #include <map>
+#include <stdlib.h>
+
+  void SetupNativeLibraries(const std::wstring& config)
+  {
+#ifndef _MSC_VER
+    std::string s(config.begin(), config.end());
+    if(s.length() < 1) s = "/system/etc/ssl/certs/";
+
+    setenv("SSL_CERT_DIR", s.c_str(), 1/*overwrite*/);
+#endif
+  }
+
+
   struct StdMapWStringWStringMapIterator {
     typedef std::map<std::wstring,std::wstring> WStringWStringMap;
     StdMapWStringWStringMapIterator(const WStringWStringMap& m) : it(m.begin()), map(m) {

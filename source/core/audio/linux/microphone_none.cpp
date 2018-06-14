@@ -5,15 +5,6 @@
 #include "interface_helpers.h"
 
 
-// FIXME TODO fmegen ANDROID! ROOBO ssl lib version issue
-// opensll version number mismatch
-extern "C" int FIPS_mode_set(int r)
-{
-    (void)r;
-    return 0;
-}
-
-
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
