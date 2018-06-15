@@ -51,10 +51,23 @@ public:
         SPX_THROW_ON_FAIL(Recognizer_EventHandle_Close(m_hevent));
     };
 
+#ifdef SWIG
+private:
+#endif
     /// <summary>
     /// Intent recognition event result.
     /// </summary>
     const IntentRecognitionResult& Result;
+
+#ifndef SWIG
+private:
+#else
+public:
+#endif
+    /// <summary>
+    /// Intent recognition event result.
+    /// </summary>
+    std::shared_ptr<IntentRecognitionResult> GetResult() const { return m_result; }
 
 private:
 

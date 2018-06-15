@@ -44,6 +44,7 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::Intent::LanguageUnderstandingModel)
 %shared_ptr(Microsoft::CognitiveServices::Speech::KeywordRecognitionModel)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Translation::TranslationTextResult)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResult)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationTextResult, Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultEventArgs>)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer)
 %shared_ptr(Microsoft::CognitiveServices::Speech::ISpeechFactory)

@@ -212,7 +212,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
 
             public override void Execute(Microsoft.CognitiveServices.Speech.Internal.IntentRecognitionEventArgs eventArgs)
             {
-                var resultEventArg = new RecognitionErrorEventArgs(eventArgs.SessionId, eventArgs.Result.Reason, eventArgs.Result.ErrorDetails);
+                var resultEventArg = new RecognitionErrorEventArgs(eventArgs.SessionId, eventArgs.GetResult().Reason, eventArgs.GetResult().ErrorDetails);
                 var handler = this.recognizer.RecognitionErrorRaised;
 
                 if (handler != null)

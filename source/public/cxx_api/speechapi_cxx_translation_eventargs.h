@@ -46,10 +46,23 @@ public:
     /// </summary>
     virtual ~TranslationTextResultEventArgs() { };
 
+#ifdef SWIG
+private:
+#endif
     /// <summary>
     /// Contains the translation text result.
     /// </summary>
     const TranslationTextResult& Result;
+
+#ifndef SWIG
+private:
+#else
+public:
+#endif
+    /// <summary>
+    /// Contains the translation text result.
+    /// </summary>
+    std::shared_ptr<TranslationTextResult> GetResult() const { return m_result; }
 
 private:
     DISABLE_DEFAULT_CTORS(TranslationTextResultEventArgs);
@@ -93,10 +106,23 @@ public:
     /// </summary>
     virtual ~TranslationSynthesisResultEventArgs() { };
 
+#ifdef SWIG
+private:
+#endif
     /// <summary>
     /// Contains the translation synthesis result.
     /// </summary>
     const TranslationSynthesisResult& Result;
+
+#ifndef SWIG
+private:
+#else
+public:
+#endif
+    /// <summary>
+    /// Contains the translation synthesis result.
+    /// </summary>
+    std::shared_ptr<TranslationSynthesisResult> GetResult() const { return m_result; }
 
 private:
 

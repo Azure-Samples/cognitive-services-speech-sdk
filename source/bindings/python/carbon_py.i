@@ -38,7 +38,7 @@
 %extend Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs {
     %pythoncode %{
     def __str__(self):
-        return u'{}:(session_id={}, result={})'.format(type(self), self.session_id, self.result)
+        return u'{}:(session_id={}, result={})'.format(type(self), self.session_id, self.get_result())
     %}
 }
 

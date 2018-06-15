@@ -13,7 +13,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         internal IntentRecognitionResultEventArgs(Internal.IntentRecognitionEventArgs e)
         {
             eventArgImpl = e;
-            Result = new IntentRecognitionResult(e.Result);
+            Result = new IntentRecognitionResult(e.GetResult());
             SessionId = e.SessionId;
         }
 

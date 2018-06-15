@@ -13,7 +13,7 @@ namespace Microsoft.CognitiveServices.Speech
         internal SpeechRecognitionResultEventArgs(Internal.SpeechRecognitionEventArgs e)
         {
             evenArgImpl = e;
-            Result = new SpeechRecognitionResult(e.Result);
+            Result = new SpeechRecognitionResult(e.GetResult());
             SessionId = e.SessionId;
         }
 

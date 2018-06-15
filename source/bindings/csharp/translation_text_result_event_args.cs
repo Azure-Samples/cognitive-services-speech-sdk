@@ -17,7 +17,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         internal TranslationTextResultEventArgs(Microsoft.CognitiveServices.Speech.Internal.TranslationTextResultEventArgs e)
         {
             eventArgImpl = e;
-            Result = new TranslationTextResult(e.Result);
+            Result = new TranslationTextResult(e.GetResult());
             SessionId = e.SessionId;
         }
 

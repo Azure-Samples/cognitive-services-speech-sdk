@@ -50,10 +50,23 @@ public:
         SPX_THROW_ON_FAIL(Recognizer_EventHandle_Close(m_hevent));
     };
 
+#ifdef SWIG
+private:
+#endif
     /// <summary>
     /// Speech recognition event result.
     /// </summary>
     const SpeechRecognitionResult& Result;
+
+#ifndef SWIG
+private:
+#else
+public:
+#endif
+    /// <summary>
+    /// Speech recognition event result.
+    /// </summary>
+    std::shared_ptr<SpeechRecognitionResult> GetResult() const { return m_result; }
 
 private:
 
