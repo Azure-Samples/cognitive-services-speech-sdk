@@ -43,6 +43,49 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         [Ignore] // TODO ENABLE once again translation works.
         [TestMethod]
+        public void TestLanguageProperties()
+        {
+            var toLanguages = new List<string>() { Language.DE };
+            var fromLanguage = Language.EN;
+            var factory = SpeechFactory.FromSubscription(subscriptionKey, region);
+            using (var translationRecognizer = factory.CreateTranslationRecognizerWithFileInput(TestData.English.Weather.AudioFile, fromLanguage, toLanguages))
+            {
+                Assert.AreEqual(translationRecognizer.SourceLanguage, fromLanguage);
+                CollectionAssert.AreEqual(translationRecognizer.TargetLanguages, toLanguages);
+                Assert.AreEqual(translationRecognizer.OutputVoiceName, String.Empty);
+            }
+        }
+
+        [TestMethod]
+        public void TestLanguagePropertiesMultiTargets()
+        {
+            var toLanguages = new List<string>() { Language.DE, Language.ES };
+            var fromLanguage = Language.EN;
+            var factory = SpeechFactory.FromSubscription(subscriptionKey, region);
+            using (var translationRecognizer = factory.CreateTranslationRecognizerWithFileInput(TestData.English.Weather.AudioFile, fromLanguage, toLanguages))
+            {
+                Assert.AreEqual(translationRecognizer.SourceLanguage, fromLanguage);
+                CollectionAssert.AreEqual(translationRecognizer.TargetLanguages, toLanguages);
+                Assert.AreEqual(translationRecognizer.OutputVoiceName, String.Empty);
+            }
+        }
+
+        [TestMethod]
+        public void TestOutputVoiceName()
+        {
+            var toLanguages = new List<string>() { Language.DE };
+            var fromLanguage = Language.EN;
+            var voice = Voice.DE;
+            var factory = SpeechFactory.FromSubscription(subscriptionKey, region);
+            using (var translationRecognizer = factory.CreateTranslationRecognizerWithFileInput(TestData.English.Weather.AudioFile, fromLanguage, toLanguages, voice))
+            {
+                Assert.AreEqual(translationRecognizer.SourceLanguage, fromLanguage);
+                CollectionAssert.AreEqual(translationRecognizer.TargetLanguages, toLanguages);
+                Assert.AreEqual(translationRecognizer.OutputVoiceName, voice);
+            }
+        }
+
+        [TestMethod]
         public async Task TranslationBatmanEnToDeFinalTextResult()
         {
             var toLanguages = new List<string>() { Language.DE };
@@ -50,7 +93,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Console.WriteLine(TestData.English.Batman.AudioFile);
             var actualTranslation = await this.translationHelper.GetTranslationFinalResult(TestData.English.Batman.AudioFile, Language.EN, toLanguages);
             Assert.IsNotNull(actualTranslation);
-     
+
             Assert.AreEqual(TestData.English.Batman.Utterances[0], actualTranslation.Text);
             Assert.AreEqual(TestData.German.Batman.Utterances[0], actualTranslation.Translations[Language.DE]);
         }

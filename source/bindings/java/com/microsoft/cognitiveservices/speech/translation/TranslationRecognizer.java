@@ -93,21 +93,12 @@ import com.microsoft.cognitiveservices.speech.AudioInputStream;
      ArrayList<String> _TargetLanguages = new ArrayList<String>();
 
      /**
-       * Gets a boolean value which indicates whether a voice output of the translated text is desired.
-       * @return Gets a boolean value which indicates whether a voice output of the translated text is desired.
+       * Gets the name of output voice.
+       * @return the name of output voice.
        */
-     public boolean isVoiceOutputDesired() {
-         return _IsVoiceOutputDesired;
-     }//     { get; set; }
-     
-     /**
-      * Sets a boolean value which indicates whether a voice output of the translated text is desired.
-      * @param value The new value for the voice flag.
-      */
-     public void isVoiceOutputDesired(boolean value) {
-         _IsVoiceOutputDesired = value;
-     }//     { get; set; }
-     private boolean _IsVoiceOutputDesired;
+     public String getOutputVoiceName() {
+        return _Parameters.getString(RecognizerParameterNames.TranslationVoice);
+     }
 
      /**
        * The collection of parameters and their values defined for this TranslationRecognizer.

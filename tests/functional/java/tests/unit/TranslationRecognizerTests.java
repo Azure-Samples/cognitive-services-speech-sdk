@@ -145,7 +145,7 @@ public class TranslationRecognizerTests {
     // -----------------------------------------------------------------------
 
     @Test
-    public void testIsVoiceOutputDesired1() {
+    public void testGetOutputVoiceNameNoSetting() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
@@ -158,15 +158,14 @@ public class TranslationRecognizerTests {
         String language = "en-US";
         TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, language, targets);
 
-        assertFalse(r.isVoiceOutputDesired());
+        assertTrue(r.getOutputVoiceName().isEmpty());
 
         r.close();
         s.close();
     }
 
-    @Ignore // TODO why is voiceoutput desired not true (FIX JAVA LIB IMPL!!)
     @Test
-    public void testIsVoiceOutputDesired2() {
+    public void testGetOutputVoiceName() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
@@ -177,33 +176,10 @@ public class TranslationRecognizerTests {
         targets.add("en-US");        
         
         String language = "en-US";
-        TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, language, targets, "voice");
+        String voice = "de-DE-Katja";
+        TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, language, targets, voice);
 
-        assertTrue(r.isVoiceOutputDesired());
-
-        r.close();
-        s.close();
-    }
-
-    @Test
-    public void testIsVoiceOutputDesiredBoolean() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        assertNotNull(s);
-
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
-        assertNotNull(ais);
-        
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");        
-        
-        String language = "en-US";
-        TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, language, targets);
-
-        assertFalse(r.isVoiceOutputDesired());
-
-        r.isVoiceOutputDesired(true);
-
-        assertTrue(r.isVoiceOutputDesired());
+        assertEquals(r.getOutputVoiceName(), voice);
 
         r.close();
         s.close();

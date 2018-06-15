@@ -42,7 +42,8 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     ///     var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
     ///     string fromLanguage = "en-US";
     ///     var toLanguages = new List&lt;string&gt;() { "de-DE" };
-    ///     TranslationRecognizer reco = factory.CreateTranslationRecognizerWithFileInput("audioFileName", fromLanguage, toLanguages);
+    ///     var voiceName = "de-DE-Hedda";
+    ///     TranslationRecognizer reco = factory.CreateTranslationRecognizerWithFileInput("audioFileName", fromLanguage, toLanguages, voiceName);
     ///
     ///     reco.OnSessionEvent += MySessionEventHandler;
     ///     reco.FinalResultReceived += MyFinalResultEventHandler;
@@ -138,9 +139,14 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         }
 
         /// <summary>
-        /// Gets/sets a boolean value which indicates whether a voice output of the translated text is desired.
+        /// Gets the name of output voice.
         /// </summary>
-        public bool IsVoiceOutputDesired { get; set; }
+        public string OutputVoiceName {
+            get
+            {
+                return Parameters.Get<string>(TranslationParameterNames.Voice);
+            }
+        }
 
         /// <summary>
         /// The collection of parameters and their values defined for this <see cref="TranslationRecognizer"/>.
