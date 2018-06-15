@@ -14,30 +14,21 @@ using System.Linq;
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     [TestClass]
-    public sealed class TranslationTests
+    public sealed class TranslationTests : RecognitionTestBase
     {
         private TranslationTestsHelper translationHelper;
-        private static string subscriptionKey, region, synthesisDir;
+        private static string synthesisDir;
         
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
-            subscriptionKey = Config.GetSettingByKey<String>(context, "UnifiedSpeechSubscriptionKey");
-            region = Config.GetSettingByKey<String>(context, "Region");
-            var inputDir = Config.GetSettingByKey<String>(context, "InputDir");
-
+            BaseClassInit(context);
             synthesisDir = Path.Combine(inputDir, "synthesis");
-            TestData.AudioDir = Path.Combine(inputDir, "audio");
-
-            Console.WriteLine("region: " + region);
-            Console.WriteLine("input directory: " + inputDir);
-            Console.WriteLine("all files: " + String.Join("\n", Directory.GetFiles(inputDir, "*.*", SearchOption.AllDirectories)));
         }
 
         [TestInitialize]
         public void TestInitalize()
         {
-            var factory = SpeechFactory.FromSubscription(subscriptionKey, region);
             this.translationHelper = new TranslationTestsHelper(factory);
         }
 

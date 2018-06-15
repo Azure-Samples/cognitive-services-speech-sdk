@@ -14,10 +14,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     [TestClass]
-    public class SpeechRecognitionTests
+    public class SpeechRecognitionTests : RecognitionTestBase
     {
-        private static string subscriptionKey, region, inputDir, deploymentId;
-        private SpeechFactory testFactory;
+        private static string deploymentId;
         private SpeechRecognitionTestsHelper speechRecognitionTestsHelper;
         private TaskCompletionSource<int> taskCompletionSource;
         private TimeSpan timeout = TimeSpan.FromSeconds(90);
@@ -25,25 +24,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
         {
-            subscriptionKey = Config.GetSettingByKey<String>(context, "UnifiedSpeechSubscriptionKey");
+            BaseClassInit(context);
             deploymentId = Config.GetSettingByKey<String>(context, "DeploymentId");
-            region = Config.GetSettingByKey<String>(context, "Region");
-            inputDir = Config.GetSettingByKey<String>(context, "InputDir");
-            TestData.AudioDir = Path.Combine(inputDir, "audio");
-           
         }
 
         [TestInitialize]
         public void Initialize()
         {
             speechRecognitionTestsHelper = new SpeechRecognitionTestsHelper();
-            testFactory = SpeechFactory.FromSubscription(subscriptionKey, region);
         }
 
         [TestMethod]
         public async Task ValidBaselineRecognition()
         {
-            using (var recognizer = testFactory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
             {
                 speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
@@ -60,7 +54,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task ValidCustomRecognition()
         {
-            using (var recognizer = testFactory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
             {
                 recognizer.DeploymentId = deploymentId;
                 speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
@@ -104,13 +98,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public void InvalidInputFileHandledProperly()
         {
-            Assert.ThrowsException<ApplicationException>(() => testFactory.CreateSpeechRecognizerWithFileInput("invalidFile.wav"));
+            Assert.ThrowsException<ApplicationException>(() => factory.CreateSpeechRecognizerWithFileInput("invalidFile.wav"));
         }
 
         [TestMethod]
         public async Task InvalidDeploymentIdHandledProperly()
         {
-            using (var recognizer = testFactory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
             {
                 recognizer.DeploymentId = "invalidDeploymentId";
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
@@ -124,7 +118,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [Ignore]
         public async Task GermanRecognition()
         {
-            using (var recognizer = testFactory.CreateSpeechRecognizerWithFileInput(TestData.German.FirstOne.AudioFile, Language.DE_DE))
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.German.FirstOne.AudioFile, Language.DE_DE))
             {
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
                 Assert.IsFalse(string.IsNullOrEmpty(result.Text));
@@ -135,7 +129,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task ContinuousRecognitionOnLongFileInput()
         {
-            using (var recognizer = testFactory.CreateSpeechRecognizerWithFileInput(TestData.English.Batman.AudioFile))
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Batman.AudioFile))
             {
                 taskCompletionSource = new TaskCompletionSource<int>();
                 List<string> recognizedText = new List<string>();
@@ -174,7 +168,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [Ignore]
         public async Task SubscribeToManyEventHandlers()
         {
-            using (var recognizer = testFactory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
             {
                 const int numLoops = 7;
                 for (int i = 0; i < numLoops; i++)
@@ -196,7 +190,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [Ignore]
         public async Task UnsubscribeFromEventHandlers()
         {
-            using (var recognizer = testFactory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
             {
 
                 speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
@@ -216,7 +210,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [Ignore]
         public async Task ResubscribeToEventHandlers()
         {
-            using (var recognizer = testFactory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
             {
                 const int numSubscriptions = 3;
                 const int numUnsubscriptions = 2;
@@ -251,7 +245,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [Ignore]
         public async Task ChangeSubscriptionDuringRecognition()
         {
-            using (var recognizer = testFactory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
             {
                 speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
                 recognizer.OnSessionEvent += (s, e) =>
