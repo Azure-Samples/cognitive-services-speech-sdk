@@ -28,7 +28,7 @@ cp -av "$SOURCE_ROOT/samples/cxx/linux/quickstart" "$TEST_DIR"
 
 perl -i -pe 's(SPEECHSDK_ROOT:=.*)(SPEECHSDK_ROOT:=/test/speechsdk)' "$TEST_DIR/quickstart/Makefile"
 perl -i -pe 's(L"YourSubscriptionKey")(L"'$SPEECH_SUBSCRIPTION_KEY'")' "$TEST_DIR/quickstart/"*.cpp
-perl -i -pe 's(L"YourServiceRegion")(L"westus")' "$TEST_DIR/QuickStart/"*.cpp
+perl -i -pe 's(L"YourServiceRegion")(L"westus")' "$TEST_DIR/quickstart/"*.cpp
 perl -i -pe 's(L"YourAudioFile.wav")(L"/test/whatstheweatherlike.wav")' "$TEST_DIR/quickstart/"*.cpp
 perl -i -pe 's(//#define FROM_FILE)(#define FROM_FILE)' "$TEST_DIR/quickstart/"*.cpp
 
