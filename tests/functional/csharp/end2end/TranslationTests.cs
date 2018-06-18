@@ -77,6 +77,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore] // Bug 1294947
         public async Task TranslationBatmanEnToDeFinalTextResult()
         {
             var toLanguages = new List<string>() { Language.DE };
