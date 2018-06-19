@@ -140,7 +140,7 @@ void CSpxMockRecoEngineAdapter::FireIntermediateResult()
     m_cbFireNextIntermediate += m_numMsBetweenIntermediates * m_format->nAvgBytesPerSec / 1000;
 
     auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateIntermediateResult(nullptr,  resultText.c_str(), ResultType::Speech);
+    auto result = factory->CreateIntermediateResult(nullptr,  resultText.c_str(), ResultType::Speech, offset, m_cbFireNextIntermediate - offset);
 
     GetSite()->FireAdapterResult_Intermediate(this, offset, result);
 }
@@ -164,7 +164,7 @@ void CSpxMockRecoEngineAdapter::FireFinalResult()
     FireSpeechEndDetected();
 
     auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateFinalResult(nullptr, resultText.c_str(), ResultType::Speech);
+    auto result = factory->CreateFinalResult(nullptr, resultText.c_str(), ResultType::Speech, offset, m_cbFireNextFinalResult - offset);
 
     GetSite()->FireAdapterResult_FinalResult(this, offset, result);
 }

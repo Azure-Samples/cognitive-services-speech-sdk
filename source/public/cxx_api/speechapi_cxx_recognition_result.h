@@ -226,6 +226,16 @@ public:
     const std::wstring& Text;
 
     /// <summary>
+    /// Duration of the recognized speech. 
+    /// </summary>
+    uint64_t Duration() const { return m_duration; }
+
+    /// <summary>
+    /// Offset of the recognized speech. 
+    /// </summary>
+    uint64_t Offset() const { return m_offset; }
+
+    /// <summary>
     /// Collection of additional RecognitionResult properties.
     /// </summary>
     ResultPropertyValueCollection& Properties;
@@ -295,6 +305,9 @@ private:
             SPX_THROW_ON_FAIL(hr = Result_GetText(hresult, sz, maxCharCount));
             *ptext = sz;
         }
+
+        SPX_THROW_ON_FAIL(hr = Result_GetOffset(hresult, &m_offset));
+        SPX_THROW_ON_FAIL(hr = Result_GetDuration(hresult, &m_duration));
     };
 
     SPXRESULTHANDLE m_hresult;
@@ -302,6 +315,8 @@ private:
     std::wstring m_resultId;
     Speech::Reason m_reason;
     std::wstring m_text;
+    uint64_t m_offset;
+    uint64_t m_duration;
 };
 
 

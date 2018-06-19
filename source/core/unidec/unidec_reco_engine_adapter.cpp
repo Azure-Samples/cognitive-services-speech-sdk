@@ -315,9 +315,8 @@ void CSpxUnidecRecoEngineAdapter::Intermediate(const wchar_t* wavId, size_t sent
     auto text = TrimWords(words, L"!sent_start", L"!sent_end");
 
     auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateIntermediateResult(nullptr, text.c_str(), ResultType::Speech);
-
     auto offset = (uint32_t)framePos.SentenceStartIndex;
+    auto result = factory->CreateIntermediateResult(nullptr, text.c_str(), ResultType::Speech, offset, 0);
     GetSite()->FireAdapterResult_Intermediate(this, offset, result);
 }
 
@@ -356,7 +355,7 @@ void CSpxUnidecRecoEngineAdapter::Sentence(const wchar_t* wavId, size_t sentence
         if (index == 0 && text.length() > 0)
         {
             auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-            finalResult = factory->CreateFinalResult(nullptr, text.c_str(), ResultType::Speech);
+            finalResult = factory->CreateFinalResult(nullptr, text.c_str(), ResultType::Speech, offset, 0);
         }
     }
 

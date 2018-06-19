@@ -61,6 +61,32 @@ SPXAPI Result_GetText(SPXRESULTHANDLE hresult, wchar_t* pszText, uint32_t cchTex
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
+SPXAPI Result_GetOffset(SPXRESULTHANDLE hresult, uint64_t* offset)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, offset == nullptr);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
+        auto result = (*resulthandles)[hresult];
+        *offset = result->GetOffset();
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI Result_GetDuration(SPXRESULTHANDLE hresult, uint64_t* duration)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, duration == nullptr);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
+        auto result = (*resulthandles)[hresult];
+        *duration = result->GetDuration();
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
 SPXAPI Result_GetProperty_Name(Result_Property property, wchar_t* name, uint32_t cchName)
 {
     SPXAPI_INIT_HR_TRY(hr)

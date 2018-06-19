@@ -42,10 +42,12 @@ public:
     std::wstring GetText() override;
     Reason GetReason() override;
     ResultType GetType() override;
+    uint64_t GetOffset() const override { return m_offset; }
+    uint64_t GetDuration() const override { return m_duration; }
 
     // --- ISpxRecognitionResultInit ---
-    void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, ResultType type) override;
-    void InitFinalResult(const wchar_t* resultId, const wchar_t* text, ResultType type) override;
+    void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration) override;
+    void InitFinalResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration) override;
     void InitNoMatch(ResultType type) override;
     void InitError(const wchar_t* text, ResultType type) override;
 
@@ -93,7 +95,9 @@ private:
     SynthesisStatus m_synthesisStatus;
     std::wstring m_synthesisFailureReason;
     const uint8_t* m_audioBuffer;
-    size_t m_audioLength;
+    size_t m_audioLength{0};
+    uint64_t m_offset{0};
+    uint64_t m_duration{0};
 };
 
 

@@ -6,6 +6,8 @@ package com.microsoft.cognitiveservices.speech;
 
 import com.microsoft.cognitiveservices.speech.internal.RecognitionResult;
 import com.microsoft.cognitiveservices.speech.internal.ResultPropertyValueCollection;
+import java.math.*;
+import java.time.*;
 
 /**
   * Defines result of speech recognition.
@@ -16,10 +18,15 @@ public class SpeechRecognitionResult {
     private RecognitionStatus reason;
     private String text;
     private RecognitionResultCollection properties;
+    private Duration duration;
+    private long offset;
 
     protected SpeechRecognitionResult(RecognitionResult result) {
         resultId = result.getResultId();
         text = result.getText();
+        BigInteger tenThousand = BigInteger.valueOf(10000);
+        duration = Duration.ofMillis(result.duration().divide(tenThousand).longValue());
+        offset = result.offset().divide(tenThousand).longValue();
         reason = RecognitionStatus.values()[result.getReason().swigValue()];
         properties = new RecognitionResultCollection(result.getProperties());
     }
@@ -46,6 +53,22 @@ public class SpeechRecognitionResult {
       */
     public String getText() {
         return text;
+    }
+
+    /**
+      * Duration of recognized speech.
+      * @return Duration of recognized speech.
+      */
+    public Duration getDuration() {
+        return duration;
+    }
+
+    /**
+      * Offset of recognized speech in milliseconds.
+      * @return Offset of recognized speech in milliseconds.
+      */
+    public long getOffset() {
+        return offset;
     }
 
     /**

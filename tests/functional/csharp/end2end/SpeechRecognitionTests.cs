@@ -42,6 +42,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
 
+                Assert.IsTrue(result.Duration.Ticks > 0);
+                Assert.AreEqual(0, result.Offset.Ticks);
                 Assert.AreEqual(speechRecognitionTestsHelper.FinalResultEventCount, 1);
                 Assert.AreEqual(speechRecognitionTestsHelper.SpeechStartedEventCount, 1);
                 Assert.AreEqual(speechRecognitionTestsHelper.SpeechEndedEventCount, 1);

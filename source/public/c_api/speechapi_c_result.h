@@ -15,6 +15,8 @@ typedef enum Result_RecognitionReason Result_RecognitionReason;
 SPXAPI Result_GetRecognitionReason(SPXRESULTHANDLE hresult, Result_RecognitionReason* preason);
 
 SPXAPI Result_GetText(SPXRESULTHANDLE hresult, wchar_t* pszText, uint32_t cchText);
+SPXAPI Result_GetOffset(SPXRESULTHANDLE hresult, uint64_t* offset);
+SPXAPI Result_GetDuration(SPXRESULTHANDLE hresult, uint64_t* duration);
 
 enum Result_Property { ResultProperty_Json = 1,  ResultProperty_LanguageUnderstandingJson = 2, ResultProperty_ErrorDetails = 3 };
 typedef enum Result_Property Result_Property;

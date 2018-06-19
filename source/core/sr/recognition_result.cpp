@@ -41,10 +41,13 @@ ResultType CSpxRecognitionResult::GetType()
     return m_type;
 }
 
-void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, ResultType type)
+void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration)
 {
     m_reason = Reason::IntermediateResult;
     m_type = type;
+
+    m_offset = offset;
+    m_duration = duration;
 
     m_resultId = resultId == nullptr
         ? PAL::CreateGuid()
@@ -55,10 +58,13 @@ void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* resultId, cons
     SPX_DBG_TRACE_VERBOSE("%s: resultId=%ls", __FUNCTION__, m_resultId.c_str());
 }
 
-void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, const wchar_t* text, ResultType type)
+void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration)
 {
     m_reason = Reason::Recognized;
     m_type = type;
+
+    m_offset = offset;
+    m_duration = duration;
 
     m_resultId = resultId == nullptr
         ? PAL::CreateGuid()
@@ -76,6 +82,9 @@ void CSpxRecognitionResult::InitNoMatch(ResultType type)
     SPX_DBG_TRACE_FUNCTION();
     m_reason = Reason::NoMatch;
     m_type = type;
+
+    m_offset = 0;
+    m_duration = 0;
 }
 
 void CSpxRecognitionResult::InitError(const wchar_t* text, ResultType type)

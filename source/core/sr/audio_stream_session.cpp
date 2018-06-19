@@ -748,22 +748,22 @@ std::shared_ptr<ISpxRecognitionEventArgs> CSpxAudioStreamSession::CreateRecognit
     return recoEvent;
 }
 
-std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, ResultType type)
+std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration)
 {
     auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
 
     auto initResult = SpxQueryInterface<ISpxRecognitionResultInit>(result);
-    initResult->InitIntermediateResult(resultId, text, type);
+    initResult->InitIntermediateResult(resultId, text, type, offset, duration);
 
     return result;
 }
 
-std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateFinalResult(const wchar_t* resultId, const wchar_t* text, ResultType type)
+std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateFinalResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration)
 {
     auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
 
     auto initResult = SpxQueryInterface<ISpxRecognitionResultInit>(result);
-    initResult->InitFinalResult(resultId, text, type);
+    initResult->InitFinalResult(resultId, text, type, offset, duration);
 
     return result;
 }

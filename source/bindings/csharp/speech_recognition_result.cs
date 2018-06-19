@@ -49,6 +49,16 @@ namespace Microsoft.CognitiveServices.Speech
         public string Text { get; }
 
         /// <summary>
+        /// Duration of the recognized speech.
+        /// </summary>
+        public TimeSpan Duration => TimeSpan.FromTicks((long)this.resultImpl.Duration());
+
+        /// <summary>
+        /// Offset of the recognized speech in ticks.
+        /// </summary>
+        public DateTimeOffset Offset => new DateTimeOffset((long)this.resultImpl.Offset(), TimeSpan.Zero);
+
+        /// <summary>
         /// In case of an unsuccessful recognition, provides a brief description of an occurred error.
         /// This field is only filled-out if the recognition status (<see cref="RecognitionStatus"/>) is set to Canceled.
         /// </summary>
