@@ -27,6 +27,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public int SpeechStartedEventCount { get; set; }
 
+        private TaskCompletionSource<int> taskCompletionSource;
+        private TimeSpan timeout = TimeSpan.FromSeconds(90);
+
         public SpeechRecognitionTestsHelper()
         {
             ErrorEventCount = 0;
@@ -35,6 +38,23 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             SessionStoppedEventCount = 0;
             SpeechEndedEventCount = 0;
             SpeechStartedEventCount = 0;
+            taskCompletionSource = new TaskCompletionSource<int>();
+        }
+
+        public async Task CompleteContinuousRecognition(SpeechRecognizer recognizer)
+        {
+            taskCompletionSource = new TaskCompletionSource<int>();
+            recognizer.OnSessionEvent += (s, e) =>
+            {
+                if (e.EventType == SessionEventType.SessionStoppedEvent)
+                {
+                    taskCompletionSource.TrySetResult(0);
+                }
+            };
+
+            await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+            await Task.WhenAny(taskCompletionSource.Task, Task.Delay(timeout));
+            await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
         }
 
         private void FinalResultEventCounter(object sender, SpeechRecognitionResultEventArgs e)
