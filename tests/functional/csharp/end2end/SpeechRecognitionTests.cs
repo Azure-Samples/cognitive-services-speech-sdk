@@ -32,6 +32,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             speechRecognitionTestsHelper = new SpeechRecognitionTestsHelper();
         }
 
+        [Ignore] // Related to VSO Item 1298031
         [TestMethod]
         public async Task ValidBaselineRecognition()
         {
@@ -45,6 +46,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [Ignore] // Related to VSO Item 1298031
         [TestMethod]
         public async Task ValidCustomRecognition()
         {
@@ -71,6 +73,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [Ignore] // Related to VSO Item 1298031
         [TestMethod]
         public async Task InvalidRegionHandledProperly()
         {
@@ -84,12 +87,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [Ignore] // Related to VSO Item 1298031
         [TestMethod]
         public void InvalidInputFileHandledProperly()
         {
             Assert.ThrowsException<ApplicationException>(() => factory.CreateSpeechRecognizerWithFileInput("invalidFile.wav"));
         }
 
+        [Ignore] // Related to VSO Item 1298031
         [TestMethod]
         public async Task InvalidDeploymentIdHandledProperly()
         {
@@ -103,6 +108,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [Ignore] // Related to VSO Item 1298031
         [TestMethod]
         public async Task GermanRecognition()
         {
@@ -114,7 +120,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [Ignore] // TODO ENABLE AFTER MORE BUILDS
+        [Ignore] // Related to VSO Item 1298031
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task ContinuousRecognitionOnLongFileInput()
         {
