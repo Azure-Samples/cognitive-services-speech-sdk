@@ -1,0 +1,774 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+#
+# If you run into issue wrt. referenced resources when settings this build up, cf. here:
+#   https://github.com/Microsoft/vsts-agent/issues/1301 wrt. ConnectedServiceName
+#
+# TODO describe parameters
+resources:
+- repo: self
+  clean: true
+phases:
+
+- phase: Pre
+  queue:
+    name: Hosted Linux Preview
+    timeoutInMinutes: 30
+  steps:
+  - task: Bash@3
+    name: var
+    inputs:
+      filePath: ci/set-variables.sh
+    displayName: Set variables
+  - task: Bash@3
+    inputs:
+      targetType: inline
+      script: |
+        . ci/functions.sh
+        vsts_updatebuildnumber $(SPEECHSDK_SEMVER2NOMETA)
+  - task: Bash@3
+    inputs:
+      filePath: ci/check-git-head.sh
+    displayName: Repository checks
+
+- phase: WindowsBuild
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsBuild '))
+  queue:
+    name: Hosted VS2017
+    timeoutInMinutes: 30
+    parallel: 4
+    matrix:
+      x64_debug:
+        BuildPlatform: x64
+        BuildConfiguration: Debug
+      x64_release:
+        BuildPlatform: x64
+        BuildConfiguration: Release
+      x86_release:
+        BuildPlatform: Win32
+        BuildConfiguration: Release
+      x86_debug:
+        BuildPlatform: Win32
+        BuildConfiguration: Debug
+  steps:
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set Windows target platform (Windows-x86 or Windows-x64)
+    inputs:
+      type: InlineScript
+      script: |
+        . ci/functions.sh
+        TARGET=Windows-x64
+        [[ "$(BuildPlatform)" == Win32 ]] && TARGET=Windows-x86
+        vsts_setvar SPEECHSDK_TARGET_PLATFORM "$TARGET"
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set variables
+    inputs:
+      type: FilePath
+      scriptPath: 'ci/set-variables.sh'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Install build dependencies
+    inputs:
+      type: FilePath
+      scriptPath: 'ci/install-build-dependencies.sh'
+  - task: CmdLine@1
+    displayName: Generate set_cmake_arch.bat
+    inputs:
+      filename: echo
+      arguments: 'IF $(BuildPlatform)==x64 (set CMakeArch=15 Win64) ELSE (set CMakeArch=15) > set_cmake_arch.bat'
+      failOnStandardError: true
+  - task: BatchScript@1
+    displayName: Run set_cmake_arch.bat
+    inputs:
+      filename: 'set_cmake_arch.bat'
+      modifyEnvironment: true
+      failOnStandardError: true
+  - task: CMake@1
+    displayName: Generate solution
+    inputs:
+      workingDirectory: 'build/$(BuildPlatform)'
+      cmakeArgs: '-G "Visual Studio $(CMakeArch)" ../..'
+  - task: NuGetCommand@2
+    displayName: NuGet restore
+    inputs:
+      restoreSolution: 'build/$(BuildPlatform)/carbon.sln'
+  - task: VSBuild@1
+    displayName: Build solution
+    inputs:
+      solution: 'build/$(BuildPlatform)/carbon.sln'
+      platform: '$(BuildPlatform)'
+      configuration: '$(BuildConfiguration)'
+      clean: true
+      maximumCpuCount: true
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'Sign Windows C++, C# and Java binaries'
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      FolderPath: 'build/$(BuildPlatform)/bin/$(BuildConfiguration)'
+      Pattern: 'Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.csharp.bindings.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.java.bindings.dll'
+      signConfigType: inlineSignParams
+      inlineOperation: |
+        [
+          {
+            "keyCode": "CP-230012",
+            "operationSetCode": "SigntoolSign",
+            "parameters": [
+              {
+                "parameterName": "OpusName",
+                "parameterValue": "Microsoft"
+              },
+              {
+                "parameterName": "OpusInfo",
+                "parameterValue": "http://www.microsoft.com"
+              },
+              {
+                "parameterName": "PageHash",
+                "parameterValue": "/NPH"
+              },
+              {
+                "parameterName": "FileDigest",
+                "parameterValue": "/fd sha256"
+              },
+              {
+                "parameterName": "TimeStamp",
+                "parameterValue": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
+              }
+            ],
+            "toolName": "signtool.exe",
+            "toolVersion": "6.2.9304.0"
+          },
+          {
+              "keyCode": "CP-230012",
+              "operationSetCode": "SigntoolVerify",
+              "parameters": [ ],
+              "toolName": "signtool.exe",
+              "toolVersion": "6.2.9304.0"
+           }
+        ]
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Download sample audios
+    inputs:
+      type: FilePath
+      scriptPath: './build/$(BuildPlatform)/tests/download_audio.sh'
+      cwd: 'build/$(BuildPlatform)'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set test variables
+    inputs:
+      type: FilePath
+      scriptPath: './ci/set-test-variables.sh'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Unit tests
+    inputs:
+      type: FilePath
+      scriptPath: '$(Build.Repository.LocalPath)/ci/test/rununittest.sh'
+      args: './bin/$(BuildConfiguration) $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      cwd: 'build/$(BuildPlatform)'
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Carbonx tests
+    inputs:
+      type: FilePath
+      scriptPath: '$(Build.Repository.LocalPath)/ci/test/runcarbonx.sh'
+      args: './bin/$(BuildConfiguration) $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      cwd: 'build/$(BuildPlatform)'
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: UspConsole tests
+    inputs:
+      type: FilePath
+      scriptPath: '$(Build.Repository.LocalPath)/ci/test/runuspconsole.sh'
+      args: './bin/$(BuildConfiguration) $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      cwd: 'build/$(BuildPlatform)'
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Carbon CSharp tests
+    inputs:
+      type: FilePath
+      scriptPath: '$(Build.Repository.LocalPath)/ci/test/runcsharp.sh'
+      args: './bin/$(BuildConfiguration) $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      cwd: 'build/$(BuildPlatform)'
+    condition: and(succeeded(),eq(variables['BuildConfiguration'], 'Release'),eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Run Java (JUnit) tests
+    inputs:
+      type: FilePath
+      scriptPath: '$(Build.Repository.LocalPath)/ci/test/runjava.sh'
+      args: '$(Build.Repository.LocalPath) ./ $(BuildConfiguration) $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      cwd: 'build/$(BuildPlatform)'
+    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'), eq(variables['BuildPlatform'], 'x64'),eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
+  - task: VSTest@1
+    displayName: Run C# tests
+    inputs:
+      testAssembly: '**\Microsoft.CognitiveServices.Speech.Tests*.dll;-:**\obj\**'
+      runSettingsFile: 'tests/functional/csharp/end2end/csharp.runsettings'
+      overrideTestrunParameters: 'UnifiedSpeechSubscriptionKey=$(KeySkyman);Region=westus;InputDir=$(Build.Repository.LocalPath)/tests/input;DeploymentId=$(TEST_MODEL_ID)'
+      runInParallel: False
+      vsTestVersion: latest
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Create drop files
+    inputs:
+      type: FilePath
+      scriptPath: './ci/drop/bindrop.sh'
+      args: '$(BuildPlatform) $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)'
+  - task: PublishBuildArtifacts@1
+    displayName: Publish drop
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: Windows
+      publishLocation: Container
+
+- phase: WindowsNuGet
+  dependsOn: WindowsBuild
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsNuGet '))
+  queue:
+    name: Hosted VS2017
+    timeoutInMinutes: 30
+  steps:
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set variables
+    inputs:
+      type: FilePath
+      scriptPath: 'ci/set-variables.sh'
+  - task: DownloadBuildArtifacts@0
+    inputs:
+      artifactName: Windows
+      downloadPath: $(System.ArtifactsDirectory)\In
+  - task: NuGetCommand@2
+    inputs:
+      command: custom
+      arguments: help
+    displayName: Set up NUGETEXETOOLPATH
+  - bash: |
+      . ci/functions.sh
+      vsts_setvar ZipBasename "SpeechSDK-WindowsSamples-$(SPEECHSDK_SEMVER2NOMETA)"
+    displayName: 'Set variables'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    inputs:
+      type: FilePath
+      scriptPath: './ci/nuget/pack.sh'
+      args: '$(System.ArtifactsDirectory)\In\Windows $(SPEECHSDK_SEMVER2NOMETA) $(Build.ArtifactStagingDirectory)\Windows'
+    displayName: Create NuGet
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    inputs:
+      type: InlineScript
+      script: |
+         set -e -x -o pipefail
+         # Drop is not needed anymore
+         rm -rf "$(cygpath -au "$(System.ArtifactsDirectory)\In")"
+         git clean -fdx samples
+         perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)"
+         mkdir "$(ZipBasename)"{,/csharp,/cxx}
+         cp --verbose --preserve license.md ThirdPartyNotices.md "$(ZipBasename)"
+         cp --verbose --recursive --preserve samples/csharp/quickstart samples/csharp/windows/{SpeechToText,Translation}-WPF "$(ZipBasename)/csharp"
+         cp --verbose --recursive --preserve samples/cxx/windows/quickstart "$(ZipBasename)/cxx"
+         NOW=$(date -Iseconds)
+         find "$(ZipBasename)" | xargs touch --date=$NOW
+    displayName: 'Create directory with patched samples'
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: $(ZipBasename)
+      includeRootFolder: true
+      archiveType: zip
+      archiveFile: $(Build.ArtifactStagingDirectory)//Windows/$(ZipBasename).zip
+    displayName: 'Create .zip'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    inputs:
+      type: InlineScript
+      script: |
+         ./ci/nuget/restore-from-local.sh "$(cygpath -au "$(Build.ArtifactStagingDirectory)/Windows")" samples
+    displayName: 'Test - restore packages'
+  - task: VSBuild@1
+    inputs:
+      solution: 'samples/**/*.sln'
+      platform: x64
+      configuration: Release
+      maximumCpuCount: true
+    displayName: 'Test - build solutions (x64 Release only)'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    inputs:
+      type: FilePath
+      scriptPath: 'ci/nuget/smoke_test.sh'
+      args: '$(Build.ArtifactStagingDirectory)\Windows $(KeySkyman)'
+    timeoutInMinutes: 2
+    continueOnError: true
+    displayName: Test - smoke-test
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      FolderPath: '$(Build.ArtifactStagingDirectory)/Windows'
+      Pattern: '*.nupkg'
+      signConfigType: inlineSignParams
+      inlineOperation: |
+        [
+          {
+            "keyCode": "CP-401405",
+            "operationSetCode": "NuGetSign",
+            "parameters": [ ],
+            "toolName": "sign",
+            "toolVersion": "1.0"
+          },
+          {
+            "keyCode": "CP-401405",
+            "operationSetCode": "NuGetVerify",
+            "parameters": [ ],
+            "toolName": "sign",
+            "toolVersion": "1.0"
+          }
+        ]
+    condition: eq(variables['SPEECHSDK_SIGN'], 'true')
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    enabled: false
+    inputs:
+      type: InlineScript
+      script: |
+         . ci/functions.sh
+         set -e -o pipefail
+         SHA256_SUM="$(sha256sum "$(cygpath -au "$(Build.ArtifactStagingDirectory)/$(ZipBasename).zip")" | cut -f1 -d' ')"
+         # N.B. two spaces in the next line intentional
+         echo "$SHA256_SUM  $(ZipBasename).zip"
+         vsts_setvar WINSAMPLES_SHA256SUM "$SHA256_SUM"
+         # checksum is not yet used...
+    displayName: 'Compute SHA256 for .zip'
+  - task: NuGetCommand@2
+    displayName: NuGet push to VSTS feed
+    inputs:
+      command: push
+      publishVstsFeed: $(SPEECHSDK_VSTS_FEED)
+    condition: eq(variables['SPEECHSDK_NUGET_VSTS_PUSH'],'true')
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/Windows'
+      ArtifactName: Windows
+      publishLocation: Container
+    condition: succeededOrFailed()
+    displayName: 'Publish .zip and .nupkg'
+
+- phase: AndroidBuild
+  variables:
+    ANDROID_NDK: $(System.ArtifactsDirectory)\ndk-r16b
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidBuild '))
+  queue:
+    name: Hosted VS2017
+    timeoutInMinutes: 30
+    parallel: 2
+    matrix:
+      debug:
+        BuildConfiguration: Debug
+      release:
+        BuildConfiguration: Release
+  steps:
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set Android-arm32 target platform
+    inputs:
+      type: InlineScript
+      script: |
+        . ci/functions.sh
+        vsts_setvar SPEECHSDK_TARGET_PLATFORM Android-arm32
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set variables
+    inputs:
+      type: FilePath
+      scriptPath: 'ci/set-variables.sh'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Install build dependencies
+    inputs:
+      type: FilePath
+      scriptPath: 'ci/install-build-dependencies.sh'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Get NDK
+    inputs:
+      type: InlineScript
+      script: |
+        . ci/functions.sh
+        set -x -e -o pipefail
+        NDK_VER=r16b
+        NDK_SHA1SUM=f3f1909ed1052e98dda2c79d11c22f3da28daf25
+        NDK_BASE="$(System.ArtifactsDirectory)\ndk-$NDK_VER"
+        NDK_BASE_UNIX="$(cygpath -au "$NDK_BASE")"
+        NDK_ZIP="$NDK_BASE_UNIX.zip"
+        curl https://dl.google.com/android/repository/android-ndk-$NDK_VER-windows-x86_64.zip -o "$NDK_ZIP"
+        echo "$NDK_SHA1SUM  $NDK_ZIP" | sha1sum -c --strict -
+        unzip -q -o "$NDK_ZIP" -d "$NDK_BASE_UNIX.tmp"
+        # A single nested directory should be inside
+        existsExactlyOneDir "$NDK_BASE_UNIX.tmp"/*
+        mv "$NDK_BASE_UNIX.tmp"/* "$NDK_BASE_UNIX"
+        rmdir "$NDK_BASE_UNIX.tmp"
+        rm "$NDK_ZIP"
+        # This doesn't seem to work reliably .. or with multi-configuration build?
+        # vsts_setvar ANDROID_NDK "$NDK_BASE"
+        # echo Try 2
+        # vsts_setvar ANDROID_NDK "$NDK_BASE"
+        echo Done.
+  - task: BatchScript@1
+    displayName: Build
+    inputs:
+      filename: 'ci\android\build-android.bat'
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: Sign com.microsoft.cognitiveservices.speech.jar
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      FolderPath: 'build/lib'
+      Pattern: com.microsoft.cognitiveservices.speech.jar
+      signConfigType: inlineSignParams
+      inlineOperation: |
+       [
+         {
+           "keyCode": "CP-232612-Java",
+           "operationSetCode": "JavaSign",
+           "parameters": [
+           {
+             "parameterName": "SigAlg",
+             "parameterValue": "SHA256withRSA"
+           },
+           {
+             "parameterName": "Timestamp",
+             "parameterValue": "-tsa http://sha256timestamp.ws.symantec.com/sha256/timestamp"
+           }
+           ],
+           "toolName": "sign",
+           "toolVersion": "1.0"
+         },
+         {
+           "keyCode": "CP-232612-Java",
+           "operationSetCode": "JavaVerify",
+           "parameters": [ ],
+           "toolName": "sign",
+           "toolVersion": "1.0"
+         }
+       ]
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: 'Create artifact: Android'
+    inputs:
+      type: FilePath
+      scriptPath: './ci/drop/bindrop.sh'
+      args: '"" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/Out/Android-arm32/$(BuildConfiguration) ANDROID'
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Android'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/Out'
+      ArtifactName: Android
+      publishLocation: Container
+
+- phase: LinuxBuild
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxBuild '))
+  queue:
+    name: Hosted Linux Preview
+    timeoutInMinutes: 30
+    parallel: 2
+    matrix:
+      debug:
+        BuildConfiguration: Debug
+      release:
+        BuildConfiguration: Release
+  steps:
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set Linux-x64 target platform
+    inputs:
+      type: InlineScript
+      script: |
+        . ci/functions.sh
+        vsts_setvar SPEECHSDK_TARGET_PLATFORM Linux-x64
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set variables
+    inputs:
+      type: FilePath
+      scriptPath: 'ci/set-variables.sh'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Install build dependencies
+    inputs:
+      type: FilePath
+      scriptPath: 'ci/install-build-dependencies.sh'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: C API can be parsed by GCC
+    inputs:
+      type: FilePath
+      scriptPath: './ci/check-gcc-parse.sh'
+  - task: CMake@1
+    displayName: Generate makefiles
+    inputs:
+      cmakeArgs: '-DCMAKE_BUILD_TYPE=$(BuildConfiguration) ..'
+  - task: CMake@1
+    displayName: CMake build
+    inputs:
+      cmakeArgs: '--build . -- -j4'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Download sample audios
+    inputs:
+      type: FilePath
+      scriptPath: './build/tests/download_audio.sh'
+      cwd: build
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set test variables
+    inputs:
+      type: FilePath
+      scriptPath: './ci/set-test-variables.sh'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Unit tests
+    inputs:
+      type: FilePath
+      scriptPath: '$(Build.Repository.LocalPath)/ci/test/rununittest.sh'
+      args: './bin $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      cwd: build
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Carbonx tests
+    inputs:
+      type: FilePath
+      scriptPath: '$(Build.Repository.LocalPath)/ci/test/runcarbonx.sh'
+      args: './bin $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      cwd: build
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: UspConsole tests
+    inputs:
+      type: FilePath
+      scriptPath: '$(Build.Repository.LocalPath)/ci/test/runuspconsole.sh'
+      args: './bin $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      cwd: build
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Create drop files
+    inputs:
+      type: FilePath
+      scriptPath: './ci/drop/bindrop.sh'
+      args: '"" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/Linux-x64/$(BuildConfiguration)'
+    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
+  - task: PublishBuildArtifacts@1
+    displayName: Publish drop
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: Linux
+      publishLocation: Container
+    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
+
+- phase: LinuxX86Build
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxBuild '))
+  queue:
+    name: Hosted Linux Preview
+    timeoutInMinutes: 30
+    parallel: 2
+    matrix:
+      debug:
+        BuildConfiguration: Debug
+      release:
+        BuildConfiguration: Release
+  steps:
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set Linux-x86 target platform
+    inputs:
+      type: InlineScript
+      script: |
+        . ci/functions.sh
+        vsts_setvar SPEECHSDK_TARGET_PLATFORM Linux-x86
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set variables
+    inputs:
+      type: FilePath
+      scriptPath: 'ci/set-variables.sh'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Build container, SDK, create drop
+    inputs:
+      type: InlineScript
+      script: |
+        set -e -o pipefail -x
+        export SPEECH_SUBSCRIPTION_KEY=$(KeySkyman)
+
+        pushd ci/docker
+        ./build.sh linux/x86
+        ./build-and-smoke-test.sh linux/x86 $(BuildConfiguration) build/Linux-x86
+        popd
+        ./ci/drop/bindrop.sh "Linux-x86" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/Linux-x86/$(BuildConfiguration)
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Linux x86'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: Linux
+      publishLocation: Container
+    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
+
+- phase: LinuxDrop
+  dependsOn: [LinuxBuild, LinuxX86Build]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxDrop '))
+  queue:
+    name: Hosted Linux Preview
+    timeoutInMinutes: 30
+  steps:
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set variables
+    inputs:
+      type: FilePath
+      scriptPath: 'ci/set-variables.sh'
+  - task: DownloadBuildArtifacts@0
+    displayName: Download Build Artifacts
+    inputs:
+      artifactName: Linux
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Create release drop
+    inputs:
+      type: FilePath
+      scriptPath: './ci/drop/linux-reldrop.sh'
+      args: '"$(SPEECHSDK_SEMVER2NOMETA)" "$(Build.Repository.LocalPath)" "$(System.ArtifactsDirectory)/Linux" "$(Build.ArtifactStagingDirectory)/Linux/Drop"'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Roll samples
+    inputs:
+      type: FilePath
+      scriptPath: './ci/drop/linux-samples.sh'
+      args: '"$(SPEECHSDK_SEMVER2NOMETA)" "$(Build.ArtifactStagingDirectory)/Linux/Drop"'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Test - build quickstart
+    inputs:
+      type: FilePath
+      scriptPath: './ci/drop/test-quickstart-linux.sh'
+      args: '"$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz"'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Test - run quickstart
+    inputs:
+      type: InlineScript
+      script: 'SPEECH_SUBSCRIPTION_KEY=$(KeySkyman) ./ci/drop/test-quickstart-linux.sh --smoke-test "$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz"'
+    timeoutInMinutes: 5
+    continueOnError: true
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Linux Release Drop'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/Linux'
+      ArtifactName: Linux
+      publishLocation: Container
+
+- phase: OsxBuild
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' OsxBuild '))
+  queue:
+    name: Hosted macOS Preview
+    timeoutInMinutes: 30
+    parallel: 2
+    matrix:
+      debug:
+        BuildConfiguration: Debug
+      release:
+        BuildConfiguration: Release
+  steps:
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set OSX-x64 target platform copy
+    inputs:
+      type: InlineScript
+      script: |
+        . ci/functions.sh
+        vsts_setvar SPEECHSDK_TARGET_PLATFORM Linux-x64
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set variables
+    inputs:
+      type: FilePath
+      scriptPath: 'ci/set-variables.sh'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Install build dependencies
+    inputs:
+      type: FilePath
+      scriptPath: 'ci/install-build-dependencies.sh'
+  - task: CMake@1
+    displayName: Generate makefiles
+    inputs:
+      cmakeArgs: '-DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl/ ..'
+  - task: CMake@1
+    displayName: CMake build
+    inputs:
+      cmakeArgs: '--build . -- -j4'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Download sample audios
+    inputs:
+      type: FilePath
+      scriptPath: './build/tests/download_audio.sh'
+      cwd: build
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set test variables
+    inputs:
+      type: FilePath
+      scriptPath: './ci/set-test-variables.sh'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Unit tests
+    inputs:
+      type: FilePath
+      scriptPath: '$(Build.Repository.LocalPath)/ci/test/rununittest.sh'
+      args: './bin $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      cwd: build
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Carbonx tests
+    inputs:
+      type: FilePath
+      scriptPath: '$(Build.Repository.LocalPath)/ci/test/runcarbonx.sh'
+      args: './bin $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      cwd: build
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: UspConsole tests
+    inputs:
+      type: FilePath
+      scriptPath: '$(Build.Repository.LocalPath)/ci/test/runuspconsole.sh'
+      args: './bin $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      cwd: build
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Create drop files
+    inputs:
+      type: FilePath
+      scriptPath: './ci/drop/bindrop.sh'
+      args: '"" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/OSX-x64/$(BuildConfiguration)'
+    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
+  - task: PublishBuildArtifacts@1
+    displayName: Publish drop
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: OSX
+      publishLocation: Container
+    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
+
+- phase: Doxygen
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' Doxygen '))
+  queue:
+    name: Hosted macOS Preview
+    timeoutInMinutes: 30
+  steps:
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set variables
+    inputs:
+      type: FilePath
+      scriptPath: 'ci/set-variables.sh'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    inputs:
+      type: InlineScript
+      script: |
+        set -e -o pipefail
+        brew install doxygen
+        cd ci/doxygen
+        mkdir "$(Build.ArtifactStagingDirectory)/Doxygen"
+        for lang in c cpp csharp java; do
+          (
+            cat ${lang}_doxygen.txt;
+            echo PROJECT_NUMBER=$(SPEECHSDK_SEMVER2);
+            echo 'WARN_FORMAT="##''vso[task.logissue type=warning;sourcepath=$file;linenumber=$line;columnnumber=1]$text"';
+            echo OUTPUT_DIRECTORY=$(Build.ArtifactStagingDirectory)/Doxygen
+          ) | doxygen -
+        done
+        git clone https://github.com/sourcey/moxygen.git
+        cd moxygen
+        git checkout c00d16803a6dfc40796cd4b76271c481ed865243
+        git apply ../0001-Provide-shortname-provide-plain.patch
+        npm install
+        cd ..
+        node moxygen/bin/moxygen.js -o cppapi.md -t ./moxygen_template/cpp -a $(Build.ArtifactStagingDirectory)/Doxygen/cppxml
+        powershell -NoProfile -NoLogo -ExecutionPolicy Bypass -NonInteractive doxmox2docs.ps1 \
+          -DoxygenIndexXml $(Build.ArtifactStagingDirectory)/Doxygen/cppxml/index.xml \
+          -MoxygenApiMd cppapi.md \
+          -OutputDir $(Build.ArtifactStagingDirectory)/Doxygen/cppmd
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/Doxygen'
+      ArtifactName: Doxygen
+      publishLocation: Container

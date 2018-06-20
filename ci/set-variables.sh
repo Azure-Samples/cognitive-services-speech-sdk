@@ -4,8 +4,7 @@
 #
 # Inputs:
 # * version.txt in the repository directory
-# * Variables coming from the build definition:
-#   * $RUNPHASE - build options
+# * Output overrides named OVERRIDE_* coming from the build definition (cf. below)
 # * Various VSTS build variables
 #   * $BUILD_BUILDID
 #   * $BUILD_REASON
@@ -16,7 +15,7 @@
 #
 # Outputs:
 # * SPEECHSDK_MAIN_BUILD - equal to "true" if running from our main build
-#   definition (4062), "false" otherwise.
+#   definition (4062), "false" otherwise. TODO no need to export?
 # * SPEECHSDK_BUILD_TYPE - can be "dev", "int", "prod", which (roughly) correspond to
 #   dev-box / PR / feature-branch, nightly, release-branch builds. "int" and "prod"
 #   can only come from the main build definition (i.e., no clone, and no draft).
@@ -35,10 +34,15 @@
 #   We are currently using this (and not SPEECHSDK_SEMVER2) for NuGet packages,
 #   since VSTS package management does not support build meta information.
 # * SPEECHSDK_SIGN - equal to "true" if should sign, "false" otherwise.
-#   For testing signing, if RUNPHASE contains SIGN, this is set to "true".
 # * SPEECHSDK_NUGET_VSTS_PUSH - equal to "true" if a push to (one of) our internal
 #   VSTS packagement feeds should be made.
+# * SPEECHSDK_VSTS_FEED - VSTS feed to push to (if a push is done)
+#     Defaults to our CarbonPre VSTS feed for 'dev' builds, Carbon otherwise.
 # * SPEECHSDK_BUILD_AGENT_PLATFORM - can be "Windows-x64", "OSX-x64", "Linux-x64"
+# * SPEECHSDK_BUILD_PHASES - space-separated and space-enclosed list of build phases to run
+#     Default: " WindowsBuild WindowsNuGet LinuxBuild LinuxDrop OsxBuild AndroidBuild Doxygen "
+#     Check phase condition in build.yml for valid phase names.
+# * SPEECHSDK_RUN_TESTS - whether to run tests. Can be 'true' (default) or 'false'.
 #
 # Override mechanism:
 # Any of the outputs can be overridden. To override output X, specify a
@@ -88,9 +92,10 @@ IN_VSTS=$([[ -n $SYSTEM_DEFINITIONID && -n $SYSTEM_COLLECTIONID ]] && echo true 
 if $IN_VSTS; then
   # We're running in VSTS
 
-  MAIN_BUILD_DEF=19422243-19b9-4d85-9ca6-bc961861d287/4062
+  # TODO remove the first one once we've switched off the old Carbon Build
+  MAIN_BUILD_DEFS=,19422243-19b9-4d85-9ca6-bc961861d287/4062,19422243-19b9-4d85-9ca6-bc961861d287/4833,
 
-  SPEECHSDK_MAIN_BUILD=$([[ $SYSTEM_COLLECTIONID/$SYSTEM_DEFINITIONID == $MAIN_BUILD_DEF ]] && echo true || echo false)
+  SPEECHSDK_MAIN_BUILD=$([[ $MAIN_BUILD_DEFS == *,$SYSTEM_COLLECTIONID/$SYSTEM_DEFINITIONID,* ]] && echo true || echo false)
 
   if [[ $SPEECHSDK_MAIN_BUILD ]]; then
     # Non-draft build definition
@@ -123,18 +128,26 @@ elif [[ ! $VERSION =~ ^([0-9]+\.){2}[0-9]+(-(alpha|beta|rc)\.[0-9]+)?$ ]]; then
   exit 1
 fi
 
+# Build phases to run (currently: all for all build types)
+SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsNuGet LinuxBuild LinuxDrop OsxBuild AndroidBuild Doxygen "
+
+# Running tests is default
+SPEECHSDK_RUN_TESTS=true
+
 case $SPEECHSDK_BUILD_TYPE in
   dev)
     PRERELEASE_VERSION=-alpha.0.$_BUILD_ID
     META=+$_BUILD_COMMIT
     SPEECHSDK_SIGN=false
     SPEECHSDK_NUGET_VSTS_PUSH=false
+    SPEECHSDK_VSTS_FEED=6e3392a0-60e1-412f-8fc5-41de1c818f6c # CarbonPre
     ;;
   int)
     PRERELEASE_VERSION=-beta.0.$_BUILD_ID
     META=+$_BUILD_COMMIT
     SPEECHSDK_SIGN=true
     SPEECHSDK_NUGET_VSTS_PUSH=true
+    SPEECHSDK_VSTS_FEED=6cad1ef4-30c7-40bd-8d67-d624d756c9c8 # Carbon
     ;;
   prod)
     # Prod builds take exactly the version from version.txt, no extra
@@ -143,18 +156,11 @@ case $SPEECHSDK_BUILD_TYPE in
     META=
     SPEECHSDK_SIGN=true
     SPEECHSDK_NUGET_VSTS_PUSH=true
+    SPEECHSDK_VSTS_FEED=6cad1ef4-30c7-40bd-8d67-d624d756c9c8 # Carbon
     ;;
 esac
 
-# Set SPEECHSDK_SIGN to true if explicitly requested
-if [[ "$RUNPHASE" = *Sign* || "$RUNPHASE" = *All* ]]; then
-  SPEECHSDK_SIGN=true
-fi
-
-# Set SPEECHSDK_NUGET_VSTS_PUSH to true if explicitly requested
-if [[ "$RUNPHASE" = *WindowsNuGetPush* || "$RUNPHASE" = *All* ]]; then
-  SPEECHSDK_NUGET_VSTS_PUSH=true
-fi
+# Set the _output_ variables used for conditionally running phases.
 
 SPEECHSDK_SEMVER2NOMETA="$VERSION$PRERELEASE_VERSION"
 SPEECHSDK_SEMVER2="$SPEECHSDK_SEMVER2NOMETA$META"
@@ -171,11 +177,28 @@ for var in \
   SPEECHSDK_SEMVER2NOMETA \
   SPEECHSDK_SIGN \
   SPEECHSDK_NUGET_VSTS_PUSH \
+  SPEECHSDK_VSTS_FEED \
   SPEECHSDK_BUILD_AGENT_PLATFORM \
+  SPEECHSDK_RUN_TESTS \
   ; \
 do
   overrideVar=OVERRIDE_$var
   overrideValue="${!overrideVar}"
 
+  [[ -n $overrideValue ]] && echo Picking override: $overrideVar=$overrideValue
+
   vsts_setvar $var "${overrideValue:-${!var}}"
+done
+
+# Some outputs are (cross-phase) outputs. Potentially all could / should be, still testing this.
+for var in \
+  SPEECHSDK_BUILD_PHASES \
+  ; \
+do
+  overrideVar=OVERRIDE_$var
+  overrideValue="${!overrideVar}"
+
+  [[ -n $overrideValue ]] && echo Picking override: $overrideVar=$overrideValue
+
+  vsts_setoutvar $var "${overrideValue:-${!var}}"
 done
