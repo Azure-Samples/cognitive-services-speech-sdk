@@ -257,10 +257,10 @@ int GetISO8601TimeOffset(char *buffer, unsigned int length, int offset)
 
 #if defined(WIN32)
     strftime(buffer, length, "%FT%T.", &timeinfo);
-    snprintf(buffer + 20, 5, "%03dZ", stCurrentTimeAfterOffset.wMilliseconds);
+    (void) snprintf(buffer + 20, 5, "%03uZ", stCurrentTimeAfterOffset.wMilliseconds);
 #else
     strftime(buffer, length, "%FT%T.", timeinfo);
-    snprintf(buffer + 20, 5, "%03dZ", adjusted_ms);
+    (void) snprintf(buffer + 20, 5, "%03dZ", adjusted_ms);
 #endif
     return 0;
 }
@@ -284,7 +284,7 @@ int GetISO8601Time(char *buffer, unsigned int length)
 #if defined(WIN32)
     SYSTEMTIME sysTime;
     GetSystemTime(&sysTime);
-    timeStringLength += snprintf(buffer + 20, 5, "%03dZ", sysTime.wMilliseconds);
+    timeStringLength += snprintf(buffer + 20, 5, "%03uZ", sysTime.wMilliseconds);
 #else
     struct timeval curTime;
     gettimeofday(&curTime, NULL);
@@ -510,7 +510,7 @@ static void prepare_send_free(TELEMETRY_HANDLE handle, TELEMETRY_DATA *telemetry
     char requestId[NO_DASH_UUID_LEN] = "";
     if (!IS_STRING_NULL_OR_EMPTY(telemetry_object->requestId))
     {
-        snprintf(requestId, NO_DASH_UUID_LEN, "%s", telemetry_object->requestId);
+        (void) snprintf(requestId, NO_DASH_UUID_LEN, "%s", telemetry_object->requestId);
     }
     
     STRING_HANDLE serialized = PropertybagSerialize(telemetry_serialize, telemetry_object);
@@ -614,21 +614,25 @@ void register_requestId_change_event(TELEMETRY_HANDLE handle, const char *reques
     }
     // Check if current_telelmetry_object is initialized and populated
     // Also, check if this is not the first requestId set
-    Lock(handle->lock);
-    TELEMETRY_DATA* telemetry_data = handle->current_telemetry_object;
-    if (!IS_STRING_NULL_OR_EMPTY(telemetry_data->requestId) && 
-        telemetry_data->bPayloadSet)
-    {
-        // Insert current telemetry object into the queue
-        (void)singlylinkedlist_add(handle->inband_telemetry_queue, telemetry_data);
-        // Assign new memory with zeros to current telemetry object
-        handle->current_telemetry_object = (TELEMETRY_DATA *)calloc(1, sizeof(TELEMETRY_DATA));
+    if (handle->current_telemetry_object) {
+        Lock(handle->lock);
+
+        TELEMETRY_DATA* telemetry_data = handle->current_telemetry_object;
+        if (!IS_STRING_NULL_OR_EMPTY(telemetry_data->requestId) && telemetry_data->bPayloadSet)
+        {
+            // Insert current telemetry object into the queue
+            (void)singlylinkedlist_add(handle->inband_telemetry_queue, telemetry_data);
+            // Assign new memory with zeros to current telemetry object
+            handle->current_telemetry_object = (TELEMETRY_DATA *)calloc(1, sizeof(TELEMETRY_DATA));
+        }
+
+        if (handle->current_telemetry_object) {
+            // Set the requestId element for the current telemetry object
+            strcpy_s(handle->current_telemetry_object->requestId, NO_DASH_UUID_LEN, requestId);
+        }
+
+        Unlock(handle->lock);
     }
-
-    // Set the requestId element for the current telemetry object
-    strcpy_s(handle->current_telemetry_object->requestId, NO_DASH_UUID_LEN, requestId);
-
-    Unlock(handle->lock);
 }
 
 void inband_connection_telemetry(TELEMETRY_HANDLE handle, const char *connectionId, const char *key, void *value)
@@ -680,18 +684,19 @@ void inband_tts_telemetry(TELEMETRY_HANDLE handle, const char *id, const char *k
     // Add the tts event to the current telemetry object if the requestIds are the same
     
     // NOTE: IMPORTANT! this logic is no loger sound!!!
-    
-    if (!IS_STRING_NULL_OR_EMPTY(handle->current_telemetry_object->requestId) &&
-        strcmp(handle->current_telemetry_object->requestId, id) == 0)
-    {
-        PROPERTYBAG_HANDLE* ttsJson = &handle->current_telemetry_object->ttsJson;
-        if (value == NULL)
+    if (handle->current_telemetry_object) {
+        if (!IS_STRING_NULL_OR_EMPTY(handle->current_telemetry_object->requestId) &&
+            strcmp(handle->current_telemetry_object->requestId, id) == 0)
         {
-            populate_event_timestamp(ttsJson, kEvent_type_audioPlayback, NULL, key);
-        }
-        else
-        {
-            populate_event_key_value(ttsJson, kEvent_type_audioPlayback, NULL, key, value);
+            PROPERTYBAG_HANDLE* ttsJson = &handle->current_telemetry_object->ttsJson;
+            if (value == NULL)
+            {
+                populate_event_timestamp(ttsJson, kEvent_type_audioPlayback, NULL, key);
+            }
+            else
+            {
+                populate_event_key_value(ttsJson, kEvent_type_audioPlayback, NULL, key, value);
+            }
         }
     }
     // flush the tts event as is immediately
@@ -758,13 +763,15 @@ TELEMETRY_HANDLE telemetry_create(PTELEMETRY_WRITE callback, void* context)
     PropertybagInitialize();
     initialize_message_name_array();
     TELEMETRY_CONTEXT* ctx = (TELEMETRY_CONTEXT *)calloc(1, sizeof(TELEMETRY_CONTEXT));
-    ctx->current_telemetry_object = (TELEMETRY_DATA *)calloc(1, sizeof(TELEMETRY_DATA));
-    // as 
-    ctx->current_connection_telemetry_object = (TELEMETRY_DATA *)calloc(1, sizeof(TELEMETRY_DATA));
-    ctx->lock = Lock_Init();
-    ctx->callback = callback;
-    ctx->callbackContext = context;
-    ctx->inband_telemetry_queue = singlylinkedlist_create();
+    if (ctx) {
+        ctx->current_telemetry_object = (TELEMETRY_DATA *)calloc(1, sizeof(TELEMETRY_DATA));
+        // as 
+        ctx->current_connection_telemetry_object = (TELEMETRY_DATA *)calloc(1, sizeof(TELEMETRY_DATA));
+        ctx->lock = Lock_Init();
+        ctx->callback = callback;
+        ctx->callbackContext = context;
+        ctx->inband_telemetry_queue = singlylinkedlist_create();
+    }
     return ctx;
 }
 

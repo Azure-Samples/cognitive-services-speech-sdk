@@ -12,18 +12,20 @@ namespace Impl {
 
 void CSpxKwsModel::InitFromFile(const wchar_t* fileName)
 {
-    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    if (fileName) {
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
-    SPX_IFTRUE_THROW_HR(fileName == nullptr || fileName[0] == '\0', SPXERR_INVALID_ARG);
-    SPX_IFTRUE_THROW_HR(!m_fileName.empty(), SPXERR_ALREADY_INITIALIZED);
+        SPX_IFTRUE_THROW_HR(fileName == nullptr || fileName[0] == '\0', SPXERR_INVALID_ARG);
+        SPX_IFTRUE_THROW_HR(!m_fileName.empty(), SPXERR_ALREADY_INITIALIZED);
 
-    m_fileName = fileName;
+        m_fileName = fileName;
 
-    FILE* file = nullptr;
-    PAL::fopen_s(&file, PAL::ToString(fileName).c_str(), "rb");
-    if (file != nullptr) fclose(file);
+        FILE* file = nullptr;
+        PAL::fopen_s(&file, PAL::ToString(fileName).c_str(), "rb");
+        if (file != nullptr) fclose(file);
 
-    SPX_IFTRUE_THROW_HR(file == nullptr, SPXERR_FILE_OPEN_FAILED);
+        SPX_IFTRUE_THROW_HR(file == nullptr, SPXERR_FILE_OPEN_FAILED);
+    }
 }
 
 
