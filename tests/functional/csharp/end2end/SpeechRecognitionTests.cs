@@ -18,6 +18,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     {
         private static string deploymentId;
         private SpeechRecognitionTestsHelper speechRecognitionTestsHelper;
+        private const int testTimeout = 90000;
 
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
@@ -32,22 +33,44 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             speechRecognitionTestsHelper = new SpeechRecognitionTestsHelper();
         }
 
-        [Ignore] // Related to VSO Item 1298031
-        [TestMethod]
+        [Ignore] //TODO: Enable after Bug 1269097 is fixed
+        [TestMethod, Timeout(testTimeout)]
         public async Task ValidBaselineRecognition()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
             {
                 speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-                Assert.IsTrue(result.Duration.Ticks > 0);
+                Assert.IsTrue(result.Duration.Ticks > 0, result.RecognitionStatus.ToString());
                 Assert.AreEqual(0, result.Offset.Ticks);
                 Assert.IsTrue(speechRecognitionTestsHelper.AreResultsMatching(result.Text, TestData.English.Weather.Utterance));
             }
         }
 
-        [Ignore] // Related to VSO Item 1298031
-        [TestMethod]
+        [TestMethod, Timeout(testTimeout)] //TODO: Remove Test after Bug 1269097 is fixed
+        public async Task ContinuousValidBaselineRecognition()
+        {
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
+            {
+                List<string> recognizedText = new List<string>();
+                speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
+                recognizer.FinalResultReceived += (s, e) =>
+                {
+                    if (e.Result.Text.Length > 0)
+                    {
+                        recognizedText.Add(e.Result.Text);
+                    }
+                };
+
+                await speechRecognitionTestsHelper.CompleteContinuousRecognition(recognizer);
+
+                Assert.IsTrue(recognizedText.Count > 0);
+                Assert.IsTrue(speechRecognitionTestsHelper.AreResultsMatching(recognizedText[0], TestData.English.Weather.Utterance));
+            }
+        }
+
+        [Ignore] //TODO: Enable after Bug 1269097 is fixed
+        [TestMethod, Timeout(testTimeout)]
         public async Task ValidCustomRecognition()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
@@ -59,8 +82,32 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        [TestMethod, Timeout(testTimeout)] //TODO: Remove Test after Bug 1269097 is fixed
+        public async Task ContinuousValidCustomRecognition()
+        {
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
+            {
+                recognizer.DeploymentId = deploymentId;
+
+                List<string> recognizedText = new List<string>();
+                speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
+                recognizer.FinalResultReceived += (s, e) =>
+                {
+                    if (e.Result.Text.Length > 0)
+                    {
+                        recognizedText.Add(e.Result.Text);
+                    }
+                };
+
+                await speechRecognitionTestsHelper.CompleteContinuousRecognition(recognizer);
+
+                Assert.IsTrue(recognizedText.Count > 0);
+                Assert.IsTrue(speechRecognitionTestsHelper.AreResultsMatching(recognizedText[0], TestData.English.Weather.Utterance));
+            }
+        }
+
         [Ignore] // TODO ENABLE AFTER FIXING BROKEN SERVICE
-        [TestMethod]
+        [TestMethod, Timeout(testTimeout)]
         public async Task InvalidKeyHandledProperly()
         {
             var factory = SpeechFactory.FromSubscription("invalidKey", region);
@@ -73,8 +120,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [Ignore] // Related to VSO Item 1298031
-        [TestMethod]
+        [TestMethod, Timeout(testTimeout)]
         public async Task InvalidRegionHandledProperly()
         {
             var factory = SpeechFactory.FromSubscription(subscriptionKey, "invalidRegion");
@@ -87,15 +133,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [Ignore] // Related to VSO Item 1298031
-        [TestMethod]
+        [TestMethod, Timeout(testTimeout)]
         public void InvalidInputFileHandledProperly()
         {
             Assert.ThrowsException<ApplicationException>(() => factory.CreateSpeechRecognizerWithFileInput("invalidFile.wav"));
         }
 
-        [Ignore] // Related to VSO Item 1298031
-        [TestMethod]
+        [TestMethod, Timeout(testTimeout)]
         public async Task InvalidDeploymentIdHandledProperly()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
@@ -108,20 +152,41 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [Ignore] // Related to VSO Item 1298031
-        [TestMethod]
+        [Ignore] //TODO: Enable after Bug 1269097 is fixed
+        [TestMethod, Timeout(testTimeout)]
         public async Task GermanRecognition()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.German.FirstOne.AudioFile, Language.DE_DE))
             {
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-                Assert.IsFalse(string.IsNullOrEmpty(result.Text));
+                Assert.IsFalse(string.IsNullOrEmpty(result.Text), result.RecognitionStatus.ToString());
                 Assert.IsTrue(speechRecognitionTestsHelper.AreResultsMatching(result.Text, TestData.German.FirstOne.Utterance));
             }
         }
 
-        [Ignore] // Related to VSO Item 1298031
-        [TestMethod, TestCategory(TestCategory.LongRunning)]
+        [TestMethod, Timeout(testTimeout)] //TODO: Remove Test after Bug 1269097 is fixed
+        public async Task ContinuousGermanRecognition()
+        {
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.German.FirstOne.AudioFile, Language.DE_DE))
+            {
+                List<string> recognizedText = new List<string>();
+                speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
+                recognizer.FinalResultReceived += (s, e) =>
+                {
+                    if (e.Result.Text.Length > 0)
+                    {
+                        recognizedText.Add(e.Result.Text);
+                    }
+                };
+
+                await speechRecognitionTestsHelper.CompleteContinuousRecognition(recognizer);
+
+                Assert.IsTrue(recognizedText.Count > 0);
+                Assert.IsTrue(speechRecognitionTestsHelper.AreResultsMatching(recognizedText[0], TestData.German.FirstOne.Utterance));
+            }
+        }
+
+        [TestMethod, TestCategory(TestCategory.LongRunning), Timeout(testTimeout)]
         public async Task ContinuousRecognitionOnLongFileInput()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Batman.AudioFile))
@@ -142,14 +207,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(0, speechRecognitionTestsHelper.ErrorEventCount, AssertOutput.WrongErrorCount);
                 Assert.IsTrue(speechRecognitionTestsHelper.SpeechStartedEventCount > 0, AssertOutput.WrongSpeechStartedCount);
                 Assert.IsTrue(speechRecognitionTestsHelper.SpeechEndedEventCount > 0, AssertOutput.WrongSpeechEndedCount);
-                Assert.AreEqual(1, speechRecognitionTestsHelper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
                 Assert.IsTrue(recognizedText.Count > 0);
                 Assert.IsTrue(speechRecognitionTestsHelper.AreResultsMatching(recognizedText[0], TestData.English.Batman.Utterances[0]));
                 Assert.IsTrue(speechRecognitionTestsHelper.AreResultsMatching(recognizedText.Last(), TestData.English.Batman.Utterances.Last()));
             }
         }
 
-        [TestMethod]
+        [TestMethod, Timeout(testTimeout)]
         public async Task SubscribeToManyEventHandlers()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
@@ -170,7 +234,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [TestMethod, Timeout(testTimeout)]
         public async Task UnsubscribeFromEventHandlers()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
@@ -188,7 +252,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [TestMethod, Timeout(testTimeout)]
         public async Task ResubscribeToEventHandlers()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
@@ -222,7 +286,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod]
+        [TestMethod, Timeout(testTimeout)]
         public async Task ChangeSubscriptionDuringRecognition()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
