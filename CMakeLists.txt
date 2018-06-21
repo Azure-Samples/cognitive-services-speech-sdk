@@ -1,6 +1,6 @@
 if(WIN32)
-  # Version >= 3.7.x is required for generating VS 2017 solutions.
-  cmake_minimum_required(VERSION 3.7)
+  # Version >= 3.10.3 is required for generating VS 2017 solutions and ensuring SWIG to create correct dll names.
+  cmake_minimum_required(VERSION 3.10)
 else()
   cmake_minimum_required(VERSION 3.5)
 endif()
