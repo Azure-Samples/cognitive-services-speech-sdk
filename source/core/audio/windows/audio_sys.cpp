@@ -721,7 +721,7 @@ DWORD WINAPI captureThreadProc(
     AUDIO_SYS_DATA* pInput = (AUDIO_SYS_DATA*)lpParameter;
     DWORD waitResult;
     IAudioCaptureClient *pCaptureClient;
-    int audio_result = -1;
+    int audio_result = 0;
 
     HANDLE allEvents[] = { pInput->hCaptureThreadShouldExit, pInput->hBufferReady };
 
@@ -730,7 +730,8 @@ DWORD WINAPI captureThreadProc(
     BYTE *pData;
     DWORD flags;
     size_t space_remaining = 0;
-    size_t adding = 0;
+    size_t adding = 0;    
+    AudioDataBuffer audioBuff = { nullptr, 0, 0 };
 
     if (pInput->input_state_cb)
     {
@@ -738,10 +739,10 @@ DWORD WINAPI captureThreadProc(
     }
     pInput->current_input_state = AUDIO_STATE_RUNNING;
 
-    AudioDataBuffer audioBuff = { NULL, pInput->inputFrameCnt * pInput->audioInFormat.nBlockAlign, 0 };
-
     hr = pInput->pAudioInputClient->GetService(IID_IAudioCaptureClient,(void**)&pCaptureClient);
     EXIT_ON_ERROR(hr);
+
+    audioBuff.totalSize = pInput->inputFrameCnt * pInput->audioInFormat.nBlockAlign;
 
     audioBuff.pAudioData = (BYTE *)malloc(sizeof(BYTE) * audioBuff.totalSize);
     if (!audioBuff.pAudioData)
@@ -784,22 +785,25 @@ DWORD WINAPI captureThreadProc(
 
                 // If we there is data remaining in the audio buffer pData.
                 // Flush the local audio buff and reset it. Then copy over the remaining data.
-                if (adding <= (numFramesAvailable * 2))
+                if (adding < (numFramesAvailable * 2))
                 {
                     audio_result = pInput->audio_write_cb(pInput->user_write_ctx,
                         audioBuff.pAudioData,
-                        audioBuff.totalSize);
+                        audioBuff.currentSize);
 
                     size_t data_remaining = (numFramesAvailable * 2) - adding;
 
                     // Reset local audio buffer.
                     audioBuff.currentSize = 0;
-                    memcpy_s(audioBuff.pAudioData,
-                        audioBuff.totalSize,
-                        pData + adding,
-                        data_remaining);
-
-                    audioBuff.currentSize += data_remaining;
+                    if (data_remaining > 0)
+                    {
+                        size_t copySize = min(data_remaining, audioBuff.totalSize);
+                        memcpy_s(audioBuff.pAudioData,
+                             audioBuff.totalSize,
+                            pData + adding,
+                            copySize);
+                        audioBuff.currentSize += copySize;
+                    }
                 }
 
                 hr = pCaptureClient->ReleaseBuffer(numFramesAvailable);

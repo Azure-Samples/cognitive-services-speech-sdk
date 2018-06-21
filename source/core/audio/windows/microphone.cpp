@@ -49,7 +49,8 @@ MicrophonePump::MicrophonePump()
     SPX_IFTRUE_THROW_HR(result != AUDIO_RESULT_OK, SPXERR_MIC_ERROR);
 
     // size in samples for a buffer that holds the audio from Core Audio API.
-    int val = 160;
+    // 100 ms for now.
+    int val = 1600;
     result = audio_set_options(m_audioHandle, AUDIO_OPTION_INPUT_FRAME_COUNT, &val);
     SPX_IFTRUE_THROW_HR(result != AUDIO_RESULT_OK, SPXERR_MIC_ERROR);
 }
