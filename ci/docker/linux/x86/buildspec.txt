@@ -2,4 +2,6 @@ from-ubuntu16-x86
 
 deps
 
+swig
+
 builduser

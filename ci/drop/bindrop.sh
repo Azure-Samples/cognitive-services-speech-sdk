@@ -27,7 +27,6 @@ BUILD_ROOT="$SOURCE_ROOT/build/$PLATFORM"
 
 SRCJAR="$BUILD_ROOT/lib/com.microsoft.cognitiveservices.speech.jar"
 SRCJARSRC="$BUILD_ROOT/lib/com.microsoft.cognitiveservices.speech-src.zip"
-SRCJARBINDING="$BUILD_ROOT/bin/libMicrosoft.CognitiveServices.Speech.java.bindings.so"
 SRCCARBONX="$BUILD_ROOT/bin/carbonx"
 
 if [[ $OS = "Windows_NT" ]]; then
@@ -39,6 +38,8 @@ if [[ $OS = "Windows_NT" ]]; then
              SRCBIN="$BUILD_ROOT/bin/$CONFIG"
              SRCLIB="$BUILD_ROOT/lib/$CONFIG"
              SRCDYNLIB="$BUILD_ROOT/bin/$CONFIG"
+
+             SRCJNILIB="$SRCBIN/Microsoft.CognitiveServices.Speech.java.bindings.dll"
              ;;
     ANDROID) LIBPREFIX=libMicrosoft.CognitiveServices.Speech.
              DYNLIBSUFFIX=.so
@@ -47,25 +48,29 @@ if [[ $OS = "Windows_NT" ]]; then
              SRCBIN="$BUILD_ROOT/bin"
              SRCLIB="$BUILD_ROOT/lib"
              SRCDYNLIB="$BUILD_ROOT/lib"
+
+             SRCJNILIB="$SRCBIN/libMicrosoft.CognitiveServices.Speech.java.bindings.so"
              ;;
     *) echo "We should never reach this point"
-       echo "The forth parameter should be empty to ANDROID"
+       echo "The fourth parameter should be empty or ANDROID"
        ;;
   esac
 else
   LIBPREFIX=libMicrosoft.CognitiveServices.Speech.
 
-  if [[ $(uname) = Linux ]]; then
-    DYNLIBSUFFIX=.so
-  else
-    DYNLIBSUFFIX=.dylib
-  fi
-
-  STATLIBSUFFIX=.a
-
   SRCBIN="$BUILD_ROOT/bin"
   SRCLIB="$BUILD_ROOT/lib"
   SRCDYNLIB="$BUILD_ROOT/lib"
+
+  if [[ $(uname) = Linux ]]; then
+    DYNLIBSUFFIX=.so
+    SRCJNILIB="$SRCBIN/libMicrosoft.CognitiveServices.Speech.java.bindings.so"
+  else
+    DYNLIBSUFFIX=.dylib
+    SRCJNILIB="$SRCBIN/libMicrosoft.CognitiveServices.Speech.java.bindings.jnilib"
+  fi
+
+  STATLIBSUFFIX=.a
 fi
 
 SRCINC="$SOURCE_ROOT/source/public"
@@ -103,9 +108,9 @@ if [[ $OS = "Windows_NT" ]]; then
 fi
 
 # Copy .jar if available
-[[ -e $SRCJAR ]] && cp $CPOPT "$SRCJAR" "$DESTPUBLIB"
-[[ -e $SRCJARSRC ]] && cp $CPOPT "$SRCJARSRC" "$DESTPUBLIB"
-[[ -e $SRCJARBINDING ]] && cp $CPOPT "$SRCJARBINDING" "$DESTPUBLIB"
+cp $CPOPT "$SRCJAR" "$DESTPUBLIB"
+cp $CPOPT "$SRCJARSRC" "$DESTPUBLIB"
+cp $CPOPT "$SRCJNILIB" "$DESTPUBLIB"
 
 # copy carbonx if available
 [[ -e $SRCCARBONX ]] && mkdir -p "$DESTPUBBIN" && cp $CPOPT "$SRCCARBONX" "$DESTPUBBIN"

@@ -13,12 +13,21 @@ RUN apt-get update && \
         libcurl4-openssl-dev \
         alsa \
         libasound2-dev \
-        swig \
         python \
         python-dev \
+        default-jdk \
         default-jre-headless \
-        default-jdk-headless \
-        curl
+        curl \
+        libpcre++-dev
+
+ARG SWIG_VERSION=3.0.12
+RUN curl -L http://prdownloads.sourceforge.net/swig/swig-$SWIG_VERSION.tar.gz | tar xvfz - && \
+    cd swig-$SWIG_VERSION && \
+    ./configure && \
+    make -j $(nproc) && \
+    make install && \
+    cd .. && \
+    rm -rf swig-$SWIG_VERSION
 
 # Override at docker build time, as appropriate:
 ARG BUILD_UID=0

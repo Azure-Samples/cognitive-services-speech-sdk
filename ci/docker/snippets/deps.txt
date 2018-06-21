@@ -10,9 +10,9 @@ RUN apt-get update && \
         libcurl4-openssl-dev \
         alsa \
         libasound2-dev \
-        swig \
         python \
         python-dev \
+        default-jdk \
         default-jre-headless \
-        default-jdk-headless \
-        curl
+        curl \
+        libpcre++-dev

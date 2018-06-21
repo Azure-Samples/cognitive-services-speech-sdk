@@ -29,12 +29,9 @@ if(WIN32)
     endif()
 endif()
 
-# @wolfgang: need JNI on linux
-if(WIN32 OR CMAKE_CL_64 OR ANDROID)
-    option(BUILD_JAVA "Build Java/Android SWIG module" ON)
-    if(BUILD_JAVA)
-        add_subdirectory(java)
-    endif()
+option(BUILD_JAVA "Build Java/Android SWIG module" ON)
+if(BUILD_JAVA)
+    add_subdirectory(java)
 endif()
 
 # Dummy target to make this CMakeLists file appear 
