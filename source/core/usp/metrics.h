@@ -261,6 +261,7 @@ extern const char* kEvent_type_sdk;
 extern const char* kEvent_name_key;
 extern const char* kEvent_start_key;
 extern const char* kEvent_end_key;
+extern const char* kEvent_deviceid_key;
 extern const char* kEvent_id_key;
 extern const char* kEvent_memory_key;
 extern const char* kEvent_cpu_key;
@@ -270,7 +271,7 @@ extern const char* kEvent_status_key;
 #define metrics_device_startup(handle, deviceid) \
 { \
     JSON_Value * value = json_value_init_string(deviceid); \
-    inband_event_key_value_populate(handle, kEvent_type_device, NULL, kEvent_start_key, value); \
+    inband_event_key_value_populate(handle, kEvent_type_device, NULL, kEvent_deviceid_key, value); \
     json_value_free(value); \
 }
 

@@ -51,6 +51,7 @@ const char* kEvent_value = "value";
 const char* kEvent_name_key = "name";
 const char* kEvent_start_key = "Start";
 const char* kEvent_end_key = "End";
+const char* kEvent_deviceid_key = "DeviceId";
 const char* kEvent_id_key = "Id";
 const char* kEvent_memory_key = "Memory";
 const char* kEvent_cpu_key = "CPU";
@@ -737,6 +738,7 @@ void inband_event_key_value_populate(TELEMETRY_HANDLE handle, const char *eventN
     if (pBag != NULL)
     {
         int ret = populate_event_key_value(pBag, eventName, id, key, value);
+
         // Set the bPayloadSet flag
         handle->current_telemetry_object->bPayloadSet |= (ret == 0);
     }
