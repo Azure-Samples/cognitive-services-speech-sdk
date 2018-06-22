@@ -26,15 +26,28 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A speech factory instance.</returns>
         public static SpeechFactory FromSubscription(string subscriptionKey, string region)
         {
-            SpeechFactory factory = new SpeechFactory(subscriptionKey, region);
-            return factory;
+            return new SpeechFactory(Internal.SpeechFactory.FromSubscription(subscriptionKey, region));
+        }
+
+        /// <summary>
+        /// Creates an instance of the speech factory with specified authorization token and region.
+        /// Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
+        /// expipres, the caller needs to refresh it by setting the property `AuthorizationToken` with a new valid token.
+        /// Otherwise, all the recognizers created by this SpeechFactory instance will encounter errors during recognition.
+        /// </summary>
+        /// <param name="authorizationToken">The authorization token.</param>
+        /// <param name="region">The region name.</param>
+        /// <returns>A speech factory instance.</returns>
+        public static SpeechFactory FromAuthorizationToken(string authorizationToken, string region)
+        {
+            return new SpeechFactory(Internal.SpeechFactory.FromAuthorizationToken(authorizationToken, region));
         }
 
         /// <summary>
         /// Creates an instance of the speech factory with specified endpoint and subscription key.
-        /// This method is intended only for users who use a non-standard service endpoint.
+        /// This method is intended only for users who use a non-standard service endpoint or paramters.
         /// Note: The query parameters specified in the endpoint URL are not changed, even if they are set by any other APIs.
-        /// For example, if language is defined in uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
+        /// For example, if language is defined in the uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
         /// the language setting in uri takes precedence, and the effective language is "de-DE".
         /// Only the parameters that are not specified in the endpoint URL can be set by other APIs.
         /// </summary>
@@ -43,8 +56,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A speech factory instance.</returns>
         public static SpeechFactory FromEndPoint(Uri endpoint, string subscriptionKey)
         {
-            SpeechFactory factory = new SpeechFactory(endpoint, subscriptionKey);
-            return factory;
+            return new SpeechFactory(Internal.SpeechFactory.FromEndpoint(endpoint.ToString(), subscriptionKey));
         }
 
         /// <summary>
@@ -317,25 +329,9 @@ namespace Microsoft.CognitiveServices.Speech
             return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerWithStreamImpl(audioStream.Forwarder, sourceLanguage, AsWStringVector(targetLanguages), voice), audioStream);
         }
 
-        /// <summary>
-        /// Creates an instance of the speech factory with specified subscription key and region. Currently as private method.
-        /// </summary>
-        /// <param name="subscriptionKey">The subscription key.</param>
-        /// <param name="region">The region name.</param>
-        private SpeechFactory(string subscriptionKey, string region)
+        private SpeechFactory(Internal.ICognitiveServicesSpeechFactory factoryImpl)
         {
-            factoryImpl = Internal.SpeechFactory.FromSubscription(subscriptionKey, region);
-            InitParameters();
-        }
-
-        /// <summary>
-        /// Creates an instance of the speech factory with specified endpoint and subscription key. Currently as private method.
-        /// </summary>
-        /// <param name="endpoint">The service endpoint to connect to.</param>
-        /// <param name="subscriptionKey">The subscription key.</param>
-        private SpeechFactory(Uri endpoint, string subscriptionKey)
-        {
-            factoryImpl = Internal.SpeechFactory.FromEndpoint(endpoint.ToString(), subscriptionKey);
+            this.factoryImpl = factoryImpl;
             InitParameters();
         }
 

@@ -17,7 +17,7 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
    * Factory methods to create recognizers.
    */
  public final class SpeechFactory implements Closeable {
-     
+
     // load the native library.
     static {
         // TODO name of library will depend on version
@@ -26,45 +26,43 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
     }
 
     /**
-      * Creates an instance of recognizer factory with specified subscription key and region.
-      * @param subscriptionKey The subscription key.
-      * @param region The region name.
+      * Creates an instance of recognizer factory.
       */
-    private SpeechFactory(String subscriptionKey, String region) {
-        factoryImpl = com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromSubscription(subscriptionKey, region);
+    private SpeechFactory(com.microsoft.cognitiveservices.speech.internal.ICognitiveServicesSpeechFactory factoryImpl) {
+        this.factoryImpl = factoryImpl;
 
         // connect the native properties with the swig layer.
         _Parameters = new ParameterCollection<SpeechFactory>(this);
     }
 
     /**
-      * Creates an instance of recognizer factory with specified subscription key and endpoint.
-      * @param region The region name.
-      * @param endpoint The endpoint.
-      * @param subscriptionKey The subscription key or authenticationToken based on the isSubscription flag.
-      */
-    private SpeechFactory(java.net.URI endpoint, String subscriptionKey) {
-        factoryImpl = com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromEndpoint(endpoint.toString(), subscriptionKey);
-
-        // connect the native properties with the swig layer.
-        _Parameters = new ParameterCollection<SpeechFactory>(this);
-    }
-
-    /**
-      * Static instance of SpeechFactory returned by passing subscriptionKey 
+      * Static instance of SpeechFactory returned by passing subscriptionKey and service region.
       * @param subscriptionKey The subscription key.
-      * @param region The region name. Pass null if not used.
+      * @param region The region name.
       * @return The speech factory
       */
     public static SpeechFactory fromSubscription(String subscriptionKey, String region) {
-        return new SpeechFactory(subscriptionKey, region);
-    }    
+        return new SpeechFactory(com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromSubscription(subscriptionKey, region));
+    }
+
+    /**
+      * Static instance of SpeechFactory returned by passing authorization token and service region.
+      * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
+      * expipres, the caller needs to refresh it by setting the property `AuthorizationToken` with a new valid token.
+      * Otherwise, all the recognizers created by this SpeechFactory instance will encounter errors during recognition.
+      * @param authorizationToken The authorization token.
+      * @param region The region name.
+      * @return The speech factory
+      */
+    public static SpeechFactory fromAuthorizationToken(String authorizationToken, String region) {
+        return new SpeechFactory(com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromAuthorizationToken(authorizationToken, region));
+    }
 
     /**
       * Creates an instance of the speech factory with specified endpoint and subscription key.
-      * This method is intended only for users who use a non-standard service endpoint.
+      * This method is intended only for users who use a non-standard service endpoint or paramters.
       * Note: The query parameters specified in the endpoint URL are not changed, even if they are set by any other APIs.
-      * For example, if language is defined in uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
+      * For example, if language is defined in the uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
       * the language setting in uri takes precedence, and the effective language is "de-DE".
       * Only the parameters that are not specified in the endpoint URL can be set by other APIs.
       * @param endpoint The service endpoint to connect to.
@@ -72,9 +70,9 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return A speech factory instance.
       */
     public static SpeechFactory fromEndPoint(java.net.URI endpoint, String subscriptionKey) {
-        return new SpeechFactory(endpoint, subscriptionKey);
+        return new SpeechFactory(com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromEndpoint(endpoint.toString(), subscriptionKey));
     }
-    
+
     /**
       * Gets the subscription key.
       * @return the subscription key.
