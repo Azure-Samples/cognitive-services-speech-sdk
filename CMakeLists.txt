@@ -130,11 +130,8 @@ endif()
 
 add_subdirectory(${CARBONX})
 
-# @wolfgang: need JNI on linux
 if(BUILD_JAVA)
-  if(WIN32)
-    add_subdirectory(${JAVA_SAMPLES})
-  endif()
+  add_subdirectory(${JAVA_SAMPLES})
 endif()
 
 # Dummy targets to make API header appear

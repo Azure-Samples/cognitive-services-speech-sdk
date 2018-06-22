@@ -33,7 +33,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             speechRecognitionTestsHelper = new SpeechRecognitionTestsHelper();
         }
 
-        [Ignore] //TODO: Enable after Bug 1269097 is fixed
+        [Ignore("TODO https://msasg.visualstudio.com/Skyman/_workitems/edit/1269097")]
         [TestMethod, Timeout(testTimeout)]
         public async Task ValidBaselineRecognition()
         {
@@ -69,7 +69,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [Ignore] //TODO: Enable after Bug 1269097 is fixed
+        [Ignore("TODO https://msasg.visualstudio.com/Skyman/_workitems/edit/1269097")]
         [TestMethod, Timeout(testTimeout)]
         public async Task ValidCustomRecognition()
         {
@@ -152,7 +152,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [Ignore] //TODO: Enable after Bug 1269097 is fixed
+        [Ignore("TODO https://msasg.visualstudio.com/Skyman/_workitems/edit/1269097")]
         [TestMethod, Timeout(testTimeout)]
         public async Task GermanRecognition()
         {
@@ -187,6 +187,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod, TestCategory(TestCategory.LongRunning), Timeout(testTimeout)]
+        [Ignore("TODO https://msasg.visualstudio.com/Skyman/_workitems/edit/1304778")]
         public async Task ContinuousRecognitionOnLongFileInput()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Batman.AudioFile))

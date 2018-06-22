@@ -37,9 +37,6 @@ if(NOT ANDROID)
   add_subdirectory("${SRC_DIR}/functional/csharp/console")
 endif()
 
-# @wolfgang: need JNI on linux
 if(BUILD_JAVA)
-  if(WIN32 OR CMAKE_CL_64 OR ANDROID)
-    add_subdirectory(${JAVA_TESTS})
-  endif()
+  add_subdirectory(${JAVA_TESTS})
 endif()

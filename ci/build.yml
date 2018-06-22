@@ -188,7 +188,7 @@ phases:
       scriptPath: '$(Build.Repository.LocalPath)/ci/test/runcsharp.sh'
       args: './bin/$(BuildConfiguration) $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
       cwd: 'build/$(BuildPlatform)'
-    condition: and(succeeded(),eq(variables['BuildConfiguration'], 'Release'),eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
+    condition: and(eq(variables['BuildConfiguration'], 'Release'),eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Run Java (JUnit) tests
     inputs:
@@ -196,7 +196,7 @@ phases:
       scriptPath: '$(Build.Repository.LocalPath)/ci/test/runjava.sh'
       args: '$(Build.Repository.LocalPath) ./ $(BuildConfiguration) $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
       cwd: 'build/$(BuildPlatform)'
-    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'), eq(variables['BuildPlatform'], 'x64'),eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
+    condition: and(eq(variables['BuildConfiguration'], 'Release'), eq(variables['BuildPlatform'], 'x64'),eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
   - task: VSTest@1
     displayName: Run C# tests
     inputs:
@@ -532,6 +532,14 @@ phases:
       cwd: build
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Run Java (JUnit) tests
+    inputs:
+      type: FilePath
+      scriptPath: '$(Build.Repository.LocalPath)/ci/test/runjava.sh'
+      args: '$(Build.Repository.LocalPath) ./ "" $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      cwd: build
+    condition: and(eq(variables['BuildConfiguration'], 'Release'), eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Create drop files
     inputs:
       type: FilePath
@@ -713,6 +721,14 @@ phases:
       args: './bin $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
       cwd: build
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Run Java (JUnit) tests
+    inputs:
+      type: FilePath
+      scriptPath: '$(Build.Repository.LocalPath)/ci/test/runjava.sh'
+      args: '$(Build.Repository.LocalPath) ./ "" $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      cwd: build
+    condition: and(eq(variables['BuildConfiguration'], 'Release'), eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Create drop files
     inputs:
