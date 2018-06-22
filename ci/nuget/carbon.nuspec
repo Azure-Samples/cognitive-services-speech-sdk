@@ -10,10 +10,15 @@
     <projectUrl>https://aka.ms/csspeech</projectUrl>
     <licenseUrl>https://aka.ms/csspeech/license</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
-    <description>Microsoft Cognitive Services Speech SDK</description>
-    <summary>This NuGet package provides native and managed libraries for the Microsoft Cognitive Services Speech SDK. Documentation is available at https://aka.ms/csspeech</summary>
-    <tags>Microsoft Speech Cognitive Services native C++ C# .Net</tags>
-    <releaseNotes>This is version $Version$.</releaseNotes>
+    <summary>Microsoft Cognitive Services Speech SDK</summary>
+    <description>
+      This NuGet package provides native and managed libraries for the Microsoft Cognitive Services Speech SDK.
+      Documentation is available at https://aka.ms/csspeech.
+    </description>
+    <tags>Microsoft Speech Cognitive Services native C++ C# .NET .NETStandard</tags>
+    <releaseNotes>
+      See https://aka.ms/csspeech/whatsnew.
+    </releaseNotes>
     <dependencies />
   </metadata>
   <files>
