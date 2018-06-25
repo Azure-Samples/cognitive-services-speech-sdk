@@ -1,5 +1,11 @@
 #!/bin/bash
 
+function die {
+    set +x
+    echo -e $1
+    exit 1
+}
+
 set -e
 
 [ $# -ne 5 ] && echo -e "Usage: e2e_uspconsole binary_dir keySpeech keyCris keyLuis keySkyman" && exit 1
