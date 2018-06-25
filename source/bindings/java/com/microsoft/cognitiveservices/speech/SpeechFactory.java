@@ -12,6 +12,7 @@ import com.microsoft.cognitiveservices.speech.ParameterCollection;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
+import com.microsoft.cognitiveservices.speech.util.Contracts;
 
  /**
    * Factory methods to create recognizers.
@@ -19,16 +20,36 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
  public final class SpeechFactory implements Closeable {
 
     // load the native library.
+    static Class<?> speechFactoryClass = null;
     static {
         // TODO name of library will depend on version
         System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
-        com.microsoft.cognitiveservices.speech.internal.carbon_javaJNI.setupNativeLibraries(""/*useDefaults*/);
+
+        // one-time init
+        configureNativePlatformBinding(""/*useDefaults*/);
+
+        // prevent classgc from freeing this class
+        speechFactoryClass = SpeechFactory.class;
+    }
+
+    /**
+      * Configures the binding for this target, e.g., passing SSL configuration
+      * information.
+      *
+      * @param bindingConfig The platform specific binding configuration.
+      */
+    public static void configureNativePlatformBinding(String bindingConfig) {
+        Contracts.throwIfNull(bindingConfig, "bindingConfig");
+
+        com.microsoft.cognitiveservices.speech.internal.carbon_javaJNI.setupNativeLibraries(bindingConfig);
     }
 
     /**
       * Creates an instance of recognizer factory.
       */
     private SpeechFactory(com.microsoft.cognitiveservices.speech.internal.ICognitiveServicesSpeechFactory factoryImpl) {
+        Contracts.throwIfNull(factoryImpl, "factoryImpl");
+
         this.factoryImpl = factoryImpl;
 
         // connect the native properties with the swig layer.
@@ -42,6 +63,9 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return The speech factory
       */
     public static SpeechFactory fromSubscription(String subscriptionKey, String region) {
+        Contracts.throwIfIllegalSubscriptionKey(subscriptionKey, "subscriptionKey");
+        Contracts.throwIfNullOrWhitespace(region, "region");
+
         return new SpeechFactory(com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromSubscription(subscriptionKey, region));
     }
 
@@ -55,6 +79,9 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return The speech factory
       */
     public static SpeechFactory fromAuthorizationToken(String authorizationToken, String region) {
+        Contracts.throwIfNullOrWhitespace(authorizationToken, "authorizationToken");
+        Contracts.throwIfNullOrWhitespace(region, "region");
+
         return new SpeechFactory(com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromAuthorizationToken(authorizationToken, region));
     }
 
@@ -70,6 +97,9 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return A speech factory instance.
       */
     public static SpeechFactory fromEndPoint(java.net.URI endpoint, String subscriptionKey) {
+        Contracts.throwIfNull(endpoint, "endpoint");
+        Contracts.throwIfIllegalSubscriptionKey(subscriptionKey, "subscriptionKey");
+
         return new SpeechFactory(com.microsoft.cognitiveservices.speech.internal.SpeechFactory.fromEndpoint(endpoint.toString(), subscriptionKey));
     }
 
@@ -98,6 +128,8 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @param value the authorization token.
       */
     public void setAuthorizationToken(String value) {
+        Contracts.throwIfNullOrWhitespace(value, "value");
+
         _Parameters.set(FactoryParameterNames.AuthorizationToken, value);
     }
 
@@ -140,6 +172,8 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return A speech recognizer instance.
       */
     public SpeechRecognizer createSpeechRecognizer(String language) {
+        Contracts.throwIfIllegalLanguage(language, "language");
+
         return new SpeechRecognizer(factoryImpl.createSpeechRecognizer(language), null);
     }
 
@@ -150,6 +184,9 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return A speech recognizer instance.
       */
     public SpeechRecognizer createSpeechRecognizer(String language, SpeechOutputFormat format) {
+        Contracts.throwIfIllegalLanguage(language, "language");
+        Contracts.throwIfNull(format, "format");
+
         return new SpeechRecognizer(factoryImpl.createSpeechRecognizer(language,
             format == SpeechOutputFormat.Simple ?
                     com.microsoft.cognitiveservices.speech.internal.OutputFormat.Simple :
@@ -163,6 +200,8 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return A speech recognizer instance.
       */
     public SpeechRecognizer createSpeechRecognizerWithFileInput(String audioFile) {
+        Contracts.throwIfNullOrWhitespace(audioFile, "audioFile");
+
         return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithFileInput(audioFile), null);
     }
 
@@ -173,6 +212,9 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
      * @return A speech recognizer instance.
      */
     public SpeechRecognizer createSpeechRecognizerWithFileInput(String audioFile, String language) {
+        Contracts.throwIfNullOrWhitespace(audioFile, "audioFile");
+        Contracts.throwIfIllegalLanguage(language, "language");
+
         return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithFileInput(audioFile, language), null);
     }
     /**
@@ -183,6 +225,10 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
      * @return A speech recognizer instance.
      */
     public SpeechRecognizer createSpeechRecognizerWithFileInput(String audioFile, String language, SpeechOutputFormat format) {
+        Contracts.throwIfNullOrWhitespace(audioFile, "audioFile");
+        Contracts.throwIfIllegalLanguage(language, "language");
+        Contracts.throwIfNull(format, "format");
+
         return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithFileInput(audioFile, language,
                     format == SpeechOutputFormat.Simple ?
                         com.microsoft.cognitiveservices.speech.internal.OutputFormat.Simple :
@@ -196,6 +242,8 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return A speech recognizer instance.
       */
     public SpeechRecognizer createSpeechRecognizerWithStream(AudioInputStream audioStream) {
+        Contracts.throwIfNull(audioStream, "audioStream");
+
         return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithStreamImpl(audioStream), audioStream);
     }
 
@@ -206,6 +254,9 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
      * @return A speech recognizer instance.
      */
     public SpeechRecognizer createSpeechRecognizerWithStream(AudioInputStream audioStream, String language) {
+        Contracts.throwIfNull(audioStream, "audioStream");
+        Contracts.throwIfIllegalLanguage(language, "language");
+
        return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithStreamImpl(audioStream, language), audioStream);
     }
 
@@ -217,6 +268,10 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
      * @return A speech recognizer instance.
      */
     public SpeechRecognizer createSpeechRecognizerWithStream(AudioInputStream audioStream, String language, SpeechOutputFormat format) {
+        Contracts.throwIfNull(audioStream, "audioStream");
+        Contracts.throwIfIllegalLanguage(language, "language");
+        Contracts.throwIfNull(format, "format");
+
        return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithStreamImpl(audioStream, language,
                    format == SpeechOutputFormat.Simple ?
                     com.microsoft.cognitiveservices.speech.internal.OutputFormat.Simple :
@@ -238,6 +293,8 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return An intent recognizer instance.
       */
     public IntentRecognizer createIntentRecognizer(String language) {
+        Contracts.throwIfIllegalLanguage(language, "language");
+
         return new IntentRecognizer(factoryImpl.createIntentRecognizer(language), null);
     }
 
@@ -247,6 +304,8 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return An intent recognizer instance
       */
     public IntentRecognizer createIntentRecognizerWithFileInput(String audioFile) {
+        Contracts.throwIfNullOrWhitespace(audioFile, "audioFile");
+
         return new IntentRecognizer(factoryImpl.createIntentRecognizerWithFileInput(audioFile), null);
     }
 
@@ -257,6 +316,9 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return An intent recognizer instance
       */
     public IntentRecognizer createIntentRecognizerWithFileInput(String audioFile, String language) {
+        Contracts.throwIfNullOrWhitespace(audioFile, "audioFile");
+        Contracts.throwIfIllegalLanguage(language, "language");
+
         return new IntentRecognizer(factoryImpl.createIntentRecognizerWithFileInput(audioFile, language), null);
     }
 
@@ -266,6 +328,8 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return An intent recognizer instance.
       */
     public IntentRecognizer createIntentRecognizerWithStream(AudioInputStream audioStream) {
+        Contracts.throwIfNull(audioStream, "audioStream");
+
         return new IntentRecognizer(factoryImpl.createIntentRecognizerWithStreamImpl(audioStream), audioStream);
     }
 
@@ -276,6 +340,9 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return An intent recognizer instance.
       */
     public IntentRecognizer createIntentRecognizerWithStream(AudioInputStream audioStream, String language) {
+        Contracts.throwIfNull(audioStream, "audioStream");
+        Contracts.throwIfIllegalLanguage(language, "language");
+
         return new IntentRecognizer(factoryImpl.createIntentRecognizerWithStreamImpl(audioStream, language), audioStream);
     }
 
@@ -286,9 +353,13 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
       * @return A translation recognizer instance.
       */
     public TranslationRecognizer createTranslationRecognizer(String sourceLanguage, ArrayList<String> targetLanguages) {
+        Contracts.throwIfIllegalLanguage(sourceLanguage, "sourceLanguage");
+        Contracts.throwIfNull(targetLanguages, "targetLanguages");
+
         com.microsoft.cognitiveservices.speech.internal.WstringVector v = new com.microsoft.cognitiveservices.speech.internal.WstringVector();
         
         for(String element : targetLanguages) {
+            Contracts.throwIfIllegalLanguage(element, "targetLanguages");
             v.add(element);
         }
 
@@ -303,13 +374,18 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
      * @return A translation recognizer instance.
      */
    public TranslationRecognizer createTranslationRecognizer(String sourceLanguage, ArrayList<String> targetLanguages, String voice) {
-       com.microsoft.cognitiveservices.speech.internal.WstringVector v = new com.microsoft.cognitiveservices.speech.internal.WstringVector();
-       
-       for(String element : targetLanguages) {
-           v.add(element);
-       }
+        Contracts.throwIfIllegalLanguage(sourceLanguage, "sourceLanguage");
+        Contracts.throwIfNull(targetLanguages, "targetLanguages");
+        Contracts.throwIfNullOrWhitespace(voice, "voice");
 
-       return new TranslationRecognizer(factoryImpl.createTranslationRecognizer(sourceLanguage, v, voice), null);
+        com.microsoft.cognitiveservices.speech.internal.WstringVector v = new com.microsoft.cognitiveservices.speech.internal.WstringVector();
+       
+        for(String element : targetLanguages) {
+            Contracts.throwIfIllegalLanguage(element, "targetLanguages");
+            v.add(element);
+        }
+
+        return new TranslationRecognizer(factoryImpl.createTranslationRecognizer(sourceLanguage, v, voice), null);
    }
     
    /**
@@ -320,9 +396,14 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
      * @return A translation recognizer instance.
      */
    public TranslationRecognizer createTranslationRecognizerWithFileInput(String audioFile, String sourceLanguage, ArrayList<String> targetLanguages) {
-       com.microsoft.cognitiveservices.speech.internal.WstringVector v = new com.microsoft.cognitiveservices.speech.internal.WstringVector();
+        Contracts.throwIfNullOrWhitespace(audioFile, "audioFile");
+        Contracts.throwIfIllegalLanguage(sourceLanguage, "sourceLanguage");
+        Contracts.throwIfNull(targetLanguages, "targetLanguages");
+
+        com.microsoft.cognitiveservices.speech.internal.WstringVector v = new com.microsoft.cognitiveservices.speech.internal.WstringVector();
        
        for(String element : targetLanguages) {
+           Contracts.throwIfIllegalLanguage(element, "targetLanguages");
            v.add(element);
        }
 
@@ -338,9 +419,15 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
      * @return A translation recognizer instance.
      */
    public TranslationRecognizer createTranslationRecognizerWithFileInput(String audioFile, String sourceLanguage, ArrayList<String> targetLanguages, String voice) {
+        Contracts.throwIfNullOrWhitespace(audioFile, "audioFile");
+        Contracts.throwIfIllegalLanguage(sourceLanguage, "sourceLanguage");
+        Contracts.throwIfNull(targetLanguages, "targetLanguages");
+        Contracts.throwIfNullOrWhitespace(voice, "voice");
+
        com.microsoft.cognitiveservices.speech.internal.WstringVector v = new com.microsoft.cognitiveservices.speech.internal.WstringVector();
        
        for(String element : targetLanguages) {
+           Contracts.throwIfIllegalLanguage(element, "targetLanguages");
            v.add(element);
        }
 
@@ -355,9 +442,14 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
     * @return A translation recognizer instance.
     */
    public TranslationRecognizer createTranslationRecognizerWithStream(AudioInputStream audioStream, String sourceLanguage, ArrayList<String> targetLanguages) {
+        Contracts.throwIfNull(audioStream, "audioStream");
+        Contracts.throwIfIllegalLanguage(sourceLanguage, "sourceLanguage");
+        Contracts.throwIfNull(targetLanguages, "targetLanguages");
+
        com.microsoft.cognitiveservices.speech.internal.WstringVector v = new com.microsoft.cognitiveservices.speech.internal.WstringVector();
        
        for(String element : targetLanguages) {
+           Contracts.throwIfIllegalLanguage(element, "targetLanguages");
            v.add(element);
        }
 
@@ -373,9 +465,15 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
     * @return A translation recognizer instance.
     */
    public TranslationRecognizer createTranslationRecognizerWithStream(AudioInputStream audioStream, String sourceLanguage, ArrayList<String> targetLanguages, String voice) {
+        Contracts.throwIfNull(audioStream, "audioStream");
+        Contracts.throwIfIllegalLanguage(sourceLanguage, "sourceLanguage");
+        Contracts.throwIfNull(targetLanguages, "targetLanguages");
+        Contracts.throwIfNullOrWhitespace(voice, "voice");
+
        com.microsoft.cognitiveservices.speech.internal.WstringVector v = new com.microsoft.cognitiveservices.speech.internal.WstringVector();
        
        for(String element : targetLanguages) {
+           Contracts.throwIfIllegalLanguage(element, "targetLanguages");
            v.add(element);
        }
 

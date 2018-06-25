@@ -4,14 +4,21 @@ package com.microsoft.cognitiveservices.speech;
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+import com.microsoft.cognitiveservices.speech.util.Contracts;
+
+
 /**
   * Defines contents of speech intermediate/final result event.
   */
 public final class SpeechRecognitionResultEventArgs {
     
     SpeechRecognitionResultEventArgs(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventArgs e) {
+        Contracts.throwIfNull(e, "e");
+
         this._Result = new SpeechRecognitionResult(e.getResult());
         this._SessionId = e.getSessionId();
+    
+        Contracts.throwIfNull(this._SessionId, "SessionId");
     }
 
     /**

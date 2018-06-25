@@ -4,6 +4,8 @@ package com.microsoft.cognitiveservices.speech;
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+import com.microsoft.cognitiveservices.speech.util.Contracts;
+
 
 /**
   * Defines audio input stream.
@@ -44,6 +46,8 @@ public abstract class AudioInputStream extends com.microsoft.cognitiveservices.s
         }
         
         AudioInputStreamFormat format = getFormat();        
+        Contracts.throwIfNull(format, "format");
+
         pformat.setAvgBytesPerSec(format.AvgBytesPerSec);
         pformat.setBlockAlign(format.BlockAlign);
         pformat.setChannels(format.Channels);

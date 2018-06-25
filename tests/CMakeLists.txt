@@ -37,6 +37,4 @@ if(NOT ANDROID)
   add_subdirectory("${SRC_DIR}/functional/csharp/console")
 endif()
 
-if(BUILD_JAVA)
-  add_subdirectory(${JAVA_TESTS})
-endif()
+add_subdirectory(${JAVA_TESTS})

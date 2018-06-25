@@ -4,6 +4,7 @@ package com.microsoft.cognitiveservices.speech.intent;
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
   * Represents language understanding model used for intent recognition.
@@ -14,7 +15,6 @@ public final class LanguageUnderstandingModel
     static {
         // TODO name of library will depend on version
         System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
-        com.microsoft.cognitiveservices.speech.internal.carbon_javaJNI.setupNativeLibraries(""/*useDefaults*/);
     }
 
     /**
@@ -24,6 +24,8 @@ public final class LanguageUnderstandingModel
       */
     public static LanguageUnderstandingModel fromEndpoint(String uri)
     {
+        Contracts.throwIfNullOrWhitespace(uri, "uri");
+
         return new LanguageUnderstandingModel(com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel.fromEndpoint(uri));
     }
 
@@ -34,6 +36,8 @@ public final class LanguageUnderstandingModel
       */
       public static LanguageUnderstandingModel fromAppId(String appId)
       {
+          Contracts.throwIfNullOrWhitespace(appId, "appId");
+
           return new LanguageUnderstandingModel(com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel.fromAppId(appId));
       }
 
@@ -46,11 +50,17 @@ public final class LanguageUnderstandingModel
       */
     public static LanguageUnderstandingModel fromSubscription(String subscriptionKey, String appId, String region)
     {
+        Contracts.throwIfNullOrWhitespace(subscriptionKey, "subscriptionKey");
+        Contracts.throwIfNullOrWhitespace(appId, "appId");
+        Contracts.throwIfNullOrWhitespace(region, "region");
+
         return new LanguageUnderstandingModel(com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel.fromSubscription(subscriptionKey, appId, region));
     }
 
     LanguageUnderstandingModel(com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel model)
     {
+        Contracts.throwIfNull(model, "model");
+
         modelImpl = model;
     }
 

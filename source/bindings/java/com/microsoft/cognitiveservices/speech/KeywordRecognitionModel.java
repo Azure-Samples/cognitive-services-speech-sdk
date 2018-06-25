@@ -5,6 +5,7 @@ package com.microsoft.cognitiveservices.speech;
 //
 
 import java.io.Closeable;
+import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 
 /**
@@ -16,7 +17,6 @@ public class KeywordRecognitionModel implements Closeable
     static {
         // TODO name of library will depend on version
         System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
-        com.microsoft.cognitiveservices.speech.internal.carbon_javaJNI.setupNativeLibraries(""/*useDefaults*/);
     }
 
     /**
@@ -26,6 +26,8 @@ public class KeywordRecognitionModel implements Closeable
       */
     public static KeywordRecognitionModel fromFile(String fileName)
     {
+        Contracts.throwIfNullOrWhitespace(fileName, "fileName");
+
         return new KeywordRecognitionModel(com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel.fromFile(fileName));
     }
 
@@ -46,6 +48,8 @@ public class KeywordRecognitionModel implements Closeable
 
     KeywordRecognitionModel(com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel model)
     {
+        Contracts.throwIfNull(model, "model");
+
         modelImpl = model;
     }
 

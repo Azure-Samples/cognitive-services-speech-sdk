@@ -4,6 +4,8 @@ package com.microsoft.cognitiveservices.speech;
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+import com.microsoft.cognitiveservices.speech.util.Contracts;
+
 /**
   * Defines content of a RecognitionErrorEvent. 
   */
@@ -11,12 +13,15 @@ public final class RecognitionErrorEventArgs //extends System.EventArgs
 {
     public RecognitionErrorEventArgs(String sessionId, RecognitionStatus status)
     {
+        Contracts.throwIfNullOrWhitespace(sessionId, "sessionId");
+
         this._status = status;
         this._sessionId = sessionId;
     }
 
     public RecognitionErrorEventArgs(String sessionId, com.microsoft.cognitiveservices.speech.internal.Reason reason)
     {
+        Contracts.throwIfNullOrWhitespace(sessionId, "sessionId");
 //        Debug.Assert((int)Internal.Reason.Recognized == (int)RecognitionStatus.Success);
 //        Debug.Assert((int)Internal.Reason.IntermediateResult == (int)RecognitionStatus.IntermediateResult);
 //        Debug.Assert((int)Internal.Reason.NoMatch == (int)RecognitionStatus.NoMatch);

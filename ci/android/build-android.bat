@@ -4,6 +4,14 @@ call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliar
 
 set SOURCE_ROOT=%CD%
 
+REM ARM32 bit
+set TARGET_ARCHITECTURE=armeabi-v7a
+if "%BuildPlatformAndroid%" == "arm32" set TARGET_ARCHITECTURE=armeabi-v7a
+
+REM ARM64 bit (TODO: make this a build parameter)
+if "%BuildPlatformAndroid%" == "arm64" set TARGET_ARCHITECTURE=arm64-v8a
+
+
 mkdir build && ^
 cd build && ^
 cmake -G "NMake Makefiles" ^
@@ -11,11 +19,11 @@ cmake -G "NMake Makefiles" ^
     -DCMAKE_SYSTEM_NAME=Android ^
     -DCMAKE_SYSTEM_VERSION=26 ^
     -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang ^
-    -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a ^
+    -DCMAKE_ANDROID_ARCH_ABI=%TARGET_ARCHITECTURE% ^
     -DCMAKE_ANDROID_STL_TYPE=c++_static ^
-    -DOPENSSL_ROOT_DIR="%SOURCE_ROOT%\external\android_ssl_curl\libs\armeabi-v7a" ^
-    -DCURL_LIBRARY="%SOURCE_ROOT%\external\android_ssl_curl\libs\armeabi-v7a\lib\libcurl.a" ^
-    -DCURL_INCLUDE_DIR="%SOURCE_ROOT%\external\android_ssl_curl\libs\armeabi-v7a\include" ^
+    -DOPENSSL_ROOT_DIR="%SOURCE_ROOT%\external\android_ssl_curl\libs\%TARGET_ARCHITECTURE%" ^
+    -DCURL_LIBRARY="%SOURCE_ROOT%\external\android_ssl_curl\libs\%TARGET_ARCHITECTURE%\lib\libcurl.a" ^
+    -DCURL_INCLUDE_DIR="%SOURCE_ROOT%\external\android_ssl_curl\libs\%TARGET_ARCHITECTURE%\include" ^
     -DCMAKE_BUILD_TYPE="%BuildConfiguration%" ^
     %SOURCE_ROOT% ^
   && ^

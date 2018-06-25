@@ -5,6 +5,8 @@ package com.microsoft.cognitiveservices.speech;
 //
 
 import java.io.Closeable;
+import com.microsoft.cognitiveservices.speech.util.Contracts;
+
 
 /**
  * Represents collection of parameters and their values.
@@ -12,6 +14,7 @@ import java.io.Closeable;
 public final class ParameterCollection<OwnerType> implements Closeable {
     
     public ParameterCollection(OwnerType owner) {
+        Contracts.throwIfNull(owner, "owner");
         
         if (owner.getClass().equals(com.microsoft.cognitiveservices.speech.SpeechFactory.class)) {
             com.microsoft.cognitiveservices.speech.SpeechFactory speechFactory = (com.microsoft.cognitiveservices.speech.SpeechFactory)owner;
@@ -41,6 +44,7 @@ public final class ParameterCollection<OwnerType> implements Closeable {
       * @return true if the parameter has a value, and false otherwise.
       */
     public boolean isString(String name) {
+        Contracts.throwIfNullOrWhitespace(name, "name");
         
         if(factoryParameters != null) {
             return factoryParameters.containsString(name);
@@ -57,6 +61,7 @@ public final class ParameterCollection<OwnerType> implements Closeable {
       * @return true if the parameter has a value, and false otherwise.
       */
     public boolean isInt(String name) {
+        Contracts.throwIfNullOrWhitespace(name, "name");
         
         if(factoryParameters != null) {
             return factoryParameters.containsNumber(name);
@@ -73,6 +78,7 @@ public final class ParameterCollection<OwnerType> implements Closeable {
       * @return true if the parameter has a value, and false otherwise.
       */
     public boolean isBool(String name) {
+        Contracts.throwIfNullOrWhitespace(name, "name");
         
         if(factoryParameters != null) {
             return factoryParameters.containsBool(name);
@@ -125,6 +131,7 @@ public final class ParameterCollection<OwnerType> implements Closeable {
       * @return value of the parameter.
       */
     public String getString(String name, String defaultValue) {
+        Contracts.throwIfNullOrWhitespace(name, "name");
         
         if(factoryParameters != null) {
             String ret = factoryParameters.getString(name, defaultValue);
@@ -146,6 +153,7 @@ public final class ParameterCollection<OwnerType> implements Closeable {
       * @return value of the parameter.
       */
     public int getInt(String name, int defaultValue) {
+        Contracts.throwIfNullOrWhitespace(name, "name");
         
         if(factoryParameters != null) {
             int ret = factoryParameters.getNumber(name, defaultValue);
@@ -167,6 +175,7 @@ public final class ParameterCollection<OwnerType> implements Closeable {
       * @return value of the parameter.
       */
     public boolean getBool(String name, boolean defaultValue) {
+        Contracts.throwIfNullOrWhitespace(name, "name");
         
         if(factoryParameters != null) {
             boolean ret = factoryParameters.getBool(name, defaultValue);
@@ -185,6 +194,8 @@ public final class ParameterCollection<OwnerType> implements Closeable {
       * @param value The value of the parameter.
       */
     public void set(String name, String value) {
+        Contracts.throwIfNullOrWhitespace(name, "name");
+        Contracts.throwIfNull(value, "value");
         
         if(factoryParameters != null) {
             factoryParameters.setString(name, value);
@@ -201,6 +212,7 @@ public final class ParameterCollection<OwnerType> implements Closeable {
       * @param value The value of the parameter.
       */
     public void set(String name, int value) {
+        Contracts.throwIfNullOrWhitespace(name, "name");
         
         if(factoryParameters != null) {
             factoryParameters.setNumber(name, value);
@@ -217,6 +229,7 @@ public final class ParameterCollection<OwnerType> implements Closeable {
       * @param value The value of the parameter.
       */
     public void set(String name, boolean value) {
+        Contracts.throwIfNullOrWhitespace(name, "name");
         
         if(factoryParameters != null) {
             factoryParameters.setBool(name, value);

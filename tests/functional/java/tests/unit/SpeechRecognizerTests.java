@@ -177,32 +177,6 @@ public class SpeechRecognizerTests {
         s.close();
     }
 
-    @Ignore // TODO why cannot set de-DE language
-    @Test
-    public void testSetLanguage() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        assertNotNull(s);
-
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
-        assertNotNull(ais);
-
-        String language1 = "en-US";
-        SpeechRecognizer r = s.createSpeechRecognizerWithStream(ais, language1);
-        assertNotNull(r);
-
-        assertNotNull(r.getLanguage());
-        assertEquals(language1, r.getLanguage());
-        
-        String language2 = "de-DE";
-        r.setLanguage(language2);
-
-        assertNotNull(r.getLanguage());
-        assertEquals(language2, r.getLanguage());
-
-        r.close();
-        s.close();
-    }
-
     // -----------------------------------------------------------------------
     // --- 
     // -----------------------------------------------------------------------

@@ -5,6 +5,7 @@ package com.microsoft.cognitiveservices.speech;
 //
 
 import java.math.*;
+import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
  * Defines payload for session events like Speech Start/End Detected
@@ -13,9 +14,13 @@ public final class RecognitionEventArgs // extends EventArgs
 {
     public RecognitionEventArgs(RecognitionEventType type, com.microsoft.cognitiveservices.speech.internal.RecognitionEventArgs arg)
     {
+        Contracts.throwIfNull(arg, "arg");
+
         this.sessionId = arg.getSessionId();
         this.eventType = type;
         this.offset = arg.getOffset();
+
+        Contracts.throwIfNull(this.sessionId, "SessionId");
     }
 
     /**

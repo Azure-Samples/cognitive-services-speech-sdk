@@ -7,17 +7,22 @@ package com.microsoft.cognitiveservices.speech.intent;
 import com.microsoft.cognitiveservices.speech.ResultParameterNames;
 import com.microsoft.cognitiveservices.speech.internal.IntentRecognitionEventArgs;
 import com.microsoft.cognitiveservices.speech.internal.ResultPropertyValueCollection;
+import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
   * Defines content of an intent intermediate/final result events.
   */
 public final class IntentRecognitionResultEventArgs // : System.EventArgs
 {
-    IntentRecognitionResultEventArgs(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionEventArgs e)
+    IntentRecognitionResultEventArgs(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionEventArgs eventArg)
     {
-        this.eventArgImpl = e;
-        this._Result = new IntentRecognitionResult(e.getResult());
-        this._SessionId = e.getSessionId();
+        Contracts.throwIfNull(eventArg, "eventArg");
+
+        this.eventArgImpl = eventArg;
+        this._Result = new IntentRecognitionResult(eventArg.getResult());
+        this._SessionId = eventArg.getSessionId();
+
+        Contracts.throwIfNull(this._SessionId, "SessionId");
     }
 
     /**
@@ -43,7 +48,11 @@ public final class IntentRecognitionResultEventArgs // : System.EventArgs
     
     public ResultPropertyValueCollection getProperties()
     {
-        return eventArgImpl.getResult().getProperties();
+        ResultPropertyValueCollection r = eventArgImpl.getResult().getProperties();
+
+        Contracts.throwIfNull(r, "result properties");
+
+        return r;
     }
 
     /**

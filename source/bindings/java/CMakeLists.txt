@@ -105,6 +105,7 @@ set(JAVA_SOURCES
 
     com/microsoft/cognitiveservices/speech/util/EventHandler.java
     com/microsoft/cognitiveservices/speech/util/EventHandlerImpl.java
+    com/microsoft/cognitiveservices/speech/util/Contracts.java
 )
 
 set(SWIG_JAVA_SOURCES

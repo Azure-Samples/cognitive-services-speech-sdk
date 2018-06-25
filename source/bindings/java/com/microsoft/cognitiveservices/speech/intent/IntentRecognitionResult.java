@@ -5,6 +5,7 @@ package com.microsoft.cognitiveservices.speech.intent;
 //
 
 import com.microsoft.cognitiveservices.speech.ResultParameterNames;
+import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
   * Defines result of intent recognition.
@@ -13,7 +14,10 @@ public final class IntentRecognitionResult extends com.microsoft.cognitiveservic
     
     IntentRecognitionResult(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionResult result) {
         super(result);
+        Contracts.throwIfNull(result, "result");
+
         this._intentId = result.getIntentId();
+        Contracts.throwIfNull(this._intentId, "IntentId");
     }
 
     /**

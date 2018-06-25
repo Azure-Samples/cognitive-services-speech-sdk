@@ -4,6 +4,7 @@ package com.microsoft.cognitiveservices.speech.translation;
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
   * Defines translation synthesis result, i.e. the voice output of the translated text in the target language.
@@ -13,6 +14,8 @@ public final class TranslationSynthesisResult
     // BUG: this is hack for making documentation going.
     TranslationSynthesisResult(com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResult result)
     {
+        Contracts.throwIfNull(result, "result");
+
         _AudioData = new byte[0]; // TODO result.getAudioData();
     }
 

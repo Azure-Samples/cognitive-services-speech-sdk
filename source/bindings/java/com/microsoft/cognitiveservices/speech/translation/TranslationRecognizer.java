@@ -13,6 +13,7 @@ import com.microsoft.cognitiveservices.speech.RecognitionErrorEventArgs;
 import com.microsoft.cognitiveservices.speech.RecognizerParameterNames;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.AudioInputStream;
+import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 //
 //Copyright (c) Microsoft. All rights reserved.
@@ -51,6 +52,8 @@ import com.microsoft.cognitiveservices.speech.AudioInputStream;
       */
      public TranslationRecognizer(com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer recoImpl, AudioInputStream ais) {
         super(ais);
+
+        Contracts.throwIfNull(recoImpl, "recoImpl");
          this.recoImpl = recoImpl;
 
          intermediateResultHandler = new ResultHandlerImpl(this, /*isFinalResultHandler:*/ false);
@@ -150,6 +153,8 @@ import com.microsoft.cognitiveservices.speech.AudioInputStream;
       * @return A task representing the asynchronous operation that starts the recognition.
       */
     public Future<Void> startKeywordRecognitionAsync(KeywordRecognitionModel model) {
+        Contracts.throwIfNull(model, "model");
+
         return s_executorService.submit(() -> {
                 recoImpl.startKeywordRecognitionAsync(model.getModelImpl());
                 return null;
@@ -215,6 +220,8 @@ import com.microsoft.cognitiveservices.speech.AudioInputStream;
      {
          public ResultHandlerImpl(TranslationRecognizer recognizer, boolean isFinalResultHandler)
          {
+            Contracts.throwIfNull(recognizer, "recognizer");
+
              this.recognizer = recognizer;
              this.isFinalResultHandler = isFinalResultHandler;
          }
@@ -222,6 +229,8 @@ import com.microsoft.cognitiveservices.speech.AudioInputStream;
          @Override
          public void execute(com.microsoft.cognitiveservices.speech.internal.TranslationTextResultEventArgs eventArgs)
          {
+            Contracts.throwIfNull(eventArgs, "eventArgs");
+
              if (recognizer.disposed)
              {
                  return;
@@ -242,12 +251,16 @@ import com.microsoft.cognitiveservices.speech.AudioInputStream;
      // Defines an internal class to raise a C# event for error during recognition when a corresponding callback is invoked by the native layer.
      class ErrorHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.TranslationTexEventListener {
          public ErrorHandlerImpl(TranslationRecognizer recognizer) {
+            Contracts.throwIfNull(recognizer, "recognizer");
+
              this.recognizer = recognizer;
          }
 
          @Override
          public void execute(com.microsoft.cognitiveservices.speech.internal.TranslationTextResultEventArgs eventArgs)
          {
+            Contracts.throwIfNull(eventArgs, "eventArgs");
+
              if (recognizer.disposed)
              {
                  return;
@@ -270,6 +283,8 @@ import com.microsoft.cognitiveservices.speech.AudioInputStream;
      {
          public SynthesisHandlerImpl(TranslationRecognizer recognizer)
          {
+            Contracts.throwIfNull(recognizer, "recognizer");
+
              this.recognizer = recognizer;
          }
 
@@ -277,6 +292,8 @@ import com.microsoft.cognitiveservices.speech.AudioInputStream;
          @Override
          public void execute(com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResultEventArgs eventArgs)
          {
+            Contracts.throwIfNull(eventArgs, "eventArgs");
+
              if (recognizer.disposed)
              {
                  return;

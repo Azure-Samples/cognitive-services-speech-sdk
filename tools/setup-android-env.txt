@@ -109,8 +109,13 @@ echo done.
 
 
 # clang with NEW ssl/curl
-cmake  -G "NMake Makefiles" -Duse_default_uuid=ON  -DCMAKE_SYSTEM_NAME=Android -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang  -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a -DCMAKE_ANDROID_NDK=/android-ndk-r16b    -DCMAKE_SYSTEM_VERSION=26 -DCMAKE_ANDROID_STL_TYPE=c++_static  -DOPENSSL_ROOT_DIR=\Carbon\external\android_ssl_curl\libs\armeabi-v7a  -DCURL_LIBRARY=\Carbon\external\android_ssl_curl\libs\armeabi-v7a\lib\libcurl.so -DCURL_INCLUDE_DIR=\Carbon\external\android_ssl_curl\libs\armeabi-v7a\include -DCMAKE_BUILD_TYPE=Debug ..
+cmake  -G "NMake Makefiles" -Duse_default_uuid=ON  -DCMAKE_SYSTEM_NAME=Android -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang  -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a -DCMAKE_ANDROID_NDK=/android-ndk-r16b    -DCMAKE_SYSTEM_VERSION=26 -DCMAKE_ANDROID_STL_TYPE=c++_static  -DOPENSSL_ROOT_DIR=\Carbon\external\android_ssl_curl\libs\armeabi-v7a  -DCURL_LIBRARY=\Carbon\external\android_ssl_curl\libs\armeabi-v7a\lib\libcurl.a -DCURL_INCLUDE_DIR=\Carbon\external\android_ssl_curl\libs\armeabi-v7a\include -DCMAKE_BUILD_TYPE=Debug ..
 
 # settings on the device
 echo setenv("SSL_CERT_DIR", "/system/etc/ssl/certs/");
 export SSL_CERT_DIR=/system/etc/ssl/certs/
+
+
+# clang arm64 with NEW ssl/curl
+cmake  -G "NMake Makefiles" -Duse_default_uuid=ON  -DCMAKE_SYSTEM_NAME=Android -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang  -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a -DCMAKE_ANDROID_NDK=/android-ndk-r16b    -DCMAKE_SYSTEM_VERSION=26 -DCMAKE_ANDROID_STL_TYPE=c++_static  -DOPENSSL_ROOT_DIR=\Carbon\external\android_ssl_curl\libs\arm64-v8a  -DCURL_LIBRARY=\Carbon\external\android_ssl_curl\libs\arm64-v8a\lib\libcurl.a -DCURL_INCLUDE_DIR=\Carbon\external\android_ssl_curl\libs\arm64-v8a\include -DCMAKE_BUILD_TYPE=Debug ..
+

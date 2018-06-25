@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
+import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
   * Defines the base class Recognizer which mainly contains common event handlers.
@@ -37,6 +38,7 @@ public class Recognizer implements Closeable
       * @param ais An optional audio input stream associated with the recognizer
      */
     protected Recognizer(AudioInputStream ais) {
+        // Note: Since ais is optional, no test for null reference
         audioInputStreamHolder = ais;
         sessionStartedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStartedEvent);
         sessionStoppedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStoppedEvent);
@@ -85,13 +87,16 @@ public class Recognizer implements Closeable
     class SessionEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SessionEventListener {
         
         public SessionEventHandlerImpl(Recognizer recognizer, SessionEventType eventType) {
+            Contracts.throwIfNull(recognizer, "recognizer");
+
             this.recognizer = recognizer;
             this.eventType = eventType;
         }
 
         @Override
         public void execute(com.microsoft.cognitiveservices.speech.internal.SessionEventArgs eventArgs) {
-            
+            Contracts.throwIfNull(eventArgs, "eventArgs");
+
             if (recognizer.disposed) {
                 return;
             }
@@ -116,6 +121,8 @@ public class Recognizer implements Closeable
     {
         public RecognitionEventHandlerImpl(Recognizer recognizer, RecognitionEventType eventType)
         {
+            Contracts.throwIfNull(recognizer, "recognizer");
+
             this.recognizer = recognizer;
             this.eventType = eventType;
         }
@@ -123,6 +130,8 @@ public class Recognizer implements Closeable
         @Override
         public void execute(com.microsoft.cognitiveservices.speech.internal.RecognitionEventArgs eventArgs)
         {
+            Contracts.throwIfNull(eventArgs, "eventArgs");
+
             if (recognizer.disposed)
             {
                 return;

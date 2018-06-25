@@ -4,15 +4,19 @@ package com.microsoft.cognitiveservices.speech.translation;
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+import com.microsoft.cognitiveservices.speech.util.Contracts;
+
 /**
   * Defines the content of translation synthesis result event.
   */
 public final class TranslationSynthesisResultEventArgs //: System.EventArgs
 {
-    TranslationSynthesisResultEventArgs(com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResultEventArgs e)
+    TranslationSynthesisResultEventArgs(com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResultEventArgs eventArg)
     {
-        this._Result = new TranslationSynthesisResult(e.getResult());
-        this._sessionId = e.getSessionId();
+        Contracts.throwIfNull(eventArg, "eventArg");
+
+        this._Result = new TranslationSynthesisResult(eventArg.getResult());
+        this._sessionId = eventArg.getSessionId();
     }
 
     /**

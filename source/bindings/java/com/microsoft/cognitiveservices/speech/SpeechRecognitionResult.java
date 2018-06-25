@@ -6,8 +6,9 @@ package com.microsoft.cognitiveservices.speech;
 
 import com.microsoft.cognitiveservices.speech.internal.RecognitionResult;
 import com.microsoft.cognitiveservices.speech.internal.ResultPropertyValueCollection;
-import java.math.*;
-import java.time.*;
+import com.microsoft.cognitiveservices.speech.util.Contracts;
+
+import java.math.BigInteger;
 
 /**
   * Defines result of speech recognition.
@@ -18,17 +19,21 @@ public class SpeechRecognitionResult {
     private RecognitionStatus reason;
     private String text;
     private RecognitionResultCollection properties;
-    private Duration duration;
+    private long duration;
     private long offset;
 
     protected SpeechRecognitionResult(RecognitionResult result) {
+        Contracts.throwIfNull(result, "result");
+
         resultId = result.getResultId();
         text = result.getText();
         BigInteger tenThousand = BigInteger.valueOf(10000);
-        duration = Duration.ofMillis(result.duration().divide(tenThousand).longValue());
+        duration = result.duration().divide(tenThousand).longValue();
         offset = result.offset().divide(tenThousand).longValue();
         reason = RecognitionStatus.values()[result.getReason().swigValue()];
         properties = new RecognitionResultCollection(result.getProperties());
+
+        Contracts.throwIfNull(resultId, "resultId");
     }
 
     /**
@@ -56,10 +61,10 @@ public class SpeechRecognitionResult {
     }
 
     /**
-      * Duration of recognized speech.
-      * @return Duration of recognized speech.
+      * Duration of recognized speech in milliseconds.
+      * @return Duration of recognized speech in milliseconds.
       */
-    public Duration getDuration() {
+    public long getDuration() {
         return duration;
     }
 
@@ -114,6 +119,8 @@ public class SpeechRecognitionResult {
         
         RecognitionResultCollection(ResultPropertyValueCollection collection)
         {
+            Contracts.throwIfNull(collection, "collection");
+
             _collection = collection;
         }
         
@@ -124,6 +131,7 @@ public class SpeechRecognitionResult {
          * @return true if the parameter has a value, and false otherwise.
          */
        public boolean isString(String name) {
+            Contracts.throwIfNull(name, "name");
            
            return _collection.containsString(name);
        }
@@ -135,6 +143,7 @@ public class SpeechRecognitionResult {
          * @return true if the parameter has a value, and false otherwise.
          */
        public boolean isInt(String name) {
+            Contracts.throwIfNull(name, "name");
            
            return _collection.containsNumber(name);
        }
@@ -146,6 +155,7 @@ public class SpeechRecognitionResult {
          * @return true if the parameter has a value, and false otherwise.
          */
        public boolean isBool(String name) {
+            Contracts.throwIfNull(name, "name");
            
            return _collection.containsBool(name);
        }
@@ -193,6 +203,8 @@ public class SpeechRecognitionResult {
          * @return value of the parameter.
          */
        public String getString(String name, String defaultValue) {
+           Contracts.throwIfNull(name, "name");
+
            return _collection.getString(name, defaultValue);
        }
 
@@ -206,6 +218,8 @@ public class SpeechRecognitionResult {
          * @return value of the parameter.
          */
        public int getInt(String name, int defaultValue) {
+           Contracts.throwIfNull(name, "name");
+
            return _collection.getNumber(name, defaultValue);
        }
 
@@ -219,6 +233,8 @@ public class SpeechRecognitionResult {
          * @return value of the parameter.
          */
        public boolean getBool(String name, boolean defaultValue) {
+           Contracts.throwIfNull(name, "name");
+
            return _collection.getBool(name, defaultValue);
        }
     }

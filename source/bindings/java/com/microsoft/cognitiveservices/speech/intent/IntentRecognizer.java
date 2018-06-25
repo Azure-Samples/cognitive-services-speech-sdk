@@ -13,6 +13,7 @@ import com.microsoft.cognitiveservices.speech.RecognizerParameterNames;
 import com.microsoft.cognitiveservices.speech.internal.IntentTrigger;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.AudioInputStream;
+import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
   * Perform intent recognition on the speech input. It returns both recognized text and recognized intent.
@@ -41,6 +42,8 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       */
     public IntentRecognizer(com.microsoft.cognitiveservices.speech.internal.IntentRecognizer recoImpl, AudioInputStream ais) {
         super(ais);
+
+        Contracts.throwIfNull(recoImpl, "recoImpl");
         this.recoImpl = recoImpl;
 
         intermediateResultHandler = new IntentHandlerImpl(this, /*isFinalResultHandler:*/ false);
@@ -74,6 +77,8 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       * @param value the spoken language of recognition.
       */
     public void setLanguage(String value) {
+            Contracts.throwIfNullOrWhitespace(value, "value");
+
             _Parameters.set(RecognizerParameterNames.SpeechRecognitionLanguage, value);
     }
 
@@ -125,6 +130,9 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       * @param phrase A String that specifies the phrase representing the intent.
       */
     public void addIntent(String intentId, String phrase) {
+        Contracts.throwIfNullOrWhitespace(intentId, "intentId");
+        Contracts.throwIfNullOrWhitespace(phrase, "phrase");
+
         recoImpl.addIntent(intentId, phrase);
     }
 
@@ -135,6 +143,10 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       * @param intentName The intent name defined in the intent model. If it is null, all intent names defined in the model will be added.
       */
     public void addIntent(String intentId, LanguageUnderstandingModel model, String intentName) {
+        Contracts.throwIfNullOrWhitespace(intentId, "intentId");
+        Contracts.throwIfNullOrWhitespace(intentName, "intentName");
+        Contracts.throwIfNull(model, "model");
+
         IntentTrigger trigger = com.microsoft.cognitiveservices.speech.internal.IntentTrigger.from(model.getModelImpl(), intentName);
         recoImpl.addIntent(intentId, trigger);
     }
@@ -147,6 +159,8 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       * @return A task representing the asynchronous operation that starts the recognition.
       */
     public Future<Void> startKeywordRecognitionAsync(KeywordRecognitionModel model) {
+        Contracts.throwIfNull(model, "model");
+
         return s_executorService.submit(() -> {
                 recoImpl.startKeywordRecognition(model.getModelImpl());
                 return null;
@@ -208,12 +222,15 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     private class IntentHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.IntentEventListener {
         
         public IntentHandlerImpl(IntentRecognizer recognizer, boolean isFinalResultHandler) {
+            Contracts.throwIfNull(recognizer, "recognizer");
+
             this.recognizer = recognizer;
             this.isFinalResultHandler = isFinalResultHandler;
         }
 
         @Override
         public void execute(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionEventArgs eventArgs) {
+            Contracts.throwIfNull(eventArgs, "eventArgs");
             
             IntentRecognitionResultEventArgs resultEventArg = new IntentRecognitionResultEventArgs(eventArgs);
             EventHandlerImpl<IntentRecognitionResultEventArgs> handler = isFinalResultHandler ? recognizer.FinalResultReceived : recognizer.IntermediateResultReceived;
@@ -236,6 +253,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
 
         @Override
         public void execute(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionEventArgs eventArgs) {
+            Contracts.throwIfNull(eventArgs, "eventArgs");
             
             RecognitionErrorEventArgs resultEventArg = new RecognitionErrorEventArgs(eventArgs.getSessionId(), eventArgs.getResult().getReason());
             EventHandlerImpl<RecognitionErrorEventArgs>  handler = this.recognizer.RecognitionErrorRaised;

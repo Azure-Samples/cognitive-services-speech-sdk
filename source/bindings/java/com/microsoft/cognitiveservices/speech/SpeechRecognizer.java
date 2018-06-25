@@ -7,6 +7,7 @@ package com.microsoft.cognitiveservices.speech;
 import java.util.concurrent.Future;
 
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
+import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
   * Performs speech recognition from microphone, file, or other audio input streams, and gets transcribed text as result.
@@ -36,6 +37,8 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       */
     public SpeechRecognizer(com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer recoImpl, AudioInputStream ais) {
         super(ais);
+
+        Contracts.throwIfNull(recoImpl, "recoImpl");
         this.recoImpl = recoImpl;
 
         intermediateResultHandler = new ResultHandlerImpl(this, /*isFinalResultHandler:*/ false);
@@ -69,6 +72,8 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       * @param value The deployment id of a customized speech model that is used for speech recognition.
       */
     public void setDeploymentId(String value) {
+        Contracts.throwIfNullOrWhitespace(value, "value");
+
         _Parameters.set(RecognizerParameterNames.SpeechModelId, value);
     }
 
@@ -78,14 +83,6 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       */
     public String getLanguage() {
         return _Parameters.getString(RecognizerParameterNames.SpeechRecognitionLanguage);
-    }
-
-    /**
-      * Sets the spoken language of recognition.
-      * @param value The spoken language of recognition.
-      */
-    public void setLanguage(String value) {
-        _Parameters.set(RecognizerParameterNames.SpeechRecognitionLanguage, value);
     }
 
     /**
@@ -138,6 +135,8 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       * @return A task representing the asynchronous operation that starts the recognition.
       */
     public Future<Void> startKeywordRecognitionAsync(KeywordRecognitionModel model) {
+        Contracts.throwIfNull(model, "model");
+
         return s_executorService.submit(() -> {
                 recoImpl.startKeywordRecognition(model.getModelImpl());
                 return null;
@@ -197,12 +196,15 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     private class ResultHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventListener {
         
         ResultHandlerImpl(SpeechRecognizer recognizer, boolean isFinalResultHandler) {
+            Contracts.throwIfNull(recognizer, "recognizer");
+
             this.recognizer = recognizer;
             this.isFinalResultHandler = isFinalResultHandler;
         }
 
         @Override
         public void execute(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventArgs eventArgs) {
+            Contracts.throwIfNull(eventArgs, "eventArgs");
             
             if (recognizer.disposed) {
                 return;
@@ -223,6 +225,8 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     private class ErrorHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventListener {
         
         ErrorHandlerImpl(SpeechRecognizer recognizer) {
+            Contracts.throwIfNull(recognizer, "recognizer");
+
             this.recognizer = recognizer;
         }
 
