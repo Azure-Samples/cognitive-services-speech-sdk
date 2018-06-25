@@ -1,4 +1,11 @@
 #!/bin/bash
+#
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+#
+# This script is run through build-and-smoke-test.sh. The source root repository
+# is mapped as a volume (/csspeech), the subscription key is provided as an environment
+# variable ($SPEECH_SUBSCRIPTION_KEY).
 
 set -e -o pipefail -x
 
@@ -21,6 +28,4 @@ cmake -DCMAKE_BUILD_TYPE="$BUILD_CONFIGURATION" "$SOURCE_DIRECTORY"
 
 cmake --build . -- -j$(nproc)
 
-"$SOURCE_DIRECTORY/tests/scripts/download_audio.sh"
-
-./bin/carbonx --speech --input:./whatstheweatherlike.wav --subscription:$SPEECH_SUBSCRIPTION_KEY
+./bin/carbonx --speech --input:/csspeech/tests/input/audio/whatstheweatherlike.wav --subscription:$SPEECH_SUBSCRIPTION_KEY

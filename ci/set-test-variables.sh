@@ -13,4 +13,4 @@ vsts_setvar TEST_SPEECH_ENDPOINT "wss://westus.stt.speech.microsoft.com/speech/r
 
 vsts_setvar TEST_CRIS_ENDPOINT "wss://westus.stt.speech.microsoft.com/speech/recognition/interactive/cognitiveservices/v1?cid=$TEST_MODEL_ID"
 
-vsts_setvar TEST_AUDIO_FILE whatstheweatherlike.wav
+vsts_setvar TEST_AUDIO_FILE $BUILD_REPOSITORY_LOCALPATH/tests/input/audio/whatstheweatherlike.wav

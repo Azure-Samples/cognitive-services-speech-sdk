@@ -147,12 +147,6 @@ phases:
         ]
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Download sample audios
-    inputs:
-      type: FilePath
-      scriptPath: './build/$(BuildPlatform)/tests/download_audio.sh'
-      cwd: 'build/$(BuildPlatform)'
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set test variables
     inputs:
       type: FilePath
@@ -497,12 +491,6 @@ phases:
     inputs:
       cmakeArgs: '--build . -- -j4'
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Download sample audios
-    inputs:
-      type: FilePath
-      scriptPath: './build/tests/download_audio.sh'
-      cwd: build
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set test variables
     inputs:
       type: FilePath
@@ -686,12 +674,6 @@ phases:
     displayName: CMake build
     inputs:
       cmakeArgs: '--build . -- -j4'
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Download sample audios
-    inputs:
-      type: FilePath
-      scriptPath: './build/tests/download_audio.sh'
-      cwd: build
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set test variables
     inputs:
