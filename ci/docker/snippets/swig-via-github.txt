@@ -1,0 +1,9 @@
+ARG SWIG_VERSION=3.0.12
+RUN curl -L https://github.com/swig/swig/archive/rel-$SWIG_VERSION.tar.gz | tar xvfz - && \
+    cd swig-rel-$SWIG_VERSION && \
+    ./autogen.sh && \
+    ./configure && \
+    make -j $(nproc) && \
+    make install && \
+    cd .. && \
+    rm -rf swig-$SWIG_VERSION

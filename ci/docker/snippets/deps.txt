@@ -15,4 +15,6 @@ RUN apt-get update && \
         default-jdk \
         default-jre-headless \
         curl \
-        libpcre++-dev
+        libpcre++-dev \
+        bison \
+        automake

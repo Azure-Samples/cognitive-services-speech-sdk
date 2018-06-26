@@ -2,6 +2,6 @@ from-ubuntu16-x86
 
 deps
 
-swig
+swig-via-github
 
 builduser

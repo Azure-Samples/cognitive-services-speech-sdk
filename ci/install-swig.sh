@@ -3,8 +3,9 @@
 
 SWIG_VERSION=3.0.12
 
-curl -L http://prdownloads.sourceforge.net/swig/swig-$SWIG_VERSION.tar.gz | tar xvfz - && \
-cd swig-$SWIG_VERSION && \
+curl -L https://github.com/swig/swig/archive/rel-$SWIG_VERSION.tar.gz | tar xvfz - && \
+cd swig-rel-$SWIG_VERSION && \
+./autogen.sh && \
 ./configure && \
 make -j $(nproc) && \
 make install && \
