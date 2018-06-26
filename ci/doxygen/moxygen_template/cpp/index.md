@@ -1,11 +1,4 @@
 MOXYGENBEGIN {#indexref}
----
-ms.service: cognitive-services
-ms.technology: Speech
-ms.topic: reference
-ms.date: 05/07/2018
-ms.author: wolfma
----
 # Summary
 
  Members                        | Descriptions

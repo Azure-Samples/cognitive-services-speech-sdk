@@ -226,6 +226,8 @@ add_custom_command(TARGET ${JAVA_LIB}
                    WORKING_DIRECTORY "${SRC_DIR}"
                    COMMENT "Generating src package including javadoc information")
 
+if(TODO_JAVADOC_CREATION_HAS_BAD_DEPS) # triggers build breaks, will fix soon
+
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com/microsoft/cognitiveservices/speech/SessionEventArgs.java
                    COMMAND  ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/com ${CMAKE_CURRENT_BINARY_DIR}/swig-generated/com
                    COMMENT "Copying v2 api files to output directory")
@@ -247,3 +249,5 @@ create_javadoc(copy-over-api-files
   AUTHOR TRUE
   USE TRUE
   VERSION TRUE)
+
+endif()
