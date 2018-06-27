@@ -10,7 +10,6 @@ message(STATUS "Python include path: ${PYTHON_INCLUDE_PATH}")
 include_directories(${PYTHON_INCLUDE_PATH})
 
 set(SRC_DIR "${PROJECT_SOURCE_DIR}")
-set(INC_DIR "${PROJECT_SOURCE_DIR}/include")
 
 # Since we're linking  against the release version of python.lib, disable iterator debugging.
 if(MSVC)
@@ -19,8 +18,6 @@ if(MSVC)
      add_definitions(-D_ITERATOR_DEBUG_LEVEL=0)
 endif()
 
-
-# ${SWIG_INTERFACE} should resolve to {repo/root}/bindings/carbon.i
 set(CMAKE_SWIG_FLAGS "")
 
 set_source_files_properties("${SRC_DIR}/carbon_py.i" PROPERTIES
@@ -30,7 +27,7 @@ set_source_files_properties("${SRC_DIR}/carbon_py.i" PROPERTIES
     )
 
 #if(MSVC)
-#  set_source_files_properties(../carbon.i PROPERTIES 
+#  set_source_files_properties(../carbon.i PROPERTIES
 #    SWIG_FLAGS "-D_WIN32"
 #    )
 #endif()
@@ -41,17 +38,17 @@ if (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
    set_source_files_properties(${SWIG_INTERFACE} PROPERTIES SWIG_FLAGS "-D_WIN64")
 endif()
 
-include_directories(${INC_DIR})
 include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
 include_directories("${SRC_DIR}/..")
 
-set(SOURCES 
+set(SOURCES
     "${SRC_DIR}/carbon_py.i"
     "${SRC_DIR}/test.py.in"
     "${SRC_DIR}/conftest.py"
 )
 
+# ${SWIG_INTERFACE} and ${SWIG_WRAPPERS} point to common interface / header files
 set(SWIG_MODULE_${PROJECT_NAME}_EXTRA_DEPS ${SWIG_INTERFACE} ${SWIG_WRAPPERS})
 
 if("${CMAKE_VERSION}" VERSION_GREATER 3.8)
@@ -68,7 +65,7 @@ if(MSVC)
    set_target_properties(${SWIG_MODULE_${PROJECT_NAME}_REAL_NAME} PROPERTIES COMPILE_FLAGS "/bigobj")
 endif()
 
-#target_include_directories(${SWIG_MODULE_carbon_py_REAL_NAME} PRIVATE 
+#target_include_directories(${SWIG_MODULE_carbon_py_REAL_NAME} PRIVATE
 #    ${PYTHON_INCLUDE_DIRS})
 
 #target_link_libraries(${SWIG_MODULE_carbon_py_REAL_NAME} PRIVATE
