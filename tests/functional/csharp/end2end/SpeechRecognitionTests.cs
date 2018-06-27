@@ -262,12 +262,41 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 };
 
                 await speechRecognitionTestsHelper.CompleteContinuousRecognition(recognizer);
-
                 Assert.AreEqual(1, speechRecognitionTestsHelper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
                 Assert.AreEqual(0, speechRecognitionTestsHelper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
                 Assert.AreEqual(0, speechRecognitionTestsHelper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
                 Assert.AreEqual(0, speechRecognitionTestsHelper.SpeechEndedEventCount, AssertOutput.WrongSpeechEndedCount);
                 Assert.AreEqual(0, speechRecognitionTestsHelper.ErrorEventCount, AssertOutput.WrongErrorCount);
+            }
+        }
+
+        [Ignore] //KWS not available on Windows/Linux yet
+        [TestMethod]
+        public void TestKeywordRecognition()
+        {
+           
+        }
+
+        [TestMethod]
+        public void TestGetters()
+        {
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.German.FirstOne.AudioFile))
+            {
+                Assert.IsTrue(string.IsNullOrEmpty(recognizer.Language));
+                Assert.AreEqual(recognizer.Language, recognizer.Parameters.Get<string>(SpeechParameterNames.RecognitionLanguage));
+
+                Assert.IsTrue(string.IsNullOrEmpty(recognizer.DeploymentId));
+                recognizer.DeploymentId = deploymentId;
+                Assert.AreEqual(deploymentId, recognizer.DeploymentId);
+                Assert.AreEqual(deploymentId, recognizer.Parameters.Get<string>(SpeechParameterNames.DeploymentId));
+            }
+
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.German.FirstOne.AudioFile, Language.DE_DE))
+            {
+                Assert.AreEqual(Language.DE_DE, recognizer.Language);
+                Assert.AreEqual(Language.DE_DE, recognizer.Parameters.Get<string>(SpeechParameterNames.RecognitionLanguage));
+
+                Assert.AreEqual(recognizer.DeploymentId, recognizer.Parameters.Get<string>(SpeechParameterNames.DeploymentId));
             }
         }
     }

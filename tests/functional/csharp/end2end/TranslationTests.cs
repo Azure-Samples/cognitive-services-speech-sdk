@@ -180,6 +180,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             CollectionAssert.AreEqual(expectedSynthesisByteResult[0], actualSynthesisByteResult.Result.Audio);
         }
 
+        [Ignore] // TODO ENABLE AFTER FIXING BROKEN SERVICE
         [TestMethod]
         public async Task TranslationWeatherEnToFrCarolineTextAndSynthesisResultContinuous()
         {
