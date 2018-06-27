@@ -15,7 +15,7 @@ namespace CsharpHelloWorld
         static async Task RecoFromMicrophoneAsync()
         {
             var subscriptionKey = "<Please replace with your subscription key>";
-            var region = "<Please replace with your service region>";
+            var region = "<Please replace with your service region, e.g., 'westus'>";
 
             var factory = SpeechFactory.FromSubscription(subscriptionKey, region);
 
