@@ -3,6 +3,9 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Microsoft.CognitiveServices.SpeechRecognition Example" Margin="5,5,5,5" MinWidth="800" FontSize="16">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="b2v" />
+    </Window.Resources>
     <Grid Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
@@ -111,9 +114,14 @@
                                 <StackPanel Margin="10">
                                     <TextBlock Text="Subscription Key:" />
                                     <TextBox VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="2" Text="{Binding ElementName=mainWindow, Path=SubscriptionKey, Mode=TwoWay}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
-
-                                    <TextBlock Text="CRIS Model ID:" />
-                                    <TextBox VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="2" Text="{Binding ElementName=mainWindow, Path=CustomModelDeploymentId, Mode=TwoWay}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+                                    <StackPanel Visibility="{Binding IsChecked, ElementName=bothRadioButton ,Converter={StaticResource b2v}}" >
+                                        <TextBlock Text="CRIS Model ID:"/>
+                                        <TextBox VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="2" Text="{Binding ElementName=mainWindow, Path=CustomModelDeploymentId, Mode=TwoWay}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+                                    </StackPanel>
+                                    <StackPanel Visibility="{Binding IsChecked, ElementName=customRadioButton ,Converter={StaticResource b2v}}" >
+                                        <TextBlock Text="CRIS Model ID:"/>
+                                        <TextBox VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="2" Text="{Binding ElementName=mainWindow, Path=CustomModelDeploymentId, Mode=TwoWay}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+                                    </StackPanel>
                                     <Button Margin="0,5,0,0" Padding="5" Height="35" VerticalAlignment="Top" Click="SaveKey_Click">Save Keys</Button>
                                 </StackPanel>
                             </Expander>

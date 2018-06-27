@@ -134,13 +134,13 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             this.UseMicrophone= false;
             this.UseFileInput = true;
 
-            this.UseBaseModel = false;
+            this.UseBaseModel = true;
             this.UseCustomModel = false;
-            this.UseBaseAndCustomModels = true;
+            this.UseBaseAndCustomModels = false;
 
             // Set the default choice for radio buttons.
             this.fileInputRadioButton.IsChecked = true;
-            this.bothRadioButton.IsChecked = true;
+            this.basicRadioButton.IsChecked = true;
 
             this.SubscriptionKey = this.GetValueFromIsolatedStorage(subscriptionKeyFileName);
             this.CustomModelDeploymentId = this.GetValueFromIsolatedStorage(deploymentIdFileName);
@@ -169,15 +169,21 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
 
             if (!AreKeysValid())
             {
-                MessageBox.Show("Subscription Key or Model ID is wrong or missing!");
-                if (this.UseBaseModel || this.UseBaseAndCustomModels)
+                if(this.UseBaseModel)
                 {
-                    this.WriteLine(this.baseModelLogText, "--- Error : Subscription Key or Model Key is wrong or missing! ---");
+                    MessageBox.Show("Subscription Key is wrong or missing!");
+                    this.WriteLine(this.baseModelLogText, "--- Error : Subscription Key is wrong or missing! ---");
                 }
-
-                if (this.UseCustomModel || this.UseBaseAndCustomModels)
+                else if(this.UseCustomModel)
                 {
-                    this.WriteLine(this.customModelLogText, "--- Error : Subscription Key or Model Key is wrong or missing! ---");
+                    MessageBox.Show("Subscription Key or Custom Model DeploymentId is missing or wrong! If you do not need the custom model, please change Settings->Recognition Type.");
+                    this.WriteLine(this.customModelLogText, "--- Error : Subscription Key or Custom Model DeploymentId is wrong or missing! ---");
+                }
+                else if(this.UseBaseAndCustomModels)
+                {
+                    MessageBox.Show("Subscription Key or Custom Model DeploymentId is missing or wrong! If you do not need the custom model, please change Settings->Recognition Type.");
+                    this.WriteLine(this.baseModelLogText, "--- Error : Subscription Key or Custom Model DeploymentId is wrong or missing! ---");
+                    this.WriteLine(this.customModelLogText, "--- Error : Subscription Key or Custom Model DeploymentId is wrong or missing! ---");
                 }
 
                 this.EnableButtons();
@@ -234,7 +240,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         }
 
         /// <summary>
-        /// Creates Recognizer with custom model and selected language:
+        /// Creates Recognizer with custom model deploymentId and selected language:
         /// Creates a factory with subscription key and selected region
         /// If input source is audio file, creates recognizer with audio file otherwise with default mic
         /// Waits on RunRecognition
