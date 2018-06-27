@@ -11,7 +11,7 @@ using namespace Microsoft::CognitiveServices::Speech;
 
 void recognizeSpeech() {
     wstring subscriptionKey{ L"<Please replace with your subscription key>" };
-    wstring region{ L"<Please replace with your service region>" };
+    wstring region{ L"<Please replace with your service region (e.g., 'westus')>" };
 
     auto factory = SpeechFactory::FromSubscription(subscriptionKey, region);
 
