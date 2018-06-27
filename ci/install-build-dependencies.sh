@@ -16,7 +16,7 @@ case $SPEECHSDK_BUILD_AGENT_PLATFORM in
     sudo apt-get remove --yes libssl-dev
     sudo apt-get install --yes --target-release xenial-updates libssl-dev
 
-    sudo apt-get install --yes pkg-config zlib1g-dev libcurl4-openssl-dev libasound2-dev uuid-dev python-dev python-setuptools default-jdk libpcre++-dev bison
+    sudo apt-get install --yes pkg-config zlib1g-dev libcurl4-openssl-dev libasound2-dev uuid-dev python-dev python-setuptools default-jdk libpcre++-dev bison automake
     sudo "$SCRIPT_DIR/install-swig.sh"
     pip install -U pytest
     ;;
