@@ -52,20 +52,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
             {
-                List<string> recognizedText = new List<string>();
-                speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
-                recognizer.FinalResultReceived += (s, e) =>
-                {
-                    if (e.Result.Text.Length > 0)
-                    {
-                        recognizedText.Add(e.Result.Text);
-                    }
-                };
-
-                await speechRecognitionTestsHelper.CompleteContinuousRecognition(recognizer);
-
-                Assert.IsTrue(recognizedText.Count > 0);
-                Assert.IsTrue(speechRecognitionTestsHelper.AreResultsMatching(recognizedText[0], TestData.English.Weather.Utterance));
+                Assert.IsTrue(await speechRecognitionTestsHelper.IsValidSimpleRecognizer(recognizer, TestData.English.Weather.Utterance));
             }
         }
 
@@ -88,21 +75,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
             {
                 recognizer.DeploymentId = deploymentId;
-
-                List<string> recognizedText = new List<string>();
-                speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
-                recognizer.FinalResultReceived += (s, e) =>
-                {
-                    if (e.Result.Text.Length > 0)
-                    {
-                        recognizedText.Add(e.Result.Text);
-                    }
-                };
-
-                await speechRecognitionTestsHelper.CompleteContinuousRecognition(recognizer);
-
-                Assert.IsTrue(recognizedText.Count > 0);
-                Assert.IsTrue(speechRecognitionTestsHelper.AreResultsMatching(recognizedText[0], TestData.English.Weather.Utterance));
+                Assert.IsTrue(await speechRecognitionTestsHelper.IsValidSimpleRecognizer(recognizer, TestData.English.Weather.Utterance));
             }
         }
 
@@ -169,20 +142,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.German.FirstOne.AudioFile, Language.DE_DE))
             {
-                List<string> recognizedText = new List<string>();
-                speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
-                recognizer.FinalResultReceived += (s, e) =>
-                {
-                    if (e.Result.Text.Length > 0)
-                    {
-                        recognizedText.Add(e.Result.Text);
-                    }
-                };
-
-                await speechRecognitionTestsHelper.CompleteContinuousRecognition(recognizer);
-
-                Assert.IsTrue(recognizedText.Count > 0);
-                Assert.IsTrue(speechRecognitionTestsHelper.AreResultsMatching(recognizedText[0], TestData.German.FirstOne.Utterance));
+                Assert.IsTrue(await speechRecognitionTestsHelper.IsValidSimpleRecognizer(recognizer, TestData.German.FirstOne.Utterance));
             }
         }
 

@@ -3,10 +3,13 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
@@ -31,6 +34,31 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 byteArrList.Add(File.ReadAllBytes(Path.Combine(dir, string.Concat(prefix, i, ".wav"))));
             }
             return byteArrList;
+        }
+
+        public static async Task<string> GetToken(string key)
+        {
+            string fetchTokenUri = "https://westus.api.cognitive.microsoft.com/sts/v1.0";
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", key);
+                UriBuilder uriBuilder = new UriBuilder(fetchTokenUri);
+                uriBuilder.Path += "/issueToken";
+
+                using (var result = await client.PostAsync(uriBuilder.Uri.AbsoluteUri, null))
+                {
+                    Console.WriteLine("Token Uri: {0}", uriBuilder.Uri.AbsoluteUri);
+                    if (result.IsSuccessStatusCode)
+                    {
+                        return await result.Content.ReadAsStringAsync();
+                    }
+                    else
+                    {
+                        throw new HttpRequestException($"Cannot get token from {fetchTokenUri}. Error: {result.StatusCode}");
+                    }
+                }
+            }
         }
 
         public static AudioInputStream OpenWaveFile(string filename)

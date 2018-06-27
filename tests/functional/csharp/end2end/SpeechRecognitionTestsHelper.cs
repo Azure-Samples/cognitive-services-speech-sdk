@@ -57,6 +57,31 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
         }
 
+        public async Task<bool> IsValidSimpleRecognizer(SpeechRecognizer speechRecognizer, string expectedRecognitionResult)
+        {
+            List<string> recognizedText = new List<string>();
+            
+            speechRecognizer.FinalResultReceived += (s, e) =>
+            {
+                if (e.Result.Text.Length > 0)
+                {
+                    recognizedText.Add(e.Result.Text);
+                }
+            };
+
+            await CompleteContinuousRecognition(speechRecognizer);
+
+            speechRecognizer.Dispose();
+            if (recognizedText.Count > 0)
+            {
+                return AreResultsMatching(recognizedText[0], expectedRecognitionResult);
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         private void FinalResultEventCounter(object sender, SpeechRecognitionResultEventArgs e)
         {
             FinalResultEventCount++;
