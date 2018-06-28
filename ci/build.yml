@@ -201,6 +201,10 @@ phases:
       runInParallel: False
       vsTestVersion: latest
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFiles: '**/test-*.xml'
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Create drop files
     inputs:
@@ -536,6 +540,10 @@ phases:
       args: '$(Build.Repository.LocalPath) ./ "" $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
       cwd: build
     condition: and(eq(variables['BuildConfiguration'], 'Release'), eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFiles: '**/test-*.xml'
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Create drop files
     inputs:
@@ -720,6 +728,10 @@ phases:
       args: '$(Build.Repository.LocalPath) ./ "" $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
       cwd: build
     condition: and(eq(variables['BuildConfiguration'], 'Release'), eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFiles: '**/test-*.xml'
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Create drop files
     inputs:

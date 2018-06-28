@@ -8,13 +8,13 @@ function die {
 
 function run_usp_tests {
     echo "Run usp tests."
-    (set -x; $USP_TESTS_EXE $args)
+    (set -x; $USP_TESTS_EXE $args --regionId westus --reporter junit --out test-usp_tests-$AGENT_OS.xml --success)
     echo -e "\n"
 }
 
 function run_cxx_api_tests {
     echo "Run cxx_api tests"
-    (set -x; $CXX_API_TESTS_EXE $args --regionId westus)
+    (set -x; $CXX_API_TESTS_EXE $args --regionId westus --reporter junit --out test-cxx_api-$AGENT_OS.xml --success)
     echo -e "\n"
 }
 
