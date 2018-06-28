@@ -26,6 +26,7 @@ phases:
       script: |
         . ci/functions.sh
         vsts_updatebuildnumber $(SPEECHSDK_SEMVER2NOMETA)
+        vsts_addbuildtag $(SPEECHSDK_BUILD_TYPE)
   - task: Bash@3
     inputs:
       filePath: ci/check-git-head.sh

@@ -5,6 +5,8 @@
 #
 # To be sourced from depending scripts.
 
+# https://github.com/Microsoft/vsts-tasks/blob/master/docs/authoring/commands.md
+
 function vsts_setvar {
   echo Setting Build Variable $1=$2
   echo "##vso[task.setvariable variable=$1]$2"
@@ -18,6 +20,11 @@ function vsts_setoutvar {
 function vsts_updatebuildnumber {
   echo Updating build number to $1
   echo "##vso[build.updatebuildnumber]$1"
+}
+
+function vsts_addbuildtag {
+  echo Adding build tag $1
+  echo "##vso[build.addbuildtag]$1"
 }
 
 function existsExactlyOneDir {
