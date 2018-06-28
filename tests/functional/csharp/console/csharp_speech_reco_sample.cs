@@ -38,21 +38,36 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: Session event: {0}.", e.ToString()));
         }
 
-        public static async Task SpeechRecognitionBaseModelAsync(string keySpeech, string lang, string fileName, bool useStream)
+        public static async Task SpeechRecognitionBaseModelAsync(string key, string lang, string fileName, bool useStream, bool useToken)
         {
             Console.WriteLine("Speech Recognition using base model.");
+            SpeechFactory factory;
+            if (useToken)
+            {
+                factory = SpeechFactory.FromAuthorizationToken(key, "westus");
+            }
+            else
+            {
+                factory = SpeechFactory.FromSubscription(key, "westus");
+            }
 
-            var factory = SpeechFactory.FromSubscription(keySpeech, "westus");
             await RecognizeAsync(factory, lang, null, fileName, useStream).ConfigureAwait(false);
         }
 
-        public static async Task SpeechRecognitionCustomizedModelAsync(string keySpeech, string lang, string model, string fileName, bool useStream)
+        public static async Task SpeechRecognitionCustomizedModelAsync(string key, string lang, string model, string fileName, bool useStream, bool useToken)
         {
             Console.WriteLine("Speech Recognition using customized model.");
+            SpeechFactory factory;
+            if (useToken)
+            {
+                factory = SpeechFactory.FromAuthorizationToken(key, "westus");
+            }
+            else
+            {
+                factory = SpeechFactory.FromSubscription(key, "westus");
+            }
 
-            var factory = SpeechFactory.FromSubscription(keySpeech, "westus");
             await RecognizeAsync(factory, lang, model, fileName, useStream).ConfigureAwait(false);
-
         }
 
         public static async Task SpeechRecognitionByEndpointAsync(string subscriptionKey, string endpoint, string lang, string model, string fileName, bool useStream)

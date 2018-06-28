@@ -50,7 +50,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task FactoryFromAuthenticationToken()
+        public async Task FactoryFromAuthorizationToken()
         {
             var token = await Config.GetToken(subscriptionKey);
             var factoryFromToken = SpeechFactory.FromAuthorizationToken(token, region);
@@ -63,7 +63,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task SetAuthenticationTokenOnFactory()
+        public async Task SetAuthorizationTokenOnFactory()
         {
             var token = await Config.GetToken(subscriptionKey);
             var factoryFromToken = SpeechFactory.FromAuthorizationToken(token, region);

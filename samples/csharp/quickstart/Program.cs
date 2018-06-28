@@ -23,6 +23,7 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine("7. Translation with microphone input.");
             Console.WriteLine("8. Translation with file input.");
             Console.WriteLine("9. Translation with audio stream.");
+            Console.WriteLine("A. Speech continuous recognition using authorization token.");
 
             Console.Write("Your choice (0: Stop.): ");
 
@@ -59,6 +60,9 @@ namespace MicrosoftSpeechSDKSamples
                         break;
                     case ConsoleKey.D9:
                         TranslationSamples.TranslationWithAudioStreamAsync().Wait();
+                        break;
+                    case ConsoleKey.A:
+                        SpeechRecognitionWithTokenSample.ContinuousRecognitionWithAuthorizationTokenAsync().Wait();
                         break;
                     case ConsoleKey.D0:
                         Console.WriteLine("Exiting...");

@@ -19,9 +19,10 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine("Usage: carbon_csharp_console mode(speech|intent|translation) key audioinput(mic|filename) model:modelId|lang:language|endpoint:url");
                 Environment.Exit(1);
             }
-
+           
             string subKey = null;
             string fileName = null;
+            bool useToken = false;
             bool useBaseModel = true;
             bool useEndpoint = false;
             bool isSpeechReco = false;
@@ -60,6 +61,7 @@ namespace MicrosoftSpeechSDKSamples
                         throw new IndexOutOfRangeException("no key is specified.");
                     }
                     subKey = args[1].Substring(index + 1);
+                    useToken = true;
                 }
                 else
                 {
@@ -68,6 +70,10 @@ namespace MicrosoftSpeechSDKSamples
 
                 Trace.Assert(isSpeechReco || isIntentReco || isTranslation);
                 Trace.Assert(subKey != null);
+                if (useToken && (isIntentReco || isTranslation))
+                {
+                    throw new InvalidOperationException("The specified mode is not supported with authorization token: " + modeStr);
+                }
 
                 if (args.Length >= 3)
                 {
@@ -130,6 +136,11 @@ namespace MicrosoftSpeechSDKSamples
                     }
                     else if (paraStr.ToLower().StartsWith("endpoint:"))
                     {
+                        if (useToken)
+                        {
+                            throw new InvalidOperationException("Recognition with endpoint is not supported with authorization token.");
+                        }
+
                         useEndpoint = true;
                         var index = paraStr.IndexOf(':');
                         if (index == -1)
@@ -175,12 +186,12 @@ namespace MicrosoftSpeechSDKSamples
                         if (useBaseModel)
                         {
                             Console.WriteLine("=============== Run speech recognition samples using base model. ===============");
-                            SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(subKey, lang: lang, fileName: fileName, useStream: useStream).Wait();
+                            SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(subKey, lang: lang, fileName: fileName, useStream: useStream, useToken: useToken).Wait();
                         }
                         else
                         {
                             Console.WriteLine("=============== Run speech recognition samples using customized model. ===============");
-                            SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(subKey, lang, modelId, fileName, useStream: useStream).Wait();
+                            SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(subKey, lang, modelId, fileName, useStream: useStream, useToken: useToken).Wait();
                         }
                     }
                 }

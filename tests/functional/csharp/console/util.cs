@@ -67,8 +67,7 @@ namespace MicrosoftSpeechSDKSamples
 
         public static async Task<string> GetToken(string key)
         {
-            string fetchTokenUri = "https://api.cognitive.microsoft.com/sts/v1.0";
-
+            string fetchTokenUri = "https://westus.api.cognitive.microsoft.com/sts/v1.0";
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", key);
