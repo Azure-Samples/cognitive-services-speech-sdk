@@ -42,15 +42,7 @@ void CSpxRecognizer::SetStringValue(const wchar_t* name, const wchar_t* value)
     // Check to see if the caller is trying to set the CUSTOM SPEECH Model ID...
     if (wcscmp(name, g_SPEECH_ModelId) == 0)
     {
-        // For now, we can only have one Recognizer per Session, so, we'll 
-        // just pass this over to the default session...
-
-        EnsureDefaultSession();
-
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(m_defaultSession);
-        SPX_IFTRUE_THROW_HR(namedProperties->HasStringValue(name), SPXERR_ALREADY_INITIALIZED); // throw if it's already been set
-
-        namedProperties->SetStringValue(name, value);
+        SetStringValueInProperties(name, value);
     }
 }
 
@@ -77,11 +69,32 @@ void CSpxRecognizer::Disable()
 
 CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxRecognizer::RecognizeAsync()
 {
+    auto currentRecoMode = GetStringValueFromProperties(g_SPEECH_RecoMode, L"");
+    if (currentRecoMode.empty())
+    {
+        SetStringValueInProperties(g_SPEECH_RecoMode, g_SPEECH_RecoMode_Interactive);
+    }
+    else
+    {
+        // Since the mode is set during connection setup, no mode switch is allowed.
+        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(g_SPEECH_RecoMode_Interactive) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);
+    }
+
     return m_defaultSession->RecognizeAsync();
 }
 
 CSpxAsyncOp<void> CSpxRecognizer::StartContinuousRecognitionAsync()
 {
+    auto currentRecoMode = GetStringValueFromProperties(g_SPEECH_RecoMode, L"");
+    if (currentRecoMode.empty())
+    {
+        SetStringValueInProperties(g_SPEECH_RecoMode, g_SPEECH_RecoMode_Conversation);
+    }
+    else
+    {
+        // Since the mode is set during connection setup, no mode switch is allowed.
+        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(g_SPEECH_RecoMode_Conversation) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);
+    }
     return m_defaultSession->StartContinuousRecognitionAsync();
 }
 
@@ -195,6 +208,22 @@ void CSpxRecognizer::FireRecoEvent(ISpxRecognizerEvents::RecoEvent_Type* pevent,
             : factory->CreateRecognitionEventArgs(sessionId, offset);
         pevent->Signal(recoEvent);
     }
+}
+
+void CSpxRecognizer::SetStringValueInProperties(const wchar_t* name, const wchar_t* value)
+{
+    // For now, we can only have one Recognizer per Session, so, we'll just pass this over to the default session.
+    EnsureDefaultSession();
+    auto namedProperties = SpxQueryService<ISpxNamedProperties>(m_defaultSession);
+    SPX_IFTRUE_THROW_HR(namedProperties->HasStringValue(name), SPXERR_ALREADY_INITIALIZED); // throw if it's already been set
+    namedProperties->SetStringValue(name, value);
+}
+
+std::wstring CSpxRecognizer::GetStringValueFromProperties(const wchar_t* name, const wchar_t* defaultValue) {
+    // For now, we can only have one Recognizer per Session, so, we'll just pass this over to the default session.
+    EnsureDefaultSession();
+    auto namedProperties = SpxQueryService<ISpxNamedProperties>(m_defaultSession);
+    return namedProperties->GetStringValue(name, defaultValue);
 }
 
 void CSpxRecognizer::EnsureDefaultSession()

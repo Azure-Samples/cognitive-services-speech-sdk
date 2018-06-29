@@ -205,3 +205,7 @@ typedef uintptr_t SPXHR;
 /// </summary>
 #define SPXERR_INVALID_REGION  __SPX_ERRCODE_FAILED(0x01D)
 
+/// <summary>
+/// Switch between single shot and continuous recognition is not supported.
+/// </summary>
+#define SPXERR_SWITCH_MODE_NOT_ALLOWED  __SPX_ERRCODE_FAILED(0x01E)

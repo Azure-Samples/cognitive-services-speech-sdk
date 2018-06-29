@@ -90,6 +90,8 @@ private:
     std::shared_ptr<ISpxSession> m_defaultSession;
     std::atomic_bool m_fEnabled;
 
+    void SetStringValueInProperties(const wchar_t* name, const wchar_t* value);
+    std::wstring GetStringValueFromProperties(const wchar_t* name, const wchar_t* defaultValue);
     void FireRecoEvent(ISpxRecognizerEvents::RecoEvent_Type* pevent, const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result, uint64_t offset = 0);
 };
 

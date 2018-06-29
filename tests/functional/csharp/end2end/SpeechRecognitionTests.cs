@@ -187,7 +187,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 await speechRecognitionTestsHelper.CompleteContinuousRecognition(recognizer);
 
-                Assert.AreEqual(numLoops, speechRecognitionTestsHelper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
+                // The weather audio return 2 final results.
+                Assert.AreEqual(2 * numLoops, speechRecognitionTestsHelper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
                 Assert.AreEqual(numLoops, speechRecognitionTestsHelper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
                 Assert.AreEqual(numLoops, speechRecognitionTestsHelper.SpeechEndedEventCount, AssertOutput.WrongSpeechEndedCount);
                 Assert.AreEqual(numLoops, speechRecognitionTestsHelper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
@@ -239,7 +240,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 await speechRecognitionTestsHelper.CompleteContinuousRecognition(recognizer);
 
-                Assert.AreEqual(diff, speechRecognitionTestsHelper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
+                // The weather audio return 2 final results.
+                Assert.AreEqual(2 * diff, speechRecognitionTestsHelper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
                 Assert.AreEqual(diff, speechRecognitionTestsHelper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
                 Assert.AreEqual(diff, speechRecognitionTestsHelper.SpeechEndedEventCount, AssertOutput.WrongSpeechEndedCount);
                 Assert.AreEqual(diff, speechRecognitionTestsHelper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
@@ -297,6 +299,54 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(Language.DE_DE, recognizer.Parameters.Get<string>(SpeechParameterNames.RecognitionLanguage));
 
                 Assert.AreEqual(recognizer.DeploymentId, recognizer.Parameters.Get<string>(SpeechParameterNames.DeploymentId));
+            }
+        }
+
+        [TestMethod]
+        public async Task TestExceptionSwitchFromSingleShotToContinuous()
+        {
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
+            {
+                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                var ex = await Assert.ThrowsExceptionAsync<ApplicationException>(() => recognizer.StartContinuousRecognitionAsync());
+                Assert.IsTrue(ex.Message.Contains("Exception with an error code: 0x1e"));
+            }
+        }
+
+        [TestMethod]
+        public async Task TestExceptionSwitchFromContinuousToSingleShot()
+        {
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
+            {
+                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                var ex = await Assert.ThrowsExceptionAsync<ApplicationException>(() => recognizer.RecognizeAsync());
+                Assert.IsTrue(ex.Message.Contains("Exception with an error code: 0x1e"));
+            }
+        }
+
+        [TestMethod]
+        public async Task TestSingleShotTwice()
+        {
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Batman.AudioFile))
+            {
+                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                // Bug: need to wait before calling RecognizeAsync() again. Otherwise the error 0x13 occurs.
+                // https://msasg.visualstudio.com/Skyman/_workitems/edit/1313114
+                await Task.Delay(1000);
+                var result2 = await recognizer.RecognizeAsync().ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
+        public async Task TestContinuousRecognitionTwice()
+        {
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Batman.AudioFile))
+            {
+                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
             }
         }
     }

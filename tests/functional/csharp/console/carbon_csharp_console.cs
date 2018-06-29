@@ -16,10 +16,10 @@ namespace MicrosoftSpeechSDKSamples
         {
             if (args.Length < 2)
             {
-                Console.WriteLine("Usage: carbon_csharp_console mode(speech|intent|translation) key audioinput(mic|filename) model:modelId|lang:language|endpoint:url");
+                Console.WriteLine("Usage: carbon_csharp_console mode(speech|intent|translation:cont|single) key(key|token:key) audioinput(mic|filename|stream:file) model:modelId|lang:language|endpoint:url");
                 Environment.Exit(1);
             }
-           
+
             string subKey = null;
             string fileName = null;
             bool useToken = false;
@@ -32,10 +32,12 @@ namespace MicrosoftSpeechSDKSamples
             string modelId = null;
             string endpoint = null;
             bool useStream = false;
+            bool useContinuousRecognition = false;
 
             if (args.Length >= 2)
             {
-                var modeStr = args[0];
+                var index = args[0].IndexOf(':');
+                var modeStr = (index == -1) ? args[0] : args[0].Substring(0, index);
                 if (string.Compare(modeStr, "speech", true) == 0)
                 {
                     isSpeechReco = true;
@@ -53,189 +55,197 @@ namespace MicrosoftSpeechSDKSamples
                     throw new InvalidOperationException("The specified mode is not supported: " + modeStr);
                 }
 
-                if (args[1].ToLower().StartsWith("token:"))
+                if (index != -1)
                 {
-                    var index = args[1].IndexOf(':');
+                    if (isIntentReco || isTranslation)
+                    {
+                        throw new InvalidOperationException("Only speech reco supports selection of continuous or singleshot");
+                    }
+
+                    var str = args[0].Substring(index + 1);
+                    if (string.Compare(str, "cont", true) == 0)
+                    {
+                        useContinuousRecognition = true;
+                    }
+                    else if (string.Compare(str, "single", true) == 0)
+                    {
+                        useContinuousRecognition = false;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("only cont or single is supported.");
+                    }
+                }
+            }
+
+            if (args[1].ToLower().StartsWith("token:"))
+            {
+                var index = args[1].IndexOf(':');
+                if (index == -1)
+                {
+                    throw new IndexOutOfRangeException("no key is specified.");
+                }
+                subKey = args[1].Substring(index + 1);
+                useToken = true;
+            }
+            else
+            {
+                subKey = args[1];
+            }
+
+            Trace.Assert(isSpeechReco || isIntentReco || isTranslation);
+            Trace.Assert(subKey != null);
+            if (useToken && (isIntentReco || isTranslation))
+            {
+                throw new InvalidOperationException("The specified mode is not supported with authorization token: " + args[0]);
+            }
+
+            if (args.Length >= 3)
+            {
+                var audioInputStr = args[2];
+
+                if (string.Compare(audioInputStr, "mic", true) == 0)
+                {
+                    fileName = null;
+                }
+                else if (audioInputStr.ToLower().StartsWith("stream:"))
+                {
+                    useStream = true;
+                    var index = audioInputStr.IndexOf(':');
                     if (index == -1)
                     {
-                        throw new IndexOutOfRangeException("no key is specified.");
+                        throw new IndexOutOfRangeException("No file name specified as stream input.");
                     }
-                    subKey = args[1].Substring(index + 1);
-                    useToken = true;
+                    fileName = audioInputStr.Substring(index + 1);
+                    if (String.IsNullOrEmpty(fileName))
+                    {
+                        throw new IndexOutOfRangeException("No file name specified as stream input.");
+                    }
                 }
                 else
                 {
-                    subKey = args[1];
+                    fileName = audioInputStr;
                 }
+            }
 
-                Trace.Assert(isSpeechReco || isIntentReco || isTranslation);
-                Trace.Assert(subKey != null);
-                if (useToken && (isIntentReco || isTranslation))
+            if (args.Length >= 4)
+            {
+                var paraStr = args[3];
+                if (paraStr.ToLower().StartsWith("lang:"))
                 {
-                    throw new InvalidOperationException("The specified mode is not supported with authorization token: " + modeStr);
-                }
-
-                if (args.Length >= 3)
-                {
-                    var audioInputStr = args[2];
-
-                    if (string.Compare(audioInputStr, "mic", true) == 0)
+                    useBaseModel = true;
+                    var index = paraStr.IndexOf(':');
+                    if (index == -1)
                     {
-                        fileName = null;
+                        throw new IndexOutOfRangeException("no language is specified.");
                     }
-                    else if (audioInputStr.ToLower().StartsWith("stream:"))
+                    lang = paraStr.Substring(index + 1);
+                    if (String.IsNullOrEmpty(lang))
                     {
-                        useStream = true;
-                        var index = audioInputStr.IndexOf(':');
-                        if (index == -1)
-                        {
-                            throw new IndexOutOfRangeException("No file name specified as stream input.");
-                        }
-                        fileName = audioInputStr.Substring(index + 1);
-                        if (String.IsNullOrEmpty(fileName))
-                        {
-                            throw new IndexOutOfRangeException("No file name specified as stream input.");
-                        }
-                    }
-                    else
-                    {
-                        fileName = audioInputStr;
+                        throw new IndexOutOfRangeException("no language is specified.");
                     }
                 }
-
-                if (args.Length >= 4)
+                else if (paraStr.ToLower().StartsWith("model:"))
                 {
-                    var paraStr = args[3];
-                    if (paraStr.ToLower().StartsWith("lang:"))
+                    useBaseModel = false;
+                    var index = paraStr.IndexOf(':');
+                    if (index == -1)
                     {
-                        useBaseModel = true;
-                        var index = paraStr.IndexOf(':');
-                        if (index == -1)
-                        {
-                            throw new IndexOutOfRangeException("no language is specified.");
-                        }
-                        lang = paraStr.Substring(index + 1);
-                        if (String.IsNullOrEmpty(lang))
-                        {
-                            throw new IndexOutOfRangeException("no language is specified.");
-                        }
+                        throw new IndexOutOfRangeException("no model is specified.");
                     }
-                    else if (paraStr.ToLower().StartsWith("model:"))
+                    modelId = paraStr.Substring(index + 1);
+                    if (String.IsNullOrEmpty(modelId))
                     {
-                        useBaseModel = false;
-                        var index = paraStr.IndexOf(':');
-                        if (index == -1)
-                        {
-                            throw new IndexOutOfRangeException("no model is specified.");
-                        }
-                        modelId = paraStr.Substring(index + 1);
-                        if (String.IsNullOrEmpty(modelId))
-                        {
-                            throw new IndexOutOfRangeException("no model is specified.");
-                        }
-                    }
-                    else if (paraStr.ToLower().StartsWith("endpoint:"))
-                    {
-                        if (useToken)
-                        {
-                            throw new InvalidOperationException("Recognition with endpoint is not supported with authorization token.");
-                        }
-
-                        useEndpoint = true;
-                        var index = paraStr.IndexOf(':');
-                        if (index == -1)
-                        {
-                            throw new IndexOutOfRangeException("no endpoint is specified.");
-                        }
-                        endpoint = paraStr.Substring(index + 1);
-                        if (String.IsNullOrEmpty(endpoint))
-                        {
-                            throw new IndexOutOfRangeException("no endpoint is specified.");
-                        }
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("Only the following values are allowed: lang:language, model:modelId, endpoint:url.");
+                        throw new IndexOutOfRangeException("no model is specified.");
                     }
                 }
-
-#if false
-                var factory = RecognizerFactory.Instance;
-                if (useToken)
+                else if (paraStr.ToLower().StartsWith("endpoint:"))
                 {
-                    token = GetToken(subKey).Result;
-                    factory.AuthorizationToken = token;
-                    Console.WriteLine("Use authorization token.");
+                    if (useToken)
+                    {
+                        throw new InvalidOperationException("Recognition with endpoint is not supported with authorization token.");
+                    }
+
+                    useEndpoint = true;
+                    var index = paraStr.IndexOf(':');
+                    if (index == -1)
+                    {
+                        throw new IndexOutOfRangeException("no endpoint is specified.");
+                    }
+                    endpoint = paraStr.Substring(index + 1);
+                    if (String.IsNullOrEmpty(endpoint))
+                    {
+                        throw new IndexOutOfRangeException("no endpoint is specified.");
+                    }
                 }
                 else
                 {
-                    factory.SubscriptionKey = subKey;
-                    Console.WriteLine("Use subscription key.");
+                    throw new InvalidOperationException("Only the following values are allowed: lang:language, model:modelId, endpoint:url.");
                 }
-#endif
+            }
 
-                if (isSpeechReco)
+            if (isSpeechReco)
+            {
+                if (useEndpoint)
                 {
-                    if (useEndpoint)
+                    Console.WriteLine("=============== Run speech recognition samples by specifying endpoint. ===============");
+                    SpeechRecognitionSamples.SpeechRecognitionByEndpointAsync(subKey, endpoint, lang: lang, model: modelId, fileName: fileName, useStream: useStream, useContinuousRecognition: useContinuousRecognition).Wait();
+                }
+                else
+                {
+                    if (useBaseModel)
                     {
-                        Console.WriteLine("=============== Run speech recognition samples by specifying endpoint. ===============");
-                        SpeechRecognitionSamples.SpeechRecognitionByEndpointAsync(subKey, endpoint, lang: lang, model: modelId, fileName: fileName, useStream: useStream).Wait();
+                        Console.WriteLine("=============== Run speech recognition samples using base model. ===============");
+                        SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(subKey, lang: lang, fileName: fileName, useStream: useStream, useToken: useToken, useContinuousRecognition: useContinuousRecognition).Wait();
                     }
                     else
                     {
-                        if (useBaseModel)
-                        {
-                            Console.WriteLine("=============== Run speech recognition samples using base model. ===============");
-                            SpeechRecognitionSamples.SpeechRecognitionBaseModelAsync(subKey, lang: lang, fileName: fileName, useStream: useStream, useToken: useToken).Wait();
-                        }
-                        else
-                        {
-                            Console.WriteLine("=============== Run speech recognition samples using customized model. ===============");
-                            SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(subKey, lang, modelId, fileName, useStream: useStream, useToken: useToken).Wait();
-                        }
+                        Console.WriteLine("=============== Run speech recognition samples using customized model. ===============");
+                        SpeechRecognitionSamples.SpeechRecognitionCustomizedModelAsync(subKey, lang, modelId, fileName, useStream: useStream, useToken: useToken, useContinuousRecognition: useContinuousRecognition).Wait();
                     }
                 }
-                else if (isIntentReco)
+            }
+            else if (isIntentReco)
+            {
+                if (useEndpoint)
                 {
-                    if (useEndpoint)
+                    Console.WriteLine("=============== Run intent recognition samples by specifying endpoint. ===============");
+                    IntentRecognitionSamples.IntentRecognitionByEndpointAsync(subKey, endpoint, fileName).Wait();
+                }
+                else
+                {
+                    if (useBaseModel)
                     {
-                        Console.WriteLine("=============== Run intent recognition samples by specifying endpoint. ===============");
-                        IntentRecognitionSamples.IntentRecognitionByEndpointAsync(subKey, endpoint, fileName).Wait();
+                        Console.WriteLine("=============== Run intent recognition samples using base speech model. ===============");
+                        IntentRecognitionSamples.IntentRecognitionBaseModelAsync(subKey, fileName).Wait();
                     }
                     else
                     {
-                        if (useBaseModel)
-                        {
-                            Console.WriteLine("=============== Run intent recognition samples using base speech model. ===============");
-                            IntentRecognitionSamples.IntentRecognitionBaseModelAsync(subKey, fileName).Wait();
-                        }
-                        else
-                        {
-                            Console.WriteLine("=============== Intent recognition with CRIS model is not supported yet. ===============");
-                        }
+                        Console.WriteLine("=============== Intent recognition with CRIS model is not supported yet. ===============");
                     }
                 }
-                else if (isTranslation)
+            }
+            else if (isTranslation)
+            {
+                if (useEndpoint)
                 {
-                    if (useEndpoint)
+                    Console.WriteLine("=============== Run translation samples by specifying endpoint. ===============");
+                    TranslationSamples.TranslationByEndpointAsync(subKey, endpoint, fileName, useStream: useStream).Wait();
+                }
+                else
+                {
+                    if (useBaseModel)
                     {
-                        Console.WriteLine("=============== Run translation samples by specifying endpoint. ===============");
-                        TranslationSamples.TranslationByEndpointAsync(subKey, endpoint, fileName, useStream: useStream).Wait();
+                        Console.WriteLine("=============== Run translationsamples using base speech model. ===============");
+                        TranslationSamples.TranslationBaseModelAsync(subKey, fileName, useStream: useStream).Wait();
                     }
                     else
                     {
-                        if (useBaseModel)
-                        {
-                            Console.WriteLine("=============== Run translationsamples using base speech model. ===============");
-                            TranslationSamples.TranslationBaseModelAsync(subKey, fileName, useStream: useStream).Wait();
-                        }
-                        else
-                        {
-                            Console.WriteLine("=============== Translation using CRIS model is not supported yet. ===============");
-                        }
+                        Console.WriteLine("=============== Translation using CRIS model is not supported yet. ===============");
                     }
                 }
             }
         }
     }
 }
+
