@@ -56,9 +56,10 @@
   {
 #ifndef _MSC_VER
     std::string s(config.begin(), config.end());
-    if(s.length() < 1) s = "/system/etc/ssl/certs/";
+    int overwrite = 1;
+    if(s.length() < 1) { overwrite = 0; s = "/system/etc/ssl/certs/"; }
 
-    setenv("SSL_CERT_DIR", s.c_str(), 1/*overwrite*/);
+    setenv("SSL_CERT_DIR", s.c_str(), overwrite);
 #endif
   }
 
