@@ -2,6 +2,9 @@
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
+echo Not currently used.
+exit 1
+
 # Get some helpers
 . "$SCRIPT_DIR/../functions.sh"
 

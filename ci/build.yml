@@ -241,7 +241,7 @@ phases:
     displayName: Set up NUGETEXETOOLPATH
   - bash: |
       . ci/functions.sh
-      vsts_setvar ZipBasename "SpeechSDK-WindowsSamples-$(SPEECHSDK_SEMVER2NOMETA)"
+      vsts_setvar ZipBasename "SpeechSDK-Samples-$(SPEECHSDK_SEMVER2NOMETA)"
     displayName: 'Set variables'
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     inputs:
@@ -249,6 +249,7 @@ phases:
       scriptPath: './ci/nuget/pack.sh'
       args: '$(System.ArtifactsDirectory)\In\Windows $(SPEECHSDK_SEMVER2NOMETA) $(Build.ArtifactStagingDirectory)\Windows'
     displayName: Create NuGet
+  # We could / should generate this elsewhere? Doesn't only apply to Windows + NuGet anymore...
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     inputs:
       type: InlineScript
@@ -256,12 +257,10 @@ phases:
          set -e -x -o pipefail
          # Drop is not needed anymore
          rm -rf "$(cygpath -au "$(System.ArtifactsDirectory)\In")"
-         git clean -fdx samples
+         git clean -fdx public_samples
          perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)"
-         mkdir "$(ZipBasename)"{,/csharp,/cxx}
+         cp --verbose --recursive --preserve public_samples "$(ZipBasename)"
          cp --verbose --preserve license.md ThirdPartyNotices.md "$(ZipBasename)"
-         cp --verbose --recursive --preserve samples/csharp/quickstart samples/csharp/windows/{SpeechToText,Translation}-WPF "$(ZipBasename)/csharp"
-         cp --verbose --recursive --preserve samples/cxx/windows/quickstart "$(ZipBasename)/cxx"
          NOW=$(date -Iseconds)
          find "$(ZipBasename)" | xargs touch --date=$NOW
     displayName: 'Create directory with patched samples'
@@ -270,17 +269,17 @@ phases:
       rootFolderOrFile: $(ZipBasename)
       includeRootFolder: true
       archiveType: zip
-      archiveFile: $(Build.ArtifactStagingDirectory)//Windows/$(ZipBasename).zip
+      archiveFile: $(Build.ArtifactStagingDirectory)/Windows/$(ZipBasename).zip
     displayName: 'Create .zip'
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     inputs:
       type: InlineScript
       script: |
-         ./ci/nuget/restore-from-local.sh "$(cygpath -au "$(Build.ArtifactStagingDirectory)/Windows")" samples
+         ./ci/nuget/restore-from-local.sh "$(cygpath -au "$(Build.ArtifactStagingDirectory)/Windows")" public_samples
     displayName: 'Test - restore packages'
   - task: VSBuild@1
     inputs:
-      solution: 'samples/**/*.sln'
+      solution: 'public_samples/**/*.sln'
       platform: x64
       configuration: Release
       maximumCpuCount: true
@@ -289,7 +288,7 @@ phases:
     inputs:
       type: FilePath
       scriptPath: 'ci/nuget/smoke_test.sh'
-      args: '$(Build.ArtifactStagingDirectory)\Windows $(KeySkyman)'
+      args: '$(KeySkyman)'
     timeoutInMinutes: 2
     continueOnError: true
     displayName: Test - smoke-test
@@ -327,7 +326,7 @@ phases:
          SHA256_SUM="$(sha256sum "$(cygpath -au "$(Build.ArtifactStagingDirectory)/$(ZipBasename).zip")" | cut -f1 -d' ')"
          # N.B. two spaces in the next line intentional
          echo "$SHA256_SUM  $(ZipBasename).zip"
-         vsts_setvar WINSAMPLES_SHA256SUM "$SHA256_SUM"
+         vsts_setvar SAMPLES_SHA256SUM "$SHA256_SUM"
          # checksum is not yet used...
     displayName: 'Compute SHA256 for .zip'
   - task: NuGetCommand@2
@@ -627,12 +626,6 @@ phases:
       type: FilePath
       scriptPath: './ci/drop/linux-reldrop.sh'
       args: '"$(SPEECHSDK_SEMVER2NOMETA)" "$(Build.Repository.LocalPath)" "$(System.ArtifactsDirectory)/Linux" "$(Build.ArtifactStagingDirectory)/Linux/Drop"'
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Roll samples
-    inputs:
-      type: FilePath
-      scriptPath: './ci/drop/linux-samples.sh'
-      args: '"$(SPEECHSDK_SEMVER2NOMETA)" "$(Build.ArtifactStagingDirectory)/Linux/Drop"'
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Test - build quickstart
     inputs:

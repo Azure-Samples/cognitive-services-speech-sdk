@@ -74,15 +74,10 @@ build**/*
 /packages/Richland.Speech.UnidecRuntime.18.1.5.24286743
 /external/unidec/bin
 
-samples/CxxHelloWorld/packages
-samples/CxxHelloWorld/x64
-samples/CxxHelloWorld/CxxHelloWorld/x64
-samples/CxxHelloWorld/Debug
-samples/CxxHelloWorld/CxxHelloWorld/Debug
-samples/CxxHelloWorld/Release
-samples/CxxHelloWorld/CxxHelloWorld/Release
-
-samples/CsharpHelloWorld/CsharpHelloWorld/bin/
-samples/CsharpHelloWorld/CsharpHelloWorld/obj/
-samples/CsharpHelloWorld/packages/
 tests/end2end/csharp/TestResults
+
+public_samples/**/x64
+public_samples/**/packages
+public_samples/**/bin
+public_samples/**/obj
+public_samples/**/objd

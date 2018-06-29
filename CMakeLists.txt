@@ -102,7 +102,7 @@ endif()
 set(TESTS "${CARBON_ROOT}/tests")
 set(JAVA_TESTS "${TESTS}/functional/java")
 
-set(JAVA_SAMPLES "${CARBON_ROOT}/samples/java/quickstart")
+set(JAVA_SAMPLES "${CARBON_ROOT}/tests/functional/java/console")
 
 set(CARBONX "${TESTS}/functional/cxx/carbonx")
 

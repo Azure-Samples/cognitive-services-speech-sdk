@@ -11,16 +11,16 @@ BEGIN {
 
   $version = shift
     or die "Supply version to use as first and only argument\n";
-  $samplesDir = 'samples';
+  $public_samples = 'public_samples';
 
-  -d $samplesDir
-    or die "Cannot find $samplesDir, please launch from repository root\n";
+  -d $public_samples
+    or die "Cannot find $public_samples directory, please launch from repository root\n";
 
   @ARGV = ();
   find(sub {
     m(^(?:$rePkgConfig|$reCsProj|$reVcxProj)$) &&
     push @ARGV, $File::Find::name
-  }, $samplesDir);
+  }, $public_samples);
 }
 if ($ARGV ne $oldargv) {
   warn "Patching $ARGV\n";
@@ -28,9 +28,6 @@ if ($ARGV ne $oldargv) {
 }
 $ARGV =~ m(.*/$rePkgConfig$) && s/(<package id="$rePkgId" version=")([^"]*)"/$1$version"/;
 $ARGV =~ m(.*/(?:$reCsProj|$reVcxProj)$) && do {
-  # Custom version property we have in smoke check
-  s((\Q<SpeechSdkVersion Condition="'$(SpeechSdkVersion)' == ''">\E)([^<]*)(\Q</SpeechSdkVersion>\E))($1$version$3)g;
-
   # <HintPath>...<HintPath>, <Import Project ... />, <Error ... />
   s((["'>](?:\.\.\\)*packages\\$rePkgId\.)[^\\]*\\)($1$version\\)g;
 };
