@@ -15,6 +15,7 @@
 #include "recognition_result.h"
 #include "service_helpers.h"
 #include "usp.h"
+#include "audio_buffer.h"
 
 #ifdef _MSC_VER
 #include <shared_mutex>
@@ -134,14 +135,14 @@ private:
     SPXHR GetRecoModeFromProperties(const std::shared_ptr<ISpxNamedProperties>& properties, USP::RecognitionMode& recoMode) const;
     USP::OutputFormat GetOutputFormat(const ISpxNamedProperties& properties) const;
 
-    void UspWrite(const uint8_t* buffer, size_t byteToWrite);
+    void UspWriteAvailableChunks();
+
     void UspSendSpeechContext();
     void UspSendMessage(const std::string& messagePath, const std::string &buffer);
     void UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size);
     void UspWriteFormat(WAVEFORMATEX* pformat);
-    void UspWrite_Actual(const uint8_t* buffer, size_t byteToWrite);
-    void UspWrite_Buffered(const uint8_t* buffer, size_t byteToWrite);
-    void UspWrite_Flush();
+    void UspWriteActual(const uint8_t* buffer, size_t byteToWrite);
+    void UspWriteFlush();
 
     void OnSpeechStartDetected(const USP::SpeechStartDetectedMsg&) override;
     void OnSpeechEndDetected(const USP::SpeechEndDetectedMsg&) override;
@@ -176,9 +177,7 @@ private:
     std::string GetLanguageUnderstandingJsonFromIntentInfo(const std::string& provider, const std::string& id, const std::string& key, const std::string& region);
 
     std::string GetSpeechContextJson(const std::string& dgiJson, const std::string& LanguageUnderstandingJson);
-    void SendSpeechContextMessage(std::string& speechContextMessage);
 
-    void FireFinalResultNowOrLater(const USP::SpeechPhraseMsg& message);
     void FireFinalResultNow(const USP::SpeechPhraseMsg& message, const std::string& luisJson = "");
 
     void FireFinalResultLater(const USP::SpeechPhraseMsg& message);
@@ -264,17 +263,25 @@ private:
     AudioState m_audioState;
     UspState m_uspState;
 
-    const size_t m_servicePreferedMilliseconds = 600;
-    size_t m_servicePreferedBufferSizeSendingNow;
-
-    const bool m_fUseBufferedImplementation = true;
-    std::shared_ptr<uint8_t> m_buffer;
-    size_t m_bytesInBuffer;
-    uint8_t* m_ptrIntoBuffer;
-    size_t m_bytesLeftInBuffer;
-
     bool m_expectIntentResponse = true;
     USP::SpeechPhraseMsg m_finalResultMessageToFireLater;
+
+    // Current speech context, lazily initialized on the first audio.
+    // TODO: Not clear why this cannot be passed to the reco adapter in the constructor...
+    std::string m_currentSpeechContext;
+
+    // Replay buffer with input audio.
+    // In case of connectivity problems the data is replayed
+    // from this buffer to guarantee exactly-once delivery of the final
+    // results to the user.
+    audio_buffer_ptr m_audioBuffer;
+
+    // Retry flag in case of errors.
+    // Currently we retry only in case of an interrupted connection
+    // (the service breaks the connection each 10 minutes or so).
+    // TODO: Reconnect for all cases (i.e. when the serivce is not availabe)
+    // will be done after the threading model cleanup.
+    int m_retry{ false };
 };
 
 

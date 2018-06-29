@@ -1501,7 +1501,6 @@ void TransportDoWork(TransportHandle transportHandle)
             if (ProcessPacket(request, packet)) 
             {
                 OnTransportError(request, TRANSPORT_ERROR_NONE);
-                break;
             }
             singlylinkedlist_remove(request->queue, list_item);
         }

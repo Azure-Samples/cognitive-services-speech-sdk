@@ -773,7 +773,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         // TODO: 1164154
         telemetry_flush(connection->m_telemetry.get());
         TransportCreateRequestId(connection->m_transport.get());
-        
+
         connection->Invoke([&] { callbacks->OnTurnEnd({ }); });
     }
     else if (path == path::speechHypothesis || path == path::speechFragment)

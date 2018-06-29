@@ -46,7 +46,8 @@ enum class SynthesisStatus : int
     Success, Error, InvalidMessage
 };
 
-struct JsonMsg {
+struct JsonMsg
+{
 
     JsonMsg() = default;
     JsonMsg(const JsonMsg&) = default;
@@ -107,8 +108,7 @@ struct TurnEndMsg : JsonMsg
 {
     TurnEndMsg() :
         JsonMsg(std::wstring())
-    {
-    }
+    {}
 };
 
 struct SpeechMsg : public JsonMsg
