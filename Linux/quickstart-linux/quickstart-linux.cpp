@@ -18,6 +18,8 @@ using namespace Microsoft::CognitiveServices::Speech;
 void recognizeSpeech() {
     wstring_convert<codecvt_utf8_utf16<wchar_t>> cvt;
 
+    // Please replace below with your own subscription key and service region
+    // (e.g., "westus").
     wstring subscriptionKey{ L"YourSubscriptionKey" };
     wstring region{ L"YourServiceRegion" };
 
