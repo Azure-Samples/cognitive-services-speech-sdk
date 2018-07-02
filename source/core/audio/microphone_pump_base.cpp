@@ -28,7 +28,7 @@ MicrophonePumpBase::~MicrophonePumpBase()
     audio_destroy(m_audioHandle);
 }
 
-uint16_t MicrophonePumpBase::GetFormat(WAVEFORMATEX* format, uint16_t size) 
+uint16_t MicrophonePumpBase::GetFormat(WAVEFORMATEX* format, uint16_t size)
 {
     auto totalSize = uint16_t(sizeof(WAVEFORMATEX) + m_format.cbSize);
     if (format != nullptr)
@@ -64,12 +64,12 @@ void MicrophonePumpBase::StartPump(SinkType processor)
 void MicrophonePumpBase::StopPump()
 {
     ReleaseSink resetSinkWhenExit(m_sink);
-    
+
     SPX_DBG_TRACE_SCOPE("MicrophonePumpBase::StopPump ...", "MicrophonePumpBase::StopPump ... Done");
-    
+
     SPX_IFTRUE_THROW_HR(m_audioHandle == nullptr, SPXERR_INVALID_ARG);
     SPX_IFTRUE_THROW_HR(m_sink == nullptr, SPXERR_INVALID_ARG);
-    
+
     {
         unique_lock<mutex> lock(m_mutex);
         if (m_state == State::NoInput || m_state == State::Idle)
@@ -103,7 +103,7 @@ void MicrophonePumpBase::UpdateState(AUDIO_STATE state)
 {
     SPX_DBG_TRACE_SCOPE("MicrophonePumpBase::UpdateState() ...", "MicrophonePumpBase::UpdateState ... Done!");
     unique_lock<mutex> lock(m_mutex);
-    SPX_IFTRUE_THROW_HR(m_sink == nullptr, SPXERR_INVALID_ARG);   
+    SPX_IFTRUE_THROW_HR(m_sink == nullptr, SPXERR_INVALID_ARG);
 
     SPX_DBG_TRACE_VERBOSE("%s: UpdateState with state as %d.", __FUNCTION__, int(state));
     switch (state)
@@ -115,7 +115,7 @@ void MicrophonePumpBase::UpdateState(AUDIO_STATE state)
         break;
 
     case AUDIO_STATE_STOPPED:
-        // Let the sink know we're done for now...        
+        // Let the sink know we're done for now...
         m_sink->SetFormat(nullptr);
         m_state = State::Idle;
         m_cv.notify_one();

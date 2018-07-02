@@ -10,6 +10,9 @@
 #include "ispxinterfaces.h"
 #include "interface_helpers.h"
 #include "audio_sys.h"
+#ifdef WIN32
+#include "windows\com_init_and_uninit.h"
+#endif
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -78,6 +81,13 @@ protected:
     std::condition_variable m_cv;
     const int m_waitMsStartPumpRequestTimeout = 5000;
     const int m_waitMsStopPumpRequestTimeout = 5000;
+
+private:
+
+#ifdef WIN32
+    ComInitAndUnInit   m_com;
+#endif
+
 };
      
 } } } } // Microsoft::CognitiveServices::Speech::Impl

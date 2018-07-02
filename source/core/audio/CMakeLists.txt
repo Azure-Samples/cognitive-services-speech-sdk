@@ -41,11 +41,13 @@ include_directories(${SRC_DIR}) # for "stdafx.h"
 if(WIN32)
     list(APPEND HEADERS_PRIVATE
         "${SRC_DIR}/windows/iunknown.h"
+        "${SRC_DIR}/windows/com_init_and_uninit.h"
     )
     list(APPEND SOURCES
         "${SRC_DIR}/windows/microphone.cpp"
         "${SRC_DIR}/windows/audio_sys.cpp"
-    )    
+        "${SRC_DIR}/windows/com_init_and_uninit.cpp"
+    )
 elseif(APPLE)
     list(APPEND SOURCES
         "${SRC_DIR}/osx/microphone.cpp"

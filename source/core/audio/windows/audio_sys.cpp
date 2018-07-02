@@ -405,9 +405,6 @@ AUDIO_SYS_HANDLE audio_create()
     result->current_input_state = AUDIO_STATE_STOPPED;
     result->inputFrameCnt = 160;
 
-    hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
-    EXIT_ON_ERROR(hr);
-
     {
         IMMDeviceEnumerator * pEnumeratorRaw = nullptr;
         hr = CoCreateInstance(
@@ -553,7 +550,6 @@ void audio_destroy(AUDIO_SYS_HANDLE handle)
         }
 
         free(audioData);
-        CoUninitialize();
     }
 }
 
@@ -730,7 +726,7 @@ DWORD WINAPI captureThreadProc(
     BYTE *pData;
     DWORD flags;
     size_t space_remaining = 0;
-    size_t adding = 0;    
+    size_t adding = 0;
     AudioDataBuffer audioBuff = { nullptr, 0, 0 };
 
     if (pInput->input_state_cb)
