@@ -5,8 +5,8 @@
     <!-- Uncomment the following property to link against Speech SDK debug libraries TODO does this work yet-->
     <!--<SpeechSdkUseDebugLibs>1</SpeechSdkUseDebugLibs>-->
     <!-- Version corresponds to the latest published package. Must match what is in packages.config -->
-    <SpeechSdkTargetsBaseName>..\packages\Microsoft.CognitiveServices.Speech.0.4.0\build\net45\Microsoft.CognitiveServices.Speech</SpeechSdkTargetsBaseName>
-    <SpeechSdkLibDir>..\packages\Microsoft.CognitiveServices.Speech.0.4.0\lib\net45\</SpeechSdkLibDir>
+    <SpeechSdkTargetsBaseName>..\packages\Microsoft.CognitiveServices.Speech.0.4.0\build\net461\Microsoft.CognitiveServices.Speech</SpeechSdkTargetsBaseName>
+    <SpeechSdkLibDir>..\packages\Microsoft.CognitiveServices.Speech.0.4.0\lib\net461\</SpeechSdkLibDir>
     <SpeechSdkTargets>$(SpeechSdkTargetsBaseName).targets</SpeechSdkTargets>
   </PropertyGroup>
   <PropertyGroup>

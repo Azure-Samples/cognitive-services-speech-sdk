@@ -29,6 +29,9 @@ SRCJAR="$BUILD_ROOT/lib/com.microsoft.cognitiveservices.speech.jar"
 SRCJARSRC="$BUILD_ROOT/lib/com.microsoft.cognitiveservices.speech-src.zip"
 SRCCARBONX="$BUILD_ROOT/bin/carbonx"
 
+CSHARPSUPPORTED=false
+CSHARPBINDINGSNAME=Microsoft.CognitiveServices.Speech.csharp.bindings
+
 if [[ $OS = "Windows_NT" ]]; then
   case $TARGET in
     UNKNOWN) LIBPREFIX=Microsoft.CognitiveServices.Speech.
@@ -39,7 +42,9 @@ if [[ $OS = "Windows_NT" ]]; then
              SRCLIB="$BUILD_ROOT/lib/$CONFIG"
              SRCDYNLIB="$BUILD_ROOT/bin/$CONFIG"
 
-             SRCJNILIB="$SRCBIN/Microsoft.CognitiveServices.Speech.java.bindings.dll"
+             SRCJAVABINDINGS="$SRCBIN/Microsoft.CognitiveServices.Speech.java.bindings.dll"
+             CSHARPSUPPORTED=true
+             SRCCSHARPBINDINGS="$SRCBIN/$CSHARPBINDINGSNAME.dll"
              ;;
     ANDROID) LIBPREFIX=libMicrosoft.CognitiveServices.Speech.
              DYNLIBSUFFIX=.so
@@ -49,7 +54,7 @@ if [[ $OS = "Windows_NT" ]]; then
              SRCLIB="$BUILD_ROOT/lib"
              SRCDYNLIB="$BUILD_ROOT/lib"
 
-             SRCJNILIB="$SRCBIN/libMicrosoft.CognitiveServices.Speech.java.bindings.so"
+             SRCJAVABINDINGS="$SRCBIN/libMicrosoft.CognitiveServices.Speech.java.bindings.so"
              ;;
     *) echo "We should never reach this point"
        echo "The fourth parameter should be empty or ANDROID"
@@ -64,13 +69,20 @@ else
 
   if [[ $(uname) = Linux ]]; then
     DYNLIBSUFFIX=.so
-    SRCJNILIB="$SRCBIN/libMicrosoft.CognitiveServices.Speech.java.bindings.so"
+    SRCJAVABINDINGS="$SRCBIN/libMicrosoft.CognitiveServices.Speech.java.bindings.so"
   else
     DYNLIBSUFFIX=.dylib
-    SRCJNILIB="$SRCBIN/libMicrosoft.CognitiveServices.Speech.java.bindings.jnilib"
+    SRCJAVABINDINGS="$SRCBIN/libMicrosoft.CognitiveServices.Speech.java.bindings.jnilib"
   fi
 
   STATLIBSUFFIX=.a
+
+  if [[ $PLATFORM = "Linux-x86" ]]; then
+    CSHARPSUPPORTED=false
+  else
+    CSHARPSUPPORTED=true
+    SRCCSHARPBINDINGS="$SRCBIN/$CSHARPBINDINGSNAME.so"
+  fi
 fi
 
 SRCINC="$SOURCE_ROOT/source/public"
@@ -78,7 +90,7 @@ SRCPRIVINC="$SOURCE_ROOT/source/core/include"
 SRCPRIVINC2="$SOURCE_ROOT/source/core/common/include"
 
 DESTPUBLIB="$DEST/public/lib"
-DESTPUBLIBNET46="$DEST/public/lib/net461"
+DESTPUBLIBNET461="$DEST/public/lib/net461"
 DESTPUBLIBNETSTANDARD20="$DEST/public/lib/netstandard2.0"
 DESTPUBBIN="$DEST/public/bin"
 DESTPUBINC="$DEST/public/include"
@@ -86,10 +98,12 @@ DESTPRIVLIB="$DEST/private/lib"
 DESTPRIVINC="$DEST/private/include"
 DESTPRIVINC2="$DEST/private/include.common"
 
+DESTCSHARPBINDINGS="$DESTPUBLIB/$CSHARPBINDINGSNAME.dll"
+
 printf "\nCopying files to drop location\n"
 
 # N.B. no long option for -p (parents) on OSX.
-mkdir -p "$DESTPUBLIB" "$DESTPUBLIBNET46" "$DESTPUBLIBNETSTANDARD20" "$(dirname "$DESTPUBINC")" "$DESTPRIVLIB" "$(dirname "$DESTPRIVINC")" "$(dirname "$DESTPRIVINC2")"  "$DESTPUBLIB"
+mkdir -p "$DESTPUBLIB" "$DESTPUBLIBNET461" "$DESTPUBLIBNETSTANDARD20" "$(dirname "$DESTPUBINC")" "$DESTPRIVLIB" "$(dirname "$DESTPRIVINC")" "$(dirname "$DESTPRIVINC2")"  "$DESTPUBLIB"
 
 # N.B. no long option for -v (verbose) and -p (preserve) on OSX.
 CPOPT="-v -p"
@@ -102,7 +116,7 @@ if [[ $OS = "Windows_NT" ]]; then
     cp $CPOPT "$SRCLIB"/$LIBPREFIX*.lib "$DESTPUBLIB"
     cp $CPOPT "$SRCDYNLIB"/$LIBPREFIX*.pdb "$DESTPUBLIB"    
 
-    cp $CPOPT "$SRCDYNLIB"/net461/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBNET46"
+    cp $CPOPT "$SRCDYNLIB"/net461/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBNET461"
     cp $CPOPT "$SRCDYNLIB"/netstandard2.0/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBNETSTANDARD20"    
   fi
 fi
@@ -110,7 +124,11 @@ fi
 # Copy .jar if available
 cp $CPOPT "$SRCJAR" "$DESTPUBLIB"
 cp $CPOPT "$SRCJARSRC" "$DESTPUBLIB"
-cp $CPOPT "$SRCJNILIB" "$DESTPUBLIB"
+cp $CPOPT "$SRCJAVABINDINGS" "$DESTPUBLIB"
+
+if [[ "$CSHARPSUPPORTED" = true ]]; then
+  cp $CPOPT "$SRCCSHARPBINDINGS" "$DESTCSHARPBINDINGS"
+fi
 
 # copy carbonx if available
 [[ -e $SRCCARBONX ]] && mkdir -p "$DESTPUBBIN" && cp $CPOPT "$SRCCARBONX" "$DESTPUBBIN"

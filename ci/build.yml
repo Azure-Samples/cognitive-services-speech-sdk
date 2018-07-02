@@ -218,8 +218,8 @@ phases:
       ArtifactName: Windows
       publishLocation: Container
 
-- phase: WindowsNuGet
-  dependsOn: WindowsBuild
+- phase: NuGet
+  dependsOn: [LinuxBuild, LinuxX86Build, WindowsBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsNuGet '))
   queue:
     name: Hosted VS2017
@@ -231,8 +231,14 @@ phases:
       type: FilePath
       scriptPath: 'ci/set-variables.sh'
   - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading Windows artifacts'
     inputs:
       artifactName: Windows
+      downloadPath: $(System.ArtifactsDirectory)\In
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading Linux artifacts'
+    inputs:
+      artifactName: Linux
       downloadPath: $(System.ArtifactsDirectory)\In
   - task: NuGetCommand@2
     inputs:
@@ -247,7 +253,7 @@ phases:
     inputs:
       type: FilePath
       scriptPath: './ci/nuget/pack.sh'
-      args: '$(System.ArtifactsDirectory)\In\Windows $(SPEECHSDK_SEMVER2NOMETA) $(Build.ArtifactStagingDirectory)\Windows'
+      args: '$(System.ArtifactsDirectory)\In $(SPEECHSDK_SEMVER2NOMETA) $(Build.ArtifactStagingDirectory)\Windows'
     displayName: Create NuGet
   # We could / should generate this elsewhere? Doesn't only apply to Windows + NuGet anymore...
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0

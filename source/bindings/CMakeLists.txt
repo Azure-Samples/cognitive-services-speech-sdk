@@ -24,11 +24,11 @@ if(BUILD_PYTHON)
     endif()   
 endif()
 
-if(WIN32)
-    option(BUILD_CSHARP "Build C# SWIG module" ON)
-    if(BUILD_CSHARP)
-        add_subdirectory(csharp)
-    endif()
+option(BUILD_CSHARP "Build C# SWIG module" ON)
+if(BUILD_CSHARP AND
+   NOT ANDROID AND 
+   (WIN32 OR (UNIX AND ${CMAKE_SIZEOF_VOID_P} EQUAL 8)))
+    add_subdirectory(csharp)
 endif()
 
 option(BUILD_JAVA "Build Java/Android SWIG module" ON)

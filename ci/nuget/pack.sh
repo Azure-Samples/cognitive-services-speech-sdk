@@ -21,11 +21,16 @@ DROP_DIR="${1?$USAGE}"
 VERSION="${2?$USAGE}"
 OUTPUT_DIR="${3?$USAGE}"
 
-DROP_DIR="$(cygpath --unix --absolute "$DROP_DIR")"
-[[ -e $DROP_DIR ]]
+# Check that Windows drop directory exists and turn into Windows path.
+WINDOWS_DROP_DIR="$(cygpath --unix --absolute "$DROP_DIR/Windows")"
+[[ -e $WINDOWS_DROP_DIR ]]
+WINDOWS_DROP_DIR="$(cygpath --windows --absolute "$WINDOWS_DROP_DIR")"
+
+# Check that Linux drop directory exists and turn into Windows path.
+LINUX_DROP_DIR="$(cygpath --unix --absolute "$DROP_DIR/Linux")"
+[[ -e $LINUX_DROP_DIR ]]
+LINUX_DROP_DIR="$(cygpath --windows --absolute "$LINUX_DROP_DIR")"
 
 OUTPUT_DIR="$(cygpath --windows --absolute "$OUTPUT_DIR")"
 
-DROP_DIR="$(cygpath --windows --absolute "$DROP_DIR")"
-
-"$NUGETEXETOOLPATH" pack ./ci/nuget/carbon.nuspec -Properties "DropDir=$DROP_DIR;Version=$VERSION" -OutputDirectory "$OUTPUT_DIR"
+"$NUGETEXETOOLPATH" pack ./ci/nuget/carbon.nuspec -Properties "WindowsDropDir=$WINDOWS_DROP_DIR;LinuxDropDir=$LINUX_DROP_DIR;Version=$VERSION" -OutputDirectory "$OUTPUT_DIR"

@@ -49,20 +49,22 @@ set_target_properties(${SWIG_MODULE_${CSHARP_BINDINGS}_REAL_NAME} PROPERTIES
 configure_file(${SRC_DIR}/Microsoft.CognitiveServices.Speech.csharp.csproj.template
   ${CMAKE_CURRENT_BINARY_DIR}/Microsoft.CognitiveServices.Speech.csharp.csproj)
 
-set(SWIG_CS_SOURCES ${CSHARP_SOURCE_DIRECTORY}/*.cs)
-set(ALL_CSHARP_SOURCES ${SRC_DIR}/*.cs ${SWIG_CS_SOURCES})
+if(WIN32)
+    set(SWIG_CS_SOURCES ${CSHARP_SOURCE_DIRECTORY}/*.cs)
+    set(ALL_CSHARP_SOURCES ${SRC_DIR}/*.cs ${SWIG_CS_SOURCES})
 
-set(CSHARP_PROJECT_PATH ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}) 
-
-set(CSHARP_LIB_CUSTOM "${PROJECT_NAME}_CUSTOM" CACHE INTERNAL "")
-add_custom_target(${CSHARP_LIB_CUSTOM} ALL
-  COMMAND ${CMAKE_MAKE_PROGRAM} /t:Restore "${CSHARP_PROJECT_PATH}.csproj"
-  COMMAND ${CMAKE_MAKE_PROGRAM} /p:Configuration=$<CONFIGURATION> "${CSHARP_PROJECT_PATH}.csproj"
-  COMMAND del /S /Q obj
-  COMMENT "Building external C# project")
-add_dependencies(${CSHARP_LIB_CUSTOM} ${CSHARP_BINDINGS})
-
-enable_language(CSharp)
-add_library(${CSHARP_LIB} SHARED IMPORTED GLOBAL)
-add_dependencies(${CSHARP_LIB} ${CSHARP_LIB_CUSTOM})
-set_target_properties(${CSHARP_LIB} PROPERTIES IMPORTED_LOCATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)/net46/${PROJECT_NAME}.dll")
+    set(CSHARP_PROJECT_PATH ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}) 
+    
+    set(CSHARP_LIB_CUSTOM "${PROJECT_NAME}_CUSTOM" CACHE INTERNAL "")
+    add_custom_target(${CSHARP_LIB_CUSTOM} ALL
+      COMMAND ${CMAKE_MAKE_PROGRAM} /t:Restore "${CSHARP_PROJECT_PATH}.csproj"
+      COMMAND ${CMAKE_MAKE_PROGRAM} /p:Configuration=$<CONFIGURATION> "${CSHARP_PROJECT_PATH}.csproj"
+      COMMAND del /S /Q obj
+      COMMENT "Building external C# project")
+    add_dependencies(${CSHARP_LIB_CUSTOM} ${CSHARP_BINDINGS})
+    
+    enable_language(CSharp)
+    add_library(${CSHARP_LIB} SHARED IMPORTED GLOBAL)
+    add_dependencies(${CSHARP_LIB} ${CSHARP_LIB_CUSTOM})
+    set_target_properties(${CSHARP_LIB} PROPERTIES IMPORTED_LOCATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)/net46/${PROJECT_NAME}.dll")
+endif()
