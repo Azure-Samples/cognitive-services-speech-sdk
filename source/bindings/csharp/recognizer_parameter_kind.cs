@@ -37,6 +37,19 @@ namespace Microsoft.CognitiveServices.Speech
         public const string OutputFormat = "SPEECH-OutputFormat";
     }
 
+    internal class OutputFormatParameterValues
+    {
+        /// <summary>
+        /// The name of simple output format.
+        /// </summary>
+        public const string Simple = "SIMPLE";
+
+        /// <summary>
+        /// The name of detailed output format.
+        /// </summary>
+        public const string Detailed = "DETAILED";
+    }
+
     /// <summary>
     /// Defines name of translation parameters.
     /// </summary>

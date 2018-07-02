@@ -30,6 +30,7 @@ import com.microsoft.cognitiveservices.speech.SessionEventType;
 import com.microsoft.cognitiveservices.speech.SpeechFactory;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
+import com.microsoft.cognitiveservices.speech.SpeechOutputFormat;
 
 import tests.Settings;
 
@@ -148,7 +149,7 @@ public class SpeechRecognizerTests {
 
         WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
         assertNotNull(ais);
-        
+
         SpeechRecognizer r = s.createSpeechRecognizerWithStream(ais);
         assertNotNull(r);
 
@@ -172,6 +173,39 @@ public class SpeechRecognizerTests {
 
         assertNotNull(r.getLanguage());
         assertEquals(language, r.getLanguage());
+
+        r.close();
+        s.close();
+    }
+
+    // -----------------------------------------------------------------------
+    // ---
+    // -----------------------------------------------------------------------
+
+    @Test
+    public void testGetOutputFormatDefault() {
+        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        assertNotNull(s);
+
+        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
+        assertNotNull(r);
+
+        assertEquals(r.getOutputFormat(), SpeechOutputFormat.Simple);
+
+        r.close();
+        s.close();
+    }
+
+    @Test
+    public void testGetOutputFormatDetailed() {
+        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        assertNotNull(s);
+
+        String language = "de-DE";
+        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile, language, SpeechOutputFormat.Detailed);
+        assertNotNull(r);
+
+        assertEquals(r.getOutputFormat(), SpeechOutputFormat.Detailed);
         
         r.close();
         s.close();

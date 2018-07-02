@@ -130,6 +130,17 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
+        /// Gets the output format setting.
+        /// </summary>
+        public SpeechOutputFormat OutputFormat
+        {
+            get
+            {
+                return Parameters.Get<string>(SpeechParameterNames.OutputFormat) ==  OutputFormatParameterValues.Detailed ? SpeechOutputFormat.Detailed : SpeechOutputFormat.Simple;
+            }
+        }
+
+        /// <summary>
         /// The collection of parameters and their values defined for this <see cref="SpeechRecognizer"/>.
         /// </summary>
         public IRecognizerParameters Parameters { get; internal set; }

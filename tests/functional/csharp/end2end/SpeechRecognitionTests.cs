@@ -291,6 +291,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 recognizer.DeploymentId = deploymentId;
                 Assert.AreEqual(deploymentId, recognizer.DeploymentId);
                 Assert.AreEqual(deploymentId, recognizer.Parameters.Get<string>(SpeechParameterNames.DeploymentId));
+
+                Assert.AreEqual(recognizer.OutputFormat, SpeechOutputFormat.Simple);
             }
 
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.German.FirstOne.AudioFile, Language.DE_DE))
@@ -299,6 +301,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(Language.DE_DE, recognizer.Parameters.Get<string>(SpeechParameterNames.RecognitionLanguage));
 
                 Assert.AreEqual(recognizer.DeploymentId, recognizer.Parameters.Get<string>(SpeechParameterNames.DeploymentId));
+
+                Assert.AreEqual(recognizer.OutputFormat, SpeechOutputFormat.Simple);
+            }
+
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.German.FirstOne.AudioFile, Language.DE_DE, SpeechOutputFormat.Simple))
+            {
+                Assert.AreEqual(recognizer.OutputFormat, SpeechOutputFormat.Simple);
+            }
+
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.German.FirstOne.AudioFile, Language.DE_DE, SpeechOutputFormat.Detailed))
+            {
+                Assert.AreEqual(recognizer.OutputFormat, SpeechOutputFormat.Detailed);
             }
         }
 

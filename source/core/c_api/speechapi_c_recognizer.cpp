@@ -96,6 +96,10 @@ SPXAPI Recognizer_GetParameter_Name(Recognizer_Parameter parameter, wchar_t* nam
                 parameterName = g_SPEECH_ModelId;
                 break;
 
+            case RecognizerParameter_OutputFormat:
+                parameterName = g_SPEECH_OutputFormat;
+                break;
+
             default:
                 hr = SPXERR_INVALID_ARG;
                 break;
