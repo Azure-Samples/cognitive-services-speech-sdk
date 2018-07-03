@@ -54,12 +54,25 @@
 
   void SetupNativeLibraries(const std::wstring& config)
   {
-#ifndef _MSC_VER
     std::string s(config.begin(), config.end());
     int overwrite = 1;
-    if(s.length() < 1) { overwrite = 0; s = "/system/etc/ssl/certs/"; }
 
-    setenv("SSL_CERT_DIR", s.c_str(), overwrite);
+#if defined(__ANDROID__)
+    // only on roobo, set default.
+    // otherwise, assume everything is setup correctly
+    // in case we get an empty string.
+    if(s.length() < 1)
+    {
+      overwrite = 0;
+      s = "/system/etc/ssl/certs/";
+    }
+#endif
+
+#ifndef _MSC_VER
+    if(s.length() > 0)
+    {
+      setenv("SSL_CERT_DIR", s.c_str(), overwrite);
+    }
 #endif
   }
 
