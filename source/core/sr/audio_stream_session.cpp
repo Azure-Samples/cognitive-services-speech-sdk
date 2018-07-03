@@ -759,12 +759,12 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateIntermediat
     return result;
 }
 
-std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateFinalResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration)
+std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateFinalResult(ResultType type, const wchar_t* resultId, Reason reason, const wchar_t* text, uint64_t offset, uint64_t duration)
 {
     auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
 
     auto initResult = SpxQueryInterface<ISpxRecognitionResultInit>(result);
-    initResult->InitFinalResult(resultId, text, type, offset, duration);
+    initResult->InitFinalResult(resultId, reason, text, type, offset, duration);
 
     return result;
 }

@@ -58,9 +58,9 @@ void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* resultId, cons
     SPX_DBG_TRACE_VERBOSE("%s: resultId=%ls", __FUNCTION__, m_resultId.c_str());
 }
 
-void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration)
+void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, Reason reason, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration)
 {
-    m_reason = Reason::Recognized;
+    m_reason = reason;
     m_type = type;
 
     m_offset = offset;
@@ -105,7 +105,7 @@ const map<wstring, wstring>& CSpxRecognitionResult::GetTranslationText()
     return m_translations;
 }
 
-TranslationStatus CSpxRecognitionResult::GetTranslationStatus() const
+TranslationStatusCode CSpxRecognitionResult::GetTranslationStatus() const
 {
     return m_translationStatus;
 }
@@ -115,14 +115,14 @@ const wstring& CSpxRecognitionResult::GetTranslationFailureReason() const
     return m_translationFailureReason;
 }
 
-void CSpxRecognitionResult::InitTranslationTextResult(TranslationStatus status, const map<wstring, wstring>& translations, const wstring& failureReason)
+void CSpxRecognitionResult::InitTranslationTextResult(TranslationStatusCode status, const map<wstring, wstring>& translations, const wstring& failureReason)
 {
     m_translations = translations;
     m_translationStatus = status;
     m_translationFailureReason = failureReason;
 }
 
-SynthesisStatus CSpxRecognitionResult::GetSynthesisStatus()
+SynthesisStatusCode CSpxRecognitionResult::GetSynthesisStatus()
 {
     return m_synthesisStatus;
 }
@@ -143,7 +143,7 @@ size_t CSpxRecognitionResult::GetLength() const
 }
 
 // ISpxTranslationSynthesisResultInit
-void CSpxRecognitionResult::InitTranslationSynthesisResult(SynthesisStatus status, const uint8_t* audioData, size_t audioLength, const wstring& failureReason)
+void CSpxRecognitionResult::InitTranslationSynthesisResult(SynthesisStatusCode status, const uint8_t* audioData, size_t audioLength, const wstring& failureReason)
 {
     m_synthesisStatus = status;
     m_audioBuffer = audioData;

@@ -22,12 +22,6 @@ namespace Microsoft.CognitiveServices.Speech
 
         internal RecognitionErrorEventArgs(string sessionId, Microsoft.CognitiveServices.Speech.Internal.Reason reason, string failureReason)
         {
-            Trace.Assert((int)Internal.Reason.Recognized == (int)RecognitionStatus.Recognized);
-            Trace.Assert((int)Internal.Reason.IntermediateResult == (int)RecognitionStatus.IntermediateResult);
-            Trace.Assert((int)Internal.Reason.NoMatch == (int)RecognitionStatus.NoMatch);
-            Trace.Assert((int)Internal.Reason.Canceled == (int)RecognitionStatus.Canceled);
-            Trace.Assert((int)Internal.Reason.OtherRecognizer == (int)RecognitionStatus.OtherRecognizer);
-
             Status = (RecognitionStatus)((int)reason);
             SessionId = sessionId;
             FailureReason = failureReason;

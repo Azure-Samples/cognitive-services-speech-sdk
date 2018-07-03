@@ -94,11 +94,6 @@ private:
 
     std::wstring ParameterNameFromEnum(FactoryParameter parameter)
     {
-        static_assert((int)FactoryParameter_Region == (int)FactoryParameter::Region, "FactoryParameter_* enum values == FactoryParameter::* enum values");
-        static_assert((int)FactoryParameter_SubscriptionKey == (int)FactoryParameter::SubscriptionKey, "FactoryParameter_* enum values == FactoryParameter::* enum values");
-        static_assert((int)FactoryParameter_AuthorizationToken == (int)FactoryParameter::AuthorizationToken, "FactoryParameter_* enum values == FactoryParameter::* enum values");
-        static_assert((int)FactoryParameter_Endpoint == (int)FactoryParameter::Endpoint, "FactoryParameter_* enum values == FactoryParameter::* enum values");
-
         const size_t maxCharCount = 4096;
         wchar_t sz[maxCharCount+1];
         SPX_THROW_ON_FAIL(SpeechFactory_GetParameter_Name(static_cast<Factory_Parameter>(parameter), sz, maxCharCount));

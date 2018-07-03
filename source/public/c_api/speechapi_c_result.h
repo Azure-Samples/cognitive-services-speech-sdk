@@ -10,7 +10,7 @@
 
 SPXAPI Result_GetResultId(SPXRESULTHANDLE hresult, wchar_t* pszResultId, uint32_t cchResultId);
 
-enum Result_RecognitionReason { Reason_Recognized, Reason_IntermediateResult, Reason_NoMatch, Reason_Canceled, Reason_OtherRecognizer };
+enum Result_RecognitionReason { Reason_Recognized, Reason_IntermediateResult, Reason_NoMatch, Reason_InitialSilenceTimeout, Reason_InitialBabbleTimeout, Reason_Canceled };
 typedef enum Result_RecognitionReason Result_RecognitionReason;
 SPXAPI Result_GetRecognitionReason(SPXRESULTHANDLE hresult, Result_RecognitionReason* preason);
 

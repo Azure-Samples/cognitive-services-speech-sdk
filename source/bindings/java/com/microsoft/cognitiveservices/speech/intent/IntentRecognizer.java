@@ -53,7 +53,6 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         recoImpl.getFinalResult().addEventListener(finalResultHandler);
 
         errorHandler = new ErrorHandlerImpl(this);
-        recoImpl.getNoMatch().addEventListener(errorHandler);
         recoImpl.getCanceled().addEventListener(errorHandler);
 
         recoImpl.getSessionStarted().addEventListener(sessionStartedHandler);
@@ -189,7 +188,6 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         if (disposing) {
             recoImpl.getIntermediateResult().removeEventListener(intermediateResultHandler);
             recoImpl.getFinalResult().removeEventListener(finalResultHandler);
-            recoImpl.getNoMatch().removeEventListener(errorHandler);
             recoImpl.getCanceled().removeEventListener(errorHandler);
             recoImpl.getSessionStarted().removeEventListener(sessionStartedHandler);
             recoImpl.getSessionStopped().removeEventListener(sessionStoppedHandler);

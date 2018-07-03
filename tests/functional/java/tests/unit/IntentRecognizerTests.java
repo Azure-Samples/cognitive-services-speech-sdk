@@ -195,12 +195,12 @@ public class IntentRecognizerTests {
 
         IntentRecognitionResult res = future.get();
         assertNotNull(res);
-        assertEquals(RecognitionStatus.Success, res.getReason());
+        assertEquals(RecognitionStatus.Recognized, res.getReason());
         assertEquals("What's the weather like?", res.getText());
 
         // TODO: check for specific json parameters
         assertTrue(res.getLanguageUnderstanding().length() > 0);
-        assertEquals(RecognitionStatus.Success, res.getReason());
+        assertEquals(RecognitionStatus.Recognized, res.getReason());
         
         r.close();
         s.close();
@@ -439,7 +439,7 @@ public class IntentRecognizerTests {
         assertNotNull(res);
         assertEquals(2, eventsMap.size());
         assertTrue(res.getLanguageUnderstanding().length() > 0);
-        assertEquals(RecognitionStatus.Success, res.getReason());
+        assertEquals(RecognitionStatus.Recognized, res.getReason());
         
         r.close();
         s.close();
@@ -476,7 +476,7 @@ public class IntentRecognizerTests {
         assertNotNull(res);
         assertEquals(2, eventsMap.size());
         assertTrue(res.getLanguageUnderstanding().length() > 0);
-        assertEquals(RecognitionStatus.Success, res.getReason());
+        assertEquals(RecognitionStatus.Recognized, res.getReason());
         
         r.close();
         s.close();

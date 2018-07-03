@@ -7,13 +7,19 @@
 #include <cstring>
 #include "stdafx.h"
 #include "string_utils.h"
+#include "speechapi_cxx_translation_result.h"
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
+static_assert((int)Result_Translation_Success == (int)::Microsoft::CognitiveServices::Speech::Translation::TranslationStatusCode::Success, "Result_Translation* enum values == TranslationStatus::* enum values");
+static_assert((int)Result_Translation_Error == (int)::Microsoft::CognitiveServices::Speech::Translation::TranslationStatusCode::Error, "Result_Translation* enum values == TranslationStatus::* enum values");
+
+static_assert((int)Result_Synthesis_Success == (int)::Microsoft::CognitiveServices::Speech::Translation::SynthesisStatusCode::Success, "Result_TranslationSynthesis* enum values == TranslationSynthesisStatus::* enum values");
+static_assert((int)Result_Synthesis_End == (int)::Microsoft::CognitiveServices::Speech::Translation::SynthesisStatusCode::SynthesisEnd, "Result_TranslationSynthesis* enum values == TranslationSynthesisStatus::* enum values");
+static_assert((int)Result_Synthesis_Error == (int)::Microsoft::CognitiveServices::Speech::Translation::SynthesisStatusCode::Error, "Result_TranslationSynthesis* enum values == TranslationSynthesisStatus::* enum values");
+
 SPXAPI TranslationTextResult_GetTranslationStatus(SPXRESULTHANDLE handle, Result_TranslationStatus* statusPointer)
 {
-    static_assert((int)Result_Translation_Success == (int)TranslationStatus::Success, "Result_Translation* enum values == TranslationStatus::* enum values");
-    static_assert((int)Result_Translation_Error == (int)TranslationStatus::Error, "Result_Translation* enum values == TranslationStatus::* enum values");
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, statusPointer == nullptr);
 
     SPXAPI_INIT_HR_TRY(hr)
@@ -117,9 +123,6 @@ SPXAPI TranslationTextResult_GetTranslationText(SPXRESULTHANDLE handle, Result_T
 
 SPXAPI TranslationSynthesisResult_GetSynthesisStatus(SPXRESULTHANDLE handle, Result_SynthesisStatus* statusPointer)
 {
-    static_assert((int)Result_Synthesis_Success == (int)SynthesisStatus::Success, "Result_TranslationSynthesis* enum values == TranslationSynthesisStatus::* enum values");
-    static_assert((int)Result_Synthesis_End == (int)SynthesisStatus::SynthesisEnd, "Result_TranslationSynthesis* enum values == TranslationSynthesisStatus::* enum values");
-    static_assert((int)Result_Synthesis_Error == (int)SynthesisStatus::Error, "Result_TranslationSynthesis* enum values == TranslationSynthesisStatus::* enum values");
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, statusPointer == nullptr);
 
     SPXAPI_INIT_HR_TRY(hr)

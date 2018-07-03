@@ -94,12 +94,6 @@ public:
     EventSignal<const RecoEventArgs&> FinalResult;
 
     /// <summary>
-    /// Signal for events containing no-match recognition results 
-    /// (indicating an successful recognition attempt).
-    /// </summary>
-    EventSignal<const RecoEventArgs&> NoMatch;
-
-    /// <summary>
     /// Signal for events containing canceled recognition results
     /// (indicating a recognition attempt that was canceled as a result or a direct cancellation request 
     /// or, alternatively, a transport or protocol failure).
@@ -118,7 +112,6 @@ protected:
         SpeechEndDetected(GetRecognitionEventConnectionsChangedCallback(), GetRecognitionEventConnectionsChangedCallback()),
         IntermediateResult(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback()),
         FinalResult(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback()),
-        NoMatch(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback()),
         Canceled(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback()),
         m_hasyncRecognize(SPXHANDLE_INVALID),
         m_hasyncStartContinuous(SPXHANDLE_INVALID),
@@ -144,7 +137,6 @@ protected:
 
         // Disconnect the event signals in reverse construction order
         Canceled.DisconnectAll();
-        NoMatch.DisconnectAll();
         FinalResult.DisconnectAll();
         IntermediateResult.DisconnectAll();
         SpeechEndDetected.DisconnectAll();
@@ -274,10 +266,6 @@ protected:
             {
                 Recognizer_FinalResult_SetEventCallback(m_hreco, FinalResult.IsConnected() ? AsyncRecognizer::FireEvent_FinalResult: nullptr, this);
             }
-            else if (&recoEvent == &NoMatch)
-            {
-                Recognizer_NoMatch_SetEventCallback(m_hreco, NoMatch.IsConnected() ? AsyncRecognizer::FireEvent_NoMatch : nullptr, this);
-            }
             else if (&recoEvent == &Canceled)
             {
                 Recognizer_Canceled_SetEventCallback(m_hreco, Canceled.IsConnected() ? AsyncRecognizer::FireEvent_Canceled : nullptr, this);
@@ -379,16 +367,6 @@ protected:
         auto pThis = static_cast<AsyncRecognizer*>(pvContext);
         auto keepAlive = pThis->shared_from_this();
         pThis->FinalResult.Signal(*recoEvent.get());
-    }
-
-    static void FireEvent_NoMatch(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
-    {
-        UNUSED(hreco);
-        std::unique_ptr<RecoEventArgs> recoEvent { new RecoEventArgs(hevent) };
-
-        auto pThis = static_cast<AsyncRecognizer*>(pvContext);
-        auto keepAlive = pThis->shared_from_this();
-        pThis->NoMatch.Signal(*recoEvent.get());
     }
 
     static void FireEvent_Canceled(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)

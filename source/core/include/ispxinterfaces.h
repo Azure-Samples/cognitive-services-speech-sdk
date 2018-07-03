@@ -16,9 +16,11 @@
 #include "shared_ptr_helpers.h"
 #include "speechapi_cxx_audioinputstream.h"
 #include "speechapi_cxx_factory.h"
+#include "speechapi_cxx_translation_result.h"
 
 
 using namespace Microsoft::CognitiveServices::Speech;
+using namespace Microsoft::CognitiveServices::Speech::Translation;
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -427,7 +429,7 @@ class ISpxRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxRecognitionRes
 public:
 
     virtual void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration) = 0;
-    virtual void InitFinalResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration) = 0;
+    virtual void InitFinalResult(const wchar_t* resultId, Reason reason, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration) = 0;
     virtual void InitError(const wchar_t* text, ResultType type) = 0;
 };
 
@@ -508,7 +510,6 @@ public:
 
     RecoEvent_Type IntermediateResult;
     RecoEvent_Type FinalResult;
-    RecoEvent_Type NoMatch;
     RecoEvent_Type Canceled;
     RecoEvent_Type TranslationSynthesisResult;
 
@@ -519,7 +520,6 @@ protected:
         SpeechEndDetected(connectedCallback, disconnectedCallback),
         IntermediateResult(connectedCallback, disconnectedCallback),
         FinalResult(connectedCallback, disconnectedCallback),
-        NoMatch(connectedCallback, disconnectedCallback),
         Canceled(connectedCallback, disconnectedCallback)
     {
     }
@@ -634,7 +634,7 @@ class ISpxRecoResultFactory : public ISpxInterfaceBaseFor<ISpxRecoResultFactory>
 public:
 
     virtual std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration) = 0;
-    virtual std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration) = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(ResultType type, const wchar_t* resultId, Reason reason, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
     virtual std::shared_ptr<ISpxRecognitionResult> CreateErrorResult(const wchar_t* text, ResultType type) = 0;
 };
 
@@ -716,12 +716,10 @@ public:
     virtual void InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload) = 0;
 };
 
-enum class TranslationStatus { Success, Error };
-
 class ISpxTranslationTextResult : public ISpxInterfaceBaseFor<ISpxTranslationTextResult>
 {
 public:
-    virtual TranslationStatus GetTranslationStatus() const = 0;
+    virtual TranslationStatusCode GetTranslationStatus() const = 0;
     virtual const std::wstring& GetTranslationFailureReason() const = 0;
     virtual const std::map<std::wstring, std::wstring>& GetTranslationText() = 0;
 };
@@ -729,15 +727,13 @@ public:
 class ISpxTranslationTextResultInit : public ISpxInterfaceBaseFor<ISpxTranslationTextResultInit>
 {
 public:
-    virtual void InitTranslationTextResult(TranslationStatus status, const std::map<std::wstring, std::wstring>& translations, const std::wstring& failureReason) = 0;
+    virtual void InitTranslationTextResult(TranslationStatusCode status, const std::map<std::wstring, std::wstring>& translations, const std::wstring& failureReason) = 0;
 };
-
-enum class SynthesisStatus { Success, SynthesisEnd, Error };
 
 class ISpxTranslationSynthesisResult : public ISpxInterfaceBaseFor<ISpxTranslationSynthesisResult>
 {
 public:
-    virtual SynthesisStatus GetSynthesisStatus() = 0;
+    virtual SynthesisStatusCode GetSynthesisStatus() = 0;
     virtual const std::wstring& GetSynthesisFailureReason() = 0;
     virtual const uint8_t* GetAudio() const = 0;
     virtual size_t GetLength() const = 0;
@@ -747,7 +743,7 @@ class ISpxTranslationSynthesisResultInit : public ISpxInterfaceBaseFor<ISpxTrans
 {
 public:
 
-    virtual void InitTranslationSynthesisResult(SynthesisStatus status, const uint8_t* audioData, size_t audioLength, const std::wstring& failureReason) = 0;
+    virtual void InitTranslationSynthesisResult(SynthesisStatusCode status, const uint8_t* audioData, size_t audioLength, const std::wstring& failureReason) = 0;
 };
 
 class ISpxLanguageUnderstandingModel : public ISpxInterfaceBaseFor<ISpxLanguageUnderstandingModel>

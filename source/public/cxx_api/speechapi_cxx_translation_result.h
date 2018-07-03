@@ -91,9 +91,6 @@ private:
 
     void PopulateResultFields(SPXRESULTHANDLE resultHandle)
     {
-        static_assert((int)Result_Translation_Success == (int)::Microsoft::CognitiveServices::Speech::Translation::TranslationStatusCode::Success, "Result_Translation* enum values == TranslationStatus::* enum values");
-        static_assert((int)Result_Translation_Error == (int)::Microsoft::CognitiveServices::Speech::Translation::TranslationStatusCode::Error, "Result_Translation* enum values == TranslationStatus::* enum values");
-
         SPX_INIT_HR(hr);
 
         Result_TranslationStatus status;
@@ -220,9 +217,6 @@ private:
 
     void PopulateResultFields(SPXRESULTHANDLE resultHandle)
     {
-        static_assert((int)Result_Synthesis_Success == (int)::Microsoft::CognitiveServices::Speech::Translation::SynthesisStatusCode::Success, "Result_Synthesis* enum values == SynthesisStatus::* enum values");
-        static_assert((int)Result_Synthesis_End == (int)::Microsoft::CognitiveServices::Speech::Translation::SynthesisStatusCode::SynthesisEnd, "Result_Synthesis* enum values == SynthesisStatus::* enum values");
-        static_assert((int)Result_Synthesis_Error == (int)::Microsoft::CognitiveServices::Speech::Translation::SynthesisStatusCode::Error, "Result_Synthesis* enum values == SynthesisStatus::* enum values");
 
         SPX_INIT_HR(hr);
 

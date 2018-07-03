@@ -91,24 +91,27 @@ void CarbonTestConsole::Sample_HelloWorld_Intent(const wchar_t* subscriptionKey,
     auto result = recognizer->RecognizeAsync().get();
 
     // Check the reason returned
-    if (result->Reason == Reason::Recognized)
+    switch (result->Reason)
     {
-        // wcout << L"We recognized: " << result->Text << '\n';
-        // wcout << L"IntentId=" << result->IntentId << '\n';
-        // wcout << L"json=" << result->Properties[ResultProperty::LanguageUnderstandingJson].GetString();
+    case Reason::Recognized:
         ConsoleWriteLine(L"We recognized: %s", result->Text.c_str());
         ConsoleWriteLine(L"IntentId='%s'", result->IntentId.c_str());
         ConsoleWriteLine(L"json='%s'", result->Properties[ResultProperty::LanguageUnderstandingJson].GetString().c_str());
-    }
-    else if (result->Reason == Reason::NoMatch)
-    {
-        // wcout << L"We didn't hear anything" << '\n';
-        ConsoleWriteLine(L"We didn't hear anything");
-    }
-    else if (result->Reason == Reason::Canceled)
-    {
-        // wcout << L"There was an error, reason " << int(result->Reason) << L"-" << result->Text << '\n';
+        break;
+    case Reason::InitialSilenceTimeout:
+        ConsoleWriteLine(L"We only heard silence in the audio stream.");
+        break;
+    case Reason::InitialBabbleTimeout:
+        ConsoleWriteLine(L"We only heard noise in the audio stream.");
+        break; 
+    case Reason::NoMatch:
+        ConsoleWriteLine(L"We detected speech in the audio stream, but could not recognize any words from the target language. This could be caused by wrong language setting or wrong audio format.");
+        break;
+    case Reason::Canceled:
         ConsoleWriteLine(L"There was an error, reason=%d - %s", int(result->Reason), result->Text.c_str());
+        break;
+    default:
+        break;
     }
 }
 

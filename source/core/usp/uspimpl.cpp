@@ -544,15 +544,15 @@ void Connection::Impl::OnTransportError(TransportHandle transportHandle, Transpo
         break;
 
     case TRANSPORT_ERROR_HTTP_UNAUTHORIZED:
-        connection->Invoke([&] { callbacks->OnError("WebSocket Upgrade failed with an authentication error (401)."); });
+        connection->Invoke([&] { callbacks->OnError("WebSocket Upgrade failed with an authentication error (401). Please check the subscription key or the authorization token, and the region name."); });
         break;
 
     case TRANSPORT_ERROR_HTTP_FORBIDDEN:
-        connection->Invoke([&] { callbacks->OnError("WebSocket Upgrade failed with an authentication error (403)."); });
+        connection->Invoke([&] { callbacks->OnError("WebSocket Upgrade failed with an authentication error (403). Please check the subscription key or the authorization token, and the region name."); });
         break;
 
     case TRANSPORT_ERROR_CONNECTION_FAILURE:
-        connection->Invoke([&] { callbacks->OnError("Connection failed (no connection to the remote host)."); });
+        connection->Invoke([&] { callbacks->OnError("Connection failed (no connection to the remote host). Please check network connection, firewall setting, and the region name used to create speech factory."); });
         break;
 
     case TRANSPORT_ERROR_DNS_FAILURE:
@@ -577,7 +577,7 @@ static RecognitionStatus ToRecognitionStatus(const string& str)
         { "Success", RecognitionStatus::Success },
         { "NoMatch", RecognitionStatus::NoMatch },
         { "InitialSilenceTimeout", RecognitionStatus::InitialSilenceTimeout },
-        { "BabbleTimeout", RecognitionStatus::BabbleTimeout },
+        { "BabbleTimeout", RecognitionStatus::InitialBabbleTimeout },
         { "Error", RecognitionStatus::Error },
         { "EndOfDictation", RecognitionStatus::EndOfDictation },
     };
@@ -655,7 +655,7 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
         {
             PROTOCOL_VIOLATION("No TranslationStatus is provided. Json: %s", translation.dump().c_str());
             result.translationStatus = TranslationStatus::InvalidMessage;
-            result.failureReason = L"Status is missing in the protocol message.";
+            result.failureReason = L"Status is missing in the protocol message. Response text:" + PAL::ToWString(json.dump());
         }
 
         auto failure = translation.find(json_properties::translationFailureReason);
@@ -666,7 +666,7 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
 
         if ((result.translationStatus == TranslationStatus::Success) && (result.translations.size() == 0))
         {
-            PROTOCOL_VIOLATION("No Translations text block in the message, but TranslationStatus is succcess. Json:", translation.dump().c_str());
+            PROTOCOL_VIOLATION("No Translations text block in the message, but TranslationStatus is success. Response text:", json.dump().c_str());
         }
     }
 
@@ -811,8 +811,9 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         result.duration = json[json_properties::duration].get<DurationType>();
         result.recognitionStatus = ToRecognitionStatus(json[json_properties::recoStatus].get<string>());
 
-        if (result.recognitionStatus == RecognitionStatus::Success)
+        switch (result.recognitionStatus)
         {
+        case RecognitionStatus::Success:
             if (json.find(json_properties::displayText) != json.end())
             {
                 // The DisplayText field will be present only if the RecognitionStatus field has the value Success.
@@ -835,9 +836,30 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
                     }
                 }
             }
+            connection->Invoke([&] { callbacks->OnSpeechPhrase(result); });
+            break;
+        case RecognitionStatus::InitialSilenceTimeout:
+        case RecognitionStatus::InitialBabbleTimeout:
+        case RecognitionStatus::NoMatch:
+            connection->Invoke([&] { callbacks->OnSpeechPhrase(result); });
+            break;
+        case RecognitionStatus::Error:
+            {
+                auto msg = "The recognition service encountered an internal error and could not continue. Response text:" + json.dump();
+                connection->Invoke([&] { callbacks->OnError(msg.c_str()); });
+                break;
+            }
+        case RecognitionStatus::EndOfDictation:
+            // Currently we do not communicate and of dictation to the user.
+            return;
+        case RecognitionStatus::InvalidMessage:
+        default:
+            {
+                auto msg = "Responses received is invalid. Response text:" + json.dump();
+                connection->Invoke([&] { callbacks->OnError(msg.c_str()); });
+                break;
+            }
         }
-
-        connection->Invoke([&] { callbacks->OnSpeechPhrase(result); });
     }
     else if (path == path::translationHypothesis)
     {
@@ -857,37 +879,50 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
     }
     else if (path == path::translationPhrase)
     {
-        std::wstring localReason;
-
         auto status = ToRecognitionStatus(json.at(json_properties::recoStatus));
-
-        if (status == RecognitionStatus::EndOfDictation)
-        {
-            // Currently we do not communicate and of dictation to the user.
-            return;
-        }
-
         auto speechResult = RetrieveSpeechResult(json);
 
         TranslationResult translationResult;
-        if (status == RecognitionStatus::Success)
+        switch (status)
         {
+        case RecognitionStatus::EndOfDictation:
+            // Currently we do not communicate and of dictation to the user.
+            return;
+        case RecognitionStatus::Success:
             translationResult = RetrieveTranslationResult(json, true);
-        }
-        else if (status == RecognitionStatus::InitialSilenceTimeout)
-        {
+            break;
+        case RecognitionStatus::InitialSilenceTimeout:
+        case RecognitionStatus::InitialBabbleTimeout:
+        case RecognitionStatus::NoMatch:
             translationResult.translationStatus = TranslationStatus::Success;
+            break;
+        case RecognitionStatus::Error:
+            translationResult.translationStatus = TranslationStatus::Error;
+            translationResult.failureReason = L"The speech recognition service encountered an internal error and could not continue. Response text:" + PAL::ToWString(json.dump());;
+            break;
+        case RecognitionStatus::InvalidMessage:
+        default:
+            translationResult.translationStatus = TranslationStatus::InvalidMessage;
+            translationResult.failureReason = L"Response received is invalid. Response text:" + PAL::ToWString(json.dump());
+            break;
         }
 
-        connection->Invoke([&] { callbacks->OnTranslationPhrase({
-            std::move(speechResult.json),
-            speechResult.offset,
-            speechResult.duration,
-            std::move(speechResult.text),
-            std::move(translationResult),
-            status
+        if (translationResult.translationStatus == TranslationStatus::Success)
+        {
+            connection->Invoke([&] { callbacks->OnTranslationPhrase({
+                std::move(speechResult.json),
+                speechResult.offset,
+                speechResult.duration,
+                std::move(speechResult.text),
+                std::move(translationResult),
+                status
+                });
             });
-        });
+        }
+        else
+        {
+            connection->Invoke([&] { callbacks->OnError(PAL::ToString(translationResult.failureReason).c_str()); });
+        }
     }
     else if (path == path::translationSynthesisEnd)
     {
@@ -923,7 +958,14 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
 
         msg.failureReason = localReason + msg.failureReason;
 
-        connection->Invoke([&] { callbacks->OnTranslationSynthesisEnd(msg); });
+        if (msg.synthesisStatus == SynthesisStatus::Success)
+        {
+            connection->Invoke([&] { callbacks->OnTranslationSynthesisEnd(msg); });
+        }
+        else
+        {
+            connection->Invoke([&] { callbacks->OnError(PAL::ToString(msg.failureReason).c_str()); });
+        }
     }
     else
     {

@@ -139,11 +139,6 @@ static void OnFinalResult(const IntentRecognitionEventArgs& e)
     wcout << L"    LUIS Json: " << e.Result.Properties[ResultProperty::LanguageUnderstandingJson].GetString() << '\n';
 }
 
-static void OnNoMatch(const IntentRecognitionEventArgs& e)
-{
-    wcout << L"NoMatch:" << (int)e.Result.Reason << '\n';
-}
-
 static void OnCanceled(const IntentRecognitionEventArgs& e)
 {
     wcout << L"Canceled:" << (int)e.Result.Reason << L"- " << e.Result.Text << '\n';
@@ -170,7 +165,6 @@ void IntentContinuousRecognitionUsingEvents()
     recognizer->IntermediateResult.Connect(&OnPartialResult);
     recognizer->FinalResult.Connect(&OnFinalResult);
     recognizer->Canceled.Connect(&OnCanceled);
-    recognizer->NoMatch.Connect(&OnNoMatch);
 
     wcout << L"Say something...\n";
 
@@ -188,6 +182,5 @@ void IntentContinuousRecognitionUsingEvents()
     recognizer->IntermediateResult.Disconnect(&OnPartialResult);
     recognizer->FinalResult.Disconnect(&OnFinalResult);
     recognizer->Canceled.Disconnect(&OnCanceled);
-    recognizer->NoMatch.Disconnect(&OnNoMatch);
 }
 // </IntentContinuousRecognitionUsingEvents>

@@ -164,6 +164,9 @@ void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_
         switch (reason)
         {
         case Reason::Recognized:
+        case Reason::InitialBabbleTimeout:
+        case Reason::InitialSilenceTimeout:
+        case Reason::NoMatch:
             pevent = &FinalResult;
             SPX_DBG_TRACE_VERBOSE_IF(!pevent->IsConnected(), "%s: No FinalResult event signal connected!! nobody listening...", __FUNCTION__);
             break;
@@ -172,26 +175,14 @@ void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_
             pevent = &IntermediateResult;
             break;
 
-        case Reason::NoMatch:
-            pevent = &NoMatch;
-            break;
-
         case Reason::Canceled:
             pevent = &Canceled;
             break;
 
-        case Reason::OtherRecognizer:
-            SPX_THROW_HR(SPXERR_INVALID_ARG);
-            break;
-
         default:
-            SPX_DBG_ASSERT_WITH_MESSAGE(
-                reason != Reason::Recognized &&
-                reason != Reason::IntermediateResult &&
-                reason != Reason::NoMatch &&
-                reason != Reason::Canceled &&
-                reason != Reason::OtherRecognizer,
-                "The reason found in the result was unexpected.");
+            // This should be changed to throw exception. But currently it causes problem in lock.
+            // Bug: https://msasg.visualstudio.com/Skyman/_workitems/edit/1314877
+            SPX_DBG_ASSERT_WITH_MESSAGE(false, "The reason found in the result was unexpected.");
             break;
         }
     }

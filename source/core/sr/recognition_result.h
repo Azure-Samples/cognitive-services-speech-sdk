@@ -47,7 +47,7 @@ public:
 
     // --- ISpxRecognitionResultInit ---
     void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration) override;
-    void InitFinalResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration) override;
+    void InitFinalResult(const wchar_t* resultId, Reason reason, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration) override;
     void InitError(const wchar_t* text, ResultType type) override;
 
     // --- ISpxIntentRecognitionResult ---
@@ -57,21 +57,21 @@ public:
     void InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload) override;
 
     // -- ISpxTranslationTextResult ---
-    TranslationStatus GetTranslationStatus() const override;
+    TranslationStatusCode GetTranslationStatus() const override;
     const std::wstring& GetTranslationFailureReason() const override;
     const std::map<std::wstring, std::wstring>& GetTranslationText() override;
 
     // -- ISpxTranslationTextResulInit --
-    void InitTranslationTextResult(TranslationStatus status, const std::map<std::wstring, std::wstring>& translations, const std::wstring& failureReason) override;
+    void InitTranslationTextResult(TranslationStatusCode status, const std::map<std::wstring, std::wstring>& translations, const std::wstring& failureReason) override;
 
     // -- ISpxTranslationSynthesisResult ---
     const uint8_t* GetAudio() const override;
-    SynthesisStatus GetSynthesisStatus() override;
+    SynthesisStatusCode GetSynthesisStatus() override;
     const std::wstring& GetSynthesisFailureReason() override;
     size_t GetLength() const override;
 
     // ISpxTranslationSynthesisResultInit
-    void InitTranslationSynthesisResult(SynthesisStatus status, const uint8_t* audioData, size_t audioLength, const std::wstring& failureReason) override;
+    void InitTranslationSynthesisResult(SynthesisStatusCode status, const uint8_t* audioData, size_t audioLength, const std::wstring& failureReason) override;
 
 private:
 
@@ -88,10 +88,10 @@ private:
     std::wstring m_intentId;
 
     std::map<std::wstring, std::wstring> m_translations;
-    TranslationStatus m_translationStatus;
+    TranslationStatusCode m_translationStatus;
     std::wstring m_translationFailureReason;
 
-    SynthesisStatus m_synthesisStatus;
+    SynthesisStatusCode m_synthesisStatus;
     std::wstring m_synthesisFailureReason;
     const uint8_t* m_audioBuffer;
     size_t m_audioLength{0};

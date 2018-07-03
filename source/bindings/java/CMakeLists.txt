@@ -122,14 +122,14 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognizerBase.java
     ${CMAKE_SWIG_OUTDIR}/SpeechScopeResourceValue.java
-    ${CMAKE_SWIG_OUTDIR}/SynthesisScopeResourceValue.java
 
+    ${CMAKE_SWIG_OUTDIR}/SynthesisStatusCode.java
+    ${CMAKE_SWIG_OUTDIR}/SynthesisScopeResourceValue.java
     ${CMAKE_SWIG_OUTDIR}/TextScopeResourceValue.java
     ${CMAKE_SWIG_OUTDIR}/TranslationLanguageResource.java
     ${CMAKE_SWIG_OUTDIR}/TranslationRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/TranslationRecognizerBase.java
     ${CMAKE_SWIG_OUTDIR}/TranslationStatusCode.java
-    ${CMAKE_SWIG_OUTDIR}/SynthesisStatusCode.java
     ${CMAKE_SWIG_OUTDIR}/TranslationSynthesisEventListener.java
     ${CMAKE_SWIG_OUTDIR}/TranslationSynthesisEventSignal.java
     ${CMAKE_SWIG_OUTDIR}/TranslationSynthesisResult.java
@@ -190,7 +190,6 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/SessionEventArgs.java
     ${PACKAGE_DIR}/SessionEventType.java
     ${PACKAGE_DIR}/SpeechFactory.java
-    ${PACKAGE_DIR}/SpeechRecognitionReason.java
     ${PACKAGE_DIR}/SpeechRecognitionResult.java
     ${PACKAGE_DIR}/SpeechRecognitionResultEventArgs.java
     ${PACKAGE_DIR}/SpeechRecognizer.java

@@ -9,9 +9,11 @@ package com.microsoft.cognitiveservices.speech;
   */
 public enum RecognitionStatus
 {
-    Success,
+    Recognized,
     IntermediateResult,
     NoMatch,
-    Canceled,
-    OtherRecognizer
+    InitialSilenceTimeout,
+    InitialBabbleTimeout,
+    Canceled
 }
+

@@ -98,7 +98,6 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             recoImpl.TranslationSynthesisResultEvent.Connect(synthesisResultHandler);
 
             errorHandler = new ErrorHandlerImpl(this);
-            recoImpl.NoMatch.Connect(errorHandler);
             recoImpl.Canceled.Connect(errorHandler);
 
             recoImpl.SessionStarted.Connect(sessionStartedHandler);

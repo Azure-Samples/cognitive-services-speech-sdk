@@ -23,9 +23,10 @@ namespace Microsoft.CognitiveServices.Speech
             Trace.Assert((int)RecognitionStatus.Recognized == (int)Internal.Reason.Recognized);
             Trace.Assert((int)RecognitionStatus.IntermediateResult == (int)Internal.Reason.IntermediateResult);
             Trace.Assert((int)RecognitionStatus.NoMatch == (int)Internal.Reason.NoMatch);
+            Trace.Assert((int)RecognitionStatus.InitialSilenceTimeout == (int)Internal.Reason.InitialSilenceTimeout);
+            Trace.Assert((int)RecognitionStatus.InitialBabbleTimeout == (int)Internal.Reason.InitialBabbleTimeout);
             Trace.Assert((int)RecognitionStatus.Canceled == (int)Internal.Reason.Canceled);
-            Trace.Assert((int)RecognitionStatus.OtherRecognizer == (int)Internal.Reason.OtherRecognizer);
-            
+
             resultImpl = result;
             this.ResultId = result.ResultId;
             this.Text = result.Text;

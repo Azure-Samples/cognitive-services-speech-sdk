@@ -85,7 +85,7 @@ map<USP::RecognitionStatus, string> recognitionStatusToText =
     { USP::RecognitionStatus::Success, "Success" },
     { USP::RecognitionStatus::NoMatch, "No Match" },
     { USP::RecognitionStatus::InitialSilenceTimeout, "Initial Silence Timeout" },
-    { USP::RecognitionStatus::BabbleTimeout, "Babble Timeout" },
+    { USP::RecognitionStatus::InitialBabbleTimeout, "Initial Babble Timeout" },
     { USP::RecognitionStatus::Error, "Error" },
     { USP::RecognitionStatus::EndOfDictation, "End of dictation" }
 };

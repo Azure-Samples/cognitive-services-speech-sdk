@@ -66,7 +66,6 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
          recoImpl.getTranslationSynthesisResultEvent().addEventListener(synthesisResultHandler);
 
          errorHandler = new ErrorHandlerImpl(this);
-         recoImpl.getNoMatch().addEventListener(errorHandler);
          recoImpl.getCanceled().addEventListener(errorHandler);
 
          recoImpl.getSessionStarted().addEventListener(sessionStartedHandler);
@@ -185,7 +184,6 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
          {
              recoImpl.getIntermediateResult().removeEventListener(intermediateResultHandler);
              recoImpl.getFinalResult().removeEventListener(finalResultHandler);
-             recoImpl.getNoMatch().removeEventListener(errorHandler);
              recoImpl.getCanceled().removeEventListener(errorHandler);
              recoImpl.getSessionStarted().removeEventListener(sessionStartedHandler);
              recoImpl.getSessionStopped().removeEventListener(sessionStoppedHandler);

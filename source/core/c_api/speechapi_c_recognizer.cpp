@@ -12,6 +12,8 @@
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
+static_assert((int)RecognizerParameter_DeploymentId == (int)RecognizerParameter::DeploymentId, "RecognizerParameter_* enum values == RecognizerParameter::* enum values");
+
 SPXAPI_(bool) Recognizer_Handle_IsValid(SPXRECOHANDLE hreco)
 {
     return Handle_IsValid<SPXRECOHANDLE, ISpxRecognizer>(hreco);
@@ -568,11 +570,6 @@ SPXAPI Recognizer_IntermediateResult_SetEventCallback(SPXRECOHANDLE hreco, PRECO
 SPXAPI Recognizer_FinalResult_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext)
 {
     return Recognizer_RecoEvent_SetCallback(&ISpxRecognizerEvents::FinalResult, hreco, pCallback, pvContext);
-}
-
-SPXAPI Recognizer_NoMatch_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext)
-{
-    return Recognizer_RecoEvent_SetCallback(&ISpxRecognizerEvents::NoMatch, hreco, pCallback, pvContext);
 }
 
 SPXAPI Recognizer_Canceled_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext)

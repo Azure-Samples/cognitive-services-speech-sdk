@@ -13,7 +13,8 @@ namespace Microsoft.CognitiveServices.Speech
         Recognized,
         IntermediateResult,
         NoMatch,
-        Canceled,
-        OtherRecognizer
+        InitialSilenceTimeout,
+        InitialBabbleTimeout,
+        Canceled
     }
 }

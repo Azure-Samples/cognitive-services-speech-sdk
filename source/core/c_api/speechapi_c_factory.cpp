@@ -22,6 +22,11 @@ using namespace std;
 static_assert((int)OutputFormat::Simple == (int)SpeechOutputFormat_Simple, "OutputFormat should match between C and C++ layers");
 static_assert((int)OutputFormat::Detailed == (int)SpeechOutputFormat_Detailed, "OutputFormat should match between C and C++ layers");
 
+static_assert((int)FactoryParameter_Region == (int)FactoryParameter::Region, "FactoryParameter_* enum values == FactoryParameter::* enum values");
+static_assert((int)FactoryParameter_SubscriptionKey == (int)FactoryParameter::SubscriptionKey, "FactoryParameter_* enum values == FactoryParameter::* enum values");
+static_assert((int)FactoryParameter_AuthorizationToken == (int)FactoryParameter::AuthorizationToken, "FactoryParameter_* enum values == FactoryParameter::* enum values");
+static_assert((int)FactoryParameter_Endpoint == (int)FactoryParameter::Endpoint, "FactoryParameter_* enum values == FactoryParameter::* enum values");
+
 std::shared_ptr<ISpxNamedProperties> GetNamedPropertiesFromFactoryHandle(SPXFACTORYHANDLE hfactory)
 {
     std::shared_ptr<ISpxNamedProperties> namedProperties;

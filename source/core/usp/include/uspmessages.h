@@ -27,7 +27,7 @@ typedef uint64_t DurationType;
  */
 enum class RecognitionStatus : int
 {
-    Success, NoMatch, InitialSilenceTimeout, BabbleTimeout, Error, EndOfDictation, InvalidMessage
+    Success, NoMatch, InitialSilenceTimeout, InitialBabbleTimeout, Error, EndOfDictation, InvalidMessage
 };
 
 /**

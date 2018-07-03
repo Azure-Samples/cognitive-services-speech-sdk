@@ -19,7 +19,7 @@ namespace Speech {
 /// <summary>
 /// Specifies the possible reasons a recognition result might be generated.
 /// </summary>
-enum class Reason { Recognized, IntermediateResult, NoMatch, Canceled, OtherRecognizer };
+enum class Reason { Recognized, IntermediateResult, NoMatch, InitialSilenceTimeout, InitialBabbleTimeout, Canceled };
 
 /// <summary>
 /// Specifies properties that can be retrieved from a RecognitionResult.
@@ -100,10 +100,6 @@ private:
 
     std::wstring PropertyNameFromEnum(ResultProperty property)
     {
-        static_assert((int)ResultProperty_Json == (int)ResultProperty::Json, "ResultProperty_* enum values == ResultProperty::* enum values");
-        static_assert((int)ResultProperty_LanguageUnderstandingJson == (int)ResultProperty::LanguageUnderstandingJson, "ResultProperty_* enum values == ResultProperty::* enum values");
-        static_assert((int)ResultProperty_ErrorDetails == (int)ResultProperty::ErrorDetails, "ResultProperty_* enum values == ResultProperty::* enum values");
-
         const size_t maxCharCount = 4096;
         wchar_t sz[maxCharCount+1];
         SPX_THROW_ON_FAIL(Result_GetProperty_Name(static_cast<Result_Property>(property), sz, maxCharCount));
@@ -271,16 +267,6 @@ private:
 
     void PopulateResultFields(SPXRESULTHANDLE hresult, std::wstring *presultId, Speech::Reason* preason, std::wstring* ptext)
     {
-        static_assert((int)Reason_NoMatch == (int)Microsoft::CognitiveServices::Speech::Reason::NoMatch, 
-            "Reason_* enum values == Reason::* enum values");
-        static_assert((int)Reason_Canceled == (int)Microsoft::CognitiveServices::Speech::Reason::Canceled, 
-            "Reason_* enum values == Reason::* enum values");
-        static_assert((int)Reason_Recognized == (int)Microsoft::CognitiveServices::Speech::Reason::Recognized, 
-            "Reason_* enum values == Reason::* enum values");
-        static_assert((int)Reason_OtherRecognizer == (int)Microsoft::CognitiveServices::Speech::Reason::OtherRecognizer, 
-            "Reason_* enum values == Reason::* enum values");
-        static_assert((int)Reason_IntermediateResult == (int)Microsoft::CognitiveServices::Speech::Reason::IntermediateResult, 
-            "Reason_* enum values == Reason::* enum values");
 
         SPX_INIT_HR(hr);
 

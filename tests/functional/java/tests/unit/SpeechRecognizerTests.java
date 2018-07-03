@@ -261,7 +261,7 @@ public class SpeechRecognizerTests {
 
         SpeechRecognitionResult res = future.get();
         assertNotNull(res);
-        assertEquals(RecognitionStatus.Success, res.getReason());
+        assertEquals(RecognitionStatus.Recognized, res.getReason());
         assertEquals("What's the weather like?", res.getText());
 
         r.close();
@@ -310,7 +310,7 @@ public class SpeechRecognizerTests {
         
         SpeechRecognitionResult res = r.recognizeAsync().get();
         assertNotNull(res);
-        assertEquals(RecognitionStatus.Success, res.getReason());
+        assertEquals(RecognitionStatus.Recognized, res.getReason());
         assertTrue(res.getErrorDetails().isEmpty());
         assertEquals("What's the weather like?", res.getText());
 

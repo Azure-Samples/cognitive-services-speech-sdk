@@ -10,6 +10,17 @@
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
+static_assert((int)Reason_Recognized == (int)Reason::Recognized, "Reason_* enum values == Reason::* enum values");
+static_assert((int)Reason_IntermediateResult == (int)Reason::IntermediateResult, "Reason_* enum values == Reason::* enum values");
+static_assert((int)Reason_NoMatch == (int)Reason::NoMatch, "Reason_* enum values == Reason::* enum values");
+static_assert((int)Reason_InitialSilenceTimeout == (int)Reason::InitialSilenceTimeout, "Reason_* enum values == Reason::* enum values");
+static_assert((int)Reason_InitialBabbleTimeout == (int)Reason::InitialBabbleTimeout, "Reason_* enum values == Reason::* enum values");
+static_assert((int)Reason_Canceled == (int)Reason::Canceled, "Reason_* enum values == Reason::* enum values");
+
+static_assert((int)ResultProperty_Json == (int)ResultProperty::Json, "ResultProperty_* enum values == ResultProperty::* enum values");
+static_assert((int)ResultProperty_LanguageUnderstandingJson == (int)ResultProperty::LanguageUnderstandingJson, "ResultProperty_* enum values == ResultProperty::* enum values");
+static_assert((int)ResultProperty_ErrorDetails == (int)ResultProperty::ErrorDetails, "ResultProperty_* enum values == ResultProperty::* enum values");
+
 SPXAPI Result_GetResultId(SPXRESULTHANDLE hresult, wchar_t* pszResultId, uint32_t cchResultId)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, cchResultId == 0);
@@ -28,12 +39,6 @@ SPXAPI Result_GetResultId(SPXRESULTHANDLE hresult, wchar_t* pszResultId, uint32_
 
 SPXAPI Result_GetRecognitionReason(SPXRESULTHANDLE hresult, Result_RecognitionReason* preason)
 {
-    static_assert((int)Reason_NoMatch == (int)Reason::NoMatch, "Reason_* enum values == Reason::* enum values");
-    static_assert((int)Reason_Canceled == (int)Reason::Canceled, "Reason_* enum values == Reason::* enum values");
-    static_assert((int)Reason_Recognized == (int)Reason::Recognized, "Reason_* enum values == Reason::* enum values");
-    static_assert((int)Reason_OtherRecognizer == (int)Reason::OtherRecognizer, "Reason_* enum values == Reason::* enum values");
-    static_assert((int)Reason_IntermediateResult == (int)Reason::IntermediateResult, "Reason_* enum values == Reason::* enum values");
-
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, preason == nullptr);
 
     SPXAPI_INIT_HR_TRY(hr)

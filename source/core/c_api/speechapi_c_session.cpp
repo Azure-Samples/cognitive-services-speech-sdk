@@ -9,8 +9,12 @@
 #include "event_helpers.h"
 #include "handle_helpers.h"
 #include "string_utils.h"
+#include "speechapi_cxx_session_parameter_collection.h"
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
+
+static_assert((int)SessionParameter_SubscriptionKey == (int)::Microsoft::CognitiveServices::Speech::SessionParameter::SubscriptionKey, "SessionParameter_* enum values == SessionParameter::* enum values");
+static_assert((int)SessionParameter_AuthorizationToken == (int)::Microsoft::CognitiveServices::Speech::SessionParameter::AuthorizationToken, "SessionParameter_* enum values == SessionParameter::* enum values");
 
 SPXAPI Session_From_Recognizer(SPXRECOHANDLE hreco, SPXSESSIONHANDLE* phsession)
 {

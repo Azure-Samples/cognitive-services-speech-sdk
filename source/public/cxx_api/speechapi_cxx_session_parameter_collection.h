@@ -43,9 +43,6 @@ private:
 
     std::wstring ParameterNameFromEnum(SessionParameter parameter)
     {
-        static_assert((int)SessionParameter_SubscriptionKey == (int)SessionParameter::SubscriptionKey, "SessionParameter_* enum values == SessionParameter::* enum values");
-        static_assert((int)SessionParameter_AuthorizationToken == (int)SessionParameter::AuthorizationToken, "SessionParameter_* enum values == SessionParameter::* enum values");
-
         const size_t maxCharCount = 4096;
         wchar_t sz[maxCharCount+1];
         SPX_THROW_ON_FAIL(Session_GetParameter_Name(static_cast<Session_Parameter>(parameter), sz, maxCharCount));

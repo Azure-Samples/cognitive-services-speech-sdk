@@ -186,8 +186,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 await speechRecognitionTestsHelper.CompleteContinuousRecognition(recognizer);
 
-                // The weather audio return 2 final results.
-                Assert.AreEqual(2 * numLoops, speechRecognitionTestsHelper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
+                Assert.AreEqual(numLoops, speechRecognitionTestsHelper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
                 Assert.AreEqual(numLoops, speechRecognitionTestsHelper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
                 Assert.AreEqual(numLoops, speechRecognitionTestsHelper.SpeechEndedEventCount, AssertOutput.WrongSpeechEndedCount);
                 Assert.AreEqual(numLoops, speechRecognitionTestsHelper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
@@ -239,8 +238,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 await speechRecognitionTestsHelper.CompleteContinuousRecognition(recognizer);
 
-                // The weather audio return 2 final results.
-                Assert.AreEqual(2 * diff, speechRecognitionTestsHelper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
+                Assert.AreEqual(diff, speechRecognitionTestsHelper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
                 Assert.AreEqual(diff, speechRecognitionTestsHelper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
                 Assert.AreEqual(diff, speechRecognitionTestsHelper.SpeechEndedEventCount, AssertOutput.WrongSpeechEndedCount);
                 Assert.AreEqual(diff, speechRecognitionTestsHelper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);

@@ -128,11 +128,6 @@ static void OnSynthesisResult(const TranslationSynthesisResultEventArgs& e)
     }
 }
 
-static void OnNoMatch(const TranslationTextResultEventArgs& e)
-{
-    wcout << L"NoMatch:" << (int)e.Result.Reason << '\n';
-}
-
 static void OnCanceled(const TranslationTextResultEventArgs& e)
 {
     wcout << L"Canceled:" << (int)e.Result.Reason << L"- " << e.Result.Text << '\n';
@@ -157,7 +152,6 @@ void TranslationContinuousRecognitionUsingEvents()
     recognizer->IntermediateResult.Connect(&OnPartialResult);
     recognizer->FinalResult.Connect(&OnFinalResult);
     recognizer->Canceled.Connect(&OnCanceled);
-    recognizer->NoMatch.Connect(&OnNoMatch);
     recognizer->TranslationSynthesisResultEvent.Connect(&OnSynthesisResult);
 
     wcout << L"Say something...\n";
@@ -176,7 +170,6 @@ void TranslationContinuousRecognitionUsingEvents()
     recognizer->IntermediateResult.Disconnect(&OnPartialResult);
     recognizer->FinalResult.Disconnect(&OnFinalResult);
     recognizer->Canceled.Disconnect(&OnCanceled);
-    recognizer->NoMatch.Disconnect(&OnNoMatch);
     recognizer->TranslationSynthesisResultEvent.Disconnect(&OnSynthesisResult);
 }
 // </TranslationContinuousRecognitionUsingEvents>

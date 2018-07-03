@@ -164,7 +164,7 @@ void CSpxMockRecoEngineAdapter::FireFinalResult()
     FireSpeechEndDetected();
 
     auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateFinalResult(nullptr, resultText.c_str(), ResultType::Speech, offset, m_cbFireNextFinalResult - offset);
+    auto result = factory->CreateFinalResult(ResultType::Speech, nullptr, Reason::Recognized, resultText.c_str(), offset, m_cbFireNextFinalResult - offset);
 
     GetSite()->FireAdapterResult_FinalResult(this, offset, result);
 }

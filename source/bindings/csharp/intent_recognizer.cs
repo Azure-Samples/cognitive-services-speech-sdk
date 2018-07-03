@@ -41,7 +41,6 @@ namespace Microsoft.CognitiveServices.Speech.Intent
             recoImpl.FinalResult.Connect(finalResultHandler);
 
             errorHandler = new ErrorHandlerImpl(this);
-            recoImpl.NoMatch.Connect(errorHandler);
             recoImpl.Canceled.Connect(errorHandler);
 
             recoImpl.SessionStarted.Connect(sessionStartedHandler);
@@ -156,7 +155,6 @@ namespace Microsoft.CognitiveServices.Speech.Intent
             {
                 recoImpl.IntermediateResult.Disconnect(intermediateResultHandler);
                 recoImpl.FinalResult.Disconnect(finalResultHandler);
-                recoImpl.NoMatch.Disconnect(errorHandler);
                 recoImpl.Canceled.Disconnect(errorHandler);
                 recoImpl.SessionStarted.Disconnect(sessionStartedHandler);
                 recoImpl.SessionStopped.Disconnect(sessionStoppedHandler);

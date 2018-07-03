@@ -169,7 +169,7 @@ public:
 
     // --- ISpxRecoResultFactory
     std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type, uint64_t offset, uint64_t duration) override;
-    std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type, uint64_t offset, uint64_t duration) override;
+    std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(ResultType type, const wchar_t* resultId, Reason reason, const wchar_t* text, uint64_t offset, uint64_t duration) override;
     std::shared_ptr<ISpxRecognitionResult> CreateErrorResult(const wchar_t* text, ResultType type) override;
 
     // --- ISpxRecoEngineAdapterSite (second part...)

@@ -170,10 +170,6 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
                     callbackCounts[Callbacks::final_result]++;
                     SPX_TRACE_VERBOSE("callbackCounts[Callbacks::final_result]=%d", callbackCounts[Callbacks::final_result].load());
                 });
-                recognizer->NoMatch.Connect([&](const SpeechRecognitionEventArgs&) {
-                    callbackCounts[Callbacks::no_match]++;
-                    SPX_TRACE_VERBOSE("callbackCounts[Callbacks::no_match]=%d", callbackCounts[Callbacks::no_match].load());
-                });
                 recognizer->SessionStarted.Connect([&](const SessionEventArgs&) {
                     callbackCounts[Callbacks::session_started]++;
                     SPX_TRACE_VERBOSE("callbackCounts[Callbacks::session_started]=%d", callbackCounts[Callbacks::session_started].load());

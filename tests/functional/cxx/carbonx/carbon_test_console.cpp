@@ -563,7 +563,6 @@ void CarbonTestConsole::ConsoleInput_HelpOnRecognizer()
     ConsoleWriteLine(L"    SpeechEndDetected       {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    IntermediateResult {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    FinalResult        {Connect | Disconnect | DisconnectAll}");
-    ConsoleWriteLine(L"    NoMatch            {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    Canceled           {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"");
 }
@@ -601,7 +600,6 @@ void CarbonTestConsole::ConsoleInput_HelpOnSpeech()
     ConsoleWriteLine(L"    SpeechEndDetected       {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    IntermediateResult {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    FinalResult        {Connect | Disconnect | DisconnectAll}");
-    ConsoleWriteLine(L"    NoMatch            {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    Canceled           {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"");
 }
@@ -630,7 +628,6 @@ void CarbonTestConsole::ConsoleInput_HelpOnIntent()
     ConsoleWriteLine(L"    SpeechEndDetected       {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    IntermediateResult {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    FinalResult        {Connect | Disconnect | DisconnectAll}");
-    ConsoleWriteLine(L"    NoMatch            {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"    Canceled           {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine(L"");
 }
@@ -752,11 +749,6 @@ void CarbonTestConsole::ConsoleInput_Recognizer(const wchar_t* psz, std::shared_
         auto fn = std::bind(&CarbonTestConsole::Recognizer_FinalResultHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"finalresult "), m_recognizer->FinalResult, fn);
     }
-    else if (PAL::wcsnicmp(psz, L"nomatch ", wcslen(L"nomatch ")) == 0)
-    {
-        auto fn = std::bind(&CarbonTestConsole::Recognizer_NoMatchHandler, this, std::placeholders::_1);
-        Recognizer_Event(psz + wcslen(L"nomatch "), m_recognizer->NoMatch, fn);
-    }
     else if (PAL::wcsnicmp(psz, L"canceled ", wcslen(L"canceled ")) == 0)
     {
         auto fn = std::bind(&CarbonTestConsole::Recognizer_CanceledHandler, this, std::placeholders::_1);
@@ -831,11 +823,6 @@ void CarbonTestConsole::ConsoleInput_SpeechRecognizer(const wchar_t* psz, std::s
     {
         auto fn = std::bind(&CarbonTestConsole::SpeechRecognizer_FinalResultHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"finalresult "), m_speechRecognizer->FinalResult, fn);
-    }
-    else if (PAL::wcsnicmp(psz, L"nomatch ", wcslen(L"nomatch ")) == 0)
-    {
-        auto fn = std::bind(&CarbonTestConsole::SpeechRecognizer_NoMatchHandler, this, std::placeholders::_1);
-        Recognizer_Event(psz + wcslen(L"nomatch "), m_speechRecognizer->NoMatch, fn);
     }
     else if (PAL::wcsnicmp(psz, L"canceled ", wcslen(L"canceled ")) == 0)
     {
@@ -935,11 +922,6 @@ void CarbonTestConsole::ConsoleInput_IntentRecognizer(const wchar_t* psz, std::s
     {
         auto fn = std::bind(&CarbonTestConsole::IntentRecognizer_FinalResultHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + wcslen(L"finalresult "), m_intentRecognizer->FinalResult, fn);
-    }
-    else if (PAL::wcsnicmp(psz, L"nomatch ", wcslen(L"nomatch ")) == 0)
-    {
-        auto fn = std::bind(&CarbonTestConsole::IntentRecognizer_NoMatchHandler, this, std::placeholders::_1);
-        Recognizer_Event(psz + wcslen(L"nomatch "), m_intentRecognizer->NoMatch, fn);
     }
     else if (PAL::wcsnicmp(psz, L"canceled ", wcslen(L"canceled ")) == 0)
     {
@@ -1304,15 +1286,17 @@ std::wstring CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
     static_assert(0 == (int)Reason::Recognized, "Reason::* enum values changed!");
     static_assert(1 == (int)Reason::IntermediateResult, "Reason::* enum values changed!");
     static_assert(2 == (int)Reason::NoMatch, "Reason::* enum values changed!");
-    static_assert(3 == (int)Reason::Canceled, "Reason::* enum values changed!");
-    static_assert(4 == (int)Reason::OtherRecognizer, "Reason::* enum values changed!");
+    static_assert(3 == (int)Reason::InitialSilenceTimeout, "Reason::* enum values changed!");
+    static_assert(4 == (int)Reason::InitialBabbleTimeout, "Reason::* enum values changed!");
+    static_assert(5 == (int)Reason::Canceled, "Reason::* enum values changed!");
 
     std::wstring reasons[] = {
         L"Recognized",
         L"IntermediateResult",
         L"NoMatch",
+        L"InitialSilenceTimeout",
+        L"InitialBabbleTimeout",
         L"Canceled",
-        L"OtherRecognizer"
     };
 
     std::wstring str;
@@ -1334,15 +1318,17 @@ std::wstring CarbonTestConsole::ToString(const IntentRecognitionEventArgs& e)
     static_assert(0 == (int)Reason::Recognized, "Reason::* enum values changed!");
     static_assert(1 == (int)Reason::IntermediateResult, "Reason::* enum values changed!");
     static_assert(2 == (int)Reason::NoMatch, "Reason::* enum values changed!");
-    static_assert(3 == (int)Reason::Canceled, "Reason::* enum values changed!");
-    static_assert(4 == (int)Reason::OtherRecognizer, "Reason::* enum values changed!");
+    static_assert(3 == (int)Reason::InitialSilenceTimeout, "Reason::* enum values changed!");
+    static_assert(4 == (int)Reason::InitialBabbleTimeout, "Reason::* enum values changed!");
+    static_assert(5 == (int)Reason::Canceled, "Reason::* enum values changed!");
 
     std::wstring reasons[] = {
         L"Recognized",
         L"IntermediateResult",
         L"NoMatch",
+        L"InitialSilenceTimeout",
+        L"InitialBabbleTimeout",
         L"Canceled",
-        L"OtherRecognizer"
     };
 
     std::wstring str;

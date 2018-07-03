@@ -33,7 +33,6 @@ callbacks = {
   'session_stopped' : _TestCallback('In session_stopped callback'),
   'intermediate_result' : _TestCallback('In intermediate_result callback'),
   'final_result' : _TestCallback('In final_result callback'),
-  'no_match' : _TestCallback('In no_match callback'),
   'canceled' : _TestCallback('In Canceled callback'),
 }
 

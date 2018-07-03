@@ -48,7 +48,6 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         recoImpl.getFinalResult().addEventListener(finalResultHandler);
 
         errorHandler = new ErrorHandlerImpl(this);
-        recoImpl.getNoMatch().addEventListener(errorHandler);
         recoImpl.getCanceled().addEventListener(errorHandler);
 
         recoImpl.getSessionStarted().addEventListener(sessionStartedHandler);
@@ -177,7 +176,6 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         if (disposing) {
             getRecoImpl().getIntermediateResult().removeEventListener(intermediateResultHandler);
             getRecoImpl().getFinalResult().removeEventListener(finalResultHandler);
-            getRecoImpl().getNoMatch().removeEventListener(errorHandler);
             getRecoImpl().getCanceled().removeEventListener(errorHandler);
             getRecoImpl().getSessionStarted().removeEventListener(sessionStartedHandler);
             getRecoImpl().getSessionStopped().removeEventListener(sessionStoppedHandler);

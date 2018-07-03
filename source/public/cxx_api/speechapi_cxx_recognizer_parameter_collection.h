@@ -96,8 +96,6 @@ private:
 
     std::wstring ParameterNameFromEnum(RecognizerParameter parameter)
     {
-        static_assert((int)RecognizerParameter_DeploymentId == (int)RecognizerParameter::DeploymentId, "RecognizerParameter_* enum values == RecognizerParameter::* enum values");
-
         const size_t maxCharCount = 4096;
         wchar_t sz[maxCharCount+1];
         SPX_THROW_ON_FAIL(Recognizer_GetParameter_Name(static_cast<Recognizer_Parameter>(parameter), sz, maxCharCount));

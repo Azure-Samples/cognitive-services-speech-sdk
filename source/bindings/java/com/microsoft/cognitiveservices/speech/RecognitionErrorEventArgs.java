@@ -22,12 +22,6 @@ public final class RecognitionErrorEventArgs //extends System.EventArgs
     public RecognitionErrorEventArgs(String sessionId, com.microsoft.cognitiveservices.speech.internal.Reason reason)
     {
         Contracts.throwIfNullOrWhitespace(sessionId, "sessionId");
-//        Debug.Assert((int)Internal.Reason.Recognized == (int)RecognitionStatus.Success);
-//        Debug.Assert((int)Internal.Reason.IntermediateResult == (int)RecognitionStatus.IntermediateResult);
-//        Debug.Assert((int)Internal.Reason.NoMatch == (int)RecognitionStatus.NoMatch);
-//        Debug.Assert((int)Internal.Reason.Canceled == (int)RecognitionStatus.Canceled);
-//        Debug.Assert((int)Internal.Reason.OtherRecognizer == (int)RecognitionStatus.OtherRecognizer);
-
         this._status = RecognitionStatus.values()[(int)reason.swigValue()];
         this._sessionId = sessionId;
     }

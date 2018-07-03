@@ -245,11 +245,11 @@ public class TranslationRecognizerTests {
 
         TranslationTextResult res = future.get();
         assertNotNull(res);
-        assertEquals(RecognitionStatus.Success, res.getReason());
+        assertEquals(RecognitionStatus.Recognized, res.getReason());
         assertEquals("What's the weather like?", res.getText());
 
         assertTrue(res.getErrorDetails().isEmpty());
-        assertEquals(RecognitionStatus.Success, res.getReason());
+        assertEquals(RecognitionStatus.Recognized, res.getReason());
         assertNotNull(res.getProperties());
         assertEquals("What's the weather like?", res.getText()); // original text
         assertEquals(1, res.getTranslations().size());

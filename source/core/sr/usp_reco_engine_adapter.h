@@ -178,8 +178,8 @@ private:
 
     std::string GetSpeechContextJson(const std::string& dgiJson, const std::string& LanguageUnderstandingJson);
 
+    Reason ToReason(USP::RecognitionStatus uspRecognitionStatus);
     void FireFinalResultNow(const USP::SpeechPhraseMsg& message, const std::string& luisJson = "");
-
     void FireFinalResultLater(const USP::SpeechPhraseMsg& message);
     void FireFinalResultLater_WaitingForIntentComplete(const std::  string& luisJson = "");
 

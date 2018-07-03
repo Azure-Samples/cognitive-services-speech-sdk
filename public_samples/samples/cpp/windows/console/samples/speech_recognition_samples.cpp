@@ -142,11 +142,6 @@ static void OnFinalResult(const SpeechRecognitionEventArgs& e)
     wcout << L"FinalResult: status:" << (int)e.Result.Reason << L". Text: " << e.Result.Text << '\n';
 }
 
-static void OnNoMatch(const SpeechRecognitionEventArgs& e)
-{
-    wcout << L"NoMatch:" << (int)e.Result.Reason << '\n';
-}
-
 static void OnCanceled(const SpeechRecognitionEventArgs& e)
 {
     wcout << L"Canceled:" << (int)e.Result.Reason << L"- " << e.Result.Text << '\n';
@@ -167,7 +162,6 @@ void SpeechContinuousRecognitionUsingEvents()
     recognizer->IntermediateResult.Connect(&OnPartialResult);
     recognizer->FinalResult.Connect(&OnFinalResult);
     recognizer->Canceled.Connect(&OnCanceled);
-    recognizer->NoMatch.Connect(&OnNoMatch);
 
     wcout << L"Say something...\n";
 
@@ -185,6 +179,5 @@ void SpeechContinuousRecognitionUsingEvents()
     recognizer->IntermediateResult.Disconnect(&OnPartialResult);
     recognizer->FinalResult.Disconnect(&OnFinalResult);
     recognizer->Canceled.Disconnect(&OnCanceled);
-    recognizer->NoMatch.Disconnect(&OnNoMatch);
 }
 // </SpeechContinuousRecognitionUsingEvents>

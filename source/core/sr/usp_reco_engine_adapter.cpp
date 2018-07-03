@@ -12,6 +12,7 @@
 #include <inttypes.h>
 #include <cstring>
 #include <chrono>
+#include <map>
 #include "service_helpers.h"
 #include "create_object_helpers.h"
 #include "exception.h"
@@ -788,13 +789,13 @@ void CSpxUspRecoEngineAdapter::OnSpeechPhrase(const USP::SpeechPhraseMsg& messag
     }
 }
 
-static TranslationStatus GetTranslationStatus(::USP::TranslationStatus uspStatus)
+static TranslationStatusCode GetTranslationStatus(::USP::TranslationStatus uspStatus)
 {
-    TranslationStatus status = TranslationStatus::Error;
+    TranslationStatusCode status = TranslationStatusCode::Error;
     switch (uspStatus)
     {
     case ::USP::TranslationStatus::Success:
-        status = TranslationStatus::Success;
+        status = TranslationStatusCode::Success;
         break;
     case ::USP::TranslationStatus::Error:
         break;
@@ -899,7 +900,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
         {
             // Create the result
             auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-            auto result = factory->CreateFinalResult(nullptr, message.text.c_str(), ResultType::TranslationText, message.offset, message.duration);
+            auto result = factory->CreateFinalResult(ResultType::TranslationText, nullptr, ToReason(message.recognitionStatus), message.text.c_str(),  message.offset, message.duration);
 
             auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
             namedProperties->SetStringValue(g_RESULT_Json, message.json.c_str());
@@ -928,11 +929,11 @@ void CSpxUspRecoEngineAdapter::OnTranslationSynthesis(const USP::TranslationSynt
     InvokeOnSite([this, &message](const SitePtr& site)
     {
         auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-        auto result = factory->CreateFinalResult(nullptr, L"", ResultType::TranslationSynthesis, 0, 0);
+        auto result = factory->CreateFinalResult(ResultType::TranslationSynthesis, nullptr, Reason::Recognized, L"", 0, 0);
 
         // Update our result to be an "TranslationSynthesis" result.
         auto initTranslationResult = SpxQueryInterface<ISpxTranslationSynthesisResultInit>(result);
-        initTranslationResult->InitTranslationSynthesisResult(SynthesisStatus::Success, message.audioBuffer, message.audioLength, L"");
+        initTranslationResult->InitTranslationSynthesisResult(SynthesisStatusCode::Success, message.audioBuffer, message.audioLength, L"");
 
         site->FireAdapterResult_TranslationSynthesis(this, result);
     });
@@ -947,27 +948,27 @@ void CSpxUspRecoEngineAdapter::OnTranslationSynthesisEnd(const USP::TranslationS
         return;
 
     auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-    auto result = factory->CreateFinalResult(nullptr, L"", ResultType::TranslationSynthesis, 0, 0);
+    auto result = factory->CreateFinalResult(ResultType::TranslationSynthesis, nullptr, Reason::Recognized, L"", 0, 0);
 
     // Update our result to be an "TranslationSynthesis" result.
     auto initTranslationResult = SpxQueryInterface<ISpxTranslationSynthesisResultInit>(result);
-    SynthesisStatus status;
+    SynthesisStatusCode status;
     switch (message.synthesisStatus)
     {
     case ::USP::SynthesisStatus::Success:
         // Indicates the end of syntheis.
-        status = SynthesisStatus::SynthesisEnd;
+        status = SynthesisStatusCode::SynthesisEnd;
         break;
     case ::USP::SynthesisStatus::Error:
-        status = SynthesisStatus::Error;
+        status = SynthesisStatusCode::Error;
         break;
     case ::USP::SynthesisStatus::InvalidMessage:
         // The failureReason contains additional error messages.
         // Todo: have better error handling for different statuses.
-        status = SynthesisStatus::Error;
+        status = SynthesisStatusCode::Error;
         break;
     default:
-        status = SynthesisStatus::Error;
+        status = SynthesisStatusCode::Error;
         SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
         break;
     }
@@ -1353,6 +1354,26 @@ std::string CSpxUspRecoEngineAdapter::GetSpeechContextJson(const std::string& dg
     return contextJson;
 }
 
+Reason CSpxUspRecoEngineAdapter::ToReason(USP::RecognitionStatus uspRecognitionStatus)
+{
+    const static std::map<USP::RecognitionStatus, Reason> reasonMap = {
+        { USP::RecognitionStatus::Success, Reason::Recognized },
+        { USP::RecognitionStatus::NoMatch, Reason::NoMatch },
+        { USP::RecognitionStatus::InitialSilenceTimeout, Reason::InitialSilenceTimeout },
+        { USP::RecognitionStatus::InitialBabbleTimeout, Reason::InitialBabbleTimeout },
+        { USP::RecognitionStatus::Error, Reason::Canceled },
+    };
+
+    auto item = reasonMap.find(uspRecognitionStatus);
+
+    if (item == reasonMap.end())
+    {
+        SPX_TRACE_ERROR("Unexpected recognition status %d when converting to Reason.", uspRecognitionStatus);
+        SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
+    }
+    return item->second;
+}
+
 
 void CSpxUspRecoEngineAdapter::FireFinalResultLater(const USP::SpeechPhraseMsg& message)
 {
@@ -1367,7 +1388,7 @@ void CSpxUspRecoEngineAdapter::FireFinalResultNow(const USP::SpeechPhraseMsg& me
     {
         // Create the result
         auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-        auto result = factory->CreateFinalResult(nullptr, message.displayText.c_str(), ResultType::Speech, message.offset, message.duration);
+        auto result = factory->CreateFinalResult(ResultType::Speech, nullptr, ToReason(message.recognitionStatus), message.displayText.c_str(), message.offset, message.duration);
 
         auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
         namedProperties->SetStringValue(g_RESULT_Json, message.json.c_str());
