@@ -20,12 +20,12 @@ namespace MicrosoftSpeechSDKSamples
 
         private static void MyIntermediateResultEventHandler(object sender, SpeechRecognitionResultEventArgs e)
         {
-            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: intermediate result: {0} ", e.ToString()));
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: intermediate result: {0}, Offset: {1}, Duration: {2} ", e.ToString(), e.Result.Offset, e.Result.Duration));
         }
 
         private static void MyFinalResultEventHandler(object sender, SpeechRecognitionResultEventArgs e)
         {
-            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: final result: {0} ", e.ToString()));
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: final result: {0}, Offset: {1}, Duration: {2} ", e.ToString(), e.Result.Offset, e.Result.Duration));
         }
 
         private static void MyErrorEventHandler(object sender, RecognitionErrorEventArgs e)
@@ -193,7 +193,7 @@ namespace MicrosoftSpeechSDKSamples
             {
                 if (e.Result.RecognitionStatus == RecognitionStatus.Recognized)
                 {
-                    Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, Text: {e.Result.Text}.");
+                    Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, Text: {e.Result.Text}, Offset: {e.Result.Offset}, Duration: {e.Result.Duration}.");
                 }
                 else
                 {
@@ -203,7 +203,7 @@ namespace MicrosoftSpeechSDKSamples
 
             reco.OnSpeechDetectedEvent += (s, e) =>
             {
-                Console.WriteLine($"SpeechDetectedEvent received: {e.EventType.ToString()}");
+                Console.WriteLine($"SpeechDetectedEvent received: {e.EventType.ToString()}, offset: {e.Offset}.");
                 if (e.EventType == RecognitionEventType.SpeechEndDetectedEvent)
                 {
                     Console.WriteLine($"Speech end detected.");

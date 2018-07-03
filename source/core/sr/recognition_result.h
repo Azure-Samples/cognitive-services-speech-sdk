@@ -48,7 +48,6 @@ public:
     // --- ISpxRecognitionResultInit ---
     void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration) override;
     void InitFinalResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration) override;
-    void InitNoMatch(ResultType type) override;
     void InitError(const wchar_t* text, ResultType type) override;
 
     // --- ISpxIntentRecognitionResult ---

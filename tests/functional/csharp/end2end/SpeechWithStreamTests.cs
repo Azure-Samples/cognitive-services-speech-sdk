@@ -54,20 +54,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [Ignore("because of the bug detailed in VSO BUG 1293499")]
         public async Task SimpleRecognitionBatmanContinuous()
         {
+            int mismatchCount = 0;
             var result = await this.speechHelper.GetSpeechFinalRecognitionContinuous(TestData.English.Batman.AudioFile);
-            Assert.AreNotEqual(result.Count, 0);
-
-            Assert.IsTrue(Config.AreResultsMatching(result[0].Result.Text, TestData.English.Batman.Utterances[0]), result[0].Result.Text);
-            Assert.IsTrue(Config.AreResultsMatching(result.Last().Result.Text, TestData.English.Batman.Utterances.Last()), result.Last().Result.Text);
-
-            string actualText = String.Join(" ", result.Select(r => r.Result.Text).ToList());
-            Assert.IsTrue(actualText.Contains("The most dangerous man on Earth"), actualText);
-            Assert.IsTrue(actualText.Contains("if not the world's greatest crimes"), actualText);
-            Assert.IsTrue(actualText.Contains("Batman has been repeatedly described as having genius level intellect"), actualText);
-            Assert.IsTrue(actualText.Contains("is nearly unparalleled"), actualText);
-            Assert.IsTrue(actualText.Contains("describes superman as"), actualText);
-            Assert.IsTrue(actualText.Contains("often gathering information under"), actualText);
-            Assert.IsTrue(actualText.Contains("and to break free"), actualText);
+            Assert.AreEqual(TestData.English.Batman.Utterances.Length, result.Count);
+            var actualRecognitionTextResults = result.Select(t => t.Result.Text).ToArray();
+            for (var i = 0; i < result.Count; i++)
+            {
+                if (!Config.AreResultsMatching(TestData.English.Batman.Utterances[i], actualRecognitionTextResults[i]))
+                {
+                    Console.WriteLine($"Recognition {i}:\n    {TestData.English.Batman.Utterances[i]}\n    {actualRecognitionTextResults[i]}");
+                    mismatchCount++;
+                }
+            }
+            Assert.AreEqual(0, mismatchCount);
         } 
 
         [TestMethod]
@@ -93,14 +92,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.IsTrue(Config.AreResultsMatching(lastUtteranceNormalizedForm, TestData.English.Batman.Utterances.Last()), lastUtteranceNormalizedForm);
             Assert.IsTrue(Config.AreResultsMatching(lastUtteranceLexicalForm, TestData.English.Batman.Utterances.Last()), lastUtteranceLexicalForm);
 
-            string actualText = String.Join(" ", result.Select(r => r.Result.Text).ToList());
-            Assert.IsTrue(actualText.Contains("The most dangerous man on Earth"), actualText);
-            Assert.IsTrue(actualText.Contains("if not the world's greatest crimes"), actualText);
-            Assert.IsTrue(actualText.Contains("Batman has been repeatedly described as having genius level intellect"), actualText);
-            Assert.IsTrue(actualText.Contains("is nearly unparalleled"), actualText);
-            Assert.IsTrue(actualText.Contains("describes superman as"), actualText);
-            Assert.IsTrue(actualText.Contains("often gathering information under"), actualText);
-            Assert.IsTrue(actualText.Contains("and to break free"), actualText);
+            int mismatchCount = 0;
+            Assert.AreEqual(TestData.English.Batman.Utterances.Length, result.Count);
+            var actualRecognitionTextResults = result.Select(t => t.Result.Text).ToArray();
+            for (var i = 0; i < result.Count; i++)
+            {
+                if (!Config.AreResultsMatching(TestData.English.Batman.Utterances[i], actualRecognitionTextResults[i]))
+                {
+                    Console.WriteLine($"Recognition {i}:\n    {TestData.English.Batman.Utterances[i]}\n    {actualRecognitionTextResults[i]}");
+                    mismatchCount++;
+                }
+            }
+            Assert.AreEqual(0, mismatchCount);
         }
 
         [TestMethod]

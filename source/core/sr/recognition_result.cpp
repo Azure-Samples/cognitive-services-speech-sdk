@@ -77,16 +77,6 @@ void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, const wchar
     SPX_DBG_TRACE_VERBOSE("%s: resultId=%ls", __FUNCTION__, m_resultId.c_str());
 }
 
-void CSpxRecognitionResult::InitNoMatch(ResultType type)
-{
-    SPX_DBG_TRACE_FUNCTION();
-    m_reason = Reason::NoMatch;
-    m_type = type;
-
-    m_offset = 0;
-    m_duration = 0;
-}
-
 void CSpxRecognitionResult::InitError(const wchar_t* text, ResultType type)
 {
     SPX_DBG_TRACE_FUNCTION();

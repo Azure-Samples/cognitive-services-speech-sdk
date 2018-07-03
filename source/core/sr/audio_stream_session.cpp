@@ -26,6 +26,7 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
+std::chrono::minutes CSpxAudioStreamSession::m_recoAsyncTimeoutDuration = std::chrono::minutes(1);
 
 CSpxAudioStreamSession::CSpxAudioStreamSession() :
     m_sessionId(PAL::CreateGuid()),
@@ -459,12 +460,12 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::WaitForRecognitio
     std::unique_lock<std::mutex> lock(m_mutex);
 
     SPX_DBG_TRACE_VERBOSE("Waiting for Recognition...");
-    m_cv.wait_for(lock, std::chrono::seconds(m_recoAsyncTimeout), [&] { return !m_recoAsyncWaiting; });
+    m_cv.wait_for(lock, m_recoAsyncTimeoutDuration, [&] { return !m_recoAsyncWaiting; });
     SPX_DBG_TRACE_VERBOSE("Waiting for Recognition... Done!");
 
     if (!m_recoAsyncResult) // Deal with the timeout condition...
     {
-        SPX_DBG_TRACE_VERBOSE("%s: Timed out waiting for recognition... ", __FUNCTION__);
+        SPX_DBG_TRACE_VERBOSE("%s: Timed out waiting for recognition result... ", __FUNCTION__);
 
         // We'll need to stop the pump ourselves...
         if (ChangeState(SessionState::ProcessingAudio, SessionState::StoppingPump))
@@ -540,8 +541,8 @@ void CSpxAudioStreamSession::EnsureFireResultEvent()
      if (m_recoAsyncWaiting)
      {
          auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
-         auto noMatchResult = factory->CreateNoMatchResult(ResultType::Speech);
-         WaitForRecognition_Complete(noMatchResult);
+         auto timeoutCanceledResult = factory->CreateErrorResult(L"Timeout: no recognition result received.", ResultType::Speech);
+         WaitForRecognition_Complete(timeoutCanceledResult);
      }
 }
 
@@ -764,16 +765,6 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateFinalResult
 
     auto initResult = SpxQueryInterface<ISpxRecognitionResultInit>(result);
     initResult->InitFinalResult(resultId, text, type, offset, duration);
-
-    return result;
-}
-
-std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateNoMatchResult(ResultType type)
-{
-    auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
-
-    auto initResult = SpxQueryInterface<ISpxRecognitionResultInit>(result);
-    initResult->InitNoMatch(type);
 
     return result;
 }
@@ -1233,7 +1224,7 @@ void CSpxAudioStreamSession::WaitForKwsSingleShotRecognition()
     std::unique_lock<std::mutex> lock(m_mutex);
 
     SPX_DBG_TRACE_VERBOSE("Waiting for KwsSingleShot Recognition...");
-    m_cv.wait_for(lock, std::chrono::seconds(m_recoAsyncTimeout), [&] { return !m_recoAsyncWaiting; });
+    m_cv.wait_for(lock, m_recoAsyncTimeoutDuration, [&] { return !m_recoAsyncWaiting; });
     SPX_DBG_TRACE_VERBOSE("Waiting for KwsSingleShot Recognition... Done!");
 
     lock.unlock();

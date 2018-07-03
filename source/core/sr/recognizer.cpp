@@ -70,14 +70,16 @@ void CSpxRecognizer::Disable()
 CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxRecognizer::RecognizeAsync()
 {
     auto currentRecoMode = GetStringValueFromProperties(g_SPEECH_RecoMode, L"");
+    auto recoModeToSet = dynamic_cast<ISpxTranslationRecognizer *>(this) != nullptr ? g_SPEECH_RecoMode_Conversation : g_SPEECH_RecoMode_Interactive;
+
     if (currentRecoMode.empty())
     {
-        SetStringValueInProperties(g_SPEECH_RecoMode, g_SPEECH_RecoMode_Interactive);
+        SetStringValueInProperties(g_SPEECH_RecoMode, recoModeToSet);
     }
     else
     {
         // Since the mode is set during connection setup, no mode switch is allowed.
-        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(g_SPEECH_RecoMode_Interactive) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);
+        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(recoModeToSet) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);
     }
 
     return m_defaultSession->RecognizeAsync();

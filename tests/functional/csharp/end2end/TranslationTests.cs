@@ -32,7 +32,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             this.translationHelper = new TranslationTestsHelper(factory);
         }
 
-        [Ignore] // TODO ENABLE once again translation works.
         [TestMethod]
         public void TestLanguageProperties()
         {
@@ -78,46 +77,58 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         [TestMethod]
         [Ignore] // Bug 1294947
-        public async Task TranslationBatmanEnToDeFinalTextResult()
+        public async Task TranslationWeatherEnToDeFinalTextResult()
         {
             var toLanguages = new List<string>() { Language.DE };
 
-            Console.WriteLine(TestData.English.Batman.AudioFile);
-            var actualTranslation = await this.translationHelper.GetTranslationFinalResult(TestData.English.Batman.AudioFile, Language.EN, toLanguages);
+            Console.WriteLine(TestData.English.Weather.AudioFile);
+            var actualTranslation = await this.translationHelper.GetTranslationFinalResult(TestData.English.Weather.AudioFile, Language.EN, toLanguages);
             Assert.IsNotNull(actualTranslation);
 
-            Assert.AreEqual(TestData.English.Batman.Utterances[0], actualTranslation.Text);
-            Assert.AreEqual(TestData.German.Batman.Utterances[0], actualTranslation.Translations[Language.DE]);
+            Assert.AreEqual(TestData.English.Weather.Utterance, actualTranslation.Text);
+            Assert.AreEqual(TestData.German.Weather.Utterance, actualTranslation.Translations[Language.DE]);
         }
 
         [TestMethod]
         [Ignore]
-        public async Task TranslationBatmanEntoFrAndEsFinalTextResult()
+        public async Task TranslationWeatherEntoFrAndEsFinalTextResult()
         {
             var toLanguages = new List<string>() { Language.FR, Language.ES };
 
-            var actualTranslation = await this.translationHelper.GetTranslationFinalResult(TestData.English.Batman.AudioFile, Language.EN, toLanguages);
+            var actualTranslation = await this.translationHelper.GetTranslationFinalResult(TestData.English.Weather.AudioFile, Language.EN, toLanguages);
             Assert.IsNotNull(actualTranslation);
-            Assert.AreEqual(TestData.English.Batman.Utterances[0], actualTranslation.Text);
+            Assert.AreEqual(TestData.English.Weather.Utterance, actualTranslation.Text);
 
-            Assert.AreEqual(TestData.French.Batman.Utterances[0], actualTranslation.Translations[Language.FR]);
-            Assert.AreEqual(TestData.Spanish.Batman.Utterances[0], actualTranslation.Translations[Language.ES]);
+            Assert.AreEqual(TestData.French.Weather.Utterance, actualTranslation.Translations[Language.FR]);
+            Assert.AreEqual(TestData.Spanish.Weather.Utterance, actualTranslation.Translations[Language.ES]);
         }
 
         [Ignore] // TODO ENABLE AFTER FIXING BROKEN SERVICE
-        [TestMethod]
+        [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task TranslationBatmanEnToDeFinalTextResultContinuous()
         {
             List<string> toLanguages = new List<string>() { Language.DE };
 
             var actualTranslations = await this.translationHelper.GetTranslationFinalResultContinuous(TestData.English.Batman.AudioFile, Language.EN, toLanguages);
-            Assert.AreEqual(14, actualTranslations[ResultType.Text].Count);
+            Assert.AreEqual(TestData.German.Batman.Utterances.Length, actualTranslations[ResultType.Text].Count);
 
             var actualRecognitionTextResults = actualTranslations[ResultType.Text].Cast<TranslationTextResultEventArgs>().Select(t => t.Result.Text).ToList();
             var actualTranslationsTextResults = actualTranslations[ResultType.Text].Cast<TranslationTextResultEventArgs>().Select(t => t.Result.Translations[Language.DE]).ToList();
-
-            CollectionAssert.AreEquivalent(TestData.English.Batman.Utterances, actualRecognitionTextResults);
-            CollectionAssert.AreEquivalent(TestData.German.Batman.Utterances, actualTranslationsTextResults);
+            int mismatchCount = 0;
+            for (var i = 0; i < actualTranslations.Count; i++)
+            {
+                if (!Config.AreResultsMatching(TestData.English.Batman.Utterances[i], actualRecognitionTextResults[i]))
+                {
+                    Console.WriteLine($"Recognition {i}:\n    {TestData.English.Batman.Utterances[i]}\n    {actualRecognitionTextResults[i]}");
+                    mismatchCount++;
+                }
+                if (!Config.AreResultsMatching(TestData.German.Batman.Utterances[i], actualTranslationsTextResults[i]))
+                {
+                    Console.WriteLine($"Translation {i}:\n    {TestData.German.Batman.Utterances[i]}\n    {actualTranslationsTextResults[i]}");
+                    mismatchCount++;
+                }
+            }
+            Assert.AreEqual(0, mismatchCount);
         }
 
         [TestMethod]
@@ -138,8 +149,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.AreEqual(TestData.Spanish.FirstOne.Utterance, actualTranslationRecognition.Result.Translations[Language.ES]);
         }
 
-        [TestMethod]
-        [Ignore]
+        [TestMethod, TestCategory(TestCategory.LongRunning)]
+        [Ignore("Need need to update expected synthesis data. https://msasg.visualstudio.com/Skyman/_workitems/edit/1314220")]
         public async Task TranslationBatmanEnToDeKatjaSynthesisResultContinuous()
         {
             var toLanguages = new List<string>() { Language.DE };
@@ -210,7 +221,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore]
+        [Ignore("The current implementation also delivers events when calling RecognizeAsync().")] 
         public async Task TranslationAsyncRecognizerEventReceived()
         {
             var toLanguages = new List<string>() { Language.DE };

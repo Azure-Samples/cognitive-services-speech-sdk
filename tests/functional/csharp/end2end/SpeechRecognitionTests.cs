@@ -79,7 +79,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [Ignore] // TODO ENABLE AFTER FIXING BROKEN SERVICE
         [TestMethod, Timeout(testTimeout)]
         public async Task InvalidKeyHandledProperly()
         {

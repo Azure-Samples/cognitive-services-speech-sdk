@@ -170,7 +170,6 @@ public:
     // --- ISpxRecoResultFactory
     std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type, uint64_t offset, uint64_t duration) override;
     std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type, uint64_t offset, uint64_t duration) override;
-    std::shared_ptr<ISpxRecognitionResult> CreateNoMatchResult(enum ResultType type) override;
     std::shared_ptr<ISpxRecognitionResult> CreateErrorResult(const wchar_t* text, ResultType type) override;
 
     // --- ISpxRecoEngineAdapterSite (second part...)
@@ -305,7 +304,11 @@ private:
     std::mutex m_mutex;
     std::condition_variable m_cv;
 
-    const int m_recoAsyncTimeout = 10;
+    // 1 minute as timeout value for RecognizeAsync(), which should be sufficient even for translation in conversation mode.
+    // Note using std::chrono::minutes::max() could cause wait_for to exit straight away instead of 
+    // infinite timeout, because wait_for() in VS is implemented via wait_until() and a possible integer
+    // overflow could make new time < now.
+    static std::chrono::minutes m_recoAsyncTimeoutDuration;
     const int m_waitForAdatperCompletedSetFormatStopTimeout = 20;
     const int m_shutdownTimeoutInMs = 500;
 
