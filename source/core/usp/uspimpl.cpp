@@ -425,11 +425,15 @@ void Connection::Impl::Connect()
         ThrowRuntimeError("Failed to create transport request.");
     }
 
+#ifdef __linux__
     m_dnsCache = DnsCachePtr(DnsCacheCreate(), DnsCacheDestroy);
     if (!m_dnsCache)
     {
         ThrowRuntimeError("Failed to create DNS cache.");
     }
+#else
+    m_dnsCache = nullptr;
+#endif
 
     TransportSetDnsCache(m_transport.get(), m_dnsCache.get());
     TransportSetCallbacks(m_transport.get(), OnTransportError, OnTransportData);
