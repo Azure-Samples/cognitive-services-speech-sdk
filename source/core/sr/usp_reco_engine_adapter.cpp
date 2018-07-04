@@ -877,7 +877,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
     }
     for (const auto& it : resultMap)
     {
-        SPX_DBG_TRACE_VERBOSE("          , tranlated to %ls: %ls,\n", it.first.c_str(), it.second.c_str());
+        SPX_DBG_TRACE_VERBOSE("          , translated to %ls: %ls,\n", it.first.c_str(), it.second.c_str());
     }
 #endif
 

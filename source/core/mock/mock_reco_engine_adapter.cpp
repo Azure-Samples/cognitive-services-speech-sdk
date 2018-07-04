@@ -122,8 +122,7 @@ void CSpxMockRecoEngineAdapter::TermFormat()
 
 void CSpxMockRecoEngineAdapter::End()
 {
-    SPX_DBG_ASSERT(GetSite());
-    GetSite()->AdapterCompletedSetFormatStop(this);
+    InvokeOnSite([this](const SitePtr& site) { site->AdapterCompletedSetFormatStop(this); });
 }
 
 void CSpxMockRecoEngineAdapter::FireIntermediateResult()
@@ -139,10 +138,12 @@ void CSpxMockRecoEngineAdapter::FireIntermediateResult()
     m_cbFiredLastIntermediate = offset;
     m_cbFireNextIntermediate += m_numMsBetweenIntermediates * m_format->nAvgBytesPerSec / 1000;
 
-    auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateIntermediateResult(nullptr,  resultText.c_str(), ResultType::Speech, offset, m_cbFireNextIntermediate - offset);
-
-    GetSite()->FireAdapterResult_Intermediate(this, offset, result);
+    InvokeOnSite([&](const SitePtr& site)
+    {
+        auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
+        auto result = factory->CreateIntermediateResult(nullptr, resultText.c_str(), ResultType::Speech, offset, m_cbFireNextIntermediate - offset);
+        site->FireAdapterResult_Intermediate(this, offset, result);
+    });
 }
 
 void CSpxMockRecoEngineAdapter::FireFinalResult()
@@ -163,10 +164,12 @@ void CSpxMockRecoEngineAdapter::FireFinalResult()
 
     FireSpeechEndDetected();
 
-    auto factory = SpxQueryService<ISpxRecoResultFactory>(GetSite());
-    auto result = factory->CreateFinalResult(ResultType::Speech, nullptr, Reason::Recognized, resultText.c_str(), offset, m_cbFireNextFinalResult - offset);
-
-    GetSite()->FireAdapterResult_FinalResult(this, offset, result);
+    InvokeOnSite([&](const SitePtr& site)
+    {
+        auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
+        auto result = factory->CreateFinalResult(ResultType::Speech, nullptr, Reason::Recognized, resultText.c_str(), offset, m_cbFireNextFinalResult - offset);
+        site->FireAdapterResult_FinalResult(this, offset, result);
+    });
 }
 
 void CSpxMockRecoEngineAdapter::EnsureFireFinalResult()
@@ -181,15 +184,20 @@ void CSpxMockRecoEngineAdapter::EnsureFireFinalResult()
 void CSpxMockRecoEngineAdapter::FireSpeechStartDetected()
 {
     SPX_DBG_TRACE_VERBOSE("%s: offset=%llu", __FUNCTION__, m_cbAudioProcessed);
-
-    GetSite()->AdapterDetectedSpeechStart(this, m_cbAudioProcessed);
+    InvokeOnSite([this](const SitePtr& site)
+    {
+        site->AdapterDetectedSpeechStart(this, m_cbAudioProcessed);
+    });
 }
 
 void CSpxMockRecoEngineAdapter::FireSpeechEndDetected()
 {
     SPX_DBG_TRACE_VERBOSE("%s: offset=%llu", __FUNCTION__, m_cbAudioProcessed);
 
-    GetSite()->AdapterDetectedSpeechEnd(this, m_cbAudioProcessed);
+    InvokeOnSite([this](const SitePtr& site)
+    {
+        site->AdapterDetectedSpeechEnd(this, m_cbAudioProcessed);
+    });
 }
 
 

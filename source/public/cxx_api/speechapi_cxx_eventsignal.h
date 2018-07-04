@@ -18,6 +18,9 @@ namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 
+// Forward declaration for friends.
+namespace Translation { class TranslationRecognizer; }
+namespace Impl { class ISpxRecognizerEvents; }
 
 /// <summary>
 /// Clients can connect to the event signal to receive events, or disconnect from the event signal to stop receiving events.
@@ -31,32 +34,15 @@ template <class T>
 class EventSignal
 {
 public:
-
-    /// <summary>
-    /// Type for callbacks used when any client connects to the signal (the number of connected clients changes from zero to one) or
-    /// the last client disconnects from the signal (the number of connected clients changes from one to zero).
-    /// </summary>
-    using NotifyCallback_Type = std::function<void(EventSignal<T>&)>;
-
     /// <summary>
     /// Constructs an event signal with empty register and disconnect callbacks.
     /// <summary>
     EventSignal() :
         m_connectedCallback(nullptr),
-        m_disconnectedCallback(nullptr)
+        m_disconnectedCallback(nullptr),
+        m_disconnectUnderLock(false)
     {
-    };
-
-    /// <summary>
-    /// Constructor.
-    /// <summary>
-    /// <param name="connected">Callback to invoke if the number of connected clients changes from zero to one.</param>
-    /// <param name="disconnected">Callback to invoke if the number of connected clients changes from one to zero.</param>
-    EventSignal(NotifyCallback_Type connected, NotifyCallback_Type disconnected) :
-        m_connectedCallback(connected),
-        m_disconnectedCallback(disconnected)
-    {
-    };
+    }
 
     /// <summary>
     /// Destructor.
@@ -72,7 +58,7 @@ public:
             m_disconnectedCallback = nullptr;
         }
         DisconnectAll();
-    };
+    }
 
     /// <summary>
     /// Callback type that is used for signalling the event to connected clients.
@@ -88,7 +74,7 @@ public:
     {
         Connect(callback);
         return *this;
-    };
+    }
 
     /// <summary>
     /// Subtraction assignment operator overload.
@@ -99,7 +85,7 @@ public:
     {
         Disconnect(callback);
         return *this;
-    };
+    }
 
     /// <summary>
     /// Function call operator.
@@ -127,7 +113,7 @@ public:
         {
             m_connectedCallback(*this);
         }
-    };
+    }
 
     /// <summary>
     /// Disconnects given callback.
@@ -146,9 +132,13 @@ public:
 
         if (m_callbacks.empty() && prevSize > 0 && m_disconnectedCallback != nullptr)
         {
-            m_disconnectedCallback(*this);
+            auto disconnectedCallback = m_disconnectedCallback;
+            if (!m_disconnectUnderLock)
+                lock.unlock();
+
+            disconnectedCallback(*this);
         }
-    };
+    }
 
     /// <summary>
     /// Disconnects all registered callbacks.
@@ -162,9 +152,13 @@ public:
 
         if (prevSize > 0 && m_disconnectedCallback != nullptr)
         {
-            m_disconnectedCallback(*this);
+            auto disconnectedCallback = m_disconnectedCallback;
+            if (!m_disconnectUnderLock)
+                lock.unlock();
+
+            disconnectedCallback(*this);
         }
-    };
+    }
 
     /// <summary>
     /// Signals the event with given arguments <paramref name="t"/> to all connected callbacks.
@@ -188,18 +182,41 @@ public:
                 c3(t);
             }
         }
-    };
+    }
 
     /// <summary>
     /// Checks if a callback is connected.
     /// <summary>
     /// <returns>true if a callback is connected</returns>
-    bool IsConnected() const 
+    bool IsConnected() const
     {
+        std::unique_lock<std::recursive_mutex> lock(m_mutex);
         return !m_callbacks.empty();
-    };
+    }
 
 private:
+    friend class ::Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer;
+    friend class ::Microsoft::CognitiveServices::Speech::Impl::ISpxRecognizerEvents;
+    template <class, class> friend class AsyncRecognizer;
+
+    /// <summary>
+    /// Type for callbacks used when any client connects to the signal (the number of connected clients changes from zero to one) or
+    /// the last client disconnects from the signal (the number of connected clients changes from one to zero).
+    /// </summary>
+    using NotifyCallback_Type = std::function<void(EventSignal<T>&)>;
+
+    /// <summary>
+    /// Constructor.
+    /// <summary>
+    /// <param name="connected">Callback to invoke if the number of connected clients changes from zero to one.</param>
+    /// <param name="disconnected">Callback to invoke if the number of connected clients changes from one to zero.</param>
+    /// <param name="disconnectUnderLock">Flag indicating whether disconnect callback should be called under lock.</param>
+    EventSignal(NotifyCallback_Type connected, NotifyCallback_Type disconnected, bool disconnectUnderLock) :
+        m_connectedCallback(connected),
+        m_disconnectedCallback(disconnected),
+        m_disconnectUnderLock(disconnectUnderLock)
+    {
+    }
 
     EventSignal(const EventSignal&) = delete;
     EventSignal(const EventSignal&&) = delete;
@@ -207,10 +224,12 @@ private:
     EventSignal& operator=(const EventSignal&) = delete;
 
     std::list<CallbackFunction> m_callbacks;
-    std::recursive_mutex m_mutex;
+    mutable std::recursive_mutex m_mutex;
 
     NotifyCallback_Type m_connectedCallback;
     NotifyCallback_Type m_disconnectedCallback;
+
+    bool m_disconnectUnderLock;
 };
 
 

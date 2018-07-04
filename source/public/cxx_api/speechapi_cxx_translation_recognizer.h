@@ -134,7 +134,7 @@ public:
         BaseType(hreco),
         // Todo: OnTranslationError(m_onTranslationError),
         Parameters(hreco),
-        TranslationSynthesisResultEvent(GetTranslationAudioEventConnectionsChangedCallback(), GetTranslationAudioEventConnectionsChangedCallback())
+        TranslationSynthesisResultEvent(GetTranslationAudioEventConnectionsChangedCallback(), GetTranslationAudioEventConnectionsChangedCallback(), false)
     {
         SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     }

@@ -48,6 +48,7 @@ public:
 
 
 private:
+    using SitePtr = std::shared_ptr<ISpxRecoEngineAdapterSite>;
 
     CSpxMockRecoEngineAdapter(const CSpxMockRecoEngineAdapter&) = delete;
     CSpxMockRecoEngineAdapter(const CSpxMockRecoEngineAdapter&&) = delete;

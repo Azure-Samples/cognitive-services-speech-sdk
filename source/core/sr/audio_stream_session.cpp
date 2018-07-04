@@ -95,6 +95,10 @@ void CSpxAudioStreamSession::Term()
     SpxTermAndClear(m_kwsAdapter);
     SpxTermAndClear(m_recoAdapter);
     SpxTermAndClear(m_luAdapter);
+
+    if (!writeLock.owns_lock())
+        writeLock.lock();
+
     m_audioProcessor = nullptr;
 }
 
@@ -1118,7 +1122,11 @@ void CSpxAudioStreamSession::InitKwsEngineAdapter(std::shared_ptr<ISpxKwsModel> 
 
 void CSpxAudioStreamSession::ProcessAudioDataNow(AudioData_Type data, uint32_t size)
 {
-    m_audioProcessor->ProcessAudio(data, size);
+    ReadLock_Type readLock(m_combinedAdapterAndStateMutex);
+    auto processor = m_audioProcessor;
+    readLock.unlock();
+    if(processor)
+        m_audioProcessor->ProcessAudio(data, size);
 }
 
 void CSpxAudioStreamSession::ProcessAudioDataLater(AudioData_Type audio, uint32_t size)
@@ -1333,14 +1341,20 @@ void CSpxAudioStreamSession::InformAdapterSetFormatStopping(SessionState comingF
     if (comingFromState == SessionState::StoppingPump)
     {
         SPX_DBG_TRACE_VERBOSE("%s: ProcessingAudio - size=%d", __FUNCTION__, 0);
-        m_audioProcessor->ProcessAudio(nullptr, 0);
+        if (m_audioProcessor)
+        {
+            m_audioProcessor->ProcessAudio(nullptr, 0);
+        }
     }
 
     // Then we can finally tell it we're done, by sending a nullptr WAVEFORMAT
     if (!m_expectAdapterStartedTurn && !m_expectAdapterStoppedTurn)
     {
         SPX_DBG_TRACE_VERBOSE("%s: SetFormat(nullptr)", __FUNCTION__);
-        m_audioProcessor->SetFormat(nullptr);
+        if (m_audioProcessor)
+        {
+            m_audioProcessor->SetFormat(nullptr);
+        }
         m_adapterAudioMuted = false;
     }
 }

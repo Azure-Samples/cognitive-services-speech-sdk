@@ -516,14 +516,13 @@ public:
 protected:
 
     ISpxRecognizerEvents(RecoEvent_Type::NotifyCallback_Type connectedCallback, RecoEvent_Type::NotifyCallback_Type disconnectedCallback) :
-        SpeechStartDetected(connectedCallback, disconnectedCallback),
-        SpeechEndDetected(connectedCallback, disconnectedCallback),
-        IntermediateResult(connectedCallback, disconnectedCallback),
-        FinalResult(connectedCallback, disconnectedCallback),
-        Canceled(connectedCallback, disconnectedCallback)
+        SpeechStartDetected(connectedCallback, disconnectedCallback, true),
+        SpeechEndDetected(connectedCallback, disconnectedCallback, true),
+        IntermediateResult(connectedCallback, disconnectedCallback, true),
+        FinalResult(connectedCallback, disconnectedCallback, true),
+        Canceled(connectedCallback, disconnectedCallback, true)
     {
     }
-
 
 private:
 
