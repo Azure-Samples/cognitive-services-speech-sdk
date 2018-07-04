@@ -30,4 +30,7 @@ $ARGV =~ m(.*/$rePkgConfig$) && s/(<package id="$rePkgId" version=")([^"]*)"/$1$
 $ARGV =~ m(.*/(?:$reCsProj|$reVcxProj)$) && do {
   # <HintPath>...<HintPath>, <Import Project ... />, <Error ... />
   s((["'>](?:\.\.\\)*packages\\$rePkgId\.)[^\\]*\\)($1$version\\)g;
+
+  # <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="X" />
+  s((?<=<PackageReference Include="$rePkgId" Version=")[^"]*)($version)g;
 };

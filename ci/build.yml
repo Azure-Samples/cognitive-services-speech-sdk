@@ -240,11 +240,10 @@ phases:
     inputs:
       artifactName: Linux
       downloadPath: $(System.ArtifactsDirectory)\In
-  - task: NuGetCommand@2
+  - task: NuGetToolInstaller@0
+    displayName: Use NuGet 4.6.*
     inputs:
-      command: custom
-      arguments: help
-    displayName: Set up NUGETEXETOOLPATH
+      versionSpec: 4.6
   - bash: |
       . ci/functions.sh
       vsts_setvar ZipBasename "SpeechSDK-Samples-$(SPEECHSDK_SEMVER2NOMETA)"
@@ -283,11 +282,10 @@ phases:
       script: |
          ./ci/nuget/restore-from-local.sh "$(cygpath -au "$(Build.ArtifactStagingDirectory)/Windows")" public_samples
     displayName: 'Test - restore packages'
+  # Note: for now building any platform. In the future, should build all available.
   - task: VSBuild@1
     inputs:
       solution: 'public_samples/**/*.sln'
-      platform: x64
-      configuration: Release
       maximumCpuCount: true
     displayName: 'Test - build solutions (x64 Release only)'
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
