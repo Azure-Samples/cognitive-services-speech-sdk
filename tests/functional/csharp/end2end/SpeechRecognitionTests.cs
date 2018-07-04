@@ -18,7 +18,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     {
         private static string deploymentId;
         private SpeechRecognitionTestsHelper speechRecognitionTestsHelper;
-        private const int testTimeout = 90000;
 
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
@@ -34,7 +33,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [Ignore("TODO https://msasg.visualstudio.com/Skyman/_workitems/edit/1269097")]
-        [TestMethod, Timeout(testTimeout)]
+        [TestMethod]
         public async Task ValidBaselineRecognition()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
@@ -47,7 +46,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod, Timeout(testTimeout)] //TODO: Remove Test after Bug 1269097 is fixed
+        [TestMethod] //TODO: Remove Test after Bug 1269097 is fixed
         public async Task ContinuousValidBaselineRecognition()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
@@ -57,7 +56,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [Ignore("TODO https://msasg.visualstudio.com/Skyman/_workitems/edit/1269097")]
-        [TestMethod, Timeout(testTimeout)]
+        [TestMethod]
         public async Task ValidCustomRecognition()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
@@ -69,7 +68,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod, Timeout(testTimeout)] //TODO: Remove Test after Bug 1269097 is fixed
+        [TestMethod] //TODO: Remove Test after Bug 1269097 is fixed
         public async Task ContinuousValidCustomRecognition()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
@@ -79,7 +78,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod, Timeout(testTimeout)]
+        [TestMethod]
         public async Task InvalidKeyHandledProperly()
         {
             var factory = SpeechFactory.FromSubscription("invalidKey", region);
@@ -92,7 +91,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod, Timeout(testTimeout)]
+        [TestMethod]
         public async Task InvalidRegionHandledProperly()
         {
             var factory = SpeechFactory.FromSubscription(subscriptionKey, "invalidRegion");
@@ -105,13 +104,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod, Timeout(testTimeout)]
+        [TestMethod]
         public void InvalidInputFileHandledProperly()
         {
             Assert.ThrowsException<ApplicationException>(() => factory.CreateSpeechRecognizerWithFileInput("invalidFile.wav"));
         }
 
-        [TestMethod, Timeout(testTimeout)]
+        [TestMethod]
         public async Task InvalidDeploymentIdHandledProperly()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
@@ -125,7 +124,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [Ignore("TODO https://msasg.visualstudio.com/Skyman/_workitems/edit/1269097")]
-        [TestMethod, Timeout(testTimeout)]
+        [TestMethod]
         public async Task GermanRecognition()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.German.FirstOne.AudioFile, Language.DE_DE))
@@ -136,7 +135,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod, Timeout(testTimeout)] //TODO: Remove Test after Bug 1269097 is fixed
+        [TestMethod] //TODO: Remove Test after Bug 1269097 is fixed
         public async Task ContinuousGermanRecognition()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.German.FirstOne.AudioFile, Language.DE_DE))
@@ -145,7 +144,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod, TestCategory(TestCategory.LongRunning), Timeout(testTimeout)]
+        [TestMethod, TestCategory(TestCategory.LongRunning)]
         [Ignore("TODO https://msasg.visualstudio.com/Skyman/_workitems/edit/1304778")]
         public async Task ContinuousRecognitionOnLongFileInput()
         {
@@ -173,7 +172,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod, Timeout(testTimeout)]
+        [TestMethod]
         public async Task SubscribeToManyEventHandlers()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
@@ -194,7 +193,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod, Timeout(testTimeout)]
+        [TestMethod]
         public async Task UnsubscribeFromEventHandlers()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
@@ -212,7 +211,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod, Timeout(testTimeout)]
+        [TestMethod]
         public async Task ResubscribeToEventHandlers()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
@@ -246,7 +245,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [TestMethod, Timeout(testTimeout)]
+        [TestMethod]
         public async Task ChangeSubscriptionDuringRecognition()
         {
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))

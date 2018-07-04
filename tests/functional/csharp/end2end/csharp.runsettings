@@ -1,8 +1,11 @@
 <RunSettings>
+    <MSTestV2>
+        <TestTimeout>120000</TestTimeout>
+    </MSTestV2>
     <TestRunParameters>
         <Parameter name="UnifiedSpeechSubscriptionKey" value=""/>
         <Parameter name="Region" value="westus"/>
         <Parameter name="DeploymentId" value=""/>
-        <Parameter name="InputDir" value="..\..\..\tests\input\"/>  
-    </TestRunParameters>  
+        <Parameter name="InputDir" value="..\..\..\tests\input\"/>
+    </TestRunParameters>
 </RunSettings>
