@@ -36,6 +36,7 @@ Dockerfile text
 *.yml text
 *.runsettings text
 *.template text
+*.xml text
 
 # Bash and "git apply" only like Unix line endings
 *.sh text eol=lf

@@ -60,6 +60,8 @@ ipch/
 
 #docfx related files
 ci/docfx/obj*/**/*
+ci/android/aar
+ci/android/aar-debug
 bindings/csharp/obj*/**/*
 
 # Doxygen

@@ -8,6 +8,35 @@
 resources:
 - repo: self
   clean: true
+
+variables:
+  SIGN_PARAMS_JAVA: |
+    [
+      {
+        "keyCode": "CP-232612-Java",
+        "operationSetCode": "JavaSign",
+        "parameters": [
+        {
+          "parameterName": "SigAlg",
+          "parameterValue": "SHA256withRSA"
+        },
+        {
+          "parameterName": "Timestamp",
+          "parameterValue": "-tsa http://sha256timestamp.ws.symantec.com/sha256/timestamp"
+        }
+        ],
+        "toolName": "sign",
+        "toolVersion": "1.0"
+      },
+      {
+        "keyCode": "CP-232612-Java",
+        "operationSetCode": "JavaVerify",
+        "parameters": [ ],
+        "toolName": "sign",
+        "toolVersion": "1.0"
+      }
+    ]
+
 phases:
 
 - phase: Pre
@@ -201,6 +230,7 @@ phases:
       runInParallel: False
       vsTestVersion: latest
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+    timeoutInMinutes: 7
   - task: PublishTestResults@2
     inputs:
       testResultsFiles: '**/test-*.xml'
@@ -423,32 +453,7 @@ phases:
       FolderPath: 'build/lib'
       Pattern: com.microsoft.cognitiveservices.speech.jar
       signConfigType: inlineSignParams
-      inlineOperation: |
-       [
-         {
-           "keyCode": "CP-232612-Java",
-           "operationSetCode": "JavaSign",
-           "parameters": [
-           {
-             "parameterName": "SigAlg",
-             "parameterValue": "SHA256withRSA"
-           },
-           {
-             "parameterName": "Timestamp",
-             "parameterValue": "-tsa http://sha256timestamp.ws.symantec.com/sha256/timestamp"
-           }
-           ],
-           "toolName": "sign",
-           "toolVersion": "1.0"
-         },
-         {
-           "keyCode": "CP-232612-Java",
-           "operationSetCode": "JavaVerify",
-           "parameters": [ ],
-           "toolName": "sign",
-           "toolVersion": "1.0"
-         }
-       ]
+      inlineOperation: $(SIGN_PARAMS_JAVA)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: 'Create artifact: Android'
@@ -462,6 +467,96 @@ phases:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/Out'
       ArtifactName: Android
       publishLocation: Container
+
+- phase: AndroidPackage
+  dependsOn: AndroidBuild
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidPackage '))
+  variables:
+    ARTIFACT_ID: client-sdk-android
+    GROUP_ID: com.microsoft.cognitiveservices.speech
+  queue:
+    name: Hosted VS2017
+    timeoutInMinutes: 30
+  steps:
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set variables
+    inputs:
+      type: FilePath
+      scriptPath: 'ci/set-variables.sh'
+  - bash: |
+      . ci/functions.sh
+      ArtifactRelativePath="maven/${GROUP_ID//\./\/}/$ARTIFACT_ID/$SPEECHSDK_SEMVER2NOMETA"
+      vsts_setvar ArtifactRelativePath "$ArtifactRelativePath"
+      mkdir -p "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/Out/Android/$(ArtifactRelativePath)
+    displayName: 'Set variables and create directory hierarchy'
+  - task: DownloadBuildArtifacts@0
+    inputs:
+      artifactName: Android
+      downloadPath: $(System.ArtifactsDirectory)/In
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Build .aar
+    inputs:
+      type: FilePath
+      scriptPath: './ci/android/build-aar.sh'
+      args: '"$(SPEECHSDK_SEMVER2NOMETA)" "$(SPEECHSDK_VERSION_CODE)" "$(Build.ArtifactStagingDirectory)/In/Android" "$(Build.ArtifactStagingDirectory)/Out"'
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: Sign speech-sdk-debug.aar
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      FolderPath: '$(Build.ArtifactStagingDirectory)/Out'
+      Pattern: '*.aar'
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_JAVA)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  # Note: "The file extension should match the selected archive type." - so we are renaming afterwards
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: './ci/android/aar'
+      includeRootFolder: false
+      archiveType: zip
+      archiveFile: $(Build.ArtifactStagingDirectory)/Out/Android/$(ArtifactRelativePath)/$(ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA).zip
+    displayName: 'Create .zip (Release)'
+  # Just archive the debug version for now
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: './ci/android/aar-debug'
+      includeRootFolder: false
+      archiveType: zip
+      archiveFile: $(Build.ArtifactStagingDirectory)/Out/Android/$(ARTIFACT_ID)-debug-$(SPEECHSDK_SEMVER2NOMETA).zip
+    displayName: 'Create .zip (Debug)'
+  - task: Bash@3
+    displayName: 'Rename .zip -> .aar'
+    inputs:
+      targetType: inline
+      script: |
+        mv "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/Out/Android/$(ArtifactRelativePath)/$(ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA).{zip,aar}
+        mv "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/Out/Android/$(ARTIFACT_ID)-debug-$(SPEECHSDK_SEMVER2NOMETA).{zip,aar}
+  - task: Bash@3
+    displayName: 'Create .pom'
+    inputs:
+      targetType: inline
+      script: |
+        cat >> "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/Out/Android/$(ArtifactRelativePath)/$(ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA).pom <<POM
+        <?xml version="1.0" encoding="UTF-8"?>
+        <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <modelVersion>4.0.0</modelVersion>
+          <groupId>$(GROUP_ID)</groupId>
+          <artifactId>$(ARTIFACT_ID)</artifactId>
+          <version>$(SPEECHSDK_SEMVER2NOMETA)</version>
+          <packaging>aar</packaging>
+          <description>
+             Microsoft Cognitive Services Speech SDK for Android.
+             Documentation available at https://aka.ms/csspeech.
+          </description>
+        </project>
+        POM
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/Out'
+      ArtifactName: Android
+      publishLocation: Container
+    displayName: 'Publish .aar and .pom'
 
 - phase: LinuxBuild
   dependsOn: Pre

@@ -29,7 +29,10 @@
 #   release.
 #   For example: release/0.3.0 is created, version.txt contents are changed to
 #   "0.3.0-rc1", and further along to "0.3.0-rc2", and finally to "0.3.0" from which the
-#   release can be created./
+#   release can be created.
+# * SPEECHSDK_VERSION_CODE - (Android) version code, an integer that linearly
+#   orders versions for production builds. (Currently used in the Android Library, not sure
+#   if it's strictly required there)
 # * SPEECHSDK_SEMVER2NOMETA - same as above, without build meta data
 #   We are currently using this (and not SPEECHSDK_SEMVER2) for NuGet packages,
 #   since VSTS package management does not support build meta information.
@@ -40,7 +43,7 @@
 #     Defaults to our CarbonPre VSTS feed for 'dev' builds, Carbon otherwise.
 # * SPEECHSDK_BUILD_AGENT_PLATFORM - can be "Windows-x64", "OSX-x64", "Linux-x64"
 # * SPEECHSDK_BUILD_PHASES - space-separated and space-enclosed list of build phases to run
-#     Default: " WindowsBuild WindowsNuGet LinuxBuild LinuxDrop OsxBuild AndroidBuild Doxygen "
+#     Default: " WindowsBuild WindowsNuGet LinuxBuild LinuxDrop OsxBuild AndroidBuild AndroidPackage Doxygen "
 #     Check phase condition in build.yml for valid phase names.
 # * SPEECHSDK_RUN_TESTS - whether to run tests. Can be 'true' (default) or 'false'.
 #
@@ -121,15 +124,69 @@ else
 fi
 
 if [[ $SPEECHSDK_BUILD_TYPE != prod && ! $VERSION =~ ^([0-9]+\.){2}[0-9]+$ ]]; then
-  echo Invalid version, should be MAJOR.MINOR.PATCH: $VERSION
-  exit 1
+   echo Invalid version, should be MAJOR.MINOR.PATCH: $VERSION
+   exit 1
 elif [[ ! $VERSION =~ ^([0-9]+\.){2}[0-9]+(-(alpha|beta|rc)\.[0-9]+)?$ ]]; then
-  echo Invalid version, should be MAJOR.MINOR.PATCH with optional alpha/beta/rc pre-release: $VERSION
+   echo Invalid version, should be MAJOR.MINOR.PATCH with optional alpha/beta/rc pre-release: $VERSION
   exit 1
 fi
 
+# Must succeed with checks above:
+[[ $VERSION =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-(alpha|beta|rc)\.([0-9]+))?$ ]]
+
+if [[ $SPEECHSDK_BUILD_TYPE == prod ]]; then
+  # Note: The greatest value Google Play allows for versionCode is 2100000000.
+  # We assume we are bound to this below.
+  # Version code schema: 1AAABBCCDD
+  # where
+  #  * AAA - MAJOR
+  #  * BB - MINOR
+  #  * CC - PATCH
+  #  * DD - following encoding:
+  #    * 1..30 for alpha-DD,
+  #    * 31..60 for beta-(DD - 30),
+  #    * 61..90 for rc-(DD - 60),
+  #    * 99 for final (no pre-release tag)
+  MAJOR_VERSION="${BASH_REMATCH[1]}"
+  MINOR_VERSION="${BASH_REMATCH[2]}"
+  PATCH_VERSION="${BASH_REMATCH[3]}"
+
+  if [[ -n ${BASH_REMATCH[4]} ]]; then
+    case ${BASH_REMATCH[5]} in
+      alpha)
+        LAST_OFFSET=$((0 + ${BASH_REMATCH[6]}))
+        ;;
+      beta)
+        LAST_OFFSET=$((30 + ${BASH_REMATCH[6]}))
+        ;;
+      rc)
+        LAST_OFFSET=$((60 + ${BASH_REMATCH[6]}))
+        ;;
+    esac
+  else
+    # Final
+    LAST_OFFSET=99
+  fi
+  SPEECHSDK_VERSION_CODE=$((
+    1000000000 +
+    1000000 * $MAJOR_VERSION +
+    10000 * $MINOR_VERSION +
+    100 * $PATCH_VERSION +
+    $LAST_OFFSET))
+else
+  # These are non-official builds. Pick something based on build ID, plus the
+  # type (int or dev). This doesn't need to be perfect, but at least, nightly
+  # (timed int builds) builds should order well wrt. themselves and dev builds.
+  if [[ $SPEECHSDK_BUILD_TYPE == int ]]; then
+    SPEECHSDK_VERSION_CODE=$((500000000 + $_BUILD_ID))
+  else
+    # dev
+    SPEECHSDK_VERSION_CODE=$_BUILD_ID
+  fi
+fi
+
 # Build phases to run (currently: all for all build types)
-SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsNuGet LinuxBuild LinuxDrop OsxBuild AndroidBuild Doxygen "
+SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsNuGet LinuxBuild LinuxDrop OsxBuild AndroidBuild AndroidPackage Doxygen "
 
 # Running tests is default
 SPEECHSDK_RUN_TESTS=true
@@ -171,15 +228,16 @@ set +x
 # build definition will pickup SPEECHSDK_SEMVER2NOMETA for the NuGet.
 
 for var in \
-  SPEECHSDK_MAIN_BUILD \
+  SPEECHSDK_BUILD_AGENT_PLATFORM \
   SPEECHSDK_BUILD_TYPE \
+  SPEECHSDK_MAIN_BUILD \
+  SPEECHSDK_NUGET_VSTS_PUSH \
+  SPEECHSDK_RUN_TESTS \
   SPEECHSDK_SEMVER2 \
   SPEECHSDK_SEMVER2NOMETA \
   SPEECHSDK_SIGN \
-  SPEECHSDK_NUGET_VSTS_PUSH \
+  SPEECHSDK_VERSION_CODE \
   SPEECHSDK_VSTS_FEED \
-  SPEECHSDK_BUILD_AGENT_PLATFORM \
-  SPEECHSDK_RUN_TESTS \
   ; \
 do
   overrideVar=OVERRIDE_$var
