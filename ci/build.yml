@@ -189,6 +189,7 @@ phases:
       args: './bin/$(BuildConfiguration) $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
       cwd: 'build/$(BuildPlatform)'
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+    timeoutInMinutes: 7
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Carbonx tests
     inputs:
@@ -197,6 +198,7 @@ phases:
       args: './bin/$(BuildConfiguration) $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
       cwd: 'build/$(BuildPlatform)'
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+    timeoutInMinutes: 7
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: UspConsole tests
     inputs:
@@ -205,6 +207,7 @@ phases:
       args: './bin/$(BuildConfiguration) $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
       cwd: 'build/$(BuildPlatform)'
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+    timeoutInMinutes: 7
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Carbon CSharp tests
     inputs:
@@ -213,6 +216,7 @@ phases:
       args: './bin/$(BuildConfiguration) $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
       cwd: 'build/$(BuildPlatform)'
     condition: and(eq(variables['BuildConfiguration'], 'Release'),eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
+    timeoutInMinutes: 7
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Run Java (JUnit) tests
     inputs:
@@ -221,6 +225,7 @@ phases:
       args: '$(Build.Repository.LocalPath) ./ $(BuildConfiguration) $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
       cwd: 'build/$(BuildPlatform)'
     condition: and(eq(variables['BuildConfiguration'], 'Release'), eq(variables['BuildPlatform'], 'x64'),eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
+    timeoutInMinutes: 7
   - task: VSTest@1
     displayName: Run C# tests
     inputs:
@@ -614,6 +619,7 @@ phases:
       args: './bin $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
       cwd: build
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+    timeoutInMinutes: 7
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Carbonx tests
     inputs:
@@ -622,6 +628,7 @@ phases:
       args: './bin $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
       cwd: build
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+    timeoutInMinutes: 7
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: UspConsole tests
     inputs:
@@ -630,6 +637,7 @@ phases:
       args: './bin $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
       cwd: build
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+    timeoutInMinutes: 7
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Run Java (JUnit) tests
     inputs:
@@ -638,6 +646,7 @@ phases:
       args: '$(Build.Repository.LocalPath) ./ "" $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
       cwd: build
     condition: and(eq(variables['BuildConfiguration'], 'Release'), eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
+    timeoutInMinutes: 7
   - task: PublishTestResults@2
     inputs:
       testResultsFiles: '**/test-*.xml'
@@ -796,6 +805,7 @@ phases:
       args: './bin $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
       cwd: build
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+    timeoutInMinutes: 7
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Carbonx tests
     inputs:
@@ -804,6 +814,7 @@ phases:
       args: './bin $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
       cwd: build
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+    timeoutInMinutes: 7
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: UspConsole tests
     inputs:
@@ -812,6 +823,7 @@ phases:
       args: './bin $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
       cwd: build
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
+    timeoutInMinutes: 7
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Run Java (JUnit) tests
     inputs:
@@ -820,6 +832,7 @@ phases:
       args: '$(Build.Repository.LocalPath) ./ "" $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
       cwd: build
     condition: and(eq(variables['BuildConfiguration'], 'Release'), eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
+    timeoutInMinutes: 7
   - task: PublishTestResults@2
     inputs:
       testResultsFiles: '**/test-*.xml'
