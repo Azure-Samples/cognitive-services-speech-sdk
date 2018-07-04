@@ -5,7 +5,9 @@
 
 // <toplevel>
 using System;
+#if NET461
 using System.Media;
+#endif
 using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -80,11 +82,13 @@ namespace MicrosoftSpeechSDKSamples
                     if (e.Result.Status == SynthesisStatus.Success)
                     {
                         Console.WriteLine($"Synthesis result received. Size of audio data: {e.Result.Audio.Length}");
+                        #if NET461
                         using (var m = new MemoryStream(e.Result.Audio))
                         {
                             SoundPlayer simpleSound = new SoundPlayer(m);
                             simpleSound.PlaySync();
                         }
+                        #endif
                     }
                     else if (e.Result.Status == SynthesisStatus.SynthesisEnd)
                     {
