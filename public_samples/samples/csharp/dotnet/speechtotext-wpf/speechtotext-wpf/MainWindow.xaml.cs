@@ -169,17 +169,17 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
 
             if (!AreKeysValid())
             {
-                if(this.UseBaseModel)
+                if (this.UseBaseModel)
                 {
                     MessageBox.Show("Subscription Key is wrong or missing!");
                     this.WriteLine(this.baseModelLogText, "--- Error : Subscription Key is wrong or missing! ---");
                 }
-                else if(this.UseCustomModel)
+                else if (this.UseCustomModel)
                 {
                     MessageBox.Show("Subscription Key or Custom Model DeploymentId is missing or wrong! If you do not need the custom model, please change Settings->Recognition Type.");
                     this.WriteLine(this.customModelLogText, "--- Error : Subscription Key or Custom Model DeploymentId is wrong or missing! ---");
                 }
-                else if(this.UseBaseAndCustomModels)
+                else if (this.UseBaseAndCustomModels)
                 {
                     MessageBox.Show("Subscription Key or Custom Model DeploymentId is missing or wrong! If you do not need the custom model, please change Settings->Recognition Type.");
                     this.WriteLine(this.baseModelLogText, "--- Error : Subscription Key or Custom Model DeploymentId is wrong or missing! ---");
@@ -418,7 +418,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// <param name="key">The key which should be stored</param>
         private static void SaveKeyToIsolatedStorage(string fileName, string key)
         {
-            if(fileName != null && key != null)
+            if (fileName != null && key != null)
             {
                 using (IsolatedStorageFile isoStore = IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Assembly, null, null))
                 {
