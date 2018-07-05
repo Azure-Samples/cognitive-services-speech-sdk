@@ -477,7 +477,7 @@ phases:
   dependsOn: AndroidBuild
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidPackage '))
   variables:
-    ARTIFACT_ID: client-sdk-android
+    ARTIFACT_ID: client-sdk
     GROUP_ID: com.microsoft.cognitiveservices.speech
   queue:
     name: Hosted VS2017
@@ -492,7 +492,6 @@ phases:
       . ci/functions.sh
       ArtifactRelativePath="maven/${GROUP_ID//\./\/}/$ARTIFACT_ID/$SPEECHSDK_SEMVER2NOMETA"
       vsts_setvar ArtifactRelativePath "$ArtifactRelativePath"
-      mkdir -p "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/Out/Android/$(ArtifactRelativePath)
     displayName: 'Set variables and create directory hierarchy'
   - task: DownloadBuildArtifacts@0
     inputs:
@@ -556,12 +555,20 @@ phases:
           </description>
         </project>
         POM
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    inputs:
+      type: InlineScript
+      script: |
+         set -e -x -o pipefail
+         perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)"
+         ./ci/run-gradle.sh "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/Out/Android/maven
   - task: PublishBuildArtifacts@1
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/Out'
       ArtifactName: Android
       publishLocation: Container
     displayName: 'Publish .aar and .pom'
+    condition: succeededOrFailed()
 
 - phase: LinuxBuild
   dependsOn: Pre

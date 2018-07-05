@@ -4,10 +4,12 @@ BEGIN {
   use File::Find;
 
   # Some REs
-  $rePkgId = qr/\QMicrosoft.CognitiveServices.Speech\E/;
+  $reNugetId = qr/\QMicrosoft.CognitiveServices.Speech\E/;
+  $reMavenId = qr/\Qcom.microsoft.cognitiveservices.speech:client-sdk\E/;
   $rePkgConfig = qr/packages\.config/;
   $reCsProj = qr/.*\.csproj/;
   $reVcxProj = qr/.*\.vcxproj/;
+  $reGradleBuild = qr/build\.gradle/;
 
   $version = shift
     or die "Supply version to use as first and only argument\n";
@@ -18,7 +20,7 @@ BEGIN {
 
   @ARGV = ();
   find(sub {
-    m(^(?:$rePkgConfig|$reCsProj|$reVcxProj)$) &&
+    m(^(?:$rePkgConfig|$reCsProj|$reVcxProj|$reGradleBuild)$) &&
     push @ARGV, $File::Find::name
   }, $public_samples);
 }
@@ -26,11 +28,12 @@ if ($ARGV ne $oldargv) {
   warn "Patching $ARGV\n";
   $oldargv = $ARGV;
 }
-$ARGV =~ m(.*/$rePkgConfig$) && s/(<package id="$rePkgId" version=")([^"]*)"/$1$version"/;
+$ARGV =~ m(.*/$rePkgConfig$) && s/(<package id="$reNugetId" version=")([^"]*)"/$1$version"/;
 $ARGV =~ m(.*/(?:$reCsProj|$reVcxProj)$) && do {
   # <HintPath>...<HintPath>, <Import Project ... />, <Error ... />
-  s((["'>](?:\.\.\\)*packages\\$rePkgId\.)[^\\]*\\)($1$version\\)g;
+  s((["'>](?:\.\.\\)*packages\\$reNugetId\.)[^\\]*\\)($1$version\\)g;
 
   # <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="X" />
-  s((?<=<PackageReference Include="$rePkgId" Version=")[^"]*)($version)g;
+  s((?<=<PackageReference Include="$reNugetId" Version=")[^"]*)($version)g;
 };
+$ARGV =~ m(.*/$reGradleBuild$) && s/(\bimplementation\s+(['"])$reMavenId:)(.*?)\2/$1$version$2/;

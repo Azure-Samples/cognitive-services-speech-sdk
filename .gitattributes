@@ -5,6 +5,8 @@
 Makefile text
 Dockerfile text
 .dockerignore text
+gradlew text
+proguard-rules.pro text
 
 *.bat text
 *.c text
@@ -13,6 +15,7 @@ Dockerfile text
 *.cpp text
 *.cs text
 *.csproj text
+*.gradle text
 *.h text
 *.hpp text
 *.i text
@@ -22,21 +25,22 @@ Dockerfile text
 *.json text
 *.md text
 *.nuspec text
-*.props text
 *.pl text
+*.properties text
+*.props text
 *.ps1 text
 *.py text
+*.runsettings text
 *.sln text
 *.targets text
+*.template text
 *.txt text
 *.vcxproj text
 *.vcxproj.filters text
 *.vcxproj.user text
 *.xaml text
-*.yml text
-*.runsettings text
-*.template text
 *.xml text
+*.yml text
 
 # Bash and "git apply" only like Unix line endings
 *.sh text eol=lf
