@@ -236,12 +236,12 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
       * @param format Output format, simple or detailed.
       * @return A speech recognizer instance.
       */
-    public SpeechRecognizer createSpeechRecognizer(String language, SpeechOutputFormat format) {
+    public SpeechRecognizer createSpeechRecognizer(String language, OutputFormat format) {
         Contracts.throwIfIllegalLanguage(language, "language");
         Contracts.throwIfNull(format, "format");
 
         return new SpeechRecognizer(factoryImpl.createSpeechRecognizer(language,
-            format == SpeechOutputFormat.Simple ?
+            format == OutputFormat.Simple ?
                     com.microsoft.cognitiveservices.speech.internal.OutputFormat.Simple :
                     com.microsoft.cognitiveservices.speech.internal.OutputFormat.Detailed
                     ), null);
@@ -277,13 +277,13 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
      * @param format. Output format, simple or detailed.
      * @return A speech recognizer instance.
      */
-    public SpeechRecognizer createSpeechRecognizerWithFileInput(String audioFile, String language, SpeechOutputFormat format) {
+    public SpeechRecognizer createSpeechRecognizerWithFileInput(String audioFile, String language, OutputFormat format) {
         Contracts.throwIfNullOrWhitespace(audioFile, "audioFile");
         Contracts.throwIfIllegalLanguage(language, "language");
         Contracts.throwIfNull(format, "format");
 
         return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithFileInput(audioFile, language,
-                    format == SpeechOutputFormat.Simple ?
+                    format == OutputFormat.Simple ?
                         com.microsoft.cognitiveservices.speech.internal.OutputFormat.Simple :
                         com.microsoft.cognitiveservices.speech.internal.OutputFormat.Detailed
                     ), null);
@@ -320,13 +320,13 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
      * @param format. Output format, simple or detailed.
      * @return A speech recognizer instance.
      */
-    public SpeechRecognizer createSpeechRecognizerWithStream(AudioInputStream audioStream, String language, SpeechOutputFormat format) {
+    public SpeechRecognizer createSpeechRecognizerWithStream(AudioInputStream audioStream, String language, OutputFormat format) {
         Contracts.throwIfNull(audioStream, "audioStream");
         Contracts.throwIfIllegalLanguage(language, "language");
         Contracts.throwIfNull(format, "format");
 
        return new SpeechRecognizer(factoryImpl.createSpeechRecognizerWithStreamImpl(audioStream, language,
-                   format == SpeechOutputFormat.Simple ?
+                   format == OutputFormat.Simple ?
                     com.microsoft.cognitiveservices.speech.internal.OutputFormat.Simple :
                     com.microsoft.cognitiveservices.speech.internal.OutputFormat.Detailed
                     ), audioStream);

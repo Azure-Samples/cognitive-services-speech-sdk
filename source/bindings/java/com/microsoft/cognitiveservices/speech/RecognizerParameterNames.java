@@ -32,7 +32,7 @@ public final class RecognizerParameterNames
     /**
       * The name of parameter `OutputFormat`.
       */
-    public static final String SpeechOutputFormat = "SPEECH-OutputFormat";
+    public static final String OutputFormat = "SPEECH-OutputFormat";
 
     /**
      * The name of parameter `TRANSLATION-FromLanguage` which describes the source language of audio.

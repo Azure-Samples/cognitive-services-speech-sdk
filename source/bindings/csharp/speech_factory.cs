@@ -141,10 +141,10 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
         /// <param name="format">Output format: simple or detailed.</param>
         /// <returns>A speech recognizer instance.</returns>
-        public SpeechRecognizer CreateSpeechRecognizer(string language, SpeechOutputFormat format)
+        public SpeechRecognizer CreateSpeechRecognizer(string language, OutputFormat format)
         {
             return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizer(language,
-                format == SpeechOutputFormat.Simple ? Internal.OutputFormat.Simple : Internal.OutputFormat.Detailed));
+                format == OutputFormat.Simple ? Internal.OutputFormat.Simple : Internal.OutputFormat.Detailed));
         }
 
         /// <summary>
@@ -196,10 +196,10 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
         /// <param name="format">Output format: simple or detailed.</param>
         /// <returns>A speech recognizer instance.</returns>
-        public SpeechRecognizer CreateSpeechRecognizerWithFileInput(string audioFile, string language, SpeechOutputFormat format)
+        public SpeechRecognizer CreateSpeechRecognizerWithFileInput(string audioFile, string language, OutputFormat format)
         {
             return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithFileInput(audioFile, language,
-                format == SpeechOutputFormat.Simple ? Internal.OutputFormat.Simple : Internal.OutputFormat.Detailed));
+                format == OutputFormat.Simple ? Internal.OutputFormat.Simple : Internal.OutputFormat.Detailed));
         }
 
         /// <summary>
@@ -209,10 +209,10 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
         /// <param name="format">Output format: simple or detailed.</param>
         /// <returns>A speech recognizer instance.</returns>
-        public SpeechRecognizer CreateSpeechRecognizerWithStream(AudioInputStream audioStream, string language, SpeechOutputFormat format)
+        public SpeechRecognizer CreateSpeechRecognizerWithStream(AudioInputStream audioStream, string language, OutputFormat format)
         {
             return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithStreamImpl(audioStream.Forwarder, language,
-                format == SpeechOutputFormat.Simple ? Internal.OutputFormat.Simple : Internal.OutputFormat.Detailed), audioStream);
+                format == OutputFormat.Simple ? Internal.OutputFormat.Simple : Internal.OutputFormat.Detailed), audioStream);
         }
 
         /// <summary>

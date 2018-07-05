@@ -88,11 +88,11 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       * Gets the output format of recognition.
       * @return The output format of recognition.
       */
-    public SpeechOutputFormat getOutputFormat() {
-        if (_Parameters.getString(RecognizerParameterNames.SpeechOutputFormat).equals("DETAILED")) {
-            return SpeechOutputFormat.Detailed;
+    public OutputFormat getOutputFormat() {
+        if (_Parameters.getString(RecognizerParameterNames.OutputFormat).equals("DETAILED")) {
+            return OutputFormat.Detailed;
         } else {
-            return SpeechOutputFormat.Simple;
+            return OutputFormat.Simple;
         }
     }
 

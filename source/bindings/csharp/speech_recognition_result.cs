@@ -55,9 +55,9 @@ namespace Microsoft.CognitiveServices.Speech
         public TimeSpan Duration => TimeSpan.FromTicks((long)this.resultImpl.Duration());
 
         /// <summary>
-        /// Offset of the recognized speech in ticks.
+        /// Offset of the recognized speech in ticks. A single tick represents one hundred nanoseconds or one ten-millionth of a second.
         /// </summary>
-        public DateTimeOffset Offset => new DateTimeOffset((long)this.resultImpl.Offset(), TimeSpan.Zero);
+        public long OffsetInTicks => (long)this.resultImpl.Offset();
 
         /// <summary>
         /// In case of an unsuccessful recognition, provides a brief description of an occurred error.

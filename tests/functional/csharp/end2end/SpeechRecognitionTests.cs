@@ -41,7 +41,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
                 Assert.IsTrue(result.Duration.Ticks > 0, result.RecognitionStatus.ToString());
-                Assert.AreEqual(0, result.Offset.Ticks);
+                Assert.AreEqual(0, result.OffsetInTicks);
                 Assert.IsTrue(speechRecognitionTestsHelper.AreResultsMatching(result.Text, TestData.English.Weather.Utterance));
             }
         }
@@ -288,7 +288,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(deploymentId, recognizer.DeploymentId);
                 Assert.AreEqual(deploymentId, recognizer.Parameters.Get<string>(SpeechParameterNames.DeploymentId));
 
-                Assert.AreEqual(recognizer.OutputFormat, SpeechOutputFormat.Simple);
+                Assert.AreEqual(recognizer.OutputFormat, OutputFormat.Simple);
             }
 
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.German.FirstOne.AudioFile, Language.DE_DE))
@@ -298,17 +298,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 Assert.AreEqual(recognizer.DeploymentId, recognizer.Parameters.Get<string>(SpeechParameterNames.DeploymentId));
 
-                Assert.AreEqual(recognizer.OutputFormat, SpeechOutputFormat.Simple);
+                Assert.AreEqual(recognizer.OutputFormat, OutputFormat.Simple);
             }
 
-            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.German.FirstOne.AudioFile, Language.DE_DE, SpeechOutputFormat.Simple))
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.German.FirstOne.AudioFile, Language.DE_DE, OutputFormat.Simple))
             {
-                Assert.AreEqual(recognizer.OutputFormat, SpeechOutputFormat.Simple);
+                Assert.AreEqual(recognizer.OutputFormat, OutputFormat.Simple);
             }
 
-            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.German.FirstOne.AudioFile, Language.DE_DE, SpeechOutputFormat.Detailed))
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.German.FirstOne.AudioFile, Language.DE_DE, OutputFormat.Detailed))
             {
-                Assert.AreEqual(recognizer.OutputFormat, SpeechOutputFormat.Detailed);
+                Assert.AreEqual(recognizer.OutputFormat, OutputFormat.Detailed);
             }
         }
 

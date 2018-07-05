@@ -16,7 +16,7 @@ namespace Microsoft.CognitiveServices.Speech
     /// <summary>
     /// Output format.
     /// </summary>
-    public enum SpeechOutputFormat
+    public enum OutputFormat
     {
         Simple = 0,
         Detailed = 1

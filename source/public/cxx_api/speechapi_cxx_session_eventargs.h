@@ -15,8 +15,8 @@
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
-   
-    
+
+
 /// <summary>
 /// Base class for session event arguments.
 /// </summary>

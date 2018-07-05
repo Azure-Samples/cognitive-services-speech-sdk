@@ -131,11 +131,11 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Gets the output format setting.
         /// </summary>
-        public SpeechOutputFormat OutputFormat
+        public OutputFormat OutputFormat
         {
             get
             {
-                return Parameters.Get<string>(SpeechParameterNames.OutputFormat) ==  OutputFormatParameterValues.Detailed ? SpeechOutputFormat.Detailed : SpeechOutputFormat.Simple;
+                return Parameters.Get<string>(SpeechParameterNames.OutputFormat) ==  OutputFormatParameterValues.Detailed ? OutputFormat.Detailed : OutputFormat.Simple;
             }
         }
 

@@ -193,7 +193,7 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/SpeechRecognitionResult.java
     ${PACKAGE_DIR}/SpeechRecognitionResultEventArgs.java
     ${PACKAGE_DIR}/SpeechRecognizer.java
-    ${PACKAGE_DIR}/SpeechOutputFormat.java
+    ${PACKAGE_DIR}/OutputFormat.java
 
     ${PACKAGE_DIR}/intent/IntentRecognitionResult.java
     ${PACKAGE_DIR}/intent/IntentRecognitionResultEventArgs.java

@@ -40,7 +40,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [Ignore("because of the bug in VSO BUG 1293606")]
         public async Task DetailedRecognitionBatman()
         {
-            var result = await this.speechHelper.GetSpeechFinalRecognitionResult(TestData.English.Batman.AudioFile, Language.EN, SpeechOutputFormat.Detailed);
+            var result = await this.speechHelper.GetSpeechFinalRecognitionResult(TestData.English.Batman.AudioFile, Language.EN, OutputFormat.Detailed);
             var detailedRecognitionText = String.Join(" ", result.Best().Select(r => r.Text).ToList());
             var detailedRecognitionNormalizedForm = String.Join(" ", result.Best().Select(r => r.NormalizedForm).ToList());
             var detailedRecognitionLexicalForm = String.Join(" ", result.Best().Select(r => r.NormalizedForm).ToList());
@@ -73,7 +73,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [Ignore("because of the bug detailed in VSO BUG 1290780 and 1293499")]
         public async Task DetailedRecognitionBatmanContinuous()
         {
-            var result = await this.speechHelper.GetSpeechFinalRecognitionContinuous(TestData.English.Batman.AudioFile, Language.EN, SpeechOutputFormat.Detailed);
+            var result = await this.speechHelper.GetSpeechFinalRecognitionContinuous(TestData.English.Batman.AudioFile, Language.EN, OutputFormat.Detailed);
             Assert.AreNotEqual(result.Count, 0); 
 
             var firstUtteranceText = String.Join(" ", result[0].Result.Best().Select(r => r.Text).ToList());
@@ -110,7 +110,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [Ignore("because of the bug detailed in VSO BUG 1290780")]
         public async Task DetailedRecognitionBatmanContinuousBest()
         {
-            var result = await this.speechHelper.GetSpeechFinalRecognitionContinuous(TestData.English.Batman.AudioFile, Language.EN, SpeechOutputFormat.Detailed);
+            var result = await this.speechHelper.GetSpeechFinalRecognitionContinuous(TestData.English.Batman.AudioFile, Language.EN, OutputFormat.Detailed);
             Assert.AreNotEqual(result.Count, 0);
 
             var firstUtteranceText = String.Join(" ", result[0].Result.Best().Select(r => r.Text).ToList());

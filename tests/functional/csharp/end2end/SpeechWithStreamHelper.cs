@@ -21,7 +21,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             timeout = TimeSpan.FromSeconds(90);
         }
 
-        SpeechRecognizer CreateSpeechRecognizerWithStream(String audioFile, String language = null, SpeechOutputFormat format = SpeechOutputFormat.Simple)
+        SpeechRecognizer CreateSpeechRecognizerWithStream(String audioFile, String language = null, OutputFormat format = OutputFormat.Simple)
         {
             var stream = Config.OpenWaveFile(audioFile);
             if (string.IsNullOrEmpty(language))
@@ -34,7 +34,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        public async Task<SpeechRecognitionResult> GetSpeechFinalRecognitionResult(String audioFile, String language = null, SpeechOutputFormat format = SpeechOutputFormat.Simple)
+        public async Task<SpeechRecognitionResult> GetSpeechFinalRecognitionResult(String audioFile, String language = null, OutputFormat format = OutputFormat.Simple)
         {
             using (var recognizer = CreateSpeechRecognizerWithStream(audioFile, language, format))
             {
@@ -44,7 +44,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        public async Task<List<SpeechRecognitionResultEventArgs>> GetSpeechFinalRecognitionContinuous(String audioFile, String language = null, SpeechOutputFormat format = SpeechOutputFormat.Simple)
+        public async Task<List<SpeechRecognitionResultEventArgs>> GetSpeechFinalRecognitionContinuous(String audioFile, String language = null, OutputFormat format = OutputFormat.Simple)
         {
             using (var recognizer = CreateSpeechRecognizerWithStream(audioFile, language, format))
             {
@@ -69,7 +69,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        public async Task<List<List<SpeechRecognitionResultEventArgs>>> GetSpeechIntermediateRecognitionContinuous(String audioFile, String language = null, SpeechOutputFormat format = SpeechOutputFormat.Simple)
+        public async Task<List<List<SpeechRecognitionResultEventArgs>>> GetSpeechIntermediateRecognitionContinuous(String audioFile, String language = null, OutputFormat format = OutputFormat.Simple)
         {
             using (var recognizer = CreateSpeechRecognizerWithStream(audioFile, language, format))
             {

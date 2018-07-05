@@ -30,7 +30,7 @@ import com.microsoft.cognitiveservices.speech.SessionEventType;
 import com.microsoft.cognitiveservices.speech.SpeechFactory;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
-import com.microsoft.cognitiveservices.speech.SpeechOutputFormat;
+import com.microsoft.cognitiveservices.speech.OutputFormat;
 
 import tests.Settings;
 
@@ -190,7 +190,7 @@ public class SpeechRecognizerTests {
         SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
         assertNotNull(r);
 
-        assertEquals(r.getOutputFormat(), SpeechOutputFormat.Simple);
+        assertEquals(r.getOutputFormat(), OutputFormat.Simple);
 
         r.close();
         s.close();
@@ -202,10 +202,10 @@ public class SpeechRecognizerTests {
         assertNotNull(s);
 
         String language = "de-DE";
-        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile, language, SpeechOutputFormat.Detailed);
+        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile, language, OutputFormat.Detailed);
         assertNotNull(r);
 
-        assertEquals(r.getOutputFormat(), SpeechOutputFormat.Detailed);
+        assertEquals(r.getOutputFormat(), OutputFormat.Detailed);
         
         r.close();
         s.close();

@@ -20,12 +20,12 @@ namespace MicrosoftSpeechSDKSamples
 
         private static void MyIntermediateResultEventHandler(object sender, SpeechRecognitionResultEventArgs e)
         {
-            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: intermediate result: {0}, Offset: {1}, Duration: {2} ", e.ToString(), e.Result.Offset, e.Result.Duration));
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: intermediate result: {0}, Offset: {1}, Duration: {2} ", e.ToString(), e.Result.OffsetInTicks, e.Result.Duration));
         }
 
         private static void MyFinalResultEventHandler(object sender, SpeechRecognitionResultEventArgs e)
         {
-            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: final result: {0}, Offset: {1}, Duration: {2} ", e.ToString(), e.Result.Offset, e.Result.Duration));
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: final result: {0}, Offset: {1}, Duration: {2} ", e.ToString(), e.Result.OffsetInTicks, e.Result.Duration));
         }
 
         private static void MyErrorEventHandler(object sender, RecognitionErrorEventArgs e)
@@ -193,7 +193,7 @@ namespace MicrosoftSpeechSDKSamples
             {
                 if (e.Result.RecognitionStatus == RecognitionStatus.Recognized)
                 {
-                    Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, Text: {e.Result.Text}, Offset: {e.Result.Offset}, Duration: {e.Result.Duration}.");
+                    Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, Text: {e.Result.Text}, Offset: {e.Result.OffsetInTicks}, Duration: {e.Result.Duration}.");
                 }
                 else
                 {
