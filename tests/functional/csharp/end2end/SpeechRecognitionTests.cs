@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using static Microsoft.CognitiveServices.Speech.Tests.EndToEnd.AssertHelpers;
+
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     [TestClass]
@@ -85,8 +87,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
             {
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-                Assert.IsFalse(string.IsNullOrEmpty(result.RecognitionFailureReason));
-                Assert.IsTrue(result.RecognitionFailureReason.Contains("401"));
+                AssertStringContains(result.RecognitionFailureReason, "401");
                 Assert.AreEqual(RecognitionStatus.Canceled, result.RecognitionStatus);
             }
         }
@@ -98,8 +99,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
             {
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-                Assert.IsFalse(string.IsNullOrEmpty(result.RecognitionFailureReason));
-                Assert.IsTrue(result.RecognitionFailureReason.Contains("Connection failed"));
+                AssertStringContains(result.RecognitionFailureReason, "Connection failed");
                 Assert.AreEqual(RecognitionStatus.Canceled, result.RecognitionStatus);
             }
         }
@@ -117,8 +117,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 recognizer.DeploymentId = "invalidDeploymentId";
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-                Assert.IsFalse(string.IsNullOrEmpty(result.RecognitionFailureReason));
-                Assert.IsTrue(result.RecognitionFailureReason.Contains("400"));
+                AssertStringContains(result.RecognitionFailureReason, "400");
                 Assert.AreEqual(RecognitionStatus.Canceled, result.RecognitionStatus);
             }
         }
@@ -319,7 +318,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
                 var ex = await Assert.ThrowsExceptionAsync<ApplicationException>(() => recognizer.StartContinuousRecognitionAsync());
-                Assert.IsTrue(ex.Message.Contains("Exception with an error code: 0x1e"));
+                AssertStringContains(ex.Message, "Exception with an error code: 0x1e");
             }
         }
 
@@ -331,7 +330,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
                 var ex = await Assert.ThrowsExceptionAsync<ApplicationException>(() => recognizer.RecognizeAsync());
-                Assert.IsTrue(ex.Message.Contains("Exception with an error code: 0x1e"));
+                AssertStringContains(ex.Message, "Exception with an error code: 0x1e");
             }
         }
 
