@@ -22,7 +22,10 @@ import java.util.concurrent.Future;
 import static android.Manifest.permission.*;
 
 public class MainActivity extends AppCompatActivity {
-    private static String speechSubscriptionKey = "YourSpeechSubscriptionKey";
+
+    // Replace below with your own subscription key
+    private static String speechSubscriptionKey = "YourSubscriptionKey";
+    // Replace below with your own service region (e.g., "westus").
     private static String serviceRegion = "YourServiceRegion";
 
     @Override

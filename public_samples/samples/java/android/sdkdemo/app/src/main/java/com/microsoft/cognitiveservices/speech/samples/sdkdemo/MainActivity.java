@@ -35,11 +35,24 @@ import static android.Manifest.permission.RECORD_AUDIO;
 
 public class MainActivity extends AppCompatActivity {
 
-    // Subscription
+    //
+    // Configuration for speech recognition
+    //
+
+    // Replace below with your own subscription key
     private static final String SpeechSubscriptionKey = "YourSubscriptionKey";
-    private static final String SpeechRegion = "YourRegion"; // You can change this, if you want to test the intent, and your LUIS region is different.
+    // Replace below with your own service region (e.g., "westus").
+    private static final String SpeechRegion = "YourServiceRegion";
+
+    //
+    // Configuration for intent recognition
+    //
+
+    // Replace below with your own Language Understanding subscription key
     private static final String LuisSubscriptionKey = "YourLuisSubscriptionKey";
-    private static final String LuisRegion = "YourLuisRegion"; // you can change this, if you want to test the intent, and your LUIS region is different.
+    // Replace below with the deployment region of your Language Understanding application
+    private static final String LuisRegion = "YourLuisRegion";
+    // Replace below with the application ID of your Language Understanding application
     private static final String LuisAppId = "YourLuisApplicationId";
 
     private TextView recognizedTextView;
