@@ -107,6 +107,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
 
     /**
       * Starts speech recognition, and stops after the first utterance is recognized. The task returns the recognition text as result.
+      * Note: RecognizeAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
       * @return A task representing the recognition operation. The task returns a value of SpeechRecognitionResult
       */
     public Future<SpeechRecognitionResult> recognizeAsync() {

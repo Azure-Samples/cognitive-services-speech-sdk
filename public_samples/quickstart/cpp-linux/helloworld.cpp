@@ -9,51 +9,52 @@
 #include <iostream> // cin, cout
 #include <speechapi_cxx.h>
 
-// Uncomment this and recompile if you want to test file input:
-//#define FROM_FILE
-
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 
 void recognizeSpeech() {
     wstring_convert<codecvt_utf8_utf16<wchar_t>> cvt;
 
-    // Please replace below with your own subscription key.
-    wstring subscriptionKey{ L"YourSubscriptionKey" };
-    // Please replace below with your service region (e.g., "westus").
-    wstring region{ L"YourServiceRegion" };
+    // Creates an instance of a speech factory with specified
+    // subscription key and service region. Replace with your own subscription key
+    // and service region (e.g., "westus").
+    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"YourServiceRegion");
 
-#ifdef FROM_FILE
-    wstring filename = L"YourAudioFile.wav";
-#endif
-
-    auto factory = SpeechFactory::FromSubscription(subscriptionKey, region);
-
-#ifndef FROM_FILE
+    // Creates a speech recognizer
     auto recognizer = factory->CreateSpeechRecognizer();
     cout << "Say something...\n";
-#else
-    auto recognizer = factory->CreateSpeechRecognizerWithFileInput(filename);
-    cout << "Recognizing from file...\n";
-#endif
 
+    // Performs recognition.
+    // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
+    // for single shot recognition like command or query. For long-running recognition, use
+    // StartContinuousRecognitionAsync() instead.
     auto future = recognizer->RecognizeAsync();
     auto result = future.get();
     auto resultText = cvt.to_bytes(result->Text);
     auto errorDetails = cvt.to_bytes(result->ErrorDetails);
 
+    // Checks result.
     if (result->Reason != Reason::Recognized) {
-        cout << "There was an error, reason " << int(result->Reason) << " - " << errorDetails << '\n';
+        cout << "Recognition Status:" << int(result->Reason) << ". ";
+        if (result->Reason == Reason::Canceled)
+        {
+            cout << "There was an error, reason: " << errorDetails << std::endl;
+        }
+        else
+        {
+            cout << "No speech could be recognized.\n";
+        }
     }
     else {
-        cout << "We recognized: " << resultText << '\n';
+        cout << "We recognized: " << resultText << std::endl;
     }
-    cout << "Please press a key to continue.\n";
-    cin.get();
 }
 
 int main(int argc, char **argv) {
     recognizeSpeech();
+
+    cout << "Please press a key to exit.\n";
+    cin.get();
     return 0;
 }
 // </code>

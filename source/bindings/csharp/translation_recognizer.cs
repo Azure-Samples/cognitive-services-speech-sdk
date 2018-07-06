@@ -154,6 +154,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
 
         /// <summary>
         /// Starts recognition and translation, and stops after the first utterance is recognized. The task returns the translation text as result.
+        /// Note: RecognizeAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
         /// </summary>
         /// <returns>A task representing the recognition operation. The task returns a value of <see cref="TranslationTextResult"/> </returns>
         /// <example>

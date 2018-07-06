@@ -113,6 +113,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 
      /**
        * Starts recognition and translation, and stops after the first utterance is recognized. The task returns the translation text as result.
+       * Note: RecognizeAsync() returns when the first utterance has been recognized, so it is suitableonly for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
        * @return A task representing the recognition operation. The task returns a value of TranslationTextResult.
        */
      public Future<TranslationTextResult> recognizeAsync() {

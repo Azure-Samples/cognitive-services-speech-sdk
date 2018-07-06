@@ -26,8 +26,6 @@
     <!-- Uncomment the following property to link against Speech SDK debug libraries -->
     <!--<SpeechSdkUseDebugLibs>1</SpeechSdkUseDebugLibs>-->
     <!-- Version corresponds to the latest published package. Must match what is in packages.config -->
-    <SpeechSdkTargetsBaseName>..\packages\Microsoft.CognitiveServices.Speech.0.4.0\build\native\Microsoft.CognitiveServices.Speech</SpeechSdkTargetsBaseName>
-    <SpeechSdkTargets>$(SpeechSdkTargetsBaseName).targets</SpeechSdkTargets>
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -170,12 +168,12 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <!-- N.B. the .targets extensions must be spelled out here -->
-    <Import Project="$(SpeechSdkTargetsBaseName).targets" Condition="Exists('$(SpeechSdkTargets)')" />
+    <Import Project="..\packages\Microsoft.CognitiveServices.Speech.0.5.0-beta.0.2683133\build\native\Microsoft.CognitiveServices.Speech.targets" Condition="Exists('..\packages\Microsoft.CognitiveServices.Speech.0.5.0-beta.0.2683133\build\native\Microsoft.CognitiveServices.Speech.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('$(SpeechSdkTargets)')" Text="$([System.String]::Format('$(ErrorText)', '$(SpeechSdkTargets)'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.CognitiveServices.Speech.0.5.0-beta.0.2683133\build\native\Microsoft.CognitiveServices.Speech.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CognitiveServices.Speech.0.5.0-beta.0.2683133\build\native\Microsoft.CognitiveServices.Speech.targets'))" />
   </Target>
 </Project>

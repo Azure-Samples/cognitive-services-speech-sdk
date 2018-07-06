@@ -39,23 +39,31 @@ namespace MicrosoftSpeechSDKSamples
             // Define the cancellation token in order to stop the periodic renewal 
             // of authorization token after completing recognition.
             CancellationTokenSource source = new CancellationTokenSource();
-            CancellationToken cancellationToken = source.Token;
 
             // Run task for token renewal in the background.
-            var tokenRenewTask = StartTokenRenewTask(cancellationToken); 
+            var tokenRenewTask = StartTokenRenewTask(source.Token); 
 
             // Creates a speech recognizer using microphone as audio input. The default language is "en-us".
             using (var recognizer = factory.CreateSpeechRecognizer())
             {
                 // Subscribe to events.
                 recognizer.FinalResultReceived += (s, e) => {
-                    if (e.Result.RecognitionStatus == RecognitionStatus.Recognized)
+                    var result = e.Result;
+                    if (result.RecognitionStatus == RecognitionStatus.Recognized)
                     {
-                        Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, Text: {e.Result.Text}.");
+                        Console.WriteLine($"\n    Final result: Status: {result.RecognitionStatus.ToString()}, Text: {result.Text}.");
                     }
                     else
                     {
-                        Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, FailureReason: {e.Result.RecognitionFailureReason}.");
+                        Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
+                        if (result.RecognitionStatus == RecognitionStatus.Canceled)
+                        {
+                            Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
+                        }
+                        else
+                        {
+                            Console.WriteLine("No speech could be recognized.\n");
+                        }
                     }
                 };
 

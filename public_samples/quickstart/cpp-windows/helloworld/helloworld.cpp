@@ -10,51 +10,43 @@
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 
-int wmain(int argc, wchar_t **argv)
+void recognizeSpeech()
 {
-    auto usage = L"Usage: helloworld <subscriptionKey> <service-region> [<path-to-wav-file>]\n";
+    // Creates an instance of a speech factory with specified
+    // subscription key and service region. Replace with your own subscription key
+    // and service region (e.g., "westus").
+    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"YourServiceRegion");
 
-    if (argc < 3)
-    {
-        // In Visual Studio, right-click the helloworld project in the Solution Explorer and add
-        // your subscription key to Properties > Debugging > Command Arguments.
-        wcout << "Error: missing parameters.\n" << usage;
-        exit(1);
-    }
+    // Creates a speech recognizer.
+    auto recognizer = factory->CreateSpeechRecognizer();
+    wcout << L"Say something...\n";
 
-    wstring subscriptionKey{ argv[1] };
-    wstring region{ argv[2] };
-    wstring filename;
-
-    if (4 < argc)
-    {
-        wcout << "Error: too many parameters.\n" << usage;
-        exit(1);
-    }
-
-    if (argc == 4)
-    {
-        filename = wstring(argv[3]);
-    }
-
-    auto factory = SpeechFactory::FromSubscription(subscriptionKey, region);
-
-    auto recognizeFromFile = !filename.empty();
-
-    auto recognizer = recognizeFromFile ? factory->CreateSpeechRecognizerWithFileInput(filename) : factory->CreateSpeechRecognizer();
-
-    wcout << (recognizeFromFile ? L"Recognizing from file...\n" : L"Say something...\n");
+    // Performs recognition.
+    // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
+    // only for single shot recognition like command or query. For long-running recognition, use
+    // StartContinuousRecognitionAsync() instead.
     auto result = recognizer->RecognizeAsync().get();
 
-    int exitCode = 0;
-
-    if (result->Reason != Reason::Recognized) {
-        exitCode = 1;
-        wcout << L"There was an error, reason " << int(result->Reason) << L" - " << result->ErrorDetails << '\n';
+    // Checks result.
+    if (result->Reason != Reason::Recognized)
+    {
+        wcout << L"Recognition Status: " << int(result->Reason) << L". ";
+        if (result->Reason == Reason::Canceled)
+        {
+            wcout << L"There was an error, reason: " << result->ErrorDetails << std::endl;
+        }
+        else
+        {
+            wcout << L"No speech could be recognized.\n";
+        }
     }
     else {
-        wcout << L"We recognized: " << result->Text << '\n';
+        wcout << L"We recognized: " << result->Text << std::endl;
     }
+}
 
-    return exitCode;
+int wmain()
+{
+    recognizeSpeech();
+    return 0;
 }

@@ -19,7 +19,39 @@ namespace Speech {
 /// <summary>
 /// Specifies the possible reasons a recognition result might be generated.
 /// </summary>
-enum class Reason { Recognized, IntermediateResult, NoMatch, InitialSilenceTimeout, InitialBabbleTimeout, Canceled };
+enum class Reason
+{ 
+    /// <summary>
+    /// Indicates the result is a phrase that has been successfully recognized.
+    /// </summary>
+    Recognized,
+
+    /// <summary>
+    /// Indicates the result is a hypothesis text that has been recognized.
+    /// </summary>
+    IntermediateResult,
+
+    /// <summary>
+    /// Indicates that speech was detected in the audio stream, but no words from the target language were matched.
+    /// Possible reasons could be wrong setting of the target language or wrong format of audio stream.
+    /// </summary>
+    NoMatch,
+
+    /// <summary>
+    /// Indicates that the start of the audio stream contained only silence, and the service timed out waiting for speech.
+    /// </summary>
+    InitialSilenceTimeout,
+
+    /// <summary>
+    /// Indicates that the start of the audio stream contained only noise, and the service timed out waiting for speech.
+    /// </summary>
+    InitialBabbleTimeout,
+
+    /// <summary>
+    /// Indicates that an error occurred during recognition. The ErrorDetails in Property contains detailed error reasons.
+    /// </summary>
+    Canceled
+};
 
 /// <summary>
 /// Specifies properties that can be retrieved from a RecognitionResult.

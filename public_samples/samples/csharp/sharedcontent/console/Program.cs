@@ -15,15 +15,14 @@ namespace MicrosoftSpeechSDKSamples
         {
 
             Console.WriteLine("1. Speech recognition with microphone input.");
-            Console.WriteLine("2. Speech recognition in the specified language.");
-            Console.WriteLine("3. Speech recognition with file input.");
+            Console.WriteLine("2. Speech recognition in the specified language and using detailed output format.");
+            Console.WriteLine("3. Speech continuous recognition with file input.");
             Console.WriteLine("4. Speech recognition using customized model.");
-            Console.WriteLine("5. Speech continuous recognition using events.");
-            Console.WriteLine("6. Speech recognition with audio stream.");
-            Console.WriteLine("7. Translation with microphone input.");
-            Console.WriteLine("8. Translation with file input.");
-            Console.WriteLine("9. Translation with audio stream.");
-            Console.WriteLine("A. Speech continuous recognition using authorization token.");
+            Console.WriteLine("5. Speech recognition with audio stream.");
+            Console.WriteLine("6. Translation with microphone input.");
+            Console.WriteLine("7. Translation with file input.");
+            Console.WriteLine("8. Translation with audio stream.");
+            Console.WriteLine("9. Speech continuous recognition using authorization token.");
 
             Console.Write("Your choice (0: Stop.): ");
 
@@ -38,30 +37,27 @@ namespace MicrosoftSpeechSDKSamples
                         SpeechRecognitionSamples.RecognitionWithMicrophoneAsync().Wait();
                         break;
                     case ConsoleKey.D2:
-                        SpeechRecognitionSamples.RecognitionWithLanguageAsync().Wait();
+                        SpeechRecognitionSamples.RecognitionWithLanguageAndDetailedOutputAsync().Wait();
                         break;
                     case ConsoleKey.D3:
-                        SpeechRecognitionSamples.RecognitionWithFileAsync().Wait();
+                        SpeechRecognitionSamples.ContinuousRecognitionWithFileAsync().Wait();
                         break;
                     case ConsoleKey.D4:
                         SpeechRecognitionSamples.RecognitionUsingCustomizedModelAsync().Wait();
                         break;
                     case ConsoleKey.D5:
-                        SpeechRecognitionSamples.ContinuousRecognitionAsync().Wait();
-                        break;
-                    case ConsoleKey.D6:
                         SpeechRecognitionSamples.RecognitionWithAudioStreamAsync().Wait();
                         break;
-                    case ConsoleKey.D7:
+                    case ConsoleKey.D6:
                         TranslationSamples.TranslationWithMicrophoneAsync().Wait();
                         break;
-                    case ConsoleKey.D8:
+                    case ConsoleKey.D7:
                         TranslationSamples.TranslationWithFileAsync().Wait();
                         break;
-                    case ConsoleKey.D9:
+                    case ConsoleKey.D8:
                         TranslationSamples.TranslationWithAudioStreamAsync().Wait();
                         break;
-                    case ConsoleKey.A:
+                    case ConsoleKey.D9:
                         SpeechRecognitionWithTokenSample.ContinuousRecognitionWithAuthorizationTokenAsync().Wait();
                         break;
                     case ConsoleKey.D0:

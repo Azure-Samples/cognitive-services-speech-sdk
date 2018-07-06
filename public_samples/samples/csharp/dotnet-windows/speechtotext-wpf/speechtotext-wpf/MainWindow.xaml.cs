@@ -344,8 +344,11 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             }
 
             this.WriteLine(log);
-            this.WriteLine(log, " --- Final result received --- ");
-            this.WriteLine(log,  e.Result.Text);
+            this.WriteLine(log, $" --- Final result received. Status: {e.Result.RecognitionStatus.ToString()}. --- ");
+            if (!string.IsNullOrEmpty(e.Result.Text))
+            {
+                this.WriteLine(log, e.Result.Text);
+            }
         }
 
         /// <summary>
@@ -357,7 +360,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             var log = (rt == RecoType.Base) ? this.baseModelLogText : this.customModelLogText;
             source.TrySetResult(0);
             this.WriteLine(log, "--- Error received ---");
-            this.WriteLine(log, "Reason {0}", e.Status);
+            this.WriteLine(log, $"Status: {e.Status.ToString()}. Reason: {e.FailureReason}.");
             this.WriteLine(log);
         }
 

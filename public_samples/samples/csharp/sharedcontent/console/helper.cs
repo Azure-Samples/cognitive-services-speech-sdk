@@ -57,6 +57,5 @@ namespace MicrosoftSpeechSDKSamples
             // reader set to the start of the body, i.e., the raw sample data
             return new BinaryAudioStreamReader(format, reader);
         }
-
     }
 }

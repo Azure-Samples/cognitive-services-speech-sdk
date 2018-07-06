@@ -323,14 +323,6 @@ phases:
       solution: 'public_samples/**/*.sln'
       maximumCpuCount: true
     displayName: 'Test - build solutions (x64 Release only)'
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    inputs:
-      type: FilePath
-      scriptPath: 'ci/nuget/smoke_test.sh'
-      args: '$(KeySkyman)'
-    timeoutInMinutes: 2
-    continueOnError: true
-    displayName: Test - smoke-test
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing'
@@ -747,13 +739,6 @@ phases:
       type: FilePath
       scriptPath: './ci/drop/test-quickstart-linux.sh'
       args: '"$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz"'
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Test - run quickstart
-    inputs:
-      type: InlineScript
-      script: 'SPEECH_SUBSCRIPTION_KEY=$(KeySkyman) ./ci/drop/test-quickstart-linux.sh --smoke-test "$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz"'
-    timeoutInMinutes: 5
-    continueOnError: true
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Linux Release Drop'
     inputs:

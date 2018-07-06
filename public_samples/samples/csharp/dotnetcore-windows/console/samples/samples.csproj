@@ -6,15 +6,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\..\dotnet\console\samples\helper.cs" Link="helper.cs" />
-    <Compile Include="..\..\..\dotnet\console\samples\Program.cs" Link="Program.cs" />
-    <Compile Include="..\..\..\dotnet\console\samples\speech_recognition_samples.cs" Link="speech_recognition_samples.cs" />
-    <Compile Include="..\..\..\dotnet\console\samples\speech_recognition_with_token_sample.cs" Link="speech_recognition_with_token_sample.cs" />
-    <Compile Include="..\..\..\dotnet\console\samples\translation_samples.cs" Link="translation_samples.cs" />
+    <Compile Include="..\..\..\sharedcontent\console\helper.cs" Link="helper.cs" />
+    <Compile Include="..\..\..\sharedcontent\console\Program.cs" Link="Program.cs" />
+    <Compile Include="..\..\..\sharedcontent\console\speech_recognition_samples.cs" Link="speech_recognition_samples.cs" />
+    <Compile Include="..\..\..\sharedcontent\console\speech_recognition_with_token_sample.cs" Link="speech_recognition_with_token_sample.cs" />
+    <Compile Include="..\..\..\sharedcontent\console\translation_samples.cs" Link="translation_samples.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="0.5.0-beta.0.2643527" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="0.5.0-beta.0.2683133" />
   </ItemGroup>
 
 </Project>

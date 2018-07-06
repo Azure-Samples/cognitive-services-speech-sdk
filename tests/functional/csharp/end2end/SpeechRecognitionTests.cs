@@ -358,5 +358,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
             }
         }
+
+        [TestMethod]
+        public async Task TestInitialSilenceTimeout()
+        {
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Silence.AudioFile))
+            {
+                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                Assert.IsTrue(result.RecognitionStatus == RecognitionStatus.InitialSilenceTimeout, result.RecognitionStatus.ToString());
+                Assert.IsTrue(result.OffsetInTicks > 0, result.OffsetInTicks.ToString());
+                Assert.IsTrue(String.IsNullOrEmpty(result.Text), result.Text);
+            }
+        }
     }
 }

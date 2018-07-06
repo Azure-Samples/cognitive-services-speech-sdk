@@ -50,6 +50,9 @@ public:
 
     /// <summary>
     /// Performs speech recognition in a non-blocking (asynchronous) mode.
+    /// Note: RecognizeAsync() returns when the first utterance has been recognized, 
+    /// so it is suitable only for single shot recognition like command or query.
+    /// For long-running recognition, use StartContinuousRecognitionAsync() instead.
     /// </summary>
     /// <returns>Future containing result value (a shared pointer to IntentRecognitionResult)
     /// of the asynchronous speech recognition.

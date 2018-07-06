@@ -9,19 +9,16 @@
 using namespace std;
 
 extern void SpeechRecognitionWithMicrophone();
-extern void SpeechRecognitionWithLanguage();
-extern void SpeechRecognitionWithFile();
+extern void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat();
+extern void SpeechContinuousRecognitionWithFile();
 extern void SpeechRecognitionUsingCustomizedModel();
-extern void SpeechContinuousRecognitionUsingEvents();
 
 extern void IntentRecognitionWithMicrophone();
 extern void IntentRecognitionWithLanguage();
-extern void IntentRecognitionWithFile();
-extern void IntentContinuousRecognitionUsingEvents();
+extern void IntentContinuousRecognitionWithFile();
 
 extern void TranslationWithMicrophone();
-extern void TranslationWithFile();
-extern void TranslationContinuousRecognitionUsingEvents();
+extern void TranslationContinuousRecognition();
 
 void SpeechSamples()
 {
@@ -30,10 +27,9 @@ void SpeechSamples()
     {
         cout << "\nSPEECH RECOGNITION SAMPLES:\n";
         cout << "1.) Speech recognition with microphone input.\n";
-        cout << "2.) Speech recognition in the specified language.\n";
-        cout << "3.) Speech recognition with file input.\n";
-        cout << "4.) Speech recognition using CRIS model.\n";
-        cout << "5.) Speech continuous recognition using events.\n";
+        cout << "2.) Speech recognition in the specified language and using detailed output format.\n";
+        cout << "3.) Speech continuous recognition with file input.\n";
+        cout << "4.) Speech recognition using customized model.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
 
         input.empty();
@@ -45,16 +41,13 @@ void SpeechSamples()
             SpeechRecognitionWithMicrophone();
             break;
         case '2':
-            SpeechRecognitionWithLanguage();
+            SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat();
             break;
         case '3':
-            SpeechRecognitionWithFile();
+            SpeechContinuousRecognitionWithFile();
             break;
         case '4':
             SpeechRecognitionUsingCustomizedModel();
-            break;
-        case '5':
-            SpeechContinuousRecognitionUsingEvents();
             break;
         case '0':
             break;
@@ -70,8 +63,7 @@ void IntentSamples()
         cout << "\nINTENT RECOGNITION SAMPLES:\n";
         cout << "1.) Intent recognition with microphone input.\n";
         cout << "2.) Intent recognition in the specified language.\n";
-        cout << "3.) Intent recognition with file input.\n";
-        cout << "4.) Intent continuous recognition using events.\n";
+        cout << "3.) Intent continuous recognition with file input.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
 
         input.empty();
@@ -86,10 +78,7 @@ void IntentSamples()
             IntentRecognitionWithLanguage();
             break;
         case '3':
-            IntentRecognitionWithFile();
-            break;
-        case '4':
-            IntentContinuousRecognitionUsingEvents();
+            IntentContinuousRecognitionWithFile();
             break;
         case '0':
             break;
@@ -104,8 +93,7 @@ void TranslationSamples()
     {
         cout << "\nTRANSLATION SAMPLES:\n";
         cout << "1.) Translation with microphone input.\n";
-        cout << "2.) Translation with file input.\n";
-        cout << "3.) Translation continuous recognition using events.\n";
+        cout << "2.) Translation continuous recognition.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
 
         input.empty();
@@ -117,10 +105,7 @@ void TranslationSamples()
             TranslationWithMicrophone();
             break;
         case '2':
-            TranslationWithFile();
-            break;
-        case '3':
-            TranslationContinuousRecognitionUsingEvents();
+            TranslationContinuousRecognition();
             break;
         case '0':
             break;

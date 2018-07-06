@@ -76,6 +76,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 public static readonly string AudioFile = Path.Combine(AudioDir, "whatstheweatherlike.wav");
                 public static readonly string Utterance = "What's the weather like?";
             }
+
+            public sealed class Silence
+            {
+                public static readonly string AudioFile = Path.Combine(AudioDir, "silenceshort.wav");
+            }
         }
 
         public sealed class French
