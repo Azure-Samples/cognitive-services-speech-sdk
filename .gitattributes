@@ -41,6 +41,9 @@ proguard-rules.pro text
 *.xaml text
 *.xml text
 *.yml text
+*.appxmanifest text
+*.sln text
+*.xaml.cs text
 
 # Bash and "git apply" only like Unix line endings
 *.sh text eol=lf
@@ -55,6 +58,7 @@ proguard-rules.pro text
 *.jar binary
 *.snk binary
 *.a binary
+*.pfx binary
 
 # externals are ignored
 external/curl/**/* binary
