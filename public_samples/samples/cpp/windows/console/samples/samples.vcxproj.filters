@@ -42,4 +42,9 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="whatstheweatherlike.wav">
+      <Filter>Resource Files</Filter>
+    </Resource>
+  </ItemGroup>
 </Project>

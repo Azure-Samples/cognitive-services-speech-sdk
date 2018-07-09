@@ -165,7 +165,7 @@ void IntentContinuousRecognitionWithFile()
 
     // Creates an intent recognizer using file as audio input.
     // Replace with your own audio file name.
-    auto recognizer = factory->CreateIntentRecognizerWithFileInput(L"YourAudioFile.wav");
+    auto recognizer = factory->CreateIntentRecognizerWithFileInput(L"whatstheweatherlike.wav");
 
     // Creates a language understanding model using the app id, and adds specific intents from your model
     auto model = LanguageUnderstandingModel::FromAppId(L"YourLuisAppId");

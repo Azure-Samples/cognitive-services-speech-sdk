@@ -150,7 +150,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // Creates a translation recognizer using file as audio input.
             // Replace with your own audio file name.
-            using (var recognizer = factory.CreateTranslationRecognizerWithFileInput(@"YourAudioFile.wav", fromLanguage, toLanguages))
+            using (var recognizer = factory.CreateTranslationRecognizerWithFileInput(@"whatstheweatherlike.wav", fromLanguage, toLanguages))
             {
                 // Subscribes to events.
                 recognizer.IntermediateResultReceived += (s, e) =>
@@ -257,7 +257,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // Create an audio stream from a wav file.
             // Replace with your own audio file name.
-            var stream = Helper.OpenWaveFile(@"YourAudioFile.wav");
+            var stream = Helper.OpenWaveFile(@"whatstheweatherlike.wav");
 
             // Creates a translation recognizer using audio stream as input.
             using (var recognizer = factory.CreateTranslationRecognizerWithStream(stream, fromLanguage, toLanguages))

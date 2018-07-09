@@ -173,7 +173,7 @@ void SpeechContinuousRecognitionWithFile()
 
     // Creates a speech recognizer using file as audio input.
     // Replace with your own audio file name.
-    auto recognizer = factory->CreateSpeechRecognizerWithFileInput(L"YourAudioFile.wav");
+    auto recognizer = factory->CreateSpeechRecognizerWithFileInput(L"whatstheweatherlike.wav");
 
     // Subscribes to events.
     recognizer->IntermediateResult.Connect(&OnPartialResult);

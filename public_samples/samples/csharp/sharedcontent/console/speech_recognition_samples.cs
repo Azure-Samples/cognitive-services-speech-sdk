@@ -166,7 +166,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // Creates a speech recognizer using file as audio input.
             // Replace with your own audio file name.
-            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(@"YourAudioFile.wav"))
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(@"whatstheweatherlike.wav"))
             {
                 // Subscribes to events.
                 recognizer.IntermediateResultReceived += (s, e) => {
@@ -239,7 +239,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // Create an audio stream from a wav file.
             // Replace with your own audio file name.
-            var stream = Helper.OpenWaveFile(@"YourAudioFile.wav");
+            var stream = Helper.OpenWaveFile(@"whatstheweatherlike.wav");
 
             // Creates a speech recognizer using audio stream input.
             using (var recognizer = factory.CreateSpeechRecognizerWithStream(stream))
