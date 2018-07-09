@@ -21,8 +21,9 @@ pretty_print "ENTERING runcsharp.sh"
 pretty_print "Running carbon_csharp *speech*"
 ./tests/e2e_carbon_csharp.sh $BINARY_DIR speech $UserKeySpeech $UserKeyCris $UserKeyLuis $UserKeySkyman
 
-pretty_print "Running carbon_csharp *translation*"
-./tests/e2e_carbon_csharp.sh $BINARY_DIR translation $UserKeySpeech $UserKeyCris $UserKeyLuis $UserKeySkyman
+# Disabling due to synthesis service being down
+#pretty_print "Running carbon_csharp *translation*"
+#./tests/e2e_carbon_csharp.sh $BINARY_DIR translation $UserKeySpeech $UserKeyCris $UserKeyLuis $UserKeySkyman
 
 #pretty_print "Running carbon_csharp *intent*"
 #./tests/e2e_carbon_csharp.sh $BINARY_DIR intent $UserKeySpeech $UserKeyCris $UserKeyLuis $UserKeySkyman
