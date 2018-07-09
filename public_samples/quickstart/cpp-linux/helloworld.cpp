@@ -52,9 +52,6 @@ void recognizeSpeech() {
 
 int main(int argc, char **argv) {
     recognizeSpeech();
-
-    cout << "Please press a key to exit.\n";
-    cin.get();
     return 0;
 }
 // </code>

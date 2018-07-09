@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+// <code>
 using System;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
@@ -41,7 +42,6 @@ namespace helloworld
                     {
                         Console.WriteLine("No speech could be recognized.\n");
                     }
-                    Environment.Exit(1);
                 }
                 else
                 {
@@ -53,6 +53,9 @@ namespace helloworld
         static void Main()
         {
             RecognizeSpeechAsync().Wait();
+            Console.WriteLine("Please press a key to continue.");
+            Console.ReadLine();
         }
     }
 }
+// </code>

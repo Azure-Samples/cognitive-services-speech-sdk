@@ -17,8 +17,11 @@ using namespace Microsoft::CognitiveServices::Speech::Intent;
 void IntentRecognitionWithMicrophone()
 {
     // <IntentRecognitionWithMicrophone>
-    // Creates an instance of a speech factory with specified
-    // subscription key and service region. Replace with your own subscription key
+    // Creates an instance of a speech factory with specified subscription key
+    // and service region. Note that in contrast to other services supported by
+    // the Cognitive Service Speech SDK, the intent recognition services
+    // requires a specific subscription key from https://www.luis.ai/.
+    // Once you've obtained it, replace with below with your own LUIS subscription key
     // and service region (e.g., "westus").
     auto factory = SpeechFactory::FromSubscription(L"YourLuisSubscriptionKey", L"YourLuisServiceRegion");
 
@@ -160,7 +163,7 @@ void IntentContinuousRecognitionWithFile()
     // and service region (e.g., "westus").
     auto factory = SpeechFactory::FromSubscription(L"YourLuisSubscriptionKey", L"YourLuisServiceRegion");
 
-    // Creates a intent recognizer using file as audio input.
+    // Creates an intent recognizer using file as audio input.
     // Replace with your own audio file name.
     auto recognizer = factory->CreateIntentRecognizerWithFileInput(L"YourAudioFile.wav");
 
