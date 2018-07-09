@@ -68,47 +68,10 @@ void TranslationWithMicrophone()
     // </TranslationWithMicrophone>
 }
 
-
-// <TranslationContinuousRecognition>
-// Defines event handlers for different events.
-static void OnPartialResult(const TranslationTextResultEventArgs& e)
-{
-    wcout << L"IntermediateResult: Recognized text:" << e.Result.Text << std::endl;
-    for (const auto& it : e.Result.Translations)
-    {
-        wcout << L"    Translated into " << it.first.c_str() << ": " << it.second.c_str() << std::endl;
-    }
-}
-
-static void OnFinalResult(const TranslationTextResultEventArgs& e)
-{
-    wcout << L"FinalResult: status:" << (int)e.Result.TranslationStatus << L". Recognized Text: " << e.Result.Text << std::endl;
-    for (const auto& it : e.Result.Translations)
-    {
-        wcout << L"    Translated into " << it.first.c_str() << ": " << it.second.c_str() << std::endl;
-    }
-}
-
-static void OnSynthesisResult(const TranslationSynthesisResultEventArgs& e)
-{
-    if (e.Result.SynthesisStatus == SynthesisStatusCode::Success)
-    {
-        wcout << L"Translation synthesis result: size of audio data: " << e.Result.Audio.size();
-    }
-    else if (e.Result.SynthesisStatus == SynthesisStatusCode::Error)
-    {
-        wcout << L"Translation synthesis error: " << e.Result.FailureReason;
-    }
-}
-
-static void OnCanceled(const TranslationTextResultEventArgs& e)
-{
-    wcout << L"Canceled:" << (int)e.Result.Reason << L"- " << e.Result.Text << std::endl;
-}
-
 // Continuous translation.
 void TranslationContinuousRecognition()
 {
+    // <TranslationContinuousRecognition>
     // Creates an instance of a speech factory with specified
     // subscription key and service region. Replace with your own subscription key
     // and service region (e.g., "westus").
@@ -122,10 +85,40 @@ void TranslationContinuousRecognition()
     auto recognizer = factory->CreateTranslationRecognizer(fromLanguage, toLanguages);
 
     // Subscribes to events.
-    recognizer->IntermediateResult.Connect(&OnPartialResult);
-    recognizer->FinalResult.Connect(&OnFinalResult);
-    recognizer->Canceled.Connect(&OnCanceled);
-    recognizer->TranslationSynthesisResultEvent.Connect(&OnSynthesisResult);
+    recognizer->IntermediateResult.Connect([](const TranslationTextResultEventArgs& e)
+    {
+        wcout << L"IntermediateResult: Recognized text:" << e.Result.Text << std::endl;
+        for (const auto& it : e.Result.Translations)
+        {
+            wcout << L"    Translated into " << it.first.c_str() << ": " << it.second.c_str() << std::endl;
+        }
+    });
+
+    recognizer->FinalResult.Connect([](const TranslationTextResultEventArgs& e)
+    {
+        wcout << L"FinalResult: status:" << (int)e.Result.TranslationStatus << L". Recognized Text: " << e.Result.Text << std::endl;
+        for (const auto& it : e.Result.Translations)
+        {
+            wcout << L"    Translated into " << it.first.c_str() << ": " << it.second.c_str() << std::endl;
+        }
+    });
+
+    recognizer->Canceled.Connect([](const TranslationTextResultEventArgs& e)
+    {
+        wcout << L"Canceled:" << (int)e.Result.Reason << L"- " << e.Result.Text << std::endl;
+    });
+
+    recognizer->TranslationSynthesisResultEvent.Connect([](const TranslationSynthesisResultEventArgs& e)
+    {
+        if (e.Result.SynthesisStatus == SynthesisStatusCode::Success)
+        {
+            wcout << L"Translation synthesis result: size of audio data: " << e.Result.Audio.size();
+        }
+        else if (e.Result.SynthesisStatus == SynthesisStatusCode::Error)
+        {
+            wcout << L"Translation synthesis error: " << e.Result.FailureReason;
+        }
+    });
 
     wcout << L"Say something...\n";
 
@@ -138,11 +131,5 @@ void TranslationContinuousRecognition()
 
     // Stops recognition.
     recognizer->StopContinuousRecognitionAsync().wait();
-
-    // Unsubscribes to events.
-    recognizer->IntermediateResult.Disconnect(&OnPartialResult);
-    recognizer->FinalResult.Disconnect(&OnFinalResult);
-    recognizer->Canceled.Disconnect(&OnCanceled);
-    recognizer->TranslationSynthesisResultEvent.Disconnect(&OnSynthesisResult);
+    // </TranslationContinuousRecognition>
 }
-// </TranslationContinuousRecognition>

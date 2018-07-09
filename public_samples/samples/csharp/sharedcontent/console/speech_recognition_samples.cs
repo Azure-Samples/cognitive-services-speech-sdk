@@ -239,60 +239,64 @@ namespace MicrosoftSpeechSDKSamples
 
             // Create an audio stream from a wav file.
             // Replace with your own audio file name.
-            var stream = Helper.OpenWaveFile(@"whatstheweatherlike.wav");
-
-            // Creates a speech recognizer using audio stream input.
-            using (var recognizer = factory.CreateSpeechRecognizerWithStream(stream))
+            using (var stream = Helper.OpenWaveFile(@"whatstheweatherlike.wav"))
             {
-                // Subscribes to events.
-                recognizer.IntermediateResultReceived += (s, e) => {
-                    Console.WriteLine($"\n    Partial result: {e.Result.Text}.");
-                };
+                // Creates a speech recognizer using audio stream input.
+                using (var recognizer = factory.CreateSpeechRecognizerWithStream(stream))
+                {
+                    // Subscribes to events.
+                    recognizer.IntermediateResultReceived += (s, e) =>
+                    {
+                        Console.WriteLine($"\n    Partial result: {e.Result.Text}.");
+                    };
 
-                recognizer.FinalResultReceived += (s, e) => {
-                    var result = e.Result;
-                    if (result.RecognitionStatus == RecognitionStatus.Recognized)
+                    recognizer.FinalResultReceived += (s, e) =>
                     {
-                        Console.WriteLine($"\n    Final result: Status: {result.RecognitionStatus.ToString()}, Text: {result.Text}.");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-                        if (result.RecognitionStatus == RecognitionStatus.Canceled)
+                        var result = e.Result;
+                        if (result.RecognitionStatus == RecognitionStatus.Recognized)
                         {
-                            Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
+                            Console.WriteLine($"\n    Final result: Status: {result.RecognitionStatus.ToString()}, Text: {result.Text}.");
                         }
                         else
                         {
-                            Console.WriteLine("No speech could be recognized.\n");
+                            Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
+                            if (result.RecognitionStatus == RecognitionStatus.Canceled)
+                            {
+                                Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
+                            }
+                            else
+                            {
+                                Console.WriteLine("No speech could be recognized.\n");
+                            }
                         }
-                    }
-                };
+                    };
 
-                recognizer.RecognitionErrorRaised += (s, e) => {
-                    Console.WriteLine($"\n    An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}");
-                    stopStreamRecognitionTaskCompletionSource.TrySetResult(0);
-                };
-
-                recognizer.OnSessionEvent += (s, e) =>
-                {
-                    Console.WriteLine($"\nSession event. Event: {e.EventType.ToString()}.");
-                    // Stops translation when session stop is detected.
-                    if (e.EventType == SessionEventType.SessionStoppedEvent)
+                    recognizer.RecognitionErrorRaised += (s, e) =>
                     {
-                        Console.WriteLine($"\nStop recognition.");
+                        Console.WriteLine($"\n    An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}");
                         stopStreamRecognitionTaskCompletionSource.TrySetResult(0);
-                    }
-                };
+                    };
 
-                // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
-                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                    recognizer.OnSessionEvent += (s, e) =>
+                    {
+                        Console.WriteLine($"\nSession event. Event: {e.EventType.ToString()}.");
+                        // Stops translation when session stop is detected.
+                        if (e.EventType == SessionEventType.SessionStoppedEvent)
+                        {
+                            Console.WriteLine($"\nStop recognition.");
+                            stopStreamRecognitionTaskCompletionSource.TrySetResult(0);
+                        }
+                    };
 
-                // Waits for completion.
-                await stopStreamRecognitionTaskCompletionSource.Task.ConfigureAwait(false);
+                    // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                    await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
-                // Stops recognition.
-                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                    // Waits for completion.
+                    await stopStreamRecognitionTaskCompletionSource.Task.ConfigureAwait(false);
+
+                    // Stops recognition.
+                    await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                }
             }
         }
         // </recognitionAudioStream>

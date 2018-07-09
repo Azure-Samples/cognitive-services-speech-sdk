@@ -113,51 +113,10 @@ void IntentRecognitionWithLanguage()
     // </IntentRecognitionWithLanguage>
 }
 
-
-// <IntentContinuousRecognitionWithFile>
-static std::mutex g_stopIntentRecognitionMutex;
-static std::condition_variable g_stopIntentRecognitionConditionVariable;
-static bool g_stopIntentRecognition;
-
-static void NotifyToStopRecognition()
-{
-    std::unique_lock<std::mutex> locker(g_stopIntentRecognitionMutex);
-    g_stopIntentRecognition = true;
-    g_stopIntentRecognitionConditionVariable.notify_all();
-}
-
-// Defines event handlers for different events.
-static void OnPartialResult(const IntentRecognitionEventArgs& e)
-{
-    wcout << L"IntermediateResult:" << e.Result.Text << std::endl;
-}
-
-static void OnFinalResult(const IntentRecognitionEventArgs& e)
-{
-    wcout << L"FinalResult: status:" << (int)e.Result.Reason << L". Text: " << e.Result.Text << std::endl;
-    wcout << L"    Intent Id: " << e.Result.IntentId << std::endl;
-    wcout << L"    LUIS Json: " << e.Result.Properties[ResultProperty::LanguageUnderstandingJson].GetString() << std::endl;
-}
-
-static void OnCanceled(const IntentRecognitionEventArgs& e)
-{
-    wcout << L"Canceled:" << (int)e.Result.Reason << L"- " << e.Result.ErrorDetails << std::endl;
-
-    // Notify to stop recognition.
-    NotifyToStopRecognition();
-}
-
-static void OnSessionStoppedEvent(const SessionEventArgs& e)
-{
-    wcout << L"Session stopped.";
-
-    // Notify to stop recognition.
-    NotifyToStopRecognition();
-}
-
 // Continuous intent recognition.
 void IntentContinuousRecognitionWithFile()
 {
+    // <IntentContinuousRecognitionWithFile>
     // Creates an instance of a speech factory with specified
     // subscription key and service region. Replace with your own subscription key
     // and service region (e.g., "westus").
@@ -167,6 +126,9 @@ void IntentContinuousRecognitionWithFile()
     // Replace with your own audio file name.
     auto recognizer = factory->CreateIntentRecognizerWithFileInput(L"whatstheweatherlike.wav");
 
+    // promise for synchronization of recognition end.
+    std::promise<void> recognitionEnd;
+
     // Creates a language understanding model using the app id, and adds specific intents from your model
     auto model = LanguageUnderstandingModel::FromAppId(L"YourLuisAppId");
     recognizer->AddIntent(L"id1", model, L"YourLuisIntentName1");
@@ -174,26 +136,40 @@ void IntentContinuousRecognitionWithFile()
     recognizer->AddIntent(L"any-IntentId-here", model, L"YourLuisIntentName3");
 
     // Subscribes to events.
-    recognizer->IntermediateResult.Connect(&OnPartialResult);
-    recognizer->FinalResult.Connect(&OnFinalResult);
-    recognizer->Canceled.Connect(&OnCanceled);
-    recognizer->SessionStopped.Connect(&OnSessionStoppedEvent);
+    recognizer->IntermediateResult.Connect([] (const IntentRecognitionEventArgs& e)
+    {
+        wcout << L"IntermediateResult:" << e.Result.Text << std::endl;
+    });
+
+    recognizer->FinalResult.Connect([] (const IntentRecognitionEventArgs& e)
+    {
+        wcout << L"FinalResult: status:" << (int)e.Result.Reason << L". Text: " << e.Result.Text << std::endl;
+        wcout << L"    Intent Id: " << e.Result.IntentId << std::endl;
+        wcout << L"    LUIS Json: " << e.Result.Properties[ResultProperty::LanguageUnderstandingJson].GetString() << std::endl;
+    });
+
+    recognizer->Canceled.Connect([&recognitionEnd] (const IntentRecognitionEventArgs& e)
+    {
+        wcout << L"Canceled:" << (int)e.Result.Reason << L"- " << e.Result.ErrorDetails << std::endl;
+        // Notify to stop recognition.
+        recognitionEnd.set_value();
+    });
+
+    recognizer->SessionStopped.Connect([&recognitionEnd](const SessionEventArgs& e)
+    {
+        wcout << L"Session stopped.";
+        // Notify to stop recognition.
+        recognitionEnd.set_value();
+    });
 
     // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
     recognizer->StartContinuousRecognitionAsync().wait();
 
-    {
-        std::unique_lock<std::mutex> lock(g_stopIntentRecognitionMutex);
-        g_stopIntentRecognitionConditionVariable.wait(lock, [] { return g_stopIntentRecognition; });
-    }
+    // Waits for recognition end.
+    recognitionEnd.get_future().wait();
 
     // Stops recognition.
     recognizer->StopContinuousRecognitionAsync().wait();
-
-    // Unsubscribes from events.
-    recognizer->IntermediateResult.Disconnect(&OnPartialResult);
-    recognizer->FinalResult.Disconnect(&OnFinalResult);
-    recognizer->Canceled.Disconnect(&OnCanceled);
-    recognizer->SessionStopped.Disconnect(&OnSessionStoppedEvent);
+    // </IntentContinuousRecognitionWithFile>
 }
-// </IntentContinuousRecognitionWithFile>
+

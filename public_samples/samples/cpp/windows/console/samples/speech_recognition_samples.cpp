@@ -4,8 +4,6 @@
 //
 
 #include "stdafx.h"
-#include <mutex>
-#include <condition_variable>
 
 // <toplevel>
 #include <speechapi_cxx.h>
@@ -101,71 +99,9 @@ void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
     // </SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat>
 }
 
-// <SpeechContinuousRecognitionWithFile>
-static std::mutex g_stopSpeechRecognitionMutex;
-static std::condition_variable g_stopSpeechRecognitionConditionVariable;
-static bool g_stopSpeechRecognition;
-
-static void NotifyToStopRecognition()
-{
-    std::unique_lock<std::mutex> lock(g_stopSpeechRecognitionMutex);
-    g_stopSpeechRecognition = true;
-    g_stopSpeechRecognitionConditionVariable.notify_all();
-}
-
-static void OnPartialResult(const SpeechRecognitionEventArgs& e)
-{
-    wcout << L"IntermediateResult:" << e.Result.Text << std::endl;
-}
-
-static void OnFinalResult(const SpeechRecognitionEventArgs& e)
-{
-    wcout << L"Recognition Status:" << int(e.Result.Reason);
-    switch (e.Result.Reason)
-    {
-    case Reason::Recognized:
-        wcout << L"We recognized: " << e.Result.Text
-              << L". Offset: " << e.Result.Offset() << L". Duration: " << e.Result.Duration()
-              << std::endl;
-        break;
-    case Reason::InitialSilenceTimeout:
-        wcout << L"The start of the audio stream contains only silence, and the service timed out waiting for speech.\n";
-        break;
-    case Reason::InitialBabbleTimeout:
-        wcout << L"The start of the audio stream contains only noise, and the service timed out waiting for speech.\n";
-        break;
-    case Reason::NoMatch:
-        wcout << L"The speech was detected in the audio stream, but no words from the target language were matched."
-              << L"Possible reasons could be wrong setting of the target language or wrong format of audio stream.\n";
-        break;
-    case Reason::Canceled:
-        wcout << L"There was an error, reason: " << e.Result.ErrorDetails << std::endl;
-        break;
-    default:
-        wcout << L"Recognition Status:" << int(e.Result.Reason);
-        break;
-    }
-}
-
-static void OnCanceled(const SpeechRecognitionEventArgs& e)
-{
-    wcout << L"Canceled:" << (int)e.Result.Reason << L"- " << e.Result.ErrorDetails << std::endl;
-
-    // Notify to stop recognition.
-    NotifyToStopRecognition();
-
-}
-
-static void OnSessionStoppedEvent(const SessionEventArgs& e)
-{
-    wcout << L"Session stopped.";
-
-    // Notify to stop recognition.
-    NotifyToStopRecognition();
-}
-
 void SpeechContinuousRecognitionWithFile()
 {
+    // <SpeechContinuousRecognitionWithFile>
     // Creates an instance of a speech factory with specified
     // subscription key and service region. Replace with your own subscription key
     // and service region (e.g., "westus").
@@ -175,30 +111,69 @@ void SpeechContinuousRecognitionWithFile()
     // Replace with your own audio file name.
     auto recognizer = factory->CreateSpeechRecognizerWithFileInput(L"whatstheweatherlike.wav");
 
+    // promise for synchronization of recognition end.
+    std::promise<void> recognitionEnd;
+
     // Subscribes to events.
-    recognizer->IntermediateResult.Connect(&OnPartialResult);
-    recognizer->FinalResult.Connect(&OnFinalResult);
-    recognizer->Canceled.Connect(&OnCanceled);
-    recognizer->SessionStopped.Connect(&OnSessionStoppedEvent);
+    recognizer->IntermediateResult.Connect([] (const SpeechRecognitionEventArgs& e)
+    {
+        wcout << L"IntermediateResult:" << e.Result.Text << std::endl;
+    });
+
+    recognizer->FinalResult.Connect([] (const SpeechRecognitionEventArgs& e)
+    {
+        wcout << L"Recognition Status:" << int(e.Result.Reason) << std::endl;
+        switch (e.Result.Reason)
+        {
+        case Reason::Recognized:
+            wcout << L"We recognized: " << e.Result.Text
+                << L". Offset: " << e.Result.Offset() << L". Duration: " << e.Result.Duration()
+                << std::endl;
+            break;
+        case Reason::InitialSilenceTimeout:
+            wcout << L"The start of the audio stream contains only silence, and the service timed out waiting for speech.\n";
+            break;
+        case Reason::InitialBabbleTimeout:
+            wcout << L"The start of the audio stream contains only noise, and the service timed out waiting for speech.\n";
+            break;
+        case Reason::NoMatch:
+            wcout << L"The speech was detected in the audio stream, but no words from the target language were matched."
+                << L"Possible reasons could be wrong setting of the target language or wrong format of audio stream.\n";
+            break;
+        case Reason::Canceled:
+            wcout << L"There was an error, reason: " << e.Result.ErrorDetails << std::endl;
+            break;
+        default:
+            wcout << L"Recognition Status:" << int(e.Result.Reason);
+            break;
+        }
+    });
+
+    recognizer->Canceled.Connect( [&recognitionEnd] (const SpeechRecognitionEventArgs& e)
+    {
+        wcout << L"Canceled:" << (int)e.Result.Reason << L"- " << e.Result.ErrorDetails << std::endl;
+        // Notify to stop recognition.
+        recognitionEnd.set_value();
+    });
+
+    recognizer->SessionStopped.Connect( [&recognitionEnd] (const SessionEventArgs& e)
+    {
+        wcout << L"Session stopped.";
+        // Notify to stop recognition.
+        recognitionEnd.set_value();
+    });
 
     // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
     recognizer->StartContinuousRecognitionAsync().wait();
 
-    {
-        std::unique_lock<std::mutex> lock(g_stopSpeechRecognitionMutex);
-        g_stopSpeechRecognitionConditionVariable.wait(lock, [] { return g_stopSpeechRecognition; });
-    }
+    // Waits for recognition end.
+    recognitionEnd.get_future().wait();
 
     // Stops recognition.
     recognizer->StopContinuousRecognitionAsync().wait();
-
-    // Unsubscribes from events.
-    recognizer->IntermediateResult.Disconnect(&OnPartialResult);
-    recognizer->FinalResult.Disconnect(&OnFinalResult);
-    recognizer->Canceled.Disconnect(&OnCanceled);
-    recognizer->SessionStopped.Disconnect(&OnSessionStoppedEvent);
+    // </SpeechContinuousRecognitionWithFile>
 }
-// </SpeechContinuousRecognitionWithFile>
+
 
 // Speech recognition using a customized model.
 void SpeechRecognitionUsingCustomizedModel()
