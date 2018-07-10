@@ -104,7 +104,7 @@
                                         <ComboBoxItem Tag="de-DE">German</ComboBoxItem>
                                         <ComboBoxItem Tag="It-IT">Italian</ComboBoxItem>
                                         <ComboBoxItem Tag="ja-JP">Japanese</ComboBoxItem>
-                                        <ComboBoxItem Tag="pt-BR">Portugese</ComboBoxItem>
+                                        <ComboBoxItem Tag="pt-BR">Portuguese</ComboBoxItem>
                                         <ComboBoxItem Tag="ru-RU">Russian</ComboBoxItem>
                                         <ComboBoxItem Tag="es-ES">Spanish</ComboBoxItem>
                                     </ComboBox>

@@ -44,7 +44,7 @@
                         <ComboBoxItem Tag="de-DE">German</ComboBoxItem>
                         <ComboBoxItem Tag="it-IT">Italian</ComboBoxItem>
                         <ComboBoxItem Tag="ja-JP">Japanese</ComboBoxItem>
-                        <ComboBoxItem Tag="pt-BR">Portugese</ComboBoxItem>
+                        <ComboBoxItem Tag="pt-BR">Portuguese</ComboBoxItem>
                         <ComboBoxItem Tag="ru-RU">Russian</ComboBoxItem>
                         <ComboBoxItem Tag="es-ES">Spanish</ComboBoxItem>
                     </ComboBox>
@@ -58,7 +58,7 @@
                         <ListBoxItem Tag="de-DE" IsSelected="true">German</ListBoxItem>
                         <ListBoxItem Tag="it-IT">Italian</ListBoxItem>
                         <ListBoxItem Tag="ja-JP">Japanese</ListBoxItem>
-                        <ListBoxItem Tag="pt-BR">Portugese</ListBoxItem>
+                        <ListBoxItem Tag="pt-BR">Portuguese</ListBoxItem>
                         <ListBoxItem Tag="ru-RU">Russian</ListBoxItem>
                         <ListBoxItem Tag="es-ES">Spanish</ListBoxItem>
                     </ListBox>
@@ -72,7 +72,7 @@
                         <ComboBoxItem Tag="de-DE">German</ComboBoxItem>
                         <ComboBoxItem Tag="it-IT">Italian</ComboBoxItem>
                         <ComboBoxItem Tag="ja-JP">Japanese</ComboBoxItem>
-                        <ComboBoxItem Tag="pt-BR">Portugese</ComboBoxItem>
+                        <ComboBoxItem Tag="pt-BR">Portuguese</ComboBoxItem>
                         <ComboBoxItem Tag="ru-RU">Russian</ComboBoxItem>
                         <ComboBoxItem Tag="es-ES">Spanish</ComboBoxItem>
                     </ComboBox>

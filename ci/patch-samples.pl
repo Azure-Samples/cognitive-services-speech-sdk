@@ -23,6 +23,8 @@ BEGIN {
     m(^(?:$rePkgConfig|$reCsProj|$reVcxProj|$reGradleBuild)$) &&
     push @ARGV, $File::Find::name
   }, $public_samples);
+
+  $seenPackageReference = 0;
 }
 if ($ARGV ne $oldargv) {
   warn "Patching $ARGV\n";
@@ -35,5 +37,9 @@ $ARGV =~ m(.*/(?:$reCsProj|$reVcxProj)$) && do {
 
   # <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="X" />
   s((?<=<PackageReference Include="$reNugetId" Version=")[^"]*)($version)g;
+
+  # <PackageReference Include="Microsoft.CognitiveServices.Speech">\n<Version>X</Version>
+  s((?<=<Version>)[^<]*)($version)g if $seenPackageReference;
+  $seenPackageReference = m(<PackageReference Include="$reNugetId">);
 };
 $ARGV =~ m(.*/$reGradleBuild$) && s/(\bimplementation\s+(['"])$reMavenId:)(.*?)\2/$1$version$2/;
