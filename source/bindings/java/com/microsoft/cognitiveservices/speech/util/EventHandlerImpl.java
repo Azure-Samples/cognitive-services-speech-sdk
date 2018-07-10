@@ -7,7 +7,7 @@ package com.microsoft.cognitiveservices.speech.util;
 import java.util.ArrayList;
 
 /**
-  * Implements the binding between the carbon event handler and java event handling.
+  * Implements the binding between the Speech SDK core event handler and Java event handling.
   */
 public class EventHandlerImpl<T> {
     /**
