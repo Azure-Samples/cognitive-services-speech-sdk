@@ -61,8 +61,13 @@ else()
         list(APPEND AUDIO_LIBS asound)
     else()
         list(APPEND SOURCES
-            "${SRC_DIR}/linux/microphone_none.cpp"
+            "${SRC_DIR}/android/microphone.cpp"
+            "${SRC_DIR}/android/audio_sys.cpp"
+            "${SRC_DIR}/android/audio_common.cpp"
+            "${SRC_DIR}/android/audio_recorder.cpp"
+            "${SRC_DIR}/android/debug_utils.cpp"
         )
+        list(APPEND AUDIO_LIBS OpenSLES android log atomic)
     endif()
 endif()
 
