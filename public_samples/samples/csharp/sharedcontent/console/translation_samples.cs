@@ -23,9 +23,8 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task TranslationWithMicrophoneAsync()
         {
             // <TranslationWithMicrophoneAsync>
-            // Creates an instance of a speech factory with specified
-            // subscription key and service region. Replace with your own subscription key
-            // and service region (e.g., "westus").
+            // Creates an instance of a speech factory with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
             var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             // Sets source and target languages.
@@ -245,9 +244,8 @@ namespace MicrosoftSpeechSDKSamples
         {
             stopTranslationWithAudioStreamTaskCompletionSource = new TaskCompletionSource<int>();
 
-            // Creates an instance of a speech factory with specified
-            // subscription key and service region. Replace with your own subscription key
-            // and service region (e.g., "westus").
+            // Creates an instance of a speech factory with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
             var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             // Sets source and target languages

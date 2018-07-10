@@ -16,9 +16,8 @@ using namespace Microsoft::CognitiveServices::Speech;
 void SpeechRecognitionWithMicrophone()
 {
     // <SpeechRecognitionWithMicrophone>
-    // Creates an instance of a speech factory with specified
-    // subscription key and service region. Replace with your own subscription key
-    // and service region (e.g., "westus").
+    // Creates an instance of a speech factory with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
     auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"YourServiceRegion");
 
     // Creates a speech recognizer using microphone as audio input. The default language is "en-us".
@@ -59,9 +58,8 @@ void SpeechRecognitionWithMicrophone()
 void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
 {
     // <SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat>
-    // Creates an instance of a speech factory with specified
-    // subscription key and service region. Replace with your own subscription key
-    // and service region (e.g., "westus").
+    // Creates an instance of a speech factory with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
     auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"YourServiceRegion");
 
     // Creates a speech recognizer in the specified language using microphone as audio input.
@@ -102,9 +100,8 @@ void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
 void SpeechContinuousRecognitionWithFile()
 {
     // <SpeechContinuousRecognitionWithFile>
-    // Creates an instance of a speech factory with specified
-    // subscription key and service region. Replace with your own subscription key
-    // and service region (e.g., "westus").
+    // Creates an instance of a speech factory with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
     auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"YourServiceRegion");
 
     // Creates a speech recognizer using file as audio input.
@@ -179,9 +176,8 @@ void SpeechContinuousRecognitionWithFile()
 void SpeechRecognitionUsingCustomizedModel()
 {
     // <SpeechRecognitionUsingCustomizedModel>
-    // Creates an instance of a speech factory with specified
-    // subscription key and service region. Replace with your own subscription key
-    // and service region (e.g., "westus").
+    // Creates an instance of a speech factory with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
     auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"YourServiceRegion");
 
     // Creates a speech recognizer using microphone as audio input.

@@ -20,9 +20,8 @@ using namespace Microsoft::CognitiveServices::Speech::Translation;
 void TranslationWithMicrophone()
 {
     // <TranslationWithMicrophone>
-    // Creates an instance of a speech factory with specified
-    // subscription key and service region. Replace with your own subscription key
-    // and service region (e.g., "westus").
+    // Creates an instance of a speech factory with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
     auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"YourServiceRegion");
 
     // Sets source and target languages
@@ -72,9 +71,8 @@ void TranslationWithMicrophone()
 void TranslationContinuousRecognition()
 {
     // <TranslationContinuousRecognition>
-    // Creates an instance of a speech factory with specified
-    // subscription key and service region. Replace with your own subscription key
-    // and service region (e.g., "westus").
+    // Creates an instance of a speech factory with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
     auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"YourServiceRegion");
 
     // Sets source and target languages

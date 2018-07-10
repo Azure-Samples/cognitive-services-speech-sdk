@@ -16,29 +16,6 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Defines event handler for session events, e.g., SessionStartedEvent and SessionStoppedEvent.
         /// </summary>
-        /// <example>
-        /// Create a speech recognizer, setup an event handler for session events
-        /// <code>
-        /// static void MySessionEventHandler(object sender, RecognitionEventArgs e)
-        /// {
-        ///     Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition event: {0} ", e.ToString()));
-        /// }
-        ///
-        /// static async Task SpeechRecognizerSample()
-        /// {
-        ///     var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
-        ///     SpeechRecognizer reco = factory.CreateSpeechRecognizerWithFileInput("audioFileName");
-        ///
-        ///     reco.OnSpeechDetectedEvent += MySessionEventHandler;
-        ///
-        ///     // Starts recognition.
-        ///     var result = await reco.RecognizeAsync();
-        ///
-        ///     reco.OnSpeechDetectedEvent -= MySessionEventHandler;
-        ///     Console.WriteLine("Speech Recognition: Recognition result: " + result);
-        /// }
-        /// </code>
-        /// </example>
         public event EventHandler<SessionEventArgs> OnSessionEvent;
 
         /// <summary>

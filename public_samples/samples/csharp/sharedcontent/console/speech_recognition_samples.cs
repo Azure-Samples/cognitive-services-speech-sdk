@@ -17,9 +17,8 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionWithMicrophoneAsync()
         {
             // <recognitionWithMicrophone>
-            // Creates an instance of a speech factory with specified
-            // subscription key and service region. Replace with your own subscription key
-            // and service region (e.g., "westus").
+            // Creates an instance of a speech factory with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
             var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             // Creates a speech recognizer using microphone as audio input. The default language is "en-us".
@@ -59,9 +58,8 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionWithLanguageAndDetailedOutputAsync()
         {
             // <recognitionWithLanguageAndDetailedOutputFormat>
-            // Creates an instance of a speech factory with specified
-            // subscription key and service region. Replace with your own subscription key
-            // and service region (e.g., "westus").
+            // Creates an instance of a speech factory with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
             var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             // Creates a speech recognizer for the specified language, using microphone as audio input.
@@ -110,9 +108,8 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionUsingCustomizedModelAsync()
         {
             // <recognitionCustomized>
-            // Creates an instance of a speech factory with specified
-            // subscription key and service region. Replace with your own subscription key
-            // and service region (e.g., "westus").
+            // Creates an instance of a speech factory with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
             var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             // Creates a speech recognizer using microphone as audio input.
@@ -159,9 +156,8 @@ namespace MicrosoftSpeechSDKSamples
         {
             stopFileRecognitionTaskCompletionSource = new TaskCompletionSource<int>();
 
-            // Creates an instance of a speech factory with specified
-            // subscription key and service region. Replace with your own subscription key
-            // and service region (e.g., "westus").
+            // Creates an instance of a speech factory with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
             var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             // Creates a speech recognizer using file as audio input.
@@ -232,9 +228,8 @@ namespace MicrosoftSpeechSDKSamples
         {
             stopStreamRecognitionTaskCompletionSource = new TaskCompletionSource<int>();
 
-            // Creates an instance of a speech factory with specified
-            // subscription key and service region. Replace with your own subscription key
-            // and service region (e.g., "westus").
+            // Creates an instance of a speech factory with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
             var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             // Create an audio stream from a wav file.
