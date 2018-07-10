@@ -541,10 +541,17 @@ phases:
           <artifactId>$(ARTIFACT_ID)</artifactId>
           <version>$(SPEECHSDK_SEMVER2NOMETA)</version>
           <packaging>aar</packaging>
+          <name>Microsoft Cognitive Services Speech SDK for Android</name>
           <description>
-             Microsoft Cognitive Services Speech SDK for Android.
-             Documentation available at https://aka.ms/csspeech.
+            This SDK allows you to use the Microsoft Cognitive Speech Service
+            (Preview). See https://aka.ms/csspeech for more information.
           </description>
+          <licenses>
+            <license>
+              <name>Microsoft Software License Terms for Microsoft Cognitive Services Speech SDK Preview</name>
+              <url>https://aka.ms/csspeech/license</url>
+            </license>
+          </licenses>
         </project>
         POM
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
