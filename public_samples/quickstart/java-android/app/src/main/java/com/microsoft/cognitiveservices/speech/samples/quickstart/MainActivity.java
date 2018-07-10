@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+// <code>
 package com.microsoft.cognitiveservices.speech.samples.quickstart;
 
 import android.support.v4.app.ActivityCompat;
@@ -36,15 +37,20 @@ public class MainActivity extends AppCompatActivity {
         // Note: we need to request the permissions
         int requestCode = 5; // unique code for the permission request
         ActivityCompat.requestPermissions(MainActivity.this, new String[]{RECORD_AUDIO, INTERNET}, requestCode);
-    }
-
-    public void onSpeechButtonClicked(View v) {
-        TextView txt = (TextView) this.findViewById(R.id.hello);
 
         try {
             // Note: required once after app start.
             SpeechFactory.configureNativePlatformBindingWithDefaultCertificate(MainActivity.this.getCacheDir().getAbsolutePath());
+        } catch (Exception ex) {
+            Log.e("SpeechSDKDemo", "unexpected " + ex.getMessage());
+            assert(false);
+        }
+    }
 
+    public void onSpeechButtonClicked(View v) {
+        TextView txt = (TextView) this.findViewById(R.id.hello); // 'hello' is the ID of your text view
+
+        try {
             SpeechFactory factory = SpeechFactory.fromSubscription(speechSubscriptionKey, serviceRegion);
             assert(factory!= null);
 
@@ -56,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
             Future<SpeechRecognitionResult> task = reco.recognizeAsync();
             assert(task != null);
 
-            // Note: this will block the ui thread, so eventually, you want to
+            // Note: this will block the UI thread, so eventually, you want to
             //        register for the event (see full samples)
             SpeechRecognitionResult result = task.get();
             assert(result != null);
@@ -77,3 +83,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 }
+// </code>
