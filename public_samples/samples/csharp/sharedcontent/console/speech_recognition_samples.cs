@@ -148,17 +148,14 @@ namespace MicrosoftSpeechSDKSamples
         }
 
         // Continuous speech recognition.
-        // <recognitionContinuousWithFile>
-        // The TaskCompletionSource to stop recognition.
-        private static TaskCompletionSource<int> stopFileRecognitionTaskCompletionSource;
-
         public static async Task ContinuousRecognitionWithFileAsync()
         {
-            stopFileRecognitionTaskCompletionSource = new TaskCompletionSource<int>();
-
+            // <recognitionContinuousWithFile>
             // Creates an instance of a speech factory with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
             var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            var stopRecognition = new TaskCompletionSource<int>();
 
             // Creates a speech recognizer using file as audio input.
             // Replace with your own audio file name.
@@ -194,7 +191,7 @@ namespace MicrosoftSpeechSDKSamples
 
                 recognizer.RecognitionErrorRaised += (s, e) => {
                     Console.WriteLine($"\n    An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}");
-                    stopFileRecognitionTaskCompletionSource.TrySetResult(0);
+                    stopRecognition.TrySetResult(0);
                 };
 
                 recognizer.OnSessionEvent += (s, e) => {
@@ -203,7 +200,7 @@ namespace MicrosoftSpeechSDKSamples
                     if (e.EventType == SessionEventType.SessionStoppedEvent)
                     {
                         Console.WriteLine($"\nStop recognition.");
-                        stopFileRecognitionTaskCompletionSource.TrySetResult(0);
+                        stopRecognition.TrySetResult(0);
                     }
                 };
 
@@ -211,26 +208,24 @@ namespace MicrosoftSpeechSDKSamples
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
                 // Waits for completion.
-                await stopFileRecognitionTaskCompletionSource.Task.ConfigureAwait(false);
+                // Use Task.WaitAny to keep the task rooted.
+                Task.WaitAny(new[] { stopRecognition.Task });
 
                 // Stops recognition.
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
             }
+            // </recognitionContinuousWithFile>
         }
-        // </recognitionContinuousWithFile>
-
-        // <recognitionAudioStream>
-        // The TaskCompletionSource to stop recognition.
-        private static TaskCompletionSource<int> stopStreamRecognitionTaskCompletionSource;
 
         // Speech recognition with audio stream
         public static async Task RecognitionWithAudioStreamAsync()
         {
-            stopStreamRecognitionTaskCompletionSource = new TaskCompletionSource<int>();
-
+            // <recognitionAudioStream>
             // Creates an instance of a speech factory with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
             var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            var stopRecognition = new TaskCompletionSource<int>();
 
             // Create an audio stream from a wav file.
             // Replace with your own audio file name.
@@ -269,7 +264,7 @@ namespace MicrosoftSpeechSDKSamples
                     recognizer.RecognitionErrorRaised += (s, e) =>
                     {
                         Console.WriteLine($"\n    An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}");
-                        stopStreamRecognitionTaskCompletionSource.TrySetResult(0);
+                        stopRecognition.TrySetResult(0);
                     };
 
                     recognizer.OnSessionEvent += (s, e) =>
@@ -279,7 +274,7 @@ namespace MicrosoftSpeechSDKSamples
                         if (e.EventType == SessionEventType.SessionStoppedEvent)
                         {
                             Console.WriteLine($"\nStop recognition.");
-                            stopStreamRecognitionTaskCompletionSource.TrySetResult(0);
+                            stopRecognition.TrySetResult(0);
                         }
                     };
 
@@ -287,13 +282,14 @@ namespace MicrosoftSpeechSDKSamples
                     await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
                     // Waits for completion.
-                    await stopStreamRecognitionTaskCompletionSource.Task.ConfigureAwait(false);
+                    // Use Task.WaitAny to keep the task rooted.
+                    Task.WaitAny(new[] { stopRecognition.Task });
 
                     // Stops recognition.
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
                 }
             }
+            // </recognitionAudioStream>
         }
-        // </recognitionAudioStream>
     }
 }

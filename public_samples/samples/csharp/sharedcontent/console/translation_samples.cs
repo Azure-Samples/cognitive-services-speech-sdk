@@ -5,14 +5,13 @@
 
 // <toplevel>
 using System;
-#if NET461
-using System.Media;
-#endif
-using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Translation;
+#if NET461
+using System.Media;
+#endif
 // </toplevel>
 
 namespace MicrosoftSpeechSDKSamples
@@ -129,18 +128,14 @@ namespace MicrosoftSpeechSDKSamples
         }
 
         // Translation using file input.
-        // <TranslationWithFileAsync>
-        // The TaskCompletionSource must be rooted.
-        // See https://blogs.msdn.microsoft.com/pfxteam/2011/10/02/keeping-async-methods-alive/ for details.
-        private static TaskCompletionSource<int> stopTranslationWithFileTaskCompletionSource;
-
         public static async Task TranslationWithFileAsync()
         {
-            stopTranslationWithFileTaskCompletionSource = new TaskCompletionSource<int>();
-
+            // <TranslationWithFileAsync>
             // Creates an instance of a speech factory with specified subscription key and service region. 
             // Replace with your own subscription key and service region (e.g., "westus").
             var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            var stopTranslation = new TaskCompletionSource<int>();
 
             // Sets source and target languages.
             // Replace with languages of your choice.
@@ -204,7 +199,7 @@ namespace MicrosoftSpeechSDKSamples
                 recognizer.RecognitionErrorRaised += (s, e) =>
                 {
                     Console.WriteLine($"\nAn error occurred. Status: {e.Status.ToString()}");
-                    stopTranslationWithFileTaskCompletionSource.TrySetResult(0);
+                    stopTranslation.TrySetResult(0);
                 };
 
                 recognizer.OnSpeechDetectedEvent += (s, e) =>
@@ -219,7 +214,7 @@ namespace MicrosoftSpeechSDKSamples
                     if (e.EventType == SessionEventType.SessionStoppedEvent)
                     {
                         Console.WriteLine($"\nStop translation.");
-                        stopTranslationWithFileTaskCompletionSource.TrySetResult(0);
+                        stopTranslation.TrySetResult(0);
                     }
                 };
 
@@ -228,25 +223,24 @@ namespace MicrosoftSpeechSDKSamples
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
                 // Waits for completion.
-                await stopTranslationWithFileTaskCompletionSource.Task.ConfigureAwait(false);
+                // Use Task.WaitAny to keep the task rooted.
+                Task.WaitAny(new[] { stopTranslation.Task });
 
                 // Stops translation.
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
             }
+            // </TranslationWithFileAsync>
         }
-        // </TranslationWithFileAsync>
 
         // Translation using audio stream.
-        // <TranslationWithAudioStreamAsync>
-        private static TaskCompletionSource<int> stopTranslationWithAudioStreamTaskCompletionSource;
-
         public static async Task TranslationWithAudioStreamAsync()
         {
-            stopTranslationWithAudioStreamTaskCompletionSource = new TaskCompletionSource<int>();
-
+            // <TranslationWithAudioStreamAsync>
             // Creates an instance of a speech factory with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
             var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            var stopTranslation = new TaskCompletionSource<int>();
 
             // Sets source and target languages
             // Replace with languages of your choice.
@@ -313,7 +307,7 @@ namespace MicrosoftSpeechSDKSamples
                     recognizer.RecognitionErrorRaised += (s, e) =>
                     {
                         Console.WriteLine($"\nAn error occurred. Status: {e.Status.ToString()}");
-                        stopTranslationWithAudioStreamTaskCompletionSource.TrySetResult(0);
+                        stopTranslation.TrySetResult(0);
                     };
 
                     recognizer.OnSpeechDetectedEvent += (s, e) =>
@@ -328,7 +322,7 @@ namespace MicrosoftSpeechSDKSamples
                     if (e.EventType == SessionEventType.SessionStoppedEvent)
                         {
                             Console.WriteLine($"\nStop translation.");
-                            stopTranslationWithAudioStreamTaskCompletionSource.TrySetResult(0);
+                            stopTranslation.TrySetResult(0);
                         }
                     };
 
@@ -337,13 +331,14 @@ namespace MicrosoftSpeechSDKSamples
                     await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
                     // Waits for completion.
-                    await stopTranslationWithAudioStreamTaskCompletionSource.Task.ConfigureAwait(false);
+                    // Use Task.WaitAny to keep the task rooted.
+                    Task.WaitAny(new[] { stopTranslation.Task });
 
                     // Stops translation.
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
                 }
             }
+            // </TranslationWithAudioStreamAsync>
         }
-        // </TranslationWithAudioStreamAsync>
     }
 }

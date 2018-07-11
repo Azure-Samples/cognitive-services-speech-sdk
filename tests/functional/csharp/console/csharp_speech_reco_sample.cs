@@ -16,8 +16,6 @@ namespace MicrosoftSpeechSDKSamples
 {
     public class SpeechRecognitionSamples
     {
-        private static TaskCompletionSource<int> tcs;
-
         private static void MyIntermediateResultEventHandler(object sender, SpeechRecognitionResultEventArgs e)
         {
             Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: intermediate result: {0}, Offset: {1}, Duration: {2} ", e.ToString(), e.Result.OffsetInTicks, e.Result.Duration));
@@ -144,8 +142,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             if (useContinuousRecognition)
             {
-                tcs = new TaskCompletionSource<int>();
-                await ContinuousRecognitionAsync(reco, model, tcs).ConfigureAwait(false);
+                await ContinuousRecognitionAsync(reco, model).ConfigureAwait(false);
             }
             else
             {
@@ -180,9 +177,11 @@ namespace MicrosoftSpeechSDKSamples
             reco.OnSessionEvent -= MySessionEventHandler;
         }
 
-        private static async Task ContinuousRecognitionAsync(SpeechRecognizer reco, string modelId, TaskCompletionSource<int> tcs)
+        private static async Task ContinuousRecognitionAsync(SpeechRecognizer reco, string modelId)
         {
             Console.WriteLine("Continuous recognition.");
+            var tcsLocal = new TaskCompletionSource<int>();
+
             // Sets deployment id of a customized model if needed.
             if (!string.IsNullOrEmpty(modelId))
             {
@@ -221,7 +220,7 @@ namespace MicrosoftSpeechSDKSamples
                 if (e.EventType == SessionEventType.SessionStoppedEvent)
                 {
                     Console.WriteLine($"Session Stop detected. Stop the recognition.");
-                    tcs.TrySetResult(0);
+                    tcsLocal.TrySetResult(0);
                 }
             };
 
@@ -229,7 +228,8 @@ namespace MicrosoftSpeechSDKSamples
             await reco.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
             // Waits for completion.
-            await tcs.Task.ConfigureAwait(false);
+            // Use Task.WaitAny to make sure that the task is rooted.
+            Task.WaitAny(new []{ tcsLocal.Task });
 
             // Stops translation.
             await reco.StopContinuousRecognitionAsync().ConfigureAwait(false);
