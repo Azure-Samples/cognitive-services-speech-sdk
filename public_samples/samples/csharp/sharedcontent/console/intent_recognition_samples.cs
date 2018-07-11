@@ -61,8 +61,8 @@ namespace MicrosoftSpeechSDKSamples
                     Console.WriteLine($"\n    Intent Id: {result.IntentId}.");
                     Console.WriteLine($"\n    Language Understanding JSON: {result.Properties.Get<string>(ResultPropertyKind.LanguageUnderstandingJson)}.");
                 }
-                // </intentRecognitionWithMicrophone>
             }
+            // </intentRecognitionWithMicrophone>
         }
 
         // Continuous intent recognition using file input.
@@ -133,8 +133,8 @@ namespace MicrosoftSpeechSDKSamples
 
                 // Stops recognition.
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
-                // </intentContinuousRecognitionWithFile>
             }
+            // </intentContinuousRecognitionWithFile>
         }
 
         // Intent recognition in the specified language, using microphone.
@@ -188,8 +188,8 @@ namespace MicrosoftSpeechSDKSamples
                     Console.WriteLine($"\n    Intent Id: {result.IntentId}.");
                     Console.WriteLine($"\n    Language Understanding JSON: {result.Properties.Get<string>(ResultPropertyKind.LanguageUnderstandingJson)}.");
                 }
-                // </intentRecognitionWithLanguage>
             }
+            // </intentRecognitionWithLanguage>
         }
     }
 }
