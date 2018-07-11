@@ -196,7 +196,7 @@ namespace MicrosoftSpeechSDKSamples
 
                 recognizer.OnSessionEvent += (s, e) => {
                     Console.WriteLine($"\n    Session event. Event: {e.EventType.ToString()}.");
-                    // Stops translation when session stop is detected.
+                    // Stops recognition when session stop is detected.
                     if (e.EventType == SessionEventType.SessionStoppedEvent)
                     {
                         Console.WriteLine($"\nStop recognition.");

@@ -23,6 +23,9 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine("7. Translation with file input.");
             Console.WriteLine("8. Translation with audio stream.");
             Console.WriteLine("9. Speech continuous recognition using authorization token.");
+            Console.WriteLine("A. Intent recognition with microphone input.");
+            Console.WriteLine("B. Intent continuous recognition with file input.");
+            Console.WriteLine("C. Intent recognition in the specified language with microphone input.");
 
             Console.Write("Your choice (0: Stop.): ");
 
@@ -59,6 +62,15 @@ namespace MicrosoftSpeechSDKSamples
                         break;
                     case ConsoleKey.D9:
                         SpeechRecognitionWithTokenSample.ContinuousRecognitionWithAuthorizationTokenAsync().Wait();
+                        break;
+                    case ConsoleKey.A:
+                        IntentRecognitionSamples.RecognitionWithMicrophoneAsync().Wait();
+                        break;
+                    case ConsoleKey.B:
+                        IntentRecognitionSamples.ContinuousRecognitionWithFileAsync().Wait();
+                        break;
+                    case ConsoleKey.C:
+                        IntentRecognitionSamples.RecognitionWithMicrophoneUsingLanguageAsync().Wait();
                         break;
                     case ConsoleKey.D0:
                         Console.WriteLine("Exiting...");

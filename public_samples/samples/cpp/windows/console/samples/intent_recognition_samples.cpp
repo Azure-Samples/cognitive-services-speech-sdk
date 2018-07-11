@@ -21,18 +21,18 @@ void IntentRecognitionWithMicrophone()
     // and service region. Note that in contrast to other services supported by
     // the Cognitive Service Speech SDK, the intent recognition services
     // requires a specific subscription key from https://www.luis.ai/.
-    // Once you've obtained it, replace with below with your own LUIS subscription key
+    // Once you've obtained it, replace with below with your own Language Understanding subscription key
     // and service region (e.g., "westus").
-    auto factory = SpeechFactory::FromSubscription(L"YourLuisSubscriptionKey", L"YourLuisServiceRegion");
+    auto factory = SpeechFactory::FromSubscription(L"YourLanguageUnderstandingSubscriptionKey", L"YourLanguageUnderstandingServiceRegion");
 
     // Creates an intent recognizer using microphone as audio input. The default language is "en-us".
     auto recognizer = factory->CreateIntentRecognizer();
 
     // Creates a language understanding model using the app id, and adds specific intents from your model
-    auto model = LanguageUnderstandingModel::FromAppId(L"YourLuisAppId");
-    recognizer->AddIntent(L"id1", model, L"YourLuisIntentName1");
-    recognizer->AddIntent(L"id2", model, L"YourLuisIntentName2");
-    recognizer->AddIntent(L"any-IntentId-here", model, L"YourLuisIntentName3");
+    auto model = LanguageUnderstandingModel::FromAppId(L"YourLanguageUnderstandingAppId");
+    recognizer->AddIntent(L"id1", model, L"YourLanguageUnderstandingIntentName1");
+    recognizer->AddIntent(L"id2", model, L"YourLanguageUnderstandingIntentName2");
+    recognizer->AddIntent(L"any-IntentId-here", model, L"YouLanguageUnderstandingIntentName3");
 
     wcout << L"Say something...\n";
 
@@ -72,19 +72,19 @@ void IntentRecognitionWithLanguage()
     // and service region. Note that in contrast to other services supported by
     // the Cognitive Service Speech SDK, the intent recognition services
     // requires a specific subscription key from https://www.luis.ai/.
-    // Once you've obtained it, replace with below with your own LUIS subscription key
+    // Once you've obtained it, replace with below with your own Language Understanding subscription key
     // and service region (e.g., "westus").
-    auto factory = SpeechFactory::FromSubscription(L"YourLuisSubscriptionKey", L"YourLuisServiceRegion");
+    auto factory = SpeechFactory::FromSubscription(L"YourLanguageUnderstandingSubscriptionKey", L"YourLanguageUnderstandingServiceRegion");
 
     // Creates an intent recognizer in the specified language using microphone as audio input.
     auto lang = L"de-de";
     auto recognizer = factory->CreateIntentRecognizer(lang);
 
     // Creates a language understanding model using the app id, and adds specific intents from your model
-    auto model = LanguageUnderstandingModel::FromAppId(L"YourLuisAppId");
-    recognizer->AddIntent(L"id1", model, L"YourLuisIntentName1");
-    recognizer->AddIntent(L"id2", model, L"YourLuisIntentName2");
-    recognizer->AddIntent(L"any-IntentId-here", model, L"YourLuisIntentName3");
+    auto model = LanguageUnderstandingModel::FromAppId(L"YourLanguageUnderstandingAppId");
+    recognizer->AddIntent(L"id1", model, L"YourLanguageUnderstandingIntentName1");
+    recognizer->AddIntent(L"id2", model, L"YourLanguageUnderstandingIntentName2");
+    recognizer->AddIntent(L"any-IntentId-here", model, L"YouLanguageUnderstandingIntentName3");
 
     wcout << L"Say something in " << lang << L"...\n";
 
@@ -124,9 +124,9 @@ void IntentContinuousRecognitionWithFile()
     // and service region. Note that in contrast to other services supported by
     // the Cognitive Service Speech SDK, the intent recognition services
     // requires a specific subscription key from https://www.luis.ai/.
-    // Once you've obtained it, replace with below with your own LUIS subscription key
+    // Once you've obtained it, replace with below with your own Language Understanding subscription key
     // and service region (e.g., "westus").
-    auto factory = SpeechFactory::FromSubscription(L"YourLuisSubscriptionKey", L"YourLuisServiceRegion");
+    auto factory = SpeechFactory::FromSubscription(L"YourLanguageUnderstandingSubscriptionKey", L"YourLanguageUnderstandingServiceRegion");
 
     // Creates an intent recognizer using file as audio input.
     // Replace with your own audio file name.
@@ -136,10 +136,10 @@ void IntentContinuousRecognitionWithFile()
     std::promise<void> recognitionEnd;
 
     // Creates a language understanding model using the app id, and adds specific intents from your model
-    auto model = LanguageUnderstandingModel::FromAppId(L"YourLuisAppId");
-    recognizer->AddIntent(L"id1", model, L"YourLuisIntentName1");
-    recognizer->AddIntent(L"id2", model, L"YourLuisIntentName2");
-    recognizer->AddIntent(L"any-IntentId-here", model, L"YourLuisIntentName3");
+    auto model = LanguageUnderstandingModel::FromAppId(L"YourLanguageUnderstandingAppId");
+    recognizer->AddIntent(L"id1", model, L"YourLanguageUnderstandingIntentName1");
+    recognizer->AddIntent(L"id2", model, L"YourLanguageUnderstandingIntentName2");
+    recognizer->AddIntent(L"any-IntentId-here", model, L"YouLanguageUnderstandingIntentName3");
 
     // Subscribes to events.
     recognizer->IntermediateResult.Connect([] (const IntentRecognitionEventArgs& e)
@@ -151,7 +151,7 @@ void IntentContinuousRecognitionWithFile()
     {
         wcout << L"FinalResult: status:" << (int)e.Result.Reason << L". Text: " << e.Result.Text << std::endl;
         wcout << L"    Intent Id: " << e.Result.IntentId << std::endl;
-        wcout << L"    LUIS Json: " << e.Result.Properties[ResultProperty::LanguageUnderstandingJson].GetString() << std::endl;
+        wcout << L"    Language Understanding Json: " << e.Result.Properties[ResultProperty::LanguageUnderstandingJson].GetString() << std::endl;
     });
 
     recognizer->Canceled.Connect([&recognitionEnd] (const IntentRecognitionEventArgs& e)
