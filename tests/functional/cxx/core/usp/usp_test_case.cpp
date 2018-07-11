@@ -10,6 +10,7 @@
 
 #include "test_utils.h"
 #include "usp.h"
+#include "guid_utils.h"
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
@@ -28,7 +29,7 @@ public:
 
     void Init()
     {
-        auto client = USP::Client(shared_from_this(), m_endpoint)
+        auto client = USP::Client(shared_from_this(), m_endpoint, PAL::CreateGuidWithoutDashes())
             .SetRecognitionMode(m_mode)
             .SetRegion("westus")
             .SetAuthentication(USP::AuthenticationType::SubscriptionKey, Keys::Speech);
@@ -40,7 +41,7 @@ public:
         m_connection = client.Connect();
     }
 
-    virtual void OnError(const std::string& error) override
+    virtual void OnError(bool /*transport*/, const std::string& error) override
     {
         FAIL(error);
     }

@@ -241,7 +241,8 @@ private:
 
 
 private:
-
+    // Unique identifier of the session, used mostly for diagnostics.
+    // Is represented by UUID without dashes.
     const std::wstring m_sessionId;
 
     #ifdef _MSC_VER

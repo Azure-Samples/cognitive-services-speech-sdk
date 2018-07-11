@@ -29,7 +29,7 @@ namespace Impl {
 std::chrono::minutes CSpxAudioStreamSession::m_recoAsyncTimeoutDuration = std::chrono::minutes(1);
 
 CSpxAudioStreamSession::CSpxAudioStreamSession() :
-    m_sessionId(PAL::CreateGuid()),
+    m_sessionId(PAL::CreateGuidWithoutDashes()),
     m_recoKind(RecognitionKind::Idle),
     m_sessionState(SessionState::Idle),
     m_expectAdapterStartedTurn(false),
@@ -882,6 +882,10 @@ std::wstring CSpxAudioStreamSession::GetStringValue(const wchar_t* name, const w
     if (PAL::wcsicmp(name, L"KWSModelPath") == 0 && m_kwsModel != nullptr)
     {
         return m_kwsModel->GetFileName();
+    }
+    else if (PAL::wcsicmp(name, g_sessionId) == 0)
+    {
+        return m_sessionId;
     }
 
     return ISpxNamedPropertiesImpl::GetStringValue(name, defaultValue);

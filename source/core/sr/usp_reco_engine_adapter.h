@@ -57,7 +57,7 @@ public:
     void OnSpeechFragment(const USP::SpeechFragmentMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnSpeechFragment(m); }); }
     void OnTurnStart(const USP::TurnStartMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTurnStart(m); }); }
     void OnTurnEnd(const USP::TurnEndMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTurnEnd(m); }); }
-    void OnError(const std::string& error) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnError(error); }); }
+    void OnError(bool transport, const std::string& error) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnError(transport, error); }); }
     void OnTranslationHypothesis(const USP::TranslationHypothesisMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationHypothesis(m); }); }
     void OnTranslationPhrase(const USP::TranslationPhraseMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationPhrase(m); }); }
     void OnTranslationSynthesis(const USP::TranslationSynthesisMsg& m) override { InvokeOnSite([=](std::shared_ptr<ISpxUspCallbacks> callback) { callback->OnTranslationSynthesis(m); }); }
@@ -134,6 +134,7 @@ private:
     SPXHR GetRecoModeFromEndpoint(const std::wstring& endpoint, USP::RecognitionMode& mode);
     SPXHR GetRecoModeFromProperties(const std::shared_ptr<ISpxNamedProperties>& properties, USP::RecognitionMode& recoMode) const;
     USP::OutputFormat GetOutputFormat(const ISpxNamedProperties& properties) const;
+    std::wstring GetSessionId(const ISpxNamedProperties& properties) const;
 
     void UspWriteAvailableChunks();
 
@@ -151,7 +152,7 @@ private:
     void OnSpeechPhrase(const USP::SpeechPhraseMsg&) override;
     void OnTurnStart(const USP::TurnStartMsg&) override;
     void OnTurnEnd(const USP::TurnEndMsg&) override;
-    void OnError(const std::string& error) override;
+    void OnError(bool transport, const std::string& error) override;
     void OnUserMessage(const USP::UserMsg&) override;
 
     void OnTranslationHypothesis(const USP::TranslationHypothesisMsg&) override;

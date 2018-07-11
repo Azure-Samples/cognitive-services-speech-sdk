@@ -271,7 +271,7 @@ bool CSpxUnidecRecoEngineAdapter::NextStream(AudioStreamDescriptor** pAudioStrea
 
 bool CSpxUnidecRecoEngineAdapter::InitStream(AudioStreamDescriptor** pAudioStream, bool* enableSegmentation)
 {
-    m_streamId = PAL::CreateGuid();
+    m_streamId = PAL::CreateGuidWithoutDashes();
     m_audioStream.StreamId = m_streamId.c_str();
     
     m_audioStream.wFormatTag = m_format->wFormatTag;

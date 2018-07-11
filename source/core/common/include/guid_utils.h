@@ -7,9 +7,10 @@
 
 #pragma once
 
-namespace PAL {
-
-std::wstring CreateGuid();
+namespace PAL
+{
+// Creates a GUID without dashes.
+std::wstring CreateGuidWithoutDashes();
 
 std::string DeviceUuid();
 

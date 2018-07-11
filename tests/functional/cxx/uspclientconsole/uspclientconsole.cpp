@@ -15,6 +15,7 @@
 #include <string>
 #include <map>
 #include "audio_sys.h"
+#include "guid_utils.h"
 
 // #include "azure_c_shared_utility/audio_sys.h"
 
@@ -134,7 +135,7 @@ virtual void OnTurnEnd(const USP::TurnEndMsg&) override
     turnEnd = true;
 }
 
-virtual void OnError(const string& error) override
+virtual void OnError(bool /*transport*/, const string& error) override
 {
     printf("Response: On Error: %s.\n", error.c_str());
     turnEnd = true;
@@ -323,7 +324,7 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    USP::Client client(testCallbacks, endpointType);
+    USP::Client client(testCallbacks, endpointType, PAL::CreateGuidWithoutDashes());
     // TODO: make region as parameter
     client.SetRegion("westus");
     if (!customUrl.empty())

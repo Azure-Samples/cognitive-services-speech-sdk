@@ -118,8 +118,6 @@ void CSpxUspRecoEngineAdapter::SetFormat(WAVEFORMATEX* pformat)
 
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) site->AdapterCompletedSetFormatStop()", __FUNCTION__, this);
         InvokeOnSite([this](const SitePtr& p) { p->AdapterCompletedSetFormatStop(this); });
-
-        m_format.reset();
     }
     else
     {
@@ -201,7 +199,11 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
 
     // Create the usp client, which we'll configure and use to create the actual connection
     auto uspCallbacks = SpxCreateObjectWithSite<ISpxUspCallbacks>("CSpxUspCallbackWrapper", this);
-    USP::Client client(uspCallbacks, USP::EndpointType::Speech);
+
+    // Currently we use a session id as a connection id to correlate logs on the server side with a particular user
+    // session, because currently there is a single connection for session at any point in time.
+    auto sessionId = GetSessionId(*properties);
+    USP::Client client(uspCallbacks, USP::EndpointType::Speech, sessionId);
 
     // Set up the connection properties, and create the connection
     SetUspEndpoint(properties, client);
@@ -454,6 +456,12 @@ USP::OutputFormat CSpxUspRecoEngineAdapter::GetOutputFormat(const ISpxNamedPrope
     LogError("Unknown output format value %ls", value.c_str());
     SPX_THROW_HR(SPXERR_INVALID_ARG);
     return USP::OutputFormat::Simple; // Make compiler happy.
+}
+
+std::wstring CSpxUspRecoEngineAdapter::GetSessionId(const ISpxNamedProperties& properties) const
+{
+    // Session id must be a valid GUID without dashes.
+    return properties.GetStringValue(g_sessionId);
 }
 
 SPXHR CSpxUspRecoEngineAdapter::GetRecoModeFromEndpoint(const std::wstring& endpoint, USP::RecognitionMode& recoMode)
@@ -1083,7 +1091,7 @@ void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
     }
 }
 
-void CSpxUspRecoEngineAdapter::OnError(const std::string& error)
+void CSpxUspRecoEngineAdapter::OnError(bool transport, const std::string& error)
 {
     try
     {
@@ -1105,7 +1113,9 @@ void CSpxUspRecoEngineAdapter::OnError(const std::string& error)
 
             ResetAfterError();
         }
-        else if (m_retry && ChangeState(AudioState::Ready, UspState::Idle))
+        // We reconnect only in case of transport errors
+        // and if there was already at least one correct recognition.
+        else if (m_retry && transport && ChangeState(AudioState::Ready, UspState::Idle))
         {
             UspTerminate();
             UspInitialize();
@@ -1123,6 +1133,7 @@ void CSpxUspRecoEngineAdapter::OnError(const std::string& error)
                     {
                         UspSendMessage("speech.context", m_currentSpeechContext);
                     }
+                    UspWriteFormat(m_format.get());
                     UspWriteActual(chunk->data, chunk->size);
                 }
                 else if (chunk->size > 0 && IsState(AudioState::Sending))

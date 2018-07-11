@@ -62,8 +62,9 @@ struct Callbacks
 
     /**
     * A callback function that will be invoked when an error occurs in handling communication with service.
+    * transport - indicates if the error was origniated on transport, not USP layer.
     */
-    virtual void OnError(const std::string& /*error*/) {}
+    virtual void OnError(bool /*transport*/, const std::string& /*error*/) {}
 
     /**
     * A callback function that will be invoked when the first chunk in an audio stream is received from the service.
@@ -163,14 +164,16 @@ public:
     * Creates a USP client.
     * @param callbacks The struct defines callback functions that will be invoked when various USP events occur.
     * @param type  The speech service to be used, Speech, Intent, Translation, and etc.
+    * @param connectionId Connection id, that will be passed to the service in the X-ConnectionId header and can be used for diagnostics.
     */
-    Client(CallbacksPtr callbacks, EndpointType endpoint):
+    Client(CallbacksPtr callbacks, EndpointType endpoint, const std::wstring& connectionId):
         m_callbacks(callbacks),
         m_endpoint(endpoint),
         m_recoMode(RecognitionMode::Interactive),
         m_outputFormat(OutputFormat::Simple),
         m_language(s_defaultLanguage),
-        m_authType(AuthenticationType::SubscriptionKey)
+        m_authType(AuthenticationType::SubscriptionKey),
+        m_connectionId(connectionId)
     {
     }
 
@@ -324,6 +327,7 @@ private:
     AuthenticationType m_authType;
     std::string m_authData;
 
+    std::wstring m_connectionId;
 };
 
 }}}}

@@ -173,11 +173,11 @@ void Connection::Impl::WorkThread(weak_ptr<Connection::Impl> ptr)
         }
         catch (const exception& e)
         {
-            connection->Invoke([&] { callbacks->OnError(e.what()); });
+            connection->Invoke([&] { callbacks->OnError(false, e.what()); });
         }
         catch (...)
         {
-            connection->Invoke([&] { callbacks->OnError("Unhandled exception in the USP layer."); });
+            connection->Invoke([&] { callbacks->OnError(false, "Unhandled exception in the USP layer."); });
         }
 
         connection->m_cv.wait_for(lock, chrono::milliseconds(200), [&] {return connection->m_haveWork || !connection->m_connected; });
@@ -419,7 +419,8 @@ void Connection::Impl::Connect()
     // Log the device uuid
     metrics_device_startup(m_telemetry.get(), PAL::DeviceUuid().c_str());
 
-    m_transport = TransportPtr(TransportRequestCreate(connectionUrl.c_str(), this, m_telemetry.get(), headersPtr), TransportRequestDestroy);
+    std::string connectionId = PAL::ToString(m_config.m_connectionId);
+    m_transport = TransportPtr(TransportRequestCreate(connectionUrl.c_str(), this, m_telemetry.get(), headersPtr, connectionId.c_str()), TransportRequestDestroy);
     if (m_transport == nullptr)
     {
         ThrowRuntimeError("Failed to create transport request.");
@@ -544,31 +545,31 @@ void Connection::Impl::OnTransportError(TransportHandle transportHandle, Transpo
     switch (reason)
     {
     case TRANSPORT_ERROR_NONE:
-        connection->Invoke([&] { callbacks->OnError("Unknown transport error."); });
+        connection->Invoke([&] { callbacks->OnError(true, "Unknown transport error."); });
         break;
 
     case TRANSPORT_ERROR_HTTP_UNAUTHORIZED:
-        connection->Invoke([&] { callbacks->OnError("WebSocket Upgrade failed with an authentication error (401). Please check the subscription key or the authorization token, and the region name."); });
+        connection->Invoke([&] { callbacks->OnError(true, "WebSocket Upgrade failed with an authentication error (401). Please check the subscription key or the authorization token, and the region name."); });
         break;
 
     case TRANSPORT_ERROR_HTTP_FORBIDDEN:
-        connection->Invoke([&] { callbacks->OnError("WebSocket Upgrade failed with an authentication error (403). Please check the subscription key or the authorization token, and the region name."); });
+        connection->Invoke([&] { callbacks->OnError(true, "WebSocket Upgrade failed with an authentication error (403). Please check the subscription key or the authorization token, and the region name."); });
         break;
 
     case TRANSPORT_ERROR_CONNECTION_FAILURE:
-        connection->Invoke([&] { callbacks->OnError("Connection failed (no connection to the remote host). Please check network connection, firewall setting, and the region name used to create speech factory."); });
+        connection->Invoke([&] { callbacks->OnError(true, "Connection failed (no connection to the remote host). Please check network connection, firewall setting, and the region name used to create speech factory."); });
         break;
 
     case TRANSPORT_ERROR_DNS_FAILURE:
-        connection->Invoke([&] { callbacks->OnError("Connection failed (the remote host did not respond)."); });
+        connection->Invoke([&] { callbacks->OnError(true, "Connection failed (the remote host did not respond)."); });
         break;
 
     case TRANSPORT_ERROR_REMOTECLOSED:
-        connection->Invoke([&] { callbacks->OnError("Connection was closed by the remote host."); });
+        connection->Invoke([&] { callbacks->OnError(true, "Connection was closed by the remote host."); });
         break;
 
     default:
-        connection->Invoke([&] { callbacks->OnError("Communication Error. Error code: " + to_string(reason)); });
+        connection->Invoke([&] { callbacks->OnError(true, "Communication Error. Error code: " + to_string(reason)); });
         break;
     }
 
@@ -850,7 +851,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         case RecognitionStatus::Error:
             {
                 auto msg = "The recognition service encountered an internal error and could not continue. Response text:" + json.dump();
-                connection->Invoke([&] { callbacks->OnError(msg.c_str()); });
+                connection->Invoke([&] { callbacks->OnError(false, msg.c_str()); });
                 break;
             }
         case RecognitionStatus::EndOfDictation:
@@ -860,7 +861,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         default:
             {
                 auto msg = "Responses received is invalid. Response text:" + json.dump();
-                connection->Invoke([&] { callbacks->OnError(msg.c_str()); });
+                connection->Invoke([&] { callbacks->OnError(false, msg.c_str()); });
                 break;
             }
         }
@@ -925,7 +926,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         }
         else
         {
-            connection->Invoke([&] { callbacks->OnError(PAL::ToString(translationResult.failureReason).c_str()); });
+            connection->Invoke([&] { callbacks->OnError(false, PAL::ToString(translationResult.failureReason).c_str()); });
         }
     }
     else if (path == path::translationSynthesisEnd)
@@ -968,7 +969,7 @@ void Connection::Impl::OnTransportData(TransportHandle transportHandle, HTTP_HEA
         }
         else
         {
-            connection->Invoke([&] { callbacks->OnError(PAL::ToString(msg.failureReason).c_str()); });
+            connection->Invoke([&] { callbacks->OnError(false, PAL::ToString(msg.failureReason).c_str()); });
         }
     }
     else

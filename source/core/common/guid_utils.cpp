@@ -12,9 +12,9 @@
 
 #define UUID_LENGTH 36
 
-namespace PAL {
-    // TODO: drop prefix, use a namespace instead?
-    std::wstring CreateGuid()
+namespace PAL
+{
+    std::wstring CreateGuidWithoutDashes()
     {
         std::string uuidStr(UUID_LENGTH, char{ 0 });
         auto result = UniqueId_Generate(&uuidStr[0], UUID_LENGTH + 1);

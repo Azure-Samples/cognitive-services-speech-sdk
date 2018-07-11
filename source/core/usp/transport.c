@@ -779,16 +779,6 @@ void TransportWriteTelemetry(TransportHandle handle, const uint8_t* buffer, size
     }
 }
 
-static void TransportCreateConnectionId(TransportHandle transportHandle)
-{
-    TransportRequest* request = (TransportRequest*)transportHandle;
-    if (transportHandle && request->isWS)
-    {
-        UniqueId_Generate(request->connectionId, sizeof(request->connectionId));
-        GuidDToNFormat(request->connectionId);
-    }
-}
-
 void TransportCreateRequestId(TransportHandle transportHandle)
 {
     TransportStream*  stream;
@@ -819,7 +809,7 @@ void TransportCreateRequestId(TransportHandle transportHandle)
     }
 }
 
-TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETRY_HANDLE telemetry, HTTP_HEADERS_HANDLE connectionHeaders)
+TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETRY_HANDLE telemetry, HTTP_HEADERS_HANDLE connectionHeaders, const char* connectionId)
 {
     TransportRequest *request;
     int err = -1;
@@ -894,7 +884,14 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
 
     if (request->isWS)
     {
-        TransportCreateConnectionId(request);
+        if (sizeof(request->connectionId) < strlen(connectionId) + 1)
+        {
+            free(request);
+            LogError("Invalid size of connection Id. Please use a valid GUID with dashes removed.");
+            return NULL;
+        }
+
+        strncpy(request->connectionId, connectionId, strlen(connectionId));
         TransportCreateRequestId(request);
         HTTPHeaders_ReplaceHeaderNameValuePair(connectionHeaders, "X-ConnectionId", request->connectionId);
         char* headers = ConstructHeadersString(connectionHeaders);
@@ -903,6 +900,7 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
         char* str = (char*)malloc(len);
         if (str == NULL)
         {
+            free(request);
             LogError("Failed to allocate memory for connection headers string.");
             return NULL;
         }

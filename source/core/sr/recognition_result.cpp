@@ -50,7 +50,7 @@ void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* resultId, cons
     m_duration = duration;
 
     m_resultId = resultId == nullptr
-        ? PAL::CreateGuid()
+        ? PAL::CreateGuidWithoutDashes()
         : resultId;
 
     m_text = text;
@@ -67,7 +67,7 @@ void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, Reason reas
     m_duration = duration;
 
     m_resultId = resultId == nullptr
-        ? PAL::CreateGuid()
+        ? PAL::CreateGuidWithoutDashes()
         : resultId;
 
     m_text = text == nullptr
