@@ -54,9 +54,7 @@ public class MainActivity extends AppCompatActivity {
             SpeechFactory factory = SpeechFactory.fromSubscription(speechSubscriptionKey, serviceRegion);
             assert(factory!= null);
 
-            AudioInputStream microphoneStream = new MicrophoneStream();
-
-            SpeechRecognizer reco = factory.createSpeechRecognizerWithStream(microphoneStream);
+            SpeechRecognizer reco = factory.createSpeechRecognizer();
             assert(reco != null);
 
             Future<SpeechRecognitionResult> task = reco.recognizeAsync();
@@ -74,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
                 txt.setText("Error recognizing. Did you update the subscription info?" + System.lineSeparator() + result.toString());
             }
 
-            microphoneStream.close();
             reco.close();
             factory.close();
         } catch (Exception ex) {
