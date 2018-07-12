@@ -3,10 +3,12 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+// <toplevel>
 using System;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Intent;
+// </toplevel>
 
 namespace MicrosoftSpeechSDKSamples
 {
