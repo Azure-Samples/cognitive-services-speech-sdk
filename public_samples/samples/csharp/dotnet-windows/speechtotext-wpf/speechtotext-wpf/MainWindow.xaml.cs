@@ -101,6 +101,8 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         private string subscriptionKey;
         private const string deploymentIdFileName = "CustomModelDeploymentId.txt";
         private const string subscriptionKeyFileName = "SubscriptionKey.txt";
+        private string wavFileName;
+
         // The TaskCompletionSource must be rooted.
         // See https://blogs.msdn.microsoft.com/pfxteam/2011/10/02/keeping-async-methods-alive/ for details.
         private TaskCompletionSource<int> stopBaseRecognitionTaskCompletionSource;
@@ -131,16 +133,17 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// </summary>
         private void Initialize()
         {
-            this.UseMicrophone= false;
+            this.UseMicrophone = false;
             this.UseFileInput = true;
 
             this.UseBaseModel = true;
             this.UseCustomModel = false;
             this.UseBaseAndCustomModels = false;
 
-            // Set the default choice for radio buttons.
+            // Set the default values for UI
             this.fileInputRadioButton.IsChecked = true;
             this.basicRadioButton.IsChecked = true;
+            this.stopButton.IsEnabled = false;
 
             this.SubscriptionKey = this.GetValueFromIsolatedStorage(subscriptionKeyFileName);
             this.CustomModelDeploymentId = this.GetValueFromIsolatedStorage(deploymentIdFileName);
@@ -158,11 +161,12 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         private void StartButton_Click(object sender, RoutedEventArgs e)
         {
             this.startButton.IsEnabled = false;
+            this.stopButton.IsEnabled = true;
             this.radioGroup.IsEnabled = false;
             this.optionPanel.IsEnabled = false;
             this.LogRecognitionStart(this.customModelLogText, this.customModelCurrentText);
             this.LogRecognitionStart(this.baseModelLogText, this.baseModelCurrentText);
-            string wavFileName = "";
+            wavFileName = "";
 
             this.Region = ((ComboBoxItem)regionComboBox.SelectedItem).Tag.ToString();
             this.RecognitionLanguage = ((ComboBoxItem)languageComboBox.SelectedItem).Tag.ToString();
@@ -194,20 +198,42 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             {
                 wavFileName = GetFile();
                 if (wavFileName.Length <= 0) return;
-                Task.Run(() => this.PlayAudioFile(wavFileName));
+                Task.Run(() => this.PlayAudioFile());
             }
 
             if (this.UseCustomModel || this.UseBaseAndCustomModels)
             {
                 stopCustomRecognitionTaskCompletionSource = new TaskCompletionSource<int>();
-                Task.Run(async () => { await CreateCustomReco(wavFileName, stopCustomRecognitionTaskCompletionSource).ConfigureAwait(false); });
+                Task.Run(async () => { await CreateCustomReco().ConfigureAwait(false); });
             }
 
             if (this.UseBaseModel || this.UseBaseAndCustomModels)
             {
                 stopBaseRecognitionTaskCompletionSource = new TaskCompletionSource<int>();
-                Task.Run(async () => { await CreateBaseReco(wavFileName, stopBaseRecognitionTaskCompletionSource).ConfigureAwait(false); });
+                Task.Run(async () => { await CreateBaseReco().ConfigureAwait(false); });
             }
+        }
+
+
+        /// <summary>
+        /// Handles the Click event of the StopButton:
+        /// Stops Recognition and enables Settings Panel in UI
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
+        private void StopButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.stopButton.IsEnabled = false;
+            if (this.UseBaseModel || this.UseBaseAndCustomModels)
+            {
+                stopBaseRecognitionTaskCompletionSource.TrySetResult(0);
+            }
+            if (this.UseCustomModel || this.UseBaseAndCustomModels)
+            {
+                stopCustomRecognitionTaskCompletionSource.TrySetResult(0); 
+            }
+
+            EnableButtons();
         }
 
         /// <summary>
@@ -216,8 +242,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// If input source is audio file, creates recognizer with audio file otherwise with default mic
         /// Waits on RunRecognition
         /// </summary>
-        /// <param name="wavFileName">file</param>
-        private async Task CreateBaseReco(string wavFileName, TaskCompletionSource<int> source)
+        private async Task CreateBaseReco()
         {
             // Todo: suport users to specifiy a different region.
             var basicFactory = SpeechFactory.FromSubscription(this.SubscriptionKey, this.Region);
@@ -227,14 +252,14 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             {
                 using (basicRecognizer = basicFactory.CreateSpeechRecognizer(this.RecognitionLanguage))
                 {
-                    await this.RunRecognizer(basicRecognizer, RecoType.Base, source).ConfigureAwait(false);
+                    await this.RunRecognizer(basicRecognizer, RecoType.Base, stopBaseRecognitionTaskCompletionSource).ConfigureAwait(false);
                 }
             }
             else
             {
                 using (basicRecognizer = basicFactory.CreateSpeechRecognizerWithFileInput(wavFileName, this.RecognitionLanguage))
                 {
-                    await this.RunRecognizer(basicRecognizer, RecoType.Base, source).ConfigureAwait(false);
+                    await this.RunRecognizer(basicRecognizer, RecoType.Base, stopBaseRecognitionTaskCompletionSource).ConfigureAwait(false);
                 }
             }
         }
@@ -245,8 +270,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// If input source is audio file, creates recognizer with audio file otherwise with default mic
         /// Waits on RunRecognition
         /// </summary>
-        /// <param name="wavFileName">The source of the event.</param>
-        private async Task CreateCustomReco(string wavFileName, TaskCompletionSource<int> source)
+        private async Task CreateCustomReco()
         {
             // Todo: suport users to specifiy a different region.
             var customFactory = SpeechFactory.FromSubscription(this.SubscriptionKey, this.Region);
@@ -257,7 +281,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 using (customRecognizer = customFactory.CreateSpeechRecognizer(this.RecognitionLanguage))
                 {
                     customRecognizer.DeploymentId = this.CustomModelDeploymentId;
-                    await this.RunRecognizer(customRecognizer, RecoType.Custom, source).ConfigureAwait(false);
+                    await this.RunRecognizer(customRecognizer, RecoType.Custom, stopCustomRecognitionTaskCompletionSource).ConfigureAwait(false);
                 }
             }
             else
@@ -265,7 +289,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 using (customRecognizer = customFactory.CreateSpeechRecognizerWithFileInput(wavFileName, this.RecognitionLanguage))
                 {
                     customRecognizer.DeploymentId = this.CustomModelDeploymentId;
-                    await this.RunRecognizer(customRecognizer, RecoType.Custom, source).ConfigureAwait(false);
+                    await this.RunRecognizer(customRecognizer, RecoType.Custom, stopCustomRecognitionTaskCompletionSource).ConfigureAwait(false);
                 }
             }
         }
@@ -476,12 +500,12 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         /// </summary>
         public string GetFile()
         {
-            string wavFileName = "";
+            string filePath = "";
             this.Dispatcher.Invoke(() =>
             {
-                wavFileName = this.fileNameTextBox.Text;
+                filePath = this.fileNameTextBox.Text;
             });
-            if (!File.Exists(wavFileName))
+            if (!File.Exists(filePath))
             {
                 MessageBox.Show("File does not exist!");
                 this.WriteLine(this.baseModelLogText, "--- Error : File does not exist! ---");
@@ -489,15 +513,15 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
                 this.EnableButtons();
                 return "";
             }
-            return wavFileName;
+            return filePath;
         }
 
         /// <summary>
         /// Plays the audio file
         /// </summary>
-        private void PlayAudioFile(string filePath)
+        private void PlayAudioFile()
         {
-            SoundPlayer player = new SoundPlayer(filePath);
+            SoundPlayer player = new SoundPlayer(wavFileName);
             player.Load();
             player.Play();
         }

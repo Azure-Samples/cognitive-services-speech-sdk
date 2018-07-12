@@ -132,7 +132,14 @@
                     </StackPanel>
 
                 </Expander>
-                <Button x:Name="startButton" Grid.Row="1" Content="Start" Click="StartButton_Click" Margin="10" Padding="15" VerticalAlignment="Bottom"/>
+                <Grid VerticalAlignment="Bottom">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"></RowDefinition>
+                        <RowDefinition Height="auto"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Button x:Name="startButton" Grid.Row="0" Content="Start" Click="StartButton_Click" Margin="10" Padding="15" VerticalAlignment="Top"/>
+                    <Button x:Name="stopButton" Grid.Row="1" Content="Stop" Click="StopButton_Click" Margin="10" Padding="15" VerticalAlignment="Bottom" Visibility="{Binding IsChecked, ElementName=micRadioButton ,Converter={StaticResource b2v}}"/>
+                </Grid>
             </Grid>
         </Grid>
     </Grid>
