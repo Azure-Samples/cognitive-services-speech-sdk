@@ -12,7 +12,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import com.microsoft.cognitiveservices.speech.AudioInputStream;
 import com.microsoft.cognitiveservices.speech.RecognitionStatus;
 import com.microsoft.cognitiveservices.speech.SpeechFactory;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
