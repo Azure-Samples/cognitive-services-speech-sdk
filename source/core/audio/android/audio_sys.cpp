@@ -643,7 +643,7 @@ static bool audio_recorder_engine_service(void *ctx, uint32_t msg, void *data)
     }
 
     default:
-        assert(false);
+        assert(false); // debugging aid.
         return false;
     }
 

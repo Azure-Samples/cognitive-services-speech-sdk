@@ -39,7 +39,7 @@ public:
         : size_(size), buffer_(buffer) {
         // This is necessary because we depend on twos-complement wraparound
         // to take care of overflow conditions.
-        assert(size < std::numeric_limits<int>::max());
+        SPX_IFFALSE_THROW_HR(size < std::numeric_limits<int>::max(), SPXERR_INVALID_ARG);
     }
 
     bool push(const T& item) {
@@ -61,7 +61,7 @@ public:
         });
 
         // if there's no space, result should not have been set, and vice versa
-        assert(check == (result != nullptr));
+        SPX_IFFALSE_THROW_HR(check == (result != nullptr), SPXERR_INVALID_ARG);
 
         return result;
     }
@@ -78,7 +78,7 @@ public:
             // if this isn't the same pointer we got from a call to get(), then
             // something has gone terribly wrong. Either there was an intervening
             // call to push() or commit(), or the pointer is spurious.
-            assert(ptr == head);
+            SPX_IFFALSE_THROW_HR(ptr == head, SPXERR_INVALID_ARG);
             return true;
         });
         return result;
@@ -178,7 +178,7 @@ __inline__ sample_buf* allocateSampleBufs(uint32_t count, uint32_t sizeInByte) {
         return nullptr;
     }
     sample_buf* bufs = new sample_buf[count];
-    assert(bufs);
+    SPX_IFFALSE_THROW_HR(bufs != nullptr, SPXERR_INVALID_ARG);
     memset(bufs, 0, sizeof(sample_buf) * count);
 
     uint32_t allocSize = (sizeInByte + 3) & ~3;  // padding to 4 bytes aligned

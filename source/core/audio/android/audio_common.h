@@ -59,7 +59,7 @@ __inline__ uint64_t GetSystemTicks(void) {
 
 #define SLASSERT(x)                   \
   do {                                \
-    assert(SL_RESULT_SUCCESS == (x)); \
+    SPX_IFFALSE_THROW_HR(SL_RESULT_SUCCESS == (x), SPXERR_MIC_ERROR); \
     (void)(x);                        \
   } while (0)
 

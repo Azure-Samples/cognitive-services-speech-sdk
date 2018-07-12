@@ -29,7 +29,8 @@ void AudioRecorder::ProcessSLCallback(SLAndroidSimpleBufferQueueItf bq) {
 #ifdef ENABLE_LOG
     recLog_->logTime();
 #endif
-    assert(bq == recBufQueueItf_);
+    SPX_IFFALSE_THROW_HR(bq == recBufQueueItf_, SPXERR_INVALID_ARG);
+
     sample_buf *dataBuf = NULL;
     devShadowQueue_->front(&dataBuf);
     devShadowQueue_->pop();
@@ -95,7 +96,7 @@ AudioRecorder::AudioRecorder(SampleFormat *sampleFormat, SLEngineItf slEngine)
     SLASSERT(result);
 
     devShadowQueue_ = new AudioQueue(DEVICE_SHADOW_BUFFER_QUEUE_LEN);
-    assert(devShadowQueue_);
+    SPX_IFFALSE_THROW_HR(devShadowQueue_ != nullptr, SPXERR_INVALID_ARG);
 
 #ifdef ENABLE_LOG
     std::string name = "rec";
@@ -125,7 +126,7 @@ SLboolean AudioRecorder::Start(void) {
             break;
         }
         freeQueue_->pop();
-        assert(buf->buf_ && buf->cap_ && !buf->size_);
+        SPX_IFFALSE_THROW_HR(buf->buf_ && buf->cap_ && !buf->size_, SPXERR_INVALID_ARG);
 
         result = (*recBufQueueItf_)->Enqueue(recBufQueueItf_, buf->buf_, buf->cap_);
         SLASSERT(result);
@@ -181,7 +182,7 @@ AudioRecorder::~AudioRecorder() {
 }
 
 void AudioRecorder::SetBufQueues(AudioQueue *freeQ, AudioQueue *recQ) {
-    assert(freeQ && recQ);
+    SPX_IFFALSE_THROW_HR(freeQ && recQ, SPXERR_INVALID_ARG);
     freeQueue_ = freeQ;
     recQueue_ = recQ;
 }
