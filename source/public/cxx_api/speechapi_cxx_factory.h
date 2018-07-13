@@ -238,7 +238,7 @@ public:
     /// Creates an instance of the speech factory with specified subscription key and region.
     /// </summary>
     /// <param name="subscription">The subscription key.</param>
-    /// <param name="region">The region name.</param>
+    /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
     static std::shared_ptr<ICognitiveServicesSpeechFactory> FromSubscription(const std::wstring& subscription, const std::wstring& region)
     {
         SPXFACTORYHANDLE hfactory;
@@ -253,7 +253,7 @@ public:
     /// Creates an instance of the speech factory with specified authorization token and region.
     /// </summary>
     /// <param name="authorizationToken">The authorization token.</param>
-    /// <param name="region">The region name.</param>
+    /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
     static std::shared_ptr<ICognitiveServicesSpeechFactory> FromAuthorizationToken(const std::wstring& authToken, const std::wstring& region)
     {
         SPXFACTORYHANDLE hfactory;

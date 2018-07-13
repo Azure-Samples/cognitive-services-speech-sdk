@@ -22,7 +22,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// Creates an instance of the speech factory with specified subscription key and region.
         /// </summary>
         /// <param name="subscriptionKey">The subscription key.</param>
-        /// <param name="region">The region name.</param>
+        /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
         /// <returns>A speech factory instance.</returns>
         public static SpeechFactory FromSubscription(string subscriptionKey, string region)
         {
@@ -36,7 +36,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// Otherwise, all the recognizers created by this SpeechFactory instance will encounter errors during recognition.
         /// </summary>
         /// <param name="authorizationToken">The authorization token.</param>
-        /// <param name="region">The region name.</param>
+        /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
         /// <returns>A speech factory instance.</returns>
         public static SpeechFactory FromAuthorizationToken(string authorizationToken, string region)
         {

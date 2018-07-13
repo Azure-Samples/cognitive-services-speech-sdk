@@ -112,7 +112,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
     /**
       * Static instance of SpeechFactory returned by passing subscriptionKey and service region.
       * @param subscriptionKey The subscription key.
-      * @param region The region name.
+      * @param region The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
       * @return The speech factory
       */
     public static SpeechFactory fromSubscription(String subscriptionKey, String region) {
@@ -128,7 +128,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
       * expipres, the caller needs to refresh it by setting the property `AuthorizationToken` with a new valid token.
       * Otherwise, all the recognizers created by this SpeechFactory instance will encounter errors during recognition.
       * @param authorizationToken The authorization token.
-      * @param region The region name.
+      * @param region The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
       * @return The speech factory
       */
     public static SpeechFactory fromAuthorizationToken(String authorizationToken, String region) {

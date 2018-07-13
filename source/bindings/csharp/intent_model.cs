@@ -38,7 +38,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// </summary>
         /// <param name="subscriptionKey">A string that represents the subscription key of Language Understanding service.</param>
         /// <param name="appId">A string that represents the application id of Language Understanding service.</param>
-        /// <param name="region">A string that represents the region of the Language Understanding service.</param>
+        /// <param name="region">A string that represents the region of the Language Understanding service (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
         /// <returns>The language understanding model being created.</returns>
         public static LanguageUnderstandingModel FromSubscription(string subscriptionKey, string appId, string region)
         {
@@ -49,7 +49,6 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         {
             modelImpl = model;
         }
-
 
         // Hold the reference.
         internal Microsoft.CognitiveServices.Speech.Internal.LanguageUnderstandingModel modelImpl { get; }

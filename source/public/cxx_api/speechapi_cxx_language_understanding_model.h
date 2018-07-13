@@ -52,7 +52,7 @@ public:
     /// </summary>
     /// <param name="subscriptionKey">A string that represents the subscription key of Language Understanding service.</param>
     /// <param name="appId">A string that represents the application id of Language Understanding service.</param>
-    /// <param name="region">A String that represents the region of the Language Understanding service.</param>
+    /// <param name="region">A String that represents the region of the Language Understanding service (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
     /// <returns>A shared pointer to language understanding model.</returns>
     static std::shared_ptr<LanguageUnderstandingModel> FromSubscription(const std::wstring& subscriptionKey, const std::wstring& appId, const std::wstring& region)
     {
