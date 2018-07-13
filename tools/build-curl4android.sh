@@ -36,8 +36,8 @@ configure_make() {
 
   configure $*
 
-  # fix me
- echo  cp ${TOOLS_ROOT}/../output/android/openssl-${ABI}/lib/libssl.a ${SYSROOT}/usr/lib
+  # fix me (currently depends on build-openssl-android.sh being executed first!)
+  cp ${TOOLS_ROOT}/../output/android/openssl-${ABI}/lib/libssl.a ${SYSROOT}/usr/lib
   cp ${TOOLS_ROOT}/../output/android/openssl-${ABI}/lib/libcrypto.a ${SYSROOT}/usr/lib
   cp -r ${TOOLS_ROOT}/../output/android/openssl-${ABI}/include/openssl ${SYSROOT}/usr/include
 
@@ -58,15 +58,11 @@ configure_make() {
               --disable-shared \
               --disable-smb \
               --disable-telnet \
-              --disable-verbose
+              --disable-verbose \
+              --without-librtmp
   PATH=$TOOLCHAIN_PATH:$PATH
 
-#  make clean
-
-  echo "xxxxxxx hi there, run make, fix errors, then resume by exiting the shell xxx"
-  bash
-  echo "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa hi there, thanks xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-
+  make clean
 
   if make -j4
   then

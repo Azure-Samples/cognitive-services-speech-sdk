@@ -59,10 +59,6 @@ configure_make() {
 
   make clean
   
-    echo "xxxxxxx hi there, run make, fix errors, then resume by exiting the shell xxx"
-    bash
-    echo "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa hi there, thanks xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-
   if make -j4; then
     # make install
 
