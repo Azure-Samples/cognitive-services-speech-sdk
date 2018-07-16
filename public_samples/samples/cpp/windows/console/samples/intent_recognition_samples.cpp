@@ -28,11 +28,11 @@ void IntentRecognitionWithMicrophone()
     // Creates an intent recognizer using microphone as audio input. The default language is "en-us".
     auto recognizer = factory->CreateIntentRecognizer();
 
-    // Creates a language understanding model using the app id, and adds specific intents from your model
+    // Creates a Language Understanding model using the app id, and adds specific intents from your model
     auto model = LanguageUnderstandingModel::FromAppId(L"YourLanguageUnderstandingAppId");
     recognizer->AddIntent(L"id1", model, L"YourLanguageUnderstandingIntentName1");
     recognizer->AddIntent(L"id2", model, L"YourLanguageUnderstandingIntentName2");
-    recognizer->AddIntent(L"any-IntentId-here", model, L"YouLanguageUnderstandingIntentName3");
+    recognizer->AddIntent(L"any-IntentId-here", model, L"YourLanguageUnderstandingIntentName3");
 
     wcout << L"Say something...\n";
 
@@ -80,11 +80,11 @@ void IntentRecognitionWithLanguage()
     auto lang = L"de-de";
     auto recognizer = factory->CreateIntentRecognizer(lang);
 
-    // Creates a language understanding model using the app id, and adds specific intents from your model
+    // Creates a Language Understanding model using the app id, and adds specific intents from your model
     auto model = LanguageUnderstandingModel::FromAppId(L"YourLanguageUnderstandingAppId");
     recognizer->AddIntent(L"id1", model, L"YourLanguageUnderstandingIntentName1");
     recognizer->AddIntent(L"id2", model, L"YourLanguageUnderstandingIntentName2");
-    recognizer->AddIntent(L"any-IntentId-here", model, L"YouLanguageUnderstandingIntentName3");
+    recognizer->AddIntent(L"any-IntentId-here", model, L"YourLanguageUnderstandingIntentName3");
 
     wcout << L"Say something in " << lang << L"...\n";
 
@@ -135,11 +135,11 @@ void IntentContinuousRecognitionWithFile()
     // promise for synchronization of recognition end.
     std::promise<void> recognitionEnd;
 
-    // Creates a language understanding model using the app id, and adds specific intents from your model
+    // Creates a Language Understanding model using the app id, and adds specific intents from your model
     auto model = LanguageUnderstandingModel::FromAppId(L"YourLanguageUnderstandingAppId");
     recognizer->AddIntent(L"id1", model, L"YourLanguageUnderstandingIntentName1");
     recognizer->AddIntent(L"id2", model, L"YourLanguageUnderstandingIntentName2");
-    recognizer->AddIntent(L"any-IntentId-here", model, L"YouLanguageUnderstandingIntentName3");
+    recognizer->AddIntent(L"any-IntentId-here", model, L"YourLanguageUnderstandingIntentName3");
 
     // Subscribes to events.
     recognizer->IntermediateResult.Connect([] (const IntentRecognitionEventArgs& e)

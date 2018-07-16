@@ -7,7 +7,7 @@ This project hosts the **samples** for the Microsoft Cognitive Services Speech S
 This repository hosts samples that help you to get started with several features of the SDK.
 In addition more complex scenarios are included to give you a head-start on using speech technology in your application.
 
-We tested the samples with the latest released version of the SDK (0.5.0) on the Windows 10, Ubuntu 16.04, and Android TODO platform.
+We tested the samples with the latest released version of the SDK (0.5.0) on the Windows 10, Ubuntu 16.04, and ARM-based Android devices (API 23: Android 6.0 Marshmallow or higher).
 
 ## Getting Started
 
@@ -41,6 +41,7 @@ Instructions to build are included in the sample's README.
 
 All Android samples require a working installation of [Android Studio](https://developer.android.com/studio/).
 They make use of the Microsoft Cognitive Services Speech SDK for Android Maven package (`com.microsoft.cognitiveservices.speech:client-sdk`) that is hosted under `https://csspeechstorage.blob.core.windows.net/maven/`.
+At this time, we support ARM-based Android devices (API 23: Android 6.0 Marshmallow or higher).
 
 ## Overview of samples
 

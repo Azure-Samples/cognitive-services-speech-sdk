@@ -29,7 +29,7 @@ namespace MicrosoftSpeechSDKSamples
             // Creates an intent recognizer using microphone as audio input.The default language is "en-us".
             using (var recognizer = factory.CreateIntentRecognizer())
             {
-                // Creates a language understanding model using the app id, and adds specific intents from your model
+                // Creates a Language Understanding model using the app id, and adds specific intents from your model
                 var model = LanguageUnderstandingModel.FromAppId("YourLanguageUnderstandingAppId");
                 recognizer.AddIntent("id1", model, "YourLanguageUnderstandingIntentName1");
                 recognizer.AddIntent("id2", model, "YourLanguageUnderstandingIntentName2");
@@ -86,7 +86,7 @@ namespace MicrosoftSpeechSDKSamples
                 // The TaskCompletionSource to stop recognition.
                 var stopRecognition = new TaskCompletionSource<int>();
 
-                // Creates a language understanding model using the app id, and adds specific intents from your model
+                // Creates a Language Understanding model using the app id, and adds specific intents from your model
                 var model = LanguageUnderstandingModel.FromAppId("YourLanguageUnderstandingAppId");
                 recognizer.AddIntent("id1", model, "YourLanguageUnderstandingIntentName1");
                 recognizer.AddIntent("id2", model, "YourLanguageUnderstandingIntentName2");
@@ -156,7 +156,7 @@ namespace MicrosoftSpeechSDKSamples
 
             using (var recognizer = factory.CreateIntentRecognizer(lang))
             {
-                // Creates a language understanding model using the app id, and adds specific intents from your model
+                // Creates a Language Understanding model using the app id, and adds specific intents from your model
                 var model = LanguageUnderstandingModel.FromAppId("YourLanguageUnderstandingAppId");
                 recognizer.AddIntent("id1", model, "YourLanguageUnderstandingIntentName1");
                 recognizer.AddIntent("id2", model, "YourLanguageUnderstandingIntentName2");

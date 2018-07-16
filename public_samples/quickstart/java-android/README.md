@@ -8,7 +8,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * A PC (Windows, Linux, Mac) capable to run Android Studio.
 * The latest version of [Android Studio](https://developer.android.com/studio/).
-* An Android device [enabled for development](https://developer.android.com/studio/debug/dev-options). TODO version etc.
+* An ARM-based Android device (API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone.
 
 ## Build the sample
 

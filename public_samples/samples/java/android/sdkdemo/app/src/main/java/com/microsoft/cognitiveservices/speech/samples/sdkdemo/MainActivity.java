@@ -49,11 +49,11 @@ public class MainActivity extends AppCompatActivity {
     //
 
     // Replace below with your own Language Understanding subscription key
-    private static final String LuisSubscriptionKey = "YourLuisSubscriptionKey";
+    private static final String LanguageUnderstandingSubscriptionKey = "YourLanguageUnderstandingSubscriptionKey";
     // Replace below with the deployment region of your Language Understanding application
-    private static final String LuisRegion = "YourLuisRegion";
+    private static final String LanguageUnderstandingServiceRegion = "YourLanguageUnderstandingServiceRegion";
     // Replace below with the application ID of your Language Understanding application
-    private static final String LuisAppId = "YourLuisApplicationId";
+    private static final String LanguageUnderstandingAppId = "YourLanguageUnderstandingAppId";
 
     private TextView recognizedTextView;
 
@@ -261,10 +261,10 @@ public class MainActivity extends AppCompatActivity {
             content.add("");
             content.add("");
             try {
-                final SpeechFactory intentFactory = SpeechFactory.fromSubscription(LuisSubscriptionKey, LuisRegion);
+                final SpeechFactory intentFactory = SpeechFactory.fromSubscription(LanguageUnderstandingSubscriptionKey, LanguageUnderstandingServiceRegion);
                 final IntentRecognizer reco = intentFactory.createIntentRecognizerWithStream(createMicrophoneStream());
 
-                LanguageUnderstandingModel intentModel = LanguageUnderstandingModel.fromAppId(LuisAppId);
+                LanguageUnderstandingModel intentModel = LanguageUnderstandingModel.fromAppId(LanguageUnderstandingAppId);
                 for (Map.Entry<String, String> entry : intentIdMap.entrySet()) {
                     reco.addIntent(entry.getKey(), intentModel, entry.getValue());
                 }
@@ -282,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
                     String s = result.getText();
 
                     if (result.getReason() != RecognitionStatus.Recognized) {
-                        s = "Intent failed with " + result.getReason() + ". Did you enter your Luis subscription?" + System.lineSeparator() + result.getErrorDetails();
+                        s = "Intent failed with " + result.getReason() + ". Did you enter your Language Understanding subscription?" + System.lineSeparator() + result.getErrorDetails();
                     }
 
                     String intentId = result.getIntentId();
