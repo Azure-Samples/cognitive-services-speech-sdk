@@ -495,15 +495,6 @@ phases:
       type: FilePath
       scriptPath: './ci/android/build-aar.sh'
       args: '"$(SPEECHSDK_SEMVER2NOMETA)" "$(SPEECHSDK_VERSION_CODE)" "$(Build.ArtifactStagingDirectory)/In/Android" "$(Build.ArtifactStagingDirectory)/Out"'
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
-    displayName: Sign speech-sdk-debug.aar
-    inputs:
-      ConnectedServiceName: 'Speech SDK ESRP Signing'
-      FolderPath: '$(Build.ArtifactStagingDirectory)/Out'
-      Pattern: '*.aar'
-      signConfigType: inlineSignParams
-      inlineOperation: $(SIGN_PARAMS_JAVA)
-    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   # Note: "The file extension should match the selected archive type." - so we are renaming afterwards
   - task: ArchiveFiles@2
     inputs:
@@ -527,6 +518,15 @@ phases:
       script: |
         mv "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/Out/Android/$(ArtifactRelativePath)/$(ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA).{zip,aar}
         mv "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/Out/Android/$(ARTIFACT_ID)-debug-$(SPEECHSDK_SEMVER2NOMETA).{zip,aar}
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'Sign *.aar'
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      FolderPath: '$(Build.ArtifactStagingDirectory)/Out'
+      Pattern: '*.aar'
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_JAVA)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   - task: Bash@3
     displayName: 'Create .pom'
     inputs:
