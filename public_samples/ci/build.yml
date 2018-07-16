@@ -1,0 +1,73 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+#
+# vim:set expandtab shiftwidth=2 tabstop=2:
+#
+# Variables:
+#   SpeechSdkVersion - Speech SDK version to use
+#   SpeechSdkNuGetSource - where to pick up the Speech SDK from ("nuget.org" or "VstsFeed")
+#   SpeechSdkVstsFeed - VSTS feed to use if SpeechSdkNuGetSource == "VstsFeed"
+resources:
+- repo: self
+  clean: true
+phases:
+- phase: Pre
+  queue:
+    name: Hosted Linux Preview
+  steps:
+  - task: Bash@3
+    inputs:
+      filePath: ./ci/check-git-head.sh
+    displayName: Repository checks
+  - task: Bash@3
+    name: var
+    displayName: Set variables
+    inputs:
+      targetType: inline
+      script: |
+        . ci/functions.sh
+        set -e -o pipefail
+        case "$(SpeechSdkNuGetSource)" in
+          nuget.org)
+            V_VSTS_FEED=
+            V_INCLUDE_NUGET_ORG=true
+            ;;
+          VstsFeed)
+            V_VSTS_FEED="$(SpeechSdkVstsFeed)"
+            # TODO should revisit if we depend on other public NuGet packages:
+            V_INCLUDE_NUGET_ORG=false
+            ;;
+          *)
+            echo Unexpected value SpeechSdkNuGetSource=$(SpeechSdkNuGetSource)
+            exit 1
+            ;;
+        esac
+        vsts_setoutvar V_VSTS_FEED "$V_VSTS_FEED"
+        vsts_setoutvar V_INCLUDE_NUGET_ORG "$V_INCLUDE_NUGET_ORG"
+- phase: Windows
+  dependsOn: Pre
+  queue:
+    name: Hosted VS2017
+  variables:
+    V_VSTS_FEED: $[dependencies.Pre.outputs['var.V_VSTS_FEED']]
+    V_INCLUDE_NUGET_ORG: $[dependencies.Pre.outputs['var.V_INCLUDE_NUGET_ORG']]
+  steps:
+  - task: Bash@3
+    displayName: Patch samples to version $(SpeechSdkVersion)
+    inputs:
+      targetType: inline
+      script: |
+        set -e -x -o pipefail
+        perl ci/patch-samples.pl "$(SpeechSdkVersion)"
+        git diff
+  - task: NuGetCommand@2
+    inputs:
+      command: restore
+      vstsFeed: $(V_VSTS_FEED)
+      includeNuGetOrg: $(V_INCLUDE_NUGET_ORG)
+  - task: VSBuild@1
+    inputs:
+      platform: x64
+      configuration: Release
+      maximumCpuCount: true
+    displayName: Build samples (x64 Release)
