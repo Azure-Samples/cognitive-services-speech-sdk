@@ -1,23 +1,37 @@
 .gitattributes text
 .gitignore text
 
+.classpath text
+.project text
 Makefile text
+gradlew text
+proguard-rules.pro text
 
+*.appxmanifest text
+*.bat text
 *.config text
 *.cpp text
 *.cs text
 *.csproj text
-*.filters text
+*.gradle text
 *.h text
+*.java text
 *.md text
 *.pl text
+*.prefs text
+*.properties text
 *.sln text
 *.vcxproj text
+*.vcxproj.filters text
 *.xaml text
+*.xml text
 *.yml text
 
 # Bash only likes Unix line endings
 *.sh text eol=lf
 
 # Binary extensions:
+*.jar binary
+*.pfx binary
+*.png binary
 *.wav binary
