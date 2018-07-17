@@ -58,16 +58,24 @@ phases:
       targetType: inline
       script: |
         set -e -x -o pipefail
-        perl ci/patch-samples.pl "$(SpeechSdkVersion)"
+        perl ci/patch-samples.pl "$(SpeechSdkVersion)" .
         git diff
+  - task: NuGetToolInstaller@0
+    displayName: Use NuGet 4.6.*
+    inputs:
+      versionSpec: 4.6
   - task: NuGetCommand@2
     inputs:
       command: restore
       vstsFeed: $(V_VSTS_FEED)
       includeNuGetOrg: $(V_INCLUDE_NUGET_ORG)
+  # Note: for now building any platform. In the future, should build all available.
   - task: VSBuild@1
     inputs:
-      platform: x64
-      configuration: Release
       maximumCpuCount: true
-    displayName: Build samples (x64 Release)
+    displayName: 'Build samples (*.sln)'
+    # Get results from all builds:
+    continueOnError: true
+  - bash: |
+      ./ci/run-gradle.sh
+    displayName: 'Build samples (gradle)'
