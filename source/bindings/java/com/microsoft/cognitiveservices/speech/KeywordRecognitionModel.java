@@ -28,7 +28,7 @@ public class KeywordRecognitionModel implements Closeable
     {
         Contracts.throwIfNullOrWhitespace(fileName, "fileName");
 
-        return new KeywordRecognitionModel(com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel.fromFile(fileName));
+        return new KeywordRecognitionModel(com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel.FromFile(fileName));
     }
 
     /**

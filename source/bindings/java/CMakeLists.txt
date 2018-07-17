@@ -145,7 +145,6 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Translation__SpeechScopeResourceValue_t.java
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Translation__SynthesisScopeResourceValue_t.java
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Translation__TextScopeResourceValue_t.java
-    ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_std__vectorT_unsigned_char_t.java
 
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXEVENTHANDLE.java
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXFACTORYHANDLE.java
@@ -162,6 +161,7 @@ set(SWIG_JAVA_SOURCES
 #    ${CMAKE_SWIG_OUTDIR}/ValueCollectionSessionParameter.java
     ${CMAKE_SWIG_OUTDIR}/VoidFuture.java
     ${CMAKE_SWIG_OUTDIR}/WstringVector.java
+    ${CMAKE_SWIG_OUTDIR}/UInt8Vector.java
 )
 
 set_source_files_properties(${SWIG_JAVA_SOURCES} PROPERTIES GENERATED TRUE)
@@ -206,6 +206,7 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/translation/TranslationSynthesisResultEventArgs.java
     ${PACKAGE_DIR}/translation/TranslationTextResult.java
     ${PACKAGE_DIR}/translation/TranslationTextResultEventArgs.java
+    ${PACKAGE_DIR}/translation/SynthesisStatus.java
 
     ${PACKAGE_DIR}/util/EventHandler.java
     ${PACKAGE_DIR}/util/EventHandlerImpl.java

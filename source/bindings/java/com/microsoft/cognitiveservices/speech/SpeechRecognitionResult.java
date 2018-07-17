@@ -28,8 +28,8 @@ public class SpeechRecognitionResult {
         resultId = result.getResultId();
         text = result.getText();
         BigInteger tenThousand = BigInteger.valueOf(10000);
-        duration = result.duration().divide(tenThousand).longValue();
-        offset = result.offset().divide(tenThousand).longValue();
+        duration = result.Duration().divide(tenThousand).longValue();
+        offset = result.Offset().divide(tenThousand).longValue();
         reason = RecognitionStatus.values()[result.getReason().swigValue()];
         properties = new RecognitionResultCollection(result.getProperties());
 
@@ -133,7 +133,7 @@ public class SpeechRecognitionResult {
        public boolean isString(String name) {
             Contracts.throwIfNull(name, "name");
            
-           return _collection.containsString(name);
+           return _collection.ContainsString(name);
        }
 
        /**
@@ -145,7 +145,7 @@ public class SpeechRecognitionResult {
        public boolean isInt(String name) {
             Contracts.throwIfNull(name, "name");
            
-           return _collection.containsNumber(name);
+           return _collection.ContainsNumber(name);
        }
 
        /**
@@ -157,7 +157,7 @@ public class SpeechRecognitionResult {
        public boolean isBool(String name) {
             Contracts.throwIfNull(name, "name");
            
-           return _collection.containsBool(name);
+           return _collection.ContainsBool(name);
        }
 
        /**
@@ -205,7 +205,7 @@ public class SpeechRecognitionResult {
        public String getString(String name, String defaultValue) {
            Contracts.throwIfNull(name, "name");
 
-           return _collection.getString(name, defaultValue);
+           return _collection.GetString(name, defaultValue);
        }
 
        /**
@@ -220,7 +220,7 @@ public class SpeechRecognitionResult {
        public int getInt(String name, int defaultValue) {
            Contracts.throwIfNull(name, "name");
 
-           return _collection.getNumber(name, defaultValue);
+           return _collection.GetNumber(name, defaultValue);
        }
 
        /**
@@ -235,7 +235,7 @@ public class SpeechRecognitionResult {
        public boolean getBool(String name, boolean defaultValue) {
            Contracts.throwIfNull(name, "name");
 
-           return _collection.getBool(name, defaultValue);
+           return _collection.GetBool(name, defaultValue);
        }
     }
 }

@@ -68,21 +68,6 @@ public class WaveFileAudioInputStreamTest {
     }
 
     @Test
-    public void testTestFormatOverload() {
-        WaveFileAudioInputStream s = new WaveFileAudioInputStream(Settings.WaveFile);
-        assertNotNull(s);
-        
-        AudioInputStreamFormat f1 = s.getFormat();
-        assertNotNull(f1);
-
-        long len = s.getFormat(null, 0);
-        assertEquals(24, len);
-
-        len = s.getFormat(null, 555);
-        assertEquals(24, len);
-    }
-
-    @Test
     public void testTestFormatParameters() {
         WaveFileAudioInputStream s = new WaveFileAudioInputStream(Settings.WaveFile);
         assertNotNull(s);

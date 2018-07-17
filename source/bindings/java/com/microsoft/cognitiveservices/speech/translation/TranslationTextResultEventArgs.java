@@ -15,7 +15,7 @@ public final class TranslationTextResultEventArgs //: System.EventArgs
     {
         Contracts.throwIfNull(eventArg, "eventArg");
 
-        this._Result = new TranslationTextResult(eventArg.getResult());
+        this._Result = new TranslationTextResult(eventArg.GetResult());
         this._SessionId = eventArg.getSessionId();
     }
 

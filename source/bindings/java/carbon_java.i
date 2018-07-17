@@ -1,8 +1,5 @@
 %module(directors="1") carbon_java
 
-%rename("%(firstlowercase)s", %$isfunction) "";
-%rename("%(firstlowercase)s", %$ismember) "";
-
 %typemap(directorin, descriptor="[B") (char *STRING, unsigned int LENGTH) {
    jbyteArray jb = (jenv)->NewByteArray($2);
    (jenv)->SetByteArrayRegion(jb, 0, $2, (jbyte *)$1);
@@ -108,3 +105,4 @@
 }
 
 %include "carbon.i"
+%template(UInt8Vector) std::vector<uint8_t>;

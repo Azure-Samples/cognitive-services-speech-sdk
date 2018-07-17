@@ -94,7 +94,7 @@ public class Recognizer implements Closeable
         }
 
         @Override
-        public void execute(com.microsoft.cognitiveservices.speech.internal.SessionEventArgs eventArgs) {
+        public void Execute(com.microsoft.cognitiveservices.speech.internal.SessionEventArgs eventArgs) {
             Contracts.throwIfNull(eventArgs, "eventArgs");
 
             if (recognizer.disposed) {
@@ -128,7 +128,7 @@ public class Recognizer implements Closeable
         }
 
         @Override
-        public void execute(com.microsoft.cognitiveservices.speech.internal.RecognitionEventArgs eventArgs)
+        public void Execute(com.microsoft.cognitiveservices.speech.internal.RecognitionEventArgs eventArgs)
         {
             Contracts.throwIfNull(eventArgs, "eventArgs");
 

@@ -57,21 +57,21 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
          this.recoImpl = recoImpl;
 
          intermediateResultHandler = new ResultHandlerImpl(this, /*isFinalResultHandler:*/ false);
-         recoImpl.getIntermediateResult().addEventListener(intermediateResultHandler);
+         recoImpl.getIntermediateResult().AddEventListener(intermediateResultHandler);
 
          finalResultHandler = new ResultHandlerImpl(this, /*isFinalResultHandler:*/ true);
-         recoImpl.getFinalResult().addEventListener(finalResultHandler);
+         recoImpl.getFinalResult().AddEventListener(finalResultHandler);
 
          synthesisResultHandler = new SynthesisHandlerImpl(this);
-         recoImpl.getTranslationSynthesisResultEvent().addEventListener(synthesisResultHandler);
+         recoImpl.getTranslationSynthesisResultEvent().AddEventListener(synthesisResultHandler);
 
          errorHandler = new ErrorHandlerImpl(this);
-         recoImpl.getCanceled().addEventListener(errorHandler);
+         recoImpl.getCanceled().AddEventListener(errorHandler);
 
-         recoImpl.getSessionStarted().addEventListener(sessionStartedHandler);
-         recoImpl.getSessionStopped().addEventListener(sessionStoppedHandler);
-         recoImpl.getSpeechStartDetected().addEventListener(speechStartDetectedHandler);
-         recoImpl.getSpeechEndDetected().addEventListener(speechEndDetectedHandler);
+         recoImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
+         recoImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
+         recoImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
+         recoImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
 
          _Parameters = new ParameterCollection<TranslationRecognizer>(this);
      }
@@ -118,7 +118,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
        */
      public Future<TranslationTextResult> recognizeAsync() {
          return s_executorService.submit(() -> {
-                 return new TranslationTextResult(recoImpl.recognize());
+                 return new TranslationTextResult(recoImpl.Recognize());
              });
      }
 
@@ -129,7 +129,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
        */
      public Future<Void> startContinuousRecognitionAsync() {
          return s_executorService.submit(() -> {
-                 recoImpl.startContinuousRecognitionAsync();
+                 recoImpl.StartContinuousRecognitionAsync();
                  return null;
              });
      }
@@ -140,7 +140,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
        */
      public Future<Void> stopContinuousRecognitionAsync() {
          return s_executorService.submit(() -> {
-                 recoImpl.stopContinuousRecognitionAsync();
+                 recoImpl.StopContinuousRecognitionAsync();
                  return null;
              });
      }
@@ -156,7 +156,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
         Contracts.throwIfNull(model, "model");
 
         return s_executorService.submit(() -> {
-                recoImpl.startKeywordRecognitionAsync(model.getModelImpl());
+                recoImpl.StartKeywordRecognitionAsync(model.getModelImpl());
                 return null;
             });
     }
@@ -168,7 +168,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
       */
     public Future<Void> stopKeywordRecognitionAsync() {
         return s_executorService.submit(() -> {
-                recoImpl.stopKeywordRecognitionAsync();
+                recoImpl.StopKeywordRecognitionAsync();
                 return null;
             });
     }
@@ -183,14 +183,14 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 
          if (disposing)
          {
-             recoImpl.getIntermediateResult().removeEventListener(intermediateResultHandler);
-             recoImpl.getFinalResult().removeEventListener(finalResultHandler);
-             recoImpl.getCanceled().removeEventListener(errorHandler);
-             recoImpl.getSessionStarted().removeEventListener(sessionStartedHandler);
-             recoImpl.getSessionStopped().removeEventListener(sessionStoppedHandler);
-             recoImpl.getSpeechStartDetected().removeEventListener(speechStartDetectedHandler);
-             recoImpl.getSpeechEndDetected().removeEventListener(speechEndDetectedHandler);
-             recoImpl.getTranslationSynthesisResultEvent().removeEventListener(synthesisResultHandler);
+             recoImpl.getIntermediateResult().RemoveEventListener(intermediateResultHandler);
+             recoImpl.getFinalResult().RemoveEventListener(finalResultHandler);
+             recoImpl.getCanceled().RemoveEventListener(errorHandler);
+             recoImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
+             recoImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
+             recoImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
+             recoImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
+             recoImpl.getTranslationSynthesisResultEvent().RemoveEventListener(synthesisResultHandler);
 
              intermediateResultHandler.delete();
              finalResultHandler.delete();
@@ -214,7 +214,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
      private ErrorHandlerImpl errorHandler;
      private boolean disposed = false;
 
-     // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
+     // Defines an internal class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
      private class ResultHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.TranslationTexEventListener
      {
          public ResultHandlerImpl(TranslationRecognizer recognizer, boolean isFinalResultHandler)
@@ -226,7 +226,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
          }
 
          @Override
-         public void execute(com.microsoft.cognitiveservices.speech.internal.TranslationTextResultEventArgs eventArgs)
+         public void Execute(com.microsoft.cognitiveservices.speech.internal.TranslationTextResultEventArgs eventArgs)
          {
             Contracts.throwIfNull(eventArgs, "eventArgs");
 
@@ -247,7 +247,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
          private boolean isFinalResultHandler;
      }
 
-     // Defines an internal class to raise a C# event for error during recognition when a corresponding callback is invoked by the native layer.
+     // Defines an internal class to raise an event for error during recognition when a corresponding callback is invoked by the native layer.
      class ErrorHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.TranslationTexEventListener {
          public ErrorHandlerImpl(TranslationRecognizer recognizer) {
             Contracts.throwIfNull(recognizer, "recognizer");
@@ -256,7 +256,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
          }
 
          @Override
-         public void execute(com.microsoft.cognitiveservices.speech.internal.TranslationTextResultEventArgs eventArgs)
+         public void Execute(com.microsoft.cognitiveservices.speech.internal.TranslationTextResultEventArgs eventArgs)
          {
             Contracts.throwIfNull(eventArgs, "eventArgs");
 
@@ -277,7 +277,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
          private TranslationRecognizer recognizer;
      }
 
-     // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
+     // Defines an internal class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
      private class SynthesisHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisEventListener
      {
          public SynthesisHandlerImpl(TranslationRecognizer recognizer)
@@ -289,7 +289,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 
              
          @Override
-         public void execute(com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResultEventArgs eventArgs)
+         public void Execute(com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResultEventArgs eventArgs)
          {
             Contracts.throwIfNull(eventArgs, "eventArgs");
 

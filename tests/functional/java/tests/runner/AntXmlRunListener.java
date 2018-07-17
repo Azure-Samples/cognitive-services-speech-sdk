@@ -61,7 +61,7 @@ public class AntXmlRunListener extends RunListener {
     @Override
     public void testRunStarted(Description description) {
         String testsuiteName = description.getDisplayName();
-        if(testsuiteName == "null") testsuiteName = null;
+        if (testsuiteName == "null") testsuiteName = null;
         
         this.document = getDocumentBuilder().newDocument();
         this.rootElement = this.document.createElement("testsuite");
@@ -113,7 +113,7 @@ public class AntXmlRunListener extends RunListener {
 
         String message = null;
         Ignore annotation = description.getAnnotation(Ignore.class);
-        if(annotation != null) {
+        if (annotation != null) {
             message = annotation.value();
         }
 

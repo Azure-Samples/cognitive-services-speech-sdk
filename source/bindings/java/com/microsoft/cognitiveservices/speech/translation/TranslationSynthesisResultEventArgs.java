@@ -15,7 +15,7 @@ public final class TranslationSynthesisResultEventArgs //: System.EventArgs
     {
         Contracts.throwIfNull(eventArg, "eventArg");
 
-        this._Result = new TranslationSynthesisResult(eventArg.getResult());
+        this._Result = new TranslationSynthesisResult(eventArg.GetResult());
         this._sessionId = eventArg.getSessionId();
     }
 

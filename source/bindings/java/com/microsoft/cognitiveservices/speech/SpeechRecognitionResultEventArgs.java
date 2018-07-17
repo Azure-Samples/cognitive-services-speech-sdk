@@ -15,7 +15,7 @@ public final class SpeechRecognitionResultEventArgs {
     SpeechRecognitionResultEventArgs(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventArgs e) {
         Contracts.throwIfNull(e, "e");
 
-        this._Result = new SpeechRecognitionResult(e.getResult());
+        this._Result = new SpeechRecognitionResult(e.GetResult());
         this._SessionId = e.getSessionId();
     
         Contracts.throwIfNull(this._SessionId, "SessionId");

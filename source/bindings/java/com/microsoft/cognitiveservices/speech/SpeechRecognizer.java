@@ -42,18 +42,18 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         this.recoImpl = recoImpl;
 
         intermediateResultHandler = new ResultHandlerImpl(this, /*isFinalResultHandler:*/ false);
-        recoImpl.getIntermediateResult().addEventListener(intermediateResultHandler);
+        recoImpl.getIntermediateResult().AddEventListener(intermediateResultHandler);
 
         finalResultHandler = new ResultHandlerImpl(this, /*isFinalResultHandler:*/ true);
-        recoImpl.getFinalResult().addEventListener(finalResultHandler);
+        recoImpl.getFinalResult().AddEventListener(finalResultHandler);
 
         errorHandler = new ErrorHandlerImpl(this);
-        recoImpl.getCanceled().addEventListener(errorHandler);
+        recoImpl.getCanceled().AddEventListener(errorHandler);
 
-        recoImpl.getSessionStarted().addEventListener(sessionStartedHandler);
-        recoImpl.getSessionStopped().addEventListener(sessionStoppedHandler);
-        recoImpl.getSpeechStartDetected().addEventListener(speechStartDetectedHandler);
-        recoImpl.getSpeechEndDetected().addEventListener(speechEndDetectedHandler);
+        recoImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
+        recoImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
+        recoImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
+        recoImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
 
         _Parameters = new ParameterCollection<SpeechRecognizer>(this);
     }
@@ -112,7 +112,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       */
     public Future<SpeechRecognitionResult> recognizeAsync() {
         return s_executorService.submit(() -> {
-                return new SpeechRecognitionResult(recoImpl.recognize()); 
+                return new SpeechRecognitionResult(recoImpl.Recognize()); 
             });
     }
 
@@ -123,7 +123,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       */
     public Future<Void> startContinuousRecognitionAsync() {
         return s_executorService.submit(() -> {
-                recoImpl.startContinuousRecognitionAsync();
+                recoImpl.StartContinuousRecognitionAsync();
                 return null;
             });
     }
@@ -134,7 +134,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       */
     public Future<Void> stopContinuousRecognitionAsync() {
         return s_executorService.submit(() -> {
-                recoImpl.stopContinuousRecognitionAsync();
+                recoImpl.StopContinuousRecognitionAsync();
                 return null;
             });
     }
@@ -150,7 +150,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         Contracts.throwIfNull(model, "model");
 
         return s_executorService.submit(() -> {
-                recoImpl.startKeywordRecognition(model.getModelImpl());
+                recoImpl.StartKeywordRecognition(model.getModelImpl());
                 return null;
             });
     }
@@ -162,7 +162,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       */
     public Future<Void> stopKeywordRecognitionAsync() {
         return s_executorService.submit(() -> {
-                recoImpl.stopKeywordRecognition();
+                recoImpl.StopKeywordRecognition();
                 return null;
             });
     }
@@ -175,13 +175,13 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         }
 
         if (disposing) {
-            getRecoImpl().getIntermediateResult().removeEventListener(intermediateResultHandler);
-            getRecoImpl().getFinalResult().removeEventListener(finalResultHandler);
-            getRecoImpl().getCanceled().removeEventListener(errorHandler);
-            getRecoImpl().getSessionStarted().removeEventListener(sessionStartedHandler);
-            getRecoImpl().getSessionStopped().removeEventListener(sessionStoppedHandler);
-            getRecoImpl().getSpeechStartDetected().removeEventListener(speechStartDetectedHandler);
-            getRecoImpl().getSpeechEndDetected().removeEventListener(speechEndDetectedHandler);
+            getRecoImpl().getIntermediateResult().RemoveEventListener(intermediateResultHandler);
+            getRecoImpl().getFinalResult().RemoveEventListener(finalResultHandler);
+            getRecoImpl().getCanceled().RemoveEventListener(errorHandler);
+            getRecoImpl().getSessionStarted().RemoveEventListener(sessionStartedHandler);
+            getRecoImpl().getSessionStopped().RemoveEventListener(sessionStoppedHandler);
+            getRecoImpl().getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
+            getRecoImpl().getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
 
             intermediateResultHandler.delete();
             finalResultHandler.delete();
@@ -214,7 +214,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         }
 
         @Override
-        public void execute(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventArgs eventArgs) {
+        public void Execute(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventArgs eventArgs) {
             Contracts.throwIfNull(eventArgs, "eventArgs");
             
             if (recognizer.disposed) {
@@ -242,13 +242,13 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         }
 
         @Override
-        public void execute(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventArgs eventArgs) {
+        public void Execute(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventArgs eventArgs) {
             
             if (recognizer.disposed) {
                 return;
             }
 
-            RecognitionErrorEventArgs resultEventArg = new RecognitionErrorEventArgs(eventArgs.getSessionId(), eventArgs.getResult().getReason());
+            RecognitionErrorEventArgs resultEventArg = new RecognitionErrorEventArgs(eventArgs.getSessionId(), eventArgs.GetResult().getReason());
             EventHandlerImpl<RecognitionErrorEventArgs> handler = this.recognizer.RecognitionErrorRaised;
 
             if (handler != null) {

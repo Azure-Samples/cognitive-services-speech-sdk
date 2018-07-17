@@ -10,14 +10,17 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 /**
   * Defines audio input stream.
   */
-public abstract class AudioInputStream extends com.microsoft.cognitiveservices.speech.internal.AudioInputStream
+public abstract class AudioInputStream
 {
+    public AudioInputStream() {
+        _adapter = new AudioInputStreamAdapter(this);
+    }
+
     /**
      * Reads data from audio input stream into the data buffer. The maximal number of bytes to be read is determined by the size of dataBuffer.
      * @param dataBuffer The byte array to store the read data.
      * @return the number of bytes have been read.
      */
-    @Override
     public abstract long read(byte[] dataBuffer);
 
     /**
@@ -29,32 +32,62 @@ public abstract class AudioInputStream extends com.microsoft.cognitiveservices.s
     /**
       * Closes the audio input stream.
       */
-    @Override
     public abstract void close();
 
-    /**
-     * The Function being called to get the data from the audio stream.
-     * @param pformat The pointer to the AudioInputStreamFormat buffer, or null if querying the size of the structure.
-     * @param cbFormat The size of the AudioInputStreamFormat buffer being passed, or 0 if querying the size of the structure.
-     * @return The size of the AudioInputStreamFormat buffer required to hold the format information.
-     */
-    @Override
-    public long getFormat(com.microsoft.cognitiveservices.speech.internal.AudioInputStreamFormat pformat, long cbFormat) {
-     // Note: 24 Bytes is the size of AudioInputStreamFormat
-        if(pformat == null || cbFormat < 24) {
+    private AudioInputStreamAdapter  _adapter;
+    com.microsoft.cognitiveservices.speech.internal.AudioInputStream getAdapter() {
+        return _adapter;
+    }
+
+    static class AudioInputStreamAdapter extends com.microsoft.cognitiveservices.speech.internal.AudioInputStream {
+        private AudioInputStream _target;
+
+        AudioInputStreamAdapter(AudioInputStream target) {
+            _target = target;
+        }
+
+        /**
+         * Reads data from audio input stream into the data buffer. The maximal number of bytes to be read is determined by the size of dataBuffer.
+         * @param dataBuffer The byte array to store the read data.
+         * @return the number of bytes have been read.
+         */
+        @Override
+        public long Read(byte[] dataBuffer) {
+            return _target.read(dataBuffer);
+        }
+
+        /**
+          * Closes the audio input stream.
+          */
+        @Override
+        public void Close() {
+            _target.close();
+        }
+
+        /**
+         * The Function being called to get the data from the audio stream.
+         * @param pformat The pointer to the AudioInputStreamFormat buffer, or null if querying the size of the structure.
+         * @param cbFormat The size of the AudioInputStreamFormat buffer being passed, or 0 if querying the size of the structure.
+         * @return The size of the AudioInputStreamFormat buffer required to hold the format information.
+         */
+        @Override
+        public long GetFormat(com.microsoft.cognitiveservices.speech.internal.AudioInputStreamFormat pformat, long cbFormat) {
+         // Note: 24 Bytes is the size of AudioInputStreamFormat
+            if (pformat == null || cbFormat < 24) {
+                return 24;
+            }
+
+            AudioInputStreamFormat format = _target.getFormat();
+            Contracts.throwIfNull(format, "format");
+
+            pformat.setAvgBytesPerSec(format.AvgBytesPerSec);
+            pformat.setBlockAlign(format.BlockAlign);
+            pformat.setChannels(format.Channels);
+            pformat.setSamplesPerSec(format.SamplesPerSec);
+            pformat.setBitsPerSample(format.BitsPerSample);
+            pformat.setFormatTag(format.FormatTag);
+
             return 24;
         }
-        
-        AudioInputStreamFormat format = getFormat();        
-        Contracts.throwIfNull(format, "format");
-
-        pformat.setAvgBytesPerSec(format.AvgBytesPerSec);
-        pformat.setBlockAlign(format.BlockAlign);
-        pformat.setChannels(format.Channels);
-        pformat.setSamplesPerSec(format.SamplesPerSec);
-        pformat.setBitsPerSample(format.BitsPerSample);
-        pformat.setFormatTag(format.FormatTag);
-
-        return 24;
     }
 }

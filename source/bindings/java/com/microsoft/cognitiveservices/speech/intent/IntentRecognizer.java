@@ -47,18 +47,18 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         this.recoImpl = recoImpl;
 
         intermediateResultHandler = new IntentHandlerImpl(this, /*isFinalResultHandler:*/ false);
-        recoImpl.getIntermediateResult().addEventListener(intermediateResultHandler);
+        recoImpl.getIntermediateResult().AddEventListener(intermediateResultHandler);
 
         finalResultHandler = new IntentHandlerImpl(this, /*isFinalResultHandler:*/ true);
-        recoImpl.getFinalResult().addEventListener(finalResultHandler);
+        recoImpl.getFinalResult().AddEventListener(finalResultHandler);
 
         errorHandler = new ErrorHandlerImpl(this);
-        recoImpl.getCanceled().addEventListener(errorHandler);
+        recoImpl.getCanceled().AddEventListener(errorHandler);
 
-        recoImpl.getSessionStarted().addEventListener(sessionStartedHandler);
-        recoImpl.getSessionStopped().addEventListener(sessionStoppedHandler);
-        recoImpl.getSpeechStartDetected().addEventListener(speechStartDetectedHandler);
-        recoImpl.getSpeechEndDetected().addEventListener(speechEndDetectedHandler);
+        recoImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
+        recoImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
+        recoImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
+        recoImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
     
         _Parameters = new ParameterCollection<IntentRecognizer>(this);
     }
@@ -97,7 +97,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       */
     public Future<IntentRecognitionResult> recognizeAsync() {
         return s_executorService.submit(() -> {
-                return  new IntentRecognitionResult(recoImpl.recognize());
+                return  new IntentRecognitionResult(recoImpl.Recognize());
             });
     }
 
@@ -108,7 +108,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       */
     public Future<Void> startContinuousRecognitionAsync() {
         return s_executorService.submit(() -> {
-                recoImpl.startContinuousRecognition();
+                recoImpl.StartContinuousRecognition();
                 return null;
             });
     }
@@ -119,7 +119,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       */
     public Future<Void> stopContinuousRecognitionAsync() {
         return s_executorService.submit(() -> {
-                recoImpl.stopContinuousRecognition();
+                recoImpl.StopContinuousRecognition();
                 return null;
             });
     }
@@ -133,7 +133,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         Contracts.throwIfNullOrWhitespace(intentId, "intentId");
         Contracts.throwIfNullOrWhitespace(phrase, "phrase");
 
-        recoImpl.addIntent(intentId, phrase);
+        recoImpl.AddIntent(intentId, phrase);
     }
 
     /**
@@ -147,8 +147,8 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         Contracts.throwIfNullOrWhitespace(intentName, "intentName");
         Contracts.throwIfNull(model, "model");
 
-        IntentTrigger trigger = com.microsoft.cognitiveservices.speech.internal.IntentTrigger.from(model.getModelImpl(), intentName);
-        recoImpl.addIntent(intentId, trigger);
+        IntentTrigger trigger = com.microsoft.cognitiveservices.speech.internal.IntentTrigger.From(model.getModelImpl(), intentName);
+        recoImpl.AddIntent(intentId, trigger);
     }
    
     /**
@@ -162,7 +162,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         Contracts.throwIfNull(model, "model");
 
         return s_executorService.submit(() -> {
-                recoImpl.startKeywordRecognition(model.getModelImpl());
+                recoImpl.StartKeywordRecognition(model.getModelImpl());
                 return null;
             });
     }
@@ -174,7 +174,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       */
     public Future<Void> stopKeywordRecognitionAsync() {
         return s_executorService.submit(() -> {
-            recoImpl.stopKeywordRecognition();
+            recoImpl.StopKeywordRecognition();
             return null;
         });
     }
@@ -187,13 +187,13 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         }
 
         if (disposing) {
-            recoImpl.getIntermediateResult().removeEventListener(intermediateResultHandler);
-            recoImpl.getFinalResult().removeEventListener(finalResultHandler);
-            recoImpl.getCanceled().removeEventListener(errorHandler);
-            recoImpl.getSessionStarted().removeEventListener(sessionStartedHandler);
-            recoImpl.getSessionStopped().removeEventListener(sessionStoppedHandler);
-            recoImpl.getSpeechStartDetected().removeEventListener(speechStartDetectedHandler);
-            recoImpl.getSpeechEndDetected().removeEventListener(speechEndDetectedHandler);
+            recoImpl.getIntermediateResult().RemoveEventListener(intermediateResultHandler);
+            recoImpl.getFinalResult().RemoveEventListener(finalResultHandler);
+            recoImpl.getCanceled().RemoveEventListener(errorHandler);
+            recoImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
+            recoImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
+            recoImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
+            recoImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
 
             intermediateResultHandler.delete();
             finalResultHandler.delete();
@@ -228,7 +228,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         }
 
         @Override
-        public void execute(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionEventArgs eventArgs) {
+        public void Execute(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionEventArgs eventArgs) {
             Contracts.throwIfNull(eventArgs, "eventArgs");
             
             IntentRecognitionResultEventArgs resultEventArg = new IntentRecognitionResultEventArgs(eventArgs);
@@ -251,10 +251,10 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         }
 
         @Override
-        public void execute(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionEventArgs eventArgs) {
+        public void Execute(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionEventArgs eventArgs) {
             Contracts.throwIfNull(eventArgs, "eventArgs");
             
-            RecognitionErrorEventArgs resultEventArg = new RecognitionErrorEventArgs(eventArgs.getSessionId(), eventArgs.getResult().getReason());
+            RecognitionErrorEventArgs resultEventArg = new RecognitionErrorEventArgs(eventArgs.getSessionId(), eventArgs.GetResult().getReason());
             EventHandlerImpl<RecognitionErrorEventArgs>  handler = this.recognizer.RecognitionErrorRaised;
 
             if (handler != null) {

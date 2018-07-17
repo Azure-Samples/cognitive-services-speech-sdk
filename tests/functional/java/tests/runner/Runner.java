@@ -1,3 +1,7 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
 package tests.runner;
 
 import org.junit.runner.JUnitCore;
@@ -29,7 +33,7 @@ public class Runner {
             }
         }
         else {
-            System.out.println("No filename givein in TestOutputFilename system property. using System.out.");
+            System.out.println("No filename given in TestOutputFilename system property. Using System.out.");
         }
         
         AntXmlRunListener xmlWriter = new AntXmlRunListener(outputStream != null ? outputStream : System.out);

@@ -47,10 +47,10 @@ public final class ParameterCollection<OwnerType> implements Closeable {
         Contracts.throwIfNullOrWhitespace(name, "name");
         
         if(factoryParameters != null) {
-            return factoryParameters.containsString(name);
+            return factoryParameters.ContainsString(name);
         }
         else {
-            return recognizerParameters.containsString(name);
+            return recognizerParameters.ContainsString(name);
         }
     }
 
@@ -64,10 +64,10 @@ public final class ParameterCollection<OwnerType> implements Closeable {
         Contracts.throwIfNullOrWhitespace(name, "name");
         
         if(factoryParameters != null) {
-            return factoryParameters.containsNumber(name);
+            return factoryParameters.ContainsNumber(name);
         }
         else {
-            return recognizerParameters.containsNumber(name);
+            return recognizerParameters.ContainsNumber(name);
         }
     }
 
@@ -81,10 +81,10 @@ public final class ParameterCollection<OwnerType> implements Closeable {
         Contracts.throwIfNullOrWhitespace(name, "name");
         
         if(factoryParameters != null) {
-            return factoryParameters.containsBool(name);
+            return factoryParameters.ContainsBool(name);
         }
         else {
-            return recognizerParameters.containsBool(name);
+            return recognizerParameters.ContainsBool(name);
         }
     }
 
@@ -134,11 +134,11 @@ public final class ParameterCollection<OwnerType> implements Closeable {
         Contracts.throwIfNullOrWhitespace(name, "name");
         
         if(factoryParameters != null) {
-            String ret = factoryParameters.getString(name, defaultValue);
+            String ret = factoryParameters.GetString(name, defaultValue);
             return ret;
         }
         else {
-            String ret = recognizerParameters.getString(name, defaultValue);
+            String ret = recognizerParameters.GetString(name, defaultValue);
             return ret;
         }
     }
@@ -156,11 +156,11 @@ public final class ParameterCollection<OwnerType> implements Closeable {
         Contracts.throwIfNullOrWhitespace(name, "name");
         
         if(factoryParameters != null) {
-            int ret = factoryParameters.getNumber(name, defaultValue);
+            int ret = factoryParameters.GetNumber(name, defaultValue);
             return ret;
         }
         else {
-            int ret = recognizerParameters.getNumber(name, defaultValue);
+            int ret = recognizerParameters.GetNumber(name, defaultValue);
             return ret;
         }
     }
@@ -178,11 +178,11 @@ public final class ParameterCollection<OwnerType> implements Closeable {
         Contracts.throwIfNullOrWhitespace(name, "name");
         
         if(factoryParameters != null) {
-            boolean ret = factoryParameters.getBool(name, defaultValue);
+            boolean ret = factoryParameters.GetBool(name, defaultValue);
             return ret;
         }
         else {
-            boolean ret = recognizerParameters.getBool(name, defaultValue);
+            boolean ret = recognizerParameters.GetBool(name, defaultValue);
             return ret;
         }
     }
@@ -198,10 +198,10 @@ public final class ParameterCollection<OwnerType> implements Closeable {
         Contracts.throwIfNull(value, "value");
         
         if(factoryParameters != null) {
-            factoryParameters.setString(name, value);
+            factoryParameters.SetString(name, value);
         }
         else {
-            recognizerParameters.setString(name, value);
+            recognizerParameters.SetString(name, value);
         }
     }
 
@@ -215,10 +215,10 @@ public final class ParameterCollection<OwnerType> implements Closeable {
         Contracts.throwIfNullOrWhitespace(name, "name");
         
         if(factoryParameters != null) {
-            factoryParameters.setNumber(name, value);
+            factoryParameters.SetNumber(name, value);
         }
         else {
-            recognizerParameters.setNumber(name, value);
+            recognizerParameters.SetNumber(name, value);
         }
     }
 
@@ -232,10 +232,10 @@ public final class ParameterCollection<OwnerType> implements Closeable {
         Contracts.throwIfNullOrWhitespace(name, "name");
         
         if(factoryParameters != null) {
-            factoryParameters.setBool(name, value);
+            factoryParameters.SetBool(name, value);
         }
         else {
-            recognizerParameters.setBool(name, value);
+            recognizerParameters.SetBool(name, value);
         }
     }
 

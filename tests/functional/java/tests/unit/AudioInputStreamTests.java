@@ -20,42 +20,6 @@ public class AudioInputStreamTests {
         Settings.LoadSettings();
     }
 
-    // -----------------------------------------------------------------------
-    // --- 
-    // -----------------------------------------------------------------------
-
-    @Test
-    public void testGetFormatAudioInputStreamFormatInt() {
-        WaveFileAudioInputStream s = new WaveFileAudioInputStream(Settings.WaveFile);
-        assertNotNull(s);
-        
-        long r = s.getFormat(null, 0);
-        assertTrue(r > 0);
-        assertTrue(r == 24);
-
-        r = s.getFormat(null, 128);
-        assertTrue(r > 0);
-        assertTrue(r == 24);
-        
-        com.microsoft.cognitiveservices.speech.internal.AudioInputStreamFormat f = new com.microsoft.cognitiveservices.speech.internal.AudioInputStreamFormat();
-        r = s.getFormat(f, 0);
-        assertTrue(r > 0);
-        assertTrue(r == 24);
-
-        r = s.getFormat(f, 128);
-        assertTrue(r > 0);
-        assertTrue(r == 24);
-        
-        // check known parameters
-        assertEquals(32000, f.getAvgBytesPerSec());
-        assertEquals(2, f.getBlockAlign());
-        assertEquals(1, f.getChannels());
-        assertEquals(16000, f.getSamplesPerSec());
-        assertEquals(16, f.getBitsPerSample());
-        assertEquals(1, f.getFormatTag());
-        
-        s.close();
-    }
 
     // -----------------------------------------------------------------------
     // --- 

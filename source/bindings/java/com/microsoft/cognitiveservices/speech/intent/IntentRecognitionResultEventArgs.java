@@ -19,7 +19,7 @@ public final class IntentRecognitionResultEventArgs // : System.EventArgs
         Contracts.throwIfNull(eventArg, "eventArg");
 
         this.eventArgImpl = eventArg;
-        this._Result = new IntentRecognitionResult(eventArg.getResult());
+        this._Result = new IntentRecognitionResult(eventArg.GetResult());
         this._SessionId = eventArg.getSessionId();
 
         Contracts.throwIfNull(this._SessionId, "SessionId");
@@ -48,7 +48,7 @@ public final class IntentRecognitionResultEventArgs // : System.EventArgs
     
     public ResultPropertyValueCollection getProperties()
     {
-        ResultPropertyValueCollection r = eventArgImpl.getResult().getProperties();
+        ResultPropertyValueCollection r = eventArgImpl.GetResult().getProperties();
 
         Contracts.throwIfNull(r, "result properties");
 
@@ -67,8 +67,8 @@ public final class IntentRecognitionResultEventArgs // : System.EventArgs
                " Status:" + _Result.getReason() +
                " IntentId:<" + _Result.getIntentId() +
                "> Recognized text:<" + _Result.getText() +
-               "> Recognized json:<" + getProperties().getString(ResultParameterNames.Json) +
-               "> LanguageUnderstandingJson <" + getProperties().getString(ResultParameterNames.LanguageUnderstandingJson) +
+               "> Recognized json:<" + getProperties().GetString(ResultParameterNames.Json) +
+               "> LanguageUnderstandingJson <" + getProperties().GetString(ResultParameterNames.LanguageUnderstandingJson) +
                 ">.";
     }
     

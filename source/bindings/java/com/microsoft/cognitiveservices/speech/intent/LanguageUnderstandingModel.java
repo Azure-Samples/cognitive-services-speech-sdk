@@ -26,7 +26,7 @@ public final class LanguageUnderstandingModel
     {
         Contracts.throwIfNullOrWhitespace(uri, "uri");
 
-        return new LanguageUnderstandingModel(com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel.fromEndpoint(uri));
+        return new LanguageUnderstandingModel(com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel.FromEndpoint(uri));
     }
 
     /**
@@ -38,7 +38,7 @@ public final class LanguageUnderstandingModel
       {
           Contracts.throwIfNullOrWhitespace(appId, "appId");
 
-          return new LanguageUnderstandingModel(com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel.fromAppId(appId));
+          return new LanguageUnderstandingModel(com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel.FromAppId(appId));
       }
 
     /**
@@ -54,7 +54,7 @@ public final class LanguageUnderstandingModel
         Contracts.throwIfNullOrWhitespace(appId, "appId");
         Contracts.throwIfNullOrWhitespace(region, "region");
 
-        return new LanguageUnderstandingModel(com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel.fromSubscription(subscriptionKey, appId, region));
+        return new LanguageUnderstandingModel(com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel.FromSubscription(subscriptionKey, appId, region));
     }
 
     LanguageUnderstandingModel(com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel model)
