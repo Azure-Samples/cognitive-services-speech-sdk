@@ -298,7 +298,7 @@ phases:
          # Drop is not needed anymore
          rm -rf "$(cygpath -au "$(System.ArtifactsDirectory)\In")"
          git clean -fdx public_samples
-         perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)"
+         perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
          cp --verbose --recursive --preserve public_samples "$(ZipBasename)"
          cp --verbose --preserve license.md ThirdPartyNotices.md "$(ZipBasename)"
          NOW=$(date -Iseconds)
@@ -322,7 +322,7 @@ phases:
     inputs:
       solution: 'public_samples/**/*.sln'
       maximumCpuCount: true
-    displayName: 'Test - build solutions (x64 Release only)'
+    displayName: 'Test - build solutions'
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing'
@@ -559,7 +559,7 @@ phases:
       type: InlineScript
       script: |
          set -e -x -o pipefail
-         perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)"
+         perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
          ./ci/run-gradle.sh "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/Out/Android/maven
   - task: PublishBuildArtifacts@1
     inputs:

@@ -1,5 +1,11 @@
 #!/usr/bin/perl -i -p
-# (can be launched, for example, from Git Bash prompt)
+#
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+#
+# vim:set expandtab shiftwidth=2 tabstop=2:
+#
+# (can be launched, for example, from a Git Bash prompt)
 BEGIN {
   use File::Find;
 
@@ -12,17 +18,18 @@ BEGIN {
   $reGradleBuild = qr/build\.gradle/;
 
   $version = shift
-    or die "Supply version to use as first and only argument\n";
-  $public_samples = 'public_samples';
+    or die "Supply version to use as first argument\n";
+  $samplesDir = shift
+    or die "Supply directory to use as second argument\n";
 
-  -d $public_samples
-    or die "Cannot find $public_samples directory, please launch from repository root\n";
+  -d $samplesDir
+    or die "Cannot find $samplesDir\n";
 
   @ARGV = ();
   find(sub {
     m(^(?:$rePkgConfig|$reCsProj|$reVcxProj|$reGradleBuild)$) &&
     push @ARGV, $File::Find::name
-  }, $public_samples);
+  }, $samplesDir);
 
   $seenPackageReference = 0;
 }
