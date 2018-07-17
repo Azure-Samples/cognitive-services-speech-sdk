@@ -8,9 +8,6 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
@@ -58,7 +55,7 @@ public class RecognizerParameterNamesTests {
         s.close();
     }
     
-    @Ignore // TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)
+    @Ignore("TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)")
     @Test
     public void testRecognizerParameterNames3() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);

@@ -8,9 +8,6 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
@@ -58,7 +55,7 @@ public class RecognizerTests {
         s.close();
     }
     
-    @Ignore // TODO does not work with microphone
+    @Ignore("TODO does not work with microphone")
     @Test
     public void testRecognizer3() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);

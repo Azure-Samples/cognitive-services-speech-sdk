@@ -6,9 +6,6 @@ package tests.endtoend;
 
 import static org.junit.Assert.*;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
@@ -25,7 +22,7 @@ public class SampleRecognizeIntentTest {
         Settings.LoadSettings();
     }
 
-    @Ignore // TODO why does that not return the expected result
+    @Ignore("TODO why does that not return the expected result")
     @Test
     public void test() {
         test = new SampleRecognizeIntent();

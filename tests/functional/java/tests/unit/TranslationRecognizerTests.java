@@ -13,9 +13,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
@@ -57,7 +54,7 @@ public class TranslationRecognizerTests {
     // --- 
     // -----------------------------------------------------------------------
 
-    @Ignore // TODO not working with microphone
+    @Ignore("TODO not working with microphone")
     @Test
     public void testTranslationRecognizer1() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -119,7 +116,7 @@ public class TranslationRecognizerTests {
         s.close();
     }
 
-    @Ignore // TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)
+    @Ignore("TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)")
     @Test
     public void testGetTargetLanguages() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -189,7 +186,7 @@ public class TranslationRecognizerTests {
     // --- 
     // -----------------------------------------------------------------------
 
-    @Ignore // TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)
+    @Ignore("TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)")
     @Test
     public void testGetParameters() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -216,7 +213,7 @@ public class TranslationRecognizerTests {
     // --- 
     // -----------------------------------------------------------------------
 
-    @Ignore // TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)
+    @Ignore("TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)")
     @Test
     public void testRecognizeAsync1() throws InterruptedException, ExecutionException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -260,7 +257,7 @@ public class TranslationRecognizerTests {
         s.close();
     }
 
-    @Ignore // TODO why is event order wrong?
+    @Ignore("TODO why is event order wrong?")
     @Test
     public void testRecognizeAsync2() throws InterruptedException, ExecutionException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -413,7 +410,7 @@ public class TranslationRecognizerTests {
         s.close();
     }
 
-    @Ignore // TODO why is the event number not 1
+    @Ignore("TODO why is the event number not 1")
     @Test
     public void testStartStopContinuousRecognitionAsync() throws InterruptedException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -478,7 +475,7 @@ public class TranslationRecognizerTests {
     // --- 
     // -----------------------------------------------------------------------
 
-    @Ignore // TODO not working with microphone
+    @Ignore("TODO not working with microphone")
     @Test
     public void testGetRecoImpl() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);

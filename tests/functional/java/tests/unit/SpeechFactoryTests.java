@@ -56,7 +56,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(null, Settings.SpeechRegion);
     }
 
-    @Ignore // TODO why does illegal key succeed? 
+    @Ignore("TODO why does illegal key succeed?")
     @Test(expected = NullPointerException.class)
     public void testFromSubscription4() {
         SpeechFactory s = SpeechFactory.fromSubscription("illegal", "illegal");
@@ -118,7 +118,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromEndPoint(URI.create("http://www.example.com"), null);
     }
 
-    @Ignore // TODO why does illegal token not fail? 
+    @Ignore("TODO why does illegal token not fail?")
     @Test(expected = RuntimeException.class)
     public void testFromEndpoint4() {
         SpeechFactory s = SpeechFactory.fromEndPoint(URI.create("http://www.example.com"), "illegal-subscription");
@@ -175,7 +175,7 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Ignore // TODO why is a string an int? 
+    @Ignore("TODO why is a string an int?")
     @Test
     public void testGetParametersString() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -212,7 +212,7 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Ignore // TODO why is a an int a bool
+    @Ignore("TODO why is a an int a bool")
     @Test
     public void testGetParametersInt() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -249,7 +249,7 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Ignore // TODO why is a string a bool? 
+    @Ignore("TODO why is a string a bool?")
     @Test
     public void testGetParametersBool() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -290,7 +290,7 @@ public class SpeechFactoryTests {
     // --- 
     // -----------------------------------------------------------------------
 
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateSpeechRecognizer() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -308,7 +308,7 @@ public class SpeechFactoryTests {
     // --- 
     // -----------------------------------------------------------------------
 
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateSpeechRecognizerLanguage1() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -324,7 +324,7 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateSpeechRecognizerLanguage2() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -340,7 +340,7 @@ public class SpeechFactoryTests {
         s.close();
     }
     
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateSpeechRecognizerLanguageSuccess() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -433,7 +433,7 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Ignore // TODO why can create illegal language 
+    @Ignore("TODO why can create illegal language")
     @Test
     public void testCreateSpeechRecognizerStringString3() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -465,7 +465,7 @@ public class SpeechFactoryTests {
     // --- 
     // -----------------------------------------------------------------------
 
-    @Ignore // TODO can create with null stream? 
+    @Ignore("TODO can create with null stream?")
     @Test
     public void testCreateSpeechRecognizerAudioInputStream1() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -510,7 +510,7 @@ public class SpeechFactoryTests {
         s.close();
     }
     
-    @Ignore // TODO why does null stream not fail 
+    @Ignore("TODO why does null stream not fail")
     @Test
     public void testCreateSpeechRecognizerAudioInputStreamString2() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -542,7 +542,7 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Ignore // TODO why does illegal language not fail 
+    @Ignore("TODO why does illegal language not fail")
     @Test
     public void testCreateSpeechRecognizerAudioInputStreamString4() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -578,7 +578,7 @@ public class SpeechFactoryTests {
     // --- 
     // -----------------------------------------------------------------------
 
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateIntentRecognizer() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -588,7 +588,7 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateIntentRecognizerLanguage1() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -604,7 +604,7 @@ public class SpeechFactoryTests {
         s.close();
     }
     
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateIntentRecognizerLanguage2() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -620,7 +620,7 @@ public class SpeechFactoryTests {
         s.close();
     }
        
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateIntentRecognizerLanguageSuccess() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -680,7 +680,7 @@ public class SpeechFactoryTests {
     }
    
 
-    @Ignore // TODO why can create with null stream? 
+    @Ignore("TODO why can create with null stream?")
     @Test
     public void testCreateIntentRecognizerAudioInputStream1() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -725,7 +725,7 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Ignore // TODO why does null stream not fail 
+    @Ignore("TODO why does null stream not fail")
     @Test
     public void testCreateIntentRecognizerAudioInputStreamString2() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -741,7 +741,7 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Ignore // TODO why does illegal language not fail 
+    @Ignore("TODO why does illegal language not fail")
     @Test
     public void testCreateIntentRecognizerAudioInputStreamString3() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -776,7 +776,7 @@ public class SpeechFactoryTests {
     // --- 
     // -----------------------------------------------------------------------
 
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfString1() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -792,7 +792,7 @@ public class SpeechFactoryTests {
         s.close();
     }
     
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfString2() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -808,7 +808,7 @@ public class SpeechFactoryTests {
         s.close();
     }
     
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfString3() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -824,7 +824,7 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfString4() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -842,7 +842,7 @@ public class SpeechFactoryTests {
         s.close();
     }
     
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfString5() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -862,7 +862,7 @@ public class SpeechFactoryTests {
     }
 
 
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringSuccess() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -883,7 +883,7 @@ public class SpeechFactoryTests {
     // --- 
     // -----------------------------------------------------------------------
 
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString1() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -899,7 +899,7 @@ public class SpeechFactoryTests {
         s.close();
     }
     
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString2() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -915,7 +915,7 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString3() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -931,7 +931,7 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString4() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -949,7 +949,7 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString5() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -968,7 +968,7 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString6() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -987,7 +987,7 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString7() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -1006,7 +1006,7 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringStringSuccess() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -1119,7 +1119,7 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Ignore // TODO why can create with illegal source language 
+    @Ignore("TODO why can create with illegal source language")
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfString7() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -1287,7 +1287,7 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Ignore // TODO why can create with illegal voice? 
+    @Ignore("TODO why can create with illegal voice?")
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString9() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -1411,7 +1411,7 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Ignore // TODO why does illegal target language not fail 
+    @Ignore("TODO why does illegal target language not fail")
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfString6() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -1579,7 +1579,7 @@ public class SpeechFactoryTests {
         s.close();
     }
 
-    @Ignore // TODO create with stream on illegal voice does not fail?
+    @Ignore("TODO create with stream on illegal voice does not fail?")
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringString8() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);

@@ -10,6 +10,11 @@ set(JAVA_SOURCES_TESTS
     ${PROJECT_SOURCE_DIR}/tests/AllTests.java
     ${PROJECT_SOURCE_DIR}/tests/Settings.java
 
+    ${PROJECT_SOURCE_DIR}/tests/runner/DateUtils.java
+    ${PROJECT_SOURCE_DIR}/tests/runner/DomElementWriter.java
+    ${PROJECT_SOURCE_DIR}/tests/runner/Runner.java
+    ${PROJECT_SOURCE_DIR}/tests/runner/AntXmlRunListener.java
+
     ${PROJECT_SOURCE_DIR}/tests/endtoend/AllEnd2EndTests.java
     ${PROJECT_SOURCE_DIR}/tests/endtoend/SampleRecognizeIntentTest.java
     ${PROJECT_SOURCE_DIR}/tests/endtoend/MicrophoneAudioInputStreamTest.java

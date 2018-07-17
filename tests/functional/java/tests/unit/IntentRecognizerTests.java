@@ -13,9 +13,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
@@ -71,7 +68,7 @@ public class IntentRecognizerTests {
         s.close();
     }
 
-    @Ignore // TODO why does not get phrase    
+    @Ignore("TODO why does not get phrase")
     @Test
     public void testIntentRecognizer2() throws InterruptedException, ExecutionException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -118,7 +115,7 @@ public class IntentRecognizerTests {
         s.close();
     }
 
-    @Ignore // TODO check if language can be set to german
+    @Ignore("TODO check if language can be set to german")
     @Test
     public void testSetLanguage() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -169,7 +166,7 @@ public class IntentRecognizerTests {
     // --- 
     // -----------------------------------------------------------------------
 
-    @Ignore // TODO why is Canceled reported instead of success    
+    @Ignore("TODO why is Canceled reported instead of success")
     @Test
     public void testRecognizeAsync1() throws InterruptedException, ExecutionException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -206,7 +203,7 @@ public class IntentRecognizerTests {
         s.close();
     }
 
-    @Ignore // TODO why are error details not empty
+    @Ignore("TODO why are error details not empty")
     @Test
     public void testRecognizeAsync2() throws InterruptedException, ExecutionException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -350,7 +347,7 @@ public class IntentRecognizerTests {
         s.close();
     }
 
-    @Ignore // TODO why number of events not 1
+    @Ignore("TODO why number of events not 1")
     @Test
     public void testStartStopContinuousRecognitionAsync() throws InterruptedException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -412,7 +409,7 @@ public class IntentRecognizerTests {
     // --- 
     // -----------------------------------------------------------------------
 
-    @Ignore // TODO why is mapsize not 2    
+    @Ignore("TODO why is mapsize not 2")
     @Test
     public void testAddIntentStringString() throws InterruptedException, ExecutionException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -445,7 +442,7 @@ public class IntentRecognizerTests {
         s.close();
     }
 
-    @Ignore // TODO why is mapsize not 2    
+    @Ignore("TODO why is mapsize not 2")
     @Test
     public void testAddIntentStringLanguageUnderstandingModelString() throws InterruptedException, ExecutionException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);

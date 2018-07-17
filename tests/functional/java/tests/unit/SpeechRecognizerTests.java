@@ -14,9 +14,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
@@ -73,7 +70,7 @@ public class SpeechRecognizerTests {
         s.close();
     }
 
-    @Ignore // TODO why is the result not matching the expected
+    @Ignore("TODO why is the result not matching the expected")
     @Test
     public void testSpeechRecognizer2() throws InterruptedException, ExecutionException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -235,7 +232,7 @@ public class SpeechRecognizerTests {
     // --- 
     // -----------------------------------------------------------------------
 
-    @Ignore // TODO why is the result canceled?
+    @Ignore("TODO why is the result canceled?")
     @Test
     public void testRecognizeAsync1() throws InterruptedException, ExecutionException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -268,7 +265,7 @@ public class SpeechRecognizerTests {
         s.close();
     }
 
-    @Ignore // TODO why does not get whats the weather like
+    @Ignore("TODO why does not get whats the weather like")
     @Test
     public void testRecognizeAsync2() throws InterruptedException, ExecutionException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -413,7 +410,7 @@ public class SpeechRecognizerTests {
         s.close();
     }
 
-    @Ignore // TODO why is the number of events not 1
+    @Ignore("TODO why is the number of events not 1")
     @Test
     public void testStartStopContinuousRecognitionAsync() throws InterruptedException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);

@@ -22,7 +22,7 @@ public class MicrophoneAudioInputStreamTest {
         System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
     }
 
-    @Ignore // TODO: enable. however, this will crash the java vm at shutdown due to COM issues.
+    @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void test() {
         fail("Not yet implemented");

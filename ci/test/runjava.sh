@@ -61,7 +61,8 @@ SPEECH_SDK_TEST_PROPERTIES=" \
   -DLuisRegion=westus2 \
   -DWaveFile=$SPEECH_SDK_BUILD_ROOT/tests/input/whatstheweatherlike.wav \
   -DKeyword=Computer \
-  -DKeywordModel=/data/keyword/kws.table"
+  -DKeywordModel=/data/keyword/kws.table \
+  -DTestOutputFilename=test-java-unittests.xml"
 
 set -x
 java \
@@ -72,7 +73,7 @@ java \
     "$SPEECH_SDK_EXTERNAL/junit/junit-4.12.jar" \
     "$SPEECH_SDK_EXTERNAL/junit/hamcrest-core-1.3.jar" ) \
   $SPEECH_SDK_TEST_PROPERTIES \
-  org.junit.runner.JUnitCore \
+  tests.runner.Runner \
   $TESTCLASS
 
 pretty_print "LEAVING runjava.sh"
