@@ -32,8 +32,11 @@ public class Settings {
     public static Object s_settingsClassLock;
     
     static {
-        // TODO name of library will depend on version once we have semantic dll names
-        System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
+        try {
+            Class.forName("com.microsoft.cognitiveservices.speech.SpeechFactory");
+        } catch (ClassNotFoundException e) {
+            throw new UnsatisfiedLinkError(e.toString());
+        }
 
         // prevent classgc from reclaiming the settings class, thus
         // throwing away any custom setting value..

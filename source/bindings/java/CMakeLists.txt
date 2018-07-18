@@ -211,10 +211,17 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/util/EventHandler.java
     ${PACKAGE_DIR}/util/EventHandlerImpl.java
     ${PACKAGE_DIR}/util/Contracts.java
+
+if(NOT ANDROID)
+    ${PACKAGE_DIR}/NativeLibraryLoader.java
+endif()
 )
 
 enable_language(Java)
-add_jar(${JAVA_LIB} SOURCES ${SWIG_JAVA_SOURCES} ${JAVA_SOURCES} OUTPUT_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+add_jar(${JAVA_LIB}
+        SOURCES ${SWIG_JAVA_SOURCES} ${JAVA_SOURCES}
+        OUTPUT_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+
 add_dependencies(${JAVA_LIB} ${JAVA_BINDINGS} ${SWIG_MODULE_${JAVA_BINDINGS}_REAL_NAME})
 
 set_target_properties(${JAVA_LIB} PROPERTIES FOLDER bindings/java)

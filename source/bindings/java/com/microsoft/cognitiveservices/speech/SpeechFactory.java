@@ -22,8 +22,26 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
     // load the native library.
     static Class<?> speechFactoryClass = null;
     static {
-        // TODO name of library will depend on version
-        System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
+
+        // First choice is to load the binaries from
+        // the resources attached to the jar file. On Android,
+        // this is not possible, so falling back to loading it
+        // from disk.
+        try {
+            // This is a loose coupling since the class might not be available
+            // when running on Android. Therefore, use reflection to find the
+            // helper class and call the load function.
+            // Fall back to standard loadLibrary, in case that fails.
+            Class<?> ncl = Class.forName("com.microsoft.cognitiveservices.speech.NativeLibraryLoader");
+            java.lang.reflect.Method nclm = ncl.getMethod("loadNativeBinding");
+            nclm.invoke(null); // static.
+        }
+        catch(Exception ex) {
+            // In case, we cannot load the helper class, fall back to loading
+            // the binding just by binding name.
+            // TODO name of library will depend on version
+            System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
+        }
 
         // one-time init
         configureNativePlatformBinding(""/*useDefaults*/);
