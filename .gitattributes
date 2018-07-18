@@ -10,6 +10,7 @@ proguard-rules.pro text
 
 *.bat text
 *.c text
+.classpath text
 *.cmd text
 *.config text
 *.cpp text
@@ -30,6 +31,8 @@ proguard-rules.pro text
 *.props text
 *.ps1 text
 *.py text
+*.prefs text
+*.project text
 *.runsettings text
 *.sln text
 *.targets text

@@ -130,7 +130,7 @@ class NativeLibraryLoader {
 
         // determine if the VM aruns on 64 or 32 bit
         String dataModelSize = System.getProperty("sun.arch.data.model");
-        if(dataModelSize != null && dataModelSize == "64") {
+        if(dataModelSize != null && dataModelSize.equals("64")) {
             dataModelSize = "64";
         }
         else {

@@ -5,6 +5,7 @@ package com.microsoft.cognitiveservices.speech.intent;
 //
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.SpeechFactory;
 
 /**
   * Represents language understanding model used for intent recognition.
@@ -13,8 +14,13 @@ public final class LanguageUnderstandingModel
 { 
     // load the native library.
     static {
-        // TODO name of library will depend on version
-        System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
+        // trigger loading of native library
+        try {
+            Class.forName(SpeechFactory.class.getName());
+        }
+        catch (ClassNotFoundException ex) {
+            // ignored.
+        }
     }
 
     /**

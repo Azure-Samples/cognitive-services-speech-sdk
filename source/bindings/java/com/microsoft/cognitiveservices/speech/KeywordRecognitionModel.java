@@ -27,8 +27,7 @@ public class KeywordRecognitionModel implements Closeable
 { 
     // load the native library.
     static {
-        // TODO name of library will depend on version
-        System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
+        Class<?> speechFactorLoadTrigger = SpeechFactory.speechFactoryClass;
     }
 
     /**
