@@ -16,6 +16,4 @@ pretty_print() {
   printf '%.0s=' {1..78}; echo
 }
 
-pretty_print "ENTERING runuspconsole.sh"
-
 ./tests/e2e_uspconsole.sh $BINARY_DIR $UserKeySpeech $UserKeyCris $UserKeyLuis $UserKeySkyman

@@ -56,3 +56,20 @@ function print_vars {
     esac
   done
 }
+
+function joinArgs {
+  SEP=$1
+  shift 1
+
+  [[ $# -ge 1 ]] && {
+    printf '%s' $1
+    shift 1
+  }
+  [[ $# -ge 1 ]] && printf "$SEP%s" "$@"
+}
+
+function die {
+    set +x
+    printf "$1"
+    exit 1
+}

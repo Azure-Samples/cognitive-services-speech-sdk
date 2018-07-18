@@ -91,6 +91,7 @@ phases:
         TARGET=Windows-x64
         [[ "$(BuildPlatform)" == Win32 ]] && TARGET=Windows-x86
         vsts_setvar SPEECHSDK_TARGET_PLATFORM "$TARGET"
+        vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set variables
     inputs:
@@ -194,8 +195,8 @@ phases:
     displayName: Carbonx tests
     inputs:
       type: FilePath
-      scriptPath: '$(Build.Repository.LocalPath)/ci/test/runcarbonx.sh'
-      args: './bin/$(BuildConfiguration) $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      scriptPath: '$(Build.Repository.LocalPath)/ci/test/e2e_carbonx.sh'
+      args: './bin/$(BuildConfiguration) all $(KeySkyman)'
       cwd: 'build/$(BuildPlatform)'
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
     timeoutInMinutes: 7
@@ -203,8 +204,8 @@ phases:
     displayName: UspConsole tests
     inputs:
       type: FilePath
-      scriptPath: '$(Build.Repository.LocalPath)/ci/test/runuspconsole.sh'
-      args: './bin/$(BuildConfiguration) $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      scriptPath: '$(Build.Repository.LocalPath)/ci/test/e2e_uspconsole.sh'
+      args: './bin/$(BuildConfiguration) $(KeySkyman)'
       cwd: 'build/$(BuildPlatform)'
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
     timeoutInMinutes: 7
@@ -212,8 +213,8 @@ phases:
     displayName: Carbon CSharp tests
     inputs:
       type: FilePath
-      scriptPath: '$(Build.Repository.LocalPath)/ci/test/runcsharp.sh'
-      args: './bin/$(BuildConfiguration) $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      scriptPath: '$(Build.Repository.LocalPath)/ci/test/e2e_carbon_csharp_console.sh'
+      args: './bin/$(BuildConfiguration) all $(KeySkyman)'
       cwd: 'build/$(BuildPlatform)'
     condition: and(eq(variables['BuildConfiguration'], 'Release'),eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
     timeoutInMinutes: 7
@@ -404,6 +405,7 @@ phases:
       script: |
         . ci/functions.sh
         vsts_setvar SPEECHSDK_TARGET_PLATFORM Android-$(BuildPlatform)
+        vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set variables
     inputs:
@@ -589,6 +591,7 @@ phases:
       script: |
         . ci/functions.sh
         vsts_setvar SPEECHSDK_TARGET_PLATFORM Linux-x64
+        vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set variables
     inputs:
@@ -630,8 +633,8 @@ phases:
     displayName: Carbonx tests
     inputs:
       type: FilePath
-      scriptPath: '$(Build.Repository.LocalPath)/ci/test/runcarbonx.sh'
-      args: './bin $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      scriptPath: '$(Build.Repository.LocalPath)/ci/test/e2e_carbonx.sh'
+      args: './bin all $(KeySkyman)'
       cwd: build
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
     timeoutInMinutes: 7
@@ -639,8 +642,8 @@ phases:
     displayName: UspConsole tests
     inputs:
       type: FilePath
-      scriptPath: '$(Build.Repository.LocalPath)/ci/test/runuspconsole.sh'
-      args: './bin $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      scriptPath: '$(Build.Repository.LocalPath)/ci/test/e2e_uspconsole.sh'
+      args: './bin $(KeySkyman)'
       cwd: build
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
     timeoutInMinutes: 7
@@ -692,6 +695,7 @@ phases:
       script: |
         . ci/functions.sh
         vsts_setvar SPEECHSDK_TARGET_PLATFORM Linux-x86
+        vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set variables
     inputs:
@@ -772,7 +776,8 @@ phases:
       type: InlineScript
       script: |
         . ci/functions.sh
-        vsts_setvar SPEECHSDK_TARGET_PLATFORM Linux-x64
+        vsts_setvar SPEECHSDK_TARGET_PLATFORM OSX-x64
+        vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set variables
     inputs:
@@ -809,8 +814,8 @@ phases:
     displayName: Carbonx tests
     inputs:
       type: FilePath
-      scriptPath: '$(Build.Repository.LocalPath)/ci/test/runcarbonx.sh'
-      args: './bin $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      scriptPath: '$(Build.Repository.LocalPath)/ci/test/e2e_carbonx.sh'
+      args: './bin all $(KeySkyman)'
       cwd: build
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
     timeoutInMinutes: 7
@@ -818,8 +823,8 @@ phases:
     displayName: UspConsole tests
     inputs:
       type: FilePath
-      scriptPath: '$(Build.Repository.LocalPath)/ci/test/runuspconsole.sh'
-      args: './bin $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      scriptPath: '$(Build.Repository.LocalPath)/ci/test/e2e_uspconsole.sh'
+      args: './bin $(KeySkyman)'
       cwd: build
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
     timeoutInMinutes: 7
