@@ -57,4 +57,34 @@ public class Contracts {
 
         // TODO: implement more tests
     }
+
+    /**
+      * Checks if the filename exists.
+      * @param filename The filename to test
+      * @param message The error message in case filename does not exist.
+      */
+    public static void throwIfFileDoesNotExist(String filename, String message) {
+        throwIfNullOrWhitespace(filename, message);
+
+        java.io.File file = new java.io.File(filename);
+
+        if(!file.exists() || !file.isFile()) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    /**
+      * Checks if the directory exists.
+      * @param directory The directory to test
+      * @param message The error message in case directory does not exist.
+      */
+    public static void throwIfDirectoryDoesNotExist(String directory, String message) {
+        throwIfNullOrWhitespace(directory, message);
+
+        java.io.File file = new java.io.File(directory);
+
+        if(!file.exists() || !file.isDirectory()) {
+            throw new IllegalArgumentException(message);
+        }
+    }
 }

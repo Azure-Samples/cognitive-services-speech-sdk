@@ -7,6 +7,8 @@ package com.microsoft.cognitiveservices.speech;
 import java.io.Closeable;
 import java.net.URI;
 import java.util.ArrayList;
+import java.io.File;
+import java.io.IOException;
 
 import com.microsoft.cognitiveservices.speech.ParameterCollection;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
@@ -19,7 +21,8 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
    */
  public final class SpeechFactory implements Closeable {
 
-    // load the native library.
+    // load the native library. Hold the class active so the
+    // class GC does not reclaim it (and the local variables!)
     static Class<?> speechFactoryClass = null;
     static {
 
@@ -56,12 +59,63 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
       *
       * @param bindingConfig The platform specific binding configuration.
       */
-    public static void configureNativePlatformBinding(String bindingConfig) {
+    static void configureNativePlatformBinding(String bindingConfig) {
         Contracts.throwIfNull(bindingConfig, "bindingConfig");
 
         com.microsoft.cognitiveservices.speech.internal.carbon_javaJNI.SetupNativeLibraries(bindingConfig);
     }
 
+    /**
+     * Configures the directory in which certificates are stored and placed
+     * the default root certificate for speech services in that directory.
+     *
+     * Takes the default tempdir + "/speech-sdk-certs"
+     */
+    public static void configureNativePlatformBindingWithDefaultCertificate() {
+        String filePathRoot = System.getProperty("java.io.tmpdir");
+        Contracts.throwIfNullOrWhitespace(filePathRoot, "java.io.tmpdir");
+
+        // out default is /speech-sdk-certs
+        filePathRoot += File.separator + "speech-sdk-certs";
+
+        File directoryRoot = new File(filePathRoot);
+        directoryRoot.mkdirs();
+        directoryRoot.deleteOnExit();
+
+        Contracts.throwIfDirectoryDoesNotExist(filePathRoot, "path is not a directory");
+        SpeechFactory.configureNativePlatformBindingWithDefaultCertificate(directoryRoot.getAbsolutePath());
+    }
+
+    /**
+      * Configures the directory in which certificates are stored and placed
+      * the default root certificate for speech services in that directory.
+      *
+      * @param path The platform specific path where to store the certificate.
+      */
+    static void configureNativePlatformBindingWithDefaultCertificate(String path) {
+        Contracts.throwIfNullOrWhitespace(path, "path");
+
+        java.io.File cacheFile = new java.io.File(path, defaultCertFilenameHash );
+
+        if (!cacheFile.exists()) {
+            try {
+                java.io.FileOutputStream outputStream = new java.io.FileOutputStream(cacheFile);
+                try {
+                    byte[] buf = defaultCertString.getBytes("UTF-8");
+                    outputStream.write(buf, 0, buf.length);
+                } finally {
+                    outputStream.close();
+                }
+            } catch (java.io.IOException e) {
+                throw new IllegalArgumentException("Could not open " + cacheFile.toString(), e);
+            }
+        }
+
+        String certPath = new java.io.File(path).getAbsolutePath();
+        com.microsoft.cognitiveservices.speech.internal.carbon_javaJNI.SetupNativeLibraries(certPath);
+    }
+
+    // Baltimore_CyberTrust_Root
     private static String defaultCertString = "-----BEGIN CERTIFICATE-----\n" +
     "MIIDdzCCAl+gAwIBAgIEAgAAuTANBgkqhkiG9w0BAQUFADBaMQswCQYDVQQGEwJJ\n"+
     "RTESMBAGA1UEChMJQmFsdGltb3JlMRMwEQYDVQQLEwpDeWJlclRydXN0MSIwIAYD\n"+
@@ -84,37 +138,9 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
     "R9I4LtD+gdwyah617jzV/OeBHRnDJELqYzmp\n"+
     "-----END CERTIFICATE-----";
 
+    // Baltimore_CyberTrust_Root
     private static String defaultCertFilenameHash = "653b494a.0";
     
-   /**
-      * Configures the directory in which certificates are stored and placed
-      * the default root certificate for speech services in that directory.
-      *
-      * @param path The platform specific path where to store the certificate.
-      */
-    public static void configureNativePlatformBindingWithDefaultCertificate(String path) throws java.io.IOException {
-        Contracts.throwIfNullOrWhitespace(path, "path");
-
-        java.io.File cacheFile = new java.io.File(path, defaultCertFilenameHash );
-
-        if (!cacheFile.exists()) {
-            try {
-                java.io.FileOutputStream outputStream = new java.io.FileOutputStream(cacheFile);
-                try {
-                    byte[] buf = defaultCertString.getBytes("UTF-8");
-                    outputStream.write(buf, 0, buf.length);
-                } finally {
-                    outputStream.close();
-                }
-            } catch (java.io.IOException e) {
-                throw new java.io.IOException("Could not open " + cacheFile.toString(), e);
-            }
-        }
-
-        String certPath = new java.io.File(path).getAbsolutePath();
-        com.microsoft.cognitiveservices.speech.internal.carbon_javaJNI.SetupNativeLibraries(certPath);
-    }
-
     /**
       * Creates an instance of recognizer factory.
       */
