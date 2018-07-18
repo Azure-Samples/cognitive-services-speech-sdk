@@ -38,13 +38,12 @@ public class Main {
                 System.out.println("SpeechSDKDemo: " + result.getText());
             }
             else if (result.getReason() == RecognitionStatus.Canceled) {
-                System.out.println("SpeechSDKDemo: Request was canceled, reason " + result.getErrorDetails());
-            }
-            else if (result.getReason() == RecognitionStatus.NoMatch) {
-                System.out.println("SpeechSDKDemo: There was audio, but nothing was recognized.");
+                System.out.println("SpeechSDKDemo: The request was Canceled. Did you update the subscription info?" +
+                                   System.lineSeparator() +
+                                   result.getErrorDetails());
             }
             else {
-                System.out.println("SpeechSDKDemo: Error recognizing. Did you update the subscription info?" +
+                System.out.println("SpeechSDKDemo: No speech could be recognized. " +
                                    System.lineSeparator() +
                                    result.toString());
             }

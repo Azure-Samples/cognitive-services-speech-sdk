@@ -249,6 +249,30 @@ public class ParameterCollectionTests {
         }
     }
     
+    @Test
+    public void testSetStringStringTwoTimes() {
+        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        assertNotNull(s);
+        
+        String value1 = "value1";
+        String value2 = "value2";
+        String key = "stringKey";
+        String valueDefault = "valueDefault";
+        
+        ParameterCollection<?> sfp = s.getParameters();
+        assertNotNull(sfp);
+        
+        String actual = sfp.getString(key, valueDefault);
+        assertEquals(valueDefault, actual);
+        
+        sfp.set(key, value1);
+        actual = sfp.getString(key, valueDefault);
+        assertEquals(value1, actual);
+        
+        sfp.set(key, value2);
+        actual = sfp.getString(key, valueDefault);
+        assertEquals(value2, actual);
+    }
 
     @Test
     public void testGetSetStringString() {

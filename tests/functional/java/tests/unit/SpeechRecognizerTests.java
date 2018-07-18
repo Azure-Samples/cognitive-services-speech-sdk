@@ -70,7 +70,6 @@ public class SpeechRecognizerTests {
         s.close();
     }
 
-    @Ignore("TODO why is the result not matching the expected")
     @Test
     public void testSpeechRecognizer2() throws InterruptedException, ExecutionException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -232,7 +231,6 @@ public class SpeechRecognizerTests {
     // --- 
     // -----------------------------------------------------------------------
 
-    @Ignore("TODO why is the result canceled?")
     @Test
     public void testRecognizeAsync1() throws InterruptedException, ExecutionException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -305,6 +303,8 @@ public class SpeechRecognizerTests {
             eventsMap.put(e.getEventType().name(), now);
         });
         
+        // Note: TODO session stopped event not necessarily raised before async operation returns!
+        //       this makes this test flaky
         SpeechRecognitionResult res = r.recognizeAsync().get();
         assertNotNull(res);
         assertEquals(RecognitionStatus.Recognized, res.getReason());
@@ -314,19 +314,30 @@ public class SpeechRecognizerTests {
         // session events are first and last event
         final Integer LAST_RECORDED_EVENT_ID = eventIdentifier.get();
         assertTrue(LAST_RECORDED_EVENT_ID > FIRST_EVENT_ID);
-        assertEquals(FIRST_EVENT_ID, eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()));
-        assertEquals(LAST_RECORDED_EVENT_ID, eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()));
+        assertEquals(FIRST_EVENT_ID, eventsMap.get(SessionEventType.SessionStartedEvent.name()));
+        if(eventsMap.containsKey(SessionEventType.SessionStoppedEvent.name()))
+            assertEquals(LAST_RECORDED_EVENT_ID, eventsMap.get(SessionEventType.SessionStoppedEvent.name()));
         
         // end events come after start events.
-        assertTrue(eventsMap.get(SessionEventType.SessionStartedEvent.name()) < eventsMap.get(SessionEventType.SessionStoppedEvent.name()));
+        if(eventsMap.containsKey(SessionEventType.SessionStoppedEvent.name()))
+            assertTrue(eventsMap.get(SessionEventType.SessionStartedEvent.name()) < eventsMap.get(SessionEventType.SessionStoppedEvent.name()));
         assertTrue(eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()) < eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()));
+        assertEquals((Integer)(FIRST_EVENT_ID + 1), eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()));
+        
+        // make sure, first end of speech, then final result
+        assertEquals((Integer)(LAST_RECORDED_EVENT_ID - 2), eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()));
+        assertEquals((Integer)(LAST_RECORDED_EVENT_ID - 1), eventsMap.get("FinalResultReceived"));
 
         // recognition events come after session start but before session end events
         assertTrue(eventsMap.get(SessionEventType.SessionStartedEvent.name()) < eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()));
-        assertTrue(eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()) < eventsMap.get(SessionEventType.SessionStoppedEvent.name()));
+        if(eventsMap.containsKey(SessionEventType.SessionStoppedEvent.name()))
+            assertTrue(eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()) < eventsMap.get(SessionEventType.SessionStoppedEvent.name()));
 
         // there is no partial result reported after the final result
         // (and check that we have intermediate and final results recorded)
+        if(eventsMap.containsKey("IntermediateResultReceived"))
+            assertTrue(eventsMap.get("IntermediateResultReceived") > eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()));
+        assertTrue(eventsMap.get("FinalResultReceived") < eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()));
         assertTrue(eventsMap.get("IntermediateResultReceived") < eventsMap.get("FinalResultReceived"));
 
         // make sure events we don't expect, don't get raised
@@ -410,7 +421,6 @@ public class SpeechRecognizerTests {
         s.close();
     }
 
-    @Ignore("TODO why is the number of events not 1")
     @Test
     public void testStartStopContinuousRecognitionAsync() throws InterruptedException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);

@@ -55,7 +55,7 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | [Quickstart C# .NET for Windows](./quickstart/csharp-dotnet-windows/)                                       | Windows  | Demonstrates one-shot speech recognition from microphone             |
 | [Quickstart C# .NET Core for Windows](./quickstart/csharp-dotnetcore-windows/)                              | Windows  | Demonstrates one-shot speech recognition from microphone             |
 | [Quickstart for Android](./quickstart/java-android/)                                                        | Android  | Demonstrates one-shot speech recognition from microphone             |
-| [Quickstart Java Jre](./quickstart/java-jre/)                                                               | Windows  | Demonstrates one-shot speech recognition from microphone             |
+| [Quickstart Java Jre](./quickstart/java-jre/)                                                               | Linux, Windows | Demonstrates one-shot speech recognition from microphone             |
 
 The following samples demonstrate additional capabilities of the Speech SDK, such additional modes of speech recognition as well as intent recognition and translation:
 

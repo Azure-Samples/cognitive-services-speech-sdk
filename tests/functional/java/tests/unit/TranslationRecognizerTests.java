@@ -299,7 +299,9 @@ public class TranslationRecognizerTests {
             eventsMap.put(e.getEventType().name() + "-" + System.currentTimeMillis(), now);
             eventsMap.put(e.getEventType().name(), now);
         });
-        
+
+        // TODO there is no guarantee that SessionStoppedEvent comes before the recognizeAsync() call returns?!
+        //      this is why below SessionStoppedEvent checks are conditional 
         TranslationTextResult res = r.recognizeAsync().get();
         assertNotNull(res);
         assertTrue(res.getErrorDetails().isEmpty());
@@ -308,16 +310,21 @@ public class TranslationRecognizerTests {
         // session events are first and last event
         final Integer LAST_RECORDED_EVENT_ID = eventIdentifier.get();
         assertTrue(LAST_RECORDED_EVENT_ID > FIRST_EVENT_ID);
-        assertEquals(FIRST_EVENT_ID, eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()));
-        assertEquals(LAST_RECORDED_EVENT_ID, eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()));
-        
+        assertEquals(FIRST_EVENT_ID, eventsMap.get(SessionEventType.SessionStartedEvent.name()));
+        if(eventsMap.containsKey(SessionEventType.SessionStoppedEvent.name()))
+            assertEquals(LAST_RECORDED_EVENT_ID, eventsMap.get(SessionEventType.SessionStoppedEvent.name()));
+       
         // end events come after start events.
-        assertTrue(eventsMap.get(SessionEventType.SessionStartedEvent.name()) < eventsMap.get(SessionEventType.SessionStoppedEvent.name()));
+        if(eventsMap.containsKey(SessionEventType.SessionStoppedEvent.name()))
+            assertTrue(eventsMap.get(SessionEventType.SessionStartedEvent.name()) < eventsMap.get(SessionEventType.SessionStoppedEvent.name()));
         assertTrue(eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()) < eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()));
+        assertEquals((Integer)(FIRST_EVENT_ID + 1), eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()));
+        assertEquals((Integer)(LAST_RECORDED_EVENT_ID - 1), eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()));
 
         // recognition events come after session start but before session end events
         assertTrue(eventsMap.get(SessionEventType.SessionStartedEvent.name()) < eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()));
-        assertTrue(eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()) < eventsMap.get(SessionEventType.SessionStoppedEvent.name()));
+        if(eventsMap.containsKey(SessionEventType.SessionStoppedEvent.name()))
+            assertTrue(eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()) < eventsMap.get(SessionEventType.SessionStoppedEvent.name()));
 
         // there is no partial result reported after the final result
         // (and check that we have intermediate and final results recorded)
@@ -410,7 +417,6 @@ public class TranslationRecognizerTests {
         s.close();
     }
 
-    @Ignore("TODO why is the event number not 1")
     @Test
     public void testStartStopContinuousRecognitionAsync() throws InterruptedException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
