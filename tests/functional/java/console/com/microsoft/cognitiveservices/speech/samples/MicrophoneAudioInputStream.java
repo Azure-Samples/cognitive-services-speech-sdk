@@ -46,7 +46,7 @@ public class MicrophoneAudioInputStream extends AudioInputStream {
      * @return the number of bytes have been read.
      */
     @Override
-    public int read(byte[] dataBuffer) {
+    public long read(byte[] dataBuffer) {
         return audioLine.read(dataBuffer, 0, dataBuffer.length);
     }
 

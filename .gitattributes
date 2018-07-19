@@ -7,7 +7,10 @@ Dockerfile text
 .dockerignore text
 gradlew text
 proguard-rules.pro text
+.classpath text
+.project text
 
+*.appxmanifest text
 *.bat text
 *.c text
 .classpath text
@@ -27,6 +30,7 @@ proguard-rules.pro text
 *.md text
 *.nuspec text
 *.pl text
+*.prefs text
 *.properties text
 *.props text
 *.ps1 text
@@ -35,6 +39,7 @@ proguard-rules.pro text
 *.project text
 *.runsettings text
 *.sln text
+*.sln text
 *.targets text
 *.template text
 *.txt text
@@ -42,11 +47,9 @@ proguard-rules.pro text
 *.vcxproj.filters text
 *.vcxproj.user text
 *.xaml text
+*.xaml.cs text
 *.xml text
 *.yml text
-*.appxmanifest text
-*.sln text
-*.xaml.cs text
 
 # Bash and "git apply" only like Unix line endings
 *.sh text eol=lf
