@@ -11,11 +11,14 @@ BEGIN {
 
   # Some REs
   $reNugetId = qr/\QMicrosoft.CognitiveServices.Speech\E/;
-  $reMavenId = qr/\Qcom.microsoft.cognitiveservices.speech:client-sdk\E/;
+  $reMavenGroupId = qr/\Qcom.microsoft.cognitiveservices.speech\E/;
+  $reMavenArtifactId = qr/\Qclient-sdk\E/;
+  $reMavenId = qr/$reMavenGroupId:$reMavenArtifactId/;
   $rePkgConfig = qr/packages\.config/;
   $reCsProj = qr/.*\.csproj/;
   $reVcxProj = qr/.*\.vcxproj/;
   $reGradleBuild = qr/build\.gradle/;
+  $reMavenPom = qr/pom\.xml/;
 
   $version = shift
     or die "Supply version to use as first argument\n";
@@ -27,11 +30,12 @@ BEGIN {
 
   @ARGV = ();
   find(sub {
-    m(^(?:$rePkgConfig|$reCsProj|$reVcxProj|$reGradleBuild)$) &&
+    m(^(?:$rePkgConfig|$reCsProj|$reVcxProj|$reGradleBuild|$reMavenPom)$) &&
     push @ARGV, $File::Find::name
   }, $samplesDir);
 
   $seenPackageReference = 0;
+  $mavenDepState = 0;
 }
 if ($ARGV ne $oldargv) {
   warn "Patching $ARGV\n";
@@ -50,3 +54,12 @@ $ARGV =~ m(.*/(?:$reCsProj|$reVcxProj)$) && do {
   $seenPackageReference = m(<PackageReference Include="$reNugetId">);
 };
 $ARGV =~ m(.*/$reGradleBuild$) && s/(\bimplementation\s+(['"])$reMavenId:)(.*?)\2/$1$version$2/;
+$ARGV =~ m(.*/$reMavenPom$) && do {
+  if ($mavenDepState == 2) {
+    $mavenDepState = 0 if s((?<=<version>)[^<]*)($version);
+  } elsif ($mavenDepState == 1) {
+    $mavenDepState = 2 if m(<artifactId>$reMavenArtifactId</artifactId>);
+  } else {
+    $mavenDepState = 1 if m(<groupId>$reMavenGroupId</groupId>);
+  }
+}

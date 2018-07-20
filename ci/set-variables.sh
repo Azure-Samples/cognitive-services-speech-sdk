@@ -43,7 +43,7 @@
 #     Defaults to our CarbonPre VSTS feed for 'dev' builds, Carbon otherwise.
 # * SPEECHSDK_BUILD_AGENT_PLATFORM - can be "Windows-x64", "OSX-x64", "Linux-x64"
 # * SPEECHSDK_BUILD_PHASES - space-separated and space-enclosed list of build phases to run
-#     Default: " WindowsBuild WindowsNuGet LinuxBuild LinuxDrop OsxBuild AndroidBuild AndroidPackage Doxygen "
+#     Default: " WindowsBuild WindowsNuGet LinuxBuild LinuxDrop OsxBuild AndroidBuild AndroidPackage Doxygen JavaJrePackage "
 #     Check phase condition in build.yml for valid phase names.
 # * SPEECHSDK_RUN_TESTS - whether to run tests. Can be 'true' (default) or 'false'.
 #
@@ -186,7 +186,7 @@ else
 fi
 
 # Build phases to run (currently: all for all build types)
-SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsNuGet LinuxBuild LinuxDrop OsxBuild AndroidBuild AndroidPackage Doxygen "
+SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsNuGet LinuxBuild LinuxDrop OsxBuild AndroidBuild AndroidPackage Doxygen JavaJrePackage "
 
 # Running tests is default
 SPEECHSDK_RUN_TESTS=true

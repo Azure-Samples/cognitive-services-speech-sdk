@@ -36,6 +36,8 @@ variables:
         "toolVersion": "1.0"
       }
     ]
+  SPEECHSDK_MAVEN_ARTIFACT_ID: client-sdk
+  SPEECHSDK_MAVEN_GROUP_ID: com.microsoft.cognitiveservices.speech
 
 phases:
 
@@ -254,6 +256,103 @@ phases:
       ArtifactName: Windows
       publishLocation: Container
 
+# Note: for now this packages up only {Linux,Windows}-x64-Release
+- phase: JavaJrePackage
+  dependsOn: [LinuxBuild, WindowsBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' JavaJrePackage '))
+  queue:
+    name: Hosted VS2017
+    timeoutInMinutes: 30
+  steps:
+  - bash: |
+      set -x -e -o pipefail
+      ./ci/set-variables.sh
+      ./ci/set-test-variables.sh
+    displayName: Set variables
+  - bash: |
+      set -x -e -o pipefail
+      . ci/functions.sh
+      PublishArtifactName=JavaJrePackage
+      ArtifactOutWindows="$(Build.ArtifactStagingDirectory)/Out/$PublishArtifactName"
+      ArtifactOut="$(cygpath -au "$ArtifactOutWindows")"
+      ArtifactBasename="$(SPEECHSDK_MAVEN_ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA)"
+      MavenRoot="$ArtifactOut/maven"
+      MavenRootWindows="$ArtifactOutWindows/maven"
+      relativeMavenPackageDir="${SPEECHSDK_MAVEN_GROUP_ID//\./\/}/$SPEECHSDK_MAVEN_ARTIFACT_ID/$SPEECHSDK_SEMVER2NOMETA"
+      MavenPackageDir="$MavenRoot/$relativeMavenPackageDir"
+      MavenPackageDirWindows="$MavenRootWindows/$relativeMavenPackageDir"
+      vsts_setvars_by_ref PublishArtifactName Artifact{Out{,Windows},Basename} Maven{Root,PackageDir}{,Windows}
+    displayName: Set package variables
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading Windows artifacts'
+    inputs:
+      artifactName: Windows
+      downloadPath: $(System.ArtifactsDirectory)/In
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading Linux artifacts'
+    inputs:
+      artifactName: Linux
+      downloadPath: $(System.ArtifactsDirectory)/In
+  - bash: |
+      ./ci/jre/build-jar.sh "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/In
+  # Note: doc says "The file extension should match the selected archive type." - so we are renaming afterwards
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: './ci/jre/jar'
+      includeRootFolder: false
+      archiveType: zip
+      archiveFile: '$(ArtifactOutWindows)/$(ArtifactBasename).zip'
+    displayName: 'Create .zip'
+  - bash: |
+      set -x -e -o pipefail
+      mkdir -p "$(MavenPackageDir)"
+      mv "$(ArtifactOut)/$(ArtifactBasename).zip" "$(MavenPackageDir)/$(ArtifactBasename).jar"
+    displayName: 'Rename .zip -> .jar, place'
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'Sign *.jar'
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      FolderPath: '$(MavenRootWindows)'
+      Pattern: '*.jar'
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_JAVA)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - bash: |
+      set -e -x -o pipefail
+      perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
+      ./ci/run-maven.sh public_samples "$(MavenRoot)"
+    displayName: Build Maven-based samples
+  - bash: |
+       set -x
+       java \
+        -cp $(printf "%s;" \
+           "$(MavenPackageDirWindows)/$(ArtifactBasename).jar" \
+           "$(Build.ArtifactStagingDirectory)/In/Windows/x64/Release/private/bin/com.microsoft.cognitiveservices.speech.tests.jar" \
+           "external/junit/junit-4.12.jar" \
+           "external/junit/hamcrest-core-1.3.jar") \
+         -DSpeechSubscriptionKey=$(KeySkyman) \
+         -DSpeechRegion=westus \
+         -DLuisRegion=westus2 \
+         -DWaveFile=$TEST_AUDIO_FILE \
+         -DKeyword=Computer \
+         -DKeywordModel=/data/keyword/kws.table \
+         -DTestOutputFilename=test-java-unittests-package.xml \
+         tests.runner.Runner \
+         tests.AllTests
+    displayName: Run unit test
+  # TODO more - e.g. POM?
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFiles: '**/test-*.xml'
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/Out'
+      ArtifactName: $(PublishArtifactName)
+      publishLocation: Container
+    displayName: 'Publish .jar'
+    condition: succeededOrFailed()
+
 - phase: NuGet
   dependsOn: [LinuxBuild, LinuxX86Build, WindowsBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsNuGet '))
@@ -470,40 +569,40 @@ phases:
 - phase: AndroidPackage
   dependsOn: AndroidBuild
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' AndroidPackage '))
-  variables:
-    ARTIFACT_ID: client-sdk
-    GROUP_ID: com.microsoft.cognitiveservices.speech
   queue:
     name: Hosted VS2017
     timeoutInMinutes: 30
   steps:
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  - bash: ./ci/set-variables.sh
     displayName: Set variables
-    inputs:
-      type: FilePath
-      scriptPath: 'ci/set-variables.sh'
   - bash: |
+      set -x -e -o pipefail
       . ci/functions.sh
-      ArtifactRelativePath="maven/${GROUP_ID//\./\/}/$ARTIFACT_ID/$SPEECHSDK_SEMVER2NOMETA"
-      vsts_setvar ArtifactRelativePath "$ArtifactRelativePath"
-    displayName: 'Set variables and create directory hierarchy'
+      PublishArtifactName=Android
+      ArtifactOutWindows="$(Build.ArtifactStagingDirectory)/Out/$PublishArtifactName"
+      ArtifactOut="$(cygpath -au "$ArtifactOutWindows")"
+      ArtifactBasename="$(SPEECHSDK_MAVEN_ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA)"
+      MavenRootWindows="$ArtifactOutWindows/maven"
+      MavenRoot="$ArtifactOut/maven"
+      relativeMavenPackageDir="${SPEECHSDK_MAVEN_GROUP_ID//\./\/}/$SPEECHSDK_MAVEN_ARTIFACT_ID/$SPEECHSDK_SEMVER2NOMETA"
+      MavenPackageDir="$MavenRoot/$relativeMavenPackageDir"
+      MavenPackageDirWindows="$MavenRootWindows/$relativeMavenPackageDir"
+      vsts_setvars_by_ref PublishArtifactName Artifact{Out{,Windows},Basename} Maven{Root,PackageDir}{,Windows}
+    displayName: Set package variables
   - task: DownloadBuildArtifacts@0
     inputs:
       artifactName: Android
       downloadPath: $(System.ArtifactsDirectory)/In
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Build .aar
-    inputs:
-      type: FilePath
-      scriptPath: './ci/android/build-aar.sh'
-      args: '"$(SPEECHSDK_SEMVER2NOMETA)" "$(SPEECHSDK_VERSION_CODE)" "$(Build.ArtifactStagingDirectory)/In/Android" "$(Build.ArtifactStagingDirectory)/Out"'
-  # Note: "The file extension should match the selected archive type." - so we are renaming afterwards
+  - bash: |
+      ./ci/android/build-aar.sh "$(SPEECHSDK_SEMVER2NOMETA)" "$(SPEECHSDK_VERSION_CODE)" "$(Build.ArtifactStagingDirectory)/In/Android"
+    displayName: Build AAR content
+  # Note: doc says "The file extension should match the selected archive type." - so we are renaming afterwards
   - task: ArchiveFiles@2
     inputs:
       rootFolderOrFile: './ci/android/aar'
       includeRootFolder: false
       archiveType: zip
-      archiveFile: $(Build.ArtifactStagingDirectory)/Out/Android/$(ArtifactRelativePath)/$(ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA).zip
+      archiveFile: '$(ArtifactOutWindows)/$(ArtifactBasename).zip'
     displayName: 'Create .zip (Release)'
   # Just archive the debug version for now
   - task: ArchiveFiles@2
@@ -511,64 +610,57 @@ phases:
       rootFolderOrFile: './ci/android/aar-debug'
       includeRootFolder: false
       archiveType: zip
-      archiveFile: $(Build.ArtifactStagingDirectory)/Out/Android/$(ARTIFACT_ID)-debug-$(SPEECHSDK_SEMVER2NOMETA).zip
+      archiveFile: '$(ArtifactOutWindows)/$(ArtifactBasename)-debug.zip'
     displayName: 'Create .zip (Debug)'
-  - task: Bash@3
-    displayName: 'Rename .zip -> .aar'
-    inputs:
-      targetType: inline
-      script: |
-        mv "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/Out/Android/$(ArtifactRelativePath)/$(ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA).{zip,aar}
-        mv "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/Out/Android/$(ARTIFACT_ID)-debug-$(SPEECHSDK_SEMVER2NOMETA).{zip,aar}
+  # TODO if we use the .pom for Android and JRE, should change <packaging/> and <description/>
+  - bash: |
+      set -x -e -o pipefail
+      mv "$(ArtifactOut)/$(ArtifactBasename)-debug".{zip,aar}
+      mkdir -p "$(MavenPackageDir)"
+      mv "$(ArtifactOut)/$(ArtifactBasename).zip" "$(MavenPackageDir)/$(ArtifactBasename).aar"
+      cat >> "$(MavenPackageDir)/$(ArtifactBasename).pom" <<POM
+      <?xml version="1.0" encoding="UTF-8"?>
+      <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <modelVersion>4.0.0</modelVersion>
+        <groupId>$(SPEECHSDK_MAVEN_GROUP_ID)</groupId>
+        <artifactId>$(SPEECHSDK_MAVEN_ARTIFACT_ID)</artifactId>
+        <version>$(SPEECHSDK_SEMVER2NOMETA)</version>
+        <packaging>aar</packaging>
+        <name>Microsoft Cognitive Services Speech SDK for Android</name>
+        <description>
+          This SDK allows you to use the Microsoft Cognitive Speech Service
+          (Preview). See https://aka.ms/csspeech for more information.
+        </description>
+        <licenses>
+          <license>
+            <name>Microsoft Software License Terms for Microsoft Cognitive Services Speech SDK Preview</name>
+            <url>https://aka.ms/csspeech/license</url>
+          </license>
+        </licenses>
+      </project>
+      POM
+    displayName: 'Rename .zip -> .aar, place, and create .pom'
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
-    displayName: 'Sign *.aar'
+    displayName: 'Sign *.aar (Release)'
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing'
-      FolderPath: '$(Build.ArtifactStagingDirectory)/Out'
+      FolderPath: '$(MavenRootWindows)'
       Pattern: '*.aar'
       signConfigType: inlineSignParams
       inlineOperation: $(SIGN_PARAMS_JAVA)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
-  - task: Bash@3
-    displayName: 'Create .pom'
-    inputs:
-      targetType: inline
-      script: |
-        cat >> "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/Out/Android/$(ArtifactRelativePath)/$(ARTIFACT_ID)-$(SPEECHSDK_SEMVER2NOMETA).pom <<POM
-        <?xml version="1.0" encoding="UTF-8"?>
-        <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-          <modelVersion>4.0.0</modelVersion>
-          <groupId>$(GROUP_ID)</groupId>
-          <artifactId>$(ARTIFACT_ID)</artifactId>
-          <version>$(SPEECHSDK_SEMVER2NOMETA)</version>
-          <packaging>aar</packaging>
-          <name>Microsoft Cognitive Services Speech SDK for Android</name>
-          <description>
-            This SDK allows you to use the Microsoft Cognitive Speech Service
-            (Preview). See https://aka.ms/csspeech for more information.
-          </description>
-          <licenses>
-            <license>
-              <name>Microsoft Software License Terms for Microsoft Cognitive Services Speech SDK Preview</name>
-              <url>https://aka.ms/csspeech/license</url>
-            </license>
-          </licenses>
-        </project>
-        POM
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    inputs:
-      type: InlineScript
-      script: |
-         set -e -x -o pipefail
-         perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
-         ./ci/run-gradle.sh "$(cygpath -au "$(Build.ArtifactStagingDirectory)")"/Out/Android/maven
+  - bash: |
+      set -e -x -o pipefail
+      perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
+      ./ci/run-gradle.sh public_samples "$(MavenRoot)"
+    displayName: Build Gradle-based samples
   - task: PublishBuildArtifacts@1
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/Out'
-      ArtifactName: Android
+      ArtifactName: '$(PublishArtifactName)'
       publishLocation: Container
-    displayName: 'Publish .aar and .pom'
+    displayName: 'Publish'
     condition: succeededOrFailed()
 
 - phase: LinuxBuild
@@ -708,7 +800,6 @@ phases:
       script: |
         set -e -o pipefail -x
         export SPEECH_SUBSCRIPTION_KEY=$(KeySkyman)
-
         pushd ci/docker
         ./build.sh linux/x86
         ./build-and-smoke-test.sh linux/x86 $(BuildConfiguration) build/Linux-x86

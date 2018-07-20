@@ -88,6 +88,7 @@ fi
 SRCINC="$SOURCE_ROOT/source/public"
 SRCPRIVINC="$SOURCE_ROOT/source/core/include"
 SRCPRIVINC2="$SOURCE_ROOT/source/core/common/include"
+SRCPRIVTESTJAR="$BUILD_ROOT/bin/com.microsoft.cognitiveservices.speech.tests.jar"
 
 DESTPUBLIB="$DEST/public/lib"
 DESTPUBLIBNET461="$DEST/public/lib/net461"
@@ -95,6 +96,7 @@ DESTPUBLIBNETSTANDARD20="$DEST/public/lib/netstandard2.0"
 DESTPUBBIN="$DEST/public/bin"
 DESTPUBINC="$DEST/public/include"
 DESTPRIVLIB="$DEST/private/lib"
+DESTPRIVBIN="$DEST/private/bin"
 DESTPRIVINC="$DEST/private/include"
 DESTPRIVINC2="$DEST/private/include.common"
 
@@ -103,7 +105,7 @@ DESTCSHARPBINDINGS="$DESTPUBLIB/$CSHARPBINDINGSNAME.dll"
 printf "\nCopying files to drop location\n"
 
 # N.B. no long option for -p (parents) on OSX.
-mkdir -p "$DESTPUBLIB" "$DESTPUBLIBNET461" "$DESTPUBLIBNETSTANDARD20" "$(dirname "$DESTPUBINC")" "$DESTPRIVLIB" "$(dirname "$DESTPRIVINC")" "$(dirname "$DESTPRIVINC2")"  "$DESTPUBLIB"
+mkdir -p "$DESTPUBLIB" "$DESTPUBLIBNET461" "$DESTPUBLIBNETSTANDARD20" "$(dirname "$DESTPUBINC")" "$DESTPRIVLIB" "$DESTPRIVBIN" "$(dirname "$DESTPRIVINC")" "$(dirname "$DESTPRIVINC2")"  "$DESTPUBLIB"
 
 # N.B. no long option for -v (verbose) and -p (preserve) on OSX.
 CPOPT="-v -p"
@@ -121,10 +123,13 @@ if [[ $OS = "Windows_NT" ]]; then
   fi
 fi
 
-# Copy .jar if available
+# Copy .jar
 cp $CPOPT "$SRCJAR" "$DESTPUBLIB"
 cp $CPOPT "$SRCJARSRC" "$DESTPUBLIB"
 cp $CPOPT "$SRCJAVABINDINGS" "$DESTPUBLIB"
+
+# Copy (private) test .jar
+cp $CPOPT "$SRCPRIVTESTJAR" "$DESTPRIVBIN"
 
 if [[ "$CSHARPSUPPORTED" = true ]]; then
   cp $CPOPT "$SRCCSHARPBINDINGS" "$DESTCSHARPBINDINGS"

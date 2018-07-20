@@ -14,34 +14,28 @@ else
   PACKAGE_PATH=
 fi
 
-echo $PACKAGE_PATH
-
 set -e -x -o pipefail
 
-readarray -t PROJECTS < <(find "$SAMPLES_DIR" -name gradlew.bat -printf '%h\n')
+readarray -t PROJECTS < <(find "$SAMPLES_DIR" -name pom.xml -printf '%h\n')
 
 for dir in "${PROJECTS[@]}"; do
   echo $dir
   pushd "$dir"
-  [[ -e gradlew.bat ]]
-  [[ -e build.gradle ]]
+  [[ -e pom.xml ]]
 
   # Patch in local repo if package path specified
 
   [[ -n $PACKAGE_PATH ]] && {
+    perl -i -lpe 'BEGIN { ($s, $r) = splice @ARGV, 0, 2; $s = qr/\Q$s/ } s/$s/$r/g' \
+      https://csspeechstorage.blob.core.windows.net/maven/ \
+      "file:///${PACKAGE_PATH//\\/\/}/" \
+      pom.xml
+  }
 
-  cat >> build.gradle <<MAVEN
-allprojects {
-    repositories {
-        maven {
-            url '${PACKAGE_PATH//\\/\\\\}'
-        }
-    }
-}
-MAVEN
-    }
+  # Cygwin / Git bash perl can't in-place edit w/o backup
+  rm -f pom.xml.bak
 
-    ./gradlew assemble
+  mvn package
 
   popd
 done

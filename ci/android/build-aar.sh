@@ -6,18 +6,14 @@ SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 . "$SCRIPT_DIR/../functions.sh"
 
 set -x -e -o pipefail
-USAGE="Usage: $0 version-name version-code drop-dir output-dir"
+USAGE="Usage: $0 version-name version-code drop-dir"
 VERSION_NAME="${1?$USAGE}"
 # TODO is version code relevant for Android libraries?
 VERSION_CODE="${2?$USAGE}"
 DROP_DIR="${3?$USAGE}"
-OUT_DIR="${4?$USAGE}"
 
 # Make absolute
 DROP_DIR="$(readlink -f "$DROP_DIR")"
-OUT_DIR="$(readlink -f "$OUT_DIR")"
-
-[[ -d $OUT_DIR ]] || mkdir -p "$OUT_DIR"
 
 AAR_TEMPLATE_DIR="$SCRIPT_DIR/aartemplate"
 [[ $AAR_TEMPLATE_DIR ]]
