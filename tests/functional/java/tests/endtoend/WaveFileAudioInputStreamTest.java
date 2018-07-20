@@ -160,7 +160,7 @@ public class WaveFileAudioInputStreamTest {
         // can read before close
         byte[]buf = new byte[2];
         long numread = s.read(buf);
-        assertTrue(numread == 2);
+        assertEquals(2, numread);
 
         // close underlying stream
         s.close();

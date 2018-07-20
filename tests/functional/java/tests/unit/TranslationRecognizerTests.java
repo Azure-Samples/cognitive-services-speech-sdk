@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.BeforeClass;
@@ -215,7 +217,7 @@ public class TranslationRecognizerTests {
 
     @Ignore("TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)")
     @Test
-    public void testRecognizeAsync1() throws InterruptedException, ExecutionException {
+    public void testRecognizeAsync1() throws InterruptedException, ExecutionException, TimeoutException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
@@ -230,12 +232,8 @@ public class TranslationRecognizerTests {
         Future<TranslationTextResult> future = r.recognizeAsync();
         assertNotNull(future);
 
-        // Wait for max 10 seconds
-        long now = System.currentTimeMillis();
-        while(((System.currentTimeMillis() - now) < 10000) &&
-              (!future.isDone() || !future.isCancelled())) {
-            Thread.sleep(200);
-        }
+        // Wait for max 30 seconds
+        future.get(30, TimeUnit.SECONDS);
 
         assertFalse(future.isCancelled());
         assertTrue(future.isDone());
@@ -342,7 +340,7 @@ public class TranslationRecognizerTests {
     // -----------------------------------------------------------------------
 
     @Test
-    public void testStartContinuousRecognitionAsync() throws InterruptedException {
+    public void testStartContinuousRecognitionAsync() throws InterruptedException, ExecutionException, TimeoutException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
@@ -357,12 +355,8 @@ public class TranslationRecognizerTests {
         Future<?> future = r.startContinuousRecognitionAsync();
         assertNotNull(future);
 
-        // Wait for max 10 seconds
-        long now = System.currentTimeMillis();
-        while(((System.currentTimeMillis() - now) < 10000) &&
-              (!future.isDone() || !future.isCancelled())) {
-            Thread.sleep(200);
-        }
+        // Wait for max 30 seconds
+        future.get(30, TimeUnit.SECONDS);
 
         assertFalse(future.isCancelled());
         assertTrue(future.isDone());
@@ -372,7 +366,7 @@ public class TranslationRecognizerTests {
     }
 
     @Test
-    public void testStopContinuousRecognitionAsync() throws InterruptedException {
+    public void testStopContinuousRecognitionAsync() throws InterruptedException, ExecutionException, TimeoutException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
@@ -387,12 +381,8 @@ public class TranslationRecognizerTests {
         Future<?> future = r.startContinuousRecognitionAsync();
         assertNotNull(future);
 
-        // Wait for max 10 seconds
-        long now = System.currentTimeMillis();
-        while(((System.currentTimeMillis() - now) < 10000) &&
-              (!future.isDone() || !future.isCancelled())) {
-            Thread.sleep(200);
-        }
+        // Wait for max 30 seconds
+        future.get(30, TimeUnit.SECONDS);
 
         assertFalse(future.isCancelled());
         assertTrue(future.isDone());
@@ -403,12 +393,8 @@ public class TranslationRecognizerTests {
         future = r.stopContinuousRecognitionAsync();
         assertNotNull(future);
 
-        // Wait for max 10 seconds
-        now = System.currentTimeMillis();
-        while(((System.currentTimeMillis() - now) < 10000) &&
-              (!future.isDone() || !future.isCancelled())) {
-            Thread.sleep(200);
-        }
+        // Wait for max 30 seconds
+        future.get(30, TimeUnit.SECONDS);
 
         assertFalse(future.isCancelled());
         assertTrue(future.isDone());
@@ -418,7 +404,7 @@ public class TranslationRecognizerTests {
     }
 
     @Test
-    public void testStartStopContinuousRecognitionAsync() throws InterruptedException {
+    public void testStartStopContinuousRecognitionAsync() throws InterruptedException, ExecutionException, TimeoutException {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
@@ -439,36 +425,28 @@ public class TranslationRecognizerTests {
         Future<?> future = r.startContinuousRecognitionAsync();
         assertNotNull(future);
 
-        // Wait for max 10 seconds
-        long now = System.currentTimeMillis();
-        while(((System.currentTimeMillis() - now) < 10000) &&
-              (!future.isDone() || !future.isCancelled())) {
-            Thread.sleep(200);
-        }
+        // Wait for max 30 seconds
+        future.get(30, TimeUnit.SECONDS);
 
         assertFalse(future.isCancelled());
         assertTrue(future.isDone());
 
         // wait until we get at least on final result
-        now = System.currentTimeMillis();
-        while(((System.currentTimeMillis() - now) < 10000) &&
+        long now = System.currentTimeMillis();
+        while(((System.currentTimeMillis() - now) < 30000) &&
               (rEvents.isEmpty())) {
             Thread.sleep(200);
         }
 
         // test that we got one result
         // TODO multi-phrase test with several phrases in one session
-        assertTrue(rEvents.size() == 1);
+        assertEquals(1, rEvents.size());
 
         future = r.stopContinuousRecognitionAsync();
         assertNotNull(future);
 
-        // Wait for max 10 seconds
-        now = System.currentTimeMillis();
-        while(((System.currentTimeMillis() - now) < 10000) &&
-              (!future.isDone() || !future.isCancelled())) {
-            Thread.sleep(200);
-        }
+        // Wait for max 30 seconds
+        future.get(30, TimeUnit.SECONDS);
 
         assertFalse(future.isCancelled());
         assertTrue(future.isDone());
