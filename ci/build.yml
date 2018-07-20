@@ -400,7 +400,6 @@ phases:
          git clean -fdx public_samples
          perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
          cp --verbose --recursive --preserve public_samples "$(ZipBasename)"
-         cp --verbose --preserve license.md ThirdPartyNotices.md "$(ZipBasename)"
          NOW=$(date -Iseconds)
          find "$(ZipBasename)" | xargs touch --date=$NOW
     displayName: 'Create directory with patched samples'
