@@ -27,7 +27,7 @@ endif()
 option(BUILD_CSHARP "Build C# SWIG module" ON)
 if(BUILD_CSHARP AND
    NOT ANDROID AND 
-   (WIN32 OR (UNIX AND ${CMAKE_SIZEOF_VOID_P} EQUAL 8)))
+   (WIN32 OR (UNIX AND NOT APPLE AND ${CMAKE_SIZEOF_VOID_P} EQUAL 8)))
     add_subdirectory(csharp)
 endif()
 

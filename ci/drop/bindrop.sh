@@ -77,7 +77,7 @@ else
 
   STATLIBSUFFIX=.a
 
-  if [[ $PLATFORM = "Linux-x86" ]]; then
+  if [[ $PLATFORM = "Linux-x86" || $(uname) = Darwin ]]; then
     CSHARPSUPPORTED=false
   else
     CSHARPSUPPORTED=true
