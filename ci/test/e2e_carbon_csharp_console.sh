@@ -50,6 +50,10 @@ for action in $Actions; do
   esac
 done
 
+# TODO: skip auth token tests if this step fails
+TOKEN="$(getAuthorizationToken "$UserKeySkyman" westus)" ||
+  die "Error: could not obtain authorization token"
+
 # Using array of pairs for deterministic test order
 
 variants=(
@@ -58,15 +62,13 @@ variants=(
   "speechEndpoint"          "$UserKeySkyman $TEST_AUDIO_FILE endpoint:"$TEST_SPEECH_ENDPOINT""
   "crisEndpoint"            "$UserKeySkyman $TEST_AUDIO_FILE endpoint:"$TEST_CRIS_ENDPOINT""
   "baseModelWithStream"     "$UserKeySkyman stream:$TEST_AUDIO_FILE"
-  #"authTokenWithBaseModel"  "token:$UserKeySkyman $TEST_AUDIO_FILE"
-  #"authTokenWithEndpoint"   "token:$UserKeySkyman $TEST_AUDIO_FILE endpoint:\"$TEST_SPEECH_ENDPOINT\""
 )
 
 PLATFORMS_TO_RUN="$(joinArgs , Windows-{x86,x64}-Release)"
 
 PLATFORM=$SPEECHSDK_TARGET_PLATFORM-$SPEECHSDK_BUILD_CONFIGURATION
 
-startTests TESTRUNNER TEST-carbon_csharp_console "$PLATFORM" "$UserKeySkyman"
+startTests TESTRUNNER TEST-carbon_csharp_console "$PLATFORM" "$UserKeySkyman $TOKEN"
 startSuite TESTRUNNER "$(basename "$CARBON_CSHARP_CONSOLE" .exe)"
 
 TIMEOUT_SECONDS=30
@@ -80,6 +82,12 @@ for action in $Actions; do
     runTest TESTRUNNER "$TEST_NAME" "$PLATFORMS_TO_RUN" $TIMEOUT_SECONDS \
       $CARBON_CSHARP_CONSOLE $action $variantArg
   done
+
+  if [[ $action == speech ]]; then
+    runTest TESTRUNNER "$action authTokenWithBaseModel" "$PLATFORMS_TO_RUN" $TIMEOUT_SECONDS \
+      $CARBON_CSHARP_CONSOLE $action token:$TOKEN $TEST_AUDIO_FILE
+  fi
+
 done
 
 endSuite TESTRUNNER

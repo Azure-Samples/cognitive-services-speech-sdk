@@ -82,7 +82,31 @@ function joinArgs {
 }
 
 function die {
-    set +x
-    printf "$1"
-    exit 1
+  set +x
+  printf "$1"
+  exit 1
+}
+
+function getAuthorizationToken {
+  local usage key region token_endpoint output exit_code
+  usage="Usage: ${FUNCNAME[0]} key region"
+  key="${1?$usage}"
+  region="${2?$usage}"
+  token_endpoint="https://$region.api.cognitive.microsoft.com/sts/v1.0/issueToken"
+
+  # Use built-in + stdin to pass the key
+  output="$(printf "Content-type: application/x-www-form-urlencoded\nContent-Length: 0\nOcp-Apim-Subscription-Key: %s\n" "$key" |
+    curl -s -S -X POST "$token_endpoint" -H '@-')"
+  exit_code=$?
+  if [[ $exit_code == 0 ]]; then
+    # Check for Base64 URL encoding
+    if [[ $output =~ ^[a-zA-Z0-9_.-]*$ ]]; then
+      printf "%s" "$output"
+    else
+      printf "%s" "$output" 1>&2
+      return 1
+    fi
+  else
+    return $exit_code
+  fi
 }
