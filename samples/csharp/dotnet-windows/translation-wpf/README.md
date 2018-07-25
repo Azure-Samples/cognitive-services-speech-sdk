@@ -1,7 +1,9 @@
-# Quickstart: Recognize speech in C# under .NET Framework for Windows
+# Translation WPF sample for .NET Framework on Windows
 
-This sample demonstrates how to recognize speech with C# under the .NET Framework (version 4.6.1 or above) using the Speech SDK for Windows.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-csharp-dotnet-windows) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
+This sample demonstrates how to translate speech with C# in a WPF application under the .NET Framework on Windows.
+Multiple languages to translate into can be selected; a language can be separately selected for voice output.
+
+The sample runs on .NET Framework 4.6.1 (or above) on Windows.
 
 ## Prerequisites
 
@@ -17,20 +19,25 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 * [Download the sample code to your development PC.](../../README.md#get-the-samples)
 * Start Microsoft Visual Studio 2017 and select **File** \> **Open** \> **Project/Solution**.
 * Navigate to the folder containing this sample, and select the solution file contained within it.
-* Edit the `Program.cs` source:
-  * Replace the string `YourSubscriptionKey` with your own subscription key.
-  * Replace the string `YourServiceRegion` with the service region of your subscription.
-    For example, replace with `westus` if you are using the 30-day free trial subscription.
-* Set the active solution configuration and platform to the desired values under **Build** \> **Configuration Manager**:
-  * On a 64-bit Windows installation, choose `x64` as active solution platform.
-  * On a 32-bit Windows installation, choose `x86` as active solution platform.
 * Press Ctrl+Shift+B, or select **Build** \> **Build Solution**.
 
 ## Run the sample
 
 To debug the app and then run it, press F5 or use **Debug** \> **Start Debugging**. To run the app without debugging, press Ctrl+F5 or use **Debug** \> **Start Without Debugging**.
 
+The app displays a graphical user interface (GUI).
+
+* Use the **Enter Subscription Key** text field in the upper right to configure your subscription key.
+* In the **Region and Language** fly-out on the left, configure the region that is associated with your subscription.
+* In the same fly-out, pick your target language and a language for voice output.
+* To start translating, select **Start Translation**.
+* The app will then continuously translate utterance from your microphone.
+* To stop translating, select **Stop Translation**.
+
+> **Note:**
+> if you use the **Save Key** button, your subscription key will be written to an unencrypted file named `SubscriptionKey.txt` on your disk, inside [.NET Isolated Storage](https://docs.microsoft.com/dotnet/standard/io/isolated-storage).
+> Please use the [documentation](https://docs.microsoft.com/dotnet/standard/io/isolated-storage) if you'd like to locate and delete this file.
+
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-csharp-dotnet-windows)
 * [Speech SDK API reference for C#](https://aka.ms/csspeech/csharpref)

@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-namespace Microsoft.CognitiveServices.SpeechRecognition
+namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
 {
     using System;
     using System.Windows;
