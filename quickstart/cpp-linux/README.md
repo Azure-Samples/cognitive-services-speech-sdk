@@ -18,7 +18,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 * [Download the sample code to your development PC.](../../README.md#get-the-samples)
 * Download and extract the Speech SDK
-  * **By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
+  * **By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
   * Run the following commands after replacing the string `/your/path` with a directory (absolute path) of your choice:
 
     ```sh
@@ -62,3 +62,4 @@ Run the application:
 ## References
 
 * [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-cpp-linux)
+* [Speech SDK API reference for C++](https://aka.ms/csspeech/cppref)
