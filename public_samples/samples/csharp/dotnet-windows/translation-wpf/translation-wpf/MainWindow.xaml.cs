@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-namespace Microsoft.CognitiveServices.SpeechRecognition
+namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
 {
     using System;
     using System.Collections.Generic;
@@ -91,7 +91,7 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
             string recoSource = "microphone";
             this.SetCurrentText(currentText, string.Empty);
             log.Clear();
-            this.WriteLine(log, "\n--- Start speech recognition using " + recoSource + " ----\n\n");
+            this.WriteLine(log, "\n--- Start speech translation using " + recoSource + " ----\n\n");
         }
 
         /// <summary>
@@ -255,7 +255,10 @@ namespace Microsoft.CognitiveServices.SpeechRecognition
         {
 
             this.settingsPanel.IsEnabled = false;
-            this.SubscriptionKey = this.GetSubscriptionKeyFromFile(SubscriptionKeyFileName);
+            if (String.IsNullOrEmpty(this.SubscriptionKey))
+            {
+                this.SubscriptionKey = this.GetSubscriptionKeyFromFile(SubscriptionKeyFileName);
+            }
             this.Region = ((ComboBoxItem)regionComboBox.SelectedItem).Tag.ToString();
             this.FromLanguage = ((ComboBoxItem)fromLanguageComboBox.SelectedItem).Tag.ToString();
             this.ToLanguages = new List<string>();
