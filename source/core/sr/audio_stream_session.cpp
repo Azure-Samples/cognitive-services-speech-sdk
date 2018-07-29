@@ -1379,6 +1379,8 @@ void CSpxAudioStreamSession::AdapterCompletedSetFormatStop(AdapterDoneProcessing
             SPX_DBG_TRACE_VERBOSE("KwsSingleShot Waiting for done ... Done!! Switching back to Keyword/Processing");
             SPX_DBG_TRACE_VERBOSE("%s: Now Keyword/ProcessingAudio ...", __FUNCTION__);
 
+            // holding readLock will cause deadlock if this calling thread holds the last reference to the recognizer.
+            readLock.unlock();
             FireSessionStoppedEvent();
         }
         else if (ChangeState(SessionState::HotSwapPaused, SessionState::ProcessingAudio))
@@ -1388,6 +1390,8 @@ void CSpxAudioStreamSession::AdapterCompletedSetFormatStop(AdapterDoneProcessing
 
             if (doneAdapter == AdapterDoneProcessingAudio::Keyword && IsKind(RecognitionKind::KwsSingleShot))
             {
+                // holding readLock will cause deadlock if this calling thread holds the last reference to the recognizer.
+                readLock.unlock();
                 FireSessionStartedEvent();
             }
         }
@@ -1395,8 +1399,11 @@ void CSpxAudioStreamSession::AdapterCompletedSetFormatStop(AdapterDoneProcessing
         {
             if (doneAdapter == AdapterDoneProcessingAudio::Speech)
             {
+                // holding readLock will cause deadlock if this calling thread holds the last reference to the recognizer.
+                readLock.unlock();
                 // The Reco Engine adapter request to finish processing audio has completed, that signifies that the "session" has stopped
                 FireSessionStoppedEvent();
+                readLock.lock();
 
                 // Restart the keyword spotter if necessary...
                 if (m_kwsModel != nullptr && ChangeState(SessionState::Idle, RecognitionKind::Keyword, SessionState::WaitForPumpSetFormatStart))
