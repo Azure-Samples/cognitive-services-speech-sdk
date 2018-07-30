@@ -246,6 +246,11 @@ namespace MicrosoftSpeechSDKSamples
                 }
             }
         }
+
+        static void UnhandledExceptionTrapper(object sender, UnhandledExceptionEventArgs e) {
+            Console.WriteLine(e.ExceptionObject.ToString());
+            Environment.Exit(1);
+        }
     }
 }
 
