@@ -21,8 +21,9 @@ public class IntentRecognitionSamples {
     {
         // <IntentRecognitionWithMicrophone>
         // Creates an instance of a speech factory with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
+        // subscription key (called 'endpoint key' by the Language Understanding service)
+        // and service region. Replace with your own subscription (endpoint) key
+        // and service region (e.g., "westus2").
         SpeechFactory factory = SpeechFactory.fromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
 
         // Creates an intent recognizer using microphone as audio input. The default language is "en-us".
@@ -56,8 +57,9 @@ public class IntentRecognitionSamples {
     {
         // <IntentRecognitionWithLanguage>
         // Creates an instance of a speech factory with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
+        // subscription key (called 'endpoint key' by the Language Understanding service)
+        // and service region. Replace with your own subscription (endpoint) key
+        // and service region (e.g., "westus2").
         SpeechFactory factory = SpeechFactory.fromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
 
         // Creates an intent recognizer in the specified language using microphone as audio input.
@@ -92,8 +94,9 @@ public class IntentRecognitionSamples {
     {
         // <IntentContinuousRecognitionWithFile>
         // Creates an instance of a speech factory with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
+        // subscription key (called 'endpoint key' by the Language Understanding service)
+        // and service region. Replace with your own subscription (endpoint) key
+        // and service region (e.g., "westus2").
         SpeechFactory factory = SpeechFactory.fromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
 
         // Creates an intent recognizer using file as audio input.
