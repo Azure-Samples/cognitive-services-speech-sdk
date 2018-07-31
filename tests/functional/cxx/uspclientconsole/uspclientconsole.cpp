@@ -17,6 +17,8 @@
 #include "audio_sys.h"
 #include "guid_utils.h"
 
+#include <assert.h>
+
 // #include "azure_c_shared_utility/audio_sys.h"
 
 #include "usp.h"
@@ -193,6 +195,22 @@ const map<string, USP::RecognitionMode> modeMap = {
     { "dictation", USP::RecognitionMode::Dictation }
 };
 
+#if defined(_MSC_VER) && defined(_DEBUG)
+// in case of asserts in debug mode, print the message into stderr and throw exception
+int HandleDebugAssert(int,               // reportType  - ignoring reportType, printing message and aborting for all reportTypes
+    char *message,     // message     - fully assembled debug user message
+    int * returnValue) // returnValue - retVal value of zero continues execution
+{
+    fprintf(stderr, "C-Runtime: %s\n", message);
+
+    if (returnValue) {
+        *returnValue = 0;   // return value of 0 will continue operation and NOT start the debugger
+    }
+
+    return 1;            // make sure no message box is displayed
+}
+#endif
+
 int main(int argc, char* argv[])
 {
     auto testCallbacks = std::make_shared<UspCallbacks>();
@@ -207,6 +225,14 @@ int main(int argc, char* argv[])
     string language;
     string format;
     string inputFile;
+
+#if defined(_MSC_VER) && defined(_DEBUG)
+    // in case of asserts in debug mode, print the message into stderr and throw exception
+    if (_CrtSetReportHook2(_CRT_RPTHOOK_INSTALL, HandleDebugAssert) == -1) {
+        fprintf(stderr, "_CrtSetReportHook2 failed.\n");
+        return -1;
+    }
+#endif
 
     if (argc < 2)
     {

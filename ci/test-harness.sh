@@ -116,7 +116,7 @@ function runTest {
     START_SECONDS=$(date +%s.%N)
     timeout -k 5s $TIMEOUT_SECONDS stdbuf -o0 -e0 "$@" 2>&1 |
       "${REDACT[@]}" 1>> "${!outputRef}.out"
-    EXIT_CODE=$?
+    EXIT_CODE=${PIPESTATUS[0]}
     END_SECONDS=$(date +%s.%N)
     TIME_SECONDS=$(perl -e "printf '%0.3f', $END_SECONDS - $START_SECONDS")
 
