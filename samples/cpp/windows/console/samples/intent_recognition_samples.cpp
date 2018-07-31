@@ -19,8 +19,9 @@ void IntentRecognitionWithMicrophone()
     // <IntentRecognitionWithMicrophone>
     // Creates an instance of a speech factory with specified subscription key
     // and service region. Note that in contrast to other services supported by
-    // the Cognitive Service Speech SDK, the intent recognition services
+    // the Cognitive Service Speech SDK, the Language Understanding service
     // requires a specific subscription key from https://www.luis.ai/.
+    // The Language Understanding service calls the required key 'endpoint key'.
     // Once you've obtained it, replace with below with your own Language Understanding subscription key
     // and service region (e.g., "westus").
     auto factory = SpeechFactory::FromSubscription(L"YourLanguageUnderstandingSubscriptionKey", L"YourLanguageUnderstandingServiceRegion");
@@ -70,9 +71,10 @@ void IntentRecognitionWithLanguage()
     // <IntentRecognitionWithLanguage>
     // Creates an instance of a speech factory with specified subscription key
     // and service region. Note that in contrast to other services supported by
-    // the Cognitive Service Speech SDK, the intent recognition services
+    // the Cognitive Service Speech SDK, the Language Understanding service
     // requires a specific subscription key from https://www.luis.ai/.
-    // Once you've obtained it, replace with below with your own Language Understanding subscription key
+    // The Language Understanding service calls the required key 'endpoint key'.
+    // Once you've obtained it, replace with below with your own Language Understanding service subscription key
     // and service region (e.g., "westus").
     auto factory = SpeechFactory::FromSubscription(L"YourLanguageUnderstandingSubscriptionKey", L"YourLanguageUnderstandingServiceRegion");
 
@@ -122,8 +124,9 @@ void IntentContinuousRecognitionWithFile()
     // <IntentContinuousRecognitionWithFile>
     // Creates an instance of a speech factory with specified subscription key
     // and service region. Note that in contrast to other services supported by
-    // the Cognitive Service Speech SDK, the intent recognition services
+    // the Cognitive Service Speech SDK, the Language Understanding service
     // requires a specific subscription key from https://www.luis.ai/.
+    // The Language Understanding service calls the required key 'endpoint key'.
     // Once you've obtained it, replace with below with your own Language Understanding subscription key
     // and service region (e.g., "westus").
     auto factory = SpeechFactory::FromSubscription(L"YourLanguageUnderstandingSubscriptionKey", L"YourLanguageUnderstandingServiceRegion");
