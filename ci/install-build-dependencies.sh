@@ -26,6 +26,11 @@ case $SPEECHSDK_BUILD_AGENT_PLATFORM in
   OSX-x64)
     brew info openssl
     brew install swig ossp-uuid pkg-config
-    sudo easy_install -U pytest
+
+    sudo easy_install pip
+
+    # ignore install six, otherwise pip install pytest will complain about six installed by distutils
+    sudo -H pip install --ignore-installed six
+    sudo -H pip install pytest
     ;;
 esac
