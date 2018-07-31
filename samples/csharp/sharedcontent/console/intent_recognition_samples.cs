@@ -20,8 +20,9 @@ namespace MicrosoftSpeechSDKSamples
             // <intentRecognitionWithMicrophone>
             // Creates an instance of a speech factory with specified subscription key
             // and service region. Note that in contrast to other services supported by
-            // the Cognitive Service Speech SDK, the intent recognition services
+            // the Cognitive Service Speech SDK, the Language Understanding service
             // requires a specific subscription key from https://www.luis.ai/.
+            // The Language Understanding service calls the required key 'endpoint key'.
             // Once you've obtained it, replace with below with your own Language Understanding subscription key
             // and service region (e.g., "westus").
             var factory = SpeechFactory.FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
@@ -73,8 +74,9 @@ namespace MicrosoftSpeechSDKSamples
             // <intentContinuousRecognitionWithFile>
             // Creates an instance of a speech factory with specified subscription key
             // and service region. Note that in contrast to other services supported by
-            // the Cognitive Service Speech SDK, the intent recognition services
+            // the Cognitive Service Speech SDK, the Language Understanding service
             // requires a specific subscription key from https://www.luis.ai/.
+            // The Language Understanding service calls the required key 'endpoint key'.
             // Once you've obtained it, replace with below with your own Language Understanding subscription key
             // and service region (e.g., "westus").
             var factory = SpeechFactory.FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
@@ -145,8 +147,9 @@ namespace MicrosoftSpeechSDKSamples
             // <intentRecognitionWithLanguage>
             // Creates an instance of a speech factory with specified subscription key
             // and service region. Note that in contrast to other services supported by
-            // the Cognitive Service Speech SDK, the intent recognition services
+            // the Cognitive Service Speech SDK, the Language Understanding service
             // requires a specific subscription key from https://www.luis.ai/.
+            // The Language Understanding service calls the required key 'endpoint key'.
             // Once you've obtained it, replace with below with your own Language Understanding subscription key
             // and service region (e.g., "westus").
             var factory = SpeechFactory.FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");

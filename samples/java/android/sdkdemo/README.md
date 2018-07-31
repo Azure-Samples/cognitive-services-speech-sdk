@@ -23,9 +23,10 @@ This sample demonstrates how to recognize speech and intents with Java using the
   * Replace the string `YourServiceRegion` with the service region of your subscription.
     For example, replace with `westus` if you are using the 30-day free trial subscription.
   * If you'd like to use intent recognition powered by the [Language Understanding service (LUIS)](https://aka.ms/csspeech/luisdocs), also do the following edits:
-    * Replace the string `YourLanguageUnderstandingServiceRegion` with your Language Understanding service subscription key.
-    * Replace the string `YourLanguageUnderstandingSubscriptionKey` with the region associated with your Language Understanding service subscription.
+    * `YourLanguageUnderstandingSubscriptionKey`: replace with your Language Understanding service subscription key (endpoint key).
+    * `YourLanguageUnderstandingServiceRegion`: replace with the region associated with your Language Understanding service subscription.
     * Replace the string `YourLanguageUnderstandingAppId` with the ID of a Language Understanding service application that you want to recognize intents with.
+    * `YourLanguageUnderstandingIntentName1`, `YourLanguageUnderstandingIntentName2`, `YourLanguageUnderstandingIntentName3`: replace with names of intents that your Language Understanding service application recognizes.
 * Press Ctrl+F9, or select **Build** \> **Make Project**.
 
 ## Run the sample

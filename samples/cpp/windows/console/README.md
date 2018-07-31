@@ -23,8 +23,8 @@ This sample demonstrates various forms of speech recognition, intent recognition
     For example, `westus` or `northeurope`.
   * `YourDeploymentId` (optional): replace with the deployment ID of your customized model in [CRIS](https://cris.ai).
   * The following settings apply for intent recognition powered by the [Language Understanding service (LUIS)](https://aka.ms/csspeech/luisdocs):
-    * `YourLanguageUnderstandingServiceRegion`: replace with your Language Understanding service subscription key.
-    * `YourLanguageUnderstandingSubscriptionKey`: replace with the region associated with your Language Understanding service subscription.
+    * `YourLanguageUnderstandingSubscriptionKey`: replace with your Language Understanding service subscription key (endpoint key).
+    * `YourLanguageUnderstandingServiceRegion`: replace with the region associated with your Language Understanding service subscription.
     * `YourLanguageUnderstandingAppId`: replace with the ID of a Language Understanding service application that you want to recognize intents with.
     * `YourLanguageUnderstandingIntentName1`, `YourLanguageUnderstandingIntentName2`, `YourLanguageUnderstandingIntentName3`: replace with names of intents that your Language Understanding service application recognizes.
 
