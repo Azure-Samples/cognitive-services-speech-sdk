@@ -1,13 +1,17 @@
-# Quickstart: Recognize speech on Java Jre
+# Quickstart: Recognize speech in Java on Windows or Linux (Ubuntu 16.04)
 
-This sample demonstrates how to recognize speech with Java using the Speech SDK for Java.
+This sample demonstrates how to recognize speech with the Speech SDK for Java on Windows or Linux (Ubuntu 16.04)
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-java-jre) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.
+
+> **Note:**
+> the Speech SDK for the JRE currently supports only the Windows x64 platform and Linux (Ubuntu 16.04) x64 distribution.
 
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A PC (Windows, Linux) capable to run Eclipse, with a working microphone.
-* The latest version of [Eclipse](https://www.eclipse.org).
+* A PC (Windows x64, Ubuntu 16.04 x64) capable to run Eclipse, with a working microphone.
+* 64-bit JRE/JDK for Java 8 or higher.
+* Version 4.8 of [Eclipse](https://www.eclipse.org), 64-bit.
 
 ## Build the sample
 
@@ -15,7 +19,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 * **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
 * [Download the sample code to your development PC.](../../README.md#get-the-samples)
-* Create an empty workspace in Eclipse and import this folder as a project into your workspace.
+* Create an empty workspace in Eclipse and import the folder containing this sample as a project into your workspace.
 * Edit the `Main` source:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
   * Replace the string `YourServiceRegion` with the service region of your subscription.
@@ -29,3 +33,4 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 ## References
 
 * [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-java-jre)
+* [Speech SDK API reference for Java](https://aka.ms/csspeech/javaref)
