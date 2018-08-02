@@ -472,9 +472,11 @@ static void OnWSOpened(void* context, WS_OPEN_RESULT open_result)
         if (open_result >= WS_OPEN_ERROR_BAD_RESPONSE_STATUS)
         {
             // upgrade failed with a non-101 HTTP response code, which is encoded in the open_result enum value.
+            // Bug 1352497: (open_result - WS_OPEN_ERROR_BAD_RESPONSE_STATUS) could exceed value defined by TransportError,
+            // a complete mapping needs to be done.
             err = TRANSPORT_ERROR_NONE + (open_result - WS_OPEN_ERROR_BAD_RESPONSE_STATUS);
-        } 
-        else 
+        }
+        else
         {
             err = TRANSPORT_ERROR_CONNECTION_FAILURE;
         }

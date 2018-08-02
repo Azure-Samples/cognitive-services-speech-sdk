@@ -548,6 +548,10 @@ void Connection::Impl::OnTransportError(TransportHandle transportHandle, Transpo
         connection->Invoke([&] { callbacks->OnError(true, "Unknown transport error."); });
         break;
 
+    case TRANSPORT_ERROR_HTTP_BADREQUEST:
+        connection->Invoke([&] { callbacks->OnError(true, "WebSocket Upgrade failed with a bad request (400). Please check the language name and deployment id, and ensure the deployment id (if used) is correctly associated with the provided subscription key."); });
+        break;
+
     case TRANSPORT_ERROR_HTTP_UNAUTHORIZED:
         connection->Invoke([&] { callbacks->OnError(true, "WebSocket Upgrade failed with an authentication error (401). Please check the subscription key or the authorization token, and the region name."); });
         break;

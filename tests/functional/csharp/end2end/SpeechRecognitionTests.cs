@@ -87,7 +87,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile))
             {
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-                AssertStringContains(result.RecognitionFailureReason, "401");
+                AssertStringContains(result.RecognitionFailureReason, "WebSocket Upgrade failed with an authentication error (401)");
                 Assert.AreEqual(RecognitionStatus.Canceled, result.RecognitionStatus);
             }
         }
@@ -117,7 +117,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 recognizer.DeploymentId = "invalidDeploymentId";
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-                AssertStringContains(result.RecognitionFailureReason, "400");
+                AssertStringContains(result.RecognitionFailureReason, "WebSocket Upgrade failed with a bad request (400)");
+                Assert.AreEqual(RecognitionStatus.Canceled, result.RecognitionStatus);
+            }
+        }
+
+        [TestMethod]
+        public async Task InvalidLanguageHandledProperly()
+        {
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile, "InvalidLang"))
+            {
+                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                AssertStringContains(result.RecognitionFailureReason, "WebSocket Upgrade failed with a bad request (400)");
                 Assert.AreEqual(RecognitionStatus.Canceled, result.RecognitionStatus);
             }
         }

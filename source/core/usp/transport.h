@@ -99,12 +99,15 @@ int TransportStreamFlush(TransportHandle transportHandle);
  */
 void TransportDoWork(TransportHandle transportHandle);
 
+// Bug https://msasg.visualstudio.com/Skyman/_workitems/edit/1352497: 
+// Error erturned by uws_client could be out of value defined below.
 typedef enum _TransportError
 {
     TRANSPORT_ERROR_NONE = 0,
     TRANSPORT_ERROR_REMOTECLOSED,
     TRANSPORT_ERROR_CONNECTION_FAILURE,
     TRANSPORT_ERROR_DNS_FAILURE,
+    TRANSPORT_ERROR_HTTP_BADREQUEST = 400,
     TRANSPORT_ERROR_HTTP_UNAUTHORIZED = 401,
     TRANSPORT_ERROR_HTTP_FORBIDDEN = 403,
 } TransportError;
