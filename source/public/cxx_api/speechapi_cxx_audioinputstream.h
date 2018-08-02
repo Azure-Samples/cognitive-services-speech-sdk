@@ -16,7 +16,7 @@ namespace Speech {
 
 /// <summary>
 /// A structure that describes the audio format.
-/// Currently, only PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.
+/// Currently, only PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
 /// </summary>
 typedef struct _AudioInputStreamFormatCPP
 {

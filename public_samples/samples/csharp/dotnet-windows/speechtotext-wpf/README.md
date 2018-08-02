@@ -37,7 +37,7 @@ If you like detailed output from the speech service, use the **Baseline Model Ou
   Please use the [documentation](https://docs.microsoft.com/dotnet/standard/io/isolated-storage) if you'd like to locate and delete this file.
 
 * If you are using your own `.wav` file as input source, make sure it is in the right format.
-  Currently, the only supported `.wav` format is **mono (single-channel), 16 kHZ sample rate, 16 bits per sample**.
+  Currently, the only supported `.wav` format is **mono (single-channel), 16 kHz sample rate, 16 bits per sample**.
 
 ## References
 

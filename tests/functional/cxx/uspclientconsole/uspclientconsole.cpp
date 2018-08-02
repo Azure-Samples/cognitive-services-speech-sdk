@@ -180,7 +180,7 @@ virtual void OnTranslationPhrase(const USP::TranslationPhraseMsg& message) overr
 
 };
 
-#define AUDIO_BYTES_PER_SECOND (16000*2) //16KHz, 16bit PCM
+#define AUDIO_BYTES_PER_SECOND (16000*2) // 16 kHz, 16 bit PCM
 
 const map<string, USP::EndpointType> typeMap = {
     { "speech", USP::EndpointType::Speech },

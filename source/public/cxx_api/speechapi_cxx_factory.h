@@ -90,21 +90,21 @@ public:
     /// <summary>
     /// Creates a SpeechRecognizer, using the specified audio file as input.
     /// </summary>
-    /// <param name="fileName">Specifies the input audio file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.</param>
+    /// <param name="fileName">Specifies the input audio file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
     /// <returns>A shared pointer to SpeechRecognizer</returns>
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName) = 0;
 
     /// <summary>
     /// Creates a SpeechRecognizer for the specified spoken language, using the specified audio file as input.
     /// </summary>
-    /// <param name="fileName">Specifies the input audio file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.</param>
+    /// <param name="fileName">Specifies the input audio file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
     /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
     /// <returns>A shared pointer to SpeechRecognizer</returns>
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) = 0;
 
     /// Creates a SpeechRecognizer for the specified spoken language, using the specified audio file as input.
     /// </summary>
-    /// <param name="fileName">Specifies the input audio file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.</param>
+    /// <param name="fileName">Specifies the input audio file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
     /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
     /// <param name="format">Output format.</param>
     /// <returns>A shared pointer to SpeechRecognizer</returns>

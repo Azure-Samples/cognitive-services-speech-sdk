@@ -487,7 +487,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
     
    /**
      * Creates a translation recognizer using the specified file as audio input.
-     * @param audioFile Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.
+     * @param audioFile Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
      * @param sourceLanguage The spoken language that needs to be translated.
      * @param targetLanguages The target languages of translation.
      * @return A translation recognizer instance.
@@ -509,7 +509,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 
     /**
      * Creates a translation recognizer using the specified file as audio input.
-     * @param audioFile Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.
+     * @param audioFile Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
      * @param sourceLanguage The spoken language that needs to be translated.
      * @param targetLanguages The target languages of translation.
      * @param voice Specifies the name of voice tag if a synthesized audio output is desired.

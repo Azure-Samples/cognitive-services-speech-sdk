@@ -150,7 +150,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Creates a speech recognizer using the specified file as audio input.
         /// </summary>
-        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.</param>
+        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
         /// <returns>A speech recognizer instance.</returns>
         public SpeechRecognizer CreateSpeechRecognizerWithFileInput(string audioFile)
         {
@@ -160,7 +160,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Creates a speech recognizer using the specified file as audio input for a specified language.
         /// </summary>
-        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.</param>
+        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
         /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
         /// <returns>A speech recognizer instance.</returns>
         public SpeechRecognizer CreateSpeechRecognizerWithFileInput(string audioFile, string language)
@@ -171,7 +171,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Creates a speech recognizer using the specified file as audio input for a specified language and a specified output format.
         /// </summary>
-        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.</param>
+        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
         /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
         /// <param name="format">Output format: simple or detailed.</param>
         /// <returns>A speech recognizer instance.</returns>
@@ -237,7 +237,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Creates an intent recognizer using the specified file as audio input.
         /// </summary>
-        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.</param>
+        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
         /// <returns>An intent recognizer instance</returns>
         public IntentRecognizer CreateIntentRecognizerWithFileInput(string audioFile)
         {
@@ -248,7 +248,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// Creates an intent recognizer using the specified file as audio input for a specified language.
         /// </summary>
         /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
-        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.</param>
+        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
         /// <returns>An intent recognizer instance</returns>
         public IntentRecognizer CreateIntentRecognizerWithFileInput(string audioFile, string language)
         {
@@ -303,7 +303,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Creates a translation recognizer using the specified file as audio input for a specified source language and a specified list of target languages.
         /// </summary>
-        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.</param>
+        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
         /// <param name="sourceLanguage">The spoken language that needs to be translated.</param>
         /// <param name="targetLanguages">The target languages of translation.</param>
         /// <returns>A translation recognizer instance.</returns>
@@ -315,7 +315,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Creates a translation recognizer using the specified file as audio input for a specified source language, a specified list of target languages and a specified output voice.
         /// </summary>
-        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 KHz sample rate, and a single channel (Mono) is supported.</param>
+        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
         /// <param name="sourceLanguage">The spoken language that needs to be translated.</param>
         /// <param name="targetLanguages">The target languages of translation.</param>
         /// <param name="voice">Specifies the name of voice tag if a synthesized audio output is desired.</param>
