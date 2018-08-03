@@ -236,16 +236,16 @@ int main(int argc, char* argv[])
 
     if (argc < 2)
     {
-        printf("Usage: uspclientconsole options inputfile");
-        printf("The following options are available:");
-        printf("      inputType:audio|message:[path]");
-        printf("      auth:key");
-        printf("      type:speech|intent|tranlsation|cdsdk");
-        printf("      mode:interactive|conversation|dictation");
-        printf("      url:endpoint");
-        printf("      lang:language");
-        printf("      model:id");
-        printf("      output:simple|detailed");
+        printf("Usage: uspclientconsole options inputfile\n");
+        printf("The following options are available:\n");
+        printf("      inputType:audio|message:[path]\n");
+        printf("      auth:key\n");
+        printf("      type:speech|intent|tranlsation|cdsdk\n");
+        printf("      mode:interactive|conversation|dictation\n");
+        printf("      url:endpoint\n");
+        printf("      lang:language\n");
+        printf("      model:id\n");
+        printf("      output:simple|detailed\n");
         exit(1);
     }
 

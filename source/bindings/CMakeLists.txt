@@ -26,9 +26,11 @@ endif()
 
 option(BUILD_CSHARP "Build C# SWIG module" ON)
 if(BUILD_CSHARP AND
-   NOT ANDROID AND 
+   NOT ANDROID AND
+   # Version >= 3.10.3 is required for SWIG to create correct dll names.
+   ("${CMAKE_VERSION}" VERSION_GREATER_EQUAL 3.10.3) AND
    (WIN32 OR (UNIX AND NOT APPLE AND ${CMAKE_SIZEOF_VOID_P} EQUAL 8)))
-    add_subdirectory(csharp)
+       add_subdirectory(csharp)
 endif()
 
 option(BUILD_JAVA "Build Java/Android SWIG module" ON)

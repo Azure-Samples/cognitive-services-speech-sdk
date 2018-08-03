@@ -80,7 +80,7 @@ else
   if [[ $PLATFORM = "Linux-x86" || $(uname) = Darwin ]]; then
     CSHARPSUPPORTED=false
   else
-    CSHARPSUPPORTED=true
+    CSHARPSUPPORTED=false
     SRCCSHARPBINDINGS="$SRCBIN/$CSHARPBINDINGSNAME.so"
   fi
 fi
