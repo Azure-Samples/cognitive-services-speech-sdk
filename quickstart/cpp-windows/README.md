@@ -13,14 +13,15 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 ## Build the sample
 
+* **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 * [Download the sample code to your development PC.](../../README.md#get-the-samples)
 * Start Microsoft Visual Studio 2017 and select **File** \> **Open** \> **Project/Solution**.
-* Choose the folder containing this sample.
+* Navigate to the folder containing this sample, and select the solution file contained within it.
 * Edit the `helloworld.cpp` source:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
   * Replace the string `YourServiceRegion` with the service region of your subscription.
     For example, replace with `westus` if you are using the 30-day free trial subscription.
-* Set the active solution configuration and platform to the desired values under **Build** \> **Configuration Manager**.
+* Set the active solution configuration and platform to the desired values under **Build** \> **Configuration Manager**:
   * On a 64-bit Windows installation, choose `x64` as active solution platform.
   * On a 32-bit Windows installation, choose `x86` as active solution platform.
 * Press Ctrl+Shift+B, or select **Build** \> **Build Solution**.
@@ -32,3 +33,4 @@ To debug the app and then run it, press F5 or use **Debug** \> **Start Debugging
 ## References
 
 * [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-cpp-windows)
+* [Speech SDK API reference for C++](https://aka.ms/csspeech/cppref)

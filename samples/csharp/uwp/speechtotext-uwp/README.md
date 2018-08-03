@@ -1,12 +1,12 @@
-# Quickstart: Recognize speech in C# under Universal Windows Platform
+# Speech-to-text UWP sample
 
-This sample demonstrates how to recognize speech with C# under the Universal Windows Platform using the Speech SDK.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-csharp-uwp) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
+This sample demonstrates various forms of recognizing speech with C# under the Universal Windows Platform using the Speech SDK.
 
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A Windows PC with Windows 10 Fall Creators Update (10.0; Build 16299) or later and with a working microphone.
+* A Windows PC with Windows 10 Fall Creators Update (10.0; Build 16299) or later.
+  Some sample scenarios require a working microphone.
 * [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
 * The **Universal Windows Platform development** workload in Visual Studio.
 * Note: processor target ARM is not yet supported.
@@ -19,10 +19,6 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 * [Download the sample code to your development PC.](../../README.md#get-the-samples)
 * Start Microsoft Visual Studio 2017 and select **File** \> **Open** \> **Project/Solution**.
 * Navigate to the folder containing this sample, and select the solution file contained within it.
-* Edit the `MainPage.xaml.cs` source:
-  * Replace the string `YourSubscriptionKey` with your own subscription key.
-  * Replace the string `YourServiceRegion` with the service region of your subscription.
-    For example, replace with `westus` if you are using the 30-day free trial subscription.
 * Set the active solution configuration and platform to the desired values under **Build** \> **Configuration Manager**:
   * On a 64-bit Windows installation, choose `x64` as active solution platform.
   * On a 32-bit Windows installation, choose `x86` as active solution platform.
@@ -32,7 +28,19 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 To debug the app and then run it, press F5 or use **Debug** \> **Start Debugging**. To run the app without debugging, press Ctrl+F5 or use **Debug** \> **Start Without Debugging**.
 
+The app displays a graphical user interface (GUI).
+
+* Use the **Subscription Key** text field to enter your subscription key.
+* In the drop down below, choose the region associated with your subscription.
+* In the drop-down right below the subscription key, choose the input language.
+* If you'd like to use your microphone, select **Enable Microphone**, which (first time you're clicking it) launches a permission prompt asking for microphone access.
+  Approve it.
+* With the other buttons you can launch a specific speech recognition scenario.
+
+> **Note:**
+> if you are using your own `.wav` file as input source, make sure it is in the right format.
+> Currently, the only supported `.wav` format is **mono (single-channel), 16 kHZ sample rate, 16 bits per sample**.
+
 ## References
 
-* [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-csharp-uwp)
 * [Speech SDK API reference for C#](https://aka.ms/csspeech/csharpref)

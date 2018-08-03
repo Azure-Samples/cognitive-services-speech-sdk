@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     //
 
     // Replace below with your own Language Understanding subscription key
+    // The intent recognition service calls the required key 'endpoint key'.
     private static final String LanguageUnderstandingSubscriptionKey = "YourLanguageUnderstandingSubscriptionKey";
     // Replace below with the deployment region of your Language Understanding application
     private static final String LanguageUnderstandingServiceRegion = "YourLanguageUnderstandingServiceRegion";

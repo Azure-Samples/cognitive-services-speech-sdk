@@ -15,7 +15,7 @@ import com.microsoft.cognitiveservices.speech.AudioInputStreamFormat;
 /**
  * MicrophoneStream exposes the Android Microphone as an AudioInputStream
  * to be consumed by the Speech SDK.
- * It configures the microphone with 16000khz, 16bits, mono.
+ * It configures the microphone with 16 kHz sample rate, 16 bit samples, mono (single-channel).
  */
 public class MicrophoneStream extends AudioInputStream {
     private final static int SAMPLE_RATE = 16000;
@@ -45,7 +45,7 @@ public class MicrophoneStream extends AudioInputStream {
     }
 
     private void initMic() {
-        // Note: currently, the SpeechSDK supports 16000, 16bit, mono streams only.
+        // Note: currently, the Speech SDK support 16 kHz sample rate, 16 bit samples, mono (single-channel) only.
         AudioFormat af = new AudioFormat.Builder()
                 .setSampleRate(SAMPLE_RATE)
                 .setEncoding(AudioFormat.ENCODING_PCM_16BIT)

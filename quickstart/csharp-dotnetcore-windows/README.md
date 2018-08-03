@@ -1,6 +1,6 @@
 # Quickstart: Recognize speech in C# under .NET Core (Windows only)
 
-This sample demonstrates how to recognize speech with C# under .NET Core using the Speech SDK for Windows.
+This sample demonstrates how to recognize speech with C# under .NET Core 2.0 using the Speech SDK for Windows.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-cpp-dotnetcore-windows) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
 
 ## Prerequisites
@@ -13,9 +13,10 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 ## Build the sample
 
+* **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 * [Download the sample code to your development PC.](../../README.md#get-the-samples)
 * Start Microsoft Visual Studio 2017 and select **File** \> **Open** \> **Project/Solution**.
-* Choose the folder containing this sample.
+* Navigate to the folder containing this sample, and select the solution file contained within it.
 * Edit the `Program.cs` source:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
   * Replace the string `YourServiceRegion` with the service region of your subscription.
@@ -29,3 +30,4 @@ To debug the app and then run it, press F5 or use **Debug** \> **Start Debugging
 ## References
 
 * [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-cpp-dotnetcore-windows)
+* [Speech SDK API reference for C#](https://aka.ms/csspeech/csharpref)

@@ -10,33 +10,43 @@ BEGIN {
   use File::Find;
 
   # Some REs
-  $rePkgId = qr/\QMicrosoft.CognitiveServices.Speech\E/;
+  $reNugetId = qr/\QMicrosoft.CognitiveServices.Speech\E/;
+  $reMavenId = qr/\Qcom.microsoft.cognitiveservices.speech:client-sdk\E/;
   $rePkgConfig = qr/packages\.config/;
   $reCsProj = qr/.*\.csproj/;
   $reVcxProj = qr/.*\.vcxproj/;
+  $reGradleBuild = qr/build\.gradle/;
 
   $version = shift
-    or die "Supply version to use as first and only argument\n";
-  $samplesDir = '.';
+    or die "Supply version to use as first argument\n";
+  $samplesDir = shift
+    or die "Supply directory to use as second argument\n";
 
   -d $samplesDir
-    or die "Cannot find $samplesDir, please launch from repository root\n";
+    or die "Cannot find $samplesDir\n";
 
   @ARGV = ();
   find(sub {
-    m(^(?:$rePkgConfig|$reCsProj|$reVcxProj)$) &&
+    m(^(?:$rePkgConfig|$reCsProj|$reVcxProj|$reGradleBuild)$) &&
     push @ARGV, $File::Find::name
   }, $samplesDir);
+
+  $seenPackageReference = 0;
 }
 if ($ARGV ne $oldargv) {
   warn "Patching $ARGV\n";
   $oldargv = $ARGV;
 }
-$ARGV =~ m(.*/$rePkgConfig$) && s/(<package id="$rePkgId" version=")([^"]*)"/$1$version"/;
+$ARGV =~ m(.*/$rePkgConfig$) && s/(<package id="$reNugetId" version=")([^"]*)"/$1$version"/;
 $ARGV =~ m(.*/(?:$reCsProj|$reVcxProj)$) && do {
-  # Custom version property we have in smoke check
-  s((\Q<SpeechSdkVersion Condition="'$(SpeechSdkVersion)' == ''">\E)([^<]*)(\Q</SpeechSdkVersion>\E))($1$version$3)g;
-
   # <HintPath>...<HintPath>, <Import Project ... />, <Error ... />
-  s((["'>](?:\.\.\\)*packages\\$rePkgId\.)[^\\]*\\)($1$version\\)g;
+  s((["'>](?:\.\.\\)*packages\\$reNugetId\.)[^\\]*\\)($1$version\\)g;
+
+  # <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="X" />
+  s((?<=<PackageReference Include="$reNugetId" Version=")[^"]*)($version)g;
+
+  # <PackageReference Include="Microsoft.CognitiveServices.Speech">\n<Version>X</Version>
+  s((?<=<Version>)[^<]*)($version)g if $seenPackageReference;
+  $seenPackageReference = m(<PackageReference Include="$reNugetId">);
 };
+$ARGV =~ m(.*/$reGradleBuild$) && s/(\bimplementation\s+(['"])$reMavenId:)(.*?)\2/$1$version$2/;
