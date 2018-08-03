@@ -7,7 +7,10 @@ RUN apt-get update && \
       libssl1.0.0 \
       libcurl3 \
       libasound2 \
-      wget
+      wget \
+      # test dependencies
+      pulseaudio \
+      pulseaudio-utils
 
 # Override at docker build time, as appropriate:
 ARG BUILD_UID=0

@@ -834,12 +834,9 @@ phases:
       type: FilePath
       scriptPath: './ci/drop/linux-reldrop.sh'
       args: '"$(SPEECHSDK_SEMVER2NOMETA)" "$(Build.Repository.LocalPath)" "$(System.ArtifactsDirectory)/Linux" "$(Build.ArtifactStagingDirectory)/Linux/Drop"'
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Test - build quickstart
-    inputs:
-      type: FilePath
-      scriptPath: './ci/drop/test-quickstart-linux.sh'
-      args: '"$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz"'
+  - bash: |
+      SPEECH_SUBSCRIPTION_KEY="$(KeySkyman)" ./ci/drop/test-quickstart-linux.sh --smoke-test "$(Build.ArtifactStagingDirectory)/Linux/Drop/SpeechSDK-Linux-$(SPEECHSDK_SEMVER2NOMETA).tar.gz"
+    displayName: Test - build and run quickstart
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Linux Release Drop'
     inputs:
