@@ -5,6 +5,7 @@ package com.microsoft.cognitiveservices.speech.samples.console;
 //
 
 import java.io.IOException;
+import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 import java.io.FileInputStream;
@@ -14,6 +15,7 @@ import java.io.FileNotFoundException;
 import com.microsoft.cognitiveservices.speech.*;
 // </toplevel>
 
+@SuppressWarnings("resource") // scanner
 public class SpeechRecognitionSamples {
     // Speech recognition from microphone.
     public static void recognitionWithMicrophoneAsync() throws InterruptedException, ExecutionException {
@@ -150,7 +152,7 @@ public class SpeechRecognitionSamples {
             recognizer.startContinuousRecognitionAsync().get();
 
             System.out.println("Press any key to stop");
-            System.in.read();
+            new Scanner(System.in).nextLine();
 
             recognizer.stopContinuousRecognitionAsync().get();
         }

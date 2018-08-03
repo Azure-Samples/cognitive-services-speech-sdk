@@ -38,8 +38,10 @@ public class MainActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(MainActivity.this, new String[]{RECORD_AUDIO, INTERNET}, requestCode);
 
         try {
-            // Note: required once after app start.
-            SpeechFactory.configureNativePlatformBindingWithDefaultCertificate(MainActivity.this.getCacheDir().getAbsolutePath());
+            // Note: Configure native platform binding. This currently configures the directory
+            //       in which to store certificates required to access the speech service.
+            //       It is required to call this once after app start.
+            SpeechFactory.configureNativePlatformBindingWithDefaultCertificate();
         } catch (Exception ex) {
             Log.e("SpeechSDKDemo", "unexpected " + ex.getMessage());
             assert(false);

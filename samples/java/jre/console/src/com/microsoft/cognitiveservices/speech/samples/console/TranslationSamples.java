@@ -7,6 +7,7 @@ package com.microsoft.cognitiveservices.speech.samples.console;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 import java.io.FileInputStream;
@@ -17,6 +18,7 @@ import com.microsoft.cognitiveservices.speech.*;
 import com.microsoft.cognitiveservices.speech.translation.*;
 // </toplevel>
 
+@SuppressWarnings("resource") // scanner
 public class TranslationSamples {
     // Translation from microphone.
     public static void translationWithMicrophoneAsync() throws InterruptedException, ExecutionException, IOException {
@@ -31,8 +33,11 @@ public class TranslationSamples {
         ArrayList<String> toLanguages = new ArrayList<String>();
         toLanguages.add("de");
 
-        // Creates a translation recognizer using microphone as audio input.
-        TranslationRecognizer recognizer = factory.createTranslationRecognizer(fromLanguage, toLanguages);
+        // Sets voice name of synthesis output.
+        String GermanVoice = "de-DE-Hedda";
+
+        // Creates a translation recognizer using microphone as audio input, and requires voice output.
+        TranslationRecognizer recognizer = factory.createTranslationRecognizer(fromLanguage, toLanguages, GermanVoice);
         {
             // Subscribes to events.
             recognizer.IntermediateResultReceived.addEventListener((s, e) -> {
@@ -69,6 +74,10 @@ public class TranslationSamples {
                 }
             });
 
+            recognizer.SynthesisResultReceived.addEventListener((s, e) -> {
+                System.out.println("Synthesis result received. Size of audio data: " + e.getResult().getAudio().length);
+            });
+
             recognizer.RecognitionErrorRaised.addEventListener((s, e) -> {
                 System.out.println("\nAn error occurred. Status: " + e.getStatus());
             });
@@ -82,7 +91,7 @@ public class TranslationSamples {
             recognizer.startContinuousRecognitionAsync().get();
 
             System.out.println("Press any key to stop");
-            System.in.read();
+            new Scanner(System.in).nextLine();
 
             recognizer.stopContinuousRecognitionAsync().get();
         }

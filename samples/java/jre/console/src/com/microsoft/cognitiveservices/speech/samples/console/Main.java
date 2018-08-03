@@ -1,10 +1,13 @@
 package com.microsoft.cognitiveservices.speech.samples.console;
 
+import java.util.Scanner;
+
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+@SuppressWarnings("resource") // scanner
 public class Main {
 
     public static void main(String[] args) {
@@ -16,7 +19,6 @@ public class Main {
         System.out.println("6. Translation with microphone input.");
         System.out.println("7. Translation with file input.");
         System.out.println("8. Translation with audio stream.");
-        System.out.println("9. Speech continuous recognition using authorization token.");
         System.out.println("A. Intent recognition with microphone.");
         System.out.println("B. Intent recognition with language.");
         System.out.println("C. Intent continuous recognition using events with file.");
@@ -24,56 +26,56 @@ public class Main {
         System.out.print("Your choice (0: Stop.): ");
 
         try {
-            char x;
+            String x;
             do {
-                x = (char) System.in.read();
+                x = new Scanner(System.in).nextLine();
                 System.out.println("");
                 switch (x) {
-                case '1':
+                case "1":
                     SpeechRecognitionSamples.recognitionWithMicrophoneAsync();
                     break;
-                case '2':
+                case "2":
                     SpeechRecognitionSamples.recognitionWithLanguageAsync();
                     break;
-                case '3':
+                case "3":
                     SpeechRecognitionSamples.recognitionUsingCustomizedModelAsync();
                     break;
-                case '4':
+                case "4":
                     SpeechRecognitionSamples.continuousRecognitionWithFileAsync();
                     break;
-                case '5':
+                case "5":
                     SpeechRecognitionSamples.recognitionWithAudioStreamAsync();
                     break;
-                case '6':
+                case "6":
                     TranslationSamples.translationWithMicrophoneAsync();
                     break;
-                case '7':
+                case "7":
                     TranslationSamples.translationWithFileAsync();
                     break;
-                case '8':
+                case "8":
                     TranslationSamples.translationWithAudioStreamAsync();
                     break;
-                // case '9':
-                // SpeechRecognitionWithTokenSample.ContinuousRecognitionWithAuthorizationTokenAsync();
-                // break;
-                case 'a':
-                case 'A':
+                case "a":
+                case "A":
                     IntentRecognitionSamples.intentRecognitionWithMicrophone();
                     break;
-                case 'b':
-                case 'B':
+                case "b":
+                case "B":
                     IntentRecognitionSamples.intentRecognitionWithLanguage();
                     break;
-                case 'c':
-                case 'C':
+                case "c":
+                case "C":
                     IntentRecognitionSamples.intentContinuousRecognitionWithFile();
                     break;
-                case '0':
+                case "0":
                     System.out.println("Exiting...");
                     break;
                 }
                 System.out.println("\nRecognition done. Your Choice (0: Stop): ");
-            } while (x != '0');
+            } while (!x.equals("0"));
+            
+            System.out.println("Finishing demo.");
+            System.exit(0);
         } catch (Exception ex) {
             System.out.println("Unexpected " + ex.toString());
             System.exit(1);

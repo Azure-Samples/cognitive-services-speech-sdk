@@ -5,6 +5,7 @@ package com.microsoft.cognitiveservices.speech.samples.console;
 //
 
 import java.io.IOException;
+import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
 // <toplevel>
@@ -12,6 +13,7 @@ import com.microsoft.cognitiveservices.speech.*;
 import com.microsoft.cognitiveservices.speech.intent.*;
 // </toplevel>
 
+@SuppressWarnings("resource") // scanner
 public class IntentRecognitionSamples {
 
     // Intent recognition using microphone.
@@ -19,8 +21,9 @@ public class IntentRecognitionSamples {
     {
         // <IntentRecognitionWithMicrophone>
         // Creates an instance of a speech factory with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
+        // subscription key (called 'endpoint key' by the Language Understanding service)
+        // and service region. Replace with your own subscription (endpoint) key
+        // and service region (e.g., "westus2").
         SpeechFactory factory = SpeechFactory.fromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
 
         // Creates an intent recognizer using microphone as audio input. The default language is "en-us".
@@ -54,8 +57,9 @@ public class IntentRecognitionSamples {
     {
         // <IntentRecognitionWithLanguage>
         // Creates an instance of a speech factory with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
+        // subscription key (called 'endpoint key' by the Language Understanding service)
+        // and service region. Replace with your own subscription (endpoint) key
+        // and service region (e.g., "westus2").
         SpeechFactory factory = SpeechFactory.fromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
 
         // Creates an intent recognizer in the specified language using microphone as audio input.
@@ -90,8 +94,9 @@ public class IntentRecognitionSamples {
     {
         // <IntentContinuousRecognitionWithFile>
         // Creates an instance of a speech factory with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
+        // subscription key (called 'endpoint key' by the Language Understanding service)
+        // and service region. Replace with your own subscription (endpoint) key
+        // and service region (e.g., "westus2").
         SpeechFactory factory = SpeechFactory.fromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
 
         // Creates an intent recognizer using file as audio input.
@@ -123,11 +128,10 @@ public class IntentRecognitionSamples {
         recognizer.startContinuousRecognitionAsync().get();
 
         System.out.println("Press any key to stop...");
-        System.in.read();
+        new Scanner(System.in).nextLine();
 
         // Stops recognition.
         recognizer.stopContinuousRecognitionAsync().get();
         // </IntentContinuousRecognitionWithFile>
     }
-
 }
