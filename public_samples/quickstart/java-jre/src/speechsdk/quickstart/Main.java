@@ -2,13 +2,14 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+// <code>
 package speechsdk.quickstart;
 
 import java.util.concurrent.Future;
 import com.microsoft.cognitiveservices.speech.*;
 
 /**
- * Java-Jre Quickstart
+ * Quickstart: recognize speech using the Speech SDK for Java.
  */
 public class Main {
 
@@ -28,6 +29,8 @@ public class Main {
             SpeechRecognizer reco = factory.createSpeechRecognizer();
             assert(reco != null);
 
+            System.out.println("Say something...");
+
             Future<SpeechRecognitionResult> task = reco.recognizeAsync();
             assert(task != null);
 
@@ -35,15 +38,15 @@ public class Main {
             assert(result != null);
 
             if (result.getReason() == RecognitionStatus.Recognized) {
-                System.out.println("SpeechSDKDemo: " + result.getText());
+                System.out.println("We recognized: " + result.getText());
             }
             else if (result.getReason() == RecognitionStatus.Canceled) {
-                System.out.println("SpeechSDKDemo: The request was Canceled. Did you update the subscription info?" +
+                System.out.println("The request was canceled. Did you update the subscription info?" +
                                    System.lineSeparator() +
                                    result.getErrorDetails());
             }
             else {
-                System.out.println("SpeechSDKDemo: No speech could be recognized. " +
+                System.out.println("No speech could be recognized. " +
                                    System.lineSeparator() +
                                    result.toString());
             }
@@ -53,10 +56,11 @@ public class Main {
             
             System.exit(0);
         } catch (Exception ex) {
-            System.out.println("SpeechSDKDemo: Unexpected " + ex.getMessage());
+            System.out.println("Unexpected exception: " + ex.getMessage());
 
             assert(false);
             System.exit(1);
         }
     }
 }
+// </code>

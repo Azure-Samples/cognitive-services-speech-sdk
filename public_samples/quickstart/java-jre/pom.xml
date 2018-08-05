@@ -16,18 +16,22 @@
       </plugin>
     </plugins>
   </build>
+  <!-- <repositories> -->
   <repositories>
     <repository>
-        <id>maven-cognitiveservices-speech</id>
-        <name>Public online microsoft cognitive services speech repository</name>
-        <url>https://csspeechstorage.blob.core.windows.net/maven/</url>
+      <id>maven-cognitiveservices-speech</id>
+      <name>Public online microsoft cognitive services speech repository</name>
+      <url>https://csspeechstorage.blob.core.windows.net/maven/</url>
     </repository>
-</repositories>
+  </repositories>
+  <!-- </repositories> -->
+  <!-- <dependencies> -->
   <dependencies>
-  <dependency>
+    <dependency>
       <groupId>com.microsoft.cognitiveservices.speech</groupId>
       <artifactId>client-sdk</artifactId>
       <version>0.6.0-SNAPSHOT</version>
-  </dependency>
+    </dependency>
   </dependencies>
+  <!-- </dependencies> -->
 </project>
