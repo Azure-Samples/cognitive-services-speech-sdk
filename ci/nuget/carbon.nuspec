@@ -51,12 +51,17 @@
     <file src="$WindowsDropDir$\Win32\Release\public\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" />
     <file src="$WindowsDropDir$\Win32\Release\public\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" target="lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" />
 
-    <!-- .NET standard native dlls -->
+    <!-- .NET standard Windows native dlls -->
     <file src="$WindowsDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" target="runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" />
     <file src="$WindowsDropDir$\Win32\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.core.dll" />
     <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" />
     <file src="$WindowsDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.dll" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.core.dll" />
 
-    <!-- TODO: add Linux native dlls from $LinuxDropDir -->
+    <!-- .NET standard UTF32 dlls, built on Windows, used on Linux -->
+    <file src="$WindowsDropDir$\x64\Release\public\lib\utf32\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="runtimes\linux-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" />
+    <file src="$WindowsDropDir$\x64\Release\public\lib\utf32\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" target="runtimes\linux-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" />
+
+    <!-- .NET standard Linux native dlls -->
+    <file src="$LinuxDropDir$\Linux-x64\Release\public\lib\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" target="runtimes\linux-x64\native\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" />
   </files>
 </package>

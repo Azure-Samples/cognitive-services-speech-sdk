@@ -80,7 +80,7 @@ else
   if [[ $PLATFORM = "Linux-x86" || $(uname) = Darwin ]]; then
     CSHARPSUPPORTED=false
   else
-    CSHARPSUPPORTED=false
+    CSHARPSUPPORTED=true
     SRCCSHARPBINDINGS="$SRCBIN/$CSHARPBINDINGSNAME.so"
   fi
 fi
@@ -93,6 +93,7 @@ SRCPRIVTESTJAR="$BUILD_ROOT/bin/com.microsoft.cognitiveservices.speech.tests.jar
 DESTPUBLIB="$DEST/public/lib"
 DESTPUBLIBNET461="$DEST/public/lib/net461"
 DESTPUBLIBNETSTANDARD20="$DEST/public/lib/netstandard2.0"
+DESTPUBLIBUTF32NETSTANDARD20="$DEST/public/lib/utf32/netstandard2.0"
 DESTPUBBIN="$DEST/public/bin"
 DESTPUBINC="$DEST/public/include"
 DESTPRIVLIB="$DEST/private/lib"
@@ -105,7 +106,7 @@ DESTCSHARPBINDINGS="$DESTPUBLIB/$CSHARPBINDINGSNAME.dll"
 printf "\nCopying files to drop location\n"
 
 # N.B. no long option for -p (parents) on OSX.
-mkdir -p "$DESTPUBLIB" "$DESTPUBLIBNET461" "$DESTPUBLIBNETSTANDARD20" "$(dirname "$DESTPUBINC")" "$DESTPRIVLIB" "$DESTPRIVBIN" "$(dirname "$DESTPRIVINC")" "$(dirname "$DESTPRIVINC2")"  "$DESTPUBLIB"
+mkdir -p "$DESTPUBLIB" "$DESTPUBLIBNET461" "$DESTPUBLIBNETSTANDARD20" "$DESTPUBLIBUTF32NETSTANDARD20" "$(dirname "$DESTPUBINC")" "$DESTPRIVLIB" "$DESTPRIVBIN" "$(dirname "$DESTPRIVINC")" "$(dirname "$DESTPRIVINC2")"  "$DESTPUBLIB"
 
 # N.B. no long option for -v (verbose) and -p (preserve) on OSX.
 CPOPT="-v -p"
@@ -120,6 +121,7 @@ if [[ $OS = "Windows_NT" ]]; then
 
     cp $CPOPT "$SRCDYNLIB"/net461/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBNET461"
     cp $CPOPT "$SRCDYNLIB"/netstandard2.0/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBNETSTANDARD20"    
+    cp $CPOPT "$SRCDYNLIB"Utf32/netstandard2.0/$LIBPREFIX*.{pdb,xml,dll} "$DESTPUBLIBUTF32NETSTANDARD20"   
   fi
 fi
 

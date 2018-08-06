@@ -31,8 +31,20 @@
 
 %define SWIGCSHARP_IMTYPE_WSTRING(TYPENAME)
 %typemap(imtype,
-         inattributes="[System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPWStr)]",
-         outattributes="[return: System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.BStr)]"
+         inattributes="
+                       #if USE_UTF32
+                       [System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Utf32StringMarshaler))]
+                       #else
+                       [System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPWStr)]
+                       #endif
+                      ",
+         outattributes="
+                        #if USE_UTF32
+                        [return: System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
+                        #else
+                        [return: System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.BStr)]
+                        #endif
+                       " 
         ) TYPENAME "string"
 %enddef
 
@@ -43,22 +55,37 @@ static SWIG_CSharpWStringHelperCallback SWIG_csharp_wstring_callback = NULL;
 %}
 
 %pragma(csharp) imclasscode=%{
-  protected class SWIGWStringHelper {
 
+  protected class SWIGWStringHelper
+  {
+    #if USE_UTF32 
+    [return: System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
+    public delegate string SWIGWStringDelegate([System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Utf32StringMarshaler))] string message);
+    #else
     [return: System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.BStr)]
     public delegate string SWIGWStringDelegate(global::System.IntPtr message);
-
+    #endif
     static SWIGWStringDelegate wstringDelegate = new SWIGWStringDelegate(CreateWString);
 
     [global::System.Runtime.InteropServices.DllImport("$dllimport", EntryPoint="SWIGRegisterWStringCallback_$module")]
     public static extern void SWIGRegisterWStringCallback_$module(SWIGWStringDelegate wstringDelegate);
 
-    [return: System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.BStr)]
-    static string CreateWString([global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPWStr)]global::System.IntPtr cString) {
-      return global::System.Runtime.InteropServices.Marshal.PtrToStringUni(cString);
+    #if USE_UTF32 
+    [return: System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
+    static string CreateWString([System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Utf32StringMarshaler))] string value) 
+    {
+        return value;
     }
+    #else
+    [return: System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.BStr)]
+    static string CreateWString([global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPWStr)]global::System.IntPtr value) 
+    {
+      return global::System.Runtime.InteropServices.Marshal.PtrToStringUni(value);
+    }
+    #endif
 
-    static SWIGWStringHelper() {
+    static SWIGWStringHelper()
+    {
       SWIGRegisterWStringCallback_$module(wstringDelegate);
     }
   }

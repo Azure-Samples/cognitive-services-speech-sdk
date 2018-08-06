@@ -38,8 +38,21 @@ include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
 include_directories("${SRC_DIR}/..")
 
-swig_add_library(${CSHARP_BINDINGS} LANGUAGE csharp SOURCES ${SOURCES})
-swig_link_libraries(${CSHARP_BINDINGS} ${SPEECHSDK_CORE_LIBRARY})
+if(WIN32)
+  swig_add_library(${CSHARP_BINDINGS} LANGUAGE csharp SOURCES ${SOURCES})
+  swig_link_libraries(${CSHARP_BINDINGS} ${SPEECHSDK_CORE_LIBRARY})
+else()
+  # Due to .netcore loading on Linux, it currently does not support side-by-side located
+  # native dependencies, so we compile everything into a single so.
+  swig_add_library(${CSHARP_BINDINGS} LANGUAGE csharp SOURCES ${SOURCES} $<TARGET_OBJECTS:c_api>)
+  swig_link_libraries(${CSHARP_BINDINGS}
+    PRIVATE sr
+    PRIVATE audio 
+    PRIVATE usp
+    PRIVATE common 
+    PRIVATE factory)
+endif()
+
 set_target_properties(${SWIG_MODULE_${CSHARP_BINDINGS}_REAL_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 set_target_properties(${SWIG_MODULE_${CSHARP_BINDINGS}_REAL_NAME} PROPERTIES
     FOLDER bindings/csharp
@@ -59,6 +72,7 @@ if(WIN32)
     add_custom_target(${CSHARP_LIB_CUSTOM} ALL
       COMMAND ${CMAKE_MAKE_PROGRAM} /t:Restore "${CSHARP_PROJECT_PATH}.csproj"
       COMMAND ${CMAKE_MAKE_PROGRAM} /p:Configuration=$<CONFIGURATION> "${CSHARP_PROJECT_PATH}.csproj"
+      COMMAND ${CMAKE_MAKE_PROGRAM} /p:Configuration=$<CONFIGURATION>Utf32 "${CSHARP_PROJECT_PATH}.csproj"
       COMMAND del /S /Q obj
       COMMENT "Building external C# project")
     add_dependencies(${CSHARP_LIB_CUSTOM} ${CSHARP_BINDINGS})
