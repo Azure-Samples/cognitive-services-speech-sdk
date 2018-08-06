@@ -138,39 +138,12 @@ public class SpeechFactoryTests {
     // -----------------------------------------------------------------------
 
     @Test
-    public void testGetEndpoint() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
-        assertNotNull(s.getEndpoint());
-        
-        s.close();
-    }
-
-    // -----------------------------------------------------------------------
-    // --- 
-    // -----------------------------------------------------------------------
-
-    @Test
     public void testGetParameters1() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         
         assertNotNull(s.getParameters());
         assertEquals(s.getRegion(), s.getParameters().getString(FactoryParameterNames.Region));
-        assertEquals(s.getEndpoint(), URI.create(s.getParameters().getString(FactoryParameterNames.Endpoint)));
         assertEquals(s.getSubscriptionKey(), s.getParameters().getString(FactoryParameterNames.SubscriptionKey));
-        
-        s.close();
-    }
-
-    @Test
-    public void testGetParameters2() {
-        SpeechFactory s1 = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
-        SpeechFactory s = SpeechFactory.fromEndPoint(s1.getEndpoint(), Settings.SpeechSubscriptionKey);
-        
-        assertNotNull(s.getParameters());
-        assertEquals(s.getRegion(), s.getParameters().getString(FactoryParameterNames.Region));
-        assertEquals(s.getAuthorizationToken(), s.getParameters().getString(FactoryParameterNames.AuthorizationToken));
         
         s.close();
     }

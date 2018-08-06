@@ -100,18 +100,6 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Gets the service endpoint when connecting to the service.
-        /// </summary>
-        public Uri EndpointURL
-        {
-            get
-            {
-                var endpointStr = Parameters.Get<string>(FactoryParameterNames.Endpoint);
-                return new Uri(endpointStr);
-            }
-        }
-
-        /// <summary>
         /// The collection of parameters and their values defined for this <see cref="SpeechFactory"/>.
         /// </summary>
         public IFactoryParameters Parameters { get; private set; }

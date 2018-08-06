@@ -239,20 +239,13 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
     }
 
     /**
-      * Gets the service endpoint.
-      * @return the service endpoint.
-      */
-    public URI getEndpoint() {
-        return URI.create(_Parameters.getString(FactoryParameterNames.Endpoint));
-    }
-
-    /**
       * The collection of parameters and their values defined for this RecognizerFactory.
       * @return The collection of parameters and their values defined for this RecognizerFactory.
       */
     public ParameterCollection<SpeechFactory> getParameters() {
         return _Parameters;
-    } // { get; private set; }
+    }
+
     private final ParameterCollection<SpeechFactory> _Parameters;
 
     /**
