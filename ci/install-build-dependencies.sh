@@ -25,7 +25,7 @@ case $SPEECHSDK_BUILD_AGENT_PLATFORM in
     ;;
   OSX-x64)
     brew info openssl
-    brew install swig ossp-uuid pkg-config
+    brew install swig ossp-uuid pkg-config coreutils
 
     sudo easy_install pip
 

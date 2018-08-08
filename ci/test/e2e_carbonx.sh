@@ -80,7 +80,7 @@ for action in $Actions; do
   for ((modeIndex = 0; modeIndex < ${#modes[@]}; modeIndex += 2)); do
     mode="${modes[$modeIndex]}"
     modeArg="${modes[$modeIndex + 1]}"
-    for ((targetIndex = 0; targetIndex < ${#targets[@]}; targetIndex += 3)); do
+    for ((targetIndex = 0; targetIndex < ${#targets[@]}; targetIndex += 2)); do
       target="${targets[$targetIndex]}"
       targetArg="${targets[$targetIndex + 1]}"
       TEST_NAME="$action $mode $target"

@@ -19,6 +19,7 @@ function startTests {
   eval ${_testStateVarPrefix}_output=\"$2\"
   eval ${_testStateVarPrefix}_platform=\"$3\"
   eval ${_testStateVarPrefix}_redactStrings=\"$4\"
+  eval ${_testStateVarPrefix}_allpass=true
 
   cat > ${!outputRef}.xml <<XML
 <?xml version="1.0" encoding="UTF-8"?>
@@ -37,7 +38,7 @@ function startSuite {
   eval ${_testStateVarPrefix}_tests=0
   eval ${_testStateVarPrefix}_skipped=0
   eval ${_testStateVarPrefix}_time=0
-  eval ${_testStateVarPrefix}_timestamp=\"$(date --iso-8601=s)\"
+  eval ${_testStateVarPrefix}_timestamp=\"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"
   eval ${_testStateVarPrefix}_testsuiteName=\"$2 - ${!platformRef}\"
   eval ${_testStateVarPrefix}_classname=\"$2.global\"
 }
@@ -53,6 +54,9 @@ function endSuite {
   local timestampRef=${_testStateVarPrefix}_timestamp
   local outputRef=${_testStateVarPrefix}_output
   local testsuiteNameRef=${_testStateVarPrefix}_testsuiteName
+  local allpassRef=${_testStateVarPrefix}_allpass
+
+  [[ ${!failuresRef} == 0 ]] || eval $allpassRef=false
 
   (
   cat <<XML
@@ -74,9 +78,12 @@ XML
 function endTests {
   local _testStateVarPrefix="$1"
   local outputRef=${_testStateVarPrefix}_output
+  local allpassRef=${_testStateVarPrefix}_allpass
   echo '</testsuites>' >> ${!outputRef}.xml
-
   # TODO perhaps more clean-up
+
+  # Return exit code 0 or 1
+  ${!allpassRef}
 }
 
 function runTest {
@@ -106,18 +113,25 @@ function runTest {
 
   print_vars = TEST_NAME TIMEOUT_SECONDS COMMAND - |
     "${REDACT[@]}" |
-    tee --append "${!outputRef}.out"
+    tee -a "${!outputRef}.out"
 
   local START_SECONDS EXIT_CODE END_SECONDS TIME_SECONDS TAIL
 
   local SKIP_CODE=999
 
+  local COREUTILS_PREFIX
+  if [[ $(uname) = Darwin ]]; then
+    COREUTILS_PREFIX=g
+  else
+    COREUTILS_PREFIX=
+  fi
+
   if [[ ",$PLATFORMS_TO_RUN," == *,${!platformRef},* ]]; then
-    START_SECONDS=$(date +%s.%N)
-    timeout -k 5s $TIMEOUT_SECONDS stdbuf -o0 -e0 "$@" 2>&1 |
+    START_SECONDS=$(perl -MTime::HiRes=clock_gettime -le 'print clock_gettime()')
+    ${COREUTILS_PREFIX}timeout -k 5s $TIMEOUT_SECONDS ${COREUTILS_PREFIX}stdbuf -o0 -e0 "$@" 2>&1 |
       "${REDACT[@]}" 1>> "${!outputRef}.out"
     EXIT_CODE=${PIPESTATUS[0]}
-    END_SECONDS=$(date +%s.%N)
+    END_SECONDS=$(perl -MTime::HiRes=clock_gettime -le 'print clock_gettime()')
     TIME_SECONDS=$(perl -e "printf '%0.3f', $END_SECONDS - $START_SECONDS")
 
     TAIL="$(tail "${!outputRef}.out")"
@@ -130,7 +144,7 @@ function runTest {
   fi
 
   print_vars EXIT_CODE TIME_SECONDS = |
-    tee --append "${!outputRef}.out"
+    tee -a "${!outputRef}.out"
   echo
 
   case $EXIT_CODE in
@@ -148,7 +162,7 @@ function runTest {
         "${!classnameRef}" \
         "$TEST_NAME" \
         "$TIME_SECONDS" \
-        "EXITCODE-$EXITCODE" \
+        "EXITCODE-$EXIT_CODE" \
         "$TAIL" \
         >> "${!outputRef}.xml.parts"
       eval "(( $failuresRef++ ))"
