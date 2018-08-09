@@ -40,14 +40,25 @@ include_directories(${SRC_DIR}) # for "stdafx.h"
 
 if(WIN32)
     list(APPEND HEADERS_PRIVATE
-        "${SRC_DIR}/windows/iunknown.h"
-        "${SRC_DIR}/windows/com_init_and_uninit.h"
-    )
+            "${SRC_DIR}/windows/iunknown.h"
+            "${SRC_DIR}/windows/com_init_and_uninit.h"
+            "${SRC_DIR}/windows/audio_sys_win_base.h"
+        )
     list(APPEND SOURCES
-        "${SRC_DIR}/windows/microphone.cpp"
-        "${SRC_DIR}/windows/audio_sys.cpp"
-        "${SRC_DIR}/windows/com_init_and_uninit.cpp"
-    )
+            "${SRC_DIR}/windows/microphone.cpp"
+            "${SRC_DIR}/windows/com_init_and_uninit.cpp"
+            "${SRC_DIR}/windows/audio_sys_win_base.cpp"
+        )
+    if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
+        list(APPEND SOURCES
+            "${SRC_DIR}/windows/audio_sys_winrt.cpp"
+        )
+        list(APPEND AUDIO_LIBS mmdevapi)
+    else()
+        list(APPEND SOURCES
+            "${SRC_DIR}/windows/audio_sys_win32.cpp"
+        )
+    endif()
 elseif(APPLE)
     list(APPEND SOURCES
         "${SRC_DIR}/osx/microphone.cpp"

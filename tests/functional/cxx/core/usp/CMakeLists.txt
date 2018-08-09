@@ -18,6 +18,12 @@ source_group("Header Files" FILES ${TEST_HEADERS})
 add_executable(${PROJECT_NAME} ${SOURCES} ${TEST_HEADERS})
 target_link_libraries(${PROJECT_NAME} usp common ${TEST_LIBS})
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
+if (${use_openssl})
+        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ignore:4099")
+endif()
+endif()
+
 if (NOT WIN32)
     find_package (Threads)
     target_link_libraries (${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})

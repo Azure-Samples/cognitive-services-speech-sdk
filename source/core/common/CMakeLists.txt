@@ -35,7 +35,7 @@ set(HEADERS
     "${CARBON_INCLUDE}/ispxinterfaces.h"
     )
 
-set(HEADERS_PRIVATE   
+set(HEADERS_PRIVATE
     "${INC_DIR}/azure_c_shared_utility_urlencode_wrapper.h"
     "${INC_DIR}/azure_c_shared_utility_buffer_wrapper.h"
     "${INC_DIR}/azure_c_shared_utility_httpapi_wrapper.h"
@@ -47,7 +47,6 @@ set(HEADERS_PRIVATE
 
 set(SOURCES
     "${SRC_DIR}/exception.cpp"
-    "${SRC_DIR}/debug_utils.cpp"
     "${SRC_DIR}/handle_table.cpp"
     "${SRC_DIR}/http_helpers.cpp"
     "${SRC_DIR}/urlencode_helpers.cpp"
@@ -60,6 +59,16 @@ set(SOURCES
     "${SRC_DIR}/site_helpers.cpp"
     "${SRC_DIR}/stdafx.cpp"
     )
+
+if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
+    list(APPEND SOURCES
+            "${SRC_DIR}/debug_utils_winrt.cpp"
+    )
+else()
+   list(APPEND SOURCES
+           "${SRC_DIR}/debug_utils.cpp"
+    )
+endif()
 
 source_group("Header Files (public)" FILES ${HEADERS})
 source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})

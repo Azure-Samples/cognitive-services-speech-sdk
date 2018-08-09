@@ -30,6 +30,7 @@
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/lock.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 
 #include "metrics.h"
 #include "iobuffer.h"
@@ -220,7 +221,7 @@ int ParseHttpHeaders(HTTP_HEADERS_HANDLE headersHandle, const unsigned char* buf
         }
     }
 
-    // skip the trailing '\n' 
+    // skip the trailing '\n'
     if (isDone)
     {
         offset++;
@@ -440,7 +441,7 @@ static void OnWSClose(void* context)
             request->isOpen = false;
             request->state = TRANSPORT_STATE_NETWORK_CHECK;
         }
-        else 
+        else
         {
             metrics_transport_closed();
             OnTransportClosed(request);
@@ -796,8 +797,7 @@ void TransportCreateRequestId(TransportHandle transportHandle)
                 ((uint8_t)hexchar_to_int(request->requestId[i + 1]));
         }
 
-        // TODO: why is this logged as session id???
-        LogInfo("SessionId: '%s'", request->requestId);
+        LogInfo("RequestId: '%s'", request->requestId);
         metrics_transport_requestid(request->telemetry, request->requestId);
 
         for (stream = request->ws.streamHead; stream != NULL; stream = stream->next)
@@ -810,6 +810,26 @@ void TransportCreateRequestId(TransportHandle transportHandle)
         }
     }
 }
+static char defaultCertString[] = "-----BEGIN CERTIFICATE-----\n"
+"MIIDdzCCAl+gAwIBAgIEAgAAuTANBgkqhkiG9w0BAQUFADBaMQswCQYDVQQGEwJJ\n"
+"RTESMBAGA1UEChMJQmFsdGltb3JlMRMwEQYDVQQLEwpDeWJlclRydXN0MSIwIAYD\n"
+"VQQDExlCYWx0aW1vcmUgQ3liZXJUcnVzdCBSb290MB4XDTAwMDUxMjE4NDYwMFoX\n"
+"DTI1MDUxMjIzNTkwMFowWjELMAkGA1UEBhMCSUUxEjAQBgNVBAoTCUJhbHRpbW9y\n"
+"ZTETMBEGA1UECxMKQ3liZXJUcnVzdDEiMCAGA1UEAxMZQmFsdGltb3JlIEN5YmVy\n"
+"VHJ1c3QgUm9vdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKMEuyKr\n"
+"mD1X6CZymrV51Cni4eiVgLGw41uOKymaZN+hXe2wCQVt2yguzmKiYv60iNoS6zjr\n"
+"IZ3AQSsBUnuId9Mcj8e6uYi1agnnc+gRQKfRzMpijS3ljwumUNKoUMMo6vWrJYeK\n"
+"mpYcqWe4PwzV9/lSEy/CG9VwcPCPwBLKBsua4dnKM3p31vjsufFoREJIE9LAwqSu\n"
+"XmD+tqYF/LTdB1kC1FkYmGP1pWPgkAx9XbIGevOF6uvUA65ehD5f/xXtabz5OTZy\n"
+"dc93Uk3zyZAsuT3lySNTPx8kmCFcB5kpvcY67Oduhjprl3RjM71oGDHweI12v/ye\n"
+"jl0qhqdNkNwnGjkCAwEAAaNFMEMwHQYDVR0OBBYEFOWdWTCCR1jMrPoIVDaGezq1\n"
+"BE3wMBIGA1UdEwEB/wQIMAYBAf8CAQMwDgYDVR0PAQH/BAQDAgEGMA0GCSqGSIb3\n"
+"DQEBBQUAA4IBAQCFDF2O5G9RaEIFoN27TyclhAO992T9Ldcw46QQF+vaKSm2eT92\n"
+"9hkTI7gQCvlYpNRhcL0EYWoSihfVCr3FvDB81ukMJY2GQE/szKN+OMY3EU/t3Wgx\n"
+"jkzSswF07r51XgdIGn9w/xZchMB5hbgF/X++ZRGjD8ACtPhSNzkE1akxehi/oCr0\n"
+"Epn3o0WC4zxe9Z2etciefC7IpJ5OCBRLbf1wbWsaY71k5h+3zvDyny67G7fyUIhz\n"
+"ksLi4xaNmjICq44Y3ekQEe5+NauQrz4wlHrQMz2nZQ/1/I6eYs9HRCwBXbsdtTLS\n"
+"R9I4LtD+gdwyah617jzV/OeBHRnDJELqYzmp\n""-----END CERTIFICATE-----";
 
 TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETRY_HANDLE telemetry, HTTP_HEADERS_HANDLE connectionHeaders, const char* connectionId)
 {
@@ -876,7 +896,7 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
     {
         request->isWS = true;
         request->ws.config.port = port == -1 ? 80 : port;
-        
+
         use_ssl = false;
     }
     else
@@ -942,6 +962,9 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
                 // to detect that the network went down.
                 // int val = ANSWER_TIMEOUT_MS;
                 // uws_client_set_option(request->ws.WSHandle, "timeout", &val);
+
+                uws_client_set_option(request->ws.WSHandle, OPTION_TRUSTED_CERT, defaultCertString);
+
             }
         }
 
@@ -1136,7 +1159,7 @@ static int TransportOpen(TransportRequest* request)
             }
         }
     }
-    
+
     return 0;
 }
 
@@ -1176,7 +1199,7 @@ static int add_auth_headers(TokenStore tokenStore, HTTP_HEADERS_HANDLE headers, 
         LogError("cached bing token is not valid");
     }
     STRING_delete(accessToken);
-    
+
     (void)tokenStore;
     return tokenChanged;
 }
@@ -1185,7 +1208,7 @@ int TransportRequestPrepare(TransportHandle transportHandle)
 {
     TransportRequest* request = (TransportRequest*)transportHandle;
     int err = 0;
-    if (NULL == request || 
+    if (NULL == request ||
         NULL == request->http.requestHandle)
     {
         return -1;
@@ -1370,12 +1393,12 @@ int TransportStreamWrite(TransportHandle transportHandle, const uint8_t* buffer,
     }
 
     size_t headerLen;
-    size_t payloadSize = sizeof(g_requestFormat) + 
-        (size_t)request->ws.pathLen + 
-        sizeof(g_KeywordStreamId) + 
-        30 + 
-        sizeof(g_keywordRequestId) + 
-        sizeof(request->requestId) + 
+    size_t payloadSize = sizeof(g_requestFormat) +
+        (size_t)request->ws.pathLen +
+        sizeof(g_KeywordStreamId) +
+        30 +
+        sizeof(g_keywordRequestId) +
+        sizeof(request->requestId) +
         sizeof(g_timeStampHeaderName) +
         TIME_STRING_MAX_SIZE +
         bufferSize + 2; // 2 = header length
@@ -1498,7 +1521,7 @@ void TransportDoWork(TransportHandle transportHandle)
                 metrics_transport_state_start(packet->msgtype);
             }
 
-            if (ProcessPacket(request, packet)) 
+            if (ProcessPacket(request, packet))
             {
                 OnTransportError(request, TRANSPORT_ERROR_NONE);
             }

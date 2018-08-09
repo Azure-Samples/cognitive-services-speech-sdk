@@ -32,7 +32,7 @@ bool turnEnd = false;
 thread ttsThread;
 
 // TODO: MSFT 1135317 Move TTS to own source file
-// We receive the audio response chunk by chunk (for example from TTS) and store it into a file. 
+// We receive the audio response chunk by chunk (for example from TTS) and store it into a file.
 // Once the entire response is received, we play out the audio file using the audio system of the OS.
 static int TTSRenderLoop(IOBUFFER* ioBuffer)
 {
@@ -74,7 +74,7 @@ static int TTSRenderLoop(IOBUFFER* ioBuffer)
     audio_playwavfile(hAudio, "test.wav");
 
     // HACK: Rather than sleeping for the length of the audio...
-    // we should modify audio_playwavfile to have a callback to be called when the audio is done playing. 
+    // we should modify audio_playwavfile to have a callback to be called when the audio is done playing.
     auto numMilliSeconds = (fileSize * 8) / (256);
     this_thread::sleep_for(chrono::milliseconds(numMilliSeconds));
 #endif
@@ -160,7 +160,7 @@ virtual void OnAudioStreamStart(const USP::AudioStreamStartMsg& msg) override
 virtual void OnTranslationHypothesis(const USP::TranslationHypothesisMsg& message) override
 {
     printf("Response: Translation.Hypothesis message. Text: %ls, starts at offset %" PRIu64 ", with duration %" PRIu64 ".\n", message.text.c_str(), message.offset, message.duration);
-    auto resultMap = message.translation.translations; 
+    auto resultMap = message.translation.translations;
     for (const auto& it : resultMap)
     {
         printf("          , tranlated to %ls: %ls,\n", it.first.c_str(), it.second.c_str());
@@ -169,7 +169,7 @@ virtual void OnTranslationHypothesis(const USP::TranslationHypothesisMsg& messag
 
 virtual void OnTranslationPhrase(const USP::TranslationPhraseMsg& message) override
 {
-    printf("Response: Speech.Phrase message. Status: %s, Text: %ls, starts at %" PRIu64 ", with duration %" PRIu64 ", Translation status: %d.\n", 
+    printf("Response: Speech.Phrase message. Status: %s, Text: %ls, starts at %" PRIu64 ", with duration %" PRIu64 ", Translation status: %d.\n",
         recognitionStatusToText[message.recognitionStatus].c_str(), message.text.c_str(), message.offset, message.duration, (int)message.translation.translationStatus);
     auto resultMap = message.translation.translations;
     for (const auto& it : resultMap)
@@ -322,7 +322,7 @@ int main(int argc, char* argv[])
             {
                 printf("Only one input file is allowed.");
                 exit(1);
-            } 
+            }
             else
             {
                 inputFile = argStr;

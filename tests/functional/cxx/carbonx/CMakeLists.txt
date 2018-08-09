@@ -46,14 +46,20 @@ source_group("Source Files" FILES ${SOURCES})
 source_group("Speech C API headers" FILES ${SPEECH_C_API_HEADERS})
 source_group("Speech CXX API headers" FILES ${SPEECH_CXX_API_HEADERS})
 
-add_executable(carbon_test_console 
+add_executable(carbonx 
     ${SPEECH_C_API_HEADERS} ${SPEECH_CXX_API_HEADERS}
     ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES}
     )
  
-target_link_libraries(carbon_test_console common ${SPEECHSDK_CORE_LIBRARY})
+target_link_libraries(carbonx common ${SPEECHSDK_CORE_LIBRARY})
 
-set_target_properties (carbon_test_console PROPERTIES
+if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
+if (${use_openssl})
+        set_target_properties(carbonx PROPERTIES LINK_FLAGS "/ignore:4099")
+endif()
+endif()
+
+set_target_properties (carbonx PROPERTIES
     FOLDER tools
     OUTPUT_NAME carbonx
 )

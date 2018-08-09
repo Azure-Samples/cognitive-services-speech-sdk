@@ -11,6 +11,14 @@ source_group("Source Files" FILES ${SOURCES})
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} usp audio)
 
+
+if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
+if (${use_openssl})
+        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ignore:4099")
+endif()
+endif()
+
+
 # TODO
 #[[
 if(UNIX)

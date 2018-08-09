@@ -41,7 +41,7 @@ std::shared_ptr<ISpxObjectFactory> CSpxModuleFactory::Get(const std::string& fil
 
     std::shared_ptr<ISpxObjectFactory> factory(new CSpxModuleFactory(filename));
     m_factoryMap->emplace(filename, factory);
-    
+
     return factory;
 }
 
@@ -61,9 +61,9 @@ void* CSpxModuleFactory::CreateObject(const char* className, const char* interfa
 
 CSpxModuleFactory::PCREATE_MODULE_OBJECT_FUNC CSpxModuleFactory::GetCreateModuleObjectFunctionPointer(const std::string& filename)
 {
-    if (filename == "carbon") 
+    if (filename == "carbon")
     {
-        // "carbon" is magic value which means that we don't need to load anything 
+        // "carbon" is magic value which means that we don't need to load anything
         // (this code is already a part of a carbon lib linked to an executable that
         // uses carbon API).
         return CreateModuleObject;
@@ -71,12 +71,15 @@ CSpxModuleFactory::PCREATE_MODULE_OBJECT_FUNC CSpxModuleFactory::GetCreateModule
 
     #if _MSC_VER
 
+#if !defined(WINAPI_FAMILY) || (WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP)
     HMODULE handle = LoadLibraryA(filename.c_str());
+#else // Windows Store WinRT app
+    HMODULE handle = LoadPackagedLibrary(PAL::ToWString(filename).c_str(), 0);
+#endif
     if (handle != NULL)
     {
         return (PCREATE_MODULE_OBJECT_FUNC)GetProcAddress(handle, "CreateModuleObject");
     }
-
     #else
 
     void* handle = dlopen(filename.c_str(), RTLD_LOCAL | RTLD_LAZY);

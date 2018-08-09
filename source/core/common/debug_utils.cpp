@@ -184,7 +184,7 @@ static void CollectCallStack(size_t skipLevels, bool makeFunctionNamesStandOut, 
     frames = RtlCaptureStackBackTrace(0, MAX_CALLERS, callStack, nullptr);
 
     SYMBOL_INFO* symbolInfo = (SYMBOL_INFO*)calloc(sizeof(SYMBOL_INFO) + 256 * sizeof(char), 1); // this is a variable-length structure, can't use vector easily
-    if (symbolInfo == nullptr) // failed somehow 
+    if (symbolInfo == nullptr) // failed somehow
     {
         return write("Failed to allocated SYMBOL_INFO struct.\n");
     }
@@ -254,7 +254,7 @@ static void CollectCallStack(size_t skipLevels, bool makeFunctionNamesStandOut, 
             std::string fName(mangled_name);
             if (status == 0)
                 fName = makeFunctionNamesStandOut ? MakeFunctionNameStandOut(ret) : ret; // make it a bit more readable
-            
+
             free(ret);
 
             buffer << std::setw(20) << std::left << current.substr(endOffset + 1)
@@ -297,7 +297,7 @@ static void CollectCallStack(size_t skipLevels, bool makeFunctionNamesStandOut, 
 }
 
 
-std::string GetCallStack(size_t skipLevels/* = 0*/, bool makeFunctionNamesStandOut/* = false*/) 
+std::string GetCallStack(size_t skipLevels/* = 0*/, bool makeFunctionNamesStandOut/* = false*/)
 {
     try
     {
