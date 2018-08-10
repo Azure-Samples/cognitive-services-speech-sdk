@@ -431,7 +431,6 @@
 %include <speechapi_cxx_intent_recognizer.h>
 
 %ignore Microsoft::CognitiveServices::Speech::FactoryParameterValue::FactoryParameterValue(SPXFACTORYHANDLE, enum FactoryParameter);
-%ignore GetLanguageResource(LanguageResourceScope scopes, std::wstring acceptLanguage);
 
 %include <speechapi_cxx_translation_result.h>
 %include <speechapi_cxx_translation_eventargs.h>

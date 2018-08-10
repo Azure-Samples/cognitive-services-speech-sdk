@@ -23,7 +23,7 @@ The following query parameters are supported.
 
 | Parameter | Default Value | Description | Data Type |
 | - | - | - | - |
-| from | (empty) | Specifies the language of the incoming speech. The value is one of the language identifiers from the speech scope in the response from the [Languages API](https://docs.microsofttranslator.com/languages.html). | string |
+| from | (empty) | Specifies the language of the incoming speech. The value is one of the language identifiers from the speech scope in the response from the [Languages API](https://docs.microsoft.com/azure/cognitive-services/Translator/reference/v3-0-languages). | string |
 | to | (empty) | Specifies the language to translate the transcribed text into. The value is one of the language identifiers from the text scope in the response from the Languages API. | string |
 | features | (empty) | Comma-separated set of features selected by the client. Available features include: `TextToSpeech`: specifies that the service must return the translated audio of the final translated sentence. `Partial`: specifies that the service must return intermediate recognition results while the audio is streaming to the service. `TimingInfo`: specifies that the service must return timing information associated with each recognition. As an example, a client would specify `features=partial,texttospeech` to receive partial results and text-to-speech, but no timing information. Note that final results are always streamed to the client. | string |
 | voice | (empty) | Identifies what voice to use for text-to-speech rendering of the translated text. The value is one of the voice identifiers from the tts scope in the response from the Languages API. If a voice is not specified, the system will automatically choose one when the text-to-speech feature is enabled.| string |
@@ -231,7 +231,7 @@ The speech USP protocol defines a set of telemetry messages to be exchanged betw
 
 #### Translation Discovery Request
 
-The `translation.discoveryRequest` message is used by client for querying the [languages resource](https://docs.microsofttranslator.com/languages.html) for the current set of supported languages, for example, the set of languages and voices available for speech recognition, for text translation and for text-to-speech.
+The `translation.discoveryRequest` message is used by client for querying the [languages resource](https://docs.microsoft.com/azure/cognitive-services/Translator/reference/v3-0-languages) for the current set of supported languages, for example, the set of languages and voices available for speech recognition, for text translation and for text-to-speech.
 
 | Field | Description |
 | - | - |

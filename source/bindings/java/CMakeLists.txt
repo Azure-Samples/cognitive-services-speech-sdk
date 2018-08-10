@@ -72,7 +72,6 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/BaseRecognizerBase.java
     ${CMAKE_SWIG_OUTDIR}/BaseValueCollection.java
     ${CMAKE_SWIG_OUTDIR}/carbon_java.java
-    ${CMAKE_SWIG_OUTDIR}/carbon_javaConstants.java
     ${CMAKE_SWIG_OUTDIR}/carbon_javaJNI.java
     ${CMAKE_SWIG_OUTDIR}/EventArgs.java
     ${CMAKE_SWIG_OUTDIR}/FactoryParameter.java
@@ -121,12 +120,8 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionResultPtrFuture.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognizerBase.java
-    ${CMAKE_SWIG_OUTDIR}/SpeechScopeResourceValue.java
 
     ${CMAKE_SWIG_OUTDIR}/SynthesisStatusCode.java
-    ${CMAKE_SWIG_OUTDIR}/SynthesisScopeResourceValue.java
-    ${CMAKE_SWIG_OUTDIR}/TextScopeResourceValue.java
-    ${CMAKE_SWIG_OUTDIR}/TranslationLanguageResource.java
     ${CMAKE_SWIG_OUTDIR}/TranslationRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/TranslationRecognizerBase.java
     ${CMAKE_SWIG_OUTDIR}/TranslationStatusCode.java
@@ -141,10 +136,6 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/TranslationTextResultPtrFuture.java
     ${CMAKE_SWIG_OUTDIR}/StdMapWStringWString.java
     ${CMAKE_SWIG_OUTDIR}/StdMapWStringWStringMapIterator.java
-
-    ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Translation__SpeechScopeResourceValue_t.java
-    ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Translation__SynthesisScopeResourceValue_t.java
-    ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_std__mapT_std__wstring_Microsoft__CognitiveServices__Speech__Translation__TextScopeResourceValue_t.java
 
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXEVENTHANDLE.java
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXFACTORYHANDLE.java
