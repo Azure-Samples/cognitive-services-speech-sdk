@@ -87,7 +87,11 @@ set(CARBON_C_API "${CARBON_PUBLIC}/c_api")
 set(CARBON_CXX_API "${CARBON_PUBLIC}/cxx_api")
 set(CARBON_INCLUDE "${CARBON_CORE}/include")
 
-set(SPEECHSDK_CORE_LIBRARY "Microsoft.CognitiveServices.Speech.core")
+if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
+  set(SPEECHSDK_CORE_LIBRARY "Microsoft.CognitiveServices.Speech.core.uwp")
+else()
+  set(SPEECHSDK_CORE_LIBRARY "Microsoft.CognitiveServices.Speech.core")
+endif()
 
 FILE(GLOB SPEECH_C_API_HEADERS "${CARBON_C_API}/*.h")
 FILE(GLOB SPEECH_CXX_API_HEADERS "${CARBON_CXX_API}/*.h")

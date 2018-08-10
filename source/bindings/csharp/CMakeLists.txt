@@ -8,7 +8,12 @@ set(CSHARP_LIB ${PROJECT_NAME} CACHE INTERNAL "")
 
 # Build the cxx binding dll via swig
 set(SOURCES "${SRC_DIR}/carbon_csharp.i")
-set(CSHARP_BINDINGS ${PROJECT_NAME}.bindings)
+
+if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
+  set(CSHARP_BINDINGS ${PROJECT_NAME}.bindings.uwp)
+else()
+  set(CSHARP_BINDINGS ${PROJECT_NAME}.bindings)
+endif()
 # ${SWIG_INTERFACE} and ${SWIG_WRAPPERS} point to common interface / header files
 set(SWIG_MODULE_${CSHARP_BINDINGS}_EXTRA_DEPS
     ${SWIG_INTERFACE}

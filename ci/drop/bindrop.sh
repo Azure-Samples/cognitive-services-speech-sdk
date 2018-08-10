@@ -2,19 +2,19 @@
 
 USAGE="Usage: $0 platform configuration destination"
 
+set -e -o pipefail
+
 PLATFORM="${1?$USAGE}"
 CONFIG="${2?$USAGE}"
 DEST="${3?$USAGE}"
 TARGET="${4-UNKNOWN}"
 
-echo "PLATFORM = $PLATFORM"
-echo "CONFIG = $CONFIG"
-echo "DEST = $DEST"
-echo "TARGET = $TARGET"
-
-set -e -x -o pipefail
-
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+. "$SCRIPT_DIR/../functions.sh"
+
+print_vars = PLATFORM CONFIG DEST TARGET =
+
+set -x
 
 # Ensure Unix paths on Windows from here on
 if [[ $OS = "Windows_NT" ]]; then
@@ -30,11 +30,16 @@ SRCJARSRC="$BUILD_ROOT/lib/com.microsoft.cognitiveservices.speech-src.zip"
 SRCCARBONX="$BUILD_ROOT/bin/carbonx"
 
 CSHARPSUPPORTED=false
-CSHARPBINDINGSNAME=Microsoft.CognitiveServices.Speech.csharp.bindings
+
+if [[ $TARGET == UWP ]]; then
+  CSHARPBINDINGSNAME=Microsoft.CognitiveServices.Speech.csharp.bindings.uwp
+else
+  CSHARPBINDINGSNAME=Microsoft.CognitiveServices.Speech.csharp.bindings
+fi
 
 if [[ $OS = "Windows_NT" ]]; then
   case $TARGET in
-    UNKNOWN) LIBPREFIX=Microsoft.CognitiveServices.Speech.
+    UNKNOWN|UWP) LIBPREFIX=Microsoft.CognitiveServices.Speech.
              DYNLIBSUFFIX=.dll
              STATLIBSUFFIX=.lib
 

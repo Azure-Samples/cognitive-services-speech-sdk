@@ -36,6 +36,44 @@ variables:
         "toolVersion": "1.0"
       }
     ]
+  SIGN_PARAMS_DLL: |
+    [
+      {
+        "keyCode": "CP-230012",
+        "operationSetCode": "SigntoolSign",
+        "parameters": [
+          {
+            "parameterName": "OpusName",
+            "parameterValue": "Microsoft"
+          },
+          {
+            "parameterName": "OpusInfo",
+            "parameterValue": "http://www.microsoft.com"
+          },
+          {
+            "parameterName": "PageHash",
+            "parameterValue": "/NPH"
+          },
+          {
+            "parameterName": "FileDigest",
+            "parameterValue": "/fd sha256"
+          },
+          {
+            "parameterName": "TimeStamp",
+            "parameterValue": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
+          }
+        ],
+        "toolName": "signtool.exe",
+        "toolVersion": "6.2.9304.0"
+      },
+      {
+          "keyCode": "CP-230012",
+          "operationSetCode": "SigntoolVerify",
+          "parameters": [ ],
+          "toolName": "signtool.exe",
+          "toolVersion": "6.2.9304.0"
+       }
+    ]
   SPEECHSDK_MAVEN_ARTIFACT_ID: client-sdk
   SPEECHSDK_MAVEN_GROUP_ID: com.microsoft.cognitiveservices.speech
 
@@ -140,44 +178,7 @@ phases:
       FolderPath: 'build/$(BuildPlatform)/bin/$(BuildConfiguration)'
       Pattern: 'Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.csharp.bindings.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.java.bindings.dll'
       signConfigType: inlineSignParams
-      inlineOperation: |
-        [
-          {
-            "keyCode": "CP-230012",
-            "operationSetCode": "SigntoolSign",
-            "parameters": [
-              {
-                "parameterName": "OpusName",
-                "parameterValue": "Microsoft"
-              },
-              {
-                "parameterName": "OpusInfo",
-                "parameterValue": "http://www.microsoft.com"
-              },
-              {
-                "parameterName": "PageHash",
-                "parameterValue": "/NPH"
-              },
-              {
-                "parameterName": "FileDigest",
-                "parameterValue": "/fd sha256"
-              },
-              {
-                "parameterName": "TimeStamp",
-                "parameterValue": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
-              }
-            ],
-            "toolName": "signtool.exe",
-            "toolVersion": "6.2.9304.0"
-          },
-          {
-              "keyCode": "CP-230012",
-              "operationSetCode": "SigntoolVerify",
-              "parameters": [ ],
-              "toolName": "signtool.exe",
-              "toolVersion": "6.2.9304.0"
-           }
-        ]
+      inlineOperation: $(SIGN_PARAMS_DLL)
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set test variables
@@ -254,6 +255,88 @@ phases:
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
       ArtifactName: Windows
+      publishLocation: Container
+
+- phase: WindowsUwpBuild
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsBuild '))
+  queue:
+    name: Hosted VS2017
+    timeoutInMinutes: 30
+    parallel: 4
+    matrix:
+      x64_debug:
+        BuildPlatform: x64
+        BuildConfiguration: Debug
+      x64_release:
+        BuildPlatform: x64
+        BuildConfiguration: Release
+      x86_release:
+        BuildPlatform: Win32
+        BuildConfiguration: Release
+      x86_debug:
+        BuildPlatform: Win32
+        BuildConfiguration: Debug
+  steps:
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set Windows target platform (Windows-x86 or Windows-x64)
+    inputs:
+      type: InlineScript
+      script: |
+        . ci/functions.sh
+        TARGET=WindowsUwp-x64
+        [[ "$(BuildPlatform)" == Win32 ]] && TARGET=WindowsUwp-x86
+        vsts_setvar SPEECHSDK_TARGET_PLATFORM "$TARGET"
+        vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+  - bash: |
+      set -e -o pipefail
+      . ci/functions.sh
+      ./ci/set-variables.sh
+      SPEECHSDK_CMAKE_GENERATOR="Visual Studio 15"
+      [[ "$(BuildPlatform)" == x64 ]] && SPEECHSDK_CMAKE_GENERATOR+=" Win64"
+      vsts_setvar SPEECHSDK_CMAKE_GENERATOR "$SPEECHSDK_CMAKE_GENERATOR"
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Install build dependencies
+    inputs:
+      type: FilePath
+      scriptPath: 'ci/install-build-dependencies.sh'
+  - task: CMake@1
+    displayName: Generate solution
+    inputs:
+      workingDirectory: 'build/$(BuildPlatform)'
+      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -Duse_default_uuid=ON -Duse_builtin_httpapi=ON -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0 -Dskip_samples=ON -Duse_openssl=ON -Duse_schannel=OFF -DOPENSSL_ROOT_DIR=../../external/uwp_ssl/lib/$(BuildPlatform) -DOPENSSL_INCLUDE_DIR=../../external/uwp_ssl/include -DOPENSSL_USE_STATIC_LIBS=TRUE -DBUILD_PYTHON=OFF ../..'
+  - task: NuGetCommand@2
+    displayName: NuGet restore
+    inputs:
+      restoreSolution: 'build/$(BuildPlatform)/carbon.sln'
+  - task: VSBuild@1
+    displayName: Build solution
+    inputs:
+      solution: 'build/$(BuildPlatform)/carbon.sln'
+      platform: '$(BuildPlatform)'
+      configuration: '$(BuildConfiguration)'
+      clean: true
+      maximumCpuCount: true
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'Sign Windows C++ and C# binaries'
+    inputs:
+      ConnectedServiceName: 'Speech SDK ESRP Signing'
+      FolderPath: 'build/$(BuildPlatform)/bin/$(BuildConfiguration)'
+      Pattern: 'Microsoft.CognitiveServices.Speech.core.uwp.dll,Microsoft.CognitiveServices.Speech.csharp.bindings.uwp.dll,Microsoft.CognitiveServices.Speech.csharp.dll'
+      signConfigType: inlineSignParams
+      inlineOperation: $(SIGN_PARAMS_DLL)
+    condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Create drop files
+    inputs:
+      type: FilePath
+      scriptPath: './ci/drop/bindrop.sh'
+      args: '$(BuildPlatform) $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration) UWP'
+  - task: PublishBuildArtifacts@1
+    displayName: Publish drop
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: WindowsUwp
       publishLocation: Container
 
 # Note: for now this packages up only {Linux,Windows}-x64-Release
@@ -354,7 +437,7 @@ phases:
     condition: succeededOrFailed()
 
 - phase: NuGet
-  dependsOn: [Pre, LinuxBuild, LinuxX86Build, WindowsBuild]
+  dependsOn: [Pre, LinuxBuild, LinuxX86Build, WindowsBuild, WindowsUwpBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsNuGet '))
   queue:
     name: Hosted VS2017
@@ -374,6 +457,11 @@ phases:
     displayName: 'Downloading Linux artifacts'
     inputs:
       artifactName: Linux
+      downloadPath: $(System.ArtifactsDirectory)\In
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading WindowsUwp artifacts'
+    inputs:
+      artifactName: WindowsUwp
       downloadPath: $(System.ArtifactsDirectory)\In
   - task: NuGetToolInstaller@0
     displayName: Use NuGet 4.6.*

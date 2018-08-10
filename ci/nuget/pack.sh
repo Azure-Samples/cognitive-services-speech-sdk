@@ -26,6 +26,11 @@ WINDOWS_DROP_DIR="$(cygpath --unix --absolute "$DROP_DIR/Windows")"
 [[ -e $WINDOWS_DROP_DIR ]]
 WINDOWS_DROP_DIR="$(cygpath --windows --absolute "$WINDOWS_DROP_DIR")"
 
+# Check that Windows UWP drop directory exists and turn into Windows path.
+WINDOWS_UWP_DROP_DIR="$(cygpath --unix --absolute "$DROP_DIR/WindowsUwp")"
+[[ -e $WINDOWS_UWP_DROP_DIR ]]
+WINDOWS_UWP_DROP_DIR="$(cygpath --windows --absolute "$WINDOWS_UWP_DROP_DIR")"
+
 # Check that Linux drop directory exists and turn into Windows path.
 LINUX_DROP_DIR="$(cygpath --unix --absolute "$DROP_DIR/Linux")"
 [[ -e $LINUX_DROP_DIR ]]
@@ -33,4 +38,6 @@ LINUX_DROP_DIR="$(cygpath --windows --absolute "$LINUX_DROP_DIR")"
 
 OUTPUT_DIR="$(cygpath --windows --absolute "$OUTPUT_DIR")"
 
-"$NUGETEXETOOLPATH" pack ./ci/nuget/carbon.nuspec -Properties "WindowsDropDir=$WINDOWS_DROP_DIR;LinuxDropDir=$LINUX_DROP_DIR;Version=$VERSION" -OutputDirectory "$OUTPUT_DIR"
+"$NUGETEXETOOLPATH" pack ./ci/nuget/carbon.nuspec \
+  -Properties "WindowsDropDir=$WINDOWS_DROP_DIR;WindowsUwpDropDir=$WINDOWS_UWP_DROP_DIR;LinuxDropDir=$LINUX_DROP_DIR;Version=$VERSION" \
+  -OutputDirectory "$OUTPUT_DIR"
