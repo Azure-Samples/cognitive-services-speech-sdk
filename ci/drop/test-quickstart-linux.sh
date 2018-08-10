@@ -28,7 +28,7 @@ trap '[[ -d $TEST_DIR ]] &&  rm -rf $TEST_DIR' EXIT
 mkdir "$TEST_DIR/speechsdk"
 tar -xzf "$RELEASE_DROP" --strip-components=1 -C "$TEST_DIR/speechsdk"
 cp -av "$SOURCE_ROOT/public_samples/quickstart/cpp-linux" "$TEST_DIR"
-cp -p "$SCRIPT_DIR/run-test.sh" "$TEST_DIR/cpp-linux"
+cp -p "$SCRIPT_DIR/../run-with-pulseaudio.sh" "$TEST_DIR/cpp-linux"
 cp -p "$SOURCE_ROOT/tests/input/audio/whatstheweatherlike.wav" "$TEST_DIR/cpp-linux"
 
 perl -i -pe 's(SPEECHSDK_ROOT:=.*)(SPEECHSDK_ROOT:=/test/speechsdk)' "$TEST_DIR/cpp-linux/Makefile"
@@ -36,7 +36,7 @@ perl -i -pe 's(L"YourSubscriptionKey")(L"'$SPEECH_SUBSCRIPTION_KEY'")' "$TEST_DI
 perl -i -pe 's(L"YourServiceRegion")(L"westus")' "$TEST_DIR/cpp-linux/"*.cpp
 
 if [[ $SMOKE_TEST == 1 ]]; then
-  docker run --rm --volume "$(readlink -f "$TEST_DIR"):/test" --workdir /test/cpp-linux "$DOCKER_TAG" bash -c 'make && LD_LIBRARY_PATH=/test/speechsdk/lib/x64 ./run-test.sh'
+  docker run --rm --volume "$(readlink -f "$TEST_DIR"):/test" --workdir /test/cpp-linux "$DOCKER_TAG" bash -c 'make && LD_LIBRARY_PATH=/test/speechsdk/lib/x64 ./run-with-pulseaudio.sh whatstheweatherlike.wav ./helloworld'
 else
   docker run --rm --volume "$(readlink -f "$TEST_DIR"):/test" --workdir /test/cpp-linux "$DOCKER_TAG" make
 fi

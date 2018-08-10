@@ -8,13 +8,16 @@ USAGE="Usage: $0 samples-dir [<path-to-maven-repository>]"
 
 SAMPLES_DIR="${1?$USAGE}"
 
-if [[ -n $1 ]]; then
-  PACKAGE_PATH="$(cygpath -aw "$2")"
+set -e -x -o pipefail
+
+if [[ -n $2 ]]; then
+  PACKAGE_PATH="$2"
+  if [[ $OS = "Windows_NT" ]]; then
+    PACKAGE_PATH="$(cygpath -aw "$2")"
+  fi
 else
   PACKAGE_PATH=
 fi
-
-set -e -x -o pipefail
 
 readarray -t PROJECTS < <(find "$SAMPLES_DIR" -name pom.xml -printf '%h\n')
 

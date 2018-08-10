@@ -14,7 +14,7 @@ import com.microsoft.cognitiveservices.speech.*;
 public class Main {
 
     /**
-     * @param args Arguments are ignored in this Quickstart sample.
+     * @param args Arguments are ignored in this sample.
      */
     public static void main(String[] args) {
         try {
@@ -23,8 +23,10 @@ public class Main {
             // Replace below with your own service region (e.g., "westus").
             String serviceRegion = "YourServiceRegion";
 
+            int exitCode = 1;
+
             SpeechFactory factory = SpeechFactory.fromSubscription(speechSubscriptionKey, serviceRegion);
-            assert(factory!= null);
+            assert(factory != null);
 
             SpeechRecognizer reco = factory.createSpeechRecognizer();
             assert(reco != null);
@@ -39,6 +41,7 @@ public class Main {
 
             if (result.getReason() == RecognitionStatus.Recognized) {
                 System.out.println("We recognized: " + result.getText());
+                exitCode = 0;
             }
             else if (result.getReason() == RecognitionStatus.Canceled) {
                 System.out.println("The request was canceled. Did you update the subscription info?" +
@@ -54,7 +57,7 @@ public class Main {
             reco.close();
             factory.close();
             
-            System.exit(0);
+            System.exit(exitCode);
         } catch (Exception ex) {
             System.out.println("Unexpected exception: " + ex.getMessage());
 
