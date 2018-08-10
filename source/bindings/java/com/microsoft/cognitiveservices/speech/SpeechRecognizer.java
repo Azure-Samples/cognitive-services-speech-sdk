@@ -123,7 +123,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       */
     public Future<Void> startContinuousRecognitionAsync() {
         return s_executorService.submit(() -> {
-                recoImpl.StartContinuousRecognitionAsync();
+                recoImpl.StartContinuousRecognition();
                 return null;
             });
     }
@@ -134,7 +134,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       */
     public Future<Void> stopContinuousRecognitionAsync() {
         return s_executorService.submit(() -> {
-                recoImpl.StopContinuousRecognitionAsync();
+                recoImpl.StopContinuousRecognition();
                 return null;
             });
     }
@@ -142,7 +142,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     /**
       * Starts speech recognition on a continuous audio stream with keyword spotting, until stopKeywordRecognitionAsync() is called.
       * User must subscribe to events to receive recognition results.
-      * Note: Key word spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
+      * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
       * @param model The keyword recognition model that specifies the keyword to be recognized.
       * @return A task representing the asynchronous operation that starts the recognition.
       */
@@ -157,7 +157,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
 
     /**
       * Stops continuous speech recognition.
-      * Note: Key word spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
+      * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
       * @return A task representing the asynchronous operation that stops the recognition.
       */
     public Future<Void> stopKeywordRecognitionAsync() {
@@ -175,18 +175,18 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         }
 
         if (disposing) {
-            getRecoImpl().getIntermediateResult().RemoveEventListener(intermediateResultHandler);
-            getRecoImpl().getFinalResult().RemoveEventListener(finalResultHandler);
-            getRecoImpl().getCanceled().RemoveEventListener(errorHandler);
-            getRecoImpl().getSessionStarted().RemoveEventListener(sessionStartedHandler);
-            getRecoImpl().getSessionStopped().RemoveEventListener(sessionStoppedHandler);
-            getRecoImpl().getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
-            getRecoImpl().getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
+            recoImpl.getIntermediateResult().RemoveEventListener(intermediateResultHandler);
+            recoImpl.getFinalResult().RemoveEventListener(finalResultHandler);
+            recoImpl.getCanceled().RemoveEventListener(errorHandler);
+            recoImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
+            recoImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
+            recoImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
+            recoImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
 
             intermediateResultHandler.delete();
             finalResultHandler.delete();
             errorHandler.delete();
-            getRecoImpl().delete();
+            recoImpl.delete();
             _Parameters.close();
             disposed = true;
             super.dispose(disposing);

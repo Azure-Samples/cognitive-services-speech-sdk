@@ -21,19 +21,37 @@ public class SpeechRecognitionResult {
     private RecognitionResultCollection properties;
     private long duration;
     private long offset;
+    private RecognitionResult _resultImpl;
 
     protected SpeechRecognitionResult(RecognitionResult result) {
         Contracts.throwIfNull(result, "result");
 
-        resultId = result.getResultId();
-        text = result.getText();
-        BigInteger tenThousand = BigInteger.valueOf(10000);
-        duration = result.Duration().divide(tenThousand).longValue();
-        offset = result.Offset().divide(tenThousand).longValue();
-        reason = RecognitionStatus.values()[result.getReason().swigValue()];
-        properties = new RecognitionResultCollection(result.getProperties());
-
+        this._resultImpl = result;
+        this.resultId = result.getResultId();
         Contracts.throwIfNull(resultId, "resultId");
+
+        BigInteger tenThousand = BigInteger.valueOf(10000);
+        this.duration = result.Duration().divide(tenThousand).longValue();
+        this.offset = result.Offset().divide(tenThousand).longValue();
+
+        this.text = result.getText();
+        this.reason = RecognitionStatus.values()[result.getReason().swigValue()];
+        this.properties = new RecognitionResultCollection(result.getProperties());
+    }
+
+    /**
+      * Explicitly frees any external resource attached to the object
+      */
+    public void close() {
+        if (this._resultImpl != null) {
+            this._resultImpl.delete();
+        }
+        this._resultImpl = null;
+
+        if (this.properties != null) {
+            this.properties.close();
+        }
+        this.properties = null;
     }
 
     /**
@@ -41,7 +59,7 @@ public class SpeechRecognitionResult {
       * @return Specifies the result identifier.
       */
     public String getResultId() {
-        return resultId;
+        return this.resultId;
     }
     
     /**
@@ -49,7 +67,7 @@ public class SpeechRecognitionResult {
       * @return Specifies status of the result.
       */
     public RecognitionStatus getReason() {
-        return reason;
+        return this.reason;
     }
 
     /**
@@ -57,7 +75,7 @@ public class SpeechRecognitionResult {
       * @return Presents the recognized text in the result.
       */
     public String getText() {
-        return text;
+        return this.text;
     }
 
     /**
@@ -65,7 +83,7 @@ public class SpeechRecognitionResult {
       * @return Duration of recognized speech in milliseconds.
       */
     public long getDuration() {
-        return duration;
+        return this.duration;
     }
 
     /**
@@ -73,7 +91,7 @@ public class SpeechRecognitionResult {
       * @return Offset of recognized speech in milliseconds.
       */
     public long getOffset() {
-        return offset;
+        return this.offset;
     }
 
     /**
@@ -82,7 +100,7 @@ public class SpeechRecognitionResult {
     * @return a brief description of an error.
     */
     public String getErrorDetails() {
-        return properties.getString(ResultParameterNames.ErrorDetails);
+        return this.properties.getString(ResultParameterNames.ErrorDetails);
     }
 
     /**
@@ -90,7 +108,7 @@ public class SpeechRecognitionResult {
     * @return Json serialized representation of the result.
     */
     public String getJson() {
-      return properties.getString(ResultParameterNames.Json);
+      return this.properties.getString(ResultParameterNames.Json);
     }
 
     /**
@@ -98,7 +116,7 @@ public class SpeechRecognitionResult {
      * @return The set of properties exposed in the result.
      */
     public RecognitionResultCollection getProperties() {
-        return properties;
+        return this.properties;
     }
 
     /**
@@ -107,9 +125,9 @@ public class SpeechRecognitionResult {
       */
     @Override
     public String toString() {
-        return "ResultId:" + resultId +
-               " Status:" + reason +
-               " Recognized text:<" + text +
+        return "ResultId:" + this.resultId +
+               " Status:" + this.reason +
+               " Recognized text:<" + this.text +
                ">.";
     }
     
@@ -121,9 +139,19 @@ public class SpeechRecognitionResult {
         {
             Contracts.throwIfNull(collection, "collection");
 
-            _collection = collection;
+            this._collection = collection;
         }
         
+        /**
+          * Explicitly frees any external resource attached to the object
+          */
+        public void close() {
+            if (this._collection != null) {
+                this._collection.delete();
+            }
+            this._collection = null;
+        }
+
         /**
          * Checks whether the parameter specified by name has a String value.
          *

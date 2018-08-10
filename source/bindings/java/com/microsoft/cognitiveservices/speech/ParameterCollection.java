@@ -249,10 +249,16 @@ public final class ParameterCollection<OwnerType> implements Closeable {
             return;
         }
 
-        if(recognizerParameters != null)
+        if (recognizerParameters != null) {
             recognizerParameters.delete();
-        if(factoryParameters != null)
+        }
+        recognizerParameters = null;
+
+        if (factoryParameters != null) {
             factoryParameters.delete();
+        }
+        factoryParameters = null;
+
         disposed = true;
     }
 

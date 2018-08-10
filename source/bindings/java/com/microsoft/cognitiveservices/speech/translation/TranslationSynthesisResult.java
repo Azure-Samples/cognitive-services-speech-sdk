@@ -11,11 +11,12 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
   */
 public final class TranslationSynthesisResult
 {
-    TranslationSynthesisResult(com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResult result)
-    {
+    private com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResult _resultImpl;
+
+    TranslationSynthesisResult(com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResult result) {
         Contracts.throwIfNull(result, "result");
 
-        _result = result;
+        _resultImpl = result;
         _AudioData = null;
 
         com.microsoft.cognitiveservices.speech.internal.SynthesisStatusCode status = result.getSynthesisStatus();
@@ -34,13 +35,23 @@ public final class TranslationSynthesisResult
     }
 
     /**
+      * Explicitly frees any external resource attached to the object
+      */
+    public void close() {
+        if (this._resultImpl != null) {
+            this._resultImpl.delete();
+        }
+        this._resultImpl = null;
+    }
+
+    /**
       * Translated text in the target language.
       * @return Translated text in the target language.
       */
     public byte[] getAudio()
     {
         if (_AudioData == null) {
-            com.microsoft.cognitiveservices.speech.internal.UInt8Vector audio = _result.getAudio();
+            com.microsoft.cognitiveservices.speech.internal.UInt8Vector audio = _resultImpl.getAudio();
             int size = (int)audio.size();
             _AudioData = new byte[size];
 
@@ -70,6 +81,4 @@ public final class TranslationSynthesisResult
     {
         return "Status <<" + getSynthesisStatus() + ", audioData " + (_AudioData != null ? _AudioData.length : "no") + " bytes available>>";
     }
-
-    private com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResult _result;
 }

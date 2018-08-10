@@ -129,7 +129,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
        */
      public Future<Void> startContinuousRecognitionAsync() {
          return s_executorService.submit(() -> {
-                 recoImpl.StartContinuousRecognitionAsync();
+                 recoImpl.StartContinuousRecognition();
                  return null;
              });
      }
@@ -140,7 +140,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
        */
      public Future<Void> stopContinuousRecognitionAsync() {
          return s_executorService.submit(() -> {
-                 recoImpl.StopContinuousRecognitionAsync();
+                 recoImpl.StopContinuousRecognition();
                  return null;
              });
      }
@@ -156,7 +156,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
         Contracts.throwIfNull(model, "model");
 
         return s_executorService.submit(() -> {
-                recoImpl.StartKeywordRecognitionAsync(model.getModelImpl());
+                recoImpl.StartKeywordRecognition(model.getModelImpl());
                 return null;
             });
     }
@@ -168,7 +168,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
       */
     public Future<Void> stopKeywordRecognitionAsync() {
         return s_executorService.submit(() -> {
-                recoImpl.StopKeywordRecognitionAsync();
+                recoImpl.StopKeywordRecognition();
                 return null;
             });
     }

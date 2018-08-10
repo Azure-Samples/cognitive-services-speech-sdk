@@ -11,13 +11,28 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
   * Defines result of intent recognition.
   */
 public final class IntentRecognitionResult extends com.microsoft.cognitiveservices.speech.SpeechRecognitionResult {
+    private com.microsoft.cognitiveservices.speech.internal.IntentRecognitionResult _resultImpl;
     
     IntentRecognitionResult(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionResult result) {
         super(result);
         Contracts.throwIfNull(result, "result");
 
+        this._resultImpl = result;
         this._intentId = result.getIntentId();
         Contracts.throwIfNull(this._intentId, "IntentId");
+    }
+
+    /**
+      * Explicitly frees any external resource attached to the object
+      */
+    @Override
+    public void close() {
+        if (this._resultImpl != null) {
+            this._resultImpl.delete();
+        }
+        this._resultImpl = null;
+
+        super.close();
     }
 
     /**
