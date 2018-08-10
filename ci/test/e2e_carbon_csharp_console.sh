@@ -68,7 +68,7 @@ PLATFORMS_TO_RUN="$(joinArgs , Windows-{x86,x64}-Release)"
 
 PLATFORM=$SPEECHSDK_TARGET_PLATFORM-$SPEECHSDK_BUILD_CONFIGURATION
 
-startTests TESTRUNNER TEST-carbon_csharp_console "$PLATFORM" "$UserKeySkyman $TOKEN"
+startTests TESTRUNNER test-carbon_csharp_console "$PLATFORM" "$UserKeySkyman $TOKEN"
 startSuite TESTRUNNER "$(basename "$CARBON_CSHARP_CONSOLE" .exe)"
 
 TIMEOUT_SECONDS=30

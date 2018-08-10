@@ -48,7 +48,7 @@ PLATFORMS_TO_RUN="$(joinArgs , {OSX-x64,Linux-x64,Windows-{x86,x64}}-{Debug,Rele
 
 PLATFORM=$SPEECHSDK_TARGET_PLATFORM-$SPEECHSDK_BUILD_CONFIGURATION
 
-startTests TESTRUNNER TEST-uspconsole "$PLATFORM" "$UserKeySkyman"
+startTests TESTRUNNER test-uspconsole "$PLATFORM" "$UserKeySkyman"
 startSuite TESTRUNNER "$(basename "$USPCONSOLE" .exe)"
 
 TIMEOUT_SECONDS=30
