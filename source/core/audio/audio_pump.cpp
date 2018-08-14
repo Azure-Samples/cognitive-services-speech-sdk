@@ -27,10 +27,6 @@ CSpxAudioPump::CSpxAudioPump() :
 
 CSpxAudioPump::~CSpxAudioPump()
 {
-    if (m_thread.joinable())
-    {
-        m_thread.join();
-    }
 }
 
 void CSpxAudioPump::SetAudioReader(std::shared_ptr<ISpxAudioReader>& reader)
@@ -75,6 +71,12 @@ void CSpxAudioPump::StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProc
     m_thread = std::thread(&CSpxAudioPump::PumpThread, this, std::move(keepAliveForThread), pISpxAudioProcessor);
 
     m_stateRequested = State::Processing; // it's ok we set the requested state after we 'start' the thread; PumpThread will wait for the lock
+
+    // We must detach the thread because it will call into the session to destroy the session, thus trying to
+    // delete itself. Therefore, we must not join, but instead make sure it holds the instance alive until it
+    // ends.
+    m_thread.detach();
+
     WaitForPumpStart(lock);
 }
 
@@ -113,7 +115,9 @@ ISpxAudioPump::State CSpxAudioPump::GetState()
 
 void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor)
 {
-    UNUSED(keepAlive);
+    // make sure, we release the reference only after the last operation we did.
+    std::shared_ptr<CSpxAudioPump> keepAliveLock = keepAlive;
+
     SPX_DBG_TRACE_SCOPE("*** AudioPump THREAD started! ***", "*** AudioPump THREAD stopped! ***");
 
     // Get the format from the reader and give it to the processor
@@ -160,13 +164,6 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
         {
             return true;
         }
-
-        // If we're not still processing, then we should detach the thread, and return false (to the while() loop below);
-        // Doing so will cause that while() loop to exit, and then the thread will exit. We need to detach the thread
-        // because the dtor (see above) will m_thread.join() so that when the last reference is released (which may be the keep
-        // alive refernce in this thread proc), we won't deadlock. 
-        SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(), checkAndChangeState: state (%d) != State::Processing (%d); detaching thread, returning false...", m_state, State::Processing);
-        m_thread.detach();
 
         // Returning true will cause the while() loop (see below) to exit, thus exiting the thread
         return false;
