@@ -88,7 +88,7 @@ using namespace Microsoft::CognitiveServices::Speech::Translation;
 //     |____/ \__,_|_.__/|___/\___|_|  |_| .__/ \__|_|\___/|_| |_|      //
 //                                       |_|                            //
 
-constexpr auto speechRegion = L"uswest2";
+constexpr auto speechRegion = L"westus";
 constexpr auto luisRegion = L"westus2";
 constexpr auto translationRegion = L"westus2";
 

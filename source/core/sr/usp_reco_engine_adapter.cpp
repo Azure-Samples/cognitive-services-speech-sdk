@@ -141,6 +141,8 @@ void CSpxUspRecoEngineAdapter::ProcessAudio(AudioData_Type data, uint32_t size)
     }
     else if (size > 0 && ChangeState(AudioState::Ready, UspState::Idle, AudioState::Sending, UspState::WaitingForTurnStart))
     {
+        bool skipCallback = m_turnStartingSent;
+        m_turnStartingSent = true;
         writeLock.unlock(); // SendPreAudioMessages() will use USP to send speech config/context ... don't hold the lock
 
         SPX_DBG_TRACE_VERBOSE_IF(1, "%s: (0x%8x)->SendPreAudioMessages() ... size=%d", __FUNCTION__, this, size);
@@ -148,8 +150,15 @@ void CSpxUspRecoEngineAdapter::ProcessAudio(AudioData_Type data, uint32_t size)
         m_audioBuffer->add(data, size);
         UspWriteAvailableChunks();
 
-        SPX_DBG_TRACE_VERBOSE("%s: site->AdapterStartingTurn()", __FUNCTION__);
-        InvokeOnSite([this](const SitePtr& p) { p->AdapterStartingTurn(this); });
+        if (skipCallback)
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: Due to reconnect in the middle of a turn, skipping AdapterStartingTurn callback.", __FUNCTION__);
+        }
+        else
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: site->AdapterStartingTurn()", __FUNCTION__);
+            InvokeOnSite([this](const SitePtr& p) { p->AdapterStartingTurn(this); });
+        }
     }
     else if (size > 0 && IsState(AudioState::Sending))
     {
@@ -999,11 +1008,20 @@ void CSpxUspRecoEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
     }
     else if (ChangeState(UspState::WaitingForTurnStart, UspState::WaitingForPhrase))
     {
+        bool skipCallback = m_turnStartedSent;
+        m_turnStartedSent = true;
         writeLock.unlock(); // calls to site shouldn't hold locks
 
-        SPX_DBG_TRACE_VERBOSE("%s: site->AdapterStartedTurn()", __FUNCTION__);
-        SPX_DBG_ASSERT(GetSite());
-        InvokeOnSite([this, &message](const SitePtr& p) { p->AdapterStartedTurn(this, message.contextServiceTag); });
+        if(skipCallback)
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: Due to reconnect in the middle of a turn, skipping this AdapterStartedTurn event.", __FUNCTION__);
+        }
+        else
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: site->AdapterStartedTurn()", __FUNCTION__);
+            SPX_DBG_ASSERT(GetSite());
+            InvokeOnSite([this, &message](const SitePtr& p) { p->AdapterStartedTurn(this, message.contextServiceTag); });
+        }
     }
     else
     {
@@ -1019,6 +1037,8 @@ void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
     UNUSED(message);
 
     WriteLock_Type writeLock(m_stateMutex);
+    m_turnStartedSent = false;
+    m_turnStartingSent = false;
     m_audioBuffer->new_turn();
     auto adapterTurnStopped = false;
     auto prepareReady = !m_singleShot &&
@@ -1113,10 +1133,24 @@ void CSpxUspRecoEngineAdapter::OnError(bool transport, const std::string& error)
 
             ResetAfterError();
         }
-        // We reconnect only in case of transport errors
-        // and if there was already at least one correct recognition.
-        else if (m_retry && transport && ChangeState(AudioState::Ready, UspState::Idle))
+        // We reconnect only in case of transport errors and if there has already been at least one correct recognition.
+        // We also do that only in continuous mode, because in intractive turns are short and
+        // the connection is forcibly reset at turn ends.
+        else if (m_retry && transport && !IsInteractiveMode())
         {
+            SPX_DBG_TRACE_VERBOSE("%s: Error received, trying to reconnect...", __FUNCTION__, error.c_str());
+
+            if (IsState(UspState::WaitingForTurnEnd))
+            {
+                SPX_DBG_TRACE_VERBOSE("%s: Forcibly communicating TurnEnd.", __FUNCTION__);
+                writeLock.unlock();
+                OnTurnEnd(USP::TurnEndMsg());
+                writeLock.lock();
+            }
+
+            // Perform actual reconnect.
+            ChangeState(AudioState::Ready, UspState::Idle);
+
             UspTerminate();
             UspInitialize();
             m_audioBuffer->new_turn();

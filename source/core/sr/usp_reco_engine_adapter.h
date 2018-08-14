@@ -283,6 +283,12 @@ private:
     // TODO: Reconnect for all cases (i.e. when the serivce is not availabe)
     // will be done after the threading model cleanup.
     int m_retry{ false };
+
+    // Flag indicating whether AdapterTurnStarting was fired. Used when reconnection happened in the middle of a turn.
+    int m_turnStartingSent{ false };
+
+    // Flag indicating whether AdapterTurnStarted was fired. Used when reconnection happened in the middle of a turn.
+    int m_turnStartedSent{ false };
 };
 
 
