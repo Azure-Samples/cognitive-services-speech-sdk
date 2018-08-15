@@ -4,11 +4,6 @@ if(NOT EXISTS ${AZURE_SHARED_LIB_DIR} OR NOT EXISTS ${AZURE_SHARED_LIB_DIR}/CMak
     execute_process(COMMAND git submodule update --init)
 endif()
 
-if(APPLE)
-    # apple-based tlsio (tlsio_appleios.c) seem to be buggy
-    # (it spouts a ton of "Cannot accept bytes" to stderr)
-    set(use_openssl ON CACHE BOOL "Using openssl-based TLS")
-endif()
 add_subdirectory(${AZURE_SHARED_LIB_DIR} azure_c_shared_utility EXCLUDE_FROM_ALL)
 
 set(AZURE_SHARED_LIB aziotsharedutil)
@@ -17,11 +12,6 @@ set_target_properties(${AZURE_SHARED_LIB} PROPERTIES FOLDER external_libs)
 if (UNIX)
     set_target_properties(${AZURE_SHARED_LIB} PROPERTIES COMPILE_FLAGS 
     "-Wno-error=unused-variable -Wno-error=implicit-function-declaration")
-    if (APPLE)
-        # Apple deprecated OpenSSL:
-        # https://stackoverflow.com/questions/7406946/why-is-apple-deprecating-openssl-in-macos-10-7-lion
-        set_target_properties (${AZURE_SHARED_LIB} PROPERTIES COMPILE_FLAGS "-Wno-deprecated-declarations")
-    endif()
 endif()
 
 

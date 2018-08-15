@@ -978,6 +978,55 @@ phases:
       ArtifactName: Linux
       publishLocation: Container
 
+- phase: IosBuild
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' IosBuild '))
+  queue:
+    name: Hosted macOS Preview
+    timeoutInMinutes: 30
+    parallel: 2
+    matrix:
+      debug:
+        BuildConfiguration: Debug
+      release:
+        BuildConfiguration: Release
+  steps:
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set iOS target platform
+    inputs:
+      type: InlineScript
+      script: |
+        . ci/functions.sh
+        vsts_setvar SPEECHSDK_TARGET_PLATFORM IOS
+        vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set variables
+    inputs:
+      type: FilePath
+      scriptPath: 'ci/set-variables.sh'
+  - task: CMake@1
+    displayName: Generate makefiles
+    inputs:
+      cmakeArgs: ' -DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DBUILD_JAVA=OFF -DBUILD_CSHARP=OFF -DBUILD_PYTHON=OFF -Duse_openssl=OFF -Duse_builtin_httpapi=ON -DCMAKE_TOOLCHAIN_FILE=../external/ios-cmake/ios.toolchain.cmake -DIOS_PLATFORM=OS -DENABLE_BITCODE=1 -DIOS_DEPLOYMENT_TARGET="10.0" ..'
+  - task: CMake@1
+    displayName: CMake build
+    inputs:
+      cmakeArgs: '--build . -- -j4'
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Create drop files
+    inputs:
+      type: FilePath
+      scriptPath: './ci/drop/bindrop.sh'
+      args: '"" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/iOS/$(BuildConfiguration) IOS'
+    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
+  - task: PublishBuildArtifacts@1
+    displayName: Publish drop
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: iOS
+      publishLocation: Container
+    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
+
 - phase: OsxBuild
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' OsxBuild '))
@@ -992,7 +1041,7 @@ phases:
         BuildConfiguration: Release
   steps:
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Set OSX-x64 target platform copy
+    displayName: Set OSX-x64 target platform 
     inputs:
       type: InlineScript
       script: |
@@ -1012,7 +1061,7 @@ phases:
   - task: CMake@1
     displayName: Generate makefiles
     inputs:
-      cmakeArgs: '-DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl/ ..'
+      cmakeArgs: '-DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DMACOSX=ON -DBUILD_CSHARP=OFF -Duse_builtin_httpapi=ON ..'
   - task: CMake@1
     displayName: CMake build
     inputs:
@@ -1067,7 +1116,7 @@ phases:
     inputs:
       type: FilePath
       scriptPath: './ci/drop/bindrop.sh'
-      args: '"" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/OSX-x64/$(BuildConfiguration)'
+      args: '"" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/OSX-x64/$(BuildConfiguration) OSX'
     condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
   - task: PublishBuildArtifacts@1
     displayName: Publish drop

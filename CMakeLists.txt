@@ -5,6 +5,14 @@ else()
   cmake_minimum_required(VERSION 3.5)
 endif()
 
+option(BUILD_PYTHON "Build Python SWIG module" ON)
+option(BUILD_CSHARP "Build C# SWIG module" ON)
+option(BUILD_JAVA "Build Java/Android SWIG module" ON)
+
+message("BUILD_PYTHON=${BUILD_PYTHON}")
+message("BUILD_CSHARP=${BUILD_CSHARP}")
+message("BUILD_JAVA=${BUILD_JAVA}")
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -12,7 +20,6 @@ if(NOT CMAKE_BUILD_TYPE)
       "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
       FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
-
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 14)

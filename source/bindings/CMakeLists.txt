@@ -1,4 +1,7 @@
 # Setup SWIG
+
+if (BUILD_PYTHON OR BUILD_CSHARP OR BUILD_JAVA)
+
 find_package(SWIG REQUIRED)
 include(UseSWIG)
 
@@ -15,7 +18,7 @@ elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 # Add subdirectories for each language if desired
-option(BUILD_PYTHON "Build Python SWIG module" ON)
+
 if(BUILD_PYTHON)
     if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
         if(NOT ANDROID)
@@ -24,15 +27,14 @@ if(BUILD_PYTHON)
     endif()   
 endif()
 
-option(BUILD_CSHARP "Build C# SWIG module" ON)
+
 if(BUILD_CSHARP AND
    NOT ANDROID AND
-   NOT APPLE AND
    (WIN32 OR ${CMAKE_SIZEOF_VOID_P} EQUAL 8))
        add_subdirectory(csharp)
 endif()
 
-option(BUILD_JAVA "Build Java/Android SWIG module" ON)
+
 if(BUILD_JAVA)
     add_subdirectory(java)
 endif()
@@ -42,3 +44,5 @@ endif()
 add_custom_target(swig 
     SOURCES ${SWIG_INTERFACE} ${SWIG_WRAPPERS})
 set_target_properties(swig PROPERTIES FOLDER bindings)
+
+endif()

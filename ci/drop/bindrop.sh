@@ -30,6 +30,7 @@ SRCJARSRC="$BUILD_ROOT/lib/com.microsoft.cognitiveservices.speech-src.zip"
 SRCCARBONX="$BUILD_ROOT/bin/carbonx"
 
 CSHARPSUPPORTED=false
+JAVASUPPORTED=true
 
 if [[ $TARGET == UWP ]]; then
   CSHARPBINDINGSNAME=Microsoft.CognitiveServices.Speech.csharp.bindings.uwp
@@ -82,12 +83,17 @@ else
 
   STATLIBSUFFIX=.a
 
-  if [[ $PLATFORM = "Linux-x86" || $(uname) = Darwin ]]; then
+  if [[ $PLATFORM = "Linux-x86" || $TARGET == "OSX" ]]; then
     CSHARPSUPPORTED=false
   else
     CSHARPSUPPORTED=true
     SRCCSHARPBINDINGS="$SRCBIN/$CSHARPBINDINGSNAME.so"
   fi
+  
+  if [[ $TARGET == "IOS" ]]; then
+     CSHARPSUPPORTED=false
+     JAVASUPPORTED=false
+  fi  
 fi
 
 SRCINC="$SOURCE_ROOT/source/public"
@@ -130,6 +136,7 @@ if [[ $OS = "Windows_NT" ]]; then
   fi
 fi
 
+if [[ "$JAVASUPPORTED" = true ]]; then
 # Copy .jar
 cp $CPOPT "$SRCJAR" "$DESTPUBLIB"
 cp $CPOPT "$SRCJARSRC" "$DESTPUBLIB"
@@ -137,6 +144,7 @@ cp $CPOPT "$SRCJAVABINDINGS" "$DESTPUBLIB"
 
 # Copy (private) test .jar
 cp $CPOPT "$SRCPRIVTESTJAR" "$DESTPRIVBIN"
+fi
 
 if [[ "$CSHARPSUPPORTED" = true ]]; then
   cp $CPOPT "$SRCCSHARPBINDINGS" "$DESTCSHARPBINDINGS"

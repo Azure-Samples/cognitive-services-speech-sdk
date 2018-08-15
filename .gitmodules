@@ -7,3 +7,6 @@
 [submodule "tests/input"]
     path = tests/input
     url = https://msasg.visualstudio.com/Skyman/_git/CarbonTest
+[submodule "external/ios-cmake"]
+    path = external/ios-cmake
+    url = https://github.com/leetal/ios-cmake

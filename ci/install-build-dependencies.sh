@@ -24,8 +24,7 @@ case $SPEECHSDK_BUILD_AGENT_PLATFORM in
     pip install -U pytest
     ;;
   OSX-x64)
-    brew info openssl
-    brew install swig ossp-uuid pkg-config coreutils
+    brew install swig pkg-config coreutils
 
     sudo easy_install pip
 
