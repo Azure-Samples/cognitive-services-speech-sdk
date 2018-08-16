@@ -39,7 +39,7 @@ The app displays a graphical user interface (GUI).
 
 > **Note:**
 > if you are using your own `.wav` file as input source, make sure it is in the right format.
-> Currently, the only supported `.wav` format is **mono (single-channel), 16 kHZ sample rate, 16 bits per sample**.
+> Currently, the only supported `.wav` format is **mono (single-channel), 16 kHz sample rate, 16 bits per sample**.
 
 ## References
 
