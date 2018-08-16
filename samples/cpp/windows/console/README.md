@@ -33,6 +33,10 @@ This sample demonstrates various forms of speech recognition, intent recognition
   * On a 32-bit Windows installation, choose `x86` as active solution platform.
 * Press Ctrl+Shift+B, or select **Build** \> **Build Solution**.
 
+> **Note**
+> If you are seeing red squigglies from IntelliSense for Speech SDK APIs,
+> right-click into your editor window and select **Rescan** > **Rescan Solution** to resolve.
+
 ## Run the sample
 
 To debug the app and then run it, press F5 or use **Debug** \> **Start Debugging**. To run the app without debugging, press Ctrl+F5 or use **Debug** \> **Start Without Debugging**.
