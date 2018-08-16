@@ -39,7 +39,13 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
             java.lang.reflect.Method nclm = ncl.getMethod("loadNativeBinding");
             nclm.invoke(null); // static.
         }
-        catch(Exception ex) {
+        catch(java.lang.Error ex) {
+            // In case, we cannot load the helper class, fall back to loading
+            // the binding just by binding name.
+            // TODO name of library will depend on version
+            System.loadLibrary("Microsoft.CognitiveServices.Speech.java.bindings");
+        }
+        catch(java.lang.Exception ex2) {
             // In case, we cannot load the helper class, fall back to loading
             // the binding just by binding name.
             // TODO name of library will depend on version

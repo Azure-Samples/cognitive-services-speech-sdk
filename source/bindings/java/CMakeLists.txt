@@ -202,11 +202,10 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/util/EventHandler.java
     ${PACKAGE_DIR}/util/EventHandlerImpl.java
     ${PACKAGE_DIR}/util/Contracts.java
-
-if(NOT ANDROID)
-    ${PACKAGE_DIR}/NativeLibraryLoader.java
-endif()
 )
+if(NOT ANDROID)
+  list(APPEND JAVA_SOURCES ${PACKAGE_DIR}/NativeLibraryLoader.java)
+endif()
 
 enable_language(Java)
 add_jar(${JAVA_LIB}
