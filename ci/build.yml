@@ -175,7 +175,7 @@ phases:
     displayName: 'Sign Windows C++, C# and Java binaries'
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing'
-      FolderPath: 'build/$(BuildPlatform)/bin/$(BuildConfiguration)'
+      FolderPath: 'build/$(BuildPlatform)/bin'
       Pattern: 'Microsoft.CognitiveServices.Speech.core.dll,Microsoft.CognitiveServices.Speech.csharp.bindings.dll,Microsoft.CognitiveServices.Speech.csharp.dll,Microsoft.CognitiveServices.Speech.java.bindings.dll'
       signConfigType: inlineSignParams
       inlineOperation: $(SIGN_PARAMS_DLL)
