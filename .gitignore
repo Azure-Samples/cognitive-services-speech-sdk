@@ -58,6 +58,11 @@ ipch/
 *.vsp
 *.vspx
 
+#xcode user settings
+xcuserdata
+project.xcworkspace
+.DS_Store
+
 #docfx related files
 ci/docfx/obj*/**/*
 ci/android/aar

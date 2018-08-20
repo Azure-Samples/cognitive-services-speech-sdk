@@ -51,6 +51,13 @@ proguard-rules.pro text
 *.xml text
 *.yml text
 
+# Objective C files, XCode files
+*.mm text
+*.m text
+*.storyboard text
+*.plist text
+*.pbxproj text
+
 # Bash and "git apply" only like Unix line endings
 *.sh text eol=lf
 *.patch text eol=lf

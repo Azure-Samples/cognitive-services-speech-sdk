@@ -9,7 +9,7 @@
 
 #include <string>
 #include <stdexcept>
-#include <speechapi_c_error.h>
+#include "speechapi_c_error.h"
 
 #ifdef SWIG
 #define final
