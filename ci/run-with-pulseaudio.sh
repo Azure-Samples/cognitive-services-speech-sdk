@@ -9,6 +9,7 @@ shift 1
 
 # Launch PA daemon
 pulseaudio -D --exit-idle-time=-1
+trap 'pulseaudio --kill' EXIT
 sleep 1.5
 
 # Configure microphone input
@@ -22,10 +23,9 @@ jobs
 # Launch helloworld with pulseaudio-alsa
 padsp "$@"
 
-# TODO trap handler to ensure kill
-
 # Wait for paplay to complete (in this case it should already be done)
 wait
 
 # Stop daemon
+trap '' EXIT
 pulseaudio --kill

@@ -443,10 +443,7 @@ phases:
     name: Hosted Linux Preview
     timeoutInMinutes: 30
   steps:
-  - bash: |
-      set -x -e -o pipefail
-      ./ci/set-variables.sh
-      ./ci/set-test-variables.sh
+  - bash: './ci/set-variables.sh && ./ci/set-test-variables.sh'
     displayName: Set variables
   - bash: |
       set -x -e -o pipefail
@@ -475,7 +472,7 @@ phases:
   - bash: |
       set -e -x -o pipefail
       DOCKER_TAG=csspeechdev_linuxoobejre_x64
-      DOCKER_DIR="./ci/docker/linuxoobejre/x64"
+      DOCKER_DIR=./ci/docker/linuxoobejre/x64
       ./ci/docker/build-image.sh "$DOCKER_TAG" "$DOCKER_DIR"
       cp "$(PathToJar)" $(Build.Repository.LocalPath)
       docker run --rm --volume "$(Build.Repository.LocalPath):/test:ro" --workdir /test "$DOCKER_TAG" ./ci/run-with-pulseaudio.sh \
@@ -606,6 +603,45 @@ phases:
       publishLocation: Container
     condition: succeededOrFailed()
     displayName: 'Publish .zip and .nupkg'
+
+- phase: NuGetLinuxTest
+  dependsOn: [Pre, NuGet]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsNuGet '))
+  queue:
+    name: Hosted Linux Preview
+    timeoutInMinutes: 30
+  steps:
+  - bash: './ci/set-variables.sh && ./ci/set-test-variables.sh'
+    displayName: Set variables
+  - task: DownloadBuildArtifacts@0
+    displayName: Downloading Windows artifacts
+    inputs:
+      artifactName: Windows
+      downloadPath: $(System.ArtifactsDirectory)/In
+  - bash: |
+      set -e -x -o pipefail
+      perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
+      find public_samples/quickstart/csharp-dotnetcore -name \*.cs -print0 | xargs -0 perl -i -pe 's("YourServiceRegion")("westus")'
+      find public_samples/quickstart/csharp-dotnetcore -name \*.cs -print0 | xargs -0 perl -i -pe 's("YourSubscriptionKey")("'$(KeySkyman)'")'
+      mkdir localnuget
+      cp --verbose $(System.ArtifactsDirectory)/In/Windows/Microsoft.CognitiveServices.Speech.*.nupkg localnuget
+      DOCKER_TAG=csspeechdev_linuxoobenetcore20_x64
+      DOCKER_DIR=./ci/docker/linuxoobenetcore20/x64
+      ./ci/docker/build-image.sh "$DOCKER_TAG" "$DOCKER_DIR"
+      docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$DOCKER_TAG" bash - <<"SCRIPT"
+        set -e -x -o pipefail
+        PATH_TO_AUDIO=/test/tests/input/audio/whatstheweatherlike.wav
+        cd public_samples/quickstart/csharp-dotnetcore
+        dotnet restore --no-cache --source /test/localnuget helloworld/helloworld.csproj
+        dotnet build helloworld/helloworld.csproj
+        pulseaudio -D --exit-idle-time=-1
+        sleep 1.5
+        pactl load-module module-null-sink sink_name=MicOutput sink_properties=device.description=Virtual_Microphone_Output
+        pacmd load-module module-virtual-source source_name=VirtualMic
+        trap 'pulseaudio --kill' EXIT
+        /test/ci/nuget/quickstart-dotnetcore-e2e.expect $PATH_TO_AUDIO dotnet helloworld/bin/Debug/netcoreapp2.0/helloworld.dll
+      SCRIPT
+    displayName: Test
 
 - phase: AndroidBuild
   variables:
@@ -1041,7 +1077,7 @@ phases:
         BuildConfiguration: Release
   steps:
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    displayName: Set OSX-x64 target platform 
+    displayName: Set OSX-x64 target platform
     inputs:
       type: InlineScript
       script: |

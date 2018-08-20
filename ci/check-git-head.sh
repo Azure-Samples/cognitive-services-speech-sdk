@@ -62,7 +62,7 @@ checkEmptyStdout \
   "text file(s) with hard tabs encountered"
 
 checkEmptyStdout \
-  "git ls-tree --full-tree -l -r $gitTree | grep -E '^100644 blob .*(\\.sh|/gradlew)$'" \
+  "git ls-tree --full-tree -l -r $gitTree | grep -E '^100644 blob .*(\\.sh|/gradlew|\\.expect)$'" \
   "Shell scripts should have executable permissions set, please fix"
 
 checkEmptyStdout \

@@ -19,6 +19,7 @@ proguard-rules.pro text
 *.cpp text
 *.cs text
 *.csproj text
+*.expect text
 *.gradle text
 *.h text
 *.hpp text
