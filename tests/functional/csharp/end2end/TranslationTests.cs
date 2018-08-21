@@ -132,7 +132,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore]
         public async Task TranslationFirstOneDeToFrAndEsFinalTextResultContinuous()
         {
             var toLanguages = new List<string>() { Language.FR, Language.ES };
@@ -178,7 +177,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore]
         public async Task TranslationWeatherEnToFrCarolineSynthesisResultContinuous()
         {
             var toLanguages = new List<string>() { Language.FR };
@@ -191,7 +189,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             CollectionAssert.AreEqual(expectedSynthesisByteResult[0], actualSynthesisByteResult.Result.Audio);
         }
 
-        [Ignore] // TODO ENABLE AFTER FIXING BROKEN SERVICE
         [TestMethod]
         public async Task TranslationWeatherEnToFrCarolineTextAndSynthesisResultContinuous()
         {

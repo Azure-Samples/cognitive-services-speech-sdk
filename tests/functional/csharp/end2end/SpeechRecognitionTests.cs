@@ -34,7 +34,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             speechRecognitionTestsHelper = new SpeechRecognitionTestsHelper();
         }
 
-        [Ignore("TODO https://msasg.visualstudio.com/Skyman/_workitems/edit/1269097")]
         [TestMethod]
         public async Task ValidBaselineRecognition()
         {
@@ -57,7 +56,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [Ignore("TODO https://msasg.visualstudio.com/Skyman/_workitems/edit/1269097")]
         [TestMethod]
         public async Task ValidCustomRecognition()
         {
@@ -133,7 +131,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [Ignore("TODO https://msasg.visualstudio.com/Skyman/_workitems/edit/1269097")]
         [TestMethod]
         public async Task GermanRecognition()
         {
@@ -278,13 +275,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        [Ignore] //KWS not available on Windows/Linux yet
-        [TestMethod]
-        public void TestKeywordRecognition()
-        {
-           
-        }
-
         [TestMethod]
         public void TestGetters()
         {
@@ -353,7 +343,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
                 // Bug: need to wait before calling RecognizeAsync() again. Otherwise the error 0x13 occurs.
                 // https://msasg.visualstudio.com/Skyman/_workitems/edit/1313114
-                await Task.Delay(1000);
+                await Task.Delay(3000);
                 var result2 = await recognizer.RecognizeAsync().ConfigureAwait(false);
             }
         }

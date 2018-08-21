@@ -44,7 +44,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var detailedRecognitionText = String.Join(" ", result.Best().Select(r => r.Text).ToList());
             var detailedRecognitionNormalizedForm = String.Join(" ", result.Best().Select(r => r.NormalizedForm).ToList());
             var detailedRecognitionLexicalForm = String.Join(" ", result.Best().Select(r => r.NormalizedForm).ToList());
-            
+
             Assert.IsTrue(Config.AreResultsMatching(detailedRecognitionText, TestData.English.Batman.Utterances[0]), detailedRecognitionText);
             Assert.IsTrue(Config.AreResultsMatching(detailedRecognitionNormalizedForm, TestData.English.Batman.Utterances[0]), detailedRecognitionNormalizedForm);
             Assert.IsTrue(Config.AreResultsMatching(detailedRecognitionLexicalForm, TestData.English.Batman.Utterances[0]), detailedRecognitionLexicalForm);
