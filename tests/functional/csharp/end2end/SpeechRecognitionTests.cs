@@ -341,12 +341,26 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Batman.AudioFile))
             {
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-                // Bug: need to wait before calling RecognizeAsync() again. Otherwise the error 0x13 occurs.
-                // https://msasg.visualstudio.com/Skyman/_workitems/edit/1313114
-                await Task.Delay(3000);
                 var result2 = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                AssertStringContains(result.Text, "detective skills");
+                AssertStringContains(result2.Text, "martial artists");
             }
         }
+
+        [TestMethod]
+        public async Task TestStartStopManyTimes()
+        {
+            const int NumberOfIterations = 100;
+            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Batman.AudioFile))
+            {
+                for (int i = 0; i < NumberOfIterations; ++i)
+                {
+                    await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                    await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                }
+            }
+        }
+
 
         [TestMethod]
         public async Task TestContinuousRecognitionTwice()

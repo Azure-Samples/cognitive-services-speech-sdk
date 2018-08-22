@@ -26,8 +26,6 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-std::chrono::minutes CSpxAudioStreamSession::m_recoAsyncTimeoutDuration = std::chrono::minutes(1);
-
 CSpxAudioStreamSession::CSpxAudioStreamSession() :
     m_sessionId(PAL::CreateGuidWithoutDashes()),
     m_recoKind(RecognitionKind::Idle),
@@ -77,11 +75,7 @@ void CSpxAudioStreamSession::Term()
         m_audioPump->StopPump();
 
         // Let's wait until we're actually stopped...
-        std::unique_lock<std::mutex> lock(m_mutex);
-
-        SPX_DBG_TRACE_VERBOSE("Waiting for Idle...");
-        m_cv.wait_for(lock, std::chrono::milliseconds(m_shutdownTimeoutInMs), [&] { return IsState(SessionState::Idle); });
-        SPX_DBG_TRACE_VERBOSE("Waiting for Idle... Done!");
+        WaitForIdle();
     }
 
     // Don't need the recognizers any more...
@@ -240,6 +234,19 @@ void CSpxAudioStreamSession::RemoveRecognizer(ISpxRecognizer* recognizer)
     });
 }
 
+void CSpxAudioStreamSession::WaitForIdle()
+{
+    // TODO: When KWS tests are in place,
+    // split m_cv into two varialbes, one depending on state, another - on actual result.
+    std::unique_lock<std::mutex> lock(m_mutex);
+    SPX_DBG_TRACE_VERBOSE("%s: Waiting for Idle", __FUNCTION__);
+    if (!m_cv.wait_for(lock, m_shutdownTimeout, [&] { return IsState(SessionState::Idle); }))
+    {
+        SPX_DBG_TRACE_WARNING("%s: Timeout happened during wait for Idle", __FUNCTION__);
+    }
+    SPX_DBG_TRACE_VERBOSE("%s: Waiting for Idle finished", __FUNCTION__);
+}
+
 CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxAudioStreamSession::RecognizeAsync()
 {
     SPX_DBG_TRACE_FUNCTION();
@@ -258,6 +265,9 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxAudioStreamSession::Reco
         // Wait for the recognition result, and then stop recognizing
         auto result = this->WaitForRecognition();
         this->StopRecognizing(RecognitionKind::SingleShot);
+
+        // Wait for the session to become idle, otherwise next RecognizeAsync can come in an unexpected state.
+        WaitForIdle();
 
         // Return our result back to the future/caller
         return result;
@@ -325,6 +335,9 @@ CSpxAsyncOp<void> CSpxAudioStreamSession::StopRecognitionAsync(RecognitionKind s
         auto keepAliveCopy = keepAlive;
 
         this->StopRecognizing(stopKind);
+
+        // Wait for the session to become idle, otherwise next RecognizeAsync can come in an unexpected state.
+        WaitForIdle();
     });
 
     auto taskFuture = task.get_future();
@@ -486,7 +499,7 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::WaitForRecognitio
         lock.lock();
 
         SPX_DBG_TRACE_VERBOSE("Waiting for AdapterCompletedSetFormatStop...");
-        m_cv.wait_for(lock, std::chrono::seconds(m_waitForAdatperCompletedSetFormatStopTimeout), [&] {
+        m_cv.wait_for(lock, m_waitForAdapterCompletedSetFormatStopTimeout, [&] {
             return !this->IsState(SessionState::StoppingPump) && !this->IsState(SessionState::WaitForAdapterCompletedSetFormatStop);
         });
         SPX_DBG_TRACE_VERBOSE("Waiting for AdapterCompletedSetFormatStop... Done!!");
@@ -1246,7 +1259,7 @@ void CSpxAudioStreamSession::WaitForKwsSingleShotRecognition()
     if (!m_recoAsyncResult) // Deal with the timeout condition...
     {
         SPX_DBG_TRACE_VERBOSE("KwsSingleShot Waiting for AdapterDone...");
-        m_cv.wait_for(lock, std::chrono::seconds(m_waitForAdatperCompletedSetFormatStopTimeout), [&] { return !this->IsState(SessionState::WaitForAdapterCompletedSetFormatStop); });
+        m_cv.wait_for(lock, m_waitForAdapterCompletedSetFormatStopTimeout, [&] { return !this->IsState(SessionState::WaitForAdapterCompletedSetFormatStop); });
         SPX_DBG_TRACE_VERBOSE("KwsSingleShot Waiting for AdapterDone... Done!!");
     }
 }

@@ -239,6 +239,8 @@ private:
     std::shared_ptr<ISpxLuEngineAdapter> GetLuEngineAdapter();
     std::shared_ptr<ISpxNamedProperties> GetParentProperties() const override;
 
+    void WaitForIdle();
+
 
 private:
     // Unique identifier of the session, used mostly for diagnostics.
@@ -309,9 +311,9 @@ private:
     // Note using std::chrono::minutes::max() could cause wait_for to exit straight away instead of 
     // infinite timeout, because wait_for() in VS is implemented via wait_until() and a possible integer
     // overflow could make new time < now.
-    static std::chrono::minutes m_recoAsyncTimeoutDuration;
-    const int m_waitForAdatperCompletedSetFormatStopTimeout = 20;
-    const int m_shutdownTimeoutInMs = 500;
+    const std::chrono::minutes m_recoAsyncTimeoutDuration = std::chrono::minutes(1);
+    const std::chrono::seconds m_waitForAdapterCompletedSetFormatStopTimeout = std::chrono::seconds(20);
+    const std::chrono::milliseconds m_shutdownTimeout = std::chrono::milliseconds(500);
 
     bool m_recoAsyncWaiting;
     std::shared_ptr<ISpxRecognitionResult> m_recoAsyncResult;
