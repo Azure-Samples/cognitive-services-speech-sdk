@@ -1,19 +1,18 @@
+.classpath text
+.dockerignore text
+.editorconfig text
 .gitattributes text
 .gitignore text
 .gitmodules text
-
-Makefile text
+.project text
 Dockerfile text
-.dockerignore text
+Makefile text
 gradlew text
 proguard-rules.pro text
-.classpath text
-.project text
 
 *.appxmanifest text
 *.bat text
 *.c text
-.classpath text
 *.cmd text
 *.config text
 *.cpp text
@@ -28,19 +27,24 @@ proguard-rules.pro text
 *.java text
 *.js text
 *.json text
+*.m text
 *.md text
+*.mm text
 *.nuspec text
+*.pbxproj text
 *.pl text
+*.plist text
 *.prefs text
+*.prefs text
+*.project text
 *.properties text
 *.props text
 *.ps1 text
 *.py text
-*.prefs text
-*.project text
 *.runsettings text
 *.sln text
 *.sln text
+*.storyboard text
 *.targets text
 *.template text
 *.txt text
@@ -52,27 +56,20 @@ proguard-rules.pro text
 *.xml text
 *.yml text
 
-# Objective C files, XCode files
-*.mm text
-*.m text
-*.storyboard text
-*.plist text
-*.pbxproj text
-
 # Bash and "git apply" only like Unix line endings
 *.sh text eol=lf
 *.patch text eol=lf
 
 # Binary extensions:
-*.exe binary
-*.lib binary
-*.zip binary
-*.png binary
-*.wav binary
-*.jar binary
-*.snk binary
 *.a binary
+*.exe binary
+*.jar binary
+*.lib binary
 *.pfx binary
+*.png binary
+*.snk binary
+*.wav binary
+*.zip binary
 
 # externals are ignored
 external/curl/**/* binary
