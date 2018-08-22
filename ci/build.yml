@@ -621,6 +621,16 @@ phases:
   - bash: |
       set -e -x -o pipefail
       perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)" public_samples
+      perl ci/patch-samples.pl "$(SPEECHSDK_SEMVER2NOMETA)" tests/functional/csharp/end2end/
+      # dotnet test does not allow to supply TestRunParameters from command-line?!
+      perl -pi - tests/functional/csharp/end2end/csharp.runsettings <<"SCRIPT"
+        BEGIN {
+          %A = qw(UnifiedSpeechSubscriptionKey $(KeySkyman) Region westus DeploymentId $(TEST_MODEL_ID) InputDir /test/tests/input/);
+          $keysRe = "(?:\\b" . (join "\\b|\\b", keys %A) . "\\b)";
+          $keysRe = qr/$keysRe/;
+        }
+        s/(<Parameter name="($keysRe)" value=")([^"]*)/$1.$A{$2}/ge
+      SCRIPT
       find public_samples/quickstart/csharp-dotnetcore -name \*.cs -print0 | xargs -0 perl -i -pe 's("YourServiceRegion")("westus")'
       find public_samples/quickstart/csharp-dotnetcore -name \*.cs -print0 | xargs -0 perl -i -pe 's("YourSubscriptionKey")("'$(KeySkyman)'")'
       mkdir localnuget
@@ -628,6 +638,14 @@ phases:
       DOCKER_TAG=csspeechdev_linuxoobenetcore20_x64
       DOCKER_DIR=./ci/docker/linuxoobenetcore20/x64
       ./ci/docker/build-image.sh "$DOCKER_TAG" "$DOCKER_DIR"
+      # First run the unit tests
+      docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$DOCKER_TAG" bash - <<"SCRIPT"
+        set -e -x -o pipefail
+        cd tests/functional/csharp/end2end
+        dotnet restore --no-cache --source https://api.nuget.org/v3/index.json --source /test/localnuget Microsoft.CognitiveServices.Speech.Tests.EndToEnd.csproj
+        dotnet test --framework netcoreapp2.0 --settings csharp.runsettings --logger 'trx;LogFileName=TEST-csharp-end2end-for-nupkg.trx'
+      SCRIPT
+      # Then run the end-to-end for the quickstart
       docker run --rm -i --volume "$(Build.Repository.LocalPath):/test" --workdir /test "$DOCKER_TAG" bash - <<"SCRIPT"
         set -e -x -o pipefail
         PATH_TO_AUDIO=/test/tests/input/audio/whatstheweatherlike.wav
@@ -642,6 +660,10 @@ phases:
         /test/ci/nuget/quickstart-dotnetcore-e2e.expect $PATH_TO_AUDIO dotnet helloworld/bin/Debug/netcoreapp2.0/helloworld.dll
       SCRIPT
     displayName: Test
+  - task: PublishTestResults@2
+    inputs:
+      testRunner: VSTest
+      testResultsFiles: '**/TEST-*.trx'
 
 - phase: AndroidBuild
   variables:
