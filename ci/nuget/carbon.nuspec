@@ -5,8 +5,7 @@
     <version>$Version$</version>
     <title>Microsoft Cognitive Services Speech SDK</title>
     <authors>Microsoft</authors>
-    <owners>Microsoft, Speech Services</owners>
-    <copyright>© Microsoft Corporation. All rights reserved</copyright>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <projectUrl>https://aka.ms/csspeech</projectUrl>
     <licenseUrl>https://aka.ms/csspeech/license</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
