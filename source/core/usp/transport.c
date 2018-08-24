@@ -37,6 +37,8 @@
 #include "transport.h"
 #include "uspcommon.h"
 
+#define COUNT_OF(a) (sizeof(a) / sizeof((a)[0]))
+
 // uncomment the line below to see all non-binary protocol messages in the log
 // #define LOG_TEXT_MESSAGES
 
@@ -94,7 +96,7 @@ typedef enum _TRANSPORT_STATE
 
 
 /**
-* The TransportRequest type represents a structure used to for all transport
+* The TransportRequest type represents a structure used for all transport
 * related context.
 */
 typedef struct _TransportRequest
@@ -385,48 +387,51 @@ static void OnTransportClosed(TransportRequest* request)
 // For websocket requests, the caller must ensure that the wsio instance is not
 // open when this function is called.  uws_client_open_async will fail for an already-open
 // wsio instance and we may get stuck retrying the open.
-static void OnTransportError(TransportRequest* request, TransportError err)
+static void OnTransportError(TransportRequest* request, TransportErrorInfo* errorInfo)
 {
     if (request->state == TRANSPORT_STATE_RESETTING)
     {
-        // don't propogate errors during the reset state, these errors are expected.
+        // don't propagate errors during the reset state, these errors are expected.
         return;
     }
 
     OnTransportClosed(request);
     InvalidateRequestId(request);
     if (request->onTransportError != NULL) {
-        request->onTransportError(request, err, request->context);
+        request->onTransportError(request, errorInfo, request->context);
     }
 }
 
+DEFINE_ENUM_STRINGS(WS_ERROR, WS_ERROR_VALUES);
+
 static void OnWSError(void* context, WS_ERROR errorCode)
 {
-#ifdef NO_LOGGING
-    UNUSED(errorCode);
-#endif
-
-    LogError("WS operation failed with error code=%d", errorCode);
+    LogError("WS operation failed with error code=%d(%s)", errorCode, ENUM_TO_STRING(WS_ERROR, errorCode));
 
     TransportRequest* request = (TransportRequest*)context;
     if (request)
     {
         metrics_transport_dropped();
-        OnTransportError(request, TRANSPORT_ERROR_NONE);
+        TransportErrorInfo errorInfo;
+        errorInfo.reason = TRANSPORT_ERROR_WEBSOCKET_ERROR;
+        errorInfo.errorCode = errorCode;
+        errorInfo.errorString = ENUM_TO_STRING(WS_ERROR, errorCode);
+        OnTransportError(request, &errorInfo);
     }
 }
 
 static void OnWSPeerClosed(void* context, uint16_t* closeCode, const unsigned char* extraData, size_t extraDataLength)
 {
-    // TODO: figure out what should be done with these.
-    (void)closeCode;
-    (void)extraData;
-    (void)extraDataLength;
     TransportRequest* request = (TransportRequest*)context;
     if (request)
     {
         metrics_transport_dropped();
-        OnTransportError(request, TRANSPORT_ERROR_REMOTECLOSED); // technically, not an error.
+        TransportErrorInfo errorInfo;
+        errorInfo.reason = TRANSPORT_ERROR_REMOTE_CLOSED;
+        // WebSocket close code, if present (cf. https://tools.ietf.org/html/rfc6455#section-7.4.1):
+        errorInfo.errorCode = closeCode != NULL ? *closeCode : -1;
+        errorInfo.errorString = extraDataLength > 0 ? (const char*)extraData : NULL;
+        OnTransportError(request, &errorInfo); // technically, not an error.
     }
 }
 
@@ -449,10 +454,13 @@ static void OnWSClose(void* context)
     }
 }
 
-static void OnWSOpened(void* context, WS_OPEN_RESULT open_result)
+DEFINE_ENUM_STRINGS(WS_OPEN_RESULT, WS_OPEN_RESULT_VALUES);
+
+static void OnWSOpened(void* context, WS_OPEN_RESULT_DETAILED open_result_detailed)
 {
     TransportRequest* request = (TransportRequest*)context;
-    TransportError err;
+    WS_OPEN_RESULT open_result = open_result_detailed.result;
+    char errorString[32];
 
     request->isOpen = (open_result == WS_OPEN_OK);
     if (request->isOpen)
@@ -470,21 +478,30 @@ static void OnWSOpened(void* context, WS_OPEN_RESULT open_result)
         request->state = TRANSPORT_STATE_CLOSED;
         metrics_transport_dropped();
 
-        if (open_result >= WS_OPEN_ERROR_BAD_RESPONSE_STATUS)
-        {
-            // upgrade failed with a non-101 HTTP response code, which is encoded in the open_result enum value.
-            // Bug 1352497: (open_result - WS_OPEN_ERROR_BAD_RESPONSE_STATUS) could exceed value defined by TransportError,
-            // a complete mapping needs to be done.
-            err = TRANSPORT_ERROR_NONE + (open_result - WS_OPEN_ERROR_BAD_RESPONSE_STATUS);
-        }
-        else
-        {
-            err = TRANSPORT_ERROR_CONNECTION_FAILURE;
-        }
+        LogError("WS open operation failed with result=%d(%s), code=%d[0x%08x]",
+            open_result,
+            ENUM_TO_STRING(WS_OPEN_RESULT, open_result),
+            open_result_detailed.code,
+            open_result_detailed.code);
 
         if (request->onTransportError)
         {
-            request->onTransportError((TransportHandle)request, err, request->context);
+            TransportErrorInfo errorInfo;
+            if (open_result == WS_OPEN_ERROR_BAD_RESPONSE_STATUS)
+            {
+                errorInfo.reason = TRANSPORT_ERROR_WEBSOCKET_UPGRADE;
+                errorInfo.errorCode = open_result_detailed.code; // HTTP status
+                errorInfo.errorString = NULL;
+            }
+            else
+            {
+                errorInfo.reason = TRANSPORT_ERROR_CONNECTION_FAILURE;
+                errorInfo.errorCode = open_result_detailed.result;
+                errorInfo.errorString = errorString;
+                (void)snprintf(errorString, COUNT_OF(errorString) - 1, "%d",
+                    open_result_detailed.code);
+            }
+            request->onTransportError((TransportHandle)request, &errorInfo, request->context);
         }
     }
 }
@@ -492,6 +509,9 @@ static void OnWSOpened(void* context, WS_OPEN_RESULT open_result)
 static void OnWSFrameSent(void* context, WS_SEND_FRAME_RESULT sendResult)
 {
     (void)sendResult;
+
+    // TODO ok to ignore?
+
     TransportPacket *msg = (TransportPacket*)context;
     // the first byte is the message type
     if (msg->msgtype != METRIC_MESSAGE_TYPE_INVALID)
@@ -621,7 +641,11 @@ static void DnsComplete(DnsCacheHandle handle, int error, DNS_RESULT_HANDLE resu
             // open, and it's safe to call OnTransportError.  We do the DNS
             // check before opening the connection.  We assert about this with
             // the TRANSPORT_STATE_NETWORK_CHECKING check above.
-            OnTransportError(request, TRANSPORT_ERROR_DNS_FAILURE);
+            TransportErrorInfo errorInfo;
+            errorInfo.reason = TRANSPORT_ERROR_DNS_FAILURE;
+            errorInfo.errorCode = error;
+            errorInfo.errorString = NULL;
+            OnTransportError(request, &errorInfo);
         }
         else
         {
@@ -709,7 +733,7 @@ static int ProcessPacket(TransportRequest* request, TransportPacket* packet)
         packet);
     if (err)
     {
-        LogError("WS trasfer failed with %d", err);
+        LogError("WS transfer failed with %d", err);
         free(packet);
     }
     return err;
@@ -996,6 +1020,7 @@ void TransportRequestDestroy(TransportHandle transportHandle)
             if (request->isOpen)
             {
                 (void)uws_client_close_async(request->ws.WSHandle, OnWSClose, request);
+                // TODO ok to ignore return code?
                 while (request->isOpen)
                 {
                     uws_client_dowork(request->ws.WSHandle);
@@ -1123,10 +1148,8 @@ static int TransportOpen(TransportRequest* request)
             {
                 metrics_transport_start(request->telemetry, request->connectionId);
                 const int result = uws_client_open_async(request->ws.WSHandle,
-                    OnWSOpened,
-                    request,
-                    OnWSFrameReceived,
-                    request,
+                    OnWSOpened, request,
+                    OnWSFrameReceived, request,
                     OnWSPeerClosed, request,
                     OnWSError, request);
                 if (result)
@@ -1222,7 +1245,7 @@ int TransportRequestPrepare(TransportHandle transportHandle)
             if (closeResult)
             {
                 // we failed to close the ws connection. Destroy it instead.
-
+                // TODO is this complete? bubble up error?
             }
         }
     }
@@ -1498,10 +1521,14 @@ void TransportDoWork(TransportHandle transportHandle)
             {
                 metrics_transport_state_start(packet->msgtype);
             }
-
-            if (ProcessPacket(request, packet))
+            int res = ProcessPacket(request, packet);
+            if (res != 0)
             {
-                OnTransportError(request, TRANSPORT_ERROR_NONE);
+                TransportErrorInfo errorInfo;
+                errorInfo.reason = TRANSPORT_ERROR_WEBSOCKET_SEND_FRAME;
+                errorInfo.errorCode = res;
+                errorInfo.errorString = NULL;
+                OnTransportError(request, &errorInfo);
             }
             singlylinkedlist_remove(request->queue, list_item);
         }

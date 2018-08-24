@@ -35,12 +35,12 @@ typedef struct _IOBUFFER
 
 /**
 * Creates a new IOBUFFER.
-* @return An pointer to the new IOBUFFER.
+* @return A pointer to the new IOBUFFER.
 */
 IOBUFFER* IoBufferNew();
 
 /**
-* Deletes a IOBUFFER.
+* Deletes an IOBUFFER.
 * @param buffer The pointer to the IOBUFFER to be deleted.
 */
 void IoBufferDelete(IOBUFFER* buffer);

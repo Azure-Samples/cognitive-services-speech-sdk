@@ -37,7 +37,7 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
 
 /**
  * Destroys a transport request.
- * @param transportHandle The tranport handle representing the request to be destroyed.
+ * @param transportHandle The transport handle representing the request to be destroyed.
  */
 void TransportRequestDestroy(TransportHandle transportHandle);
 
@@ -95,34 +95,72 @@ int TransportStreamFlush(TransportHandle transportHandle);
 
 /**
  * Processes any outstanding operations that need attention.
- * @param tranportHandle The request to process.
+ * @param transportHandle The request to process.
  */
 void TransportDoWork(TransportHandle transportHandle);
 
-// Bug https://msasg.visualstudio.com/Skyman/_workitems/edit/1352497: 
-// Error erturned by uws_client could be out of value defined below.
 typedef enum _TransportError
 {
-    TRANSPORT_ERROR_NONE = 0,
-    TRANSPORT_ERROR_REMOTECLOSED,
+    TRANSPORT_ERROR_UNKNOWN,
+    TRANSPORT_ERROR_REMOTE_CLOSED,
     TRANSPORT_ERROR_CONNECTION_FAILURE,
-    TRANSPORT_ERROR_DNS_FAILURE,
-    TRANSPORT_ERROR_HTTP_BADREQUEST = 400,
-    TRANSPORT_ERROR_HTTP_UNAUTHORIZED = 401,
-    TRANSPORT_ERROR_HTTP_FORBIDDEN = 403,
+    TRANSPORT_ERROR_WEBSOCKET_UPGRADE,
+    TRANSPORT_ERROR_WEBSOCKET_SEND_FRAME,
+    TRANSPORT_ERROR_WEBSOCKET_ERROR,
+    TRANSPORT_ERROR_DNS_FAILURE
 } TransportError;
+
+typedef enum _HttpStatusCode 
+{
+    HTTP_BADREQUEST = 400,
+    HTTP_UNAUTHORIZED = 401,
+    HTTP_FORBIDDEN = 403,
+    HTTP_TOO_MANY_REQUESTS = 429,
+} HttpStatusCode;
+
+/** Transport error with additional information.
+ *
+ * For internal documentation, here is a rough overview on what errorCode contains:
+ *
+ * For TRANSPORT_ERROR_REMOTE_CLOSED, it should be a WebSocket close code if
+ * there was one or -1 if none was received. See CLOSE_* in uws_client.h or
+ * WebSocket RFC.
+ *
+ * For TRANSPORT_ERROR_CONNECTION_FAILURE, it is a WS_OPEN_RESULT. (The
+ * errorString should contain an internal numerical code as well. There are
+ * a variety of sources for this one, including native socket operation errors.)
+ *
+ * For TRANSPORT_ERROR_WEBSOCKET_UPGRADE, it is an HTTP status code != 101,
+ * received as a upgrade response.
+ *
+ * For TRANSPORT_ERROR_WEBSOCKET_SEND_FRAME and an HTTP connection it's -1.
+ *
+ * For TRANSPORT_ERROR_WEBSOCKET_SEND_FRAME and an WebSocket connection it's 1
+ * or a line number where the error originated (e.g., from uws_client.c).
+ *
+ * For TRANSPORT_ERROR_WEBSOCKET_ERROR, it is a WS_ERROR.
+ *
+ * For TRANSPORT_ERROR_DNS_FAILURE, which cannot trigger on Windows, is is a
+ * getaddrinfo() return value.
+ */
+typedef struct _TransportErrorInfo
+{
+    TransportError reason;
+    int errorCode;
+    const char *errorString;
+} TransportErrorInfo;
 
 /**
  * The TransportErrorCallback type represents an application-defined
  * status callback function used for signaling when the transport has failed.
  * @param transportHandle The transport handle.
- * @param reason The reeason for the error.
+ * @param errorInfo Pointer to struct containing transport error information (or NULL).
  * @param context A pointer to the application-defined callback context.
  */
-typedef void(*TransportErrorCallback)(TransportHandle transportHandle, TransportError reason, void* context);
+typedef void(*TransportErrorCallback)(TransportHandle transportHandle, TransportErrorInfo* errorInfo, void* context);
 
 /**
- * The PTRANSPORT_RECV_CALLBACK type represents an application-defined
+ * The TransportReponseCallback type represents an application-defined
  * status callback function used for signaling when data has been received.
  * @param transportHandle The transport handle.
  * @param responseHeader A response header handle.
@@ -163,8 +201,9 @@ void TransportCreateRequestId(TransportHandle transportHandle);
 const char* TransportGetRequestId(TransportHandle transportHandle);
 
 /**
-* sets the DNS cache on transport
+* Sets the DNS cache on transport
 * @param transportHandle The transport handle.
+* @param dnsCache The DNS cache handle.
 */
 void TransportSetDnsCache(TransportHandle transportHandle, DnsCacheHandle dnsCache);
 
@@ -172,7 +211,7 @@ void TransportSetDnsCache(TransportHandle transportHandle, DnsCacheHandle dnsCac
  * Sends the provided buffer content as a telemetry event (using 'telemetry' message path).
  * @param transportHandle Transport handle.
  * @param buffer The buffer to write.
- * @param bufferSize Size of the buffer in bytes.
+ * @param bytesToWrite Size of the buffer in bytes.
  * @param requestId Request id to tag the telemetry message with.
  * @return A return code or zero if successful.
  */

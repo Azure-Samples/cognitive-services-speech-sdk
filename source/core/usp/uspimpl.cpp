@@ -68,7 +68,7 @@ template <class T>
 static void throw_if_null(const T* ptr, const string& name)
 {
     if (ptr == NULL)
-    { 
+    {
         ThrowInvalidArgumentException("The argument '" + name +"' is null."); \
     }
 }
@@ -532,48 +532,80 @@ void Connection::Impl::QueueAudioEnd()
 }
 
 // Callback for transport errors
-void Connection::Impl::OnTransportError(TransportHandle transportHandle, TransportError reason, void* context)
+void Connection::Impl::OnTransportError(TransportHandle transportHandle, TransportErrorInfo* errorInfo, void* context)
 {
     (void)transportHandle;
     throw_if_null(context, "context");
 
     Connection::Impl *connection = static_cast<Connection::Impl*>(context);
-    LogInfo("TS:%" PRIu64 ", TransportError: connection:0x%x, reason=%d.", connection->getTimestamp(), connection, reason);
+
+    auto errorStr = (errorInfo->errorString != nullptr) ? errorInfo->errorString : "";
+    LogInfo("TS:%" PRIu64 ", TransportError: connection:0x%x, reason=%d, code=%d [0x%08x], string=%s",
+        connection->getTimestamp(), connection, errorInfo->reason, errorInfo->errorCode, errorInfo->errorCode, errorStr);
 
     auto callbacks = connection->m_config.m_callbacks;
 
-    switch (reason)
+    switch (errorInfo->reason)
     {
-    case TRANSPORT_ERROR_NONE:
-        connection->Invoke([&] { callbacks->OnError(true, "Unknown transport error."); });
-        break;
-
-    case TRANSPORT_ERROR_HTTP_BADREQUEST:
-        connection->Invoke([&] { callbacks->OnError(true, "WebSocket Upgrade failed with a bad request (400). Please check the language name and deployment id, and ensure the deployment id (if used) is correctly associated with the provided subscription key."); });
-        break;
-
-    case TRANSPORT_ERROR_HTTP_UNAUTHORIZED:
-        connection->Invoke([&] { callbacks->OnError(true, "WebSocket Upgrade failed with an authentication error (401). Please check the subscription key or the authorization token, and the region name."); });
-        break;
-
-    case TRANSPORT_ERROR_HTTP_FORBIDDEN:
-        connection->Invoke([&] { callbacks->OnError(true, "WebSocket Upgrade failed with an authentication error (403). Please check the subscription key or the authorization token, and the region name."); });
+    case TRANSPORT_ERROR_REMOTE_CLOSED:
+        connection->Invoke([&] {
+            callbacks->OnError(true, "Connection was closed by the remote host. Error code: " + to_string(errorInfo->errorCode) + ". Error details: " + errorStr);
+        });
         break;
 
     case TRANSPORT_ERROR_CONNECTION_FAILURE:
-        connection->Invoke([&] { callbacks->OnError(true, "Connection failed (no connection to the remote host). Please check network connection, firewall setting, and the region name used to create speech factory."); });
+        connection->Invoke([&] { 
+            callbacks->OnError(true,
+                std::string("Connection failed (no connection to the remote host). Internal error: ") +
+                std::to_string(errorInfo->errorCode) + ". Error details: " + errorStr +
+                std::string(". Please check network connection, firewall setting, and the region name used to create speech factory.")); });
+        break;
+
+    case TRANSPORT_ERROR_WEBSOCKET_UPGRADE:
+        switch (errorInfo->errorCode)
+        {
+        case HTTP_BADREQUEST:
+            connection->Invoke([&] { callbacks->OnError(true, "WebSocket Upgrade failed with a bad request (400). Please check the language name and deployment id, and ensure the deployment id (if used) is correctly associated with the provided subscription key."); });
+            break;
+        case HTTP_UNAUTHORIZED:
+            connection->Invoke([&] { callbacks->OnError(true, "WebSocket Upgrade failed with an authentication error (401). Please check the subscription key or the authorization token, and the region name."); });
+            break;
+        case HTTP_FORBIDDEN:
+            connection->Invoke([&] { callbacks->OnError(true, "WebSocket Upgrade failed with an authentication error (403). Please check the subscription key or the authorization token, and the region name."); });
+            break;
+        case HTTP_TOO_MANY_REQUESTS:
+            connection->Invoke([&] { callbacks->OnError(true, "WebSocket Upgrade failed with too many requests error (429). Please check concurrency limits and usage on your subscription key."); });
+            break;
+        default:
+            connection->Invoke([&] { callbacks->OnError(true, "WebSocket Upgrade failed with HTTP status code: " + std::to_string(errorInfo->errorCode)); });
+            break;
+        }
+        break;
+
+    case TRANSPORT_ERROR_WEBSOCKET_SEND_FRAME:
+        connection->Invoke([&] {
+            callbacks->OnError(true,
+                std::string("Failure while sending a frame over the WebSocket connection. Internal error: ") +
+                std::to_string(errorInfo->errorCode) + ". Error details: " + errorStr);
+        });
+        break;
+
+    case TRANSPORT_ERROR_WEBSOCKET_ERROR:
+        connection->Invoke([&] { callbacks->OnError(true,
+            std::string("WebSocket operation failed. Internal error: ") +
+            std::to_string(errorInfo->errorCode) + ". Error details: " + errorStr);
+        });
         break;
 
     case TRANSPORT_ERROR_DNS_FAILURE:
-        connection->Invoke([&] { callbacks->OnError(true, "Connection failed (the remote host did not respond)."); });
-        break;
-
-    case TRANSPORT_ERROR_REMOTECLOSED:
-        connection->Invoke([&] { callbacks->OnError(true, "Connection was closed by the remote host."); });
+        connection->Invoke([&] { callbacks->OnError(true,
+            std::string("DNS connection failed (the remote host did not respond). Internal error: ") + std::to_string(errorInfo->errorCode));
+        });
         break;
 
     default:
-        connection->Invoke([&] { callbacks->OnError(true, "Communication Error. Error code: " + to_string(reason)); });
+    case TRANSPORT_ERROR_UNKNOWN:
+        connection->Invoke([&] { callbacks->OnError(true, "Unknown transport error."); });
         break;
     }
 
