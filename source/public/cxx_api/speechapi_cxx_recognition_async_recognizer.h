@@ -273,7 +273,7 @@ protected:
         }
     }
 
-    virtual void RecogntionEventConnectionsChanged(const EventSignal<const RecognitionEventArgs&>& recognitionEvent)
+    virtual void RecognitionEventConnectionsChanged(const EventSignal<const RecognitionEventArgs&>& recognitionEvent)
     {
         if (m_hreco != SPXHANDLE_INVALID)
         {
@@ -405,7 +405,7 @@ private:
 
     inline std::function<void(const EventSignal<const RecognitionEventArgs&>&)> GetRecognitionEventConnectionsChangedCallback()
     {
-        return [=](const EventSignal<const RecognitionEventArgs&>& recoEvent) { this->RecogntionEventConnectionsChanged(recoEvent); };
+        return [=](const EventSignal<const RecognitionEventArgs&>& recoEvent) { this->RecognitionEventConnectionsChanged(recoEvent); };
     }
 };
 

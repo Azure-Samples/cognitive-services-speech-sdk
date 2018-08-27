@@ -88,7 +88,7 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
         }
         // The TaskCompletionSource to stop recognition.
         private TaskCompletionSource<int> stopRecognitionTaskCompletionSource;
-        private async void SpeechRecogntionFromFile_ButtonClicked()
+        private async void SpeechRecognitionFromFile_ButtonClicked()
         {
             stopRecognitionTaskCompletionSource = new TaskCompletionSource<int>();
             if (!AreKeysValid())
@@ -155,7 +155,7 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
                 NotifyUser($"Can't open {filename} !", NotifyType.ErrorMessage);
             }
         }
-        private async void SpeechRecogntionFromStream_ButtonClicked(object sender, RoutedEventArgs e)
+        private async void SpeechRecognitionFromStream_ButtonClicked(object sender, RoutedEventArgs e)
         {
             stopRecognitionTaskCompletionSource = new TaskCompletionSource<int>();
             AudioInputStream audioStream = null;
