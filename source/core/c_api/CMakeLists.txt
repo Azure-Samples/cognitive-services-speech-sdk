@@ -40,11 +40,14 @@ source_group("Source Files" FILES ${SOURCES})
 
 source_group("Speech C API headers" FILES ${SPEECH_C_API_HEADERS})
 
-
-add_library(c_api OBJECT 
+add_library(c_api OBJECT
     ${SPEECH_C_API_HEADERS}
     ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES}
     )
+
+if(WIN32 AND SPECTRE_MITIGATION)
+    set_property(TARGET c_api PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
+endif()
 
 set_target_properties (c_api PROPERTIES
     FOLDER carbon_libs

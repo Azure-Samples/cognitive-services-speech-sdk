@@ -42,6 +42,10 @@ source_group("Source Files" FILES ${SOURCES})
 
 add_library(${PROJECT_NAME} SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES} $<TARGET_OBJECTS:c_api>)
 
+if(WIN32 AND SPECTRE_MITIGATION)
+    set_property(TARGET ${PROJECT_NAME} PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
+endif()
+
 if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
 if (${use_openssl})
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ignore:4099")

@@ -6,6 +6,7 @@
 namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
 {
     using System;
+    using System.Globalization;
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Diagnostics;
@@ -33,7 +34,7 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
-        /// Helper function for INotifyPropertyChanged interface 
+        /// Helper function for INotifyPropertyChanged interface
         /// </summary>
         /// <typeparam name="T">Property type</typeparam>
         /// <param name="caller">Property name</param>
@@ -109,7 +110,7 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
         /// <param name="args">The arguments.</param>
         private void WriteLine(TextBox log, string format, params object[] args)
         {
-            var formattedStr = string.Format(format, args);
+            var formattedStr = string.Format(CultureInfo.InvariantCulture, format, args);
             Trace.WriteLine(formattedStr);
             Dispatcher.Invoke(() =>
             {
@@ -192,7 +193,7 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
             voiceMap.Add("ru-RU", "ru-RU-Irina");
             voiceMap.Add("es-ES", "es-ES-Laura");
         }
-    
+
         #endregion
 
         private TranslationRecognizer recognizer;

@@ -57,7 +57,18 @@ if("${CMAKE_VERSION}" VERSION_GREATER 3.8)
 else()
     swig_add_module(${JAVA_BINDINGS} java ${SWIG_JAVA_INTERFACE})
 endif()
+
+if(WIN32 AND SPECTRE_MITIGATION)
+    set_property(TARGET ${JAVA_BINDINGS} PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
+endif()
+
 swig_link_libraries(${JAVA_BINDINGS} ${SPEECHSDK_CORE_LIBRARY})
+
+if(WIN32)
+    # Ensure we build with debug information (TODO global setting does not apply?)
+    set_target_properties(${JAVA_BINDINGS} PROPERTIES LINK_FLAGS "/DEBUG /OPT:REF /OPT:ICF")
+endif()
+
 set_target_properties(${SWIG_MODULE_${JAVA_BINDINGS}_REAL_NAME}
   PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}

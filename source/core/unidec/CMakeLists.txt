@@ -37,6 +37,10 @@ endif()
 
 add_library(unidec SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
+if(WIN32 AND SPECTRE_MITIGATION)
+    set_property(TARGET unidec PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
+endif()
+
 set_target_properties (unidec PROPERTIES
     DEFINE_SYMBOL  "SPX_CONFIG_EXPORTAPIS" 
     OUTPUT_NAME "carbon-unidec"

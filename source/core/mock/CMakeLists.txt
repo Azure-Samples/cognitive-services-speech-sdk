@@ -41,6 +41,10 @@ source_group("Source Files" FILES ${SOURCES})
 
 add_library(mock SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
+if(WIN32 AND SPECTRE_MITIGATION)
+    set_property(TARGET mock PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
+endif()
+
 set_target_properties (mock PROPERTIES
     DEFINE_SYMBOL  "SPX_CONFIG_EXPORTAPIS" 
     OUTPUT_NAME "carbon-mock"

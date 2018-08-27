@@ -12,6 +12,10 @@ include_directories ("${COMMON}/include")
 
 add_library(parson STATIC "${CARBON_ROOT}/external/parson/parson.c")
 
+if(WIN32 AND SPECTRE_MITIGATION)
+    set_property(TARGET parson PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
+endif()
+
 if(MSVC)
   set_target_properties (parson PROPERTIES
       COMPILE_FLAGS "/wd4232"
@@ -56,6 +60,10 @@ source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
 source_group("Source Files" FILES ${SOURCES})
 
 add_library(usp STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
+
+if(WIN32 AND SPECTRE_MITIGATION)
+    set_property(TARGET usp PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
+endif()
 
 set(USP_LIBS ${AZURE_SHARED_LIB} parson)
 

@@ -13,6 +13,8 @@ message("BUILD_PYTHON=${BUILD_PYTHON}")
 message("BUILD_CSHARP=${BUILD_CSHARP}")
 message("BUILD_JAVA=${BUILD_JAVA}")
 
+option(SPECTRE_MITIGATION "Build with Spectre mitigation" OFF)
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -47,17 +49,23 @@ if(MSVC)
   # Force to always compile with W4
   # first remove all possible warning settings to avoid warning D9025
   string(REGEX REPLACE "/W[0-3]" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+  string(REGEX REPLACE "/W[0-3]" "" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
   # then add warning level 4 flags
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4 /WX")
   # disable precompiled headers (for now) to allow build in IDE environment
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Y-")
 
   # add control flow guard
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /guard:cf")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /guard:cf")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /guard:cf")
 
   # make sure we generate pdbs for release as well
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
+  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /Zi")
   set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
+
   # add flags for windows store app
   if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /O2")
@@ -74,7 +82,7 @@ elseif(ANDROID)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 endif()
 
-# Android build complains about 
+# Android build complains about
 # <built-in>: In function 'float abs(float)':
 # <built-in>: warning: conflicts with previous declaration here [-Wattributes]
 # Added -Wno-attributes to suppress it.

@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -177,7 +178,7 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
             StorageFile file = await picker.PickSingleFileAsync();
             if (file == null)
             {
-                string s = string.Format("Can't open {0} !", file.Path);
+                string s = string.Format(CultureInfo.InvariantCulture, "Can't open {0} !", file.Path);
                 NotifyUser(s, NotifyType.ErrorMessage);
                 return;
             }

@@ -76,6 +76,7 @@ variables:
     ]
   SPEECHSDK_MAVEN_ARTIFACT_ID: client-sdk
   SPEECHSDK_MAVEN_GROUP_ID: com.microsoft.cognitiveservices.speech
+  SPEECHSDK_NUGET_VERSION: 4.6
 
 phases:
 
@@ -100,6 +101,175 @@ phases:
     inputs:
       filePath: ci/check-git-head.sh
     displayName: Repository checks
+
+- phase: WindowsSdlBuild
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsSdlBuild '))
+  queue:
+    name: Hosted VS2017
+    timeoutInMinutes: 120
+  variables:
+    BuildPlatform: x64
+    BuildConfiguration: Release
+  steps:
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Set Windows target platform (Windows-x64)
+    inputs:
+      type: InlineScript
+      script: |
+        . ci/functions.sh
+        TARGET=Windows-x64
+        [[ "$(BuildPlatform)" == Win32 ]] && TARGET=Windows-x86
+        vsts_setvar SPEECHSDK_TARGET_PLATFORM "$TARGET"
+        vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
+  - bash: ./ci/set-variables.sh
+    displayName: Set variables
+  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+    displayName: Install build dependencies
+    inputs:
+      type: FilePath
+      scriptPath: 'ci/install-build-dependencies.sh'
+  - script: |
+      start /wait /d "%ProgramFiles(x86)%\Microsoft Visual Studio\Installer" vs_installer.exe ^
+        modify ^
+        --installPath "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise" ^
+        --add Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre ^
+        --passive --norestart
+    displayName: Install Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre VS component
+    condition: eq(variables['SPEECHSDK_SPECTRE_MITIGATION'],'true')
+  - task: CmdLine@1
+    displayName: Generate set_cmake_arch.bat
+    inputs:
+      filename: echo
+      arguments: 'IF $(BuildPlatform)==x64 (set CMakeArch=15 Win64) ELSE (set CMakeArch=15) > set_cmake_arch.bat'
+      failOnStandardError: true
+  - task: BatchScript@1
+    displayName: Run set_cmake_arch.bat
+    inputs:
+      filename: 'set_cmake_arch.bat'
+      modifyEnvironment: true
+      failOnStandardError: true
+  - task: NuGetToolInstaller@0
+    displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
+    inputs:
+      versionSpec: $(SPEECHSDK_NUGET_VERSION)
+  - task: CMake@1
+    displayName: Generate solution
+    inputs:
+      workingDirectory: 'build/$(BuildPlatform)'
+      cmakeArgs: '-G "Visual Studio $(CMakeArch)" -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION) ../..'
+  - task: VSBuild@1
+    displayName: Build solution
+    inputs:
+      solution: 'build/$(BuildPlatform)/carbon.sln'
+      platform: '$(BuildPlatform)'
+      configuration: '$(BuildConfiguration)'
+      clean: true
+      maximumCpuCount: true
+      # Needed for SDL:
+      createLogFile: true
+  # Checks BEGIN
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@2
+    displayName: 'Run the PREfast SDL Native Rules for MSBuild'
+    continueOnError: true
+    condition: eq(variables['SPEECHSK_SDL_ALL'],'true')
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
+    displayName: 'Run Roslyn Analyzers'
+    continueOnError: true
+    condition: succeededOrFailed()
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-binskim.BinSkim@3
+    displayName: 'BinSkim (can pass only with Spectre mitigation)'
+    inputs:
+      arguments: 'analyze build/$(BuildPlatform)/bin/$(BuildConfiguration)/*.dll --recurse'
+    continueOnError: true
+    condition: eq(variables['SPEECHSDK_SPECTRE_MITIGATION'],'true')
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-antimalware.AntiMalware@3
+    displayName: 'AntiMalware (disabled - determine host)'
+    inputs:
+      FileDirPath: '.'
+      EnableServices: true
+      SignatureFreshness: ThreeDays
+      TreatStaleSignatureAs: Warning
+    continueOnError: true
+    condition: succeededOrFailed()
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-apiscan.APIScan@1
+    displayName: 'APIScan ToDo'
+    inputs:
+      softwareName: 'Cognitive Services Speech SDK'
+      softwareVersionNum: 1.0
+      isLargeApp: false
+    enabled: false
+    continueOnError: true
+    condition: succeededOrFailed()
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
+    displayName: 'CredScan (source-scan, dir: all)'
+    inputs:
+      suppressionsFile: 'ci/sdl/LocalSuppression.json'
+      debugMode: false
+    continueOnError: true
+    condition: succeededOrFailed()
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@1
+    displayName: 'PoliCheck (source-scan, dir: source)'
+    inputs:
+      targetType: F
+      targetArgument: 'source'
+      result: PoliCheckSource.xml
+      optionsFC: 1
+    continueOnError: true
+    condition: succeededOrFailed()
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@1
+    displayName: 'PoliCheck (source-scan, dir: public samples)'
+    inputs:
+      targetType: F
+      targetArgument: 'public_samples'
+      termTypeT: 0001aCustom
+      result: PoliCheckSamples.xml
+      SOMEnabled: true
+      optionsFC: 1
+    continueOnError: true
+    condition: succeededOrFailed()
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-fxcop.FxCop@2
+    displayName: 'Run FxCop'
+    inputs:
+      inputType: Basic
+      targets: 'build/$(BuildPlatform)/bin/$(BuildConfiguration)/net461'
+      disableRules: 'Microsoft.Globalization#CA2101'
+      verbose: true
+    continueOnError: true
+    condition: succeededOrFailed()
+  - bash: rm -rf build/$(BuildPlatform)/source/bindings/java/javadoc
+    displayName: Remove JavaDoc folder
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-moderncop.ModernCop@2
+    displayName: 'ModernCop (managed JS code)'
+    inputs:
+      arguments: '/dir:"$(Build.SourcesDirectory)" /groups:sdl /setting:JS2085.EnableStrictMode.EnforceModulePattern=false'
+    continueOnError: true
+    condition: succeededOrFailed()
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-autoapplicability.AutoApplicability@1
+    displayName: 'Run AutoApplicability'
+    inputs:
+      ApplyRules: All
+      ExternalRelease: true
+    continueOnError: true
+    condition: succeededOrFailed()
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-tslint.TSLint@1
+    displayName: 'Run TSLint'
+    inputs:
+      Ruleset: tslatest
+    continueOnError: true
+    condition: succeededOrFailed()
+  # Checks END
+  # Publish artifact and fail the build if necessary
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
+    displayName: 'Publish Security Analysis Logs'
+    inputs:
+      AllTools: true
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
+    displayName: 'SDL: Post Analysis'
+    inputs:
+      AllTools: true
+    continueOnError: true
+    condition: succeededOrFailed()
 
 - phase: WindowsBuild
   dependsOn: Pre
@@ -132,16 +302,24 @@ phases:
         [[ "$(BuildPlatform)" == Win32 ]] && TARGET=Windows-x86
         vsts_setvar SPEECHSDK_TARGET_PLATFORM "$TARGET"
         vsts_setvar SPEECHSDK_BUILD_CONFIGURATION "$(BuildConfiguration)"
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  - bash: ./ci/set-variables.sh
     displayName: Set variables
-    inputs:
-      type: FilePath
-      scriptPath: 'ci/set-variables.sh'
+  - bash: . ./ci/functions.sh && vsts_setvar SPEECHSDK_SPECTRE_MITIGATION false
+    displayName: Reset SPEECHSDK_SPECTRE_MITIGATION in Debug
+    condition: eq(variables['BuildConfiguration'], 'Debug')
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Install build dependencies
     inputs:
       type: FilePath
       scriptPath: 'ci/install-build-dependencies.sh'
+  - script: |
+      start /wait /d "%ProgramFiles(x86)%\Microsoft Visual Studio\Installer" vs_installer.exe ^
+        modify ^
+        --installPath "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise" ^
+        --add Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre ^
+        --passive --norestart
+    displayName: Install Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre VS component
+    condition: eq(variables['SPEECHSDK_SPECTRE_MITIGATION'],'true')
   - task: CmdLine@1
     displayName: Generate set_cmake_arch.bat
     inputs:
@@ -154,15 +332,15 @@ phases:
       filename: 'set_cmake_arch.bat'
       modifyEnvironment: true
       failOnStandardError: true
+  - task: NuGetToolInstaller@0
+    displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
+    inputs:
+      versionSpec: $(SPEECHSDK_NUGET_VERSION)
   - task: CMake@1
     displayName: Generate solution
     inputs:
       workingDirectory: 'build/$(BuildPlatform)'
-      cmakeArgs: '-G "Visual Studio $(CMakeArch)" ../..'
-  - task: NuGetCommand@2
-    displayName: NuGet restore
-    inputs:
-      restoreSolution: 'build/$(BuildPlatform)/carbon.sln'
+      cmakeArgs: '-G "Visual Studio $(CMakeArch)" -DSPECTRE_MITIGATION=$(SPEECHSDK_SPECTRE_MITIGATION) ../..'
   - task: VSBuild@1
     displayName: Build solution
     inputs:
@@ -508,9 +686,9 @@ phases:
       artifactName: WindowsUwp
       downloadPath: $(System.ArtifactsDirectory)\In
   - task: NuGetToolInstaller@0
-    displayName: Use NuGet 4.6.*
+    displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
     inputs:
-      versionSpec: 4.6
+      versionSpec: $(SPEECHSDK_NUGET_VERSION)
   - bash: |
       . ci/functions.sh
       vsts_setvar ZipBasename "SpeechSDK-Samples-$(SPEECHSDK_SEMVER2NOMETA)"

@@ -46,17 +46,23 @@ include_directories("${SRC_DIR}/..")
 if(WIN32)
   swig_add_library(${CSHARP_BINDINGS} LANGUAGE csharp SOURCES ${SOURCES})
   swig_link_libraries(${CSHARP_BINDINGS} ${SPEECHSDK_CORE_LIBRARY})
+  if(SPECTRE_MITIGATION)
+    set_property(TARGET ${CSHARP_BINDINGS} PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
+  endif()
+  # Ensure we build with debug information (TODO global setting does not apply?)
+  set_target_properties(${CSHARP_BINDINGS} PROPERTIES LINK_FLAGS "/DEBUG /OPT:REF /OPT:ICF")
 else()
   # Due to .netcore loading on Linux, it currently does not support side-by-side located
   # native dependencies, so we compile everything into a single so.
   swig_add_library(${CSHARP_BINDINGS} LANGUAGE csharp SOURCES ${SOURCES} $<TARGET_OBJECTS:c_api>)
   swig_link_libraries(${CSHARP_BINDINGS}
     PRIVATE sr
-    PRIVATE audio 
+    PRIVATE audio
     PRIVATE usp
-    PRIVATE common 
+    PRIVATE common
     PRIVATE factory)
 endif()
+
 
 set_target_properties(${SWIG_MODULE_${CSHARP_BINDINGS}_REAL_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 set_target_properties(${SWIG_MODULE_${CSHARP_BINDINGS}_REAL_NAME} PROPERTIES
@@ -71,8 +77,8 @@ if(WIN32)
     set(SWIG_CS_SOURCES ${CSHARP_SOURCE_DIRECTORY}/*.cs)
     set(ALL_CSHARP_SOURCES ${SRC_DIR}/*.cs ${SWIG_CS_SOURCES})
 
-    set(CSHARP_PROJECT_PATH ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}) 
-    
+    set(CSHARP_PROJECT_PATH ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME})
+
     set(CSHARP_LIB_CUSTOM "${PROJECT_NAME}_CUSTOM" CACHE INTERNAL "")
     add_custom_target(${CSHARP_LIB_CUSTOM} ALL
       COMMAND ${CMAKE_MAKE_PROGRAM} /t:Restore "${CSHARP_PROJECT_PATH}.csproj"
@@ -81,9 +87,10 @@ if(WIN32)
       COMMAND del /S /Q obj
       COMMENT "Building external C# project")
     add_dependencies(${CSHARP_LIB_CUSTOM} ${CSHARP_BINDINGS})
-    
+ 
     enable_language(CSharp)
     add_library(${CSHARP_LIB} SHARED IMPORTED GLOBAL)
+
     add_dependencies(${CSHARP_LIB} ${CSHARP_LIB_CUSTOM})
     set_target_properties(${CSHARP_LIB} PROPERTIES IMPORTED_LOCATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)/net46/${PROJECT_NAME}.dll")
 endif()

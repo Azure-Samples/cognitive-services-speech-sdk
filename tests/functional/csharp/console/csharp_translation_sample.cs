@@ -43,12 +43,12 @@ namespace MicrosoftSpeechSDKSamples
 
         private static void MyErrorEventHandler(object sender, RecognitionErrorEventArgs e)
         {
-            Console.WriteLine(String.Format("Translation: error occurred. SessionId: {0}, Reason: {1}", e.SessionId, e.Status));
+            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Translation: error occurred. SessionId: {0}, Reason: {1}", e.SessionId, e.Status));
         }
 
         private static void MySpeechEndDetectedHandler(object sender, RecognitionEventArgs e)
         {
-            Console.WriteLine(String.Format("Translation: Speech detected event: {0}.", e.ToString()));
+            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Translation: Speech detected event: {0}.", e.ToString()));
             if (e.EventType == RecognitionEventType.SpeechEndDetectedEvent)
             {
                 translationEndTaskCompletionSource.TrySetResult(0);

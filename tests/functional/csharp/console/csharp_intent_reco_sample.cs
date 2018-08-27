@@ -6,6 +6,7 @@
 //
 
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Intent;
@@ -16,22 +17,22 @@ namespace MicrosoftSpeechSDKSamples
     {
         private static void MyIntermediateResultEventHandler(object sender, IntentRecognitionResultEventArgs e)
         {
-            Console.WriteLine(String.Format("Intent recognition: intermediate rsult: {0} ", e.ToString()));
+            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: intermediate rsult: {0} ", e.ToString()));
         }
 
         private static void MyFinalResultEventHandler(object sender, IntentRecognitionResultEventArgs e)
         {
-            Console.WriteLine(String.Format("Intent recognition: final result: {0} ", e.ToString()));
+            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: final result: {0} ", e.ToString()));
         }
 
         private static void MyErrorEventHandler(object sender, RecognitionErrorEventArgs e)
         {
-            Console.WriteLine(String.Format("Intent recognition: error occurred. SessionId: {0}, Reason: {1}", e.SessionId, e.Status));
+            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: error occurred. SessionId: {0}, Reason: {1}", e.SessionId, e.Status));
         }
 
         private static void MySessionEventHandler(object sender, SessionEventArgs e)
         {
-            Console.WriteLine(String.Format("Intent recognition: Session event: {0}.", e.ToString()));
+            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: Session event: {0}.", e.ToString()));
         }
 
         public static async Task IntentRecognitionBaseModelAsync(string keySpeech, string fileName)
@@ -60,7 +61,7 @@ namespace MicrosoftSpeechSDKSamples
         //{
         //    var factory = SpeechFactory.Instance;
 
-        //    Console.WriteLine(String.Format("Intent Recognition using customized speech model:{0}.", modelId));
+        //    Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent Recognition using customized speech model:{0}.", modelId));
 
         //    factory.SubscriptionKey = keySpeech;
         //    factory.ModelId = modelId;
@@ -72,7 +73,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             var factory = SpeechFactory.FromEndPoint(new Uri(endpoint), subKey);
 
-            Console.WriteLine(String.Format("Intent Recognition using endpoint:{0}.", endpoint));
+            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent Recognition using endpoint:{0}.", endpoint));
 
             if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {

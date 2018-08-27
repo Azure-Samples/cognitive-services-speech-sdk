@@ -6,6 +6,7 @@
 namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
 {
     using System;
+    using System.Globalization;
     using System.ComponentModel;
     using System.Diagnostics;
     using System.IO;
@@ -67,7 +68,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
                 this.OnPropertyChanged<string>();
             }
         }
-        
+
         /// <summary>
         /// Gets or sets region name of the service
         /// </summary>
@@ -230,7 +231,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
             }
             if (this.UseCustomModel || this.UseBaseAndCustomModels)
             {
-                stopCustomRecognitionTaskCompletionSource.TrySetResult(0); 
+                stopCustomRecognitionTaskCompletionSource.TrySetResult(0);
             }
 
             EnableButtons();
@@ -394,7 +395,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
         private void SessionEventHandler(SessionEventArgs e, RecoType rt, TaskCompletionSource<int> source)
         {
             var log = (rt == RecoType.Base) ? this.baseModelLogText : this.customModelLogText;
-            this.WriteLine(log, String.Format("Speech recognition: Session event: {0}.", e.ToString()));
+            this.WriteLine(log, String.Format(CultureInfo.InvariantCulture, "Speech recognition: Session event: {0}.", e.ToString()));
             if (e.EventType == SessionEventType.SessionStoppedEvent)
             {
                 source.TrySetResult(0);
@@ -404,7 +405,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
         private void SpeechDetectedEventHandler(RecognitionEventArgs e, RecoType rt)
         {
             var log = (rt == RecoType.Base) ? this.baseModelLogText : this.customModelLogText;
-            this.WriteLine(log, String.Format("Speech recognition: Speech event: {0}.", e.ToString()));
+            this.WriteLine(log, String.Format(CultureInfo.InvariantCulture, "Speech recognition: Speech event: {0}.", e.ToString()));
         }
 
         #endregion
@@ -549,7 +550,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
 
         private void WriteLine(TextBox log, string format, params object[] args)
         {
-            var formattedStr = string.Format(format, args);
+            var formattedStr = string.Format(CultureInfo.InvariantCulture, format, args);
             Trace.WriteLine(formattedStr);
             this.Dispatcher.Invoke(() =>
             {
@@ -567,7 +568,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
         }
 
         /// <summary>
-        /// Helper function for INotifyPropertyChanged interface 
+        /// Helper function for INotifyPropertyChanged interface
         /// </summary>
         /// <typeparam name="T">Property type</typeparam>
         /// <param name="caller">Property name</param>

@@ -59,6 +59,7 @@ if(WIN32)
             "${SRC_DIR}/windows/audio_sys_win32.cpp"
         )
     endif()
+
 elseif(APPLE)
     list(APPEND SOURCES
         "${SRC_DIR}/osx/microphone.cpp"
@@ -91,6 +92,10 @@ source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
 source_group("Source Files" FILES ${SOURCES})
 
 add_library(audio STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
+
+if(WIN32 AND SPECTRE_MITIGATION)
+    set_property(TARGET audio PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
+endif()
 
 set_target_properties (audio PROPERTIES
     FOLDER carbon_libs

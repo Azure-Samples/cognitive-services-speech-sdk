@@ -76,6 +76,10 @@ source_group("Source Files" FILES ${SOURCES})
 
 add_library(common STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES})
 
+if(WIN32 AND SPECTRE_MITIGATION)
+    set_property(TARGET common PROPERTY VS_GLOBAL_SpectreMitigation "Spectre")
+endif()
+
 set_target_properties (common PROPERTIES
     FOLDER carbon_libs
 )
