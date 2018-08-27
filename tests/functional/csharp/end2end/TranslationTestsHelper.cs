@@ -35,7 +35,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public async Task<EventArgs> GetTranslationFinalResultEvents(string path, string fromLanguage, List<string> toLanguages)
         {
-            using (var recognizer = CreateTranslationRecognizer(path, fromLanguage, toLanguages))
+            using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages)))
             {
                 EventArgs eventArgs = null;
                 recognizer.FinalResultReceived += (s, e) => eventArgs = e;
@@ -48,7 +48,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public async Task<TranslationTextResult> GetTranslationFinalResult(string path, string fromLanguage, List<string> toLanguages)
         {
-            using (var recognizer = CreateTranslationRecognizer(path, fromLanguage, toLanguages))
+            using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages)))
             {
                 TranslationTextResult result = null;
                 await Task.WhenAny(recognizer.RecognizeAsync().ContinueWith(t => result = t.Result), Task.Delay(timeout));
@@ -58,7 +58,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public async Task<Dictionary<ResultType, List<EventArgs>>> GetTranslationFinalResultContinuous(string path, string fromLanguage, List<string> toLanguages, string voice=null)
         {
-            using (var recognizer = CreateTranslationRecognizer(path, fromLanguage, toLanguages, voice))
+            using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages, voice)))
             {
                 var tcs = new TaskCompletionSource<bool>();
                 var receivedFinalResultEvents = new Dictionary<ResultType, List<EventArgs>>(); ;
@@ -73,7 +73,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         synthesisResultEvents.Add(e);
                     }
                 };
-                
+
                 recognizer.OnSessionEvent += (s, e) =>
                 {
                     if (e.EventType.ToString().Equals("SessionStoppedEvent"))
@@ -94,7 +94,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public async Task<List<List<TranslationTextResultEventArgs>>> GetTranslationIntermediateResultContinuous(string path, string fromLanguage, List<string> toLanguages)
         {
-            using (var recognizer = CreateTranslationRecognizer(path, fromLanguage, toLanguages))
+            using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages)))
             {
                 var tcs = new TaskCompletionSource<bool>();
                 var listOfIntermediateResults = new List<List<TranslationTextResultEventArgs>>();
@@ -124,6 +124,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 return listOfIntermediateResults;
             }
+        }
+
+        public static TranslationRecognizer TrackSessionId(TranslationRecognizer recognizer)
+        {
+            recognizer.OnSessionEvent += (s, e) =>
+            {
+                if (e.EventType == SessionEventType.SessionStartedEvent)
+                {
+                    Console.WriteLine("SessionId: " + e.SessionId);
+                }
+            };
+            return recognizer;
         }
     }
 

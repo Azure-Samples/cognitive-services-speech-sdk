@@ -74,7 +74,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task DetailedRecognitionBatmanContinuous()
         {
             var result = await this.speechHelper.GetSpeechFinalRecognitionContinuous(TestData.English.Batman.AudioFile, Language.EN, OutputFormat.Detailed);
-            Assert.AreNotEqual(result.Count, 0); 
+            Assert.AreNotEqual(result.Count, 0);
 
             var firstUtteranceText = String.Join(" ", result[0].Result.Best().Select(r => r.Text).ToList());
             var firstUtteranceNormalizedForm = String.Join(" ", result[0].Result.Best().Select(r => r.NormalizedForm).ToList());

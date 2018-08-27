@@ -9,12 +9,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     sealed class SpeechRecognitionTestsHelper
     {
-
         public int ErrorEventCount { get; set; }
 
         public int FinalResultEventCount { get; set; }
@@ -114,6 +112,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 SpeechStartedEventCount++;
             }
+        }
+
+        public static SpeechRecognizer TrackSessionId(SpeechRecognizer recognizer)
+        {
+            recognizer.OnSessionEvent += (s, e) =>
+            {
+                if (e.EventType == SessionEventType.SessionStartedEvent)
+                {
+                    Console.WriteLine("SessionId: " + e.SessionId);
+                }
+            };
+            return recognizer;
         }
 
         public void SubscribeToCounterEventHandlers(SpeechRecognizer recognizer)

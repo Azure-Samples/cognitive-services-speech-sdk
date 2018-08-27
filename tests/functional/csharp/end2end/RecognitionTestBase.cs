@@ -13,7 +13,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     {
         public static string inputDir, subscriptionKey, region;
         public SpeechFactory factory;
-        
+
         public static void BaseClassInit(TestContext context)
         {
             subscriptionKey = Config.GetSettingByKey<String>(context, "UnifiedSpeechSubscriptionKey");
@@ -24,7 +24,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             Console.WriteLine("region: " + region);
             Console.WriteLine("input directory: " + inputDir);
-            Console.WriteLine("all files: " + String.Join("\n", Directory.GetFiles(inputDir, "*.*", SearchOption.AllDirectories)));
         }
 
         [TestInitialize]

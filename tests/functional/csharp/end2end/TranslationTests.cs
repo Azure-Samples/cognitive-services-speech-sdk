@@ -13,6 +13,8 @@ using System.Linq;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static TranslationTestsHelper;
+
     [TestClass]
     public sealed class TranslationTests : RecognitionTestBase
     {
@@ -38,7 +40,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { Language.DE };
             var fromLanguage = Language.EN;
             var factory = SpeechFactory.FromSubscription(subscriptionKey, region);
-            using (var translationRecognizer = factory.CreateTranslationRecognizerWithFileInput(TestData.English.Weather.AudioFile, fromLanguage, toLanguages))
+            using (var translationRecognizer = TrackSessionId(factory.CreateTranslationRecognizerWithFileInput(TestData.English.Weather.AudioFile, fromLanguage, toLanguages)))
             {
                 Assert.AreEqual(translationRecognizer.SourceLanguage, fromLanguage);
                 CollectionAssert.AreEqual(translationRecognizer.TargetLanguages, toLanguages);
@@ -52,7 +54,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { Language.DE, Language.ES };
             var fromLanguage = Language.EN;
             var factory = SpeechFactory.FromSubscription(subscriptionKey, region);
-            using (var translationRecognizer = factory.CreateTranslationRecognizerWithFileInput(TestData.English.Weather.AudioFile, fromLanguage, toLanguages))
+            using (var translationRecognizer = TrackSessionId(factory.CreateTranslationRecognizerWithFileInput(TestData.English.Weather.AudioFile, fromLanguage, toLanguages)))
             {
                 Assert.AreEqual(translationRecognizer.SourceLanguage, fromLanguage);
                 CollectionAssert.AreEqual(translationRecognizer.TargetLanguages, toLanguages);
@@ -67,7 +69,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var fromLanguage = Language.EN;
             var voice = Voice.DE;
             var factory = SpeechFactory.FromSubscription(subscriptionKey, region);
-            using (var translationRecognizer = factory.CreateTranslationRecognizerWithFileInput(TestData.English.Weather.AudioFile, fromLanguage, toLanguages, voice))
+            using (var translationRecognizer = TrackSessionId(factory.CreateTranslationRecognizerWithFileInput(TestData.English.Weather.AudioFile, fromLanguage, toLanguages, voice)))
             {
                 Assert.AreEqual(translationRecognizer.SourceLanguage, fromLanguage);
                 CollectionAssert.AreEqual(translationRecognizer.TargetLanguages, toLanguages);

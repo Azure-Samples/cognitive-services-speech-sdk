@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static SpeechRecognitionTestsHelper;
+
     sealed class SpeechWithStreamHelper
     {
         private readonly SpeechFactory factory;
@@ -36,7 +38,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public async Task<SpeechRecognitionResult> GetSpeechFinalRecognitionResult(String audioFile, String language = null, OutputFormat format = OutputFormat.Simple)
         {
-            using (var recognizer = CreateSpeechRecognizerWithStream(audioFile, language, format))
+            using (var recognizer = TrackSessionId(CreateSpeechRecognizerWithStream(audioFile, language, format)))
             {
                 SpeechRecognitionResult result = null;
                 await Task.WhenAny(recognizer.RecognizeAsync().ContinueWith(t => result = t.Result), Task.Delay(timeout));
@@ -46,7 +48,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public async Task<List<SpeechRecognitionResultEventArgs>> GetSpeechFinalRecognitionContinuous(String audioFile, String language = null, OutputFormat format = OutputFormat.Simple)
         {
-            using (var recognizer = CreateSpeechRecognizerWithStream(audioFile, language, format))
+            using (var recognizer = TrackSessionId(CreateSpeechRecognizerWithStream(audioFile, language, format)))
             {
                 var tcs = new TaskCompletionSource<bool>();
                 var textResultEvents = new List<SpeechRecognitionResultEventArgs>();
@@ -64,14 +66,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await recognizer.StartContinuousRecognitionAsync();
                 await Task.WhenAny(tcs.Task, Task.Delay(timeout));
                 await recognizer.StopContinuousRecognitionAsync();
-                
+
                 return textResultEvents;
             }
         }
 
         public async Task<List<List<SpeechRecognitionResultEventArgs>>> GetSpeechIntermediateRecognitionContinuous(String audioFile, String language = null, OutputFormat format = OutputFormat.Simple)
         {
-            using (var recognizer = CreateSpeechRecognizerWithStream(audioFile, language, format))
+            using (var recognizer = TrackSessionId(CreateSpeechRecognizerWithStream(audioFile, language, format)))
             {
                 var tcs = new TaskCompletionSource<bool>();
                 var listOfIntermediateResults = new List<List<SpeechRecognitionResultEventArgs>>();
