@@ -1,0 +1,7 @@
+# ignore the npm packages
+/**/node_modules/
+coverage/*
+
+/**/speech.key
+/samples/**/package-lock.json
+.idea/

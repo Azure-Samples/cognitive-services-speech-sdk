@@ -4,8 +4,10 @@
 .gitattributes text
 .gitignore text
 .gitmodules text
+.npmignore text
 .project text
 Dockerfile text
+LICENSE text
 Makefile text
 gradlew text
 proguard-rules.pro text
@@ -22,6 +24,7 @@ proguard-rules.pro text
 *.gradle text
 *.h text
 *.hpp text
+*.html text
 *.i text
 *.in text
 *.java text
@@ -35,7 +38,6 @@ proguard-rules.pro text
 *.pl text
 *.plist text
 *.prefs text
-*.prefs text
 *.project text
 *.properties text
 *.props text
@@ -43,10 +45,11 @@ proguard-rules.pro text
 *.py text
 *.runsettings text
 *.sln text
-*.sln text
 *.storyboard text
 *.targets text
 *.template text
+*.ts text
+*.tsx text
 *.txt text
 *.vcxproj text
 *.vcxproj.filters text

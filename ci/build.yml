@@ -1365,6 +1365,43 @@ phases:
       publishLocation: Container
     condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
 
+# TODO stuff like version
+- phase: JsBuild
+  dependsOn: Pre
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' JsBuild '))
+  queue:
+    name: Hosted VS2017
+    demands: npm
+  steps:
+  - task: Npm@1
+    displayName: 'npm run build'
+    inputs:
+      command: custom
+      workingDir: source/bindings/js
+      verbose: false
+      customCommand: 'run build'
+  - task: Npm@1
+    displayName: 'npm run bundle'
+    inputs:
+      command: custom
+      workingDir: source/bindings/js
+      verbose: false
+      customCommand: 'run bundle'
+  - task: Npm@1
+    displayName: 'npm tests installer'
+    inputs:
+      workingDir: tests/functional/js/Unit
+      verbose: false
+  - script: RunTests.cmd SpeechSubscriptionKey:$(KeySkyman)
+    displayName: 'Run tests'
+    workingDirectory: tests/functional/js/Unit
+  - task: PublishTestResults@2
+    displayName: 'Publish Test Results **/TEST-*.xml'
+    condition: always()
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-tslint.TSLint@1
+    displayName: 'Run TSLint'
+    enabled: false
+
 - phase: Doxygen
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' Doxygen '))

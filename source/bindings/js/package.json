@@ -1,0 +1,51 @@
+{
+  "name": "microsoft-speech-browser-sdk",
+  "version": "0.0.12",
+  "description": "Microsoft Speech SDK for browsers",
+  "main": "distrib/Speech.Browser.Sdk.js",
+  "types": "distrib/speech.browser.sdk.d.ts",
+  "keywords": [
+    "microsoft",
+    "speech",
+    "sdk",
+    "javascript",
+    "typescript",
+    "ts",
+    "js",
+    "browser",
+    "websocket",
+    "speechtotext"
+  ],
+  "bugs": {
+    "url": "https://github.com/Azure-Samples/SpeechToText-WebSockets-Javascript/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Azure-Samples/SpeechToText-WebSockets-Javascript.git"
+  },
+  "author": "Microsoft",
+  "license": "MIT",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-bump": "^2.8.0",
+    "gulp-git": "^2.2.0",
+    "gulp-minify": "0.0.15",
+    "gulp-sourcemaps": "^2.6.0",
+    "gulp-tag-version": "^1.3.0",
+    "gulp-tslint": "^8.0.0",
+    "gulp-typescript": "^3.2.3",
+    "source-map-loader": "^0.2.3",
+    "tslint": "^5.8.0",
+    "typescript": "^2.6.2",
+    "webpack-stream": "^4.0.0"
+  },
+  "scripts": {
+    "prepublishOnly": "npm install & gulp build",
+    "build": "npm install & gulp build",
+    "bundle": "npm install & gulp bundle",
+    "patchRelease": "npm install & gulp patchRelease",
+    "featureRelease": "npm install & gulp featureRelease",
+    "majorRelease": "npm install & gulp majorRelease",
+    "preRelease": "npm install & gulp preRelease"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  /*
+  Using recommended community rules
+   https://github.com/palantir/tslint/blob/master/src/configs/recommended.ts
+  */
+  "extends": "tslint:recommended",
+  "rules": {
+
+    "max-line-length": [false],
+
+    "member-ordering":[
+      true, {
+        "order": [
+          "private-static-field",
+          "private-instance-field",
+          "constructor",
+          "public-static-method",
+          "public-instance-method",
+          "protected-static-method",
+          "protected-instance-method",
+          "private-static-method",
+          "private-instance-method"
+          ]
+      }
+    ],
+
+    "no-reference": true,
+    "no-namespace": true,
+    "no-bitwise": false,
+    "no-shadowed-variable": false,
+
+    "only-arrow-functions": [
+      true
+    ],
+
+    /* Enabling strictest possible type checking on every thing we write */
+    "typedef": [
+      true,
+      "arrow-parameter",
+      "call-signature",
+      "member-variable-declaration",
+      "parameter",
+      "property-declaration"
+    ]
+  }
+}

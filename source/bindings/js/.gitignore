@@ -1,0 +1,9 @@
+# ignore the npm packages
+/**/node_modules/
+# ignore auto-generated (transpiled) js files
+src/**/*.js
+distrib/*
+
+/**/speech.key
+/samples/**/package-lock.json
+.idea/

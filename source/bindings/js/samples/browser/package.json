@@ -1,0 +1,9 @@
+{
+  "name": "sample_speech_server",
+  "description": "A simple http server to facilitate SDK testing on mobile devices as well as provide a token authentication example",
+  "main": "sample-server.js",
+  "dependencies": {
+    "localtunnel": "^1.8.3",
+    "qrcode-terminal": "^0.11.0"
+  }
+}
