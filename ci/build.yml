@@ -172,7 +172,7 @@ phases:
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@2
     displayName: 'Run the PREfast SDL Native Rules for MSBuild'
     continueOnError: true
-    condition: eq(variables['SPEECHSK_SDL_ALL'],'true')
+    condition: eq(variables['SPEECHSDK_SDL_ALL'],'true')
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
     displayName: 'Run Roslyn Analyzers'
     continueOnError: true
