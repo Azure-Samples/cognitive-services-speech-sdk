@@ -234,36 +234,3 @@ add_custom_command(TARGET ${JAVA_LIB}
                    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
                    COMMENT "Generating src package including javadoc information")
 
-#
-# Set up targets for JavaDoc processing, an auxiliary one (copy_files_javadoc)
-# and a main one (${PROJECT_NAME}_javadoc).
-#
-
-set(JAVADOC_SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/javadoc")
-
-add_custom_command(OUTPUT ${JAVADOC_SOURCE_DIR}
-    DEPENDS ${JAVA_LIB}
-    COMMAND ${CMAKE_COMMAND} -E remove_directory "${JAVADOC_SOURCE_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}" "${JAVADOC_SOURCE_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_BINARY_DIR}/swig-generated" "${JAVADOC_SOURCE_DIR}"
-    COMMENT "Copy files for javadoc target."
-    VERBATIM)
-
-add_custom_target(copy_files_javadoc ALL
-    DEPENDS "${JAVADOC_SOURCE_DIR}")
-
-# N.B. this will create target ${PROJECT_NAME}_javadoc
-create_javadoc(${PROJECT_NAME}
-    PACKAGES ${PROJECT_NAME}
-           ${PROJECT_NAME}.util
-           ${PROJECT_NAME}.translation
-           ${PROJECT_NAME}.intent
-    SOURCEPATH "${JAVADOC_SOURCE_DIR}"
-    WINDOWTITLE "Speech SDK for Java"
-    DOCTITLE "<h1>Speech SDK for Java</h1>"
-    INSTALLPATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${JAVA_LIB}-doc"
-    AUTHOR TRUE
-    USE TRUE
-    VERSION TRUE)
-
-add_dependencies(${PROJECT_NAME}_javadoc copy_files_javadoc)

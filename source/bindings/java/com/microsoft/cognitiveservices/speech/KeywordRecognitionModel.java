@@ -69,9 +69,10 @@ public class KeywordRecognitionModel implements Closeable
      * Creates a keyword recognition model using the specified input stream.
      * @param inputStream A stream that represents data for the keyword recognition model.
      *                 Note, the file can be a zip file in which case the model will be extracted from the zip.
-     * @param name the name of the kws.
+     * @param name The name of the kws.
      * @param isZipped If true, the input stream is treated as a zip. false, if the input is just the kws table file.
      * @return The keyword recognition model being created.
+     * @throws IOException If the name of the kws contains a file separator
      */
     public static KeywordRecognitionModel fromStream(InputStream inputStream, String name, boolean isZipped) throws IOException {
         Contracts.throwIfNull(inputStream, "inputStream");

@@ -184,7 +184,7 @@ phases:
     continueOnError: true
     condition: eq(variables['SPEECHSDK_SPECTRE_MITIGATION'],'true')
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-antimalware.AntiMalware@3
-    displayName: 'AntiMalware (disabled - determine host)'
+    displayName: 'AntiMalware'
     inputs:
       FileDirPath: '.'
       EnableServices: true
@@ -193,7 +193,7 @@ phases:
     continueOnError: true
     condition: succeededOrFailed()
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-apiscan.APIScan@1
-    displayName: 'APIScan ToDo'
+    displayName: 'APIScan'
     inputs:
       softwareName: 'Cognitive Services Speech SDK'
       softwareVersionNum: 1.0

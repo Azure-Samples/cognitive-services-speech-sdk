@@ -48,9 +48,9 @@ set(SOURCES
     "${SRC_DIR}/recognizer.cpp"
     "${SRC_DIR}/session_event_args.cpp"
     "${SRC_DIR}/usp_reco_engine_adapter.cpp"
-    "${SRC_DIR}/stdafx.cpp"
     "${SRC_DIR}/translation_recognizer.cpp"
     "${SRC_DIR}/audio_buffer.cpp"
+    "${SRC_DIR}/stdafx.cpp"
     )
 
 source_group("Header Files (public)" FILES ${HEADERS})

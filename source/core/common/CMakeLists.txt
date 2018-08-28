@@ -57,7 +57,6 @@ set(SOURCES
     "${SRC_DIR}/guid_utils.cpp"
     "${SRC_DIR}/platform.cpp"
     "${SRC_DIR}/site_helpers.cpp"
-    "${SRC_DIR}/stdafx.cpp"
     )
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
@@ -69,6 +68,9 @@ else()
            "${SRC_DIR}/debug_utils.cpp"
     )
 endif()
+
+# make this the last source file to avoid link warning LNK4221 
+list(APPEND SOURCES "${SRC_DIR}/stdafx.cpp")
 
 source_group("Header Files (public)" FILES ${HEADERS})
 source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
