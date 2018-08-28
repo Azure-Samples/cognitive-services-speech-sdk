@@ -58,7 +58,7 @@ for ((testIndex = 0; testIndex < ${#tests[@]}; testIndex += 2)); do
   testArg="${tests[$testIndex + 1]}"
 
   runTest TESTRUNNER "$t" "$PLATFORMS_TO_RUN" $TIMEOUT_SECONDS \
-    $USPCONSOLE auth:$UserKeySkyman type:speech $testArg $TEST_AUDIO_FILE
+    $USPCONSOLE auth:$UserKeySkyman region:westus type:speech $testArg $TEST_AUDIO_FILE
 done
 
 endSuite TESTRUNNER

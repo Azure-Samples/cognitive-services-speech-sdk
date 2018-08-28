@@ -20,7 +20,7 @@
   <repositories>
     <repository>
       <id>maven-cognitiveservices-speech</id>
-      <name>Public online microsoft cognitive services speech repository</name>
+      <name>Microsoft Cognitive Services Speech Maven Repository</name>
       <url>https://csspeechstorage.blob.core.windows.net/maven/</url>
     </repository>
   </repositories>

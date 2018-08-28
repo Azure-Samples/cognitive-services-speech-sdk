@@ -17,6 +17,7 @@
 #include "audio_sys.h"
 #include "guid_utils.h"
 
+#include <iostream>
 #include <assert.h>
 
 // #include "azure_c_shared_utility/audio_sys.h"
@@ -24,6 +25,11 @@
 #include "usp.h"
 
 #define UNUSED(x) (void)(x)
+
+#ifndef _MSC_VER
+#define localtime_s(__tm, __timet) localtime_r(__timet, __tm)
+#define gmtime_s(__tm, __timet) gmtime_r(__timet, __tm)
+#endif
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
@@ -174,7 +180,7 @@ virtual void OnTranslationPhrase(const USP::TranslationPhraseMsg& message) overr
     auto resultMap = message.translation.translations;
     for (const auto& it : resultMap)
     {
-        printf("          , tranlated to %ls: %ls,\n", it.first.c_str(), it.second.c_str());
+        printf("          , translated to %ls: %ls,\n", it.first.c_str(), it.second.c_str());
     }
 }
 
@@ -225,6 +231,7 @@ int main(int argc, char* argv[])
     string language;
     string format;
     string inputFile;
+    string region{ "westus" };
 
 #if defined(_MSC_VER) && defined(_DEBUG)
     // in case of asserts in debug mode, print the message into stderr and throw exception
@@ -240,7 +247,8 @@ int main(int argc, char* argv[])
         printf("The following options are available:\n");
         printf("      inputType:audio|message:[path]\n");
         printf("      auth:key\n");
-        printf("      type:speech|intent|tranlsation|cdsdk\n");
+        printf("      region:region\n");
+        printf("      type:speech|intent|translation|cdsdk\n");
         printf("      mode:interactive|conversation|dictation\n");
         printf("      url:endpoint\n");
         printf("      lang:language\n");
@@ -285,6 +293,11 @@ int main(int argc, char* argv[])
         {
             pos = argStr.find(':');
             authData = argStr.substr(pos + 1);
+        }
+        else if (argStr.find("region:") != string::npos)
+        {
+            pos = argStr.find(':');
+            region = argStr.substr(pos + 1);
         }
         else if (argStr.find("type:") != string::npos)
         {
@@ -350,73 +363,84 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    USP::Client client(testCallbacks, endpointType, PAL::CreateGuidWithoutDashes());
-    // TODO: make region as parameter
-    client.SetRegion("westus");
+    auto connectionId = PAL::CreateGuidWithoutDashes();
+
+    {
+        struct tm newtime;
+        char buf[32];
+        time_t now;
+        time(&now);
+        gmtime_s(&newtime, &now);
+        strftime(buf, sizeof buf, "%FT%TZ", &newtime);
+        printf("Connection ID '%ls' at %s\n", connectionId.c_str(), buf);
+    }
+
+    USP::Client client(testCallbacks, endpointType, connectionId);
+    client.SetRegion(region);
     if (!customUrl.empty())
     {
         client.SetEndpointUrl(customUrl.c_str());
     }
 
-        // Set Authentication.
-        if (!authData.empty())
+    // Set Authentication.
+    if (!authData.empty())
+    {
+        auto type = USP::AuthenticationType::SubscriptionKey;
+        if (client.GetEndpointType() == USP::EndpointType::CDSDK)
         {
-            auto type = USP::AuthenticationType::SubscriptionKey;
-            if (client.GetEndpointType() == USP::EndpointType::CDSDK)
-            {
-                type = USP::AuthenticationType::SearchDelegationRPSToken;
-            }
-
-            client.SetAuthentication(type, authData);
+            type = USP::AuthenticationType::SearchDelegationRPSToken;
         }
 
-        if (!recoMode.empty())
-        {
-            auto it = modeMap.find(recoMode);
-            if (it == modeMap.end())
-            {
-                printf("Invalid recognition mode: %s", recoMode.c_str());
-                exit(1);
-            }
-            else
-            {
-                client.SetRecognitionMode(it->second);
-            }
-        }
+        client.SetAuthentication(type, authData);
+    }
 
-        if (!modelId.empty())
+    if (!recoMode.empty())
+    {
+        auto it = modeMap.find(recoMode);
+        if (it == modeMap.end())
         {
-            client.SetModelId(modelId.c_str());
-        }
-
-        if (!language.empty())
-        {
-            client.SetLanguage(language.c_str());
-        }
-
-        if (!format.empty())
-        {
-            if (format.compare("detailed") == 0)
-            {
-                client.SetOutputFormat(USP::OutputFormat::Detailed);
-            }
-            else if (format.compare("simple") == 0)
-            {
-                client.SetOutputFormat(USP::OutputFormat::Simple);
-            }
-            else
-            {
-                printf("unknown output format: %s\n", format.c_str());
-                exit(1);
-            }
-        }
-
-        ifstream data(inputFile, ios::in | ((isAudioMessage) ? ios::binary : ios::in));
-        if (!data.is_open() || data.fail())
-        {
-            printf("Error: open file %s failed", inputFile.c_str());
+            printf("Invalid recognition mode: %s", recoMode.c_str());
             exit(1);
         }
+        else
+        {
+            client.SetRecognitionMode(it->second);
+        }
+    }
+
+    if (!modelId.empty())
+    {
+        client.SetModelId(modelId.c_str());
+    }
+
+    if (!language.empty())
+    {
+        client.SetLanguage(language.c_str());
+    }
+
+    if (!format.empty())
+    {
+        if (format.compare("detailed") == 0)
+        {
+            client.SetOutputFormat(USP::OutputFormat::Detailed);
+        }
+        else if (format.compare("simple") == 0)
+        {
+            client.SetOutputFormat(USP::OutputFormat::Simple);
+        }
+        else
+        {
+            printf("unknown output format: %s\n", format.c_str());
+            exit(1);
+        }
+    }
+
+    ifstream data(inputFile, ios::in | ((isAudioMessage) ? ios::binary : ios::in));
+    if (!data.is_open() || data.fail())
+    {
+        printf("Error: open file %s failed", inputFile.c_str());
+        exit(1);
+    }
 
     // Connect to service
     auto connection = client.Connect();
