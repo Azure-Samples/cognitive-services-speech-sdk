@@ -34,6 +34,7 @@ function run_tests {
         : # we don't build python bindings on Win32
     else
         pretty_print "Running Python tests"
+        export PATH=$PATH:$HOME/.local/bin
         py_args="--filename ./tests/input/whatstheweatherlike.wav --subscription $UserKeySkyman"
         [ ! -z $endpoint ] && py_args+=" --endpoint $endpoint"
         py.test -s ./source/bindings/python/test.py $py_args

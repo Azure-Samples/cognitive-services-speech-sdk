@@ -82,7 +82,7 @@ phases:
 
 - phase: Pre
   queue:
-    name: Hosted Linux Preview
+    name: Hosted Ubuntu 1604
     timeoutInMinutes: 30
   steps:
   - task: Bash@3
@@ -615,7 +615,7 @@ phases:
   dependsOn: [Pre, JavaJrePackage]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' JavaJrePackage '))
   queue:
-    name: Hosted Linux Preview
+    name: Hosted Ubuntu 1604
     timeoutInMinutes: 30
   steps:
   - bash: './ci/set-variables.sh && ./ci/set-test-variables.sh'
@@ -783,7 +783,7 @@ phases:
   dependsOn: [Pre, NuGet]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsNuGet '))
   queue:
-    name: Hosted Linux Preview
+    name: Hosted Ubuntu 1604
     timeoutInMinutes: 30
   steps:
   - bash: './ci/set-variables.sh && ./ci/set-test-variables.sh'
@@ -1033,7 +1033,7 @@ phases:
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxBuild '))
   queue:
-    name: Hosted Linux Preview
+    name: Hosted Ubuntu 1604
     timeoutInMinutes: 30
     parallel: 2
     matrix:
@@ -1138,7 +1138,7 @@ phases:
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxBuild '))
   queue:
-    name: Hosted Linux Preview
+    name: Hosted Ubuntu 1604
     timeoutInMinutes: 30
     parallel: 2
     matrix:
@@ -1184,7 +1184,7 @@ phases:
   dependsOn: [Pre, LinuxBuild, LinuxX86Build]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' LinuxDrop '))
   queue:
-    name: Hosted Linux Preview
+    name: Hosted Ubuntu 1604
     timeoutInMinutes: 30
   steps:
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
