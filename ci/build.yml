@@ -129,12 +129,10 @@ phases:
     inputs:
       type: FilePath
       scriptPath: 'ci/install-build-dependencies.sh'
-  - script: |
-      start /wait /d "%ProgramFiles(x86)%\Microsoft Visual Studio\Installer" vs_installer.exe ^
-        modify ^
-        --installPath "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise" ^
-        --add Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre ^
-        --passive --norestart
+  # TODO detect installation failures, export diagnostics. For now, we'll fail in msbuild a little bit down.
+  - powershell: |
+      Invoke-WebRequest -OutFile vs_enterprise.exe https://aka.ms/vs/15/release/vs_enterprise.exe
+      Start-Process -Wait cmd -Verb runas -ArgumentList /c, cd, (Get-Location), '&&', start, /wait, .\vs_enterprise.exe, modify, --installPath, '"%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise"', --add, Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre, --quiet, --norestart, --wait, '&&', echo, '%ERRORLEVEL%', '>', result.txt
     displayName: Install Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre VS component
     condition: eq(variables['SPEECHSDK_SPECTRE_MITIGATION'],'true')
   - task: CmdLine@1
@@ -169,10 +167,6 @@ phases:
       # Needed for SDL:
       createLogFile: true
   # Checks BEGIN
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@2
-    displayName: 'Run the PREfast SDL Native Rules for MSBuild'
-    continueOnError: true
-    condition: eq(variables['SPEECHSDK_SDL_ALL'],'true')
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
     displayName: 'Run Roslyn Analyzers'
     continueOnError: true
@@ -258,6 +252,10 @@ phases:
       Ruleset: tslatest
     continueOnError: true
     condition: succeededOrFailed()
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@2
+    displayName: 'Run the PREfast SDL Native Rules for MSBuild'
+    continueOnError: true
+    condition: eq(variables['SPEECHSDK_SDL_ALL'],'true')
   # Checks END
   # Publish artifact and fail the build if necessary
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
@@ -276,7 +274,7 @@ phases:
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsBuild '))
   queue:
     name: Hosted VS2017
-    timeoutInMinutes: 30
+    timeoutInMinutes: 40
     parallel: 4
     matrix:
       x64_debug:
@@ -312,12 +310,10 @@ phases:
     inputs:
       type: FilePath
       scriptPath: 'ci/install-build-dependencies.sh'
-  - script: |
-      start /wait /d "%ProgramFiles(x86)%\Microsoft Visual Studio\Installer" vs_installer.exe ^
-        modify ^
-        --installPath "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise" ^
-        --add Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre ^
-        --passive --norestart
+  # TODO detect installation failures, export diagnostics. For now, we'll fail in msbuild a little bit down.
+  - powershell: |
+      Invoke-WebRequest -OutFile vs_enterprise.exe https://aka.ms/vs/15/release/vs_enterprise.exe
+      Start-Process -Wait cmd -Verb runas -ArgumentList /c, cd, (Get-Location), '&&', start, /wait, .\vs_enterprise.exe, modify, --installPath, '"%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise"', --add, Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre, --quiet, --norestart, --wait, '&&', echo, '%ERRORLEVEL%', '>', result.txt
     displayName: Install Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre VS component
     condition: eq(variables['SPEECHSDK_SPECTRE_MITIGATION'],'true')
   - task: CmdLine@1
