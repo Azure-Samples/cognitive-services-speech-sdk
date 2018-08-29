@@ -14,6 +14,7 @@ using System.Linq;
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     using static TranslationTestsHelper;
+    using static SpeechRecognitionTestsHelper;
 
     [TestClass]
     public sealed class TranslationTests : RecognitionTestBase
@@ -116,21 +117,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             var actualRecognitionTextResults = actualTranslations[ResultType.Text].Cast<TranslationTextResultEventArgs>().Select(t => t.Result.Text).ToList();
             var actualTranslationsTextResults = actualTranslations[ResultType.Text].Cast<TranslationTextResultEventArgs>().Select(t => t.Result.Translations[Language.DE]).ToList();
-            int mismatchCount = 0;
             for (var i = 0; i < actualTranslations.Count; i++)
             {
-                if (!Config.AreResultsMatching(TestData.English.Batman.Utterances[i], actualRecognitionTextResults[i]))
-                {
-                    Console.WriteLine($"Recognition {i}:\n    {TestData.English.Batman.Utterances[i]}\n    {actualRecognitionTextResults[i]}");
-                    mismatchCount++;
-                }
-                if (!Config.AreResultsMatching(TestData.German.Batman.Utterances[i], actualTranslationsTextResults[i]))
-                {
-                    Console.WriteLine($"Translation {i}:\n    {TestData.German.Batman.Utterances[i]}\n    {actualTranslationsTextResults[i]}");
-                    mismatchCount++;
-                }
+                AssertMatching(TestData.English.Batman.Utterances[i], actualRecognitionTextResults[i]);
             }
-            Assert.AreEqual(0, mismatchCount);
         }
 
         [TestMethod]
@@ -186,9 +176,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var actualTranslations = await this.translationHelper.GetTranslationFinalResultContinuous(TestData.English.Weather.AudioFile, Language.EN, toLanguages, Voice.FR);
             Assert.AreEqual(1, actualTranslations[ResultType.Synthesis].Count);
 
-            var expectedSynthesisByteResult = Config.GetByteArraysForFilesWithSamePrefix(synthesisDir, "fr_caroline_weather");
             var actualSynthesisByteResult = (TranslationSynthesisResultEventArgs)actualTranslations[ResultType.Synthesis].Single();
-            CollectionAssert.AreEqual(expectedSynthesisByteResult[0], actualSynthesisByteResult.Result.Audio);
+            const int MinSize = 50000;
+            Assert.IsTrue(actualSynthesisByteResult.Result.Audio.Length > MinSize,
+                $"Received response for speech synthesis is less than {MinSize}: {actualSynthesisByteResult.Result.Audio.Length}.");
         }
 
         [TestMethod]
@@ -197,15 +188,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { Language.FR };
 
             var actualTranslations = await this.translationHelper.GetTranslationFinalResultContinuous(TestData.English.Weather.AudioFile, Language.EN, toLanguages, Voice.FR);
-            Assert.AreEqual(actualTranslations[ResultType.Text].Count, 1);
-            Assert.AreEqual(actualTranslations[ResultType.Synthesis].Count, 1);
+            Assert.AreEqual(1, actualTranslations[ResultType.Text].Count);
+            Assert.AreEqual(1, actualTranslations[ResultType.Synthesis].Count);
 
-            var actualTextReuslt = (TranslationTextResultEventArgs)actualTranslations[ResultType.Text].Single();
-            Assert.AreEqual(TestData.English.Weather.Utterance, actualTextReuslt.Result.Text);
+            var actualTextResult = (TranslationTextResultEventArgs)actualTranslations[ResultType.Text].Single();
+            Assert.AreEqual(TestData.English.Weather.Utterance, actualTextResult.Result.Text);
 
-            var expectedSynthesisByteResult = Config.GetByteArraysForFilesWithSamePrefix(synthesisDir, "fr_caroline_weather");
             var actualSynthesisByteResult = (TranslationSynthesisResultEventArgs)actualTranslations[ResultType.Synthesis].Single();
-            CollectionAssert.AreEqual(expectedSynthesisByteResult[0], actualSynthesisByteResult.Result.Audio);
+            const int MinSize = 50000;
+            Assert.IsTrue(actualSynthesisByteResult.Result.Audio.Length > MinSize,
+                $"Received response for speech synthesis is less than {MinSize}: {actualSynthesisByteResult.Result.Audio.Length}.");
         }
 
         [TestMethod]

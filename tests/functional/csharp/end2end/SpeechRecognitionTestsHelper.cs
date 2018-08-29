@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,12 +56,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
         }
 
-        public async Task<bool> IsValidSimpleRecognizer(SpeechRecognizer speechRecognizer, string expectedRecognitionResult)
+        public async Task<string> GetFirstRecognizerResult(SpeechRecognizer speechRecognizer)
         {
             List<string> recognizedText = new List<string>();
-            
             speechRecognizer.FinalResultReceived += (s, e) =>
             {
+                Console.WriteLine($"Received result '{e.ToString()}'");
                 if (e.Result.Text.Length > 0)
                 {
                     recognizedText.Add(e.Result.Text);
@@ -70,14 +71,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             await CompleteContinuousRecognition(speechRecognizer);
 
             speechRecognizer.Dispose();
-            if (recognizedText.Count > 0)
-            {
-                return AreResultsMatching(recognizedText[0], expectedRecognitionResult);
-            }
-            else
-            {
-                return false;
-            }
+            return recognizedText.Count > 0 ? recognizedText[0] : string.Empty;
         }
 
         private void FinalResultEventCounter(object sender, SpeechRecognitionResultEventArgs e)
@@ -142,22 +136,26 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             recognizer.OnSpeechDetectedEvent -= SpeechEventCounter;
         }
 
-        public bool AreResultsMatching(String actualText, String expectedText)
+        public static void AssertMatching(string expectedText, string actualText)
         {
             string plainActualText = Normalize(actualText);
             string plainExpectedText = Normalize(expectedText);
 
             if (plainActualText.Length <= plainExpectedText.Length)
             {
-                return plainExpectedText.Contains(plainActualText);
+                Assert.IsTrue(
+                    plainExpectedText.Contains(plainActualText),
+                    $"'{plainExpectedText}' does not contain '{plainActualText}' as expected");
             }
             else
             {
-                return plainActualText.Contains(plainExpectedText);
+                Assert.IsTrue(
+                    plainActualText.Contains(plainExpectedText),
+                    $"'{plainActualText}' does not contain '{plainExpectedText}' as expected");
             }
         }
 
-        private string Normalize(string str)
+        public static string Normalize(string str)
         {
             str = str.ToLower();
             return Regex.Replace(str, "[^a-z0-9' ]+", "", RegexOptions.Compiled);

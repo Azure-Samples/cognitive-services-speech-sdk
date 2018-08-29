@@ -20,7 +20,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     public class SpeechRecognitionTests : RecognitionTestBase
     {
         private static string deploymentId;
-        private SpeechRecognitionTestsHelper speechRecognitionTestsHelper;
+        private SpeechRecognitionTestsHelper helper;
 
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
@@ -32,7 +32,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestInitialize]
         public void Initialize()
         {
-            speechRecognitionTestsHelper = new SpeechRecognitionTestsHelper();
+            helper = new SpeechRecognitionTestsHelper();
         }
 
         [TestMethod]
@@ -40,11 +40,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             using (var recognizer = TrackSessionId(factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile)))
             {
-                speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
+                helper.SubscribeToCounterEventHandlers(recognizer);
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-                Assert.IsTrue(result.Duration.Ticks > 0, result.RecognitionStatus.ToString());
-                Assert.AreEqual(0, result.OffsetInTicks);
-                Assert.IsTrue(speechRecognitionTestsHelper.AreResultsMatching(result.Text, TestData.English.Weather.Utterance));
+                Assert.IsTrue(result.Duration.Ticks > 0, result.RecognitionStatus.ToString(), "Duration == 0");
+                Assert.AreEqual(0, result.OffsetInTicks, "Offset not zero");
+                AssertMatching(TestData.English.Weather.Utterance, result.Text);
             }
         }
 
@@ -53,7 +53,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             using (var recognizer = TrackSessionId(factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile)))
             {
-                Assert.IsTrue(await speechRecognitionTestsHelper.IsValidSimpleRecognizer(recognizer, TestData.English.Weather.Utterance));
+                AssertMatching(
+                    TestData.English.Weather.Utterance,
+                    await helper.GetFirstRecognizerResult(recognizer));
             }
         }
 
@@ -63,9 +65,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile)))
             {
                 recognizer.DeploymentId = deploymentId;
-                speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
+                helper.SubscribeToCounterEventHandlers(recognizer);
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-                Assert.IsTrue(speechRecognitionTestsHelper.AreResultsMatching(result.Text, TestData.English.Weather.Utterance));
+                AssertMatching(TestData.English.Weather.Utterance, result.Text);
             }
         }
 
@@ -75,7 +77,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile)))
             {
                 recognizer.DeploymentId = deploymentId;
-                Assert.IsTrue(await speechRecognitionTestsHelper.IsValidSimpleRecognizer(recognizer, TestData.English.Weather.Utterance));
+                AssertMatching(TestData.English.Weather.Utterance,
+                    await helper.GetFirstRecognizerResult(recognizer));
             }
         }
 
@@ -139,7 +142,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
                 Assert.IsFalse(string.IsNullOrEmpty(result.Text), result.RecognitionStatus.ToString());
-                Assert.IsTrue(speechRecognitionTestsHelper.AreResultsMatching(result.Text, TestData.German.FirstOne.Utterance));
+                AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
             }
         }
 
@@ -148,7 +151,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             using (var recognizer = TrackSessionId(factory.CreateSpeechRecognizerWithFileInput(TestData.German.FirstOne.AudioFile, Language.DE_DE)))
             {
-                Assert.IsTrue(await speechRecognitionTestsHelper.IsValidSimpleRecognizer(recognizer, TestData.German.FirstOne.Utterance));
+                var result = await helper.GetFirstRecognizerResult(recognizer);
+                AssertMatching(TestData.German.FirstOne.Utterance, result);
             }
         }
 
@@ -159,7 +163,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(factory.CreateSpeechRecognizerWithFileInput(TestData.English.Batman.AudioFile)))
             {
                 List<string> recognizedText = new List<string>();
-                speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
+                helper.SubscribeToCounterEventHandlers(recognizer);
                 recognizer.FinalResultReceived += (s, e) =>
                 {
                     if (e.Result.Text.Length > 0)
@@ -168,15 +172,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     }
                 };
 
-                await speechRecognitionTestsHelper.CompleteContinuousRecognition(recognizer);
+                await helper.CompleteContinuousRecognition(recognizer);
 
-                Assert.IsTrue(speechRecognitionTestsHelper.FinalResultEventCount > 0, AssertOutput.WrongFinalResultCount);
-                Assert.AreEqual(0, speechRecognitionTestsHelper.ErrorEventCount, AssertOutput.WrongErrorCount);
-                Assert.IsTrue(speechRecognitionTestsHelper.SpeechStartedEventCount > 0, AssertOutput.WrongSpeechStartedCount);
-                Assert.IsTrue(speechRecognitionTestsHelper.SpeechEndedEventCount > 0, AssertOutput.WrongSpeechEndedCount);
+                Assert.IsTrue(helper.FinalResultEventCount > 0, AssertOutput.WrongFinalResultCount);
+                Assert.AreEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
+                Assert.IsTrue(helper.SpeechStartedEventCount > 0, AssertOutput.WrongSpeechStartedCount);
+                Assert.IsTrue(helper.SpeechEndedEventCount > 0, AssertOutput.WrongSpeechEndedCount);
                 Assert.IsTrue(recognizedText.Count > 0);
-                Assert.IsTrue(speechRecognitionTestsHelper.AreResultsMatching(recognizedText[0], TestData.English.Batman.Utterances[0]));
-                Assert.IsTrue(speechRecognitionTestsHelper.AreResultsMatching(recognizedText.Last(), TestData.English.Batman.Utterances.Last()));
+                AssertMatching(TestData.English.Batman.Utterances[0], recognizedText[0]);
+                AssertMatching(TestData.English.Batman.Utterances.Last(), recognizedText.Last());
             }
         }
 
@@ -188,15 +192,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 const int numLoops = 7;
                 for (int i = 0; i < numLoops; i++)
                 {
-                    speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
+                    helper.SubscribeToCounterEventHandlers(recognizer);
                 }
-                await speechRecognitionTestsHelper.CompleteContinuousRecognition(recognizer);
+                await helper.CompleteContinuousRecognition(recognizer);
 
-                Assert.AreEqual(numLoops, speechRecognitionTestsHelper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
-                Assert.AreEqual(numLoops, speechRecognitionTestsHelper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
-                Assert.AreEqual(numLoops, speechRecognitionTestsHelper.SpeechEndedEventCount, AssertOutput.WrongSpeechEndedCount);
-                Assert.AreEqual(numLoops, speechRecognitionTestsHelper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
-                Assert.AreEqual(0, speechRecognitionTestsHelper.ErrorEventCount, AssertOutput.WrongErrorCount);
+                Assert.AreEqual(numLoops, helper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
+                Assert.AreEqual(numLoops, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
+                Assert.AreEqual(numLoops, helper.SpeechEndedEventCount, AssertOutput.WrongSpeechEndedCount);
+                Assert.AreEqual(numLoops, helper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
+                Assert.AreEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
             }
         }
 
@@ -205,16 +209,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             using (var recognizer = TrackSessionId(factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile)))
             {
-                speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
-                speechRecognitionTestsHelper.UnsubscribeFromCounterEventHandlers(recognizer);
+                helper.SubscribeToCounterEventHandlers(recognizer);
+                helper.UnsubscribeFromCounterEventHandlers(recognizer);
 
-                await speechRecognitionTestsHelper.CompleteContinuousRecognition(recognizer);
+                await helper.CompleteContinuousRecognition(recognizer);
 
-                Assert.AreEqual(0, speechRecognitionTestsHelper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
-                Assert.AreEqual(0, speechRecognitionTestsHelper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
-                Assert.AreEqual(0, speechRecognitionTestsHelper.SpeechEndedEventCount, AssertOutput.WrongSpeechEndedCount);
-                Assert.AreEqual(0, speechRecognitionTestsHelper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
-                Assert.AreEqual(0, speechRecognitionTestsHelper.ErrorEventCount, AssertOutput.WrongErrorCount);
+                Assert.AreEqual(0, helper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
+                Assert.AreEqual(0, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
+                Assert.AreEqual(0, helper.SpeechEndedEventCount, AssertOutput.WrongSpeechEndedCount);
+                Assert.AreEqual(0, helper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
+                Assert.AreEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
             }
         }
 
@@ -229,26 +233,26 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 for (int i = 0; i < numSubscriptions; i++)
                 {
-                    speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
+                    helper.SubscribeToCounterEventHandlers(recognizer);
                 }
 
                 for (int i = 0; i < numUnsubscriptions; i++)
                 {
-                    speechRecognitionTestsHelper.UnsubscribeFromCounterEventHandlers(recognizer);
+                    helper.UnsubscribeFromCounterEventHandlers(recognizer);
                 }
 
                 for (int i = 0; i < numSubscriptions; i++)
                 {
-                    speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
+                    helper.SubscribeToCounterEventHandlers(recognizer);
                 }
 
-                await speechRecognitionTestsHelper.CompleteContinuousRecognition(recognizer);
+                await helper.CompleteContinuousRecognition(recognizer);
 
-                Assert.AreEqual(diff, speechRecognitionTestsHelper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
-                Assert.AreEqual(diff, speechRecognitionTestsHelper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
-                Assert.AreEqual(diff, speechRecognitionTestsHelper.SpeechEndedEventCount, AssertOutput.WrongSpeechEndedCount);
-                Assert.AreEqual(diff, speechRecognitionTestsHelper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
-                Assert.AreEqual(0, speechRecognitionTestsHelper.ErrorEventCount, AssertOutput.WrongErrorCount);
+                Assert.AreEqual(diff, helper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
+                Assert.AreEqual(diff, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
+                Assert.AreEqual(diff, helper.SpeechEndedEventCount, AssertOutput.WrongSpeechEndedCount);
+                Assert.AreEqual(diff, helper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
+                Assert.AreEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
             }
         }
 
@@ -257,21 +261,21 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             using (var recognizer = TrackSessionId(factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile)))
             {
-                speechRecognitionTestsHelper.SubscribeToCounterEventHandlers(recognizer);
+                helper.SubscribeToCounterEventHandlers(recognizer);
                 recognizer.OnSessionEvent += (s, e) =>
                 {
                     if (e.EventType == SessionEventType.SessionStartedEvent)
                     {
-                        speechRecognitionTestsHelper.UnsubscribeFromCounterEventHandlers(recognizer);
+                        helper.UnsubscribeFromCounterEventHandlers(recognizer);
                     }
                 };
 
-                await speechRecognitionTestsHelper.CompleteContinuousRecognition(recognizer);
-                Assert.AreEqual(1, speechRecognitionTestsHelper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
-                Assert.AreEqual(0, speechRecognitionTestsHelper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
-                Assert.AreEqual(0, speechRecognitionTestsHelper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
-                Assert.AreEqual(0, speechRecognitionTestsHelper.SpeechEndedEventCount, AssertOutput.WrongSpeechEndedCount);
-                Assert.AreEqual(0, speechRecognitionTestsHelper.ErrorEventCount, AssertOutput.WrongErrorCount);
+                await helper.CompleteContinuousRecognition(recognizer);
+                Assert.AreEqual(1, helper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
+                Assert.AreEqual(0, helper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
+                Assert.AreEqual(0, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
+                Assert.AreEqual(0, helper.SpeechEndedEventCount, AssertOutput.WrongSpeechEndedCount);
+                Assert.AreEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
             }
         }
 

@@ -15,6 +15,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using static Config;
+    using static SpeechRecognitionTestsHelper;
+
     [TestClass]
     public class SpeechFactoryTests : RecognitionTestBase
     {
@@ -58,8 +61,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var speechRecognizer = factoryFromToken.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile);
             SpeechRecognitionTestsHelper helper = new SpeechRecognitionTestsHelper();
 
-            Assert.AreEqual(token, factoryFromToken.AuthorizationToken);
-            Assert.IsTrue(await helper.IsValidSimpleRecognizer(speechRecognizer, TestData.English.Weather.Utterance));
+            Assert.AreEqual(token, factoryFromToken.AuthorizationToken, "Set of authentication token did not work as expected");
+            AssertMatching(TestData.English.Weather.Utterance, await helper.GetFirstRecognizerResult(speechRecognizer));
         }
 
         [TestMethod]
@@ -73,8 +76,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var speechRecognizer = factoryFromToken.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile);
             SpeechRecognitionTestsHelper helper = new SpeechRecognitionTestsHelper();
 
-            Assert.AreEqual(newToken, factoryFromToken.AuthorizationToken);
-            Assert.IsTrue(await helper.IsValidSimpleRecognizer(speechRecognizer, TestData.English.Weather.Utterance));
+            Assert.AreEqual(newToken, factoryFromToken.AuthorizationToken, "Set of authentication token did not work as expected");
+            AssertMatching(TestData.English.Weather.Utterance, await helper.GetFirstRecognizerResult(speechRecognizer));
         }
     }
 }

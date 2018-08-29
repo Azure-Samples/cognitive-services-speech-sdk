@@ -111,25 +111,5 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             // reader set to the start of the body, i.e., the raw sample data
             return new BinaryAudioStreamReader(format, reader);
         }
-
-        public static bool AreResultsMatching(string actualText, string expectedText)
-        {
-            string plainActualText = Normalize(actualText);
-            string plainExpectedText = Normalize(expectedText);
-
-            if (plainActualText.Length <= plainExpectedText.Length)
-            {
-                return plainExpectedText.Contains(plainActualText);
-            }
-            else
-            {
-                return plainActualText.Contains(plainExpectedText);
-            }
-        }
-
-        private static string Normalize(string str)
-        {
-            return Regex.Replace(str, "[^a-zA-Z0-9' ]+", "", RegexOptions.Compiled).ToLower();
-        }
     }
 }

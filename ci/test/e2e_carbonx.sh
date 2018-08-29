@@ -85,6 +85,12 @@ for action in $Actions; do
       targetArg="${targets[$targetIndex + 1]}"
       TEST_NAME="$action $mode $target"
 
+      # Disabling cris intent test due to flakiness
+      # https://msasg.visualstudio.com/DefaultCollection/Skyman/_workitems/edit/1388581
+      if [[ "$TEST_NAME" = "intent default crisEndpoint" ]]; then
+        continue
+      fi
+
       runTest TESTRUNNER "$TEST_NAME" "$PLATFORMS_TO_RUN" $TIMEOUT_SECONDS \
         $CARBONX --subscription:$UserKeySkyman --input $TEST_AUDIO_FILE --$action $modeArg $targetArg
     done

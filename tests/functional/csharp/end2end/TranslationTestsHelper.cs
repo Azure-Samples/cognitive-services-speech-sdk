@@ -65,9 +65,20 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var textResultEvents = new List<EventArgs>();
                 var synthesisResultEvents = new List<EventArgs>();
 
-                recognizer.FinalResultReceived += (s, e) => textResultEvents.Add(e);
+                recognizer.RecognitionErrorRaised += (s, e) =>
+                {
+                    Console.WriteLine($"Received error: {e.ToString()}");
+                };
+
+                recognizer.FinalResultReceived += (s, e) =>
+                {
+                    Console.WriteLine($"Received final result event: {e.ToString()}");
+                    textResultEvents.Add(e);
+                };
+
                 recognizer.SynthesisResultReceived += (s, e) =>
                 {
+                    Console.WriteLine($"Received synthesis event: {e.ToString()}");
                     if (e.Result.Status == SynthesisStatus.Success)
                     {
                         synthesisResultEvents.Add(e);
@@ -76,7 +87,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 recognizer.OnSessionEvent += (s, e) =>
                 {
-                    if (e.EventType.ToString().Equals("SessionStoppedEvent"))
+                    Console.WriteLine($"Received session event: {e.ToString()}");
+                    if (e.EventType == SessionEventType.SessionStoppedEvent)
                     {
                         tcs.TrySetResult(true);
                     }
