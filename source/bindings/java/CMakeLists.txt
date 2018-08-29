@@ -227,10 +227,14 @@ add_dependencies(${JAVA_LIB} ${JAVA_BINDINGS} ${SWIG_MODULE_${JAVA_BINDINGS}_REA
 
 set_target_properties(${JAVA_LIB} PROPERTIES FOLDER bindings/java)
 
+# Adding logcat logging
+if(ANDROID)
+    target_link_libraries(${JAVA_BINDINGS} log)
+endif()
+
 # Note: this could also run earlier than post-build
 add_custom_command(TARGET ${JAVA_LIB}
                    POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E tar cvf "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${JAVA_LIB}-src.zip" --format=zip com
                    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
                    COMMENT "Generating src package including javadoc information")
-

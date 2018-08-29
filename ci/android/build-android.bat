@@ -14,7 +14,7 @@ cd build && ^
 cmake -G "NMake Makefiles" ^
     -Duse_default_uuid=ON ^
     -DCMAKE_SYSTEM_NAME=Android ^
-    -DCMAKE_SYSTEM_VERSION=26 ^
+    -DCMAKE_SYSTEM_VERSION=21 ^
     -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang ^
     -DCMAKE_ANDROID_ARCH_ABI=%TARGET_ARCHITECTURE% ^
     -DCMAKE_ANDROID_STL_TYPE=c++_static ^

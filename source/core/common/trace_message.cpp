@@ -77,10 +77,6 @@ void SpxTraceMessage_Internal(int level, const char* pszTitle, const char* pszFo
         default: androidPrio = ANDROID_LOG_FATAL; break;
     }
 
-    // TODO: roobo does not forward anything less than Error/Fatal to logcat
-    //       unless you flash the latest image to the device.
-    // androidPrio = ANDROID_LOG_FATAL;
-
     __android_log_vprint(androidPrio, "SpeechSDK", format.c_str(), argptr);
 
 // In release mode, do not log anything.
