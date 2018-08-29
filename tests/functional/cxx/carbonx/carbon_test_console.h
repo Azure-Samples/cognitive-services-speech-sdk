@@ -47,6 +47,7 @@ private:
         std::wstring m_strEndpointUri;
         std::wstring m_strCustomSpeechModelId;
         std::wstring m_strSubscriptionKey;
+        std::wstring m_strRegion;
         std::wstring m_strIntentAppId;
 
         bool m_fRecognizeAsync = false;

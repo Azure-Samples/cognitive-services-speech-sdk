@@ -170,6 +170,12 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
             pstrNextArg = &pconsoleArgs->m_strSubscriptionKey;
             fNextArgRequired = true;
         }
+        else if (PAL::wcsnicmp(pszArg, L"--region", wcslen(L"--region")) == 0)
+        {
+            fShowOptions = pconsoleArgs->m_strRegion.length() > 0 || fNextArgRequired;
+            pstrNextArg = &pconsoleArgs->m_strRegion;
+            fNextArgRequired = true;
+        }
         else if (PAL::wcsnicmp(pszArg, L"--intentAppId", wcslen(L"--intentAppId")) == 0)
         {
             fShowOptions = pconsoleArgs->m_strIntentAppId.length() > 0 || fNextArgRequired;
@@ -352,6 +358,7 @@ void CarbonTestConsole::DisplayConsoleUsage()
     ConsoleWriteLine(L"");
     ConsoleWriteLine(L"       --endpoint:{uri}              Use {uri} as the USP endpoint.");
     ConsoleWriteLine(L"       --subscription:{key}          Use {key} as the subscription key.");
+    ConsoleWriteLine(L"       --region:{region}             Use {region} as the service region.");
     ConsoleWriteLine(L"       --customSpeechModelId:{id}    Use {id} as the Custom Speech Model ID.");
     ConsoleWriteLine(L"");
     ConsoleWriteLine(L"     Additional:");
@@ -1041,7 +1048,8 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<SpeechRecognizer>& 
     auto result = future.get();
     ConsoleWriteLine(L"RecognizeAsync %ls... Waiting... Done!\n", name.c_str());
 
-    ConsoleWriteLine(L"SpeechRecognitionResult: ResultId=%d; Reason=%d; ErrorDetails=%ls; Text=%ls", result->ResultId.c_str(), result->Reason, result->ErrorDetails.c_str(), result->Text.c_str());
+    ConsoleWriteLine(L"SpeechRecognitionResult: ResultId=%ls; Reason=%d; ErrorDetails=%ls; Text=%ls",
+        result->ResultId.c_str(), result->Reason, result->ErrorDetails.c_str(), result->Text.c_str());
 }
 
 void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<IntentRecognizer>& recognizer)
@@ -1061,7 +1069,8 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<IntentRecognizer>& 
     auto intentId = result->IntentId;
     auto intentJson = result->Properties[ResultProperty::LanguageUnderstandingJson].GetString();
 
-    ConsoleWriteLine(L"IntentRecognitionResult: ResultId=%d; Reason=%d; Text=%ls, ErrorDetails=%ls, IntentId=%ls, Json=%ls", resultId.c_str(), reason, errorDetails.c_str(), text.c_str(), intentId.c_str(), intentJson.c_str());
+    ConsoleWriteLine(L"IntentRecognitionResult: ResultId=%ls; Reason=%d; Text=%ls, ErrorDetails=%ls, IntentId=%ls, Json=%ls",
+        resultId.c_str(), reason, text.c_str(), errorDetails.c_str(), intentId.c_str(), intentJson.c_str());
 }
 
 void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<TranslationRecognizer>& recognizer)
@@ -1073,7 +1082,7 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<TranslationRecogniz
     auto result = future.get();
     ConsoleWriteLine(L"RecognizeAsync %ls... Waiting... Done!\n", name.c_str());
 
-    ConsoleWriteLine(L"TranslationTextResult: ResultId=%d, ErrorDetails=%ls, RecognizedText=%ls, TranslationsStatus=%d",
+    ConsoleWriteLine(L"TranslationTextResult: ResultId=%ls, ErrorDetails=%ls, RecognizedText=%ls, TranslationsStatus=%d",
         result->TranslationTextResult::ResultId.c_str(), result->ErrorDetails.c_str(), result->Text.c_str(), (int)result->TranslationStatus);
     for (auto it : result->Translations)
     {
@@ -1411,6 +1420,11 @@ void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
     if (!pconsoleArgs->m_strSubscriptionKey.empty())
     {
         m_subscriptionKey = pconsoleArgs->m_strSubscriptionKey;
+    }
+
+    if (!pconsoleArgs->m_strRegion.empty())
+    {
+        m_regionId = pconsoleArgs->m_strRegion;
     }
 
     if (!pconsoleArgs->m_strEndpointUri.empty())

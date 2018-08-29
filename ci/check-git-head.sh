@@ -74,6 +74,12 @@ checkEmptyStdout \
   "git grep -I -l $'\r$' $gitTree | cut -d: -f2" \
   "CR LF detected in the (in-repo) version of text file(s), please change to just LF"
 
+# Note: test only lists the files, not the actual matches.
+# Meant to be a cheap check, nothign water-proof (which should be client-side anyway).
+checkEmptyStdout \
+  "git grep -l -i -I -P '[^a-f0-9][a-f0-9]{32}[^a-f0-9]' | fgrep -e external/uwp_ssl/include/openssl/bn.h -e tests/scripts/test-server.js -v" \
+  "Potentially subscription key checked in? Double check, if necessary modify white-list in this script: git grep -i -I -P '[^a-f0-9][a-f0-9]{32}[^a-f0-9]'"
+
 if [ $errorCount -ne 0 ]
 then
   echo "=============================================================================="

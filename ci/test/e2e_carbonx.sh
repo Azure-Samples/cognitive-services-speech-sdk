@@ -11,7 +11,7 @@ SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 . "$SCRIPT_DIR/../test-harness.sh"
 
 USAGE="
-Usage: $SCRIPT_NAME binary_dir action(all|speech|intent) keySkyman
+Usage: $SCRIPT_NAME binary_dir action(all|speech|intent) keySkyman regionSkyman keyLuis regionLuis
 
 Expected environment variables:
   - \$TEST_AUDIO_FILE - audio input file
@@ -20,7 +20,7 @@ Expected environment variables:
   - \$TEST_CRIS_ENDPOINT - CRIS endpoint
 "
 
-[[ $# -eq 3 ]] || die "Error: wrong number of arguments.\n$USAGE"
+[[ $# -eq 6 ]] || die "Error: wrong number of arguments.\n$USAGE"
 [[ -n $TEST_AUDIO_FILE ]] || die "Error: \$TEST_AUDIO_FILE not set.\n$USAGE"
 [[ -n $TEST_MODEL_ID ]] || die "Error: \$TEST_MODEL_ID not set.\n$USAGE"
 [[ -n $TEST_SPEECH_ENDPOINT ]] || die "Error: \$TEST_SPEECH_ENDPOINT not set.\n$USAGE"
@@ -28,7 +28,10 @@ Expected environment variables:
 
 BINARY_DIR=$1
 Action=$2
-UserKeySkyman=$3
+KeySkyman=$3
+RegionSkyman=$4
+KeyLuis=$5
+RegionLuis=$6
 
 CARBONX=$BINARY_DIR/carbonx
 
@@ -69,7 +72,7 @@ PLATFORMS_TO_RUN="$(joinArgs , {OSX-x64,Linux-x64,Windows-{x86,x64}}-{Debug,Rele
 
 PLATFORM=$SPEECHSDK_TARGET_PLATFORM-$SPEECHSDK_BUILD_CONFIGURATION
 
-startTests TESTRUNNER test-carbonx "$PLATFORM" "$UserKeySkyman"
+startTests TESTRUNNER test-carbonx "$PLATFORM" "$KeySkyman $KeyLuis"
 
 startSuite TESTRUNNER "$(basename "$CARBONX" .exe)"
 
@@ -85,14 +88,20 @@ for action in $Actions; do
       targetArg="${targets[$targetIndex + 1]}"
       TEST_NAME="$action $mode $target"
 
-      # Disabling cris intent test due to flakiness
-      # https://msasg.visualstudio.com/DefaultCollection/Skyman/_workitems/edit/1388581
-      if [[ "$TEST_NAME" = "intent default crisEndpoint" ]]; then
-        continue
+      if [[ $action == intent ]]; then
+
+        # Only do intent for base model
+        if [[ $target != baseModel ]]; then
+          continue
+        fi
+
+        AUTH="--subscription:$KeyLuis --region $RegionLuis"
+      else
+        AUTH="--subscription:$KeySkyman --region $RegionSkyman"
       fi
 
       runTest TESTRUNNER "$TEST_NAME" "$PLATFORMS_TO_RUN" $TIMEOUT_SECONDS \
-        $CARBONX --subscription:$UserKeySkyman --input $TEST_AUDIO_FILE --$action $modeArg $targetArg
+        $CARBONX $AUTH --input $TEST_AUDIO_FILE --$action $modeArg $targetArg
     done
   done
 done

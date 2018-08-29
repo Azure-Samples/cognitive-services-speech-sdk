@@ -95,7 +95,7 @@ constexpr auto translationRegion = L"westus2";
 constexpr auto bingSpeechEndpoint = LR"(wss://speech.platform.bing.com/speech/recognition/interactive/cognitiveservices/v1?format=simple&language=en-us)";
 constexpr auto luisPpeSpeechEndpoint = LR"(wss://speech.platform.bing.com/ppe/speech/uswest2/recognition/interactive/cognitiveservices/v1?format=simple&setflight=cognitiveservicesintent&&language=en-us)";
 constexpr auto luisSpeechEndpoint = LR"(wss://speech.platform.bing.com/speech/uswest2/recognition/interactive/cognitiveservices/v1?format=simple&language=en-us)";
-constexpr auto luisEndpoint = LR"(https://westus2.api.cognitive.microsoft.com/luis/v2.0/apps/6ad2c77d-180b-45a2-88aa-8c442538c090?subscription-key=38680d89f2134d34837ab1389c3102df&verbose=true&timezoneOffset=0&q=)";
+constexpr auto luisEndpoint = LR"(https://REGION.api.cognitive.microsoft.com/luis/v2.0/apps/APP-ID?subscription-key=KEY&verbose=true&timezoneOffset=0&q=)";
 
 
 void unused()

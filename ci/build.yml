@@ -378,7 +378,7 @@ phases:
     inputs:
       type: FilePath
       scriptPath: '$(Build.Repository.LocalPath)/ci/test/e2e_carbonx.sh'
-      args: './bin/$(BuildConfiguration) all $(KeySkyman)'
+      args: './bin/$(BuildConfiguration) all $(KeySkyman) westus $(KeyLuis) westus2'
       cwd: 'build/$(BuildPlatform)'
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
     timeoutInMinutes: 7
@@ -1097,7 +1097,7 @@ phases:
     inputs:
       type: FilePath
       scriptPath: '$(Build.Repository.LocalPath)/ci/test/e2e_carbonx.sh'
-      args: './bin all $(KeySkyman)'
+      args: './bin all $(KeySkyman) westus $(KeyLuis) westus2'
       cwd: build
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
     timeoutInMinutes: 7
@@ -1324,7 +1324,7 @@ phases:
     inputs:
       type: FilePath
       scriptPath: '$(Build.Repository.LocalPath)/ci/test/e2e_carbonx.sh'
-      args: './bin all $(KeySkyman)'
+      args: './bin all $(KeySkyman) westus $(KeyLuis) westus2'
       cwd: build
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
     timeoutInMinutes: 7
