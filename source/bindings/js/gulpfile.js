@@ -1,3 +1,4 @@
+"use strict";
 var gulp = require("gulp");
 var ts = require('gulp-typescript');
 var sourcemaps = require('gulp-sourcemaps');
@@ -62,11 +63,11 @@ function BumpVersionTagAndCommit(versionType) {
   return gulp.src(['./package.json'])
         // bump the version number
         .pipe(versionBump({type:versionType}))
-        // save it back to filesystem 
+        // save it back to filesystem
         .pipe(gulp.dest('./'))
-        // commit the changed version number 
+        // commit the changed version number
         .pipe(git.commit('Bumping package version'))
         // tag it in the repository
     .pipe(tagVersion());
 }
- 
+

@@ -249,7 +249,9 @@ phases:
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-tslint.TSLint@1
     displayName: 'Run TSLint'
     inputs:
-      Ruleset: tslatest
+      Ruleset: custom
+      RulesetFile: source/bindings/js/tslint.json
+      Files: source/**/*.ts
     continueOnError: true
     condition: succeededOrFailed()
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@2
@@ -262,11 +264,11 @@ phases:
     displayName: 'Publish Security Analysis Logs'
     inputs:
       AllTools: true
+    condition: succeededOrFailed()
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
     displayName: 'SDL: Post Analysis'
     inputs:
       AllTools: true
-    continueOnError: true
     condition: succeededOrFailed()
 
 - phase: WindowsBuild

@@ -1,3 +1,4 @@
+"use strict";
 var http = require('http');
 var https = require('https');
 var url = require('url');
@@ -8,7 +9,7 @@ var qrcode = require('qrcode-terminal'); // "qrcode-terminal": "^0.11.0",
 var sample = fs.readFileSync(__dirname + '/Sample.html', 'utf8');
 
 var enableTunnel = false;
-for (let j = 0; j < process.argv.length; j++) {  
+for (var j = 0; j < process.argv.length; j++) {
     enableTunnel |= process.argv[j] == 'enableTunnel';
 }
 
@@ -36,11 +37,11 @@ var server = http.createServer(function(request, response){
         response.end();
     }
 
-    path= url.parse(request.url).pathname;    
+    path= url.parse(request.url).pathname;
     console.log("Incoming request:" + request.url);
 
     if (path == '/token') {
-        getToken(key, function(token){ 
+        getToken(key, function(token){
             respond(200, token);
          })
     } else if (path == '/') {
@@ -48,7 +49,7 @@ var server = http.createServer(function(request, response){
     } else {
         var pathExists = fs.existsSync(__dirname + '/../../'+path);
 
-        if (!pathExists || 
+        if (!pathExists ||
             !path.endsWith('speech.sdk.bundle.js') &&
             !path.endsWith('speech.sdk.bundle.js.map')) {
             respond(404);
@@ -66,7 +67,7 @@ if (enableTunnel) {
     var tunnel = localtunnel(port, function(err, tunnel) {
         if (err) {
             quit = true;
-            server.close(); 
+            server.close();
             console.log('Something went south...' + err.message)
         } else {
             printServerInfo(tunnel.url)
@@ -75,7 +76,7 @@ if (enableTunnel) {
 
     tunnel.on('close', function() {
         quit = true;
-        server.close();   
+        server.close();
     });
 } else {
     printServerInfo('http://'+os.hostname() + ':' + port);
