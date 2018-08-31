@@ -3,10 +3,10 @@
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 import { FileAudioSource } from "../../common.browser/Exports";
-import { ArgumentNullError, IAudioSource } from "../../common/Exports";
-import { IAuthentication, IConnectionFactory, RecognitionMode, RecognizerConfig, ServiceRecognizerBase, SpeechConfig, SpeechRecognitionEvent, TranslationConfig, TranslationFailedEvent, TranslationHypothesisEvent, TranslationServiceRecognizer, TranslationSimplePhraseEvent } from "../speech/Exports";
+import { IAudioSource } from "../../common/Exports";
+import { IAuthentication, IConnectionFactory, RecognitionMode, RecognizerConfig, ServiceRecognizerBase, SpeechConfig, SpeechRecognitionEvent, SpeechResultFormat, TranslationConfig, TranslationFailedEvent, TranslationHypothesisEvent, TranslationServiceRecognizer, TranslationSimplePhraseEvent } from "../speech/Exports";
 import { Contracts } from "./Contracts";
-import { AudioInputStream, ISpeechProperties, KeywordRecognitionModel, RecognitionErrorEventArgs, RecognitionStatus, Recognizer, RecognizerParameterNames, TranslationConnectionFactory, TranslationStatus, TranslationSynthesisResultEventArgs, TranslationTextResult, TranslationTextResultEventArgs } from "./Exports";
+import { AudioInputStream, FactoryParameterNames, ISpeechProperties, KeywordRecognitionModel, RecognitionErrorEventArgs, RecognitionStatus, Recognizer, RecognizerParameterNames, TranslationConnectionFactory, TranslationStatus, TranslationSynthesisResultEventArgs, TranslationTextResult, TranslationTextResultEventArgs } from "./Exports";
 
 export class TranslationRecognizer extends Recognizer {
     private disposedTranslationRecognizer: boolean;
@@ -98,9 +98,7 @@ export class TranslationRecognizer extends Recognizer {
     public recognizeAsync(cb?: (e: TranslationTextResult) => void, err?: (e: string) => void): void {
         Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
 
-        //   return s_executorService.submit(() -> {
-        //           return new TranslationTextResult(recoImpl.Recognize());
-        //       });
+        this.implCloseExistingRecognizer();
 
         let audioSource;
         if (this.audioInputStreamHolder) {
@@ -111,8 +109,8 @@ export class TranslationRecognizer extends Recognizer {
         }
 
         this.reco = this.implRecognizerSetup(
-            RecognitionMode.Interactive,
-            this.parameters.get("SPEECH-SubscriptionKey", undefined),
+            RecognitionMode.Conversation,
+            this.parameters.get(FactoryParameterNames.SubscriptionKey, undefined),
             audioSource,
             new TranslationConnectionFactory());
 
@@ -186,11 +184,22 @@ export class TranslationRecognizer extends Recognizer {
     public startContinuousRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
         Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
 
-        //   return s_executorService.submit(() -> {
-        //           recoImpl.StartContinuousRecognitionAsync();
-        //           return null;
-        //       });
-        throw new ArgumentNullError("not supported");
+        this.implCloseExistingRecognizer();
+
+        this.recognizeAsync(
+            (result: TranslationTextResult) => {
+                // ignored
+            },
+            (message: string) => {
+                if (!!err) {
+                    err(message);
+                }
+            });
+
+        if (!!cb) {
+            cb();
+            cb = undefined;
+        }
     }
 
     /**
@@ -201,11 +210,11 @@ export class TranslationRecognizer extends Recognizer {
     public stopContinuousRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
         Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
 
-        //   return s_executorService.submit(() -> {
-        //           recoImpl.StopContinuousRecognitionAsync();
-        //           return null;
-        //       });
-        throw new ArgumentNullError("not supported");
+        this.implCloseExistingRecognizer();
+
+        if (!!cb) {
+            cb();
+        }
     }
 
     /**
@@ -224,7 +233,9 @@ export class TranslationRecognizer extends Recognizer {
         //          recoImpl.StartKeywordRecognitionAsync(model.getModelImpl());
         //          return null;
         //      });
-        throw new ArgumentNullError("not supported");
+
+        this.implCloseExistingRecognizer();
+        throw new Error("not supported");
     }
 
     /**
@@ -240,7 +251,9 @@ export class TranslationRecognizer extends Recognizer {
         //          recoImpl.StopKeywordRecognitionAsync();
         //          return null;
         //      });
-        throw new ArgumentNullError("not supported");
+
+        this.implCloseExistingRecognizer();
+        throw new Error("not supported");
     }
 
     /**
@@ -258,6 +271,7 @@ export class TranslationRecognizer extends Recognizer {
         }
 
         if (disposing) {
+            this.implCloseExistingRecognizer();
             this.disposedTranslationRecognizer = true;
             super.dispose(disposing);
         }
@@ -267,8 +281,9 @@ export class TranslationRecognizer extends Recognizer {
         return new TranslationConfig(
             speechConfig,
             recognitionMode,
-            this.parameters.get("TRANSLATION-FromLanguage", "en-us"),
-            this.targetLanguages);
+            this.parameters.get(RecognizerParameterNames.TranslationFromLanguage, "en-us"),
+            this.targetLanguages,
+            this.parameters);
     }
 
     protected CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioSource: IAudioSource, recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
@@ -277,6 +292,13 @@ export class TranslationRecognizer extends Recognizer {
 
     // tslint:disable-next-line:member-ordering
     private reco: ServiceRecognizerBase;
+
+    private implCloseExistingRecognizer(): void {
+        if (this.reco) {
+            this.reco.AudioSource.TurnOff();
+            this.reco = undefined;
+        }
+    }
 
     private FireEventForResult(evResult: TranslationSimplePhraseEvent): TranslationTextResultEventArgs {
         const ev = new TranslationTextResultEventArgs();

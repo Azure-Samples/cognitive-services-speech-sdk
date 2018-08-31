@@ -1,3 +1,4 @@
+import { ISpeechProperties } from "../speech.browser/Exports";
 import { Context, RecognitionMode, RecognizerConfig, SpeechConfig, SpeechResultFormat } from "./RecognizerConfig";
 
 export class TranslationConfig extends RecognizerConfig {
@@ -8,8 +9,8 @@ export class TranslationConfig extends RecognizerConfig {
         recognitionMode: RecognitionMode = RecognitionMode.Conversation,
         language: string = "en-us",
         targetLanguages: string[] = ["de-de"],
-        format: SpeechResultFormat = SpeechResultFormat.Simple) {
-        super(platformConfig, recognitionMode, language, format);
+        sdkProperties: ISpeechProperties) {
+        super(platformConfig, recognitionMode, language, sdkProperties);
 
         this.targetLanguages = targetLanguages;
     }

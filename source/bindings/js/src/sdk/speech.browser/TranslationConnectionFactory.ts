@@ -15,6 +15,7 @@ import {
     TranslationConfig,
     WebsocketMessageFormatter,
 } from "../speech/Exports";
+import { FactoryParameterNames } from "./Exports";
 
 const TestHooksParamName: string = "testhooks";
 const ConnectionIdHeader: string = "X-ConnectionId";
@@ -26,7 +27,12 @@ export class TranslationConnectionFactory implements IConnectionFactory {
         authInfo: AuthInfo,
         connectionId?: string): IConnection => {
 
-        const endpoint = this.Host + Storage.Local.GetOrAdd("TranslationRelativeUri", "/speech/translation/cognitiveservices/v1");
+        let endpoint: string = config.RecognizerProperties.get(FactoryParameterNames.Endpoint, undefined);
+        if (!endpoint) {
+            const region: string = config.RecognizerProperties.get(FactoryParameterNames.Region, "westus");
+
+            endpoint = this.Host(region) + Storage.Local.GetOrAdd("TranslationRelativeUri", "/speech/translation/cognitiveservices/v1");
+        }
 
         let targets: string = "";
         config.TargetLanguages.forEach((value: string, index: number, array: string[]) => targets += value + ",");
@@ -49,8 +55,8 @@ export class TranslationConnectionFactory implements IConnectionFactory {
         return new WebsocketConnection(endpoint, queryParams, headers, new WebsocketMessageFormatter(), connectionId);
     }
 
-    private get Host(): string {
-        return Storage.Local.GetOrAdd("Host", "wss://westus.s2s.speech.microsoft.com"); // TODO: More than one region....
+    private Host(region: string): string {
+        return Storage.Local.GetOrAdd("Host", "wss://" + region + ".s2s.speech.microsoft.com");
     }
 
     private get IsDebugModeEnabled(): boolean {

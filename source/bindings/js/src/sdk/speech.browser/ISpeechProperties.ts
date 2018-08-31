@@ -19,7 +19,7 @@ export class ISpeechProperties {
      * @param def The default value which is returned if the parameter is not available in the collection.
      * @return value of the parameter.
      */
-    public get(key: string, def: string): string {
+    public get(key: string, def?: string): string {
         for (let n = 0; n < this.keys.length; n++) {
             if (this.keys[n] === key) {
                 return this.values[n];

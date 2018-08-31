@@ -1,5 +1,5 @@
-//Copyright (c) Microsoft. All rights reserved.
-//Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// copyright (c) Microsoft. All rights reserved.
+// licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
 /*
@@ -15,15 +15,16 @@ import com.microsoft.cognitiveservices.speech.AudioInputStreamFormat;
 
 import * as sdk from "../../../../../source/bindings/js/Speech.Browser.Sdk";
 import * as fs from "fs";
+import { AudioInputStream } from "../../../../../source/bindings/js/distrib/src/sdk/speech.browser/Exports";
 
-export class WaveFileAudioInputStream extends sdk.AudioInputStream {
+export class WaveFileAudioInputStream extends  AudioInputStream {
 
     public constructor(filename: string) {
-        // Obtain and open the line.
+        // obtain and open the line.
         /*
         try {
             audioInputStream = AudioSystem.getAudioInputStream(new File(filename));
-            
+
             AudioFormat audioFormat = audioInputStream.getFormat();
             if(audioFormat.getChannels() != audioFormat.getChannels()) throw new IllegalArgumentException("channels");
             if(audioFormat.getSampleRate() != audioFormat.getSampleRate()) throw new IllegalArgumentException("samplerate");
@@ -46,7 +47,7 @@ export class WaveFileAudioInputStream extends sdk.AudioInputStream {
     /**
      * Reads data from audio input stream into the data buffer. The maximal number
      * of bytes to be read is determined by the size of dataBuffer.
-     * 
+     *
      * @param dataBuffer
      *            The byte array to store the read data.
      * @return the number of bytes have been read.
@@ -54,7 +55,7 @@ export class WaveFileAudioInputStream extends sdk.AudioInputStream {
     public read(dataBuffer: number[]): number {
         /*
         if(dataBuffer == null) throw new NullPointerException("dataBuffer");
-        
+
         try {
             int numRead = audioInputStream.read(dataBuffer, 0, dataBuffer.length);
             return numRead > 0 ? numRead : 0;
@@ -69,7 +70,7 @@ export class WaveFileAudioInputStream extends sdk.AudioInputStream {
 
     /**
      * Returns the audioFormat of this audio stream.
-     * 
+     *
      * @return The audioFormat of the audio stream.
      */
     public getFormat(): sdk.AudioInputStreamFormat {
@@ -88,7 +89,7 @@ export class WaveFileAudioInputStream extends sdk.AudioInputStream {
     /**
      * Closes the audio input stream.
      */
-    public close() {
+    public close(): void {
         /*
             try {
                 javax.sound.sampled.AudioInputStream a = audioInputStream;

@@ -1,14 +1,13 @@
 //
-//Copyright (c) Microsoft. All rights reserved.
-//Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// copyright (c) Microsoft. All rights reserved.
+// licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
 import * as sdk from "../../../../../source/bindings/js/Speech.Browser.Sdk";
-import { Promise } from "../../../../../source/bindings/js/Speech.Browser.Sdk";
 
 export class Settings {
 
-    // Subscription
+    // subscription
     public static SpeechSubscriptionKey :string = "<<YOUR_SUBSCRIPTION_KEY>>";
     public static SpeechRegion :string = "<<YOUR_REGION>>";
 
@@ -27,8 +26,8 @@ export class Settings {
 
     private static isSettingsInitialized :boolean = false;
     public static s_settingsClassLock :Object;
-    
-    static initialize(){
+
+    static initialize(): void {
        /* TODO: How do we validate the type exists in TypeScript?
        try {
             Class.forName("com.microsoft.cognitiveservices.speech.SpeechFactory");
@@ -40,14 +39,15 @@ export class Settings {
         // prevent classgc from reclaiming the settings class, thus
         // throwing away any custom setting value..
         Settings.s_settingsClassLock = new Settings();
-        
+
         Settings.LoadSettings();
-    };
+    }
 
     public static LoadSettings = () => {
-        if(Settings.isSettingsInitialized)
+        if(Settings.isSettingsInitialized) {
             return;
-        
+        }
+
         /* TODO: What's the equivlant parameter passing story?
         Settings.SpeechAuthorizationToken = System.getProperty("SpeechAuthorizationToken", SpeechAuthorizationToken);
         Settings.SpeechSubscriptionKey = System.getProperty("SpeechSubscriptionKey", SpeechSubscriptionKey);
@@ -66,13 +66,12 @@ export class Settings {
         Settings.isSettingsInitialized = true;
     }
 
-    
-    public static getFactory() :sdk.SpeechFactory {
+    public static getFactory(): sdk.SpeechFactory {
         if (Settings.factory == null) {
             try {
                 Settings.factory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
-                // PMA parameters
+                // the PMA parameters
                 Settings.factory.parameters.set("DeviceGeometry", "Circular6+1");
                 Settings.factory.parameters.set("SelectedGeometry", "Circular3+1");
             } catch (ex) {
@@ -85,24 +84,11 @@ export class Settings {
         return Settings.factory;
     }
 
-    public static displayException(ex) {
+    public static displayException(ex: any): void {
         console.error(ex.getMessage() + "\n");
         for (let item of ex.getStackTrace()) {
             console.error(item.toString());
         }
     }
-
-    public static setOnTaskCompletedListener<T>(task: Promise<T>, listener: OnTaskCompletedListener<T>)  {
-       // new FutureTask<Object>(() -> {
-       //     listener.onCompleted(task.get());
-       //     return true;
-       // }).run();
-    }
-
-
 }
 Settings.initialize();
-
-interface OnTaskCompletedListener<T> {
-    onCompleted(taskResult: T);
-}

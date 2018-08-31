@@ -1406,7 +1406,7 @@ phases:
     inputs:
       workingDir: tests/functional/js/Unit
       verbose: false
-  - script: RunTests.cmd SpeechSubscriptionKey:$(KeySkyman)
+  - script: RunTests.cmd SpeechSubscriptionKey:$(KeySkyman) SpeechRegion:westus
     displayName: 'Run tests'
     workingDirectory: tests/functional/js/Unit
   - task: PublishTestResults@2

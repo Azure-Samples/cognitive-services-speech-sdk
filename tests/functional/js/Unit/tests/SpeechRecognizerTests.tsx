@@ -6,7 +6,7 @@ import * as sdk from "../../../../../source/bindings/js/distrib/Speech.Browser.S
 import { Settings } from "./Settings";
 import { WaveFileAudioInputStream } from "./WaveFileAudioInputStream";
 import { promises } from "fs";
-//import { SpeechRecognitionResult, CreateRecognizerWithFileAudioSource } from "../../../../../source/bindings/js/Speech.Browser.Sdk";
+// import { SpeechRecognitionResult, CreateRecognizerWithFileAudioSource } from "../../../../../source/bindings/js/Speech.Browser.Sdk";
 import { setTimeout } from "timers";
 import { settings } from "cluster";
 import { WaitForCondition } from "./Utilities";
@@ -159,7 +159,7 @@ test("testGetLanguage2", ()=> {
     expect(r).not.toBeUndefined();
 
     expect(r.language).not.toBeNull();
-    expect(language == r.language);
+    expect(language === r.language);
 
     r.close();
     s.close();

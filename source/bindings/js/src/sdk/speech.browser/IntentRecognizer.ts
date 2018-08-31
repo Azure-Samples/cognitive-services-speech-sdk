@@ -2,7 +2,7 @@
 // copyright (c) Microsoft. All rights reserved.
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-import { ArgumentNullError, IAudioSource } from "../../common/Exports";
+import { IAudioSource } from "../../common/Exports";
 import { IAuthentication, IConnectionFactory, RecognitionMode, RecognizerConfig, ServiceRecognizerBase, SpeechConfig } from "../speech/Exports";
 import { Contracts } from "./Contracts";
 import { AudioInputStream, IntentRecognitionResult, IntentRecognitionResultEventArgs, ISpeechProperties, KeywordRecognitionModel, LanguageUnderstandingModel, RecognitionErrorEventArgs, Recognizer, RecognizerParameterNames } from "./Exports";
@@ -77,7 +77,7 @@ export class IntentRecognizer extends Recognizer {
         //  return s_executorService.submit(() -> {
         //          return  new IntentRecognitionResult(recoImpl.Recognize());
         //      });
-        throw new ArgumentNullError("not supported");
+        throw new Error("not supported");
     }
 
     /**
@@ -93,7 +93,7 @@ export class IntentRecognizer extends Recognizer {
         //          recoImpl.StartContinuousRecognition();
         //          return null;
         //      });
-        throw new ArgumentNullError("not supported");
+        throw new Error("not supported");
     }
 
     /**
@@ -108,7 +108,7 @@ export class IntentRecognizer extends Recognizer {
         //          recoImpl.StopContinuousRecognition();
         //          return null;
         //      });
-        throw new ArgumentNullError("not supported");
+        throw new Error("not supported");
     }
 
     /**
@@ -122,7 +122,7 @@ export class IntentRecognizer extends Recognizer {
         Contracts.throwIfNullOrWhitespace(phrase, "phrase");
 
         //  recoImpl.AddIntent(intentId, phrase);
-        throw new ArgumentNullError("not supported");
+        throw new Error("not supported");
     }
 
     /**
@@ -139,7 +139,7 @@ export class IntentRecognizer extends Recognizer {
 
         //  IntentTrigger trigger = com.microsoft.cognitiveservices.speech.internal.IntentTrigger.From(model.getModelImpl(), intentName);
         //  recoImpl.AddIntent(intentId, trigger);
-        throw new ArgumentNullError("not supported");
+        throw new Error("not supported");
     }
 
     /**
@@ -158,7 +158,7 @@ export class IntentRecognizer extends Recognizer {
         //          recoImpl.StartKeywordRecognition(model.getModelImpl());
         //          return null;
         //      });
-        throw new ArgumentNullError("not supported");
+        throw new Error("not supported");
     }
 
     /**
@@ -174,7 +174,7 @@ export class IntentRecognizer extends Recognizer {
         //      recoImpl.StopKeywordRecognition();
         //      return null;
         //  });
-        throw new ArgumentNullError("not supported");
+        throw new Error("not supported");
     }
 
     /**

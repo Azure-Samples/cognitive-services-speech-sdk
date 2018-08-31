@@ -5,6 +5,7 @@ import {
     Promise,
     Storage,
 } from "../../common/Exports";
+import { FactoryParameterNames } from "../speech.browser/Exports";
 import {
     AuthInfo,
     IAuthentication,
@@ -25,17 +26,21 @@ export class SpeechConnectionFactory implements IConnectionFactory {
         authInfo: AuthInfo,
         connectionId?: string): IConnection => {
 
-        let endpoint = "";
-        switch (config.RecognitionMode) {
-            case RecognitionMode.Conversation:
-                endpoint = this.Host + this.ConversationRelativeUri;
-                break;
-            case RecognitionMode.Dictation:
-                endpoint = this.Host + this.DictationRelativeUri;
-                break;
-            default:
-                endpoint = this.Host + this.InteractiveRelativeUri; // default is interactive
-                break;
+        let endpoint: string = config.RecognizerProperties.get(FactoryParameterNames.Endpoint, undefined);
+        if (!endpoint) {
+            const region: string = config.RecognizerProperties.get(FactoryParameterNames.Region, "westus");
+
+            switch (config.RecognitionMode) {
+                case RecognitionMode.Conversation:
+                    endpoint = this.Host(region) + this.ConversationRelativeUri;
+                    break;
+                case RecognitionMode.Dictation:
+                    endpoint = this.Host(region) + this.DictationRelativeUri;
+                    break;
+                default:
+                    endpoint = this.Host(region) + this.InteractiveRelativeUri; // default is interactive
+                    break;
+            }
         }
 
         const queryParams: IStringDictionary<string> = {
@@ -54,8 +59,8 @@ export class SpeechConnectionFactory implements IConnectionFactory {
         return new WebsocketConnection(endpoint, queryParams, headers, new WebsocketMessageFormatter(), connectionId);
     }
 
-    private get Host(): string {
-        return Storage.Local.GetOrAdd("Host", "wss://westus.stt.speech.microsoft.com");
+    private Host(region: string): string {
+        return Storage.Local.GetOrAdd("Host", "wss://" + region + ".stt.speech.microsoft.com");
     }
 
     private get InteractiveRelativeUri(): string {

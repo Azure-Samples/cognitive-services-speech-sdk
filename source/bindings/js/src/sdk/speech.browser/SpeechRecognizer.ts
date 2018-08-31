@@ -3,7 +3,7 @@
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 import { FileAudioSource } from "../../common.browser/Exports";
-import { ArgumentNullError, IAudioSource } from "../../common/Exports";
+import { IAudioSource } from "../../common/Exports";
 import { IAuthentication, IConnectionFactory, IDetailedSpeechPhrase, ISimpleSpeechPhrase, ISpeechFragment, RecognitionMode, RecognitionStatus2, RecognizerConfig, ServiceRecognizerBase, SpeechConfig, SpeechRecognitionEvent, SpeechRecognitionResultEvent, SpeechResultFormat, SpeechServiceRecognizer } from "../speech/Exports";
 import { SpeechConnectionFactory } from "../speech/SpeechConnectionFactory";
 import { Contracts } from "./Contracts";
@@ -387,7 +387,7 @@ export class SpeechRecognizer extends Recognizer {
         Contracts.throwIfNull(model, "model");
 
         this.implCloseExistingRecognizer();
-        throw new ArgumentNullError("keyword recognition not supported");
+        throw new Error("keyword recognition not supported");
     }
 
     /**
@@ -400,7 +400,7 @@ export class SpeechRecognizer extends Recognizer {
         Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
 
         this.implCloseExistingRecognizer();
-        throw new ArgumentNullError("keyword recognition not supported");
+        throw new Error("keyword recognition not supported");
     }
 
     /**
@@ -429,8 +429,8 @@ export class SpeechRecognizer extends Recognizer {
         return new RecognizerConfig(
             speechConfig,
             recognitionMode,
-            this.parameters.get("language", "en-us"),
-            this.parameters.get("outputFormat", "SIMPLE") ? SpeechResultFormat.Simple : SpeechResultFormat.Detailed);
+            this.parameters.get(RecognizerParameterNames.SpeechRecognitionLanguage, "en-us"),
+            this.parameters);
     }
 
     protected CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioSource: IAudioSource, recognizerConfig: RecognizerConfig): ServiceRecognizerBase {

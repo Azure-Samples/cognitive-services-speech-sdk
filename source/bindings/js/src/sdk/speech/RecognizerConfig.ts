@@ -1,3 +1,4 @@
+import { ISpeechProperties, RecognizerParameterNames } from "../speech.browser/Exports";
 
 export enum RecognitionMode {
     Interactive,
@@ -13,20 +14,24 @@ export enum SpeechResultFormat {
 export class RecognizerConfig {
     private recognitionMode: RecognitionMode = RecognitionMode.Interactive;
     private language: string;
-    private format: SpeechResultFormat;
     private speechConfig: SpeechConfig;
     private recognitionActivityTimeout: number;
+    private sdkProperties: ISpeechProperties;
 
     constructor(
         platformConfig: SpeechConfig,
         recognitionMode: RecognitionMode = RecognitionMode.Interactive,
         language: string = "en-us",
-        format: SpeechResultFormat = SpeechResultFormat.Simple) {
+        sdkProperties: ISpeechProperties) {
         this.speechConfig = platformConfig ? platformConfig : new SpeechConfig(new Context(null, null));
         this.recognitionMode = recognitionMode;
         this.language = language;
-        this.format = format;
         this.recognitionActivityTimeout = recognitionMode === RecognitionMode.Interactive ? 8000 : 25000;
+        this.sdkProperties = sdkProperties;
+    }
+
+    public get RecognizerProperties(): ISpeechProperties {
+        return this.sdkProperties;
     }
 
     public get RecognitionMode(): RecognitionMode {
@@ -38,7 +43,8 @@ export class RecognizerConfig {
     }
 
     public get Format(): SpeechResultFormat {
-        return this.format;
+            const format = this.sdkProperties.get(RecognizerParameterNames.OutputFormat, "SIMPLE") ? SpeechResultFormat.Simple : SpeechResultFormat.Detailed;
+            return format;
     }
 
     public get SpeechConfig(): SpeechConfig {

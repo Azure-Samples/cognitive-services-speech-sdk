@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+      "module": "commonjs",
+      "preserveConstEnums": true,
+      "sourceMap": true,
+      "target": "ES5",
+      "declaration": true,
+      "noImplicitAny": true,
+      "removeComments": false
+  }
+}
