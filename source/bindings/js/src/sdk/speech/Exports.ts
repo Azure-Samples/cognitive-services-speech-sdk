@@ -10,3 +10,5 @@ export * from "./Recognizer";
 export * from "./RecognizerConfig";
 export * from "./SpeechResults";
 export * from "./WebsocketMessageFormatter";
+export * from "./TranslationConfig";
+export * from "./SpeechConnectionFactory";

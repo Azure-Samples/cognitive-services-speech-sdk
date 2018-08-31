@@ -14,7 +14,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "jest --setupFiles ../../../../build/tests/functional/js/Unit/TestConfiguration.ts"
+    "test": "jest"
   },
   "keywords": [],
   "author": "",

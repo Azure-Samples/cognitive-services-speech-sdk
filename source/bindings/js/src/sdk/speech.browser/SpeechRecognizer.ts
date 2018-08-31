@@ -1,83 +1,19 @@
+//
+// copyright (c) Microsoft. All rights reserved.
+// licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
 import { FileAudioSource } from "../../common.browser/Exports";
-import { ArgumentNullError, Deferred, Promise } from "../../common/Exports";
-import { ISimpleSpeechPhrase, RecognitionMode, RecognitionStatus2, Recognizer, SpeechRecognitionEvent, SpeechRecognitionResultEvent, SpeechResultFormat } from "../speech/Exports";
-import { IDetailedSpeechPhrase, ISpeechFragment } from "../speech/SpeechResults";
-import { AudioInputStream, OutputFormat } from "./Exports";
-import { ISpeechProperties, KeywordRecognitionModel, RecognitionErrorEventArgs, RecognitionStatus, RecognizerBase } from "./Recognizer";
+import { ArgumentNullError, IAudioSource } from "../../common/Exports";
+import { IAuthentication, IConnectionFactory, IDetailedSpeechPhrase, ISimpleSpeechPhrase, ISpeechFragment, RecognitionMode, RecognitionStatus2, RecognizerConfig, ServiceRecognizerBase, SpeechConfig, SpeechRecognitionEvent, SpeechRecognitionResultEvent, SpeechResultFormat, SpeechServiceRecognizer } from "../speech/Exports";
+import { SpeechConnectionFactory } from "../speech/SpeechConnectionFactory";
+import { Contracts } from "./Contracts";
+import { AudioInputStream, FactoryParameterNames, ISpeechProperties, KeywordRecognitionModel, OutputFormat, RecognitionErrorEventArgs, RecognitionStatus, Recognizer, RecognizerParameterNames, SpeechRecognitionResult, SpeechRecognitionResultEventArgs } from "./Exports";
 
-// tslint:disable-next-line:max-classes-per-file
-export class SpeechRecognitionResultEventArgs {
-    /**
-     * Specifies the recognition result.
-     * @return the recognition result.
-     */
-    public result: SpeechRecognitionResult;
-
-    /**
-     * Specifies the session identifier.
-     * @return the session identifier.
-     */
-    public sessionId: string;
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class SpeechRecognitionResult {
-    /**
-     * Specifies the result identifier.
-     * @return Specifies the result identifier.
-     */
-    public resultId: string;
-
-    /**
-     * Specifies status of the result.
-     * @return Specifies status of the result.
-     */
-    public reason: RecognitionStatus;
-
-    /**
-     * Presents the recognized text in the result.
-     * @return Presents the recognized text in the result.
-     */
-    public text: string;
-
-    /**
-     * Duration of recognized speech in milliseconds.
-     * @return Duration of recognized speech in milliseconds.
-     */
-    public duration: number;
-
-    /**
-     * Offset of recognized speech in milliseconds.
-     * @return Offset of recognized speech in milliseconds.
-     */
-    public offset: number;
-
-    /**
-     * In case of an unsuccessful recognition, provides a brief description of an occurred error.
-     * This field is only filled-out if the recognition status (@see RecognitionStatus) is set to Canceled.
-     * @return a brief description of an error.
-     */
-    public errorDetails: string;
-
-    /**
-     * A string containing Json serialized recognition result as it was received from the service.
-     * @return Json serialized representation of the result.
-     */
-    public json: string;
-
-    /**
-     *  The set of properties exposed in the result.
-     * @return The set of properties exposed in the result.
-     */
-    public properties: ISpeechProperties;
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class SpeechRecognizer extends RecognizerBase {
+/**
+ * Performs speech recognition from microphone, file, or other audio input streams, and gets transcribed text as result.
+ */
+export class SpeechRecognizer extends Recognizer {
     private disposedSpeechRecognizer: boolean = false;
-    private intermediateResultReceivedHandler: Array<(sender: RecognizerBase, event: SpeechRecognitionResultEventArgs) => void> = Array();
-    private finalResultReceivedHandler: Array<(sender: RecognizerBase, event: SpeechRecognitionResultEventArgs) => void> = {} = Array();
-    private recognitionErrorRaisedHandler: Array<(sender: RecognizerBase, event: RecognitionErrorEventArgs) => void> = Array();
 
     /**
      * SpeechRecognizer constructor.
@@ -88,44 +24,31 @@ export class SpeechRecognizer extends RecognizerBase {
         super(ais);
 
         this.parameters = parameters;
-
-        //  this.intermediateResultHandler = new ResultHandlerImpl(this, /*isFinalResultHandler:*/ false);
-        //  this.finalResultHandler = new ResultHandlerImpl(this, /*isFinalResultHandler:*/ true);
-        //  this.errorHandler = new ErrorHandlerImpl(this);
-
-        //  this.recoImpl.getSessionStarted().AddEventListener(this.sessionStartedHandler);
-        //  this.recoImpl.getSessionStopped().AddEventListener(this.sessionStoppedHandler);
-        //  this.recoImpl.getSpeechStartDetected().AddEventListener(this.speechStartDetectedHandler);
-        //  this.recoImpl.getSpeechEndDetected().AddEventListener(this.speechEndDetectedHandler);
     }
 
     /**
      * The event IntermediateResultReceived signals that an intermediate recognition result is received.
      */
-    public IntermediateResultReceived(onEventCallback: (sender: RecognizerBase, event: SpeechRecognitionResultEventArgs) => void): void {
-        this.intermediateResultReceivedHandler.push(onEventCallback);
-    }
+    public IntermediateResultReceived: (sender: Recognizer, event: SpeechRecognitionResultEventArgs) => void;
 
     /**
      * The event FinalResultReceived signals that a final recognition result is received.
      */
-    public FinalResultReceived(onEventCallback: (sender: RecognizerBase, event: SpeechRecognitionResultEventArgs) => void): void {
-        this.finalResultReceivedHandler.push(onEventCallback);
-    }
+    public FinalResultReceived: (sender: Recognizer, event: SpeechRecognitionResultEventArgs) => void;
 
     /**
      * The event RecognitionErrorRaised signals that an error occurred during recognition.
      */
-    public RecognitionErrorRaised(onEventCallback: (sender: RecognizerBase, event: RecognitionErrorEventArgs) => void): void {
-        this.recognitionErrorRaisedHandler.push(onEventCallback);
-    }
+    public RecognitionErrorRaised: (sender: Recognizer, event: RecognitionErrorEventArgs) => void;
 
     /**
      * Gets the deployment id of a customized speech model that is used for speech recognition.
      * @return the deployment id of a customized speech model that is used for speech recognition.
      */
     public get deploymentId(): string {
-        return this.parameters.get("deploymentId", undefined); // "_Parameters.getString(RecognizerParameterNames.SpeechModelId)";
+        Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
+
+        return this.parameters.get(RecognizerParameterNames.SpeechModelId, "00000000-0000-0000-0000-000000000000");
     }
 
     /**
@@ -133,10 +56,10 @@ export class SpeechRecognizer extends RecognizerBase {
      * @param value The deployment id of a customized speech model that is used for speech recognition.
      */
     public set deploymentId(value: string) {
-        // Contracts.throwIfNullOrWhitespace(value, "value");
+        Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
+        Contracts.throwIfNullOrWhitespace(value, "value");
 
-        //  _Parameters.set(RecognizerParameterNames.SpeechModelId, value);
-        this.parameters.set("deploymentId", value);
+        this.parameters.set(RecognizerParameterNames.SpeechModelId, value);
     }
 
     /**
@@ -144,7 +67,9 @@ export class SpeechRecognizer extends RecognizerBase {
      * @return The spoken language of recognition.
      */
     public get language(): string {
-        return this.parameters.get("SPEECH-RecoLanguage", "en-us"); // return "_Parameters.getString(RecognizerParameterNames.SpeechRecognitionLanguage)";
+        Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
+
+        return this.parameters.get(RecognizerParameterNames.SpeechRecognitionLanguage, "en-us");
     }
 
     /**
@@ -152,7 +77,9 @@ export class SpeechRecognizer extends RecognizerBase {
      * @return The output format of recognition.
      */
     public get outputFormat(): OutputFormat {
-        if (this.parameters.get("outputFormat", "SIMPLE") === "SIMPLE") {
+        Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
+
+        if (this.parameters.get(RecognizerParameterNames.OutputFormat, "SIMPLE") === "SIMPLE") {
             return OutputFormat.Simple;
         } else {
             return OutputFormat.Detailed;
@@ -167,14 +94,15 @@ export class SpeechRecognizer extends RecognizerBase {
 
     /**
      * Starts speech recognition, and stops after the first utterance is recognized. The task returns the recognition text as result.
-     * Note: RecognizeAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
-     * @return A task representing the recognition operation. The task returns a value of SpeechRecognitionResult
+     * Note: RecognizeAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition
+     *       like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
+     * @param cb Callback that received the SpeechRecognitionResult.
+     * @param err Callback invoked in case of an error.
      */
-    public recognizeAsync(): Promise<SpeechRecognitionResult> {
-        this.implCloseExistingRecognizer();
+    public recognizeAsync(cb?: (e: SpeechRecognitionResult) => void, err?: (e: string) => void): void {
+        Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
 
-        let deferred = new Deferred<SpeechRecognitionResult>();
-        const promise = deferred.Promise();
+        this.implCloseExistingRecognizer();
 
         let audioSource;
         if (this.audioInputStreamHolder) {
@@ -186,12 +114,11 @@ export class SpeechRecognizer extends RecognizerBase {
 
         this.reco = this.implRecognizerSetup(
             RecognitionMode.Interactive,
-            this.parameters.get("SPEECH-RecoLanguage", "en-us"),
-            this.parameters.get("outputFormat", "SIMPLE") ? SpeechResultFormat.Simple : SpeechResultFormat.Detailed,
-            this.parameters.get("SPEECH-SubscriptionKey", undefined),
-            audioSource);
+            this.parameters.get(FactoryParameterNames.SubscriptionKey, undefined),
+            audioSource,
+            new SpeechConnectionFactory());
 
-        this.implRecognizerStart(this.reco,  (event: SpeechRecognitionEvent) => {
+        this.implRecognizerStart(this.reco, (event: SpeechRecognitionEvent) => {
             if (this.disposedSpeechRecognizer || !this.reco) {
                 return;
             }
@@ -211,14 +138,14 @@ export class SpeechRecognizer extends RecognizerBase {
                         ev.sessionId = evResult.SessionId;
                         ev.status = reason;
 
-                        this.recognitionErrorRaisedHandler.forEach((cb: (s: RecognizerBase, e: RecognitionErrorEventArgs) => void) => {
-                            cb(this, ev);
-                        });
+                        if (!!this.RecognitionErrorRaised) {
+                            this.RecognitionErrorRaised(this, ev);
+                        }
 
                         // report result to promise.
-                        if (deferred !== undefined) {
-                            deferred.Reject(evResult.Result.DisplayText);
-                            deferred = undefined;
+                        if (!!err) {
+                            err(evResult.Result.DisplayText);
+                            err = undefined;
                         }
                     } else {
                         const ev = new SpeechRecognitionResultEventArgs();
@@ -231,14 +158,14 @@ export class SpeechRecognizer extends RecognizerBase {
                         ev.result.text = evResult.Result.DisplayText;
                         ev.result.reason = reason;
 
-                        this.finalResultReceivedHandler.forEach((cb: (s: RecognizerBase, e: SpeechRecognitionResultEventArgs) => void) => {
-                            cb(this, ev);
-                        });
+                        if (!!this.FinalResultReceived) {
+                            this.FinalResultReceived(this, ev);
+                        }
 
                         // report result to promise.
-                        if (deferred !== undefined) {
-                            deferred.Resolve(ev.result);
-                            deferred = undefined;
+                        if (!!cb) {
+                            cb(ev.result);
+                            cb = undefined;
                         }
                     }
                 }
@@ -254,14 +181,14 @@ export class SpeechRecognizer extends RecognizerBase {
                         ev.sessionId = evResult.SessionId;
                         ev.status = reason;
 
-                        this.recognitionErrorRaisedHandler.forEach((cb: (s: RecognizerBase, e: RecognitionErrorEventArgs) => void) => {
-                            cb(this, ev);
-                        });
+                        if (!!this.RecognitionErrorRaised) {
+                            this.RecognitionErrorRaised(this, ev);
+                        }
 
                         // report result to promise.
-                        if (deferred !== undefined) {
-                            deferred.Reject(JSON.stringify(evResult.Result));
-                            deferred = undefined;
+                        if (!!err) {
+                            err(JSON.stringify(evResult.Result));
+                            err = undefined;
                         }
                     } else {
                         const ev = new SpeechRecognitionResultEventArgs();
@@ -273,14 +200,14 @@ export class SpeechRecognizer extends RecognizerBase {
                         ev.result.duration = evResult.Result.Duration;
                         ev.result.reason = reason;
 
-                        this.finalResultReceivedHandler.forEach((cb: (s: RecognizerBase, e: SpeechRecognitionResultEventArgs) => void) => {
-                            cb(this, ev);
-                        });
+                        if (!!this.FinalResultReceived) {
+                            this.FinalResultReceived(this, ev);
+                        }
 
                         // report result to promise.
-                        if (deferred !== undefined) {
-                            deferred.Resolve(ev.result);
-                            deferred = undefined;
+                        if (!!cb) {
+                            cb(ev.result);
+                            cb = undefined;
                         }
                     }
                 }
@@ -299,27 +226,25 @@ export class SpeechRecognizer extends RecognizerBase {
                     ev.result.duration = evResult.Result.Duration;
                     ev.result.text = evResult.Result.Text;
 
-                    this.intermediateResultReceivedHandler.forEach((cb: (s: RecognizerBase, e: SpeechRecognitionResultEventArgs) => void) => {
-                        cb(this, ev);
-                    });
+                    if (!!this.IntermediateResultReceived) {
+                        this.IntermediateResultReceived(this, ev);
+                    }
                 }
                 break;
             }
         });
-
-        return promise;
     }
 
     /**
      * Starts speech recognition on a continuous audio stream, until stopContinuousRecognitionAsync() is called.
      * User must subscribe to events to receive recognition results.
-     * @return A task representing the asynchronous operation that starts the recognition.
+     * @param cb Callback that received the recognition has started.
+     * @param err Callback invoked in case of an error.
      */
-    public startContinuousRecognitionAsync(): Promise<void> {
-        this.implCloseExistingRecognizer();
+    public startContinuousRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
+        Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
 
-        let deferred = new Deferred<void>();
-        const promise = deferred.Promise();
+        this.implCloseExistingRecognizer();
 
         let audioSource;
         if (this.audioInputStreamHolder) {
@@ -331,20 +256,19 @@ export class SpeechRecognizer extends RecognizerBase {
 
         this.reco = this.implRecognizerSetup(
             RecognitionMode.Conversation,
-            this.parameters.get("language", "en-us"),
-            this.parameters.get("outputFormat", "SIMPLE") ? SpeechResultFormat.Simple : SpeechResultFormat.Detailed,
-            this.parameters.get("SPEECH-SubscriptionKey", undefined),
-            audioSource);
+            this.parameters.get(FactoryParameterNames.SubscriptionKey, undefined),
+            audioSource,
+            new SpeechConnectionFactory());
 
-        this.implRecognizerStart(this.reco,  (event: SpeechRecognitionEvent) => {
+        this.implRecognizerStart(this.reco, (event: SpeechRecognitionEvent) => {
             if (this.disposedSpeechRecognizer || !this.reco) {
                 return;
             }
 
             // report result to promise.
-            if (deferred !== undefined) {
-                deferred.Resolve(undefined);
-                deferred = undefined;
+            if (!!cb) {
+                cb();
+                cb = undefined;
             }
 
             /*
@@ -362,14 +286,8 @@ export class SpeechRecognizer extends RecognizerBase {
                         ev.sessionId = evResult.SessionId;
                         ev.status = reason;
 
-                        this.recognitionErrorRaisedHandler.forEach((cb: (s: RecognizerBase, e: RecognitionErrorEventArgs) => void) => {
-                            cb(this, ev);
-                        });
-
-                        // report result to promise.
-                        if (deferred !== undefined) {
-                            deferred.Reject(evResult.Result.DisplayText);
-                            deferred = undefined;
+                        if (!!this.RecognitionErrorRaised) {
+                            this.RecognitionErrorRaised(this, ev);
                         }
                     } else {
                         const ev = new SpeechRecognitionResultEventArgs();
@@ -382,9 +300,9 @@ export class SpeechRecognizer extends RecognizerBase {
                         ev.result.text = evResult.Result.DisplayText;
                         ev.result.reason = reason;
 
-                        this.finalResultReceivedHandler.forEach((cb: (s: RecognizerBase, e: SpeechRecognitionResultEventArgs) => void) => {
-                            cb(this, ev);
-                        });
+                        if (!!this.FinalResultReceived) {
+                            this.FinalResultReceived(this, ev);
+                        }
                     }
                 }
                 break;
@@ -399,14 +317,8 @@ export class SpeechRecognizer extends RecognizerBase {
                         ev.sessionId = evResult.SessionId;
                         ev.status = reason;
 
-                        this.recognitionErrorRaisedHandler.forEach((cb: (s: RecognizerBase, e: RecognitionErrorEventArgs) => void) => {
-                            cb(this, ev);
-                        });
-
-                        // report result to promise.
-                        if (deferred !== undefined) {
-                            deferred.Reject(JSON.stringify(evResult.Result));
-                            deferred = undefined;
+                        if (!!this.RecognitionErrorRaised) {
+                            this.RecognitionErrorRaised(this, ev);
                         }
                     } else {
                         const ev = new SpeechRecognitionResultEventArgs();
@@ -418,9 +330,9 @@ export class SpeechRecognizer extends RecognizerBase {
                         ev.result.duration = evResult.Result.Duration;
                         ev.result.reason = reason;
 
-                        this.finalResultReceivedHandler.forEach((cb: (s: RecognizerBase, e: SpeechRecognitionResultEventArgs) => void) => {
-                            cb(this, ev);
-                        });
+                        if (!!this.FinalResultReceived) {
+                            this.FinalResultReceived(this, ev);
+                        }
                     }
                 }
                 break;
@@ -438,29 +350,28 @@ export class SpeechRecognizer extends RecognizerBase {
                     ev.result.duration = evResult.Result.Duration;
                     ev.result.text = evResult.Result.Text;
 
-                    this.intermediateResultReceivedHandler.forEach((cb: (s: RecognizerBase, e: SpeechRecognitionResultEventArgs) => void) => {
-                        cb(this, ev);
-                    });
+                    if (!!this.IntermediateResultReceived) {
+                        this.IntermediateResultReceived(this, ev);
+                    }
                 }
                 break;
             }
         });
-
-        return promise;
     }
 
     /**
      * Stops continuous speech recognition.
-     * @return A task representing the asynchronous operation that stops the recognition.
+     * @param cb Callback that received the recognition has stopped.
+     * @param err Callback invoked in case of an error.
      */
-    public stopContinuousRecognitionAsync(): Promise<void> {
-        const deferred = new Deferred<void>();
+    public stopContinuousRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
+        Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
 
         this.implCloseExistingRecognizer();
 
-        deferred.Resolve(undefined);
-
-        return deferred.Promise();
+        if (!!cb) {
+            cb();
+        }
     }
 
     /**
@@ -468,15 +379,13 @@ export class SpeechRecognizer extends RecognizerBase {
      * User must subscribe to events to receive recognition results.
      * Note: Key word spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
      * @param model The keyword recognition model that specifies the keyword to be recognized.
-     * @return A task representing the asynchronous operation that starts the recognition.
+     * @param cb Callback that received the recognition has started.
+     * @param err Callback invoked in case of an error.
      */
-    public startKeywordRecognitionAsync(model: KeywordRecognitionModel): Promise<void> {
-        //  Contracts.throwIfNull(model, "model");
+    public startKeywordRecognitionAsync(model: KeywordRecognitionModel, cb?: () => void, err?: (e: string) => void): void {
+        Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
+        Contracts.throwIfNull(model, "model");
 
-        //  return s_executorService.submit(() -> {
-        //          recoImpl.StartKeywordRecognition(model.getModelImpl());
-        //          return null;
-        //      });
         this.implCloseExistingRecognizer();
         throw new ArgumentNullError("keyword recognition not supported");
     }
@@ -484,13 +393,12 @@ export class SpeechRecognizer extends RecognizerBase {
     /**
      * Stops continuous speech recognition.
      * Note: Key word spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
-     * @return A task representing the asynchronous operation that stops the recognition.
+     * @param cb Callback that received the recognition has stopped.
+     * @param err Callback invoked in case of an error.
      */
-    public stopKeywordRecognitionAsync(): Promise<void> {
-        //  return s_executorService.submit(() -> {
-        //          recoImpl.StopKeywordRecognition();
-        //          return null;
-        //      });
+    public stopKeywordRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
+        Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
+
         this.implCloseExistingRecognizer();
         throw new ArgumentNullError("keyword recognition not supported");
     }
@@ -499,6 +407,8 @@ export class SpeechRecognizer extends RecognizerBase {
      * closes all external resources held by an instance of this class.
      */
     public close(): void {
+        Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
+
         this.dispose(true);
     }
 
@@ -508,11 +418,6 @@ export class SpeechRecognizer extends RecognizerBase {
         }
 
         if (disposing) {
-            //  intermediateResultHandler.delete();
-            //  finalResultHandler.delete();
-            //  errorHandler.delete();
-            //  getRecoImpl().delete();
-            //  _Parameters.close();
             this.implCloseExistingRecognizer();
             this.disposedSpeechRecognizer = true;
         }
@@ -520,8 +425,20 @@ export class SpeechRecognizer extends RecognizerBase {
         super.dispose(disposing);
     }
 
+    protected CreateRecognizerConfig(speechConfig: SpeechConfig, recognitionMode: RecognitionMode): RecognizerConfig {
+        return new RecognizerConfig(
+            speechConfig,
+            recognitionMode,
+            this.parameters.get("language", "en-us"),
+            this.parameters.get("outputFormat", "SIMPLE") ? SpeechResultFormat.Simple : SpeechResultFormat.Detailed);
+    }
+
+    protected CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioSource: IAudioSource, recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
+        return new SpeechServiceRecognizer(authentication, connectionFactory, audioSource, recognizerConfig);
+    }
+
     // tslint:disable-next-line:member-ordering
-    private reco: Recognizer;
+    private reco: ServiceRecognizerBase;
 
     private implCloseExistingRecognizer(): void {
         if (this.reco) {

@@ -13,7 +13,7 @@ import {
     RecognizerConfig,
     SpeechResultFormat,
     WebsocketMessageFormatter,
-} from "../speech/Exports";
+} from "./Exports";
 
 const TestHooksParamName: string = "testhooks";
 const ConnectionIdHeader: string = "X-ConnectionId";

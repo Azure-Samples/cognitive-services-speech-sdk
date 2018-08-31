@@ -1,101 +1,15 @@
-import { Promise } from "../../common/Exports";
-import { ISpeechProperties, KeywordRecognitionModel, RecognitionErrorEventArgs, RecognitionStatus, RecognizerBase } from "./Recognizer";
-import { AudioInputStream, OutputFormat } from "./SpeechFactory";
+//
+// copyright (c) Microsoft. All rights reserved.
+// licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+import { FileAudioSource } from "../../common.browser/Exports";
+import { ArgumentNullError, IAudioSource } from "../../common/Exports";
+import { IAuthentication, IConnectionFactory, RecognitionMode, RecognizerConfig, ServiceRecognizerBase, SpeechConfig, SpeechRecognitionEvent, TranslationConfig, TranslationFailedEvent, TranslationHypothesisEvent, TranslationServiceRecognizer, TranslationSimplePhraseEvent } from "../speech/Exports";
+import { Contracts } from "./Contracts";
+import { AudioInputStream, ISpeechProperties, KeywordRecognitionModel, RecognitionErrorEventArgs, RecognitionStatus, Recognizer, RecognizerParameterNames, TranslationConnectionFactory, TranslationStatus, TranslationSynthesisResultEventArgs, TranslationTextResult, TranslationTextResultEventArgs } from "./Exports";
 
-// tslint:disable-next-line:max-classes-per-file
-export class TranslationTextResultEventArgs {
-    /**
-     * Specifies the recognition result.
-     * @return the recognition result.
-     */
-    public result: TranslationTextResult;
-
-    /**
-     * Specifies the session identifier.
-     * @return the session identifier.
-     */
-    public sessionId: string;
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class TranslationSynthesisResultEventArgs {
-    /**
-     * Specifies the translation synthesis result.
-     * @return Specifies the translation synthesis result.
-     */
-    public result: TranslationSynthesisResult;
-
-    /**
-     * Specifies the session identifier.
-     * @return Specifies the session identifier.
-     */
-    public sessionId: string;
-}
-
-/**
- * Defines recognition status.
- */
-export enum TranslationStatus {
-    Success = 0,
-    Error,
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class TranslationTextResult {
-    /**
-     * Specifies translation status.
-     * @return the translation status.
-     */
-    public translationStatus: TranslationStatus;
-
-    /**
-     * Presents the translation results. Each item in the dictionary represents translation result in one of target languages, where the key
-     * is the name of the target language, in BCP-47 format, and the value is the translation text in the specified language.
-     * @return the current translation map.
-     */
-    public translations: ISpeechProperties;
-}
-
-export enum SynthesisStatus {
-    /**
-     * The response contains valid audio data.
-     */
-    Success,
-    /**
-     * Indicates the end of audio data. No valid audio data is included in the message.
-     */
-    SynthesisEnd,
-    /**
-     * Indicates an error occurred during synthesis data processing.
-     */
-    Error,
-}
-
-/**
- * Defines translation synthesis result, i.e. the voice output of the translated text in the target language.
- */
-// tslint:disable-next-line:max-classes-per-file
-export class TranslationSynthesisResult {
-    /**
-     * Translated text in the target language.
-     * @return Translated text in the target language.
-     */
-    public audio: ByteString;
-
-    /**
-     * Status of the synthesis.
-     * @return status of the synthesis.
-     */
-    public synthesisStatus: SynthesisStatus;
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class TranslationRecognizer extends RecognizerBase {
-    private disposedTranslationRecognizer: boolean = false;
-    private intermediateResultReceivedHandler: Array<(sender: RecognizerBase, event: TranslationTextResultEventArgs) => void>;
-    private finalResultReceivedHandler: Array<(sender: RecognizerBase, event: TranslationTextResultEventArgs) => void>;
-    private recognitionErrorRaisedHandler: Array<(sender: RecognizerBase, event: RecognitionErrorEventArgs) => void>;
-    private synthesisResultReceivedHandler: Array<(sender: RecognizerBase, event: TranslationSynthesisResultEventArgs) => void>;
+export class TranslationRecognizer extends Recognizer {
+    private disposedTranslationRecognizer: boolean;
 
     /**
      * Initializes an instance of the TranslationRecognizer.
@@ -105,43 +19,38 @@ export class TranslationRecognizer extends RecognizerBase {
     public constructor(parameters: ISpeechProperties, ais: AudioInputStream) {
         super(ais);
 
+        this.disposedTranslationRecognizer = false;
         this.parameters = parameters;
     }
 
     /**
      * The event IntermediateResultReceived signals that an intermediate recognition result is received.
      */
-    public IntermediateResultReceived(onEventCallback: (sender: TranslationRecognizer, event: TranslationTextResultEventArgs) => void): void {
-        this.intermediateResultReceivedHandler.push(onEventCallback);
-    }
+    public IntermediateResultReceived: (sender: TranslationRecognizer, event: TranslationTextResultEventArgs) => void;
 
     /**
      * The event FinalResultReceived signals that a final recognition result is received.
      */
-    public FinalResultReceived(onEventCallback: (sender: TranslationRecognizer, event: TranslationTextResultEventArgs) => void): void {
-        this.finalResultReceivedHandler.push(onEventCallback);
-    }
+    public FinalResultReceived: (sender: TranslationRecognizer, event: TranslationTextResultEventArgs) => void;
 
     /**
      * The event RecognitionErrorRaised signals that an error occurred during recognition.
      */
-    public RecognitionErrorRaised(onEventCallback: (sender: TranslationRecognizer, event: RecognitionErrorEventArgs) => void): void {
-        this.recognitionErrorRaisedHandler.push(onEventCallback);
-    }
+    public RecognitionErrorRaised: (sender: TranslationRecognizer, event: RecognitionErrorEventArgs) => void;
 
     /**
      * The event SynthesisResultReceived signals that a translation synthesis result is received.
      */
-    public SynthesisResultReceived(onEventCallback: (sender: TranslationRecognizer, event: TranslationSynthesisResultEventArgs) => void): void {
-        this.synthesisResultReceivedHandler.push(onEventCallback);
-    }
+    public SynthesisResultReceived: (sender: TranslationRecognizer, event: TranslationSynthesisResultEventArgs) => void;
 
     /**
      * Gets the language name that was set when the recognizer was created.
      * @return Gets the language name that was set when the recognizer was created.
      */
     public get sourceLanguage(): string {
-        return this.parameters.get("sourceLanguage", "en-us");
+        Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
+
+        return this.parameters.get(RecognizerParameterNames.TranslationFromLanguage, "en-us");
     }
 
     /**
@@ -150,11 +59,13 @@ export class TranslationRecognizer extends RecognizerBase {
      * @return Gets target languages for translation that were set when the recognizer was created.
      */
     public get targetLanguages(): string[] {
+        Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
+
         let n = 0;
         const languages = [];
 
-        while (this.parameters.has("targetLanguages" + n)) {
-            languages.push(this.parameters.get("targetLanguages" + n, undefined));
+        while (this.parameters.has(RecognizerParameterNames.TranslationToLanguage + n)) {
+            languages.push(this.parameters.get(RecognizerParameterNames.TranslationToLanguage + n, undefined));
             n++;
         }
 
@@ -166,7 +77,9 @@ export class TranslationRecognizer extends RecognizerBase {
      * @return the name of output voice.
      */
     public get outputVoiceName(): string {
-        return this.parameters.get("voice", "en-us");
+        Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
+
+        return this.parameters.get(RecognizerParameterNames.TranslationVoice, "en-us");
     }
 
     /**
@@ -177,39 +90,122 @@ export class TranslationRecognizer extends RecognizerBase {
 
     /**
      * Starts recognition and translation, and stops after the first utterance is recognized. The task returns the translation text as result.
-     * Note: RecognizeAsync() returns when the first utterance has been recognized, so it is suitableonly for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
-     * @return A task representing the recognition operation. The task returns a value of TranslationTextResult.
+     * Note: RecognizeAsync() returns when the first utterance has been recognized, so it is suitableonly
+     *       for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
+     * @param cb Callback that received the result when the translation has completed.
+     * @param err Callback invoked in case of an error.
      */
-    public recognizeAsync(): Promise<TranslationTextResult> {
+    public recognizeAsync(cb?: (e: TranslationTextResult) => void, err?: (e: string) => void): void {
+        Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
+
         //   return s_executorService.submit(() -> {
         //           return new TranslationTextResult(recoImpl.Recognize());
         //       });
-        return new Promise<TranslationTextResult>(null);
+
+        let audioSource;
+        if (this.audioInputStreamHolder) {
+            audioSource = new FileAudioSource(this.audioInputStreamHolder.file);
+        } else if (this.parameters.has("audioFile")) {
+            const file = new File([""], this.parameters.get("audioFile", undefined));
+            audioSource = new FileAudioSource(file);
+        }
+
+        this.reco = this.implRecognizerSetup(
+            RecognitionMode.Interactive,
+            this.parameters.get("SPEECH-SubscriptionKey", undefined),
+            audioSource,
+            new TranslationConnectionFactory());
+
+        this.implRecognizerStart(this.reco, (event: SpeechRecognitionEvent) => {
+            if (!this.reco) {
+                return;
+            }
+            switch (event.Name) {
+                case "TranslationSimplePhraseEvent":
+                    {
+                        const evResult = event as TranslationSimplePhraseEvent;
+                        if (evResult.Result === undefined) {
+                            if (!!err) {
+                                err(TranslationStatus.Error.toString()); // TODO: Need to capture and route better error from the service.
+                                break;
+                            }
+                        }
+
+                        const result: TranslationTextResultEventArgs = this.FireEventForResult(evResult);
+
+                        if (!!this.FinalResultReceived) {
+                            this.FinalResultReceived(this, result);
+                        }
+
+                        // report result to promise.
+                        if (!!cb) {
+                            cb(result.result);
+                            cb = undefined;
+                        }
+                    }
+                    break;
+                case "TranslationHypothesisEvent":
+                    {
+                        const evResult = event as TranslationHypothesisEvent;
+
+                        const result: TranslationTextResultEventArgs = this.FireEventForResult(evResult);
+
+                        if (!!this.IntermediateResultReceived) {
+                            this.IntermediateResultReceived(this, result);
+                        }
+
+                    }
+                    break;
+                case "TranslationFailedEvent":
+                    {
+                        const evResult = event as TranslationFailedEvent;
+                        const errorEvent: RecognitionErrorEventArgs = new RecognitionErrorEventArgs();
+                        errorEvent.status = RecognitionStatus.Canceled;
+                        errorEvent.sessionId = evResult.SessionId;
+
+                        if (!!this.RecognitionErrorRaised) {
+                            this.RecognitionErrorRaised(this, errorEvent);
+                        }
+
+                        if (!!err) {
+                            err(errorEvent.status.toString());
+                        }
+
+                        break;
+                    }
+            }
+        });
     }
 
     /**
      * Starts recognition and translation on a continuous audio stream, until StopContinuousRecognitionAsync() is called.
      * User must subscribe to events to receive translation results.
-     * @return A task representing the asynchronous operation that starts the recognition.
+     * @param cb Callback that received the translation has started.
+     * @param err Callback invoked in case of an error.
      */
-    public startContinuousRecognitionAsync(): Promise<void> {
+    public startContinuousRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
+        Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
+
         //   return s_executorService.submit(() -> {
         //           recoImpl.StartContinuousRecognitionAsync();
         //           return null;
         //       });
-        return new Promise<void>(null);
+        throw new ArgumentNullError("not supported");
     }
 
     /**
      * Stops continuous recognition and translation.
-     * @return A task representing the asynchronous operation that stops the translation.
+     * @param cb Callback that received the translation has stopped.
+     * @param err Callback invoked in case of an error.
      */
-    public stopContinuousRecognitionAsync(): Promise<void> {
+    public stopContinuousRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
+        Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
+
         //   return s_executorService.submit(() -> {
         //           recoImpl.StopContinuousRecognitionAsync();
         //           return null;
         //       });
-        return new Promise<void>(null);
+        throw new ArgumentNullError("not supported");
     }
 
     /**
@@ -217,29 +213,43 @@ export class TranslationRecognizer extends RecognizerBase {
      * User must subscribe to events to receive recognition results.
      * Note: Key word spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
      * @param model The keyword recognition model that specifies the keyword to be recognized.
-     * @return A task representing the asynchronous operation that starts the recognition.
+     * @param cb Callback that received the translation has started.
+     * @param err Callback invoked in case of an error.
      */
-    public startKeywordRecognitionAsync(model: KeywordRecognitionModel): Promise<void> {
-        //  Contracts.throwIfNull(model, "model");
+    public startKeywordRecognitionAsync(model: KeywordRecognitionModel, cb?: () => void, err?: (e: string) => void): void {
+        Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
+        Contracts.throwIfNull(model, "model");
 
         //  return s_executorService.submit(() -> {
         //          recoImpl.StartKeywordRecognitionAsync(model.getModelImpl());
         //          return null;
         //      });
-        return new Promise<void>(null);
+        throw new ArgumentNullError("not supported");
     }
 
     /**
      * Stops continuous speech recognition.
      * Note: Key word spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
-     * @return A task representing the asynchronous operation that stops the recognition.
+     * @param cb Callback that received the translation has stopped.
+     * @param err Callback invoked in case of an error.
      */
-    public stopKeywordRecognitionAsync(): Promise<void> {
+    public stopKeywordRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
+        Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
+
         //  return s_executorService.submit(() -> {
         //          recoImpl.StopKeywordRecognitionAsync();
         //          return null;
         //      });
-        return new Promise<void>(null);
+        throw new ArgumentNullError("not supported");
+    }
+
+    /**
+     * closes all external resources held by an instance of this class.
+     */
+    public close(): void {
+        Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
+
+        this.dispose(true);
     }
 
     protected dispose(disposing: boolean): boolean {
@@ -248,13 +258,38 @@ export class TranslationRecognizer extends RecognizerBase {
         }
 
         if (disposing) {
-            //   intermediateResultHandler.delete();
-            //   finalResultHandler.delete();
-            //   errorHandler.delete();
-            //   recoImpl.delete();
-            //   _Parameters.close();
             this.disposedTranslationRecognizer = true;
             super.dispose(disposing);
         }
+    }
+
+    protected CreateRecognizerConfig(speechConfig: SpeechConfig, recognitionMode: RecognitionMode): RecognizerConfig {
+        return new TranslationConfig(
+            speechConfig,
+            recognitionMode,
+            this.parameters.get("TRANSLATION-FromLanguage", "en-us"),
+            this.targetLanguages);
+    }
+
+    protected CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioSource: IAudioSource, recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
+        return new TranslationServiceRecognizer(authentication, connectionFactory, audioSource, recognizerConfig);
+    }
+
+    // tslint:disable-next-line:member-ordering
+    private reco: ServiceRecognizerBase;
+
+    private FireEventForResult(evResult: TranslationSimplePhraseEvent): TranslationTextResultEventArgs {
+        const ev = new TranslationTextResultEventArgs();
+        ev.sessionId = evResult.SessionId;
+
+        ev.result = new TranslationTextResult();
+        ev.result.translationStatus = (TranslationStatus as any)[evResult.Result.Translation.TranslationStatus];
+
+        ev.result.translations = new ISpeechProperties();
+        for (const translation of evResult.Result.Translation.Translations) {
+            ev.result.translations.set(translation.Language, translation.Text);
+        }
+
+        return ev;
     }
 }

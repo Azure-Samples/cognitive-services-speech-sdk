@@ -1,85 +1,14 @@
-import { Promise } from "../../common/Exports";
-import { ISpeechProperties, KeywordRecognitionModel, RecognitionErrorEventArgs, RecognitionStatus, RecognizerBase } from "./Recognizer";
-import { AudioInputStream, OutputFormat } from "./SpeechFactory";
+//
+// copyright (c) Microsoft. All rights reserved.
+// licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+import { ArgumentNullError, IAudioSource } from "../../common/Exports";
+import { IAuthentication, IConnectionFactory, RecognitionMode, RecognizerConfig, ServiceRecognizerBase, SpeechConfig } from "../speech/Exports";
+import { Contracts } from "./Contracts";
+import { AudioInputStream, IntentRecognitionResult, IntentRecognitionResultEventArgs, ISpeechProperties, KeywordRecognitionModel, LanguageUnderstandingModel, RecognitionErrorEventArgs, Recognizer, RecognizerParameterNames } from "./Exports";
 
-// tslint:disable-next-line:max-classes-per-file
-export class IntentRecognitionResultEventArgs {
-    /**
-     * Represents the intent recognition result.
-     * @return Represents the intent recognition result.
-     */
-    public result: IntentRecognitionResult;
-
-    /**
-     * A String represents the session identifier.
-     * @return A String represents the session identifier.
-     */
-    public sessionId: string;
-
-    public properties: ISpeechProperties;
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class IntentRecognitionResult {
-    /**
-     * A String that represents the intent identifier being recognized.
-     * @return A String that represents the intent identifier being recognized.
-     */
-    public intentId: string;
-
-    /**
-     * A String that represents the intent including properties being recognized.
-     * @return A String that represents the intent including properties being recognized.
-     */
-    public languageUnderstanding: string;
-
-    /**
-     * A String that represents the intent as json.
-     * @return A String that represents the intent as json.
-     */
-    public json: string;
-
-    /**
-     * A String that represents error result in case the call failed.
-     * @return A String that represents error result in case the call failed.
-     */
-    public errorDetails: string;
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class LanguageUnderstandingModel {
-    private constructor() {
-    }
-
-    /**
-     * Creates an language understanding model using the specified endpoint.
-     * @param uri A String that represents the endpoint of the language understanding model.
-     * @return The language understanding model being created.
-     */
-    public static fromEndpoint(uri: URL): LanguageUnderstandingModel {
-        //  Contracts.throwIfNullOrWhitespace(uri, "uri");
-        //  return new LanguageUnderstandingModel(com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel.FromEndpoint(uri));
-        return new LanguageUnderstandingModel();
-    }
-
-    /**
-     * Creates an language understanding model using the application id of Language Understanding service.
-     * @param appId A String that represents the application id of Language Understanding service.
-     * @return The language understanding model being created.
-     */
-    public static fromAppId(appId: string): LanguageUnderstandingModel {
-        //    Contracts.throwIfNullOrWhitespace(appId, "appId");
-        //    return new LanguageUnderstandingModel(com.microsoft.cognitiveservices.speech.internal.LanguageUnderstandingModel.FromAppId(appId));
-        return new LanguageUnderstandingModel();
-    }
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class IntentRecognizer extends RecognizerBase {
-    private disposedIntentRecognizer: boolean = false;
-    private intermediateResultReceivedHandler: Array<(sender: RecognizerBase, event: IntentRecognitionResultEventArgs) => void>;
-    private finalResultReceivedHandler: Array<(sender: RecognizerBase, event: IntentRecognitionResultEventArgs) => void>;
-    private recognitionErrorRaisedHandler: Array<(sender: RecognizerBase, event: RecognitionErrorEventArgs) => void>;
+export class IntentRecognizer extends Recognizer {
+    private disposedIntentRecognizer: boolean;
 
     // TODO should only be visible internally for SpeechFactory
     /**
@@ -90,36 +19,33 @@ export class IntentRecognizer extends RecognizerBase {
     public constructor(parameters: ISpeechProperties, ais: AudioInputStream) {
         super(ais);
 
+        this.disposedIntentRecognizer = false;
         this.parameters = parameters;
     }
 
     /**
      * The event IntermediateResultReceived signals that an intermediate recognition result is received.
      */
-    public IntermediateResultReceived(onEventCallback: (sender: IntentRecognizer, event: IntentRecognitionResultEventArgs) => void): void {
-        this.intermediateResultReceivedHandler.push(onEventCallback);
-    }
+    public IntermediateResultReceived: (sender: IntentRecognizer, event: IntentRecognitionResultEventArgs) => void;
 
     /**
      * The event FinalResultReceived signals that a final recognition result is received.
      */
-    public FinalResultReceived(onEventCallback: (sender: IntentRecognizer, event: IntentRecognitionResultEventArgs) => void): void {
-        this.finalResultReceivedHandler.push(onEventCallback);
-    }
+    public FinalResultReceived: (sender: IntentRecognizer, event: IntentRecognitionResultEventArgs) => void;
 
     /**
      * The event RecognitionErrorRaised signals that an error occurred during recognition.
      */
-    public RecognitionErrorRaised(onEventCallback: (sender: IntentRecognizer, event: RecognitionErrorEventArgs) => void): void {
-        this.recognitionErrorRaisedHandler.push(onEventCallback);
-    }
+    public RecognitionErrorRaised: (sender: IntentRecognizer, event: RecognitionErrorEventArgs) => void;
 
     /**
      * Gets the spoken language of recognition.
      * @return the spoken language of recognition.
      */
     public get language(): string {
-        return this.parameters.get("language", "en-us");
+        Contracts.throwIfDisposed(this.disposedIntentRecognizer);
+
+        return this.parameters.get(RecognizerParameterNames.SpeechRecognitionLanguage, "en-us");
     }
 
     /**
@@ -127,8 +53,10 @@ export class IntentRecognizer extends RecognizerBase {
      * @param value the spoken language of recognition.
      */
     public set language(value: string) {
-        // Contracts.throwIfNullOrWhitespace(value, "value");
-        this.parameters.set("language", value);
+        Contracts.throwIfDisposed(this.disposedIntentRecognizer);
+        Contracts.throwIfNullOrWhitespace(value, "value");
+
+        this.parameters.set("SPEECH-RecoLanguage", value);
     }
 
     /**
@@ -140,38 +68,47 @@ export class IntentRecognizer extends RecognizerBase {
     /**
      * Starts intent recognition, and stops after the first utterance is recognized. The task returns the recognition text and intent as result.
      * Note: RecognizeAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
-     * @return A task representing the recognition operation. The task returns a value of IntentRecognitionResult
+     * @param cb Callback that received the recognition has finished with an IntentRecognitionResult.
+     * @param err Callback invoked in case of an error.
      */
-    public recognizeAsync(): Promise<IntentRecognitionResult> {
+    public recognizeAsync(cb?: (e: IntentRecognitionResult) => void, err?: (e: string) => void): void {
+        Contracts.throwIfDisposed(this.disposedIntentRecognizer);
+
         //  return s_executorService.submit(() -> {
         //          return  new IntentRecognitionResult(recoImpl.Recognize());
         //      });
-        return new Promise<IntentRecognitionResult>(null);
+        throw new ArgumentNullError("not supported");
     }
 
     /**
      * Starts speech recognition on a continuous audio stream, until stopContinuousRecognitionAsync() is called.
      * User must subscribe to events to receive recognition results.
-     * @return A task representing the asynchronous operation that starts the recognition.
+     * @param cb Callback that received the recognition has started.
+     * @param err Callback invoked in case of an error.
      */
-    public startContinuousRecognitionAsync(): Promise<void> {
+    public startContinuousRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
+        Contracts.throwIfDisposed(this.disposedIntentRecognizer);
+
         //  return s_executorService.submit(() -> {
         //          recoImpl.StartContinuousRecognition();
         //          return null;
         //      });
-        return new Promise<void>(null);
+        throw new ArgumentNullError("not supported");
     }
 
     /**
      * Stops continuous intent recognition.
-     * @return A task representing the asynchronous operation that stops the recognition.
+     * @param cb Callback that received the recognition has stopped.
+     * @param err Callback invoked in case of an error.
      */
-    public stopContinuousRecognitionAsync(): Promise<void> {
+    public stopContinuousRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
+        Contracts.throwIfDisposed(this.disposedIntentRecognizer);
+
         //  return s_executorService.submit(() -> {
         //          recoImpl.StopContinuousRecognition();
         //          return null;
         //      });
-        return new Promise<void>(null);
+        throw new ArgumentNullError("not supported");
     }
 
     /**
@@ -180,10 +117,12 @@ export class IntentRecognizer extends RecognizerBase {
      * @param phrase A String that specifies the phrase representing the intent.
      */
     public addIntent(intentId: string, phrase: string): void {
-        //  Contracts.throwIfNullOrWhitespace(intentId, "intentId");
-        //  Contracts.throwIfNullOrWhitespace(phrase, "phrase");
+        Contracts.throwIfDisposed(this.disposedIntentRecognizer);
+        Contracts.throwIfNullOrWhitespace(intentId, "intentId");
+        Contracts.throwIfNullOrWhitespace(phrase, "phrase");
 
         //  recoImpl.AddIntent(intentId, phrase);
+        throw new ArgumentNullError("not supported");
     }
 
     /**
@@ -193,12 +132,14 @@ export class IntentRecognizer extends RecognizerBase {
      * @param intentName The intent name defined in the intent model. If it is null, all intent names defined in the model will be added.
      */
     public addIntentWithLanguageModel(intentId: string, model: LanguageUnderstandingModel, intentName: string): void {
-        //  Contracts.throwIfNullOrWhitespace(intentId, "intentId");
-        //  Contracts.throwIfNullOrWhitespace(intentName, "intentName");
-        //  Contracts.throwIfNull(model, "model");
+        Contracts.throwIfDisposed(this.disposedIntentRecognizer);
+        Contracts.throwIfNullOrWhitespace(intentId, "intentId");
+        Contracts.throwIfNullOrWhitespace(intentName, "intentName");
+        Contracts.throwIfNull(model, "model");
 
         //  IntentTrigger trigger = com.microsoft.cognitiveservices.speech.internal.IntentTrigger.From(model.getModelImpl(), intentName);
         //  recoImpl.AddIntent(intentId, trigger);
+        throw new ArgumentNullError("not supported");
     }
 
     /**
@@ -206,29 +147,50 @@ export class IntentRecognizer extends RecognizerBase {
      * User must subscribe to events to receive recognition results.
      * Note: Key word spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
      * @param model The keyword recognition model that specifies the keyword to be recognized.
-     * @return A task representing the asynchronous operation that starts the recognition.
+     * @param cb Callback that received the recognition has started.
+     * @param err Callback invoked in case of an error.
      */
-    public startKeywordRecognitionAsync(model: KeywordRecognitionModel): Promise<void> {
-        //  Contracts.throwIfNull(model, "model");
+    public startKeywordRecognitionAsync(model: KeywordRecognitionModel, cb?: () => void, err?: (e: string) => void): void {
+        Contracts.throwIfDisposed(this.disposedIntentRecognizer);
+        Contracts.throwIfNull(model, "model");
 
         //  return s_executorService.submit(() -> {
         //          recoImpl.StartKeywordRecognition(model.getModelImpl());
         //          return null;
         //      });
-        return new Promise<void>(null);
+        throw new ArgumentNullError("not supported");
     }
 
     /**
      * Stops continuous speech recognition.
      * Note: Key word spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
-     * @return A task representing the asynchronous operation that stops the recognition.
+     * @param cb Callback that received the recognition has stopped.
+     * @param err Callback invoked in case of an error.
      */
-    public stopKeywordRecognitionAsync(): Promise<void> {
+    public stopKeywordRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
+        Contracts.throwIfDisposed(this.disposedIntentRecognizer);
+
         //  return s_executorService.submit(() -> {
         //      recoImpl.StopKeywordRecognition();
         //      return null;
         //  });
-        return new Promise<void>(null);
+        throw new ArgumentNullError("not supported");
+    }
+
+    /**
+     * closes all external resources held by an instance of this class.
+     */
+    public close(): void {
+        Contracts.throwIfDisposed(this.disposedIntentRecognizer);
+
+        this.dispose(true);
+    }
+
+    protected CreateRecognizerConfig(speecgConfig: SpeechConfig, recognitionMode: RecognitionMode): RecognizerConfig {
+        throw new Error("Method not implemented.");
+    }
+    protected CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioSource: IAudioSource, recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
+        throw new Error("Method not implemented.");
     }
 
     protected dispose(disposing: boolean): void {

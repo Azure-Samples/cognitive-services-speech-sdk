@@ -56,4 +56,3 @@ test.skip("testRecognizer3", () => {
     r.close();
     s.close();
 });
-

@@ -1,185 +1,18 @@
+//
+// copyright (c) Microsoft. All rights reserved.
+// licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
 import { MicAudioSource, PcmRecorder } from "../../common.browser/Exports";
 import { IAudioSource } from "../../common/Exports";
-import { CognitiveSubscriptionKeyAuthentication, Context, Device, OS, RecognitionMode, Recognizer, RecognizerConfig, SpeechConfig, SpeechRecognitionEvent, SpeechResultFormat } from "../speech/Exports";
-import { SpeechConnectionFactory } from "./Exports";
-import { AudioInputStream } from "./SpeechFactory";
+import { CognitiveSubscriptionKeyAuthentication, Context, Device, IAuthentication, IConnectionFactory, OS, RecognitionMode, RecognizerConfig, ServiceRecognizerBase, SpeechConfig, SpeechRecognitionEvent } from "../speech/Exports";
+import { Contracts } from "./Contracts";
+import { AudioInputStream, RecognitionEventArgs, RecognitionEventType, SessionEventArgs, SessionEventType } from "./Exports";
 
-export enum SessionEventType {
-    SessionStartedEvent = 0,
-    SessionStoppedEvent,
-}
-
-export enum RecognitionEventType {
-    SpeechStartDetectedEvent = 0,
-    SpeechEndDetectedEvent,
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class ISpeechProperties {
-    private keys: string[] = [] as string[];
-    private values: string[] = [] as string[];
-
-    public get(key: string, def: string): string {
-        for (let n = 0; n < this.keys.length; n++) {
-            if (this.keys[n] === key) {
-                return this.values[n];
-            }
-        }
-
-        return def;
-    }
-
-    public set(key: string, value: string): void {
-        for (let n = 0; n < this.keys.length; n++) {
-            if (this.keys[n] === key) {
-                this.values[n] = value;
-                return;
-            }
-        }
-
-        this.keys.push(key);
-        this.values.push(value);
-    }
-
-    public has(key: string): boolean {
-        // tslint:disable-next-line:prefer-for-of
-        for (let n = 0; n < this.keys.length; n++) {
-            if (this.keys[n] === key) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public clone(): ISpeechProperties {
-        const clonedMap = new ISpeechProperties();
-
-        for (let n = 0; n < this.keys.length; n++) {
-            clonedMap.keys.push(this.keys[n]);
-            clonedMap.values.push(this.values[n]);
-        }
-
-        return clonedMap;
-    }
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class SessionEventArgs {
-    /**
-     * Represents the event type.
-     * @return Represents the event type.
-     */
-    public eventType: SessionEventType;
-
-    /**
-     * Represents the session identifier.
-     * @return Represents the session identifier.
-     */
-    public SessionId: string;
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class RecognitionEventArgs {
-    /**
-     * Represents the event type.
-     */
-    public eventType: RecognitionEventType;
-
-    /**
-     * Represents the session identifier.
-     */
-    public sessionId: string;
-
-    /**
-     * Represents the message offset
-     */
-    public offset: number;
-}
-
-export enum RecognitionStatus {
-    /**
-     * Indicates the result is a phrase that has been successfully recognized.
-     */
-    Recognized,
-
-    /**
-     * Indicates the result is a hypothesis text that has been recognized.
-     */
-    IntermediateResult,
-
-    /**
-     * Indicates that speech was detected in the audio stream, but no words from the target language were matched.
-     * Possible reasons could be wrong setting of the target language or wrong format of audio stream.
-     */
-    NoMatch,
-
-    /**
-     * Indicates that the start of the audio stream contained only silence, and the service timed out waiting for speech.
-     */
-    InitialSilenceTimeout,
-
-    /**
-     * Indicates that the start of the audio stream contained only noise, and the service timed out waiting for speech.
-     */
-    InitialBabbleTimeout,
-
-    /**
-     * Indicates that an error occurred during recognition. The getErrorDetails() method returns detailed error reasons.
-     */
-    Canceled,
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class RecognitionErrorEventArgs {
-    /**
-     * Specifies the error reason.
-     * @return Specifies the error reason.
-     */
-    public status: RecognitionStatus;
-
-    /**
-     * Specifies the session identifier.
-     * @return Specifies the session identifier.
-     */
-    public sessionId: string;
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class KeywordRecognitionModel {
-    private disposed: boolean = false;
-
-    private constructor() {
-    }
-
-    /**
-     * Creates a keyword recognition model using the specified filename.
-     * @param fileName A string that represents file name for the keyword recognition model.
-     *                 Note, the file can point to a zip file in which case the model will be extracted from the zip.
-     * @return The keyword recognition model being created.
-     */
-    public static fromFile(fileName: string): KeywordRecognitionModel {
-        // Contracts.throwIfFileDoesNotExist(fileName, "fileName");
-        return new KeywordRecognitionModel();
-    }
-
-    /**
-     * Dispose of associated resources.
-     */
-    public close(): void {
-        if (this.disposed) {
-            return;
-        }
-
-        this.disposed = true;
-    }
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class RecognizerBase {
-    private disposed: boolean = false;
-    private sessionEventHandler: Array<(sender: RecognizerBase, event: SessionEventArgs) => void> = Array();
-    private recognitionEventHandler: Array<(sender: RecognizerBase, event: RecognitionEventArgs) => void> = Array();
+/**
+ * Defines the base class Recognizer which mainly contains common event handlers.
+ */
+export abstract class Recognizer {
+    private disposed: boolean;
 
     protected audioInputStreamHolder: AudioInputStream;
 
@@ -191,30 +24,25 @@ export class RecognizerBase {
         // Note: Since ais is optional, no test for null reference
         this.audioInputStreamHolder = ais;
 
-        // this.sessionStartedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStartedEvent);
-        // this.sessionStoppedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStoppedEvent);
-        // this.speechStartDetectedHandler = new RecognitionEventHandlerImpl(this, RecognitionEventType.SpeechStartDetectedEvent);
-        // this.speechEndDetectedHandler = new RecognitionEventHandlerImpl(this, RecognitionEventType.SpeechEndDetectedEvent);
+        this.disposed = false;
     }
 
     /**
      * Defines event handler for session events, e.g., SessionStartedEvent and SessionStoppedEvent.
      */
-    public SessionEvent(onEventCallback: (sender: RecognizerBase, event: SessionEventArgs) => void): void {
-        this.sessionEventHandler.push(onEventCallback);
-    }
+    public SessionEvent: (sender: Recognizer, event: SessionEventArgs) => void;
 
     /**
      * Defines event handler for session events, e.g., SpeechStartDetectedEvent and SpeechEndDetectedEvent.
      */
-    public RecognitionEvent(onEventCallback: (sender: RecognizerBase, event: RecognitionEventArgs) => void): void {
-        this.recognitionEventHandler.push(onEventCallback);
-    }
+    public RecognitionEvent: (sender: Recognizer, event: RecognitionEventArgs) => void;
 
     /**
      * Dispose of associated resources.
      */
     public close(): void {
+        Contracts.throwIfDisposed(this.disposed);
+
         this.dispose(true);
     }
 
@@ -243,27 +71,28 @@ export class RecognizerBase {
     // ################################################################################################################
     //
 
-    // Setup the recognizer
-    protected implRecognizerSetup(recognitionMode: RecognitionMode, language: string, format: SpeechResultFormat, subscriptionKey: string, audioSource: IAudioSource): Recognizer {
+    protected abstract CreateRecognizerConfig(speecgConfig: SpeechConfig, recognitionMode: RecognitionMode): RecognizerConfig;
 
-        const recognizerConfig = new RecognizerConfig(
+    protected abstract CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioSource: IAudioSource, recognizerConfig: RecognizerConfig): ServiceRecognizerBase;
+
+    // Setup the recognizer
+    protected implRecognizerSetup(recognitionMode: RecognitionMode, subscriptionKey: string, audioSource: IAudioSource, speechConnectionFactory: IConnectionFactory): ServiceRecognizerBase {
+
+        const recognizerConfig = this.CreateRecognizerConfig(
             new SpeechConfig(
                 new Context(
                     new OS("navigator.userAgent", "Browser", null),
-                    new Device("SpeechSample", "SpeechSample", "1.0.00000"))),
-            recognitionMode,
-            language, // Supported languages are specific to each recognition mode. Refer to docs.
-            format); // SDK.SpeechResultFormat.Simple (Options - Simple/Detailed)
+                    new Device("SpeechSample", "SpeechSample", "1.0.00000"))), // TODO: Need to get these values from the caller?
+            recognitionMode); // SDK.SpeechResultFormat.Simple (Options - Simple/Detailed)
 
         const authentication = new CognitiveSubscriptionKeyAuthentication(subscriptionKey);
-        const speechConnectionFactory = new SpeechConnectionFactory();
 
         if (!audioSource) {
             const pcmRecorder = new PcmRecorder();
             audioSource = new MicAudioSource(pcmRecorder);
         }
 
-        return new Recognizer(
+        return this.CreateServiceRecognizer(
             authentication,
             speechConnectionFactory,
             audioSource,
@@ -271,7 +100,7 @@ export class RecognizerBase {
     }
 
     // Start the recognition
-    protected implRecognizerStart(recognizer: Recognizer, cb: (event: SpeechRecognitionEvent) => void): void {
+    protected implRecognizerStart(recognizer: ServiceRecognizerBase, cb: (event: SpeechRecognitionEvent) => void): void {
         recognizer.Recognize((event: SpeechRecognitionEvent) => {
             if (this.disposed) {
                 return;
@@ -296,18 +125,20 @@ export class RecognizerBase {
                     sessionEvent = new SessionEventArgs();
                     sessionEvent.SessionId = event.SessionId;
                     sessionEvent.eventType = SessionEventType.SessionStartedEvent;
-                    this.sessionEventHandler.forEach((cb2: (s: RecognizerBase, e: SessionEventArgs) => void) => {
-                        cb2(this, sessionEvent);
-                    });
+
+                    if (!!this.SessionEvent) {
+                        this.SessionEvent(this, sessionEvent);
+                    }
                     break;
 
                 case "RecognitionEndedEvent":
                     sessionEvent = new SessionEventArgs();
                     sessionEvent.SessionId = event.SessionId;
                     sessionEvent.eventType = SessionEventType.SessionStoppedEvent;
-                    this.sessionEventHandler.forEach((cb2: (s: RecognizerBase, e: SessionEventArgs) => void) => {
-                        cb2(this, sessionEvent);
-                    });
+
+                    if (!!this.SessionEvent) {
+                        this.SessionEvent(this, sessionEvent);
+                    }
                     break;
 
                 case "SpeechStartDetectedEvent":
@@ -315,9 +146,10 @@ export class RecognizerBase {
                     recognitionEvent.sessionId = event.SessionId;
                     recognitionEvent.eventType = RecognitionEventType.SpeechStartDetectedEvent;
                     recognitionEvent.offset = 0; // TODO
-                    this.recognitionEventHandler.forEach((cb2: (s: RecognizerBase, e: RecognitionEventArgs) => void) => {
-                        cb2(this, recognitionEvent);
-                    });
+
+                    if (!!this.RecognitionEvent) {
+                        this.RecognitionEvent(this, recognitionEvent);
+                    }
                     break;
 
                 case "SpeechEndDetectedEvent":
@@ -325,9 +157,10 @@ export class RecognizerBase {
                     recognitionEvent.sessionId = event.SessionId;
                     recognitionEvent.eventType = RecognitionEventType.SpeechEndDetectedEvent;
                     recognitionEvent.offset = 0; // TODO
-                    this.recognitionEventHandler.forEach((cb2: (s: RecognizerBase, e: RecognitionEventArgs) => void) => {
-                        cb2(this, recognitionEvent);
-                    });
+
+                    if (!!this.RecognitionEvent) {
+                        this.RecognitionEvent(this, recognitionEvent);
+                    }
                     break;
 
                 default:

@@ -5,6 +5,8 @@ import {
     ISpeechEndDetectedResult,
     ISpeechFragment,
     ISpeechStartDetectedResult,
+    ITranslationFragment,
+    ITranslationPhrase,
 } from "./SpeechResults";
 
 export class SpeechRecognitionEvent extends PlatformEvent {
@@ -165,6 +167,26 @@ export class SpeechDetailedPhraseEvent extends SpeechRecognitionResultEvent<IDet
     }
 }
 
+// tslint:disable-next-line:max-classes-per-file
+export class TranslationHypothesisEvent extends SpeechRecognitionResultEvent<ITranslationFragment> {
+    constructor(requestId: string, sessionId: string, result: ITranslationFragment) {
+        super("TranslationHypothesisEvent", requestId, sessionId, result);
+    }
+}
+// tslint:disable-next-line:max-classes-per-file
+export class TranslationSimplePhraseEvent extends SpeechRecognitionResultEvent<ITranslationFragment> {
+    constructor(requestId: string, sessionId: string, result: ITranslationFragment) {
+        super("TranslationSimplePhraseEvent", requestId, sessionId, result);
+    }
+}
+
+// tslint:disable-next-line:max-classes-per-file
+export class TranslationFailedEvent extends SpeechRecognitionResultEvent<ITranslationPhrase> {
+    constructor(requestId: string, sessionId: string, result: ITranslationPhrase) {
+        super("TranslationFailedEvent", requestId, sessionId, result);
+    }
+
+}
 export enum RecognitionCompletionStatus {
     Success,
     AudioSourceError,

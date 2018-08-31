@@ -1,101 +1,16 @@
+//
+// copyright (c) Microsoft. All rights reserved.
+// licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
 import { ArgumentNullError } from "../../common/Error";
-import { IntentRecognizer } from "./IntentRecognizer";
-import { ISpeechProperties } from "./Recognizer";
-import { SpeechRecognizer } from "./SpeechRecognizer";
-import { TranslationRecognizer } from "./TranslationRecognizer";
+import { Contracts } from "./Contracts";
+import { AudioInputStream, FactoryParameterNames, IntentRecognizer, ISpeechProperties, OutputFormat, RecognizerParameterNames, SpeechRecognizer, TranslationRecognizer } from "./Exports";
 
-export enum OutputFormat {
-    Simple = 0,
-    Detailed,
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class AudioInputStreamFormat {
-    /**
-     * The format of the audio, valid values: 1 (PCM)
-     */
-    public formatTag: number;
-
-    /**
-     * The number of channels, valid values: 1 (Mono).
-     */
-    public channels: number;
-
-    /**
-     * The sample rate, valid values: 16000.
-     */
-    public samplesPerSec: number;
-
-    /**
-     * Average bytes per second, usually calculated as nSamplesPerSec * nChannels * ceil(wBitsPerSample, 8).
-     */
-    public avgBytesPerSec: number;
-
-    /**
-     * The size of a single frame, valid values: nChannels * ceil(wBitsPerSample, 8).
-     */
-    public blockAlign: number;
-
-    /**
-     * The bits per sample, valid values: 16
-     */
-    public bitsPerSample: number;
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class AudioInputStream {
-    private fileHolder: File;
-
-    protected constructor(file?: File) {
-        this.fileHolder = file;
-    }
-
-    public get file(): File {
-        return this.fileHolder;
-    }
-
-    /**
-     * Reads data from audio input stream into the data buffer. The maximal number of bytes to be read is determined by the size of dataBuffer.
-     * @param dataBuffer The byte array to store the read data.
-     * @return the number of bytes have been read.
-     */
-    public read(dataBuffer: number[]): number {
-        // implement your own
-        return -1;
-    }
-
-    /**
-     * Returns the format of this audio stream.
-     * @return The format of the audio stream.
-     */
-    public get format(): AudioInputStreamFormat {
-        // implement your own
-        return undefined;
-    }
-
-    /**
-     * Closes the audio input stream.
-     */
-    public close(): void {
-        // implement your own
-    }
-}
-
-// tslint:disable-next-line:max-classes-per-file
-export class FileInputStream extends AudioInputStream {
-
-    public constructor(file: File) {
-        super(file);
-    }
-}
-
-// tslint:disable-next-line:max-classes-per-file
+ /**
+  * Factory methods to create recognizers.
+  */
 export class SpeechFactory {
-    //  private ResultHandlerImpl intermediateResultHandler;
-    //  private ResultHandlerImpl finalResultHandler;
-    //  private ErrorHandlerImpl errorHandler;
-    //  private factoryImpl: com.microsoft.cognitiveservices.speech.internal.ICognitiveServicesSpeechFactory;
-    private disposed: boolean = false;
+    private disposed: boolean;
 
     /**
      * Static instance of SpeechFactory returned by passing subscriptionKey and service region.
@@ -104,9 +19,8 @@ export class SpeechFactory {
      * @return The speech factory
      */
     public static fromSubscription = (subscriptionKey: string, region: string): SpeechFactory => {
-        SpeechFactory.ThrowIfNullOrUndefined(subscriptionKey, "subscriptionKey");
-        SpeechFactory.ThrowIfNullOrUndefined(region, "region");
-        // return new SpeechFactory(com.microsoft.cognitiveservices.speech.internal.SpeechFactory.FromSubscription(subscriptionKey, region));
+        Contracts.throwIfNullOrUndefined(subscriptionKey, "subscriptionKey");
+        Contracts.throwIfNullOrUndefined(region, "region");
 
         if (subscriptionKey === undefined ||
             subscriptionKey === null) {
@@ -118,8 +32,8 @@ export class SpeechFactory {
         }
 
         const properties = new ISpeechProperties();
-        properties.set("SPEECH-SubscriptionKey", subscriptionKey);
-        properties.set("SPEECH-Region", region);
+        properties.set(FactoryParameterNames.SubscriptionKey, subscriptionKey);
+        properties.set(FactoryParameterNames.Region, region);
 
         return new SpeechFactory(properties);
     }
@@ -134,13 +48,12 @@ export class SpeechFactory {
      * @return The speech factory
      */
     public static fromAuthorizationToken = (authorizationToken: string, region: string): SpeechFactory => {
-        SpeechFactory.ThrowIfNullOrUndefined(authorizationToken, "authorizationToken");
-        SpeechFactory.ThrowIfNullOrUndefined(region, "region");
+        Contracts.throwIfNullOrUndefined(authorizationToken, "authorizationToken");
+        Contracts.throwIfNullOrUndefined(region, "region");
 
-        // return new SpeechFactory(com.microsoft.cognitiveservices.speech.internal.SpeechFactory.FromAuthorizationToken(authorizationToken, region));
         const properties = new ISpeechProperties();
-        properties.set("SPEECH-AuthToken", authorizationToken);
-        properties.set("SPEECH-Region", region);
+        properties.set(FactoryParameterNames.AuthorizationToken, authorizationToken);
+        properties.set(FactoryParameterNames.Region, region);
 
         return new SpeechFactory(properties);
     }
@@ -157,13 +70,12 @@ export class SpeechFactory {
      * @return A speech factory instance.
      */
     public static fromEndpoint = (endpoint: URL, subscriptionKey: string): SpeechFactory => {
-        SpeechFactory.ThrowIfNullOrUndefined(endpoint, "endpoint");
-        SpeechFactory.ThrowIfNullOrUndefined(subscriptionKey, "subscriptionKey");
+        Contracts.throwIfNullOrUndefined(endpoint, "endpoint");
+        Contracts.throwIfNullOrUndefined(subscriptionKey, "subscriptionKey");
 
-        // return new SpeechFactory(com.microsoft.cognitiveservices.speech.internal.SpeechFactory.FromEndpoint(endpoint.toString(), subscriptionKey));
         const properties = new ISpeechProperties();
-        properties.set("SPEECH-SubscriptionKey", subscriptionKey);
-        properties.set("SPEECH-Endpoint", endpoint.toString());
+        properties.set(FactoryParameterNames.SubscriptionKey, subscriptionKey);
+        properties.set(FactoryParameterNames.Endpoint, endpoint.toString());
 
         return new SpeechFactory(properties);
     }
@@ -171,6 +83,7 @@ export class SpeechFactory {
     // tslint:disable-next-line:member-ordering
     private constructor(properties: ISpeechProperties) {
         this.parameters = properties;
+        this.disposed = false;
     }
 
     /**
@@ -178,7 +91,9 @@ export class SpeechFactory {
      * @return the subscription key.
      */
     public get subscriptionKey(): string {
-        return this.parameters.get("SPEECH-SubscriptionKey", undefined);
+        Contracts.throwIfDisposed(this.disposed);
+
+        return this.parameters.get(FactoryParameterNames.SubscriptionKey, undefined);
     }
 
     /**
@@ -188,7 +103,9 @@ export class SpeechFactory {
      * @return Gets the authorization token.
      */
     public get authorizationToken(): string {
-        return this.parameters.get("SPEECH-AuthToken", undefined);
+        Contracts.throwIfDisposed(this.disposed);
+
+        return this.parameters.get(FactoryParameterNames.AuthorizationToken, undefined);
     }
 
     /**
@@ -198,9 +115,10 @@ export class SpeechFactory {
      * @param value the authorization token.
      */
     public set authorizationToken(value: string) {
-        SpeechFactory.ThrowIfNullOrUndefined(value, "value");
+        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfNullOrUndefined(value, "value");
 
-        this.parameters.set("SPEECH-AuthToken", value);
+        this.parameters.set(FactoryParameterNames.AuthorizationToken, value);
     }
 
     /**
@@ -208,7 +126,9 @@ export class SpeechFactory {
      * @return the region name of the service to be connected.
      */
     public get region(): string {
-        return this.parameters.get("SPEECH-Region", undefined);
+        Contracts.throwIfDisposed(this.disposed);
+
+        return this.parameters.get(FactoryParameterNames.Region, undefined);
     }
 
     /**
@@ -216,8 +136,9 @@ export class SpeechFactory {
      * @return the service endpoint.
      */
     public get endpoint(): URL {
-        // URI.create(_Parameters.getString(FactoryParameterNames.Endpoint));
-        return this.parameters.has("SPEECH-Endpoint") ? new URL(this.parameters.get("SPEECH-Endpoint", undefined)) : undefined;
+        Contracts.throwIfDisposed(this.disposed);
+
+        return this.parameters.has(FactoryParameterNames.Endpoint) ? new URL(this.parameters.get(FactoryParameterNames.Endpoint, undefined)) : undefined;
     }
 
     /**
@@ -231,7 +152,9 @@ export class SpeechFactory {
      * @return A speech recognizer instance.
      */
     public createSpeechRecognizer(): SpeechRecognizer {
-        return new SpeechRecognizer(this.parameters.clone(), null); // new SpeechRecognizer(factoryImpl.CreateSpeechRecognizer(), null);
+        Contracts.throwIfDisposed(this.disposed);
+
+        return new SpeechRecognizer(this.parameters.clone(), null);
     }
 
     /**
@@ -240,9 +163,11 @@ export class SpeechFactory {
      * @return A speech recognizer instance.
      */
     public createSpeechRecognizerWithLanguage(language: string): SpeechRecognizer {
-        SpeechFactory.ThrowIfNullOrUndefined(language, "language");
+        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfNullOrUndefined(language, "language");
+
         const parameters = this.parameters.clone();
-        parameters.set("SPEECH-RecoLanguage", language);
+        parameters.set(RecognizerParameterNames.SpeechRecognitionLanguage, language);
 
         return new SpeechRecognizer(parameters, null);
     }
@@ -254,17 +179,13 @@ export class SpeechFactory {
      * @return A speech recognizer instance.
      */
     public createSpeechRecognizerWithLanguageAndOutput(language: string, format: OutputFormat): SpeechRecognizer {
-        SpeechFactory.ThrowIfNullOrUndefined(language, "language");
-        SpeechFactory.ThrowIfNullOrUndefined(format, "format");
+        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfNullOrUndefined(language, "language");
+        Contracts.throwIfNullOrUndefined(format, "format");
 
-        // return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizer(language,
-        //     format == OutputFormat.Simple ?
-        //             com.microsoft.cognitiveservices.speech.internal.OutputFormat.Simple :
-        //             com.microsoft.cognitiveservices.speech.internal.OutputFormat.Detailed
-        //             ), null);
         const parameters = this.parameters.clone();
-        parameters.set("SPEECH-RecoLanguage", language);
-        parameters.set("SPEECH-OutputFormat", format === OutputFormat.Simple ? "SIMPLE" : "DETAILED");
+        parameters.set(RecognizerParameterNames.SpeechRecognitionLanguage, language);
+        parameters.set(RecognizerParameterNames.OutputFormat, format === OutputFormat.Simple ? "SIMPLE" : "DETAILED");
 
         return new SpeechRecognizer(parameters, null);
     }
@@ -275,7 +196,8 @@ export class SpeechFactory {
      * @return A speech recognizer instance.
      */
     public createSpeechRecognizerWithFileInput(audioFile: string): SpeechRecognizer {
-        SpeechFactory.ThrowIfNullOrUndefined(audioFile, "audioFile");
+        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfNullOrUndefined(audioFile, "audioFile");
 
         const parameters = this.parameters.clone();
         parameters.set("audioFile", audioFile);
@@ -290,15 +212,17 @@ export class SpeechFactory {
      * @return A speech recognizer instance.
      */
     public createSpeechRecognizerWithFileInputAndLanguage(audioFile: string, language: string): SpeechRecognizer {
-        SpeechFactory.ThrowIfNullOrUndefined(audioFile, "audioFile");
-        SpeechFactory.ThrowIfNullOrUndefined(language, "language");
+        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfNullOrUndefined(audioFile, "audioFile");
+        Contracts.throwIfNullOrUndefined(language, "language");
 
         const parameters = this.parameters.clone();
         parameters.set("audioFile", audioFile);
-        parameters.set("SPEECH-RecoLanguage", language);
+        parameters.set(RecognizerParameterNames.SpeechRecognitionLanguage, language);
 
         return new SpeechRecognizer(parameters, null);
     }
+
     /**
      * Creates a speech recognizer, using the specified file as audio input.
      * @param audioFile Specifies the audio input file.
@@ -307,14 +231,15 @@ export class SpeechFactory {
      * @return A speech recognizer instance.
      */
     public createSpeechRecognizerWithFileInputAndLanguageAndOutput(audioFile: string, language: string, format: OutputFormat): SpeechRecognizer {
-        SpeechFactory.ThrowIfNullOrUndefined(audioFile, "audioFile");
-        SpeechFactory.ThrowIfNullOrUndefined(language, "language");
-        SpeechFactory.ThrowIfNullOrUndefined(format, "format");
+        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfNullOrUndefined(audioFile, "audioFile");
+        Contracts.throwIfNullOrUndefined(language, "language");
+        Contracts.throwIfNullOrUndefined(format, "format");
 
         const parameters = this.parameters.clone();
         parameters.set("audioFile", audioFile);
-        parameters.set("SPEECH-RecoLanguage", language);
-        parameters.set("SPEECH-OutputFormat", format === OutputFormat.Simple ? "SIMPLE" : "DETAILED");
+        parameters.set(RecognizerParameterNames.SpeechRecognitionLanguage, language);
+        parameters.set(RecognizerParameterNames.OutputFormat, format === OutputFormat.Simple ? "SIMPLE" : "DETAILED");
 
         return new SpeechRecognizer(parameters, null);
     }
@@ -325,7 +250,9 @@ export class SpeechFactory {
      * @return A speech recognizer instance.
      */
     public createSpeechRecognizerWithStream(audioStream: AudioInputStream): SpeechRecognizer {
-        SpeechFactory.ThrowIfNullOrUndefined(audioStream, "audioStream");
+        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfNullOrUndefined(audioStream, "audioStream");
+
         const parameters = this.parameters.clone();
 
         return new SpeechRecognizer(parameters, audioStream);
@@ -338,11 +265,12 @@ export class SpeechFactory {
      * @return A speech recognizer instance.
      */
     public createSpeechRecognizerWithStreamAndLanguage(audioStream: AudioInputStream, language: string): SpeechRecognizer {
-        SpeechFactory.ThrowIfNullOrUndefined(audioStream, "audioStream");
-        SpeechFactory.ThrowIfNullOrUndefined(language, "language");
+        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfNullOrUndefined(audioStream, "audioStream");
+        Contracts.throwIfNullOrUndefined(language, "language");
 
         const parameters = this.parameters.clone();
-        parameters.set("SPEECH-RecoLanguage", language);
+        parameters.set(RecognizerParameterNames.SpeechRecognitionLanguage, language);
 
         return new SpeechRecognizer(parameters, audioStream);
     }
@@ -355,18 +283,14 @@ export class SpeechFactory {
      * @return A speech recognizer instance.
      */
     public createSpeechRecognizerWithStreamAndLanguageAndOutput(audioStream: AudioInputStream, language: string, format: OutputFormat): SpeechRecognizer {
-        SpeechFactory.ThrowIfNullOrUndefined(audioStream, "audioStream");
-        SpeechFactory.ThrowIfNullOrUndefined(language, "language");
-        SpeechFactory.ThrowIfNullOrUndefined(format, "format");
+        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfNullOrUndefined(audioStream, "audioStream");
+        Contracts.throwIfNullOrUndefined(language, "language");
+        Contracts.throwIfNullOrUndefined(format, "format");
 
-        //    return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithStreamImpl(audioStream.getAdapter(), language,
-        //                format == OutputFormat.Simple ?
-        //                 com.microsoft.cognitiveservices.speech.internal.OutputFormat.Simple :
-        //                 com.microsoft.cognitiveservices.speech.internal.OutputFormat.Detailed
-        //                 ), audioStream);
         const parameters = this.parameters.clone();
-        parameters.set("SPEECH-RecoLanguage", language);
-        parameters.set("SPEECH-OutputFormat", format === OutputFormat.Simple ? "SIMPLE" : "DETAILED");
+        parameters.set(RecognizerParameterNames.SpeechRecognitionLanguage, language);
+        parameters.set(RecognizerParameterNames.OutputFormat, format === OutputFormat.Simple ? "SIMPLE" : "DETAILED");
 
         return new SpeechRecognizer(parameters, audioStream);
     }
@@ -376,8 +300,10 @@ export class SpeechFactory {
      * @return An intent recognizer instance.
      */
     public createIntentRecognizer(): IntentRecognizer {
+        Contracts.throwIfDisposed(this.disposed);
+
         const parameters = this.parameters.clone();
-        return new IntentRecognizer(parameters, null); // new IntentRecognizer(factoryImpl.CreateIntentRecognizer(language), null);
+        return new IntentRecognizer(parameters, null);
     }
 
     /**
@@ -386,12 +312,13 @@ export class SpeechFactory {
      * @return An intent recognizer instance.
      */
     public createIntentRecognizerWithLanguage(language: string): IntentRecognizer {
-        SpeechFactory.ThrowIfNullOrUndefined(language, "language");
+        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfNullOrUndefined(language, "language");
 
         const parameters = this.parameters.clone();
-        parameters.set("SPEECH-RecoLanguage", language);
+        parameters.set(RecognizerParameterNames.SpeechRecognitionLanguage, language);
 
-        return new IntentRecognizer(parameters, null); // new IntentRecognizer(factoryImpl.CreateIntentRecognizer(language), null);
+        return new IntentRecognizer(parameters, null);
     }
 
     /**
@@ -400,12 +327,13 @@ export class SpeechFactory {
      * @return An intent recognizer instance
      */
     public createIntentRecognizerWithFileInput(audioFile: string): IntentRecognizer {
-        SpeechFactory.ThrowIfNullOrUndefined(audioFile, "audioFile");
+        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfNullOrUndefined(audioFile, "audioFile");
 
         const parameters = this.parameters.clone();
         parameters.set("audioFile", audioFile);
 
-        return new IntentRecognizer(parameters, null); // new IntentRecognizer(factoryImpl.CreateIntentRecognizerWithFileInput(audioFile), null);
+        return new IntentRecognizer(parameters, null);
     }
 
     /**
@@ -415,14 +343,15 @@ export class SpeechFactory {
      * @return An intent recognizer instance
      */
     public createIntentRecognizerWithFileInputAndLanguage(audioFile: string, language: string): IntentRecognizer {
-        SpeechFactory.ThrowIfNullOrUndefined(audioFile, "audioFile");
-        SpeechFactory.ThrowIfNullOrUndefined(language, "language");
+        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfNullOrUndefined(audioFile, "audioFile");
+        Contracts.throwIfNullOrUndefined(language, "language");
 
         const parameters = this.parameters.clone();
         parameters.set("audioFile", audioFile);
-        parameters.set("SPEECH-RecoLanguage", language);
+        parameters.set(RecognizerParameterNames.SpeechRecognitionLanguage, language);
 
-        return new IntentRecognizer(parameters, null); // new IntentRecognizer(factoryImpl.CreateIntentRecognizer(language), null);
+        return new IntentRecognizer(parameters, null);
     }
 
     /**
@@ -431,11 +360,12 @@ export class SpeechFactory {
      * @return An intent recognizer instance.
      */
     public createIntentRecognizerWithStream(audioStream: AudioInputStream): IntentRecognizer {
-        SpeechFactory.ThrowIfNullOrUndefined(audioStream, "audioStream");
+        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfNullOrUndefined(audioStream, "audioStream");
 
         const parameters = this.parameters.clone();
 
-        return new IntentRecognizer(parameters, audioStream); // new IntentRecognizer(factoryImpl.CreateIntentRecognizer(language), null);
+        return new IntentRecognizer(parameters, audioStream);
     }
 
     /**
@@ -445,13 +375,14 @@ export class SpeechFactory {
      * @return An intent recognizer instance.
      */
     public createIntentRecognizerWithStreamAndLanguage(audioStream: AudioInputStream, language: string): IntentRecognizer {
-        SpeechFactory.ThrowIfNullOrUndefined(audioStream, "audioStream");
-        SpeechFactory.ThrowIfNullOrUndefined(language, "language");
+        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfNullOrUndefined(audioStream, "audioStream");
+        Contracts.throwIfNullOrUndefined(language, "language");
 
         const parameters = this.parameters.clone();
-        parameters.set("SPEECH-RecoLanguage", language);
+        parameters.set(RecognizerParameterNames.SpeechRecognitionLanguage, language);
 
-        return new IntentRecognizer(parameters, audioStream); // new IntentRecognizer(factoryImpl.CreateIntentRecognizer(language), null);
+        return new IntentRecognizer(parameters, audioStream);
     }
 
     /**
@@ -461,22 +392,17 @@ export class SpeechFactory {
      * @return A translation recognizer instance.
      */
     public createTranslationRecognizer(sourceLanguage: string, targetLanguages: string[]): TranslationRecognizer {
-        SpeechFactory.ThrowIfNullOrUndefined(sourceLanguage, "sourceLanguage");
-        SpeechFactory.ThrowIfNullOrUndefined(targetLanguages, "targetLanguages");
-        if (targetLanguages.length === 0) {
-            throw new ArgumentNullError("targetLanguages");
-        }
-
-        // com.microsoft.cognitiveservices.speech.internal.WstringVector v = new com.microsoft.cognitiveservices.speech.internal.WstringVector();
+        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfNullOrUndefined(sourceLanguage, "sourceLanguage");
+        Contracts.throwIfArrayEmptyOrWhitespace(targetLanguages, "targetLanguages");
 
         const parameters = this.parameters.clone();
-        parameters.set("TRANSLATION-FromLanguage", sourceLanguage);
+        parameters.set(RecognizerParameterNames.TranslationFromLanguage, sourceLanguage);
 
         for (let n = 0; n < targetLanguages.length; n++) {
-            parameters.set("TRANSLATION-ToLanguage" + n, targetLanguages[n]);
+            parameters.set(RecognizerParameterNames.TranslationToLanguage + n, targetLanguages[n]);
         }
 
-        // return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizer(sourceLanguage, v), null);
         return new TranslationRecognizer(parameters, null);
     }
 
@@ -488,22 +414,19 @@ export class SpeechFactory {
      * @return A translation recognizer instance.
      */
     public createTranslationRecognizerWithVoice(sourceLanguage: string, targetLanguages: string[], voice: string): TranslationRecognizer {
-        SpeechFactory.ThrowIfNullOrUndefined(sourceLanguage, "sourceLanguage");
-        SpeechFactory.ThrowIfNullOrUndefined(targetLanguages, "targetLanguages");
-        SpeechFactory.ThrowIfNullOrUndefined(voice, "voice");
-        if (targetLanguages.length === 0) {
-            throw new ArgumentNullError("targetLanguages");
-        }
+        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfNullOrUndefined(sourceLanguage, "sourceLanguage");
+        Contracts.throwIfArrayEmptyOrWhitespace(targetLanguages, "targetLanguages");
+        Contracts.throwIfNullOrUndefined(voice, "voice");
 
         const parameters = this.parameters.clone();
-        parameters.set("TRANSLATION-FromLanguage", sourceLanguage);
-        parameters.set("TRANSLATION-Voice", voice);
+        parameters.set(RecognizerParameterNames.TranslationFromLanguage, sourceLanguage);
+        parameters.set(RecognizerParameterNames.TranslationVoice, voice);
 
         for (let n = 0; n < targetLanguages.length; n++) {
-            parameters.set("TRANSLATION-ToLanguage" + n, targetLanguages[n]);
+            parameters.set(RecognizerParameterNames.TranslationToLanguage + n, targetLanguages[n]);
         }
 
-        // return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizer(sourceLanguage, v, voice), null);
         return new TranslationRecognizer(parameters, null);
     }
 
@@ -515,19 +438,17 @@ export class SpeechFactory {
      * @return A translation recognizer instance.
      */
     public createTranslationRecognizerWithFileInput(audioFile: string, sourceLanguage: string, targetLanguages: string[]): TranslationRecognizer {
-        SpeechFactory.ThrowIfNullOrUndefined(audioFile, "audioFile");
-        SpeechFactory.ThrowIfNullOrUndefined(sourceLanguage, "sourceLanguage");
-        SpeechFactory.ThrowIfNullOrUndefined(targetLanguages, "targetLanguages");
-        if (targetLanguages.length === 0) {
-            throw new ArgumentNullError("targetLanguages");
-        }
+        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfNullOrUndefined(audioFile, "audioFile");
+        Contracts.throwIfNullOrUndefined(sourceLanguage, "sourceLanguage");
+        Contracts.throwIfArrayEmptyOrWhitespace(targetLanguages, "targetLanguages");
 
         const parameters = this.parameters.clone();
         parameters.set("audioFile", audioFile);
-        parameters.set("TRANSLATION-FromLanguage", sourceLanguage);
+        parameters.set(RecognizerParameterNames.TranslationFromLanguage, sourceLanguage);
 
         for (let n = 0; n < targetLanguages.length; n++) {
-            parameters.set("TRANSLATION-ToLanguage" + n, targetLanguages[n]);
+            parameters.set(RecognizerParameterNames.TranslationToLanguage + n, targetLanguages[n]);
         }
 
         return new TranslationRecognizer(parameters, null);
@@ -542,21 +463,19 @@ export class SpeechFactory {
      * @return A translation recognizer instance.
      */
     public createTranslationRecognizerWithFileInputAndVoice(audioFile: string, sourceLanguage: string, targetLanguages: string[], voice: string): TranslationRecognizer {
-        SpeechFactory.ThrowIfNullOrUndefined(audioFile, "audioFile");
-        SpeechFactory.ThrowIfNullOrUndefined(sourceLanguage, "sourceLanguage");
-        SpeechFactory.ThrowIfNullOrUndefined(targetLanguages, "targetLanguages");
-        SpeechFactory.ThrowIfNullOrUndefined(voice, "voice");
-        if (targetLanguages.length === 0) {
-            throw new ArgumentNullError("targetLanguages");
-        }
+        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfNullOrUndefined(audioFile, "audioFile");
+        Contracts.throwIfNullOrUndefined(sourceLanguage, "sourceLanguage");
+        Contracts.throwIfArrayEmptyOrWhitespace(targetLanguages, "targetLanguages");
+        Contracts.throwIfNullOrUndefined(voice, "voice");
 
         const parameters = this.parameters.clone();
         parameters.set("audioFile", audioFile);
-        parameters.set("TRANSLATION-FromLanguage", sourceLanguage);
-        parameters.set("TRANSLATION-Voice", voice);
+        parameters.set(RecognizerParameterNames.TranslationFromLanguage, sourceLanguage);
+        parameters.set(RecognizerParameterNames.TranslationVoice, voice);
 
         for (let n = 0; n < targetLanguages.length; n++) {
-            parameters.set("TRANSLATION-ToLanguage" + n, targetLanguages[n]);
+            parameters.set(RecognizerParameterNames.TranslationToLanguage + n, targetLanguages[n]);
         }
 
         return new TranslationRecognizer(parameters, null);
@@ -570,18 +489,16 @@ export class SpeechFactory {
      * @return A translation recognizer instance.
      */
     public createTranslationRecognizerWithStream(audioStream: AudioInputStream, sourceLanguage: string, targetLanguages: string[]): TranslationRecognizer {
-        SpeechFactory.ThrowIfNullOrUndefined(audioStream, "audioStream");
-        SpeechFactory.ThrowIfNullOrUndefined(sourceLanguage, "sourceLanguage");
-        SpeechFactory.ThrowIfNullOrUndefined(targetLanguages, "targetLanguages");
-        if (targetLanguages.length === 0) {
-            throw new ArgumentNullError("targetLanguages");
-        }
+        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfNullOrUndefined(audioStream, "audioStream");
+        Contracts.throwIfNullOrUndefined(sourceLanguage, "sourceLanguage");
+        Contracts.throwIfArrayEmptyOrWhitespace(targetLanguages, "targetLanguages");
 
         const parameters = this.parameters.clone();
-        parameters.set("TRANSLATION-FromLanguage", sourceLanguage);
+        parameters.set(RecognizerParameterNames.TranslationFromLanguage, sourceLanguage);
 
         for (let n = 0; n < targetLanguages.length; n++) {
-            parameters.set("TRANSLATION-ToLanguage" + n, targetLanguages[n]);
+            parameters.set(RecognizerParameterNames.TranslationToLanguage + n, targetLanguages[n]);
         }
 
         return new TranslationRecognizer(parameters, audioStream);
@@ -596,19 +513,20 @@ export class SpeechFactory {
      * @return A translation recognizer instance.
      */
     public createTranslationRecognizerWithStreamAndVoice(audioStream: AudioInputStream, sourceLanguage: string, targetLanguages: string[], voice: string): TranslationRecognizer {
-        SpeechFactory.ThrowIfNullOrUndefined(audioStream, "audioStream");
-        SpeechFactory.ThrowIfNullOrUndefined(sourceLanguage, "sourceLanguage");
-        SpeechFactory.ThrowIfNullOrUndefined(targetLanguages, "targetLanguages");
-        SpeechFactory.ThrowIfNullOrUndefined(voice, "voice");
+        Contracts.throwIfDisposed(this.disposed);
+        Contracts.throwIfNullOrUndefined(audioStream, "audioStream");
+        Contracts.throwIfNullOrUndefined(sourceLanguage, "sourceLanguage");
+        Contracts.throwIfArrayEmptyOrWhitespace(targetLanguages, "targetLanguages");
+        Contracts.throwIfNullOrUndefined(voice, "voice");
 
         const parameters = this.parameters.clone();
-        parameters.set("TRANSLATION-FromLanguage", sourceLanguage);
+        parameters.set(RecognizerParameterNames.TranslationFromLanguage, sourceLanguage);
+        parameters.set(RecognizerParameterNames.TranslationVoice, voice);
 
         for (let n = 0; n < targetLanguages.length; n++) {
-            parameters.set("TRANSLATION-ToLanguage" + n, targetLanguages[n]);
+            parameters.set(RecognizerParameterNames.TranslationToLanguage + n, targetLanguages[n]);
         }
 
-        // return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerWithStreamImpl(audioStream.getAdapter(), sourceLanguage, v, voice), audioStream);
         return new TranslationRecognizer(parameters, audioStream);
     }
 
@@ -616,16 +534,10 @@ export class SpeechFactory {
      * Dispose of associated resources.
      */
     public close(): void {
-        if (!this.disposed) {
-            // _Parameters.close();
-            // factoryImpl.delete();
-            this.disposed = true;
-        }
-    }
+        Contracts.throwIfDisposed(this.disposed);
 
-    private static ThrowIfNullOrUndefined(param: any, name: string): void {
-        if (param === undefined || param === null) {
-            throw new ArgumentNullError(name);
+        if (!this.disposed) {
+            this.disposed = true;
         }
     }
 }

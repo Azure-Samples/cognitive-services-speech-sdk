@@ -197,28 +197,28 @@
                     reco = speechSdkRecognizer.createSpeechRecognizerWithStreamAndLanguage(audioFile, languageOptions.value);
                 }
 
-                reco.IntermediateResultReceived(function (s, e) {
+                reco.IntermediateResultReceived = function (s, e) {
                     window.console.log(e);
                     hypothesisDiv.innerHTML = e.result.text;
-                });
+                };
 
-                reco.FinalResultReceived(function (s, e) {
+                reco.FinalResultReceived = function (s, e) {
                     window.console.log(e);
 
                     statusDiv.innerHTML = "";
                     hypothesisDiv.innerHTML = "";
                     phraseDiv.innerHTML += e.result.text + "\r\n";
-                });
+                };
 
-                reco.SessionEvent(function (s, e) {
+                reco.SessionEvent = function (s, e) {
                     window.console.log(e);
                     statusDiv.innerHTML += "SessionEvent: " +  JSON.stringify(e);
-                });
+                };
 
-                reco.RecognitionEvent(function (s, e) {
+                reco.RecognitionEvent = function (s, e) {
                     window.console.log(e);
                     statusDiv.innerHTML += "RecognitionEvent: " + JSON.stringify(e);
-                });
+                };
 
                 reco.startContinuousRecognitionAsync();
 
@@ -253,33 +253,43 @@
                     reco = speechSdkRecognizer.createSpeechRecognizerWithStreamAndLanguage(audioFile, languageOptions.value);
                 }
 
-                reco.IntermediateResultReceived(function (s, e) {
+                reco.IntermediateResultReceived = function (s, e) {
                     window.console.log(e);
                     hypothesisDiv.innerHTML = e.result.text;
-                });
+                };
 
-                reco.SessionEvent(function (s, e) {
+                reco.SessionEvent = function (s, e) {
                     window.console.log(e);
                     statusDiv.innerHTML += "SessionEvent: " +  JSON.stringify(e);
-                });
+                };
 
-                reco.RecognitionEvent(function (s, e) {
+                reco.RecognitionEvent = function (s, e) {
                     window.console.log(e);
                     statusDiv.innerHTML += "RecognitionEvent: " + JSON.stringify(e);
-                });
+                };
 
                 // Note: this is how you can process the result directly
                 //       rather then subscribing to the FinalResultReceived
                 //       event
-                reco.recognizeAsync().sink.on(function (result) {
-                    window.console.log(result);
+                reco.recognizeAsync(
+                    function (result) {
+                        window.console.log(result);
 
-                    statusDiv.innerHTML = "";
-                    hypothesisDiv.innerHTML = "";
-                    phraseDiv.innerHTML += result.text + "\r\n";
+                        statusDiv.innerHTML = "";
+                        hypothesisDiv.innerHTML = "";
+                        phraseDiv.innerHTML += result.text + "\r\n";
 
-                    sdkStopRecognizeAsyncBtn.click();
-                });
+                        sdkStopRecognizeAsyncBtn.click();
+                    },
+                    function (err) {
+                        window.console.log(result);
+
+                        statusDiv.innerHTML = "ERROR";
+                        hypothesisDiv.innerHTML = "ERROR";
+                        phraseDiv.innerHTML += "ERROR\r\n";
+
+                        sdkStopRecognizeAsyncBtn.click();
+                    });
 
                 sdkStartRecognizeAsyncBtn.disabled = true;
                 sdkStopRecognizeAsyncBtn.disabled = false;

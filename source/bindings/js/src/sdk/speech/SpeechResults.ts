@@ -1,3 +1,4 @@
+import { TranslationStatus } from "../speech.browser/TranslationStatus";
 
 export enum RecognitionStatus2 {
     Success,
@@ -16,6 +17,24 @@ export interface ISpeechFragment {
     Text: string;
     Offset?: number;
     Duration?: number;
+}
+
+export interface ITranslationPhrase {
+    RecognitionStatus: RecognitionStatus2;
+}
+
+export interface ITranslationFragment extends ISpeechFragment {
+    Translation: ITranslations;
+}
+
+export interface ITranslations {
+    TranslationStatus: TranslationStatus;
+    Translations: ITranslation[];
+}
+
+export interface ITranslation {
+    Language: string;
+    Text: string;
 }
 
 export interface ISpeechEndDetectedResult {
