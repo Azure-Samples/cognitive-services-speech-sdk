@@ -271,6 +271,37 @@ phases:
       AllTools: true
     condition: succeededOrFailed()
 
+- phase: TsaUpload
+  dependsOn: [Pre, WindowsSdlBuild]
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' TsaUpload '))
+  queue:
+    name: Carbon
+    timeoutInMinutes: 30
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Downloading CodeAnalysisLogs artifacts'
+    inputs:
+      artifactName: CodeAnalysisLogs
+      downloadPath: $(System.ArtifactsDirectory)/In
+  - powershell: |
+      $logDir = "$(Agent.BuildDirectory)/_sdt/logs"
+      if (Test-Path $logDir) {
+        Remove-Item -Recurse -Force $logDir
+      }
+      if (-not (Test-Path (Split-Path $logDir))) {
+        New-Item -ItemType Directory (Split-Path $logDir)
+      }
+      Move-Item $(System.ArtifactsDirectory)/In/CodeAnalysisLogs $logDir
+    displayName: Move logs to target location
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@1
+    displayName: 'TSA upload to Codebase: Carbon_master Stamp: Bing'
+    inputs:
+      tsaStamp: Bing
+      codeBaseName: 'Carbon_master'
+    # TODO or fail on error?
+    continueOnError: true
+    condition: succeededOrFailed()
+
 - phase: WindowsBuild
   dependsOn: Pre
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsBuild '))

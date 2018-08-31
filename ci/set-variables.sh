@@ -47,7 +47,8 @@
 #     Defaults to our CarbonPre VSTS feed for 'dev' builds, Carbon otherwise.
 # * SPEECHSDK_BUILD_AGENT_PLATFORM - can be "Windows-x64", "OSX-x64", "Linux-x64"
 # * SPEECHSDK_BUILD_PHASES - space-separated and space-enclosed list of build phases to run
-#     Default: " WindowsBuild WindowsNuGet LinuxBuild LinuxDrop OsxBuild IosBuild AndroidBuild AndroidPackage Doxygen JavaJrePackage WindowsSdlBuild JsBuild"
+#     Default: " WindowsBuild WindowsNuGet LinuxBuild LinuxDrop OsxBuild IosBuild AndroidBuild AndroidPackage Doxygen JavaJrePackage WindowsSdlBuild JsBuild "
+#     For int (nightly) builds, "TsaUpload" is added to the default phased.
 #     Check phase condition in build.yml for valid phase names.
 # * SPEECHSDK_RUN_TESTS - whether to run tests. Can be 'true' (default) or 'false'.
 #
@@ -206,6 +207,10 @@ case $SPEECHSDK_BUILD_TYPE in
     SPEECHSDK_SDL_ALL=false
     ;;
   int)
+    # TSA Upload only for Nightly, not for manually scheduled
+    if [[ $BUILD_REASON == Schedule ]]; then
+      SPEECHSDK_BUILD_PHASES+="TsaUpload "
+    fi
     PRERELEASE_VERSION=-beta.0.$_BUILD_ID
     META=+$_BUILD_COMMIT
     SPEECHSDK_SIGN=true
