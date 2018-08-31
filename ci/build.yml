@@ -111,6 +111,7 @@ phases:
   variables:
     BuildPlatform: x64
     BuildConfiguration: Release
+    SPEECHSDK_BUILD_PHASES: $[ dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'] ]
   steps:
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set Windows target platform (Windows-x64)
@@ -134,7 +135,7 @@ phases:
       Invoke-WebRequest -OutFile vs_enterprise.exe https://aka.ms/vs/15/release/vs_enterprise.exe
       Start-Process -Wait cmd -Verb runas -ArgumentList /c, cd, (Get-Location), '&&', start, /wait, .\vs_enterprise.exe, modify, --installPath, '"%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise"', --add, Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre, --quiet, --norestart, --wait, '&&', echo, '%ERRORLEVEL%', '>', result.txt
     displayName: Install Microsoft.VisualStudio.Component.VC.Runtimes.x86.x64.Spectre VS component
-    condition: eq(variables['SPEECHSDK_SPECTRE_MITIGATION'],'true')
+    condition: and(succeeded(),eq(variables['SPEECHSDK_SPECTRE_MITIGATION'],'true'))
   - task: CmdLine@1
     displayName: Generate set_cmake_arch.bat
     inputs:
@@ -169,14 +170,11 @@ phases:
   # Checks BEGIN
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
     displayName: 'Run Roslyn Analyzers'
-    continueOnError: true
-    condition: succeededOrFailed()
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-binskim.BinSkim@3
     displayName: 'BinSkim (can pass only with Spectre mitigation)'
     inputs:
       arguments: 'analyze build/$(BuildPlatform)/bin/$(BuildConfiguration)/*.dll --recurse'
-    continueOnError: true
-    condition: eq(variables['SPEECHSDK_SPECTRE_MITIGATION'],'true')
+    condition: and(succeeded(),eq(variables['SPEECHSDK_SPECTRE_MITIGATION'],'true'))
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-antimalware.AntiMalware@3
     displayName: 'AntiMalware'
     inputs:
@@ -184,8 +182,6 @@ phases:
       EnableServices: true
       SignatureFreshness: ThreeDays
       TreatStaleSignatureAs: Warning
-    continueOnError: true
-    condition: succeededOrFailed()
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-apiscan.APIScan@1
     displayName: 'APIScan'
     inputs:
@@ -193,15 +189,11 @@ phases:
       softwareVersionNum: 1.0
       isLargeApp: false
     enabled: false
-    continueOnError: true
-    condition: succeededOrFailed()
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
     displayName: 'CredScan (source-scan, dir: all)'
     inputs:
       suppressionsFile: 'ci/sdl/LocalSuppression.json'
       debugMode: false
-    continueOnError: true
-    condition: succeededOrFailed()
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@1
     displayName: 'PoliCheck (source-scan, dir: source)'
     inputs:
@@ -209,8 +201,6 @@ phases:
       targetArgument: 'source'
       result: PoliCheckSource.xml
       optionsFC: 1
-    continueOnError: true
-    condition: succeededOrFailed()
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@1
     displayName: 'PoliCheck (source-scan, dir: public samples)'
     inputs:
@@ -220,8 +210,6 @@ phases:
       result: PoliCheckSamples.xml
       SOMEnabled: true
       optionsFC: 1
-    continueOnError: true
-    condition: succeededOrFailed()
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-fxcop.FxCop@2
     displayName: 'Run FxCop'
     inputs:
@@ -229,47 +217,44 @@ phases:
       targets: 'build/$(BuildPlatform)/bin/$(BuildConfiguration)/net461'
       disableRules: 'Microsoft.Globalization#CA2101'
       verbose: true
-    continueOnError: true
-    condition: succeededOrFailed()
   - bash: rm -rf build/$(BuildPlatform)/source/bindings/java/javadoc
     displayName: Remove JavaDoc folder
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-moderncop.ModernCop@2
     displayName: 'ModernCop (managed JS code)'
     inputs:
-      arguments: '/dir:"$(Build.SourcesDirectory)" /groups:sdl /setting:JS2085.EnableStrictMode.EnforceModulePattern=false'
-    continueOnError: true
-    condition: succeededOrFailed()
+      InputType: Basic
+      OutputFormat: red
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-autoapplicability.AutoApplicability@1
     displayName: 'Run AutoApplicability'
     inputs:
       ApplyRules: All
       ExternalRelease: true
-    continueOnError: true
-    condition: succeededOrFailed()
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-tslint.TSLint@1
     displayName: 'Run TSLint'
     inputs:
       Ruleset: custom
       RulesetFile: source/bindings/js/tslint.json
       Files: source/**/*.ts
-    continueOnError: true
-    condition: succeededOrFailed()
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@2
     displayName: 'Run the PREfast SDL Native Rules for MSBuild'
-    continueOnError: true
-    condition: eq(variables['SPEECHSDK_SDL_ALL'],'true')
   # Checks END
   # Publish artifact and fail the build if necessary
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
     displayName: 'Publish Security Analysis Logs'
     inputs:
       AllTools: true
-    condition: succeededOrFailed()
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
-    displayName: 'SDL: Post Analysis'
+    displayName: 'SDL: Post Analysis (w/o TsaUpload)'
     inputs:
       AllTools: true
-    condition: succeededOrFailed()
+    continueOnError: false
+    condition: not(contains(variables['SPEECHSDK_BUILD_PHASES'], ' TsaUpload '))
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
+    displayName: 'SDL: Post Analysis (w/ TsaUpload)'
+    inputs:
+      AllTools: true
+    continueOnError: true
+    condition: contains(variables['SPEECHSDK_BUILD_PHASES'], ' TsaUpload ')
 
 - phase: TsaUpload
   dependsOn: [Pre, WindowsSdlBuild]
