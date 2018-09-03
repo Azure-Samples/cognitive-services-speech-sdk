@@ -20,10 +20,6 @@ expect {
           puts "### BAD RECO TEXT: [set recoText]"
         }
       }
-      "\s" {
-        set match $expect_out(buffer)
-        puts "### UNEXPECTED OUTPUT: [set match]"
-      }
       timeout {
         puts "### TIMEOUT waiting for result"
       }
