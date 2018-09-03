@@ -4,7 +4,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "AppDelegate.h"
 #import "speech_factory.h"
 
 int main(int argc, char * argv[]) {

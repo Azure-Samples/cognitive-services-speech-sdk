@@ -6,7 +6,7 @@
 #import <Foundation/Foundation.h>
 #import "speech_recognition_result.h"
 #import "speech_recognition_result_private.h"
-#import "../../../../public/cxx_api/speechapi_cxx.h"
+#import "speechapi_cxx.h"
 
 @implementation SpeechRecognitionResult
 {

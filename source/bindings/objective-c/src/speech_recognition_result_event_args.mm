@@ -7,7 +7,7 @@
 #import "speech_recognition_result_event_args.h"
 #import "speech_recognition_result_event_args_private.h"
 #import "speech_recognition_result_private.h"
-#import "../../../../public/cxx_api/speechapi_cxx.h"
+#import "speechapi_cxx.h"
 
 @implementation SpeechRecognitionResultEventArgs
 {

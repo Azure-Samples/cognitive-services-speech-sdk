@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "speechapi_cxx_common.h"
+#include <speechapi_cxx_common.h>
 #include <speechapi_cxx_property_names.h>
 
 #include <speechapi_cxx_audioinputstream.h>

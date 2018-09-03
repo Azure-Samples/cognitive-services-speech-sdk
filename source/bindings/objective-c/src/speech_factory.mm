@@ -8,7 +8,7 @@
 #import "speech_factory.h"
 #import "speech_recognizer.h"
 #import "speech_recognizer_private.h"
-#import "../../../../public/cxx_api/speechapi_cxx.h"
+#import "speechapi_cxx.h"
 
 @implementation SpeechFactory
 {

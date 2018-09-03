@@ -144,7 +144,10 @@ add_subdirectory(${USP})
 add_subdirectory(${C_API})
 add_subdirectory(${SR})
 add_subdirectory(${MOCK})
+if(NOT DEFINED APPLE)
 add_subdirectory(${LIBCARBON})
+endif()
+
 
 add_subdirectory(${CARBON_BINDINGS})
 add_subdirectory(${TESTS})

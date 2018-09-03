@@ -7,11 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3C496F6C21281F8400F8E263 /* speech_recognition_result.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C496F6121281F8300F8E263 /* speech_recognition_result.mm */; };
-		3C496F6D21281F8400F8E263 /* speech_recognizer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C496F6321281F8300F8E263 /* speech_recognizer.mm */; };
-		3C496F6E21281F8400F8E263 /* speech_recognition_result_event_args.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C496F6621281F8300F8E263 /* speech_recognition_result_event_args.mm */; };
-		3C496F6F21281F8400F8E263 /* speech_factory.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C496F6721281F8300F8E263 /* speech_factory.mm */; };
-		3C61523F212589EB00B2E94E /* libMicrosoft.CognitiveServices.Speech.core.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C61523E212589EB00B2E94E /* libMicrosoft.CognitiveServices.Speech.core.dylib */; };
+		3C824066213D3F9700EDEA09 /* libMicrosoft.CognitiveServices.Speech.core.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C61523E212589EB00B2E94E /* libMicrosoft.CognitiveServices.Speech.core.dylib */; };
 		3CA6CF8B211F471500CD2768 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CA6CF8A211F471500CD2768 /* AppDelegate.m */; };
 		3CA6CF8E211F471500CD2768 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CA6CF8D211F471500CD2768 /* ViewController.m */; };
 		3CA6CF91211F471500CD2768 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3CA6CF8F211F471500CD2768 /* Main.storyboard */; };
@@ -33,17 +29,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		3C496F6121281F8300F8E263 /* speech_recognition_result.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_recognition_result.mm; path = ../../SpeechSDK/SpeechSDK/speech_recognition_result.mm; sourceTree = "<group>"; };
-		3C496F6221281F8300F8E263 /* speech_recognition_result_event_args_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_recognition_result_event_args_private.h; path = ../../SpeechSDK/SpeechSDK/speech_recognition_result_event_args_private.h; sourceTree = "<group>"; };
-		3C496F6321281F8300F8E263 /* speech_recognizer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_recognizer.mm; path = ../../SpeechSDK/SpeechSDK/speech_recognizer.mm; sourceTree = "<group>"; };
-		3C496F6421281F8300F8E263 /* speech_recognition_result.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_recognition_result.h; path = ../../SpeechSDK/SpeechSDK/speech_recognition_result.h; sourceTree = "<group>"; };
-		3C496F6521281F8300F8E263 /* speech_recognition_result_event_args.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_recognition_result_event_args.h; path = ../../SpeechSDK/SpeechSDK/speech_recognition_result_event_args.h; sourceTree = "<group>"; };
-		3C496F6621281F8300F8E263 /* speech_recognition_result_event_args.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_recognition_result_event_args.mm; path = ../../SpeechSDK/SpeechSDK/speech_recognition_result_event_args.mm; sourceTree = "<group>"; };
-		3C496F6721281F8300F8E263 /* speech_factory.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_factory.mm; path = ../../SpeechSDK/SpeechSDK/speech_factory.mm; sourceTree = "<group>"; };
-		3C496F6821281F8300F8E263 /* speech_recognizer_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_recognizer_private.h; path = ../../SpeechSDK/SpeechSDK/speech_recognizer_private.h; sourceTree = "<group>"; };
-		3C496F6921281F8300F8E263 /* speech_factory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_factory.h; path = ../../SpeechSDK/SpeechSDK/speech_factory.h; sourceTree = "<group>"; };
-		3C496F6A21281F8300F8E263 /* speech_recognizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_recognizer.h; path = ../../SpeechSDK/SpeechSDK/speech_recognizer.h; sourceTree = "<group>"; };
-		3C496F6B21281F8300F8E263 /* speech_recognition_result_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_recognition_result_private.h; path = ../../SpeechSDK/SpeechSDK/speech_recognition_result_private.h; sourceTree = "<group>"; };
 		3C61523E212589EB00B2E94E /* libMicrosoft.CognitiveServices.Speech.core.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libMicrosoft.CognitiveServices.Speech.core.dylib; path = ../../../../build_ios_simulator_debug/lib/libMicrosoft.CognitiveServices.Speech.core.dylib; sourceTree = "<group>"; };
 		3CA6CF86211F471500CD2768 /* SpeechSDK_iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpeechSDK_iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3CA6CF89211F471500CD2768 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -66,7 +51,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3C61523F212589EB00B2E94E /* libMicrosoft.CognitiveServices.Speech.core.dylib in Frameworks */,
+				3C824066213D3F9700EDEA09 /* libMicrosoft.CognitiveServices.Speech.core.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -103,17 +88,6 @@
 		3CA6CF88211F471500CD2768 /* SpeechSDK_iOS */ = {
 			isa = PBXGroup;
 			children = (
-				3C496F6921281F8300F8E263 /* speech_factory.h */,
-				3C496F6721281F8300F8E263 /* speech_factory.mm */,
-				3C496F6221281F8300F8E263 /* speech_recognition_result_event_args_private.h */,
-				3C496F6521281F8300F8E263 /* speech_recognition_result_event_args.h */,
-				3C496F6621281F8300F8E263 /* speech_recognition_result_event_args.mm */,
-				3C496F6B21281F8300F8E263 /* speech_recognition_result_private.h */,
-				3C496F6421281F8300F8E263 /* speech_recognition_result.h */,
-				3C496F6121281F8300F8E263 /* speech_recognition_result.mm */,
-				3C496F6821281F8300F8E263 /* speech_recognizer_private.h */,
-				3C496F6A21281F8300F8E263 /* speech_recognizer.h */,
-				3C496F6321281F8300F8E263 /* speech_recognizer.mm */,
 				3CA6CF89211F471500CD2768 /* AppDelegate.h */,
 				3CA6CF8A211F471500CD2768 /* AppDelegate.m */,
 				3CA6CF8C211F471500CD2768 /* ViewController.h */,
@@ -248,12 +222,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				3CA6CF8E211F471500CD2768 /* ViewController.m in Sources */,
-				3C496F6D21281F8400F8E263 /* speech_recognizer.mm in Sources */,
 				3CA6CF99211F471600CD2768 /* main.m in Sources */,
-				3C496F6C21281F8400F8E263 /* speech_recognition_result.mm in Sources */,
-				3C496F6E21281F8400F8E263 /* speech_recognition_result_event_args.mm in Sources */,
 				3CA6CF8B211F471500CD2768 /* AppDelegate.m in Sources */,
-				3C496F6F21281F8400F8E263 /* speech_factory.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -410,13 +380,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 6H88U8258Q;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/../../../public/cxx_api",
-					"$(SRCROOT)/../../../public/c_api",
+					"$(SRCROOT)/../../../../source/bindings/objective-c/public",
+					"$(SRCROOT)/../../../../source/public/cxx_api",
+					"$(SRCROOT)/../../../../source/public/c_api",
 				);
 				INFOPLIST_FILE = SpeechSDK_iOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks $(SRCROOT)/../../../../build_ios_simulator_debug/lib";
 				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../../../../build_ios_simulator_debug/lib";
+				OTHER_LDFLAGS = "-v";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.cognitiveservices.SpeechSDK-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				RUN_CLANG_STATIC_ANALYZER = YES;
@@ -429,13 +402,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 6H88U8258Q;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/../../../public/cxx_api",
-					"$(SRCROOT)/../../../public/c_api",
+					"$(SRCROOT)/../../../../source/bindings/objective-c/public",
+					"$(SRCROOT)/../../../../source/public/cxx_api",
+					"$(SRCROOT)/../../../../source/public/c_api",
 				);
 				INFOPLIST_FILE = SpeechSDK_iOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks $(SRCROOT)/../../../../build_ios_simulator_debug/lib";
 				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../../../../build_ios_simulator_debug/lib";
+				OTHER_LDFLAGS = "-v";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.cognitiveservices.SpeechSDK-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				RUN_CLANG_STATIC_ANALYZER = YES;

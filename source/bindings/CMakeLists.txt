@@ -48,3 +48,7 @@ add_custom_target(swig
 set_target_properties(swig PROPERTIES FOLDER bindings)
 
 endif()
+
+if(APPLE)
+    add_subdirectory(objective-c)
+endif()
