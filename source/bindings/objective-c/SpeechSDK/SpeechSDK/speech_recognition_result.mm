@@ -15,7 +15,8 @@
 
 - (instancetype)init:(void *)resultHandle
 {
-    self->resultImpl = *static_cast<std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechRecognitionResult> *>(resultHandle);
+    self = [super init];
+    resultImpl = *static_cast<std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechRecognitionResult> *>(resultHandle);
     
     std::wstring stdwstring = resultImpl->ResultId;
     char *data = (char *)stdwstring.data();

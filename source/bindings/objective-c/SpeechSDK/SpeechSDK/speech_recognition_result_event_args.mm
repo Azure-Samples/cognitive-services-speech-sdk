@@ -16,6 +16,7 @@
 
 - (instancetype)init:(void *)eventArgsHandle
 {
+    self = [super init];
     eventArgsImpl = static_cast<Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs *>(eventArgsHandle);
     
     std::wstring stdwstring = eventArgsImpl->SessionId;

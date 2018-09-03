@@ -53,6 +53,7 @@ struct EventHandlerHelper
 
 - (instancetype)init:(void *)recoHandle
 {
+    self = [super init];
     recoImpl = *static_cast<std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechRecognizer> *>(recoHandle);
     if (recoImpl == nullptr) {
         return nil;
