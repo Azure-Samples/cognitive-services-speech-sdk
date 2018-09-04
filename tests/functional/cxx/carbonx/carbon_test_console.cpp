@@ -1124,7 +1124,7 @@ void CarbonTestConsole::Recognizer_StartKeywordRecognition(std::shared_ptr<T>& r
     auto name = PAL::ToWString(PAL::GetTypeName(*recognizer.get()));
     ConsoleWriteLine(L"\nStartKeywordRecognitionAsync %ls...", name.c_str());
 
-    auto model = KeywordRecognitionModel::FromFile(L"heycortana_en-US.table");
+    auto model = KeywordRecognitionModel::FromFile(L"kws.table");
     auto future = recognizer->StartKeywordRecognitionAsync(model);
 
     ConsoleWriteLine(L"StartKeywordRecognitionAsync %ls... Waiting...", name.c_str());

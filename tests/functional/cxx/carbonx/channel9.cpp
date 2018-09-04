@@ -255,7 +255,7 @@ void CarbonTestConsole::ch9_do_kws_speech()
         printf("KEYWORD SPOTTING: Say 'Hey Cortana' followed by whatever you want ...  (press ENTER to exit) \n\n");
     };
 
-    auto keywordModel = KeywordRecognitionModel::FromFile(L"heycortana_en-US.table");
+    auto keywordModel = KeywordRecognitionModel::FromFile(L"kws.table");
     recognizer->StartKeywordRecognitionAsync(keywordModel);
 
     printf("KEYWORD SPOTTING: Say 'Hey Cortana' followed by whatever you want ...  (press ENTER to exit) \n\n");
@@ -287,7 +287,7 @@ void CarbonTestConsole::ch9_do_kws_intent()
     recognizer->AddIntent(L"2", model, L"TV.WatchTV");
     recognizer->AddIntent(L"3", model, L"TV.ShowGuide");
 
-    auto keywordModel = KeywordRecognitionModel::FromFile(L"heycortana_en-US.table");
+    auto keywordModel = KeywordRecognitionModel::FromFile(L"kws.table");
     recognizer->StartKeywordRecognitionAsync(keywordModel);
 
     printf("KEYWORD SPOTTING: Say 'Hey Cortana' followed by whatever you want ...  (press ENTER to exit) \n\n");
