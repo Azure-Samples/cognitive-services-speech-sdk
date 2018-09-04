@@ -182,6 +182,12 @@ bool CarbonTestConsole::ParseConsoleArgs(int argc, const wchar_t* argv[], Consol
             pstrNextArg = &pconsoleArgs->m_strIntentAppId;
             fNextArgRequired = true;
         }
+        else if (PAL::wcsnicmp(pszArg, L"--intentNames", wcslen(L"--intentNames")) == 0)
+        {
+            fShowOptions = pconsoleArgs->m_strIntentNames.length() > 0 || fNextArgRequired;
+            pstrNextArg = &pconsoleArgs->m_strIntentNames;
+            fNextArgRequired = true;
+        }
         else if (PAL::wcsicmp(pszArg, L"--single") == 0)
         {
             fShowOptions = pconsoleArgs->m_fContinuousRecognition || fNextArgRequired;
@@ -1441,6 +1447,20 @@ void CarbonTestConsole::InitGlobalParameters(ConsoleArgs* pconsoleArgs)
     {
         m_intentAppId = pconsoleArgs->m_strIntentAppId;
     }
+
+    if (!pconsoleArgs->m_strIntentNames.empty())
+    {
+        std::string::size_type i, j;
+        const std::wstring &s = pconsoleArgs->m_strIntentNames;
+
+        for (i = j = 0; j = s.find(L",", i), j < std::string::npos; i = j + 1)
+        {
+            if (i < j)
+                m_intentNames.push_back(s.substr(i, j - i));
+        }
+        if (i < s.length())
+            m_intentNames.push_back(s.substr(i));
+    }
 }
 
 void CarbonTestConsole::EnsureInitCarbon(ConsoleArgs* pconsoleArgs)
@@ -1523,6 +1543,15 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
 
         auto fn2 = std::bind(&CarbonTestConsole::IntentRecognizer_IntermediateResultHandler, this, std::placeholders::_1);
         m_intentRecognizer->IntermediateResult.Connect(fn2);
+
+        if (!m_intentAppId.empty())
+        {
+            auto model = LanguageUnderstandingModel::FromAppId(m_intentAppId);
+            for (auto & intentName : m_intentNames)
+            {
+                m_intentRecognizer->AddIntent(intentName, model, intentName);
+            }
+        }
 
         m_recognizer = BaseAsyncRecognizer::FromRecognizer(m_intentRecognizer);
         m_session = Session::FromRecognizer(m_intentRecognizer);

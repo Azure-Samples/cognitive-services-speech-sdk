@@ -18,13 +18,17 @@ Expected environment variables:
   - \$TEST_MODEL_ID - CRIS Model ID
   - \$TEST_SPEECH_ENDPOINT - speech endpoint
   - \$TEST_CRIS_ENDPOINT - CRIS endpoint
+  - \$TEST_INTENT_HOMEAUTOMATION_APPID - intent home automation appId
+  - \$TEST_INTENT_HOMEAUTOMATION_TURNON_INTENT - name of the turn-on intent
+  - \$TEST_INTENT_HOMEAUTOMATION_TURNON_AUDIO - audio input for turning on something
 "
 
 [[ $# -eq 6 ]] || die "Error: wrong number of arguments.\n$USAGE"
-[[ -n $TEST_AUDIO_FILE ]] || die "Error: \$TEST_AUDIO_FILE not set.\n$USAGE"
-[[ -n $TEST_MODEL_ID ]] || die "Error: \$TEST_MODEL_ID not set.\n$USAGE"
-[[ -n $TEST_SPEECH_ENDPOINT ]] || die "Error: \$TEST_SPEECH_ENDPOINT not set.\n$USAGE"
-[[ -n $TEST_CRIS_ENDPOINT ]] || die "Error: \$TEST_CRIS_ENDPOINT not set.\n$USAGE"
+
+for envVariable in TEST_{AUDIO_FILE,MODEL_ID,{SPEECH,CRIS}_ENDPOINT,INTENT_HOMEAUTOMATION_{APPID,TURNON_{INTENT,AUDIO}}}
+do
+  [[ -n ${!envVariable} ]] || die "Error: \$$envVariable not set.\n$USAGE"
+done
 
 BINARY_DIR=$1
 Action=$2
@@ -95,13 +99,13 @@ for action in $Actions; do
           continue
         fi
 
-        AUTH="--subscription:$KeyLuis --region $RegionLuis"
+        EXTRA_ARGS="--subscription:$KeyLuis --region $RegionLuis --input $TEST_INTENT_HOMEAUTOMATION_TURNON_AUDIO --intentNames $TEST_INTENT_HOMEAUTOMATION_TURNON_INTENT --intentAppId $TEST_INTENT_HOMEAUTOMATION_APPID"
       else
-        AUTH="--subscription:$KeySkyman --region $RegionSkyman"
+        EXTRA_ARGS="--subscription:$KeySkyman --region $RegionSkyman --input $TEST_AUDIO_FILE"
       fi
 
       runTest TESTRUNNER "$TEST_NAME" "$PLATFORMS_TO_RUN" $TIMEOUT_SECONDS \
-        $CARBONX $AUTH --input $TEST_AUDIO_FILE --$action $modeArg $targetArg
+        $CARBONX $EXTRA_ARGS --$action $modeArg $targetArg
     done
   done
 done

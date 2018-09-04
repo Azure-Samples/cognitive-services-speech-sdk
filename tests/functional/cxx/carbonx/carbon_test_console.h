@@ -49,6 +49,7 @@ private:
         std::wstring m_strSubscriptionKey;
         std::wstring m_strRegion;
         std::wstring m_strIntentAppId;
+        std::wstring m_strIntentNames; // comma-separated
 
         bool m_fRecognizeAsync = false;
 
@@ -249,6 +250,7 @@ private:
     std::wstring m_endpointUri;
     std::wstring m_customSpeechModelId;
     std::wstring m_intentAppId;
+    std::vector<std::wstring> m_intentNames;
 
     void* m_commandSystem = nullptr;
 };
