@@ -12,6 +12,7 @@
 #include "named_properties_impl.h"
 #include "packaged_task_helpers.h"
 #include "service_helpers.h"
+#include "audio_buffer.h"
 
 #include <shared_mutex>
 
@@ -191,9 +192,7 @@ public:
 
 
 private:
-
     std::shared_ptr<ISpxRecoEngineAdapter> EnsureInitRecoEngineAdapter();
-    void EnsureResetRecoEngineAdapter();
     void InitRecoEngineAdapter();
 
     void StartResetEngineAdapter();
@@ -205,12 +204,7 @@ private:
     std::shared_ptr<ISpxKwsEngineAdapter> EnsureInitKwsEngineAdapter(std::shared_ptr<ISpxKwsModel> model);
     void InitKwsEngineAdapter(std::shared_ptr<ISpxKwsModel> model);
 
-    void ProcessAudioDataNow(AudioData_Type data, uint32_t size);
-
-    void ProcessAudioDataLater(AudioData_Type audio, uint32_t size);
-    void ProcessAudioDataLater_Complete();
-    void ProcessAudioDataLater_Overflow();
-    void ProcessAudioDataLater_Clear();
+    bool ProcessNextAudio();
 
     void HotSwapToKwsSingleShotWhilePaused();
     void WaitForKwsSingleShotRecognition();
@@ -246,6 +240,10 @@ private:
     // Unique identifier of the session, used mostly for diagnostics.
     // Is represented by UUID without dashes.
     const std::wstring m_sessionId;
+
+    using milliseconds = std::chrono::milliseconds;
+    using seconds = std::chrono::seconds;
+    using minutes = std::chrono::minutes;
 
     #ifdef _MSC_VER
     using ReadWriteMutex_Type = std::shared_mutex;
@@ -292,17 +290,22 @@ private:
     //  Using or changing the Adapter (as ISpxAudioProcessor) requires locking/unlocking the reader writer lock
     //
     ReadWriteMutex_Type m_combinedAdapterAndStateMutex;
+
+    // In order to reliably deliver audio, we always swap audio processor
+    // together with its audio buffer. Otherwise data can be processed by a stale processor
     std::shared_ptr<ISpxAudioProcessor> m_audioProcessor;
+    bool m_isKwsProcessor{ false };
+    AudioBufferPtr m_audioBuffer;
+    DataChunkPtr m_spottedKeyword;
+
+    // We replay after the last successful result. Richland currently has the upper bound
+    // of 30 seconds to generate a speech segment. To be on the safe side, similar to the old SDK we buffer for 1 minute.
+    constexpr static seconds MaxBufferedBeforeOverflow = seconds(60);
+    constexpr static milliseconds MaxBufferedBeforeSimulateRealtime = milliseconds(500);
+    constexpr static int SimulateRealtimePercentage = 50;
+    constexpr static seconds ShutdownTimeout = seconds(3);
 
     // Other member data ...
-
-    const int m_maxMsStashedBeforeSimulateRealtime = 500;
-    const int m_simulateRealtimePercentage = 50;
-    const int m_maxMsStashedBeforeOverflow = 5000;
-
-    std::mutex m_processAudioLaterMutex;
-    std::queue<std::pair<AudioData_Type, uint32_t>> m_processAudioLater;
-    uint64_t m_sizeProcessAudioLater;
 
     std::mutex m_mutex;
     std::condition_variable m_cv;
@@ -311,15 +314,17 @@ private:
     // Note using std::chrono::minutes::max() could cause wait_for to exit straight away instead of 
     // infinite timeout, because wait_for() in VS is implemented via wait_until() and a possible integer
     // overflow could make new time < now.
-    const std::chrono::minutes m_recoAsyncTimeoutDuration = std::chrono::minutes(1);
-    const std::chrono::seconds m_waitForAdapterCompletedSetFormatStopTimeout = std::chrono::seconds(20);
-    const std::chrono::milliseconds m_shutdownTimeout = std::chrono::milliseconds(500);
+    const minutes m_recoAsyncTimeoutDuration = minutes(1);
+    const seconds m_waitForAdapterCompletedSetFormatStopTimeout = seconds(20);
 
     bool m_recoAsyncWaiting;
     std::shared_ptr<ISpxRecognitionResult> m_recoAsyncResult;
 
     CSpxPackagedTaskHelper m_taskHelper;
     std::list<std::weak_ptr<ISpxRecognizer>> m_recognizers;
+
+    bool m_isReliableDelivery{ false };
+    bool m_shouldRetry{ false };
 };
 
 

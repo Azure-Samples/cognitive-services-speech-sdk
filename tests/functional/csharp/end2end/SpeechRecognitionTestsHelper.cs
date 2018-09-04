@@ -50,10 +50,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     taskCompletionSource.TrySetResult(0);
                 }
             };
+            string error = string.Empty;
+            recognizer.RecognitionErrorRaised += (s, e) => { error = e.ToString(); };
 
             await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
             await Task.WhenAny(taskCompletionSource.Task, Task.Delay(timeout));
             await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                Assert.Fail($"Error received: {error}");
+            }
         }
 
         public async Task<string> GetFirstRecognizerResult(SpeechRecognizer speechRecognizer)

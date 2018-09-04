@@ -420,6 +420,7 @@ public:
     virtual Reason GetReason() = 0;
     virtual ResultType GetType() = 0;
     virtual uint64_t GetOffset() const = 0;
+    virtual void SetOffset(uint64_t) = 0;
     virtual uint64_t GetDuration() const = 0;
 };
 
@@ -575,6 +576,27 @@ public:
     virtual void SetAdapterMode(bool singleShot) = 0;
 };
 
+class SpxRecoEngineAdapterError
+{
+    bool m_isTransportError;
+    std::string m_info;
+
+public:
+
+    SpxRecoEngineAdapterError(bool isTransportError, const std::string& info)
+        : m_isTransportError{ isTransportError }, m_info{ info }
+    {}
+
+    bool IsTransportError() const
+    {
+        return m_isTransportError;
+    }
+
+    const std::string& Info() const
+    {
+        return m_info;
+    }
+};
 
 class ISpxRecoEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxRecoEngineAdapterSite>
 {
@@ -582,7 +604,7 @@ public:
 
     using ResultPayload_Type = std::shared_ptr<ISpxRecognitionResult>;
     using AdditionalMessagePayload_Type = void*;
-    using ErrorPayload_Type = const std::string&;
+    using ErrorPayload_Type = std::shared_ptr<SpxRecoEngineAdapterError>;
 
     virtual void GetScenarioCount(uint16_t* countSpeech, uint16_t* countIntent, uint16_t* countTranslation) = 0;
 

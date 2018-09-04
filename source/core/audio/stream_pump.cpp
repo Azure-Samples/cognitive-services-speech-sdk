@@ -50,6 +50,10 @@ namespace Impl {
 
         AudioInputStreamFormat format;
         auto retValue = m_streamReader->GetFormat(&format, cbFormat);
+        if (!pformat)
+        {
+            return (uint16_t)retValue;
+        }
 
         pformat->nAvgBytesPerSec = (uint32_t)format.AvgBytesPerSec;
         pformat->nBlockAlign = (uint16_t)format.BlockAlign;

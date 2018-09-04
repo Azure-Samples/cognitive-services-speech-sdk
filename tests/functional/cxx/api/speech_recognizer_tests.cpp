@@ -356,6 +356,7 @@ TEST_CASE("KWS basics", "[api][cxx]")
 
                 std::unique_lock<std::mutex> lock(mtx);
                 cv.wait_for(lock, std::chrono::seconds(30), [&] { return gotFinalResult >= 1 && gotSessionStopped >= 1; });
+                lock.unlock();
 
                 recognizer->StopKeywordRecognitionAsync().get();
 

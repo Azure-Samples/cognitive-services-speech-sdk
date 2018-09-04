@@ -22,6 +22,12 @@ CSpxMockInteractiveMicrophone::CSpxMockInteractiveMicrophone() :
 {
 }
 
+void CSpxMockInteractiveMicrophone::Init()
+{
+    SPX_DBG_TRACE_FUNCTION();
+    ISpxObjectWithSiteInitImpl<ISpxGenericSite>::Init();
+    EnsureAudioPump();
+}
 
 void CSpxMockInteractiveMicrophone::StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor)
 {

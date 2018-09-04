@@ -83,13 +83,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task TranslationWeatherEnToDeFinalTextResult()
         {
             var toLanguages = new List<string>() { Language.DE };
+            var result = await this.translationHelper.GetTranslationFinalResult(TestData.English.Weather.AudioFile, Language.EN, toLanguages);
+            Assert.IsNotNull(result, "Translation should not be null");
 
-            Console.WriteLine(TestData.English.Weather.AudioFile);
-            var actualTranslation = await this.translationHelper.GetTranslationFinalResult(TestData.English.Weather.AudioFile, Language.EN, toLanguages);
-            Assert.IsNotNull(actualTranslation);
-
-            Assert.AreEqual(TestData.English.Weather.Utterance, actualTranslation.Text);
-            Assert.AreEqual(TestData.German.Weather.Utterance, actualTranslation.Translations[Language.DE]);
+            Console.WriteLine(result.ToString());
+            Console.WriteLine($"Status: {result.RecognitionStatus}, failure reasons: {result.FailureReason}, {result.RecognitionFailureReason}");
+            Assert.AreEqual(TestData.English.Weather.Utterance, result.Text);
+            Assert.AreEqual(TestData.German.Weather.Utterance, result.Translations[Language.DE]);
         }
 
         [TestMethod]
@@ -98,12 +98,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var toLanguages = new List<string>() { Language.FR, Language.ES };
 
-            var actualTranslation = await this.translationHelper.GetTranslationFinalResult(TestData.English.Weather.AudioFile, Language.EN, toLanguages);
-            Assert.IsNotNull(actualTranslation);
-            Assert.AreEqual(TestData.English.Weather.Utterance, actualTranslation.Text);
+            var result = await this.translationHelper.GetTranslationFinalResult(TestData.English.Weather.AudioFile, Language.EN, toLanguages);
+            Assert.IsNotNull(result, "Translation should not be null");
 
-            Assert.AreEqual(TestData.French.Weather.Utterance, actualTranslation.Translations[Language.FR]);
-            Assert.AreEqual(TestData.Spanish.Weather.Utterance, actualTranslation.Translations[Language.ES]);
+            Console.WriteLine(result.ToString());
+            Console.WriteLine($"Status: {result.RecognitionStatus}, failure reasons: {result.FailureReason}, {result.RecognitionFailureReason}");
+            Assert.AreEqual(TestData.English.Weather.Utterance, result.Text);
+            Assert.AreEqual(TestData.French.Weather.Utterance, result.Translations[Language.FR]);
+            Assert.AreEqual(TestData.Spanish.Weather.Utterance, result.Translations[Language.ES]);
         }
 
         [Ignore] // TODO ENABLE AFTER FIXING BROKEN SERVICE
@@ -148,24 +150,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             var actualTranslations = await this.translationHelper.GetTranslationFinalResultContinuous(TestData.English.Batman.AudioFile, Language.EN, toLanguages, Voice.DE);
             Assert.AreNotEqual(actualTranslations[ResultType.Synthesis].Count, 0);
-            var actualSynthesisByteResults = actualTranslations[ResultType.Synthesis].Cast<TranslationSynthesisResultEventArgs>().Select(t => t.Result.Audio).ToList();
-
-            var expectedSynthesisByteResults = Config.GetByteArraysForFilesWithSamePrefix(synthesisDir, "de_katja_batman_utterance");
-
-            CollectionAssert.AreEquivalent(expectedSynthesisByteResults[0], actualSynthesisByteResults[0]);
-            CollectionAssert.AreEquivalent(expectedSynthesisByteResults[1], actualSynthesisByteResults[1]);
-            CollectionAssert.AreEquivalent(expectedSynthesisByteResults[2], actualSynthesisByteResults[2]);
-            CollectionAssert.AreEquivalent(expectedSynthesisByteResults[3], actualSynthesisByteResults[3]);
-            CollectionAssert.AreEquivalent(expectedSynthesisByteResults[4], actualSynthesisByteResults[4]);
-            CollectionAssert.AreEquivalent(expectedSynthesisByteResults[5], actualSynthesisByteResults[5]);
-            CollectionAssert.AreEquivalent(expectedSynthesisByteResults[6], actualSynthesisByteResults[6]);
-            CollectionAssert.AreEquivalent(expectedSynthesisByteResults[7], actualSynthesisByteResults[7]);
-            CollectionAssert.AreEquivalent(expectedSynthesisByteResults[8], actualSynthesisByteResults[8]);
-            CollectionAssert.AreEquivalent(expectedSynthesisByteResults[9], actualSynthesisByteResults[9]);
-            CollectionAssert.AreEquivalent(expectedSynthesisByteResults[10], actualSynthesisByteResults[10]);
-            CollectionAssert.AreEquivalent(expectedSynthesisByteResults[11], actualSynthesisByteResults[11]);
-            CollectionAssert.AreEquivalent(expectedSynthesisByteResults[12], actualSynthesisByteResults[12]);
-            CollectionAssert.AreEquivalent(expectedSynthesisByteResults[13], actualSynthesisByteResults[13]);
+            var actualSynthesisByteResults = actualTranslations[ResultType.Synthesis].Cast<TranslationSynthesisResultEventArgs>().ToList();
+            const int MinSize = 20000;
+            foreach (var s in actualSynthesisByteResults)
+            {
+                Console.WriteLine($"Status : {s.Result.Status}, Failure reason if any: {s.Result.FailureReason}");
+                Assert.IsTrue(s.Result.Audio.Length > MinSize, $"Expects audio size {s.Result.Audio.Length} to be greater than {MinSize}");
+            }
         }
 
         [TestMethod]
@@ -209,15 +200,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.AreNotEqual(actualTranslations.Count, 0);
 
             Assert.IsTrue(actualTranslations[0].Last().Result.Text.Contains("What"));
-        }
-
-        [TestMethod]
-        [Ignore("The current implementation also delivers events when calling RecognizeAsync().")] 
-        public async Task TranslationAsyncRecognizerEventReceived()
-        {
-            var toLanguages = new List<string>() { Language.DE };
-            var observedEvent = await this.translationHelper.GetTranslationFinalResultEvents(TestData.English.Batman.AudioFile, Language.EN, toLanguages);
-            Assert.IsNull(observedEvent);
         }
     }
 }

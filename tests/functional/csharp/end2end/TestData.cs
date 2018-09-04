@@ -17,19 +17,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 public static readonly string[] Utterances =
                 {
-                    "Fähigkeiten und Fähigkeiten Batman hat keine inhärenten Supermächte. Er verlässt sich auf seine eigenen wissenschaftlichen Kenntnisse Detektiv Kenntnisse und sportliche Fähigkeiten.",
-                    "In den Geschichten Batman gilt als einer der weltweit größten Detektiv, wenn nicht der weltweit größte Krimi-Löser.",
-                    "Batman wurde wiederholt als Genie Level Intellekt beschrieben. Einer der größten Kampfkünstler im DC-Universum.",
-                    "Und mit Peak menschlichen körperlichen Konditionierung reiste die Welt Erwerb der Fähigkeiten benötigt, um seine Kreuzzug Gründen Verbrechen zu unterstützen.",
-                    "Sein Wissen und Know-how in fast jeder Disziplin, die dem Menschen bekannt ist, ist fast beispiellos von jedem anderen Charakter im Universum.",
-                    "Bat man es unerschöpflichen Reichtum ermöglicht es ihm, fortschrittliche Technologie als kompetente Wissenschaftler nutzen in der Lage zu nutzen und zu modifizieren, diese Technologien zu seinem Vorteil zugreifen.",
-                    "Batman beschreibt Superman als den gefährlichsten Mann auf Erden in der Lage, ein Team von Super powered Außerirdischen zu besiegen.",
-                    "Von sich selbst, um seine inhaftierten Mitspieler zu retten.",
-                    "In der ersten Storyline Superman hält Batman auch als einer der brillantesten Köpfe auf dem Planeten.",
-                    "Batman hat die Fähigkeit, unter großen körperlichen Schmerz zu funktionieren und Geist Kontrolle zu widerstehen. Er ist ein Meister der Verkleidung.",
-                    "Mehrsprachig und ein Experte in der Spionage oft sammeln Informationen unter verschiedenen Identität.",
-                    "FAT man es Karate Judo und Jujitsu Training hat ihn nach dem Master of Stealth eine Flucht ermöglicht Tumor ermöglicht es ihm zu erscheinen und verschwinden nach bewillen gemacht.",
-                    "Und frei zu brechen."
+                    "Fähigkeiten und Fähigkeiten Batman hat keine inhärenten Superkräfte. Er setzt auf seine eigenen wissenschaftlichen Kenntnisse Detektivfähigkeiten und athletisches Geschick.",
+                    "In den Geschichten gilt Batman als einer der größten Detektiv der Welt, wenn nicht gar der größte Verbrecher Löser der Welt.",
+                    "Batman wurde immer wieder als genialer Level-Intellekt beschrieben. Einer der größten Kampfkünstler im DC-Universum.",
+                    "Und mit dem Spitzenwert der menschlichen körperlichen Konditionierung reiste er durch die Welt und erwarb die Fähigkeiten, die nötig waren, um seinem Kreuzzug zu helfen.",
+                    "Sein Wissen und seine Expertise in fast jeder Disziplin, die dem Menschen bekannt ist, ist durch jeden anderen Charakter im Universum fast beispiellos.",
+                    "Bat man es unerschöpflichen Reichtum ermöglicht es ihm, auf fortschrittliche Technologie zuzugreifen, da ein kompetenter Wissenschaftler in der Lage ist, diese Technologien zu seinem Vorteil zu nutzen und zu modifizieren.",
+                    "Batman beschreibt Superman als den gefährlichsten Mann der Erde, der in der Lage ist, ein Team von Super betriebenen Außerirdischen zu besiegen.",
+                    "Von sich aus, um seine inhaftierten Teamkollegen zu retten.",
+                    "In der ersten Storyline hält Superman auch Batman für einen der brillantesten Köpfe auf dem Planeten.",
+                    "Batman hat die Fähigkeit, unter großen körperlichen Schmerzen zu funktionieren und der Gedankenkontrolle zu widerstehen. Er ist ein Meister der Verkleidung.",
+                    "Mehrsprachig und ein Experte für Spionage sammelt oft Informationen unter verschiedenen Identitäts Gruppen.",
+                    "FAT man es Karate Judo und Jujitsu Training hat ihn nach Master of Stealth zu einer Flucht gemacht, die es ihm erlaubt, zu erscheinen und zu verschwinden.",
+                    "Nach Willen und zur Pause frei."
                 };
             }
 

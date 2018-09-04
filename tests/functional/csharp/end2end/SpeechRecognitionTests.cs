@@ -174,11 +174,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 await helper.CompleteContinuousRecognition(recognizer);
 
-                Assert.IsTrue(helper.FinalResultEventCount > 0, AssertOutput.WrongFinalResultCount);
+                Assert.IsTrue(helper.FinalResultEventCount > 0, $"Invalid number of final result events {helper.FinalResultEventCount}");
                 Assert.AreEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
-                Assert.IsTrue(helper.SpeechStartedEventCount > 0, AssertOutput.WrongSpeechStartedCount);
-                Assert.IsTrue(helper.SpeechEndedEventCount > 0, AssertOutput.WrongSpeechEndedCount);
-                Assert.IsTrue(recognizedText.Count > 0);
+                Assert.AreEqual(1, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
+                Assert.IsTrue(recognizedText.Count > 0, $"Invalid number of text messages {recognizedText.Count}");
+
                 AssertMatching(TestData.English.Batman.Utterances[0], recognizedText[0]);
                 AssertMatching(TestData.English.Batman.Utterances.Last(), recognizedText.Last());
             }
@@ -332,6 +332,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             using (var recognizer = TrackSessionId(factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile)))
             {
+                recognizer.RecognitionErrorRaised += (s, e) => { Console.WriteLine($"Error received: {e.ToString()}"); };
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
                 var ex = await Assert.ThrowsExceptionAsync<ApplicationException>(() => recognizer.RecognizeAsync());
@@ -345,8 +346,24 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(factory.CreateSpeechRecognizerWithFileInput(TestData.English.Batman.AudioFile)))
             {
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-                await recognizer.RecognizeAsync().ConfigureAwait(false);
+                Assert.IsTrue(result.Duration.Ticks > 0, result.RecognitionStatus.ToString(), "First result duration should be greater than 0");
+                var offset = result.OffsetInTicks;
+                var expectedNextOffset = offset + result.Duration.Ticks;
+
+                var result2 = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                var offset2 = result2.OffsetInTicks;
+
+                Console.WriteLine($"Offset1 {offset}, offset1 + duration {expectedNextOffset}");
+                Console.WriteLine($"Offset2 {offset2}, its duration {result2.Duration.Ticks}");
+                Console.WriteLine($"Result1: {result.ToString()}");
+                Console.WriteLine($"Result2: {result2.ToString()}");
+
+                Assert.AreEqual(result.RecognitionStatus, RecognitionStatus.Recognized);
                 AssertStringContains(result.Text, "detective skills");
+                Assert.IsTrue(result.Duration.Ticks > 0, $"Result duration {result.Duration.Ticks} in {result.ToString()} should be greater than 0");
+
+                Assert.AreEqual(result2.RecognitionStatus, RecognitionStatus.Recognized);
+                Assert.IsTrue(offset2 >= expectedNextOffset, $"Offset of the second recognition {offset2} should be greater or equal than offset of the first plus duration {expectedNextOffset}.");
             }
         }
 
@@ -356,10 +373,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             const int NumberOfIterations = 100;
             using (var recognizer = TrackSessionId(factory.CreateSpeechRecognizerWithFileInput(TestData.English.Batman.AudioFile)))
             {
+                string error = string.Empty;
+                recognizer.RecognitionErrorRaised += (s, e) => { error = e.ToString(); };
                 for (int i = 0; i < NumberOfIterations; ++i)
                 {
                     await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                }
+
+                if (!string.IsNullOrEmpty(error))
+                {
+                    Assert.Fail($"Error received: {error}");
                 }
             }
         }
@@ -370,10 +394,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             using (var recognizer = TrackSessionId(factory.CreateSpeechRecognizerWithFileInput(TestData.English.Batman.AudioFile)))
             {
+                string error = string.Empty;
+                recognizer.RecognitionErrorRaised += (s, e) => { error = e.ToString(); };
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+
+                if (!string.IsNullOrEmpty(error))
+                {
+                    Assert.Fail($"Error received: {error}");
+                }
             }
         }
 

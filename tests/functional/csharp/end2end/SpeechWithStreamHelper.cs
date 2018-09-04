@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+using MicrosoftSpeechSDKSamples;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
     using static SpeechRecognitionTestsHelper;
 
     sealed class SpeechWithStreamHelper
@@ -20,12 +22,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public SpeechWithStreamHelper(SpeechFactory factory)
         {
             this.factory = factory;
-            timeout = TimeSpan.FromSeconds(90);
+            timeout = TimeSpan.FromSeconds(200);
         }
 
         SpeechRecognizer CreateSpeechRecognizerWithStream(String audioFile, String language = null, OutputFormat format = OutputFormat.Simple)
         {
-            var stream = Config.OpenWaveFile(audioFile);
+            var stream = Util.OpenWaveFile(audioFile);
             if (string.IsNullOrEmpty(language))
             {
                 return this.factory.CreateSpeechRecognizerWithStream(stream);
@@ -53,7 +55,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var tcs = new TaskCompletionSource<bool>();
                 var textResultEvents = new List<SpeechRecognitionResultEventArgs>();
 
-                recognizer.FinalResultReceived += (s, e) => textResultEvents.Add(e);
+                recognizer.FinalResultReceived += (s, e) =>
+                {
+                    Console.WriteLine($"Received result {e.Result.ToString()}");
+                    textResultEvents.Add(e);
+                };
 
                 recognizer.OnSessionEvent += (s, e) =>
                 {
@@ -62,10 +68,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         tcs.TrySetResult(true);
                     }
                 };
+                string error = string.Empty;
+                recognizer.RecognitionErrorRaised += (s, e) => { error = e.ToString(); };
 
                 await recognizer.StartContinuousRecognitionAsync();
                 await Task.WhenAny(tcs.Task, Task.Delay(timeout));
                 await recognizer.StopContinuousRecognitionAsync();
+
+                if (!string.IsNullOrEmpty(error))
+                {
+                    Assert.Fail($"Error received: {error}");
+                }
 
                 return textResultEvents;
             }
@@ -96,10 +109,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     listOfIntermediateResults.Add(receivedIntermediateResultEvents);
                     receivedIntermediateResultEvents = new List<SpeechRecognitionResultEventArgs>();
                 };
+                string error = string.Empty;
+                recognizer.RecognitionErrorRaised += (s, e) => { error = e.ToString(); };
 
                 await recognizer.StartContinuousRecognitionAsync();
                 await Task.WhenAny(tcs.Task, Task.Delay(timeout));
                 await recognizer.StopContinuousRecognitionAsync();
+
+                if (!string.IsNullOrEmpty(error))
+                {
+                    Assert.Fail($"Error received: {error}");
+                }
 
                 return listOfIntermediateResults;
             }

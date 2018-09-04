@@ -155,10 +155,11 @@ inline void __spx_do_trace_message(int level, const char* pszTitle, const char* 
 
 #ifdef __cplusplus
 #include <memory>
-#define __SPX_TRACE_SCOPE(t1, t2, x, y)                             \
-    __SPX_TRACE_INFO(t1, x);                                        \
-    auto f2 = [](int*) -> void { __SPX_TRACE_INFO(t2, y); };        \
-    std::unique_ptr<int, decltype(f2)> onExit((int*)1, f2)
+#define __SPX_TRACE_SCOPE(t1, t2, x, y)                                                      \
+    __SPX_TRACE_INFO(t1, x);                                                                 \
+    auto evaluateYInScopeInMacros = y;                                                       \
+    auto leavingScopePrinterInMacros = [&evaluateYInScopeInMacros](int*) -> void { __SPX_TRACE_INFO(t2, evaluateYInScopeInMacros); }; \
+    std::unique_ptr<int, decltype(leavingScopePrinterInMacros)> onExit((int*)1, leavingScopePrinterInMacros)
 #endif /* __cplusplus */
 
 

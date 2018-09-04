@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 using Microsoft.CognitiveServices.Speech.Translation;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic; 
 using System.Threading;
@@ -18,7 +19,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public TranslationTestsHelper (SpeechFactory factory)
         {
             this.factory = factory;
-            timeout = TimeSpan.FromSeconds(90);
+            timeout = TimeSpan.FromSeconds(200);
         }
 
         TranslationRecognizer CreateTranslationRecognizer(string path, string fromLanguage, List<string> toLanguages, string voice=null)
@@ -65,11 +66,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var textResultEvents = new List<EventArgs>();
                 var synthesisResultEvents = new List<EventArgs>();
 
-                recognizer.RecognitionErrorRaised += (s, e) =>
-                {
-                    Console.WriteLine($"Received error: {e.ToString()}");
-                };
-
+                string error = string.Empty;
+                recognizer.RecognitionErrorRaised += (s, e) => { error = e.ToString(); };
                 recognizer.FinalResultReceived += (s, e) =>
                 {
                     Console.WriteLine($"Received final result event: {e.ToString()}");
@@ -98,6 +96,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await Task.WhenAny(tcs.Task, Task.Delay(timeout));
                 await recognizer.StopContinuousRecognitionAsync();
 
+                if (!string.IsNullOrEmpty(error))
+                {
+                    Assert.Fail($"Error received: {error}");
+                }
+
                 receivedFinalResultEvents.Add(ResultType.Text, textResultEvents);
                 receivedFinalResultEvents.Add(ResultType.Synthesis, synthesisResultEvents);
                 return receivedFinalResultEvents;
@@ -116,23 +119,43 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 {
                     if (e.EventType.ToString().Equals("SessionStartedEvent"))
                     {
+                        Console.WriteLine($"Session started {e.ToString()}");
                         receivedIntermediateResultEvents = new List<TranslationTextResultEventArgs>();
                     }
                     if (e.EventType.ToString().Equals("SessionStoppedEvent"))
                     {
+                        Console.WriteLine($"Session stopped {e.ToString()}");
                         tcs.TrySetResult(true);
                     }
                 };
-                recognizer.IntermediateResultReceived += (s, e) => receivedIntermediateResultEvents.Add(e);
+                recognizer.IntermediateResultReceived += (s, e) =>
+                {
+                    Console.WriteLine($"Got intermediate result {e.ToString()}");
+                    receivedIntermediateResultEvents.Add(e);
+                };
+
                 recognizer.FinalResultReceived += (s, e) =>
                 {
+                    Console.WriteLine($"Got final result {e.ToString()}");
                     listOfIntermediateResults.Add(receivedIntermediateResultEvents);
                     receivedIntermediateResultEvents = new List<TranslationTextResultEventArgs>();
+                };
+
+                string error = string.Empty;
+                recognizer.RecognitionErrorRaised += (s, e) =>
+                {
+                    error = e.ToString();
+                    tcs.TrySetResult(false);
                 };
 
                 await recognizer.StartContinuousRecognitionAsync();
                 await Task.WhenAny(tcs.Task, Task.Delay(timeout));
                 await recognizer.StopContinuousRecognitionAsync();
+
+                if (!string.IsNullOrEmpty(error))
+                {
+                    Assert.Fail($"Error received: {error}");
+                }
 
                 return listOfIntermediateResults;
             }

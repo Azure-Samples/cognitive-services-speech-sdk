@@ -44,6 +44,7 @@ public:
     ResultType GetType() override;
     uint64_t GetOffset() const override { return m_offset; }
     uint64_t GetDuration() const override { return m_duration; }
+    void SetOffset(uint64_t offset) override { m_offset = offset; }
 
     // --- ISpxRecognitionResultInit ---
     void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration) override;

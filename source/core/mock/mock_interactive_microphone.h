@@ -31,9 +31,10 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioPump)
     SPX_INTERFACE_MAP_END()
 
+    void Init() override;
+
     // --- ISpxAudioPump (overrides) ---
     void StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor) override;
-
 
 private:
 

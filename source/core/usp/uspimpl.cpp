@@ -704,11 +704,6 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
         {
             result.failureReason += PAL::ToWString(failure->get<string>());
         }
-
-        if ((result.translationStatus == TranslationStatus::Success) && (result.translations.size() == 0))
-        {
-            PROTOCOL_VIOLATION("No Translations text block in the message, but TranslationStatus is success. Response text:", json.dump().c_str());
-        }
     }
 
     if (expectStatus && result.translationStatus != TranslationStatus::Success)
@@ -729,6 +724,11 @@ static TranslationResult RetrieveTranslationResult(const nlohmann::json& json, b
             }
 
             result.translations[PAL::ToWString(lang)] = PAL::ToWString(txt);
+        }
+
+        if (!result.translations.size())
+        {
+            PROTOCOL_VIOLATION("No Translations text block in the message. Response text:", json.dump().c_str());
         }
         return result;
     }

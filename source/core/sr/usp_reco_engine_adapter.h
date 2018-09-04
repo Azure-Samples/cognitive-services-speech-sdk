@@ -15,7 +15,6 @@
 #include "recognition_result.h"
 #include "service_helpers.h"
 #include "usp.h"
-#include "audio_buffer.h"
 
 #ifdef _MSC_VER
 #include <shared_mutex>
@@ -134,10 +133,8 @@ private:
     SPXHR GetRecoModeFromEndpoint(const std::wstring& endpoint, USP::RecognitionMode& mode);
     SPXHR GetRecoModeFromProperties(const std::shared_ptr<ISpxNamedProperties>& properties, USP::RecognitionMode& recoMode) const;
     USP::OutputFormat GetOutputFormat(const ISpxNamedProperties& properties) const;
-    std::wstring GetSessionId(const ISpxNamedProperties& properties) const;
 
-    void UspWriteAvailableChunks();
-
+    void UspWrite(const uint8_t* buffer, size_t byteToWrite);
     void UspSendSpeechContext();
     void UspSendMessage(const std::string& messagePath, const std::string &buffer);
     void UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size);
@@ -179,10 +176,11 @@ private:
 
     std::string GetSpeechContextJson(const std::string& dgiJson, const std::string& LanguageUnderstandingJson);
 
-    Reason ToReason(USP::RecognitionStatus uspRecognitionStatus);
     void FireFinalResultNow(const USP::SpeechPhraseMsg& message, const std::string& luisJson = "");
+
     void FireFinalResultLater(const USP::SpeechPhraseMsg& message);
     void FireFinalResultLater_WaitingForIntentComplete(const std::  string& luisJson = "");
+    Reason ToReason(USP::RecognitionStatus uspRecognitionStatus);
 
     bool IsInteractiveMode() const { return m_recoMode == USP::RecognitionMode::Interactive; }
 
@@ -266,29 +264,6 @@ private:
 
     bool m_expectIntentResponse = true;
     USP::SpeechPhraseMsg m_finalResultMessageToFireLater;
-
-    // Current speech context, lazily initialized on the first audio.
-    // TODO: Not clear why this cannot be passed to the reco adapter in the constructor...
-    std::string m_currentSpeechContext;
-
-    // Replay buffer with input audio.
-    // In case of connectivity problems the data is replayed
-    // from this buffer to guarantee exactly-once delivery of the final
-    // results to the user.
-    audio_buffer_ptr m_audioBuffer;
-
-    // Retry flag in case of errors.
-    // Currently we retry only in case of an interrupted connection
-    // (the service breaks the connection each 10 minutes or so).
-    // TODO: Reconnect for all cases (i.e. when the serivce is not availabe)
-    // will be done after the threading model cleanup.
-    int m_retry{ false };
-
-    // Flag indicating whether AdapterTurnStarting was fired. Used when reconnection happened in the middle of a turn.
-    int m_turnStartingSent{ false };
-
-    // Flag indicating whether AdapterTurnStarted was fired. Used when reconnection happened in the middle of a turn.
-    int m_turnStartedSent{ false };
 };
 
 

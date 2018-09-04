@@ -4,8 +4,10 @@
 //
 using Microsoft.CognitiveServices.Speech;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -13,6 +15,58 @@ namespace MicrosoftSpeechSDKSamples
 {
     public class Util
     {
+        internal sealed class RepeatedAudioInputStream : AudioInputStream
+        {
+            private readonly List<AudioInputStream> streamsWithEqualFormat;
+            private readonly AudioInputStreamFormat format;
+
+            /// <summary>
+            /// Creates an object.
+            /// </summary>
+            /// <param name="streamsWithEqualFormat">Streams with equal format</param>
+            public RepeatedAudioInputStream(List<AudioInputStream> streamsWithEqualFormat)
+            {
+                if (streamsWithEqualFormat == null || streamsWithEqualFormat.Count < 1)
+                {
+                    throw new ArgumentException("Please provide valid streams");
+                }
+
+                this.streamsWithEqualFormat = streamsWithEqualFormat;
+                this.format = streamsWithEqualFormat.First().GetFormat();
+            }
+
+            public override AudioInputStreamFormat GetFormat()
+            {
+                return this.format;
+            }
+
+            public override int Read(byte[] dataBuffer)
+            {
+                while (this.streamsWithEqualFormat.Count > 0)
+                {
+                    var result = this.streamsWithEqualFormat.First().Read(dataBuffer);
+                    if (result != 0)
+                    {
+                        return result;
+                    }
+                    this.streamsWithEqualFormat.First().Close();
+                    this.streamsWithEqualFormat.RemoveAt(0);
+                }
+                return 0;
+            }
+        }
+
+        public static AudioInputStream OpenWaveFile(string filename, int times)
+        {
+            var streams = new List<AudioInputStream>();
+            for (int i = 0; i < times; ++i)
+            {
+                streams.Add(OpenWaveFile(filename));
+            }
+
+            return new RepeatedAudioInputStream(streams);
+        }
+
         public static AudioInputStream OpenWaveFile(string filename)
         {
             BinaryReader reader = new BinaryReader(File.OpenRead(filename));

@@ -12,15 +12,16 @@
 #include <inttypes.h>
 #include <cstring>
 #include <chrono>
-#include <map>
 #include "service_helpers.h"
 #include "create_object_helpers.h"
 #include "exception.h"
+
 
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
+
 
 CSpxUspRecoEngineAdapter::CSpxUspRecoEngineAdapter() :
     m_resetUspAfterAudioByteCount(0),
@@ -118,6 +119,8 @@ void CSpxUspRecoEngineAdapter::SetFormat(WAVEFORMATEX* pformat)
 
         SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) site->AdapterCompletedSetFormatStop()", __FUNCTION__, this);
         InvokeOnSite([this](const SitePtr& p) { p->AdapterCompletedSetFormatStop(this); });
+
+        m_format.reset();
     }
     else
     {
@@ -141,39 +144,27 @@ void CSpxUspRecoEngineAdapter::ProcessAudio(AudioData_Type data, uint32_t size)
     }
     else if (size > 0 && ChangeState(AudioState::Ready, UspState::Idle, AudioState::Sending, UspState::WaitingForTurnStart))
     {
-        bool skipCallback = m_turnStartingSent;
-        m_turnStartingSent = true;
         writeLock.unlock(); // SendPreAudioMessages() will use USP to send speech config/context ... don't hold the lock
 
         SPX_DBG_TRACE_VERBOSE_IF(1, "%s: (0x%8x)->SendPreAudioMessages() ... size=%d", __FUNCTION__, this, size);
         SendPreAudioMessages();
-        m_audioBuffer->add(data, size);
-        UspWriteAvailableChunks();
+        UspWrite(data.get(), size);
 
-        if (skipCallback)
-        {
-            SPX_DBG_TRACE_VERBOSE("%s: Due to reconnect in the middle of a turn, skipping AdapterStartingTurn callback.", __FUNCTION__);
-        }
-        else
-        {
-            SPX_DBG_TRACE_VERBOSE("%s: site->AdapterStartingTurn()", __FUNCTION__);
-            InvokeOnSite([this](const SitePtr& p) { p->AdapterStartingTurn(this); });
-        }
+        SPX_DBG_TRACE_VERBOSE("%s: site->AdapterStartingTurn()", __FUNCTION__);
+        InvokeOnSite([this](const SitePtr& p) { p->AdapterStartingTurn(this); });
     }
     else if (size > 0 && IsState(AudioState::Sending))
     {
-        writeLock.unlock();
+        writeLock.unlock(); // UspWrite() will use USP to send data... don't hold the lock
 
         SPX_DBG_TRACE_VERBOSE_IF(1, "%s: (0x%8x) Sending Audio ... size=%d", __FUNCTION__, this, size);
-        m_audioBuffer->add(data, size);
-        UspWriteAvailableChunks();
+        UspWrite(data.get(), size);
     }
     else if (size == 0 && IsState(AudioState::Sending))
     {
-        writeLock.unlock();
+        writeLock.unlock(); // UspWriteFlush() will use USP to send data... don't hold the lock
 
         SPX_DBG_TRACE_VERBOSE_IF(1, "%s: (0x%8x) Flushing Audio ... size=0 USP-FLUSH", __FUNCTION__, this);
-        m_audioBuffer->add(nullptr, 0);
         UspWriteFlush();
     }
     else if (!IsState(AudioState::Sending))
@@ -208,10 +199,7 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
 
     // Create the usp client, which we'll configure and use to create the actual connection
     auto uspCallbacks = SpxCreateObjectWithSite<ISpxUspCallbacks>("CSpxUspCallbackWrapper", this);
-
-    // Currently we use a session id as a connection id to correlate logs on the server side with a particular user
-    // session, because currently there is a single connection for session at any point in time.
-    auto sessionId = GetSessionId(*properties);
+    auto sessionId = properties->GetStringValue(g_sessionId);
     USP::Client client(uspCallbacks, USP::EndpointType::Speech, sessionId);
 
     // Set up the connection properties, and create the connection
@@ -467,12 +455,6 @@ USP::OutputFormat CSpxUspRecoEngineAdapter::GetOutputFormat(const ISpxNamedPrope
     return USP::OutputFormat::Simple; // Make compiler happy.
 }
 
-std::wstring CSpxUspRecoEngineAdapter::GetSessionId(const ISpxNamedProperties& properties) const
-{
-    // Session id must be a valid GUID without dashes.
-    return properties.GetStringValue(g_sessionId);
-}
-
 SPXHR CSpxUspRecoEngineAdapter::GetRecoModeFromEndpoint(const std::wstring& endpoint, USP::RecognitionMode& recoMode)
 {
     SPXHR hr = SPX_NOERROR;
@@ -517,12 +499,6 @@ void CSpxUspRecoEngineAdapter::UspSendSpeechContext()
     {
         // Since it's not empty, we'll send it (empty means we don't have either dgi or intent payload)
         std::string messagePath = "speech.context";
-
-        {
-            WriteLock_Type writeLock(m_stateMutex);
-            m_currentSpeechContext = speechContext;
-        }
-
         UspSendMessage(messagePath, speechContext);
     }
 }
@@ -579,21 +555,17 @@ void CSpxUspRecoEngineAdapter::UspWriteFormat(WAVEFORMATEX* pformat)
     ptr = FormatBufferWriteChars(ptr, "data", cbChunkType);
     ptr = FormatBufferWriteNumber(ptr, cbDataChunk);
 
-    // Now that we've prepared the header/buffer, send it along to Truman/Newman/Skyman via UspWriteActual
+    // Now that we've prepared the header/buffer, send it along to Truman/Newman/Skyman via UspWrite
     SPX_DBG_ASSERT(cbHeader == size_t(ptr - buffer.get()));
-    UspWriteActual(buffer.get(), cbHeader);
+    UspWrite(buffer.get(), cbHeader);
 }
 
-void CSpxUspRecoEngineAdapter::UspWriteAvailableChunks()
+void CSpxUspRecoEngineAdapter::UspWrite(const uint8_t* buffer, size_t byteToWrite)
 {
-    // Currently, this has to be protected by lock, in order not to contend with reconnection
-    WriteLock_Type writeLock(m_stateMutex);
-    data_chunk_ptr chunk;
-    while ((chunk = m_audioBuffer->get_next()) != nullptr)
-    {
-        m_uspAudioByteCount += chunk->size;
-        UspWriteActual(chunk->data, chunk->size);
-    }
+    SPX_DBG_TRACE_VERBOSE_IF(byteToWrite == 0, "%s(..., %d)", __FUNCTION__, byteToWrite);
+
+    m_uspAudioByteCount += byteToWrite;
+    UspWriteActual(buffer, byteToWrite);
 }
 
 void CSpxUspRecoEngineAdapter::UspWriteActual(const uint8_t* buffer, size_t byteToWrite)
@@ -608,14 +580,10 @@ void CSpxUspRecoEngineAdapter::UspWriteActual(const uint8_t* buffer, size_t byte
 
 void CSpxUspRecoEngineAdapter::UspWriteFlush()
 {
-    WriteLock_Type writeLock(m_stateMutex);
     // We should only ever be asked to Flush when we're in a valid state ... 
     SPX_DBG_ASSERT(m_uspConnection != nullptr || IsState(UspState::Terminating) || IsState(UspState::Zombie));
     if (!IsState(UspState::Terminating) && !IsState(UspState::Zombie) && m_uspConnection != nullptr)
     {
-        data_chunk_ptr chunk;
-        while ((chunk = m_audioBuffer->get_next()) != nullptr)
-            UspWriteActual(chunk->data, chunk->size);
         m_uspConnection->FlushAudio();
     }
 }
@@ -654,6 +622,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechEndDetected(const USP::SpeechEndDetectedM
 
     WriteLock_Type writeLock(m_stateMutex);
     auto requestMute = ChangeState(AudioState::Sending, AudioState::Mute);
+
     if (IsBadState())
     {
         SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace message
@@ -726,7 +695,6 @@ void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& me
     bool sendIntermediate = false;
 
     WriteLock_Type writeLock(m_stateMutex);
-    m_retry = true;
     if (IsBadState())
     {
         SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace message
@@ -775,8 +743,6 @@ void CSpxUspRecoEngineAdapter::OnSpeechPhrase(const USP::SpeechPhraseMsg& messag
     SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x", __FUNCTION__, this);
 
     WriteLock_Type writeLock(m_stateMutex);
-    m_audioBuffer->discard_till(message.offset + message.duration);
-    m_retry = true;
     if (IsBadState())
     {
         SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace message
@@ -899,8 +865,6 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
 #endif
 
     WriteLock_Type writeLock(m_stateMutex);
-    m_audioBuffer->discard_till(message.offset + message.duration);
-    m_retry = true;
     if (IsBadState())
     {
         SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace warning
@@ -917,7 +881,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
         {
             // Create the result
             auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-            auto result = factory->CreateFinalResult(ResultType::TranslationText, nullptr, ToReason(message.recognitionStatus), message.text.c_str(),  message.offset, message.duration);
+            auto result = factory->CreateFinalResult(ResultType::TranslationText, nullptr, ToReason(message.recognitionStatus), message.text.c_str(), message.offset, message.duration);
 
             auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
             namedProperties->SetStringValue(g_RESULT_Json, message.json.c_str());
@@ -1008,20 +972,11 @@ void CSpxUspRecoEngineAdapter::OnTurnStart(const USP::TurnStartMsg& message)
     }
     else if (ChangeState(UspState::WaitingForTurnStart, UspState::WaitingForPhrase))
     {
-        bool skipCallback = m_turnStartedSent;
-        m_turnStartedSent = true;
         writeLock.unlock(); // calls to site shouldn't hold locks
 
-        if(skipCallback)
-        {
-            SPX_DBG_TRACE_VERBOSE("%s: Due to reconnect in the middle of a turn, skipping this AdapterStartedTurn event.", __FUNCTION__);
-        }
-        else
-        {
-            SPX_DBG_TRACE_VERBOSE("%s: site->AdapterStartedTurn()", __FUNCTION__);
-            SPX_DBG_ASSERT(GetSite());
-            InvokeOnSite([this, &message](const SitePtr& p) { p->AdapterStartedTurn(this, message.contextServiceTag); });
-        }
+        SPX_DBG_TRACE_VERBOSE("%s: site->AdapterStartedTurn()", __FUNCTION__);
+        SPX_DBG_ASSERT(GetSite());
+        InvokeOnSite([this, &message](const SitePtr& p) { p->AdapterStartedTurn(this, message.contextServiceTag); });
     }
     else
     {
@@ -1037,10 +992,8 @@ void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
     UNUSED(message);
 
     WriteLock_Type writeLock(m_stateMutex);
-    m_turnStartedSent = false;
-    m_turnStartingSent = false;
-    m_audioBuffer->new_turn();
     auto adapterTurnStopped = false;
+
     auto prepareReady = !m_singleShot &&
         (ChangeState(AudioState::Sending, AudioState::Ready) ||
          ChangeState(AudioState::Mute, AudioState::Ready));
@@ -1111,96 +1064,27 @@ void CSpxUspRecoEngineAdapter::OnTurnEnd(const USP::TurnEndMsg& message)
     }
 }
 
-void CSpxUspRecoEngineAdapter::OnError(bool transport, const std::string& error)
+void CSpxUspRecoEngineAdapter::OnError(bool isTransport, const std::string& error)
 {
-    try
+    SPX_DBG_TRACE_VERBOSE("Response: On Error: %s.\n", error.c_str());
+
+    WriteLock_Type writeLock(m_stateMutex);
+    if (IsBadState())
     {
-        SPX_DBG_TRACE_VERBOSE("Response: On Error: %s.\n", error.c_str());
-
-        WriteLock_Type writeLock(m_stateMutex);
-        if (IsBadState())
-        {
-            SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace message
-            SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
-        }
-        else if (ShouldResetAfterError() && ChangeState(AudioState::Ready, UspState::Idle))
-        {
-            writeLock.unlock(); // calls to site shouldn't hold locks
-
-            SPX_DBG_TRACE_VERBOSE("%s: ResetAfterError!! ... error='%s'", __FUNCTION__, error.c_str());
-
-            InvokeOnSite([this, error](const SitePtr& p) { p->Error(this, error); });
-
-            ResetAfterError();
-        }
-        // We reconnect only in case of transport errors and if there has already been at least one correct recognition.
-        // We also do that only in continuous mode, because in intractive turns are short and
-        // the connection is forcibly reset at turn ends.
-        else if (m_retry && transport && !IsInteractiveMode())
-        {
-            SPX_DBG_TRACE_VERBOSE("%s: Error received, trying to reconnect...", __FUNCTION__, error.c_str());
-
-            if (IsState(UspState::WaitingForTurnEnd))
-            {
-                SPX_DBG_TRACE_VERBOSE("%s: Forcibly communicating TurnEnd.", __FUNCTION__);
-                writeLock.unlock();
-                OnTurnEnd(USP::TurnEndMsg());
-                writeLock.lock();
-            }
-
-            // Perform actual reconnect.
-            ChangeState(AudioState::Ready, UspState::Idle);
-
-            UspTerminate();
-            UspInitialize();
-            m_audioBuffer->new_turn();
-
-            // There could be still data inside the buffer, lets send it to the server.
-            // Currently we do this under lock in order not to have contentions with incoming pumping thread in ProcessAudio.
-            // TODO: This should be moved to a single place, we should not allow several threads into the usp_reco_engine_adapter.
-            while (m_audioBuffer->has_next())
-            {
-                auto chunk = m_audioBuffer->get_next();
-                if (chunk->size > 0 && ChangeState(AudioState::Ready, UspState::Idle, AudioState::Sending, UspState::WaitingForTurnStart))
-                {
-                    if (!m_currentSpeechContext.empty())
-                    {
-                        UspSendMessage("speech.context", m_currentSpeechContext);
-                    }
-                    UspWriteFormat(m_format.get());
-                    UspWriteActual(chunk->data, chunk->size);
-                }
-                else if (chunk->size > 0 && IsState(AudioState::Sending))
-                {
-                    UspWriteActual(chunk->data, chunk->size);
-                }
-                else if (chunk->size == 0 && IsState(AudioState::Sending) && m_uspConnection != nullptr)
-                {
-                    m_uspConnection->FlushAudio();
-                }
-            }
-
-            // Currently we only retry once. If we recovered, the flag is reset,
-            // if the error persists, next send will result in an error that gets propagated to the user.
-            m_retry = false;
-        }
-        else if (ChangeState(UspState::Error))
-        {
-            writeLock.unlock(); // calls to site shouldn't hold locks
-
-            SPX_DBG_TRACE_VERBOSE("%s: site->Error() ... error='%s'", __FUNCTION__, error.c_str());
-            InvokeOnSite([this, error](const SitePtr& p) { p->Error(this, error); });
-        }
-        else
-        {
-            SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace message
-            SPX_DBG_TRACE_WARNING("%s: (0x%8x) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, this, m_audioState, m_uspState);
-        }
+        SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace message
+        SPX_DBG_TRACE_VERBOSE("%s: (0x%8x) IGNORING... (audioState/uspState=%d/%d) %s", __FUNCTION__, this, m_audioState, m_uspState, IsState(UspState::Terminating) ? "(USP-TERMINATING)" : "********** USP-UNEXPECTED !!!!!!");
     }
-    catch (...)
+    else if (ChangeState(UspState::Error))
     {
-        ChangeState(UspState::Error);
-        InvokeOnSite([this, error](const SitePtr& p) { p->Error(this, error); });
+        writeLock.unlock(); // calls to site shouldn't hold locks
+
+        SPX_DBG_TRACE_VERBOSE("%s: site->Error() ... error='%s'", __FUNCTION__, error.c_str());
+        InvokeOnSite([this, error, isTransport](const SitePtr& p) { p->Error(this,  std::make_shared<SpxRecoEngineAdapterError>(isTransport, error)); });
+    }
+    else
+    {
+       SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for trace message
+       SPX_DBG_TRACE_WARNING("%s: (0x%8x) UNEXPECTED USP State transition ... (audioState/uspState=%d/%d)", __FUNCTION__, this, m_audioState, m_uspState);
     }
 }
 
@@ -1403,10 +1287,10 @@ Reason CSpxUspRecoEngineAdapter::ToReason(USP::RecognitionStatus uspRecognitionS
 {
     const static std::map<USP::RecognitionStatus, Reason> reasonMap = {
         { USP::RecognitionStatus::Success, Reason::Recognized },
-        { USP::RecognitionStatus::NoMatch, Reason::NoMatch },
-        { USP::RecognitionStatus::InitialSilenceTimeout, Reason::InitialSilenceTimeout },
-        { USP::RecognitionStatus::InitialBabbleTimeout, Reason::InitialBabbleTimeout },
-        { USP::RecognitionStatus::Error, Reason::Canceled },
+    { USP::RecognitionStatus::NoMatch, Reason::NoMatch },
+    { USP::RecognitionStatus::InitialSilenceTimeout, Reason::InitialSilenceTimeout },
+    { USP::RecognitionStatus::InitialBabbleTimeout, Reason::InitialBabbleTimeout },
+    { USP::RecognitionStatus::Error, Reason::Canceled },
     };
 
     auto item = reasonMap.find(uspRecognitionStatus);
@@ -1418,7 +1302,6 @@ Reason CSpxUspRecoEngineAdapter::ToReason(USP::RecognitionStatus uspRecognitionS
     }
     return item->second;
 }
-
 
 void CSpxUspRecoEngineAdapter::FireFinalResultLater(const USP::SpeechPhraseMsg& message)
 {
@@ -1494,7 +1377,6 @@ void CSpxUspRecoEngineAdapter::PrepareFirstAudioReadyState(WAVEFORMATEX* format)
     auto sizeOfFormat = sizeof(WAVEFORMATEX) + format->cbSize;
     m_format = SpxAllocWAVEFORMATEX(sizeOfFormat);
     memcpy(m_format.get(), format, sizeOfFormat);
-    m_audioBuffer = std::make_shared<pcm_audio_buffer>(*m_format);
 
     m_resetUspAfterAudioByteCount = m_format->nAvgBytesPerSec * m_resetUspAfterAudioSeconds;
     if (ShouldResetBeforeFirstAudio())
@@ -1508,6 +1390,7 @@ void CSpxUspRecoEngineAdapter::PrepareFirstAudioReadyState(WAVEFORMATEX* format)
 void CSpxUspRecoEngineAdapter::PrepareAudioReadyState()
 {
     SPX_DBG_ASSERT(IsState(AudioState::Ready, UspState::Idle));
+
     EnsureUspInit();
 }
 

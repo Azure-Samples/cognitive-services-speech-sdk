@@ -26,6 +26,10 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
+constexpr std::chrono::seconds CSpxAudioStreamSession::MaxBufferedBeforeOverflow;
+constexpr std::chrono::milliseconds CSpxAudioStreamSession::MaxBufferedBeforeSimulateRealtime;
+constexpr std::chrono::seconds CSpxAudioStreamSession::ShutdownTimeout;
+
 CSpxAudioStreamSession::CSpxAudioStreamSession() :
     m_sessionId(PAL::CreateGuidWithoutDashes()),
     m_recoKind(RecognitionKind::Idle),
@@ -34,7 +38,6 @@ CSpxAudioStreamSession::CSpxAudioStreamSession() :
     m_expectAdapterStoppedTurn(false),
     m_adapterAudioMuted(false),
     m_turnEndStopKind(RecognitionKind::Idle),
-    m_sizeProcessAudioLater(0),
     m_recoAsyncWaiting(false)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
@@ -46,7 +49,6 @@ CSpxAudioStreamSession::~CSpxAudioStreamSession()
     SPX_DBG_ASSERT(m_kwsAdapter == nullptr);
     SPX_DBG_ASSERT(m_recoAdapter == nullptr);
     SPX_DBG_ASSERT(m_luAdapter == nullptr);
-    SPX_DBG_ASSERT(m_resetRecoAdapter == nullptr);
 }
 
 void CSpxAudioStreamSession::Init()
@@ -94,6 +96,7 @@ void CSpxAudioStreamSession::Term()
         writeLock.lock();
 
     m_audioProcessor = nullptr;
+    m_audioBuffer = nullptr;
 }
 
 void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
@@ -110,7 +113,7 @@ void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
     audioFilePump->Open(pszFileName);
 
     // Limit the maximal speed to 2 times of real-time streaming
-    audioFilePump->SetRealTimePercentage(50);
+    audioFilePump->SetRealTimePercentage(SimulateRealtimePercentage);
 
     // Defer calling InitRecoEngineAdapter() or InitKwsEngineAdapter() until later ...
 }
@@ -163,8 +166,6 @@ void CSpxAudioStreamSession::SetFormat(WAVEFORMATEX* pformat)
     {
         // Our stop pump request has been satisfied... Let's wait for the adapter to finish...
         SPX_DBG_TRACE_VERBOSE("%s: Now WaitForAdapterCompletedSetFormatStop (from StoppingPump)...", __FUNCTION__);
-        ProcessAudioDataLater_Clear();
-
         SPX_DBG_ASSERT(readLock.owns_lock()); // Keep the lock to call InformAdapterSetFormatStopping()...
         InformAdapterSetFormatStopping(SessionState::StoppingPump);
     }
@@ -172,8 +173,6 @@ void CSpxAudioStreamSession::SetFormat(WAVEFORMATEX* pformat)
     {
         // The pump stopped itself... That's possible when WAV files reach EOS. Let's wait for the adapter to finish...
         SPX_DBG_TRACE_VERBOSE("%s: Now WaitForAdapterCompletedSetFormatStop (from ProcessingAudio) ...", __FUNCTION__);
-        ProcessAudioDataLater_Clear();
-
         SPX_DBG_ASSERT(readLock.owns_lock()); // Keep the lock to call InformAdapterSetFormatStopping()...
         InformAdapterSetFormatStopping(SessionState::ProcessingAudio);
     }
@@ -185,33 +184,117 @@ void CSpxAudioStreamSession::SetFormat(WAVEFORMATEX* pformat)
 
 void CSpxAudioStreamSession::ProcessAudio(AudioData_Type data, uint32_t size)
 {
-    // NOTE: Don't hold the m_combinedAdapterAndStateMutex here...
+    static_assert(MaxBufferedBeforeSimulateRealtime < MaxBufferedBeforeOverflow,
+        "Buffer size triggering real time data consumption cannot be bigger than overflow limit");
+
+    bool shouldSlowdown = false;
+    bool overflowHappened = false;
+    {
+        WriteLock_Type writeLock(m_combinedAdapterAndStateMutex);
+        if (!m_audioBuffer)
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: Session has been shutdown while processing was in flight, buffer has already been destroyed", __FUNCTION__);
+            return;
+        }
+
+        auto buffered = milliseconds(m_audioBuffer->StashedSizeInBytes() * 1000 / m_format->nAvgBytesPerSec);
+        shouldSlowdown = buffered > MaxBufferedBeforeSimulateRealtime;
+        overflowHappened = buffered > MaxBufferedBeforeOverflow;
+        if (overflowHappened)
+        {
+            // drop everything from the buffer
+            SPX_DBG_TRACE_VERBOSE("%s: Overflow happened, dropping the buffer and resetting the adapter, stashed size %d bytes.", __FUNCTION__, m_audioBuffer->StashedSizeInBytes());
+            m_audioBuffer->Drop();
+        }
+    }
+
+    if (overflowHappened)
+    {
+        // In case of overflow we send the error and reset the adapter
+        Error(m_recoAdapter.get(), std::make_shared<SpxRecoEngineAdapterError>(false, "Service timeout. Resetting the buffer"));
+        StartResetEngineAdapter();
+        return;
+    }
+
+    if (shouldSlowdown)
+    {
+        // Sleep to slow down pulling.
+        auto sleepPeriod = std::chrono::milliseconds(size * 1000 / m_format->nAvgBytesPerSec * SimulateRealtimePercentage / 100);
+        SPX_DBG_TRACE_VERBOSE("%s - Stashing ... sleeping for %d ms", __FUNCTION__, sleepPeriod.count());
+        std::this_thread::sleep_for(sleepPeriod);
+    }
+
+    {
+        // Add the chunk to the buffer.
+        WriteLock_Type writeLock(m_combinedAdapterAndStateMutex);
+        if (!m_audioBuffer || !m_audioProcessor)
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: Session has been shutdown while processing was in flight, buffer/processor has already been destroyed", __FUNCTION__);
+            return;
+        }
+
+        m_audioBuffer->Add(data, size);
+    }
+
+    while (ProcessNextAudio())
+    {
+    }
+}
+
+bool CSpxAudioStreamSession::ProcessNextAudio()
+{
     ReadLock_Type readStateLock(m_stateMutex);
     auto sessionState = m_sessionState;
     readStateLock.unlock();
 
     if (sessionState == SessionState::ProcessingAudio && !m_adapterAudioMuted)
     {
-        SPX_DBG_TRACE_VERBOSE_IF(0, "%s - size=%d", __FUNCTION__, size);
+        AudioBufferPtr buffer;
+        std::shared_ptr<ISpxAudioProcessor> processor;
+        bool isKwsProcessor = false;
 
-        ProcessAudioDataLater_Complete();
-        ProcessAudioDataNow(data, size);
+        {
+            ReadLock_Type readLock(m_combinedAdapterAndStateMutex);
+            buffer = m_audioBuffer;
+            processor = m_audioProcessor;
+            isKwsProcessor = m_isKwsProcessor;
+        }
+
+        if(!buffer || !processor)
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: Session has been shutdown while processing was in flight, buffer/processor has already been destroyed", __FUNCTION__);
+            return false;
+        }
+
+        auto item = buffer->GetNext();
+        if (item)
+        {
+            if (isKwsProcessor)
+            {
+                // In KWS we always discard what we give out, because currently
+                // there is no ACKING logic from KWS adapter, this will change with unidec in place.
+                buffer->DiscardBytes(item->size);
+            }
+
+            processor->ProcessAudio(item->data, (uint32_t)item->size);
+            return true;
+        }
     }
     else if (sessionState == SessionState::HotSwapPaused || m_adapterAudioMuted)
     {
-        // Don't process this data, if we're paused...
-        SPX_DBG_TRACE_VERBOSE_IF(1, "%s - size=%d -- Saving for later ... sessionState %d; adapterRequestedIdle %s", __FUNCTION__, size, sessionState, m_adapterAudioMuted ? "true" : "false");
-        ProcessAudioDataLater(data, size);
+        // Don't process this data, if we're paused, it has been buffered...
+        SPX_DBG_TRACE_VERBOSE("%s: Saving for later ... sessionState %d; adapterRequestedIdle %s", __FUNCTION__, sessionState, m_adapterAudioMuted ? "true" : "false");
     }
     else if (sessionState == SessionState::StoppingPump)
     {
-        // Don't process this data if we're actively stopping...
-        SPX_DBG_TRACE_VERBOSE_IF(1, "%s - size=%d -- Ignoring (state == StoppingPump)", __FUNCTION__, size);
+        // Don't process this data if we're actively stopping, it is buffered and
+        // we will process it if the source is resilient...
     }
     else
     {
         SPX_TRACE_WARNING("%s: Unexpected SessionState: recoKind %d; sessionState %d", __FUNCTION__, m_recoKind, sessionState);
     }
+    return false;
 }
 
 const std::wstring& CSpxAudioStreamSession::GetSessionId() const
@@ -237,10 +320,10 @@ void CSpxAudioStreamSession::RemoveRecognizer(ISpxRecognizer* recognizer)
 void CSpxAudioStreamSession::WaitForIdle()
 {
     // TODO: When KWS tests are in place,
-    // split m_cv into two varialbes, one depending on state, another - on actual result.
+    // split m_cv into two variables, one depending on state, another - on actual result.
     std::unique_lock<std::mutex> lock(m_mutex);
     SPX_DBG_TRACE_VERBOSE("%s: Waiting for Idle", __FUNCTION__);
-    if (!m_cv.wait_for(lock, m_shutdownTimeout, [&] { return IsState(SessionState::Idle); }))
+    if (!m_cv.wait_for(lock, ShutdownTimeout, [&] { return IsState(SessionState::Idle); }))
     {
         SPX_DBG_TRACE_WARNING("%s: Timeout happened during wait for Idle", __FUNCTION__);
     }
@@ -353,11 +436,17 @@ void CSpxAudioStreamSession::StartRecognizing(RecognitionKind startKind, std::sh
 {
     // Since we're checking the RecoKind and SessionState multiple times, take a read lock
     ReadLock_Type readLock(m_combinedAdapterAndStateMutex);
-
     if (ChangeState(RecognitionKind::Idle, SessionState::Idle, startKind, SessionState::WaitForPumpSetFormatStart))
     {
         // We're starting from idle!! Let's get the Audio Pump running
         SPX_DBG_TRACE_VERBOSE("%s: Now WaitForPumpSetFormatStart ...", __FUNCTION__);
+
+        // Make sure we drop left overs of the previous recognition
+        // if the source does not need reliability guarantees.
+        if (m_audioBuffer && !m_isReliableDelivery)
+        {
+            m_audioBuffer->Drop();
+        }
 
         readLock.unlock(); // StartAudioPump() will take a write lock, so we need to clear our read lock
         StartAudioPump(startKind, model);
@@ -376,7 +465,6 @@ void CSpxAudioStreamSession::StartRecognizing(RecognitionKind startKind, std::sh
         SPX_DBG_TRACE_WARNING("%s: Resetting adapter via HotSwap (ProcessingAudio -> HotSwapPaused) ... attempting to stay in continuous mode!!! ...", __FUNCTION__);
 
         readLock.unlock(); // HotSwap* will take a write lock, so we need to clear our read lock
-        FireSessionStoppedEvent();
         HotSwapAdaptersWhilePaused(startKind, model);
 
         SPX_DBG_TRACE_WARNING("%s: Simulating GetSite()->AdapterCompletedSetFormatStop() ...", __FUNCTION__);
@@ -424,6 +512,7 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
         // So ... Let's clear our keyword (since we're not spotting, we don't need it anymore)
         SPX_DBG_TRACE_VERBOSE("%s: Changing keyword to '' ... nothing else...", __FUNCTION__);
         m_kwsModel.reset();
+        readLock.unlock();
 
         // And we'll stop the pump
         SPX_DBG_TRACE_VERBOSE("%s: Now StoppingPump ...", __FUNCTION__);
@@ -451,6 +540,8 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
     }
     else if (ChangeState(SessionState::ProcessingAudio, SessionState::StoppingPump))
     {
+        readLock.unlock();
+
         // We've been asked to stop whatever it is we're doing, while we're actively processing audio ...
         // So ... Let's stop the pump
         SPX_DBG_TRACE_VERBOSE("%s: Now StoppingPump ...", __FUNCTION__);
@@ -624,7 +715,9 @@ void CSpxAudioStreamSession::KeywordDetected(ISpxKwsEngineAdapter* adapter, uint
     {
         // We've been told a keyword was recognized... Stash the audio, and start KwsSingleShot recognition!!
         SPX_DBG_TRACE_VERBOSE("%s: Now KwsSingleShot/Paused ...", __FUNCTION__);
-        ProcessAudioDataLater(audioData, size);
+
+        // Currently not under lock, because this is changed only in HotSwapPaused state (by a single thread at a time).
+        m_spottedKeyword = std::make_shared<DataChunk>(audioData, size);
         HotSwapToKwsSingleShotWhilePaused();
     }
 }
@@ -683,6 +776,11 @@ void CSpxAudioStreamSession::AdapterStoppedTurn(ISpxRecoEngineAdapter* /* adapte
 
     // Since we're checking the SessionState, take a read-lock
     ReadLock_Type readLock(m_combinedAdapterAndStateMutex);
+    if (m_audioBuffer)
+    {
+        m_audioBuffer->NewTurn();
+    }
+
     if (IsState(SessionState::WaitForAdapterCompletedSetFormatStop))
     {
         // We are waiting for the adapter to confirm it got the SetFormat(nullptr), but we haven't sent the request yet...
@@ -708,12 +806,18 @@ void CSpxAudioStreamSession::AdapterDetectedSpeechStart(ISpxRecoEngineAdapter* a
 {
     UNUSED(adapter);
 
+    auto buffer = m_audioBuffer;
+    offset = buffer ? buffer->ToAbsolute(offset) : offset;
+
     FireSpeechStartDetectedEvent(offset);
 }
 
 void CSpxAudioStreamSession::AdapterDetectedSpeechEnd(ISpxRecoEngineAdapter* adapter, uint64_t offset)
 {
     UNUSED(adapter);
+
+    auto buffer = m_audioBuffer;
+    offset = buffer ? buffer->ToAbsolute(offset) : offset;
 
     FireSpeechEndDetectedEvent(offset);
 }
@@ -801,14 +905,25 @@ void CSpxAudioStreamSession::FireAdapterResult_Intermediate(ISpxRecoEngineAdapte
     UNUSED(offset);
     SPX_DBG_ASSERT(!IsState(SessionState::WaitForPumpSetFormatStart));
 
+    auto buffer = m_audioBuffer;
+    offset = buffer ? buffer->ToAbsolute(offset) : offset;
+    result->SetOffset(offset);
+
     FireResultEvent(GetSessionId(), result);
 }
 
 void CSpxAudioStreamSession::FireAdapterResult_FinalResult(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result)
 {
     UNUSED(adapter);
-    UNUSED(offset);
     SPX_DBG_ASSERT_WITH_MESSAGE(!IsState(SessionState::WaitForPumpSetFormatStart), "ERROR! FireAdapterResult_FinalResult was called with SessionState==WaitForPumpSetFormatStart");
+
+    auto buffer = m_audioBuffer;
+    m_shouldRetry = true;
+    if (buffer)
+    {
+        result->SetOffset(buffer->ToAbsolute(offset));
+        buffer->DiscardTill(offset + result->GetDuration());
+    }
 
     // Only try and process the result with the LU Adapter if we have one (we won't have one, if nobody every added an IntentTrigger)
     if (m_luAdapter != nullptr)
@@ -880,9 +995,20 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
 {
     UNUSED(adapter);
 
-    auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
-    auto error = factory->CreateErrorResult(PAL::ToWString(payload).c_str(), ResultType::Speech);
-    WaitForRecognition_Complete(error);
+    // If it is a transport error and the connection was successfull before, we retry in continuous mode.
+    // Otherwise report the error to the user, so that he can recreate a recognizer.
+    if (IsKind(RecognitionKind::Continuous) && payload->IsTransportError() && m_shouldRetry)
+    {
+        // Currently no back-off, retrying only once.
+        m_shouldRetry = false;
+        StartResetEngineAdapter();
+    }
+    else
+    {
+        auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
+        auto error = factory->CreateErrorResult(PAL::ToWString(payload->Info()).c_str(), ResultType::Speech);
+        WaitForRecognition_Complete(error);
+    }
 }
 
 std::shared_ptr<ISpxSession> CSpxAudioStreamSession::GetDefaultSession()
@@ -914,21 +1040,6 @@ std::shared_ptr<ISpxRecoEngineAdapter> CSpxAudioStreamSession::EnsureInitRecoEng
         EnsureIntentRegionSet();
     }
     return m_recoAdapter;
-}
-
-void CSpxAudioStreamSession::EnsureResetRecoEngineAdapter()
-{
-    if (m_resetRecoAdapter != nullptr && m_resetRecoAdapter == m_recoAdapter)
-    {
-        // Let's term and clear our reco adapter...
-        SPX_DBG_TRACE_VERBOSE("%s: resetting reco adapter (0x%8x)...", __FUNCTION__, m_resetRecoAdapter.get());
-        SpxTermAndClear(m_resetRecoAdapter);
-        m_expectAdapterStartedTurn = false;
-        m_expectAdapterStoppedTurn = false;
-        m_adapterAudioMuted = false;
-
-        m_recoAdapter = nullptr; // Already termed (see above)
-    }
 }
 
 void CSpxAudioStreamSession::InitRecoEngineAdapter()
@@ -988,11 +1099,13 @@ void CSpxAudioStreamSession::EnsureResetEngineEngineAdapterComplete()
         // Let's term and clear our reco adapter...
         SPX_DBG_TRACE_VERBOSE("%s: resetting reco adapter (0x%8x)...", __FUNCTION__, m_resetRecoAdapter.get());
         SpxTermAndClear(m_resetRecoAdapter);
+
         m_expectAdapterStartedTurn = false;
         m_expectAdapterStoppedTurn = false;
         m_adapterAudioMuted = false;
 
         m_recoAdapter = nullptr; // Already termed (see above)
+        m_resetRecoAdapter = nullptr;
     }
 }
 
@@ -1137,89 +1250,6 @@ void CSpxAudioStreamSession::InitKwsEngineAdapter(std::shared_ptr<ISpxKwsModel> 
     SPX_IFTRUE_THROW_HR(m_kwsAdapter == nullptr, SPXERR_NOT_FOUND);
 }
 
-void CSpxAudioStreamSession::ProcessAudioDataNow(AudioData_Type data, uint32_t size)
-{
-    ReadLock_Type readLock(m_combinedAdapterAndStateMutex);
-    auto processor = m_audioProcessor;
-    readLock.unlock();
-    if(processor)
-        m_audioProcessor->ProcessAudio(data, size);
-}
-
-void CSpxAudioStreamSession::ProcessAudioDataLater(AudioData_Type audio, uint32_t size)
-{
-    std::unique_lock<std::mutex> lock(m_processAudioLaterMutex);
-
-    m_processAudioLater.emplace(audio, size);
-    m_sizeProcessAudioLater += size;
-
-    SPX_DBG_TRACE_VERBOSE("%s - Stashed audio size=%d; item# %d; totalSize now %d", __FUNCTION__, size, m_processAudioLater.size(), m_sizeProcessAudioLater);
-
-    auto millisecondsProcessLater = m_sizeProcessAudioLater * 1000 / m_format->nAvgBytesPerSec;
-    auto slowDown = m_processAudioLater.size() > 1 && millisecondsProcessLater >= (uint64_t)m_maxMsStashedBeforeSimulateRealtime;
-    if (slowDown)
-    {
-        auto milliseconds = size * 1000 / m_format->nAvgBytesPerSec * m_simulateRealtimePercentage / 100;
-        SPX_DBG_TRACE_VERBOSE("%s - Stashing ... sleeping for %d ms", __FUNCTION__, milliseconds);
-        std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
-    }
-
-    auto audioOverflow = m_processAudioLater.size() > 1 && millisecondsProcessLater >= (uint64_t)m_maxMsStashedBeforeOverflow;
-    if (audioOverflow)
-    {
-        lock.unlock();
-        ProcessAudioDataLater_Overflow();
-    }
-}
-
-void CSpxAudioStreamSession::ProcessAudioDataLater_Complete()
-{
-    if (!m_processAudioLater.empty())
-    {
-        std::unique_lock<std::mutex> lock(m_processAudioLaterMutex);
-        SPX_DBG_TRACE_VERBOSE_IF(!m_processAudioLater.empty(), "%s - Stash not empty!! PROCESSING ... items=%d; totalSize=%d", __FUNCTION__, m_processAudioLater.size(), m_sizeProcessAudioLater);
-
-        decltype(m_processAudioLater) audioData;
-        audioData.swap(m_processAudioLater);
-
-        auto itemsProcessed = 0;
-        while (!audioData.empty())
-        {
-            auto item = audioData.front();
-            audioData.pop();
-
-            auto audio = item.first;
-            auto size = item.second;
-            m_sizeProcessAudioLater -= size;
-
-            ++itemsProcessed;
-            SPX_DBG_TRACE_VERBOSE("%s - stash item# %d; size=%d (remaining=%d)", __FUNCTION__, itemsProcessed, size, m_sizeProcessAudioLater);
-            ProcessAudioDataNow(audio, size);
-        }
-    }
-}
-
-void CSpxAudioStreamSession::ProcessAudioDataLater_Overflow()
-{
-    SPX_DBG_TRACE_ERROR("%s - Stashed audio OVERFLOW ... (CLEARING=%d) ... recoKind %d; sessionState %d", __FUNCTION__, m_sizeProcessAudioLater, m_recoKind, m_sessionState);
-    ProcessAudioDataLater_Clear();
-
-    // Send the error, and get ready to reset the adapter
-    Error(m_recoAdapter.get(), "Service timed out waiting for response ... Starting Adapter Reset !!!");
-    StartResetEngineAdapter();
-}
-
-void CSpxAudioStreamSession::ProcessAudioDataLater_Clear()
-{
-    std::unique_lock<std::mutex> lock(m_processAudioLaterMutex);
-
-    decltype(m_processAudioLater) discardData;
-    discardData.swap(m_processAudioLater);
-    m_sizeProcessAudioLater = 0;
-
-    SPX_DBG_TRACE_VERBOSE_IF(!discardData.empty(), "%s - Stash not empty!! CLEARING ... items=%d; totalSize=%d", __FUNCTION__, discardData.size(), m_sizeProcessAudioLater);
-}
-
 void CSpxAudioStreamSession::HotSwapToKwsSingleShotWhilePaused()
 {
     // We need to do all this work on a background thread, because we can't guarantee it's safe
@@ -1277,10 +1307,21 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shar
     // Lock the Audio Processor mutex, since we'll be picking which one we're using...
     WriteLock_Type writeLock(m_combinedAdapterAndStateMutex);
 
-    // Depending on the startKind, we'll either use the Kws Engine Adapter or the Reco Engine Adapter
+    auto cbFormat = m_audioPump->GetFormat(nullptr, 0);
+    auto waveformat = SpxAllocWAVEFORMATEX(cbFormat);
+    m_audioPump->GetFormat(waveformat.get(), cbFormat);
+
+    if (!m_audioBuffer)
+    {
+        m_audioBuffer = std::make_shared<PcmAudioBuffer>(*waveformat);
+    }
+    m_audioBuffer->NewTurn();
+
+    // Depending on the startKind, we'll either switch to the Kws Engine Adapter or the Reco Engine Adapter
     m_audioProcessor = startKind == RecognitionKind::Keyword
         ? SpxQueryInterface<ISpxAudioProcessor>(EnsureInitKwsEngineAdapter(model))
         : SpxQueryInterface<ISpxAudioProcessor>(EnsureInitRecoEngineAdapter());
+    m_isKwsProcessor = (startKind == RecognitionKind::Keyword);
 
     writeLock.unlock(); // DON'T HOLD THE LOCK any longer than here.
     // The StartPump() call (see below) will instigate a call to this::SetFormat, which will try to acquire the reader lock from a different thread...
@@ -1302,10 +1343,32 @@ void CSpxAudioStreamSession::HotSwapAdaptersWhilePaused(RecognitionKind startKin
     WriteLock_Type writeLock(m_combinedAdapterAndStateMutex);
     auto oldAudioProcessor = m_audioProcessor;
 
+    // Get the format in which the pump is currently sending audio data to the Session
+    auto cbFormat = m_audioPump->GetFormat(nullptr, 0);
+    auto waveformat = SpxAllocWAVEFORMATEX(cbFormat);
+    m_audioPump->GetFormat(waveformat.get(), cbFormat);
+
     // Depending on the startKind, we'll either switch to the Kws Engine Adapter or the Reco Engine Adapter
-    m_audioProcessor = startKind == RecognitionKind::Keyword
-        ? SpxQueryInterface<ISpxAudioProcessor>(EnsureInitKwsEngineAdapter(model))
-        : SpxQueryInterface<ISpxAudioProcessor>(EnsureInitRecoEngineAdapter());
+    if (startKind == RecognitionKind::Keyword)
+    {
+        m_audioProcessor = SpxQueryInterface<ISpxAudioProcessor>(EnsureInitKwsEngineAdapter(model));
+        m_isKwsProcessor = true;
+    }
+    else
+    {
+        m_audioProcessor = SpxQueryInterface<ISpxAudioProcessor>(EnsureInitRecoEngineAdapter());
+        m_isKwsProcessor = false;
+        if (m_spottedKeyword)
+        {
+            // Switching from KWS to single shot, creating buffer from scratch with added keyword.
+            auto currentBuffer = m_audioBuffer;
+            m_audioBuffer = std::make_shared<PcmAudioBuffer>(*waveformat);
+            SPX_DBG_TRACE_VERBOSE_IF(1, "%s: Size of spotted keyword %d", __FUNCTION__, m_spottedKeyword->size);
+            m_audioBuffer->Add(m_spottedKeyword->data, m_spottedKeyword->size);
+            currentBuffer->CopyNonAcknowledgedDataTo(m_audioBuffer);
+            m_spottedKeyword = nullptr;
+        }
+    }
 
     // Tell the old Audio Processor that we've sent the last bit of audio data we're going to send
     SPX_DBG_TRACE_VERBOSE_IF(1, "%s: ProcessingAudio - size=%d", __FUNCTION__, 0);
@@ -1315,10 +1378,8 @@ void CSpxAudioStreamSession::HotSwapAdaptersWhilePaused(RecognitionKind startKin
     oldAudioProcessor->SetFormat(nullptr);
     m_adapterAudioMuted = false;
 
-    // Get the format in which the pump is currently sending audio data to the Session
-    auto cbFormat = m_audioPump->GetFormat(nullptr, 0);
-    auto waveformat = SpxAllocWAVEFORMATEX(cbFormat);
-    m_audioPump->GetFormat(waveformat.get(), cbFormat);
+    if (m_audioBuffer)
+        m_audioBuffer->NewTurn();
 
     // Inform the Audio Processor that we're starting...
     SPX_DBG_ASSERT(writeLock.owns_lock());
