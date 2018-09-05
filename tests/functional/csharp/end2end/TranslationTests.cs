@@ -79,7 +79,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore] // Bug 1294947
         public async Task TranslationWeatherEnToDeFinalTextResult()
         {
             var toLanguages = new List<string>() { Language.DE };
@@ -108,7 +107,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Assert.AreEqual(TestData.Spanish.Weather.Utterance, result.Translations[Language.ES]);
         }
 
-        [Ignore] // TODO ENABLE AFTER FIXING BROKEN SERVICE
         [TestMethod, TestCategory(TestCategory.LongRunning)]
         public async Task TranslationBatmanEnToDeFinalTextResultContinuous()
         {
@@ -143,7 +141,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod, TestCategory(TestCategory.LongRunning)]
-        [Ignore("Need need to update expected synthesis data. https://msasg.visualstudio.com/Skyman/_workitems/edit/1314220")]
         public async Task TranslationBatmanEnToDeKatjaSynthesisResultContinuous()
         {
             var toLanguages = new List<string>() { Language.DE };

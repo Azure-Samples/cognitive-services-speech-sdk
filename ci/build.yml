@@ -432,7 +432,7 @@ phases:
       runInParallel: False
       vsTestVersion: latest
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
-    timeoutInMinutes: 7
+    timeoutInMinutes: 20
   - task: PublishTestResults@2
     inputs:
       testResultsFiles: '**/test-*.xml'

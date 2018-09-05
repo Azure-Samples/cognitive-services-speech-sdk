@@ -33,7 +33,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore("because of the test not returning any result for long period of time occasionally")]
         public async Task SimpleRecognitionBatman()
         {
             var result = await this.speechHelper.GetSpeechFinalRecognitionResult(TestData.English.Batman.AudioFile);
@@ -41,7 +40,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore("because of the bug in VSO BUG 1293606")]
         public async Task DetailedRecognitionBatman()
         {
             var result = await this.speechHelper.GetSpeechFinalRecognitionResult(TestData.English.Batman.AudioFile, Language.EN, OutputFormat.Detailed);
@@ -55,7 +53,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore("because of the bug detailed in VSO BUG 1293499")]
         public async Task SimpleRecognitionBatmanContinuous()
         {
             var result = await this.speechHelper.GetSpeechFinalRecognitionContinuous(TestData.English.Batman.AudioFile);
@@ -68,7 +65,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore("because of the bug detailed in VSO BUG 1290780 and 1293499")]
         public async Task DetailedRecognitionBatmanContinuous()
         {
             var result = await this.speechHelper.GetSpeechFinalRecognitionContinuous(TestData.English.Batman.AudioFile, Language.EN, OutputFormat.Detailed);
@@ -99,7 +95,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        [Ignore("because of the bug detailed in VSO BUG 1290780")]
         public async Task DetailedRecognitionBatmanContinuousBest()
         {
             var result = await this.speechHelper.GetSpeechFinalRecognitionContinuous(TestData.English.Batman.AudioFile, Language.EN, OutputFormat.Detailed);

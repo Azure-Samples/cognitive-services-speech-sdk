@@ -157,7 +157,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod, TestCategory(TestCategory.LongRunning)]
-        [Ignore("TODO https://msasg.visualstudio.com/Skyman/_workitems/edit/1304778")]
         public async Task ContinuousRecognitionOnLongFileInput()
         {
             using (var recognizer = TrackSessionId(factory.CreateSpeechRecognizerWithFileInput(TestData.English.Batman.AudioFile)))
@@ -177,6 +176,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.IsTrue(helper.FinalResultEventCount > 0, $"Invalid number of final result events {helper.FinalResultEventCount}");
                 Assert.AreEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
                 Assert.AreEqual(1, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
+                Assert.IsTrue(helper.SpeechEndedEventCount > 0, $"Unexpected number of speech ended events {helper.SpeechEndedEventCount}");
                 Assert.IsTrue(recognizedText.Count > 0, $"Invalid number of text messages {recognizedText.Count}");
 
                 AssertMatching(TestData.English.Batman.Utterances[0], recognizedText[0]);
