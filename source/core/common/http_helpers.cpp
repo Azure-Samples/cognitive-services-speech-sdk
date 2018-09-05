@@ -64,7 +64,7 @@ std::string SpxHttpDownloadString(const char* httpHostName, const char* httpRela
     responseBuffer = BUFFER_new();
     SPX_IFTRUE_EXITFN_WHR(responseBuffer == NULL, hr = SPXERR_ABORT);
 
-    // Allocate space to recieve the response headers if necessary
+    // Allocate space to receive the response headers if necessary
     responseHttpHeaders = presponseHeaders != nullptr ? HTTPHeaders_Alloc() : NULL;
     SPX_IFTRUE_EXITFN_WHR(presponseHeaders != nullptr && responseHttpHeaders == NULL, hr = SPXERR_ABORT);
 

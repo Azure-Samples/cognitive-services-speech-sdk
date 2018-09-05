@@ -112,12 +112,14 @@ private:
         }
 
         bufLen = 0;
-        std::unique_ptr<Result_TranslationTextBufferHeader> phraseBuffer;
+        std::shared_ptr<Result_TranslationTextBufferHeader> phraseBuffer;
         // retrieve the required buffer size first.
         hr = TranslationTextResult_GetTranslationText(resultHandle, nullptr, &bufLen);
         if (hr == SPXERR_BUFFER_TOO_SMALL)
         {
-            phraseBuffer = std::unique_ptr<Result_TranslationTextBufferHeader>((Result_TranslationTextBufferHeader *)(new char[bufLen]));
+            char *ptr = new char[bufLen];
+            phraseBuffer = std::shared_ptr<Result_TranslationTextBufferHeader>((Result_TranslationTextBufferHeader*)ptr,
+                [](void *to_delete) { delete[] ((char*)to_delete); });
             hr = TranslationTextResult_GetTranslationText(resultHandle, phraseBuffer.get(), &bufLen);
         }
         SPX_THROW_ON_FAIL(hr);

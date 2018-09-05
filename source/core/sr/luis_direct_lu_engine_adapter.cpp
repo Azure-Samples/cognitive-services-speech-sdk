@@ -175,7 +175,7 @@ void CSpxLuisDirectEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionR
             auto intentName = ExtractIntent(json);
             SPX_DBG_TRACE_VERBOSE("LUIS intent == '%ls'", intentName.c_str());
 
-            // Map the LUIS intent name in that payload to the specified "IntentId" specified when the devleoper-user called AddIntent("IntentId", ...)
+            // Map the LUIS intent name in that payload to the specified "IntentId" specified when the developer-user called AddIntent("IntentId", ...)
             auto intentId = IntentIdFromIntentName(intentName);
             SPX_DBG_TRACE_VERBOSE("IntentRecognitionResult::IntentId == '%ls'", intentId.c_str());
 
@@ -195,7 +195,7 @@ void CSpxLuisDirectEngineAdapter::GetConnectionInfoFromTriggers(const std::strin
 {
     // The LUIS Direct LU Engine Adapter currently only allows for a single (1 !!!) language understanding model to be used. If the API developer-user specifies
     // more than a single language understanding model via AddIntent(), we'll fail this call with SPXERR_ABORT. However, specifying more than one intent, where
-    // all of those intents are from teh same language understanding model, is supported. The code below iterates thru all the triggers, finding the 
+    // all of those intents are from the same language understanding model, is supported. The code below iterates thru all the triggers, finding the
     // "hostName/relativePath" ... It stores the first one it finds. It then continues iterating thru the triggers, ensuring
     // that all the other triggers have data that links them to the same language understanding model found initially... 
 
