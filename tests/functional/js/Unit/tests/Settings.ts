@@ -18,6 +18,7 @@ export class Settings {
     public static LuisAppId :string = "<<YOUR_LUIS_APP_KEY>>";
 
     public static WaveFile: string = "../../../input/audio/whatstheweatherlike.wav";
+    public static LongFile: string = "../../../input/audio/batman.wav";
 
     public static Keyword :string = "Computer";
     public static KeywordModel :string = "/data/keyword/kws.table";

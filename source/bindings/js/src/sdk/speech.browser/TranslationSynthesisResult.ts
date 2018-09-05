@@ -12,11 +12,16 @@ export class TranslationSynthesisResult {
      * Translated text in the target language.
      * @return Translated text in the target language.
      */
-    public audio: ByteString;
+    public audio: Uint8Array;
 
     /**
      * Status of the synthesis.
      * @return status of the synthesis.
      */
     public synthesisStatus: SynthesisStatus;
+
+    /**
+     * Should the synthesis fail, the reason why.
+     */
+    public failureReason: string;
 }

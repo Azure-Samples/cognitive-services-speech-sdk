@@ -48,6 +48,14 @@ export class TranslationConnectionFactory implements IConnectionFactory {
             queryParams[TestHooksParamName] = "1";
         }
 
+        const voiceName: string = "voice";
+        const featureName: string = "features";
+
+        if (undefined !== config.Voice) {
+            queryParams[voiceName] = config.Voice;
+            queryParams[featureName] = "texttospeech";
+        }
+
         const headers: IStringDictionary<string> = {};
         headers[authInfo.HeaderName] = authInfo.Token;
         headers[ConnectionIdHeader] = connectionId;

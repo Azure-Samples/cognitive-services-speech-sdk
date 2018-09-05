@@ -145,6 +145,8 @@
                         <option value="zh-HK">Chinese - HK</option>
                         <option value="zh-TW">Chinese - TW</option>
                     </select>
+                    <input id="voiceOutput" type="checkbox">
+                    <label for="voiceOutput">voice output</label>
                     </td>
             </tr>
             <tr>
@@ -200,9 +202,10 @@
         var regionOptions;
         var sdkStartContinousRecognitionBtn, sdkStopContinousRecognitionBtn;
         var sdkStartContinousTranslationBtn, sdkStopContinousTranslationBtn;
-        var sdkStartRecognizeAsyncBtn, sdkStopRecognizeAsyncBtn, languageTargetOptions;
+        var sdkStartRecognizeAsyncBtn, sdkStopRecognizeAsyncBtn, languageTargetOptions, voiceOutput;
         var speechSdkRecognizer;
         var audioFile, audioFileValid;
+        var soundContext = new AudioContext();
 
         document.addEventListener("DOMContentLoaded", function () {
             createBtn = document.getElementById("createBtn");
@@ -218,6 +221,7 @@
             key = document.getElementById("key");
             languageOptions = document.getElementById("languageOptions");
             languageTargetOptions = document.getElementById("languageTargetOptions");
+            voiceOutput = document.getElementById("voiceOutput");
             regionOptions = document.getElementById("regionOptions");
             formatOptions = document.getElementById("formatOptions");
             inputSource = document.getElementById("inputSource");
@@ -297,10 +301,19 @@
 
                 speechSdkRecognizer = SDK.SpeechFactory.fromSubscription(key.value, regionOptions.value);
 
-                if (!audioFileValid) {
-                    reco = speechSdkRecognizer.createTranslationRecognizer(languageOptions.value, [languageOptions.value, languageTargetOptions.value]);
-                } else {
-                    reco = speechSdkRecognizer.createTranslationRecognizerWithStream(audioFile, languageOptions.value, [languageOptions.value, languageTargetOptions.value]);
+                if (!voiceOutput.checked) {
+                    if (!audioFileValid) {
+                        reco = speechSdkRecognizer.createTranslationRecognizer(languageOptions.value, [languageOptions.value, languageTargetOptions.value]);
+                    } else {
+                        reco = speechSdkRecognizer.createTranslationRecognizerWithStream(audioFile, languageOptions.value, [languageOptions.value, languageTargetOptions.value]);
+                    }
+                }
+                else {
+                    if (!audioFileValid) {
+                        reco = speechSdkRecognizer.createTranslationRecognizerWithVoice(languageOptions.value, [languageOptions.value, languageTargetOptions.value], "en-US-Zira");
+                    } else {
+                        reco = speechSdkRecognizer.createTranslationRecognizerWithStreamAndVoice(audioFile, languageOptions.value, [languageOptions.value, languageTargetOptions.value], "en-US-Zira");
+                    }
                 }
 
                 reco.IntermediateResultReceived = function (s, e) {
@@ -314,6 +327,19 @@
                     statusDiv.innerHTML = "";
                     hypothesisDiv.innerHTML = "";
                     phraseDiv.innerHTML += JSON.stringify(e.result.translations.values) + "\r\n";
+                };
+
+                reco.SynthesisResultReceived = function (s, e) {
+                    window.console.log(e);
+
+                    var source = soundContext.createBufferSource();
+                    soundContext.decodeAudioData(e.result.audio.buffer, function(newBuffer) {
+                        source.buffer = newBuffer;
+                        source.connect(soundContext.destination);
+                        source.start(0);
+                    });
+
+                    statusDiv.innerHTML = "playing audio";
                 };
 
                 reco.SessionEvent = function (s, e) {

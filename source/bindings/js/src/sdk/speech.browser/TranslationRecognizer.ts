@@ -4,9 +4,40 @@
 //
 import { FileAudioSource } from "../../common.browser/Exports";
 import { IAudioSource } from "../../common/Exports";
-import { IAuthentication, IConnectionFactory, RecognitionMode, RecognizerConfig, ServiceRecognizerBase, SpeechConfig, SpeechRecognitionEvent, SpeechResultFormat, TranslationConfig, TranslationFailedEvent, TranslationHypothesisEvent, TranslationServiceRecognizer, TranslationSimplePhraseEvent } from "../speech/Exports";
+import {
+    IAuthentication,
+    IConnectionFactory,
+    RecognitionMode,
+    RecognizerConfig,
+    ServiceRecognizerBase,
+    SpeechConfig,
+    SpeechRecognitionEvent,
+    SpeechResultFormat,
+    TranslationConfig,
+    TranslationFailedEvent,
+    TranslationHypothesisEvent,
+    TranslationServiceRecognizer,
+    TranslationSimplePhraseEvent,
+    TranslationSynthesisErrorEvent,
+    TranslationSynthesisEvent,
+} from "../speech/Exports";
 import { Contracts } from "./Contracts";
-import { AudioInputStream, FactoryParameterNames, ISpeechProperties, KeywordRecognitionModel, RecognitionErrorEventArgs, RecognitionStatus, Recognizer, RecognizerParameterNames, TranslationConnectionFactory, TranslationStatus, TranslationSynthesisResultEventArgs, TranslationTextResult, TranslationTextResultEventArgs } from "./Exports";
+import {
+    AudioInputStream,
+    FactoryParameterNames,
+    ISpeechProperties,
+    KeywordRecognitionModel,
+    RecognitionErrorEventArgs,
+    RecognitionStatus,
+    Recognizer,
+    RecognizerParameterNames,
+    TranslationConnectionFactory,
+    TranslationStatus,
+    TranslationSynthesisResult,
+    TranslationSynthesisResultEventArgs,
+    TranslationTextResult,
+    TranslationTextResultEventArgs,
+} from "./Exports";
 
 export class TranslationRecognizer extends Recognizer {
     private disposedTranslationRecognizer: boolean;
@@ -79,7 +110,7 @@ export class TranslationRecognizer extends Recognizer {
     public get outputVoiceName(): string {
         Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
 
-        return this.parameters.get(RecognizerParameterNames.TranslationVoice, "en-us");
+        return this.parameters.get(RecognizerParameterNames.TranslationVoice, undefined);
     }
 
     /**
@@ -168,9 +199,41 @@ export class TranslationRecognizer extends Recognizer {
                         if (!!err) {
                             err(errorEvent.status.toString());
                         }
-
-                        break;
                     }
+                    break;
+                case "TranslationSynthesisEvent":
+                    {
+                        const evResut: TranslationSynthesisEvent = event as TranslationSynthesisEvent;
+                        const retEvent: TranslationSynthesisResultEventArgs = new TranslationSynthesisResultEventArgs();
+
+                        retEvent.result = new TranslationSynthesisResult();
+                        retEvent.result.audio = new Uint8Array(evResut.Result);
+                        retEvent.sessionId = evResut.SessionId;
+
+                        if (!!this.SynthesisResultReceived) {
+                            this.SynthesisResultReceived(this, retEvent);
+                        }
+                    }
+                    break;
+                case "TranslationSynthesisErrorEvent":
+                    {
+                        const evResut: TranslationSynthesisErrorEvent = event as TranslationSynthesisErrorEvent;
+                        const retEvent: TranslationSynthesisResultEventArgs = new TranslationSynthesisResultEventArgs();
+
+                        retEvent.result = new TranslationSynthesisResult();
+                        retEvent.result.synthesisStatus = evResut.Result.SynthesisStatus;
+                        retEvent.result.failureReason = evResut.Result.FailureReason;
+                        retEvent.sessionId = evResut.SessionId;
+
+                        if (!!this.SynthesisResultReceived) {
+                            this.SynthesisResultReceived(this, retEvent);
+                        }
+
+                        if (!!err) {
+                            err(evResut.Result.FailureReason);
+                        }
+                    }
+                    break;
             }
         });
     }
@@ -283,6 +346,7 @@ export class TranslationRecognizer extends Recognizer {
             recognitionMode,
             this.parameters.get(RecognizerParameterNames.TranslationFromLanguage, "en-us"),
             this.targetLanguages,
+            this.outputVoiceName,
             this.parameters);
     }
 

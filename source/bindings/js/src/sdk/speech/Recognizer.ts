@@ -18,6 +18,7 @@ import {
     PromiseHelper,
     PromiseResult,
 } from "../../common/Exports";
+import { SynthesisStatus } from "../speech.browser/Exports";
 import { AuthInfo, IAuthentication } from "./IAuthentication";
 import { IConnectionFactory } from "./IConnectionFactory";
 import {
@@ -38,6 +39,8 @@ import {
     TranslationFailedEvent,
     TranslationHypothesisEvent,
     TranslationSimplePhraseEvent,
+    TranslationSynthesisErrorEvent,
+    TranslationSynthesisEvent,
 } from "./RecognitionEvents";
 import { RecognitionMode, RecognizerConfig, SpeechResultFormat } from "./RecognizerConfig";
 import { ServiceTelemetryListener } from "./ServiceTelemetryListener.Internal";
@@ -48,6 +51,7 @@ import {
     ISpeechEndDetectedResult,
     ISpeechFragment,
     ISpeechStartDetectedResult,
+    ISynthesisEnd,
     ITranslationFragment,
     ITranslationPhrase,
     RecognitionStatus2,
@@ -209,6 +213,7 @@ export abstract class ServiceRecognizerBase {
             .Read()
             .OnSuccessContinueWithPromise((message: ConnectionMessage) => {
                 const connectionMessage = SpeechConnectionMessage.FromConnectionMessage(message);
+
                 if (connectionMessage.RequestId.toLowerCase() === requestSession.RequestId.toLowerCase()) {
                     switch (connectionMessage.Path.toLowerCase()) {
                         case "turn.start":
@@ -396,12 +401,43 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
                 const status2: string = "" + translatedPhrase.RecognitionStatus;
                 const recstatus2 = (RecognitionStatus2 as any)[status2];
 
-                if (recstatus2 !== RecognitionStatus2.Error) {
-                    requestSession.OnServiceSimpleTranslationPhraseResponse(JSON.parse(connectionMessage.TextBody));
-                } else {
-                    requestSession.OnServiceTranslationErrorResponse(translatedPhrase);
+                switch (recstatus2) {
+                    case RecognitionStatus2.Success:
+                        {
+                            requestSession.OnServiceSimpleTranslationPhraseResponse(JSON.parse(connectionMessage.TextBody));
+                            break;
+                        }
+                    case RecognitionStatus2.Error:
+                        {
+                            requestSession.OnServiceTranslationErrorResponse(translatedPhrase);
+                        }
+                }
+                break;
+            case "translation.synthesis":
+                if (this.recognizerConfig.IsContinuousRecognition) {
+                    // For continuous recognition telemetry has to be sent for every phrase as per spec.
+                    this.SendTelemetryData(requestSession.RequestId, connection, requestSession.GetTelemetry());
                 }
 
+                requestSession.OnServiceTranslationSynthesis(connectionMessage.BinaryBody);
+                break;
+            case "translation.synthesis.end":
+                if (this.recognizerConfig.IsContinuousRecognition) {
+                    // For continuous recognition telemetry has to be sent for every phrase as per spec.
+                    this.SendTelemetryData(requestSession.RequestId, connection, requestSession.GetTelemetry());
+                }
+
+                const synthEnd: ISynthesisEnd = JSON.parse(connectionMessage.TextBody);
+                const status3: string = "" + synthEnd.SynthesisStatus;
+                const synthStatus = (SynthesisStatus as any)[status3];
+                synthEnd.SynthesisStatus = synthStatus;
+
+                switch (synthStatus) {
+                    case SynthesisStatus.Error:
+                        {
+                            requestSession.OnServiceTranslationSynthesisError(synthEnd);
+                        }
+                }
                 break;
             default:
                 break;
@@ -601,6 +637,14 @@ class TranslationRequestSession extends RequestSessionBase {
 
     public OnServiceTranslationErrorResponse = (result: ITranslationPhrase): void => {
         this.OnEvent(new TranslationFailedEvent(this.RequestId, this.sessionId, result));
+    }
+
+    public OnServiceTranslationSynthesis = (result: ArrayBuffer): void => {
+        this.OnEvent(new TranslationSynthesisEvent(this.RequestId, this.sessionId, result));
+    }
+
+    public OnServiceTranslationSynthesisError = (result: ISynthesisEnd): void => {
+        this.OnEvent(new TranslationSynthesisErrorEvent(this.RequestId, this.sessionId, result));
     }
 }
 

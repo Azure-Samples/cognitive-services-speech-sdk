@@ -4,9 +4,16 @@
 //
 
 import * as sdk from "../../../../../source/bindings/js/Speech.Browser.Sdk";
+import { ByteBufferAudioInputStream } from "./ByteBufferAudioInputStream";
 import { Settings } from "./Settings";
 import { WaveFileAudioInputStream } from "./WaveFileAudioInputStream";
 import { WaitForCondition } from "./Utilities";
+import { setTimeout } from "timers";
+import { SynthesisStatus } from "../../../../../source/bindings/js/distrib/Speech.Browser.Sdk";
+import { settings } from "cluster";
+import { reverse } from "dns";
+import { SpeechRecognitionEvent } from "../../../../../source/bindings/js/src/sdk/speech/Exports";
+
 
 beforeAll(() => {
     // Override inputs, if necessary
@@ -111,7 +118,7 @@ test("GetTargetLanguages", () => {
 // -----------------------------------------------------------------------
 
 //@Test
-test("GetOutputVoiceNameNoSetting", () => {
+test.skip("GetOutputVoiceNameNoSetting", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
@@ -200,6 +207,15 @@ test("RecognizeAsync1", done => {
     //assertNotNull(r.getRecoImpl());
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
+    r.SynthesisResultReceived = ((o, e) => {
+        if (e.result.synthesisStatus === SynthesisStatus.Error) {
+            r.close();
+            s.close();
+            setTimeout(() => done(), 1);
+            fail(e.result.failureReason);
+        }
+    });
+
     r.recognizeAsync(
         (res: sdk.TranslationTextResult) => {
             expect(res).not.toBeUndefined();
@@ -242,13 +258,22 @@ test("Translate Multiple Targets", done => {
     //assertNotNull(r.getRecoImpl());
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
+    r.SynthesisResultReceived = ((o, e) => {
+        if (e.result.synthesisStatus === SynthesisStatus.Error) {
+            r.close();
+            s.close();
+            setTimeout(() => done(), 1);
+            fail(e.result.failureReason);
+        }
+    });
+
     r.recognizeAsync(
         (res: sdk.TranslationTextResult) => {
             expect(res).not.toBeUndefined();
             expect(sdk.RecognitionStatus.Recognized).toEqual(res.translationStatus);
             expect("Wie ist das Wetter?").toEqual(res.translations.get("de", ""));
             expect("What's the weather like?").toEqual(res.translations.get("en", ""));
-            
+
             r.close();
             s.close();
             done();
@@ -335,6 +360,15 @@ test("Validate Event Ordering", done => {
         eventsMap["Session:" + e.eventType.toPrecision()] = now;
     };
 
+    r.SynthesisResultReceived = ((o, e) => {
+        if (e.result.synthesisStatus === SynthesisStatus.Error) {
+            r.close();
+            s.close();
+            setTimeout(() => done(), 1);
+            fail(e.result.failureReason);
+        }
+    });
+
     // TODO there is no guarantee that SessionStoppedEvent comes before the recognizeAsync() call returns?!
     //      this is why below SessionStoppedEvent checks are conditional 
     r.recognizeAsync((res: sdk.TranslationTextResult) => {
@@ -355,9 +389,9 @@ test("Validate Event Ordering", done => {
         if ("Session:" + sdk.SessionEventType.SessionStoppedEvent.toString() in eventsMap) {
             expect(eventsMap["Session:" + sdk.SessionEventType.SessionStartedEvent.toString()]).toBeLessThan(eventsMap["Session:" + sdk.SessionEventType.SessionStoppedEvent.toString()]);
         }
-       
+
         expect((FIRST_EVENT_ID + 1)).toEqual(eventsMap[sdk.RecognitionEventType.SpeechStartDetectedEvent.toString()]);
-       
+
         //expect(eventsMap[sdk.RecognitionEventType.SpeechStartDetectedEvent.toString()]).toBeLessThan(eventsMap[sdk.RecognitionEventType.SpeechEndDetectedEvent.toString()]);
         // expect((LAST_RECORDED_EVENT_ID - 1)).toEqual(eventsMap[sdk.RecognitionEventType.SpeechEndDetectedEvent.toString()]);
 
@@ -377,7 +411,7 @@ test("Validate Event Ordering", done => {
         r.close();
         s.close();
         done();
-    
+
     }, (error: string) => {
         fail(error);
         r.close();
@@ -385,127 +419,374 @@ test("Validate Event Ordering", done => {
         done();
     });
 });
-/*
+
 // -----------------------------------------------------------------------
 // --- 
 // -----------------------------------------------------------------------
 
 //@Test
-test("StartContinuousRecognitionAsync", () => {
+test("StartContinuousRecognitionAsync", done => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
     const targets: string[] = [];
     targets.push("en-US");
 
-    const r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targets);
+    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
+    expect(ais).not.toBeUndefined();
+
+    const r = s.createTranslationRecognizerWithStream(ais, "en-US", targets);
     expect(r).not.toBeUndefined();
     //assertNotNull(r.getRecoImpl());
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
-    Future <?> future = r.startContinuousRecognitionAsync();
-    assertNotNull(future);
+    r.startContinuousRecognitionAsync(() => {
+        const start: number = Date.now();
 
-    // Wait for max 30 seconds
-    future.get(30, TimeUnit.SECONDS);
+        done();
+        r.close();
+        s.close();
+    }, (error) => {
+        r.close();
+        s.close();
+        fail(error)
+    });
+}, 10000);
 
-    assertFalse(future.isCancelled());
-    assertTrue(future.isDone());
+//@Test
+test("StopContinuousRecognitionAsync", done => {
+    const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    expect(s).not.toBeUndefined();
 
-    r.close();
-    s.close();
+    const targets: string[] = [];
+    targets.push("en-US");
+
+    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
+    expect(ais).not.toBeUndefined();
+
+    const r = s.createTranslationRecognizerWithStream(ais, "en-US", targets);
+    expect(r).not.toBeUndefined();
+    //assertNotNull(r.getRecoImpl());
+    expect(r instanceof sdk.Recognizer).toEqual(true);
+
+    r.startContinuousRecognitionAsync(() => {
+        const end: number = Date.now() + 1000;
+
+        WaitForCondition(() => {
+            return end <= Date.now();
+        }, () => {
+            r.stopContinuousRecognitionAsync(() => {
+                r.close();
+                s.close();
+                done();
+            }, (error) => fail(error));
+        });
+    }, (error) => fail(error));
 });
 
 //@Test
-test("StopContinuousRecognitionAsync", () => {
+test("StartStopContinuousRecognitionAsync", done => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
     const targets: string[] = [];
     targets.push("en-US");
 
-    const r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targets);
+    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
+    expect(ais).not.toBeUndefined();
+
+    const r = s.createTranslationRecognizerWithStream(ais, "en-US", targets);
     expect(r).not.toBeUndefined();
     //assertNotNull(r.getRecoImpl());
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
-    Future <?> future = r.startContinuousRecognitionAsync();
-    assertNotNull(future);
+    const rEvents: { [id: string]: string; } = {};
 
-    // Wait for max 30 seconds
-    future.get(30, TimeUnit.SECONDS);
-
-    assertFalse(future.isCancelled());
-    assertTrue(future.isDone());
-
-    // just wait one second
-    Thread.sleep(1000);
-
-    future = r.stopContinuousRecognitionAsync();
-    assertNotNull(future);
-
-    // Wait for max 30 seconds
-    future.get(30, TimeUnit.SECONDS);
-
-    assertFalse(future.isCancelled());
-    assertTrue(future.isDone());
-
-    r.close();
-    s.close();
-});
-
-//@Test
-test("StartStopContinuousRecognitionAsync", () => {
-    const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
-
-    const targets: string[] = [];
-    targets.push("en-US");
-
-    const r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targets);
-    expect(r).not.toBeUndefined();
-    //assertNotNull(r.getRecoImpl());
-    expect(r instanceof sdk.Recognizer).toEqual(true);
-
-    final ArrayList < String > rEvents = new ArrayList<>();
-
-    r.FinalResultReceived.addEventListener((o, e) -> {
-        rEvents.add("Result@" + System.currentTimeMillis());
+    r.FinalResultReceived = ((o, e) => {
+        const result: string = e.result.translations.get("en", "");
+        rEvents["Result@" + Date.now()] = result;
     });
 
-    Future <?> future = r.startContinuousRecognitionAsync();
-    assertNotNull(future);
-
-    // Wait for max 30 seconds
-    future.get(30, TimeUnit.SECONDS);
-
-    assertFalse(future.isCancelled());
-    assertTrue(future.isDone());
+    r.startContinuousRecognitionAsync();
 
     // wait until we get at least on final result
-    long now = System.currentTimeMillis();
-    while (((System.currentTimeMillis() - now) < 30000) &&
-        (rEvents.isEmpty())) {
-        Thread.sleep(200);
-    }
+    const now: number = Date.now();
 
-    // test that we got one result
-    // TODO multi-phrase test with several phrases in one session
-    assertEquals(1, rEvents.size());
+    WaitForCondition((): boolean => {
+        return Object.keys(rEvents).length > 0;
+    }, () => {
+        expect(rEvents[Object.keys(rEvents)[0]]).toEqual("What's the weather like?");
 
-    future = r.stopContinuousRecognitionAsync();
-    assertNotNull(future);
-
-    // Wait for max 30 seconds
-    future.get(30, TimeUnit.SECONDS);
-
-    assertFalse(future.isCancelled());
-    assertTrue(future.isDone());
-
-    r.close();
-    s.close();
+        r.stopContinuousRecognitionAsync(() => {
+            r.close();
+            s.close();
+            done();
+        }, (error) => fail(error));
+    });
 });
 
+//@Test
+test("TranslateVoiceRoundTrip", done => {
+    const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    expect(s).not.toBeUndefined();
+
+    const targets: string[] = [];
+    targets.push("en-US");
+
+    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
+    expect(ais).not.toBeUndefined();
+
+    const voice: string = "en-US-Zira";
+    const r = s.createTranslationRecognizerWithStreamAndVoice(ais, "en-US", targets, voice);
+
+    expect(r).not.toBeUndefined();
+    //assertNotNull(r.getRecoImpl());
+    expect(r instanceof sdk.Recognizer).toEqual(true);
+
+    const rEvents: { [id: string]: Uint8Array; } = {};
+
+    r.SynthesisResultReceived = ((o, e) => {
+        const result: Uint8Array = e.result.audio;
+        rEvents["Result@" + Date.now()] = result;
+    });
+
+    r.startContinuousRecognitionAsync();
+
+    // wait until we get at least on final result
+    const now: number = Date.now();
+
+    WaitForCondition((): boolean => {
+        return Object.keys(rEvents).length > 0;
+    }, () => {
+        r.stopContinuousRecognitionAsync(() => {
+            r.close();
+            const result: Uint8Array = rEvents[Object.keys(rEvents)[0]];
+
+            const inputStream = new ByteBufferAudioInputStream(result);
+
+            const r2: sdk.SpeechRecognizer = s.createSpeechRecognizerWithStreamAndLanguage(inputStream, targets[0]);
+            r2.recognizeAsync((speech: sdk.SpeechRecognitionResult) => {
+                expect(speech.text).toEqual("What's the weather like?");
+                r2.close();
+                s.close();
+                done();
+            }, (error) => fail(error));
+        }, (error) => fail(error));
+    });
+});
+
+test("TranslateVoiceInvalidVoice", done => {
+    const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    expect(s).not.toBeUndefined();
+
+    const targets: string[] = [];
+    targets.push("de-DE");
+
+    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
+    expect(ais).not.toBeUndefined();
+
+    const voice: string = "de-DE-Hedda)";
+    const r = s.createTranslationRecognizerWithStreamAndVoice(ais, "en-US", targets, voice);
+
+    expect(r).not.toBeUndefined();
+    //assertNotNull(r.getRecoImpl());
+    expect(r instanceof sdk.Recognizer).toEqual(true);
+
+    r.SynthesisResultReceived = ((o, e) => {
+        if (e.result.synthesisStatus === SynthesisStatus.Error) {
+            r.close();
+            s.close();
+            setTimeout(() => done(), 1);
+            expect(e.result.failureReason).toEqual("Synthesis service failed with code:  - Could not identify the voice 'de-DE-Hedda)' for the text to speech service ");
+        } else {
+            r.close();
+            s.close();
+            setTimeout(() => done(), 1);
+            fail("Should have failed, instead got status='" + e.result.synthesisStatus.toString() + "'");
+        }
+    });
+
+    r.RecognitionErrorRaised = ((o, e) => {
+        r.close();
+        s.close();
+        setTimeout(() => done(), 1);
+        fail(e);
+    });
+
+    r.startContinuousRecognitionAsync();
+});
+
+test("TranslateVoiceUSToGerman", done => {
+    const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    expect(s).not.toBeUndefined();
+
+    const targets: string[] = [];
+    targets.push("de-DE");
+
+    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
+    expect(ais).not.toBeUndefined();
+
+    const voice: string = "de-DE-Hedda";
+    const r = s.createTranslationRecognizerWithStreamAndVoice(ais, "en-US", targets, voice);
+
+    expect(r).not.toBeUndefined();
+    //assertNotNull(r.getRecoImpl());
+    expect(r instanceof sdk.Recognizer).toEqual(true);
+
+    const rEvents: { [id: string]: Uint8Array; } = {};
+
+    r.SynthesisResultReceived = ((o, e) => {
+        if (e.result.synthesisStatus === SynthesisStatus.Error) {
+            r.close();
+            s.close();
+            setTimeout(() => done(), 1);
+            fail(e.result.failureReason);
+        }
+
+        const result: Uint8Array = e.result.audio;
+        rEvents["Result@" + Date.now()] = result;
+    });
+
+    r.RecognitionErrorRaised = ((o, e) => {
+        r.close();
+        s.close();
+        setTimeout(() => done(), 1);
+        fail(e);
+    });
+
+    r.startContinuousRecognitionAsync();
+
+    // wait until we get at least on final result
+    const now: number = Date.now();
+
+    WaitForCondition((): boolean => {
+        return Object.keys(rEvents).length > 0;
+    }, () => {
+        r.stopContinuousRecognitionAsync(() => {
+            r.close();
+            const result: Uint8Array = rEvents[Object.keys(rEvents)[0]];
+
+            const inputStream = new ByteBufferAudioInputStream(result);
+
+            const r2: sdk.SpeechRecognizer = s.createSpeechRecognizerWithStreamAndLanguage(inputStream, targets[0]);
+            r2.recognizeAsync((speech: sdk.SpeechRecognitionResult) => {
+                expect(speech.text).toEqual("Wie ist das Wetter?");
+                r2.close();
+                s.close();
+                done();
+            }, (error) => {
+                r2.close();
+                s.close();
+                setTimeout(() => done(), 1);
+                fail(error);
+            });
+        }, (error) => {
+            r.close();
+            s.close();
+            setTimeout(() => done(), 1);
+            fail(error);
+        });
+    });
+});
+
+test("MultiPhrase", done => {
+    const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    expect(s).not.toBeUndefined();
+
+    const targets: string[] = [];
+    targets.push("en-US");
+
+    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.LongFile);
+    expect(ais).not.toBeUndefined();
+
+    const voice: string = "en-US-Zira";
+    const r = s.createTranslationRecognizerWithStreamAndVoice(ais, "en-US", targets, voice);
+
+    expect(r).not.toBeUndefined();
+    //assertNotNull(r.getRecoImpl());
+    expect(r instanceof sdk.Recognizer).toEqual(true);
+
+    const rEvents: { [id: string]: Uint8Array; } = {};
+
+    r.SynthesisResultReceived = ((o, e) => {
+        if (e.result.synthesisStatus === SynthesisStatus.Error) {
+            r.close();
+            s.close();
+            setTimeout(() => done(), 1);
+            fail(e.result.failureReason);
+        }
+
+        const result: Uint8Array = e.result.audio;
+        rEvents["Result@" + Date.now()] = result;
+    });
+
+    r.RecognitionErrorRaised = ((o, e) => {
+        r.close();
+        s.close();
+        setTimeout(() => done(), 1);
+        fail(e);
+    });
+
+    r.startContinuousRecognitionAsync();
+
+    // wait until we get at least on final result
+    const now: number = Date.now();
+
+    WaitForCondition((): boolean => {
+        return Object.keys(rEvents).length > 5;
+    }, () => {
+        r.stopContinuousRecognitionAsync(() => {
+            r.close();
+
+            let byteCount: number = 0;
+            Object.keys(rEvents).forEach((value, index, array) => {
+                byteCount += rEvents[value].byteLength;
+            });
+
+            const result: Uint8Array = new Uint8Array(byteCount);
+
+            byteCount = 0;
+            Object.keys(rEvents).forEach((value, index, array) => {
+                result.set(rEvents[value], byteCount);
+                byteCount += rEvents[value].byteLength;
+            });
+
+            const inputStream = new ByteBufferAudioInputStream(result);
+
+            const r2: sdk.SpeechRecognizer = s.createSpeechRecognizerWithStreamAndLanguage(inputStream, targets[0]);
+            let constResult: string = "";
+            let numEvents: number = 0;
+
+            r2.FinalResultReceived = (o, e: sdk.SpeechRecognitionResultEventArgs) => {
+                constResult += e.result.text + " ";
+                numEvents++;
+            };
+
+            r2.startContinuousRecognitionAsync(() => {
+                WaitForCondition(() => (numEvents > 4), () => {
+                    r2.stopContinuousRecognitionAsync();
+                    r2.close();
+                    s.close();
+                    setTimeout(() => done(), 1);
+                    expect(constResult).toEqual("Skills and abilities Batman has no inherent super powers. He relies on his own scientific knowledge detective skills and athletic prowess. In the stories Batman is regarded as one of the world's greatest detective if not the world's greatest crime solver. Batman has been repeatedly described as having genius level intellect. One of the greatest martial artists in the DC universe. ");
+                });
+            },
+                (error) => {
+                    r2.close();
+                    s.close();
+                    setTimeout(() => done(), 1);
+                    fail(error);
+                });
+
+        }, (error) => {
+            r.close();
+            s.close();
+            setTimeout(() => done(), 1);
+            fail(error);
+        });
+    });
+}, 45000);
+/*
 // -----------------------------------------------------------------------
 // --- 
 // -----------------------------------------------------------------------

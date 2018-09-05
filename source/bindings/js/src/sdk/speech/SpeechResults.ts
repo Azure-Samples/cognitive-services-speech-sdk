@@ -1,3 +1,4 @@
+import { SynthesisStatus } from "../speech.browser/SynthesisStatus";
 import { TranslationStatus } from "../speech.browser/TranslationStatus";
 
 export enum RecognitionStatus2 {
@@ -61,4 +62,9 @@ export interface IPhrase {
     ITN: string;
     MaskedITN: string;
     Display: string;
+}
+
+export interface ISynthesisEnd {
+    SynthesisStatus: SynthesisStatus;
+    FailureReason: string;
 }

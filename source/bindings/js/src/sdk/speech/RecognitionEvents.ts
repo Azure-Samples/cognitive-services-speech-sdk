@@ -1,10 +1,12 @@
 import { EventType, PlatformEvent } from "../../common/Exports";
+import { SynthesisStatus } from "../speech.browser/Exports";
 import {
     IDetailedSpeechPhrase,
     ISimpleSpeechPhrase,
     ISpeechEndDetectedResult,
     ISpeechFragment,
     ISpeechStartDetectedResult,
+    ISynthesisEnd,
     ITranslationFragment,
     ITranslationPhrase,
 } from "./SpeechResults";
@@ -185,8 +187,22 @@ export class TranslationFailedEvent extends SpeechRecognitionResultEvent<ITransl
     constructor(requestId: string, sessionId: string, result: ITranslationPhrase) {
         super("TranslationFailedEvent", requestId, sessionId, result);
     }
-
 }
+
+// tslint:disable-next-line:max-classes-per-file
+export class TranslationSynthesisEvent extends SpeechRecognitionResultEvent<ArrayBuffer> {
+    constructor(requestId: string, sessionId: string, result: ArrayBuffer) {
+        super("TranslationSynthesisEvent", requestId, sessionId, result);
+    }
+}
+
+// tslint:disable-next-line:max-classes-per-file
+export class TranslationSynthesisErrorEvent extends SpeechRecognitionResultEvent<ISynthesisEnd> {
+    constructor(requestId: string, sessionId: string, result: ISynthesisEnd) {
+        super("TranslationSynthesisErrorEvent", requestId, sessionId, result);
+    }
+}
+
 export enum RecognitionCompletionStatus {
     Success,
     AudioSourceError,

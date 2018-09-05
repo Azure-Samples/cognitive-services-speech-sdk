@@ -15,9 +15,8 @@ import com.microsoft.cognitiveservices.speech.AudioInputStreamFormat;
 
 import * as sdk from "../../../../../source/bindings/js/Speech.Browser.Sdk";
 import * as fs from "fs";
-import { AudioInputStream } from "../../../../../source/bindings/js/distrib/src/sdk/speech.browser/Exports";
 
-export class WaveFileAudioInputStream extends  AudioInputStream {
+export class WaveFileAudioInputStream extends  sdk.AudioInputStream {
 
     public constructor(filename: string) {
         // obtain and open the line.
