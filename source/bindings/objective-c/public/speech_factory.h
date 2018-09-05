@@ -36,7 +36,7 @@ typedef NS_ENUM(NSInteger, OutputFormat)
 
 + (SpeechFactory*)fromSubscription:(NSString *)subscription AndRegion:(NSString *)region;
 //+ (SpeechFactory*)fromAuthorizationToken:(NSString *)authToken AndRegion:(NSString *)region;
-//+ (SpeechFactory*)fromEndpoint:(NSString *)endpointUrl AndRegion:(NSString *)region;
++ (SpeechFactory*)fromEndpoint:(NSString *)endpointUrl AndSubscription:(NSString *)subscriptionKey;
 
 @end
 

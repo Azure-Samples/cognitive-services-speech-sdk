@@ -4,6 +4,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "NSString_STL.h"
 #import "speech_recognition_result_event_args.h"
 #import "speech_recognition_result_event_args_private.h"
 #import "speech_recognition_result_private.h"
@@ -19,10 +20,7 @@
     self = [super init];
     eventArgsImpl = static_cast<Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs *>(eventArgsHandle);
     
-    std::wstring stdwstring = eventArgsImpl->SessionId;
-    char *data = (char *)stdwstring.data();
-    size_t size = stdwstring.size() * sizeof(wchar_t);
-    _sessionId = [[NSString alloc] initWithBytes:data length:size encoding:CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingUTF32LE)];
+    _sessionId = [NSString stringWithWString:eventArgsImpl->SessionId];
     
     // Todo: error handling
     std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechRecognitionResult> resultImpl = eventArgsImpl->GetResult();

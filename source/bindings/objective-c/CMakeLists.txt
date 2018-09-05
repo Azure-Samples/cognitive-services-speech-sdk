@@ -17,13 +17,15 @@ set(HEADERS "${OBJC_PUBLIC_HEADER_DIR}/speech_factory.h"
             "${OBJC_PUBLIC_HEADER_DIR}/speech_recognition_result_event_args.h"
 )
 
-set(HEADERS_PRIVATE "${SRC_DIR}/speech_recognizer_private.h"                  
-                    "${SRC_DIR}/speech_recognition_result_private.h"                    
+set(HEADERS_PRIVATE "${SRC_DIR}/NSString_STL.h" 
+                    "${SRC_DIR}/speech_recognizer_private.h"
+                    "${SRC_DIR}/speech_recognition_result_private.h"
                     "${SRC_DIR}/speech_recognition_result_event_args_private.h"
                     "${LIBCARBON_SRC_DIR}/stdafx.h"
 )
 
 set(SOURCES 
+    "${SRC_DIR}/NSString_STL.mm"
     "${SRC_DIR}/speech_factory.mm"
     "${SRC_DIR}/speech_recognizer.mm"
     "${SRC_DIR}/speech_recognition_result.mm"
@@ -37,6 +39,7 @@ source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
 source_group("Source Files" FILES ${SOURCES})
 
 add_library(${PROJECT_NAME} SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES} $<TARGET_OBJECTS:c_api>)
+
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE sr

@@ -4,6 +4,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "NSString_STL.h"
 #import "speech_recognition_result.h"
 #import "speech_recognition_result_private.h"
 #import "speechapi_cxx.h"
@@ -18,20 +19,9 @@
     self = [super init];
     resultImpl = *static_cast<std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechRecognitionResult> *>(resultHandle);
     
-    std::wstring stdwstring = resultImpl->ResultId;
-    char *data = (char *)stdwstring.data();
-    size_t size = stdwstring.size() * sizeof(wchar_t);
-    _resultId = [[NSString alloc] initWithBytes:data length:size encoding:CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingUTF32LE)];
-    
-    stdwstring = resultImpl->Text;
-    data = (char *)stdwstring.data();
-    size = stdwstring.size() * sizeof(wchar_t);
-    _text = [[NSString alloc] initWithBytes:data length:size encoding:CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingUTF32LE)];
-    
-    stdwstring = resultImpl->ErrorDetails;
-    data = (char *)stdwstring.data();
-    size = stdwstring.size() * sizeof(wchar_t);
-    _recognitionFailureReason = [[NSString alloc] initWithBytes:data length:size encoding:CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingUTF32LE)];
+    _resultId = [NSString stringWithWString:resultImpl->ResultId];
+    _text = [NSString stringWithWString:resultImpl->Text];
+    _recognitionFailureReason = [NSString stringWithWString:resultImpl->ErrorDetails];
     
     switch (resultImpl->Reason)
     {
