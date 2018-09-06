@@ -1809,6 +1809,7 @@ int /*__cdecl*/ wmain(int argc, const wchar_t* argv[])
 /// UNIX main function converts arguments in UTF-8 encoding and passes to Visual-Studio style wmain() which takes wchar_t strings.
 int main(int argc, char* argv[])
 {
+    setlocale(LC_ALL, "");
     // TODO: change to STL containers
     wchar_t** wargs = new wchar_t*[argc];
     for (int i = 0; i < argc; ++i)

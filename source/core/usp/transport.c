@@ -749,7 +749,7 @@ static void WsioQueue(TransportRequest* request, TransportPacket* packet)
         return;
     }
 #ifdef LOG_TEXT_MESSAGES
-    if (packet->wstype == WSIO_MSG_TYPE_TEXT)
+    if (packet->wstype == WS_TEXT_FRAME)
     {
         LogInfo("Message sent:\n>>>>>>>>>>\n%.*s\n>>>>>>>>>>", packet->length, packet->buffer);
     }

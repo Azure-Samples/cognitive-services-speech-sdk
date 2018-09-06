@@ -51,6 +51,7 @@ void recognizeSpeech() {
 }
 
 int main(int argc, char **argv) {
+    setlocale(LC_ALL, "");
     recognizeSpeech();
     return 0;
 }
