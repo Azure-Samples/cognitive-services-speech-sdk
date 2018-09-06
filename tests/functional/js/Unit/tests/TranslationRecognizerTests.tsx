@@ -638,7 +638,8 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
     });
 });
 
-test("MultiPhrase", (done: jest.DoneCallback) => {
+// TODO: Need a shorter file to use.
+test.skip("MultiPhrase", (done: jest.DoneCallback) => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
