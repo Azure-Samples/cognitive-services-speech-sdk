@@ -27,7 +27,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public int SpeechStartedEventCount { get; set; }
 
         private TaskCompletionSource<int> taskCompletionSource;
-        private TimeSpan timeout = TimeSpan.FromSeconds(90);
+        private TimeSpan timeout = TimeSpan.FromMinutes(6);
 
         public SpeechRecognitionTestsHelper()
         {

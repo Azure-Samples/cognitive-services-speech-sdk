@@ -171,7 +171,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 await recognizer.StartContinuousRecognitionAsync();
                 // Make sure the task is rooted.
-                await Task.WhenAny(taskSource.Task, Task.Delay(TimeSpan.FromMinutes(3)));
+                await Task.WhenAny(taskSource.Task, Task.Delay(TimeSpan.FromMinutes(6)));
                 await recognizer.StopContinuousRecognitionAsync();
 
                 // Checking text results.

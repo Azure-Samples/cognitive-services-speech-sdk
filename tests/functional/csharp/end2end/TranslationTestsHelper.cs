@@ -19,7 +19,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public TranslationTestsHelper (SpeechFactory factory)
         {
             this.factory = factory;
-            timeout = TimeSpan.FromSeconds(200);
+            timeout = TimeSpan.FromMinutes(6);
         }
 
         TranslationRecognizer CreateTranslationRecognizer(string path, string fromLanguage, List<string> toLanguages, string voice=null)

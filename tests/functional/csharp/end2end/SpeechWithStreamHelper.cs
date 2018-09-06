@@ -22,7 +22,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public SpeechWithStreamHelper(SpeechFactory factory)
         {
             this.factory = factory;
-            timeout = TimeSpan.FromSeconds(200);
+            timeout = TimeSpan.FromMinutes(6);
         }
 
         SpeechRecognizer CreateSpeechRecognizerWithStream(String audioFile, String language = null, OutputFormat format = OutputFormat.Simple)

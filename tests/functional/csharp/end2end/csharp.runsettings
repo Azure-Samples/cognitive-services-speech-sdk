@@ -1,6 +1,6 @@
 <RunSettings>
     <MSTestV2>
-        <TestTimeout>180000</TestTimeout>
+        <TestTimeout>300000</TestTimeout>
     </MSTestV2>
     <TestRunParameters>
         <Parameter name="UnifiedSpeechSubscriptionKey" value=""/>

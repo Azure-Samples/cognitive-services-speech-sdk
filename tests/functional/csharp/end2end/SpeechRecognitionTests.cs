@@ -176,7 +176,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.IsTrue(helper.FinalResultEventCount > 0, $"Invalid number of final result events {helper.FinalResultEventCount}");
                 Assert.AreEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
                 Assert.AreEqual(1, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
-                Assert.IsTrue(helper.SpeechEndedEventCount > 0, $"Unexpected number of speech ended events {helper.SpeechEndedEventCount}");
                 Assert.IsTrue(recognizedText.Count > 0, $"Invalid number of text messages {recognizedText.Count}");
 
                 AssertMatching(TestData.English.Batman.Utterances[0], recognizedText[0]);
@@ -198,7 +197,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 Assert.AreEqual(numLoops, helper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
                 Assert.AreEqual(numLoops, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
-                Assert.AreEqual(numLoops, helper.SpeechEndedEventCount, AssertOutput.WrongSpeechEndedCount);
                 Assert.AreEqual(numLoops, helper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
                 Assert.AreEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
             }
@@ -216,7 +214,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 Assert.AreEqual(0, helper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
                 Assert.AreEqual(0, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
-                Assert.AreEqual(0, helper.SpeechEndedEventCount, AssertOutput.WrongSpeechEndedCount);
                 Assert.AreEqual(0, helper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
                 Assert.AreEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
             }
@@ -250,7 +247,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 Assert.AreEqual(diff, helper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
                 Assert.AreEqual(diff, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
-                Assert.AreEqual(diff, helper.SpeechEndedEventCount, AssertOutput.WrongSpeechEndedCount);
                 Assert.AreEqual(diff, helper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
                 Assert.AreEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
             }
@@ -274,7 +270,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Assert.AreEqual(1, helper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
                 Assert.AreEqual(0, helper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
                 Assert.AreEqual(0, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
-                Assert.AreEqual(0, helper.SpeechEndedEventCount, AssertOutput.WrongSpeechEndedCount);
                 Assert.AreEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
             }
         }
