@@ -17,7 +17,7 @@
 
 + (instancetype)stringWithWString:(const std::wstring&)str
 {
-    return [[NSString alloc] initWithBytes:str.data() length:str.size() encoding:CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingUTF32LE)];
+    return [[NSString alloc] initWithBytes:str.data() length:str.size()*sizeof(wchar_t) encoding:CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingUTF32LE)];
 }
 
 @end
