@@ -35,10 +35,4 @@ export class ByteBufferAudioInputStream extends sdk.AudioInputStream {
         const f: sdk.AudioInputStreamFormat = new sdk.AudioInputStreamFormat();
         return f;
     }
-
-    /**
-     * Closes the audio input stream.
-     */
-    public close(): void {
-    }
 }

@@ -2,18 +2,18 @@
 // copyright (c) Microsoft. All rights reserved.
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+import { promises } from "fs";
+import { setTimeout } from "timers";
 import * as sdk from "../../../../../source/bindings/js/distrib/Speech.Browser.Sdk";
 import { Settings } from "./Settings";
+import { default as WaitForCondition } from "./Utilities";
 import { WaveFileAudioInputStream } from "./WaveFileAudioInputStream";
-import { promises } from "fs";
-// import { SpeechRecognitionResult, CreateRecognizerWithFileAudioSource } from "../../../../../source/bindings/js/Speech.Browser.Sdk";
-import { setTimeout } from "timers";
-import { settings } from "cluster";
-import { WaitForCondition } from "./Utilities";
-import { doesNotReject } from "assert";
 
 const FIRST_EVENT_ID: number = 1;
-// private AtomicInteger eventIdentifier = new AtomicInteger(FIRST_EVENT_ID);
+const IntermediateResultReceived: string = "IntermediateResultReceived";
+const FinalResultReceived: string = "FinalResultReceived";
+const Session: string = "Session";
+const RecognitionErrorRaised: string = "RecognitionErrorRaised";
 
 let eventIdentifier: number;
 
@@ -22,38 +22,27 @@ beforeAll(() => {
     Settings.LoadSettings();
 });
 
-// -----------------------------------------------------------------------
-// ---
-// -----------------------------------------------------------------------
-
-// @Ignore
-// @Test
-test.skip("testDispose", ()=> {
+test.skip("testDispose", () => {
     // todo: make dispose method public
     fail("dispose not yet public");
 });
 
-// -----------------------------------------------------------------------
-// ---
-// -----------------------------------------------------------------------
-
-// @Test
-test("testSpeechRecognizer1", ()=> {
+test("testSpeechRecognizer1", () => {
 
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
     const r: sdk.SpeechRecognizer = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
     expect(r).not.toBeUndefined();
-// ??     assertNotNull(r.getRecoImpl());
+    // ??     assertNotNull(r.getRecoImpl());
     expect(r instanceof sdk.Recognizer);
 
     r.close();
     s.close();
 });
 /*
-// @Test
-test("testSpeechRecognizer2", done => {
+
+test("testSpeechRecognizer2", (done: jest.DoneCallback) => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
@@ -73,8 +62,8 @@ test("testSpeechRecognizer2", done => {
             r.close();
             s.close();
         },
-        (err) => {
-            fail(err);
+        (err:string) => {
+            fail(err:string);
             done();
 
             r.close();
@@ -82,11 +71,6 @@ test("testSpeechRecognizer2", done => {
         });
 });
 
-// -----------------------------------------------------------------------
-// ---
-// -----------------------------------------------------------------------
-
-// @Test
 test("testGetDeploymentId", ()=> {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
@@ -103,7 +87,6 @@ test("testGetDeploymentId", ()=> {
     s.close();
 });
 
-// @Test
 test("testSetDeploymentId", ()=> {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
@@ -125,12 +108,8 @@ test("testSetDeploymentId", ()=> {
     s.close();
 });
 */
-// -----------------------------------------------------------------------
-// ---
-// -----------------------------------------------------------------------
 
-// @Test
-test("testGetLanguage1", ()=> {
+test("testGetLanguage1", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
@@ -146,8 +125,7 @@ test("testGetLanguage1", ()=> {
     s.close();
 });
 
-// @Test
-test("testGetLanguage2", ()=> {
+test("testGetLanguage2", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
@@ -165,12 +143,7 @@ test("testGetLanguage2", ()=> {
     s.close();
 });
 
-// -----------------------------------------------------------------------
-// ---
-// -----------------------------------------------------------------------
-
-// @Test
-test("testGetOutputFormatDefault", ()=> {
+test("testGetOutputFormatDefault", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
@@ -183,14 +156,13 @@ test("testGetOutputFormatDefault", ()=> {
     s.close();
 });
 
-// @Test
-test("testGetOutputFormatDetailed", ()=> {
+test("testGetOutputFormatDetailed", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const language:string = "de-DE";
+    const language: string = "de-DE";
     const r: sdk.SpeechRecognizer =
-     s.createSpeechRecognizerWithFileInputAndLanguageAndOutput(Settings.WaveFile, language, sdk.OutputFormat.Detailed);
+        s.createSpeechRecognizerWithFileInputAndLanguageAndOutput(Settings.WaveFile, language, sdk.OutputFormat.Detailed);
     expect(r).not.toBeUndefined();
 
     expect(r.outputFormat === sdk.OutputFormat.Detailed);
@@ -199,12 +171,7 @@ test("testGetOutputFormatDetailed", ()=> {
     s.close();
 });
 
-// -----------------------------------------------------------------------
-// ---
-// -----------------------------------------------------------------------
-
-// @Test
-test("testGetParameters", ()=> {
+test("testGetParameters", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
@@ -214,18 +181,14 @@ test("testGetParameters", ()=> {
     expect(r.parameters).not.toBeUndefined();
     // expect(r.language ==  r.parameters.get(RecognizerParameterNames.SpeechRecognitionLanguage));
     // expect(r.deploymentId == r.parameters.get(RecognizerParameterNames.SpeechModelId)); // TODO: is this really the correct mapping?
-    expect(r.language ===  r.parameters.get("SPEECH-Language", null));
+    expect(r.language === r.parameters.get("SPEECH-Language", null));
     expect(r.deploymentId === r.parameters.get("SPEECH=ModelId", null)); // todo: is this really the correct mapping?
 
     r.close();
     s.close();
 });
-// -----------------------------------------------------------------------
-// ---
-// -----------------------------------------------------------------------
 
-// @Test
-test("testRecognizeAsync1", done => {
+test("testRecognizeAsync1", (done: jest.DoneCallback) => {
 
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
@@ -238,7 +201,7 @@ test("testRecognizeAsync1", done => {
     expect(r instanceof sdk.Recognizer);
 
     r.recognizeAsync(
-        (p2) => {
+        (p2: sdk.SpeechRecognitionResult) => {
             const res: sdk.SpeechRecognitionResult = p2;
             expect(res).not.toBeUndefined();
             expect(sdk.RecognitionStatus.Recognized === res.reason);
@@ -249,19 +212,15 @@ test("testRecognizeAsync1", done => {
             done();
 
         },
-        (error) => {
-            console.error("Error: " + error);
-            expect(false).toEqual(true);
-
+        (error: string) => {
             r.close();
             s.close();
-            done();
+            setTimeout(() => done(), 1);
+            fail(error);
         });
 });
 
-// @Ignore("TODO why does not get whats the weather like")
-// @Test
-test("testRecognizeAsync2", done => {
+test("testRecognizeAsync2", (done: jest.DoneCallback) => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
@@ -275,30 +234,30 @@ test("testRecognizeAsync2", done => {
     const eventsMap: { [id: string]: number; } = {};
     eventIdentifier = 1;
 
-    r.FinalResultReceived = (o, e) => {
-        eventsMap["FinalResultReceived"] = eventIdentifier++;
+    r.FinalResultReceived = (o: sdk.Recognizer, e: sdk.SpeechRecognitionResultEventArgs) => {
+        eventsMap[FinalResultReceived] = eventIdentifier++;
     };
 
-    r.IntermediateResultReceived = (o, e) => {
+    r.IntermediateResultReceived = (o: sdk.Recognizer, e: sdk.SpeechRecognitionResultEventArgs) => {
         const now: number = eventIdentifier++;
-        eventsMap["IntermediateResultReceived-" + Date.now().toPrecision(4)] = now;
-        eventsMap["IntermediateResultReceived"] = now;
+        eventsMap[IntermediateResultReceived + "-" + Date.now().toPrecision(4)] = now;
+        eventsMap[IntermediateResultReceived] = now;
     };
 
-    r.RecognitionErrorRaised = (o, e) => {
-        eventsMap["RecognitionErrorRaised"] = eventIdentifier++;
+    r.RecognitionErrorRaised = (o: sdk.Recognizer, e: sdk.RecognitionErrorEventArgs) => {
+        eventsMap[RecognitionErrorRaised] = eventIdentifier++;
     };
 
     // todo eventType should be renamed and be a function getEventType()
-    r.RecognitionEvent = (o, e) => {
+    r.RecognitionEvent = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs) => {
         const now: number = eventIdentifier++;
         eventsMap[e.eventType.toString()] = now;
     };
 
-    r.SessionEvent = (o, e) => {
+    r.SessionEvent = (o: sdk.Recognizer, e: sdk.SessionEventArgs) => {
         const now: number = eventIdentifier++;
-        eventsMap["session" + e.eventType.toString()] = now;
-        eventsMap["session" + e.eventType.toString() + "-" + Date.now().toPrecision(4)] = now;
+        eventsMap[Session + e.eventType.toString()] = now;
+        eventsMap[Session + e.eventType.toString() + "-" + Date.now().toPrecision(4)] = now;
     };
 
     // note: TODO session stopped event not necessarily raised before async operation returns!
@@ -315,16 +274,16 @@ test("testRecognizeAsync2", done => {
 
             expect(LAST_RECORDED_EVENT_ID).toBeGreaterThan(FIRST_EVENT_ID);
 
-            expect("session" + sdk.SessionEventType.SessionStartedEvent in eventsMap).toEqual(true);
-            expect(eventsMap["session" + sdk.SessionEventType.SessionStartedEvent.toString()]).toEqual(FIRST_EVENT_ID);
+            expect(Session + sdk.SessionEventType.SessionStartedEvent in eventsMap).toEqual(true);
+            expect(eventsMap[Session + sdk.SessionEventType.SessionStartedEvent.toString()]).toEqual(FIRST_EVENT_ID);
 
-            if ("session" + sdk.SessionEventType.SessionStoppedEvent.toString() in eventsMap) {
-                expect(LAST_RECORDED_EVENT_ID).toEqual(eventsMap["session" + sdk.SessionEventType.SessionStoppedEvent.toString()]);
+            if (Session + sdk.SessionEventType.SessionStoppedEvent.toString() in eventsMap) {
+                expect(LAST_RECORDED_EVENT_ID).toEqual(eventsMap[Session + sdk.SessionEventType.SessionStoppedEvent.toString()]);
             }
             // end events come after start events.
-            if ("session" + sdk.SessionEventType.SessionStoppedEvent.toString() in eventsMap) {
-                expect(eventsMap["session" + sdk.SessionEventType.SessionStartedEvent.toString()])
-                    .toBeLessThan(eventsMap["session" + sdk.SessionEventType.SessionStoppedEvent.toString()]);
+            if (Session + sdk.SessionEventType.SessionStoppedEvent.toString() in eventsMap) {
+                expect(eventsMap[Session + sdk.SessionEventType.SessionStartedEvent.toString()])
+                    .toBeLessThan(eventsMap[Session + sdk.SessionEventType.SessionStoppedEvent.toString()]);
             }
 
             expect(eventsMap[sdk.RecognitionEventType.SpeechStartDetectedEvent.toString()])
@@ -334,31 +293,31 @@ test("testRecognizeAsync2", done => {
             // make sure, first end of speech, then final result
             expect((LAST_RECORDED_EVENT_ID - 2)).toEqual(eventsMap[sdk.RecognitionEventType.SpeechEndDetectedEvent.toString()]);
 
-            expect((LAST_RECORDED_EVENT_ID - 1)).toEqual(eventsMap["FinalResultReceived"]);
+            expect((LAST_RECORDED_EVENT_ID - 1)).toEqual(eventsMap[FinalResultReceived]);
 
             // recognition events come after session start but before session end events
-            expect(eventsMap["session" + sdk.SessionEventType.SessionStartedEvent.toString()])
+            expect(eventsMap[Session + sdk.SessionEventType.SessionStartedEvent.toString()])
                 .toBeLessThan(eventsMap[sdk.RecognitionEventType.SpeechStartDetectedEvent.toString()]);
 
-            if ("session" + sdk.SessionEventType.SessionStoppedEvent.toString() in eventsMap) {
+            if (Session + sdk.SessionEventType.SessionStoppedEvent.toString() in eventsMap) {
                 expect(eventsMap[sdk.RecognitionEventType.SpeechEndDetectedEvent.toString()])
-                    .toBeLessThan(eventsMap["session" + sdk.SessionEventType.SessionStoppedEvent.toString()]);
+                    .toBeLessThan(eventsMap[Session + sdk.SessionEventType.SessionStoppedEvent.toString()]);
             }
 
             // there is no partial result reported after the final result
             // (and check that we have intermediate and final results recorded)
-            if ("IntermediateResultReceived" in eventsMap) {
-                expect(eventsMap["IntermediateResultReceived"])
+            if (IntermediateResultReceived in eventsMap) {
+                expect(eventsMap[IntermediateResultReceived])
                     .toBeGreaterThan(eventsMap[sdk.RecognitionEventType.SpeechStartDetectedEvent.toString()]);
             }
 
             // speech should stop before getting the final result.
-            expect(eventsMap["FinalResultReceived"]).toBeGreaterThan(eventsMap[sdk.RecognitionEventType.SpeechEndDetectedEvent.toString()]);
+            expect(eventsMap[FinalResultReceived]).toBeGreaterThan(eventsMap[sdk.RecognitionEventType.SpeechEndDetectedEvent.toString()]);
 
-            expect(eventsMap["IntermediateResultReceived"]).toBeLessThan(eventsMap["FinalResultReceived"]);
+            expect(eventsMap[IntermediateResultReceived]).toBeLessThan(eventsMap[FinalResultReceived]);
 
             // make sure events we don't expect, don't get raised
-            expect("RecognitionErrorRaised" in eventsMap).toBeFalsy();
+            expect(RecognitionErrorRaised in eventsMap).toBeFalsy();
 
             r.close();
             s.close();
@@ -374,12 +333,7 @@ test("testRecognizeAsync2", done => {
 
 }, 15000);
 
-// -----------------------------------------------------------------------
-// ---
-// -----------------------------------------------------------------------
-
-// @Test
-test("testStartContinuousRecognitionAsync", done => {
+test("testStartContinuousRecognitionAsync", (done: jest.DoneCallback) => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
@@ -395,7 +349,7 @@ test("testStartContinuousRecognitionAsync", done => {
         () => {
             done();
         },
-        (err) => {
+        (err: string) => {
             expect(false).toEqual(true);
             done();
         });
@@ -404,8 +358,7 @@ test("testStartContinuousRecognitionAsync", done => {
     s.close();
 });
 
-// @Test
-test("testStopContinuousRecognitionAsync", done => {
+test("testStopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
@@ -422,26 +375,21 @@ test("testStopContinuousRecognitionAsync", done => {
                 () => {
                     done();
                 },
-                (err) => {
+                (err: string) => {
                     expect(false).toEqual(true);
                     done();
                 });
         },
-        (err) => {
+        (err: string) => {
             expect(false).toEqual(true);
             done();
         });
-
-    setTimeout(() => {
-        // empty
-    }, 1000);
 
     r.close();
     s.close();
 });
 
-// @Test
-test("testStartStopContinuousRecognitionAsync", done => {
+test("testStartStopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
@@ -454,7 +402,7 @@ test("testStartStopContinuousRecognitionAsync", done => {
 
     const rEvents: string[] = [];
 
-    r.FinalResultReceived = (o, e) => {
+    r.FinalResultReceived = (o: sdk.Recognizer, e: sdk.SpeechRecognitionResultEventArgs) => {
         rEvents.push("Result@" + Date.now().toPrecision(4).toString() + ": " + e.result.reason + "/" + e.result.text);
     };
 
@@ -463,7 +411,7 @@ test("testStartStopContinuousRecognitionAsync", done => {
         () => {
             done();
         },
-        (error) => {
+        (error: string) => {
             fail(error);
             r.close();
             s.close();
@@ -471,11 +419,6 @@ test("testStartStopContinuousRecognitionAsync", done => {
         });
 });
 
-// -----------------------------------------------------------------------
-// ---
-// -----------------------------------------------------------------------
-
-// @Test
 test("testGetRecoImpl", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
@@ -491,18 +434,11 @@ test("testGetRecoImpl", () => {
     s.close();
 });
 
-// -----------------------------------------------------------------------
-// ---
-// -----------------------------------------------------------------------
-
-// @Ignore
-// @Test
 test.skip("testRecognizer", () => {
     // todo: constructor is protected,
     fail("Not yet implemented");
 });
 
-// @Test
 test("testClose", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
