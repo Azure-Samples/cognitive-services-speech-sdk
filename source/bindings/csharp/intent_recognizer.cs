@@ -136,10 +136,10 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <summary>
         /// Adds an intent from Language Understanding service for recognition.
         /// </summary>
-        /// <param name="intentId">A string that represents the identifier of the intent to be recognized.</param>
+        /// <param name="intentId">A string that represents the identifier of the intent to be recognized. Ignored if intentName is empty.</param>
         /// <param name="model">The language understanding model from Language Understanding service.</param>
-        /// <param name="intentName">The intent name defined in the language understanding model. If it is null, all intent names defined in the model will be added.</param>
-        public void AddIntent(string intentId, LanguageUnderstandingModel model, string intentName = null)
+        /// <param name="intentName">The intent name defined in the language understanding model (optional). If it is empty, all intent names defined in the model will be added.</param>
+        public void AddIntent(string intentId, LanguageUnderstandingModel model, string intentName = "")
         {
             var trigger = Microsoft.CognitiveServices.Speech.Internal.IntentTrigger.From(model.modelImpl, intentName);
             recoImpl.AddIntent(intentId, trigger);

@@ -127,9 +127,9 @@ export class IntentRecognizer extends Recognizer {
 
     /**
      * Adds an intent from Language Understanding service for recognition.
-     * @param intentId A String that represents the identifier of the intent to be recognized.
+     * @param intentId A String that represents the identifier of the intent to be recognized. Ignored if intentName is empty.
      * @param model The intent model from Language Understanding service.
-     * @param intentName The intent name defined in the intent model. If it is null, all intent names defined in the model will be added.
+     * @param intentName The intent name defined in the intent model. If it is empty, all intent names defined in the model will be added.
      */
     public addIntentWithLanguageModel(intentId: string, model: LanguageUnderstandingModel, intentName: string): void {
         Contracts.throwIfDisposed(this.disposedIntentRecognizer);

@@ -428,7 +428,7 @@ phases:
     inputs:
       testAssembly: '**\Microsoft.CognitiveServices.Speech.Tests*.dll;-:**\obj\**'
       runSettingsFile: 'tests/functional/csharp/end2end/csharp.runsettings'
-      overrideTestrunParameters: 'UnifiedSpeechSubscriptionKey=$(KeySkyman);Region=westus;InputDir=$(Build.Repository.LocalPath)/tests/input;DeploymentId=$(TEST_MODEL_ID)'
+      overrideTestrunParameters: 'UnifiedSpeechSubscriptionKey=$(KeySkyman);Region=westus;InputDir=$(Build.Repository.LocalPath)/tests/input;DeploymentId=$(TEST_MODEL_ID);LanguageUnderstandingSubscriptionKey=$(luis-westus-s0-201809-key1);LanguageUnderstandingServiceRegion=westus;LanguageUnderstandingHomeAutomationAppId=$(TEST_INTENT_HOMEAUTOMATION_APPID)'
       runInParallel: False
       vsTestVersion: latest
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
@@ -818,7 +818,16 @@ phases:
       # dotnet test does not allow to supply TestRunParameters from command-line?!
       perl -pi - tests/functional/csharp/end2end/csharp.runsettings <<"SCRIPT"
         BEGIN {
-          %A = qw(UnifiedSpeechSubscriptionKey $(KeySkyman) Region westus DeploymentId $(TEST_MODEL_ID) InputDir /test/tests/input/);
+          %A = qw(
+            UnifiedSpeechSubscriptionKey $(KeySkyman)
+            Region westus
+            DeploymentId $(TEST_MODEL_ID)
+            InputDir /test/tests/input/
+            LanguageUnderstandingSubscriptionKey $(luis-westus-s0-201809-key1)
+            LanguageUnderstandingServiceRegion westus
+            LanguageUnderstandingHomeAutomationAppId $(TEST_INTENT_HOMEAUTOMATION_APPID)
+          );
+
           $keysRe = "(?:\\b" . (join "\\b|\\b", keys %A) . "\\b)";
           $keysRe = qr/$keysRe/;
         }

@@ -88,6 +88,19 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 public static readonly string AudioFile = Path.Combine(AudioDir, "silenceshort.wav");
             }
+            public sealed class HomeAutomation
+            {
+                public sealed class TurnOn
+                {
+                    public static readonly string AudioFile = Path.Combine(AudioDir, "TurnOnTheLamp.wav");
+                    public static readonly string Utterance = "Turn on the lamp.";
+                }
+                public sealed class TurnOff
+                {
+                    public static readonly string AudioFile = Path.Combine(AudioDir, "ShutDownTheComputer.wav");
+                    public static readonly string Utterance = "Shut down the computer.";
+                }
+            }
         }
 
         public sealed class French

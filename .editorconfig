@@ -1,6 +1,6 @@
 root = true
 
-[*.{c,cpp,cs,h,i,java,py}]
+[*.{c,cpp,cs,h,i,java,py,runsettings}]
 indent_style = space
 indent_size = 4
 trim_trailing_whitespace = true

@@ -7,5 +7,8 @@
         <Parameter name="Region" value="westus"/>
         <Parameter name="DeploymentId" value=""/>
         <Parameter name="InputDir" value="..\..\..\tests\input\"/>
+        <Parameter name="LanguageUnderstandingSubscriptionKey" value=""/>
+        <Parameter name="LanguageUnderstandingServiceRegion" value="westus"/>
+        <Parameter name="LanguageUnderstandingHomeAutomationAppId" value=""/>
     </TestRunParameters>
 </RunSettings>

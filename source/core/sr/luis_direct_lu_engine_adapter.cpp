@@ -180,7 +180,7 @@ void CSpxLuisDirectEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionR
             SPX_DBG_TRACE_VERBOSE("IntentRecognitionResult::IntentId == '%ls'", intentId.c_str());
 
             // If we have a valid IntentId...
-            bool validIntentResult = !intentId.empty() || (m_emptyIntentNameOk && !json.empty());
+            bool validIntentResult = !intentId.empty();
             if (validIntentResult)
             {
                 // Update our result to be an "Intent" result, with the appropriate ID and JSON payload
@@ -256,7 +256,7 @@ std::wstring CSpxLuisDirectEngineAdapter::IntentIdFromIntentName(const std::wstr
     {
         return m_intentNameToIdMap[intentName];
     }
-    return L"X-" + intentName;
+    return m_emptyIntentNameOk ? intentName : L"";
 }
 
 
