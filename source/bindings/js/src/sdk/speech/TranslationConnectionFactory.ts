@@ -5,6 +5,7 @@ import {
     Promise,
     Storage,
 } from "../../common/Exports";
+import { FactoryParameterNames } from "../speech.browser/Exports";
 import {
     AuthInfo,
     IAuthentication,
@@ -14,8 +15,7 @@ import {
     SpeechResultFormat,
     TranslationConfig,
     WebsocketMessageFormatter,
-} from "../speech/Exports";
-import { FactoryParameterNames } from "./Exports";
+} from "./Exports";
 
 const TestHooksParamName: string = "testhooks";
 const ConnectionIdHeader: string = "X-ConnectionId";

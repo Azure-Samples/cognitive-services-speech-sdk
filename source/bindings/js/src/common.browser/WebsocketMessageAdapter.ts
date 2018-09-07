@@ -78,12 +78,17 @@ export class WebsocketMessageAdapter {
         this.connectionEstablishDeferral = new Deferred<ConnectionOpenResponse>();
         this.connectionState = ConnectionState.Connecting;
 
-        this.websocketClient = new WebSocket(this.uri);
-        this.websocketClient.binaryType = "arraybuffer";
-        this.receivingMessageQueue = new Queue<ConnectionMessage>();
-        this.disconnectDeferral = new Deferred<boolean>();
-        this.sendMessageQueue = new Queue<ISendItem>();
-        this.ProcessSendQueue();
+        try {
+            this.websocketClient = new WebSocket(this.uri);
+            this.websocketClient.binaryType = "arraybuffer";
+            this.receivingMessageQueue = new Queue<ConnectionMessage>();
+            this.disconnectDeferral = new Deferred<boolean>();
+            this.sendMessageQueue = new Queue<ISendItem>();
+            this.ProcessSendQueue();
+        } catch (error) {
+            this.connectionEstablishDeferral.Resolve(new ConnectionOpenResponse(500, error));
+            return this.connectionEstablishDeferral.Promise();
+        }
 
         this.OnEvent(new ConnectionStartEvent(this.connectionId, this.uri));
 
@@ -183,7 +188,7 @@ export class WebsocketMessageAdapter {
 
     public Close = (reason?: string): Promise<boolean> => {
         if (this.websocketClient) {
-            if (this.connectionState !== ConnectionState.Connected) {
+            if (this.connectionState !== ConnectionState.Disconnected) {
                 this.websocketClient.close(1000, reason ? reason : "Normal closure by client");
             }
         } else {
@@ -201,6 +206,11 @@ export class WebsocketMessageAdapter {
 
     private SendRawMessage = (sendItem: ISendItem): Promise<boolean> => {
         try {
+            // indicates we are draining the queue and it came with no message;
+            if (!sendItem) {
+                return PromiseHelper.FromResult(true);
+            }
+
             this.OnEvent(new ConnectionMessageSentEvent(this.connectionId, new Date().toISOString(), sendItem.Message));
             this.websocketClient.send(sendItem.RawWebsocketMessage.Payload);
             return PromiseHelper.FromResult(true);
@@ -228,6 +238,11 @@ export class WebsocketMessageAdapter {
         this.sendMessageQueue
             .Dequeue()
             .On((sendItem: ISendItem) => {
+                // indicates we are draining the queue and it came with no message;
+                if (!sendItem) {
+                    return;
+                }
+
                 this.SendRawMessage(sendItem)
                     .On((result: boolean) => {
                         sendItem.SendStatusDeferral.Resolve(result);

@@ -4,7 +4,7 @@
 //
 import { FileAudioSource } from "../../common.browser/Exports";
 import { IAudioSource } from "../../common/Exports";
-import { IAuthentication, IConnectionFactory, IDetailedSpeechPhrase, ISimpleSpeechPhrase, ISpeechFragment, RecognitionMode, RecognitionStatus2, RecognizerConfig, ServiceRecognizerBase, SpeechConfig, SpeechRecognitionEvent, SpeechRecognitionResultEvent, SpeechResultFormat, SpeechServiceRecognizer } from "../speech/Exports";
+import { IAuthentication, IConnectionFactory, IDetailedSpeechPhrase, ISimpleSpeechPhrase, ISpeechFragment, RecognitionCompletionStatus, RecognitionEndedEvent, RecognitionMode, RecognitionStatus2, RecognizerConfig, ServiceRecognizerBase, SpeechConfig, SpeechRecognitionEvent, SpeechRecognitionResultEvent, SpeechServiceRecognizer } from "../speech/Exports";
 import { SpeechConnectionFactory } from "../speech/SpeechConnectionFactory";
 import { Contracts } from "./Contracts";
 import { AudioInputStream, FactoryParameterNames, ISpeechProperties, KeywordRecognitionModel, OutputFormat, RecognitionErrorEventArgs, RecognitionStatus, Recognizer, RecognizerParameterNames, SpeechRecognitionResult, SpeechRecognitionResultEventArgs } from "./Exports";
@@ -123,115 +123,7 @@ export class SpeechRecognizer extends Recognizer {
                 return;
             }
 
-            /*
-             Alternative syntax for typescript devs.
-             if (event instanceof SDK.RecognitionTriggeredEvent)
-            */
-            switch (event.Name) {
-                case "SpeechSimplePhraseEvent":
-                {
-                    const evResult = event as SpeechRecognitionResultEvent<ISimpleSpeechPhrase>;
-
-                    const reason = this.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
-                    if (reason === RecognitionStatus.Canceled) {
-                        const ev = new RecognitionErrorEventArgs();
-                        ev.sessionId = evResult.SessionId;
-                        ev.status = reason;
-
-                        if (!!this.RecognitionErrorRaised) {
-                            this.RecognitionErrorRaised(this, ev);
-                        }
-
-                        // report result to promise.
-                        if (!!err) {
-                            err(evResult.Result.DisplayText);
-                            err = undefined;
-                        }
-                    } else {
-                        const ev = new SpeechRecognitionResultEventArgs();
-                        ev.sessionId = evResult.SessionId;
-
-                        ev.result = new SpeechRecognitionResult();
-                        ev.result.json = JSON.stringify(evResult.Result);
-                        ev.result.offset = evResult.Result.Offset;
-                        ev.result.duration = evResult.Result.Duration;
-                        ev.result.text = evResult.Result.DisplayText;
-                        ev.result.reason = reason;
-
-                        if (!!this.FinalResultReceived) {
-                            this.FinalResultReceived(this, ev);
-                        }
-
-                        // report result to promise.
-                        if (!!cb) {
-                            cb(ev.result);
-                            cb = undefined;
-                        }
-                    }
-                }
-                break;
-
-                case "SpeechDetailedPhraseEvent":
-                {
-                    const evResult = event as SpeechRecognitionResultEvent<IDetailedSpeechPhrase>;
-
-                    const reason = this.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
-                    if (reason === RecognitionStatus.Canceled) {
-                        const ev = new RecognitionErrorEventArgs();
-                        ev.sessionId = evResult.SessionId;
-                        ev.status = reason;
-
-                        if (!!this.RecognitionErrorRaised) {
-                            this.RecognitionErrorRaised(this, ev);
-                        }
-
-                        // report result to promise.
-                        if (!!err) {
-                            err(JSON.stringify(evResult.Result));
-                            err = undefined;
-                        }
-                    } else {
-                        const ev = new SpeechRecognitionResultEventArgs();
-                        ev.sessionId = evResult.SessionId;
-
-                        ev.result = new SpeechRecognitionResult();
-                        ev.result.json = JSON.stringify(evResult.Result);
-                        ev.result.offset = evResult.Result.Offset;
-                        ev.result.duration = evResult.Result.Duration;
-                        ev.result.reason = reason;
-
-                        if (!!this.FinalResultReceived) {
-                            this.FinalResultReceived(this, ev);
-                        }
-
-                        // report result to promise.
-                        if (!!cb) {
-                            cb(ev.result);
-                            cb = undefined;
-                        }
-                    }
-                }
-                break;
-
-                case "SpeechHypothesisEvent":
-                {
-                    const evResult = event as SpeechRecognitionResultEvent<ISpeechFragment>;
-
-                    const ev = new SpeechRecognitionResultEventArgs();
-                    ev.sessionId = evResult.SessionId;
-
-                    ev.result = new SpeechRecognitionResult();
-                    ev.result.json = JSON.stringify(evResult.Result);
-                    ev.result.offset = evResult.Result.Offset;
-                    ev.result.duration = evResult.Result.Duration;
-                    ev.result.text = evResult.Result.Text;
-
-                    if (!!this.IntermediateResultReceived) {
-                        this.IntermediateResultReceived(this, ev);
-                    }
-                }
-                break;
-            }
+            this.implDispatchMessageHandler(event, cb, err);
         });
     }
 
@@ -271,91 +163,7 @@ export class SpeechRecognizer extends Recognizer {
                 cb = undefined;
             }
 
-            /*
-             Alternative syntax for typescript devs.
-             if (event instanceof SDK.RecognitionTriggeredEvent)
-            */
-            switch (event.Name) {
-                case "SpeechSimplePhraseEvent":
-                {
-                    const evResult = event as SpeechRecognitionResultEvent<ISimpleSpeechPhrase>;
-
-                    const reason = this.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
-                    if (reason === RecognitionStatus.Canceled) {
-                        const ev = new RecognitionErrorEventArgs();
-                        ev.sessionId = evResult.SessionId;
-                        ev.status = reason;
-
-                        if (!!this.RecognitionErrorRaised) {
-                            this.RecognitionErrorRaised(this, ev);
-                        }
-                    } else {
-                        const ev = new SpeechRecognitionResultEventArgs();
-                        ev.sessionId = evResult.SessionId;
-
-                        ev.result = new SpeechRecognitionResult();
-                        ev.result.json = JSON.stringify(evResult.Result);
-                        ev.result.offset = evResult.Result.Offset;
-                        ev.result.duration = evResult.Result.Duration;
-                        ev.result.text = evResult.Result.DisplayText;
-                        ev.result.reason = reason;
-
-                        if (!!this.FinalResultReceived) {
-                            this.FinalResultReceived(this, ev);
-                        }
-                    }
-                }
-                break;
-
-                case "SpeechDetailedPhraseEvent":
-                {
-                    const evResult = event as SpeechRecognitionResultEvent<IDetailedSpeechPhrase>;
-
-                    const reason = this.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
-                    if (reason === RecognitionStatus.Canceled) {
-                        const ev = new RecognitionErrorEventArgs();
-                        ev.sessionId = evResult.SessionId;
-                        ev.status = reason;
-
-                        if (!!this.RecognitionErrorRaised) {
-                            this.RecognitionErrorRaised(this, ev);
-                        }
-                    } else {
-                        const ev = new SpeechRecognitionResultEventArgs();
-                        ev.sessionId = evResult.SessionId;
-
-                        ev.result = new SpeechRecognitionResult();
-                        ev.result.json = JSON.stringify(evResult.Result);
-                        ev.result.offset = evResult.Result.Offset;
-                        ev.result.duration = evResult.Result.Duration;
-                        ev.result.reason = reason;
-
-                        if (!!this.FinalResultReceived) {
-                            this.FinalResultReceived(this, ev);
-                        }
-                    }
-                }
-                break;
-
-                case "SpeechHypothesisEvent":
-                {
-                    const evResult = event as SpeechRecognitionResultEvent<ISpeechFragment>;
-
-                    const ev = new SpeechRecognitionResultEventArgs();
-                    ev.sessionId = evResult.SessionId;
-
-                    ev.result = new SpeechRecognitionResult();
-                    ev.result.json = JSON.stringify(evResult.Result);
-                    ev.result.offset = evResult.Result.Offset;
-                    ev.result.duration = evResult.Result.Duration;
-                    ev.result.text = evResult.Result.Text;
-
-                    if (!!this.IntermediateResultReceived) {
-                        this.IntermediateResultReceived(this, ev);
-                    }
-                }
-                break;
-            }
+            this.implDispatchMessageHandler(event, undefined, err);
         });
     }
 
@@ -443,11 +251,145 @@ export class SpeechRecognizer extends Recognizer {
     private implCloseExistingRecognizer(): void {
         if (this.reco) {
             this.reco.AudioSource.TurnOff();
+            this.reco.Dispose();
             this.reco = undefined;
         }
     }
 
-    private implTranslateRecognitionResult(recognitionStatus: RecognitionStatus2): RecognitionStatus {
+    private implDispatchMessageHandler(event: SpeechRecognitionEvent, cb?: (e: SpeechRecognitionResult) => void, err?: (e: string) => void): void {
+        /*
+         Alternative syntax for typescript devs.
+         if (event instanceof SDK.RecognitionTriggeredEvent)
+        */
+       switch (event.Name) {
+        case "RecognitionEndedEvent":
+        {
+            const recoEndedEvent: RecognitionEndedEvent = event as RecognitionEndedEvent;
+            if (recoEndedEvent.Status !== RecognitionCompletionStatus.Success) {
+                const errorEvent: RecognitionErrorEventArgs = new RecognitionErrorEventArgs();
+
+                errorEvent.status = RecognitionStatus.Canceled;
+                errorEvent.sessionId = recoEndedEvent.SessionId;
+                errorEvent.error = recoEndedEvent.Error;
+
+                if (this.RecognitionErrorRaised) {
+                    this.RecognitionErrorRaised(this, errorEvent); // call error handler, if configured
+                }
+
+                if (!!err) {
+                    err(recoEndedEvent.Error); // call error handler, if configured
+                }
+            }
+        }
+        break;
+
+        case "SpeechSimplePhraseEvent":
+        {
+            const evResult = event as SpeechRecognitionResultEvent<ISimpleSpeechPhrase>;
+
+            const reason = this.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
+            if (reason === RecognitionStatus.Canceled) {
+                const ev = new RecognitionErrorEventArgs();
+                ev.sessionId = evResult.SessionId;
+                ev.status = reason;
+
+                if (!!this.RecognitionErrorRaised) {
+                    this.RecognitionErrorRaised(this, ev);
+                }
+
+                // report result to promise.
+                if (!!err) {
+                    err(evResult.Result.DisplayText);
+                    err = undefined;
+                }
+            } else {
+                const ev = new SpeechRecognitionResultEventArgs();
+                ev.sessionId = evResult.SessionId;
+
+                ev.result = new SpeechRecognitionResult();
+                ev.result.json = JSON.stringify(evResult.Result);
+                ev.result.offset = evResult.Result.Offset;
+                ev.result.duration = evResult.Result.Duration;
+                ev.result.text = evResult.Result.DisplayText;
+                ev.result.reason = reason;
+
+                if (!!this.FinalResultReceived) {
+                    this.FinalResultReceived(this, ev);
+                }
+
+                // report result to promise.
+                if (!!cb) {
+                    cb(ev.result);
+                    cb = undefined;
+                }
+            }
+        }
+        break;
+
+        case "SpeechDetailedPhraseEvent":
+        {
+            const evResult = event as SpeechRecognitionResultEvent<IDetailedSpeechPhrase>;
+
+            const reason = this.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
+            if (reason === RecognitionStatus.Canceled) {
+                const ev = new RecognitionErrorEventArgs();
+                ev.sessionId = evResult.SessionId;
+                ev.status = reason;
+
+                if (!!this.RecognitionErrorRaised) {
+                    this.RecognitionErrorRaised(this, ev);
+                }
+
+                // report result to promise.
+                if (!!err) {
+                    err(JSON.stringify(evResult.Result));
+                    err = undefined;
+                }
+            } else {
+                const ev = new SpeechRecognitionResultEventArgs();
+                ev.sessionId = evResult.SessionId;
+
+                ev.result = new SpeechRecognitionResult();
+                ev.result.json = JSON.stringify(evResult.Result);
+                ev.result.offset = evResult.Result.Offset;
+                ev.result.duration = evResult.Result.Duration;
+                ev.result.reason = reason;
+
+                if (!!this.FinalResultReceived) {
+                    this.FinalResultReceived(this, ev);
+                }
+
+                // report result to promise.
+                if (!!cb) {
+                    cb(ev.result);
+                    cb = undefined;
+                }
+            }
+        }
+        break;
+
+        case "SpeechHypothesisEvent":
+        {
+            const evResult = event as SpeechRecognitionResultEvent<ISpeechFragment>;
+
+            const ev = new SpeechRecognitionResultEventArgs();
+            ev.sessionId = evResult.SessionId;
+
+            ev.result = new SpeechRecognitionResult();
+            ev.result.json = JSON.stringify(evResult.Result);
+            ev.result.offset = evResult.Result.Offset;
+            ev.result.duration = evResult.Result.Duration;
+            ev.result.text = evResult.Result.Text;
+
+            if (!!this.IntermediateResultReceived) {
+                this.IntermediateResultReceived(this, ev);
+            }
+        }
+        break;
+    }
+}
+
+private implTranslateRecognitionResult(recognitionStatus: RecognitionStatus2): RecognitionStatus {
         let reason = RecognitionStatus.Canceled;
         const recognitionStatus2: string = "" + recognitionStatus;
         const recstatus2 = (RecognitionStatus2 as any)[recognitionStatus2];

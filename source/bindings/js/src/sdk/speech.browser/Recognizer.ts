@@ -5,6 +5,7 @@
 import { MicAudioSource, PcmRecorder } from "../../common.browser/Exports";
 import { IAudioSource } from "../../common/Exports";
 import { CognitiveSubscriptionKeyAuthentication, Context, Device, IAuthentication, IConnectionFactory, OS, RecognitionMode, RecognizerConfig, ServiceRecognizerBase, SpeechConfig, SpeechRecognitionEvent } from "../speech/Exports";
+import { RecognitionCompletionStatus, RecognitionEndedEvent } from "../speech/RecognitionEvents";
 import { Contracts } from "./Contracts";
 import { AudioInputStream, RecognitionEventArgs, RecognitionEventType, SessionEventArgs, SessionEventType } from "./Exports";
 
@@ -132,9 +133,17 @@ export abstract class Recognizer {
                     break;
 
                 case "RecognitionEndedEvent":
+                    const recoEndedEvent = event as RecognitionEndedEvent;
+
                     sessionEvent = new SessionEventArgs();
-                    sessionEvent.SessionId = event.SessionId;
+                    sessionEvent.SessionId = recoEndedEvent.SessionId;
                     sessionEvent.eventType = SessionEventType.SessionStoppedEvent;
+
+                    if (recoEndedEvent.Status !== RecognitionCompletionStatus.Success) {
+                        if (cb) {
+                            cb(event); // call continuation, if configured.
+                        }
+                    }
 
                     if (!!this.SessionEvent) {
                         this.SessionEvent(this, sessionEvent);

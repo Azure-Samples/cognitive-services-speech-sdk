@@ -422,11 +422,11 @@
                         sdkStopRecognizeAsyncBtn.click();
                     },
                     function (err) {
-                        window.console.log(result);
+                        window.console.log(err);
 
-                        statusDiv.innerHTML = "ERROR";
-                        hypothesisDiv.innerHTML = "ERROR";
-                        phraseDiv.innerHTML += "ERROR\r\n";
+                        statusDiv.innerHTML = "";
+                        hypothesisDiv.innerHTML = "";
+                        phraseDiv.innerHTML += "ERROR: " + err;
 
                         sdkStopRecognizeAsyncBtn.click();
                     });

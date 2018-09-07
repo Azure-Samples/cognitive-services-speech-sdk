@@ -7,13 +7,15 @@ import { IAudioSource } from "../../common/Exports";
 import {
     IAuthentication,
     IConnectionFactory,
+    RecognitionCompletionStatus,
+    RecognitionEndedEvent,
     RecognitionMode,
     RecognizerConfig,
     ServiceRecognizerBase,
     SpeechConfig,
     SpeechRecognitionEvent,
-    SpeechResultFormat,
     TranslationConfig,
+    TranslationConnectionFactory,
     TranslationFailedEvent,
     TranslationHypothesisEvent,
     TranslationServiceRecognizer,
@@ -31,7 +33,6 @@ import {
     RecognitionStatus,
     Recognizer,
     RecognizerParameterNames,
-    TranslationConnectionFactory,
     TranslationStatus,
     TranslationSynthesisResult,
     TranslationSynthesisResultEventArgs,
@@ -150,6 +151,27 @@ export class TranslationRecognizer extends Recognizer {
                 return;
             }
             switch (event.Name) {
+                case "RecognitionEndedEvent":
+                {
+                    const recoEndedEvent: RecognitionEndedEvent = event as RecognitionEndedEvent;
+                    if (recoEndedEvent.Status !== RecognitionCompletionStatus.Success) {
+                        const errorEvent: RecognitionErrorEventArgs = new RecognitionErrorEventArgs();
+
+                        errorEvent.status = RecognitionStatus.Canceled;
+                        errorEvent.sessionId = recoEndedEvent.SessionId;
+                        errorEvent.error = recoEndedEvent.Error;
+
+                        if (this.RecognitionErrorRaised) {
+                            this.RecognitionErrorRaised(this, errorEvent); // call error handler, if configured
+                        }
+
+                        if (!!err) {
+                            err(recoEndedEvent.Error); // call error handler, if configured
+                        }
+                    }
+                }
+                break;
+
                 case "TranslationSimplePhraseEvent":
                     {
                         const evResult = event as TranslationSimplePhraseEvent;
@@ -360,6 +382,7 @@ export class TranslationRecognizer extends Recognizer {
     private implCloseExistingRecognizer(): void {
         if (this.reco) {
             this.reco.AudioSource.TurnOff();
+            this.reco.Dispose();
             this.reco = undefined;
         }
     }

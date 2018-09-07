@@ -60,16 +60,25 @@ export class Queue<TItem> implements IQueue<TItem> {
     public Dequeue = (): Promise<TItem> => {
         this.ThrowIfDispose();
         const deferredSubscriber = new Deferred<TItem>();
-        this.subscribers.Add({ deferral: deferredSubscriber, type: SubscriberType.Dequeue });
-        this.Drain();
+
+        if (this.subscribers) {
+            this.subscribers.Add({ deferral: deferredSubscriber, type: SubscriberType.Dequeue });
+            this.Drain();
+        }
+
         return deferredSubscriber.Promise();
     }
 
     public Peek = (): Promise<TItem> => {
         this.ThrowIfDispose();
         const deferredSubscriber = new Deferred<TItem>();
-        this.subscribers.Add({ deferral: deferredSubscriber, type: SubscriberType.Peek });
-        this.Drain();
+
+        const subs = this.subscribers;
+        if (subs) {
+            this.subscribers.Add({ deferral: deferredSubscriber, type: SubscriberType.Peek });
+            this.Drain();
+        }
+
         return deferredSubscriber.Promise();
     }
 
@@ -86,10 +95,28 @@ export class Queue<TItem> implements IQueue<TItem> {
         if (!this.IsDisposed() && !this.isDisposing) {
             this.disposeReason = reason;
             this.isDisposing = true;
-            while (this.subscribers.Length() > 0) {
-                const subscriber = this.subscribers.RemoveFirst();
-                // TODO: this needs work (Resolve(null) instead?).
-                subscriber.deferral.Reject("Disposed");
+
+            const subs = this.subscribers;
+            if (subs) {
+                while (subs.Length() > 0) {
+                    const subscriber = subs.RemoveFirst();
+                    // TODO: this needs work (Resolve(null) instead?).
+                    subscriber.deferral.Resolve(undefined);
+                    // subscriber.deferral.Reject("Disposed");
+                }
+
+                // note: this block assumes cooperative multitasking, i.e.,
+                // between the if-statement and the assignment there are no
+                // thread switches.
+                // Reason is that between the initial const = this.; and this
+                // point there is the derral.Resolve() operation that might have
+                // caused recursive calls to the Queue, especially, calling
+                // Dispose() on the queue alredy (which would reset the var
+                // here to null!).
+                // That should generally hold true for javascript...
+                if (this.subscribers === subs) {
+                    this.subscribers = subs;
+                }
             }
 
             for (const detachable of this.detachables) {
@@ -124,13 +151,43 @@ export class Queue<TItem> implements IQueue<TItem> {
         if (!this.isDrainInProgress && !this.isDisposing) {
             this.isDrainInProgress = true;
 
-            while (this.list.Length() > 0 && this.subscribers.Length() > 0 && !this.isDisposing) {
-                const subscriber = this.subscribers.RemoveFirst();
-                if (subscriber.type === SubscriberType.Peek) {
-                    subscriber.deferral.Resolve(this.list.First());
-                } else {
-                    const dequeuedItem = this.list.RemoveFirst();
-                    subscriber.deferral.Resolve(dequeuedItem);
+            const subs = this.subscribers;
+            const lists = this.list;
+            if (subs && lists) {
+                while (lists.Length() > 0 && subs.Length() > 0 && !this.isDisposing) {
+                    const subscriber = subs.RemoveFirst();
+                    if (subscriber.type === SubscriberType.Peek) {
+                        subscriber.deferral.Resolve(lists.First());
+                    } else {
+                        const dequeuedItem = lists.RemoveFirst();
+                        subscriber.deferral.Resolve(dequeuedItem);
+                    }
+                }
+
+                // note: this block assumes cooperative multitasking, i.e.,
+                // between the if-statement and the assignment there are no
+                // thread switches.
+                // Reason is that between the initial const = this.; and this
+                // point there is the derral.Resolve() operation that might have
+                // caused recursive calls to the Queue, especially, calling
+                // Dispose() on the queue alredy (which would reset the var
+                // here to null!).
+                // That should generally hold true for javascript...
+                if (this.subscribers === subs) {
+                    this.subscribers = subs;
+                }
+
+                // note: this block assumes cooperative multitasking, i.e.,
+                // between the if-statement and the assignment there are no
+                // thread switches.
+                // Reason is that between the initial const = this.; and this
+                // point there is the derral.Resolve() operation that might have
+                // caused recursive calls to the Queue, especially, calling
+                // Dispose() on the queue alredy (which would reset the var
+                // here to null!).
+                // That should generally hold true for javascript...
+                if (this.list === lists) {
+                    this.list = lists;
                 }
             }
 

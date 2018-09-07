@@ -28,7 +28,6 @@ export * from "./TranslationSynthesisResult";
 export * from "./ResultParameterNames";
 export * from "./RecognizerParameterNames";
 export * from "./FactoryParameterNames";
-export * from "./TranslationConnectionFactory";
 
 export * from "./SpeechFactory";
 export * from "./Recognizer";

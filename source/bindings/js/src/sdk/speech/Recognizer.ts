@@ -10,6 +10,7 @@ import {
     IAudioStreamNode,
     IConnection,
     IDetachable,
+    IDisposable,
     IEventSource,
     IStreamChunk,
     MessageType,
@@ -57,14 +58,16 @@ import {
     RecognitionStatus2,
 } from "./SpeechResults";
 
-export abstract class ServiceRecognizerBase {
+export abstract class ServiceRecognizerBase implements IDisposable {
     private authentication: IAuthentication;
     private connectionFactory: IConnectionFactory;
+    private connection: IConnection;
     private audioSource: IAudioSource;
     private speechConfigConnectionId: string;
     private connectionFetchPromise: Promise<IConnection>;
     private connectionId: string;
     private authFetchEventId: string;
+    private isDisposed: boolean;
     protected recognizerConfig: RecognizerConfig;
 
     public constructor(
@@ -93,10 +96,22 @@ export abstract class ServiceRecognizerBase {
         this.connectionFactory = connectionFactory;
         this.audioSource = audioSource;
         this.recognizerConfig = recognizerConfig;
+        this.isDisposed = false;
     }
 
     public get AudioSource(): IAudioSource {
         return this.audioSource;
+    }
+
+    public IsDisposed(): boolean {
+        return this.isDisposed;
+    }
+    public Dispose(reason?: string): void {
+        this.isDisposed = true;
+        if (this.connection) {
+            this.connection.Dispose(reason);
+            this.connection = undefined;
+        }
     }
 
     public Recognize = (onEventCallback: (event: SpeechRecognitionEvent) => void, speechContextJson?: string): Promise<boolean> => {
@@ -189,13 +204,18 @@ export abstract class ServiceRecognizerBase {
                     requestSession.OnAuthCompleted(false);
                 }
 
-                const connection = this.connectionFactory.Create(this.recognizerConfig, result.Result, this.connectionId);
-                requestSession.ListenForServiceTelemetry(connection.Events);
+                if (this.connection) {
+                    this.connection.Dispose();
+                    this.connection = undefined;
+                }
 
-                return connection.Open().OnSuccessContinueWithPromise((response: ConnectionOpenResponse) => {
+                this.connection = this.connectionFactory.Create(this.recognizerConfig, result.Result, this.connectionId);
+                requestSession.ListenForServiceTelemetry(this.connection.Events);
+
+                return this.connection.Open().OnSuccessContinueWithPromise((response: ConnectionOpenResponse) => {
                     if (response.StatusCode === 200) {
                         requestSession.OnConnectionEstablishCompleted(response.StatusCode);
-                        return PromiseHelper.FromResult(connection);
+                        return PromiseHelper.FromResult(this.connection);
                     } else if (response.StatusCode === 403 && !isUnAuthorized) {
                         return this.FetchConnection(requestSession, true);
                     } else {
@@ -212,6 +232,11 @@ export abstract class ServiceRecognizerBase {
         return connection
             .Read()
             .OnSuccessContinueWithPromise((message: ConnectionMessage) => {
+                // indicates we are draining the queue and it came with no message;
+                if (!message) {
+                    return PromiseHelper.FromResult(true);
+                }
+
                 const connectionMessage = SpeechConnectionMessage.FromConnectionMessage(message);
 
                 if (connectionMessage.RequestId.toLowerCase() === requestSession.RequestId.toLowerCase()) {
@@ -562,7 +587,6 @@ export abstract class RequestSessionBase {
     public Dispose = (error?: string): void => {
         if (!this.isDisposed) {
             // we should have completed by now. If we did not its an unknown error.
-            this.OnComplete(RecognitionCompletionStatus.UnknownError, error);
             this.isDisposed = true;
             for (const detachable of this.detachables) {
                 detachable.Detach();

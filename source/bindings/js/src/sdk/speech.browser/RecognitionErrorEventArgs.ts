@@ -19,4 +19,10 @@ export class RecognitionErrorEventArgs {
      * @return Specifies the session identifier.
      */
     public sessionId: string;
+
+    /**
+     * Contains additional information in case the status
+     * indicates an error condition.
+     */
+    public error: string;
 }
