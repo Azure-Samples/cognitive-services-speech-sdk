@@ -16,7 +16,7 @@
 %include <exception.i>
 %include <std_except.i>
 %include <std_shared_ptr.i>
-%include <std_wstring.i>
+%include <std_string.i>
 %include <stdint.i>
 %include <std_vector.i>
 %include <std_map.i>
@@ -51,8 +51,8 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::ICognitiveServicesSpeechFactory)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Value)
 
-%template(WstringVector) std::vector<std::wstring>;
-%template(StdMapWStringWString) std::map<std::wstring, std::wstring>;
+%template(StringVector) std::vector<std::string>;
+%template(StdMapStringString) std::map<std::string, std::string>;
 
 %ignore CallbackWrapper::GetFunction();
 %ignore FutureWrapper::FutureWrapper;
@@ -71,7 +71,7 @@
 
 %ignore operator=;
 %ignore operator[];
-%ignore operator const std::wstring;
+%ignore operator const std::string;
 %ignore operator int32_t;
 %ignore operator SPXLUISHANDLE;
 %ignore operator SPXTRIGGERHANDLE;
@@ -285,7 +285,7 @@
 
 %extend Microsoft::CognitiveServices::Speech::Value {
 
-    const std::wstring& __setitem__(const std::wstring& value) {
+    const std::string& __setitem__(const std::string& value) {
         return ($self)->operator=(value);
     }
 
@@ -308,7 +308,7 @@
 
 %define %add_subscript_operator(Type, Enum)
 %extend Microsoft::CognitiveServices::Speech::Type {
-    ValuePtr __getitem__(const std::wstring& name) {
+    ValuePtr __getitem__(const std::string& name) {
         return std::make_shared<Value>(std::move(($self)->operator[](name)));
     }
     ValuePtr __getitem__(Microsoft::CognitiveServices::Speech::Enum index) {
@@ -321,7 +321,7 @@
 
 %define %add_subscript_operator(Type, Enum)
 %extend Microsoft::CognitiveServices::Speech::Type {
-    ValuePtr Get(const std::wstring& name) {
+    ValuePtr Get(const std::string& name) {
         return std::make_shared<Value>(std::move(($self)->operator[](name)));
     }
     ValuePtr Get(Microsoft::CognitiveServices::Speech::Enum index) {

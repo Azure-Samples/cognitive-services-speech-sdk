@@ -452,7 +452,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
         Contracts.throwIfIllegalLanguage(sourceLanguage, "sourceLanguage");
         Contracts.throwIfNull(targetLanguages, "targetLanguages");
 
-        com.microsoft.cognitiveservices.speech.internal.WstringVector v = new com.microsoft.cognitiveservices.speech.internal.WstringVector();
+        com.microsoft.cognitiveservices.speech.internal.StringVector v = new com.microsoft.cognitiveservices.speech.internal.StringVector();
         
         for(String element : targetLanguages) {
             Contracts.throwIfIllegalLanguage(element, "targetLanguages");
@@ -474,7 +474,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
         Contracts.throwIfNull(targetLanguages, "targetLanguages");
         Contracts.throwIfNullOrWhitespace(voice, "voice");
 
-        com.microsoft.cognitiveservices.speech.internal.WstringVector v = new com.microsoft.cognitiveservices.speech.internal.WstringVector();
+        com.microsoft.cognitiveservices.speech.internal.StringVector v = new com.microsoft.cognitiveservices.speech.internal.StringVector();
        
         for(String element : targetLanguages) {
             Contracts.throwIfIllegalLanguage(element, "targetLanguages");
@@ -496,7 +496,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
         Contracts.throwIfIllegalLanguage(sourceLanguage, "sourceLanguage");
         Contracts.throwIfNull(targetLanguages, "targetLanguages");
 
-        com.microsoft.cognitiveservices.speech.internal.WstringVector v = new com.microsoft.cognitiveservices.speech.internal.WstringVector();
+        com.microsoft.cognitiveservices.speech.internal.StringVector v = new com.microsoft.cognitiveservices.speech.internal.StringVector();
        
        for(String element : targetLanguages) {
            Contracts.throwIfIllegalLanguage(element, "targetLanguages");
@@ -520,7 +520,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
         Contracts.throwIfNull(targetLanguages, "targetLanguages");
         Contracts.throwIfNullOrWhitespace(voice, "voice");
 
-       com.microsoft.cognitiveservices.speech.internal.WstringVector v = new com.microsoft.cognitiveservices.speech.internal.WstringVector();
+       com.microsoft.cognitiveservices.speech.internal.StringVector v = new com.microsoft.cognitiveservices.speech.internal.StringVector();
        
        for(String element : targetLanguages) {
            Contracts.throwIfIllegalLanguage(element, "targetLanguages");
@@ -542,7 +542,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
         Contracts.throwIfIllegalLanguage(sourceLanguage, "sourceLanguage");
         Contracts.throwIfNull(targetLanguages, "targetLanguages");
 
-       com.microsoft.cognitiveservices.speech.internal.WstringVector v = new com.microsoft.cognitiveservices.speech.internal.WstringVector();
+       com.microsoft.cognitiveservices.speech.internal.StringVector v = new com.microsoft.cognitiveservices.speech.internal.StringVector();
        
        for(String element : targetLanguages) {
            Contracts.throwIfIllegalLanguage(element, "targetLanguages");
@@ -566,7 +566,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
         Contracts.throwIfNull(targetLanguages, "targetLanguages");
         Contracts.throwIfNullOrWhitespace(voice, "voice");
 
-       com.microsoft.cognitiveservices.speech.internal.WstringVector v = new com.microsoft.cognitiveservices.speech.internal.WstringVector();
+       com.microsoft.cognitiveservices.speech.internal.StringVector v = new com.microsoft.cognitiveservices.speech.internal.StringVector();
        
        for(String element : targetLanguages) {
            Contracts.throwIfIllegalLanguage(element, "targetLanguages");

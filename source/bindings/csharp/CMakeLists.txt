@@ -27,6 +27,7 @@ set(SWIG_MODULE_${CSHARP_BINDINGS}_EXTRA_DEPS
 set(CMAKE_SWIG_FLAGS
    -w401,516,503,302
    -namespace Microsoft.CognitiveServices.Speech.Internal
+   -DSWIG_CSHARP_NO_STRING_HELPER
    -dllimport "${CSHARP_BINDINGS}.dll")
 set_source_files_properties("${SRC_DIR}/carbon_csharp.i" PROPERTIES
     CPLUSPLUS ON)
@@ -83,7 +84,7 @@ if(WIN32)
     add_custom_target(${CSHARP_LIB_CUSTOM} ALL
       COMMAND ${CMAKE_MAKE_PROGRAM} /t:Restore "${CSHARP_PROJECT_PATH}.csproj"
       COMMAND ${CMAKE_MAKE_PROGRAM} /p:Configuration=$<CONFIGURATION> "${CSHARP_PROJECT_PATH}.csproj"
-      COMMAND ${CMAKE_MAKE_PROGRAM} /p:Configuration=$<CONFIGURATION>Utf32 "${CSHARP_PROJECT_PATH}.csproj"
+      COMMAND ${CMAKE_MAKE_PROGRAM} /p:Configuration=$<CONFIGURATION>Utf8 "${CSHARP_PROJECT_PATH}.csproj"
       COMMAND del /S /Q obj
       COMMENT "Building external C# project")
     add_dependencies(${CSHARP_LIB_CUSTOM} ${CSHARP_BINDINGS})

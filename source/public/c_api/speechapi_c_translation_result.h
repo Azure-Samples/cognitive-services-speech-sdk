@@ -17,9 +17,9 @@ typedef struct _Result_TranslationTextBufferHeader {
     // The number of target languages. This indicates the array size of targetLanguages and translationTexts.
     size_t numberEntries;
     // Points to an array of target language names. The size of the array is numberEntries.
-    wchar_t** targetLanguages;
+    char** targetLanguages;
     // Points to an array of translation texts. The element in the array is the translation text of the target language which has the same index in targetLanguages.
-    wchar_t** translationTexts;
+    char** translationTexts;
     // After that is the data buffer containing target language names and translation texts.
 } Result_TranslationTextBufferHeader;
 
@@ -30,7 +30,7 @@ SPXAPI TranslationTextResult_GetTranslationText(SPXRESULTHANDLE handle, Result_T
 
 SPXAPI TranslationTextResult_GetTranslationStatus(SPXRESULTHANDLE handle, Result_TranslationStatus* statusPointer);
 
-SPXAPI TranslationTextResult_GetFailureReason(SPXRESULTHANDLE handle, wchar_t* buffer, size_t* bufferSizePointer);
+SPXAPI TranslationTextResult_GetFailureReason(SPXRESULTHANDLE handle, char* buffer, size_t* bufferSizePointer);
 
 // audioBuffer: point to the header for storing synthesis audio data. The parameter lengthPointer points to the variable saving the size of buffer. On return, *lengthPointer is set to the size of the buffer returned. 
 // If textBuffer is nullptr or the length is smaller than the size required, the function returns SPXERR_BUFFER_TOO_SMALL.
@@ -38,4 +38,4 @@ SPXAPI TranslationSynthesisResult_GetSynthesisData(SPXRESULTHANDLE handle, uint8
 
 SPXAPI TranslationSynthesisResult_GetSynthesisStatus(SPXRESULTHANDLE handle, Result_SynthesisStatus* statusPointer);
 
-SPXAPI TranslationSynthesisResult_GetFailureReason(SPXRESULTHANDLE handle, wchar_t* buffer, size_t* bufferSizePointer);
+SPXAPI TranslationSynthesisResult_GetFailureReason(SPXRESULTHANDLE handle, char* buffer, size_t* bufferSizePointer);

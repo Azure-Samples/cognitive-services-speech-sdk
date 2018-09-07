@@ -8,11 +8,9 @@
 #include "stdafx.h"
 #include "string_utils.h"
 
-
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
-
-SPXAPI IntentResult_GetIntentId(SPXRESULTHANDLE hresult, wchar_t* pszIntentId, uint32_t cchIntentId)
+SPXAPI IntentResult_GetIntentId(SPXRESULTHANDLE hresult, char* pszIntentId, uint32_t cchIntentId)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, cchIntentId == 0);
 
@@ -23,9 +21,9 @@ SPXAPI IntentResult_GetIntentId(SPXRESULTHANDLE hresult, wchar_t* pszIntentId, u
 
         auto intentResult = SpxQueryInterface<ISpxIntentRecognitionResult>(result);
 
-        auto strActual = intentResult->GetIntentId();
+        auto strActual = PAL::ToString(intentResult->GetIntentId());
         auto pszActual = strActual.c_str();
-        PAL::wcscpy(pszIntentId, cchIntentId, pszActual, strActual.size(), true);
+        PAL::strcpy(pszIntentId, cchIntentId, pszActual, strActual.size(), true);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

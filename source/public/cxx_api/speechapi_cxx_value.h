@@ -64,7 +64,7 @@ public:
     /// If the value represents a string, sets its value.
     /// </summary>
     /// <param name="value">Value to set</param>
-    virtual void SetString(const std::wstring& value) { m_delegatePtr->SetString(value); }
+    virtual void SetString(const std::string& value) { m_delegatePtr->SetString(value); }
 
     /// <summary>
     /// If the value represents a string, gets its value.
@@ -72,7 +72,7 @@ public:
     /// </summary>
     /// <param name="defaultValue">Value to return if value type is not string (defaults to empty string).</param>
     /// <returns>string value or default</returns>
-    virtual std::wstring GetString(const std::wstring& defaultValue = L"") { return m_delegatePtr->GetString(defaultValue); }
+    virtual std::string GetString(const std::string& defaultValue = "") { return m_delegatePtr->GetString(defaultValue); }
 
     /// <summary>
     /// Checks if the value represents a number (32-bit integer).
@@ -119,14 +119,14 @@ public:
     /// </summary>
     /// <param name="value">Value to set</param>
     /// <returns>the value that was set</returns>
-    const wchar_t* operator=(const wchar_t* value) { SetString(value); return value; }
+    const char* operator=(const char* value) { SetString(value); return value; }
 
     /// <summary>
     /// Assignment operator for a value that represents a string.
     /// </summary>
     /// <param name="value">Value to set</param>
     /// <returns>the value that was set</returns>
-    const std::wstring& operator=(const std::wstring& value) { SetString(value); return value; }
+    const std::string& operator=(const std::string& value) { SetString(value); return value; }
 
     /// <summary>
     /// Assignment operator for a value that represents a number (32-bit integer).
@@ -146,7 +146,7 @@ public:
     /// Conversion operator for value that represent a string.
     /// <summary>
     /// <returns>string value or empty string</returns>
-    operator const std::wstring() { return GetString(); }
+    operator const std::string() { return GetString(); }
 
     /// <summary>
     /// Conversion operator for value that represent a number (32-bit integer).
@@ -176,19 +176,19 @@ public:
 
     virtual ~BaseValueCollection() = default;
 
-    virtual Value operator[](const std::wstring& name) = 0;
+    virtual Value operator[](const std::string& name) = 0;
 
-    virtual bool ContainsString(const std::wstring& name) = 0;
-    virtual void SetString(const std::wstring& name, const std::wstring& value) = 0;
-    virtual std::wstring GetString(const std::wstring& name, const std::wstring& defaultValue = L"") = 0;
+    virtual bool ContainsString(const std::string& name) = 0;
+    virtual void SetString(const std::string& name, const std::string& value) = 0;
+    virtual std::string GetString(const std::string& name, const std::string& defaultValue = "") = 0;
 
-    virtual bool ContainsNumber(const std::wstring& name) = 0;
-    virtual void SetNumber(const std::wstring& name, int32_t value) = 0;
-    virtual int32_t GetNumber(const std::wstring& name, int32_t defaultValue = 0) = 0;
+    virtual bool ContainsNumber(const std::string& name) = 0;
+    virtual void SetNumber(const std::string& name, int32_t value) = 0;
+    virtual int32_t GetNumber(const std::string& name, int32_t defaultValue = 0) = 0;
 
-    virtual bool ContainsBool(const std::wstring& name) = 0;
-    virtual void SetBool(const std::wstring& name, bool value) = 0;
-    virtual bool GetBool(const std::wstring& name, bool defaultValue = false) = 0;
+    virtual bool ContainsBool(const std::string& name) = 0;
+    virtual void SetBool(const std::string& name, bool value) = 0;
+    virtual bool GetBool(const std::string& name, bool defaultValue = false) = 0;
 
 protected:
 
@@ -210,19 +210,19 @@ class HandleValueCollection : public BaseValueCollection
 public:
     virtual ~HandleValueCollection() = default;
 
-    Value operator[](const std::wstring& name) override { return Value(new T(m_handle, name)); }
+    Value operator[](const std::string& name) override { return Value(new T(m_handle, name)); }
 
-    bool ContainsString(const std::wstring& name) override { return T(m_handle, name).IsString(); }
-    void SetString(const std::wstring& name, const std::wstring& value) override { T(m_handle, name).SetString(value); }
-    std::wstring GetString(const std::wstring& name, const std::wstring& defaultValue = L"") override { return T(m_handle, name).GetString(defaultValue); }
+    bool ContainsString(const std::string& name) override { return T(m_handle, name).IsString(); }
+    void SetString(const std::string& name, const std::string& value) override { T(m_handle, name).SetString(value); }
+    std::string GetString(const std::string& name, const std::string& defaultValue = "") override { return T(m_handle, name).GetString(defaultValue); }
 
-    bool ContainsNumber(const std::wstring& name) override { return T(m_handle, name).IsNumber(); }
-    void SetNumber(const std::wstring& name, int32_t value) override { T(m_handle, name).SetNumber(value); }
-    int32_t GetNumber(const std::wstring& name, int32_t defaultValue = 0) override { return T(m_handle, name).GetNumber(defaultValue); }
+    bool ContainsNumber(const std::string& name) override { return T(m_handle, name).IsNumber(); }
+    void SetNumber(const std::string& name, int32_t value) override { T(m_handle, name).SetNumber(value); }
+    int32_t GetNumber(const std::string& name, int32_t defaultValue = 0) override { return T(m_handle, name).GetNumber(defaultValue); }
 
-    bool ContainsBool(const std::wstring& name) override { return T(m_handle, name).IsBool(); }
-    void SetBool(const std::wstring& name, bool value) override { T(m_handle, name).SetBool(value); }
-    bool GetBool(const std::wstring& name, bool defaultValue = false) override { return T(m_handle, name).GetBool(defaultValue); }
+    bool ContainsBool(const std::string& name) override { return T(m_handle, name).IsBool(); }
+    void SetBool(const std::string& name, bool value) override { T(m_handle, name).SetBool(value); }
+    bool GetBool(const std::string& name, bool defaultValue = false) override { return T(m_handle, name).GetBool(defaultValue); }
 
 protected:
 

@@ -81,7 +81,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task TranslationWeatherEnToDeFinalTextResult()
         {
-            var toLanguages = new List<string>() { Language.DE };
+            var toLanguages = new List<string>() { Language.DE, Language.ZH };
             var result = await this.translationHelper.GetTranslationFinalResult(TestData.English.Weather.AudioFile, Language.EN, toLanguages);
             Assert.IsNotNull(result, "Translation should not be null");
 
@@ -89,6 +89,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             Console.WriteLine($"Status: {result.RecognitionStatus}, failure reasons: {result.FailureReason}, {result.RecognitionFailureReason}");
             Assert.AreEqual(TestData.English.Weather.Utterance, result.Text);
             Assert.AreEqual(TestData.German.Weather.Utterance, result.Translations[Language.DE]);
+            Assert.AreEqual(TestData.Chinese.Weather.Utterance, result.Translations[Language.ZH]);
         }
 
         [TestMethod]

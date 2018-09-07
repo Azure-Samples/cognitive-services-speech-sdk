@@ -32,10 +32,10 @@ void __swig_spx_do_trace_message(int level, const char* pszTitle, const char* ps
 %feature("director") AudioInputStream;
 %apply (char *STRING, int LENGTH) { (char* dataBuffer, size_t size) };
 
-%include "std_wstring.i"
+%include "std_string.i"
 
-%typemap(javainterfaces) StdMapWStringWStringMapIterator "java.util.Iterator<String>"
-%typemap(javacode) StdMapWStringWStringMapIterator %{
+%typemap(javainterfaces) StdMapStringStringMapIterator "java.util.Iterator<String>"
+%typemap(javacode) StdMapStringStringMapIterator %{
   public void remove() throws UnsupportedOperationException {
     throw new UnsupportedOperationException();
   }
@@ -49,14 +49,14 @@ void __swig_spx_do_trace_message(int level, const char* pszTitle, const char* ps
   }
 %}
 
-%javamethodmodifiers StdMapWStringWStringMapIterator::nextImpl "private";
+%javamethodmodifiers StdMapStringStringMapIterator::nextImpl "private";
 %inline %{
 #include <map>
 #include <stdlib.h>
 
-  void SetupNativeLibraries(const std::wstring& config)
+  void SetupNativeLibraries(const std::string& p)
   {
-    std::string s(config.begin(), config.end());
+    std::string s = p;
     int overwrite = 1;
 
 #if defined(__ANDROID__)
@@ -79,33 +79,33 @@ void __swig_spx_do_trace_message(int level, const char* pszTitle, const char* ps
   }
 
 
-  struct StdMapWStringWStringMapIterator {
-    typedef std::map<std::wstring,std::wstring> WStringWStringMap;
-    StdMapWStringWStringMapIterator(const WStringWStringMap& m) : it(m.begin()), map(m) {
+  struct StdMapStringStringMapIterator {
+    typedef std::map<std::string,std::string> StringStringMap;
+    StdMapStringStringMapIterator(const StringStringMap& m) : it(m.begin()), map(m) {
     }
 
     bool hasNext() const {
       return it != map.end();
     }
 
-    const std::wstring& nextImpl() {
-      const std::pair<std::wstring,std::wstring>& ret = *it++;
+    const std::string& nextImpl() {
+      const std::pair<std::string,std::string>& ret = *it++;
       currentKey = ret.first; //get the key
       return currentKey;
     }
   private:
-    std::wstring currentKey;
-    WStringWStringMap::const_iterator it;
-    const WStringWStringMap& map;
+    std::string currentKey;
+    StringStringMap::const_iterator it;
+    const StringStringMap& map;
   };
 %}
 
-%typemap(javainterfaces) std::map<std::wstring,std::wstring> "Iterable<String>"
+%typemap(javainterfaces) std::map<std::string,std::string> "Iterable<String>"
 
-%newobject std::map<std::wstring,std::wstring>::iterator() const;
-%extend std::map<std::wstring,std::wstring> {
-  StdMapWStringWStringMapIterator *iterator() const {
-    return new StdMapWStringWStringMapIterator(*$self);
+%newobject std::map<std::string,std::string>::iterator() const;
+%extend std::map<std::string,std::string> {
+  StdMapStringStringMapIterator *iterator() const {
+    return new StdMapStringStringMapIterator(*$self);
   }
 }
 

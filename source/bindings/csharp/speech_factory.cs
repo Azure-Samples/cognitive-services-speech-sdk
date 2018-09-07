@@ -273,7 +273,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A translation recognizer instance.</returns>
         public TranslationRecognizer CreateTranslationRecognizer(string sourceLanguage, IEnumerable<string> targetLanguages)
         {
-            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizer(sourceLanguage, AsWStringVector(targetLanguages)));
+            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizer(sourceLanguage, AsStringVector(targetLanguages)));
         }
 
         /// <summary>
@@ -285,7 +285,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A translation recognizer instance.</returns>
         public TranslationRecognizer CreateTranslationRecognizer(string sourceLanguage, IEnumerable<string> targetLanguages, string voice)
         {
-            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizer(sourceLanguage, AsWStringVector(targetLanguages), voice));
+            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizer(sourceLanguage, AsStringVector(targetLanguages), voice));
         }
 
         /// <summary>
@@ -297,7 +297,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A translation recognizer instance.</returns>
         public TranslationRecognizer CreateTranslationRecognizerWithFileInput(string audioFile, string sourceLanguage, IEnumerable<string> targetLanguages)
         {
-            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerWithFileInput(audioFile, sourceLanguage, AsWStringVector(targetLanguages)));
+            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerWithFileInput(audioFile, sourceLanguage, AsStringVector(targetLanguages)));
         }
 
         /// <summary>
@@ -310,7 +310,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A translation recognizer instance.</returns>
         public TranslationRecognizer CreateTranslationRecognizerWithFileInput(string audioFile, string sourceLanguage, IEnumerable<string> targetLanguages, string voice)
         {
-            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerWithFileInput(audioFile, sourceLanguage, AsWStringVector(targetLanguages), voice));
+            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerWithFileInput(audioFile, sourceLanguage, AsStringVector(targetLanguages), voice));
         }
 
         /// <summary>
@@ -322,7 +322,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A translation recognizer instance.</returns>
         public TranslationRecognizer CreateTranslationRecognizerWithStream(AudioInputStream audioStream, string sourceLanguage, IEnumerable<string> targetLanguages)
         {
-            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerWithStreamImpl(audioStream.Forwarder, sourceLanguage, AsWStringVector(targetLanguages)), audioStream);
+            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerWithStreamImpl(audioStream.Forwarder, sourceLanguage, AsStringVector(targetLanguages)), audioStream);
         }
 
         /// <summary>
@@ -335,7 +335,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A translation recognizer instance.</returns>
         public TranslationRecognizer CreateTranslationRecognizerWithStream(AudioInputStream audioStream, string sourceLanguage, IEnumerable<string> targetLanguages, string voice)
         {
-            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerWithStreamImpl(audioStream.Forwarder, sourceLanguage, AsWStringVector(targetLanguages), voice), audioStream);
+            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerWithStreamImpl(audioStream.Forwarder, sourceLanguage, AsStringVector(targetLanguages), voice), audioStream);
         }
 
         private SpeechFactory(Internal.ICognitiveServicesSpeechFactory factoryImpl)
@@ -352,9 +352,9 @@ namespace Microsoft.CognitiveServices.Speech
         // Hold the reference.
         internal Internal.ICognitiveServicesSpeechFactory factoryImpl;
 
-        private static Internal.WstringVector AsWStringVector(IEnumerable<string> input)
+        private static Internal.StringVector AsStringVector(IEnumerable<string> input)
         {
-            var inputVector = new Internal.WstringVector();
+            var inputVector = new Internal.StringVector();
             foreach (var element in input)
             {
                 inputVector.Add(element);

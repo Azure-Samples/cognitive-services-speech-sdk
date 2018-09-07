@@ -29,7 +29,7 @@ void CarbonTestConsole::Sample_HelloWorld_In_C()
      SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
      if (SPX_SUCCEEDED(hr))
      {
-        ConsoleWriteLine(L"Say something...");
+        ConsoleWriteLine("Say something...");
         hr = ::Recognizer_RecognizeAsync(hreco, &hasync);
      }
 
@@ -39,7 +39,7 @@ void CarbonTestConsole::Sample_HelloWorld_In_C()
         hr = ::Recognizer_RecognizeAsync_WaitFor(hasync, 30 * 1000, &hresult);
      }
 
-     wchar_t text[1024];
+     char text[1024];
      if (SPX_SUCCEEDED(hr))
      {
         hr = ::Result_GetText(hresult, text, sizeof(text) / sizeof(text[0]));
@@ -47,7 +47,7 @@ void CarbonTestConsole::Sample_HelloWorld_In_C()
 
      if (SPX_SUCCEEDED(hr))
      {
-        ConsoleWriteLine(L"You said:\n\n    '%ls'", text);
+        ConsoleWriteLine("You said:\n\n    '%ls'", text);
      }
 
      ::Recognizer_AsyncHandle_Close(hresult);

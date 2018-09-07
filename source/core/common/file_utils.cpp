@@ -7,13 +7,16 @@
 #include  <wchar.h>
 #include "file_utils.h"
 #include "platform.h"
-#include <cstring> 
+#include <cstring>
+#include "string_utils.h"
+
+#ifndef _MSC_VER
+#include <unistd.h>
+#endif
 
 namespace PAL {
 
 #ifndef _MSC_VER
-#include <unistd.h>
-
 std::string wtocharpath(const wchar_t *wstr)
 {
     size_t length = wcslen(wstr);
@@ -23,7 +26,6 @@ std::string wtocharpath(const wchar_t *wstr)
     str.resize(std::strlen(&str[0])); // set size correctly for shorter strings
     return str;
 }
-
 #endif
 
 errno_t fopen_s(FILE** file, const char* fileName, const char* mode)
@@ -47,7 +49,17 @@ int waccess(const wchar_t *path, int mode)
 #ifdef _MSC_VER
     return _waccess(path, mode);
 #else
-    return access(wtocharpath(path).c_str(), mode);
+    return ::access(wtocharpath(path).c_str(), mode);
+#endif
+}
+
+int access(const char *path, int mode)
+{
+#ifdef _MSC_VER
+    auto s = ToWString(path);
+    return _waccess(s.c_str(), mode);
+#else
+    return ::access(path, mode);
 #endif
 }
 

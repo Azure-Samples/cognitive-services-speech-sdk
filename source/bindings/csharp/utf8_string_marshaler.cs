@@ -9,23 +9,20 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.CognitiveServices.Speech
 {
-    internal sealed class Utf32StringMarshaler : ICustomMarshaler
+    internal sealed class Utf8StringMarshaler : ICustomMarshaler
     {
-        private static Utf32StringMarshaler marshaler;
-
-        // UTF32 is fixed length encoding, 4 bytes per codepoint.
-        private static readonly int sizeOfUnicodeCodepointInBytes = 4;
+        private static Utf8StringMarshaler marshaler;
 
         // Limit the length by 4 MB for safety check if something bad has happened on the native side.
         private static readonly int lengthLimit = 1 << 22;
 
         public object MarshalNativeToManaged(IntPtr native)
         {
-            // Identifying the length of the UTF32 string by searching for four 0 bytes.
+            // Identifying the length of the UTF8 string by searching for 0 byte.
             int lengthInBytes = 0;
-            while (Marshal.ReadInt32(native + lengthInBytes) != 0 && lengthInBytes < lengthLimit)
+            while (Marshal.ReadByte(native + lengthInBytes) != 0 && lengthInBytes < lengthLimit)
             {
-                lengthInBytes += sizeOfUnicodeCodepointInBytes;
+                lengthInBytes++;
             }
 
             if (lengthInBytes >= lengthLimit)
@@ -37,7 +34,7 @@ namespace Microsoft.CognitiveServices.Speech
 
             // Performancewise this can be improved by switching to unsafe code and avoiding copying.
             Marshal.Copy(native, buffer, 0, lengthInBytes);
-            return Encoding.UTF32.GetString(buffer);
+            return Encoding.UTF8.GetString(buffer);
         }
 
         public IntPtr MarshalManagedToNative(object managed)
@@ -54,14 +51,14 @@ namespace Microsoft.CognitiveServices.Speech
                 throw new ArgumentException("The input argument is not a string type.");
             }
 
-            byte[] buffer = Encoding.UTF32.GetBytes(managedAsString);
+            byte[] buffer = Encoding.UTF8.GetBytes(managedAsString);
 
             // allocating memory for byte array and null termination character.
-            IntPtr strNativePointer = Marshal.AllocHGlobal(buffer.Length + sizeOfUnicodeCodepointInBytes);
+            IntPtr strNativePointer = Marshal.AllocHGlobal(buffer.Length + 1);
             Marshal.Copy(buffer, 0, strNativePointer, buffer.Length);
 
             // adding null termination to the end of the allocated memory. 
-            Marshal.WriteInt32(strNativePointer + buffer.Length, 0);
+            Marshal.WriteByte(strNativePointer + buffer.Length, 0);
             return strNativePointer; 
         }
 
@@ -83,7 +80,7 @@ namespace Microsoft.CognitiveServices.Speech
         {
             if (marshaler == null)
             {
-                marshaler = new Utf32StringMarshaler();
+                marshaler = new Utf8StringMarshaler();
             }
 
             return marshaler;

@@ -24,93 +24,83 @@
 %feature("director") AudioInputStream;
 %include "speechapi_cxx_audioinputstream.h"
 
-#define SWIG_CSHARP_NO_WSTRING_HELPER
-
-%include <std_wstring.i>
 %include <std_vector.i>
 
-%define SWIGCSHARP_IMTYPE_WSTRING(TYPENAME)
+%define SWIGCSHARP_IMTYPE_STRING(TYPENAME)
 %typemap(imtype,
          inattributes="
-                       #if USE_UTF32
-                       [System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Utf32StringMarshaler))]
-                       #else
-                       [System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPWStr)]
-                       #endif
+                        #if USE_UTF8
+                        [System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
+                        #else
+                        [System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Utf8StringMarshaler))]
+                        #endif
                       ",
          outattributes="
-                        #if USE_UTF32
+                        #if USE_UTF8
                         [return: System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
                         #else
                         [return: System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.BStr)]
                         #endif
-                       " 
+                       "
         ) TYPENAME "string"
 %enddef
 
+
 %insert(runtime) %{
-/* Callback for returning strings to C# without leaking memory */
-typedef void * (SWIGSTDCALL* SWIG_CSharpWStringHelperCallback)(const wchar_t *);
-static SWIG_CSharpWStringHelperCallback SWIG_csharp_wstring_callback = NULL;
+typedef char* (SWIGSTDCALL* SWIG_CSharpStringHelperCallback)(const char *);
+static SWIG_CSharpStringHelperCallback SWIG_csharp_string_callback = NULL;
 %}
+
 
 %pragma(csharp) imclasscode=%{
 
-  protected class SWIGWStringHelper
-  {
-    #if USE_UTF32 
+  protected class SWIGStringHelper {
+
+    #if USE_UTF8
     [return: System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
-    public delegate string SWIGWStringDelegate([System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Utf32StringMarshaler))] string message);
+    public delegate string SWIGStringDelegate([System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)] string message);
     #else
     [return: System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.BStr)]
-    public delegate string SWIGWStringDelegate(global::System.IntPtr message);
-    #endif
-    static SWIGWStringDelegate wstringDelegate = new SWIGWStringDelegate(CreateWString);
-
-    [global::System.Runtime.InteropServices.DllImport("$dllimport", EntryPoint="SWIGRegisterWStringCallback_$module")]
-    public static extern void SWIGRegisterWStringCallback_$module(SWIGWStringDelegate wstringDelegate);
-
-    #if USE_UTF32 
-    [return: System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPStr)]
-    static string CreateWString([System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Utf32StringMarshaler))] string value) 
-    {
-        return value;
-    }
-    #else
-    [return: System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.BStr)]
-    static string CreateWString([global::System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.LPWStr)]global::System.IntPtr value) 
-    {
-      return global::System.Runtime.InteropServices.Marshal.PtrToStringUni(value);
-    }
+    public delegate string SWIGStringDelegate([System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Utf8StringMarshaler))] string message);
     #endif
 
-    static SWIGWStringHelper()
-    {
-      SWIGRegisterWStringCallback_$module(wstringDelegate);
+    static SWIGStringDelegate stringDelegate = new SWIGStringDelegate(CreateString);
+
+    [global::System.Runtime.InteropServices.DllImport("Microsoft.CognitiveServices.Speech.csharp.bindings.dll", EntryPoint="SWIGRegisterStringCallback_carbon_csharp")]
+    public static extern void SWIGRegisterStringCallback_carbon_csharp(SWIGStringDelegate stringDelegate);
+
+    static string CreateString(string cString) {
+      return cString;
+    }
+
+    static SWIGStringHelper() {
+      SWIGRegisterStringCallback_carbon_csharp(stringDelegate);
     }
   }
 
-  static protected SWIGWStringHelper swigWStringHelper = new SWIGWStringHelper();
+  static protected SWIGStringHelper swigStringHelper = new SWIGStringHelper();
 %}
+
 
 %insert(runtime) %{
 #ifdef __cplusplus
 extern "C"
 #endif
-SWIGEXPORT void SWIGSTDCALL SWIGRegisterWStringCallback_$module(SWIG_CSharpWStringHelperCallback callback) {
-  SWIG_csharp_wstring_callback = callback;
+SWIGEXPORT void SWIGSTDCALL SWIGRegisterStringCallback_carbon_csharp(SWIG_CSharpStringHelperCallback callback) {
+  SWIG_csharp_string_callback = callback;
 }
 %}
 
-SWIGCSHARP_IMTYPE_WSTRING(std::wstring)
-SWIGCSHARP_IMTYPE_WSTRING(std::wstring&)
-SWIGCSHARP_IMTYPE_WSTRING(const std::wstring&)
-SWIGCSHARP_IMTYPE_WSTRING(std::wstring*)
-SWIGCSHARP_IMTYPE_WSTRING(const std::wstring*)
-SWIGCSHARP_IMTYPE_WSTRING(wchar_t*)
-SWIGCSHARP_IMTYPE_WSTRING(const wchar_t*)
 
-SWIG_STD_VECTOR_ENHANCED(std::vector<std::wstring>)
+SWIGCSHARP_IMTYPE_STRING(std::string)
+SWIGCSHARP_IMTYPE_STRING(std::string&)
+SWIGCSHARP_IMTYPE_STRING(const std::string&)
+SWIGCSHARP_IMTYPE_STRING(std::string*)
+SWIGCSHARP_IMTYPE_STRING(const std::string*)
+SWIGCSHARP_IMTYPE_STRING(char_t*)
+SWIGCSHARP_IMTYPE_STRING(const char*)
+
+SWIG_STD_VECTOR_ENHANCED(std::vector<std::string>)
 %template(UnsignedCharVector) std::vector<unsigned char>;
 
 %ignore operator bool;

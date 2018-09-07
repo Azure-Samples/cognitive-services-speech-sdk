@@ -18,11 +18,11 @@
 
 - (instancetype)initWithSubscription:(NSString *)subscription AndRegion:(NSString *)region
 {
-    std::wstring subscriptionWString = [subscription wstring];
-    std::wstring regionWString = [region wstring];
+    std::string subscriptionString = [subscription string];
+    std::string regionString = [region string];
     
     try {
-        factoryImpl = Microsoft::CognitiveServices::Speech::SpeechFactory::FromSubscription(subscriptionWString, regionWString);
+        factoryImpl = Microsoft::CognitiveServices::Speech::SpeechFactory::FromSubscription(subscriptionString, regionString);
         if (factoryImpl == nullptr)
             return nil;
         _subscriptionKey = subscription;
@@ -39,11 +39,11 @@
 
 - (instancetype)initWithEndpoint:(NSString *)endpoint AndSubscription:(NSString *)subscriptionKey
 {
-    std::wstring endpointWString = [endpoint wstring];
-    std::wstring subscriptionKeyWString = [subscriptionKey wstring];
+    std::string endpointString = [endpoint string];
+    std::string subscriptionKeyString = [subscriptionKey string];
 
     try {
-        factoryImpl = Microsoft::CognitiveServices::Speech::SpeechFactory::FromEndpoint(endpointWString, subscriptionKeyWString);
+        factoryImpl = Microsoft::CognitiveServices::Speech::SpeechFactory::FromEndpoint(endpointString, subscriptionKeyString);
         if (factoryImpl == nullptr)
             return nil;
         _subscriptionKey = subscriptionKey;
@@ -82,11 +82,11 @@
 
 - (SpeechRecognizer*)createSpeechRecognizerWithFileInput:(NSString *)path
 {
-    std::wstring pathWString = [path wstring];
+    std::string pathString = [path string];
     
     try
     {
-        std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechRecognizer> recoImpl = factoryImpl->CreateSpeechRecognizerWithFileInput(pathWString);
+        std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechRecognizer> recoImpl = factoryImpl->CreateSpeechRecognizerWithFileInput(pathString);
         if (recoImpl == nullptr)
             return nil;
         SpeechRecognizer *reco = [[SpeechRecognizer alloc] init:(void *)&recoImpl];

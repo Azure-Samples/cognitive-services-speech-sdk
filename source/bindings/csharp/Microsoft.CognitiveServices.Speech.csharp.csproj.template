@@ -11,7 +11,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningLevel>4</WarningLevel>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <Configurations>Debug;Release;DebugUtf32;ReleaseUtf32</Configurations>
+    <Configurations>Debug;Release;DebugUtf8;ReleaseUtf8</Configurations>
     <NoWarn>1701;1702;1705;1591</NoWarn>
     <Version>0.0.0</Version>
     <DebugSymbols>true</DebugSymbols>
@@ -30,8 +30,8 @@
   <PropertyGroup Condition="$(Configuration.Contains('Release'))">
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
-  <PropertyGroup Condition="$(Configuration.Contains('Utf32'))">
-    <DefineConstants>USE_UTF32</DefineConstants>
+  <PropertyGroup Condition="$(Configuration.Contains('Utf8'))">
+    <DefineConstants>USE_UTF8</DefineConstants>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>

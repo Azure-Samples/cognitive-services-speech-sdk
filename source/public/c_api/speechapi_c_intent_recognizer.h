@@ -9,4 +9,4 @@
 #include <speechapi_c_common.h>
 
 
-SPXAPI IntentRecognizer_AddIntent(SPXRECOHANDLE hreco, const wchar_t* intentId, SPXTRIGGERHANDLE htrigger);
+SPXAPI IntentRecognizer_AddIntent(SPXRECOHANDLE hreco, const char* intentId, SPXTRIGGERHANDLE htrigger);

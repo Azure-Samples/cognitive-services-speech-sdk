@@ -17,10 +17,10 @@ void CarbonTestConsole::Sample_HelloWorld()
     auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
     auto recognizer = factory->CreateSpeechRecognizer();
 
-    ConsoleWriteLine(L"Say something...");
+    ConsoleWriteLine("Say something...");
     auto result = recognizer->RecognizeAsync().get();
 
-    ConsoleWriteLine(L"You said:\n\n    '%ls'", result->Text.c_str());
+    ConsoleWriteLine("You said:\n\n    '%s'", result->Text.c_str());
 }
 
 void CarbonTestConsole::Sample_HelloWorld_WithEvents()
@@ -29,41 +29,41 @@ void CarbonTestConsole::Sample_HelloWorld_WithEvents()
     auto recognizer = factory->CreateSpeechRecognizer();
 
     recognizer->IntermediateResult += [&](const SpeechRecognitionEventArgs& e) {
-        ConsoleWriteLine(L"IntermediateResult: text=%ls", e.Result.Text.c_str());
+        ConsoleWriteLine("IntermediateResult: text=%s", e.Result.Text.c_str());
     };
 
-    ConsoleWriteLine(L"Say something...");
+    ConsoleWriteLine("Say something...");
     auto result = recognizer->RecognizeAsync().get();
 
-    ConsoleWriteLine(L"You said:\n\n    '%ls'", result->Text.c_str());
+    ConsoleWriteLine("You said:\n\n    '%s'", result->Text.c_str());
 }
 
-void CarbonTestConsole::Sample_HelloWorld_PickEngine(const wchar_t* pszEngine) // L"Usp", L"Unidec", or L"Mock"
+void CarbonTestConsole::Sample_HelloWorld_PickEngine(const char* pszEngine) // L"Usp", L"Unidec", or L"Mock"
 {
     auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
     auto recognizer = factory->CreateSpeechRecognizer();
     auto session = Session::FromRecognizer(recognizer);
 
-    std::wstring propertyName = std::wstring(L"__use") + std::wstring(pszEngine) + std::wstring(L"RecoEngine");
+    std::string propertyName = "__use" + std::string(pszEngine) + "RecoEngine";
     session->Parameters[propertyName.c_str()] = true;
 
     recognizer->IntermediateResult += [&](const SpeechRecognitionEventArgs& e) {
-        ConsoleWriteLine(L"IntermediateResult: text=%ls", e.Result.Text.c_str());
+        ConsoleWriteLine("IntermediateResult: text=%s", e.Result.Text.c_str());
     };
 
-    ConsoleWriteLine(L"Say something...");
+    ConsoleWriteLine("Say something...");
     auto result = recognizer->RecognizeAsync().get();
 
-    ConsoleWriteLine(L"You said:\n\n    '%ls'", result->Text.c_str());
+    ConsoleWriteLine("You said:\n\n    '%s'", result->Text.c_str());
 }
 
 void CarbonTestConsole::Sample_HelloWorld_Intent()
 {
-    constexpr auto luisRegion = LR"(westus2)";
+    constexpr auto luisRegion = R"(westus2)";
     Sample_HelloWorld_Intent(m_subscriptionKey.c_str(), m_intentAppId.c_str(), luisRegion);
 }
 
-void CarbonTestConsole::Sample_HelloWorld_Intent(const wchar_t* subscriptionKey, const wchar_t* appId, const wchar_t* region)
+void CarbonTestConsole::Sample_HelloWorld_Intent(const char* subscriptionKey, const char* appId, const char* region)
 {
     auto factory = SpeechFactory::FromSubscription(subscriptionKey, region);
 
@@ -71,21 +71,21 @@ void CarbonTestConsole::Sample_HelloWorld_Intent(const wchar_t* subscriptionKey,
     auto recognizer = factory->CreateIntentRecognizer();
 
     // Create a LanguageUnderstandingModel associated with your LU application
-    auto luisSubscriptionKey = L"YourLuisSubscriptionKey"; luisSubscriptionKey = subscriptionKey;
-    auto luisAppId = L"YourLuisAppId"; luisAppId = appId;
-    auto luisRegion = L"YourLuisEndpoint"; luisRegion = region;
+    auto luisSubscriptionKey = "YourLuisSubscriptionKey"; luisSubscriptionKey = subscriptionKey;
+    auto luisAppId = "YourLuisAppId"; luisAppId = appId;
+    auto luisRegion = "YourLuisEndpoint"; luisRegion = region;
     auto model = LanguageUnderstandingModel::FromSubscription(luisSubscriptionKey, luisAppId, luisRegion);
 
     // Add each intent you wish to recognize to the intent recognizer
-    auto intentName1 = L"IntentNameFromLuisPortal"; intentName1 = L"Calendar.Add";
-    auto intentName2 = L"IntentNameFromLuisPortal"; intentName2 = L"Communication.SendEmail";
+    auto intentName1 = "IntentNameFromLuisPortal"; intentName1 = "Calendar.Add";
+    auto intentName2 = "IntentNameFromLuisPortal"; intentName2 = "Communication.SendEmail";
 
-    recognizer->AddIntent(L"1", model, intentName1);
-    recognizer->AddIntent(L"some other id", model, intentName2);
+    recognizer->AddIntent("1", model, intentName1);
+    recognizer->AddIntent("some other id", model, intentName2);
 
     // Prompt the user to speak
     // wcout << L"Say something...\n";
-    ConsoleWriteLine(L"Say something...");
+    ConsoleWriteLine("Say something...");
 
     // Start recognition; will return the first result recognized
     auto result = recognizer->RecognizeAsync().get();
@@ -94,21 +94,21 @@ void CarbonTestConsole::Sample_HelloWorld_Intent(const wchar_t* subscriptionKey,
     switch (result->Reason)
     {
     case Reason::Recognized:
-        ConsoleWriteLine(L"We recognized: %s", result->Text.c_str());
-        ConsoleWriteLine(L"IntentId='%s'", result->IntentId.c_str());
-        ConsoleWriteLine(L"json='%s'", result->Properties[ResultProperty::LanguageUnderstandingJson].GetString().c_str());
+        ConsoleWriteLine("We recognized: %s", result->Text.c_str());
+        ConsoleWriteLine("IntentId='%s'", result->IntentId.c_str());
+        ConsoleWriteLine("json='%s'", result->Properties[ResultProperty::LanguageUnderstandingJson].GetString().c_str());
         break;
     case Reason::InitialSilenceTimeout:
-        ConsoleWriteLine(L"We only heard silence in the audio stream.");
+        ConsoleWriteLine("We only heard silence in the audio stream.");
         break;
     case Reason::InitialBabbleTimeout:
-        ConsoleWriteLine(L"We only heard noise in the audio stream.");
+        ConsoleWriteLine("We only heard noise in the audio stream.");
         break; 
     case Reason::NoMatch:
-        ConsoleWriteLine(L"We detected speech in the audio stream, but could not recognize any words from the target language. This could be caused by wrong language setting or wrong audio format.");
+        ConsoleWriteLine("We detected speech in the audio stream, but could not recognize any words from the target language. This could be caused by wrong language setting or wrong audio format.");
         break;
     case Reason::Canceled:
-        ConsoleWriteLine(L"There was an error, reason=%d - %s", int(result->Reason), result->Text.c_str());
+        ConsoleWriteLine("There was an error, reason=%d - %s", int(result->Reason), result->Text.c_str());
         break;
     default:
         break;
@@ -120,10 +120,10 @@ void CarbonTestConsole::Sample_HelloWorld_Subscription()
     auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
     auto recognizer = factory->CreateSpeechRecognizer();
 
-    ConsoleWriteLine(L"Say something...");
+    ConsoleWriteLine("Say something...");
     auto result = recognizer->RecognizeAsync().get();
 
-    ConsoleWriteLine(L"You said:\n\n    '%ls'", result->Text.c_str());
+    ConsoleWriteLine("You said:\n\n    '%s'", result->Text.c_str());
 }
 
 void CarbonTestConsole::Sample_HelloWorld_Subscription_With_CRIS()
@@ -133,19 +133,19 @@ void CarbonTestConsole::Sample_HelloWorld_Subscription_With_CRIS()
 
     recognizer->SetDeploymentId(m_customSpeechModelId);
 
-    ConsoleWriteLine(L"Say something...");
+    ConsoleWriteLine("Say something...");
     auto result = recognizer->RecognizeAsync().get();
 
-    ConsoleWriteLine(L"You said:\n\n    '%ls'", result->Text.c_str());
+    ConsoleWriteLine("You said:\n\n    '%s'", result->Text.c_str());
 }
 
-void CarbonTestConsole::Sample_HelloWorld_Language(const wchar_t* language)
+void CarbonTestConsole::Sample_HelloWorld_Language(const char* language)
 {
     auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
     auto recognizer = factory->CreateSpeechRecognizer(language);
 
-    ConsoleWriteLine(L"Say something...");
+    ConsoleWriteLine("Say something...");
     auto result = recognizer->RecognizeAsync().get();
 
-    ConsoleWriteLine(L"You said:\n\n    '%ls'", result->Text.c_str());
+    ConsoleWriteLine("You said:\n\n    '%s'", result->Text.c_str());
 }

@@ -20,7 +20,7 @@
     self = [super init];
     eventArgsImpl = static_cast<Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs *>(eventArgsHandle);
     
-    _sessionId = [NSString stringWithWString:eventArgsImpl->SessionId];
+    _sessionId = [NSString stringWithString:eventArgsImpl->SessionId];
     
     // Todo: error handling
     std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechRecognitionResult> resultImpl = eventArgsImpl->GetResult();

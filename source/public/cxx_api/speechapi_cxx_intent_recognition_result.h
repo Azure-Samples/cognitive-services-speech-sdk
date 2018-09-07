@@ -45,17 +45,17 @@ public:
     /// <summary>
     /// Unique intent id.
     /// </summary>
-    const std::wstring& IntentId;
+    const std::string& IntentId;
 
 private:
     DISABLE_DEFAULT_CTORS(IntentRecognitionResult);
 
-    void PopulateIntentFields(SPXRESULTHANDLE hresult, std::wstring* pintentId)
+    void PopulateIntentFields(SPXRESULTHANDLE hresult, std::string* pintentId)
     {
         SPX_INIT_HR(hr);
         
         const size_t maxCharCount = 1024;
-        wchar_t sz[maxCharCount+1];
+        char sz[maxCharCount+1];
 
         if (pintentId != nullptr && Recognizer_ResultHandle_IsValid(hresult))
         {
@@ -64,7 +64,7 @@ private:
         }
     }
 
-    std::wstring m_intentId;
+    std::string m_intentId;
 };
 
 

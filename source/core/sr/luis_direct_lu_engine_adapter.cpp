@@ -45,8 +45,8 @@ void CSpxLuisDirectEngineAdapter::AddIntentTrigger(const wchar_t* id, std::share
         if (model->GetSubscriptionKey().empty() && model->GetRegion().empty())
         {
             auto properties = SpxQueryInterface<ISpxNamedProperties>(GetSite());
-            auto region = properties->GetStringValue(g_SPEECH_Region);
-            auto key = properties->GetStringValue(g_SPEECH_SubscriptionKey);
+            auto region = properties->GetStringValue(PAL::ToWString(g_SPEECH_Region).c_str());
+            auto key = properties->GetStringValue(PAL::ToWString(g_SPEECH_SubscriptionKey).c_str());
             model->UpdateSubscription(key.c_str(), region.c_str());
         }
 
@@ -150,7 +150,7 @@ void CSpxLuisDirectEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionR
     {
         // Check to see if we already have the JSON payload (from the speech service)
         auto properties = SpxQueryInterface<ISpxNamedProperties>(result);
-        auto json = PAL::ToString(properties->GetStringValue(g_RESULT_LanguageUnderstandingJson));
+        auto json = PAL::ToString(properties->GetStringValue(PAL::ToWString(g_RESULT_LanguageUnderstandingJson).c_str()));
         SPX_DBG_TRACE_VERBOSE("%s: text='%s'; already-existing-IntentResultJson='%s'", __FUNCTION__, resultText.c_str(), json.c_str());
 
         // If we don't already have the LUIS json, fetch it from LUIS now...

@@ -21,7 +21,7 @@ static_assert((int)ResultProperty_Json == (int)ResultProperty::Json, "ResultProp
 static_assert((int)ResultProperty_LanguageUnderstandingJson == (int)ResultProperty::LanguageUnderstandingJson, "ResultProperty_* enum values == ResultProperty::* enum values");
 static_assert((int)ResultProperty_ErrorDetails == (int)ResultProperty::ErrorDetails, "ResultProperty_* enum values == ResultProperty::* enum values");
 
-SPXAPI Result_GetResultId(SPXRESULTHANDLE hresult, wchar_t* pszResultId, uint32_t cchResultId)
+SPXAPI Result_GetResultId(SPXRESULTHANDLE hresult, char* pszResultId, uint32_t cchResultId)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, cchResultId == 0);
 
@@ -30,9 +30,9 @@ SPXAPI Result_GetResultId(SPXRESULTHANDLE hresult, wchar_t* pszResultId, uint32_
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
 
-        auto strActual = result->GetResultId();
+        auto strActual = PAL::ToString(result->GetResultId());
         auto pszActual = strActual.c_str();
-        PAL::wcscpy(pszResultId, cchResultId, pszActual, strActual.size(), true);
+        PAL::strcpy(pszResultId, cchResultId, pszActual, strActual.size(), true);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -50,7 +50,7 @@ SPXAPI Result_GetRecognitionReason(SPXRESULTHANDLE hresult, Result_RecognitionRe
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI Result_GetText(SPXRESULTHANDLE hresult, wchar_t* pszText, uint32_t cchText)
+SPXAPI Result_GetText(SPXRESULTHANDLE hresult, char* pszText, uint32_t cchText)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, cchText == 0);
 
@@ -59,9 +59,9 @@ SPXAPI Result_GetText(SPXRESULTHANDLE hresult, wchar_t* pszText, uint32_t cchTex
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
 
-        auto strActual = result->GetText();
+        auto strActual = PAL::ToString(result->GetText());
         auto pszActual = strActual.c_str();
-        PAL::wcscpy(pszText, cchText, pszActual, strActual.size(), true);
+        PAL::strcpy(pszText, cchText, pszActual, strActual.size(), true);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
@@ -92,11 +92,11 @@ SPXAPI Result_GetDuration(SPXRESULTHANDLE hresult, uint64_t* duration)
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI Result_GetProperty_Name(Result_Property property, wchar_t* name, uint32_t cchName)
+SPXAPI Result_GetProperty_Name(Result_Property property, char* name, uint32_t cchName)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        const wchar_t* propertyName = L"";
+        const char* propertyName = "";
         switch (property)
         {
             case ResultProperty_Json:
@@ -116,91 +116,123 @@ SPXAPI Result_GetProperty_Name(Result_Property property, wchar_t* name, uint32_t
                 break;
         }
 
-        PAL::wcscpy(name, cchName, propertyName, wcslen(propertyName), true);
+        PAL::strcpy(name, cchName, propertyName, strlen(propertyName), true);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI Result_GetProperty_String(SPXRESULTHANDLE hresult, const wchar_t* name, wchar_t* value, uint32_t cchValue, const wchar_t* defaultValue)
+SPXAPI Result_GetProperty_String(SPXRESULTHANDLE hresult, const char* name, char* value, uint32_t cchValue, const char* defaultValue)
 {
+    if (name == nullptr)
+        return SPXERR_INVALID_ARG;
+
+    if (defaultValue == nullptr)
+        return SPXERR_INVALID_ARG;
+
+    if (value == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
 
         auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-        auto tempValue = namedProperties->GetStringValue(name, defaultValue);
+        auto tempValue = PAL::ToString(
+            namedProperties->GetStringValue(PAL::ToWString(name).c_str(),
+                PAL::ToWString(defaultValue).c_str()));
 
-        PAL::wcscpy(value, cchValue, tempValue.c_str(), tempValue.size(), true);
+        PAL::strcpy(value, cchValue, tempValue.c_str(), tempValue.size(), true);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_(bool) Result_ContainsProperty_String(SPXRESULTHANDLE hresult, const wchar_t* name)
+SPXAPI_(bool) Result_ContainsProperty_String(SPXRESULTHANDLE hresult, const char* name)
 {
+    if (name == nullptr)
+        return false;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
 
         auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-        return namedProperties->HasStringValue(name);
+        return namedProperties->HasStringValue(PAL::ToWString(name).c_str());
     }
     SPXAPI_CATCH_AND_RETURN(hr, false);
 }
 
-SPXAPI Result_GetProperty_Int32(SPXRESULTHANDLE hresult, const wchar_t* name, int32_t* pvalue, int32_t defaultValue)
+SPXAPI Result_GetProperty_Int32(SPXRESULTHANDLE hresult, const char* name, int32_t* pvalue, int32_t defaultValue)
 {
+    if (name == nullptr)
+        return SPXERR_INVALID_ARG;
+
+    if (pvalue == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
 
         auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-        auto tempValue = namedProperties->GetNumberValue(name, defaultValue);
+        auto tempValue = namedProperties->GetNumberValue(PAL::ToWString(name).c_str(), defaultValue);
 
         *pvalue = (int32_t)tempValue;
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_(bool) Result_ContainsProperty_Int32(SPXRESULTHANDLE hresult, const wchar_t* name)
+SPXAPI_(bool) Result_ContainsProperty_Int32(SPXRESULTHANDLE hresult, const char* name)
 {
+    if (name == nullptr)
+        return false;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
 
         auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-        return namedProperties->HasNumberValue(name);
+        return namedProperties->HasNumberValue(PAL::ToWString(name).c_str());
     }
     SPXAPI_CATCH_AND_RETURN(hr, false);
 }
 
-SPXAPI Result_GetProperty_Bool(SPXRESULTHANDLE hresult, const wchar_t* name, bool* pvalue, bool defaultValue)
+SPXAPI Result_GetProperty_Bool(SPXRESULTHANDLE hresult, const char* name, bool* pvalue, bool defaultValue)
 {
+    if (name == nullptr)
+        return SPXERR_INVALID_ARG;
+
+    if (pvalue == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
 
         auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-        auto tempValue = namedProperties->GetBooleanValue(name, defaultValue);
+        auto tempValue = namedProperties->GetBooleanValue(PAL::ToWString(name).c_str(), defaultValue);
 
         *pvalue = !!tempValue;
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_(bool) Result_ContainsProperty_Bool(SPXRESULTHANDLE hresult, const wchar_t* name)
+SPXAPI_(bool) Result_ContainsProperty_Bool(SPXRESULTHANDLE hresult, const char* name)
 {
+    if (name == nullptr)
+        return false;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
 
         auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-        return namedProperties->HasBooleanValue(name);
+        return namedProperties->HasBooleanValue(PAL::ToWString(name).c_str());
     }
     SPXAPI_CATCH_AND_RETURN(hr, false);
 }

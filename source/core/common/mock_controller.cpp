@@ -9,6 +9,7 @@
 #include "mock_controller.h"
 #include "speechapi_c_factory.h"
 #include "speechapi_cxx_factory_parameter.h"
+#include "string_utils.h"
 
 
 using namespace Microsoft::CognitiveServices::Speech;
@@ -24,7 +25,7 @@ class MockParameterValue : public FactoryParameterValue
 {
 public:
 
-    MockParameterValue(const wchar_t* psz) : FactoryParameterValue(SPXFACTORYHANDLE_ROOTSITEPARAMETERS_HACK, psz) { };
+    MockParameterValue(const char* psz) : FactoryParameterValue(SPXFACTORYHANDLE_ROOTSITEPARAMETERS_HACK, psz) { };
 
 private:
 
@@ -32,32 +33,32 @@ private:
 };
 
 
-void SpxSetMockParameterString(const wchar_t* name, const wchar_t* value)
+void SpxSetMockParameterString(const char* name, const char* value)
 {
     MockParameterValue(name).SetString(value);
 }
 
-void SpxSetMockParameterNumber(const wchar_t* name, int32_t value)
+void SpxSetMockParameterNumber(const char* name, int32_t value)
 {
     MockParameterValue(name).SetNumber(value);
 }
 
-void SpxSetMockParameterBool(const wchar_t* name, bool value)
+void SpxSetMockParameterBool(const char* name, bool value)
 {
     MockParameterValue(name).SetBool(value);
 }
 
-std::wstring SpxGetMockParameterString(const wchar_t* name, const wchar_t* defaultValue)
+std::string SpxGetMockParameterString(const char* name, const char* defaultValue)
 {
     return MockParameterValue(name).GetString(defaultValue);
 }
 
-int32_t SpxGetMockParameterNumber(const wchar_t* name, int32_t defaultValue)
+int32_t SpxGetMockParameterNumber(const char* name, int32_t defaultValue)
 {
     return MockParameterValue(name).GetNumber(defaultValue);
 }
 
-bool SpxGetMockParameterBool(const wchar_t* name, bool defaultValue)
+bool SpxGetMockParameterBool(const char* name, bool defaultValue)
 {
     return MockParameterValue(name).GetBool(defaultValue);
 }

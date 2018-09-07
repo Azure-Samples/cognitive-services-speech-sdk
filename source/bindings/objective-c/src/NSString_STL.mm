@@ -7,17 +7,16 @@
 
 @implementation NSString (STL)
 
-- (std::wstring)wstring
+- (std::string)string
 {
-    NSData *data = [self dataUsingEncoding:CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingUTF32LE)];
-    std::wstring wstring = std::wstring((wchar_t *)[data bytes], [data length]/sizeof(wchar_t));
-
-    return wstring;
+    NSData *data = [self dataUsingEncoding:CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingUTF8)];
+    std::string value = std::string((char*)[data bytes], [data length]/sizeof(char));
+    return value;
 }
 
-+ (instancetype)stringWithWString:(const std::wstring&)str
++ (instancetype)stringWithString:(const std::string&)str
 {
-    return [[NSString alloc] initWithBytes:str.data() length:str.size()*sizeof(wchar_t) encoding:CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingUTF32LE)];
+    return [[NSString alloc] initWithBytes:str.data() length:str.size()*sizeof(char) encoding:CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingUTF8)];
 }
 
 @end

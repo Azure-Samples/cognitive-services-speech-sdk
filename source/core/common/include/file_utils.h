@@ -17,6 +17,7 @@ typedef int errno_t;
 namespace PAL {
 
     int waccess(const wchar_t *path, int mode);
+    int access(const char *path, int mode);
 
     errno_t fopen_s(FILE **file, const char *fileName, const char *mode);
 

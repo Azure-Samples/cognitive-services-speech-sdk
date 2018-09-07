@@ -1022,7 +1022,7 @@ std::wstring CSpxAudioStreamSession::GetStringValue(const wchar_t* name, const w
     {
         return m_kwsModel->GetFileName();
     }
-    else if (PAL::wcsicmp(name, g_sessionId) == 0)
+    else if (PAL::wcsicmp(name, PAL::ToWString(g_sessionId).c_str()) == 0)
     {
         return m_sessionId;
     }
@@ -1124,7 +1124,7 @@ std::shared_ptr<ISpxKwsEngineAdapter> CSpxAudioStreamSession::EnsureInitKwsEngin
 void CSpxAudioStreamSession::EnsureIntentRegionSet()
 {
     // Let's default the "intentRegion" to the speech region
-    auto intentRegion = PAL::ToString(this->GetStringValue(g_SPEECH_Region, L""));
+    auto intentRegion = PAL::ToString(this->GetStringValue(PAL::ToWString(g_SPEECH_Region).c_str(), L""));
 
     // Now ... let's check to see if we have a different region specified for intent...
     SPX_DBG_ASSERT(m_recognizers.size() == 1); // we only support 1 recognizer today...
@@ -1144,7 +1144,7 @@ void CSpxAudioStreamSession::EnsureIntentRegionSet()
     }
 
     // Finally ... Let's actually store the region
-    SetStringValue(g_INTENT_Region, PAL::ToWString(SpeechRegionFromIntentRegion(intentRegion)).c_str());
+    SetStringValue(PAL::ToWString(g_INTENT_Region).c_str(), PAL::ToWString(SpeechRegionFromIntentRegion(intentRegion)).c_str());
 }
 
 std::string CSpxAudioStreamSession::SpeechRegionFromIntentRegion(const std::string& intentRegion)

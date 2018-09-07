@@ -12,6 +12,6 @@
 SPXAPI_(bool) LanguageUnderstandingModel_Handle_IsValid(SPXLUMODELHANDLE hlumodel);
 SPXAPI LanguageUnderstandingModel_Handle_Close(SPXLUMODELHANDLE hlumodel);
 
-SPXAPI LanguageUnderstandingModel_Create_From_Uri(const wchar_t* uri, SPXLUMODELHANDLE* phlumodel);
-SPXAPI LanguageUnderstandingModel_Create_From_AppId(const wchar_t* appId, SPXLUMODELHANDLE* phlumodel);
-SPXAPI LanguageUnderstandingModel_Create_From_Subscription(const wchar_t* subscriptionKey, const wchar_t* appId, const wchar_t* region, SPXLUMODELHANDLE* phlumodel);
+SPXAPI LanguageUnderstandingModel_Create_From_Uri(const char* uri, SPXLUMODELHANDLE* phlumodel);
+SPXAPI LanguageUnderstandingModel_Create_From_AppId(const char* appId, SPXLUMODELHANDLE* phlumodel);
+SPXAPI LanguageUnderstandingModel_Create_From_Subscription(const char* subscriptionKey, const char* appId, const char* region, SPXLUMODELHANDLE* phlumodel);

@@ -18,41 +18,41 @@ using namespace Microsoft::CognitiveServices::Speech::Impl; // for mocks
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace std;
 
-static wstring input_file(L"tests/input/whatstheweatherlike.wav");
+static string input_file("tests/input/whatstheweatherlike.wav");
 
 
 static std::shared_ptr<ICognitiveServicesSpeechFactory> GetFactory()
 {
     // Assuming subscription key contains only single-byte characters.
     static std::shared_ptr<ICognitiveServicesSpeechFactory> factory = !Config::Endpoint.empty()
-        ? SpeechFactory::FromEndpoint(PAL::ToWString(Config::Endpoint), PAL::ToWString(Keys::Speech))
-        : SpeechFactory::FromSubscription(PAL::ToWString(Keys::Speech), PAL::ToWString(Config::Region));
+        ? SpeechFactory::FromEndpoint(Config::Endpoint, Keys::Speech)
+        : SpeechFactory::FromSubscription(Keys::Speech, Config::Region);
 
     return factory;
 }
 
 void UseMocks(bool value)
 {
-    SpxSetMockParameterBool(L"CARBON-INTERNAL-MOCK-UspRecoEngine", value);
-    SpxSetMockParameterBool(L"CARBON-INTERNAL-MOCK-Microphone", value);
-    SpxSetMockParameterBool(L"CARBON-INTERNAL-MOCK-SdkKwsEngine", value);
+    SpxSetMockParameterBool("CARBON-INTERNAL-MOCK-UspRecoEngine", value);
+    SpxSetMockParameterBool("CARBON-INTERNAL-MOCK-Microphone", value);
+    SpxSetMockParameterBool("CARBON-INTERNAL-MOCK-SdkKwsEngine", value);
 }
 
 void UseMockUsp(bool value)
 {
-    SpxSetMockParameterBool(L"CARBON-INTERNAL-MOCK-UspRecoEngine", value);
+    SpxSetMockParameterBool("CARBON-INTERNAL-MOCK-UspRecoEngine", value);
 }
 
 bool IsUsingMocks(bool uspMockRequired = true)
 {
-    return SpxGetMockParameterBool(L"CARBON-INTERNAL-MOCK-Microphone") &&
-           SpxGetMockParameterBool(L"CARBON-INTERNAL-MOCK-SdkKwsEngine") &&
-           (SpxGetMockParameterBool(L"CARBON-INTERNAL-MOCK-UspRecoEngine") || !uspMockRequired);
+    return SpxGetMockParameterBool("CARBON-INTERNAL-MOCK-Microphone") &&
+           SpxGetMockParameterBool("CARBON-INTERNAL-MOCK-SdkKwsEngine") &&
+           (SpxGetMockParameterBool("CARBON-INTERNAL-MOCK-UspRecoEngine") || !uspMockRequired);
 }
 
 void SetMockRealTimeSpeed(int value)
 {
-    SpxSetMockParameterNumber(L"CARBON-INTERNAL-MOCK-RealTimeAudioPercentage", value);
+    SpxSetMockParameterNumber("CARBON-INTERNAL-MOCK-RealTimeAudioPercentage", value);
 }
 
 
@@ -91,7 +91,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             }
         }
 
-        auto model = KeywordRecognitionModel::FromFile(L"tests/input/heycortana_en-US.table");
+        auto model = KeywordRecognitionModel::FromFile("tests/input/heycortana_en-US.table");
         REQUIRE(model != nullptr);
 
         {
@@ -127,7 +127,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
         UseMocks(true);
 
-        REQUIRE(exists(input_file));
+        REQUIRE(exists(PAL::ToWString(input_file)));
 
         mutex mtx;
         condition_variable cv;
@@ -228,7 +228,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
         UseMocks(false);
-        REQUIRE(exists(input_file));
+        REQUIRE(exists(PAL::ToWString(input_file)));
         REQUIRE(!IsUsingMocks());
 
         auto recognizer = GetFactory()->CreateSpeechRecognizerWithFileInput(input_file);
@@ -241,9 +241,9 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
         UseMocks(false);
-        REQUIRE(exists(input_file));
+        REQUIRE(exists(PAL::ToWString(input_file)));
         REQUIRE(!IsUsingMocks());
-        auto badKeyFactory = SpeechFactory::FromSubscription(L"invalid_key", L"invalid_region");
+        auto badKeyFactory = SpeechFactory::FromSubscription("invalid_key", "invalid_region");
         auto recognizer = badKeyFactory->CreateSpeechRecognizerWithFileInput(input_file);
         auto result = recognizer->RecognizeAsync().get();
 
@@ -259,14 +259,14 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
    
     SECTION("Wrong Key triggers Canceled Event ")
     {
-        REQUIRE(exists(input_file));
+        REQUIRE(exists(PAL::ToWString(input_file)));
         UseMocks(false);
         mutex mtx;
         condition_variable cv;
 
         bool connectionReportedError = false;
-        wstring wrongKey = L"wrongKey";
-        auto factory = SpeechFactory::FromSubscription(wrongKey, L"westus");
+        string wrongKey = "wrongKey";
+        auto factory = SpeechFactory::FromSubscription(wrongKey, "westus");
         auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
 
         recognizer->Canceled.Connect([&](const SpeechRecognitionEventArgs& args) {
@@ -290,10 +290,10 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
     SECTION("German Speech Recognition works")
     {
-        wstring german_input_file(L"tests/input/CallTheFirstOne.wav");
-        REQUIRE(exists(german_input_file));
+        string german_input_file("tests/input/CallTheFirstOne.wav");
+        REQUIRE(exists(PAL::ToWString(german_input_file)));
         auto factory = GetFactory();
-        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(german_input_file, L"de-DE");
+        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(german_input_file, "de-DE");
         auto result = recognizer->RecognizeAsync().get();
         REQUIRE(result != nullptr);
         REQUIRE(!result->Text.empty());
@@ -301,10 +301,10 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
     SECTION("German Speech Recognition works")
     {
-        wstring german_input_file(L"tests/input/CallTheFirstOne.wav");
-        REQUIRE(exists(german_input_file));
+        string german_input_file("tests/input/CallTheFirstOne.wav");
+        REQUIRE(exists(PAL::ToWString(german_input_file)));
         auto factory = GetFactory();
-        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(german_input_file, L"de-DE");
+        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(german_input_file, "de-DE");
         auto result = recognizer->RecognizeAsync().get();
         REQUIRE(result != nullptr);
         REQUIRE(!result->Text.empty());
@@ -347,7 +347,7 @@ TEST_CASE("KWS basics", "[api][cxx]")
                 cv.notify_all();
             };
 
-            auto model = KeywordRecognitionModel::FromFile(L"tests/input/heycortana_en-US.table");
+            auto model = KeywordRecognitionModel::FromFile("tests/input/heycortana_en-US.table");
             recognizer->StartKeywordRecognitionAsync(model);
 
             THEN("We wait up to 30 seconds for a KwsSingleShot recognition and it's accompanying SessionStopped")
@@ -386,18 +386,18 @@ TEST_CASE("Speech on local server", "[api][cxx]")
         }
 
         UseMocks(false);
-        REQUIRE(exists(input_file));
+        REQUIRE(exists(PAL::ToWString(input_file)));
         REQUIRE(!IsUsingMocks());
 
         const int numLoops = 10;
 
-        auto factory = SpeechFactory::FromEndpoint(PAL::ToWString(Config::Endpoint), LR"({"max_timeout":"0"})");
+        auto factory = SpeechFactory::FromEndpoint(Config::Endpoint, R"({"max_timeout":"0"})");
         for (int i = 0; i < numLoops; i++)
         {
             auto recognizer = factory->CreateSpeechRecognizerWithFileInput(input_file);
             auto result = recognizer->RecognizeAsync().get();
             REQUIRE(result->Reason == Reason::Recognized);
-            REQUIRE(result->Text == L"Remind me to buy 5 iPhones.");
+            REQUIRE(result->Text == "Remind me to buy 5 iPhones.");
         }
 
         // BUGBUG: this currently fails because CSpxAudioStreamSession::WaitForRecognition() returns a nullptr on a timeout.
@@ -418,7 +418,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
-    REQUIRE(exists(input_file));
+    REQUIRE(exists(PAL::ToWString(input_file)));
 
     mutex mtx;
     condition_variable cv;
@@ -513,14 +513,14 @@ TEST_CASE("Speech Factory basics", "[api][cxx]")
     {
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
-        auto f1 = SpeechFactory::FromEndpoint(L"1", L"invalid_key");
-        auto f2 = SpeechFactory::FromEndpoint(L"2", L"invalid_key");
+        auto f1 = SpeechFactory::FromEndpoint("1", "invalid_key");
+        auto f2 = SpeechFactory::FromEndpoint("2", "invalid_key");
 
         auto endpoint1 = f1->Parameters[FactoryParameter::Endpoint].GetString();
         auto endpoint2 = f2->Parameters[FactoryParameter::Endpoint].GetString();
 
         //REQUIRE(endpoint1 == L"1"); BUGBUG this fails!!!
-        REQUIRE(endpoint2 == L"2");
+        REQUIRE(endpoint2 == "2");
     }
 
 }

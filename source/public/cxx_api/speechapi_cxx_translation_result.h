@@ -43,8 +43,8 @@ class TranslationTextResult final : public Microsoft::CognitiveServices::Speech:
 
 private:
     TranslationStatusCode m_translationStatus;
-    std::map<std::wstring, std::wstring> m_translations;
-    std::wstring m_failureReason;
+    std::map<std::string, std::string> m_translations;
+    std::string m_failureReason;
 
 public:
 
@@ -80,12 +80,12 @@ public:
     /// Presents the translation results. Each item in the map is a key value pair, where key is the language tag of the translated text,
     /// and value is the translation text in that language.
     /// </summary>
-    const std::map<std::wstring, std::wstring>& Translations;
+    const std::map<std::string, std::string>& Translations;
 
     /// <summary>
     /// Contains failure reason if TranslationStatus indicates an error. Otherwise it is empty.
     /// </summary>
-    const std::wstring& FailureReason;
+    const std::string& FailureReason;
 
 private:
 
@@ -98,17 +98,17 @@ private:
         m_translationStatus = static_cast<::Microsoft::CognitiveServices::Speech::Translation::TranslationStatusCode>(status);
 
         size_t bufLen = 0;
-        std::unique_ptr<wchar_t[]> reasonBuffer;
+        std::unique_ptr<char[]> reasonBuffer;
         hr = TranslationTextResult_GetFailureReason(resultHandle, nullptr, &bufLen);
         if (hr == SPXERR_BUFFER_TOO_SMALL)
         {
-            reasonBuffer = std::make_unique<wchar_t[]>(bufLen);
+            reasonBuffer = std::make_unique<char[]>(bufLen);
             hr = TranslationTextResult_GetFailureReason(resultHandle, reasonBuffer.get(), &bufLen);
         }
         SPX_THROW_ON_FAIL(hr);
         if (bufLen != 0)
         {
-            m_failureReason = std::wstring(reasonBuffer.get());
+            m_failureReason = std::string(reasonBuffer.get());
         }
 
         bufLen = 0;
@@ -131,7 +131,7 @@ private:
 
         for (size_t i = 0; i < phraseBuffer->numberEntries; i++)
         {
-            m_translations[std::wstring(phraseBuffer->targetLanguages[i])] = std::wstring(phraseBuffer->translationTexts[i]);
+            m_translations[std::string(phraseBuffer->targetLanguages[i])] = std::string(phraseBuffer->translationTexts[i]);
         }
 
         SPX_DBG_TRACE_VERBOSE("Translation phrases: numberentries: %d", (int)m_translations.size());
@@ -175,7 +175,7 @@ class TranslationSynthesisResult
 private:
     SynthesisStatusCode m_synthesisStatus;
     std::vector<uint8_t> m_audioData;
-    std::wstring m_failureReason;
+    std::string m_failureReason;
 
 public:
     /// <summary>
@@ -212,7 +212,7 @@ public:
     /// <summary>
     /// Contains failure reason if SynthesisStatus indicates an error. Otherwise it is empty.
     /// </summary>
-    const std::wstring& FailureReason;
+    const std::string& FailureReason;
 
 
 private:
@@ -227,17 +227,17 @@ private:
         m_synthesisStatus = static_cast<::Microsoft::CognitiveServices::Speech::Translation::SynthesisStatusCode>(status);
 
         size_t bufLen = 0;
-        std::unique_ptr<wchar_t[]> reasonBuffer;
+        std::unique_ptr<char[]> reasonBuffer;
         hr = TranslationSynthesisResult_GetFailureReason(resultHandle, nullptr, &bufLen);
         if (hr == SPXERR_BUFFER_TOO_SMALL)
         {
-            reasonBuffer = std::make_unique<wchar_t[]>(bufLen);
+            reasonBuffer = std::make_unique<char[]>(bufLen);
             hr = TranslationSynthesisResult_GetFailureReason(resultHandle, reasonBuffer.get(), &bufLen);
         }
         SPX_THROW_ON_FAIL(hr);
         if (bufLen > 0)
         {
-            m_failureReason = std::wstring(reasonBuffer.get());
+            m_failureReason = std::string(reasonBuffer.get());
         }
 
         bufLen = 0;

@@ -24,14 +24,17 @@ SPXAPI LanguageUnderstandingModel_Handle_Close(SPXLUMODELHANDLE hlumodel)
     return Handle_Close<SPXLUMODELHANDLE, ISpxLanguageUnderstandingModel>(hlumodel);
 }
 
-SPXAPI LanguageUnderstandingModel_Create_From_Uri(const wchar_t* uri, SPXLUMODELHANDLE* phlumodel)
+SPXAPI LanguageUnderstandingModel_Create_From_Uri(const char* uri, SPXLUMODELHANDLE* phlumodel)
 {
+    if (uri == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phlumodel = SPXHANDLE_INVALID;
 
         auto model = SpxCreateObjectWithSite<ISpxLanguageUnderstandingModel>("CSpxLanguageUnderstandingModel", SpxGetRootSite());
-        model->InitEndpoint(uri);
+        model->InitEndpoint(PAL::ToWString(uri).c_str());
         
         auto languageUnderstandingModelHandles = CSpxSharedPtrHandleTableManager::Get<ISpxLanguageUnderstandingModel, SPXLUMODELHANDLE>();
         *phlumodel = languageUnderstandingModelHandles->TrackHandle(model);
@@ -39,14 +42,17 @@ SPXAPI LanguageUnderstandingModel_Create_From_Uri(const wchar_t* uri, SPXLUMODEL
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI LanguageUnderstandingModel_Create_From_AppId(const wchar_t* appId, SPXLUMODELHANDLE* phlumodel)
+SPXAPI LanguageUnderstandingModel_Create_From_AppId(const char* appId, SPXLUMODELHANDLE* phlumodel)
 {
+    if (appId == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phlumodel = SPXHANDLE_INVALID;
 
         auto model = SpxCreateObjectWithSite<ISpxLanguageUnderstandingModel>("CSpxLanguageUnderstandingModel", SpxGetRootSite());
-        model->InitAppId(appId);
+        model->InitAppId(PAL::ToWString(appId).c_str());
 
         auto languageUnderstandingModelHandles = CSpxSharedPtrHandleTableManager::Get<ISpxLanguageUnderstandingModel, SPXLUMODELHANDLE>();
         *phlumodel = languageUnderstandingModelHandles->TrackHandle(model);
@@ -54,14 +60,23 @@ SPXAPI LanguageUnderstandingModel_Create_From_AppId(const wchar_t* appId, SPXLUM
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI LanguageUnderstandingModel_Create_From_Subscription(const wchar_t* subscriptionKey, const wchar_t* appId, const wchar_t* region, SPXLUMODELHANDLE* phlumodel)
+SPXAPI LanguageUnderstandingModel_Create_From_Subscription(const char* subscriptionKey, const char* appId, const char* region, SPXLUMODELHANDLE* phlumodel)
 {
+    if (subscriptionKey == nullptr)
+        return SPXERR_INVALID_ARG;
+
+    if (appId == nullptr)
+        return SPXERR_INVALID_ARG;
+
+    if (region == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phlumodel = SPXHANDLE_INVALID;
 
         auto model = SpxCreateObjectWithSite<ISpxLanguageUnderstandingModel>("CSpxLanguageUnderstandingModel", SpxGetRootSite());
-        model->InitSubscription(subscriptionKey, appId, region);
+        model->InitSubscription(PAL::ToWString(subscriptionKey).c_str(), PAL::ToWString(appId).c_str(), PAL::ToWString(region).c_str());
 
         auto languageUnderstandingModelHandles = CSpxSharedPtrHandleTableManager::Get<ISpxLanguageUnderstandingModel, SPXLUMODELHANDLE>();
         *phlumodel = languageUnderstandingModelHandles->TrackHandle(model);

@@ -88,14 +88,14 @@ using namespace Microsoft::CognitiveServices::Speech::Translation;
 //     |____/ \__,_|_.__/|___/\___|_|  |_| .__/ \__|_|\___/|_| |_|      //
 //                                       |_|                            //
 
-constexpr auto speechRegion = L"westus";
-constexpr auto luisRegion = L"westus2";
-constexpr auto translationRegion = L"westus2";
+constexpr auto speechRegion = "westus";
+constexpr auto luisRegion = "westus2";
+constexpr auto translationRegion = "westus2";
 
-constexpr auto bingSpeechEndpoint = LR"(wss://speech.platform.bing.com/speech/recognition/interactive/cognitiveservices/v1?format=simple&language=en-us)";
-constexpr auto luisPpeSpeechEndpoint = LR"(wss://speech.platform.bing.com/ppe/speech/uswest2/recognition/interactive/cognitiveservices/v1?format=simple&setflight=cognitiveservicesintent&&language=en-us)";
-constexpr auto luisSpeechEndpoint = LR"(wss://speech.platform.bing.com/speech/uswest2/recognition/interactive/cognitiveservices/v1?format=simple&language=en-us)";
-constexpr auto luisEndpoint = LR"(https://REGION.api.cognitive.microsoft.com/luis/v2.0/apps/APP-ID?subscription-key=KEY&verbose=true&timezoneOffset=0&q=)";
+constexpr auto bingSpeechEndpoint = R"(wss://speech.platform.bing.com/speech/recognition/interactive/cognitiveservices/v1?format=simple&language=en-us)";
+constexpr auto luisPpeSpeechEndpoint = R"(wss://speech.platform.bing.com/ppe/speech/uswest2/recognition/interactive/cognitiveservices/v1?format=simple&setflight=cognitiveservicesintent&&language=en-us)";
+constexpr auto luisSpeechEndpoint = R"(wss://speech.platform.bing.com/speech/uswest2/recognition/interactive/cognitiveservices/v1?format=simple&language=en-us)";
+constexpr auto luisEndpoint = R"(https://REGION.api.cognitive.microsoft.com/luis/v2.0/apps/APP-ID?subscription-key=KEY&verbose=true&timezoneOffset=0&q=)";
 
 
 void unused()
@@ -129,7 +129,7 @@ void CarbonTestConsole::ch9_do_speech()
     printf("Say something...\n");
     auto result = recognizer->RecognizeAsync().get();
 
-    printf("FINAL RESULT: '%ls'\n", result->Text.c_str());
+    printf("FINAL RESULT: '%s'\n", result->Text.c_str());
 }
 
 void CarbonTestConsole::ch9_do_speech_intermediate()
@@ -138,13 +138,13 @@ void CarbonTestConsole::ch9_do_speech_intermediate()
     auto recognizer = factory->CreateSpeechRecognizer();
 
     recognizer->IntermediateResult += [](const SpeechRecognitionEventArgs& e) {
-        printf("INTERMEDIATE: %ls ...\n", e.Result.Text.c_str());
+        printf("INTERMEDIATE: %s ...\n", e.Result.Text.c_str());
     };
 
     printf("Listening...\n");
     auto result = recognizer->RecognizeAsync().get();
 
-    printf("FINAL RESULT: '%ls'\n", result->Text.c_str());
+    printf("FINAL RESULT: '%s'\n", result->Text.c_str());
 }
 
 void CarbonTestConsole::ch9_do_speech_continuous()
@@ -153,11 +153,11 @@ void CarbonTestConsole::ch9_do_speech_continuous()
     auto recognizer = factory->CreateSpeechRecognizer();
 
     recognizer->IntermediateResult += [](const SpeechRecognitionEventArgs& e) {
-        printf("INTERMEDIATE: %ls ...\n", e.Result.Text.c_str());
+        printf("INTERMEDIATE: %s ...\n", e.Result.Text.c_str());
     };
 
     recognizer->FinalResult += [](const SpeechRecognitionEventArgs& e) {
-        printf("FINAL RESULT: '%ls'\n\n", e.Result.Text.c_str());
+        printf("FINAL RESULT: '%s'\n\n", e.Result.Text.c_str());
         printf("Listening... (press ENTER to exit) \n\n");
     };
 
@@ -182,23 +182,23 @@ void CarbonTestConsole::ch9_do_intent()
     auto recognizer = factory->CreateIntentRecognizer();
 
     recognizer->IntermediateResult += [](const IntentRecognitionEventArgs& e) {
-        printf("INTERMEDIATE: %ls ...\n", e.Result.Text.c_str());
+        printf("INTERMEDIATE: %s ...\n", e.Result.Text.c_str());
     };
 
     auto model = LanguageUnderstandingModel::FromSubscription(m_subscriptionKey, m_intentAppId, luisRegion);
     // auto model = LanguageUnderstandingModel::FromEndpoint(luisEndpoint);
     // auto model = LanguageUnderstandingModel::FromAppId(luisAppId);
-    recognizer->AddIntent(L"1", model, L"TV.ChangeChannel");
-    recognizer->AddIntent(L"2", model, L"TV.WatchTV");
-    recognizer->AddIntent(L"3", model, L"TV.ShowGuide");
+    recognizer->AddIntent("1", model, "TV.ChangeChannel");
+    recognizer->AddIntent("2", model, "TV.WatchTV");
+    recognizer->AddIntent("3", model, "TV.ShowGuide");
     //recognizer->AddIntent(L"all intents", IntentTrigger::From(model, L""));
 
     printf("Listening...\n");
     auto result = recognizer->RecognizeAsync().get();
 
-    printf("FINAL RESULT: '%ls'\n", result->Text.c_str());
-    printf("   INTENT ID: '%ls'\n", result->IntentId.c_str());
-    printf("   LUIS JSON: '%ls'\n\n", result->Properties[ResultProperty::LanguageUnderstandingJson].GetString().c_str());
+    printf("FINAL RESULT: '%s'\n", result->Text.c_str());
+    printf("   INTENT ID: '%s'\n", result->IntentId.c_str());
+    printf("   LUIS JSON: '%s'\n\n", result->Properties[ResultProperty::LanguageUnderstandingJson].GetString().c_str());
 
     //recognizer->StopContinuousRecognitionAsync();
 }
@@ -209,22 +209,22 @@ void CarbonTestConsole::ch9_do_intent_continuous()
     auto recognizer = factory->CreateIntentRecognizer();
 
     recognizer->IntermediateResult += [](const IntentRecognitionEventArgs& e) {
-        printf("INTERMEDIATE: %ls ...\n", e.Result.Text.c_str());
+        printf("INTERMEDIATE: %s ...\n", e.Result.Text.c_str());
     };
 
     recognizer->FinalResult += [](const IntentRecognitionEventArgs& e) {
-        printf("FINAL RESULT: '%ls'\n", e.Result.Text.c_str());
-        printf("   INTENT ID: '%ls'\n", e.Result.IntentId.c_str());
-        printf("   LUIS JSON: '%ls'\n\n", e.Result.Properties[ResultProperty::LanguageUnderstandingJson].GetString().c_str());
+        printf("FINAL RESULT: '%s'\n", e.Result.Text.c_str());
+        printf("   INTENT ID: '%s'\n", e.Result.IntentId.c_str());
+        printf("   LUIS JSON: '%s'\n\n", e.Result.Properties[ResultProperty::LanguageUnderstandingJson].GetString().c_str());
         printf("Listening... (press ENTER to exit) \n\n");
     };
 
     auto model = LanguageUnderstandingModel::FromSubscription(m_subscriptionKey, m_intentAppId, luisRegion);
     // auto model = LanguageUnderstandingModel::FromEndpoint(luisEndpoint);
     // auto model = LanguageUnderstandingModel::FromAppId(luisAppId);
-    recognizer->AddIntent(L"1", model, L"TV.ChangeChannel");
-    recognizer->AddIntent(L"2", model, L"TV.WatchTV");
-    recognizer->AddIntent(L"3", model, L"TV.ShowGuide");
+    recognizer->AddIntent("1", model, "TV.ChangeChannel");
+    recognizer->AddIntent("2", model, "TV.WatchTV");
+    recognizer->AddIntent("3", model, "TV.ShowGuide");
 
     recognizer->StartContinuousRecognitionAsync();
 
@@ -247,15 +247,15 @@ void CarbonTestConsole::ch9_do_kws_speech()
     auto recognizer = factory->CreateSpeechRecognizer();
 
     recognizer->IntermediateResult += [](const SpeechRecognitionEventArgs& e) {
-        printf("INTERMEDIATE: %ls ...\n", e.Result.Text.c_str());
+        printf("INTERMEDIATE: %s ...\n", e.Result.Text.c_str());
     };
 
     recognizer->FinalResult += [](const SpeechRecognitionEventArgs& e) {
-        printf("FINAL RESULT: '%ls'\n", e.Result.Text.c_str());
+        printf("FINAL RESULT: '%s'\n", e.Result.Text.c_str());
         printf("KEYWORD SPOTTING: Say 'Hey Cortana' followed by whatever you want ...  (press ENTER to exit) \n\n");
     };
 
-    auto keywordModel = KeywordRecognitionModel::FromFile(L"kws.table");
+    auto keywordModel = KeywordRecognitionModel::FromFile("kws.table");
     recognizer->StartKeywordRecognitionAsync(keywordModel);
 
     printf("KEYWORD SPOTTING: Say 'Hey Cortana' followed by whatever you want ...  (press ENTER to exit) \n\n");
@@ -270,24 +270,24 @@ void CarbonTestConsole::ch9_do_kws_intent()
     auto recognizer = factory->CreateIntentRecognizer();
 
     recognizer->IntermediateResult += [](const IntentRecognitionEventArgs& e) {
-        printf("INTERMEDIATE: %ls ...\n", e.Result.Text.c_str());
+        printf("INTERMEDIATE: %s ...\n", e.Result.Text.c_str());
     };
 
     recognizer->FinalResult += [](const IntentRecognitionEventArgs& e) {
-        printf("FINAL RESULT: '%ls'\n", e.Result.Text.c_str());
-        printf("   INTENT ID: '%ls'\n", e.Result.IntentId.c_str());
-        printf("   LUIS JSON: '%ls'\n\n", e.Result.Properties[ResultProperty::LanguageUnderstandingJson].GetString().c_str());
+        printf("FINAL RESULT: '%s'\n", e.Result.Text.c_str());
+        printf("   INTENT ID: '%s'\n", e.Result.IntentId.c_str());
+        printf("   LUIS JSON: '%s'\n\n", e.Result.Properties[ResultProperty::LanguageUnderstandingJson].GetString().c_str());
         printf("KEYWORD SPOTTING: Say 'Hey Cortana' followed by whatever you want ...  (press ENTER to exit) \n\n");
     };
 
     auto model = LanguageUnderstandingModel::FromSubscription(m_subscriptionKey, m_intentAppId, luisRegion);
     // auto model = LanguageUnderstandingModel::FromEndpoint(luisEndpoint);
     // auto model = LanguageUnderstandingModel::FromAppId(luisAppId);
-    recognizer->AddIntent(L"1", model, L"TV.ChangeChannel");
-    recognizer->AddIntent(L"2", model, L"TV.WatchTV");
-    recognizer->AddIntent(L"3", model, L"TV.ShowGuide");
+    recognizer->AddIntent("1", model, "TV.ChangeChannel");
+    recognizer->AddIntent("2", model, "TV.WatchTV");
+    recognizer->AddIntent("3", model, "TV.ShowGuide");
 
-    auto keywordModel = KeywordRecognitionModel::FromFile(L"kws.table");
+    auto keywordModel = KeywordRecognitionModel::FromFile("kws.table");
     recognizer->StartKeywordRecognitionAsync(keywordModel);
 
     printf("KEYWORD SPOTTING: Say 'Hey Cortana' followed by whatever you want ...  (press ENTER to exit) \n\n");
@@ -306,16 +306,16 @@ void CarbonTestConsole::ch9_do_kws_intent()
 void CarbonTestConsole::ch9_do_translation()
 {
     auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, translationRegion);
-    auto recognizer = factory->CreateTranslationRecognizer(L"en-US", { L"de-DE", L"fr-FR", L"es-ES" });
+    auto recognizer = factory->CreateTranslationRecognizer("en-US", { "de-DE", "fr-FR", "es-ES" });
 
     recognizer->IntermediateResult += [](const TranslationTextResultEventArgs& e) {
-        printf("INTERMEDIATE: %ls ...\n", e.Result.Text.c_str());
+        printf("INTERMEDIATE: %s ...\n", e.Result.Text.c_str());
     };
 
     recognizer->FinalResult += [](const TranslationTextResultEventArgs& e) {
-        printf("FINAL RESULT: '%ls'\n", e.Result.Text.c_str());
+        printf("FINAL RESULT: '%s'\n", e.Result.Text.c_str());
         for (auto translation : e.Result.Translations) {
-            printf(" TRANSLATION: '%ls' => '%ls'\n", translation.first.c_str(), translation.second.c_str());
+            printf(" TRANSLATION: '%s' => '%s'\n", translation.first.c_str(), translation.second.c_str());
         }
         printf("Listening... (press ENTER to exit) \n\n");
     };

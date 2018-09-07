@@ -62,9 +62,9 @@
     <file src="$WindowsUwpDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.csharp.bindings.uwp.dll" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.csharp.bindings.uwp.dll" />
     <file src="$WindowsUwpDropDir$\x64\Release\public\lib\Microsoft.CognitiveServices.Speech.core.uwp.dll" target="runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.core.uwp.dll" />
 
-    <!-- .NET standard UTF32 dlls, built on Windows, used on Linux -->
-    <file src="$WindowsDropDir$\x64\Release\public\lib\utf32\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="runtimes\linux-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" />
-    <file src="$WindowsDropDir$\x64\Release\public\lib\utf32\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" target="runtimes\linux-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" />
+    <!-- .NET standard UTF8 dlls, built on Windows, used on Linux -->
+    <file src="$WindowsDropDir$\x64\Release\public\lib\utf8\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" target="runtimes\linux-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.dll" />
+    <file src="$WindowsDropDir$\x64\Release\public\lib\utf8\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" target="runtimes\linux-x64\lib\netstandard2.0\Microsoft.CognitiveServices.Speech.csharp.xml" />
 
     <!-- .NET standard Linux native dlls -->
     <file src="$LinuxDropDir$\Linux-x64\Release\public\lib\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" target="runtimes\linux-x64\native\Microsoft.CognitiveServices.Speech.csharp.bindings.dll" />

@@ -1,12 +1,10 @@
 #include "stdafx.h"
 #include "event_helpers.h"
 
-
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
-    
 
 SPXAPI_PRIVATE Recognizer_SessionEvent_SetCallback(ISpxRecognizerEvents::SessionEvent_Type ISpxRecognizerEvents::*psessionEvent, SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext)
 {

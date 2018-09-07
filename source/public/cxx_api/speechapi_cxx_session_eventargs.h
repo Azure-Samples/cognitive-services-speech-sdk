@@ -40,7 +40,7 @@ public:
     /// <summary>
     /// Session identifier (a GUID in string format).
     /// </summary>
-    const std::wstring& SessionId;
+    const std::string& SessionId;
 
 
 protected:
@@ -50,14 +50,14 @@ protected:
     /// <summary>
     /// Extract session identifier from given event handle <paramref name="hevent"/>
     /// </summary>
-    static const std::wstring GetSessionId(SPXEVENTHANDLE hevent)
+    static const std::string GetSessionId(SPXEVENTHANDLE hevent)
     {
         static const auto cchMaxUUID = 36;
         static const auto cchMaxSessionId = cchMaxUUID + 1;
-        wchar_t sessionId[cchMaxSessionId] = {};
+        char sessionId[cchMaxSessionId] = {};
 
         SPX_THROW_ON_FAIL(Recognizer_SessionEvent_GetSessionId(hevent, sessionId, cchMaxSessionId));
-        return std::wstring(sessionId);
+        return std::string(sessionId);
     };
 
     /*! \endcond */
@@ -66,7 +66,7 @@ private:
 
     DISABLE_DEFAULT_CTORS(SessionEventArgs);
 
-    std::wstring m_sessionId;
+    std::string m_sessionId;
 };
 
 

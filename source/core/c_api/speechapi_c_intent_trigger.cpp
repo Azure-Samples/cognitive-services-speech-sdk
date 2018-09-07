@@ -4,15 +4,12 @@
 //
 // speechapi_c_intent_trigger.cpp: Public API definitions for IntentTrigger related C methods
 //
-
 #include "stdafx.h"
 #include "create_object_helpers.h"
 #include "handle_helpers.h"
 #include "resource_manager.h"
 
-
 using namespace Microsoft::CognitiveServices::Speech::Impl;
-
 
 SPXAPI_(bool) IntentTrigger_Handle_IsValid(SPXTRIGGERHANDLE htrigger)
 {
@@ -24,14 +21,17 @@ SPXAPI IntentTrigger_Handle_Close(SPXTRIGGERHANDLE htrigger)
     return Handle_Close<SPXTRIGGERHANDLE, ISpxTrigger>(htrigger);
 }
 
-SPXAPI IntentTrigger_Create_From_Phrase(const wchar_t* phrase, SPXTRIGGERHANDLE* phtrigger)
+SPXAPI IntentTrigger_Create_From_Phrase(const char* phrase, SPXTRIGGERHANDLE* phtrigger)
 {
+    if (phrase == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phtrigger = SPXHANDLE_INVALID;
 
         auto trigger = SpxCreateObjectWithSite<ISpxTrigger>("CSpxIntentTrigger", SpxGetRootSite());
-        trigger->InitPhraseTrigger(phrase);
+        trigger->InitPhraseTrigger(PAL::ToWString(phrase).c_str());
         
         auto triggerhandles = CSpxSharedPtrHandleTableManager::Get<ISpxTrigger, SPXTRIGGERHANDLE>();
         *phtrigger = triggerhandles->TrackHandle(trigger);
@@ -44,8 +44,11 @@ SPXAPI IntentTrigger_Create_From_LanguageUnderstandingModel(SPXLUMODELHANDLE hlu
     return IntentTrigger_Create_From_LanguageUnderstandingModel_Intent(hlumodel, nullptr, phtrigger);
 }
 
-SPXAPI IntentTrigger_Create_From_LanguageUnderstandingModel_Intent(SPXLUMODELHANDLE hlumodel, const wchar_t* intentName, SPXTRIGGERHANDLE* phtrigger)
+SPXAPI IntentTrigger_Create_From_LanguageUnderstandingModel_Intent(SPXLUMODELHANDLE hlumodel, const char* intentName, SPXTRIGGERHANDLE* phtrigger)
 {
+    if (intentName == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phtrigger = SPXHANDLE_INVALID;
@@ -54,7 +57,7 @@ SPXAPI IntentTrigger_Create_From_LanguageUnderstandingModel_Intent(SPXLUMODELHAN
         auto model = (*languageUnderstandingModelHandles)[hlumodel];
 
         auto trigger = SpxCreateObjectWithSite<ISpxTrigger>("CSpxIntentTrigger", SpxGetRootSite());
-        trigger->InitLanguageUnderstandingModelTrigger(model, intentName);
+        trigger->InitLanguageUnderstandingModelTrigger(model, PAL::ToWString(intentName).c_str());
 
         auto triggerhandles = CSpxSharedPtrHandleTableManager::Get<ISpxTrigger, SPXTRIGGERHANDLE>();
         *phtrigger = triggerhandles->TrackHandle(trigger);

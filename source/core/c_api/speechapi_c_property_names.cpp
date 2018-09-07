@@ -4,33 +4,33 @@
 //
 
 
-const wchar_t* g_RESULT_Json = LR"(RESULT-Json)";
-const wchar_t* g_RESULT_LanguageUnderstandingJson = LR"(RESULT-LanguageUnderstandingJson)";
-const wchar_t* g_RESULT_ErrorDetails = LR"(RESULT-ErrorDetails)";
+const char* g_RESULT_Json = R"(RESULT-Json)";
+const char* g_RESULT_LanguageUnderstandingJson = R"(RESULT-LanguageUnderstandingJson)";
+const char* g_RESULT_ErrorDetails = R"(RESULT-ErrorDetails)";
 
-const wchar_t* g_SPEECH_Region = LR"(SPEECH-Region)";
-const wchar_t* g_SPEECH_SubscriptionKey = LR"(SPEECH-SubscriptionKey)";
-const wchar_t* g_SPEECH_AuthToken = LR"(SPEECH-AuthToken)";
-const wchar_t* g_SPEECH_RpsToken = LR"(SPEECH-RpsToken)";
-const wchar_t* g_SPEECH_Endpoint = LR"(SPEECH-Endpoint)";
+const char* g_SPEECH_Region = R"(SPEECH-Region)";
+const char* g_SPEECH_SubscriptionKey = R"(SPEECH-SubscriptionKey)";
+const char* g_SPEECH_AuthToken = R"(SPEECH-AuthToken)";
+const char* g_SPEECH_RpsToken = R"(SPEECH-RpsToken)";
+const char* g_SPEECH_Endpoint = R"(SPEECH-Endpoint)";
 
-const wchar_t* g_SPEECH_ModelId = LR"(SPEECH-ModelId)";
-const wchar_t* g_SPEECH_RecoLanguage = LR"(SPEECH-RecoLanguage)";
+const char* g_SPEECH_ModelId = R"(SPEECH-ModelId)";
+const char* g_SPEECH_RecoLanguage = R"(SPEECH-RecoLanguage)";
 
-const wchar_t* g_sessionId = LR"(SessionId)";
+const char* g_sessionId = R"(SessionId)";
 
-const wchar_t* g_SPEECH_OutputFormat = LR"(SPEECH-OutputFormat)";
-const wchar_t* g_SPEECH_OutputFormat_Simple = LR"(SIMPLE)";
-const wchar_t* g_SPEECH_OutputFormat_Detailed = LR"(DETAILED)";
+const char* g_SPEECH_OutputFormat = R"(SPEECH-OutputFormat)";
+const char* g_SPEECH_OutputFormat_Simple = R"(SIMPLE)";
+const char* g_SPEECH_OutputFormat_Detailed = R"(DETAILED)";
 
-const wchar_t* g_INTENT_Region = LR"(INTENT-region)";
+const char* g_INTENT_Region = R"(INTENT-region)";
 
-const wchar_t* g_TRANSLATION_FromLanguage = LR"(TRANSLATION-FromLanguage)";
-const wchar_t* g_TRANSLATION_ToLanguages = LR"(TRANSLATION-ToLanguages)";
-const wchar_t* g_TRANSLATION_Voice = LR"(TRANSLATION-Voice)";
-const wchar_t* g_TRANSLATION_Features = LR"(TRANSLATION-Features)";
+const char* g_TRANSLATION_FromLanguage = R"(TRANSLATION-FromLanguage)";
+const char* g_TRANSLATION_ToLanguages = R"(TRANSLATION-ToLanguages)";
+const char* g_TRANSLATION_Voice = R"(TRANSLATION-Voice)";
+const char* g_TRANSLATION_Features = R"(TRANSLATION-Features)";
 
-const wchar_t* g_SPEECH_RecoMode = LR"(SPEECH-RecoMode)";
-const wchar_t* g_SPEECH_RecoMode_Interactive = LR"(INTERACTIVE)";
-const wchar_t* g_SPEECH_RecoMode_Conversation = LR"(CONVERSATION)";
-const wchar_t* g_SPEECH_RecoMode_Dictation = LR"(DICTATION)";
+const char* g_SPEECH_RecoMode = R"(SPEECH-RecoMode)";
+const char* g_SPEECH_RecoMode_Interactive = R"(INTERACTIVE)";
+const char* g_SPEECH_RecoMode_Conversation = R"(CONVERSATION)";
+const char* g_SPEECH_RecoMode_Dictation = R"(DICTATION)";

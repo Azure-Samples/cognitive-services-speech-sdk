@@ -20,13 +20,13 @@ namespace Impl {
 #define SPXFACTORYHANDLE_ROOTSITEPARAMETERS_HACK ((SPXFACTORYHANDLE)+1)
 
 
-void SpxSetMockParameterString(const wchar_t* name, const wchar_t* value);
-void SpxSetMockParameterNumber(const wchar_t* name, int32_t value);
-void SpxSetMockParameterBool(const wchar_t* name, bool value);
+void SpxSetMockParameterString(const char* name, const char* value);
+void SpxSetMockParameterNumber(const char* name, int32_t value);
+void SpxSetMockParameterBool(const char* name, bool value);
 
-std::wstring SpxGetMockParameterString(const wchar_t* name, const wchar_t* defaultValue = L"");
-int32_t SpxGetMockParameterNumber(const wchar_t* name, int32_t defaultValue = 0);
-bool SpxGetMockParameterBool(const wchar_t* name, bool defaultValue = false);
+std::string SpxGetMockParameterString(const char* name, const char* defaultValue = "");
+int32_t SpxGetMockParameterNumber(const char* name, int32_t defaultValue = 0);
+bool SpxGetMockParameterBool(const char* name, bool defaultValue = false);
 
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

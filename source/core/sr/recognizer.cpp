@@ -40,7 +40,7 @@ void CSpxRecognizer::Term()
 void CSpxRecognizer::SetStringValue(const wchar_t* name, const wchar_t* value)
 {
     // Check to see if the caller is trying to set the CUSTOM SPEECH Model ID...
-    if (wcscmp(name, g_SPEECH_ModelId) == 0)
+    if (wcscmp(name, PAL::ToWString(g_SPEECH_ModelId).c_str()) == 0)
     {
         SetStringValueInProperties(name, value);
     }
@@ -69,17 +69,17 @@ void CSpxRecognizer::Disable()
 
 CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxRecognizer::RecognizeAsync()
 {
-    auto currentRecoMode = GetStringValueFromProperties(g_SPEECH_RecoMode, L"");
+    auto currentRecoMode = GetStringValueFromProperties(PAL::ToWString(g_SPEECH_RecoMode).c_str(), L"");
     auto recoModeToSet = dynamic_cast<ISpxTranslationRecognizer *>(this) != nullptr ? g_SPEECH_RecoMode_Conversation : g_SPEECH_RecoMode_Interactive;
 
     if (currentRecoMode.empty())
     {
-        SetStringValueInProperties(g_SPEECH_RecoMode, recoModeToSet);
+        SetStringValueInProperties(PAL::ToWString(g_SPEECH_RecoMode).c_str(), PAL::ToWString(recoModeToSet).c_str());
     }
     else
     {
         // Since the mode is set during connection setup, no mode switch is allowed.
-        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(recoModeToSet) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);
+        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(PAL::ToWString(recoModeToSet).c_str()) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);
     }
 
     return m_defaultSession->RecognizeAsync();
@@ -87,15 +87,15 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxRecognizer::RecognizeAsy
 
 CSpxAsyncOp<void> CSpxRecognizer::StartContinuousRecognitionAsync()
 {
-    auto currentRecoMode = GetStringValueFromProperties(g_SPEECH_RecoMode, L"");
+    auto currentRecoMode = GetStringValueFromProperties(PAL::ToWString(g_SPEECH_RecoMode).c_str(), L"");
     if (currentRecoMode.empty())
     {
-        SetStringValueInProperties(g_SPEECH_RecoMode, g_SPEECH_RecoMode_Conversation);
+        SetStringValueInProperties(PAL::ToWString(g_SPEECH_RecoMode).c_str(), PAL::ToWString(g_SPEECH_RecoMode_Conversation).c_str());
     }
     else
     {
         // Since the mode is set during connection setup, no mode switch is allowed.
-        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(g_SPEECH_RecoMode_Conversation) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);
+        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(PAL::ToWString(g_SPEECH_RecoMode_Conversation).c_str()) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);
     }
     return m_defaultSession->StartContinuousRecognitionAsync();
 }

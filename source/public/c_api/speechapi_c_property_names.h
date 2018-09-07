@@ -7,34 +7,34 @@
 
 #pragma once
 
-extern SPXDLL_EXPORT const wchar_t* g_RESULT_Json;
-extern SPXDLL_EXPORT const wchar_t* g_RESULT_LanguageUnderstandingJson;
-extern SPXDLL_EXPORT const wchar_t* g_RESULT_ErrorDetails;
+extern SPXDLL_EXPORT const char* g_RESULT_Json;
+extern SPXDLL_EXPORT const char* g_RESULT_LanguageUnderstandingJson;
+extern SPXDLL_EXPORT const char* g_RESULT_ErrorDetails;
 
-extern SPXDLL_EXPORT const wchar_t* g_SPEECH_Region;
-extern SPXDLL_EXPORT const wchar_t* g_SPEECH_SubscriptionKey;
-extern SPXDLL_EXPORT const wchar_t* g_SPEECH_AuthToken;
-extern SPXDLL_EXPORT const wchar_t* g_SPEECH_RpsToken;
-extern SPXDLL_EXPORT const wchar_t* g_SPEECH_Endpoint;
+extern SPXDLL_EXPORT const char* g_SPEECH_Region;
+extern SPXDLL_EXPORT const char* g_SPEECH_SubscriptionKey;
+extern SPXDLL_EXPORT const char* g_SPEECH_AuthToken;
+extern SPXDLL_EXPORT const char* g_SPEECH_RpsToken;
+extern SPXDLL_EXPORT const char* g_SPEECH_Endpoint;
 
-extern SPXDLL_EXPORT const wchar_t* g_SPEECH_ModelId;
-extern SPXDLL_EXPORT const wchar_t* g_SPEECH_RecoLanguage;
+extern SPXDLL_EXPORT const char* g_SPEECH_ModelId;
+extern SPXDLL_EXPORT const char* g_SPEECH_RecoLanguage;
 
-extern SPXDLL_EXPORT const wchar_t* g_SPEECH_OutputFormat;
-extern SPXDLL_EXPORT const wchar_t* g_SPEECH_OutputFormat_Simple;
-extern SPXDLL_EXPORT const wchar_t* g_SPEECH_OutputFormat_Detailed;
+extern SPXDLL_EXPORT const char* g_SPEECH_OutputFormat;
+extern SPXDLL_EXPORT const char* g_SPEECH_OutputFormat_Simple;
+extern SPXDLL_EXPORT const char* g_SPEECH_OutputFormat_Detailed;
 
-extern SPXDLL_EXPORT const wchar_t* g_sessionId;
+extern SPXDLL_EXPORT const char* g_sessionId;
 
-extern SPXDLL_EXPORT const wchar_t* g_INTENT_Region;
+extern SPXDLL_EXPORT const char* g_INTENT_Region;
 
-extern SPXDLL_EXPORT const wchar_t* g_TRANSLATION_FromLanguage;
-extern SPXDLL_EXPORT const wchar_t* g_TRANSLATION_ToLanguages;
-extern SPXDLL_EXPORT const wchar_t* g_TRANSLATION_Voice;
-extern SPXDLL_EXPORT const wchar_t* g_TRANSLATION_Features;
+extern SPXDLL_EXPORT const char* g_TRANSLATION_FromLanguage;
+extern SPXDLL_EXPORT const char* g_TRANSLATION_ToLanguages;
+extern SPXDLL_EXPORT const char* g_TRANSLATION_Voice;
+extern SPXDLL_EXPORT const char* g_TRANSLATION_Features;
 
-extern SPXDLL_EXPORT const wchar_t* g_SPEECH_RecoMode;
-extern SPXDLL_EXPORT const wchar_t* g_SPEECH_RecoMode_Interactive;
-extern SPXDLL_EXPORT const wchar_t* g_SPEECH_RecoMode_Conversation;
-extern SPXDLL_EXPORT const wchar_t* g_SPEECH_RecoMode_Dictation;
+extern SPXDLL_EXPORT const char* g_SPEECH_RecoMode;
+extern SPXDLL_EXPORT const char* g_SPEECH_RecoMode_Interactive;
+extern SPXDLL_EXPORT const char* g_SPEECH_RecoMode_Conversation;
+extern SPXDLL_EXPORT const char* g_SPEECH_RecoMode_Dictation;
 

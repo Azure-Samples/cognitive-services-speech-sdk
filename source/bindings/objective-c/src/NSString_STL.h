@@ -12,8 +12,8 @@
 
 @interface NSString (STL)
 
-- (std::wstring)wstring;
-+ (instancetype)stringWithWString:(const std::wstring&)str;
+- (std::string)string;
++ (instancetype)stringWithString:(const std::string&)str;
 
 @end
 

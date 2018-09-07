@@ -27,7 +27,7 @@ namespace Impl {
 
 bool ShouldMock(const wchar_t* psz)
 {
-    return SpxGetMockParameterBool(psz, false);
+    return SpxGetMockParameterBool(PAL::ToString(psz).c_str(), false);
 }
 
 SPX_EXTERN_C void* Mock_CreateModuleObject(const char* className, const char* interfaceName)

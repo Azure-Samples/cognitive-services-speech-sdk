@@ -145,8 +145,8 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/TranslationTextResult.java
     ${CMAKE_SWIG_OUTDIR}/TranslationTextResultEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/TranslationTextResultPtrFuture.java
-    ${CMAKE_SWIG_OUTDIR}/StdMapWStringWString.java
-    ${CMAKE_SWIG_OUTDIR}/StdMapWStringWStringMapIterator.java
+    ${CMAKE_SWIG_OUTDIR}/StdMapStringString.java
+    ${CMAKE_SWIG_OUTDIR}/StdMapStringStringMapIterator.java
 
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXEVENTHANDLE.java
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXFACTORYHANDLE.java
@@ -162,7 +162,7 @@ set(SWIG_JAVA_SOURCES
 #    ${CMAKE_SWIG_OUTDIR}/ValueCollectionRecognizerFactoryParameter.java
 #    ${CMAKE_SWIG_OUTDIR}/ValueCollectionSessionParameter.java
     ${CMAKE_SWIG_OUTDIR}/VoidFuture.java
-    ${CMAKE_SWIG_OUTDIR}/WstringVector.java
+    ${CMAKE_SWIG_OUTDIR}/StringVector.java
     ${CMAKE_SWIG_OUTDIR}/UInt8Vector.java
 )
 

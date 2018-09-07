@@ -24,14 +24,17 @@ SPXAPI KeywordRecognitionModel_Handle_Close(SPXKEYWORDHANDLE hkeyword)
     return Handle_Close<SPXKEYWORDHANDLE, ISpxKwsModel>(hkeyword);
 }
 
-SPXAPI KeywordRecognitionModel_Create_From_File(const wchar_t* fileName, SPXKEYWORDHANDLE* phkwmodel)
+SPXAPI KeywordRecognitionModel_Create_From_File(const char* fileName, SPXKEYWORDHANDLE* phkwmodel)
 {
+    if (fileName == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phkwmodel = SPXHANDLE_INVALID;
 
         auto model = SpxCreateObjectWithSite<ISpxKwsModel>("CSpxKwsModel", SpxGetRootSite());
-        model->InitFromFile(fileName);
+        model->InitFromFile(PAL::ToWString(fileName).c_str());
         
         auto handles = CSpxSharedPtrHandleTableManager::Get<ISpxKwsModel, SPXKEYWORDHANDLE>();
         *phkwmodel = handles->TrackHandle(model);

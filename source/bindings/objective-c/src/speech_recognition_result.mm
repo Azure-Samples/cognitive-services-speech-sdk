@@ -19,9 +19,9 @@
     self = [super init];
     resultImpl = *static_cast<std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechRecognitionResult> *>(resultHandle);
     
-    _resultId = [NSString stringWithWString:resultImpl->ResultId];
-    _text = [NSString stringWithWString:resultImpl->Text];
-    _recognitionFailureReason = [NSString stringWithWString:resultImpl->ErrorDetails];
+    _resultId = [NSString stringWithString:resultImpl->ResultId];
+    _text = [NSString stringWithString:resultImpl->Text];
+    _recognitionFailureReason = [NSString stringWithString:resultImpl->ErrorDetails];
     
     switch (resultImpl->Reason)
     {

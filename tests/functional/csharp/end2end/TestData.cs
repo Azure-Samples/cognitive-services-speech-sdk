@@ -45,6 +45,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
+        public sealed class Chinese
+        {
+            public sealed class Weather
+            {
+                public static readonly string Utterance = "天气怎么样？";
+            }
+        }
+
         public sealed class English
         {
             public sealed class Batman

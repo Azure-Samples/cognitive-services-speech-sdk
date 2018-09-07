@@ -111,7 +111,7 @@ public:
     /// </summary>
     /// <param name="intentId">Id of the intent.</param>
     /// <param name="phrase">The phrase corresponding to the intent.</param>
-    void AddIntent(const std::wstring& intentId, const std::wstring& simplePhrase)
+    void AddIntent(const std::string& intentId, const std::string& simplePhrase)
     {
         auto trigger = IntentTrigger::From(simplePhrase);
         return AddIntent(intentId, trigger);
@@ -122,7 +122,7 @@ public:
     /// </summary>
     /// <param name="intentId">A string that represents the identifier for model to be recognized.</param>
     /// <param name="model">The language understanding model from Language Understanding service.</param>
-    void AddIntent(const std::wstring& intentId, std::shared_ptr<LanguageUnderstandingModel> model)
+    void AddIntent(const std::string& intentId, std::shared_ptr<LanguageUnderstandingModel> model)
     {
         auto trigger = IntentTrigger::From(model);
         AddIntent(intentId, trigger);
@@ -134,7 +134,7 @@ public:
     /// <param name="intentId">A string that represents the identifier of the intent to be recognized.</param>
     /// <param name="model">The language understanding model from Language Understanding service.</param>
     /// <param name="intentName">The intent name defined in the language understanding model.</param>
-    void AddIntent(const std::wstring& intentId, std::shared_ptr<LanguageUnderstandingModel> model, const std::wstring& intentName)
+    void AddIntent(const std::string& intentId, std::shared_ptr<LanguageUnderstandingModel> model, const std::string& intentName)
     {
         auto trigger = IntentTrigger::From(model, intentName);
         AddIntent(intentId, trigger);
@@ -145,7 +145,7 @@ public:
     /// </summary>
     /// <param name="intentId">Id of the intent.</param>
     /// <param name="trigger">The IntentTrigger corresponding to the intent.</param>
-    void AddIntent(const std::wstring& intentId, std::shared_ptr<IntentTrigger> trigger)
+    void AddIntent(const std::string& intentId, std::shared_ptr<IntentTrigger> trigger)
     {
         SPX_THROW_ON_FAIL(IntentRecognizer_AddIntent(m_hreco, intentId.c_str(), (SPXTRIGGERHANDLE)(*trigger.get())));
     }

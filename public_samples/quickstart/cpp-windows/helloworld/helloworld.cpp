@@ -16,11 +16,11 @@ void recognizeSpeech()
     // Creates an instance of a speech factory with specified
     // subscription key and service region. Replace with your own subscription key
     // and service region (e.g., "westus").
-    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"YourServiceRegion");
+    auto factory = SpeechFactory::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
     // Creates a speech recognizer.
     auto recognizer = factory->CreateSpeechRecognizer();
-    wcout << L"Say something...\n";
+    cout << "Say something...\n";
 
     // Performs recognition.
     // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
@@ -31,26 +31,26 @@ void recognizeSpeech()
     // Checks result.
     if (result->Reason != Reason::Recognized)
     {
-        wcout << L"Recognition Status: " << int(result->Reason) << L". ";
+        cout << "Recognition Status: " << int(result->Reason) << ". ";
         if (result->Reason == Reason::Canceled)
         {
-            wcout << L"There was an error, reason: " << result->ErrorDetails << std::endl;
+            cout << "There was an error, reason: " << result->ErrorDetails << std::endl;
         }
         else
         {
-            wcout << L"No speech could be recognized.\n";
+            cout << "No speech could be recognized.\n";
         }
     }
     else {
-        wcout << L"We recognized: " << result->Text << std::endl;
+        cout << "We recognized: " << result->Text << std::endl;
     }
 }
 
 int wmain()
 {
     recognizeSpeech();
-    wcout << L"Please press a key to continue.\n";
-    wcin.get();
+    cout << "Please press a key to continue.\n";
+    cin.get();
     return 0;
 }
 // </code>

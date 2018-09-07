@@ -33,7 +33,7 @@ SPXAPI TranslationTextResult_GetTranslationStatus(SPXRESULTHANDLE handle, Result
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_RESULTTYPE SPXAPI_NOTHROW CheckAndCopyBuffer(const std::wstring& source, wchar_t* buffer, size_t* bufferSizePointer)
+SPXAPI_RESULTTYPE SPXAPI_NOTHROW CheckAndCopyBuffer(const std::string& source, char* buffer, size_t* bufferSizePointer)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -45,13 +45,13 @@ SPXAPI_RESULTTYPE SPXAPI_NOTHROW CheckAndCopyBuffer(const std::wstring& source, 
             return SPXERR_BUFFER_TOO_SMALL;
         }
 
-        PAL::wcscpy(buffer, *bufferSizePointer, source.c_str(), len, true);
+        PAL::strcpy(buffer, *bufferSizePointer, source.c_str(), len, true);
         *bufferSizePointer = len;
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI TranslationTextResult_GetFailureReason(SPXRESULTHANDLE handle, wchar_t* buffer, size_t* bufferSizePointer)
+SPXAPI TranslationTextResult_GetFailureReason(SPXRESULTHANDLE handle, char* buffer, size_t* bufferSizePointer)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, bufferSizePointer == nullptr);
 
@@ -61,7 +61,7 @@ SPXAPI TranslationTextResult_GetFailureReason(SPXRESULTHANDLE handle, wchar_t* b
         auto result = (*resulthandles)[handle];
 
         auto textResult = SpxQueryInterface<ISpxTranslationTextResult>(result);
-        auto reason = textResult->GetTranslationFailureReason();
+        auto reason = PAL::ToString(textResult->GetTranslationFailureReason());
 
         hr = CheckAndCopyBuffer(reason, buffer, bufferSizePointer);
     }
@@ -81,10 +81,10 @@ SPXAPI TranslationTextResult_GetTranslationText(SPXRESULTHANDLE handle, Result_T
         auto translationPhrases = textResult->GetTranslationText();
 
         size_t entries = translationPhrases.size();
-        size_t sizeInBytes = sizeof(Result_TranslationTextBufferHeader) + sizeof(wchar_t *) * entries * 2; /* space for targetLanguages and translationTexts array*/
+        size_t sizeInBytes = sizeof(Result_TranslationTextBufferHeader) + sizeof(char *) * entries * 2; /* space for targetLanguages and translationTexts array*/
         for (const auto& it : translationPhrases)
         {
-            sizeInBytes += (it.first.size() + 1 + it.second.size() + 1) * sizeof(wchar_t);
+            sizeInBytes += (PAL::ToString(it.first).size() + 1 + PAL::ToString(it.second).size() + 1) * sizeof(char);
         }
 
         if ((textBuffer == nullptr) || (*lengthPointer < sizeInBytes))
@@ -95,18 +95,18 @@ SPXAPI TranslationTextResult_GetTranslationText(SPXRESULTHANDLE handle, Result_T
 
         textBuffer->bufferSize = sizeInBytes;
         textBuffer->numberEntries = entries;
-        textBuffer->targetLanguages = reinterpret_cast<wchar_t **>(textBuffer + 1);
+        textBuffer->targetLanguages = reinterpret_cast<char**>(textBuffer + 1);
         textBuffer->translationTexts = textBuffer->targetLanguages + entries;
-        auto data = reinterpret_cast<wchar_t *>(textBuffer->translationTexts + entries);
+        auto data = reinterpret_cast<char*>(textBuffer->translationTexts + entries);
         size_t index = 0;
         for (const auto& it : translationPhrases)
         {
-            std::wstring lang, text;
-            std::tie(lang, text) = it;
-            PAL::wcscpy(data, lang.size() + 1, lang.c_str(), lang.size() + 1, true);
+            std::string lang = PAL::ToString(it.first);
+            std::string text = PAL::ToString(it.second);
+            PAL::strcpy(data, lang.size() + 1, lang.c_str(), lang.size() + 1, true);
             textBuffer->targetLanguages[index] = data;
             data += lang.size() + 1;
-            PAL::wcscpy(data, text.size() + 1, text.c_str(), text.size() + 1, true);
+            PAL::strcpy(data, text.size() + 1, text.c_str(), text.size() + 1, true);
             textBuffer->translationTexts[index] = data;
             data += text.size() + 1;
             index++;
@@ -136,7 +136,7 @@ SPXAPI TranslationSynthesisResult_GetSynthesisStatus(SPXRESULTHANDLE handle, Res
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI TranslationSynthesisResult_GetFailureReason(SPXRESULTHANDLE handle, wchar_t* buffer, size_t* bufferSizePointer)
+SPXAPI TranslationSynthesisResult_GetFailureReason(SPXRESULTHANDLE handle, char* buffer, size_t* bufferSizePointer)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, bufferSizePointer == nullptr);
 
@@ -146,7 +146,7 @@ SPXAPI TranslationSynthesisResult_GetFailureReason(SPXRESULTHANDLE handle, wchar
         auto result = (*resulthandles)[handle];
 
         auto synthesisResult = SpxQueryInterface<ISpxTranslationSynthesisResult>(result);
-        auto reason = synthesisResult->GetSynthesisFailureReason();
+        auto reason = PAL::ToString(synthesisResult->GetSynthesisFailureReason());
 
         hr = CheckAndCopyBuffer(reason, buffer, bufferSizePointer);
     }

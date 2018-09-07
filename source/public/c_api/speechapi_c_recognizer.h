@@ -27,19 +27,19 @@ SPXAPI Recognizer_IsEnabled(SPXRECOHANDLE hreco, bool* pfEnabled);
 
 enum Recognizer_Parameter { RecognizerParameter_DeploymentId = 1, RecognizerParameter_OutputFormat = 2 };
 typedef enum Recognizer_Parameter Recognizer_Parameter;
-SPXAPI Recognizer_GetParameter_Name(Recognizer_Parameter parameter, wchar_t* name, uint32_t cchName);
+SPXAPI Recognizer_GetParameter_Name(Recognizer_Parameter parameter, char* name, uint32_t cchName);
 
-SPXAPI Recognizer_SetParameter_String(SPXRECOHANDLE hreco, const wchar_t* name, const wchar_t* value);
-SPXAPI Recognizer_GetParameter_String(SPXRECOHANDLE hreco, const wchar_t* name, wchar_t* value, uint32_t cchValue, const wchar_t* defaultValue);
-SPXAPI_(bool) Recognizer_ContainsParameter_String(SPXRECOHANDLE hreco, const wchar_t* name);
+SPXAPI Recognizer_SetParameter_String(SPXRECOHANDLE hreco, const char* name, const char* value);
+SPXAPI Recognizer_GetParameter_String(SPXRECOHANDLE hreco, const char* name, char* value, uint32_t cchValue, const char* defaultValue);
+SPXAPI_(bool) Recognizer_ContainsParameter_String(SPXRECOHANDLE hreco, const char* name);
 
-SPXAPI Recognizer_SetParameter_Int32(SPXRECOHANDLE hreco, const wchar_t* name, int32_t value);
-SPXAPI Recognizer_GetParameter_Int32(SPXRECOHANDLE hreco, const wchar_t* name, int32_t* pvalue, int32_t defaultValue);
-SPXAPI_(bool) Recognizer_ContainsParameter_Int32(SPXRECOHANDLE hreco, const wchar_t* name);
+SPXAPI Recognizer_SetParameter_Int32(SPXRECOHANDLE hreco, const char* name, int32_t value);
+SPXAPI Recognizer_GetParameter_Int32(SPXRECOHANDLE hreco, const char* name, int32_t* pvalue, int32_t defaultValue);
+SPXAPI_(bool) Recognizer_ContainsParameter_Int32(SPXRECOHANDLE hreco, const char* name);
 
-SPXAPI Recognizer_SetParameter_Bool(SPXRECOHANDLE hreco, const wchar_t* name, bool value);
-SPXAPI Recognizer_GetParameter_Bool(SPXRECOHANDLE hreco, const wchar_t* name, bool* pvalue, bool defaultValue);
-SPXAPI_(bool) Recognizer_ContainsParameter_Bool(SPXRECOHANDLE hreco, const wchar_t* name);
+SPXAPI Recognizer_SetParameter_Bool(SPXRECOHANDLE hreco, const char* name, bool value);
+SPXAPI Recognizer_GetParameter_Bool(SPXRECOHANDLE hreco, const char* name, bool* pvalue, bool defaultValue);
+SPXAPI_(bool) Recognizer_ContainsParameter_Bool(SPXRECOHANDLE hreco, const char* name);
 
 SPXAPI Recognizer_Recognize(SPXRECOHANDLE hreco, SPXRESULTHANDLE* phresult);
 SPXAPI Recognizer_RecognizeAsync(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync);
@@ -73,6 +73,6 @@ SPXAPI Recognizer_Canceled_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CA
 SPXAPI Recognizer_SpeechStartDetected_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext);
 SPXAPI Recognizer_SpeechEndDetected_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext);
 
-SPXAPI Recognizer_SessionEvent_GetSessionId(SPXEVENTHANDLE hevent, wchar_t* pszSessionId, uint32_t cchSessionId);
+SPXAPI Recognizer_SessionEvent_GetSessionId(SPXEVENTHANDLE hevent, char* pszSessionId, uint32_t cchSessionId);
 SPXAPI Recognizer_RecognitionEvent_GetOffset(SPXEVENTHANDLE hevent, uint64_t *pszOffset);
 SPXAPI Recognizer_RecognitionEvent_GetResult(SPXEVENTHANDLE hevent, SPXRESULTHANDLE* phresult);

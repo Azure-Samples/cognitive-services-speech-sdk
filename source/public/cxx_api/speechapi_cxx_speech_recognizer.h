@@ -107,7 +107,7 @@ public:
     /// Sets the deployment id if the recognizer uses a customized model for recognition.
     /// </summary>
     /// <param name="value">A string that represents the deployment id.</param>
-    void SetDeploymentId(const std::wstring& deploymentId)
+    void SetDeploymentId(const std::string& deploymentId)
     {
         Parameters[RecognizerParameter::DeploymentId] = deploymentId;
     }

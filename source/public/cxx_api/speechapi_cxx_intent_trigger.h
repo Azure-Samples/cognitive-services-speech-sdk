@@ -29,7 +29,7 @@ public:
     /// </summary>
     /// <param name="simplePhrase">The simple phrase to create an intent trigger for.</param>
     /// <returns>A shared pointer to an intent trigger.</returns>
-    static std::shared_ptr<IntentTrigger> From(const std::wstring& simplePhrase)
+    static std::shared_ptr<IntentTrigger> From(const std::string& simplePhrase)
     {
         SPXTRIGGERHANDLE htrigger = SPXHANDLE_INVALID;
         SPX_THROW_ON_FAIL(IntentTrigger_Create_From_Phrase(simplePhrase.c_str(), &htrigger));
@@ -54,7 +54,7 @@ public:
     /// <param name="model">The LanguageUnderstandingModel to create an intent trigger for.</param>
     /// <param name="model">The intent name to create an intent trigger for.</param>
     /// <returns>A shared pointer to an intent trigger.</returns>
-    static std::shared_ptr<IntentTrigger> From(std::shared_ptr<LanguageUnderstandingModel> model, const std::wstring& intentName)
+    static std::shared_ptr<IntentTrigger> From(std::shared_ptr<LanguageUnderstandingModel> model, const std::string& intentName)
     {
         SPXTRIGGERHANDLE htrigger = SPXHANDLE_INVALID;
         SPX_THROW_ON_FAIL(IntentTrigger_Create_From_LanguageUnderstandingModel_Intent((SPXLUMODELHANDLE)(*model.get()), intentName.c_str(), &htrigger));

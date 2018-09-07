@@ -27,7 +27,7 @@ public:
     /// </summary>
     /// <param name="fileName">The file name of the keyword recognition model.</param>
     /// <returns>A shared pointer to keyword recognition model.</returns>
-    static std::shared_ptr<KeywordRecognitionModel> FromFile(const std::wstring& fileName)
+    static std::shared_ptr<KeywordRecognitionModel> FromFile(const std::string& fileName)
     {
         SPXKEYWORDHANDLE hkeyword = SPXHANDLE_INVALID;
         SPX_THROW_ON_FAIL(KeywordRecognitionModel_Create_From_File(fileName.c_str(), &hkeyword));

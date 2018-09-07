@@ -4,18 +4,19 @@
 //
 //
 
-#if defined(_MSC_VER) || defined(_CODECVT_H)
-#include <codecvt>
-#else
+#if !defined(_MSC_VER)
 #include <strings.h>
 #include <cstdlib>
 #include <clocale>
 #endif
 
+#include <codecvt>
+#include <locale>
 #include <wchar.h>
 #include <assert.h>
 #include <algorithm>
 #include <vector>
+#include <cstring>
 #include "string_utils.h"
 
 namespace PAL {
@@ -47,9 +48,19 @@ int wcsnicmp(const wchar_t *a, const wchar_t *b, size_t n)
 #endif
 }
 
+int strnicmp(const char *a, const char *b, size_t n)
+{
+#ifdef _MSC_VER
+    return _strnicmp(a, b, n);
+#else
+    return ::strncasecmp(a, b, n);
+#endif
+}
+
+
 // Similarly to strcpy_s, wcscpy_s functions, dstSize and srcSize are sizes of corresponding
 // arrays in terms of number of elements (in wide characters).
-void wcscpy(wchar_t *dst, size_t dstSize, const wchar_t *src, size_t srcSize, bool truncate)
+void strcpy(char *dst, size_t dstSize, const char *src, size_t srcSize, bool truncate)
 {
     // TODO (alrezni): throw instead of asserting, 
     // see https://msdn.microsoft.com/en-us/library/5dae5d43.aspx
@@ -67,39 +78,24 @@ void wcscpy(wchar_t *dst, size_t dstSize, const wchar_t *src, size_t srcSize, bo
     }
 
 #ifdef _MSC_VER
-    wcsncpy_s(dst, dstSize, src, toCopy);
+    strncpy_s(dst, dstSize, src, toCopy);
 #else
-    wcsncpy(dst, src, toCopy);
+    std::strncpy(dst, src, toCopy);
 #endif
 
     dst[std::min(toCopy, dstSize-1)] = 0; // make sure the string is null-terminated
 }
 
-
 std::string ToString(const std::wstring& wstring)
 {
-#ifdef _MSC_VER
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
     return converter.to_bytes(wstring);
-#else
-    const auto length = wstring.length() * sizeof(std::wstring::value_type) + 1;
-    std::vector<char> buf(length);
-    const auto res = std::wcstombs(buf.data(), wstring.c_str(), sizeof(char)*length);
-    return (res <= length) ? buf.data() : "";
-#endif
 }
 
 std::wstring ToWString(const std::string& string)
 {
-#ifdef _MSC_VER
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
     return converter.from_bytes(string);
-#else
-    const auto length = string.length() + 1;
-    std::vector<wchar_t> buf(length);
-    const auto res = std::mbstowcs(buf.data(), string.c_str(), sizeof(wchar_t)*length);
-    return (res <= length) ? buf.data() : L"";
-#endif
 }
 
 } // PAL

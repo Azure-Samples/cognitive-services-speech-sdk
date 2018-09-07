@@ -12,4 +12,4 @@
 SPXAPI_(bool) KeywordRecognitionModel_Handle_IsValid(SPXKEYWORDHANDLE hkeyword);
 SPXAPI KeywordRecognitionModel_Handle_Close(SPXKEYWORDHANDLE hkeyword);
 
-SPXAPI KeywordRecognitionModel_Create_From_File(const wchar_t* fileName, SPXKEYWORDHANDLE* phkwmodel);
+SPXAPI KeywordRecognitionModel_Create_From_File(const char* fileName, SPXKEYWORDHANDLE* phkwmodel);

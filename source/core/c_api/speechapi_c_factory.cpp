@@ -151,12 +151,12 @@ SPXAPI SpeechFactory_CreateSpeechRecognizer_With_Stream(SPXFACTORYHANDLE hfactor
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI SpeechFactory_CreateSpeechRecognizer_With_StreamAndLanguage(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, SpeechApi_AudioInputStream *pstream, const wchar_t* pszLanguage)
+SPXAPI SpeechFactory_CreateSpeechRecognizer_With_StreamAndLanguage(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, SpeechApi_AudioInputStream *pstream, const char* pszLanguage)
 {
     return SpeechFactory_CreateSpeechRecognizer_With_StreamAndLanguageAndFormat(hfactory, phreco, pstream, pszLanguage, SpeechOutputFormat_Simple);
 }
 
-SPXAPI SpeechFactory_CreateSpeechRecognizer_With_StreamAndLanguageAndFormat(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, SpeechApi_AudioInputStream *pstream, const wchar_t* pszLanguage, SpeechOutputFormat format)
+SPXAPI SpeechFactory_CreateSpeechRecognizer_With_StreamAndLanguageAndFormat(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, SpeechApi_AudioInputStream *pstream, const char* pszLanguage, SpeechOutputFormat format)
 {
     if (pszLanguage == nullptr)
         return SPXERR_INVALID_ARG;
@@ -168,19 +168,19 @@ SPXAPI SpeechFactory_CreateSpeechRecognizer_With_StreamAndLanguageAndFormat(SPXF
         SpeechApiAudioInputStreamWrapper* stream = new SpeechApiAudioInputStreamWrapper(pstream); // TODO: Leaking? Same in other places.
 
         *phreco = SPXHANDLE_INVALID;
-        auto recognizer = factory->CreateSpeechRecognizerWithStream(stream, pszLanguage, (OutputFormat)format);
+        auto recognizer = factory->CreateSpeechRecognizerWithStream(stream, PAL::ToWString(pszLanguage), (OutputFormat)format);
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI SpeechFactory_CreateSpeechRecognizer_With_Language(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const wchar_t* pszLanguage)
+SPXAPI SpeechFactory_CreateSpeechRecognizer_With_Language(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const char* pszLanguage)
 {
     return SpeechFactory_CreateSpeechRecognizer_With_LanguageAndFormat(hfactory, phreco, pszLanguage, SpeechOutputFormat_Simple);
 }
 
-SPXAPI SpeechFactory_CreateSpeechRecognizer_With_LanguageAndFormat(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, SpeechOutputFormat format)
+SPXAPI SpeechFactory_CreateSpeechRecognizer_With_LanguageAndFormat(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const char* pszLanguage, SpeechOutputFormat format)
 {
     if (pszLanguage == nullptr)
         return SPXERR_INVALID_ARG;
@@ -191,34 +191,37 @@ SPXAPI SpeechFactory_CreateSpeechRecognizer_With_LanguageAndFormat(SPXFACTORYHAN
         auto factory = (*factoryhandles)[hfactory];
         *phreco = SPXHANDLE_INVALID;
 
-        auto recognizer = factory->CreateSpeechRecognizer(std::wstring(pszLanguage), (OutputFormat)format);
+        auto recognizer = factory->CreateSpeechRecognizer(PAL::ToWString(pszLanguage), (OutputFormat)format);
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI SpeechFactory_CreateSpeechRecognizer_With_FileInput(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const wchar_t* pszFileName)
+SPXAPI SpeechFactory_CreateSpeechRecognizer_With_FileInput(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const char* pszFileName)
 {
+    if (pszFileName == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
         auto factory = (*factoryhandles)[hfactory];
         *phreco = SPXHANDLE_INVALID;
 
-        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(pszFileName);
+        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(PAL::ToWString(pszFileName));
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI SpeechFactory_CreateSpeechRecognizer_With_FileInputAndLanguage(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName)
+SPXAPI SpeechFactory_CreateSpeechRecognizer_With_FileInputAndLanguage(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const char* pszLanguage, const char* pszFileName)
 {
     return SpeechFactory_CreateSpeechRecognizer_With_FileInputAndLanguageAndFormat(hfactory, phreco, pszLanguage, pszFileName, SpeechOutputFormat_Simple);
 }
 
-SPXAPI SpeechFactory_CreateSpeechRecognizer_With_FileInputAndLanguageAndFormat(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName, SpeechOutputFormat format)
+SPXAPI SpeechFactory_CreateSpeechRecognizer_With_FileInputAndLanguageAndFormat(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const char* pszLanguage, const char* pszFileName, SpeechOutputFormat format)
 {
     if (pszLanguage == nullptr)
         return SPXERR_INVALID_ARG;
@@ -232,7 +235,7 @@ SPXAPI SpeechFactory_CreateSpeechRecognizer_With_FileInputAndLanguageAndFormat(S
         auto factory = (*factoryhandles)[hfactory];
         *phreco = SPXHANDLE_INVALID;
 
-        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(pszFileName, pszLanguage, (OutputFormat)format);
+        auto recognizer = factory->CreateSpeechRecognizerWithFileInput(PAL::ToWString(pszFileName), PAL::ToWString(pszLanguage), (OutputFormat)format);
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }
@@ -254,45 +257,57 @@ SPXAPI SpeechFactory_CreateIntentRecognizer_With_Defaults(SPXFACTORYHANDLE hfact
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI SpeechFactory_CreateIntentRecognizer_With_Language(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const wchar_t* pszLanguage)
+SPXAPI SpeechFactory_CreateIntentRecognizer_With_Language(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const char* pszLanguage)
 {
+    if (pszLanguage == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
         auto factory = (*factoryhandles)[hfactory];
         *phreco = SPXHANDLE_INVALID;
 
-        auto recognizer = factory->CreateIntentRecognizer(pszLanguage);
+        auto recognizer = factory->CreateIntentRecognizer(PAL::ToWString(pszLanguage));
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI SpeechFactory_CreateIntentRecognizer_With_FileInput(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const wchar_t* pszFileName)
+SPXAPI SpeechFactory_CreateIntentRecognizer_With_FileInput(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const char* pszFileName)
 {
+    if (pszFileName == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
         auto factory = (*factoryhandles)[hfactory];
         *phreco = SPXHANDLE_INVALID;
 
-        auto recognizer = factory->CreateIntentRecognizerWithFileInput(pszFileName);
+        auto recognizer = factory->CreateIntentRecognizerWithFileInput(PAL::ToWString(pszFileName));
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI SpeechFactory_CreateIntentRecognizer_With_FileInputAndLanguage(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const wchar_t* pszLanguage, const wchar_t* pszFileName)
+SPXAPI SpeechFactory_CreateIntentRecognizer_With_FileInputAndLanguage(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const char* pszLanguage, const char* pszFileName)
 {
+    if (pszLanguage == nullptr)
+        return SPXERR_INVALID_ARG;
+
+    if (pszFileName == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
         auto factory = (*factoryhandles)[hfactory];
         *phreco = SPXHANDLE_INVALID;
 
-        auto recognizer = factory->CreateIntentRecognizerWithFileInput(pszFileName, pszLanguage);
+        auto recognizer = factory->CreateIntentRecognizerWithFileInput(PAL::ToWString(pszFileName), PAL::ToWString(pszLanguage));
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }
@@ -315,8 +330,11 @@ SPXAPI SpeechFactory_CreateIntentRecognizer_With_Stream(SPXFACTORYHANDLE hfactor
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI SpeechFactory_CreateIntentRecognizer_With_StreamAndLanguage(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, SpeechApi_AudioInputStream *pstream, const wchar_t* pszLanguage)
+SPXAPI SpeechFactory_CreateIntentRecognizer_With_StreamAndLanguage(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, SpeechApi_AudioInputStream *pstream, const char* pszLanguage)
 {
+    if (pszLanguage == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
@@ -324,29 +342,38 @@ SPXAPI SpeechFactory_CreateIntentRecognizer_With_StreamAndLanguage(SPXFACTORYHAN
         SpeechApiAudioInputStreamWrapper* stream = new SpeechApiAudioInputStreamWrapper(pstream);
 
         *phreco = SPXHANDLE_INVALID;
-        auto recognizer = factory->CreateIntentRecognizerWithStream(stream, pszLanguage);
+        auto recognizer = factory->CreateIntentRecognizerWithStream(stream, PAL::ToWString(pszLanguage));
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-inline vector<wstring> GetVectorFromBuffer(const wchar_t* buffer[], size_t entries)
+inline vector<wstring> GetVectorFromBuffer(const char* buffer[], size_t entries)
 {
     vector<wstring> result;
     if (buffer != nullptr)
     {
         for (size_t i = 0; i < entries; i++)
         {
-            result.push_back(buffer[i]);
+            if (!buffer[i])
+                Impl::ThrowWithCallstack(SPXERR_INVALID_ARG);
+            else
+                result.push_back(PAL::ToWString(buffer[i]));
         }
     }
 
     return result;
 }
 
-SPXAPI SpeechFactory_CreateTranslationRecognizer(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* recoHandlePointer, const wchar_t* sourceLanguage, const wchar_t* targetLanguages[], size_t numberOfTargetLanguages, const wchar_t* voice)
+SPXAPI SpeechFactory_CreateTranslationRecognizer(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* recoHandlePointer, const char* sourceLanguage, const char* targetLanguages[], size_t numberOfTargetLanguages, const char* voice)
 {
+    if (sourceLanguage == nullptr)
+        return SPXERR_INVALID_ARG;
+
+    if (voice == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
@@ -354,15 +381,24 @@ SPXAPI SpeechFactory_CreateTranslationRecognizer(SPXFACTORYHANDLE hfactory, SPXR
         *recoHandlePointer = SPXHANDLE_INVALID;
 
         auto toLangs = GetVectorFromBuffer(targetLanguages, numberOfTargetLanguages);
-        auto recognizer = factory->CreateTranslationRecognizer(sourceLanguage, toLangs, voice);
+        auto recognizer = factory->CreateTranslationRecognizer(PAL::ToWString(sourceLanguage), toLangs, PAL::ToWString(voice));
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *recoHandlePointer = recohandles->TrackHandle(recognizer);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI SpeechFactory_CreateTranslationRecognizer_With_FileInput(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* recoHandlePointer, const wchar_t* sourceLanguage, const wchar_t* targetLanguages[], size_t numberOfTargetLanguages, const wchar_t* voice, const wchar_t* fileName)
+SPXAPI SpeechFactory_CreateTranslationRecognizer_With_FileInput(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* recoHandlePointer, const char* sourceLanguage, const char* targetLanguages[], size_t numberOfTargetLanguages, const char* voice, const char* fileName)
 {
+    if (sourceLanguage == nullptr)
+        return SPXERR_INVALID_ARG;
+
+    if (voice == nullptr)
+        return SPXERR_INVALID_ARG;
+
+    if (fileName == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
@@ -370,15 +406,21 @@ SPXAPI SpeechFactory_CreateTranslationRecognizer_With_FileInput(SPXFACTORYHANDLE
         *recoHandlePointer = SPXHANDLE_INVALID;
 
         auto toLangs = GetVectorFromBuffer(targetLanguages, numberOfTargetLanguages);
-        auto recognizer = factory->CreateTranslationRecognizerWithFileInput(fileName, sourceLanguage, toLangs, voice);
+        auto recognizer = factory->CreateTranslationRecognizerWithFileInput(PAL::ToWString(fileName), PAL::ToWString(sourceLanguage), toLangs, PAL::ToWString(voice));
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *recoHandlePointer = recohandles->TrackHandle(recognizer);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI SpeechFactory_CreateTranslationRecognizer_With_Stream(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* recoHandlePointer, const wchar_t* sourceLanguage, const wchar_t* targetLanguages[], size_t numberOfTargetLanguages, const wchar_t* voice, SpeechApi_AudioInputStream *stream)
+SPXAPI SpeechFactory_CreateTranslationRecognizer_With_Stream(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* recoHandlePointer, const char* sourceLanguage, const char* targetLanguages[], size_t numberOfTargetLanguages, const char* voice, SpeechApi_AudioInputStream *stream)
 {
+    if (sourceLanguage == nullptr)
+        return SPXERR_INVALID_ARG;
+
+    if (voice == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
@@ -387,7 +429,7 @@ SPXAPI SpeechFactory_CreateTranslationRecognizer_With_Stream(SPXFACTORYHANDLE hf
 
         *recoHandlePointer = SPXHANDLE_INVALID;
         auto toLangs = GetVectorFromBuffer(targetLanguages, numberOfTargetLanguages);
-        auto recognizer = factory->CreateTranslationRecognizerWithStream(streamWrapper, sourceLanguage, toLangs, voice);
+        auto recognizer = factory->CreateTranslationRecognizerWithStream(streamWrapper, PAL::ToWString(sourceLanguage), toLangs, PAL::ToWString(voice));
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *recoHandlePointer = recohandles->TrackHandle(recognizer);
     }
@@ -395,11 +437,11 @@ SPXAPI SpeechFactory_CreateTranslationRecognizer_With_Stream(SPXFACTORYHANDLE hf
 }
 
 
-SPXAPI SpeechFactory_GetParameter_Name(Factory_Parameter parameter, wchar_t* name, uint32_t cchName)
+SPXAPI SpeechFactory_GetParameter_Name(Factory_Parameter parameter, char* name, uint32_t cchName)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
-        const wchar_t* parameterName = L"";
+        const char* parameterName = "";
         switch (parameter)
         {
             case FactoryParameter_SubscriptionKey:
@@ -423,106 +465,139 @@ SPXAPI SpeechFactory_GetParameter_Name(Factory_Parameter parameter, wchar_t* nam
                 break;
         }
 
-        PAL::wcscpy(name, cchName, parameterName, wcslen(parameterName), true);
+        PAL::strcpy(name, cchName, parameterName, strlen(parameterName), true);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI SpeechFactory_SetParameter_String(SPXFACTORYHANDLE hfactory, const wchar_t* name, const wchar_t* value)
+SPXAPI SpeechFactory_SetParameter_String(SPXFACTORYHANDLE hfactory, const char* name, const char* value)
 {
+    if (name == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto namedProperties = GetNamedPropertiesFromFactoryHandle(hfactory);
-        namedProperties->SetStringValue(name, value);
+        namedProperties->SetStringValue(PAL::ToWString(name).c_str(), value ? PAL::ToWString(value).c_str() : nullptr);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI SpeechFactory_GetParameter_String(SPXFACTORYHANDLE hfactory, const wchar_t* name, wchar_t* value, uint32_t cchValue, const wchar_t* defaultValue)
+SPXAPI SpeechFactory_GetParameter_String(SPXFACTORYHANDLE hfactory, const char* name, char* value, uint32_t cchValue, const char* defaultValue)
 {
+    if (name == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto namedProperties = GetNamedPropertiesFromFactoryHandle(hfactory);
-        auto tempValue = namedProperties->GetStringValue(name, defaultValue);
-        PAL::wcscpy(value, cchValue, tempValue.c_str(), tempValue.size(), true);
+        auto tempValue = PAL::ToString(namedProperties->GetStringValue(PAL::ToWString(name).c_str(), defaultValue ? PAL::ToWString(defaultValue).c_str(): nullptr));
+        PAL::strcpy(value, cchValue, tempValue.c_str(), tempValue.size(), true);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_(bool) SpeechFactory_ContainsParameter_String(SPXFACTORYHANDLE hfactory, const wchar_t* name)
+SPXAPI_(bool) SpeechFactory_ContainsParameter_String(SPXFACTORYHANDLE hfactory, const char* name)
 {
+    if (name == nullptr)
+        return false;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto namedProperties = GetNamedPropertiesFromFactoryHandle(hfactory);
-        return namedProperties->HasStringValue(name);
+        return namedProperties->HasStringValue(PAL::ToWString(name).c_str());
     }
     SPXAPI_CATCH_AND_RETURN(hr, false)
 }
 
-SPXAPI SpeechFactory_SetParameter_Int32(SPXFACTORYHANDLE hfactory, const wchar_t* name, int32_t value)
+SPXAPI SpeechFactory_SetParameter_Int32(SPXFACTORYHANDLE hfactory, const char* name, int32_t value)
 {
+    if (name == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto namedProperties = GetNamedPropertiesFromFactoryHandle(hfactory);
-        namedProperties->SetNumberValue(name, value);
+        namedProperties->SetNumberValue(PAL::ToWString(name).c_str(), value);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI SpeechFactory_GetParameter_Int32(SPXFACTORYHANDLE hfactory, const wchar_t* name, int32_t* pvalue, int32_t defaultValue)
+SPXAPI SpeechFactory_GetParameter_Int32(SPXFACTORYHANDLE hfactory, const char* name, int32_t* pvalue, int32_t defaultValue)
 {
+    if (name == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto namedProperties = GetNamedPropertiesFromFactoryHandle(hfactory);
-        auto tempValue = namedProperties->GetNumberValue(name, defaultValue);
+        auto tempValue = namedProperties->GetNumberValue(PAL::ToWString(name).c_str(), defaultValue);
         *pvalue = (int32_t)tempValue;
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_(bool) SpeechFactory_ContainsParameter_Int32(SPXFACTORYHANDLE hfactory, const wchar_t* name)
+SPXAPI_(bool) SpeechFactory_ContainsParameter_Int32(SPXFACTORYHANDLE hfactory, const char* name)
 {
+    if (name == nullptr)
+        return false;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto namedProperties = GetNamedPropertiesFromFactoryHandle(hfactory);
-        return namedProperties->HasNumberValue(name);
+        return namedProperties->HasNumberValue(PAL::ToWString(name).c_str());
     }
     SPXAPI_CATCH_AND_RETURN(hr, false)
 }
 
-SPXAPI SpeechFactory_SetParameter_Bool(SPXFACTORYHANDLE hfactory, const wchar_t* name, bool value)
+SPXAPI SpeechFactory_SetParameter_Bool(SPXFACTORYHANDLE hfactory, const char* name, bool value)
 {
+    if (name == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto namedProperties = GetNamedPropertiesFromFactoryHandle(hfactory);
-        namedProperties->SetBooleanValue(name, value);
+        namedProperties->SetBooleanValue(PAL::ToWString(name).c_str(), value);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI SpeechFactory_GetParameter_Bool(SPXFACTORYHANDLE hfactory, const wchar_t* name, bool* pvalue, bool defaultValue)
+SPXAPI SpeechFactory_GetParameter_Bool(SPXFACTORYHANDLE hfactory, const char* name, bool* pvalue, bool defaultValue)
 {
+    if (name == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto namedProperties = GetNamedPropertiesFromFactoryHandle(hfactory);
-        auto tempValue = namedProperties->GetBooleanValue(name, defaultValue);
+        auto tempValue = namedProperties->GetBooleanValue(PAL::ToWString(name).c_str(), defaultValue);
         *pvalue = tempValue;
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_(bool) SpeechFactory_ContainsParameter_Bool(SPXFACTORYHANDLE hfactory, const wchar_t* name)
+SPXAPI_(bool) SpeechFactory_ContainsParameter_Bool(SPXFACTORYHANDLE hfactory, const char* name)
 {
+    if (name == nullptr)
+        return false;
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto namedProperties = GetNamedPropertiesFromFactoryHandle(hfactory);
-        return namedProperties->HasBooleanValue(name);
+        return namedProperties->HasBooleanValue(PAL::ToWString(name).c_str());
     }
     SPXAPI_CATCH_AND_RETURN(hr, false)
 }
 
-SPXAPI SpeechFactory_FromAuthorizationToken(const wchar_t* authToken, const wchar_t* region, SPXFACTORYHANDLE* phfactory)
+SPXAPI SpeechFactory_FromAuthorizationToken(const char* authToken, const char* region, SPXFACTORYHANDLE* phfactory)
 {
+    if (region == nullptr)
+        return SPXERR_INVALID_ARG;
+
+    if (authToken == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -531,11 +606,11 @@ SPXAPI SpeechFactory_FromAuthorizationToken(const wchar_t* authToken, const wcha
         auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
 
         auto namedProperties = SpxQueryService<ISpxNamedProperties>(factory);
-        namedProperties->SetStringValue(g_SPEECH_AuthToken, authToken);
+        namedProperties->SetStringValue(PAL::ToWString(g_SPEECH_AuthToken).c_str(), PAL::ToWString(authToken).c_str());
 
         if (region != nullptr && *region != L'\0')
         {
-            namedProperties->SetStringValue(g_SPEECH_Region, region);
+            namedProperties->SetStringValue(PAL::ToWString(g_SPEECH_Region).c_str(), PAL::ToWString(region).c_str());
         }
 
         auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
@@ -544,8 +619,14 @@ SPXAPI SpeechFactory_FromAuthorizationToken(const wchar_t* authToken, const wcha
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI SpeechFactory_FromSubscription(const wchar_t* subscriptionKey, const wchar_t* region, SPXFACTORYHANDLE* phfactory)
+SPXAPI SpeechFactory_FromSubscription(const char* subscriptionKey, const char* region, SPXFACTORYHANDLE* phfactory)
 {
+    if (region == nullptr)
+        return SPXERR_INVALID_ARG;
+
+    if (subscriptionKey == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -554,11 +635,11 @@ SPXAPI SpeechFactory_FromSubscription(const wchar_t* subscriptionKey, const wcha
         auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
 
         auto namedProperties = SpxQueryService<ISpxNamedProperties>(factory);
-        namedProperties->SetStringValue(g_SPEECH_SubscriptionKey, subscriptionKey);
+        namedProperties->SetStringValue(PAL::ToWString(g_SPEECH_SubscriptionKey).c_str(), PAL::ToWString(subscriptionKey).c_str());
 
         if (region != nullptr && *region != L'\0')
         {
-            namedProperties->SetStringValue(g_SPEECH_Region, region);
+            namedProperties->SetStringValue(PAL::ToWString(g_SPEECH_Region).c_str(), PAL::ToWString(region).c_str());
         }
 
         auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
@@ -567,8 +648,14 @@ SPXAPI SpeechFactory_FromSubscription(const wchar_t* subscriptionKey, const wcha
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI SpeechFactory_FromEndpoint(const wchar_t* endpoint, const wchar_t* subscription, SPXFACTORYHANDLE* phfactory)
+SPXAPI SpeechFactory_FromEndpoint(const char* endpoint, const char* subscription, SPXFACTORYHANDLE* phfactory)
 {
+    if (endpoint == nullptr)
+        return SPXERR_INVALID_ARG;
+
+    if (subscription == nullptr)
+        return SPXERR_INVALID_ARG;
+
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -577,11 +664,11 @@ SPXAPI SpeechFactory_FromEndpoint(const wchar_t* endpoint, const wchar_t* subscr
         auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
 
         auto namedProperties = SpxQueryService<ISpxNamedProperties>(factory);
-        namedProperties->SetStringValue(g_SPEECH_Endpoint, endpoint);
+        namedProperties->SetStringValue(PAL::ToWString(g_SPEECH_Endpoint).c_str(), PAL::ToWString(endpoint).c_str());
 
         if (subscription != nullptr && *subscription != L'\0')
         {
-            namedProperties->SetStringValue(g_SPEECH_SubscriptionKey, subscription);
+            namedProperties->SetStringValue(PAL::ToWString(g_SPEECH_SubscriptionKey).c_str(), PAL::ToWString(subscription).c_str());
         }
 
         auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();

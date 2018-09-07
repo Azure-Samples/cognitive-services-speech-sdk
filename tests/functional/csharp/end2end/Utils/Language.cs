@@ -11,6 +11,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public static readonly string TR = "tr";
         public static readonly string ES = "es";
         public static readonly string DE = "de";
+        public static readonly string ZH = "zh-Hans";
         public static readonly string DE_DE = "de-DE";
     }
 }

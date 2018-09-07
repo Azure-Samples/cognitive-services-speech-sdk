@@ -84,7 +84,7 @@ void CSpxRecognitionResult::InitError(const wchar_t* text, ResultType type)
     m_type = type;
     if (text != nullptr) 
     {
-        SetStringValue(g_RESULT_ErrorDetails, text);
+        SetStringValue(PAL::ToWString(g_RESULT_ErrorDetails).c_str(), text);
     }
 }
 
@@ -97,7 +97,7 @@ void CSpxRecognitionResult::InitIntentResult(const wchar_t* intentId, const wcha
 {
     m_intentId = (intentId != nullptr) ? intentId : L"";
 
-    SetStringValue(g_RESULT_LanguageUnderstandingJson, jsonPayload);
+    SetStringValue(PAL::ToWString(g_RESULT_LanguageUnderstandingJson).c_str(), jsonPayload);
 }
 
 const map<wstring, wstring>& CSpxRecognitionResult::GetTranslationText()
