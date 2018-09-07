@@ -125,6 +125,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore]
         public async Task TranslationFirstOneDeToFrAndEsFinalTextResultContinuous()
         {
             var toLanguages = new List<string>() { Language.FR, Language.ES };
