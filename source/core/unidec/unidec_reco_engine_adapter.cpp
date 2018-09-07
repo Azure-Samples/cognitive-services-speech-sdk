@@ -136,8 +136,8 @@ std::wstring CSpxUnidecRecoEngineAdapter::GetBaseModelPath()
     SPX_IFTRUE_THROW_HR(properties == nullptr, SPXERR_UNEXPECTED_UNIDEC_SITE_FAILURE);
 
     // Get the property value for the base model path
-    auto value = properties->GetStringValue(L"__unidecBaseModelPath", LR"(..\..\..\external\unidec\bin\)");
-    return value;
+    auto value = properties->GetStringValue("__unidecBaseModelPath", R"(..\..\..\external\unidec\bin\)");
+    return PAL::ToWString(value);
 }
 
 void CSpxUnidecRecoEngineAdapter::InitFormat(WAVEFORMATEX* pformat)

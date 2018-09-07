@@ -81,13 +81,12 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/AudioInputStreamFormat.java
     ${CMAKE_SWIG_OUTDIR}/BaseAsyncRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/BaseRecognizerBase.java
-    ${CMAKE_SWIG_OUTDIR}/BaseValueCollection.java
+    ${CMAKE_SWIG_OUTDIR}/HandleType.java
+    ${CMAKE_SWIG_OUTDIR}/SpeechPropertyId.java
     ${CMAKE_SWIG_OUTDIR}/carbon_java.java
     ${CMAKE_SWIG_OUTDIR}/carbon_javaJNI.java
     ${CMAKE_SWIG_OUTDIR}/EventArgs.java
-    ${CMAKE_SWIG_OUTDIR}/FactoryParameter.java
-    ${CMAKE_SWIG_OUTDIR}/FactoryParameterCollection.java
-    ${CMAKE_SWIG_OUTDIR}/FactoryParameterCollectionBase.java
+    ${CMAKE_SWIG_OUTDIR}/FactoryPropertyCollection.java
     ${CMAKE_SWIG_OUTDIR}/ICognitiveServicesSpeechFactory.java
     ${CMAKE_SWIG_OUTDIR}/IntentEventListener.java
     ${CMAKE_SWIG_OUTDIR}/IntentEventSignal.java
@@ -109,20 +108,14 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/RecognitionEventSignal.java
     ${CMAKE_SWIG_OUTDIR}/RecognitionResult.java
     ${CMAKE_SWIG_OUTDIR}/Recognizer.java
-    ${CMAKE_SWIG_OUTDIR}/RecognizerParameter.java
-    ${CMAKE_SWIG_OUTDIR}/RecognizerParameterValueCollection.java
-    ${CMAKE_SWIG_OUTDIR}/RecognizerParameterValueCollectionBase.java
-    ${CMAKE_SWIG_OUTDIR}/ResultProperty.java
-    ${CMAKE_SWIG_OUTDIR}/ResultPropertyValueCollection.java
-    ${CMAKE_SWIG_OUTDIR}/ResultPropertyValueCollectionBase.java
+    ${CMAKE_SWIG_OUTDIR}/RecognizerPropertyCollection.java
+    ${CMAKE_SWIG_OUTDIR}/ResultPropertyCollection.java
 
     ${CMAKE_SWIG_OUTDIR}/Session.java
     ${CMAKE_SWIG_OUTDIR}/SessionEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/SessionEventListener.java
     ${CMAKE_SWIG_OUTDIR}/SessionEventSignal.java
-    ${CMAKE_SWIG_OUTDIR}/SessionParameter.java
-    ${CMAKE_SWIG_OUTDIR}/SessionParameterValueCollection.java
-    ${CMAKE_SWIG_OUTDIR}/SessionParameterValueCollectionBase.java
+    ${CMAKE_SWIG_OUTDIR}/SessionPropertyCollection.java
     ${CMAKE_SWIG_OUTDIR}/SpeechFactory.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionEventListener.java
@@ -149,7 +142,6 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/StdMapStringStringMapIterator.java
 
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXEVENTHANDLE.java
-    ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXFACTORYHANDLE.java
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXKEYWORDHANDLE.java
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXLUMODELHANDLE.java
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXRECOHANDLE.java
@@ -157,10 +149,7 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXSESSIONHANDLE.java
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXTRIGGERHANDLE.java
 
-    ${CMAKE_SWIG_OUTDIR}/Value.java
-#    ${CMAKE_SWIG_OUTDIR}/ValueCollectionRecognizerProperty.java
-#    ${CMAKE_SWIG_OUTDIR}/ValueCollectionRecognizerFactoryParameter.java
-#    ${CMAKE_SWIG_OUTDIR}/ValueCollectionSessionParameter.java
+    
     ${CMAKE_SWIG_OUTDIR}/VoidFuture.java
     ${CMAKE_SWIG_OUTDIR}/StringVector.java
     ${CMAKE_SWIG_OUTDIR}/UInt8Vector.java

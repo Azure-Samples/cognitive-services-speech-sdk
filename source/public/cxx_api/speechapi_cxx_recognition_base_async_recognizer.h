@@ -13,7 +13,6 @@
 #include <speechapi_cxx_session_eventargs.h>
 #include <speechapi_cxx_recognition_base_async_recognizer.h>
 
-
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -30,7 +29,7 @@ public:
     /// </summary>
     /// <returns>A shared pointer to BaseAsyncRecognizer.</returns>
     template <class T>
-    static std::shared_ptr<BaseAsyncRecognizer> FromRecognizer(const std::shared_ptr<T> &recognizer) 
+    static std::shared_ptr<BaseAsyncRecognizer> FromRecognizer(const std::shared_ptr<T> &recognizer)
     {
         UNUSED(recognizer);
         SPX_STATIC_ASSERT_IS_BASE_OF(Recognizer, T);

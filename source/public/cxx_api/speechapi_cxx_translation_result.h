@@ -64,7 +64,7 @@ public:
         FailureReason(m_failureReason)
     {
         PopulateResultFields(resultHandle);
-        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%ls; translation status=0x%x.", 
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%s; translation status=0x%x.", 
             __FUNCTION__, this, Handle, ResultId.c_str(), TranslationStatus);
     };
 
@@ -139,7 +139,7 @@ private:
         for (const auto& cf : m_translations)
         {
             (void)(cf); // prevent warning for cf when compiling release builds
-            SPX_DBG_TRACE_VERBOSE(" phrase for %ls: %ls", cf.first.c_str(), cf.second.c_str());
+            SPX_DBG_TRACE_VERBOSE(" phrase for %s: %s", cf.first.c_str(), cf.second.c_str());
         }
 #endif
     };

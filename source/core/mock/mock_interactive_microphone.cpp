@@ -57,10 +57,10 @@ void CSpxMockInteractiveMicrophone::InitAudioPump()
 
     // Try to get the filename from our site's property collection
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
-    auto fileName = properties->GetStringValue(L"CARBON-INTERNAL-MOCK-WavFileAudio");
+    auto fileName = properties->GetStringValue("CARBON-INTERNAL-MOCK-WavFileAudio");
 
     // Create the wav file pump if we have a filename, otherwise create the mock audio pump
-    fileName.empty() ? InitMockAudioPump() : InitWavFilePump(fileName);
+    fileName.empty() ? InitMockAudioPump() : InitWavFilePump(PAL::ToWString(fileName));
 }
 
 void CSpxMockInteractiveMicrophone::InitMockAudioPump()
@@ -77,7 +77,7 @@ void CSpxMockInteractiveMicrophone::InitMockAudioPump()
     // Set other various properties that control the mock
     auto realtimeReader = SpxQueryInterface<ISpxAudioReaderRealTime>(reader);
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
-    realtimeReader->SetRealTimePercentage((uint8_t)properties->GetNumberValue(L"CARBON-INTERNAL-MOCK-RealTimeAudioPercentage", 100));
+    realtimeReader->SetRealTimePercentage(static_cast<uint8_t>(std::stoi(properties->GetStringValue("CARBON-INTERNAL-MOCK-RealTimeAudioPercentage", "100"))));
 
     // And ... We're finished
     m_delegateToAudioPump = SpxQueryInterface<ISpxAudioPump>(pumpInit);
@@ -95,9 +95,10 @@ void CSpxMockInteractiveMicrophone::InitWavFilePump(const std::wstring& fileName
 
     // Set other various properties that control the mock
     auto properties = SpxQueryService<ISpxNamedProperties>(GetSite());
-    audioFilePump->SetContinuousLoop(properties->GetBooleanValue(L"CARBON-INTERNAL-MOCK-ContinuousAudio"));
-    audioFilePump->SetIterativeLoop(properties->GetBooleanValue(L"CARBON-INTERNAL-MOCK-IterativeAudio"));
-    audioFilePump->SetRealTimePercentage((uint8_t)properties->GetNumberValue(L"CARBON-INTERNAL-MOCK-RealTimeAudioPercentage", 100));
+    
+    audioFilePump->SetContinuousLoop(PAL::ToBool(properties->GetStringValue("CARBON-INTERNAL-MOCK-ContinuousAudio").c_str()));
+    audioFilePump->SetIterativeLoop(PAL::ToBool(properties->GetStringValue("CARBON-INTERNAL-MOCK-IterativeAudio").c_str()));
+    audioFilePump->SetRealTimePercentage(static_cast<uint8_t>(std::stoi(properties->GetStringValue("CARBON-INTERNAL-MOCK-RealTimeAudioPercentage", "100"))));
 
     // and ... We're finished
     m_delegateToAudioPump = SpxQueryInterface<ISpxAudioPump>(audioFilePump);

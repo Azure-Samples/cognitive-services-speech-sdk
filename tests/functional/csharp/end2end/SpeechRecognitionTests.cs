@@ -280,12 +280,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(factory.CreateSpeechRecognizerWithFileInput(TestData.German.FirstOne.AudioFile)))
             {
                 Assert.IsTrue(string.IsNullOrEmpty(recognizer.Language));
-                Assert.AreEqual(recognizer.Language, recognizer.Parameters.Get<string>(SpeechParameterNames.RecognitionLanguage));
+                Assert.AreEqual(recognizer.Language, recognizer.Parameters.Get(SpeechParameterNames.RecognitionLanguage));
 
                 Assert.IsTrue(string.IsNullOrEmpty(recognizer.DeploymentId));
                 recognizer.DeploymentId = deploymentId;
                 Assert.AreEqual(deploymentId, recognizer.DeploymentId);
-                Assert.AreEqual(deploymentId, recognizer.Parameters.Get<string>(SpeechParameterNames.DeploymentId));
+                Assert.AreEqual(deploymentId, recognizer.Parameters.Get(SpeechParameterNames.DeploymentId));
 
                 Assert.AreEqual(recognizer.OutputFormat, OutputFormat.Simple);
             }
@@ -293,9 +293,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(factory.CreateSpeechRecognizerWithFileInput(TestData.German.FirstOne.AudioFile, Language.DE_DE)))
             {
                 Assert.AreEqual(Language.DE_DE, recognizer.Language);
-                Assert.AreEqual(Language.DE_DE, recognizer.Parameters.Get<string>(SpeechParameterNames.RecognitionLanguage));
+                Assert.AreEqual(Language.DE_DE, recognizer.Parameters.Get(SpeechParameterNames.RecognitionLanguage));
 
-                Assert.AreEqual(recognizer.DeploymentId, recognizer.Parameters.Get<string>(SpeechParameterNames.DeploymentId));
+                Assert.AreEqual(recognizer.DeploymentId, recognizer.Parameters.Get(SpeechParameterNames.DeploymentId));
 
                 Assert.AreEqual(recognizer.OutputFormat, OutputFormat.Simple);
             }

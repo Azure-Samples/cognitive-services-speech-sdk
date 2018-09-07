@@ -14,6 +14,7 @@
 #include "handle_helpers.h"
 #include "resource_manager.h"
 #include "mock_controller.h"
+#include "property_id_2_name_map.h"
 
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
@@ -22,37 +23,6 @@ using namespace std;
 static_assert((int)OutputFormat::Simple == (int)SpeechOutputFormat_Simple, "OutputFormat should match between C and C++ layers");
 static_assert((int)OutputFormat::Detailed == (int)SpeechOutputFormat_Detailed, "OutputFormat should match between C and C++ layers");
 
-static_assert((int)FactoryParameter_Region == (int)FactoryParameter::Region, "FactoryParameter_* enum values == FactoryParameter::* enum values");
-static_assert((int)FactoryParameter_SubscriptionKey == (int)FactoryParameter::SubscriptionKey, "FactoryParameter_* enum values == FactoryParameter::* enum values");
-static_assert((int)FactoryParameter_AuthorizationToken == (int)FactoryParameter::AuthorizationToken, "FactoryParameter_* enum values == FactoryParameter::* enum values");
-static_assert((int)FactoryParameter_Endpoint == (int)FactoryParameter::Endpoint, "FactoryParameter_* enum values == FactoryParameter::* enum values");
-
-std::shared_ptr<ISpxNamedProperties> GetNamedPropertiesFromFactoryHandle(SPXFACTORYHANDLE hfactory)
-{
-    std::shared_ptr<ISpxNamedProperties> namedProperties;
-    if (hfactory == SPXFACTORYHANDLE_ROOTSITEPARAMETERS_HACK)
-    {
-        namedProperties = SpxQueryService<ISpxNamedProperties>(SpxGetRootSite());
-    }
-    else
-    {
-        auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
-        auto factory = (*factoryhandles)[hfactory];
-        namedProperties = SpxQueryService<ISpxNamedProperties>(factory);
-    }
-
-    return namedProperties;
-}
-
-SPXAPI_(bool) SpeechFactory_Handle_IsValid(SPXFACTORYHANDLE hfactory)
-{
-    return Handle_IsValid<SPXFACTORYHANDLE, ISpxSpeechApiFactory>(hfactory);
-}
-
-SPXAPI SpeechFactory_Handle_Close(SPXFACTORYHANDLE hfactory)
-{
-    return Handle_Close<SPXFACTORYHANDLE, ISpxSpeechApiFactory>(hfactory);
-}
 
 SPXAPI SpeechFactory_CreateSpeechRecognizer_With_Defaults(SPXFACTORYHANDLE  hfactory, SPXRECOHANDLE* phreco)
 {
@@ -436,162 +406,20 @@ SPXAPI SpeechFactory_CreateTranslationRecognizer_With_Stream(SPXFACTORYHANDLE hf
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-
-SPXAPI SpeechFactory_GetParameter_Name(Factory_Parameter parameter, char* name, uint32_t cchName)
+SPXAPI_(bool) SpeechFactory_Handle_IsValid(SPXFACTORYHANDLE hfactory)
 {
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        const char* parameterName = "";
-        switch (parameter)
-        {
-            case FactoryParameter_SubscriptionKey:
-                parameterName = g_SPEECH_SubscriptionKey;
-                break;
-
-            case FactoryParameter_AuthorizationToken:
-                parameterName = g_SPEECH_AuthToken;
-                break;
-
-            case FactoryParameter_Region:
-                parameterName = g_SPEECH_Region;
-                break;
-
-            case FactoryParameter_Endpoint:
-                parameterName = g_SPEECH_Endpoint;
-                break;
-
-            default:
-                hr = SPXERR_INVALID_ARG;
-                break;
-        }
-
-        PAL::strcpy(name, cchName, parameterName, strlen(parameterName), true);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    return Handle_IsValid<SPXFACTORYHANDLE, ISpxSpeechApiFactory>(hfactory);
 }
 
-SPXAPI SpeechFactory_SetParameter_String(SPXFACTORYHANDLE hfactory, const char* name, const char* value)
+SPXAPI SpeechFactory_Handle_Close(SPXFACTORYHANDLE hfactory)
 {
-    if (name == nullptr)
-        return SPXERR_INVALID_ARG;
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto namedProperties = GetNamedPropertiesFromFactoryHandle(hfactory);
-        namedProperties->SetStringValue(PAL::ToWString(name).c_str(), value ? PAL::ToWString(value).c_str() : nullptr);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
-}
-
-SPXAPI SpeechFactory_GetParameter_String(SPXFACTORYHANDLE hfactory, const char* name, char* value, uint32_t cchValue, const char* defaultValue)
-{
-    if (name == nullptr)
-        return SPXERR_INVALID_ARG;
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto namedProperties = GetNamedPropertiesFromFactoryHandle(hfactory);
-        auto tempValue = PAL::ToString(namedProperties->GetStringValue(PAL::ToWString(name).c_str(), defaultValue ? PAL::ToWString(defaultValue).c_str(): nullptr));
-        PAL::strcpy(value, cchValue, tempValue.c_str(), tempValue.size(), true);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
-}
-
-SPXAPI_(bool) SpeechFactory_ContainsParameter_String(SPXFACTORYHANDLE hfactory, const char* name)
-{
-    if (name == nullptr)
-        return false;
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto namedProperties = GetNamedPropertiesFromFactoryHandle(hfactory);
-        return namedProperties->HasStringValue(PAL::ToWString(name).c_str());
-    }
-    SPXAPI_CATCH_AND_RETURN(hr, false)
-}
-
-SPXAPI SpeechFactory_SetParameter_Int32(SPXFACTORYHANDLE hfactory, const char* name, int32_t value)
-{
-    if (name == nullptr)
-        return SPXERR_INVALID_ARG;
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto namedProperties = GetNamedPropertiesFromFactoryHandle(hfactory);
-        namedProperties->SetNumberValue(PAL::ToWString(name).c_str(), value);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
-}
-
-SPXAPI SpeechFactory_GetParameter_Int32(SPXFACTORYHANDLE hfactory, const char* name, int32_t* pvalue, int32_t defaultValue)
-{
-    if (name == nullptr)
-        return SPXERR_INVALID_ARG;
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto namedProperties = GetNamedPropertiesFromFactoryHandle(hfactory);
-        auto tempValue = namedProperties->GetNumberValue(PAL::ToWString(name).c_str(), defaultValue);
-        *pvalue = (int32_t)tempValue;
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
-}
-
-SPXAPI_(bool) SpeechFactory_ContainsParameter_Int32(SPXFACTORYHANDLE hfactory, const char* name)
-{
-    if (name == nullptr)
-        return false;
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto namedProperties = GetNamedPropertiesFromFactoryHandle(hfactory);
-        return namedProperties->HasNumberValue(PAL::ToWString(name).c_str());
-    }
-    SPXAPI_CATCH_AND_RETURN(hr, false)
-}
-
-SPXAPI SpeechFactory_SetParameter_Bool(SPXFACTORYHANDLE hfactory, const char* name, bool value)
-{
-    if (name == nullptr)
-        return SPXERR_INVALID_ARG;
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto namedProperties = GetNamedPropertiesFromFactoryHandle(hfactory);
-        namedProperties->SetBooleanValue(PAL::ToWString(name).c_str(), value);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
-}
-
-SPXAPI SpeechFactory_GetParameter_Bool(SPXFACTORYHANDLE hfactory, const char* name, bool* pvalue, bool defaultValue)
-{
-    if (name == nullptr)
-        return SPXERR_INVALID_ARG;
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto namedProperties = GetNamedPropertiesFromFactoryHandle(hfactory);
-        auto tempValue = namedProperties->GetBooleanValue(PAL::ToWString(name).c_str(), defaultValue);
-        *pvalue = tempValue;
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
-}
-
-SPXAPI_(bool) SpeechFactory_ContainsParameter_Bool(SPXFACTORYHANDLE hfactory, const char* name)
-{
-    if (name == nullptr)
-        return false;
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto namedProperties = GetNamedPropertiesFromFactoryHandle(hfactory);
-        return namedProperties->HasBooleanValue(PAL::ToWString(name).c_str());
-    }
-    SPXAPI_CATCH_AND_RETURN(hr, false)
+    return Handle_Close<SPXFACTORYHANDLE, ISpxSpeechApiFactory>(hfactory);
 }
 
 SPXAPI SpeechFactory_FromAuthorizationToken(const char* authToken, const char* region, SPXFACTORYHANDLE* phfactory)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phfactory == nullptr);
+
     if (region == nullptr)
         return SPXERR_INVALID_ARG;
 
@@ -606,11 +434,15 @@ SPXAPI SpeechFactory_FromAuthorizationToken(const char* authToken, const char* r
         auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
 
         auto namedProperties = SpxQueryService<ISpxNamedProperties>(factory);
-        namedProperties->SetStringValue(PAL::ToWString(g_SPEECH_AuthToken).c_str(), PAL::ToWString(authToken).c_str());
+        namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceAuthorization_Token), authToken);
 
         if (region != nullptr && *region != L'\0')
         {
-            namedProperties->SetStringValue(PAL::ToWString(g_SPEECH_Region).c_str(), PAL::ToWString(region).c_str());
+            namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Region), region);
+        }
+        else
+        {
+            SPX_IFFAILED_THROW_HR(SPXERR_INVALID_ARG);
         }
 
         auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
@@ -621,6 +453,7 @@ SPXAPI SpeechFactory_FromAuthorizationToken(const char* authToken, const char* r
 
 SPXAPI SpeechFactory_FromSubscription(const char* subscriptionKey, const char* region, SPXFACTORYHANDLE* phfactory)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phfactory == nullptr);
     if (region == nullptr)
         return SPXERR_INVALID_ARG;
 
@@ -635,11 +468,15 @@ SPXAPI SpeechFactory_FromSubscription(const char* subscriptionKey, const char* r
         auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
 
         auto namedProperties = SpxQueryService<ISpxNamedProperties>(factory);
-        namedProperties->SetStringValue(PAL::ToWString(g_SPEECH_SubscriptionKey).c_str(), PAL::ToWString(subscriptionKey).c_str());
+        namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Key), subscriptionKey);
 
         if (region != nullptr && *region != L'\0')
         {
-            namedProperties->SetStringValue(PAL::ToWString(g_SPEECH_Region).c_str(), PAL::ToWString(region).c_str());
+            namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Region), region);
+        }
+        else
+        {
+            SPX_IFFAILED_THROW_HR(SPXERR_INVALID_ARG);
         }
 
         auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
@@ -650,6 +487,7 @@ SPXAPI SpeechFactory_FromSubscription(const char* subscriptionKey, const char* r
 
 SPXAPI SpeechFactory_FromEndpoint(const char* endpoint, const char* subscription, SPXFACTORYHANDLE* phfactory)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phfactory == nullptr);
     if (endpoint == nullptr)
         return SPXERR_INVALID_ARG;
 
@@ -664,15 +502,39 @@ SPXAPI SpeechFactory_FromEndpoint(const char* endpoint, const char* subscription
         auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
 
         auto namedProperties = SpxQueryService<ISpxNamedProperties>(factory);
-        namedProperties->SetStringValue(PAL::ToWString(g_SPEECH_Endpoint).c_str(), PAL::ToWString(endpoint).c_str());
+        namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Endpoint), endpoint);
 
         if (subscription != nullptr && *subscription != L'\0')
         {
-            namedProperties->SetStringValue(PAL::ToWString(g_SPEECH_SubscriptionKey).c_str(), PAL::ToWString(subscription).c_str());
+            namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Key), subscription);
+        }
+        else
+        {
+            SPX_IFFAILED_THROW_HR(SPXERR_INVALID_ARG);
         }
 
         auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
         *phfactory = factoryhandles->TrackHandle(factory);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI speech_factory_get_property_bag(SPXFACTORYHANDLE hfactory, SPXPROPERTYBAGHANDLE* hpropbag)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
+
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
+        auto factory = (*factoryhandles)[hfactory];
+
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(factory);
+
+        auto baghandle = CSpxSharedPtrHandleTableManager::Get<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>();
+        *hpropbag = baghandle->TrackHandle(namedProperties);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+
 }

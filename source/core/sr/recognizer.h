@@ -5,8 +5,8 @@
 #include "asyncop.h"
 #include "ispxinterfaces.h"
 #include "interface_helpers.h"
-#include "named_properties_impl.h"
-
+#include "property_bag_impl.h"
+#include "service_helpers.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -17,9 +17,10 @@ namespace Impl {
 class CSpxRecognizer :
     public ISpxRecognizer,
     public ISpxRecognizerEvents,
-    public ISpxNamedPropertiesImpl,
+    public ISpxServiceProvider,
     public ISpxSessionFromRecognizer,
-    public ISpxObjectWithSiteInitImpl<ISpxRecognizerSite>
+    public ISpxObjectWithSiteInitImpl<ISpxRecognizerSite>,
+    public ISpxPropertyBagImpl
 {
 public:
 
@@ -29,10 +30,11 @@ public:
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
-        SPX_INTERFACE_MAP_ENTRY(ISpxSessionFromRecognizer)
-        SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
+        SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
+        SPX_INTERFACE_MAP_ENTRY(ISpxSessionFromRecognizer)        
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognizerEvents)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognizer)
+        SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxObjectWithSiteInit
@@ -40,7 +42,7 @@ public:
     void Term() override;
 
     // --- ISpxNamedProperties (overrides)
-    void SetStringValue(const wchar_t* name, const wchar_t* value) override;
+    void SetStringValue(const char* name, const char* value) override;
 
     // --- ISpxRecognizer
 
@@ -69,6 +71,11 @@ public:
 
     void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) override;
 
+    // --- IServiceProvider
+    SPX_SERVICE_MAP_BEGIN()
+        SPX_SERVICE_MAP_ENTRY(ISpxNamedProperties)
+        SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
+    SPX_SERVICE_MAP_END()
 
 protected:
 
@@ -90,8 +97,8 @@ private:
     std::shared_ptr<ISpxSession> m_defaultSession;
     std::atomic_bool m_fEnabled;
 
-    void SetStringValueInProperties(const wchar_t* name, const wchar_t* value);
-    std::wstring GetStringValueFromProperties(const wchar_t* name, const wchar_t* defaultValue);
+    void SetStringValueInProperties(const char* name, const char* value);
+    std::string GetStringValueFromProperties(const char* name, const char* defaultValue);
     void FireRecoEvent(ISpxRecognizerEvents::RecoEvent_Type* pevent, const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result, uint64_t offset = 0);
 };
 

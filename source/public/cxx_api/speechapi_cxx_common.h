@@ -34,7 +34,7 @@ inline void __spx_rethrow(SPXHR hr)
 {
     auto handle = reinterpret_cast<SPXERRORHANDLE>(hr);
     auto error = Error_GetCode(handle);
-    if (error == SPX_NOERROR) 
+    if (error == SPX_NOERROR)
     {
         throw hr;
     }

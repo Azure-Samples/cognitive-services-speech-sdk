@@ -2,7 +2,7 @@
 #include <string>
 #include "ispxinterfaces.h"
 #include "interface_helpers.h"
-#include "named_properties_impl.h"
+#include "property_bag_impl.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -18,7 +18,7 @@ class CSpxRecognitionResult :
     public ISpxTranslationTextResultInit,
     public ISpxTranslationSynthesisResult,
     public ISpxTranslationSynthesisResultInit,
-    public ISpxNamedPropertiesImpl
+    public ISpxPropertyBagImpl
 {
 public:
 

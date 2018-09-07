@@ -71,7 +71,7 @@ private:
 private:
 
     DISABLE_DEFAULT_CTORS(SpeechRecognitionEventArgs);
-    
+
     SPXRESULTHANDLE ResultHandleFromEventHandle(SPXEVENTHANDLE hevent)
     {
         SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;

@@ -95,7 +95,7 @@ public:
 
     /// <summary>
     /// Signal for events containing canceled recognition results
-    /// (indicating a recognition attempt that was canceled as a result or a direct cancellation request 
+    /// (indicating a recognition attempt that was canceled as a result or a direct cancellation request
     /// or, alternatively, a transport or protocol failure).
     /// </summary>
     EventSignal<const RecoEventArgs&> Canceled;

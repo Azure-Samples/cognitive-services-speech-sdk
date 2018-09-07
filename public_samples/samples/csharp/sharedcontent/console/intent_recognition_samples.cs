@@ -40,7 +40,7 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine("Say something...");
 
                 // Performs recognition.
-                // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
+                // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable
                 // only for single shot recognition like command or query. For long-running recognition, use
                 // StartContinuousRecognitionAsync() instead.
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
@@ -62,7 +62,7 @@ namespace MicrosoftSpeechSDKSamples
                 {
                     Console.WriteLine($"We recognized: {result.Text}.");
                     Console.WriteLine($"\n    Intent Id: {result.IntentId}.");
-                    Console.WriteLine($"\n    Language Understanding JSON: {result.Properties.Get<string>(ResultPropertyKind.LanguageUnderstandingJson)}.");
+                    Console.WriteLine($"\n    Language Understanding JSON: {result.Properties.Get(ResultPropertyKind.Json)}.");
                 }
             }
             // </intentRecognitionWithMicrophone>
@@ -104,7 +104,7 @@ namespace MicrosoftSpeechSDKSamples
                     {
                         Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, Text: {e.Result.Text}.");
                         Console.WriteLine($"\n    Intent Id: {e.Result.IntentId}.");
-                        Console.WriteLine($"\n    Language Understanding JSON: {e.Result.Properties.Get<string>(ResultPropertyKind.LanguageUnderstandingJson)}.");
+                        Console.WriteLine($"\n    Language Understanding JSON: {e.Result.Properties.Get(ResultPropertyKind.Json)}.");
                     }
                     else
                     {
@@ -169,7 +169,7 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine("Say something in " + lang + "...");
 
                 // Performs recognition.
-                // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
+                // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable
                 // only for single shot recognition like command or query. For long-running recognition, use
                 // StartContinuousRecognitionAsync() instead.
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
@@ -191,7 +191,7 @@ namespace MicrosoftSpeechSDKSamples
                 {
                     Console.WriteLine($"We recognized: {result.Text}.");
                     Console.WriteLine($"\n    Intent Id: {result.IntentId}.");
-                    Console.WriteLine($"\n    Language Understanding JSON: {result.Properties.Get<string>(ResultPropertyKind.LanguageUnderstandingJson)}.");
+                    Console.WriteLine($"\n    Language Understanding JSON: {result.Properties.Get(ResultPropertyKind.Json)}.");
                 }
             }
             // </intentRecognitionWithLanguage>

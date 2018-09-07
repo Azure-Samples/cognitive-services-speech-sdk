@@ -279,7 +279,7 @@ bool CarbonTestConsole::ValidateConsoleArgs(ConsoleArgs* pconsoleArgs)
     }
     else if (PAL::access(pconsoleArgs->m_audioInput.c_str(), 0) != 0)
     {
-        SPX_DBG_TRACE_ERROR("File does not exist: %ls", pconsoleArgs->m_audioInput.c_str());
+        SPX_DBG_TRACE_ERROR("File does not exist: %s", pconsoleArgs->m_audioInput.c_str());
         fValid = false;
     }
 
@@ -471,7 +471,7 @@ void CarbonTestConsole::ProcessConsoleInput(const char* psz)
     }
     else
     {
-        ConsoleWriteLine("\nUnknown command: '%ls'.\n\nUse 'HELP' for a list of valid commands.\n", psz);
+        ConsoleWriteLine("\nUnknown command: '%s'.\n\nUse 'HELP' for a list of valid commands.\n", psz);
     }
 }
 
@@ -694,7 +694,7 @@ void CarbonTestConsole::ConsoleInput_Factory(const char* psz)
     }
     else
     {
-        ConsoleWriteLine("\nUnknown method/event: '%ls'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
+        ConsoleWriteLine("\nUnknown method/event: '%s'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
     }
 }
 
@@ -769,7 +769,7 @@ void CarbonTestConsole::ConsoleInput_Recognizer(const char* psz, std::shared_ptr
     }
     else
     {
-        ConsoleWriteLine("\nUnknown method/event: '%ls'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
+        ConsoleWriteLine("\nUnknown method/event: '%s'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
     }
 }
 
@@ -868,7 +868,7 @@ void CarbonTestConsole::ConsoleInput_SpeechRecognizer(const char* psz, std::shar
     }
     else
     {
-        ConsoleWriteLine("\nUnknown method/event: '%ls'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
+        ConsoleWriteLine("\nUnknown method/event: '%s'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
     }
 }
 
@@ -968,7 +968,7 @@ void CarbonTestConsole::ConsoleInput_IntentRecognizer(const char* psz, std::shar
     // }
     else
     {
-        ConsoleWriteLine("\nUnknown method/event: '%ls'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
+        ConsoleWriteLine("\nUnknown method/event: '%s'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
     }
 }
 
@@ -1007,7 +1007,7 @@ void CarbonTestConsole::Recognizer_IsEnabled(std::shared_ptr<T>& recognizer)
     auto name = PAL::GetTypeName(*recognizer.get());
     ConsoleWrite("\n%s.IsEnabled == ", name.c_str());
     bool enabled = recognizer->IsEnabled();
-    ConsoleWriteLine("%s\n", ToString(enabled).c_str());
+    ConsoleWriteLine("%s\n", BoolToString(enabled).c_str());
 }
 
 template <class T>
@@ -1019,7 +1019,7 @@ void CarbonTestConsole::Recognizer_Enable(std::shared_ptr<T>& recognizer)
     ConsoleWriteLine("Enabling %s... Done!\n", name.c_str());
 
     bool enabled = recognizer->IsEnabled();
-    ConsoleWriteLine("%s.IsEnabled == %s\n", name.c_str(), ToString(enabled).c_str());
+    ConsoleWriteLine("%s.IsEnabled == %s\n", name.c_str(), BoolToString(enabled).c_str());
 }
 
 template <class T>
@@ -1031,7 +1031,7 @@ void CarbonTestConsole::Recognizer_Disable(std::shared_ptr<T>& recognizer)
     ConsoleWriteLine("Disabling %s... Done!\n", name.c_str());
 
     bool enabled = recognizer->IsEnabled();
-    ConsoleWriteLine("%s.IsEnabled == %s\n", name.c_str(), ToString(enabled).c_str());
+    ConsoleWriteLine("%s.IsEnabled == %s\n", name.c_str(), BoolToString(enabled).c_str());
 }
 
 template <class T>
@@ -1073,9 +1073,9 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<IntentRecognizer>& 
     auto errorDetails = result->ErrorDetails;
 
     auto intentId = result->IntentId;
-    auto intentJson = result->Properties[ResultProperty::LanguageUnderstandingJson].GetString();
+    auto intentJson = result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonResult);
 
-    ConsoleWriteLine("IntentRecognitionResult: ResultId=%ls; Reason=%d; Text=%ls, ErrorDetails=%ls, IntentId=%ls, Json=%ls",
+    ConsoleWriteLine("IntentRecognitionResult: ResultId=%s; Reason=%d; Text=%s, ErrorDetails=%s, IntentId=%s, Json=%s",
         resultId.c_str(), reason, text.c_str(), errorDetails.c_str(), intentId.c_str(), intentJson.c_str());
 }
 
@@ -1088,11 +1088,11 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<TranslationRecogniz
     auto result = future.get();
     ConsoleWriteLine("RecognizeAsync %s... Waiting... Done!\n", name.c_str());
 
-    ConsoleWriteLine("TranslationTextResult: ResultId=%ls, ErrorDetails=%ls, RecognizedText=%ls, TranslationsStatus=%d",
+    ConsoleWriteLine("TranslationTextResult: ResultId=%s, ErrorDetails=%s, RecognizedText=%s, TranslationsStatus=%d",
         result->TranslationTextResult::ResultId.c_str(), result->ErrorDetails.c_str(), result->Text.c_str(), (int)result->TranslationStatus);
     for (auto it : result->Translations)
     {
-        ConsoleWriteLine("                Translation to %ls: %ls", it.first.c_str(), it.second.c_str());
+        ConsoleWriteLine("                Translation to %s: %s", it.first.c_str(), it.second.c_str());
     }
 }
 
@@ -1160,7 +1160,7 @@ void CarbonTestConsole::Recognizer_Event(const char* psz, EventSignal<T>& recogn
     }
     else
     {
-        ConsoleWriteLine("\nUnknown event method: '%ls'.\n\nUse 'HELP' for a list of valid commands.", psz);
+        ConsoleWriteLine("\nUnknown event method: '%s'.\n\nUse 'HELP' for a list of valid commands.", psz);
     }
 }
 
@@ -1200,100 +1200,77 @@ void CarbonTestConsole::ConsoleInput_Session(const char* psz)
     }
     else
     {
-        ConsoleWriteLine("\nUnknown method/event: '%ls'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
+        ConsoleWriteLine("\nUnknown method/event: '%s'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
     }
 }
 
 void CarbonTestConsole::Session_FromSpeechRecognizer()
 {
     auto name = PAL::GetTypeName(*m_speechRecognizer.get());
-    ConsoleWriteLine("\nGetting Session from %ls...", name.c_str());
+    ConsoleWriteLine("\nGetting Session from %s...", name.c_str());
     m_session = Session::FromRecognizer(m_speechRecognizer);
-    ConsoleWriteLine("Getting Session from %ls... Done!\n", name.c_str());
+    ConsoleWriteLine("Getting Session from %s... Done!\n", name.c_str());
 }
 
 template <class T>
 void CarbonTestConsole::Parameters_SetString(T &parameters, const char* psz)
 {
     std::string input(psz);
-    auto iSpace = input.find(L' ');
-    if (iSpace != std::string::npos && psz[iSpace + 1] != L'\0')
+    auto iSpace = input.find(' ');
+    if (iSpace != std::string::npos && psz[iSpace + 1] != '\0')
     {
         std::string name(psz, iSpace);
-        parameters[name.c_str()] = std::string(psz + iSpace + 1);
-        ConsoleWriteLine("Set string '%ls' to '%ls'!\n", name.c_str(), psz + iSpace + 1);
+        std::string value(psz + iSpace + 1);
+        parameters.SetProperty(name, value);
+        ConsoleWriteLine("Set string '%s' to '%s'!\n", name.c_str(), psz + iSpace + 1);
     }
     else
     {
-        ConsoleWriteLine("\nInvalid usage: '%ls'.\n\nUse 'HELP' for valid usage.\n", psz);
+        ConsoleWriteLine("\nInvalid usage: '%s'.\n\nUse 'HELP' for valid usage.\n", psz);
     }
 }
 
 template <class T>
 void CarbonTestConsole::Parameters_GetString(T &parameters, const char* psz)
 {
-    auto value = parameters[psz].GetString();
-    ConsoleWriteLine("Get string '%ls' : '%ls'\n", psz, value.c_str());
+    auto value = parameters.GetProperty(psz);
+    ConsoleWriteLine("Get string '%s' : '%s'\n", psz, value.c_str());
 }
 
 template <class T>
 void CarbonTestConsole::Parameters_SetNumber(T &parameters, const char* psz)
 {
-    std::string input(psz);
-    auto iSpace = input.find(L' ');
-    if (iSpace != std::string::npos)
-    {
-        std::string name(psz, iSpace);
-        parameters[name.c_str()] = std::stoi(psz + iSpace + 1);
-        ConsoleWriteLine("Set number '%ls' to '%ls'!\n", name.c_str(), psz + iSpace + 1);
-    }
-    else
-    {
-        ConsoleWriteLine("\nInvalid usage: '%ls'.\n\nUse 'HELP' for valid usage.\n", psz);
-    }
+    return Parameters_SetString(parameters, psz);
 }
 
 template <class T>
 void CarbonTestConsole::Parameters_GetBool(T &parameters, const char* psz)
 {
-    auto value = parameters[psz].GetBool();
-    ConsoleWriteLine("Get bool '%ls' : %s\n", psz, ToString(value).c_str());
+    auto value = parameters.GetProperty(psz);
+    ConsoleWriteLine("Get bool '%s' : %s\n", psz, value.c_str());
 }
 
 template <class T>
 void CarbonTestConsole::Parameters_SetBool(T &parameters, const char* psz)
 {
-    std::string input(psz);
-    auto iSpace = input.find(L' ');
-    if (iSpace != std::string::npos)
-    {
-        std::string name(psz, iSpace);
-        bool value = ToBool(psz + iSpace + 1);
-
-        parameters[name.c_str()] = value;
-        ConsoleWriteLine("Set number '%ls' to '%ls'!\n", name.c_str(), psz + iSpace + 1);
-    }
-    else
-    {
-        ConsoleWriteLine("\nInvalid usage: '%ls'.\n\nUse 'HELP' for valid usage.\n", psz);
-    }
+    return Parameters_SetString(parameters, psz);
 }
 
 template <class T>
 void CarbonTestConsole::Parameters_GetNumber(T &parameters, const char* psz)
 {
-    auto value = parameters[psz].GetNumber();
-    ConsoleWriteLine("Get number '%ls' : %d\n", psz, value);
+    auto value = parameters.GetProperty(psz);
+    ConsoleWriteLine("Get number '%s' : %d\n", psz, value.c_str());
 }
 
 bool CarbonTestConsole::ToBool(const char* psz)
 {
-    return PAL::stricmp(psz, "true") == 0 || PAL::stricmp(psz, "1") == 0;
+    return PAL::ToBool(psz);
 }
 
-std::string CarbonTestConsole::ToString(bool f)
+std::string CarbonTestConsole::BoolToString(bool f)
 {
-    return f ? "true" : "false";
+    return PAL::BoolToString(f);
 }
 
 std::string CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
@@ -1640,97 +1617,97 @@ void CarbonTestConsole::RunSample(const std::string& strSampleName)
 {
     if (PAL::stricmp(strSampleName.c_str(), "helloworld") == 0)
     {
-        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         Sample_HelloWorld();
     }
     else if (PAL::stricmp(strSampleName.c_str(), "helloworld with events") == 0)
     {
-        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         Sample_HelloWorld_WithEvents();
     }
     else if (PAL::stricmp(strSampleName.c_str(), "helloworld c") == 0)
     {
-        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         Sample_HelloWorld_In_C();
     }
     else if (PAL::stricmp(strSampleName.c_str(), "helloworld usp") == 0)
     {
-        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         Sample_HelloWorld_PickEngine("Usp");
     }
     else if (PAL::stricmp(strSampleName.c_str(), "helloworld unidec") == 0)
     {
-        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         Sample_HelloWorld_PickEngine("Unidec");
     }
     else if (PAL::stricmp(strSampleName.c_str(), "helloworld mockengine") == 0)
     {
-        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         Sample_HelloWorld_PickEngine("Mock");
     }
     else if (PAL::stricmp(strSampleName.c_str(), "helloworld intent") == 0)
     {
-        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         Sample_HelloWorld_Intent();
     }
     else if (PAL::stricmp(strSampleName.c_str(), "helloworld subscription with cris") == 0)
     {
-        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         Sample_HelloWorld_Subscription_With_CRIS();
     }
     else if (PAL::stricmp(strSampleName.c_str(), "helloworld french") == 0)
     {
-        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         Sample_HelloWorld_Language("fr-fr");
     }
     else if (PAL::stricmp(strSampleName.c_str(), "channel9") == 0)
     {
-        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         channel9();
     }
     else if (PAL::stricmp(strSampleName.c_str(), "do_speech") == 0)
     {
-        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         ch9_do_speech();
     }
     else if (PAL::stricmp(strSampleName.c_str(), "do_speech_intermediate") == 0)
     {
-        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         ch9_do_speech_intermediate();
     }
     else if (PAL::stricmp(strSampleName.c_str(), "do_speech_continuous") == 0)
     {
-        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         ch9_do_speech_continuous();
     }
     else if (PAL::stricmp(strSampleName.c_str(), "do_intent") == 0)
     {
-        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         ch9_do_intent();
     }
     else if (PAL::stricmp(strSampleName.c_str(), "do_intent_continuous") == 0)
     {
-        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         ch9_do_intent_continuous();
     }
     else if (PAL::stricmp(strSampleName.c_str(), "do_kws_speech") == 0)
     {
-        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         ch9_do_kws_speech();
     }
     else if (PAL::stricmp(strSampleName.c_str(), "do_kws_intent") == 0)
     {
-        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         ch9_do_kws_intent();
     }
     else if (PAL::stricmp(strSampleName.c_str(), "do_translation") == 0)
     {
-        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         ch9_do_translation();
     }
     else
     {
-        ConsoleWriteLine("\nUnknown sample: '%ls'.\n", strSampleName.c_str());
+        ConsoleWriteLine("\nUnknown sample: '%s'.\n", strSampleName.c_str());
     }
 }
 

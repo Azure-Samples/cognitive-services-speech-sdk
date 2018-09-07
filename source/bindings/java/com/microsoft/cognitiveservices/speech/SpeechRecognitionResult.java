@@ -5,7 +5,7 @@ package com.microsoft.cognitiveservices.speech;
 //
 
 import com.microsoft.cognitiveservices.speech.internal.RecognitionResult;
-import com.microsoft.cognitiveservices.speech.internal.ResultPropertyValueCollection;
+import com.microsoft.cognitiveservices.speech.internal.ResultPropertyCollection;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 import java.math.BigInteger;
@@ -136,9 +136,9 @@ public class SpeechRecognitionResult {
     
     public class RecognitionResultCollection
     {
-        ResultPropertyValueCollection _collection;
+        ResultPropertyCollection _collection;
         
-        RecognitionResultCollection(ResultPropertyValueCollection collection)
+        RecognitionResultCollection(ResultPropertyCollection collection)
         {
             Contracts.throwIfNull(collection, "collection");
 
@@ -155,42 +155,6 @@ public class SpeechRecognitionResult {
             this._collection = null;
         }
 
-        /**
-         * Checks whether the parameter specified by name has a String value.
-         *
-         * @param name The parameter name.
-         * @return true if the parameter has a value, and false otherwise.
-         */
-       public boolean isString(String name) {
-            Contracts.throwIfNull(name, "name");
-           
-           return _collection.ContainsString(name);
-       }
-
-       /**
-         * Checks whether the parameter specified by name has an Int value.
-         *
-         * @param name The parameter name.
-         * @return true if the parameter has a value, and false otherwise.
-         */
-       public boolean isInt(String name) {
-            Contracts.throwIfNull(name, "name");
-           
-           return _collection.ContainsNumber(name);
-       }
-
-       /**
-         * Checks whether the parameter specified by name has a Boolean value.
-         *
-         * @param name The parameter name.
-         * @return true if the parameter has a value, and false otherwise.
-         */
-       public boolean isBool(String name) {
-            Contracts.throwIfNull(name, "name");
-           
-           return _collection.ContainsBool(name);
-       }
-
        /**
          * Returns the parameter value in type String. The parameter must have the same type as String.
          * If the name is not available, it returns an empty String.
@@ -202,27 +166,6 @@ public class SpeechRecognitionResult {
            return getString(name, "");
        }
        
-       /**
-        * Returns the parameter value in type int. The parameter must have the same type as int.
-        * If the name is not available, it returns 0.
-        *
-        * @param name The parameter name.
-        * @return value of the parameter.
-        */
-       public int getInt(String name) {
-           return getInt(name, 0);
-       }
-       
-       /**
-        * Returns the parameter value in type boolean. The parameter must have the same type as boolean.
-        * If the name is not available, it returns false.
-        *
-        * @param name The parameter name.
-        * @return value of the parameter.
-        */
-       public boolean getBool(String name) {
-           return getBool(name, false);
-       }
        
        /**
          * Returns the parameter value in type String. The parameter must have the same type as String.
@@ -236,37 +179,7 @@ public class SpeechRecognitionResult {
        public String getString(String name, String defaultValue) {
            Contracts.throwIfNull(name, "name");
 
-           return _collection.GetString(name, defaultValue);
-       }
-
-       /**
-         * Returns the parameter value in type int. The parameter must have the same type as int.
-         * Currently only String, int and bool are allowed.
-         * If the name is not available, the specified defaultValue is returned.
-         *
-         * @param name The parameter name.
-         * @param defaultValue The default value which is returned if the parameter is not available in the collection.
-         * @return value of the parameter.
-         */
-       public int getInt(String name, int defaultValue) {
-           Contracts.throwIfNull(name, "name");
-
-           return _collection.GetNumber(name, defaultValue);
-       }
-
-       /**
-         * Returns the parameter value in type boolean. The parameter must have the same type as boolean.
-         * Currently only String, int and bool are allowed.
-         * If the name is not available, the specified defaultValue is returned.
-         *
-         * @param name The parameter name.
-         * @param defaultValue The default value which is returned if the parameter is not available in the collection.
-         * @return value of the parameter.
-         */
-       public boolean getBool(String name, boolean defaultValue) {
-           Contracts.throwIfNull(name, "name");
-
-           return _collection.GetBool(name, defaultValue);
+           return _collection.GetProperty(name, defaultValue);
        }
     }
 }

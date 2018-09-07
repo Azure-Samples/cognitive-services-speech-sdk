@@ -65,7 +65,7 @@
 //
 
 #pragma once
-#include "named_properties_impl.h"
+#include "property_bag_impl.h"
 #include "interface_helpers.h"
 #include "service_helpers.h"
 #include "service_provider_impl.h"
@@ -85,7 +85,7 @@ class CSpxResourceManager :
     private CSpxSingleton<CSpxResourceManager, ISpxObjectFactory>,
     public ISpxServiceProviderImpl,
     public ISpxObjectFactory,
-    public ISpxNamedPropertiesImpl,
+    public ISpxPropertyBagImpl,
     public ISpxGenericSite
 {
 public:

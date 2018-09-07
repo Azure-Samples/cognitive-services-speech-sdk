@@ -111,7 +111,7 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return Parameters.Get<string>(SpeechParameterNames.DeploymentId);
+                return Parameters.Get(SpeechParameterNames.DeploymentId);
             }
 
             set
@@ -127,7 +127,7 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return Parameters.Get<string>(SpeechParameterNames.RecognitionLanguage);
+                return Parameters.Get(SpeechParameterNames.RecognitionLanguage);
             }
         }
 
@@ -138,7 +138,7 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return Parameters.Get<string>(SpeechParameterNames.OutputFormat) ==  OutputFormatParameterValues.Detailed ? OutputFormat.Detailed : OutputFormat.Simple;
+                return Parameters.Get(SpeechParameterNames.OutputFormat) ==  OutputFormatParameterValues.Detailed ? OutputFormat.Detailed : OutputFormat.Simple;
             }
         }
 

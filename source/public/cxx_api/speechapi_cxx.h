@@ -8,12 +8,11 @@
 #pragma once
 
 #include <speechapi_cxx_common.h>
-#include <speechapi_cxx_property_names.h>
 
+#include <speechapi_cxx_properties.h>
 #include <speechapi_cxx_audioinputstream.h>
 #include <speechapi_cxx_eventargs.h>
 #include <speechapi_cxx_eventsignal.h>
-#include <speechapi_cxx_value.h>
 
 #include <speechapi_cxx_session_eventargs.h>
 
@@ -22,7 +21,6 @@
 #include <speechapi_cxx_recognition_async_recognizer.h>
 #include <speechapi_cxx_recognition_base_async_recognizer.h>
 
-#include <speechapi_cxx_recognizer_parameter_collection.h>
 #include <speechapi_cxx_recognizer.h>
 
 #include <speechapi_cxx_speech_recognition_result.h>
@@ -41,5 +39,4 @@
 
 #include <speechapi_cxx_factory.h>
 
-#include <speechapi_cxx_session_parameter_collection.h>
 #include <speechapi_cxx_session.h>

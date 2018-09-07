@@ -25,4 +25,8 @@ int strnicmp(const char *a, const char *b, size_t n);
 std::string ToString(const std::wstring& wstring);
 std::wstring ToWString(const std::string& string);
 
+std::string BoolToString(bool b);
+
+bool ToBool(const std::string& str);
+
 } // PAL

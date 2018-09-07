@@ -58,9 +58,9 @@ void IntentRecognitionWithMicrophone()
     }
     else
     {
-        cout << "We recognized: " << result->Text << std::endl;
-        cout << "    Intent Id: " << result->IntentId << std::endl;
-        cout << "    Intent response in Json: " << result->Properties[ResultProperty::LanguageUnderstandingJson].GetString() << std::endl;
+        cout << L"We recognized: " << result->Text << std::endl;
+        cout << L"    Intent Id: " << result->IntentId << std::endl;
+        cout << L"    Intent response in Json: " << result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonResult) << std::endl;
     }
     // </IntentRecognitionWithMicrophone>
 }
@@ -111,9 +111,9 @@ void IntentRecognitionWithLanguage()
     }
     else
     {
-        cout << "We recognized: " << result->Text << std::endl;
-        cout << "    Intent Id: " << result->IntentId << std::endl;
-        cout << "    Intent response in Json: " << result->Properties[ResultProperty::LanguageUnderstandingJson].GetString() << std::endl;
+        cout << L"We recognized: " << result->Text << std::endl;
+        cout << L"    Intent Id: " << result->IntentId << std::endl;
+        cout << L"    Intent response in Json: " << result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonResult) << std::endl;
     }
     // </IntentRecognitionWithLanguage>
 }
@@ -152,9 +152,9 @@ void IntentContinuousRecognitionWithFile()
 
     recognizer->FinalResult.Connect([] (const IntentRecognitionEventArgs& e)
     {
-        cout << "FinalResult: status:" << (int)e.Result.Reason << ". Text: " << e.Result.Text << std::endl;
-        cout << "    Intent Id: " << e.Result.IntentId << std::endl;
-        cout << "    Language Understanding Json: " << e.Result.Properties[ResultProperty::LanguageUnderstandingJson].GetString() << std::endl;
+        cout << L"FinalResult: status:" << (int)e.Result.Reason << L". Text: " << e.Result.Text << std::endl;
+        cout << L"    Intent Id: " << e.Result.IntentId << std::endl;
+        cout << L"    Language Understanding Json: " << e.Result.Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonResult) << std::endl;
     });
 
     recognizer->Canceled.Connect([&recognitionEnd] (const IntentRecognitionEventArgs& e)

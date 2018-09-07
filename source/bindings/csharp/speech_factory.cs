@@ -66,7 +66,7 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return Parameters.Get<string>(FactoryParameterNames.SubscriptionKey);
+                return Parameters.Get(FactoryParameterNames.SubscriptionKey);
             }
         }
 
@@ -79,7 +79,7 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return Parameters.Get<string>(FactoryParameterNames.AuthorizationToken);
+                return Parameters.Get(FactoryParameterNames.AuthorizationToken);
             }
 
             set
@@ -95,7 +95,7 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return Parameters.Get<string>(FactoryParameterNames.Region);
+                return Parameters.Get(FactoryParameterNames.Region);
             }
         }
 
@@ -364,179 +364,41 @@ namespace Microsoft.CognitiveServices.Speech
 
         private class FactoryParametersImpl : IFactoryParameters
         {
-            private Internal.FactoryParameterCollection factoryParameterImpl;
+            private Internal.FactoryPropertyCollection factoryParameterImpl;
 
-            public FactoryParametersImpl(Internal.FactoryParameterCollection internalFactoryParameters)
+            public FactoryParametersImpl(Internal.FactoryPropertyCollection internalFactoryParameters)
             {
                 factoryParameterImpl = internalFactoryParameters;
             }
 
-            public bool Is<T>(FactoryParameterKind propertyKind)
+            public string Get(FactoryParameterKind propertyKind)
             {
-                if (typeof(T) == typeof(string))
-                {
-                    return factoryParameterImpl.Get((Internal.FactoryParameter)propertyKind).IsString();
-                }
-                else if (typeof(T) == typeof(int))
-                {
-                    return factoryParameterImpl.Get((Internal.FactoryParameter)propertyKind).IsNumber();
-                }
-                else if (typeof(T) == typeof(bool))
-                {
-                    return factoryParameterImpl.Get((Internal.FactoryParameter)propertyKind).IsBool();
-                }
-                else
-                {
-                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
-                }
+                return Get(propertyKind, string.Empty);
             }
 
-            public bool Is<T>(string propertyName)
+            public string Get(string propertyName)
             {
-                if (typeof(T) == typeof(string))
-                {
-                    return factoryParameterImpl.Get(propertyName).IsString();
-                }
-                else if (typeof(T) == typeof(int))
-                {
-                    return factoryParameterImpl.Get(propertyName).IsNumber();
-                }
-                else if (typeof(T) == typeof(bool))
-                {
-                    return factoryParameterImpl.Get(propertyName).IsBool();
-                }
-                else
-                {
-                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
-                }
+                return Get(propertyName, string.Empty);
             }
 
-            public T Get<T>(FactoryParameterKind propertyKind)
+            public string Get(FactoryParameterKind propertyKind, string defaultValue)
             {
-                T defaultT;
-                if (typeof(T) == typeof(string))
-                {
-                    defaultT = (T)Convert.ChangeType(string.Empty, typeof(T), CultureInfo.InvariantCulture);
-                }
-                else if (typeof(T) == typeof(int))
-                {
-                    defaultT = (T)Convert.ChangeType(0, typeof(T), CultureInfo.InvariantCulture);
-                }
-                else if (typeof(T) == typeof(bool))
-                {
-                    defaultT = (T)Convert.ChangeType(false, typeof(T), CultureInfo.InvariantCulture);
-                }
-                else
-                {
-                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
-                }
-
-                return Get<T>(propertyKind, defaultT);
+                return factoryParameterImpl.GetProperty((Internal.SpeechPropertyId)propertyKind, defaultValue); 
             }
 
-            public T Get<T>(string propertyName)
+            public string Get(string propertyName, string defaultValue)
             {
-                T defaultT;
-                if (typeof(T) == typeof(string))
-                {
-                    defaultT = (T)Convert.ChangeType(string.Empty, typeof(T), CultureInfo.InvariantCulture);
-                }
-                else if (typeof(T) == typeof(int))
-                {
-                    defaultT = (T)Convert.ChangeType(0, typeof(T), CultureInfo.InvariantCulture);
-                }
-                else if (typeof(T) == typeof(bool))
-                {
-                    defaultT = (T)Convert.ChangeType(false, typeof(T), CultureInfo.InvariantCulture);
-                }
-                else
-                {
-                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
-                }
-
-                return Get<T>(propertyName, defaultT);
-            }
-
-            public T Get<T>(FactoryParameterKind propertyKind, T defaultValue)
-            {
-                if (typeof(T) == typeof(string))
-                {
-                    var defaultInT = (string)Convert.ChangeType(defaultValue, typeof(string), CultureInfo.InvariantCulture);
-                    var ret = factoryParameterImpl.Get((Internal.FactoryParameter)propertyKind).GetString(defaultInT);
-                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
-                }
-                else if (typeof(T) == typeof(int))
-                {
-                    var defaultInT = (int)Convert.ChangeType(defaultValue, typeof(int), CultureInfo.InvariantCulture);
-                    var ret = factoryParameterImpl.Get((Internal.FactoryParameter)propertyKind).GetNumber(defaultInT);
-                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
-                }
-                else if (typeof(T) == typeof(bool))
-                {
-                    var defaultInT = (bool)Convert.ChangeType(defaultValue, typeof(bool), CultureInfo.InvariantCulture);
-                    var ret = factoryParameterImpl.Get((Internal.FactoryParameter)propertyKind).GetBool(defaultInT);
-                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
-                }
-                else
-                {
-                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
-                }
-            }
-
-            public T Get<T>(string propertyName, T defaultValue)
-            {
-                if (typeof(T) == typeof(string))
-                {
-                    var defaultInT = (string)Convert.ChangeType(defaultValue, typeof(string), CultureInfo.InvariantCulture);
-                    var ret = factoryParameterImpl.Get(propertyName).GetString(defaultInT);
-                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
-                }
-                else if (typeof(T) == typeof(int))
-                {
-                    var defaultInT = (int)Convert.ChangeType(defaultValue, typeof(int), CultureInfo.InvariantCulture);
-                    var ret = factoryParameterImpl.Get(propertyName).GetNumber(defaultInT);
-                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
-                }
-                else if (typeof(T) == typeof(bool))
-                {
-                    var defaultInT = (bool)Convert.ChangeType(defaultValue, typeof(bool), CultureInfo.InvariantCulture);
-                    var ret = factoryParameterImpl.Get(propertyName).GetBool(defaultInT);
-                    return (T)Convert.ChangeType(ret, typeof(T), CultureInfo.InvariantCulture);
-                }
-                else
-                {
-                    throw new NotImplementedException("Property type: Unsupported value type: " + typeof(T));
-                }
+                return factoryParameterImpl.GetProperty(propertyName, defaultValue);
             }
 
             public void Set(FactoryParameterKind propertyKind, string value)
             {
-                factoryParameterImpl.Get((Internal.FactoryParameter)propertyKind).SetString(value);
+                factoryParameterImpl.SetProperty((Internal.SpeechPropertyId)propertyKind, value);
             }
 
             public void Set(string propertyName, string value)
             {
-                factoryParameterImpl.Get(propertyName).SetString(value);
-            }
-
-            public void Set(FactoryParameterKind propertyKind, int value)
-            {
-                factoryParameterImpl.Get((Internal.FactoryParameter)propertyKind).SetNumber(value);
-            }
-
-            public void Set(string propertyName, int value)
-            {
-                factoryParameterImpl.Get(propertyName).SetNumber(value);
-            }
-
-            public void Set(FactoryParameterKind propertyKind, bool value)
-            {
-                factoryParameterImpl.Get((Internal.FactoryParameter)propertyKind).SetBool(value);
-            }
-
-            public void Set(string propertyName, bool value)
-            {
-                factoryParameterImpl.Get(propertyName).SetBool(value);
+                factoryParameterImpl.SetProperty(propertyName, value);
             }
         }
 

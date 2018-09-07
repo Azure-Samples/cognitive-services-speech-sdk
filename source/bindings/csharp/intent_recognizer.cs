@@ -63,7 +63,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         {
             get
             {
-                return Parameters.Get<string>(SpeechParameterNames.RecognitionLanguage);
+                return Parameters.Get(SpeechParameterNames.RecognitionLanguage);
             }
         }
 

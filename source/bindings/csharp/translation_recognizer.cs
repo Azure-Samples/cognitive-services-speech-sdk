@@ -161,7 +161,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         {
             get
             {
-                return Parameters.Get<string>(TranslationParameterNames.SourceLanguage);
+                return Parameters.Get(TranslationParameterNames.SourceLanguage);
             }
         }
 
@@ -173,7 +173,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         {
             get
             {
-                var plainStr = Parameters.Get<string>(TranslationParameterNames.TargetLanguages);
+                var plainStr = Parameters.Get(TranslationParameterNames.TargetLanguages);
                 return plainStr.Split(',');
             }
         }
@@ -184,7 +184,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         public string OutputVoiceName {
             get
             {
-                return Parameters.Get<string>(TranslationParameterNames.Voice);
+                return Parameters.Get(TranslationParameterNames.Voice);
             }
         }
 

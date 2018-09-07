@@ -62,7 +62,7 @@ int strnicmp(const char *a, const char *b, size_t n)
 // arrays in terms of number of elements (in wide characters).
 void strcpy(char *dst, size_t dstSize, const char *src, size_t srcSize, bool truncate)
 {
-    // TODO (alrezni): throw instead of asserting, 
+    // TODO (alrezni): throw instead of asserting,
     // see https://msdn.microsoft.com/en-us/library/5dae5d43.aspx
     // and https://msdn.microsoft.com/en-us/library/td1esda9.aspx
     // for more details on error conditions, add unit tests.
@@ -96,6 +96,16 @@ std::wstring ToWString(const std::string& string)
 {
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
     return converter.from_bytes(string);
+}
+
+std::string BoolToString(bool b)
+{
+    return b ? "true" : "false";
+}
+
+bool ToBool(const std::string& str)
+{
+    return stricmp(str.c_str(), "true") == 0;
 }
 
 } // PAL

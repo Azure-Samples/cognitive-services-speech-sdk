@@ -44,14 +44,14 @@ public:
     explicit TranslationRecognizer(SPXRECOHANDLE hreco) :
         BaseType(hreco),
         // Todo: OnTranslationError(m_onTranslationError),
-        Parameters(hreco),
+        Parameters(hreco, HandleType::RECOGNIZER),
         TranslationSynthesisResultEvent(GetTranslationAudioEventConnectionsChangedCallback(), GetTranslationAudioEventConnectionsChangedCallback(), false)
     {
         SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     }
 
     /// <summary>
-    /// Deconstructs the instance.
+    /// Deconstruct the instance.
     /// </summary>
     ~TranslationRecognizer()
     {
@@ -121,7 +121,7 @@ public:
     /// <summary>
     /// The collection of parameters and their values defined for this <see cref="TranslationRecognizer"/>.
     /// </summary>
-    RecognizerParameterValueCollection Parameters;
+    PropertyCollection<SPXRECOHANDLE> Parameters;
 
     /// <summary>
     /// The event signals that a translation synthesis result is received.

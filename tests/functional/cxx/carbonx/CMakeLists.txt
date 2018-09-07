@@ -4,8 +4,9 @@ set(SRC_DIR "${PROJECT_SOURCE_DIR}")
 
 include_directories(${CARBON_C_API})
 include_directories(${CARBON_CXX_API})
-
+include_directories(${CARBON_INCLUDE})
 include_directories("${COMMON}/include") # for PAL utils
+
 
 set(HEADERS)
 
@@ -50,8 +51,8 @@ add_executable(carbonx
     ${SPEECH_C_API_HEADERS} ${SPEECH_CXX_API_HEADERS}
     ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES}
     )
- 
-target_link_libraries(carbonx common ${SPEECHSDK_CORE_LIBRARY})
+# common is needed for PAL etc
+target_link_libraries(carbonx common mock ${SPEECHSDK_CORE_LIBRARY})
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
 if (${use_openssl})

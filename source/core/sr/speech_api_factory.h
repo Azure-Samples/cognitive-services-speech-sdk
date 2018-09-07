@@ -11,7 +11,7 @@
 #include "service_helpers.h"
 #include <speechapi_cxx_audioinputstream.h>
 #include "interface_helpers.h"
-#include "named_properties_impl.h"
+#include "property_bag_impl.h"
 
 
 namespace Microsoft {
@@ -25,7 +25,7 @@ class CSpxSpeechApiFactory :
     public ISpxServiceProvider,
     public ISpxSpeechApiFactory,
     public ISpxGenericSite,
-    public ISpxNamedPropertiesImpl
+    public ISpxPropertyBagImpl
 {
 public:
 

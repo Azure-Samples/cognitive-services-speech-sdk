@@ -11,6 +11,7 @@
 #include "luis_direct_lu_engine_adapter.h"
 #include "string_utils.h"
 #include "service_helpers.h"
+#include "property_id_2_name_map.h"
 
 #ifdef _MSC_VER
 #pragma warning( push )
@@ -45,9 +46,9 @@ void CSpxLuisDirectEngineAdapter::AddIntentTrigger(const wchar_t* id, std::share
         if (model->GetSubscriptionKey().empty() && model->GetRegion().empty())
         {
             auto properties = SpxQueryInterface<ISpxNamedProperties>(GetSite());
-            auto region = properties->GetStringValue(PAL::ToWString(g_SPEECH_Region).c_str());
-            auto key = properties->GetStringValue(PAL::ToWString(g_SPEECH_SubscriptionKey).c_str());
-            model->UpdateSubscription(key.c_str(), region.c_str());
+            auto region = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Region));
+            auto key = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Key));
+            model->UpdateSubscription(PAL::ToWString(key).c_str(), PAL::ToWString(region).c_str());
         }
 
         std::unique_lock<std::mutex> lock(m_mutex);
@@ -144,13 +145,13 @@ void CSpxLuisDirectEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionR
     SPX_DBG_TRACE_FUNCTION();
 
     // We only need to process the result when the user actually said something...
-    std::string resultText = PAL::ToString(result->GetText().c_str());
+    std::string resultText = PAL::ToString(result->GetText());
     SPX_DBG_TRACE_VERBOSE("%s: text='%s'", __FUNCTION__, resultText.c_str());
     if (!resultText.empty())
     {
         // Check to see if we already have the JSON payload (from the speech service)
         auto properties = SpxQueryInterface<ISpxNamedProperties>(result);
-        auto json = PAL::ToString(properties->GetStringValue(PAL::ToWString(g_RESULT_LanguageUnderstandingJson).c_str()));
+        auto json = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_JsonResult));
         SPX_DBG_TRACE_VERBOSE("%s: text='%s'; already-existing-IntentResultJson='%s'", __FUNCTION__, resultText.c_str(), json.c_str());
 
         // If we don't already have the LUIS json, fetch it from LUIS now...

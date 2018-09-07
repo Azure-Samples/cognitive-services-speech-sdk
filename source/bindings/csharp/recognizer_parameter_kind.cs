@@ -12,8 +12,8 @@ namespace Microsoft.CognitiveServices.Speech
     /// </summary>
     public enum RecognizerParameterKind
     {
-        DeploymentId = 1,
-        OutputFormat = 2
+        DeploymentId = Internal.SpeechPropertyId.SpeechServiceConnection_DeploymentId,
+        OutputFormat = Internal.SpeechPropertyId.SpeechServiceResponse_OutputFormat
     }
 
     /// <summary>

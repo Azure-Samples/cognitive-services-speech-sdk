@@ -47,7 +47,7 @@ void CarbonTestConsole::Sample_HelloWorld_In_C()
 
      if (SPX_SUCCEEDED(hr))
      {
-        ConsoleWriteLine("You said:\n\n    '%ls'", text);
+        ConsoleWriteLine("You said:\n\n    '%s'", text);
      }
 
      ::Recognizer_AsyncHandle_Close(hresult);

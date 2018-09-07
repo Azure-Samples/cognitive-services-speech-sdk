@@ -10,6 +10,10 @@
 #include <spxerror.h>
 #include <spx_namespace.h>
 
+#ifndef _Analysis_noreturn_
+#define _Analysis_noreturn_
+#endif // ! _Analysis_noreturn_
+
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -28,11 +32,10 @@ private:
     SPXHR m_error;
 };
 
-void ThrowWithCallstack(SPXHR hr, size_t skipLevels = 0);
-
-void ThrowRuntimeError(const std::string& msg, size_t skipLevels = 0);
-void ThrowInvalidArgumentException(const std::string& msg, size_t skipLevels = 0);
-void ThrowLogicError(const std::string& msg, size_t skipLevels = 0);
+_Analysis_noreturn_ void ThrowWithCallstack(SPXHR hr, size_t skipLevels = 0);
+_Analysis_noreturn_ void ThrowRuntimeError(const std::string& msg, size_t skipLevels = 0);
+_Analysis_noreturn_ void ThrowInvalidArgumentException(const std::string& msg, size_t skipLevels = 0);
+_Analysis_noreturn_ void ThrowLogicError(const std::string& msg, size_t skipLevels = 0);
 
 SPXHR StoreException(ExceptionWithCallStack&& ex);
 

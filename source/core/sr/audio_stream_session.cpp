@@ -19,6 +19,7 @@
 #include "interface_helpers.h"
 #include "site_helpers.h"
 #include "service_helpers.h"
+#include "property_id_2_name_map.h"
 
 
 namespace Microsoft {
@@ -1016,18 +1017,18 @@ std::shared_ptr<ISpxSession> CSpxAudioStreamSession::GetDefaultSession()
     return SpxSharedPtrFromThis<ISpxSession>(this);
 }
 
-std::wstring CSpxAudioStreamSession::GetStringValue(const wchar_t* name, const wchar_t* defaultValue) const
+std::string CSpxAudioStreamSession::GetStringValue(const char* name, const char* defaultValue) const
 {
-    if (PAL::wcsicmp(name, L"KWSModelPath") == 0 && m_kwsModel != nullptr)
+    if (PAL::stricmp(name, "KWSModelPath") == 0 && m_kwsModel != nullptr)
     {
-        return m_kwsModel->GetFileName();
+        return PAL::ToString(m_kwsModel->GetFileName());
     }
-    else if (PAL::wcsicmp(name, PAL::ToWString(g_sessionId).c_str()) == 0)
+    else if (PAL::stricmp(name, GetPropertyName(SpeechPropertyId::Speech_SessionId)) == 0)
     {
-        return m_sessionId;
+        return PAL::ToString(m_sessionId);
     }
 
-    return ISpxNamedPropertiesImpl::GetStringValue(name, defaultValue);
+    return ISpxPropertyBagImpl::GetStringValue(name, defaultValue);
 }
 
 std::shared_ptr<ISpxRecoEngineAdapter> CSpxAudioStreamSession::EnsureInitRecoEngineAdapter()
@@ -1045,10 +1046,10 @@ std::shared_ptr<ISpxRecoEngineAdapter> CSpxAudioStreamSession::EnsureInitRecoEng
 void CSpxAudioStreamSession::InitRecoEngineAdapter()
 {
     // determine which type (or types) of reco engine adapters we should try creating...
-    bool tryUnidec = GetBooleanValue(L"CARBON-INTERNAL-UseRecoEngine-Unidec", false);
-    bool tryMock = GetBooleanValue(L"CARBON-INTERNAL-UseRecoEngine-Mock", false);
-    bool tryUsp = GetBooleanValue(L"CARBON-INTERNAL-UseRecoEngine-Usp", false);
-
+    bool tryUnidec = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseRecoEngine-Unidec", PAL::BoolToString(false).c_str()));
+    bool tryMock = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseRecoEngine-Mock", PAL::BoolToString(false).c_str()));
+    bool tryUsp = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseRecoEngine-Usp", PAL::BoolToString(false).c_str()));
+    
     // if nobody specified which type(s) of reco engine adapters this session should use, we'll use the USP
     if (!tryUnidec && !tryMock && !tryUsp)
     {
@@ -1124,7 +1125,7 @@ std::shared_ptr<ISpxKwsEngineAdapter> CSpxAudioStreamSession::EnsureInitKwsEngin
 void CSpxAudioStreamSession::EnsureIntentRegionSet()
 {
     // Let's default the "intentRegion" to the speech region
-    auto intentRegion = PAL::ToString(this->GetStringValue(PAL::ToWString(g_SPEECH_Region).c_str(), L""));
+    auto intentRegion = this->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Region), "");
 
     // Now ... let's check to see if we have a different region specified for intent...
     SPX_DBG_ASSERT(m_recognizers.size() == 1); // we only support 1 recognizer today...
@@ -1142,9 +1143,8 @@ void CSpxAudioStreamSession::EnsureIntentRegionSet()
            intentRegion = region;
        }
     }
-
     // Finally ... Let's actually store the region
-    SetStringValue(PAL::ToWString(g_INTENT_Region).c_str(), PAL::ToWString(SpeechRegionFromIntentRegion(intentRegion)).c_str());
+    SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_IntentRegion), SpeechRegionFromIntentRegion(intentRegion).c_str());
 }
 
 std::string CSpxAudioStreamSession::SpeechRegionFromIntentRegion(const std::string& intentRegion)
@@ -1215,10 +1215,9 @@ void CSpxAudioStreamSession::InitKwsEngineAdapter(std::shared_ptr<ISpxKwsModel> 
 {
     m_kwsModel = model;
 
-    // determine which type (or types) of reco engine adapters we should try creating...
-    bool tryMock = GetBooleanValue(L"CARBON-INTERNAL-UseKwsEngine-Mock", false);
-    bool trySdk = GetBooleanValue(L"CARBON-INTERNAL-UseKwsEngine-Sdk", false);
-    bool tryDdk = GetBooleanValue(L"CARBON-INTERNAL-UseKwsEngine-Ddk", false);
+    bool tryMock = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseKwsEngine-Mock", "false").c_str());
+    bool tryDdk = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseKwsEngine-Ddk", "false").c_str());
+    bool trySdk = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseKwsEngine-Sdk", "false").c_str());
 
     // if nobody specified which type(s) of reco engine adapters this session should use, we'll use the SDK KWS engine
     if (!tryMock && !trySdk && !tryDdk)
@@ -1559,9 +1558,9 @@ void CSpxAudioStreamSession::InitLuEngineAdapter()
     SPX_IFTRUE_THROW_HR(m_luAdapter != nullptr, SPXERR_ALREADY_INITIALIZED);
 
     // determine which type (or types) of reco engine adapters we should try creating...
-    bool tryLuisDirect = GetBooleanValue(L"CARBON-INTERNAL-UseLuEngine-LuisDirect", false);
-    bool tryMock = GetBooleanValue(L"CARBON-INTERNAL-UseLuEngine-Mock", false);
-
+    bool tryLuisDirect = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseLuEngine-LuisDirect", "false").c_str());
+    bool tryMock = PAL::ToBool(GetStringValue("CARBON-INTERNAL-UseLuEngine-Mock", "false").c_str());
+    
     // if nobody specified which type(s) of LU engine adapters this session should use, we'll use LuisDirect
     if (!tryLuisDirect && !tryMock)
     {

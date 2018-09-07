@@ -44,8 +44,8 @@ void CarbonTestConsole::Sample_HelloWorld_PickEngine(const char* pszEngine) // L
     auto recognizer = factory->CreateSpeechRecognizer();
     auto session = Session::FromRecognizer(recognizer);
 
-    std::string propertyName = "__use" + std::string(pszEngine) + "RecoEngine";
-    session->Parameters[propertyName.c_str()] = true;
+    std::string propertyName = std::string("__use") + std::string(pszEngine) + std::string("RecoEngine");
+    session->Parameters.SetProperty(propertyName, "true");
 
     recognizer->IntermediateResult += [&](const SpeechRecognitionEventArgs& e) {
         ConsoleWriteLine("IntermediateResult: text=%s", e.Result.Text.c_str());
@@ -96,7 +96,7 @@ void CarbonTestConsole::Sample_HelloWorld_Intent(const char* subscriptionKey, co
     case Reason::Recognized:
         ConsoleWriteLine("We recognized: %s", result->Text.c_str());
         ConsoleWriteLine("IntentId='%s'", result->IntentId.c_str());
-        ConsoleWriteLine("json='%s'", result->Properties[ResultProperty::LanguageUnderstandingJson].GetString().c_str());
+        ConsoleWriteLine("json='%s'", result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonResult).c_str());
         break;
     case Reason::InitialSilenceTimeout:
         ConsoleWriteLine("We only heard silence in the audio stream.");

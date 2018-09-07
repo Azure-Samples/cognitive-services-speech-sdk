@@ -15,7 +15,7 @@
 #include <speechapi_cxx_recognition_async_recognizer.h>
 #include <speechapi_cxx_speech_recognition_eventargs.h>
 #include <speechapi_cxx_speech_recognition_result.h>
-#include <speechapi_cxx_recognizer_parameter_collection.h>
+#include <speechapi_cxx_properties.h>
 
 
 namespace Microsoft {
@@ -34,7 +34,7 @@ public:
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
-    explicit SpeechRecognizer(SPXRECOHANDLE hreco) : BaseType(hreco), Parameters(hreco)
+    explicit SpeechRecognizer(SPXRECOHANDLE hreco) : BaseType(hreco), Parameters(hreco, HandleType::RECOGNIZER)
     {
         SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     }
@@ -50,7 +50,7 @@ public:
 
     /// <summary>
     /// Performs speech recognition in a non-blocking (asynchronous) mode.
-    /// Note: RecognizeAsync() returns when the first utterance has been recognized, 
+    /// Note: RecognizeAsync() returns when the first utterance has been recognized,
     /// so it is suitable only for single shot recognition like command or query.
     /// For long-running recognition, use StartContinuousRecognitionAsync() instead.
     /// </summary>
@@ -101,15 +101,16 @@ public:
         return BaseType::StopKeywordRecognitionAsyncInternal();
     }
 
-    RecognizerParameterValueCollection Parameters;
+    PropertyCollection<SPXRECOHANDLE> Parameters;
+
 
     /// <summary>
     /// Sets the deployment id if the recognizer uses a customized model for recognition.
     /// </summary>
     /// <param name="value">A string that represents the deployment id.</param>
     void SetDeploymentId(const std::string& deploymentId)
-    {
-        Parameters[RecognizerParameter::DeploymentId] = deploymentId;
+    { 
+        Parameters.SetProperty(SpeechPropertyId::SpeechServiceConnection_DeploymentId, deploymentId);
     }
 
 

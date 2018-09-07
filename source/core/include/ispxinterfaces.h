@@ -12,6 +12,7 @@
 #include "spxcore_common.h"
 #include "platform.h"
 #include "asyncop.h"
+#include <speechapi_cxx_common.h>
 #include "speechapi_cxx_eventsignal.h"
 #include "shared_ptr_helpers.h"
 #include "speechapi_cxx_audioinputstream.h"
@@ -708,17 +709,9 @@ class ISpxNamedProperties : public ISpxInterfaceBaseFor<ISpxNamedProperties>
 {
 public:
 
-    virtual std::wstring GetStringValue(const wchar_t* name, const wchar_t* defaultValue = L"") const = 0;
-    virtual void SetStringValue(const wchar_t* name, const wchar_t* value) = 0;
-    virtual bool HasStringValue(const wchar_t* name) const = 0;
-
-    virtual double GetNumberValue(const wchar_t* name, double defaultValue = 0) const = 0;
-    virtual void SetNumberValue(const wchar_t* name, double value) = 0;
-    virtual bool HasNumberValue(const wchar_t* name) const = 0;
-
-    virtual bool GetBooleanValue(const wchar_t* name, bool defaultValue = false) const = 0;
-    virtual void SetBooleanValue(const wchar_t* name, bool value) = 0;
-    virtual bool HasBooleanValue(const wchar_t* name) const = 0;
+    virtual std::string GetStringValue(const char* name, const char* defaultValue = "") const = 0;
+    virtual void SetStringValue(const char* name, const char* value) = 0;
+    virtual bool HasStringValue(const char* name) const = 0;
 };
 
 

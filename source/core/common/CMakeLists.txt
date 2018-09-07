@@ -21,7 +21,7 @@ set(HEADERS
     "${INC_DIR}/http_helpers.h"
     "${INC_DIR}/urlencode_helpers.h"
     "${INC_DIR}/mock_controller.h"
-    "${INC_DIR}/named_properties_impl.h"
+    "${INC_DIR}/property_bag_impl.h"
     "${INC_DIR}/resource_manager.h"
     "${INC_DIR}/service_helpers.h"
     "${INC_DIR}/service_provider_impl.h"
@@ -33,6 +33,7 @@ set(HEADERS
     "${INC_DIR}/string_utils.h"
     "${INC_DIR}/file_utils.h"
     "${CARBON_INCLUDE}/ispxinterfaces.h"
+    "${INC_DIR}/property_id_2_name_map.h"
     )
 
 set(HEADERS_PRIVATE
@@ -57,6 +58,7 @@ set(SOURCES
     "${SRC_DIR}/guid_utils.cpp"
     "${SRC_DIR}/platform.cpp"
     "${SRC_DIR}/site_helpers.cpp"
+    "${SRC_DIR}/property_id_2_name_map.cpp"
     )
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")

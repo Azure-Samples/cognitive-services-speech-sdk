@@ -26,10 +26,17 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognizerEvents)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognizer)
         SPX_INTERFACE_MAP_ENTRY(ISpxTranslationRecognizer)
+        SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxObjectInit (overrides) ---
     void Init() override;
+
+    // --- IServiceProvider
+    SPX_SERVICE_MAP_BEGIN()
+        SPX_SERVICE_MAP_ENTRY(ISpxNamedProperties)
+        SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
+    SPX_SERVICE_MAP_END()
 
 private:
 

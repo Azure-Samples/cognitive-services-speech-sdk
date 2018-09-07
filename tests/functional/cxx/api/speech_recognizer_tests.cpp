@@ -10,6 +10,9 @@
 
 #include "test_utils.h"
 
+#include "exception.h"
+#define __SPX_THROW_HR_IMPL(hr) Microsoft::CognitiveServices::Speech::Impl::ThrowWithCallstack(hr)
+
 #include "speechapi_cxx.h"
 #include "mock_controller.h"
 
@@ -233,7 +236,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
         auto recognizer = GetFactory()->CreateSpeechRecognizerWithFileInput(input_file);
         auto result = recognizer->RecognizeAsync().get();
-        REQUIRE(!result->Properties[ResultProperty::Json].GetString().empty());
+        REQUIRE(!result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_Json).empty());
     }
 
     SECTION("Check that recognition result contains error details.")
@@ -516,8 +519,8 @@ TEST_CASE("Speech Factory basics", "[api][cxx]")
         auto f1 = SpeechFactory::FromEndpoint("1", "invalid_key");
         auto f2 = SpeechFactory::FromEndpoint("2", "invalid_key");
 
-        auto endpoint1 = f1->Parameters[FactoryParameter::Endpoint].GetString();
-        auto endpoint2 = f2->Parameters[FactoryParameter::Endpoint].GetString();
+        auto endpoint1 = f1->Parameters.GetProperty(SpeechPropertyId::SpeechServiceConnection_Endpoint);
+        auto endpoint2 = f2->Parameters.GetProperty(SpeechPropertyId::SpeechServiceConnection_Endpoint);
 
         //REQUIRE(endpoint1 == L"1"); BUGBUG this fails!!!
         REQUIRE(endpoint2 == "2");

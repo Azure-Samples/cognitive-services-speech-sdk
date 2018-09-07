@@ -17,16 +17,18 @@ namespace Speech {
 namespace Impl {
 
 
-#define SPXFACTORYHANDLE_ROOTSITEPARAMETERS_HACK ((SPXFACTORYHANDLE)+1)
-
+#define SPXFACTORYHANDLE_ROOTSITEPARAMETERS_MOCK ((SPXFACTORYHANDLE)+1)
 
 void SpxSetMockParameterString(const char* name, const char* value);
-void SpxSetMockParameterNumber(const char* name, int32_t value);
-void SpxSetMockParameterBool(const char* name, bool value);
 
 std::string SpxGetMockParameterString(const char* name, const char* defaultValue = "");
-int32_t SpxGetMockParameterNumber(const char* name, int32_t defaultValue = 0);
+
+void SpxSetMockParameterBool(const char* name, bool value);
+
 bool SpxGetMockParameterBool(const char* name, bool defaultValue = false);
 
+void SpxSetMockParameterNumber(const char * name, int32_t value);
+
+int32_t SpxGetMockParameterNumber(const char* name, int32_t defaultValue);
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

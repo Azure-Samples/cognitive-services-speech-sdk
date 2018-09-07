@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "recognition_result.h"
 #include "guid_utils.h"
+#include "property_id_2_name_map.h"
 
 using namespace std;
 
@@ -82,9 +83,9 @@ void CSpxRecognitionResult::InitError(const wchar_t* text, ResultType type)
     SPX_DBG_TRACE_FUNCTION();
     m_reason = Reason::Canceled;
     m_type = type;
-    if (text != nullptr) 
+    if (text != nullptr)
     {
-        SetStringValue(PAL::ToWString(g_RESULT_ErrorDetails).c_str(), text);
+        SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_JsonErrorDetails), PAL::ToString(text).c_str());
     }
 }
 
@@ -97,7 +98,7 @@ void CSpxRecognitionResult::InitIntentResult(const wchar_t* intentId, const wcha
 {
     m_intentId = (intentId != nullptr) ? intentId : L"";
 
-    SetStringValue(PAL::ToWString(g_RESULT_LanguageUnderstandingJson).c_str(), jsonPayload);
+    SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_JsonResult), jsonPayload ? PAL::ToString(std::wstring()).c_str() : "");
 }
 
 const map<wstring, wstring>& CSpxRecognitionResult::GetTranslationText()

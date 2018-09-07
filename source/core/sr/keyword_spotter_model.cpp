@@ -21,7 +21,7 @@ void CSpxKwsModel::InitFromFile(const wchar_t* fileName)
         m_fileName = fileName;
 
         FILE* file = nullptr;
-        PAL::fopen_s(&file, PAL::ToString(fileName).c_str(), "rb");
+        PAL::fopen_s(&file, PAL::ToString(std::wstring(fileName)).c_str(), "rb");
         if (file != nullptr) fclose(file);
 
         SPX_IFTRUE_THROW_HR(file == nullptr, SPXERR_FILE_OPEN_FAILED);

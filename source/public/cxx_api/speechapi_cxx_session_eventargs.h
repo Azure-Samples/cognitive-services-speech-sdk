@@ -10,7 +10,7 @@
 #include <speechapi_cxx_common.h>
 #include <speechapi_c_recognizer.h>
 #include <speechapi_cxx_eventargs.h>
-
+#include <spxdebug.h>
 
 namespace Microsoft {
 namespace CognitiveServices {

@@ -91,9 +91,9 @@ void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
     }
     else
     {
-        cout << "We recognized: " << result->Text << endl
-             << "Detailed output result in JSON: " << result->Properties[ResultProperty::Json].GetString()
-             << endl;
+        cout << L"We recognized: " << result->Text << endl
+              << L"Detailed output result in JSON: " << result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_Json)
+              << endl;
     }
     // </SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat>
 }

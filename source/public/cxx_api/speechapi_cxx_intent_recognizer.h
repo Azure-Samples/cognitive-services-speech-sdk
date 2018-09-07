@@ -13,7 +13,8 @@
 #include <speechapi_cxx_intent_recognition_result.h>
 #include <speechapi_cxx_intent_recognition_eventargs.h>
 #include <speechapi_cxx_intent_trigger.h>
-
+#include <speechapi_cxx_properties.h>
+#include <spxdebug.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -34,7 +35,7 @@ public:
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
-    explicit IntentRecognizer(SPXRECOHANDLE hreco) : BaseType(hreco), Parameters(hreco)
+    explicit IntentRecognizer(SPXRECOHANDLE hreco) : BaseType(hreco), Parameters(hreco, HandleType::RECOGNIZER)
     {
         SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     }
@@ -104,7 +105,8 @@ public:
     /// <summary>
     /// A collection of parameter names and their values.
     /// </summary>
-    RecognizerParameterValueCollection Parameters;
+    PropertyCollection<SPXRECOHANDLE> Parameters;
+    
 
     /// <summary>
     /// Adds a phrase that should be recognized as intent with the specified id.

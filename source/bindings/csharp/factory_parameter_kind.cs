@@ -13,10 +13,10 @@ namespace Microsoft.CognitiveServices.Speech
     /// </summary>
     public enum FactoryParameterKind
     {
-        Region = 1,
-        SubscriptionKey = 2,
-        AuthorizationToken = 3,
-        Endpoint = 4
+        Region = Internal.SpeechPropertyId.SpeechServiceConnection_Region,
+        SubscriptionKey = Internal.SpeechPropertyId.SpeechServiceConnection_Key,
+        AuthorizationToken = Internal.SpeechPropertyId.SpeechServiceAuthorization_Token,
+        Endpoint = Internal.SpeechPropertyId.SpeechServiceConnection_Endpoint
     }
 
     /// <summary>

@@ -4,7 +4,7 @@
 #include "handle_table.h"
 #include "service_helpers.h"
 #include "create_object_helpers.h"
-
+#include "property_id_2_name_map.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -37,10 +37,10 @@ void CSpxRecognizer::Term()
     SPX_DBG_TRACE_FUNCTION();
 }
 
-void CSpxRecognizer::SetStringValue(const wchar_t* name, const wchar_t* value)
+void CSpxRecognizer::SetStringValue(const char* name, const char* value)
 {
     // Check to see if the caller is trying to set the CUSTOM SPEECH Model ID...
-    if (wcscmp(name, PAL::ToWString(g_SPEECH_ModelId).c_str()) == 0)
+    if (PAL::stricmp(name, GetPropertyName(SpeechPropertyId::SpeechServiceConnection_DeploymentId)) == 0)
     {
         SetStringValueInProperties(name, value);
     }
@@ -69,17 +69,21 @@ void CSpxRecognizer::Disable()
 
 CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxRecognizer::RecognizeAsync()
 {
-    auto currentRecoMode = GetStringValueFromProperties(PAL::ToWString(g_SPEECH_RecoMode).c_str(), L"");
-    auto recoModeToSet = dynamic_cast<ISpxTranslationRecognizer *>(this) != nullptr ? g_SPEECH_RecoMode_Conversation : g_SPEECH_RecoMode_Interactive;
+    const char* reco_mode = GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode);
+    auto currentRecoMode = GetStringValueFromProperties(reco_mode, "");
+    auto recoModeToSet = dynamic_cast<ISpxTranslationRecognizer *>(this) != nullptr
+        ? GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode_Conversation)
+        : GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode_Interactive);
 
+    std::string recoMode = recoModeToSet ? recoModeToSet : "";
     if (currentRecoMode.empty())
     {
-        SetStringValueInProperties(PAL::ToWString(g_SPEECH_RecoMode).c_str(), PAL::ToWString(recoModeToSet).c_str());
+        SetStringValueInProperties(reco_mode, recoModeToSet);
     }
     else
     {
         // Since the mode is set during connection setup, no mode switch is allowed.
-        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(PAL::ToWString(recoModeToSet).c_str()) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);
+        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(recoMode) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);
     }
 
     return m_defaultSession->RecognizeAsync();
@@ -87,15 +91,16 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxRecognizer::RecognizeAsy
 
 CSpxAsyncOp<void> CSpxRecognizer::StartContinuousRecognitionAsync()
 {
-    auto currentRecoMode = GetStringValueFromProperties(PAL::ToWString(g_SPEECH_RecoMode).c_str(), L"");
+    const char* reco_mode = GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode);
+    auto currentRecoMode = GetStringValueFromProperties(reco_mode, "");
     if (currentRecoMode.empty())
     {
-        SetStringValueInProperties(PAL::ToWString(g_SPEECH_RecoMode).c_str(), PAL::ToWString(g_SPEECH_RecoMode_Conversation).c_str());
+        SetStringValueInProperties(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode), GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode_Conversation));
     }
     else
     {
         // Since the mode is set during connection setup, no mode switch is allowed.
-        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(PAL::ToWString(g_SPEECH_RecoMode_Conversation).c_str()) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);
+        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode_Conversation)) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);
     }
     return m_defaultSession->StartContinuousRecognitionAsync();
 }
@@ -203,7 +208,7 @@ void CSpxRecognizer::FireRecoEvent(ISpxRecognizerEvents::RecoEvent_Type* pevent,
     }
 }
 
-void CSpxRecognizer::SetStringValueInProperties(const wchar_t* name, const wchar_t* value)
+void CSpxRecognizer::SetStringValueInProperties(const char* name, const char* value)
 {
     // For now, we can only have one Recognizer per Session, so, we'll just pass this over to the default session.
     EnsureDefaultSession();
@@ -212,7 +217,8 @@ void CSpxRecognizer::SetStringValueInProperties(const wchar_t* name, const wchar
     namedProperties->SetStringValue(name, value);
 }
 
-std::wstring CSpxRecognizer::GetStringValueFromProperties(const wchar_t* name, const wchar_t* defaultValue) {
+std::string CSpxRecognizer::GetStringValueFromProperties(const char* name, const char* defaultValue)
+{
     // For now, we can only have one Recognizer per Session, so, we'll just pass this over to the default session.
     EnsureDefaultSession();
     auto namedProperties = SpxQueryService<ISpxNamedProperties>(m_defaultSession);

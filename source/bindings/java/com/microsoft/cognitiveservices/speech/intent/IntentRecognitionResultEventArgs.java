@@ -6,7 +6,7 @@ package com.microsoft.cognitiveservices.speech.intent;
 
 import com.microsoft.cognitiveservices.speech.ResultParameterNames;
 import com.microsoft.cognitiveservices.speech.internal.IntentRecognitionEventArgs;
-import com.microsoft.cognitiveservices.speech.internal.ResultPropertyValueCollection;
+import com.microsoft.cognitiveservices.speech.internal.ResultPropertyCollection;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
@@ -46,9 +46,9 @@ public final class IntentRecognitionResultEventArgs // : System.EventArgs
     // { get; }
     private String _SessionId;
     
-    public ResultPropertyValueCollection getProperties()
+    public ResultPropertyCollection getProperties()
     {
-        ResultPropertyValueCollection r = eventArgImpl.GetResult().getProperties();
+        ResultPropertyCollection r = eventArgImpl.GetResult().getProperties();
 
         Contracts.throwIfNull(r, "result properties");
 
@@ -67,8 +67,8 @@ public final class IntentRecognitionResultEventArgs // : System.EventArgs
                " Status:" + _Result.getReason() +
                " IntentId:<" + _Result.getIntentId() +
                "> Recognized text:<" + _Result.getText() +
-               "> Recognized json:<" + getProperties().GetString(ResultParameterNames.Json) +
-               "> LanguageUnderstandingJson <" + getProperties().GetString(ResultParameterNames.LanguageUnderstandingJson) +
+               "> Recognized json:<" + getProperties().GetProperty(ResultParameterNames.Json) +
+               "> LanguageUnderstandingJson <" + getProperties().GetProperty(ResultParameterNames.LanguageUnderstandingJson) +
                 ">.";
     }
     

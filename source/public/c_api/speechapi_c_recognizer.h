@@ -25,21 +25,7 @@ SPXAPI Recognizer_Enable(SPXRECOHANDLE hreco);
 SPXAPI Recognizer_Disable(SPXRECOHANDLE hreco);
 SPXAPI Recognizer_IsEnabled(SPXRECOHANDLE hreco, bool* pfEnabled);
 
-enum Recognizer_Parameter { RecognizerParameter_DeploymentId = 1, RecognizerParameter_OutputFormat = 2 };
-typedef enum Recognizer_Parameter Recognizer_Parameter;
-SPXAPI Recognizer_GetParameter_Name(Recognizer_Parameter parameter, char* name, uint32_t cchName);
-
-SPXAPI Recognizer_SetParameter_String(SPXRECOHANDLE hreco, const char* name, const char* value);
-SPXAPI Recognizer_GetParameter_String(SPXRECOHANDLE hreco, const char* name, char* value, uint32_t cchValue, const char* defaultValue);
-SPXAPI_(bool) Recognizer_ContainsParameter_String(SPXRECOHANDLE hreco, const char* name);
-
-SPXAPI Recognizer_SetParameter_Int32(SPXRECOHANDLE hreco, const char* name, int32_t value);
-SPXAPI Recognizer_GetParameter_Int32(SPXRECOHANDLE hreco, const char* name, int32_t* pvalue, int32_t defaultValue);
-SPXAPI_(bool) Recognizer_ContainsParameter_Int32(SPXRECOHANDLE hreco, const char* name);
-
-SPXAPI Recognizer_SetParameter_Bool(SPXRECOHANDLE hreco, const char* name, bool value);
-SPXAPI Recognizer_GetParameter_Bool(SPXRECOHANDLE hreco, const char* name, bool* pvalue, bool defaultValue);
-SPXAPI_(bool) Recognizer_ContainsParameter_Bool(SPXRECOHANDLE hreco, const char* name);
+SPXAPI recognizer_get_property_bag(SPXRECOHANDLE hreco, SPXPROPERTYBAGHANDLE* hpropbag);
 
 SPXAPI Recognizer_Recognize(SPXRECOHANDLE hreco, SPXRESULTHANDLE* phresult);
 SPXAPI Recognizer_RecognizeAsync(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync);

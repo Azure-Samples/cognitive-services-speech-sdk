@@ -12,10 +12,11 @@
 #include <speechapi_cxx_speech_recognizer.h>
 #include <speechapi_cxx_intent_recognizer.h>
 #include <speechapi_cxx_translation_recognizer.h>
-#include <speechapi_cxx_factory_parameter.h>
 #include <speechapi_cxx_audioinputstream.h>
+#include <speechapi_cxx_properties.h>
 #include <speechapi_c_common.h>
 #include <speechapi_c_factory.h>
+
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -37,8 +38,8 @@ public:
     /// <summary>
     /// Creates a new factory instance parametrized with an instance of FactoryParameterCollection.
     /// </summary>
-    explicit ISpeechFactory(FactoryParameterCollection& parameters) : Parameters(parameters) { }
-
+    explicit ISpeechFactory(PropertyCollection<SPXFACTORYHANDLE>& parameters) : Parameters(parameters) { }
+    
     /// <summary>
     /// Virtual destructor.
     /// </summary>
@@ -47,7 +48,8 @@ public:
     /// <summary>
     /// Collection of parameters used for all recognizers created by the factory.
     /// </summary>
-    FactoryParameterCollection& Parameters;
+    PropertyCollection<SPXFACTORYHANDLE>& Parameters;
+
 
 private:
 
@@ -64,7 +66,7 @@ public:
     /// <summary>
     /// Creates a new factory instance parametrized with an instance of FactoryParameterCollection.
     /// </summary>
-    explicit ICognitiveServicesSpeechFactory(FactoryParameterCollection& parameters) : ISpeechFactory(parameters) { }
+    explicit ICognitiveServicesSpeechFactory(PropertyCollection<SPXFACTORYHANDLE>& parameters) : ISpeechFactory(parameters) { }
 
     /// <summary>
     /// Creates a SpeechRecognizer, using the default microphone as input.
@@ -291,7 +293,8 @@ private:
     public:
         InternalCognitiveServicesSpeechFactory(SPXFACTORYHANDLE hfactory) :
             ICognitiveServicesSpeechFactory(m_parameters),
-            m_parameters(hfactory),
+
+            m_parameters(hfactory, HandleType::FACTORY),
             m_hfactory(hfactory)
         {
         }
@@ -569,17 +572,17 @@ private:
             SPX_THROW_ON_FAIL(::SpeechFactory_CreateTranslationRecognizer_With_Stream(m_hfactory, &hreco, sourceLanguage.c_str(), targetLangBuffer.get(), num, voice.c_str(), audioInputStream));
             return std::make_shared<Translation::TranslationRecognizer>(hreco);
         }
-
+        
         virtual void SetAuthorizationToken(const std::string& value) override
         {
-            m_parameters[FactoryParameter::AuthorizationToken] = value;
+            m_parameters.SetProperty(SpeechPropertyId::SpeechServiceAuthorization_Token, value);
         }
 
     private:
 
         DISABLE_COPY_AND_MOVE(InternalCognitiveServicesSpeechFactory);
 
-        FactoryParameterCollection m_parameters;
+        PropertyCollection<SPXFACTORYHANDLE> m_parameters;
 
         SPXFACTORYHANDLE m_hfactory;
     };

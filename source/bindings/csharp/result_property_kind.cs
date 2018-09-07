@@ -12,9 +12,9 @@ namespace Microsoft.CognitiveServices.Speech
     /// </summary>
     public enum ResultPropertyKind
     {
-        Json = 1,
-        LanguageUnderstandingJson = 2,
-        ErrorDetails = 3
+        Json = Internal.SpeechPropertyId.SpeechServiceResponse_Json,
+        LanguageUnderstandingJson = Internal.SpeechPropertyId.SpeechServiceResponse_JsonResult,
+        ErrorDetails = Internal.SpeechPropertyId.SpeechServiceResponse_JsonErrorDetails
     }
 
     /// <summary>

@@ -9,7 +9,7 @@
 #include <queue>
 #include "spxcore_common.h"
 #include "interface_helpers.h"
-#include "named_properties_impl.h"
+#include "property_bag_impl.h"
 #include "packaged_task_helpers.h"
 #include "service_helpers.h"
 #include "audio_buffer.h"
@@ -36,7 +36,7 @@ class CSpxAudioStreamSession :
     public ISpxRecoEngineAdapterSite,
     public ISpxRecoResultFactory,
     public ISpxEventArgsFactory,
-    public ISpxNamedPropertiesImpl
+    public ISpxPropertyBagImpl
 {
 public:
 
@@ -188,7 +188,7 @@ public:
     std::shared_ptr<ISpxSession> GetDefaultSession() override;
 
     // --- ISpxNamedProperties (overrides)
-    std::wstring GetStringValue(const wchar_t* name, const wchar_t* defaultValue) const override;
+    std::string GetStringValue(const char* name, const char* defaultValue) const override;
 
 
 private:

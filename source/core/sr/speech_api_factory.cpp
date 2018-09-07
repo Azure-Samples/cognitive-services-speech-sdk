@@ -10,6 +10,7 @@
 #include "create_object_helpers.h"
 #include "speech_api_factory.h"
 #include "site_helpers.h"
+#include "property_id_2_name_map.h"
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -75,13 +76,11 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerWith
     auto namedProperties = SpxQueryService<ISpxNamedProperties>(sessionAsSite);
     if (!language.empty())
     {
-        namedProperties->SetStringValue(PAL::ToWString(g_SPEECH_RecoLanguage).c_str(), language.c_str());
+        namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoLanguage), PAL::ToString(language).c_str());
     }
 
-    namedProperties->SetStringValue(PAL::ToWString(g_SPEECH_OutputFormat).c_str(),
-        format == OutputFormat::Simple
-        ? PAL::ToWString(g_SPEECH_OutputFormat_Simple).c_str()
-        : PAL::ToWString(g_SPEECH_OutputFormat_Detailed).c_str());
+    namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_OutputFormat),
+        format == OutputFormat::Simple ? GetPropertyName(SpeechPropertyId::SpeechServiceResponse_OutputFormat_Simple): GetPropertyName(SpeechPropertyId::SpeechServiceResponse_OutputFormat_Detailed));
 
     // Add the recognizer to the session
     session->AddRecognizer(recognizer);
@@ -133,7 +132,7 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateIntentRecognizerWith
     auto namedProperties = SpxQueryService<ISpxNamedProperties>(sessionAsSite);
     if (!language.empty())
     {
-        namedProperties->SetStringValue(PAL::ToWString(g_SPEECH_RecoLanguage).c_str(), language.c_str());
+        namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoLanguage), PAL::ToString(language).c_str());
     }
 
     // Add the recognizer to the session
@@ -216,7 +215,7 @@ void CSpxSpeechApiFactory::SetTranslationParameter(const std::shared_ptr<ISpxNam
 {
     SPX_THROW_HR_IF(SPXERR_INVALID_ARG, sourceLanguage.empty());
 
-    namedProperties->SetStringValue(PAL::ToWString(g_TRANSLATION_FromLanguage).c_str(), sourceLanguage.c_str());
+    namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_TranslationFromLanguage), PAL::ToString(sourceLanguage).c_str());
     std::wstring plainStr;
     // The target languages are in BCP-47 format, and should not contain the character ','.
     SPX_THROW_HR_IF(SPXERR_INVALID_ARG, targetLanguages.size() == 0);
@@ -228,11 +227,11 @@ void CSpxSpeechApiFactory::SetTranslationParameter(const std::shared_ptr<ISpxNam
         plainStr += L"," + *lang;
     }
     SPX_THROW_HR_IF(SPXERR_INVALID_ARG, plainStr.empty());
-    namedProperties->SetStringValue(PAL::ToWString(g_TRANSLATION_ToLanguages).c_str(), plainStr.c_str());
-    namedProperties->SetStringValue(PAL::ToWString(g_TRANSLATION_Voice).c_str(), voice.c_str());
+    namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_TranslationToLanguages), PAL::ToString(plainStr).c_str());
+    namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_TranslationVoice), PAL::ToString(voice).c_str());
 
     // Set mode to conversation for translation
-    namedProperties->SetStringValue(PAL::ToWString(g_SPEECH_RecoMode).c_str(), PAL::ToWString(g_SPEECH_RecoMode_Conversation).c_str());
+    namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode), GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode_Conversation));
 }
 
 std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateRecognizerInternal(const char* sessionClassName,
@@ -264,13 +263,11 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateRecognizerInternal(c
     auto namedProperties = SpxQueryService<ISpxNamedProperties>(sessionAsSite);
     if (language != nullptr)
     {
-        namedProperties->SetStringValue(PAL::ToWString(g_SPEECH_RecoLanguage).c_str(), language);
+        namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoLanguage), PAL::ToString(language).c_str());
     }
 
-    namedProperties->SetStringValue(PAL::ToWString(g_SPEECH_OutputFormat).c_str(),
-        format == OutputFormat::Simple
-        ? PAL::ToWString(g_SPEECH_OutputFormat_Simple).c_str()
-        : PAL::ToWString(g_SPEECH_OutputFormat_Detailed).c_str());
+    namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_OutputFormat),
+        format == OutputFormat::Simple ? GetPropertyName(SpeechPropertyId::SpeechServiceResponse_OutputFormat_Simple) : GetPropertyName((SpeechPropertyId::SpeechServiceResponse_OutputFormat_Detailed)));
 
     // Add the recognizer to the session
     session->AddRecognizer(recognizer);

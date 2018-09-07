@@ -90,7 +90,7 @@ T ## Signal.connect, T ## Signal.disconnect = _generate_signal_methods(T ## Call
     %pythoncode %{
     @property
     def json(self):
-        return self.properties[ResultProperty_Json].get_string()
+        return self.properties.get_property(SpeechPropertyId_SpeechServiceResponse_Json)
     %}
 }
 

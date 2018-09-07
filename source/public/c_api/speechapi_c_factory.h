@@ -33,24 +33,10 @@ SPXAPI SpeechFactory_CreateTranslationRecognizer(SPXFACTORYHANDLE hfactory, SPXR
 SPXAPI SpeechFactory_CreateTranslationRecognizer_With_FileInput(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* recoHandlePointer, const char* sourceLanguage, const char* targetLanguages[], size_t numberOfTargetLanguages, const char* voice, const char* fileName);
 SPXAPI SpeechFactory_CreateTranslationRecognizer_With_Stream(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* recoHandlePointer, const char* sourceLanguage, const char* targetLanguages[], size_t numberOfTargetLanguages, const char* voice, SpeechApi_AudioInputStream *stream);
 
-enum Factory_Parameter { FactoryParameter_Region = 1, FactoryParameter_SubscriptionKey = 2, FactoryParameter_AuthorizationToken = 3, FactoryParameter_Endpoint = 4 };
-typedef enum Factory_Parameter Factory_Parameter;
-SPXAPI SpeechFactory_GetParameter_Name(Factory_Parameter parameter, char* name, uint32_t cchName);
-
-SPXAPI SpeechFactory_SetParameter_String(SPXFACTORYHANDLE hfactory, const char* name, const char* value);
-SPXAPI SpeechFactory_GetParameter_String(SPXFACTORYHANDLE hfactory, const char* name, char* value, uint32_t cchValue, const char* defaultValue);
-SPXAPI_(bool) SpeechFactory_ContainsParameter_String(SPXFACTORYHANDLE hfactory, const char* name);
-
-SPXAPI SpeechFactory_SetParameter_Int32(SPXFACTORYHANDLE hfactory, const char* name, int32_t value);
-SPXAPI SpeechFactory_GetParameter_Int32(SPXFACTORYHANDLE hfactory, const char* name, int32_t* pvalue, int32_t defaultValue);
-SPXAPI_(bool) SpeechFactory_ContainsParameter_Int32(SPXFACTORYHANDLE hfactory, const char* name);
-
-SPXAPI SpeechFactory_SetParameter_Bool(SPXFACTORYHANDLE hfactory, const char* name, bool value);
-SPXAPI SpeechFactory_GetParameter_Bool(SPXFACTORYHANDLE hfactory, const char* name, bool* pvalue, bool defaultValue);
-SPXAPI_(bool) SpeechFactory_ContainsParameter_Bool(SPXFACTORYHANDLE hfactory, const char* name);
-
 SPXAPI_(bool) SpeechFactory_Handle_IsValid(SPXFACTORYHANDLE hreco);
 SPXAPI SpeechFactory_Handle_Close(SPXFACTORYHANDLE hreco);
+
+SPXAPI speech_factory_get_property_bag(SPXFACTORYHANDLE hfactory, SPXPROPERTYBAGHANDLE* hpropbag);
 
 SPXAPI SpeechFactory_FromAuthorizationToken(const char* authToken, const char* region, SPXFACTORYHANDLE* phfactory);
 SPXAPI SpeechFactory_FromSubscription(const char* subscriptionKey, const char* region, SPXFACTORYHANDLE* phfactory);

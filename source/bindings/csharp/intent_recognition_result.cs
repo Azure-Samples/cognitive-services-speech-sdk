@@ -31,7 +31,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         public override string ToString()
         {
             return string.Format(CultureInfo.InvariantCulture, "ResultId:{0} Status:{1} IntentId:<{2}> Recognized text:<{3}> Recognized Json:{4}. LanguageUnderstandingJson:{5}",
-                ResultId, RecognitionStatus, IntentId, Text, Properties.Get<string>(ResultPropertyKind.Json), Properties.Get<string>(ResultPropertyKind.LanguageUnderstandingJson));
+                ResultId, RecognitionStatus, IntentId, Text, Properties.Get(ResultPropertyKind.Json), Properties.Get(ResultPropertyKind.LanguageUnderstandingJson));
         }
 
         // Hold the reference

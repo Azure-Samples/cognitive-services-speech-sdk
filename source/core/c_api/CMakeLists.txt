@@ -14,6 +14,7 @@ set(HEADERS_PRIVATE
     "${SRC_DIR}/stdafx.h"
     "${SRC_DIR}/event_helpers.h"
     "${SRC_DIR}/try_catch_helpers.h"
+     "${SRC_DIR}/handle_helpers.h"
     )
 
 set(SOURCES
@@ -30,7 +31,8 @@ set(SOURCES
     "${SRC_DIR}/speechapi_c_factory.cpp"
     "${SRC_DIR}/speechapi_c_result.cpp"
     "${SRC_DIR}/speechapi_c_session.cpp"
-    "${SRC_DIR}/speechapi_c_property_names.cpp"
+    "${SRC_DIR}/speechapi_c_common.cpp"
+
     "${SRC_DIR}/stdafx.cpp"
     )
 

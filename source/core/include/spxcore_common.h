@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <spxdebug.h>
 #include <speechapi_c_common.h>
-#include <speechapi_c_property_names.h>
 
 #include <spx_namespace.h>
 

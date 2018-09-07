@@ -26,6 +26,8 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognizerEvents)
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognizer)
         SPX_INTERFACE_MAP_ENTRY(ISpxIntentRecognizer)
+        SPX_INTERFACE_MAP_ENTRY(ISpxServiceProvider)
+
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxObjectInit (overrides) ---
@@ -34,6 +36,12 @@ public:
     // --- ISpxIntentRecognizer ---
     void AddIntentTrigger(const wchar_t* intentId, std::shared_ptr<ISpxTrigger> trigger) override;
 
+
+    // --- IServiceProvider
+    SPX_SERVICE_MAP_BEGIN()
+        SPX_SERVICE_MAP_ENTRY(ISpxNamedProperties)
+        SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
+    SPX_SERVICE_MAP_END()
 
 private:
 

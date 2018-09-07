@@ -12,8 +12,7 @@
 #include <string>
 #include <speechapi_cxx_common.h>
 #include <speechapi_c.h>
-#include <speechapi_cxx_session_parameter_collection.h>
-
+#include<speechapi_cxx_properties.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -23,7 +22,7 @@ namespace Speech {
 class Session
 {
 private:
-    SessionParameterValueCollection m_parameters;
+    PropertyCollection<SPXSESSIONHANDLE> m_parameters;
 
 public:
 
@@ -39,7 +38,7 @@ public:
     }
 
     explicit Session(SPXSESSIONHANDLE hsession) :
-        m_parameters(hsession),
+        m_parameters(hsession, HandleType::SESSION),
         Parameters(m_parameters),
         m_hsession(hsession)
     {
@@ -57,7 +56,7 @@ public:
         }
     }
 
-    SessionParameterValueCollection& Parameters;
+    PropertyCollection<SPXSESSIONHANDLE>& Parameters;
 
 private:
 

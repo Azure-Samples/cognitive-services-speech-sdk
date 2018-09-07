@@ -8,9 +8,8 @@
 #include "stdafx.h"
 #include "mock_controller.h"
 #include "speechapi_c_factory.h"
-#include "speechapi_cxx_factory_parameter.h"
+#include "speechapi_cxx_properties.h"
 #include "string_utils.h"
-
 
 using namespace Microsoft::CognitiveServices::Speech;
 
@@ -21,47 +20,44 @@ namespace Speech {
 namespace Impl {
 
 
-class MockParameterValue : public FactoryParameterValue
+class MockParameterValue : public PropertyCollection<SPXRECOHANDLE>
 {
 public:
 
-    MockParameterValue(const char* psz) : FactoryParameterValue(SPXFACTORYHANDLE_ROOTSITEPARAMETERS_HACK, psz) { };
+    MockParameterValue() : PropertyCollection(SPXFACTORYHANDLE_ROOTSITEPARAMETERS_MOCK, HandleType::MOCK) { };
 
 private:
 
     DISABLE_COPY_AND_MOVE(MockParameterValue);
 };
 
-
-void SpxSetMockParameterString(const char* name, const char* value)
+void SpxSetMockParameterString(const char* name, const char * value)
 {
-    MockParameterValue(name).SetString(value);
-}
-
-void SpxSetMockParameterNumber(const char* name, int32_t value)
-{
-    MockParameterValue(name).SetNumber(value);
-}
-
-void SpxSetMockParameterBool(const char* name, bool value)
-{
-    MockParameterValue(name).SetBool(value);
+    MockParameterValue().SetProperty(name, value);
 }
 
 std::string SpxGetMockParameterString(const char* name, const char* defaultValue)
 {
-    return MockParameterValue(name).GetString(defaultValue);
+    return MockParameterValue().GetProperty(name, defaultValue);
 }
 
-int32_t SpxGetMockParameterNumber(const char* name, int32_t defaultValue)
+void SpxSetMockParameterBool(const char* name, bool value)
 {
-    return MockParameterValue(name).GetNumber(defaultValue);
+    MockParameterValue().SetProperty(name, PAL::BoolToString(value));
 }
 
 bool SpxGetMockParameterBool(const char* name, bool defaultValue)
 {
-    return MockParameterValue(name).GetBool(defaultValue);
+    return PAL::ToBool(MockParameterValue().GetProperty(name, PAL::BoolToString(defaultValue)).c_str());
 }
 
+void SpxSetMockParameterNumber(const char* name, int32_t value)
+{
+    MockParameterValue().SetProperty(name, std::to_string(value).c_str());
+}
 
+int32_t SpxGetMockParameterNumber(const char* name, int32_t defaultValue)
+{
+    return std::stoi(MockParameterValue().GetProperty(name, std::to_string(defaultValue)));
+}
 } } } } // Microsoft::CognitiveServices::Speech::Impl

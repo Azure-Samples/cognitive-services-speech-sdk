@@ -25,7 +25,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A collection of best recognitions.</returns>
         public static IEnumerable<DetailedSpeechRecognitionResult> Best(this SpeechRecognitionResult result)
         {
-            var json = result.Properties.Get<string>(ResultPropertyKind.Json);
+            var json = result.Properties.Get(ResultPropertyKind.Json);
             using (var stream = new MemoryStream())
             using (var writer = new StreamWriter(stream))
             {
