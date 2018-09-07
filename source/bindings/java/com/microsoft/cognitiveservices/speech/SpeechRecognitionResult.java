@@ -21,6 +21,7 @@ public class SpeechRecognitionResult {
     private RecognitionResultCollection properties;
     private long duration;
     private long offset;
+    private String errorDetails;
     private RecognitionResult _resultImpl;
 
     protected SpeechRecognitionResult(RecognitionResult result) {
@@ -36,6 +37,8 @@ public class SpeechRecognitionResult {
 
         this.text = result.getText();
         this.reason = RecognitionStatus.values()[result.getReason().swigValue()];
+        this.errorDetails = result.getErrorDetails();
+
         this.properties = new RecognitionResultCollection(result.getProperties());
     }
 
@@ -100,7 +103,7 @@ public class SpeechRecognitionResult {
     * @return a brief description of an error.
     */
     public String getErrorDetails() {
-        return this.properties.getString(ResultParameterNames.ErrorDetails);
+        return this.errorDetails;
     }
 
     /**
