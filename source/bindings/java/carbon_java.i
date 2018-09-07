@@ -54,32 +54,7 @@ void __swig_spx_do_trace_message(int level, const char* pszTitle, const char* ps
 #include <map>
 #include <stdlib.h>
 
-  void SetupNativeLibraries(const std::string& p)
-  {
-    std::string s = p;
-    int overwrite = 1;
-
-#if defined(__ANDROID__)
-    // only on roobo, set default.
-    // otherwise, assume everything is setup correctly
-    // in case we get an empty string.
-    if(s.length() < 1)
-    {
-      overwrite = 0;
-      s = "/system/etc/ssl/certs/";
-    }
-#endif
-
-#ifndef _MSC_VER
-    if(s.length() > 0)
-    {
-      setenv("SSL_CERT_DIR", s.c_str(), overwrite);
-    }
-#endif
-  }
-
-
-  struct StdMapStringStringMapIterator {
+struct StdMapStringStringMapIterator {
     typedef std::map<std::string,std::string> StringStringMap;
     StdMapStringStringMapIterator(const StringStringMap& m) : it(m.begin()), map(m) {
     }
