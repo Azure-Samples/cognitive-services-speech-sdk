@@ -142,7 +142,7 @@ export class TranslationRecognizer extends Recognizer {
 
         this.reco = this.implRecognizerSetup(
             RecognitionMode.Conversation,
-            this.parameters.get(FactoryParameterNames.SubscriptionKey, undefined),
+            this.parameters,
             audioSource,
             new TranslationConnectionFactory());
 

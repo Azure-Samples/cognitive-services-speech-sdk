@@ -3,11 +3,11 @@
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 import { MicAudioSource, PcmRecorder } from "../../common.browser/Exports";
-import { IAudioSource } from "../../common/Exports";
-import { CognitiveSubscriptionKeyAuthentication, Context, Device, IAuthentication, IConnectionFactory, OS, RecognitionMode, RecognizerConfig, ServiceRecognizerBase, SpeechConfig, SpeechRecognitionEvent } from "../speech/Exports";
+import { IAudioSource, Promise, PromiseHelper } from "../../common/Exports";
+import { CognitiveSubscriptionKeyAuthentication, CognitiveTokenAuthentication, Context, Device, IAuthentication, IConnectionFactory, OS, RecognitionMode, RecognizerConfig, ServiceRecognizerBase, SpeechConfig, SpeechRecognitionEvent } from "../speech/Exports";
 import { RecognitionCompletionStatus, RecognitionEndedEvent } from "../speech/RecognitionEvents";
 import { Contracts } from "./Contracts";
-import { AudioInputStream, RecognitionEventArgs, RecognitionEventType, SessionEventArgs, SessionEventType } from "./Exports";
+import { AudioInputStream, FactoryParameterNames, ISpeechProperties, RecognitionEventArgs, RecognitionEventType, SessionEventArgs, SessionEventType } from "./Exports";
 
 /**
  * Defines the base class Recognizer which mainly contains common event handlers.
@@ -77,7 +77,7 @@ export abstract class Recognizer {
     protected abstract CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioSource: IAudioSource, recognizerConfig: RecognizerConfig): ServiceRecognizerBase;
 
     // Setup the recognizer
-    protected implRecognizerSetup(recognitionMode: RecognitionMode, subscriptionKey: string, audioSource: IAudioSource, speechConnectionFactory: IConnectionFactory): ServiceRecognizerBase {
+    protected implRecognizerSetup(recognitionMode: RecognitionMode, parameters: ISpeechProperties, audioSource: IAudioSource, speechConnectionFactory: IConnectionFactory): ServiceRecognizerBase {
 
         const recognizerConfig = this.CreateRecognizerConfig(
             new SpeechConfig(
@@ -86,7 +86,18 @@ export abstract class Recognizer {
                     new Device("SpeechSample", "SpeechSample", "1.0.00000"))), // TODO: Need to get these values from the caller?
             recognitionMode); // SDK.SpeechResultFormat.Simple (Options - Simple/Detailed)
 
-        const authentication = new CognitiveSubscriptionKeyAuthentication(subscriptionKey);
+        const subscriptionKey = parameters.get(FactoryParameterNames.SubscriptionKey, undefined);
+        const authentication = subscriptionKey ?
+            new CognitiveSubscriptionKeyAuthentication(subscriptionKey) :
+            new CognitiveTokenAuthentication(
+                (authFetchEventId: string): Promise<string> => {
+                    const authorizationToken = parameters.get(FactoryParameterNames.AuthorizationToken, undefined);
+                    return PromiseHelper.FromResult(authorizationToken);
+                },
+                (authFetchEventId: string): Promise<string> => {
+                    const authorizationToken = parameters.get(FactoryParameterNames.AuthorizationToken, undefined);
+                    return PromiseHelper.FromResult(authorizationToken);
+                });
 
         if (!audioSource) {
             const pcmRecorder = new PcmRecorder();

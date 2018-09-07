@@ -114,7 +114,7 @@ export class SpeechRecognizer extends Recognizer {
 
         this.reco = this.implRecognizerSetup(
             RecognitionMode.Interactive,
-            this.parameters.get(FactoryParameterNames.SubscriptionKey, undefined),
+            this.parameters,
             audioSource,
             new SpeechConnectionFactory());
 
@@ -148,7 +148,7 @@ export class SpeechRecognizer extends Recognizer {
 
         this.reco = this.implRecognizerSetup(
             RecognitionMode.Conversation,
-            this.parameters.get(FactoryParameterNames.SubscriptionKey, undefined),
+            this.parameters,
             audioSource,
             new SpeechConnectionFactory());
 

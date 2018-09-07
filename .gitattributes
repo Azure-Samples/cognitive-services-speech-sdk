@@ -35,6 +35,7 @@ proguard-rules.pro text
 *.mm text
 *.nuspec text
 *.pbxproj text
+*.php text
 *.pl text
 *.plist text
 *.prefs text
