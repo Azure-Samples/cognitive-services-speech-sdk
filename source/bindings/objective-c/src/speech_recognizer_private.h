@@ -6,15 +6,15 @@
 #ifndef speechrecognizer_private_h
 #define speechrecognizer_private_h
 
+#import "speech_recognizer.h"
+#import "common_private.h"
+
 @interface SpeechRecognizer (Private)
 
-// Todo: better opaque pointer in obj-c, or a typedef
-- (instancetype)init:(void *)recoHandle;
+- (instancetype)init :(SpeechRecoSharedPtr)recoHandle;
 
-- (void *)getRecoHandle;
-
-- (void)onFinalResultEvent:(SpeechRecognitionResultEventArgs *)eventArgs;
-- (void)onIntermediateResultEvent:(SpeechRecognitionResultEventArgs *)eventArgs;
+- (void)onFinalResultEvent :(SpeechRecognitionResultEventArgs *)eventArgs;
+- (void)onIntermediateResultEvent :(SpeechRecognitionResultEventArgs *)eventArgs;
 
 @end
 #endif /* speechrecognizer_private_h */

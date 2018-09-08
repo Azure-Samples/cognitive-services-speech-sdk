@@ -11,15 +11,11 @@
 
 typedef NS_ENUM(NSInteger, OutputFormat)
 {
-    Simple = 0,
-    Detailed = 1
+    OutputFormatSimple = 0,
+    OutoutFormatDetailed = 1
 };
 
 @interface SpeechFactory : NSObject
-
-@property (readonly) NSString* subscriptionKey;
-@property NSString* authorizationToken;
-@property (readonly) NSString* region;
 
 - (SpeechRecognizer*)createSpeechRecognizerWithDefaultMicrophone;
 // - (SpeechRecognizer*) createSpeechREcognizerUsingDefaultMicrophoneWithLanguage: (NSString *)language;
@@ -35,7 +31,7 @@ typedef NS_ENUM(NSInteger, OutputFormat)
 
 
 + (SpeechFactory*)fromSubscription:(NSString *)subscription AndRegion:(NSString *)region;
-//+ (SpeechFactory*)fromAuthorizationToken:(NSString *)authToken AndRegion:(NSString *)region;
++ (SpeechFactory*)fromAuthorizationToken:(NSString *)authToken AndRegion:(NSString *)region;
 + (SpeechFactory*)fromEndpoint:(NSString *)endpointUrl AndSubscription:(NSString *)subscriptionKey;
 
 @end

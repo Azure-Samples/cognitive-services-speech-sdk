@@ -6,6 +6,8 @@
 #ifndef SpeechRecognitionResult_h
 #define SpeechRecognitionResult_h
 
+#import <Foundation/Foundation.h>
+
 typedef NS_ENUM(NSInteger, RecognitionStatus)
 {
     Recognized = 0,
@@ -24,9 +26,10 @@ typedef NS_ENUM(NSInteger, RecognitionStatus)
 
 @property (readonly) NSString* text;
 
-// Use NSUInteger?
-// - (NSInteger) getDuration;
-// - (NSInteger) getOffset;
+@property (readonly) NSUInteger duration;
+
+@property (readonly) NSUInteger offset;
+
 @property (readonly) NSString* recognitionFailureReason;
 
 // Todo: get property bag

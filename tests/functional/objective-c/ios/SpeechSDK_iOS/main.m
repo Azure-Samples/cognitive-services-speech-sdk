@@ -17,7 +17,6 @@ int main(int argc, char * argv[]) {
         NSLog(@"Main bundle path: %@", mainBundle);
         NSLog(@"myFile path: %@", myFile);
         
-        NSLog(@"Factory subscription key %@.",factory.subscriptionKey);
         SpeechRecognizer *recognizer = [factory createSpeechRecognizerWithFileInput:myFile];
         // Test1: Use Recognize()
         //SpeechRecognitionResult *result = [recognizer recognize];
@@ -32,9 +31,17 @@ int main(int argc, char * argv[]) {
         //    [NSThread sleepForTimeInterval:1.0f];
         
         // Test3: Use StartContinuousRecognitionAsync()
+        [recognizer addSessionEventListener: ^ (Recognizer * recognizer, SessionEventArgs *eventArgs) {
+            NSLog(@"Received Session event. Type:%@(%d) SessionId: %@", eventArgs.eventType == SessionStartedEvent? @"SessionStart" : @"SessionStop", (int)eventArgs.eventType, eventArgs.sessionId);
+            if (eventArgs.eventType == SessionStoppedEvent)
+                end = true;
+        }];
+        
+        [recognizer addRecognitionEventListener: ^ (Recognizer * recognizer, RecognitionEventArgs *eventArgs) {
+            NSLog(@"Received Recognition event. Type:%@(%d) SessionId: %@ Offset: %d", eventArgs.eventType == SpeechStartDetectedEvent? @"SpeechStart" : @"SpeechEnd", (int)eventArgs.eventType, eventArgs.sessionId, (int)eventArgs.offset);
+        }];
         [recognizer addFinalResultEventListener: ^ (SpeechRecognizer * reconizer, SpeechRecognitionResultEventArgs *eventArgs) {
             NSLog(@"Received final result event. SessionId: %@, recognition result:%@. Status %ld.", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.recognitionStatus);
-            end = true;
         }];
         [recognizer addIntermediateResultEventListener: ^ (SpeechRecognizer * reconizer, SpeechRecognitionResultEventArgs *eventArgs) {
             NSLog(@"Received interemdiate result event. SessionId: %@, intermediate result:%@.", eventArgs.sessionId, eventArgs.result.text);

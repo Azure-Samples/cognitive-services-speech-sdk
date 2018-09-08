@@ -3,47 +3,83 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#import <Foundation/Foundation.h>
-#import "speech_recognizer.h"
+#import "recognizer_private.h"
 #import "speech_recognizer_private.h"
 #import "speech_recognition_result_private.h"
 #import "speech_recognition_result_event_args_private.h"
-#import "speechapi_cxx.h"
+#import "session_event_args_private.h"
+#import "recognition_event_args_private.h"
+#import "common_private.h"
+
+namespace SpeechImpl = Microsoft::CognitiveServices::Speech;
 
 struct EventHandlerHelper
 {
     SpeechRecognizer *recognizer;
+    SpeechRecoSharedPtr recoImpl;
 
-    EventHandlerHelper(SpeechRecognizer *reco) : recognizer(reco)
+    EventHandlerHelper(SpeechRecognizer *reco, SpeechRecoSharedPtr recoImpl)
     {
+        recognizer = reco;
+        this->recoImpl = recoImpl;
     }
     
     void addFinalResultEventHandler()
     {
-        void *handle = [recognizer getRecoHandle];
-        auto recoImpl = *static_cast<std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechRecognizer> *>(handle);
-        recoImpl->FinalResult.Connect([this] (const Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs& e)
+        NSLog(@"Add FinalResultEventHandler");
+        recoImpl->FinalResult.Connect([this] (const SpeechImpl::SpeechRecognitionEventArgs& e)
             {
-                SpeechRecognitionResultEventArgs *eventArgs = [[SpeechRecognitionResultEventArgs alloc] init: (void *)&e];
+                SpeechRecognitionResultEventArgs *eventArgs = [[SpeechRecognitionResultEventArgs alloc] init: e];
                 [recognizer onFinalResultEvent: eventArgs];
             });
     }
     
     void addIntermediateResultEventHandler()
     {
-        void *handle = [recognizer getRecoHandle];
-        auto recoImpl = *static_cast<std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechRecognizer> *>(handle);
-        recoImpl->IntermediateResult.Connect([this] (const Microsoft::CognitiveServices::Speech::SpeechRecognitionEventArgs& e)
+        NSLog(@"Add IntermediateResultEventHandler");
+        recoImpl->IntermediateResult.Connect([this] (const SpeechImpl::SpeechRecognitionEventArgs& e)
             {
-                SpeechRecognitionResultEventArgs *eventArgs = [[SpeechRecognitionResultEventArgs alloc] init: (void *)&e];
+                SpeechRecognitionResultEventArgs *eventArgs = [[SpeechRecognitionResultEventArgs alloc] init: e];
                 [recognizer onIntermediateResultEvent: eventArgs];
+            });
+    }
+    
+    void addSessionEventHandler()
+    {
+        NSLog(@"Add SessionEventHandler");
+        recoImpl->SessionStarted.Connect([this] (const SpeechImpl::SessionEventArgs& e)
+            {
+                SessionEventArgs *eventArgs = [[SessionEventArgs alloc] initWithHandle :SessionStartedEvent :e];
+                [recognizer onSessionEvent: eventArgs];
+            });
+        
+        recoImpl->SessionStopped.Connect([this] (const SpeechImpl::SessionEventArgs& e)
+            {
+                SessionEventArgs *eventArgs = [[SessionEventArgs alloc] initWithHandle :SessionStoppedEvent :e];
+                [recognizer onSessionEvent: eventArgs];
+            });
+    }
+    
+    void addRecognitionEventHandler()
+    {
+        NSLog(@"Add RecognitionEventHandler");
+        recoImpl->SpeechStartDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
+            {
+                RecognitionEventArgs *eventArgs = [[RecognitionEventArgs alloc] initWithHandle :SpeechStartDetectedEvent :e];
+                [recognizer onRecognitionEvent: eventArgs];
+            });
+        
+        recoImpl->SpeechEndDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
+            {
+                RecognitionEventArgs *eventArgs = [[RecognitionEventArgs alloc] initWithHandle :SpeechEndDetectedEvent : e];
+                [recognizer onRecognitionEvent: eventArgs];
             });
     }
 };
 
 @implementation SpeechRecognizer
 {
-    std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechRecognizer> recoImpl;
+    SpeechRecoSharedPtr recoImpl;
     dispatch_queue_t dispatchQueue;
     NSMutableArray *finalResultEventListenerList;
     NSMutableArray *intermediateResultEventListenerList;
@@ -51,20 +87,28 @@ struct EventHandlerHelper
     NSLock *arrayLock;
 }
 
-- (instancetype)init:(void *)recoHandle
+- (instancetype)init :(SpeechRecoSharedPtr)recoHandle
 {
     self = [super init];
-    recoImpl = *static_cast<std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechRecognizer> *>(recoHandle);
+    recoImpl = recoHandle;
     if (recoImpl == nullptr) {
         return nil;
     }
     else
     {
         dispatchQueue = dispatch_queue_create("com.microsoft.cognitiveservices.speech", nil);
+        
         finalResultEventListenerList = [NSMutableArray array];
         intermediateResultEventListenerList = [NSMutableArray array];
         arrayLock = [[NSLock alloc] init];
-        eventImpl = new EventHandlerHelper(self);
+        
+        eventImpl = new EventHandlerHelper(self, recoImpl);
+        [super setDispatchQueue: dispatchQueue];
+        eventImpl->addIntermediateResultEventHandler();
+        eventImpl->addFinalResultEventHandler();
+        eventImpl->addSessionEventHandler();
+        eventImpl->addRecognitionEventHandler();
+        
         return self;
     }
 }
@@ -85,13 +129,13 @@ struct EventHandlerHelper
     }
     
     try {
-        std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechRecognitionResult> resultImpl = recoImpl->RecognizeAsync().get();
+        std::shared_ptr<SpeechImpl::SpeechRecognitionResult> resultImpl = recoImpl->RecognizeAsync().get();
         if (resultImpl == nullptr) {
             result = [[SpeechRecognitionResult alloc] initWithRuntimeError: @"No result available."];
         }
         else
         {
-            result = [[SpeechRecognitionResult alloc] init: (void *)&resultImpl];
+            result = [[SpeechRecognitionResult alloc] init: resultImpl];
         }
     }
     catch (...) {
@@ -115,13 +159,13 @@ struct EventHandlerHelper
     }
     
     try {
-        std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechRecognitionResult> resultImpl = recoImpl->RecognizeAsync().get();
+        std::shared_ptr<SpeechImpl::SpeechRecognitionResult> resultImpl = recoImpl->RecognizeAsync().get();
         if (resultImpl == nullptr) {
             result = [[SpeechRecognitionResult alloc] initWithRuntimeError: @"No result available."];
         }
         else
         {
-            result = [[SpeechRecognitionResult alloc] init: (void *)&resultImpl];
+            result = [[SpeechRecognitionResult alloc] init: resultImpl];
         }
     }
     catch (...) {
@@ -152,7 +196,7 @@ struct EventHandlerHelper
     }
 }
 
-- (void)stopContinuousRecognition;
+- (void)stopContinuousRecognition
 {
     if (recoImpl == nullptr) {
         // Todo: return error?
@@ -182,18 +226,24 @@ struct EventHandlerHelper
 
 - (void)onFinalResultEvent:(SpeechRecognitionResultEventArgs *)eventArgs
 {
+    NSLog(@"OBJC: onFinalResultEvent");
     [arrayLock lock];
     for (id handle in finalResultEventListenerList) {
-        ((RecognitionResultEventHandlerBlock)handle)(self, eventArgs);
+        dispatch_async(dispatchQueue, ^{
+            ((RecognitionResultEventHandlerBlock)handle)(self, eventArgs);
+        });
     }
     [arrayLock unlock];
 }
 
 - (void)onIntermediateResultEvent:(SpeechRecognitionResultEventArgs *)eventArgs
 {
+    NSLog(@"OBJC: onIntermediateResultEvent");
     [arrayLock lock];
     for (id handle in intermediateResultEventListenerList) {
-        ((RecognitionResultEventHandlerBlock)handle)(self, eventArgs);
+        dispatch_async(dispatchQueue, ^{
+            ((RecognitionResultEventHandlerBlock)handle)(self, eventArgs);
+        });
     }
     [arrayLock unlock];
 }
@@ -201,8 +251,6 @@ struct EventHandlerHelper
 - (void)addFinalResultEventListener:(RecognitionResultEventHandlerBlock)eventHandler
 {
     [arrayLock lock];
-    if ([finalResultEventListenerList count] == 0)
-        eventImpl->addFinalResultEventHandler();
     [finalResultEventListenerList addObject:eventHandler];
     [arrayLock unlock];
     return;
@@ -220,8 +268,6 @@ struct EventHandlerHelper
 - (void)addIntermediateResultEventListener:(RecognitionResultEventHandlerBlock)eventHandler
 {
     [arrayLock lock];
-    if ([intermediateResultEventListenerList count] == 0)
-        eventImpl->addIntermediateResultEventHandler();
     [intermediateResultEventListenerList addObject:eventHandler];
     [arrayLock unlock];
     return;

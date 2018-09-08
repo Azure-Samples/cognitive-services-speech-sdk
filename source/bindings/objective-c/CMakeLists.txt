@@ -10,29 +10,13 @@ include_directories(${OBJC_PUBLIC_HEADER_DIR})
 include_directories(${CARBON_INCLUDE})
 include_directories("${COMMON}/include")
 
+FILE(GLOB OBJC_PUBLIC_HEADERS "${OBJC_PUBLIC_HEADER_DIR}/*.h")
+FILE(GLOB OBJC_PRIVATE_HEADERS "${SRC_DIR}/*.h")
+FILE(GLOB OBJC_SOURCE "${SRC_DIR}/*.mm")
 
-set(HEADERS "${OBJC_PUBLIC_HEADER_DIR}/speech_factory.h"
-            "${OBJC_PUBLIC_HEADER_DIR}/speech_recognizer.h"
-            "${OBJC_PUBLIC_HEADER_DIR}/speech_recognition_result.h"
-            "${OBJC_PUBLIC_HEADER_DIR}/speech_recognition_result_event_args.h"
-)
-
-set(HEADERS_PRIVATE "${SRC_DIR}/NSString_STL.h" 
-                    "${SRC_DIR}/speech_recognizer_private.h"
-                    "${SRC_DIR}/speech_recognition_result_private.h"
-                    "${SRC_DIR}/speech_recognition_result_event_args_private.h"
-                    "${LIBCARBON_SRC_DIR}/stdafx.h"
-)
-
-set(SOURCES 
-    "${SRC_DIR}/NSString_STL.mm"
-    "${SRC_DIR}/speech_factory.mm"
-    "${SRC_DIR}/speech_recognizer.mm"
-    "${SRC_DIR}/speech_recognition_result.mm"
-    "${SRC_DIR}/speech_recognition_result_event_args.mm"
-    "${LIBCARBON_SRC_DIR}/dll.cpp"
-    "${LIBCARBON_SRC_DIR}/stdafx.cpp"
-)
+set(HEADERS ${OBJC_PUBLIC_HEADERS}) 
+set(HEADERS_PRIVATE ${OBJC_PRIVATE_HEADERS}) 
+set(SOURCES ${OBJC_SOURCE})
 
 source_group("Header Files (public)" FILES ${HEADERS})
 source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})

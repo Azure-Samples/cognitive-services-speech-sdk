@@ -5,10 +5,13 @@
 
 #ifndef SpeechRecognizer_h
 #define SpeechRecognizer_h
+
+#import <Foundation/Foundation.h>
+#import "recognizer.h"
 #import "speech_recognition_result.h"
 #import "speech_recognition_result_event_args.h"
 
-@interface SpeechRecognizer : NSObject
+@interface SpeechRecognizer : Recognizer
 
 typedef void (^RecognitionResultEventHandlerBlock)(SpeechRecognizer *, SpeechRecognitionResultEventArgs *);
 
@@ -34,7 +37,6 @@ typedef void (^RecognitionResultEventHandlerBlock)(SpeechRecognizer *, SpeechRec
 // - connectSessionStarted((void) (^HandlingSessionStarted) : (SessionEventArgs *)sessionEvent);
 
 // We might need a close/dispose method to ensure the native resource can be released quickly
-
 
 @end
 

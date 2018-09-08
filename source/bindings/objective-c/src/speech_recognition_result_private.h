@@ -6,12 +6,13 @@
 #ifndef speechrecognitionresult_private_h
 #define speechrecognitionresult_private_h
 
-#define BINDING_OBJECTIVE_C
+#import "speech_recognition_result.h"
+
+#import "common_private.h"
 
 @interface SpeechRecognitionResult (Private)
 
-// Todo: better opaque pointer in obj-c, or a typedef
-- (instancetype)init:(void *)resultHandle;
+- (instancetype)init :(std::shared_ptr<SpeechImpl::SpeechRecognitionResult>)resultHandle;
 
 - (instancetype)initWithRuntimeError:(NSString *)message;
 

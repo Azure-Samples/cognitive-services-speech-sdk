@@ -9,14 +9,12 @@
 
 - (std::string)string
 {
-    NSData *data = [self dataUsingEncoding:CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingUTF8)];
-    std::string value = std::string((char*)[data bytes], [data length]/sizeof(char));
-    return value;
+    return [self UTF8String];
 }
 
 + (instancetype)stringWithString:(const std::string&)str
 {
-    return [[NSString alloc] initWithBytes:str.data() length:str.size()*sizeof(char) encoding:CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingUTF8)];
+    return [[NSString alloc] initWithUTF8String: str.c_str()];
 }
 
 @end

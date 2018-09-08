@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3C61523D2125825900B2E94E /* libMicrosoft.CognitiveServices.Speech.core.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C61523C2125825900B2E94E /* libMicrosoft.CognitiveServices.Speech.core.dylib */; };
 		3CBD7F13211CD69B00F72336 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3CBD7F12211CD69B00F72336 /* Assets.xcassets */; };
 		3CBD7F19211CD69C00F72336 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CBD7F18211CD69C00F72336 /* main.m */; };
 		3CBD7F23211CD69C00F72336 /* SpeechSDKTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CBD7F22211CD69C00F72336 /* SpeechSDKTests.m */; };
+		3CE340AA2142BBD700CCA7F7 /* libMicrosoft.CognitiveServices.Speech.core.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C61523C2125825900B2E94E /* libMicrosoft.CognitiveServices.Speech.core.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -24,6 +24,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3C2B03C1214241000074206C /* SpeechSDK_Framework.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpeechSDK_Framework.framework; path = ../../../../../SpeechSDK_Framework.framework; sourceTree = "<group>"; };
 		3C61523C2125825900B2E94E /* libMicrosoft.CognitiveServices.Speech.core.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libMicrosoft.CognitiveServices.Speech.core.dylib; path = ../../../../build_mac_debug/lib/libMicrosoft.CognitiveServices.Speech.core.dylib; sourceTree = "<group>"; };
 		3CBD7F06211CD69B00F72336 /* SpeechSDK.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpeechSDK.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3CBD7F12211CD69B00F72336 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -39,7 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3C61523D2125825900B2E94E /* libMicrosoft.CognitiveServices.Speech.core.dylib in Frameworks */,
+				3CE340AA2142BBD700CCA7F7 /* libMicrosoft.CognitiveServices.Speech.core.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -94,6 +95,7 @@
 		3CBD7F32211D8B3100F72336 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				3C2B03C1214241000074206C /* SpeechSDK_Framework.framework */,
 				3C61523C2125825900B2E94E /* libMicrosoft.CognitiveServices.Speech.core.dylib */,
 			);
 			name = Frameworks;
@@ -371,7 +373,7 @@
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../../source/bindings/objective-c/public";
 				INFOPLIST_FILE = SpeechSDK/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				"LD_RUNPATH_SEARCH_PATHS[arch=*]" = "$(inherited) @executable_path/Frameworks $(SRCROOT)/../../../../build_mac_debug/lib";
+				"LD_RUNPATH_SEARCH_PATHS[arch=*]" = "$(inherited) @executable_path/Frameworks $(HOME)";
 				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../../../../build_mac_debug/lib";
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.cognitiveservices.SpeechSDKSamples;
 				PRODUCT_NAME = "$(TARGET_NAME)";
