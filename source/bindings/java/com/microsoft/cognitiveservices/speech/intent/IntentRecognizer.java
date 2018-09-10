@@ -6,13 +6,13 @@ package com.microsoft.cognitiveservices.speech.intent;
 
 import java.util.concurrent.Future;
 
+import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
 import com.microsoft.cognitiveservices.speech.ParameterCollection;
 import com.microsoft.cognitiveservices.speech.RecognitionErrorEventArgs;
 import com.microsoft.cognitiveservices.speech.RecognizerParameterNames;
 import com.microsoft.cognitiveservices.speech.internal.IntentTrigger;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
-import com.microsoft.cognitiveservices.speech.AudioInputStream;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
@@ -38,10 +38,10 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     /**
       * Initializes an instance of the IntentRecognizer.
       * @param recoImpl The internal recognizer implementation.
-      * @param ais An optional audio input stream associated with the recognizer
+      * @param audioInput An optional audio input configuration associated with the recognizer
       */
-    public IntentRecognizer(com.microsoft.cognitiveservices.speech.internal.IntentRecognizer recoImpl, AudioInputStream ais) {
-        super(ais);
+    public IntentRecognizer(com.microsoft.cognitiveservices.speech.internal.IntentRecognizer recoImpl, AudioConfig audioInput) {
+        super(audioInput);
 
         Contracts.throwIfNull(recoImpl, "recoImpl");
         this.recoImpl = recoImpl;

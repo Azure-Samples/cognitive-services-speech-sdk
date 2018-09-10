@@ -3,8 +3,9 @@
 #include <memory>
 #include <spxerror.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <spxdebug.h>
-#include <speechapi_c_common.h>
+#include <speechapi_cxx_common.h>
 
 #include <spx_namespace.h>
 

@@ -19,7 +19,11 @@
 
 #define SPX_CONFIG_INCLUDE_TRACE_THREAD_ID      1
 #define SPX_CONFIG_INCLUDE_TRACE_HIRES_CLOCK    1
+// #define SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER   1
 
+#ifdef SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER
+#include <windows.h>
+#endif // SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER
 
 decltype(std::chrono::high_resolution_clock::now()) __g_spx_trace_message_time0 = std::chrono::high_resolution_clock::now();
 
@@ -90,6 +94,12 @@ void SpxTraceMessage_Internal(int level, const char* pszTitle, const char* pszFo
 #else
     vfprintf(stderr, format.c_str(), argptr);
 #endif
+
+#ifdef SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER
+    char sz[4096];
+    vsprintf_s(sz, 4096, format.c_str(), argptr);
+    OutputDebugStringA(sz);
+#endif // SPX_CONFIG_INCLUDE_TRACE_WINDOWS_DEBUGGER
 }
 
 void SpxTraceMessage(int level, const char* pszTitle, const char* pszFormat, ...)

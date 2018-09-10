@@ -38,11 +38,11 @@ void CSpxMockWavFilePump::EnsureAudioPump()
 void CSpxMockWavFilePump::InitAudioPump()
 {
     // Create the mock reader...
-    auto reader = SpxCreateObjectWithSite<ISpxAudioReader>("CSpxMockAudioReader", GetSite());
+    auto reader = SpxCreateObjectWithSite<ISpxAudioStreamReader>("CSpxMockAudioReader", GetSite());
 
     // Create an audio pump, and set the reader
-    auto pumpInit = SpxCreateObjectWithSite<ISpxAudioPumpReaderInit>("CSpxAudioPump", GetSite());
-    pumpInit->SetAudioReader(reader);
+    auto pumpInit = SpxCreateObjectWithSite<ISpxAudioPumpInit>("CSpxAudioPump", GetSite());
+    pumpInit->SetReader(reader);
 
     // And ... We're finished
     m_delegateToAudioPump = SpxQueryInterface<ISpxAudioPump>(pumpInit);

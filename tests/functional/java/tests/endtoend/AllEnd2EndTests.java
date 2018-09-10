@@ -14,7 +14,7 @@ import org.junit.runners.Suite.SuiteClasses;
     SampleRecognizeIntentTest.class,
     SampleRecognizeWithIntermediateResultsTest.class,
     SampleSimpleRecognizeTest.class,
-    WaveFileAudioInputStreamTest.class
+    WavFileAudioInputStreamTest.class
     })
 public class AllEnd2EndTests {
 

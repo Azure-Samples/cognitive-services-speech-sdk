@@ -7,9 +7,6 @@
 
 #pragma once
 #include <speechapi_cxx_common.h>
-#include <speechapi_c.h>
-#include <speechapi_cxx_common.h>
-#include <spxdebug.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -38,7 +35,7 @@ public:
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
     explicit KeywordRecognitionModel(SPXKEYWORDHANDLE hkeyword = SPXHANDLE_INVALID) : m_hkwmodel(hkeyword) { }
-    
+
     /// <summary>
     /// Virtual destructor.
     /// </summary>

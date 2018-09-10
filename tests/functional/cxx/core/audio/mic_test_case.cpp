@@ -31,13 +31,13 @@ public:
         m_processAudioCallCounter{ 0 }
     {}
 
-    virtual void SetFormat(WAVEFORMATEX* format) override 
+    virtual void SetFormat(SPXWAVEFORMATEX* format) override 
     {
         unique_lock<mutex> lock(m_mutex);
         if (format != nullptr) 
         {
             m_setFormatCallCounter++;
-            std::memcpy(&m_format, format, sizeof(WAVEFORMATEX));
+            std::memcpy(&m_format, format, sizeof(SPXWAVEFORMATEX));
         }
         else 
         {
@@ -89,7 +89,7 @@ public:
         return m_processAudioCallCounter;
     }
 
-    const WAVEFORMATEX& GetFormat() const
+    const SPXWAVEFORMATEX& GetFormat() const
     {
         unique_lock<mutex> lock(m_mutex);
         REQUIRE(!m_running);
@@ -124,7 +124,7 @@ private:
     bool m_running { true };
     mutable mutex m_mutex;
     condition_variable m_cv;
-    WAVEFORMATEX m_format;
+    SPXWAVEFORMATEX m_format;
     vector<DataBuffer> m_data;
     int m_setFormatCallCounter;
     int m_setFormatWithNullptrCallCounter;
@@ -184,7 +184,7 @@ public:
     function<void(void)> m_reset;
 };
 
-void CheckFormatIsValid(const WAVEFORMATEX& format)
+void CheckFormatIsValid(const SPXWAVEFORMATEX& format)
 {
     REQUIRE(format.wFormatTag != 0);
     REQUIRE(format.nChannels != 0);
@@ -226,7 +226,7 @@ TEST_CASE("Mic is properly functioning", "[audio][mic]")
 
     SECTION("freshly created mic provides a valid audio format") 
     {
-        WAVEFORMATEX format;
+        SPXWAVEFORMATEX format;
         REQUIRE(mic->GetFormat(&format, sizeof(format)) != 0);
         CheckFormatIsValid(format);
     }
@@ -440,8 +440,8 @@ TEST_CASE("Mic is properly functioning", "[audio][mic]")
     {
         REQUIRE(mic->GetFormat(nullptr, 0) != 0);
         REQUIRE(mic->GetFormat(nullptr, uint16_t(-1)) != 0);
-        vector<char> x(sizeof(WAVEFORMATEX)/sizeof(char));
-        REQUIRE(mic->GetFormat(reinterpret_cast<WAVEFORMATEX*>(x.data()), 1) != 0);
+        vector<char> x(sizeof(SPXWAVEFORMATEX)/sizeof(char));
+        REQUIRE(mic->GetFormat(reinterpret_cast<SPXWAVEFORMATEX*>(x.data()), 1) != 0);
         CHECK_THROWS(mic->StartPump(nullptr)); 
         REQUIRE(mic->GetState() == ISpxAudioPump::State::NoInput);
     }

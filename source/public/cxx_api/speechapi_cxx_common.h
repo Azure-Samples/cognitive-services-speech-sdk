@@ -7,8 +7,10 @@
 
 #pragma once
 
+#include <functional>
 #include <string>
 #include <stdexcept>
+#include <speechapi_c_common.h>
 #include <speechapi_c_error.h>
 
 #ifdef SWIG

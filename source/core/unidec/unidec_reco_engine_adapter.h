@@ -46,7 +46,7 @@ public:
     void SetAdapterMode(bool singleShot) override;
 
     // --- ISpxAudioProcessor
-    void SetFormat(WAVEFORMATEX* pformat) override;
+    void SetFormat(SPXWAVEFORMATEX* pformat) override;
     void ProcessAudio(AudioData_Type data, uint32_t size) override;
 
 
@@ -63,7 +63,7 @@ private:
     void InitConfig();
     std::wstring GetBaseModelPath();
 
-    void InitFormat(WAVEFORMATEX* pformat);
+    void InitFormat(SPXWAVEFORMATEX* pformat);
     void TermFormat();
 
     void EnsureEngine();

@@ -109,9 +109,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task InteractiveCheckFileOffsets()
         {
             var factory = this.factory;
-            var stream = Util.OpenWaveFile(TestData.English.Batman.AudioFile, 1);
+            var audioInput = Util.OpenWavFile(TestData.English.Batman.AudioFile);
             var results = new List<SpeechRecognitionResult>();
-            using (var recognizer = this.factory.CreateSpeechRecognizerWithStream(stream, Language.EN))
+            using (var recognizer = this.factory.CreateSpeechRecognizerFromConfig(audioInput, Language.EN))
             {
                 while (true)
                 {
@@ -134,10 +134,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task ContinuousCheckFileOffsets()
         {
             const int Times = 2;
-            var stream = Util.OpenWaveFile(TestData.English.Batman.AudioFile, Times);
+            var audioInput = Util.OpenWavFile(TestData.English.Batman.AudioFile, Times);
             var results = new List<SpeechRecognitionResult>();
             var taskSource = new TaskCompletionSource<bool>();
-            using (var recognizer = this.factory.CreateSpeechRecognizerWithStream(stream, Language.EN))
+            using (var recognizer = this.factory.CreateSpeechRecognizerFromConfig(audioInput, Language.EN))
             {
                 recognizer.FinalResultReceived += (s, e) =>
                 {

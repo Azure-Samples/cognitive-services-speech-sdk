@@ -42,7 +42,7 @@ public:
 
     // --- ISpxAudioProcessor
 
-    void SetFormat(WAVEFORMATEX* pformat) override;
+    void SetFormat(SPXWAVEFORMATEX* pformat) override;
     void ProcessAudio(AudioData_Type data, uint32_t size) override;
 
 
@@ -55,7 +55,7 @@ private:
 
     bool HasFormat() { return m_format.get() != nullptr; }
 
-    void InitFormat(WAVEFORMATEX* pformat);
+    void InitFormat(SPXWAVEFORMATEX* pformat);
     void TermFormat();
     void End();
 

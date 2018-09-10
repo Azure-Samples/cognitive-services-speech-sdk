@@ -29,23 +29,23 @@ CSpxAudioPump::~CSpxAudioPump()
 {
 }
 
-void CSpxAudioPump::SetAudioReader(std::shared_ptr<ISpxAudioReader>& reader)
+void CSpxAudioPump::SetReader(std::shared_ptr<ISpxAudioStreamReader> reader)
 {
     std::unique_lock<std::mutex> lock(m_mutex);
-    SPX_IFTRUE_THROW_HR(reader.get() != nullptr && m_audioReader.get() != nullptr, SPXERR_ALREADY_INITIALIZED);
+    SPX_IFTRUE_THROW_HR(reader.get() != nullptr && m_reader.get() != nullptr, SPXERR_ALREADY_INITIALIZED);
     SPX_IFTRUE_THROW_HR(m_state == State::Paused || m_state == State::Processing, SPXERR_AUDIO_IS_PUMPING);
 
-    m_audioReader = reader;
+    m_reader = reader;
     m_state = reader.get() != nullptr ? State::Idle : State::NoInput;
 }
 
-uint16_t CSpxAudioPump::GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat)
+uint16_t CSpxAudioPump::GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat)
 {
-    SPX_IFTRUE_THROW_HR(m_audioReader.get() == nullptr, SPXERR_UNINITIALIZED);
-    return m_audioReader->GetFormat(pformat, cbFormat);
+    SPX_IFTRUE_THROW_HR(m_reader.get() == nullptr, SPXERR_UNINITIALIZED);
+    return m_reader->GetFormat(pformat, cbFormat);
 }
 
-void CSpxAudioPump::SetFormat(const WAVEFORMATEX* pformat, uint16_t cbFormat)
+void CSpxAudioPump::SetFormat(const SPXWAVEFORMATEX* pformat, uint16_t cbFormat)
 {
     UNUSED(pformat);
     UNUSED(cbFormat);
@@ -56,7 +56,7 @@ void CSpxAudioPump::StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProc
 {
     std::unique_lock<std::mutex> lock(m_mutex);
 
-    SPX_IFTRUE_THROW_HR(m_audioReader.get() == nullptr, SPXERR_UNINITIALIZED);
+    SPX_IFTRUE_THROW_HR(m_reader.get() == nullptr, SPXERR_UNINITIALIZED);
     SPX_IFTRUE_THROW_HR(m_thread.joinable(), SPXERR_AUDIO_IS_PUMPING);
     SPX_IFTRUE_THROW_HR(m_state == State::NoInput, SPXERR_NO_AUDIO_INPUT);
     SPX_IFTRUE_THROW_HR(m_state == State::Processing, SPXERR_AUDIO_IS_PUMPING);
@@ -125,13 +125,13 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
         // Get the format from the reader and give it to the processor
         SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(): getting format from reader...");
 
-        SPX_TRACE_ERROR_IF(m_audioReader == nullptr, "CSpxAudioPump::PumpThread(): m_audioReader == nullptr !!! Unexpected !!");
-        auto cbFormat = m_audioReader->GetFormat(nullptr, 0);
+        SPX_TRACE_ERROR_IF(m_reader == nullptr, "CSpxAudioPump::PumpThread(): m_reader == nullptr !!! Unexpected !!");
+        auto cbFormat = m_reader->GetFormat(nullptr, 0);
         SPX_TRACE_ERROR_IF(cbFormat == 0, "CSpxAudioPump::PumpThread(): cbFormat == 0 !!! Unexpected !!");
 
         auto waveformat = SpxAllocWAVEFORMATEX(cbFormat);
         SPX_TRACE_ERROR_IF(waveformat == nullptr, "CSpxAudioPump::PumpThread(): SpxAllocWAVEFORMATEX(cbFormat) == nullptr !!! Unexpected !!");
-        m_audioReader->GetFormat(waveformat.get(), cbFormat);
+        m_reader->GetFormat(waveformat.get(), cbFormat);
 
         SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::PumpThread(): setting format on processor...");
         SPX_TRACE_ERROR_IF(pISpxAudioProcessor == nullptr, "CSpxAudioPump::PumpThread(): pISpxAudioProcessor == nullptr !!! Unexpected !!");
@@ -182,13 +182,13 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
             }
 
             // Read the buffer, and send it to the processor
-            auto cbRead = m_audioReader->Read(data.get(), bytesPerFrame);
+            auto cbRead = m_reader->Read(data.get(), bytesPerFrame);
             pISpxAudioProcessor->ProcessAudio(data, cbRead);
 
             // If we didn't read any data, move to the 'Idle' state
             if (cbRead == 0)
             {
-                SPX_DBG_TRACE_INFO("m_audioReader->Read() read ZERO (0) bytes... Indicating end of stream based input.");
+                SPX_DBG_TRACE_INFO("m_reader->Read() read ZERO (0) bytes... Indicating end of stream based input.");
                 std::unique_lock<std::mutex> lock(m_mutex);
                 m_stateRequested = State::Idle;
             }

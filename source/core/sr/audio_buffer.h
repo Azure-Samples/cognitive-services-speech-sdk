@@ -78,7 +78,7 @@ namespace Impl {
     class PcmAudioBuffer : public AudioBuffer
     {
     public:
-        explicit PcmAudioBuffer(const WAVEFORMATEX& header);
+        explicit PcmAudioBuffer(const SPXWAVEFORMATEX& header);
 
         void Add(const std::shared_ptr<uint8_t>& data, uint64_t dataSize) override;
         DataChunkPtr GetNext() override;
@@ -103,7 +103,7 @@ namespace Impl {
         const uint32_t MillisecondsInSecond = 1000;
         const uint32_t TicksInMillisecond = 10000;
 
-        const WAVEFORMATEX m_header;
+        const SPXWAVEFORMATEX m_header;
         std::deque<DataChunkPtr> m_audioBuffers;
         uint64_t m_totalSizeInBytes;
 

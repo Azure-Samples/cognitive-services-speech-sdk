@@ -989,7 +989,7 @@ void CarbonTestConsole::Factory_CreateSpeechRecognizer(const char* psz)
 
     m_speechRecognizer = *psz == '\0'
         ? factory->CreateSpeechRecognizer()
-        : factory->CreateSpeechRecognizerWithFileInput(psz + 1);
+        : factory->CreateSpeechRecognizerFromConfig(AudioConfig::FromWavFileInput(psz + 1));
 
     auto fn1 = std::bind(&CarbonTestConsole::SpeechRecognizer_FinalResultHandler, this, std::placeholders::_1);
     m_speechRecognizer->FinalResult.Connect(fn1);
@@ -1481,7 +1481,7 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
     {
         m_speechRecognizer = (wavFileName.length() == 0)
             ? factory->CreateSpeechRecognizer()
-            : factory->CreateSpeechRecognizerWithFileInput(wavFileName);
+            : factory->CreateSpeechRecognizerFromConfig(AudioConfig::FromWavFileInput(wavFileName));
 
         auto fn1 = std::bind(&CarbonTestConsole::SpeechRecognizer_FinalResultHandler, this, std::placeholders::_1);
         m_speechRecognizer->FinalResult.Connect(fn1);
@@ -1494,7 +1494,7 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
     }
     else if (recognizerType == PAL::GetTypeName<TranslationRecognizer>())
     {
-        m_translationRecognizer = factory->CreateTranslationRecognizer("en-us", std::vector<std::string>{"zh-cn"});
+        m_translationRecognizer = factory->CreateTranslationRecognizerFromConfig("en-us", std::vector<std::string>{"zh-cn"});
 
         auto fn1 = std::bind(&CarbonTestConsole::TranslationRecognizer_FinalResultHandler, this, std::placeholders::_1);
         m_translationRecognizer->FinalResult.Connect(fn1);
@@ -1513,7 +1513,7 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
     {
         m_intentRecognizer = wavFileName.length() == 0
             ? factory->CreateIntentRecognizer()
-            : factory->CreateIntentRecognizerWithFileInput(wavFileName);
+            : factory->CreateIntentRecognizerFromConfig(AudioConfig::FromWavFileInput(wavFileName));
 
         auto fn1 = std::bind(&CarbonTestConsole::IntentRecognizer_FinalResultHandler, this, std::placeholders::_1);
         m_intentRecognizer->FinalResult.Connect(fn1);
@@ -1619,6 +1619,26 @@ void CarbonTestConsole::RunSample(const std::string& strSampleName)
     {
         ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         Sample_HelloWorld();
+    }
+    else if (PAL::stricmp(strSampleName.c_str(), "helloworld microphone") == 0)
+    {
+        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        Sample_HelloWorld_Microphone();
+    }
+    else if (PAL::stricmp(strSampleName.c_str(), "helloworld file") == 0)
+    {
+        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        Sample_HelloWorld_File();
+    }
+    else if (PAL::stricmp(strSampleName.c_str(), "helloworld push stream") == 0)
+    {
+        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        Sample_HelloWorld_PushStream();
+    }
+    else if (PAL::stricmp(strSampleName.c_str(), "helloworld pull stream") == 0)
+    {
+        ConsoleWriteLine("Running sample: %ls\n", strSampleName.c_str());
+        Sample_HelloWorld_PullStream();
     }
     else if (PAL::stricmp(strSampleName.c_str(), "helloworld with events") == 0)
     {

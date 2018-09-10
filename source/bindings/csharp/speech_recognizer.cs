@@ -99,9 +99,9 @@ namespace Microsoft.CognitiveServices.Speech
             Parameters = new RecognizerParametersImpl(recoImpl.Parameters);
         }
 
-        internal SpeechRecognizer(Internal.SpeechRecognizer recoImpl, AudioInputStream inputStream) : this(recoImpl)
+        internal SpeechRecognizer(Internal.SpeechRecognizer recoImpl, Audio.AudioConfig audioIn) : this(recoImpl)
         {
-            streamInput = inputStream;
+            this.audioInput = audioIn;
         }
 
         /// <summary>
@@ -271,7 +271,7 @@ namespace Microsoft.CognitiveServices.Speech
         private readonly ResultHandlerImpl finalResultHandler;
         private readonly ErrorHandlerImpl errorHandler;
         private bool disposed = false;
-        private readonly AudioInputStream streamInput;
+        private readonly Audio.AudioConfig audioInput;
 
         // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         private class ResultHandlerImpl : Internal.SpeechRecognitionEventListener

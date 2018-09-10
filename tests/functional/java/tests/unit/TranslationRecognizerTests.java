@@ -19,6 +19,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
 
+import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.RecognitionEventType;
 import com.microsoft.cognitiveservices.speech.RecognitionStatus;
 import com.microsoft.cognitiveservices.speech.Recognizer;
@@ -65,7 +66,7 @@ public class TranslationRecognizerTests {
         ArrayList<String> targets = new ArrayList<>();
         targets.add("en-US");
         
-        TranslationRecognizer r = s.createTranslationRecognizer("en-US", targets);
+        TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-US", targets);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -79,13 +80,13 @@ public class TranslationRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
         
         ArrayList<String> targets = new ArrayList<>();
         targets.add("en-US");        
         
-        TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, "en-US", targets);
+        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", targets);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -103,14 +104,14 @@ public class TranslationRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
         
         ArrayList<String> targets = new ArrayList<>();
         targets.add("en-US");        
         
         String language = "en-US";
-        TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, language, targets);
+        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), language, targets);
         assertTrue(!r.getSourceLanguage().isEmpty());
         assertEquals(language, r.getSourceLanguage());
 
@@ -124,14 +125,14 @@ public class TranslationRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
         
         ArrayList<String> targets = new ArrayList<>();
         targets.add("en-US");        
         
         String language = "en-US";
-        TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, language, targets);
+        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), language, targets);
         assertEquals(1, r.getTargetLanguages().size());
         assertEquals(targets.get(0), r.getTargetLanguages().get(0));
 
@@ -148,14 +149,14 @@ public class TranslationRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
         
         ArrayList<String> targets = new ArrayList<>();
         targets.add("en-US");        
         
         String language = "en-US";
-        TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, language, targets);
+        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), language, targets);
 
         assertTrue(r.getOutputVoiceName().isEmpty());
 
@@ -168,7 +169,7 @@ public class TranslationRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
         
         ArrayList<String> targets = new ArrayList<>();
@@ -176,7 +177,7 @@ public class TranslationRecognizerTests {
         
         String language = "en-US";
         String voice = "de-DE-Katja";
-        TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, language, targets, voice);
+        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), language, targets, voice);
 
         assertEquals(r.getOutputVoiceName(), voice);
 
@@ -197,7 +198,7 @@ public class TranslationRecognizerTests {
         ArrayList<String> targets = new ArrayList<>();
         targets.add("en-US");        
         
-        TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targets);
+        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets);
         assertNotNull(r);
 
         assertNotNull(r.getParameters());
@@ -224,7 +225,7 @@ public class TranslationRecognizerTests {
         ArrayList<String> targets = new ArrayList<>();
         targets.add("en-US");        
         
-        TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targets);
+        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -264,7 +265,7 @@ public class TranslationRecognizerTests {
         ArrayList<String> targets = new ArrayList<>();
         targets.add("en-US");        
         
-        TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targets);
+        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -347,7 +348,7 @@ public class TranslationRecognizerTests {
         ArrayList<String> targets = new ArrayList<>();
         targets.add("en-US");        
         
-        TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targets);
+        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -373,7 +374,7 @@ public class TranslationRecognizerTests {
         ArrayList<String> targets = new ArrayList<>();
         targets.add("en-US");        
         
-        TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targets);
+        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -411,7 +412,7 @@ public class TranslationRecognizerTests {
         ArrayList<String> targets = new ArrayList<>();
         targets.add("en-US");        
         
-        TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targets);
+        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -468,7 +469,7 @@ public class TranslationRecognizerTests {
         ArrayList<String> targets = new ArrayList<>();
         targets.add("en-US");
         
-        TranslationRecognizer r = s.createTranslationRecognizer("en-US", targets);
+        TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-US", targets);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);

@@ -28,9 +28,9 @@ MicrophonePumpBase::~MicrophonePumpBase()
     audio_destroy(m_audioHandle);
 }
 
-uint16_t MicrophonePumpBase::GetFormat(WAVEFORMATEX* format, uint16_t size)
+uint16_t MicrophonePumpBase::GetFormat(SPXWAVEFORMATEX* format, uint16_t size)
 {
-    auto totalSize = uint16_t(sizeof(WAVEFORMATEX) + m_format.cbSize);
+    auto totalSize = uint16_t(sizeof(SPXWAVEFORMATEX) + m_format.cbSize);
     if (format != nullptr)
     {
         memcpy(format, &m_format, min(totalSize, size));
@@ -109,7 +109,7 @@ void MicrophonePumpBase::UpdateState(AUDIO_STATE state)
     switch (state)
     {
     case AUDIO_STATE_STARTING:
-        m_sink->SetFormat(const_cast<WAVEFORMATEX*>(&m_format));
+        m_sink->SetFormat(const_cast<SPXWAVEFORMATEX*>(&m_format));
         m_state = State::Processing;
         m_cv.notify_one();
         break;

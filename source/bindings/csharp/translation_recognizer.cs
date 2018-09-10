@@ -31,7 +31,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     ///     const string GermanVoice = "de-DE-Hedda";
     ///
     ///     // Creates a translation recognizer using microphone as audio input, and requires voice output.
-    ///     using (var recognizer = factory.CreateTranslationRecognizer(fromLanguage, toLanguages, GermanVoice))
+    ///     using (var recognizer = factory.CreateTranslationRecognizerFromConfig(fromLanguage, toLanguages, GermanVoice))
     ///     {
     ///         // Subscribes to events.
     ///         recognizer.IntermediateResultReceived += (s, e) =>
@@ -149,9 +149,9 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             Parameters = new RecognizerParametersImpl(recoImpl.Parameters);
         }
 
-        internal TranslationRecognizer(Internal.TranslationRecognizer recoImpl, AudioInputStream stream) : this(recoImpl)
+        internal TranslationRecognizer(Internal.TranslationRecognizer recoImpl, Audio.AudioConfig audioIn) : this(recoImpl)
         {
-            streamInput = stream;
+            this.audioInput = audioIn;
         }
 
         /// <summary>
@@ -211,7 +211,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         ///     <![CDATA[var toLanguages = new List<string>() { "de" };]]>
         ///
         ///     // Creates a translation recognizer.
-        ///     using (var recognizer = factory.CreateTranslationRecognizer(fromLanguage, toLanguages))
+        ///     using (var recognizer = factory.CreateTranslationRecognizerFromConfig(fromLanguage, toLanguages))
         ///     {
         ///         // Starts recognizing.
         ///         Console.WriteLine("Say something...");
@@ -309,7 +309,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         private readonly SynthesisHandlerImpl synthesisResultHandler;
         private readonly ErrorHandlerImpl errorHandler;
         private bool disposed = false;
-        private readonly AudioInputStream streamInput;
+        private readonly Audio.AudioConfig audioInput;
 
         // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         private class ResultHandlerImpl : Internal.TranslationTextEventListener

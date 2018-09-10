@@ -9,6 +9,7 @@
 
 
 using namespace Microsoft::CognitiveServices::Speech;
+using namespace Microsoft::CognitiveServices::Speech::Audio;
 using namespace Microsoft::CognitiveServices::Speech::Intent;
 using namespace Microsoft::CognitiveServices::Speech::Translation;
 
@@ -208,6 +209,11 @@ private:
     void RunInteractivePrompt();
 
     void Sample_HelloWorld();
+    void Sample_HelloWorld_Microphone();
+    void Sample_HelloWorld_File();
+    void Sample_HelloWorld_PushStream();
+    void Sample_HelloWorld_PullStream();
+    
     void Sample_HelloWorld_WithEvents();
     void Sample_HelloWorld_In_C();
 

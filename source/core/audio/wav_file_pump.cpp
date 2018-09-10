@@ -48,12 +48,11 @@ void CSpxWavFilePump::EnsurePump()
     SPX_IFTRUE_THROW_HR(m_delegateToAudioPump != nullptr, SPXERR_ALREADY_INITIALIZED);
 
     // Create the pump ... 
-    auto pumpInit = SpxCreateObjectWithSite<ISpxAudioPumpReaderInit>("CSpxAudioPump", GetSite());
+    auto pumpInit = SpxCreateObjectWithSite<ISpxAudioPumpInit>("CSpxAudioPump", GetSite());
 
     // Set the reader...
-    auto fileAsReader = SpxQueryInterface<ISpxAudioReader>(m_delegateToAudioFile);
-
-    pumpInit->SetAudioReader(fileAsReader);
+    auto fileAsReader = SpxQueryInterface<ISpxAudioStreamReader>(m_delegateToAudioFile);
+    pumpInit->SetReader(fileAsReader);
 
     // And ... We're finished
     m_delegateToAudioPump = SpxQueryInterface<ISpxAudioPump>(pumpInit);

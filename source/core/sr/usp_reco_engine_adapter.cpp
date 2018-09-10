@@ -81,7 +81,7 @@ void CSpxUspRecoEngineAdapter::SetAdapterMode(bool singleShot)
     m_singleShot = singleShot;
 }
 
-void CSpxUspRecoEngineAdapter::SetFormat(WAVEFORMATEX* pformat)
+void CSpxUspRecoEngineAdapter::SetFormat(SPXWAVEFORMATEX* pformat)
 {
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     SPX_DBG_TRACE_VERBOSE("%s: this=0x%8x", __FUNCTION__, this);
@@ -522,13 +522,13 @@ void CSpxUspRecoEngineAdapter::UspSendMessage(const std::string& messagePath, co
     }
 }
 
-void CSpxUspRecoEngineAdapter::UspWriteFormat(WAVEFORMATEX* pformat)
+void CSpxUspRecoEngineAdapter::UspWriteFormat(SPXWAVEFORMATEX* pformat)
 {
     static const uint16_t cbTag = 4;
     static const uint16_t cbChunkType = 4;
     static const uint16_t cbChunkSize = 4;
 
-    uint32_t cbFormatChunk = sizeof(WAVEFORMAT) + pformat->cbSize;
+    uint32_t cbFormatChunk = sizeof(SPXWAVEFORMAT) + pformat->cbSize;
     uint32_t cbRiffChunk = 0;       // NOTE: This isn't technically accurate for a RIFF/WAV file, but it's fine for Truman/Newman/Skyman
     uint32_t cbDataChunk = 0;       // NOTE: Similarly, this isn't technically correct for the 'data' chunk, but it's fine for Truman/Newman/Skyman
 
@@ -550,7 +550,7 @@ void CSpxUspRecoEngineAdapter::UspWriteFormat(WAVEFORMATEX* pformat)
     // The 'WAVE' chunk header
     ptr = FormatBufferWriteChars(ptr, "WAVE", cbChunkType);
 
-    // The 'fmt ' chunk (consists of 'fmt ' followed by the total size of the WAVEFORMAT(EX)(TENSIBLE), followed by the WAVEFORMAT(EX)(TENSIBLE)
+    // The 'fmt ' chunk (consists of 'fmt ' followed by the total size of the SPXWAVEFORMAT(EX)(TENSIBLE), followed by the SPXWAVEFORMAT(EX)(TENSIBLE)
     ptr = FormatBufferWriteChars(ptr, "fmt ", cbChunkType);
     ptr = FormatBufferWriteNumber(ptr, cbFormatChunk);
     ptr = FormatBufferWriteBytes(ptr, (uint8_t*)pformat, cbFormatChunk);
@@ -1375,11 +1375,11 @@ bool CSpxUspRecoEngineAdapter::ChangeState(AudioState fromAudioState, UspState f
     return false;
 }
 
-void CSpxUspRecoEngineAdapter::PrepareFirstAudioReadyState(WAVEFORMATEX* format)
+void CSpxUspRecoEngineAdapter::PrepareFirstAudioReadyState(SPXWAVEFORMATEX* format)
 {
     SPX_DBG_ASSERT(IsState(AudioState::Ready, UspState::Idle));
 
-    auto sizeOfFormat = sizeof(WAVEFORMATEX) + format->cbSize;
+    auto sizeOfFormat = sizeof(SPXWAVEFORMATEX) + format->cbSize;
     m_format = SpxAllocWAVEFORMATEX(sizeOfFormat);
     memcpy(m_format.get(), format, sizeOfFormat);
 

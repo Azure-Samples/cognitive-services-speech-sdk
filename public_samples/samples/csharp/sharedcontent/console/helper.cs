@@ -4,17 +4,18 @@
 //
 
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 using System.Diagnostics;
 using System.IO;
+
 
 namespace MicrosoftSpeechSDKSamples
 {
     public class Helper
     {
-        public static AudioInputStream OpenWaveFile(string filename)
+        public static AudioConfig OpenWavFile(string filename)
         {
             BinaryReader reader = new BinaryReader(File.OpenRead(filename));
-            AudioInputStreamFormat format = new AudioInputStreamFormat();
 
             // Tag "RIFF"
             char[] data = new char[4];
@@ -33,14 +34,15 @@ namespace MicrosoftSpeechSDKSamples
             // Tag: "fmt"
             reader.Read(data, 0, 4);
             Trace.Assert((data[0] == 'f') && (data[1] == 'm') && (data[2] == 't') && (data[3] == ' '), "Wrong format tag in wav header");
+
             // chunk format size
-            long formatSize = reader.ReadInt32();
-            format.FormatTag = reader.ReadUInt16();
-            format.Channels = reader.ReadUInt16();
-            format.SamplesPerSec = (int)reader.ReadUInt32();
-            format.AvgBytesPerSec = (int)reader.ReadUInt32();
-            format.BlockAlign = reader.ReadUInt16();
-            format.BitsPerSample = reader.ReadUInt16();
+            var formatSize = reader.ReadInt32();
+            var formatTag = reader.ReadUInt16();
+            var channels = reader.ReadUInt16();
+            var samplesPerSecond = reader.ReadUInt32();
+            var avgBytesPerSec = reader.ReadUInt32();
+            var blockAlign = reader.ReadUInt16();
+            var bitsPerSample = reader.ReadUInt16();
 
             // Until now we have read 16 bytes in format, the rest is cbSize and is ignored for now.
             if (formatSize > 16)
@@ -55,7 +57,8 @@ namespace MicrosoftSpeechSDKSamples
 
             // now, we have the format in the format parameter and the
             // reader set to the start of the body, i.e., the raw sample data
-            return new BinaryAudioStreamReader(format, reader);
+            AudioStreamFormat format = AudioStreamFormat.GetWaveFormatPCM(samplesPerSecond, (byte)bitsPerSample, (byte)channels);
+            return AudioConfig.FromStreamInput(new BinaryAudioStreamReader(reader), format);
         }
     }
 }

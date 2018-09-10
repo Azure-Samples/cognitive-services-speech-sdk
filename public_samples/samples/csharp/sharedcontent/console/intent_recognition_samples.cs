@@ -7,6 +7,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Intent;
 // </toplevel>
 
@@ -83,60 +84,63 @@ namespace MicrosoftSpeechSDKSamples
 
             // Creates an intent recognizer using file as audio input.
             // Replace with your own audio file name.
-            using (var recognizer = factory.CreateIntentRecognizerWithFileInput("whatstheweatherlike.wav"))
+            using (var audioInput = AudioConfig.FromWavFileInput("whatstheweatherlike.wav"))
             {
-                // The TaskCompletionSource to stop recognition.
-                var stopRecognition = new TaskCompletionSource<int>();
+                using (var recognizer = factory.CreateIntentRecognizerFromConfig(audioInput))
+                {
+                    // The TaskCompletionSource to stop recognition.
+                    var stopRecognition = new TaskCompletionSource<int>();
 
-                // Creates a Language Understanding model using the app id, and adds specific intents from your model
-                var model = LanguageUnderstandingModel.FromAppId("YourLanguageUnderstandingAppId");
-                recognizer.AddIntent("id1", model, "YourLanguageUnderstandingIntentName1");
-                recognizer.AddIntent("id2", model, "YourLanguageUnderstandingIntentName2");
-                recognizer.AddIntent("any-IntentId-here", model, "YourLanguageUnderstandingIntentName3");
+                    // Creates a Language Understanding model using the app id, and adds specific intents from your model
+                    var model = LanguageUnderstandingModel.FromAppId("YourLanguageUnderstandingAppId");
+                    recognizer.AddIntent("id1", model, "YourLanguageUnderstandingIntentName1");
+                    recognizer.AddIntent("id2", model, "YourLanguageUnderstandingIntentName2");
+                    recognizer.AddIntent("any-IntentId-here", model, "YourLanguageUnderstandingIntentName3");
 
-                // Subscribes to events.
-                recognizer.IntermediateResultReceived += (s, e) => {
-                    Console.WriteLine($"\n    Partial result: {e.Result.Text}.");
-                };
+                    // Subscribes to events.
+                    recognizer.IntermediateResultReceived += (s, e) => {
+                        Console.WriteLine($"\n    Partial result: {e.Result.Text}.");
+                    };
 
-                recognizer.FinalResultReceived += (s, e) => {
-                    if (e.Result.RecognitionStatus == RecognitionStatus.Recognized)
-                    {
-                        Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, Text: {e.Result.Text}.");
-                        Console.WriteLine($"\n    Intent Id: {e.Result.IntentId}.");
-                        Console.WriteLine($"\n    Language Understanding JSON: {e.Result.Properties.Get(ResultPropertyKind.Json)}.");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, FailureReason: {e.Result.RecognitionFailureReason}.");
-                    }
-                };
+                    recognizer.FinalResultReceived += (s, e) => {
+                        if (e.Result.RecognitionStatus == RecognitionStatus.Recognized)
+                        {
+                            Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, Text: {e.Result.Text}.");
+                            Console.WriteLine($"\n    Intent Id: {e.Result.IntentId}.");
+                            Console.WriteLine($"\n    Language Understanding JSON: {e.Result.Properties.Get(ResultPropertyKind.Json)}.");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, FailureReason: {e.Result.RecognitionFailureReason}.");
+                        }
+                    };
 
-                recognizer.RecognitionErrorRaised += (s, e) => {
-                    Console.WriteLine($"\n    An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}");
-                    stopRecognition.TrySetResult(0);
-                };
-
-                recognizer.OnSessionEvent += (s, e) => {
-                    Console.WriteLine($"\n    Session event. Event: {e.EventType.ToString()}.");
-                    // Stops recognition when session stop is detected.
-                    if (e.EventType == SessionEventType.SessionStoppedEvent)
-                    {
-                        Console.WriteLine($"\nStop recognition.");
+                    recognizer.RecognitionErrorRaised += (s, e) => {
+                        Console.WriteLine($"\n    An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}");
                         stopRecognition.TrySetResult(0);
-                    }
-                };
+                    };
 
-                // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
-                Console.WriteLine("Say something...");
-                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                    recognizer.OnSessionEvent += (s, e) => {
+                        Console.WriteLine($"\n    Session event. Event: {e.EventType.ToString()}.");
+                        // Stops recognition when session stop is detected.
+                        if (e.EventType == SessionEventType.SessionStoppedEvent)
+                        {
+                            Console.WriteLine($"\nStop recognition.");
+                            stopRecognition.TrySetResult(0);
+                        }
+                    };
 
-                // Waits for completion.
-                // Use Task.WaitAny to keep the task rooted.
-                Task.WaitAny(new[] { stopRecognition.Task });
+                    // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                    Console.WriteLine("Say something...");
+                    await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
-                // Stops recognition.
-                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                    // Waits for completion.
+                    // Use Task.WaitAny to keep the task rooted.
+                    Task.WaitAny(new[] { stopRecognition.Task });
+
+                    // Stops recognition.
+                    await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                }
             }
             // </intentContinuousRecognitionWithFile>
         }
@@ -157,7 +161,7 @@ namespace MicrosoftSpeechSDKSamples
             // Creates an intent recognizer in the specified language using microphone as audio input.
             var lang = "de-de";
 
-            using (var recognizer = factory.CreateIntentRecognizer(lang))
+            using (var recognizer = factory.CreateIntentRecognizerFromConfig(lang))
             {
                 // Creates a Language Understanding model using the app id, and adds specific intents from your model
                 var model = LanguageUnderstandingModel.FromAppId("YourLanguageUnderstandingAppId");

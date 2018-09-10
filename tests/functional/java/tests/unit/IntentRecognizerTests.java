@@ -19,6 +19,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
 
+import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.RecognitionEventType;
 import com.microsoft.cognitiveservices.speech.RecognitionStatus;
 import com.microsoft.cognitiveservices.speech.Recognizer;
@@ -61,7 +62,7 @@ public class IntentRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        IntentRecognizer r = s.createIntentRecognizerWithFileInput(Settings.WaveFile);
+        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -76,10 +77,10 @@ public class IntentRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
-        
-        IntentRecognizer r = s.createIntentRecognizerWithStream(ais);
+
+        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -101,11 +102,11 @@ public class IntentRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
 
         String language = "en-US";
-        IntentRecognizer r = s.createIntentRecognizerWithStream(ais, language);
+        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromStreamInput(ais), language);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -123,11 +124,11 @@ public class IntentRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
 
         String language = "en-US";
-        IntentRecognizer r = s.createIntentRecognizerWithStream(ais, language);
+        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromStreamInput(ais), language);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -154,7 +155,7 @@ public class IntentRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        IntentRecognizer r = s.createIntentRecognizerWithFileInput(Settings.WaveFile);
+        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
 
         assertNotNull(r.getParameters());
@@ -174,7 +175,7 @@ public class IntentRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        IntentRecognizer r = s.createIntentRecognizerWithFileInput(Settings.WaveFile);
+        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -207,7 +208,7 @@ public class IntentRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        IntentRecognizer r = s.createIntentRecognizerWithFileInput(Settings.WaveFile);
+        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -280,7 +281,7 @@ public class IntentRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        IntentRecognizer r = s.createIntentRecognizerWithFileInput(Settings.WaveFile);
+        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -303,7 +304,7 @@ public class IntentRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        IntentRecognizer r = s.createIntentRecognizerWithFileInput(Settings.WaveFile);
+        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -339,7 +340,7 @@ public class IntentRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        IntentRecognizer r = s.createIntentRecognizerWithFileInput(Settings.WaveFile);
+        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -393,7 +394,7 @@ public class IntentRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        IntentRecognizer r = s.createIntentRecognizerWithFileInput(Settings.WaveFile);
+        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
 
         // TODO check if intent is recognized
@@ -426,7 +427,7 @@ public class IntentRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        IntentRecognizer r = s.createIntentRecognizerWithFileInput(Settings.WaveFile);
+        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
 
         LanguageUnderstandingModel model = LanguageUnderstandingModel.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisAppId, Settings.LuisRegion);
@@ -466,7 +467,7 @@ public class IntentRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        IntentRecognizer r = s.createIntentRecognizerWithFileInput(Settings.WaveFile);
+        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);

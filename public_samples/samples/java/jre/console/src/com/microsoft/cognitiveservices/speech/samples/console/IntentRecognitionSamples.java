@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutionException;
 
 // <toplevel>
 import com.microsoft.cognitiveservices.speech.*;
+import com.microsoft.cognitiveservices.speech.audio.*;
 import com.microsoft.cognitiveservices.speech.intent.*;
 // </toplevel>
 
@@ -101,7 +102,8 @@ public class IntentRecognitionSamples {
 
         // Creates an intent recognizer using file as audio input.
         // Replace with your own audio file name.
-        IntentRecognizer recognizer = factory.createIntentRecognizerWithFileInput("YourAudioFile.wav");
+        AudioConfig audioInput = AudioConfig.fromWavFileInput("YourAudioFile.wav");
+        IntentRecognizer recognizer = factory.createIntentRecognizerFromConfig(audioInput);
 
         // Creates a language understanding model using the app id, and adds specific intents from your model
         LanguageUnderstandingModel model = LanguageUnderstandingModel.fromAppId("YourLanguageUnderstandingAppId");

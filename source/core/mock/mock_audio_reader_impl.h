@@ -15,17 +15,17 @@ namespace Speech {
 namespace Impl {
 
 
-class ISpxMockAudioReaderImpl : public ISpxAudioReader, public ISpxAudioReaderRealTime
+class ISpxMockAudioReaderImpl : public ISpxAudioStream, public ISpxAudioStreamReader, public ISpxAudioStreamInitRealTime
 {
 public:
 
     ISpxMockAudioReaderImpl() = default;
 
-    // --- ISpxAudioReaderRealTime ---
+    // --- ISpxAudioStreamInitRealTime ---
     void SetRealTimePercentage(uint8_t percentage);
 
-    // --- ISpxAudioReader ---
-    uint16_t GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat);
+    // --- ISpxAudioStreamReader ---
+    uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat);
     uint32_t Read(uint8_t* pbuffer, uint32_t cbBuffer);
     void Close() { }
 

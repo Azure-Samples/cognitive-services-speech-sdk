@@ -69,11 +69,11 @@ public:
     
     void InitFromFile(const wchar_t* pszFileName) override;
     void InitFromMicrophone() override;
-    void InitFromStream(AudioInputStream* audioInputStream) override;
+    void InitFromStream(std::shared_ptr<ISpxAudioStream> stream) override;
 
     // --- ISpxAudioProcessor
 
-    void SetFormat(WAVEFORMATEX* pformat) override;
+    void SetFormat(SPXWAVEFORMATEX* pformat) override;
     void ProcessAudio(AudioData_Type data, uint32_t size) override;
 
     // --- IServiceProvider ---
@@ -212,7 +212,7 @@ private:
     void StartAudioPump(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model);
     void HotSwapAdaptersWhilePaused(RecognitionKind startKind, std::shared_ptr<ISpxKwsModel> model = nullptr);
 
-    void InformAdapterSetFormatStarting(WAVEFORMATEX* format);
+    void InformAdapterSetFormatStarting(SPXWAVEFORMATEX* format);
     void InformAdapterSetFormatStopping(SessionState comingFromState);
 
     enum AdapterDoneProcessingAudio { Keyword, Speech };

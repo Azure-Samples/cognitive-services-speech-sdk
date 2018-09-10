@@ -16,14 +16,14 @@ void CarbonTestConsole::Sample_HelloWorld_In_C()
      if (SPX_SUCCEEDED(hr))
      {
          hr = !m_endpointUri.empty()
-             ? ::SpeechFactory_FromEndpoint(m_endpointUri.c_str(), m_subscriptionKey.c_str(), &hfactory)
-             : ::SpeechFactory_FromSubscription(m_subscriptionKey.c_str(), nullptr, &hfactory);
+             ? ::speech_factory_from_endpoint(m_endpointUri.c_str(), m_subscriptionKey.c_str(), &hfactory)
+             : ::speech_factory_from_subscription(m_subscriptionKey.c_str(), nullptr, &hfactory);
      }
 
      SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
      if (SPX_SUCCEEDED(hr))
      {
-        hr = ::SpeechFactory_CreateSpeechRecognizer_With_Defaults(hfactory, &hreco);
+         hr = ::speech_factory_create_speech_recognizer_from_config(hfactory, &hreco, nullptr, SpeechOutputFormat_Simple, nullptr);
      }
 
      SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
@@ -59,6 +59,6 @@ void CarbonTestConsole::Sample_HelloWorld_In_C()
      ::Recognizer_Handle_Close(hreco);
      hreco = SPXHANDLE_INVALID;
 
-     ::SpeechFactory_Handle_Close(hfactory);
+     ::speech_factory_handle_close(hfactory);
      hfactory = SPXHANDLE_INVALID;
 }

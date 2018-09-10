@@ -17,7 +17,7 @@ namespace Speech {
 namespace Impl {
 
 
-class CSpxAudioPump : public ISpxAudioPump, public ISpxAudioPumpReaderInit
+class CSpxAudioPump : public ISpxAudioPump, public ISpxAudioPumpInit
 {
 public:
 
@@ -25,18 +25,18 @@ public:
     ~CSpxAudioPump();
 
     SPX_INTERFACE_MAP_BEGIN()
-        SPX_INTERFACE_MAP_ENTRY(ISpxAudioPumpReaderInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioPumpInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioPump)
     SPX_INTERFACE_MAP_END()
 
-    // --- ISpxAudioPumpReaderInit
+    // --- ISpxAudioPumpInit
 
-    void SetAudioReader(std::shared_ptr<ISpxAudioReader>& reader) override;
+    void SetReader(std::shared_ptr<ISpxAudioStreamReader> reader) override;
 
     // --- ISpxAudioPump
 
-    uint16_t GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat) override;
-    void SetFormat(const WAVEFORMATEX* pformat, uint16_t cbFormat) override;
+    uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) override;
+    void SetFormat(const SPXWAVEFORMATEX* pformat, uint16_t cbFormat) override;
 
     void StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor) override;
     void PausePump() override;
@@ -60,7 +60,7 @@ private:
     std::mutex m_mutex;
     std::condition_variable m_cv;
 
-    std::shared_ptr<ISpxAudioReader> m_audioReader;
+    std::shared_ptr<ISpxAudioStreamReader> m_reader;
 
     State m_state;
     State m_stateRequested;

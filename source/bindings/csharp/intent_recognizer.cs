@@ -51,9 +51,9 @@ namespace Microsoft.CognitiveServices.Speech.Intent
             Parameters = new RecognizerParametersImpl(recoImpl.Parameters);
         }
 
-        internal IntentRecognizer(Internal.IntentRecognizer recoImpl, AudioInputStream stream) : this(recoImpl)
+        internal IntentRecognizer(Internal.IntentRecognizer recoImpl, Audio.AudioConfig audioIn) : this(recoImpl)
         {
-            streamInput = stream;
+            this.audioInput = audioIn;
         }
 
         /// <summary>
@@ -176,7 +176,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         private readonly IntentHandlerImpl intermediateResultHandler;
         private readonly IntentHandlerImpl finalResultHandler;
         private readonly ErrorHandlerImpl errorHandler;
-        private readonly AudioInputStream streamInput;
+        private readonly Audio.AudioConfig audioInput;
 
         // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         private class IntentHandlerImpl : Internal.IntentEventListener

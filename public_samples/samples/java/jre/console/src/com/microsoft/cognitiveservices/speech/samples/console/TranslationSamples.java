@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 
 // <toplevel>
 import com.microsoft.cognitiveservices.speech.*;
+import com.microsoft.cognitiveservices.speech.audio.*;
 import com.microsoft.cognitiveservices.speech.translation.*;
 // </toplevel>
 
@@ -37,7 +38,7 @@ public class TranslationSamples {
         String GermanVoice = "de-DE-Hedda";
 
         // Creates a translation recognizer using microphone as audio input, and requires voice output.
-        TranslationRecognizer recognizer = factory.createTranslationRecognizer(fromLanguage, toLanguages, GermanVoice);
+        TranslationRecognizer recognizer = factory.createTranslationRecognizerFromConfig(fromLanguage, toLanguages, GermanVoice);
         {
             // Subscribes to events.
             recognizer.IntermediateResultReceived.addEventListener((s, e) -> {
@@ -118,7 +119,8 @@ public class TranslationSamples {
 
         // Creates a translation recognizer using file as audio input.
         // Replace with your own audio file name.
-        TranslationRecognizer recognizer = factory.createTranslationRecognizerWithFileInput("YourAudioFile.wav", fromLanguage, toLanguages);
+        AudioConfig audioInput = AudioConfig.fromWavFileInput("YourAudioFile.wav");
+        TranslationRecognizer recognizer = factory.createTranslationRecognizerFromConfig(audioInput, fromLanguage, toLanguages);
         {
             // Subscribes to events.
             recognizer.IntermediateResultReceived.addEventListener((s, e) -> {
@@ -203,10 +205,11 @@ public class TranslationSamples {
 
         // Create an audio stream from a wav file.
         // Replace with your own audio file name.
-        AudioInputStream stream = new WavStream(new FileInputStream("YourAudioFile.wav"));
+        PullAudioInputStreamCallback callback = new WavStream(new FileInputStream("YourAudioFile.wav"));
+        AudioConfig audioInput = AudioConfig.fromStreamInput(callback);
 
         // Creates a translation recognizer using audio stream as input.
-        TranslationRecognizer recognizer = factory.createTranslationRecognizerWithStream(stream, fromLanguage, toLanguages);
+        TranslationRecognizer recognizer = factory.createTranslationRecognizerFromConfig(audioInput, fromLanguage, toLanguages);
         {
             // Subscribes to events.
             recognizer.IntermediateResultReceived.addEventListener((s, e) -> {

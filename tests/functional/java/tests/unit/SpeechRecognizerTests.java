@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.junit.Ignore;
 
 
+import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.RecognitionEventType;
 import com.microsoft.cognitiveservices.speech.RecognitionStatus;
 import com.microsoft.cognitiveservices.speech.Recognizer;
@@ -63,7 +64,7 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
+        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -77,10 +78,10 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
         
-        SpeechRecognizer r = s.createSpeechRecognizerWithStream(ais);
+        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -102,10 +103,10 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
         
-        SpeechRecognizer r = s.createSpeechRecognizerWithStream(ais);
+        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
 
         assertNotNull(r.getDeploymentId());
@@ -119,10 +120,10 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
         
-        SpeechRecognizer r = s.createSpeechRecognizerWithStream(ais);
+        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
 
         assertNotNull(r.getDeploymentId());
@@ -145,10 +146,10 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
 
-        SpeechRecognizer r = s.createSpeechRecognizerWithStream(ais);
+        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
 
         assertNotNull(r.getLanguage());
@@ -162,11 +163,11 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
 
         String language = "de-DE";
-        SpeechRecognizer r = s.createSpeechRecognizerWithStream(ais, language);
+        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromStreamInput(ais), language);
         assertNotNull(r);
 
         assertNotNull(r.getLanguage());
@@ -185,7 +186,7 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
+        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
 
         assertEquals(r.getOutputFormat(), OutputFormat.Simple);
@@ -200,7 +201,7 @@ public class SpeechRecognizerTests {
         assertNotNull(s);
 
         String language = "de-DE";
-        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile, language, OutputFormat.Detailed);
+        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), language, OutputFormat.Detailed);
         assertNotNull(r);
 
         assertEquals(r.getOutputFormat(), OutputFormat.Detailed);
@@ -218,7 +219,7 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
+        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
 
         assertNotNull(r.getParameters());
@@ -238,7 +239,7 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
+        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -267,7 +268,7 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
+        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -354,7 +355,7 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
+        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -377,7 +378,7 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
+        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -412,7 +413,7 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
+        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -465,7 +466,7 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
+        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -490,7 +491,7 @@ public class SpeechRecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
+        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertTrue(r instanceof Recognizer);
                 

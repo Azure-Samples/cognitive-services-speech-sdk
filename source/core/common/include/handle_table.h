@@ -191,6 +191,20 @@ public:
         return (CSpxHandleTable<T, Handle>*) (*s_tables)[name];
     }
 
+    template<class T, class Handle>
+    static std::shared_ptr<T> GetPtr(Handle handle)
+    {
+        auto handletable = Get<T, Handle>();
+        return (*handletable)[handle];
+    }
+
+    template<class T, class Handle>
+    static Handle TrackHandle(std::shared_ptr<T> t)
+    {
+        auto handletable = Get<T, Handle>();
+        return handletable->TrackHandle(t);
+    }
+
     static void Term()
     {
         // TODO: on OSX statics are destroyed before LibUnload is invoked,

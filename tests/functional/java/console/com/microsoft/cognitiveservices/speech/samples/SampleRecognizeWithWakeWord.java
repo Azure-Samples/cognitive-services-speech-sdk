@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
 import com.microsoft.cognitiveservices.speech.SessionEventType;
 import com.microsoft.cognitiveservices.speech.SpeechFactory;
@@ -19,6 +20,7 @@ public class SampleRecognizeWithWakeWord implements Runnable, Stoppable {
     private final List<String> content = new ArrayList<>();
     private boolean continuousListeningStarted = false;
     private SpeechRecognizer reco = null;
+    private AudioConfig audioInput = null;
     private String buttonText = "";
 
     @Override
@@ -31,6 +33,7 @@ public class SampleRecognizeWithWakeWord implements Runnable, Stoppable {
             Future<?> task = reco.stopKeywordRecognitionAsync();
             SampleSettings.setOnTaskCompletedListener(task, result -> {
                 reco.close();
+                audioInput.close();
 
                 System.out.println("Continuous recognition stopped.");
                 System.out.println(buttonText);
@@ -57,8 +60,9 @@ public class SampleRecognizeWithWakeWord implements Runnable, Stoppable {
         content.clear();
         content.add("");
         try {
-            // Note: to use the microphone, replace the parameter with "new MicrophoneAudioInputStream()"
-            reco = factory.createSpeechRecognizerWithFileInput(SampleSettings.WaveFile);
+            // Note: to use the microphone, use "AudioConfig.fromDefaultMicrophoneInput()"
+            audioInput = AudioConfig.fromWavFileInput(SampleSettings.WavFile);
+            reco = factory.createSpeechRecognizerFromConfig(audioInput);
 
             reco.SessionEvent.addEventListener((o, sessionEventArgs) -> {
 

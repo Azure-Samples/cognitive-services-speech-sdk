@@ -15,22 +15,26 @@ set(HEADERS "${INC_DIR}/audio_sys.h")
 set(HEADERS_PRIVATE
     "${SRC_DIR}/stdafx.h"
     "${SRC_DIR}/audio_pump.h"
+    "${SRC_DIR}/audio_config.h"
+    "${SRC_DIR}/pull_audio_input_stream.h"
+    "${SRC_DIR}/push_audio_input_stream.h"
     "${SRC_DIR}/create_module_object.h"
     "${SRC_DIR}/microphone.h"
     "${SRC_DIR}/microphone_pump_base.h"
     "${SRC_DIR}/interactive_microphone.h"
     "${SRC_DIR}/wav_file_reader.h"
     "${SRC_DIR}/wav_file_pump.h"
-    "${SRC_DIR}/stream_pump.h"
     )
 
 set(SOURCES
     "${SRC_DIR}/audio_pump.cpp"
+    "${SRC_DIR}/audio_config.cpp"
+    "${SRC_DIR}/pull_audio_input_stream.cpp"
+    "${SRC_DIR}/push_audio_input_stream.cpp"
     "${SRC_DIR}/create_module_object.cpp"
     "${SRC_DIR}/interactive_microphone.cpp"
     "${SRC_DIR}/wav_file_reader.cpp"
     "${SRC_DIR}/wav_file_pump.cpp"
-    "${SRC_DIR}/stream_pump.cpp"
     "${SRC_DIR}/microphone_pump_base.cpp"
     )
 

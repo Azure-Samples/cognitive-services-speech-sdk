@@ -37,6 +37,13 @@ namespace Impl {
             return static_cast<x*>(this);                                               \
         }
 
+#define SPX_INTERFACE_MAP_ENTRY2(x, y)                                                  \
+        if (PAL::stricmp(PAL::GetTypeName<x>().c_str(), interfaceName) == 0)            \
+        {                                                                               \
+            SPX_DBG_TRACE_INTERFACE_MAP_FOUND_IT();                                     \
+            return static_cast<x*>(static_cast<y*>(this));                              \
+        }
+
 #define SPX_INTERFACE_MAP_END()                                                         \
         return nullptr;                                                                 \
     };

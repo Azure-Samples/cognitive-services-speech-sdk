@@ -19,8 +19,8 @@ class ISpxDelegateAudioPumpImpl : public ISpxAudioPump
 {
     // --- ISpxAudioPump
 
-    uint16_t GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat) override { return m_delegateToAudioPump->GetFormat(pformat, cbFormat); }
-    void SetFormat(const WAVEFORMATEX* pformat, uint16_t cbFormat) override { m_delegateToAudioPump->SetFormat(pformat, cbFormat); }
+    uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) override { return m_delegateToAudioPump->GetFormat(pformat, cbFormat); }
+    void SetFormat(const SPXWAVEFORMATEX* pformat, uint16_t cbFormat) override { m_delegateToAudioPump->SetFormat(pformat, cbFormat); }
 
     void StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor) override { m_delegateToAudioPump->StartPump(pISpxAudioProcessor); }
     void PausePump() override { m_delegateToAudioPump->PausePump(); }

@@ -21,13 +21,13 @@ void ISpxMockAudioReaderImpl::SetRealTimePercentage(uint8_t percentage)
     m_simulateRealtimePercentage = percentage;
 }
 
-uint16_t ISpxMockAudioReaderImpl::GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat)
+uint16_t ISpxMockAudioReaderImpl::GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat)
 {
-    uint16_t cbFormatRequired = sizeof(WAVEFORMATEX);
+    uint16_t cbFormatRequired = sizeof(SPXWAVEFORMATEX);
 
     if (pformat != nullptr) // Calling with GetFormat(nullptr, ???) is valid; we don't copy bits, only return sizeof block required
     {
-        WAVEFORMATEX format;
+        SPXWAVEFORMATEX format;
         format.wFormatTag = WAVE_FORMAT_PCM;
         format.nChannels = 1;
         format.nSamplesPerSec = 16000;

@@ -19,6 +19,7 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 using Windows.Storage;
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
@@ -109,46 +110,49 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
                 // Creates an instance of a speech factory with specified and service region (e.g., "westus").
                 var factory = SpeechFactory.FromSubscription(this.SubscriptionKey, this.Region);
                 // Creates a speech recognizer using file as audio input. The default language is "en-us".
-                using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(file.Path, this.RecognitionLanguage))
+                using (var audioInput = AudioConfig.FromWavFileInput(file.Path))
                 {
-                    // Subscribes to events.
-                    recognizer.IntermediateResultReceived += (s, e) =>
+                    using (var recognizer = factory.CreateSpeechRecognizerFromConfig(audioInput, this.RecognitionLanguage))
                     {
-                        NotifyUser(e.Result.Text, NotifyType.StatusMessage);
-                    };
-                    recognizer.FinalResultReceived += (s, e) =>
-                    {
-                        string str;
-                        if (e.Result.RecognitionStatus == RecognitionStatus.Recognized)
+                        // Subscribes to events.
+                        recognizer.IntermediateResultReceived += (s, e) =>
                         {
-                            str = $"Final result: Status: {e.Result.RecognitionStatus.ToString()}, Text: {e.Result.Text}.";
-                        }
-                        else
+                            NotifyUser(e.Result.Text, NotifyType.StatusMessage);
+                        };
+                        recognizer.FinalResultReceived += (s, e) =>
                         {
-                            str = $"Final result: Status: {e.Result.RecognitionStatus.ToString()}, FailureReason: {e.Result.RecognitionFailureReason}.";
-                        }
-                        NotifyUser(str, NotifyType.StatusMessage);
-                    };
-                    recognizer.RecognitionErrorRaised += (s, e) =>
-                    {
-                        NotifyUser($"An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}", NotifyType.StatusMessage);
-                    };
-                    recognizer.OnSessionEvent += (s, e) =>
-                    {
-                        NotifyUser($"Session event. Event: {e.EventType.ToString()}.", NotifyType.StatusMessage);
-                        // Stops translation when session stop is detected.
-                        if (e.EventType == SessionEventType.SessionStoppedEvent)
+                            string str;
+                            if (e.Result.RecognitionStatus == RecognitionStatus.Recognized)
+                            {
+                                str = $"Final result: Status: {e.Result.RecognitionStatus.ToString()}, Text: {e.Result.Text}.";
+                            }
+                            else
+                            {
+                                str = $"Final result: Status: {e.Result.RecognitionStatus.ToString()}, FailureReason: {e.Result.RecognitionFailureReason}.";
+                            }
+                            NotifyUser(str, NotifyType.StatusMessage);
+                        };
+                        recognizer.RecognitionErrorRaised += (s, e) =>
                         {
-                            NotifyUser($"Stop recognition.", NotifyType.StatusMessage);
-                            stopRecognitionTaskCompletionSource.TrySetResult(0);
-                        }
-                    };
-                    // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
-                    await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
-                    // Waits for completion.
-                    await stopRecognitionTaskCompletionSource.Task.ConfigureAwait(false);
-                    // Stops recognition.
-                    await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                            NotifyUser($"An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}", NotifyType.StatusMessage);
+                        };
+                        recognizer.OnSessionEvent += (s, e) =>
+                        {
+                            NotifyUser($"Session event. Event: {e.EventType.ToString()}.", NotifyType.StatusMessage);
+                            // Stops translation when session stop is detected.
+                            if (e.EventType == SessionEventType.SessionStoppedEvent)
+                            {
+                                NotifyUser($"Stop recognition.", NotifyType.StatusMessage);
+                                stopRecognitionTaskCompletionSource.TrySetResult(0);
+                            }
+                        };
+                        // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                        await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                        // Waits for completion.
+                        await stopRecognitionTaskCompletionSource.Task.ConfigureAwait(false);
+                        // Stops recognition.
+                        await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                    }
                 }
             }
             else
@@ -159,7 +163,7 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
         private async void SpeechRecognitionFromStream_ButtonClicked(object sender, RoutedEventArgs e)
         {
             stopRecognitionTaskCompletionSource = new TaskCompletionSource<int>();
-            AudioInputStream audioStream = null;
+            AudioConfig audioInput = null;
             BinaryReader reader = null;
             Stream stream = null;
 
@@ -188,12 +192,12 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
                 reader = new BinaryReader(stream);
 
                 // Create an audio stream from a wav file.
-                audioStream = MicrosoftSpeechSDKSamples.Helper.OpenWaveFile(reader);
+                audioInput = MicrosoftSpeechSDKSamples.Helper.OpenWaveFile(reader);
 
                 // Creates an instance of a speech factory with specified and service region (e.g., "westus").
                 var factory = SpeechFactory.FromSubscription(this.SubscriptionKey, this.Region);
                 // Creates a speech recognizer using file as audio input. The default language is "en-us".
-                using (var recognizer = factory.CreateSpeechRecognizerWithStream(audioStream, this.RecognitionLanguage))
+                using (var recognizer = factory.CreateSpeechRecognizerFromConfig(audioInput, this.RecognitionLanguage))
                 {
                     // Subscribes to events.
                     recognizer.IntermediateResultReceived += (s, ee) =>
@@ -245,9 +249,9 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
                 {
                     reader.Dispose();
                 }
-                if (audioStream != null)
+                if (audioInput != null)
                 {
-                    audioStream.Dispose();
+                    audioInput.Dispose();
                 }
                 if(stream != null)
                 {

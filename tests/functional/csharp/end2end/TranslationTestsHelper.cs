@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Translation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -22,21 +23,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             timeout = TimeSpan.FromMinutes(6);
         }
 
-        TranslationRecognizer CreateTranslationRecognizer(string path, string fromLanguage, List<string> toLanguages, string voice=null)
+        TranslationRecognizer CreateTranslationRecognizerFromConfig(string path, string fromLanguage, List<string> toLanguages, string voice=null)
         {
+            var audioInput = AudioConfig.FromWavFileInput(path);
             if (string.IsNullOrEmpty(voice))
             {
-                return this.factory.CreateTranslationRecognizerWithFileInput(path, fromLanguage, toLanguages);
+                return this.factory.CreateTranslationRecognizerFromConfig(audioInput, fromLanguage, toLanguages);
             }
             else
             {
-                return this.factory.CreateTranslationRecognizerWithFileInput(path, fromLanguage, toLanguages, voice);
+                return this.factory.CreateTranslationRecognizerFromConfig(audioInput, fromLanguage, toLanguages, voice);
             }
         }
 
         public async Task<EventArgs> GetTranslationFinalResultEvents(string path, string fromLanguage, List<string> toLanguages)
         {
-            using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages)))
+            using (var recognizer = TrackSessionId(CreateTranslationRecognizerFromConfig(path, fromLanguage, toLanguages)))
             {
                 EventArgs eventArgs = null;
                 recognizer.FinalResultReceived += (s, e) => eventArgs = e;
@@ -49,7 +51,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public async Task<TranslationTextResult> GetTranslationFinalResult(string path, string fromLanguage, List<string> toLanguages)
         {
-            using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages)))
+            using (var recognizer = TrackSessionId(CreateTranslationRecognizerFromConfig(path, fromLanguage, toLanguages)))
             {
                 TranslationTextResult result = null;
                 await Task.WhenAny(recognizer.RecognizeAsync().ContinueWith(t => result = t.Result), Task.Delay(timeout));
@@ -59,7 +61,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public async Task<Dictionary<ResultType, List<EventArgs>>> GetTranslationFinalResultContinuous(string path, string fromLanguage, List<string> toLanguages, string voice=null)
         {
-            using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages, voice)))
+            using (var recognizer = TrackSessionId(CreateTranslationRecognizerFromConfig(path, fromLanguage, toLanguages, voice)))
             {
                 var tcs = new TaskCompletionSource<bool>();
                 var receivedFinalResultEvents = new Dictionary<ResultType, List<EventArgs>>(); ;
@@ -109,7 +111,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public async Task<List<List<TranslationTextResultEventArgs>>> GetTranslationIntermediateResultContinuous(string path, string fromLanguage, List<string> toLanguages)
         {
-            using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages)))
+            using (var recognizer = TrackSessionId(CreateTranslationRecognizerFromConfig(path, fromLanguage, toLanguages)))
             {
                 var tcs = new TaskCompletionSource<bool>();
                 var listOfIntermediateResults = new List<List<TranslationTextResultEventArgs>>();

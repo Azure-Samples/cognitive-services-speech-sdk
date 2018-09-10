@@ -8,9 +8,14 @@
 #pragma once
 
 #include <speechapi_cxx_common.h>
+#include <speechapi_cxx_smart_handle.h>
 
 #include <speechapi_cxx_properties.h>
-#include <speechapi_cxx_audioinputstream.h>
+
+#include <speechapi_cxx_audio_stream_format.h>
+#include <speechapi_cxx_audio_stream.h>
+#include <speechapi_cxx_audio_config.h>
+
 #include <speechapi_cxx_eventargs.h>
 #include <speechapi_cxx_eventsignal.h>
 

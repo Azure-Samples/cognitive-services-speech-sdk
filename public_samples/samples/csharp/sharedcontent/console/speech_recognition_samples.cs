@@ -7,6 +7,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 // </toplevel>
 
 namespace MicrosoftSpeechSDKSamples
@@ -66,7 +67,7 @@ namespace MicrosoftSpeechSDKSamples
             // Replace the language with your language in BCP-47 format, e.g. en-US.
             var lang = "de-DE";
             // Requests detailed output format.
-            using (var recognizer = factory.CreateSpeechRecognizer(lang, OutputFormat.Detailed))
+            using (var recognizer = factory.CreateSpeechRecognizerFromConfig(AudioConfig.FromDefaultMicrophoneInput(), lang, OutputFormat.Detailed))
             {
                 // Starts recognizing.
                 Console.WriteLine($"Say something in {lang} ...");
@@ -159,60 +160,63 @@ namespace MicrosoftSpeechSDKSamples
 
             // Creates a speech recognizer using file as audio input.
             // Replace with your own audio file name.
-            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(@"whatstheweatherlike.wav"))
+            using (var audioInput = AudioConfig.FromWavFileInput(@"whatstheweatherlike.wav"))
             {
-                // Subscribes to events.
-                recognizer.IntermediateResultReceived += (s, e) => {
-                    Console.WriteLine($"\n    Partial result: {e.Result.Text}.");
-                };
+                using (var recognizer = factory.CreateSpeechRecognizerFromConfig(audioInput))
+                {
+                    // Subscribes to events.
+                    recognizer.IntermediateResultReceived += (s, e) => {
+                        Console.WriteLine($"\n    Partial result: {e.Result.Text}.");
+                    };
 
-                recognizer.FinalResultReceived += (s, e) => {
-                    var result = e.Result;
-                    Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-                    switch (result.RecognitionStatus)
-                    {
-                        case RecognitionStatus.Recognized:
-                            Console.WriteLine($"\n    Final result: Text: {result.Text}, Offset: {result.OffsetInTicks}, Duration: {result.Duration}.");
-                            break;
-                        case RecognitionStatus.InitialSilenceTimeout:
-                            Console.WriteLine("The start of the audio stream contains only silence, and the service timed out waiting for speech.\n");
-                            break;
-                        case RecognitionStatus.InitialBabbleTimeout:
-                            Console.WriteLine("The start of the audio stream contains only noise, and the service timed out waiting for speech.\n");
-                            break;
-                        case RecognitionStatus.NoMatch:
-                            Console.WriteLine("The speech was detected in the audio stream, but no words from the target language were matched. Possible reasons could be wrong setting of the target language or wrong format of audio stream.\n");
-                            break;
-                        case RecognitionStatus.Canceled:
-                            Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
-                            break;
-                    }
-                };
+                    recognizer.FinalResultReceived += (s, e) => {
+                        var result = e.Result;
+                        Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
+                        switch (result.RecognitionStatus)
+                        {
+                            case RecognitionStatus.Recognized:
+                                Console.WriteLine($"\n    Final result: Text: {result.Text}, Offset: {result.OffsetInTicks}, Duration: {result.Duration}.");
+                                break;
+                            case RecognitionStatus.InitialSilenceTimeout:
+                                Console.WriteLine("The start of the audio stream contains only silence, and the service timed out waiting for speech.\n");
+                                break;
+                            case RecognitionStatus.InitialBabbleTimeout:
+                                Console.WriteLine("The start of the audio stream contains only noise, and the service timed out waiting for speech.\n");
+                                break;
+                            case RecognitionStatus.NoMatch:
+                                Console.WriteLine("The speech was detected in the audio stream, but no words from the target language were matched. Possible reasons could be wrong setting of the target language or wrong format of audio stream.\n");
+                                break;
+                            case RecognitionStatus.Canceled:
+                                Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
+                                break;
+                        }
+                    };
 
-                recognizer.RecognitionErrorRaised += (s, e) => {
-                    Console.WriteLine($"\n    An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}");
-                    stopRecognition.TrySetResult(0);
-                };
-
-                recognizer.OnSessionEvent += (s, e) => {
-                    Console.WriteLine($"\n    Session event. Event: {e.EventType.ToString()}.");
-                    // Stops recognition when session stop is detected.
-                    if (e.EventType == SessionEventType.SessionStoppedEvent)
-                    {
-                        Console.WriteLine($"\nStop recognition.");
+                    recognizer.RecognitionErrorRaised += (s, e) => {
+                        Console.WriteLine($"\n    An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}");
                         stopRecognition.TrySetResult(0);
-                    }
-                };
+                    };
 
-                // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
-                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                    recognizer.OnSessionEvent += (s, e) => {
+                        Console.WriteLine($"\n    Session event. Event: {e.EventType.ToString()}.");
+                        // Stops recognition when session stop is detected.
+                        if (e.EventType == SessionEventType.SessionStoppedEvent)
+                        {
+                            Console.WriteLine($"\nStop recognition.");
+                            stopRecognition.TrySetResult(0);
+                        }
+                    };
 
-                // Waits for completion.
-                // Use Task.WaitAny to keep the task rooted.
-                Task.WaitAny(new[] { stopRecognition.Task });
+                    // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                    await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
-                // Stops recognition.
-                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                    // Waits for completion.
+                    // Use Task.WaitAny to keep the task rooted.
+                    Task.WaitAny(new[] { stopRecognition.Task });
+
+                    // Stops recognition.
+                    await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                }
             }
             // </recognitionContinuousWithFile>
         }
@@ -229,10 +233,10 @@ namespace MicrosoftSpeechSDKSamples
 
             // Create an audio stream from a wav file.
             // Replace with your own audio file name.
-            using (var stream = Helper.OpenWaveFile(@"whatstheweatherlike.wav"))
+            using (var audioInput = Helper.OpenWavFile(@"whatstheweatherlike.wav"))
             {
                 // Creates a speech recognizer using audio stream input.
-                using (var recognizer = factory.CreateSpeechRecognizerWithStream(stream))
+                using (var recognizer = factory.CreateSpeechRecognizerFromConfig(audioInput))
                 {
                     // Subscribes to events.
                     recognizer.IntermediateResultReceived += (s, e) =>

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
+import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
 import com.microsoft.cognitiveservices.speech.SessionEventType;
 import com.microsoft.cognitiveservices.speech.SpeechFactory;
@@ -21,6 +22,7 @@ public class SampleRecognizeIntentWithWakeWord implements Runnable, Stoppable {
     private final List<String> content = new ArrayList<>();
     private boolean continuousListeningStarted = false;
     private IntentRecognizer reco = null;
+    private AudioConfig audioInput = null;
     private String buttonText = "";
 
     @Override
@@ -31,6 +33,7 @@ public class SampleRecognizeIntentWithWakeWord implements Runnable, Stoppable {
                 Future<?> task = reco.stopKeywordRecognitionAsync();
                 SampleSettings.setOnTaskCompletedListener(task, result -> {
                     reco.close();
+                    audioInput.close();
 
                     System.out.println("Continuous recognition stopped.");
                     System.out.println(buttonText);
@@ -63,9 +66,11 @@ public class SampleRecognizeIntentWithWakeWord implements Runnable, Stoppable {
         content.add("");
         content.add("");
         try {
-            // Note: to use the microphone, replace the parameter with "new MicrophoneAudioInputStream()"
-            reco = factory.createIntentRecognizerWithFileInput(SampleSettings.WaveFile);
-            
+
+            // Note: to use the microphone, use "AudioConfig.fromDefaultMicrophoneInput()"
+            audioInput = AudioConfig.fromWavFileInput(SampleSettings.WavFile);
+            reco = factory.createIntentRecognizerFromConfig(audioInput);
+
             LanguageUnderstandingModel intentModel = LanguageUnderstandingModel.fromSubscription(SampleSettings.LuisRegion,
                     SampleSettings.LuisSubscriptionKey, SampleSettings.LuisAppId);
             for (Map.Entry<String, String> entry : intentIdMap.entrySet()) {

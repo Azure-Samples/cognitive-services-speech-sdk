@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Globalization;
 
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Intent;
 using Microsoft.CognitiveServices.Speech.Translation;
 
@@ -120,87 +121,46 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A speech recognizer instance.</returns>
         public SpeechRecognizer CreateSpeechRecognizer(string language)
         {
-            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizer(language));
+            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerFromConfig(language));
         }
 
         /// <summary>
-        /// Creates a speech recognizer using the default microphone input for a specified language and a specified output format.
+        /// Creates a speech recognizer using the specified audio input configuration.
         /// </summary>
+        /// <param name="audioInput">Specifies the audio input configuration.</param>
+        /// <returns>A speech recognizer instance.</returns>
+        public SpeechRecognizer CreateSpeechRecognizerFromConfig(AudioConfig audioInput)
+        {
+            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerFromConfig(audioInput.configImpl), audioInput);
+        }
+
+        /// <summary>
+        /// Creates a speech recognizer using the specified audio input configuration for a specified language.
+        /// </summary>
+        /// <param name="audioInput">Specifies the audio input configuration.</param>
+        /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
+        /// <returns>A speech recognizer instance.</returns>
+        public SpeechRecognizer CreateSpeechRecognizerFromConfig(AudioConfig audioInput, string language)
+        {
+            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerFromConfig(language, audioInput.configImpl), audioInput);
+        }
+
+        /// <summary>
+        /// Creates a speech recognizer using the specified audio input configuration for a specified language and a specified output format.
+        /// </summary>
+        /// <param name="audioInput">Specifies the audio input configuration.</param>
         /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
         /// <param name="format">Output format: simple or detailed.</param>
         /// <returns>A speech recognizer instance.</returns>
-        public SpeechRecognizer CreateSpeechRecognizer(string language, OutputFormat format)
+        public SpeechRecognizer CreateSpeechRecognizerFromConfig(AudioConfig audioInput, string language, OutputFormat format)
         {
-            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizer(language,
-                format == OutputFormat.Simple ? Internal.OutputFormat.Simple : Internal.OutputFormat.Detailed));
-        }
-
-        /// <summary>
-        /// Creates a speech recognizer using the specified file as audio input.
-        /// </summary>
-        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
-        /// <returns>A speech recognizer instance.</returns>
-        public SpeechRecognizer CreateSpeechRecognizerWithFileInput(string audioFile)
-        {
-            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithFileInput(audioFile));
-        }
-
-        /// <summary>
-        /// Creates a speech recognizer using the specified file as audio input for a specified language.
-        /// </summary>
-        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
-        /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
-        /// <returns>A speech recognizer instance.</returns>
-        public SpeechRecognizer CreateSpeechRecognizerWithFileInput(string audioFile, string language)
-        {
-            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithFileInput(audioFile, language));
-        }
-
-        /// <summary>
-        /// Creates a speech recognizer using the specified file as audio input for a specified language and a specified output format.
-        /// </summary>
-        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
-        /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
-        /// <param name="format">Output format: simple or detailed.</param>
-        /// <returns>A speech recognizer instance.</returns>
-        public SpeechRecognizer CreateSpeechRecognizerWithFileInput(string audioFile, string language, OutputFormat format)
-        {
-            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithFileInput(audioFile, language,
-                format == OutputFormat.Simple ? Internal.OutputFormat.Simple : Internal.OutputFormat.Detailed));
-        }
-
-        /// <summary>
-        /// Creates a speech recognizer using the specified input stream as audio input.
-        /// </summary>
-        /// <param name="audioStream">Specifies the audio input stream.</param>
-        /// <returns>A speech recognizer instance.</returns>
-        public SpeechRecognizer CreateSpeechRecognizerWithStream(AudioInputStream audioStream)
-        {
-            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithStreamImpl(audioStream.Forwarder), audioStream);
-        }
-
-        /// <summary>
-        /// Creates a speech recognizer using the specified input stream as audio input for a specified language.
-        /// </summary>
-        /// <param name="audioStream">Specifies the audio input stream.</param>
-        /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
-        /// <returns>A speech recognizer instance.</returns>
-        public SpeechRecognizer CreateSpeechRecognizerWithStream(AudioInputStream audioStream, string language)
-        {
-            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithStreamImpl(audioStream.Forwarder, language), audioStream);
-        }
-
-        /// <summary>
-        /// Creates a speech recognizer using the specified input stream as audio input for a specified language and a specified output format.
-        /// </summary>
-        /// <param name="audioStream">Specifies the audio input stream.</param>
-        /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
-        /// <param name="format">Output format: simple or detailed.</param>
-        /// <returns>A speech recognizer instance.</returns>
-        public SpeechRecognizer CreateSpeechRecognizerWithStream(AudioInputStream audioStream, string language, OutputFormat format)
-        {
-            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerWithStreamImpl(audioStream.Forwarder, language,
-                format == OutputFormat.Simple ? Internal.OutputFormat.Simple : Internal.OutputFormat.Detailed), audioStream);
+            return new SpeechRecognizer(factoryImpl.CreateSpeechRecognizerFromConfig(
+                                            language,
+                                            format == OutputFormat.Simple
+                                                ? Internal.OutputFormat.Simple
+                                                : Internal.OutputFormat.Detailed,
+                                            audioInput.configImpl),
+                                        audioInput);
         }
 
         /// <summary>
@@ -217,52 +177,30 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
         /// <returns>An intent recognizer instance.</returns>
-        public IntentRecognizer CreateIntentRecognizer(string language)
+        public IntentRecognizer CreateIntentRecognizerFromConfig(string language)
         {
-            return new IntentRecognizer(factoryImpl.CreateIntentRecognizer(language));
+            return new IntentRecognizer(factoryImpl.CreateIntentRecognizerFromConfig(language));
         }
 
         /// <summary>
-        /// Creates an intent recognizer using the specified file as audio input.
+        /// Creates an intent recognizer using the specified audio input configuration.
         /// </summary>
-        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
+        /// <param name="audioInput">Specifies the audio input configuration.</param>
         /// <returns>An intent recognizer instance</returns>
-        public IntentRecognizer CreateIntentRecognizerWithFileInput(string audioFile)
+        public IntentRecognizer CreateIntentRecognizerFromConfig(AudioConfig audioInput)
         {
-            return new IntentRecognizer(factoryImpl.CreateIntentRecognizerWithFileInput(audioFile));
+            return new IntentRecognizer(factoryImpl.CreateIntentRecognizerFromConfig(audioInput.configImpl), audioInput);
         }
 
         /// <summary>
-        /// Creates an intent recognizer using the specified file as audio input for a specified language.
+        /// Creates an intent recognizer using the specified audio input configuration for a specified language.
         /// </summary>
+        /// <param name="audioInput">Specifies the audio input configuration.</param>
         /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
-        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
         /// <returns>An intent recognizer instance</returns>
-        public IntentRecognizer CreateIntentRecognizerWithFileInput(string audioFile, string language)
+        public IntentRecognizer CreateIntentRecognizerFromConfig(AudioConfig audioInput, string language)
         {
-            return new IntentRecognizer(factoryImpl.CreateIntentRecognizerWithFileInput(audioFile, language));
-        }
-
-        /// <summary>
-        /// Creates an intent recognizer using the specified input stream as audio input.
-        /// </summary>
-        /// <param name="audioStream">Specifies the audio input stream.</param>
-        /// <returns>An intent recognizer instance.</returns>
-        public IntentRecognizer CreateIntentRecognizerWithStream(AudioInputStream audioStream)
-        {
-            return new IntentRecognizer(factoryImpl.CreateIntentRecognizerWithStreamImpl(audioStream.Forwarder), audioStream);
-        }
-
-
-        /// <summary>
-        /// Creates an intent recognizer using the specified input stream as audio input for a specified language.
-        /// </summary>
-        /// <param name="audioStream">Specifies the audio input stream.</param>
-        /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
-        /// <returns>An intent recognizer instance.</returns>
-        public IntentRecognizer CreateIntentRecognizerWithStream(AudioInputStream audioStream, string language)
-        {
-            return new IntentRecognizer(factoryImpl.CreateIntentRecognizerWithStreamImpl(audioStream.Forwarder, language), audioStream);
+            return new IntentRecognizer(factoryImpl.CreateIntentRecognizerFromConfig(language, audioInput.configImpl), audioInput);
         }
 
         /// <summary>
@@ -271,9 +209,9 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="sourceLanguage">The spoken language that needs to be translated.</param>
         /// <param name="targetLanguages">The target languages of translation.</param>
         /// <returns>A translation recognizer instance.</returns>
-        public TranslationRecognizer CreateTranslationRecognizer(string sourceLanguage, IEnumerable<string> targetLanguages)
+        public TranslationRecognizer CreateTranslationRecognizerFromConfig(string sourceLanguage, IEnumerable<string> targetLanguages)
         {
-            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizer(sourceLanguage, AsStringVector(targetLanguages)));
+            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerFromConfig(sourceLanguage, AsStringVector(targetLanguages)));
         }
 
         /// <summary>
@@ -283,59 +221,34 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="targetLanguages">The target languages of translation.</param>
         /// <param name="voice">Specifies the name of voice tag if a synthesized audio output is desired.</param>
         /// <returns>A translation recognizer instance.</returns>
-        public TranslationRecognizer CreateTranslationRecognizer(string sourceLanguage, IEnumerable<string> targetLanguages, string voice)
+        public TranslationRecognizer CreateTranslationRecognizerFromConfig(string sourceLanguage, IEnumerable<string> targetLanguages, string voice)
         {
-            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizer(sourceLanguage, AsStringVector(targetLanguages), voice));
+            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerFromConfig(sourceLanguage, AsStringVector(targetLanguages), voice));
         }
 
         /// <summary>
-        /// Creates a translation recognizer using the specified file as audio input for a specified source language and a specified list of target languages.
+        /// Creates a translation recognizer using the specified audio input configuration for a specified source language and a specified list of target languages.
         /// </summary>
-        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
+        /// <param name="audioInput">Specifies the audio input configuration.</param>
         /// <param name="sourceLanguage">The spoken language that needs to be translated.</param>
         /// <param name="targetLanguages">The target languages of translation.</param>
         /// <returns>A translation recognizer instance.</returns>
-        public TranslationRecognizer CreateTranslationRecognizerWithFileInput(string audioFile, string sourceLanguage, IEnumerable<string> targetLanguages)
+        public TranslationRecognizer CreateTranslationRecognizerFromConfig(AudioConfig audioInput, string sourceLanguage, IEnumerable<string> targetLanguages)
         {
-            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerWithFileInput(audioFile, sourceLanguage, AsStringVector(targetLanguages)));
+            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerFromConfig(sourceLanguage, AsStringVector(targetLanguages), audioInput.configImpl), audioInput);
         }
 
         /// <summary>
-        /// Creates a translation recognizer using the specified file as audio input for a specified source language, a specified list of target languages and a specified output voice.
+        /// Creates a translation recognizer using the specified audio input configuration for a specified source language, a specified list of target languages and a specified output voice.
         /// </summary>
-        /// <param name="audioFile">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
-        /// <param name="sourceLanguage">The spoken language that needs to be translated.</param>
-        /// <param name="targetLanguages">The target languages of translation.</param>
-        /// <param name="voice">Specifies the name of voice tag if a synthesized audio output is desired.</param>
-        /// <returns>A translation recognizer instance.</returns>
-        public TranslationRecognizer CreateTranslationRecognizerWithFileInput(string audioFile, string sourceLanguage, IEnumerable<string> targetLanguages, string voice)
-        {
-            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerWithFileInput(audioFile, sourceLanguage, AsStringVector(targetLanguages), voice));
-        }
-
-        /// <summary>
-        /// Creates a translation recognizer using the specified input stream as audio input for a specified source language and a specified list of target languages.
-        /// </summary>
-        /// <param name="audioStream">Specifies the audio input stream.</param>
-        /// <param name="sourceLanguage">The spoken language that needs to be translated.</param>
-        /// <param name="targetLanguages">The target languages of translation.</param>
-        /// <returns>A translation recognizer instance.</returns>
-        public TranslationRecognizer CreateTranslationRecognizerWithStream(AudioInputStream audioStream, string sourceLanguage, IEnumerable<string> targetLanguages)
-        {
-            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerWithStreamImpl(audioStream.Forwarder, sourceLanguage, AsStringVector(targetLanguages)), audioStream);
-        }
-
-        /// <summary>
-        /// Creates a translation recognizer using the specified input stream as audio input for a specified source language, a specified list of target languages and a specified output voice.
-        /// </summary>
-        /// <param name="audioStream">Specifies the audio input stream.</param>
+        /// <param name="audioInput">Specifies the audio input configuration.</param>
         /// <param name="sourceLanguage">The spoken language that needs to be translated.</param>
         /// <param name="targetLanguages">The target languages of translation.</param>
         /// <param name="voice">Specifies the name of voice tag if a synthesized audio output is desired.</param>
         /// <returns>A translation recognizer instance.</returns>
-        public TranslationRecognizer CreateTranslationRecognizerWithStream(AudioInputStream audioStream, string sourceLanguage, IEnumerable<string> targetLanguages, string voice)
+        public TranslationRecognizer CreateTranslationRecognizerFromConfig(AudioConfig audioInput, string sourceLanguage, IEnumerable<string> targetLanguages, string voice)
         {
-            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerWithStreamImpl(audioStream.Forwarder, sourceLanguage, AsStringVector(targetLanguages), voice), audioStream);
+            return new TranslationRecognizer(factoryImpl.CreateTranslationRecognizerFromConfig(sourceLanguage, AsStringVector(targetLanguages), voice, audioInput.configImpl), audioInput);
         }
 
         private SpeechFactory(Internal.ICognitiveServicesSpeechFactory factoryImpl)

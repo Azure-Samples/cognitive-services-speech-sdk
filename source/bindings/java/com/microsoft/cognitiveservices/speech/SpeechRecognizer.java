@@ -6,6 +6,7 @@ package com.microsoft.cognitiveservices.speech;
 
 import java.util.concurrent.Future;
 
+import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
@@ -33,10 +34,10 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     /**
       * SpeechRecognizer constructor.
       * @param recoImpl The recognizer implementation
-      * @param ais An optional audio input stream associated with the recognizer
+      * @param audioInput An optional audio input configuration associated with the recognizer
       */
-    public SpeechRecognizer(com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer recoImpl, AudioInputStream ais) {
-        super(ais);
+    public SpeechRecognizer(com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer recoImpl, AudioConfig audioInput) {
+        super(audioInput);
 
         Contracts.throwIfNull(recoImpl, "recoImpl");
         this.recoImpl = recoImpl;

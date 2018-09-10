@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Translation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
@@ -41,7 +42,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { Language.DE };
             var fromLanguage = Language.EN;
             var factory = SpeechFactory.FromSubscription(subscriptionKey, region);
-            using (var translationRecognizer = TrackSessionId(factory.CreateTranslationRecognizerWithFileInput(TestData.English.Weather.AudioFile, fromLanguage, toLanguages)))
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            using (var translationRecognizer = TrackSessionId(factory.CreateTranslationRecognizerFromConfig(audioInput, fromLanguage, toLanguages)))
             {
                 Assert.AreEqual(translationRecognizer.SourceLanguage, fromLanguage);
                 CollectionAssert.AreEqual(translationRecognizer.TargetLanguages, toLanguages);
@@ -55,7 +57,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { Language.DE, Language.ES };
             var fromLanguage = Language.EN;
             var factory = SpeechFactory.FromSubscription(subscriptionKey, region);
-            using (var translationRecognizer = TrackSessionId(factory.CreateTranslationRecognizerWithFileInput(TestData.English.Weather.AudioFile, fromLanguage, toLanguages)))
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            using (var translationRecognizer = TrackSessionId(factory.CreateTranslationRecognizerFromConfig(audioInput, fromLanguage, toLanguages)))
             {
                 Assert.AreEqual(translationRecognizer.SourceLanguage, fromLanguage);
                 CollectionAssert.AreEqual(translationRecognizer.TargetLanguages, toLanguages);
@@ -70,7 +73,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var fromLanguage = Language.EN;
             var voice = Voice.DE;
             var factory = SpeechFactory.FromSubscription(subscriptionKey, region);
-            using (var translationRecognizer = TrackSessionId(factory.CreateTranslationRecognizerWithFileInput(TestData.English.Weather.AudioFile, fromLanguage, toLanguages, voice)))
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            using (var translationRecognizer = TrackSessionId(factory.CreateTranslationRecognizerFromConfig(audioInput, fromLanguage, toLanguages, voice)))
             {
                 Assert.AreEqual(translationRecognizer.SourceLanguage, fromLanguage);
                 CollectionAssert.AreEqual(translationRecognizer.TargetLanguages, toLanguages);

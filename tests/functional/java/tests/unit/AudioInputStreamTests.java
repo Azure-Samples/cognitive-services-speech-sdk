@@ -8,8 +8,8 @@ import static org.junit.Assert.*;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import com.microsoft.cognitiveservices.speech.AudioInputStream;
-import com.microsoft.cognitiveservices.speech.AudioInputStreamFormat;
+
+import com.microsoft.cognitiveservices.speech.audio.PullAudioInputStreamCallback;
 
 import tests.Settings;
 
@@ -26,31 +26,8 @@ public class AudioInputStreamTests {
     // -----------------------------------------------------------------------
 
     @Test
-    public void testGetFormat() {
-        WaveFileAudioInputStream s = new WaveFileAudioInputStream(Settings.WaveFile);
-        assertNotNull(s);
-
-        AudioInputStreamFormat f = s.getFormat();
-        assertNotNull(f);
-
-        // check known parameters
-        assertEquals(32000, f.AvgBytesPerSec);
-        assertEquals(2, f.BlockAlign);
-        assertEquals(1, f.Channels);
-        assertEquals(16000, f.SamplesPerSec);
-        assertEquals(16, f.BitsPerSample);
-        assertEquals(1, f.FormatTag);
-
-        s.close();
-    }
-
-    // -----------------------------------------------------------------------
-    // --- 
-    // -----------------------------------------------------------------------
-
-    @Test
     public void testRead1() {
-        WaveFileAudioInputStream s = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(s);
 
         try {
@@ -66,12 +43,12 @@ public class AudioInputStreamTests {
 
     @Test
     public void testRead2() {
-        WaveFileAudioInputStream s = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(s);
 
         byte[] b = new byte[0];
         
-        long n = s.read(b);
+        int n = s.read(b);
         assertEquals(0, n);
         
         s.close();
@@ -79,13 +56,13 @@ public class AudioInputStreamTests {
 
     @Test
     public void testRead3() {
-        WaveFileAudioInputStream s = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(s);
 
         byte[] b = new byte[16];
 
         // note: might be less, but must be > 0
-        long n = s.read(b);
+        int n = s.read(b);
         assertTrue(n > 0);
         assertTrue(n <= b.length);
         
@@ -94,13 +71,13 @@ public class AudioInputStreamTests {
 
     @Test
     public void testRead4() {
-        WaveFileAudioInputStream s = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(s);
 
         byte[] b = new byte[3];
 
         // note: might be rounded to sample size (which is 2 bytes in our case!)
-        long n = s.read(b);
+        int n = s.read(b);
         assertTrue(b.length == n || n == b.length-1);
         
         s.close();
@@ -108,14 +85,14 @@ public class AudioInputStreamTests {
     
     @Test
     public void testRead5() {
-        WaveFileAudioInputStream s = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(s);
 
         // know for sure that file is smaller than 8MB
         byte[] b = new byte[1024*1024*8];
 
         // must return real size, not just the length of the passed in array.
-        long n = s.read(b);
+        int n = s.read(b);
         assertTrue(n < b.length);
         
         s.close();
@@ -123,14 +100,14 @@ public class AudioInputStreamTests {
     
     @Test
     public void testRead6() {
-        WaveFileAudioInputStream s = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(s);
 
         // know for sure that file is smaller than 8MB
         byte[] b = new byte[1024*1024*8];
 
         // drain the file
-        long n = s.read(b);
+        int n = s.read(b);
         assertTrue(n < b.length);
 
         // since we hit the end of the file, must return 0
@@ -146,7 +123,7 @@ public class AudioInputStreamTests {
 
     @Test
     public void testClose() {
-        WaveFileAudioInputStream s = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(s);
 
         s.close();
@@ -158,8 +135,8 @@ public class AudioInputStreamTests {
 
     @Test
     public void testAudioInputStream() {
-        WaveFileAudioInputStream s = new WaveFileAudioInputStream(Settings.WaveFile);
-        assertTrue(s instanceof AudioInputStream);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
+        assertTrue(s instanceof PullAudioInputStreamCallback);
         
         s.close();
     }

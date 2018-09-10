@@ -12,6 +12,7 @@ using System.IO;
 using System.Media;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Translation;
 
 namespace MicrosoftSpeechSDKSamples
@@ -63,13 +64,13 @@ namespace MicrosoftSpeechSDKSamples
             if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {
                 Console.WriteLine($"Translation into languages: {To2Langs[0]}, and {To2Langs[1]}:");
-                using (var reco = factory.CreateTranslationRecognizer(FromLang, To2Langs))
+                using (var reco = factory.CreateTranslationRecognizerFromConfig(FromLang, To2Langs))
                 {
                     await DoTranslationAsync(reco).ConfigureAwait(false);
                 }
 
                 Console.WriteLine($"Translation into {ToChinese} with voice {ChineseVoice}");
-                using (var reco = factory.CreateTranslationRecognizer(FromLang, ToChinese, ChineseVoice))
+                using (var reco = factory.CreateTranslationRecognizerFromConfig(FromLang, ToChinese, ChineseVoice))
                 {
                     await DoTranslationAsync(reco).ConfigureAwait(false);
                 }
@@ -79,27 +80,28 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine($"Translation into languages: {To2Langs[0]}, and {To2Langs[1]}:");
                 if (useStream)
                 {
-                    var stream = Util.OpenWaveFile(fileName);
-                    using (var reco = factory.CreateTranslationRecognizerWithStream(stream, FromLang, To2Langs))
+                    var audioInput = Util.OpenWavFile(fileName);
+                    using (var reco = factory.CreateTranslationRecognizerFromConfig(audioInput, FromLang, To2Langs))
                     {
                         await DoTranslationAsync(reco).ConfigureAwait(false);
                     }
                 }
                 else
                 {
-                    using (var reco = factory.CreateTranslationRecognizerWithFileInput(fileName, FromLang, To2Langs))
+                    var audioInput = AudioConfig.FromWavFileInput(fileName);
+                    using (var reco = factory.CreateTranslationRecognizerFromConfig(audioInput, FromLang, To2Langs))
                     {
                         await DoTranslationAsync(reco).ConfigureAwait(false);
                     }
 
                     Console.WriteLine($"Translation into {ToChinese} with voice {ChineseVoice}");
-                    using (var reco = factory.CreateTranslationRecognizerWithFileInput(fileName, FromLang, ToChinese, ChineseVoice))
+                    using (var reco = factory.CreateTranslationRecognizerFromConfig(audioInput, FromLang, ToChinese, ChineseVoice))
                     {
                         await DoTranslationAsync(reco).ConfigureAwait(false);
                     }
 
                     Console.WriteLine($"Translation into {ToGerman} with voice {GermanVoice}");
-                    using (var reco = factory.CreateTranslationRecognizerWithFileInput(fileName, FromLang, ToGerman, GermanVoice))
+                    using (var reco = factory.CreateTranslationRecognizerFromConfig(audioInput, FromLang, ToGerman, GermanVoice))
                     {
                         await DoTranslationAsync(reco).ConfigureAwait(false);
                     }
@@ -116,7 +118,7 @@ namespace MicrosoftSpeechSDKSamples
             if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {
                 // The language setting does not have any effect if the endpoint is specified.
-                using (var reco = factory.CreateTranslationRecognizer(FromLang, To2Langs))
+                using (var reco = factory.CreateTranslationRecognizerFromConfig(FromLang, To2Langs))
                 {
                     await DoTranslationAsync(reco).ConfigureAwait(false);
                 }
@@ -125,15 +127,16 @@ namespace MicrosoftSpeechSDKSamples
             {
                 if (useStream)
                 {
-                    var stream = Util.OpenWaveFile(fileName);
-                    using (var reco = factory.CreateTranslationRecognizerWithStream(stream, FromLang, To2Langs))
+                    var audioInput = Util.OpenWavFile(fileName);
+                    using (var reco = factory.CreateTranslationRecognizerFromConfig(audioInput, FromLang, To2Langs))
                     {
                         await DoTranslationAsync(reco).ConfigureAwait(false);
                     }
                 }
                 else
                 {
-                    using (var reco = factory.CreateTranslationRecognizerWithFileInput(fileName, FromLang, To2Langs))
+                    var audioInput = AudioConfig.FromWavFileInput(fileName);
+                    using (var reco = factory.CreateTranslationRecognizerFromConfig(audioInput, FromLang, To2Langs))
                     {
                         await DoTranslationAsync(reco).ConfigureAwait(false);
                     }

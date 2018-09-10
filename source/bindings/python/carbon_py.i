@@ -82,7 +82,9 @@ T ## Signal.connect, T ## Signal.disconnect = _generate_signal_methods(T ## Call
     def create_speech_recognizer(self, filename=None):
         if not filename:
             return self.create_speech_recognizer()
-        return self.create_speech_recognizer_with_file_input(filename)
+
+        audioInput = AudioConfig.from_wav_file_input(filename)
+        return self.create_speech_recognizer_from_config(audioInput)
     %}
 }
 

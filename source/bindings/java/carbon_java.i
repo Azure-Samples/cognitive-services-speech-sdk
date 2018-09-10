@@ -26,11 +26,11 @@ void __swig_spx_do_trace_message(int level, const char* pszTitle, const char* ps
 
 %{
 #include <speechapi_cxx_common.h>
-#include "speechapi_cxx_audioinputstream.h"
+#include "speechapi_cxx_audio_stream.h"
 %}
 
-%feature("director") AudioInputStream;
-%apply (char *STRING, int LENGTH) { (char* dataBuffer, size_t size) };
+%feature("director") PullAudioInputStreamCallback;
+%apply (char *STRING, int LENGTH) { (uint8_t* dataBuffer, uint32_t size) };
 
 %include "std_string.i"
 

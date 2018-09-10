@@ -37,7 +37,6 @@ namespace Microsoft.CognitiveServices.Speech
 
         private bool disposed = false;
 
-
         internal KeywordRecognitionModel(Microsoft.CognitiveServices.Speech.Internal.KeywordRecognitionModel model)
         {
             modelImpl = model;

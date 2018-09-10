@@ -11,7 +11,7 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-    PcmAudioBuffer::PcmAudioBuffer(const WAVEFORMATEX& header)
+    PcmAudioBuffer::PcmAudioBuffer(const SPXWAVEFORMATEX& header)
         : m_header{ header },
           m_totalSizeInBytes{ 0 },
           m_currentChunk{ 0 },

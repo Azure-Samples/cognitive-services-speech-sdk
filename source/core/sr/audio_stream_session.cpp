@@ -114,7 +114,8 @@ void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)
     audioFilePump->Open(pszFileName);
 
     // Limit the maximal speed to 2 times of real-time streaming
-    audioFilePump->SetRealTimePercentage(SimulateRealtimePercentage);
+    auto realTime = SpxQueryInterface<ISpxAudioStreamInitRealTime>(audioFilePump);
+    realTime->SetRealTimePercentage(SimulateRealtimePercentage);
 
     // Defer calling InitRecoEngineAdapter() or InitKwsEngineAdapter() until later ...
 }
@@ -131,26 +132,28 @@ void CSpxAudioStreamSession::InitFromMicrophone()
     // Defer calling InitRecoEngineAdapter() or InitKwsEngineAdapter() until later ...
 }
 
-void CSpxAudioStreamSession::InitFromStream(AudioInputStream* audioInputStream)
+void CSpxAudioStreamSession::InitFromStream(std::shared_ptr<ISpxAudioStream> stream)
 {
     SPX_THROW_HR_IF(SPXERR_ALREADY_INITIALIZED, m_audioPump.get() != nullptr);
     SPX_DBG_ASSERT(IsKind(RecognitionKind::Idle) && IsState(SessionState::Idle));
     SPX_DBG_TRACE_VERBOSE("%s: Now Idle ...", __FUNCTION__);
 
     // Create the stream pump
-    auto audioStreamPump = SpxCreateObjectWithSite<ISpxStreamPumpReaderInit>("CSpxStreamPump", this);
-    m_audioPump = SpxQueryInterface<ISpxAudioPump>(audioStreamPump);
+    auto audioPump = SpxCreateObjectWithSite<ISpxAudioPumpInit>("CSpxAudioPump", this);
+    m_audioPump = SpxQueryInterface<ISpxAudioPump>(audioPump);
 
     // Attach the stream to the pump
-    audioStreamPump->SetAudioStream(audioInputStream);
+    auto reader = SpxQueryInterface<ISpxAudioStreamReader>(stream);
+    audioPump->SetReader(reader);
 
     // Limit the maximal speed to 2 times of real-time streaming
-    audioStreamPump->SetRealTimePercentage(50);
+    auto realTime = SpxQueryInterface<ISpxAudioStreamInitRealTime>(stream);
+    realTime->SetRealTimePercentage(50);
 
     // Defer calling InitRecoEngineAdapter() until later ... (see ::EnsureInitRecoEngineAdapter())
 }
 
-void CSpxAudioStreamSession::SetFormat(WAVEFORMATEX* pformat)
+void CSpxAudioStreamSession::SetFormat(SPXWAVEFORMATEX* pformat)
 {
     // Since we're checking the RecoKind and SessionState multiple times, take a read lock
     ReadLock_Type readLock(m_combinedAdapterAndStateMutex);
@@ -1373,7 +1376,7 @@ void CSpxAudioStreamSession::HotSwapAdaptersWhilePaused(RecognitionKind startKin
     SPX_DBG_TRACE_VERBOSE_IF(1, "%s: ProcessingAudio - size=%d", __FUNCTION__, 0);
     oldAudioProcessor->ProcessAudio(nullptr, 0);
 
-    // Then tell it we're finally done, by sending a nullptr WAVEFORMAT
+    // Then tell it we're finally done, by sending a nullptr SPXWAVEFORMAT
     oldAudioProcessor->SetFormat(nullptr);
     m_adapterAudioMuted = false;
 
@@ -1387,12 +1390,12 @@ void CSpxAudioStreamSession::HotSwapAdaptersWhilePaused(RecognitionKind startKin
     // The call to ProcessAudio(nullptr, 0) and SetFormat(nullptr) will instigate a call from that Adapter to this::AdapterCompletedSetFormatStop(adapter) shortly...
 }
 
-void CSpxAudioStreamSession::InformAdapterSetFormatStarting(WAVEFORMATEX* format)
+void CSpxAudioStreamSession::InformAdapterSetFormatStarting(SPXWAVEFORMATEX* format)
 {
     // NOTE: Callers will have already taken a reader or writer lock... Do NOT take a lock here ourselves!
     // ReadLock_Type readerLock(m_combinedAdapterAndStateMutex);
 
-    auto sizeOfFormat = sizeof(WAVEFORMATEX) + format->cbSize;
+    auto sizeOfFormat = sizeof(SPXWAVEFORMATEX) + format->cbSize;
     m_format = SpxAllocWAVEFORMATEX(sizeOfFormat);
     memcpy(m_format.get(), format, sizeOfFormat);
 
@@ -1424,7 +1427,7 @@ void CSpxAudioStreamSession::InformAdapterSetFormatStopping(SessionState comingF
         }
     }
 
-    // Then we can finally tell it we're done, by sending a nullptr WAVEFORMAT
+    // Then we can finally tell it we're done, by sending a nullptr SPXWAVEFORMAT
     if (!m_expectAdapterStartedTurn && !m_expectAdapterStoppedTurn)
     {
         SPX_DBG_TRACE_VERBOSE("%s: SetFormat(nullptr)", __FUNCTION__);

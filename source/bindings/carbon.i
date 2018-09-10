@@ -54,6 +54,13 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::PropertyCollection<SPXRESULTHANDLE>)
 %shared_ptr(Microsoft::CognitiveServices::Speech::PropertyCollection<SPXSESSIONHANDLE>)
 
+%shared_ptr(Microsoft::CognitiveServices::Speech::Audio::AudioConfig)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Audio::AudioInputStream)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Audio::AudioStreamFormat)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Audio::PushAudioInputStream)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Audio::PullAudioInputStream)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Audio::PullAudioInputStreamCallback)
+
 
 %template(StringVector) std::vector<std::string>;
 %template(StdMapStringString) std::map<std::string, std::string>;
@@ -67,6 +74,7 @@
 %ignore Microsoft::CognitiveServices::Speech::ICognitiveServicesSpeechFactory::CreateTranslationRecognizerWithStream;
 
 %include <speechapi_cxx_common.h>
+%include <speechapi_cxx_enums.h>
 
 %ignore Microsoft::CognitiveServices::Speech::NotYetImplementedException;
 
@@ -336,7 +344,11 @@
 %template(SessionPropertyCollection) Microsoft::CognitiveServices::Speech::PropertyCollection<SPXSESSIONHANDLE>;
 
 
-%include <speechapi_cxx_audioinputstream.h>
+%include <speechapi_cxx_audio_stream_format.h>
+%include <speechapi_cxx_audio_stream.h>
+%include <speechapi_cxx_audio_config.h>
+
+
 %include <speechapi_cxx_keyword_recognition_model.h>
 
 %include <speechapi_cxx_eventargs.h>

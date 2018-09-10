@@ -6,6 +6,7 @@ package tests.endtoend;
 
 import java.util.concurrent.Future;
 
+import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.SpeechFactory;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
@@ -31,8 +32,9 @@ public class SampleSimpleRecognize implements Runnable {
         SpeechFactory factory = Settings.getFactory();
 
         try {
-            // TODO: to use the microphone, replace the parameter with "new MicrophoneAudioInputStream()"
-            SpeechRecognizer reco = factory.createSpeechRecognizerWithFileInput(Settings.WaveFile);
+            // Note: to use the microphone, use "AudioConfig.fromDefaultMicrophoneInput()"
+            AudioConfig audioInput = AudioConfig.fromWavFileInput(Settings.WavFile);
+            SpeechRecognizer reco = factory.createSpeechRecognizerFromConfig(audioInput);
 
             Future<SpeechRecognitionResult> task = reco.recognizeAsync();
 
@@ -43,6 +45,7 @@ public class SampleSimpleRecognize implements Runnable {
             
             // Note: do not close the factory as it is shared between tests.
             reco.close();
+            audioInput.close();
         } catch (Exception ex) {
             recognitionResult = ex.toString();
             

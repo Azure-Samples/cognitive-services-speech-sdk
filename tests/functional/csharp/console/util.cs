@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,62 +16,67 @@ namespace MicrosoftSpeechSDKSamples
 {
     public class Util
     {
-        internal sealed class RepeatedAudioInputStream : AudioInputStream
+        internal sealed class RepeatedAudioInputStream : PullAudioInputStreamCallback
         {
-            private readonly List<AudioInputStream> streamsWithEqualFormat;
-            private readonly AudioInputStreamFormat format;
+            private readonly List<PullAudioInputStreamCallback> callbacks;
 
-            /// <summary>
-            /// Creates an object.
-            /// </summary>
-            /// <param name="streamsWithEqualFormat">Streams with equal format</param>
-            public RepeatedAudioInputStream(List<AudioInputStream> streamsWithEqualFormat)
+            public RepeatedAudioInputStream(List<PullAudioInputStreamCallback> callbacks)
             {
-                if (streamsWithEqualFormat == null || streamsWithEqualFormat.Count < 1)
+                if (callbacks == null || callbacks.Count < 1)
                 {
                     throw new ArgumentException("Please provide valid streams");
                 }
 
-                this.streamsWithEqualFormat = streamsWithEqualFormat;
-                this.format = streamsWithEqualFormat.First().GetFormat();
+                this.callbacks = callbacks;
             }
 
-            public override AudioInputStreamFormat GetFormat()
+            public override int Read(byte[] dataBuffer, uint size)
             {
-                return this.format;
-            }
-
-            public override int Read(byte[] dataBuffer)
-            {
-                while (this.streamsWithEqualFormat.Count > 0)
+                while (this.callbacks.Count > 0)
                 {
-                    var result = this.streamsWithEqualFormat.First().Read(dataBuffer);
+                    var result = this.callbacks.First().Read(dataBuffer, size);
                     if (result != 0)
                     {
                         return result;
                     }
-                    this.streamsWithEqualFormat.First().Close();
-                    this.streamsWithEqualFormat.RemoveAt(0);
+                    this.callbacks.First().Close();
+                    this.callbacks.RemoveAt(0);
                 }
                 return 0;
             }
+
+            public override void Close()
+            {
+                while (this.callbacks.Count > 0)
+                {
+                    this.callbacks.First().Close();
+                    this.callbacks.RemoveAt(0);
+                }
+            }
         }
 
-        public static AudioInputStream OpenWaveFile(string filename, int times)
+        public static AudioConfig OpenWavFile(string filename, int times)
         {
-            var streams = new List<AudioInputStream>();
+            AudioStreamFormat format = null;
+            var callbacks = new List<PullAudioInputStreamCallback>();
             for (int i = 0; i < times; ++i)
             {
-                streams.Add(OpenWaveFile(filename));
+                callbacks.Add(OpenWavFile(filename, out format));
             }
 
-            return new RepeatedAudioInputStream(streams);
+             return AudioConfig.FromStreamInput(new RepeatedAudioInputStream(callbacks), format);
         }
 
-        public static AudioInputStream OpenWaveFile(string filename)
+        public static AudioConfig OpenWavFile(string filename)
+        {
+            AudioStreamFormat format = null;
+            var callback = OpenWavFile(filename, out format);
+            return AudioConfig.FromStreamInput(callback, format);
+        }
+
+        private static PullAudioInputStreamCallback OpenWavFile(string filename, out AudioStreamFormat format)
         {
             BinaryReader reader = new BinaryReader(File.OpenRead(filename));
-            AudioInputStreamFormat format = new AudioInputStreamFormat();
 
             // Tag "RIFF"
             char[] data = new char[4];
@@ -90,15 +96,15 @@ namespace MicrosoftSpeechSDKSamples
             reader.Read(data, 0, 4);
             Trace.Assert((data[0] == 'f') && (data[1] == 'm') && (data[2] == 't') && (data[3] == ' '), "Wrong format tag in wav header");
             // chunk format size
-            long formatSize = reader.ReadInt32();
-            format.FormatTag = reader.ReadUInt16();
-            format.Channels = reader.ReadUInt16();
-            format.SamplesPerSec = (int)reader.ReadUInt32();
-            format.AvgBytesPerSec = (int)reader.ReadUInt32();
-            format.BlockAlign = reader.ReadUInt16();
-            format.BitsPerSample = reader.ReadUInt16();
+            var formatSize = reader.ReadInt32();
+            var unusedFormatTag = reader.ReadUInt16();
+            var channels = reader.ReadUInt16();
+            var samplesPerSecond = reader.ReadUInt32();
+            var unusedAvgBytesPerSec = reader.ReadUInt32();
+            var unusedBlockAlign = reader.ReadUInt16();
+            var bitsPerSample = reader.ReadUInt16();
 
-            // The following code is wrong. As the cbSize is not specified
+            // The following code is wrong. As the cbSize is not specified 
             // at this position, but should be derived from formatSize.
             // skip over reamining header bytes, if any
             //int cbSize = reader.ReadUInt16();
@@ -116,7 +122,8 @@ namespace MicrosoftSpeechSDKSamples
 
             // now, we have the format in the format parameter and the
             // reader set to the start of the body, i.e., the raw sample data
-            return new BinaryAudioStreamReader(format, reader);
+            format = AudioStreamFormat.GetWaveFormatPCM(samplesPerSecond, (byte)bitsPerSample, (byte)channels);
+            return new BinaryAudioStreamReader(reader);
         }
 
         public static async Task<string> GetToken(string key)

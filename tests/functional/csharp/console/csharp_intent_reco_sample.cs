@@ -9,6 +9,7 @@ using System;
 using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Intent;
 
 namespace MicrosoftSpeechSDKSamples
@@ -50,7 +51,8 @@ namespace MicrosoftSpeechSDKSamples
             }
             else
             {
-                using (var reco = factory.CreateIntentRecognizerWithFileInput(fileName))
+                var audioInput = AudioConfig.FromWavFileInput(fileName);
+                using (var reco = factory.CreateIntentRecognizerFromConfig(audioInput))
                 {
                     await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
                 }
@@ -84,7 +86,8 @@ namespace MicrosoftSpeechSDKSamples
             }
             else
             {
-                using (var reco = factory.CreateIntentRecognizerWithFileInput(fileName))
+                var audioInput = AudioConfig.FromWavFileInput(fileName);
+                using (var reco = factory.CreateIntentRecognizerFromConfig(audioInput))
                 {
                     await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
                 }

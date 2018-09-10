@@ -34,7 +34,7 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioPump)
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioFile)
-        SPX_INTERFACE_MAP_ENTRY(ISpxAudioReaderRealTime)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamInitRealTime)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxAudioFile overrides ---

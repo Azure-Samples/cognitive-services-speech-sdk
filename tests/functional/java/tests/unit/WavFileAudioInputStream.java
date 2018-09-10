@@ -1,4 +1,4 @@
-package com.microsoft.cognitiveservices.speech.samples;
+package tests.unit;
 //
 //Copyright (c) Microsoft. All rights reserved.
 //Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
@@ -10,14 +10,13 @@ import java.io.IOException;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 
-import com.microsoft.cognitiveservices.speech.AudioInputStream;
-import com.microsoft.cognitiveservices.speech.AudioInputStreamFormat;
+import com.microsoft.cognitiveservices.speech.audio.PullAudioInputStreamCallback;
 
-public class WaveFileAudioInputStream extends AudioInputStream {
+public class WavFileAudioInputStream extends PullAudioInputStreamCallback {
     AudioFormat audioFormat = new AudioFormat(16000, 16, 1, /*isSigned*/true, /*isBigEndian*/false);
     javax.sound.sampled.AudioInputStream audioInputStream;
     
-    public WaveFileAudioInputStream(String filename) {
+    public WavFileAudioInputStream(String filename) {
         // Obtain and open the line.
         try {
             audioInputStream = AudioSystem.getAudioInputStream(new File(filename));
@@ -42,7 +41,7 @@ public class WaveFileAudioInputStream extends AudioInputStream {
      * @return the number of bytes have been read.
      */
     @Override
-    public long read(byte[] dataBuffer) {
+    public int read(byte[] dataBuffer) {
         if(dataBuffer == null) throw new NullPointerException("dataBuffer");
         
         try {
@@ -54,29 +53,14 @@ public class WaveFileAudioInputStream extends AudioInputStream {
     }
 
     /**
-     * Returns the audioFormat of this audio stream.
-     * 
-     * @return The audioFormat of the audio stream.
-     */
-    @Override
-    public AudioInputStreamFormat getFormat() {
-        AudioInputStreamFormat  f = new AudioInputStreamFormat();
-        f.BlockAlign = (short)(audioFormat.getChannels() * (audioFormat.getSampleSizeInBits() + 7) / 8);
-        f.AvgBytesPerSec = f.BlockAlign * (int)audioFormat.getSampleRate();
-        f.Channels = (short) audioFormat.getChannels();
-        f.SamplesPerSec = (int)audioFormat.getSampleRate();
-        f.BitsPerSample = (short) audioFormat.getSampleSizeInBits();
-        f.FormatTag = 1; // PCM signed (we selected this in the constructor!).
-        return f;
-    }
-
-    /**
      * Closes the audio input stream.
      */
     @Override
     public void close() {
         try {
-            audioInputStream.close();
+            javax.sound.sampled.AudioInputStream a = audioInputStream;
+            audioInputStream = null;
+            a.close();
         } catch (IOException | NullPointerException e) {
             throw new IllegalAccessError(e.toString());
         }

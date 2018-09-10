@@ -11,6 +11,7 @@ using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 
 namespace MicrosoftSpeechSDKSamples
 {
@@ -102,15 +103,16 @@ namespace MicrosoftSpeechSDKSamples
                     if (useStream)
                     {
                         Console.WriteLine("Using stream input.");
-                        var stream = Util.OpenWaveFile(fileName);
-                        using (var reco = factory.CreateSpeechRecognizerWithStream(stream))
+                        var audioInput = Util.OpenWavFile(fileName);
+                        using (var reco = factory.CreateSpeechRecognizerFromConfig(audioInput))
                         {
                             await StartRecognitionAsync(reco, model, useContinuousRecognition);
                         }
                     }
                     else
                     {
-                        using (var reco = factory.CreateSpeechRecognizerWithFileInput(fileName))
+                        var audioInput = AudioConfig.FromWavFileInput(fileName);
+                        using (var reco = factory.CreateSpeechRecognizerFromConfig(audioInput))
                         {
                             await StartRecognitionAsync(reco, model, useContinuousRecognition);
                         }
@@ -121,15 +123,16 @@ namespace MicrosoftSpeechSDKSamples
                     if (useStream)
                     {
                         Console.WriteLine("Using stream input.");
-                        var stream = Util.OpenWaveFile(fileName);
-                        using (var reco = factory.CreateSpeechRecognizerWithStream(stream, lang))
+                        var audioInput = Util.OpenWavFile(fileName);
+                        using (var reco = factory.CreateSpeechRecognizerFromConfig(audioInput, lang))
                         {
                             await StartRecognitionAsync(reco, model, useContinuousRecognition);
                         }
                     }
                     else
                     {
-                        using (var reco = factory.CreateSpeechRecognizerWithFileInput(fileName, lang))
+                        var audioInput = AudioConfig.FromWavFileInput(fileName);
+                        using (var reco = factory.CreateSpeechRecognizerFromConfig(audioInput, lang))
                         {
                             await StartRecognitionAsync(reco, model, useContinuousRecognition);
                         }

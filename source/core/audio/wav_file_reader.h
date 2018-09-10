@@ -16,7 +16,7 @@ namespace Speech {
 namespace Impl {
 
 
-class CSpxWavFileReader : public ISpxAudioFile, public ISpxAudioReader, public ISpxAudioReaderRealTime
+class CSpxWavFileReader : public ISpxAudioFile, public ISpxAudioStream, public ISpxAudioStreamReader, public ISpxAudioStreamInitRealTime
 {
 public:
 
@@ -27,8 +27,9 @@ public:
 
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxAudioFile)
-        SPX_INTERFACE_MAP_ENTRY(ISpxAudioReader)
-        SPX_INTERFACE_MAP_ENTRY(ISpxAudioReaderRealTime)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioStream)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamReader)
+        SPX_INTERFACE_MAP_ENTRY(ISpxAudioStreamInitRealTime)
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxAudioFile
@@ -40,11 +41,14 @@ public:
 
     void SetContinuousLoop(bool value) override;
     void SetIterativeLoop(bool value) override;
+
+    // --- ISpxAudioStreamInitRealTime ---
+    
     void SetRealTimePercentage(uint8_t percentage) override;
 
-    // --- ISpxAudioReader
+    // --- ISpxAudioStreamReader
 
-    uint16_t GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat) override;
+    uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) override;
     uint32_t Read(uint8_t* pbuffer, uint32_t cbBuffer) override;
 
 

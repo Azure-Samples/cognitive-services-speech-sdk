@@ -8,75 +8,394 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 
-namespace Microsoft.CognitiveServices.Speech
+namespace Microsoft.CognitiveServices.Speech.Audio
 {
     /// <summary>
-    /// The Audio stream format.
+    /// Represents audio stream format used for custom audio input configurations.
     /// </summary>
-    public struct AudioInputStreamFormat
-    {
+    public sealed class AudioStreamFormat : IDisposable
+    { 
         /// <summary>
-        /// The format of the audio, valid values: 1 (PCM)
+        /// Creates an audio stream format object representing the default microphone input format (16Khz 16bit mono PCM).
         /// </summary>
-        public int FormatTag;
+        /// <returns>The audio stream format being created.</returns>
+        public static AudioStreamFormat GetDefaultInputFormat()
+        {
+            return new AudioStreamFormat(Microsoft.CognitiveServices.Speech.Internal.AudioStreamFormat.GetDefaultInputFormat());
+        }
 
         /// <summary>
-        /// The number of channels, valid values: 1 (Mono).
+        /// Creates an audio stream format object with the specified pcm waveformat characteristics.
         /// </summary>
-        public int Channels;
+        /// <param name="samplesPerSecond">Sample rate, in samples per second (hertz).</param>
+        /// <param name="bitsPerSample">Bits per sample, typically 16.</param>
+        /// <param name="channels">Number of channels in the waveform-audio data. Monaural data uses one channel and stereo data uses two channels.</param>
+        /// <returns>The audio stream format being created.</returns>
+        public static AudioStreamFormat GetWaveFormatPCM(uint samplesPerSecond, byte bitsPerSample, byte channels)
+        {
+            return new AudioStreamFormat(Microsoft.CognitiveServices.Speech.Internal.AudioStreamFormat.GetWaveFormatPCM(samplesPerSecond, bitsPerSample, channels));
+        }
 
         /// <summary>
-        /// The sample rate, valid values: 16000.
+        /// Dispose of associated resources.
         /// </summary>
-        public int SamplesPerSec;
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
 
-        /// <summary>
-        /// Average bytes per second, usually calculated as nSamplesPerSec * nChannels * ceil(wBitsPerSample, 8).
-        /// </summary>
-        public int AvgBytesPerSec;
+            formatImpl.Dispose();
+            disposed = true;
+        }
 
-        /// <summary>
-        /// The size of a single frame, valid values: nChannels * ceil(wBitsPerSample, 8).
-        /// </summary>
-        public int BlockAlign;
+        private bool disposed = false;
 
-        /// <summary>
-        /// The bits per sample, valid values: 16
-        /// </summary>
-        public int BitsPerSample;
-    };
+        internal AudioStreamFormat(Microsoft.CognitiveServices.Speech.Internal.AudioStreamFormat format)
+        {
+            formatImpl = format;
+        }
+
+        internal Microsoft.CognitiveServices.Speech.Internal.AudioStreamFormat formatImpl { get; }
+    }
 
     /// <summary>
-    /// Defines audio input stream.
+    /// Represents audio input stream used for custom audio input configurations.
     /// </summary>
-    public abstract class AudioInputStream : IDisposable
+    public class AudioInputStream : IDisposable
+    { 
+        /// <summary>
+        /// Creates a memory backed PushAudioInputStream using the default format (16Khz 16bit mono PCM).
+        /// </summary>
+        /// <returns>The push audio input stream being created.</returns>
+        public static PushAudioInputStream CreatePushStream()
+        {
+            return new PushAudioInputStream();
+        }
+
+        /// <summary>
+        /// Creates a memory backed PushAudioInputStream with the specified audio format.
+        /// </summary>
+        /// <param name="format">The audio data format in which audio will be written to the push audio stream's write() method (currently only support 16Khz 16bit mono PCM).</param>
+        /// <returns>The push audio input stream being created.</returns>
+        public static PushAudioInputStream CreatePushStream(AudioStreamFormat format)
+        {
+            return new PushAudioInputStream(format);
+        }
+
+        /// <summary>
+        /// Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods, using the default format (16Khz 16bit mono PCM).
+        /// </summary>
+        /// <param name="callback">The custom audio input object, derived from PullAudioInputStreamCallback</param>
+        /// <returns>The pull audio input stream being created.</returns>
+        public static PullAudioInputStream CreatePullStream(PullAudioInputStreamCallback callback)
+        {
+            return new PullAudioInputStream(callback);
+        }
+
+        /// <summary>
+        /// Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods.
+        /// </summary>
+        /// <param name="callback">The custom audio input object, derived from PullAudioInputStreamCallback.</param>
+        /// <param name="format">The audio data format in which audio will be returned from the callback's read() method (currently only support 16Khz 16bit mono PCM).</param>
+        /// <returns>The pull audio input stream being created.</returns>
+        public static PullAudioInputStream CreatePullStream(PullAudioInputStreamCallback callback, AudioStreamFormat format)
+        {
+            return new PullAudioInputStream(callback, format);
+        }
+
+        /// <summary>
+        /// Dispose of associated resources.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// This method performs cleanup of resources.
+        /// The Boolean parameter <paramref name="disposing"/> indicates whether the method is called from <see cref="IDisposable.Dispose"/> (if <paramref name="disposing"/> is true) or from the finalizer (if <paramref name="disposing"/> is false).
+        /// Derived classes should override this method to dispose resource if needed.
+        /// </summary>
+        /// <param name="disposing">Flag to request disposal.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                streamImpl.Dispose();
+            }
+
+            disposed = true;
+        }
+
+        private bool disposed = false;
+
+        internal AudioInputStream(Microsoft.CognitiveServices.Speech.Internal.AudioInputStream stream)
+        {
+            streamImpl = stream;
+        }
+
+        internal Microsoft.CognitiveServices.Speech.Internal.AudioInputStream streamImpl { get; }
+    }
+
+    /// <summary>
+    /// Represents audio input configuration used for specifying what type of input to use (microphone, file, stream).
+    /// </summary>
+    public sealed class AudioConfig : IDisposable
+    { 
+        /// <summary>
+        /// Creates an AudioConfig object representing the default microphone on the system.
+        /// </summary>
+        /// <returns>The audio input configuration being created.</returns>
+        public static AudioConfig FromDefaultMicrophoneInput()
+        {
+            return new AudioConfig(Microsoft.CognitiveServices.Speech.Internal.AudioConfig.FromDefaultMicrophoneInput());
+        }
+
+        /// <summary>
+        /// Creates an AudioConfig object representing the specified file.
+        /// </summary>
+        /// <param name="fileName">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
+        /// <returns>The audio input configuration being created.</returns>
+        public static AudioConfig FromWavFileInput(string fileName)
+        {
+            return new AudioConfig(Microsoft.CognitiveServices.Speech.Internal.AudioConfig.FromWavFileInput(fileName));
+        }
+
+        /// <summary>
+        /// Creates an AudioConfig object representing the specified stream.
+        /// </summary>
+        /// <param name="audioStream">Specifies the custom audio input stream. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
+        /// <returns>The audio input configuration being created.</returns>
+        public static AudioConfig FromStreamInput(AudioInputStream audioStream)
+        {
+            return new AudioConfig(Microsoft.CognitiveServices.Speech.Internal.AudioConfig.FromStreamInput(audioStream.streamImpl), audioStream);
+        }
+
+        /// <summary>
+        /// Creates an AudioConfig object representing the specified stream.
+        /// </summary>
+        /// <param name="callback">Specifies the pull audio input stream callback. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
+        /// <returns>The audio input configuration being created.</returns>
+        public static AudioConfig FromStreamInput(PullAudioInputStreamCallback callback)
+        {
+            PullAudioInputStream pullStream = new PullAudioInputStream(callback);
+            return new AudioConfig(Microsoft.CognitiveServices.Speech.Internal.AudioConfig.FromStreamInput(pullStream.streamImpl), pullStream, true);
+        }
+
+        /// <summary>
+        /// Creates an AudioConfig object representing the specified stream.
+        /// </summary>
+        /// <param name="callback">Specifies the pull audio input stream callback. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
+        /// <param name="format">The audio data format in which audio will be written to the push audio stream's write() method (currently only support 16Khz 16bit mono PCM).</param>
+        /// <returns>The audio input configuration being created.</returns>
+        public static AudioConfig FromStreamInput(PullAudioInputStreamCallback callback, AudioStreamFormat format)
+        {
+            PullAudioInputStream pullStream = new PullAudioInputStream(callback, format);
+            return new AudioConfig(Microsoft.CognitiveServices.Speech.Internal.AudioConfig.FromStreamInput(pullStream.streamImpl), pullStream, true);
+        }
+
+        /// <summary>
+        /// Dispose of associated resources.
+        /// </summary>
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            configImpl.Dispose();
+            disposed = true;
+
+            if (disposeStream)
+            {
+                streamKeepAlive.Dispose();
+            }
+            else
+            {
+                streamKeepAlive = null;
+            }
+        }
+
+        private bool disposed = false;
+        private AudioInputStream streamKeepAlive = null;
+        private bool disposeStream = false;
+
+        internal AudioConfig(Microsoft.CognitiveServices.Speech.Internal.AudioConfig config, AudioInputStream audioStream = null, bool ownStream = false)
+        {
+            configImpl = config;
+            streamKeepAlive = audioStream;
+            disposeStream = ownStream;
+        }
+
+        internal Microsoft.CognitiveServices.Speech.Internal.AudioConfig configImpl { get; }
+    }
+
+    /// <summary>
+    /// Represents memory backed push audio input stream used for custom audio input configurations.
+    /// </summary>
+    public sealed class PushAudioInputStream : AudioInputStream
+    { 
+        /// <summary>
+        /// Creates a memory backed PushAudioInputStream using the default format (16Khz 16bit mono PCM).
+        /// </summary>
+        public PushAudioInputStream() : 
+            this(Microsoft.CognitiveServices.Speech.Internal.PushAudioInputStream.CreatePushStream())
+        {
+        }
+
+        /// <summary>
+        /// Creates a memory backed PushAudioInputStream with the specified audio format.
+        /// </summary>
+        /// <param name="format">The audio data format in which audio will be written to the push audio stream's write() method (currently only support 16Khz 16bit mono PCM).</param>
+        public PushAudioInputStream(AudioStreamFormat format) : 
+            this(Microsoft.CognitiveServices.Speech.Internal.PushAudioInputStream.CreatePushStream(format.formatImpl))
+        {
+        }
+
+        /// <summary>
+        /// Writes the audio data specified by making an internal copy of the data.
+        /// </summary>
+        /// <param name="dataBuffer">The audio buffer of which this function will make a copy.</param>
+        public void Write(byte[] dataBuffer)
+        {
+            pushImpl.Write(dataBuffer, (uint)dataBuffer.Length);
+        }
+
+        /// <summary>
+        /// Closes the stream.
+        /// </summary>
+        public void Close()
+        {
+            pushImpl.Close();
+        }
+
+        /// <summary>
+        /// This method performs cleanup of resources.
+        /// The Boolean parameter <paramref name="disposing"/> indicates whether the method is called from <see cref="IDisposable.Dispose"/> (if <paramref name="disposing"/> is true) or from the finalizer (if <paramref name="disposing"/> is false).
+        /// Derived classes should override this method to dispose resource if needed.
+        /// </summary>
+        /// <param name="disposing">Flag to request disposal.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                pushImpl.Dispose();
+            }
+
+            disposed = true;
+            base.Dispose(disposing);
+        }
+
+        private bool disposed = false;
+
+        internal PushAudioInputStream(Microsoft.CognitiveServices.Speech.Internal.PushAudioInputStream stream) :
+            base(stream)
+        {
+            pushImpl = stream;
+        }
+
+        internal Microsoft.CognitiveServices.Speech.Internal.PushAudioInputStream pushImpl { get; }
+    }
+
+    /// <summary>
+    /// Represents audio input stream used for custom audio input configurations.
+    /// </summary>
+    public sealed class PullAudioInputStream : AudioInputStream
+    {
+        /// <summary>
+        /// Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods using the default format (16Khz 16bit mono PCM).
+        /// </summary>
+        /// <param name="callback">The custom audio input object, derived from PullAudioInputStreamCallback.</param>
+        /// <returns>The pull audio input stream being created.</returns>
+        public PullAudioInputStream(PullAudioInputStreamCallback callback) : 
+            this(Microsoft.CognitiveServices.Speech.Internal.PullAudioInputStream.CreatePullStream(callback.Adapter), callback)
+        {
+        }
+
+        /// <summary>
+        /// Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods.
+        /// </summary>
+        /// <param name="callback">The custom audio input object, derived from PullAudioInputStreamCallback.</param>
+        /// <param name="format">The audio data format in which audio will be returned from the callback's read() method (currently only support 16Khz 16bit mono PCM).</param>
+        /// <returns>The pull audio input stream being created.</returns>
+        public PullAudioInputStream(PullAudioInputStreamCallback callback, AudioStreamFormat format) : 
+            this(Microsoft.CognitiveServices.Speech.Internal.PullAudioInputStream.CreatePullStream(format.formatImpl, callback.Adapter), callback)
+        {
+        }
+
+        /// <summary>
+        /// This method performs cleanup of resources.
+        /// The Boolean parameter <paramref name="disposing"/> indicates whether the method is called from <see cref="IDisposable.Dispose"/> (if <paramref name="disposing"/> is true) or from the finalizer (if <paramref name="disposing"/> is false).
+        /// Derived classes should override this method to dispose resource if needed.
+        /// </summary>
+        /// <param name="disposing">Flag to request disposal.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                callbackKeepAlive = null;
+            }
+
+            disposed = true;
+            base.Dispose(disposing);
+        }
+
+        private bool disposed = false;
+
+        internal PullAudioInputStream(Microsoft.CognitiveServices.Speech.Internal.PullAudioInputStream stream, PullAudioInputStreamCallback callback) :
+            base(stream)
+        {
+            callbackKeepAlive = callback;
+        }
+
+        private PullAudioInputStreamCallback callbackKeepAlive = null;
+    }
+
+    /// <summary>
+    /// An abstract base class that defines callback methods (Read() and Close()) for custom audio input streams).
+    /// </summary>
+    public abstract class PullAudioInputStreamCallback : IDisposable
     {
         /// <summary>
         /// The adapter to the internal 
         /// </summary>
-        internal AudioInputStreamForwarder Forwarder { get; private set; }
+        internal PullAudioInputStreamCallbackInternalAdapter Adapter { get; private set; }
 
         /// <summary>
-        /// Creates a new audio input stream.
+        /// Creates a new push audio input stream callback.
         /// </summary>
-        public AudioInputStream()
+        public PullAudioInputStreamCallback()
         {
-            Forwarder = new AudioInputStreamForwarder(this);
+            Adapter = new PullAudioInputStreamCallbackInternalAdapter(this);
         }
-
-        /// <summary>
-        /// Gets the format of this audio stream.
-        /// </summary>
-        /// <returns>Returns the format of this audio stream.</returns>
-        abstract public AudioInputStreamFormat GetFormat();
 
         /// <summary>
         /// Reads binary data from the stream.
         /// </summary>
         /// <param name="dataBuffer">The buffer to fill</param>
+        /// <param name="size">The size of the buffer.</param>
         /// <returns>The number of bytes filled, or 0 in case the stream hits its end and there is no more data available.
-        /// If there is no data immediate available, Read() blocks untils the next data becomes available.</returns>
-        abstract public int Read(byte[] dataBuffer);
+        /// If there is no data immediate available, Read() blocks until the next data becomes available.</returns>
+        abstract public int Read(byte[] dataBuffer, uint size);
 
         /// <summary>
         /// Closes the audio input stream.
@@ -87,7 +406,7 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Disposes the resources held by this instance.
+        /// Dispose of associated resources.
         /// </summary>
         public void Dispose()
         {
@@ -96,129 +415,155 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Disposes the resources held by this instance.
+        /// This method performs cleanup of resources.
+        /// The Boolean parameter <paramref name="disposing"/> indicates whether the method is called from <see cref="IDisposable.Dispose"/> (if <paramref name="disposing"/> is true) or from the finalizer (if <paramref name="disposing"/> is false).
+        /// Derived classes should override this method to dispose resource if needed.
         /// </summary>
-        /// <param name="disposing">True if called by Dispose().</param>
+        /// <param name="disposing">Flag to request disposal.</param>
         protected virtual void Dispose(bool disposing)
         {
+            if (disposed)
+            {
+                return;
+            }
+
             if (disposing)
             {
-                this.Forwarder.Dispose();
+                this.Adapter.Dispose();
             }
+
+            disposed = true;
         }
+
+        private bool disposed = false;
     }
 
     /// <summary>
     /// Adapter class to the native stream api.
     /// </summary>
-    public sealed class BinaryAudioStreamReader : AudioInputStream, IDisposable
+    public sealed class BinaryAudioStreamReader : PullAudioInputStreamCallback, IDisposable
     {
         private System.IO.BinaryReader _reader;
-        private AudioInputStreamFormat _format;
 
         /// <summary>
         /// Creates and initializes an instance of BinaryAudioStreamReader.
         /// </summary>
-        /// <param name="format">The format of the underlying stream</param>
         /// <param name="reader">The underlying stream to read the audio data from. Note: The stream contains the bare sample data, not the container (like wave header data, etc).</param>
-        public BinaryAudioStreamReader(AudioInputStreamFormat format , System.IO.BinaryReader reader)
+        public BinaryAudioStreamReader(System.IO.BinaryReader reader)
         {
-            _format = format;
             _reader = reader;
         }
 
         /// <summary>
         /// Creates and initializes an instance of BinaryAudioStreamReader.
         /// </summary>
-        /// <param name="format">The format of the underlying stream</param>
         /// <param name="stream">The underlying stream to read the audio data from. Note: The stream contains the bare sample data, not the container (like wave header data, etc).</param>
-        public BinaryAudioStreamReader(AudioInputStreamFormat format, System.IO.Stream stream) 
-            : this(format, new System.IO.BinaryReader(stream))
+        public BinaryAudioStreamReader(System.IO.Stream stream) 
+            : this(new System.IO.BinaryReader(stream))
         {
-        }
-
-        /// <summary>
-        /// Gets the format of the stream.
-        /// </summary>
-        /// <returns>Returns the format of the stream</returns>
-        public override AudioInputStreamFormat GetFormat()
-        {
-            return _format;
         }
 
         /// <summary>
         /// Reads binary data from the stream.
         /// </summary>
         /// <param name="dataBuffer">The buffer to fill</param>
+        /// <param name="size">The size of the buffer.</param>
         /// <returns>The number of bytes filled, or 0 in case the stream hits its end and there is no more data available.
-        /// If there is no data immediate available, Read() blocks untils the next data becomes available.</returns>
-        public override int Read(byte[] dataBuffer)
+        /// If there is no data immediate available, Read() blocks until the next data becomes available.</returns>
+        public override int Read(byte[] dataBuffer, uint size)
         {
-            return _reader.Read(dataBuffer, 0, dataBuffer.Length);
+            return _reader.Read(dataBuffer, 0, (int)size);
         }
 
         /// <summary>
-        /// Disposes the resorces held by this instance.
+        /// This method performs cleanup of resources.
+        /// The Boolean parameter <paramref name="disposing"/> indicates whether the method is called from <see cref="IDisposable.Dispose"/> (if <paramref name="disposing"/> is true) or from the finalizer (if <paramref name="disposing"/> is false).
+        /// Derived classes should override this method to dispose resource if needed.
         /// </summary>
-        /// <param name="disposing">If true, called through Dispose().</param>
-        override protected void Dispose(bool disposing)
+        /// <param name="disposing">Flag to request disposal.</param>
+        protected override void Dispose(bool disposing)
         {
-            if(disposing)
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
             {
                 _reader.Dispose();
             }
+
+            disposed = true;
             base.Dispose(disposing);
         }
+
+        private bool disposed = false;
     }
 
     /// <summary>
     /// Adapter class to the native audio stream interface.
     /// </summary>
-    internal class AudioInputStreamForwarder : Internal.AudioInputStream, IDisposable
+    internal class PullAudioInputStreamCallbackInternalAdapter : Internal.PullAudioInputStreamCallback, IDisposable
     {
-        private AudioInputStream _target;
+        private PullAudioInputStreamCallback callback;
 
-        public AudioInputStreamForwarder(AudioInputStream target)
+        public PullAudioInputStreamCallbackInternalAdapter(PullAudioInputStreamCallback callback)
         {
-            _target = target;
+            this.callback = callback;
         }
 
-        override public uint Read(byte[] dataBuffer, uint size)
+        override public int Read(byte[] dataBuffer, uint size)
         {
             if (size != dataBuffer.Length)
             {
                 throw new ArgumentException(nameof(size));
             }
 
-            int count = _target.Read(dataBuffer);
+            int count = callback.Read(dataBuffer, size);
             if (count < 0)
             {
                 throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Invalid count: '{0}'. A negative value is not allowed.", count));
             }
 
-            return (uint)count;
+            return count;
         }
 
         override public void Close()
         {
-            _target.Close();
+            callback.Close();
         }
 
-        override public uint GetFormat(Internal.AudioInputStreamFormat pformat, uint cbFormat)
+        /// <summary>
+        /// Dispose of associated resources.
+        /// </summary>
+        override public void Dispose()
         {
-            if (pformat == null || cbFormat < 24)
-                return 24;
-
-            var format = _target.GetFormat();            
-            
-            pformat.AvgBytesPerSec = format.AvgBytesPerSec;
-            pformat.BlockAlign = format.BlockAlign;
-            pformat.Channels = format.Channels;
-            pformat.SamplesPerSec = format.SamplesPerSec;
-            pformat.BitsPerSample = format.BitsPerSample;
-            pformat.FormatTag = format.FormatTag;
-
-            return 24;
+            Dispose(true);
+            base.Dispose();
+            GC.SuppressFinalize(this);
         }
+
+        /// <summary>
+        /// This method performs cleanup of resources.
+        /// The Boolean parameter <paramref name="disposing"/> indicates whether the method is called from <see cref="IDisposable.Dispose"/> (if <paramref name="disposing"/> is true) or from the finalizer (if <paramref name="disposing"/> is false).
+        /// Derived classes should override this method to dispose resource if needed.
+        /// </summary>
+        /// <param name="disposing">Flag to request disposal.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                callback = null;
+            }
+
+            disposed = true;
+        }
+
+        private bool disposed = false;
     };
 }

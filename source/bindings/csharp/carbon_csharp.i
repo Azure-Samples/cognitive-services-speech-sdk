@@ -8,21 +8,21 @@
 
 %{
 #include <speechapi_cxx_common.h>
-#include "speechapi_cxx_audioinputstream.h"
+#include "speechapi_cxx_audio_stream.h"
 %}
 
 // only apply to those named "dataBuffer"
+%apply char* { uint8_t* dataBuffer }
 %typemap(imtype,
          directoroutattributes="[FIXME_NOT_NEEDED /*left in swig to fast-fail in case new code requires new marshalling*/]",
          directorinattributes="[System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPArray, ArraySubType = System.Runtime.InteropServices.UnmanagedType.U1, SizeParamIndex = 1)][System.Runtime.InteropServices.Out][System.Runtime.InteropServices.In]"
-        ) char* dataBuffer "byte[]"
-%typemap(cstype) char* dataBuffer "byte[]"
-%typemap(in) char* dataBuffer %{ $1 = ($1_ltype)$input; %}
-%typemap(directorin) char* dataBuffer %{ $input = ($1_ltype)$1; %}
-%typemap(csin) char *dataBuffer "$csinput"
+        ) uint8_t* dataBuffer "byte[]"
+%typemap(cstype) uint8_t* dataBuffer "byte[]"
+%typemap(in) uint8_t* dataBuffer %{ $1 = ($1_ltype)$input; %}
+%typemap(directorin) uint8_t* dataBuffer %{ $input = (char*)$1; %}
+%typemap(csin) uint8_t *dataBuffer "$csinput"
 
-%feature("director") AudioInputStream;
-%include "speechapi_cxx_audioinputstream.h"
+%feature("director") PullAudioInputStreamCallback;
 
 %include <std_vector.i>
 

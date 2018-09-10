@@ -48,7 +48,7 @@ void CSpxMockRecoEngineAdapter::SetAdapterMode(bool singleShot)
     m_singleShot = singleShot;
 }
 
-void CSpxMockRecoEngineAdapter::SetFormat(WAVEFORMATEX* pformat)
+void CSpxMockRecoEngineAdapter::SetFormat(SPXWAVEFORMATEX* pformat)
 {
     SPX_DBG_TRACE_VERBOSE_IF(pformat == nullptr, "%s - pformat == nullptr", __FUNCTION__);
     SPX_DBG_TRACE_VERBOSE_IF(pformat != nullptr, "%s\n  wFormatTag:      %s\n  nChannels:       %d\n  nSamplesPerSec:  %d\n  nAvgBytesPerSec: %d\n  nBlockAlign:     %d\n  wBitsPerSample:  %d\n  cbSize:          %d",
@@ -99,11 +99,11 @@ void CSpxMockRecoEngineAdapter::ProcessAudio(AudioData_Type /* data */, uint32_t
     }
 }
 
-void CSpxMockRecoEngineAdapter::InitFormat(WAVEFORMATEX* pformat)
+void CSpxMockRecoEngineAdapter::InitFormat(SPXWAVEFORMATEX* pformat)
 {
     SPX_IFTRUE_THROW_HR(HasFormat(), SPXERR_ALREADY_INITIALIZED);
 
-    auto sizeOfFormat = sizeof(WAVEFORMATEX) + pformat->cbSize;
+    auto sizeOfFormat = sizeof(SPXWAVEFORMATEX) + pformat->cbSize;
     m_format = SpxAllocWAVEFORMATEX(sizeOfFormat);
     memcpy(m_format.get(), pformat, sizeOfFormat);
 

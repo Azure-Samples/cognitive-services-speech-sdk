@@ -31,6 +31,7 @@ bool Handle_IsValid(handle_type handle)
 template<class handle_type, class ptr_type>
 SPXHR Handle_Close(handle_type handle)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, handle == nullptr);
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto handletable = CSpxSharedPtrHandleTableManager::Get<ptr_type, handle_type>();

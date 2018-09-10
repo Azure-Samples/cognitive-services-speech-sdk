@@ -101,7 +101,7 @@ public:
     void SetAdapterMode(bool singleShot) override;
 
     // --- ISpxAudioProcessor
-    void SetFormat(WAVEFORMATEX* pformat) override;
+    void SetFormat(SPXWAVEFORMATEX* pformat) override;
     void ProcessAudio(AudioData_Type data, uint32_t size) override;
 
     // --- IServiceProvider ---
@@ -138,7 +138,7 @@ private:
     void UspSendSpeechContext();
     void UspSendMessage(const std::string& messagePath, const std::string &buffer);
     void UspSendMessage(const std::string& messagePath, const uint8_t* buffer, size_t size);
-    void UspWriteFormat(WAVEFORMATEX* pformat);
+    void UspWriteFormat(SPXWAVEFORMATEX* pformat);
     void UspWriteActual(const uint8_t* buffer, size_t byteToWrite);
     void UspWriteFlush();
 
@@ -212,7 +212,7 @@ private:
     bool ChangeState(AudioState toAudioState, UspState toUspState) { return ChangeState(m_audioState, m_uspState, toAudioState, toUspState); }
     bool ChangeState(AudioState fromAudioState, UspState fromUspState, AudioState toAudioState, UspState toUspState);
 
-    void PrepareFirstAudioReadyState(WAVEFORMATEX* format);
+    void PrepareFirstAudioReadyState(SPXWAVEFORMATEX* format);
     void PrepareAudioReadyState();
     void SendPreAudioMessages();
 

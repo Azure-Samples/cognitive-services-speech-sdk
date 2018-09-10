@@ -29,7 +29,7 @@ CSpxWavFileReader::CSpxWavFileReader() :
 
 CSpxWavFileReader::~CSpxWavFileReader()
 {
-    Close(); // WaveFile_Type may close via it's dtor; force close now for proper telemetry/tracing from ::Close method
+    Close(); // WavFile_Type may close via it's dtor; force close now for proper telemetry/tracing from ::Close method
 }
 
 void CSpxWavFileReader::Open(const wchar_t* fileName)
@@ -81,20 +81,20 @@ void CSpxWavFileReader::SetRealTimePercentage(uint8_t percentage)
     m_simulateRealtimePercentage = percentage;
 }
 
-uint16_t CSpxWavFileReader::GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat)
+uint16_t CSpxWavFileReader::GetFormat(SPXWAVEFORMATEX* format, uint16_t cbFormat)
 {
     SPX_IFTRUE_THROW_HR(!IsOpen(), SPXERR_UNINITIALIZED);
 
     EnsureGetFormat();
-    SPX_DBG_TRACE_ERROR_IF(m_waveformat.get() == nullptr, "IsOpen() returned true; EnsureGetFormat() didn't throw; we should have a WAVEFORMAT now...");
+    SPX_DBG_TRACE_ERROR_IF(m_waveformat.get() == nullptr, "IsOpen() returned true; EnsureGetFormat() didn't throw; we should have a SPXWAVEFORMAT now...");
     SPX_IFTRUE_THROW_HR(m_waveformat.get() == nullptr, SPXERR_UNSUPPORTED_FORMAT);
 
-    uint16_t cbFormatRequired = sizeof(WAVEFORMATEX) + m_waveformat->cbSize;
+    uint16_t cbFormatRequired = sizeof(SPXWAVEFORMATEX) + m_waveformat->cbSize;
 
-    if (pformat != nullptr) // Calling with GetFormat(nullptr, ???) is valid; we don't copy bits, only return sizeof block required
+    if (format != nullptr) // Calling with GetFormat(nullptr, ???) is valid; we don't copy bits, only return sizeof block required
     {
         size_t cb = std::min(cbFormat, cbFormatRequired);
-        std::memcpy(pformat, m_waveformat.get(), cb);
+        std::memcpy(format, m_waveformat.get(), cb);
     }
 
     return cbFormatRequired;
@@ -105,7 +105,7 @@ uint32_t CSpxWavFileReader::Read(uint8_t* pbuffer, uint32_t cbBuffer)
     SPX_IFTRUE_THROW_HR(!IsOpen(), SPXERR_UNINITIALIZED);
 
     EnsureGetFormat();
-    SPX_DBG_ASSERT_WITH_MESSAGE(m_waveformat.get() != nullptr, "IsOpen() returned true; EnsureGetFormat() didn't throw; we should have a WAVEFORMAT now...");
+    SPX_DBG_ASSERT_WITH_MESSAGE(m_waveformat.get() != nullptr, "IsOpen() returned true; EnsureGetFormat() didn't throw; we should have a SPXWAVEFORMAT now...");
 
     uint32_t cbRead = 0;
     while (cbBuffer > 0 && !m_file->eof())
@@ -167,7 +167,7 @@ void CSpxWavFileReader::FindFormatAndDataChunks()
     // Initialize the first data chunk seek position to zero
     m_firstSeekDataChunkPos = 0;
     
-    // Read chunks until we've read the WAVEFORMAT and found the 'data' chunk position
+    // Read chunks until we've read the SPXWAVEFORMAT and found the 'data' chunk position
     while ((m_waveformat.get() == nullptr || m_firstSeekDataChunkPos == 0) && ReadChunkTypeAndSize(chunkType, &chunkSize))
     {
         if (0 == std::memcmp(chunkType, "fmt ", cbChunkType)) // Is this the format chunk?
@@ -221,15 +221,15 @@ bool CSpxWavFileReader::ReadChunkTypeAndSize(uint8_t* pchunkType, uint32_t* pchu
 
 void CSpxWavFileReader::ReadFormatChunk(uint32_t chunkSize)
 {
-    SPX_IFTRUE_THROW_HR(chunkSize < sizeof(WAVEFORMATEX) && chunkSize != sizeof(WAVEFORMAT), SPXERR_INVALID_HEADER);
+    SPX_IFTRUE_THROW_HR(chunkSize < sizeof(SPXWAVEFORMATEX) && chunkSize != sizeof(SPXWAVEFORMAT), SPXERR_INVALID_HEADER);
     
-    auto cbAllocate = std::max((size_t)chunkSize, sizeof(WAVEFORMATEX)); // allocate space for EX structure, no matter what
+    auto cbAllocate = std::max((size_t)chunkSize, sizeof(SPXWAVEFORMATEX)); // allocate space for EX structure, no matter what
     auto waveformat = SpxAllocWAVEFORMATEX(cbAllocate);
     waveformat->cbSize = 0;
     
-    // Read the WAVEFORMAT/WAVEFORMATEX
+    // Read the SPXWAVEFORMAT/SPXWAVEFORMATEX
     SPX_IFTRUE_THROW_HR(!m_file->read((char*)waveformat.get(), chunkSize), SPXERR_UNEXPECTED_EOF);
-    SPX_DBG_TRACE_VERBOSE_IF(m_file->eof(), "It's very uncommon, but possible, to hit EOF after reading WAVEFORMAT/WAVEFORMATEX");
+    SPX_DBG_TRACE_VERBOSE_IF(m_file->eof(), "It's very uncommon, but possible, to hit EOF after reading SPXWAVEFORMAT/SPXWAVEFORMATEX");
 
     // Finally, store the format
     m_waveformat = waveformat;

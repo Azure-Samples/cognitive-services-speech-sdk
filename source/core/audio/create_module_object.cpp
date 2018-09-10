@@ -8,11 +8,13 @@
 #include "stdafx.h"
 
 #include "audio_pump.h"
+#include "audio_config.h"
+#include "pull_audio_input_stream.h"
+#include "push_audio_input_stream.h"
 #include "interactive_microphone.h"
 #include "factory_helpers.h"
 #include "wav_file_reader.h"
 #include "wav_file_pump.h"
-#include "stream_pump.h"
 
 
 namespace Microsoft {
@@ -24,11 +26,13 @@ namespace Impl {
 SPX_EXTERN_C void* AudioLib_CreateModuleObject(const char* className, const char* interfaceName)
 {
     SPX_FACTORY_MAP_BEGIN();
-    SPX_FACTORY_MAP_ENTRY(CSpxAudioPump, ISpxAudioPumpReaderInit);
+    SPX_FACTORY_MAP_ENTRY(CSpxAudioPump, ISpxAudioPumpInit);
+    SPX_FACTORY_MAP_ENTRY(CSpxAudioConfig, ISpxAudioConfig);
+    SPX_FACTORY_MAP_ENTRY(CSpxPushAudioInputStream, ISpxAudioStreamInitFormat);
+    SPX_FACTORY_MAP_ENTRY(CSpxPullAudioInputStream, ISpxAudioStreamInitFormat);
     SPX_FACTORY_MAP_ENTRY(CSpxInteractiveMicrophone, ISpxAudioPump);
     SPX_FACTORY_MAP_ENTRY(CSpxWavFileReader, ISpxAudioFile);
     SPX_FACTORY_MAP_ENTRY(CSpxWavFilePump, ISpxAudioFile);
-    SPX_FACTORY_MAP_ENTRY(CSpxStreamPump, ISpxStreamPumpReaderInit);
     SPX_FACTORY_MAP_END();
 }
 

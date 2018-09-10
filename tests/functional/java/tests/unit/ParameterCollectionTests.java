@@ -15,6 +15,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
 
+import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.ParameterCollection;
 import com.microsoft.cognitiveservices.speech.SpeechFactory;
 
@@ -41,15 +42,15 @@ public class ParameterCollectionTests {
         ParameterCollection<?> sfp = s.getParameters();
         assertNotNull(sfp);
         
-        ParameterCollection<?> crp  = s.createIntentRecognizerWithFileInput(Settings.WaveFile).getParameters();
+        ParameterCollection<?> crp  = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile)).getParameters();
         assertNotNull(crp);
         
-        ParameterCollection<?> srp  = s.createSpeechRecognizerWithFileInput(Settings.WaveFile).getParameters();
+        ParameterCollection<?> srp  = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile)).getParameters();
         assertNotNull(srp);
 
         ArrayList<String> targetLanguages = new ArrayList<>();
         targetLanguages.add("en-US");
-        ParameterCollection<?> trp  = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targetLanguages).getParameters();
+        ParameterCollection<?> trp  = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targetLanguages).getParameters();
         assertNotNull(crp);
     }
 
@@ -74,17 +75,17 @@ public class ParameterCollectionTests {
         assertNotNull(sfp);
         testIsParametersString(sfp);
         
-        ParameterCollection<?> crp  = s.createIntentRecognizerWithFileInput(Settings.WaveFile).getParameters();
+        ParameterCollection<?> crp  = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile)).getParameters();
         assertNotNull(crp);
         testIsParametersString(crp);
         
-        ParameterCollection<?> srp  = s.createSpeechRecognizerWithFileInput(Settings.WaveFile).getParameters();
+        ParameterCollection<?> srp  = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile)).getParameters();
         assertNotNull(srp);
         testIsParametersString(srp);
         
         ArrayList<String> targetLanguages = new ArrayList<>();
         targetLanguages.add("en-US");
-        ParameterCollection<?> trp  = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targetLanguages).getParameters();
+        ParameterCollection<?> trp  = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targetLanguages).getParameters();
         assertNotNull(trp);
         testIsParametersString(trp);
     }
@@ -138,17 +139,17 @@ public class ParameterCollectionTests {
         assertNotNull(sfp);
         testIsParametersString(sfp);
         
-        ParameterCollection<?> crp  = s.createIntentRecognizerWithFileInput(Settings.WaveFile).getParameters();
+        ParameterCollection<?> crp  = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile)).getParameters();
         assertNotNull(crp);
         testIsParametersString(crp);
         
-        ParameterCollection<?> srp  = s.createSpeechRecognizerWithFileInput(Settings.WaveFile).getParameters();
+        ParameterCollection<?> srp  = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile)).getParameters();
         assertNotNull(srp);
         testIsParametersString(srp);
         
         ArrayList<String> targetLanguages = new ArrayList<>();
         targetLanguages.add("en-US");
-        ParameterCollection<?> trp  = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targetLanguages).getParameters();
+        ParameterCollection<?> trp  = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targetLanguages).getParameters();
         assertNotNull(trp);
         testIsParametersString(trp);
     }
@@ -180,17 +181,17 @@ public class ParameterCollectionTests {
         assertNotNull(sfp);
         testGetParametersStringString(sfp);
         
-        ParameterCollection<?> crp  = s.createIntentRecognizerWithFileInput(Settings.WaveFile).getParameters();
+        ParameterCollection<?> crp  = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile)).getParameters();
         assertNotNull(crp);
         testGetParametersStringString(crp);
         
-        ParameterCollection<?> srp  = s.createSpeechRecognizerWithFileInput(Settings.WaveFile).getParameters();
+        ParameterCollection<?> srp  = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile)).getParameters();
         assertNotNull(srp);
         testGetParametersStringString(srp);
         
         ArrayList<String> targetLanguages = new ArrayList<>();
         targetLanguages.add("en-US");
-        ParameterCollection<?> trp  = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targetLanguages).getParameters();
+        ParameterCollection<?> trp  = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targetLanguages).getParameters();
         assertNotNull(trp);
         testGetParametersStringString(trp);
     }
@@ -207,15 +208,15 @@ public class ParameterCollectionTests {
         ParameterCollection<?> sfp = s.getParameters();
         assertNotNull(sfp);
         
-        ParameterCollection<?> crp  = s.createIntentRecognizerWithFileInput(Settings.WaveFile).getParameters();
+        ParameterCollection<?> crp  = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile)).getParameters();
         assertNotNull(crp);
         
-        ParameterCollection<?> srp  = s.createSpeechRecognizerWithFileInput(Settings.WaveFile).getParameters();
+        ParameterCollection<?> srp  = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile)).getParameters();
         assertNotNull(srp);
         
         ArrayList<String> targetLanguages = new ArrayList<>();
         targetLanguages.add("en-US");
-        ParameterCollection<?> trp  = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targetLanguages).getParameters();
+        ParameterCollection<?> trp  = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targetLanguages).getParameters();
         assertNotNull(trp);
         
         trp.close();

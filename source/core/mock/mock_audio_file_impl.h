@@ -16,7 +16,7 @@ namespace Speech {
 namespace Impl {
 
 
-class ISpxMockAudioFileImpl : public ISpxAudioFile, public ISpxAudioReaderRealTime
+class ISpxMockAudioFileImpl : public ISpxAudioFile, public ISpxAudioStreamInitRealTime
 {
 public:
 
@@ -30,6 +30,8 @@ public:
 
     void SetContinuousLoop(bool value) override { UNUSED(value); }
     void SetIterativeLoop(bool value) override { UNUSED(value); }
+
+    // --- ISpxAudioStreamInitRealTime ---
     void SetRealTimePercentage(uint8_t percentage) override { UNUSED(percentage); }
 
 

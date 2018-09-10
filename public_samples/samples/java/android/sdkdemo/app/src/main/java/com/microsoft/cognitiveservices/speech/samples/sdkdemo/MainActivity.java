@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.RecognitionStatus;
 import com.microsoft.cognitiveservices.speech.SessionEventType;
 import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
@@ -120,7 +121,9 @@ public class MainActivity extends AppCompatActivity {
             clearTextBox();
 
             try {
-                final SpeechRecognizer reco = speechFactory.createSpeechRecognizerWithStream(createMicrophoneStream());
+                // final AudioConfig audioInput = AudioConfig.fromDefaultMicrophoneInput();
+                final AudioConfig audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
+                final SpeechRecognizer reco = speechFactory.createSpeechRecognizerFromConfig(audioInput);
 
                 final Future<SpeechRecognitionResult> task = reco.recognizeAsync();
                 setOnTaskCompletedListener(task, result -> {
@@ -150,7 +153,9 @@ public class MainActivity extends AppCompatActivity {
             clearTextBox();
 
             try {
-                final SpeechRecognizer reco = speechFactory.createSpeechRecognizerWithStream(createMicrophoneStream());
+                // final AudioConfig audioInput = AudioConfig.fromDefaultMicrophoneInput();
+                final AudioConfig audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
+                final SpeechRecognizer reco = speechFactory.createSpeechRecognizerFromConfig(audioInput);
 
                 reco.IntermediateResultReceived.addEventListener((o, speechRecognitionResultEventArgs) -> {
                     final String s = speechRecognitionResultEventArgs.getResult().getText();
@@ -179,6 +184,7 @@ public class MainActivity extends AppCompatActivity {
             private static final String logTag = "reco 3";
             private boolean continuousListeningStarted = false;
             private SpeechRecognizer reco = null;
+            private AudioConfig audioInput = null;
             private String buttonText = "";
             private ArrayList<String> content = new ArrayList<>();
 
@@ -208,7 +214,10 @@ public class MainActivity extends AppCompatActivity {
 
                 try {
                     content.clear();
-                    reco = speechFactory.createSpeechRecognizerWithStream(createMicrophoneStream());
+                    
+                    // audioInput = AudioConfig.fromDefaultMicrophoneInput();
+                    audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
+                    reco = speechFactory.createSpeechRecognizerFromConfig(audioInput);
 
                     reco.IntermediateResultReceived.addEventListener((o, speechRecognitionResultEventArgs) -> {
                         final String s = speechRecognitionResultEventArgs.getResult().getText();
@@ -259,7 +268,10 @@ public class MainActivity extends AppCompatActivity {
             content.add("");
             try {
                 final SpeechFactory intentFactory = SpeechFactory.fromSubscription(LanguageUnderstandingSubscriptionKey, LanguageUnderstandingServiceRegion);
-                final IntentRecognizer reco = intentFactory.createIntentRecognizerWithStream(createMicrophoneStream());
+
+                // final AudioConfig audioInput = AudioConfig.fromDefaultMicrophoneInput();
+                final AudioConfig audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
+                final IntentRecognizer reco = intentFactory.createIntentRecognizerFromConfig(audioInput);
 
                 LanguageUnderstandingModel intentModel = LanguageUnderstandingModel.fromAppId(LanguageUnderstandingAppId);
                 for (Map.Entry<String, String> entry : intentIdMap.entrySet()) {

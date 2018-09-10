@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Intent;
 
 namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
@@ -64,7 +65,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [DataRow("DontCare", "", "HomeAutomation.TurnOn")]
         public async Task RecognizeIntent(string localIntent, string modelIntent, string expectedIntent)
         {
-            using (var recognizer = TrackSessionId(factory.CreateIntentRecognizerWithFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile)))
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile);
+            using (var recognizer = TrackSessionId(factory.CreateIntentRecognizerFromConfig(audioInput)))
             {
                 var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
                 recognizer.AddIntent(localIntent, model, modelIntent);

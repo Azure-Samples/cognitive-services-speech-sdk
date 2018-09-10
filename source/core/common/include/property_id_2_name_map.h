@@ -6,7 +6,6 @@
 //
 
 #pragma once
-#include "speechapi_cxx_properties.h"
 
 namespace Microsoft {
 namespace CognitiveServices {

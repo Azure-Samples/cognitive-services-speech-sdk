@@ -35,7 +35,7 @@ SPX_EXTERN_C void* Mock_CreateModuleObject(const char* className, const char* in
     SPX_DBG_TRACE_VERBOSE("%s trying to create %s, %s.", __FUNCTION__, className, interfaceName);
 
     SPX_FACTORY_MAP_BEGIN();
-    SPX_FACTORY_MAP_ENTRY(CSpxMockAudioReader, ISpxAudioReader);
+    SPX_FACTORY_MAP_ENTRY(CSpxMockAudioReader, ISpxAudioStreamReader);
     SPX_FACTORY_MAP_ENTRY(CSpxMockInteractiveMicrophone, ISpxAudioPump);
     SPX_FACTORY_MAP_ENTRY(CSpxMockKwsEngineAdapter, ISpxKwsEngineAdapter);
     SPX_FACTORY_MAP_ENTRY(CSpxMockRecoEngineAdapter, ISpxRecoEngineAdapter);

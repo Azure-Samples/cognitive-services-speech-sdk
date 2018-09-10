@@ -5,6 +5,7 @@
 using Windows.Storage.Streams;
 using Windows.Storage;
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 using System.Diagnostics;
 using System.IO;
 using System;
@@ -12,9 +13,8 @@ namespace MicrosoftSpeechSDKSamples
 {
     public class Helper
     {
-        public static AudioInputStream OpenWaveFile(BinaryReader reader)
+        public static AudioConfig OpenWaveFile(BinaryReader reader)
         {
-            AudioInputStreamFormat format = new AudioInputStreamFormat();
             // Tag "RIFF"
             char[] data = new char[4];
             reader.Read(data, 0, 4);
@@ -25,6 +25,7 @@ namespace MicrosoftSpeechSDKSamples
             
             // Chunk size
             long fileSize = reader.ReadInt32();
+
             // Subchunk, Wave Header
             // Subchunk, Format
             // Tag: "WAVE"
@@ -33,23 +34,27 @@ namespace MicrosoftSpeechSDKSamples
             {
                 throw new global::System.FormatException("Wrong wav tag in wav header");
             }
+
             // Tag: "fmt"
             reader.Read(data, 0, 4);
             if ((data[0] != 'f') || (data[1] != 'm') || (data[2] != 't') && (data[3] != ' '))
             {
                 throw new global::System.FormatException("Wrong format tag in wav header");
             }
+
             // chunk format size
-            long formatSize = reader.ReadInt32();
-            format.FormatTag = reader.ReadUInt16();
-            format.Channels = reader.ReadUInt16();
-            format.SamplesPerSec = (int)reader.ReadUInt32();
-            format.AvgBytesPerSec = (int)reader.ReadUInt32();
-            format.BlockAlign = reader.ReadUInt16();
-            format.BitsPerSample = reader.ReadUInt16();
+            var formatSize = reader.ReadInt32();
+            var formatTag = reader.ReadUInt16();
+            var channels = reader.ReadUInt16();
+            var samplesPerSec = reader.ReadUInt32();
+            var avgBytesPerSec = (int)reader.ReadUInt32();
+            var blockAlign = reader.ReadUInt16();
+            var bitsPerSample = reader.ReadUInt16();
+
             // Until now we have read 16 bytes in format, the rest is cbSize and is ignored for now.
             if (formatSize > 16)
                 reader.ReadBytes((int)(formatSize - 16));
+
             // Second Chunk, data
             // tag: data.
             reader.Read(data, 0, 4);
@@ -60,9 +65,11 @@ namespace MicrosoftSpeechSDKSamples
             }
             // data chunk size
             int dataSize = reader.ReadInt32();
+
             // now, we have the format in the format parameter and the
             // reader set to the start of the body, i.e., the raw sample data
-            return new BinaryAudioStreamReader(format, reader);
+            AudioStreamFormat format = AudioStreamFormat.GetWaveFormatPCM(samplesPerSec, (byte)bitsPerSample, (byte)channels);
+            return AudioConfig.FromStreamInput(new BinaryAudioStreamReader(reader), format);
         }
     }
 }

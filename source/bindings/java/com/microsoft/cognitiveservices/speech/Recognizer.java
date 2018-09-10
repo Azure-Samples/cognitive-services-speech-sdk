@@ -8,6 +8,7 @@ import java.io.Closeable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
@@ -31,15 +32,15 @@ public class Recognizer implements Closeable
       */
     final public EventHandlerImpl<RecognitionEventArgs> RecognitionEvent = new EventHandlerImpl<RecognitionEventArgs>();
 
-    private AudioInputStream audioInputStreamHolder;
+    private AudioConfig audioInputKeepAlive;
 
     /**
      * Creates and initializes an instance of a Recognizer
-      * @param ais An optional audio input stream associated with the recognizer
+      * @param audioInput An optional audio input configuration associated with the recognizer
      */
-    protected Recognizer(AudioInputStream ais) {
+    protected Recognizer(AudioConfig audioInput) {
         // Note: Since ais is optional, no test for null reference
-        audioInputStreamHolder = ais;
+        audioInputKeepAlive = audioInput;
         sessionStartedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStartedEvent);
         sessionStoppedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStoppedEvent);
         speechStartDetectedHandler = new RecognitionEventHandlerImpl(this, RecognitionEventType.SpeechStartDetectedEvent);

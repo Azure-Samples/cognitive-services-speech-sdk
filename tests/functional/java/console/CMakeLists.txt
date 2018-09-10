@@ -15,7 +15,7 @@ set(JAVA_SOURCES
     ${PROJECT_SOURCE_DIR}/com/microsoft/cognitiveservices/speech/samples/SampleSettings.java
     ${PROJECT_SOURCE_DIR}/com/microsoft/cognitiveservices/speech/samples/SampleSimpleRecognize.java
     ${PROJECT_SOURCE_DIR}/com/microsoft/cognitiveservices/speech/samples/Stoppable.java
-    ${PROJECT_SOURCE_DIR}/com/microsoft/cognitiveservices/speech/samples/WaveFileAudioInputStream.java
+    ${PROJECT_SOURCE_DIR}/com/microsoft/cognitiveservices/speech/samples/WavFileAudioInputStream.java
 )
 
 add_jar(${PROJECT_NAME}

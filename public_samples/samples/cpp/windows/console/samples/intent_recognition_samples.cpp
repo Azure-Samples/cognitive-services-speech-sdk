@@ -10,6 +10,7 @@
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
+using namespace Microsoft::CognitiveServices::Speech::Audio;
 using namespace Microsoft::CognitiveServices::Speech::Intent;
 // </toplevel>
 
@@ -80,7 +81,7 @@ void IntentRecognitionWithLanguage()
 
     // Creates an intent recognizer in the specified language using microphone as audio input.
     auto lang = "de-de";
-    auto recognizer = factory->CreateIntentRecognizer(lang);
+    auto recognizer = factory->CreateIntentRecognizerFromConfig(lang);
 
     // Creates a Language Understanding model using the app id, and adds specific intents from your model
     auto model = LanguageUnderstandingModel::FromAppId("YourLanguageUnderstandingAppId");
@@ -133,7 +134,8 @@ void IntentContinuousRecognitionWithFile()
 
     // Creates an intent recognizer using file as audio input.
     // Replace with your own audio file name.
-    auto recognizer = factory->CreateIntentRecognizerWithFileInput("whatstheweatherlike.wav");
+    auto audioInput = AudioConfig::FromWavFileInput("whatstheweatherlike.wav");
+    auto recognizer = factory->CreateIntentRecognizerFromConfig(audioInput);
 
     // promise for synchronization of recognition end.
     std::promise<void> recognitionEnd;

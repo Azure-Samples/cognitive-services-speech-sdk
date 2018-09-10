@@ -9,7 +9,6 @@
 #include <spxdebug.h>
 #include <spxerror.h>
 #include "service_helpers.h"
-#include <speechapi_cxx_audioinputstream.h>
 #include "interface_helpers.h"
 #include "property_bag_impl.h"
 
@@ -40,26 +39,9 @@ public:
     SPX_INTERFACE_MAP_END()
 
     // --- ISpxSpeechApiFactory
-    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer() override;
-    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language) override;
-    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language, OutputFormat format) override;
-    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName) override;
-    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) override;
-    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language, OutputFormat format) override;
-    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream) override;
-    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language) override;
-    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language, OutputFormat format) override;
-
-    std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer() override;
-    std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer(const std::wstring& language) override;
-    std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName) override;
-    std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) override;
-    std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithStream(AudioInputStream*) override;
-    std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language) override;
-
-    std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizer(const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") override;
-    std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") override;
-    std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerWithStream(AudioInputStream *stream, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") override;
+    std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerFromConfig(const char* pszLanguage, OutputFormat format, std::shared_ptr<ISpxAudioConfig> audioInput) override;
+    std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerFromConfig(const char* pszLanguage, OutputFormat format, std::shared_ptr<ISpxAudioConfig> audioInput) override;
+    std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerFromConfig(const std::string& sourcelanguage, const std::vector<std::string>& targetLanguages, const std::string& voice, std::shared_ptr<ISpxAudioConfig> audioInput) override;
 
     // --- IServiceProvider
     SPX_SERVICE_MAP_BEGIN()
@@ -67,23 +49,29 @@ public:
     SPX_SERVICE_MAP_ENTRY_SITE(GetSite())
     SPX_SERVICE_MAP_END()
 
-
 protected:
-
-    std::shared_ptr<ISpxRecognizer> CreateRecognizerInternal(
-        const char* sessionClassName,
-        const char* recognizerClassName,
-        const wchar_t* fileName = nullptr,
-        const wchar_t* language = nullptr,
-        OutputFormat format = OutputFormat::Simple);
 
     std::shared_ptr<ISpxNamedProperties> GetParentProperties() const override { return SpxQueryService<ISpxNamedProperties>(GetSite()); }
 
 private:
 
-    std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerInternal(wchar_t const* fileNameStr, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice);
-    void SetTranslationParameter(const std::shared_ptr<ISpxNamedProperties>& namedProperties, const std::wstring& sourceLanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice);
+    std::shared_ptr<ISpxRecognizer> CreateRecognizerFromConfigInternal(
+        const char* sessionClassName, 
+        const char* recognizerClassName,
+        const char* language = nullptr,
+        OutputFormat format = OutputFormat::Simple,
+        std::shared_ptr<ISpxAudioConfig> audioInput = nullptr);
 
+    std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerFromConfigInternal(
+        const std::string& sourceLanguage,
+        const std::vector<std::string>& targetLanguages,
+        const std::string& voice,
+        std::shared_ptr<ISpxAudioConfig> audioInput);
+
+    void InitSessionFromAudioInputConfig(std::shared_ptr<ISpxSession> session, std::shared_ptr<ISpxAudioConfig> audioInput);
+
+    void SetRecognizerProperties(const std::shared_ptr<ISpxNamedProperties>& namedProperties, const char* language, OutputFormat format);
+    void SetTranslationProperties(const std::shared_ptr<ISpxNamedProperties>& namedProperties, const std::string& sourceLanguage, const std::vector<std::string>& targetLanguages, const std::string& voice);
 };
 
 

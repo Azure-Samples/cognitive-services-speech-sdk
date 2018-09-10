@@ -21,7 +21,7 @@ public class Settings {
     public static String LuisRegion = "<<YOUR_LUIS_REGION>>";
     public static String LuisAppId = "<<YOUR_LUIS_APP_KEY>>";
 
-    public static String WaveFile = "whatstheweatherlike.wav";
+    public static String WavFile = "whatstheweatherlike.wav";
 
     public static String Keyword = "Computer";
     public static String KeywordModel = "/data/keyword/kws.table";
@@ -57,7 +57,7 @@ public class Settings {
         LuisRegion = System.getProperty("LuisRegion", LuisRegion);
         LuisAppId = System.getProperty("LuisAppId", LuisAppId);
 
-        WaveFile = System.getProperty("WaveFile", WaveFile);
+        WavFile = System.getProperty("WaveFile", WavFile);
 
         Keyword = System.getProperty("Keyword", Keyword);
         KeywordModel = System.getProperty("KeywordModel", KeywordModel);

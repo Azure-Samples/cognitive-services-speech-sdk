@@ -7,7 +7,6 @@
 
 #pragma once
 #include <speechapi_cxx_common.h>
-#include <speechapi_c_common.h>
 #include <speechapi_cxx_session_eventargs.h>
 #include <speechapi_cxx_translation_result.h>
 

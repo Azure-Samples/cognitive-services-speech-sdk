@@ -11,28 +11,15 @@
 #include <map>
 #include <new>
 #include <speechapi_cxx_common.h>
+#include <speechapi_cxx_enums.h>
 #include <speechapi_c.h>
-#include <speechapi_cxx_recognition_result.h>
+#include <speechapi_cxx_speech_recognition_result.h>
+
 
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Translation {
-
-/// <summary>
-/// Defines the status code of translation result.
-/// </summary>
-enum class TranslationStatusCode {
-    /// <summary>
-    /// The translation is successful.
-    /// </summary>
-    Success,
-
-    /// <summary>
-    /// An error occurred during translation.
-    /// </summary>
-    Error
-};
 
 
 /// <summary> 
@@ -145,26 +132,6 @@ private:
     };
 
     DISABLE_DEFAULT_CTORS(TranslationTextResult);
-};
-
-/// <summary>
-/// Defines the status code of synthesis result.
-/// </summary>
-enum class SynthesisStatusCode {
-    /// <summary>
-    /// The audio data contained in the message is valid.
-    /// </summary>
-    Success,
-
-    /// <summary>
-    /// Indicates the end of audio data. No audio data is included in this message.
-    /// </summary>
-    SynthesisEnd,
-
-    /// <summary>
-    /// An error occurred during translation.
-    /// </summary>
-    Error
 };
 
 /// <summary>

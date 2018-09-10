@@ -1,8 +1,14 @@
-
 #pragma once
+
 #include <string>
-#include <speechapi_c_common.h>
 #include <spxdebug.h>
+#include <speechapi_cxx_common.h>
+#include <speechapi_cxx_enums.h>
+#include <speechapi_c_factory.h>
+#include <speechapi_c_result.h>
+#include <speechapi_c_recognizer.h>
+#include <speechapi_c_session.h>
+#include <speechapi_c_property_bag.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -18,43 +24,6 @@ class SpeechFactory;
 namespace Intent { class IntentRecognizer; }
 namespace Translation { class TranslationRecognizer;   }
 namespace Impl { class MockParameterValue; }
-
-enum class SpeechPropertyId
-{
-    SpeechServiceConnection_Key = 1000,
-    SpeechServiceConnection_Endpoint = 1001,
-    SpeechServiceConnection_Region = 1002,
-    SpeechServiceAuthorization_Token = 1003,
-    SpeechServiceAuthorization_Type = 1004,
-    SpeechServiceRps_Token = 1005,
-    SpeechServiceConnection_DeploymentId = 1006,
-    
-    SpeechServiceConnection_TranslationFromLanguage = 2000,
-    SpeechServiceConnection_TranslationToLanguages = 2001,
-    SpeechServiceConnection_TranslationVoice = 2002,
-    SpeechServiceConnection_TranslationFeatures = 2003,
-    SpeechServiceConnection_IntentRegion = 2004,
-
-    SpeechServiceConnection_RecoMode = 3000,
-    SpeechServiceConnection_RecoMode_Interactive = 3001,
-    SpeechServiceConnection_RecoMode_Conversation = 3002,
-    SpeechServiceConnection_RecoMode_Dictation = 3004,
-    SpeechServiceConnection_RecoLanguage = 3005,
-    Speech_SessionId = 3006,
-
-    SpeechServiceResponse_OutputFormat = 4000,
-    SpeechServiceResponse_OutputFormat_Simple = 4001,
-    SpeechServiceResponse_OutputFormat_Detailed = 4002,
-    SpeechServiceResponse_RequestProfanityFilterTrueFalse = 4003,
-
-    SpeechServiceResponse_Json = 5000,
-    SpeechServiceResponse_JsonResult = 5001,
-    SpeechServiceResponse_JsonErrorDetails = 5002,
-    
-    CancellationDetails_ReasonCanceled = 6000,
-    CancellationDetails_ReasonText = 6001,
-    CancellationDetails_ReasonDetailedText = 6002
-};
 
 enum class HandleType { MOCK, RESULT, SESSION, RECOGNIZER, FACTORY};
 

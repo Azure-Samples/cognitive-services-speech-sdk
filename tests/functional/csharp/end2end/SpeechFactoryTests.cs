@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
+using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Intent;
 using Microsoft.CognitiveServices.Speech.Translation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -30,17 +31,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public void TestCreateRecognizerTypes()
         {
-            var speechRecognizer = factory.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var speechRecognizer = factory.CreateSpeechRecognizerFromConfig(audioInput);
             Assert.IsInstanceOfType(speechRecognizer, typeof(SpeechRecognizer));
             speechRecognizer.Dispose();
 
             var targetLanguages = new List<string>() { Language.DE, Language.ES };
             var sourceLanguage = Language.EN;
-            var translationRecognizer = factory.CreateTranslationRecognizerWithFileInput(TestData.English.Weather.AudioFile, sourceLanguage, targetLanguages);
+            var translationRecognizer = factory.CreateTranslationRecognizerFromConfig(audioInput, sourceLanguage, targetLanguages);
             Assert.IsInstanceOfType(translationRecognizer, typeof(TranslationRecognizer));
             translationRecognizer.Dispose();
 
-            var intentRecognizer = factory.CreateIntentRecognizerWithFileInput(TestData.English.Weather.AudioFile);
+            var intentRecognizer = factory.CreateIntentRecognizerFromConfig(audioInput);
             Assert.IsInstanceOfType(intentRecognizer, typeof(IntentRecognizer));
             intentRecognizer.Dispose();
         }
@@ -58,7 +60,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var token = await Config.GetToken(subscriptionKey);
             var factoryFromToken = SpeechFactory.FromAuthorizationToken(token, region);
 
-            var speechRecognizer = factoryFromToken.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var speechRecognizer = factoryFromToken.CreateSpeechRecognizerFromConfig(audioInput);
             SpeechRecognitionTestsHelper helper = new SpeechRecognitionTestsHelper();
 
             Assert.AreEqual(token, factoryFromToken.AuthorizationToken, "Set of authentication token did not work as expected");
@@ -73,7 +76,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var newToken = await Config.GetToken(subscriptionKey);
             factoryFromToken.AuthorizationToken = newToken;
 
-            var speechRecognizer = factoryFromToken.CreateSpeechRecognizerWithFileInput(TestData.English.Weather.AudioFile);
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
+            var speechRecognizer = factoryFromToken.CreateSpeechRecognizerFromConfig(audioInput);
             SpeechRecognitionTestsHelper helper = new SpeechRecognitionTestsHelper();
 
             Assert.AreEqual(newToken, factoryFromToken.AuthorizationToken, "Set of authentication token did not work as expected");

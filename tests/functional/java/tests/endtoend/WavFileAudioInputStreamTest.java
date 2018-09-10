@@ -15,13 +15,12 @@ import org.junit.Ignore;
 import static org.junit.Assert.*;
 
 import tests.Settings;
-import com.microsoft.cognitiveservices.speech.AudioInputStreamFormat;
 
-import tests.unit.WaveFileAudioInputStream;
+import tests.unit.WavFileAudioInputStream;
 
 @SuppressWarnings("unused")
-public class WaveFileAudioInputStreamTest {
-    WaveFileAudioInputStream waveStream;
+public class WavFileAudioInputStreamTest {
+    WavFileAudioInputStream waveStream;
     
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
@@ -32,7 +31,7 @@ public class WaveFileAudioInputStreamTest {
     @Test
     public void testCreateWithNullFilename() {
         try {
-            new WaveFileAudioInputStream(null);
+            new WavFileAudioInputStream(null);
             fail("Not expected");
         }
         catch(Exception ex) {
@@ -43,7 +42,7 @@ public class WaveFileAudioInputStreamTest {
     @Test
     public void testCreateWithEmptyFilename() {
         try {
-            WaveFileAudioInputStream s = new WaveFileAudioInputStream("");
+            WavFileAudioInputStream s = new WavFileAudioInputStream("");
             fail("unexpected");
         }
         catch(Exception ex) {
@@ -54,7 +53,7 @@ public class WaveFileAudioInputStreamTest {
     @Test
     public void testCreateWithIllegalFilename() {
         try {
-            new WaveFileAudioInputStream("illegal-filename-" + (new Random().nextInt()));
+            new WavFileAudioInputStream("illegal-filename-" + (new Random().nextInt()));
             fail("Not expected");
         }
         catch(Exception ex) {
@@ -64,28 +63,12 @@ public class WaveFileAudioInputStreamTest {
 
     @Test
     public void testCreateWithLegalFilename() {
-        new WaveFileAudioInputStream(Settings.WaveFile);
+        new WavFileAudioInputStream(Settings.WavFile);
     }
-
-    @Test
-    public void testTestFormatParameters() {
-        WaveFileAudioInputStream s = new WaveFileAudioInputStream(Settings.WaveFile);
-        assertNotNull(s);
-        
-        AudioInputStreamFormat f1 = s.getFormat();
-        assertNotNull(f1);
-        assertEquals(1, f1.Channels);
-        assertEquals(16,  f1.BitsPerSample);
-        assertEquals(2, f1.BlockAlign);
-        assertEquals(16000, f1.SamplesPerSec);
-        assertEquals(32000, f1.AvgBytesPerSec);
-        assertEquals(1, f1.FormatTag); // pcm
-    }
-
 
     @Test
     public void testTestClose1() {
-        WaveFileAudioInputStream s = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(s);
 
         s.close();
@@ -93,7 +76,7 @@ public class WaveFileAudioInputStreamTest {
 
     @Test
     public void testTestClose2() {
-        WaveFileAudioInputStream s = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(s);
 
         s.close();
@@ -109,7 +92,7 @@ public class WaveFileAudioInputStreamTest {
 
     @Test
     public void testTestRead1() {
-        WaveFileAudioInputStream s = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(s);
 
         try {
@@ -123,43 +106,43 @@ public class WaveFileAudioInputStreamTest {
 
     @Test
     public void testTestRead2() {
-        WaveFileAudioInputStream s = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(s);
 
         byte[]buf = new byte[0];
-        long numread = s.read(buf);
+        int numread = s.read(buf);
         assertEquals(0, numread);
     }
 
     @Test
     public void testTestRead3() {
-        WaveFileAudioInputStream s = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(s);
 
         byte[]buf = new byte[16];
-        long numread = s.read(buf);
+        int numread = s.read(buf);
         assertEquals(16, numread);
     }
 
     @Test
     public void testTestRead4() {
-        WaveFileAudioInputStream s = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(s);
 
         byte[]buf = new byte[15];
-        long numread = s.read(buf);
+        int numread = s.read(buf);
         assertTrue(numread > 0); // must read at least one sample since file is not empty 
         assertTrue(numread <= buf.length); // might not read full number of bytes!
     }
 
     @Test
     public void testTestRead5() {
-        WaveFileAudioInputStream s = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream s = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(s);
 
         // can read before close
         byte[]buf = new byte[2];
-        long numread = s.read(buf);
+        int numread = s.read(buf);
         assertEquals(2, numread);
 
         // close underlying stream

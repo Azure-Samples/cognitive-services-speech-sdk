@@ -6,6 +6,7 @@ package com.microsoft.cognitiveservices.speech.samples;
 
 import java.util.concurrent.Future;
 
+import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.SpeechFactory;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResultEventArgs;
@@ -20,10 +21,12 @@ public class SampleRecognizeWithIntermediateResults implements Runnable {
         // create factory
         SpeechFactory factory = SampleSettings.getFactory();
         SpeechRecognizer reco = null;
+        AudioConfig audioInput = null;
 
         try {
-            // Note: to use the microphone, replace the parameter with "new MicrophoneAudioInputStream()"
-            reco = factory.createSpeechRecognizerWithFileInput(SampleSettings.WaveFile);
+            // Note: to use the microphone, use "AudioConfig.fromDefaultMicrophoneInput()"
+            audioInput = AudioConfig.fromWavFileInput(SampleSettings.WavFile);
+            reco = factory.createSpeechRecognizerFromConfig(audioInput);
 
             reco.IntermediateResultReceived.addEventListener((o, speechRecognitionResultEventArgs) -> {
                 String s = speechRecognitionResultEventArgs.getResult().getText();
@@ -43,6 +46,7 @@ public class SampleRecognizeWithIntermediateResults implements Runnable {
         }
         finally {
             if(reco != null) reco.close();
+            if(audioInput != null) reco.close();
         }
     }
 }

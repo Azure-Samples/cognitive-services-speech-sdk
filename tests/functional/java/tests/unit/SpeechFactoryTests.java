@@ -17,7 +17,9 @@ import org.junit.Ignore;
 import java.net.URI;
 import java.util.ArrayList;
 
-import com.microsoft.cognitiveservices.speech.AudioInputStream;
+import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
+import com.microsoft.cognitiveservices.speech.audio.AudioInputStream;
+import com.microsoft.cognitiveservices.speech.audio.PullAudioInputStreamCallback;
 import com.microsoft.cognitiveservices.speech.FactoryParameterNames;
 import com.microsoft.cognitiveservices.speech.ParameterCollection;
 import com.microsoft.cognitiveservices.speech.Recognizer;
@@ -243,7 +245,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            SpeechRecognizer r = s.createSpeechRecognizerWithFileInput((String)null);
+            SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput((String)null));
             fail("not expected");
         }
         catch(NullPointerException ex) {
@@ -258,7 +260,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            SpeechRecognizer r = s.createSpeechRecognizerWithFileInput("illegal-" + Settings.WaveFile);
+            SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput("illegal-" + Settings.WavFile));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -272,7 +274,7 @@ public class SpeechFactoryTests {
     public void testCreateSpeechRecognizerStringSuccess() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         
-        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
+        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -287,7 +289,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            SpeechRecognizer r = s.createSpeechRecognizerWithFileInput((String)null, null);
+            SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput((String)null), null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -302,7 +304,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            SpeechRecognizer r = s.createSpeechRecognizerWithFileInput((String)null, "en-EN");
+            SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput((String)null), "en-EN");
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -318,7 +320,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile, "illegal-language");
+            SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "illegal-language");
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -332,7 +334,7 @@ public class SpeechFactoryTests {
     public void testCreateSpeechRecognizerStringStringSuccess() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
-        SpeechRecognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile, "en-EN");
+        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-EN");
         
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -350,7 +352,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            SpeechRecognizer r = s.createSpeechRecognizerWithStream((AudioInputStream)null);
+            SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromStreamInput((AudioInputStream)null));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -364,8 +366,8 @@ public class SpeechFactoryTests {
     public void testCreateSpeechRecognizerAudioInputStreamSuccess() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
-        SpeechRecognizer r = s.createSpeechRecognizerWithStream(ais);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
+        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromStreamInput(ais));
         
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -379,7 +381,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            SpeechRecognizer r = s.createSpeechRecognizerWithStream((AudioInputStream)null, null);
+            SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromStreamInput((AudioInputStream)null), null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -395,7 +397,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            SpeechRecognizer r = s.createSpeechRecognizerWithStream((AudioInputStream)null, "en-US");
+            SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromStreamInput((AudioInputStream)null), "en-US");
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -410,8 +412,8 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
-            SpeechRecognizer r = s.createSpeechRecognizerWithStream(ais, null);
+            WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
+            SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromStreamInput(ais), null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -427,8 +429,8 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
-            SpeechRecognizer r = s.createSpeechRecognizerWithStream(ais, "illegal-language");
+            WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
+            SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "illegal-language");
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -442,9 +444,9 @@ public class SpeechFactoryTests {
     public void testCreateSpeechRecognizerAudioInputStreamStringSuccess() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         
-        SpeechRecognizer r = s.createSpeechRecognizerWithStream(ais, "en-US");
+        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US");
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -519,7 +521,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            IntentRecognizer r = s.createIntentRecognizerWithFileInput((String)null);
+            IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput((String)null));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -534,7 +536,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            IntentRecognizer r = s.createIntentRecognizerWithFileInput("illegal-" + Settings.WaveFile);
+            IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput("illegal-" + Settings.WavFile));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -548,7 +550,7 @@ public class SpeechFactoryTests {
     public void testCreateIntentRecognizerStringSuccess() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
-        IntentRecognizer r = s.createIntentRecognizerWithFileInput(Settings.WaveFile);
+        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -565,7 +567,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            IntentRecognizer r = s.createIntentRecognizerWithStream((AudioInputStream)null);
+            IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromStreamInput((AudioInputStream)null));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -579,8 +581,8 @@ public class SpeechFactoryTests {
     public void testCreateIntentRecognizerAudioInputStreamSuccess() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
-        IntentRecognizer r = s.createIntentRecognizerWithStream(ais);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
+        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromStreamInput(ais));
         
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -594,7 +596,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            IntentRecognizer r = s.createIntentRecognizerWithStream((AudioInputStream)null, null);
+            IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromStreamInput((AudioInputStream)null), null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -610,7 +612,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            IntentRecognizer r = s.createIntentRecognizerWithStream((AudioInputStream)null, "en-US");
+            IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromStreamInput((AudioInputStream)null), "en-US");
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -626,8 +628,8 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
-            IntentRecognizer r = s.createIntentRecognizerWithStream(ais, "illegal-language");
+            WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
+            IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "illegal-language");
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -641,8 +643,8 @@ public class SpeechFactoryTests {
     public void testCreateIntentRecognizerAudioInputStreamStringSuccess() {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
-        IntentRecognizer r = s.createIntentRecognizerWithStream(ais, "en-US");
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
+        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US");
         
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -661,7 +663,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizer(null, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(null, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -677,7 +679,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizer("illegal", null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig("illegal", null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -693,7 +695,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizer("en-EN", null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-EN", null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -711,7 +713,7 @@ public class SpeechFactoryTests {
         try {
             ArrayList<String> targets = new ArrayList<>();
 
-            TranslationRecognizer r = s.createTranslationRecognizer("en-EN", targets);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-EN", targets);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -730,7 +732,7 @@ public class SpeechFactoryTests {
             ArrayList<String> targets = new ArrayList<>();
             targets.add("illegal");
 
-            TranslationRecognizer r = s.createTranslationRecognizer("en-EN", targets);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-EN", targets);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -749,7 +751,7 @@ public class SpeechFactoryTests {
         ArrayList<String> targets = new ArrayList<>();
         targets.add("en-US");
         
-        TranslationRecognizer r = s.createTranslationRecognizer("en-EN", targets);
+        TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-EN", targets);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -768,7 +770,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizer(null, null, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(((String)null), null, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -784,7 +786,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizer("illegal", null, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig("illegal", null, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -800,7 +802,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizer("en-US", null, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-US", null, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -818,7 +820,7 @@ public class SpeechFactoryTests {
         try {
             ArrayList<String> targets = new ArrayList<>();
 
-            TranslationRecognizer r = s.createTranslationRecognizer("en-US", targets, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-US", targets, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -837,7 +839,7 @@ public class SpeechFactoryTests {
             ArrayList<String> targets = new ArrayList<>();
             targets.add("illegal");
 
-            TranslationRecognizer r = s.createTranslationRecognizer("en-US", targets, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-US", targets, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -856,7 +858,7 @@ public class SpeechFactoryTests {
             ArrayList<String> targets = new ArrayList<>();
             targets.add("en-US");
 
-            TranslationRecognizer r = s.createTranslationRecognizer("en-US", targets, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-US", targets, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -875,7 +877,7 @@ public class SpeechFactoryTests {
             ArrayList<String> targets = new ArrayList<>();
             targets.add("en-US");
 
-            TranslationRecognizer r = s.createTranslationRecognizer("en-US", targets, "illegal");
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-US", targets, "illegal");
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -893,7 +895,7 @@ public class SpeechFactoryTests {
         ArrayList<String> targets = new ArrayList<>();
         targets.add("en-US");
 
-        TranslationRecognizer r = s.createTranslationRecognizer("en-US", targets, "en-US");
+        TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-US", targets, "en-US");
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -911,7 +913,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(null, null, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(null), null, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -926,7 +928,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerWithFileInput("illegal-" + Settings.WaveFile, null, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput("illegal-" + Settings.WavFile), null, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -941,7 +943,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, null, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), null, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -956,7 +958,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "illegal", null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "illegal", null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -971,7 +973,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -988,7 +990,7 @@ public class SpeechFactoryTests {
         try {
             ArrayList<String> targets = new ArrayList<>();
             
-            TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targets);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1007,7 +1009,7 @@ public class SpeechFactoryTests {
             ArrayList<String> targets = new ArrayList<>();
             targets.add("illegal");
             
-            TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targets);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1024,7 +1026,7 @@ public class SpeechFactoryTests {
         ArrayList<String> targets = new ArrayList<>();
         targets.add("en-US");
         
-        TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targets);
+        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -1043,7 +1045,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(null, null, null, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(null), null, null, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1058,7 +1060,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerWithFileInput("illegal-" + Settings.WaveFile, null, null, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput("illegal-" + Settings.WavFile), null, null, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1073,7 +1075,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, null, null, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), null, null, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1088,7 +1090,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "illegal", null, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "illegal", null, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1103,7 +1105,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", null, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", null, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1120,7 +1122,7 @@ public class SpeechFactoryTests {
         try {
             ArrayList<String> targets = new ArrayList<>();
             
-            TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targets, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1138,7 +1140,7 @@ public class SpeechFactoryTests {
             ArrayList<String> targets = new ArrayList<>();
             targets.add("illegal");
             
-            TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targets, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1156,7 +1158,7 @@ public class SpeechFactoryTests {
             ArrayList<String> targets = new ArrayList<>();
             targets.add("en-US");
             
-            TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targets, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1175,7 +1177,7 @@ public class SpeechFactoryTests {
             ArrayList<String> targets = new ArrayList<>();
             targets.add("en-US");
             
-            TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targets, "illegal");
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets, "illegal");
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1192,7 +1194,7 @@ public class SpeechFactoryTests {
         ArrayList<String> targets = new ArrayList<>();
         targets.add("en-US");
         
-        TranslationRecognizer r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targets, "en-US");
+        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets, "en-US");
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -1210,7 +1212,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerWithStream(null, null, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput((PullAudioInputStreamCallback)null), ((String)null), null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1225,9 +1227,9 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+            WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, null, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), ((String)null), null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1242,9 +1244,9 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+            WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, "illegal", null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "illegal", null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1259,9 +1261,9 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+            WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, "en-US", null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1278,9 +1280,9 @@ public class SpeechFactoryTests {
         try {
             ArrayList<String> targets = new ArrayList<>();
             
-            WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+            WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, "en-US", targets);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", targets);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1299,9 +1301,9 @@ public class SpeechFactoryTests {
             ArrayList<String> targets = new ArrayList<>();
             targets.add("illegal");
             
-            WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+            WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, "en-US", targets);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", targets);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1318,9 +1320,9 @@ public class SpeechFactoryTests {
         ArrayList<String> targets = new ArrayList<>();
         targets.add("en-US");
         
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         
-        TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, "en-US", targets);
+        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", targets);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -1338,7 +1340,7 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerWithStream(null, null, null, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput((PullAudioInputStreamCallback)null), ((String)null), null, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1353,9 +1355,9 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+            WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, null, null, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), ((String)null), null, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1370,9 +1372,9 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+            WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, "illegal", null, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "illegal", null, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1387,9 +1389,9 @@ public class SpeechFactoryTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+            WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, "en-US", null, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", null, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1406,9 +1408,9 @@ public class SpeechFactoryTests {
         try {
             ArrayList<String> targets = new ArrayList<>();
             
-            WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+            WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, "en-US", targets, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", targets, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1426,9 +1428,9 @@ public class SpeechFactoryTests {
             ArrayList<String> targets = new ArrayList<>();
             targets.add("illegal");
             
-            WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+            WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, "en-US", targets, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", targets, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1446,9 +1448,9 @@ public class SpeechFactoryTests {
             ArrayList<String> targets = new ArrayList<>();
             targets.add("en-US");
             
-            WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+            WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, "en-US", targets, null);
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", targets, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1467,9 +1469,9 @@ public class SpeechFactoryTests {
             ArrayList<String> targets = new ArrayList<>();
             targets.add("en-US");
             
-            WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+            WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, "en-US", targets, "illegal");
+            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", targets, "illegal");
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1486,9 +1488,9 @@ public class SpeechFactoryTests {
         ArrayList<String> targets = new ArrayList<>();
         targets.add("en-US");
         
-        WaveFileAudioInputStream ais = new WaveFileAudioInputStream(Settings.WaveFile);
+        WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         
-        TranslationRecognizer r = s.createTranslationRecognizerWithStream(ais, "en-US", targets, "en-US");
+        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", targets, "en-US");
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);

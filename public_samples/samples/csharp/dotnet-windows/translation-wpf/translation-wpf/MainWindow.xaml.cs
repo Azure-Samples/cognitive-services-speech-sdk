@@ -315,7 +315,7 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
         private void CreateRecognizer()
         {
             this.factory = SpeechFactory.FromSubscription(SubscriptionKey, Region);
-            this.recognizer = this.factory.CreateTranslationRecognizer(FromLanguage, ToLanguages, voice);
+            this.recognizer = this.factory.CreateTranslationRecognizerFromConfig(FromLanguage, ToLanguages, voice);
 
             this.recognizer.IntermediateResultReceived += this.OnPartialResponseReceivedHandler;
             this.recognizer.FinalResultReceived += this.OnFinalResponse;

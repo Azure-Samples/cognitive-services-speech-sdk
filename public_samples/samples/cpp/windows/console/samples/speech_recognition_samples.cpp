@@ -11,6 +11,7 @@
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
+using namespace Microsoft::CognitiveServices::Speech::Audio;
 // </toplevel>
 
 // Speech recognition using microphone.
@@ -67,7 +68,7 @@ void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
     // Replace the language with your language in BCP-47 format, e.g. en-US.
     auto lang = "de-DE";
     // Requests detailed output format.
-    auto recognizer = factory->CreateSpeechRecognizer(lang, OutputFormat::Detailed);
+    auto recognizer = factory->CreateSpeechRecognizerFromConfig(lang, OutputFormat::Detailed, nullptr);
     cout << "Say something in " << lang << "...\n";
 
     // Performs recognition.
@@ -107,7 +108,8 @@ void SpeechContinuousRecognitionWithFile()
 
     // Creates a speech recognizer using file as audio input.
     // Replace with your own audio file name.
-    auto recognizer = factory->CreateSpeechRecognizerWithFileInput("whatstheweatherlike.wav");
+    auto audioInput = AudioConfig::FromWavFileInput("whatstheweatherlike.wav");
+    auto recognizer = factory->CreateSpeechRecognizerFromConfig(audioInput);
 
     // promise for synchronization of recognition end.
     promise<void> recognitionEnd;
@@ -215,22 +217,21 @@ void SpeechRecognitionUsingCustomizedModel()
 void SpeechContinuousRecognitionWithStream()
 {
     // <SpeechContinuousRecognitionWithStream>
-    // First, defines your own audio input stream class that implements AudioInputStream interface.
-    // The sample here illustrates how to define such an audio input stream that reads from a wav file.
+    // First, define your own pull audio input stream callback class that implements the
+    // PullAudioInputStreamCallback interface. The sample here illustrates how to define such
+    // a callback that reads audio data from a wav file.
 
     // Defines common constants for WAV format.
     constexpr uint16_t tagBufferSize = 4;
     constexpr uint16_t chunkTypeBufferSize = 4;
     constexpr uint16_t chunkSizeBufferSize = 4;
 
-    using AudioFormat = ::Microsoft::CognitiveServices::Speech::AudioInputStreamFormat;
-
-    // AudioInputStreamFromFile implements AudioInputStream interface, and uses a wav file as stream source
-    class AudioInputStreamFromFile final : public AudioInputStream
+    // AudioInputFromFileCallback implements PullAudioInputStreamCallback interface, and uses a wav file as source
+    class AudioInputFromFileCallback final : public PullAudioInputStreamCallback
     {
     public: 
         // Constructor that creates an input stream from a file.
-        AudioInputStreamFromFile(const string& audioFileName)
+        AudioInputFromFileCallback(const string& audioFileName)
         {
             if (audioFileName.empty())
                 throw invalid_argument("Audio filename is empty");
@@ -245,33 +246,8 @@ void SpeechContinuousRecognitionWithStream()
         }
 
         // Destructor.
-        ~AudioInputStreamFromFile()
+        ~AudioInputFromFileCallback()
         {
-        }
-
-        // Implements AudioInputStream::GetFormat() which is called to get the format of the audio stream.
-        // The parameter formatBuffer is passed by the caller, and used to return the audio input format data, and cbFormat is the buffer size.
-        // If formatBuffer is null, then only the required format buffer size is returned, but no data is written into the buffer.
-        // Otherwise, it returns the size in bytes of the format buffer that has been written, and the formatBuffer contains the format data.
-        size_t GetFormat(AudioFormat* formatBuffer, size_t cbFormat) override
-        {
-            if (formatBuffer == nullptr)
-            {
-                return sizeof(AudioFormat);
-            }
-            else
-            {
-                if (cbFormat < sizeof(AudioFormat))
-                    throw invalid_argument("cbFormat is too small to hold AudioInputStreamFormat");
-
-                formatBuffer->FormatTag = m_formatHeader.FormatTag;
-                formatBuffer->Channels = m_formatHeader.Channels;
-                formatBuffer->SamplesPerSec = m_formatHeader.SamplesPerSec;
-                formatBuffer->AvgBytesPerSec = m_formatHeader.AvgBytesPerSec;
-                formatBuffer->BlockAlign = m_formatHeader.BlockAlign;
-                formatBuffer->BitsPerSample = m_formatHeader.BitsPerSample;
-                return sizeof(AudioFormat);
-            }
         }
 
         // Implements AudioInputStream::Read() which is called to get data from the audio stream.
@@ -280,18 +256,18 @@ void SpeechContinuousRecognitionWithStream()
         // If there is no data, this function must wait until data is available.
         // It returns the number of bytes that have been copied in 'dataBuffer'.
         // It returns 0 to indicate that the stream reaches end or is closed.
-        size_t Read(char* dataBuffer, size_t size) override
+        int Read(uint8_t* dataBuffer, uint32_t size) override
         {
             if (m_fs.eof())
                 // returns 0 to indicate that the stream reaches end.
                 return 0;
-            m_fs.read(dataBuffer, size);
+            m_fs.read((char*)dataBuffer, size);
             if (!m_fs.eof() && !m_fs.good())
                 // returns 0 to close the stream on read error.
                 return 0;
             else
                 // returns the number of bytes that have been read.
-                return m_fs.gcount();
+                return (int)m_fs.gcount();
         }
 
         // Implements AudioInputStream::Close() which is called when the stream needs to be closed.
@@ -387,13 +363,15 @@ void SpeechContinuousRecognitionWithStream()
     // Replace with your own subscription key and service region (e.g., "westus").
     auto factory = SpeechFactory::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-    // Creates an input stream from file.
+    // Creates a callback that will read audio data from a WAV file.
     // Currently, the only supported WAV format is mono(single channel), 16 kHZ sample rate, 16 bits per sample.
     // Replace with your own audio file name.
-    auto inputStream = make_shared<AudioInputStreamFromFile>("whatstheweatherlike.wav");
-    
+    auto callback = make_shared<AudioInputFromFileCallback>("whatstheweatherlike.wav");
+    auto pullStream = AudioInputStream::CreatePullStream(callback);
+
     // Creates a speech recognizer from stream input;
-    auto recognizer = factory->CreateSpeechRecognizerWithStream(inputStream);
+    auto audioInput = AudioConfig::FromStreamInput(pullStream);
+    auto recognizer = factory->CreateSpeechRecognizerFromConfig(audioInput);
 
     // promise for synchronization of recognition end.
     promise<void> recognitionEnd;

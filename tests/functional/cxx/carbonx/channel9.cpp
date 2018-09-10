@@ -89,8 +89,8 @@ using namespace Microsoft::CognitiveServices::Speech::Translation;
 //                                       |_|                            //
 
 constexpr auto speechRegion = "westus";
-constexpr auto luisRegion = "westus2";
-constexpr auto translationRegion = "westus2";
+constexpr auto luisRegion = "westus";
+constexpr auto translationRegion = "westus";
 
 constexpr auto bingSpeechEndpoint = R"(wss://speech.platform.bing.com/speech/recognition/interactive/cognitiveservices/v1?format=simple&language=en-us)";
 constexpr auto luisPpeSpeechEndpoint = R"(wss://speech.platform.bing.com/ppe/speech/uswest2/recognition/interactive/cognitiveservices/v1?format=simple&setflight=cognitiveservicesintent&&language=en-us)";
@@ -306,7 +306,7 @@ void CarbonTestConsole::ch9_do_kws_intent()
 void CarbonTestConsole::ch9_do_translation()
 {
     auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, translationRegion);
-    auto recognizer = factory->CreateTranslationRecognizer("en-US", { "de-DE", "fr-FR", "es-ES" });
+    auto recognizer = factory->CreateTranslationRecognizerFromConfig("en-US", { "de-DE", "fr-FR", "es-ES" });
 
     recognizer->IntermediateResult += [](const TranslationTextResultEventArgs& e) {
         printf("INTERMEDIATE: %s ...\n", e.Result.Text.c_str());

@@ -27,14 +27,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         SpeechRecognizer CreateSpeechRecognizerWithStream(String audioFile, String language = null, OutputFormat format = OutputFormat.Simple)
         {
-            var stream = Util.OpenWaveFile(audioFile);
+            var audioInput = Util.OpenWavFile(audioFile);
             if (string.IsNullOrEmpty(language))
             {
-                return this.factory.CreateSpeechRecognizerWithStream(stream);
+                return this.factory.CreateSpeechRecognizerFromConfig(audioInput);
             }
             else
             {
-                return this.factory.CreateSpeechRecognizerWithStream(stream, language, format);
+                return this.factory.CreateSpeechRecognizerFromConfig(audioInput, language, format);
             }
         }
 

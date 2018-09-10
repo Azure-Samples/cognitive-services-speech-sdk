@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
+import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.SpeechFactory;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResultEventArgs;
@@ -42,8 +43,9 @@ public class SampleRecognizeIntent implements Runnable {
 
         content.add("");
         try {
-            // TODO: to use the microphone, replace the parameter with "new MicrophoneAudioInputStream()"
-            IntentRecognizer reco = factory.createIntentRecognizerWithFileInput(Settings.WaveFile);
+            // Note: to use the microphone, use "AudioConfig.fromDefaultMicrophoneInput()"
+            AudioConfig audioInput = AudioConfig.fromWavFileInput(Settings.WavFile);
+            IntentRecognizer reco = factory.createIntentRecognizerFromConfig(audioInput);
 
             HashMap<String, String> intentIdMap = new HashMap<>();
             intentIdMap.put("1", "play music");
@@ -85,6 +87,7 @@ public class SampleRecognizeIntent implements Runnable {
 
             reco.close();
             factory.close();
+            audioInput.close();
         } catch (Exception ex) {
             Settings.displayException(ex);
             

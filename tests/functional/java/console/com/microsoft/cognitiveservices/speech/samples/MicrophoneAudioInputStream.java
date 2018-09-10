@@ -10,10 +10,9 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.TargetDataLine;
 
-import com.microsoft.cognitiveservices.speech.AudioInputStream;
-import com.microsoft.cognitiveservices.speech.AudioInputStreamFormat;
+import com.microsoft.cognitiveservices.speech.audio.PullAudioInputStreamCallback;
 
-public class MicrophoneAudioInputStream extends AudioInputStream {
+public class MicrophoneAudioInputStream extends PullAudioInputStreamCallback {
     private AudioFormat audioFormat = new AudioFormat(16000, 16, 1, /*isSigned*/true, /*isBigEndian*/false);
     private TargetDataLine audioLine;
     
@@ -46,25 +45,8 @@ public class MicrophoneAudioInputStream extends AudioInputStream {
      * @return the number of bytes have been read.
      */
     @Override
-    public long read(byte[] dataBuffer) {
+    public int read(byte[] dataBuffer) {
         return audioLine.read(dataBuffer, 0, dataBuffer.length);
-    }
-
-    /**
-     * Returns the audioFormat of this audio stream.
-     * 
-     * @return The audioFormat of the audio stream.
-     */
-    @Override
-    public AudioInputStreamFormat getFormat() {
-        AudioInputStreamFormat  f = new AudioInputStreamFormat();
-        f.BlockAlign = (short)(audioFormat.getChannels() * (audioFormat.getSampleSizeInBits() + 7) / 8);
-        f.AvgBytesPerSec = f.BlockAlign * (int)audioFormat.getSampleRate();
-        f.Channels = (short) audioFormat.getChannels();
-        f.SamplesPerSec = (int)audioFormat.getSampleRate();
-        f.BitsPerSample = (short) audioFormat.getSampleSizeInBits();
-        f.FormatTag = 1; // PCM signed (we selected this in the constructor!).
-        return f;
     }
 
     /**

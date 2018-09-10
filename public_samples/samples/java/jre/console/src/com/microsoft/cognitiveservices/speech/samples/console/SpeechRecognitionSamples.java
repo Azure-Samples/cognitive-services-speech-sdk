@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 
 // <toplevel>
 import com.microsoft.cognitiveservices.speech.*;
+import com.microsoft.cognitiveservices.speech.audio.*;
 // </toplevel>
 
 @SuppressWarnings("resource") // scanner
@@ -121,7 +122,8 @@ public class SpeechRecognitionSamples {
 
         // Creates a speech recognizer using file as audio input.
         // Replace with your own audio file name.
-        SpeechRecognizer recognizer = factory.createSpeechRecognizerWithFileInput("YourAudioFile.wav");
+        AudioConfig audioInput = AudioConfig.fromWavFileInput("YourAudioFile.wav");
+        SpeechRecognizer recognizer = factory.createSpeechRecognizerFromConfig(audioInput);
         {
             // Subscribes to events.
             recognizer.IntermediateResultReceived.addEventListener((s, e) -> {
@@ -174,10 +176,11 @@ public class SpeechRecognitionSamples {
 
         // Create an audio stream from a wav file.
         // Replace with your own audio file name.
-        AudioInputStream stream = new WavStream(new FileInputStream("YourAudioFile.wav"));
+        PullAudioInputStreamCallback callback = new WavStream(new FileInputStream("YourAudioFile.wav"));
+        AudioConfig audioInput = AudioConfig.fromStreamInput(callback);
 
         // Creates a speech recognizer using audio stream input.
-        SpeechRecognizer recognizer = factory.createSpeechRecognizerWithStream(stream);
+        SpeechRecognizer recognizer = factory.createSpeechRecognizerFromConfig(audioInput);
         {
             // Subscribes to events.
             recognizer.IntermediateResultReceived.addEventListener((s, e) -> {

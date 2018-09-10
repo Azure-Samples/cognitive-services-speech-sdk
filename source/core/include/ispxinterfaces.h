@@ -14,14 +14,13 @@
 #include "asyncop.h"
 #include <speechapi_cxx_common.h>
 #include "speechapi_cxx_eventsignal.h"
+#include "speechapi_cxx_enums.h"
 #include "shared_ptr_helpers.h"
-#include "speechapi_cxx_audioinputstream.h"
-#include "speechapi_cxx_factory.h"
-#include "speechapi_cxx_translation_result.h"
 
 
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Translation;
+
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -273,7 +272,7 @@ public:
 
 
 #pragma pack (push, 1)
-struct WAVEFORMAT
+struct SPXWAVEFORMAT
 {
     uint16_t wFormatTag;        /* format type */
     uint16_t nChannels;         /* number of channels (i.e. mono, stereo...) */
@@ -283,7 +282,7 @@ struct WAVEFORMAT
     uint16_t wBitsPerSample;    /* Number of bits per sample of mono data */
 };
 
-struct WAVEFORMATEX
+struct SPXWAVEFORMATEX
 {
     uint16_t wFormatTag;        /* format type */
     uint16_t nChannels;         /* number of channels (i.e. mono, stereo...) */
@@ -297,10 +296,10 @@ struct WAVEFORMATEX
 
 
 
-using SpxWAVEFORMATEX_Type = std::shared_ptr<WAVEFORMATEX>;
+using SpxWAVEFORMATEX_Type = std::shared_ptr<SPXWAVEFORMATEX>;
 inline SpxWAVEFORMATEX_Type SpxAllocWAVEFORMATEX(size_t sizeInBytes)
 {
-    return SpxAllocSharedBuffer<WAVEFORMATEX>(sizeInBytes);
+    return SpxAllocSharedBuffer<SPXWAVEFORMATEX>(sizeInBytes);
 }
 
 using SpxSharedAudioBuffer_Type = SpxSharedUint8Buffer_Type;
@@ -310,33 +309,51 @@ inline SpxSharedAudioBuffer_Type SpxAllocSharedAudioBuffer(size_t sizeInBytes)
 }
 
 
-class ISpxAudioReader : public ISpxInterfaceBaseFor<ISpxAudioReader>
+class ISpxAudioStream : public ISpxInterfaceBaseFor<ISpxAudioStream>
 {
 public:
 
-    virtual uint16_t GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
-    virtual uint32_t Read(uint8_t* pbuffer, uint32_t cbBuffer) = 0;
-    virtual void Close() = 0;
+    virtual uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
 };
 
+class ISpxAudioStreamInitFormat : public ISpxInterfaceBaseFor<ISpxAudioStreamInitFormat>
+{
+public:
 
-class ISpxAudioReaderRealTime : public ISpxInterfaceBaseFor<ISpxAudioReaderRealTime>
+    virtual void SetFormat(SPXWAVEFORMATEX* format) = 0;
+};
+
+class ISpxAudioStreamInitRealTime : public ISpxInterfaceBaseFor<ISpxAudioStreamInitRealTime>
 {
 public:
 
     virtual void SetRealTimePercentage(uint8_t percentage) = 0;
 };
 
-
-class ISpxAudioWriter : public ISpxInterfaceBaseFor<ISpxAudioWriter>
+class ISpxAudioStreamReaderInitCallbacks : public ISpxInterfaceBaseFor<ISpxAudioStreamReaderInitCallbacks>
 {
 public:
 
-    using AudioData_Type = SpxSharedAudioBuffer_Type;
-    
-    virtual void SetFormat(WAVEFORMATEX* pformat) = 0;
-    virtual void Write(AudioData_Type data, uint32_t cbData) = 0;
+    using ReadCallbackFunction_Type = std::function<int(uint8_t*, uint32_t)>;
+    using CloseCallbackFunction_Type = std::function<void()>;
+
+    virtual void SetCallbacks(ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback) = 0;
+};
+
+class ISpxAudioStreamReader : public ISpxInterfaceBaseFor<ISpxAudioStreamReader>
+{
+public:
+
+    virtual uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
+    virtual uint32_t Read(uint8_t* pbuffer, uint32_t cbBuffer) = 0;
     virtual void Close() = 0;
+};
+
+class ISpxAudioStreamWriter : public ISpxInterfaceBaseFor<ISpxAudioStreamWriter>
+{
+public:
+
+    virtual void Write(uint8_t* buffer, uint32_t size) = 0;
 };
 
 
@@ -351,9 +368,19 @@ public:
 
     virtual void SetContinuousLoop(bool value) = 0;
     virtual void SetIterativeLoop(bool value) = 0;
-    virtual void SetRealTimePercentage(uint8_t percentage) = 0;
 };
 
+class ISpxAudioConfig : public ISpxInterfaceBaseFor<ISpxAudioConfig>
+{
+public:
+
+    virtual void InitFromDefaultDevice() = 0;
+    virtual void InitFromFile(const wchar_t* pszFileName) = 0;
+    virtual void InitFromStream(std::shared_ptr<ISpxAudioStream> stream) = 0;
+
+    virtual std::wstring GetFileName() const = 0;
+    virtual std::shared_ptr<ISpxAudioStream> GetStream() = 0;
+};
 
 class ISpxAudioProcessor : public ISpxInterfaceBaseFor<ISpxAudioProcessor>
 {
@@ -361,7 +388,7 @@ public:
 
     using AudioData_Type = SpxSharedAudioBuffer_Type;
 
-    virtual void SetFormat(WAVEFORMATEX* pformat) = 0;
+    virtual void SetFormat(SPXWAVEFORMATEX* pformat) = 0;
     virtual void ProcessAudio(AudioData_Type data, uint32_t cbData) = 0;
 };
 
@@ -370,8 +397,8 @@ class ISpxAudioPump : public ISpxInterfaceBaseFor<ISpxAudioPump>
 {
 public:
 
-    virtual uint16_t GetFormat(WAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
-    virtual void SetFormat(const WAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
+    virtual uint16_t GetFormat(SPXWAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
+    virtual void SetFormat(const SPXWAVEFORMATEX* pformat, uint16_t cbFormat) = 0;
 
     virtual void StartPump(std::shared_ptr<ISpxAudioProcessor> pISpxAudioProcessor) = 0;
     virtual void PausePump() = 0;
@@ -383,21 +410,11 @@ public:
 };
 
 
-class ISpxAudioPumpReaderInit : public ISpxInterfaceBaseFor<ISpxAudioPumpReaderInit>
+class ISpxAudioPumpInit : public ISpxInterfaceBaseFor<ISpxAudioPumpInit>
 {
 public:
 
-    virtual void SetAudioReader(std::shared_ptr<ISpxAudioReader>& reader) = 0;
-};
-
-class ISpxStreamPumpReaderInit : public ISpxInterfaceBaseFor<ISpxStreamPumpReaderInit>
-{
-public:
-
-    virtual void SetAudioStream(AudioInputStream* reader) = 0;
-
-    virtual void SetRealTimePercentage(uint8_t percentage) = 0;
-
+    virtual void SetReader(std::shared_ptr<ISpxAudioStreamReader> reader) = 0;
 };
 
 
@@ -556,7 +573,7 @@ public:
 
     virtual void InitFromFile(const wchar_t* pszFileName) = 0;
     virtual void InitFromMicrophone() = 0;
-    virtual void InitFromStream(AudioInputStream* audioInputStream) = 0;
+    virtual void InitFromStream(std::shared_ptr<ISpxAudioStream> stream) = 0;
 };
 
 
@@ -681,27 +698,10 @@ public:
 class ISpxSpeechApiFactory : public ISpxInterfaceBaseFor<ISpxSpeechApiFactory>
 {
 public:
-    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer() = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language) = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizer(const std::wstring& language, OutputFormat format) = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName) = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language, OutputFormat format) = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream*) = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language) = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language, OutputFormat format) = 0;
 
-    virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer() = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizer(const std::wstring& language) = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName) = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& language) = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithStream(AudioInputStream*) = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerWithStream(AudioInputStream* audioInputStream, const std::wstring& language) = 0;
-
-    virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizer(const std::wstring& sourcelanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerWithFileInput(const std::wstring& fileName, const std::wstring& sourcelanguae, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") = 0;
-    virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerWithStream(AudioInputStream *stream, const std::wstring& sourcelanguage, const std::vector<std::wstring>& targetLanguages, const std::wstring& voice = L"") = 0;
-
+    virtual std::shared_ptr<ISpxRecognizer> CreateSpeechRecognizerFromConfig(const char* pszLanguage, OutputFormat format, std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateIntentRecognizerFromConfig(const char* pszLanguage, OutputFormat format, std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
+    virtual std::shared_ptr<ISpxRecognizer> CreateTranslationRecognizerFromConfig(const std::string& sourcelanguage, const std::vector<std::string>& targetLanguages, const std::string& voice, std::shared_ptr<ISpxAudioConfig> audioInput) = 0;
 };
 
 

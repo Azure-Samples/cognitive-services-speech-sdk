@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// speechapi_c_common.cpp: Public API definitions for Recognizer related C methods
+// speechapi_c_property_bag.cpp: Public API definitions for Property Bag related C methods
 //
 
 #include "stdafx.h"
@@ -15,7 +15,7 @@
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
-std::shared_ptr<ISpxNamedProperties> property_bag_from_handler(SPXPROPERTYBAGHANDLE hpropbag)
+std::shared_ptr<ISpxNamedProperties> property_bag_from_handle(SPXPROPERTYBAGHANDLE hpropbag)
 {
     std::shared_ptr<ISpxNamedProperties> namedProperties;
     if (SPXFACTORYHANDLE_ROOTSITEPARAMETERS_MOCK == hpropbag)
@@ -38,9 +38,8 @@ SPXAPI_(bool) property_bag_is_valid(SPXPROPERTYBAGHANDLE hpropbag)
     return Handle_IsValid<SPXPROPERTYBAGHANDLE, ISpxNamedProperties>(hpropbag);
 }
 
-SPXAPI_(bool) property_bag_close(SPXPROPERTYBAGHANDLE hpropbag)
+SPXAPI property_bag_close(SPXPROPERTYBAGHANDLE hpropbag)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
     return Handle_Close<SPXPROPERTYBAGHANDLE, ISpxNamedProperties>(hpropbag);
 }
 /*
@@ -57,7 +56,7 @@ SPXAPI__(const char*) property_bag_get_string(SPXPROPERTYBAGHANDLE hpropbag, int
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto namedProperties = property_bag_from_handler(hpropbag);
+        auto namedProperties = property_bag_from_handle(hpropbag);
 
         const char* name_in_use = name ? name : GetPropertyName(static_cast<SpeechPropertyId>(id));
         auto tempValue = namedProperties->GetStringValue(name_in_use, defaultValue);
@@ -69,7 +68,7 @@ SPXAPI__(const char*) property_bag_get_string(SPXPROPERTYBAGHANDLE hpropbag, int
     SPXAPI_CATCH_AND_RETURN(hr, result);
 }
 
-SPXAPI property_bag_free_string(const char* value )
+SPXAPI property_bag_free_string(const char* value)
 {
     SPX_INIT_HR(hr);
     delete[] value;
@@ -85,7 +84,7 @@ SPXAPI property_bag_set_string(SPXPROPERTYBAGHANDLE hpropbag, int id, const char
 
     SPXAPI_INIT_HR_TRY(hr)
     {
-        auto namedProperties = property_bag_from_handler(hpropbag);
+        auto namedProperties = property_bag_from_handle(hpropbag);
         namedProperties->SetStringValue(name_in_use, defaultValue);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);

@@ -19,6 +19,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
     using System.IO.IsolatedStorage;
 
     using Microsoft.CognitiveServices.Speech;
+    using Microsoft.CognitiveServices.Speech.Audio;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -258,9 +259,12 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
             }
             else
             {
-                using (basicRecognizer = basicFactory.CreateSpeechRecognizerWithFileInput(wavFileName, this.RecognitionLanguage))
+                using (var audioInput = AudioConfig.FromWavFileInput(wavFileName))
                 {
-                    await this.RunRecognizer(basicRecognizer, RecoType.Base, stopBaseRecognitionTaskCompletionSource).ConfigureAwait(false);
+                    using (basicRecognizer = basicFactory.CreateSpeechRecognizerFromConfig(audioInput, this.RecognitionLanguage))
+                    {
+                        await this.RunRecognizer(basicRecognizer, RecoType.Base, stopBaseRecognitionTaskCompletionSource).ConfigureAwait(false);
+                    }
                 }
             }
         }
@@ -287,10 +291,13 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
             }
             else
             {
-                using (customRecognizer = customFactory.CreateSpeechRecognizerWithFileInput(wavFileName, this.RecognitionLanguage))
+                using (var audioInput = AudioConfig.FromWavFileInput(wavFileName))
                 {
-                    customRecognizer.DeploymentId = this.CustomModelDeploymentId;
-                    await this.RunRecognizer(customRecognizer, RecoType.Custom, stopCustomRecognitionTaskCompletionSource).ConfigureAwait(false);
+                    using (customRecognizer = customFactory.CreateSpeechRecognizerFromConfig(audioInput, this.RecognitionLanguage))
+                    {
+                        customRecognizer.DeploymentId = this.CustomModelDeploymentId;
+                        await this.RunRecognizer(customRecognizer, RecoType.Custom, stopCustomRecognitionTaskCompletionSource).ConfigureAwait(false);
+                    }
                 }
             }
         }

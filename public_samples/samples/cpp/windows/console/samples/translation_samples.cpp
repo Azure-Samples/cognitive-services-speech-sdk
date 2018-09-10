@@ -30,7 +30,7 @@ void TranslationWithMicrophone()
     vector<string> toLanguages { "de", "fr" };
 
     // Creates a translation recognizer using microphone as audio input.
-    auto recognizer = factory->CreateTranslationRecognizer(fromLanguage, toLanguages);
+    auto recognizer = factory->CreateTranslationRecognizerFromConfig(fromLanguage, toLanguages);
     cout << "Say something...\n";
 
     // Starts translation.
@@ -80,7 +80,7 @@ void TranslationContinuousRecognition()
     vector<string> toLanguages{ "de", "fr" };
 
     // Creates a translation recognizer using microphone as audio input.
-    auto recognizer = factory->CreateTranslationRecognizer(fromLanguage, toLanguages);
+    auto recognizer = factory->CreateTranslationRecognizerFromConfig(fromLanguage, toLanguages);
 
     // Subscribes to events.
     recognizer->IntermediateResult.Connect([](const TranslationTextResultEventArgs& e)

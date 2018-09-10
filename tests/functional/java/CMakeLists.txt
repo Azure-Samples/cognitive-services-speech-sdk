@@ -20,7 +20,7 @@ set(JAVA_SOURCES_TESTS
     ${PROJECT_SOURCE_DIR}/tests/endtoend/MicrophoneAudioInputStreamTest.java
     ${PROJECT_SOURCE_DIR}/tests/endtoend/SampleRecognizeWithIntermediateResultsTest.java
     ${PROJECT_SOURCE_DIR}/tests/endtoend/SampleSimpleRecognizeTest.java
-    ${PROJECT_SOURCE_DIR}/tests/endtoend/WaveFileAudioInputStreamTest.java
+    ${PROJECT_SOURCE_DIR}/tests/endtoend/WavFileAudioInputStreamTest.java
     ${PROJECT_SOURCE_DIR}/tests/endtoend/SampleRecognizeWithIntermediateResults.java
     ${PROJECT_SOURCE_DIR}/tests/endtoend/SampleSimpleRecognize.java
     ${PROJECT_SOURCE_DIR}/tests/endtoend/SampleRecognizeIntent.java
@@ -36,7 +36,7 @@ set(JAVA_SOURCES_TESTS
     ${PROJECT_SOURCE_DIR}/tests/unit/RecognizerParameterNamesTests.java
     ${PROJECT_SOURCE_DIR}/tests/unit/AudioInputStreamTests.java
     ${PROJECT_SOURCE_DIR}/tests/unit/ParameterCollectionTests.java
-    ${PROJECT_SOURCE_DIR}/tests/unit/WaveFileAudioInputStream.java
+    ${PROJECT_SOURCE_DIR}/tests/unit/WavFileAudioInputStream.java
 )
 
 add_jar(${PROJECT_NAME}

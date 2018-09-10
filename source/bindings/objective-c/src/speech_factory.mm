@@ -99,7 +99,7 @@
     
     try
     {
-        SpeechRecoSharedPtr recoImpl = factoryImpl->CreateSpeechRecognizerWithFileInput(pathString);
+        SpeechRecoSharedPtr recoImpl = factoryImpl->CreateSpeechRecognizerWithFileInputHACKFOROBJECTIVEC(pathString);
         if (recoImpl == nullptr)
             return nil;
         SpeechRecognizer *reco = [[SpeechRecognizer alloc] init :recoImpl];

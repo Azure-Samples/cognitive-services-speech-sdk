@@ -12,6 +12,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Ignore;
 
+import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.Recognizer;
 import com.microsoft.cognitiveservices.speech.SpeechFactory;
 
@@ -34,7 +35,7 @@ public class RecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        Recognizer r = s.createIntentRecognizerWithFileInput(Settings.WaveFile);
+        Recognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertTrue(r instanceof Recognizer);
 
@@ -47,7 +48,7 @@ public class RecognizerTests {
         SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        Recognizer r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
+        Recognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertTrue(r instanceof Recognizer);
 
@@ -64,7 +65,7 @@ public class RecognizerTests {
         ArrayList<String> targets = new ArrayList<>();
         targets.add("en-US");
         
-        Recognizer r = s.createTranslationRecognizer("en-US", targets);
+        Recognizer r = s.createTranslationRecognizerFromConfig("en-US", targets);
         assertNotNull(r);
         assertTrue(r instanceof Recognizer);
 
