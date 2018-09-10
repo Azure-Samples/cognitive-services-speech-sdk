@@ -2,12 +2,11 @@
 // copyright (c) Microsoft. All rights reserved.
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-import { MicAudioSource, PcmRecorder } from "../../common.browser/Exports";
-import { IAudioSource, Promise, PromiseHelper } from "../../common/Exports";
+import { Promise, PromiseHelper } from "../../common/Exports";
 import { CognitiveSubscriptionKeyAuthentication, CognitiveTokenAuthentication, Context, Device, IAuthentication, IConnectionFactory, OS, RecognitionMode, RecognizerConfig, ServiceRecognizerBase, SpeechConfig, SpeechRecognitionEvent } from "../speech/Exports";
 import { RecognitionCompletionStatus, RecognitionEndedEvent } from "../speech/RecognitionEvents";
 import { Contracts } from "./Contracts";
-import { AudioInputStream, FactoryParameterNames, ISpeechProperties, RecognitionEventArgs, RecognitionEventType, SessionEventArgs, SessionEventType } from "./Exports";
+import { AudioConfig, FactoryParameterNames, ISpeechProperties, RecognitionEventArgs, RecognitionEventType, SessionEventArgs, SessionEventType } from "./Exports";
 
 /**
  * Defines the base class Recognizer which mainly contains common event handlers.
@@ -15,15 +14,15 @@ import { AudioInputStream, FactoryParameterNames, ISpeechProperties, Recognition
 export abstract class Recognizer {
     private disposed: boolean;
 
-    protected audioInputStreamHolder: AudioInputStream;
+    protected audioInputStreamHolder: AudioConfig;
 
     /**
      * Creates and initializes an instance of a Recognizer
      * @param ais An optional audio input stream associated with the recognizer
      */
-    protected constructor(ais: AudioInputStream) {
+    protected constructor(audioInput: AudioConfig) {
         // Note: Since ais is optional, no test for null reference
-        this.audioInputStreamHolder = ais;
+        this.audioInputStreamHolder = audioInput;
 
         this.disposed = false;
     }
@@ -74,10 +73,10 @@ export abstract class Recognizer {
 
     protected abstract CreateRecognizerConfig(speecgConfig: SpeechConfig, recognitionMode: RecognitionMode): RecognizerConfig;
 
-    protected abstract CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioSource: IAudioSource, recognizerConfig: RecognizerConfig): ServiceRecognizerBase;
+    protected abstract CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioConfig: AudioConfig, recognizerConfig: RecognizerConfig): ServiceRecognizerBase;
 
     // Setup the recognizer
-    protected implRecognizerSetup(recognitionMode: RecognitionMode, parameters: ISpeechProperties, audioSource: IAudioSource, speechConnectionFactory: IConnectionFactory): ServiceRecognizerBase {
+    protected implRecognizerSetup(recognitionMode: RecognitionMode, parameters: ISpeechProperties, audioConfig: AudioConfig, speechConnectionFactory: IConnectionFactory): ServiceRecognizerBase {
 
         const recognizerConfig = this.CreateRecognizerConfig(
             new SpeechConfig(
@@ -99,15 +98,10 @@ export abstract class Recognizer {
                     return PromiseHelper.FromResult(authorizationToken);
                 });
 
-        if (!audioSource) {
-            const pcmRecorder = new PcmRecorder();
-            audioSource = new MicAudioSource(pcmRecorder);
-        }
-
         return this.CreateServiceRecognizer(
             authentication,
             speechConnectionFactory,
-            audioSource,
+            audioConfig,
             recognizerConfig);
     }
 

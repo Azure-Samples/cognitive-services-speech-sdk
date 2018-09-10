@@ -5,10 +5,10 @@
 
 import { setTimeout } from "timers";
 import * as sdk from "../../../../../source/bindings/js/Speech.Browser.Sdk";
-import { ByteBufferAudioInputStream } from "./ByteBufferAudioInputStream";
+import { ByteBufferAudioFile } from "./ByteBufferAudioFile";
 import { Settings } from "./Settings";
 import { default as WaitForCondition } from "./Utilities";
-import { WaveFileAudioInputStream } from "./WaveFileAudioInputStream";
+import { WaveFileAudioInput } from "./WaveFileAudioInputStream";
 
 beforeAll(() => {
     // Override inputs, if necessary
@@ -42,13 +42,13 @@ test("TranslationRecognizer2", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
-    expect(ais).not.toBeUndefined();
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
     const targets: string[] = [];
     targets.push("en-US");
 
-    const r = s.createTranslationRecognizerWithStream(ais, "en-US", targets);
+    const r = s.createTranslationRecognizerFromConfig(config, "en-US", targets);
     expect(r).not.toBeUndefined();
 
     expect(r instanceof sdk.Recognizer).toEqual(true);
@@ -61,14 +61,14 @@ test("GetSourceLanguage", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
-    expect(ais).not.toBeUndefined();
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
     const targets: string[] = [];
     targets.push("en-us");
 
     const language: string = "en-us";
-    const r = s.createTranslationRecognizerWithStream(ais, language, targets);
+    const r = s.createTranslationRecognizerFromConfig(config, language, targets);
     expect(r.sourceLanguage).not.toBeUndefined();
     expect(r.sourceLanguage).not.toBeNull();
     expect(r.sourceLanguage).toEqual(language);
@@ -81,14 +81,14 @@ test("GetTargetLanguages", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
-    expect(ais).not.toBeUndefined();
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
     const targets: string[] = [];
     targets.push("en-us");
 
     const language: string = "en-us";
-    const r = s.createTranslationRecognizerWithStream(ais, language, targets);
+    const r = s.createTranslationRecognizerFromConfig(config, language, targets);
     expect(r.targetLanguages).not.toBeUndefined();
     expect(r.targetLanguages).not.toBeNull();
     expect(r.targetLanguages.length).toEqual(1);
@@ -102,14 +102,14 @@ test.skip("GetOutputVoiceNameNoSetting", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
-    expect(ais).not.toBeUndefined();
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
     const targets: string[] = [];
     targets.push("en-US");
 
     const language: string = "en-US";
-    const r = s.createTranslationRecognizerWithStream(ais, language, targets);
+    const r = s.createTranslationRecognizerFromConfig(config, language, targets);
 
     expect(r.outputVoiceName).not.toBeUndefined();
 
@@ -121,15 +121,15 @@ test("GetOutputVoiceName", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
-    expect(ais).not.toBeUndefined();
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
     const targets: string[] = [];
     targets.push("en-US");
 
     const language: string = "en-US";
     const voice: string = "de-DE-Katja";
-    const r = s.createTranslationRecognizerWithStreamAndVoice(ais, language, targets, voice);
+    const r = s.createTranslationRecognizerFromConfigAndVoice(config, language, targets, voice);
 
     expect(r.outputVoiceName).toEqual(voice);
 
@@ -144,7 +144,10 @@ test("GetParameters", () => {
     const targets: string[] = [];
     targets.push("en-US");
 
-    const r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, "en-US", targets);
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
+
+    const r = s.createTranslationRecognizerFromConfig(config, "en-US", targets);
     expect(r).not.toBeUndefined();
 
     expect(r.parameters).not.toBeUndefined();
@@ -162,14 +165,14 @@ test("RecognizeAsync1", (done: jest.DoneCallback) => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
-    expect(ais).not.toBeUndefined();
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
     const targets: string[] = [];
     targets.push("de-de");
 
     const language: string = "en-us";
-    const r = s.createTranslationRecognizerWithStream(ais, language, targets);
+    const r = s.createTranslationRecognizerFromConfig(config, language, targets);
 
     expect(r).not.toBeUndefined();
 
@@ -207,15 +210,15 @@ test("Translate Multiple Targets", (done: jest.DoneCallback) => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
-    expect(ais).not.toBeUndefined();
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
     const targets: string[] = [];
     targets.push("de-de");
     targets.push("en-US");
 
     const language: string = "en-us";
-    const r = s.createTranslationRecognizerWithStream(ais, language, targets);
+    const r = s.createTranslationRecognizerFromConfig(config, language, targets);
 
     expect(r).not.toBeUndefined();
 
@@ -250,16 +253,19 @@ test("Translate Multiple Targets", (done: jest.DoneCallback) => {
         });
 }, 10000);
 
-test("RecognizeAsync_badStream", (done: jest.DoneCallback) => {
+test.skip("RecognizeAsync_badStream", (done: jest.DoneCallback) => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
     const targets: string[] = [];
     targets.push("de-de");
 
-    const language: string = "en-us";
-    const r = s.createTranslationRecognizerWithFileInput(Settings.WaveFile, language, targets);
+    const language: string = "en-US";
 
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
+
+    const r = s.createTranslationRecognizerFromConfig(config, language, targets);
     expect(r).not.toBeUndefined();
 
     expect(r instanceof sdk.Recognizer).toEqual(true);
@@ -282,10 +288,10 @@ test("Validate Event Ordering", (done: jest.DoneCallback) => {
     const targets: string[] = [];
     targets.push("en-US");
 
-    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
-    expect(ais).not.toBeUndefined();
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
-    const r = s.createTranslationRecognizerWithStream(ais, "en-US", targets);
+    const r = s.createTranslationRecognizerFromConfig(config, "en-US", targets);
     expect(r).not.toBeUndefined();
 
     expect(r instanceof sdk.Recognizer).toEqual(true);
@@ -384,10 +390,10 @@ test("StartContinuousRecognitionAsync", (done: jest.DoneCallback) => {
     const targets: string[] = [];
     targets.push("en-US");
 
-    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
-    expect(ais).not.toBeUndefined();
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
-    const r = s.createTranslationRecognizerWithStream(ais, "en-US", targets);
+    const r = s.createTranslationRecognizerFromConfig(config, "en-US", targets);
     expect(r).not.toBeUndefined();
 
     expect(r instanceof sdk.Recognizer).toEqual(true);
@@ -412,10 +418,10 @@ test("StopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
     const targets: string[] = [];
     targets.push("en-US");
 
-    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
-    expect(ais).not.toBeUndefined();
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
-    const r = s.createTranslationRecognizerWithStream(ais, "en-US", targets);
+    const r = s.createTranslationRecognizerFromConfig(config, "en-US", targets);
     expect(r).not.toBeUndefined();
 
     expect(r instanceof sdk.Recognizer).toEqual(true);
@@ -442,10 +448,10 @@ test("StartStopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
     const targets: string[] = [];
     targets.push("en-US");
 
-    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
-    expect(ais).not.toBeUndefined();
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
-    const r = s.createTranslationRecognizerWithStream(ais, "en-US", targets);
+    const r = s.createTranslationRecognizerFromConfig(config, "en-US", targets);
     expect(r).not.toBeUndefined();
 
     expect(r instanceof sdk.Recognizer).toEqual(true);
@@ -482,11 +488,11 @@ test("TranslateVoiceRoundTrip", (done: jest.DoneCallback) => {
     const targets: string[] = [];
     targets.push("en-US");
 
-    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
-    expect(ais).not.toBeUndefined();
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
     const voice: string = "en-US-Zira";
-    const r = s.createTranslationRecognizerWithStreamAndVoice(ais, "en-US", targets, voice);
+    const r = s.createTranslationRecognizerFromConfigAndVoice(config, "en-US", targets, voice);
 
     expect(r).not.toBeUndefined();
 
@@ -511,9 +517,10 @@ test("TranslateVoiceRoundTrip", (done: jest.DoneCallback) => {
             r.close();
             const result: Uint8Array = rEvents[Object.keys(rEvents)[0]];
 
-            const inputStream = new ByteBufferAudioInputStream(result);
+            const inputStream: File = ByteBufferAudioFile.Load(result);
+            const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(inputStream);
 
-            const r2: sdk.SpeechRecognizer = s.createSpeechRecognizerWithStreamAndLanguage(inputStream, targets[0]);
+            const r2: sdk.SpeechRecognizer = s.createSpeechRecognizerFromConfigAndLanguage(config, targets[0]);
             r2.recognizeAsync((speech: sdk.SpeechRecognitionResult) => {
                 expect(speech.text).toEqual("What's the weather like?");
                 r2.close();
@@ -531,11 +538,11 @@ test("TranslateVoiceInvalidVoice", (done: jest.DoneCallback) => {
     const targets: string[] = [];
     targets.push("de-DE");
 
-    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
-    expect(ais).not.toBeUndefined();
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
     const voice: string = "de-DE-Hedda)";
-    const r = s.createTranslationRecognizerWithStreamAndVoice(ais, "en-US", targets, voice);
+    const r = s.createTranslationRecognizerFromConfigAndVoice(config, "en-US", targets, voice);
 
     expect(r).not.toBeUndefined();
 
@@ -572,11 +579,11 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
     const targets: string[] = [];
     targets.push("de-DE");
 
-    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
-    expect(ais).not.toBeUndefined();
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
     const voice: string = "de-DE-Hedda";
-    const r = s.createTranslationRecognizerWithStreamAndVoice(ais, "en-US", targets, voice);
+    const r = s.createTranslationRecognizerFromConfigAndVoice(config, "en-US", targets, voice);
 
     expect(r).not.toBeUndefined();
 
@@ -615,9 +622,10 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
             r.close();
             const result: Uint8Array = rEvents[Object.keys(rEvents)[0]];
 
-            const inputStream = new ByteBufferAudioInputStream(result);
+            const inputStream: File = ByteBufferAudioFile.Load(result);
+            const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(inputStream);
 
-            const r2: sdk.SpeechRecognizer = s.createSpeechRecognizerWithStreamAndLanguage(inputStream, targets[0]);
+            const r2: sdk.SpeechRecognizer = s.createSpeechRecognizerFromConfigAndLanguage(config, targets[0]);
             r2.recognizeAsync((speech: sdk.SpeechRecognitionResult) => {
                 expect(speech.text).toEqual("Wie ist das Wetter?");
                 r2.close();
@@ -646,11 +654,11 @@ test.skip("MultiPhrase", (done: jest.DoneCallback) => {
     const targets: string[] = [];
     targets.push("en-US");
 
-    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.LongFile);
-    expect(ais).not.toBeUndefined();
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
     const voice: string = "en-US-Zira";
-    const r = s.createTranslationRecognizerWithStreamAndVoice(ais, "en-US", targets, voice);
+    const r = s.createTranslationRecognizerFromConfigAndVoice(config, "en-US", targets, voice);
 
     expect(r).not.toBeUndefined();
 
@@ -701,9 +709,10 @@ test.skip("MultiPhrase", (done: jest.DoneCallback) => {
                 byteCount += rEvents[value].byteLength;
             });
 
-            const inputStream = new ByteBufferAudioInputStream(result);
+            const inputStream: File = ByteBufferAudioFile.Load(result);
+            const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(inputStream);
 
-            const r2: sdk.SpeechRecognizer = s.createSpeechRecognizerWithStreamAndLanguage(inputStream, targets[0]);
+            const r2: sdk.SpeechRecognizer = s.createSpeechRecognizerFromConfigAndLanguage(config, targets[0]);
             let constResult: string = "";
             let numEvents: number = 0;
 

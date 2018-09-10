@@ -4,10 +4,10 @@
 //
 import { promises } from "fs";
 import { setTimeout } from "timers";
-import * as sdk from "../../../../../source/bindings/js/distrib/Speech.Browser.Sdk";
+import * as sdk from "../../../../../source/bindings/js/Speech.Browser.Sdk";
 import { Settings } from "./Settings";
 import { default as WaitForCondition } from "./Utilities";
-import { WaveFileAudioInputStream } from "./WaveFileAudioInputStream";
+import { WaveFileAudioInput } from "./WaveFileAudioInputStream";
 
 const FIRST_EVENT_ID: number = 1;
 const IntermediateResultReceived: string = "IntermediateResultReceived";
@@ -32,7 +32,10 @@ test("testSpeechRecognizer1", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
+
+    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerFromConfig(config);
     expect(r).not.toBeUndefined();
     // ??     assertNotNull(r.getRecoImpl());
     expect(r instanceof sdk.Recognizer);
@@ -113,10 +116,10 @@ test("testGetLanguage1", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
-    expect(ais).not.toBeUndefined();
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
-    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerWithStream(ais);
+    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerFromConfig(config);
     expect(r).not.toBeUndefined();
 
     expect(r.language).not.toBeNull();
@@ -129,11 +132,11 @@ test("testGetLanguage2", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const ais: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
-    expect(ais).not.toBeUndefined();
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
     const language: string = "de-DE";
-    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerWithStreamAndLanguage(ais, language);
+    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerFromConfigAndLanguage(config, language);
     expect(r).not.toBeUndefined();
 
     expect(r.language).not.toBeNull();
@@ -147,7 +150,10 @@ test("testGetOutputFormatDefault", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
+
+    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerFromConfig(config);
     expect(r).not.toBeUndefined();
 
     expect(r.outputFormat === sdk.OutputFormat.Simple);
@@ -160,9 +166,12 @@ test("testGetOutputFormatDetailed", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
+
     const language: string = "de-DE";
     const r: sdk.SpeechRecognizer =
-        s.createSpeechRecognizerWithFileInputAndLanguageAndOutput(Settings.WaveFile, language, sdk.OutputFormat.Detailed);
+        s.createSpeechRecognizerFromConfigAndLanguageAndOutput(config, language, sdk.OutputFormat.Detailed);
     expect(r).not.toBeUndefined();
 
     expect(r.outputFormat === sdk.OutputFormat.Detailed);
@@ -175,7 +184,10 @@ test("testGetParameters", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
+
+    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerFromConfig(config);
     expect(r).not.toBeUndefined();
 
     expect(r.parameters).not.toBeUndefined();
@@ -193,9 +205,10 @@ test("testRecognizeAsync1", (done: jest.DoneCallback) => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const wavFile: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
-    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerWithStream(wavFile);
+    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerFromConfig(config);
     expect(r).not.toBeUndefined();
     // ??     assertNotNull(r.getRecoImpl());
     expect(r instanceof sdk.Recognizer);
@@ -224,9 +237,10 @@ test("testRecognizeAsync2", (done: jest.DoneCallback) => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const wavFile: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
-    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerWithStream(wavFile);
+    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerFromConfig(config);
     expect(r).not.toBeUndefined();
     // ??     assertNotNull(r.getRecoImpl());
     expect(r instanceof sdk.Recognizer);
@@ -337,9 +351,10 @@ test("testStartContinuousRecognitionAsync", (done: jest.DoneCallback) => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const wavFile: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
-    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerWithStream(wavFile);
+    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerFromConfig(config);
 
     expect(r).not.toBeUndefined();
     // ??     assertNotNull(r.getRecoImpl());
@@ -362,9 +377,10 @@ test("testStopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const wavFile: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
-    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerWithStream(wavFile);
+    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerFromConfig(config);
     expect(r).not.toBeUndefined();
     // ??     assertNotNull(r.getRecoImpl());
     expect(r instanceof sdk.Recognizer);
@@ -393,9 +409,10 @@ test("testStartStopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const wavFile: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
-    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerWithStream(wavFile);
+    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerFromConfig(config);
     expect(r).not.toBeUndefined();
     // ??     assertNotNull(r.getRecoImpl());
     expect(r instanceof sdk.Recognizer);
@@ -423,9 +440,10 @@ test("testGetRecoImpl", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const wavFile: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
-    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerWithStream(wavFile);
+    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerFromConfig(config);
     expect(r).not.toBeUndefined();
     // ??     assertNotNull(r.getRecoImpl());
     expect(r instanceof sdk.Recognizer);
@@ -443,9 +461,11 @@ test("testClose", () => {
     const s: sdk.SpeechFactory = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const wavFile: WaveFileAudioInputStream = new WaveFileAudioInputStream(Settings.WaveFile);
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
-    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerWithStream(wavFile); expect(r).not.toBeUndefined();
+    const r: sdk.SpeechRecognizer = s.createSpeechRecognizerFromConfig(config);
+    expect(r).not.toBeUndefined();
     expect(r instanceof sdk.Recognizer);
 
     r.close();

@@ -2,10 +2,10 @@
 // copyright (c) Microsoft. All rights reserved.
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-import { IAudioSource } from "../../common/Exports";
+
 import { IAuthentication, IConnectionFactory, RecognitionMode, RecognizerConfig, ServiceRecognizerBase, SpeechConfig } from "../speech/Exports";
 import { Contracts } from "./Contracts";
-import { AudioInputStream, IntentRecognitionResult, IntentRecognitionResultEventArgs, ISpeechProperties, KeywordRecognitionModel, LanguageUnderstandingModel, RecognitionErrorEventArgs, Recognizer, RecognizerParameterNames } from "./Exports";
+import { AudioConfig, AudioInputStream, IntentRecognitionResult, IntentRecognitionResultEventArgs, ISpeechProperties, KeywordRecognitionModel, LanguageUnderstandingModel, RecognitionErrorEventArgs, Recognizer, RecognizerParameterNames } from "./Exports";
 
 export class IntentRecognizer extends Recognizer {
     private disposedIntentRecognizer: boolean;
@@ -189,7 +189,7 @@ export class IntentRecognizer extends Recognizer {
     protected CreateRecognizerConfig(speecgConfig: SpeechConfig, recognitionMode: RecognitionMode): RecognizerConfig {
         throw new Error("Method not implemented.");
     }
-    protected CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioSource: IAudioSource, recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
+    protected CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioConfig: AudioConfig, recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
         throw new Error("Method not implemented.");
     }
 

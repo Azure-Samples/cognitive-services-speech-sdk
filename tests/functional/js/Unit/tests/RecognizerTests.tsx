@@ -5,6 +5,7 @@
 
 import * as sdk from "../../../../../source/bindings/js/Speech.Browser.Sdk";
 import { Settings } from "./Settings";
+import { WaveFileAudioInput } from "./WaveFileAudioInputStream";
 
 beforeEach(() => {
     // Override inputs, if necessary
@@ -15,7 +16,10 @@ test("testRecognizer1", () => {
     const s = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const r = s.createIntentRecognizerWithFileInput(Settings.WaveFile);
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
+
+    const r = s.createIntentRecognizerWithFileInput(config);
     expect(r).not.toBeUndefined();
     expect(r instanceof sdk.Recognizer);
 
@@ -27,7 +31,10 @@ test("testRecognizer2", () => {
     const s = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    const r = s.createSpeechRecognizerWithFileInput(Settings.WaveFile);
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
+
+    const r = s.createSpeechRecognizerFromConfig(config);
     expect(r).not.toBeUndefined();
     expect(r instanceof sdk.Recognizer);
 

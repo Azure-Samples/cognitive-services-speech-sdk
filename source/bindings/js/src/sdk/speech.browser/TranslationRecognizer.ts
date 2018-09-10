@@ -2,8 +2,6 @@
 // copyright (c) Microsoft. All rights reserved.
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-import { FileAudioSource } from "../../common.browser/Exports";
-import { IAudioSource } from "../../common/Exports";
 import {
     IAuthentication,
     IConnectionFactory,
@@ -23,9 +21,10 @@ import {
     TranslationSynthesisErrorEvent,
     TranslationSynthesisEvent,
 } from "../speech/Exports";
+import { AudioConfigImpl } from "./Audio/AudioConfig";
 import { Contracts } from "./Contracts";
 import {
-    AudioInputStream,
+    AudioConfig,
     FactoryParameterNames,
     ISpeechProperties,
     KeywordRecognitionModel,
@@ -48,7 +47,7 @@ export class TranslationRecognizer extends Recognizer {
      * @param recoImpl The internal recognizer implementation.
      * @param ais An optional audio input stream associated with the recognizer
      */
-    public constructor(parameters: ISpeechProperties, ais: AudioInputStream) {
+    public constructor(parameters: ISpeechProperties, ais: AudioConfig) {
         super(ais);
 
         this.disposedTranslationRecognizer = false;
@@ -132,18 +131,10 @@ export class TranslationRecognizer extends Recognizer {
 
         this.implCloseExistingRecognizer();
 
-        let audioSource;
-        if (this.audioInputStreamHolder) {
-            audioSource = new FileAudioSource(this.audioInputStreamHolder.file);
-        } else if (this.parameters.has("audioFile")) {
-            const file = new File([""], this.parameters.get("audioFile", undefined));
-            audioSource = new FileAudioSource(file);
-        }
-
         this.reco = this.implRecognizerSetup(
             RecognitionMode.Conversation,
             this.parameters,
-            audioSource,
+            this.audioInputStreamHolder,
             new TranslationConnectionFactory());
 
         this.implRecognizerStart(this.reco, (event: SpeechRecognitionEvent) => {
@@ -152,25 +143,25 @@ export class TranslationRecognizer extends Recognizer {
             }
             switch (event.Name) {
                 case "RecognitionEndedEvent":
-                {
-                    const recoEndedEvent: RecognitionEndedEvent = event as RecognitionEndedEvent;
-                    if (recoEndedEvent.Status !== RecognitionCompletionStatus.Success) {
-                        const errorEvent: RecognitionErrorEventArgs = new RecognitionErrorEventArgs();
+                    {
+                        const recoEndedEvent: RecognitionEndedEvent = event as RecognitionEndedEvent;
+                        if (recoEndedEvent.Status !== RecognitionCompletionStatus.Success) {
+                            const errorEvent: RecognitionErrorEventArgs = new RecognitionErrorEventArgs();
 
-                        errorEvent.status = RecognitionStatus.Canceled;
-                        errorEvent.sessionId = recoEndedEvent.SessionId;
-                        errorEvent.error = recoEndedEvent.Error;
+                            errorEvent.status = RecognitionStatus.Canceled;
+                            errorEvent.sessionId = recoEndedEvent.SessionId;
+                            errorEvent.error = recoEndedEvent.Error;
 
-                        if (this.RecognitionErrorRaised) {
-                            this.RecognitionErrorRaised(this, errorEvent); // call error handler, if configured
-                        }
+                            if (this.RecognitionErrorRaised) {
+                                this.RecognitionErrorRaised(this, errorEvent); // call error handler, if configured
+                            }
 
-                        if (!!err) {
-                            err(recoEndedEvent.Error); // call error handler, if configured
+                            if (!!err) {
+                                err(recoEndedEvent.Error); // call error handler, if configured
+                            }
                         }
                     }
-                }
-                break;
+                    break;
 
                 case "TranslationSimplePhraseEvent":
                     {
@@ -372,8 +363,11 @@ export class TranslationRecognizer extends Recognizer {
             this.parameters);
     }
 
-    protected CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioSource: IAudioSource, recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
-        return new TranslationServiceRecognizer(authentication, connectionFactory, audioSource, recognizerConfig);
+    protected CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioConfig: AudioConfig, recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
+
+        const configImpl: AudioConfigImpl = audioConfig as AudioConfigImpl;
+
+        return new TranslationServiceRecognizer(authentication, connectionFactory, configImpl, recognizerConfig);
     }
 
     // tslint:disable-next-line:member-ordering
