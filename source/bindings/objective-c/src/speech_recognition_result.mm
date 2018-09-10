@@ -52,7 +52,7 @@
     return self;
 }
 
-- (instancetype)initWithRuntimeError: (NSString *)message
+- (instancetype)initWithError: (NSString *)message
 {
     _recognitionStatus = RecognitionStatus::Canceled;
     _recognitionFailureReason = message;

@@ -4,20 +4,22 @@
 //
 
 #import "recognizer_private.h"
-#import "speech_recognizer_private.h"
-#import "speech_recognition_result_private.h"
-#import "speech_recognition_result_event_args_private.h"
+#import "translation_recognizer_private.h"
+#import "translation_text_result_private.h"
+#import "translation_text_result_event_args_private.h"
+#import "translation_synthesis_result_private.h"
+#import "translation_synthesis_result_event_args_private.h"
 #import "session_event_args_private.h"
 #import "recognition_event_args_private.h"
 #import "recognition_error_event_args_private.h"
 #import "common_private.h"
 
-struct SpeechEventHandlerHelper
+struct TranslationEventHandlerHelper
 {
-    SpeechRecognizer *recognizer;
-    SpeechRecoSharedPtr recoImpl;
+    TranslationRecognizer *recognizer;
+    TranslationRecoSharedPtr recoImpl;
 
-    SpeechEventHandlerHelper(SpeechRecognizer *reco, SpeechRecoSharedPtr recoImpl)
+    TranslationEventHandlerHelper(TranslationRecognizer *reco, TranslationRecoSharedPtr recoImpl)
     {
         recognizer = reco;
         this->recoImpl = recoImpl;
@@ -26,31 +28,41 @@ struct SpeechEventHandlerHelper
     void addFinalResultEventHandler()
     {
         NSLog(@"Add FinalResultEventHandler");
-        recoImpl->FinalResult.Connect([this] (const SpeechImpl::SpeechRecognitionEventArgs& e)
+        recoImpl->FinalResult.Connect([this] (const TranslationImpl::TranslationTextResultEventArgs& e)
             {
-                SpeechRecognitionResultEventArgs *eventArgs = [[SpeechRecognitionResultEventArgs alloc] init: e];
+                TranslationTextResultEventArgs *eventArgs = [[TranslationTextResultEventArgs alloc] init: e];
                 [recognizer onFinalResultEvent: eventArgs];
             });
     }
-    
+
     void addIntermediateResultEventHandler()
     {
         NSLog(@"Add IntermediateResultEventHandler");
-        recoImpl->IntermediateResult.Connect([this] (const SpeechImpl::SpeechRecognitionEventArgs& e)
+        recoImpl->IntermediateResult.Connect([this] (const TranslationImpl::TranslationTextResultEventArgs& e)
             {
-                SpeechRecognitionResultEventArgs *eventArgs = [[SpeechRecognitionResultEventArgs alloc] init: e];
+                TranslationTextResultEventArgs *eventArgs = [[TranslationTextResultEventArgs alloc] init: e];
                 [recognizer onIntermediateResultEvent: eventArgs];
+            });
+    }
+
+    void addSynthesisResultEventHandler()
+    {
+        NSLog(@"Add SynthesisResultEventHandler");
+        recoImpl->TranslationSynthesisResultEvent.Connect([this] (const TranslationImpl::TranslationSynthesisResultEventArgs& e)
+            {
+                TranslationSynthesisResultEventArgs *eventArgs = [[TranslationSynthesisResultEventArgs alloc] init: e];
+                [recognizer onSynthesisResultEvent: eventArgs];
             });
     }
 
     void addErrorEventHandler()
     {
         NSLog(@"Add ErrorEventHandler");
-        recoImpl->Canceled.Connect([this] (const SpeechImpl::SpeechRecognitionEventArgs& e)
+        recoImpl->Canceled.Connect([this] (const TranslationImpl::TranslationTextResultEventArgs& e)
             {
-                NSString* sessionId = [NSString stringWithString:e.SessionId];
+                NSString *sessionId = [NSString stringWithString:e.SessionId];
                 auto result = e.GetResult();
-                NSString* failureReason = [NSString stringWithString:result->ErrorDetails];
+                NSString *failureReason = [NSString stringWithString:result->ErrorDetails];
                 RecognitionStatus status;
                 switch (result->Reason)
                 {
@@ -74,12 +86,11 @@ struct SpeechEventHandlerHelper
                     break;
                 default:
                     // Todo error handling.
-                    NSLog(@"Unknown recognition status");
                     status = RecognitionStatus::Canceled;
-                        failureReason = @"Unexpected status error.";
+                    NSLog(@"Unknown recognition status");
                     break;
                 }
-                RecognitionErrorEventArgs *eventArgs = [[RecognitionErrorEventArgs alloc] init:sessionId :status :failureReason];
+                RecognitionErrorEventArgs *eventArgs = [[RecognitionErrorEventArgs alloc] init :sessionId :status :failureReason];
                 [recognizer onErrorEvent: eventArgs];
             });
     }
@@ -117,17 +128,19 @@ struct SpeechEventHandlerHelper
     }
 };
 
-@implementation SpeechRecognizer
+@implementation TranslationRecognizer
 {
-    SpeechRecoSharedPtr recoImpl;
+    TranslationRecoSharedPtr recoImpl;
     dispatch_queue_t dispatchQueue;
     NSMutableArray *finalResultEventListenerList;
     NSMutableArray *intermediateResultEventListenerList;
-    struct SpeechEventHandlerHelper *eventImpl;
+    NSMutableArray *synthesisResultEventListenerList;
+    NSMutableArray *errorEventListenerList;
+    struct TranslationEventHandlerHelper *eventImpl;
     NSLock *arrayLock;
 }
 
-- (instancetype)init :(SpeechRecoSharedPtr)recoHandle
+- (instancetype)init :(TranslationRecoSharedPtr)recoHandle
 {
     self = [super init];
     recoImpl = recoHandle;
@@ -137,18 +150,22 @@ struct SpeechEventHandlerHelper
     else
     {
         dispatchQueue = dispatch_queue_create("com.microsoft.cognitiveservices.speech", nil);
+        
         finalResultEventListenerList = [NSMutableArray array];
         intermediateResultEventListenerList = [NSMutableArray array];
+        synthesisResultEventListenerList = [NSMutableArray array];
+        errorEventListenerList = [NSMutableArray array];
         arrayLock = [[NSLock alloc] init];
         
-        eventImpl = new SpeechEventHandlerHelper(self, recoImpl);
+        eventImpl = new TranslationEventHandlerHelper(self, recoImpl);
         [super setDispatchQueue: dispatchQueue];
         eventImpl->addIntermediateResultEventHandler();
         eventImpl->addFinalResultEventHandler();
+        eventImpl->addSynthesisResultEventHandler();
         eventImpl->addErrorEventHandler();
         eventImpl->addSessionEventHandler();
         eventImpl->addRecognitionEventHandler();
-
+        
         return self;
     }
 }
@@ -159,39 +176,39 @@ struct SpeechEventHandlerHelper
     delete eventImpl;
 }
 
-- (SpeechRecognitionResult *)recognize
+- (TranslationTextResult *)translate
 {
-    SpeechRecognitionResult *result = nil;
+    TranslationTextResult *result = nil;
     
     if (recoImpl == nullptr) {
-        result = [[SpeechRecognitionResult alloc] initWithError: @"Recognizer has been closed."];
+        result = [[TranslationTextResult alloc] initWithError: @"Recognizer has been closed."];
         return result;
     }
     
     try {
-        std::shared_ptr<SpeechImpl::SpeechRecognitionResult> resultImpl = recoImpl->RecognizeAsync().get();
+        std::shared_ptr<TranslationImpl::TranslationTextResult> resultImpl = recoImpl->RecognizeAsync().get();
         if (resultImpl == nullptr) {
-            result = [[SpeechRecognitionResult alloc] initWithError: @"No result available."];
+            result = [[TranslationTextResult alloc] initWithError: @"No result available."];
         }
         else
         {
-            result = [[SpeechRecognitionResult alloc] init: resultImpl];
+            result = [[TranslationTextResult alloc] init: resultImpl];
         }
     }
     catch (...) {
         // Todo: better error handling
         NSLog(@"exception caught");
-        result = [[SpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
+        result = [[TranslationTextResult alloc] initWithError: @"Runtime Exception"];
     }
     
     return result;
 }
 
-- (void)recognizeAsync:(void (^)(SpeechRecognitionResult *))resultReceivedBlock
+- (void)translateAsync:(void (^)(TranslationTextResult *))resultReceivedBlock
 {
-    SpeechRecognitionResult *result = nil;
+    TranslationTextResult *result = nil;
     if (recoImpl == nullptr) {
-        result = [[SpeechRecognitionResult alloc] initWithError: @"Recognizer has been closed."];
+        result = [[TranslationTextResult alloc] initWithError: @"Recognizer has been closed."];
         dispatch_async(dispatchQueue, ^{
             resultReceivedBlock(result);
         });
@@ -199,19 +216,19 @@ struct SpeechEventHandlerHelper
     }
     
     try {
-        std::shared_ptr<SpeechImpl::SpeechRecognitionResult> resultImpl = recoImpl->RecognizeAsync().get();
+        std::shared_ptr<TranslationImpl::TranslationTextResult> resultImpl = recoImpl->RecognizeAsync().get();
         if (resultImpl == nullptr) {
-            result = [[SpeechRecognitionResult alloc] initWithError: @"No result available."];
+            result = [[TranslationTextResult alloc] initWithError: @"No result available."];
         }
         else
         {
-            result = [[SpeechRecognitionResult alloc] init: resultImpl];
+            result = [[TranslationTextResult alloc] init: resultImpl];
         }
     }
     catch (...) {
         // Todo: better error handling
         NSLog(@"exception caught");
-        result = [[SpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
+        result = [[TranslationTextResult alloc] initWithError: @"Runtime Exception"];
     }
     
     dispatch_async(dispatchQueue, ^{
@@ -219,7 +236,7 @@ struct SpeechEventHandlerHelper
     });
 }
 
-- (void)startContinuousRecognition
+- (void)startContinuousTranslation
 {
     if (recoImpl == nullptr) {
         // Todo: return error?
@@ -236,7 +253,7 @@ struct SpeechEventHandlerHelper
     }
 }
 
-- (void)stopContinuousRecognition
+- (void)stopContinuousTranslation
 {
     if (recoImpl == nullptr) {
         // Todo: return error?
@@ -260,7 +277,7 @@ struct SpeechEventHandlerHelper
     }
 }
 
-- (void)onFinalResultEvent:(SpeechRecognitionResultEventArgs *)eventArgs
+- (void)onFinalResultEvent:(TranslationTextResultEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onFinalResultEvent");
     NSArray* workCopyOfList;
@@ -269,26 +286,40 @@ struct SpeechEventHandlerHelper
     [arrayLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
-            ((RecognitionResultEventHandlerBlock)handle)(self, eventArgs);
+            ((TranslationTextResultEventHandlerBlock)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)onIntermediateResultEvent:(SpeechRecognitionResultEventArgs *)eventArgs
+- (void)onIntermediateResultEvent:(TranslationTextResultEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onIntermediateResultEvent");
     NSArray* workCopyOfList;
     [arrayLock lock];
     workCopyOfList = [NSArray arrayWithArray:intermediateResultEventListenerList];
     [arrayLock unlock];
-    for (id handle in intermediateResultEventListenerList) {
+    for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
-            ((RecognitionResultEventHandlerBlock)handle)(self, eventArgs);
+            ((TranslationTextResultEventHandlerBlock)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)addFinalResultEventListener:(RecognitionResultEventHandlerBlock)eventHandler
+- (void)onSynthesisResultEvent:(TranslationSynthesisResultEventArgs *)eventArgs
+{
+    NSLog(@"OBJC: onSynthesisResultEvent");
+    NSArray* workCopyOfList;
+    [arrayLock lock];
+    workCopyOfList = [NSArray arrayWithArray:synthesisResultEventListenerList];
+    [arrayLock unlock];
+    for (id handle in workCopyOfList) {
+        dispatch_async(dispatchQueue, ^{
+            ((TranslationSynthesisResultEventHandlerBlock)handle)(self, eventArgs);
+        });
+    }
+}
+
+- (void)addFinalResultEventListener:(TranslationTextResultEventHandlerBlock)eventHandler
 {
     [arrayLock lock];
     [finalResultEventListenerList addObject:eventHandler];
@@ -296,7 +327,7 @@ struct SpeechEventHandlerHelper
     return;
 }
 
-- (void)addIntermediateResultEventListener:(RecognitionResultEventHandlerBlock)eventHandler
+- (void)addIntermediateResultEventListener:(TranslationTextResultEventHandlerBlock)eventHandler
 {
     [arrayLock lock];
     [intermediateResultEventListenerList addObject:eventHandler];
@@ -304,4 +335,12 @@ struct SpeechEventHandlerHelper
     return;
 }
 
+
+- (void)addSynthesisResultEventListener:(TranslationSynthesisResultEventHandlerBlock)eventHandler
+{
+    [arrayLock lock];
+    [synthesisResultEventListenerList addObject:eventHandler];
+    [arrayLock unlock];
+    return;
+}
 @end

@@ -9,17 +9,18 @@
 #import <Foundation/Foundation.h>
 #import "session_event_args.h"
 #import "recognition_event_args.h"
+#import "recognition_error_event_args.h"
 
 @interface Recognizer : NSObject
 
 typedef void (^SessionEventHandlerBlock)(Recognizer *, SessionEventArgs *);
 typedef void (^RecognitionEventHandlerBlock)(Recognizer *, RecognitionEventArgs *);
+typedef void (^ErrorEventHandlerBlock)(Recognizer *, RecognitionErrorEventArgs *);
 
 - (void)addSessionEventListener:(SessionEventHandlerBlock)eventHandler;
-- (void)removeSessionEventListener:(SessionEventHandlerBlock)eventHandler;
-
 - (void)addRecognitionEventListener:(RecognitionEventHandlerBlock)eventHandler;
-- (void)removeRecognitionEventListener:(RecognitionEventHandlerBlock)eventHandler;
+- (void)addErrorEventListener:(ErrorEventHandlerBlock)eventHandler;
+
 
 @end
 

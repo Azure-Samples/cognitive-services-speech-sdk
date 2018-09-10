@@ -8,18 +8,7 @@
 
 @implementation RecognitionEventArgs
 
-- (instancetype)init:(RecognitionEventType)eventType :(NSString *)sessionId  :(NSUInteger)offset
-{
-    self = [super init];
-    
-    _sessionId = sessionId;
-    _eventType = eventType;
-    _offset = offset;
-   
-    return self;
-}
-
-- (instancetype)initWithHandle :(RecognitionEventType)eventType :(const SpeechImpl::RecognitionEventArgs&) eventArgsHandle
+- (instancetype)init :(RecognitionEventType)eventType :(const SpeechImpl::RecognitionEventArgs&) eventArgsHandle
 {
     self = [super init];
     

@@ -3,8 +3,8 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#ifndef speechrecognitioneventargs_h
-#define speechrecognitioneventargs_h
+#ifndef speech_recognition_result_event_args_h
+#define speech_recognition_result_event_args_h
 
 #import <Foundation/Foundation.h>
 #import "speech_recognition_result.h"
@@ -17,4 +17,4 @@
 
 @end
 
-#endif /* speechrecognitioneventargs_h */
+#endif /* speech_recognition_result_event_args_h */

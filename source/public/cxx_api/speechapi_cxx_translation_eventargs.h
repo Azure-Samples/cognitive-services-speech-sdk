@@ -45,7 +45,7 @@ public:
     /// </summary>
     virtual ~TranslationTextResultEventArgs() { };
 
-#ifdef SWIG
+#if defined(SWIG) || defined(BINDING_OBJECTIVE_C)
 private:
 #endif
     /// <summary>
@@ -53,10 +53,10 @@ private:
     /// </summary>
     const TranslationTextResult& Result;
 
-#ifndef SWIG
-private:
-#else
+#if defined(SWIG) || defined(BINDING_OBJECTIVE_C)
 public:
+#else
+private:
 #endif
     /// <summary>
     /// Contains the translation text result.
@@ -105,7 +105,7 @@ public:
     /// </summary>
     virtual ~TranslationSynthesisResultEventArgs() { };
 
-#ifdef SWIG
+#if defined(SWIG) || defined(BINDING_OBJECTIVE_C)
 private:
 #endif
     /// <summary>
@@ -113,10 +113,10 @@ private:
     /// </summary>
     const TranslationSynthesisResult& Result;
 
-#ifndef SWIG
-private:
-#else
+#if defined(SWIG) || defined(BINDING_OBJECTIVE_C)
 public:
+#else
+private:
 #endif
     /// <summary>
     /// Contains the translation synthesis result.

@@ -11,17 +11,22 @@
 {
     dispatch_queue_t dispatchQueue;
     NSMutableArray *sessionEventListenerList;
-    NSMutableArray *recognitionEventListenerList;
     NSLock *sessionEventArrayLock;
+    NSMutableArray *recognitionEventListenerList;   
     NSLock *recognitionEventArrayLock;
+    NSMutableArray *errorEventListenerList;
+    NSLock *errorEventArrayLock;
 }
 
 - (instancetype)init
 {
     sessionEventListenerList = [NSMutableArray array];
-    recognitionEventListenerList = [NSMutableArray array];
     sessionEventArrayLock = [[NSLock alloc] init];
+    recognitionEventListenerList = [NSMutableArray array];
     recognitionEventArrayLock = [[NSLock alloc] init];
+    errorEventListenerList = [NSMutableArray array];
+    errorEventArrayLock = [[NSLock alloc] init];
+    
     return self;
 }
 
@@ -33,13 +38,15 @@
 - (void)onSessionEvent:(SessionEventArgs *)eventArgs
 {
     NSLog(@"OBJC OnSessionEvent");
+    NSArray* workCopyOfList;
     [sessionEventArrayLock lock];
-    for (id handle in sessionEventListenerList) {
+    workCopyOfList = [NSArray arrayWithArray:sessionEventListenerList];
+    [sessionEventArrayLock unlock];
+    for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
             ((SessionEventHandlerBlock)handle)(self, eventArgs);
         });
     }
-    [sessionEventArrayLock unlock];
 }
 
 - (void)addSessionEventListener:(SessionEventHandlerBlock)eventHandler
@@ -49,24 +56,18 @@
     [sessionEventArrayLock unlock];
 }
 
-- (void)removeSessionEventListener:(SessionEventHandlerBlock)eventHandler
-{
-    [sessionEventArrayLock lock];
-    [sessionEventListenerList removeObject:eventHandler];
-    [sessionEventArrayLock unlock];
-    return;
-}
-
 - (void)onRecognitionEvent:(RecognitionEventArgs *)eventArgs
 {
     NSLog(@"OBJC OnRecognitionEvent");
+    NSArray* workCopyOfList;
     [recognitionEventArrayLock lock];
-    for (id handle in recognitionEventListenerList) {
+    workCopyOfList = [NSArray arrayWithArray:recognitionEventListenerList];
+    [recognitionEventArrayLock unlock];
+    for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
             ((RecognitionEventHandlerBlock)handle)(self, eventArgs);
         });
     }
-    [recognitionEventArrayLock unlock];
 }
 
 - (void)addRecognitionEventListener:(RecognitionEventHandlerBlock)eventHandler
@@ -74,15 +75,27 @@
     [recognitionEventArrayLock lock];
     [recognitionEventListenerList addObject:eventHandler];
     [recognitionEventArrayLock unlock];
-    return;
 }
 
-- (void)removeRecognitionEventListener:(RecognitionEventHandlerBlock)eventHandler
+- (void)onErrorEvent:(RecognitionErrorEventArgs *)eventArgs
 {
-    [recognitionEventArrayLock lock];
-    [sessionEventListenerList removeObject:eventHandler];
-    [recognitionEventArrayLock unlock];
-    return;
+    NSLog(@"OBJC OnErrorEvent");
+    NSArray* workCopyOfList;
+    [errorEventArrayLock lock];
+    workCopyOfList = [NSArray arrayWithArray:errorEventListenerList];
+    [errorEventArrayLock unlock];
+    for (id handle in workCopyOfList) {
+        dispatch_async(dispatchQueue, ^{
+            ((ErrorEventHandlerBlock)handle)(self, eventArgs);
+        });
+    }
+}
+
+- (void)addErrorEventListener:(ErrorEventHandlerBlock)eventHandler
+{
+    [errorEventArrayLock lock];
+    [errorEventListenerList addObject:eventHandler];
+    [errorEventArrayLock unlock];
 }
 
 @end

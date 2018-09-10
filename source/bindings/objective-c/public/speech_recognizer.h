@@ -30,13 +30,7 @@ typedef void (^RecognitionResultEventHandlerBlock)(SpeechRecognizer *, SpeechRec
 
 // How to add events, as a protocol, and individual blocks?
 - (void)addFinalResultEventListener:(RecognitionResultEventHandlerBlock)eventHandler;
-- (void)removeFinalResultEventListener:(RecognitionResultEventHandlerBlock)eventHandler;
-
 - (void)addIntermediateResultEventListener:(RecognitionResultEventHandlerBlock)eventHandler;
-- (void)removeIntermediateResultEventListener:(RecognitionResultEventHandlerBlock)eventHandler;
-// - connectSessionStarted((void) (^HandlingSessionStarted) : (SessionEventArgs *)sessionEvent);
-
-// We might need a close/dispose method to ensure the native resource can be released quickly
 
 @end
 

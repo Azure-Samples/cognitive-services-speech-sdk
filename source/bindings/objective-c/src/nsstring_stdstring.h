@@ -4,8 +4,8 @@
 //
 
 
-#ifndef NSString_STL_h
-#define NSString_STL_h
+#ifndef nsstring_stdstring_h
+#define nsstring_stdstring_h
 
 #import <Foundation/Foundation.h>
 #import <string>
@@ -17,4 +17,4 @@
 
 @end
 
-#endif /* NSString_STL_h */
+#endif /* nsstring_stdstring_h */

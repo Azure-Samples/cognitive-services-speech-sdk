@@ -7,16 +7,7 @@
 #define SpeechRecognitionResult_h
 
 #import <Foundation/Foundation.h>
-
-typedef NS_ENUM(NSInteger, RecognitionStatus)
-{
-    Recognized = 0,
-    IntermediateResult,
-    NoMatch,
-    InitialSilenceTimeout,
-    InitialBabbleTimeout,
-    Canceled
-};
+#import "recognition_status.h"
 
 @interface SpeechRecognitionResult : NSObject
 

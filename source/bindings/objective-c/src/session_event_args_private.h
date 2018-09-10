@@ -12,9 +12,7 @@
 
 @interface SessionEventArgs (Private)
 
-// Todo: better opaque pointer in obj-c, or a typedef
-- (instancetype)init: (SessionEventType)eventType :(NSString *)sessionId;
-- (instancetype)initWithHandle: (SessionEventType)eventType :(const SpeechImpl::SessionEventArgs&) eventArgsHandle;
+- (instancetype)init: (SessionEventType)eventType :(const SpeechImpl::SessionEventArgs&) eventArgsHandle;
 
 @end
 

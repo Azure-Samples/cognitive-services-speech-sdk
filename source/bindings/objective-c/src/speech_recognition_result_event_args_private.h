@@ -8,7 +8,6 @@
 
 #import "speech_recognition_result_event_args.h"
 
-#define BINDING_OBJECTIVE_C
 #import "common_private.h"
 
 @interface SpeechRecognitionResultEventArgs (Private)

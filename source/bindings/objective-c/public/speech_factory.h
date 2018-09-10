@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "speech_recognizer.h"
+#import "translation_recognizer.h"
 
 typedef NS_ENUM(NSInteger, OutputFormat)
 {
@@ -17,7 +18,7 @@ typedef NS_ENUM(NSInteger, OutputFormat)
 
 @interface SpeechFactory : NSObject
 
-- (SpeechRecognizer*)createSpeechRecognizerWithDefaultMicrophone;
+- (SpeechRecognizer*)createSpeechRecognizer;
 // - (SpeechRecognizer*) createSpeechREcognizerUsingDefaultMicrophoneWithLanguage: (NSString *)language;
 // - (SpeechRecognizer*) createSpeechRecognizerUsingDefaultMicrophoneWithLanguage: (NSString *)language AndOutputFormat: (OutputFormat)outputFormat;
 
@@ -28,6 +29,11 @@ typedef NS_ENUM(NSInteger, OutputFormat)
 //- (SpeechRecognizer*) createSpeechRecognizerWithStream: (AudioInputStream *)inputStream;
 //- (SpeechRecognizer*) createSpeechRecognizerWithStream: (AudioInputStream *)inputStream AndLanguage: (NSString *)language;
 //- (SpeechRecognizer*) createSpeechRecognizerWithStream: (AudioInputStream *)inputStream AndLanguage: (NSString *)language AndOutputFormat: (OutputFormat)outputFormat;
+
+- (TranslationRecognizer*)createTranslationRecognizerFromLanguage:(NSString *)from ToLanguages:(NSArray *)to;
+- (TranslationRecognizer*)createTranslationRecognizerFromLanguage:(NSString *)from ToLanguages:(NSArray *)to WithVoiceOutput:(NSString *)voice;
+- (TranslationRecognizer*)createTranslationRecognizerWithFileInput:(NSString *)path FromLanguage:(NSString *)from ToLanguages:(NSArray *)to;
+- (TranslationRecognizer*)createTranslationRecognizerWithFileInput:(NSString *)path FromLanguage:(NSString *)from ToLanguages:(NSArray *)to WithVoiceOutput:(NSString *)voice;
 
 
 + (SpeechFactory*)fromSubscription:(NSString *)subscription AndRegion:(NSString *)region;

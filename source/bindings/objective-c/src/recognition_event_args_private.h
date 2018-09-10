@@ -12,9 +12,7 @@
 
 @interface RecognitionEventArgs (Private)
 
-// Todo: better opaque pointer in obj-c, or a typedef
-- (instancetype)init: (RecognitionEventType)eventType :(NSString *)sessionId :(NSUInteger)offset;
-- (instancetype)initWithHandle: (RecognitionEventType)eventType :(const SpeechImpl::RecognitionEventArgs&) eventArgsHandle;
+- (instancetype)init: (RecognitionEventType)eventType :(const SpeechImpl::RecognitionEventArgs&) eventArgsHandle;
 
 @end
 

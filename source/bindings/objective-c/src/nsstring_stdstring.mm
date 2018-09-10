@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#import "NSString_STL.h"
+#import "nsstring_stdstring.h"
 
 @implementation NSString (STL)
 

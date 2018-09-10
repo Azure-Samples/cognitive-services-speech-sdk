@@ -5,6 +5,7 @@
 
 #import "speech_factory.h"
 #import "speech_recognizer_private.h"
+#import "translation_recognizer_private.h"
 
 #import "common_private.h"
 
@@ -77,7 +78,7 @@
     }
 }
 
-- (SpeechRecognizer*)createSpeechRecognizerWithDefaultMicrophone
+- (SpeechRecognizer*)createSpeechRecognizer
 {
     try {
         SpeechRecoSharedPtr recoImpl = factoryImpl->CreateSpeechRecognizer();
@@ -96,7 +97,6 @@
 - (SpeechRecognizer*)createSpeechRecognizerWithFileInput:(NSString *)path
 {
     std::string pathString = [path string];
-    
     try
     {
         SpeechRecoSharedPtr recoImpl = factoryImpl->CreateSpeechRecognizerWithFileInputHACKFOROBJECTIVEC(pathString);
@@ -108,6 +108,98 @@
     catch (...)
     {
         // If the exception happens on 
+        // Todo: better error handling.
+        NSLog(@"Exception caught.");
+    }
+    return nil;
+}
+
+- (TranslationRecognizer*)createTranslationRecognizerFromLanguage:(NSString *)from ToLanguages:(NSArray *)to
+{
+    std::vector<std::string> toList;
+    NSEnumerator *it = [to objectEnumerator];
+    NSString* lang;
+    while (lang = [it nextObject]) {
+        toList.push_back([lang string]);
+    }
+
+    try {
+        TranslationRecoSharedPtr recoImpl = factoryImpl->CreateTranslationRecognizer([from string], toList);
+        if (recoImpl == nullptr)
+            return nil;
+        TranslationRecognizer *reco = [[TranslationRecognizer alloc] init :recoImpl];
+        return reco;
+    }
+    catch (...) {
+        // Todo: better error handling.
+        NSLog(@"Exception caught.");
+    }
+    return nil;
+}
+
+- (TranslationRecognizer*)createTranslationRecognizerFromLanguage:(NSString *)from ToLanguages:(NSArray *)to WithVoiceOutput:(NSString *)voice
+{
+    std::vector<std::string> toList;
+    NSEnumerator *it = [to objectEnumerator];
+    NSString* lang;
+    while (lang = [it nextObject]) {
+        toList.push_back([lang string]);
+    }
+
+    try {
+        TranslationRecoSharedPtr recoImpl = factoryImpl->CreateTranslationRecognizer([from string], toList, [voice string]);
+        if (recoImpl == nullptr)
+            return nil;
+        TranslationRecognizer *reco = [[TranslationRecognizer alloc] init :recoImpl];
+        return reco;
+    }
+    catch (...) {
+        // Todo: better error handling.
+        NSLog(@"Exception caught.");
+    }
+    return nil;
+}
+
+- (TranslationRecognizer*)createTranslationRecognizerWithFileInput:(NSString *)path FromLanguage:(NSString *)from ToLanguages:(NSArray *)to
+{
+    std::vector<std::string> toList;
+    NSEnumerator *it = [to objectEnumerator];
+    NSString* lang;
+    while (lang = [it nextObject]) {
+        toList.push_back([lang string]);
+    }
+
+    try {
+        TranslationRecoSharedPtr recoImpl = factoryImpl->CreateTranslationRecognizerWithFileInput([path string], [from string], toList);
+        if (recoImpl == nullptr)
+            return nil;
+        TranslationRecognizer *reco = [[TranslationRecognizer alloc] init :recoImpl];
+        return reco;
+    }
+    catch (...) {
+        // Todo: better error handling.
+        NSLog(@"Exception caught.");
+    }
+    return nil;
+}
+
+- (TranslationRecognizer*)createTranslationRecognizerWithFileInput:(NSString *)path FromLanguage:(NSString *)from ToLanguages:(NSArray *)to WithVoiceOutput:(NSString *)voice
+{
+    std::vector<std::string> toList;
+    NSEnumerator *it = [to objectEnumerator];
+    NSString* lang;
+    while (lang = [it nextObject]) {
+        toList.push_back([lang string]);
+    }
+
+    try {
+        TranslationRecoSharedPtr recoImpl = factoryImpl->CreateTranslationRecognizerWithFileInput([path string], [from string], toList, [voice string]);
+        if (recoImpl == nullptr)
+            return nil;
+        TranslationRecognizer *reco = [[TranslationRecognizer alloc] init :recoImpl];
+        return reco;
+    }
+    catch (...) {
         // Todo: better error handling.
         NSLog(@"Exception caught.");
     }
