@@ -124,7 +124,7 @@
     }
 
     try {
-        TranslationRecoSharedPtr recoImpl = factoryImpl->CreateTranslationRecognizer([from string], toList);
+        TranslationRecoSharedPtr recoImpl = factoryImpl->CreateTranslationRecognizerFromConfig([from string], toList);
         if (recoImpl == nullptr)
             return nil;
         TranslationRecognizer *reco = [[TranslationRecognizer alloc] init :recoImpl];
@@ -147,7 +147,7 @@
     }
 
     try {
-        TranslationRecoSharedPtr recoImpl = factoryImpl->CreateTranslationRecognizer([from string], toList, [voice string]);
+        TranslationRecoSharedPtr recoImpl = factoryImpl->CreateTranslationRecognizerFromConfig([from string], toList, [voice string]);
         if (recoImpl == nullptr)
             return nil;
         TranslationRecognizer *reco = [[TranslationRecognizer alloc] init :recoImpl];
@@ -170,7 +170,7 @@
     }
 
     try {
-        TranslationRecoSharedPtr recoImpl = factoryImpl->CreateTranslationRecognizerWithFileInput([path string], [from string], toList);
+        TranslationRecoSharedPtr recoImpl = factoryImpl->CreateTranslationRecognizerWithFileInputHACKFOROBJECTIVEC([from string], toList,[path string]);
         if (recoImpl == nullptr)
             return nil;
         TranslationRecognizer *reco = [[TranslationRecognizer alloc] init :recoImpl];
@@ -193,7 +193,7 @@
     }
 
     try {
-        TranslationRecoSharedPtr recoImpl = factoryImpl->CreateTranslationRecognizerWithFileInput([path string], [from string], toList, [voice string]);
+        TranslationRecoSharedPtr recoImpl = factoryImpl->CreateTranslationRecognizerWithFileInputHACKFOROBJECTIVEC([from string], toList, [voice string], [path string]);
         if (recoImpl == nullptr)
             return nil;
         TranslationRecognizer *reco = [[TranslationRecognizer alloc] init :recoImpl];

@@ -74,6 +74,8 @@ public:
 
     // TODO: Remove this after Objective-C has proper AudioConfig support
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerWithFileInputHACKFOROBJECTIVEC(const std::string& fileName) = 0;
+    virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithFileInputHACKFOROBJECTIVEC(const std::string& sourceLanguage, const std::vector<std::string>& targetLanguages, const std::string& fileName) = 0;
+    virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithFileInputHACKFOROBJECTIVEC(const std::string& sourceLanguage, const std::vector<std::string>& targetLanguages, const std::string& voice, const std::string& fileName) = 0;
 
     /// <summary>
     /// Creates a SpeechRecognizer for the specified spoken language, using the default microphone as input.
@@ -289,6 +291,18 @@ private:
         {
             auto audioInput = Audio::AudioConfig::FromWavFileInput(fileName);
             return CreateSpeechRecognizerFromConfig(audioInput);
+        }
+
+        virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithFileInputHACKFOROBJECTIVEC(const std::string& sourceLanguage, const std::vector<std::string>& targetLanguages, const std::string& fileName) override
+        {
+            auto audioInput = Audio::AudioConfig::FromWavFileInput(fileName);
+            return CreateTranslationRecognizerFromConfig(sourceLanguage, targetLanguages, audioInput);
+        }
+
+        virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerWithFileInputHACKFOROBJECTIVEC(const std::string& sourceLanguage, const std::vector<std::string>& targetLanguages, const std::string& voice, const std::string& fileName) override
+        {
+            auto audioInput = Audio::AudioConfig::FromWavFileInput(fileName);
+            return CreateTranslationRecognizerFromConfig(sourceLanguage, targetLanguages, voice, audioInput);
         }
 
         virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerFromConfig(const std::string& language) override
