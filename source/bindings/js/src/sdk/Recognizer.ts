@@ -29,7 +29,9 @@ export abstract class Recognizer {
         Contracts.throwIfNull(audioConfig, "audioConfig");
 
         this.audioConfig = audioConfig;
-        this.speechConfig = speechConfig;
+        const speechConfigImpl: SpeechConfigImpl = speechConfig as SpeechConfigImpl;
+
+        this.speechConfig = speechConfigImpl.clone();
 
         this.disposed = false;
     }

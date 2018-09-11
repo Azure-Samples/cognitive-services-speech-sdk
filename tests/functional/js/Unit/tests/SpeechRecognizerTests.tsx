@@ -477,3 +477,36 @@ test("testClose", () => {
     r.close();
     s.close();
 });
+
+test("Config is copied on construction", () => {
+    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    expect(s).not.toBeUndefined();
+    s.language = "en-US";
+
+    const ranVal: string = Math.random().toString();
+    console.error(ranVal);
+    s.setProperty("RandomProperty", ranVal);
+    s.setProperty(sdk.RecognizerParameterNames.TranslationVoice, "en-US-Zira");
+
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
+
+    const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s, config);
+    expect(r).not.toBeUndefined();
+    expect(r instanceof sdk.Recognizer);
+
+    expect(r.language).toEqual("en-US");
+    expect(r.parameters.get("RandomProperty")).toEqual(ranVal);
+    expect(r.parameters.get(sdk.RecognizerParameterNames.TranslationVoice)).toEqual("en-US-Zira");
+
+    // Change them.
+    s.language = "de-DE";
+    s.setProperty("RandomProperty", Math.random.toString());
+    s.setProperty(sdk.RecognizerParameterNames.TranslationVoice, "de-DE-Hedda");
+
+    // Validate no change.
+    expect(r.language).toEqual("en-US");
+    expect(r.parameters.get("RandomProperty")).toEqual(ranVal);
+    expect(r.parameters.get(sdk.RecognizerParameterNames.TranslationVoice)).toEqual("en-US-Zira");
+
+});

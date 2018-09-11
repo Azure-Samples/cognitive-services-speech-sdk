@@ -201,4 +201,9 @@ export class SpeechConfigImpl extends SpeechConfig {
         return this.speechProperties.get(name, def);
     }
 
+    public clone(): SpeechConfigImpl {
+        const ret: SpeechConfigImpl = new SpeechConfigImpl();
+        ret.speechProperties = this.speechProperties.clone();
+        return ret;
+    }
 }
