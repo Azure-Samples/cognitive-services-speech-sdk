@@ -292,7 +292,7 @@ phases:
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsBuild '))
   queue:
     name: Hosted VS2017
-    timeoutInMinutes: 40
+    timeoutInMinutes: 60
     parallel: 4
     matrix:
       x64_debug:

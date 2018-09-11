@@ -32,10 +32,10 @@ class ISpeechFactory
 public:
 
     /// <summary>
-    /// Creates a new factory instance parametrized with an instance of FactoryParameterCollection.
+    /// Creates a new factory instance parametrized with an instance of <see cref="PropertyCollection"/>.
     /// </summary>
     explicit ISpeechFactory(PropertyCollection<SPXFACTORYHANDLE>& parameters) : Parameters(parameters) { }
-    
+
     /// <summary>
     /// Virtual destructor.
     /// </summary>
@@ -61,7 +61,7 @@ class ICognitiveServicesSpeechFactory : public ISpeechFactory
 public:
 
     /// <summary>
-    /// Creates a new factory instance parameterized with an instance of FactoryParameterCollection.
+    /// Creates a new factory instance parametrized with an instance of <see cref="PropertyCollection"/>.
     /// </summary>
     explicit ICognitiveServicesSpeechFactory(PropertyCollection<SPXFACTORYHANDLE>& parameters) : ISpeechFactory(parameters) { }
 
@@ -89,7 +89,7 @@ public:
     /// Creates a SpeechRecognizer, using the specified audio input configuration.
     /// NOTE: Remove this overload once SpeechConfig object exists...
     /// </summary>
-    /// <param name="audioInput">The audio input configuration (e.g. microhone, file, or custom audio input stream).</param>
+    /// <param name="audioInput">The audio input configuration (e.g. microphone, file, or custom audio input stream).</param>
     /// <returns>A shared pointer to SpeechRecognizer</returns>
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerFromConfig(std::shared_ptr<Audio::AudioConfig> audioInput) = 0;
 
@@ -98,7 +98,7 @@ public:
     /// NOTE: Remove this overload once SpeechConfig object exists...
     /// </summary>
     /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
-    /// <param name="audioInput">The audio input configuration (e.g. microhone, file, or custom audio input stream).</param>
+    /// <param name="audioInput">The audio input configuration (e.g. microphone, file, or custom audio input stream).</param>
     /// <returns>A shared pointer to SpeechRecognizer</returns>
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerFromConfig(const std::string& language, std::shared_ptr<Audio::AudioConfig> audioInput) = 0;
 
@@ -117,7 +117,7 @@ public:
     /// </summary>
     /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
     /// <param name="format">Output format.</param>
-    /// <param name="audioInput">The audio input configuration (e.g. microhone, file, or custom audio input stream).</param>
+    /// <param name="audioInput">The audio input configuration (e.g. microphone, file, or custom audio input stream).</param>
     /// <returns>A shared pointer to SpeechRecognizer</returns>
     virtual std::shared_ptr<Speech::SpeechRecognizer> CreateSpeechRecognizerFromConfig(const std::string& language, OutputFormat format, std::shared_ptr<Audio::AudioConfig> audioInput) = 0;
 
@@ -138,7 +138,7 @@ public:
     /// Creates an IntentRecognizer, using the specified audio input configuration.
     /// NOTE: Remove this overload once SpeechConfig object exists...
     /// </summary>
-    /// <param name="audioInput">The audio input configuration (e.g. microhone, file, or custom audio input stream).</param>
+    /// <param name="audioInput">The audio input configuration (e.g. microphone, file, or custom audio input stream).</param>
     /// <returns>A shared pointer to IntentRecognizer</returns>
     virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerFromConfig(std::shared_ptr<Audio::AudioConfig> audioInput) = 0;
 
@@ -147,7 +147,7 @@ public:
     /// NOTE: Remove this overload once SpeechConfig object exists...
     /// </summary>
     /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
-    /// <param name="audioInput">The audio input configuration (e.g. microhone, file, or custom audio input stream).</param>
+    /// <param name="audioInput">The audio input configuration (e.g. microphone, file, or custom audio input stream).</param>
     /// <returns>A shared pointer to IntentRecognizer</returns>
     virtual std::shared_ptr<Intent::IntentRecognizer> CreateIntentRecognizerFromConfig(const std::string& language, std::shared_ptr<Audio::AudioConfig> audioInput) = 0;
 
@@ -155,7 +155,7 @@ public:
     /// Creates an IntentRecognizer for the specified spoken language, using the specified audio input configuration.
     /// NOTE: Remove this overload once SpeechConfig object exists...
     /// </summary>
-    /// <param name="audioInput">The audio input configuration (e.g. microhone, file, or custom audio input stream).</param>
+    /// <param name="audioInput">The audio input configuration (e.g. microphone, file, or custom audio input stream).</param>
     /// <param name="language">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
     /// <param name="format">Output format.</param>
     /// <returns>A shared pointer to IntentRecognizer</returns>
@@ -183,17 +183,17 @@ public:
     /// </summary>
     /// <param name="sourceLanguage">The spoken language of the audio input in BCP-47 format.</param>
     /// <param name="targetLanguages">A list of target languages of translation in BCP-47 format.</param>
-    /// <param name="audioInput">The audio input configuration (e.g. microhone, file, or custom audio input stream).</param>
+    /// <param name="audioInput">The audio input configuration (e.g. microphone, file, or custom audio input stream).</param>
     /// <returns>A shared pointer to TranslationRecognizer</returns>
     virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerFromConfig(const std::string& sourceLanguage, const std::vector<std::string>& targetLanguages, std::shared_ptr<Audio::AudioConfig> audioInput) = 0;
-        
+
     /// <summary>
     /// Creates a TranslationRecognizer, using the specified pair of source/target languages and the specified audio input configuration.
     /// </summary>
     /// <param name="sourceLanguage">The spoken language of the audio input in BCP-47 format.</param>
     /// <param name="targetLanguages">A list of target languages of translation in BCP-47 format.</param>
     /// <param name="voice">Specifies the name of voice tag if a synthesized audio output is desired.</param>
-    /// <param name="audioInput">The audio input configuration (e.g. microhone, file, or custom audio input stream).</param>
+    /// <param name="audioInput">The audio input configuration (e.g. microphone, file, or custom audio input stream).</param>
     /// <returns>A shared pointer to TranslationRecognizer</returns>
     virtual std::shared_ptr<Translation::TranslationRecognizer> CreateTranslationRecognizerFromConfig(const std::string& sourceLanguage, const std::vector<std::string>& targetLanguages, const std::string& voice, std::shared_ptr<Audio::AudioConfig> audioInput) = 0;
 
@@ -251,8 +251,8 @@ public:
     /// Creates an instance of the speech factory with specified endpoint and subscription.
     /// This method is intended only for users who use a non-standard service endpoint.
     /// Note: The query parameters specified in the endpoint URL are not changed, even if they are set by any other APIs.
-    /// For example, if language is defined in uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
-    /// the language setting in uri takes precedence, and the effective language is "de-DE".
+    /// For example, if language is defined in URI as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
+    /// the language setting in URI takes precedence, and the effective language is "de-DE".
     /// Only the parameters that are not specified in the endpoint URL can be set by other APIs.
     /// </summary>
     /// <param name="endpoint">The service endpoint to connect to.</param>
