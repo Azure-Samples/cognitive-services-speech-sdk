@@ -27,13 +27,8 @@
         <td><button id="startRecognizeAsyncButton">Start Recognition</button></td>
       </tr>
       <tr>
-        <td></td>
-        <td>
-          <table>
-            <tr><td>Results:</td></tr>
-            <tr><td><textarea id="phraseDiv" style="display: inline-block;width:500px;height:200px"></textarea></td></tr>
-          </table>
-        </td>
+        <td align="right">Results</td>
+        <td><textarea id="phraseDiv" style="display: inline-block;width:500px;height:200px"></textarea></td>
       </tr>
     </table>
   </div>
@@ -164,7 +159,6 @@
         SpeechSDK = speechSdk;
         startRecognizeAsyncButton.disabled = false;
 
-        // in case we have an authorization function, call it.
         // in case we have an authorization function, call it.
         if (typeof RequestAuthorizationToken === "function") {
             RequestAuthorizationToken();

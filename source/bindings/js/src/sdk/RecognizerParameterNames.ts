@@ -9,13 +9,13 @@
  */
  export class RecognizerParameterNames {
      /**
-      * The name of parameter `SpeechRpsToken`
+      * The name of parameter `SpeechRpsToken`.
       * @property
       */
      public static SpeechRpsToken: string = "SPEECH-RpsToken";
 
      /**
-      * The name of parameter `SpeechModelId`
+      * The name of parameter `SpeechModelId`.
       * @property
       */
      public static SpeechModelId: string = "SPEECH-ModelId";
@@ -27,7 +27,7 @@
      public static SpeechRecognitionLanguage: string = "SPEECH-RecoLanguage";
 
      /**
-      * The name of parameter `RecognitionMode`.
+      * The name of parameter `SpeechRecognitionMode`.
       * @property
       */
      public static SpeechRecognitionMode: string = "SPEECH-RecoMode";
@@ -39,37 +39,37 @@
      public static OutputFormat: string = "SPEECH-OutputFormat";
 
      /**
-      * The name of parameter `TRANSLATION-FromLanguage` which describes the source language of audio.
+      * The name of parameter `TranslationFromLanguage` which describes the source language of audio.
       * @property
       */
      public static TranslationFromLanguage: string = "TRANSLATION-FromLanguage";
 
      /**
-      * The name of parameter `TRANSLATION-ToLanguage` which describes target languages for translation.
+      * The name of parameter `TranslationToLanguage` which describes target languages for translation.
       * @property
       */
      public static TranslationToLanguage: string = "TRANSLATION-ToLanguage";
 
     /**
-     * The name of parameter `TRANSLATION-Voice` which describes the name of output voice in translation.
+     * The name of parameter `TranslationVoice` which describes the name of output voice in translation.
      * @property
      */
     public static TranslationVoice: string = "TRANSLATION-Voice";
 
     /**
-     * The name of parameter `Region`
+     * The name of parameter `Region`.
      * @property
      */
     public static Region: string = "SPEECH-Region";
 
     /**
-     * The name of parameter `SpeechSubscriptionKey`
+     * The name of parameter `SubscriptionKey`.
      * @property
      */
     public static SubscriptionKey: string = "SPEECH-SubscriptionKey";
 
     /**
-     * The name of parameter `SpeechAuthToken`
+     * The name of parameter `AuthorizationToken`
      * @property
      */
     public static AuthorizationToken: string = "SPEECH-AuthToken";

@@ -7,21 +7,29 @@ import { Contracts } from "./Contracts";
 import { RecognizerParameterNames } from "./Exports";
 import { ISpeechProperties } from "./ISpeechProperties";
 
+/**
+ * Speech configuration.
+ * @class
+ */
 export abstract class SpeechConfig {
+    /**
+     * Creates and initializes an instance.
+     * @constructor
+     */
     protected constructor() { }
 
     /**
      * Static instance of SpeechConfig returned by passing subscriptionKey and service region.
+     * @member
      * @param subscriptionKey The subscription key.
      * @param region The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
-     * @return The speech factory
+     * @returns The speech factory
      */
     public static fromSubscription(subscriptionKey: string, region: string): SpeechConfig {
         Contracts.throwIfNullOrWhitespace(subscriptionKey, "subscriptionKey");
         Contracts.throwIfNullOrWhitespace(region, "region");
 
         const speechImpl: SpeechConfigImpl = new SpeechConfigImpl();
-
         speechImpl.setProperty(RecognizerParameterNames.Region, region);
         speechImpl.setProperty(RecognizerParameterNames.SubscriptionKey, subscriptionKey);
 
@@ -31,48 +39,98 @@ export abstract class SpeechConfig {
     /**
      * Creates an instance of the speech factory with specified endpoint and subscription key.
      * This method is intended only for users who use a non-standard service endpoint or paramters.
-     * Note: The query parameters specified in the endpoint URL are not changed, even if they are set by any other APIs.
-     * For example, if language is defined in the uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
      * the language setting in uri takes precedence, and the effective language is "de-DE".
+     * @member
      * @param endpoint The service endpoint to connect to.
      * @param subscriptionKey The subscription key.
-     * @return A speech factory instance.
+     * @returns A speech factory instance.
      */
     public static fromEndpoint(endpoint: URL, subscriptionKey: string): SpeechConfig {
         Contracts.throwIfNull(endpoint, "endpoint");
         Contracts.throwIfNullOrWhitespace(subscriptionKey, "subscriptionKey");
-        const speechImpl: SpeechConfigImpl = new SpeechConfigImpl();
 
+        const speechImpl: SpeechConfigImpl = new SpeechConfigImpl();
         speechImpl.setProperty(RecognizerParameterNames.Endpoint, endpoint.href);
         speechImpl.setProperty(RecognizerParameterNames.SubscriptionKey, subscriptionKey);
         return speechImpl;
     }
 
+    /**
+     * Creates an instance of the speech factory with specified initial authorization token and region.
+     * @param authorizationToken The initial authorization token.
+     * @param region The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
+     * @returns A speech factory instance.
+     */
+    public static fromAuthorizationToken(authorizationToken: string, region: string): SpeechConfig {
+        Contracts.throwIfNull(authorizationToken, "authorizationToken");
+        Contracts.throwIfNullOrWhitespace(region, "region");
+
+        const speechImpl: SpeechConfigImpl = new SpeechConfigImpl();
+        speechImpl.setProperty(RecognizerParameterNames.Region, region);
+        speechImpl.authorizationToken = authorizationToken;
+        return speechImpl;
+    }
+
+    /**
+     * Returns the subscription key.
+     * @property
+     */
     public abstract get subscriptionKey(): string;
 
+    /**
+     * Returns the current region.
+     * @property
+     */
     public abstract get region(): string;
 
+    /**
+     * Returns the current authorization token.
+     * @property
+     */
     public abstract get authorizationToken(): string;
 
     /**
      * Sets the authorization token.
      * If this is set, subscription key is ignored.
      * User needs to make sure the provided authorization token is valid and not expired.
+     * @property
      * @param value the authorization token.
      */
     public abstract set authorizationToken(value: string);
 
+    /**
+     * Returns the configured language.
+     * @property
+     */
     public abstract get language(): string;
+
     /**
      * Sets the input language.
+     * @property
      * @param value the authorization token.
      */
     public abstract set language(vale: string);
 
+    /**
+     * Sets an arbitrary property.
+     * @member
+     * @param name - The name of the property to set.
+     * @param value - The new value of the property.
+     */
     public abstract setProperty(name: string, value: string): void;
 
+    /**
+     * Returns the current value of an arbitrary property.
+     * @param name - The name of the property to query.
+     * @param def - The value to return in case the property is not known.
+     * @returns The current value, or provided default, of the given property.
+     */
     public abstract getProperty(name: string, def?: string): string;
 
+    /**
+     * Closes the configuration.
+     * @member
+     */
     /* tslint:disable:no-empty */
     public close(): void { }
 }

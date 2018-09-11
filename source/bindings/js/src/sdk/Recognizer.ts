@@ -26,8 +26,8 @@ export abstract class Recognizer {
      */
     protected constructor(speechConfig: SpeechConfig, audioConfig: AudioConfig) {
         Contracts.throwIfNull(speechConfig as SpeechConfigImpl, "speechConfig");
+        Contracts.throwIfNull(audioConfig, "audioConfig");
 
-        // Note: Since ais is optional, no test for null reference
         this.audioConfig = audioConfig;
         this.speechConfig = speechConfig;
 

@@ -71,8 +71,9 @@ test.skip("testFromEndpoint4", () => {
     expect(() => sdk.SpeechConfig.fromEndpoint(new URL("http://www.example.com"), "illegal-subscription")).toThrowError();
 });
 
-test("testFromEndpointSuccess", () => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromEndpoint(new URL("http://www.example.com"), Settings.SpeechSubscriptionKey);
+// TODO use an endpoint that we control so the subscription key is not leaked!
+test.skip("testFromEndpointSuccess", () => {
+    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromEndpoint(new URL("http://www.example.com"), "Settings.SpeechSubscriptionKey");
 
     expect(s).not.toBeUndefined();
 

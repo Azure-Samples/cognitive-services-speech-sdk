@@ -26,7 +26,7 @@ export class TranslationConnectionFactory implements IConnectionFactory {
 
         let endpoint: string = config.SpeechConfig.getProperty(RecognizerParameterNames.Endpoint, undefined);
         if (!endpoint) {
-            const region: string = config.SpeechConfig.getProperty(RecognizerParameterNames.Region, "westus");
+            const region: string = config.SpeechConfig.getProperty(RecognizerParameterNames.Region, undefined);
 
             endpoint = this.Host(region) + Storage.Local.GetOrAdd("TranslationRelativeUri", "/speech/translation/cognitiveservices/v1");
         }

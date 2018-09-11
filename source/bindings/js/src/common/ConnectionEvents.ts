@@ -48,7 +48,7 @@ export class ConnectionClosedEvent extends ConnectionEvent {
     private statusCode: number;
 
     constructor(connectionId: string, statusCode: number, reason: string) {
-        super("ConnectionClosedEvent", connectionId, EventType.Warning);
+        super("ConnectionClosedEvent", connectionId, EventType.Debug);
         this.reason = reason;
         this.statusCode = statusCode;
     }

@@ -4,7 +4,7 @@
 //
 
 /**
- * Defines recognition status.
+ * Defines translation status.
  */
 export enum TranslationStatus {
     Success = 0,

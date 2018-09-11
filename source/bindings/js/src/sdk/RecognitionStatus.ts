@@ -34,7 +34,7 @@
     InitialBabbleTimeout,
 
     /**
-     * Indicates that an error occurred during recognition. The getErrorDetails() method returns detailed error reasons.
+     * Indicates that an error occurred during recognition.
      */
     Canceled,
 }

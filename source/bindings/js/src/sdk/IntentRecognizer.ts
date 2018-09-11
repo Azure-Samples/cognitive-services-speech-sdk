@@ -9,7 +9,7 @@ import { AudioConfig, AudioInputStream, IntentRecognitionResult, IntentRecogniti
 import { SpeechConfigImpl } from "./SpeechConfig";
 
 /**
- * Intent recognizer
+ * Intent recognizer.
  * @class
  */
 export class IntentRecognizer extends Recognizer {

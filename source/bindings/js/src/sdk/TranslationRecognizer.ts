@@ -133,8 +133,8 @@ export class TranslationRecognizer extends Recognizer {
 
     /**
      * Starts recognition and translation, and stops after the first utterance is recognized. The task returns the translation text as result.
-     * Note: RecognizeAsync() returns when the first utterance has been recognized, so it is suitableonly
-     *       for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
+     * Note: recognizeAsync returns when the first utterance has been recognized, so it is suitableonly
+     *       for single shot recognition like command or query. For long-running recognition, use startContinuousRecognitionAsync() instead.
      * @member
      * @param cb - Callback that received the result when the translation has completed.
      * @param err - Callback invoked in case of an error.
@@ -265,7 +265,7 @@ export class TranslationRecognizer extends Recognizer {
     }
 
     /**
-     * Starts recognition and translation on a continuous audio stream, until StopContinuousRecognitionAsync() is called.
+     * Starts recognition and translation on a continuous audio stream, until stopContinuousRecognitionAsync() is called.
      * User must subscribe to events to receive translation results.
      * @member
      * @param cb - Callback that received the translation has started.
@@ -321,11 +321,6 @@ export class TranslationRecognizer extends Recognizer {
         Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
         Contracts.throwIfNull(model, "model");
 
-        //  return s_executorService.submit(() -> {
-        //          recoImpl.StartKeywordRecognitionAsync(model.getModelImpl());
-        //          return null;
-        //      });
-
         this.implCloseExistingRecognizer();
         throw new Error("not supported");
     }
@@ -339,11 +334,6 @@ export class TranslationRecognizer extends Recognizer {
      */
     public stopKeywordRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
         Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
-
-        //  return s_executorService.submit(() -> {
-        //          recoImpl.StopKeywordRecognitionAsync();
-        //          return null;
-        //      });
 
         this.implCloseExistingRecognizer();
         throw new Error("not supported");

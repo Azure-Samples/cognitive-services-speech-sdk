@@ -28,7 +28,7 @@ export class SpeechConnectionFactory implements IConnectionFactory {
 
         let endpoint: string = config.SpeechConfig.getProperty(RecognizerParameterNames.Endpoint, undefined);
         if (!endpoint) {
-            const region: string = config.SpeechConfig.getProperty(RecognizerParameterNames.Region, "westus");
+            const region: string = config.SpeechConfig.getProperty(RecognizerParameterNames.Region, undefined);
 
             switch (config.RecognitionMode) {
                 case RecognitionMode.Conversation:

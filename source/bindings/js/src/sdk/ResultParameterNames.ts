@@ -4,7 +4,7 @@
 //
 
 /**
- * Defines constants used in speech recognition and translation.
+ * Defines constants used in speech recognition, intent, and translation.
  * @class
  */
 export class ResultParameterNames {

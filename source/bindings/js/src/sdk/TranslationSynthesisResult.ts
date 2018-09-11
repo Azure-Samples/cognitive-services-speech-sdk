@@ -12,7 +12,7 @@ export class TranslationSynthesisResult {
     /**
      * Translated text in the target language.
      * @property
-     * @returns Translated text in the target language.
+     * @returns Translated audio in the target language.
      */
     public audio: Uint8Array;
 
