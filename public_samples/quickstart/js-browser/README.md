@@ -12,7 +12,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 ## Build the sample
 
-> Note: more detailed step-by-step instructions are available [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-javascript).
+> Note: more detailed step-by-step instructions are available [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-js-browser).
 
 * **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
 * [Download the sample code to your development PC.](../../README.md#get-the-samples)
