@@ -203,7 +203,6 @@
         var sdkStartContinousRecognitionBtn, sdkStopContinousRecognitionBtn;
         var sdkStartContinousTranslationBtn, sdkStopContinousTranslationBtn;
         var sdkStartRecognizeAsyncBtn, sdkStopRecognizeAsyncBtn, languageTargetOptions, voiceOutput;
-        var speechSdkRecognizer;
         var audioFile, audioFileValid;
         var soundContext = new AudioContext();
 
@@ -237,13 +236,11 @@
                 phraseDiv.innerHTML = "";
                 statusDiv.innerHTML = "";
 
-                speechSdkRecognizer = SDK.SpeechFactory.fromSubscription(key.value, regionOptions.value);
+                var audioConfig = audioFileValid ? SDK.AudioConfig.fromWavFileInput(audioFile) : SDK.AudioConfig.fromDefaultMicrophoneInput();
+                var speechConfig = SDK.SpeechConfig.fromSubscription(key.value, regionOptions.value);
 
-                if (!audioFileValid) {
-                    reco = speechSdkRecognizer.createSpeechRecognizerWithLanguage(languageOptions.value);
-                } else {
-                    reco = speechSdkRecognizer.createSpeechRecognizerWithStreamAndLanguage(audioFile, languageOptions.value);
-                }
+                speechConfig.language = languageOptions.value;
+                reco = new SDK.SpeechRecognizer(speechConfig, audioConfig);
 
                 reco.IntermediateResultReceived = function (s, e) {
                     window.console.log(e);
@@ -299,22 +296,17 @@
                 phraseDiv.innerHTML = "";
                 statusDiv.innerHTML = "";
 
-                speechSdkRecognizer = SDK.SpeechFactory.fromSubscription(key.value, regionOptions.value);
+                var audioConfig = audioFileValid ? SDK.AudioConfig.fromWavFileInput(audioFile) : SDK.AudioConfig.fromDefaultMicrophoneInput();
+                var speechConfig = SDK.SpeechConfig.fromSubscription(key.value, regionOptions.value);
 
-                if (!voiceOutput.checked) {
-                    if (!audioFileValid) {
-                        reco = speechSdkRecognizer.createTranslationRecognizer(languageOptions.value, [languageOptions.value, languageTargetOptions.value]);
-                    } else {
-                        reco = speechSdkRecognizer.createTranslationRecognizerWithStream(audioFile, languageOptions.value, [languageOptions.value, languageTargetOptions.value]);
-                    }
+                speechConfig.language = languageOptions.value;
+                speechConfig.setProperty(SDK.RecognizerParameterNames.TranslationFromLanguage, languageOptions.value);
+                speechConfig.setProperty(SDK.RecognizerParameterNames.TranslationToLanguage, [languageOptions.value, languageTargetOptions.value]);
+                if (voiceOutput.checked) {
+                    speechConfig.setProperty(SDK.RecognizerParameterNames.TranslationVoice, "en-US-Zira");
                 }
-                else {
-                    if (!audioFileValid) {
-                        reco = speechSdkRecognizer.createTranslationRecognizerWithVoice(languageOptions.value, [languageOptions.value, languageTargetOptions.value], "en-US-Zira");
-                    } else {
-                        reco = speechSdkRecognizer.createTranslationRecognizerWithStreamAndVoice(audioFile, languageOptions.value, [languageOptions.value, languageTargetOptions.value], "en-US-Zira");
-                    }
-                }
+
+                reco = new SDK.TranslationRecognizer(speechConfig, audioConfig);
 
                 reco.IntermediateResultReceived = function (s, e) {
                     window.console.log(e);
@@ -385,13 +377,11 @@
                 phraseDiv.innerHTML = "";
                 statusDiv.innerHTML = "";
 
-                speechSdkRecognizer = SDK.SpeechFactory.fromSubscription(key.value, regionOptions.value);
+                var audioConfig = audioFileValid ? SDK.AudioConfig.fromWavFileInput(audioFile) : SDK.AudioConfig.fromDefaultMicrophoneInput();
+                var speechConfig = SDK.SpeechConfig.fromSubscription(key.value, regionOptions.value);
 
-                if (!audioFileValid) {
-                    reco = speechSdkRecognizer.createSpeechRecognizerWithLanguage(languageOptions.value);
-                } else {
-                    reco = speechSdkRecognizer.createSpeechRecognizerWithStreamAndLanguage(audioFile, languageOptions.value);
-                }
+                speechConfig.language = languageOptions.value;
+                reco = new SDK.SpeechRecognizer(speechConfig, audioConfig);
 
                 reco.IntermediateResultReceived = function (s, e) {
                     window.console.log(e);

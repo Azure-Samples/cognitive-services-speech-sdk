@@ -1,6 +1,6 @@
 {
-  "name": "microsoft-speech-browser-sdk",
-  "version": "0.0.12",
+  "name": "microsoft-speech-sdk-js-browser",
+  "version": "0.7.0",
   "description": "Microsoft Speech SDK for browsers",
   "main": "distrib/Speech.Browser.Sdk.js",
   "types": "distrib/speech.browser.sdk.d.ts",
@@ -17,11 +17,11 @@
     "speechtotext"
   ],
   "bugs": {
-    "url": "https://github.com/Azure-Samples/SpeechToText-WebSockets-Javascript/issues"
+    "url": "https://msasg.visualstudio.com/DefaultCollection/Skyman/_git/Carbon"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Azure-Samples/SpeechToText-WebSockets-Javascript.git"
+    "url": "https://msasg.visualstudio.com/DefaultCollection/Skyman/_git/Carbon"
   },
   "author": "Microsoft",
   "license": "MIT",

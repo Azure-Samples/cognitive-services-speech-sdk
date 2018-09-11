@@ -13,13 +13,13 @@ beforeEach(() => {
 });
 
 test("testRecognizer1", () => {
-    const s = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    const s = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
     const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
     const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
-    const r = s.createIntentRecognizerWithFileInput(config);
+    const r = new sdk.IntentRecognizer(s, config);
     expect(r).not.toBeUndefined();
     expect(r instanceof sdk.Recognizer);
 
@@ -28,13 +28,13 @@ test("testRecognizer1", () => {
 });
 
 test("testRecognizer2", () => {
-    const s = sdk.SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    const s = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
     const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
     const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
-    const r = s.createSpeechRecognizerFromConfig(config);
+    const r = new sdk.SpeechRecognizer(s, config);
     expect(r).not.toBeUndefined();
     expect(r instanceof sdk.Recognizer);
 

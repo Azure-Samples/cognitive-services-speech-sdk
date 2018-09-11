@@ -6,4 +6,4 @@ import { Events, Storage } from "./src/common/Exports";
 Events.Instance.AttachListener(new ConsoleLoggingListener());
 
 // Speech SDK API
-export * from "./src/sdk/speech.browser/Exports";
+export * from "./src/sdk/Exports";
