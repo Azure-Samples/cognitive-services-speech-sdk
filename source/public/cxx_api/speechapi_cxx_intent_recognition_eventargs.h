@@ -50,7 +50,7 @@ public:
         SPX_THROW_ON_FAIL(Recognizer_EventHandle_Close(m_hevent));
     };
 
-#ifdef SWIG
+#if defined(SWIG) || defined(BINDING_OBJECTIVE_C)
 private:
 #endif
     /// <summary>
@@ -58,10 +58,10 @@ private:
     /// </summary>
     const IntentRecognitionResult& Result;
 
-#ifndef SWIG
-private:
-#else
+#if defined(SWIG) || defined(BINDING_OBJECTIVE_C)
 public:
+#else
+private:
 #endif
     /// <summary>
     /// Intent recognition event result.

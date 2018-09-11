@@ -3,17 +3,17 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#ifndef speech_recognition_result_h
-#define speech_recognition_result_h
+#ifndef intent_recognition_result_h
+#define intent_recognition_result_h
 
 #import <Foundation/Foundation.h>
 #import "recognition_status.h"
 #import "recognition_result_base.h"
 
-@interface SpeechRecognitionResult : RecognitionResultBase
+@interface IntentRecognitionResult : RecognitionResultBase
 
-// Currently same as RecognitionResultBase.
+@property (readonly) NSString* intentId;
 
 @end
 
-#endif /* speech_recognition_result_h */
+#endif /* intent_recognition_result_h */

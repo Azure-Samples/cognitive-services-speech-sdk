@@ -3,8 +3,8 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#ifndef speechrecognizer_private_h
-#define speechrecognizer_private_h
+#ifndef speech_recognizer_private_h
+#define speech_recognizer_private_h
 
 #import "speech_recognizer.h"
 #import "common_private.h"
@@ -13,8 +13,8 @@
 
 - (instancetype)init :(SpeechRecoSharedPtr)recoHandle;
 
-- (void)onFinalResultEvent :(SpeechRecognitionResultEventArgs *)eventArgs;
-- (void)onIntermediateResultEvent :(SpeechRecognitionResultEventArgs *)eventArgs;
+- (void)onFinalResultEvent :(SpeechRecognitionEventArgs *)eventArgs;
+- (void)onIntermediateResultEvent :(SpeechRecognitionEventArgs *)eventArgs;
 
 @end
-#endif /* speechrecognizer_private_h */
+#endif /* speech_recognizer_private_h */

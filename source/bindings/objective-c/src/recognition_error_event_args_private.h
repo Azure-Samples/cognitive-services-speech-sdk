@@ -7,7 +7,6 @@
 #define recognition_error_event_args_private_h
 
 #import "recognition_error_event_args.h"
-
 #import "common_private.h"
 
 @interface RecognitionErrorEventArgs (Private)

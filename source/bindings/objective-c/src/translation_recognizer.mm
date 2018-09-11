@@ -6,9 +6,9 @@
 #import "recognizer_private.h"
 #import "translation_recognizer_private.h"
 #import "translation_text_result_private.h"
-#import "translation_text_result_event_args_private.h"
+#import "translation_text_event_args_private.h"
 #import "translation_synthesis_result_private.h"
-#import "translation_synthesis_result_event_args_private.h"
+#import "translation_synthesis_event_args_private.h"
 #import "session_event_args_private.h"
 #import "recognition_event_args_private.h"
 #import "recognition_error_event_args_private.h"
@@ -30,7 +30,7 @@ struct TranslationEventHandlerHelper
         NSLog(@"Add FinalResultEventHandler");
         recoImpl->FinalResult.Connect([this] (const TranslationImpl::TranslationTextResultEventArgs& e)
             {
-                TranslationTextResultEventArgs *eventArgs = [[TranslationTextResultEventArgs alloc] init: e];
+                TranslationTextEventArgs *eventArgs = [[TranslationTextEventArgs alloc] init: e];
                 [recognizer onFinalResultEvent: eventArgs];
             });
     }
@@ -40,7 +40,7 @@ struct TranslationEventHandlerHelper
         NSLog(@"Add IntermediateResultEventHandler");
         recoImpl->IntermediateResult.Connect([this] (const TranslationImpl::TranslationTextResultEventArgs& e)
             {
-                TranslationTextResultEventArgs *eventArgs = [[TranslationTextResultEventArgs alloc] init: e];
+                TranslationTextEventArgs *eventArgs = [[TranslationTextEventArgs alloc] init: e];
                 [recognizer onIntermediateResultEvent: eventArgs];
             });
     }
@@ -50,7 +50,7 @@ struct TranslationEventHandlerHelper
         NSLog(@"Add SynthesisResultEventHandler");
         recoImpl->TranslationSynthesisResultEvent.Connect([this] (const TranslationImpl::TranslationSynthesisResultEventArgs& e)
             {
-                TranslationSynthesisResultEventArgs *eventArgs = [[TranslationSynthesisResultEventArgs alloc] init: e];
+                TranslationSynthesisEventArgs *eventArgs = [[TranslationSynthesisEventArgs alloc] init: e];
                 [recognizer onSynthesisResultEvent: eventArgs];
             });
     }
@@ -277,7 +277,7 @@ struct TranslationEventHandlerHelper
     }
 }
 
-- (void)onFinalResultEvent:(TranslationTextResultEventArgs *)eventArgs
+- (void)onFinalResultEvent:(TranslationTextEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onFinalResultEvent");
     NSArray* workCopyOfList;
@@ -286,12 +286,12 @@ struct TranslationEventHandlerHelper
     [arrayLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
-            ((TranslationTextResultEventHandlerBlock)handle)(self, eventArgs);
+            ((TranslationTextEventHandlerBlock)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)onIntermediateResultEvent:(TranslationTextResultEventArgs *)eventArgs
+- (void)onIntermediateResultEvent:(TranslationTextEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onIntermediateResultEvent");
     NSArray* workCopyOfList;
@@ -300,12 +300,12 @@ struct TranslationEventHandlerHelper
     [arrayLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
-            ((TranslationTextResultEventHandlerBlock)handle)(self, eventArgs);
+            ((TranslationTextEventHandlerBlock)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)onSynthesisResultEvent:(TranslationSynthesisResultEventArgs *)eventArgs
+- (void)onSynthesisResultEvent:(TranslationSynthesisEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onSynthesisResultEvent");
     NSArray* workCopyOfList;
@@ -314,12 +314,12 @@ struct TranslationEventHandlerHelper
     [arrayLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
-            ((TranslationSynthesisResultEventHandlerBlock)handle)(self, eventArgs);
+            ((TranslationSynthesisEventHandlerBlock)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)addFinalResultEventListener:(TranslationTextResultEventHandlerBlock)eventHandler
+- (void)addFinalResultEventListener:(TranslationTextEventHandlerBlock)eventHandler
 {
     [arrayLock lock];
     [finalResultEventListenerList addObject:eventHandler];
@@ -327,7 +327,7 @@ struct TranslationEventHandlerHelper
     return;
 }
 
-- (void)addIntermediateResultEventListener:(TranslationTextResultEventHandlerBlock)eventHandler
+- (void)addIntermediateResultEventListener:(TranslationTextEventHandlerBlock)eventHandler
 {
     [arrayLock lock];
     [intermediateResultEventListenerList addObject:eventHandler];
@@ -336,7 +336,7 @@ struct TranslationEventHandlerHelper
 }
 
 
-- (void)addSynthesisResultEventListener:(TranslationSynthesisResultEventHandlerBlock)eventHandler
+- (void)addSynthesisResultEventListener:(TranslationSynthesisEventHandlerBlock)eventHandler
 {
     [arrayLock lock];
     [synthesisResultEventListenerList addObject:eventHandler];

@@ -3,11 +3,11 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#ifndef speechrecognitionresult_private_h
-#define speechrecognitionresult_private_h
+#ifndef speech_recognition_result_private_h
+#define speech_recognition_result_private_h
 
 #import "speech_recognition_result.h"
-
+#import "recognition_result_base_private.h"
 #import "common_private.h"
 
 @interface SpeechRecognitionResult (Private)
@@ -18,4 +18,4 @@
 
 @end
 
-#endif /* speechrecognitionresult_private_h */
+#endif /* speech_recognition_result_private_h */

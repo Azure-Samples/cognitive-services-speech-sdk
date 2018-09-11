@@ -6,7 +6,7 @@
 #import "speech_factory.h"
 #import "speech_recognizer_private.h"
 #import "translation_recognizer_private.h"
-
+#import "intent_recognizer_private.h"
 #import "common_private.h"
 
 @implementation SpeechFactory
@@ -103,6 +103,42 @@
         if (recoImpl == nullptr)
             return nil;
         SpeechRecognizer *reco = [[SpeechRecognizer alloc] init :recoImpl];
+        return reco;
+    }
+    catch (...)
+    {
+        // If the exception happens on 
+        // Todo: better error handling.
+        NSLog(@"Exception caught.");
+    }
+    return nil;
+}
+
+- (IntentRecognizer*)createIntentRecognizer
+{
+    try {
+        IntentRecoSharedPtr recoImpl = factoryImpl->CreateIntentRecognizer();
+        if (recoImpl == nullptr)
+            return nil;
+        IntentRecognizer *reco = [[IntentRecognizer alloc] init :recoImpl];
+        return reco;
+    }
+    catch (...) {
+        // Todo: better error handling.
+        NSLog(@"Exception caught.");
+    }
+    return nil;
+}
+
+- (IntentRecognizer*)createIntentRecognizerWithFileInput:(NSString *)path
+{
+    std::string pathString = [path string];
+    try
+    {
+        IntentRecoSharedPtr recoImpl = factoryImpl->CreateIntentRecognizerWithFileInputHACKFOROBJECTIVEC(pathString);
+        if (recoImpl == nullptr)
+            return nil;
+        IntentRecognizer *reco = [[IntentRecognizer alloc] init :recoImpl];
         return reco;
     }
     catch (...)

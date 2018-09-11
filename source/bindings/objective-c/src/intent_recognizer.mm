@@ -4,20 +4,20 @@
 //
 
 #import "recognizer_private.h"
-#import "speech_recognizer_private.h"
-#import "speech_recognition_result_private.h"
-#import "speech_recognition_event_args_private.h"
+#import "intent_recognizer_private.h"
+#import "intent_recognition_result_private.h"
+#import "intent_recognition_event_args_private.h"
 #import "session_event_args_private.h"
 #import "recognition_event_args_private.h"
 #import "recognition_error_event_args_private.h"
 #import "common_private.h"
 
-struct SpeechEventHandlerHelper
+struct IntentEventHandlerHelper
 {
-    SpeechRecognizer *recognizer;
-    SpeechRecoSharedPtr recoImpl;
+    IntentRecognizer *recognizer;
+    IntentRecoSharedPtr recoImpl;
 
-    SpeechEventHandlerHelper(SpeechRecognizer *reco, SpeechRecoSharedPtr recoImpl)
+    IntentEventHandlerHelper(IntentRecognizer *reco, IntentRecoSharedPtr recoImpl)
     {
         recognizer = reco;
         this->recoImpl = recoImpl;
@@ -26,9 +26,9 @@ struct SpeechEventHandlerHelper
     void addFinalResultEventHandler()
     {
         NSLog(@"Add FinalResultEventHandler");
-        recoImpl->FinalResult.Connect([this] (const SpeechImpl::SpeechRecognitionEventArgs& e)
+        recoImpl->FinalResult.Connect([this] (const IntentImpl::IntentRecognitionEventArgs& e)
             {
-                SpeechRecognitionEventArgs *eventArgs = [[SpeechRecognitionEventArgs alloc] init: e];
+                IntentRecognitionEventArgs *eventArgs = [[IntentRecognitionEventArgs alloc] init: e];
                 [recognizer onFinalResultEvent: eventArgs];
             });
     }
@@ -36,9 +36,9 @@ struct SpeechEventHandlerHelper
     void addIntermediateResultEventHandler()
     {
         NSLog(@"Add IntermediateResultEventHandler");
-        recoImpl->IntermediateResult.Connect([this] (const SpeechImpl::SpeechRecognitionEventArgs& e)
+        recoImpl->IntermediateResult.Connect([this] (const IntentImpl::IntentRecognitionEventArgs& e)
             {
-                SpeechRecognitionEventArgs *eventArgs = [[SpeechRecognitionEventArgs alloc] init: e];
+                IntentRecognitionEventArgs *eventArgs = [[IntentRecognitionEventArgs alloc] init: e];
                 [recognizer onIntermediateResultEvent: eventArgs];
             });
     }
@@ -46,7 +46,7 @@ struct SpeechEventHandlerHelper
     void addErrorEventHandler()
     {
         NSLog(@"Add ErrorEventHandler");
-        recoImpl->Canceled.Connect([this] (const SpeechImpl::SpeechRecognitionEventArgs& e)
+        recoImpl->Canceled.Connect([this] (const IntentImpl::IntentRecognitionEventArgs& e)
             {
                 NSString* sessionId = [NSString stringWithString:e.SessionId];
                 auto result = e.GetResult();
@@ -117,17 +117,17 @@ struct SpeechEventHandlerHelper
     }
 };
 
-@implementation SpeechRecognizer
+@implementation IntentRecognizer
 {
-    SpeechRecoSharedPtr recoImpl;
+    IntentRecoSharedPtr recoImpl;
     dispatch_queue_t dispatchQueue;
     NSMutableArray *finalResultEventListenerList;
     NSMutableArray *intermediateResultEventListenerList;
-    struct SpeechEventHandlerHelper *eventImpl;
+    struct IntentEventHandlerHelper *eventImpl;
     NSLock *arrayLock;
 }
 
-- (instancetype)init :(SpeechRecoSharedPtr)recoHandle
+- (instancetype)init :(IntentRecoSharedPtr)recoHandle
 {
     self = [super init];
     recoImpl = recoHandle;
@@ -141,7 +141,7 @@ struct SpeechEventHandlerHelper
         intermediateResultEventListenerList = [NSMutableArray array];
         arrayLock = [[NSLock alloc] init];
         
-        eventImpl = new SpeechEventHandlerHelper(self, recoImpl);
+        eventImpl = new IntentEventHandlerHelper(self, recoImpl);
         [super setDispatchQueue: dispatchQueue];
         eventImpl->addIntermediateResultEventHandler();
         eventImpl->addFinalResultEventHandler();
@@ -159,39 +159,54 @@ struct SpeechEventHandlerHelper
     delete eventImpl;
 }
 
-- (SpeechRecognitionResult *)recognize
+- (void)AddIntentUsingId: (NSString *)intentId ForPhrase: (NSString *)simplePhrase
 {
-    SpeechRecognitionResult *result = nil;
+    recoImpl->AddIntent([intentId string], [simplePhrase string]);
+}
+
+- (void)AddIntentUsingId: (NSString *)intentId FromModel: (LanguageUnderstandingModel *)model
+{
+    recoImpl->AddIntent([intentId string], [model getModelHandle]);
+}
+
+- (void)AddIntentUsingId: (NSString *)intentId FromModel: (LanguageUnderstandingModel *)model WithIntentName: (NSString *)intentName
+{
+    recoImpl->AddIntent([intentId string], [model getModelHandle], [intentName string]);
+}
+
+- (IntentRecognitionResult *)recognize
+{
+    IntentRecognitionResult *result = nil;
     
     if (recoImpl == nullptr) {
-        result = [[SpeechRecognitionResult alloc] initWithError: @"Recognizer has been closed."];
+        result = [[IntentRecognitionResult alloc] initWithError: @"Recognizer has been closed."];
         return result;
     }
     
     try {
-        std::shared_ptr<SpeechImpl::SpeechRecognitionResult> resultImpl = recoImpl->RecognizeAsync().get();
+        std::shared_ptr<IntentImpl::IntentRecognitionResult> resultImpl = recoImpl->RecognizeAsync().get();
         if (resultImpl == nullptr) {
-            result = [[SpeechRecognitionResult alloc] initWithError: @"No result available."];
+            result = [[IntentRecognitionResult alloc] initWithError: @"No result available."];
         }
         else
         {
-            result = [[SpeechRecognitionResult alloc] init: resultImpl];
+            result = [[IntentRecognitionResult alloc] init: resultImpl];
         }
     }
     catch (...) {
         // Todo: better error handling
         NSLog(@"exception caught");
-        result = [[SpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
+        result = [[IntentRecognitionResult alloc] initWithError: @"Runtime Exception"];
     }
     
     return result;
 }
 
-- (void)recognizeAsync:(void (^)(SpeechRecognitionResult *))resultReceivedBlock
+- (void)recognizeAsync:(void (^)(IntentRecognitionResult *))resultReceivedBlock
 {
-    SpeechRecognitionResult *result = nil;
+    IntentRecognitionResult *result = nil;
     if (recoImpl == nullptr) {
-        result = [[SpeechRecognitionResult alloc] initWithError: @"Recognizer has been closed."];
+        result = [[IntentRecognitionResult alloc] initWithError: @"Recognizer has been closed."];
         dispatch_async(dispatchQueue, ^{
             resultReceivedBlock(result);
         });
@@ -199,19 +214,19 @@ struct SpeechEventHandlerHelper
     }
     
     try {
-        std::shared_ptr<SpeechImpl::SpeechRecognitionResult> resultImpl = recoImpl->RecognizeAsync().get();
+        std::shared_ptr<IntentImpl::IntentRecognitionResult> resultImpl = recoImpl->RecognizeAsync().get();
         if (resultImpl == nullptr) {
-            result = [[SpeechRecognitionResult alloc] initWithError: @"No result available."];
+            result = [[IntentRecognitionResult alloc] initWithError: @"No result available."];
         }
         else
         {
-            result = [[SpeechRecognitionResult alloc] init: resultImpl];
+            result = [[IntentRecognitionResult alloc] init: resultImpl];
         }
     }
     catch (...) {
         // Todo: better error handling
         NSLog(@"exception caught");
-        result = [[SpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
+        result = [[IntentRecognitionResult alloc] initWithError: @"Runtime Exception"];
     }
     
     dispatch_async(dispatchQueue, ^{
@@ -260,7 +275,7 @@ struct SpeechEventHandlerHelper
     }
 }
 
-- (void)onFinalResultEvent:(SpeechRecognitionEventArgs *)eventArgs
+- (void)onFinalResultEvent:(IntentRecognitionEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onFinalResultEvent");
     NSArray* workCopyOfList;
@@ -269,12 +284,12 @@ struct SpeechEventHandlerHelper
     [arrayLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
-            ((SpeechRecognitionEventHandlerBlock)handle)(self, eventArgs);
+            ((IntentRecognitionEventHandlerBlock)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)onIntermediateResultEvent:(SpeechRecognitionEventArgs *)eventArgs
+- (void)onIntermediateResultEvent:(IntentRecognitionEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onIntermediateResultEvent");
     NSArray* workCopyOfList;
@@ -283,12 +298,12 @@ struct SpeechEventHandlerHelper
     [arrayLock unlock];
     for (id handle in intermediateResultEventListenerList) {
         dispatch_async(dispatchQueue, ^{
-            ((SpeechRecognitionEventHandlerBlock)handle)(self, eventArgs);
+            ((IntentRecognitionEventHandlerBlock)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)addFinalResultEventListener:(SpeechRecognitionEventHandlerBlock)eventHandler
+- (void)addFinalResultEventListener:(IntentRecognitionEventHandlerBlock)eventHandler
 {
     [arrayLock lock];
     [finalResultEventListenerList addObject:eventHandler];
@@ -296,7 +311,7 @@ struct SpeechEventHandlerHelper
     return;
 }
 
-- (void)addIntermediateResultEventListener:(SpeechRecognitionEventHandlerBlock)eventHandler
+- (void)addIntermediateResultEventListener:(IntentRecognitionEventHandlerBlock)eventHandler
 {
     [arrayLock lock];
     [intermediateResultEventListenerList addObject:eventHandler];

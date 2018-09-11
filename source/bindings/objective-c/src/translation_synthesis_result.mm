@@ -41,14 +41,6 @@
     return self;
 }
 
-- (instancetype)initWithError: (NSString *)message
-{
-    _status = SynthesisStatus::SynthesisError;
-    _failureReason = message;
-    _audio = nil;
-    return self;
-}
-
 - (void)dealloc
 {
     if (resultImpl != nullptr) {

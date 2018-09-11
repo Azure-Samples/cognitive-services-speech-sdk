@@ -3,17 +3,17 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#ifndef SpeechRecognizer_h
-#define SpeechRecognizer_h
+#ifndef speech_recognizer_h
+#define speech_recognizer_h
 
 #import <Foundation/Foundation.h>
 #import "recognizer.h"
 #import "speech_recognition_result.h"
-#import "speech_recognition_result_event_args.h"
+#import "speech_recognition_event_args.h"
 
 @interface SpeechRecognizer : Recognizer
 
-typedef void (^RecognitionResultEventHandlerBlock)(SpeechRecognizer *, SpeechRecognitionResultEventArgs *);
+typedef void (^SpeechRecognitionEventHandlerBlock)(SpeechRecognizer *, SpeechRecognitionEventArgs *);
 
 - (void)close;
 
@@ -29,9 +29,9 @@ typedef void (^RecognitionResultEventHandlerBlock)(SpeechRecognizer *, SpeechRec
 // - (void) setDeploymentId: (NSString *)deploymentId;
 
 // How to add events, as a protocol, and individual blocks?
-- (void)addFinalResultEventListener:(RecognitionResultEventHandlerBlock)eventHandler;
-- (void)addIntermediateResultEventListener:(RecognitionResultEventHandlerBlock)eventHandler;
+- (void)addFinalResultEventListener:(SpeechRecognitionEventHandlerBlock)eventHandler;
+- (void)addIntermediateResultEventListener:(SpeechRecognitionEventHandlerBlock)eventHandler;
 
 @end
 
-#endif /* SpeechRecognizer_h */
+#endif /* speech_recognizer_h */

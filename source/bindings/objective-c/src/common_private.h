@@ -15,8 +15,10 @@
 
 namespace SpeechImpl = Microsoft::CognitiveServices::Speech;
 namespace TranslationImpl = Microsoft::CognitiveServices::Speech::Translation;
+namespace IntentImpl = Microsoft::CognitiveServices::Speech::Intent;
 
 using SpeechRecoSharedPtr = std::shared_ptr<SpeechImpl::SpeechRecognizer>;
 using TranslationRecoSharedPtr = std::shared_ptr<TranslationImpl::TranslationRecognizer>;
+using IntentRecoSharedPtr = std::shared_ptr<IntentImpl::IntentRecognizer>;
 
 #endif /* common_private_h */

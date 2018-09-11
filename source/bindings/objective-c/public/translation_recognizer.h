@@ -9,14 +9,14 @@
 #import <Foundation/Foundation.h>
 #import "recognizer.h"
 #import "translation_text_result.h"
-#import "translation_text_result_event_args.h"
+#import "translation_text_event_args.h"
 #import "translation_synthesis_result.h"
-#import "translation_synthesis_result_event_args.h"
+#import "translation_synthesis_event_args.h"
 
 @interface TranslationRecognizer : Recognizer
 
-typedef void (^TranslationTextResultEventHandlerBlock)(TranslationRecognizer *, TranslationTextResultEventArgs *);
-typedef void (^TranslationSynthesisResultEventHandlerBlock)(TranslationRecognizer *, TranslationSynthesisResultEventArgs *);
+typedef void (^TranslationTextEventHandlerBlock)(TranslationRecognizer *, TranslationTextEventArgs *);
+typedef void (^TranslationSynthesisEventHandlerBlock)(TranslationRecognizer *, TranslationSynthesisEventArgs *);
 
 - (void)close;
 
@@ -29,9 +29,9 @@ typedef void (^TranslationSynthesisResultEventHandlerBlock)(TranslationRecognize
 - (void)startContinuousTranslation;
 - (void)stopContinuousTranslation;
 
-- (void)addFinalResultEventListener:(TranslationTextResultEventHandlerBlock)eventHandler;
-- (void)addIntermediateResultEventListener:(TranslationTextResultEventHandlerBlock)eventHandler;
-- (void)addSynthesisResultEventListener:(TranslationSynthesisResultEventHandlerBlock)eventHandler;
+- (void)addFinalResultEventListener:(TranslationTextEventHandlerBlock)eventHandler;
+- (void)addIntermediateResultEventListener:(TranslationTextEventHandlerBlock)eventHandler;
+- (void)addSynthesisResultEventListener:(TranslationSynthesisEventHandlerBlock)eventHandler;
 
 @end
 

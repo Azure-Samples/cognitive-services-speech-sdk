@@ -5,7 +5,6 @@
 
 #import "recognition_event_args_private.h"
 
-
 @implementation RecognitionEventArgs
 
 - (instancetype)init :(RecognitionEventType)eventType :(const SpeechImpl::RecognitionEventArgs&) eventArgsHandle

@@ -7,15 +7,12 @@
 #define translation_text_result_private_h
 
 #import "translation_text_result.h"
-#import "speech_recognition_result_private.h"
-
+#import "recognition_result_base_private.h"
 #import "common_private.h"
 
 @interface TranslationTextResult (Private)
 
 - (instancetype)init :(std::shared_ptr<TranslationImpl::TranslationTextResult>)resultHandle;
-
-- (instancetype)InitWithError:(NSString *)message;
 
 @end
 

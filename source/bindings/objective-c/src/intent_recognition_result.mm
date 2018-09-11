@@ -3,18 +3,19 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#import "speech_recognition_result_private.h"
+#import "intent_recognition_result_private.h"
 #import "common_private.h"
 
-@implementation SpeechRecognitionResult
+@implementation IntentRecognitionResult
 {
-    std::shared_ptr<SpeechImpl::SpeechRecognitionResult> resultImpl;
+    std::shared_ptr<IntentImpl::IntentRecognitionResult> resultImpl;
 }
 
-- (instancetype)init :(std::shared_ptr<SpeechImpl::SpeechRecognitionResult>)resultHandle
+- (instancetype)init :(std::shared_ptr<IntentImpl::IntentRecognitionResult>)resultHandle
 {
     self = [super init :resultHandle];
     resultImpl = resultHandle;
+    _intentId = [NSString stringWithString :resultHandle->IntentId];
     return self;
 }
 

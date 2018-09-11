@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "speech_recognizer.h"
 #import "translation_recognizer.h"
+#import "intent_recognizer.h"
 
 typedef NS_ENUM(NSInteger, OutputFormat)
 {
@@ -29,6 +30,9 @@ typedef NS_ENUM(NSInteger, OutputFormat)
 //- (SpeechRecognizer*) createSpeechRecognizerWithStream: (AudioInputStream *)inputStream;
 //- (SpeechRecognizer*) createSpeechRecognizerWithStream: (AudioInputStream *)inputStream AndLanguage: (NSString *)language;
 //- (SpeechRecognizer*) createSpeechRecognizerWithStream: (AudioInputStream *)inputStream AndLanguage: (NSString *)language AndOutputFormat: (OutputFormat)outputFormat;
+
+- (IntentRecognizer*)createIntentRecognizer;
+- (IntentRecognizer*)createIntentRecognizerWithFileInput:(NSString *)path;
 
 - (TranslationRecognizer*)createTranslationRecognizerFromLanguage:(NSString *)from ToLanguages:(NSArray *)to;
 - (TranslationRecognizer*)createTranslationRecognizerFromLanguage:(NSString *)from ToLanguages:(NSArray *)to WithVoiceOutput:(NSString *)voice;

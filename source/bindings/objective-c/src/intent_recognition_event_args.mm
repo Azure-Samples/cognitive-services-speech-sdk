@@ -3,20 +3,19 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#import "speech_recognition_result_event_args_private.h"
-#import "speech_recognition_result_private.h"
+#import "intent_recognition_event_args_private.h"
+#import "intent_recognition_result_private.h"
 
 #import "common_private.h"
 
-@implementation SpeechRecognitionResultEventArgs
+@implementation IntentRecognitionEventArgs
 
-- (instancetype)init:(const SpeechImpl::SpeechRecognitionEventArgs&)e
+- (instancetype)init:(const IntentImpl::IntentRecognitionEventArgs&)e
 {
     self = [super init];
-    
     _sessionId = [NSString stringWithString:e.SessionId];
-    _result = [[SpeechRecognitionResult alloc] init :e.GetResult()];
-    
+    _result = [[IntentRecognitionResult alloc] init :e.GetResult()];
+
     return self;
 }
 

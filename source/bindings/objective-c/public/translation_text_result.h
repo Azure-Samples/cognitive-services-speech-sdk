@@ -7,7 +7,7 @@
 #define translation_text_result_h
 
 #import <Foundation/Foundation.h>
-#import "speech_recognition_result.h"
+#import "recognition_result_base.h"
 
 typedef NS_ENUM(NSInteger, TranslationStatus)
 {
@@ -15,7 +15,7 @@ typedef NS_ENUM(NSInteger, TranslationStatus)
     TranslationError
 };
 
-@interface TranslationTextResult : SpeechRecognitionResult
+@interface TranslationTextResult : RecognitionResultBase
 
 @property (readonly) TranslationStatus translationStatus;
 

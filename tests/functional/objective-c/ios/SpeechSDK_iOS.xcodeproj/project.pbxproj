@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3C5D93EC2146856B000C7129 /* TurnOnTheLamp.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3C5D93EB2146856B000C7129 /* TurnOnTheLamp.wav */; };
+		3C5D93FA2146CC61000C7129 /* test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D93F92146CC61000C7129 /* test.m */; };
 		3C824066213D3F9700EDEA09 /* libMicrosoft.CognitiveServices.Speech.core.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C61523E212589EB00B2E94E /* libMicrosoft.CognitiveServices.Speech.core.dylib */; };
 		3CA6CF8B211F471500CD2768 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CA6CF8A211F471500CD2768 /* AppDelegate.m */; };
 		3CA6CF8E211F471500CD2768 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CA6CF8D211F471500CD2768 /* ViewController.m */; };
@@ -606,6 +608,9 @@
 		3C0A910E21400498005325E2 /* run_test_server.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = run_test_server.sh; sourceTree = "<group>"; };
 		3C0A910F21400498005325E2 /* test-server.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "test-server.js"; sourceTree = "<group>"; };
 		3C0A911021400498005325E2 /* unit_tests.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = unit_tests.sh; sourceTree = "<group>"; };
+		3C5D93EB2146856B000C7129 /* TurnOnTheLamp.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = TurnOnTheLamp.wav; path = ../../../input/audio/TurnOnTheLamp.wav; sourceTree = "<group>"; };
+		3C5D93F92146CC61000C7129 /* test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = test.m; path = ../../shared/test.m; sourceTree = "<group>"; };
+		3C5D93FB2146CD40000C7129 /* test.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = test.h; path = ../../shared/test.h; sourceTree = "<group>"; };
 		3C61523E212589EB00B2E94E /* libMicrosoft.CognitiveServices.Speech.core.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libMicrosoft.CognitiveServices.Speech.core.dylib; path = ../../../../build_ios_simulator_debug/lib/libMicrosoft.CognitiveServices.Speech.core.dylib; sourceTree = "<group>"; };
 		3CA6CF86211F471500CD2768 /* SpeechSDK_iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpeechSDK_iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3CA6CF89211F471500CD2768 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -2214,6 +2219,7 @@
 		3CA6CF7D211F471500CD2768 = {
 			isa = PBXGroup;
 			children = (
+				3C5D93EB2146856B000C7129 /* TurnOnTheLamp.wav */,
 				3CC3789B2121CFD600F07A66 /* whatstheweatherlike.wav */,
 				3CA6CF88211F471500CD2768 /* SpeechSDK_iOS */,
 				3CA6CFA1211F471600CD2768 /* SpeechSDK_iOSTests */,
@@ -2234,6 +2240,7 @@
 		3CA6CF88211F471500CD2768 /* SpeechSDK_iOS */ = {
 			isa = PBXGroup;
 			children = (
+				3C5D93F92146CC61000C7129 /* test.m */,
 				3CA6CF89211F471500CD2768 /* AppDelegate.h */,
 				3CA6CF8A211F471500CD2768 /* AppDelegate.m */,
 				3CA6CF8C211F471500CD2768 /* ViewController.h */,
@@ -2243,6 +2250,7 @@
 				3CA6CF94211F471600CD2768 /* LaunchScreen.storyboard */,
 				3CA6CF97211F471600CD2768 /* Info.plist */,
 				3CA6CF98211F471600CD2768 /* main.m */,
+				3C5D93FB2146CD40000C7129 /* test.h */,
 			);
 			path = SpeechSDK_iOS;
 			sourceTree = "<group>";
@@ -2350,6 +2358,7 @@
 				3CC3789C2121CFD600F07A66 /* whatstheweatherlike.wav in Resources */,
 				3CA6CF96211F471600CD2768 /* LaunchScreen.storyboard in Resources */,
 				3CA6CF93211F471600CD2768 /* Assets.xcassets in Resources */,
+				3C5D93EC2146856B000C7129 /* TurnOnTheLamp.wav in Resources */,
 				3CA6CF91211F471500CD2768 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2369,6 +2378,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3CA6CF8E211F471500CD2768 /* ViewController.m in Sources */,
+				3C5D93FA2146CC61000C7129 /* test.m in Sources */,
 				3CA6CF99211F471600CD2768 /* main.m in Sources */,
 				3CA6CF8B211F471500CD2768 /* AppDelegate.m in Sources */,
 			);
