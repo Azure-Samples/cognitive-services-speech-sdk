@@ -52,7 +52,7 @@ add_executable(carbonx
     ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES}
     )
 # common is needed for PAL etc
-target_link_libraries(carbonx common mock ${SPEECHSDK_CORE_LIBRARY})
+target_link_libraries(carbonx common ${SPEECHSDK_CORE_LIBRARY})
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
 if (${use_openssl})
