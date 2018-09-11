@@ -430,8 +430,16 @@ static void OnWSPeerClosed(void* context, uint16_t* closeCode, const unsigned ch
         errorInfo.reason = TRANSPORT_ERROR_REMOTE_CLOSED;
         // WebSocket close code, if present (cf. https://tools.ietf.org/html/rfc6455#section-7.4.1):
         errorInfo.errorCode = closeCode != NULL ? *closeCode : -1;
-        errorInfo.errorString = extraDataLength > 0 ? (const char*)extraData : NULL;
+        char* errorReason = NULL;
+        if (extraDataLength > 0)
+        {
+            errorReason = (char*)malloc(extraDataLength + 1);
+            strncpy(errorReason, (const char*)extraData, extraDataLength);
+            errorReason[extraDataLength] = '\0';
+        }
+        errorInfo.errorString = (const char*)errorReason;
         OnTransportError(request, &errorInfo); // technically, not an error.
+        free(errorReason);
     }
 }
 
