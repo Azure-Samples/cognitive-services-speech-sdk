@@ -16,11 +16,15 @@ proguard-rules.pro text
 *.gradle text
 *.h text
 *.java text
+*.json text
+*.m text
 *.md text
 *.pl text
+*.plist text
 *.prefs text
 *.properties text
 *.sln text
+*.storyboard text
 *.vcxproj text
 *.vcxproj.filters text
 *.xaml text
