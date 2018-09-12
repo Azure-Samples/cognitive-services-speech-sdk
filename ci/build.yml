@@ -1396,6 +1396,11 @@ phases:
     name: Hosted VS2017
     demands: npm
   steps:
+  - task: Bash@3
+    name: var
+    inputs:
+      filePath: ci/set-variables.sh
+    displayName: Set variables
   - task: Npm@1
     displayName: 'npm run build'
     inputs:
@@ -1403,6 +1408,13 @@ phases:
       workingDir: source/bindings/js
       verbose: false
       customCommand: 'run build'
+  - task: Npm@1
+    displayName: 'npm version'
+    inputs:
+      command: custom
+      workingDir: source/bindings/js
+      verbose: false
+      customCommand: version $(SPEECHSDK_SEMVER2NOMETA)
   - task: Npm@1
     displayName: 'npm run bundle'
     inputs:
