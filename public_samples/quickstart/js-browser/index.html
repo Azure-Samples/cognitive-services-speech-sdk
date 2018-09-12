@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Microsoft Cognitive Service Speech SDK JavaScript Quickstart</title>
+  <title>Microsoft Cognitive Services Speech SDK JavaScript Quickstart</title>
   <meta charset="utf-8" />
 </head>
 <body style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px;">
+  <!-- <uidiv> -->
   <div id="warning">
     <h1 style="font-weight:500;">Speech Recognition SpeechSDK not found (speech.sdk.bundle.js missing).</h1>
   </div>
+  
   <div id="content" style="display:none">
     <table width="100%">
       <tr>
         <td></td>
-        <td><h1 style="font-weight:500;">Microsoft Cognitive Service Speech SDK JavaScript Quickstart</h1></td>
+        <td><h1 style="font-weight:500;">Microsoft Cognitive Services Speech SDK JavaScript Quickstart</h1></td>
       </tr>
       <tr>
         <td align="right"><a href="https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started" target="_blank">Subscription</a>:</td>
@@ -24,21 +26,28 @@
       </tr>
       <tr>
         <td></td>
-        <td><button id="startRecognizeAsyncButton">Start Recognition</button></td>
+        <td><button id="startRecognizeAsyncButton">Start recognition</button></td>
       </tr>
       <tr>
-        <td align="right">Results</td>
+        <td align="right" valign="top">Results</td>
         <td><textarea id="phraseDiv" style="display: inline-block;width:500px;height:200px"></textarea></td>
       </tr>
     </table>
   </div>
+  <!-- </uidiv> -->
 
-  <!-- SpeechSDK REFERENCE -->
-  <!-- TODO replace path with CDN -->
+  <!-- <speechsdkref> -->
+  <!-- SpeechSDK reference sdk. -->
   <script src="speech.sdk.bundle.js"></script>
+  <!-- </speechsdkref> -->
 
+  <!-- <authorizationfunction> -->
   <!-- SpeechSDK Authorization token -->
   <script>
+  // Note: Replace the URL with a valid endpoint to retrieve
+  //       authorization tokens for your subscription.
+  var authorizationEndpoint = "token.php";
+
   function RequestAuthorizationToken() {
     if (authorizationEndpoint) {
       const a = new XMLHttpRequest();
@@ -46,125 +55,89 @@
       a.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       a.send("");
       a.onload = function() {
-          token = this.responseText;
-          subscriptionKey.value = "using authorization token (hit F5 to refresh)";
-          regionKey.value = "westus";
           subscriptionKey.disabled = true;
+          subscriptionKey.value = "using authorization token (hit F5 to refresh)";
+          token = this.responseText;
           authorizationToken = token;
           console.log("Got an authorization token: " + token);
       }
     }
   }
   </script>
+  <!-- </authorizationfunction> -->
 
+  <!-- <quickstartcode> -->
   <!-- SpeechSDK USAGE -->
   <script>
-    // On document load resolve the SpeechSDK dependency
-    function Initialize(onComplete) {
-      if (!!window.SpeechSDK) {
-        document.getElementById('content').style.display = 'block';
-        document.getElementById('warning').style.display = 'none';
-        onComplete(window.SpeechSDK);
-      }
-    }
-
     // status fields and start button in UI
     var phraseDiv;
     var startRecognizeAsyncButton;
 
-    // subscription key for speech services.
+    // subscription key and region key for speech services.
     var subscriptionKey, regionKey;
-
-    // TODO: replace the URL with a valid endpoint to retrieve
-    //     authorization tokens for your subscription or leave
-    //     undefined to use your subscription key.
-    var authorizationEndpoint = "token.php";
     var authorizationToken;
-
-    // speech sdk
     var SpeechSDK;
     var recognizer;
 
     document.addEventListener("DOMContentLoaded", function () {
       startRecognizeAsyncButton = document.getElementById("startRecognizeAsyncButton");
-
       subscriptionKey = document.getElementById("subscriptionKey");
       regionKey = document.getElementById("regionKey");
-
       phraseDiv = document.getElementById("phraseDiv");
 
       startRecognizeAsyncButton.addEventListener("click", function () {
+        startRecognizeAsyncButton.disabled = true;
         phraseDiv.innerHTML = "";
 
-        // if at this point, if we got an authorization token, use the token.
-        //  Otherwise use the provided subscription key
+        // if we got an authorization token, use the token. Otherwise use the provided subscription key
         var speechConfig;
         if (authorizationToken) {
           speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, regionKey.value);
         } else {
           if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
-            alert("Please enter your Microsoft Cognitive Service Speech subscription key!");
+            alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
             return;
           }
-
           speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, regionKey.value);
         }
 
-        var audioConfig  = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
-
         speechConfig.language = "en-US";
+        var audioConfig  = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
         recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
 
-        // Note: this is how you can process the result directly
-        //     rather then subscribing to the FinalResultReceived
-        //     event
         recognizer.recognizeAsync(
           function (result) {
+            startRecognizeAsyncButton.disabled = false;
+            phraseDiv.innerHTML += result.text;
             window.console.log(result);
 
-            phraseDiv.innerHTML += result.text + "\r\n";
-
             recognizer.close();
             recognizer = undefined;
-
-            startRecognizeAsyncButton.disabled = false;
           },
           function (err) {
-            window.console.log(err);
-
+            startRecognizeAsyncButton.disabled = false;
             phraseDiv.innerHTML += err;
+            window.console.log(err);
 
             recognizer.close();
             recognizer = undefined;
-
-            startRecognizeAsyncButton.disabled = false;
           });
-
-        startRecognizeAsyncButton.disabled = true;
       });
 
-      subscriptionKey.addEventListener("focus", function () {
-         if (subscriptionKey.value == "subscription") {
-           subscriptionKey.value = "";
-         }
-      });
-
-      subscriptionKey.addEventListener("focusout", function () {
-         if (subscriptionKey.value == "") {
-           subscriptionKey.value = "subscription";
-         }
-      });
-
-      Initialize(function (speechSdk) {
-        SpeechSDK = speechSdk;
+      if (!!window.SpeechSDK) {
+        SpeechSDK = window.SpeechSDK;
         startRecognizeAsyncButton.disabled = false;
 
-        // in case we have an authorization function, call it.
+        document.getElementById('content').style.display = 'block';
+        document.getElementById('warning').style.display = 'none';
+
+        // in case we have a function for getting an authorization token, call it.
         if (typeof RequestAuthorizationToken === "function") {
             RequestAuthorizationToken();
         }
-      });
+      }
     });
   </script>
+  <!-- </quickstartcode> -->
 </body>
 </html>
