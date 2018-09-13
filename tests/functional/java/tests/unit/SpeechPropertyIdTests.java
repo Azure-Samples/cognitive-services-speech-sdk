@@ -18,7 +18,7 @@ import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
-import com.microsoft.cognitiveservices.speech.translation.SpeechTranslatorConfig;
+import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig;
 
 import tests.Settings;
 
@@ -63,7 +63,7 @@ public class SpeechPropertyIdTests {
     @Ignore("TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)")
     @Test
     public void testRecognizerParameterNames3() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         s.addTargetLanguage("en-US");

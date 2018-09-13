@@ -30,9 +30,9 @@ namespace MicrosoftSpeechSDKSamples
             // Voice name of synthesis output.
             const string GermanVoice = "de-DE-Hedda";
 
-            // Creates an instance of a speech translator config with specified subscription key and service region.
+            // Creates an instance of a speech translation config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechTranslatorConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechTranslationConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
             config.SpeechRecognitionLanguage = fromLanguage;
             config.VoiceName = GermanVoice;
 
@@ -131,9 +131,9 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with a language of your choice.
             string fromLanguage = "en-US";
 
-            // Creates an instance of a speech translator config with specified subscription key and service region.
+            // Creates an instance of a speech translation config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechTranslatorConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechTranslationConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
             config.SpeechRecognitionLanguage = fromLanguage;
 
             // Translation target language(s).
@@ -229,9 +229,9 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with a language of your choice.
             string fromLanguage = "en-US";
 
-            // Creates an instance of a speech translator config with specified subscription key and service region.
+            // Creates an instance of a speech translation config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechTranslatorConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechTranslationConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
             config.SpeechRecognitionLanguage = fromLanguage;
 
             // Translation target language(s).

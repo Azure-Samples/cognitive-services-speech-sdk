@@ -34,7 +34,7 @@ public final class SpeechRecognitionCanceledEventArgs {
       */
     public SpeechRecognitionResult getResult() {
         return _Result;
-    }// { get; }
+    }
 
     /**
       * Specifies the session identifier.
@@ -42,7 +42,7 @@ public final class SpeechRecognitionCanceledEventArgs {
       */
     public final String getSessionId() {
         return _SessionId;
-    }// { get; }
+    }
 
     /**
       * The reason the recognition was canceled.

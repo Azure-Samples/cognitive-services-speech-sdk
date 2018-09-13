@@ -74,18 +74,18 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
 
     /**
      * Constructs an instance of a translation recognizer.
-     * @param stc speech translator config.
+     * @param stc speech translation config.
      * @param audioConfig audio config.
      */
-    public TranslationRecognizer(com.microsoft.cognitiveservices.speech.translation.SpeechTranslatorConfig stc, AudioConfig audioConfig) {
+    public TranslationRecognizer(com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig stc, AudioConfig audioConfig) {
          this(com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer.FromConfig(stc.getImpl(), audioConfig.getConfigImpl()), audioConfig);
     }
 
     /**
      * Constructs an instance of a translation recognizer.
-     * @param stc speech translator config.
+     * @param stc speech translation config.
      */
-    public TranslationRecognizer(com.microsoft.cognitiveservices.speech.translation.SpeechTranslatorConfig stc) {
+    public TranslationRecognizer(com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig stc) {
          this(com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer.FromConfig(stc.getImpl(), null), null);
     }
 

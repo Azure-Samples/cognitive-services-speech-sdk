@@ -16,7 +16,7 @@
 #include <speechapi_cxx_recognition_async_recognizer.h>
 #include <speechapi_cxx_translation_result.h>
 #include <speechapi_cxx_translation_eventargs.h>
-#include <speechapi_cxx_speech_translator_config.h>
+#include <speechapi_cxx_speech_translation_config.h>
 #include <speechapi_cxx_audio_stream.h>
 
 namespace Microsoft {
@@ -35,7 +35,7 @@ public:
      /// Users should use this function to create a translation recognizer.
      /// </summary>
     /// <param name="hreco">The shared smart pointer of the created translation recognizer. </param>
-    static std::shared_ptr<TranslationRecognizer> FromConfig(std::shared_ptr<SpeechTranslatorConfig> speechconfig, std::shared_ptr<Audio::AudioConfig> audioInput = nullptr)
+    static std::shared_ptr<TranslationRecognizer> FromConfig(std::shared_ptr<SpeechTranslationConfig> speechconfig, std::shared_ptr<Audio::AudioConfig> audioInput = nullptr)
     {
         SPXRECOHANDLE hreco { SPXHANDLE_INVALID };
         SPX_THROW_ON_FAIL(::recognizer_create_translation_recognizer_from_config(
@@ -53,7 +53,7 @@ public:
     /// It is intended for internal use only. It creates an instance of <see cref="TranslationRecognizer"/>. 
     /// </summary>
     /// <remarks>
-    /// It is recommended to use SpeechTranslatorConfig to create an instance of <see cref="TranslationRecognizer"/>. This method is mainly
+    /// It is recommended to use SpeechTranslationConfig to create an instance of <see cref="TranslationRecognizer"/>. This method is mainly
     /// used in case where a recognizer handle has been created by methods via C-API.
     /// </remarks>
     /// <param name="hreco">The handle of the recognizer that is returned by C-API.</param>

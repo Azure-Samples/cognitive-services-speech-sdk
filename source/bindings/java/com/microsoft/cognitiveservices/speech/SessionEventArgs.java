@@ -32,8 +32,8 @@ public final class SessionEventArgs // extends EventArgs
       */
     public SessionEventType getEventType() {
         return _eventType;
-    }// { get; }
-    private final SessionEventType _eventType;// { get; }
+    }
+    private final SessionEventType _eventType;
 
     /**
       * Represents the session identifier.
@@ -41,7 +41,7 @@ public final class SessionEventArgs // extends EventArgs
       */
     public String getSessionId() {
         return _sessionId;
-    } // { get; }
+    }
     private final String _sessionId;
 
     /**

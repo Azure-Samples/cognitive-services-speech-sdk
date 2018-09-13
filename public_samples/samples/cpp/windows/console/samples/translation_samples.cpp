@@ -20,9 +20,9 @@ using namespace Microsoft::CognitiveServices::Speech::Translation;
 void TranslationWithMicrophone()
 {
     // <TranslationWithMicrophone>
-    // Creates an instance of a speech translator config with specified subscription key and service region.
+    // Creates an instance of a speech translation config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
-    auto config = SpeechTranslatorConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    auto config = SpeechTranslationConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
     // Sets source and target languages
     // Replace with the languages of your choice.
@@ -77,9 +77,9 @@ void TranslationWithMicrophone()
 void TranslationContinuousRecognition()
 {
     // <TranslationContinuousRecognition>
-    // Creates an instance of a speech translator config with specified subscription key and service region.
+    // Creates an instance of a speech translation config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
-    auto config = SpeechTranslatorConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    auto config = SpeechTranslationConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
     // Sets source and target languages
     auto fromLanguage = "en-US";

@@ -39,7 +39,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public void TestLanguageProperties()
         {
-            var config = SpeechTranslatorConfig.FromSubscription(subscriptionKey, region);
+            var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
             config.SpeechRecognitionLanguage = Language.EN;
             config.AddTargetLanguage(Language.DE);
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
@@ -56,7 +56,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var toLanguages = new List<string>() { Language.DE, Language.ES };
             var fromLanguage = Language.EN;
-            var config = SpeechTranslatorConfig.FromSubscription(subscriptionKey, region);
+            var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
             config.SpeechRecognitionLanguage = fromLanguage;
 
             toLanguages.ForEach(l => config.AddTargetLanguage(l));
@@ -75,7 +75,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { Language.DE };
             var fromLanguage = Language.EN;
             var voice = Voice.DE;
-            var config = SpeechTranslatorConfig.FromSubscription(subscriptionKey, region);
+            var config = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
             config.SpeechRecognitionLanguage = fromLanguage;
             config.VoiceName = voice;
 

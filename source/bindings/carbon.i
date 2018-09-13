@@ -53,7 +53,7 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::PropertyCollection<SPXRESULTHANDLE>)
 %shared_ptr(Microsoft::CognitiveServices::Speech::PropertyCollection<SPXSESSIONHANDLE>)
 %shared_ptr(Microsoft::CognitiveServices::Speech::SpeechConfig)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Translation::SpeechTranslatorConfig)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Translation::SpeechTranslationConfig)
 
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::AudioConfig)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::AudioInputStream)
@@ -95,7 +95,7 @@
 
 
 %include <speechapi_cxx_speech_config.h>
-%include <speechapi_cxx_speech_translator_config.h>
+%include <speechapi_cxx_speech_translation_config.h>
 
 // %extend need to come first, before the %ignore for the same method (RecognizeAsync, etc.)
 %extend Microsoft::CognitiveServices::Speech::SpeechRecognizer {

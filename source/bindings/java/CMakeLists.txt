@@ -135,7 +135,7 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionResultPtrFuture.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognizerBase.java
-    ${CMAKE_SWIG_OUTDIR}/SpeechTranslatorConfig.java
+    ${CMAKE_SWIG_OUTDIR}/SpeechTranslationConfig.java
 
     ${CMAKE_SWIG_OUTDIR}/TranslationRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/TranslationRecognizerBase.java
@@ -220,7 +220,7 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/translation/TranslationTextResult.java
     ${PACKAGE_DIR}/translation/TranslationTextResultEventArgs.java
     ${PACKAGE_DIR}/translation/TranslationTextResultCanceledEventArgs.java
-    ${PACKAGE_DIR}/translation/SpeechTranslatorConfig.java
+    ${PACKAGE_DIR}/translation/SpeechTranslationConfig.java
 
     ${PACKAGE_DIR}/util/EventHandler.java
     ${PACKAGE_DIR}/util/EventHandlerImpl.java

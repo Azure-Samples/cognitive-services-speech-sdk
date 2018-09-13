@@ -9,30 +9,30 @@ using System.Collections.Generic;
 namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
-    /// Speech translator configuration.
+    /// Speech translation configuration.
     /// </summary>
-    public sealed class SpeechTranslatorConfig : SpeechConfig
+    public sealed class SpeechTranslationConfig : SpeechConfig
     {
-        internal readonly Internal.SpeechTranslatorConfig impl;
+        internal readonly Internal.SpeechTranslationConfig impl;
 
-        internal SpeechTranslatorConfig(Internal.SpeechTranslatorConfig impl) : base(impl)
+        internal SpeechTranslationConfig(Internal.SpeechTranslationConfig impl) : base(impl)
         {
             this.impl = impl;
         }
 
         /// <summary>
-        /// Creates an instance of speech translator config with specified subscription key and region.
+        /// Creates an instance of speech translation config with specified subscription key and region.
         /// </summary>
         /// <param name="subscriptionKey">The subscription key, can be empty if authorization token is specified later.</param>
         /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
         /// <returns>A speech config instance.</returns>
-        public new static SpeechTranslatorConfig FromSubscription(string subscriptionKey, string region)
+        public new static SpeechTranslationConfig FromSubscription(string subscriptionKey, string region)
         {
-            return new SpeechTranslatorConfig(Internal.SpeechTranslatorConfig.FromSubscription(subscriptionKey, region));
+            return new SpeechTranslationConfig(Internal.SpeechTranslationConfig.FromSubscription(subscriptionKey, region));
         }
 
         /// <summary>
-        /// Creates an instance of the speech translator config with specified authorization token and region.
+        /// Creates an instance of the speech translation config with specified authorization token and region.
         /// Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
         /// expires, the caller needs to refresh it by setting the property `AuthorizationToken` on the corresponding
         /// recognizer with a new valid token.
@@ -40,13 +40,13 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="authorizationToken">The authorization token.</param>
         /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
         /// <returns>A speech config instance.</returns>
-        public new static SpeechTranslatorConfig FromAuthorizationToken(string authorizationToken, string region)
+        public new static SpeechTranslationConfig FromAuthorizationToken(string authorizationToken, string region)
         {
-            return new SpeechTranslatorConfig(Internal.SpeechTranslatorConfig.FromSubscription(authorizationToken, region));
+            return new SpeechTranslationConfig(Internal.SpeechTranslationConfig.FromSubscription(authorizationToken, region));
         }
 
         /// <summary>
-        /// Creates an instance of the speech translator config with specified endpoint and subscription key.
+        /// Creates an instance of the speech translation config with specified endpoint and subscription key.
         /// This method is intended only for users who use a non-standard service endpoint or parameters.
         /// Note: The query parameters specified in the endpoint URL are not changed, even if they are set by any other APIs.
         /// For example, if language is defined in the uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
@@ -56,9 +56,9 @@ namespace Microsoft.CognitiveServices.Speech
         /// <param name="endpoint">The service endpoint to connect to.</param>
         /// <param name="subscriptionKey">The subscription key.</param>
         /// <returns>A speech config instance.</returns>
-        public new static SpeechTranslatorConfig FromEndpoint(Uri endpoint, string subscriptionKey)
+        public new static SpeechTranslationConfig FromEndpoint(Uri endpoint, string subscriptionKey)
         {
-            return new SpeechTranslatorConfig(Internal.SpeechTranslatorConfig.FromEndpoint(endpoint.ToString(), subscriptionKey));
+            return new SpeechTranslationConfig(Internal.SpeechTranslationConfig.FromEndpoint(endpoint.ToString(), subscriptionKey));
         }
 
         /// <summary>

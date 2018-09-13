@@ -27,7 +27,7 @@ public final class SpeechRecognitionResultEventArgs {
       */
     public SpeechRecognitionResult getResult() {
         return _Result;
-    }// { get; }
+    }
     private SpeechRecognitionResult _Result;
 
     /**
@@ -36,7 +36,7 @@ public final class SpeechRecognitionResultEventArgs {
       */
     public final String getSessionId() {
         return _SessionId;
-    }// { get; }
+    }
     private String _SessionId;
 
     /**

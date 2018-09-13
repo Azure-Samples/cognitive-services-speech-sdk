@@ -16,9 +16,9 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     /// <code>
     /// public async Task TranslationContinuousRecognitionAsync()
     /// {
-    ///     // Creates an instance of a speech translator config with specified subscription key and service region. 
+    ///     // Creates an instance of a speech translation config with specified subscription key and service region. 
     ///     // Replace with your own subscription key and service region (e.g., "westus").
-    ///     var config = SpeechTranslatorConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    ///     var config = SpeechTranslationConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
     ///
     ///     // Sets source and target languages.
     ///     string fromLanguage = "en-US";
@@ -108,11 +108,11 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         public event EventHandler<TranslationSynthesisResultEventArgs> SynthesisResultReceived;
 
         /// <summary>
-        /// Creates a translation recognizer using the default microphone input for a specified translator configuration.
+        /// Creates a translation recognizer using the default microphone input for a specified translation configuration.
         /// </summary>
-        /// <param name="config">Translator config.</param>
+        /// <param name="config">Translation config.</param>
         /// <returns>A translation recognizer instance.</returns>
-        public TranslationRecognizer(SpeechTranslatorConfig config)
+        public TranslationRecognizer(SpeechTranslationConfig config)
             : this(config != null ? config.impl : throw new ArgumentNullException(nameof(config)), null)
         {
         }
@@ -120,17 +120,17 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// <summary>
         /// Creates a translation recognizer using the specified speech translator and audio configuration.
         /// </summary>
-        /// <param name="config">Translator config.</param>
+        /// <param name="config">Translation config.</param>
         /// <param name="audioConfig">Audio config.</param>
         /// <returns>A translation recognizer instance.</returns>
-        public TranslationRecognizer(SpeechTranslatorConfig config, Audio.AudioConfig audioConfig)
+        public TranslationRecognizer(SpeechTranslationConfig config, Audio.AudioConfig audioConfig)
             : this(config != null ? config.impl : throw new ArgumentNullException(nameof(config)),
                    audioConfig != null ? audioConfig.configImpl : throw new ArgumentNullException(nameof(audioConfig)))
         {
             this.audioConfig = audioConfig;
         }
 
-        internal TranslationRecognizer(Internal.SpeechTranslatorConfig config, Internal.AudioConfig audioConfig)
+        internal TranslationRecognizer(Internal.SpeechTranslationConfig config, Internal.AudioConfig audioConfig)
         {
             this.recoImpl = Internal.TranslationRecognizer.FromConfig(config, audioConfig);
 
@@ -225,9 +225,9 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// <code>
         /// public async Task TranslationSingleShotRecognitionAsync()
         /// {
-        ///     // Creates an instance of a speech translator config with specified subscription key and service region. 
+        ///     // Creates an instance of a speech translation config with specified subscription key and service region. 
         ///     // Replace with your own subscription key and service region (e.g., "westus").
-        ///     var config = SpeechTranslatorConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        ///     var config = SpeechTranslationConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
         ///
         ///     string fromLanguage = "en-US";
         ///     config.Language = fromLanguage;

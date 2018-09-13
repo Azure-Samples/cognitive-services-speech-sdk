@@ -58,16 +58,16 @@ namespace MicrosoftSpeechSDKSamples
 
         public static async Task TranslationBaseModelAsync(string keyTranslation, string fileName, bool useStream)
         {
-            var config = SpeechTranslatorConfig.FromSubscription(keyTranslation, "westus");
+            var config = SpeechTranslationConfig.FromSubscription(keyTranslation, "westus");
             config.SpeechRecognitionLanguage = FromLang;
             To2Langs.ForEach(l => config.AddTargetLanguage(l));
 
-            var chineseConfig = SpeechTranslatorConfig.FromSubscription(keyTranslation, "westus");
+            var chineseConfig = SpeechTranslationConfig.FromSubscription(keyTranslation, "westus");
             chineseConfig.SpeechRecognitionLanguage = FromLang;
             chineseConfig.VoiceName = ChineseVoice;
             chineseConfig.AddTargetLanguage(ChineseLocale);
 
-            var germanConfig = SpeechTranslatorConfig.FromSubscription(keyTranslation, "westus");
+            var germanConfig = SpeechTranslationConfig.FromSubscription(keyTranslation, "westus");
             germanConfig.SpeechRecognitionLanguage = FromLang;
             germanConfig.VoiceName = GermanVoice;
             germanConfig.AddTargetLanguage(GermanLocale);
@@ -125,7 +125,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Translation using endopoint:{0}.", endpoint));
 
-            SpeechTranslatorConfig config = SpeechTranslatorConfig.FromEndpoint(new Uri(endpoint), subKey);
+            SpeechTranslationConfig config = SpeechTranslationConfig.FromEndpoint(new Uri(endpoint), subKey);
             config.SpeechRecognitionLanguage = FromLang;
 
             To2Langs.ForEach(l => config.AddTargetLanguage(l));

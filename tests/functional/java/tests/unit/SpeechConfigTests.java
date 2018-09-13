@@ -25,7 +25,7 @@ import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
-import com.microsoft.cognitiveservices.speech.translation.SpeechTranslatorConfig;
+import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig;
                                                           
 
 import tests.Settings;
@@ -620,7 +620,7 @@ public class SpeechConfigTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfString1() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
             TranslationRecognizer r = new TranslationRecognizer(s, null);
@@ -637,7 +637,7 @@ public class SpeechConfigTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfString2() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("illegal");
 
         try {
@@ -654,7 +654,7 @@ public class SpeechConfigTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfString3() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-EN");
 
         try {
@@ -671,7 +671,7 @@ public class SpeechConfigTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfString4() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-EN");
         s.addTargetLanguage("");
 
@@ -690,7 +690,7 @@ public class SpeechConfigTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfString5() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.addTargetLanguage("illegal");
 
         try {
@@ -709,7 +709,7 @@ public class SpeechConfigTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringSuccess() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.addTargetLanguage("en-US");
         s.setSpeechRecognitionLanguage("en-EN");
 
@@ -729,7 +729,7 @@ public class SpeechConfigTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString1() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
             TranslationRecognizer r = new TranslationRecognizer(null,null);
@@ -745,7 +745,7 @@ public class SpeechConfigTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString2() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("illegal");
 
         try {
@@ -762,7 +762,7 @@ public class SpeechConfigTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString3() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
 
         try {
@@ -779,7 +779,7 @@ public class SpeechConfigTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString4() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
 
         try {
@@ -798,7 +798,7 @@ public class SpeechConfigTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString5() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("illegal");
 
@@ -816,7 +816,7 @@ public class SpeechConfigTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString6() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("en-US");
 
@@ -837,7 +837,7 @@ public class SpeechConfigTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString7() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("en-US");
         s.setVoiceName("illegal");
@@ -859,7 +859,7 @@ public class SpeechConfigTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringStringSuccess() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("en-US");
         s.setVoiceName("en-US");
@@ -879,7 +879,7 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfString1() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
             TranslationRecognizer r = new TranslationRecognizer(null,null);
@@ -894,7 +894,7 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfString2() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
             TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput("illegal-" + Settings.WavFile));
@@ -909,7 +909,7 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfString3() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
             TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
@@ -924,7 +924,7 @@ public class SpeechConfigTests {
     
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfString4() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("illegal");
         
         try {
@@ -940,7 +940,7 @@ public class SpeechConfigTests {
     
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfString5() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         
         try {
@@ -956,7 +956,7 @@ public class SpeechConfigTests {
     
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfString6() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         
         try {
@@ -975,7 +975,7 @@ public class SpeechConfigTests {
     @Ignore("TODO why can create with illegal source language")
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfString7() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("illegal");     
         
@@ -992,7 +992,7 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringSuccess() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("en-US");
         
@@ -1012,7 +1012,7 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString1() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
             TranslationRecognizer r = new TranslationRecognizer(s, null);
@@ -1027,7 +1027,7 @@ public class SpeechConfigTests {
     
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString2() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
             TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput("illegal-" + Settings.WavFile));
@@ -1042,7 +1042,7 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString3() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
             TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
@@ -1057,7 +1057,7 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString4() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("illegal");
         
         try {
@@ -1073,7 +1073,7 @@ public class SpeechConfigTests {
     
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString5() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         
         try {
@@ -1089,7 +1089,7 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString6() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         
         try {
@@ -1106,7 +1106,7 @@ public class SpeechConfigTests {
     @Test
     @Ignore("TODO: Check, now we can pass language as part of config, and it can be null")
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString7() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("illegal");
         
@@ -1125,7 +1125,7 @@ public class SpeechConfigTests {
     @Test
     @Ignore("TODO: Check, now we can pass language as part of config, and it can be null")
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString8() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("en-US");
         
@@ -1143,7 +1143,7 @@ public class SpeechConfigTests {
     @Ignore("TODO why can create with illegal voice?")
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString9() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("en-US");
         s.setVoiceName("illegal");
@@ -1161,7 +1161,7 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringStringSuccess() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("en-US");
         s.setVoiceName("en-US");
@@ -1181,7 +1181,7 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfString1() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
             TranslationRecognizer r = new TranslationRecognizer(s, null);
@@ -1196,7 +1196,7 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfString2() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
             WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
@@ -1213,7 +1213,7 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfString3() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("illegal");
         
         try {
@@ -1231,7 +1231,7 @@ public class SpeechConfigTests {
     
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfString4() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         
         try {
@@ -1249,7 +1249,7 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfString5() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         
         try {
@@ -1270,7 +1270,7 @@ public class SpeechConfigTests {
     @Ignore("TODO why does illegal target language not fail")
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfString6() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.addTargetLanguage("illegal");
         s.setSpeechRecognitionLanguage("en-US");
         
@@ -1290,7 +1290,7 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringSuccess() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.addTargetLanguage("en-US");
         s.setSpeechRecognitionLanguage("en-US");
         
@@ -1311,7 +1311,7 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringString1() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
          
         try {
             TranslationRecognizer r = new TranslationRecognizer(s,  null);
@@ -1326,7 +1326,7 @@ public class SpeechConfigTests {
     
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringString2() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
             WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
@@ -1343,7 +1343,7 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringString3() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("illegal");
         
         try {
@@ -1361,7 +1361,7 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringString4() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         
         try {
@@ -1379,7 +1379,7 @@ public class SpeechConfigTests {
     
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringString5() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         
         try {
@@ -1400,7 +1400,7 @@ public class SpeechConfigTests {
     @Test
     @Ignore("TODO: Check, now we can pass language as part of config, and it can be null")
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringString6() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("illegal");
         
@@ -1420,7 +1420,7 @@ public class SpeechConfigTests {
     @Test
     @Ignore("TODO: Check, now we can pass language as part of config, and it can be null")
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringString7() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("en-US");
         
@@ -1441,7 +1441,7 @@ public class SpeechConfigTests {
     @Ignore("TODO create with stream on illegal voice does not fail?")
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringString8() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("en-US");
         s.setVoiceName("illegal");
@@ -1464,7 +1464,7 @@ public class SpeechConfigTests {
 
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringStringSuccess() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("en-US");
         s.setVoiceName("en-US");

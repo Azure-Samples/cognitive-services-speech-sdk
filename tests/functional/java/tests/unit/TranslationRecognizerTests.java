@@ -26,7 +26,7 @@ import com.microsoft.cognitiveservices.speech.RecognitionEventType;
 import com.microsoft.cognitiveservices.speech.Recognizer;
 import com.microsoft.cognitiveservices.speech.SessionEventType;
 import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
-import com.microsoft.cognitiveservices.speech.translation.SpeechTranslatorConfig;
+import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 import com.microsoft.cognitiveservices.speech.translation.TranslationTextResult;
 
@@ -60,7 +60,7 @@ public class TranslationRecognizerTests {
     @Ignore("TODO not working with microphone")
     @Test
     public void testTranslationRecognizer1() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("de");
@@ -76,7 +76,7 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testTranslationRecognizer2() throws InterruptedException, ExecutionException {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
@@ -100,7 +100,7 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testGetSpeechRecognitionLanguage() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
@@ -121,7 +121,7 @@ public class TranslationRecognizerTests {
     @Ignore("TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)")
     @Test
     public void testGetTargetLanguages() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
@@ -145,7 +145,7 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testGetOutputVoiceNameNoSetting() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
@@ -164,7 +164,7 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testGetVoiceName() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
@@ -191,7 +191,7 @@ public class TranslationRecognizerTests {
     @Ignore("TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)")
     @Test
     public void testGetParameters() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         String language = "en-US";
@@ -219,7 +219,7 @@ public class TranslationRecognizerTests {
     @Ignore("TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)")
     @Test
     public void testRecognizeAsync1() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         String language = "en-US";
@@ -258,7 +258,7 @@ public class TranslationRecognizerTests {
     @Ignore("TODO why is event order wrong?")
     @Test
     public void testRecognizeAsync2() throws InterruptedException, ExecutionException {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         String language = "en-US";
@@ -344,7 +344,7 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testStartContinuousRecognitionAsync() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         String language = "en-US";
@@ -371,7 +371,7 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testStopContinuousRecognitionAsync() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         String language = "en-US";
@@ -410,7 +410,7 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testStartStopContinuousRecognitionAsync() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         String language = "en-US";
@@ -468,7 +468,7 @@ public class TranslationRecognizerTests {
     @Ignore("TODO not working with microphone")
     @Test
     public void testGetRecoImpl() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         String language = "en-US";

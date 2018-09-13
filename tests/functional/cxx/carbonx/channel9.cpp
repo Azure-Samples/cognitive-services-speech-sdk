@@ -305,7 +305,7 @@ void CarbonTestConsole::ch9_do_kws_intent()
 
 void CarbonTestConsole::ch9_do_translation()
 {
-    auto sc = SpeechTranslatorConfig::FromSubscription(m_subscriptionKey, translationRegion);
+    auto sc = SpeechTranslationConfig::FromSubscription(m_subscriptionKey, translationRegion);
     sc->SetSpeechRecognitionLanguage("en-US");
     sc->AddTargetLanguage("de-DE");
     sc->AddTargetLanguage("fr-FR");

@@ -25,7 +25,7 @@ public final class TranslationSynthesisResultEventArgs //: System.EventArgs
       */
     public final TranslationSynthesisResult getResult() {
         return _Result;
-    }// { get; }
+    }
     private TranslationSynthesisResult _Result;
 
     /**
@@ -35,7 +35,7 @@ public final class TranslationSynthesisResultEventArgs //: System.EventArgs
     public final String getSessionId()
     {
         return _sessionId;
-    }// { get; }
+    }
     private String _sessionId;
 
     /**

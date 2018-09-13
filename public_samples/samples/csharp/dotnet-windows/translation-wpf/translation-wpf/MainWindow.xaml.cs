@@ -197,7 +197,7 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
         #endregion
 
         private TranslationRecognizer recognizer;
-        private SpeechTranslatorConfig config;
+        private SpeechTranslationConfig config;
         private string subscriptionKey;
         private const string SubscriptionKeyFileName = "SubscriptionKey.txt";
         private bool started;
@@ -314,7 +314,7 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
         /// </summary>
         private void CreateRecognizer()
         {
-            this.config = SpeechTranslatorConfig.FromSubscription(SubscriptionKey, Region);
+            this.config = SpeechTranslationConfig.FromSubscription(SubscriptionKey, Region);
             this.config.SpeechRecognitionLanguage = FromLanguage;
             this.config.VoiceName = voice;
             ToLanguages.ForEach(l => this.config.AddTargetLanguage(l));

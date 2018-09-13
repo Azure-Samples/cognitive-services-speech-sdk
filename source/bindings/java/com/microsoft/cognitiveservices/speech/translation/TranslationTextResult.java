@@ -36,7 +36,7 @@ public final class TranslationTextResult extends com.microsoft.cognitiveservices
       */
     public final Map<String, String> getTranslations() {
         return _Translations;
-    }// { get; }
+    }
     private Map<String, String> _Translations;
     
     /**

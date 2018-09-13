@@ -33,7 +33,7 @@ public final class IntentRecognitionResultEventArgs // : System.EventArgs
     public final IntentRecognitionResult getResult()
     {
         return _Result;
-    }//{ get; }
+    }
     private IntentRecognitionResult  _Result;
 
     /**
@@ -44,7 +44,7 @@ public final class IntentRecognitionResultEventArgs // : System.EventArgs
     {
         return _SessionId;
     }
-    // { get; }
+   
     private String _SessionId;
     
     public ResultPropertyCollection getProperties()

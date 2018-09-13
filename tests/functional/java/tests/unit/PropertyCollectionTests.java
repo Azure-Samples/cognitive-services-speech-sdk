@@ -21,7 +21,7 @@ import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
-import com.microsoft.cognitiveservices.speech.translation.SpeechTranslatorConfig;
+import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig;
 import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
 
 import tests.Settings;
@@ -50,7 +50,7 @@ public class PropertyCollectionTests {
         PropertyCollection srp  = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile)).getParameters();
         assertNotNull(srp);
 
-        SpeechTranslatorConfig st = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig st = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         st.setSpeechRecognitionLanguage("en-US");
         st.addTargetLanguage("en-US");
         PropertyCollection trp  = new TranslationRecognizer(st, AudioConfig.fromWavFileInput(Settings.WavFile)).getParameters();
@@ -97,7 +97,7 @@ public class PropertyCollectionTests {
         assertNotNull(srp);
         testIsParametersString(srp);
         
-        SpeechTranslatorConfig st = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig st = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         st.setSpeechRecognitionLanguage("en-US");
         st.addTargetLanguage("en-US");
         PropertyCollection trp  = new TranslationRecognizer(st, AudioConfig.fromWavFileInput(Settings.WavFile)).getParameters();
@@ -132,7 +132,7 @@ public class PropertyCollectionTests {
         assertNotNull(srp);
         testIsParametersString(srp);
         
-        SpeechTranslatorConfig st = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig st = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         st.setSpeechRecognitionLanguage("en-US");
         st.addTargetLanguage("en-US");
         PropertyCollection trp  = new TranslationRecognizer(st, AudioConfig.fromWavFileInput(Settings.WavFile)).getParameters();
@@ -170,7 +170,7 @@ public class PropertyCollectionTests {
         assertNotNull(srp);
         testGetParametersStringString(srp);
         
-        SpeechTranslatorConfig st = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig st = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         st.setSpeechRecognitionLanguage("en-US");
         st.addTargetLanguage("en-US");
         PropertyCollection trp  = new TranslationRecognizer(st, AudioConfig.fromWavFileInput(Settings.WavFile)).getParameters();
@@ -193,7 +193,7 @@ public class PropertyCollectionTests {
         PropertyCollection srp  = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile)).getParameters();
         assertNotNull(srp);
         
-        SpeechTranslatorConfig st = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig st = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         st.setSpeechRecognitionLanguage("en-US");
         st.addTargetLanguage("en-US");
         PropertyCollection trp  = new TranslationRecognizer(st, AudioConfig.fromWavFileInput(Settings.WavFile)).getParameters();

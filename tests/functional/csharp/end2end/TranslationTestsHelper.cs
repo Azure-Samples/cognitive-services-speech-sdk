@@ -25,9 +25,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             timeout = TimeSpan.FromMinutes(6);
         }
 
-        public SpeechTranslatorConfig GetConfig(string path, string fromLanguage, List<string> toLanguages, string voice)
+        public SpeechTranslationConfig GetConfig(string path, string fromLanguage, List<string> toLanguages, string voice)
         {
-            var config = SpeechTranslatorConfig.FromSubscription(this.subscriptionKey, this.region);
+            var config = SpeechTranslationConfig.FromSubscription(this.subscriptionKey, this.region);
             config.SpeechRecognitionLanguage = fromLanguage;
             toLanguages.ForEach(l => config.AddTargetLanguage(l));
 

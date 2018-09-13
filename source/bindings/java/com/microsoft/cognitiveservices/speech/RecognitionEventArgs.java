@@ -26,17 +26,17 @@ public final class RecognitionEventArgs // extends EventArgs
     /**
      * Represents the event type.
      */
-    public final RecognitionEventType eventType;// { get; }
+    public final RecognitionEventType eventType;
 
     /**
      * Represents the session identifier.
      */
-    public final String sessionId; // { get; }
+    public final String sessionId;
 
     /**
      * Represents the message offset
      */
-    public final BigInteger offset; //{ get; }
+    public final BigInteger offset;
 
     /**
      * Returns a String that represents the session event.

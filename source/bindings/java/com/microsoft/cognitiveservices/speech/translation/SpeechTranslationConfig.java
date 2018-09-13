@@ -17,9 +17,9 @@ import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
  /**
-   * Speech translator configuration.
+   * Speech translation configuration.
    */
- public final class SpeechTranslatorConfig implements Closeable {
+ public final class SpeechTranslationConfig implements Closeable {
 
     // load the native library.
     static {
@@ -35,39 +35,39 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
     /**
       * Creates an instance of recognizer config.
       */
-    private SpeechTranslatorConfig(com.microsoft.cognitiveservices.speech.internal.SpeechTranslatorConfig configImpl) {
+    private SpeechTranslationConfig(com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig configImpl) {
         Contracts.throwIfNull(configImpl, "configImpl");
 
         this.translatorConfigImpl = configImpl;
     }
 
     /**
-      * Static instance of SpeechTranslatorConfig returned by passing subscriptionKey and service region.
+      * Static instance of SpeechTranslationConfig returned by passing subscriptionKey and service region.
       * @param subscriptionKey The subscription key.
       * @param region The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
       * @return The speech config 
       */
-    public static SpeechTranslatorConfig fromSubscription(String subscriptionKey, String region) {
+    public static SpeechTranslationConfig fromSubscription(String subscriptionKey, String region) {
         Contracts.throwIfIllegalSubscriptionKey(subscriptionKey, "subscriptionKey");
         Contracts.throwIfNullOrWhitespace(region, "region");
 
-        return new SpeechTranslatorConfig(com.microsoft.cognitiveservices.speech.internal.SpeechTranslatorConfig.FromSubscription(subscriptionKey, region));
+        return new SpeechTranslationConfig(com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig.FromSubscription(subscriptionKey, region));
     }
 
     /**
-      * Static instance of SpeechTranslatorConfig returned by passing authorization token and service region.
+      * Static instance of SpeechTranslationConfig returned by passing authorization token and service region.
       * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
       * expipres, the caller needs to refresh it by setting the property `AuthorizationToken` with a new valid token.
-      * Otherwise, all the recognizers created by this SpeechTranslatorConfig instance will encounter errors during recognition.
+      * Otherwise, all the recognizers created by this SpeechTranslationConfig instance will encounter errors during recognition.
       * @param authorizationToken The authorization token.
       * @param region The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
       * @return The speech config 
       */
-    public static SpeechTranslatorConfig fromAuthorizationToken(String authorizationToken, String region) {
+    public static SpeechTranslationConfig fromAuthorizationToken(String authorizationToken, String region) {
         Contracts.throwIfNullOrWhitespace(authorizationToken, "authorizationToken");
         Contracts.throwIfNullOrWhitespace(region, "region");
 
-        return new SpeechTranslatorConfig(com.microsoft.cognitiveservices.speech.internal.SpeechTranslatorConfig.FromAuthorizationToken(authorizationToken, region));
+        return new SpeechTranslationConfig(com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig.FromAuthorizationToken(authorizationToken, region));
     }
 
     /**
@@ -81,11 +81,11 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
       * @param subscriptionKey The subscription key.
       * @return A speech config instance.
       */
-    public static SpeechTranslatorConfig fromEndpoint(java.net.URI endpoint, String subscriptionKey) {
+    public static SpeechTranslationConfig fromEndpoint(java.net.URI endpoint, String subscriptionKey) {
         Contracts.throwIfNull(endpoint, "endpoint");
         Contracts.throwIfIllegalSubscriptionKey(subscriptionKey, "subscriptionKey");
 
-        return new SpeechTranslatorConfig(com.microsoft.cognitiveservices.speech.internal.SpeechTranslatorConfig.FromEndpoint(endpoint.toString(), subscriptionKey));
+        return new SpeechTranslationConfig(com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig.FromEndpoint(endpoint.toString(), subscriptionKey));
     }
 
     /**
@@ -172,14 +172,14 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
     }
     
     /**
-     * Returns the speech translator config implementation
-     * @return The implementation of the speech translator config.
+     * Returns the speech translation config implementation
+     * @return The implementation of the speech translation config.
      */
-    com.microsoft.cognitiveservices.speech.internal.SpeechTranslatorConfig getImpl()
+    com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig getImpl()
     {
         return translatorConfigImpl;
     }
 
-    private com.microsoft.cognitiveservices.speech.internal.SpeechTranslatorConfig translatorConfigImpl;
+    private com.microsoft.cognitiveservices.speech.internal.SpeechTranslationConfig translatorConfigImpl;
     private boolean disposed = false;
 }

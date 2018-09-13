@@ -1646,8 +1646,8 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
     else if (recognizerType == PAL::GetTypeName<TranslationRecognizer>())
     {
         auto sc = !m_endpointUri.empty()
-            ? SpeechTranslatorConfig::FromEndpoint(m_endpointUri, m_subscriptionKey)
-            : SpeechTranslatorConfig::FromSubscription(m_subscriptionKey, m_regionId);
+            ? SpeechTranslationConfig::FromEndpoint(m_endpointUri, m_subscriptionKey)
+            : SpeechTranslationConfig::FromSubscription(m_subscriptionKey, m_regionId);
 
         sc->SetSpeechRecognitionLanguage("en-US");
         sc->AddTargetLanguage("de");

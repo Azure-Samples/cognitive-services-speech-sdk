@@ -42,7 +42,7 @@ public final class IntentRecognitionResult extends com.microsoft.cognitiveservic
       */
     public String getIntentId() {
         return _intentId;
-    } // { get; }
+    }
     private String _intentId;
 
     /**
@@ -51,7 +51,7 @@ public final class IntentRecognitionResult extends com.microsoft.cognitiveservic
      */
     public String getLanguageUnderstanding() {
         return getProperties().getProperty(SpeechPropertyId.SpeechServiceResponse_JsonResult);
-    } // { get; }
+    }
 
    /**
     * A String that represents the intent as json.
@@ -59,7 +59,7 @@ public final class IntentRecognitionResult extends com.microsoft.cognitiveservic
     */
     public String getJson() {
       return getProperties().getProperty(SpeechPropertyId.SpeechServiceResponse_Json);
-    } // { get; }
+    }
 
     /**
       * Returns a String that represents the intent recognition result.

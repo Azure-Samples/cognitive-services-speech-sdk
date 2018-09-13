@@ -23,7 +23,7 @@ public final class TranslationTextResultEventArgs //: System.EventArgs
       * Specifies the recognition result.
       * @return the recognition result.
       */
-    public final TranslationTextResult getResult() // { get; }
+    public final TranslationTextResult getResult()
     {
         return _Result;
     }
@@ -36,7 +36,7 @@ public final class TranslationTextResultEventArgs //: System.EventArgs
     public final String getSessionId()
     {
         return _SessionId;
-    }// { get; }
+    }
     private String _SessionId;
 
     /**

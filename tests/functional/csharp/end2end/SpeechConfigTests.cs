@@ -38,7 +38,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
 
             var sourceLanguage = Language.EN;
-            var translatorConfig = SpeechTranslatorConfig.FromSubscription(subscriptionKey, region);
+            var translatorConfig = SpeechTranslationConfig.FromSubscription(subscriptionKey, region);
             translatorConfig.SpeechRecognitionLanguage = sourceLanguage;
 
             var targetLanguages = new List<string>() { Language.DE, Language.ES };

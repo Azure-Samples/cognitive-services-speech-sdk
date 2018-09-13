@@ -25,10 +25,10 @@ public class TranslationSamples {
     public static void translationWithMicrophoneAsync() throws InterruptedException, ExecutionException, IOException
     {
         // <TranslationWithMicrophoneAsync>
-        // Creates an instance of a speech translator config with specified
+        // Creates an instance of a speech translation config with specified
         // subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
-        SpeechTranslatorConfig config = SpeechTranslatorConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechTranslationConfig config = SpeechTranslationConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
         // Sets source and target language(s).
         String fromLanguage = "en-US";
@@ -107,10 +107,10 @@ public class TranslationSamples {
     {
         stopTranslationWithFileSemaphore = new Semaphore(0);
 
-        // Creates an instance of a speech translator config with specified
+        // Creates an instance of a speech translation config with specified
         // subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
-        SpeechTranslatorConfig config = SpeechTranslatorConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechTranslationConfig config = SpeechTranslationConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
         // Sets source and target languages
         String fromLanguage = "en-US";
@@ -193,10 +193,10 @@ public class TranslationSamples {
     {
         stopTranslationWithAudioStreamSemaphore = new Semaphore(0);
 
-        // Creates an instance of a speech translator config with specified
+        // Creates an instance of a speech translation config with specified
         // subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
-        SpeechTranslatorConfig config = SpeechTranslatorConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechTranslationConfig config = SpeechTranslationConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
         // Sets source and target languages
         String fromLanguage = "en-US";

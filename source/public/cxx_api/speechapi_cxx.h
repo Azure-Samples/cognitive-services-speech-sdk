@@ -41,6 +41,6 @@
 #include <speechapi_cxx_translation_result.h>
 #include <speechapi_cxx_translation_eventargs.h>
 #include <speechapi_cxx_translation_recognizer.h>
-#include <speechapi_cxx_speech_translator_config.h>
+#include <speechapi_cxx_speech_translation_config.h>
 
 #include <speechapi_cxx_session.h>

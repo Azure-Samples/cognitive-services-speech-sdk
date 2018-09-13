@@ -17,7 +17,7 @@ import com.microsoft.cognitiveservices.speech.Recognizer;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
-import com.microsoft.cognitiveservices.speech.translation.SpeechTranslatorConfig;
+import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 
 import tests.Settings;
@@ -63,7 +63,7 @@ public class RecognizerTests {
     @Ignore("TODO does not work with microphone")
     @Test
     public void testRecognizer3() {
-        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         s.addTargetLanguage("en-US");
