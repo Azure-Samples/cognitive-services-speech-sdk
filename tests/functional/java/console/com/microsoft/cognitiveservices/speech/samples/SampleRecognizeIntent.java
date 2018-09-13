@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import com.microsoft.cognitiveservices.speech.SpeechFactory;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResultEventArgs;
@@ -24,20 +24,19 @@ public class SampleRecognizeIntent implements Runnable {
     ///////////////////////////////////////////////////
     @Override
     public void run() {
-        SpeechFactory factory = null;
+        SpeechConfig config = null;
         AudioConfig audioInput = null;
         IntentRecognizer reco = null;
 
         List<String> content = new ArrayList<>();
 
         content.add("");
+        SpeechConfig sc = null;
         try {
-            // create factory
-            factory = SpeechFactory.fromSubscription(SampleSettings.LuisSubscriptionKey, SampleSettings.LuisRegion);
-
-            // Note: to use the microphone, use "AudioConfig.fromDefaultMicrophoneInput()"
+            // create config 
+            sc = SpeechConfig.fromSubscription(SampleSettings.LuisSubscriptionKey, SampleSettings.LuisRegion);
             audioInput = AudioConfig.fromWavFileInput(SampleSettings.WavFile);
-            reco = factory.createIntentRecognizerFromConfig(audioInput);
+            reco = new IntentRecognizer(sc, audioInput);
 
             HashMap<String, String> intentIdMap = new HashMap<>();
             intentIdMap.put("1", "play music");
@@ -81,7 +80,7 @@ public class SampleRecognizeIntent implements Runnable {
         }
         finally {
             if(reco != null) reco.close();
-            if(factory != null) factory.close();
+            if(sc != null) sc.close();
             if(audioInput != null) audioInput.close();
         }
     }

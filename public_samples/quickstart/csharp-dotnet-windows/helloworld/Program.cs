@@ -14,13 +14,13 @@ namespace helloworld
     {
         public static async Task RecognizeSpeechAsync()
         {
-            // Creates an instance of a speech factory with specified
+            // Creates an instance of a speech config with specified
             // subscription key and service region. Replace with your own subscription key
             // and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             // Creates a speech recognizer.
-            using (var recognizer = factory.CreateSpeechRecognizer())
+            using (var recognizer = new SpeechRecognizer(config))
             {
                 Console.WriteLine("Say something...");
 

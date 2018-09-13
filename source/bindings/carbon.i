@@ -47,12 +47,11 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResult)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationTextResult, Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultEventArgs>)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer)
-%shared_ptr(Microsoft::CognitiveServices::Speech::ISpeechFactory)
-%shared_ptr(Microsoft::CognitiveServices::Speech::ICognitiveServicesSpeechFactory)
 %shared_ptr(Microsoft::CognitiveServices::Speech::PropertyCollection<SPXRECOHANDLE>)
-%shared_ptr(Microsoft::CognitiveServices::Speech::PropertyCollection<SPXFACTORYHANDLE>)
 %shared_ptr(Microsoft::CognitiveServices::Speech::PropertyCollection<SPXRESULTHANDLE>)
 %shared_ptr(Microsoft::CognitiveServices::Speech::PropertyCollection<SPXSESSIONHANDLE>)
+%shared_ptr(Microsoft::CognitiveServices::Speech::SpeechConfig)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Translation::SpeechTranslatorConfig)
 
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::AudioConfig)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::AudioInputStream)
@@ -68,10 +67,6 @@
 %ignore CallbackWrapper::GetFunction();
 %ignore FutureWrapper::FutureWrapper;
 %include <wrappers.h>
-
-%ignore Microsoft::CognitiveServices::Speech::ICognitiveServicesSpeechFactory::CreateSpeechRecognizerWithStream;
-%ignore Microsoft::CognitiveServices::Speech::ICognitiveServicesSpeechFactory::CreateIntentRecognizerWithStream;
-%ignore Microsoft::CognitiveServices::Speech::ICognitiveServicesSpeechFactory::CreateTranslationRecognizerWithStream;
 
 %include <speechapi_cxx_common.h>
 %include <speechapi_cxx_enums.h>
@@ -95,6 +90,10 @@
 %template(IntentRecognitionResultPtrFuture) FutureWrapper<IntentRecognitionResultPtr>;
 %template(TranslationTextResultPtrFuture) FutureWrapper<TranslationTextResultPtr>;
 %template(VoidFuture) FutureWrapper<void>;
+
+
+%include <speechapi_cxx_speech_config.h>
+%include <speechapi_cxx_speech_translator_config.h>
 
 // %extend need to come first, before the %ignore for the same method (RecognizeAsync, etc.)
 %extend Microsoft::CognitiveServices::Speech::SpeechRecognizer {
@@ -339,7 +338,6 @@
 %include <speechapi_cxx_properties.h>
 
 %template(RecognizerPropertyCollection) Microsoft::CognitiveServices::Speech::PropertyCollection<SPXRECOHANDLE>;
-%template(FactoryPropertyCollection) Microsoft::CognitiveServices::Speech::PropertyCollection<SPXFACTORYHANDLE>;
 %template(ResultPropertyCollection) Microsoft::CognitiveServices::Speech::PropertyCollection<SPXRESULTHANDLE>;
 %template(SessionPropertyCollection) Microsoft::CognitiveServices::Speech::PropertyCollection<SPXSESSIONHANDLE>;
 
@@ -414,8 +412,6 @@
 
 %include <speechapi_cxx_intent_recognizer.h>
 
-%ignore Microsoft::CognitiveServices::Speech::FactoryParameterValue::FactoryParameterValue(SPXFACTORYHANDLE, enum FactoryParameter);
-
 %include <speechapi_cxx_translation_result.h>
 %include <speechapi_cxx_translation_eventargs.h>
 
@@ -434,9 +430,7 @@
 %template(TranslationSynthesisEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResultEventArgs&>;
 %template(TranslationRecognizerBase) Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationTextResult, Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultEventArgs>;
 
-%immutable Microsoft::CognitiveServices::Speech::ISpeechFactory::Parameters;
 %include <speechapi_cxx_translation_recognizer.h>
-%include <speechapi_cxx_factory.h>
 
 %immutable Microsoft::CognitiveServices::Speech::Session::Parameters;
 

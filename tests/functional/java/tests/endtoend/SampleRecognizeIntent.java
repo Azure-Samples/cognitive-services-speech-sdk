@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.concurrent.Future;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
-import com.microsoft.cognitiveservices.speech.SpeechFactory;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResultEventArgs;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
@@ -36,16 +36,16 @@ public class SampleRecognizeIntent implements Runnable {
     ///////////////////////////////////////////////////
     @Override
     public void run() {
-        // create factory
-        SpeechFactory factory = SpeechFactory.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
+        // create config 
+        SpeechConfig config = SpeechConfig.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisRegion);
 
         List<String> content = new ArrayList<>();
 
         content.add("");
         try {
-            // Note: to use the microphone, use "AudioConfig.fromDefaultMicrophoneInput()"
+            // TODO: to use the microphone, replace the parameter with "new MicrophoneAudioInputStream()"
             AudioConfig audioInput = AudioConfig.fromWavFileInput(Settings.WavFile);
-            IntentRecognizer reco = factory.createIntentRecognizerFromConfig(audioInput);
+            IntentRecognizer reco = new IntentRecognizer(config, audioInput);
 
             HashMap<String, String> intentIdMap = new HashMap<>();
             intentIdMap.put("1", "play music");
@@ -86,7 +86,7 @@ public class SampleRecognizeIntent implements Runnable {
             System.out.println(String.join("\n", content));
 
             reco.close();
-            factory.close();
+            config.close();
             audioInput.close();
         } catch (Exception ex) {
             Settings.displayException(ex);

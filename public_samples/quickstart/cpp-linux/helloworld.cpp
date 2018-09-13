@@ -11,13 +11,13 @@ using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 
 void recognizeSpeech() {
-    // Creates an instance of a speech factory with specified
+    // Creates an instance of a speech config with specified
     // subscription key and service region. Replace with your own subscription key
     // and service region (e.g., "westus").
-    auto factory = SpeechFactory::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
     // Creates a speech recognizer
-    auto recognizer = factory->CreateSpeechRecognizer();
+    auto recognizer = SpeechRecognizer::FromConfig(config);
     cout << "Say something...\n";
 
     // Performs recognition.

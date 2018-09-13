@@ -9,6 +9,9 @@ import java.util.concurrent.Future;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
+import com.microsoft.cognitiveservices.speech.PropertyCollection;
+import com.microsoft.cognitiveservices.speech.RecognizerProperties;
 
 /**
   * Performs speech recognition from microphone, file, or other audio input streams, and gets transcribed text as result.
@@ -36,8 +39,8 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       * @param recoImpl The recognizer implementation
       * @param audioInput An optional audio input configuration associated with the recognizer
       */
-    public SpeechRecognizer(com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer recoImpl, AudioConfig audioInput) {
-        super(audioInput);
+    private SpeechRecognizer(com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer recoImpl, AudioConfig audioConfig) {
+        super(audioConfig);
 
         Contracts.throwIfNull(recoImpl, "recoImpl");
         this.recoImpl = recoImpl;
@@ -56,33 +59,59 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         recoImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
         recoImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
 
-        _Parameters = new ParameterCollection<SpeechRecognizer>(this);
+        _Parameters = new RecognizerProperties<SpeechRecognizer>(this);
     }
 
     /**
-      * Gets the deployment id of a customized speech model that is used for speech recognition.
-      * @return the deployment id of a customized speech model that is used for speech recognition.
+      * Initializes a new instance of Speech Recognizer.
+      * @param speechConfig speech configuration.
       */
-    public String getDeploymentId() {
-        return _Parameters.getString(RecognizerParameterNames.SpeechModelId);
+    public SpeechRecognizer(SpeechConfig speechConfig)
+    {
+        this(com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), null), null);
+    }
+
+    /**
+      * Initializes a new instance of Speech Recognizer.
+      * @param speechConfig speech configuration.
+      * @param audioConfig audio configuration.
+      */
+    public SpeechRecognizer(SpeechConfig speechConfig, AudioConfig audioConfig)
+    {
+        this(com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), audioConfig.getConfigImpl()), audioConfig);
+    }
+
+    /**
+      * Gets the endpoint ID of a customized speech model that is used for speech recognition.
+      * @return the endpoint ID of a customized speech model that is used for speech recognition.
+      */
+    public String getEndpointId() {
+        return recoImpl.GetEndpointId();
     }
     
     /**
-      * Sets the deployment id of a customized speech model that is used for speech recognition.
-      * @param value The deployment id of a customized speech model that is used for speech recognition.
+      * Sets the authorization token used to communicate with the service.
+      * @param token Authorization token.
       */
-    public void setDeploymentId(String value) {
-        Contracts.throwIfNullOrWhitespace(value, "value");
+    public void setAuthorizationToken(String token) {
+        Contracts.throwIfNullOrWhitespace(token, "token");
+        recoImpl.SetAuthorizationToken(token);
+    }
 
-        _Parameters.set(RecognizerParameterNames.SpeechModelId, value);
+    /**
+      * Gets the authorization token used to communicate with the service.
+      * @return Authorization token.
+      */
+    public String getAuthorizationToken() {
+        return recoImpl.GetAuthorizationToken();
     }
 
     /**
       * Gets the spoken language of recognition.
       * @return The spoken language of recognition.
       */
-    public String getLanguage() {
-        return _Parameters.getString(RecognizerParameterNames.SpeechRecognitionLanguage);
+    public String getSpeechRecognitionLanguage() {
+        return _Parameters.getProperty(SpeechPropertyId.SpeechServiceConnection_RecoLanguage);
     }
 
     /**
@@ -90,7 +119,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       * @return The output format of recognition.
       */
     public OutputFormat getOutputFormat() {
-        if (_Parameters.getString(RecognizerParameterNames.OutputFormat).equals("DETAILED")) {
+        if (_Parameters.getProperty(SpeechPropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse).equals("true")) {
             return OutputFormat.Detailed;
         } else {
             return OutputFormat.Simple;
@@ -101,10 +130,11 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       * The collection of parameters and their values defined for this SpeechRecognizer.
       * @return The collection of parameters and their values defined for this SpeechRecognizer.
       */
-    public ParameterCollection<SpeechRecognizer> getParameters() {
+    public PropertyCollection getParameters() {
         return _Parameters;
-    }// { get; }
-    private ParameterCollection<SpeechRecognizer> _Parameters;
+    }
+
+    private RecognizerProperties<SpeechRecognizer> _Parameters;
 
     /**
       * Starts speech recognition, and stops after the first utterance is recognized. The task returns the recognition text as result.

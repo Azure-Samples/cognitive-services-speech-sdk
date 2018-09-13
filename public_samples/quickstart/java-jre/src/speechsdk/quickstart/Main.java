@@ -24,11 +24,10 @@ public class Main {
             String serviceRegion = "YourServiceRegion";
 
             int exitCode = 1;
+            SpeechConfig config = SpeechConfig.fromSubscription(speechSubscriptionKey, serviceRegion);
+            assert(config != null);
 
-            SpeechFactory factory = SpeechFactory.fromSubscription(speechSubscriptionKey, serviceRegion);
-            assert(factory != null);
-
-            SpeechRecognizer reco = factory.createSpeechRecognizer();
+            SpeechRecognizer reco = new SpeechRecognizer(config);
             assert(reco != null);
 
             System.out.println("Say something...");
@@ -55,7 +54,6 @@ public class Main {
             }
 
             reco.close();
-            factory.close();
             
             System.exit(exitCode);
         } catch (Exception ex) {

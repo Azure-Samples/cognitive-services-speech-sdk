@@ -29,20 +29,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestInitialize]
         public void TestInitalize()
         {
-            speechHelper = new SpeechWithStreamHelper(factory);
+            speechHelper = new SpeechWithStreamHelper();
         }
 
         [TestMethod]
         public async Task SimpleRecognitionBatman()
         {
-            var result = await this.speechHelper.GetSpeechFinalRecognitionResult(TestData.English.Batman.AudioFile);
+            var result = await this.speechHelper.GetSpeechFinalRecognitionResult(this.config, TestData.English.Batman.AudioFile);
             AssertMatching(TestData.English.Batman.Utterances[0], result.Text);
         }
 
         [TestMethod]
         public async Task DetailedRecognitionBatman()
         {
-            var result = await this.speechHelper.GetSpeechFinalRecognitionResult(TestData.English.Batman.AudioFile, Language.EN, OutputFormat.Detailed);
+            this.config.SpeechRecognitionLanguage = Language.EN;
+            this.config.OutputFormat = OutputFormat.Detailed;
+            var result = await this.speechHelper.GetSpeechFinalRecognitionResult(this.config, TestData.English.Batman.AudioFile);
             var detailedRecognitionText = string.Join(" ", result.Best().Select(r => r.Text).ToList());
             var detailedRecognitionNormalizedForm = string.Join(" ", result.Best().Select(r => r.NormalizedForm).ToList());
             var detailedRecognitionLexicalForm = string.Join(" ", result.Best().Select(r => r.NormalizedForm).ToList());
@@ -55,7 +57,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task SimpleRecognitionBatmanContinuous()
         {
-            var result = await this.speechHelper.GetSpeechFinalRecognitionContinuous(TestData.English.Batman.AudioFile);
+            var result = await this.speechHelper.GetSpeechFinalRecognitionContinuous(this.config, TestData.English.Batman.AudioFile);
             Assert.AreEqual(TestData.English.Batman.Utterances.Length, result.Count, "Unexpected number of utterances.");
             var actualRecognitionTextResults = result.Select(t => t.Result.Text).ToArray();
             for (var i = 0; i < result.Count; i++)
@@ -67,7 +69,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task DetailedRecognitionBatmanContinuous()
         {
-            var result = await this.speechHelper.GetSpeechFinalRecognitionContinuous(TestData.English.Batman.AudioFile, Language.EN, OutputFormat.Detailed);
+            this.config.SpeechRecognitionLanguage = Language.EN;
+            this.config.OutputFormat = OutputFormat.Detailed;
+            var result = await this.speechHelper.GetSpeechFinalRecognitionContinuous(this.config, TestData.English.Batman.AudioFile);
             Assert.AreNotEqual(result.Count, 0);
 
             var firstUtteranceText = string.Join(" ", result[0].Result.Best().Select(r => r.Text).ToList());
@@ -97,7 +101,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestMethod]
         public async Task DetailedRecognitionBatmanContinuousBest()
         {
-            var result = await this.speechHelper.GetSpeechFinalRecognitionContinuous(TestData.English.Batman.AudioFile, Language.EN, OutputFormat.Detailed);
+            this.config.SpeechRecognitionLanguage = Language.EN;
+            this.config.OutputFormat = OutputFormat.Detailed;
+            var result = await this.speechHelper.GetSpeechFinalRecognitionContinuous(this.config, TestData.English.Batman.AudioFile);
             Assert.AreNotEqual(result.Count, 0, "Received no result");
 
             var firstUtteranceText = string.Join(" ", result[0].Result.Best().Select(r => r.Text).ToList());
@@ -108,10 +114,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [Ignore]
         public async Task InteractiveCheckFileOffsets()
         {
-            var factory = this.factory;
+            this.config.SpeechRecognitionLanguage = Language.EN;
             var audioInput = Util.OpenWavFile(TestData.English.Batman.AudioFile);
             var results = new List<SpeechRecognitionResult>();
-            using (var recognizer = this.factory.CreateSpeechRecognizerFromConfig(audioInput, Language.EN))
+            using (var recognizer = new SpeechRecognizer(this.config, audioInput))
             {
                 while (true)
                 {
@@ -137,7 +143,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = Util.OpenWavFile(TestData.English.Batman.AudioFile, Times);
             var results = new List<SpeechRecognitionResult>();
             var taskSource = new TaskCompletionSource<bool>();
-            using (var recognizer = this.factory.CreateSpeechRecognizerFromConfig(audioInput, Language.EN))
+            this.config.SpeechRecognitionLanguage = Language.EN;
+            using (var recognizer = new SpeechRecognizer(this.config, audioInput))
             {
                 recognizer.FinalResultReceived += (s, e) =>
                 {

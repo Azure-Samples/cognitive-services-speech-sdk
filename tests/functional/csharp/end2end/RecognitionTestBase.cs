@@ -12,7 +12,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     public class RecognitionTestBase
     {
         public static string inputDir, subscriptionKey, region;
-        public SpeechFactory factory;
+        public SpeechConfig config;
 
         public static void BaseClassInit(TestContext context)
         {
@@ -29,7 +29,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestInitialize]
         public void BaseTestInit()
         {
-            factory = SpeechFactory.FromSubscription(subscriptionKey, region);
+            config = SpeechConfig.FromSubscription(subscriptionKey, region);
         }
     }
 }

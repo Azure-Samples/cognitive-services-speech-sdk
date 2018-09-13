@@ -15,6 +15,7 @@
 #include "resource_manager.h"
 #include "mock_controller.h"
 #include "property_id_2_name_map.h"
+#include "speechapi_c_speech_config.h"
 
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Impl;
@@ -23,17 +24,6 @@ using namespace std;
 static_assert((int)OutputFormat::Simple == (int)SpeechOutputFormat_Simple, "OutputFormat should match between C and C++ layers");
 static_assert((int)OutputFormat::Detailed == (int)SpeechOutputFormat_Detailed, "OutputFormat should match between C and C++ layers");
 
-
-SPXAPI_(bool) speech_factory_handle_is_valid(SPXFACTORYHANDLE hfactory)
-{
-    return Handle_IsValid<SPXFACTORYHANDLE, ISpxSpeechApiFactory>(hfactory);
-}
-
-SPXAPI speech_factory_handle_close(SPXFACTORYHANDLE hfactory)
-{
-    return Handle_Close<SPXFACTORYHANDLE, ISpxSpeechApiFactory>(hfactory);
-}
-
 std::shared_ptr<ISpxAudioConfig> AudioConfigFromHandleOrEmptyIfInvalid(SPXAUDIOCONFIGHANDLE haudioConfig)
 {
     return audio_config_is_handle_valid(haudioConfig)
@@ -41,180 +31,128 @@ std::shared_ptr<ISpxAudioConfig> AudioConfigFromHandleOrEmptyIfInvalid(SPXAUDIOC
         : nullptr;
 }
 
-SPXAPI speech_factory_create_speech_recognizer_from_config(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const char* pszLanguage, SpeechOutputFormat format, SPXAUDIOCONFIGHANDLE haudioInput)
+SPXAPI recognizer_create_speech_recognizer_from_config(SPXRECOHANDLE* phreco, SPXSPEECHCONFIGHANDLE hspeechconfig, SPXAUDIOCONFIGHANDLE haudioInput)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phreco == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !speech_config_is_handle_valid(hspeechconfig));
+
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phreco = SPXHANDLE_INVALID;
 
-        auto factory = CSpxSharedPtrHandleTableManager::GetPtr<ISpxSpeechApiFactory, SPXFACTORYHANDLE>(hfactory);
-        auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioInput);
-        auto recognizer = factory->CreateSpeechRecognizerFromConfig(pszLanguage, (OutputFormat)format, audioInput);
+        // get the input parameters from the hspeechconfig
+        auto confighandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
+        auto speechconfig = (*confighandles)[hspeechconfig];
+        auto speechconfig_propertybag = SpxQueryInterface<ISpxNamedProperties>(speechconfig);
+        auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
 
-        *phreco = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxRecognizer, SPXRECOHANDLE>(recognizer);
+        //copy the properties from the speech config into the factory
+        auto fbag = SpxQueryInterface<ISpxNamedProperties>(factory);
+        fbag->Copy(speechconfig_propertybag.get());
+
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(speechconfig);
+        auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioInput);
+
+        auto recoLanguage = namedProperties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoLanguage));
+        auto outputFormat = namedProperties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse));
+        OutputFormat format = PAL::stricmp(outputFormat.c_str(), PAL::BoolToString(true).c_str()) == 0 ? OutputFormat::Detailed : OutputFormat::Simple;
+
+        auto recognizer = factory->CreateSpeechRecognizerFromConfig(recoLanguage.c_str(), format, audioInput);
+
+        auto fhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
+        fhandles->TrackHandle(factory);
+
+        // track the reco handle
+        auto recohandles  = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        *phreco = recohandles->TrackHandle(recognizer);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI speech_factory_create_intent_recognizer_from_config(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const char* pszLanguage, SpeechOutputFormat format, SPXAUDIOCONFIGHANDLE haudioInput)
+SPXAPI recognizer_create_translation_recognizer_from_config(SPXRECOHANDLE* phreco, SPXSPEECHCONFIGHANDLE hspeechconfig, SPXAUDIOCONFIGHANDLE haudioInput)
 {
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phreco == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !speech_config_is_handle_valid(hspeechconfig));
+
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
     SPXAPI_INIT_HR_TRY(hr)
     {
         *phreco = SPXHANDLE_INVALID;
 
-        auto factory = CSpxSharedPtrHandleTableManager::GetPtr<ISpxSpeechApiFactory, SPXFACTORYHANDLE>(hfactory);
+        std::shared_ptr<ISpxRecognizer> recognizer;
+
+        // create a factory
+        auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
+
+        auto confighandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
+        auto speechconfig = (*confighandles)[hspeechconfig];
+
+        //copy the properties from the speech config into the factory
+        auto speechconfig_propertybag = SpxQueryInterface<ISpxNamedProperties>(speechconfig);
+        auto fbag = SpxQueryInterface<ISpxNamedProperties>(factory);
+        fbag->Copy(speechconfig_propertybag.get());
+
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(speechconfig);
+        auto source_lang = namedProperties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_TranslationFromLanguage));
+        auto voice = namedProperties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_TranslationVoice));
+
+        // language names are separated by comma
+        auto to_langs = namedProperties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_TranslationToLanguages));
+        auto vlangs = PAL::split(to_langs, ",");
+
         auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioInput);
-        auto recognizer = factory->CreateIntentRecognizerFromConfig(pszLanguage, (OutputFormat)format, audioInput);
+        recognizer = factory->CreateTranslationRecognizerFromConfig(source_lang, vlangs, voice, audioInput);
 
-        *phreco = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxRecognizer, SPXRECOHANDLE>(recognizer);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
-}
-
-inline vector<string> TargetLanguagesVectorFromArray(const char* buffer[], size_t entries)
-{
-    vector<string> result;
-    if (buffer != nullptr)
-    {
-        for (size_t i = 0; i < entries; i++)
-        {
-            result.push_back(buffer[i]);
-        }
-    }
-
-    return result;
-}
-
-SPXAPI speech_factory_create_translation_recognizer_from_config(SPXFACTORYHANDLE hfactory, SPXRECOHANDLE* phreco, const char* sourceLanguage, const char* targetLanguages[], size_t numberOfTargetLanguages, const char* voice, SPXAUDIOCONFIGHANDLE haudioInput)
-{
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        *phreco = SPXHANDLE_INVALID;
-
-        auto factory = CSpxSharedPtrHandleTableManager::GetPtr<ISpxSpeechApiFactory, SPXFACTORYHANDLE>(hfactory);
-        auto toLangs = TargetLanguagesVectorFromArray(targetLanguages, numberOfTargetLanguages);
-        auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioInput);
-        auto recognizer = factory->CreateTranslationRecognizerFromConfig(sourceLanguage, toLangs, voice, audioInput);
-
-        *phreco = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxRecognizer, SPXRECOHANDLE>(recognizer);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
-}
-
-SPXAPI speech_factory_from_authorization_token(const char* authToken, const char* region, SPXFACTORYHANDLE* phfactory)
-{
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phfactory == nullptr);
-
-    if (region == nullptr)
-        return SPXERR_INVALID_ARG;
-
-    if (authToken == nullptr)
-        return SPXERR_INVALID_ARG;
-
-    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        *phfactory = SPXHANDLE_INVALID;
-
-        auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
-
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(factory);
-        namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceAuthorization_Token), authToken);
-
-        if (region != nullptr && *region != L'\0')
-        {
-            namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Region), region);
-        }
-        else
-        {
-            SPX_IFFAILED_THROW_HR(SPXERR_INVALID_ARG);
-        }
-
-        *phfactory = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxSpeechApiFactory, SPXFACTORYHANDLE>(factory);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
-}
-
-SPXAPI speech_factory_from_subscription(const char* subscriptionKey, const char* region, SPXFACTORYHANDLE* phfactory)
-{
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phfactory == nullptr);
-    if (region == nullptr)
-        return SPXERR_INVALID_ARG;
-
-    if (subscriptionKey == nullptr)
-        return SPXERR_INVALID_ARG;
-
-    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        *phfactory = SPXHANDLE_INVALID;
-
-        auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
-
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(factory);
-        namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Key), subscriptionKey);
-
-        if (region != nullptr && *region != L'\0')
-        {
-            namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Region), region);
-        }
-        else
-        {
-            SPX_IFFAILED_THROW_HR(SPXERR_INVALID_ARG);
-        }
-
-        *phfactory = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxSpeechApiFactory, SPXFACTORYHANDLE>(factory);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
-}
-
-SPXAPI speech_factory_from_endpoint(const char* endpoint, const char* subscription, SPXFACTORYHANDLE* phfactory)
-{
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phfactory == nullptr);
-    if (endpoint == nullptr)
-        return SPXERR_INVALID_ARG;
-
-    if (subscription == nullptr)
-        return SPXERR_INVALID_ARG;
-
-    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        *phfactory = SPXHANDLE_INVALID;
-
-        auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
-
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(factory);
-        namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Endpoint), endpoint);
-
-        if (subscription != nullptr && *subscription != L'\0')
-        {
-            namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Key), subscription);
-        }
-        else
-        {
-            SPX_IFFAILED_THROW_HR(SPXERR_INVALID_ARG);
-        }
-
-        *phfactory = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxSpeechApiFactory, SPXFACTORYHANDLE>(factory);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
-}
-
-SPXAPI speech_factory_get_property_bag(SPXFACTORYHANDLE hfactory, SPXPROPERTYBAGHANDLE* hpropbag)
-{
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
-
-    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        *hpropbag = SPXHANDLE_INVALID;
-
+        // TODO: track the factory weixu where to save the factory handle? who cleans this up?
         auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
-        auto factory = (*factoryhandles)[hfactory];
-        auto namedProperties = SpxQueryService<ISpxNamedProperties>(factory);
+        factoryhandles->TrackHandle(factory);
 
-        *hpropbag = CSpxSharedPtrHandleTableManager::TrackHandle<ISpxNamedProperties, SPXPROPERTYBAGHANDLE>(namedProperties);
+        // track the reco handle
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        *phreco = recohandles->TrackHandle(recognizer);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI recognizer_create_intent_recognizer_from_config(SPXRECOHANDLE* phreco, SPXSPEECHCONFIGHANDLE hspeechconfig, SPXAUDIOCONFIGHANDLE haudioInput)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, phreco == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, !speech_config_is_handle_valid(hspeechconfig));
+
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        *phreco = SPXHANDLE_INVALID;
+
+        // create a factory
+        auto factory = SpxCreateObjectWithSite<ISpxSpeechApiFactory>("CSpxSpeechApiFactory", SpxGetRootSite());
+
+        auto confighandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechConfig, SPXSPEECHCONFIGHANDLE>();
+        auto speechconfig = (*confighandles)[hspeechconfig];
+        auto speechconfig_propertybag = SpxQueryInterface<ISpxNamedProperties>(speechconfig);
+        auto fbag = SpxQueryInterface<ISpxNamedProperties>(factory);
+        fbag->Copy(speechconfig_propertybag.get());
+
+        auto namedProperties = SpxQueryService<ISpxNamedProperties>(speechconfig);
+        auto lang = namedProperties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_IntentSourceLanguage));
+        auto outputFormat = namedProperties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse));
+        OutputFormat format = PAL::stricmp(outputFormat.c_str(), PAL::BoolToString(true).c_str()) == 0 ? OutputFormat::Detailed : OutputFormat::Simple;
+
+        auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioInput);
+        std::shared_ptr<ISpxRecognizer> recognizer = factory->CreateIntentRecognizerFromConfig(lang.c_str(), format, audioInput);
+
+        // TODO: track the factory weixu where to save the factory handle? who cleans this up?
+        auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
+        factoryhandles->TrackHandle(factory);
+
+        // track the reco handle
+        auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
+        *phreco = recohandles->TrackHandle(recognizer);
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+    
 }

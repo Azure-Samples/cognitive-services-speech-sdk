@@ -7,7 +7,7 @@ package tests;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
-import com.microsoft.cognitiveservices.speech.SpeechFactory;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
 
 public class Settings {
 
@@ -26,14 +26,14 @@ public class Settings {
     public static String Keyword = "Computer";
     public static String KeywordModel = "/data/keyword/kws.table";
 
-    private static SpeechFactory factory;
+    private static SpeechConfig config;
 
     private static Boolean isSettingsInitialized = false;
     public static Object s_settingsClassLock;
     
     static {
         try {
-            Class.forName("com.microsoft.cognitiveservices.speech.SpeechFactory");
+            Class.forName("com.microsoft.cognitiveservices.speech.SpeechConfig");
         } catch (ClassNotFoundException e) {
             throw new UnsatisfiedLinkError(e.toString());
         }
@@ -64,16 +64,16 @@ public class Settings {
 
         isSettingsInitialized = true;
     }
-
-    
-    public static SpeechFactory getFactory() {
-        if (factory == null) {
+   
+   
+    public static SpeechConfig getSpeechConfig() {
+        if (config == null) {
             try {
-                factory = SpeechFactory.fromSubscription(SpeechSubscriptionKey, SpeechRegion);
+                config = SpeechConfig.fromSubscription(SpeechSubscriptionKey, SpeechRegion);
 
                 // PMA parameters
-                factory.getParameters().set("DeviceGeometry", "Circular6+1");
-                factory.getParameters().set("SelectedGeometry", "Circular3+1");
+                config.setProperty("DeviceGeometry", "Circular6+1");
+                config.setProperty("SelectedGeometry", "Circular3+1");
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
                 displayException(ex);
@@ -81,9 +81,9 @@ public class Settings {
             }
         }
 
-        return factory;
+        return config;
     }
-
+   
     public static void displayException(Exception ex) {
         System.out.println(ex.getMessage() + "\n");
         for (StackTraceElement item : ex.getStackTrace()) {

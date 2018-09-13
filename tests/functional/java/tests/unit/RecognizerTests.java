@@ -14,7 +14,11 @@ import org.junit.Ignore;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.Recognizer;
-import com.microsoft.cognitiveservices.speech.SpeechFactory;
+import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
+import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
+import com.microsoft.cognitiveservices.speech.translation.SpeechTranslatorConfig;
+import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 
 import tests.Settings;
 
@@ -32,10 +36,10 @@ public class RecognizerTests {
     
     @Test
     public void testRecognizer1() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        Recognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
+        Recognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertTrue(r instanceof Recognizer);
 
@@ -45,10 +49,10 @@ public class RecognizerTests {
 
     @Test
     public void testRecognizer2() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        Recognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
+        Recognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertTrue(r instanceof Recognizer);
 
@@ -59,13 +63,12 @@ public class RecognizerTests {
     @Ignore("TODO does not work with microphone")
     @Test
     public void testRecognizer3() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");
+        s.addTargetLanguage("en-US");
         
-        Recognizer r = s.createTranslationRecognizerFromConfig("en-US", targets);
+        Recognizer r = new TranslationRecognizer(s);
         assertNotNull(r);
         assertTrue(r instanceof Recognizer);
 

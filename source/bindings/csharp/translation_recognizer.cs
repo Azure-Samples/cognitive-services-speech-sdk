@@ -4,10 +4,7 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.CognitiveServices.Speech;
 
 namespace Microsoft.CognitiveServices.Speech.Translation
 {
@@ -19,19 +16,20 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     /// <code>
     /// public async Task TranslationContinuousRecognitionAsync()
     /// {
-    ///     // Creates an instance of a speech factory with specified subscription key and service region. 
+    ///     // Creates an instance of a speech translator config with specified subscription key and service region. 
     ///     // Replace with your own subscription key and service region (e.g., "westus").
-    ///     var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    ///     var config = SpeechTranslatorConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
     ///
     ///     // Sets source and target languages.
     ///     string fromLanguage = "en-US";
-    ///     <![CDATA[List<string> toLanguages = new List<string>() { "de" };]]>
+    ///     config.Language = fromLanguage;
+    ///     config.AddTargetLanguage("de");
     ///
     ///     // Sets voice name of synthesis output.
     ///     const string GermanVoice = "de-DE-Hedda";
-    ///
-    ///     // Creates a translation recognizer using microphone as audio input, and requires voice output.
-    ///     using (var recognizer = factory.CreateTranslationRecognizerFromConfig(fromLanguage, toLanguages, GermanVoice))
+    ///     config.VoiceName = GermanVoice;
+    ///     // Creates a translation recognizer using microphone as audio input.
+    ///     using (var recognizer = new TranslationRecognizer(config))
     ///     {
     ///         // Subscribes to events.
     ///         recognizer.IntermediateResultReceived += (s, e) =>
@@ -125,9 +123,32 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// </summary>
         public event EventHandler<TranslationSynthesisResultEventArgs> SynthesisResultReceived;
 
-        internal TranslationRecognizer(Internal.TranslationRecognizer recoImpl)
+        /// <summary>
+        /// Creates a translation recognizer using the default microphone input for a specified translator configuration.
+        /// </summary>
+        /// <param name="config">Translator config.</param>
+        /// <returns>A translation recognizer instance.</returns>
+        public TranslationRecognizer(SpeechTranslatorConfig config)
+            : this(config != null ? config.impl : throw new ArgumentNullException(nameof(config)), null)
         {
-            this.recoImpl = recoImpl;
+        }
+
+        /// <summary>
+        /// Creates a translation recognizer using the specified speech translator and audio configuration.
+        /// </summary>
+        /// <param name="config">Translator config.</param>
+        /// <param name="audioConfig">Audio config.</param>
+        /// <returns>A translation recognizer instance.</returns>
+        public TranslationRecognizer(SpeechTranslatorConfig config, Audio.AudioConfig audioConfig)
+            : this(config != null ? config.impl : throw new ArgumentNullException(nameof(config)),
+                   audioConfig != null ? audioConfig.configImpl : throw new ArgumentNullException(nameof(audioConfig)))
+        {
+            this.audioConfig = audioConfig;
+        }
+
+        internal TranslationRecognizer(Internal.SpeechTranslatorConfig config, Internal.AudioConfig audioConfig)
+        {
+            this.recoImpl = Internal.TranslationRecognizer.FromConfig(config, audioConfig);
 
             intermediateResultHandler = new ResultHandlerImpl(this, isFinalResultHandler: false);
             recoImpl.IntermediateResult.Connect(intermediateResultHandler);
@@ -146,22 +167,17 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             recoImpl.SpeechStartDetected.Connect(speechStartDetectedHandler);
             recoImpl.SpeechEndDetected.Connect(speechEndDetectedHandler);
 
-            Parameters = new RecognizerParametersImpl(recoImpl.Parameters);
-        }
-
-        internal TranslationRecognizer(Internal.TranslationRecognizer recoImpl, Audio.AudioConfig audioIn) : this(recoImpl)
-        {
-            this.audioInput = audioIn;
+            Parameters = new PropertyCollectionImpl(recoImpl.Parameters);
         }
 
         /// <summary>
         /// Gets the language name that was set when the recognizer was created.
         /// </summary>
-        public string SourceLanguage
+        public string SpeechRecognitionLanguage
         {
             get
             {
-                return Parameters.Get(TranslationParameterNames.SourceLanguage);
+                return Parameters.Get(SpeechPropertyId.SpeechServiceConnection_TranslationFromLanguage);
             }
         }
 
@@ -173,25 +189,47 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         {
             get
             {
-                var plainStr = Parameters.Get(TranslationParameterNames.TargetLanguages);
+                var plainStr = Parameters.Get(SpeechPropertyId.SpeechServiceConnection_TranslationToLanguages);
                 return plainStr.Split(',');
             }
         }
 
         /// <summary>
-        /// Gets the name of output voice.
+        /// Gets the name of output voice if speech synthesis is used.
         /// </summary>
-        public string OutputVoiceName {
+        public string VoiceName
+        {
             get
             {
-                return Parameters.Get(TranslationParameterNames.Voice);
+                return Parameters.Get(SpeechPropertyId.SpeechServiceConnection_TranslationVoice);
             }
         }
 
         /// <summary>
         /// The collection of parameters and their values defined for this <see cref="TranslationRecognizer"/>.
         /// </summary>
-        public IRecognizerParameters Parameters { get; internal set; }
+        public IPropertyCollection Parameters { get; internal set; }
+
+        /// <summary>
+        /// Gets/sets authorization token used to communicate with the service.
+        /// </summary>
+        public string AuthorizationToken
+        {
+            get
+            {
+                return this.recoImpl.GetAuthorizationToken();
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
+                this.recoImpl.SetAuthorizationToken(value);
+            }
+        }
 
         /// <summary>
         /// Starts recognition and translation, and stops after the first utterance is recognized. The task returns the translation text as result.
@@ -203,15 +241,16 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// <code>
         /// public async Task TranslationSingleShotRecognitionAsync()
         /// {
-        ///     // Creates an instance of a speech factory with specified subscription key and service region. 
+        ///     // Creates an instance of a speech translator config with specified subscription key and service region. 
         ///     // Replace with your own subscription key and service region (e.g., "westus").
-        ///     var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        ///     var config = SpeechTranslatorConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
         ///
         ///     string fromLanguage = "en-US";
-        ///     <![CDATA[var toLanguages = new List<string>() { "de" };]]>
+        ///     config.Language = fromLanguage;
+        ///     config.AddTargetLanguage("de");
         ///
         ///     // Creates a translation recognizer.
-        ///     using (var recognizer = factory.CreateTranslationRecognizerFromConfig(fromLanguage, toLanguages))
+        ///     using (var recognizer = new TranslationRecognizer(config))
         ///     {
         ///         // Starts recognizing.
         ///         Console.WriteLine("Say something...");
@@ -264,7 +303,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// <summary>
         /// Starts speech recognition on a continuous audio stream with keyword spotting, until StopKeywordRecognitionAsync() is called.
         /// User must subscribe to events to receive recognition results.
-        /// Note: Key word spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
+        /// Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
         /// </summary>
         /// <param name="model">The keyword recognition model that specifies the keyword to be recognized.</param>
         /// <returns>A task representing the asynchronous operation that starts the recognition.</returns>
@@ -309,7 +348,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         private readonly SynthesisHandlerImpl synthesisResultHandler;
         private readonly ErrorHandlerImpl errorHandler;
         private bool disposed = false;
-        private readonly Audio.AudioConfig audioInput;
+        private readonly Audio.AudioConfig audioConfig;
 
         // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         private class ResultHandlerImpl : Internal.TranslationTextEventListener

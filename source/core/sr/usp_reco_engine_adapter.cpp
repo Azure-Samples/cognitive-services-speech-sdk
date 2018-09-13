@@ -341,7 +341,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_DefaultSpeechService(std::
     client.SetEndpointType(USP::EndpointType::Speech)
           .SetRegion(region);
 
-    auto customSpeechModelId = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_DeploymentId));
+    auto customSpeechModelId = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_EndpointId));
     if (!customSpeechModelId.empty())
     {
         return client.SetModelId(customSpeechModelId);
@@ -441,15 +441,15 @@ SPXHR CSpxUspRecoEngineAdapter::GetRecoModeFromProperties(const std::shared_ptr<
 
 USP::OutputFormat CSpxUspRecoEngineAdapter::GetOutputFormat(const ISpxNamedProperties& properties) const
 {
-    if (!properties.HasStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_OutputFormat)))
+    if (!properties.HasStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse)))
         return USP::OutputFormat::Simple;
 
-    auto value = properties.GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_OutputFormat));
-    if (value.empty() || PAL::stricmp(value.c_str(), GetPropertyName(SpeechPropertyId::SpeechServiceResponse_OutputFormat_Simple)) == 0)
+    auto value = properties.GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse));
+    if (value.empty() || PAL::stricmp(value.c_str(), PAL::BoolToString(false).c_str()) == 0)
     {
         return USP::OutputFormat::Simple;
     }
-    else if (PAL::stricmp(value.c_str(), GetPropertyName(SpeechPropertyId::SpeechServiceResponse_OutputFormat_Detailed)) == 0)
+    else if (PAL::stricmp(value.c_str(), PAL::BoolToString(true).c_str()) == 0)
     {
         return USP::OutputFormat::Detailed;
     }

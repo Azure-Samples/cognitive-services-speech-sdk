@@ -389,6 +389,14 @@ protected:
 
     /*! \endcond */
 
+    template <typename Handle, typename Config>
+    static Handle HandleOrInvalid(std::shared_ptr<Config> audioInput)
+    {
+        return audioInput == nullptr
+            ? (Handle)SPXHANDLE_INVALID
+            : (Handle)(*audioInput.get());
+    }
+
 private:
 
     DISABLE_DEFAULT_CTORS(AsyncRecognizer);

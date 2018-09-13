@@ -123,8 +123,8 @@ void unused()
 
 void CarbonTestConsole::ch9_do_speech()
 {
-    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, speechRegion);
-    auto recognizer = factory->CreateSpeechRecognizer();
+    auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, speechRegion);
+    auto recognizer = SpeechRecognizer::FromConfig(sc, nullptr);
 
     printf("Say something...\n");
     auto result = recognizer->RecognizeAsync().get();
@@ -134,8 +134,8 @@ void CarbonTestConsole::ch9_do_speech()
 
 void CarbonTestConsole::ch9_do_speech_intermediate()
 {
-    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, speechRegion);
-    auto recognizer = factory->CreateSpeechRecognizer();
+    auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, speechRegion);
+    auto recognizer = SpeechRecognizer::FromConfig(sc, nullptr);
 
     recognizer->IntermediateResult += [](const SpeechRecognitionEventArgs& e) {
         printf("INTERMEDIATE: %s ...\n", e.Result.Text.c_str());
@@ -149,8 +149,8 @@ void CarbonTestConsole::ch9_do_speech_intermediate()
 
 void CarbonTestConsole::ch9_do_speech_continuous()
 {
-    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, speechRegion);
-    auto recognizer = factory->CreateSpeechRecognizer();
+    auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, speechRegion);
+    auto recognizer = SpeechRecognizer::FromConfig(sc, nullptr);
 
     recognizer->IntermediateResult += [](const SpeechRecognitionEventArgs& e) {
         printf("INTERMEDIATE: %s ...\n", e.Result.Text.c_str());
@@ -178,8 +178,8 @@ void CarbonTestConsole::ch9_do_speech_continuous()
 
 void CarbonTestConsole::ch9_do_intent()
 {
-    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, luisRegion);
-    auto recognizer = factory->CreateIntentRecognizer();
+    auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, luisRegion);
+    auto recognizer = IntentRecognizer::FromConfig(sc, nullptr);
 
     recognizer->IntermediateResult += [](const IntentRecognitionEventArgs& e) {
         printf("INTERMEDIATE: %s ...\n", e.Result.Text.c_str());
@@ -205,8 +205,8 @@ void CarbonTestConsole::ch9_do_intent()
 
 void CarbonTestConsole::ch9_do_intent_continuous()
 {
-    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, luisRegion);
-    auto recognizer = factory->CreateIntentRecognizer();
+    auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, luisRegion);
+    auto recognizer = IntentRecognizer::FromConfig(sc, nullptr);
 
     recognizer->IntermediateResult += [](const IntentRecognitionEventArgs& e) {
         printf("INTERMEDIATE: %s ...\n", e.Result.Text.c_str());
@@ -243,8 +243,8 @@ void CarbonTestConsole::ch9_do_intent_continuous()
 
 void CarbonTestConsole::ch9_do_kws_speech()
 {
-    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, speechRegion);
-    auto recognizer = factory->CreateSpeechRecognizer();
+    auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, speechRegion);
+    auto recognizer = SpeechRecognizer::FromConfig(sc, nullptr);
 
     recognizer->IntermediateResult += [](const SpeechRecognitionEventArgs& e) {
         printf("INTERMEDIATE: %s ...\n", e.Result.Text.c_str());
@@ -266,8 +266,8 @@ void CarbonTestConsole::ch9_do_kws_speech()
 
 void CarbonTestConsole::ch9_do_kws_intent()
 {
-    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, luisRegion);
-    auto recognizer = factory->CreateIntentRecognizer();
+    auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, luisRegion);
+    auto recognizer = IntentRecognizer::FromConfig(sc, nullptr);
 
     recognizer->IntermediateResult += [](const IntentRecognitionEventArgs& e) {
         printf("INTERMEDIATE: %s ...\n", e.Result.Text.c_str());
@@ -305,8 +305,12 @@ void CarbonTestConsole::ch9_do_kws_intent()
 
 void CarbonTestConsole::ch9_do_translation()
 {
-    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, translationRegion);
-    auto recognizer = factory->CreateTranslationRecognizerFromConfig("en-US", { "de-DE", "fr-FR", "es-ES" });
+    auto sc = SpeechTranslatorConfig::FromSubscription(m_subscriptionKey, translationRegion);
+    sc->SetSpeechRecognitionLanguage("en-US");
+    sc->AddTargetLanguage("de-DE");
+    sc->AddTargetLanguage("fr-FR");
+    sc->AddTargetLanguage("es-ES");
+    auto recognizer = TranslationRecognizer::FromConfig(sc, nullptr);
 
     recognizer->IntermediateResult += [](const TranslationTextResultEventArgs& e) {
         printf("INTERMEDIATE: %s ...\n", e.Result.Text.c_str());

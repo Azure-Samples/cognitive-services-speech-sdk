@@ -33,21 +33,21 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestInitialize]
         public void TestInitalize()
         {
-            this.translationHelper = new TranslationTestsHelper(factory);
+            this.translationHelper = new TranslationTestsHelper(RecognitionTestBase.subscriptionKey, RecognitionTestBase.region);
         }
 
         [TestMethod]
         public void TestLanguageProperties()
         {
-            var toLanguages = new List<string>() { Language.DE };
-            var fromLanguage = Language.EN;
-            var factory = SpeechFactory.FromSubscription(subscriptionKey, region);
+            var config = SpeechTranslatorConfig.FromSubscription(subscriptionKey, region);
+            config.SpeechRecognitionLanguage = Language.EN;
+            config.AddTargetLanguage(Language.DE);
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var translationRecognizer = TrackSessionId(factory.CreateTranslationRecognizerFromConfig(audioInput, fromLanguage, toLanguages)))
+            using (var translationRecognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
             {
-                Assert.AreEqual(translationRecognizer.SourceLanguage, fromLanguage);
-                CollectionAssert.AreEqual(translationRecognizer.TargetLanguages, toLanguages);
-                Assert.AreEqual(translationRecognizer.OutputVoiceName, String.Empty);
+                Assert.AreEqual(translationRecognizer.SpeechRecognitionLanguage, Language.EN);
+                CollectionAssert.AreEqual(translationRecognizer.TargetLanguages, new List<string> { Language.DE });
+                Assert.AreEqual(translationRecognizer.VoiceName, String.Empty);
             }
         }
 
@@ -56,29 +56,36 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var toLanguages = new List<string>() { Language.DE, Language.ES };
             var fromLanguage = Language.EN;
-            var factory = SpeechFactory.FromSubscription(subscriptionKey, region);
+            var config = SpeechTranslatorConfig.FromSubscription(subscriptionKey, region);
+            config.SpeechRecognitionLanguage = fromLanguage;
+
+            toLanguages.ForEach(l => config.AddTargetLanguage(l));
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var translationRecognizer = TrackSessionId(factory.CreateTranslationRecognizerFromConfig(audioInput, fromLanguage, toLanguages)))
+            using (var translationRecognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
             {
-                Assert.AreEqual(translationRecognizer.SourceLanguage, fromLanguage);
+                Assert.AreEqual(translationRecognizer.SpeechRecognitionLanguage, fromLanguage);
                 CollectionAssert.AreEqual(translationRecognizer.TargetLanguages, toLanguages);
-                Assert.AreEqual(translationRecognizer.OutputVoiceName, String.Empty);
+                Assert.AreEqual(translationRecognizer.VoiceName, String.Empty);
             }
         }
 
         [TestMethod]
-        public void TestOutputVoiceName()
+        public void TestVoiceName()
         {
             var toLanguages = new List<string>() { Language.DE };
             var fromLanguage = Language.EN;
             var voice = Voice.DE;
-            var factory = SpeechFactory.FromSubscription(subscriptionKey, region);
+            var config = SpeechTranslatorConfig.FromSubscription(subscriptionKey, region);
+            config.SpeechRecognitionLanguage = fromLanguage;
+            config.VoiceName = voice;
+
+            toLanguages.ForEach(l => config.AddTargetLanguage(l));
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
-            using (var translationRecognizer = TrackSessionId(factory.CreateTranslationRecognizerFromConfig(audioInput, fromLanguage, toLanguages, voice)))
+            using (var translationRecognizer = TrackSessionId(new TranslationRecognizer(config, audioInput)))
             {
-                Assert.AreEqual(translationRecognizer.SourceLanguage, fromLanguage);
+                Assert.AreEqual(translationRecognizer.SpeechRecognitionLanguage, fromLanguage);
                 CollectionAssert.AreEqual(translationRecognizer.TargetLanguages, toLanguages);
-                Assert.AreEqual(translationRecognizer.OutputVoiceName, voice);
+                Assert.AreEqual(translationRecognizer.VoiceName, voice);
             }
         }
 

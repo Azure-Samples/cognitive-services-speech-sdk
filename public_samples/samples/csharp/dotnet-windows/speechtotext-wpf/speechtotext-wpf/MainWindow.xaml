@@ -120,11 +120,11 @@
                                     <TextBox VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="2" Text="{Binding ElementName=mainWindow, Path=SubscriptionKey, Mode=TwoWay}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
                                     <StackPanel Visibility="{Binding IsChecked, ElementName=bothRadioButton ,Converter={StaticResource b2v}}" >
                                         <TextBlock Text="CRIS Model ID:"/>
-                                        <TextBox VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="2" Text="{Binding ElementName=mainWindow, Path=CustomModelDeploymentId, Mode=TwoWay}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+                                        <TextBox VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="2" Text="{Binding ElementName=mainWindow, Path=CustomModelEndpointId, Mode=TwoWay}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
                                     </StackPanel>
                                     <StackPanel Visibility="{Binding IsChecked, ElementName=customRadioButton ,Converter={StaticResource b2v}}" >
                                         <TextBlock Text="CRIS Model ID:"/>
-                                        <TextBox VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="2" Text="{Binding ElementName=mainWindow, Path=CustomModelDeploymentId, Mode=TwoWay}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+                                        <TextBox VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="2" Text="{Binding ElementName=mainWindow, Path=CustomModelEndpointId, Mode=TwoWay}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
                                     </StackPanel>
                                     <Button Margin="0,5,0,0" Padding="5" Height="35" VerticalAlignment="Top" Click="SaveKey_Click">Save Keys</Button>
                                 </StackPanel>

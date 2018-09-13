@@ -21,14 +21,15 @@ public class IntentRecognitionSamples {
     public static void intentRecognitionWithMicrophone() throws InterruptedException, ExecutionException
     {
         // <IntentRecognitionWithMicrophone>
-        // Creates an instance of a speech factory with specified
+        // Creates an instance of a speech config with specified
         // subscription key (called 'endpoint key' by the Language Understanding service)
         // and service region. Replace with your own subscription (endpoint) key
         // and service region (e.g., "westus2").
-        SpeechFactory factory = SpeechFactory.fromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
+        // The default language is "en-us".
+        SpeechConfig config = SpeechConfig.fromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
 
-        // Creates an intent recognizer using microphone as audio input. The default language is "en-us".
-        IntentRecognizer recognizer = factory.createIntentRecognizer();
+        // Creates an intent recognizer using microphone as audio input.
+        IntentRecognizer recognizer = new IntentRecognizer(config);
 
         // Creates a language understanding model using the app id, and adds specific intents from your model
         LanguageUnderstandingModel model = LanguageUnderstandingModel.fromAppId("YourLanguageUnderstandingAppId");
@@ -57,15 +58,16 @@ public class IntentRecognitionSamples {
     public static void intentRecognitionWithLanguage() throws InterruptedException, ExecutionException
     {
         // <IntentRecognitionWithLanguage>
-        // Creates an instance of a speech factory with specified
+        // Creates an instance of a speech config with specified
         // subscription key (called 'endpoint key' by the Language Understanding service)
         // and service region. Replace with your own subscription (endpoint) key
         // and service region (e.g., "westus2").
-        SpeechFactory factory = SpeechFactory.fromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
+        SpeechConfig config = SpeechConfig.fromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
 
         // Creates an intent recognizer in the specified language using microphone as audio input.
         String lang = "de-de";
-        IntentRecognizer recognizer = factory.createIntentRecognizer(lang);
+        config.setSpeechRecognitionLanguage(lang);
+        IntentRecognizer recognizer = new IntentRecognizer(config);
 
         // Creates a language understanding model using the app id, and adds specific intents from your model
         LanguageUnderstandingModel model = LanguageUnderstandingModel.fromAppId("YourLanguageUnderstandingAppId");
@@ -94,16 +96,16 @@ public class IntentRecognitionSamples {
     public static void intentContinuousRecognitionWithFile() throws InterruptedException, ExecutionException, IOException
     {
         // <IntentContinuousRecognitionWithFile>
-        // Creates an instance of a speech factory with specified
+        // Creates an instance of a speech config with specified
         // subscription key (called 'endpoint key' by the Language Understanding service)
         // and service region. Replace with your own subscription (endpoint) key
         // and service region (e.g., "westus2").
-        SpeechFactory factory = SpeechFactory.fromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
+        SpeechConfig config = SpeechConfig.fromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
 
         // Creates an intent recognizer using file as audio input.
         // Replace with your own audio file name.
         AudioConfig audioInput = AudioConfig.fromWavFileInput("YourAudioFile.wav");
-        IntentRecognizer recognizer = factory.createIntentRecognizerFromConfig(audioInput);
+        IntentRecognizer recognizer = new IntentRecognizer(config, audioInput);
 
         // Creates a language understanding model using the app id, and adds specific intents from your model
         LanguageUnderstandingModel model = LanguageUnderstandingModel.fromAppId("YourLanguageUnderstandingAppId");

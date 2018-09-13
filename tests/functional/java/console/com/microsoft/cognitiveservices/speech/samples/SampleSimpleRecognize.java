@@ -7,7 +7,7 @@ package com.microsoft.cognitiveservices.speech.samples;
 import java.util.concurrent.Future;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
-import com.microsoft.cognitiveservices.speech.SpeechFactory;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 
@@ -18,15 +18,16 @@ public class SampleSimpleRecognize implements Runnable {
     ///////////////////////////////////////////////////
     @Override
     public void run() {
-        // create factory
-        SpeechFactory factory = SampleSettings.getFactory();
+        // create config 
+        SpeechConfig config = null;
         SpeechRecognizer reco = null;
         AudioConfig audioInput = null;
 
         try {
-            // Note: to use the microphone, use "AudioConfig.fromDefaultMicrophoneInput()"
-            audioInput = AudioConfig.fromWavFileInput(SampleSettings.WavFile);
-            reco = factory.createSpeechRecognizerFromConfig(audioInput);
+
+            config = SampleSettings.getSpeechConfig();
+            audioInput = AudioConfig.fromWavFileInput(SampleSettings.WavFile);   
+            reco = new SpeechRecognizer(config, audioInput);
 
             Future<SpeechRecognitionResult> task = reco.recognizeAsync();
 
@@ -41,8 +42,7 @@ public class SampleSimpleRecognize implements Runnable {
         finally {
             if(reco != null) reco.close();
             if(audioInput != null) audioInput.close();
-
-            factory.close();
+            if(config != null) config.close();
         }
     }
 }

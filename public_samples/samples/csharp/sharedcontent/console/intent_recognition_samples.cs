@@ -19,17 +19,18 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionWithMicrophoneAsync()
         {
             // <intentRecognitionWithMicrophone>
-            // Creates an instance of a speech factory with specified subscription key
+            // Creates an instance of a speech config with specified subscription key
             // and service region. Note that in contrast to other services supported by
-            // the Cognitive Service Speech SDK, the Language Understanding service
+            // the Cognitive Services Speech SDK, the Language Understanding service
             // requires a specific subscription key from https://www.luis.ai/.
             // The Language Understanding service calls the required key 'endpoint key'.
             // Once you've obtained it, replace with below with your own Language Understanding subscription key
             // and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
+            // The default language is "en-us".
+            var config = SpeechConfig.FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
 
-            // Creates an intent recognizer using microphone as audio input.The default language is "en-us".
-            using (var recognizer = factory.CreateIntentRecognizer())
+            // Creates an intent recognizer using microphone as audio input.
+            using (var recognizer = new IntentRecognizer(config))
             {
                 // Creates a Language Understanding model using the app id, and adds specific intents from your model
                 var model = LanguageUnderstandingModel.FromAppId("YourLanguageUnderstandingAppId");
@@ -63,7 +64,7 @@ namespace MicrosoftSpeechSDKSamples
                 {
                     Console.WriteLine($"We recognized: {result.Text}.");
                     Console.WriteLine($"\n    Intent Id: {result.IntentId}.");
-                    Console.WriteLine($"\n    Language Understanding JSON: {result.Properties.Get(ResultPropertyKind.Json)}.");
+                    Console.WriteLine($"\n    Language Understanding JSON: {result.Properties.Get(SpeechPropertyId.SpeechServiceResponse_Json)}.");
                 }
             }
             // </intentRecognitionWithMicrophone>
@@ -73,20 +74,20 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task ContinuousRecognitionWithFileAsync()
         {
             // <intentContinuousRecognitionWithFile>
-            // Creates an instance of a speech factory with specified subscription key
+            // Creates an instance of a speech config with specified subscription key
             // and service region. Note that in contrast to other services supported by
-            // the Cognitive Service Speech SDK, the Language Understanding service
+            // the Cognitive Services Speech SDK, the Language Understanding service
             // requires a specific subscription key from https://www.luis.ai/.
             // The Language Understanding service calls the required key 'endpoint key'.
             // Once you've obtained it, replace with below with your own Language Understanding subscription key
             // and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
+            var config = SpeechConfig.FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
 
             // Creates an intent recognizer using file as audio input.
             // Replace with your own audio file name.
             using (var audioInput = AudioConfig.FromWavFileInput("whatstheweatherlike.wav"))
             {
-                using (var recognizer = factory.CreateIntentRecognizerFromConfig(audioInput))
+                using (var recognizer = new IntentRecognizer(config, audioInput))
                 {
                     // The TaskCompletionSource to stop recognition.
                     var stopRecognition = new TaskCompletionSource<int>();
@@ -107,7 +108,7 @@ namespace MicrosoftSpeechSDKSamples
                         {
                             Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, Text: {e.Result.Text}.");
                             Console.WriteLine($"\n    Intent Id: {e.Result.IntentId}.");
-                            Console.WriteLine($"\n    Language Understanding JSON: {e.Result.Properties.Get(ResultPropertyKind.Json)}.");
+                            Console.WriteLine($"\n    Language Understanding JSON: {e.Result.Properties.Get(SpeechPropertyId.SpeechServiceResponse_Json)}.");
                         }
                         else
                         {
@@ -149,19 +150,19 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionWithMicrophoneUsingLanguageAsync()
         {
             // <intentRecognitionWithLanguage>
-            // Creates an instance of a speech factory with specified subscription key
+            // Creates an instance of a speech config with specified subscription key
             // and service region. Note that in contrast to other services supported by
-            // the Cognitive Service Speech SDK, the Language Understanding service
+            // the Cognitive Services Speech SDK, the Language Understanding service
             // requires a specific subscription key from https://www.luis.ai/.
             // The Language Understanding service calls the required key 'endpoint key'.
             // Once you've obtained it, replace with below with your own Language Understanding subscription key
             // and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
+            var config = SpeechConfig.FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
+            var language = "de-de";
+            config.SpeechRecognitionLanguage = language;
 
             // Creates an intent recognizer in the specified language using microphone as audio input.
-            var lang = "de-de";
-
-            using (var recognizer = factory.CreateIntentRecognizerFromConfig(lang))
+            using (var recognizer = new IntentRecognizer(config))
             {
                 // Creates a Language Understanding model using the app id, and adds specific intents from your model
                 var model = LanguageUnderstandingModel.FromAppId("YourLanguageUnderstandingAppId");
@@ -170,7 +171,7 @@ namespace MicrosoftSpeechSDKSamples
                 recognizer.AddIntent("any-IntentId-here", model, "YourLanguageUnderstandingIntentName3");
 
                 // Starts recognizing.
-                Console.WriteLine("Say something in " + lang + "...");
+                Console.WriteLine("Say something in " + language + "...");
 
                 // Performs recognition.
                 // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable
@@ -195,7 +196,7 @@ namespace MicrosoftSpeechSDKSamples
                 {
                     Console.WriteLine($"We recognized: {result.Text}.");
                     Console.WriteLine($"\n    Intent Id: {result.IntentId}.");
-                    Console.WriteLine($"\n    Language Understanding JSON: {result.Properties.Get(ResultPropertyKind.Json)}.");
+                    Console.WriteLine($"\n    Language Understanding JSON: {result.Properties.Get(SpeechPropertyId.SpeechServiceResponse_Json)}.");
                 }
             }
             // </intentRecognitionWithLanguage>

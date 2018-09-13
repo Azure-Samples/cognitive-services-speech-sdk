@@ -18,17 +18,18 @@ using namespace Microsoft::CognitiveServices::Speech::Intent;
 void IntentRecognitionWithMicrophone()
 {
     // <IntentRecognitionWithMicrophone>
-    // Creates an instance of a speech factory with specified subscription key
+    // Creates an instance of a speech config with specified subscription key
     // and service region. Note that in contrast to other services supported by
-    // the Cognitive Service Speech SDK, the Language Understanding service
+    // the Cognitive Services Speech SDK, the Language Understanding service
     // requires a specific subscription key from https://www.luis.ai/.
     // The Language Understanding service calls the required key 'endpoint key'.
     // Once you've obtained it, replace with below with your own Language Understanding subscription key
     // and service region (e.g., "westus").
-    auto factory = SpeechFactory::FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
+    // The default recognition language is "en-us".
+    auto config = SpeechConfig::FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
 
-    // Creates an intent recognizer using microphone as audio input. The default language is "en-us".
-    auto recognizer = factory->CreateIntentRecognizer();
+    // Creates an intent recognizer using microphone as audio input.
+    auto recognizer = IntentRecognizer::FromConfig(config);
 
     // Creates a Language Understanding model using the app id, and adds specific intents from your model
     auto model = LanguageUnderstandingModel::FromAppId("YourLanguageUnderstandingAppId");
@@ -70,18 +71,19 @@ void IntentRecognitionWithMicrophone()
 void IntentRecognitionWithLanguage()
 {
     // <IntentRecognitionWithLanguage>
-    // Creates an instance of a speech factory with specified subscription key
+    // Creates an instance of a speech config with specified subscription key
     // and service region. Note that in contrast to other services supported by
-    // the Cognitive Service Speech SDK, the Language Understanding service
+    // the Cognitive Services Speech SDK, the Language Understanding service
     // requires a specific subscription key from https://www.luis.ai/.
     // The Language Understanding service calls the required key 'endpoint key'.
     // Once you've obtained it, replace with below with your own Language Understanding service subscription key
     // and service region (e.g., "westus").
-    auto factory = SpeechFactory::FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
+    auto config = SpeechConfig::FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
 
     // Creates an intent recognizer in the specified language using microphone as audio input.
     auto lang = "de-de";
-    auto recognizer = factory->CreateIntentRecognizerFromConfig(lang);
+    config->SetSpeechRecognitionLanguage(lang);
+    auto recognizer = IntentRecognizer::FromConfig(config);
 
     // Creates a Language Understanding model using the app id, and adds specific intents from your model
     auto model = LanguageUnderstandingModel::FromAppId("YourLanguageUnderstandingAppId");
@@ -123,19 +125,19 @@ void IntentRecognitionWithLanguage()
 void IntentContinuousRecognitionWithFile()
 {
     // <IntentContinuousRecognitionWithFile>
-    // Creates an instance of a speech factory with specified subscription key
+    // Creates an instance of a speech config with specified subscription key
     // and service region. Note that in contrast to other services supported by
-    // the Cognitive Service Speech SDK, the Language Understanding service
+    // the Cognitive Services Speech SDK, the Language Understanding service
     // requires a specific subscription key from https://www.luis.ai/.
     // The Language Understanding service calls the required key 'endpoint key'.
     // Once you've obtained it, replace with below with your own Language Understanding subscription key
     // and service region (e.g., "westus").
-    auto factory = SpeechFactory::FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
+    auto config = SpeechConfig::FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
 
     // Creates an intent recognizer using file as audio input.
     // Replace with your own audio file name.
     auto audioInput = AudioConfig::FromWavFileInput("whatstheweatherlike.wav");
-    auto recognizer = factory->CreateIntentRecognizerFromConfig(audioInput);
+    auto recognizer = IntentRecognizer::FromConfig(config, audioInput);
 
     // promise for synchronization of recognition end.
     std::promise<void> recognitionEnd;
@@ -183,4 +185,3 @@ void IntentContinuousRecognitionWithFile()
     recognizer->StopContinuousRecognitionAsync().wait();
     // </IntentContinuousRecognitionWithFile>
 }
-

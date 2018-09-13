@@ -19,7 +19,7 @@ namespace MicrosoftSpeechSDKSamples
         private const string subscriptionKey = "YourSubscriptionKey";
         private const string region = "YourServiceRegion";
 
-        private static SpeechFactory factory;
+        private static SpeechConfig config;
         private static string authorizationToken;
         
         // Authorization token expires every 10 minutes. Renew it every 9 minutes.
@@ -32,20 +32,22 @@ namespace MicrosoftSpeechSDKSamples
             // specified subscription key and service region (e.g., "westus").
             authorizationToken = await GetToken(subscriptionKey, region);
 
-            // Creates an instance of a speech factory with 
+            // Creates an instance of a speech config with 
             // acquired authorization token and service region (e.g., "westus").
-            factory = SpeechFactory.FromAuthorizationToken(authorizationToken, region);
+            // The default language is "en-us".
+            config = SpeechConfig.FromAuthorizationToken(authorizationToken, region);
 
             // Define the cancellation token in order to stop the periodic renewal 
             // of authorization token after completing recognition.
             CancellationTokenSource source = new CancellationTokenSource();
 
-            // Run task for token renewal in the background.
-            var tokenRenewTask = StartTokenRenewTask(source.Token); 
-
-            // Creates a speech recognizer using microphone as audio input. The default language is "en-us".
-            using (var recognizer = factory.CreateSpeechRecognizer())
+            // Creates a speech recognizer using microphone as audio input.
+            using (var recognizer = new SpeechRecognizer(config))
             {
+
+                // Run task for token renewal in the background.
+                var tokenRenewTask = StartTokenRenewTask(source.Token, recognizer); 
+
                 // Subscribe to events.
                 recognizer.FinalResultReceived += (s, e) => {
                     var result = e.Result;
@@ -86,7 +88,7 @@ namespace MicrosoftSpeechSDKSamples
         }
 
         // Renews authorization token periodically until cancellationToken is cancelled.
-        public static Task StartTokenRenewTask(CancellationToken cancellationToken)
+        public static Task StartTokenRenewTask(CancellationToken cancellationToken, SpeechRecognizer recognizer)
         {
             return Task.Run(async () =>
             {
@@ -96,7 +98,7 @@ namespace MicrosoftSpeechSDKSamples
 
                     if (!cancellationToken.IsCancellationRequested)
                     {
-                        factory.AuthorizationToken = await GetToken(subscriptionKey, region);
+                        recognizer.AuthorizationToken = await GetToken(subscriptionKey, region);
                     }
                 }
             });

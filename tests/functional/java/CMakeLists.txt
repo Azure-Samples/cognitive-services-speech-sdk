@@ -29,13 +29,13 @@ set(JAVA_SOURCES_TESTS
     ${PROJECT_SOURCE_DIR}/tests/unit/IntentRecognizerTests.java
     ${PROJECT_SOURCE_DIR}/tests/unit/KeywordRecognitionModelTests.java
     ${PROJECT_SOURCE_DIR}/tests/unit/LanguageUnderstandingModelTests.java
-    ${PROJECT_SOURCE_DIR}/tests/unit/SpeechFactoryTests.java
+    ${PROJECT_SOURCE_DIR}/tests/unit/SpeechConfigTests.java
     ${PROJECT_SOURCE_DIR}/tests/unit/SpeechRecognizerTests.java
     ${PROJECT_SOURCE_DIR}/tests/unit/TranslationRecognizerTests.java
     ${PROJECT_SOURCE_DIR}/tests/unit/RecognizerTests.java
-    ${PROJECT_SOURCE_DIR}/tests/unit/RecognizerParameterNamesTests.java
+    ${PROJECT_SOURCE_DIR}/tests/unit/SpeechPropertyIdTests.java
     ${PROJECT_SOURCE_DIR}/tests/unit/AudioInputStreamTests.java
-    ${PROJECT_SOURCE_DIR}/tests/unit/ParameterCollectionTests.java
+    ${PROJECT_SOURCE_DIR}/tests/unit/PropertyCollectionTests.java
     ${PROJECT_SOURCE_DIR}/tests/unit/WavFileAudioInputStream.java
 )
 

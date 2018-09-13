@@ -4,8 +4,6 @@
 //
 
 using System;
-using System.Globalization;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.CognitiveServices.Speech
@@ -18,12 +16,12 @@ namespace Microsoft.CognitiveServices.Speech
     /// <code>
     /// public async Task SpeechContinuousRecognitionAsync()
     /// {
-    ///     // Creates an instance of a speech factory with specified subscription key and service region.
+    ///     // Creates an instance of a speech config with specified subscription key and service region.
     ///     // Replace with your own subscription key and service region (e.g., "westus").
-    ///     var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    ///     var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
     ///
     ///     // Creates a speech recognizer from microphone.
-    ///     using (var recognizer = factory.CreateSpeechRecognizer())
+    ///     using (var recognizer = new SpeechRecognizer(config))
     ///     {
     ///         // Subscribes to events.
     ///         recognizer.IntermediateResultReceived += (s, e) => {
@@ -78,9 +76,30 @@ namespace Microsoft.CognitiveServices.Speech
         /// </summary>
         public event EventHandler<RecognitionErrorEventArgs> RecognitionErrorRaised;
 
-        internal SpeechRecognizer(Internal.SpeechRecognizer recoImpl)
+        /// <summary>
+        /// Creates a new instance of SpeechRecognizer.
+        /// </summary>
+        /// <param name="speechConfig">Speech configuration</param>
+        public SpeechRecognizer(SpeechConfig speechConfig)
+            : this(speechConfig != null ? speechConfig.configImpl : throw new ArgumentNullException(nameof(speechConfig)), null)
         {
-            this.recoImpl = recoImpl;
+        }
+
+        /// <summary>
+        /// Creates a new instance of SpeechRecognizer.
+        /// </summary>
+        /// <param name="speechConfig">Speech configuration</param>
+        /// <param name="audioConfig">Audio configuration</param>
+        public SpeechRecognizer(SpeechConfig speechConfig, Audio.AudioConfig audioConfig)
+            : this(speechConfig != null ? speechConfig.configImpl : throw new ArgumentNullException(nameof(speechConfig)),
+                   audioConfig != null ? audioConfig.configImpl : throw new ArgumentNullException(nameof(audioConfig)))
+        {
+            this.audioConfig = audioConfig;
+        }
+
+        internal SpeechRecognizer(Internal.SpeechConfig config, Internal.AudioConfig audioConfig)
+        {
+            this.recoImpl = Internal.SpeechRecognizer.FromConfig(config, audioConfig);
 
             intermediateResultHandler = new ResultHandlerImpl(this, isFinalResultHandler: false);
             recoImpl.IntermediateResult.Connect(intermediateResultHandler);
@@ -96,38 +115,50 @@ namespace Microsoft.CognitiveServices.Speech
             recoImpl.SpeechStartDetected.Connect(speechStartDetectedHandler);
             recoImpl.SpeechEndDetected.Connect(speechEndDetectedHandler);
 
-            Parameters = new RecognizerParametersImpl(recoImpl.Parameters);
-        }
-
-        internal SpeechRecognizer(Internal.SpeechRecognizer recoImpl, Audio.AudioConfig audioIn) : this(recoImpl)
-        {
-            this.audioInput = audioIn;
+            Parameters = new PropertyCollectionImpl(recoImpl.Parameters);
         }
 
         /// <summary>
-        /// Gets/sets the deployment id of a customized speech model that is used for speech recognition.
+        /// Gets the endpoint ID of a customized speech model that is used for speech recognition.
         /// </summary>
-        public string DeploymentId
+        /// <returns>the endpoint ID of a customized speech model that is used for speech recognition</returns>
+        public string EndpointId
         {
             get
             {
-                return Parameters.Get(SpeechParameterNames.DeploymentId);
+                return this.recoImpl.GetEndpointId();
+            }
+        }
+
+        /// <summary>
+        /// Gets/sets authorization token used to communicate with the service.
+        /// </summary>
+        public string AuthorizationToken
+        {
+            get
+            {
+                return this.recoImpl.GetAuthorizationToken();
             }
 
             set
             {
-                recoImpl.SetDeploymentId(value);
+                if(value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
+                this.recoImpl.SetAuthorizationToken(value);
             }
         }
 
         /// <summary>
         /// Gets the language name that was set when the recognizer was created.
         /// </summary>
-        public string Language
+        public string SpeechRecognitionLanguage
         {
             get
             {
-                return Parameters.Get(SpeechParameterNames.RecognitionLanguage);
+                return this.recoImpl.Parameters.GetProperty(Internal.SpeechPropertyId.SpeechServiceConnection_RecoLanguage, string.Empty);
             }
         }
 
@@ -138,14 +169,16 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return Parameters.Get(SpeechParameterNames.OutputFormat) ==  OutputFormatParameterValues.Detailed ? OutputFormat.Detailed : OutputFormat.Simple;
+                return this.recoImpl.Parameters.GetProperty(Internal.SpeechPropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse, "false") == "true"
+                    ? OutputFormat.Detailed
+                    : OutputFormat.Simple;
             }
         }
 
         /// <summary>
         /// The collection of parameters and their values defined for this <see cref="SpeechRecognizer"/>.
         /// </summary>
-        public IRecognizerParameters Parameters { get; internal set; }
+        public IPropertyCollection Parameters { get; internal set; }
 
         /// <summary>
         /// Starts speech recognition, and stops after the first utterance is recognized. The task returns the recognition text as result.
@@ -157,12 +190,12 @@ namespace Microsoft.CognitiveServices.Speech
         /// <code>
         /// public async Task SpeechSingleShotRecognitionAsync()
         /// {
-        ///     // Creates an instance of a speech factory with specified subscription key and service region.
+        ///     // Creates an instance of a speech config with specified subscription key and service region.
         ///     // Replace with your own subscription key and service region (e.g., "westus").
-        ///     var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        ///     var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
         ///
         ///     // Creates a speech recognizer using microphone as audio input. The default language is "en-us".
-        ///     using (var recognizer = factory.CreateSpeechRecognizer())
+        ///     using (var recognizer = new SpeechRecognizer(config))
         ///     {
         ///         // Starts recognizing.
         ///         Console.WriteLine("Say something...");
@@ -221,7 +254,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Starts speech recognition on a continuous audio stream with keyword spotting, until StopKeywordRecognitionAsync() is called.
         /// User must subscribe to events to receive recognition results.
-        /// Note: Key word spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
+        /// Note: Keyword spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
         /// </summary>
         /// <param name="model">The keyword recognition model that specifies the keyword to be recognized.</param>
         /// <returns>A task representing the asynchronous operation that starts the recognition.</returns>
@@ -271,7 +304,7 @@ namespace Microsoft.CognitiveServices.Speech
         private readonly ResultHandlerImpl finalResultHandler;
         private readonly ErrorHandlerImpl errorHandler;
         private bool disposed = false;
-        private readonly Audio.AudioConfig audioInput;
+        private readonly Audio.AudioConfig audioConfig;
 
         // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         private class ResultHandlerImpl : Internal.SpeechRecognitionEventListener

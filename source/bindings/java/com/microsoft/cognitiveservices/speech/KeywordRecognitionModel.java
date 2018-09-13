@@ -27,11 +27,12 @@ public class KeywordRecognitionModel implements Closeable
 { 
     // load the native library.
     static {
-        Class<?> speechFactorLoadTrigger = SpeechFactory.speechFactoryClass;
+        Class<?> speechFactorLoadTrigger = SpeechConfig.speechConfigClass;
     }
 
     /**
      * Creates a keyword recognition model using the specified filename.
+     * Note: keyword spotting functionality is only available in the Cognitive Services Speech Devices SDK.
      * @param fileName A string that represents file name for the keyword recognition model.
      *                 Note, the file can point to a zip file in which case the model will be extracted from the zip.
      * @return The keyword recognition model being created.
@@ -162,7 +163,7 @@ public class KeywordRecognitionModel implements Closeable
 
     private com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel modelImpl;
     /**
-      * Returns the language understanding model.
+      * Returns the keyword recognition model.
       * @return The implementation of the model.
       */
     public com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel getModelImpl()

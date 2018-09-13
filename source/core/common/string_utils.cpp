@@ -21,6 +21,8 @@
 
 namespace PAL {
 
+using namespace std;
+
 int stricmp(const char *a, const char *b)
 {
 #ifdef _MSC_VER
@@ -106,6 +108,29 @@ std::string BoolToString(bool b)
 bool ToBool(const std::string& str)
 {
     return stricmp(str.c_str(), "true") == 0;
+}
+
+vector<string> split(string str, const string& token)
+{
+    vector<string> result;
+    while (str.size())
+    {
+        size_t index = str.find(token);
+        if (index != string::npos)
+        {
+            result.push_back(str.substr(0, index));
+            str = str.substr(index + token.size());
+            if (str.size() == 0)
+                result.push_back(str);
+        }
+        else
+        {
+            result.push_back(str);
+            str.clear();
+        }
+    }
+
+    return result;
 }
 
 } // PAL

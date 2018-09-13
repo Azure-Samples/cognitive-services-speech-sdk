@@ -18,12 +18,13 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionWithMicrophoneAsync()
         {
             // <recognitionWithMicrophone>
-            // Creates an instance of a speech factory with specified subscription key and service region.
+            // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            // The default language is "en-us".
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            // Creates a speech recognizer using microphone as audio input. The default language is "en-us".
-            using (var recognizer = factory.CreateSpeechRecognizer())
+            // Creates a speech recognizer using microphone as audio input.
+            using (var recognizer = new SpeechRecognizer(config))
             {
                 // Starts recognizing.
                 Console.WriteLine("Say something...");
@@ -59,18 +60,21 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionWithLanguageAndDetailedOutputAsync()
         {
             // <recognitionWithLanguageAndDetailedOutputFormat>
-            // Creates an instance of a speech factory with specified subscription key and service region.
+            // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // Replace the language with your language in BCP-47 format, e.g., en-US.
+            var language = "de-DE";
+            config.SpeechRecognitionLanguage = language;
+            config.OutputFormat = OutputFormat.Detailed;
 
             // Creates a speech recognizer for the specified language, using microphone as audio input.
-            // Replace the language with your language in BCP-47 format, e.g. en-US.
-            var lang = "de-DE";
             // Requests detailed output format.
-            using (var recognizer = factory.CreateSpeechRecognizerFromConfig(AudioConfig.FromDefaultMicrophoneInput(), lang, OutputFormat.Detailed))
+            using (var recognizer = new SpeechRecognizer(config))
             {
                 // Starts recognizing.
-                Console.WriteLine($"Say something in {lang} ...");
+                Console.WriteLine($"Say something in {language} ...");
 
                 // Performs recognition.
                 // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
@@ -109,16 +113,15 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionUsingCustomizedModelAsync()
         {
             // <recognitionCustomized>
-            // Creates an instance of a speech factory with specified subscription key and service region.
+            // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            // Replace with the CRIS endpoint id of your customized model.
+            config.EndpointId = "YourEndpointId";
 
             // Creates a speech recognizer using microphone as audio input.
-            using (var recognizer = factory.CreateSpeechRecognizer())
+            using (var recognizer = new SpeechRecognizer(config))
             {
-                // Replace with the CRIS deployment id of your customized model.
-                recognizer.DeploymentId = "YourDeploymentId";
-
                 Console.WriteLine("Say something...");
 
                 // Performs recognition.
@@ -152,9 +155,9 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task ContinuousRecognitionWithFileAsync()
         {
             // <recognitionContinuousWithFile>
-            // Creates an instance of a speech factory with specified subscription key and service region.
+            // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             var stopRecognition = new TaskCompletionSource<int>();
 
@@ -162,14 +165,16 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own audio file name.
             using (var audioInput = AudioConfig.FromWavFileInput(@"whatstheweatherlike.wav"))
             {
-                using (var recognizer = factory.CreateSpeechRecognizerFromConfig(audioInput))
+                using (var recognizer = new SpeechRecognizer(config, audioInput))
                 {
                     // Subscribes to events.
-                    recognizer.IntermediateResultReceived += (s, e) => {
+                    recognizer.IntermediateResultReceived += (s, e) =>
+                    {
                         Console.WriteLine($"\n    Partial result: {e.Result.Text}.");
                     };
 
-                    recognizer.FinalResultReceived += (s, e) => {
+                    recognizer.FinalResultReceived += (s, e) =>
+                    {
                         var result = e.Result;
                         Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
                         switch (result.RecognitionStatus)
@@ -192,12 +197,14 @@ namespace MicrosoftSpeechSDKSamples
                         }
                     };
 
-                    recognizer.RecognitionErrorRaised += (s, e) => {
+                    recognizer.RecognitionErrorRaised += (s, e) =>
+                    {
                         Console.WriteLine($"\n    An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}");
                         stopRecognition.TrySetResult(0);
                     };
 
-                    recognizer.OnSessionEvent += (s, e) => {
+                    recognizer.OnSessionEvent += (s, e) =>
+                    {
                         Console.WriteLine($"\n    Session event. Event: {e.EventType.ToString()}.");
                         // Stops recognition when session stop is detected.
                         if (e.EventType == SessionEventType.SessionStoppedEvent)
@@ -225,9 +232,9 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionWithAudioStreamAsync()
         {
             // <recognitionAudioStream>
-            // Creates an instance of a speech factory with specified subscription key and service region.
+            // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             var stopRecognition = new TaskCompletionSource<int>();
 
@@ -236,7 +243,7 @@ namespace MicrosoftSpeechSDKSamples
             using (var audioInput = Helper.OpenWavFile(@"whatstheweatherlike.wav"))
             {
                 // Creates a speech recognizer using audio stream input.
-                using (var recognizer = factory.CreateSpeechRecognizerFromConfig(audioInput))
+                using (var recognizer = new SpeechRecognizer(config, audioInput))
                 {
                     // Subscribes to events.
                     recognizer.IntermediateResultReceived += (s, e) =>

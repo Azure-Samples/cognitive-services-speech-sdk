@@ -8,9 +8,10 @@ import java.util.concurrent.Future;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
-import com.microsoft.cognitiveservices.speech.ParameterCollection;
+import com.microsoft.cognitiveservices.speech.PropertyCollection;
+import com.microsoft.cognitiveservices.speech.RecognizerProperties;
+import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
 import com.microsoft.cognitiveservices.speech.RecognitionErrorEventArgs;
-import com.microsoft.cognitiveservices.speech.RecognizerParameterNames;
 import com.microsoft.cognitiveservices.speech.internal.IntentTrigger;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
@@ -34,13 +35,12 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       */
     final public EventHandlerImpl<RecognitionErrorEventArgs> RecognitionErrorRaised = new EventHandlerImpl<RecognitionErrorEventArgs>();
 
-    // TODO should only be visible internally for SpeechFactory
     /**
       * Initializes an instance of the IntentRecognizer.
       * @param recoImpl The internal recognizer implementation.
-      * @param audioInput An optional audio input configuration associated with the recognizer
+      * @param audioInput An audio input configuration associated with the recognizer.
       */
-    public IntentRecognizer(com.microsoft.cognitiveservices.speech.internal.IntentRecognizer recoImpl, AudioConfig audioInput) {
+    private IntentRecognizer(com.microsoft.cognitiveservices.speech.internal.IntentRecognizer recoImpl, AudioConfig audioInput) {
         super(audioInput);
 
         Contracts.throwIfNull(recoImpl, "recoImpl");
@@ -60,35 +60,64 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         recoImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
         recoImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
     
-        _Parameters = new ParameterCollection<IntentRecognizer>(this);
+        _Parameters = new RecognizerProperties<IntentRecognizer>(this);
+    }
+
+    /**
+      * Create a new instance of an intent recognizer.
+      * @return a new instance of an intent recognizer.
+      * @param speechConfig speech configuration.
+      */
+    public IntentRecognizer(com.microsoft.cognitiveservices.speech.SpeechConfig speechConfig)
+    {
+        this(com.microsoft.cognitiveservices.speech.internal.IntentRecognizer.FromConfig(speechConfig.getImpl(), null), null);
+    }
+
+    /**
+      * Create a new instance of an intent recognizer.
+      * @return a new instance of an intent recognizer.
+      * @param speechConfig speech configuration.
+      * @param speechConfig audio configuration.
+      */
+    public IntentRecognizer(com.microsoft.cognitiveservices.speech.SpeechConfig speechConfig, AudioConfig audioConfig)
+    {
+        this(com.microsoft.cognitiveservices.speech.internal.IntentRecognizer.FromConfig(speechConfig.getImpl(), audioConfig.getConfigImpl()), audioConfig); 
     }
 
     /**
       * Gets the spoken language of recognition.
       * @return the spoken language of recognition.
       */
-    public String getLanguage() {
-            return _Parameters.getString(RecognizerParameterNames.SpeechRecognitionLanguage);
+    public String getSpeechRecognitionLanguage() {
+        return _Parameters.getProperty(SpeechPropertyId.SpeechServiceConnection_RecoLanguage);
     }
 
     /**
-      * Sets the spoken language of recognition.
-      * @param value the spoken language of recognition.
+      * Sets the authorization token used to communicate with the service.
+      * @param token Authorization token.
       */
-    public void setLanguage(String value) {
-            Contracts.throwIfNullOrWhitespace(value, "value");
+    public void setAuthorizationToken(String token) {
+        Contracts.throwIfNullOrWhitespace(token, "token");
+        recoImpl.SetAuthorizationToken(token);
+    }
 
-            _Parameters.set(RecognizerParameterNames.SpeechRecognitionLanguage, value);
+    /**
+      * sets the authorization token used to communicate with the service.
+      * @return Authorization token.
+      */
+    public String getAuthorizationToken() {
+        return recoImpl.GetAuthorizationToken();
     }
 
     /**
       * The collection of parameters and their values defined for this IntentRecognizer.
       * @return The collection of parameters and their values defined for this IntentRecognizer.
       */
-    public ParameterCollection<IntentRecognizer> getParameters() {
+    public PropertyCollection getParameters() {
         return _Parameters;
-    }// { get; }
-    private ParameterCollection<IntentRecognizer> _Parameters;
+    }
+
+    private RecognizerProperties<IntentRecognizer> _Parameters;
 
     /**
       * Starts intent recognition, and stops after the first utterance is recognized. The task returns the recognition text and intent as result.

@@ -124,12 +124,9 @@ void CSpxSpeechApiFactory::SetRecognizerProperties(const std::shared_ptr<ISpxNam
         namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoLanguage), language);
     }
 
-    // Set the output format ... 
     namedProperties->SetStringValue(
-        GetPropertyName(SpeechPropertyId::SpeechServiceResponse_OutputFormat),
-        format == OutputFormat::Simple
-            ? GetPropertyName(SpeechPropertyId::SpeechServiceResponse_OutputFormat_Simple)
-            : GetPropertyName(SpeechPropertyId::SpeechServiceResponse_OutputFormat_Detailed));
+        GetPropertyName(SpeechPropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse),
+        PAL::BoolToString(format == OutputFormat::Detailed).c_str());
 }
 
 void CSpxSpeechApiFactory::SetTranslationProperties(const std::shared_ptr<ISpxNamedProperties>& namedProperties, const std::string& sourceLanguage, const std::vector<std::string>& targetLanguages, const std::string& voice)

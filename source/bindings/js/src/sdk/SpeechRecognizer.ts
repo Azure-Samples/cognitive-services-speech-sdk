@@ -76,7 +76,7 @@ export class SpeechRecognizer extends Recognizer {
     /**
      * Sets the deployment id of a customized speech model that is used for speech recognition.
      * @property
-     * @param {string} value - The deployment id of a customized speech model that is used for speech recognition.
+     * @param value The deployment id of a customized speech model that is used for speech recognition.
      */
     public set deploymentId(value: string) {
         Contracts.throwIfDisposed(this.disposedSpeechRecognizer);

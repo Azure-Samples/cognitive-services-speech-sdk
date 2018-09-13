@@ -7,6 +7,7 @@ package com.microsoft.cognitiveservices.speech.intent;
 import com.microsoft.cognitiveservices.speech.ResultParameterNames;
 import com.microsoft.cognitiveservices.speech.internal.IntentRecognitionEventArgs;
 import com.microsoft.cognitiveservices.speech.internal.ResultPropertyCollection;
+import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
@@ -49,9 +50,7 @@ public final class IntentRecognitionResultEventArgs // : System.EventArgs
     public ResultPropertyCollection getProperties()
     {
         ResultPropertyCollection r = eventArgImpl.GetResult().getProperties();
-
         Contracts.throwIfNull(r, "result properties");
-
         return r;
     }
 
@@ -67,8 +66,8 @@ public final class IntentRecognitionResultEventArgs // : System.EventArgs
                " Status:" + _Result.getReason() +
                " IntentId:<" + _Result.getIntentId() +
                "> Recognized text:<" + _Result.getText() +
-               "> Recognized json:<" + getProperties().GetProperty(ResultParameterNames.Json) +
-               "> LanguageUnderstandingJson <" + getProperties().GetProperty(ResultParameterNames.LanguageUnderstandingJson) +
+               "> Recognized json:<" + getProperties().GetProperty(SpeechPropertyId.SpeechServiceResponse_Json.getValue()) +
+               "> LanguageUnderstandingJson <" + getProperties().GetProperty(SpeechPropertyId.SpeechServiceResponse_JsonResult.getValue()) +
                 ">.";
     }
     

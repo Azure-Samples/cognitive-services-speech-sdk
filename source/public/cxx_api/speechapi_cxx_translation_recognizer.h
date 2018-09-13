@@ -16,6 +16,8 @@
 #include <speechapi_cxx_recognition_async_recognizer.h>
 #include <speechapi_cxx_translation_result.h>
 #include <speechapi_cxx_translation_eventargs.h>
+#include <speechapi_cxx_speech_translator_config.h>
+#include <speechapi_cxx_audio_stream.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -28,6 +30,20 @@ namespace Translation {
 class TranslationRecognizer final : public AsyncRecognizer<TranslationTextResult, TranslationTextResultEventArgs>
 {
 public:
+     /// <summary>
+     /// Create a translation recognizer from a translation config and an audio config.
+     /// Users should use this function to create a translation recognizer.
+     /// </summary>
+    /// <param name="hreco">The shared smart pointer of the created translation recognizer. </param>
+    static std::shared_ptr<TranslationRecognizer> FromConfig(std::shared_ptr<SpeechTranslatorConfig> speechconfig, std::shared_ptr<Audio::AudioConfig> audioInput = nullptr)
+    {
+        SPXRECOHANDLE hreco { SPXHANDLE_INVALID };
+        SPX_THROW_ON_FAIL(::recognizer_create_translation_recognizer_from_config(
+            &hreco,
+            HandleOrInvalid<SPXSPEECHCONFIGHANDLE, SpeechConfig>(speechconfig),
+            HandleOrInvalid<SPXAUDIOCONFIGHANDLE, Audio::AudioConfig>(audioInput)));
+        return std::make_shared<TranslationRecognizer>(hreco);
+    }
 
     // The AsyncRecognizer only deals with events for translation text result. The audio output event
     // is managed by OnTranslationSynthesisResult.
@@ -37,13 +53,12 @@ public:
     /// It is intended for internal use only. It creates an instance of <see cref="TranslationRecognizer"/>. 
     /// </summary>
     /// <remarks>
-    /// It is recommended to use SpeechFactory to create an instance of <see cref="TranslationRecognizer"/>. This method is mainly
-    /// used in case where a recognizer handle has been created by methods via C-API like RecognizerFactory_CreateTranslationRecognizer().
+    /// It is recommended to use SpeechTranslatorConfig to create an instance of <see cref="TranslationRecognizer"/>. This method is mainly
+    /// used in case where a recognizer handle has been created by methods via C-API.
     /// </remarks>
-    /// <param name="hreco">The handle of the recognizer that is returned by RecognizerFactory_CreateTranslationRecognizer().</param>
+    /// <param name="hreco">The handle of the recognizer that is returned by C-API.</param>
     explicit TranslationRecognizer(SPXRECOHANDLE hreco) :
         BaseType(hreco),
-        // Todo: OnTranslationError(m_onTranslationError),
         Parameters(hreco, HandleType::RECOGNIZER),
         TranslationSynthesisResultEvent(GetTranslationAudioEventConnectionsChangedCallback(), GetTranslationAudioEventConnectionsChangedCallback(), false)
     {
@@ -117,6 +132,24 @@ public:
 
         return future;
     };
+
+    /// <summary>
+    /// Sets the authorization token that will be used for connecting the service.
+    /// </summary>
+    /// <param name="token">A string that represents the endpoint id.</param>
+    void SetAuthorizationToken(const std::string& token)
+    {
+        Parameters.SetProperty(SpeechPropertyId::SpeechServiceAuthorization_Token, token);
+    }
+
+    /// <summary>
+    /// Gets the authorization token.
+    /// </summary>
+    /// <returns>Authorization token</returns>
+    std::string GetAuthorizationToken()
+    {
+        return Parameters.GetProperty(SpeechPropertyId::SpeechServiceAuthorization_Token, "");
+    }
 
     /// <summary>
     /// The collection of parameters and their values defined for this <see cref="TranslationRecognizer"/>.

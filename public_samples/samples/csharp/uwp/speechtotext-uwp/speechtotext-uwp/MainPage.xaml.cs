@@ -68,10 +68,12 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
                 NotifyUser("Subscription Key is missing!", NotifyType.ErrorMessage);
                 return;
             }
-            // Creates an instance of a speech factory with specified
-            var factory = SpeechFactory.FromSubscription(this.SubscriptionKey, this.Region);
-            // Creates a speech recognizer using microphone as audio input. The default language is "en-us".
-            using (var recognizer = factory.CreateSpeechRecognizer(this.RecognitionLanguage))
+            // Creates an instance of a speech config with specified subscription key and region.
+            var config = SpeechConfig.FromSubscription(this.SubscriptionKey, this.Region);
+            config.SpeechRecognitionLanguage = this.RecognitionLanguage;
+
+            // Creates a speech recognizer using microphone as audio input.
+            using (var recognizer = new SpeechRecognizer(config))
             {
                 // Starts recognition. It returns when the first utterance has been recognized.
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
@@ -107,12 +109,14 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
             StorageFile file = await StorageFile.GetFileFromApplicationUriAsync(new Uri(filename));
             if (file != null)
             {
-                // Creates an instance of a speech factory with specified and service region (e.g., "westus").
-                var factory = SpeechFactory.FromSubscription(this.SubscriptionKey, this.Region);
-                // Creates a speech recognizer using file as audio input. The default language is "en-us".
+                // Creates an instance of a speech config with specified and service region (e.g., "westus").
+                var config = SpeechConfig.FromSubscription(this.SubscriptionKey, this.Region);
+                config.SpeechRecognitionLanguage = this.RecognitionLanguage;
+
+                // Creates a speech recognizer using file as audio input.
                 using (var audioInput = AudioConfig.FromWavFileInput(file.Path))
                 {
-                    using (var recognizer = factory.CreateSpeechRecognizerFromConfig(audioInput, this.RecognitionLanguage))
+                    using (var recognizer = new SpeechRecognizer(config, audioInput))
                     {
                         // Subscribes to events.
                         recognizer.IntermediateResultReceived += (s, e) =>
@@ -194,10 +198,12 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
                 // Create an audio stream from a wav file.
                 audioInput = MicrosoftSpeechSDKSamples.Helper.OpenWaveFile(reader);
 
-                // Creates an instance of a speech factory with specified and service region (e.g., "westus").
-                var factory = SpeechFactory.FromSubscription(this.SubscriptionKey, this.Region);
-                // Creates a speech recognizer using file as audio input. The default language is "en-us".
-                using (var recognizer = factory.CreateSpeechRecognizerFromConfig(audioInput, this.RecognitionLanguage))
+                // Creates an instance of a speech config with specified and service region (e.g., "westus").
+                var config = SpeechConfig.FromSubscription(this.SubscriptionKey, this.Region);
+                config.SpeechRecognitionLanguage = this.RecognitionLanguage;
+
+                // Creates a speech recognizer using file as audio input.
+                using (var recognizer = new SpeechRecognizer(config, audioInput))
                 {
                     // Subscribes to events.
                     recognizer.IntermediateResultReceived += (s, ee) =>

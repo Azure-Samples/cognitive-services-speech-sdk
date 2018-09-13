@@ -75,10 +75,10 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
         /// <param name="e">An System.EventArgs that contains the event data.</param>
         protected override void OnClosed(EventArgs e)
         {
-            if (this.factory != null)
+            if (this.config != null)
             {
                 this.recognizer.Dispose();
-                this.factory = null;
+                this.config = null;
             }
 
             base.OnClosed(e);
@@ -197,7 +197,7 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
         #endregion
 
         private TranslationRecognizer recognizer;
-        private SpeechFactory factory;
+        private SpeechTranslatorConfig config;
         private string subscriptionKey;
         private const string SubscriptionKeyFileName = "SubscriptionKey.txt";
         private bool started;
@@ -307,15 +307,19 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
         }
 
         /// <summary>
-        /// Initializes the factory object with subscription key and region
+        /// Initializes the config object with subscription key and region
         /// Initializes the recognizer object with a TranslationRecognizer
         /// Subscribes the recognizer to recognition Event Handlers
         /// If recognition is running, starts a thread which stops the recognition
         /// </summary>
         private void CreateRecognizer()
         {
-            this.factory = SpeechFactory.FromSubscription(SubscriptionKey, Region);
-            this.recognizer = this.factory.CreateTranslationRecognizerFromConfig(FromLanguage, ToLanguages, voice);
+            this.config = SpeechTranslatorConfig.FromSubscription(SubscriptionKey, Region);
+            this.config.SpeechRecognitionLanguage = FromLanguage;
+            this.config.VoiceName = voice;
+            ToLanguages.ForEach(l => this.config.AddTargetLanguage(l));
+
+            this.recognizer = new TranslationRecognizer(this.config);
 
             this.recognizer.IntermediateResultReceived += this.OnPartialResponseReceivedHandler;
             this.recognizer.FinalResultReceived += this.OnFinalResponse;

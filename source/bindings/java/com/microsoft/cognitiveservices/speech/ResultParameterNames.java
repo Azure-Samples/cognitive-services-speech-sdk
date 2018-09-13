@@ -8,19 +8,4 @@ package com.microsoft.cognitiveservices.speech;
   * Defines constants used in speech recognition and translation.
   */
 public final class ResultParameterNames
-{
-    /**
-     * The resulting language understanding json output.
-     */
-    public static final String LanguageUnderstandingJson = "RESULT-LanguageUnderstandingJson";
-    
-    /**
-     * The raw json output.
-     */
-    public static final String Json = "RESULT-Json";
-    
-    /**
-     *  Error details, if the call failed.
-     */
-    public static final String ErrorDetails = "RESULT-ErrorDetails";
-}
+{}

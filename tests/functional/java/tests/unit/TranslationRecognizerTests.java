@@ -23,9 +23,9 @@ import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.RecognitionEventType;
 import com.microsoft.cognitiveservices.speech.RecognitionStatus;
 import com.microsoft.cognitiveservices.speech.Recognizer;
-import com.microsoft.cognitiveservices.speech.RecognizerParameterNames;
 import com.microsoft.cognitiveservices.speech.SessionEventType;
-import com.microsoft.cognitiveservices.speech.SpeechFactory;
+import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
+import com.microsoft.cognitiveservices.speech.translation.SpeechTranslatorConfig;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 import com.microsoft.cognitiveservices.speech.translation.TranslationStatus;
 import com.microsoft.cognitiveservices.speech.translation.TranslationTextResult;
@@ -60,13 +60,12 @@ public class TranslationRecognizerTests {
     @Ignore("TODO not working with microphone")
     @Test
     public void testTranslationRecognizer1() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
+        s.setSpeechRecognitionLanguage("en-US");
+        s.addTargetLanguage("de");
 
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");
-        
-        TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-US", targets);
+        TranslationRecognizer r = new TranslationRecognizer(s);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -77,16 +76,16 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testTranslationRecognizer2() throws InterruptedException, ExecutionException {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
         
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");        
+        s.setSpeechRecognitionLanguage("en-US");
+        s.addTargetLanguage("de");
         
-        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", targets);
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -100,20 +99,20 @@ public class TranslationRecognizerTests {
     // -----------------------------------------------------------------------
 
     @Test
-    public void testGetSourceLanguage() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    public void testGetSpeechRecognitionLanguage() {
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
         
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");        
-        
         String language = "en-US";
-        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), language, targets);
-        assertTrue(!r.getSourceLanguage().isEmpty());
-        assertEquals(language, r.getSourceLanguage());
+        s.setSpeechRecognitionLanguage(language);
+        s.addTargetLanguage("de");
+        
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
+        assertTrue(!r.getSpeechRecognitionLanguage().isEmpty());
+        assertEquals(language, r.getSpeechRecognitionLanguage());
 
         r.close();
         s.close();
@@ -122,19 +121,19 @@ public class TranslationRecognizerTests {
     @Ignore("TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)")
     @Test
     public void testGetTargetLanguages() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
         
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");        
-        
         String language = "en-US";
-        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), language, targets);
+        s.setSpeechRecognitionLanguage(language);
+        s.addTargetLanguage(language);
+
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
         assertEquals(1, r.getTargetLanguages().size());
-        assertEquals(targets.get(0), r.getTargetLanguages().get(0));
+        assertEquals(language, r.getTargetLanguages().get(0));
 
         r.close();
         s.close();
@@ -146,40 +145,40 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testGetOutputVoiceNameNoSetting() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
         
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");        
-        
         String language = "en-US";
-        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), language, targets);
+        s.setSpeechRecognitionLanguage(language);
+        s.addTargetLanguage(language);
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
 
-        assertTrue(r.getOutputVoiceName().isEmpty());
+        assertTrue(r.getVoiceName().isEmpty());
 
         r.close();
         s.close();
     }
 
     @Test
-    public void testGetOutputVoiceName() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    public void testGetVoiceName() {
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
         
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");        
-        
         String language = "en-US";
         String voice = "de-DE-Katja";
-        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), language, targets, voice);
+        s.setSpeechRecognitionLanguage(language);
+        s.addTargetLanguage(language);
+        s.setVoiceName(voice);
 
-        assertEquals(r.getOutputVoiceName(), voice);
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
+
+        assertEquals(r.getVoiceName(), voice);
 
         r.close();
         s.close();
@@ -192,21 +191,22 @@ public class TranslationRecognizerTests {
     @Ignore("TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)")
     @Test
     public void testGetParameters() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");        
-        
-        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets);
+        String language = "en-US";
+        s.setSpeechRecognitionLanguage(language);
+        s.addTargetLanguage(language);
+
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
 
         assertNotNull(r.getParameters());
-        assertEquals(r.getSourceLanguage(), r.getParameters().getString(RecognizerParameterNames.TranslationFromLanguage));
+        assertEquals(r.getSpeechRecognitionLanguage(), r.getParameters().getProperty(SpeechPropertyId.SpeechServiceConnection_TranslationFromLanguage));
         
         // TODO this cannot be true, right? comparing an array with a string parameter???
         assertEquals(1, r.getTargetLanguages().size());
-        assertEquals(r.getTargetLanguages().get(0), r.getParameters().getString(RecognizerParameterNames.TranslationToLanguage));
+        assertEquals(r.getTargetLanguages().get(0), r.getParameters().getProperty(SpeechPropertyId.SpeechServiceConnection_TranslationToLanguages));
         
         r.close();
         s.close();
@@ -219,13 +219,14 @@ public class TranslationRecognizerTests {
     @Ignore("TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)")
     @Test
     public void testRecognizeAsync1() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");        
+        String language = "en-US";
+        s.setSpeechRecognitionLanguage(language);
+        s.addTargetLanguage(language);
         
-        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets);
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -259,13 +260,14 @@ public class TranslationRecognizerTests {
     @Ignore("TODO why is event order wrong?")
     @Test
     public void testRecognizeAsync2() throws InterruptedException, ExecutionException {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");        
+        String language = "en-US";
+        s.setSpeechRecognitionLanguage(language);
+        s.addTargetLanguage(language);
         
-        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets);
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -342,13 +344,14 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testStartContinuousRecognitionAsync() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");        
+        String language = "en-US";
+        s.setSpeechRecognitionLanguage(language);
+        s.addTargetLanguage(language);
         
-        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets);
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -368,13 +371,14 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testStopContinuousRecognitionAsync() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");        
+        String language = "en-US";
+        s.setSpeechRecognitionLanguage(language);
+        s.addTargetLanguage(language);
         
-        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets);
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -406,13 +410,14 @@ public class TranslationRecognizerTests {
 
     @Test
     public void testStartStopContinuousRecognitionAsync() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");        
+        String language = "en-US";
+        s.setSpeechRecognitionLanguage(language);
+        s.addTargetLanguage(language);
         
-        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets);
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -463,13 +468,14 @@ public class TranslationRecognizerTests {
     @Ignore("TODO not working with microphone")
     @Test
     public void testGetRecoImpl() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");
+        String language = "en-US";
+        s.setSpeechRecognitionLanguage(language);
+        s.addTargetLanguage(language);
         
-        TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-US", targets);
+        TranslationRecognizer r = new TranslationRecognizer(s, null);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);

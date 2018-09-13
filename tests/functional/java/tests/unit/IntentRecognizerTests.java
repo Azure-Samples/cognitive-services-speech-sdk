@@ -23,9 +23,9 @@ import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.RecognitionEventType;
 import com.microsoft.cognitiveservices.speech.RecognitionStatus;
 import com.microsoft.cognitiveservices.speech.Recognizer;
-import com.microsoft.cognitiveservices.speech.RecognizerParameterNames;
 import com.microsoft.cognitiveservices.speech.SessionEventType;
-import com.microsoft.cognitiveservices.speech.SpeechFactory;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
+import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
@@ -59,28 +59,26 @@ public class IntentRecognizerTests {
     
     @Test
     public void testIntentRecognizer1() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        assertNotNull(s);
+        SpeechConfig config = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        assertNotNull(config);
 
-        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
+        IntentRecognizer r = new IntentRecognizer(config, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
                 
         r.close();
-        s.close();
+        config.close();
     }
 
     @Ignore("TODO why does not get phrase")
     @Test
     public void testIntentRecognizer2() throws InterruptedException, ExecutionException {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
-        assertNotNull(ais);
-
-        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromStreamInput(ais));
+        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -99,20 +97,21 @@ public class IntentRecognizerTests {
     
     @Test
     public void testGetLanguage() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
         assertNotNull(s);
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
 
-        String language = "en-US";
-        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromStreamInput(ais), language);
+        
+        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
 
-        assertFalse(r.getLanguage().isEmpty());
-        assertEquals(language, r.getLanguage());
+        assertFalse(r.getSpeechRecognitionLanguage().isEmpty());
+        assertEquals("en-US", r.getSpeechRecognitionLanguage());
         
         r.close();
         s.close();
@@ -121,26 +120,27 @@ public class IntentRecognizerTests {
     @Ignore("TODO check if language can be set to german")
     @Test
     public void testSetLanguage() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
         assertNotNull(s);
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
-
-        String language = "en-US";
-        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromStreamInput(ais), language);
+        
+        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
 
-        assertFalse(r.getLanguage().isEmpty());
-        assertEquals(language, r.getLanguage());
+        assertFalse(r.getSpeechRecognitionLanguage().isEmpty());
+        assertEquals("en-US", r.getSpeechRecognitionLanguage());
 
-        String language2 = "de-DE";
-        r.setLanguage(language2);
+        // TODO not supported on recognizer anymore:
+        // String language2 = "de-DE";
+        // r.setLanguage(language2);
 
-        assertFalse(r.getLanguage().isEmpty());
-        assertEquals(language2, r.getLanguage());
+        // assertFalse(r.getSpeechRecognitionLanguage().isEmpty());
+        // assertEquals(language2, r.getSpeechRecognitionLanguage());
 
         r.close();
         s.close();
@@ -152,14 +152,14 @@ public class IntentRecognizerTests {
     
     @Test
     public void testGetParameters() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
+        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
 
         assertNotNull(r.getParameters());
-        assertEquals(r.getLanguage(), r.getParameters().getString(RecognizerParameterNames.SpeechRecognitionLanguage));
+        assertEquals(r.getSpeechRecognitionLanguage(), r.getParameters().getProperty(SpeechPropertyId.SpeechServiceConnection_RecoLanguage));
         
         r.close();
         s.close();
@@ -172,10 +172,10 @@ public class IntentRecognizerTests {
     @Ignore("TODO why is Canceled reported instead of success")
     @Test
     public void testRecognizeAsync1() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
+        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -205,10 +205,10 @@ public class IntentRecognizerTests {
     @Ignore("TODO why are error details not empty")
     @Test
     public void testRecognizeAsync2() throws InterruptedException, ExecutionException {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
+        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -278,10 +278,10 @@ public class IntentRecognizerTests {
     
     @Test
     public void testStartContinuousRecognitionAsync() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
+        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -301,10 +301,10 @@ public class IntentRecognizerTests {
 
     @Test
     public void testStopContinuousRecognitionAsync() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
+        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -337,10 +337,10 @@ public class IntentRecognizerTests {
     @Ignore("TODO why number of events not 1")
     @Test
     public void testStartStopContinuousRecognitionAsync() throws InterruptedException, ExecutionException, TimeoutException {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
+        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -391,10 +391,10 @@ public class IntentRecognizerTests {
     @Ignore("TODO why is mapsize not 2")
     @Test
     public void testAddIntentStringString() throws InterruptedException, ExecutionException {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
+        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
 
         // TODO check if intent is recognized
@@ -424,10 +424,10 @@ public class IntentRecognizerTests {
     @Ignore("TODO why is mapsize not 2")
     @Test
     public void testAddIntentStringLanguageUnderstandingModelString() throws InterruptedException, ExecutionException {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
+        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
 
         LanguageUnderstandingModel model = LanguageUnderstandingModel.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisAppId, Settings.LuisRegion);
@@ -464,10 +464,10 @@ public class IntentRecognizerTests {
     
     @Test
     public void testGetRecoImpl() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
-        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
+        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);

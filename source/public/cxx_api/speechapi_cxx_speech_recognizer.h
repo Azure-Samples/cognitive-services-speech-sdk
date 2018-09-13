@@ -16,7 +16,8 @@
 #include <speechapi_cxx_speech_recognition_eventargs.h>
 #include <speechapi_cxx_speech_recognition_result.h>
 #include <speechapi_cxx_properties.h>
-
+#include <speechapi_cxx_speech_config.h>
+#include <speechapi_cxx_audio_stream.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -24,12 +25,24 @@ namespace Speech {
 
 class Session;
 
-
 class SpeechRecognizer final : public AsyncRecognizer<SpeechRecognitionResult, SpeechRecognitionEventArgs>
 {
 public:
-
     using BaseType = AsyncRecognizer<SpeechRecognitionResult, SpeechRecognitionEventArgs>;
+
+     /// <summary>
+     /// Create a speech recognizer from a speech config and audio config.
+     /// </summary>
+     /// <returns> smart pointer wrapped speech recognizer pointer.</returns>
+    static std::shared_ptr<SpeechRecognizer> FromConfig(std::shared_ptr<SpeechConfig> speechconfig, std::shared_ptr<Audio::AudioConfig> audioInput = nullptr)
+    {
+        SPXRECOHANDLE hreco;
+        SPX_THROW_ON_FAIL(::recognizer_create_speech_recognizer_from_config(
+            &hreco,
+            HandleOrInvalid<SPXAUDIOCONFIGHANDLE,SpeechConfig>(speechconfig),
+            HandleOrInvalid<SPXAUDIOCONFIGHANDLE, Audio::AudioConfig>(audioInput)));
+        return std::make_shared<SpeechRecognizer>(hreco);
+    }
 
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
@@ -103,21 +116,35 @@ public:
 
     PropertyCollection<SPXRECOHANDLE> Parameters;
 
-
     /// <summary>
-    /// Sets the deployment id if the recognizer uses a customized model for recognition.
+    /// Gets the endpoint ID of a customized speech model that is used for speech recognition.
     /// </summary>
-    /// <param name="value">A string that represents the deployment id.</param>
-    void SetDeploymentId(const std::string& deploymentId)
-    { 
-        Parameters.SetProperty(SpeechPropertyId::SpeechServiceConnection_DeploymentId, deploymentId);
+    /// <returns>the endpoint ID of a customized speech model that is used for speech recognition</returns>
+    std::string GetEndpointId()
+    {
+        return Parameters.GetProperty(SpeechPropertyId::SpeechServiceConnection_EndpointId, "");
     }
 
+    /// <summary>
+    /// Sets the authorization token that will be used for connecting the server.
+    /// </summary>
+    /// <param name="value">A string that represents the endpoint id.</param>
+    void SetAuthorizationToken(const std::string& token)
+    {
+        Parameters.SetProperty(SpeechPropertyId::SpeechServiceAuthorization_Token, token);
+    }
+
+    /// <summary>
+    /// Gets the authorization token.
+    /// </summary>
+    /// <returns>Authorization token</returns>
+    std::string GetAuthorizationToken()
+    {
+        return Parameters.GetProperty(SpeechPropertyId::SpeechServiceAuthorization_Token, "");
+    }
 
 private:
-
     DISABLE_DEFAULT_CTORS(SpeechRecognizer);
-
     friend class Microsoft::CognitiveServices::Speech::Session;
 };
 

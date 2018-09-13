@@ -83,7 +83,7 @@ class NativeLibraryLoader {
 
     private static String[] getResourceLines(String resourceName) throws IOException {
         // Read resource file if it exists
-        InputStream inStream = SpeechFactory.class.getResourceAsStream(getResourcesPath() + resourceName);
+        InputStream inStream = SpeechConfig.class.getResourceAsStream(getResourcesPath() + resourceName);
 
         // in case there is no embedded jni-manifest, use fixed names
         if (inStream == null) {
@@ -165,7 +165,7 @@ class NativeLibraryLoader {
         }
 
         String path = prefix + libName;
-        InputStream inStream = SpeechFactory.class.getResourceAsStream(path);
+        InputStream inStream = SpeechConfig.class.getResourceAsStream(path);
         if (inStream == null) {
             throw new FileNotFoundException(String.format("Could not find resource %s in jar.", path));
         }

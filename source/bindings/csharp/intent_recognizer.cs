@@ -30,9 +30,30 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// </summary>
         public event EventHandler<RecognitionErrorEventArgs> RecognitionErrorRaised;
 
-        internal IntentRecognizer(Internal.IntentRecognizer recoImpl)
+        /// <summary>
+        /// Creates a new instance of IntentRecognizer.
+        /// </summary>
+        /// <param name="speechConfig">Speech configuration</param>
+        public IntentRecognizer(SpeechConfig speechConfig)
+            : this(speechConfig != null ? speechConfig.configImpl : throw new ArgumentNullException(nameof(speechConfig)), null)
         {
-            this.recoImpl = recoImpl;
+        }
+
+        /// <summary>
+        /// Creates a new instance of IntentRecognizer.
+        /// </summary>
+        /// <param name="speechConfig">Speech configuration</param>
+        /// <param name="audioConfig">Audio configuration</param>
+        public IntentRecognizer(SpeechConfig speechConfig, Audio.AudioConfig audioConfig)
+            : this(speechConfig != null ? speechConfig.configImpl : throw new ArgumentNullException(nameof(speechConfig)),
+                   audioConfig != null ? audioConfig.configImpl : throw new ArgumentNullException(nameof(audioConfig)))
+        {
+            this.audioConfig = audioConfig;
+        }
+
+        internal IntentRecognizer(Internal.SpeechConfig config, Internal.AudioConfig audioConfig)
+        {
+            this.recoImpl = Internal.IntentRecognizer.FromConfig(config, audioConfig);
 
             intermediateResultHandler = new IntentHandlerImpl(this, isFinalResultHandler: false);
             recoImpl.IntermediateResult.Connect(intermediateResultHandler);
@@ -48,29 +69,45 @@ namespace Microsoft.CognitiveServices.Speech.Intent
             recoImpl.SpeechStartDetected.Connect(speechStartDetectedHandler);
             recoImpl.SpeechEndDetected.Connect(speechEndDetectedHandler);
 
-            Parameters = new RecognizerParametersImpl(recoImpl.Parameters);
-        }
-
-        internal IntentRecognizer(Internal.IntentRecognizer recoImpl, Audio.AudioConfig audioIn) : this(recoImpl)
-        {
-            this.audioInput = audioIn;
+            Parameters = new PropertyCollectionImpl(recoImpl.Parameters);
         }
 
         /// <summary>
-        /// Gets the language name that was set when the recognizer was created.
+        /// Gets the language name that is used for recognition.
         /// </summary>
-        public string Language
+        public string SpeechRecognitionLanguage
         {
             get
             {
-                return Parameters.Get(SpeechParameterNames.RecognitionLanguage);
+                return Parameters.Get(SpeechPropertyId.SpeechServiceConnection_IntentSourceLanguage);
             }
         }
 
         /// <summary>
-        /// The collection of parameters and their values defined for this <see cref="IntentRecognizer"/>.
+        /// Gets/sets authorization token used to communicate with the service.
         /// </summary>
-        public IRecognizerParameters Parameters { get; internal set; }
+        public string AuthorizationToken
+        {
+            get
+            {
+                return this.recoImpl.GetAuthorizationToken();
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
+                this.recoImpl.SetAuthorizationToken(value);
+            }
+        }
+
+        /// <summary>
+        /// Gets the collection of parameters and their values defined for this <see cref="IntentRecognizer"/>.
+        /// </summary>
+        public IPropertyCollection Parameters { get; internal set; }
 
         /// <summary>
         /// Starts intent recognition, and stops after the first utterance is recognized. The task returns the recognition text and intent as result.
@@ -176,7 +213,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         private readonly IntentHandlerImpl intermediateResultHandler;
         private readonly IntentHandlerImpl finalResultHandler;
         private readonly ErrorHandlerImpl errorHandler;
-        private readonly Audio.AudioConfig audioInput;
+        private readonly Audio.AudioConfig audioConfig;
 
         // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         private class IntentHandlerImpl : Internal.IntentEventListener
@@ -223,6 +260,4 @@ namespace Microsoft.CognitiveServices.Speech.Intent
             private IntentRecognizer recognizer;
         }
     }
-
-    
 }

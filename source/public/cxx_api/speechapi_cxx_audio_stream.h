@@ -324,7 +324,7 @@ protected:
     public:
 
         FunctionCallbackWrapper(ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback) :
-            m_readCallback(readCallback), 
+            m_readCallback(readCallback),
             m_closeCallback(closeCallback)
         {
         };

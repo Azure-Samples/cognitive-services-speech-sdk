@@ -40,11 +40,10 @@ namespace MicrosoftSpeechSDKSamples
         {
             Console.WriteLine("Intent Recognition using base speech model.");
 
-            var factory = SpeechFactory.FromSubscription(keySpeech, "europewest");
-
+            var config = SpeechConfig.FromSubscription(keySpeech, "europewest");
             if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {
-                using (var reco = factory.CreateIntentRecognizer())
+                using (var reco = new IntentRecognizer(config))
                 {
                     await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
                 }
@@ -52,34 +51,22 @@ namespace MicrosoftSpeechSDKSamples
             else
             {
                 var audioInput = AudioConfig.FromWavFileInput(fileName);
-                using (var reco = factory.CreateIntentRecognizerFromConfig(audioInput))
+                using (var reco = new IntentRecognizer(config, audioInput))
                 {
                     await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
                 }
             }
         }
 
-        //public static async Task IntentRecognitionCustomizedModelAsync(string keySpeech, string modelId, string fileName)
-        //{
-        //    var factory = SpeechFactory.Instance;
-
-        //    Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent Recognition using customized speech model:{0}.", modelId));
-
-        //    factory.SubscriptionKey = keySpeech;
-        //    factory.ModelId = modelId;
-
-        //    await DoIntentRecognitionAsync(factory, fileName).ConfigureAwait(false);
-        //}
-
         public static async Task IntentRecognitionByEndpointAsync(string subKey, string endpoint, string fileName)
         {
-            var factory = SpeechFactory.FromEndPoint(new Uri(endpoint), subKey);
+            var config = SpeechConfig.FromEndpoint(new Uri(endpoint), subKey);
 
             Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent Recognition using endpoint:{0}.", endpoint));
 
             if ((fileName == null) || String.Compare(fileName, "mic", true) == 0)
             {
-                using (var reco = factory.CreateIntentRecognizer())
+                using (var reco = new IntentRecognizer(config))
                 {
                     await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
                 }
@@ -87,7 +74,7 @@ namespace MicrosoftSpeechSDKSamples
             else
             {
                 var audioInput = AudioConfig.FromWavFileInput(fileName);
-                using (var reco = factory.CreateIntentRecognizerFromConfig(audioInput))
+                using (var reco = new IntentRecognizer(config, audioInput))
                 {
                     await DoIntentRecognitionAsync(reco).ConfigureAwait(false);
                 }

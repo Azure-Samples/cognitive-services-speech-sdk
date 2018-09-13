@@ -18,12 +18,12 @@ using namespace Microsoft::CognitiveServices::Speech::Audio;
 void SpeechRecognitionWithMicrophone()
 {
     // <SpeechRecognitionWithMicrophone>
-    // Creates an instance of a speech factory with specified subscription key and service region.
+    // Creates an instance of a speech config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
-    auto factory = SpeechFactory::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
     // Creates a speech recognizer using microphone as audio input. The default language is "en-us".
-    auto recognizer = factory->CreateSpeechRecognizer();
+    auto recognizer = SpeechRecognizer::FromConfig(config);
     cout << "Say something...\n";
 
     // Performs recognition.
@@ -60,15 +60,18 @@ void SpeechRecognitionWithMicrophone()
 void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
 {
     // <SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat>
-    // Creates an instance of a speech factory with specified subscription key and service region.
+    // Creates an instance of a speech config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
-    auto factory = SpeechFactory::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
     // Creates a speech recognizer in the specified language using microphone as audio input.
     // Replace the language with your language in BCP-47 format, e.g. en-US.
     auto lang = "de-DE";
-    // Requests detailed output format.
-    auto recognizer = factory->CreateSpeechRecognizerFromConfig(lang, OutputFormat::Detailed, nullptr);
+    config->SetSpeechRecognitionLanguage(lang);
+    // Request detailed output format.
+    config->SetOutputFormat(OutputFormat::Detailed);
+
+    auto recognizer = SpeechRecognizer::FromConfig(config);
     cout << "Say something in " << lang << "...\n";
 
     // Performs recognition.
@@ -102,14 +105,14 @@ void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
 void SpeechContinuousRecognitionWithFile()
 {
     // <SpeechContinuousRecognitionWithFile>
-    // Creates an instance of a speech factory with specified subscription key and service region.
+    // Creates an instance of a speech config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
-    auto factory = SpeechFactory::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
     // Creates a speech recognizer using file as audio input.
     // Replace with your own audio file name.
     auto audioInput = AudioConfig::FromWavFileInput("whatstheweatherlike.wav");
-    auto recognizer = factory->CreateSpeechRecognizerFromConfig(audioInput);
+    auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
 
     // promise for synchronization of recognition end.
     promise<void> recognitionEnd;
@@ -178,16 +181,16 @@ void SpeechContinuousRecognitionWithFile()
 void SpeechRecognitionUsingCustomizedModel()
 {
     // <SpeechRecognitionUsingCustomizedModel>
-    // Creates an instance of a speech factory with specified subscription key and service region.
+    // Creates an instance of a speech config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
-    auto factory = SpeechFactory::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    // Set the endpoint ID of your customized model
+    // Replace with your own CRIS endpoint ID.
+    config->SetEndpointId("YourEndpointId");
 
     // Creates a speech recognizer using microphone as audio input.
-    auto recognizer = factory->CreateSpeechRecognizer();
+    auto recognizer = SpeechRecognizer::FromConfig(config);
 
-    // Set the deployment id of your customized model
-    // Replace with your own CRIS deployment id.
-    recognizer->SetDeploymentId("YourDeploymentId");
     cout << "Say something...\n";
 
     // Performs recognition.
@@ -359,9 +362,9 @@ void SpeechContinuousRecognitionWithStream()
         fstream m_fs;
     };
 
-    // Creates an instance of a speech factory with specified subscription key and service region.
+    // Creates an instance of a speech config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
-    auto factory = SpeechFactory::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
     // Creates a callback that will read audio data from a WAV file.
     // Currently, the only supported WAV format is mono(single channel), 16 kHZ sample rate, 16 bits per sample.
@@ -371,7 +374,7 @@ void SpeechContinuousRecognitionWithStream()
 
     // Creates a speech recognizer from stream input;
     auto audioInput = AudioConfig::FromStreamInput(pullStream);
-    auto recognizer = factory->CreateSpeechRecognizerFromConfig(audioInput);
+    auto recognizer = SpeechRecognizer::FromConfig(config, audioInput);
 
     // promise for synchronization of recognition end.
     promise<void> recognitionEnd;

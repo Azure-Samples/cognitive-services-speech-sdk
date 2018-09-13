@@ -27,7 +27,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         private static string languageUnderstandingServiceRegion;
         private static string languageUnderstandingHomeAutomationAppId;
 
-        private SpeechFactory factory;
+        private SpeechConfig config;
 
         [ClassInitialize]
         public static void TestClassinitialize(TestContext context)
@@ -43,7 +43,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         [TestInitialize]
         public void Initialize()
         {
-            factory = SpeechFactory.FromSubscription(languageUnderstandingSubscriptionKey, languageUnderstandingServiceRegion);
+            config = SpeechConfig.FromSubscription(languageUnderstandingSubscriptionKey, languageUnderstandingServiceRegion);
         }
 
         public static IntentRecognizer TrackSessionId(IntentRecognizer recognizer)
@@ -66,7 +66,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task RecognizeIntent(string localIntent, string modelIntent, string expectedIntent)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile);
-            using (var recognizer = TrackSessionId(factory.CreateIntentRecognizerFromConfig(audioInput)))
+            using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
             {
                 var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
                 recognizer.AddIntent(localIntent, model, modelIntent);

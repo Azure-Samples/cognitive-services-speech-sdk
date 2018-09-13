@@ -28,7 +28,7 @@ It runs under the .NET Framework 4.6.1 (or above) on Windows.
   * `YourSubscriptionKey`: replace with your subscription key.
   * `YourServiceRegion`: replace with the [region](https://aka.ms/csspeech/region) your subscription is associated with.
     For example, `westus` or `northeurope`.
-  * `YourDeploymentId` (optional): replace with the deployment ID of your customized model in [CRIS](https://cris.ai).
+  * `YourEndpointId` (optional): replace with the endpoint ID of your customized model in [CRIS](https://cris.ai).
   * The following settings apply for intent recognition powered by the [Language Understanding service (LUIS)](https://aka.ms/csspeech/luisdocs):
     * `YourLanguageUnderstandingSubscriptionKey`: replace with your Language Understanding service subscription key (endpoint key).
     * `YourLanguageUnderstandingServiceRegion`: replace with the region associated with your Language Understanding service subscription.

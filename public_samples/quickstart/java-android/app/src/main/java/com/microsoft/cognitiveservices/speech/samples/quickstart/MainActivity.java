@@ -13,7 +13,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.microsoft.cognitiveservices.speech.RecognitionStatus;
-import com.microsoft.cognitiveservices.speech.SpeechFactory;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 
@@ -42,10 +42,10 @@ public class MainActivity extends AppCompatActivity {
         TextView txt = (TextView) this.findViewById(R.id.hello); // 'hello' is the ID of your text view
 
         try {
-            SpeechFactory factory = SpeechFactory.fromSubscription(speechSubscriptionKey, serviceRegion);
-            assert(factory!= null);
+            SpeechConfig config = SpeechConfig.fromSubscription(speechSubscriptionKey, serviceRegion);
+            assert(config != null);
 
-            SpeechRecognizer reco = factory.createSpeechRecognizer();
+            SpeechRecognizer reco = new SpeechRecognizer(config);
             assert(reco != null);
 
             Future<SpeechRecognitionResult> task = reco.recognizeAsync();
@@ -64,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
             reco.close();
-            factory.close();
         } catch (Exception ex) {
             Log.e("SpeechSDKDemo", "unexpected " + ex.getMessage());
             assert(false);

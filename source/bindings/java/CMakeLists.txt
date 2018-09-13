@@ -91,8 +91,6 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/carbon_java.java
     ${CMAKE_SWIG_OUTDIR}/carbon_javaJNI.java
     ${CMAKE_SWIG_OUTDIR}/EventArgs.java
-    ${CMAKE_SWIG_OUTDIR}/FactoryPropertyCollection.java
-    ${CMAKE_SWIG_OUTDIR}/ICognitiveServicesSpeechFactory.java
     ${CMAKE_SWIG_OUTDIR}/IntentEventListener.java
     ${CMAKE_SWIG_OUTDIR}/IntentEventSignal.java
     ${CMAKE_SWIG_OUTDIR}/IntentRecognitionEventArgs.java
@@ -100,9 +98,7 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/IntentRecognitionResultPtrFuture.java
     ${CMAKE_SWIG_OUTDIR}/IntentRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/IntentRecognizerBase.java
-    ${CMAKE_SWIG_OUTDIR}/IntentTrigger.java
-    ${CMAKE_SWIG_OUTDIR}/ISpeechFactory.java
-
+    ${CMAKE_SWIG_OUTDIR}/IntentTrigger.java 
     ${CMAKE_SWIG_OUTDIR}/KeywordRecognitionModel.java
     ${CMAKE_SWIG_OUTDIR}/LanguageUnderstandingModel.java
     ${CMAKE_SWIG_OUTDIR}/OutputFormat.java
@@ -120,8 +116,8 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/SessionEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/SessionEventListener.java
     ${CMAKE_SWIG_OUTDIR}/SessionEventSignal.java
-    ${CMAKE_SWIG_OUTDIR}/SessionPropertyCollection.java
-    ${CMAKE_SWIG_OUTDIR}/SpeechFactory.java
+    ${CMAKE_SWIG_OUTDIR}/SessionPropertyCollection.java    
+    ${CMAKE_SWIG_OUTDIR}/SpeechConfig.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionEventListener.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionEventSignal.java
@@ -129,8 +125,10 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionResultPtrFuture.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognizerBase.java
+    ${CMAKE_SWIG_OUTDIR}/SpeechTranslatorConfig.java
 
     ${CMAKE_SWIG_OUTDIR}/SynthesisStatusCode.java
+    
     ${CMAKE_SWIG_OUTDIR}/TranslationRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/TranslationRecognizerBase.java
     ${CMAKE_SWIG_OUTDIR}/TranslationStatusCode.java
@@ -154,7 +152,6 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXSESSIONHANDLE.java
     ${CMAKE_SWIG_OUTDIR}/SWIGTYPE_p_SPXTRIGGERHANDLE.java
 
-    
     ${CMAKE_SWIG_OUTDIR}/VoidFuture.java
     ${CMAKE_SWIG_OUTDIR}/StringVector.java
     ${CMAKE_SWIG_OUTDIR}/UInt8Vector.java
@@ -171,22 +168,23 @@ set(JAVA_LIB ${PROJECT_NAME})
 string(REPLACE . / PACKAGE_DIR ${PROJECT_NAME})
 
 set(JAVA_SOURCES
-    ${PACKAGE_DIR}/FactoryParameterNames.java
     ${PACKAGE_DIR}/KeywordRecognitionModel.java
-    ${PACKAGE_DIR}/ParameterCollection.java
+    ${PACKAGE_DIR}/PropertyCollection.java
+    ${PACKAGE_DIR}/RecognizerProperties.java
+    ${PACKAGE_DIR}/ResultProperties.java
     ${PACKAGE_DIR}/RecognitionErrorEventArgs.java
     ${PACKAGE_DIR}/RecognitionEventArgs.java
     ${PACKAGE_DIR}/RecognitionEventType.java
     ${PACKAGE_DIR}/RecognitionStatus.java
     ${PACKAGE_DIR}/Recognizer.java
-    ${PACKAGE_DIR}/RecognizerParameterNames.java
     ${PACKAGE_DIR}/ResultParameterNames.java
     ${PACKAGE_DIR}/SessionEventArgs.java
     ${PACKAGE_DIR}/SessionEventType.java
-    ${PACKAGE_DIR}/SpeechFactory.java
+    ${PACKAGE_DIR}/SpeechConfig.java
     ${PACKAGE_DIR}/SpeechRecognitionResult.java
     ${PACKAGE_DIR}/SpeechRecognitionResultEventArgs.java
     ${PACKAGE_DIR}/SpeechRecognizer.java
+    
     ${PACKAGE_DIR}/OutputFormat.java
 
     ${PACKAGE_DIR}/audio/AudioConfig.java
@@ -208,6 +206,7 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/translation/TranslationTextResult.java
     ${PACKAGE_DIR}/translation/TranslationTextResultEventArgs.java
     ${PACKAGE_DIR}/translation/SynthesisStatus.java
+    ${PACKAGE_DIR}/translation/SpeechTranslatorConfig.java
 
     ${PACKAGE_DIR}/util/EventHandler.java
     ${PACKAGE_DIR}/util/EventHandlerImpl.java

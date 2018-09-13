@@ -15,17 +15,15 @@ namespace CognitiveServices {
 namespace Speech {
 
 class SpeechRecognizer;
-class ISpeechFactory;
 class Session;
 class RecognitionResult;
-class SpeechFactory;
 
 // Forward declaration for friends.
 namespace Intent { class IntentRecognizer; }
-namespace Translation { class TranslationRecognizer;   }
+namespace Translation { class TranslationRecognizer; }
 namespace Impl { class MockParameterValue; }
 
-enum class HandleType { MOCK, RESULT, SESSION, RECOGNIZER, FACTORY};
+enum class HandleType { MOCK, RESULT, SESSION, RECOGNIZER };
 
 template <typename Handle >
 class PropertyCollection
@@ -47,9 +45,6 @@ private:
             break;
         case HandleType::SESSION:
             SPX_THROW_ON_FAIL(hr = session_get_property_bag(h, &m_propbag));
-            break;
-        case HandleType::FACTORY:
-            SPX_THROW_ON_FAIL(hr = speech_factory_get_property_bag(h, &m_propbag));
             break;
         case HandleType::RECOGNIZER:
             SPX_THROW_ON_FAIL(hr = recognizer_get_property_bag(h, &m_propbag));
@@ -100,8 +95,6 @@ private:
     DISABLE_COPY_AND_MOVE(PropertyCollection);
 
     friend class Microsoft::CognitiveServices::Speech::SpeechRecognizer;
-    friend class Microsoft::CognitiveServices::Speech::ISpeechFactory;
-    friend class Microsoft::CognitiveServices::Speech::SpeechFactory;
     friend class Microsoft::CognitiveServices::Speech::Session;
     friend class Microsoft::CognitiveServices::Speech::RecognitionResult;
     friend class Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer;

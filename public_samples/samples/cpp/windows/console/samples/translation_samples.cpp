@@ -20,17 +20,19 @@ using namespace Microsoft::CognitiveServices::Speech::Translation;
 void TranslationWithMicrophone()
 {
     // <TranslationWithMicrophone>
-    // Creates an instance of a speech factory with specified subscription key and service region.
+    // Creates an instance of a speech translator config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
-    auto factory = SpeechFactory::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    auto config = SpeechTranslatorConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
     // Sets source and target languages
     // Replace with the languages of your choice.
     auto fromLanguage = "en-US";
-    vector<string> toLanguages { "de", "fr" };
+    config->SetSpeechRecognitionLanguage(fromLanguage);
+    config->AddTargetLanguage("de");
+    config->AddTargetLanguage("fr");
 
     // Creates a translation recognizer using microphone as audio input.
-    auto recognizer = factory->CreateTranslationRecognizerFromConfig(fromLanguage, toLanguages);
+    auto recognizer = TranslationRecognizer::FromConfig(config);
     cout << "Say something...\n";
 
     // Starts translation.
@@ -71,16 +73,18 @@ void TranslationWithMicrophone()
 void TranslationContinuousRecognition()
 {
     // <TranslationContinuousRecognition>
-    // Creates an instance of a speech factory with specified subscription key and service region.
+    // Creates an instance of a speech translator config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
-    auto factory = SpeechFactory::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    auto config = SpeechTranslatorConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
     // Sets source and target languages
     auto fromLanguage = "en-US";
-    vector<string> toLanguages{ "de", "fr" };
+    config->SetSpeechRecognitionLanguage(fromLanguage);
+    config->AddTargetLanguage("de");
+    config->AddTargetLanguage("fr");
 
     // Creates a translation recognizer using microphone as audio input.
-    auto recognizer = factory->CreateTranslationRecognizerFromConfig(fromLanguage, toLanguages);
+    auto recognizer = TranslationRecognizer::FromConfig(config);
 
     // Subscribes to events.
     recognizer->IntermediateResult.Connect([](const TranslationTextResultEventArgs& e)

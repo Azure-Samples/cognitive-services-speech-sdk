@@ -15,26 +15,22 @@
 #include <speechapi_c.h>
 #include <speechapi_cxx_speech_recognition_result.h>
 
-
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Translation {
 
-
-/// <summary> 
+/// <summary>
 /// Defines the translation text result.
 /// </summary>
-class TranslationTextResult final : public Microsoft::CognitiveServices::Speech::RecognitionResult
+class TranslationTextResult final : public SpeechRecognitionResult
 {
-
 private:
     TranslationStatusCode m_translationStatus;
     std::map<std::string, std::string> m_translations;
     std::string m_failureReason;
 
 public:
-
     /// <summary>
     /// Describes the status of translation result.
     /// </summary>
@@ -45,7 +41,7 @@ public:
     /// </summary>
     /// <param name="resultHandle">The handle of the result returned by recognizer in C-API.</param>
     explicit TranslationTextResult(SPXRESULTHANDLE resultHandle) :
-        RecognitionResult(resultHandle),
+        SpeechRecognitionResult(resultHandle),
         TranslationStatus(m_translationStatus),
         Translations(m_translations),
         FailureReason(m_failureReason)
@@ -53,7 +49,7 @@ public:
         PopulateResultFields(resultHandle);
         SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%s; translation status=0x%x.", 
             __FUNCTION__, this, Handle, ResultId.c_str(), TranslationStatus);
-    };
+    }
 
     /// <summary>
     /// Destructs the instance.
@@ -61,7 +57,7 @@ public:
     virtual ~TranslationTextResult()
     {
         SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, Handle);
-    };
+    }
 
     /// <summary>
     /// Presents the translation results. Each item in the map is a key value pair, where key is the language tag of the translated text,
@@ -75,7 +71,6 @@ public:
     const std::string& FailureReason;
 
 private:
-
     void PopulateResultFields(SPXRESULTHANDLE resultHandle)
     {
         SPX_INIT_HR(hr);
@@ -159,7 +154,7 @@ public:
     };
 
     /// <summary>
-    /// Deconstructs the instance.
+    /// Destructs the instance.
     /// </summary>
     virtual ~TranslationSynthesisResult()
     {

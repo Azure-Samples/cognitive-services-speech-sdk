@@ -81,27 +81,27 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
         public string RecognitionLanguage { get; set; }
 
         /// <summary>
-        /// Gets or sets deployment ID of the custom model
+        /// Gets or sets endpoint ID of the custom model
         /// </summary>
-        public string CustomModelDeploymentId
+        public string CustomModelEndpointId
         {
             get
             {
-                return this.deploymentId;
+                return this.endpointId;
             }
 
             set
             {
-                this.deploymentId = value?.Trim();
+                this.endpointId = value?.Trim();
                 this.OnPropertyChanged<string>();
             }
         }
 
         // Private properties
         private const string defaultLocale = "en-US";
-        private string deploymentId;
+        private string endpointId;
         private string subscriptionKey;
-        private const string deploymentIdFileName = "CustomModelDeploymentId.txt";
+        private const string endpointIdFileName = "CustomModelEndpointId.txt";
         private const string subscriptionKeyFileName = "SubscriptionKey.txt";
         private string wavFileName;
 
@@ -148,7 +148,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
             this.stopButton.IsEnabled = false;
 
             this.SubscriptionKey = this.GetValueFromIsolatedStorage(subscriptionKeyFileName);
-            this.CustomModelDeploymentId = this.GetValueFromIsolatedStorage(deploymentIdFileName);
+            this.CustomModelEndpointId = this.GetValueFromIsolatedStorage(endpointIdFileName);
         }
 
         /// <summary>
@@ -182,14 +182,14 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
                 }
                 else if (this.UseCustomModel)
                 {
-                    MessageBox.Show("Subscription Key or Custom Model DeploymentId is missing or wrong! If you do not need the custom model, please change Settings->Recognition Type.");
-                    this.WriteLine(this.customModelLogText, "--- Error : Subscription Key or Custom Model DeploymentId is wrong or missing! ---");
+                    MessageBox.Show("Subscription Key or Custom Model Endpoint ID is missing or wrong! If you do not need the custom model, please change Settings->Recognition Type.");
+                    this.WriteLine(this.customModelLogText, "--- Error : Subscription Key or Custom Model endpoint ID is wrong or missing! ---");
                 }
                 else if (this.UseBaseAndCustomModels)
                 {
-                    MessageBox.Show("Subscription Key or Custom Model DeploymentId is missing or wrong! If you do not need the custom model, please change Settings->Recognition Type.");
-                    this.WriteLine(this.baseModelLogText, "--- Error : Subscription Key or Custom Model DeploymentId is wrong or missing! ---");
-                    this.WriteLine(this.customModelLogText, "--- Error : Subscription Key or Custom Model DeploymentId is wrong or missing! ---");
+                    MessageBox.Show("Subscription Key or Custom Model endpoint ID is missing or wrong! If you do not need the custom model, please change Settings->Recognition Type.");
+                    this.WriteLine(this.baseModelLogText, "--- Error : Subscription Key or Custom Model endpoint ID is wrong or missing! ---");
+                    this.WriteLine(this.customModelLogText, "--- Error : Subscription Key or Custom Model endpoint ID is wrong or missing! ---");
                 }
 
                 this.EnableButtons();
@@ -240,19 +240,20 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
 
         /// <summary>
         /// Creates Recognizer with baseline model and selected language:
-        /// Creates a factory with subscription key and selected region
+        /// Creates a config with subscription key and selected region
         /// If input source is audio file, creates recognizer with audio file otherwise with default mic
         /// Waits on RunRecognition
         /// </summary>
         private async Task CreateBaseReco()
         {
             // Todo: suport users to specifiy a different region.
-            var basicFactory = SpeechFactory.FromSubscription(this.SubscriptionKey, this.Region);
-            SpeechRecognizer basicRecognizer;
+            var config = SpeechConfig.FromSubscription(this.SubscriptionKey, this.Region);
+            config.SpeechRecognitionLanguage = this.RecognitionLanguage;
 
+            SpeechRecognizer basicRecognizer;
             if (this.UseMicrophone)
             {
-                using (basicRecognizer = basicFactory.CreateSpeechRecognizer(this.RecognitionLanguage))
+                using (basicRecognizer = new SpeechRecognizer(config))
                 {
                     await this.RunRecognizer(basicRecognizer, RecoType.Base, stopBaseRecognitionTaskCompletionSource).ConfigureAwait(false);
                 }
@@ -261,31 +262,32 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
             {
                 using (var audioInput = AudioConfig.FromWavFileInput(wavFileName))
                 {
-                    using (basicRecognizer = basicFactory.CreateSpeechRecognizerFromConfig(audioInput, this.RecognitionLanguage))
+                    using (basicRecognizer = new SpeechRecognizer(config, audioInput))
                     {
                         await this.RunRecognizer(basicRecognizer, RecoType.Base, stopBaseRecognitionTaskCompletionSource).ConfigureAwait(false);
                     }
-                }
+               }
             }
         }
 
         /// <summary>
-        /// Creates Recognizer with custom model deploymentId and selected language:
-        /// Creates a factory with subscription key and selected region
+        /// Creates Recognizer with custom model endpointId and selected language:
+        /// Creates a config with subscription key and selected region
         /// If input source is audio file, creates recognizer with audio file otherwise with default mic
         /// Waits on RunRecognition
         /// </summary>
         private async Task CreateCustomReco()
         {
             // Todo: suport users to specifiy a different region.
-            var customFactory = SpeechFactory.FromSubscription(this.SubscriptionKey, this.Region);
-            SpeechRecognizer customRecognizer;
+            var config = SpeechConfig.FromSubscription(this.SubscriptionKey, this.Region);
+            config.SpeechRecognitionLanguage = this.RecognitionLanguage;
+            config.EndpointId = this.CustomModelEndpointId;
 
+            SpeechRecognizer customRecognizer;
             if (this.UseMicrophone)
             {
-                using (customRecognizer = customFactory.CreateSpeechRecognizer(this.RecognitionLanguage))
+                using (customRecognizer = new SpeechRecognizer(config))
                 {
-                    customRecognizer.DeploymentId = this.CustomModelDeploymentId;
                     await this.RunRecognizer(customRecognizer, RecoType.Custom, stopCustomRecognitionTaskCompletionSource).ConfigureAwait(false);
                 }
             }
@@ -293,12 +295,11 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
             {
                 using (var audioInput = AudioConfig.FromWavFileInput(wavFileName))
                 {
-                    using (customRecognizer = customFactory.CreateSpeechRecognizerFromConfig(audioInput, this.RecognitionLanguage))
+                    using (customRecognizer = new SpeechRecognizer(config, audioInput))
                     {
-                        customRecognizer.DeploymentId = this.CustomModelDeploymentId;
                         await this.RunRecognizer(customRecognizer, RecoType.Custom, stopCustomRecognitionTaskCompletionSource).ConfigureAwait(false);
                     }
-                }
+               }
             }
         }
 
@@ -476,7 +477,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
             try
             {
                 SaveKeyToIsolatedStorage(subscriptionKeyFileName, this.SubscriptionKey);
-                SaveKeyToIsolatedStorage(deploymentIdFileName, this.CustomModelDeploymentId);
+                SaveKeyToIsolatedStorage(endpointIdFileName, this.CustomModelEndpointId);
                 MessageBox.Show("Keys are saved to your disk.\nYou do not need to paste it next time.", "Keys");
             }
             catch (Exception exception)
@@ -495,7 +496,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
         private bool AreKeysValid()
         {
             if (this.subscriptionKey == null || this.subscriptionKey.Length <= 0 ||
-                ((this.UseCustomModel || this.UseBaseAndCustomModels) && (this.deploymentId == null || this.deploymentId.Length <= 0)))
+                ((this.UseCustomModel || this.UseBaseAndCustomModels) && (this.endpointId == null || this.endpointId.Length <= 0)))
             {
                 return false;
             }

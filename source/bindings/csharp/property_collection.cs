@@ -3,27 +3,23 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-
 namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
-    /// Interface to retrieve a property value from property collection of recognition result.
+    /// Interface to retrieve a property value from a property collection.
     /// </summary>
-    public interface IResultProperties
+    public interface IPropertyCollection
     {
         /// <summary>
-        /// Returns value of the property in string/>. 
+        /// Returns value of the property in string.
         /// If the property value is not defined, an empty string is returned
         /// </summary>
-        /// <param name="propertyKind">The kind of property. see <see cref="ResultPropertyKind"/></param>
+        /// <param name="id">The id of property. see <see cref="SpeechPropertyId"/></param>
         /// <returns>value of the property.</returns>
-        string Get(ResultPropertyKind propertyKind);
+        string Get(SpeechPropertyId id);
 
         /// <summary>
-        /// Returns value of the property in string/>. 
+        /// Returns value of the property in string.
         /// If the property value is not defined, an empty string is returned,
         /// </summary>
         /// <param name="propertyName">The name of property.</param>
@@ -31,16 +27,16 @@ namespace Microsoft.CognitiveServices.Speech
         string Get(string propertyName);
 
         /// <summary>
-        /// Returns value of the property in string/>. 
+        /// Returns value of the property in string.
         /// If the property value is not defined, the specified defaultValue is returned.
         /// </summary>
-        /// <param name="propertyKind">The kind of property. see <see cref="ResultPropertyKind"/></param>
+        /// <param name="id">The id of property. see <see cref="SpeechPropertyId"/></param>
         /// <param name="defaultValue">The default value which is returned if no value is defined for the property.</param>
         /// <returns>value of the property.</returns>
-        string Get(ResultPropertyKind propertyKind, string defaultValue);
+        string Get(SpeechPropertyId id, string defaultValue);
 
         /// <summary>
-        /// Returns value of the property in string/>.
+        /// Returns value of the property in string.
         /// If the property value is not defined, the specified defaultValue is returned.
         /// </summary>
         /// <param name="propertyName">The name of property.</param>

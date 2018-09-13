@@ -45,7 +45,7 @@ protected:
     template <class I>
     std::shared_ptr<I> QueryInterfaceInternal()
     {
-        // try to query for the interface via our virtual method... 
+        // try to query for the interface via our virtual method...
         auto ptr = QueryInterface(PAL::GetTypeName<I>().c_str());
         if (ptr != nullptr)
         {
@@ -154,7 +154,7 @@ public:
     template <class I>
     std::shared_ptr<I> CreateObject(const char* className)
     {
-        // try to create the object from our interface virtual method... 
+        // try to create the object from our interface virtual method...
         auto obj = CreateObject(className, PAL::GetTypeName<I>().c_str());
         if (obj != nullptr)
         {
@@ -518,7 +518,7 @@ public:
 
     virtual void FireSpeechStartDetected(const std::wstring& sessionId, uint64_t offset) = 0;
     virtual void FireSpeechEndDetected(const std::wstring& sessionId, uint64_t offset) = 0;
-    
+
     virtual void FireResultEvent(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) = 0;
 
     SessionEvent_Type SessionStarted;
@@ -585,8 +585,8 @@ public:
 };
 
 
-class ISpxRecoEngineAdapter : 
-    public ISpxAudioProcessor, 
+class ISpxRecoEngineAdapter :
+    public ISpxAudioProcessor,
     public ISpxInterfaceBaseFor<ISpxRecoEngineAdapter>
 {
 public:
@@ -652,8 +652,8 @@ public:
 };
 
 
-class ISpxKwsEngineAdapter : 
-    public ISpxAudioProcessor, 
+class ISpxKwsEngineAdapter :
+    public ISpxAudioProcessor,
     public ISpxInterfaceBaseFor<ISpxKwsEngineAdapter>
 {
 };
@@ -712,6 +712,7 @@ public:
     virtual std::string GetStringValue(const char* name, const char* defaultValue = "") const = 0;
     virtual void SetStringValue(const char* name, const char* value) = 0;
     virtual bool HasStringValue(const char* name) const = 0;
+    virtual void Copy(ISpxNamedProperties* from) = 0;
 };
 
 
@@ -810,7 +811,7 @@ public:
 
     virtual void AddIntentTrigger(const wchar_t* intentId, std::shared_ptr<ISpxTrigger> trigger) = 0;
 
-    // TODO: RobCh: Add additional methods required... 
+    // TODO: RobCh: Add additional methods required...
 };
 
 class ISpxTranslationRecognizer : public ISpxInterfaceBaseFor<ISpxTranslationRecognizer>
@@ -837,5 +838,15 @@ class ISpxLuEngineAdapter :
 class ISpxLuEngineAdapterSite : public ISpxInterfaceBaseFor<ISpxLuEngineAdapterSite>
 {
 };
+
+
+class ISpxSpeechConfig : public ISpxInterfaceBaseFor<ISpxSpeechConfig>
+{
+public:
+    virtual void InitFromSubscription(const char * subscription, const char* region) = 0;
+    virtual void InitFromEndpoint(const char * endpoint, const char* subscription) = 0;
+    virtual void InitAuthorizationToken(const char * authToken, const char * region) = 0;
+};
+
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

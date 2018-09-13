@@ -14,31 +14,39 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 {
     sealed class TranslationTestsHelper
     {
-        private SpeechFactory factory;
+        private string subscriptionKey;
+        private string region;
         private TimeSpan timeout;
 
-        public TranslationTestsHelper (SpeechFactory factory)
+        public TranslationTestsHelper(string subscriptionKey, string region)
         {
-            this.factory = factory;
+            this.subscriptionKey = subscriptionKey;
+            this.region = region;
             timeout = TimeSpan.FromMinutes(6);
         }
 
-        TranslationRecognizer CreateTranslationRecognizerFromConfig(string path, string fromLanguage, List<string> toLanguages, string voice=null)
+        public SpeechTranslatorConfig GetConfig(string path, string fromLanguage, List<string> toLanguages, string voice)
+        {
+            var config = SpeechTranslatorConfig.FromSubscription(this.subscriptionKey, this.region);
+            config.SpeechRecognitionLanguage = fromLanguage;
+            toLanguages.ForEach(l => config.AddTargetLanguage(l));
+
+            if (!string.IsNullOrEmpty(voice))
+            {
+                config.VoiceName = voice;
+            }
+            return config;
+        }
+
+        TranslationRecognizer CreateTranslationRecognizer(string path, string fromLanguage, List<string> toLanguages, string voice = null)
         {
             var audioInput = AudioConfig.FromWavFileInput(path);
-            if (string.IsNullOrEmpty(voice))
-            {
-                return this.factory.CreateTranslationRecognizerFromConfig(audioInput, fromLanguage, toLanguages);
-            }
-            else
-            {
-                return this.factory.CreateTranslationRecognizerFromConfig(audioInput, fromLanguage, toLanguages, voice);
-            }
+            return new TranslationRecognizer(GetConfig(path, fromLanguage, toLanguages, voice), audioInput);
         }
 
         public async Task<EventArgs> GetTranslationFinalResultEvents(string path, string fromLanguage, List<string> toLanguages)
         {
-            using (var recognizer = TrackSessionId(CreateTranslationRecognizerFromConfig(path, fromLanguage, toLanguages)))
+            using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages)))
             {
                 EventArgs eventArgs = null;
                 recognizer.FinalResultReceived += (s, e) => eventArgs = e;
@@ -51,7 +59,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public async Task<TranslationTextResult> GetTranslationFinalResult(string path, string fromLanguage, List<string> toLanguages)
         {
-            using (var recognizer = TrackSessionId(CreateTranslationRecognizerFromConfig(path, fromLanguage, toLanguages)))
+            using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages)))
             {
                 TranslationTextResult result = null;
                 await Task.WhenAny(recognizer.RecognizeAsync().ContinueWith(t => result = t.Result), Task.Delay(timeout));
@@ -61,7 +69,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public async Task<Dictionary<ResultType, List<EventArgs>>> GetTranslationFinalResultContinuous(string path, string fromLanguage, List<string> toLanguages, string voice=null)
         {
-            using (var recognizer = TrackSessionId(CreateTranslationRecognizerFromConfig(path, fromLanguage, toLanguages, voice)))
+            using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages, voice)))
             {
                 var tcs = new TaskCompletionSource<bool>();
                 var receivedFinalResultEvents = new Dictionary<ResultType, List<EventArgs>>(); ;
@@ -111,7 +119,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public async Task<List<List<TranslationTextResultEventArgs>>> GetTranslationIntermediateResultContinuous(string path, string fromLanguage, List<string> toLanguages)
         {
-            using (var recognizer = TrackSessionId(CreateTranslationRecognizerFromConfig(path, fromLanguage, toLanguages)))
+            using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages)))
             {
                 var tcs = new TaskCompletionSource<bool>();
                 var listOfIntermediateResults = new List<List<TranslationTextResultEventArgs>>();

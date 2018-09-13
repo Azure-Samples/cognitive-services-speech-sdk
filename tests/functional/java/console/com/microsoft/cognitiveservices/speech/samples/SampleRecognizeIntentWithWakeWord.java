@@ -13,7 +13,7 @@ import java.util.concurrent.Future;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
 import com.microsoft.cognitiveservices.speech.SessionEventType;
-import com.microsoft.cognitiveservices.speech.SpeechFactory;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
 
@@ -59,18 +59,17 @@ public class SampleRecognizeIntentWithWakeWord implements Runnable, Stoppable {
         intentIdMap.put("1", "play music");
         intentIdMap.put("2", "stop");
 
-        // create factory
-        SpeechFactory factory = SampleSettings.getFactory();
+        // create config 
+        SpeechConfig config = SampleSettings.getSpeechConfig();
 
         content.clear();
         content.add("");
         content.add("");
         try {
-
-            // Note: to use the microphone, use "AudioConfig.fromDefaultMicrophoneInput()"
+            // Note: to use the microphone, replace the parameter with "new MicrophoneAudioInputStream()"
             audioInput = AudioConfig.fromWavFileInput(SampleSettings.WavFile);
-            reco = factory.createIntentRecognizerFromConfig(audioInput);
-
+            reco = new IntentRecognizer(config, audioInput);
+            
             LanguageUnderstandingModel intentModel = LanguageUnderstandingModel.fromSubscription(SampleSettings.LuisRegion,
                     SampleSettings.LuisSubscriptionKey, SampleSettings.LuisAppId);
             for (Map.Entry<String, String> entry : intentIdMap.entrySet()) {

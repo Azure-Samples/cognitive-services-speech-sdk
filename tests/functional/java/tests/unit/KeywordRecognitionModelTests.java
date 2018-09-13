@@ -17,11 +17,9 @@ import org.junit.Ignore;
 import java.net.URI;
 import java.util.ArrayList;
 
-import com.microsoft.cognitiveservices.speech.FactoryParameterNames;
 import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
-import com.microsoft.cognitiveservices.speech.ParameterCollection;
 import com.microsoft.cognitiveservices.speech.Recognizer;
-import com.microsoft.cognitiveservices.speech.SpeechFactory;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;

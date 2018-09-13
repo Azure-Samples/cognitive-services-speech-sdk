@@ -7,6 +7,8 @@ package com.microsoft.cognitiveservices.speech;
 import com.microsoft.cognitiveservices.speech.internal.RecognitionResult;
 import com.microsoft.cognitiveservices.speech.internal.ResultPropertyCollection;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.ResultProperties;
+import com.microsoft.cognitiveservices.speech.PropertyCollection;
 
 import java.math.BigInteger;
 
@@ -18,7 +20,7 @@ public class SpeechRecognitionResult {
     private String resultId;
     private RecognitionStatus reason;
     private String text;
-    private RecognitionResultCollection properties;
+    private ResultProperties properties;
     private long duration;
     private long offset;
     private String errorDetails;
@@ -39,7 +41,7 @@ public class SpeechRecognitionResult {
         this.reason = RecognitionStatus.values()[result.getReason().swigValue()];
         this.errorDetails = result.getErrorDetails();
 
-        this.properties = new RecognitionResultCollection(result.getProperties());
+        this.properties = new ResultProperties(result.getProperties());
     }
 
     /**
@@ -111,14 +113,14 @@ public class SpeechRecognitionResult {
     * @return Json serialized representation of the result.
     */
     public String getJson() {
-      return this.properties.getString(ResultParameterNames.Json);
+      return this.properties.getProperty(SpeechPropertyId.SpeechServiceResponse_Json);
     }
 
     /**
      *  The set of properties exposed in the result.
      * @return The set of properties exposed in the result.
      */
-    public RecognitionResultCollection getProperties() {
+    public PropertyCollection getProperties() {
         return this.properties;
     }
 
@@ -133,53 +135,8 @@ public class SpeechRecognitionResult {
                " Recognized text:<" + this.text +
                ">.";
     }
-    
-    public class RecognitionResultCollection
-    {
-        ResultPropertyCollection _collection;
-        
-        RecognitionResultCollection(ResultPropertyCollection collection)
-        {
-            Contracts.throwIfNull(collection, "collection");
 
-            this._collection = collection;
-        }
-        
-        /**
-          * Explicitly frees any external resource attached to the object
-          */
-        public void close() {
-            if (this._collection != null) {
-                this._collection.delete();
-            }
-            this._collection = null;
-        }
-
-       /**
-         * Returns the parameter value in type String. The parameter must have the same type as String.
-         * If the name is not available, it returns an empty String.
-         *
-         * @param name The parameter name.
-         * @return value of the parameter.
-         */
-       public String getString(String name) {
-           return getString(name, "");
-       }
-       
-       
-       /**
-         * Returns the parameter value in type String. The parameter must have the same type as String.
-         * Currently only String, int and bool are allowed.
-         * If the name is not available, the specified defaultValue is returned.
-         *
-         * @param name The parameter name.
-         * @param defaultValue The default value which is returned if the parameter is not available in the collection.
-         * @return value of the parameter.
-         */
-       public String getString(String name, String defaultValue) {
-           Contracts.throwIfNull(name, "name");
-
-           return _collection.GetProperty(name, defaultValue);
-       }
+    RecognitionResult getImpl() {
+        return _resultImpl;
     }
 }

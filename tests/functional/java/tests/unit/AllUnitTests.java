@@ -10,16 +10,16 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-    SpeechFactoryTests.class,
+    SpeechConfigTests.class,
     SpeechRecognizerTests.class,
     IntentRecognizerTests.class,
     TranslationRecognizerTests.class,
     KeywordRecognitionModelTests.class,
     LanguageUnderstandingModelTests.class,
     RecognizerTests.class,
-    RecognizerParameterNamesTests.class,
+    SpeechPropertyIdTests.class,
     AudioInputStreamTests.class,
-    ParameterCollectionTests.class
+    PropertyCollectionTests.class
     })
 public class AllUnitTests {
 

@@ -6,6 +6,7 @@ package com.microsoft.cognitiveservices.speech.intent;
 
 import com.microsoft.cognitiveservices.speech.ResultParameterNames;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
 
 /**
   * Defines result of intent recognition.
@@ -49,7 +50,7 @@ public final class IntentRecognitionResult extends com.microsoft.cognitiveservic
      * @return A String that represents the intent including properties being recognized.
      */
     public String getLanguageUnderstanding() {
-        return getProperties().getString(ResultParameterNames.LanguageUnderstandingJson);
+        return getProperties().getProperty(SpeechPropertyId.SpeechServiceResponse_JsonResult);
     } // { get; }
 
    /**
@@ -57,7 +58,7 @@ public final class IntentRecognitionResult extends com.microsoft.cognitiveservic
     * @return A String that represents the intent as json.
     */
     public String getJson() {
-      return getProperties().getString(ResultParameterNames.Json);
+      return getProperties().getProperty(SpeechPropertyId.SpeechServiceResponse_Json);
     } // { get; }
 
     /**
@@ -65,7 +66,7 @@ public final class IntentRecognitionResult extends com.microsoft.cognitiveservic
      * @return A String that represents error result in case the call failed.
      */
      public String getErrorDetails() {
-       return getProperties().getString(ResultParameterNames.ErrorDetails);
+       return getProperties().getProperty(SpeechPropertyId.SpeechServiceResponse_JsonErrorDetails);
      } // { get; }
     
     /**
@@ -78,8 +79,8 @@ public final class IntentRecognitionResult extends com.microsoft.cognitiveservic
                " Status:" + getReason() +
                " IntentId:<" + _intentId +
                "> Recognized text:<" + getText() +
-               "> Recognized json:<" + getProperties().getString(ResultParameterNames.Json) +
-               "> LanguageUnderstandingJson <" + getProperties().getString(ResultParameterNames.LanguageUnderstandingJson) +
+               "> Recognized json:<" + getProperties().getProperty(SpeechPropertyId.SpeechServiceResponse_Json) +
+               "> LanguageUnderstandingJson <" + getProperties().getProperty(SpeechPropertyId.SpeechServiceResponse_JsonResult) +
                ">.";
     }
 }

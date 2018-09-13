@@ -17,7 +17,7 @@ import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.RecognitionStatus;
 import com.microsoft.cognitiveservices.speech.SessionEventType;
 import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
-import com.microsoft.cognitiveservices.speech.SpeechFactory;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
@@ -101,10 +101,10 @@ public class MainActivity extends AppCompatActivity {
             recognizedTextView.setText("Could not initialize: " + ex.toString());
         }
 
-        // create factory
-        final SpeechFactory speechFactory;
+        // create config 
+        final SpeechConfig speechConfig;
         try {
-            speechFactory = SpeechFactory.fromSubscription(SpeechSubscriptionKey, SpeechRegion);
+            speechConfig = SpeechConfig.fromSubscription(SpeechSubscriptionKey, SpeechRegion);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             displayException(ex);
@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 // final AudioConfig audioInput = AudioConfig.fromDefaultMicrophoneInput();
                 final AudioConfig audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
-                final SpeechRecognizer reco = speechFactory.createSpeechRecognizerFromConfig(audioInput);
+                final SpeechRecognizer reco = new SpeechRecognizer(speechConfig, audioInput);
 
                 final Future<SpeechRecognitionResult> task = reco.recognizeAsync();
                 setOnTaskCompletedListener(task, result -> {
@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 // final AudioConfig audioInput = AudioConfig.fromDefaultMicrophoneInput();
                 final AudioConfig audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
-                final SpeechRecognizer reco = speechFactory.createSpeechRecognizerFromConfig(audioInput);
+                final SpeechRecognizer reco = new SpeechRecognizer(speechConfig, audioInput);
 
                 reco.IntermediateResultReceived.addEventListener((o, speechRecognitionResultEventArgs) -> {
                     final String s = speechRecognitionResultEventArgs.getResult().getText();
@@ -217,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
                     
                     // audioInput = AudioConfig.fromDefaultMicrophoneInput();
                     audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
-                    reco = speechFactory.createSpeechRecognizerFromConfig(audioInput);
+                    reco = new SpeechRecognizer(speechConfig, audioInput);
 
                     reco.IntermediateResultReceived.addEventListener((o, speechRecognitionResultEventArgs) -> {
                         final String s = speechRecognitionResultEventArgs.getResult().getText();
@@ -267,11 +267,11 @@ public class MainActivity extends AppCompatActivity {
             content.add("");
             content.add("");
             try {
-                final SpeechFactory intentFactory = SpeechFactory.fromSubscription(LanguageUnderstandingSubscriptionKey, LanguageUnderstandingServiceRegion);
+                final SpeechConfig intentConfig = SpeechConfig.fromSubscription(LanguageUnderstandingSubscriptionKey, LanguageUnderstandingServiceRegion);
 
                 // final AudioConfig audioInput = AudioConfig.fromDefaultMicrophoneInput();
                 final AudioConfig audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
-                final IntentRecognizer reco = intentFactory.createIntentRecognizerFromConfig(audioInput);
+                final IntentRecognizer reco = new IntentRecognizer(intentConfig, audioInput);
 
                 LanguageUnderstandingModel intentModel = LanguageUnderstandingModel.fromAppId(LanguageUnderstandingAppId);
                 for (Map.Entry<String, String> entry : intentIdMap.entrySet()) {

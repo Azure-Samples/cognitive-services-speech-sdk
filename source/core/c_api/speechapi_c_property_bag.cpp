@@ -70,9 +70,11 @@ SPXAPI__(const char*) property_bag_get_string(SPXPROPERTYBAGHANDLE hpropbag, int
 
 SPXAPI property_bag_free_string(const char* value)
 {
-    SPX_INIT_HR(hr);
-    delete[] value;
-    return hr;
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        delete[] value;
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
 SPXAPI property_bag_set_string(SPXPROPERTYBAGHANDLE hpropbag, int id, const char* name, const char* defaultValue)

@@ -13,6 +13,8 @@
 #include <speechapi_cxx_intent_recognition_eventargs.h>
 #include <speechapi_cxx_intent_trigger.h>
 #include <speechapi_cxx_properties.h>
+#include <speechapi_cxx_speech_config.h>
+#include <speechapi_cxx_audio_stream.h>
 #include <spxdebug.h>
 
 namespace Microsoft {
@@ -29,6 +31,23 @@ class IntentRecognizer : public AsyncRecognizer<IntentRecognitionResult, IntentR
 {
 public:
 
+     /// <summary>
+     /// Creates an intent recognizer from a speech config and an audio config.
+     /// Users should use this function to create a new instance of an intent recognizer.
+     /// </summary>
+    /// <param name="speechConfig">Speech configuration. </param>
+    /// <param name="audioInput">Audio configuration. </param>
+    /// <returns>Instance of intent recognizer.</returns>
+    static std::shared_ptr<IntentRecognizer> FromConfig(std::shared_ptr<SpeechConfig> speechConfig, std::shared_ptr<Audio::AudioConfig> audioInput = nullptr)
+    {
+        SPXRECOHANDLE hreco;
+        SPX_THROW_ON_FAIL(::recognizer_create_intent_recognizer_from_config(
+            &hreco,
+            HandleOrInvalid<SPXSPEECHCONFIGHANDLE, SpeechConfig>(speechConfig),
+            HandleOrInvalid<SPXAUDIOCONFIGHANDLE, Audio::AudioConfig>(audioInput)));
+        return std::make_shared<IntentRecognizer>(hreco);
+    }
+
     using BaseType = AsyncRecognizer<IntentRecognitionResult, IntentRecognitionEventArgs>;
 
     /// <summary>
@@ -40,7 +59,7 @@ public:
     }
 
     /// <summary>
-    /// Deconstructor.
+    /// destructor
     /// </summary>
     ~IntentRecognizer()
     {
@@ -105,7 +124,6 @@ public:
     /// A collection of parameter names and their values.
     /// </summary>
     PropertyCollection<SPXRECOHANDLE> Parameters;
-    
 
     /// <summary>
     /// Adds a phrase that should be recognized as intent with the specified id.
@@ -151,11 +169,26 @@ public:
         SPX_THROW_ON_FAIL(IntentRecognizer_AddIntent(m_hreco, intentId.c_str(), (SPXTRIGGERHANDLE)(*trigger.get())));
     }
 
+    /// <summary>
+    /// Sets the authorization token that will be used for connecting to the service.
+    /// </summary>
+    /// <param name="token">A string that represents the authorization token.</param>
+    void SetAuthorizationToken(const std::string& token)
+    {
+        Parameters.SetProperty(SpeechPropertyId::SpeechServiceAuthorization_Token, token);
+    }
 
+    /// <summary>
+    /// Gets the authorization token.
+    /// </summary>
+    /// <returns>Authorization token</returns>
+    std::string GetAuthorizationToken()
+    {
+        return Parameters.GetProperty(SpeechPropertyId::SpeechServiceAuthorization_Token, "");
+    }
 
 private:
     DISABLE_COPY_AND_MOVE(IntentRecognizer);
-    //DISABLE_DEFAULT_CTORS(IntentRecognizer);
 
     friend class Microsoft::CognitiveServices::Speech::Session;
 };

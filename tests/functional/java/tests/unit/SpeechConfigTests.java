@@ -20,18 +20,18 @@ import java.util.ArrayList;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.audio.AudioInputStream;
 import com.microsoft.cognitiveservices.speech.audio.PullAudioInputStreamCallback;
-import com.microsoft.cognitiveservices.speech.FactoryParameterNames;
-import com.microsoft.cognitiveservices.speech.ParameterCollection;
 import com.microsoft.cognitiveservices.speech.Recognizer;
-import com.microsoft.cognitiveservices.speech.SpeechFactory;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
+import com.microsoft.cognitiveservices.speech.translation.SpeechTranslatorConfig;
+                                                          
 
 import tests.Settings;
 
 @SuppressWarnings("unused")
-public class SpeechFactoryTests {
+public class SpeechConfigTests {
 
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
@@ -45,58 +45,30 @@ public class SpeechFactoryTests {
 
     @Test(expected = NullPointerException.class)
     public void testFromSubscription1() {
-        SpeechFactory s = SpeechFactory.fromSubscription(null, null);
+        SpeechConfig s = SpeechConfig.fromSubscription(null, null);
     }
 
     @Test(expected = NullPointerException.class)
     public void testFromSubscription2() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, null);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, null);
     }
 
     @Test(expected = NullPointerException.class)
     public void testFromSubscription3() {
-        SpeechFactory s = SpeechFactory.fromSubscription(null, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(null, Settings.SpeechRegion);
     }
 
     @Ignore("TODO why does illegal key succeed?")
     @Test(expected = NullPointerException.class)
     public void testFromSubscription4() {
-        SpeechFactory s = SpeechFactory.fromSubscription("illegal", "illegal");
+        SpeechConfig s = SpeechConfig.fromSubscription("illegal", "illegal");
     }
     
     @Test() 
     public void testFromSubscriptionSuccess() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         assertNotNull(s);
-        
-        s.close();
-    }
-
-    // -----------------------------------------------------------------------
-    // --- 
-    // -----------------------------------------------------------------------
-
-    @Test
-    public void testGetSubscriptionKey() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
-        assertNotNull(s);
-        assertEquals(Settings.SpeechSubscriptionKey, s.getSubscriptionKey());
-        
-        s.close();
-    }
-
-    // -----------------------------------------------------------------------
-    // --- 
-    // -----------------------------------------------------------------------
-
-    @Test
-    public void testGetRegion() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
-        assertNotNull(s);
-        assertEquals(Settings.SpeechRegion, s.getRegion());
         
         s.close();
     }
@@ -107,28 +79,28 @@ public class SpeechFactoryTests {
     
     @Test(expected = NullPointerException.class)
     public void testFromEndpoint1() {
-        SpeechFactory s = SpeechFactory.fromEndPoint(null, null);
+        SpeechConfig s = SpeechConfig.fromEndpoint(null, null);
     }
 
     @Test(expected = NullPointerException.class)
     public void testFromEndpoint2() {
-        SpeechFactory s = SpeechFactory.fromEndPoint(null, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromEndpoint(null, Settings.SpeechRegion);
     }
 
     @Test(expected = NullPointerException.class)
     public void testFromEndpoint3() {
-        SpeechFactory s = SpeechFactory.fromEndPoint(URI.create("http://www.example.com"), null);
+        SpeechConfig s = SpeechConfig.fromEndpoint(URI.create("http://www.example.com"), null);
     }
 
     @Ignore("TODO why does illegal token not fail?")
     @Test(expected = RuntimeException.class)
     public void testFromEndpoint4() {
-        SpeechFactory s = SpeechFactory.fromEndPoint(URI.create("http://www.example.com"), "illegal-subscription");
+        SpeechConfig s = SpeechConfig.fromEndpoint(URI.create("http://www.example.com"), "illegal-subscription");
     }
     
     @Test
     public void testFromEndpointSuccess() {
-        SpeechFactory s = SpeechFactory.fromEndPoint(URI.create("http://www.example.com"), Settings.SpeechSubscriptionKey);
+        SpeechConfig s = SpeechConfig.fromEndpoint(URI.create("http://www.example.com"), Settings.SpeechSubscriptionKey);
         
         assertNotNull(s);
         
@@ -139,44 +111,12 @@ public class SpeechFactoryTests {
     // --- 
     // -----------------------------------------------------------------------
 
-    @Test
-    public void testGetParameters1() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        
-        assertNotNull(s.getParameters());
-        assertEquals(s.getRegion(), s.getParameters().getString(FactoryParameterNames.Region));
-        assertEquals(s.getSubscriptionKey(), s.getParameters().getString(FactoryParameterNames.SubscriptionKey));
-        
-        s.close();
-    }
-
-    @Ignore("TODO why is a string an int?")
-    @Test
-    public void testGetParametersString() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
-        String name = "stringName";
-        String value = "stringValue";
-        ParameterCollection<?> p = s.getParameters();
-        
-        p.set(name, value);
-        
-        assertEquals(value, p.getString(name));
-        assertEquals(value, p.getString(name, "some-other-default-" + value));
-
-        s.close();
-    }
-
-    // -----------------------------------------------------------------------
-    // --- 
-    // -----------------------------------------------------------------------
-
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateSpeechRecognizer() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         
-        SpeechRecognizer r = s.createSpeechRecognizer();
+        SpeechRecognizer r = new SpeechRecognizer(s, null);
         
         assertNotNull(r);
         assertTrue(r instanceof Recognizer);
@@ -192,10 +132,10 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateSpeechRecognizerLanguage1() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            SpeechRecognizer r = s.createSpeechRecognizer(null);
+            SpeechRecognizer r = new SpeechRecognizer(s, null);
             fail("not expected");
         }
         catch(NullPointerException ex) {
@@ -208,10 +148,10 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateSpeechRecognizerLanguage2() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            SpeechRecognizer r = s.createSpeechRecognizer("illegal-language");
+            SpeechRecognizer r = new SpeechRecognizer(s, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -224,9 +164,10 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateSpeechRecognizerLanguageSuccess() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        
-        SpeechRecognizer r = s.createSpeechRecognizer("en-US");
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+
+        SpeechRecognizer r = new SpeechRecognizer(s, null);
         
         assertNotNull(r);
         assertTrue(r instanceof Recognizer);
@@ -242,10 +183,10 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateSpeechRecognizerString1() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput((String)null));
+            SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput((String)null));            
             fail("not expected");
         }
         catch(NullPointerException ex) {
@@ -257,10 +198,10 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateSpeechRecognizerString2() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput("illegal-" + Settings.WavFile));
+            SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput("illegal-" + Settings.WavFile));            
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -272,9 +213,9 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateSpeechRecognizerStringSuccess() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-        
-        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+
+        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -286,10 +227,10 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateSpeechRecognizerStringString1() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput((String)null), null);
+            SpeechRecognizer r = new SpeechRecognizer(s,AudioConfig.fromWavFileInput((String)null));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -301,10 +242,11 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateSpeechRecognizerStringString2() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-EN");
         try {
-            SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput((String)null), "en-EN");
+            SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput((String)null));
+            
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -317,10 +259,12 @@ public class SpeechFactoryTests {
     @Ignore("TODO why can create illegal language")
     @Test
     public void testCreateSpeechRecognizerStringString3() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("illegal-language");
 
         try {
-            SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "illegal-language");
+            SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
+
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -332,9 +276,10 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateSpeechRecognizerStringStringSuccess() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-EN");
 
-        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-EN");
+        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -349,10 +294,10 @@ public class SpeechFactoryTests {
     @Ignore("TODO can create with null stream?")
     @Test
     public void testCreateSpeechRecognizerAudioInputStream1() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+ 
         try {
-            SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromStreamInput((AudioInputStream)null));
+            SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromStreamInput((AudioInputStream)null));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -364,10 +309,10 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateSpeechRecognizerAudioInputStreamSuccess() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
-        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromStreamInput(ais));
+        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromStreamInput(ais));
         
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -378,10 +323,11 @@ public class SpeechFactoryTests {
     
     @Test
     public void testCreateSpeechRecognizerAudioInputStreamString1() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromStreamInput((AudioInputStream)null), null);
+            SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromStreamInput((AudioInputStream)null));
+
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -394,10 +340,12 @@ public class SpeechFactoryTests {
     @Ignore("TODO why does null stream not fail")
     @Test
     public void testCreateSpeechRecognizerAudioInputStreamString2() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
 
         try {
-            SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromStreamInput((AudioInputStream)null), "en-US");
+            SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromStreamInput((AudioInputStream)null));
+            
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -408,12 +356,15 @@ public class SpeechFactoryTests {
     }
     
     @Test
+    @Ignore("TODO: Check, now we can pass language as part of config, and it can be null")
     public void testCreateSpeechRecognizerAudioInputStreamString3() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
             WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
-            SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromStreamInput(ais), null);
+
+            SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromStreamInput(ais));
+            
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -426,11 +377,12 @@ public class SpeechFactoryTests {
     @Ignore("TODO why does illegal language not fail")
     @Test
     public void testCreateSpeechRecognizerAudioInputStreamString4() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("illegal-language");
 
         try {
             WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
-            SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "illegal-language");
+            SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromStreamInput(ais));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -442,11 +394,12 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateSpeechRecognizerAudioInputStreamStringSuccess() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
-        
-        SpeechRecognizer r = s.createSpeechRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US");
+        SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromStreamInput(ais));
+
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -462,9 +415,8 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateIntentRecognizer() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
-        IntentRecognizer r = s.createIntentRecognizer();
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        IntentRecognizer r = new IntentRecognizer(s, null);
 
         s.close();
     }
@@ -472,10 +424,11 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateIntentRecognizerLanguage1() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            IntentRecognizer r = s.createIntentRecognizer((String)null);
+            IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromStreamInput((AudioInputStream)null));
+            
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -488,10 +441,11 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateIntentRecognizerLanguage2() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("illegal-language");
 
         try {
-            IntentRecognizer r = s.createIntentRecognizer("illegal-language");
+            IntentRecognizer r = new IntentRecognizer(s, (AudioConfig)null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -504,9 +458,10 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateIntentRecognizerLanguageSuccess() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
 
-        IntentRecognizer r = s.createIntentRecognizer("en-US");
+        IntentRecognizer r = new IntentRecognizer(s, (AudioConfig)null);
         
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -518,10 +473,10 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateIntentRecognizerString1() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput((String)null));
+            IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput((String)null));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -533,10 +488,10 @@ public class SpeechFactoryTests {
     
     @Test
     public void testCreateIntentRecognizerString2() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput("illegal-" + Settings.WavFile));
+            IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput("illegal-" + Settings.WavFile));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -548,9 +503,8 @@ public class SpeechFactoryTests {
        
     @Test
     public void testCreateIntentRecognizerStringSuccess() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
-        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile));
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));      
         
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -564,10 +518,11 @@ public class SpeechFactoryTests {
     @Ignore("TODO why can create with null stream?")
     @Test
     public void testCreateIntentRecognizerAudioInputStream1() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromStreamInput((AudioInputStream)null));
+            IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromStreamInput((AudioInputStream)null));
+            
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -579,11 +534,11 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateIntentRecognizerAudioInputStreamSuccess() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
-        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromStreamInput(ais));
-        
+        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromStreamInput(ais));
+
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -593,10 +548,11 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateIntentRecognizerAudioInputStreamString1() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromStreamInput((AudioInputStream)null), null);
+            IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromStreamInput((AudioInputStream)null));
+            
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -609,10 +565,11 @@ public class SpeechFactoryTests {
     @Ignore("TODO why does null stream not fail")
     @Test
     public void testCreateIntentRecognizerAudioInputStreamString2() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
 
         try {
-            IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromStreamInput((AudioInputStream)null), "en-US");
+            IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromStreamInput((AudioInputStream)null));            
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -625,11 +582,13 @@ public class SpeechFactoryTests {
     @Ignore("TODO why does illegal language not fail")
     @Test
     public void testCreateIntentRecognizerAudioInputStreamString3() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("illegal-language");
 
         try {
             WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
-            IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "illegal-language");
+            IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromStreamInput(ais));
+
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -641,10 +600,11 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateIntentRecognizerAudioInputStreamStringSuccess() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
-        IntentRecognizer r = s.createIntentRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US");
+        IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromStreamInput(ais));
         
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -660,10 +620,11 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfString1() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(null, null);
+            TranslationRecognizer r = new TranslationRecognizer(s, null);
+        
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -676,10 +637,11 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfString2() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("illegal");
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig("illegal", null);
+            TranslationRecognizer r = new TranslationRecognizer(s, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -692,10 +654,11 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfString3() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-EN");
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-EN", null);
+            TranslationRecognizer r = new TranslationRecognizer(s, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -708,12 +671,13 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfString4() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-EN");
+        s.addTargetLanguage("");
 
         try {
-            ArrayList<String> targets = new ArrayList<>();
 
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-EN", targets);
+            TranslationRecognizer r = new TranslationRecognizer(s,null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -726,13 +690,12 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfString5() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.addTargetLanguage("illegal");
 
         try {
-            ArrayList<String> targets = new ArrayList<>();
-            targets.add("illegal");
-
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-EN", targets);
+        
+            TranslationRecognizer r = new TranslationRecognizer(s, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -746,12 +709,11 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringSuccess() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.addTargetLanguage("en-US");
+        s.setSpeechRecognitionLanguage("en-EN");
 
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");
-        
-        TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-EN", targets);
+        TranslationRecognizer r = new TranslationRecognizer(s, null);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -767,10 +729,10 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString1() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(((String)null), null, null);
+            TranslationRecognizer r = new TranslationRecognizer(null,null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -783,10 +745,11 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString2() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("illegal");
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig("illegal", null, null);
+            TranslationRecognizer r = new TranslationRecognizer(s, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -799,10 +762,11 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString3() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-US", null, null);
+            TranslationRecognizer r = new TranslationRecognizer(s, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -815,12 +779,13 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString4() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
 
         try {
             ArrayList<String> targets = new ArrayList<>();
 
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-US", targets, null);
+            TranslationRecognizer r = new TranslationRecognizer(s,null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -833,13 +798,12 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString5() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        s.addTargetLanguage("illegal");
 
         try {
-            ArrayList<String> targets = new ArrayList<>();
-            targets.add("illegal");
-
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-US", targets, null);
+            TranslationRecognizer r = new TranslationRecognizer(s, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -852,13 +816,15 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString6() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        s.addTargetLanguage("en-US");
 
         try {
             ArrayList<String> targets = new ArrayList<>();
             targets.add("en-US");
 
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-US", targets, null);
+            TranslationRecognizer r = new TranslationRecognizer(s, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -871,13 +837,16 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringString7() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        s.addTargetLanguage("en-US");
+        s.setVoiceName("illegal");
 
         try {
             ArrayList<String> targets = new ArrayList<>();
             targets.add("en-US");
 
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-US", targets, "illegal");
+            TranslationRecognizer r = new TranslationRecognizer(s, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -890,12 +859,12 @@ public class SpeechFactoryTests {
     @Ignore("TODO: enable. however, this will crash the java vm at shutdown due to COM issues.")
     @Test
     public void testCreateTranslationRecognizerStringArrayListOfStringStringSuccess() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        s.addTargetLanguage("en-US");
+        s.setVoiceName("en-US");
 
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");
-
-        TranslationRecognizer r = s.createTranslationRecognizerFromConfig("en-US", targets, "en-US");
+        TranslationRecognizer r = new TranslationRecognizer(s, null);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -910,10 +879,10 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfString1() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(null), null, null);
+            TranslationRecognizer r = new TranslationRecognizer(null,null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -925,10 +894,10 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfString2() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput("illegal-" + Settings.WavFile), null, null);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput("illegal-" + Settings.WavFile));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -940,10 +909,10 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfString3() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), null, null);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -955,10 +924,11 @@ public class SpeechFactoryTests {
     
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfString4() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("illegal");
+        
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "illegal", null);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -970,10 +940,11 @@ public class SpeechFactoryTests {
     
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfString5() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", null);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -985,12 +956,13 @@ public class SpeechFactoryTests {
     
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfString6() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        
         try {
             ArrayList<String> targets = new ArrayList<>();
             
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1003,13 +975,12 @@ public class SpeechFactoryTests {
     @Ignore("TODO why can create with illegal source language")
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfString7() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        s.addTargetLanguage("illegal");     
+        
         try {
-            ArrayList<String> targets = new ArrayList<>();
-            targets.add("illegal");
-            
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets);
+            TranslationRecognizer r = new TranslationRecognizer(s,null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1021,12 +992,11 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringSuccess() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        s.addTargetLanguage("en-US");
         
-        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets);
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -1042,10 +1012,10 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString1() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(null), null, null, null);
+            TranslationRecognizer r = new TranslationRecognizer(s, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1057,10 +1027,10 @@ public class SpeechFactoryTests {
     
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString2() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput("illegal-" + Settings.WavFile), null, null, null);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput("illegal-" + Settings.WavFile));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1072,10 +1042,10 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString3() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), null, null, null);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1087,10 +1057,11 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString4() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("illegal");
+        
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "illegal", null, null);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1102,10 +1073,11 @@ public class SpeechFactoryTests {
     
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString5() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", null, null);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1117,12 +1089,11 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString6() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        
         try {
-            ArrayList<String> targets = new ArrayList<>();
-            
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets, null);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1133,14 +1104,15 @@ public class SpeechFactoryTests {
     }
 
     @Test
+    @Ignore("TODO: Check, now we can pass language as part of config, and it can be null")
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString7() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        s.addTargetLanguage("illegal");
+        
         try {
-            ArrayList<String> targets = new ArrayList<>();
-            targets.add("illegal");
             
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets, null);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1151,14 +1123,14 @@ public class SpeechFactoryTests {
     }
 
     @Test
+    @Ignore("TODO: Check, now we can pass language as part of config, and it can be null")
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString8() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        s.addTargetLanguage("en-US");
+        
         try {
-            ArrayList<String> targets = new ArrayList<>();
-            targets.add("en-US");
-            
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets, null);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1171,13 +1143,13 @@ public class SpeechFactoryTests {
     @Ignore("TODO why can create with illegal voice?")
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString9() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        s.addTargetLanguage("en-US");
+        s.setVoiceName("illegal");
+        
         try {
-            ArrayList<String> targets = new ArrayList<>();
-            targets.add("en-US");
-            
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets, "illegal");
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1189,12 +1161,12 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringStringSuccess() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        s.addTargetLanguage("en-US");
+        s.setVoiceName("en-US");
         
-        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromWavFileInput(Settings.WavFile), "en-US", targets, "en-US");
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -1209,10 +1181,10 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfString1() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput((PullAudioInputStreamCallback)null), ((String)null), null);
+            TranslationRecognizer r = new TranslationRecognizer(s, null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1224,12 +1196,12 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfString2() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
             WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), ((String)null), null);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1241,12 +1213,13 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfString3() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("illegal");
+        
         try {
             WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "illegal", null);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1258,12 +1231,13 @@ public class SpeechFactoryTests {
     
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfString4() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        
         try {
             WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", null);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1275,14 +1249,15 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfString5() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        
         try {
             ArrayList<String> targets = new ArrayList<>();
             
             WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", targets);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1295,15 +1270,15 @@ public class SpeechFactoryTests {
     @Ignore("TODO why does illegal target language not fail")
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfString6() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.addTargetLanguage("illegal");
+        s.setSpeechRecognitionLanguage("en-US");
+        
         try {
-            ArrayList<String> targets = new ArrayList<>();
-            targets.add("illegal");
             
             WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", targets);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1315,14 +1290,13 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringSuccess() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.addTargetLanguage("en-US");
+        s.setSpeechRecognitionLanguage("en-US");
         
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         
-        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", targets);
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -1337,10 +1311,10 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringString1() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+         
         try {
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput((PullAudioInputStreamCallback)null), ((String)null), null, null);
+            TranslationRecognizer r = new TranslationRecognizer(s,  null);
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1352,12 +1326,12 @@ public class SpeechFactoryTests {
     
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringString2() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
         try {
             WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), ((String)null), null, null);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1369,12 +1343,13 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringString3() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("illegal");
+        
         try {
             WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "illegal", null, null);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1386,12 +1361,13 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringString4() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        
         try {
             WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", null, null);
+            TranslationRecognizer r = new TranslationRecognizer(s,AudioConfig.fromStreamInput(ais));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1403,14 +1379,15 @@ public class SpeechFactoryTests {
     
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringString5() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        
         try {
             ArrayList<String> targets = new ArrayList<>();
             
             WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", targets, null);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1421,16 +1398,16 @@ public class SpeechFactoryTests {
     }
 
     @Test
+    @Ignore("TODO: Check, now we can pass language as part of config, and it can be null")
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringString6() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        s.addTargetLanguage("illegal");
+        
         try {
-            ArrayList<String> targets = new ArrayList<>();
-            targets.add("illegal");
-            
             WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", targets, null);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1441,16 +1418,17 @@ public class SpeechFactoryTests {
     }
 
     @Test
+    @Ignore("TODO: Check, now we can pass language as part of config, and it can be null")
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringString7() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        s.addTargetLanguage("en-US");
+        
         try {
-            ArrayList<String> targets = new ArrayList<>();
-            targets.add("en-US");
             
             WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", targets, null);
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1463,15 +1441,18 @@ public class SpeechFactoryTests {
     @Ignore("TODO create with stream on illegal voice does not fail?")
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringString8() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        s.addTargetLanguage("en-US");
+        s.setVoiceName("illegal");
+        
         try {
             ArrayList<String> targets = new ArrayList<>();
             targets.add("en-US");
             
             WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
             
-            TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", targets, "illegal");
+            TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
             fail("not expected");
         }
         catch(RuntimeException ex) {
@@ -1483,14 +1464,16 @@ public class SpeechFactoryTests {
 
     @Test
     public void testCreateTranslationRecognizerWithStreamAudioInputStreamStringArrayListOfStringStringSuccess() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
-        ArrayList<String> targets = new ArrayList<>();
-        targets.add("en-US");
+        SpeechTranslatorConfig s = SpeechTranslatorConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        s.setSpeechRecognitionLanguage("en-US");
+        s.addTargetLanguage("en-US");
+        s.setVoiceName("en-US");
+        
         
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         
-        TranslationRecognizer r = s.createTranslationRecognizerFromConfig(AudioConfig.fromStreamInput(ais), "en-US", targets, "en-US");
+        TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
+        
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
@@ -1505,7 +1488,7 @@ public class SpeechFactoryTests {
 
     @Test
     public void testClose() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         
         s.close();
     }
@@ -1515,11 +1498,12 @@ public class SpeechFactoryTests {
     // -----------------------------------------------------------------------
 
     @Test
-    public void testGetFactoryImpl() {
-        SpeechFactory s = SpeechFactory.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    public void testGetConfigImpl() {
+        SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         
         assertNotNull(s);
-        assertNotNull(s.getFactoryImpl());
+        assertNotNull(s.getImpl());
     }
 
 }
+

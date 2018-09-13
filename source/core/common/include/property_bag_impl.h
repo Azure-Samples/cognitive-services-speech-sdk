@@ -9,7 +9,6 @@
 #include <map>
 #include "ispxinterfaces.h"
 
-
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
@@ -19,6 +18,19 @@ class ISpxPropertyBagImpl : public ISpxNamedProperties
 {
 public:
     // --- ISpxNamedProperties
+    void Copy(ISpxNamedProperties* from) override
+    {
+        std::unique_lock<std::mutex> lock(m_mutexProperties);
+
+        auto p = dynamic_cast<ISpxPropertyBagImpl*>(from);
+        SPX_IFTRUE_THROW_HR(p == nullptr, SPXERR_INVALID_ARG);
+
+        for (const auto& it : p->m_stringPropertyMap)
+        {
+            m_stringPropertyMap.insert(it);
+        }
+    }
+
     std::string GetStringValue(const char* name, const char* defaultValue) const override
     {
         std::unique_lock<std::mutex> lock(m_mutexProperties);

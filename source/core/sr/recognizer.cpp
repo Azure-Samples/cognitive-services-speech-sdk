@@ -39,11 +39,7 @@ void CSpxRecognizer::Term()
 
 void CSpxRecognizer::SetStringValue(const char* name, const char* value)
 {
-    // Check to see if the caller is trying to set the CUSTOM SPEECH Model ID...
-    if (PAL::stricmp(name, GetPropertyName(SpeechPropertyId::SpeechServiceConnection_DeploymentId)) == 0)
-    {
-        SetStringValueInProperties(name, value);
-    }
+    SetStringValueInProperties(name, value);
 }
 
 bool CSpxRecognizer::IsEnabled()

@@ -6,24 +6,31 @@
 //
 
 #include "stdafx.h"
-#include "carbon_test_console.h"
 
+#include "carbon_test_console.h"
 
 void CarbonTestConsole::Sample_HelloWorld_In_C()
 {
      SPXHR hr = SPX_NOERROR;
-     SPXFACTORYHANDLE hfactory = SPXHANDLE_INVALID;
+     SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
      if (SPX_SUCCEEDED(hr))
      {
          hr = !m_endpointUri.empty()
-             ? ::speech_factory_from_endpoint(m_endpointUri.c_str(), m_subscriptionKey.c_str(), &hfactory)
-             : ::speech_factory_from_subscription(m_subscriptionKey.c_str(), nullptr, &hfactory);
+             ? ::speech_config_from_endpoint(&hconfig, m_endpointUri.c_str(), m_subscriptionKey.c_str())
+             : ::speech_config_from_subscription(&hconfig, m_subscriptionKey.c_str(), nullptr);
+     }
+
+     if (SPX_SUCCEEDED(hr))
+     {
+         SPXPROPERTYBAGHANDLE bag;
+         ::speech_config_get_property_bag(hconfig, &bag);
+         ::property_bag_set_string(bag, -1, "SpeechServiceResponse_RequestDetailedResultTrueFalse", "false");
      }
 
      SPXRECOHANDLE hreco = SPXHANDLE_INVALID;
      if (SPX_SUCCEEDED(hr))
      {
-         hr = ::speech_factory_create_speech_recognizer_from_config(hfactory, &hreco, nullptr, SpeechOutputFormat_Simple, nullptr);
+         hr = ::recognizer_create_speech_recognizer_from_config(&hreco, hconfig, nullptr);
      }
 
      SPXASYNCHANDLE hasync = SPXHANDLE_INVALID;
@@ -59,6 +66,6 @@ void CarbonTestConsole::Sample_HelloWorld_In_C()
      ::Recognizer_Handle_Close(hreco);
      hreco = SPXHANDLE_INVALID;
 
-     ::speech_factory_handle_close(hfactory);
-     hfactory = SPXHANDLE_INVALID;
+     ::speech_config_release(hconfig);
+     hconfig = SPXHANDLE_INVALID;
 }

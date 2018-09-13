@@ -11,7 +11,7 @@ import java.util.concurrent.Future;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
 import com.microsoft.cognitiveservices.speech.SessionEventType;
-import com.microsoft.cognitiveservices.speech.SpeechFactory;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 
 public class SampleRecognizeWithWakeWord implements Runnable, Stoppable {
@@ -54,15 +54,15 @@ public class SampleRecognizeWithWakeWord implements Runnable, Stoppable {
             return;
         }
 
-        // create factory
-        SpeechFactory factory = SampleSettings.getFactory();
+        // create config 
+        SpeechConfig config = SampleSettings.getSpeechConfig();
 
         content.clear();
         content.add("");
         try {
-            // Note: to use the microphone, use "AudioConfig.fromDefaultMicrophoneInput()"
+            // Note: to use the microphone, replace the parameter with "new MicrophoneAudioInputStream()"
             audioInput = AudioConfig.fromWavFileInput(SampleSettings.WavFile);
-            reco = factory.createSpeechRecognizerFromConfig(audioInput);
+            reco =  new SpeechRecognizer(config,audioInput);
 
             reco.SessionEvent.addEventListener((o, sessionEventArgs) -> {
 

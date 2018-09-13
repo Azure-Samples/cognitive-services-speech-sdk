@@ -30,15 +30,16 @@ function run_tests {
     pretty_print "Running cxx_api_tests"
     ./tests/unit_tests.sh $BINARY_DIR cxx_api_tests $UserKeySpeech $UserKeyCris $UserKeyLuis $UserKeySkyman $endpoint
 
-    if [ "${AGENT_OS}" == "Windows_NT" ] && [ "${BUILDPLATFORM}" == "Win32" ]; then
-        : # we don't build python bindings on Win32
-    else
-        pretty_print "Running Python tests"
-        export PATH=$PATH:$HOME/.local/bin
-        py_args="--filename ./tests/input/whatstheweatherlike.wav --subscription $UserKeySkyman"
-        [ ! -z $endpoint ] && py_args+=" --endpoint $endpoint"
-        py.test -s ./source/bindings/python/test.py $py_args
-    fi
+   # Disable Python for GA
+   # if [ "${AGENT_OS}" == "Windows_NT" ] && [ "${BUILDPLATFORM}" == "Win32" ]; then
+   #     : # we don't build python bindings on Win32
+   # else
+   #     pretty_print "Running Python tests"
+   #     export PATH=$PATH:$HOME/.local/bin
+   #     py_args="--filename ./tests/input/whatstheweatherlike.wav --subscription $UserKeySkyman"
+   #     [ ! -z $endpoint ] && py_args+=" --endpoint $endpoint"
+   #     py.test -s ./source/bindings/python/test.py $py_args
+   # fi
 }
 
 pretty_print "ENTERING rununittest.sh"

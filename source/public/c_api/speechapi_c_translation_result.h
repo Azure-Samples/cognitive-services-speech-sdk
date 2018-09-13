@@ -9,16 +9,26 @@
 typedef enum { Result_Translation_Success, Result_Translation_Error } Result_TranslationStatus;
 typedef enum { Result_Synthesis_Success, Result_Synthesis_End, Result_Synthesis_Error } Result_SynthesisStatus;
 
-// Defines the header of the buffer that returns translation text results. The buffer starts with the header whose structure is
-// defined below, and then follows the translation results for all required languages.
+/// <summary>
+/// Defines the header of the buffer that returns translation text results. The buffer starts with the header whose structure is
+/// defined below, and then follows the translation results for all required languages.
+/// </summary>
 typedef struct _Result_TranslationTextBufferHeader {
-    // The total size of the buffer, including translation results.
+    /// <summary>
+    /// The total size of the buffer, including translation results.
+    /// </summary>
     size_t bufferSize;
-    // The number of target languages. This indicates the array size of targetLanguages and translationTexts.
+    /// <summary>
+    /// The number of target languages. This indicates the array size of targetLanguages and translationTexts.
+    /// </summary>
     size_t numberEntries;
-    // Points to an array of target language names. The size of the array is numberEntries.
+    /// <summary>
+    /// Points to an array of target language names. The size of the array is numberEntries.
+    /// </summary>
     char** targetLanguages;
-    // Points to an array of translation texts. The element in the array is the translation text of the target language which has the same index in targetLanguages.
+    /// <summary>
+    /// Points to an array of translation texts. The element in the array is the translation text of the target language which has the same index in targetLanguages.
+    /// </summary>
     char** translationTexts;
     // After that is the data buffer containing target language names and translation texts.
 } Result_TranslationTextBufferHeader;

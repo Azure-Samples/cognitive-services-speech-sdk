@@ -25,15 +25,18 @@ using namespace std;
 
 static string input_file("tests/input/whatstheweatherlike.wav");
 
-
-static std::shared_ptr<ICognitiveServicesSpeechFactory> GetFactory()
+static std::shared_ptr<SpeechConfig> CurrentSpeechConfig()
 {
-    // Assuming subscription key contains only single-byte characters.
-    static std::shared_ptr<ICognitiveServicesSpeechFactory> factory = !Config::Endpoint.empty()
-        ? SpeechFactory::FromEndpoint(Config::Endpoint, Keys::Speech)
-        : SpeechFactory::FromSubscription(Keys::Speech, Config::Region);
+    return !Config::Endpoint.empty()
+        ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech)
+        : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+}
 
-    return factory;
+template< typename RecogType>
+static std::shared_ptr<RecogType> CreateRecognizers(const string& filename)
+{
+    auto audioInput = AudioConfig::FromWavFileInput(filename);
+    return RecogType::FromConfig(CurrentSpeechConfig(), audioInput);
 }
 
 void UseMocks(bool value)
@@ -90,7 +93,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             vector<std::future<std::shared_ptr<SpeechRecognitionResult>>> futures;
             for (int i = 0; i < numLoops; i++)
             {
-                auto recognizer = GetFactory()->CreateSpeechRecognizer();
+                auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig());
                 REQUIRE(recognizer != nullptr);
                 futures.push_back(recognizer->RecognizeAsync());
             }
@@ -104,7 +107,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             int numAsyncMethods = 4;
             for (int i = 0; i < numLoops*numAsyncMethods; i++)
             {
-                auto recognizer = GetFactory()->CreateSpeechRecognizer();
+                auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig());
                 REQUIRE(recognizer != nullptr);
                 if (i % numAsyncMethods == 0)
                 {
@@ -165,8 +168,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
                 SPX_TRACE_VERBOSE("%s: START of loop #%d; mockUsp=%d; realtime=%d", __FUNCTION__, i, useMockUsp, realTimeRate);
 
-                auto audioConfig = AudioConfig::FromWavFileInput(input_file);
-                auto recognizer = GetFactory()->CreateSpeechRecognizerFromConfig(audioConfig);
+                auto recognizer = CreateRecognizers<SpeechRecognizer>(input_file);
                 REQUIRE(recognizer != nullptr);
                 REQUIRE(IsUsingMocks(useMockUsp));
 
@@ -237,8 +239,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         REQUIRE(exists(PAL::ToWString(input_file)));
         REQUIRE(!IsUsingMocks());
 
-        auto audioConfig = AudioConfig::FromWavFileInput(input_file);
-        auto recognizer = GetFactory()->CreateSpeechRecognizerFromConfig(audioConfig);
+        auto recognizer = CreateRecognizers<SpeechRecognizer>(input_file);
         auto result = recognizer->RecognizeAsync().get();
         REQUIRE(!result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_Json).empty());
     }
@@ -250,9 +251,9 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         UseMocks(false);
         REQUIRE(exists(PAL::ToWString(input_file)));
         REQUIRE(!IsUsingMocks());
-        auto badKeyFactory = SpeechFactory::FromSubscription("invalid_key", "invalid_region");
+        auto badKeyConfig = SpeechConfig::FromSubscription("invalid_key", "invalid_region");
         auto audioConfig = AudioConfig::FromWavFileInput(input_file);
-        auto recognizer = badKeyFactory->CreateSpeechRecognizerFromConfig(audioConfig);
+        auto recognizer = SpeechRecognizer::FromConfig(badKeyConfig, audioConfig);
         auto result = recognizer->RecognizeAsync().get();
 
         REQUIRE(result->Reason == Reason::Canceled);
@@ -274,9 +275,10 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
         bool connectionReportedError = false;
         string wrongKey = "wrongKey";
-        auto factory = SpeechFactory::FromSubscription(wrongKey, "westus");
-        auto audioConfig = AudioConfig::FromWavFileInput(input_file);
-        auto recognizer = factory->CreateSpeechRecognizerFromConfig(audioConfig);
+
+        auto sc = SpeechConfig::FromSubscription(wrongKey, "westus");
+        auto a = AudioConfig::FromWavFileInput(input_file);
+        auto recognizer = SpeechRecognizer::FromConfig(sc, a);
 
         recognizer->Canceled.Connect([&](const SpeechRecognitionEventArgs& args) {
             {
@@ -301,9 +303,12 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
     {
         string german_input_file("tests/input/CallTheFirstOne.wav");
         REQUIRE(exists(PAL::ToWString(german_input_file)));
-        auto factory = GetFactory();
+
+        auto sc = !Config::Endpoint.empty() ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech) : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+        sc->SetSpeechRecognitionLanguage("de-DE");
         auto audioConfig = AudioConfig::FromWavFileInput(german_input_file);
-        auto recognizer = factory->CreateSpeechRecognizerFromConfig("de-DE", OutputFormat::Simple, audioConfig);
+        auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
+
         auto result = recognizer->RecognizeAsync().get();
         REQUIRE(result != nullptr);
         REQUIRE(!result->Text.empty());
@@ -313,9 +318,12 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
     {
         string german_input_file("tests/input/CallTheFirstOne.wav");
         REQUIRE(exists(PAL::ToWString(german_input_file)));
-        auto factory = GetFactory();
+
+        auto sc = !Config::Endpoint.empty() ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech) : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+        sc->SetSpeechRecognitionLanguage("de-DE");
         auto audioConfig = AudioConfig::FromWavFileInput(german_input_file);
-        auto recognizer = factory->CreateSpeechRecognizerFromConfig("de-DE", OutputFormat::Simple, audioConfig);
+        auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
+
         auto result = recognizer->RecognizeAsync().get();
         REQUIRE(result != nullptr);
         REQUIRE(!result->Text.empty());
@@ -341,7 +349,7 @@ TEST_CASE("KWS basics", "[api][cxx]")
         {
             SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
-            auto recognizer = GetFactory()->CreateSpeechRecognizer();
+            auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig());
             REQUIRE(recognizer != nullptr);
             REQUIRE(IsUsingMocks(true));
 
@@ -401,12 +409,12 @@ TEST_CASE("Speech on local server", "[api][cxx]")
         REQUIRE(!IsUsingMocks());
 
         const int numLoops = 10;
-
-        auto factory = SpeechFactory::FromEndpoint(Config::Endpoint, R"({"max_timeout":"0"})");
+        
+        auto sc = SpeechConfig::FromEndpoint(Config::Endpoint, R"({"max_timeout":"0"})");
         for (int i = 0; i < numLoops; i++)
         {
             auto audioConfig = AudioConfig::FromWavFileInput(input_file);
-            auto recognizer = factory->CreateSpeechRecognizerFromConfig(audioConfig);
+            auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
             auto result = recognizer->RecognizeAsync().get();
             REQUIRE(result->Reason == Reason::Recognized);
             REQUIRE(result->Text == "Remind me to buy 5 iPhones.");
@@ -443,8 +451,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
         bool callback_invoked = false;
 
         REQUIRE(!IsUsingMocks());
-        auto audioConfig = AudioConfig::FromWavFileInput(input_file);
-        auto recognizer = GetFactory()->CreateSpeechRecognizerFromConfig(audioConfig);
+        auto recognizer = CreateRecognizers<SpeechRecognizer>(input_file);
 
         auto callback = [&](const SpeechRecognitionEventArgs& args)
         {
@@ -475,8 +482,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
         REQUIRE(!IsUsingMocks());
-        auto audioConfig = AudioConfig::FromWavFileInput(input_file);
-        auto recognizer = GetFactory()->CreateSpeechRecognizerFromConfig(audioConfig);
+        auto recognizer = CreateRecognizers<SpeechRecognizer>(input_file);
 
         auto callback1 = [&](const SpeechRecognitionEventArgs& args)
         {
@@ -501,7 +507,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
             recognizer->FinalResult.DisconnectAll();
         };
 
-        recognizer = GetFactory()->CreateSpeechRecognizerFromConfig(audioConfig);
+        recognizer = CreateRecognizers<SpeechRecognizer>(input_file);
         recognizer->FinalResult.Connect(callback2);
         recognizer->Canceled.Connect(callback2);
 
@@ -514,108 +520,10 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
             recognizer.reset();
         };
 
-        recognizer = GetFactory()->CreateSpeechRecognizerFromConfig(audioConfig);
+        recognizer = CreateRecognizers<SpeechRecognizer>(input_file);
         recognizer->FinalResult.Connect(callback3);
         recognizer->Canceled.Connect(callback3);
         auto future = recognizer->RecognizeAsync();
         UNUSED(future);
     }
 }
-
-TEST_CASE("Speech Factory basics", "[api][cxx]")
-{
-    SECTION("Check that factories have correct parameters.")
-    {
-        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
-
-        auto f1 = SpeechFactory::FromEndpoint("1", "invalid_key");
-        auto f2 = SpeechFactory::FromEndpoint("2", "invalid_key");
-
-        auto endpoint1 = f1->Parameters.GetProperty(SpeechPropertyId::SpeechServiceConnection_Endpoint);
-        auto endpoint2 = f2->Parameters.GetProperty(SpeechPropertyId::SpeechServiceConnection_Endpoint);
-
-        //REQUIRE(endpoint1 == L"1"); BUGBUG this fails!!!
-        REQUIRE(endpoint2 == "2");
-    }
-
-}
-
-TEST_CASE("Speech Reco Audio Input Basics", "[api][cxx][audio]")
-{
-    SECTION("Check file based input works")
-    {
-        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
-        REQUIRE(exists(PAL::ToWString(input_file)));
-
-        // Create the recognizer "with file input"
-        auto factory = GetFactory();
-        auto audioConfig = AudioConfig::FromWavFileInput(input_file);
-        auto recognizer = factory->CreateSpeechRecognizerFromConfig(audioConfig);
-
-        // Recognize and check the result
-        auto result = recognizer->RecognizeAsync().get();
-        REQUIRE(result != nullptr);
-        REQUIRE(!result->Text.empty());
-    }
-
-    SECTION("Check push stream audio input works")
-    {
-        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
-        REQUIRE(exists(PAL::ToWString(input_file)));
-
-        // Prepare to use the "Push stream" by reading the data from the file
-        FILE* hfile = nullptr;
-        PAL::fopen_s(&hfile, input_file.c_str(), "rb");
-        const auto maxSize = 1000000; auto buffer = new uint8_t[maxSize];
-        auto size = (int)fread(buffer, 1, maxSize, hfile);
-
-        // Create the recognizer "with stream input" with a "push stream"
-        auto factory = GetFactory();
-        auto pushStream = AudioInputStream::CreatePushStream();
-        auto audioConfig = AudioConfig::FromStreamInput(pushStream);
-        auto recognizer = factory->CreateSpeechRecognizerFromConfig(audioConfig);
-
-        // "Push" all the audio data into the stream
-        pushStream->Write(buffer, size);
-        pushStream->Close();
-        delete [] buffer;
-        fclose(hfile);
-
-        // Recognize and check the result
-        auto result = recognizer->RecognizeAsync().get();
-        REQUIRE(result != nullptr);
-        REQUIRE(!result->Text.empty());
-    }
-
-    SECTION("Check pull stream audio input works")
-    {
-        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
-        REQUIRE(exists(PAL::ToWString(input_file)));
-
-        // Prepare for the stream to be "Pulled"
-        FILE* hfile = nullptr;
-        PAL::fopen_s(&hfile, input_file.c_str(), "rb");
-        fseek(hfile, 44, SEEK_CUR);
-
-        // Create the "pull stream" object with C++ lambda callbacks
-        auto pullStream = AudioInputStream::CreatePullStream(
-            AudioStreamFormat::GetWaveFormatPCM(16000, 16, 1),
-            [=](uint8_t* buffer, uint32_t size) -> int { return (int)fread(buffer, 1, size, hfile); },
-            [=]() { fclose(hfile); });
-
-        // Create the recognizer "with stream input" using the "pull stream"
-        auto factory = GetFactory();
-        auto audioConfig = AudioConfig::FromStreamInput(pullStream);
-        auto recognizer = factory->CreateSpeechRecognizerFromConfig(audioConfig);
-
-        // Recognize and check the result
-        auto result = recognizer->RecognizeAsync().get();
-        REQUIRE(result != nullptr);
-        REQUIRE(!result->Text.empty());
-    }
-}
-
-
-
-
-

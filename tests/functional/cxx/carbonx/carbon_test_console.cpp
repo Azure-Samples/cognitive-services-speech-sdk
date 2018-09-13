@@ -18,6 +18,7 @@
 #include <file_utils.h>
 #include <platform.h>
 
+
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 using namespace Microsoft::CognitiveServices::Speech::Translation;
 
@@ -982,14 +983,13 @@ void CarbonTestConsole::Factory_CreateSpeechRecognizer(const char* psz)
     m_speechRecognizer = nullptr;
     m_recognizer = nullptr;
     m_session = nullptr;
+    
+    auto sc = !m_endpointUri.empty()
+        ? SpeechConfig::FromEndpoint(m_endpointUri, m_subscriptionKey)
+        : SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId);
 
-    auto factory = !m_endpointUri.empty()
-        ? SpeechFactory::FromEndpoint(m_endpointUri, m_subscriptionKey)
-        : SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
-
-    m_speechRecognizer = *psz == '\0'
-        ? factory->CreateSpeechRecognizer()
-        : factory->CreateSpeechRecognizerFromConfig(AudioConfig::FromWavFileInput(psz + 1));
+    std::string filename(psz + 1);
+    m_speechRecognizer = SpeechRecognizer::FromConfig(sc, AudioConfig::FromWavFileInput(filename));
 
     auto fn1 = std::bind(&CarbonTestConsole::SpeechRecognizer_FinalResultHandler, this, std::placeholders::_1);
     m_speechRecognizer->FinalResult.Connect(fn1);
@@ -1473,16 +1473,14 @@ void CarbonTestConsole::InitCarbon(ConsoleArgs* pconsoleArgs)
 
 void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const std::string& wavFileName)
 {
-    auto factory = !m_endpointUri.empty()
-        ? SpeechFactory::FromEndpoint(m_endpointUri, m_subscriptionKey)
-        : SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
-
     if (recognizerType == PAL::GetTypeName<SpeechRecognizer>())
     {
-        m_speechRecognizer = (wavFileName.length() == 0)
-            ? factory->CreateSpeechRecognizer()
-            : factory->CreateSpeechRecognizerFromConfig(AudioConfig::FromWavFileInput(wavFileName));
+        auto sc = !m_endpointUri.empty()
+            ? SpeechConfig::FromEndpoint(m_endpointUri, m_subscriptionKey)
+            : SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId);
 
+        m_speechRecognizer = SpeechRecognizer::FromConfig(sc, AudioConfig::FromWavFileInput(wavFileName));
+        
         auto fn1 = std::bind(&CarbonTestConsole::SpeechRecognizer_FinalResultHandler, this, std::placeholders::_1);
         m_speechRecognizer->FinalResult.Connect(fn1);
 
@@ -1494,7 +1492,15 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
     }
     else if (recognizerType == PAL::GetTypeName<TranslationRecognizer>())
     {
-        m_translationRecognizer = factory->CreateTranslationRecognizerFromConfig("en-us", std::vector<std::string>{"zh-cn"});
+        auto sc = !m_endpointUri.empty()
+            ? SpeechTranslatorConfig::FromEndpoint(m_endpointUri, m_subscriptionKey)
+            : SpeechTranslatorConfig::FromSubscription(m_subscriptionKey, m_regionId);
+
+        sc->SetSpeechRecognitionLanguage("en-US");
+        sc->AddTargetLanguage("de");
+        sc->AddTargetLanguage("es");
+
+        m_translationRecognizer = TranslationRecognizer::FromConfig(sc, AudioConfig::FromWavFileInput(wavFileName));
 
         auto fn1 = std::bind(&CarbonTestConsole::TranslationRecognizer_FinalResultHandler, this, std::placeholders::_1);
         m_translationRecognizer->FinalResult.Connect(fn1);
@@ -1511,9 +1517,12 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
     }
     else if (recognizerType == PAL::GetTypeName<IntentRecognizer>())
     {
-        m_intentRecognizer = wavFileName.length() == 0
-            ? factory->CreateIntentRecognizer()
-            : factory->CreateIntentRecognizerFromConfig(AudioConfig::FromWavFileInput(wavFileName));
+        auto sc = !m_endpointUri.empty()
+            ? SpeechConfig::FromEndpoint(m_endpointUri, m_subscriptionKey)
+            : SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId);
+        sc->SetSpeechRecognitionLanguage("en-US");
+
+        m_intentRecognizer = IntentRecognizer::FromConfig(sc, AudioConfig::FromWavFileInput(wavFileName));
 
         auto fn1 = std::bind(&CarbonTestConsole::IntentRecognizer_FinalResultHandler, this, std::placeholders::_1);
         m_intentRecognizer->FinalResult.Connect(fn1);

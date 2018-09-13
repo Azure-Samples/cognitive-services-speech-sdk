@@ -19,15 +19,17 @@ import com.microsoft.cognitiveservices.speech.audio.*;
 @SuppressWarnings("resource") // scanner
 public class SpeechRecognitionSamples {
     // Speech recognition from microphone.
-    public static void recognitionWithMicrophoneAsync() throws InterruptedException, ExecutionException {
+    public static void recognitionWithMicrophoneAsync() throws InterruptedException, ExecutionException
+    {
         // <recognitionWithMicrophone>
-        // Creates an instance of a speech factory with specified
+        // Creates an instance of a speech config with specified
         // subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
-        SpeechFactory factory = SpeechFactory.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // The default language is "en-us".
+        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-        // Creates a speech recognizer using microphone as audio input. The default language is "en-us".
-        SpeechRecognizer recognizer = factory.createSpeechRecognizer();
+        // Creates a speech recognizer using microphone as audio input.
+        SpeechRecognizer recognizer = new SpeechRecognizer(config);
         {
             // Starts recognizing.
             System.out.println("Say something...");
@@ -48,16 +50,19 @@ public class SpeechRecognitionSamples {
     }
 
     // Speech recognition in the specified spoken language.
-    public static void recognitionWithLanguageAsync() throws InterruptedException, ExecutionException {
+    public static void recognitionWithLanguageAsync() throws InterruptedException, ExecutionException
+    {
         // <recognitionWithLanguage>
-        // Creates an instance of a speech factory with specified
+        // Creates an instance of a speech config with specified
         // subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
-        SpeechFactory factory = SpeechFactory.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
         // Creates a speech recognizer for the specified language, using microphone as audio input.
         String lang = "de-de";
-        SpeechRecognizer recognizer = factory.createSpeechRecognizer(lang);
+        config.setSpeechRecognitionLanguage(lang);
+
+        SpeechRecognizer recognizer = new SpeechRecognizer(config);
         {
             // Starts recognizing.
             System.out.println("Say something in " + lang + " ...");
@@ -77,21 +82,20 @@ public class SpeechRecognitionSamples {
         // </recognitionWithLanguage>
     }
     
-
     // Speech recognition using a customized model.
-    public static void recognitionUsingCustomizedModelAsync() throws InterruptedException, ExecutionException {
+    public static void recognitionUsingCustomizedModelAsync() throws InterruptedException, ExecutionException
+    {
         // <recognitionCustomized>
-        // Creates an instance of a speech factory with specified
+        // Creates an instance of a speech config with specified
         // subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
-        SpeechFactory factory = SpeechFactory.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // Replace with the CRIS endpoint id of your customized model.
+        config.setEndpointId("YourEndpointId");
 
         // Creates a speech recognizer using microphone as audio input.
-        SpeechRecognizer recognizer = factory.createSpeechRecognizer();
+        SpeechRecognizer recognizer = new SpeechRecognizer(config);
         {
-            // Replace with the CRIS deployment id of your customized model.
-            recognizer.setDeploymentId("YourDeploymentId");
-
             // Starts recognizing.
              System.out.println("Say something...");
 
@@ -111,19 +115,19 @@ public class SpeechRecognitionSamples {
         // </recognitionCustomized>
     }
 
-
     // Speech recognition with events from file
-    public static void continuousRecognitionWithFileAsync() throws InterruptedException, ExecutionException, IOException {
+    public static void continuousRecognitionWithFileAsync() throws InterruptedException, ExecutionException, IOException
+    {
         // <recognitionContinuousWithFile>
-        // Creates an instance of a speech factory with specified
+        // Creates an instance of a speech config with specified
         // subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
-        SpeechFactory factory = SpeechFactory.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
         // Creates a speech recognizer using file as audio input.
         // Replace with your own audio file name.
         AudioConfig audioInput = AudioConfig.fromWavFileInput("YourAudioFile.wav");
-        SpeechRecognizer recognizer = factory.createSpeechRecognizerFromConfig(audioInput);
+        SpeechRecognizer recognizer = new SpeechRecognizer(config, audioInput);
         {
             // Subscribes to events.
             recognizer.IntermediateResultReceived.addEventListener((s, e) -> {
@@ -166,13 +170,14 @@ public class SpeechRecognitionSamples {
     private static Semaphore stopRecognitionSemaphore;
 
     // Speech recognition with audio stream
-    public static void recognitionWithAudioStreamAsync() throws InterruptedException, ExecutionException, FileNotFoundException {
+    public static void recognitionWithAudioStreamAsync() throws InterruptedException, ExecutionException, FileNotFoundException
+    {
         stopRecognitionSemaphore = new Semaphore(0);
 
-        // Creates an instance of a speech factory with specified
+        // Creates an instance of a speech config with specified
         // subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
-        SpeechFactory factory = SpeechFactory.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
         // Create an audio stream from a wav file.
         // Replace with your own audio file name.
@@ -180,7 +185,7 @@ public class SpeechRecognitionSamples {
         AudioConfig audioInput = AudioConfig.fromStreamInput(callback);
 
         // Creates a speech recognizer using audio stream input.
-        SpeechRecognizer recognizer = factory.createSpeechRecognizerFromConfig(audioInput);
+        SpeechRecognizer recognizer = new SpeechRecognizer(config, audioInput);
         {
             // Subscribes to events.
             recognizer.IntermediateResultReceived.addEventListener((s, e) -> {

@@ -15,11 +15,10 @@
 
 void CarbonTestConsole::Sample_HelloWorld()
 {
-    // Create the recognizer "with microphone input"
-    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
-    auto recognizer = factory->CreateSpeechRecognizer();
+    auto recognizer = SpeechRecognizer::FromConfig(
+        SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId),
+        nullptr);
 
-    // Prompt and recognize
     ConsoleWriteLine("Say something...");
     auto result = recognizer->RecognizeAsync().get();
 
@@ -30,9 +29,9 @@ void CarbonTestConsole::Sample_HelloWorld()
 void CarbonTestConsole::Sample_HelloWorld_Microphone()
 {
     // Create the recognizer "with microphone input"
-    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
-    auto audioConfig = AudioConfig::FromDefaultMicrophoneInput();
-    auto recognizer = factory->CreateSpeechRecognizerFromConfig(audioConfig);
+    auto recognizer = SpeechRecognizer::FromConfig(
+        SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId),
+        AudioConfig::FromDefaultMicrophoneInput());
 
     // Prompt and recognize
     ConsoleWriteLine("Say something...");
@@ -45,9 +44,9 @@ void CarbonTestConsole::Sample_HelloWorld_Microphone()
 void CarbonTestConsole::Sample_HelloWorld_File()
 {
     // Create the recognizer "with file input"
-    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
-    auto audioConfig = AudioConfig::FromWavFileInput("one_one_one.wav");
-    auto recognizer = factory->CreateSpeechRecognizerFromConfig(audioConfig);
+    auto recognizer = SpeechRecognizer::FromConfig(
+        SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId),
+        AudioConfig::FromWavFileInput("one_one_one.wav"));
 
     // Prompt and recognize
     ConsoleWriteLine("Say something...");
@@ -64,12 +63,12 @@ void CarbonTestConsole::Sample_HelloWorld_PushStream()
     PAL::fopen_s(&hfile, "one_one_one.wav", "rb");
     const auto maxSize = 1000000; auto buffer = new uint8_t[maxSize];
     auto size = (int)fread(buffer, 1, maxSize, hfile);
-    
+
     // Create the recognizer "with stream input" with a "push stream"
-    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
+    auto config = SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId);
     auto pushStream = AudioInputStream::CreatePushStream();
     auto audioConfig = AudioConfig::FromStreamInput(pushStream);
-    auto recognizer = factory->CreateSpeechRecognizerFromConfig(audioConfig);
+    auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
 
     // "Push" all the audio data into the stream
     pushStream->Write(buffer, size);
@@ -99,9 +98,9 @@ void CarbonTestConsole::Sample_HelloWorld_PullStream()
         [=]() { fclose(hfile); });
 
     // Create the recognizer "with stream input" using the "pull stream"
-    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
+    auto config = SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId);
     auto audioConfig = AudioConfig::FromStreamInput(pullStream);
-    auto recognizer = factory->CreateSpeechRecognizerFromConfig(audioConfig);
+    auto recognizer = SpeechRecognizer::FromConfig(config, audioConfig);
 
     // Prompt and recognize
     ConsoleWriteLine("Say something...");
@@ -113,8 +112,9 @@ void CarbonTestConsole::Sample_HelloWorld_PullStream()
 
 void CarbonTestConsole::Sample_HelloWorld_WithEvents()
 {
-    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
-    auto recognizer = factory->CreateSpeechRecognizer();
+    auto recognizer = SpeechRecognizer::FromConfig(
+        SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId),
+        nullptr);
 
     recognizer->IntermediateResult += [&](const SpeechRecognitionEventArgs& e) {
         ConsoleWriteLine("IntermediateResult: text=%s", e.Result.Text.c_str());
@@ -126,10 +126,11 @@ void CarbonTestConsole::Sample_HelloWorld_WithEvents()
     ConsoleWriteLine("You said:\n\n    '%s'", result->Text.c_str());
 }
 
-void CarbonTestConsole::Sample_HelloWorld_PickEngine(const char* pszEngine) // "Usp", "Unidec", or "Mock"
+void CarbonTestConsole::Sample_HelloWorld_PickEngine(const char* pszEngine) // L"Usp", L"Unidec", or L"Mock"
 {
-    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
-    auto recognizer = factory->CreateSpeechRecognizer();
+    auto recognizer = SpeechRecognizer::FromConfig(
+        SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId),
+        nullptr);
     auto session = Session::FromRecognizer(recognizer);
 
     std::string propertyName = std::string("__use") + std::string(pszEngine) + std::string("RecoEngine");
@@ -153,10 +154,10 @@ void CarbonTestConsole::Sample_HelloWorld_Intent()
 
 void CarbonTestConsole::Sample_HelloWorld_Intent(const char* subscriptionKey, const char* appId, const char* region)
 {
-    auto factory = SpeechFactory::FromSubscription(subscriptionKey, region);
-
     // Create an intent recognizer using microphone as audio input.
-    auto recognizer = factory->CreateIntentRecognizer();
+    auto recognizer = IntentRecognizer::FromConfig(
+        SpeechConfig::FromSubscription(subscriptionKey, region),
+        nullptr);
 
     // Create a LanguageUnderstandingModel associated with your LU application
     auto luisSubscriptionKey = "YourLuisSubscriptionKey"; luisSubscriptionKey = subscriptionKey;
@@ -204,8 +205,9 @@ void CarbonTestConsole::Sample_HelloWorld_Intent(const char* subscriptionKey, co
 
 void CarbonTestConsole::Sample_HelloWorld_Subscription()
 {
-    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
-    auto recognizer = factory->CreateSpeechRecognizer();
+    auto recognizer = SpeechRecognizer::FromConfig(
+        SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId),
+        nullptr);
 
     ConsoleWriteLine("Say something...");
     auto result = recognizer->RecognizeAsync().get();
@@ -215,10 +217,10 @@ void CarbonTestConsole::Sample_HelloWorld_Subscription()
 
 void CarbonTestConsole::Sample_HelloWorld_Subscription_With_CRIS()
 {
-    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
-    auto recognizer = factory->CreateSpeechRecognizer();
+    auto config = SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId);
+    config->SetEndpointId(m_customSpeechModelId);
 
-    recognizer->SetDeploymentId(m_customSpeechModelId);
+    auto recognizer = SpeechRecognizer::FromConfig(config);
 
     ConsoleWriteLine("Say something...");
     auto result = recognizer->RecognizeAsync().get();
@@ -228,8 +230,9 @@ void CarbonTestConsole::Sample_HelloWorld_Subscription_With_CRIS()
 
 void CarbonTestConsole::Sample_HelloWorld_Language(const char* language)
 {
-    auto factory = SpeechFactory::FromSubscription(m_subscriptionKey, m_regionId);
-    auto recognizer = factory->CreateSpeechRecognizerFromConfig(language);
+    auto config = SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId);
+    config->SetSpeechRecognitionLanguage(language);
+    auto recognizer = SpeechRecognizer::FromConfig(config, nullptr);
 
     ConsoleWriteLine("Say something...");
     auto result = recognizer->RecognizeAsync().get();

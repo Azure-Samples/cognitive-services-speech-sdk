@@ -6,59 +6,160 @@
 //
 
 #pragma once
+
 #include <string>
 #include <speechapi_cxx_common.h>
-
 
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 
-
+/// <summary>
+/// Defines speech property ids.
+/// </summary>
 enum class SpeechPropertyId
 {
+    /// <summary>
+    /// Subscription key.
+    /// </summary>
     SpeechServiceConnection_Key = 1000,
+
+    /// <summary>
+    /// Endpoint.
+    /// </summary>
     SpeechServiceConnection_Endpoint = 1001,
+
+    /// <summary>
+    /// Region.
+    /// </summary>
     SpeechServiceConnection_Region = 1002,
+
+    /// <summary>
+    /// Authorization token.
+    /// </summary>
     SpeechServiceAuthorization_Token = 1003,
+
+    /// <summary>
+    /// Authorization type.
+    /// </summary>
     SpeechServiceAuthorization_Type = 1004,
+
+    /// <summary>
+    /// RPS token.
+    /// </summary>
     SpeechServiceRps_Token = 1005,
-    SpeechServiceConnection_DeploymentId = 1006,
-    
+
+    /// <summary>
+    /// Endpoint ID.
+    /// </summary>
+    SpeechServiceConnection_EndpointId = 1006,
+
+    /// <summary>
+    /// Translation from language.
+    /// </summary>
     SpeechServiceConnection_TranslationFromLanguage = 2000,
+
+    /// <summary>
+    /// Translation to languages.
+    /// </summary>
     SpeechServiceConnection_TranslationToLanguages = 2001,
+
+    /// <summary>
+    /// Translation output voice.
+    /// </summary>
     SpeechServiceConnection_TranslationVoice = 2002,
+
+    /// <summary>
+    /// Translation features.
+    /// </summary>
     SpeechServiceConnection_TranslationFeatures = 2003,
+
+    /// <summary>
+    /// Intent region.
+    /// </summary>
     SpeechServiceConnection_IntentRegion = 2004,
 
+    /// <summary>
+    /// Intent source language. TODO:REMOVE
+    /// </summary>
+    SpeechServiceConnection_IntentSourceLanguage = 2005,
+
+    /// <summary>
+    /// Recognition mode.
+    /// </summary>
     SpeechServiceConnection_RecoMode = 3000,
+
+    /// <summary>
+    /// Interactive mode. TODO:REMOVE
+    /// </summary>
     SpeechServiceConnection_RecoMode_Interactive = 3001,
+
+    /// <summary>
+    /// Conversation mode. TODO:REMOVE
+    /// </summary>
     SpeechServiceConnection_RecoMode_Conversation = 3002,
+
+    /// <summary>
+    /// Dictation mode. TODO:REMOVE
+    /// </summary>
     SpeechServiceConnection_RecoMode_Dictation = 3004,
+
+    /// <summary>
+    /// Recognition language.
+    /// </summary>
     SpeechServiceConnection_RecoLanguage = 3005,
+
+    /// <summary>
+    /// Session id. TODO: REMOVE
+    /// </summary>
     Speech_SessionId = 3006,
 
-    SpeechServiceResponse_OutputFormat = 4000,
-    SpeechServiceResponse_OutputFormat_Simple = 4001,
-    SpeechServiceResponse_OutputFormat_Detailed = 4002,
-    SpeechServiceResponse_RequestProfanityFilterTrueFalse = 4003,
+    /// <summary>
+    /// Detailed result required.
+    /// </summary>
+    SpeechServiceResponse_RequestDetailedResultTrueFalse = 4000,
 
+    /// <summary>
+    /// Profanity filtering required.
+    /// </summary>
+    SpeechServiceResponse_RequestProfanityFilterTrueFalse = 4001,
+
+    /// <summary>
+    /// TODO:WHAT IS THIS FOR?
+    /// </summary>
     SpeechServiceResponse_Json = 5000,
+
+    /// <summary>
+    /// JSON in result.
+    /// </summary>
     SpeechServiceResponse_JsonResult = 5001,
+
+    /// <summary>
+    /// Error details.
+    /// </summary>
     SpeechServiceResponse_JsonErrorDetails = 5002,
-    
+
+    /// <summary>
+    /// Cancellation reason.
+    /// </summary>
     CancellationDetails_ReasonCanceled = 6000,
+
+    /// <summary>
+    /// Cancellation text.
+    /// </summary>
     CancellationDetails_ReasonText = 6001,
+
+    /// <summary>
+    /// Cancellation detailed text.
+    /// </summary>
     CancellationDetails_ReasonDetailedText = 6002
 };
-
 
 enum class OutputFormat
 {
     Simple = 0,
     Detailed = 1
 };
-
 
 /// <summary>
 /// Specifies the possible reasons a recognition result might be generated.
@@ -97,34 +198,22 @@ enum class Reason
     Canceled
 };
 
-
 /// <summary>
 /// Specifies properties that can be retrieved from a RecognitionResult.
 /// </summary>
 enum class ResultProperty { Json = 1, LanguageUnderstandingJson = 2, ErrorDetails = 3 };
-
 
 /// <summary>
 /// Enumerates parameters that can be used to configure a recognizer.
 /// </summary>
 enum class RecognizerParameter { DeploymentId = 1 };
 
-
-/// <summary>
-/// Enumerates parameters that can be used to configure a recognizer factory.
-/// </summary>
-enum class FactoryParameter { Region = 1, SubscriptionKey = 2, AuthorizationToken = 3, Endpoint = 4};
-
-
-
 } } } // Microsoft::CognitiveServices::Speech
-
 
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 namespace Translation {
-
 
 /// <summary>
 /// Defines the status code of translation result.
@@ -140,7 +229,6 @@ enum class TranslationStatusCode {
     /// </summary>
     Error
 };
-
 
 /// <summary>
 /// Defines the status code of synthesis result.
@@ -161,6 +249,5 @@ enum class SynthesisStatusCode {
     /// </summary>
     Error
 };
-
 
 } } } } // Microsoft::CognitiveServices::Speech::Translation

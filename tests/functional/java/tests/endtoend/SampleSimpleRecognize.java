@@ -7,7 +7,7 @@ package tests.endtoend;
 import java.util.concurrent.Future;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
-import com.microsoft.cognitiveservices.speech.SpeechFactory;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 
@@ -26,15 +26,15 @@ public class SampleSimpleRecognize implements Runnable {
     ///////////////////////////////////////////////////
     @Override
     public void run() {
-        // Note: the factory is SHARED IN ALL END2END tests
-        //       this is on purpose, to check if the factory can be reused!
-        //       therefore, do NOT CLOSE the factory at the end of the test!
-        SpeechFactory factory = Settings.getFactory();
+        // Note: the config is SHARED IN ALL END2END tests
+        //       this is on purpose, to check if the config can be reused!
+        //       therefore, do NOT CLOSE the config at the end of the test!
+        SpeechConfig config = Settings.getSpeechConfig();
 
         try {
             // Note: to use the microphone, use "AudioConfig.fromDefaultMicrophoneInput()"
             AudioConfig audioInput = AudioConfig.fromWavFileInput(Settings.WavFile);
-            SpeechRecognizer reco = factory.createSpeechRecognizerFromConfig(audioInput);
+            SpeechRecognizer reco = new SpeechRecognizer(config, audioInput);
 
             Future<SpeechRecognitionResult> task = reco.recognizeAsync();
 
@@ -43,7 +43,7 @@ public class SampleSimpleRecognize implements Runnable {
 
             System.out.println("Recognizer returned: " + recognitionResult);
             
-            // Note: do not close the factory as it is shared between tests.
+            // Note: do not close the config as it is shared between tests.
             reco.close();
             audioInput.close();
         } catch (Exception ex) {

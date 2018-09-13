@@ -26,7 +26,7 @@ typedef void (^SpeechRecognitionEventHandlerBlock)(SpeechRecognizer *, SpeechRec
 - (void)startContinuousRecognition;
 - (void)stopContinuousRecognition;
 
-// - (void) setDeploymentId: (NSString *)deploymentId;
+// - (void) setEndpointId: (NSString *)endpointId;
 
 // How to add events, as a protocol, and individual blocks?
 - (void)addFinalResultEventListener:(SpeechRecognitionEventHandlerBlock)eventHandler;

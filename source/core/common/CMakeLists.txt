@@ -34,6 +34,7 @@ set(HEADERS
     "${INC_DIR}/file_utils.h"
     "${CARBON_INCLUDE}/ispxinterfaces.h"
     "${INC_DIR}/property_id_2_name_map.h"
+    "${INC_DIR}/speech_config.h"
     )
 
 set(HEADERS_PRIVATE
@@ -59,6 +60,7 @@ set(SOURCES
     "${SRC_DIR}/platform.cpp"
     "${SRC_DIR}/site_helpers.cpp"
     "${SRC_DIR}/property_id_2_name_map.cpp"
+    "${SRC_DIR}/speech_config.cpp"
     )
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")

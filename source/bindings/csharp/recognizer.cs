@@ -133,18 +133,19 @@ namespace Microsoft.CognitiveServices.Speech
             private RecognitionEventType eventType;
         }
 
-        internal class RecognizerParametersImpl : IRecognizerParameters
+        // TODO: Evil code duplication, merge with another implmentation.
+        internal class PropertyCollectionImpl : IPropertyCollection
         {
             private Internal.RecognizerPropertyCollection recognizerParameterImpl;
 
-            public RecognizerParametersImpl(Internal.RecognizerPropertyCollection internalRecognizerParameters)
+            public PropertyCollectionImpl(Internal.RecognizerPropertyCollection internalRecognizerParameters)
             {
                 recognizerParameterImpl = internalRecognizerParameters;
             }
             
-            public string Get(RecognizerParameterKind propertyKind)
+            public string Get(SpeechPropertyId id)
             {
-                return Get(propertyKind, string.Empty);
+                return Get(id, string.Empty);
             }
 
             public string Get(string propertyName)
@@ -152,9 +153,9 @@ namespace Microsoft.CognitiveServices.Speech
                 return Get(propertyName, string.Empty);
             }
 
-            public string Get(RecognizerParameterKind propertyKind, string defaultValue)
+            public string Get(SpeechPropertyId id, string defaultValue)
             {
-                return recognizerParameterImpl.GetProperty((Internal.SpeechPropertyId)propertyKind, defaultValue);
+                return recognizerParameterImpl.GetProperty((Internal.SpeechPropertyId)id, defaultValue);
             }
 
             public string Get(string propertyName, string defaultValue)
@@ -162,9 +163,9 @@ namespace Microsoft.CognitiveServices.Speech
                 return recognizerParameterImpl.GetProperty(propertyName, defaultValue);
             }
 
-            public void Set(RecognizerParameterKind propertyKind, string value)
+            public void Set(SpeechPropertyId id, string value)
             {
-                recognizerParameterImpl.SetProperty((Internal.SpeechPropertyId)propertyKind, value);
+                recognizerParameterImpl.SetProperty((Internal.SpeechPropertyId)id, value);
             }
 
             public void Set(string propertyName, string value)

@@ -5,7 +5,7 @@ package com.microsoft.cognitiveservices.speech.audio;
 //
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
-import com.microsoft.cognitiveservices.speech.SpeechFactory;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
 
 /**
   * Represents audio input configuration used for specifying what type of input to use (microphone, file, stream).
@@ -16,7 +16,7 @@ public final class AudioConfig
     static {
         // trigger loading of native library
         try {
-            Class.forName(SpeechFactory.class.getName());
+            Class.forName(SpeechConfig.class.getName());
         }
         catch (ClassNotFoundException ex) {
             // ignored.

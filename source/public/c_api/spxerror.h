@@ -35,6 +35,9 @@ typedef uintptr_t SPXHR;
 /// </summary>
 #define SPX_FAILED(x)               (!SPX_SUCCEEDED(x))
 
+/// <summary>
+/// Base macros for all error codes.
+/// </summary>
 #define __SPX_ERRCODE_FAILED(x)     (x)
 
 /// <summary>

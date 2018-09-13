@@ -27,7 +27,7 @@ namespace Microsoft.CognitiveServices.Speech
             this.ResultId = result.ResultId;
             this.Text = result.Text;
             this.RecognitionStatus = (RecognitionStatus)((int)result.Reason);
-            Properties = new ResultPropertiesImpl(result.Properties);
+            Properties = new PropertyCollectionImpl(result.Properties);
         }
 
         /// <summary>
@@ -59,12 +59,12 @@ namespace Microsoft.CognitiveServices.Speech
         /// In case of an unsuccessful recognition, provides a brief description of an occurred error.
         /// This field is only filled-out if the recognition status (<see cref="RecognitionStatus"/>) is set to Canceled.
         /// </summary>
-        public string RecognitionFailureReason { get { return Properties.Get(ResultPropertyKind.ErrorDetails); } }
+        public string RecognitionFailureReason { get { return Properties.Get(SpeechPropertyId.SpeechServiceResponse_JsonErrorDetails); } }
 
         /// <summary>
         /// Contains properties of the results.
         /// </summary>
-        public IResultProperties Properties;
+        public IPropertyCollection Properties;
 
         /// <summary>
         /// Returns a string that represents the speech recognition result.
@@ -73,24 +73,25 @@ namespace Microsoft.CognitiveServices.Speech
         public override string ToString()
         {
             return string.Format(CultureInfo.InvariantCulture,"ResultId:{0} Status:{1} Recognized text:<{2}>. Json:{3}", 
-                ResultId, RecognitionStatus, Text, Properties.Get(ResultPropertyKind.Json));
+                ResultId, RecognitionStatus, Text, Properties.Get(SpeechPropertyId.SpeechServiceResponse_Json));
         }
 
         // Hold the reference.
         private Internal.RecognitionResult resultImpl;
 
-        private class ResultPropertiesImpl : IResultProperties
+        // TODO: Evil code duplication, merge with another implmentation.
+        internal class PropertyCollectionImpl : IPropertyCollection
         {
-            private Internal.ResultPropertyCollection resultPropertyImpl;
+            private Internal.ResultPropertyCollection impl;
 
-            public ResultPropertiesImpl(Internal.ResultPropertyCollection internalProperty)
+            public PropertyCollectionImpl(Internal.ResultPropertyCollection collection)
             {
-                resultPropertyImpl = internalProperty; 
+                impl = collection;
             }
-            
-            public string Get(ResultPropertyKind propertyKind)
+
+            public string Get(SpeechPropertyId id)
             {
-                return Get(propertyKind, string.Empty);
+                return Get(id, string.Empty);
             }
 
             public string Get(string propertyName)
@@ -98,16 +99,25 @@ namespace Microsoft.CognitiveServices.Speech
                 return Get(propertyName, string.Empty);
             }
 
-            public string Get(ResultPropertyKind propertyKind, string defaultValue)
+            public string Get(SpeechPropertyId id, string defaultValue)
             {
-                return resultPropertyImpl.GetProperty((Internal.SpeechPropertyId)propertyKind, defaultValue);
+                return impl.GetProperty((Internal.SpeechPropertyId)id, defaultValue);
             }
 
             public string Get(string propertyName, string defaultValue)
             {
-                return resultPropertyImpl.GetProperty(propertyName, defaultValue);
+                return impl.GetProperty(propertyName, defaultValue);
             }
 
+            public void Set(SpeechPropertyId id, string value)
+            {
+                impl.SetProperty((Internal.SpeechPropertyId)id, value);
+            }
+
+            public void Set(string propertyName, string value)
+            {
+                impl.SetProperty(propertyName, value);
+            }
         }
     }
 }

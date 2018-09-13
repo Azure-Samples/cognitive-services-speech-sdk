@@ -40,127 +40,99 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task SpeechRecognitionBaseModelAsync(string key, string lang, string fileName, bool useStream, bool useToken, bool useContinuousRecognition)
         {
             Console.WriteLine("Speech Recognition using base model.");
-            SpeechFactory factory;
+            SpeechConfig config = null;
             if (useToken)
             {
-                factory = SpeechFactory.FromAuthorizationToken(key, "westus");
+                config = SpeechConfig.FromAuthorizationToken(key, "westus");
             }
             else
             {
-                factory = SpeechFactory.FromSubscription(key, "westus");
+                config = SpeechConfig.FromSubscription(key, "westus");
             }
 
-            await RecognizeAsync(factory, lang, null, fileName, useStream, useContinuousRecognition).ConfigureAwait(false);
+            await RecognizeAsync(config, fileName, useStream, useContinuousRecognition).ConfigureAwait(false);
         }
 
         public static async Task SpeechRecognitionCustomizedModelAsync(string key, string lang, string model, string fileName, bool useStream, bool useToken, bool useContinuousRecognition)
         {
             Console.WriteLine("Speech Recognition using customized model.");
-            SpeechFactory factory;
+            SpeechConfig config = null;
             if (useToken)
             {
-                factory = SpeechFactory.FromAuthorizationToken(key, "westus");
+                config = SpeechConfig.FromAuthorizationToken(key, "westus");
             }
             else
             {
-                factory = SpeechFactory.FromSubscription(key, "westus");
+                config = SpeechConfig.FromSubscription(key, "westus");
             }
+            config.EndpointId = model;
 
-            await RecognizeAsync(factory, lang, model, fileName, useStream, useContinuousRecognition).ConfigureAwait(false);
+            await RecognizeAsync(config, fileName, useStream, useContinuousRecognition).ConfigureAwait(false);
         }
 
         public static async Task SpeechRecognitionByEndpointAsync(string subscriptionKey, string endpoint, string lang, string model, string fileName, bool useStream, bool useContinuousRecognition)
         {
             Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech Recognition using endopoint:{0}.", endpoint));
 
-            SpeechFactory factory = SpeechFactory.FromEndPoint(new Uri(endpoint), subscriptionKey);
-            await RecognizeAsync(factory, lang, model, fileName, useStream, useContinuousRecognition).ConfigureAwait(false);
+            SpeechConfig config = SpeechConfig.FromEndpoint(new Uri(endpoint), subscriptionKey);
+            if (!string.IsNullOrEmpty(lang))
+            {
+                config.SpeechRecognitionLanguage = lang;
+            }
+
+            if (!string.IsNullOrEmpty(model))
+            {
+                config.EndpointId = model;
+            }
+
+            await RecognizeAsync(config, fileName, useStream, useContinuousRecognition).ConfigureAwait(false);
         }
 
-        public static async Task RecognizeAsync(SpeechFactory factory, string lang, string model, string fileName, bool useStream, bool useContinuousRecognition)
+        public static async Task RecognizeAsync(SpeechConfig config, string fileName, bool useStream, bool useContinuousRecognition)
         {
             if (string.IsNullOrEmpty(fileName) || String.Compare(fileName, "mic", true) == 0)
             {
-                if (string.IsNullOrEmpty(lang))
+                using (var reco = new SpeechRecognizer(config))
                 {
-                    using (var reco = factory.CreateSpeechRecognizer())
-                    {
-                        await StartRecognitionAsync(reco, model, useContinuousRecognition);
-                    }
-                }
-                else
-                {
-                    using (var reco = factory.CreateSpeechRecognizer(lang))
-                    {
-                        await StartRecognitionAsync(reco, model, useContinuousRecognition);
-                    }
+                    await StartRecognitionAsync(reco, useContinuousRecognition);
                 }
             }
             else
             {
-                if (string.IsNullOrEmpty(lang))
+                if (useStream)
                 {
-                    if (useStream)
+                    Console.WriteLine("Using stream input.");
+                    var audioInput = Util.OpenWavFile(fileName);
+                    using (var reco = new SpeechRecognizer(config, audioInput))
                     {
-                        Console.WriteLine("Using stream input.");
-                        var audioInput = Util.OpenWavFile(fileName);
-                        using (var reco = factory.CreateSpeechRecognizerFromConfig(audioInput))
-                        {
-                            await StartRecognitionAsync(reco, model, useContinuousRecognition);
-                        }
-                    }
-                    else
-                    {
-                        var audioInput = AudioConfig.FromWavFileInput(fileName);
-                        using (var reco = factory.CreateSpeechRecognizerFromConfig(audioInput))
-                        {
-                            await StartRecognitionAsync(reco, model, useContinuousRecognition);
-                        }
+                        await StartRecognitionAsync(reco, useContinuousRecognition);
                     }
                 }
                 else
                 {
-                    if (useStream)
+                    using (var reco = new SpeechRecognizer(config, AudioConfig.FromWavFileInput(fileName)))
                     {
-                        Console.WriteLine("Using stream input.");
-                        var audioInput = Util.OpenWavFile(fileName);
-                        using (var reco = factory.CreateSpeechRecognizerFromConfig(audioInput, lang))
-                        {
-                            await StartRecognitionAsync(reco, model, useContinuousRecognition);
-                        }
-                    }
-                    else
-                    {
-                        var audioInput = AudioConfig.FromWavFileInput(fileName);
-                        using (var reco = factory.CreateSpeechRecognizerFromConfig(audioInput, lang))
-                        {
-                            await StartRecognitionAsync(reco, model, useContinuousRecognition);
-                        }
+                        await StartRecognitionAsync(reco, useContinuousRecognition);
                     }
                 }
             }
         }
 
-        private static async Task StartRecognitionAsync(SpeechRecognizer reco, string model, bool useContinuousRecognition)
+        private static async Task StartRecognitionAsync(SpeechRecognizer reco, bool useContinuousRecognition)
         {
             if (useContinuousRecognition)
             {
-                await ContinuousRecognitionAsync(reco, model).ConfigureAwait(false);
+                await ContinuousRecognitionAsync(reco).ConfigureAwait(false);
             }
             else
             {
-                await SingleShotRecognitionAsync(reco, model).ConfigureAwait(false);
+                await SingleShotRecognitionAsync(reco).ConfigureAwait(false);
             }
         }
 
-        private static async Task SingleShotRecognitionAsync(SpeechRecognizer reco, string modelId)
+        private static async Task SingleShotRecognitionAsync(SpeechRecognizer reco)
         {
             Console.WriteLine("Single-shot recognition.");
-            // Sets deployment id of a customized model if needed.
-            if (!string.IsNullOrEmpty(modelId))
-            {
-                reco.DeploymentId = modelId;
-            }
 
             // Subscribes to events.
             reco.IntermediateResultReceived += MyIntermediateResultEventHandler;
@@ -180,16 +152,10 @@ namespace MicrosoftSpeechSDKSamples
             reco.OnSessionEvent -= MySessionEventHandler;
         }
 
-        private static async Task ContinuousRecognitionAsync(SpeechRecognizer reco, string modelId)
+        private static async Task ContinuousRecognitionAsync(SpeechRecognizer reco)
         {
             Console.WriteLine("Continuous recognition.");
             var tcsLocal = new TaskCompletionSource<int>();
-
-            // Sets deployment id of a customized model if needed.
-            if (!string.IsNullOrEmpty(modelId))
-            {
-                reco.DeploymentId = modelId;
-            }
 
             reco.FinalResultReceived += (s, e) =>
             {

@@ -6,6 +6,7 @@
 
 #pragma once
 #include <string>
+#include <vector>
 
 namespace PAL {
 
@@ -26,7 +27,8 @@ std::string ToString(const std::wstring& wstring);
 std::wstring ToWString(const std::string& string);
 
 std::string BoolToString(bool b);
-
 bool ToBool(const std::string& str);
+
+std::vector<std::string> split(std::string str, const std::string& token);
 
 } // PAL

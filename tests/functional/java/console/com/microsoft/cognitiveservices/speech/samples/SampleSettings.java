@@ -7,7 +7,7 @@ package com.microsoft.cognitiveservices.speech.samples;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
-import com.microsoft.cognitiveservices.speech.SpeechFactory;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
 
 public class SampleSettings {
     private static Boolean isInitialized = false;
@@ -27,16 +27,16 @@ public class SampleSettings {
     public static String Keyword = "Computer";
     public static String KeywordModel = "/data/keyword/kws.table";
 
-    private static SpeechFactory factory;
+    private static SpeechConfig speechConfig;
 
-    public static SpeechFactory getFactory() {
-        if (factory == null) {
+    public static SpeechConfig getSpeechConfig() {
+        if (speechConfig == null) {
             try {
-                factory = SpeechFactory.fromSubscription(SpeechSubscriptionKey, SpeechRegion);
+                speechConfig = SpeechConfig.fromSubscription(SpeechSubscriptionKey, SpeechRegion);
 
                 // PMA parameters
-                factory.getParameters().set("DeviceGeometry", "Circular6+1");
-                factory.getParameters().set("SelectedGeometry", "Circular3+1");
+                speechConfig.setProperty("DeviceGeometry", "Circular6+1");
+                speechConfig.setProperty("SelectedGeometry", "Circular3+1");
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
                 displayException(ex);
@@ -44,7 +44,7 @@ public class SampleSettings {
             }
         }
 
-        return factory;
+        return speechConfig;
     }
 
     public static void displayException(Exception ex) {

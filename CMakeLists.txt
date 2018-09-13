@@ -5,7 +5,7 @@ else()
   cmake_minimum_required(VERSION 3.5)
 endif()
 
-option(BUILD_PYTHON "Build Python SWIG module" ON)
+option(BUILD_PYTHON "Build Python SWIG module" OFF)
 option(BUILD_CSHARP "Build C# SWIG module" ON)
 option(BUILD_JAVA "Build Java/Android SWIG module" ON)
 
