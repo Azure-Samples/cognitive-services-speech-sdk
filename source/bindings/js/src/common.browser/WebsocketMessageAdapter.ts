@@ -109,7 +109,7 @@ export class WebsocketMessageAdapter {
         this.websocketClient.onclose = (e: CloseEvent) => {
             if (this.connectionState === ConnectionState.Connecting) {
                 this.connectionState = ConnectionState.Disconnected;
-                this.OnEvent(new ConnectionEstablishErrorEvent(this.connectionId, e.code, e.reason));
+                // this.OnEvent(new ConnectionEstablishErrorEvent(this.connectionId, e.code, e.reason));
                 this.connectionEstablishDeferral.Resolve(new ConnectionOpenResponse(e.code, e.reason));
             } else {
                 this.OnEvent(new ConnectionClosedEvent(this.connectionId, e.code, e.reason));

@@ -194,7 +194,13 @@ export class TranslationRecognizer extends Recognizer {
 
                         // report result to promise.
                         if (!!cb) {
-                            cb(result.result);
+                            try {
+                                cb(result.result);
+                            } catch (e) {
+                                if (!!err) {
+                                    err(e);
+                                }
+                            }
                             cb = undefined;
                         }
                     }
@@ -287,7 +293,13 @@ export class TranslationRecognizer extends Recognizer {
             });
 
         if (!!cb) {
-            cb();
+            try {
+                cb();
+            } catch (e) {
+                if (!!err) {
+                    err(e);
+                }
+            }
             cb = undefined;
         }
     }
@@ -304,7 +316,13 @@ export class TranslationRecognizer extends Recognizer {
         this.implCloseExistingRecognizer();
 
         if (!!cb) {
-            cb();
+            try {
+                cb();
+            } catch (e) {
+                if (!!err) {
+                    err(e);
+                }
+            }
         }
     }
 

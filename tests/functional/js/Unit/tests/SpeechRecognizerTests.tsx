@@ -484,7 +484,7 @@ test("Config is copied on construction", () => {
     s.language = "en-US";
 
     const ranVal: string = Math.random().toString();
-    console.error(ranVal);
+
     s.setProperty("RandomProperty", ranVal);
     s.setProperty(sdk.RecognizerParameterNames.TranslationVoice, "en-US-Zira");
 

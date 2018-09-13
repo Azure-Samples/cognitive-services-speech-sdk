@@ -178,7 +178,13 @@ export class SpeechRecognizer extends Recognizer {
 
             // report result to promise.
             if (!!cb) {
-                cb();
+                try {
+                    cb();
+                } catch (e) {
+                    if (!!err) {
+                        err(e);
+                    }
+                }
                 cb = undefined;
             }
 
@@ -198,7 +204,13 @@ export class SpeechRecognizer extends Recognizer {
         this.implCloseExistingRecognizer();
 
         if (!!cb) {
-            cb();
+            try {
+                cb();
+            } catch (e) {
+                if (!!err) {
+                    err(e);
+                }
+            }
         }
     }
 
@@ -347,7 +359,13 @@ export class SpeechRecognizer extends Recognizer {
 
                         // report result to promise.
                         if (!!cb) {
-                            cb(ev.result);
+                            try {
+                                cb(ev.result);
+                            } catch (e) {
+                                if (!!err) {
+                                    err(e);
+                                }
+                            }
                             cb = undefined;
                         }
                     }
@@ -389,7 +407,13 @@ export class SpeechRecognizer extends Recognizer {
 
                         // report result to promise.
                         if (!!cb) {
-                            cb(ev.result);
+                            try {
+                                cb(ev.result);
+                            } catch (e) {
+                                if (!!err) {
+                                    err(e);
+                                }
+                            }
                             cb = undefined;
                         }
                     }
