@@ -10,7 +10,7 @@
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
-SPXAPI IntentResult_GetIntentId(SPXRESULTHANDLE hresult, char* pszIntentId, uint32_t cchIntentId)
+SPXAPI intent_result_get_intent_id(SPXRESULTHANDLE hresult, char* pszIntentId, uint32_t cchIntentId)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, cchIntentId == 0);
 

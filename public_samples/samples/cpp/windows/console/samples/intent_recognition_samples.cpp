@@ -33,9 +33,9 @@ void IntentRecognitionWithMicrophone()
 
     // Creates a Language Understanding model using the app id, and adds specific intents from your model
     auto model = LanguageUnderstandingModel::FromAppId("YourLanguageUnderstandingAppId");
-    recognizer->AddIntent("id1", model, "YourLanguageUnderstandingIntentName1");
-    recognizer->AddIntent("id2", model, "YourLanguageUnderstandingIntentName2");
-    recognizer->AddIntent("any-IntentId-here", model, "YourLanguageUnderstandingIntentName3");
+    recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
+    recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
+    recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
     cout << "Say something...\n";
 
@@ -93,9 +93,9 @@ void IntentRecognitionWithLanguage()
 
     // Creates a Language Understanding model using the app id, and adds specific intents from your model
     auto model = LanguageUnderstandingModel::FromAppId("YourLanguageUnderstandingAppId");
-    recognizer->AddIntent("id1", model, "YourLanguageUnderstandingIntentName1");
-    recognizer->AddIntent("id2", model, "YourLanguageUnderstandingIntentName2");
-    recognizer->AddIntent("any-IntentId-here", model, "YourLanguageUnderstandingIntentName3");
+    recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
+    recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
+    recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
     cout << "Say something in " << lang << "..." << std::endl;
 
@@ -156,9 +156,9 @@ void IntentContinuousRecognitionWithFile()
 
     // Creates a Language Understanding model using the app id, and adds specific intents from your model
     auto model = LanguageUnderstandingModel::FromAppId("YourLanguageUnderstandingAppId");
-    recognizer->AddIntent("id1", model, "YourLanguageUnderstandingIntentName1");
-    recognizer->AddIntent("id2", model, "YourLanguageUnderstandingIntentName2");
-    recognizer->AddIntent("any-IntentId-here", model, "YourLanguageUnderstandingIntentName3");
+    recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
+    recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
+    recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
     // Subscribes to events.
     recognizer->IntermediateResult.Connect([] (const IntentRecognitionEventArgs& e)

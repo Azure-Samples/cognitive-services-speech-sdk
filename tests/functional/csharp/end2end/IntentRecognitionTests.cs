@@ -69,7 +69,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
             {
                 var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
-                recognizer.AddIntent(localIntent, model, modelIntent);
+                recognizer.AddIntent(model, modelIntent, localIntent);
 
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
                 Assert.AreEqual(TestData.English.HomeAutomation.TurnOn.Utterance, result.Text);

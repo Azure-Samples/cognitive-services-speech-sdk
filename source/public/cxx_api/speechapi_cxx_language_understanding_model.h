@@ -30,7 +30,7 @@ public:
     static std::shared_ptr<LanguageUnderstandingModel> FromEndpoint(const std::string& uri)
     {
         SPXLUMODELHANDLE hlumodel = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(LanguageUnderstandingModel_Create_From_Uri(uri.c_str(), &hlumodel));
+        SPX_THROW_ON_FAIL(language_understanding_model_create_from_uri(&hlumodel, uri.c_str()));
         return std::make_shared<LanguageUnderstandingModel>(hlumodel);
     }
 
@@ -42,7 +42,7 @@ public:
     static std::shared_ptr<LanguageUnderstandingModel> FromAppId(const std::string& appId)
     {
         SPXLUMODELHANDLE hlumodel = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(LanguageUnderstandingModel_Create_From_AppId(appId.c_str(), &hlumodel));
+        SPX_THROW_ON_FAIL(language_understanding_model_create_from_app_id(&hlumodel, appId.c_str()));
         return std::make_shared<LanguageUnderstandingModel>(hlumodel);
     }
 
@@ -56,7 +56,7 @@ public:
     static std::shared_ptr<LanguageUnderstandingModel> FromSubscription(const std::string& subscriptionKey, const std::string& appId, const std::string& region)
     {
         SPXLUMODELHANDLE hlumodel = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(LanguageUnderstandingModel_Create_From_Subscription(subscriptionKey.c_str(), appId.c_str(), region.c_str(), &hlumodel));
+        SPX_THROW_ON_FAIL(language_understanding_model_create_from_subscription(&hlumodel, subscriptionKey.c_str(), appId.c_str(), region.c_str()));
         return std::make_shared<LanguageUnderstandingModel>(hlumodel);
     }
 
@@ -68,7 +68,7 @@ public:
     /// <summary>
     /// Virtual destructor.
     /// </summary>
-    virtual ~LanguageUnderstandingModel() { LanguageUnderstandingModel_Handle_Close(m_hlumodel); }
+    virtual ~LanguageUnderstandingModel() { language_understanding_model__handle_release(m_hlumodel); }
 
     /// <summary>
     /// Internal. Explicit conversion operator.

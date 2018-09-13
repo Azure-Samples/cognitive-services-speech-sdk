@@ -59,7 +59,7 @@ private:
 
         if (pintentId != nullptr && recognizer_result_handle_is_valid(hresult))
         {
-            SPX_THROW_ON_FAIL(hr = IntentResult_GetIntentId(hresult, sz, maxCharCount));
+            SPX_THROW_ON_FAIL(hr = intent_result_get_intent_id(hresult, sz, maxCharCount));
             *pintentId = sz;
         }
     }

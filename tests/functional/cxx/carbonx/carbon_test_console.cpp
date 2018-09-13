@@ -1688,7 +1688,7 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
             auto model = LanguageUnderstandingModel::FromAppId(m_intentAppId);
             for (auto & intentName : m_intentNames)
             {
-                m_intentRecognizer->AddIntent(intentName, model, intentName);
+                m_intentRecognizer->AddIntent(model, intentName);
             }
         }
 

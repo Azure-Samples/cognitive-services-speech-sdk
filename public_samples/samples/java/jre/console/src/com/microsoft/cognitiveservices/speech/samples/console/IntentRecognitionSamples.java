@@ -33,9 +33,9 @@ public class IntentRecognitionSamples {
 
         // Creates a language understanding model using the app id, and adds specific intents from your model
         LanguageUnderstandingModel model = LanguageUnderstandingModel.fromAppId("YourLanguageUnderstandingAppId");
-        recognizer.addIntent("id1", model, "YourLanguageUnderstandingIntentName1");
-        recognizer.addIntent("id2", model, "YourLanguageUnderstandingIntentName2");
-        recognizer.addIntent("any-IntentId-here", model, "YourLanguageUnderstandingIntentName3");
+        recognizer.addIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
+        recognizer.addIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
+        recognizer.addIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
         System.out.println("Say something...");
 
@@ -83,9 +83,9 @@ public class IntentRecognitionSamples {
 
         // Creates a language understanding model using the app id, and adds specific intents from your model
         LanguageUnderstandingModel model = LanguageUnderstandingModel.fromAppId("YourLanguageUnderstandingAppId");
-        recognizer.addIntent("id1", model, "YourLanguageUnderstandingIntentName1");
-        recognizer.addIntent("id2", model, "YourLanguageUnderstandingIntentName2");
-        recognizer.addIntent("any-IntentId-here", model, "YourLanguageUnderstandingIntentName3");
+        recognizer.addIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
+        recognizer.addIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
+        recognizer.addIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
         System.out.println("Say something...");
 
@@ -134,9 +134,9 @@ public class IntentRecognitionSamples {
 
         // Creates a language understanding model using the app id, and adds specific intents from your model
         LanguageUnderstandingModel model = LanguageUnderstandingModel.fromAppId("YourLanguageUnderstandingAppId");
-        recognizer.addIntent("id1", model, "YourLanguageUnderstandingIntentName1");
-        recognizer.addIntent("id2", model, "YourLanguageUnderstandingIntentName2");
-        recognizer.addIntent("any-IntentId-here", model, "YourLanguageUnderstandingIntentName3");
+        recognizer.addIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
+        recognizer.addIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
+        recognizer.addIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
         // Subscribes to events.
         recognizer.IntermediateResultReceived.addEventListener((s, e) -> {

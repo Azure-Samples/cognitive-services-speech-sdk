@@ -14,7 +14,7 @@
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 
-SPXAPI IntentRecognizer_AddIntent(SPXRECOHANDLE hreco, const char* intentId, SPXTRIGGERHANDLE htrigger)
+SPXAPI intent_recognizer_add_intent(SPXRECOHANDLE hreco, const char* intentId, SPXTRIGGERHANDLE htrigger)
 {
     if (intentId == nullptr)
         return SPXERR_INVALID_ARG;

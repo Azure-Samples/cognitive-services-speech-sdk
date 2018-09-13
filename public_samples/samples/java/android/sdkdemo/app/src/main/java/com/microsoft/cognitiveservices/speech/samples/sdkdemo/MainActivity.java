@@ -277,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
 
                 LanguageUnderstandingModel intentModel = LanguageUnderstandingModel.fromAppId(LanguageUnderstandingAppId);
                 for (Map.Entry<String, String> entry : intentIdMap.entrySet()) {
-                    reco.addIntent(entry.getKey(), intentModel, entry.getValue());
+                    reco.addIntent(intentModel, entry.getValue(), entry.getKey());
                 }
 
                 reco.IntermediateResultReceived.addEventListener((o, intentRecognitionResultEventArgs) -> {

@@ -8,4 +8,4 @@
 #pragma once
 #include <speechapi_c_common.h>
 
-SPXAPI IntentResult_GetIntentId(SPXRESULTHANDLE hresult, char* pszIntentId, uint32_t cchIntentId);
+SPXAPI intent_result_get_intent_id(SPXRESULTHANDLE hresult, char* pszIntentId, uint32_t cchIntentId);

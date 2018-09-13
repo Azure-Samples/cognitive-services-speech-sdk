@@ -154,32 +154,68 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     }
 
     /**
-      * Adds a phrase that should be recognized as intent.
-      * @param intentId A String that represents the identifier of the intent to be recognized.
-      * @param phrase A String that specifies the phrase representing the intent.
+      * Adds a simple phrase that may be spoken by the user, indicating a specific user intent.
+      * @param simplePhrase The phrase corresponding to the intent.
       */
-    public void addIntent(String intentId, String phrase) {
-        Contracts.throwIfNullOrWhitespace(intentId, "intentId");
-        Contracts.throwIfNullOrWhitespace(phrase, "phrase");
+      public void addIntent(String simplePhrase) {
+        Contracts.throwIfNullOrWhitespace(simplePhrase, "simplePhrase");
 
-        recoImpl.AddIntent(intentId, phrase);
+        recoImpl.AddIntent(simplePhrase);
     }
 
     /**
-      * Adds an intent from Language Understanding service for recognition.
-      * @param intentId A String that represents the identifier of the intent to be recognized. Ignored if intentName is empty.
-      * @param model The intent model from Language Understanding service.
-      * @param intentName The intent name defined in the intent model. If it empty, all intent names defined in the model will be added.
+      * Adds a simple phrase that may be spoken by the user, indicating a specific user intent.
+      * @param simplePhrase The phrase corresponding to the intent.
+      * @param intentId A custom id String to be returned in the IntentRecognitionResult's getIntentId() method.
       */
-    public void addIntent(String intentId, LanguageUnderstandingModel model, String intentName) {
+    public void addIntent(String simplePhrase, String intentId) {
+        Contracts.throwIfNullOrWhitespace(simplePhrase, "simplePhrase");
         Contracts.throwIfNullOrWhitespace(intentId, "intentId");
-        Contracts.throwIfNullOrWhitespace(intentName, "intentName");
+
+        recoImpl.AddIntent(simplePhrase, intentId);
+    }
+
+    /**
+      * Adds a single intent by name from the specified Language Understanding Model.
+      * @param model The language understanding model containing the intent.
+      * @param intentName The name of the single intent to be included from the language understanding model.
+      */
+    public void addIntent(LanguageUnderstandingModel model, String intentName) {
         Contracts.throwIfNull(model, "model");
+        Contracts.throwIfNullOrWhitespace(intentName, "intentName");
 
         IntentTrigger trigger = com.microsoft.cognitiveservices.speech.internal.IntentTrigger.From(model.getModelImpl(), intentName);
-        recoImpl.AddIntent(intentId, trigger);
+        recoImpl.AddIntent(trigger, intentName);
     }
-   
+
+    /**
+      * Adds a single intent by name from the specified Language Understanding Model.
+      * @param model The language understanding model containing the intent.
+      * @param intentName The name of the single intent to be included from the language understanding model.
+      * @param intentId A custom id String to be returned in the IntentRecognitionResult's getIntentId() method.
+      */
+    public void addIntent(LanguageUnderstandingModel model, String intentName, String intentId) {
+        Contracts.throwIfNull(model, "model");
+        Contracts.throwIfNullOrWhitespace(intentName, "intentName");
+        Contracts.throwIfNullOrWhitespace(intentId, "intentId");
+
+        IntentTrigger trigger = com.microsoft.cognitiveservices.speech.internal.IntentTrigger.From(model.getModelImpl(), intentName);
+        recoImpl.AddIntent(trigger, intentId);
+    }
+
+    /**
+      * Adds all intents from the specified Language Understanding Model.
+      * @param model The language understanding model containing the intents.
+      * @param intentId A custom id String to be returned in the IntentRecognitionResult's getIntentId() method.
+      */
+      public void addAllIntents(LanguageUnderstandingModel model, String intentId) {
+        Contracts.throwIfNull(model, "model");
+        Contracts.throwIfNullOrWhitespace(intentId, "intentId");
+
+        IntentTrigger trigger = com.microsoft.cognitiveservices.speech.internal.IntentTrigger.From(model.getModelImpl());
+        recoImpl.AddIntent(trigger, intentId);
+    }
+
     /**
       * Starts speech recognition on a continuous audio stream with keyword spotting, until stopKeywordRecognitionAsync() is called.
       * User must subscribe to events to receive recognition results.

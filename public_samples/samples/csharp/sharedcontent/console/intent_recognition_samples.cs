@@ -34,9 +34,9 @@ namespace MicrosoftSpeechSDKSamples
             {
                 // Creates a Language Understanding model using the app id, and adds specific intents from your model
                 var model = LanguageUnderstandingModel.FromAppId("YourLanguageUnderstandingAppId");
-                recognizer.AddIntent("id1", model, "YourLanguageUnderstandingIntentName1");
-                recognizer.AddIntent("id2", model, "YourLanguageUnderstandingIntentName2");
-                recognizer.AddIntent("any-IntentId-here", model, "YourLanguageUnderstandingIntentName3");
+                recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
+                recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
+                recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
                 // Starts recognizing.
                 Console.WriteLine("Say something...");
@@ -101,9 +101,9 @@ namespace MicrosoftSpeechSDKSamples
 
                     // Creates a Language Understanding model using the app id, and adds specific intents from your model
                     var model = LanguageUnderstandingModel.FromAppId("YourLanguageUnderstandingAppId");
-                    recognizer.AddIntent("id1", model, "YourLanguageUnderstandingIntentName1");
-                    recognizer.AddIntent("id2", model, "YourLanguageUnderstandingIntentName2");
-                    recognizer.AddIntent("any-IntentId-here", model, "YourLanguageUnderstandingIntentName3");
+                    recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
+                    recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
+                    recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
                     // Subscribes to events.
                     recognizer.IntermediateResultReceived += (s, e) => {
@@ -185,9 +185,9 @@ namespace MicrosoftSpeechSDKSamples
             {
                 // Creates a Language Understanding model using the app id, and adds specific intents from your model
                 var model = LanguageUnderstandingModel.FromAppId("YourLanguageUnderstandingAppId");
-                recognizer.AddIntent("id1", model, "YourLanguageUnderstandingIntentName1");
-                recognizer.AddIntent("id2", model, "YourLanguageUnderstandingIntentName2");
-                recognizer.AddIntent("any-IntentId-here", model, "YourLanguageUnderstandingIntentName3");
+                recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
+                recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
+                recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
                 // Starts recognizing.
                 Console.WriteLine("Say something in " + language + "...");

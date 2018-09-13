@@ -90,7 +90,7 @@ namespace MicrosoftSpeechSDKSamples
             reco.OnSessionEvent += MySessionEventHandler;
 
             // Todo: Add LUIS intent.
-            reco.AddIntent("WeatherIntent", "weather");
+            reco.AddIntent("weather", "WeatherIntent");
 
             // Starts recognition.
             var result = await reco.RecognizeAsync().ConfigureAwait(false);

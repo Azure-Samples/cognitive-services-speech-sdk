@@ -401,7 +401,7 @@ public class IntentRecognizerTests {
         assertNotNull(r);
 
         // TODO check if intent is recognized
-        r.addIntent("all intents", "");
+        r.addIntent("all intents");
 
         final Map<String, Integer> eventsMap = new HashMap<String, Integer>();
         
@@ -440,7 +440,7 @@ public class IntentRecognizerTests {
         
         // TODO check if intent is recognized
         // TODO what is the intent name?
-        r.addIntent("all intents", model, "");
+        r.addAllIntents(model, "any-id-you-want-here");
 
         final Map<String, Integer> eventsMap = new HashMap<String, Integer>();
         

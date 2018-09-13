@@ -248,8 +248,8 @@ void CarbonTestConsole::Sample_HelloWorld_Intent(const char* subscriptionKey, co
     auto intentName1 = "IntentNameFromLuisPortal"; intentName1 = "Calendar.Add";
     auto intentName2 = "IntentNameFromLuisPortal"; intentName2 = "Communication.SendEmail";
 
-    recognizer->AddIntent("1", model, intentName1);
-    recognizer->AddIntent("some other id", model, intentName2);
+    recognizer->AddIntent(model, intentName1, "1");
+    recognizer->AddIntent(model, intentName2, "some other id");
 
     // Prompt the user to speak
     ConsoleWriteLine("Say something...");

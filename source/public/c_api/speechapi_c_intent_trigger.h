@@ -9,9 +9,9 @@
 #include <speechapi_c_common.h>
 
 
-SPXAPI_(bool) IntentTrigger_Handle_IsValid(SPXTRIGGERHANDLE htrigger);
-SPXAPI IntentTrigger_Handle_Close(SPXTRIGGERHANDLE htrigger);
+SPXAPI_(bool) intent_trigger_handle_is_valid(SPXTRIGGERHANDLE htrigger);
 
-SPXAPI IntentTrigger_Create_From_Phrase(const char* phrase, SPXTRIGGERHANDLE* phtrigger);
-SPXAPI IntentTrigger_Create_From_LanguageUnderstandingModel(SPXLUMODELHANDLE hlumodel, SPXTRIGGERHANDLE* phtrigger);
-SPXAPI IntentTrigger_Create_From_LanguageUnderstandingModel_Intent(SPXLUMODELHANDLE hlumodel, const char* intentName, SPXTRIGGERHANDLE* phtrigger);
+SPXAPI intent_trigger_create_from_phrase(SPXTRIGGERHANDLE* htrigger, const char* phrase);
+SPXAPI intent_trigger_create_from_language_understanding_model(SPXTRIGGERHANDLE* htrigger, SPXLUMODELHANDLE hlumodel, const char* intentName);
+
+SPXAPI intent_trigger_handle_release(SPXTRIGGERHANDLE htrigger);

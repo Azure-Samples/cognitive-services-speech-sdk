@@ -126,50 +126,73 @@ public:
     PropertyCollection<SPXRECOHANDLE> Parameters;
 
     /// <summary>
-    /// Adds a phrase that should be recognized as intent with the specified id.
+    /// Adds a simple phrase that may be spoken by the user, indicating a specific user intent.
     /// </summary>
-    /// <param name="intentId">Id of the intent.</param>
-    /// <param name="phrase">The phrase corresponding to the intent.</param>
-    void AddIntent(const std::string& intentId, const std::string& simplePhrase)
+    /// <param name="simplePhrase">The phrase corresponding to the intent.</param>
+    /// <remarks>Once recognized, the IntentRecognitionResult's IntentId property will match the simplePhrase specified here.</remarks>
+    void AddIntent(const std::string& simplePhrase)
     {
         auto trigger = IntentTrigger::From(simplePhrase);
-        return AddIntent(intentId, trigger);
+        return AddIntent(trigger, simplePhrase);
     }
 
     /// <summary>
-    /// Adds all intents from Language Understanding service for recognition that will be recognized as intent with the specified id.
+    /// Adds a simple phrase that may be spoken by the user, indicating a specific user intent.
     /// </summary>
-    /// <param name="intentId">A string that represents the identifier for model to be recognized.</param>
-    /// <param name="model">The language understanding model from Language Understanding service.</param>
-    void AddIntent(const std::string& intentId, std::shared_ptr<LanguageUnderstandingModel> model)
+    /// <param name="simplePhrase">The phrase corresponding to the intent.</param>
+    /// <param name="intentId">A custom id string to be returned in the IntentRecognitionResult's IntentId property.</param>
+    /// <remarks>Once recognized, the result's intent id will match the id supplied here.</remarks>
+    void AddIntent(const std::string& simplePhrase, const std::string& intentId)
     {
-        auto trigger = IntentTrigger::From(model);
-        AddIntent(intentId, trigger);
+        auto trigger = IntentTrigger::From(simplePhrase);
+        return AddIntent(trigger, intentId);
     }
 
     /// <summary>
-    /// Adds an intent from Language Understanding service for recognition that will be recognized as intent with the specified id.
+    /// Adds a single intent by name from the specified Language Understanding Model.
     /// </summary>
-    /// <param name="intentId">A string that represents the identifier of the intent to be recognized.</param>
-    /// <param name="model">The language understanding model from Language Understanding service.</param>
-    /// <param name="intentName">The intent name defined in the language understanding model.</param>
-    void AddIntent(const std::string& intentId, std::shared_ptr<LanguageUnderstandingModel> model, const std::string& intentName)
+    /// <param name="model">The language understanding model containing the intent.</param>
+    /// <param name="intentName">The name of the single intent to be included from the language understanding model.</param>
+    /// <remarks>Once recognized, the IntentRecognitionResult's IntentId property will contain the intentName specified here.</remarks>
+    void AddIntent(std::shared_ptr<LanguageUnderstandingModel> model, const std::string& intentName)
     {
         auto trigger = IntentTrigger::From(model, intentName);
-        AddIntent(intentId, trigger);
+        AddIntent(trigger, intentName);
     }
 
     /// <summary>
-    /// Adds an IntentTrigger that should be recognized as intent with the specified id.
+    /// Adds a single intent by name from the specified Language Understanding Model.
     /// </summary>
-    /// <param name="intentId">Id of the intent.</param>
-    /// <param name="trigger">The IntentTrigger corresponding to the intent.</param>
-    void AddIntent(const std::string& intentId, std::shared_ptr<IntentTrigger> trigger)
+    /// <param name="model">The language understanding model containing the intent.</param>
+    /// <param name="intentName">The name of the single intent to be included from the language understanding model.</param>
+    /// <param name="intentId">A custom id string to be returned in the IntentRecognitionResult's IntentId property.</param>
+    void AddIntent(std::shared_ptr<LanguageUnderstandingModel> model, const std::string& intentName, const std::string& intentId)
     {
-        SPX_THROW_ON_FAIL(IntentRecognizer_AddIntent(m_hreco, intentId.c_str(), (SPXTRIGGERHANDLE)(*trigger.get())));
+        auto trigger = IntentTrigger::From(model, intentName);
+        AddIntent(trigger, intentId);
     }
 
     /// <summary>
+    /// Adds all intents from the specified Language Understanding Model.
+    /// </summary>
+    /// <param name="model">The language understanding model containing the intents.</param>
+    /// <param name="intentId">A custom string id to be returned in the IntentRecognitionResult's IntentId property.</param>
+    void AddAllIntents(std::shared_ptr<LanguageUnderstandingModel> model, const std::string& intentId)
+    {
+        auto trigger = IntentTrigger::From(model);
+        AddIntent(trigger, intentId);
+    }
+
+    /// <summary>
+    /// Adds the IntentTrigger specified.
+    /// </summary>
+    /// <param name="trigger">The IntentTrigger corresponding to the intent.</param>
+    /// <param name="intentId">A custom string id to be returned in the IntentRecognitionResult's IntentId property.</param>
+    void AddIntent(std::shared_ptr<IntentTrigger> trigger, const std::string& intentId)
+    {
+        SPX_THROW_ON_FAIL(intent_recognizer_add_intent(m_hreco, intentId.c_str(), (SPXTRIGGERHANDLE)(*trigger.get())));
+    }
+
     /// Sets the authorization token that will be used for connecting to the service.
     /// </summary>
     /// <param name="token">A string that represents the authorization token.</param>

@@ -188,10 +188,10 @@ void CarbonTestConsole::ch9_do_intent()
     auto model = LanguageUnderstandingModel::FromSubscription(m_subscriptionKey, m_intentAppId, luisRegion);
     // auto model = LanguageUnderstandingModel::FromEndpoint(luisEndpoint);
     // auto model = LanguageUnderstandingModel::FromAppId(luisAppId);
-    recognizer->AddIntent("1", model, "TV.ChangeChannel");
-    recognizer->AddIntent("2", model, "TV.WatchTV");
-    recognizer->AddIntent("3", model, "TV.ShowGuide");
-    //recognizer->AddIntent(L"all intents", IntentTrigger::From(model, L""));
+    recognizer->AddIntent(model, "TV.ChangeChannel");
+    recognizer->AddIntent(model, "TV.WatchTV");
+    recognizer->AddIntent(model, "TV.ShowGuide");
+    //recognizer->AddAllIntents(model, L"id-representing-all-intents");
 
     printf("Listening...\n");
     auto result = recognizer->RecognizeAsync().get();
@@ -222,9 +222,9 @@ void CarbonTestConsole::ch9_do_intent_continuous()
     auto model = LanguageUnderstandingModel::FromSubscription(m_subscriptionKey, m_intentAppId, luisRegion);
     // auto model = LanguageUnderstandingModel::FromEndpoint(luisEndpoint);
     // auto model = LanguageUnderstandingModel::FromAppId(luisAppId);
-    recognizer->AddIntent("1", model, "TV.ChangeChannel");
-    recognizer->AddIntent("2", model, "TV.WatchTV");
-    recognizer->AddIntent("3", model, "TV.ShowGuide");
+    recognizer->AddIntent(model, "TV.ChangeChannel");
+    recognizer->AddIntent(model, "TV.WatchTV");
+    recognizer->AddIntent(model, "TV.ShowGuide");
 
     recognizer->StartContinuousRecognitionAsync();
 
@@ -283,9 +283,9 @@ void CarbonTestConsole::ch9_do_kws_intent()
     auto model = LanguageUnderstandingModel::FromSubscription(m_subscriptionKey, m_intentAppId, luisRegion);
     // auto model = LanguageUnderstandingModel::FromEndpoint(luisEndpoint);
     // auto model = LanguageUnderstandingModel::FromAppId(luisAppId);
-    recognizer->AddIntent("1", model, "TV.ChangeChannel");
-    recognizer->AddIntent("2", model, "TV.WatchTV");
-    recognizer->AddIntent("3", model, "TV.ShowGuide");
+    recognizer->AddIntent(model, "TV.ChangeChannel");
+    recognizer->AddIntent(model, "TV.WatchTV");
+    recognizer->AddIntent(model, "TV.ShowGuide");
 
     auto keywordModel = KeywordRecognitionModel::FromFile("kws.table");
     recognizer->StartKeywordRecognitionAsync(keywordModel);

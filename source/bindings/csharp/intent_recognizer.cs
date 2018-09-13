@@ -161,27 +161,61 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         }
 
         /// <summary>
-        /// Adds a phrase that should be recognized as intent.
+        /// Adds a simple phrase that may be spoken by the user, indicating a specific user intent.
         /// </summary>
-        /// <param name="intentId">A string that represents the identifier of the intent to be recognized.</param>
-        /// <param name="phrase">A string that specifies the phrase representing the intent.</param>
-        public void AddIntent(string intentId, string phrase)
+        /// <param name="simplePhrase">The phrase corresponding to the intent.</param>
+        /// <remarks>Once recognized, the IntentRecognitionResult's IntentId property will match the simplePhrase specified here.</remarks>
+        public void AddIntent(string simplePhrase)
         {
-            recoImpl.AddIntent(intentId, phrase);
+            recoImpl.AddIntent(simplePhrase);
         }
 
         /// <summary>
-        /// Adds an intent from Language Understanding service for recognition.
+        /// Adds a simple phrase that may be spoken by the user, indicating a specific user intent.
         /// </summary>
-        /// <param name="intentId">A string that represents the identifier of the intent to be recognized. Ignored if intentName is empty.</param>
-        /// <param name="model">The language understanding model from Language Understanding service.</param>
-        /// <param name="intentName">The intent name defined in the language understanding model (optional). If it is empty, all intent names defined in the model will be added.</param>
-        public void AddIntent(string intentId, LanguageUnderstandingModel model, string intentName = "")
+        /// <param name="simplePhrase">The phrase corresponding to the intent.</param>
+        /// <param name="intentId">A custom id string to be returned in the IntentRecognitionResult's IntentId property.</param>
+        /// <remarks>Once recognized, the result's intent id will match the id supplied here.</remarks>
+        public void AddIntent(string simplePhrase, string intentId)
+        {
+            recoImpl.AddIntent(simplePhrase, intentId);
+        }
+
+        /// <summary>
+        /// Adds a single intent by name from the specified Language Understanding Model.
+        /// </summary>
+        /// <param name="model">The language understanding model containing the intent.</param>
+        /// <param name="intentName">The name of the single intent to be included from the language understanding model.</param>
+        /// <remarks>Once recognized, the IntentRecognitionResult's IntentId property will contain the intentName specified here.</remarks>
+        public void AddIntent(LanguageUnderstandingModel model, string intentName)
         {
             var trigger = Microsoft.CognitiveServices.Speech.Internal.IntentTrigger.From(model.modelImpl, intentName);
-            recoImpl.AddIntent(intentId, trigger);
+            recoImpl.AddIntent(trigger, intentName);
         }
-        
+
+        /// <summary>
+        /// Adds a single intent by name from the specified Language Understanding Model.
+        /// </summary>
+        /// <param name="model">The language understanding model containing the intent.</param>
+        /// <param name="intentName">The name of the single intent to be included from the language understanding model.</param>
+        /// <param name="intentId">A custom id string to be returned in the IntentRecognitionResult's IntentId property.</param>
+        public void AddIntent(LanguageUnderstandingModel model, string intentName, string intentId)
+        {
+            var trigger = Microsoft.CognitiveServices.Speech.Internal.IntentTrigger.From(model.modelImpl, intentName);
+            recoImpl.AddIntent(trigger, intentId);
+        }
+
+        /// <summary>
+        /// Adds all intents from the specified Language Understanding Model.
+        /// </summary>
+        /// <param name="model">The language understanding model from Language Understanding service.</param>
+        /// <param name="intentId">A custom string id to be returned in the IntentRecognitionResult's IntentId property.</param>
+        public void AddAllIntents(LanguageUnderstandingModel model, string intentId)
+        {
+            var trigger = Microsoft.CognitiveServices.Speech.Internal.IntentTrigger.From(model.modelImpl);
+            recoImpl.AddIntent(trigger, intentId);
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposed)

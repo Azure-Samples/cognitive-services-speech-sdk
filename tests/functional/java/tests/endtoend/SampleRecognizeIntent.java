@@ -55,7 +55,7 @@ public class SampleRecognizeIntent implements Runnable {
             LanguageUnderstandingModel intentModel = LanguageUnderstandingModel.fromAppId(Settings.LuisAppId);
             
             for (Map.Entry<String, String> entry : intentIdMap.entrySet()) {
-                reco.addIntent(entry.getKey(), intentModel, entry.getValue());
+                reco.addIntent(intentModel, entry.getValue(), entry.getKey());
             }
 
             reco.IntermediateResultReceived.addEventListener((o, intentRecognitionResultEventArgs) -> {

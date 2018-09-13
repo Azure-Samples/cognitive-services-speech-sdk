@@ -30,7 +30,7 @@ public:
     static std::shared_ptr<IntentTrigger> From(const std::string& simplePhrase)
     {
         SPXTRIGGERHANDLE htrigger = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(IntentTrigger_Create_From_Phrase(simplePhrase.c_str(), &htrigger));
+        SPX_THROW_ON_FAIL(intent_trigger_create_from_phrase(&htrigger, simplePhrase.c_str()));
         return std::make_shared<IntentTrigger>(htrigger);
     }
 
@@ -42,7 +42,7 @@ public:
     static std::shared_ptr<IntentTrigger> From(std::shared_ptr<LanguageUnderstandingModel> model)
     {
         SPXTRIGGERHANDLE htrigger = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(IntentTrigger_Create_From_LanguageUnderstandingModel((SPXLUMODELHANDLE)(*model.get()), &htrigger));
+        SPX_THROW_ON_FAIL(intent_trigger_create_from_language_understanding_model(&htrigger, (SPXLUMODELHANDLE)(*model.get()), nullptr));
         return std::make_shared<IntentTrigger>(htrigger);
     }
 
@@ -55,14 +55,14 @@ public:
     static std::shared_ptr<IntentTrigger> From(std::shared_ptr<LanguageUnderstandingModel> model, const std::string& intentName)
     {
         SPXTRIGGERHANDLE htrigger = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(IntentTrigger_Create_From_LanguageUnderstandingModel_Intent((SPXLUMODELHANDLE)(*model.get()), intentName.c_str(), &htrigger));
+        SPX_THROW_ON_FAIL(intent_trigger_create_from_language_understanding_model(&htrigger, (SPXLUMODELHANDLE)(*model.get()), intentName.c_str()));
         return std::make_shared<IntentTrigger>(htrigger);
     }
 
     /// <summary>
     /// Virtual destructor
     /// </summary>
-    virtual ~IntentTrigger() { IntentTrigger_Handle_Close(m_htrigger); m_htrigger = SPXHANDLE_INVALID; }
+    virtual ~IntentTrigger() { intent_trigger_handle_release(m_htrigger); m_htrigger = SPXHANDLE_INVALID; }
 
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.

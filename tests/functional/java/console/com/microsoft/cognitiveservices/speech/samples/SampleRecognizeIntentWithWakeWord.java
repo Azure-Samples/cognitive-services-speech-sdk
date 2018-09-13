@@ -73,7 +73,7 @@ public class SampleRecognizeIntentWithWakeWord implements Runnable, Stoppable {
             LanguageUnderstandingModel intentModel = LanguageUnderstandingModel.fromSubscription(SampleSettings.LuisRegion,
                     SampleSettings.LuisSubscriptionKey, SampleSettings.LuisAppId);
             for (Map.Entry<String, String> entry : intentIdMap.entrySet()) {
-                reco.addIntent(entry.getKey(), intentModel, entry.getValue());
+                reco.addIntent(intentModel, entry.getValue(), entry.getKey());
             }
 
             reco.SessionEvent.addEventListener((o, sessionEventArgs) -> {
