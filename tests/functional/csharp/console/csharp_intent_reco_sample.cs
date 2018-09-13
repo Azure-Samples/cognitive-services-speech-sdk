@@ -16,12 +16,12 @@ namespace MicrosoftSpeechSDKSamples
 {
     public class IntentRecognitionSamples
     {
-        private static void MyIntermediateResultEventHandler(object sender, IntentRecognitionResultEventArgs e)
+        private static void MyRecognizingEventHandler(object sender, IntentRecognitionResultEventArgs e)
         {
             Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: intermediate rsult: {0} ", e.ToString()));
         }
 
-        private static void MyFinalResultEventHandler(object sender, IntentRecognitionResultEventArgs e)
+        private static void MyRecognizedEventHandler(object sender, IntentRecognitionResultEventArgs e)
         {
             Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: final result: {0} ", e.ToString()));
         }
@@ -31,9 +31,14 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: canceled. SessionId: {0}, Reason: {1}", e.SessionId, e.Reason));
         }
 
-        private static void MySessionEventHandler(object sender, SessionEventArgs e)
+        private static void MySessionStartedEventHandler(object sender, SessionEventArgs e)
         {
-            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: Session event: {0}.", e.ToString()));
+            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: Session started event: {0}.", e.ToString()));
+        }
+
+        private static void MySessionStoppedEventHandler(object sender, SessionEventArgs e)
+        {
+            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: Session stopped event: {0}.", e.ToString()));
         }
 
         public static async Task IntentRecognitionBaseModelAsync(string keySpeech, string fileName)
@@ -84,24 +89,26 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task DoIntentRecognitionAsync(IntentRecognizer reco)
         {
             // Subscribes to events.
-            reco.IntermediateResultReceived += MyIntermediateResultEventHandler;
-            reco.FinalResultReceived += MyFinalResultEventHandler;
+            reco.Recognizing += MyRecognizingEventHandler;
+            reco.Recognized += MyRecognizedEventHandler;
             reco.Canceled += MyCanceledEventHandler;
-            reco.OnSessionEvent += MySessionEventHandler;
+            reco.SessionStarted += MySessionStartedEventHandler;
+            reco.SessionStopped += MySessionStoppedEventHandler;
 
             // Todo: Add LUIS intent.
             reco.AddIntent("weather", "WeatherIntent");
 
             // Starts recognition.
-            var result = await reco.RecognizeAsync().ConfigureAwait(false);
+            var result = await reco.RecognizeOnceAsync().ConfigureAwait(false);
 
             Console.WriteLine("Intent Recognition: recognition result: " + result);
 
             // Unsubscribe to events.
-            reco.IntermediateResultReceived -= MyIntermediateResultEventHandler;
-            reco.FinalResultReceived -= MyFinalResultEventHandler;
+            reco.Recognizing -= MyRecognizingEventHandler;
+            reco.Recognized -= MyRecognizedEventHandler;
             reco.Canceled -= MyCanceledEventHandler;
-            reco.OnSessionEvent -= MySessionEventHandler;
+            reco.SessionStarted -= MySessionStartedEventHandler;
+            reco.SessionStopped -= MySessionStoppedEventHandler;
         }
 
     }

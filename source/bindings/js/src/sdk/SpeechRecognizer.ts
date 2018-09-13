@@ -45,22 +45,22 @@ export class SpeechRecognizer extends Recognizer {
     }
 
     /**
-     * The event IntermediateResultReceived signals that an intermediate recognition result is received.
+     * The event recognizing signals that an intermediate recognition result is received.
      * @property
      */
-    public IntermediateResultReceived: (sender: Recognizer, event: SpeechRecognitionResultEventArgs) => void;
+    public recognizing: (sender: Recognizer, event: SpeechRecognitionResultEventArgs) => void;
 
     /**
-     * The event FinalResultReceived signals that a final recognition result is received.
+     * The event recognized signals that a final recognition result is received.
      * @property
      */
-    public FinalResultReceived: (sender: Recognizer, event: SpeechRecognitionResultEventArgs) => void;
+    public recognized: (sender: Recognizer, event: SpeechRecognitionResultEventArgs) => void;
 
     /**
-     * The event RecognitionErrorRaised signals that an error occurred during recognition.
+     * The event canceled signals that an error occurred during recognition.
      * @property
      */
-    public RecognitionErrorRaised: (sender: Recognizer, event: RecognitionErrorEventArgs) => void;
+    public canceled: (sender: Recognizer, event: RecognitionErrorEventArgs) => void;
 
     /**
      * Gets the deployment id of a customized speech model that is used for speech recognition.
@@ -127,13 +127,13 @@ export class SpeechRecognizer extends Recognizer {
 
     /**
      * Starts speech recognition, and stops after the first utterance is recognized. The task returns the recognition text as result.
-     * Note: RecognizeAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition
+     * Note: RecognizeOnceAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition
      *       like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
      * @member
      * @param cb - Callback that received the SpeechRecognitionResult.
      * @param err - Callback invoked in case of an error.
      */
-    public recognizeAsync(cb?: (e: SpeechRecognitionResult) => void, err?: (e: string) => void): void {
+    public recognizeOnceAsync(cb?: (e: SpeechRecognitionResult) => void, err?: (e: string) => void): void {
         Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
 
         this.implCloseExistingRecognizer();
@@ -312,8 +312,8 @@ export class SpeechRecognizer extends Recognizer {
                         errorEvent.sessionId = recoEndedEvent.SessionId;
                         errorEvent.error = recoEndedEvent.Error;
 
-                        if (this.RecognitionErrorRaised) {
-                            this.RecognitionErrorRaised(this, errorEvent); // call error handler, if configured
+                        if (this.canceled) {
+                            this.canceled(this, errorEvent); // call error handler, if configured
                         }
 
                         if (!!err) {
@@ -333,8 +333,8 @@ export class SpeechRecognizer extends Recognizer {
                         ev.sessionId = evResult.SessionId;
                         ev.status = reason;
 
-                        if (!!this.RecognitionErrorRaised) {
-                            this.RecognitionErrorRaised(this, ev);
+                        if (!!this.canceled) {
+                            this.canceled(this, ev);
                         }
 
                         // report result to promise.
@@ -353,8 +353,8 @@ export class SpeechRecognizer extends Recognizer {
                         ev.result.text = evResult.Result.DisplayText;
                         ev.result.reason = reason;
 
-                        if (!!this.FinalResultReceived) {
-                            this.FinalResultReceived(this, ev);
+                        if (!!this.recognized) {
+                            this.recognized(this, ev);
                         }
 
                         // report result to promise.
@@ -382,8 +382,8 @@ export class SpeechRecognizer extends Recognizer {
                         ev.sessionId = evResult.SessionId;
                         ev.status = reason;
 
-                        if (!!this.RecognitionErrorRaised) {
-                            this.RecognitionErrorRaised(this, ev);
+                        if (!!this.canceled) {
+                            this.canceled(this, ev);
                         }
 
                         // report result to promise.
@@ -401,8 +401,8 @@ export class SpeechRecognizer extends Recognizer {
                         ev.result.duration = evResult.Result.Duration;
                         ev.result.reason = reason;
 
-                        if (!!this.FinalResultReceived) {
-                            this.FinalResultReceived(this, ev);
+                        if (!!this.recognized) {
+                            this.recognized(this, ev);
                         }
 
                         // report result to promise.
@@ -432,8 +432,8 @@ export class SpeechRecognizer extends Recognizer {
                     ev.result.duration = evResult.Result.Duration;
                     ev.result.text = evResult.Result.Text;
 
-                    if (!!this.IntermediateResultReceived) {
-                        this.IntermediateResultReceived(this, ev);
+                    if (!!this.recognizing) {
+                        this.recognizing(this, ev);
                     }
                 }
                 break;

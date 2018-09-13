@@ -10,7 +10,7 @@ using System.Globalization;
 namespace Microsoft.CognitiveServices.Speech.Translation
 {
     /// <summary>
-    /// Define payload of translation intermediate/final result events.
+    /// Define payload of translation recognizing/recognized events.
     /// </summary>
     public sealed class TranslationTextResultEventArgs : System.EventArgs
     {

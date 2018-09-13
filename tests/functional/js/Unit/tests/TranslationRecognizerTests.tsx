@@ -5,6 +5,7 @@
 
 import { setTimeout } from "timers";
 import * as sdk from "../../../../../source/bindings/js/Speech.Browser.Sdk";
+import { RecognitionEventType, SessionEventType } from "../../../../../source/bindings/js/Speech.Browser.Sdk";
 import { ByteBufferAudioFile } from "./ByteBufferAudioFile";
 import { Settings } from "./Settings";
 import { default as WaitForCondition } from "./Utilities";
@@ -16,10 +17,10 @@ beforeAll(() => {
 });
 
 const FIRST_EVENT_ID: number = 1;
-const IntermediateResultReceived: string = "IntermediateResultReceived";
-const FinalResultReceived: string = "FinalResultReceived";
+const Recognizing: string = "Recognizing";
+const Recognized: string = "Recognized";
 const Session: string = "Session";
-const RecognitionErrorRaised: string = "RecognitionErrorRaised";
+const Canceled: string = "Canceled";
 
 let eventIdentifier: number;
 
@@ -162,7 +163,7 @@ test("GetParameters", () => {
     s.close();
 });
 
-test("RecognizeAsync1", (done: jest.DoneCallback) => {
+test("RecognizeOnceAsync1", (done: jest.DoneCallback) => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
@@ -177,7 +178,7 @@ test("RecognizeAsync1", (done: jest.DoneCallback) => {
 
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
-    r.SynthesisResultReceived = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
+    r.synthesized = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
         if (e.result.synthesisStatus === sdk.SynthesisStatus.Error) {
             r.close();
             s.close();
@@ -186,7 +187,7 @@ test("RecognizeAsync1", (done: jest.DoneCallback) => {
         }
     });
 
-    r.recognizeAsync(
+    r.recognizeOnceAsync(
         (res: sdk.TranslationTextResult) => {
             expect(res).not.toBeUndefined();
             expect(sdk.RecognitionStatus.Recognized).toEqual(res.translationStatus);
@@ -222,7 +223,7 @@ test("Translate Multiple Targets", (done: jest.DoneCallback) => {
 
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
-    r.SynthesisResultReceived = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
+    r.synthesized = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
         if (e.result.synthesisStatus === sdk.SynthesisStatus.Error) {
             r.close();
             s.close();
@@ -231,7 +232,7 @@ test("Translate Multiple Targets", (done: jest.DoneCallback) => {
         }
     });
 
-    r.recognizeAsync(
+    r.recognizeOnceAsync(
         (res: sdk.TranslationTextResult) => {
             expect(res).not.toBeUndefined();
             expect(sdk.RecognitionStatus.Recognized).toEqual(res.translationStatus);
@@ -251,7 +252,7 @@ test("Translate Multiple Targets", (done: jest.DoneCallback) => {
         });
 }, 10000);
 
-test.skip("RecognizeAsync_badStream", (done: jest.DoneCallback) => {
+test.skip("RecognizeOnceAsync_badStream", (done: jest.DoneCallback) => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
@@ -265,7 +266,7 @@ test.skip("RecognizeAsync_badStream", (done: jest.DoneCallback) => {
 
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
-    r.recognizeAsync(
+    r.recognizeOnceAsync(
         (res: sdk.TranslationTextResult) => {
             fail("Should have hit an error");
         },
@@ -294,34 +295,44 @@ test("Validate Event Ordering", (done: jest.DoneCallback) => {
     const eventsMap: { [id: string]: number; } = {};
     eventIdentifier = 1;
 
-    r.FinalResultReceived = (o: sdk.Recognizer, e: sdk.TranslationTextResultEventArgs) => {
-        eventsMap[FinalResultReceived] = eventIdentifier++;
+    r.recognized = (o: sdk.Recognizer, e: sdk.TranslationTextResultEventArgs) => {
+        eventsMap[Recognized] = eventIdentifier++;
     };
 
-    r.IntermediateResultReceived = (o: sdk.Recognizer, e: sdk.TranslationTextResultEventArgs) => {
+    r.recognizing = (o: sdk.Recognizer, e: sdk.TranslationTextResultEventArgs) => {
         const now: number = eventIdentifier++;
-        eventsMap[IntermediateResultReceived + "-" + Date.now().toPrecision(4)] = now;
-        eventsMap[IntermediateResultReceived] = now;
+        eventsMap[Recognizing + "-" + Date.now().toPrecision(4)] = now;
+        eventsMap[Recognizing] = now;
     };
 
-    r.RecognitionErrorRaised = (o: sdk.Recognizer, e: sdk.RecognitionErrorEventArgs) => {
-        eventsMap[RecognitionErrorRaised] = eventIdentifier++;
+    r.canceled = (o: sdk.Recognizer, e: sdk.RecognitionErrorEventArgs) => {
+        eventsMap[Canceled] = eventIdentifier++;
     };
 
     // TODO eventType should be renamed and be a function getEventType()
-    r.RecognitionEvent = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs) => {
+    r.speechStartDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs) => {
         const now: number = eventIdentifier++;
-        eventsMap[e.eventType.toString() + "-" + Date.now().toPrecision(4)] = now;
-        eventsMap[e.eventType.toString()] = now;
+        eventsMap[RecognitionEventType.SpeechStartDetectedEvent.toString() + "-" + Date.now().toPrecision(4)] = now;
+        eventsMap[RecognitionEventType.SpeechStartDetectedEvent.toString()] = now;
+    };
+    r.speechEndDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs) => {
+        const now: number = eventIdentifier++;
+        eventsMap[RecognitionEventType.SpeechEndDetectedEvent.toString() + "-" + Date.now().toPrecision(4)] = now;
+        eventsMap[RecognitionEventType.SpeechEndDetectedEvent.toString()] = now;
     };
 
-    r.SessionEvent = (o: sdk.Recognizer, e: sdk.SessionEventArgs) => {
+    r.sessionStarted = (o: sdk.Recognizer, e: sdk.SessionEventArgs) => {
         const now: number = eventIdentifier++;
-        eventsMap[Session + ":" + e.eventType.toString() + "-" + Date.now().toPrecision(4)] = now;
-        eventsMap[Session + ":" + e.eventType.toPrecision()] = now;
+        eventsMap[Session + ":" + SessionEventType.SessionStartedEvent.toString() + "-" + Date.now().toPrecision(4)] = now;
+        eventsMap[Session + ":" + SessionEventType.SessionStartedEvent.toPrecision()] = now;
+    };
+    r.sessionStopped = (o: sdk.Recognizer, e: sdk.SessionEventArgs) => {
+        const now: number = eventIdentifier++;
+        eventsMap[Session + ":" + SessionEventType.SessionStoppedEvent.toString() + "-" + Date.now().toPrecision(4)] = now;
+        eventsMap[Session + ":" + SessionEventType.SessionStoppedEvent.toPrecision()] = now;
     };
 
-    r.SynthesisResultReceived = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
+    r.synthesized = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
         if (e.result.synthesisStatus === sdk.SynthesisStatus.Error) {
             r.close();
             s.close();
@@ -330,9 +341,9 @@ test("Validate Event Ordering", (done: jest.DoneCallback) => {
         }
     });
 
-    // TODO there is no guarantee that SessionStoppedEvent comes before the recognizeAsync() call returns?!
+    // TODO there is no guarantee that SessionStoppedEvent comes before the recognizeOnceAsync() call returns?!
     //      this is why below SessionStoppedEvent checks are conditional
-    r.recognizeAsync((res: sdk.TranslationTextResult) => {
+    r.recognizeOnceAsync((res: sdk.TranslationTextResult) => {
 
         expect(res).not.toBeUndefined();
         expect(res.translations.get("en", "")).toEqual("What's the weather like?");
@@ -362,10 +373,10 @@ test("Validate Event Ordering", (done: jest.DoneCallback) => {
 
         // there is no partial result reported after the final result
         // (and check that we have intermediate and final results recorded)
-        expect(eventsMap[IntermediateResultReceived]).toBeLessThan(eventsMap[FinalResultReceived]);
+        expect(eventsMap[Recognizing]).toBeLessThan(eventsMap[Recognized]);
 
         // make sure events we don't expect, don't get raised
-        expect(RecognitionErrorRaised in eventsMap).toEqual(false);
+        expect(Canceled in eventsMap).toEqual(false);
         r.close();
         s.close();
         done();
@@ -453,7 +464,7 @@ test("StartStopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
 
     const rEvents: { [id: string]: string; } = {};
 
-    r.FinalResultReceived = ((o: sdk.Recognizer, e: sdk.TranslationTextResultEventArgs) => {
+    r.recognized = ((o: sdk.Recognizer, e: sdk.TranslationTextResultEventArgs) => {
         const result: string = e.result.translations.get("en", "");
         rEvents["Result@" + Date.now()] = result;
     });
@@ -496,7 +507,7 @@ test("TranslateVoiceRoundTrip", (done: jest.DoneCallback) => {
 
     const rEvents: { [id: string]: Uint8Array; } = {};
 
-    r.SynthesisResultReceived = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
+    r.synthesized = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
         const result: Uint8Array = e.result.audio;
         rEvents["Result@" + Date.now()] = result;
     });
@@ -517,7 +528,7 @@ test("TranslateVoiceRoundTrip", (done: jest.DoneCallback) => {
             const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(inputStream);
 
             const r2: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s, config);
-            r2.recognizeAsync((speech: sdk.SpeechRecognitionResult) => {
+            r2.recognizeOnceAsync((speech: sdk.SpeechRecognitionResult) => {
                 expect(speech.text).toEqual("What's the weather like?");
                 r2.close();
                 s.close();
@@ -543,7 +554,7 @@ test("TranslateVoiceInvalidVoice", (done: jest.DoneCallback) => {
 
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
-    r.SynthesisResultReceived = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
+    r.synthesized = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
         if (e.result.synthesisStatus === sdk.SynthesisStatus.Error) {
             r.close();
             s.close();
@@ -557,7 +568,7 @@ test("TranslateVoiceInvalidVoice", (done: jest.DoneCallback) => {
         }
     });
 
-    r.RecognitionErrorRaised = ((o: sdk.Recognizer, e: sdk.RecognitionErrorEventArgs) => {
+    r.canceled = ((o: sdk.Recognizer, e: sdk.RecognitionErrorEventArgs) => {
         r.close();
         s.close();
         setTimeout(() => done(), 1);
@@ -587,7 +598,7 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
 
     const rEvents: { [id: string]: Uint8Array; } = {};
 
-    r.SynthesisResultReceived = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
+    r.synthesized = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
         if (e.result.synthesisStatus === sdk.SynthesisStatus.Error) {
             r.close();
             s.close();
@@ -599,7 +610,7 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
         rEvents["Result@" + Date.now()] = result;
     });
 
-    r.RecognitionErrorRaised = ((o: sdk.Recognizer, e: sdk.RecognitionErrorEventArgs) => {
+    r.canceled = ((o: sdk.Recognizer, e: sdk.RecognitionErrorEventArgs) => {
         r.close();
         s.close();
         setTimeout(() => done(), 1);
@@ -624,7 +635,7 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
             s.language = "de-DE";
 
             const r2: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s, config);
-            r2.recognizeAsync((speech: sdk.SpeechRecognitionResult) => {
+            r2.recognizeOnceAsync((speech: sdk.SpeechRecognitionResult) => {
                 expect(speech.text).toEqual("Wie ist das Wetter?");
                 r2.close();
                 s.close();
@@ -664,7 +675,7 @@ test.skip("MultiPhrase", (done: jest.DoneCallback) => {
 
     const rEvents: { [id: string]: Uint8Array; } = {};
 
-    r.SynthesisResultReceived = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
+    r.synthesized = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
         if (e.result.synthesisStatus === sdk.SynthesisStatus.Error) {
             r.close();
             s.close();
@@ -676,7 +687,7 @@ test.skip("MultiPhrase", (done: jest.DoneCallback) => {
         rEvents["Result@" + Date.now()] = result;
     });
 
-    r.RecognitionErrorRaised = ((o: sdk.Recognizer, e: sdk.RecognitionErrorEventArgs) => {
+    r.canceled = ((o: sdk.Recognizer, e: sdk.RecognitionErrorEventArgs) => {
         r.close();
         s.close();
         setTimeout(() => done(), 1);
@@ -714,7 +725,7 @@ test.skip("MultiPhrase", (done: jest.DoneCallback) => {
             let constResult: string = "";
             let numEvents: number = 0;
 
-            r2.FinalResultReceived = (o: sdk.Recognizer, e: sdk.SpeechRecognitionResultEventArgs) => {
+            r2.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionResultEventArgs) => {
                 constResult += e.result.text + " ";
                 numEvents++;
             };

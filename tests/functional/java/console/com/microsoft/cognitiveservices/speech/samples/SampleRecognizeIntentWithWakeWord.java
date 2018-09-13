@@ -12,7 +12,6 @@ import java.util.concurrent.Future;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
-import com.microsoft.cognitiveservices.speech.SessionEventType;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
@@ -76,17 +75,19 @@ public class SampleRecognizeIntentWithWakeWord implements Runnable, Stoppable {
                 reco.addIntent(intentModel, entry.getValue(), entry.getKey());
             }
 
-            reco.SessionEvent.addEventListener((o, sessionEventArgs) -> {
-                System.out.println("got a session (" + sessionEventArgs.getSessionId() + ")event: "
-                        + sessionEventArgs.getEventType());
-                if (sessionEventArgs.getEventType() == SessionEventType.SessionStartedEvent) {
-                    content.set(0, "KeywordModel `" + SampleSettings.Keyword + "` detected");
-                    System.out.println(String.join(delimiter, content));
-                    content.add("");
-                }
+            reco.sessionStarted.addEventListener((o, sessionEventArgs) -> {
+                System.out.println("got a session started (" + sessionEventArgs.getSessionId() + ")event");
+
+                content.set(0, "KeywordModel `" + SampleSettings.Keyword + "` detected");
+                System.out.println(String.join(delimiter, content));
+                content.add("");
             });
 
-            reco.IntermediateResultReceived.addEventListener((o, intermediateResultEventArgs) -> {
+            reco.sessionStopped.addEventListener((o, sessionEventArgs) -> {
+                System.out.println("got a session stopped (" + sessionEventArgs.getSessionId() + ")event");
+            });
+
+            reco.recognizing.addEventListener((o, intermediateResultEventArgs) -> {
                 String s = intermediateResultEventArgs.getResult().getText();
                 System.out.println("got an intermediate result: " + s);
                 Integer index = content.size() - 2;
@@ -94,7 +95,7 @@ public class SampleRecognizeIntentWithWakeWord implements Runnable, Stoppable {
                 System.out.println(String.join(delimiter, content));
             });
 
-            reco.FinalResultReceived.addEventListener((o, finalResultEventArgs) -> {
+            reco.recognized.addEventListener((o, finalResultEventArgs) -> {
                 String s = finalResultEventArgs.getResult().getText();
                 String intentId = finalResultEventArgs.getResult().getIntentId();
                 String intent = "";

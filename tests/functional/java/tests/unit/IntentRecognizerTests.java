@@ -22,9 +22,7 @@ import org.junit.Ignore;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.ResultReason;
-import com.microsoft.cognitiveservices.speech.RecognitionEventType;
 import com.microsoft.cognitiveservices.speech.Recognizer;
-import com.microsoft.cognitiveservices.speech.SessionEventType;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
@@ -36,7 +34,7 @@ import tests.Settings;
 public class IntentRecognizerTests {
     private final Integer FIRST_EVENT_ID = 1;
     private AtomicInteger eventIdentifier = new AtomicInteger(FIRST_EVENT_ID);
-    
+
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
         // Override inputs, if necessary
@@ -44,9 +42,9 @@ public class IntentRecognizerTests {
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
-    
+
     @Ignore
     @Test
     public void testDispose() {
@@ -55,9 +53,9 @@ public class IntentRecognizerTests {
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
-    
+
     @Test
     public void testIntentRecognizer1() {
         SpeechConfig config = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -67,7 +65,7 @@ public class IntentRecognizerTests {
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-                
+
         r.close();
         config.close();
     }
@@ -83,19 +81,19 @@ public class IntentRecognizerTests {
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-        
-        IntentRecognitionResult res = r.recognizeAsync().get();
+
+        IntentRecognitionResult res = r.recognizeOnceAsync().get();
         assertNotNull(res);
         assertEquals("What's the weather like?", res.getText());
-                
+
         r.close();
         s.close();
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
-    
+
     @Test
     public void testGetLanguage() {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -105,7 +103,7 @@ public class IntentRecognizerTests {
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
 
-        
+
         IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -113,7 +111,7 @@ public class IntentRecognizerTests {
 
         assertFalse(r.getSpeechRecognitionLanguage().isEmpty());
         assertEquals("en-US", r.getSpeechRecognitionLanguage());
-        
+
         r.close();
         s.close();
     }
@@ -127,7 +125,7 @@ public class IntentRecognizerTests {
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
-        
+
         IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
@@ -148,9 +146,9 @@ public class IntentRecognizerTests {
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
-    
+
     @Test
     public void testGetParameters() {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -161,18 +159,18 @@ public class IntentRecognizerTests {
 
         assertNotNull(r.getParameters());
         assertEquals(r.getSpeechRecognitionLanguage(), r.getParameters().getProperty(SpeechPropertyId.SpeechServiceConnection_RecoLanguage));
-        
+
         r.close();
         s.close();
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
 
-    @Ignore("TODO why is Canceled reported instead of success")
+    @Ignore("TODO why is canceled reported instead of success")
     @Test
-    public void testRecognizeAsync1() throws InterruptedException, ExecutionException, TimeoutException {
+    public void testRecognizeOnceAsync1() throws InterruptedException, ExecutionException, TimeoutException {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
@@ -180,8 +178,8 @@ public class IntentRecognizerTests {
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-        
-        Future<IntentRecognitionResult> future = r.recognizeAsync();
+
+        Future<IntentRecognitionResult> future = r.recognizeOnceAsync();
         assertNotNull(future);
 
         // Wait for max 30 seconds
@@ -193,19 +191,19 @@ public class IntentRecognizerTests {
         IntentRecognitionResult res = future.get();
         assertNotNull(res);
         assertTrue(ResultReason.RecognizedSpeech == res.getReason() ||
-                   ResultReason.RecognizedIntent == res.getReason());
+                ResultReason.RecognizedIntent == res.getReason());
         assertEquals("What's the weather like?", res.getText());
 
         // TODO: check for specific json parameters
         assertTrue(res.getLanguageUnderstanding().length() > 0);
-        
+
         r.close();
         s.close();
     }
 
     @Ignore("TODO why are error details not empty")
     @Test
-    public void testRecognizeAsync2() throws InterruptedException, ExecutionException {
+    public void testRecognizeOnceAsync2() throws InterruptedException, ExecutionException {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
@@ -215,37 +213,48 @@ public class IntentRecognizerTests {
         assertTrue(r instanceof Recognizer);
 
         final Map<String, Integer> eventsMap = new HashMap<String, Integer>();
-        
-        r.FinalResultReceived.addEventListener((o, e) -> {
-            eventsMap.put("FinalResultReceived", eventIdentifier.getAndIncrement());
+
+        r.recognized.addEventListener((o, e) -> {
+            eventsMap.put("recognized", eventIdentifier.getAndIncrement());
         });
 
-        r.IntermediateResultReceived.addEventListener((o, e) -> {
+        r.recognizing.addEventListener((o, e) -> {
             int now = eventIdentifier.getAndIncrement();
-            eventsMap.put("IntermediateResultReceived-" + System.currentTimeMillis(), now);
-            eventsMap.put("IntermediateResultReceived" , now);
+            eventsMap.put("recognizing-" + System.currentTimeMillis(), now);
+            eventsMap.put("recognizing" , now);
         });
-        
-        r.Canceled.addEventListener((o, e) -> {
+
+        r.canceled.addEventListener((o, e) -> {
             if (e.getReason() == CancellationReason.Error) {
-                eventsMap.put("RecognitionErrorRaised", eventIdentifier.getAndIncrement());
+                eventsMap.put("canceled", eventIdentifier.getAndIncrement());
             }
         });
 
-        // TODO eventType should be renamed and be a function getEventType()
-        r.RecognitionEvent.addEventListener((o, e) -> {
+        r.speechStartDetected.addEventListener((o, e) -> {
             int now = eventIdentifier.getAndIncrement();
-            eventsMap.put(e.eventType.name() + "-" + System.currentTimeMillis(), now);
-            eventsMap.put(e.eventType.name(), now);
+            eventsMap.put("speechStartDetected-" + System.currentTimeMillis(), now);
+            eventsMap.put("speechStartDetected", now);
         });
 
-        r.SessionEvent.addEventListener((o, e) -> {
+        r.speechEndDetected.addEventListener((o, e) -> {
             int now = eventIdentifier.getAndIncrement();
-            eventsMap.put(e.getEventType().name() + "-" + System.currentTimeMillis(), now);
-            eventsMap.put(e.getEventType().name(), now);
+            eventsMap.put("speechEndDetected-" + System.currentTimeMillis(), now);
+            eventsMap.put("speechEndDetected", now);
         });
-        
-        IntentRecognitionResult res = r.recognizeAsync().get();
+
+        r.sessionStarted.addEventListener((o, e) -> {
+            int now = eventIdentifier.getAndIncrement();
+            eventsMap.put("sessionStarted-" + System.currentTimeMillis(), now);
+            eventsMap.put("sessionStarted", now);
+        });
+
+        r.sessionStopped.addEventListener((o, e) -> {
+            int now = eventIdentifier.getAndIncrement();
+            eventsMap.put("sessionStopped-" + System.currentTimeMillis(), now);
+            eventsMap.put("sessionStopped", now);
+        });
+
+        IntentRecognitionResult res = r.recognizeOnceAsync().get();
         assertNotNull(res);
         assertTrue(res.getReason() != ResultReason.Canceled);
         assertEquals("What's the weather like?", res.getText());
@@ -253,32 +262,32 @@ public class IntentRecognizerTests {
         // session events are first and last event
         final Integer LAST_RECORDED_EVENT_ID = eventIdentifier.get();
         assertTrue(LAST_RECORDED_EVENT_ID > FIRST_EVENT_ID);
-        assertEquals(FIRST_EVENT_ID, eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()));
-        assertEquals(LAST_RECORDED_EVENT_ID, eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()));
-        
+        assertEquals(FIRST_EVENT_ID, eventsMap.get("speechStartDetected"));
+        assertEquals(LAST_RECORDED_EVENT_ID, eventsMap.get("speechEndDetected"));
+
         // end events come after start events.
-        assertTrue(eventsMap.get(SessionEventType.SessionStartedEvent.name()) < eventsMap.get(SessionEventType.SessionStoppedEvent.name()));
-        assertTrue(eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()) < eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()));
+        assertTrue(eventsMap.get("sessionStarted") < eventsMap.get("sessionStopped"));
+        assertTrue(eventsMap.get("speechStartDetected") < eventsMap.get("speechEndDetected"));
 
         // recognition events come after session start but before session end events
-        assertTrue(eventsMap.get(SessionEventType.SessionStartedEvent.name()) < eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()));
-        assertTrue(eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()) < eventsMap.get(SessionEventType.SessionStoppedEvent.name()));
+        assertTrue(eventsMap.get("sessionStarted") < eventsMap.get("speechStartDetected"));
+        assertTrue(eventsMap.get("speechEndDetected") < eventsMap.get("sessionStopped"));
 
         // there is no partial result reported after the final result
         // (and check that we have intermediate and final results recorded)
-        assertTrue(eventsMap.get("IntermediateResultReceived") < eventsMap.get("FinalResultReceived"));
+        assertTrue(eventsMap.get("recognizing") < eventsMap.get("recognized"));
 
         // make sure events we don't expect, don't get raised
-        assertFalse(eventsMap.containsKey("RecognitionErrorRaised"));
-        
+        assertFalse(eventsMap.containsKey("canceled"));
+
         r.close();
         s.close();
     }
-    
+
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
-    
+
     @Test
     public void testStartContinuousRecognitionAsync() throws InterruptedException, ExecutionException, TimeoutException {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -288,7 +297,7 @@ public class IntentRecognizerTests {
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-        
+
         Future<?> future = r.startContinuousRecognitionAsync();
         assertNotNull(future);
 
@@ -311,7 +320,7 @@ public class IntentRecognizerTests {
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-        
+
         Future<?> future = r.startContinuousRecognitionAsync();
         assertNotNull(future);
 
@@ -347,13 +356,13 @@ public class IntentRecognizerTests {
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-        
+
         final ArrayList<String> rEvents = new ArrayList<>();
 
-        r.FinalResultReceived.addEventListener((o, e) -> {
+        r.recognized.addEventListener((o, e) -> {
             rEvents.add("Result@" + System.currentTimeMillis());
         });
-        
+
         Future<?> future = r.startContinuousRecognitionAsync();
         assertNotNull(future);
 
@@ -366,7 +375,7 @@ public class IntentRecognizerTests {
         // wait until we get at least on final result
         long now = System.currentTimeMillis();
         while(((System.currentTimeMillis() - now) < 30000) &&
-              (rEvents.isEmpty())) {
+                (rEvents.isEmpty())) {
             Thread.sleep(200);
         }
 
@@ -388,7 +397,7 @@ public class IntentRecognizerTests {
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
 
     @Ignore("TODO why is mapsize not 2")
@@ -404,9 +413,9 @@ public class IntentRecognizerTests {
         r.addIntent("all intents");
 
         final Map<String, Integer> eventsMap = new HashMap<String, Integer>();
-        
-        r.FinalResultReceived.addEventListener((o, e) -> {
-            eventsMap.put("FinalResultReceived", eventIdentifier.getAndIncrement());
+
+        r.recognized.addEventListener((o, e) -> {
+            eventsMap.put("recognized", eventIdentifier.getAndIncrement());
             if(!e.getResult().getLanguageUnderstanding().isEmpty()) {
                 eventsMap.put("IntentReceived", eventIdentifier.getAndIncrement());
             }
@@ -414,14 +423,14 @@ public class IntentRecognizerTests {
 
         // TODO why does this call require exceptions?
         // TODO check for specific intent.
-        IntentRecognitionResult res = r.recognizeAsync().get();
+        IntentRecognitionResult res = r.recognizeOnceAsync().get();
         assertNotNull(res);
         assertEquals(2, eventsMap.size());
         assertTrue(res.getLanguageUnderstanding().length() > 0);
         assertTrue(ResultReason.RecognizedSpeech == res.getReason() ||
-                   ResultReason.RecognizedIntent == res.getReason());
+                ResultReason.RecognizedIntent == res.getReason());
 
-        
+
         r.close();
         s.close();
     }
@@ -437,15 +446,15 @@ public class IntentRecognizerTests {
 
         LanguageUnderstandingModel model = LanguageUnderstandingModel.fromSubscription(Settings.LuisSubscriptionKey, Settings.LuisAppId, Settings.LuisRegion);
         assertNotNull(model);
-        
+
         // TODO check if intent is recognized
         // TODO what is the intent name?
         r.addAllIntents(model, "any-id-you-want-here");
 
         final Map<String, Integer> eventsMap = new HashMap<String, Integer>();
-        
-        r.FinalResultReceived.addEventListener((o, e) -> {
-            eventsMap.put("FinalResultReceived", eventIdentifier.getAndIncrement());
+
+        r.recognized.addEventListener((o, e) -> {
+            eventsMap.put("recognized", eventIdentifier.getAndIncrement());
             if(!e.getResult().getLanguageUnderstanding().isEmpty()) {
                 eventsMap.put("IntentReceived", eventIdentifier.getAndIncrement());
             }
@@ -453,22 +462,22 @@ public class IntentRecognizerTests {
 
         // TODO why does this call require exceptions?
         // TODO check for specific intent.
-        IntentRecognitionResult res = r.recognizeAsync().get();
+        IntentRecognitionResult res = r.recognizeOnceAsync().get();
         assertNotNull(res);
         assertEquals(2, eventsMap.size());
         assertTrue(res.getLanguageUnderstanding().length() > 0);
         assertTrue(ResultReason.RecognizedSpeech == res.getReason() ||
-                   ResultReason.RecognizedIntent == res.getReason());
+                ResultReason.RecognizedIntent == res.getReason());
 
-        
+
         r.close();
         s.close();
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
-    
+
     @Test
     public void testGetRecoImpl() {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -478,7 +487,7 @@ public class IntentRecognizerTests {
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-                
+
         r.close();
         s.close();
     }

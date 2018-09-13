@@ -24,11 +24,11 @@ namespace Microsoft.CognitiveServices.Speech
     ///     using (var recognizer = new SpeechRecognizer(config))
     ///     {
     ///         // Subscribes to events.
-    ///         recognizer.IntermediateResultReceived += (s, e) => {
+    ///         recognizer.Recognizing += (s, e) => {
     ///             Console.WriteLine($"RECOGNIZING: Text={result.Text}");
     ///         };
     ///
-    ///         recognizer.FinalResultReceived += (s, e) => {
+    ///         recognizer.Recognized += (s, e) => {
     ///             var result = e.Result;
     ///             Console.WriteLine($"Reason: {result.Reason.ToString()}");
     ///             if (result.Reason == ResultReason.RecognizedSpeech)
@@ -41,8 +41,12 @@ namespace Microsoft.CognitiveServices.Speech
     ///             Console.WriteLine($"\n    Recognition Canceled. Reason: {e.Reason.ToString()}, CanceledReason: {e.Reason}");
     ///         };
     ///
-    ///         recognizer.OnSessionEvent += (s, e) => {
-    ///             Console.WriteLine($"\n    Session event. Event: {e.EventType.ToString()}.");
+    ///         recognizer.SessionStarted += (s, e) => {
+    ///             Console.WriteLine("\n    Session started event.");
+    ///         };
+    ///
+    ///         recognizer.SessionStopped += (s, e) => {
+    ///             Console.WriteLine("\n    Session stopped event.");
     ///         };
     ///
     ///         // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
@@ -62,14 +66,14 @@ namespace Microsoft.CognitiveServices.Speech
     public sealed class SpeechRecognizer : Recognizer
     {
         /// <summary>
-        /// The event <see cref="IntermediateResultReceived"/> signals that an intermediate recognition result is received.
+        /// The event <see cref="Recognizing"/> signals that an intermediate recognition result is received.
         /// </summary>
-        public event EventHandler<SpeechRecognitionResultEventArgs> IntermediateResultReceived;
+        public event EventHandler<SpeechRecognitionResultEventArgs> Recognizing;
 
         /// <summary>
-        /// The event <see cref="FinalResultReceived"/> signals that a final recognition result is received.
+        /// The event <see cref="Recognized"/> signals that a final recognition result is received.
         /// </summary>
-        public event EventHandler<SpeechRecognitionResultEventArgs> FinalResultReceived;
+        public event EventHandler<SpeechRecognitionResultEventArgs> Recognized;
 
         /// <summary>
         /// The event <see cref="Canceled"/> signals that the speech recognition was canceled.
@@ -101,11 +105,11 @@ namespace Microsoft.CognitiveServices.Speech
         {
             this.recoImpl = Internal.SpeechRecognizer.FromConfig(config, audioConfig);
 
-            intermediateResultHandler = new ResultHandlerImpl(this, isFinalResultHandler: false);
-            recoImpl.IntermediateResult.Connect(intermediateResultHandler);
+            recognizingHandler = new ResultHandlerImpl(this, isRecognizedHandler: false);
+            recoImpl.Recognizing.Connect(recognizingHandler);
 
-            finalResultHandler = new ResultHandlerImpl(this, isFinalResultHandler: true);
-            recoImpl.FinalResult.Connect(finalResultHandler);
+            recognizedHandler = new ResultHandlerImpl(this, isRecognizedHandler: true);
+            recoImpl.Recognized.Connect(recognizedHandler);
 
             canceledHandler = new CanceledHandlerImpl(this);
             recoImpl.Canceled.Connect(canceledHandler);
@@ -182,7 +186,7 @@ namespace Microsoft.CognitiveServices.Speech
 
         /// <summary>
         /// Starts speech recognition, and stops after the first utterance is recognized. The task returns the recognition text as result.
-        /// Note: RecognizeAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
+        /// Note: RecognizeOnceAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
         /// </summary>
         /// <returns>A task representing the recognition operation. The task returns a value of <see cref="SpeechRecognitionResult"/> </returns>
         /// <example>
@@ -199,10 +203,10 @@ namespace Microsoft.CognitiveServices.Speech
         ///     {
         ///         Console.WriteLine("Say something...");
         ///
-        ///         // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+        ///         // Performs recognition. RecognizeOnceAsync() returns when the first utterance has been recognized,
         ///         // so it is suitable only for single shot recognition like command or query. For long-running
         ///         // recognition, use StartContinuousRecognitionAsync() instead.
-        ///         var result = await recognizer.RecognizeAsync();
+        ///         var result = await recognizer.RecognizeOnceAsync();
         ///
         ///         // Checks result.
         ///         if (result.Reason == ResultReason.RecognizedSpeech)
@@ -228,7 +232,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// }
         /// </code>
         /// </example>
-        public Task<SpeechRecognitionResult> RecognizeAsync()
+        public Task<SpeechRecognitionResult> RecognizeOnceAsync()
         {
             return Task.Run(() => { return new SpeechRecognitionResult(this.recoImpl.Recognize()); });
         }
@@ -283,16 +287,16 @@ namespace Microsoft.CognitiveServices.Speech
 
             if (disposing)
             {
-                recoImpl.IntermediateResult.Disconnect(intermediateResultHandler);
-                recoImpl.FinalResult.Disconnect(finalResultHandler);
+                recoImpl.Recognizing.Disconnect(recognizingHandler);
+                recoImpl.Recognized.Disconnect(recognizedHandler);
                 recoImpl.Canceled.Disconnect(canceledHandler);
                 recoImpl.SessionStarted.Disconnect(sessionStartedHandler);
                 recoImpl.SessionStopped.Disconnect(sessionStoppedHandler);
                 recoImpl.SpeechStartDetected.Disconnect(speechStartDetectedHandler);
                 recoImpl.SpeechEndDetected.Disconnect(speechEndDetectedHandler);
 
-                intermediateResultHandler?.Dispose();
-                finalResultHandler?.Dispose();
+                recognizingHandler?.Dispose();
+                recognizedHandler?.Dispose();
                 canceledHandler?.Dispose();
                 recoImpl?.Dispose();
                 disposed = true;
@@ -301,8 +305,8 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         internal readonly Internal.SpeechRecognizer recoImpl;
-        private readonly ResultHandlerImpl intermediateResultHandler;
-        private readonly ResultHandlerImpl finalResultHandler;
+        private readonly ResultHandlerImpl recognizingHandler;
+        private readonly ResultHandlerImpl recognizedHandler;
         private readonly CanceledHandlerImpl canceledHandler;
         private bool disposed = false;
         private readonly Audio.AudioConfig audioConfig;
@@ -310,10 +314,10 @@ namespace Microsoft.CognitiveServices.Speech
         // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         private class ResultHandlerImpl : Internal.SpeechRecognitionEventListener
         {
-            public ResultHandlerImpl(SpeechRecognizer recognizer, bool isFinalResultHandler)
+            public ResultHandlerImpl(SpeechRecognizer recognizer, bool isRecognizedHandler)
             {
                 this.recognizer = recognizer;
-                this.isFinalResultHandler = isFinalResultHandler;
+                this.isRecognizedHandler = isRecognizedHandler;
             }
 
             public override void Execute(Internal.SpeechRecognitionEventArgs eventArgs)
@@ -324,7 +328,7 @@ namespace Microsoft.CognitiveServices.Speech
                 }
 
                 var resultEventArg = new SpeechRecognitionResultEventArgs(eventArgs);
-                var handler = isFinalResultHandler ? recognizer.FinalResultReceived : recognizer.IntermediateResultReceived;
+                var handler = isRecognizedHandler ? recognizer.Recognized : recognizer.Recognizing;
                 if (handler != null)
                 {
                     handler(this.recognizer, resultEventArg);
@@ -332,7 +336,7 @@ namespace Microsoft.CognitiveServices.Speech
             }
 
             private SpeechRecognizer recognizer;
-            private bool isFinalResultHandler;
+            private bool isRecognizedHandler;
         }
 
         // Defines an internal class to raise a C# event for error during recognition when a corresponding callback is invoked by the native layer.

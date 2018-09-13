@@ -19,7 +19,7 @@ void CarbonTestConsole::Sample_HelloWorld()
     auto recognizer = SpeechRecognizer::FromConfig(SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId), nullptr);
 
     ConsoleWriteLine("Say something...");
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     // Show the result
     ConsoleWriteLine("You said '%s'", result->Text.c_str());
@@ -32,7 +32,7 @@ void CarbonTestConsole::Sample_HelloWorld_WithReasonInfo()
 
     // Prompt and recognize
     ConsoleWriteLine("Say something...");
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     // Show the result
     if (result->Reason == ResultReason::RecognizedSpeech)
@@ -79,7 +79,7 @@ void CarbonTestConsole::Sample_HelloWorld_Microphone()
 
     // Prompt and recognize
     ConsoleWriteLine("Say something...");
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     // Show the result
     ConsoleWriteLine("You said '%s'", result->Text.c_str());
@@ -94,7 +94,7 @@ void CarbonTestConsole::Sample_HelloWorld_File()
 
     // Prompt and recognize
     ConsoleWriteLine("Say something...");
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     // Show the result
     ConsoleWriteLine("You said '%s'", result->Text.c_str());
@@ -122,7 +122,7 @@ void CarbonTestConsole::Sample_HelloWorld_PushStream()
 
     // Prompt and recognize
     ConsoleWriteLine("Say something...");
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     // Show the result
     ConsoleWriteLine("You said '%s'", result->Text.c_str());
@@ -148,7 +148,7 @@ void CarbonTestConsole::Sample_HelloWorld_PullStream()
 
     // Prompt and recognize
     ConsoleWriteLine("Say something...");
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     // Show the result
     ConsoleWriteLine("You said '%s'", result->Text.c_str());
@@ -160,11 +160,11 @@ void CarbonTestConsole::Sample_HelloWorld_WithEvents()
         SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId),
         nullptr);
 
-    recognizer->IntermediateResult += [&](const SpeechRecognitionEventArgs& e) {
+    recognizer->Recognizing += [&](const SpeechRecognitionEventArgs& e) {
         ConsoleWriteLine("RECOGNIZING: Text=%s", e.Result->Text.c_str());
     };
 
-    recognizer->FinalResult.Connect([&] (const SpeechRecognitionEventArgs& e)
+    recognizer->Recognized.Connect([&] (const SpeechRecognitionEventArgs& e)
     {
         if (e.Result->Reason == ResultReason::RecognizedSpeech)
         {
@@ -202,7 +202,7 @@ void CarbonTestConsole::Sample_HelloWorld_WithEvents()
     });
 
     ConsoleWriteLine("Say something...");
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 }
 
 void CarbonTestConsole::Sample_HelloWorld_PickEngine(const char* pszEngine) // L"Usp", L"Unidec", or L"Mock"
@@ -215,12 +215,12 @@ void CarbonTestConsole::Sample_HelloWorld_PickEngine(const char* pszEngine) // L
     std::string propertyName = std::string("__use") + std::string(pszEngine) + std::string("RecoEngine");
     session->Parameters.SetProperty(propertyName, "true");
 
-    recognizer->IntermediateResult += [&](const SpeechRecognitionEventArgs& e) {
-        ConsoleWriteLine("IntermediateResult: text=%s", e.Result->Text.c_str());
+    recognizer->Recognizing += [&](const SpeechRecognitionEventArgs& e) {
+        ConsoleWriteLine("Recognizing: text=%s", e.Result->Text.c_str());
     };
 
     ConsoleWriteLine("Say something...");
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     ConsoleWriteLine("You said:\n\n    '%s'", result->Text.c_str());
 }
@@ -255,7 +255,7 @@ void CarbonTestConsole::Sample_HelloWorld_Intent(const char* subscriptionKey, co
     ConsoleWriteLine("Say something...");
 
     // Start recognition; will return the first result recognized
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     // Check the reason returned
     switch (result->Reason)
@@ -306,7 +306,7 @@ void CarbonTestConsole::Sample_HelloWorld_Subscription()
         nullptr);
 
     ConsoleWriteLine("Say something...");
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     ConsoleWriteLine("You said:\n\n    '%s'", result->Text.c_str());
 }
@@ -319,7 +319,7 @@ void CarbonTestConsole::Sample_HelloWorld_Subscription_With_CRIS()
     auto recognizer = SpeechRecognizer::FromConfig(config);
 
     ConsoleWriteLine("Say something...");
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     ConsoleWriteLine("You said:\n\n    '%s'", result->Text.c_str());
 }
@@ -331,7 +331,7 @@ void CarbonTestConsole::Sample_HelloWorld_Language(const char* language)
     auto recognizer = SpeechRecognizer::FromConfig(config, nullptr);
 
     ConsoleWriteLine("Say something...");
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     ConsoleWriteLine("You said:\n\n    '%s'", result->Text.c_str());
 }

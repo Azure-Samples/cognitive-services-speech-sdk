@@ -32,22 +32,22 @@ export class IntentRecognizer extends Recognizer {
     }
 
     /**
-     * The event IntermediateResultReceived signals that an intermediate recognition result is received.
+     * The event recognizing signals that an intermediate recognition result is received.
      * @property
      */
-    public IntermediateResultReceived: (sender: IntentRecognizer, event: IntentRecognitionResultEventArgs) => void;
+    public recognizing: (sender: IntentRecognizer, event: IntentRecognitionResultEventArgs) => void;
 
     /**
-     * The event FinalResultReceived signals that a final recognition result is received.
+     * The event recognized signals that a final recognition result is received.
      * @property
      */
-    public FinalResultReceived: (sender: IntentRecognizer, event: IntentRecognitionResultEventArgs) => void;
+    public recognized: (sender: IntentRecognizer, event: IntentRecognitionResultEventArgs) => void;
 
     /**
-     * The event RecognitionErrorRaised signals that an error occurred during recognition.
+     * The event canceled signals that an error occurred during recognition.
      * @property
      */
-    public RecognitionErrorRaised: (sender: IntentRecognizer, event: RecognitionErrorEventArgs) => void;
+    public canceled: (sender: IntentRecognizer, event: RecognitionErrorEventArgs) => void;
 
     /**
      * Gets the spoken language of recognition.
@@ -81,12 +81,12 @@ export class IntentRecognizer extends Recognizer {
 
     /**
      * Starts intent recognition, and stops after the first utterance is recognized. The task returns the recognition text and intent as result.
-     * Note: RecognizeAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
+     * Note: RecognizeOnceAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
      * @member
      * @param cb - Callback that received the recognition has finished with an IntentRecognitionResult.
      * @param err - Callback invoked in case of an error.
      */
-    public recognizeAsync(cb?: (e: IntentRecognitionResult) => void, err?: (e: string) => void): void {
+    public recognizeOnceAsync(cb?: (e: IntentRecognitionResult) => void, err?: (e: string) => void): void {
         Contracts.throwIfDisposed(this.disposedIntentRecognizer);
         throw new Error("not supported");
     }

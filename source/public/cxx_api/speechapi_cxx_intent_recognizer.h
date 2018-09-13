@@ -69,16 +69,16 @@ public:
 
     /// <summary>
     /// Performs intent recognition in a non-blocking (asynchronous) mode.
-    /// Note: RecognizeAsync() returns when the first utterance has been recognized, 
+    /// Note: RecognizeOnceAsync() returns when the first utterance has been recognized, 
     /// so it is suitable only for single shot recognition like command or query.
     /// For long-running recognition, use StartContinuousRecognitionAsync() instead.
     /// </summary>
     /// <returns>Future containing result value (a shared pointer to IntentRecognitionResult)
     /// of the asynchronous intent recognition.
     /// </returns>
-    std::future<std::shared_ptr<IntentRecognitionResult>> RecognizeAsync() override
+    std::future<std::shared_ptr<IntentRecognitionResult>> RecognizeOnceAsync() override
     {
-        return BaseType::RecognizeAsyncInternal();
+        return BaseType::RecognizeOnceAsyncInternal();
     }
 
     /// <summary>

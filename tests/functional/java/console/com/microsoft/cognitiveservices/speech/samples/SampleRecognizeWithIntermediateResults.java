@@ -28,13 +28,13 @@ public class SampleRecognizeWithIntermediateResults implements Runnable {
             audioInput = AudioConfig.fromWavFileInput(SampleSettings.WavFile);
             reco = new SpeechRecognizer(config, audioInput);
 
-            reco.IntermediateResultReceived.addEventListener((o, speechRecognitionResultEventArgs) -> {
+            reco.recognizing.addEventListener((o, speechRecognitionResultEventArgs) -> {
                 String s = speechRecognitionResultEventArgs.getResult().getText();
 
                 System.out.println("Intermediate result received: " + s);
             });
 
-            Future<SpeechRecognitionResult> task = reco.recognizeAsync();
+            Future<SpeechRecognitionResult> task = reco.recognizeOnceAsync();
 
             SpeechRecognitionResult recognitionResult = task.get();
             String s = recognitionResult.getText();

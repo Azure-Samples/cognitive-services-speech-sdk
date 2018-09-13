@@ -10,12 +10,6 @@ import { RecognitionEventType } from "./RecognitionEventType";
  */
 export class RecognitionEventArgs {
     /**
-     * Represents the event type.
-     * @property
-     */
-    public eventType: RecognitionEventType;
-
-    /**
      * Represents the session identifier.
      * @property
      */

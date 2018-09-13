@@ -130,7 +130,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             List<string> toLanguages = new List<string>() { Language.DE };
 
-            var actualTranslations = await this.translationHelper.GetTranslationFinalResultContinuous(TestData.English.Batman.AudioFile, Language.EN, toLanguages);
+            var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(TestData.English.Batman.AudioFile, Language.EN, toLanguages);
             Assert.AreEqual(TestData.German.Batman.Utterances.Length, actualTranslations[ResultType.Text].Count);
 
             var actualRecognitionTextResults = actualTranslations[ResultType.Text].Cast<TranslationTextResultEventArgs>().Select(t => t.Result.Text).ToList();
@@ -147,7 +147,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var toLanguages = new List<string>() { Language.FR, Language.ES };
 
-            var actualTranslations = await this.translationHelper.GetTranslationFinalResultContinuous(TestData.German.FirstOne.AudioFile, Language.DE_DE, toLanguages);
+            var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(TestData.German.FirstOne.AudioFile, Language.DE_DE, toLanguages);
             Assert.AreEqual(actualTranslations[ResultType.Text].Count, 1);
             var actualTranslationRecognition = (TranslationTextResultEventArgs)actualTranslations[ResultType.Text].Single();
             Assert.IsNotNull(actualTranslationRecognition);
@@ -164,7 +164,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var toLanguages = new List<string>() { Language.DE };
 
-            var actualTranslations = await this.translationHelper.GetTranslationFinalResultContinuous(TestData.English.Batman.AudioFile, Language.EN, toLanguages, Voice.DE);
+            var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(TestData.English.Batman.AudioFile, Language.EN, toLanguages, Voice.DE);
             Assert.AreNotEqual(actualTranslations[ResultType.Synthesis].Count, 0);
             var actualSynthesisByteResults = actualTranslations[ResultType.Synthesis].Cast<TranslationSynthesisResultEventArgs>().ToList();
             const int MinSize = 20000;
@@ -180,7 +180,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var toLanguages = new List<string>() { Language.FR };
 
-            var actualTranslations = await this.translationHelper.GetTranslationFinalResultContinuous(TestData.English.Weather.AudioFile, Language.EN, toLanguages, Voice.FR);
+            var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(TestData.English.Weather.AudioFile, Language.EN, toLanguages, Voice.FR);
             Assert.AreEqual(1, actualTranslations[ResultType.Synthesis].Count);
 
             var actualSynthesisByteResult = (TranslationSynthesisResultEventArgs)actualTranslations[ResultType.Synthesis].Single();
@@ -194,7 +194,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var toLanguages = new List<string>() { Language.FR };
 
-            var actualTranslations = await this.translationHelper.GetTranslationFinalResultContinuous(TestData.English.Weather.AudioFile, Language.EN, toLanguages, Voice.FR);
+            var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(TestData.English.Weather.AudioFile, Language.EN, toLanguages, Voice.FR);
             Assert.AreEqual(1, actualTranslations[ResultType.Text].Count);
             Assert.AreEqual(1, actualTranslations[ResultType.Synthesis].Count);
 
@@ -208,11 +208,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task TranslationWeatherEnToTrIntermediateResultContinuous()
+        public async Task TranslationWeatherEnToTrRecognizingContinuous()
         {
             var toLanguages = new List<string>() { Language.TR };
 
-            var actualTranslations = await this.translationHelper.GetTranslationIntermediateResultContinuous(TestData.English.Weather.AudioFile, Language.EN, toLanguages);
+            var actualTranslations = await this.translationHelper.GetTranslationRecognizingContinuous(TestData.English.Weather.AudioFile, Language.EN, toLanguages);
             Assert.AreNotEqual(actualTranslations.Count, 0);
 
             Assert.IsTrue(actualTranslations[0].Last().Result.Text.Contains("What"));

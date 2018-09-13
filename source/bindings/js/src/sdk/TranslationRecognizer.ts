@@ -67,28 +67,28 @@ export class TranslationRecognizer extends Recognizer {
     }
 
     /**
-     * The event IntermediateResultReceived signals that an intermediate recognition result is received.
+     * The event recognizing signals that an intermediate recognition result is received.
      * @property
      */
-    public IntermediateResultReceived: (sender: TranslationRecognizer, event: TranslationTextResultEventArgs) => void;
+    public recognizing: (sender: TranslationRecognizer, event: TranslationTextResultEventArgs) => void;
 
     /**
-     * The event FinalResultReceived signals that a final recognition result is received.
+     * The event recognized signals that a final recognition result is received.
      * @property
      */
-    public FinalResultReceived: (sender: TranslationRecognizer, event: TranslationTextResultEventArgs) => void;
+    public recognized: (sender: TranslationRecognizer, event: TranslationTextResultEventArgs) => void;
 
     /**
-     * The event RecognitionErrorRaised signals that an error occurred during recognition.
+     * The event canceled signals that an error occurred during recognition.
      * @property
      */
-    public RecognitionErrorRaised: (sender: TranslationRecognizer, event: RecognitionErrorEventArgs) => void;
+    public canceled: (sender: TranslationRecognizer, event: RecognitionErrorEventArgs) => void;
 
     /**
-     * The event SynthesisResultReceived signals that a translation synthesis result is received.
+     * The event synthesized signals that a translation synthesis result is received.
      * @property
      */
-    public SynthesisResultReceived: (sender: TranslationRecognizer, event: TranslationSynthesisResultEventArgs) => void;
+    public synthesized: (sender: TranslationRecognizer, event: TranslationSynthesisResultEventArgs) => void;
 
     /**
      * Gets the language name that was set when the recognizer was created.
@@ -133,13 +133,13 @@ export class TranslationRecognizer extends Recognizer {
 
     /**
      * Starts recognition and translation, and stops after the first utterance is recognized. The task returns the translation text as result.
-     * Note: recognizeAsync returns when the first utterance has been recognized, so it is suitableonly
+     * Note: recognizeOnceAsync returns when the first utterance has been recognized, so it is suitableonly
      *       for single shot recognition like command or query. For long-running recognition, use startContinuousRecognitionAsync() instead.
      * @member
      * @param cb - Callback that received the result when the translation has completed.
      * @param err - Callback invoked in case of an error.
      */
-    public recognizeAsync(cb?: (e: TranslationTextResult) => void, err?: (e: string) => void): void {
+    public recognizeOnceAsync(cb?: (e: TranslationTextResult) => void, err?: (e: string) => void): void {
         Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
 
         this.implCloseExistingRecognizer();
@@ -165,8 +165,8 @@ export class TranslationRecognizer extends Recognizer {
                             errorEvent.sessionId = recoEndedEvent.SessionId;
                             errorEvent.error = recoEndedEvent.Error;
 
-                            if (this.RecognitionErrorRaised) {
-                                this.RecognitionErrorRaised(this, errorEvent); // call error handler, if configured
+                            if (this.canceled) {
+                                this.canceled(this, errorEvent); // call error handler, if configured
                             }
 
                             if (!!err) {
@@ -188,8 +188,8 @@ export class TranslationRecognizer extends Recognizer {
 
                         const result: TranslationTextResultEventArgs = this.FireEventForResult(evResult);
 
-                        if (!!this.FinalResultReceived) {
-                            this.FinalResultReceived(this, result);
+                        if (!!this.recognized) {
+                            this.recognized(this, result);
                         }
 
                         // report result to promise.
@@ -211,8 +211,8 @@ export class TranslationRecognizer extends Recognizer {
 
                         const result: TranslationTextResultEventArgs = this.FireEventForResult(evResult);
 
-                        if (!!this.IntermediateResultReceived) {
-                            this.IntermediateResultReceived(this, result);
+                        if (!!this.recognizing) {
+                            this.recognizing(this, result);
                         }
 
                     }
@@ -224,8 +224,8 @@ export class TranslationRecognizer extends Recognizer {
                         errorEvent.status = RecognitionStatus.Canceled;
                         errorEvent.sessionId = evResult.SessionId;
 
-                        if (!!this.RecognitionErrorRaised) {
-                            this.RecognitionErrorRaised(this, errorEvent);
+                        if (!!this.canceled) {
+                            this.canceled(this, errorEvent);
                         }
 
                         if (!!err) {
@@ -242,8 +242,8 @@ export class TranslationRecognizer extends Recognizer {
                         retEvent.result.audio = new Uint8Array(evResut.Result);
                         retEvent.sessionId = evResut.SessionId;
 
-                        if (!!this.SynthesisResultReceived) {
-                            this.SynthesisResultReceived(this, retEvent);
+                        if (!!this.synthesized) {
+                            this.synthesized(this, retEvent);
                         }
                     }
                     break;
@@ -257,8 +257,8 @@ export class TranslationRecognizer extends Recognizer {
                         retEvent.result.failureReason = evResut.Result.FailureReason;
                         retEvent.sessionId = evResut.SessionId;
 
-                        if (!!this.SynthesisResultReceived) {
-                            this.SynthesisResultReceived(this, retEvent);
+                        if (!!this.synthesized) {
+                            this.synthesized(this, retEvent);
                         }
 
                         if (!!err) {
@@ -282,7 +282,7 @@ export class TranslationRecognizer extends Recognizer {
 
         this.implCloseExistingRecognizer();
 
-        this.recognizeAsync(
+        this.recognizeOnceAsync(
             (result: TranslationTextResult) => {
                 // ignored
             },

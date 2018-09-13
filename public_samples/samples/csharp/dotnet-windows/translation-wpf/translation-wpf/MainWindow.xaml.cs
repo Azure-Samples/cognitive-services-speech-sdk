@@ -321,9 +321,9 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
 
             this.recognizer = new TranslationRecognizer(this.config);
 
-            this.recognizer.IntermediateResultReceived += this.OnPartialResponseReceivedHandler;
-            this.recognizer.FinalResultReceived += this.OnFinalResponse;
-            this.recognizer.SynthesisResultReceived += this.OnSynthesis;
+            this.recognizer.Recognizing += this.OnPartialResponseReceivedHandler;
+            this.recognizer.Recognized += this.OnFinalResponse;
+            this.recognizer.Synthesized += this.OnSynthesis;
             this.recognizer.Canceled += this.OnCanceled;
         }
 

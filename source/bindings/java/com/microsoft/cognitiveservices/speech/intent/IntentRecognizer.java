@@ -21,19 +21,19 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
   */
 public final class IntentRecognizer extends com.microsoft.cognitiveservices.speech.Recognizer {
     /**
-      * The event IntermediateResultReceived signals that an intermediate recognition result is received.
+      * The event recognizing signals that an intermediate recognition result is received.
       */
-    final public EventHandlerImpl<IntentRecognitionResultEventArgs> IntermediateResultReceived = new EventHandlerImpl<IntentRecognitionResultEventArgs>();
+    final public EventHandlerImpl<IntentRecognitionResultEventArgs> recognizing = new EventHandlerImpl<IntentRecognitionResultEventArgs>();
 
     /**
-      * The event FinalResultReceived signals that a final recognition result is received.
+      * The event recognized signals that a final recognition result is received.
       */
-    final public EventHandlerImpl<IntentRecognitionResultEventArgs> FinalResultReceived = new EventHandlerImpl<IntentRecognitionResultEventArgs>();
+    final public EventHandlerImpl<IntentRecognitionResultEventArgs> recognized = new EventHandlerImpl<IntentRecognitionResultEventArgs>();
 
     /**
-      * The event Canceled signals that the intent recognition was canceled.
+      * The event canceled signals that the intent recognition was canceled.
       */
-    final public EventHandlerImpl<IntentRecognitionCanceledEventArgs> Canceled = new EventHandlerImpl<IntentRecognitionCanceledEventArgs>();
+    final public EventHandlerImpl<IntentRecognitionCanceledEventArgs> canceled = new EventHandlerImpl<IntentRecognitionCanceledEventArgs>();
 
     /**
       * Initializes an instance of the IntentRecognizer.
@@ -46,11 +46,11 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         Contracts.throwIfNull(recoImpl, "recoImpl");
         this.recoImpl = recoImpl;
 
-        intermediateResultHandler = new IntentHandlerImpl(this, /*isFinalResultHandler:*/ false);
-        recoImpl.getIntermediateResult().AddEventListener(intermediateResultHandler);
+        recognizingHandler = new IntentHandlerImpl(this, /*isRecognizedHandler:*/ false);
+        recoImpl.getRecognizing().AddEventListener(recognizingHandler);
 
-        finalResultHandler = new IntentHandlerImpl(this, /*isFinalResultHandler:*/ true);
-        recoImpl.getFinalResult().AddEventListener(finalResultHandler);
+        recognizedHandler = new IntentHandlerImpl(this, /*isRecognizedHandler:*/ true);
+        recoImpl.getRecognized().AddEventListener(recognizedHandler);
 
         errorHandler = new CanceledHandlerImpl(this);
         recoImpl.getCanceled().AddEventListener(errorHandler);
@@ -121,10 +121,10 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
 
     /**
       * Starts intent recognition, and stops after the first utterance is recognized. The task returns the recognition text and intent as result.
-      * Note: RecognizeAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
+      * Note: RecognizeOnceAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
       * @return A task representing the recognition operation. The task returns a value of IntentRecognitionResult
       */
-    public Future<IntentRecognitionResult> recognizeAsync() {
+    public Future<IntentRecognitionResult> recognizeOnceAsync() {
         return s_executorService.submit(() -> {
                 return  new IntentRecognitionResult(recoImpl.Recognize());
             });
@@ -252,16 +252,16 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         }
 
         if (disposing) {
-            recoImpl.getIntermediateResult().RemoveEventListener(intermediateResultHandler);
-            recoImpl.getFinalResult().RemoveEventListener(finalResultHandler);
+            recoImpl.getRecognizing().RemoveEventListener(recognizingHandler);
+            recoImpl.getRecognized().RemoveEventListener(recognizedHandler);
             recoImpl.getCanceled().RemoveEventListener(errorHandler);
             recoImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
             recoImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
             recoImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
             recoImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
 
-            intermediateResultHandler.delete();
-            finalResultHandler.delete();
+            recognizingHandler.delete();
+            recognizedHandler.delete();
             errorHandler.delete();
             recoImpl.delete();
             _Parameters.close();
@@ -278,18 +278,18 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
      
     private boolean disposed = false;
     private final com.microsoft.cognitiveservices.speech.internal.IntentRecognizer recoImpl;
-    private IntentHandlerImpl intermediateResultHandler;
-    private IntentHandlerImpl finalResultHandler;
+    private IntentHandlerImpl recognizingHandler;
+    private IntentHandlerImpl recognizedHandler;
     private CanceledHandlerImpl errorHandler;
 
     // Defines an internal class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
     private class IntentHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.IntentEventListener {
         
-        public IntentHandlerImpl(IntentRecognizer recognizer, boolean isFinalResultHandler) {
+        public IntentHandlerImpl(IntentRecognizer recognizer, boolean isRecognizedHandler) {
             Contracts.throwIfNull(recognizer, "recognizer");
 
             this.recognizer = recognizer;
-            this.isFinalResultHandler = isFinalResultHandler;
+            this.isRecognizedHandler = isRecognizedHandler;
         }
 
         @Override
@@ -297,7 +297,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
             Contracts.throwIfNull(eventArgs, "eventArgs");
             
             IntentRecognitionResultEventArgs resultEventArg = new IntentRecognitionResultEventArgs(eventArgs);
-            EventHandlerImpl<IntentRecognitionResultEventArgs> handler = isFinalResultHandler ? recognizer.FinalResultReceived : recognizer.IntermediateResultReceived;
+            EventHandlerImpl<IntentRecognitionResultEventArgs> handler = isRecognizedHandler ? recognizer.recognized : recognizer.recognizing;
             
             if (handler != null) {
                 handler.fireEvent(this, resultEventArg);
@@ -305,7 +305,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         }
 
         private IntentRecognizer recognizer;
-        private boolean isFinalResultHandler;
+        private boolean isRecognizedHandler;
     }
 
     // Defines an internal class to raise an event for error during recognition when a corresponding callback is invoked by the native layer.
@@ -324,7 +324,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
             }
 
             IntentRecognitionCanceledEventArgs canceledEventArgs = new IntentRecognitionCanceledEventArgs(eventArgs);
-            EventHandlerImpl<IntentRecognitionCanceledEventArgs>  handler = this.recognizer.Canceled;
+            EventHandlerImpl<IntentRecognitionCanceledEventArgs>  handler = this.recognizer.canceled;
 
             if (handler != null) {
                 handler.fireEvent(this, canceledEventArgs);

@@ -21,19 +21,19 @@ import com.microsoft.cognitiveservices.speech.RecognizerProperties;
 public final class SpeechRecognizer extends com.microsoft.cognitiveservices.speech.Recognizer
 {
     /**
-      * The event IntermediateResultReceived signals that an intermediate recognition result is received.
+      * The event recognizing signals that an intermediate recognition result is received.
       */
-    final public EventHandlerImpl<SpeechRecognitionResultEventArgs> IntermediateResultReceived = new EventHandlerImpl<SpeechRecognitionResultEventArgs>();
+    final public EventHandlerImpl<SpeechRecognitionResultEventArgs> recognizing = new EventHandlerImpl<SpeechRecognitionResultEventArgs>();
 
     /**
-      * The event FinalResultReceived signals that a final recognition result is received.
+      * The event recognized signals that a final recognition result is received.
       */
-    final public EventHandlerImpl<SpeechRecognitionResultEventArgs> FinalResultReceived = new EventHandlerImpl<SpeechRecognitionResultEventArgs>();
+    final public EventHandlerImpl<SpeechRecognitionResultEventArgs> recognized = new EventHandlerImpl<SpeechRecognitionResultEventArgs>();
 
     /**
-      * The event Canceled signals that the recognition was canceled.
+      * The event canceled signals that the recognition was canceled.
       */
-    final public EventHandlerImpl<SpeechRecognitionCanceledEventArgs> Canceled = new EventHandlerImpl<SpeechRecognitionCanceledEventArgs>();
+    final public EventHandlerImpl<SpeechRecognitionCanceledEventArgs> canceled = new EventHandlerImpl<SpeechRecognitionCanceledEventArgs>();
 
     /**
       * SpeechRecognizer constructor.
@@ -46,11 +46,11 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         Contracts.throwIfNull(recoImpl, "recoImpl");
         this.recoImpl = recoImpl;
 
-        intermediateResultHandler = new ResultHandlerImpl(this, /*isFinalResultHandler:*/ false);
-        recoImpl.getIntermediateResult().AddEventListener(intermediateResultHandler);
+        recognizingHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ false);
+        recoImpl.getRecognizing().AddEventListener(recognizingHandler);
 
-        finalResultHandler = new ResultHandlerImpl(this, /*isFinalResultHandler:*/ true);
-        recoImpl.getFinalResult().AddEventListener(finalResultHandler);
+        recognizedHandler = new ResultHandlerImpl(this, /*isRecognizedHandler:*/ true);
+        recoImpl.getRecognized().AddEventListener(recognizedHandler);
 
         errorHandler = new CanceledHandlerImpl(this);
         recoImpl.getCanceled().AddEventListener(errorHandler);
@@ -139,10 +139,10 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
 
     /**
       * Starts speech recognition, and stops after the first utterance is recognized. The task returns the recognition text as result.
-      * Note: RecognizeAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
+      * Note: RecognizeOnceAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
       * @return A task representing the recognition operation. The task returns a value of SpeechRecognitionResult
       */
-    public Future<SpeechRecognitionResult> recognizeAsync() {
+    public Future<SpeechRecognitionResult> recognizeOnceAsync() {
         return s_executorService.submit(() -> {
                 return new SpeechRecognitionResult(recoImpl.Recognize()); 
             });
@@ -207,16 +207,16 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         }
 
         if (disposing) {
-            recoImpl.getIntermediateResult().RemoveEventListener(intermediateResultHandler);
-            recoImpl.getFinalResult().RemoveEventListener(finalResultHandler);
+            recoImpl.getRecognizing().RemoveEventListener(recognizingHandler);
+            recoImpl.getRecognized().RemoveEventListener(recognizedHandler);
             recoImpl.getCanceled().RemoveEventListener(errorHandler);
             recoImpl.getSessionStarted().RemoveEventListener(sessionStartedHandler);
             recoImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
             recoImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
             recoImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
 
-            intermediateResultHandler.delete();
-            finalResultHandler.delete();
+            recognizingHandler.delete();
+            recognizedHandler.delete();
             errorHandler.delete();
             recoImpl.delete();
             _Parameters.close();
@@ -230,19 +230,19 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     }
 
     private com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer recoImpl;
-    private ResultHandlerImpl intermediateResultHandler;
-    private ResultHandlerImpl finalResultHandler;
+    private ResultHandlerImpl recognizingHandler;
+    private ResultHandlerImpl recognizedHandler;
     private CanceledHandlerImpl errorHandler;
     private boolean disposed = false;
 
     // Defines an internal class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
     private class ResultHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventListener {
         
-        ResultHandlerImpl(SpeechRecognizer recognizer, boolean isFinalResultHandler) {
+        ResultHandlerImpl(SpeechRecognizer recognizer, boolean isRecognizedHandler) {
             Contracts.throwIfNull(recognizer, "recognizer");
 
             this.recognizer = recognizer;
-            this.isFinalResultHandler = isFinalResultHandler;
+            this.isRecognizedHandler = isRecognizedHandler;
         }
 
         @Override
@@ -254,14 +254,14 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
             }
 
             SpeechRecognitionResultEventArgs resultEventArg = new SpeechRecognitionResultEventArgs(eventArgs);
-            EventHandlerImpl<SpeechRecognitionResultEventArgs> handler = isFinalResultHandler ? recognizer.FinalResultReceived : recognizer.IntermediateResultReceived;
+            EventHandlerImpl<SpeechRecognitionResultEventArgs> handler = isRecognizedHandler ? recognizer.recognized : recognizer.recognizing;
             if (handler != null) {
                 handler.fireEvent(this.recognizer, resultEventArg);
             }
         }
 
         private SpeechRecognizer recognizer;
-        private boolean isFinalResultHandler;
+        private boolean isRecognizedHandler;
     }
 
     // Defines an internal class to raise an event for error during recognition when a corresponding callback is invoked by the native layer.
@@ -280,7 +280,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
             }
 
             SpeechRecognitionCanceledEventArgs resultEventArg = new SpeechRecognitionCanceledEventArgs(eventArgs);
-            EventHandlerImpl<SpeechRecognitionCanceledEventArgs> handler = this.recognizer.Canceled;
+            EventHandlerImpl<SpeechRecognitionCanceledEventArgs> handler = this.recognizer.canceled;
 
             if (handler != null) {
                 handler.fireEvent(this.recognizer, resultEventArg);

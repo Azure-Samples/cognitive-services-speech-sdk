@@ -52,7 +52,7 @@ private:
         std::string m_strIntentAppId;
         std::string m_strIntentNames; // comma-separated
 
-        bool m_fRecognizeAsync = false;
+        bool m_fRecognizeOnceAsync = false;
 
         bool m_fContinuousRecognition = false;
         std::string m_strContinuousRecognitionSeconds;
@@ -134,23 +134,23 @@ private:
     void Recognizer_SpeechStartDetectedHandler(const RecognitionEventArgs& e) { ConsoleWriteLine("SpeechStartDetectedHandler: Session ID : %s , Offset : %llu", e.SessionId.c_str(), e.Offset); };
     void Recognizer_SpeechEndDetectedHandler(const RecognitionEventArgs& e) { ConsoleWriteLine("SpeechEndDetectedHandler: Session ID : %s, Offset : %llu", e.SessionId.c_str(), e.Offset); };
 
-    void Recognizer_IntermediateResultHandler(const RecognitionEventArgs& e) { UNUSED(e); };
-    void Recognizer_FinalResultHandler(const RecognitionEventArgs& e) { UNUSED(e); };
+    void Recognizer_RecognizingHandler(const RecognitionEventArgs& e) { UNUSED(e); };
+    void Recognizer_RecognizedHandler(const RecognitionEventArgs& e) { UNUSED(e); };
     void Recognizer_NoMatchHandler(const RecognitionEventArgs& e) { UNUSED(e); };
     void Recognizer_CanceledHandler(const RecognitionEventArgs& e) { UNUSED(e); };
 
-    void SpeechRecognizer_IntermediateResultHandler(const SpeechRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("IntermediateResultHandler: %s", ToString(e).c_str()); };
-    void SpeechRecognizer_FinalResultHandler(const SpeechRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("FinalResultHandler: %s", ToString(e).c_str()); }
+    void SpeechRecognizer_RecognizingHandler(const SpeechRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("RecognizingHandler: %s", ToString(e).c_str()); };
+    void SpeechRecognizer_RecognizedHandler(const SpeechRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("RecognizedHandler: %s", ToString(e).c_str()); }
     void SpeechRecognizer_NoMatchHandler(const SpeechRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("NoMatchHandler: %s", ToString(e).c_str()); }
     void SpeechRecognizer_CanceledHandler(const SpeechRecognitionCanceledEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("CanceledHandler: %s", ToString(e).c_str()); };
 
-    void TranslationRecognizer_IntermediateResultHandler(const TranslationTextResultEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("Translation IntermediateResultHandler: %s", ToString(e).c_str()); };
-    void TranslationRecognizer_FinalResultHandler(const TranslationTextResultEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("Translation FinalResultHandler: %s", ToString(e).c_str()); }
+    void TranslationRecognizer_RecognizingHandler(const TranslationTextResultEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("Translation RecognizingHandler: %s", ToString(e).c_str()); };
+    void TranslationRecognizer_RecognizedHandler(const TranslationTextResultEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("Translation RecognizedHandler: %s", ToString(e).c_str()); }
     void TranslationRecognizer_SynthesisResultHandler(const TranslationSynthesisResultEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("Translation SynthesisResultHandler: %s", ToString(e).c_str()); }
     void TranslationRecognizer_ErrorHandler(const TranslationSynthesisResultEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("Translation ErrorHandler: %s", ToString(e).c_str()); }
 
-    void IntentRecognizer_IntermediateResultHandler(const IntentRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("IntermediateResultHandler: %s", ToString(e).c_str()); };
-    void IntentRecognizer_FinalResultHandler(const IntentRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("FinalResultHandler: %s", ToString(e).c_str()); }
+    void IntentRecognizer_RecognizingHandler(const IntentRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("RecognizingHandler: %s", ToString(e).c_str()); };
+    void IntentRecognizer_RecognizedHandler(const IntentRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("RecognizedHandler: %s", ToString(e).c_str()); }
     void IntentRecognizer_NoMatchHandler(const IntentRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("NoMatchHandler: %s", ToString(e).c_str()); }
     void IntentRecognizer_CanceledHandler(const IntentRecognitionCanceledEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("CanceledHandler: %s", ToString(e).c_str()); };
 
@@ -201,7 +201,7 @@ private:
 
     void WaitForDebugger();
 
-    void RecognizeAsync();
+    void RecognizeOnceAsync();
     void ContinuousRecognition(uint16_t seconds);
 
     void RunSample(const std::string& strSampleName);

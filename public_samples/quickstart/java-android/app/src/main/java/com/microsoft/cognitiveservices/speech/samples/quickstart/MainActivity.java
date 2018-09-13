@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
             SpeechRecognizer reco = new SpeechRecognizer(config);
             assert(reco != null);
 
-            Future<SpeechRecognitionResult> task = reco.recognizeAsync();
+            Future<SpeechRecognitionResult> task = reco.recognizeOnceAsync();
             assert(task != null);
 
             // Note: this will block the UI thread, so eventually, you want to

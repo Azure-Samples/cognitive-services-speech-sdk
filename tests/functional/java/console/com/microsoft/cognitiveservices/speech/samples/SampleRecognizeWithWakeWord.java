@@ -10,7 +10,6 @@ import java.util.concurrent.Future;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
-import com.microsoft.cognitiveservices.speech.SessionEventType;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 
@@ -64,19 +63,23 @@ public class SampleRecognizeWithWakeWord implements Runnable, Stoppable {
             audioInput = AudioConfig.fromWavFileInput(SampleSettings.WavFile);
             reco =  new SpeechRecognizer(config,audioInput);
 
-            reco.SessionEvent.addEventListener((o, sessionEventArgs) -> {
+            reco.sessionStarted.addEventListener((o, sessionEventArgs) -> {
+                System.out.println("got a session started (" + sessionEventArgs.getSessionId() + ") event");
 
-                System.out.println("got a session (" + sessionEventArgs.getSessionId() + ")event: "
-                        + sessionEventArgs.getEventType());
-                if (sessionEventArgs.getEventType() == SessionEventType.SessionStartedEvent) {
-
-                    content.set(0, "KeywordModel `" + SampleSettings.Keyword + "` detected");
-                    System.out.println(String.join(delimiter, content));
-                    content.add("");
-                }
+                content.set(0, "KeywordModel `" + SampleSettings.Keyword + "` detected");
+                System.out.println(String.join(delimiter, content));
+                content.add("");
             });
 
-            reco.IntermediateResultReceived.addEventListener((o, intermediateResultEventArgs) -> {
+            reco.sessionStarted.addEventListener((o, sessionEventArgs) -> {
+                System.out.println("got a session started event");
+            });
+
+            reco.sessionStopped.addEventListener((o, sessionEventArgs) -> {
+                System.out.println("got a session stopped event");
+            });
+
+            reco.recognizing.addEventListener((o, intermediateResultEventArgs) -> {
                 String s = intermediateResultEventArgs.getResult().getText();
 
                 System.out.println("got an intermediate result: " + s);
@@ -85,7 +88,7 @@ public class SampleRecognizeWithWakeWord implements Runnable, Stoppable {
                 System.out.println(String.join(delimiter, content));
             });
 
-            reco.FinalResultReceived.addEventListener((o, finalResultEventArgs) -> {
+            reco.recognized.addEventListener((o, finalResultEventArgs) -> {
                 String s = finalResultEventArgs.getResult().getText();
 
                 System.out.println("got a final result: " + s);

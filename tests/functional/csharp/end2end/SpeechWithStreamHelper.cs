@@ -36,7 +36,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(config, AudioConfig.FromWavFileInput(audioFile))))
             {
                 SpeechRecognitionResult result = null;
-                await Task.WhenAny(recognizer.RecognizeAsync().ContinueWith(t => result = t.Result), Task.Delay(timeout));
+                await Task.WhenAny(recognizer.RecognizeOnceAsync().ContinueWith(t => result = t.Result), Task.Delay(timeout));
                 return result;
             }
         }
@@ -48,18 +48,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var tcs = new TaskCompletionSource<bool>();
                 var textResultEvents = new List<SpeechRecognitionResultEventArgs>();
 
-                recognizer.FinalResultReceived += (s, e) =>
+                recognizer.Recognized += (s, e) =>
                 {
                     Console.WriteLine($"Received result {e.Result.ToString()}");
                     textResultEvents.Add(e);
                 };
 
-                recognizer.OnSessionEvent += (s, e) =>
+                recognizer.SessionStopped += (s, e) =>
                 {
-                    if (e.EventType == SessionEventType.SessionStoppedEvent)
-                    {
-                        tcs.TrySetResult(true);
-                    }
+                    tcs.TrySetResult(true);
                 };
                 string canceled = string.Empty;
                 recognizer.Canceled += (s, e) => { canceled = e.ToString(); };
@@ -83,24 +80,21 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 var tcs = new TaskCompletionSource<bool>();
                 var listOfIntermediateResults = new List<List<SpeechRecognitionResultEventArgs>>();
-                List<SpeechRecognitionResultEventArgs> receivedIntermediateResultEvents = null;
+                List<SpeechRecognitionResultEventArgs> receivedRecognizingEvents = null;
 
-                recognizer.OnSessionEvent += (s, e) =>
+                recognizer.SessionStarted += (s, e) =>
                 {
-                    if (e.EventType == SessionEventType.SessionStartedEvent)
-                    {
-                        receivedIntermediateResultEvents = new List<SpeechRecognitionResultEventArgs>();
-                    }
-                    if (e.EventType == SessionEventType.SessionStoppedEvent)
-                    {
-                        tcs.TrySetResult(true);
-                    }
+                    receivedRecognizingEvents = new List<SpeechRecognitionResultEventArgs>();
                 };
-                recognizer.IntermediateResultReceived += (s, e) => receivedIntermediateResultEvents.Add(e);
-                recognizer.FinalResultReceived += (s, e) =>
+                recognizer.Recognizing += (s, e) => receivedRecognizingEvents.Add(e);
+                recognizer.Recognized += (s, e) =>
                 {
-                    listOfIntermediateResults.Add(receivedIntermediateResultEvents);
-                    receivedIntermediateResultEvents = new List<SpeechRecognitionResultEventArgs>();
+                    listOfIntermediateResults.Add(receivedRecognizingEvents);
+                    receivedRecognizingEvents = new List<SpeechRecognitionResultEventArgs>();
+                };
+                recognizer.SessionStopped += (s, e) =>
+                {
+                    tcs.TrySetResult(true);
                 };
                 string canceled = string.Empty;
                 recognizer.Canceled += (s, e) => { canceled = e.ToString(); };

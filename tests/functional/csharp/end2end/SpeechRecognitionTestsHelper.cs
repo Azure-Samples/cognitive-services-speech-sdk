@@ -16,7 +16,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
     {
         public int ErrorEventCount { get; set; }
 
-        public int FinalResultEventCount { get; set; }
+        public int RecognizedEventCount { get; set; }
 
         public int SessionStartedEventCount { get; set; }
 
@@ -32,7 +32,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public SpeechRecognitionTestsHelper()
         {
             ErrorEventCount = 0;
-            FinalResultEventCount = 0;
+            RecognizedEventCount = 0;
             SessionStartedEventCount = 0;
             SessionStoppedEventCount = 0;
             SpeechEndedEventCount = 0;
@@ -43,12 +43,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task CompleteContinuousRecognition(SpeechRecognizer recognizer)
         {
             taskCompletionSource = new TaskCompletionSource<int>();
-            recognizer.OnSessionEvent += (s, e) =>
+            recognizer.SessionStopped += (s, e) =>
             {
-                if (e.EventType == SessionEventType.SessionStoppedEvent)
-                {
-                    taskCompletionSource.TrySetResult(0);
-                }
+                taskCompletionSource.TrySetResult(0);
             };
             string canceled = string.Empty;
             recognizer.Canceled += (s, e) => { canceled = e.ToString(); };
@@ -66,7 +63,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public async Task<string> GetFirstRecognizerResult(SpeechRecognizer speechRecognizer)
         {
             List<string> recognizedText = new List<string>();
-            speechRecognizer.FinalResultReceived += (s, e) =>
+            speechRecognizer.Recognized += (s, e) =>
             {
                 Console.WriteLine($"Received result '{e.ToString()}'");
                 if (e.Result.Text.Length > 0)
@@ -81,9 +78,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             return recognizedText.Count > 0 ? recognizedText[0] : string.Empty;
         }
 
-        private void FinalResultEventCounter(object sender, SpeechRecognitionResultEventArgs e)
+        private void RecognizedEventCounter(object sender, SpeechRecognitionResultEventArgs e)
         {
-            FinalResultEventCount++;
+            RecognizedEventCount++;
         }
 
         private void CanceledEventCounter(object sender, SpeechRecognitionCanceledEventArgs e)
@@ -91,56 +88,53 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             ErrorEventCount++;
         }
 
-        private void SessionEventCounter(object sender, SessionEventArgs e)
+        private void SessionStartedEventCounter(object sender, SessionEventArgs e)
         {
-            if (e.EventType == SessionEventType.SessionStartedEvent)
-            {
-                SessionStartedEventCount++;
-            }
-            else if (e.EventType == SessionEventType.SessionStoppedEvent)
-            {
-                SessionStoppedEventCount++;
-            }
+            SessionStartedEventCount++;
         }
 
-        private void SpeechEventCounter(object sender, RecognitionEventArgs e)
+        private void SessionStoppedEventCounter(object sender, SessionEventArgs e)
         {
-            if (e.EventType == RecognitionEventType.SpeechEndDetectedEvent)
-            {
-                SpeechEndedEventCount++;
-            }
-            else if (e.EventType == RecognitionEventType.SpeechStartDetectedEvent)
-            {
-                SpeechStartedEventCount++;
-            }
+            SessionStoppedEventCount++;
+        }
+
+        private void SpeechStartEventCounter(object sender, RecognitionEventArgs e)
+        {
+            SpeechStartedEventCount++;
+        }
+
+        private void SpeechEndEventCounter(object sender, RecognitionEventArgs e)
+        {
+            SpeechEndedEventCount++;
         }
 
         public static SpeechRecognizer TrackSessionId(SpeechRecognizer recognizer)
         {
-            recognizer.OnSessionEvent += (s, e) =>
+            recognizer.SessionStarted += (s, e) =>
             {
-                if (e.EventType == SessionEventType.SessionStartedEvent)
-                {
-                    Console.WriteLine("SessionId: " + e.SessionId);
-                }
+                Console.WriteLine("SessionId: " + e.SessionId);
             };
             return recognizer;
         }
 
         public void SubscribeToCounterEventHandlers(SpeechRecognizer recognizer)
         {
-            recognizer.FinalResultReceived += FinalResultEventCounter;
+            recognizer.Recognized += RecognizedEventCounter;
             recognizer.Canceled += CanceledEventCounter;
-            recognizer.OnSessionEvent += SessionEventCounter;
-            recognizer.OnSpeechDetectedEvent += SpeechEventCounter;
+            recognizer.SessionStarted += SessionStartedEventCounter;
+            recognizer.SessionStopped += SessionStoppedEventCounter;
+            recognizer.SpeechStartDetected += SpeechStartEventCounter;
+            recognizer.SpeechEndDetected += SpeechEndEventCounter;
         }
 
         public void UnsubscribeFromCounterEventHandlers(SpeechRecognizer recognizer)
         {
-            recognizer.FinalResultReceived -= FinalResultEventCounter;
+            recognizer.Recognized -= RecognizedEventCounter;
             recognizer.Canceled -= CanceledEventCounter;
-            recognizer.OnSessionEvent -= SessionEventCounter;
-            recognizer.OnSpeechDetectedEvent -= SpeechEventCounter;
+            recognizer.SessionStarted -= SessionStartedEventCounter;
+            recognizer.SessionStopped -= SessionStoppedEventCounter;
+            recognizer.SpeechStartDetected -= SpeechStartEventCounter;
+            recognizer.SpeechEndDetected -= SpeechEndEventCounter;
         }
 
         public static void AssertMatching(string expectedText, string actualText)

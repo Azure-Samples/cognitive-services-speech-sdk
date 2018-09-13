@@ -44,7 +44,7 @@ namespace MicrosoftSpeechSDKSamples
             using (var recognizer = new TranslationRecognizer(config))
             {
                 // Subscribes to events.
-                recognizer.IntermediateResultReceived += (s, e) =>
+                recognizer.Recognizing += (s, e) =>
                 {
                     Console.WriteLine($"RECOGNIZING in '{fromLanguage}': Text={e.Result.Text}");
                     foreach (var element in e.Result.Translations)
@@ -53,7 +53,7 @@ namespace MicrosoftSpeechSDKSamples
                     }
                 };
 
-                recognizer.FinalResultReceived += (s, e) =>
+                recognizer.Recognized += (s, e) =>
                 {
                     if (e.Result.Reason == ResultReason.TranslatedSpeech)
                     {
@@ -74,7 +74,7 @@ namespace MicrosoftSpeechSDKSamples
                     }
                 };
 
-                recognizer.SynthesisResultReceived += (s, e) =>
+                recognizer.Synthesized += (s, e) =>
                 {
                     Console.WriteLine(e.Result.Audio.Length != 0
                         ? $"AudioSize: {e.Result.Audio.Length}"
@@ -103,9 +103,14 @@ namespace MicrosoftSpeechSDKSamples
                     }
                 };
 
-                recognizer.OnSessionEvent += (s, e) =>
+                recognizer.SessionStarted += (s, e) =>
                 {
-                    Console.WriteLine($"\nSession event. Event: {e.EventType.ToString()}.");
+                    Console.WriteLine("\nSession started event.");
+                };
+
+                recognizer.SessionStopped += (s, e) =>
+                {
+                    Console.WriteLine("\nSession stopped event.");
                 };
 
                 // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
@@ -150,7 +155,7 @@ namespace MicrosoftSpeechSDKSamples
                 using (var recognizer = new TranslationRecognizer(config, audioInput))
                 {
                     // Subscribes to events.
-                    recognizer.IntermediateResultReceived += (s, e) =>
+                    recognizer.Recognizing += (s, e) =>
                     {
                         Console.WriteLine($"RECOGNIZING in '{fromLanguage}': Text={e.Result.Text}");
                         foreach (var element in e.Result.Translations)
@@ -159,7 +164,7 @@ namespace MicrosoftSpeechSDKSamples
                         }
                     };
 
-                    recognizer.FinalResultReceived += (s, e) => {
+                    recognizer.Recognized += (s, e) => {
                         if (e.Result.Reason == ResultReason.TranslatedSpeech)
                         {
                             Console.WriteLine($"RECOGNIZED in '{fromLanguage}': Text={e.Result.Text}");
@@ -192,18 +197,22 @@ namespace MicrosoftSpeechSDKSamples
                         stopTranslation.TrySetResult(0);
                     };
 
-                    recognizer.OnSpeechDetectedEvent += (s, e) => {
-                        Console.WriteLine($"\nSpeech detected event. Event: {e.EventType.ToString()}.");
+                    recognizer.SpeechStartDetected += (s, e) => {
+                        Console.WriteLine("\nSpeech start detected event.");
                     };
 
-                    recognizer.OnSessionEvent += (s, e) => {
-                        Console.WriteLine($"\nSession event. Event: {e.EventType.ToString()}.");
-                        // Stops translation when session stop is detected.
-                        if (e.EventType == SessionEventType.SessionStoppedEvent)
-                        {
-                            Console.WriteLine($"\nStop translation.");
-                            stopTranslation.TrySetResult(0);
-                        }
+                    recognizer.SpeechEndDetected += (s, e) => {
+                        Console.WriteLine("\nSpeech end detected event.");
+                    };
+
+                    recognizer.SessionStarted += (s, e) => {
+                        Console.WriteLine("\nSession started event.");
+                    };
+
+                    recognizer.SessionStopped += (s, e) => {
+                        Console.WriteLine("\nSession stopped event.");
+                        Console.WriteLine($"\nStop translation.");
+                        stopTranslation.TrySetResult(0);
                     };
 
                     // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
@@ -249,7 +258,7 @@ namespace MicrosoftSpeechSDKSamples
                 using (var recognizer = new TranslationRecognizer(config, audioInput))
                 {
                     // Subscribes to events.
-                    recognizer.IntermediateResultReceived += (s, e) =>
+                    recognizer.Recognizing += (s, e) =>
                     {
                         Console.WriteLine($"RECOGNIZING in '{fromLanguage}': Text={e.Result.Text}");
                         foreach (var element in e.Result.Translations)
@@ -258,7 +267,7 @@ namespace MicrosoftSpeechSDKSamples
                         }
                     };
 
-                    recognizer.FinalResultReceived += (s, e) =>
+                    recognizer.Recognized += (s, e) =>
                     {
                         if (e.Result.Reason == ResultReason.TranslatedSpeech)
                         {
@@ -292,20 +301,26 @@ namespace MicrosoftSpeechSDKSamples
                         stopTranslation.TrySetResult(0);
                     };
 
-                    recognizer.OnSpeechDetectedEvent += (s, e) =>
+                    recognizer.SpeechStartDetected += (s, e) =>
                     {
-                        Console.WriteLine($"\nSpeech detected event. Event: {e.EventType.ToString()}.");
+                        Console.WriteLine("\nSpeech start detected event.");
                     };
 
-                    recognizer.OnSessionEvent += (s, e) =>
+                    recognizer.SpeechEndDetected += (s, e) =>
                     {
-                        Console.WriteLine($"\nSession event. Event: {e.EventType.ToString()}.");
-                        // Stops translation when session stop is detected.
-                        if (e.EventType == SessionEventType.SessionStoppedEvent)
-                        {
-                            Console.WriteLine($"\nStop translation.");
-                            stopTranslation.TrySetResult(0);
-                        }
+                        Console.WriteLine("\nSpeech end detected event.");
+                    };
+
+                    recognizer.SessionStarted += (s, e) =>
+                    {
+                        Console.WriteLine("\nSession started event.");
+                    };
+
+                    recognizer.SessionStopped += (s, e) =>
+                    {
+                        Console.WriteLine($"\nSession stopped event.");
+                        Console.WriteLine($"\nStop translation.");
+                        stopTranslation.TrySetResult(0);
                     };
 
                     // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.

@@ -43,7 +43,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
                 helper.SubscribeToCounterEventHandlers(recognizer);
-                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.IsTrue(result.Duration.Ticks > 0, result.Reason.ToString(), "Duration == 0");
                 Assert.AreEqual(0, result.OffsetInTicks, "Offset not zero");
                 AssertMatching(TestData.English.Weather.Utterance, result.Text);
@@ -70,7 +70,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(config, audioInput)))
             {
                 helper.SubscribeToCounterEventHandlers(recognizer);
-                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 AssertMatching(TestData.English.Weather.Utterance, result.Text);
             }
         }
@@ -94,7 +94,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(config, audioInput)))
             {
-                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.Canceled, result.Reason);
 
                 var cancellation = CancellationDetails.FromResult(result);
@@ -110,7 +110,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(config, audioInput)))
             {
-                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.Canceled, result.Reason);
 
                 var cancellation = CancellationDetails.FromResult(result);
@@ -134,7 +134,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
                 
-                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.Canceled, result.Reason);
 
                 var cancellation = CancellationDetails.FromResult(result);
@@ -150,7 +150,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
-                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(ResultReason.Canceled, result.Reason);
 
                 var cancellation = CancellationDetails.FromResult(result);
@@ -164,7 +164,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             this.config.SpeechRecognitionLanguage = Language.DE_DE;
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
             {
-                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.IsFalse(string.IsNullOrEmpty(result.Text), result.Reason.ToString());
                 AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
             }
@@ -190,7 +190,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 List<string> recognizedText = new List<string>();
                 helper.SubscribeToCounterEventHandlers(recognizer);
-                recognizer.FinalResultReceived += (s, e) =>
+                recognizer.Recognized += (s, e) =>
                 {
                     if (e.Result.Text.Length > 0)
                     {
@@ -200,7 +200,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 await helper.CompleteContinuousRecognition(recognizer);
 
-                Assert.IsTrue(helper.FinalResultEventCount > 0, $"Invalid number of final result events {helper.FinalResultEventCount}");
+                Assert.IsTrue(helper.RecognizedEventCount > 0, $"Invalid number of final result events {helper.RecognizedEventCount}");
                 Assert.AreEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
                 Assert.AreEqual(1, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
                 Assert.IsTrue(recognizedText.Count > 0, $"Invalid number of text messages {recognizedText.Count}");
@@ -223,7 +223,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 }
                 await helper.CompleteContinuousRecognition(recognizer);
 
-                Assert.AreEqual(numLoops, helper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
+                Assert.AreEqual(numLoops, helper.RecognizedEventCount, AssertOutput.WrongFinalResultCount);
                 Assert.AreEqual(numLoops, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
                 Assert.AreEqual(numLoops, helper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
                 Assert.AreEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
@@ -241,7 +241,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 await helper.CompleteContinuousRecognition(recognizer);
 
-                Assert.AreEqual(0, helper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
+                Assert.AreEqual(0, helper.RecognizedEventCount, AssertOutput.WrongFinalResultCount);
                 Assert.AreEqual(0, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
                 Assert.AreEqual(0, helper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
                 Assert.AreEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
@@ -275,7 +275,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
                 await helper.CompleteContinuousRecognition(recognizer);
 
-                Assert.AreEqual(diff, helper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
+                Assert.AreEqual(diff, helper.RecognizedEventCount, AssertOutput.WrongFinalResultCount);
                 Assert.AreEqual(diff, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
                 Assert.AreEqual(diff, helper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
                 Assert.AreEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
@@ -289,17 +289,14 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
                 helper.SubscribeToCounterEventHandlers(recognizer);
-                recognizer.OnSessionEvent += (s, e) =>
+                recognizer.SessionStarted += (s, e) =>
                 {
-                    if (e.EventType == SessionEventType.SessionStartedEvent)
-                    {
-                        helper.UnsubscribeFromCounterEventHandlers(recognizer);
-                    }
+                    helper.UnsubscribeFromCounterEventHandlers(recognizer);
                 };
 
                 await helper.CompleteContinuousRecognition(recognizer);
                 Assert.AreEqual(1, helper.SessionStartedEventCount, AssertOutput.WrongSessionStartedCount);
-                Assert.AreEqual(0, helper.FinalResultEventCount, AssertOutput.WrongFinalResultCount);
+                Assert.AreEqual(0, helper.RecognizedEventCount, AssertOutput.WrongFinalResultCount);
                 Assert.AreEqual(0, helper.SpeechStartedEventCount, AssertOutput.WrongSpeechStartedCount);
                 Assert.AreEqual(0, helper.ErrorEventCount, AssertOutput.WrongErrorCount);
             }
@@ -346,7 +343,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
-                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 var ex = await Assert.ThrowsExceptionAsync<ApplicationException>(() => recognizer.StartContinuousRecognitionAsync());
                 AssertStringContains(ex.Message, "Exception with an error code: 0x1e");
             }
@@ -361,7 +358,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 recognizer.Canceled += (s, e) => { Console.WriteLine($"Recognition Canceled: {e.ToString()}"); };
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
-                var ex = await Assert.ThrowsExceptionAsync<ApplicationException>(() => recognizer.RecognizeAsync());
+                var ex = await Assert.ThrowsExceptionAsync<ApplicationException>(() => recognizer.RecognizeOnceAsync());
                 AssertStringContains(ex.Message, "Exception with an error code: 0x1e");
             }
         }
@@ -372,12 +369,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
-                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.IsTrue(result.Duration.Ticks > 0, result.Reason.ToString(), "First result duration should be greater than 0");
                 var offset = result.OffsetInTicks;
                 var expectedNextOffset = offset + result.Duration.Ticks;
 
-                var result2 = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                var result2 = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 var offset2 = result2.OffsetInTicks;
 
                 Console.WriteLine($"Offset1 {offset}, offset1 + duration {expectedNextOffset}");
@@ -443,7 +440,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Silence.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
-                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.IsTrue(result.Reason == ResultReason.NoMatch, result.Reason.ToString());
                 Assert.IsTrue(result.OffsetInTicks > 0, result.OffsetInTicks.ToString());
                 Assert.IsTrue(String.IsNullOrEmpty(result.Text), result.Text);

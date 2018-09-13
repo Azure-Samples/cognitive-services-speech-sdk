@@ -2,18 +2,17 @@
 // copyright (c) Microsoft. All rights reserved.
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-import { promises } from "fs";
 import { setTimeout } from "timers";
 import * as sdk from "../../../../../source/bindings/js/Speech.Browser.Sdk";
+import { RecognitionEventType, SessionEventType } from "../../../../../source/bindings/js/Speech.Browser.Sdk";
 import { Settings } from "./Settings";
-import { default as WaitForCondition } from "./Utilities";
 import { WaveFileAudioInput } from "./WaveFileAudioInputStream";
 
 const FIRST_EVENT_ID: number = 1;
-const IntermediateResultReceived: string = "IntermediateResultReceived";
-const FinalResultReceived: string = "FinalResultReceived";
+const Recognizing: string = "Recognizing";
+const Recognized: string = "Recognized";
 const Session: string = "Session";
-const RecognitionErrorRaised: string = "RecognitionErrorRaised";
+const Canceled: string = "Canceled";
 
 let eventIdentifier: number;
 
@@ -56,7 +55,7 @@ test("testSpeechRecognizer2", (done: jest.DoneCallback) => {
 // ??     assertNotNull(r.getRecoImpl());
     expect(r instanceof sdk.Recognizer);
 
-    r.recognizeAsync(
+    r.recognizeOnceAsync(
         (result) => {
             expect(result).not.toBeUndefined();
             expect("What's the weather like?" === result.text);
@@ -204,7 +203,7 @@ test("testGetParameters", () => {
     s.close();
 });
 
-test("testRecognizeAsync1", (done: jest.DoneCallback) => {
+test("testRecognizeOnceAsync1", (done: jest.DoneCallback) => {
 
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
@@ -218,7 +217,7 @@ test("testRecognizeAsync1", (done: jest.DoneCallback) => {
     expect(r).not.toBeUndefined();
     expect(r instanceof sdk.Recognizer);
 
-    r.recognizeAsync(
+    r.recognizeOnceAsync(
         (p2: sdk.SpeechRecognitionResult) => {
             const res: sdk.SpeechRecognitionResult = p2;
             expect(res).not.toBeUndefined();
@@ -238,7 +237,7 @@ test("testRecognizeAsync1", (done: jest.DoneCallback) => {
         });
 });
 
-test("testRecognizeAsync2", (done: jest.DoneCallback) => {
+test("testRecognizeOnceAsync2", (done: jest.DoneCallback) => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
     s.language = "en-US";
@@ -254,36 +253,46 @@ test("testRecognizeAsync2", (done: jest.DoneCallback) => {
     const eventsMap: { [id: string]: number; } = {};
     eventIdentifier = 1;
 
-    r.FinalResultReceived = (o: sdk.Recognizer, e: sdk.SpeechRecognitionResultEventArgs) => {
-        eventsMap[FinalResultReceived] = eventIdentifier++;
+    r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionResultEventArgs) => {
+        eventsMap[Recognized] = eventIdentifier++;
     };
 
-    r.IntermediateResultReceived = (o: sdk.Recognizer, e: sdk.SpeechRecognitionResultEventArgs) => {
+    r.recognizing = (o: sdk.Recognizer, e: sdk.SpeechRecognitionResultEventArgs) => {
         const now: number = eventIdentifier++;
-        eventsMap[IntermediateResultReceived + "-" + Date.now().toPrecision(4)] = now;
-        eventsMap[IntermediateResultReceived] = now;
+        eventsMap[Recognizing + "-" + Date.now().toPrecision(4)] = now;
+        eventsMap[Recognizing] = now;
     };
 
-    r.RecognitionErrorRaised = (o: sdk.Recognizer, e: sdk.RecognitionErrorEventArgs) => {
-        eventsMap[RecognitionErrorRaised] = eventIdentifier++;
+    r.canceled = (o: sdk.Recognizer, e: sdk.RecognitionErrorEventArgs) => {
+        eventsMap[Canceled] = eventIdentifier++;
     };
 
     // todo eventType should be renamed and be a function getEventType()
-    r.RecognitionEvent = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs) => {
+    r.speechStartDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs) => {
         const now: number = eventIdentifier++;
-        eventsMap[e.eventType.toString()] = now;
+        // tslint:disable-next-line:no-string-literal
+        eventsMap[RecognitionEventType.SpeechStartDetectedEvent.toString()] = now;
+    };
+    r.speechEndDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs) => {
+        const now: number = eventIdentifier++;
+        eventsMap[RecognitionEventType.SpeechEndDetectedEvent.toString()] = now;
     };
 
-    r.SessionEvent = (o: sdk.Recognizer, e: sdk.SessionEventArgs) => {
+    r.sessionStarted = (o: sdk.Recognizer, e: sdk.SessionEventArgs) => {
         const now: number = eventIdentifier++;
-        eventsMap[Session + e.eventType.toString()] = now;
-        eventsMap[Session + e.eventType.toString() + "-" + Date.now().toPrecision(4)] = now;
+        eventsMap[Session + SessionEventType.SessionStartedEvent.toString()] = now;
+        eventsMap[Session + SessionEventType.SessionStartedEvent.toString() + "-" + Date.now().toPrecision(4)] = now;
+    };
+    r.sessionStopped = (o: sdk.Recognizer, e: sdk.SessionEventArgs) => {
+        const now: number = eventIdentifier++;
+        eventsMap[Session + SessionEventType.SessionStoppedEvent.toString()] = now;
+        eventsMap[Session + SessionEventType.SessionStoppedEvent.toString() + "-" + Date.now().toPrecision(4)] = now;
     };
 
     // note: TODO session stopped event not necessarily raised before async operation returns!
     //       this makes this test flaky
 
-    r.recognizeAsync(
+    r.recognizeOnceAsync(
         (res: sdk.SpeechRecognitionResult) => {
             expect(res).not.toBeUndefined();
             expect("What's the weather like?").toEqual(res.text);
@@ -313,7 +322,7 @@ test("testRecognizeAsync2", (done: jest.DoneCallback) => {
             // make sure, first end of speech, then final result
             expect((LAST_RECORDED_EVENT_ID - 2)).toEqual(eventsMap[sdk.RecognitionEventType.SpeechEndDetectedEvent.toString()]);
 
-            expect((LAST_RECORDED_EVENT_ID - 1)).toEqual(eventsMap[FinalResultReceived]);
+            expect((LAST_RECORDED_EVENT_ID - 1)).toEqual(eventsMap[Recognized]);
 
             // recognition events come after session start but before session end events
             expect(eventsMap[Session + sdk.SessionEventType.SessionStartedEvent.toString()])
@@ -326,18 +335,18 @@ test("testRecognizeAsync2", (done: jest.DoneCallback) => {
 
             // there is no partial result reported after the final result
             // (and check that we have intermediate and final results recorded)
-            if (IntermediateResultReceived in eventsMap) {
-                expect(eventsMap[IntermediateResultReceived])
+            if (Recognizing in eventsMap) {
+                expect(eventsMap[Recognizing])
                     .toBeGreaterThan(eventsMap[sdk.RecognitionEventType.SpeechStartDetectedEvent.toString()]);
             }
 
             // speech should stop before getting the final result.
-            expect(eventsMap[FinalResultReceived]).toBeGreaterThan(eventsMap[sdk.RecognitionEventType.SpeechEndDetectedEvent.toString()]);
+            expect(eventsMap[Recognized]).toBeGreaterThan(eventsMap[sdk.RecognitionEventType.SpeechEndDetectedEvent.toString()]);
 
-            expect(eventsMap[IntermediateResultReceived]).toBeLessThan(eventsMap[FinalResultReceived]);
+            expect(eventsMap[Recognizing]).toBeLessThan(eventsMap[Recognized]);
 
             // make sure events we don't expect, don't get raised
-            expect(RecognitionErrorRaised in eventsMap).toBeFalsy();
+            expect(Canceled in eventsMap).toBeFalsy();
 
             r.close();
             s.close();
@@ -425,7 +434,7 @@ test("testStartStopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
 
     const rEvents: string[] = [];
 
-    r.FinalResultReceived = (o: sdk.Recognizer, e: sdk.SpeechRecognitionResultEventArgs) => {
+    r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionResultEventArgs) => {
         rEvents.push("Result@" + Date.now().toPrecision(4).toString() + ": " + e.result.reason + "/" + e.result.text);
     };
 

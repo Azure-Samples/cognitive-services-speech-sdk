@@ -9,7 +9,7 @@ namespace Microsoft.CognitiveServices.Speech
     /// <summary>
     /// Define session event types.
     /// </summary>
-    public enum SessionEventType
+    internal enum SessionEventType
     {
         SessionStartedEvent,
         SessionStoppedEvent

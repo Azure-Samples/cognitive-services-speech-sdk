@@ -15,7 +15,6 @@ import android.widget.TextView;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.ResultReason;
-import com.microsoft.cognitiveservices.speech.SessionEventType;
 import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
@@ -126,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
                 final AudioConfig audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
                 final SpeechRecognizer reco = new SpeechRecognizer(speechConfig, audioInput);
 
-                final Future<SpeechRecognitionResult> task = reco.recognizeAsync();
+                final Future<SpeechRecognitionResult> task = reco.recognizeOnceAsync();
                 setOnTaskCompletedListener(task, result -> {
                     String s = result.getText();
                     if (result.getReason() != ResultReason.RecognizedSpeech) {
@@ -159,13 +158,13 @@ public class MainActivity extends AppCompatActivity {
                 final AudioConfig audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
                 final SpeechRecognizer reco = new SpeechRecognizer(speechConfig, audioInput);
 
-                reco.IntermediateResultReceived.addEventListener((o, speechRecognitionResultEventArgs) -> {
+                reco.recognizing.addEventListener((o, speechRecognitionResultEventArgs) -> {
                     final String s = speechRecognitionResultEventArgs.getResult().getText();
                     Log.i(logTag, "Intermediate result received: " + s);
                     setRecognizedText(s);
                 });
 
-                final Future<SpeechRecognitionResult> task = reco.recognizeAsync();
+                final Future<SpeechRecognitionResult> task = reco.recognizeOnceAsync();
                 setOnTaskCompletedListener(task, result -> {
                     final String s = result.getText();
                     reco.close();
@@ -221,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
                     audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
                     reco = new SpeechRecognizer(speechConfig, audioInput);
 
-                    reco.IntermediateResultReceived.addEventListener((o, speechRecognitionResultEventArgs) -> {
+                    reco.recognizing.addEventListener((o, speechRecognitionResultEventArgs) -> {
                         final String s = speechRecognitionResultEventArgs.getResult().getText();
                         Log.i(logTag, "Intermediate result received: " + s);
                         content.add(s);
@@ -229,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
                         content.remove(content.size() - 1);
                     });
 
-                    reco.FinalResultReceived.addEventListener((o, speechRecognitionResultEventArgs) -> {
+                    reco.recognized.addEventListener((o, speechRecognitionResultEventArgs) -> {
                         final String s = speechRecognitionResultEventArgs.getResult().getText();
                         Log.i(logTag, "Final result received: " + s);
                         content.add(s);
@@ -280,14 +279,14 @@ public class MainActivity extends AppCompatActivity {
                     reco.addIntent(intentModel, entry.getValue(), entry.getKey());
                 }
 
-                reco.IntermediateResultReceived.addEventListener((o, intentRecognitionResultEventArgs) -> {
+                reco.recognizing.addEventListener((o, intentRecognitionResultEventArgs) -> {
                     final String s = intentRecognitionResultEventArgs.getResult().getText();
                     Log.i(logTag, "Intermediate result received: " + s);
                     content.set(0, s);
                     setRecognizedText(TextUtils.join(System.lineSeparator(), content));
                 });
 
-                final Future<IntentRecognitionResult> task = reco.recognizeAsync();
+                final Future<IntentRecognitionResult> task = reco.recognizeOnceAsync();
                 setOnTaskCompletedListener(task, result -> {
                     Log.i(logTag, "Continuous recognition stopped.");
                     String s = result.getText();

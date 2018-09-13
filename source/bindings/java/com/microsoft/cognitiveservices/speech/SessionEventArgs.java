@@ -14,26 +14,15 @@ public final class SessionEventArgs // extends EventArgs
 {
     /**
       * Constructs a SessionEcentArgs.
-      * @param type the SessionEventType
       * @param arg The native SessionEventArgs
       */
-    public SessionEventArgs(SessionEventType type, com.microsoft.cognitiveservices.speech.internal.SessionEventArgs arg) {
+    public SessionEventArgs(com.microsoft.cognitiveservices.speech.internal.SessionEventArgs arg) {
         Contracts.throwIfNull(arg, "arg");
 
         this._sessionId = arg.getSessionId();
-        this._eventType = type;
 
         Contracts.throwIfNull(this._sessionId, "SessionId");
     }
-
-    /**
-      * Represents the event type.
-      * @return Represents the event type.
-      */
-    public SessionEventType getEventType() {
-        return _eventType;
-    }
-    private final SessionEventType _eventType;
 
     /**
       * Represents the session identifier.
@@ -42,6 +31,7 @@ public final class SessionEventArgs // extends EventArgs
     public String getSessionId() {
         return _sessionId;
     }
+
     private final String _sessionId;
 
     /**
@@ -50,8 +40,7 @@ public final class SessionEventArgs // extends EventArgs
      */
     @Override
     public String toString() {
-        return "EventType: " + _eventType.toString() +
-               " SessionId: " + _sessionId.toString() +
+        return "SessionId: " + _sessionId.toString() +
                ".";
     }
 }

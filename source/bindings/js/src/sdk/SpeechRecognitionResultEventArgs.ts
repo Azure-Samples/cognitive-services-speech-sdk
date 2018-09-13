@@ -5,7 +5,7 @@
 import { SpeechRecognitionResult } from "./Exports";
 
 /**
- * Defines contents of speech intermediate/final result event.
+ * Defines contents of speech recognizing/recognized event.
  * @class
  */
 export class SpeechRecognitionResultEventArgs {

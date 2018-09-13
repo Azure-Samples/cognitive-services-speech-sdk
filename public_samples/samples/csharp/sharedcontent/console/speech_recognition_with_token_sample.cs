@@ -49,7 +49,7 @@ namespace MicrosoftSpeechSDKSamples
                 var tokenRenewTask = StartTokenRenewTask(source.Token, recognizer); 
 
                 // Subscribe to events.
-                recognizer.FinalResultReceived += (s, e) =>
+                recognizer.Recognized += (s, e) =>
                 {
                     if (e.Result.Reason == ResultReason.RecognizedSpeech)
                     {

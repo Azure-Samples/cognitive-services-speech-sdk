@@ -35,7 +35,7 @@ public class SpeechRecognitionSamples {
             System.out.println("Say something...");
 
             // Starts recognition. It returns when the first utterance has been recognized.
-            SpeechRecognitionResult result = recognizer.recognizeAsync().get();
+            SpeechRecognitionResult result = recognizer.recognizeOnceAsync().get();
 
             // Checks result.
             if (result.getReason() == ResultReason.RecognizedSpeech) {
@@ -77,7 +77,7 @@ public class SpeechRecognitionSamples {
             System.out.println("Say something in " + lang + " ...");
 
             // Starts recognition. It returns when the first utterance has been recognized.
-            SpeechRecognitionResult result = recognizer.recognizeAsync().get();
+            SpeechRecognitionResult result = recognizer.recognizeOnceAsync().get();
 
             // Checks result.
             if (result.getReason() == ResultReason.RecognizedSpeech) {
@@ -99,7 +99,7 @@ public class SpeechRecognitionSamples {
         recognizer.close();
         // </recognitionWithLanguage>
     }
-    
+
     // Speech recognition using a customized model.
     public static void recognitionUsingCustomizedModelAsync() throws InterruptedException, ExecutionException
     {
@@ -115,13 +115,13 @@ public class SpeechRecognitionSamples {
         SpeechRecognizer recognizer = new SpeechRecognizer(config);
         {
             // Starts recognizing.
-             System.out.println("Say something...");
+            System.out.println("Say something...");
 
-             // Starts recognition. It returns when the first utterance has been recognized.
-             SpeechRecognitionResult result = recognizer.recognizeAsync().get();
+            // Starts recognition. It returns when the first utterance has been recognized.
+            SpeechRecognitionResult result = recognizer.recognizeOnceAsync().get();
 
-             // Checks result.
-             if (result.getReason() == ResultReason.RecognizedSpeech) {
+            // Checks result.
+            if (result.getReason() == ResultReason.RecognizedSpeech) {
                 System.out.println("RECOGNIZED: Text=" + result.getText());
             }
             else if (result.getReason() == ResultReason.NoMatch) {
@@ -136,9 +136,9 @@ public class SpeechRecognitionSamples {
                     System.out.println("CANCELED: Did you update the subscription info?");
                 }
             }
-         }
+        }
 
-         recognizer.close();
+        recognizer.close();
         // </recognitionCustomized>
     }
 
@@ -157,11 +157,11 @@ public class SpeechRecognitionSamples {
         SpeechRecognizer recognizer = new SpeechRecognizer(config, audioInput);
         {
             // Subscribes to events.
-            recognizer.IntermediateResultReceived.addEventListener((s, e) -> {
+            recognizer.recognizing.addEventListener((s, e) -> {
                 System.out.println("RECOGNIZING: Text=" + e.getResult().getText());
             });
 
-            recognizer.FinalResultReceived.addEventListener((s, e) -> {
+            recognizer.recognized.addEventListener((s, e) -> {
                 if (e.getResult().getReason() == ResultReason.RecognizedSpeech) {
                     System.out.println("RECOGNIZED: Text=" + e.getResult().getText());
                 }
@@ -170,7 +170,7 @@ public class SpeechRecognitionSamples {
                 }
             });
 
-            recognizer.Canceled.addEventListener((s, e) -> {
+            recognizer.canceled.addEventListener((s, e) -> {
                 System.out.println("CANCELED: Reason=" + e.getReason());
 
                 if (e.getReason() == CancellationReason.Error) {
@@ -179,8 +179,12 @@ public class SpeechRecognitionSamples {
                 }
             });
 
-            recognizer.SessionEvent.addEventListener((s, e) -> {
-                System.out.println("\n    Session event. Event: " + e.getEventType() + ".");
+            recognizer.sessionStarted.addEventListener((s, e) -> {
+                System.out.println("\n    Session started event.");
+            });
+
+            recognizer.sessionStopped.addEventListener((s, e) -> {
+                System.out.println("\n    Session stopped event.");
             });
 
             // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
@@ -218,11 +222,11 @@ public class SpeechRecognitionSamples {
         SpeechRecognizer recognizer = new SpeechRecognizer(config, audioInput);
         {
             // Subscribes to events.
-            recognizer.IntermediateResultReceived.addEventListener((s, e) -> {
+            recognizer.recognizing.addEventListener((s, e) -> {
                 System.out.println("RECOGNIZING: Text=" + e.getResult().getText());
             });
 
-            recognizer.FinalResultReceived.addEventListener((s, e) -> {
+            recognizer.recognized.addEventListener((s, e) -> {
                 if (e.getResult().getReason() == ResultReason.RecognizedSpeech) {
                     System.out.println("RECOGNIZED: Text=" + e.getResult().getText());
                 }
@@ -231,7 +235,7 @@ public class SpeechRecognitionSamples {
                 }
             });
 
-            recognizer.Canceled.addEventListener((s, e) -> {
+            recognizer.canceled.addEventListener((s, e) -> {
                 System.out.println("CANCELED: Reason=" + e.getReason());
 
                 if (e.getReason() == CancellationReason.Error) {
@@ -242,15 +246,16 @@ public class SpeechRecognitionSamples {
                 stopRecognitionSemaphore.release();
             });
 
-            recognizer.SessionEvent.addEventListener((s, e) -> {
-                System.out.println("\nSession event. Event: " + e.getEventType() + ".");
-                
+            recognizer.sessionStarted.addEventListener((s, e) -> {
+                System.out.println("\nSession started event.");
+            });
+
+            recognizer.sessionStopped.addEventListener((s, e) -> {
+                System.out.println("\nSession stopped event.");
+
                 // Stops translation when session stop is detected.
-                if (e.getEventType() == SessionEventType.SessionStoppedEvent)
-                {
-                    System.out.println("\nStop translation.");
-                    stopRecognitionSemaphore.release();
-                }
+                System.out.println("\nStop translation.");
+                stopRecognitionSemaphore.release();
             });
 
             // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.

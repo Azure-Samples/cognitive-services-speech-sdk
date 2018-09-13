@@ -6,13 +6,13 @@ using System.Globalization;
 namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
-    /// Define payload of speech intermediate/final result events.
+    /// Define payload of speech recognizing/recognized events.
     /// </summary>
     public sealed class SpeechRecognitionResultEventArgs : System.EventArgs
     {
         internal SpeechRecognitionResultEventArgs(Internal.SpeechRecognitionEventArgs e)
         {
-            evenArgImpl = e;
+            eventArgImpl = e;
             Result = new SpeechRecognitionResult(e.GetResult());
             SessionId = e.SessionId;
         }
@@ -37,7 +37,7 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         // Hold the reference
-        private Internal.SpeechRecognitionEventArgs evenArgImpl;
+        private Internal.SpeechRecognitionEventArgs eventArgImpl;
     }
 
     /// <summary>
@@ -47,7 +47,7 @@ namespace Microsoft.CognitiveServices.Speech
     {
         internal SpeechRecognitionCanceledEventArgs(Internal.SpeechRecognitionCanceledEventArgs e)
         {
-            evenArgImpl = e;
+            eventArgImpl = e;
             Result = new SpeechRecognitionResult(e.GetResult());
             SessionId = e.SessionId;
             
@@ -87,6 +87,6 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         // Hold the reference
-        private Internal.SpeechRecognitionCanceledEventArgs evenArgImpl;
+        private Internal.SpeechRecognitionCanceledEventArgs eventArgImpl;
     }
 }

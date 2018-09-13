@@ -6,7 +6,7 @@ using System.Globalization;
 namespace Microsoft.CognitiveServices.Speech.Intent
 {
     /// <summary>
-    /// Define payload of intent intermediate/final result events.
+    /// Define payload of intent recognizing/recognized events.
     /// </summary>
     public sealed class IntentRecognitionResultEventArgs : System.EventArgs
     {

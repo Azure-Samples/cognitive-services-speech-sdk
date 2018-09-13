@@ -34,7 +34,7 @@ public:
     /// <returns>Future containing result value (a shared pointer to RecoResult)
     /// of the asynchronous recognition.
     /// </returns>
-    virtual std::future<std::shared_ptr<RecoResult>> RecognizeAsync() = 0;
+    virtual std::future<std::shared_ptr<RecoResult>> RecognizeOnceAsync() = 0;
 
     /// <summary>
     /// Asynchronously initiates continuous recognition operation.
@@ -85,13 +85,13 @@ public:
     /// <summary>
     /// Signal for events containing intermediate recognition results.
     /// </summary>
-    EventSignal<const RecoEventArgs&> IntermediateResult;
+    EventSignal<const RecoEventArgs&> Recognizing;
 
     /// <summary>
     /// Signal for events containing final recognition results.
     /// (indicating a successful recognition attempt).
     /// </summary>
-    EventSignal<const RecoEventArgs&> FinalResult;
+    EventSignal<const RecoEventArgs&> Recognized;
 
     /// <summary>
     /// Signal for events containing canceled recognition results
@@ -110,8 +110,8 @@ protected:
         SessionStopped(GetSessionEventConnectionsChangedCallback(), GetSessionEventConnectionsChangedCallback(), false),
         SpeechStartDetected(GetRecognitionEventConnectionsChangedCallback(), GetRecognitionEventConnectionsChangedCallback(), false),
         SpeechEndDetected(GetRecognitionEventConnectionsChangedCallback(), GetRecognitionEventConnectionsChangedCallback(), false),
-        IntermediateResult(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback(), false),
-        FinalResult(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback(), false),
+        Recognizing(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback(), false),
+        Recognized(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback(), false),
         Canceled(GetRecoCanceledEventConnectionsChangedCallback(), GetRecoCanceledEventConnectionsChangedCallback(), false),
         m_hasyncRecognize(SPXHANDLE_INVALID),
         m_hasyncStartContinuous(SPXHANDLE_INVALID),
@@ -137,8 +137,8 @@ protected:
 
         // Disconnect the event signals in reverse construction order
         Canceled.DisconnectAll();
-        FinalResult.DisconnectAll();
-        IntermediateResult.DisconnectAll();
+        Recognized.DisconnectAll();
+        Recognizing.DisconnectAll();
         SpeechEndDetected.DisconnectAll();
         SpeechStartDetected.DisconnectAll();
         SessionStopped.DisconnectAll();
@@ -155,7 +155,7 @@ protected:
         }
     }
 
-    std::future<std::shared_ptr<RecoResult>> RecognizeAsyncInternal()
+    std::future<std::shared_ptr<RecoResult>> RecognizeOnceAsyncInternal()
     {
         auto keepAlive = this->shared_from_this();
         auto future = std::async(std::launch::async, [keepAlive, this]() -> std::shared_ptr<RecoResult> {
@@ -258,13 +258,13 @@ protected:
             SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8x", __FUNCTION__, m_hreco);
             SPX_DBG_TRACE_VERBOSE_IF(!::recognizer_handle_is_valid(m_hreco), "%s: m_hreco is INVALID!!!", __FUNCTION__);
 
-            if (&recoEvent == &IntermediateResult)
+            if (&recoEvent == &Recognizing)
             {
-                recognizer_recognizing_set_callback(m_hreco, IntermediateResult.IsConnected() ? AsyncRecognizer::FireEvent_IntermediateResult: nullptr, this);
+                recognizer_recognizing_set_callback(m_hreco, Recognizing.IsConnected() ? AsyncRecognizer::FireEvent_Recognizing: nullptr, this);
             }
-            else if (&recoEvent == &FinalResult)
+            else if (&recoEvent == &Recognized)
             {
-                recognizer_recognized_set_callback(m_hreco, FinalResult.IsConnected() ? AsyncRecognizer::FireEvent_FinalResult: nullptr, this);
+                recognizer_recognized_set_callback(m_hreco, Recognized.IsConnected() ? AsyncRecognizer::FireEvent_Recognized: nullptr, this);
             }
         }
     }
@@ -359,24 +359,24 @@ protected:
         pThis->SpeechEndDetected.Signal(*recoEvent.get());
     }
 
-    static void FireEvent_IntermediateResult(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
+    static void FireEvent_Recognizing(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
     {
         UNUSED(hreco);
         std::unique_ptr<RecoEventArgs> recoEvent { new RecoEventArgs(hevent) };
 
         auto pThis = static_cast<AsyncRecognizer*>(pvContext);
         auto keepAlive = pThis->shared_from_this();
-        pThis->IntermediateResult.Signal(*recoEvent.get());
+        pThis->Recognizing.Signal(*recoEvent.get());
     }
 
-    static void FireEvent_FinalResult(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
+    static void FireEvent_Recognized(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
     {
         UNUSED(hreco);
         std::unique_ptr<RecoEventArgs> recoEvent { new RecoEventArgs(hevent) };
 
         auto pThis = static_cast<AsyncRecognizer*>(pvContext);
         auto keepAlive = pThis->shared_from_this();
-        pThis->FinalResult.Signal(*recoEvent.get());
+        pThis->Recognized.Signal(*recoEvent.get());
     }
 
     static void FireEvent_Canceled(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)

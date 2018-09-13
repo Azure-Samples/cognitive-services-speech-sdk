@@ -8,7 +8,7 @@ namespace Microsoft.CognitiveServices.Speech
     /// <summary>
     /// Define recognition event types.
     /// </summary>
-    public enum RecognitionEventType
+    internal enum RecognitionEventType
     {
         SpeechStartDetectedEvent,
         SpeechEndDetectedEvent

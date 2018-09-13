@@ -49,7 +49,7 @@ public class SampleRecognizeIntent implements Runnable {
                 reco.addIntent(intentModel, entry.getValue(), entry.getKey());
             }
 
-            reco.IntermediateResultReceived.addEventListener((o, intentRecognitionResultEventArgs) -> {
+            reco.recognizing.addEventListener((o, intentRecognitionResultEventArgs) -> {
                 String s = intentRecognitionResultEventArgs.getResult().getText();
                 System.out.println("Intermediate result received: " + s);
                 content.add(s);
@@ -57,7 +57,7 @@ public class SampleRecognizeIntent implements Runnable {
                 System.out.println(String.join("\n", content));
             });
 
-            Future<IntentRecognitionResult> task = reco.recognizeAsync();
+            Future<IntentRecognitionResult> task = reco.recognizeOnceAsync();
             IntentRecognitionResult recognitionResult = task.get();
             
             System.out.println("Continuous recognition stopped.");

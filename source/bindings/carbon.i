@@ -97,11 +97,11 @@
 %include <speechapi_cxx_speech_config.h>
 %include <speechapi_cxx_speech_translation_config.h>
 
-// %extend need to come first, before the %ignore for the same method (RecognizeAsync, etc.)
+// %extend need to come first, before the %ignore for the same method (RecognizeOnceAsync, etc.)
 %extend Microsoft::CognitiveServices::Speech::SpeechRecognizer {
 
     SpeechRecognitionResultPtr Recognize() {
-        return ($self)->RecognizeAsync().get();
+        return ($self)->RecognizeOnceAsync().get();
     }
 
     void StartContinuousRecognition()
@@ -124,8 +124,8 @@
         ($self)->StopKeywordRecognitionAsync().get();
     }
 
-    FutureWrapper<SpeechRecognitionResultPtr> RecognizeAsync() {
-        auto future = ($self)->RecognizeAsync();
+    FutureWrapper<SpeechRecognitionResultPtr> RecognizeOnceAsync() {
+        auto future = ($self)->RecognizeOnceAsync();
         return FutureWrapper<SpeechRecognitionResultPtr>(std::move(future));
     }
 
@@ -157,7 +157,7 @@
 %extend Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer {
 
     IntentRecognitionResultPtr Recognize() {
-        return ($self)->RecognizeAsync().get();
+        return ($self)->RecognizeOnceAsync().get();
     }
 
     void StartContinuousRecognition()
@@ -180,8 +180,8 @@
         ($self)->StopKeywordRecognitionAsync().get();
     }
 
-    FutureWrapper<IntentRecognitionResultPtr> RecognizeAsync() {
-        auto future = ($self)->RecognizeAsync();
+    FutureWrapper<IntentRecognitionResultPtr> RecognizeOnceAsync() {
+        auto future = ($self)->RecognizeOnceAsync();
         return FutureWrapper<IntentRecognitionResultPtr>(std::move(future));
     }
 
@@ -213,7 +213,7 @@
 %extend Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer {
 
     TranslationTextResultPtr Recognize() {
-        return ($self)->RecognizeAsync().get();
+        return ($self)->RecognizeOnceAsync().get();
     }
 
     void StartContinuousRecognition()
@@ -236,8 +236,8 @@
         ($self)->StopKeywordRecognitionAsync().get();
     }
 
-    FutureWrapper<TranslationTextResultPtr> RecognizeAsync() {
-        auto future = ($self)->RecognizeAsync();
+    FutureWrapper<TranslationTextResultPtr> RecognizeOnceAsync() {
+        auto future = ($self)->RecognizeOnceAsync();
         return FutureWrapper<TranslationTextResultPtr>(std::move(future));
     }
 
@@ -329,7 +329,7 @@
 %ignore Microsoft::CognitiveServices::Speech::EventSignal::operator+=;
 %ignore Microsoft::CognitiveServices::Speech::EventSignal::operator-=;
 
-%ignore RecognizeAsync;
+%ignore RecognizeOnceAsync;
 %ignore StartContinuousRecognitionAsync;
 %ignore StopContinuousRecognitionAsync;
 %ignore StartKeywordRecognitionAsync;

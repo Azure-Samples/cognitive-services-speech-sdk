@@ -6,9 +6,8 @@ package com.microsoft.cognitiveservices.speech;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
-
 /**
-  * Defines contents of speech intermediate/final result event.
+  * Defines contents of speech recognizing/recognized event.
   */
 public final class SpeechRecognitionResultEventArgs {
     

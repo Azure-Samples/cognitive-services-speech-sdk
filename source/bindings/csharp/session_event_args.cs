@@ -11,17 +11,11 @@ namespace Microsoft.CognitiveServices.Speech
     /// </summary>
     public sealed class SessionEventArgs : System.EventArgs
     {
-        internal SessionEventArgs(SessionEventType type,  Internal.SessionEventArgs arg)
+        internal SessionEventArgs(Internal.SessionEventArgs arg)
         {
             eventArgImpl = arg;
             SessionId = arg.SessionId;
-            EventType = type;
         }
-
-        /// <summary>
-        /// Represents the event type.
-        /// </summary>
-        public SessionEventType EventType { get; }
 
         /// <summary>
         /// Represents the session identifier.
@@ -34,7 +28,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A string that represents the session event.</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "EventType: {0} SessionId: {1}.", EventType, SessionId);
+            return string.Format(CultureInfo.InvariantCulture, "SessionId: {0}.", SessionId);
         }
 
         // Hold the reference

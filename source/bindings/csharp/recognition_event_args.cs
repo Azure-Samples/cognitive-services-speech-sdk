@@ -11,18 +11,12 @@ namespace Microsoft.CognitiveServices.Speech
     /// </summary>
     public sealed class RecognitionEventArgs : System.EventArgs
     {
-        internal RecognitionEventArgs(RecognitionEventType type, Internal.RecognitionEventArgs arg)
+        internal RecognitionEventArgs(Internal.RecognitionEventArgs arg)
         {
             eventArgsImpl = arg;
             SessionId = arg.SessionId;
-            EventType = type;
             Offset = arg.Offset;
         }
-
-        /// <summary>
-        /// Represents the event type.
-        /// </summary>
-        public RecognitionEventType EventType { get; }
 
         /// <summary>
         /// Represents the session identifier.
@@ -40,7 +34,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A string that represents the session event.</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "EventType: {0} SessionId: {1} Offset: {2}", EventType, SessionId, Offset);
+            return string.Format(CultureInfo.InvariantCulture, "SessionId: {0} Offset: {1}", SessionId, Offset);
         }
 
         // hold the reference

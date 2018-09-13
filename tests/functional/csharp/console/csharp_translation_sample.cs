@@ -19,12 +19,12 @@ namespace MicrosoftSpeechSDKSamples
 {
     public class TranslationSamples
     {
-        private static void MyIntermediateResultEventHandler(object sender, TranslationTextResultEventArgs e)
+        private static void MyRecognizingEventHandler(object sender, TranslationTextResultEventArgs e)
         {
             Console.WriteLine($"Translation: intermediate result: {e.ToString()}.");
         }
 
-        private static void MyFinalResultEventHandler(object sender, TranslationTextResultEventArgs e)
+        private static void MyRecognizedEventHandler(object sender, TranslationTextResultEventArgs e)
         {
             Console.WriteLine($"Translation: final result: {e.ToString()}.");
         }
@@ -49,11 +49,8 @@ namespace MicrosoftSpeechSDKSamples
 
         private static void MySpeechEndDetectedHandler(object sender, RecognitionEventArgs e)
         {
-            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Translation: Speech detected event: {0}.", e.ToString()));
-            if (e.EventType == RecognitionEventType.SpeechEndDetectedEvent)
-            {
-                translationEndTaskCompletionSource.TrySetResult(0);
-            }
+            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Translation: Speech end detected event: {0}.", e.ToString()));
+            translationEndTaskCompletionSource.TrySetResult(0);
         }
 
         public static async Task TranslationBaseModelAsync(string keyTranslation, string fileName, bool useStream)
@@ -162,11 +159,11 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task DoTranslationAsync(TranslationRecognizer reco)
         {
             // Subscribes to events.
-            reco.IntermediateResultReceived += MyIntermediateResultEventHandler;
-            reco.FinalResultReceived += MyFinalResultEventHandler;
-            reco.SynthesisResultReceived += MySynthesisEventHandler;
+            reco.Recognizing += MyRecognizingEventHandler;
+            reco.Recognized += MyRecognizedEventHandler;
+            reco.Synthesized += MySynthesisEventHandler;
             reco.Canceled += MyCanceledEventHandler;
-            reco.OnSpeechDetectedEvent += MySpeechEndDetectedHandler;
+            reco.SpeechEndDetected += MySpeechEndDetectedHandler;
 
             translationEndTaskCompletionSource = new TaskCompletionSource<int>();
 

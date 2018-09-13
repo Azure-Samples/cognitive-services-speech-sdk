@@ -121,7 +121,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 while (true)
                 {
-                    var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                    var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                     if (result.Reason == ResultReason.Canceled)
                     {
                         break;
@@ -146,7 +146,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             this.config.SpeechRecognitionLanguage = Language.EN;
             using (var recognizer = new SpeechRecognizer(this.config, audioInput))
             {
-                recognizer.FinalResultReceived += (s, e) =>
+                recognizer.Recognized += (s, e) =>
                 {
                     Console.WriteLine($"Result recognized {e.ToString()}");
                     if (e.Result.Reason == ResultReason.Canceled)
@@ -160,14 +160,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     }
                 };
 
-                recognizer.OnSessionEvent += (s, e) =>
+                recognizer.SessionStarted += (s, e) =>
                 {
-                    Console.WriteLine($"Received session event {e.ToString()}");
-                    if (e.EventType == SessionEventType.SessionStoppedEvent)
-                    {
-                        Console.WriteLine("Exiting due to session stop event");
-                        taskSource.SetResult(true);
-                    }
+                    Console.WriteLine($"Received session started event {e.ToString()}");
+                };
+
+                recognizer.SessionStopped += (s, e) =>
+                {
+                    Console.WriteLine($"Received session stopped event {e.ToString()}");
+                    Console.WriteLine("Exiting due to session stop event");
+                    taskSource.SetResult(true);
                 };
 
                 recognizer.Canceled += (s, e) =>

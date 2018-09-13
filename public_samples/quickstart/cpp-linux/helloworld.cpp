@@ -19,10 +19,10 @@ void recognizeSpeech() {
     auto recognizer = SpeechRecognizer::FromConfig(config);
     cout << "Say something...\n";
 
-    // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+    // Performs recognition. RecognizeOnceAsync() returns when the first utterance has been recognized,
     // so it is suitable only for single shot recognition like command or query. For long-running
     // recognition, use StartContinuousRecognitionAsync() instead.
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     // Checks result.
     if (result->Reason == ResultReason::RecognizedSpeech) {

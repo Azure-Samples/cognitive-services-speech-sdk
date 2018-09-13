@@ -48,12 +48,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public static IntentRecognizer TrackSessionId(IntentRecognizer recognizer)
         {
-            recognizer.OnSessionEvent += (s, e) =>
+            recognizer.SessionStarted += (s, e) =>
             {
-                if (e.EventType == SessionEventType.SessionStartedEvent)
-                {
-                    Console.WriteLine("SessionId: " + e.SessionId);
-                }
+                Console.WriteLine("SessionId: " + e.SessionId);
             };
             return recognizer;
         }
@@ -71,7 +68,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
                 recognizer.AddIntent(model, modelIntent, localIntent);
 
-                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(TestData.English.HomeAutomation.TurnOn.Utterance, result.Text);
                 Assert.AreEqual(expectedIntent, result.IntentId);
             }

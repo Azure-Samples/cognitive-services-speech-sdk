@@ -127,7 +127,7 @@ void CarbonTestConsole::ch9_do_speech()
     auto recognizer = SpeechRecognizer::FromConfig(sc, nullptr);
 
     printf("Say something...\n");
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     printf("FINAL RESULT: '%s'\n", result->Text.c_str());
 }
@@ -137,12 +137,12 @@ void CarbonTestConsole::ch9_do_speech_intermediate()
     auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, speechRegion);
     auto recognizer = SpeechRecognizer::FromConfig(sc, nullptr);
 
-    recognizer->IntermediateResult += [](const SpeechRecognitionEventArgs& e) {
+    recognizer->Recognizing += [](const SpeechRecognitionEventArgs& e) {
         printf("INTERMEDIATE: %s ...\n", e.Result->Text.c_str());
     };
 
     printf("Listening...\n");
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     printf("FINAL RESULT: '%s'\n", result->Text.c_str());
 }
@@ -152,11 +152,11 @@ void CarbonTestConsole::ch9_do_speech_continuous()
     auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, speechRegion);
     auto recognizer = SpeechRecognizer::FromConfig(sc, nullptr);
 
-    recognizer->IntermediateResult += [](const SpeechRecognitionEventArgs& e) {
+    recognizer->Recognizing += [](const SpeechRecognitionEventArgs& e) {
         printf("INTERMEDIATE: %s ...\n", e.Result->Text.c_str());
     };
 
-    recognizer->FinalResult += [](const SpeechRecognitionEventArgs& e) {
+    recognizer->Recognized += [](const SpeechRecognitionEventArgs& e) {
         printf("FINAL RESULT: '%s'\n\n", e.Result->Text.c_str());
         printf("Listening... (press ENTER to exit) \n\n");
     };
@@ -181,7 +181,7 @@ void CarbonTestConsole::ch9_do_intent()
     auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, luisRegion);
     auto recognizer = IntentRecognizer::FromConfig(sc, nullptr);
 
-    recognizer->IntermediateResult += [](const IntentRecognitionEventArgs& e) {
+    recognizer->Recognizing += [](const IntentRecognitionEventArgs& e) {
         printf("INTERMEDIATE: %s ...\n", e.Result->Text.c_str());
     };
 
@@ -194,7 +194,7 @@ void CarbonTestConsole::ch9_do_intent()
     //recognizer->AddAllIntents(model, L"id-representing-all-intents");
 
     printf("Listening...\n");
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     printf("FINAL RESULT: '%s'\n", result->Text.c_str());
     printf("   INTENT ID: '%s'\n", result->IntentId.c_str());
@@ -208,11 +208,11 @@ void CarbonTestConsole::ch9_do_intent_continuous()
     auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, luisRegion);
     auto recognizer = IntentRecognizer::FromConfig(sc, nullptr);
 
-    recognizer->IntermediateResult += [](const IntentRecognitionEventArgs& e) {
+    recognizer->Recognizing += [](const IntentRecognitionEventArgs& e) {
         printf("INTERMEDIATE: %s ...\n", e.Result->Text.c_str());
     };
 
-    recognizer->FinalResult += [](const IntentRecognitionEventArgs& e) {
+    recognizer->Recognized += [](const IntentRecognitionEventArgs& e) {
         printf("FINAL RESULT: '%s'\n", e.Result->Text.c_str());
         printf("   INTENT ID: '%s'\n", e.Result->IntentId.c_str());
         printf("   LUIS JSON: '%s'\n\n", e.Result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonResult).c_str());
@@ -246,11 +246,11 @@ void CarbonTestConsole::ch9_do_kws_speech()
     auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, speechRegion);
     auto recognizer = SpeechRecognizer::FromConfig(sc, nullptr);
 
-    recognizer->IntermediateResult += [](const SpeechRecognitionEventArgs& e) {
+    recognizer->Recognizing += [](const SpeechRecognitionEventArgs& e) {
         printf("INTERMEDIATE: %s ...\n", e.Result->Text.c_str());
     };
 
-    recognizer->FinalResult += [](const SpeechRecognitionEventArgs& e) {
+    recognizer->Recognized += [](const SpeechRecognitionEventArgs& e) {
         printf("FINAL RESULT: '%s'\n", e.Result->Text.c_str());
         printf("KEYWORD SPOTTING: Say 'Hey Cortana' followed by whatever you want ...  (press ENTER to exit) \n\n");
     };
@@ -269,11 +269,11 @@ void CarbonTestConsole::ch9_do_kws_intent()
     auto sc = SpeechConfig::FromSubscription(m_subscriptionKey, luisRegion);
     auto recognizer = IntentRecognizer::FromConfig(sc, nullptr);
 
-    recognizer->IntermediateResult += [](const IntentRecognitionEventArgs& e) {
+    recognizer->Recognizing += [](const IntentRecognitionEventArgs& e) {
         printf("INTERMEDIATE: %s ...\n", e.Result->Text.c_str());
     };
 
-    recognizer->FinalResult += [](const IntentRecognitionEventArgs& e) {
+    recognizer->Recognized += [](const IntentRecognitionEventArgs& e) {
         printf("FINAL RESULT: '%s'\n", e.Result->Text.c_str());
         printf("   INTENT ID: '%s'\n", e.Result->IntentId.c_str());
         printf("   LUIS JSON: '%s'\n\n", e.Result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonResult).c_str());
@@ -312,11 +312,11 @@ void CarbonTestConsole::ch9_do_translation()
     sc->AddTargetLanguage("es-ES");
     auto recognizer = TranslationRecognizer::FromConfig(sc, nullptr);
 
-    recognizer->IntermediateResult += [](const TranslationTextResultEventArgs& e) {
+    recognizer->Recognizing += [](const TranslationTextResultEventArgs& e) {
         printf("INTERMEDIATE: %s ...\n", e.Result->Text.c_str());
     };
 
-    recognizer->FinalResult += [](const TranslationTextResultEventArgs& e) {
+    recognizer->Recognized += [](const TranslationTextResultEventArgs& e) {
         printf("FINAL RESULT: '%s'\n", e.Result->Text.c_str());
         for (auto translation : e.Result->Translations) {
             printf(" TRANSLATION: '%s' => '%s'\n", translation.first.c_str(), translation.second.c_str());

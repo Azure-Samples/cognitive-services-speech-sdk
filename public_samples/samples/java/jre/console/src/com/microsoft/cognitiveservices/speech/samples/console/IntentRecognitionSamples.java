@@ -40,7 +40,7 @@ public class IntentRecognitionSamples {
         System.out.println("Say something...");
 
         // Starts recognition. It returns when the first utterance has been recognized.
-        IntentRecognitionResult result = recognizer.recognizeAsync().get();
+        IntentRecognitionResult result = recognizer.recognizeOnceAsync().get();
 
         // Checks result.
         if (result.getReason() == ResultReason.RecognizedIntent) {
@@ -90,7 +90,7 @@ public class IntentRecognitionSamples {
         System.out.println("Say something...");
 
         // Starts recognition. It returns when the first utterance has been recognized.
-        IntentRecognitionResult result = recognizer.recognizeAsync().get();
+        IntentRecognitionResult result = recognizer.recognizeOnceAsync().get();
 
         // Checks result.
         if (result.getReason() == ResultReason.RecognizedIntent) {
@@ -139,11 +139,11 @@ public class IntentRecognitionSamples {
         recognizer.addIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
         // Subscribes to events.
-        recognizer.IntermediateResultReceived.addEventListener((s, e) -> {
+        recognizer.recognizing.addEventListener((s, e) -> {
             System.out.println("RECOGNIZING: Text=" + e.getResult().getText());
         });
 
-        recognizer.FinalResultReceived.addEventListener((s, e) -> {
+        recognizer.recognized.addEventListener((s, e) -> {
             if (e.getResult().getReason() == ResultReason.RecognizedIntent) {
                 System.out.println("RECOGNIZED: Text=" + e.getResult().getText());
                 System.out.println("    Intent Id: " + e.getResult().getIntentId());
@@ -158,7 +158,7 @@ public class IntentRecognitionSamples {
             }
         });
 
-        recognizer.Canceled.addEventListener((s, e) -> {
+        recognizer.canceled.addEventListener((s, e) -> {
             System.out.println("CANCELED: Reason=" + e.getReason());
 
             if (e.getReason() == CancellationReason.Error) {

@@ -24,9 +24,7 @@ import org.junit.Ignore;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.ResultReason;
-import com.microsoft.cognitiveservices.speech.RecognitionEventType;
 import com.microsoft.cognitiveservices.speech.Recognizer;
-import com.microsoft.cognitiveservices.speech.SessionEventType;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
@@ -38,7 +36,7 @@ import tests.Settings;
 public class SpeechRecognizerTests {
     private final Integer FIRST_EVENT_ID = 1;
     private AtomicInteger eventIdentifier = new AtomicInteger(FIRST_EVENT_ID);
-    
+
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
         // Override inputs, if necessary
@@ -46,7 +44,7 @@ public class SpeechRecognizerTests {
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
 
     @Ignore
@@ -57,7 +55,7 @@ public class SpeechRecognizerTests {
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
 
     @Test
@@ -69,7 +67,7 @@ public class SpeechRecognizerTests {
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-        
+
         r.close();
         s.close();
     }
@@ -81,22 +79,22 @@ public class SpeechRecognizerTests {
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
-        
+
         SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-        
-        SpeechRecognitionResult res = r.recognizeAsync().get();
+
+        SpeechRecognitionResult res = r.recognizeOnceAsync().get();
         assertNotNull(res);
         assertEquals("What's the weather like?", res.getText());
-                
+
         r.close();
         s.close();
     }
-    
+
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
 
     @Test
@@ -106,12 +104,12 @@ public class SpeechRecognizerTests {
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
-        
+
         SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
 
         assertNotNull(r.getEndpointId());
-        
+
         r.close();
         s.close();
     }
@@ -124,7 +122,7 @@ public class SpeechRecognizerTests {
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
-        
+
         SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
 
@@ -132,15 +130,15 @@ public class SpeechRecognizerTests {
 
         //String newEndpointId = "new-" + r.getEndpointId();
         //r.setEndpointId(newEndpointId);
-        
+
         //assertEquals(newEndpointId, r.getEndpointId());
-        
+
         r.close();
         s.close();
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
 
     @Test
@@ -155,7 +153,7 @@ public class SpeechRecognizerTests {
         assertNotNull(r);
 
         assertNotNull(r.getSpeechRecognitionLanguage());
-        
+
         r.close();
         s.close();
     }
@@ -210,13 +208,13 @@ public class SpeechRecognizerTests {
         assertNotNull(r);
 
         assertEquals(r.getOutputFormat(), OutputFormat.Detailed);
-        
+
         r.close();
         s.close();
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
 
     @Test
@@ -230,17 +228,17 @@ public class SpeechRecognizerTests {
         assertNotNull(r.getParameters());
         assertEquals(r.getSpeechRecognitionLanguage(), r.getParameters().getProperty(SpeechPropertyId.SpeechServiceConnection_RecoLanguage));
         assertEquals(r.getEndpointId(), r.getParameters().getProperty(SpeechPropertyId.SpeechServiceConnection_EndpointId)); // TODO: is this really the correct mapping?
-        
+
         r.close();
         s.close();
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
 
     @Test
-    public void testRecognizeAsync1() throws InterruptedException, ExecutionException, TimeoutException {
+    public void testRecognizeOnceAsync1() throws InterruptedException, ExecutionException, TimeoutException {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
@@ -248,8 +246,8 @@ public class SpeechRecognizerTests {
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-        
-        Future<SpeechRecognitionResult> future = r.recognizeAsync();
+
+        Future<SpeechRecognitionResult> future = r.recognizeOnceAsync();
         assertNotNull(future);
 
         // Wait for max 30 seconds
@@ -269,7 +267,7 @@ public class SpeechRecognizerTests {
 
     @Ignore("TODO why does not get whats the weather like")
     @Test
-    public void testRecognizeAsync2() throws InterruptedException, ExecutionException {
+    public void testRecognizeOnceAsync2() throws InterruptedException, ExecutionException {
         SpeechConfig s = SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
@@ -279,39 +277,50 @@ public class SpeechRecognizerTests {
         assertTrue(r instanceof Recognizer);
 
         final Map<String, Integer> eventsMap = new HashMap<String, Integer>();
-        
-        r.FinalResultReceived.addEventListener((o, e) -> {
-            eventsMap.put("FinalResultReceived", eventIdentifier.getAndIncrement());
+
+        r.recognized.addEventListener((o, e) -> {
+            eventsMap.put("recognized", eventIdentifier.getAndIncrement());
         });
 
-        r.IntermediateResultReceived.addEventListener((o, e) -> {
+        r.recognizing.addEventListener((o, e) -> {
             int now = eventIdentifier.getAndIncrement();
-            eventsMap.put("IntermediateResultReceived-" + System.currentTimeMillis(), now);
-            eventsMap.put("IntermediateResultReceived" , now);
+            eventsMap.put("recognizing-" + System.currentTimeMillis(), now);
+            eventsMap.put("recognizing" , now);
         });
-        
-        r.Canceled.addEventListener((o, e) -> {
+
+        r.canceled.addEventListener((o, e) -> {
             if (e.getReason() == CancellationReason.Error) {
-                eventsMap.put("RecognitionErrorRaised", eventIdentifier.getAndIncrement());
+                eventsMap.put("canceled", eventIdentifier.getAndIncrement());
             }
         });
 
-        // TODO eventType should be renamed and be a function getEventType()
-        r.RecognitionEvent.addEventListener((o, e) -> {
+        r.speechStartDetected.addEventListener((o, e) -> {
             int now = eventIdentifier.getAndIncrement();
-            eventsMap.put(e.eventType.name() + "-" + System.currentTimeMillis(), now);
-            eventsMap.put(e.eventType.name(), now);
+            eventsMap.put("speechStartDetected-" + System.currentTimeMillis(), now);
+            eventsMap.put("speechStartDetected", now);
         });
 
-        r.SessionEvent.addEventListener((o, e) -> {
+        r.speechEndDetected.addEventListener((o, e) -> {
             int now = eventIdentifier.getAndIncrement();
-            eventsMap.put(e.getEventType().name() + "-" + System.currentTimeMillis(), now);
-            eventsMap.put(e.getEventType().name(), now);
+            eventsMap.put("speechEndDetected-" + System.currentTimeMillis(), now);
+            eventsMap.put("speechEndDetected", now);
         });
-        
+
+        r.sessionStarted.addEventListener((o, e) -> {
+            int now = eventIdentifier.getAndIncrement();
+            eventsMap.put("sessionStarted-" + System.currentTimeMillis(), now);
+            eventsMap.put("sessionStarted", now);
+        });
+
+        r.sessionStopped.addEventListener((o, e) -> {
+            int now = eventIdentifier.getAndIncrement();
+            eventsMap.put("sessionStopped-" + System.currentTimeMillis(), now);
+            eventsMap.put("sessionStopped", now);
+        });
+
         // Note: TODO session stopped event not necessarily raised before async operation returns!
         //       this makes this test flaky
-        SpeechRecognitionResult res = r.recognizeAsync().get();
+        SpeechRecognitionResult res = r.recognizeOnceAsync().get();
         assertNotNull(res);
         assertEquals(ResultReason.RecognizedSpeech, res.getReason());
         assertEquals("What's the weather like?", res.getText());
@@ -319,41 +328,41 @@ public class SpeechRecognizerTests {
         // session events are first and last event
         final Integer LAST_RECORDED_EVENT_ID = eventIdentifier.get();
         assertTrue(LAST_RECORDED_EVENT_ID > FIRST_EVENT_ID);
-        assertEquals(FIRST_EVENT_ID, eventsMap.get(SessionEventType.SessionStartedEvent.name()));
-        if(eventsMap.containsKey(SessionEventType.SessionStoppedEvent.name()))
-            assertEquals(LAST_RECORDED_EVENT_ID, eventsMap.get(SessionEventType.SessionStoppedEvent.name()));
-        
+        assertEquals(FIRST_EVENT_ID, eventsMap.get("sessionStarted"));
+        if(eventsMap.containsKey("sessionStopped"))
+            assertEquals(LAST_RECORDED_EVENT_ID, eventsMap.get("sessionStopped"));
+
         // end events come after start events.
-        if(eventsMap.containsKey(SessionEventType.SessionStoppedEvent.name()))
-            assertTrue(eventsMap.get(SessionEventType.SessionStartedEvent.name()) < eventsMap.get(SessionEventType.SessionStoppedEvent.name()));
-        assertTrue(eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()) < eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()));
-        assertEquals((Integer)(FIRST_EVENT_ID + 1), eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()));
-        
+        if(eventsMap.containsKey("sessionStopped"))
+            assertTrue(eventsMap.get("sessionStarted") < eventsMap.get("sessionStopped"));
+        assertTrue(eventsMap.get("speechStartDetected") < eventsMap.get("speechEndDetected"));
+        assertEquals((Integer)(FIRST_EVENT_ID + 1), eventsMap.get("speechStartDetected"));
+
         // make sure, first end of speech, then final result
-        assertEquals((Integer)(LAST_RECORDED_EVENT_ID - 2), eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()));
-        assertEquals((Integer)(LAST_RECORDED_EVENT_ID - 1), eventsMap.get("FinalResultReceived"));
+        assertEquals((Integer)(LAST_RECORDED_EVENT_ID - 2), eventsMap.get("speechEndDetected"));
+        assertEquals((Integer)(LAST_RECORDED_EVENT_ID - 1), eventsMap.get("recognized"));
 
         // recognition events come after session start but before session end events
-        assertTrue(eventsMap.get(SessionEventType.SessionStartedEvent.name()) < eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()));
-        if(eventsMap.containsKey(SessionEventType.SessionStoppedEvent.name()))
-            assertTrue(eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()) < eventsMap.get(SessionEventType.SessionStoppedEvent.name()));
+        assertTrue(eventsMap.get("sessionStarted") < eventsMap.get("speechStartDetected"));
+        if(eventsMap.containsKey("sessionStopped"))
+            assertTrue(eventsMap.get("speechEndDetected") < eventsMap.get("sessionStopped"));
 
         // there is no partial result reported after the final result
         // (and check that we have intermediate and final results recorded)
-        if(eventsMap.containsKey("IntermediateResultReceived"))
-            assertTrue(eventsMap.get("IntermediateResultReceived") > eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()));
-        assertTrue(eventsMap.get("FinalResultReceived") < eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()));
-        assertTrue(eventsMap.get("IntermediateResultReceived") < eventsMap.get("FinalResultReceived"));
+        if(eventsMap.containsKey("recognizing"))
+            assertTrue(eventsMap.get("recognizing") > eventsMap.get("speechStartDetected"));
+        assertTrue(eventsMap.get("recognized") < eventsMap.get("speechEndDetected"));
+        assertTrue(eventsMap.get("recognizing") < eventsMap.get("recognized"));
 
         // make sure events we don't expect, don't get raised
-        assertFalse(eventsMap.containsKey("RecognitionErrorRaised"));
-        
+        assertFalse(eventsMap.containsKey("canceled"));
+
         r.close();
         s.close();
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
 
     @Test
@@ -365,7 +374,7 @@ public class SpeechRecognizerTests {
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-        
+
         Future<?> future = r.startContinuousRecognitionAsync();
         assertNotNull(future);
 
@@ -388,7 +397,7 @@ public class SpeechRecognizerTests {
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-        
+
         Future<?> future = r.startContinuousRecognitionAsync();
         assertNotNull(future);
 
@@ -423,13 +432,13 @@ public class SpeechRecognizerTests {
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-        
+
         final ArrayList<String> rEvents = new ArrayList<>();
 
-        r.FinalResultReceived.addEventListener((o, e) -> {
+        r.recognized.addEventListener((o, e) -> {
             rEvents.add("Result@" + System.currentTimeMillis());
         });
-        
+
         Future<?> future = r.startContinuousRecognitionAsync();
         assertNotNull(future);
 
@@ -442,7 +451,7 @@ public class SpeechRecognizerTests {
         // wait until we get at least on final result
         long now = System.currentTimeMillis();
         while(((System.currentTimeMillis() - now) < 30000) &&
-              (rEvents.isEmpty())) {
+                (rEvents.isEmpty())) {
             Thread.sleep(200);
         }
 
@@ -464,7 +473,7 @@ public class SpeechRecognizerTests {
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
 
     @Test
@@ -476,13 +485,13 @@ public class SpeechRecognizerTests {
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-                
+
         r.close();
         s.close();
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
 
     @Ignore
@@ -500,7 +509,7 @@ public class SpeechRecognizerTests {
         SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertTrue(r instanceof Recognizer);
-                
+
         r.close();
         s.close();
     }

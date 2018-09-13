@@ -77,14 +77,14 @@ public:
     /// <summary>
     /// Starts translation recognition as an asynchronous operation, and stops after the first utterance is recognized.
     /// The asynchronous operation returns <see creaf="TranslationTextResult"/> as result.
-    /// Note: RecognizeAsync() returns when the first utterance has been recognized, 
+    /// Note: RecognizeOnceAsync() returns when the first utterance has been recognized, 
     /// so it is suitable only for single shot recognition like command or query.
     /// For long-running recognition, use StartContinuousRecognitionAsync() instead.
     /// </summary>
     /// <returns>An asynchronous operation representing the recognition. It returns a value of <see cref="TranslationTextResult"/> as result.</returns>
-    std::future<std::shared_ptr<TranslationTextResult>> RecognizeAsync() override
+    std::future<std::shared_ptr<TranslationTextResult>> RecognizeOnceAsync() override
     {
-        return BaseType::RecognizeAsyncInternal();
+        return BaseType::RecognizeOnceAsyncInternal();
     }
 
     /// <summary>

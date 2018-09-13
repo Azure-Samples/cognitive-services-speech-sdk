@@ -35,10 +35,10 @@ void TranslationWithMicrophone()
     auto recognizer = TranslationRecognizer::FromConfig(config);
     cout << "Say something...\n";
 
-    // Starts translation. RecognizeAsync() returns when the first utterance has been recognized,
+    // Starts translation. RecognizeOnceAsync() returns when the first utterance has been recognized,
     // so it is suitable only for single shot recognition like command or query. For long-running
     // recognition, use StartContinuousRecognitionAsync() instead.
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     // Checks result.
     if (result->Reason == ResultReason::TranslatedSpeech)
@@ -91,16 +91,16 @@ void TranslationContinuousRecognition()
     auto recognizer = TranslationRecognizer::FromConfig(config);
 
     // Subscribes to events.
-    recognizer->IntermediateResult.Connect([](const TranslationTextResultEventArgs& e)
+    recognizer->Recognizing.Connect([](const TranslationTextResultEventArgs& e)
     {
-        cout << "IntermediateResult:" << e.Result->Text << std::endl;
+        cout << "Recognizing:" << e.Result->Text << std::endl;
         for (const auto& it : e.Result->Translations)
         {
             cout << "  Translated into '" << it.first.c_str() << "': " << it.second.c_str() << std::endl;
         }
     });
 
-    recognizer->FinalResult.Connect([](const TranslationTextResultEventArgs& e)
+    recognizer->Recognized.Connect([](const TranslationTextResultEventArgs& e)
     {
         if (e.Result->Reason == ResultReason::TranslatedSpeech)
         {

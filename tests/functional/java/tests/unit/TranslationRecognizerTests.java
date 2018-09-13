@@ -22,9 +22,7 @@ import org.junit.Ignore;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.ResultReason;
-import com.microsoft.cognitiveservices.speech.RecognitionEventType;
 import com.microsoft.cognitiveservices.speech.Recognizer;
-import com.microsoft.cognitiveservices.speech.SessionEventType;
 import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
 import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
@@ -35,7 +33,7 @@ import tests.Settings;
 public class TranslationRecognizerTests {
     private final Integer FIRST_EVENT_ID = 1;
     private AtomicInteger eventIdentifier = new AtomicInteger(FIRST_EVENT_ID);
-    
+
     @BeforeClass
     static public void setUpBeforeClass() throws Exception {
         // Override inputs, if necessary
@@ -43,7 +41,7 @@ public class TranslationRecognizerTests {
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
 
     @Ignore
@@ -54,7 +52,7 @@ public class TranslationRecognizerTests {
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
 
     @Ignore("TODO not working with microphone")
@@ -69,7 +67,7 @@ public class TranslationRecognizerTests {
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-                
+
         r.close();
         s.close();
     }
@@ -81,21 +79,21 @@ public class TranslationRecognizerTests {
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
-        
+
         s.setSpeechRecognitionLanguage("en-US");
         s.addTargetLanguage("de");
-        
+
         TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-        
+
         r.close();
         s.close();
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
 
     @Test
@@ -105,11 +103,11 @@ public class TranslationRecognizerTests {
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
-        
+
         String language = "en-US";
         s.setSpeechRecognitionLanguage(language);
         s.addTargetLanguage("de");
-        
+
         TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromStreamInput(ais));
         assertTrue(!r.getSpeechRecognitionLanguage().isEmpty());
         assertEquals(language, r.getSpeechRecognitionLanguage());
@@ -126,7 +124,7 @@ public class TranslationRecognizerTests {
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
-        
+
         String language = "en-US";
         s.setSpeechRecognitionLanguage(language);
         s.addTargetLanguage(language);
@@ -140,7 +138,7 @@ public class TranslationRecognizerTests {
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
 
     @Test
@@ -150,7 +148,7 @@ public class TranslationRecognizerTests {
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
-        
+
         String language = "en-US";
         s.setSpeechRecognitionLanguage(language);
         s.addTargetLanguage(language);
@@ -169,7 +167,7 @@ public class TranslationRecognizerTests {
 
         WavFileAudioInputStream ais = new WavFileAudioInputStream(Settings.WavFile);
         assertNotNull(ais);
-        
+
         String language = "en-US";
         String voice = "de-DE-Katja";
         s.setSpeechRecognitionLanguage(language);
@@ -185,7 +183,7 @@ public class TranslationRecognizerTests {
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
 
     @Ignore("TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)")
@@ -203,35 +201,35 @@ public class TranslationRecognizerTests {
 
         assertNotNull(r.getParameters());
         assertEquals(r.getSpeechRecognitionLanguage(), r.getParameters().getProperty(SpeechPropertyId.SpeechServiceConnection_TranslationFromLanguage));
-        
+
         // TODO this cannot be true, right? comparing an array with a string parameter???
         assertEquals(1, r.getTargetLanguages().size());
         assertEquals(r.getTargetLanguages().get(0), r.getParameters().getProperty(SpeechPropertyId.SpeechServiceConnection_TranslationToLanguages));
-        
+
         r.close();
         s.close();
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
 
     @Ignore("TODO why is number translations not 1 (FIX JAVA LIB FORWARD PROPERTY)")
     @Test
-    public void testRecognizeAsync1() throws InterruptedException, ExecutionException, TimeoutException {
+    public void testRecognizeOnceAsync1() throws InterruptedException, ExecutionException, TimeoutException {
         SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         String language = "en-US";
         s.setSpeechRecognitionLanguage(language);
         s.addTargetLanguage(language);
-        
+
         TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-        
-        Future<TranslationTextResult> future = r.recognizeAsync();
+
+        Future<TranslationTextResult> future = r.recognizeOnceAsync();
         assertNotNull(future);
 
         // Wait for max 30 seconds
@@ -243,7 +241,7 @@ public class TranslationRecognizerTests {
         TranslationTextResult res = future.get();
         assertNotNull(res);
         assertTrue(ResultReason.RecognizedSpeech == res.getReason() ||
-                   ResultReason.RecognizedIntent == res.getReason());
+                ResultReason.RecognizedIntent == res.getReason());
         assertEquals("What's the weather like?", res.getText());
 
         assertNotNull(res.getProperties());
@@ -257,53 +255,64 @@ public class TranslationRecognizerTests {
 
     @Ignore("TODO why is event order wrong?")
     @Test
-    public void testRecognizeAsync2() throws InterruptedException, ExecutionException {
+    public void testRecognizeOnceAsync2() throws InterruptedException, ExecutionException {
         SpeechTranslationConfig s = SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
         assertNotNull(s);
 
         String language = "en-US";
         s.setSpeechRecognitionLanguage(language);
         s.addTargetLanguage(language);
-        
+
         TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
 
         final Map<String, Integer> eventsMap = new HashMap<String, Integer>();
-        
-        r.FinalResultReceived.addEventListener((o, e) -> {
-            eventsMap.put("FinalResultReceived", eventIdentifier.getAndIncrement());
+
+        r.recognized.addEventListener((o, e) -> {
+            eventsMap.put("recognized", eventIdentifier.getAndIncrement());
         });
 
-        r.IntermediateResultReceived.addEventListener((o, e) -> {
+        r.recognizing.addEventListener((o, e) -> {
             int now = eventIdentifier.getAndIncrement();
-            eventsMap.put("IntermediateResultReceived-" + System.currentTimeMillis(), now);
-            eventsMap.put("IntermediateResultReceived" , now);
+            eventsMap.put("recognizing-" + System.currentTimeMillis(), now);
+            eventsMap.put("recognizing" , now);
         });
-        
-        r.Canceled.addEventListener((o, e) -> {
+
+        r.canceled.addEventListener((o, e) -> {
             if (e.getReason() == CancellationReason.Error) {
-                eventsMap.put("RecognitionErrorRaised", eventIdentifier.getAndIncrement());
+                eventsMap.put("canceled", eventIdentifier.getAndIncrement());
             }
         });
 
-        // TODO eventType should be renamed and be a function getEventType()
-        r.RecognitionEvent.addEventListener((o, e) -> {
+        r.speechStartDetected.addEventListener((o, e) -> {
             int now = eventIdentifier.getAndIncrement();
-            eventsMap.put(e.eventType.name() + "-" + System.currentTimeMillis(), now);
-            eventsMap.put(e.eventType.name(), now);
+            eventsMap.put("speechStartDetected-" + System.currentTimeMillis(), now);
+            eventsMap.put("speechStartDetected", now);
         });
 
-        r.SessionEvent.addEventListener((o, e) -> {
+        r.speechEndDetected.addEventListener((o, e) -> {
             int now = eventIdentifier.getAndIncrement();
-            eventsMap.put(e.getEventType().name() + "-" + System.currentTimeMillis(), now);
-            eventsMap.put(e.getEventType().name(), now);
+            eventsMap.put("speechEndDetected-" + System.currentTimeMillis(), now);
+            eventsMap.put("speechEndDetected", now);
         });
 
-        // TODO there is no guarantee that SessionStoppedEvent comes before the recognizeAsync() call returns?!
-        //      this is why below SessionStoppedEvent checks are conditional 
-        TranslationTextResult res = r.recognizeAsync().get();
+        r.sessionStarted.addEventListener((o, e) -> {
+            int now = eventIdentifier.getAndIncrement();
+            eventsMap.put("sessionStarted-" + System.currentTimeMillis(), now);
+            eventsMap.put("sessionStarted", now);
+        });
+
+        r.sessionStopped.addEventListener((o, e) -> {
+            int now = eventIdentifier.getAndIncrement();
+            eventsMap.put("sessionStopped-" + System.currentTimeMillis(), now);
+            eventsMap.put("sessionStopped", now);
+        });
+
+        // TODO there is no guarantee that SessionStoppedEvent comes before the recognizeOnceAsync() call returns?!
+        //      this is why below SessionStoppedEvent checks are conditional
+        TranslationTextResult res = r.recognizeOnceAsync().get();
         assertNotNull(res);
         assertTrue(res.getReason() != ResultReason.Canceled);
         assertEquals("What's the weather like?", res.getText());
@@ -311,35 +320,35 @@ public class TranslationRecognizerTests {
         // session events are first and last event
         final Integer LAST_RECORDED_EVENT_ID = eventIdentifier.get();
         assertTrue(LAST_RECORDED_EVENT_ID > FIRST_EVENT_ID);
-        assertEquals(FIRST_EVENT_ID, eventsMap.get(SessionEventType.SessionStartedEvent.name()));
-        if(eventsMap.containsKey(SessionEventType.SessionStoppedEvent.name()))
-            assertEquals(LAST_RECORDED_EVENT_ID, eventsMap.get(SessionEventType.SessionStoppedEvent.name()));
-       
+        assertEquals(FIRST_EVENT_ID, eventsMap.get("sessionStarted"));
+        if(eventsMap.containsKey("sessionStopped"))
+            assertEquals(LAST_RECORDED_EVENT_ID, eventsMap.get("sessionStopped"));
+
         // end events come after start events.
-        if(eventsMap.containsKey(SessionEventType.SessionStoppedEvent.name()))
-            assertTrue(eventsMap.get(SessionEventType.SessionStartedEvent.name()) < eventsMap.get(SessionEventType.SessionStoppedEvent.name()));
-        assertTrue(eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()) < eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()));
-        assertEquals((Integer)(FIRST_EVENT_ID + 1), eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()));
-        assertEquals((Integer)(LAST_RECORDED_EVENT_ID - 1), eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()));
+        if(eventsMap.containsKey("sessionStopped"))
+            assertTrue(eventsMap.get("sessionStarted") < eventsMap.get("sessionStopped"));
+        assertTrue(eventsMap.get("speechStartDetected") < eventsMap.get("speechEndDetected"));
+        assertEquals((Integer)(FIRST_EVENT_ID + 1), eventsMap.get("speechStartDetected"));
+        assertEquals((Integer)(LAST_RECORDED_EVENT_ID - 1), eventsMap.get("speechEndDetected"));
 
         // recognition events come after session start but before session end events
-        assertTrue(eventsMap.get(SessionEventType.SessionStartedEvent.name()) < eventsMap.get(RecognitionEventType.SpeechStartDetectedEvent.name()));
-        if(eventsMap.containsKey(SessionEventType.SessionStoppedEvent.name()))
-            assertTrue(eventsMap.get(RecognitionEventType.SpeechEndDetectedEvent.name()) < eventsMap.get(SessionEventType.SessionStoppedEvent.name()));
+        assertTrue(eventsMap.get("sessionStarted") < eventsMap.get("speechStartDetected"));
+        if(eventsMap.containsKey("sessionStopped"))
+            assertTrue(eventsMap.get("speechEndDetected") < eventsMap.get("sessionStopped"));
 
         // there is no partial result reported after the final result
         // (and check that we have intermediate and final results recorded)
-        assertTrue(eventsMap.get("IntermediateResultReceived") < eventsMap.get("FinalResultReceived"));
+        assertTrue(eventsMap.get("recognizing") < eventsMap.get("recognized"));
 
         // make sure events we don't expect, don't get raised
-        assertFalse(eventsMap.containsKey("RecognitionErrorRaised"));
-        
+        assertFalse(eventsMap.containsKey("canceled"));
+
         r.close();
         s.close();
     }
-    
+
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
 
     @Test
@@ -350,12 +359,12 @@ public class TranslationRecognizerTests {
         String language = "en-US";
         s.setSpeechRecognitionLanguage(language);
         s.addTargetLanguage(language);
-        
+
         TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-        
+
         Future<?> future = r.startContinuousRecognitionAsync();
         assertNotNull(future);
 
@@ -377,12 +386,12 @@ public class TranslationRecognizerTests {
         String language = "en-US";
         s.setSpeechRecognitionLanguage(language);
         s.addTargetLanguage(language);
-        
+
         TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-        
+
         Future<?> future = r.startContinuousRecognitionAsync();
         assertNotNull(future);
 
@@ -416,18 +425,18 @@ public class TranslationRecognizerTests {
         String language = "en-US";
         s.setSpeechRecognitionLanguage(language);
         s.addTargetLanguage(language);
-        
+
         TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-        
+
         final ArrayList<String> rEvents = new ArrayList<>();
 
-        r.FinalResultReceived.addEventListener((o, e) -> {
+        r.recognized.addEventListener((o, e) -> {
             rEvents.add("Result@" + System.currentTimeMillis());
         });
-        
+
         Future<?> future = r.startContinuousRecognitionAsync();
         assertNotNull(future);
 
@@ -440,7 +449,7 @@ public class TranslationRecognizerTests {
         // wait until we get at least on final result
         long now = System.currentTimeMillis();
         while(((System.currentTimeMillis() - now) < 30000) &&
-              (rEvents.isEmpty())) {
+                (rEvents.isEmpty())) {
             Thread.sleep(200);
         }
 
@@ -462,7 +471,7 @@ public class TranslationRecognizerTests {
     }
 
     // -----------------------------------------------------------------------
-    // --- 
+    // ---
     // -----------------------------------------------------------------------
 
     @Ignore("TODO not working with microphone")
@@ -474,12 +483,12 @@ public class TranslationRecognizerTests {
         String language = "en-US";
         s.setSpeechRecognitionLanguage(language);
         s.addTargetLanguage(language);
-        
+
         TranslationRecognizer r = new TranslationRecognizer(s, null);
         assertNotNull(r);
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
-                
+
         r.close();
         s.close();
     }

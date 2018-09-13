@@ -7,7 +7,7 @@ package com.microsoft.cognitiveservices.speech;
 /** 
 * Define RecognitionEventType event types.
 */
-public enum RecognitionEventType
+enum RecognitionEventType
 {
     SpeechStartDetectedEvent,
     SpeechEndDetectedEvent

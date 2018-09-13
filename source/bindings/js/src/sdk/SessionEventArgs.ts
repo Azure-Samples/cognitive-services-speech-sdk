@@ -10,13 +10,6 @@ import { SessionEventType } from "./SessionEventType";
  */
 export class SessionEventArgs {
     /**
-     * Represents the event type.
-     * @property
-     * @returns Represents the event type.
-     */
-    public eventType: SessionEventType;
-
-    /**
      * Represents the session identifier.
      * @property
      * @returns Represents the session identifier.

@@ -192,13 +192,13 @@ bool CarbonTestConsole::ParseConsoleArgs(const std::vector<std::string>& args, C
         else if (PAL::stricmp(pszArg, "--single") == 0)
         {
             fShowOptions = pconsoleArgs->m_fContinuousRecognition || fNextArgRequired;
-            pconsoleArgs->m_fRecognizeAsync = true;
+            pconsoleArgs->m_fRecognizeOnceAsync = true;
             pstrNextArg = nullptr;
             fNextArgRequired = false;
         }
         else if (PAL::strnicmp(pszArg, "--continuous", strlen("--continuous")) == 0)
         {
-            fShowOptions = pconsoleArgs->m_fRecognizeAsync || fNextArgRequired;
+            fShowOptions = pconsoleArgs->m_fRecognizeOnceAsync || fNextArgRequired;
             pconsoleArgs->m_fContinuousRecognition = true;
             pconsoleArgs->m_continuousRecognitionSeconds = UINT16_MAX;
             pstrNextArg = &pconsoleArgs->m_strContinuousRecognitionSeconds;
@@ -290,7 +290,7 @@ bool CarbonTestConsole::ValidateConsoleArgs(ConsoleArgs* pconsoleArgs)
         pconsoleArgs->m_continuousRecognitionSeconds = uint16_t(std::min(std::max(seconds, 0), 30));
     }
 
-    if (pconsoleArgs->m_fRecognizeAsync || pconsoleArgs->m_fContinuousRecognition)
+    if (pconsoleArgs->m_fRecognizeOnceAsync || pconsoleArgs->m_fContinuousRecognition)
     {
         if (pconsoleArgs->m_strRecognizerType.length() == 0)
         {
@@ -299,7 +299,7 @@ bool CarbonTestConsole::ValidateConsoleArgs(ConsoleArgs* pconsoleArgs)
     }
     else if (pconsoleArgs->m_strRecognizerType.length() > 0)
     {
-        pconsoleArgs->m_fRecognizeAsync = !pconsoleArgs->m_fCommandSystem && !pconsoleArgs->m_fInteractivePrompt;
+        pconsoleArgs->m_fRecognizeOnceAsync = !pconsoleArgs->m_fCommandSystem && !pconsoleArgs->m_fInteractivePrompt;
     }
 
     if (!pconsoleArgs->m_strHowManyTimes.empty())
@@ -326,12 +326,12 @@ void CarbonTestConsole::ProcessConsoleArgs(ConsoleArgs* pconsoleArgs)
 
     EnsureInitCarbon(pconsoleArgs);
 
-    if (pconsoleArgs->m_fRecognizeAsync)
+    if (pconsoleArgs->m_fRecognizeOnceAsync)
     {
         auto count = pconsoleArgs->m_runHowManyTimes;
         while (count-- > 0)
         {
-            RecognizeAsync();
+            RecognizeOnceAsync();
             ConsoleWrite(count > 0 ? "\n" : "");
         }
     }
@@ -370,7 +370,7 @@ void CarbonTestConsole::DisplayConsoleUsage()
     ConsoleWriteLine("");
     ConsoleWriteLine("     Additional:");
     ConsoleWriteLine("");
-    ConsoleWriteLine("       --single                Use RecognizeAsync for a single utterance.");
+    ConsoleWriteLine("       --single                Use RecognizeOnceAsync for a single utterance.");
     ConsoleWriteLine("       --continuous:{seconds}  Use [Start/Stop]ContinuousRecognition, waiting");
     ConsoleWriteLine("                               {seconds} in between starting and stopping.");
     ConsoleWriteLine("");
@@ -575,8 +575,8 @@ void CarbonTestConsole::ConsoleInput_HelpOnRecognizer()
     ConsoleWriteLine("    SessionStopped     {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine("    SpeechStartDetected       {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine("    SpeechEndDetected       {Connect | Disconnect | DisconnectAll}");
-    ConsoleWriteLine("    IntermediateResult {Connect | Disconnect | DisconnectAll}");
-    ConsoleWriteLine("    FinalResult        {Connect | Disconnect | DisconnectAll}");
+    ConsoleWriteLine("    Recognizing {Connect | Disconnect | DisconnectAll}");
+    ConsoleWriteLine("    Recognized        {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine("    Canceled           {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine("");
 }
@@ -612,8 +612,8 @@ void CarbonTestConsole::ConsoleInput_HelpOnSpeech()
     ConsoleWriteLine("    SessionStopped     {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine("    SpeechStartDetected       {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine("    SpeechEndDetected       {Connect | Disconnect | DisconnectAll}");
-    ConsoleWriteLine("    IntermediateResult {Connect | Disconnect | DisconnectAll}");
-    ConsoleWriteLine("    FinalResult        {Connect | Disconnect | DisconnectAll}");
+    ConsoleWriteLine("    Recognizing {Connect | Disconnect | DisconnectAll}");
+    ConsoleWriteLine("    Recognized        {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine("    Canceled           {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine("");
 }
@@ -640,8 +640,8 @@ void CarbonTestConsole::ConsoleInput_HelpOnIntent()
     ConsoleWriteLine("    SessionStopped     {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine("    SpeechStartDetected       {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine("    SpeechEndDetected       {Connect | Disconnect | DisconnectAll}");
-    ConsoleWriteLine("    IntermediateResult {Connect | Disconnect | DisconnectAll}");
-    ConsoleWriteLine("    FinalResult        {Connect | Disconnect | DisconnectAll}");
+    ConsoleWriteLine("    Recognizing {Connect | Disconnect | DisconnectAll}");
+    ConsoleWriteLine("    Recognized        {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine("    Canceled           {Connect | Disconnect | DisconnectAll}");
     ConsoleWriteLine("");
 }
@@ -755,13 +755,13 @@ void CarbonTestConsole::ConsoleInput_Recognizer(const char* psz, std::shared_ptr
     }
     else if (PAL::strnicmp(psz, "intermediateresult ", strlen("intermediateresult ")) == 0)
     {
-        auto fn = std::bind(&CarbonTestConsole::Recognizer_IntermediateResultHandler, this, std::placeholders::_1);
-        Recognizer_Event(psz + strlen("intermediateresult "), m_recognizer->IntermediateResult, fn);
+        auto fn = std::bind(&CarbonTestConsole::Recognizer_RecognizingHandler, this, std::placeholders::_1);
+        Recognizer_Event(psz + strlen("intermediateresult "), m_recognizer->Recognizing, fn);
     }
     else if (PAL::strnicmp(psz, "finalresult ", strlen("finalresult ")) == 0)
     {
-        auto fn = std::bind(&CarbonTestConsole::Recognizer_FinalResultHandler, this, std::placeholders::_1);
-        Recognizer_Event(psz + strlen("finalresult "), m_recognizer->FinalResult, fn);
+        auto fn = std::bind(&CarbonTestConsole::Recognizer_RecognizedHandler, this, std::placeholders::_1);
+        Recognizer_Event(psz + strlen("finalresult "), m_recognizer->Recognized, fn);
     }
     else if (PAL::strnicmp(psz, "canceled ", strlen("canceled ")) == 0)
     {
@@ -830,13 +830,13 @@ void CarbonTestConsole::ConsoleInput_SpeechRecognizer(const char* psz, std::shar
     }
     else if (PAL::strnicmp(psz, "intermediateresult ", strlen("intermediateresult ")) == 0)
     {
-        auto fn = std::bind(&CarbonTestConsole::SpeechRecognizer_IntermediateResultHandler, this, std::placeholders::_1);
-        Recognizer_Event(psz + strlen("intermediateresult "), m_speechRecognizer->IntermediateResult, fn);
+        auto fn = std::bind(&CarbonTestConsole::SpeechRecognizer_RecognizingHandler, this, std::placeholders::_1);
+        Recognizer_Event(psz + strlen("intermediateresult "), m_speechRecognizer->Recognizing, fn);
     }
     else if (PAL::strnicmp(psz, "finalresult ", strlen("finalresult ")) == 0)
     {
-        auto fn = std::bind(&CarbonTestConsole::SpeechRecognizer_FinalResultHandler, this, std::placeholders::_1);
-        Recognizer_Event(psz + strlen("finalresult "), m_speechRecognizer->FinalResult, fn);
+        auto fn = std::bind(&CarbonTestConsole::SpeechRecognizer_RecognizedHandler, this, std::placeholders::_1);
+        Recognizer_Event(psz + strlen("finalresult "), m_speechRecognizer->Recognized, fn);
     }
     else if (PAL::strnicmp(psz, "canceled ", strlen("canceled ")) == 0)
     {
@@ -929,13 +929,13 @@ void CarbonTestConsole::ConsoleInput_IntentRecognizer(const char* psz, std::shar
     }
     else if (PAL::strnicmp(psz, "intermediateresult ", strlen("intermediateresult ")) == 0)
     {
-        auto fn = std::bind(&CarbonTestConsole::IntentRecognizer_IntermediateResultHandler, this, std::placeholders::_1);
-        Recognizer_Event(psz + strlen("intermediateresult "), m_intentRecognizer->IntermediateResult, fn);
+        auto fn = std::bind(&CarbonTestConsole::IntentRecognizer_RecognizingHandler, this, std::placeholders::_1);
+        Recognizer_Event(psz + strlen("intermediateresult "), m_intentRecognizer->Recognizing, fn);
     }
     else if (PAL::strnicmp(psz, "finalresult ", strlen("finalresult ")) == 0)
     {
-        auto fn = std::bind(&CarbonTestConsole::IntentRecognizer_FinalResultHandler, this, std::placeholders::_1);
-        Recognizer_Event(psz + strlen("finalresult "), m_intentRecognizer->FinalResult, fn);
+        auto fn = std::bind(&CarbonTestConsole::IntentRecognizer_RecognizedHandler, this, std::placeholders::_1);
+        Recognizer_Event(psz + strlen("finalresult "), m_intentRecognizer->Recognized, fn);
     }
     else if (PAL::strnicmp(psz, "canceled ", strlen("canceled ")) == 0)
     {
@@ -991,11 +991,11 @@ void CarbonTestConsole::Factory_CreateSpeechRecognizer(const char* psz)
     std::string filename(psz + 1);
     m_speechRecognizer = SpeechRecognizer::FromConfig(sc, AudioConfig::FromWavFileInput(filename));
 
-    auto fn1 = std::bind(&CarbonTestConsole::SpeechRecognizer_FinalResultHandler, this, std::placeholders::_1);
-    m_speechRecognizer->FinalResult.Connect(fn1);
+    auto fn1 = std::bind(&CarbonTestConsole::SpeechRecognizer_RecognizedHandler, this, std::placeholders::_1);
+    m_speechRecognizer->Recognized.Connect(fn1);
 
-    auto fn2 = std::bind(&CarbonTestConsole::SpeechRecognizer_IntermediateResultHandler, this, std::placeholders::_1);
-    m_speechRecognizer->IntermediateResult.Connect(fn2);
+    auto fn2 = std::bind(&CarbonTestConsole::SpeechRecognizer_RecognizingHandler, this, std::placeholders::_1);
+    m_speechRecognizer->Recognizing.Connect(fn2);
 
     m_recognizer = BaseAsyncRecognizer::FromRecognizer(m_speechRecognizer);
     m_session = Session::FromRecognizer(m_speechRecognizer);
@@ -1038,21 +1038,21 @@ template <class T>
 void CarbonTestConsole::recognizer_recognize_once(std::shared_ptr<T>& recognizer)
 {
     auto name = PAL::GetTypeName(*recognizer.get());
-    ConsoleWriteLine("\nRecognizeAsync %s...", name.c_str());
-    auto future = recognizer->RecognizeAsync();
-    ConsoleWriteLine("RecognizeAsync %s... Waiting...", name.c_str());
+    ConsoleWriteLine("\nRecognizeOnceAsync %s...", name.c_str());
+    auto future = recognizer->RecognizeOnceAsync();
+    ConsoleWriteLine("RecognizeOnceAsync %s... Waiting...", name.c_str());
     auto result = future.get();
-    ConsoleWriteLine("RecognizeAsync %s... Waiting... Done!\n", name.c_str());
+    ConsoleWriteLine("RecognizeOnceAsync %s... Waiting... Done!\n", name.c_str());
 }
 
 void CarbonTestConsole::recognizer_recognize_once(std::shared_ptr<SpeechRecognizer>& recognizer)
 {
     auto name = PAL::GetTypeName(*recognizer.get());
-    ConsoleWriteLine("\nRecognizeAsync %s...", name.c_str());
-    auto future = recognizer->RecognizeAsync();
-    ConsoleWriteLine("RecognizeAsync %s... Waiting...", name.c_str());
+    ConsoleWriteLine("\nRecognizeOnceAsync %s...", name.c_str());
+    auto future = recognizer->RecognizeOnceAsync();
+    ConsoleWriteLine("RecognizeOnceAsync %s... Waiting...", name.c_str());
     auto result = future.get();
-    ConsoleWriteLine("RecognizeAsync %s... Waiting... Done!\n", name.c_str());
+    ConsoleWriteLine("RecognizeOnceAsync %s... Waiting... Done!\n", name.c_str());
     ConsoleWriteLine("SpeechRecognitionResult: ResultId=%s; Reason=%d; Text=%s", result->ResultId.c_str(), result->Reason, result->Text.c_str());
 
     if (result->Reason == ResultReason::Canceled)
@@ -1066,11 +1066,11 @@ void CarbonTestConsole::recognizer_recognize_once(std::shared_ptr<SpeechRecogniz
 void CarbonTestConsole::recognizer_recognize_once(std::shared_ptr<IntentRecognizer>& recognizer)
 {
     auto name = PAL::GetTypeName(*recognizer.get());
-    ConsoleWriteLine("\nRecognizeAsync %s...", name.c_str());
-    auto future = recognizer->RecognizeAsync();
-    ConsoleWriteLine("RecognizeAsync %s... Waiting...", name.c_str());
+    ConsoleWriteLine("\nRecognizeOnceAsync %s...", name.c_str());
+    auto future = recognizer->RecognizeOnceAsync();
+    ConsoleWriteLine("RecognizeOnceAsync %s... Waiting...", name.c_str());
     auto result = future.get();
-    ConsoleWriteLine("RecognizeAsync %s... Waiting... Done!\n", name.c_str());
+    ConsoleWriteLine("RecognizeOnceAsync %s... Waiting... Done!\n", name.c_str());
 
     auto resultId = result->ResultId;
     auto reason = result->Reason;
@@ -1091,11 +1091,11 @@ void CarbonTestConsole::recognizer_recognize_once(std::shared_ptr<IntentRecogniz
 void CarbonTestConsole::recognizer_recognize_once(std::shared_ptr<TranslationRecognizer>& recognizer)
 {
     auto name = PAL::GetTypeName(*recognizer.get());
-    ConsoleWriteLine("\nRecognizeAsync %s...", name.c_str());
-    auto future = recognizer->RecognizeAsync();
-    ConsoleWriteLine("RecognizeAsync %s... Waiting...", name.c_str());
+    ConsoleWriteLine("\nRecognizeOnceAsync %s...", name.c_str());
+    auto future = recognizer->RecognizeOnceAsync();
+    ConsoleWriteLine("RecognizeOnceAsync %s... Waiting...", name.c_str());
     auto result = future.get();
-    ConsoleWriteLine("RecognizeAsync %s... Waiting... Done!\n", name.c_str());
+    ConsoleWriteLine("RecognizeOnceAsync %s... Waiting... Done!\n", name.c_str());
 
     ConsoleWriteLine("TranslationTextResult: ResultId=%s, RecognizedText=%s", result->TranslationTextResult::ResultId.c_str(), result->Text.c_str());
 
@@ -1634,11 +1634,11 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
 
         m_speechRecognizer = SpeechRecognizer::FromConfig(sc, AudioConfig::FromWavFileInput(wavFileName));
         
-        auto fn1 = std::bind(&CarbonTestConsole::SpeechRecognizer_FinalResultHandler, this, std::placeholders::_1);
-        m_speechRecognizer->FinalResult.Connect(fn1);
+        auto fn1 = std::bind(&CarbonTestConsole::SpeechRecognizer_RecognizedHandler, this, std::placeholders::_1);
+        m_speechRecognizer->Recognized.Connect(fn1);
 
-        auto fn2 = std::bind(&CarbonTestConsole::SpeechRecognizer_IntermediateResultHandler, this, std::placeholders::_1);
-        m_speechRecognizer->IntermediateResult.Connect(fn2);
+        auto fn2 = std::bind(&CarbonTestConsole::SpeechRecognizer_RecognizingHandler, this, std::placeholders::_1);
+        m_speechRecognizer->Recognizing.Connect(fn2);
 
         m_recognizer = BaseAsyncRecognizer::FromRecognizer(m_speechRecognizer);
         m_session = Session::FromRecognizer(m_speechRecognizer);
@@ -1655,11 +1655,11 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
 
         m_translationRecognizer = TranslationRecognizer::FromConfig(sc, AudioConfig::FromWavFileInput(wavFileName));
 
-        auto fn1 = std::bind(&CarbonTestConsole::TranslationRecognizer_FinalResultHandler, this, std::placeholders::_1);
-        m_translationRecognizer->FinalResult.Connect(fn1);
+        auto fn1 = std::bind(&CarbonTestConsole::TranslationRecognizer_RecognizedHandler, this, std::placeholders::_1);
+        m_translationRecognizer->Recognized.Connect(fn1);
 
-        auto fn2 = std::bind(&CarbonTestConsole::TranslationRecognizer_IntermediateResultHandler, this, std::placeholders::_1);
-        m_translationRecognizer->IntermediateResult.Connect(fn2);
+        auto fn2 = std::bind(&CarbonTestConsole::TranslationRecognizer_RecognizingHandler, this, std::placeholders::_1);
+        m_translationRecognizer->Recognizing.Connect(fn2);
 
         auto fn3 = std::bind(&CarbonTestConsole::TranslationRecognizer_SynthesisResultHandler, this, std::placeholders::_1);
         m_translationRecognizer->TranslationSynthesisResultEvent.Connect(fn3);
@@ -1677,11 +1677,11 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
 
         m_intentRecognizer = IntentRecognizer::FromConfig(sc, AudioConfig::FromWavFileInput(wavFileName));
 
-        auto fn1 = std::bind(&CarbonTestConsole::IntentRecognizer_FinalResultHandler, this, std::placeholders::_1);
-        m_intentRecognizer->FinalResult.Connect(fn1);
+        auto fn1 = std::bind(&CarbonTestConsole::IntentRecognizer_RecognizedHandler, this, std::placeholders::_1);
+        m_intentRecognizer->Recognized.Connect(fn1);
 
-        auto fn2 = std::bind(&CarbonTestConsole::IntentRecognizer_IntermediateResultHandler, this, std::placeholders::_1);
-        m_intentRecognizer->IntermediateResult.Connect(fn2);
+        auto fn2 = std::bind(&CarbonTestConsole::IntentRecognizer_RecognizingHandler, this, std::placeholders::_1);
+        m_intentRecognizer->Recognizing.Connect(fn2);
 
         if (!m_intentAppId.empty())
         {
@@ -1711,7 +1711,7 @@ void CarbonTestConsole::WaitForDebugger()
     PAL_WaitForDebugger();
 }
 
-void CarbonTestConsole::RecognizeAsync()
+void CarbonTestConsole::RecognizeOnceAsync()
 {
     if (m_intentRecognizer != nullptr)
     {

@@ -32,7 +32,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     ///     using (var recognizer = new TranslationRecognizer(config))
     ///     {
     ///         // Subscribes to events.
-    ///         recognizer.IntermediateResultReceived += (s, e) =>
+    ///         recognizer.Recognizing += (s, e) =>
     ///         {
     ///             Console.WriteLine($"RECOGNIZING in '{fromLanguage}': Text={e.Result.Text}");
     ///             foreach (var element in e.Result.Translations)
@@ -41,7 +41,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     ///             }
     ///         };
     ///
-    ///         recognizer.FinalResultReceived += (s, e) =>
+    ///         recognizer.Recognized += (s, e) =>
     ///         {
     ///             if (result.Reason == ResultReason.TranslatedSpeech)
     ///             {
@@ -53,7 +53,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     ///             }
     ///         };
     ///
-    ///         recognizer.SynthesisResultReceived += (s, e) =>
+    ///         recognizer.Synthesized += (s, e) =>
     ///         {
     ///             Console.WriteLine(e.Result.Audio.Length != 0
     ///                 ? $"AudioSize: {e.Result.Audio.Length}"
@@ -65,9 +65,14 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     ///             Console.WriteLine($"\nRecognition canceled. Reason: {e.Reason}; ErrorDetails: {e.ErrorDetails}");
     ///         };
     ///
-    ///         recognizer.OnSessionEvent += (s, e) =>
+    ///         recognizer.SessionStarted += (s, e) =>
     ///         {
-    ///             Console.WriteLine($"\nSession event. Event: {e.EventType.ToString()}.");
+    ///             Console.WriteLine("\nSession started event.");
+    ///         };
+    ///
+    ///         recognizer.SessionStopped += (s, e) =>
+    ///         {
+    ///             Console.WriteLine("\nSession stopped event.");
     ///         };
     ///
     ///         // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
@@ -88,14 +93,14 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     public sealed class TranslationRecognizer : Recognizer
     {
         /// <summary>
-        /// The event <see cref="IntermediateResultReceived"/> signals that an intermediate recognition result is received.
+        /// The event <see cref="Recognizing"/> signals that an intermediate recognition result is received.
         /// </summary>
-        public event EventHandler<TranslationTextResultEventArgs> IntermediateResultReceived;
+        public event EventHandler<TranslationTextResultEventArgs> Recognizing;
 
         /// <summary>
-        /// The event <see cref="FinalResultReceived"/> signals that a final recognition result is received.
+        /// The event <see cref="Recognized"/> signals that a final recognition result is received.
         /// </summary>
-        public event EventHandler<TranslationTextResultEventArgs> FinalResultReceived;
+        public event EventHandler<TranslationTextResultEventArgs> Recognized;
 
         /// <summary>
         /// The event <see cref="Canceled"/> signals that the speech to text/synthesis translation was canceled.
@@ -103,9 +108,9 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         public event EventHandler<TranslationTextResultCanceledEventArgs> Canceled;
 
         /// <summary>
-        /// The event <see cref="SynthesisResultReceived"/> signals that a translation synthesis result is received.
+        /// The event <see cref="Synthesized"/> signals that a translation synthesis result is received.
         /// </summary>
-        public event EventHandler<TranslationSynthesisResultEventArgs> SynthesisResultReceived;
+        public event EventHandler<TranslationSynthesisResultEventArgs> Synthesized;
 
         /// <summary>
         /// Creates a translation recognizer using the default microphone input for a specified translation configuration.
@@ -134,11 +139,11 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         {
             this.recoImpl = Internal.TranslationRecognizer.FromConfig(config, audioConfig);
 
-            intermediateResultHandler = new ResultHandlerImpl(this, isFinalResultHandler: false);
-            recoImpl.IntermediateResult.Connect(intermediateResultHandler);
+            recognizingHandler = new ResultHandlerImpl(this, isRecognizedHandler: false);
+            recoImpl.Recognizing.Connect(recognizingHandler);
 
-            finalResultHandler = new ResultHandlerImpl(this, isFinalResultHandler: true);
-            recoImpl.FinalResult.Connect(finalResultHandler);
+            recognizedHandler = new ResultHandlerImpl(this, isRecognizedHandler: true);
+            recoImpl.Recognized.Connect(recognizedHandler);
 
             synthesisResultHandler = new SynthesisHandlerImpl(this);
             recoImpl.TranslationSynthesisResultEvent.Connect(synthesisResultHandler);
@@ -217,7 +222,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
 
         /// <summary>
         /// Starts recognition and translation, and stops after the first utterance is recognized. The task returns the translation text as result.
-        /// Note: RecognizeAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
+        /// Note: RecognizeOnceAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
         /// </summary>
         /// <returns>A task representing the recognition operation. The task returns a value of <see cref="TranslationTextResult"/> </returns>
         /// <example>
@@ -239,10 +244,10 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         ///         // Starts recognizing.
         ///         Console.WriteLine("Say something...");
         ///
-        ///         // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+        ///         // Performs recognition. RecognizeOnceAsync() returns when the first utterance has been recognized,
         ///         // so it is suitable only for single shot recognition like command or query. For long-running
         ///         // recognition, use StartContinuousRecognitionAsync() instead.
-        ///         var result = await recognizer.RecognizeAsync();
+        ///         var result = await recognizer.RecognizeOnceAsync();
         ///
         ///         if (result.Reason == ResultReason.TranslatedSpeech)
         ///         {
@@ -256,7 +261,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// }
         /// </code>
         /// </example>
-        public Task<TranslationTextResult> RecognizeAsync()
+        public Task<TranslationTextResult> RecognizeOnceAsync()
         {
             return Task.Run(() => { return new TranslationTextResult(this.recoImpl.Recognize()); });
         }
@@ -313,8 +318,8 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             {
                 recoImpl?.Dispose();
 
-                intermediateResultHandler?.Dispose();
-                finalResultHandler?.Dispose();
+                recognizingHandler?.Dispose();
+                recognizedHandler?.Dispose();
                 canceledHandler?.Dispose();
 
                 disposed = true;
@@ -323,8 +328,8 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         }
 
         internal readonly Internal.TranslationRecognizer recoImpl;
-        private readonly ResultHandlerImpl intermediateResultHandler;
-        private readonly ResultHandlerImpl finalResultHandler;
+        private readonly ResultHandlerImpl recognizingHandler;
+        private readonly ResultHandlerImpl recognizedHandler;
         private readonly SynthesisHandlerImpl synthesisResultHandler;
         private readonly CanceledHandlerImpl canceledHandler;
         private bool disposed = false;
@@ -333,10 +338,10 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         private class ResultHandlerImpl : Internal.TranslationTextEventListener
         {
-            public ResultHandlerImpl(TranslationRecognizer recognizer, bool isFinalResultHandler)
+            public ResultHandlerImpl(TranslationRecognizer recognizer, bool isRecognizedHandler)
             {
                 this.recognizer = recognizer;
-                this.isFinalResultHandler = isFinalResultHandler;
+                this.isRecognizedHandler = isRecognizedHandler;
             }
 
             public override void Execute(Internal.TranslationTextResultEventArgs eventArgs)
@@ -347,7 +352,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
                 }
 
                 TranslationTextResultEventArgs resultEventArg = new TranslationTextResultEventArgs(eventArgs);
-                var handler = isFinalResultHandler ? recognizer.FinalResultReceived : recognizer.IntermediateResultReceived;
+                var handler = isRecognizedHandler ? recognizer.Recognized : recognizer.Recognizing;
                 if (handler != null)
                 {
                     handler(this.recognizer, resultEventArg);
@@ -355,7 +360,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             }
 
             private TranslationRecognizer recognizer;
-            private bool isFinalResultHandler;
+            private bool isRecognizedHandler;
         }
 
         // Defines an internal class to raise a C# event for error during recognition when a corresponding callback is invoked by the native layer.
@@ -401,7 +406,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
                 }
 
                 var resultEventArg = new TranslationSynthesisResultEventArgs(eventArgs);
-                var handler = recognizer.SynthesisResultReceived;
+                var handler = recognizer.Synthesized;
                 if (handler != null)
                 {
                     handler(this.recognizer, resultEventArg);

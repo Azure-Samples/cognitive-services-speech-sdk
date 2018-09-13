@@ -14,14 +14,24 @@ namespace Microsoft.CognitiveServices.Speech
     public class Recognizer : IDisposable
     {
         /// <summary>
-        /// Defines event handler for session events, e.g., SessionStartedEvent and SessionStoppedEvent.
+        /// Defines event handler for session started event.
         /// </summary>
-        public event EventHandler<SessionEventArgs> OnSessionEvent;
+        public event EventHandler<SessionEventArgs> SessionStarted;
 
         /// <summary>
-        /// Defines event handler for session events, e.g., SpeechStartDetectedEvent and SpeechEndDetectedEvent.
+        /// Defines event handler for session stopped event.
         /// </summary>
-        public event EventHandler<RecognitionEventArgs> OnSpeechDetectedEvent;
+        public event EventHandler<SessionEventArgs> SessionStopped;
+
+        /// <summary>
+        /// Defines event handler for speech start detected event.
+        /// </summary>
+        public event EventHandler<RecognitionEventArgs> SpeechStartDetected;
+
+        /// <summary>
+        /// Defines event handler for speech end detected event.
+        /// </summary>
+        public event EventHandler<RecognitionEventArgs> SpeechEndDetected;
 
         internal Recognizer()
         {
@@ -89,8 +99,11 @@ namespace Microsoft.CognitiveServices.Speech
                     return;
                 }
 
-                var arg = new SessionEventArgs(eventType, eventArgs);
-                var handler = this.recognizer.OnSessionEvent;
+                var arg = new SessionEventArgs(eventArgs);
+
+                var handler = eventType == SessionEventType.SessionStartedEvent
+                    ? this.recognizer.SessionStarted
+                    : this.recognizer.SessionStopped;
 
                 if (handler != null)
                 {
@@ -120,8 +133,10 @@ namespace Microsoft.CognitiveServices.Speech
                     return;
                 }
 
-                var arg = new RecognitionEventArgs(eventType, eventArgs);
-                var handler = this.recognizer.OnSpeechDetectedEvent;
+                var arg = new RecognitionEventArgs(eventArgs);
+                var handler = eventType == RecognitionEventType.SpeechStartDetectedEvent
+                    ? this.recognizer.SpeechStartDetected
+                    : this.recognizer.SpeechEndDetected;
 
                 if (handler != null)
                 {

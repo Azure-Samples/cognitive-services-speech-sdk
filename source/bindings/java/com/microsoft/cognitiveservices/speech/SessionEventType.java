@@ -7,7 +7,7 @@ package com.microsoft.cognitiveservices.speech;
 /**
   * Define session event types.
   */
-public enum SessionEventType
+enum SessionEventType
 {
     SessionStartedEvent,
     SessionStoppedEvent

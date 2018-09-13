@@ -26,7 +26,7 @@
       </tr>
       <tr>
         <td></td>
-        <td><button id="startRecognizeAsyncButton">Start recognition</button></td>
+        <td><button id="startRecognizeOnceAsyncButton">Start recognition</button></td>
       </tr>
       <tr>
         <td align="right" valign="top">Results</td>
@@ -71,7 +71,7 @@
   <script>
     // status fields and start button in UI
     var phraseDiv;
-    var startRecognizeAsyncButton;
+    var startRecognizeOnceAsyncButton;
 
     // subscription key and region key for speech services.
     var subscriptionKey, regionKey;
@@ -80,13 +80,13 @@
     var recognizer;
 
     document.addEventListener("DOMContentLoaded", function () {
-      startRecognizeAsyncButton = document.getElementById("startRecognizeAsyncButton");
+      startRecognizeOnceAsyncButton = document.getElementById("startRecognizeOnceAsyncButton");
       subscriptionKey = document.getElementById("subscriptionKey");
       regionKey = document.getElementById("regionKey");
       phraseDiv = document.getElementById("phraseDiv");
 
-      startRecognizeAsyncButton.addEventListener("click", function () {
-        startRecognizeAsyncButton.disabled = true;
+      startRecognizeOnceAsyncButton.addEventListener("click", function () {
+        startRecognizeOnceAsyncButton.disabled = true;
         phraseDiv.innerHTML = "";
 
         // if we got an authorization token, use the token. Otherwise use the provided subscription key
@@ -105,9 +105,9 @@
         var audioConfig  = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
         recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
 
-        recognizer.recognizeAsync(
+        recognizer.recognizeOnceAsync(
           function (result) {
-            startRecognizeAsyncButton.disabled = false;
+            startRecognizeOnceAsyncButton.disabled = false;
             phraseDiv.innerHTML += result.text;
             window.console.log(result);
 
@@ -115,7 +115,7 @@
             recognizer = undefined;
           },
           function (err) {
-            startRecognizeAsyncButton.disabled = false;
+            startRecognizeOnceAsyncButton.disabled = false;
             phraseDiv.innerHTML += err;
             window.console.log(err);
 
@@ -126,7 +126,7 @@
 
       if (!!window.SpeechSDK) {
         SpeechSDK = window.SpeechSDK;
-        startRecognizeAsyncButton.disabled = false;
+        startRecognizeOnceAsyncButton.disabled = false;
 
         document.getElementById('content').style.display = 'block';
         document.getElementById('warning').style.display = 'none';

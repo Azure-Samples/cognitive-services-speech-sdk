@@ -77,7 +77,7 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
             using (var recognizer = new SpeechRecognizer(config))
             {
                 // Starts recognition. It returns when the first utterance has been recognized.
-                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 // Checks result.
                 string str;
                 if (result.Reason != ResultReason.RecognizedSpeech)
@@ -120,11 +120,11 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
                     using (var recognizer = new SpeechRecognizer(config, audioInput))
                     {
                         // Subscribes to events.
-                        recognizer.IntermediateResultReceived += (s, e) =>
+                        recognizer.Recognizing += (s, e) =>
                         {
                             NotifyUser(e.Result.Text, NotifyType.StatusMessage);
                         };
-                        recognizer.FinalResultReceived += (s, e) =>
+                        recognizer.Recognized += (s, e) =>
                         {
                             string str = "";
                             if (e.Result.Reason == ResultReason.RecognizedSpeech)
@@ -150,15 +150,15 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
 
                             NotifyUser(sb.ToString(), NotifyType.StatusMessage);
                         };
-                        recognizer.OnSessionEvent += (s, e) =>
+                        recognizer.SessionStarted += (s, e) =>
                         {
-                            NotifyUser($"Session event. Event: {e.EventType.ToString()}.", NotifyType.StatusMessage);
-                            // Stops translation when session stop is detected.
-                            if (e.EventType == SessionEventType.SessionStoppedEvent)
-                            {
-                                NotifyUser($"Stop recognition.", NotifyType.StatusMessage);
-                                stopRecognitionTaskCompletionSource.TrySetResult(0);
-                            }
+                            NotifyUser("Session started event.", NotifyType.StatusMessage);
+                        };
+                        recognizer.SessionStopped += (s, e) =>
+                        {
+                            NotifyUser("Session stopped event.", NotifyType.StatusMessage);
+                            NotifyUser("Stop recognition.", NotifyType.StatusMessage);
+                            stopRecognitionTaskCompletionSource.TrySetResult(0);
                         };
                         // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
                         await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
@@ -216,11 +216,11 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
                 using (var recognizer = new SpeechRecognizer(config, audioInput))
                 {
                     // Subscribes to events.
-                    recognizer.IntermediateResultReceived += (s, ee) =>
+                    recognizer.Recognizing += (s, ee) =>
                     {
                         NotifyUser(ee.Result.Text, NotifyType.StatusMessage);
                     };
-                    recognizer.FinalResultReceived += (s, ee) =>
+                    recognizer.Recognized += (s, ee) =>
                     {
                         string str = "";
                         if (ee.Result.Reason == ResultReason.RecognizedSpeech)
@@ -246,15 +246,15 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
 
                         NotifyUser(sb.ToString(), NotifyType.StatusMessage);
                     };
-                    recognizer.OnSessionEvent += (s, ee) =>
+                    recognizer.SessionStarted += (s, ee) =>
                     {
-                        NotifyUser($"Session event. Event: {ee.EventType.ToString()}.", NotifyType.StatusMessage);
-                        // Stops translation when session stop is detected.
-                        if (ee.EventType == SessionEventType.SessionStoppedEvent)
-                        {
-                            NotifyUser($"Stop recognition.", NotifyType.StatusMessage);
-                            stopRecognitionTaskCompletionSource.TrySetResult(0);
-                        }
+                        NotifyUser("Session started event.", NotifyType.StatusMessage);
+                    };
+                    recognizer.SessionStopped += (s, ee) =>
+                    {
+                        NotifyUser("Session stopped event.", NotifyType.StatusMessage);
+                        NotifyUser("Stop recognition.", NotifyType.StatusMessage);
+                        stopRecognitionTaskCompletionSource.TrySetResult(0);
                     };
                     // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
                     await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);

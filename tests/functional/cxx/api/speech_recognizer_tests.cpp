@@ -95,7 +95,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             {
                 auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig());
                 REQUIRE(recognizer != nullptr);
-                futures.push_back(recognizer->RecognizeAsync());
+                futures.push_back(recognizer->RecognizeOnceAsync());
             }
         }
 
@@ -174,7 +174,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
                 bool sessionEnded = false;
 
-                recognizer->FinalResult.Connect([&](const SpeechRecognitionEventArgs&) {
+                recognizer->Recognized.Connect([&](const SpeechRecognitionEventArgs&) {
                     callbackCounts[Callbacks::final_result]++;
                     SPX_TRACE_VERBOSE("callbackCounts[Callbacks::final_result]=%d", callbackCounts[Callbacks::final_result].load());
                 });
@@ -198,7 +198,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
                     cv.notify_one();
                 });
 
-                auto result = recognizer->RecognizeAsync().get();
+                auto result = recognizer->RecognizeOnceAsync().get();
                 CHECK(result != nullptr);
 
                 SPX_TRACE_VERBOSE("%s: Wait for session end (loop #%d)", __FUNCTION__, i);
@@ -240,7 +240,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         REQUIRE(!IsUsingMocks());
 
         auto recognizer = CreateRecognizers<SpeechRecognizer>(input_file);
-        auto result = recognizer->RecognizeAsync().get();
+        auto result = recognizer->RecognizeOnceAsync().get();
         REQUIRE(!result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_Json).empty());
     }
 
@@ -254,7 +254,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         auto badKeyConfig = SpeechConfig::FromSubscription("invalid_key", "invalid_region");
         auto audioConfig = AudioConfig::FromWavFileInput(input_file);
         auto recognizer = SpeechRecognizer::FromConfig(badKeyConfig, audioConfig);
-        auto result = recognizer->RecognizeAsync().get();
+        auto result = recognizer->RecognizeOnceAsync().get();
 
         REQUIRE(result->Reason == ResultReason::Canceled);
 
@@ -291,7 +291,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             cv.notify_one();
         });
 
-        auto result = recognizer->RecognizeAsync().get();
+        auto result = recognizer->RecognizeOnceAsync().get();
         // TODO ENABLE AFTER FIXING BROKEN SERVICE       REQUIRE(result->Reason == ResultReason::Canceled);
 
         {
@@ -311,7 +311,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         auto audioConfig = AudioConfig::FromWavFileInput(german_input_file);
         auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
 
-        auto result = recognizer->RecognizeAsync().get();
+        auto result = recognizer->RecognizeOnceAsync().get();
         REQUIRE(result != nullptr);
         REQUIRE(!result->Text.empty());
     }
@@ -326,7 +326,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         auto audioConfig = AudioConfig::FromWavFileInput(german_input_file);
         auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
 
-        auto result = recognizer->RecognizeAsync().get();
+        auto result = recognizer->RecognizeOnceAsync().get();
         REQUIRE(result != nullptr);
         REQUIRE(!result->Text.empty());
     }
@@ -355,7 +355,7 @@ TEST_CASE("KWS basics", "[api][cxx]")
             REQUIRE(recognizer != nullptr);
             REQUIRE(IsUsingMocks(true));
 
-            recognizer->FinalResult += [&](const SpeechRecognitionEventArgs& /* e */) {
+            recognizer->Recognized += [&](const SpeechRecognitionEventArgs& /* e */) {
                 std::unique_lock<std::mutex> lock(mtx);
                 gotFinalResult++;
                 SPX_TRACE_VERBOSE("gotFinalResult=%d", gotFinalResult);
@@ -381,7 +381,7 @@ TEST_CASE("KWS basics", "[api][cxx]")
 
                 recognizer->StopKeywordRecognitionAsync().get();
 
-                THEN("We should see that we got at least 1 FinalResult and the same number of SessionStopped events")
+                THEN("We should see that we got at least 1 Recognized and the same number of SessionStopped events")
                 {
                     REQUIRE(gotFinalResult >= 1);
                 }
@@ -417,7 +417,7 @@ TEST_CASE("Speech on local server", "[api][cxx]")
         {
             auto audioConfig = AudioConfig::FromWavFileInput(input_file);
             auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
-            auto result = recognizer->RecognizeAsync().get();
+            auto result = recognizer->RecognizeOnceAsync().get();
             REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
             REQUIRE(result->Text == "Remind me to buy 5 iPhones.");
         }
@@ -429,7 +429,7 @@ TEST_CASE("Speech on local server", "[api][cxx]")
         {
         auto audioConfig = AudioConfig::FromWavFileInput(input_file);
         auto recognizer = factory->CreateSpeechRecognizerFromConfig(audioConfig);
-        auto result = recognizer->RecognizeAsync().get();
+        auto result = recognizer->RecognizeOnceAsync().get();
         REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
         REQUIRE(result->Text == L"Remind me to buy 5 iPhones.");
         }
@@ -468,10 +468,10 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
 
         auto canceledCallback = [&](const SpeechRecognitionCanceledEventArgs& args) { callback(args); };
 
-        recognizer->FinalResult.Connect(callback);
+        recognizer->Recognized.Connect(callback);
         recognizer->Canceled.Connect(canceledCallback); // Canceled is called if there are connection issues.
 
-        auto result = recognizer->RecognizeAsync().get();
+        auto result = recognizer->RecognizeOnceAsync().get();
 
         {
             unique_lock<mutex> lock(mtx);
@@ -496,29 +496,29 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
             }
             else
             {
-                recognizer->FinalResult.DisconnectAll();
+                recognizer->Recognized.DisconnectAll();
             }
         };
         auto canceledCallback1 = [&](const SpeechRecognitionCanceledEventArgs& args) { callback1(args); };
 
-        recognizer->FinalResult.Connect(callback1);
+        recognizer->Recognized.Connect(callback1);
         recognizer->Canceled.Connect(canceledCallback1);
 
-        auto result = recognizer->RecognizeAsync().get();
+        auto result = recognizer->RecognizeOnceAsync().get();
         UNUSED(result);
 
         auto callback2 = [&](const SpeechRecognitionEventArgs&)
         {
             recognizer->Canceled.DisconnectAll();
-            recognizer->FinalResult.DisconnectAll();
+            recognizer->Recognized.DisconnectAll();
         };
         auto canceledCallback2 = [&](const SpeechRecognitionCanceledEventArgs& args) { callback2(args); };
 
         recognizer = CreateRecognizers<SpeechRecognizer>(input_file);
-        recognizer->FinalResult.Connect(callback2);
+        recognizer->Recognized.Connect(callback2);
         recognizer->Canceled.Connect(canceledCallback2);
 
-        result = recognizer->RecognizeAsync().get();
+        result = recognizer->RecognizeOnceAsync().get();
         UNUSED(result);
 
         auto callback3 = [&](const SpeechRecognitionEventArgs&)
@@ -529,9 +529,9 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
         auto canceledCallback3 = [&](const SpeechRecognitionEventArgs& args) { callback3(args); };
         
         recognizer = CreateRecognizers<SpeechRecognizer>(input_file);
-        recognizer->FinalResult.Connect(callback3);
+        recognizer->Recognized.Connect(callback3);
         recognizer->Canceled.Connect(canceledCallback3);
-        auto future = recognizer->RecognizeAsync();
+        auto future = recognizer->RecognizeOnceAsync();
         UNUSED(future);
     }
 }

@@ -12,21 +12,15 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
  */
 public final class RecognitionEventArgs // extends EventArgs
 {
-    public RecognitionEventArgs(RecognitionEventType type, com.microsoft.cognitiveservices.speech.internal.RecognitionEventArgs arg)
+    public RecognitionEventArgs(com.microsoft.cognitiveservices.speech.internal.RecognitionEventArgs arg)
     {
         Contracts.throwIfNull(arg, "arg");
 
         this.sessionId = arg.getSessionId();
-        this.eventType = type;
         this.offset = arg.getOffset();
 
         Contracts.throwIfNull(this.sessionId, "SessionId");
     }
-
-    /**
-     * Represents the event type.
-     */
-    public final RecognitionEventType eventType;
 
     /**
      * Represents the session identifier.
@@ -44,6 +38,6 @@ public final class RecognitionEventArgs // extends EventArgs
      */
     @Override
     public String toString() {
-        return "EventType: " + eventType.toString() + " SessionId: " + sessionId.toString() + " Offset: " + offset.toString() + ".";
+        return "SessionId: " + sessionId.toString() + " Offset: " + offset.toString() + ".";
     }
 }

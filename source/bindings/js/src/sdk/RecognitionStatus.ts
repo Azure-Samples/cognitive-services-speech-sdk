@@ -15,7 +15,7 @@
     /**
      * Indicates the result is a hypothesis text that has been recognized.
      */
-    IntermediateResult,
+    Recognizing,
 
     /**
      * Indicates that speech was detected in the audio stream, but no words from the target language were matched.

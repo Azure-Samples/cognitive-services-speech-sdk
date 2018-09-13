@@ -41,10 +41,10 @@ namespace MicrosoftSpeechSDKSamples
                 // Starts recognizing.
                 Console.WriteLine("Say something...");
 
-                // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+                // Performs recognition. RecognizeOnceAsync() returns when the first utterance has been recognized,
                 // so it is suitable only for single shot recognition like command or query. For long-running
                 // recognition, use StartContinuousRecognitionAsync() instead.
-                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
                 // Checks result.
                 if (result.Reason == ResultReason.RecognizedIntent)
@@ -106,11 +106,11 @@ namespace MicrosoftSpeechSDKSamples
                     recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
                     // Subscribes to events.
-                    recognizer.IntermediateResultReceived += (s, e) => {
+                    recognizer.Recognizing += (s, e) => {
                         Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
                     };
 
-                    recognizer.FinalResultReceived += (s, e) => {
+                    recognizer.Recognized += (s, e) => {
                         if (e.Result.Reason == ResultReason.RecognizedIntent)
                         {
                             Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
@@ -140,15 +140,16 @@ namespace MicrosoftSpeechSDKSamples
                         stopRecognition.TrySetResult(0);
                     };
 
-                    recognizer.OnSessionEvent += (s, e) => {
-                        Console.WriteLine($"\n    Session event. Event: {e.EventType.ToString()}.");
-                        // Stops recognition when session stop is detected.
-                        if (e.EventType == SessionEventType.SessionStoppedEvent)
-                        {
-                            Console.WriteLine($"\nStop recognition.");
-                            stopRecognition.TrySetResult(0);
-                        }
+                    recognizer.SessionStarted += (s, e) => {
+                        Console.WriteLine("\n    Session started event.");
                     };
+
+                    recognizer.SessionStopped += (s, e) => {
+                        Console.WriteLine("\n    Session stopped event.");
+                        Console.WriteLine("\nStop recognition.");
+                        stopRecognition.TrySetResult(0);
+                    };
+
 
                     // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
                     Console.WriteLine("Say something...");
@@ -192,10 +193,10 @@ namespace MicrosoftSpeechSDKSamples
                 // Starts recognizing.
                 Console.WriteLine("Say something in " + language + "...");
 
-                // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+                // Performs recognition. RecognizeOnceAsync() returns when the first utterance has been recognized,
                 // so it is suitable only for single shot recognition like command or query. For long-running
                 // recognition, use StartContinuousRecognitionAsync() instead.
-                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
                 // Checks result.
                 if (result.Reason == ResultReason.RecognizedIntent)

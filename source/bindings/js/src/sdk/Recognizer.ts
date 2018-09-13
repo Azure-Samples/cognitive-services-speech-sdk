@@ -37,16 +37,28 @@ export abstract class Recognizer {
     }
 
     /**
-     * Defines event handler for session events, e.g., SessionStartedEvent and SessionStoppedEvent.
+     * Defines event handler for session started events.
      * @property
      */
-    public SessionEvent: (sender: Recognizer, event: SessionEventArgs) => void;
+    public sessionStarted: (sender: Recognizer, event: SessionEventArgs) => void;
 
     /**
-     * Defines event handler for session events, e.g., SpeechStartDetectedEvent and SpeechEndDetectedEvent.
+     * Defines event handler for session stopped events.
      * @property
      */
-    public RecognitionEvent: (sender: Recognizer, event: RecognitionEventArgs) => void;
+    public sessionStopped: (sender: Recognizer, event: SessionEventArgs) => void;
+
+    /**
+     * Defines event handler for speech started events.
+     * @property
+     */
+    public speechStartDetected: (sender: Recognizer, event: RecognitionEventArgs) => void;
+
+    /**
+     * Defines event handler for speech stopped events.
+     * @property
+     */
+    public speechEndDetected: (sender: Recognizer, event: RecognitionEventArgs) => void;
 
     /**
      * Dispose of associated resources.
@@ -126,8 +138,8 @@ export abstract class Recognizer {
                 return;
             }
 
-            let sessionEvent: SessionEventArgs;
-            let recognitionEvent: RecognitionEventArgs;
+            let sessionStartStopEventArgs: SessionEventArgs;
+            let speechStartStopEventArgs: RecognitionEventArgs;
 
             /*
                 Alternative syntax for typescript devs.
@@ -142,21 +154,19 @@ export abstract class Recognizer {
                     break;
 
                 case "RecognitionStartedEvent": // Fires when the client connects to the service successfuly.
-                    sessionEvent = new SessionEventArgs();
-                    sessionEvent.SessionId = event.SessionId;
-                    sessionEvent.eventType = SessionEventType.SessionStartedEvent;
+                    sessionStartStopEventArgs = new SessionEventArgs();
+                    sessionStartStopEventArgs.SessionId = event.SessionId;
 
-                    if (!!this.SessionEvent) {
-                        this.SessionEvent(this, sessionEvent);
+                    if (!!this.sessionStarted) {
+                        this.sessionStarted(this, sessionStartStopEventArgs);
                     }
                     break;
 
                 case "RecognitionEndedEvent":
                     const recoEndedEvent = event as RecognitionEndedEvent;
 
-                    sessionEvent = new SessionEventArgs();
-                    sessionEvent.SessionId = recoEndedEvent.SessionId;
-                    sessionEvent.eventType = SessionEventType.SessionStoppedEvent;
+                    sessionStartStopEventArgs = new SessionEventArgs();
+                    sessionStartStopEventArgs.SessionId = recoEndedEvent.SessionId;
 
                     if (recoEndedEvent.Status !== RecognitionCompletionStatus.Success) {
                         if (cb) {
@@ -164,30 +174,28 @@ export abstract class Recognizer {
                         }
                     }
 
-                    if (!!this.SessionEvent) {
-                        this.SessionEvent(this, sessionEvent);
+                    if (!!this.sessionStopped) {
+                        this.sessionStopped(this, sessionStartStopEventArgs);
                     }
                     break;
 
-                case "SpeechStartDetectedEvent":
-                    recognitionEvent = new RecognitionEventArgs();
-                    recognitionEvent.sessionId = event.SessionId;
-                    recognitionEvent.eventType = RecognitionEventType.SpeechStartDetectedEvent;
-                    recognitionEvent.offset = 0; // TODO
+                    case "SpeechStartDetectedEvent":
+                    speechStartStopEventArgs = new RecognitionEventArgs();
+                    speechStartStopEventArgs.sessionId = event.SessionId;
+                    speechStartStopEventArgs.offset = 0; // TODO
 
-                    if (!!this.RecognitionEvent) {
-                        this.RecognitionEvent(this, recognitionEvent);
+                    if (!!this.speechStartDetected) {
+                        this.speechStartDetected(this, speechStartStopEventArgs);
                     }
                     break;
 
                 case "SpeechEndDetectedEvent":
-                    recognitionEvent = new RecognitionEventArgs();
-                    recognitionEvent.sessionId = event.SessionId;
-                    recognitionEvent.eventType = RecognitionEventType.SpeechEndDetectedEvent;
-                    recognitionEvent.offset = 0; // TODO
+                    speechStartStopEventArgs = new RecognitionEventArgs();
+                    speechStartStopEventArgs.sessionId = event.SessionId;
+                    speechStartStopEventArgs.offset = 0; // TODO
 
-                    if (!!this.RecognitionEvent) {
-                        this.RecognitionEvent(this, recognitionEvent);
+                    if (!!this.speechEndDetected) {
+                        this.speechEndDetected(this, speechStartStopEventArgs);
                     }
                     break;
 

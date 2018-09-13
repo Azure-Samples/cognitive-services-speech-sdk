@@ -43,7 +43,7 @@ public class TranslationSamples {
         TranslationRecognizer recognizer = new TranslationRecognizer(config);
         {
             // Subscribes to events.
-            recognizer.IntermediateResultReceived.addEventListener((s, e) -> {
+            recognizer.recognizing.addEventListener((s, e) -> {
                 System.out.println("RECOGNIZING in '" + fromLanguage + "': Text=" + e.getResult().getText());
 
                 Map<String, String> map = e.getResult().getTranslations();
@@ -52,7 +52,7 @@ public class TranslationSamples {
                 }
             });
 
-            recognizer.FinalResultReceived.addEventListener((s, e) -> {
+            recognizer.recognized.addEventListener((s, e) -> {
                 if (e.getResult().getReason() == ResultReason.TranslatedSpeech) {
                     System.out.println("RECOGNIZED in '" + fromLanguage + "': Text=" + e.getResult().getText());
 
@@ -70,11 +70,11 @@ public class TranslationSamples {
                 }
             });
 
-            recognizer.SynthesisResultReceived.addEventListener((s, e) -> {
+            recognizer.synthesized.addEventListener((s, e) -> {
                 System.out.println("Synthesis result received. Size of audio data: " + e.getResult().getAudio().length);
             });
 
-            recognizer.Canceled.addEventListener((s, e) -> {
+            recognizer.canceled.addEventListener((s, e) -> {
                 System.out.println("CANCELED: Reason=" + e.getReason());
 
                 if (e.getReason() == CancellationReason.Error) {
@@ -83,8 +83,12 @@ public class TranslationSamples {
                 }
             });
 
-            recognizer.SessionEvent.addEventListener((s, e) -> {
-                System.out.println("\nSession event. Event: " + e.getEventType() + ".");
+            recognizer.sessionStarted.addEventListener((s, e) -> {
+                System.out.println("\nSession started event.");
+            });
+
+            recognizer.sessionStopped.addEventListener((s, e) -> {
+                System.out.println("\nSession stopped event.");
             });
 
             // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
@@ -124,7 +128,7 @@ public class TranslationSamples {
         TranslationRecognizer recognizer = new TranslationRecognizer(config, audioInput);
         {
             // Subscribes to events.
-            recognizer.IntermediateResultReceived.addEventListener((s, e) -> {
+            recognizer.recognizing.addEventListener((s, e) -> {
                 System.out.println("RECOGNIZING in '" + fromLanguage + "': Text=" + e.getResult().getText());
 
                 Map<String, String> map = e.getResult().getTranslations();
@@ -133,7 +137,7 @@ public class TranslationSamples {
                 }
             });
 
-            recognizer.FinalResultReceived.addEventListener((s, e) -> {
+            recognizer.recognized.addEventListener((s, e) -> {
                 if (e.getResult().getReason() == ResultReason.TranslatedSpeech) {
                     System.out.println("RECOGNIZED in '" + fromLanguage + "': Text=" + e.getResult().getText());
 
@@ -151,7 +155,7 @@ public class TranslationSamples {
                 }
             });
 
-            recognizer.Canceled.addEventListener((s, e) -> {
+            recognizer.canceled.addEventListener((s, e) -> {
                 System.out.println("CANCELED: Reason=" + e.getReason());
 
                 if (e.getReason() == CancellationReason.Error) {
@@ -162,14 +166,16 @@ public class TranslationSamples {
                 stopTranslationWithFileSemaphore.release();;
             });
 
-            recognizer.SessionEvent.addEventListener((s, e) -> {
-                System.out.println("\nSession event. Event: " + e.getEventType() + ".");
+            recognizer.sessionStarted.addEventListener((s, e) -> {
+                System.out.println("\nSession started event.");
+            });
+
+            recognizer.sessionStopped.addEventListener((s, e) -> {
+                System.out.println("\nSession stopped event.");
 
                 // Stops translation when session stop is detected.
-                if (e.getEventType() == SessionEventType.SessionStoppedEvent) {
-                    System.out.println("\nStop translation.");
-                    stopTranslationWithFileSemaphore.release();;
-                }
+                System.out.println("\nStop translation.");
+                stopTranslationWithFileSemaphore.release();;
             });
 
             // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
@@ -213,7 +219,7 @@ public class TranslationSamples {
         TranslationRecognizer recognizer = new TranslationRecognizer(config, audioInput);
         {
             // Subscribes to events.
-            recognizer.IntermediateResultReceived.addEventListener((s, e) -> {
+            recognizer.recognizing.addEventListener((s, e) -> {
                 System.out.println("RECOGNIZING in '" + fromLanguage + "': Text=" + e.getResult().getText());
 
                 Map<String, String> map = e.getResult().getTranslations();
@@ -222,7 +228,7 @@ public class TranslationSamples {
                 }
             });
 
-            recognizer.FinalResultReceived.addEventListener((s, e) -> {
+            recognizer.recognized.addEventListener((s, e) -> {
                 if (e.getResult().getReason() == ResultReason.TranslatedSpeech) {
                     System.out.println("RECOGNIZED in '" + fromLanguage + "': Text=" + e.getResult().getText());
 
@@ -240,7 +246,7 @@ public class TranslationSamples {
                 }
             });
 
-            recognizer.Canceled.addEventListener((s, e) -> {
+            recognizer.canceled.addEventListener((s, e) -> {
                 System.out.println("CANCELED: Reason=" + e.getReason());
 
                 if (e.getReason() == CancellationReason.Error) {
@@ -251,14 +257,16 @@ public class TranslationSamples {
                 stopTranslationWithAudioStreamSemaphore.release();
             });
 
-            recognizer.SessionEvent.addEventListener((s, e) -> {
-                System.out.println("\nSession event. Event: " + e.getEventType() + ".");
+            recognizer.sessionStarted.addEventListener((s, e) -> {
+                System.out.println("\nSession started event.");
+            });
+
+            recognizer.sessionStopped.addEventListener((s, e) -> {
+                System.out.println("\nSession stopped event.");
 
                 // Stops translation when session stop is detected.
-                if (e.getEventType() == SessionEventType.SessionStoppedEvent) {
-                    System.out.println("\nStop translation.");
-                    stopTranslationWithAudioStreamSemaphore.release();
-                }
+                System.out.println("\nStop translation.");
+                stopTranslationWithAudioStreamSemaphore.release();
             });
 
             // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.

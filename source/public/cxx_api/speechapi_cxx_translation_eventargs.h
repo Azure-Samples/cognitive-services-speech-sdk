@@ -18,7 +18,7 @@ namespace Translation {
 
 
 /// <summary>
-/// Defines payload that is sent with the event <see cref="IntermediateResult"/> or <see cref="FinalResult"/>.
+/// Defines payload that is sent with the event <see cref="Recognizing"/> or <see cref="Recognized"/>.
 /// </summary>
 class TranslationTextResultEventArgs : public RecognitionEventArgs
 {

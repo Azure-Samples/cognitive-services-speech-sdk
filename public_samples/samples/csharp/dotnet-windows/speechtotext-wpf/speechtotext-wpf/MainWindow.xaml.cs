@@ -305,7 +305,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
 
         /// <summary>
         /// Subscribes to Recognition Events
-        /// Starts the Recognition and waits until Final Result is received, then Stops recognition
+        /// Starts the Recognition and waits until final result is received, then Stops recognition
         /// </summary>
         /// <param name="recognizer">Recognizer object</param>
         /// <param name="recoType">Type of Recognizer</param>
@@ -321,14 +321,25 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
                 isChecked = this.immediateResultsCheckBox.IsChecked == true;
             });
 
+            EventHandler<SpeechRecognitionResultEventArgs> recognizingHandler = (sender, e) => RecognizedEventHandler(e, recoType);
             if (isChecked)
             {
-                recognizer.IntermediateResultReceived += (sender, e) => IntermediateResultEventHandler(e, recoType);
+                recognizer.Recognizing += recognizingHandler;
             }
-            recognizer.FinalResultReceived += (sender, e) => FinalResultEventHandler(e, recoType);
-            recognizer.Canceled += (sender, e) => CanceledEventHandler(e, recoType, source);
-            recognizer.OnSessionEvent += (sender, e) => SessionEventHandler(e, recoType, source);
-            recognizer.OnSpeechDetectedEvent += (sender, e) => SpeechDetectedEventHandler(e, recoType);
+
+            EventHandler<SpeechRecognitionResultEventArgs> recognizedHandler = (sender, e) => RecognizedEventHandler(e, recoType);
+            EventHandler<SpeechRecognitionCanceledEventArgs> canceledHandler = (sender, e) => CanceledEventHandler(e, recoType, source);
+            EventHandler<SessionEventArgs> sessionStartedHandler = (sender, e) => SessionStartedEventHandler(e, recoType);
+            EventHandler<SessionEventArgs> sessionStoppedHandler = (sender, e) => SessionStoppedEventHandler(e, recoType, source);
+            EventHandler<RecognitionEventArgs> speechStartDetectedHandler = (sender, e) => SpeechDetectedEventHandler(e, recoType, "start");
+            EventHandler<RecognitionEventArgs> speechEndDetectedHandler = (sender, e) => SpeechDetectedEventHandler(e, recoType, "end");
+
+            recognizer.Recognized += recognizedHandler;
+            recognizer.Canceled += canceledHandler;
+            recognizer.SessionStarted += sessionStartedHandler;
+            recognizer.SessionStopped += sessionStoppedHandler;
+            recognizer.SpeechStartDetected -= speechStartDetectedHandler;
+            recognizer.SpeechEndDetected -= speechEndDetectedHandler;
 
             //start,wait,stop recognition
             await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
@@ -340,29 +351,31 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
             // unsubscribe from events
             if (isChecked)
             {
-                recognizer.IntermediateResultReceived -= (sender, e) => IntermediateResultEventHandler(e, recoType);
+                recognizer.Recognizing -= recognizingHandler;
             }
-            recognizer.FinalResultReceived -= (sender, e) => FinalResultEventHandler(e, recoType);
-            recognizer.Canceled -= (sender, e) => CanceledEventHandler(e, recoType, source);
-            recognizer.OnSessionEvent -= (sender, e) => SessionEventHandler(e, recoType, source);
-            recognizer.OnSpeechDetectedEvent -= (sender, e) => SpeechDetectedEventHandler(e, recoType);
+            recognizer.Recognized -= recognizedHandler;
+            recognizer.Canceled -= canceledHandler;
+            recognizer.SessionStarted -= sessionStartedHandler;
+            recognizer.SessionStopped -= sessionStoppedHandler;
+            recognizer.SpeechStartDetected -= speechStartDetectedHandler;
+            recognizer.SpeechEndDetected -= speechEndDetectedHandler;
         }
 
         #region Recognition Event Handlers
 
         /// <summary>
-        /// Logs Intermediate Recognition results
+        /// Logs intermediate recognition results
         /// </summary>
-        private void IntermediateResultEventHandler(SpeechRecognitionResultEventArgs e, RecoType rt)
+        private void RecognizingEventHandler(SpeechRecognitionResultEventArgs e, RecoType rt)
         {
             var log = (rt == RecoType.Base) ? this.baseModelLogText : this.customModelLogText;
             this.WriteLine(log, "Intermediate result: {0} ", e.Result.Text);
         }
 
         /// <summary>
-        /// Logs the Final result
+        /// Logs the final recognition result
         /// </summary>
-        private void FinalResultEventHandler(SpeechRecognitionResultEventArgs e, RecoType rt)
+        private void RecognizedEventHandler(SpeechRecognitionResultEventArgs e, RecoType rt)
         {
             TextBox log;
             if (rt == RecoType.Base)
@@ -398,22 +411,29 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
         }
 
         /// <summary>
-        /// If SessionStoppedEvent is received, sets the TaskCompletionSource to 0, in order to trigger Recognition Stop
+        /// Session started event handler.
         /// </summary>
-        private void SessionEventHandler(SessionEventArgs e, RecoType rt, TaskCompletionSource<int> source)
+        private void SessionStartedEventHandler(SessionEventArgs e, RecoType rt)
         {
             var log = (rt == RecoType.Base) ? this.baseModelLogText : this.customModelLogText;
-            this.WriteLine(log, String.Format(CultureInfo.InvariantCulture, "Speech recognition: Session event: {0}.", e.ToString()));
-            if (e.EventType == SessionEventType.SessionStoppedEvent)
-            {
-                source.TrySetResult(0);
-            }
+            this.WriteLine(log, String.Format(CultureInfo.InvariantCulture, "Speech recognition: Session started event: {0}.", e.ToString()));
         }
 
-        private void SpeechDetectedEventHandler(RecognitionEventArgs e, RecoType rt)
+        /// <summary>
+        /// Session stopped event handler. Set the TaskCompletionSource to 0, in order to trigger Recognition Stop
+        /// </summary>
+        private void SessionStoppedEventHandler(SessionEventArgs e, RecoType rt, TaskCompletionSource<int> source)
         {
             var log = (rt == RecoType.Base) ? this.baseModelLogText : this.customModelLogText;
-            this.WriteLine(log, String.Format(CultureInfo.InvariantCulture, "Speech recognition: Speech event: {0}.", e.ToString()));
+            this.WriteLine(log, String.Format(CultureInfo.InvariantCulture, "Speech recognition: Session stopped event: {0}.", e.ToString()));
+            source.TrySetResult(0);
+        }
+
+        private void SpeechDetectedEventHandler(RecognitionEventArgs e, RecoType rt, string eventType)
+        {
+            var log = (rt == RecoType.Base) ? this.baseModelLogText : this.customModelLogText;
+            this.WriteLine(log, String.Format(CultureInfo.InvariantCulture, "Speech recognition: Speech {0} detected event: {1}.",
+                eventType, e.ToString()));
         }
 
         #endregion

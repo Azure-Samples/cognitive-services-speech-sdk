@@ -94,10 +94,10 @@
             </td>
             </tr>
             <tr>
-                <td align="right"><b>Speech SDK API recognizeAsync:</b></td>
+                <td align="right"><b>Speech SDK API recognizeOnceAsync:</b></td>
                 <td>
-                    <button id="speechsdkStartRecognizeAsync">recognizeAsync()</button>
-                    <button id="speechsdkStopRecognizeAsync" disabled="disabled">STOP recognizeAsync()</button>
+                    <button id="speechsdkStartRecognizeOnceAsync">recognizeOnceAsync()</button>
+                    <button id="speechsdkStopRecognizeOnceAsync" disabled="disabled">STOP recognizeOnceAsync()</button>
                 </td>
             </tr>
             <tr>
@@ -202,14 +202,14 @@
         var regionOptions;
         var sdkStartContinousRecognitionBtn, sdkStopContinousRecognitionBtn;
         var sdkStartContinousTranslationBtn, sdkStopContinousTranslationBtn;
-        var sdkStartRecognizeAsyncBtn, sdkStopRecognizeAsyncBtn, languageTargetOptions, voiceOutput;
+        var sdkStartRecognizeOnceAsyncBtn, sdkStopRecognizeOnceAsyncBtn, languageTargetOptions, voiceOutput;
         var audioFile, audioFileValid;
         var soundContext = new AudioContext();
 
         document.addEventListener("DOMContentLoaded", function () {
             createBtn = document.getElementById("createBtn");
-            sdkStartRecognizeAsyncBtn = document.getElementById("speechsdkStartRecognizeAsync");
-            sdkStopRecognizeAsyncBtn = document.getElementById("speechsdkStopRecognizeAsync");
+            sdkStartRecognizeOnceAsyncBtn = document.getElementById("speechsdkStartRecognizeOnceAsync");
+            sdkStopRecognizeOnceAsyncBtn = document.getElementById("speechsdkStopRecognizeOnceAsync");
             sdkStartContinousRecognitionBtn = document.getElementById("speechsdkStartContinousRecognition");
             sdkStopContinousRecognitionBtn = document.getElementById("speechsdkStopContinousRecognition");
             sdkStartContinousTranslationBtn = document.getElementById("speechsdkStartContinousTranslation");
@@ -242,12 +242,12 @@
                 speechConfig.language = languageOptions.value;
                 reco = new SDK.SpeechRecognizer(speechConfig, audioConfig);
 
-                reco.IntermediateResultReceived = function (s, e) {
+                reco.recognizing = function (s, e) {
                     window.console.log(e);
                     hypothesisDiv.innerHTML = e.result.text;
                 };
 
-                reco.FinalResultReceived = function (s, e) {
+                reco.recognized = function (s, e) {
                     window.console.log(e);
 
                     statusDiv.innerHTML = "";
@@ -255,14 +255,24 @@
                     phraseDiv.innerHTML += e.result.text + "\r\n";
                 };
 
-                reco.SessionEvent = function (s, e) {
+                reco.sessionStarted = function (s, e) {
                     window.console.log(e);
-                    statusDiv.innerHTML += "SessionEvent: " +  JSON.stringify(e);
+                    statusDiv.innerHTML += "sessionStarted: " +  JSON.stringify(e);
                 };
 
-                reco.RecognitionEvent = function (s, e) {
+                reco.sessionStopped = function (s, e) {
                     window.console.log(e);
-                    statusDiv.innerHTML += "RecognitionEvent: " + JSON.stringify(e);
+                    statusDiv.innerHTML += "sessionStopped: " +  JSON.stringify(e);
+                };
+
+                reco.speechStartDetected  = function (s, e) {
+                    window.console.log(e);
+                    statusDiv.innerHTML += "speechStartDetected: " + JSON.stringify(e);
+                };
+
+                reco.speechEndDetected  = function (s, e) {
+                    window.console.log(e);
+                    statusDiv.innerHTML += "speechEndDetected: " + JSON.stringify(e);
                 };
 
                 reco.startContinuousRecognitionAsync();
@@ -308,12 +318,12 @@
 
                 reco = new SDK.TranslationRecognizer(speechConfig, audioConfig);
 
-                reco.IntermediateResultReceived = function (s, e) {
+                reco.recognizing = function (s, e) {
                     window.console.log(e);
                     hypothesisDiv.innerHTML = JSON.stringify(e.result.translations.values);
                 };
 
-                reco.FinalResultReceived = function (s, e) {
+                reco.recognized = function (s, e) {
                     window.console.log(e);
 
                     statusDiv.innerHTML = "";
@@ -321,7 +331,7 @@
                     phraseDiv.innerHTML += JSON.stringify(e.result.translations.values) + "\r\n";
                 };
 
-                reco.SynthesisResultReceived = function (s, e) {
+                reco.synthesized = function (s, e) {
                     window.console.log(e);
 
                     var source = soundContext.createBufferSource();
@@ -334,16 +344,25 @@
                     statusDiv.innerHTML = "playing audio";
                 };
 
-                reco.SessionEvent = function (s, e) {
+                reco.sessionStarted = function (s, e) {
                     window.console.log(e);
-                    statusDiv.innerHTML += "SessionEvent: " +  JSON.stringify(e);
+                    statusDiv.innerHTML += "sessionStarted: " +  JSON.stringify(e);
                 };
 
-                reco.RecognitionEvent = function (s, e) {
+                reco.sessionStopped = function (s, e) {
                     window.console.log(e);
-                    statusDiv.innerHTML += "RecognitionEvent: " + JSON.stringify(e);
+                    statusDiv.innerHTML += "sessionStopped: " +  JSON.stringify(e);
                 };
 
+                reco.speechStartDetected = function (s, e) {
+                    window.console.log(e);
+                    statusDiv.innerHTML += "speechStartDetected: " + JSON.stringify(e);
+                };
+
+                reco.speechEndDetected = function (s, e) {
+                    window.console.log(e);
+                    statusDiv.innerHTML += "speechEndDetected: " + JSON.stringify(e);
+                };
                 reco.startContinuousRecognitionAsync();
 
                 languageTargetOptions.disabled = true;
@@ -367,7 +386,7 @@
                     });
             });
 
-            sdkStartRecognizeAsyncBtn.addEventListener("click", function () {
+            sdkStartRecognizeOnceAsyncBtn.addEventListener("click", function () {
                 if (key.value == "" || key.value == "YOUR_SPEECH_API_KEY") {
                     alert("Please enter your Cognitive Services Speech subscription key!");
                     return;
@@ -383,25 +402,35 @@
                 speechConfig.language = languageOptions.value;
                 reco = new SDK.SpeechRecognizer(speechConfig, audioConfig);
 
-                reco.IntermediateResultReceived = function (s, e) {
+                reco.recognizing = function (s, e) {
                     window.console.log(e);
                     hypothesisDiv.innerHTML = e.result.text;
                 };
 
-                reco.SessionEvent = function (s, e) {
+                reco.sessionStarted = function (s, e) {
                     window.console.log(e);
-                    statusDiv.innerHTML += "SessionEvent: " +  JSON.stringify(e);
+                    statusDiv.innerHTML += "sessionStarted: " +  JSON.stringify(e);
                 };
 
-                reco.RecognitionEvent = function (s, e) {
+                reco.sessionStopped = function (s, e) {
                     window.console.log(e);
-                    statusDiv.innerHTML += "RecognitionEvent: " + JSON.stringify(e);
+                    statusDiv.innerHTML += "sessionStopped: " +  JSON.stringify(e);
+                };
+
+                reco.speechStartDetected = function (s, e) {
+                    window.console.log(e);
+                    statusDiv.innerHTML += "speechStartDetected: " + JSON.stringify(e);
+                };
+
+                reco.speechEndDetected = function (s, e) {
+                    window.console.log(e);
+                    statusDiv.innerHTML += "speechEndDetected: " + JSON.stringify(e);
                 };
 
                 // Note: this is how you can process the result directly
-                //       rather then subscribing to the FinalResultReceived
+                //       rather then subscribing to the recognized
                 //       event
-                reco.recognizeAsync(
+                reco.recognizeOnceAsync(
                     function (result) {
                         window.console.log(result);
 
@@ -409,7 +438,7 @@
                         hypothesisDiv.innerHTML = "";
                         phraseDiv.innerHTML += result.text + "\r\n";
 
-                        sdkStopRecognizeAsyncBtn.click();
+                        sdkStopRecognizeOnceAsyncBtn.click();
                     },
                     function (err) {
                         window.console.log(err);
@@ -418,16 +447,16 @@
                         hypothesisDiv.innerHTML = "";
                         phraseDiv.innerHTML += "ERROR: " + err;
 
-                        sdkStopRecognizeAsyncBtn.click();
+                        sdkStopRecognizeOnceAsyncBtn.click();
                     });
 
-                sdkStartRecognizeAsyncBtn.disabled = true;
-                sdkStopRecognizeAsyncBtn.disabled = false;
+                sdkStartRecognizeOnceAsyncBtn.disabled = true;
+                sdkStopRecognizeOnceAsyncBtn.disabled = false;
             });
 
-            sdkStopRecognizeAsyncBtn.addEventListener("click", function () {
-                sdkStartRecognizeAsyncBtn.disabled = false;
-                sdkStopRecognizeAsyncBtn.disabled = true;
+            sdkStopRecognizeOnceAsyncBtn.addEventListener("click", function () {
+                sdkStartRecognizeOnceAsyncBtn.disabled = false;
+                sdkStopRecognizeOnceAsyncBtn.disabled = true;
 
                 reco.close();
                 reco = undefined;
@@ -461,7 +490,7 @@
             Initialize(function (speechSdk) {
                 SDK = speechSdk;
                 sdkStartContinousRecognitionBtn.disabled = false;
-                sdkStartRecognizeAsyncBtn.disabled = false;
+                sdkStartRecognizeOnceAsyncBtn.disabled = false;
             });
         });
     </script>

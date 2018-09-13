@@ -16,14 +16,14 @@ namespace Microsoft.CognitiveServices.Speech.Intent
     public sealed class IntentRecognizer : Recognizer
     {
         /// <summary>
-        /// The event <see cref="IntermediateResultReceived"/> signals that an intermediate recognition result is received.
+        /// The event <see cref="Recognizing"/> signals that an intermediate recognition result is received.
         /// </summary>
-        public event EventHandler<IntentRecognitionResultEventArgs> IntermediateResultReceived;
+        public event EventHandler<IntentRecognitionResultEventArgs> Recognizing;
 
         /// <summary>
-        /// The event <see cref="FinalResultReceived"/> signals that a final recognition result is received.
+        /// The event <see cref="Recognized"/> signals that a final recognition result is received.
         /// </summary>
-        public event EventHandler<IntentRecognitionResultEventArgs> FinalResultReceived;
+        public event EventHandler<IntentRecognitionResultEventArgs> Recognized;
 
         /// <summary>
         /// The event <see cref="Canceled"/> signals that the intent recognition was canceled.
@@ -55,11 +55,11 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         {
             this.recoImpl = Internal.IntentRecognizer.FromConfig(config, audioConfig);
 
-            intermediateResultHandler = new IntentHandlerImpl(this, isFinalResultHandler: false);
-            recoImpl.IntermediateResult.Connect(intermediateResultHandler);
+            recognizingHandler = new IntentHandlerImpl(this, isRecognizedHandler: false);
+            recoImpl.Recognizing.Connect(recognizingHandler);
 
-            finalResultHandler = new IntentHandlerImpl(this, isFinalResultHandler: true);
-            recoImpl.FinalResult.Connect(finalResultHandler);
+            recognizedHandler = new IntentHandlerImpl(this, isRecognizedHandler: true);
+            recoImpl.Recognized.Connect(recognizedHandler);
 
             canceledHandler = new CanceledHandlerImpl(this);
             recoImpl.Canceled.Connect(canceledHandler);
@@ -111,10 +111,10 @@ namespace Microsoft.CognitiveServices.Speech.Intent
 
         /// <summary>
         /// Starts intent recognition, and stops after the first utterance is recognized. The task returns the recognition text and intent as result.
-        /// Note: RecognizeAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
+        /// Note: RecognizeOnceAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
         /// </summary>
         /// <returns>A task representing the recognition operation. The task returns a value of <see cref="IntentRecognitionResult"/></returns>
-        public Task<IntentRecognitionResult> RecognizeAsync()
+        public Task<IntentRecognitionResult> RecognizeOnceAsync()
         {
             return Task.Run(() => { return new IntentRecognitionResult(this.recoImpl.Recognize()); });
         }
@@ -225,16 +225,16 @@ namespace Microsoft.CognitiveServices.Speech.Intent
 
             if (disposing)
             {
-                recoImpl.IntermediateResult.Disconnect(intermediateResultHandler);
-                recoImpl.FinalResult.Disconnect(finalResultHandler);
+                recoImpl.Recognizing.Disconnect(recognizingHandler);
+                recoImpl.Recognized.Disconnect(recognizedHandler);
                 recoImpl.Canceled.Disconnect(canceledHandler);
                 recoImpl.SessionStarted.Disconnect(sessionStartedHandler);
                 recoImpl.SessionStopped.Disconnect(sessionStoppedHandler);
                 recoImpl.SpeechStartDetected.Disconnect(speechStartDetectedHandler);
                 recoImpl.SpeechEndDetected.Disconnect(speechEndDetectedHandler);
 
-                intermediateResultHandler?.Dispose();
-                finalResultHandler?.Dispose();
+                recognizingHandler?.Dispose();
+                recognizedHandler?.Dispose();
                 canceledHandler?.Dispose();
                 recoImpl?.Dispose();
                 disposed = true;
@@ -244,24 +244,24 @@ namespace Microsoft.CognitiveServices.Speech.Intent
 
         private bool disposed = false;
         internal readonly Internal.IntentRecognizer recoImpl;
-        private readonly IntentHandlerImpl intermediateResultHandler;
-        private readonly IntentHandlerImpl finalResultHandler;
+        private readonly IntentHandlerImpl recognizingHandler;
+        private readonly IntentHandlerImpl recognizedHandler;
         private readonly CanceledHandlerImpl canceledHandler;
         private readonly Audio.AudioConfig audioConfig;
 
         // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
         private class IntentHandlerImpl : Internal.IntentEventListener
         {
-            public IntentHandlerImpl(IntentRecognizer recognizer, bool isFinalResultHandler)
+            public IntentHandlerImpl(IntentRecognizer recognizer, bool isRecognizedHandler)
             {
                 this.recognizer = recognizer;
-                this.isFinalResultHandler = isFinalResultHandler;
+                this.isRecognizedHandler = isRecognizedHandler;
             }
 
             public override void Execute(Internal.IntentRecognitionEventArgs eventArgs)
             {
                 var resultEventArg = new IntentRecognitionResultEventArgs(eventArgs);
-                var handler = isFinalResultHandler ? recognizer.FinalResultReceived : recognizer.IntermediateResultReceived;
+                var handler = isRecognizedHandler ? recognizer.Recognized : recognizer.Recognizing;
                 if (handler != null)
                 {
                     handler(this, resultEventArg);
@@ -269,7 +269,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
             }
 
             private IntentRecognizer recognizer;
-            private bool isFinalResultHandler;
+            private bool isRecognizedHandler;
         }
 
         // Defines an internal class to raise a C# event for error during recognition when a corresponding callback is invoked by the native layer.

@@ -54,19 +54,22 @@ CSpxResourceManager::CSpxResourceManager()
 
     m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
 #else
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-mock"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-mock.dll"));
 
     // Note: due to new naming, removing any carbon prefix in name
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.pmakws"));
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.kws"));
+    // Note: due to dots in filenames, MUST append .dll suffix!
+    //       (added them for consistency to all names, but the
+    //       special "carbon" core component)
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.pmakws.dll"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("Microsoft.CognitiveServices.Speech.extension.kws.dll"));
 
     // TODO remove the following two lines once carbon prefixes are removed
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-pmakws"));
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-kws"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-pmakws.dll"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-kws.dll"));
     // TODO remove the previous two lines once carbon prefixes are removed
 
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon"));
-    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-unidec"));
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon")); // this is special, internal name, no dll extension!
+    m_moduleFactories.push_back(CSpxModuleFactory::Get("carbon-unidec.dll"));
 #endif
 }
 

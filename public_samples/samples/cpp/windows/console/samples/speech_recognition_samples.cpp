@@ -26,10 +26,10 @@ void SpeechRecognitionWithMicrophone()
     auto recognizer = SpeechRecognizer::FromConfig(config);
     cout << "Say something...\n";
 
-    // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+    // Performs recognition. RecognizeOnceAsync() returns when the first utterance has been recognized,
     // so it is suitable only for single shot recognition like command or query. For long-running
     // recognition, use StartContinuousRecognitionAsync() instead.
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     // Checks result.
     if (result->Reason == ResultReason::RecognizedSpeech)
@@ -73,10 +73,10 @@ void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
     auto recognizer = SpeechRecognizer::FromConfig(config);
     cout << "Say something in " << lang << "...\n";
 
-    // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+    // Performs recognition. RecognizeOnceAsync() returns when the first utterance has been recognized,
     // so it is suitable only for single shot recognition like command or query. For long-running
     // recognition, use StartContinuousRecognitionAsync() instead.
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     // Checks result.
     if (result->Reason == ResultReason::RecognizedSpeech)
@@ -119,12 +119,12 @@ void SpeechContinuousRecognitionWithFile()
     promise<void> recognitionEnd;
 
     // Subscribes to events.
-    recognizer->IntermediateResult.Connect([] (const SpeechRecognitionEventArgs& e)
+    recognizer->Recognizing.Connect([] (const SpeechRecognitionEventArgs& e)
     {
-        cout << "IntermediateResult:" << e.Result->Text << endl;
+        cout << "Recognizing:" << e.Result->Text << endl;
     });
 
-    recognizer->FinalResult.Connect([] (const SpeechRecognitionEventArgs& e)
+    recognizer->Recognized.Connect([] (const SpeechRecognitionEventArgs& e)
     {
         if (e.Result->Reason == ResultReason::RecognizedSpeech)
         {
@@ -184,10 +184,10 @@ void SpeechRecognitionUsingCustomizedModel()
 
     cout << "Say something...\n";
 
-    // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+    // Performs recognition. RecognizeOnceAsync() returns when the first utterance has been recognized,
     // so it is suitable only for single shot recognition like command or query. For long-running
     // recognition, use StartContinuousRecognitionAsync() instead.
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     // Checks result.
     if (result->Reason == ResultReason::RecognizedSpeech)
@@ -377,12 +377,12 @@ void SpeechContinuousRecognitionWithStream()
     promise<void> recognitionEnd;
 
     // Subscribes to events.
-    recognizer->IntermediateResult.Connect([](const SpeechRecognitionEventArgs& e)
+    recognizer->Recognizing.Connect([](const SpeechRecognitionEventArgs& e)
     {
-        cout << "IntermediateResult:" << e.Result->Text << endl;
+        cout << "Recognizing:" << e.Result->Text << endl;
     });
 
-    recognizer->FinalResult.Connect([] (const SpeechRecognitionEventArgs& e)
+    recognizer->Recognized.Connect([] (const SpeechRecognitionEventArgs& e)
     {
         if (e.Result->Reason == ResultReason::RecognizedSpeech)
         {

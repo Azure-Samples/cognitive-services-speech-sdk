@@ -58,7 +58,7 @@ namespace helloworld
                 using (var recognizer = new SpeechRecognizer(config))
                 {
                     // Starts recognition. It returns when the first utterance has been recognized.
-                    var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                    var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
                     // Checks result.
                     StringBuilder sb = new StringBuilder();

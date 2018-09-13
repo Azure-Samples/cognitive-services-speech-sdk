@@ -11,7 +11,7 @@ import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
-  * Defines content of an intent intermediate/final result events.
+  * Defines content of an intent recognizing/recognized events.
   */
 public final class IntentRecognitionResultEventArgs // : System.EventArgs
 {

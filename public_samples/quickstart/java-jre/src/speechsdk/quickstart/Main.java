@@ -32,7 +32,7 @@ public class Main {
 
             System.out.println("Say something...");
 
-            Future<SpeechRecognitionResult> task = reco.recognizeAsync();
+            Future<SpeechRecognitionResult> task = reco.recognizeOnceAsync();
             assert(task != null);
 
             SpeechRecognitionResult result = task.get();

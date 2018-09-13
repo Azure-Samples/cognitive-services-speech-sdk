@@ -44,15 +44,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             return new TranslationRecognizer(GetConfig(path, fromLanguage, toLanguages, voice), audioInput);
         }
 
-        public async Task<EventArgs> GetTranslationFinalResultEvents(string path, string fromLanguage, List<string> toLanguages)
+        public async Task<EventArgs> GetTranslationRecognizedEvents(string path, string fromLanguage, List<string> toLanguages)
         {
             using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages)))
             {
                 EventArgs eventArgs = null;
-                recognizer.FinalResultReceived += (s, e) => eventArgs = e;
-                recognizer.SynthesisResultReceived += (s, e) => eventArgs = e;
-                recognizer.IntermediateResultReceived += (s, e) => eventArgs = e;
-                await Task.WhenAny(recognizer.RecognizeAsync(), Task.Delay(timeout));
+                recognizer.Recognized += (s, e) => eventArgs = e;
+                recognizer.Synthesized += (s, e) => eventArgs = e;
+                recognizer.Recognizing += (s, e) => eventArgs = e;
+                await Task.WhenAny(recognizer.RecognizeOnceAsync(), Task.Delay(timeout));
                 return eventArgs;
             }
         }
@@ -62,29 +62,29 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages)))
             {
                 TranslationTextResult result = null;
-                await Task.WhenAny(recognizer.RecognizeAsync().ContinueWith(t => result = t.Result), Task.Delay(timeout));
+                await Task.WhenAny(recognizer.RecognizeOnceAsync().ContinueWith(t => result = t.Result), Task.Delay(timeout));
                 return result;
             }
         }
 
-        public async Task<Dictionary<ResultType, List<EventArgs>>> GetTranslationFinalResultContinuous(string path, string fromLanguage, List<string> toLanguages, string voice=null)
+        public async Task<Dictionary<ResultType, List<EventArgs>>> GetTranslationRecognizedContinuous(string path, string fromLanguage, List<string> toLanguages, string voice=null)
         {
             using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages, voice)))
             {
                 var tcs = new TaskCompletionSource<bool>();
-                var receivedFinalResultEvents = new Dictionary<ResultType, List<EventArgs>>(); ;
+                var receivedRecognizedEvents = new Dictionary<ResultType, List<EventArgs>>(); ;
                 var textResultEvents = new List<EventArgs>();
                 var synthesisResultEvents = new List<EventArgs>();
 
                 string canceled = string.Empty;
                 recognizer.Canceled += (s, e) => { canceled = e.ToString(); };
-                recognizer.FinalResultReceived += (s, e) =>
+                recognizer.Recognized += (s, e) =>
                 {
                     Console.WriteLine($"Received final result event: {e.ToString()}");
                     textResultEvents.Add(e);
                 };
 
-                recognizer.SynthesisResultReceived += (s, e) =>
+                recognizer.Synthesized += (s, e) =>
                 {
                     Console.WriteLine($"Received synthesis event: {e.ToString()}");
                     if (e.Result.Audio.Length > 0)
@@ -93,13 +93,15 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     }
                 };
 
-                recognizer.OnSessionEvent += (s, e) =>
+                recognizer.SessionStarted += (s, e) =>
                 {
-                    Console.WriteLine($"Received session event: {e.ToString()}");
-                    if (e.EventType == SessionEventType.SessionStoppedEvent)
-                    {
-                        tcs.TrySetResult(true);
-                    }
+                    Console.WriteLine($"Received session started event: {e.ToString()}");
+                };
+
+                recognizer.SessionStopped += (s, e) =>
+                {
+                    Console.WriteLine($"Received stopped session event: {e.ToString()}");
+                    tcs.TrySetResult(true);
                 };
 
                 await recognizer.StartContinuousRecognitionAsync();
@@ -111,44 +113,41 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     Assert.Fail($"Recognition Canceled: {canceled}");
                 }
 
-                receivedFinalResultEvents.Add(ResultType.Text, textResultEvents);
-                receivedFinalResultEvents.Add(ResultType.Synthesis, synthesisResultEvents);
-                return receivedFinalResultEvents;
+                receivedRecognizedEvents.Add(ResultType.Text, textResultEvents);
+                receivedRecognizedEvents.Add(ResultType.Synthesis, synthesisResultEvents);
+                return receivedRecognizedEvents;
             }
         }
 
-        public async Task<List<List<TranslationTextResultEventArgs>>> GetTranslationIntermediateResultContinuous(string path, string fromLanguage, List<string> toLanguages)
+        public async Task<List<List<TranslationTextResultEventArgs>>> GetTranslationRecognizingContinuous(string path, string fromLanguage, List<string> toLanguages)
         {
             using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages)))
             {
                 var tcs = new TaskCompletionSource<bool>();
                 var listOfIntermediateResults = new List<List<TranslationTextResultEventArgs>>();
-                List<TranslationTextResultEventArgs> receivedIntermediateResultEvents = null;
+                List<TranslationTextResultEventArgs> receivedRecognizingEvents = null;
 
-                recognizer.OnSessionEvent += (s, e) =>
+                recognizer.SessionStarted += (s, e) =>
                 {
-                    if (e.EventType.ToString().Equals("SessionStartedEvent"))
-                    {
-                        Console.WriteLine($"Session started {e.ToString()}");
-                        receivedIntermediateResultEvents = new List<TranslationTextResultEventArgs>();
-                    }
-                    if (e.EventType.ToString().Equals("SessionStoppedEvent"))
-                    {
-                        Console.WriteLine($"Session stopped {e.ToString()}");
-                        tcs.TrySetResult(true);
-                    }
+                    Console.WriteLine($"Session started {e.ToString()}");
+                    receivedRecognizingEvents = new List<TranslationTextResultEventArgs>();
                 };
-                recognizer.IntermediateResultReceived += (s, e) =>
+                recognizer.SessionStopped += (s, e) =>
+                {
+                    Console.WriteLine($"Session stopped {e.ToString()}");
+                    tcs.TrySetResult(true);
+                };
+                recognizer.Recognizing += (s, e) =>
                 {
                     Console.WriteLine($"Got intermediate result {e.ToString()}");
-                    receivedIntermediateResultEvents.Add(e);
+                    receivedRecognizingEvents.Add(e);
                 };
 
-                recognizer.FinalResultReceived += (s, e) =>
+                recognizer.Recognized += (s, e) =>
                 {
                     Console.WriteLine($"Got final result {e.ToString()}");
-                    listOfIntermediateResults.Add(receivedIntermediateResultEvents);
-                    receivedIntermediateResultEvents = new List<TranslationTextResultEventArgs>();
+                    listOfIntermediateResults.Add(receivedRecognizingEvents);
+                    receivedRecognizingEvents = new List<TranslationTextResultEventArgs>();
                 };
 
                 string canceled = string.Empty;
@@ -173,12 +172,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         public static TranslationRecognizer TrackSessionId(TranslationRecognizer recognizer)
         {
-            recognizer.OnSessionEvent += (s, e) =>
+            recognizer.SessionStarted += (s, e) =>
             {
-                if (e.EventType == SessionEventType.SessionStartedEvent)
-                {
-                    Console.WriteLine("SessionId: " + e.SessionId);
-                }
+                Console.WriteLine("SessionId: " + e.SessionId);
             };
             return recognizer;
         }

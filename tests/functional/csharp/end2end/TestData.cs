@@ -59,7 +59,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 public static readonly string AudioFile = Path.Combine(AudioDir,"batman.wav");
                 // This is expected results using StartContinuousRecognitionAsync() which uses converstation mode.
-                // The result using RecognizeAsync() might be slightly different, since it uses interactive mode.
+                // The result using RecognizeOnceAsync() might be slightly different, since it uses interactive mode.
                 public static readonly string[] Utterances =
                 {
                     "Skills and abilities Batman has no inherent super powers, he relies on his own scientific knowledge detective skills and athletic prowess.",

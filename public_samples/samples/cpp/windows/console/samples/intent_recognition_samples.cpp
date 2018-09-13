@@ -39,10 +39,10 @@ void IntentRecognitionWithMicrophone()
 
     cout << "Say something...\n";
 
-    // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+    // Performs recognition. RecognizeOnceAsync() returns when the first utterance has been recognized,
     // so it is suitable only for single shot recognition like command or query. For long-running
     // recognition, use StartContinuousRecognitionAsync() instead.
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     // Checks result.
     if (result->Reason == ResultReason::RecognizedIntent)
@@ -99,10 +99,10 @@ void IntentRecognitionWithLanguage()
 
     cout << "Say something in " << lang << "..." << std::endl;
 
-    // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+    // Performs recognition. RecognizeOnceAsync() returns when the first utterance has been recognized,
     // so it is suitable only for single shot recognition like command or query. For long-running
     // recognition, use StartContinuousRecognitionAsync() instead.
-    auto result = recognizer->RecognizeAsync().get();
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     // Checks result.
     if (result->Reason == ResultReason::RecognizedIntent)
@@ -161,12 +161,12 @@ void IntentContinuousRecognitionWithFile()
     recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
     // Subscribes to events.
-    recognizer->IntermediateResult.Connect([] (const IntentRecognitionEventArgs& e)
+    recognizer->Recognizing.Connect([] (const IntentRecognitionEventArgs& e)
     {
-        cout << "IntermediateResult:" << e.Result->Text << std::endl;
+        cout << "Recognizing:" << e.Result->Text << std::endl;
     });
 
-    recognizer->FinalResult.Connect([] (const IntentRecognitionEventArgs& e)
+    recognizer->Recognized.Connect([] (const IntentRecognitionEventArgs& e)
     {
         if (e.Result->Reason == ResultReason::RecognizedIntent)
         {

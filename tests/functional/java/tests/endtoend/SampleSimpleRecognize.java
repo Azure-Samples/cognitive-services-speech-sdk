@@ -36,7 +36,7 @@ public class SampleSimpleRecognize implements Runnable {
             AudioConfig audioInput = AudioConfig.fromWavFileInput(Settings.WavFile);
             SpeechRecognizer reco = new SpeechRecognizer(config, audioInput);
 
-            Future<SpeechRecognitionResult> task = reco.recognizeAsync();
+            Future<SpeechRecognitionResult> task = reco.recognizeOnceAsync();
 
             SpeechRecognitionResult result = task.get();
             recognitionResult = result.getText();
