@@ -33,7 +33,7 @@ inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, std::sh
     auto factory = SpxQueryService<ISpxObjectFactory>(site);
     if (factory == nullptr)
     {
-        LogError("site does not support ISpxObjectFactory");
+        SPX_DBG_TRACE_ERROR("site does not support ISpxObjectFactory");
         return nullptr;
     }
     auto ptr = factory->CreateObject<I>(className);
