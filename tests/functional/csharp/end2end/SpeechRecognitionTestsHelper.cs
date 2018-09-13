@@ -50,16 +50,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     taskCompletionSource.TrySetResult(0);
                 }
             };
-            string error = string.Empty;
-            recognizer.RecognitionErrorRaised += (s, e) => { error = e.ToString(); };
+            string canceled = string.Empty;
+            recognizer.Canceled += (s, e) => { canceled = e.ToString(); };
 
             await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
             await Task.WhenAny(taskCompletionSource.Task, Task.Delay(timeout));
             await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
 
-            if (!string.IsNullOrEmpty(error))
+            if (!string.IsNullOrEmpty(canceled))
             {
-                Assert.Fail($"Error received: {error}");
+                Assert.Fail($"Recognition Canceled: {canceled}");
             }
         }
 
@@ -86,7 +86,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             FinalResultEventCount++;
         }
 
-        private void ErrorEventCounter(object sender, RecognitionErrorEventArgs e)
+        private void CanceledEventCounter(object sender, SpeechRecognitionCanceledEventArgs e)
         {
             ErrorEventCount++;
         }
@@ -130,7 +130,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public void SubscribeToCounterEventHandlers(SpeechRecognizer recognizer)
         {
             recognizer.FinalResultReceived += FinalResultEventCounter;
-            recognizer.RecognitionErrorRaised += ErrorEventCounter;
+            recognizer.Canceled += CanceledEventCounter;
             recognizer.OnSessionEvent += SessionEventCounter;
             recognizer.OnSpeechDetectedEvent += SpeechEventCounter;
         }
@@ -138,7 +138,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         public void UnsubscribeFromCounterEventHandlers(SpeechRecognizer recognizer)
         {
             recognizer.FinalResultReceived -= FinalResultEventCounter;
-            recognizer.RecognitionErrorRaised -= ErrorEventCounter;
+            recognizer.Canceled -= CanceledEventCounter;
             recognizer.OnSessionEvent -= SessionEventCounter;
             recognizer.OnSpeechDetectedEvent -= SpeechEventCounter;
         }

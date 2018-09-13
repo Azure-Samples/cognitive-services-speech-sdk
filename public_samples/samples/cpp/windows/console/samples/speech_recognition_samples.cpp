@@ -26,31 +26,30 @@ void SpeechRecognitionWithMicrophone()
     auto recognizer = SpeechRecognizer::FromConfig(config);
     cout << "Say something...\n";
 
-    // Performs recognition.
-    // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
-    // only for single shot recognition like command or query. For long-running recognition, use
-    // StartContinuousRecognitionAsync() instead.
+    // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+    // so it is suitable only for single shot recognition like command or query. For long-running
+    // recognition, use StartContinuousRecognitionAsync() instead.
     auto result = recognizer->RecognizeAsync().get();
 
     // Checks result.
-    if (result->Reason != Reason::Recognized)
+    if (result->Reason == ResultReason::RecognizedSpeech)
     {
-        cout << "Recognition Status: " << int(result->Reason) << ". ";
-        if (result->Reason == Reason::Canceled)
-        {
-            cout << "There was an error, reason: " << result->ErrorDetails << endl;
-        }
-        else
-        {
-            cout << "No speech could be recognized.\n";
-        }
+        cout << "RECOGNIZED: Text=" << result->Text << std::endl;
     }
-    else
+    else if (result->Reason == ResultReason::NoMatch)
     {
-        cout << "We recognized: " << result->Text
-             << " starting at " << result->Offset() << "(ticks)"
-             << ", with duration of " << result->Duration() << "(ticks)"
-             << endl;
+        cout << "NOMATCH: Speech could not be recognized." << std::endl;
+    }
+    else if (result->Reason == ResultReason::Canceled)
+    {
+        auto cancellation = CancellationDetails::FromResult(result);
+        cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
+
+        if (cancellation->Reason == CancellationReason::Error)
+        {
+            cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+            cout << "CANCELED: Did you update the subscription info?" << std::endl;
+        }
     }
     // </SpeechRecognitionWithMicrophone>
 }
@@ -74,30 +73,32 @@ void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
     auto recognizer = SpeechRecognizer::FromConfig(config);
     cout << "Say something in " << lang << "...\n";
 
-    // Performs recognition.
-    // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
-    // only for single shot recognition like command or query. For long-running recognition, use
-    // StartContinuousRecognitionAsync() instead.
+    // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+    // so it is suitable only for single shot recognition like command or query. For long-running
+    // recognition, use StartContinuousRecognitionAsync() instead.
     auto result = recognizer->RecognizeAsync().get();
 
     // Checks result.
-    if (result->Reason != Reason::Recognized)
+    if (result->Reason == ResultReason::RecognizedSpeech)
     {
-        cout << "Recognition Status:" << int(result->Reason);
-        if (result->Reason == Reason::Canceled)
-        {
-            cout << "There was an error, reason: " << result->ErrorDetails << endl;
-        }
-        else
-        {
-            cout << "No speech could be recognized.\n";
-        }
+        cout << "RECOGNIZED: Text=" << result->Text << std::endl
+             << "  Speech Service JSON: " << result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_Json)
+             << std::endl;
     }
-    else
+    else if (result->Reason == ResultReason::NoMatch)
     {
-        cout << L"We recognized: " << result->Text << endl
-              << L"Detailed output result in JSON: " << result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_Json)
-              << endl;
+        cout << "NOMATCH: Speech could not be recognized." << std::endl;
+    }
+    else if (result->Reason == ResultReason::Canceled)
+    {
+        auto cancellation = CancellationDetails::FromResult(result);
+        cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
+
+        if (cancellation->Reason == CancellationReason::Error)
+        {
+            cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+            cout << "CANCELED: Did you update the subscription info?" << std::endl;
+        }
     }
     // </SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat>
 }
@@ -120,50 +121,40 @@ void SpeechContinuousRecognitionWithFile()
     // Subscribes to events.
     recognizer->IntermediateResult.Connect([] (const SpeechRecognitionEventArgs& e)
     {
-        cout << "IntermediateResult:" << e.Result.Text << endl;
+        cout << "IntermediateResult:" << e.Result->Text << endl;
     });
 
     recognizer->FinalResult.Connect([] (const SpeechRecognitionEventArgs& e)
     {
-        cout << "Recognition Status:" << int(e.Result.Reason) << endl;
-        switch (e.Result.Reason)
+        if (e.Result->Reason == ResultReason::RecognizedSpeech)
         {
-        case Reason::Recognized:
-            cout << "We recognized: " << e.Result.Text
-                << " Offset: " << e.Result.Offset() << ". Duration: " << e.Result.Duration()
-                << endl;
-            break;
-        case Reason::InitialSilenceTimeout:
-            cout << "The start of the audio stream contains only silence, and the service timed out waiting for speech.\n";
-            break;
-        case Reason::InitialBabbleTimeout:
-            cout << "The start of the audio stream contains only noise, and the service timed out waiting for speech.\n";
-            break;
-        case Reason::NoMatch:
-            cout << "Speech was detected in the audio stream, but no words from the target language were matched. "
-                << "Possible reasons could be wrong setting of the target language or wrong format of audio stream.\n";
-            break;
-        case Reason::Canceled:
-            cout << "There was an error, reason: " << e.Result.ErrorDetails << endl;
-            break;
-        default:
-            cout << "Recognition Status:" << int(e.Result.Reason);
-            break;
+            cout << "RECOGNIZED: Text=" << e.Result->Text << std::endl
+                 << "  Offset=" << e.Result->Offset() << std::endl
+                 << "  Duration=" << e.Result->Duration() << std::endl;
+        }
+        else if (e.Result->Reason == ResultReason::NoMatch)
+        {
+            cout << "NOMATCH: Speech could not be recognized." << std::endl;
         }
     });
 
-    recognizer->Canceled.Connect( [&recognitionEnd] (const SpeechRecognitionEventArgs& e)
+    recognizer->Canceled.Connect([&recognitionEnd](const SpeechRecognitionCanceledEventArgs& e)
     {
-        cout << "Canceled:" << (int)e.Result.Reason << "- " << e.Result.ErrorDetails << endl;
-        // Notify to stop recognition.
-        recognitionEnd.set_value();
+        cout << "CANCELED: Reason=" << (int)e.Reason << std::endl;
+
+        if (e.Reason == CancellationReason::Error)
+        {
+            cout << "CANCELED: ErrorDetails=" << e.ErrorDetails << std::endl;
+            cout << "CANCELED: Did you update the subscription info?" << std::endl;
+        }
+
+        recognitionEnd.set_value(); // Notify to stop recognition.
     });
 
-    recognizer->SessionStopped.Connect( [&recognitionEnd] (const SessionEventArgs& e)
+    recognizer->SessionStopped.Connect([&recognitionEnd](const SessionEventArgs& e)
     {
         cout << "Session stopped.";
-        // Notify to stop recognition.
-        recognitionEnd.set_value();
+        recognitionEnd.set_value(); // Notify to stop recognition.
     });
 
     // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
@@ -193,24 +184,30 @@ void SpeechRecognitionUsingCustomizedModel()
 
     cout << "Say something...\n";
 
-    // Performs recognition.
-    // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
-    // only for single shot recognition like command or query. For long-running recognition, use
-    // StartContinuousRecognitionAsync() instead.
+    // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+    // so it is suitable only for single shot recognition like command or query. For long-running
+    // recognition, use StartContinuousRecognitionAsync() instead.
     auto result = recognizer->RecognizeAsync().get();
 
     // Checks result.
-    if (result->Reason != Reason::Recognized)
+    if (result->Reason == ResultReason::RecognizedSpeech)
     {
-        cout << "Recognition Status:" << int(result->Reason);
-        if (result->Reason == Reason::Canceled)
-        {
-            cout << "There was an error, reason: " << result->ErrorDetails << endl;
-        }
+        cout << "RECOGNIZED: Text=" << result->Text << std::endl;
     }
-    else
+    else if (result->Reason == ResultReason::NoMatch)
     {
-        cout << "We recognized: " << result->Text << endl;
+        cout << "NOMATCH: Speech could not be recognized." << std::endl;
+    }
+    else if (result->Reason == ResultReason::Canceled)
+    {
+        auto cancellation = CancellationDetails::FromResult(result);
+        cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
+
+        if (cancellation->Reason == CancellationReason::Error)
+        {
+            cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+            cout << "CANCELED: Did you update the subscription info?" << std::endl;
+        }
     }
     // </SpeechRecognitionUsingCustomizedModel>
 }
@@ -382,50 +379,40 @@ void SpeechContinuousRecognitionWithStream()
     // Subscribes to events.
     recognizer->IntermediateResult.Connect([](const SpeechRecognitionEventArgs& e)
     {
-        cout << "IntermediateResult:" << e.Result.Text << endl;
+        cout << "IntermediateResult:" << e.Result->Text << endl;
     });
 
-    recognizer->FinalResult.Connect([](const SpeechRecognitionEventArgs& e)
+    recognizer->FinalResult.Connect([] (const SpeechRecognitionEventArgs& e)
     {
-        cout << "Recognition Status:" << int(e.Result.Reason) << endl;
-        switch (e.Result.Reason)
+        if (e.Result->Reason == ResultReason::RecognizedSpeech)
         {
-        case Reason::Recognized:
-            cout << "We recognized: " << e.Result.Text
-                << " Offset: " << e.Result.Offset() << ". Duration: " << e.Result.Duration()
-                << endl;
-            break;
-        case Reason::InitialSilenceTimeout:
-            cout << "The start of the audio stream contains only silence, and the service timed out waiting for speech.\n";
-            break;
-        case Reason::InitialBabbleTimeout:
-            cout << "The start of the audio stream contains only noise, and the service timed out waiting for speech.\n";
-            break;
-        case Reason::NoMatch:
-            cout << "Speech was detected in the audio stream, but no words from the target language were matched. "
-                << "Possible reasons could be wrong setting of the target language or wrong format of audio stream.\n";
-            break;
-        case Reason::Canceled:
-            cout << "There was an error, reason: " << e.Result.ErrorDetails << endl;
-            break;
-        default:
-            cout << "Recognition Status:" << int(e.Result.Reason);
-            break;
+            cout << "RECOGNIZED: Text=" << e.Result->Text << std::endl
+                 << "  Offset=" << e.Result->Offset() << std::endl
+                 << "  Duration=" << e.Result->Duration() << std::endl;
+        }
+        else if (e.Result->Reason == ResultReason::NoMatch)
+        {
+            cout << "NOMATCH: Speech could not be recognized." << std::endl;
         }
     });
 
-    recognizer->Canceled.Connect([&recognitionEnd](const SpeechRecognitionEventArgs& e)
+    recognizer->Canceled.Connect([&recognitionEnd](const SpeechRecognitionCanceledEventArgs& e)
     {
-        cout << "Canceled:" << (int)e.Result.Reason << "- " << e.Result.ErrorDetails << endl;
-        // Notify to stop recognition.
-        recognitionEnd.set_value();
+        cout << "CANCELED: Reason=" << (int)e.Reason << std::endl;
+
+        if (e.Reason == CancellationReason::Error)
+        {
+            cout << "CANCELED: ErrorDetails=" << e.ErrorDetails << std::endl;
+            cout << "CANCELED: Did you update the subscription info?" << std::endl;
+        }
+
+        recognitionEnd.set_value(); // Notify to stop recognition.
     });
 
     recognizer->SessionStopped.Connect([&recognitionEnd](const SessionEventArgs& e)
     {
         cout << "Session stopped.";
-        // Notify to stop recognition.
-        recognitionEnd.set_value();
+        recognitionEnd.set_value(); // Notify to stop recognition.
     });
 
     // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.

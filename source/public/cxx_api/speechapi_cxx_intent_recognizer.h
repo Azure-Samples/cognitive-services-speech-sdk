@@ -27,9 +27,11 @@ namespace Intent {
 /// about the intent of the speaker, which can be used to drive further actions using dedicated intent triggers
 /// (see <see cref="IntentTrigger"/>).
 /// </summary>
-class IntentRecognizer : public AsyncRecognizer<IntentRecognitionResult, IntentRecognitionEventArgs>
+class IntentRecognizer : public AsyncRecognizer<IntentRecognitionResult, IntentRecognitionEventArgs, IntentRecognitionCanceledEventArgs>
 {
 public:
+
+    using BaseType = AsyncRecognizer<IntentRecognitionResult, IntentRecognitionEventArgs, IntentRecognitionCanceledEventArgs>;
 
      /// <summary>
      /// Creates an intent recognizer from a speech config and an audio config.
@@ -47,8 +49,6 @@ public:
             HandleOrInvalid<SPXAUDIOCONFIGHANDLE, Audio::AudioConfig>(audioInput)));
         return std::make_shared<IntentRecognizer>(hreco);
     }
-
-    using BaseType = AsyncRecognizer<IntentRecognitionResult, IntentRecognitionEventArgs>;
 
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.

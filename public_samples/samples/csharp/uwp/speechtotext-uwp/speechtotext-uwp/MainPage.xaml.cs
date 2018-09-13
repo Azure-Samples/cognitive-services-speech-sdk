@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -79,9 +80,9 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
                 // Checks result.
                 string str;
-                if (result.RecognitionStatus != RecognitionStatus.Recognized)
+                if (result.Reason != ResultReason.RecognizedSpeech)
                 {
-                    str = $"Speech Recognition Failed. '{result.RecognitionStatus.ToString()}'";
+                    str = $"Speech Recognition Failed. '{result.Reason.ToString()}'";
                 }
                 else
                 {
@@ -125,20 +126,29 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
                         };
                         recognizer.FinalResultReceived += (s, e) =>
                         {
-                            string str;
-                            if (e.Result.RecognitionStatus == RecognitionStatus.Recognized)
+                            string str = "";
+                            if (e.Result.Reason == ResultReason.RecognizedSpeech)
                             {
-                                str = $"Final result: Status: {e.Result.RecognitionStatus.ToString()}, Text: {e.Result.Text}.";
+                                str = $"RECOGNIZED: Text={e.Result.Text}";
                             }
-                            else
+                            else if (e.Result.Reason == ResultReason.NoMatch)
                             {
-                                str = $"Final result: Status: {e.Result.RecognitionStatus.ToString()}, FailureReason: {e.Result.RecognitionFailureReason}.";
+                                str = $"NOMATCH: Speech could not be recognized.";
                             }
                             NotifyUser(str, NotifyType.StatusMessage);
                         };
-                        recognizer.RecognitionErrorRaised += (s, e) =>
+                        recognizer.Canceled += (s, e) =>
                         {
-                            NotifyUser($"An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}", NotifyType.StatusMessage);
+                            StringBuilder sb = new StringBuilder();
+                            sb.AppendLine($"CANCELED: Reason={e.Reason}");
+
+                            if (e.Reason == CancellationReason.Error)
+                            {
+                                sb.AppendLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                                sb.AppendLine($"CANCELED: Did you update the subscription info?");
+                            }
+
+                            NotifyUser(sb.ToString(), NotifyType.StatusMessage);
                         };
                         recognizer.OnSessionEvent += (s, e) =>
                         {
@@ -212,20 +222,29 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
                     };
                     recognizer.FinalResultReceived += (s, ee) =>
                     {
-                        string str;
-                        if (ee.Result.RecognitionStatus == RecognitionStatus.Recognized)
+                        string str = "";
+                        if (ee.Result.Reason == ResultReason.RecognizedSpeech)
                         {
-                            str = $"Final result: Status: {ee.Result.RecognitionStatus.ToString()}, Text: {ee.Result.Text}.";
+                            str = $"RECOGNIZED: Text={ee.Result.Text}";
                         }
-                        else
+                        else if (ee.Result.Reason == ResultReason.NoMatch)
                         {
-                            str = $"Final result: Status: {ee.Result.RecognitionStatus.ToString()}, FailureReason: {ee.Result.RecognitionFailureReason}.";
+                            str = $"NOMATCH: Speech could not be recognized.";
                         }
                         NotifyUser(str, NotifyType.StatusMessage);
                     };
-                    recognizer.RecognitionErrorRaised += (s, ee) =>
+                    recognizer.Canceled += (s, ee) =>
                     {
-                        NotifyUser($"An error occurred. Status: {ee.Status.ToString()}, FailureReason: {ee.FailureReason}", NotifyType.StatusMessage);
+                        StringBuilder sb = new StringBuilder();
+                        sb.AppendLine($"CANCELED: Reason={ee.Reason}");
+
+                        if (ee.Reason == CancellationReason.Error)
+                        {
+                            sb.AppendLine($"CANCELED: ErrorDetails={ee.ErrorDetails}");
+                            sb.AppendLine($"CANCELED: Did you update the subscription info?");
+                        }
+
+                        NotifyUser(sb.ToString(), NotifyType.StatusMessage);
                     };
                     recognizer.OnSessionEvent += (s, ee) =>
                     {

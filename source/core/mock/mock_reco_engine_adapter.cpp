@@ -141,7 +141,7 @@ void CSpxMockRecoEngineAdapter::FireIntermediateResult()
     InvokeOnSite([&](const SitePtr& site)
     {
         auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-        auto result = factory->CreateIntermediateResult(nullptr, resultText.c_str(), ResultType::Speech, offset, m_cbFireNextIntermediate - offset);
+        auto result = factory->CreateIntermediateResult(nullptr, resultText.c_str(), offset, m_cbFireNextIntermediate - offset);
         site->FireAdapterResult_Intermediate(this, offset, result);
     });
 }
@@ -167,7 +167,7 @@ void CSpxMockRecoEngineAdapter::FireFinalResult()
     InvokeOnSite([&](const SitePtr& site)
     {
         auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
-        auto result = factory->CreateFinalResult(ResultType::Speech, nullptr, Reason::Recognized, resultText.c_str(), offset, m_cbFireNextFinalResult - offset);
+        auto result = factory->CreateFinalResult(nullptr, ResultReason::RecognizedSpeech, NO_MATCH_REASON_NONE, REASON_CANCELED_NONE, resultText.c_str(), offset, m_cbFireNextFinalResult - offset);
         site->FireAdapterResult_FinalResult(this, offset, result);
     });
 }

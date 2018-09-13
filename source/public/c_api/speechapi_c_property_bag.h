@@ -12,7 +12,7 @@ SPXAPI_(bool) property_bag_is_valid(SPXPROPERTYBAGHANDLE hpropbag);
 SPXAPI property_bag_set_string(SPXPROPERTYBAGHANDLE hpropbag, int id, const char* name, const char* value);
 SPXAPI__(const char*) property_bag_get_string(SPXPROPERTYBAGHANDLE hpropbag, int id, const char* name, const char* defaultValue);
 SPXAPI property_bag_free_string(const char* value);
-SPXAPI property_bag_close(SPXPROPERTYBAGHANDLE hpropbag);
+SPXAPI property_bag_release(SPXPROPERTYBAGHANDLE hpropbag);
 
 // NOTE: Currenlty this enum is duplicated with C++ side,
 // because SWIG cannot properly resolve conditional compilation.
@@ -48,7 +48,7 @@ enum  SpeechPropertyId
     SpeechServiceResponse_JsonResult = 5001,
     SpeechServiceResponse_JsonErrorDetails = 5002,
 
-    CancellationDetails_ReasonCanceled = 6000,
+    CancellationDetails_Reason = 6000,
     CancellationDetails_ReasonText = 6001,
     CancellationDetails_ReasonDetailedText = 6002
 };

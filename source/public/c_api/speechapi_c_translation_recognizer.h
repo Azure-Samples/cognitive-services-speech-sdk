@@ -11,4 +11,4 @@
 // Todo: Translation recognizer management API.
 
 typedef void(*PTRANSLATIONSYNTHESIS_CALLBACK_FUNC)(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext);
-SPXAPI TranslationRecognizer_TranslationSynthesis_SetEventCallback(SPXRECOHANDLE hreco, PTRANSLATIONSYNTHESIS_CALLBACK_FUNC pCallback, void* pvContext);
+SPXAPI translator_synthesizing_audio_set_callback(SPXRECOHANDLE hreco, PTRANSLATIONSYNTHESIS_CALLBACK_FUNC pCallback, void* pvContext);

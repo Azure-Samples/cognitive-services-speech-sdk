@@ -8,9 +8,9 @@
 #pragma once
 #include <speechapi_c_common.h>
 
-SPXAPI Session_From_Recognizer(SPXRECOHANDLE hreco, SPXSESSIONHANDLE* phsession);
+SPXAPI session_from_recognizer(SPXRECOHANDLE hreco, SPXSESSIONHANDLE* phsession);
 
-SPXAPI_(bool) Session_Handle_IsValid(SPXSESSIONHANDLE hsession);
-SPXAPI Session_Handle_Close(SPXSESSIONHANDLE hsession);
+SPXAPI_(bool) session_handle_is_valid(SPXSESSIONHANDLE hsession);
+SPXAPI session_handle_release(SPXSESSIONHANDLE hsession);
 
 SPXAPI session_get_property_bag(SPXSESSIONHANDLE hsession, SPXPROPERTYBAGHANDLE* hpropbag);

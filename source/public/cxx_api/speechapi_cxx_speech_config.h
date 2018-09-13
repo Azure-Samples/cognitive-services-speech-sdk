@@ -204,7 +204,7 @@ public:
     virtual ~SpeechConfig()
     {
         speech_config_release(m_hconfig);
-        property_bag_close(m_propertybag);
+        property_bag_release(m_propertybag);
     }
 
 protected:

@@ -703,35 +703,35 @@ void CarbonTestConsole::ConsoleInput_Recognizer(const char* psz, std::shared_ptr
 {
     if (PAL::stricmp(psz, "isenabled") == 0)
     {
-        Recognizer_IsEnabled(recognizer);
+        recognizer_is_enabled(recognizer);
     }
     else if (PAL::stricmp(psz, "enable") == 0)
     {
-        Recognizer_Enable(recognizer);
+        recognizer_enable(recognizer);
     }
     else if (PAL::stricmp(psz, "disable") == 0)
     {
-        Recognizer_Disable(recognizer);
+        recognizer_disable(recognizer);
     }
     else if (PAL::stricmp(psz, "recognize") == 0)
     {
-        Recognizer_Recognize(recognizer);
+        recognizer_recognize_once(recognizer);
     }
     else if (PAL::stricmp(psz, "startcontinuous") == 0)
     {
-        Recognizer_StartContinuousRecognition(recognizer);
+        recognizer_start_continuous_recognition(recognizer);
     }
     else if (PAL::stricmp(psz, "stopcontinuous") == 0)
     {
-        Recognizer_StopContinuousRecognition(recognizer);
+        recognizer_stop_continuous_recognition(recognizer);
     }
     else if (PAL::stricmp(psz, "startkeyword") == 0)
     {
-        Recognizer_StartKeywordRecognition(recognizer);
+        recognizer_start_keyword_recognition(recognizer);
     }
     else if (PAL::stricmp(psz, "stopkeyword ") == 0)
     {
-        Recognizer_StopKeywordRecognition(recognizer);
+        recognizer_stop_keyword_recognition(recognizer);
     }
     else if (PAL::strnicmp(psz, "sessionstarted ", strlen("sessionstarted ")) == 0)
     {
@@ -778,35 +778,35 @@ void CarbonTestConsole::ConsoleInput_SpeechRecognizer(const char* psz, std::shar
 {
     if (PAL::stricmp(psz, "isenabled") == 0)
     {
-        Recognizer_IsEnabled(speechRecognizer);
+        recognizer_is_enabled(speechRecognizer);
     }
     else if (PAL::stricmp(psz, "enable") == 0)
     {
-        Recognizer_Enable(speechRecognizer);
+        recognizer_enable(speechRecognizer);
     }
     else if (PAL::stricmp(psz, "disable") == 0)
     {
-        Recognizer_Disable(speechRecognizer);
+        recognizer_disable(speechRecognizer);
     }
     else if (PAL::stricmp(psz, "recognize") == 0)
     {
-        Recognizer_Recognize(speechRecognizer);
+        recognizer_recognize_once(speechRecognizer);
     }
     else if (PAL::stricmp(psz, "startcontinuous") == 0)
     {
-        Recognizer_StartContinuousRecognition(speechRecognizer);
+        recognizer_start_continuous_recognition(speechRecognizer);
     }
     else if (PAL::stricmp(psz, "stopcontinuous") == 0)
     {
-        Recognizer_StopContinuousRecognition(speechRecognizer);
+        recognizer_stop_continuous_recognition(speechRecognizer);
     }
     else if (PAL::stricmp(psz, "startkeyword") == 0)
     {
-        Recognizer_StartKeywordRecognition(speechRecognizer);
+        recognizer_start_keyword_recognition(speechRecognizer);
     }
     else if (PAL::stricmp(psz, "stopkeyword") == 0)
     {
-        Recognizer_StopKeywordRecognition(speechRecognizer);
+        recognizer_stop_keyword_recognition(speechRecognizer);
     }
     else if (PAL::strnicmp(psz, "sessionstarted ", strlen("sessionstarted ")) == 0)
     {
@@ -877,35 +877,35 @@ void CarbonTestConsole::ConsoleInput_IntentRecognizer(const char* psz, std::shar
 {
     if (PAL::stricmp(psz, "isenabled") == 0)
     {
-        Recognizer_IsEnabled(intentRecognizer);
+        recognizer_is_enabled(intentRecognizer);
     }
     else if (PAL::stricmp(psz, "enable") == 0)
     {
-        Recognizer_Enable(intentRecognizer);
+        recognizer_enable(intentRecognizer);
     }
     else if (PAL::stricmp(psz, "disable") == 0)
     {
-        Recognizer_Disable(intentRecognizer);
+        recognizer_disable(intentRecognizer);
     }
     else if (PAL::stricmp(psz, "recognize") == 0)
     {
-        Recognizer_Recognize(intentRecognizer);
+        recognizer_recognize_once(intentRecognizer);
     }
     else if (PAL::stricmp(psz, "startcontinuous") == 0)
     {
-        Recognizer_StartContinuousRecognition(intentRecognizer);
+        recognizer_start_continuous_recognition(intentRecognizer);
     }
     else if (PAL::stricmp(psz, "stopcontinuous") == 0)
     {
-        Recognizer_StopContinuousRecognition(intentRecognizer);
+        recognizer_stop_continuous_recognition(intentRecognizer);
     }
     else if (PAL::stricmp(psz, "startkeyword") == 0)
     {
-        Recognizer_StartKeywordRecognition(intentRecognizer);
+        recognizer_start_keyword_recognition(intentRecognizer);
     }
     else if (PAL::stricmp(psz, "stopkeyword") == 0)
     {
-        Recognizer_StopKeywordRecognition(intentRecognizer);
+        recognizer_stop_keyword_recognition(intentRecognizer);
     }
     else if (PAL::strnicmp(psz, "sessionstarted ", strlen("sessionstarted ")) == 0)
     {
@@ -1002,7 +1002,7 @@ void CarbonTestConsole::Factory_CreateSpeechRecognizer(const char* psz)
 }
 
 template <class T>
-void CarbonTestConsole::Recognizer_IsEnabled(std::shared_ptr<T>& recognizer)
+void CarbonTestConsole::recognizer_is_enabled(std::shared_ptr<T>& recognizer)
 {
     auto name = PAL::GetTypeName(*recognizer.get());
     ConsoleWrite("\n%s.IsEnabled == ", name.c_str());
@@ -1011,7 +1011,7 @@ void CarbonTestConsole::Recognizer_IsEnabled(std::shared_ptr<T>& recognizer)
 }
 
 template <class T>
-void CarbonTestConsole::Recognizer_Enable(std::shared_ptr<T>& recognizer)
+void CarbonTestConsole::recognizer_enable(std::shared_ptr<T>& recognizer)
 {
     auto name = PAL::GetTypeName(*recognizer.get());
     ConsoleWriteLine("\nEnabling %s...", name.c_str());
@@ -1023,7 +1023,7 @@ void CarbonTestConsole::Recognizer_Enable(std::shared_ptr<T>& recognizer)
 }
 
 template <class T>
-void CarbonTestConsole::Recognizer_Disable(std::shared_ptr<T>& recognizer)
+void CarbonTestConsole::recognizer_disable(std::shared_ptr<T>& recognizer)
 {
     auto name = PAL::GetTypeName(*recognizer.get());
     ConsoleWriteLine("\nDisabling %s...", name.c_str());
@@ -1035,7 +1035,7 @@ void CarbonTestConsole::Recognizer_Disable(std::shared_ptr<T>& recognizer)
 }
 
 template <class T>
-void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<T>& recognizer)
+void CarbonTestConsole::recognizer_recognize_once(std::shared_ptr<T>& recognizer)
 {
     auto name = PAL::GetTypeName(*recognizer.get());
     ConsoleWriteLine("\nRecognizeAsync %s...", name.c_str());
@@ -1045,7 +1045,7 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<T>& recognizer)
     ConsoleWriteLine("RecognizeAsync %s... Waiting... Done!\n", name.c_str());
 }
 
-void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<SpeechRecognizer>& recognizer)
+void CarbonTestConsole::recognizer_recognize_once(std::shared_ptr<SpeechRecognizer>& recognizer)
 {
     auto name = PAL::GetTypeName(*recognizer.get());
     ConsoleWriteLine("\nRecognizeAsync %s...", name.c_str());
@@ -1053,12 +1053,17 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<SpeechRecognizer>& 
     ConsoleWriteLine("RecognizeAsync %s... Waiting...", name.c_str());
     auto result = future.get();
     ConsoleWriteLine("RecognizeAsync %s... Waiting... Done!\n", name.c_str());
+    ConsoleWriteLine("SpeechRecognitionResult: ResultId=%s; Reason=%d; Text=%s", result->ResultId.c_str(), result->Reason, result->Text.c_str());
 
-    ConsoleWriteLine("SpeechRecognitionResult: ResultId=%s; Reason=%d; ErrorDetails=%s; Text=%s",
-        result->ResultId.c_str(), result->Reason, result->ErrorDetails.c_str(), result->Text.c_str());
+    if (result->Reason == ResultReason::Canceled)
+    {
+        auto cancellation = CancellationDetails::FromResult(result);
+        ConsoleWriteLine("SpeechRecognitionResult: CancellationReason=%d; ErrorDetails=%s", cancellation->Reason, cancellation->ErrorDetails.c_str());
+    }
+
 }
 
-void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<IntentRecognizer>& recognizer)
+void CarbonTestConsole::recognizer_recognize_once(std::shared_ptr<IntentRecognizer>& recognizer)
 {
     auto name = PAL::GetTypeName(*recognizer.get());
     ConsoleWriteLine("\nRecognizeAsync %s...", name.c_str());
@@ -1070,16 +1075,20 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<IntentRecognizer>& 
     auto resultId = result->ResultId;
     auto reason = result->Reason;
     auto text = result->Text;
-    auto errorDetails = result->ErrorDetails;
 
     auto intentId = result->IntentId;
     auto intentJson = result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonResult);
 
-    ConsoleWriteLine("IntentRecognitionResult: ResultId=%s; Reason=%d; Text=%s, ErrorDetails=%s, IntentId=%s, Json=%s",
-        resultId.c_str(), reason, text.c_str(), errorDetails.c_str(), intentId.c_str(), intentJson.c_str());
+    ConsoleWriteLine("IntentRecognitionResult: ResultId=%s; Reason=%d; Text=%s, IntentId=%s, Json=%s", resultId.c_str(), reason, text.c_str(), intentId.c_str(), intentJson.c_str());
+
+    if (result->Reason == ResultReason::Canceled)
+    {
+        auto cancellation = CancellationDetails::FromResult(result);
+        ConsoleWriteLine("IntentRecognitionResult: CancellationReason=%d; ErrorDetails=%s", cancellation->Reason, cancellation->ErrorDetails.c_str());
+    }
 }
 
-void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<TranslationRecognizer>& recognizer)
+void CarbonTestConsole::recognizer_recognize_once(std::shared_ptr<TranslationRecognizer>& recognizer)
 {
     auto name = PAL::GetTypeName(*recognizer.get());
     ConsoleWriteLine("\nRecognizeAsync %s...", name.c_str());
@@ -1088,8 +1097,14 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<TranslationRecogniz
     auto result = future.get();
     ConsoleWriteLine("RecognizeAsync %s... Waiting... Done!\n", name.c_str());
 
-    ConsoleWriteLine("TranslationTextResult: ResultId=%s, ErrorDetails=%s, RecognizedText=%s, TranslationsStatus=%d",
-        result->TranslationTextResult::ResultId.c_str(), result->ErrorDetails.c_str(), result->Text.c_str(), (int)result->TranslationStatus);
+    ConsoleWriteLine("TranslationTextResult: ResultId=%s, RecognizedText=%s", result->TranslationTextResult::ResultId.c_str(), result->Text.c_str());
+
+    if (result->Reason == ResultReason::Canceled)
+    {
+        auto cancellation = CancellationDetails::FromResult(result);
+        ConsoleWriteLine("TranslationTextResult: CancellationReason=%d; ErrorDetails=%s", cancellation->Reason, cancellation->ErrorDetails.c_str());
+    }
+
     for (auto it : result->Translations)
     {
         ConsoleWriteLine("                Translation to %s: %s", it.first.c_str(), it.second.c_str());
@@ -1097,7 +1112,7 @@ void CarbonTestConsole::Recognizer_Recognize(std::shared_ptr<TranslationRecogniz
 }
 
 template <class T>
-void CarbonTestConsole::Recognizer_StartContinuousRecognition(std::shared_ptr<T>& recognizer)
+void CarbonTestConsole::recognizer_start_continuous_recognition(std::shared_ptr<T>& recognizer)
 {
     auto name = PAL::GetTypeName(*recognizer.get());
     ConsoleWriteLine("\nStartContinuousRecognitionAsync %s...", name.c_str());
@@ -1108,7 +1123,7 @@ void CarbonTestConsole::Recognizer_StartContinuousRecognition(std::shared_ptr<T>
 }
 
 template <class T>
-void CarbonTestConsole::Recognizer_StopContinuousRecognition(std::shared_ptr<T>& recognizer)
+void CarbonTestConsole::recognizer_stop_continuous_recognition(std::shared_ptr<T>& recognizer)
 {
     auto name = PAL::GetTypeName(*recognizer.get());
     ConsoleWriteLine("\nStopContinuousRecognitionAsync %s...", name.c_str());
@@ -1119,7 +1134,7 @@ void CarbonTestConsole::Recognizer_StopContinuousRecognition(std::shared_ptr<T>&
 }
 
 template <class T>
-void CarbonTestConsole::Recognizer_StartKeywordRecognition(std::shared_ptr<T>& recognizer)
+void CarbonTestConsole::recognizer_start_keyword_recognition(std::shared_ptr<T>& recognizer)
 {
     auto name = PAL::GetTypeName(*recognizer.get());
     ConsoleWriteLine("\nStartKeywordRecognitionAsync %s...", name.c_str());
@@ -1133,7 +1148,7 @@ void CarbonTestConsole::Recognizer_StartKeywordRecognition(std::shared_ptr<T>& r
 }
 
 template <class T>
-void CarbonTestConsole::Recognizer_StopKeywordRecognition(std::shared_ptr<T>& recognizer)
+void CarbonTestConsole::recognizer_stop_keyword_recognition(std::shared_ptr<T>& recognizer)
 {
     auto name = PAL::GetTypeName(*recognizer.get());
     ConsoleWriteLine("\nStopKeywordRecognitionAsync %s...", name.c_str());
@@ -1275,30 +1290,71 @@ std::string CarbonTestConsole::BoolToString(bool f)
 
 std::string CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
 {
-    static_assert(0 == (int)Reason::Recognized, "Reason::* enum values changed!");
-    static_assert(1 == (int)Reason::IntermediateResult, "Reason::* enum values changed!");
-    static_assert(2 == (int)Reason::NoMatch, "Reason::* enum values changed!");
-    static_assert(3 == (int)Reason::InitialSilenceTimeout, "Reason::* enum values changed!");
-    static_assert(4 == (int)Reason::InitialBabbleTimeout, "Reason::* enum values changed!");
-    static_assert(5 == (int)Reason::Canceled, "Reason::* enum values changed!");
+    static_assert(0 == (int)ResultReason::NoMatch, "ResultReason::* enum values changed!");
+    static_assert(1 == (int)ResultReason::Canceled, "ResultReason::* enum values changed!");
+    static_assert(2 == (int)ResultReason::RecognizingSpeech, "ResultReason::* enum values changed!");
+    static_assert(3 == (int)ResultReason::RecognizedSpeech, "ResultReason::* enum values changed!");
+    static_assert(4 == (int)ResultReason::RecognizingIntent, "ResultReason::* enum values changed!");
+    static_assert(5 == (int)ResultReason::RecognizedIntent, "ResultReason::* enum values changed!");
+    static_assert(6 == (int)ResultReason::TranslatingSpeech, "ResultReason::* enum values changed!");
+    static_assert(7 == (int)ResultReason::TranslatedSpeech, "ResultReason::* enum values changed!");
+    static_assert(8 == (int)ResultReason::SynthesizingAudio, "ResultReason::* enum values changed!");
+    static_assert(9 == (int)ResultReason::SynthesizingAudioComplete, "ResultReason::* enum values changed!");
+
+    static_assert(1 == (int)CancellationReason::Error, "CancellationReason::* enum values changed!");
+    static_assert(2 == (int)CancellationReason::EndOfStream, "CancellationReason::* enum values changed!");
+
+    static_assert(1 == (int)NoMatchReason::NotRecognized, "NoMatchReason::* enum values changed!");
+    static_assert(2 == (int)NoMatchReason::InitialSilenceTimeout, "NoMatchReason::* enum values changed!");
+    static_assert(3 == (int)NoMatchReason::InitialBabbleTimeout, "NoMatchReason::* enum values changed!");
 
     std::string reasons[] = {
-        "Recognized",
-        "IntermediateResult",
         "NoMatch",
+        "Canceled",
+        "RecognizingSpeech",
+        "RecognizedSpeech",
+        "RecognizingIntent",
+        "RecognizedIntent",
+        "TranslatingSpeech",
+        "TranslatedSpeech",
+        "SynthesizingAudio",
+        "SynthesizingAudioComplete"
+    };
+
+    std::string reasonsCanceled[] = {
+        "",
+        "Error",
+        "EndOfStream",
+    };
+
+    std::string noMatchReasons[] = {
+        "",
+        "NotRecognized",
         "InitialSilenceTimeout",
         "InitialBabbleTimeout",
-        "Canceled",
     };
 
     std::string str;
     str += "SpeechRecognitionEventArgs = { \n";
     str += "  SessionId = '" + e.SessionId + "'\n";
     str += "  Result = {\n";
-    str += "    ResultId = '" + e.Result.ResultId + "'\n";
-    str += "    Reason = Reason::" + reasons[(int)e.Result.Reason] + "\n";
-    str += "    ErrorDetails = '" + e.Result.ErrorDetails + "'\n";
-    str += "    Text = '" + e.Result.Text + "'\n";
+    str += "    ResultId = '" + e.Result->ResultId + "'\n";
+    str += "    Reason = ResultReason::" + reasons[(int)e.Result->Reason] + "\n";
+    if (e.Result->Reason == ResultReason::NoMatch)
+    {
+        auto noMatch = NoMatchDetails::FromResult(e.Result);
+        str += "    NoMatchReason = NoMatchReason::" + noMatchReasons[(int)noMatch->Reason] + "\n";
+    }
+    if (e.Result->Reason == ResultReason::Canceled)
+    {
+        auto cancellation = CancellationDetails::FromResult(e.Result);
+        str += "    CancellationReason = CancellationReason::" + reasonsCanceled[(int)cancellation->Reason] + "\n";
+        if (cancellation->Reason == CancellationReason::Error)
+        {
+            str += "    ErrorDetails = '" + cancellation->ErrorDetails + "'\n";
+        }
+    }
+    str += "    Text = '" + e.Result->Text + "'\n";
     str += "  } \n";
     str += "} \n";
 
@@ -1307,30 +1363,71 @@ std::string CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
 
 std::string CarbonTestConsole::ToString(const IntentRecognitionEventArgs& e)
 {
-    static_assert(0 == (int)Reason::Recognized, "Reason::* enum values changed!");
-    static_assert(1 == (int)Reason::IntermediateResult, "Reason::* enum values changed!");
-    static_assert(2 == (int)Reason::NoMatch, "Reason::* enum values changed!");
-    static_assert(3 == (int)Reason::InitialSilenceTimeout, "Reason::* enum values changed!");
-    static_assert(4 == (int)Reason::InitialBabbleTimeout, "Reason::* enum values changed!");
-    static_assert(5 == (int)Reason::Canceled, "Reason::* enum values changed!");
+    static_assert(0 == (int)ResultReason::NoMatch, "ResultReason::* enum values changed!");
+    static_assert(1 == (int)ResultReason::Canceled, "ResultReason::* enum values changed!");
+    static_assert(2 == (int)ResultReason::RecognizingSpeech, "ResultReason::* enum values changed!");
+    static_assert(3 == (int)ResultReason::RecognizedSpeech, "ResultReason::* enum values changed!");
+    static_assert(4 == (int)ResultReason::RecognizingIntent, "ResultReason::* enum values changed!");
+    static_assert(5 == (int)ResultReason::RecognizedIntent, "ResultReason::* enum values changed!");
+    static_assert(6 == (int)ResultReason::TranslatingSpeech, "ResultReason::* enum values changed!");
+    static_assert(7 == (int)ResultReason::TranslatedSpeech, "ResultReason::* enum values changed!");
+    static_assert(8 == (int)ResultReason::SynthesizingAudio, "ResultReason::* enum values changed!");
+    static_assert(9 == (int)ResultReason::SynthesizingAudioComplete, "ResultReason::* enum values changed!");
+
+    static_assert(1 == (int)CancellationReason::Error, "CancellationReason::* enum values changed!");
+    static_assert(2 == (int)CancellationReason::EndOfStream, "CancellationReason::* enum values changed!");
+
+    static_assert(1 == (int)NoMatchReason::NotRecognized, "NoMatchReason::* enum values changed!");
+    static_assert(2 == (int)NoMatchReason::InitialSilenceTimeout, "NoMatchReason::* enum values changed!");
+    static_assert(3 == (int)NoMatchReason::InitialBabbleTimeout, "NoMatchReason::* enum values changed!");
 
     std::string reasons[] = {
-        "Recognized",
-        "IntermediateResult",
         "NoMatch",
+        "Canceled",
+        "RecognizingSpeech",
+        "RecognizedSpeech",
+        "RecognizingIntent",
+        "RecognizedIntent",
+        "TranslatingSpeech",
+        "TranslatedSpeech",
+        "SynthesizingAudio",
+        "SynthesizingAudioComplete"
+    };
+
+    std::string reasonsCanceled[] = {
+        "",
+        "Error",
+        "EndOfStream",
+    };
+
+    std::string noMatchReasons[] = {
+        "",
+        "NotRecognized",
         "InitialSilenceTimeout",
         "InitialBabbleTimeout",
-        "Canceled",
     };
 
     std::string str;
     str += "IntentRecognitionEventArgs = { \n";
     str += "  SessionId = '" + e.SessionId + "'\n";
     str += "  Result = {\n";
-    str += "    ResultId = '" + e.Result.ResultId + "'\n";
-    str += "    Reason = Reason::" + reasons[(int)e.Result.Reason] + "\n";
-    str += "    ErrorDetails = '" + e.Result.ErrorDetails + "'\n";
-    str += "    Text = '" + e.Result.Text + "'\n";
+    str += "    ResultId = '" + e.Result->ResultId + "'\n";
+    str += "    Reason = ResultReason::" + reasons[(int)e.Result->Reason] + "\n";
+    if (e.Result->Reason == ResultReason::NoMatch)
+    {
+        auto noMatch = NoMatchDetails::FromResult(e.Result);
+        str += "    NoMatchReason = NoMatchReason::" + noMatchReasons[(int)noMatch->Reason] + "\n";
+    }
+    if (e.Result->Reason == ResultReason::Canceled)
+    {
+        auto cancellation = CancellationDetails::FromResult(e.Result);
+        str += "    CancellationReason = CancellationReason::" + reasonsCanceled[(int)cancellation->Reason] + "\n";
+        if (cancellation->Reason == CancellationReason::Error)
+        {
+            str += "    ErrorDetails = '" + cancellation->ErrorDetails + "'\n";
+        }
+    }
+    str += "    Text = '" + e.Result->Text + "'\n";
     str += "  } \n";
     str += "} \n";
 
@@ -1339,14 +1436,70 @@ std::string CarbonTestConsole::ToString(const IntentRecognitionEventArgs& e)
 
 std::string CarbonTestConsole::ToString(const TranslationTextResultEventArgs& e)
 {
+    static_assert(0 == (int)ResultReason::NoMatch, "ResultReason::* enum values changed!");
+    static_assert(1 == (int)ResultReason::Canceled, "ResultReason::* enum values changed!");
+    static_assert(2 == (int)ResultReason::RecognizingSpeech, "ResultReason::* enum values changed!");
+    static_assert(3 == (int)ResultReason::RecognizedSpeech, "ResultReason::* enum values changed!");
+    static_assert(4 == (int)ResultReason::RecognizingIntent, "ResultReason::* enum values changed!");
+    static_assert(5 == (int)ResultReason::RecognizedIntent, "ResultReason::* enum values changed!");
+    static_assert(6 == (int)ResultReason::TranslatingSpeech, "ResultReason::* enum values changed!");
+    static_assert(7 == (int)ResultReason::TranslatedSpeech, "ResultReason::* enum values changed!");
+    static_assert(8 == (int)ResultReason::SynthesizingAudio, "ResultReason::* enum values changed!");
+    static_assert(9 == (int)ResultReason::SynthesizingAudioComplete, "ResultReason::* enum values changed!");
+
+    static_assert(1 == (int)CancellationReason::Error, "CancellationReason::* enum values changed!");
+    static_assert(2 == (int)CancellationReason::EndOfStream, "CancellationReason::* enum values changed!");
+
+    static_assert(1 == (int)NoMatchReason::NotRecognized, "NoMatchReason::* enum values changed!");
+    static_assert(2 == (int)NoMatchReason::InitialSilenceTimeout, "NoMatchReason::* enum values changed!");
+    static_assert(3 == (int)NoMatchReason::InitialBabbleTimeout, "NoMatchReason::* enum values changed!");
+
+    std::string reasons[] = {
+        "NoMatch",
+        "Canceled",
+        "RecognizingSpeech",
+        "RecognizedSpeech",
+        "RecognizingIntent",
+        "RecognizedIntent",
+        "TranslatingSpeech",
+        "TranslatedSpeech",
+        "SynthesizingAudio",
+        "SynthesizingAudioComplete"
+    };
+    std::string reasonsCanceled[] = {
+        "",
+        "Error",
+        "EndOfStream",
+    };
+
+    std::string noMatchReasons[] = {
+        "",
+        "NotRecognized",
+        "InitialSilenceTimeout",
+        "InitialBabbleTimeout",
+    };
+
     std::string str;
     str += "TranslationEventArgs<TranslationTextResult> = { \n";
     str += "  SessionId = '" + e.SessionId + "'\n";
     str += "  Result = {\n";
-    str += "    ResultId = '" + e.Result.ResultId + "'\n";
-    str += "    RecognizedText = '" + e.Result.Text + "'\n";
-    str += "    ErrorDetails = '" + e.Result.ErrorDetails + "'\n";
-    for (auto it : e.Result.Translations)
+    str += "    ResultId = '" + e.Result->ResultId + "'\n";
+    str += "    RecognizedText = '" + e.Result->Text + "'\n";
+    if (e.Result->Reason == ResultReason::NoMatch)
+    {
+        auto noMatch = NoMatchDetails::FromResult(e.Result);
+        str += "    NoMatchReason = NoMatchReason::" + noMatchReasons[(int)noMatch->Reason] + "\n";
+    }
+    if (e.Result->Reason == ResultReason::Canceled)
+    {
+        auto cancellation = CancellationDetails::FromResult(e.Result);
+        str += "    CancellationReason = CancellationReason::" + reasonsCanceled[(int)cancellation->Reason] + "\n";
+        if (cancellation->Reason == CancellationReason::Error)
+        {
+            str += "    ErrorDetails = '" + cancellation->ErrorDetails + "'\n";
+        }
+    }
+    for (auto it : e.Result->Translations)
     {
         str += "    Translation to " + it.first + ": " + it.second + ".";
     }
@@ -1363,7 +1516,7 @@ std::string CarbonTestConsole::ToString(const TranslationSynthesisResultEventArg
     str += "TranslationEventArgs<TranslationSynthesisResult> = { \n";
     str += "  SessionId = '" + e.SessionId + "'\n";
     str += "  Result = {\n";
-    str += "    SizeOfAudioData = " + std::to_string(e.Result.Audio.size()) + "\n";
+    str += "    SizeOfAudioData = " + std::to_string(e.Result->Audio.size()) + "\n";
     str += "  } \n";
     str += "} \n";
 
@@ -1562,19 +1715,19 @@ void CarbonTestConsole::RecognizeAsync()
 {
     if (m_intentRecognizer != nullptr)
     {
-        Recognizer_Recognize(m_intentRecognizer);
+        recognizer_recognize_once(m_intentRecognizer);
     }
     else if (m_speechRecognizer != nullptr)
     {
-        Recognizer_Recognize(m_speechRecognizer);
+        recognizer_recognize_once(m_speechRecognizer);
     }
     else if (m_translationRecognizer != nullptr)
     {
-        Recognizer_Recognize(m_translationRecognizer);
+        recognizer_recognize_once(m_translationRecognizer);
     }
     else if (m_recognizer != nullptr)
     {
-        Recognizer_Recognize(m_recognizer);
+        recognizer_recognize_once(m_recognizer);
     }
 }
 
@@ -1582,43 +1735,43 @@ void CarbonTestConsole::ContinuousRecognition(uint16_t seconds)
 {
     if (m_intentRecognizer != nullptr)
     {
-        Recognizer_StartContinuousRecognition(m_intentRecognizer);
+        recognizer_start_continuous_recognition(m_intentRecognizer);
 
         ConsoleWrite("Waiting for %d seconds... ", seconds);
         std::this_thread::sleep_for(std::chrono::seconds(seconds));
         ConsoleWriteLine("Done!");
 
-        Recognizer_StopContinuousRecognition(m_intentRecognizer);
+        recognizer_stop_continuous_recognition(m_intentRecognizer);
     }
     else if (m_speechRecognizer != nullptr)
     {
-        Recognizer_StartContinuousRecognition(m_speechRecognizer);
+        recognizer_start_continuous_recognition(m_speechRecognizer);
 
         ConsoleWrite("Waiting for %d seconds... ", seconds);
         std::this_thread::sleep_for(std::chrono::seconds(seconds));
         ConsoleWriteLine("Done!");
 
-        Recognizer_StopContinuousRecognition(m_speechRecognizer);
+        recognizer_stop_continuous_recognition(m_speechRecognizer);
     }
     else if (m_translationRecognizer != nullptr)
     {
-        Recognizer_StartContinuousRecognition(m_translationRecognizer);
+        recognizer_start_continuous_recognition(m_translationRecognizer);
 
         ConsoleWrite("Waiting for %d seconds... ", seconds);
         std::this_thread::sleep_for(std::chrono::seconds(seconds));
         ConsoleWriteLine("Done!");
 
-        Recognizer_StopContinuousRecognition(m_translationRecognizer);
+        recognizer_stop_continuous_recognition(m_translationRecognizer);
     }
     else if (m_recognizer != nullptr)
     {
-        Recognizer_StartContinuousRecognition(m_recognizer);
+        recognizer_start_continuous_recognition(m_recognizer);
 
         ConsoleWrite("Waiting for %d seconds... ", seconds);
         std::this_thread::sleep_for(std::chrono::seconds(seconds));
         ConsoleWriteLine("Done!");
 
-        Recognizer_StopContinuousRecognition(m_recognizer);
+        recognizer_stop_continuous_recognition(m_recognizer);
     }
 }
 
@@ -1628,6 +1781,11 @@ void CarbonTestConsole::RunSample(const std::string& strSampleName)
     {
         ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
         Sample_HelloWorld();
+    }
+    else if (PAL::stricmp(strSampleName.c_str(), "helloworld with reason") == 0)
+    {
+        ConsoleWriteLine("Running sample: %s\n", strSampleName.c_str());
+        Sample_HelloWorld_WithReasonInfo();
     }
     else if (PAL::stricmp(strSampleName.c_str(), "helloworld microphone") == 0)
     {

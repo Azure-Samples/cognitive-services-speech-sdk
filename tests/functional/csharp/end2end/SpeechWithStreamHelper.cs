@@ -61,16 +61,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                         tcs.TrySetResult(true);
                     }
                 };
-                string error = string.Empty;
-                recognizer.RecognitionErrorRaised += (s, e) => { error = e.ToString(); };
+                string canceled = string.Empty;
+                recognizer.Canceled += (s, e) => { canceled = e.ToString(); };
 
                 await recognizer.StartContinuousRecognitionAsync();
                 await Task.WhenAny(tcs.Task, Task.Delay(timeout));
                 await recognizer.StopContinuousRecognitionAsync();
 
-                if (!string.IsNullOrEmpty(error))
+                if (!string.IsNullOrEmpty(canceled))
                 {
-                    Assert.Fail($"Error received: {error}");
+                    Assert.Fail($"Recognition canceled: {canceled}");
                 }
 
                 return textResultEvents;
@@ -102,16 +102,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     listOfIntermediateResults.Add(receivedIntermediateResultEvents);
                     receivedIntermediateResultEvents = new List<SpeechRecognitionResultEventArgs>();
                 };
-                string error = string.Empty;
-                recognizer.RecognitionErrorRaised += (s, e) => { error = e.ToString(); };
+                string canceled = string.Empty;
+                recognizer.Canceled += (s, e) => { canceled = e.ToString(); };
 
                 await recognizer.StartContinuousRecognitionAsync();
                 await Task.WhenAny(tcs.Task, Task.Delay(timeout));
                 await recognizer.StopContinuousRecognitionAsync();
 
-                if (!string.IsNullOrEmpty(error))
+                if (!string.IsNullOrEmpty(canceled))
                 {
-                    Assert.Fail($"Error received: {error}");
+                    Assert.Fail($"Recognition Canceled: {canceled}");
                 }
 
                 return listOfIntermediateResults;

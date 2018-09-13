@@ -7,6 +7,8 @@
 
 #pragma once
 #include <speechapi_cxx_common.h>
+#include <speechapi_c_keyword_recognition_model.h>
+
 
 namespace Microsoft {
 namespace CognitiveServices {
@@ -27,7 +29,7 @@ public:
     static std::shared_ptr<KeywordRecognitionModel> FromFile(const std::string& fileName)
     {
         SPXKEYWORDHANDLE hkeyword = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(KeywordRecognitionModel_Create_From_File(fileName.c_str(), &hkeyword));
+        SPX_THROW_ON_FAIL(keyword_recognition_model_create_from_file(fileName.c_str(), &hkeyword));
         return std::make_shared<KeywordRecognitionModel>(hkeyword);
     }
 
@@ -39,7 +41,7 @@ public:
     /// <summary>
     /// Virtual destructor.
     /// </summary>
-    virtual ~KeywordRecognitionModel() { KeywordRecognitionModel_Handle_Close(m_hkwmodel); }
+    virtual ~KeywordRecognitionModel() { keyword_recognition_model_handle_release(m_hkwmodel); }
 
     /// <summary>
     /// Internal. Explicit conversion operator.

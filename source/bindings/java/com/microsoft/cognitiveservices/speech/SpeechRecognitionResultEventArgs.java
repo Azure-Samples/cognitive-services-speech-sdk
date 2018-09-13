@@ -47,7 +47,7 @@ public final class SpeechRecognitionResultEventArgs {
     public String toString() {
         return "SessionId:" + _SessionId +
                " ResultId:" + _Result.getResultId() +
-               " Status:" + _Result.getReason() +
+               " Reason:" + _Result.getReason() +
                " Recognized text:<" + _Result.getText() +
                ">.";
     }

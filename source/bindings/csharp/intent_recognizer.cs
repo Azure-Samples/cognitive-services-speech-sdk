@@ -26,9 +26,9 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         public event EventHandler<IntentRecognitionResultEventArgs> FinalResultReceived;
 
         /// <summary>
-        /// The event <see cref="RecognitionErrorRaised"/> signals that an error occurred during recognition.
+        /// The event <see cref="Canceled"/> signals that the intent recognition was canceled.
         /// </summary>
-        public event EventHandler<RecognitionErrorEventArgs> RecognitionErrorRaised;
+        public event EventHandler<IntentRecognitionCanceledEventArgs> Canceled;
 
         /// <summary>
         /// Creates a new instance of IntentRecognizer.
@@ -61,8 +61,8 @@ namespace Microsoft.CognitiveServices.Speech.Intent
             finalResultHandler = new IntentHandlerImpl(this, isFinalResultHandler: true);
             recoImpl.FinalResult.Connect(finalResultHandler);
 
-            errorHandler = new ErrorHandlerImpl(this);
-            recoImpl.Canceled.Connect(errorHandler);
+            canceledHandler = new CanceledHandlerImpl(this);
+            recoImpl.Canceled.Connect(canceledHandler);
 
             recoImpl.SessionStarted.Connect(sessionStartedHandler);
             recoImpl.SessionStopped.Connect(sessionStoppedHandler);
@@ -193,7 +193,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
             {
                 recoImpl.IntermediateResult.Disconnect(intermediateResultHandler);
                 recoImpl.FinalResult.Disconnect(finalResultHandler);
-                recoImpl.Canceled.Disconnect(errorHandler);
+                recoImpl.Canceled.Disconnect(canceledHandler);
                 recoImpl.SessionStarted.Disconnect(sessionStartedHandler);
                 recoImpl.SessionStopped.Disconnect(sessionStoppedHandler);
                 recoImpl.SpeechStartDetected.Disconnect(speechStartDetectedHandler);
@@ -201,7 +201,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
 
                 intermediateResultHandler?.Dispose();
                 finalResultHandler?.Dispose();
-                errorHandler?.Dispose();
+                canceledHandler?.Dispose();
                 recoImpl?.Dispose();
                 disposed = true;
                 base.Dispose(disposing);
@@ -212,7 +212,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         internal readonly Internal.IntentRecognizer recoImpl;
         private readonly IntentHandlerImpl intermediateResultHandler;
         private readonly IntentHandlerImpl finalResultHandler;
-        private readonly ErrorHandlerImpl errorHandler;
+        private readonly CanceledHandlerImpl canceledHandler;
         private readonly Audio.AudioConfig audioConfig;
 
         // Defines an internal class to raise a C# event for intermediate/final result when a corresponding callback is invoked by the native layer.
@@ -239,21 +239,26 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         }
 
         // Defines an internal class to raise a C# event for error during recognition when a corresponding callback is invoked by the native layer.
-        private class ErrorHandlerImpl : Internal.IntentEventListener
+        private class CanceledHandlerImpl : Internal.IntentCanceledEventListener
         {
-            public ErrorHandlerImpl(IntentRecognizer recognizer)
+            public CanceledHandlerImpl(IntentRecognizer recognizer)
             {
                 this.recognizer = recognizer;
             }
 
-            public override void Execute(Microsoft.CognitiveServices.Speech.Internal.IntentRecognitionEventArgs eventArgs)
+            public override void Execute(Microsoft.CognitiveServices.Speech.Internal.IntentRecognitionCanceledEventArgs eventArgs)
             {
-                var resultEventArg = new RecognitionErrorEventArgs(eventArgs.SessionId, eventArgs.GetResult().Reason, eventArgs.GetResult().ErrorDetails);
-                var handler = this.recognizer.RecognitionErrorRaised;
+                if (recognizer.disposed)
+                {
+                    return;
+                }
+
+                var canceledEventArgs = new IntentRecognitionCanceledEventArgs(eventArgs);
+                var handler = this.recognizer.Canceled;
 
                 if (handler != null)
                 {
-                    handler(this, resultEventArg);
+                    handler(this, canceledEventArgs);
                 }
             }
 

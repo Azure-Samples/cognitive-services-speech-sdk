@@ -25,10 +25,11 @@ namespace Speech {
 
 class Session;
 
-class SpeechRecognizer final : public AsyncRecognizer<SpeechRecognitionResult, SpeechRecognitionEventArgs>
+class SpeechRecognizer final : public AsyncRecognizer<SpeechRecognitionResult, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>
 {
 public:
-    using BaseType = AsyncRecognizer<SpeechRecognitionResult, SpeechRecognitionEventArgs>;
+
+    using BaseType = AsyncRecognizer<SpeechRecognitionResult, SpeechRecognitionEventArgs, SpeechRecognitionCanceledEventArgs>;
 
      /// <summary>
      /// Create a speech recognizer from a speech config and audio config.

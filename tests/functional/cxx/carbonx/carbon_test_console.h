@@ -100,31 +100,31 @@ private:
     // void Factory_CreateIntentRecognizer(const char* psz);
 
     template <class T>
-    void Recognizer_IsEnabled(std::shared_ptr<T>& recognizer);
+    void recognizer_is_enabled(std::shared_ptr<T>& recognizer);
 
     template <class T>
-    void Recognizer_Enable(std::shared_ptr<T>& recognizer);
+    void recognizer_enable(std::shared_ptr<T>& recognizer);
 
     template <class T>
-    void Recognizer_Disable(std::shared_ptr<T>& recognizer);
+    void recognizer_disable(std::shared_ptr<T>& recognizer);
 
     template <class T>
-    void Recognizer_Recognize(std::shared_ptr<T>& recognizer);
-    void Recognizer_Recognize(std::shared_ptr<SpeechRecognizer>& recognizer);
-    void Recognizer_Recognize(std::shared_ptr<IntentRecognizer>& recognizer);
-    void Recognizer_Recognize(std::shared_ptr<TranslationRecognizer>& recognizer);
+    void recognizer_recognize_once(std::shared_ptr<T>& recognizer);
+    void recognizer_recognize_once(std::shared_ptr<SpeechRecognizer>& recognizer);
+    void recognizer_recognize_once(std::shared_ptr<IntentRecognizer>& recognizer);
+    void recognizer_recognize_once(std::shared_ptr<TranslationRecognizer>& recognizer);
 
     template <class T>
-    void Recognizer_StartContinuousRecognition(std::shared_ptr<T>& recognizer);
+    void recognizer_start_continuous_recognition(std::shared_ptr<T>& recognizer);
 
     template <class T>
-    void Recognizer_StopContinuousRecognition(std::shared_ptr<T>& recognizer);
+    void recognizer_stop_continuous_recognition(std::shared_ptr<T>& recognizer);
 
     template <class T>
-    void Recognizer_StartKeywordRecognition(std::shared_ptr<T>& recognizer);
+    void recognizer_start_keyword_recognition(std::shared_ptr<T>& recognizer);
 
     template <class T>
-    void Recognizer_StopKeywordRecognition(std::shared_ptr<T>& recognizer);
+    void recognizer_stop_keyword_recognition(std::shared_ptr<T>& recognizer);
 
     template <class T>
     void Recognizer_Event(const char* psz, EventSignal<T>& recognizerEvent, typename::EventSignal<T>::CallbackFunction callback);
@@ -142,7 +142,7 @@ private:
     void SpeechRecognizer_IntermediateResultHandler(const SpeechRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("IntermediateResultHandler: %s", ToString(e).c_str()); };
     void SpeechRecognizer_FinalResultHandler(const SpeechRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("FinalResultHandler: %s", ToString(e).c_str()); }
     void SpeechRecognizer_NoMatchHandler(const SpeechRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("NoMatchHandler: %s", ToString(e).c_str()); }
-    void SpeechRecognizer_CanceledHandler(const SpeechRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("CanceledHandler: %s", ToString(e).c_str()); };
+    void SpeechRecognizer_CanceledHandler(const SpeechRecognitionCanceledEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("CanceledHandler: %s", ToString(e).c_str()); };
 
     void TranslationRecognizer_IntermediateResultHandler(const TranslationTextResultEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("Translation IntermediateResultHandler: %s", ToString(e).c_str()); };
     void TranslationRecognizer_FinalResultHandler(const TranslationTextResultEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("Translation FinalResultHandler: %s", ToString(e).c_str()); }
@@ -152,7 +152,7 @@ private:
     void IntentRecognizer_IntermediateResultHandler(const IntentRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("IntermediateResultHandler: %s", ToString(e).c_str()); };
     void IntentRecognizer_FinalResultHandler(const IntentRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("FinalResultHandler: %s", ToString(e).c_str()); }
     void IntentRecognizer_NoMatchHandler(const IntentRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("NoMatchHandler: %s", ToString(e).c_str()); }
-    void IntentRecognizer_CanceledHandler(const IntentRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("CanceledHandler: %s", ToString(e).c_str()); };
+    void IntentRecognizer_CanceledHandler(const IntentRecognitionCanceledEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("CanceledHandler: %s", ToString(e).c_str()); };
 
     bool ToBool(const char* psz);
 
@@ -209,6 +209,7 @@ private:
     void RunInteractivePrompt();
 
     void Sample_HelloWorld();
+    void Sample_HelloWorld_WithReasonInfo();
     void Sample_HelloWorld_Microphone();
     void Sample_HelloWorld_File();
     void Sample_HelloWorld_PushStream();

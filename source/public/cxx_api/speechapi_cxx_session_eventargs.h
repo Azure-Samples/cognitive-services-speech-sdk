@@ -56,7 +56,7 @@ protected:
         static const auto cchMaxSessionId = cchMaxUUID + 1;
         char sessionId[cchMaxSessionId] = {};
 
-        SPX_THROW_ON_FAIL(Recognizer_SessionEvent_GetSessionId(hevent, sessionId, cchMaxSessionId));
+        SPX_THROW_ON_FAIL(recognizer_session_event_get_session_id(hevent, sessionId, cchMaxSessionId));
         return std::string(sessionId);
     };
 

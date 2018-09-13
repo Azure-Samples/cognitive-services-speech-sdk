@@ -26,9 +26,9 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: final result: {0} ", e.ToString()));
         }
 
-        private static void MyErrorEventHandler(object sender, RecognitionErrorEventArgs e)
+        private static void MyCanceledEventHandler(object sender, IntentRecognitionCanceledEventArgs e)
         {
-            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: error occurred. SessionId: {0}, Reason: {1}", e.SessionId, e.Status));
+            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: canceled. SessionId: {0}, Reason: {1}", e.SessionId, e.Reason));
         }
 
         private static void MySessionEventHandler(object sender, SessionEventArgs e)
@@ -86,7 +86,7 @@ namespace MicrosoftSpeechSDKSamples
             // Subscribes to events.
             reco.IntermediateResultReceived += MyIntermediateResultEventHandler;
             reco.FinalResultReceived += MyFinalResultEventHandler;
-            reco.RecognitionErrorRaised += MyErrorEventHandler;
+            reco.Canceled += MyCanceledEventHandler;
             reco.OnSessionEvent += MySessionEventHandler;
 
             // Todo: Add LUIS intent.
@@ -100,7 +100,7 @@ namespace MicrosoftSpeechSDKSamples
             // Unsubscribe to events.
             reco.IntermediateResultReceived -= MyIntermediateResultEventHandler;
             reco.FinalResultReceived -= MyFinalResultEventHandler;
-            reco.RecognitionErrorRaised -= MyErrorEventHandler;
+            reco.Canceled -= MyCanceledEventHandler;
             reco.OnSessionEvent -= MySessionEventHandler;
         }
 

@@ -14,7 +14,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
-import com.microsoft.cognitiveservices.speech.RecognitionStatus;
+import com.microsoft.cognitiveservices.speech.ResultReason;
 import com.microsoft.cognitiveservices.speech.SessionEventType;
 import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
@@ -23,6 +23,7 @@ import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 import com.microsoft.cognitiveservices.speech.samples.sdkdemo.MicrophoneStream;
+import com.microsoft.cognitiveservices.speech.CancellationDetails;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -128,8 +129,9 @@ public class MainActivity extends AppCompatActivity {
                 final Future<SpeechRecognitionResult> task = reco.recognizeAsync();
                 setOnTaskCompletedListener(task, result -> {
                     String s = result.getText();
-                    if (result.getReason() != RecognitionStatus.Recognized) {
-                       s = "Recognition failed with " + result.getReason() + ". Did you enter your subscription?" + System.lineSeparator() + result.getErrorDetails();
+                    if (result.getReason() != ResultReason.RecognizedSpeech) {
+                        String errorDetails = (result.getReason() == ResultReason.Canceled) ? CancellationDetails.fromResult(result).getErrorDetails() : "";
+                        s = "Recognition failed with " + result.getReason() + ". Did you enter your subscription?" + System.lineSeparator() + errorDetails;
                     }
 
                     reco.close();
@@ -290,8 +292,9 @@ public class MainActivity extends AppCompatActivity {
                     Log.i(logTag, "Continuous recognition stopped.");
                     String s = result.getText();
 
-                    if (result.getReason() != RecognitionStatus.Recognized) {
-                        s = "Intent failed with " + result.getReason() + ". Did you enter your Language Understanding subscription?" + System.lineSeparator() + result.getErrorDetails();
+                    if (result.getReason() != ResultReason.RecognizedSpeech) {
+                        String errorDetails = (result.getReason() == ResultReason.Canceled) ? CancellationDetails.fromResult(result).getErrorDetails() : "";
+                        s = "Intent failed with " + result.getReason() + ". Did you enter your Language Understanding subscription?" + System.lineSeparator() + errorDetails;
                     }
 
                     String intentId = result.getIntentId();

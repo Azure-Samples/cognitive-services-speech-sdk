@@ -12,17 +12,27 @@
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
-static_assert((int)Reason_Recognized == (int)Reason::Recognized, "Reason_* enum values == Reason::* enum values");
-static_assert((int)Reason_IntermediateResult == (int)Reason::IntermediateResult, "Reason_* enum values == Reason::* enum values");
-static_assert((int)Reason_NoMatch == (int)Reason::NoMatch, "Reason_* enum values == Reason::* enum values");
-static_assert((int)Reason_InitialSilenceTimeout == (int)Reason::InitialSilenceTimeout, "Reason_* enum values == Reason::* enum values");
-static_assert((int)Reason_InitialBabbleTimeout == (int)Reason::InitialBabbleTimeout, "Reason_* enum values == Reason::* enum values");
-static_assert((int)Reason_Canceled == (int)Reason::Canceled, "Reason_* enum values == Reason::* enum values");
+static_assert((int)ResultReason_NoMatch == (int)ResultReason::NoMatch, "ResultReason_* enum values == ResultReason::* enum values");
+static_assert((int)ResultReason_Canceled == (int)ResultReason::Canceled, "ResultReason_* enum values == ResultReason::* enum values");
+static_assert((int)ResultReason_RecognizingSpeech == (int)ResultReason::RecognizingSpeech, "ResultReason_* enum values == ResultReason::* enum values");
+static_assert((int)ResultReason_RecognizedSpeech == (int)ResultReason::RecognizedSpeech, "ResultReason_* enum values == ResultReason::* enum values");
+static_assert((int)ResultReason_RecognizingIntent == (int)ResultReason::RecognizingIntent, "ResultReason_* enum values == ResultReason::* enum values");
+static_assert((int)ResultReason_RecognizedIntent == (int)ResultReason::RecognizedIntent, "ResultReason_* enum values == ResultReason::* enum values");
+static_assert((int)ResultReason_TranslatingSpeech == (int)ResultReason::TranslatingSpeech, "ResultReason_* enum values == ResultReason::* enum values");
+static_assert((int)ResultReason_TranslatedSpeech == (int)ResultReason::TranslatedSpeech, "ResultReason_* enum values == ResultReason::* enum values");
+static_assert((int)ResultReason_SynthesizingAudio == (int)ResultReason::SynthesizingAudio, "ResultReason_* enum values == ResultReason::* enum values");
+static_assert((int)ResultReason_SynthesizingAudioComplete == (int)ResultReason::SynthesizingAudioComplete, "ResultReason_* enum values == ResultReason::* enum values");
 
-SPXAPI Result_GetResultId(SPXRESULTHANDLE hresult, char* pszResultId, uint32_t cchResultId)
+static_assert((int)CancellationReason_Error == (int)CancellationReason::Error, "CancellationReason_* enum values == CancellationReason::* enum values");
+static_assert((int)CancellationReason_EndOfStream == (int)CancellationReason::EndOfStream, "CancellationReason_* enum values == CancellationReason::* enum values");
+
+static_assert((int)NoMatchReason_NotRecognized == (int)NoMatchReason::NotRecognized, "NoMatchReason_* enum values == NoMatchReason::* enum values");
+static_assert((int)NoMatchReason_InitialSilenceTimeout == (int)NoMatchReason::InitialSilenceTimeout, "NoMatchReason_* enum values == NoMatchReason::* enum values");
+static_assert((int)NoMatchReason_InitialBabbleTimeout == (int)NoMatchReason::InitialBabbleTimeout, "NoMatchReason_* enum values == NoMatchReason::* enum values");
+
+SPXAPI result_get_result_id(SPXRESULTHANDLE hresult, char* pszResultId, uint32_t cchResultId)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, cchResultId == 0);
-
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
@@ -35,23 +45,45 @@ SPXAPI Result_GetResultId(SPXRESULTHANDLE hresult, char* pszResultId, uint32_t c
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI Result_GetRecognitionReason(SPXRESULTHANDLE hresult, Result_RecognitionReason* preason)
+SPXAPI result_get_reason(SPXRESULTHANDLE hresult, Result_Reason* reason)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, preason == nullptr);
-
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, reason == nullptr);
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[hresult];
-        *preason = (Result_RecognitionReason)result->GetReason();
+        *reason = (Result_Reason)result->GetReason();
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI Result_GetText(SPXRESULTHANDLE hresult, char* pszText, uint32_t cchText)
+SPXAPI result_get_reason_canceled(SPXRESULTHANDLE hresult, Result_CancellationReason* reason)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, reason == nullptr);
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
+        auto result = (*resulthandles)[hresult];
+        *reason = (Result_CancellationReason)result->GetCancellationReason();
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI result_get_no_match_reason(SPXRESULTHANDLE hresult, Result_NoMatchReason* reason)
+{
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, reason == nullptr);
+    SPXAPI_INIT_HR_TRY(hr)
+    {
+        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
+        auto result = (*resulthandles)[hresult];
+        *reason = (Result_NoMatchReason)result->GetNoMatchReason();
+    }
+    SPXAPI_CATCH_AND_RETURN_HR(hr);
+}
+
+SPXAPI result_get_text(SPXRESULTHANDLE hresult, char* pszText, uint32_t cchText)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, cchText == 0);
-
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
@@ -64,10 +96,9 @@ SPXAPI Result_GetText(SPXRESULTHANDLE hresult, char* pszText, uint32_t cchText)
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI Result_GetOffset(SPXRESULTHANDLE hresult, uint64_t* offset)
+SPXAPI result_get_offset(SPXRESULTHANDLE hresult, uint64_t* offset)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, offset == nullptr);
-
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
@@ -77,10 +108,9 @@ SPXAPI Result_GetOffset(SPXRESULTHANDLE hresult, uint64_t* offset)
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI Result_GetDuration(SPXRESULTHANDLE hresult, uint64_t* duration)
+SPXAPI result_get_duration(SPXRESULTHANDLE hresult, uint64_t* duration)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, duration == nullptr);
-
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
@@ -93,7 +123,6 @@ SPXAPI Result_GetDuration(SPXRESULTHANDLE hresult, uint64_t* duration)
 SPXAPI result_get_property_bag(SPXRESULTHANDLE hresult, SPXPROPERTYBAGHANDLE* hpropbag)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
-
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto resultshandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();

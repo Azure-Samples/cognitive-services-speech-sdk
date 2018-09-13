@@ -133,7 +133,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Cancellation reason.
         /// </summary>
-        CancellationDetails_ReasonCanceled = Internal.SpeechPropertyId.CancellationDetails_ReasonCanceled,
+        CancellationDetails_Reason = Internal.SpeechPropertyId.CancellationDetails_Reason,
 
         /// <summary>
         /// Cancellation text.

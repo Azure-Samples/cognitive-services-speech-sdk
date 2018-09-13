@@ -326,7 +326,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
                 recognizer.IntermediateResultReceived += (sender, e) => IntermediateResultEventHandler(e, recoType);
             }
             recognizer.FinalResultReceived += (sender, e) => FinalResultEventHandler(e, recoType);
-            recognizer.RecognitionErrorRaised += (sender, e) => ErrorEventHandler(e, recoType, source);
+            recognizer.Canceled += (sender, e) => CanceledEventHandler(e, recoType, source);
             recognizer.OnSessionEvent += (sender, e) => SessionEventHandler(e, recoType, source);
             recognizer.OnSpeechDetectedEvent += (sender, e) => SpeechDetectedEventHandler(e, recoType);
 
@@ -343,7 +343,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
                 recognizer.IntermediateResultReceived -= (sender, e) => IntermediateResultEventHandler(e, recoType);
             }
             recognizer.FinalResultReceived -= (sender, e) => FinalResultEventHandler(e, recoType);
-            recognizer.RecognitionErrorRaised -= (sender, e) => ErrorEventHandler(e, recoType, source);
+            recognizer.Canceled -= (sender, e) => CanceledEventHandler(e, recoType, source);
             recognizer.OnSessionEvent -= (sender, e) => SessionEventHandler(e, recoType, source);
             recognizer.OnSpeechDetectedEvent -= (sender, e) => SpeechDetectedEventHandler(e, recoType);
         }
@@ -377,7 +377,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
             }
 
             this.WriteLine(log);
-            this.WriteLine(log, $" --- Final result received. Status: {e.Result.RecognitionStatus.ToString()}. --- ");
+            this.WriteLine(log, $" --- Final result received. Reason: {e.Result.Reason.ToString()}. --- ");
             if (!string.IsNullOrEmpty(e.Result.Text))
             {
                 this.WriteLine(log, e.Result.Text);
@@ -385,15 +385,15 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
         }
 
         /// <summary>
-        /// Logs Error events
+        /// Logs Canceled events
         /// And sets the TaskCompletionSource to 0, in order to trigger Recognition Stop
         /// </summary>
-        private void ErrorEventHandler(RecognitionErrorEventArgs e, RecoType rt, TaskCompletionSource<int> source)
+        private void CanceledEventHandler(SpeechRecognitionCanceledEventArgs e, RecoType rt, TaskCompletionSource<int> source)
         {
             var log = (rt == RecoType.Base) ? this.baseModelLogText : this.customModelLogText;
             source.TrySetResult(0);
-            this.WriteLine(log, "--- Error received ---");
-            this.WriteLine(log, $"Status: {e.Status.ToString()}. Reason: {e.FailureReason}.");
+            this.WriteLine(log, "--- recognition canceled ---");
+            this.WriteLine(log, $"CancellationReason: {e.Reason.ToString()}. ErrorDetails: {e.ErrorDetails}.");
             this.WriteLine(log);
         }
 

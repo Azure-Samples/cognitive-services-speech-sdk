@@ -44,7 +44,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 helper.SubscribeToCounterEventHandlers(recognizer);
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-                Assert.IsTrue(result.Duration.Ticks > 0, result.RecognitionStatus.ToString(), "Duration == 0");
+                Assert.IsTrue(result.Duration.Ticks > 0, result.Reason.ToString(), "Duration == 0");
                 Assert.AreEqual(0, result.OffsetInTicks, "Offset not zero");
                 AssertMatching(TestData.English.Weather.Utterance, result.Text);
             }
@@ -95,8 +95,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(config, audioInput)))
             {
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-                AssertStringContains(result.RecognitionFailureReason, "WebSocket Upgrade failed with an authentication error (401)");
-                Assert.AreEqual(RecognitionStatus.Canceled, result.RecognitionStatus);
+                Assert.AreEqual(ResultReason.Canceled, result.Reason);
+
+                var cancellation = CancellationDetails.FromResult(result);
+                Assert.AreEqual(cancellation.Reason, CancellationReason.Error);
+                AssertStringContains(cancellation.ErrorDetails, "WebSocket Upgrade failed with an authentication error (401)");
             }
         }
 
@@ -108,8 +111,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(config, audioInput)))
             {
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-                AssertStringContains(result.RecognitionFailureReason, "Connection failed");
-                Assert.AreEqual(RecognitionStatus.Canceled, result.RecognitionStatus);
+                Assert.AreEqual(ResultReason.Canceled, result.Reason);
+
+                var cancellation = CancellationDetails.FromResult(result);
+                Assert.AreEqual(cancellation.Reason, CancellationReason.Error);
+                AssertStringContains(cancellation.ErrorDetails, "Connection failed");
             }
         }
 
@@ -129,8 +135,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-                AssertStringContains(result.RecognitionFailureReason, "WebSocket Upgrade failed with a bad request (400)");
-                Assert.AreEqual(RecognitionStatus.Canceled, result.RecognitionStatus);
+                Assert.AreEqual(ResultReason.Canceled, result.Reason);
+
+                var cancellation = CancellationDetails.FromResult(result);
+                Assert.AreEqual(cancellation.Reason, CancellationReason.Error);
+                AssertStringContains(cancellation.ErrorDetails, "WebSocket Upgrade failed with a bad request (400)");
             }
         }
 
@@ -142,8 +151,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-                AssertStringContains(result.RecognitionFailureReason, "WebSocket Upgrade failed with a bad request (400)");
-                Assert.AreEqual(RecognitionStatus.Canceled, result.RecognitionStatus);
+                Assert.AreEqual(ResultReason.Canceled, result.Reason);
+
+                var cancellation = CancellationDetails.FromResult(result);
+                AssertStringContains(cancellation.ErrorDetails, "WebSocket Upgrade failed with a bad request (400)");
             }
         }
 
@@ -154,7 +165,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, AudioConfig.FromWavFileInput(TestData.German.FirstOne.AudioFile))))
             {
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-                Assert.IsFalse(string.IsNullOrEmpty(result.Text), result.RecognitionStatus.ToString());
+                Assert.IsFalse(string.IsNullOrEmpty(result.Text), result.Reason.ToString());
                 AssertMatching(TestData.German.FirstOne.Utterance, result.Text);
             }
         }
@@ -347,7 +358,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Weather.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
-                recognizer.RecognitionErrorRaised += (s, e) => { Console.WriteLine($"Error received: {e.ToString()}"); };
+                recognizer.Canceled += (s, e) => { Console.WriteLine($"Recognition Canceled: {e.ToString()}"); };
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
                 var ex = await Assert.ThrowsExceptionAsync<ApplicationException>(() => recognizer.RecognizeAsync());
@@ -362,7 +373,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-                Assert.IsTrue(result.Duration.Ticks > 0, result.RecognitionStatus.ToString(), "First result duration should be greater than 0");
+                Assert.IsTrue(result.Duration.Ticks > 0, result.Reason.ToString(), "First result duration should be greater than 0");
                 var offset = result.OffsetInTicks;
                 var expectedNextOffset = offset + result.Duration.Ticks;
 
@@ -374,11 +385,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 Console.WriteLine($"Result1: {result.ToString()}");
                 Console.WriteLine($"Result2: {result2.ToString()}");
 
-                Assert.AreEqual(result.RecognitionStatus, RecognitionStatus.Recognized);
+                Assert.AreEqual(result.Reason, ResultReason.RecognizedSpeech);
                 AssertStringContains(result.Text, "detective skills");
                 Assert.IsTrue(result.Duration.Ticks > 0, $"Result duration {result.Duration.Ticks} in {result.ToString()} should be greater than 0");
 
-                Assert.AreEqual(result2.RecognitionStatus, RecognitionStatus.Recognized);
+                Assert.AreEqual(result2.Reason, ResultReason.RecognizedSpeech);
                 Assert.IsTrue(offset2 >= expectedNextOffset, $"Offset of the second recognition {offset2} should be greater or equal than offset of the first plus duration {expectedNextOffset}.");
             }
         }
@@ -390,17 +401,17 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
-                string error = string.Empty;
-                recognizer.RecognitionErrorRaised += (s, e) => { error = e.ToString(); };
+                string canceled = string.Empty;
+                recognizer.Canceled += (s, e) => { canceled = e.ToString(); };
                 for (int i = 0; i < NumberOfIterations; ++i)
                 {
                     await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
                 }
 
-                if (!string.IsNullOrEmpty(error))
+                if (!string.IsNullOrEmpty(canceled))
                 {
-                    Assert.Fail($"Error received: {error}");
+                    Assert.Fail($"Recognition Canceled: {canceled}");
                 }
             }
         }
@@ -412,16 +423,16 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
-                string error = string.Empty;
-                recognizer.RecognitionErrorRaised += (s, e) => { error = e.ToString(); };
+                string canceled = string.Empty;
+                recognizer.Canceled += (s, e) => { canceled = e.ToString(); };
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
 
-                if (!string.IsNullOrEmpty(error))
+                if (!string.IsNullOrEmpty(canceled))
                 {
-                    Assert.Fail($"Error received: {error}");
+                    Assert.Fail($"Recognition Canceled: {canceled}");
                 }
             }
         }
@@ -433,9 +444,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-                Assert.IsTrue(result.RecognitionStatus == RecognitionStatus.InitialSilenceTimeout, result.RecognitionStatus.ToString());
+                Assert.IsTrue(result.Reason == ResultReason.NoMatch, result.Reason.ToString());
                 Assert.IsTrue(result.OffsetInTicks > 0, result.OffsetInTicks.ToString());
                 Assert.IsTrue(String.IsNullOrEmpty(result.Text), result.Text);
+
+                var noMatch = NoMatchDetails.FromResult(result);
+                Assert.IsTrue(noMatch.Reason == NoMatchReason.InitialSilenceTimeout, noMatch.Reason.ToString());
             }
         }
     }

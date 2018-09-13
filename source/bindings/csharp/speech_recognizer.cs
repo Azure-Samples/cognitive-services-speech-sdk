@@ -25,20 +25,20 @@ namespace Microsoft.CognitiveServices.Speech
     ///     {
     ///         // Subscribes to events.
     ///         recognizer.IntermediateResultReceived += (s, e) => {
-    ///             Console.WriteLine($"\n    Partial result: {e.Result.Text}.");
+    ///             Console.WriteLine($"RECOGNIZING: Text={result.Text}");
     ///         };
     ///
     ///         recognizer.FinalResultReceived += (s, e) => {
     ///             var result = e.Result;
-    ///             Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-    ///             if (result.RecognitionStatus == RecognitionStatus.Recognized)
+    ///             Console.WriteLine($"Reason: {result.Reason.ToString()}");
+    ///             if (result.Reason == ResultReason.RecognizedSpeech)
     ///             {
     ///                     Console.WriteLine($"Final result: Text: {result.Text}."); 
     ///             }
     ///         };
     ///
-    ///         recognizer.RecognitionErrorRaised += (s, e) => {
-    ///             Console.WriteLine($"\n    An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}");
+    ///         recognizer.Canceled += (s, e) => {
+    ///             Console.WriteLine($"\n    Recognition Canceled. Reason: {e.Reason.ToString()}, CanceledReason: {e.Reason}");
     ///         };
     ///
     ///         recognizer.OnSessionEvent += (s, e) => {
@@ -72,9 +72,9 @@ namespace Microsoft.CognitiveServices.Speech
         public event EventHandler<SpeechRecognitionResultEventArgs> FinalResultReceived;
 
         /// <summary>
-        /// The event <see cref="RecognitionErrorRaised"/> signals that an error occurred during recognition.
+        /// The event <see cref="Canceled"/> signals that the speech recognition was canceled.
         /// </summary>
-        public event EventHandler<RecognitionErrorEventArgs> RecognitionErrorRaised;
+        public event EventHandler<SpeechRecognitionCanceledEventArgs> Canceled;
 
         /// <summary>
         /// Creates a new instance of SpeechRecognizer.
@@ -107,8 +107,8 @@ namespace Microsoft.CognitiveServices.Speech
             finalResultHandler = new ResultHandlerImpl(this, isFinalResultHandler: true);
             recoImpl.FinalResult.Connect(finalResultHandler);
 
-            errorHandler = new ErrorHandlerImpl(this);
-            recoImpl.Canceled.Connect(errorHandler);
+            canceledHandler = new CanceledHandlerImpl(this);
+            recoImpl.Canceled.Connect(canceledHandler);
 
             recoImpl.SessionStarted.Connect(sessionStartedHandler);
             recoImpl.SessionStopped.Connect(sessionStoppedHandler);
@@ -197,31 +197,32 @@ namespace Microsoft.CognitiveServices.Speech
         ///     // Creates a speech recognizer using microphone as audio input. The default language is "en-us".
         ///     using (var recognizer = new SpeechRecognizer(config))
         ///     {
-        ///         // Starts recognizing.
         ///         Console.WriteLine("Say something...");
         ///
-        ///         // Performs recognition.
-        ///         // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
-        ///         // only for single shot recognition like command or query. For long-running recognition, use
-        ///         // StartContinuousRecognitionAsync() instead.
-        ///         var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+        ///         // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+        ///         // so it is suitable only for single shot recognition like command or query. For long-running
+        ///         // recognition, use StartContinuousRecognitionAsync() instead.
+        ///         var result = await recognizer.RecognizeAsync();
         ///
         ///         // Checks result.
-        ///         if (result.RecognitionStatus != RecognitionStatus.Recognized)
+        ///         if (result.Reason == ResultReason.RecognizedSpeech)
         ///         {
-        ///             Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-        ///             if (result.RecognitionStatus == RecognitionStatus.Canceled)
-        ///             {
-        ///                 Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
-        ///             }
-        ///             else
-        ///             {
-        ///                 Console.WriteLine("No speech could be recognized.\n");
-        ///             }
+        ///             Console.WriteLine($"RECOGNIZED: Text={result.Text}");
         ///         }
-        ///         else
+        ///         else if (result.Reason == ResultReason.NoMatch)
         ///         {
-        ///             Console.WriteLine($"We recognized: {result.Text}");
+        ///             Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+        ///         }
+        ///         else if (result.Reason == ResultReason.Canceled)
+        ///         {
+        ///             var cancellation = CancellationDetails.FromResult(result);
+        ///             Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+        ///
+        ///             if (cancellation.Reason == CancellationReason.Error)
+        ///             {
+        ///                 Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+        ///                 Console.WriteLine($"CANCELED: Did you update the subscription info?");
+        ///             }
         ///         }
         ///     }
         /// }
@@ -284,7 +285,7 @@ namespace Microsoft.CognitiveServices.Speech
             {
                 recoImpl.IntermediateResult.Disconnect(intermediateResultHandler);
                 recoImpl.FinalResult.Disconnect(finalResultHandler);
-                recoImpl.Canceled.Disconnect(errorHandler);
+                recoImpl.Canceled.Disconnect(canceledHandler);
                 recoImpl.SessionStarted.Disconnect(sessionStartedHandler);
                 recoImpl.SessionStopped.Disconnect(sessionStoppedHandler);
                 recoImpl.SpeechStartDetected.Disconnect(speechStartDetectedHandler);
@@ -292,7 +293,7 @@ namespace Microsoft.CognitiveServices.Speech
 
                 intermediateResultHandler?.Dispose();
                 finalResultHandler?.Dispose();
-                errorHandler?.Dispose();
+                canceledHandler?.Dispose();
                 recoImpl?.Dispose();
                 disposed = true;
                 base.Dispose(disposing);
@@ -302,7 +303,7 @@ namespace Microsoft.CognitiveServices.Speech
         internal readonly Internal.SpeechRecognizer recoImpl;
         private readonly ResultHandlerImpl intermediateResultHandler;
         private readonly ResultHandlerImpl finalResultHandler;
-        private readonly ErrorHandlerImpl errorHandler;
+        private readonly CanceledHandlerImpl canceledHandler;
         private bool disposed = false;
         private readonly Audio.AudioConfig audioConfig;
 
@@ -335,31 +336,30 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         // Defines an internal class to raise a C# event for error during recognition when a corresponding callback is invoked by the native layer.
-        private class ErrorHandlerImpl : Internal.SpeechRecognitionEventListener
+        private class CanceledHandlerImpl : Internal.SpeechRecognitionCanceledEventListener
         {
-            public ErrorHandlerImpl(SpeechRecognizer recognizer)
+            public CanceledHandlerImpl(SpeechRecognizer recognizer)
             {
                 this.recognizer = recognizer;
             }
 
-            public override void Execute(Microsoft.CognitiveServices.Speech.Internal.SpeechRecognitionEventArgs eventArgs)
+            public override void Execute(Microsoft.CognitiveServices.Speech.Internal.SpeechRecognitionCanceledEventArgs eventArgs)
             {
                 if (recognizer.disposed)
                 {
                     return;
                 }
 
-                var resultEventArg = new RecognitionErrorEventArgs(eventArgs.SessionId, eventArgs.GetResult().Reason, eventArgs.GetResult().ErrorDetails);
-                var handler = this.recognizer.RecognitionErrorRaised;
+                var canceledEventArgs = new SpeechRecognitionCanceledEventArgs(eventArgs);
+                var handler = this.recognizer.Canceled;
 
                 if (handler != null)
                 {
-                    handler(this.recognizer, resultEventArg);
+                    handler(this.recognizer, canceledEventArgs);
                 }
             }
 
             private SpeechRecognizer recognizer;
         }
     }
-
 }

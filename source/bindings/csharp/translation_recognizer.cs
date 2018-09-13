@@ -34,51 +34,35 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     ///         // Subscribes to events.
     ///         recognizer.IntermediateResultReceived += (s, e) =>
     ///         {
-    ///             Console.WriteLine($"\nPartial result: recognized in {fromLanguage}: {e.Result.Text}.");
-    ///             if (e.Result.TranslationStatus == TranslationStatus.Success)
+    ///             Console.WriteLine($"RECOGNIZING in '{fromLanguage}': Text={e.Result.Text}");
+    ///             foreach (var element in e.Result.Translations)
     ///             {
-    ///                 foreach (var element in e.Result.Translations)
-    ///                 {
-    ///                     Console.WriteLine($"    Translated into {element.Key}: {element.Value}");
-    ///                 }
+    ///                 Console.WriteLine($"    TRANSLATING into '{element.Key}': {element.Value}");
     ///             }
     ///         };
     ///
     ///         recognizer.FinalResultReceived += (s, e) =>
     ///         {
-    ///             var result = e.Result;
-    ///             if (result.RecognitionStatus == RecognitionStatus.Recognized)
+    ///             if (result.Reason == ResultReason.TranslatedSpeech)
     ///             {
-    ///                 Console.WriteLine($"\nFinal result: Status: {result.RecognitionStatus.ToString()}, recognized text in {fromLanguage}: {result.Text}.");
-    ///                 if (result.TranslationStatus == TranslationStatus.Success)
+    ///                 Console.WriteLine($"\nFinal result: Reason: {e.Result.Reason.ToString()}, recognized text in {fromLanguage}: {e.Result.Text}.");
+    ///                 foreach (var element in e.Result.Translations)
     ///                 {
-    ///                     foreach (var element in result.Translations)
-    ///                     {
-    ///                         Console.WriteLine($"    Translated into {element.Key}: {element.Value}");
-    ///                     }
+    ///                     Console.WriteLine($"    TRANSLATING into '{element.Key}': {element.Value}");
     ///                 }
     ///             }
     ///         };
     ///
     ///         recognizer.SynthesisResultReceived += (s, e) =>
     ///         {
-    ///             if (e.Result.Status == SynthesisStatus.Success)
-    ///             {
-    ///                 Console.WriteLine($"Synthesis result received. Size of audio data: {e.Result.Audio.Length}");
-    ///             }
-    ///             else if (e.Result.Status == SynthesisStatus.SynthesisEnd)
-    ///             {
-    ///                 Console.WriteLine($"Synthesis result: end of synthesis result.");
-    ///             }
-    ///             else
-    ///             {
-    ///                 Console.WriteLine($"Synthesis error. Status: {e.Result.Status.ToString()}, Failure reason: {e.Result.FailureReason}");
-    ///             }
+    ///             Console.WriteLine(e.Result.Audio.Length != 0
+    ///                 ? $"AudioSize: {e.Result.Audio.Length}"
+    ///                 : $"AudioSize: {e.Result.Audio.Length} (end of synthesis data)");
     ///         };
     ///
-    ///         recognizer.RecognitionErrorRaised += (s, e) =>
+    ///         recognizer.Canceled += (s, e) =>
     ///         {
-    ///             Console.WriteLine($"\nAn error occurred. Status: {e.Status.ToString()}");
+    ///             Console.WriteLine($"\nRecognition canceled. Reason: {e.Reason}; ErrorDetails: {e.ErrorDetails}");
     ///         };
     ///
     ///         recognizer.OnSessionEvent += (s, e) =>
@@ -114,9 +98,9 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         public event EventHandler<TranslationTextResultEventArgs> FinalResultReceived;
 
         /// <summary>
-        /// The event <see cref="RecognitionErrorRaised"/> signals that an error occurred during recognition.
+        /// The event <see cref="Canceled"/> signals that the speech to text/synthesis translation was canceled.
         /// </summary>
-        public event EventHandler<RecognitionErrorEventArgs> RecognitionErrorRaised;
+        public event EventHandler<TranslationTextResultCanceledEventArgs> Canceled;
 
         /// <summary>
         /// The event <see cref="SynthesisResultReceived"/> signals that a translation synthesis result is received.
@@ -159,8 +143,8 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             synthesisResultHandler = new SynthesisHandlerImpl(this);
             recoImpl.TranslationSynthesisResultEvent.Connect(synthesisResultHandler);
 
-            errorHandler = new ErrorHandlerImpl(this);
-            recoImpl.Canceled.Connect(errorHandler);
+            canceledHandler = new CanceledHandlerImpl(this);
+            recoImpl.Canceled.Connect(canceledHandler);
 
             recoImpl.SessionStarted.Connect(sessionStartedHandler);
             recoImpl.SessionStopped.Connect(sessionStoppedHandler);
@@ -255,21 +239,17 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         ///         // Starts recognizing.
         ///         Console.WriteLine("Say something...");
         ///
-        ///         // Performs recognition.
-        ///         // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
-        ///         // only for single shot recognition like command or query. For long-running recognition, use
-        ///         // StartContinuousRecognitionAsync() instead.
+        ///         // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+        ///         // so it is suitable only for single shot recognition like command or query. For long-running
+        ///         // recognition, use StartContinuousRecognitionAsync() instead.
         ///         var result = await recognizer.RecognizeAsync();
         ///
-        ///         if (result.RecognitionStatus == RecognitionStatus.Recognized)
+        ///         if (result.Reason == ResultReason.TranslatedSpeech)
         ///         {
-        ///             Console.WriteLine($"\nFinal result: Status: {result.RecognitionStatus.ToString()}, recognized text: {result.Text}.");
-        ///             if (result.TranslationStatus == TranslationStatus.Success)
+        ///             Console.WriteLine($"\nFinal result: Reason: {result.Reason.ToString()}, recognized text: {result.Text}.");
+        ///             foreach (var element in result.Translations)
         ///             {
-        ///                 foreach (var element in result.Translations)
-        ///                 {
-        ///                     Console.WriteLine($"    Translated into {element.Key}: {element.Value}");
-        ///                 }
+        ///                 Console.WriteLine($"    TRANSLATING into '{element.Key}': {element.Value}");
         ///             }
         ///         }
         ///     }
@@ -335,7 +315,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
 
                 intermediateResultHandler?.Dispose();
                 finalResultHandler?.Dispose();
-                errorHandler?.Dispose();
+                canceledHandler?.Dispose();
 
                 disposed = true;
                 base.Dispose(disposing);
@@ -346,7 +326,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         private readonly ResultHandlerImpl intermediateResultHandler;
         private readonly ResultHandlerImpl finalResultHandler;
         private readonly SynthesisHandlerImpl synthesisResultHandler;
-        private readonly ErrorHandlerImpl errorHandler;
+        private readonly CanceledHandlerImpl canceledHandler;
         private bool disposed = false;
         private readonly Audio.AudioConfig audioConfig;
 
@@ -379,26 +359,26 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         }
 
         // Defines an internal class to raise a C# event for error during recognition when a corresponding callback is invoked by the native layer.
-        private class ErrorHandlerImpl : Internal.TranslationTextEventListener
+        private class CanceledHandlerImpl : Internal.TranslationTextCanceledEventListener
         {
-            public ErrorHandlerImpl(TranslationRecognizer recognizer)
+            public CanceledHandlerImpl(TranslationRecognizer recognizer)
             {
                 this.recognizer = recognizer;
             }
 
-            public override void Execute(Microsoft.CognitiveServices.Speech.Internal.TranslationTextResultEventArgs eventArgs)
+            public override void Execute(Microsoft.CognitiveServices.Speech.Internal.TranslationTextResultCanceledEventArgs eventArgs)
             {
                 if (recognizer.disposed)
                 {
                     return;
                 }
 
-                var resultEventArg = new RecognitionErrorEventArgs(eventArgs.SessionId, eventArgs.GetResult().Reason, eventArgs.GetResult().ErrorDetails);
-                var handler = this.recognizer.RecognitionErrorRaised;
+                var canceledEventArgs = new TranslationTextResultCanceledEventArgs(eventArgs);
+                var handler = this.recognizer.Canceled;
 
                 if (handler != null)
                 {
-                    handler(this.recognizer, resultEventArg);
+                    handler(this.recognizer, canceledEventArgs);
                 }
             }
 

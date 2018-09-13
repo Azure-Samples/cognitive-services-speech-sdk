@@ -53,7 +53,7 @@ const SpeechPropertyIdNameHash g_PropertyId2NameMap = {
     { SpeechPropertyId::SpeechServiceResponse_Json, "RESULT-Json" },
     { SpeechPropertyId::SpeechServiceResponse_JsonResult, "RESULT-LanguageUnderstandingJson" },
     { SpeechPropertyId::SpeechServiceResponse_JsonErrorDetails, "RESULT-ErrorDetails" },
-    { SpeechPropertyId::CancellationDetails_ReasonCanceled, "CancellationDetails_ReasonCanceled" },
+    { SpeechPropertyId::CancellationDetails_Reason, "CancellationDetails_Reason" },
     { SpeechPropertyId::CancellationDetails_ReasonText, "CancellationDetails_ReasonText" },
     { SpeechPropertyId::CancellationDetails_ReasonDetailedText, "CancellationDetails_ReasonDetailedText" }
 };

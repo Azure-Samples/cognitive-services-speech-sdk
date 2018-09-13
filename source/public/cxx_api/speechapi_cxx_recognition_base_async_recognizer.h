@@ -20,7 +20,7 @@ namespace Speech {
 /// <summary>
 /// BaseAsyncRecognizer class.
 /// </summary>
-class BaseAsyncRecognizer : public AsyncRecognizer<RecognitionResult, RecognitionEventArgs>
+class BaseAsyncRecognizer : public AsyncRecognizer<RecognitionResult, RecognitionEventArgs, RecognitionEventArgs>
 {
 public:
 
@@ -40,7 +40,7 @@ protected:
 
     /*! \cond PROTECTED */
 
-    using BaseType = AsyncRecognizer<RecognitionResult, RecognitionEventArgs>;
+    using BaseType = AsyncRecognizer<RecognitionResult, RecognitionEventArgs, RecognitionEventArgs>;
 
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.

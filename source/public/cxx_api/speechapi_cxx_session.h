@@ -32,7 +32,7 @@ public:
         SPX_INIT_HR(hr);
 
         SPXSESSIONHANDLE hsession = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(hr = ::Session_From_Recognizer(recognizer->m_hreco, &hsession));
+        SPX_THROW_ON_FAIL(hr = ::session_from_recognizer(recognizer->m_hreco, &hsession));
 
         return std::make_shared<Session>(hsession);
     }
@@ -51,7 +51,7 @@ public:
 
         if (m_hsession != SPXHANDLE_INVALID)
         {
-            ::Session_Handle_Close(m_hsession);
+            ::session_handle_release(m_hsession);
             m_hsession = SPXHANDLE_INVALID;
         }
     }

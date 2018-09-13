@@ -14,7 +14,7 @@
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 
-SPXAPI TranslationRecognizer_TranslationSynthesis_SetEventCallback(SPXRECOHANDLE hreco, PTRANSLATIONSYNTHESIS_CALLBACK_FUNC pCallback, void* pvContext)
+SPXAPI translator_synthesizing_audio_set_callback(SPXRECOHANDLE hreco, PTRANSLATIONSYNTHESIS_CALLBACK_FUNC pCallback, void* pvContext)
 {
-    return Recognizer_RecoEvent_SetCallback(&ISpxRecognizerEvents::TranslationSynthesisResult, hreco, pCallback, pvContext);
+    return recognizer_recognition_set_event_callback(&ISpxRecognizerEvents::TranslationSynthesisResult, hreco, pCallback, pvContext);
 }

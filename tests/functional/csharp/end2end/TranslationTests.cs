@@ -94,10 +94,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         {
             var toLanguages = new List<string>() { Language.DE, Language.ZH };
             var result = await this.translationHelper.GetTranslationFinalResult(TestData.English.Weather.AudioFile, Language.EN, toLanguages);
-            Assert.IsNotNull(result, "Translation should not be null");
 
+            Assert.IsNotNull(result, "Translation should not be null");
             Console.WriteLine(result.ToString());
-            Console.WriteLine($"Status: {result.RecognitionStatus}, failure reasons: {result.FailureReason}, {result.RecognitionFailureReason}");
+
+            var errorDetails = result.Reason == ResultReason.Canceled ? CancellationDetails.FromResult(result).ErrorDetails : "";
+            Console.WriteLine($"Reason: {result.Reason}, ErrorDetails: {errorDetails}");
+            
             Assert.AreEqual(TestData.English.Weather.Utterance, result.Text);
             Assert.AreEqual(TestData.German.Weather.Utterance, result.Translations[Language.DE]);
             Assert.AreEqual(TestData.Chinese.Weather.Utterance, result.Translations[Language.ZH]);
@@ -110,10 +113,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var toLanguages = new List<string>() { Language.FR, Language.ES };
 
             var result = await this.translationHelper.GetTranslationFinalResult(TestData.English.Weather.AudioFile, Language.EN, toLanguages);
-            Assert.IsNotNull(result, "Translation should not be null");
 
+            Assert.IsNotNull(result, "Translation should not be null");
             Console.WriteLine(result.ToString());
-            Console.WriteLine($"Status: {result.RecognitionStatus}, failure reasons: {result.FailureReason}, {result.RecognitionFailureReason}");
+
+            var errorDetails = result.Reason == ResultReason.Canceled ? CancellationDetails.FromResult(result).ErrorDetails : "";
+            Console.WriteLine($"Reason: {result.Reason}, ErrorDetails: {errorDetails}");
+
             Assert.AreEqual(TestData.English.Weather.Utterance, result.Text);
             Assert.AreEqual(TestData.French.Weather.Utterance, result.Translations[Language.FR]);
             Assert.AreEqual(TestData.Spanish.Weather.Utterance, result.Translations[Language.ES]);
@@ -146,7 +152,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             var actualTranslationRecognition = (TranslationTextResultEventArgs)actualTranslations[ResultType.Text].Single();
             Assert.IsNotNull(actualTranslationRecognition);
 
-            Assert.AreEqual(TranslationStatus.Success, actualTranslationRecognition.Result.TranslationStatus);
+            Assert.AreNotEqual(ResultReason.Canceled, actualTranslationRecognition.Result.Reason);
             Assert.AreEqual(TestData.German.FirstOne.Utterance, actualTranslationRecognition.Result.Text);
 
             Assert.AreEqual(TestData.French.FirstOne.Utterance, actualTranslationRecognition.Result.Translations[Language.FR]);
@@ -164,7 +170,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             const int MinSize = 20000;
             foreach (var s in actualSynthesisByteResults)
             {
-                Console.WriteLine($"Status : {s.Result.Status}, Failure reason if any: {s.Result.FailureReason}");
+                Console.WriteLine($"Audio.Length: {s.Result.Audio.Length}");
                 Assert.IsTrue(s.Result.Audio.Length > MinSize, $"Expects audio size {s.Result.Audio.Length} to be greater than {MinSize}");
             }
         }

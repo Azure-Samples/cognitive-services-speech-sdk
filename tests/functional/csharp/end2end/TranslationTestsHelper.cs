@@ -76,8 +76,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var textResultEvents = new List<EventArgs>();
                 var synthesisResultEvents = new List<EventArgs>();
 
-                string error = string.Empty;
-                recognizer.RecognitionErrorRaised += (s, e) => { error = e.ToString(); };
+                string canceled = string.Empty;
+                recognizer.Canceled += (s, e) => { canceled = e.ToString(); };
                 recognizer.FinalResultReceived += (s, e) =>
                 {
                     Console.WriteLine($"Received final result event: {e.ToString()}");
@@ -87,7 +87,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 recognizer.SynthesisResultReceived += (s, e) =>
                 {
                     Console.WriteLine($"Received synthesis event: {e.ToString()}");
-                    if (e.Result.Status == SynthesisStatus.Success)
+                    if (e.Result.Audio.Length > 0)
                     {
                         synthesisResultEvents.Add(e);
                     }
@@ -106,9 +106,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await Task.WhenAny(tcs.Task, Task.Delay(timeout));
                 await recognizer.StopContinuousRecognitionAsync();
 
-                if (!string.IsNullOrEmpty(error))
+                if (!string.IsNullOrEmpty(canceled))
                 {
-                    Assert.Fail($"Error received: {error}");
+                    Assert.Fail($"Recognition Canceled: {canceled}");
                 }
 
                 receivedFinalResultEvents.Add(ResultType.Text, textResultEvents);
@@ -151,10 +151,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     receivedIntermediateResultEvents = new List<TranslationTextResultEventArgs>();
                 };
 
-                string error = string.Empty;
-                recognizer.RecognitionErrorRaised += (s, e) =>
+                string canceled = string.Empty;
+                recognizer.Canceled += (s, e) =>
                 {
-                    error = e.ToString();
+                    canceled = e.ToString();
                     tcs.TrySetResult(false);
                 };
 
@@ -162,9 +162,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 await Task.WhenAny(tcs.Task, Task.Delay(timeout));
                 await recognizer.StopContinuousRecognitionAsync();
 
-                if (!string.IsNullOrEmpty(error))
+                if (!string.IsNullOrEmpty(canceled))
                 {
-                    Assert.Fail($"Error received: {error}");
+                    Assert.Fail($"Recognition canceled: {canceled}");
                 }
 
                 return listOfIntermediateResults;

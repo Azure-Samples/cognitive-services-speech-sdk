@@ -8,10 +8,10 @@ import java.util.concurrent.Future;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
+import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionCanceledEventArgs;
 import com.microsoft.cognitiveservices.speech.PropertyCollection;
 import com.microsoft.cognitiveservices.speech.RecognizerProperties;
 import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
-import com.microsoft.cognitiveservices.speech.RecognitionErrorEventArgs;
 import com.microsoft.cognitiveservices.speech.internal.IntentTrigger;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
@@ -31,9 +31,9 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     final public EventHandlerImpl<IntentRecognitionResultEventArgs> FinalResultReceived = new EventHandlerImpl<IntentRecognitionResultEventArgs>();
 
     /**
-      * The event RecognitionErrorRaised signals that an error occurred during recognition.
+      * The event Canceled signals that the intent recognition was canceled.
       */
-    final public EventHandlerImpl<RecognitionErrorEventArgs> RecognitionErrorRaised = new EventHandlerImpl<RecognitionErrorEventArgs>();
+    final public EventHandlerImpl<IntentRecognitionCanceledEventArgs> Canceled = new EventHandlerImpl<IntentRecognitionCanceledEventArgs>();
 
     /**
       * Initializes an instance of the IntentRecognizer.
@@ -52,7 +52,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         finalResultHandler = new IntentHandlerImpl(this, /*isFinalResultHandler:*/ true);
         recoImpl.getFinalResult().AddEventListener(finalResultHandler);
 
-        errorHandler = new ErrorHandlerImpl(this);
+        errorHandler = new CanceledHandlerImpl(this);
         recoImpl.getCanceled().AddEventListener(errorHandler);
 
         recoImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
@@ -244,7 +244,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     private final com.microsoft.cognitiveservices.speech.internal.IntentRecognizer recoImpl;
     private IntentHandlerImpl intermediateResultHandler;
     private IntentHandlerImpl finalResultHandler;
-    private ErrorHandlerImpl errorHandler;
+    private CanceledHandlerImpl errorHandler;
 
     // Defines an internal class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
     private class IntentHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.IntentEventListener {
@@ -273,21 +273,25 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     }
 
     // Defines an internal class to raise an event for error during recognition when a corresponding callback is invoked by the native layer.
-    private class ErrorHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.IntentEventListener {
+    private class CanceledHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.IntentCanceledEventListener {
         
-        public ErrorHandlerImpl(IntentRecognizer recognizer) {
+        public CanceledHandlerImpl(IntentRecognizer recognizer) {
+            Contracts.throwIfNull(recognizer, "recognizer");
             this.recognizer = recognizer;
         }
 
         @Override
-        public void Execute(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionEventArgs eventArgs) {
+        public void Execute(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionCanceledEventArgs eventArgs) {
             Contracts.throwIfNull(eventArgs, "eventArgs");
-            
-            RecognitionErrorEventArgs resultEventArg = new RecognitionErrorEventArgs(eventArgs.getSessionId(), eventArgs.GetResult().getReason());
-            EventHandlerImpl<RecognitionErrorEventArgs>  handler = this.recognizer.RecognitionErrorRaised;
+            if (recognizer.disposed) {
+                return;
+            }
+
+            IntentRecognitionCanceledEventArgs canceledEventArgs = new IntentRecognitionCanceledEventArgs(eventArgs);
+            EventHandlerImpl<IntentRecognitionCanceledEventArgs>  handler = this.recognizer.Canceled;
 
             if (handler != null) {
-                handler.fireEvent(this, resultEventArg);
+                handler.fireEvent(this, canceledEventArgs);
             }
         }
 

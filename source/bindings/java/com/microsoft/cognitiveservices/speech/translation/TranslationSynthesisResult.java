@@ -18,20 +18,6 @@ public final class TranslationSynthesisResult
 
         _resultImpl = result;
         _AudioData = null;
-
-        com.microsoft.cognitiveservices.speech.internal.SynthesisStatusCode status = result.getSynthesisStatus();
-        if (com.microsoft.cognitiveservices.speech.internal.SynthesisStatusCode.Success == status) {
-            _synthesisStatus = SynthesisStatus.Success;
-        }
-        else if (com.microsoft.cognitiveservices.speech.internal.SynthesisStatusCode.SynthesisEnd == status) {
-            _synthesisStatus = SynthesisStatus.SynthesisEnd;
-        }
-        else if (com.microsoft.cognitiveservices.speech.internal.SynthesisStatusCode.Error == status) {
-            _synthesisStatus = SynthesisStatus.Error;
-        }
-        else {
-            throw new IllegalArgumentException("unexpected status");
-        }
     }
 
     /**
@@ -45,11 +31,10 @@ public final class TranslationSynthesisResult
     }
 
     /**
-      * Translated text in the target language.
+      * The voice output of the translated text in the target language.
       * @return Translated text in the target language.
       */
-    public byte[] getAudio()
-    {
+    public byte[] getAudio() {
         if (_AudioData == null) {
             com.microsoft.cognitiveservices.speech.internal.UInt8Vector audio = _resultImpl.getAudio();
             int size = (int)audio.size();
@@ -64,21 +49,11 @@ public final class TranslationSynthesisResult
     private byte[] _AudioData;
 
     /**
-      * Status of the synthesis.
-      * @return status of the synthesis.
-      */
-    public SynthesisStatus getSynthesisStatus() {
-        return _synthesisStatus;
-    }
-    SynthesisStatus _synthesisStatus;
-
-    /**
       * Returns a String that represents the speech recognition result.
       * @return A String that represents the speech recognition result.
       */
     @Override
-    public String toString()
-    {
-        return "Status <<" + getSynthesisStatus() + ", audioData " + (_AudioData != null ? _AudioData.length : "no") + " bytes available>>";
+    public String toString() {
+        return "TranslationSynthesisResult: <<audioData " + (_AudioData != null ? _AudioData.length : "no") + " bytes available>>";
     }
 }

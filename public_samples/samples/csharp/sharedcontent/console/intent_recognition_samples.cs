@@ -41,30 +41,37 @@ namespace MicrosoftSpeechSDKSamples
                 // Starts recognizing.
                 Console.WriteLine("Say something...");
 
-                // Performs recognition.
-                // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable
-                // only for single shot recognition like command or query. For long-running recognition, use
-                // StartContinuousRecognitionAsync() instead.
+                // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+                // so it is suitable only for single shot recognition like command or query. For long-running
+                // recognition, use StartContinuousRecognitionAsync() instead.
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
 
                 // Checks result.
-                if (result.RecognitionStatus != RecognitionStatus.Recognized)
+                if (result.Reason == ResultReason.RecognizedIntent)
                 {
-                    Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-                    if (result.RecognitionStatus == RecognitionStatus.Canceled)
-                    {
-                        Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
-                    }
-                    else
-                    {
-                        Console.WriteLine("No speech could be recognized.\n");
-                    }
+                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+                    Console.WriteLine($"    Intent Id: {result.IntentId}.");
+                    Console.WriteLine($"    Language Understanding JSON: {result.Properties.Get(SpeechPropertyId.SpeechServiceResponse_Json)}.");
                 }
-                else
+                else if (result.Reason == ResultReason.RecognizedSpeech)
                 {
-                    Console.WriteLine($"We recognized: {result.Text}.");
-                    Console.WriteLine($"\n    Intent Id: {result.IntentId}.");
-                    Console.WriteLine($"\n    Language Understanding JSON: {result.Properties.Get(SpeechPropertyId.SpeechServiceResponse_Json)}.");
+                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+                    Console.WriteLine($"    Intent not recognized.");
+                }
+                else if (result.Reason == ResultReason.NoMatch)
+                {
+                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                }
+                else if (result.Reason == ResultReason.Canceled)
+                {
+                    var cancellation = CancellationDetails.FromResult(result);
+                    Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                    if (cancellation.Reason == CancellationReason.Error)
+                    {
+                        Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                        Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                    }
                 }
             }
             // </intentRecognitionWithMicrophone>
@@ -100,24 +107,36 @@ namespace MicrosoftSpeechSDKSamples
 
                     // Subscribes to events.
                     recognizer.IntermediateResultReceived += (s, e) => {
-                        Console.WriteLine($"\n    Partial result: {e.Result.Text}.");
+                        Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
                     };
 
                     recognizer.FinalResultReceived += (s, e) => {
-                        if (e.Result.RecognitionStatus == RecognitionStatus.Recognized)
+                        if (e.Result.Reason == ResultReason.RecognizedIntent)
                         {
-                            Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, Text: {e.Result.Text}.");
-                            Console.WriteLine($"\n    Intent Id: {e.Result.IntentId}.");
-                            Console.WriteLine($"\n    Language Understanding JSON: {e.Result.Properties.Get(SpeechPropertyId.SpeechServiceResponse_Json)}.");
+                            Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                            Console.WriteLine($"    Intent Id: {e.Result.IntentId}.");
+                            Console.WriteLine($"    Language Understanding JSON: {e.Result.Properties.Get(SpeechPropertyId.SpeechServiceResponse_Json)}.");
                         }
-                        else
+                        else if (e.Result.Reason == ResultReason.RecognizedSpeech)
                         {
-                            Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, FailureReason: {e.Result.RecognitionFailureReason}.");
+                            Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                            Console.WriteLine($"    Intent not recognized.");
+                        }
+                        else if (e.Result.Reason == ResultReason.NoMatch)
+                        {
+                            Console.WriteLine($"NOMATCH: Speech could not be recognized.");
                         }
                     };
 
-                    recognizer.RecognitionErrorRaised += (s, e) => {
-                        Console.WriteLine($"\n    An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}");
+                    recognizer.Canceled += (s, e) => {
+                        Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                        if (e.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
+
                         stopRecognition.TrySetResult(0);
                     };
 
@@ -173,30 +192,37 @@ namespace MicrosoftSpeechSDKSamples
                 // Starts recognizing.
                 Console.WriteLine("Say something in " + language + "...");
 
-                // Performs recognition.
-                // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable
-                // only for single shot recognition like command or query. For long-running recognition, use
-                // StartContinuousRecognitionAsync() instead.
+                // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+                // so it is suitable only for single shot recognition like command or query. For long-running
+                // recognition, use StartContinuousRecognitionAsync() instead.
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
 
                 // Checks result.
-                if (result.RecognitionStatus != RecognitionStatus.Recognized)
+                if (result.Reason == ResultReason.RecognizedIntent)
                 {
-                    Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-                    if (result.RecognitionStatus == RecognitionStatus.Canceled)
-                    {
-                        Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
-                    }
-                    else
-                    {
-                        Console.WriteLine("No speech could be recognized.\n");
-                    }
+                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+                    Console.WriteLine($"    Intent Id: {result.IntentId}.");
+                    Console.WriteLine($"    Language Understanding JSON: {result.Properties.Get(SpeechPropertyId.SpeechServiceResponse_Json)}.");
                 }
-                else
+                else if (result.Reason == ResultReason.RecognizedSpeech)
                 {
-                    Console.WriteLine($"We recognized: {result.Text}.");
-                    Console.WriteLine($"\n    Intent Id: {result.IntentId}.");
-                    Console.WriteLine($"\n    Language Understanding JSON: {result.Properties.Get(SpeechPropertyId.SpeechServiceResponse_Json)}.");
+                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+                    Console.WriteLine($"    Intent not recognized.");
+                }
+                else if (result.Reason == ResultReason.NoMatch)
+                {
+                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                }
+                else if (result.Reason == ResultReason.Canceled)
+                {
+                    var cancellation = CancellationDetails.FromResult(result);
+                    Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                    if (cancellation.Reason == CancellationReason.Error)
+                    {
+                        Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                        Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                    }
                 }
             }
             // </intentRecognitionWithLanguage>

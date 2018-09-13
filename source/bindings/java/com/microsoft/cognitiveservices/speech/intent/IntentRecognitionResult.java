@@ -62,21 +62,13 @@ public final class IntentRecognitionResult extends com.microsoft.cognitiveservic
     } // { get; }
 
     /**
-     * A String that represents error result in case the call failed.
-     * @return A String that represents error result in case the call failed.
-     */
-     public String getErrorDetails() {
-       return getProperties().getProperty(SpeechPropertyId.SpeechServiceResponse_JsonErrorDetails);
-     } // { get; }
-    
-    /**
       * Returns a String that represents the intent recognition result.
       * @return A String that represents the intent recognition result.
       */
     @Override
     public String toString() {
         return "ResultId:" + getResultId() +
-               " Status:" + getReason() +
+               " Reason:" + getReason() +
                " IntentId:<" + _intentId +
                "> Recognized text:<" + getText() +
                "> Recognized json:<" + getProperties().getProperty(SpeechPropertyId.SpeechServiceResponse_Json) +

@@ -11,64 +11,7 @@
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
-static_assert((int)Result_Translation_Success == (int)::Microsoft::CognitiveServices::Speech::Translation::TranslationStatusCode::Success, "Result_Translation* enum values == TranslationStatus::* enum values");
-static_assert((int)Result_Translation_Error == (int)::Microsoft::CognitiveServices::Speech::Translation::TranslationStatusCode::Error, "Result_Translation* enum values == TranslationStatus::* enum values");
-
-static_assert((int)Result_Synthesis_Success == (int)::Microsoft::CognitiveServices::Speech::Translation::SynthesisStatusCode::Success, "Result_TranslationSynthesis* enum values == TranslationSynthesisStatus::* enum values");
-static_assert((int)Result_Synthesis_End == (int)::Microsoft::CognitiveServices::Speech::Translation::SynthesisStatusCode::SynthesisEnd, "Result_TranslationSynthesis* enum values == TranslationSynthesisStatus::* enum values");
-static_assert((int)Result_Synthesis_Error == (int)::Microsoft::CognitiveServices::Speech::Translation::SynthesisStatusCode::Error, "Result_TranslationSynthesis* enum values == TranslationSynthesisStatus::* enum values");
-
-SPXAPI TranslationTextResult_GetTranslationStatus(SPXRESULTHANDLE handle, Result_TranslationStatus* statusPointer)
-{
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, statusPointer == nullptr);
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
-        auto result = (*resulthandles)[handle];
-
-        auto textResult = SpxQueryInterface<ISpxTranslationTextResult>(result);
-        *statusPointer = static_cast<Result_TranslationStatus>(textResult->GetTranslationStatus());
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
-}
-
-SPXAPI_RESULTTYPE SPXAPI_NOTHROW CheckAndCopyBuffer(const std::string& source, char* buffer, size_t* bufferSizePointer)
-{
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto len = source.size() + 1;
-
-        if ((buffer == nullptr) || (len > *bufferSizePointer))
-        {
-            *bufferSizePointer = len;
-            return SPXERR_BUFFER_TOO_SMALL;
-        }
-
-        PAL::strcpy(buffer, *bufferSizePointer, source.c_str(), len, true);
-        *bufferSizePointer = len;
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
-}
-
-SPXAPI TranslationTextResult_GetFailureReason(SPXRESULTHANDLE handle, char* buffer, size_t* bufferSizePointer)
-{
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, bufferSizePointer == nullptr);
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
-        auto result = (*resulthandles)[handle];
-
-        auto textResult = SpxQueryInterface<ISpxTranslationTextResult>(result);
-        auto reason = PAL::ToString(textResult->GetTranslationFailureReason());
-
-        hr = CheckAndCopyBuffer(reason, buffer, bufferSizePointer);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR_EXCLUDE(hr, SPXERR_BUFFER_TOO_SMALL);
-}
-
-SPXAPI TranslationTextResult_GetTranslationText(SPXRESULTHANDLE handle, Result_TranslationTextBufferHeader* textBuffer, size_t* lengthPointer)
+SPXAPI translation_text_result_get_translation_text_buffer_header(SPXRESULTHANDLE handle, Result_TranslationTextBufferHeader* textBuffer, size_t* lengthPointer)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, lengthPointer == nullptr);
 
@@ -120,40 +63,7 @@ SPXAPI TranslationTextResult_GetTranslationText(SPXRESULTHANDLE handle, Result_T
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-
-SPXAPI TranslationSynthesisResult_GetSynthesisStatus(SPXRESULTHANDLE handle, Result_SynthesisStatus* statusPointer)
-{
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, statusPointer == nullptr);
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
-        auto result = (*resulthandles)[handle];
-
-        auto synthesisResult = SpxQueryInterface<ISpxTranslationSynthesisResult>(result);
-        *statusPointer = static_cast<Result_SynthesisStatus>(synthesisResult->GetSynthesisStatus());
-    }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
-}
-
-SPXAPI TranslationSynthesisResult_GetFailureReason(SPXRESULTHANDLE handle, char* buffer, size_t* bufferSizePointer)
-{
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, bufferSizePointer == nullptr);
-
-    SPXAPI_INIT_HR_TRY(hr)
-    {
-        auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
-        auto result = (*resulthandles)[handle];
-
-        auto synthesisResult = SpxQueryInterface<ISpxTranslationSynthesisResult>(result);
-        auto reason = PAL::ToString(synthesisResult->GetSynthesisFailureReason());
-
-        hr = CheckAndCopyBuffer(reason, buffer, bufferSizePointer);
-    }
-    SPXAPI_CATCH_AND_RETURN_HR_EXCLUDE(hr, SPXERR_BUFFER_TOO_SMALL);
-}
-
-SPXAPI TranslationSynthesisResult_GetSynthesisData(SPXRESULTHANDLE handle, uint8_t* audioBuffer, size_t* lengthPointer)
+SPXAPI translation_synthesis_result_get_audio_data(SPXRESULTHANDLE handle, uint8_t* audioBuffer, size_t* lengthPointer)
 {
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, lengthPointer == nullptr);
 

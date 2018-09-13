@@ -256,8 +256,11 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         auto recognizer = SpeechRecognizer::FromConfig(badKeyConfig, audioConfig);
         auto result = recognizer->RecognizeAsync().get();
 
-        REQUIRE(result->Reason == Reason::Canceled);
-        REQUIRE(!result->ErrorDetails.empty());
+        REQUIRE(result->Reason == ResultReason::Canceled);
+
+        auto cancellation = CancellationDetails::FromResult(result);
+        REQUIRE(cancellation->Reason == CancellationReason::Error);
+        REQUIRE(!cancellation->ErrorDetails.empty());
 
         // NOTE: Looks like we still do need this...
         // TODO: there's a data race in the audio_pump thread when it tries to
@@ -280,17 +283,16 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         auto a = AudioConfig::FromWavFileInput(input_file);
         auto recognizer = SpeechRecognizer::FromConfig(sc, a);
 
-        recognizer->Canceled.Connect([&](const SpeechRecognitionEventArgs& args) {
-            {
-                REQUIRE(!args.Result.ErrorDetails.empty());
-                unique_lock<mutex> lock(mtx);
-                connectionReportedError = true;
-                cv.notify_one();
-            }
+        recognizer->Canceled.Connect([&](const SpeechRecognitionCanceledEventArgs& args) {
+            REQUIRE(args.Reason == CancellationReason::Error);
+            REQUIRE(!args.ErrorDetails.empty());
+            unique_lock<mutex> lock(mtx);
+            connectionReportedError = true;
+            cv.notify_one();
         });
 
         auto result = recognizer->RecognizeAsync().get();
-        // TODO ENABLE AFTER FIXING BROKEN SERVICE       REQUIRE(result->Reason == Reason::Canceled);
+        // TODO ENABLE AFTER FIXING BROKEN SERVICE       REQUIRE(result->Reason == ResultReason::Canceled);
 
         {
             unique_lock<mutex> lock(mtx);
@@ -416,7 +418,7 @@ TEST_CASE("Speech on local server", "[api][cxx]")
             auto audioConfig = AudioConfig::FromWavFileInput(input_file);
             auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
             auto result = recognizer->RecognizeAsync().get();
-            REQUIRE(result->Reason == Reason::Recognized);
+            REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
             REQUIRE(result->Text == "Remind me to buy 5 iPhones.");
         }
 
@@ -428,7 +430,7 @@ TEST_CASE("Speech on local server", "[api][cxx]")
         auto audioConfig = AudioConfig::FromWavFileInput(input_file);
         auto recognizer = factory->CreateSpeechRecognizerFromConfig(audioConfig);
         auto result = recognizer->RecognizeAsync().get();
-        REQUIRE(result->Reason == Reason::Recognized);
+        REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
         REQUIRE(result->Text == L"Remind me to buy 5 iPhones.");
         }
         */
@@ -464,8 +466,10 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
             std::this_thread::sleep_for(std::chrono::milliseconds(300));
         };
 
+        auto canceledCallback = [&](const SpeechRecognitionCanceledEventArgs& args) { callback(args); };
+
         recognizer->FinalResult.Connect(callback);
-        recognizer->Canceled.Connect(callback); // Canceled is called if there are connection issues.
+        recognizer->Canceled.Connect(canceledCallback); // Canceled is called if there are connection issues.
 
         auto result = recognizer->RecognizeAsync().get();
 
@@ -486,7 +490,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
 
         auto callback1 = [&](const SpeechRecognitionEventArgs& args)
         {
-            if (args.Result.Reason == Reason::Recognized) 
+            if (args.Result->Reason == ResultReason::RecognizedSpeech) 
             {
                 recognizer->Canceled.DisconnectAll();
             }
@@ -495,9 +499,11 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
                 recognizer->FinalResult.DisconnectAll();
             }
         };
+        auto canceledCallback1 = [&](const SpeechRecognitionCanceledEventArgs& args) { callback1(args); };
 
         recognizer->FinalResult.Connect(callback1);
-        recognizer->Canceled.Connect(callback1);
+        recognizer->Canceled.Connect(canceledCallback1);
+
         auto result = recognizer->RecognizeAsync().get();
         UNUSED(result);
 
@@ -506,10 +512,11 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
             recognizer->Canceled.DisconnectAll();
             recognizer->FinalResult.DisconnectAll();
         };
+        auto canceledCallback2 = [&](const SpeechRecognitionCanceledEventArgs& args) { callback2(args); };
 
         recognizer = CreateRecognizers<SpeechRecognizer>(input_file);
         recognizer->FinalResult.Connect(callback2);
-        recognizer->Canceled.Connect(callback2);
+        recognizer->Canceled.Connect(canceledCallback2);
 
         result = recognizer->RecognizeAsync().get();
         UNUSED(result);
@@ -519,10 +526,11 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
             recognizer.reset();
         };
-
+        auto canceledCallback3 = [&](const SpeechRecognitionEventArgs& args) { callback3(args); };
+        
         recognizer = CreateRecognizers<SpeechRecognizer>(input_file);
         recognizer->FinalResult.Connect(callback3);
-        recognizer->Canceled.Connect(callback3);
+        recognizer->Canceled.Connect(canceledCallback3);
         auto future = recognizer->RecognizeAsync();
         UNUSED(future);
     }

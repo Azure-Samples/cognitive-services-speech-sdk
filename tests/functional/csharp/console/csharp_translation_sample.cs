@@ -32,7 +32,7 @@ namespace MicrosoftSpeechSDKSamples
         private static void MySynthesisEventHandler(object sender, TranslationSynthesisResultEventArgs e)
         {
             Console.WriteLine($"Translation: synthesis result: {e.ToString()}.");
-            if (e.Result.Status == SynthesisStatus.Success)
+            if (e.Result.Audio.Length > 0)
             {
                 using (var m = new MemoryStream(e.Result.Audio))
                 {
@@ -42,9 +42,9 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
-        private static void MyErrorEventHandler(object sender, RecognitionErrorEventArgs e)
+        private static void MyCanceledEventHandler(object sender, TranslationTextResultCanceledEventArgs e)
         {
-            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Translation: error occurred. SessionId: {0}, Reason: {1}", e.SessionId, e.Status));
+            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Translation: canceled. SessionId: {0}, Reason: {1}", e.SessionId, e.Reason));
         }
 
         private static void MySpeechEndDetectedHandler(object sender, RecognitionEventArgs e)
@@ -165,7 +165,7 @@ namespace MicrosoftSpeechSDKSamples
             reco.IntermediateResultReceived += MyIntermediateResultEventHandler;
             reco.FinalResultReceived += MyFinalResultEventHandler;
             reco.SynthesisResultReceived += MySynthesisEventHandler;
-            reco.RecognitionErrorRaised += MyErrorEventHandler;
+            reco.Canceled += MyCanceledEventHandler;
             reco.OnSpeechDetectedEvent += MySpeechEndDetectedHandler;
 
             translationEndTaskCompletionSource = new TaskCompletionSource<int>();

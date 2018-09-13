@@ -13,7 +13,7 @@
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
-SPXAPI Session_From_Recognizer(SPXRECOHANDLE hreco, SPXSESSIONHANDLE* phsession)
+SPXAPI session_from_recognizer(SPXRECOHANDLE hreco, SPXSESSIONHANDLE* phsession)
 {
     SPXAPI_INIT_HR_TRY(hr)
     {
@@ -31,12 +31,12 @@ SPXAPI Session_From_Recognizer(SPXRECOHANDLE hreco, SPXSESSIONHANDLE* phsession)
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }
 
-SPXAPI_(bool) Session_Handle_IsValid(SPXSESSIONHANDLE hsession)
+SPXAPI_(bool) session_handle_is_valid(SPXSESSIONHANDLE hsession)
 {
     return Handle_IsValid<SPXSESSIONHANDLE, ISpxSession>(hsession);
 }
 
-SPXAPI Session_Handle_Close(SPXSESSIONHANDLE hsession)
+SPXAPI session_handle_release(SPXSESSIONHANDLE hsession)
 {
     return Handle_Close<SPXSESSIONHANDLE, ISpxSession>(hsession);
 }

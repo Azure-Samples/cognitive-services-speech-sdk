@@ -23,7 +23,7 @@ namespace Speech {
 /// <summary>
 /// AsyncRecognizer abstract base class.
 /// </summary>
-template <class RecoResult, class RecoEventArgs>
+template <class RecoResult, class RecoEventArgs, class RecoCanceledEventArgs>
 class AsyncRecognizer : public Recognizer
 {
 public:
@@ -98,7 +98,7 @@ public:
     /// (indicating a recognition attempt that was canceled as a result or a direct cancellation request
     /// or, alternatively, a transport or protocol failure).
     /// </summary>
-    EventSignal<const RecoEventArgs&> Canceled;
+    EventSignal<const RecoCanceledEventArgs&> Canceled;
 
 protected:
 
@@ -112,7 +112,7 @@ protected:
         SpeechEndDetected(GetRecognitionEventConnectionsChangedCallback(), GetRecognitionEventConnectionsChangedCallback(), false),
         IntermediateResult(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback(), false),
         FinalResult(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback(), false),
-        Canceled(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback(), false),
+        Canceled(GetRecoCanceledEventConnectionsChangedCallback(), GetRecoCanceledEventConnectionsChangedCallback(), false),
         m_hasyncRecognize(SPXHANDLE_INVALID),
         m_hasyncStartContinuous(SPXHANDLE_INVALID),
         m_hasyncStopContinuous(SPXHANDLE_INVALID),
@@ -147,9 +147,9 @@ protected:
         // Close the async handles we have open for Recognize, StartContinuous, and StopContinuous
         for (auto handle : { &m_hasyncRecognize, &m_hasyncStartContinuous, &m_hasyncStopContinuous })
         {
-            if (*handle != SPXHANDLE_INVALID && ::Recognizer_AsyncHandle_IsValid(*handle))
+            if (*handle != SPXHANDLE_INVALID && ::recognizer_async_handle_is_valid(*handle))
             {
-                ::Recognizer_AsyncHandle_Close(*handle);
+                ::recognizer_async_handle_release(*handle);
                 *handle = SPXHANDLE_INVALID;
             }
         }
@@ -162,7 +162,7 @@ protected:
             SPX_INIT_HR(hr);
 
             SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
-            SPX_THROW_ON_FAIL(hr = Recognizer_Recognize(m_hreco, &hresult));
+            SPX_THROW_ON_FAIL(hr = recognizer_recognize_once(m_hreco, &hresult));
 
             return std::make_shared<RecoResult>(hresult);
         });
@@ -175,13 +175,13 @@ protected:
         auto keepAlive = this->shared_from_this();
         auto future = std::async(std::launch::async, [keepAlive, this]() -> void {
             SPX_INIT_HR(hr);
-            SPX_THROW_ON_FAIL(hr = Recognizer_AsyncHandle_Close(m_hasyncStartContinuous)); // close any unfinished previous attempt
+            SPX_THROW_ON_FAIL(hr = recognizer_async_handle_release(m_hasyncStartContinuous)); // close any unfinished previous attempt
 
-            SPX_EXITFN_ON_FAIL(hr = Recognizer_StartContinuousRecognitionAsync(m_hreco, &m_hasyncStartContinuous));
-            SPX_EXITFN_ON_FAIL(hr = Recognizer_StartContinuousRecognitionAsync_WaitFor(m_hasyncStartContinuous, UINT32_MAX));
+            SPX_EXITFN_ON_FAIL(hr = recognizer_start_continuous_recognition_async(m_hreco, &m_hasyncStartContinuous));
+            SPX_EXITFN_ON_FAIL(hr = recognizer_start_continuous_recognition_async_wait_for(m_hasyncStartContinuous, UINT32_MAX));
 
             SPX_EXITFN_CLEANUP:
-            SPX_REPORT_ON_FAIL(/* hr = */ Recognizer_AsyncHandle_Close(m_hasyncStartContinuous)); // don't overwrite HR on cleanup
+            SPX_REPORT_ON_FAIL(/* hr = */ recognizer_async_handle_release(m_hasyncStartContinuous)); // don't overwrite HR on cleanup
             m_hasyncStartContinuous = SPXHANDLE_INVALID;
 
             SPX_THROW_ON_FAIL(hr);
@@ -195,13 +195,13 @@ protected:
         auto keepAlive = this->shared_from_this();
         auto future = std::async(std::launch::async, [keepAlive, this]() -> void {
             SPX_INIT_HR(hr);
-            SPX_THROW_ON_FAIL(hr = Recognizer_AsyncHandle_Close(m_hasyncStopContinuous)); // close any unfinished previous attempt
+            SPX_THROW_ON_FAIL(hr = recognizer_async_handle_release(m_hasyncStopContinuous)); // close any unfinished previous attempt
 
-            SPX_EXITFN_ON_FAIL(hr = Recognizer_StopContinuousRecognitionAsync(m_hreco, &m_hasyncStopContinuous));
-            SPX_EXITFN_ON_FAIL(hr = Recognizer_StopContinuousRecognitionAsync_WaitFor(m_hasyncStopContinuous, UINT32_MAX));
+            SPX_EXITFN_ON_FAIL(hr = recognizer_stop_continuous_recognition_async(m_hreco, &m_hasyncStopContinuous));
+            SPX_EXITFN_ON_FAIL(hr = recognizer_stop_continuous_recognition_async_wait_for(m_hasyncStopContinuous, UINT32_MAX));
 
             SPX_EXITFN_CLEANUP:
-            SPX_REPORT_ON_FAIL(/* hr = */ Recognizer_AsyncHandle_Close(m_hasyncStopContinuous)); // don't overwrite HR on cleanup
+            SPX_REPORT_ON_FAIL(/* hr = */ recognizer_async_handle_release(m_hasyncStopContinuous)); // don't overwrite HR on cleanup
             m_hasyncStartContinuous = SPXHANDLE_INVALID;
 
             SPX_THROW_ON_FAIL(hr);
@@ -215,14 +215,14 @@ protected:
         auto keepAlive = this->shared_from_this();
         auto future = std::async(std::launch::async, [keepAlive, model, this]() -> void {
             SPX_INIT_HR(hr);
-            SPX_THROW_ON_FAIL(hr = Recognizer_AsyncHandle_Close(m_hasyncStartKeyword)); // close any unfinished previous attempt
+            SPX_THROW_ON_FAIL(hr = recognizer_async_handle_release(m_hasyncStartKeyword)); // close any unfinished previous attempt
 
             auto hkeyword = (SPXKEYWORDHANDLE)(*model.get());
-            SPX_EXITFN_ON_FAIL(hr = Recognizer_StartKeywordRecognitionAsync(m_hreco, hkeyword, &m_hasyncStartKeyword));
-            SPX_EXITFN_ON_FAIL(hr = Recognizer_StartKeywordRecognitionAsync_WaitFor(m_hasyncStartKeyword, UINT32_MAX));
+            SPX_EXITFN_ON_FAIL(hr = recognizer_start_keyword_recognition_async(m_hreco, hkeyword, &m_hasyncStartKeyword));
+            SPX_EXITFN_ON_FAIL(hr = recognizer_start_keyword_recognition_async_wait_for(m_hasyncStartKeyword, UINT32_MAX));
 
             SPX_EXITFN_CLEANUP:
-            SPX_REPORT_ON_FAIL(/* hr = */ Recognizer_AsyncHandle_Close(m_hasyncStartKeyword)); // don't overwrite HR on cleanup
+            SPX_REPORT_ON_FAIL(/* hr = */ recognizer_async_handle_release(m_hasyncStartKeyword)); // don't overwrite HR on cleanup
             m_hasyncStartKeyword = SPXHANDLE_INVALID;
 
             SPX_THROW_ON_FAIL(hr);
@@ -236,13 +236,13 @@ protected:
         auto keepAlive = this->shared_from_this();
         auto future = std::async(std::launch::async, [keepAlive, this]() -> void {
             SPX_INIT_HR(hr);
-            SPX_THROW_ON_FAIL(hr = Recognizer_AsyncHandle_Close(m_hasyncStopKeyword)); // close any unfinished previous attempt
+            SPX_THROW_ON_FAIL(hr = recognizer_async_handle_release(m_hasyncStopKeyword)); // close any unfinished previous attempt
 
-            SPX_EXITFN_ON_FAIL(hr = Recognizer_StopKeywordRecognitionAsync(m_hreco, &m_hasyncStopKeyword));
-            SPX_EXITFN_ON_FAIL(hr = Recognizer_StopKeywordRecognitionAsync_WaitFor(m_hasyncStopKeyword, UINT32_MAX));
+            SPX_EXITFN_ON_FAIL(hr = recognizer_stop_keyword_recognition_async(m_hreco, &m_hasyncStopKeyword));
+            SPX_EXITFN_ON_FAIL(hr = recognizer_stop_keyword_recognition_async_wait_for(m_hasyncStopKeyword, UINT32_MAX));
 
             SPX_EXITFN_CLEANUP:
-            SPX_REPORT_ON_FAIL(/* hr = */ Recognizer_AsyncHandle_Close(m_hasyncStopKeyword)); // don't overwrite HR on cleanup
+            SPX_REPORT_ON_FAIL(/* hr = */ recognizer_async_handle_release(m_hasyncStopKeyword)); // don't overwrite HR on cleanup
             m_hasyncStartKeyword = SPXHANDLE_INVALID;
 
             SPX_THROW_ON_FAIL(hr);
@@ -256,19 +256,29 @@ protected:
         if (m_hreco != SPXHANDLE_INVALID)
         {
             SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8x", __FUNCTION__, m_hreco);
-            SPX_DBG_TRACE_VERBOSE_IF(!::Recognizer_Handle_IsValid(m_hreco), "%s: m_hreco is INVALID!!!", __FUNCTION__);
+            SPX_DBG_TRACE_VERBOSE_IF(!::recognizer_handle_is_valid(m_hreco), "%s: m_hreco is INVALID!!!", __FUNCTION__);
 
             if (&recoEvent == &IntermediateResult)
             {
-                Recognizer_IntermediateResult_SetEventCallback(m_hreco, IntermediateResult.IsConnected() ? AsyncRecognizer::FireEvent_IntermediateResult: nullptr, this);
+                recognizer_recognizing_set_callback(m_hreco, IntermediateResult.IsConnected() ? AsyncRecognizer::FireEvent_IntermediateResult: nullptr, this);
             }
             else if (&recoEvent == &FinalResult)
             {
-                Recognizer_FinalResult_SetEventCallback(m_hreco, FinalResult.IsConnected() ? AsyncRecognizer::FireEvent_FinalResult: nullptr, this);
+                recognizer_recognized_set_callback(m_hreco, FinalResult.IsConnected() ? AsyncRecognizer::FireEvent_FinalResult: nullptr, this);
             }
-            else if (&recoEvent == &Canceled)
+        }
+    }
+
+    virtual void RecoCanceledEventConnectionsChanged(const EventSignal<const RecoCanceledEventArgs&>& recoEvent)
+    {
+        if (m_hreco != SPXHANDLE_INVALID)
+        {
+            SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8x", __FUNCTION__, m_hreco);
+            SPX_DBG_TRACE_VERBOSE_IF(!::recognizer_handle_is_valid(m_hreco), "%s: m_hreco is INVALID!!!", __FUNCTION__);
+
+            if (&recoEvent == &Canceled)
             {
-                Recognizer_Canceled_SetEventCallback(m_hreco, Canceled.IsConnected() ? AsyncRecognizer::FireEvent_Canceled : nullptr, this);
+                recognizer_canceled_set_callback(m_hreco, Canceled.IsConnected() ? AsyncRecognizer::FireEvent_Canceled : nullptr, this);
             }
         }
     }
@@ -278,15 +288,15 @@ protected:
         if (m_hreco != SPXHANDLE_INVALID)
         {
             SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8x", __FUNCTION__, m_hreco);
-            SPX_DBG_TRACE_VERBOSE_IF(!::Recognizer_Handle_IsValid(m_hreco), "%s: m_hreco is INVALID!!!", __FUNCTION__);
+            SPX_DBG_TRACE_VERBOSE_IF(!::recognizer_handle_is_valid(m_hreco), "%s: m_hreco is INVALID!!!", __FUNCTION__);
 
             if (&recognitionEvent == &SpeechStartDetected)
             {
-                Recognizer_SpeechStartDetected_SetEventCallback(m_hreco, SpeechStartDetected.IsConnected() ? AsyncRecognizer::FireEvent_SpeechStartDetected : nullptr, this);
+                recognizer_speech_start_detected_set_callback(m_hreco, SpeechStartDetected.IsConnected() ? AsyncRecognizer::FireEvent_SpeechStartDetected : nullptr, this);
             }
             else if (&recognitionEvent == &SpeechEndDetected)
             {
-                Recognizer_SpeechEndDetected_SetEventCallback(m_hreco, SpeechEndDetected.IsConnected() ? AsyncRecognizer::FireEvent_SpeechEndDetected : nullptr, this);
+                recognizer_speech_end_detected_set_callback(m_hreco, SpeechEndDetected.IsConnected() ? AsyncRecognizer::FireEvent_SpeechEndDetected : nullptr, this);
             }
         }
     }
@@ -296,15 +306,15 @@ protected:
         if (m_hreco != SPXHANDLE_INVALID)
         {
             SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8x", __FUNCTION__, m_hreco);
-            SPX_DBG_TRACE_VERBOSE_IF(!::Recognizer_Handle_IsValid(m_hreco), "%s: m_hreco is INVALID!!!", __FUNCTION__);
+            SPX_DBG_TRACE_VERBOSE_IF(!::recognizer_handle_is_valid(m_hreco), "%s: m_hreco is INVALID!!!", __FUNCTION__);
 
             if (&sessionEvent == &SessionStarted)
             {
-                Recognizer_SessionStarted_SetEventCallback(m_hreco, SessionStarted.IsConnected() ? AsyncRecognizer::FireEvent_SessionStarted: nullptr, this);
+                recognizer_session_started_set_callback(m_hreco, SessionStarted.IsConnected() ? AsyncRecognizer::FireEvent_SessionStarted: nullptr, this);
             }
             else if (&sessionEvent == &SessionStopped)
             {
-                Recognizer_SessionStopped_SetEventCallback(m_hreco, SessionStopped.IsConnected() ? AsyncRecognizer::FireEvent_SessionStopped : nullptr, this);
+                recognizer_session_stopped_set_callback(m_hreco, SessionStopped.IsConnected() ? AsyncRecognizer::FireEvent_SessionStopped : nullptr, this);
             }
         }
     }
@@ -373,8 +383,8 @@ protected:
     {
         UNUSED(hreco);
 
-        auto ptr = new RecoEventArgs(hevent);
-        std::shared_ptr<RecoEventArgs> recoEvent(ptr);
+        auto ptr = new RecoCanceledEventArgs(hevent);
+        std::shared_ptr<RecoCanceledEventArgs> recoEvent(ptr);
 
         auto pThis = static_cast<AsyncRecognizer*>(pvContext);
         auto keepAlive = pThis->shared_from_this();
@@ -409,6 +419,11 @@ private:
     inline std::function<void(const EventSignal<const RecoEventArgs&>&)> GetRecoEventConnectionsChangedCallback()
     {
         return [=](const EventSignal<const RecoEventArgs&>& recoEvent) { this->RecoEventConnectionsChanged(recoEvent); };
+    }
+
+    inline std::function<void(const EventSignal<const RecoCanceledEventArgs&>&)> GetRecoCanceledEventConnectionsChangedCallback()
+    {
+        return [=](const EventSignal<const RecoCanceledEventArgs&>& recoEvent) { this->RecoCanceledEventConnectionsChanged(recoEvent); };
     }
 
     inline std::function<void(const EventSignal<const RecognitionEventArgs&>&)> GetRecognitionEventConnectionsChangedCallback()

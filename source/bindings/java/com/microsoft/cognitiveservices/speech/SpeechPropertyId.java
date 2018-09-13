@@ -132,7 +132,7 @@ public enum SpeechPropertyId {
     /// <summary>
     /// Cancellation reason.
     /// </summary>
-    CancellationDetails_ReasonCanceled ( com.microsoft.cognitiveservices.speech.internal.SpeechPropertyId.CancellationDetails_ReasonCanceled),
+    CancellationDetails_Reason ( com.microsoft.cognitiveservices.speech.internal.SpeechPropertyId.CancellationDetails_Reason),
 
     /// <summary>
     /// Cancellation text.

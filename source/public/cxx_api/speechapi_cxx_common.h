@@ -35,13 +35,13 @@
 inline void __spx_rethrow(SPXHR hr)
 {
     auto handle = reinterpret_cast<SPXERRORHANDLE>(hr);
-    auto error = Error_GetCode(handle);
+    auto error = error_get_error_code(handle);
     if (error == SPX_NOERROR)
     {
         throw hr;
     }
-    auto callstack = Error_GetCallStack(handle);
-    auto what = Error_GetMessage(handle);
+    auto callstack = error_get_call_stack(handle);
+    auto what = error_get_message(handle);
     throw std::runtime_error(
         (what == nullptr ? "Exception with error code: " + std::to_string(error) : std::string(what)) +
         (callstack == nullptr ? "" : std::string(callstack)));

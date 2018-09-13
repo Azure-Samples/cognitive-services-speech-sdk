@@ -653,7 +653,7 @@ void CSpxAudioStreamSession::EnsureFireResultEvent()
      if (m_recoAsyncWaiting)
      {
          auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
-         auto timeoutCanceledResult = factory->CreateErrorResult(L"Timeout: no recognition result received.", ResultType::Speech);
+         auto timeoutCanceledResult = factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, CancellationReason::Error, L"Timeout: no recognition result received.", 0, 0);
          WaitForRecognition_Complete(timeoutCanceledResult);
      }
 }
@@ -874,31 +874,22 @@ std::shared_ptr<ISpxRecognitionEventArgs> CSpxAudioStreamSession::CreateRecognit
     return recoEvent;
 }
 
-std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration)
+std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration)
 {
     auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
 
     auto initResult = SpxQueryInterface<ISpxRecognitionResultInit>(result);
-    initResult->InitIntermediateResult(resultId, text, type, offset, duration);
+    initResult->InitIntermediateResult(resultId, text, offset, duration);
 
     return result;
 }
 
-std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateFinalResult(ResultType type, const wchar_t* resultId, Reason reason, const wchar_t* text, uint64_t offset, uint64_t duration)
+std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, const wchar_t* text, uint64_t offset, uint64_t duration)
 {
     auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
 
     auto initResult = SpxQueryInterface<ISpxRecognitionResultInit>(result);
-    initResult->InitFinalResult(resultId, reason, text, type, offset, duration);
-
-    return result;
-}
-
-std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::CreateErrorResult(const wchar_t* text, ResultType type)
-{
-    auto result = SpxCreateObjectWithSite<ISpxRecognitionResult>("CSpxRecognitionResult", this);
-
-    SpxQueryInterface<ISpxRecognitionResultInit>(result)->InitError(text, type);
+    initResult->InitFinalResult(resultId, reason, noMatchReason, cancellation, text, offset, duration);
 
     return result;
 }
@@ -1010,7 +1001,7 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
     else
     {
         auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
-        auto error = factory->CreateErrorResult(PAL::ToWString(payload->Info()).c_str(), ResultType::Speech);
+        auto error = factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, CancellationReason::Error, PAL::ToWString(payload->Info()).c_str(), 0, 0);
         WaitForRecognition_Complete(error);
     }
 }

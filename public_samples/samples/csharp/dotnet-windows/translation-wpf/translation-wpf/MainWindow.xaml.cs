@@ -324,7 +324,7 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
             this.recognizer.IntermediateResultReceived += this.OnPartialResponseReceivedHandler;
             this.recognizer.FinalResultReceived += this.OnFinalResponse;
             this.recognizer.SynthesisResultReceived += this.OnSynthesis;
-            this.recognizer.RecognitionErrorRaised += this.OnError;
+            this.recognizer.Canceled += this.OnCanceled;
         }
 
         #region Recognition Event Handlers
@@ -354,7 +354,7 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
         {
             if (e.Result.Text.Length == 0)
             {
-                this.WriteLine(this.crisLogText, "Status: " + e.Result.RecognitionStatus);
+                this.WriteLine(this.crisLogText, "Reason: " + e.Result.Reason);
                 this.WriteLine(this.crisLogText, "No phrase response is available.");
             }
             else
@@ -372,13 +372,13 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
         }
 
         /// <summary>
-        /// Called when error occurs.
+        /// Called when translation is canceled.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="RecognitionErrorEventArgs"/> instance containing the event data.</param>
-        private void OnError(object sender, RecognitionErrorEventArgs e)
+        /// <param name="e">The <see cref="TranslationTextResultCanceledEventArgs"/> instance containing the event data.</param>
+        private void OnCanceled(object sender, TranslationTextResultCanceledEventArgs e)
         {
-            string text = $"Speech recognition: error occurred. Status: {e.Status}, FailureReason: {e.FailureReason}";
+            string text = $"Speech recognition: canceled. Reason: {e.Reason}, ErrorDetails: {e.ErrorDetails}";
             this.SetCurrentText(this.crisCurrentText, text);
             text += "\n";
             this.WriteLine(this.crisLogText, text);
@@ -396,7 +396,7 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
         /// <param name="e">The <see cref="TranslationSynthesisEventArgs"/> instance containing the event data.</param>
         private void OnSynthesis(object sender, TranslationSynthesisResultEventArgs e)
         {
-            if (e.Result.Status == SynthesisStatus.Success)
+            if (e.Result.Audio.Length > 0)
             {
                 using (var m = new MemoryStream(e.Result.Audio))
                 {

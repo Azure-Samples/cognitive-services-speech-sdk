@@ -15,15 +15,59 @@
 
 void CarbonTestConsole::Sample_HelloWorld()
 {
-    auto recognizer = SpeechRecognizer::FromConfig(
-        SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId),
-        nullptr);
+    // Create the recognizer "with microphone input"
+    auto recognizer = SpeechRecognizer::FromConfig(SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId), nullptr);
 
     ConsoleWriteLine("Say something...");
     auto result = recognizer->RecognizeAsync().get();
 
     // Show the result
-    ConsoleWriteLine("You said:\n\n    '%s'", result->Text.c_str());
+    ConsoleWriteLine("You said '%s'", result->Text.c_str());
+}
+
+void CarbonTestConsole::Sample_HelloWorld_WithReasonInfo()
+{
+    // Create the recognizer "with microphone input"
+    auto recognizer = SpeechRecognizer::FromConfig(SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId), nullptr);
+
+    // Prompt and recognize
+    ConsoleWriteLine("Say something...");
+    auto result = recognizer->RecognizeAsync().get();
+
+    // Show the result
+    if (result->Reason == ResultReason::RecognizedSpeech)
+    {
+        ConsoleWriteLine("RECOGNIZED: Reason=%d", result->Reason);
+        ConsoleWriteLine("RECOGNIZED: '%s'", result->Text.c_str());
+    }
+    else if (result->Reason == ResultReason::NoMatch)
+    {
+        ConsoleWriteLine("NOMATCH: Reason=%d", result->Reason);
+        auto noMatch = NoMatchDetails::FromResult(result);
+        switch (noMatch->Reason)
+        {
+        case NoMatchReason::NotRecognized:
+            ConsoleWriteLine("NOMATCH: Speech was detected, but not recognized.");
+            break;
+        case NoMatchReason::InitialSilenceTimeout:
+            ConsoleWriteLine("NOMATCH: The start of the audio stream contains only silence, and the service timed out waiting for speech.");
+            break;
+        case NoMatchReason::InitialBabbleTimeout:
+            ConsoleWriteLine("NOMATCH: The start of the audio stream contains only noise, and the service timed out waiting for speech.");
+            break;
+        }
+    }
+    else if (result->Reason == ResultReason::Canceled)
+    {
+        auto cancellation = CancellationDetails::FromResult(result);
+        ConsoleWriteLine("CANCELED: Reason=%d", cancellation->Reason);
+
+        if (cancellation->Reason == CancellationReason::Error)
+        {
+            ConsoleWriteLine("CANCELED: ErrorDetails=%s", cancellation->ErrorDetails.c_str());
+            ConsoleWriteLine("CANCELED: Did you update the subscription info?");
+        }
+    }
 }
 
 void CarbonTestConsole::Sample_HelloWorld_Microphone()
@@ -38,7 +82,7 @@ void CarbonTestConsole::Sample_HelloWorld_Microphone()
     auto result = recognizer->RecognizeAsync().get();
 
     // Show the result
-    ConsoleWriteLine("You said:\n\n    '%s'", result->Text.c_str());
+    ConsoleWriteLine("You said '%s'", result->Text.c_str());
 }
 
 void CarbonTestConsole::Sample_HelloWorld_File()
@@ -53,7 +97,7 @@ void CarbonTestConsole::Sample_HelloWorld_File()
     auto result = recognizer->RecognizeAsync().get();
 
     // Show the result
-    ConsoleWriteLine("You said:\n\n    '%s'", result->Text.c_str());
+    ConsoleWriteLine("You said '%s'", result->Text.c_str());
 }
 
 void CarbonTestConsole::Sample_HelloWorld_PushStream()
@@ -81,7 +125,7 @@ void CarbonTestConsole::Sample_HelloWorld_PushStream()
     auto result = recognizer->RecognizeAsync().get();
 
     // Show the result
-    ConsoleWriteLine("You said:\n\n    '%s'", result->Text.c_str());
+    ConsoleWriteLine("You said '%s'", result->Text.c_str());
 }
 
 void CarbonTestConsole::Sample_HelloWorld_PullStream()
@@ -107,7 +151,7 @@ void CarbonTestConsole::Sample_HelloWorld_PullStream()
     auto result = recognizer->RecognizeAsync().get();
 
     // Show the result
-    ConsoleWriteLine("You said:\n\n    '%s'", result->Text.c_str());
+    ConsoleWriteLine("You said '%s'", result->Text.c_str());
 }
 
 void CarbonTestConsole::Sample_HelloWorld_WithEvents()
@@ -117,13 +161,48 @@ void CarbonTestConsole::Sample_HelloWorld_WithEvents()
         nullptr);
 
     recognizer->IntermediateResult += [&](const SpeechRecognitionEventArgs& e) {
-        ConsoleWriteLine("IntermediateResult: text=%s", e.Result.Text.c_str());
+        ConsoleWriteLine("RECOGNIZING: Text=%s", e.Result->Text.c_str());
     };
+
+    recognizer->FinalResult.Connect([&] (const SpeechRecognitionEventArgs& e)
+    {
+        if (e.Result->Reason == ResultReason::RecognizedSpeech)
+        {
+            ConsoleWriteLine("RECOGNIZED: Text=%s", e.Result->Text.c_str());
+            ConsoleWriteLine("  Offset=%lu", e.Result->Offset());
+            ConsoleWriteLine("  Duration=%lu", e.Result->Duration());
+        }
+        else if (e.Result->Reason == ResultReason::NoMatch)
+        {
+            auto noMatch = NoMatchDetails::FromResult(e.Result);
+            switch (noMatch->Reason)
+            {
+            case NoMatchReason::NotRecognized:
+                ConsoleWriteLine("NOMATCH: Speech was detected, but not recognized.");
+                break;
+            case NoMatchReason::InitialSilenceTimeout:
+                ConsoleWriteLine("NOMATCH: The start of the audio stream contains only silence, and the service timed out waiting for speech.");
+                break;
+            case NoMatchReason::InitialBabbleTimeout:
+                ConsoleWriteLine("NOMATCH: The start of the audio stream contains only noise, and the service timed out waiting for speech.");
+                break;
+            }
+        }
+    });
+
+    recognizer->Canceled.Connect([&](const SpeechRecognitionCanceledEventArgs& e)
+    {
+        ConsoleWriteLine("CANCELED: Reason=%d", e.Reason);
+
+        if (e.Reason == CancellationReason::Error)
+        {
+            ConsoleWriteLine("CANCELED: ErrorDetails=%s", e.ErrorDetails.c_str());
+            ConsoleWriteLine("CANCELED: Did you update the subscription info?");
+        }
+    });
 
     ConsoleWriteLine("Say something...");
     auto result = recognizer->RecognizeAsync().get();
-
-    ConsoleWriteLine("You said:\n\n    '%s'", result->Text.c_str());
 }
 
 void CarbonTestConsole::Sample_HelloWorld_PickEngine(const char* pszEngine) // L"Usp", L"Unidec", or L"Mock"
@@ -137,7 +216,7 @@ void CarbonTestConsole::Sample_HelloWorld_PickEngine(const char* pszEngine) // L
     session->Parameters.SetProperty(propertyName, "true");
 
     recognizer->IntermediateResult += [&](const SpeechRecognitionEventArgs& e) {
-        ConsoleWriteLine("IntermediateResult: text=%s", e.Result.Text.c_str());
+        ConsoleWriteLine("IntermediateResult: text=%s", e.Result->Text.c_str());
     };
 
     ConsoleWriteLine("Say something...");
@@ -181,23 +260,40 @@ void CarbonTestConsole::Sample_HelloWorld_Intent(const char* subscriptionKey, co
     // Check the reason returned
     switch (result->Reason)
     {
-    case Reason::Recognized:
-        ConsoleWriteLine("We recognized: %s", result->Text.c_str());
-        ConsoleWriteLine("IntentId='%s'", result->IntentId.c_str());
-        ConsoleWriteLine("json='%s'", result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonResult).c_str());
+    case ResultReason::RecognizedSpeech:
+    case ResultReason::RecognizedIntent:
+        ConsoleWriteLine("RECOGNIZED: Text=%s", result->Text.c_str());
+        ConsoleWriteLine("  Intent Id:'%s'", result->IntentId.c_str());
+        ConsoleWriteLine("  Intent Service JSON: '%s'", result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonResult).c_str());
         break;
-    case Reason::InitialSilenceTimeout:
-        ConsoleWriteLine("We only heard silence in the audio stream.");
-        break;
-    case Reason::InitialBabbleTimeout:
-        ConsoleWriteLine("We only heard noise in the audio stream.");
-        break; 
-    case Reason::NoMatch:
-        ConsoleWriteLine("We detected speech in the audio stream, but could not recognize any words from the target language. This could be caused by wrong language setting or wrong audio format.");
-        break;
-    case Reason::Canceled:
-        ConsoleWriteLine("There was an error, reason=%d - %s", int(result->Reason), result->Text.c_str());
-        break;
+    case ResultReason::NoMatch:
+        {
+            auto noMatch = NoMatchDetails::FromResult(result);
+            switch (noMatch->Reason)
+            {
+            case NoMatchReason::NotRecognized:
+                ConsoleWriteLine("NOMATCH: Speech was detected, but not recognized.");
+                break;
+            case NoMatchReason::InitialSilenceTimeout:
+                ConsoleWriteLine("NOMATCH: The start of the audio stream contains only silence, and the service timed out waiting for speech.");
+                break;
+            case NoMatchReason::InitialBabbleTimeout:
+                ConsoleWriteLine("NOMATCH: The start of the audio stream contains only noise, and the service timed out waiting for speech.");
+                break;
+            }
+            break;
+        }
+    case ResultReason::Canceled:
+        {
+            auto cancellation = CancellationDetails::FromResult(result);
+            ConsoleWriteLine("CANCELED: Reason=%d", cancellation->Reason);
+
+            if (cancellation->Reason == CancellationReason::Error)
+            {
+                ConsoleWriteLine("CANCELED: ErrorDetails=%s", cancellation->ErrorDetails.c_str());
+                ConsoleWriteLine("CANCELED: Did you update the subscription info?");
+            }
+        }
     default:
         break;
     }

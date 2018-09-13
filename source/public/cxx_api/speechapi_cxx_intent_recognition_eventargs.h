@@ -20,13 +20,12 @@ namespace Intent {
 /// <summary>
 /// Class for intent recognition event arguments.
 /// </summary>
-class IntentRecognitionEventArgs final : public RecognitionEventArgs
+class IntentRecognitionEventArgs : public RecognitionEventArgs
 {
 private:
 
     SPXEVENTHANDLE m_hevent;
     std::shared_ptr<IntentRecognitionResult> m_result;
-
 
 public:
 
@@ -38,7 +37,7 @@ public:
         RecognitionEventArgs(hevent),
         m_hevent(hevent),
         m_result(std::make_shared<IntentRecognitionResult>(IntentResultHandleFromEventHandle(hevent))),
-        Result(*m_result.get())
+        Result(m_result)
     {
         SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hevent);
     };
@@ -47,7 +46,7 @@ public:
     virtual ~IntentRecognitionEventArgs()
     {
         SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, m_hevent);
-        SPX_THROW_ON_FAIL(Recognizer_EventHandle_Close(m_hevent));
+        SPX_THROW_ON_FAIL(recognizer_event_handle_release(m_hevent));
     };
 
 #if defined(SWIG) || defined(BINDING_OBJECTIVE_C)
@@ -56,12 +55,12 @@ private:
     /// <summary>
     /// Intent recognition event result.
     /// </summary>
-    const IntentRecognitionResult& Result;
+    std::shared_ptr<IntentRecognitionResult> Result;
 
 #if defined(SWIG) || defined(BINDING_OBJECTIVE_C)
 public:
 #else
-private:
+protected:
 #endif
     /// <summary>
     /// Intent recognition event result.
@@ -75,9 +74,72 @@ private:
     SPXRESULTHANDLE IntentResultHandleFromEventHandle(SPXEVENTHANDLE hevent)
     {
         SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(Recognizer_RecognitionEvent_GetResult(hevent, &hresult));
+        SPX_THROW_ON_FAIL(recognizer_recognition_event_get_result(hevent, &hresult));
         return hresult;
     }
+};
+
+
+/// <summary>
+/// Class for intent recognition canceled event arguments.
+/// </summary>
+class IntentRecognitionCanceledEventArgs final : public IntentRecognitionEventArgs
+{
+private:
+
+    std::shared_ptr<CancellationDetails> m_cancellation;
+    CancellationReason m_cancellationReason;
+
+public:
+
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    /// <param name="hevent">Event handle</param>
+    explicit IntentRecognitionCanceledEventArgs(SPXEVENTHANDLE hevent) :
+        IntentRecognitionEventArgs(hevent),
+        m_cancellation(CancellationDetails::FromResult(GetResult())),
+        m_cancellationReason(m_cancellation->Reason),
+        Reason(m_cancellationReason),
+        ErrorDetails(m_cancellation->ErrorDetails)
+    {
+        SPX_DBG_TRACE_VERBOSE("%s (this-0x%x)", __FUNCTION__, this);
+    };
+
+    /// <inheritdoc/>
+    virtual ~IntentRecognitionCanceledEventArgs()
+    {
+        SPX_DBG_TRACE_VERBOSE("%s (this-0x%x)", __FUNCTION__, this);
+    };
+
+#if defined(SWIG) || defined(BINDING_OBJECTIVE_C)
+private:
+#endif
+
+    /// <summary>
+    /// The reason the result was canceled.
+    /// </summary>
+    const CancellationReason& Reason;
+
+    /// <summary>
+    /// In case of an unsuccessful recognition, provides a details of why the occurred error.
+    /// This field is only filled-out if the reason canceled (<see cref="Reason"/>) is set to Error.
+    /// </summary>
+    const std::string ErrorDetails;
+
+#if defined(SWIG) || defined(BINDING_OBJECTIVE_C)
+public:
+#else
+private:
+#endif
+    /// <summary>
+    /// CancellationDetails.
+    /// </summary>
+    std::shared_ptr<CancellationDetails> GetCancellationDetails() const { return m_cancellation; }
+
+private:
+
+    DISABLE_DEFAULT_CTORS(IntentRecognitionCanceledEventArgs);
 };
 
 

@@ -38,7 +38,7 @@ SPXAPI_(bool) property_bag_is_valid(SPXPROPERTYBAGHANDLE hpropbag)
     return Handle_IsValid<SPXPROPERTYBAGHANDLE, ISpxNamedProperties>(hpropbag);
 }
 
-SPXAPI property_bag_close(SPXPROPERTYBAGHANDLE hpropbag)
+SPXAPI property_bag_release(SPXPROPERTYBAGHANDLE hpropbag)
 {
     return Handle_Close<SPXPROPERTYBAGHANDLE, ISpxNamedProperties>(hpropbag);
 }

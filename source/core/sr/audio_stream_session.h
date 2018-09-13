@@ -169,9 +169,8 @@ public:
     std::shared_ptr<ISpxRecognitionEventArgs> CreateRecognitionEventArgs(const std::wstring& sessionId, std::shared_ptr<ISpxRecognitionResult> result) override;
 
     // --- ISpxRecoResultFactory
-    std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, enum ResultType type, uint64_t offset, uint64_t duration) override;
-    std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(ResultType type, const wchar_t* resultId, Reason reason, const wchar_t* text, uint64_t offset, uint64_t duration) override;
-    std::shared_ptr<ISpxRecognitionResult> CreateErrorResult(const wchar_t* text, ResultType type) override;
+    std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) override;
+    std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, const wchar_t* text, uint64_t offset, uint64_t duration) override;
 
     // --- ISpxRecoEngineAdapterSite (second part...)
     void FireAdapterResult_Intermediate(ISpxRecoEngineAdapter* adapter, uint64_t offset, std::shared_ptr<ISpxRecognitionResult> result) override;

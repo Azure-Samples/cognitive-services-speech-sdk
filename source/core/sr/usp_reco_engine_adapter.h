@@ -180,7 +180,9 @@ private:
 
     void FireFinalResultLater(const USP::SpeechPhraseMsg& message);
     void FireFinalResultLater_WaitingForIntentComplete(const std::  string& luisJson = "");
-    Reason ToReason(USP::RecognitionStatus uspRecognitionStatus);
+    ResultReason ToReason(USP::RecognitionStatus uspRecognitionStatus);
+    CancellationReason ToCancellationReason(USP::RecognitionStatus uspRecognitionStatus);
+    NoMatchReason ToNoMatchReason(USP::RecognitionStatus uspRecognitionStatus);
 
     bool IsInteractiveMode() const { return m_recoMode == USP::RecognitionMode::Interactive; }
 

@@ -20,8 +20,9 @@ import org.junit.Test;
 import org.junit.Ignore;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
+import com.microsoft.cognitiveservices.speech.CancellationReason;
+import com.microsoft.cognitiveservices.speech.ResultReason;
 import com.microsoft.cognitiveservices.speech.RecognitionEventType;
-import com.microsoft.cognitiveservices.speech.RecognitionStatus;
 import com.microsoft.cognitiveservices.speech.Recognizer;
 import com.microsoft.cognitiveservices.speech.SessionEventType;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
@@ -191,12 +192,12 @@ public class IntentRecognizerTests {
 
         IntentRecognitionResult res = future.get();
         assertNotNull(res);
-        assertEquals(RecognitionStatus.Recognized, res.getReason());
+        assertTrue(ResultReason.RecognizedSpeech == res.getReason() ||
+                   ResultReason.RecognizedIntent == res.getReason());
         assertEquals("What's the weather like?", res.getText());
 
         // TODO: check for specific json parameters
         assertTrue(res.getLanguageUnderstanding().length() > 0);
-        assertEquals(RecognitionStatus.Recognized, res.getReason());
         
         r.close();
         s.close();
@@ -225,8 +226,10 @@ public class IntentRecognizerTests {
             eventsMap.put("IntermediateResultReceived" , now);
         });
         
-        r.RecognitionErrorRaised.addEventListener((o, e) -> {
-            eventsMap.put("RecognitionErrorRaised", eventIdentifier.getAndIncrement());
+        r.Canceled.addEventListener((o, e) -> {
+            if (e.getReason() == CancellationReason.Error) {
+                eventsMap.put("RecognitionErrorRaised", eventIdentifier.getAndIncrement());
+            }
         });
 
         // TODO eventType should be renamed and be a function getEventType()
@@ -244,7 +247,7 @@ public class IntentRecognizerTests {
         
         IntentRecognitionResult res = r.recognizeAsync().get();
         assertNotNull(res);
-        assertTrue(res.getErrorDetails().isEmpty());
+        assertTrue(res.getReason() != ResultReason.Canceled);
         assertEquals("What's the weather like?", res.getText());
 
         // session events are first and last event
@@ -415,7 +418,9 @@ public class IntentRecognizerTests {
         assertNotNull(res);
         assertEquals(2, eventsMap.size());
         assertTrue(res.getLanguageUnderstanding().length() > 0);
-        assertEquals(RecognitionStatus.Recognized, res.getReason());
+        assertTrue(ResultReason.RecognizedSpeech == res.getReason() ||
+                   ResultReason.RecognizedIntent == res.getReason());
+
         
         r.close();
         s.close();
@@ -452,7 +457,9 @@ public class IntentRecognizerTests {
         assertNotNull(res);
         assertEquals(2, eventsMap.size());
         assertTrue(res.getLanguageUnderstanding().length() > 0);
-        assertEquals(RecognitionStatus.Recognized, res.getReason());
+        assertTrue(ResultReason.RecognizedSpeech == res.getReason() ||
+                   ResultReason.RecognizedIntent == res.getReason());
+
         
         r.close();
         s.close();

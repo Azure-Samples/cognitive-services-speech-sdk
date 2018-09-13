@@ -11,36 +11,34 @@ using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 
 void recognizeSpeech() {
-    // Creates an instance of a speech config with specified
-    // subscription key and service region. Replace with your own subscription key
-    // and service region (e.g., "westus").
+    // Creates an instance of a speech config with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
     // Creates a speech recognizer
     auto recognizer = SpeechRecognizer::FromConfig(config);
     cout << "Say something...\n";
 
-    // Performs recognition.
-    // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
-    // for single shot recognition like command or query. For long-running recognition, use
-    // StartContinuousRecognitionAsync() instead.
-    auto future = recognizer->RecognizeAsync();
-    auto result = future.get();
+    // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+    // so it is suitable only for single shot recognition like command or query. For long-running
+    // recognition, use StartContinuousRecognitionAsync() instead.
+    auto result = recognizer->RecognizeAsync().get();
 
     // Checks result.
-    if (result->Reason != Reason::Recognized) {
-        cout << "Recognition Status:" << int(result->Reason) << ". ";
-        if (result->Reason == Reason::Canceled)
-        {
-            cout << "There was an error, reason: " << result->ErrorDetails << std::endl;
-        }
-        else
-        {
-            cout << "No speech could be recognized.\n";
-        }
-    }
-    else {
+    if (result->Reason == ResultReason::RecognizedSpeech) {
         cout << "We recognized: " << result->Text << std::endl;
+    }
+    else if (result->Reason == ResultReason::NoMatch) {
+        cout << "NOMATCH: Speech could not be recognized." << std::endl;
+    }
+    else if (result->Reason == ResultReason::Canceled) {
+        auto cancellation = CancellationDetails::FromResult(result);
+        cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
+
+        if (cancellation->Reason == CancellationReason::Error) {
+            cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+            cout << "CANCELED: Did you update the subscription info?" << std::endl;
+        }
     }
 }
 

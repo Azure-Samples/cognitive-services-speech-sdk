@@ -29,28 +29,30 @@ namespace MicrosoftSpeechSDKSamples
                 // Starts recognizing.
                 Console.WriteLine("Say something...");
 
-                // Performs recognition.
-                // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
-                // only for single shot recognition like command or query. For long-running recognition, use
-                // StartContinuousRecognitionAsync() instead.
+                // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+                // so it is suitable only for single shot recognition like command or query. For long-running
+                // recognition, use StartContinuousRecognitionAsync() instead.
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
 
                 // Checks result.
-                if (result.RecognitionStatus != RecognitionStatus.Recognized)
+                if (result.Reason == ResultReason.RecognizedSpeech)
                 {
-                    Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-                    if (result.RecognitionStatus == RecognitionStatus.Canceled)
-                    {
-                        Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
-                    }
-                    else
-                    {
-                        Console.WriteLine("No speech could be recognized.\n");
-                    }
+                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
                 }
-                else
+                else if (result.Reason == ResultReason.NoMatch)
                 {
-                    Console.WriteLine($"We recognized: {result.Text}, Offset: {result.OffsetInTicks}, Duration: {result.Duration}.");
+                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                }
+                else if (result.Reason == ResultReason.Canceled)
+                {
+                    var cancellation = CancellationDetails.FromResult(result);
+                    Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                    if (cancellation.Reason == CancellationReason.Error)
+                    {
+                        Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                        Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                    }
                 }
             }
             // </recognitionWithMicrophone>
@@ -76,33 +78,36 @@ namespace MicrosoftSpeechSDKSamples
                 // Starts recognizing.
                 Console.WriteLine($"Say something in {language} ...");
 
-                // Performs recognition.
-                // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
-                // only for single shot recognition like command or query. For long-running recognition, use
-                // StartContinuousRecognitionAsync() instead.
+                // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+                // so it is suitable only for single shot recognition like command or query. For long-running
+                // recognition, use StartContinuousRecognitionAsync() instead.
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
 
                 // Checks result.
-                if (result.RecognitionStatus != RecognitionStatus.Recognized)
+                if (result.Reason == ResultReason.RecognizedSpeech)
                 {
-                    Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-                    if (result.RecognitionStatus == RecognitionStatus.Canceled)
+                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+                    Console.WriteLine("  DETAILED RESULTS:");
+
+                    var detailedResults = result.Best();
+                    foreach (var item in detailedResults) // NOTE: We need to put this in all languages, or take it out of CSharp
                     {
-                        Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
-                    }
-                    else
-                    {
-                        Console.WriteLine("No speech could be recognized.\n");
+                        Console.WriteLine($"    Confidence: {item.Confidence}, Text: {item.Text}, LexicalForm: {item.LexicalForm}, NormalizedForm: {item.NormalizedForm}, MaskedNormalizedForm: {item.MaskedNormalizedForm}");
                     }
                 }
-                else
+                else if (result.Reason == ResultReason.NoMatch)
                 {
-                    Console.WriteLine($"We recognized: {result.Text}, Offset: {result.OffsetInTicks}, Duration: {result.Duration}.");
-                    Console.WriteLine("Detailed results:");
-                    var detailedResults = result.Best();
-                    foreach (var item in detailedResults)
+                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                }
+                else if (result.Reason == ResultReason.Canceled)
+                {
+                    var cancellation = CancellationDetails.FromResult(result);
+                    Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                    if (cancellation.Reason == CancellationReason.Error)
                     {
-                        Console.WriteLine($"Confidence: {item.Confidence}, Text: {item.Text}, LexicalForm: {item.LexicalForm}, NormalizedForm: {item.NormalizedForm}, MaskedNormalizedForm: {item.MaskedNormalizedForm}");
+                        Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                        Console.WriteLine($"CANCELED: Did you update the subscription info?");
                     }
                 }
             }
@@ -124,28 +129,30 @@ namespace MicrosoftSpeechSDKSamples
             {
                 Console.WriteLine("Say something...");
 
-                // Performs recognition.
-                // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
-                // only for single shot recognition like command or query. For long-running recognition, use
-                // StartContinuousRecognitionAsync() instead.
+                // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+                // so it is suitable only for single shot recognition like command or query. For long-running
+                // recognition, use StartContinuousRecognitionAsync() instead.
                 var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
 
                 // Checks results.
-                if (result.RecognitionStatus != RecognitionStatus.Recognized)
+                if (result.Reason == ResultReason.RecognizedSpeech)
                 {
-                    Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-                    if (result.RecognitionStatus == RecognitionStatus.Canceled)
-                    {
-                        Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
-                    }
-                    else
-                    {
-                        Console.WriteLine("No speech could be recognized.\n");
-                    }
+                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
                 }
-                else
+                else if (result.Reason == ResultReason.NoMatch)
                 {
-                    Console.WriteLine($"We recognized: {result.Text}, Offset: {result.OffsetInTicks}, Duration: {result.Duration}.");
+                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                }
+                else if (result.Reason == ResultReason.Canceled)
+                {
+                    var cancellation = CancellationDetails.FromResult(result);
+                    Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                    if (cancellation.Reason == CancellationReason.Error)
+                    {
+                        Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                        Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                    }
                 }
             }
             // </recognitionCustomized>
@@ -170,36 +177,31 @@ namespace MicrosoftSpeechSDKSamples
                     // Subscribes to events.
                     recognizer.IntermediateResultReceived += (s, e) =>
                     {
-                        Console.WriteLine($"\n    Partial result: {e.Result.Text}.");
+                        Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
                     };
 
                     recognizer.FinalResultReceived += (s, e) =>
                     {
-                        var result = e.Result;
-                        Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-                        switch (result.RecognitionStatus)
+                        if (e.Result.Reason == ResultReason.RecognizedSpeech)
                         {
-                            case RecognitionStatus.Recognized:
-                                Console.WriteLine($"\n    Final result: Text: {result.Text}, Offset: {result.OffsetInTicks}, Duration: {result.Duration}.");
-                                break;
-                            case RecognitionStatus.InitialSilenceTimeout:
-                                Console.WriteLine("The start of the audio stream contains only silence, and the service timed out waiting for speech.\n");
-                                break;
-                            case RecognitionStatus.InitialBabbleTimeout:
-                                Console.WriteLine("The start of the audio stream contains only noise, and the service timed out waiting for speech.\n");
-                                break;
-                            case RecognitionStatus.NoMatch:
-                                Console.WriteLine("The speech was detected in the audio stream, but no words from the target language were matched. Possible reasons could be wrong setting of the target language or wrong format of audio stream.\n");
-                                break;
-                            case RecognitionStatus.Canceled:
-                                Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
-                                break;
+                            Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                        }
+                        else if (e.Result.Reason == ResultReason.NoMatch)
+                        {
+                            Console.WriteLine($"NOMATCH: Speech could not be recognized.");
                         }
                     };
 
-                    recognizer.RecognitionErrorRaised += (s, e) =>
+                    recognizer.Canceled += (s, e) =>
                     {
-                        Console.WriteLine($"\n    An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}");
+                        Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                        if (e.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
+
                         stopRecognition.TrySetResult(0);
                     };
 
@@ -248,33 +250,31 @@ namespace MicrosoftSpeechSDKSamples
                     // Subscribes to events.
                     recognizer.IntermediateResultReceived += (s, e) =>
                     {
-                        Console.WriteLine($"\n    Partial result: {e.Result.Text}.");
+                        Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
                     };
 
                     recognizer.FinalResultReceived += (s, e) =>
                     {
-                        var result = e.Result;
-                        if (result.RecognitionStatus == RecognitionStatus.Recognized)
+                        if (e.Result.Reason == ResultReason.RecognizedSpeech)
                         {
-                            Console.WriteLine($"\n    Final result: Status: {result.RecognitionStatus.ToString()}, Text: {result.Text}.");
+                            Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
                         }
-                        else
+                        else if (e.Result.Reason == ResultReason.NoMatch)
                         {
-                            Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-                            if (result.RecognitionStatus == RecognitionStatus.Canceled)
-                            {
-                                Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
-                            }
-                            else
-                            {
-                                Console.WriteLine("No speech could be recognized.\n");
-                            }
+                            Console.WriteLine($"NOMATCH: Speech could not be recognized.");
                         }
                     };
 
-                    recognizer.RecognitionErrorRaised += (s, e) =>
+                    recognizer.Canceled += (s, e) =>
                     {
-                        Console.WriteLine($"\n    An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}");
+                        Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                        if (e.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
+
                         stopRecognition.TrySetResult(0);
                     };
 

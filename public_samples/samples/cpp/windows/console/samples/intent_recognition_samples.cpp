@@ -39,30 +39,36 @@ void IntentRecognitionWithMicrophone()
 
     cout << "Say something...\n";
 
-    // Performs recognition.
-    // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
-    // only for single shot recognition like command or query. For long-running recognition, use
-    // StartContinuousRecognitionAsync() instead.
+    // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+    // so it is suitable only for single shot recognition like command or query. For long-running
+    // recognition, use StartContinuousRecognitionAsync() instead.
     auto result = recognizer->RecognizeAsync().get();
 
     // Checks result.
-    if (result->Reason != Reason::Recognized)
+    if (result->Reason == ResultReason::RecognizedIntent)
     {
-        cout << "Recognition Status: " << int(result->Reason) << ". ";
-        if (result->Reason == Reason::Canceled)
-        {
-            cout << "There was an error, reason: " << result->ErrorDetails << std::endl;
-        }
-        else
-        {
-            cout << "No speech could be recognized.\n";
-        }
+        cout << "RECOGNIZED: Text=" << result->Text << std::endl;
+        cout << "  Intent Id: " << result->IntentId << std::endl;
+        cout << "  Intent Service JSON: " << result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonResult) << std::endl;
     }
-    else
+    else if (result->Reason == ResultReason::RecognizedSpeech)
     {
-        cout << L"We recognized: " << result->Text << std::endl;
-        cout << L"    Intent Id: " << result->IntentId << std::endl;
-        cout << L"    Intent response in Json: " << result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonResult) << std::endl;
+        cout << "RECOGNIZED: Text=" << result->Text << " (intent could not be recognized)" << std::endl;
+    }
+    else if (result->Reason == ResultReason::NoMatch)
+    {
+        cout << "NOMATCH: Speech could not be recognized." << std::endl;
+    }
+    else if (result->Reason == ResultReason::Canceled)
+    {
+        auto cancellation = CancellationDetails::FromResult(result);
+        cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
+
+        if (cancellation->Reason == CancellationReason::Error)
+        {
+            cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+            cout << "CANCELED: Did you update the subscription info?" << std::endl;
+        }
     }
     // </IntentRecognitionWithMicrophone>
 }
@@ -93,30 +99,36 @@ void IntentRecognitionWithLanguage()
 
     cout << "Say something in " << lang << "..." << std::endl;
 
-    // Performs recognition.
-    // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
-    // only for single shot recognition like command or query. For long-running recognition, use
-    // StartContinuousRecognitionAsync() instead.
+    // Performs recognition. RecognizeAsync() returns when the first utterance has been recognized,
+    // so it is suitable only for single shot recognition like command or query. For long-running
+    // recognition, use StartContinuousRecognitionAsync() instead.
     auto result = recognizer->RecognizeAsync().get();
 
     // Checks result.
-    if (result->Reason != Reason::Recognized)
+    if (result->Reason == ResultReason::RecognizedIntent)
     {
-        cout << "Recognition Status:" << int(result->Reason);
-        if (result->Reason == Reason::Canceled)
-        {
-            cout << "There was an error, reason: " << result->ErrorDetails << std::endl;
-        }
-        else
-        {
-            cout << "No speech could be recognized." << std::endl;
-        }
+        cout << "RECOGNIZED: Text=" << result->Text << std::endl;
+        cout << "  Intent Id: " << result->IntentId << std::endl;
+        cout << "  Intent Service JSON: " << result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonResult) << std::endl;
     }
-    else
+    else if (result->Reason == ResultReason::RecognizedSpeech)
     {
-        cout << L"We recognized: " << result->Text << std::endl;
-        cout << L"    Intent Id: " << result->IntentId << std::endl;
-        cout << L"    Intent response in Json: " << result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonResult) << std::endl;
+        cout << "RECOGNIZED: Text=" << result->Text << " (intent could not be recognized)" << std::endl;
+    }
+    else if (result->Reason == ResultReason::NoMatch)
+    {
+        cout << "NOMATCH: Speech could not be recognized." << std::endl;
+    }
+    else if (result->Reason == ResultReason::Canceled)
+    {
+        auto cancellation = CancellationDetails::FromResult(result);
+        cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
+
+        if (cancellation->Reason == CancellationReason::Error)
+        {
+            cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+            cout << "CANCELED: Did you update the subscription info?" << std::endl;
+        }
     }
     // </IntentRecognitionWithLanguage>
 }
@@ -151,28 +163,44 @@ void IntentContinuousRecognitionWithFile()
     // Subscribes to events.
     recognizer->IntermediateResult.Connect([] (const IntentRecognitionEventArgs& e)
     {
-        cout << "IntermediateResult:" << e.Result.Text << std::endl;
+        cout << "IntermediateResult:" << e.Result->Text << std::endl;
     });
 
     recognizer->FinalResult.Connect([] (const IntentRecognitionEventArgs& e)
     {
-        cout << L"FinalResult: status:" << (int)e.Result.Reason << L". Text: " << e.Result.Text << std::endl;
-        cout << L"    Intent Id: " << e.Result.IntentId << std::endl;
-        cout << L"    Language Understanding Json: " << e.Result.Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonResult) << std::endl;
+        if (e.Result->Reason == ResultReason::RecognizedIntent)
+        {
+            cout << "RECOGNIZED: Text=" << e.Result->Text << std::endl;
+            cout << "  Intent Id: " << e.Result->IntentId << std::endl;
+            cout << "  Intent Service JSON: " << e.Result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonResult) << std::endl;
+        }
+        else if (e.Result->Reason == ResultReason::RecognizedSpeech)
+        {
+            cout << "RECOGNIZED: Text=" << e.Result->Text << " (intent could not be recognized)" << std::endl;
+        }
+        else if (e.Result->Reason == ResultReason::NoMatch)
+        {
+            cout << "NOMATCH: Speech could not be recognized." << std::endl;
+        }
     });
 
-    recognizer->Canceled.Connect([&recognitionEnd] (const IntentRecognitionEventArgs& e)
+    recognizer->Canceled.Connect([&recognitionEnd](const IntentRecognitionCanceledEventArgs& e)
     {
-        cout << "Canceled:" << (int)e.Result.Reason << "- " << e.Result.ErrorDetails << std::endl;
-        // Notify to stop recognition.
-        recognitionEnd.set_value();
+        cout << "CANCELED: Reason=" << (int)e.Reason << std::endl;
+
+        if (e.Reason == CancellationReason::Error)
+        {
+            cout << "CANCELED: ErrorDetails=" << e.ErrorDetails << std::endl;
+            cout << "CANCELED: Did you update the subscription info?" << std::endl;
+        }
+
+        recognitionEnd.set_value(); // Notify to stop recognition.
     });
 
     recognizer->SessionStopped.Connect([&recognitionEnd](const SessionEventArgs& e)
     {
         cout << "Session stopped.";
-        // Notify to stop recognition.
-        recognitionEnd.set_value();
+        recognitionEnd.set_value(); // Notify to stop recognition.
     });
 
     // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.

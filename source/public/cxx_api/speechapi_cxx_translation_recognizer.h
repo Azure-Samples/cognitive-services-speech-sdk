@@ -27,7 +27,7 @@ namespace Translation {
 /// <summary>
 /// Performs translation on the speech input.
 /// </summary>
-class TranslationRecognizer final : public AsyncRecognizer<TranslationTextResult, TranslationTextResultEventArgs>
+class TranslationRecognizer final : public AsyncRecognizer<TranslationTextResult, TranslationTextResultEventArgs, TranslationTextResultCanceledEventArgs>
 {
 public:
      /// <summary>
@@ -47,7 +47,7 @@ public:
 
     // The AsyncRecognizer only deals with events for translation text result. The audio output event
     // is managed by OnTranslationSynthesisResult.
-    using BaseType = AsyncRecognizer<TranslationTextResult, TranslationTextResultEventArgs>;
+    using BaseType = AsyncRecognizer<TranslationTextResult, TranslationTextResultEventArgs, TranslationTextResultCanceledEventArgs>;
 
     /// <summary>
     /// It is intended for internal use only. It creates an instance of <see cref="TranslationRecognizer"/>. 
@@ -172,7 +172,7 @@ private:
         return [=](const EventSignal<const TranslationSynthesisResultEventArgs&>& audioEvent) {
             if (&audioEvent == &TranslationSynthesisResultEvent)
             {
-                TranslationRecognizer_TranslationSynthesis_SetEventCallback(m_hreco, TranslationSynthesisResultEvent.IsConnected() ? FireEvent_TranslationSynthesisResult : nullptr, this);
+                translator_synthesizing_audio_set_callback(m_hreco, TranslationSynthesisResultEvent.IsConnected() ? FireEvent_TranslationSynthesisResult : nullptr, this);
             }
         };
     }

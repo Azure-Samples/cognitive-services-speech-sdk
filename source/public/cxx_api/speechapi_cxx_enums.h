@@ -142,7 +142,7 @@ enum class SpeechPropertyId
     /// <summary>
     /// Cancellation reason.
     /// </summary>
-    CancellationDetails_ReasonCanceled = 6000,
+    CancellationDetails_Reason = 6000,
 
     /// <summary>
     /// Cancellation text.
@@ -164,90 +164,97 @@ enum class OutputFormat
 /// <summary>
 /// Specifies the possible reasons a recognition result might be generated.
 /// </summary>
-enum class Reason
+enum class ResultReason
 {
     /// <summary>
-    /// Indicates the result is a phrase that has been successfully recognized.
+    /// Indicates speech could not be recognized. More details can be found in the NoMatchDetails object.
     /// </summary>
-    Recognized,
+    NoMatch = 0,
 
     /// <summary>
-    /// Indicates the result is a hypothesis text that has been recognized.
+    /// Indicates that the recognition was canceled. More details can be found using the CancellationDetails object.
     /// </summary>
-    IntermediateResult,
+    Canceled = 1,
 
     /// <summary>
-    /// Indicates that speech was detected in the audio stream, but no words from the target language were matched.
-    /// Possible reasons could be wrong setting of the target language or wrong format of audio stream.
+    /// Indicates the speech result contains hypothesis text.
     /// </summary>
-    NoMatch,
+    RecognizingSpeech = 2,
+
+    /// <summary>
+    /// Indicates the speech result contains final text that has been recognized.
+    /// Speech Recognition is now complete for this phrase.
+    /// </summary>
+    RecognizedSpeech = 3,
+
+    /// <summary>
+    /// Indicates the intent result contains hypothesis text and intent.
+    /// </summary>
+    RecognizingIntent = 4,
+
+    /// <summary>
+    /// Indicates the intent result contains final text and intent.
+    /// Speech Recognition and Intent determination are now complete for this phrase.
+    /// </summary>
+    RecognizedIntent = 5,
+
+    /// <summary>
+    /// Indicates the translation result contains hypothesis text and its translation(s).
+    /// </summary>
+    TranslatingSpeech = 6,
+
+    /// <summary>
+    /// Indicates the translation result contains final text and corresponding translation(s).
+    /// Speech Recognition and Translation are now complete for this phrase.
+    /// </summary>
+    TranslatedSpeech = 7,
+
+    /// <summary>
+    /// Indicates the synthesized audio result contains a non-zero amount of audio data
+    /// </summary>
+    SynthesizingAudio = 8,
+
+    /// <summary>
+    /// Indicates the synthesized audio is now complete for this phrase.
+    /// </summary>
+    SynthesizingAudioComplete = 9
+};
+
+/// <summary>
+/// Defines the possible reasons a recognition result might be canceled.
+/// </summary>
+enum class CancellationReason
+{
+    /// <summary>
+    /// Indicates that an error occurred during speech recognition. The ErrorDetails property contains detailed error response.
+    /// </summary>
+    Error = 1,
+
+    /// <summary>
+    /// Indicates that the end of the audio stream was reached.
+    /// </summary>
+    EndOfStream = 2,
+};
+
+/// <summary>
+/// Defines the possible reasons a recognition result might not be recognized.
+/// </summary>
+enum class NoMatchReason
+{
+    /// <summary>
+    /// Indicates that speech was detected, but not recognized.
+    /// </summary>
+    NotRecognized = 1,
 
     /// <summary>
     /// Indicates that the start of the audio stream contained only silence, and the service timed out waiting for speech.
     /// </summary>
-    InitialSilenceTimeout,
+    InitialSilenceTimeout = 2,
 
     /// <summary>
     /// Indicates that the start of the audio stream contained only noise, and the service timed out waiting for speech.
     /// </summary>
-    InitialBabbleTimeout,
-
-    /// <summary>
-    /// Indicates that an error occurred during recognition. The ErrorDetails in Property contains detailed error reasons.
-    /// </summary>
-    Canceled
+    InitialBabbleTimeout = 3
 };
-
-/// <summary>
-/// Specifies properties that can be retrieved from a RecognitionResult.
-/// </summary>
-enum class ResultProperty { Json = 1, LanguageUnderstandingJson = 2, ErrorDetails = 3 };
-
-/// <summary>
-/// Enumerates parameters that can be used to configure a recognizer.
-/// </summary>
-enum class RecognizerParameter { DeploymentId = 1 };
 
 } } } // Microsoft::CognitiveServices::Speech
-
-namespace Microsoft {
-namespace CognitiveServices {
-namespace Speech {
-namespace Translation {
-
-/// <summary>
-/// Defines the status code of translation result.
-/// </summary>
-enum class TranslationStatusCode {
-    /// <summary>
-    /// The translation is successful.
-    /// </summary>
-    Success,
-
-    /// <summary>
-    /// An error occurred during translation.
-    /// </summary>
-    Error
-};
-
-/// <summary>
-/// Defines the status code of synthesis result.
-/// </summary>
-enum class SynthesisStatusCode {
-    /// <summary>
-    /// The audio data contained in the message is valid.
-    /// </summary>
-    Success,
-
-    /// <summary>
-    /// Indicates the end of audio data. No audio data is included in this message.
-    /// </summary>
-    SynthesisEnd,
-
-    /// <summary>
-    /// An error occurred during translation.
-    /// </summary>
-    Error
-};
-
-} } } } // Microsoft::CognitiveServices::Speech::Translation

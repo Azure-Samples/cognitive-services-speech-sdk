@@ -43,15 +43,27 @@ public class IntentRecognitionSamples {
         IntentRecognitionResult result = recognizer.recognizeAsync().get();
 
         // Checks result.
-        if (result.getReason() != RecognitionStatus.Recognized) {
-            System.out.println("There was an error, reason " + result.getReason() + "-" + result.getErrorDetails());
-        }
-        else {
-            System.out.println("We recognized: " + result.getText());
+        if (result.getReason() == ResultReason.RecognizedIntent) {
+            System.out.println("RECOGNIZED: Text=" + result.getText());
             System.out.println("    Intent Id: " + result.getIntentId());
-            System.out.println("    Language Understanding Json: " + result.getJson());
+            System.out.println("    Intent Service Json: " + result.getJson());
         }
-        // </IntentRecognitionWithMicrophone>
+        else if (result.getReason() == ResultReason.RecognizedSpeech) {
+            System.out.println("RECOGNIZED: Text=" + result.getText());
+            System.out.println("    Intent not recognized.");
+        }
+        else if (result.getReason() == ResultReason.NoMatch) {
+            System.out.println("NOMATCH: Speech could not be recognized.");
+        }
+        else if (result.getReason() == ResultReason.Canceled) {
+            CancellationDetails cancellation = CancellationDetails.fromResult(result);
+            System.out.println("CANCELED: Reason=" + cancellation.getReason());
+
+            if (cancellation.getReason() == CancellationReason.Error) {
+                System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
+                System.out.println("CANCELED: Did you update the subscription info?");
+            }
+        }
     }
 
     // Intent recognition in the specified language, using microphone.
@@ -81,13 +93,26 @@ public class IntentRecognitionSamples {
         IntentRecognitionResult result = recognizer.recognizeAsync().get();
 
         // Checks result.
-        if (result.getReason() != RecognitionStatus.Recognized) {
-            System.out.println("There was an error, reason " + result.getReason() + "-" + result.getErrorDetails());
-        }
-        else {
-            System.out.println("We recognized: " + result.getText());
+        if (result.getReason() == ResultReason.RecognizedIntent) {
+            System.out.println("RECOGNIZED: Text=" + result.getText());
             System.out.println("    Intent Id: " + result.getIntentId());
-            System.out.println("    Language Understanding Json: " + result.getJson());
+            System.out.println("    Intent Service Json: " + result.getJson());
+        }
+        else if (result.getReason() == ResultReason.RecognizedSpeech) {
+            System.out.println("RECOGNIZED: Text=" + result.getText());
+            System.out.println("    Intent not recognized.");
+        }
+        else if (result.getReason() == ResultReason.NoMatch) {
+            System.out.println("NOMATCH: Speech could not be recognized.");
+        }
+        else if (result.getReason() == ResultReason.Canceled) {
+            CancellationDetails cancellation = CancellationDetails.fromResult(result);
+            System.out.println("CANCELED: Reason=" + cancellation.getReason());
+
+            if (cancellation.getReason() == CancellationReason.Error) {
+                System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
+                System.out.println("CANCELED: Did you update the subscription info?");
+            }
         }
         // </IntentRecognitionWithLanguage>
     }
@@ -115,17 +140,31 @@ public class IntentRecognitionSamples {
 
         // Subscribes to events.
         recognizer.IntermediateResultReceived.addEventListener((s, e) -> {
-            System.out.println("IntermediateResult:" + e.getResult().getText());
+            System.out.println("RECOGNIZING: Text=" + e.getResult().getText());
         });
-        
+
         recognizer.FinalResultReceived.addEventListener((s, e) -> {
-            System.out.println("We recognized: " + e.getResult().getText());
-            System.out.println("    Intent Id: " + e.getResult().getIntentId());
-            System.out.println("    Language Understanding Json: " + e.getResult().getJson());
+            if (e.getResult().getReason() == ResultReason.RecognizedIntent) {
+                System.out.println("RECOGNIZED: Text=" + e.getResult().getText());
+                System.out.println("    Intent Id: " + e.getResult().getIntentId());
+                System.out.println("    Intent Service Json: " + e.getResult().getJson());
+            }
+            else if (e.getResult().getReason() == ResultReason.RecognizedSpeech) {
+                System.out.println("RECOGNIZED: Text=" + e.getResult().getText());
+                System.out.println("    Intent not recognized.");
+            }
+            else if (e.getResult().getReason() == ResultReason.NoMatch) {
+                System.out.println("NOMATCH: Speech could not be recognized.");
+            }
         });
-        
-        recognizer.RecognitionErrorRaised.addEventListener((s, e) -> {
-            System.out.println("Canceled:" + e.getStatus());            
+
+        recognizer.Canceled.addEventListener((s, e) -> {
+            System.out.println("CANCELED: Reason=" + e.getReason());
+
+            if (e.getReason() == CancellationReason.Error) {
+                System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
+                System.out.println("CANCELED: Did you update the subscription info?");
+            }
         });
 
         // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.

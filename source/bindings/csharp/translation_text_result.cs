@@ -18,25 +18,15 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     {
         internal TranslationTextResult(Internal.TranslationTextResult result) : base(result)
         {
-            Trace.Assert((int)TranslationStatus.Success == (int)Internal.TranslationStatusCode.Success);
-            Trace.Assert((int)TranslationStatus.Error == (int)Internal.TranslationStatusCode.Error);
-
-            TranslationStatus = (TranslationStatus)(result.TranslationStatus);
-            resultImpl = result;
+            translationResultImpl = result;
             translationTextResultMap = new Dictionary<string, string>();
-            //Todo: add translation result
+
             var map = result.Translations;
             foreach (var element in map)
             {
                 translationTextResultMap.Add(element.Key, element.Value);
             }
-            FailureReason = result.FailureReason;
         }
-
-        /// <summary>
-        /// Specifies status of translation text result.
-        /// </summary>
-        public TranslationStatus TranslationStatus { get; }
 
         /// <summary>
         /// Presents the translation results. Each item in the dictionary represents translation result in one of target languages, where the key 
@@ -45,32 +35,21 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         public IReadOnlyDictionary<string, string> Translations { get { return translationTextResultMap; } }
 
         /// <summary>
-        /// Contains failure reason if TextStatus is Error. Otherwise it is empty.
-        /// </summary>
-        public string FailureReason { get; }
-
-        /// <summary>
         /// Returns a string that represents the speech recognition result.
         /// </summary>
         /// <returns>A string that represents the speech recognition result.</returns>
         public override string ToString()
         {
-            var text = string.Format(CultureInfo.InvariantCulture,
-                "ResultId:{0} RecognitionStatus:{1}, TranslationStatus: {2}, Recognized text:<{3}>.\n", 
-                ResultId, RecognitionStatus, TranslationStatus, Text);
+            var text = string.Format(CultureInfo.InvariantCulture, "ResultId:{0} Reason:{1}, Recognized text:<{2}>.\n", ResultId, Reason, Text);
             foreach (var element in Translations)
             {
-                text += string.Format(CultureInfo.InvariantCulture, "    Translation in {0}: <{1}>.\n", element.Key, element.Value);
-            }
-            if (TranslationStatus != TranslationStatus.Success)
-            {
-                text += string.Format(CultureInfo.InvariantCulture, "Failure reason: {0} \n", FailureReason);
+                text += $"    Translation in {element.Key}: <{element.Value}>.\n";
             }
             return text;
         }
 
-        // Hold the refernce
-        private Internal.TranslationTextResult resultImpl;
+        // Hold the reference
+        private Internal.TranslationTextResult translationResultImpl;
 
         private Dictionary<string, string> translationTextResultMap;
     }

@@ -153,39 +153,37 @@ void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_
     SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
     ISpxRecognizerEvents::RecoEvent_Type* pevent = nullptr;
-
-    if (result->GetType() == ResultType::TranslationSynthesis)
+    auto reason = result->GetReason();
+    switch (reason)
     {
+    case ResultReason::Canceled:
+        pevent = &Canceled;
+        break;
+
+    case ResultReason::NoMatch:
+    case ResultReason::RecognizedSpeech:
+    case ResultReason::RecognizedIntent:
+    case ResultReason::TranslatedSpeech:
+        pevent = &FinalResult;
+        SPX_DBG_TRACE_VERBOSE_IF(!pevent->IsConnected(), "%s: No FinalResult event signal connected!! nobody listening...", __FUNCTION__);
+        break;
+
+    case ResultReason::RecognizingSpeech:
+    case ResultReason::RecognizingIntent:
+    case ResultReason::TranslatingSpeech:
+        pevent = &IntermediateResult;
+        break;
+
+    case ResultReason::SynthesizingAudio:
+    case ResultReason::SynthesizingAudioComplete:
         pevent = &TranslationSynthesisResult;
-    }
-    else
-    {
-        // Speech recognition result, intent recognition result, or translation text result.
-        auto reason = result->GetReason();
-        switch (reason)
-        {
-        case Reason::Recognized:
-        case Reason::InitialBabbleTimeout:
-        case Reason::InitialSilenceTimeout:
-        case Reason::NoMatch:
-            pevent = &FinalResult;
-            SPX_DBG_TRACE_VERBOSE_IF(!pevent->IsConnected(), "%s: No FinalResult event signal connected!! nobody listening...", __FUNCTION__);
-            break;
+        break;
 
-        case Reason::IntermediateResult:
-            pevent = &IntermediateResult;
-            break;
-
-        case Reason::Canceled:
-            pevent = &Canceled;
-            break;
-
-        default:
-            // This should be changed to throw exception. But currently it causes problem in lock.
-            // Bug: https://msasg.visualstudio.com/Skyman/_workitems/edit/1314877
-            SPX_DBG_ASSERT_WITH_MESSAGE(false, "The reason found in the result was unexpected.");
-            break;
-        }
+    default:
+        // This should be changed to throw exception. But currently it causes problem in lock.
+        // Bug: https://msasg.visualstudio.com/Skyman/_workitems/edit/1314877
+        SPX_DBG_ASSERT_WITH_MESSAGE(false, "The reason found in the result was unexpected.");
+        break;
     }
 
     FireRecoEvent(pevent, sessionId, result);

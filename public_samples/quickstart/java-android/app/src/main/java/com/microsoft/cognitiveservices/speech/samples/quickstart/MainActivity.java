@@ -12,7 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import com.microsoft.cognitiveservices.speech.RecognitionStatus;
+import com.microsoft.cognitiveservices.speech.ResultReason;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
             SpeechRecognitionResult result = task.get();
             assert(result != null);
 
-            if (result.getReason() == RecognitionStatus.Recognized) {
+            if (result.getReason() == ResultReason.RecognizedSpeech) {
                 txt.setText(result.toString());
             }
             else {

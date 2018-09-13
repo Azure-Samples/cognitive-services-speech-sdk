@@ -65,7 +65,7 @@ public:
 
     ~PropertyCollection()
     {
-        property_bag_close(m_propbag);
+        property_bag_release(m_propbag);
         m_propbag = SPXHANDLE_INVALID;
     }
 

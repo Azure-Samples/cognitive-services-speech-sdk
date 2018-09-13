@@ -18,12 +18,11 @@ import java.math.BigInteger;
 public class SpeechRecognitionResult {
 
     private String resultId;
-    private RecognitionStatus reason;
+    private ResultReason reason;
     private String text;
     private ResultProperties properties;
     private long duration;
     private long offset;
-    private String errorDetails;
     private RecognitionResult _resultImpl;
 
     protected SpeechRecognitionResult(RecognitionResult result) {
@@ -38,8 +37,7 @@ public class SpeechRecognitionResult {
         this.offset = result.Offset().divide(tenThousand).longValue();
 
         this.text = result.getText();
-        this.reason = RecognitionStatus.values()[result.getReason().swigValue()];
-        this.errorDetails = result.getErrorDetails();
+        this.reason = ResultReason.values()[result.getReason().swigValue()];
 
         this.properties = new ResultProperties(result.getProperties());
     }
@@ -68,10 +66,10 @@ public class SpeechRecognitionResult {
     }
     
     /**
-      * Specifies status of the result.
-      * @return Specifies status of the result.
+      * Specifies reason the result was created.
+      * @return Specifies reason of the result.
       */
-    public RecognitionStatus getReason() {
+    public ResultReason getReason() {
         return this.reason;
     }
 
@@ -97,15 +95,6 @@ public class SpeechRecognitionResult {
       */
     public long getOffset() {
         return this.offset;
-    }
-
-    /**
-    * In case of an unsuccessful recognition, provides a brief description of an occurred error.
-    * This field is only filled-out if the recognition status (@see RecognitionStatus) is set to Canceled.
-    * @return a brief description of an error.
-    */
-    public String getErrorDetails() {
-        return this.errorDetails;
     }
 
     /**
@@ -136,7 +125,11 @@ public class SpeechRecognitionResult {
                ">.";
     }
 
-    RecognitionResult getImpl() {
-        return _resultImpl;
+    /**
+      * Returns the recognition result implementation.
+      * @return The implementation of the result.
+      */
+    public com.microsoft.cognitiveservices.speech.internal.RecognitionResult getResultImpl() {
+        return this._resultImpl;
     }
 }

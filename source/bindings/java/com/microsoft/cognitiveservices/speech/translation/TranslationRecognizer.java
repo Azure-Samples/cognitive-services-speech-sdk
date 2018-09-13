@@ -9,10 +9,10 @@ import java.util.concurrent.Future;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
+import com.microsoft.cognitiveservices.speech.translation.TranslationTextResultCanceledEventArgs;
 import com.microsoft.cognitiveservices.speech.PropertyCollection;
 import com.microsoft.cognitiveservices.speech.RecognizerProperties;
 import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
-import com.microsoft.cognitiveservices.speech.RecognitionErrorEventArgs;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
@@ -32,9 +32,9 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
     public final EventHandlerImpl<TranslationTextResultEventArgs> FinalResultReceived = new EventHandlerImpl<TranslationTextResultEventArgs>();
 
     /**
-      * The event RecognitionErrorRaised signals that an error occurred during recognition.
+      * The event Canceled signals that the recognition/translation was canceled.
       */
-    public final EventHandlerImpl<RecognitionErrorEventArgs> RecognitionErrorRaised = new EventHandlerImpl<RecognitionErrorEventArgs>();
+    public final EventHandlerImpl<TranslationTextResultCanceledEventArgs> Canceled = new EventHandlerImpl<TranslationTextResultCanceledEventArgs>();
 
     /**
       * The event SynthesisResultReceived signals that a translation synthesis result is received.
@@ -61,7 +61,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         synthesisResultHandler = new SynthesisHandlerImpl(this);
         recoImpl.getTranslationSynthesisResultEvent().AddEventListener(synthesisResultHandler);
 
-        errorHandler = new ErrorHandlerImpl(this);
+        errorHandler = new CanceledHandlerImpl(this);
         recoImpl.getCanceled().AddEventListener(errorHandler);
 
         recoImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
@@ -177,34 +177,6 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
             });
     }
 
-   /**
-     * Starts speech recognition on a continuous audio stream with keyword spotting, until stopKeywordRecognitionAsync() is called.
-     * User must subscribe to events to receive recognition results.
-     * Note: Key word spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
-     * @param model The keyword recognition model that specifies the keyword to be recognized.
-     * @return A task representing the asynchronous operation that starts the recognition.
-     */
-   public Future<Void> startKeywordRecognitionAsync(KeywordRecognitionModel model) {
-       Contracts.throwIfNull(model, "model");
-
-       return s_executorService.submit(() -> {
-               recoImpl.StartKeywordRecognition(model.getModelImpl());
-               return null;
-           });
-   }
-
-   /**
-     * Stops continuous speech recognition.
-     * Note: Key word spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
-     * @return A task representing the asynchronous operation that stops the recognition.
-     */
-   public Future<Void> stopKeywordRecognitionAsync() {
-       return s_executorService.submit(() -> {
-               recoImpl.StopKeywordRecognition();
-               return null;
-           });
-   }
-
     @Override
     protected void dispose(boolean disposing)
     {
@@ -243,7 +215,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
     private ResultHandlerImpl intermediateResultHandler;
     private ResultHandlerImpl finalResultHandler;
     private SynthesisHandlerImpl synthesisResultHandler;
-    private ErrorHandlerImpl errorHandler;
+    private CanceledHandlerImpl errorHandler;
     private boolean disposed = false;
 
     // Defines an internal class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
@@ -279,35 +251,30 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         private boolean isFinalResultHandler;
     }
 
-    // Defines an internal class to raise an event for error during recognition when a corresponding callback is invoked by the native layer.
-    class ErrorHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.TranslationTexEventListener {
-        public ErrorHandlerImpl(TranslationRecognizer recognizer) {
-           Contracts.throwIfNull(recognizer, "recognizer");
+     // Defines an internal class to raise an event for error during recognition when a corresponding callback is invoked by the native layer.
+     class CanceledHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.TranslationTexCanceledEventListener {
+         public CanceledHandlerImpl(TranslationRecognizer recognizer) {
+            Contracts.throwIfNull(recognizer, "recognizer");
+             this.recognizer = recognizer;
+         }
 
-            this.recognizer = recognizer;
-        }
+         @Override
+         public void Execute(com.microsoft.cognitiveservices.speech.internal.TranslationTextResultCanceledEventArgs eventArgs) {
+            Contracts.throwIfNull(eventArgs, "eventArgs");
+             if (recognizer.disposed) {
+                 return;
+             }
+ 
+             TranslationTextResultCanceledEventArgs resultEventArg = new TranslationTextResultCanceledEventArgs(eventArgs);
+             EventHandlerImpl<TranslationTextResultCanceledEventArgs> handler = this.recognizer.Canceled;
+ 
+             if (handler != null) {
+                 handler.fireEvent(this.recognizer, resultEventArg);
+             }
+         }
 
-        @Override
-        public void Execute(com.microsoft.cognitiveservices.speech.internal.TranslationTextResultEventArgs eventArgs)
-        {
-           Contracts.throwIfNull(eventArgs, "eventArgs");
-
-            if (recognizer.disposed)
-            {
-                return;
-            }
-
-            RecognitionErrorEventArgs resultEventArg = null; // new RecognitionErrorEventArgs(eventArgs.SessionId, eventArgs.Result.Reason);
-            EventHandlerImpl<RecognitionErrorEventArgs> handler = this.recognizer.RecognitionErrorRaised;
-
-            if (handler != null)
-            {
-                handler.fireEvent(this.recognizer, resultEventArg);
-            }
-        }
-
-        private TranslationRecognizer recognizer;
-    }
+         private TranslationRecognizer recognizer;
+     }
 
     // Defines an internal class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
     private class SynthesisHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisEventListener

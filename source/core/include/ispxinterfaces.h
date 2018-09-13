@@ -427,7 +427,8 @@ public:
 };
 
 
-enum class ResultType { Unknown, Speech, TranslationText, TranslationSynthesis };
+#define REASON_CANCELED_NONE static_cast<CancellationReason>(0)
+#define NO_MATCH_REASON_NONE static_cast<NoMatchReason>(0)
 
 class ISpxRecognitionResult : public ISpxInterfaceBaseFor<ISpxRecognitionResult>
 {
@@ -435,8 +436,11 @@ public:
 
     virtual std::wstring GetResultId() = 0;
     virtual std::wstring GetText() = 0;
-    virtual Reason GetReason() = 0;
-    virtual ResultType GetType() = 0;
+
+    virtual ResultReason GetReason() = 0;
+    virtual CancellationReason GetCancellationReason() = 0;
+    virtual NoMatchReason GetNoMatchReason() = 0;
+
     virtual uint64_t GetOffset() const = 0;
     virtual void SetOffset(uint64_t) = 0;
     virtual uint64_t GetDuration() const = 0;
@@ -447,9 +451,8 @@ class ISpxRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxRecognitionRes
 {
 public:
 
-    virtual void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration) = 0;
-    virtual void InitFinalResult(const wchar_t* resultId, Reason reason, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration) = 0;
-    virtual void InitError(const wchar_t* text, ResultType type) = 0;
+    virtual void InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
+    virtual void InitFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
 };
 
 
@@ -672,9 +675,8 @@ class ISpxRecoResultFactory : public ISpxInterfaceBaseFor<ISpxRecoResultFactory>
 {
 public:
 
-    virtual std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration) = 0;
-    virtual std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(ResultType type, const wchar_t* resultId, Reason reason, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
-    virtual std::shared_ptr<ISpxRecognitionResult> CreateErrorResult(const wchar_t* text, ResultType type) = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
+    virtual std::shared_ptr<ISpxRecognitionResult> CreateFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, const wchar_t* text, uint64_t offset, uint64_t duration) = 0;
 };
 
 
@@ -731,11 +733,11 @@ public:
     virtual void InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload) = 0;
 };
 
+enum class TranslationStatusCode { Success, Error };
+
 class ISpxTranslationTextResult : public ISpxInterfaceBaseFor<ISpxTranslationTextResult>
 {
 public:
-    virtual TranslationStatusCode GetTranslationStatus() const = 0;
-    virtual const std::wstring& GetTranslationFailureReason() const = 0;
     virtual const std::map<std::wstring, std::wstring>& GetTranslationText() = 0;
 };
 
@@ -745,11 +747,12 @@ public:
     virtual void InitTranslationTextResult(TranslationStatusCode status, const std::map<std::wstring, std::wstring>& translations, const std::wstring& failureReason) = 0;
 };
 
+enum class SynthesisStatusCode { Success, SynthesisEnd, Error };
+
 class ISpxTranslationSynthesisResult : public ISpxInterfaceBaseFor<ISpxTranslationSynthesisResult>
 {
 public:
-    virtual SynthesisStatusCode GetSynthesisStatus() = 0;
-    virtual const std::wstring& GetSynthesisFailureReason() = 0;
+
     virtual const uint8_t* GetAudio() const = 0;
     virtual size_t GetLength() const = 0;
 };

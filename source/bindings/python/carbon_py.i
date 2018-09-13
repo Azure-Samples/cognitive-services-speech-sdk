@@ -24,7 +24,7 @@
 %extend Microsoft::CognitiveServices::Speech::Recognition::RecognitionResult {
     %pythoncode %{
     def __str__(self):
-        return u'{}:(result_id={}, reason={}, text={})'.format(type(self), self.result_id, self.reason, self.text)
+        return u'{}:(result_id={}, text={})'.format(type(self), self.result_id, self.text)
     %}
 }
 

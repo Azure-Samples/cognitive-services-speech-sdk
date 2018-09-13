@@ -14,6 +14,7 @@ namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 
+
 /// <summary>
 /// Provides data for the RecognitionEvent.
 /// </summary>
@@ -49,7 +50,7 @@ protected:
     static uint64_t GetOffset(SPXEVENTHANDLE hevent)
     {
         uint64_t offset = 0;
-        SPX_THROW_ON_FAIL(Recognizer_RecognitionEvent_GetOffset(hevent, &offset));
+        SPX_THROW_ON_FAIL(recognizer_recognition_event_get_offset(hevent, &offset));
         return offset;
     }
 

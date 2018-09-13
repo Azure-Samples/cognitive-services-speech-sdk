@@ -12,7 +12,8 @@ namespace Impl {
 
 
 CSpxRecognitionResult::CSpxRecognitionResult():
-    m_type { ResultType::Unknown}
+    m_cancellationReason { REASON_CANCELED_NONE },
+    m_noMatchReason { NO_MATCH_REASON_NONE }
 {
     SPX_DBG_TRACE_FUNCTION();
 }
@@ -32,20 +33,26 @@ wstring CSpxRecognitionResult::GetText()
     return m_text;
 }
 
-Reason CSpxRecognitionResult::GetReason()
+ResultReason CSpxRecognitionResult::GetReason()
 {
     return m_reason;
 }
 
-ResultType CSpxRecognitionResult::GetType()
+CancellationReason CSpxRecognitionResult::GetCancellationReason()
 {
-    return m_type;
+    return m_cancellationReason;
 }
 
-void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration)
+NoMatchReason CSpxRecognitionResult::GetNoMatchReason()
 {
-    m_reason = Reason::IntermediateResult;
-    m_type = type;
+    return m_noMatchReason;
+}
+
+void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* resultId, const wchar_t* text, uint64_t offset, uint64_t duration)
+{
+    m_reason = ResultReason::RecognizingSpeech;
+    m_cancellationReason = REASON_CANCELED_NONE;
+    m_noMatchReason = NO_MATCH_REASON_NONE;
 
     m_offset = offset;
     m_duration = duration;
@@ -59,10 +66,13 @@ void CSpxRecognitionResult::InitIntermediateResult(const wchar_t* resultId, cons
     SPX_DBG_TRACE_VERBOSE("%s: resultId=%ls", __FUNCTION__, m_resultId.c_str());
 }
 
-void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, Reason reason, const wchar_t* text, ResultType type, uint64_t offset, uint64_t duration)
+void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, ResultReason reason, NoMatchReason noMatchReason, CancellationReason cancellation, const wchar_t* text, uint64_t offset, uint64_t duration)
 {
+    SPX_DBG_TRACE_FUNCTION();
+
     m_reason = reason;
-    m_type = type;
+    m_cancellationReason = cancellation;
+    m_noMatchReason = noMatchReason;
 
     m_offset = offset;
     m_duration = duration;
@@ -71,22 +81,17 @@ void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, Reason reas
         ? PAL::CreateGuidWithoutDashes()
         : resultId;
 
-    m_text = text == nullptr
+    m_text = (text == nullptr || reason == ResultReason::Canceled)
         ? L""
         : text;
 
-    SPX_DBG_TRACE_VERBOSE("%s: resultId=%ls", __FUNCTION__, m_resultId.c_str());
-}
-
-void CSpxRecognitionResult::InitError(const wchar_t* text, ResultType type)
-{
-    SPX_DBG_TRACE_FUNCTION();
-    m_reason = Reason::Canceled;
-    m_type = type;
-    if (text != nullptr)
+    if (reason == ResultReason::Canceled)
     {
-        SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_JsonErrorDetails), PAL::ToString(text).c_str());
+        auto errorDetails = (text == nullptr) ? "" : PAL::ToString(text);
+        SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_JsonErrorDetails), errorDetails.c_str());
     }
+
+    SPX_DBG_TRACE_VERBOSE("%s: resultId=%ls", __FUNCTION__, m_resultId.c_str());
 }
 
 wstring CSpxRecognitionResult::GetIntentId()
@@ -96,8 +101,27 @@ wstring CSpxRecognitionResult::GetIntentId()
 
 void CSpxRecognitionResult::InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload)
 {
+    SPX_DBG_TRACE_FUNCTION();
+
     m_intentId = (intentId != nullptr) ? intentId : L"";
 
+    if (jsonPayload != nullptr && jsonPayload[0] != '\0')
+    {
+        switch (m_reason)
+        {
+        case ResultReason::RecognizingSpeech:
+            m_reason = ResultReason::RecognizingIntent;
+            break;
+        case ResultReason::RecognizedSpeech:
+            m_reason = ResultReason::RecognizedIntent;
+            break;
+        default:
+            SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
+            break;
+        }
+    }
+
+    // BUGBUG: Does this inadvertently overwrite the "speech" json?
     SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_JsonResult), jsonPayload ? PAL::ToString(std::wstring()).c_str() : "");
 }
 
@@ -106,31 +130,34 @@ const map<wstring, wstring>& CSpxRecognitionResult::GetTranslationText()
     return m_translations;
 }
 
-TranslationStatusCode CSpxRecognitionResult::GetTranslationStatus() const
-{
-    return m_translationStatus;
-}
-
-const wstring& CSpxRecognitionResult::GetTranslationFailureReason() const
-{
-    return m_translationFailureReason;
-}
-
 void CSpxRecognitionResult::InitTranslationTextResult(TranslationStatusCode status, const map<wstring, wstring>& translations, const wstring& failureReason)
 {
+    SPX_DBG_TRACE_FUNCTION();
+
     m_translations = translations;
-    m_translationStatus = status;
-    m_translationFailureReason = failureReason;
-}
 
-SynthesisStatusCode CSpxRecognitionResult::GetSynthesisStatus()
-{
-    return m_synthesisStatus;
-}
+    if (status != TranslationStatusCode::Error)
+    {
+        switch (m_reason)
+        {
+        case ResultReason::RecognizingSpeech:
+            m_reason = ResultReason::TranslatingSpeech;
+            break;
+        case ResultReason::RecognizedSpeech:
+            m_reason = ResultReason::TranslatedSpeech;
+            break;
+        default:
+            SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
+            break;
+        }
+    }
 
-const wstring& CSpxRecognitionResult::GetSynthesisFailureReason()
-{
-    return m_synthesisFailureReason;
+    if (status == TranslationStatusCode::Error)
+    {
+        SPX_DBG_TRACE_VERBOSE("%s: status=TranslationStatusCode::Error; switching result to ResultReason::Canceled", __FUNCTION__);
+        auto errorDetails = PAL::ToString(failureReason);
+        SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_JsonErrorDetails), errorDetails.c_str());
+    }
 }
 
 const uint8_t* CSpxRecognitionResult::GetAudio() const
@@ -143,13 +170,27 @@ size_t CSpxRecognitionResult::GetLength() const
     return m_audioLength;
 }
 
-// ISpxTranslationSynthesisResultInit
 void CSpxRecognitionResult::InitTranslationSynthesisResult(SynthesisStatusCode status, const uint8_t* audioData, size_t audioLength, const wstring& failureReason)
 {
-    m_synthesisStatus = status;
+    SPX_DBG_TRACE_FUNCTION();
+    SPX_DBG_ASSERT(audioLength == 0 || status == SynthesisStatusCode::Success);
+
     m_audioBuffer = audioData;
     m_audioLength = audioLength;
-    m_synthesisFailureReason = failureReason;
+
+    m_reason = m_audioLength > 0 
+        ? ResultReason::SynthesizingAudio
+        : ResultReason::SynthesizingAudioComplete;
+
+    if (status == SynthesisStatusCode::Error)
+    {
+        SPX_DBG_TRACE_VERBOSE("%s: status=SynthesisStatusCode::Error; switching result to ResultReason::Canceled", __FUNCTION__);
+        m_reason = ResultReason::Canceled;
+        m_cancellationReason = CancellationReason::Error;
+
+        auto errorDetails = PAL::ToString(failureReason);
+        SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_JsonErrorDetails), errorDetails.c_str());
+    }
 }
 
 

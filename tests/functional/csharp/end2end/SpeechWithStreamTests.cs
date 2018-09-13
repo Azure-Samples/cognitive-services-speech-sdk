@@ -122,7 +122,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 while (true)
                 {
                     var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-                    if (result.RecognitionStatus == RecognitionStatus.Canceled)
+                    if (result.Reason == ResultReason.Canceled)
                     {
                         break;
                     }
@@ -149,7 +149,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 recognizer.FinalResultReceived += (s, e) =>
                 {
                     Console.WriteLine($"Result recognized {e.ToString()}");
-                    if (e.Result.RecognitionStatus == RecognitionStatus.Canceled)
+                    if (e.Result.Reason == ResultReason.Canceled)
                     {
                         Console.WriteLine($"Received cancelled result {e.Result.ToString()}, exiting");
                         taskSource.SetResult(false);
@@ -170,9 +170,9 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     }
                 };
 
-                recognizer.RecognitionErrorRaised += (s, e) =>
+                recognizer.Canceled += (s, e) =>
                 {
-                    Console.WriteLine($"Received error event {e.ToString()}, exiting");
+                    Console.WriteLine($"Received cancel event {e.ToString()}, exiting");
                     taskSource.SetResult(false);
                 };
 

@@ -9,56 +9,56 @@
 #include <speechapi_c_common.h>
 
 
-SPXAPI_(bool) Recognizer_Handle_IsValid(SPXRECOHANDLE hreco);
-SPXAPI Recognizer_Handle_Close(SPXRECOHANDLE hreco);
+SPXAPI_(bool) recognizer_handle_is_valid(SPXRECOHANDLE hreco);
+SPXAPI recognizer_handle_release(SPXRECOHANDLE hreco);
 
-SPXAPI_(bool) Recognizer_AsyncHandle_IsValid(SPXASYNCHANDLE hasync);
-SPXAPI Recognizer_AsyncHandle_Close(SPXASYNCHANDLE hasync);
+SPXAPI_(bool) recognizer_async_handle_is_valid(SPXASYNCHANDLE hasync);
+SPXAPI recognizer_async_handle_release(SPXASYNCHANDLE hasync);
 
-SPXAPI_(bool) Recognizer_ResultHandle_IsValid(SPXRESULTHANDLE hresult);
-SPXAPI Recognizer_ResultHandle_Close(SPXRESULTHANDLE hresult);
+SPXAPI_(bool) recognizer_result_handle_is_valid(SPXRESULTHANDLE hresult);
+SPXAPI recognizer_result_handle_release(SPXRESULTHANDLE hresult);
 
-SPXAPI_(bool) Recognizer_EventHandle_IsValid(SPXEVENTHANDLE hevent);
-SPXAPI Recognizer_EventHandle_Close(SPXEVENTHANDLE hevent);
+SPXAPI_(bool) recognizer_event_handle_is_valid(SPXEVENTHANDLE hevent);
+SPXAPI recognizer_event_handle_release(SPXEVENTHANDLE hevent);
 
-SPXAPI Recognizer_Enable(SPXRECOHANDLE hreco);
-SPXAPI Recognizer_Disable(SPXRECOHANDLE hreco);
-SPXAPI Recognizer_IsEnabled(SPXRECOHANDLE hreco, bool* pfEnabled);
+SPXAPI recognizer_enable(SPXRECOHANDLE hreco);
+SPXAPI recognizer_disable(SPXRECOHANDLE hreco);
+SPXAPI recognizer_is_enabled(SPXRECOHANDLE hreco, bool* pfEnabled);
 
 SPXAPI recognizer_get_property_bag(SPXRECOHANDLE hreco, SPXPROPERTYBAGHANDLE* hpropbag);
 
-SPXAPI Recognizer_Recognize(SPXRECOHANDLE hreco, SPXRESULTHANDLE* phresult);
-SPXAPI Recognizer_RecognizeAsync(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync);
-SPXAPI Recognizer_RecognizeAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t milliseconds, SPXRESULTHANDLE* phresult);
+SPXAPI recognizer_recognize_once(SPXRECOHANDLE hreco, SPXRESULTHANDLE* phresult);
+SPXAPI recognizer_recognize_once_async(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync);
+SPXAPI recognizer_recognize_once_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds, SPXRESULTHANDLE* phresult);
 
-SPXAPI Recognizer_StartContinuousRecognition(SPXRECOHANDLE hreco);
-SPXAPI Recognizer_StartContinuousRecognitionAsync(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync);
-SPXAPI Recognizer_StartContinuousRecognitionAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t milliseconds);
+SPXAPI recognizer_start_continuous_recognition(SPXRECOHANDLE hreco);
+SPXAPI recognizer_start_continuous_recognition_async(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync);
+SPXAPI recognizer_start_continuous_recognition_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds);
 
-SPXAPI Recognizer_StopContinuousRecognition(SPXRECOHANDLE hreco);
-SPXAPI Recognizer_StopContinuousRecognitionAsync(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync);
-SPXAPI Recognizer_StopContinuousRecognitionAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t milliseconds);
+SPXAPI recognizer_stop_continuous_recognition(SPXRECOHANDLE hreco);
+SPXAPI recognizer_stop_continuous_recognition_async(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync);
+SPXAPI recognizer_stop_continuous_recognition_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds);
 
-SPXAPI Recognizer_StartKeywordRecognition(SPXRECOHANDLE hreco, SPXKEYWORDHANDLE hkeyword);
-SPXAPI Recognizer_StartKeywordRecognitionAsync(SPXRECOHANDLE hreco, SPXKEYWORDHANDLE hkeyword, SPXASYNCHANDLE* phasync);
-SPXAPI Recognizer_StartKeywordRecognitionAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t milliseconds);
+SPXAPI recognizer_start_keyword_recognition(SPXRECOHANDLE hreco, SPXKEYWORDHANDLE hkeyword);
+SPXAPI recognizer_start_keyword_recognition_async(SPXRECOHANDLE hreco, SPXKEYWORDHANDLE hkeyword, SPXASYNCHANDLE* phasync);
+SPXAPI recognizer_start_keyword_recognition_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds);
 
-SPXAPI Recognizer_StopKeywordRecognition(SPXRECOHANDLE hreco);
-SPXAPI Recognizer_StopKeywordRecognitionAsync(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync);
-SPXAPI Recognizer_StopKeywordRecognitionAsync_WaitFor(SPXASYNCHANDLE hasync, uint32_t milliseconds);
+SPXAPI recognizer_stop_keyword_recognition(SPXRECOHANDLE hreco);
+SPXAPI recognizer_stop_keyword_recognition_async(SPXRECOHANDLE hreco, SPXASYNCHANDLE* phasync);
+SPXAPI recognizer_stop_keyword_recognition_async_wait_for(SPXASYNCHANDLE hasync, uint32_t milliseconds);
 
 typedef void (*PSESSION_CALLBACK_FUNC)(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext);
-SPXAPI Recognizer_SessionStarted_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext);
-SPXAPI Recognizer_SessionStopped_SetEventCallback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext);
+SPXAPI recognizer_session_started_set_callback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext);
+SPXAPI recognizer_session_stopped_set_callback(SPXRECOHANDLE hreco, PSESSION_CALLBACK_FUNC pCallback, void* pvContext);
 
 
 typedef void (*PRECOGNITION_CALLBACK_FUNC)(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext);
-SPXAPI Recognizer_IntermediateResult_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext);
-SPXAPI Recognizer_FinalResult_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext);
-SPXAPI Recognizer_Canceled_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext);
-SPXAPI Recognizer_SpeechStartDetected_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext);
-SPXAPI Recognizer_SpeechEndDetected_SetEventCallback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext);
+SPXAPI recognizer_recognizing_set_callback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext);
+SPXAPI recognizer_recognized_set_callback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext);
+SPXAPI recognizer_canceled_set_callback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext);
+SPXAPI recognizer_speech_start_detected_set_callback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext);
+SPXAPI recognizer_speech_end_detected_set_callback(SPXRECOHANDLE hreco, PRECOGNITION_CALLBACK_FUNC pCallback, void* pvContext);
 
-SPXAPI Recognizer_SessionEvent_GetSessionId(SPXEVENTHANDLE hevent, char* pszSessionId, uint32_t cchSessionId);
-SPXAPI Recognizer_RecognitionEvent_GetOffset(SPXEVENTHANDLE hevent, uint64_t *pszOffset);
-SPXAPI Recognizer_RecognitionEvent_GetResult(SPXEVENTHANDLE hevent, SPXRESULTHANDLE* phresult);
+SPXAPI recognizer_session_event_get_session_id(SPXEVENTHANDLE hevent, char* pszSessionId, uint32_t cchSessionId);
+SPXAPI recognizer_recognition_event_get_offset(SPXEVENTHANDLE hevent, uint64_t *pszOffset);
+SPXAPI recognizer_recognition_event_get_result(SPXEVENTHANDLE hevent, SPXRESULTHANDLE* phresult);

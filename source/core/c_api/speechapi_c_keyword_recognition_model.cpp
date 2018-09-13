@@ -14,17 +14,17 @@
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 
-SPXAPI_(bool) KeywordRecognitionModel_Handle_IsValid(SPXKEYWORDHANDLE hkeyword)
+SPXAPI_(bool) keyword_recognition_model_handle_is_valid(SPXKEYWORDHANDLE hkeyword)
 {
     return Handle_IsValid<SPXKEYWORDHANDLE, ISpxKwsModel>(hkeyword);
 }
 
-SPXAPI KeywordRecognitionModel_Handle_Close(SPXKEYWORDHANDLE hkeyword)
+SPXAPI keyword_recognition_model_handle_release(SPXKEYWORDHANDLE hkeyword)
 {
     return Handle_Close<SPXKEYWORDHANDLE, ISpxKwsModel>(hkeyword);
 }
 
-SPXAPI KeywordRecognitionModel_Create_From_File(const char* fileName, SPXKEYWORDHANDLE* phkwmodel)
+SPXAPI keyword_recognition_model_create_from_file(const char* fileName, SPXKEYWORDHANDLE* phkwmodel)
 {
     if (fileName == nullptr)
         return SPXERR_INVALID_ARG;

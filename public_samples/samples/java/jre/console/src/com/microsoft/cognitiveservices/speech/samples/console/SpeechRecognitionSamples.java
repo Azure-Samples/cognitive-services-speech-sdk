@@ -38,11 +38,20 @@ public class SpeechRecognitionSamples {
             SpeechRecognitionResult result = recognizer.recognizeAsync().get();
 
             // Checks result.
-            if (result.getReason() != RecognitionStatus.Recognized) {
-                System.out.println("There was an error. Status:" + result.getReason().toString() + "}, Reason:" + result.getErrorDetails());
+            if (result.getReason() == ResultReason.RecognizedSpeech) {
+                System.out.println("RECOGNIZED: Text=" + result.getText());
             }
-            else {
-                System.out.println("We recognized: " + result.getText());
+            else if (result.getReason() == ResultReason.NoMatch) {
+                System.out.println("NOMATCH: Speech could not be recognized.");
+            }
+            else if (result.getReason() == ResultReason.Canceled) {
+                CancellationDetails cancellation = CancellationDetails.fromResult(result);
+                System.out.println("CANCELED: Reason=" + cancellation.getReason());
+
+                if (cancellation.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
+                    System.out.println("CANCELED: Did you update the subscription info?");
+                }
             }
         }
         recognizer.close();
@@ -71,11 +80,20 @@ public class SpeechRecognitionSamples {
             SpeechRecognitionResult result = recognizer.recognizeAsync().get();
 
             // Checks result.
-            if (result.getReason() != RecognitionStatus.Recognized) {
-                System.out.println("There was an error. Status:" + result.getReason().toString() + "}, Reason:" + result.getErrorDetails());
+            if (result.getReason() == ResultReason.RecognizedSpeech) {
+                System.out.println("RECOGNIZED: Text=" + result.getText());
             }
-            else {
-                System.out.println("We recognized: " + result.getText());
+            else if (result.getReason() == ResultReason.NoMatch) {
+                System.out.println("NOMATCH: Speech could not be recognized.");
+            }
+            else if (result.getReason() == ResultReason.Canceled) {
+                CancellationDetails cancellation = CancellationDetails.fromResult(result);
+                System.out.println("CANCELED: Reason=" + cancellation.getReason());
+
+                if (cancellation.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
+                    System.out.println("CANCELED: Did you update the subscription info?");
+                }
             }
         }
         recognizer.close();
@@ -103,12 +121,21 @@ public class SpeechRecognitionSamples {
              SpeechRecognitionResult result = recognizer.recognizeAsync().get();
 
              // Checks result.
-             if (result.getReason() != RecognitionStatus.Recognized) {
-                 System.out.println("There was an error. Status:" + result.getReason().toString() + "}, Reason:" + result.getErrorDetails());
-             }
-             else {
-                 System.out.println("We recognized: " + result.getText());
-             }
+             if (result.getReason() == ResultReason.RecognizedSpeech) {
+                System.out.println("RECOGNIZED: Text=" + result.getText());
+            }
+            else if (result.getReason() == ResultReason.NoMatch) {
+                System.out.println("NOMATCH: Speech could not be recognized.");
+            }
+            else if (result.getReason() == ResultReason.Canceled) {
+                CancellationDetails cancellation = CancellationDetails.fromResult(result);
+                System.out.println("CANCELED: Reason=" + cancellation.getReason());
+
+                if (cancellation.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
+                    System.out.println("CANCELED: Did you update the subscription info?");
+                }
+            }
          }
 
          recognizer.close();
@@ -131,22 +158,25 @@ public class SpeechRecognitionSamples {
         {
             // Subscribes to events.
             recognizer.IntermediateResultReceived.addEventListener((s, e) -> {
-                System.out.println("\n    Partial result: " + e.getResult().getText() + ".");
+                System.out.println("RECOGNIZING: Text=" + e.getResult().getText());
             });
 
             recognizer.FinalResultReceived.addEventListener((s, e) -> {
-                if (e.getResult().getReason() == RecognitionStatus.Recognized) {
-                    System.out.println("\n    Final result: Status: " + e.getResult().getReason().toString() +
-                                       ", Text: " + e.getResult().getText() + ".");
+                if (e.getResult().getReason() == ResultReason.RecognizedSpeech) {
+                    System.out.println("RECOGNIZED: Text=" + e.getResult().getText());
                 }
-                else {
-                    System.out.println("\n    Final result: Status: " + e.getResult().getReason().toString() +
-                                       ", FailureReason: " + e.getResult().getErrorDetails() + ".");
+                else if (e.getResult().getReason() == ResultReason.NoMatch) {
+                    System.out.println("NOMATCH: Speech could not be recognized.");
                 }
             });
 
-            recognizer.RecognitionErrorRaised.addEventListener((s, e) -> {
-                System.out.println("\n    An error occurred. Status: " + e.getStatus() + ", FailureReason: " + e.getStatus());
+            recognizer.Canceled.addEventListener((s, e) -> {
+                System.out.println("CANCELED: Reason=" + e.getReason());
+
+                if (e.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
+                    System.out.println("CANCELED: Did you update the subscription info?");
+                }
             });
 
             recognizer.SessionEvent.addEventListener((s, e) -> {
@@ -189,22 +219,26 @@ public class SpeechRecognitionSamples {
         {
             // Subscribes to events.
             recognizer.IntermediateResultReceived.addEventListener((s, e) -> {
-                System.out.println("\n    Partial result: " + e.getResult().getText() + ".");
+                System.out.println("RECOGNIZING: Text=" + e.getResult().getText());
             });
 
             recognizer.FinalResultReceived.addEventListener((s, e) -> {
-                if (e.getResult().getReason() == RecognitionStatus.Recognized) {
-                    System.out.println("\n    Final result: Status: " + e.getResult().getReason().toString() +
-                                       ", Text: " + e.getResult().getText() + ".");
+                if (e.getResult().getReason() == ResultReason.RecognizedSpeech) {
+                    System.out.println("RECOGNIZED: Text=" + e.getResult().getText());
                 }
-                else {
-                    System.out.println("\n    Final result: Status: " + e.getResult().getReason().toString() +
-                                       ", FailureReason: " + e.getResult().getErrorDetails() + ".");
+                else if (e.getResult().getReason() == ResultReason.NoMatch) {
+                    System.out.println("NOMATCH: Speech could not be recognized.");
                 }
             });
 
-            recognizer.RecognitionErrorRaised.addEventListener((s, e) -> {
-                System.out.println("\n    An error occurred. Status: " + e.getStatus() + ", FailureReason: " + e.getStatus());
+            recognizer.Canceled.addEventListener((s, e) -> {
+                System.out.println("CANCELED: Reason=" + e.getReason());
+
+                if (e.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
+                    System.out.println("CANCELED: Did you update the subscription info?");
+                }
+
                 stopRecognitionSemaphore.release();
             });
 

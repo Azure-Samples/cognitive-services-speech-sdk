@@ -63,7 +63,7 @@ public final class IntentRecognitionResultEventArgs // : System.EventArgs
     {
         return "SessionId:" + _SessionId +
                " ResultId:" + _Result.getResultId() +
-               " Status:" + _Result.getReason() +
+               " Reason:" + _Result.getReason() +
                " IntentId:<" + _Result.getIntentId() +
                "> Recognized text:<" + _Result.getText() +
                "> Recognized json:<" + getProperties().GetProperty(SpeechPropertyId.SpeechServiceResponse_Json.getValue()) +

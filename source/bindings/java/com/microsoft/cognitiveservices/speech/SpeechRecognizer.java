@@ -7,6 +7,7 @@ package com.microsoft.cognitiveservices.speech;
 import java.util.concurrent.Future;
 
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
+import com.microsoft.cognitiveservices.speech.SpeechRecognitionCanceledEventArgs;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
@@ -30,9 +31,9 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     final public EventHandlerImpl<SpeechRecognitionResultEventArgs> FinalResultReceived = new EventHandlerImpl<SpeechRecognitionResultEventArgs>();
 
     /**
-      * The event RecognitionErrorRaised signals that an error occurred during recognition.
+      * The event Canceled signals that the recognition was canceled.
       */
-    final public EventHandlerImpl<RecognitionErrorEventArgs> RecognitionErrorRaised = new EventHandlerImpl<RecognitionErrorEventArgs>();
+    final public EventHandlerImpl<SpeechRecognitionCanceledEventArgs> Canceled = new EventHandlerImpl<SpeechRecognitionCanceledEventArgs>();
 
     /**
       * SpeechRecognizer constructor.
@@ -51,7 +52,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         finalResultHandler = new ResultHandlerImpl(this, /*isFinalResultHandler:*/ true);
         recoImpl.getFinalResult().AddEventListener(finalResultHandler);
 
-        errorHandler = new ErrorHandlerImpl(this);
+        errorHandler = new CanceledHandlerImpl(this);
         recoImpl.getCanceled().AddEventListener(errorHandler);
 
         recoImpl.getSessionStarted().AddEventListener(sessionStartedHandler);
@@ -231,7 +232,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     private com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer recoImpl;
     private ResultHandlerImpl intermediateResultHandler;
     private ResultHandlerImpl finalResultHandler;
-    private ErrorHandlerImpl errorHandler;
+    private CanceledHandlerImpl errorHandler;
     private boolean disposed = false;
 
     // Defines an internal class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
@@ -264,23 +265,22 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     }
 
     // Defines an internal class to raise an event for error during recognition when a corresponding callback is invoked by the native layer.
-    private class ErrorHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventListener {
+    private class CanceledHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionCanceledEventListener {
         
-        ErrorHandlerImpl(SpeechRecognizer recognizer) {
+        CanceledHandlerImpl(SpeechRecognizer recognizer) {
             Contracts.throwIfNull(recognizer, "recognizer");
-
             this.recognizer = recognizer;
         }
 
         @Override
-        public void Execute(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventArgs eventArgs) {
-            
+        public void Execute(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionCanceledEventArgs eventArgs) {
+            Contracts.throwIfNull(eventArgs, "eventArgs");
             if (recognizer.disposed) {
                 return;
             }
 
-            RecognitionErrorEventArgs resultEventArg = new RecognitionErrorEventArgs(eventArgs.getSessionId(), eventArgs.GetResult().getReason());
-            EventHandlerImpl<RecognitionErrorEventArgs> handler = this.recognizer.RecognitionErrorRaised;
+            SpeechRecognitionCanceledEventArgs resultEventArg = new SpeechRecognitionCanceledEventArgs(eventArgs);
+            EventHandlerImpl<SpeechRecognitionCanceledEventArgs> handler = this.recognizer.Canceled;
 
             if (handler != null) {
                 handler.fireEvent(this.recognizer, resultEventArg);

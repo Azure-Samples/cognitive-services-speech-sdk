@@ -27,9 +27,9 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: final result: {0}, Offset: {1}, Duration: {2} ", e.ToString(), e.Result.OffsetInTicks, e.Result.Duration));
         }
 
-        private static void MyErrorEventHandler(object sender, RecognitionErrorEventArgs e)
+        private static void MyCanceledEventHandler(object sender, SpeechRecognitionCanceledEventArgs e)
         {
-            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: error occurred. SessionId: {0}, Reason: {1}", e.SessionId, e.Status));
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: canceled. SessionId: {0}, Reason: {1}", e.SessionId, e.Reason));
         }
 
         private static void MySessionEventHandler(object sender, SessionEventArgs e)
@@ -137,7 +137,7 @@ namespace MicrosoftSpeechSDKSamples
             // Subscribes to events.
             reco.IntermediateResultReceived += MyIntermediateResultEventHandler;
             reco.FinalResultReceived += MyFinalResultEventHandler;
-            reco.RecognitionErrorRaised += MyErrorEventHandler;
+            reco.Canceled += MyCanceledEventHandler;
             reco.OnSessionEvent += MySessionEventHandler;
 
             // Starts recognition.
@@ -148,7 +148,7 @@ namespace MicrosoftSpeechSDKSamples
             // Unsubscribe to events.
             reco.IntermediateResultReceived -= MyIntermediateResultEventHandler;
             reco.FinalResultReceived -= MyFinalResultEventHandler;
-            reco.RecognitionErrorRaised -= MyErrorEventHandler;
+            reco.Canceled -= MyCanceledEventHandler;
             reco.OnSessionEvent -= MySessionEventHandler;
         }
 
@@ -159,13 +159,13 @@ namespace MicrosoftSpeechSDKSamples
 
             reco.FinalResultReceived += (s, e) =>
             {
-                if (e.Result.RecognitionStatus == RecognitionStatus.Recognized)
+                if (e.Result.Reason == ResultReason.RecognizedSpeech)
                 {
-                    Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, Text: {e.Result.Text}, Offset: {e.Result.OffsetInTicks}, Duration: {e.Result.Duration}.");
+                    Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
                 }
-                else
+                else if (e.Result.Reason == ResultReason.NoMatch)
                 {
-                    Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, FailureReason: {e.Result.RecognitionFailureReason}.");
+                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
                 }
             };
 
@@ -178,9 +178,15 @@ namespace MicrosoftSpeechSDKSamples
                 }
             };
 
-            reco.RecognitionErrorRaised += (s, e) =>
+            reco.Canceled += (s, e) =>
             {
-                Console.WriteLine($"\n    An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}");
+                Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                if (e.Reason == CancellationReason.Error)
+                {
+                    Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                    Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                }
             };
 
             reco.OnSessionEvent += (s, e) =>

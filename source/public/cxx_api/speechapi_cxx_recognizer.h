@@ -27,7 +27,7 @@ public:
     {
         bool enabled = false;
         SPX_INIT_HR(hr);
-        SPX_THROW_ON_FAIL(hr = Recognizer_IsEnabled(m_hreco, &enabled));
+        SPX_THROW_ON_FAIL(hr = recognizer_is_enabled(m_hreco, &enabled));
         return enabled;
     };
 
@@ -37,7 +37,7 @@ public:
     virtual void Enable()
     {
         SPX_INIT_HR(hr);
-        SPX_THROW_ON_FAIL(hr = Recognizer_Enable(m_hreco));
+        SPX_THROW_ON_FAIL(hr = recognizer_enable(m_hreco));
     };
 
     /// <summary>
@@ -46,7 +46,7 @@ public:
     virtual void Disable()
     {
         SPX_INIT_HR(hr);
-        SPX_THROW_ON_FAIL(hr = Recognizer_Disable(m_hreco));
+        SPX_THROW_ON_FAIL(hr = recognizer_disable(m_hreco));
     };
 
 protected:
@@ -72,7 +72,7 @@ protected:
 
         if (m_hreco != SPXHANDLE_INVALID)
         {
-            ::Recognizer_Handle_Close(m_hreco);
+            ::recognizer_handle_release(m_hreco);
             m_hreco = SPXHANDLE_INVALID;
             SPX_DBG_TRACE_VERBOSE("%s: m_hreco=0x%8x", __FUNCTION__, m_hreco);
         }

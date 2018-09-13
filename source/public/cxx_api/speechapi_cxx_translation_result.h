@@ -23,33 +23,24 @@ namespace Translation {
 /// <summary>
 /// Defines the translation text result.
 /// </summary>
-class TranslationTextResult final : public SpeechRecognitionResult
+class TranslationTextResult final : public Microsoft::CognitiveServices::Speech::SpeechRecognitionResult
 {
 private:
-    TranslationStatusCode m_translationStatus;
+
     std::map<std::string, std::string> m_translations;
-    std::string m_failureReason;
 
 public:
-    /// <summary>
-    /// Describes the status of translation result.
-    /// </summary>
-    const TranslationStatusCode& TranslationStatus;
-
     /// <summary>
     /// It is intended for internal use only. It creates an instance of <see cref="TranslationTextResult"/>.
     /// </summary>
     /// <param name="resultHandle">The handle of the result returned by recognizer in C-API.</param>
     explicit TranslationTextResult(SPXRESULTHANDLE resultHandle) :
         SpeechRecognitionResult(resultHandle),
-        TranslationStatus(m_translationStatus),
-        Translations(m_translations),
-        FailureReason(m_failureReason)
+        Translations(m_translations)
     {
         PopulateResultFields(resultHandle);
-        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%s; translation status=0x%x.", 
-            __FUNCTION__, this, Handle, ResultId.c_str(), TranslationStatus);
-    }
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%s.", __FUNCTION__, this, Handle, ResultId.c_str());
+    };
 
     /// <summary>
     /// Destructs the instance.
@@ -65,44 +56,21 @@ public:
     /// </summary>
     const std::map<std::string, std::string>& Translations;
 
-    /// <summary>
-    /// Contains failure reason if TranslationStatus indicates an error. Otherwise it is empty.
-    /// </summary>
-    const std::string& FailureReason;
-
 private:
     void PopulateResultFields(SPXRESULTHANDLE resultHandle)
     {
         SPX_INIT_HR(hr);
 
-        Result_TranslationStatus status;
-        SPX_THROW_ON_FAIL(hr = TranslationTextResult_GetTranslationStatus(resultHandle, &status));
-        m_translationStatus = static_cast<::Microsoft::CognitiveServices::Speech::Translation::TranslationStatusCode>(status);
-
         size_t bufLen = 0;
-        std::unique_ptr<char[]> reasonBuffer;
-        hr = TranslationTextResult_GetFailureReason(resultHandle, nullptr, &bufLen);
-        if (hr == SPXERR_BUFFER_TOO_SMALL)
-        {
-            reasonBuffer = std::make_unique<char[]>(bufLen);
-            hr = TranslationTextResult_GetFailureReason(resultHandle, reasonBuffer.get(), &bufLen);
-        }
-        SPX_THROW_ON_FAIL(hr);
-        if (bufLen != 0)
-        {
-            m_failureReason = std::string(reasonBuffer.get());
-        }
-
-        bufLen = 0;
         std::shared_ptr<Result_TranslationTextBufferHeader> phraseBuffer;
         // retrieve the required buffer size first.
-        hr = TranslationTextResult_GetTranslationText(resultHandle, nullptr, &bufLen);
+        hr = translation_text_result_get_translation_text_buffer_header(resultHandle, nullptr, &bufLen);
         if (hr == SPXERR_BUFFER_TOO_SMALL)
         {
             char *ptr = new char[bufLen];
             phraseBuffer = std::shared_ptr<Result_TranslationTextBufferHeader>((Result_TranslationTextBufferHeader*)ptr,
                 [](void *to_delete) { delete[] ((char*)to_delete); });
-            hr = TranslationTextResult_GetTranslationText(resultHandle, phraseBuffer.get(), &bufLen);
+            hr = translation_text_result_get_translation_text_buffer_header(resultHandle, phraseBuffer.get(), &bufLen);
         }
         SPX_THROW_ON_FAIL(hr);
 
@@ -129,15 +97,15 @@ private:
     DISABLE_DEFAULT_CTORS(TranslationTextResult);
 };
 
+
 /// <summary>
 /// Defines the translation synthesis result, i.e. the voice output of the translated text in the target language.
 /// </summary>
 class TranslationSynthesisResult
 {
 private:
-    SynthesisStatusCode m_synthesisStatus;
+
     std::vector<uint8_t> m_audioData;
-    std::string m_failureReason;
 
 public:
     /// <summary>
@@ -145,12 +113,10 @@ public:
     /// </summary>
     /// <param name="resultHandle">The handle of the result returned by recognizer in C-API.</param>
     explicit TranslationSynthesisResult(SPXRESULTHANDLE resultHandle) :
-        SynthesisStatus(m_synthesisStatus),
-        Audio(m_audioData),
-        FailureReason(m_failureReason)
+        Audio(m_audioData)
     {
         PopulateResultFields(resultHandle);
-        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x) -- synthesis status=0x%x.", __FUNCTION__, this, SynthesisStatus);
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x)", __FUNCTION__, this, resultHandle);
     };
 
     /// <summary>
@@ -162,53 +128,23 @@ public:
     };
 
     /// <summary>
-    /// Describes the status of translation synthesis status.
-    /// </summary>
-    const SynthesisStatusCode& SynthesisStatus;
-
-    /// <summary>
     /// The voice output of the translated text in the target language.
     /// </summary>
     const std::vector<uint8_t>& Audio;
-
-    /// <summary>
-    /// Contains failure reason if SynthesisStatus indicates an error. Otherwise it is empty.
-    /// </summary>
-    const std::string& FailureReason;
 
 
 private:
 
     void PopulateResultFields(SPXRESULTHANDLE resultHandle)
     {
-
         SPX_INIT_HR(hr);
 
-        Result_SynthesisStatus status;
-        SPX_THROW_ON_FAIL(hr = TranslationSynthesisResult_GetSynthesisStatus(resultHandle, &status));
-        m_synthesisStatus = static_cast<::Microsoft::CognitiveServices::Speech::Translation::SynthesisStatusCode>(status);
-
         size_t bufLen = 0;
-        std::unique_ptr<char[]> reasonBuffer;
-        hr = TranslationSynthesisResult_GetFailureReason(resultHandle, nullptr, &bufLen);
-        if (hr == SPXERR_BUFFER_TOO_SMALL)
-        {
-            reasonBuffer = std::make_unique<char[]>(bufLen);
-            hr = TranslationSynthesisResult_GetFailureReason(resultHandle, reasonBuffer.get(), &bufLen);
-        }
-        SPX_THROW_ON_FAIL(hr);
-        if (bufLen > 0)
-        {
-            m_failureReason = std::string(reasonBuffer.get());
-        }
-
-        bufLen = 0;
-        // retrieve the required buffer size first.
-        hr = TranslationSynthesisResult_GetSynthesisData(resultHandle, nullptr, &bufLen);
+        hr = translation_synthesis_result_get_audio_data(resultHandle, nullptr, &bufLen);
         if (hr == SPXERR_BUFFER_TOO_SMALL)
         {
             m_audioData.resize(bufLen);
-            hr = TranslationSynthesisResult_GetSynthesisData(resultHandle, m_audioData.data(), &bufLen);
+            hr = translation_synthesis_result_get_audio_data(resultHandle, m_audioData.data(), &bufLen);
         }
         SPX_THROW_ON_FAIL(hr);
 

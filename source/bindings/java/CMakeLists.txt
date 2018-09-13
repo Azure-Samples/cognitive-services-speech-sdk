@@ -93,6 +93,9 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/EventArgs.java
     ${CMAKE_SWIG_OUTDIR}/IntentEventListener.java
     ${CMAKE_SWIG_OUTDIR}/IntentEventSignal.java
+    ${CMAKE_SWIG_OUTDIR}/IntentCanceledEventSignal.java
+    ${CMAKE_SWIG_OUTDIR}/IntentRecognitionCanceledEventArgs.java
+    ${CMAKE_SWIG_OUTDIR}/IntentCanceledEventListener.java
     ${CMAKE_SWIG_OUTDIR}/IntentRecognitionEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/IntentRecognitionResult.java
     ${CMAKE_SWIG_OUTDIR}/IntentRecognitionResultPtrFuture.java
@@ -103,7 +106,11 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/LanguageUnderstandingModel.java
     ${CMAKE_SWIG_OUTDIR}/OutputFormat.java
 
-    ${CMAKE_SWIG_OUTDIR}/Reason.java
+    ${CMAKE_SWIG_OUTDIR}/ResultReason.java
+    ${CMAKE_SWIG_OUTDIR}/CancellationReason.java
+    ${CMAKE_SWIG_OUTDIR}/CancellationDetails.java
+    ${CMAKE_SWIG_OUTDIR}/NoMatchReason.java
+    ${CMAKE_SWIG_OUTDIR}/NoMatchDetails.java
     ${CMAKE_SWIG_OUTDIR}/RecognitionEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/RecognitionEventListener.java
     ${CMAKE_SWIG_OUTDIR}/RecognitionEventSignal.java
@@ -116,30 +123,33 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/SessionEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/SessionEventListener.java
     ${CMAKE_SWIG_OUTDIR}/SessionEventSignal.java
-    ${CMAKE_SWIG_OUTDIR}/SessionPropertyCollection.java    
+    ${CMAKE_SWIG_OUTDIR}/SessionPropertyCollection.java
     ${CMAKE_SWIG_OUTDIR}/SpeechConfig.java
+    ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionCanceledEventArgs.java
+    ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionCanceledEventListener.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionEventListener.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionEventSignal.java
+    ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionCanceledEventSignal.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionResult.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionResultPtrFuture.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognizerBase.java
     ${CMAKE_SWIG_OUTDIR}/SpeechTranslatorConfig.java
 
-    ${CMAKE_SWIG_OUTDIR}/SynthesisStatusCode.java
-    
     ${CMAKE_SWIG_OUTDIR}/TranslationRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/TranslationRecognizerBase.java
-    ${CMAKE_SWIG_OUTDIR}/TranslationStatusCode.java
     ${CMAKE_SWIG_OUTDIR}/TranslationSynthesisEventListener.java
     ${CMAKE_SWIG_OUTDIR}/TranslationSynthesisEventSignal.java
     ${CMAKE_SWIG_OUTDIR}/TranslationSynthesisResult.java
     ${CMAKE_SWIG_OUTDIR}/TranslationSynthesisResultEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/TranslationTexEventListener.java
+    ${CMAKE_SWIG_OUTDIR}/TranslationTexCanceledEventListener.java
     ${CMAKE_SWIG_OUTDIR}/TranslationTextEventSignal.java
+    ${CMAKE_SWIG_OUTDIR}/TranslationTextCanceledEventSignal.java
     ${CMAKE_SWIG_OUTDIR}/TranslationTextResult.java
     ${CMAKE_SWIG_OUTDIR}/TranslationTextResultEventArgs.java
+    ${CMAKE_SWIG_OUTDIR}/TranslationTextResultCanceledEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/TranslationTextResultPtrFuture.java
     ${CMAKE_SWIG_OUTDIR}/StdMapStringString.java
     ${CMAKE_SWIG_OUTDIR}/StdMapStringStringMapIterator.java
@@ -168,14 +178,17 @@ set(JAVA_LIB ${PROJECT_NAME})
 string(REPLACE . / PACKAGE_DIR ${PROJECT_NAME})
 
 set(JAVA_SOURCES
+    ${PACKAGE_DIR}/CancellationDetails.java
     ${PACKAGE_DIR}/KeywordRecognitionModel.java
     ${PACKAGE_DIR}/PropertyCollection.java
     ${PACKAGE_DIR}/RecognizerProperties.java
     ${PACKAGE_DIR}/ResultProperties.java
-    ${PACKAGE_DIR}/RecognitionErrorEventArgs.java
     ${PACKAGE_DIR}/RecognitionEventArgs.java
     ${PACKAGE_DIR}/RecognitionEventType.java
-    ${PACKAGE_DIR}/RecognitionStatus.java
+    ${PACKAGE_DIR}/ResultReason.java
+    ${PACKAGE_DIR}/CancellationReason.java
+    ${PACKAGE_DIR}/NoMatchDetails.java
+    ${PACKAGE_DIR}/NoMatchReason.java
     ${PACKAGE_DIR}/Recognizer.java
     ${PACKAGE_DIR}/ResultParameterNames.java
     ${PACKAGE_DIR}/SessionEventArgs.java
@@ -183,6 +196,7 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/SpeechConfig.java
     ${PACKAGE_DIR}/SpeechRecognitionResult.java
     ${PACKAGE_DIR}/SpeechRecognitionResultEventArgs.java
+    ${PACKAGE_DIR}/SpeechRecognitionCanceledEventArgs.java
     ${PACKAGE_DIR}/SpeechRecognizer.java
     
     ${PACKAGE_DIR}/OutputFormat.java
@@ -196,16 +210,16 @@ set(JAVA_SOURCES
 
     ${PACKAGE_DIR}/intent/IntentRecognitionResult.java
     ${PACKAGE_DIR}/intent/IntentRecognitionResultEventArgs.java
+    ${PACKAGE_DIR}/intent/IntentRecognitionCanceledEventArgs.java
     ${PACKAGE_DIR}/intent/IntentRecognizer.java
     ${PACKAGE_DIR}/intent/LanguageUnderstandingModel.java
 
     ${PACKAGE_DIR}/translation/TranslationRecognizer.java
-    ${PACKAGE_DIR}/translation/TranslationStatus.java
     ${PACKAGE_DIR}/translation/TranslationSynthesisResult.java
     ${PACKAGE_DIR}/translation/TranslationSynthesisResultEventArgs.java
     ${PACKAGE_DIR}/translation/TranslationTextResult.java
     ${PACKAGE_DIR}/translation/TranslationTextResultEventArgs.java
-    ${PACKAGE_DIR}/translation/SynthesisStatus.java
+    ${PACKAGE_DIR}/translation/TranslationTextResultCanceledEventArgs.java
     ${PACKAGE_DIR}/translation/SpeechTranslatorConfig.java
 
     ${PACKAGE_DIR}/util/EventHandler.java

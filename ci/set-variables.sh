@@ -191,7 +191,8 @@ else
 fi
 
 # Build phases to run (currently: all for all build types)
-SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsNuGet LinuxBuild LinuxDrop OsxBuild IosBuild AndroidBuild AndroidPackage Doxygen JavaJrePackage JsBuild WindowsSdlBuild "
+#SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsNuGet LinuxBuild LinuxDrop OsxBuild IosBuild AndroidBuild AndroidPackage Doxygen JavaJrePackage JsBuild WindowsSdlBuild "
+SPEECHSDK_BUILD_PHASES=" WindowsBuild WindowsNuGet LinuxBuild LinuxDrop AndroidBuild AndroidPackage Doxygen JavaJrePackage JsBuild WindowsSdlBuild "
 
 # Running tests is default
 SPEECHSDK_RUN_TESTS=true

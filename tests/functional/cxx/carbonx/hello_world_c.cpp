@@ -37,19 +37,19 @@ void CarbonTestConsole::Sample_HelloWorld_In_C()
      if (SPX_SUCCEEDED(hr))
      {
         ConsoleWriteLine("Say something...");
-        hr = ::Recognizer_RecognizeAsync(hreco, &hasync);
+        hr = ::recognizer_recognize_once_async(hreco, &hasync);
      }
 
      SPXRESULTHANDLE hresult = SPXHANDLE_INVALID;
      if (SPX_SUCCEEDED(hr))
      {
-        hr = ::Recognizer_RecognizeAsync_WaitFor(hasync, 30 * 1000, &hresult);
+        hr = ::recognizer_recognize_once_async_wait_for(hasync, 30 * 1000, &hresult);
      }
 
      char text[1024];
      if (SPX_SUCCEEDED(hr))
      {
-        hr = ::Result_GetText(hresult, text, sizeof(text) / sizeof(text[0]));
+        hr = ::result_get_text(hresult, text, sizeof(text) / sizeof(text[0]));
      }
 
      if (SPX_SUCCEEDED(hr))
@@ -57,13 +57,13 @@ void CarbonTestConsole::Sample_HelloWorld_In_C()
         ConsoleWriteLine("You said:\n\n    '%s'", text);
      }
 
-     ::Recognizer_AsyncHandle_Close(hresult);
+     ::recognizer_async_handle_release(hresult);
      hasync = SPXHANDLE_INVALID;
 
-     ::Recognizer_ResultHandle_Close(hresult);
+     ::recognizer_result_handle_release(hresult);
      hresult = SPXHANDLE_INVALID;
 
-     ::Recognizer_Handle_Close(hreco);
+     ::recognizer_handle_release(hreco);
      hreco = SPXHANDLE_INVALID;
 
      ::speech_config_release(hconfig);
