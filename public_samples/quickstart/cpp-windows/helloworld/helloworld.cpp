@@ -3,9 +3,9 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-// <code>
 #include "stdafx.h"
-
+// <code>
+#include <iostream>
 #include <speechapi_cxx.h>
 
 using namespace std;

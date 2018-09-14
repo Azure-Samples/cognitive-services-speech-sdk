@@ -7,7 +7,7 @@
     <authors>Microsoft</authors>
     <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <projectUrl>https://aka.ms/csspeech</projectUrl>
-    <licenseUrl>https://aka.ms/csspeech/license</licenseUrl>
+    <licenseUrl>https://aka.ms/csspeech/license201809</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <summary>Microsoft Cognitive Services Speech SDK</summary>
     <description>
