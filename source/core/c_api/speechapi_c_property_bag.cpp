@@ -58,7 +58,7 @@ SPXAPI__(const char*) property_bag_get_string(SPXPROPERTYBAGHANDLE hpropbag, int
     {
         auto namedProperties = property_bag_from_handle(hpropbag);
 
-        const char* name_in_use = name ? name : GetPropertyName(static_cast<SpeechPropertyId>(id));
+        const char* name_in_use = name ? name : GetPropertyName(static_cast<PropertyId>(id));
         auto tempValue = namedProperties->GetStringValue(name_in_use, defaultValue);
         auto size = tempValue.size() + 1;
 
@@ -82,7 +82,7 @@ SPXAPI property_bag_set_string(SPXPROPERTYBAGHANDLE hpropbag, int id, const char
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hpropbag == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, defaultValue == nullptr);
 
-    const char* name_in_use = name ? name : GetPropertyName(static_cast<SpeechPropertyId>(id));
+    const char* name_in_use = name ? name : GetPropertyName(static_cast<PropertyId>(id));
 
     SPXAPI_INIT_HR_TRY(hr)
     {

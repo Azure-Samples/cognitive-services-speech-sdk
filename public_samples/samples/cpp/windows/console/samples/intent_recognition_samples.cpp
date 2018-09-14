@@ -49,7 +49,7 @@ void IntentRecognitionWithMicrophone()
     {
         cout << "RECOGNIZED: Text=" << result->Text << std::endl;
         cout << "  Intent Id: " << result->IntentId << std::endl;
-        cout << "  Intent Service JSON: " << result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonResult) << std::endl;
+        cout << "  Intent Service JSON: " << result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult) << std::endl;
     }
     else if (result->Reason == ResultReason::RecognizedSpeech)
     {
@@ -109,7 +109,7 @@ void IntentRecognitionWithLanguage()
     {
         cout << "RECOGNIZED: Text=" << result->Text << std::endl;
         cout << "  Intent Id: " << result->IntentId << std::endl;
-        cout << "  Intent Service JSON: " << result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonResult) << std::endl;
+        cout << "  Intent Service JSON: " << result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult) << std::endl;
     }
     else if (result->Reason == ResultReason::RecognizedSpeech)
     {
@@ -172,7 +172,7 @@ void IntentContinuousRecognitionWithFile()
         {
             cout << "RECOGNIZED: Text=" << e.Result->Text << std::endl;
             cout << "  Intent Id: " << e.Result->IntentId << std::endl;
-            cout << "  Intent Service JSON: " << e.Result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonResult) << std::endl;
+            cout << "  Intent Service JSON: " << e.Result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult) << std::endl;
         }
         else if (e.Result->Reason == ResultReason::RecognizedSpeech)
         {

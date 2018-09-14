@@ -82,7 +82,7 @@ void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
     if (result->Reason == ResultReason::RecognizedSpeech)
     {
         cout << "RECOGNIZED: Text=" << result->Text << std::endl
-             << "  Speech Service JSON: " << result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_Json)
+             << "  Speech Service JSON: " << result->Properties.GetProperty(PropertyId::SpeechServiceResponse_Json)
              << std::endl;
     }
     else if (result->Reason == ResultReason::NoMatch)

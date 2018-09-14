@@ -180,7 +180,7 @@ protected:
     CancellationDetails(RecognitionResult* result) :
         m_reason(GetCancellationReason(result)),
         Reason(m_reason),
-        ErrorDetails(result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonErrorDetails))
+        ErrorDetails(result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonErrorDetails))
     {
     }
 

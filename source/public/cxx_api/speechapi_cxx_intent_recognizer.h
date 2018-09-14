@@ -198,7 +198,7 @@ public:
     /// <param name="token">A string that represents the authorization token.</param>
     void SetAuthorizationToken(const std::string& token)
     {
-        Parameters.SetProperty(SpeechPropertyId::SpeechServiceAuthorization_Token, token);
+        Parameters.SetProperty(PropertyId::SpeechServiceAuthorization_Token, token);
     }
 
     /// <summary>
@@ -207,7 +207,7 @@ public:
     /// <returns>Authorization token</returns>
     std::string GetAuthorizationToken()
     {
-        return Parameters.GetProperty(SpeechPropertyId::SpeechServiceAuthorization_Token, "");
+        return Parameters.GetProperty(PropertyId::SpeechServiceAuthorization_Token, "");
     }
 
 private:

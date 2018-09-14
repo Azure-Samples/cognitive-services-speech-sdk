@@ -87,7 +87,7 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/BaseAsyncRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/BaseRecognizerBase.java
     ${CMAKE_SWIG_OUTDIR}/HandleType.java
-    ${CMAKE_SWIG_OUTDIR}/SpeechPropertyId.java
+    ${CMAKE_SWIG_OUTDIR}/PropertyId.java
     ${CMAKE_SWIG_OUTDIR}/carbon_java.java
     ${CMAKE_SWIG_OUTDIR}/carbon_javaJNI.java
     ${CMAKE_SWIG_OUTDIR}/EventArgs.java

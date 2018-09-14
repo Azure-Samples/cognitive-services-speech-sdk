@@ -11,7 +11,7 @@ import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionCanceledEventArgs;
 import com.microsoft.cognitiveservices.speech.PropertyCollection;
 import com.microsoft.cognitiveservices.speech.RecognizerProperties;
-import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
+import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.internal.IntentTrigger;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
@@ -89,7 +89,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
       * @return the spoken language of recognition.
       */
     public String getSpeechRecognitionLanguage() {
-        return _Parameters.getProperty(SpeechPropertyId.SpeechServiceConnection_RecoLanguage);
+        return _Parameters.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
     }
 
     /**

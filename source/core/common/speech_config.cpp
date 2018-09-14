@@ -18,8 +18,8 @@ void CSpxSpeechConfig::InitAuthorizationToken(const char * authToken, const char
     SPX_IFTRUE_THROW_HR(m_init, SPXERR_ALREADY_INITIALIZED);
     m_init = true;
 
-    SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceAuthorization_Token), authToken);
-    SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Region), region);
+    SetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token), authToken);
+    SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region), region);
 }
 
 void CSpxSpeechConfig::InitFromEndpoint(const char * endpoint, const char* subscription)
@@ -27,8 +27,8 @@ void CSpxSpeechConfig::InitFromEndpoint(const char * endpoint, const char* subsc
     SPX_IFTRUE_THROW_HR(m_init, SPXERR_ALREADY_INITIALIZED);
     m_init = true;
 
-    SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Endpoint), endpoint);
-    SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Key), subscription);
+    SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint), endpoint);
+    SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key), subscription);
 }
 
 
@@ -37,8 +37,8 @@ void CSpxSpeechConfig::InitFromSubscription(const char * subscription, const cha
     SPX_IFTRUE_THROW_HR(m_init, SPXERR_ALREADY_INITIALIZED);
     m_init = true;
 
-    SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Key), subscription);
-    SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Region), region);
+    SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key), subscription);
+    SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region), region);
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

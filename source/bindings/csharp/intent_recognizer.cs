@@ -79,7 +79,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         {
             get
             {
-                return Parameters.Get(SpeechPropertyId.SpeechServiceConnection_IntentSourceLanguage);
+                return Parameters.Get(PropertyId.SpeechServiceConnection_IntentSourceLanguage);
             }
         }
 

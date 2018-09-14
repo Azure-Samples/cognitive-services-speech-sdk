@@ -241,7 +241,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
         auto recognizer = CreateRecognizers<SpeechRecognizer>(input_file);
         auto result = recognizer->RecognizeOnceAsync().get();
-        REQUIRE(!result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_Json).empty());
+        REQUIRE(!result->Properties.GetProperty(PropertyId::SpeechServiceResponse_Json).empty());
     }
 
     SECTION("Check that recognition result contains error details.")

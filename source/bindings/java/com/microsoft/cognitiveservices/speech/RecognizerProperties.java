@@ -6,7 +6,7 @@ package com.microsoft.cognitiveservices.speech;
 
 import java.io.Closeable;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
-import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
+import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.PropertyCollection;
 
 /**
@@ -63,10 +63,10 @@ public final class RecognizerProperties<OwnerType> implements PropertyCollection
     /**
       * Gets the property's value by its id
       *
-      * @param id The speech property id
+      * @param id The property id
       * @return The value of the property.
       */
-    public String getProperty(SpeechPropertyId id) {
+    public String getProperty(PropertyId id) {
         return collection.GetProperty(id.getValue());
     }
 
@@ -86,10 +86,10 @@ public final class RecognizerProperties<OwnerType> implements PropertyCollection
     /**
       * Sets the property's value by id
       *
-      * @param id The speech property id
+      * @param id The property id
       * @param value The value of the parameter.
       */
-    public void setProperty(SpeechPropertyId id, String value) {
+    public void setProperty(PropertyId id, String value) {
         Contracts.throwIfNull(value, "value");
         
         collection.SetProperty(id.getValue(), value);

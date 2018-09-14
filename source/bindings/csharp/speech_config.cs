@@ -122,14 +122,14 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                var val = this.configImpl.GetProperty(Internal.SpeechPropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse);
+                var val = this.configImpl.GetProperty(Internal.PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse);
                 return val == "true" ? OutputFormat.Detailed : OutputFormat.Simple;
             }
 
             set
             {
                 this.configImpl.SetProperty(
-                    Internal.SpeechPropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse,
+                    Internal.PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse,
                     value == OutputFormat.Detailed ? "true" : "false");
             }
         }

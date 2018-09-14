@@ -310,8 +310,8 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
                 Assert.IsTrue(string.IsNullOrEmpty(recognizer.SpeechRecognitionLanguage));
-                Assert.AreEqual(recognizer.SpeechRecognitionLanguage, recognizer.Parameters.Get(SpeechPropertyId.SpeechServiceConnection_RecoLanguage));
-                Assert.AreEqual(deploymentId, recognizer.Parameters.Get(SpeechPropertyId.SpeechServiceConnection_EndpointId));
+                Assert.AreEqual(recognizer.SpeechRecognitionLanguage, recognizer.Parameters.Get(PropertyId.SpeechServiceConnection_RecoLanguage));
+                Assert.AreEqual(deploymentId, recognizer.Parameters.Get(PropertyId.SpeechServiceConnection_EndpointId));
                 Assert.AreEqual(OutputFormat.Simple, recognizer.OutputFormat);
             }
 
@@ -320,7 +320,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
                 Assert.AreEqual(Language.DE_DE, recognizer.SpeechRecognitionLanguage);
-                Assert.AreEqual(Language.DE_DE, recognizer.Parameters.Get(SpeechPropertyId.SpeechServiceConnection_RecoLanguage));
+                Assert.AreEqual(Language.DE_DE, recognizer.Parameters.Get(PropertyId.SpeechServiceConnection_RecoLanguage));
                 Assert.AreEqual(OutputFormat.Simple, recognizer.OutputFormat);
             }
 

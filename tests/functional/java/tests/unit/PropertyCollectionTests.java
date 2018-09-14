@@ -22,7 +22,7 @@ import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig;
-import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
+import com.microsoft.cognitiveservices.speech.PropertyId;
 
 import tests.Settings;
 
@@ -70,7 +70,7 @@ public class PropertyCollectionTests {
         assertNotNull(crp);
 
         String value = "seattle";
-        crp.setProperty(SpeechPropertyId.SpeechServiceConnection_IntentRegion, value);
+        crp.setProperty(PropertyId.SpeechServiceConnection_IntentRegion, value);
         assertEquals(value, crp.getProperty("INTENT-region", ""));
     }
     // -----------------------------------------------------------------------

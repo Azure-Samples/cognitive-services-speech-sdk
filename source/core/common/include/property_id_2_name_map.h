@@ -12,6 +12,6 @@ namespace CognitiveServices {
 namespace Speech {
 namespace Impl {
 
-const char* GetPropertyName(const SpeechPropertyId& id);
+const char* GetPropertyName(const PropertyId& id);
 
 }}}}

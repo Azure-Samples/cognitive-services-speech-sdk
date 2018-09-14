@@ -56,8 +56,8 @@ SPXAPI recognizer_create_speech_recognizer_from_config(SPXRECOHANDLE* phreco, SP
         auto namedProperties = SpxQueryService<ISpxNamedProperties>(speechconfig);
         auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioInput);
 
-        auto recoLanguage = namedProperties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoLanguage));
-        auto outputFormat = namedProperties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse));
+        auto recoLanguage = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
+        auto outputFormat = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse));
         OutputFormat format = PAL::stricmp(outputFormat.c_str(), PAL::BoolToString(true).c_str()) == 0 ? OutputFormat::Detailed : OutputFormat::Simple;
 
         auto recognizer = factory->CreateSpeechRecognizerFromConfig(recoLanguage.c_str(), format, audioInput);
@@ -97,11 +97,11 @@ SPXAPI recognizer_create_translation_recognizer_from_config(SPXRECOHANDLE* phrec
         fbag->Copy(speechconfig_propertybag.get());
 
         auto namedProperties = SpxQueryService<ISpxNamedProperties>(speechconfig);
-        auto source_lang = namedProperties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_TranslationFromLanguage));
-        auto voice = namedProperties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_TranslationVoice));
+        auto source_lang = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationFromLanguage));
+        auto voice = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice));
 
         // language names are separated by comma
-        auto to_langs = namedProperties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_TranslationToLanguages));
+        auto to_langs = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages));
         auto vlangs = PAL::split(to_langs, ",");
 
         auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioInput);
@@ -139,8 +139,8 @@ SPXAPI recognizer_create_intent_recognizer_from_config(SPXRECOHANDLE* phreco, SP
         fbag->Copy(speechconfig_propertybag.get());
 
         auto namedProperties = SpxQueryService<ISpxNamedProperties>(speechconfig);
-        auto lang = namedProperties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_IntentSourceLanguage));
-        auto outputFormat = namedProperties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse));
+        auto lang = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_IntentSourceLanguage));
+        auto outputFormat = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse));
         OutputFormat format = PAL::stricmp(outputFormat.c_str(), PAL::BoolToString(true).c_str()) == 0 ? OutputFormat::Detailed : OutputFormat::Simple;
 
         auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioInput);

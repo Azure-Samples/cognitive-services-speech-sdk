@@ -28,7 +28,7 @@ import com.microsoft.cognitiveservices.speech.Recognizer;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
-import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
+import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.OutputFormat;
 
 import tests.Settings;
@@ -226,8 +226,8 @@ public class SpeechRecognizerTests {
         assertNotNull(r);
 
         assertNotNull(r.getParameters());
-        assertEquals(r.getSpeechRecognitionLanguage(), r.getParameters().getProperty(SpeechPropertyId.SpeechServiceConnection_RecoLanguage));
-        assertEquals(r.getEndpointId(), r.getParameters().getProperty(SpeechPropertyId.SpeechServiceConnection_EndpointId)); // TODO: is this really the correct mapping?
+        assertEquals(r.getSpeechRecognitionLanguage(), r.getParameters().getProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
+        assertEquals(r.getEndpointId(), r.getParameters().getProperty(PropertyId.SpeechServiceConnection_EndpointId)); // TODO: is this really the correct mapping?
 
         r.close();
         s.close();

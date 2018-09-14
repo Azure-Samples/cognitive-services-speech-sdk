@@ -14,9 +14,9 @@ namespace Microsoft.CognitiveServices.Speech
         /// Returns value of the property in string.
         /// If the property value is not defined, an empty string is returned
         /// </summary>
-        /// <param name="id">The id of property. see <see cref="SpeechPropertyId"/></param>
+        /// <param name="id">The id of property. see <see cref="PropertyId"/></param>
         /// <returns>value of the property.</returns>
-        string Get(SpeechPropertyId id);
+        string Get(PropertyId id);
 
         /// <summary>
         /// Returns value of the property in string.
@@ -30,10 +30,10 @@ namespace Microsoft.CognitiveServices.Speech
         /// Returns value of the property in string.
         /// If the property value is not defined, the specified defaultValue is returned.
         /// </summary>
-        /// <param name="id">The id of property. see <see cref="SpeechPropertyId"/></param>
+        /// <param name="id">The id of property. see <see cref="PropertyId"/></param>
         /// <param name="defaultValue">The default value which is returned if no value is defined for the property.</param>
         /// <returns>value of the property.</returns>
-        string Get(SpeechPropertyId id, string defaultValue);
+        string Get(PropertyId id, string defaultValue);
 
         /// <summary>
         /// Returns value of the property in string.

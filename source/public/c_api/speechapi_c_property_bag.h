@@ -17,7 +17,7 @@ SPXAPI property_bag_release(SPXPROPERTYBAGHANDLE hpropbag);
 // NOTE: Currenlty this enum is duplicated with C++ side,
 // because SWIG cannot properly resolve conditional compilation.
 #ifndef __cplusplus
-enum  SpeechPropertyId
+enum  PropertyId
 {
     SpeechServiceConnection_Key = 1000,
     SpeechServiceConnection_Endpoint = 1001,

@@ -71,7 +71,7 @@ namespace Microsoft.CognitiveServices.Speech
         public override string ToString()
         {
             return string.Format(CultureInfo.InvariantCulture,"ResultId:{0} Reason:{1} Recognized text:<{2}>. Json:{3}", 
-                ResultId, Reason, Text, Properties.Get(SpeechPropertyId.SpeechServiceResponse_Json));
+                ResultId, Reason, Text, Properties.Get(PropertyId.SpeechServiceResponse_Json));
         }
 
         // Hold the reference.
@@ -87,7 +87,7 @@ namespace Microsoft.CognitiveServices.Speech
                 impl = collection;
             }
 
-            public string Get(SpeechPropertyId id)
+            public string Get(PropertyId id)
             {
                 return Get(id, string.Empty);
             }
@@ -97,9 +97,9 @@ namespace Microsoft.CognitiveServices.Speech
                 return Get(propertyName, string.Empty);
             }
 
-            public string Get(SpeechPropertyId id, string defaultValue)
+            public string Get(PropertyId id, string defaultValue)
             {
-                return impl.GetProperty((Internal.SpeechPropertyId)id, defaultValue);
+                return impl.GetProperty((Internal.PropertyId)id, defaultValue);
             }
 
             public string Get(string propertyName, string defaultValue)
@@ -107,9 +107,9 @@ namespace Microsoft.CognitiveServices.Speech
                 return impl.GetProperty(propertyName, defaultValue);
             }
 
-            public void Set(SpeechPropertyId id, string value)
+            public void Set(PropertyId id, string value)
             {
-                impl.SetProperty((Internal.SpeechPropertyId)id, value);
+                impl.SetProperty((Internal.PropertyId)id, value);
             }
 
             public void Set(string propertyName, string value)

@@ -26,39 +26,39 @@ struct EnumClassHash
     }
 };
 
-typedef std::unordered_map<SpeechPropertyId, const char*, EnumClassHash > SpeechPropertyIdNameHash;
+typedef std::unordered_map<PropertyId, const char*, EnumClassHash > SpeechPropertyIdNameHash;
 
 const SpeechPropertyIdNameHash g_PropertyId2NameMap = {
-    { SpeechPropertyId::SpeechServiceConnection_Key, "SPEECH-SubscriptionKey" },
-    { SpeechPropertyId::SpeechServiceConnection_Endpoint, "SPEECH-Endpoint" },
-    { SpeechPropertyId::SpeechServiceConnection_Region, "SPEECH-Region" },
-    { SpeechPropertyId::SpeechServiceAuthorization_Token, "SPEECH-AuthToken" },
-    { SpeechPropertyId::SpeechServiceAuthorization_Type, "SpeechServiceAuthorization_Type" },
-    { SpeechPropertyId::SpeechServiceRps_Token, "SPEECH-RpsToken" },
-    { SpeechPropertyId::SpeechServiceConnection_EndpointId, "SPEECH-ModelId" },
-    { SpeechPropertyId::SpeechServiceConnection_TranslationFromLanguage, "TRANSLATION-FromLanguage" },
-    { SpeechPropertyId::SpeechServiceConnection_TranslationToLanguages, "TRANSLATION-ToLanguages" },
-    { SpeechPropertyId::SpeechServiceConnection_TranslationVoice, "TRANSLATION-Voice" },
-    { SpeechPropertyId::SpeechServiceConnection_TranslationFeatures, "TRANSLATION-Features" },
-    { SpeechPropertyId::SpeechServiceConnection_IntentSourceLanguage, "INTENT-Lang" },
-    { SpeechPropertyId::SpeechServiceConnection_IntentRegion, "INTENT-region" },
-    { SpeechPropertyId::SpeechServiceConnection_RecoMode, "SPEECH-RecoMode" },
-    { SpeechPropertyId::SpeechServiceConnection_RecoMode_Interactive, "INTERACTIVE" },
-    { SpeechPropertyId::SpeechServiceConnection_RecoMode_Conversation, "CONVERSATION" },
-    { SpeechPropertyId::SpeechServiceConnection_RecoMode_Dictation, "DICTATION" },
-    { SpeechPropertyId::SpeechServiceConnection_RecoLanguage, "SPEECH-RecoLanguage" },
-    { SpeechPropertyId::Speech_SessionId, "SessionId" },
-    { SpeechPropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse, "SpeechServiceResponse_RequestDetailedResultTrueFalse" },
-    { SpeechPropertyId::SpeechServiceResponse_RequestProfanityFilterTrueFalse, "SpeechServiceResponse_RequestProfanityFilterTrueFalse" },
-    { SpeechPropertyId::SpeechServiceResponse_Json, "RESULT-Json" },
-    { SpeechPropertyId::SpeechServiceResponse_JsonResult, "RESULT-LanguageUnderstandingJson" },
-    { SpeechPropertyId::SpeechServiceResponse_JsonErrorDetails, "RESULT-ErrorDetails" },
-    { SpeechPropertyId::CancellationDetails_Reason, "CancellationDetails_Reason" },
-    { SpeechPropertyId::CancellationDetails_ReasonText, "CancellationDetails_ReasonText" },
-    { SpeechPropertyId::CancellationDetails_ReasonDetailedText, "CancellationDetails_ReasonDetailedText" }
+    { PropertyId::SpeechServiceConnection_Key, "SPEECH-SubscriptionKey" },
+    { PropertyId::SpeechServiceConnection_Endpoint, "SPEECH-Endpoint" },
+    { PropertyId::SpeechServiceConnection_Region, "SPEECH-Region" },
+    { PropertyId::SpeechServiceAuthorization_Token, "SPEECH-AuthToken" },
+    { PropertyId::SpeechServiceAuthorization_Type, "SpeechServiceAuthorization_Type" },
+    { PropertyId::SpeechServiceRps_Token, "SPEECH-RpsToken" },
+    { PropertyId::SpeechServiceConnection_EndpointId, "SPEECH-ModelId" },
+    { PropertyId::SpeechServiceConnection_TranslationFromLanguage, "TRANSLATION-FromLanguage" },
+    { PropertyId::SpeechServiceConnection_TranslationToLanguages, "TRANSLATION-ToLanguages" },
+    { PropertyId::SpeechServiceConnection_TranslationVoice, "TRANSLATION-Voice" },
+    { PropertyId::SpeechServiceConnection_TranslationFeatures, "TRANSLATION-Features" },
+    { PropertyId::SpeechServiceConnection_IntentSourceLanguage, "INTENT-Lang" },
+    { PropertyId::SpeechServiceConnection_IntentRegion, "INTENT-region" },
+    { PropertyId::SpeechServiceConnection_RecoMode, "SPEECH-RecoMode" },
+    { PropertyId::SpeechServiceConnection_RecoMode_Interactive, "INTERACTIVE" },
+    { PropertyId::SpeechServiceConnection_RecoMode_Conversation, "CONVERSATION" },
+    { PropertyId::SpeechServiceConnection_RecoMode_Dictation, "DICTATION" },
+    { PropertyId::SpeechServiceConnection_RecoLanguage, "SPEECH-RecoLanguage" },
+    { PropertyId::Speech_SessionId, "SessionId" },
+    { PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse, "SpeechServiceResponse_RequestDetailedResultTrueFalse" },
+    { PropertyId::SpeechServiceResponse_RequestProfanityFilterTrueFalse, "SpeechServiceResponse_RequestProfanityFilterTrueFalse" },
+    { PropertyId::SpeechServiceResponse_Json, "RESULT-Json" },
+    { PropertyId::SpeechServiceResponse_JsonResult, "RESULT-LanguageUnderstandingJson" },
+    { PropertyId::SpeechServiceResponse_JsonErrorDetails, "RESULT-ErrorDetails" },
+    { PropertyId::CancellationDetails_Reason, "CancellationDetails_Reason" },
+    { PropertyId::CancellationDetails_ReasonText, "CancellationDetails_ReasonText" },
+    { PropertyId::CancellationDetails_ReasonDetailedText, "CancellationDetails_ReasonDetailedText" }
 };
 
-const char* GetPropertyName(const SpeechPropertyId& id)
+const char* GetPropertyName(const PropertyId& id)
 {
     if (g_PropertyId2NameMap.find(id) != g_PropertyId2NameMap.end())
     {
@@ -66,7 +66,7 @@ const char* GetPropertyName(const SpeechPropertyId& id)
     }
     else
     {
-        LogError("undefined SpeechPropertyId of %d", static_cast<int>(id));
+        LogError("undefined PropertyId of %d", static_cast<int>(id));
         SPX_THROW_ON_FAIL(SPXERR_INVALID_ARG);
         return "";
     }

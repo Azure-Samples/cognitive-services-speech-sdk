@@ -264,7 +264,7 @@ void CarbonTestConsole::Sample_HelloWorld_Intent(const char* subscriptionKey, co
     case ResultReason::RecognizedIntent:
         ConsoleWriteLine("RECOGNIZED: Text=%s", result->Text.c_str());
         ConsoleWriteLine("  Intent Id:'%s'", result->IntentId.c_str());
-        ConsoleWriteLine("  Intent Service JSON: '%s'", result->Properties.GetProperty(SpeechPropertyId::SpeechServiceResponse_JsonResult).c_str());
+        ConsoleWriteLine("  Intent Service JSON: '%s'", result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult).c_str());
         break;
     case ResultReason::NoMatch:
         {

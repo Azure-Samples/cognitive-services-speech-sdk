@@ -24,7 +24,7 @@ import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.ResultReason;
 import com.microsoft.cognitiveservices.speech.Recognizer;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
-import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
+import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
@@ -158,7 +158,7 @@ public class IntentRecognizerTests {
         assertNotNull(r);
 
         assertNotNull(r.getParameters());
-        assertEquals(r.getSpeechRecognitionLanguage(), r.getParameters().getProperty(SpeechPropertyId.SpeechServiceConnection_RecoLanguage));
+        assertEquals(r.getSpeechRecognitionLanguage(), r.getParameters().getProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
 
         r.close();
         s.close();

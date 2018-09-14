@@ -144,7 +144,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
         if(format == OutputFormat.Detailed) {
             value = "true";
         }
-        speechConfigImpl.SetProperty(com.microsoft.cognitiveservices.speech.internal.SpeechPropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse, value);        
+        speechConfigImpl.SetProperty(com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse, value);        
     }
 
     /**

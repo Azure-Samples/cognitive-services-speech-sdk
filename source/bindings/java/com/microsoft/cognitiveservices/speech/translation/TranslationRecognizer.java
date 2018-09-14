@@ -12,7 +12,7 @@ import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
 import com.microsoft.cognitiveservices.speech.translation.TranslationTextResultCanceledEventArgs;
 import com.microsoft.cognitiveservices.speech.PropertyCollection;
 import com.microsoft.cognitiveservices.speech.RecognizerProperties;
-import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
+import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
@@ -94,7 +94,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
       * @return The spoken language of recognition.
       */
     public String getSpeechRecognitionLanguage() {
-        return _Parameters.getProperty(SpeechPropertyId.SpeechServiceConnection_RecoLanguage);
+        return _Parameters.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
     }
 
     /**
@@ -113,7 +113,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
       * @return the name of output voice.
       */
     public String getVoiceName() {
-       return _Parameters.getProperty(SpeechPropertyId.SpeechServiceConnection_TranslationVoice);
+       return _Parameters.getProperty(PropertyId.SpeechServiceConnection_TranslationVoice);
     }
 
     /**

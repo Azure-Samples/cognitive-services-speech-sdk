@@ -203,7 +203,7 @@ void CSpxUspRecoEngineAdapter::UspInitialize()
 
     // Currently we use a session id as a connection id to correlate logs on the server side with a particular user
     // session, because currently there is a single connection for session at any point in time.
-    auto sessionId = PAL::ToWString(properties->GetStringValue(GetPropertyName(SpeechPropertyId::Speech_SessionId)));
+    auto sessionId = PAL::ToWString(properties->GetStringValue(GetPropertyName(PropertyId::Speech_SessionId)));
     USP::Client client(uspCallbacks, USP::EndpointType::Speech, sessionId);
 
     // Set up the connection properties, and create the connection
@@ -246,7 +246,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint(std::shared_ptr<ISpxNamedP
     SPX_DBG_ASSERT(countSpeech + countIntent + countTranslation == 1); // currently only support one recognizer
 
     // now based on the endpoint, which types of recognizers, and/or the custom model id ... set up the endpoint
-    auto endpoint = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Endpoint));
+    auto endpoint = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint));
     if (0 == PAL::stricmp(endpoint.c_str(), "CORTANA"))
     {
         return SetUspEndpoint_Cortana(properties, client);
@@ -281,7 +281,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Custom(std::shared_ptr<ISp
 {
     UNUSED(properties);
 
-    auto endpoint = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Endpoint));
+    auto endpoint = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint));
     m_customEndpoint = true;
 
     SPX_DBG_TRACE_VERBOSE("%s: Using Custom URL/endpoint: %s", __FUNCTION__, endpoint.c_str());
@@ -293,13 +293,13 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Intent(std::shared_ptr<ISp
     SPX_DBG_TRACE_VERBOSE("%s: Using Intent URL/endpoint...", __FUNCTION__);
     m_customEndpoint = false;
 
-    auto intentRegion = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_IntentRegion));
+    auto intentRegion = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_IntentRegion));
     SPX_IFTRUE_THROW_HR(intentRegion.empty(), SPXERR_INVALID_REGION);
 
     client.SetEndpointType(USP::EndpointType::Intent)
           .SetIntentRegion(intentRegion);
 
-    auto language = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoLanguage));
+    auto language = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
     if (!language.empty())
     {
         client.SetLanguage(language);
@@ -312,15 +312,15 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_Translation(std::shared_pt
     SPX_DBG_TRACE_VERBOSE("%s: Using Translation URL/endpoint...", __FUNCTION__);
     m_customEndpoint = false;
 
-    auto region = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Region));
+    auto region = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region));
     SPX_IFTRUE_THROW_HR(region.empty(), SPXERR_INVALID_REGION);
 
-    auto fromLang = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_TranslationFromLanguage));
-    auto toLangs = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_TranslationToLanguages));
+    auto fromLang = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationFromLanguage));
+    auto toLangs = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages));
     SPX_IFTRUE_THROW_HR(fromLang.empty(), SPXERR_INVALID_ARG);
     SPX_IFTRUE_THROW_HR(toLangs.empty(), SPXERR_INVALID_ARG);
 
-    auto voice = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_TranslationVoice));
+    auto voice = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice));
 
     return client.SetEndpointType(USP::EndpointType::Translation)
         .SetRegion(region)
@@ -335,19 +335,19 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspEndpoint_DefaultSpeechService(std::
     SPX_DBG_TRACE_VERBOSE("%s: Using Default Speech URL/endpoint...", __FUNCTION__);
     m_customEndpoint = false;
 
-    auto region = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Region));
+    auto region = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Region));
     SPX_IFTRUE_THROW_HR(region.empty(), SPXERR_INVALID_REGION);
 
     client.SetEndpointType(USP::EndpointType::Speech)
           .SetRegion(region);
 
-    auto customSpeechModelId = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_EndpointId));
+    auto customSpeechModelId = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_EndpointId));
     if (!customSpeechModelId.empty())
     {
         return client.SetModelId(customSpeechModelId);
     }
 
-    auto lang = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoLanguage));
+    auto lang = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
     if (!lang.empty())
     {
         return client.SetLanguage(lang);
@@ -369,7 +369,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspRecoMode(std::shared_ptr<ISpxNamedP
     {
         SPX_DBG_TRACE_VERBOSE("%s: Check mode string in the Custom URL.", __FUNCTION__);
 
-        auto endpoint = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Endpoint));
+        auto endpoint = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Endpoint));
         SPX_THROW_HR_IF(SPXERR_RUNTIME_ERROR, endpoint.empty());
 
         checkHr = GetRecoModeFromEndpoint(PAL::ToWString(endpoint), mode);
@@ -383,9 +383,9 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspRecoMode(std::shared_ptr<ISpxNamedP
 USP::Client& CSpxUspRecoEngineAdapter::SetUspAuthentication(std::shared_ptr<ISpxNamedProperties>& properties, USP::Client& client)
 {
     // Get the properties that indicates what endpoint to use...
-    auto uspSubscriptionKey = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_Key));
-    auto uspAuthToken = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceAuthorization_Token));
-    auto uspRpsToken = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceRps_Token));
+    auto uspSubscriptionKey = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key));
+    auto uspAuthToken = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token));
+    auto uspRpsToken = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceRps_Token));
 
     // Use those properties to determine which authentication type to use
     if (!uspSubscriptionKey.empty())
@@ -411,21 +411,21 @@ SPXHR CSpxUspRecoEngineAdapter::GetRecoModeFromProperties(const std::shared_ptr<
      SPXHR hr = SPX_NOERROR;
 
     // Get the property that indicates what reco mode to use...
-    auto value = properties->GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode));
+    auto value = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode));
 
     if (value.empty())
     {
         hr = SPXERR_NOT_FOUND;
     }
-    else if (PAL::stricmp(value.c_str(), GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode_Interactive)) == 0)
+    else if (PAL::stricmp(value.c_str(), GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode_Interactive)) == 0)
     {
         recoMode = USP::RecognitionMode::Interactive;
     }
-    else if (PAL::stricmp(value.c_str(), GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode_Conversation)) == 0)
+    else if (PAL::stricmp(value.c_str(), GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode_Conversation)) == 0)
     {
         recoMode = USP::RecognitionMode::Conversation;
     }
-    else if (PAL::stricmp(value.c_str(), GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode_Dictation)) == 0)
+    else if (PAL::stricmp(value.c_str(), GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode_Dictation)) == 0)
     {
         recoMode = USP::RecognitionMode::Dictation;
     }
@@ -441,10 +441,10 @@ SPXHR CSpxUspRecoEngineAdapter::GetRecoModeFromProperties(const std::shared_ptr<
 
 USP::OutputFormat CSpxUspRecoEngineAdapter::GetOutputFormat(const ISpxNamedProperties& properties) const
 {
-    if (!properties.HasStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse)))
+    if (!properties.HasStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse)))
         return USP::OutputFormat::Simple;
 
-    auto value = properties.GetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse));
+    auto value = properties.GetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse));
     if (value.empty() || PAL::stricmp(value.c_str(), PAL::BoolToString(false).c_str()) == 0)
     {
         return USP::OutputFormat::Simple;
@@ -680,7 +680,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechHypothesis(const USP::SpeechHypothesisMsg
             auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
             auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), message.offset, message.duration);
             auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-            namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_Json), PAL::ToString(message.json).c_str());
+            namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_Json), PAL::ToString(message.json).c_str());
             site->FireAdapterResult_Intermediate(this, message.offset, result);
         });
     }
@@ -735,7 +735,7 @@ void CSpxUspRecoEngineAdapter::OnSpeechFragment(const USP::SpeechFragmentMsg& me
             auto factory = SpxQueryService<ISpxRecoResultFactory>(site);
             auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), message.offset, message.duration);
             auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-            namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_Json), PAL::ToString(message.json).c_str());
+            namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_Json), PAL::ToString(message.json).c_str());
             site->FireAdapterResult_Intermediate(this, message.offset, result);
         });
     }
@@ -829,7 +829,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHyp
                 auto result = factory->CreateIntermediateResult(nullptr, message.text.c_str(), message.offset, message.duration);
 
                 auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-                namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_Json), PAL::ToString(message.json).c_str());
+                namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_Json), PAL::ToString(message.json).c_str());
 
                 // Update our result to be a "TranslationText" result.
                 auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
@@ -888,7 +888,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
             auto result = factory->CreateFinalResult(nullptr, ToReason(message.recognitionStatus), ToNoMatchReason(message.recognitionStatus), ToCancellationReason(message.recognitionStatus), message.text.c_str(), message.offset, message.duration);
 
             auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-            namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_Json), PAL::ToString(message.json).c_str());
+            namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_Json), PAL::ToString(message.json).c_str());
 
             // Update our result to be an "TranslationText" result.
             auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
@@ -1364,12 +1364,12 @@ void CSpxUspRecoEngineAdapter::FireFinalResultNow(const USP::SpeechPhraseMsg& me
         auto result = factory->CreateFinalResult(nullptr, ToReason(message.recognitionStatus), ToNoMatchReason(message.recognitionStatus), ToCancellationReason(message.recognitionStatus), message.displayText.c_str(), message.offset, message.duration);
 
         auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
-        namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_Json), PAL::ToString(message.json).c_str());
+        namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_Json), PAL::ToString(message.json).c_str());
 
         // Do we already have the LUIS json payload from the service (1-hop)
         if (!luisJson.empty())
         {
-            namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_Json), luisJson.c_str());
+            namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_Json), luisJson.c_str());
         }
 
         site->FireAdapterResult_FinalResult(this, message.offset, result);

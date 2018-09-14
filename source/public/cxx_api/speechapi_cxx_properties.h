@@ -70,7 +70,7 @@ public:
     }
 
 public:
-    void SetProperty(SpeechPropertyId propertyID, const std::string& value)
+    void SetProperty(PropertyId propertyID, const std::string& value)
     {
         property_bag_set_string(m_propbag, (int)propertyID, NULL, value.c_str());
     }
@@ -80,7 +80,7 @@ public:
         property_bag_set_string(m_propbag, -1, propertyName.c_str(), value.c_str());
     }
 
-    std::string GetProperty(SpeechPropertyId propertyID, const std::string& defaultValue = "")
+    std::string GetProperty(PropertyId propertyID, const std::string& defaultValue = "")
     {
         return property_bag_get_string(m_propbag, static_cast<int>(propertyID), nullptr, defaultValue.c_str());
     }

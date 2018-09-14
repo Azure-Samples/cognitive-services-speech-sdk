@@ -17,7 +17,7 @@ namespace Speech {
 /// <summary>
 /// Defines speech property ids.
 /// </summary>
-enum class SpeechPropertyId
+enum class PropertyId
 {
     /// <summary>
     /// Subscription key.

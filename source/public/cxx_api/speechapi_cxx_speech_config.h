@@ -77,9 +77,9 @@ public:
     /// <param name="lang">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
     void SetSpeechRecognitionLanguage(const std::string & lang)
     {
-        property_bag_set_string(m_propertybag, static_cast<int>(SpeechPropertyId::SpeechServiceConnection_RecoLanguage), nullptr, lang.c_str());
-        property_bag_set_string(m_propertybag, static_cast<int>(SpeechPropertyId::SpeechServiceConnection_TranslationFromLanguage), nullptr, lang.c_str());
-        property_bag_set_string(m_propertybag, static_cast<int>(SpeechPropertyId::SpeechServiceConnection_IntentSourceLanguage), nullptr, lang.c_str());
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_RecoLanguage), nullptr, lang.c_str());
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_TranslationFromLanguage), nullptr, lang.c_str());
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_IntentSourceLanguage), nullptr, lang.c_str());
     }
 
     /// <summary>
@@ -88,7 +88,7 @@ public:
     /// </summary>
     std::string GetSpeechRecognitionLanguage() const
     {
-        return GetProperty(SpeechPropertyId::SpeechServiceConnection_RecoLanguage);
+        return GetProperty(PropertyId::SpeechServiceConnection_RecoLanguage);
     }
 
     /// <summary>
@@ -96,7 +96,7 @@ public:
     /// </summary>
     void SetEndpointId(const std::string & endpointId)
     {
-        property_bag_set_string(m_propertybag, static_cast<int>(SpeechPropertyId::SpeechServiceConnection_EndpointId), nullptr, endpointId.c_str());
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_EndpointId), nullptr, endpointId.c_str());
     }
 
     /// <summary>
@@ -104,7 +104,7 @@ public:
     /// </summary>
     std::string GetEndpointId() const
     {
-        return GetProperty(SpeechPropertyId::SpeechServiceConnection_EndpointId);
+        return GetProperty(PropertyId::SpeechServiceConnection_EndpointId);
     }
 
     /// <summary>
@@ -112,7 +112,7 @@ public:
     /// </summary>
     void SetAuthorizationToken(const std::string& token)
     {
-        property_bag_set_string(m_propertybag, static_cast<int>(SpeechPropertyId::SpeechServiceAuthorization_Token), nullptr, token.c_str());
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceAuthorization_Token), nullptr, token.c_str());
     }
 
     /// <summary>
@@ -120,7 +120,7 @@ public:
     /// </summary>
     std::string GetAuthorizationToken() const
     {
-        return GetProperty(SpeechPropertyId::SpeechServiceAuthorization_Token);
+        return GetProperty(PropertyId::SpeechServiceAuthorization_Token);
     }
 
     /// <summary>
@@ -128,7 +128,7 @@ public:
     /// </summary>
     std::string GetSubscriptionKey() const
     {
-        return GetProperty(SpeechPropertyId::SpeechServiceConnection_Key);
+        return GetProperty(PropertyId::SpeechServiceConnection_Key);
     }
 
     /// <summary>
@@ -136,7 +136,7 @@ public:
     /// </summary>
     std::string GetRegion() const
     {
-        return GetProperty(SpeechPropertyId::SpeechServiceConnection_Region);
+        return GetProperty(PropertyId::SpeechServiceConnection_Region);
     }
 
     /// <summary>
@@ -144,7 +144,7 @@ public:
     /// </summary>
     OutputFormat GetOutputFormat() const
     {
-        auto result = GetProperty(SpeechPropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse);
+        auto result = GetProperty(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse);
         return result == "true" ? OutputFormat::Detailed : OutputFormat::Simple;
     }
 
@@ -154,7 +154,7 @@ public:
     /// <param name="format">Output format</param>
     void SetOutputFormat(OutputFormat format)
     {
-        property_bag_set_string(m_propertybag, static_cast<int>(SpeechPropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse), nullptr,
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse), nullptr,
             format == OutputFormat::Detailed ? "true" : "false");
     }
 
@@ -182,7 +182,7 @@ public:
     /// Gets a property value by ID.
     /// </summary>
     /// <param name="id">The parameter id.</param>
-    std::string GetProperty(SpeechPropertyId id) const
+    std::string GetProperty(PropertyId id) const
     {
         const char* value = property_bag_get_string(m_propertybag, static_cast<int>(id), nullptr, "");
         return CopyAndFreePropertyString(value);
@@ -193,7 +193,7 @@ public:
     /// </summary>
     /// <param name="id">The property id.</param>
     /// <param name="value">The property value.</param>
-    void SetProperty(SpeechPropertyId id, const std::string& value)
+    void SetProperty(PropertyId id, const std::string& value)
     {
         property_bag_set_string(m_propertybag, static_cast<int>(id), nullptr, value.c_str());
     }

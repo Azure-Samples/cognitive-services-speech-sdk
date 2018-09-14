@@ -23,7 +23,7 @@ import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.ResultReason;
 import com.microsoft.cognitiveservices.speech.Recognizer;
-import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
+import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 import com.microsoft.cognitiveservices.speech.translation.TranslationTextResult;
@@ -200,11 +200,11 @@ public class TranslationRecognizerTests {
         assertNotNull(r);
 
         assertNotNull(r.getParameters());
-        assertEquals(r.getSpeechRecognitionLanguage(), r.getParameters().getProperty(SpeechPropertyId.SpeechServiceConnection_TranslationFromLanguage));
+        assertEquals(r.getSpeechRecognitionLanguage(), r.getParameters().getProperty(PropertyId.SpeechServiceConnection_TranslationFromLanguage));
 
         // TODO this cannot be true, right? comparing an array with a string parameter???
         assertEquals(1, r.getTargetLanguages().size());
-        assertEquals(r.getTargetLanguages().get(0), r.getParameters().getProperty(SpeechPropertyId.SpeechServiceConnection_TranslationToLanguages));
+        assertEquals(r.getTargetLanguages().get(0), r.getParameters().getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages));
 
         r.close();
         s.close();

@@ -88,7 +88,7 @@ void CSpxRecognitionResult::InitFinalResult(const wchar_t* resultId, ResultReaso
     if (reason == ResultReason::Canceled)
     {
         auto errorDetails = (text == nullptr) ? "" : PAL::ToString(text);
-        SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_JsonErrorDetails), errorDetails.c_str());
+        SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonErrorDetails), errorDetails.c_str());
     }
 
     SPX_DBG_TRACE_VERBOSE("%s: resultId=%ls", __FUNCTION__, m_resultId.c_str());
@@ -122,7 +122,7 @@ void CSpxRecognitionResult::InitIntentResult(const wchar_t* intentId, const wcha
     }
 
     // BUGBUG: Does this inadvertently overwrite the "speech" json?
-    SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_JsonResult), jsonPayload ? PAL::ToString(std::wstring()).c_str() : "");
+    SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), jsonPayload ? PAL::ToString(std::wstring()).c_str() : "");
 }
 
 const map<wstring, wstring>& CSpxRecognitionResult::GetTranslationText()
@@ -156,7 +156,7 @@ void CSpxRecognitionResult::InitTranslationTextResult(TranslationStatusCode stat
     {
         SPX_DBG_TRACE_VERBOSE("%s: status=TranslationStatusCode::Error; switching result to ResultReason::Canceled", __FUNCTION__);
         auto errorDetails = PAL::ToString(failureReason);
-        SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_JsonErrorDetails), errorDetails.c_str());
+        SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonErrorDetails), errorDetails.c_str());
     }
 }
 
@@ -189,7 +189,7 @@ void CSpxRecognitionResult::InitTranslationSynthesisResult(SynthesisStatusCode s
         m_cancellationReason = CancellationReason::Error;
 
         auto errorDetails = PAL::ToString(failureReason);
-        SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceResponse_JsonErrorDetails), errorDetails.c_str());
+        SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonErrorDetails), errorDetails.c_str());
     }
 }
 

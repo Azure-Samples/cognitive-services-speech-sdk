@@ -121,11 +121,11 @@ void CSpxSpeechApiFactory::SetRecognizerProperties(const std::shared_ptr<ISpxNam
     // Set the recognition language...
     if (language != nullptr)
     {
-        namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoLanguage), language);
+        namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage), language);
     }
 
     namedProperties->SetStringValue(
-        GetPropertyName(SpeechPropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse),
+        GetPropertyName(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse),
         PAL::BoolToString(format == OutputFormat::Detailed).c_str());
 }
 
@@ -133,7 +133,7 @@ void CSpxSpeechApiFactory::SetTranslationProperties(const std::shared_ptr<ISpxNa
 {
     SPX_THROW_HR_IF(SPXERR_INVALID_ARG, sourceLanguage.empty());
 
-    namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_TranslationFromLanguage), sourceLanguage.c_str());
+    namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationFromLanguage), sourceLanguage.c_str());
     std::string plainStr;
     // The target languages are in BCP-47 format, and should not contain the character ','.
     SPX_THROW_HR_IF(SPXERR_INVALID_ARG, targetLanguages.size() == 0);
@@ -145,11 +145,11 @@ void CSpxSpeechApiFactory::SetTranslationProperties(const std::shared_ptr<ISpxNa
         plainStr += "," + *lang;
     }
     SPX_THROW_HR_IF(SPXERR_INVALID_ARG, plainStr.empty());
-    namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_TranslationToLanguages), plainStr.c_str());
-    namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_TranslationVoice), voice.c_str());
+    namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationToLanguages), plainStr.c_str());
+    namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice), voice.c_str());
 
     // Set mode to conversation for translation
-    namedProperties->SetStringValue(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode), GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode_Conversation));
+    namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode), GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode_Conversation));
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

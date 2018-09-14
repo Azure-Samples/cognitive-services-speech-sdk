@@ -162,7 +162,7 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return this.recoImpl.Parameters.GetProperty(Internal.SpeechPropertyId.SpeechServiceConnection_RecoLanguage, string.Empty);
+                return this.recoImpl.Parameters.GetProperty(Internal.PropertyId.SpeechServiceConnection_RecoLanguage, string.Empty);
             }
         }
 
@@ -173,7 +173,7 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return this.recoImpl.Parameters.GetProperty(Internal.SpeechPropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse, "false") == "true"
+                return this.recoImpl.Parameters.GetProperty(Internal.PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse, "false") == "true"
                     ? OutputFormat.Detailed
                     : OutputFormat.Simple;
             }

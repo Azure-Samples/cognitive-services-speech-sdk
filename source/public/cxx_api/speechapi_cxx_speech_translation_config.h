@@ -69,7 +69,7 @@ public:
         if (!m_targetLanguages.empty())
             m_targetLanguages += ",";
         m_targetLanguages += language;
-        property_bag_set_string(m_propertybag, static_cast<int>(SpeechPropertyId::SpeechServiceConnection_TranslationToLanguages), nullptr, m_targetLanguages.c_str());
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_TranslationToLanguages), nullptr, m_targetLanguages.c_str());
     }
 
     /// <summary>
@@ -78,7 +78,7 @@ public:
     std::vector<std::string> GetTargetLanguages() const
     {
         std::vector<std::string> result;
-        auto targetLanguges = GetProperty(SpeechPropertyId::SpeechServiceConnection_TranslationToLanguages);
+        auto targetLanguges = GetProperty(PropertyId::SpeechServiceConnection_TranslationToLanguages);
         if (targetLanguges.empty())
             return result;
 
@@ -97,8 +97,8 @@ public:
     /// </summary>
     void SetVoiceName(const std::string& voice)
     {
-        property_bag_set_string(m_propertybag, static_cast<int>(SpeechPropertyId::SpeechServiceConnection_TranslationFeatures), nullptr, "textToSpeech");
-        property_bag_set_string(m_propertybag, static_cast<int>(SpeechPropertyId::SpeechServiceConnection_TranslationVoice), nullptr, voice.c_str());
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_TranslationFeatures), nullptr, "textToSpeech");
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_TranslationVoice), nullptr, voice.c_str());
     }
 
     /// <summary>
@@ -106,7 +106,7 @@ public:
     /// </summary>
     std::string GetVoiceName() const
     {
-        return GetProperty(SpeechPropertyId::SpeechServiceConnection_TranslationVoice);
+        return GetProperty(PropertyId::SpeechServiceConnection_TranslationVoice);
     }
 
 private:

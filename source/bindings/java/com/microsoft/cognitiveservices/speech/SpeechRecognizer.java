@@ -10,7 +10,7 @@ import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionCanceledEventArgs;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
-import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
+import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.PropertyCollection;
 import com.microsoft.cognitiveservices.speech.RecognizerProperties;
 
@@ -112,7 +112,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       * @return The spoken language of recognition.
       */
     public String getSpeechRecognitionLanguage() {
-        return _Parameters.getProperty(SpeechPropertyId.SpeechServiceConnection_RecoLanguage);
+        return _Parameters.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
     }
 
     /**
@@ -120,7 +120,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
       * @return The output format of recognition.
       */
     public OutputFormat getOutputFormat() {
-        if (_Parameters.getProperty(SpeechPropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse).equals("true")) {
+        if (_Parameters.getProperty(PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse).equals("true")) {
             return OutputFormat.Detailed;
         } else {
             return OutputFormat.Simple;

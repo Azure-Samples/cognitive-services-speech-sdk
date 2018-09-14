@@ -148,7 +148,7 @@ namespace Microsoft.CognitiveServices.Speech
             private RecognitionEventType eventType;
         }
 
-        // TODO: Evil code duplication, merge with another implmentation.
+        // TODO: Evil code duplication, merge with another implementation.
         internal class PropertyCollectionImpl : IPropertyCollection
         {
             private Internal.RecognizerPropertyCollection recognizerParameterImpl;
@@ -158,7 +158,7 @@ namespace Microsoft.CognitiveServices.Speech
                 recognizerParameterImpl = internalRecognizerParameters;
             }
             
-            public string Get(SpeechPropertyId id)
+            public string Get(PropertyId id)
             {
                 return Get(id, string.Empty);
             }
@@ -168,9 +168,9 @@ namespace Microsoft.CognitiveServices.Speech
                 return Get(propertyName, string.Empty);
             }
 
-            public string Get(SpeechPropertyId id, string defaultValue)
+            public string Get(PropertyId id, string defaultValue)
             {
-                return recognizerParameterImpl.GetProperty((Internal.SpeechPropertyId)id, defaultValue);
+                return recognizerParameterImpl.GetProperty((Internal.PropertyId)id, defaultValue);
             }
 
             public string Get(string propertyName, string defaultValue)
@@ -178,9 +178,9 @@ namespace Microsoft.CognitiveServices.Speech
                 return recognizerParameterImpl.GetProperty(propertyName, defaultValue);
             }
 
-            public void Set(SpeechPropertyId id, string value)
+            public void Set(PropertyId id, string value)
             {
-                recognizerParameterImpl.SetProperty((Internal.SpeechPropertyId)id, value);
+                recognizerParameterImpl.SetProperty((Internal.PropertyId)id, value);
             }
 
             public void Set(string propertyName, string value)

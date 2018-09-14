@@ -65,11 +65,11 @@ void CSpxRecognizer::Disable()
 
 CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxRecognizer::RecognizeAsync()
 {
-    const char* reco_mode = GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode);
+    const char* reco_mode = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
     auto currentRecoMode = GetStringValueFromProperties(reco_mode, "");
     auto recoModeToSet = dynamic_cast<ISpxTranslationRecognizer *>(this) != nullptr
-        ? GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode_Conversation)
-        : GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode_Interactive);
+        ? GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode_Conversation)
+        : GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode_Interactive);
 
     std::string recoMode = recoModeToSet ? recoModeToSet : "";
     if (currentRecoMode.empty())
@@ -87,16 +87,16 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxRecognizer::RecognizeAsy
 
 CSpxAsyncOp<void> CSpxRecognizer::StartContinuousRecognitionAsync()
 {
-    const char* reco_mode = GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode);
+    const char* reco_mode = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
     auto currentRecoMode = GetStringValueFromProperties(reco_mode, "");
     if (currentRecoMode.empty())
     {
-        SetStringValueInProperties(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode), GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode_Conversation));
+        SetStringValueInProperties(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode), GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode_Conversation));
     }
     else
     {
         // Since the mode is set during connection setup, no mode switch is allowed.
-        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(GetPropertyName(SpeechPropertyId::SpeechServiceConnection_RecoMode_Conversation)) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);
+        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode_Conversation)) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);
     }
     return m_defaultSession->StartContinuousRecognitionAsync();
 }

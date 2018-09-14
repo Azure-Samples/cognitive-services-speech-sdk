@@ -6,7 +6,7 @@ package com.microsoft.cognitiveservices.speech;
 
 import java.io.Closeable;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
-import com.microsoft.cognitiveservices.speech.SpeechPropertyId;
+import com.microsoft.cognitiveservices.speech.PropertyId;
 
 /**
  * Represents collection of properties.
@@ -37,7 +37,7 @@ public interface PropertyCollection {
       * @param id The speech property id
       * @return The value of the property.
       */
-    public String getProperty(SpeechPropertyId id);
+    public String getProperty(PropertyId id);
 
     /**
       * Sets the propery value by name
@@ -50,8 +50,8 @@ public interface PropertyCollection {
     /**
       * Sets the property's value by id
       *
-      * @param id The speech property id
+      * @param id The property id
       * @param value The value of the parameter.
       */
-    public void setProperty(SpeechPropertyId id, String value);
+    public void setProperty(PropertyId id, String value);
 }
