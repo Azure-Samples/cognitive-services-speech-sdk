@@ -121,8 +121,7 @@ void CSpxRecognitionResult::InitIntentResult(const wchar_t* intentId, const wcha
         }
     }
 
-    // BUGBUG: Does this inadvertently overwrite the "speech" json?
-    SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), jsonPayload ? PAL::ToString(std::wstring()).c_str() : "");
+    SetStringValue(GetPropertyName(PropertyId::LanguageUnderstandingServiceResponse_JsonResult), jsonPayload ? PAL::ToString(std::wstring()).c_str() : "");
 }
 
 const map<wstring, wstring>& CSpxRecognitionResult::GetTranslationText()
@@ -178,7 +177,7 @@ void CSpxRecognitionResult::InitTranslationSynthesisResult(SynthesisStatusCode s
     m_audioBuffer = audioData;
     m_audioLength = audioLength;
 
-    m_reason = m_audioLength > 0 
+    m_reason = m_audioLength > 0
         ? ResultReason::SynthesizingAudio
         : ResultReason::SynthesizingAudioComplete;
 
@@ -195,3 +194,4 @@ void CSpxRecognitionResult::InitTranslationSynthesisResult(SynthesisStatusCode s
 
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl
+

@@ -151,7 +151,7 @@ void CSpxLuisDirectEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionR
     {
         // Check to see if we already have the JSON payload (from the speech service)
         auto properties = SpxQueryInterface<ISpxNamedProperties>(result);
-        auto json = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult));
+        auto json = properties->GetStringValue(GetPropertyName(PropertyId::LanguageUnderstandingServiceResponse_JsonResult));
         SPX_DBG_TRACE_VERBOSE("%s: text='%s'; already-existing-IntentResultJson='%s'", __FUNCTION__, resultText.c_str(), json.c_str());
 
         // If we don't already have the LUIS json, fetch it from LUIS now...

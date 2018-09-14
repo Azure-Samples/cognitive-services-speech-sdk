@@ -170,7 +170,7 @@ public:
     /// <param name="result">The result that was canceled.</param>
     static std::shared_ptr<CancellationDetails> FromResult(std::shared_ptr<RecognitionResult> result)
     {
-        // TODO VSTS 1407221
+        // VSTS 1407221
         // SPX_THROW_HR_IF(result->Reason != ResultReason::Canceled, SPXERR_INVALID_ARG);
         auto ptr = new CancellationDetails(result.get());
         auto cancellation = std::shared_ptr<CancellationDetails>(ptr);
@@ -235,7 +235,7 @@ public:
     /// <param name="result">The recognition result that was not recognized.</param>
     static std::shared_ptr<NoMatchDetails> FromResult(std::shared_ptr<RecognitionResult> result)
     {
-        // TODO VSTS 1407221
+        // VSTS 1407221
         // SPX_IFTRUE_THROW_HR(result->Reason != ResultReason::NoMatch, SPXERR_INVALID_ARG);
         auto ptr = new NoMatchDetails(result.get());
         auto noMatch = std::shared_ptr<NoMatchDetails>(ptr);

@@ -58,8 +58,8 @@ public final class IntentRecognitionResultEventArgs // : System.EventArgs
                " Reason:" + _Result.getReason() +
                " IntentId:<" + _Result.getIntentId() +
                "> Recognized text:<" + _Result.getText() +
-               "> Recognized json:<" + _Result.getProperties().getProperty(PropertyId.SpeechServiceResponse_Json) +
-               "> LanguageUnderstandingJson <" + _Result.getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult) +
+               "> Recognized json:<" + _Result.getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult) +
+               "> LanguageUnderstandingJson <" + _Result.getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult) +
                ">.";
     }
     

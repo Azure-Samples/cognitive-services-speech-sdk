@@ -45,11 +45,6 @@ public enum PropertyId {
     SpeechServiceConnection_EndpointId (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_EndpointId),
 
     /// <summary>
-    /// Translation from language.
-    /// </summary>
-    SpeechServiceConnection_TranslationFromLanguage (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_TranslationFromLanguage),
-
-    /// <summary>
     /// Translation to languages.
     /// </summary>
     SpeechServiceConnection_TranslationToLanguages (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_TranslationToLanguages),
@@ -70,29 +65,9 @@ public enum PropertyId {
     SpeechServiceConnection_IntentRegion (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_IntentRegion),
 
     /// <summary>
-    /// Intent source language. TODO:REMOVE
-    /// </summary>
-    SpeechServiceConnection_IntentSourceLanguage (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_IntentSourceLanguage),
-
-    /// <summary>
-    /// Recognition mode.
+    /// Recognition mode. Can be "INTERACTIVE", "CONVERSATION", "DICTATION".
     /// </summary>
     SpeechServiceConnection_RecoMode (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_RecoMode),
-
-    /// <summary>
-    /// Interactive mode. TODO:REMOVE
-    /// </summary>
-    SpeechServiceConnection_RecoMode_Interactive ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_RecoMode_Interactive),
-
-    /// <summary>
-    /// Conversation mode. TODO:REMOVE
-    /// </summary>
-    SpeechServiceConnection_RecoMode_Conversation ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_RecoMode_Conversation),
-
-    /// <summary>
-    /// Dictation mode. TODO:REMOVE
-    /// </summary>
-    SpeechServiceConnection_RecoMode_Dictation ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_RecoMode_Dictation),
 
     /// <summary>
     /// Recognition language.
@@ -100,7 +75,7 @@ public enum PropertyId {
     SpeechServiceConnection_RecoLanguage ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_RecoLanguage),
 
     /// <summary>
-    /// Session id. TODO: REMOVE
+    /// Session ID.
     /// </summary>
     Speech_SessionId ( com.microsoft.cognitiveservices.speech.internal.PropertyId.Speech_SessionId),
 
@@ -115,12 +90,7 @@ public enum PropertyId {
     SpeechServiceResponse_RequestProfanityFilterTrueFalse (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_RequestProfanityFilterTrueFalse),
 
     /// <summary>
-    /// JSON in result.
-    /// </summary>
-    SpeechServiceResponse_Json ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_Json),
-
-    /// <summary>
-    /// JSON of language understanding in result.
+    /// JSON result of speech recognition service.
     /// </summary>
     SpeechServiceResponse_JsonResult ( com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_JsonResult),
 
@@ -142,7 +112,12 @@ public enum PropertyId {
     /// <summary>
     /// Cancellation detailed text.
     /// </summary>
-    CancellationDetails_ReasonDetailedText ( com.microsoft.cognitiveservices.speech.internal.PropertyId.CancellationDetails_ReasonDetailedText);
+    CancellationDetails_ReasonDetailedText ( com.microsoft.cognitiveservices.speech.internal.PropertyId.CancellationDetails_ReasonDetailedText),
+
+    /// <summary>
+    /// JSON result of language understanding service.
+    /// </summary>
+    LanguageUnderstandingServiceResponse_JsonResult ( com.microsoft.cognitiveservices.speech.internal.PropertyId.LanguageUnderstandingServiceResponse_JsonResult);
 
     private PropertyId(com.microsoft.cognitiveservices.speech.internal.PropertyId id) {
         this.id = id;

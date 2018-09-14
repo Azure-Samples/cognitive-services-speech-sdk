@@ -97,7 +97,7 @@ SPXAPI recognizer_create_translation_recognizer_from_config(SPXRECOHANDLE* phrec
         fbag->Copy(speechconfig_propertybag.get());
 
         auto namedProperties = SpxQueryService<ISpxNamedProperties>(speechconfig);
-        auto source_lang = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationFromLanguage));
+        auto source_lang = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
         auto voice = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice));
 
         // language names are separated by comma
@@ -139,7 +139,7 @@ SPXAPI recognizer_create_intent_recognizer_from_config(SPXRECOHANDLE* phreco, SP
         fbag->Copy(speechconfig_propertybag.get());
 
         auto namedProperties = SpxQueryService<ISpxNamedProperties>(speechconfig);
-        auto lang = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_IntentSourceLanguage));
+        auto lang = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage));
         auto outputFormat = namedProperties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse));
         OutputFormat format = PAL::stricmp(outputFormat.c_str(), PAL::BoolToString(true).c_str()) == 0 ? OutputFormat::Detailed : OutputFormat::Simple;
 

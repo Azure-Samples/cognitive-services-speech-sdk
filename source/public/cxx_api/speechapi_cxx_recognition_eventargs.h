@@ -54,7 +54,6 @@ protected:
         return offset;
     }
 
-    // Todo: make it private after passing SWIG
 private:
 
     DISABLE_COPY_AND_MOVE(RecognitionEventArgs);

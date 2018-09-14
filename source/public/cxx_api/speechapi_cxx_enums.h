@@ -55,64 +55,39 @@ enum class PropertyId
     SpeechServiceConnection_EndpointId = 1006,
 
     /// <summary>
-    /// Translation from language.
-    /// </summary>
-    SpeechServiceConnection_TranslationFromLanguage = 2000,
-
-    /// <summary>
     /// Translation to languages.
     /// </summary>
-    SpeechServiceConnection_TranslationToLanguages = 2001,
+    SpeechServiceConnection_TranslationToLanguages = 2000,
 
     /// <summary>
     /// Translation output voice.
     /// </summary>
-    SpeechServiceConnection_TranslationVoice = 2002,
+    SpeechServiceConnection_TranslationVoice = 2001,
 
     /// <summary>
     /// Translation features.
     /// </summary>
-    SpeechServiceConnection_TranslationFeatures = 2003,
+    SpeechServiceConnection_TranslationFeatures = 2002,
 
     /// <summary>
     /// Intent region.
     /// </summary>
-    SpeechServiceConnection_IntentRegion = 2004,
+    SpeechServiceConnection_IntentRegion = 2003,
 
     /// <summary>
-    /// Intent source language. TODO:REMOVE
-    /// </summary>
-    SpeechServiceConnection_IntentSourceLanguage = 2005,
-
-    /// <summary>
-    /// Recognition mode.
+    /// Recognition mode. Can be "INTERACTIVE", "CONVERSATION", "DICTATION".
     /// </summary>
     SpeechServiceConnection_RecoMode = 3000,
 
     /// <summary>
-    /// Interactive mode. TODO:REMOVE
-    /// </summary>
-    SpeechServiceConnection_RecoMode_Interactive = 3001,
-
-    /// <summary>
-    /// Conversation mode. TODO:REMOVE
-    /// </summary>
-    SpeechServiceConnection_RecoMode_Conversation = 3002,
-
-    /// <summary>
-    /// Dictation mode. TODO:REMOVE
-    /// </summary>
-    SpeechServiceConnection_RecoMode_Dictation = 3004,
-
-    /// <summary>
     /// Recognition language.
     /// </summary>
-    SpeechServiceConnection_RecoLanguage = 3005,
+    SpeechServiceConnection_RecoLanguage = 3001,
 
     /// <summary>
-    /// Session id. TODO: REMOVE
+    /// Session ID.
     /// </summary>
-    Speech_SessionId = 3006,
+    Speech_SessionId = 3002,
 
     /// <summary>
     /// Detailed result required.
@@ -125,19 +100,14 @@ enum class PropertyId
     SpeechServiceResponse_RequestProfanityFilterTrueFalse = 4001,
 
     /// <summary>
-    /// TODO:WHAT IS THIS FOR?
+    /// JSON result of speech recognition service.
     /// </summary>
-    SpeechServiceResponse_Json = 5000,
-
-    /// <summary>
-    /// JSON in result.
-    /// </summary>
-    SpeechServiceResponse_JsonResult = 5001,
+    SpeechServiceResponse_JsonResult = 5000,
 
     /// <summary>
     /// Error details.
     /// </summary>
-    SpeechServiceResponse_JsonErrorDetails = 5002,
+    SpeechServiceResponse_JsonErrorDetails = 5001,
 
     /// <summary>
     /// Cancellation reason.
@@ -152,7 +122,13 @@ enum class PropertyId
     /// <summary>
     /// Cancellation detailed text.
     /// </summary>
-    CancellationDetails_ReasonDetailedText = 6002
+    CancellationDetails_ReasonDetailedText = 6002,
+
+    /// <summary>
+    /// JSON result of language understanding service.
+    /// </summary>
+    LanguageUnderstandingServiceResponse_JsonResult = 7000
+
 };
 
 enum class OutputFormat

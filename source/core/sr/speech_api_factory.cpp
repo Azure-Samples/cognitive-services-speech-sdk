@@ -133,7 +133,7 @@ void CSpxSpeechApiFactory::SetTranslationProperties(const std::shared_ptr<ISpxNa
 {
     SPX_THROW_HR_IF(SPXERR_INVALID_ARG, sourceLanguage.empty());
 
-    namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationFromLanguage), sourceLanguage.c_str());
+    namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoLanguage), sourceLanguage.c_str());
     std::string plainStr;
     // The target languages are in BCP-47 format, and should not contain the character ','.
     SPX_THROW_HR_IF(SPXERR_INVALID_ARG, targetLanguages.size() == 0);
@@ -149,7 +149,7 @@ void CSpxSpeechApiFactory::SetTranslationProperties(const std::shared_ptr<ISpxNa
     namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_TranslationVoice), voice.c_str());
 
     // Set mode to conversation for translation
-    namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode), GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode_Conversation));
+    namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode), g_recoModeConversation);
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

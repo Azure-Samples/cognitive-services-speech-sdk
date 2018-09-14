@@ -106,7 +106,7 @@ public class SpeechRecognitionResult {
     * @return Json serialized representation of the result.
     */
     public String getJson() {
-      return this.properties.getProperty(PropertyId.SpeechServiceResponse_Json);
+      return this.properties.getProperty(PropertyId.SpeechServiceResponse_JsonResult);
     }
 
     /**

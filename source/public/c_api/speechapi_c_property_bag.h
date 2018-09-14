@@ -27,30 +27,26 @@ enum  PropertyId
     SpeechServiceRps_Token = 1005,
     SpeechServiceConnection_EndpointId = 1006,
 
-    SpeechServiceConnection_TranslationFromLanguage = 2000,
-    SpeechServiceConnection_TranslationToLanguages = 2001,
-    SpeechServiceConnection_TranslationVoice = 2002,
-    SpeechServiceConnection_TranslationFeatures = 2003,
-    SpeechServiceConnection_IntentRegion = 2004,
-    SpeechServiceConnection_IntentSourceLanguage = 2005,
+    SpeechServiceConnection_TranslationToLanguages = 2000,
+    SpeechServiceConnection_TranslationVoice = 2001,
+    SpeechServiceConnection_TranslationFeatures = 2002,
+    SpeechServiceConnection_IntentRegion = 2003,
 
     SpeechServiceConnection_RecoMode = 3000,
-    SpeechServiceConnection_RecoMode_Interactive = 3001,
-    SpeechServiceConnection_RecoMode_Conversation = 3002,
-    SpeechServiceConnection_RecoMode_Dictation = 3004,
-    SpeechServiceConnection_RecoLanguage = 3005,
-    Speech_SessionId = 3006,
+    SpeechServiceConnection_RecoLanguage = 3001,
+    Speech_SessionId = 3002,
 
     SpeechServiceResponse_RequestDetailedResultTrueFalse = 4000,
     SpeechServiceResponse_RequestProfanityFilterTrueFalse = 4001,
 
-    SpeechServiceResponse_Json = 5000,
-    SpeechServiceResponse_JsonResult = 5001,
-    SpeechServiceResponse_JsonErrorDetails = 5002,
+    SpeechServiceResponse_JsonResult = 5000,
+    SpeechServiceResponse_JsonErrorDetails = 5001,
 
     CancellationDetails_Reason = 6000,
     CancellationDetails_ReasonText = 6001,
-    CancellationDetails_ReasonDetailedText = 6002
+    CancellationDetails_ReasonDetailedText = 6002,
+
+    LanguageUnderstandingServiceResponse_JsonResult = 7000
 };
 #endif
 

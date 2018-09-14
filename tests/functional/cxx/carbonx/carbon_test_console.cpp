@@ -1076,7 +1076,7 @@ void CarbonTestConsole::recognizer_recognize_once(std::shared_ptr<IntentRecogniz
     auto text = result->Text;
 
     auto intentId = result->IntentId;
-    auto intentJson = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
+    auto intentJson = result->Properties.GetProperty(PropertyId::LanguageUnderstandingServiceResponse_JsonResult);
 
     ConsoleWriteLine("IntentRecognitionResult: ResultId=%s; Reason=%d; Text=%s, IntentId=%s, Json=%s", resultId.c_str(), reason, text.c_str(), intentId.c_str(), intentJson.c_str());
 

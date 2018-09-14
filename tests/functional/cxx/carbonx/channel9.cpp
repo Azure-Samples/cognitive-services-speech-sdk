@@ -198,7 +198,7 @@ void CarbonTestConsole::ch9_do_intent()
 
     printf("FINAL RESULT: '%s'\n", result->Text.c_str());
     printf("   INTENT ID: '%s'\n", result->IntentId.c_str());
-    printf("   LUIS JSON: '%s'\n\n", result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult).c_str());
+    printf("   LUIS JSON: '%s'\n\n", result->Properties.GetProperty(PropertyId::LanguageUnderstandingServiceResponse_JsonResult).c_str());
 
     //recognizer->StopContinuousRecognitionAsync();
 }
@@ -215,7 +215,7 @@ void CarbonTestConsole::ch9_do_intent_continuous()
     recognizer->Recognized += [](const IntentRecognitionEventArgs& e) {
         printf("FINAL RESULT: '%s'\n", e.Result->Text.c_str());
         printf("   INTENT ID: '%s'\n", e.Result->IntentId.c_str());
-        printf("   LUIS JSON: '%s'\n\n", e.Result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult).c_str());
+        printf("   LUIS JSON: '%s'\n\n", e.Result->Properties.GetProperty(PropertyId::LanguageUnderstandingServiceResponse_JsonResult).c_str());
         printf("Listening... (press ENTER to exit) \n\n");
     };
 
@@ -276,7 +276,7 @@ void CarbonTestConsole::ch9_do_kws_intent()
     recognizer->Recognized += [](const IntentRecognitionEventArgs& e) {
         printf("FINAL RESULT: '%s'\n", e.Result->Text.c_str());
         printf("   INTENT ID: '%s'\n", e.Result->IntentId.c_str());
-        printf("   LUIS JSON: '%s'\n\n", e.Result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult).c_str());
+        printf("   LUIS JSON: '%s'\n\n", e.Result->Properties.GetProperty(PropertyId::LanguageUnderstandingServiceResponse_JsonResult).c_str());
         printf("KEYWORD SPOTTING: Say 'Hey Cortana' followed by whatever you want ...  (press ENTER to exit) \n\n");
     };
 

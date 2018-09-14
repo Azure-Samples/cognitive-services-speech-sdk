@@ -14,4 +14,8 @@ namespace Impl {
 
 const char* GetPropertyName(const PropertyId& id);
 
+constexpr auto g_recoModeInteractive = "INTERACTIVE";
+constexpr auto g_recoModeDictation = "DICTATION";
+constexpr auto g_recoModeConversation = "CONVERSATION";
+
 }}}}

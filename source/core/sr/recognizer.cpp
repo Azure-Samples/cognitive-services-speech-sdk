@@ -68,10 +68,9 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxRecognizer::RecognizeAsy
     const char* reco_mode = GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode);
     auto currentRecoMode = GetStringValueFromProperties(reco_mode, "");
     auto recoModeToSet = dynamic_cast<ISpxTranslationRecognizer *>(this) != nullptr
-        ? GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode_Conversation)
-        : GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode_Interactive);
+        ? g_recoModeConversation
+        : g_recoModeInteractive;
 
-    std::string recoMode = recoModeToSet ? recoModeToSet : "";
     if (currentRecoMode.empty())
     {
         SetStringValueInProperties(reco_mode, recoModeToSet);
@@ -79,7 +78,7 @@ CSpxAsyncOp<std::shared_ptr<ISpxRecognitionResult>> CSpxRecognizer::RecognizeAsy
     else
     {
         // Since the mode is set during connection setup, no mode switch is allowed.
-        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(recoMode) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);
+        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(recoModeToSet) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);
     }
 
     return m_defaultSession->RecognizeAsync();
@@ -91,12 +90,12 @@ CSpxAsyncOp<void> CSpxRecognizer::StartContinuousRecognitionAsync()
     auto currentRecoMode = GetStringValueFromProperties(reco_mode, "");
     if (currentRecoMode.empty())
     {
-        SetStringValueInProperties(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode), GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode_Conversation));
+        SetStringValueInProperties(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode), g_recoModeConversation);
     }
     else
     {
         // Since the mode is set during connection setup, no mode switch is allowed.
-        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(GetPropertyName(PropertyId::SpeechServiceConnection_RecoMode_Conversation)) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);
+        SPX_IFTRUE_THROW_HR((currentRecoMode.compare(g_recoModeConversation) != 0), SPXERR_SWITCH_MODE_NOT_ALLOWED);
     }
     return m_defaultSession->StartContinuousRecognitionAsync();
 }

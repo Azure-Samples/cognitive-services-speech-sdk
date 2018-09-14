@@ -78,8 +78,6 @@ public:
     void SetSpeechRecognitionLanguage(const std::string & lang)
     {
         property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_RecoLanguage), nullptr, lang.c_str());
-        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_TranslationFromLanguage), nullptr, lang.c_str());
-        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_IntentSourceLanguage), nullptr, lang.c_str());
     }
 
     /// <summary>

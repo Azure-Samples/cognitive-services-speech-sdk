@@ -50,15 +50,15 @@ public final class IntentRecognitionResult extends com.microsoft.cognitiveservic
      * @return A String that represents the intent including properties being recognized.
      */
     public String getLanguageUnderstanding() {
-        return getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult);
+        return getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult);
     }
 
    /**
-    * A String that represents the intent as json.
-    * @return A String that represents the intent as json.
+    * A String that represents the speech service response as JSON.
+    * @return A String that represents the speech service response as JSON.
     */
     public String getJson() {
-      return getProperties().getProperty(PropertyId.SpeechServiceResponse_Json);
+      return getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult);
     }
 
     /**
@@ -71,8 +71,8 @@ public final class IntentRecognitionResult extends com.microsoft.cognitiveservic
                " Reason:" + getReason() +
                " IntentId:<" + _intentId +
                "> Recognized text:<" + getText() +
-               "> Recognized json:<" + getProperties().getProperty(PropertyId.SpeechServiceResponse_Json) +
-               "> LanguageUnderstandingJson <" + getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult) +
+               "> Recognized json:<" + getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult) +
+               "> LanguageUnderstandingJson <" + getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult) +
                ">.";
     }
 }

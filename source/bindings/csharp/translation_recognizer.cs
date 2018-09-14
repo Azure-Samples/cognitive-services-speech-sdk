@@ -166,7 +166,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         {
             get
             {
-                return Properties.GetProperty(PropertyId.SpeechServiceConnection_TranslationFromLanguage);
+                return Properties.GetProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
             }
         }
 

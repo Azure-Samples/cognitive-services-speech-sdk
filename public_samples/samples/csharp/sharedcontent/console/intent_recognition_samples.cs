@@ -51,7 +51,7 @@ namespace MicrosoftSpeechSDKSamples
                 {
                     Console.WriteLine($"RECOGNIZED: Text={result.Text}");
                     Console.WriteLine($"    Intent Id: {result.IntentId}.");
-                    Console.WriteLine($"    Language Understanding JSON: {result.Properties.GetProperty(PropertyId.SpeechServiceResponse_Json)}.");
+                    Console.WriteLine($"    Language Understanding JSON: {result.Properties.GetProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult)}.");
                 }
                 else if (result.Reason == ResultReason.RecognizedSpeech)
                 {
@@ -115,7 +115,7 @@ namespace MicrosoftSpeechSDKSamples
                         {
                             Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
                             Console.WriteLine($"    Intent Id: {e.Result.IntentId}.");
-                            Console.WriteLine($"    Language Understanding JSON: {e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_Json)}.");
+                            Console.WriteLine($"    Language Understanding JSON: {e.Result.Properties.GetProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult)}.");
                         }
                         else if (e.Result.Reason == ResultReason.RecognizedSpeech)
                         {
@@ -203,7 +203,7 @@ namespace MicrosoftSpeechSDKSamples
                 {
                     Console.WriteLine($"RECOGNIZED: Text={result.Text}");
                     Console.WriteLine($"    Intent Id: {result.IntentId}.");
-                    Console.WriteLine($"    Language Understanding JSON: {result.Properties.GetProperty(PropertyId.SpeechServiceResponse_Json)}.");
+                    Console.WriteLine($"    Language Understanding JSON: {result.Properties.GetProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult)}.");
                 }
                 else if (result.Reason == ResultReason.RecognizedSpeech)
                 {

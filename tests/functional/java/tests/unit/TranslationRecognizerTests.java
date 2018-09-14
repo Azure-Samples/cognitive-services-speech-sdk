@@ -200,7 +200,7 @@ public class TranslationRecognizerTests {
         assertNotNull(r);
 
         assertNotNull(r.getProperties());
-        assertEquals(r.getSpeechRecognitionLanguage(), r.getProperties().getProperty(PropertyId.SpeechServiceConnection_TranslationFromLanguage));
+        assertEquals(r.getSpeechRecognitionLanguage(), r.getProperties().getProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
 
         // TODO this cannot be true, right? comparing an array with a string parameter???
         assertEquals(1, r.getTargetLanguages().size());

@@ -46,11 +46,6 @@ namespace Microsoft.CognitiveServices.Speech
         SpeechServiceConnection_EndpointId = Internal.PropertyId.SpeechServiceConnection_EndpointId,
 
         /// <summary>
-        /// Translation from language.
-        /// </summary>
-        SpeechServiceConnection_TranslationFromLanguage = Internal.PropertyId.SpeechServiceConnection_TranslationFromLanguage,
-
-        /// <summary>
         /// Translation to languages.
         /// </summary>
         SpeechServiceConnection_TranslationToLanguages = Internal.PropertyId.SpeechServiceConnection_TranslationToLanguages,
@@ -71,29 +66,9 @@ namespace Microsoft.CognitiveServices.Speech
         SpeechServiceConnection_IntentRegion = Internal.PropertyId.SpeechServiceConnection_IntentRegion,
 
         /// <summary>
-        /// Intent source language. TODO:REMOVE
-        /// </summary>
-        SpeechServiceConnection_IntentSourceLanguage = Internal.PropertyId.SpeechServiceConnection_IntentSourceLanguage,
-
-        /// <summary>
-        /// Recognition mode.
+        /// Recognition mode. Can be "INTERACTIVE", "CONVERSATION", "DICTATION".
         /// </summary>
         SpeechServiceConnection_RecoMode = Internal.PropertyId.SpeechServiceConnection_RecoMode,
-
-        /// <summary>
-        /// Interactive mode. TODO:REMOVE
-        /// </summary>
-        SpeechServiceConnection_RecoMode_Interactive = Internal.PropertyId.SpeechServiceConnection_RecoMode_Interactive,
-
-        /// <summary>
-        /// Conversation mode. TODO:REMOVE
-        /// </summary>
-        SpeechServiceConnection_RecoMode_Conversation = Internal.PropertyId.SpeechServiceConnection_RecoMode_Conversation,
-
-        /// <summary>
-        /// Dictation mode. TODO:REMOVE
-        /// </summary>
-        SpeechServiceConnection_RecoMode_Dictation = Internal.PropertyId.SpeechServiceConnection_RecoMode_Dictation,
 
         /// <summary>
         /// Recognition language.
@@ -101,7 +76,7 @@ namespace Microsoft.CognitiveServices.Speech
         SpeechServiceConnection_RecoLanguage = Internal.PropertyId.SpeechServiceConnection_RecoLanguage,
 
         /// <summary>
-        /// Session id. TODO: REMOVE
+        /// Session ID.
         /// </summary>
         Speech_SessionId = Internal.PropertyId.Speech_SessionId,
 
@@ -116,12 +91,7 @@ namespace Microsoft.CognitiveServices.Speech
         SpeechServiceResponse_RequestProfanityFilterTrueFalse = Internal.PropertyId.SpeechServiceResponse_RequestProfanityFilterTrueFalse,
 
         /// <summary>
-        /// TODO:WHAT IS THIS FOR?
-        /// </summary>
-        SpeechServiceResponse_Json = Internal.PropertyId.SpeechServiceResponse_Json,
-
-        /// <summary>
-        /// JSON in result.
+        /// JSON result of speech recognition service.
         /// </summary>
         SpeechServiceResponse_JsonResult = Internal.PropertyId.SpeechServiceResponse_JsonResult,
 
@@ -143,6 +113,12 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Cancellation detailed text.
         /// </summary>
-        CancellationDetails_ReasonDetailedText = Internal.PropertyId.CancellationDetails_ReasonDetailedText
+        CancellationDetails_ReasonDetailedText = Internal.PropertyId.CancellationDetails_ReasonDetailedText,
+
+        /// <summary>
+        /// JSON result of language understanding service.
+        /// </summary>
+        LanguageUnderstandingServiceResponse_JsonResult = Internal.PropertyId.LanguageUnderstandingServiceResponse_JsonResult,
+
     }
 }
