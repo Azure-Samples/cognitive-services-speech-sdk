@@ -50,7 +50,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             {
                 EventArgs eventArgs = null;
                 recognizer.Recognized += (s, e) => eventArgs = e;
-                recognizer.Synthesized += (s, e) => eventArgs = e;
+                recognizer.Synthesizing += (s, e) => eventArgs = e;
                 recognizer.Recognizing += (s, e) => eventArgs = e;
                 await Task.WhenAny(recognizer.RecognizeOnceAsync(), Task.Delay(timeout));
                 return eventArgs;
@@ -84,7 +84,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     textResultEvents.Add(e);
                 };
 
-                recognizer.Synthesized += (s, e) =>
+                recognizer.Synthesizing += (s, e) =>
                 {
                     Console.WriteLine($"Received synthesis event: {e.ToString()}");
                     if (e.Result.Audio.Length > 0)

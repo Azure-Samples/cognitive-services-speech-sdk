@@ -60,7 +60,7 @@ public:
     explicit TranslationRecognizer(SPXRECOHANDLE hreco) : 
         BaseType(hreco),
         Properties(m_properties),
-        TranslationSynthesisResultEvent(GetTranslationAudioEventConnectionsChangedCallback(), GetTranslationAudioEventConnectionsChangedCallback(), false)
+        Synthesizing(GetTranslationAudioEventConnectionsChangedCallback(), GetTranslationAudioEventConnectionsChangedCallback(), false)
     {
         SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     }
@@ -159,7 +159,7 @@ public:
     /// <summary>
     /// The event signals that a translation synthesis result is received.
     /// </summary>
-    EventSignal<const TranslationSynthesisResultEventArgs&> TranslationSynthesisResultEvent;
+    EventSignal<const TranslationSynthesisResultEventArgs&> Synthesizing;
 
 private:
 
@@ -170,9 +170,9 @@ private:
     std::function<void(const EventSignal<const TranslationSynthesisResultEventArgs&>&)> GetTranslationAudioEventConnectionsChangedCallback()
     {
         return [=](const EventSignal<const TranslationSynthesisResultEventArgs&>& audioEvent) {
-            if (&audioEvent == &TranslationSynthesisResultEvent)
+            if (&audioEvent == &Synthesizing)
             {
-                translator_synthesizing_audio_set_callback(m_hreco, TranslationSynthesisResultEvent.IsConnected() ? FireEvent_TranslationSynthesisResult : nullptr, this);
+                translator_synthesizing_audio_set_callback(m_hreco, Synthesizing.IsConnected() ? FireEvent_TranslationSynthesisResult : nullptr, this);
             }
         };
     }
@@ -184,7 +184,7 @@ private:
 
         auto pThis = static_cast<TranslationRecognizer*>(pvContext);
         auto keepAlive = pThis->shared_from_this();
-        pThis->TranslationSynthesisResultEvent.Signal(*recoEvent.get());
+        pThis->Synthesizing.Signal(*recoEvent.get());
     }
 };
 

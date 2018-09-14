@@ -36,9 +36,9 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
     public final EventHandlerImpl<TranslationTextResultCanceledEventArgs> canceled = new EventHandlerImpl<TranslationTextResultCanceledEventArgs>();
 
     /**
-      * The event synthesized signals that a translation synthesis result is received.
+      * The event synthesizing signals that a translation synthesis result is received.
       */
-    public final EventHandlerImpl<TranslationSynthesisResultEventArgs> synthesized = new EventHandlerImpl<TranslationSynthesisResultEventArgs>();
+    public final EventHandlerImpl<TranslationSynthesisResultEventArgs> synthesizing = new EventHandlerImpl<TranslationSynthesisResultEventArgs>();
 
    /**
      * Constructs an instance of a translation recognizer.
@@ -58,7 +58,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         recoImpl.getRecognized().AddEventListener(recognizedHandler);
 
         synthesisResultHandler = new SynthesisHandlerImpl(this);
-        recoImpl.getTranslationSynthesisResultEvent().AddEventListener(synthesisResultHandler);
+        recoImpl.getSynthesizing().AddEventListener(synthesisResultHandler);
 
         errorHandler = new CanceledHandlerImpl(this);
         recoImpl.getCanceled().AddEventListener(errorHandler);
@@ -199,7 +199,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
             recoImpl.getSessionStopped().RemoveEventListener(sessionStoppedHandler);
             recoImpl.getSpeechStartDetected().RemoveEventListener(speechStartDetectedHandler);
             recoImpl.getSpeechEndDetected().RemoveEventListener(speechEndDetectedHandler);
-            recoImpl.getTranslationSynthesisResultEvent().RemoveEventListener(synthesisResultHandler);
+            recoImpl.getSynthesizing().RemoveEventListener(synthesisResultHandler);
 
             recognizingHandler.delete();
             recognizedHandler.delete();
@@ -291,7 +291,6 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
             this.recognizer = recognizer;
         }
 
-            
         @Override
         public void Execute(com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResultEventArgs eventArgs)
         {
@@ -303,7 +302,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
             }
 
             TranslationSynthesisResultEventArgs resultEventArg = new TranslationSynthesisResultEventArgs(eventArgs);
-            EventHandlerImpl<TranslationSynthesisResultEventArgs> handler = recognizer.synthesized;
+            EventHandlerImpl<TranslationSynthesisResultEventArgs> handler = recognizer.synthesizing;
             if (handler != null)
             {
                 handler.fireEvent(this.recognizer, resultEventArg);

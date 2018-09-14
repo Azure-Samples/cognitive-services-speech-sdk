@@ -70,7 +70,7 @@ public class TranslationSamples {
                 }
             });
 
-            recognizer.synthesized.addEventListener((s, e) -> {
+            recognizer.synthesizing.addEventListener((s, e) -> {
                 System.out.println("Synthesis result received. Size of audio data: " + e.getResult().getAudio().length);
             });
 

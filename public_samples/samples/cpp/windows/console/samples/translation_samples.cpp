@@ -132,7 +132,7 @@ void TranslationContinuousRecognition()
         }
     });
 
-    recognizer->TranslationSynthesisResultEvent.Connect([](const TranslationSynthesisResultEventArgs& e)
+    recognizer->Synthesizing.Connect([](const TranslationSynthesisResultEventArgs& e)
     {
         auto size = e.Result->Audio.size();
         cout << "Translation synthesis result: size of audio data: " << size

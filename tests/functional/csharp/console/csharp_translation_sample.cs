@@ -29,7 +29,7 @@ namespace MicrosoftSpeechSDKSamples
             Console.WriteLine($"Translation: final result: {e.ToString()}.");
         }
 
-        private static void MySynthesisEventHandler(object sender, TranslationSynthesisResultEventArgs e)
+        private static void MySynthesizingEventHandler(object sender, TranslationSynthesisResultEventArgs e)
         {
             Console.WriteLine($"Translation: synthesis result: {e.ToString()}.");
             if (e.Result.Audio.Length > 0)
@@ -161,7 +161,7 @@ namespace MicrosoftSpeechSDKSamples
             // Subscribes to events.
             reco.Recognizing += MyRecognizingEventHandler;
             reco.Recognized += MyRecognizedEventHandler;
-            reco.Synthesized += MySynthesisEventHandler;
+            reco.Synthesizing += MySynthesizingEventHandler;
             reco.Canceled += MyCanceledEventHandler;
             reco.SpeechEndDetected += MySpeechEndDetectedHandler;
 

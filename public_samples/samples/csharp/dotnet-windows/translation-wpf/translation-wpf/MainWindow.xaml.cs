@@ -321,10 +321,10 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
 
             this.recognizer = new TranslationRecognizer(this.config);
 
-            this.recognizer.Recognizing += this.OnPartialResponseReceivedHandler;
-            this.recognizer.Recognized += this.OnFinalResponse;
-            this.recognizer.Synthesized += this.OnSynthesis;
-            this.recognizer.Canceled += this.OnCanceled;
+            this.recognizer.Recognizing += this.OnRecognizingEventHandler;
+            this.recognizer.Recognized += this.OnRecognizedEventHandler;
+            this.recognizer.Synthesizing += this.OnSynthesizingEventHandler;
+            this.recognizer.Canceled += this.OnCanceledEventHandler;
         }
 
         #region Recognition Event Handlers
@@ -334,7 +334,7 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="TranslationTextResultEventArgs"/> instance containing the event data.</param>
-        private void OnPartialResponseReceivedHandler(object sender, TranslationTextResultEventArgs e)
+        private void OnRecognizingEventHandler(object sender, TranslationTextResultEventArgs e)
         {
             string text = e.Result.Text;
             foreach (var t in e.Result.Translations)
@@ -350,7 +350,7 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="TranslationTextResultEventArgs"/> instance containing the event data.</param>
-        private void OnFinalResponse(object sender, TranslationTextResultEventArgs e)
+        private void OnRecognizedEventHandler(object sender, TranslationTextResultEventArgs e)
         {
             if (e.Result.Text.Length == 0)
             {
@@ -376,7 +376,7 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="TranslationTextResultCanceledEventArgs"/> instance containing the event data.</param>
-        private void OnCanceled(object sender, TranslationTextResultCanceledEventArgs e)
+        private void OnCanceledEventHandler(object sender, TranslationTextResultCanceledEventArgs e)
         {
             string text = $"Speech recognition: canceled. Reason: {e.Reason}, ErrorDetails: {e.ErrorDetails}";
             this.SetCurrentText(this.crisCurrentText, text);
@@ -394,7 +394,7 @@ namespace MicrosoftSpeechSDKSamples.WpfTranslationSample
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="TranslationSynthesisEventArgs"/> instance containing the event data.</param>
-        private void OnSynthesis(object sender, TranslationSynthesisResultEventArgs e)
+        private void OnSynthesizingEventHandler(object sender, TranslationSynthesisResultEventArgs e)
         {
             if (e.Result.Audio.Length > 0)
             {

@@ -143,7 +143,7 @@ private:
 
 
 /// <summary>
-/// Defines payload that is sent with the event <see cref="TranslationSynthesisResultEvent"/>.
+/// Defines payload that is sent with the event <see cref="Synthesizing"/>.
 /// </summary>
 class TranslationSynthesisResultEventArgs final : public SessionEventArgs
 {

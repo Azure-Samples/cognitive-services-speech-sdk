@@ -74,7 +74,7 @@ namespace MicrosoftSpeechSDKSamples
                     }
                 };
 
-                recognizer.Synthesized += (s, e) =>
+                recognizer.Synthesizing += (s, e) =>
                 {
                     Console.WriteLine(e.Result.Audio.Length != 0
                         ? $"AudioSize: {e.Result.Audio.Length}"

@@ -53,7 +53,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     ///             }
     ///         };
     ///
-    ///         recognizer.Synthesized += (s, e) =>
+    ///         recognizer.Synthesizing += (s, e) =>
     ///         {
     ///             Console.WriteLine(e.Result.Audio.Length != 0
     ///                 ? $"AudioSize: {e.Result.Audio.Length}"
@@ -108,9 +108,9 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         public event EventHandler<TranslationTextResultCanceledEventArgs> Canceled;
 
         /// <summary>
-        /// The event <see cref="Synthesized"/> signals that a translation synthesis result is received.
+        /// The event <see cref="Synthesizing"/> signals that a translation synthesis result is received.
         /// </summary>
-        public event EventHandler<TranslationSynthesisResultEventArgs> Synthesized;
+        public event EventHandler<TranslationSynthesisResultEventArgs> Synthesizing;
 
         /// <summary>
         /// Creates a translation recognizer using the default microphone input for a specified translation configuration.
@@ -146,7 +146,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             recoImpl.Recognized.Connect(recognizedHandler);
 
             synthesisResultHandler = new SynthesisHandlerImpl(this);
-            recoImpl.TranslationSynthesisResultEvent.Connect(synthesisResultHandler);
+            recoImpl.Synthesizing.Connect(synthesisResultHandler);
 
             canceledHandler = new CanceledHandlerImpl(this);
             recoImpl.Canceled.Connect(canceledHandler);
@@ -406,7 +406,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
                 }
 
                 var resultEventArg = new TranslationSynthesisResultEventArgs(eventArgs);
-                var handler = recognizer.Synthesized;
+                var handler = recognizer.Synthesizing;
                 if (handler != null)
                 {
                     handler(this.recognizer, resultEventArg);

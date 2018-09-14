@@ -1661,7 +1661,7 @@ void CarbonTestConsole::InitRecognizer(const std::string& recognizerType, const 
         m_translationRecognizer->Recognizing.Connect(fn2);
 
         auto fn3 = std::bind(&CarbonTestConsole::TranslationRecognizer_SynthesisResultHandler, this, std::placeholders::_1);
-        m_translationRecognizer->TranslationSynthesisResultEvent.Connect(fn3);
+        m_translationRecognizer->Synthesizing.Connect(fn3);
 
         // Todo: add error handler
         //auto fn4 = std::bind(&CarbonTestConsole::TranslationRecognizer_ErrorHandler, this, std::placeholders::_1);
