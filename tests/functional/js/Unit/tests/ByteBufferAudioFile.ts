@@ -5,9 +5,9 @@
 import * as sdk from "../../../../../source/bindings/js/Speech.Browser.Sdk";
 
 export class ByteBufferAudioFile {
-    public static Load(buffer: Uint8Array): File {
+    public static Load(buffer: ArrayBuffer): File {
 
-        const parts: ArrayBuffer[] = [buffer.buffer];
+        const parts: ArrayBuffer[] = [buffer];
         const file: File = new File(parts, "file.wav");
 
         return file;

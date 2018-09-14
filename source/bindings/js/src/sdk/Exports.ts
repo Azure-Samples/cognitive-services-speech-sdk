@@ -5,10 +5,8 @@
 
 export { AudioConfig } from "./Audio/AudioConfig";
 export { AudioStreamFormat } from "./Audio/AudioStreamFormat";
-export { AudioInputStream } from "./Audio/AudioInputStream";
-export { PullAudioInputStream } from "./Audio/PullAudioInputStream";
+export { AudioInputStream, PullAudioInputStream, PushAudioInputStream } from "./Audio/AudioInputStream";
 export { PullAudioInputStreamCallback } from "./Audio/PullAudioInputStreamCallback";
-export { PushAudioInputStream } from "./Audio/PushAudioInputStream";
 export { ISpeechProperties } from "./ISpeechProperties";
 export { KeywordRecognitionModel } from "./KeywordRecognitionModel";
 export { RecognitionErrorEventArgs } from "./RecognitionErrorEventArgs";

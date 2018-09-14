@@ -17,4 +17,12 @@ export class WaveFileAudioInput {
 
         return (file);
     }
+
+    public static LoadArrayFromFile(filename: string): ArrayBuffer {
+        const fileContents: Buffer = fs.readFileSync(filename);
+
+        const ret = Uint8Array.from(fileContents);
+
+        return ret.buffer;
+    }
 }

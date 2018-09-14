@@ -14,7 +14,7 @@ export class TranslationSynthesisResult {
      * @property
      * @returns Translated audio in the target language.
      */
-    public audio: Uint8Array;
+    public audio: ArrayBuffer;
 
     /**
      * Status of the synthesis.

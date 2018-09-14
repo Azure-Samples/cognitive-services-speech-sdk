@@ -239,7 +239,7 @@ export class TranslationRecognizer extends Recognizer {
                         const retEvent: TranslationSynthesisResultEventArgs = new TranslationSynthesisResultEventArgs();
 
                         retEvent.result = new TranslationSynthesisResult();
-                        retEvent.result.audio = new Uint8Array(evResut.Result);
+                        retEvent.result.audio = evResut.Result;
                         retEvent.sessionId = evResut.SessionId;
 
                         if (!!this.synthesized) {

@@ -15,7 +15,7 @@ export abstract class PullAudioInputStreamCallback {
      * @param dataBuffer The byte array to store the read data.
      * @returns the number of bytes have been read.
      */
-    public abstract read(dataBuffer: number[]): number;
+    public abstract read(dataBuffer: ArrayBuffer): number;
 
     /**
      * Closes the audio input stream.

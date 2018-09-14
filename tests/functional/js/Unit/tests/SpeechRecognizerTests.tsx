@@ -221,8 +221,8 @@ test("testRecognizeOnceAsync1", (done: jest.DoneCallback) => {
         (p2: sdk.SpeechRecognitionResult) => {
             const res: sdk.SpeechRecognitionResult = p2;
             expect(res).not.toBeUndefined();
-            expect(sdk.RecognitionStatus.Recognized === res.reason);
-            expect("What's the weather like?" === res.text);
+            expect(sdk.RecognitionStatus.Recognized).toEqual(res.reason);
+            expect("What's the weather like?").toEqual(res.text);
 
             r.close();
             s.close();
@@ -519,3 +519,199 @@ test("Config is copied on construction", () => {
     expect(r.parameters.get(sdk.RecognizerParameterNames.TranslationVoice)).toEqual("en-US-Zira");
 
 });
+
+test("PushStream4KNoDelay", (done: jest.DoneCallback) => {
+    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    expect(s).not.toBeUndefined();
+    s.language = "en-US";
+
+    const f: ArrayBuffer = WaveFileAudioInput.LoadArrayFromFile(Settings.WaveFile);
+    const p: sdk.PushAudioInputStream = sdk.AudioInputStream.createPushStream();
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);
+    let i: number;
+
+    const sendSize: number = 4096;
+
+    for (i = sendSize - 1; i < f.byteLength; i += sendSize) {
+        p.write(f.slice(i - (sendSize - 1), i));
+    }
+
+    p.write(f.slice(i - (sendSize - 1), f.byteLength - 1));
+    p.close();
+
+    const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s, config);
+    expect(r).not.toBeUndefined();
+    expect(r instanceof sdk.Recognizer);
+
+    r.recognizeOnceAsync(
+        (p2: sdk.SpeechRecognitionResult) => {
+            const res: sdk.SpeechRecognitionResult = p2;
+
+            expect(res).not.toBeUndefined();
+            expect(sdk.RecognitionStatus.Recognized).toEqual(res.reason);
+            expect(res.text).toEqual("What's the weather like?");
+
+            r.close();
+            s.close();
+            done();
+        },
+        (error: string) => {
+            r.close();
+            s.close();
+            setTimeout(() => done(), 1);
+            fail(error);
+        });
+}, 10000);
+
+test("PushStream4KPostRecognizePush", (done: jest.DoneCallback) => {
+    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    expect(s).not.toBeUndefined();
+    s.language = "en-US";
+
+    const f: ArrayBuffer = WaveFileAudioInput.LoadArrayFromFile(Settings.WaveFile);
+    const p: sdk.PushAudioInputStream = sdk.AudioInputStream.createPushStream();
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);
+    let i: number;
+
+    const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s, config);
+    expect(r).not.toBeUndefined();
+    expect(r instanceof sdk.Recognizer);
+
+    r.recognizeOnceAsync(
+        (p2: sdk.SpeechRecognitionResult) => {
+            const res: sdk.SpeechRecognitionResult = p2;
+
+            expect(res).not.toBeUndefined();
+            expect(sdk.RecognitionStatus.Recognized).toEqual(res.reason);
+            expect(res.text).toEqual("What's the weather like?");
+
+            r.close();
+            s.close();
+            done();
+        },
+        (error: string) => {
+            r.close();
+            s.close();
+            setTimeout(() => done(), 1);
+            fail(error);
+        });
+
+    const sendSize: number = 4096;
+
+    for (i = sendSize - 1; i < f.byteLength; i += sendSize) {
+        p.write(f.slice(i - (sendSize - 1), i));
+    }
+
+    p.write(f.slice(i - (sendSize - 1), f.byteLength - 1));
+    p.close();
+
+}, 10000);
+
+test("PullStreamFullFill", (done: jest.DoneCallback) => {
+    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    expect(s).not.toBeUndefined();
+    s.language = "en-US";
+
+    const fileBuffer: ArrayBuffer = WaveFileAudioInput.LoadArrayFromFile(Settings.WaveFile);
+
+    let bytesSent: number = 0;
+    let p: sdk.PullAudioInputStream;
+
+    p = sdk.AudioInputStream.createPullStream(
+        {
+            close: () => { return; },
+            read: (buffer: ArrayBuffer): number => {
+                const copyArray: Uint8Array = new Uint8Array(buffer);
+                const start: number = bytesSent;
+                const end: number = buffer.byteLength > (fileBuffer.byteLength - bytesSent) ? (fileBuffer.byteLength - 1) : (bytesSent + buffer.byteLength - 1);
+                copyArray.set(new Uint8Array(fileBuffer.slice(start, end)));
+                bytesSent += (end - start) + 1;
+
+                if (bytesSent < buffer.byteLength) {
+                    setTimeout(() => p.close(), 1000);
+                }
+
+                return (end - start) + 1;
+            },
+        });
+
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);
+
+    const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s, config);
+    expect(r).not.toBeUndefined();
+    expect(r instanceof sdk.Recognizer);
+
+    r.recognizeOnceAsync(
+        (p2: sdk.SpeechRecognitionResult) => {
+            const res: sdk.SpeechRecognitionResult = p2;
+
+            expect(res).not.toBeUndefined();
+            expect(sdk.RecognitionStatus.Recognized).toEqual(res.reason);
+            expect(res.text).toEqual("What's the weather like?");
+
+            r.close();
+            s.close();
+            done();
+        },
+        (error: string) => {
+            r.close();
+            s.close();
+            setTimeout(() => done(), 1);
+            fail(error);
+        });
+}, 10000);
+
+test("PullStreamHalfFill", (done: jest.DoneCallback) => {
+    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    expect(s).not.toBeUndefined();
+    s.language = "en-US";
+
+    const fileBuffer: ArrayBuffer = WaveFileAudioInput.LoadArrayFromFile(Settings.WaveFile);
+
+    let bytesSent: number = 0;
+    let p: sdk.PullAudioInputStream;
+
+    p = sdk.AudioInputStream.createPullStream(
+        {
+            close: () => { return; },
+            read: (buffer: ArrayBuffer): number => {
+                const copyArray: Uint8Array = new Uint8Array(buffer);
+                const start: number = bytesSent;
+                const fillSize: number = Math.round(fileBuffer.byteLength / 2);
+                const end: number = buffer.byteLength > (fillSize - bytesSent) ? (fillSize - 1) : (bytesSent + buffer.byteLength - 1);
+                copyArray.set(new Uint8Array(fileBuffer.slice(start, end)));
+                bytesSent += (end - start) + 1;
+
+                if (bytesSent < buffer.byteLength) {
+                    setTimeout(() => p.close(), 1000);
+                }
+
+                return (end - start) + 1;
+            },
+        });
+
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);
+
+    const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s, config);
+    expect(r).not.toBeUndefined();
+    expect(r instanceof sdk.Recognizer);
+
+    r.recognizeOnceAsync(
+        (p2: sdk.SpeechRecognitionResult) => {
+            const res: sdk.SpeechRecognitionResult = p2;
+
+            expect(res).not.toBeUndefined();
+            expect(sdk.RecognitionStatus.Recognized).toEqual(res.reason);
+            expect(res.text).toEqual("What's the weather like?");
+
+            r.close();
+            s.close();
+            done();
+        },
+        (error: string) => {
+            r.close();
+            s.close();
+            setTimeout(() => done(), 1);
+            fail(error);
+        });
+}, 10000);

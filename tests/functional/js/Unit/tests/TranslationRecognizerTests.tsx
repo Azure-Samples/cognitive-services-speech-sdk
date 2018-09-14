@@ -505,10 +505,10 @@ test("TranslateVoiceRoundTrip", (done: jest.DoneCallback) => {
 
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
-    const rEvents: { [id: string]: Uint8Array; } = {};
+    const rEvents: { [id: string]: ArrayBuffer; } = {};
 
     r.synthesized = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
-        const result: Uint8Array = e.result.audio;
+        const result: ArrayBuffer = e.result.audio;
         rEvents["Result@" + Date.now()] = result;
     });
 
@@ -522,7 +522,7 @@ test("TranslateVoiceRoundTrip", (done: jest.DoneCallback) => {
     }, () => {
         r.stopContinuousRecognitionAsync(() => {
             r.close();
-            const result: Uint8Array = rEvents[Object.keys(rEvents)[0]];
+            const result: ArrayBuffer = rEvents[Object.keys(rEvents)[0]];
 
             const inputStream: File = ByteBufferAudioFile.Load(result);
             const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(inputStream);
@@ -596,7 +596,7 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
 
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
-    const rEvents: { [id: string]: Uint8Array; } = {};
+    const rEvents: { [id: string]: ArrayBuffer; } = {};
 
     r.synthesized = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
         if (e.result.synthesisStatus === sdk.SynthesisStatus.Error) {
@@ -606,7 +606,7 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
             fail(e.result.failureReason);
         }
 
-        const result: Uint8Array = e.result.audio;
+        const result: ArrayBuffer = e.result.audio;
         rEvents["Result@" + Date.now()] = result;
     });
 
@@ -627,7 +627,7 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
     }, () => {
         r.stopContinuousRecognitionAsync(() => {
             r.close();
-            const result: Uint8Array = rEvents[Object.keys(rEvents)[0]];
+            const result: ArrayBuffer = rEvents[Object.keys(rEvents)[0]];
 
             const inputStream: File = ByteBufferAudioFile.Load(result);
             const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(inputStream);
@@ -673,7 +673,7 @@ test.skip("MultiPhrase", (done: jest.DoneCallback) => {
 
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
-    const rEvents: { [id: string]: Uint8Array; } = {};
+    const rEvents: { [id: string]: ArrayBuffer; } = {};
 
     r.synthesized = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
         if (e.result.synthesisStatus === sdk.SynthesisStatus.Error) {
@@ -683,7 +683,7 @@ test.skip("MultiPhrase", (done: jest.DoneCallback) => {
             fail(e.result.failureReason);
         }
 
-        const result: Uint8Array = e.result.audio;
+        const result: ArrayBuffer = e.result.audio;
         rEvents["Result@" + Date.now()] = result;
     });
 
@@ -714,7 +714,7 @@ test.skip("MultiPhrase", (done: jest.DoneCallback) => {
 
             byteCount = 0;
             Object.keys(rEvents).forEach((value: string, index: number, array: string[]) => {
-                result.set(rEvents[value], byteCount);
+                result.set(new Uint8Array(rEvents[value]), byteCount);
                 byteCount += rEvents[value].byteLength;
             });
 

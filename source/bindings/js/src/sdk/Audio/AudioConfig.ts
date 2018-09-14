@@ -6,6 +6,7 @@
 import { FileAudioSource, MicAudioSource, PcmRecorder } from "../../common.browser/Exports";
 import { AudioSourceEvent, EventSource, IAudioSource, IAudioStreamNode, Promise } from "../../common/exports";
 import { AudioInputStream, PullAudioInputStreamCallback } from "../Exports";
+import { PullAudioInputStreamImpl, PushAudioInputStreamImpl } from "./AudioInputStream";
 
 /**
  * Represents audio input configuration used for specifying what type of input to use (microphone, file, stream).
@@ -40,7 +41,15 @@ export abstract class AudioConfig {
      * @returns The audio input configuration being created.
      */
     public static fromStreamInput(audioStream: AudioInputStream | PullAudioInputStreamCallback): AudioConfig {
-        throw new Error("NYI");
+        if (audioStream instanceof PullAudioInputStreamCallback) {
+            return new AudioConfigImpl(new PullAudioInputStreamImpl(audioStream as PullAudioInputStreamCallback));
+        }
+
+        if (audioStream instanceof AudioInputStream) {
+            return new AudioConfigImpl(audioStream as PushAudioInputStreamImpl);
+        }
+
+        throw new Error("Not Supported Type");
     }
 
     /**
