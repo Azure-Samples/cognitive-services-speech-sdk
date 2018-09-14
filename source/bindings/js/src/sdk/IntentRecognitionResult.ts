@@ -28,11 +28,4 @@ export class IntentRecognitionResult {
      * @returns A String that represents the intent as json.
      */
     public json: string;
-
-    /**
-     * A String that represents error result in case the call failed.
-     * @property
-     * @returns A String that represents error result in case the call failed.
-     */
-    public errorDetails: string;
 }

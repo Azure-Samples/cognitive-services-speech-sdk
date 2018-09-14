@@ -19,7 +19,8 @@ import {
     PromiseHelper,
     PromiseResult,
 } from "../common/Exports";
-import { SynthesisStatus } from "../sdk/Exports";
+import { OutputFormat, SynthesisStatus, TranslationStatus } from "../sdk/Exports";
+import { OutputFormatPropertyName } from "./Exports";
 import { AuthInfo, IAuthentication } from "./IAuthentication";
 import { IConnectionFactory } from "./IConnectionFactory";
 import {
@@ -27,6 +28,7 @@ import {
     ListeningStartedEvent,
     RecognitionCompletionStatus,
     RecognitionEndedEvent,
+    RecognitionFailedEvent,
     RecognitionStartedEvent,
     RecognitionTriggeredEvent,
     SpeechDetailedPhraseEvent,
@@ -34,7 +36,6 @@ import {
     SpeechFragmentEvent,
     SpeechHypothesisEvent,
     SpeechRecognitionEvent,
-    SpeechRecognitionResultEvent,
     SpeechSimplePhraseEvent,
     SpeechStartDetectedEvent,
     TranslationFailedEvent,
@@ -43,7 +44,7 @@ import {
     TranslationSynthesisErrorEvent,
     TranslationSynthesisEvent,
 } from "./RecognitionEvents";
-import { RecognitionMode, RecognizerConfig, SpeechResultFormat } from "./RecognizerConfig";
+import { RecognizerConfig } from "./RecognizerConfig";
 import { ServiceTelemetryListener } from "./ServiceTelemetryListener.Internal";
 import { SpeechConnectionMessage } from "./SpeechConnectionMessage.Internal";
 import {
@@ -55,6 +56,7 @@ import {
     ISynthesisEnd,
     ITranslationFragment,
     ITranslationPhrase,
+    ITranslationStatus,
     RecognitionStatus2,
 } from "./SpeechResults";
 
@@ -380,7 +382,7 @@ export class SpeechServiceRecognizer extends ServiceRecognizerBase {
                     // For continuous recognition telemetry has to be sent for every phrase as per spec.
                     this.SendTelemetryData(requestSession.RequestId, connection, requestSession.GetTelemetry());
                 }
-                if (this.recognizerConfig.Format === SpeechResultFormat.Simple) {
+                if (this.recognizerConfig.parameters.getProperty(OutputFormatPropertyName) === OutputFormat[OutputFormat.Simple]) {
                     requestSession.OnServiceSimpleSpeechPhraseResponse(JSON.parse(connectionMessage.TextBody));
                 } else {
                     requestSession.OnServiceDetailedSpeechPhraseResponse(JSON.parse(connectionMessage.TextBody));
@@ -429,12 +431,19 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
                 switch (recstatus2) {
                     case RecognitionStatus2.Success:
                         {
-                            requestSession.OnServiceSimpleTranslationPhraseResponse(JSON.parse(connectionMessage.TextBody));
+                            // OK, the recognition was successful. How'd the translation do?
+                            const translatedMessage: ITranslationFragment = JSON.parse(connectionMessage.TextBody);
+
+                            if ((TranslationStatus as any)[translatedMessage.Translation.TranslationStatus] === TranslationStatus.Success) {
+                                requestSession.OnServiceSimpleTranslationPhraseResponse(translatedMessage);
+                            } else {
+                                requestSession.OnServiceTranslationErrorResponse(translatedMessage);
+                            }
                             break;
                         }
                     case RecognitionStatus2.Error:
                         {
-                            requestSession.OnServiceTranslationErrorResponse(translatedPhrase);
+                            requestSession.OnServiceRecognitionErrorResponse(translatedPhrase);
                         }
                 }
                 break;
@@ -659,8 +668,12 @@ class TranslationRequestSession extends RequestSessionBase {
         this.OnEvent(new TranslationSimplePhraseEvent(this.RequestId, this.sessionId, result));
     }
 
-    public OnServiceTranslationErrorResponse = (result: ITranslationPhrase): void => {
+    public OnServiceTranslationErrorResponse = (result: ITranslationFragment): void => {
         this.OnEvent(new TranslationFailedEvent(this.RequestId, this.sessionId, result));
+    }
+
+    public OnServiceRecognitionErrorResponse = (result: ITranslationPhrase): void => {
+        this.OnEvent(new RecognitionFailedEvent(this.RequestId, this.sessionId, result));
     }
 
     public OnServiceTranslationSynthesis = (result: ArrayBuffer): void => {

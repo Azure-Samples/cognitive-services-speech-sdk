@@ -2,15 +2,13 @@ import { WebsocketConnection } from "../common.browser/Exports";
 import {
     IConnection,
     IStringDictionary,
-    Promise,
     Storage,
 } from "../common/Exports";
-import { RecognizerParameterNames } from "../sdk/Exports";
+import { PropertyId } from "../sdk/Exports";
 import {
     AuthInfo,
     IConnectionFactory,
-    SpeechResultFormat,
-    TranslationConfig,
+    RecognizerConfig,
     WebsocketMessageFormatter,
 } from "./Exports";
 
@@ -20,21 +18,20 @@ const ConnectionIdHeader: string = "X-ConnectionId";
 export class TranslationConnectionFactory implements IConnectionFactory {
 
     public Create = (
-        config: TranslationConfig,
+        config: RecognizerConfig,
         authInfo: AuthInfo,
         connectionId?: string): IConnection => {
 
-        let endpoint: string = config.SpeechConfig.getProperty(RecognizerParameterNames.Endpoint, undefined);
+        let endpoint: string = config.parameters.getProperty(PropertyId.SpeechServiceConnection_Endpoint, undefined);
         if (!endpoint) {
-            const region: string = config.SpeechConfig.getProperty(RecognizerParameterNames.Region, undefined);
+            const region: string = config.parameters.getProperty(PropertyId.SpeechServiceConnection_Region, undefined);
 
             endpoint = this.Host(region) + Storage.Local.GetOrAdd("TranslationRelativeUri", "/speech/translation/cognitiveservices/v1");
         }
 
         const queryParams: IStringDictionary<string> = {
-            format: SpeechResultFormat[config.Format].toString().toLowerCase(),
-            from: config.Language,
-            to: config.SpeechConfig.getProperty(RecognizerParameterNames.TranslationToLanguage),
+            from: config.parameters.getProperty(PropertyId.SpeechServiceConnection_TranslationFromLanguage),
+            to: config.parameters.getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages),
         };
 
         if (this.IsDebugModeEnabled) {
@@ -44,8 +41,8 @@ export class TranslationConnectionFactory implements IConnectionFactory {
         const voiceName: string = "voice";
         const featureName: string = "features";
 
-        if (undefined !== config.Voice) {
-            queryParams[voiceName] = config.Voice;
+        if (config.parameters.hasProperty(PropertyId.SpeechServiceConnection_TranslationVoice)) {
+            queryParams[voiceName] = config.parameters.getProperty(PropertyId.SpeechServiceConnection_TranslationVoice);
             queryParams[featureName] = "texttospeech";
         }
 

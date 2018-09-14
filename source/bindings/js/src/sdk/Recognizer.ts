@@ -2,12 +2,36 @@
 // copyright (c) Microsoft. All rights reserved.
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-import { CognitiveSubscriptionKeyAuthentication, CognitiveTokenAuthentication, Context, Device, IAuthentication, IConnectionFactory, OS, PlatformConfig, RecognitionMode, RecognizerConfig, ServiceRecognizerBase, SpeechRecognitionEvent } from "../common.speech/Exports";
-import { RecognitionCompletionStatus, RecognitionEndedEvent } from "../common.speech/RecognitionEvents";
-import { Promise, PromiseHelper } from "../common/Exports";
+import {
+    CognitiveSubscriptionKeyAuthentication,
+    CognitiveTokenAuthentication,
+    Context,
+    Device,
+    IAuthentication,
+    IConnectionFactory,
+    OS,
+    PlatformConfig,
+    RecognitionMode,
+    RecognizerConfig,
+    ServiceRecognizerBase,
+    SpeechRecognitionEvent,
+} from "../common.speech/Exports";
+import {
+    RecognitionCompletionStatus,
+    RecognitionEndedEvent,
+} from "../common.speech/RecognitionEvents";
+import {
+    Promise,
+    PromiseHelper,
+} from "../common/Exports";
 import { Contracts } from "./Contracts";
-import { AudioConfig, RecognitionEventArgs, RecognitionEventType, RecognizerParameterNames, SessionEventArgs, SessionEventType } from "./Exports";
-import { SpeechConfig, SpeechConfigImpl } from "./SpeechConfig";
+import {
+    AudioConfig,
+    PropertyCollection,
+    PropertyId,
+    RecognitionEventArgs,
+    SessionEventArgs,
+} from "./Exports";
 
 /**
  * Defines the base class Recognizer which mainly contains common event handlers.
@@ -17,21 +41,16 @@ export abstract class Recognizer {
     private disposed: boolean;
 
     protected audioConfig: AudioConfig;
-    protected speechConfig: SpeechConfig;
 
     /**
      * Creates and initializes an instance of a Recognizer
      * @constructor
      * @param {AudioConfig} audioInput - An optional audio input stream associated with the recognizer
      */
-    protected constructor(speechConfig: SpeechConfig, audioConfig: AudioConfig) {
-        Contracts.throwIfNull(speechConfig as SpeechConfigImpl, "speechConfig");
+    protected constructor(audioConfig: AudioConfig) {
         Contracts.throwIfNull(audioConfig, "audioConfig");
 
         this.audioConfig = audioConfig;
-        const speechConfigImpl: SpeechConfigImpl = speechConfig as SpeechConfigImpl;
-
-        this.speechConfig = speechConfigImpl.clone();
 
         this.disposed = false;
     }
@@ -101,7 +120,7 @@ export abstract class Recognizer {
     protected abstract CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioConfig: AudioConfig, recognizerConfig: RecognizerConfig): ServiceRecognizerBase;
 
     // Setup the recognizer
-    protected implRecognizerSetup(recognitionMode: RecognitionMode, speechConfig: SpeechConfig, audioConfig: AudioConfig, speechConnectionFactory: IConnectionFactory): ServiceRecognizerBase {
+    protected implRecognizerSetup(recognitionMode: RecognitionMode, speechProperties: PropertyCollection, audioConfig: AudioConfig, speechConnectionFactory: IConnectionFactory): ServiceRecognizerBase {
 
         const recognizerConfig = this.CreateRecognizerConfig(
             new PlatformConfig(
@@ -109,18 +128,17 @@ export abstract class Recognizer {
                     new OS("navigator.userAgent", "Browser", null),
                     new Device("SpeechSample", "SpeechSample", "1.0.00000"))), // TODO: Need to get these values from the caller?
             recognitionMode); // SDK.SpeechResultFormat.Simple (Options - Simple/Detailed)
-        const speechImlConfig: SpeechConfigImpl = speechConfig as SpeechConfigImpl;
 
-        const subscriptionKey = speechConfig.getProperty(RecognizerParameterNames.SubscriptionKey, undefined);
+        const subscriptionKey = speechProperties.getProperty(PropertyId.SpeechServiceConnection_Key, undefined);
         const authentication = subscriptionKey ?
             new CognitiveSubscriptionKeyAuthentication(subscriptionKey) :
             new CognitiveTokenAuthentication(
                 (authFetchEventId: string): Promise<string> => {
-                    const authorizationToken = speechConfig.getProperty(RecognizerParameterNames.AuthorizationToken, undefined);
+                    const authorizationToken = speechProperties.getProperty(PropertyId.SpeechServiceAuthorization_Token, undefined);
                     return PromiseHelper.FromResult(authorizationToken);
                 },
                 (authFetchEventId: string): Promise<string> => {
-                    const authorizationToken = speechConfig.getProperty(RecognizerParameterNames.AuthorizationToken, undefined);
+                    const authorizationToken = speechProperties.getProperty(PropertyId.SpeechServiceAuthorization_Token, undefined);
                     return PromiseHelper.FromResult(authorizationToken);
                 });
 
@@ -179,7 +197,7 @@ export abstract class Recognizer {
                     }
                     break;
 
-                    case "SpeechStartDetectedEvent":
+                case "SpeechStartDetectedEvent":
                     speechStartStopEventArgs = new RecognitionEventArgs();
                     speechStartStopEventArgs.sessionId = event.SessionId;
                     speechStartStopEventArgs.offset = 0; // TODO

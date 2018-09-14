@@ -10,6 +10,7 @@ export * from "./Recognizer";
 export * from "./RecognizerConfig";
 export * from "./SpeechResults";
 export * from "./WebsocketMessageFormatter";
-export * from "./TranslationConfig";
 export * from "./SpeechConnectionFactory";
 export * from "./TranslationConnectionFactory";
+
+export const OutputFormatPropertyName: string = "OutputFormat";

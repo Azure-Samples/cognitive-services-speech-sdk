@@ -1,18 +1,16 @@
 import { WebsocketConnection } from "../common.browser/Exports";
+import { OutputFormatPropertyName } from "../common.speech/Exports";
 import {
     IConnection,
     IStringDictionary,
-    Promise,
     Storage,
 } from "../common/Exports";
-import { RecognizerParameterNames } from "../sdk/Exports";
+import { OutputFormat, PropertyId } from "../sdk/Exports";
 import {
     AuthInfo,
-    IAuthentication,
     IConnectionFactory,
     RecognitionMode,
     RecognizerConfig,
-    SpeechResultFormat,
     WebsocketMessageFormatter,
 } from "./Exports";
 
@@ -26,9 +24,9 @@ export class SpeechConnectionFactory implements IConnectionFactory {
         authInfo: AuthInfo,
         connectionId?: string): IConnection => {
 
-        let endpoint: string = config.SpeechConfig.getProperty(RecognizerParameterNames.Endpoint, undefined);
+        let endpoint: string = config.parameters.getProperty(PropertyId.SpeechServiceConnection_Endpoint, undefined);
         if (!endpoint) {
-            const region: string = config.SpeechConfig.getProperty(RecognizerParameterNames.Region, undefined);
+            const region: string = config.parameters.getProperty(PropertyId.SpeechServiceConnection_Region, undefined);
 
             switch (config.RecognitionMode) {
                 case RecognitionMode.Conversation:
@@ -44,8 +42,8 @@ export class SpeechConnectionFactory implements IConnectionFactory {
         }
 
         const queryParams: IStringDictionary<string> = {
-            format: SpeechResultFormat[config.Format].toString().toLowerCase(),
-            language: config.Language,
+            format: config.parameters.getProperty(OutputFormatPropertyName, OutputFormat[OutputFormat.Simple]).toLowerCase(),
+            language: config.parameters.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage),
         };
 
         if (this.IsDebugModeEnabled) {

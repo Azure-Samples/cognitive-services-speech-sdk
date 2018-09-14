@@ -3,9 +3,27 @@
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-import { IAuthentication, IConnectionFactory, PlatformConfig, RecognitionMode, RecognizerConfig, ServiceRecognizerBase } from "../common.speech/Exports";
+import {
+    IAuthentication,
+    IConnectionFactory,
+    PlatformConfig,
+    RecognitionMode,
+    RecognizerConfig,
+    ServiceRecognizerBase,
+} from "../common.speech/Exports";
 import { Contracts } from "./Contracts";
-import { AudioConfig, AudioInputStream, IntentRecognitionResult, IntentRecognitionResultEventArgs, ISpeechProperties, KeywordRecognitionModel, LanguageUnderstandingModel, RecognitionErrorEventArgs, Recognizer, RecognizerParameterNames, SpeechConfig } from "./Exports";
+import {
+    AudioConfig,
+    IntentRecognitionEventArgs,
+    IntentRecognitionResult,
+    KeywordRecognitionModel,
+    LanguageUnderstandingModel,
+    PropertyCollection,
+    PropertyId,
+    Recognizer,
+    SpeechConfig,
+    SpeechRecognitionCanceledEventArgs,
+} from "./Exports";
 import { SpeechConfigImpl } from "./SpeechConfig";
 
 /**
@@ -14,70 +32,80 @@ import { SpeechConfigImpl } from "./SpeechConfig";
  */
 export class IntentRecognizer extends Recognizer {
     private disposedIntentRecognizer: boolean;
+    private privProperties: PropertyCollection;
 
-    // TODO should only be visible internally for SpeechFactory
     /**
      * Initializes an instance of the IntentRecognizer.
      * @constructor
-     * @param {ISpeechProperties} parameters - The internal set of configuration parameters.
-     * @param {AudioInputStream} ais - An optional audio input stream associated with the recognizer
+     * @param {SpeechConfig} speechConfig - The set of configuration properties.
+     * @param {AudioConfig} audioConfig - An optional audio input config associated with the recognizer
      */
     public constructor(speechConfig: SpeechConfig, audioConfig?: AudioConfig) {
-        super(speechConfig, audioConfig);
+        Contracts.throwIfNull(speechConfig, "speechConfig");
+        const configImpl: SpeechConfigImpl = speechConfig as SpeechConfigImpl;
+        Contracts.throwIfNull(configImpl, "speechConfig");
+
+        super(audioConfig);
 
         this.disposedIntentRecognizer = false;
-        this.parameters = speechConfig as SpeechConfigImpl;
+        this.privProperties = configImpl.properties;
 
-        Contracts.throwIfNullOrWhitespace(this.parameters.getProperty(RecognizerParameterNames.SpeechRecognitionLanguage), RecognizerParameterNames.SpeechRecognitionLanguage);
+        Contracts.throwIfNullOrWhitespace(this.properties.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage), PropertyId[PropertyId.SpeechServiceConnection_RecoLanguage]);
     }
 
     /**
      * The event recognizing signals that an intermediate recognition result is received.
      * @property
      */
-    public recognizing: (sender: IntentRecognizer, event: IntentRecognitionResultEventArgs) => void;
+    public recognizing: (sender: IntentRecognizer, event: IntentRecognitionEventArgs) => void;
 
     /**
      * The event recognized signals that a final recognition result is received.
      * @property
      */
-    public recognized: (sender: IntentRecognizer, event: IntentRecognitionResultEventArgs) => void;
+    public recognized: (sender: IntentRecognizer, event: IntentRecognitionEventArgs) => void;
 
     /**
      * The event canceled signals that an error occurred during recognition.
      * @property
      */
-    public canceled: (sender: IntentRecognizer, event: RecognitionErrorEventArgs) => void;
+    public canceled: (sender: IntentRecognizer, event: SpeechRecognitionCanceledEventArgs) => void;
 
     /**
      * Gets the spoken language of recognition.
      * @property
      * @returns the spoken language of recognition.
      */
-    public get language(): string {
+    public get speechRecognitionLanguage(): string {
         Contracts.throwIfDisposed(this.disposedIntentRecognizer);
 
-        return this.parameters.getProperty(RecognizerParameterNames.SpeechRecognitionLanguage);
+        return this.properties.getProperty(PropertyId.SpeechServiceConnection_IntentSourceLanguage);
     }
 
     /**
-     * Sets the spoken language of recognition.
-     * @property
-     * @param {string} value - the spoken language of recognition.
+     * Gets the authorization token used to communicate with the service.
+     * @return Authorization token.
      */
-    public set language(value: string) {
-        Contracts.throwIfDisposed(this.disposedIntentRecognizer);
-        Contracts.throwIfNullOrWhitespace(value, "value");
-
-        this.parameters.setProperty("SPEECH-RecoLanguage", value);
+    public get authorizationToken(): string {
+        return this.properties.getProperty(PropertyId.SpeechServiceAuthorization_Token);
     }
 
     /**
-     * The collection of parameters and their values defined for this IntentRecognizer.
-     * @property
-     * @returns The collection of parameters and their values defined for this IntentRecognizer.
+     * Sets the authorization token used to communicate with the service.
+     * @param value Authorization token.
      */
-    public parameters: SpeechConfigImpl;
+    public set authorizationToken(value: string) {
+        this.properties.setProperty(PropertyId.SpeechServiceAuthorization_Token, value);
+    }
+
+    /**
+     * The collection of properties and their values defined for this IntentRecognizer.
+     * @property
+     * @returns The collection of properties and their values defined for this IntentRecognizer.
+     */
+    public get properties(): PropertyCollection {
+        return this.privProperties;
+    }
 
     /**
      * Starts intent recognition, and stops after the first utterance is recognized. The task returns the recognition text and intent as result.
@@ -120,10 +148,10 @@ export class IntentRecognizer extends Recognizer {
      * @param {string} intentId - A String that represents the identifier of the intent to be recognized.
      * @param {string} phrase - A String that specifies the phrase representing the intent.
      */
-    public addIntent(intentId: string, phrase: string): void {
+    public addIntent(simplePhrase: string, intentId: string): void {
         Contracts.throwIfDisposed(this.disposedIntentRecognizer);
         Contracts.throwIfNullOrWhitespace(intentId, "intentId");
-        Contracts.throwIfNullOrWhitespace(phrase, "phrase");
+        Contracts.throwIfNullOrWhitespace(simplePhrase, "simplePhrase");
         throw new Error("not supported");
     }
 

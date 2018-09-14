@@ -8,6 +8,7 @@ import {
     IDetailedSpeechPhrase,
     ISimpleSpeechPhrase,
     ISpeechFragment,
+    OutputFormatPropertyName,
     PlatformConfig,
     RecognitionCompletionStatus,
     RecognitionEndedEvent,
@@ -22,7 +23,19 @@ import {
 import { SpeechConnectionFactory } from "../common.speech/SpeechConnectionFactory";
 import { AudioConfigImpl } from "./Audio/AudioConfig";
 import { Contracts } from "./Contracts";
-import { AudioConfig, ISpeechProperties, KeywordRecognitionModel, OutputFormat, RecognitionErrorEventArgs, RecognitionStatus, Recognizer, RecognizerParameterNames, SpeechRecognitionResult, SpeechRecognitionResultEventArgs } from "./Exports";
+import {
+    AudioConfig,
+    CancellationReason,
+    KeywordRecognitionModel,
+    OutputFormat,
+    PropertyCollection,
+    PropertyId,
+    Recognizer,
+    ResultReason,
+    SpeechRecognitionCanceledEventArgs,
+    SpeechRecognitionResult,
+    SpeechRecognitionResultEventArgs,
+} from "./Exports";
 import { SpeechConfig, SpeechConfigImpl } from "./SpeechConfig";
 
 /**
@@ -31,17 +44,23 @@ import { SpeechConfig, SpeechConfigImpl } from "./SpeechConfig";
  */
 export class SpeechRecognizer extends Recognizer {
     private disposedSpeechRecognizer: boolean = false;
+    private privProperties: PropertyCollection;
 
     /**
      * SpeechRecognizer constructor.
      * @constructor
-     * @param {ISpeechProperties} parameters - An set of initial properties for this recognizer
-     * @param {AudioConfig} ais - An optional audio configuration associated with the recognizer
+     * @param {SpeechConfig} speechConfig - An set of initial properties for this recognizer
+     * @param {AudioConfig} audioConfig - An optional audio configuration associated with the recognizer
      */
     public constructor(speechConfig: SpeechConfig, audioConfig?: AudioConfig) {
-        super(speechConfig, audioConfig);
+        super(audioConfig);
 
-        Contracts.throwIfNullOrWhitespace(this.parameters.get(RecognizerParameterNames.SpeechRecognitionLanguage), RecognizerParameterNames.SpeechRecognitionLanguage);
+        const speechConfigImpl: SpeechConfigImpl = speechConfig as SpeechConfigImpl;
+        Contracts.throwIfNull(speechConfigImpl, "speechConfig");
+        this.privProperties = speechConfigImpl.properties.clone();
+
+        Contracts.throwIfNullOrWhitespace(speechConfigImpl.properties.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage), PropertyId[PropertyId.SpeechServiceConnection_RecoLanguage]);
+
     }
 
     /**
@@ -60,7 +79,7 @@ export class SpeechRecognizer extends Recognizer {
      * The event canceled signals that an error occurred during recognition.
      * @property
      */
-    public canceled: (sender: Recognizer, event: RecognitionErrorEventArgs) => void;
+    public canceled: (sender: Recognizer, event: SpeechRecognitionCanceledEventArgs) => void;
 
     /**
      * Gets the endpoint id of a customized speech model that is used for speech recognition.
@@ -70,7 +89,7 @@ export class SpeechRecognizer extends Recognizer {
     public get endpointId(): string {
         Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
 
-        return this.speechConfigImpl.getProperty(RecognizerParameterNames.SpeechModelId, "00000000-0000-0000-0000-000000000000");
+        return this.properties.getProperty(PropertyId.SpeechServiceConnection_EndpointId, "00000000-0000-0000-0000-000000000000");
     }
 
     /**
@@ -81,8 +100,24 @@ export class SpeechRecognizer extends Recognizer {
     public set endpointId(value: string) {
         Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
         Contracts.throwIfNullOrWhitespace(value, "value");
+        this.properties.setProperty(PropertyId.SpeechServiceConnection_EndpointId, value);
+    }
 
-        this.speechConfigImpl.setProperty(RecognizerParameterNames.SpeechModelId, value);
+    /**
+     * Sets the authorization token used to communicate with the service.
+     * @param token Authorization token.
+     */
+    public set authorizationToken(token: string) {
+        Contracts.throwIfNullOrWhitespace(token, "token");
+        this.properties.setProperty(PropertyId.SpeechServiceAuthorization_Token, token);
+    }
+
+    /**
+     * Gets the authorization token used to communicate with the service.
+     * @return Authorization token.
+     */
+    public get authorizationToken(): string {
+        return this.properties.getProperty(PropertyId.SpeechServiceAuthorization_Token);
     }
 
     /**
@@ -90,10 +125,10 @@ export class SpeechRecognizer extends Recognizer {
      * @property
      * @returns The spoken language of recognition.
      */
-    public get language(): string {
+    public get speechRecognitionLanguage(): string {
         Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
 
-        return this.speechConfigImpl.getProperty(RecognizerParameterNames.SpeechRecognitionLanguage);
+        return this.properties.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
     }
 
     /**
@@ -104,7 +139,7 @@ export class SpeechRecognizer extends Recognizer {
     public get outputFormat(): OutputFormat {
         Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
 
-        if (this.speechConfigImpl.getProperty(RecognizerParameterNames.OutputFormat, "SIMPLE") === "SIMPLE") {
+        if (this.properties.getProperty(OutputFormatPropertyName, OutputFormat[OutputFormat.Simple]) === OutputFormat[OutputFormat.Simple]) {
             return OutputFormat.Simple;
         } else {
             return OutputFormat.Detailed;
@@ -112,17 +147,12 @@ export class SpeechRecognizer extends Recognizer {
     }
 
     /**
-     * The collection of parameters and their values defined for this SpeechRecognizer.
+     * The collection of properties and their values defined for this SpeechRecognizer.
      * @property
-     * @returns The collection of parameters and their values defined for this SpeechRecognizer.
+     * @returns The collection of properties and their values defined for this SpeechRecognizer.
      */
-    public get parameters(): ISpeechProperties {
-        return this.speechConfigImpl.parameters;
-    }
-
-    private get speechConfigImpl(): SpeechConfigImpl {
-        const ret: SpeechConfigImpl = this.speechConfig as SpeechConfigImpl;
-        return ret;
+    public get properties(): PropertyCollection {
+        return this.privProperties;
     }
 
     /**
@@ -140,7 +170,7 @@ export class SpeechRecognizer extends Recognizer {
 
         this.reco = this.implRecognizerSetup(
             RecognitionMode.Interactive,
-            this.speechConfig,
+            this.properties,
             this.audioConfig,
             new SpeechConnectionFactory());
 
@@ -167,7 +197,7 @@ export class SpeechRecognizer extends Recognizer {
 
         this.reco = this.implRecognizerSetup(
             RecognitionMode.Conversation,
-            this.speechConfig,
+            this.properties,
             this.audioConfig,
             new SpeechConnectionFactory());
 
@@ -277,7 +307,7 @@ export class SpeechRecognizer extends Recognizer {
         return new RecognizerConfig(
             speechConfig,
             recognitionMode,
-            this.speechConfig as SpeechConfigImpl);
+            this.properties);
     }
 
     protected CreateServiceRecognizer(authentication: IAuthentication, connectionFactory: IConnectionFactory, audioConfig: AudioConfig, recognizerConfig: RecognizerConfig): ServiceRecognizerBase {
@@ -306,11 +336,11 @@ export class SpeechRecognizer extends Recognizer {
                 {
                     const recoEndedEvent: RecognitionEndedEvent = event as RecognitionEndedEvent;
                     if (recoEndedEvent.Status !== RecognitionCompletionStatus.Success) {
-                        const errorEvent: RecognitionErrorEventArgs = new RecognitionErrorEventArgs();
+                        const errorEvent: SpeechRecognitionCanceledEventArgs = new SpeechRecognitionCanceledEventArgs();
 
-                        errorEvent.status = RecognitionStatus.Canceled;
+                        errorEvent.reason = CancellationReason.Error;
                         errorEvent.sessionId = recoEndedEvent.SessionId;
-                        errorEvent.error = recoEndedEvent.Error;
+                        errorEvent.errorDetails = recoEndedEvent.Error;
 
                         if (this.canceled) {
                             this.canceled(this, errorEvent); // call error handler, if configured
@@ -328,10 +358,10 @@ export class SpeechRecognizer extends Recognizer {
                     const evResult = event as SpeechRecognitionResultEvent<ISimpleSpeechPhrase>;
 
                     const reason = this.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
-                    if (reason === RecognitionStatus.Canceled) {
-                        const ev = new RecognitionErrorEventArgs();
+                    if (reason === ResultReason.Canceled) {
+                        const ev = new SpeechRecognitionCanceledEventArgs();
                         ev.sessionId = evResult.SessionId;
-                        ev.status = reason;
+                        ev.reason = this.implTranslateCancelResult(evResult.Result.RecognitionStatus);
 
                         if (!!this.canceled) {
                             this.canceled(this, ev);
@@ -377,10 +407,10 @@ export class SpeechRecognizer extends Recognizer {
                     const evResult = event as SpeechRecognitionResultEvent<IDetailedSpeechPhrase>;
 
                     const reason = this.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
-                    if (reason === RecognitionStatus.Canceled) {
-                        const ev = new RecognitionErrorEventArgs();
+                    if (reason === ResultReason.Canceled) {
+                        const ev = new SpeechRecognitionCanceledEventArgs();
                         ev.sessionId = evResult.SessionId;
-                        ev.status = reason;
+                        ev.reason = this.implTranslateCancelResult(evResult.Result.RecognitionStatus);
 
                         if (!!this.canceled) {
                             this.canceled(this, ev);
@@ -440,34 +470,54 @@ export class SpeechRecognizer extends Recognizer {
         }
     }
 
-    private implTranslateRecognitionResult(recognitionStatus: RecognitionStatus2): RecognitionStatus {
-        let reason = RecognitionStatus.Canceled;
+    private implTranslateRecognitionResult(recognitionStatus: RecognitionStatus2): ResultReason {
+        let reason = ResultReason.Canceled;
         const recognitionStatus2: string = "" + recognitionStatus;
         const recstatus2 = (RecognitionStatus2 as any)[recognitionStatus2];
         switch (recstatus2) {
             case RecognitionStatus2.Success:
             case RecognitionStatus2.EndOfDictation:
-                reason = RecognitionStatus.Recognized;
+                reason = ResultReason.RecognizedSpeech;
                 break;
 
             case RecognitionStatus2.NoMatch:
-                reason = RecognitionStatus.NoMatch;
+                reason = ResultReason.NoMatch;
                 break;
 
             case RecognitionStatus2.InitialSilenceTimeout:
-                reason = RecognitionStatus.InitialSilenceTimeout;
+                reason = ResultReason.Canceled;
                 break;
 
             case RecognitionStatus2.BabbleTimeout:
-                reason = RecognitionStatus.InitialBabbleTimeout;
+                reason = ResultReason.Canceled;
                 break;
 
             case RecognitionStatus2.Error:
             default:
-                reason = RecognitionStatus.Canceled;
+                reason = ResultReason.Canceled;
                 break;
         }
 
+        return reason;
+    }
+
+    private implTranslateCancelResult(recognitionStatus: RecognitionStatus2): CancellationReason {
+        let reason = CancellationReason.EndOfStream;
+        const recognitionStatus2: string = "" + recognitionStatus;
+        const recstatus2 = (RecognitionStatus2 as any)[recognitionStatus2];
+        switch (recstatus2) {
+            case RecognitionStatus2.Success:
+            case RecognitionStatus2.EndOfDictation:
+            case RecognitionStatus2.NoMatch:
+                reason = CancellationReason.EndOfStream;
+                break;
+            case RecognitionStatus2.InitialSilenceTimeout:
+            case RecognitionStatus2.BabbleTimeout:
+            case RecognitionStatus2.Error:
+            default:
+                reason = CancellationReason.Error;
+                break;
+        }
         return reason;
     }
 }

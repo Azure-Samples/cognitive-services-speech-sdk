@@ -3,9 +3,13 @@
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+import { OutputFormatPropertyName } from "../common.speech/Exports";
 import { Contracts } from "./Contracts";
-import { RecognizerParameterNames } from "./Exports";
-import { ISpeechProperties } from "./ISpeechProperties";
+import {
+    OutputFormat,
+    PropertyCollection,
+    PropertyId,
+} from "./Exports";
 
 /**
  * Speech configuration.
@@ -30,8 +34,8 @@ export abstract class SpeechConfig {
         Contracts.throwIfNullOrWhitespace(region, "region");
 
         const speechImpl: SpeechConfigImpl = new SpeechConfigImpl();
-        speechImpl.setProperty(RecognizerParameterNames.Region, region);
-        speechImpl.setProperty(RecognizerParameterNames.SubscriptionKey, subscriptionKey);
+        speechImpl.setProperty(PropertyId.SpeechServiceConnection_Region, region);
+        speechImpl.setProperty(PropertyId.SpeechServiceConnection_Key, subscriptionKey);
 
         return speechImpl;
     }
@@ -50,8 +54,8 @@ export abstract class SpeechConfig {
         Contracts.throwIfNullOrWhitespace(subscriptionKey, "subscriptionKey");
 
         const speechImpl: SpeechConfigImpl = new SpeechConfigImpl();
-        speechImpl.setProperty(RecognizerParameterNames.Endpoint, endpoint.href);
-        speechImpl.setProperty(RecognizerParameterNames.SubscriptionKey, subscriptionKey);
+        speechImpl.setProperty(PropertyId.SpeechServiceConnection_Endpoint, endpoint.href);
+        speechImpl.setProperty(PropertyId.SpeechServiceConnection_Key, subscriptionKey);
         return speechImpl;
     }
 
@@ -66,7 +70,7 @@ export abstract class SpeechConfig {
         Contracts.throwIfNullOrWhitespace(region, "region");
 
         const speechImpl: SpeechConfigImpl = new SpeechConfigImpl();
-        speechImpl.setProperty(RecognizerParameterNames.Region, region);
+        speechImpl.setProperty(PropertyId.SpeechServiceConnection_Region, region);
         speechImpl.authorizationToken = authorizationToken;
         return speechImpl;
     }
@@ -102,14 +106,14 @@ export abstract class SpeechConfig {
      * Returns the configured language.
      * @property
      */
-    public abstract get language(): string;
+    public abstract get speechRecognitionLanguage(): string;
 
     /**
      * Sets the input language.
      * @property
      * @param value the authorization token.
      */
-    public abstract set language(vale: string);
+    public abstract set speechRecognitionLanguage(vale: string);
 
     /**
      * Sets an arbitrary property.
@@ -128,6 +132,17 @@ export abstract class SpeechConfig {
     public abstract getProperty(name: string, def?: string): string;
 
     /**
+     * Sets output format.
+     */
+    public abstract set outputFormat(format: OutputFormat);
+
+    /**
+     * Sets the endpoint ID of a customized speech model that is used for speech recognition.
+     * @param value the endpoint ID
+     */
+    public abstract set endpointId(value: string);
+
+    /**
      * Closes the configuration.
      * @member
      */
@@ -138,72 +153,73 @@ export abstract class SpeechConfig {
 // tslint:disable-next-line:max-classes-per-file
 export class SpeechConfigImpl extends SpeechConfig {
 
-    private speechProperties: ISpeechProperties;
+    private privProperties: PropertyCollection;
 
     public constructor() {
         super();
-        this.speechProperties = new ISpeechProperties();
-        this.language = "en-US"; // Should we have a default?
+        this.privProperties = new PropertyCollection();
+        this.speechRecognitionLanguage = "en-US"; // Should we have a default?
+        this.outputFormat = OutputFormat.Simple;
     }
 
-    public get parameters(): ISpeechProperties {
-        return this.speechProperties;
+    public get properties(): PropertyCollection {
+        return this.privProperties;
     }
 
     public get endPoint(): URL {
-        return new URL(this.speechProperties.get(RecognizerParameterNames.Endpoint));
+        return new URL(this.privProperties.getProperty(PropertyId.SpeechServiceConnection_Endpoint));
     }
 
     public get subscriptionKey(): string {
-        return this.speechProperties.get(RecognizerParameterNames.SubscriptionKey);
+        return this.privProperties.getProperty(PropertyId.SpeechServiceConnection_Key);
     }
 
     public get region(): string {
-        return this.speechProperties.get(RecognizerParameterNames.Region);
+        return this.privProperties.getProperty(PropertyId.SpeechServiceConnection_Region);
     }
 
     public get authorizationToken(): string {
-        return this.speechProperties.get(RecognizerParameterNames.AuthorizationToken);
+        return this.privProperties.getProperty(PropertyId.SpeechServiceAuthorization_Token);
     }
 
     public set authorizationToken(value: string) {
-        this.speechProperties.set(RecognizerParameterNames.AuthorizationToken, value);
+        this.privProperties.setProperty(PropertyId.SpeechServiceAuthorization_Token, value);
     }
 
-    public get language(): string {
-        return this.speechProperties.get(RecognizerParameterNames.SpeechRecognitionLanguage);
+    public get speechRecognitionLanguage(): string {
+        return this.privProperties.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
     }
 
-    public set language(value: string) {
-        this.speechProperties.set(RecognizerParameterNames.SpeechRecognitionLanguage, value);
-        this.speechProperties.set(RecognizerParameterNames.TranslationFromLanguage, value);
+    public set speechRecognitionLanguage(value: string) {
+        this.privProperties.setProperty(PropertyId.SpeechServiceConnection_RecoLanguage, value);
     }
 
-    public setAuthorizationToken(value: string): void {
-        Contracts.throwIfNullOrWhitespace(value, "value");
+    public set outputFormat(value: OutputFormat) {
+        this.privProperties.setProperty(OutputFormatPropertyName, OutputFormat[value]);
+    }
 
-        this.speechProperties.set(RecognizerParameterNames.AuthorizationToken, value);
+    public set endpointId(value: string) {
+        this.privProperties.setProperty(PropertyId.SpeechServiceConnection_Endpoint, value);
     }
 
     public has(key: string): boolean {
-        return this.speechProperties.has(key);
+        return this.privProperties.hasProperty(key);
     }
 
-    public setProperty(name: string, value: string): void {
-        Contracts.throwIfNullOrWhitespace(name, "name");
+    public setProperty(name: string | PropertyId, value: string): void {
+        Contracts.throwIfNullOrWhitespace(value, "value");
 
-        this.speechProperties.set(name, value);
+        this.privProperties.setProperty(name, value);
     }
 
-    public getProperty(name: string, def?: string): string {
-        Contracts.throwIfNullOrWhitespace(name, "name");
+    public getProperty(name: string | PropertyId, def?: string): string {
 
-        return this.speechProperties.get(name, def);
+        return this.privProperties.getProperty(name, def);
     }
 
     public clone(): SpeechConfigImpl {
         const ret: SpeechConfigImpl = new SpeechConfigImpl();
-        ret.speechProperties = this.speechProperties.clone();
+        ret.privProperties = this.privProperties.clone();
         return ret;
     }
 }

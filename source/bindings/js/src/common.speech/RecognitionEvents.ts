@@ -183,9 +183,16 @@ export class TranslationSimplePhraseEvent extends SpeechRecognitionResultEvent<I
 }
 
 // tslint:disable-next-line:max-classes-per-file
-export class TranslationFailedEvent extends SpeechRecognitionResultEvent<ITranslationPhrase> {
-    constructor(requestId: string, sessionId: string, result: ITranslationPhrase) {
+export class TranslationFailedEvent extends SpeechRecognitionResultEvent<ITranslationFragment> {
+    constructor(requestId: string, sessionId: string, result: ITranslationFragment) {
         super("TranslationFailedEvent", requestId, sessionId, result);
+    }
+}
+
+// tslint:disable-next-line:max-classes-per-file
+export class RecognitionFailedEvent extends SpeechRecognitionResultEvent<ITranslationPhrase> {
+    constructor(requestId: string, sessionId: string, result: ITranslationPhrase) {
+        super("RecognitionFailedEvent", requestId, sessionId, result);
     }
 }
 

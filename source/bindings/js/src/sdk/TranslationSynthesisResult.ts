@@ -16,16 +16,5 @@ export class TranslationSynthesisResult {
      */
     public audio: ArrayBuffer;
 
-    /**
-     * Status of the synthesis.
-     * @property
-     * @returns status of the synthesis.
-     */
-    public synthesisStatus: SynthesisStatus;
-
-    /**
-     * Should the synthesis fail, the reason why.
-     * @property
-     */
-    public failureReason: string;
+    public reason: SynthesisStatus;
 }

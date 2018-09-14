@@ -1,5 +1,4 @@
-import { RecognizerParameterNames } from "../sdk/Exports";
-import { SpeechConfigImpl } from "../sdk/SpeechConfig";
+import { PropertyCollection } from "../sdk/Exports";
 
 export enum RecognitionMode {
     Interactive,
@@ -16,33 +15,24 @@ export class RecognizerConfig {
     private recognitionMode: RecognitionMode = RecognitionMode.Interactive;
     private platformConfig: PlatformConfig;
     private recognitionActivityTimeout: number;
-    private speechConfig: SpeechConfigImpl;
+    private speechConfig: PropertyCollection;
 
     constructor(
         platformConfig: PlatformConfig,
         recognitionMode: RecognitionMode = RecognitionMode.Interactive,
-        speechConfig: SpeechConfigImpl) {
+        speechConfig: PropertyCollection) {
         this.platformConfig = platformConfig ? platformConfig : new PlatformConfig(new Context(null, null));
         this.recognitionMode = recognitionMode;
         this.recognitionActivityTimeout = recognitionMode === RecognitionMode.Interactive ? 8000 : 25000;
         this.speechConfig = speechConfig;
     }
 
-    public get SpeechConfig(): SpeechConfigImpl {
+    public get parameters(): PropertyCollection {
         return this.speechConfig;
     }
 
     public get RecognitionMode(): RecognitionMode {
         return this.recognitionMode;
-    }
-
-    public get Language(): string {
-        return this.speechConfig.language;
-    }
-
-    public get Format(): SpeechResultFormat {
-        const format = this.speechConfig.getProperty(RecognizerParameterNames.OutputFormat, "SIMPLE") ? SpeechResultFormat.Simple : SpeechResultFormat.Detailed;
-        return format;
     }
 
     public get PlatformConfig(): PlatformConfig {

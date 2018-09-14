@@ -31,6 +31,11 @@ export interface ITranslationFragment extends ISpeechFragment {
 export interface ITranslations {
     TranslationStatus: TranslationStatus;
     Translations: ITranslation[];
+    FailureReason: string;
+}
+
+export interface ITranslationStatus {
+    TranslationStatus: TranslationStatus;
 }
 
 export interface ITranslation {

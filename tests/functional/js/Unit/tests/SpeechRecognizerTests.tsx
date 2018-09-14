@@ -120,7 +120,7 @@ test("testGetLanguage1", () => {
     const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s, config);
     expect(r).not.toBeUndefined();
 
-    expect(r.language).not.toBeNull();
+    expect(r.speechRecognitionLanguage).not.toBeNull();
 
     r.close();
     s.close();
@@ -134,13 +134,13 @@ test("testGetLanguage2", () => {
     const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
     const language: string = "de-DE";
-    s.language = language;
+    s.speechRecognitionLanguage = language;
 
     const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s, config);
     expect(r).not.toBeUndefined();
 
-    expect(r.language).not.toBeNull();
-    expect(language === r.language);
+    expect(r.speechRecognitionLanguage).not.toBeNull();
+    expect(language === r.speechRecognitionLanguage);
 
     r.close();
     s.close();
@@ -170,8 +170,8 @@ test("testGetOutputFormatDetailed", () => {
     const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
     const language: string = "de-DE";
-    s.language = language;
-    s.setProperty(sdk.RecognizerParameterNames.OutputFormat, "DETAILED");
+    s.speechRecognitionLanguage = language;
+    s.outputFormat = sdk.OutputFormat.Detailed;
 
     const r: sdk.SpeechRecognizer =
         new sdk.SpeechRecognizer(s, config);
@@ -193,11 +193,11 @@ test("testGetParameters", () => {
     const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s, config);
     expect(r).not.toBeUndefined();
 
-    expect(r.parameters).not.toBeUndefined();
-    // expect(r.language ==  r.parameters.get(RecognizerParameterNames.SpeechRecognitionLanguage));
-    // expect(r.deploymentId == r.parameters.get(RecognizerParameterNames.SpeechMspeechConfigImpl// TODO: is this really the correct mapping?
-    expect(r.language).not.toBeUndefined();
-    expect(r.deploymentId === r.parameters.get("SPEECH=ModelId", null)); // todo: is this really the correct mapping?
+    expect(r.properties).not.toBeUndefined();
+    // expect(r.language ==  r.properties.getProperty(RecognizerParameterNames.SpeechRecognitionLanguage));
+    // expect(r.deploymentId == r.properties.getProperty(RecognizerParameterNames.SpeechMspeechConfigImpl// TODO: is this really the correct mapping?
+    expect(r.speechRecognitionLanguage).not.toBeUndefined();
+    expect(r.endpointId === r.properties.getProperty(sdk.PropertyId.SpeechServiceConnection_EndpointId, null)); // todo: is this really the correct mapping?
 
     r.close();
     s.close();
@@ -208,7 +208,7 @@ test("testRecognizeOnceAsync1", (done: jest.DoneCallback) => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
 
-    s.language = "en-US";
+    s.speechRecognitionLanguage = "en-US";
 
     const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
     const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
@@ -221,8 +221,8 @@ test("testRecognizeOnceAsync1", (done: jest.DoneCallback) => {
         (p2: sdk.SpeechRecognitionResult) => {
             const res: sdk.SpeechRecognitionResult = p2;
             expect(res).not.toBeUndefined();
-            expect(sdk.RecognitionStatus.Recognized).toEqual(res.reason);
             expect("What's the weather like?").toEqual(res.text);
+            expect(res.reason).toEqual(sdk.ResultReason.RecognizedSpeech);
 
             r.close();
             s.close();
@@ -240,14 +240,13 @@ test("testRecognizeOnceAsync1", (done: jest.DoneCallback) => {
 test("testRecognizeOnceAsync2", (done: jest.DoneCallback) => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
-    s.language = "en-US";
+    s.speechRecognitionLanguage = "en-US";
 
     const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
     const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
 
     const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s, config);
     expect(r).not.toBeUndefined();
-    // ??     assertNotNull(r.getRecoImpl());
     expect(r instanceof sdk.Recognizer);
 
     const eventsMap: { [id: string]: number; } = {};
@@ -263,7 +262,7 @@ test("testRecognizeOnceAsync2", (done: jest.DoneCallback) => {
         eventsMap[Recognizing] = now;
     };
 
-    r.canceled = (o: sdk.Recognizer, e: sdk.RecognitionErrorEventArgs) => {
+    r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs) => {
         eventsMap[Canceled] = eventIdentifier++;
     };
 
@@ -295,8 +294,8 @@ test("testRecognizeOnceAsync2", (done: jest.DoneCallback) => {
     r.recognizeOnceAsync(
         (res: sdk.SpeechRecognitionResult) => {
             expect(res).not.toBeUndefined();
-            expect("What's the weather like?").toEqual(res.text);
-            expect(res.reason).toEqual(sdk.RecognitionStatus.Recognized);
+            expect(res.text).toEqual("What's the weather like?");
+            expect(res.reason).toEqual(sdk.ResultReason.RecognizedSpeech);
 
             // session events are first and last event
             const LAST_RECORDED_EVENT_ID: number = eventIdentifier;
@@ -352,15 +351,13 @@ test("testRecognizeOnceAsync2", (done: jest.DoneCallback) => {
             s.close();
             done();
         }, (error: string) => {
-
             r.close();
             s.close();
-
+            setTimeout(() => done(), 1);
             fail(error);
-            done();
         });
 
-}, 15000);
+}, 30000);
 
 test("testStartContinuousRecognitionAsync", (done: jest.DoneCallback) => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
@@ -380,8 +377,8 @@ test("testStartContinuousRecognitionAsync", (done: jest.DoneCallback) => {
             done();
         },
         (err: string) => {
-            expect(false).toEqual(true);
-            done();
+            setTimeout(() => done(), 1);
+            fail(err);
         });
 
     r.close();
@@ -407,13 +404,13 @@ test("testStopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
                     done();
                 },
                 (err: string) => {
-                    expect(false).toEqual(true);
-                    done();
+                    setTimeout(() => done(), 1);
+                    fail(err);
                 });
         },
         (err: string) => {
-            expect(false).toEqual(true);
-            done();
+            setTimeout(() => done(), 1);
+            fail(err);
         });
 
     r.close();
@@ -444,10 +441,10 @@ test("testStartStopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
             done();
         },
         (error: string) => {
-            fail(error);
             r.close();
             s.close();
-            done();
+            setTimeout(() => done(), 1);
+            fail(error);
         });
 });
 
@@ -465,11 +462,6 @@ test("testGetRecoImpl", () => {
 
     r.close();
     s.close();
-});
-
-test.skip("testRecognizer", () => {
-    // todo: constructor is protected,
-    fail("Not yet implemented");
 });
 
 test("testClose", () => {
@@ -490,12 +482,12 @@ test("testClose", () => {
 test("Config is copied on construction", () => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
-    s.language = "en-US";
+    s.speechRecognitionLanguage = "en-US";
 
     const ranVal: string = Math.random().toString();
 
     s.setProperty("RandomProperty", ranVal);
-    s.setProperty(sdk.RecognizerParameterNames.TranslationVoice, "en-US-Zira");
+    s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationVoice], "en-US-Zira");
 
     const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
     const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
@@ -504,26 +496,26 @@ test("Config is copied on construction", () => {
     expect(r).not.toBeUndefined();
     expect(r instanceof sdk.Recognizer);
 
-    expect(r.language).toEqual("en-US");
-    expect(r.parameters.get("RandomProperty")).toEqual(ranVal);
-    expect(r.parameters.get(sdk.RecognizerParameterNames.TranslationVoice)).toEqual("en-US-Zira");
+    expect(r.speechRecognitionLanguage).toEqual("en-US");
+    expect(r.properties.getProperty("RandomProperty")).toEqual(ranVal);
+    expect(r.properties.getProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationVoice])).toEqual("en-US-Zira");
 
     // Change them.
-    s.language = "de-DE";
+    s.speechRecognitionLanguage = "de-DE";
     s.setProperty("RandomProperty", Math.random.toString());
-    s.setProperty(sdk.RecognizerParameterNames.TranslationVoice, "de-DE-Hedda");
+    s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationVoice], "de-DE-Hedda");
 
     // Validate no change.
-    expect(r.language).toEqual("en-US");
-    expect(r.parameters.get("RandomProperty")).toEqual(ranVal);
-    expect(r.parameters.get(sdk.RecognizerParameterNames.TranslationVoice)).toEqual("en-US-Zira");
+    expect(r.speechRecognitionLanguage).toEqual("en-US");
+    expect(r.properties.getProperty("RandomProperty")).toEqual(ranVal);
+    expect(r.properties.getProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationVoice])).toEqual("en-US-Zira");
 
 });
 
 test("PushStream4KNoDelay", (done: jest.DoneCallback) => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
-    s.language = "en-US";
+    s.speechRecognitionLanguage = "en-US";
 
     const f: ArrayBuffer = WaveFileAudioInput.LoadArrayFromFile(Settings.WaveFile);
     const p: sdk.PushAudioInputStream = sdk.AudioInputStream.createPushStream();
@@ -548,7 +540,7 @@ test("PushStream4KNoDelay", (done: jest.DoneCallback) => {
             const res: sdk.SpeechRecognitionResult = p2;
 
             expect(res).not.toBeUndefined();
-            expect(sdk.RecognitionStatus.Recognized).toEqual(res.reason);
+            expect(sdk.ResultReason.RecognizedSpeech).toEqual(res.reason);
             expect(res.text).toEqual("What's the weather like?");
 
             r.close();
@@ -566,7 +558,7 @@ test("PushStream4KNoDelay", (done: jest.DoneCallback) => {
 test("PushStream4KPostRecognizePush", (done: jest.DoneCallback) => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
-    s.language = "en-US";
+    s.speechRecognitionLanguage = "en-US";
 
     const f: ArrayBuffer = WaveFileAudioInput.LoadArrayFromFile(Settings.WaveFile);
     const p: sdk.PushAudioInputStream = sdk.AudioInputStream.createPushStream();
@@ -582,7 +574,7 @@ test("PushStream4KPostRecognizePush", (done: jest.DoneCallback) => {
             const res: sdk.SpeechRecognitionResult = p2;
 
             expect(res).not.toBeUndefined();
-            expect(sdk.RecognitionStatus.Recognized).toEqual(res.reason);
+            expect(sdk.ResultReason.RecognizedSpeech).toEqual(res.reason);
             expect(res.text).toEqual("What's the weather like?");
 
             r.close();
@@ -610,7 +602,7 @@ test("PushStream4KPostRecognizePush", (done: jest.DoneCallback) => {
 test("PullStreamFullFill", (done: jest.DoneCallback) => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
-    s.language = "en-US";
+    s.speechRecognitionLanguage = "en-US";
 
     const fileBuffer: ArrayBuffer = WaveFileAudioInput.LoadArrayFromFile(Settings.WaveFile);
 
@@ -646,7 +638,7 @@ test("PullStreamFullFill", (done: jest.DoneCallback) => {
             const res: sdk.SpeechRecognitionResult = p2;
 
             expect(res).not.toBeUndefined();
-            expect(sdk.RecognitionStatus.Recognized).toEqual(res.reason);
+            expect(sdk.ResultReason.RecognizedSpeech).toEqual(res.reason);
             expect(res.text).toEqual("What's the weather like?");
 
             r.close();
@@ -664,7 +656,7 @@ test("PullStreamFullFill", (done: jest.DoneCallback) => {
 test("PullStreamHalfFill", (done: jest.DoneCallback) => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
-    s.language = "en-US";
+    s.speechRecognitionLanguage = "en-US";
 
     const fileBuffer: ArrayBuffer = WaveFileAudioInput.LoadArrayFromFile(Settings.WaveFile);
 
@@ -701,7 +693,7 @@ test("PullStreamHalfFill", (done: jest.DoneCallback) => {
             const res: sdk.SpeechRecognitionResult = p2;
 
             expect(res).not.toBeUndefined();
-            expect(sdk.RecognitionStatus.Recognized).toEqual(res.reason);
+            expect(sdk.ResultReason.RecognizedSpeech).toEqual(res.reason);
             expect(res.text).toEqual("What's the weather like?");
 
             r.close();

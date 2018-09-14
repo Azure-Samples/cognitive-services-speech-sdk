@@ -2,7 +2,7 @@
 // copyright (c) Microsoft. All rights reserved.
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-import { ISpeechProperties, RecognitionStatus } from "./Exports";
+import { PropertyCollection, ResultReason } from "./Exports";
 
 /**
  * Defines result of speech recognition.
@@ -21,7 +21,7 @@ export class SpeechRecognitionResult {
      * @property
      * @returns Specifies status of the result.
      */
-    public reason: RecognitionStatus;
+    public reason: ResultReason;
 
     /**
      * Presents the recognized text in the result.
@@ -64,5 +64,5 @@ export class SpeechRecognitionResult {
      * @property
      * @returns The set of properties exposed in the result.
      */
-    public properties: ISpeechProperties;
+    public properties: PropertyCollection;
 }
