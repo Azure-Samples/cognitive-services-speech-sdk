@@ -178,7 +178,7 @@ test("RecognizeOnceAsync1", (done: jest.DoneCallback) => {
 
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
-    r.synthesized = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
+    r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
         if (e.result.synthesisStatus === sdk.SynthesisStatus.Error) {
             r.close();
             s.close();
@@ -223,7 +223,7 @@ test("Translate Multiple Targets", (done: jest.DoneCallback) => {
 
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
-    r.synthesized = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
+    r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
         if (e.result.synthesisStatus === sdk.SynthesisStatus.Error) {
             r.close();
             s.close();
@@ -332,7 +332,7 @@ test("Validate Event Ordering", (done: jest.DoneCallback) => {
         eventsMap[Session + ":" + SessionEventType.SessionStoppedEvent.toPrecision()] = now;
     };
 
-    r.synthesized = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
+    r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
         if (e.result.synthesisStatus === sdk.SynthesisStatus.Error) {
             r.close();
             s.close();
@@ -507,7 +507,7 @@ test("TranslateVoiceRoundTrip", (done: jest.DoneCallback) => {
 
     const rEvents: { [id: string]: ArrayBuffer; } = {};
 
-    r.synthesized = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
+    r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
         const result: ArrayBuffer = e.result.audio;
         rEvents["Result@" + Date.now()] = result;
     });
@@ -554,7 +554,7 @@ test("TranslateVoiceInvalidVoice", (done: jest.DoneCallback) => {
 
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
-    r.synthesized = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
+    r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
         if (e.result.synthesisStatus === sdk.SynthesisStatus.Error) {
             r.close();
             s.close();
@@ -598,7 +598,7 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
 
     const rEvents: { [id: string]: ArrayBuffer; } = {};
 
-    r.synthesized = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
+    r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
         if (e.result.synthesisStatus === sdk.SynthesisStatus.Error) {
             r.close();
             s.close();
@@ -675,7 +675,7 @@ test.skip("MultiPhrase", (done: jest.DoneCallback) => {
 
     const rEvents: { [id: string]: ArrayBuffer; } = {};
 
-    r.synthesized = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
+    r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisResultEventArgs) => {
         if (e.result.synthesisStatus === sdk.SynthesisStatus.Error) {
             r.close();
             s.close();

@@ -85,10 +85,10 @@ export class TranslationRecognizer extends Recognizer {
     public canceled: (sender: TranslationRecognizer, event: RecognitionErrorEventArgs) => void;
 
     /**
-     * The event synthesized signals that a translation synthesis result is received.
+     * The event synthesizing signals that a translation synthesis result is received.
      * @property
      */
-    public synthesized: (sender: TranslationRecognizer, event: TranslationSynthesisResultEventArgs) => void;
+    public synthesizing: (sender: TranslationRecognizer, event: TranslationSynthesisResultEventArgs) => void;
 
     /**
      * Gets the language name that was set when the recognizer was created.
@@ -242,8 +242,8 @@ export class TranslationRecognizer extends Recognizer {
                         retEvent.result.audio = evResut.Result;
                         retEvent.sessionId = evResut.SessionId;
 
-                        if (!!this.synthesized) {
-                            this.synthesized(this, retEvent);
+                        if (!!this.synthesizing) {
+                            this.synthesizing(this, retEvent);
                         }
                     }
                     break;
@@ -257,8 +257,8 @@ export class TranslationRecognizer extends Recognizer {
                         retEvent.result.failureReason = evResut.Result.FailureReason;
                         retEvent.sessionId = evResut.SessionId;
 
-                        if (!!this.synthesized) {
-                            this.synthesized(this, retEvent);
+                        if (!!this.synthesizing) {
+                            this.synthesizing(this, retEvent);
                         }
 
                         if (!!err) {

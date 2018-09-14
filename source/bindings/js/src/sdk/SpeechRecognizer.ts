@@ -63,22 +63,22 @@ export class SpeechRecognizer extends Recognizer {
     public canceled: (sender: Recognizer, event: RecognitionErrorEventArgs) => void;
 
     /**
-     * Gets the deployment id of a customized speech model that is used for speech recognition.
+     * Gets the endpoint id of a customized speech model that is used for speech recognition.
      * @property
-     * @returns the deployment id of a customized speech model that is used for speech recognition.
+     * @returns the endpoint id of a customized speech model that is used for speech recognition.
      */
-    public get deploymentId(): string {
+    public get endpointId(): string {
         Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
 
         return this.speechConfigImpl.getProperty(RecognizerParameterNames.SpeechModelId, "00000000-0000-0000-0000-000000000000");
     }
 
     /**
-     * Sets the deployment id of a customized speech model that is used for speech recognition.
+     * Sets the endpoint id of a customized speech model that is used for speech recognition.
      * @property
-     * @param value The deployment id of a customized speech model that is used for speech recognition.
+     * @param value The endpoint id of a customized speech model that is used for speech recognition.
      */
-    public set deploymentId(value: string) {
+    public set endpointId(value: string) {
         Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
         Contracts.throwIfNullOrWhitespace(value, "value");
 

@@ -36,7 +36,6 @@
                         <option value="en-GB">English - GB</option>
                         <option value="en-IN">English - IN</option>
                         <option value="en-NZ">English - NZ</option>
-                        <option value="zh-CN">Chinese - CN</option>
                         <option value="en-US" selected="selected">English - US</option>
                         <option value="es-ES">Spanish - ES</option>
                         <option value="es-MX">Spanish - MX</option>
@@ -113,39 +112,36 @@
                     <button id="speechsdkStartContinousTranslation">startContinousTranslation()</button>
                     <button id="speechsdkStopContinousTranslation" disabled="disabled">STOP stopContinousTranslation()</button>
                     <select id="languageTargetOptions">
-                        <option value="ar-EG">Arabic - EG</option>
-                        <option value="ca-ES">Catalan - ES</option>
-                        <option value="da-DK">Danish - DK</option>
-                        <option value="da-DK">Danish - DK</option>
-                        <option value="de-DE" selected="selected">German - DE</option>
-                        <option value="en-AU">English - AU</option>
-                        <option value="en-CA">English - CA</option>
-                        <option value="en-GB">English - GB</option>
-                        <option value="en-IN">English - IN</option>
-                        <option value="en-NZ">English - NZ</option>
-                        <option value="zh-CN">Chinese - CN</option>
-                        <option value="en-US">English - US</option>
-                        <option value="es-ES">Spanish - ES</option>
-                        <option value="es-MX">Spanish - MX</option>
-                        <option value="fi-FI">Finnish - FI</option>
-                        <option value="fr-CA">French - CA</option>
-                        <option value="fr-FR">French - FR</option>
-                        <option value="hi-IN">Hindi - IN</option>
-                        <option value="it-IT">Italian - IT</option>
-                        <option value="ja-JP">Japanese - JP</option>
-                        <option value="ko-KR">Korean - KR</option>
-                        <option value="nb-NO">Norwegian - NO</option>
-                        <option value="nl-NL">Dutch - NL</option>
-                        <option value="pl-PL">Polish - PL</option>
-                        <option value="pt-BR">Portuguese - BR</option>
-                        <option value="pt-PT">Portuguese - PT</option>
-                        <option value="ru-RU">Russian - RU</option>
-                        <option value="sv-SE">Swedish - SE</option>
-                        <option value="zh-CN">Chinese - CN</option>
-                        <option value="zh-HK">Chinese - HK</option>
-                        <option value="zh-TW">Chinese - TW</option>
+                        <option value="ar-EG:Hoda">Arabic - EG</option>
+                        <option value="ca-ES:Herena">Catalan - ES</option>
+                        <option value="da-DK:Helle">Danish - DK</option>
+                        <option value="de-DE-Hedda" selected="selected">German - DE</option>
+                        <option value="en-AU:Catherine">English - AU</option>
+                        <option value="en-CA:Linda">English - CA</option>
+                        <option value="en-GB:Susan">English - GB</option>
+                        <option value="en-IN:Heera">English - IN</option>
+                        <option value="en-US:Zira">English - US</option>
+                        <option value="es-ES:Laura">Spanish - ES</option>
+                        <option value="es-MX:Sabina">Spanish - MX</option>
+                        <option value="fi-FI:Heidi">Finnish - FI</option>
+                        <option value="fr-CA:Caroline">French - CA</option>
+                        <option value="fr-FR:Julie">French - FR</option>
+                        <option value="hi-IN:Hemant">Hindi - IN</option>
+                        <option value="it-IT:Elsa">Italian - IT</option>
+                        <option value="ja-JP:Ayumi">Japanese - JP</option>
+                        <option value="ko-KR:Minjoon">Korean - KR</option>
+                        <option value="nb-NO:Jon">Norwegian - NO</option>
+                        <option value="nl-NL:Marijke">Dutch - NL</option>
+                        <option value="pl-PL:Paulina">Polish - PL</option>
+                        <option value="pt-BR:Maria">Portuguese - BR</option>
+                        <option value="pt-PT:Helia">Portuguese - PT</option>
+                        <option value="ru-RU:Irina">Russian - RU</option>
+                        <option value="sv-SE:Karin">Swedish - SE</option>
+                        <option value="zh-CN:Kangkang">Chinese - CN</option>
+                        <option value="zh-HK:Tracy">Chinese - HK</option>
+                        <option value="zh-TW:Yating">Chinese - TW</option>
                     </select>
-                    <input id="voiceOutput" type="checkbox">
+                    <input id="voiceOutput" type="checkbox" checked>
                     <label for="voiceOutput">voice output</label>
                     </td>
             </tr>
@@ -178,6 +174,32 @@
     <!-- SDK REFERENCE -->
     <script src="../../distrib/speech.sdk.bundle.js"></script>
 
+    <!-- Speech SDK Authorization token -->
+    <script>
+    // Note: Replace the URL with a valid endpoint to retrieve
+    //       authorization tokens for your subscription.
+    var authorizationEndpoint = "token.php";
+  
+    function RequestAuthorizationToken() {
+      if (authorizationEndpoint) {
+        const a = new XMLHttpRequest();
+        a.open("GET", authorizationEndpoint);
+        a.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        a.send("");
+        a.onload = function() {
+            key.disabled = true;
+            key.value = "using authorization token (hit F5 to refresh)";
+
+            const token = JSON.parse(atob(this.responseText.split(".")[1]));
+            regionOptions.value = token.region;
+            authorizationToken = this.responseText;
+
+            console.log("Got an authorization token: " + token);
+        }
+      }
+    }
+    </script>
+  
     <!-- SDK USAGE -->
     <script>
         // On document load resolve the SDK dependency
@@ -193,13 +215,13 @@
     <!-- Browser Hooks -->
     <script>
         var hypothesisDiv, phraseDiv, statusDiv;
-        var key, languageOptions, formatOptions, inputSource, filePicker;
+        var key, authorizationToken;
+        var regionOptions;
+        var languageOptions, formatOptions, inputSource, filePicker;
         var SDK;
         var recognizer;
-        var previousSubscriptionKey;
 
         var reco;
-        var regionOptions;
         var sdkStartContinousRecognitionBtn, sdkStopContinousRecognitionBtn;
         var sdkStartContinousTranslationBtn, sdkStopContinousTranslationBtn;
         var sdkStartRecognizeOnceAsyncBtn, sdkStopRecognizeOnceAsyncBtn, languageTargetOptions, voiceOutput;
@@ -227,17 +249,21 @@
             filePicker = document.getElementById('filePicker');
 
             sdkStartContinousRecognitionBtn.addEventListener("click", function () {
-                if (key.value == "" || key.value == "YOUR_SPEECH_API_KEY") {
-                    alert("Please enter your Cognitive Services Speech subscription key!");
-                    return;
-                }
-
                 hypothesisDiv.innerHTML = "";
                 phraseDiv.innerHTML = "";
                 statusDiv.innerHTML = "";
 
                 var audioConfig = audioFileValid ? SDK.AudioConfig.fromWavFileInput(audioFile) : SDK.AudioConfig.fromDefaultMicrophoneInput();
-                var speechConfig = SDK.SpeechConfig.fromSubscription(key.value, regionOptions.value);
+                var speechConfig;
+                if(authorizationToken) {
+                    speechConfig = SDK.SpeechConfig.fromAuthorizationToken(authorizationToken, regionOptions.value);
+                } else {
+                    if (key.value == "" || key.value == "YOUR_SPEECH_API_KEY") {
+                        alert("Please enter your Cognitive Services Speech subscription key!");
+                        return;
+                    }
+                    speechConfig = SDK.SpeechConfig.fromSubscription(key.value, regionOptions.value);
+                }
 
                 speechConfig.language = languageOptions.value;
                 reco = new SDK.SpeechRecognizer(speechConfig, audioConfig);
@@ -307,13 +333,22 @@
                 statusDiv.innerHTML = "";
 
                 var audioConfig = audioFileValid ? SDK.AudioConfig.fromWavFileInput(audioFile) : SDK.AudioConfig.fromDefaultMicrophoneInput();
-                var speechConfig = SDK.SpeechConfig.fromSubscription(key.value, regionOptions.value);
+                var speechConfig;
+                if(authorizationToken) {
+                    speechConfig = SDK.SpeechConfig.fromAuthorizationToken(authorizationToken, regionOptions.value);
+                } else {
+                    if (key.value == "" || key.value == "YOUR_SPEECH_API_KEY") {
+                        alert("Please enter your Cognitive Services Speech subscription key!");
+                        return;
+                    }
+                    speechConfig = SDK.SpeechConfig.fromSubscription(key.value, regionOptions.value);
+                }
 
                 speechConfig.language = languageOptions.value;
                 speechConfig.setProperty(SDK.RecognizerParameterNames.TranslationFromLanguage, languageOptions.value);
-                speechConfig.setProperty(SDK.RecognizerParameterNames.TranslationToLanguage, [languageOptions.value, languageTargetOptions.value]);
+                speechConfig.setProperty(SDK.RecognizerParameterNames.TranslationToLanguage, [languageTargetOptions.value.split(":")[0], languageOptions.value]);
                 if (voiceOutput.checked) {
-                    speechConfig.setProperty(SDK.RecognizerParameterNames.TranslationVoice, "en-US-Zira");
+                    speechConfig.setProperty(SDK.RecognizerParameterNames.TranslationVoice, languageTargetOptions.value.replace(":", "-"));
                 }
 
                 reco = new SDK.TranslationRecognizer(speechConfig, audioConfig);
@@ -331,11 +366,11 @@
                     phraseDiv.innerHTML += JSON.stringify(e.result.translations.values) + "\r\n";
                 };
 
-                reco.synthesized = function (s, e) {
+                reco.synthesizing = function (s, e) {
                     window.console.log(e);
 
                     var source = soundContext.createBufferSource();
-                    soundContext.decodeAudioData(e.result.audio.buffer, function(newBuffer) {
+                    soundContext.decodeAudioData(e.result.audio, function(newBuffer) {
                         source.buffer = newBuffer;
                         source.connect(soundContext.destination);
                         source.start(0);
@@ -397,7 +432,16 @@
                 statusDiv.innerHTML = "";
 
                 var audioConfig = audioFileValid ? SDK.AudioConfig.fromWavFileInput(audioFile) : SDK.AudioConfig.fromDefaultMicrophoneInput();
-                var speechConfig = SDK.SpeechConfig.fromSubscription(key.value, regionOptions.value);
+                var speechConfig;
+                if(authorizationToken) {
+                    speechConfig = SDK.SpeechConfig.fromAuthorizationToken(authorizationToken, regionOptions.value);
+                } else {
+                    if (key.value == "" || key.value == "YOUR_SPEECH_API_KEY") {
+                        alert("Please enter your Cognitive Services Speech subscription key!");
+                        return;
+                    }
+                    speechConfig = SDK.SpeechConfig.fromSubscription(key.value, regionOptions.value);
+                }
 
                 speechConfig.language = languageOptions.value;
                 reco = new SDK.SpeechRecognizer(speechConfig, audioConfig);
@@ -491,6 +535,11 @@
                 SDK = speechSdk;
                 sdkStartContinousRecognitionBtn.disabled = false;
                 sdkStartRecognizeOnceAsyncBtn.disabled = false;
+
+                // in case we have a function for getting an authorization token, call it.
+                if (typeof RequestAuthorizationToken === "function") {
+                    RequestAuthorizationToken();
+                }
             });
         });
     </script>
