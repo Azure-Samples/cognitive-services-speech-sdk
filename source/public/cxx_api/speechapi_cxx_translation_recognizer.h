@@ -57,9 +57,9 @@ public:
     /// used in case where a recognizer handle has been created by methods via C-API.
     /// </remarks>
     /// <param name="hreco">The handle of the recognizer that is returned by C-API.</param>
-    explicit TranslationRecognizer(SPXRECOHANDLE hreco) :
+    explicit TranslationRecognizer(SPXRECOHANDLE hreco) : 
         BaseType(hreco),
-        Parameters(hreco, HandleType::RECOGNIZER),
+        Properties(m_properties),
         TranslationSynthesisResultEvent(GetTranslationAudioEventConnectionsChangedCallback(), GetTranslationAudioEventConnectionsChangedCallback(), false)
     {
         SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
@@ -139,7 +139,7 @@ public:
     /// <param name="token">A string that represents the endpoint id.</param>
     void SetAuthorizationToken(const std::string& token)
     {
-        Parameters.SetProperty(PropertyId::SpeechServiceAuthorization_Token, token);
+        Properties.SetProperty(PropertyId::SpeechServiceAuthorization_Token, token);
     }
 
     /// <summary>
@@ -148,13 +148,13 @@ public:
     /// <returns>Authorization token</returns>
     std::string GetAuthorizationToken()
     {
-        return Parameters.GetProperty(PropertyId::SpeechServiceAuthorization_Token, "");
+        return Properties.GetProperty(PropertyId::SpeechServiceAuthorization_Token, "");
     }
 
     /// <summary>
-    /// The collection of parameters and their values defined for this <see cref="TranslationRecognizer"/>.
+    /// The collection or properties and their values defined for this <see cref="TranslationRecognizer"/>.
     /// </summary>
-    PropertyCollection<SPXRECOHANDLE> Parameters;
+    PropertyCollection& Properties;
 
     /// <summary>
     /// The event signals that a translation synthesis result is received.

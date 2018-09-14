@@ -199,12 +199,12 @@ public class TranslationRecognizerTests {
         TranslationRecognizer r = new TranslationRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
 
-        assertNotNull(r.getParameters());
-        assertEquals(r.getSpeechRecognitionLanguage(), r.getParameters().getProperty(PropertyId.SpeechServiceConnection_TranslationFromLanguage));
+        assertNotNull(r.getProperties());
+        assertEquals(r.getSpeechRecognitionLanguage(), r.getProperties().getProperty(PropertyId.SpeechServiceConnection_TranslationFromLanguage));
 
         // TODO this cannot be true, right? comparing an array with a string parameter???
         assertEquals(1, r.getTargetLanguages().size());
-        assertEquals(r.getTargetLanguages().get(0), r.getParameters().getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages));
+        assertEquals(r.getTargetLanguages().get(0), r.getProperties().getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages));
 
         r.close();
         s.close();

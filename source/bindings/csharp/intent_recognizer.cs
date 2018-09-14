@@ -69,7 +69,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
             recoImpl.SpeechStartDetected.Connect(speechStartDetectedHandler);
             recoImpl.SpeechEndDetected.Connect(speechEndDetectedHandler);
 
-            Parameters = new PropertyCollectionImpl(recoImpl.Parameters);
+            Properties = new PropertyCollection(recoImpl.Properties);
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         {
             get
             {
-                return Parameters.Get(PropertyId.SpeechServiceConnection_IntentSourceLanguage);
+                return Properties.GetProperty(PropertyId.SpeechServiceConnection_IntentSourceLanguage);
             }
         }
 
@@ -105,9 +105,9 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         }
 
         /// <summary>
-        /// Gets the collection of parameters and their values defined for this <see cref="IntentRecognizer"/>.
+        /// Gets the collection or properties and their values defined for this <see cref="IntentRecognizer"/>.
         /// </summary>
-        public IPropertyCollection Parameters { get; internal set; }
+        public PropertyCollection Properties { get; internal set; }
 
         /// <summary>
         /// Starts intent recognition, and stops after the first utterance is recognized. The task returns the recognition text and intent as result.

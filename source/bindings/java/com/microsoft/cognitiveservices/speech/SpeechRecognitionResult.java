@@ -5,9 +5,7 @@ package com.microsoft.cognitiveservices.speech;
 //
 
 import com.microsoft.cognitiveservices.speech.internal.RecognitionResult;
-import com.microsoft.cognitiveservices.speech.internal.ResultPropertyCollection;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
-import com.microsoft.cognitiveservices.speech.ResultProperties;
 import com.microsoft.cognitiveservices.speech.PropertyCollection;
 
 import java.math.BigInteger;
@@ -20,7 +18,7 @@ public class SpeechRecognitionResult {
     private String resultId;
     private ResultReason reason;
     private String text;
-    private ResultProperties properties;
+    private PropertyCollection properties;
     private long duration;
     private long offset;
     private RecognitionResult _resultImpl;
@@ -39,7 +37,13 @@ public class SpeechRecognitionResult {
         this.text = result.getText();
         this.reason = ResultReason.values()[result.getReason().swigValue()];
 
-        this.properties = new ResultProperties(result.getProperties());
+        this.properties = new PrivatePropertyCollection(result.getProperties());
+    }
+
+    private class PrivatePropertyCollection extends com.microsoft.cognitiveservices.speech.PropertyCollection {
+        public PrivatePropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
+          super(collection);
+        }
     }
 
     /**

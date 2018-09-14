@@ -12,7 +12,7 @@ import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.PropertyCollection;
-import com.microsoft.cognitiveservices.speech.RecognizerProperties;
+
 
 /**
   * Performs speech recognition from microphone, file, or other audio input streams, and gets transcribed text as result.
@@ -60,7 +60,13 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         recoImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
         recoImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
 
-        _Parameters = new RecognizerProperties<SpeechRecognizer>(this);
+        _Parameters = new PrivatePropertyCollection(recoImpl.getProperties());
+    }
+
+    private class PrivatePropertyCollection extends com.microsoft.cognitiveservices.speech.PropertyCollection {
+        public PrivatePropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
+          super(collection);
+        }
     }
 
     /**
@@ -128,14 +134,14 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     }
 
     /**
-      * The collection of parameters and their values defined for this SpeechRecognizer.
-      * @return The collection of parameters and their values defined for this SpeechRecognizer.
+      * The collection or properties and their values defined for this SpeechRecognizer.
+      * @return The collection or properties and their values defined for this SpeechRecognizer.
       */
-    public PropertyCollection getParameters() {
+    public PropertyCollection getProperties() {
         return _Parameters;
     }
 
-    private RecognizerProperties<SpeechRecognizer> _Parameters;
+    private com.microsoft.cognitiveservices.speech.PropertyCollection _Parameters;
 
     /**
       * Starts speech recognition, and stops after the first utterance is recognized. The task returns the recognition text as result.
@@ -225,6 +231,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         }
     }
 
+    // TODO Remove this... After tests are updated to no longer depend upon this
     public com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer getRecoImpl() {
         return recoImpl;
     }

@@ -845,27 +845,27 @@ void CarbonTestConsole::ConsoleInput_SpeechRecognizer(const char* psz, std::shar
     }
     else if (PAL::strnicmp(psz, "set string ", strlen("set string ")) == 0)
     {
-        Parameters_SetString(m_speechRecognizer->Parameters, psz + strlen("set string "));
+        Parameters_SetString(m_speechRecognizer->Properties, psz + strlen("set string "));
     }
     else if (PAL::strnicmp(psz, "get string ", strlen("get string ")) == 0)
     {
-        Parameters_GetString(m_speechRecognizer->Parameters, psz + strlen("get string "));
+        Parameters_GetString(m_speechRecognizer->Properties, psz + strlen("get string "));
     }
     else if (PAL::strnicmp(psz, "set number ", strlen("set number ")) == 0)
     {
-        Parameters_SetNumber(m_speechRecognizer->Parameters, psz + strlen("set number "));
+        Parameters_SetNumber(m_speechRecognizer->Properties, psz + strlen("set number "));
     }
     else if (PAL::strnicmp(psz, "get number ", strlen("get number ")) == 0)
     {
-        Parameters_GetNumber(m_speechRecognizer->Parameters, psz + strlen("get number "));
+        Parameters_GetNumber(m_speechRecognizer->Properties, psz + strlen("get number "));
     }
     else if (PAL::strnicmp(psz, "set bool ", strlen("set bool ")) == 0)
     {
-        Parameters_SetBool(m_speechRecognizer->Parameters, psz + strlen("set bool "));
+        Parameters_SetBool(m_speechRecognizer->Properties, psz + strlen("set bool "));
     }
     else if (PAL::strnicmp(psz, "get bool ", strlen("get bool ")) == 0)
     {
-        Parameters_GetBool(m_speechRecognizer->Parameters, psz + strlen("get bool "));
+        Parameters_GetBool(m_speechRecognizer->Properties, psz + strlen("get bool "));
     }
     else
     {
@@ -942,31 +942,30 @@ void CarbonTestConsole::ConsoleInput_IntentRecognizer(const char* psz, std::shar
         auto fn = std::bind(&CarbonTestConsole::IntentRecognizer_CanceledHandler, this, std::placeholders::_1);
         Recognizer_Event(psz + strlen("canceled "), m_intentRecognizer->Canceled, fn);
     }
-    // TODO: RobCh: Intent: Add ParametersCollection to IntentRecognizer
-    // else if (PAL::strnicmp(psz, "set string ", strlen("set string ")) == 0)
-    // {
-    //     Parameters_SetString(m_intentRecognizer->Parameters, psz + strlen("set string "));
-    // }
-    // else if (PAL::strnicmp(psz, "get string ", strlen("get string ")) == 0)
-    // {
-    //     Parameters_GetString(m_intentRecognizer->Parameters, psz + strlen("get string "));
-    // }
-    // else if (PAL::strnicmp(psz, "set number ", strlen("set number ")) == 0)
-    // {
-    //     Parameters_SetNumber(m_intentRecognizer->Parameters, psz + strlen("set number "));
-    // }
-    // else if (PAL::strnicmp(psz, "get number ", strlen("get number ")) == 0)
-    // {
-    //     Parameters_GetNumber(m_intentRecognizer->Parameters, psz + strlen("get number "));
-    // }
-    // else if (PAL::strnicmp(psz, "set bool ", strlen("set bool ")) == 0)
-    // {
-    //     Parameters_SetBool(m_intentRecognizer->Parameters, psz + strlen("set bool "));
-    // }
-    // else if (PAL::strnicmp(psz, "get bool ", strlen("get bool ")) == 0)
-    // {
-    //     Parameters_GetBool(m_intentRecognizer->Parameters, psz + strlen("get bool "));
-    // }
+    else if (PAL::strnicmp(psz, "set string ", strlen("set string ")) == 0)
+    {
+        Parameters_SetString(m_intentRecognizer->Properties, psz + strlen("set string "));
+    }
+    else if (PAL::strnicmp(psz, "get string ", strlen("get string ")) == 0)
+    {
+        Parameters_GetString(m_intentRecognizer->Properties, psz + strlen("get string "));
+    }
+    else if (PAL::strnicmp(psz, "set number ", strlen("set number ")) == 0)
+    {
+        Parameters_SetNumber(m_intentRecognizer->Properties, psz + strlen("set number "));
+    }
+    else if (PAL::strnicmp(psz, "get number ", strlen("get number ")) == 0)
+    {
+        Parameters_GetNumber(m_intentRecognizer->Properties, psz + strlen("get number "));
+    }
+    else if (PAL::strnicmp(psz, "set bool ", strlen("set bool ")) == 0)
+    {
+        Parameters_SetBool(m_intentRecognizer->Properties, psz + strlen("set bool "));
+    }
+    else if (PAL::strnicmp(psz, "get bool ", strlen("get bool ")) == 0)
+    {
+        Parameters_GetBool(m_intentRecognizer->Properties, psz + strlen("get bool "));
+    }
     else
     {
         ConsoleWriteLine("\nUnknown method/event: '%s'.\n\nUse 'HELP' for a list of valid methods/events.\n", psz);
@@ -1191,27 +1190,27 @@ void CarbonTestConsole::ConsoleInput_Session(const char* psz)
     // }
     else if (PAL::strnicmp(psz, "set string ", strlen("set string ")) == 0)
     {
-        Parameters_SetString(m_session->Parameters, psz + strlen("set string "));
+        Parameters_SetString(m_session->Properties, psz + strlen("set string "));
     }
     else if (PAL::strnicmp(psz, "get string ", strlen("get string ")) == 0)
     {
-        Parameters_GetString(m_session->Parameters, psz + strlen("get string "));
+        Parameters_GetString(m_session->Properties, psz + strlen("get string "));
     }
     else if (PAL::strnicmp(psz, "set number ", strlen("set number ")) == 0)
     {
-        Parameters_SetNumber(m_session->Parameters, psz + strlen("set number "));
+        Parameters_SetNumber(m_session->Properties, psz + strlen("set number "));
     }
     else if (PAL::strnicmp(psz, "get number ", strlen("get number ")) == 0)
     {
-        Parameters_GetNumber(m_session->Parameters, psz + strlen("get number "));
+        Parameters_GetNumber(m_session->Properties, psz + strlen("get number "));
     }
     else if (PAL::strnicmp(psz, "set bool ", strlen("set bool ")) == 0)
     {
-        Parameters_SetBool(m_session->Parameters, psz + strlen("set bool "));
+        Parameters_SetBool(m_session->Properties, psz + strlen("set bool "));
     }
     else if (PAL::strnicmp(psz, "get bool ", strlen("get bool ")) == 0)
     {
-        Parameters_GetBool(m_session->Parameters, psz + strlen("get bool "));
+        Parameters_GetBool(m_session->Properties, psz + strlen("get bool "));
     }
     else
     {

@@ -119,7 +119,7 @@ namespace Microsoft.CognitiveServices.Speech
             recoImpl.SpeechStartDetected.Connect(speechStartDetectedHandler);
             recoImpl.SpeechEndDetected.Connect(speechEndDetectedHandler);
 
-            Parameters = new PropertyCollectionImpl(recoImpl.Parameters);
+            Properties = new PropertyCollection(recoImpl.Properties);
         }
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return this.recoImpl.Parameters.GetProperty(Internal.PropertyId.SpeechServiceConnection_RecoLanguage, string.Empty);
+                return this.recoImpl.Properties.GetProperty(Internal.PropertyId.SpeechServiceConnection_RecoLanguage, string.Empty);
             }
         }
 
@@ -173,16 +173,16 @@ namespace Microsoft.CognitiveServices.Speech
         {
             get
             {
-                return this.recoImpl.Parameters.GetProperty(Internal.PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse, "false") == "true"
+                return this.recoImpl.Properties.GetProperty(Internal.PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse, "false") == "true"
                     ? OutputFormat.Detailed
                     : OutputFormat.Simple;
             }
         }
 
         /// <summary>
-        /// The collection of parameters and their values defined for this <see cref="SpeechRecognizer"/>.
+        /// The collection or properties and their values defined for this <see cref="SpeechRecognizer"/>.
         /// </summary>
-        public IPropertyCollection Parameters { get; internal set; }
+        public PropertyCollection Properties { get; internal set; }
 
         /// <summary>
         /// Starts speech recognition, and stops after the first utterance is recognized. The task returns the recognition text as result.

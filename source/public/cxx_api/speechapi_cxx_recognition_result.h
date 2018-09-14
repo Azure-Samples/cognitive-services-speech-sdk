@@ -24,9 +24,22 @@ namespace Speech {
 class RecognitionResult
 {
 private:
-    DISABLE_DEFAULT_CTORS(RecognitionResult); 
 
-    PropertyCollection<SPXRESULTHANDLE> m_properties;
+    class PrivatePropertyCollection : public PropertyCollection
+    {
+    public:
+        PrivatePropertyCollection(SPXRESULTHANDLE hresult) : 
+            PropertyCollection(
+                [=]() {
+                SPXPROPERTYBAGHANDLE hpropbag = SPXHANDLE_INVALID;
+                result_get_property_bag(hresult, &hpropbag);
+                return hpropbag;
+            }())
+        {
+        }
+    };
+
+    PrivatePropertyCollection m_properties;
 
 public:
 
@@ -67,7 +80,7 @@ public:
     /// <summary>
     /// Collection of additional RecognitionResult properties.
     /// </summary>
-    PropertyCollection<SPXRESULTHANDLE>& Properties;
+    PropertyCollection& Properties;
 
     /// <summary>
     /// Internal. Explicit conversion operator.
@@ -80,7 +93,7 @@ protected:
     /*! \cond PROTECTED */
 
     explicit RecognitionResult(SPXRESULTHANDLE hresult) :
-        m_properties(hresult, HandleType::RESULT),
+        m_properties(hresult),
         ResultId(m_resultId),
         Reason(m_reason),
         Text(m_text),
@@ -96,6 +109,8 @@ protected:
     /*! \endcond */
 
 private:
+
+    DISABLE_DEFAULT_CTORS(RecognitionResult); 
 
     void PopulateResultFields(SPXRESULTHANDLE hresult, std::string *resultId, Speech::ResultReason* reason, std::string* text)
     {

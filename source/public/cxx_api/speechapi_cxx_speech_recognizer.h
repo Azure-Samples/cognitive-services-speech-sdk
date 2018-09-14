@@ -48,7 +48,7 @@ public:
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
-    explicit SpeechRecognizer(SPXRECOHANDLE hreco) : BaseType(hreco), Parameters(hreco, HandleType::RECOGNIZER)
+    explicit SpeechRecognizer(SPXRECOHANDLE hreco) : BaseType(hreco), Properties(m_properties)
     {
         SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     }
@@ -115,7 +115,10 @@ public:
         return BaseType::StopKeywordRecognitionAsyncInternal();
     }
 
-    PropertyCollection<SPXRECOHANDLE> Parameters;
+    /// <summary>
+    /// A collection or properties and their values defined for this <see cref="SpeechRecognizer"/>.
+    /// </summary>
+    PropertyCollection& Properties;
 
     /// <summary>
     /// Gets the endpoint ID of a customized speech model that is used for speech recognition.
@@ -123,7 +126,7 @@ public:
     /// <returns>the endpoint ID of a customized speech model that is used for speech recognition</returns>
     std::string GetEndpointId()
     {
-        return Parameters.GetProperty(PropertyId::SpeechServiceConnection_EndpointId, "");
+        return Properties.GetProperty(PropertyId::SpeechServiceConnection_EndpointId, "");
     }
 
     /// <summary>
@@ -132,7 +135,7 @@ public:
     /// <param name="value">A string that represents the endpoint id.</param>
     void SetAuthorizationToken(const std::string& token)
     {
-        Parameters.SetProperty(PropertyId::SpeechServiceAuthorization_Token, token);
+        Properties.SetProperty(PropertyId::SpeechServiceAuthorization_Token, token);
     }
 
     /// <summary>
@@ -141,7 +144,7 @@ public:
     /// <returns>Authorization token</returns>
     std::string GetAuthorizationToken()
     {
-        return Parameters.GetProperty(PropertyId::SpeechServiceAuthorization_Token, "");
+        return Properties.GetProperty(PropertyId::SpeechServiceAuthorization_Token, "");
     }
 
 private:

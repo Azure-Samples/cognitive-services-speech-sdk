@@ -86,7 +86,6 @@ set(SWIG_JAVA_SOURCES
 
     ${CMAKE_SWIG_OUTDIR}/BaseAsyncRecognizer.java
     ${CMAKE_SWIG_OUTDIR}/BaseRecognizerBase.java
-    ${CMAKE_SWIG_OUTDIR}/HandleType.java
     ${CMAKE_SWIG_OUTDIR}/PropertyId.java
     ${CMAKE_SWIG_OUTDIR}/carbon_java.java
     ${CMAKE_SWIG_OUTDIR}/carbon_javaJNI.java
@@ -105,6 +104,7 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/KeywordRecognitionModel.java
     ${CMAKE_SWIG_OUTDIR}/LanguageUnderstandingModel.java
     ${CMAKE_SWIG_OUTDIR}/OutputFormat.java
+    ${CMAKE_SWIG_OUTDIR}/PropertyCollection.java
 
     ${CMAKE_SWIG_OUTDIR}/ResultReason.java
     ${CMAKE_SWIG_OUTDIR}/CancellationReason.java
@@ -116,14 +116,11 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/RecognitionEventSignal.java
     ${CMAKE_SWIG_OUTDIR}/RecognitionResult.java
     ${CMAKE_SWIG_OUTDIR}/Recognizer.java
-    ${CMAKE_SWIG_OUTDIR}/RecognizerPropertyCollection.java
-    ${CMAKE_SWIG_OUTDIR}/ResultPropertyCollection.java
 
     ${CMAKE_SWIG_OUTDIR}/Session.java
     ${CMAKE_SWIG_OUTDIR}/SessionEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/SessionEventListener.java
     ${CMAKE_SWIG_OUTDIR}/SessionEventSignal.java
-    ${CMAKE_SWIG_OUTDIR}/SessionPropertyCollection.java
     ${CMAKE_SWIG_OUTDIR}/SpeechConfig.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionCanceledEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/SpeechRecognitionCanceledEventListener.java
@@ -181,8 +178,6 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/CancellationDetails.java
     ${PACKAGE_DIR}/KeywordRecognitionModel.java
     ${PACKAGE_DIR}/PropertyCollection.java
-    ${PACKAGE_DIR}/RecognizerProperties.java
-    ${PACKAGE_DIR}/ResultProperties.java
     ${PACKAGE_DIR}/RecognitionEventArgs.java
     ${PACKAGE_DIR}/RecognitionEventType.java
     ${PACKAGE_DIR}/ResultReason.java

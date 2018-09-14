@@ -10,7 +10,6 @@ import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionCanceledEventArgs;
 import com.microsoft.cognitiveservices.speech.PropertyCollection;
-import com.microsoft.cognitiveservices.speech.RecognizerProperties;
 import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.internal.IntentTrigger;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
@@ -59,8 +58,14 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         recoImpl.getSessionStopped().AddEventListener(sessionStoppedHandler);
         recoImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
         recoImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
-    
-        _Parameters = new RecognizerProperties<IntentRecognizer>(this);
+
+        _Parameters = new PrivatePropertyCollection(recoImpl.getProperties());
+    }
+
+    private class PrivatePropertyCollection extends com.microsoft.cognitiveservices.speech.PropertyCollection {
+        public PrivatePropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
+          super(collection);
+        }
     }
 
     /**
@@ -110,14 +115,14 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     }
 
     /**
-      * The collection of parameters and their values defined for this IntentRecognizer.
-      * @return The collection of parameters and their values defined for this IntentRecognizer.
+      * The collection or properties and their values defined for this IntentRecognizer.
+      * @return The collection or properties and their values defined for this IntentRecognizer.
       */
-    public PropertyCollection getParameters() {
+    public PropertyCollection getProperties() {
         return _Parameters;
     }
 
-    private RecognizerProperties<IntentRecognizer> _Parameters;
+    private PropertyCollection _Parameters;
 
     /**
       * Starts intent recognition, and stops after the first utterance is recognized. The task returns the recognition text and intent as result.
@@ -271,7 +276,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     }
 
     
-    // TODO should only visible to property collection
+    // TODO Remove this... After tests are updated to no longer depend upon this
     public com.microsoft.cognitiveservices.speech.internal.IntentRecognizer getRecoImpl() {
         return recoImpl;
     }

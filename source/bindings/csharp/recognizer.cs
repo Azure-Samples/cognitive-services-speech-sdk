@@ -147,46 +147,5 @@ namespace Microsoft.CognitiveServices.Speech
             private Recognizer recognizer;
             private RecognitionEventType eventType;
         }
-
-        // TODO: Evil code duplication, merge with another implementation.
-        internal class PropertyCollectionImpl : IPropertyCollection
-        {
-            private Internal.RecognizerPropertyCollection recognizerParameterImpl;
-
-            public PropertyCollectionImpl(Internal.RecognizerPropertyCollection internalRecognizerParameters)
-            {
-                recognizerParameterImpl = internalRecognizerParameters;
-            }
-            
-            public string Get(PropertyId id)
-            {
-                return Get(id, string.Empty);
-            }
-
-            public string Get(string propertyName)
-            {
-                return Get(propertyName, string.Empty);
-            }
-
-            public string Get(PropertyId id, string defaultValue)
-            {
-                return recognizerParameterImpl.GetProperty((Internal.PropertyId)id, defaultValue);
-            }
-
-            public string Get(string propertyName, string defaultValue)
-            {
-                return recognizerParameterImpl.GetProperty(propertyName, defaultValue);
-            }
-
-            public void Set(PropertyId id, string value)
-            {
-                recognizerParameterImpl.SetProperty((Internal.PropertyId)id, value);
-            }
-
-            public void Set(string propertyName, string value)
-            {
-                recognizerParameterImpl.SetProperty(propertyName, value);
-            }
-        }
     }
 }

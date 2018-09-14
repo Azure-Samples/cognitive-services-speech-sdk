@@ -213,7 +213,7 @@ void CarbonTestConsole::Sample_HelloWorld_PickEngine(const char* pszEngine) // L
     auto session = Session::FromRecognizer(recognizer);
 
     std::string propertyName = std::string("__use") + std::string(pszEngine) + std::string("RecoEngine");
-    session->Parameters.SetProperty(propertyName, "true");
+    session->Properties.SetProperty(propertyName, "true");
 
     recognizer->Recognizing += [&](const SpeechRecognitionEventArgs& e) {
         ConsoleWriteLine("Recognizing: text=%s", e.Result->Text.c_str());

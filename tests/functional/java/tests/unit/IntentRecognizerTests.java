@@ -157,8 +157,8 @@ public class IntentRecognizerTests {
         IntentRecognizer r = new IntentRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
 
-        assertNotNull(r.getParameters());
-        assertEquals(r.getSpeechRecognitionLanguage(), r.getParameters().getProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
+        assertNotNull(r.getProperties());
+        assertEquals(r.getSpeechRecognitionLanguage(), r.getProperties().getProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
 
         r.close();
         s.close();

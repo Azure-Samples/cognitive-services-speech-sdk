@@ -20,11 +20,11 @@ namespace Speech {
 namespace Impl {
 
 
-class MockParameterValue : public PropertyCollection<SPXRECOHANDLE>
+class MockParameterValue : public PropertyCollection
 {
 public:
 
-    MockParameterValue() : PropertyCollection(SPXFACTORYHANDLE_ROOTSITEPARAMETERS_MOCK, HandleType::MOCK) { };
+    MockParameterValue() : PropertyCollection(SPXFACTORYHANDLE_ROOTSITEPARAMETERS_MOCK) { }
 
 private:
 

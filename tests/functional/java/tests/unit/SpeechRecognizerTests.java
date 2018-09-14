@@ -225,9 +225,9 @@ public class SpeechRecognizerTests {
         SpeechRecognizer r = new SpeechRecognizer(s, AudioConfig.fromWavFileInput(Settings.WavFile));
         assertNotNull(r);
 
-        assertNotNull(r.getParameters());
-        assertEquals(r.getSpeechRecognitionLanguage(), r.getParameters().getProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
-        assertEquals(r.getEndpointId(), r.getParameters().getProperty(PropertyId.SpeechServiceConnection_EndpointId)); // TODO: is this really the correct mapping?
+        assertNotNull(r.getProperties());
+        assertEquals(r.getSpeechRecognitionLanguage(), r.getProperties().getProperty(PropertyId.SpeechServiceConnection_RecoLanguage));
+        assertEquals(r.getEndpointId(), r.getProperties().getProperty(PropertyId.SpeechServiceConnection_EndpointId)); // TODO: is this really the correct mapping?
 
         r.close();
         s.close();

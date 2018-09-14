@@ -11,7 +11,6 @@ import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.KeywordRecognitionModel;
 import com.microsoft.cognitiveservices.speech.translation.TranslationTextResultCanceledEventArgs;
 import com.microsoft.cognitiveservices.speech.PropertyCollection;
-import com.microsoft.cognitiveservices.speech.RecognizerProperties;
 import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
@@ -69,7 +68,13 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         recoImpl.getSpeechStartDetected().AddEventListener(speechStartDetectedHandler);
         recoImpl.getSpeechEndDetected().AddEventListener(speechEndDetectedHandler);
 
-        _Parameters = new RecognizerProperties<TranslationRecognizer>(this);
+        _Parameters = new PrivatePropertyCollection(recoImpl.getProperties());
+    }
+
+    private class PrivatePropertyCollection extends com.microsoft.cognitiveservices.speech.PropertyCollection {
+        public PrivatePropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
+          super(collection);
+        }
     }
 
     /**
@@ -134,14 +139,14 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
     }
 
     /**
-      * The collection of parameters and their values defined for this TranslationRecognizer.
-      * @return The collection of parameters and their values defined for this TranslationRecognizer.
+      * The collection or properties and their values defined for this TranslationRecognizer.
+      * @return The collection or properties and their values defined for this TranslationRecognizer.
       */
-    public PropertyCollection getParameters() {
+    public PropertyCollection getProperties() {
         return _Parameters;
     }
 
-    private RecognizerProperties<TranslationRecognizer> _Parameters;
+    private PropertyCollection _Parameters;
 
     /**
       * Starts recognition and translation, and stops after the first utterance is recognized. The task returns the translation text as result.
@@ -206,7 +211,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         }
     }
 
-    // TODO should only be visible to parameter collection
+    // TODO Remove this... After tests are updated to no longer depend upon this
     public com.microsoft.cognitiveservices.speech.internal.TranslationRecognizer getRecoImpl() {
         return recoImpl;
     }

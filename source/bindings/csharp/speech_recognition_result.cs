@@ -31,7 +31,7 @@ namespace Microsoft.CognitiveServices.Speech
             this.ResultId = result.ResultId;
             this.Text = result.Text;
             this.Reason = (ResultReason)((int)result.Reason);
-            Properties = new PropertyCollectionImpl(result.Properties);
+            Properties = new PropertyCollection(result.Properties);
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// Contains properties of the results.
         /// </summary>
-        public IPropertyCollection Properties;
+        public PropertyCollection Properties;
 
         /// <summary>
         /// Returns a string that represents the speech recognition result.
@@ -71,52 +71,11 @@ namespace Microsoft.CognitiveServices.Speech
         public override string ToString()
         {
             return string.Format(CultureInfo.InvariantCulture,"ResultId:{0} Reason:{1} Recognized text:<{2}>. Json:{3}", 
-                ResultId, Reason, Text, Properties.Get(PropertyId.SpeechServiceResponse_Json));
+                ResultId, Reason, Text, Properties.GetProperty(PropertyId.SpeechServiceResponse_Json));
         }
 
         // Hold the reference.
         internal Internal.RecognitionResult resultImpl { get; }
-
-        // TODO: Evil code duplication, merge with another implmentation.
-        internal class PropertyCollectionImpl : IPropertyCollection
-        {
-            private Internal.ResultPropertyCollection impl;
-
-            public PropertyCollectionImpl(Internal.ResultPropertyCollection collection)
-            {
-                impl = collection;
-            }
-
-            public string Get(PropertyId id)
-            {
-                return Get(id, string.Empty);
-            }
-
-            public string Get(string propertyName)
-            {
-                return Get(propertyName, string.Empty);
-            }
-
-            public string Get(PropertyId id, string defaultValue)
-            {
-                return impl.GetProperty((Internal.PropertyId)id, defaultValue);
-            }
-
-            public string Get(string propertyName, string defaultValue)
-            {
-                return impl.GetProperty(propertyName, defaultValue);
-            }
-
-            public void Set(PropertyId id, string value)
-            {
-                impl.SetProperty((Internal.PropertyId)id, value);
-            }
-
-            public void Set(string propertyName, string value)
-            {
-                impl.SetProperty(propertyName, value);
-            }
-        }
     }
 
     /// <summary>

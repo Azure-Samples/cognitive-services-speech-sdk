@@ -49,9 +49,7 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResult)
 %shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationTextResult, Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultEventArgs, Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultCanceledEventArgs>)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer)
-%shared_ptr(Microsoft::CognitiveServices::Speech::PropertyCollection<SPXRECOHANDLE>)
-%shared_ptr(Microsoft::CognitiveServices::Speech::PropertyCollection<SPXRESULTHANDLE>)
-%shared_ptr(Microsoft::CognitiveServices::Speech::PropertyCollection<SPXSESSIONHANDLE>)
+%shared_ptr(Microsoft::CognitiveServices::Speech::PropertyCollection)
 %shared_ptr(Microsoft::CognitiveServices::Speech::SpeechConfig)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Translation::SpeechTranslationConfig)
 
@@ -337,12 +335,13 @@
 
 
 
+%immutable Microsoft::CognitiveServices::Speech::SpeechRecognizer::Properties;
+%immutable Microsoft::CognitiveServices::Speech::Intent::IntentRecognizer::Properties;
+%immutable Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer::Properties;
+%immutable Microsoft::CognitiveServices::Speech::RecognitionResult::Properties;
+%immutable Microsoft::CognitiveServices::Speech::Session::Properties;
+
 %include <speechapi_cxx_properties.h>
-
-%template(RecognizerPropertyCollection) Microsoft::CognitiveServices::Speech::PropertyCollection<SPXRECOHANDLE>;
-%template(ResultPropertyCollection) Microsoft::CognitiveServices::Speech::PropertyCollection<SPXRESULTHANDLE>;
-%template(SessionPropertyCollection) Microsoft::CognitiveServices::Speech::PropertyCollection<SPXSESSIONHANDLE>;
-
 
 %include <speechapi_cxx_audio_stream_format.h>
 %include <speechapi_cxx_audio_stream.h>
@@ -445,8 +444,6 @@
 %template(TranslationRecognizerBase) Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationTextResult, Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultEventArgs, Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultCanceledEventArgs>;
 
 %include <speechapi_cxx_translation_recognizer.h>
-
-%immutable Microsoft::CognitiveServices::Speech::Session::Parameters;
 
 %include <speechapi_cxx_session.h>
 

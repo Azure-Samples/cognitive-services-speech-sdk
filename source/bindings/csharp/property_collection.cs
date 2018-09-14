@@ -6,42 +6,81 @@
 namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
-    /// Interface to retrieve a property value from a property collection.
+    /// Class to retrieve a property value from a property collection.
     /// </summary>
-    public interface IPropertyCollection
+    public class PropertyCollection
     {
-        /// <summary>
-        /// Returns value of the property in string.
-        /// If the property value is not defined, an empty string is returned
-        /// </summary>
-        /// <param name="id">The id of property. see <see cref="PropertyId"/></param>
-        /// <returns>value of the property.</returns>
-        string Get(PropertyId id);
+        private Internal.PropertyCollection impl;
+
+        internal PropertyCollection(Internal.PropertyCollection collection)
+        {
+            impl = collection;
+        }
 
         /// <summary>
-        /// Returns value of the property in string.
-        /// If the property value is not defined, an empty string is returned,
+        /// Returns value of a property.
+        /// If the property value is not defined, an empty string is returned.
         /// </summary>
-        /// <param name="propertyName">The name of property.</param>
-        /// <returns>value of the property.</returns>
-        string Get(string propertyName);
+        /// <param name="id">The ID of property. see <see cref="PropertyId"/></param>
+        /// <returns>value of the property</returns>
+        public string GetProperty(PropertyId id)
+        {
+            return GetProperty(id, string.Empty);
+        }
 
         /// <summary>
-        /// Returns value of the property in string.
-        /// If the property value is not defined, the specified defaultValue is returned.
+        /// Returns value of a property.
+        /// If the property value is not defined, an empty string is returned.
+        /// </summary>
+        /// <param name="propertyName">The name of property</param>
+        /// <returns>value of the property</returns>
+        public string GetProperty(string propertyName)
+        {
+            return GetProperty(propertyName, string.Empty);
+        }
+
+        /// <summary>
+        /// Returns value of a property.
+        /// If the property value is not defined, the specified default value is returned.
         /// </summary>
         /// <param name="id">The id of property. see <see cref="PropertyId"/></param>
         /// <param name="defaultValue">The default value which is returned if no value is defined for the property.</param>
         /// <returns>value of the property.</returns>
-        string Get(PropertyId id, string defaultValue);
+        public string GetProperty(PropertyId id, string defaultValue)
+        {
+            return impl.GetProperty((Internal.PropertyId)id, defaultValue);
+        }
 
         /// <summary>
-        /// Returns value of the property in string.
-        /// If the property value is not defined, the specified defaultValue is returned.
+        /// Returns value of a property.
+        /// If the property value is not defined, the specified default value is returned.
         /// </summary>
         /// <param name="propertyName">The name of property.</param>
         /// <param name="defaultValue">The default value which is returned if no value is defined for the property.</param>
         /// <returns>value of the property.</returns>
-        string Get(string propertyName, string defaultValue);
+        public string GetProperty(string propertyName, string defaultValue)
+        {
+            return impl.GetProperty(propertyName, defaultValue);
+        }
+
+        /// <summary>
+        /// Set value of a property.
+        /// </summary>
+        /// <param name="id">The id of property. see <see cref="PropertyId"/></param>
+        /// <param name="value">value to set</param>
+        public void SetProperty(PropertyId id, string value)
+        {
+            impl.SetProperty((Internal.PropertyId)id, value);
+        }
+
+        /// <summary>
+        /// Set value of a property.
+        /// </summary>
+        /// <param name="propertyName">The name of property.</param>
+        /// <param name="value">value to set</param>
+        public void SetProperty(string propertyName, string value)
+        {
+            impl.SetProperty(propertyName, value);
+        }
     }
 }

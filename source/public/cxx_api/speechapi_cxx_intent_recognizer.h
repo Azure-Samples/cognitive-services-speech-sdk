@@ -53,7 +53,7 @@ public:
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
-    explicit IntentRecognizer(SPXRECOHANDLE hreco) : BaseType(hreco), Parameters(hreco, HandleType::RECOGNIZER)
+    explicit IntentRecognizer(SPXRECOHANDLE hreco) : BaseType(hreco), Properties(m_properties)
     {
         SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
     }
@@ -121,9 +121,9 @@ public:
     }
 
     /// <summary>
-    /// A collection of parameter names and their values.
+    /// A collection or properties and their values defined for this <see cref="IntentRecognizer"/>.
     /// </summary>
-    PropertyCollection<SPXRECOHANDLE> Parameters;
+    PropertyCollection& Properties;
 
     /// <summary>
     /// Adds a simple phrase that may be spoken by the user, indicating a specific user intent.
@@ -198,7 +198,7 @@ public:
     /// <param name="token">A string that represents the authorization token.</param>
     void SetAuthorizationToken(const std::string& token)
     {
-        Parameters.SetProperty(PropertyId::SpeechServiceAuthorization_Token, token);
+        Properties.SetProperty(PropertyId::SpeechServiceAuthorization_Token, token);
     }
 
     /// <summary>
@@ -207,10 +207,11 @@ public:
     /// <returns>Authorization token</returns>
     std::string GetAuthorizationToken()
     {
-        return Parameters.GetProperty(PropertyId::SpeechServiceAuthorization_Token, "");
+        return Properties.GetProperty(PropertyId::SpeechServiceAuthorization_Token, "");
     }
 
 private:
+
     DISABLE_COPY_AND_MOVE(IntentRecognizer);
 
     friend class Microsoft::CognitiveServices::Speech::Session;

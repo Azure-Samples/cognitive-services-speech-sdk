@@ -113,6 +113,7 @@ protected:
         Recognizing(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback(), false),
         Recognized(GetRecoEventConnectionsChangedCallback(), GetRecoEventConnectionsChangedCallback(), false),
         Canceled(GetRecoCanceledEventConnectionsChangedCallback(), GetRecoCanceledEventConnectionsChangedCallback(), false),
+        m_properties(hreco),
         m_hasyncRecognize(SPXHANDLE_INVALID),
         m_hasyncStartContinuous(SPXHANDLE_INVALID),
         m_hasyncStopContinuous(SPXHANDLE_INVALID),
@@ -390,6 +391,22 @@ protected:
         auto keepAlive = pThis->shared_from_this();
         pThis->Canceled.Signal(*ptr);
     }
+
+    class PrivatePropertyCollection : public PropertyCollection
+    {
+    public:
+        PrivatePropertyCollection(SPXRECOHANDLE hreco) : 
+            PropertyCollection(
+                [=](){ 
+                SPXPROPERTYBAGHANDLE hpropbag = SPXHANDLE_INVALID;
+                recognizer_get_property_bag(hreco, &hpropbag); 
+                return hpropbag;
+            }())
+        {
+        }
+    };
+
+    PrivatePropertyCollection m_properties;
 
     SPXASYNCHANDLE m_hasyncRecognize;
     SPXASYNCHANDLE m_hasyncStartContinuous;

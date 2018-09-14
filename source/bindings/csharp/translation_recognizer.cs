@@ -156,7 +156,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             recoImpl.SpeechStartDetected.Connect(speechStartDetectedHandler);
             recoImpl.SpeechEndDetected.Connect(speechEndDetectedHandler);
 
-            Parameters = new PropertyCollectionImpl(recoImpl.Parameters);
+            Properties = new PropertyCollection(recoImpl.Properties);
         }
 
         /// <summary>
@@ -166,7 +166,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         {
             get
             {
-                return Parameters.Get(PropertyId.SpeechServiceConnection_TranslationFromLanguage);
+                return Properties.GetProperty(PropertyId.SpeechServiceConnection_TranslationFromLanguage);
             }
         }
 
@@ -178,7 +178,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         {
             get
             {
-                var plainStr = Parameters.Get(PropertyId.SpeechServiceConnection_TranslationToLanguages);
+                var plainStr = Properties.GetProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages);
                 return plainStr.Split(',');
             }
         }
@@ -190,14 +190,14 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         {
             get
             {
-                return Parameters.Get(PropertyId.SpeechServiceConnection_TranslationVoice);
+                return Properties.GetProperty(PropertyId.SpeechServiceConnection_TranslationVoice);
             }
         }
 
         /// <summary>
-        /// The collection of parameters and their values defined for this <see cref="TranslationRecognizer"/>.
+        /// The collection or properties and their values defined for this <see cref="TranslationRecognizer"/>.
         /// </summary>
-        public IPropertyCollection Parameters { get; internal set; }
+        public PropertyCollection Properties { get; internal set; }
 
         /// <summary>
         /// Gets/sets authorization token used to communicate with the service.

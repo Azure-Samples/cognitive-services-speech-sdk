@@ -22,7 +22,22 @@ namespace Speech {
 class Session
 {
 private:
-    PropertyCollection<SPXSESSIONHANDLE> m_parameters;
+
+    class PrivatePropertyCollection : public PropertyCollection
+    {
+    public:
+        PrivatePropertyCollection(SPXSESSIONHANDLE hsession) :
+            PropertyCollection(
+                [=](){
+                SPXPROPERTYBAGHANDLE hpropbag = SPXHANDLE_INVALID;
+                session_get_property_bag(hsession, &hpropbag);
+                return hpropbag;
+            }())
+        {
+        }
+    };
+
+    PrivatePropertyCollection m_properties;
 
 public:
 
@@ -38,8 +53,8 @@ public:
     }
 
     explicit Session(SPXSESSIONHANDLE hsession) :
-        m_parameters(hsession, HandleType::SESSION),
-        Parameters(m_parameters),
+        m_properties(hsession),
+        Properties(m_properties),
         m_hsession(hsession)
     {
         SPX_DBG_TRACE_FUNCTION();
@@ -56,7 +71,7 @@ public:
         }
     }
 
-    PropertyCollection<SPXSESSIONHANDLE>& Parameters;
+    PropertyCollection& Properties;
 
 private:
 
