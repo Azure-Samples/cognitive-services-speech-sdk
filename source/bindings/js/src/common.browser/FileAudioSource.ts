@@ -154,7 +154,7 @@ export class FileAudioSource implements IAudioSource {
                         }
                     }
 
-                    stream.Write(reader.result);
+                    stream.Write(reader.result as ArrayBuffer);
                     lastWriteTimestamp = Date.now();
 
                     if (endOffset < this.file.size) {

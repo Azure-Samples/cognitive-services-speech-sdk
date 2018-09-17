@@ -20,7 +20,7 @@ export class OpusRecorder implements IRecorder {
                 const reader = new FileReader();
                 reader.readAsArrayBuffer(dataAvailableEvent.data);
                 reader.onloadend = (event: ProgressEvent) => {
-                    outputStream.Write(reader.result);
+                    outputStream.Write(reader.result as ArrayBuffer);
                 };
             }
         };
