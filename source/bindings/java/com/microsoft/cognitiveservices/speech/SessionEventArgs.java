@@ -8,7 +8,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 
 /**
- * Defines content for session events like SessionStarted/Stopped, SoundStarted/Stopped.
+ * Defines payload for SessionStarted/Stopped events.
  */
 public final class SessionEventArgs // extends EventArgs
 {

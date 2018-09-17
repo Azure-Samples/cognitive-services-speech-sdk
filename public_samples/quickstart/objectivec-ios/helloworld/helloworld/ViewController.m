@@ -5,7 +5,7 @@
 
 // <code>
 #import "ViewController.h"
-#import "speech_factory.h"
+#import <MicrosoftCognitiveServicesSpeech/speechapi.h>
 
 @interface ViewController ()
 @property (weak, nonatomic) IBOutlet UIButton *recognizeButton;
@@ -15,41 +15,39 @@
 
 @implementation ViewController
 
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    // Do any additional setup after loading the view.
-}
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
 - (IBAction)recognizeButtonTapped:(UIButton *)sender {
     __block bool end = false;
-    SpeechFactory *factory = [SpeechFactory fromSubscription:@"YourSubscriptionKey" AndRegion:@"YourServiceRegion"];
-
     NSBundle *mainBundle = [NSBundle mainBundle];
-    NSString *myFile = [mainBundle pathForResource: @"whatstheweatherlike" ofType: @"wav"];
+    NSString *weatherFile = [mainBundle pathForResource: @"whatstheweatherlike" ofType:@"wav"];
     NSLog(@"Main bundle path: %@", mainBundle);
-    NSLog(@"myFile path: %@", myFile);
+    NSLog(@"weatherFile path: %@", weatherFile);
+    AudioConfig* weatherAudioSource = [AudioConfig fromWavFileInput:weatherFile];
 
-    SpeechRecognizer *recognizer = [factory createSpeechRecognizerWithFileInput:myFile];
+    NSString *speechKey = @"YourSubscriptionKey";
+    NSString *serviceRegion = @"YourServiceRegion";
 
-    [recognizer addFinalResultEventListener: ^ (SpeechRecognizer * recognizer, SpeechRecognitionResultEventArgs *eventArgs) {
-        NSLog(@"Received final result event. SessionId: %@, recognition result:%@. Status %ld.", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.recognitionStatus);
+    SpeechConfig *speechConfig = [SpeechConfig fromSubscription:speechKey andRegion:serviceRegion];
+    SpeechRecognizer* speechRecognizer = [SpeechRecognizer fromConfig:speechConfig usingAudio:weatherAudioSource];
+
+    [speechRecognizer addSessionEventListener: ^ (Recognizer * recognizer, SessionEventArgs *eventArgs) {
+        NSLog(@"Received Session event. Type:%@(%d) SessionId: %@", eventArgs.eventType == SessionStartedEvent? @"SessionStart" : @"SessionStop", (int)eventArgs.eventType, eventArgs.sessionId);
+        if (eventArgs.eventType == SessionStoppedEvent)
+            end = true;
+    }];
+
+    [speechRecognizer addRecognizedEventListener: ^ (SpeechRecognizer * recognizer, SpeechRecognitionEventArgs *eventArgs) {
+        NSLog(@"Received final result event. SessionId: %@, recognition result:%@. Status %ld.", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.reason);
         dispatch_async(dispatch_get_main_queue(), ^{
             [self updateRecognitionResultText:(eventArgs.result.text)];
         });
-        end = true;
     }];
 
-    [recognizer startContinuousRecognition];
+    [speechRecognizer startContinuousRecognition];
     while (end == false)
         [NSThread sleepForTimeInterval:1.0f];
-    [recognizer stopContinuousRecognition];
+    [speechRecognizer stopContinuousRecognition];
 
-    [recognizer close];
+    [speechRecognizer close];
 }
 
 - (void)updateRecognitionResultText:(NSString *) resultText {
@@ -58,3 +56,4 @@
 
 @end
 // </code>
+

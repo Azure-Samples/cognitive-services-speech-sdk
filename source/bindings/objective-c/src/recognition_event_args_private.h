@@ -11,7 +11,7 @@
 
 @interface RecognitionEventArgs (Private)
 
-- (instancetype)init: (RecognitionEventType)eventType :(const SpeechImpl::RecognitionEventArgs&) eventArgsHandle;
+- (instancetype)init :(const SpeechImpl::RecognitionEventArgs&) eventArgsHandle;
 
 @end
 

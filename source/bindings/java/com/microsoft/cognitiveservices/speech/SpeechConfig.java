@@ -126,9 +126,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 
     /**
       * Sets the speech recognition language
-      * If this is set, subscription key is ignored.
-      * User needs to make sure the provided authorization token is valid and not expired.
-      * @param value the authorization token.
+      * @param value the language identifier in BCP-47 format.
       */
     public void setSpeechRecognitionLanguage(String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");

@@ -12,7 +12,7 @@
 
 @interface SessionEventArgs (Private)
 
-- (instancetype)init: (SessionEventType)eventType :(const SpeechImpl::SessionEventArgs&) eventArgsHandle;
+- (instancetype)init: (const SpeechImpl::SessionEventArgs&)eventArgsHandle;
 
 @end
 

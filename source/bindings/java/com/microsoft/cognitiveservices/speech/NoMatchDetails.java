@@ -21,8 +21,8 @@ public class NoMatchDetails {
 
     /**
       * Creates an instance of NoMatchDetails object for the NoMatch SpeechRecognitionResults.
-      * @param The recognition result that was not recognized.
-      * @return The no match details object being created.
+      * @param The recognition result that has NoMatch returned in Reason.
+      * @return The NoMatchDetails object being created.
       */
       public static com.microsoft.cognitiveservices.speech.NoMatchDetails fromResult(SpeechRecognitionResult result) {
         com.microsoft.cognitiveservices.speech.internal.NoMatchDetails noMatchImpl = com.microsoft.cognitiveservices.speech.internal.NoMatchDetails.FromResult(result.getResultImpl());
@@ -31,8 +31,8 @@ public class NoMatchDetails {
 
     /**
       * Creates an instance of NoMatchDetails object for the NoMatch IntentRecognitionResult.
-      * @param The recognition result that was not recognized.
-      * @return The no match details object being created.
+      * @param The recognition result that has NoMatch returned in Reason.
+      * @return The NoMatchDetails object being created.
       */
     public static com.microsoft.cognitiveservices.speech.NoMatchDetails fromResult(IntentRecognitionResult result) {
         com.microsoft.cognitiveservices.speech.internal.NoMatchDetails noMatchImpl = com.microsoft.cognitiveservices.speech.internal.NoMatchDetails.FromResult(result.getResultImpl());
@@ -41,8 +41,8 @@ public class NoMatchDetails {
 
     /**
       * Creates an instance of NoMatchDetails object for the NoMatch TranslationTextResult.
-      * @param The recognition result that was not recognized.
-      * @return The no match details object being created.
+      * @param The recognition result that has NoMatch returned in Reason.
+      * @return The NoMatchDetails object being created.
       */
     public static com.microsoft.cognitiveservices.speech.NoMatchDetails fromResult(TranslationTextResult result) {
         com.microsoft.cognitiveservices.speech.internal.NoMatchDetails noMatchImpl = com.microsoft.cognitiveservices.speech.internal.NoMatchDetails.FromResult(result.getResultImpl());
@@ -67,8 +67,8 @@ public class NoMatchDetails {
     }
 
     /**
-      * The reason the recognition was canceled.
-      * @return Specifies the reason canceled.
+      * The reason why NoMatch is returned.
+      * @return Specifies the reason for NoMatch.
       */
     public com.microsoft.cognitiveservices.speech.NoMatchReason getReason() {
         return this._reason;

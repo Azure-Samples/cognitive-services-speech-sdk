@@ -7,7 +7,7 @@ package com.microsoft.cognitiveservices.speech.translation;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
-  * Define payload of translation recognizing/recognized events.
+  * Defines payload of translation recognizing/recognized events.
   */
 public final class TranslationTextResultEventArgs //: System.EventArgs
 {

@@ -7,13 +7,35 @@
 #define intent_recognition_event_args_h
 
 #import <Foundation/Foundation.h>
+#import "recognition_event_args.h"
 #import "intent_recognition_result.h"
 
-@interface IntentRecognitionEventArgs : NSObject
+/**
+  * Defines payload for intent recognizing/recognized events.
+  */
+@interface IntentRecognitionEventArgs : RecognitionEventArgs
 
-@property (readonly) NSString* sessionId;
+/**
+  * Represents the intent recognition result.
+  */
+@property (readonly) IntentRecognitionResult *result;
 
-@property (readonly) IntentRecognitionResult* result;
+@end
+
+/**
+  * Define payload of intent recognition canceled result events.
+  */
+@interface IntentRecognitionCanceledEventArgs : IntentRecognitionEventArgs
+
+/**
+  * The reason the recognition was canceled.
+  */
+@property (readonly) CancellationReason reason;
+
+/**
+  * The error details of why the occurred error.
+  */
+@property (readonly) NSString *errorDetails;
 
 @end
 

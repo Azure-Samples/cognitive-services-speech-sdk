@@ -15,4 +15,10 @@
 
 @end
 
+@interface SpeechRecognitionCanceledEventArgs (Private)
+
+- (instancetype)init: (const SpeechImpl::SpeechRecognitionCanceledEventArgs&)e;
+
+@end
+
 #endif /* speech_recognition_event_args_private_h */

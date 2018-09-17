@@ -7,13 +7,18 @@
 #define translation_synthesis_result_event_args_h
 
 #import <Foundation/Foundation.h>
+#import "session_event_args.h"
 #import "translation_synthesis_result.h"
 
-@interface TranslationSynthesisResultEventArgs : NSObject
+/**
+  * Defines payload of translation synthesis result event.
+  */
+@interface TranslationSynthesisResultEventArgs : SessionEventArgs
 
-@property (readonly) NSString* sessionId;
-
-@property (readonly) TranslationSynthesisResult* result;
+/**
+  * The translation synthesis result.
+  */
+@property (readonly) TranslationSynthesisResult *result;
 
 @end
 

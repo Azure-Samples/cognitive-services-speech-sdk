@@ -16,4 +16,10 @@
 
 @end
 
+@interface TranslationTextResultCanceledEventArgs (Private)
+
+- (instancetype)init: (const TranslationImpl::TranslationTextResultCanceledEventArgs&)e;
+
+@end
+
 #endif /* translation_text_result_event_args_private_h */

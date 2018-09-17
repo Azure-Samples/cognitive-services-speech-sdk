@@ -17,35 +17,9 @@
     self = [super init];
     resultImpl = resultHandle;
 
-    switch (resultImpl->SynthesisStatus)
-    {
-        case TranslationImpl::SynthesisStatusCode::Success:
-            _status = SynthesisStatus::SynthesisSuccess;
-            break;
-        case TranslationImpl::SynthesisStatusCode::SynthesisEnd:
-            _status = SynthesisStatus::SynthesisEnd;
-            break;
-        case TranslationImpl::SynthesisStatusCode::Error:
-            _status = SynthesisStatus::SynthesisError;
-            break;
-        default:
-            // Todo error handling.
-            NSLog(@"Unknown synthesis status");
-            self = nil;
-            break;
-    }
-
-    _failureReason = [NSString stringWithString:resultImpl->FailureReason];
     _audio = [NSData dataWithBytes:resultImpl->Audio.data() length:resultImpl->Audio.size()*sizeof(resultImpl->Audio[0])];
 
     return self;
-}
-
-- (void)dealloc
-{
-    if (resultImpl != nullptr) {
-        resultImpl.reset();
-    }
 }
 
 @end

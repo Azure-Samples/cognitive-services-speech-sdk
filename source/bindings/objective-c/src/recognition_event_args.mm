@@ -4,17 +4,14 @@
 //
 
 #import "recognition_event_args_private.h"
+#import "session_event_args_private.h"
 
 @implementation RecognitionEventArgs
 
-- (instancetype)init :(RecognitionEventType)eventType :(const SpeechImpl::RecognitionEventArgs&) eventArgsHandle
+- (instancetype)init: (const SpeechImpl::RecognitionEventArgs&)eventArgsHandle
 {
-    self = [super init];
-    
-    _eventType = eventType;
-    _sessionId = [NSString stringWithString:eventArgsHandle.SessionId];
+    self = [super init: eventArgsHandle];
     _offset = eventArgsHandle.Offset;
-    
     return self;
 }
 

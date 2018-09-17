@@ -7,7 +7,7 @@
 #define speech_recognition_result_private_h
 
 #import "speech_recognition_result.h"
-#import "recognition_result_base_private.h"
+#import "recognition_result_private.h"
 #import "common_private.h"
 
 @interface SpeechRecognitionResult (Private)

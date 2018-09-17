@@ -3,14 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#import "recognizer_private.h"
-#import "speech_recognizer_private.h"
-#import "speech_recognition_result_private.h"
-#import "speech_recognition_event_args_private.h"
-#import "session_event_args_private.h"
-#import "recognition_event_args_private.h"
-#import "recognition_error_event_args_private.h"
-#import "common_private.h"
+#import "speechapi_private.h"
 
 struct SpeechEventHandlerHelper
 {
@@ -23,96 +16,73 @@ struct SpeechEventHandlerHelper
         this->recoImpl = recoImpl;
     }
     
-    void addFinalResultEventHandler()
+    void addRecognizedEventHandler()
     {
-        NSLog(@"Add FinalResultEventHandler");
-        recoImpl->FinalResult.Connect([this] (const SpeechImpl::SpeechRecognitionEventArgs& e)
+        NSLog(@"Add RecognizedEventHandler");
+        recoImpl->Recognized.Connect([this] (const SpeechImpl::SpeechRecognitionEventArgs& e)
             {
                 SpeechRecognitionEventArgs *eventArgs = [[SpeechRecognitionEventArgs alloc] init: e];
-                [recognizer onFinalResultEvent: eventArgs];
+                [recognizer onRecognizedEvent: eventArgs];
             });
     }
     
-    void addIntermediateResultEventHandler()
+    void addRecognizingEventHandler()
     {
-        NSLog(@"Add IntermediateResultEventHandler");
-        recoImpl->IntermediateResult.Connect([this] (const SpeechImpl::SpeechRecognitionEventArgs& e)
+        NSLog(@"Add RecognizingEventHandler");
+        recoImpl->Recognizing.Connect([this] (const SpeechImpl::SpeechRecognitionEventArgs& e)
             {
                 SpeechRecognitionEventArgs *eventArgs = [[SpeechRecognitionEventArgs alloc] init: e];
-                [recognizer onIntermediateResultEvent: eventArgs];
+                [recognizer onRecognizingEvent: eventArgs];
             });
     }
 
-    void addErrorEventHandler()
+    void addCanceledEventHandler()
     {
-        NSLog(@"Add ErrorEventHandler");
-        recoImpl->Canceled.Connect([this] (const SpeechImpl::SpeechRecognitionEventArgs& e)
+        NSLog(@"Add CanceledEventHandler");
+        recoImpl->Canceled.Connect([this] (const SpeechImpl::SpeechRecognitionCanceledEventArgs& e)
             {
-                NSString* sessionId = [NSString stringWithString:e.SessionId];
-                auto result = e.GetResult();
-                NSString* failureReason = [NSString stringWithString:result->ErrorDetails];
-                RecognitionStatus status;
-                switch (result->Reason)
-                {
-                case SpeechImpl::Reason::Recognized:
-                    status = RecognitionStatus::Recognized;
-                    break;
-                case SpeechImpl::Reason::IntermediateResult:
-                    status = RecognitionStatus::IntermediateResult;
-                    break;
-                case SpeechImpl::Reason::NoMatch:
-                    status = RecognitionStatus::NoMatch;
-                    break;
-                case SpeechImpl::Reason::InitialSilenceTimeout:
-                    status = RecognitionStatus::InitialSilenceTimeout;
-                    break;
-                case SpeechImpl::Reason::InitialBabbleTimeout:
-                    status = RecognitionStatus::InitialBabbleTimeout;
-                    break;
-                case SpeechImpl::Reason::Canceled:
-                    status = RecognitionStatus::Canceled;
-                    break;
-                default:
-                    // Todo error handling.
-                    NSLog(@"Unknown recognition status");
-                    status = RecognitionStatus::Canceled;
-                        failureReason = @"Unexpected status error.";
-                    break;
-                }
-                RecognitionErrorEventArgs *eventArgs = [[RecognitionErrorEventArgs alloc] init:sessionId :status :failureReason];
-                [recognizer onErrorEvent: eventArgs];
+                SpeechRecognitionCanceledEventArgs *eventArgs = [[SpeechRecognitionCanceledEventArgs alloc] init:e];
+                [recognizer onCanceledEvent: eventArgs];
             });
     }
 
-    void addSessionEventHandler()
+    void addSessionStartedEventHandler()
     {
-        NSLog(@"Add SessionEventHandler");
+        NSLog(@"Add SessionStartedEventHandler");
         recoImpl->SessionStarted.Connect([this] (const SpeechImpl::SessionEventArgs& e)
             {
-                SessionEventArgs *eventArgs = [[SessionEventArgs alloc] init :SessionStartedEvent :e];
-                [recognizer onSessionEvent: eventArgs];
-            });
-        
-        recoImpl->SessionStopped.Connect([this] (const SpeechImpl::SessionEventArgs& e)
-            {
-                SessionEventArgs *eventArgs = [[SessionEventArgs alloc] init :SessionStoppedEvent :e];
-                [recognizer onSessionEvent: eventArgs];
+                SessionEventArgs *eventArgs = [[SessionEventArgs alloc] init:e];
+                [recognizer onSessionStartedEvent: eventArgs];
             });
     }
     
-    void addRecognitionEventHandler()
+    void addSessionStoppedEventHandler()
     {
-        NSLog(@"Add RecognitionEventHandler");
+        NSLog(@"Add SessionStoppedEventHandler");
+        recoImpl->SessionStopped.Connect([this] (const SpeechImpl::SessionEventArgs& e)
+            {
+                SessionEventArgs *eventArgs = [[SessionEventArgs alloc] init:e];
+                [recognizer onSessionStoppedEvent: eventArgs];
+            });
+    }
+    
+    void addSpeechStartDetectedEventHandler()
+    {
+        NSLog(@"Add SpeechStartDetectedEventHandler");
         recoImpl->SpeechStartDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
             {
-                RecognitionEventArgs *eventArgs = [[RecognitionEventArgs alloc] init :SpeechStartDetectedEvent :e];
-                [recognizer onRecognitionEvent: eventArgs];
+                RecognitionEventArgs *eventArgs = [[RecognitionEventArgs alloc] init:e];
+                [recognizer onSpeechStartDetectedEvent: eventArgs];
             });
-        
+    }
+    
+    void addSpeechEndDetectedEventHandler()
+    {
+        NSLog(@"Add SpeechStopDetectedEventHandler");
         recoImpl->SpeechEndDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
             {
-                RecognitionEventArgs *eventArgs = [[RecognitionEventArgs alloc] init :SpeechEndDetectedEvent : e];
-                [recognizer onRecognitionEvent: eventArgs];
+                RecognitionEventArgs *eventArgs = [[RecognitionEventArgs alloc] init:e];
+                [recognizer onSpeechEndDetectedEvent: eventArgs];
             });
     }
 };
@@ -121,15 +91,52 @@ struct SpeechEventHandlerHelper
 {
     SpeechRecoSharedPtr recoImpl;
     dispatch_queue_t dispatchQueue;
-    NSMutableArray *finalResultEventListenerList;
-    NSMutableArray *intermediateResultEventListenerList;
+    
+    NSMutableArray *recognizedEventListenerList;
+    NSLock *recognizedLock;
+    NSMutableArray *recognizingEventListenerList;
+    NSLock *recognizingLock;
+    NSMutableArray *canceledEventListenerList;
+    NSLock *canceledLock;
     struct SpeechEventHandlerHelper *eventImpl;
-    NSLock *arrayLock;
+    
+    RecognizerPropertyCollection *propertyCollection;
 }
+
++ (SpeechRecognizer *)fromConfig: (SpeechConfig *)speechConfig
+{
+    try {
+        auto recoImpl = SpeechImpl::SpeechRecognizer::FromConfig([speechConfig getHandle]);
+        if (recoImpl == nullptr)
+            return nil;
+        return [[SpeechRecognizer alloc] init :recoImpl];
+    }
+    catch (...) {
+        // Todo: better error handling.
+        NSLog(@"Exception caught when creating SpeechRecognizer in core.");
+    }
+    return nil;
+}
+
++ (SpeechRecognizer *)fromConfig: (SpeechConfig *)speechConfig usingAudio: (AudioConfig *)audioConfig
+{
+    try {
+        auto recoImpl = SpeechImpl::SpeechRecognizer::FromConfig([speechConfig getHandle], [audioConfig getHandle]);
+        if (recoImpl == nullptr)
+            return nil;
+        return [[SpeechRecognizer alloc] init :recoImpl];
+    }
+    catch (...) {
+        // Todo: better error handling.
+        NSLog(@"Exception caught when creating SpeechRecognizer in core.");
+    }
+    return nil;
+}
+
 
 - (instancetype)init :(SpeechRecoSharedPtr)recoHandle
 {
-    self = [super init];
+    self = [super initFrom:recoHandle withParameters:&recoHandle->Properties];
     recoImpl = recoHandle;
     if (recoImpl == nullptr) {
         return nil;
@@ -137,29 +144,43 @@ struct SpeechEventHandlerHelper
     else
     {
         dispatchQueue = dispatch_queue_create("com.microsoft.cognitiveservices.speech", nil);
-        finalResultEventListenerList = [NSMutableArray array];
-        intermediateResultEventListenerList = [NSMutableArray array];
-        arrayLock = [[NSLock alloc] init];
+        recognizedEventListenerList = [NSMutableArray array];
+        recognizingEventListenerList = [NSMutableArray array];
+        canceledEventListenerList = [NSMutableArray array];
+        recognizedLock = [[NSLock alloc] init];
+        recognizingLock = [[NSLock alloc] init];
+        canceledLock = [[NSLock alloc] init];
         
         eventImpl = new SpeechEventHandlerHelper(self, recoImpl);
         [super setDispatchQueue: dispatchQueue];
-        eventImpl->addIntermediateResultEventHandler();
-        eventImpl->addFinalResultEventHandler();
-        eventImpl->addErrorEventHandler();
-        eventImpl->addSessionEventHandler();
-        eventImpl->addRecognitionEventHandler();
+        eventImpl->addRecognizingEventHandler();
+        eventImpl->addRecognizedEventHandler();
+        eventImpl->addCanceledEventHandler();
+        eventImpl->addSessionStartedEventHandler();
+        eventImpl->addSessionStoppedEventHandler();
+        eventImpl->addSpeechStartDetectedEventHandler();
+        eventImpl->addSpeechEndDetectedEventHandler();
 
         return self;
     }
 }
 
-- (void)dealloc
+- (void)setAuthorizationToken: (NSString *)token
 {
-    [self close];
-    delete eventImpl;
+    recoImpl->SetAuthorizationToken([token string]);
 }
 
-- (SpeechRecognitionResult *)recognize
+- (NSString *)getAuthorizationToken
+{
+    return [NSString stringWithString:recoImpl->GetAuthorizationToken()];
+}
+
+- (NSString *)getEndpointId
+{
+    return [NSString stringWithString:recoImpl->GetEndpointId()];
+}
+
+- (SpeechRecognitionResult *)recognizeOnce
 {
     SpeechRecognitionResult *result = nil;
     
@@ -169,7 +190,7 @@ struct SpeechEventHandlerHelper
     }
     
     try {
-        std::shared_ptr<SpeechImpl::SpeechRecognitionResult> resultImpl = recoImpl->RecognizeAsync().get();
+        std::shared_ptr<SpeechImpl::SpeechRecognitionResult> resultImpl = recoImpl->RecognizeOnceAsync().get();
         if (resultImpl == nullptr) {
             result = [[SpeechRecognitionResult alloc] initWithError: @"No result available."];
         }
@@ -187,7 +208,7 @@ struct SpeechEventHandlerHelper
     return result;
 }
 
-- (void)recognizeAsync:(void (^)(SpeechRecognitionResult *))resultReceivedBlock
+- (void)recognizeOnceAsync:(void (^)(SpeechRecognitionResult *))resultReceivedBlock
 {
     SpeechRecognitionResult *result = nil;
     if (recoImpl == nullptr) {
@@ -199,7 +220,7 @@ struct SpeechEventHandlerHelper
     }
     
     try {
-        std::shared_ptr<SpeechImpl::SpeechRecognitionResult> resultImpl = recoImpl->RecognizeAsync().get();
+        std::shared_ptr<SpeechImpl::SpeechRecognitionResult> resultImpl = recoImpl->RecognizeOnceAsync().get();
         if (resultImpl == nullptr) {
             result = [[SpeechRecognitionResult alloc] initWithError: @"No result available."];
         }
@@ -253,20 +274,13 @@ struct SpeechEventHandlerHelper
     }
 }
 
-- (void)close
+- (void)onRecognizedEvent:(SpeechRecognitionEventArgs *)eventArgs
 {
-    if (recoImpl != nullptr) {
-        recoImpl.reset();
-    }
-}
-
-- (void)onFinalResultEvent:(SpeechRecognitionEventArgs *)eventArgs
-{
-    NSLog(@"OBJC: onFinalResultEvent");
+    NSLog(@"OBJC: onRecognizedEvent");
     NSArray* workCopyOfList;
-    [arrayLock lock];
-    workCopyOfList = [NSArray arrayWithArray:finalResultEventListenerList];
-    [arrayLock unlock];
+    [recognizedLock lock];
+    workCopyOfList = [NSArray arrayWithArray:recognizedEventListenerList];
+    [recognizedLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
             ((SpeechRecognitionEventHandlerBlock)handle)(self, eventArgs);
@@ -274,33 +288,55 @@ struct SpeechEventHandlerHelper
     }
 }
 
-- (void)onIntermediateResultEvent:(SpeechRecognitionEventArgs *)eventArgs
+- (void)onRecognizingEvent:(SpeechRecognitionEventArgs *)eventArgs
 {
-    NSLog(@"OBJC: onIntermediateResultEvent");
+    NSLog(@"OBJC: onRecognizingEvent");
     NSArray* workCopyOfList;
-    [arrayLock lock];
-    workCopyOfList = [NSArray arrayWithArray:intermediateResultEventListenerList];
-    [arrayLock unlock];
-    for (id handle in intermediateResultEventListenerList) {
+    [recognizingLock lock];
+    workCopyOfList = [NSArray arrayWithArray:recognizingEventListenerList];
+    [recognizingLock unlock];
+    for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
             ((SpeechRecognitionEventHandlerBlock)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)addFinalResultEventListener:(SpeechRecognitionEventHandlerBlock)eventHandler
+- (void)onCanceledEvent:(SpeechRecognitionCanceledEventArgs *)eventArgs
 {
-    [arrayLock lock];
-    [finalResultEventListenerList addObject:eventHandler];
-    [arrayLock unlock];
+    NSLog(@"OBJC: onCanceledEvent");
+    NSArray* workCopyOfList;
+    [canceledLock lock];
+    workCopyOfList = [NSArray arrayWithArray:canceledEventListenerList];
+    [canceledLock unlock];
+    for (id handle in workCopyOfList) {
+        dispatch_async(dispatchQueue, ^{
+            ((SpeechRecognitionCanceledEventHandlerBlock)handle)(self, eventArgs);
+        });
+    }
+}
+
+- (void)addRecognizedEventListener:(SpeechRecognitionEventHandlerBlock)eventHandler
+{
+    [recognizedLock lock];
+    [recognizedEventListenerList addObject:eventHandler];
+    [recognizedLock unlock];
     return;
 }
 
-- (void)addIntermediateResultEventListener:(SpeechRecognitionEventHandlerBlock)eventHandler
+- (void)addRecognizingEventListener:(SpeechRecognitionEventHandlerBlock)eventHandler
 {
-    [arrayLock lock];
-    [intermediateResultEventListenerList addObject:eventHandler];
-    [arrayLock unlock];
+    [recognizingLock lock];
+    [recognizingEventListenerList addObject:eventHandler];
+    [recognizingLock unlock];
+    return;
+}
+
+- (void)addCanceledEventListener:(SpeechRecognitionCanceledEventHandlerBlock)eventHandler
+{
+    [canceledLock lock];
+    [canceledEventListenerList addObject:eventHandler];
+    [canceledLock unlock];
     return;
 }
 

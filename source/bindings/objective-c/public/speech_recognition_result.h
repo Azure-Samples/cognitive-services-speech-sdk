@@ -7,12 +7,14 @@
 #define speech_recognition_result_h
 
 #import <Foundation/Foundation.h>
-#import "recognition_status.h"
-#import "recognition_result_base.h"
+#import "recognition_result.h"
 
-@interface SpeechRecognitionResult : RecognitionResultBase
+/**
+  * Defines result of speech recognition.
+  */
+@interface SpeechRecognitionResult : RecognitionResult
 
-// Currently same as RecognitionResultBase.
+// Currently same as RecognitionResult.
 
 @end
 

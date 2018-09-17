@@ -7,16 +7,17 @@
 #define translation_recognizer_private_h
 
 #import "translation_recognizer.h"
-#import "translation_synthesis_event_args_private.h"
+#import "translation_synthesis_result_event_args_private.h"
 #import "common_private.h"
 
 @interface TranslationRecognizer (Private)
 
 - (instancetype)init :(TranslationRecoSharedPtr)recoHandle;
 
-- (void)onFinalResultEvent :(TranslationTextEventArgs *)eventArgs;
-- (void)onIntermediateResultEvent :(TranslationTextEventArgs *)eventArgs;
-- (void)onSynthesisResultEvent :(TranslationSynthesisEventArgs *)eventArgs;
+- (void)onRecognizedEvent :(TranslationTextResultEventArgs *)eventArgs;
+- (void)onRecognizingEvent :(TranslationTextResultEventArgs *)eventArgs;
+- (void)onSynthesizingEvent :(TranslationSynthesisResultEventArgs *)eventArgs;
+- (void)onCanceledEvent :(TranslationTextResultCanceledEventArgs *)eventArgs;
 
 @end
 #endif /* translation_recognizer_private_h */

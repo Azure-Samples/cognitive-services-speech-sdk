@@ -3,117 +3,87 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#import "recognizer_private.h"
-#import "intent_recognizer_private.h"
-#import "intent_recognition_result_private.h"
-#import "intent_recognition_event_args_private.h"
-#import "session_event_args_private.h"
-#import "recognition_event_args_private.h"
-#import "recognition_error_event_args_private.h"
-#import "common_private.h"
+#import "speechapi_private.h"
 
 struct IntentEventHandlerHelper
 {
     IntentRecognizer *recognizer;
     IntentRecoSharedPtr recoImpl;
-
+    
     IntentEventHandlerHelper(IntentRecognizer *reco, IntentRecoSharedPtr recoImpl)
     {
         recognizer = reco;
         this->recoImpl = recoImpl;
     }
     
-    void addFinalResultEventHandler()
+    void addRecognizedEventHandler()
     {
-        NSLog(@"Add FinalResultEventHandler");
-        recoImpl->FinalResult.Connect([this] (const IntentImpl::IntentRecognitionEventArgs& e)
-            {
-                IntentRecognitionEventArgs *eventArgs = [[IntentRecognitionEventArgs alloc] init: e];
-                [recognizer onFinalResultEvent: eventArgs];
-            });
+        NSLog(@"Add RecognizedEventHandler");
+        recoImpl->Recognized.Connect([this] (const IntentImpl::IntentRecognitionEventArgs& e)
+                                     {
+                                         IntentRecognitionEventArgs *eventArgs = [[IntentRecognitionEventArgs alloc] init: e];
+                                         [recognizer onRecognizedEvent: eventArgs];
+                                     });
     }
     
-    void addIntermediateResultEventHandler()
+    void addRecognizingEventHandler()
     {
-        NSLog(@"Add IntermediateResultEventHandler");
-        recoImpl->IntermediateResult.Connect([this] (const IntentImpl::IntentRecognitionEventArgs& e)
-            {
-                IntentRecognitionEventArgs *eventArgs = [[IntentRecognitionEventArgs alloc] init: e];
-                [recognizer onIntermediateResultEvent: eventArgs];
-            });
+        NSLog(@"Add RecognizingEventHandler");
+        recoImpl->Recognizing.Connect([this] (const IntentImpl::IntentRecognitionEventArgs& e)
+                                      {
+                                          IntentRecognitionEventArgs *eventArgs = [[IntentRecognitionEventArgs alloc] init: e];
+                                          [recognizer onRecognizingEvent: eventArgs];
+                                      });
     }
-
-    void addErrorEventHandler()
+    
+    void addCanceledEventHandler()
     {
-        NSLog(@"Add ErrorEventHandler");
-        recoImpl->Canceled.Connect([this] (const IntentImpl::IntentRecognitionEventArgs& e)
-            {
-                NSString* sessionId = [NSString stringWithString:e.SessionId];
-                auto result = e.GetResult();
-                NSString* failureReason = [NSString stringWithString:result->ErrorDetails];
-                RecognitionStatus status;
-                switch (result->Reason)
-                {
-                case SpeechImpl::Reason::Recognized:
-                    status = RecognitionStatus::Recognized;
-                    break;
-                case SpeechImpl::Reason::IntermediateResult:
-                    status = RecognitionStatus::IntermediateResult;
-                    break;
-                case SpeechImpl::Reason::NoMatch:
-                    status = RecognitionStatus::NoMatch;
-                    break;
-                case SpeechImpl::Reason::InitialSilenceTimeout:
-                    status = RecognitionStatus::InitialSilenceTimeout;
-                    break;
-                case SpeechImpl::Reason::InitialBabbleTimeout:
-                    status = RecognitionStatus::InitialBabbleTimeout;
-                    break;
-                case SpeechImpl::Reason::Canceled:
-                    status = RecognitionStatus::Canceled;
-                    break;
-                default:
-                    // Todo error handling.
-                    NSLog(@"Unknown recognition status");
-                    status = RecognitionStatus::Canceled;
-                        failureReason = @"Unexpected status error.";
-                    break;
-                }
-                RecognitionErrorEventArgs *eventArgs = [[RecognitionErrorEventArgs alloc] init:sessionId :status :failureReason];
-                [recognizer onErrorEvent: eventArgs];
-            });
+        NSLog(@"Add CanceledEventHandler");
+        recoImpl->Canceled.Connect([this] (const IntentImpl::IntentRecognitionCanceledEventArgs& e)
+                                   {
+                                       IntentRecognitionCanceledEventArgs *eventArgs = [[IntentRecognitionCanceledEventArgs alloc] init:e];
+                                       [recognizer onCanceledEvent: eventArgs];
+                                   });
     }
-
-    void addSessionEventHandler()
+    
+    void addSessionStartedEventHandler()
     {
-        NSLog(@"Add SessionEventHandler");
+        NSLog(@"Add SessionStartedEventHandler");
         recoImpl->SessionStarted.Connect([this] (const SpeechImpl::SessionEventArgs& e)
-            {
-                SessionEventArgs *eventArgs = [[SessionEventArgs alloc] init :SessionStartedEvent :e];
-                [recognizer onSessionEvent: eventArgs];
-            });
-        
-        recoImpl->SessionStopped.Connect([this] (const SpeechImpl::SessionEventArgs& e)
-            {
-                SessionEventArgs *eventArgs = [[SessionEventArgs alloc] init :SessionStoppedEvent :e];
-                [recognizer onSessionEvent: eventArgs];
-            });
+                                         {
+                                             SessionEventArgs *eventArgs = [[SessionEventArgs alloc] init:e];
+                                             [recognizer onSessionStartedEvent: eventArgs];
+                                         });
     }
     
-    void addRecognitionEventHandler()
+    void addSessionStoppedEventHandler()
     {
-        NSLog(@"Add RecognitionEventHandler");
+        NSLog(@"Add SessionStoppedEventHandler");
+        recoImpl->SessionStopped.Connect([this] (const SpeechImpl::SessionEventArgs& e)
+                                         {
+                                             SessionEventArgs *eventArgs = [[SessionEventArgs alloc] init:e];
+                                             [recognizer onSessionStoppedEvent: eventArgs];
+                                         });
+    }
+    
+    void addSpeechStartDetectedEventHandler()
+    {
+        NSLog(@"Add SpeechStartDetectedEventHandler");
         recoImpl->SpeechStartDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
-            {
-                RecognitionEventArgs *eventArgs = [[RecognitionEventArgs alloc] init :SpeechStartDetectedEvent :e];
-                [recognizer onRecognitionEvent: eventArgs];
-            });
-        
+                                              {
+                                                  RecognitionEventArgs *eventArgs = [[RecognitionEventArgs alloc] init:e];
+                                                  [recognizer onSpeechStartDetectedEvent: eventArgs];
+                                              });
+    }
+    
+    void addSpeechEndDetectedEventHandler()
+    {
+        NSLog(@"Add SpeechStopDetectedEventHandler");
         recoImpl->SpeechEndDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
-            {
-                RecognitionEventArgs *eventArgs = [[RecognitionEventArgs alloc] init :SpeechEndDetectedEvent : e];
-                [recognizer onRecognitionEvent: eventArgs];
-            });
+                                            {
+                                                RecognitionEventArgs *eventArgs = [[RecognitionEventArgs alloc] init:e];
+                                                [recognizer onSpeechEndDetectedEvent: eventArgs];
+                                            });
     }
 };
 
@@ -121,15 +91,51 @@ struct IntentEventHandlerHelper
 {
     IntentRecoSharedPtr recoImpl;
     dispatch_queue_t dispatchQueue;
-    NSMutableArray *finalResultEventListenerList;
-    NSMutableArray *intermediateResultEventListenerList;
+    
+    NSMutableArray *recognizedEventListenerList;
+    NSLock *recognizedLock;
+    NSMutableArray *recognizingEventListenerList;
+    NSLock *recognizingLock;
+    NSMutableArray *canceledEventListenerList;
+    NSLock *canceledLock;
+    
     struct IntentEventHandlerHelper *eventImpl;
-    NSLock *arrayLock;
 }
+
++ (IntentRecognizer *)fromConfig: (SpeechConfig *)speechConfig
+{
+    try {
+        auto intentRecoImpl = IntentImpl::IntentRecognizer::FromConfig([speechConfig getHandle]);
+        if (intentRecoImpl == nullptr)
+            return nil;
+        return [[IntentRecognizer alloc] init :intentRecoImpl];
+    }
+    catch (...) {
+        // Todo: better error handling.
+        NSLog(@"Exception caught when creating IntentRecognizer in core.");
+    }
+    return nil;
+}
+
++ (IntentRecognizer *)fromConfig: (SpeechConfig *)speechConfig usingAudio: (AudioConfig *)audioConfig
+{
+    try {
+        auto intentRecoImpl = IntentImpl::IntentRecognizer::FromConfig([speechConfig getHandle], [audioConfig getHandle]);
+        if (intentRecoImpl == nullptr)
+            return nil;
+        return [[IntentRecognizer alloc] init :intentRecoImpl];
+    }
+    catch (...) {
+        // Todo: better error handling.
+        NSLog(@"Exception caught when creating IntentRecognizer in core.");
+    }
+    return nil;
+}
+
 
 - (instancetype)init :(IntentRecoSharedPtr)recoHandle
 {
-    self = [super init];
+    self = [super initFrom:recoHandle withParameters:&recoHandle->Properties];
     recoImpl = recoHandle;
     if (recoImpl == nullptr) {
         return nil;
@@ -137,44 +143,65 @@ struct IntentEventHandlerHelper
     else
     {
         dispatchQueue = dispatch_queue_create("com.microsoft.cognitiveservices.speech", nil);
-        finalResultEventListenerList = [NSMutableArray array];
-        intermediateResultEventListenerList = [NSMutableArray array];
-        arrayLock = [[NSLock alloc] init];
+        
+        recognizedEventListenerList = [NSMutableArray array];
+        recognizingEventListenerList = [NSMutableArray array];
+        canceledEventListenerList = [NSMutableArray array];
+        recognizedLock = [[NSLock alloc] init];
+        recognizingLock = [[NSLock alloc] init];
+        canceledLock = [[NSLock alloc] init];
         
         eventImpl = new IntentEventHandlerHelper(self, recoImpl);
         [super setDispatchQueue: dispatchQueue];
-        eventImpl->addIntermediateResultEventHandler();
-        eventImpl->addFinalResultEventHandler();
-        eventImpl->addErrorEventHandler();
-        eventImpl->addSessionEventHandler();
-        eventImpl->addRecognitionEventHandler();
 
+        eventImpl->addRecognizingEventHandler();
+        eventImpl->addRecognizedEventHandler();
+        eventImpl->addCanceledEventHandler();
+        eventImpl->addSessionStartedEventHandler();
+        eventImpl->addSessionStoppedEventHandler();
+        eventImpl->addSpeechStartDetectedEventHandler();
+        eventImpl->addSpeechEndDetectedEventHandler();
+        
         return self;
     }
 }
 
-- (void)dealloc
+- (void)setAuthorizationToken: (NSString *)token
 {
-    [self close];
-    delete eventImpl;
+    recoImpl->SetAuthorizationToken([token string]);
 }
 
-- (void)AddIntentUsingId: (NSString *)intentId ForPhrase: (NSString *)simplePhrase
+- (NSString *)getAuthorizationToken
 {
-    recoImpl->AddIntent([intentId string], [simplePhrase string]);
+    return [NSString stringWithString:recoImpl->GetAuthorizationToken()];
 }
 
-- (void)AddIntentUsingId: (NSString *)intentId FromModel: (LanguageUnderstandingModel *)model
+- (void)addIntentFromPhrase:(NSString *)simplePhrase
 {
-    recoImpl->AddIntent([intentId string], [model getModelHandle]);
+    recoImpl->AddIntent([simplePhrase string]);
 }
 
-- (void)AddIntentUsingId: (NSString *)intentId FromModel: (LanguageUnderstandingModel *)model WithIntentName: (NSString *)intentName
+- (void)addIntentFromPhrase:(NSString *)simplePhrase mappingToId:(NSString *)intentId
 {
-    recoImpl->AddIntent([intentId string], [model getModelHandle], [intentName string]);
+    recoImpl->AddIntent([simplePhrase string], [intentId string]);
 }
 
-- (IntentRecognitionResult *)recognize
+- (void)addIntent: (NSString *)intentName fromModel:(LanguageUnderstandingModel *)model
+{
+    recoImpl->AddIntent([model getModelHandle], [intentName string]);
+}
+
+- (void)addIntent: (NSString *)intentName fromModel:(LanguageUnderstandingModel *)model mappingToId:(NSString *)intentId
+{
+    recoImpl->AddIntent([model getModelHandle], [intentName string], [intentId string]);
+}
+
+- (void)addAllIntentsFromModel:(LanguageUnderstandingModel *)model mappingToId:(NSString *)intentId
+{
+    recoImpl->AddAllIntents([model getModelHandle], [intentId string]);
+}
+
+- (IntentRecognitionResult *)recognizeOnce
 {
     IntentRecognitionResult *result = nil;
     
@@ -184,7 +211,7 @@ struct IntentEventHandlerHelper
     }
     
     try {
-        std::shared_ptr<IntentImpl::IntentRecognitionResult> resultImpl = recoImpl->RecognizeAsync().get();
+        std::shared_ptr<IntentImpl::IntentRecognitionResult> resultImpl = recoImpl->RecognizeOnceAsync().get();
         if (resultImpl == nullptr) {
             result = [[IntentRecognitionResult alloc] initWithError: @"No result available."];
         }
@@ -202,7 +229,7 @@ struct IntentEventHandlerHelper
     return result;
 }
 
-- (void)recognizeAsync:(void (^)(IntentRecognitionResult *))resultReceivedBlock
+- (void)recognizeOnceAsync:(void (^)(IntentRecognitionResult *))resultReceivedBlock
 {
     IntentRecognitionResult *result = nil;
     if (recoImpl == nullptr) {
@@ -214,7 +241,7 @@ struct IntentEventHandlerHelper
     }
     
     try {
-        std::shared_ptr<IntentImpl::IntentRecognitionResult> resultImpl = recoImpl->RecognizeAsync().get();
+        std::shared_ptr<IntentImpl::IntentRecognitionResult> resultImpl = recoImpl->RecognizeOnceAsync().get();
         if (resultImpl == nullptr) {
             result = [[IntentRecognitionResult alloc] initWithError: @"No result available."];
         }
@@ -268,20 +295,13 @@ struct IntentEventHandlerHelper
     }
 }
 
-- (void)close
+- (void)onRecognizedEvent:(IntentRecognitionEventArgs *)eventArgs
 {
-    if (recoImpl != nullptr) {
-        recoImpl.reset();
-    }
-}
-
-- (void)onFinalResultEvent:(IntentRecognitionEventArgs *)eventArgs
-{
-    NSLog(@"OBJC: onFinalResultEvent");
+    NSLog(@"OBJC: onRecognizedEvent");
     NSArray* workCopyOfList;
-    [arrayLock lock];
-    workCopyOfList = [NSArray arrayWithArray:finalResultEventListenerList];
-    [arrayLock unlock];
+    [recognizedLock lock];
+    workCopyOfList = [NSArray arrayWithArray:recognizedEventListenerList];
+    [recognizedLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
             ((IntentRecognitionEventHandlerBlock)handle)(self, eventArgs);
@@ -289,33 +309,55 @@ struct IntentEventHandlerHelper
     }
 }
 
-- (void)onIntermediateResultEvent:(IntentRecognitionEventArgs *)eventArgs
+- (void)onRecognizingEvent:(IntentRecognitionEventArgs *)eventArgs
 {
-    NSLog(@"OBJC: onIntermediateResultEvent");
+    NSLog(@"OBJC: onRecognizingEvent");
     NSArray* workCopyOfList;
-    [arrayLock lock];
-    workCopyOfList = [NSArray arrayWithArray:intermediateResultEventListenerList];
-    [arrayLock unlock];
-    for (id handle in intermediateResultEventListenerList) {
+    [recognizingLock lock];
+    workCopyOfList = [NSArray arrayWithArray:recognizingEventListenerList];
+    [recognizingLock unlock];
+    for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
             ((IntentRecognitionEventHandlerBlock)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)addFinalResultEventListener:(IntentRecognitionEventHandlerBlock)eventHandler
+- (void)onCanceledEvent:(IntentRecognitionCanceledEventArgs *)eventArgs
 {
-    [arrayLock lock];
-    [finalResultEventListenerList addObject:eventHandler];
-    [arrayLock unlock];
+    NSLog(@"OBJC: onCanceledEvent");
+    NSArray* workCopyOfList;
+    [canceledLock lock];
+    workCopyOfList = [NSArray arrayWithArray:canceledEventListenerList];
+    [canceledLock unlock];
+    for (id handle in workCopyOfList) {
+        dispatch_async(dispatchQueue, ^{
+            ((IntentRecognitionCanceledEventHandlerBlock)handle)(self, eventArgs);
+        });
+    }
+}
+
+- (void)addRecognizedEventListener:(IntentRecognitionEventHandlerBlock)eventHandler
+{
+    [recognizedLock lock];
+    [recognizedEventListenerList addObject:eventHandler];
+    [recognizedLock unlock];
     return;
 }
 
-- (void)addIntermediateResultEventListener:(IntentRecognitionEventHandlerBlock)eventHandler
+- (void)addRecognizingEventListener:(IntentRecognitionEventHandlerBlock)eventHandler
 {
-    [arrayLock lock];
-    [intermediateResultEventListenerList addObject:eventHandler];
-    [arrayLock unlock];
+    [recognizingLock lock];
+    [recognizingEventListenerList addObject:eventHandler];
+    [recognizingLock unlock];
+    return;
+}
+
+- (void)addCanceledEventListener:(IntentRecognitionCanceledEventHandlerBlock)eventHandler
+{
+    [canceledLock lock];
+    [canceledEventListenerList addObject:eventHandler];
+    [canceledLock unlock];
     return;
 }
 

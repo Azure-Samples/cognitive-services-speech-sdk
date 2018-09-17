@@ -48,7 +48,7 @@ public final class LanguageUnderstandingModel
       }
 
     /**
-      * Creates a language understanding model using hostname, subscription key and application id of Language Understanding service.
+      * Creates a language understanding model using subscription key, application id and region of Language Understanding service.
       * @param subscriptionKey A String that represents the subscription key of Language Understanding service.
       * @param appId A String that represents the application id of Language Understanding service.
       * @param region A String that represents the region of the Language Understanding service (see the <a href="https://aka.ms/csspeech/region">region page</a>).

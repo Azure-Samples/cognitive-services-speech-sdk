@@ -7,7 +7,7 @@ using System.Globalization;
 namespace Microsoft.CognitiveServices.Speech
 {
     /// <summary>
-    /// Defines payload for session events like SessionStarted/Stopped, SoundStarted/Stopped.
+    /// Defines payload for SessionStarted/Stopped events.
     /// </summary>
     public sealed class SessionEventArgs : System.EventArgs
     {

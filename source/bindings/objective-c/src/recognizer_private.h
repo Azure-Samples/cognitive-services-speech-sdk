@@ -8,15 +8,17 @@
 
 #import <Foundation/Foundation.h>
 #import "recognizer.h"
-#import "recognition_error_event_args.h"
 
 @interface Recognizer (Private)
 
+- (instancetype)initFrom:(RecognizerSharedPtr)recoHandle withParameters:(SpeechImpl::PropertyCollection *)propertiesHandle;
+
 - (void)setDispatchQueue: (dispatch_queue_t)queue;
 
-- (void)onSessionEvent: (SessionEventArgs *)eventArgs;
-- (void)onRecognitionEvent: (RecognitionEventArgs *)eventArgs;
-- (void)onErrorEvent: (RecognitionErrorEventArgs *)eventArgs;
+- (void)onSessionStartedEvent: (SessionEventArgs *)eventArgs;
+- (void)onSessionStoppedEvent: (SessionEventArgs *)eventArgs;
+- (void)onSpeechStartDetectedEvent: (RecognitionEventArgs *)eventArgs;
+- (void)onSpeechEndDetectedEvent: (RecognitionEventArgs *)eventArgs;
 
 @end
 

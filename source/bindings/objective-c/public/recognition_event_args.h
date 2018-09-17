@@ -7,19 +7,16 @@
 #define recognition_event_args_h
 
 #import <Foundation/Foundation.h>
+#import "session_event_args.h"
 
-typedef NS_ENUM(NSInteger, RecognitionEventType)
-{
-    SpeechStartDetectedEvent = 0,
-    SpeechEndDetectedEvent = 1
-};
+/**
+  * Defines payload for SpeechStartDetected and SpeechEndDetected events.
+  */
+@interface RecognitionEventArgs : SessionEventArgs
 
-@interface RecognitionEventArgs : NSObject
-
-@property (readonly) RecognitionEventType eventType;
-
-@property (readonly) NSString* sessionId;
-
+/**
+  * Represents the message offset
+  */
 @property (readonly) NSUInteger offset;
 
 @end

@@ -8,17 +8,15 @@
 
 #import <Foundation/Foundation.h>
 
-typedef NS_ENUM(NSInteger, SessionEventType)
-{
-    SessionStartedEvent = 0,
-    SessionStoppedEvent = 1
-};
-
+/**
+  * Defines payload for SessionStarted/Stopped events.
+  */
 @interface SessionEventArgs : NSObject
 
-@property (readonly) SessionEventType eventType;
-
-@property (readonly) NSString* sessionId;
+/**
+  * The session identifier.
+  */
+@property (readonly) NSString *sessionId;
 
 @end
 

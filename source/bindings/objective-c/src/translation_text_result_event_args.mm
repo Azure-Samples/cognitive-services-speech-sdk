@@ -3,21 +3,28 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#import "translation_text_result_event_args_private.h"
-#import "translation_text_result_private.h"
-
-#import "common_private.h"
+#import "speechapi_private.h"
 
 @implementation TranslationTextResultEventArgs
 
 - (instancetype)init:(const TranslationImpl::TranslationTextResultEventArgs&)e
 {
-    self = [super init];
+    self = [super init:e];
+    _result = [[TranslationTextResult alloc] init :e.GetResult()];
+    return self;
+}
 
-    _sessionId = [NSString stringWithString:e.SessionId];
-    auto resultImpl = e.GetResult();
-    _result = [[TranslationTextResult alloc] init :resultImpl];
+@end
 
+@implementation TranslationTextResultCanceledEventArgs
+
+- (instancetype)init:(const TranslationImpl::TranslationTextResultCanceledEventArgs&)e
+{
+    self = [super init:e];
+    auto cancellationDetails = e.GetCancellationDetails();
+    _reason = [Util fromCancellationReasonImpl:cancellationDetails->Reason];
+    _errorDetails = [NSString stringWithString:cancellationDetails->ErrorDetails];
+    
     return self;
 }
 

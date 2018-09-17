@@ -10,7 +10,7 @@ import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 
 /**
-  * Define payload of speech recognition canceled result events.
+  * Defines payload of speech recognition canceled events.
   */
 public final class SpeechRecognitionCanceledEventArgs {
 
@@ -53,8 +53,7 @@ public final class SpeechRecognitionCanceledEventArgs {
     }
 
     /**
-      * In case of an unsuccessful recognition, provides a details of why the occurred error.
-      * This field is only filled-out if the reason canceled (@see getReason) is set to Error.
+      * The error details of why the cancellation occurred.
       * @return A String that represents the error details.
       */
     public String getErrorDetails() {

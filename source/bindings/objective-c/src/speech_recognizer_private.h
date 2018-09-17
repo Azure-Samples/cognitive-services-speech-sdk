@@ -13,8 +13,9 @@
 
 - (instancetype)init :(SpeechRecoSharedPtr)recoHandle;
 
-- (void)onFinalResultEvent :(SpeechRecognitionEventArgs *)eventArgs;
-- (void)onIntermediateResultEvent :(SpeechRecognitionEventArgs *)eventArgs;
+- (void)onRecognizedEvent :(SpeechRecognitionEventArgs *)eventArgs;
+- (void)onRecognizingEvent :(SpeechRecognitionEventArgs *)eventArgs;
+- (void)onCanceledEvent :(SpeechRecognitionCanceledEventArgs *)eventArgs;
 
 @end
 #endif /* speech_recognizer_private_h */

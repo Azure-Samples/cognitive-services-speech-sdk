@@ -16,7 +16,7 @@ import com.microsoft.cognitiveservices.speech.util.EventHandlerImpl;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
-  * Perform intent recognition on the speech input. It returns both recognized text and recognized intent.
+  * Performs intent recognition on the speech input. It returns both recognized text and recognized intent.
   */
 public final class IntentRecognizer extends com.microsoft.cognitiveservices.speech.Recognizer {
     /**
@@ -69,9 +69,9 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     }
 
     /**
-      * Create a new instance of an intent recognizer.
-      * @return a new instance of an intent recognizer.
+      * Creates a new instance of an intent recognizer.
       * @param speechConfig speech configuration.
+      * @return a new instance of an intent recognizer.
       */
     public IntentRecognizer(com.microsoft.cognitiveservices.speech.SpeechConfig speechConfig)
     {
@@ -79,10 +79,10 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     }
 
     /**
-      * Create a new instance of an intent recognizer.
-      * @return a new instance of an intent recognizer.
+      * Creates a new instance of an intent recognizer.
       * @param speechConfig speech configuration.
-      * @param speechConfig audio configuration.
+      * @param audioConfig audio configuration.
+      * @return a new instance of an intent recognizer.
       */
     public IntentRecognizer(com.microsoft.cognitiveservices.speech.SpeechConfig speechConfig, AudioConfig audioConfig)
     {
@@ -107,7 +107,7 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
     }
 
     /**
-      * sets the authorization token used to communicate with the service.
+      * Gets the authorization token used to communicate with the service.
       * @return Authorization token.
       */
     public String getAuthorizationToken() {

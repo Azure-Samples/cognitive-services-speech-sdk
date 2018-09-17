@@ -8,8 +8,8 @@
 #define test_h
 
 
-#import "speech_factory.h"
-#import "translation_text_result.h"
+#import "speechapi.h"
+
 
 @interface EndToEndTests : NSObject
 

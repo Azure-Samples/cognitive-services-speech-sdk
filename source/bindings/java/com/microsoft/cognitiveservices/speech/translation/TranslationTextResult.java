@@ -7,13 +7,8 @@ package com.microsoft.cognitiveservices.speech.translation;
 import java.util.HashMap;
 import java.util.Map;
 
-//
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
-//
-
 /**
-  * Defines TranslationText result.
+  * Defines translation text result.
   */
 public final class TranslationTextResult extends com.microsoft.cognitiveservices.speech.SpeechRecognitionResult
 {

@@ -8,20 +8,15 @@
 
 #import <Foundation/Foundation.h>
 
-typedef NS_ENUM(NSInteger, SynthesisStatus)
-{
-    SynthesisSuccess = 0,
-    SynthesisEnd,
-    SynthesisError
-};
-
+/**
+  * Defines translation synthesis result, i.e. the voice output of the translated text in the target language.
+  */
 @interface TranslationSynthesisResult : NSObject
 
-@property (readonly) SynthesisStatus status;
-
-@property (readonly) NSData* audio;
-
-@property (readonly) NSString* failureReason;
+/**
+  * The voice output of the translated text in the target language.
+  */
+@property (readonly) NSData *audio;
 
 @end
 

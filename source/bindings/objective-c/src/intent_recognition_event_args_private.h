@@ -15,4 +15,10 @@
 
 @end
 
+@interface IntentRecognitionCanceledEventArgs (Private)
+
+- (instancetype)init: (const IntentImpl::IntentRecognitionCanceledEventArgs&)e;
+
+@end
+
 #endif /* intent_recognition_event_args_private_h */

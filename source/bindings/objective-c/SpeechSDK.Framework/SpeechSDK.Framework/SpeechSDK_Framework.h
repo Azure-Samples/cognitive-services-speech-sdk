@@ -1,9 +1,6 @@
 //
-//  SpeechSDK_Framework.h
-//  SpeechSDK.Framework
-//
-//  Created by carbon on 05.09.18.
-//  Copyright © 2018 carbon. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
 #import <Cocoa/Cocoa.h>

@@ -3,29 +3,29 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#import "recognizer_private.h"
-
-#import "common_private.h"
+#import "speechapi_private.h"
 
 @implementation Recognizer
 {
     dispatch_queue_t dispatchQueue;
-    NSMutableArray *sessionEventListenerList;
+    NSMutableArray *sessionStartedEventListenerList;
+    NSMutableArray *sessionStoppedEventListenerList;
     NSLock *sessionEventArrayLock;
-    NSMutableArray *recognitionEventListenerList;   
-    NSLock *recognitionEventArrayLock;
-    NSMutableArray *errorEventListenerList;
-    NSLock *errorEventArrayLock;
+    NSMutableArray *speechStartDetectedEventListenerList;
+    NSMutableArray *speechEndDetectedEventListenerList;
+    NSLock *speechDetectionEventArrayLock;
 }
 
-- (instancetype)init
+- (instancetype)initFrom:(RecognizerSharedPtr)recoHandle withParameters:(SpeechImpl::PropertyCollection *)propertiesHandle
 {
-    sessionEventListenerList = [NSMutableArray array];
+    self = [super init];
+    _properties = [[RecognizerPropertyCollection alloc] initWithPropertyCollection:propertiesHandle from:recoHandle];
+    sessionStartedEventListenerList = [NSMutableArray array];
+    sessionStoppedEventListenerList = [NSMutableArray array];
     sessionEventArrayLock = [[NSLock alloc] init];
-    recognitionEventListenerList = [NSMutableArray array];
-    recognitionEventArrayLock = [[NSLock alloc] init];
-    errorEventListenerList = [NSMutableArray array];
-    errorEventArrayLock = [[NSLock alloc] init];
+    speechStartDetectedEventListenerList = [NSMutableArray array];
+    speechEndDetectedEventListenerList = [NSMutableArray array];
+    speechDetectionEventArrayLock = [[NSLock alloc] init];
     
     return self;
 }
@@ -35,12 +35,12 @@
     dispatchQueue = queue;
 }
 
-- (void)onSessionEvent:(SessionEventArgs *)eventArgs
+- (void)onSessionStartedEvent:(SessionEventArgs *)eventArgs
 {
-    NSLog(@"OBJC OnSessionEvent");
+    NSLog(@"OBJC OnSessionStartedEvent");
     NSArray* workCopyOfList;
     [sessionEventArrayLock lock];
-    workCopyOfList = [NSArray arrayWithArray:sessionEventListenerList];
+    workCopyOfList = [NSArray arrayWithArray:sessionStartedEventListenerList];
     [sessionEventArrayLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
@@ -49,20 +49,41 @@
     }
 }
 
-- (void)addSessionEventListener:(SessionEventHandlerBlock)eventHandler
+- (void)onSessionStoppedEvent:(SessionEventArgs *)eventArgs
+{
+    NSLog(@"OBJC OnSessionStoppedEvent");
+    NSArray* workCopyOfList;
+    [sessionEventArrayLock lock];
+    workCopyOfList = [NSArray arrayWithArray:sessionStoppedEventListenerList];
+    [sessionEventArrayLock unlock];
+    for (id handle in workCopyOfList) {
+        dispatch_async(dispatchQueue, ^{
+            ((SessionEventHandlerBlock)handle)(self, eventArgs);
+        });
+    }
+}
+
+- (void)addSessionStartedEventListener:(SessionEventHandlerBlock)eventHandler
 {
     [sessionEventArrayLock lock];
-    [sessionEventListenerList addObject:eventHandler];
+    [sessionStartedEventListenerList addObject:eventHandler];
     [sessionEventArrayLock unlock];
 }
 
-- (void)onRecognitionEvent:(RecognitionEventArgs *)eventArgs
+- (void)addSessionStoppedEventListener:(SessionEventHandlerBlock)eventHandler
 {
-    NSLog(@"OBJC OnRecognitionEvent");
+    [sessionEventArrayLock lock];
+    [sessionStoppedEventListenerList addObject:eventHandler];
+    [sessionEventArrayLock unlock];
+}
+
+- (void)onSpeechStartDetectedEvent:(RecognitionEventArgs *)eventArgs
+{
+    NSLog(@"OBJC OnSpeechStartDetectedEvent");
     NSArray* workCopyOfList;
-    [recognitionEventArrayLock lock];
-    workCopyOfList = [NSArray arrayWithArray:recognitionEventListenerList];
-    [recognitionEventArrayLock unlock];
+    [speechDetectionEventArrayLock lock];
+    workCopyOfList = [NSArray arrayWithArray:speechStartDetectedEventListenerList];
+    [speechDetectionEventArrayLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
             ((RecognitionEventHandlerBlock)handle)(self, eventArgs);
@@ -70,32 +91,32 @@
     }
 }
 
-- (void)addRecognitionEventListener:(RecognitionEventHandlerBlock)eventHandler
+- (void)onSpeechEndDetectedEvent:(RecognitionEventArgs *)eventArgs
 {
-    [recognitionEventArrayLock lock];
-    [recognitionEventListenerList addObject:eventHandler];
-    [recognitionEventArrayLock unlock];
-}
-
-- (void)onErrorEvent:(RecognitionErrorEventArgs *)eventArgs
-{
-    NSLog(@"OBJC OnErrorEvent");
+    NSLog(@"OBJC OnSpeechEndDetectedEvent");
     NSArray* workCopyOfList;
-    [errorEventArrayLock lock];
-    workCopyOfList = [NSArray arrayWithArray:errorEventListenerList];
-    [errorEventArrayLock unlock];
+    [speechDetectionEventArrayLock lock];
+    workCopyOfList = [NSArray arrayWithArray:speechEndDetectedEventListenerList];
+    [speechDetectionEventArrayLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
-            ((ErrorEventHandlerBlock)handle)(self, eventArgs);
+            ((RecognitionEventHandlerBlock)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)addErrorEventListener:(ErrorEventHandlerBlock)eventHandler
+- (void)addSpeechStartDetectedEventListener:(RecognitionEventHandlerBlock)eventHandler
 {
-    [errorEventArrayLock lock];
-    [errorEventListenerList addObject:eventHandler];
-    [errorEventArrayLock unlock];
+    [speechDetectionEventArrayLock lock];
+    [speechStartDetectedEventListenerList addObject:eventHandler];
+    [speechDetectionEventArrayLock unlock];
+}
+
+- (void)addSpeechEndDetectedEventListener:(RecognitionEventHandlerBlock)eventHandler
+{
+    [speechDetectionEventArrayLock lock];
+    [speechEndDetectedEventListenerList addObject:eventHandler];
+    [speechDetectionEventArrayLock unlock];
 }
 
 @end

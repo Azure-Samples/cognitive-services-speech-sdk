@@ -7,23 +7,19 @@
 #define translation_text_result_h
 
 #import <Foundation/Foundation.h>
-#import "recognition_result_base.h"
+#import "recognition_result.h"
 
-typedef NS_ENUM(NSInteger, TranslationStatus)
-{
-    TranslationSuccess = 0,
-    TranslationError
-};
+/**
+  * Defines translation text result.
+  */
+@interface TranslationTextResult : RecognitionResult
 
-@interface TranslationTextResult : RecognitionResultBase
-
-@property (readonly) TranslationStatus translationStatus;
-
-@property (readonly) NSMutableDictionary* translations;
-
-@property (readonly) NSString* failureReason;
-
-// Todo: get property bag
+/**
+  * The translation results. Each item in the dictionary represents translation result in one of target languages, where the key
+  * is the name of the target language, in BCP-47 format, and the value is the translation text in the specified language.
+  * @return the translated text results.
+  */
+@property (readonly) NSMutableDictionary *translations;
 
 @end
 

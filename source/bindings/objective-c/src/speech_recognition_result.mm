@@ -18,11 +18,4 @@
     return self;
 }
 
-- (void)dealloc
-{
-    if (resultImpl != nullptr) {
-        resultImpl.reset();
-    }
-}
-
 @end

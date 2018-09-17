@@ -23,7 +23,8 @@ namespace Translation {
 /// <summary>
 /// Defines the translation text result.
 /// </summary>
-class TranslationTextResult final : public Microsoft::CognitiveServices::Speech::SpeechRecognitionResult
+
+class TranslationTextResult final : public RecognitionResult
 {
 private:
 
@@ -35,7 +36,7 @@ public:
     /// </summary>
     /// <param name="resultHandle">The handle of the result returned by recognizer in C-API.</param>
     explicit TranslationTextResult(SPXRESULTHANDLE resultHandle) :
-        SpeechRecognitionResult(resultHandle),
+        RecognitionResult(resultHandle),
         Translations(m_translations)
     {
         PopulateResultFields(resultHandle);

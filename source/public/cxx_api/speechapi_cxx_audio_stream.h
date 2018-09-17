@@ -51,7 +51,7 @@ public:
     /// <returns>A shared pointer to PushAudioInputStream</returns>
     static std::shared_ptr<PushAudioInputStream> CreatePushStream(std::shared_ptr<AudioStreamFormat> format);
 
-#ifndef SWIG
+#if defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
     /// <summary>
     /// Creates a PullAudioInputStream that delegates to the specified callback functions for Read() and Close() methods, using the default format (16Khz 16bit mono PCM).
     /// </summary>
@@ -63,7 +63,7 @@ public:
     /// </summary>
     /// <returns>A shared pointer to PullAudioInputStream</returns>
     static std::shared_ptr<PullAudioInputStream> CreatePullStream(ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback = nullptr);
-#endif // SWIG
+#endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
     /// <summary>
     /// Creates a PullAudioInputStream that delegates to the specified callback interface for Read() and Close() methods, using the default format (16Khz 16bit mono PCM).
@@ -71,7 +71,7 @@ public:
     /// <returns>A shared pointer to PullAudioInputStream</returns>
     static std::shared_ptr<PullAudioInputStream> CreatePullStream(std::shared_ptr<PullAudioInputStreamCallback> callback);
 
-#ifndef SWIG
+#if defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
     /// <summary>
     /// Creates a PullAudioInputStream that delegates to the specified callback functions for Read() and Close() methods.
     /// </summary>
@@ -83,7 +83,7 @@ public:
     /// </summary>
     /// <returns>A shared pointer to PullAudioInputStream</returns>
     static std::shared_ptr<PullAudioInputStream> CreatePullStream(std::shared_ptr<AudioStreamFormat> format, ReadCallbackFunction_Type readCallback, CloseCallbackFunction_Type closeCallback = nullptr);
-#endif // SWIG
+#endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
     /// <summary>
     /// Creates a PullAudioInputStream that delegates to the specified callback interface for Read() and Close() methods.
@@ -242,7 +242,7 @@ class PullAudioInputStream : public AudioInputStream
 {
 public:
 
-#ifndef SWIG
+#if defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
     /// <summary>
     /// Creates a PullAudioInputStream utilizing the specified Read() and Close() "C" callback functions pointers
     /// </summary>
@@ -260,7 +260,7 @@ public:
     {
         return Create(nullptr, readCallback, closeCallback);
     }
-#endif // SWIG
+#endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
     /// <summary>
     /// Creates a PullAudioInputStream utilizing the specified Read() and Close() callback functions.
@@ -271,7 +271,7 @@ public:
         return Create(nullptr, callback);
     }
 
-#ifndef SWIG
+#if defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
     /// <summary>
     /// Creates a PullAudioInputStream utilizing the specified Read() and Close() "C" callback functions pointers
     /// </summary>
@@ -292,7 +292,7 @@ public:
         auto wrapper = std::make_shared<FunctionCallbackWrapper>(readCallback, closeCallback);
         return Create(format, wrapper);
     }
-#endif // SWIG
+#endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
     /// <summary>
     /// Creates a PullAudioInputStream utilizing the specified Read() and Close() callback functions.
@@ -371,7 +371,7 @@ inline std::shared_ptr<PushAudioInputStream> AudioInputStream::CreatePushStream(
     return PushAudioInputStream::Create(format);
 }
 
-#ifndef SWIG
+#if defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 inline std::shared_ptr<PullAudioInputStream> AudioInputStream::CreatePullStream(void* pvContext, CUSTOM_AUDIO_PULL_STREAM_READ_CALLBACK readCallback, CUSTOM_AUDIO_PULL_STREAM_CLOSE_CALLBACK closeCallback)
 {
     return PullAudioInputStream::Create(pvContext, readCallback, closeCallback);
@@ -381,14 +381,14 @@ inline std::shared_ptr<PullAudioInputStream> AudioInputStream::CreatePullStream(
 {
     return PullAudioInputStream::Create(readCallback, closeCallback);
 }
-#endif // SWIG
+#endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
 inline std::shared_ptr<PullAudioInputStream> AudioInputStream::CreatePullStream(std::shared_ptr<PullAudioInputStreamCallback> callback)
 {
     return PullAudioInputStream::Create(callback);
 }
 
-#ifndef SWIG
+#if defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 inline std::shared_ptr<PullAudioInputStream> AudioInputStream::CreatePullStream(std::shared_ptr<AudioStreamFormat> format, void* pvContext, CUSTOM_AUDIO_PULL_STREAM_READ_CALLBACK readCallback, CUSTOM_AUDIO_PULL_STREAM_CLOSE_CALLBACK closeCallback)
 {
     return PullAudioInputStream::Create(format, pvContext, readCallback, closeCallback);
@@ -398,7 +398,7 @@ inline std::shared_ptr<PullAudioInputStream> AudioInputStream::CreatePullStream(
 {
     return PullAudioInputStream::Create(format, readCallback, closeCallback);
 }
-#endif // SWIG
+#endif // defined(BINDING_OBJECTIVE_C) || !defined(SWIG)
 
 inline std::shared_ptr<PullAudioInputStream> AudioInputStream::CreatePullStream(std::shared_ptr<AudioStreamFormat> format, std::shared_ptr<PullAudioInputStreamCallback> callback)
 {

@@ -10,7 +10,7 @@ import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.translation.TranslationTextResult;
 
 /**
-  * Define payload of speech recognition canceled result events.
+  * Defines payload of translation canceled events.
   */
 public final class TranslationTextResultCanceledEventArgs {
 

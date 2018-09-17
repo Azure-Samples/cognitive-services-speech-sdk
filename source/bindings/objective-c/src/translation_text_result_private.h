@@ -7,7 +7,7 @@
 #define translation_text_result_private_h
 
 #import "translation_text_result.h"
-#import "recognition_result_base_private.h"
+#import "recognition_result_private.h"
 #import "common_private.h"
 
 @interface TranslationTextResult (Private)

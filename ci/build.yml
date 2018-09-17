@@ -1241,8 +1241,7 @@ phases:
 
 - phase: IosBuild
   dependsOn: Pre
-  # TODO IosBuild temporarily disabled for API change
-  condition: and(false, contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' IosBuild '))
+  condition: contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' IosBuild ')
   queue:
     name: Hosted macOS Preview
     timeoutInMinutes: 30
@@ -1291,8 +1290,7 @@ phases:
 
 - phase: OsxBuild
   dependsOn: Pre
-  # TODO OsxBuild temporarily disabled for API change
-  condition: and(false, contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' OsxBuild '))
+  condition: contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' OsxBuild ')
   queue:
     name: Hosted macOS Preview
     timeoutInMinutes: 30

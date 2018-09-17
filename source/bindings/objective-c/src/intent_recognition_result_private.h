@@ -7,7 +7,7 @@
 #define intent_recognition_result_private_h
 
 #import "intent_recognition_result.h"
-#import "recognition_result_base_private.h"
+#import "recognition_result_private.h"
 #import "common_private.h"
 
 @interface IntentRecognitionResult (Private)

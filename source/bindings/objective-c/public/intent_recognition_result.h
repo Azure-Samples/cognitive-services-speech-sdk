@@ -7,12 +7,18 @@
 #define intent_recognition_result_h
 
 #import <Foundation/Foundation.h>
-#import "recognition_status.h"
-#import "recognition_result_base.h"
+#import "recognition_result.h"
 
-@interface IntentRecognitionResult : RecognitionResultBase
+/**
+  * Defines result of intent recognition.
+  */
+@interface IntentRecognitionResult : RecognitionResult
 
-@property (readonly) NSString* intentId;
+
+/**
+  * A String that represents the intent identifier being recognized.
+  */
+@property (readonly) NSString *intentId;
 
 @end
 

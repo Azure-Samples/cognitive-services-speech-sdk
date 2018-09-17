@@ -14,8 +14,9 @@
 
 - (instancetype)init :(IntentRecoSharedPtr)recoHandle;
 
-- (void)onFinalResultEvent :(IntentRecognitionEventArgs *)eventArgs;
-- (void)onIntermediateResultEvent :(IntentRecognitionEventArgs *)eventArgs;
+- (void)onRecognizedEvent :(IntentRecognitionEventArgs *)eventArgs;
+- (void)onRecognizingEvent :(IntentRecognitionEventArgs *)eventArgs;
+- (void)onCanceledEvent :(IntentRecognitionCanceledEventArgs *)eventArgs;
 
 @end
 #endif /* intent_recognizer_private_h */

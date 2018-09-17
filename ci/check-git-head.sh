@@ -81,7 +81,7 @@ checkEmptyStdout \
   "Potentially subscription key checked in? Double check, if necessary modify white-list in this script: git grep -i -I -P '[^a-f0-9][a-f0-9]{32}[^a-f0-9]'"
 
 checkEmptyStdout \
-  "git grep -l -i -I carbon public_samples source/public source/bindings/csharp source/bindings/js ThirdPartyNotices.md license.md | grep -v -e CMakeLists\.txt$ -e carbon_[a-z]*\.i$" \
+  "git grep -l -i -I carbon public_samples source/public source/bindings/csharp source/bindings/js source/bindings/objective-c ThirdPartyNotices.md license.md | grep -v -e CMakeLists\.txt$ -e carbon_[a-z]*\.i$" \
   "Remove Carbon in files"
 
 if [ $errorCount -ne 0 ]

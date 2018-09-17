@@ -9,18 +9,40 @@
 #import <Foundation/Foundation.h>
 #import "session_event_args.h"
 #import "recognition_event_args.h"
-#import "recognition_error_event_args.h"
+
+/**
+ * Defines the base class Recognizer which mainly contains common event handlers.
+ */
 
 @interface Recognizer : NSObject
 
 typedef void (^SessionEventHandlerBlock)(Recognizer *, SessionEventArgs *);
 typedef void (^RecognitionEventHandlerBlock)(Recognizer *, RecognitionEventArgs *);
-typedef void (^ErrorEventHandlerBlock)(Recognizer *, RecognitionErrorEventArgs *);
 
-- (void)addSessionEventListener:(SessionEventHandlerBlock)eventHandler;
-- (void)addRecognitionEventListener:(RecognitionEventHandlerBlock)eventHandler;
-- (void)addErrorEventListener:(ErrorEventHandlerBlock)eventHandler;
+/**
+  * The collection or properties and their values defined for this Recognizer.
+  */
+@property (readonly) id <PropertyCollection> properties;
 
+/**
+ * Subscribes to SessionStarted event using block.
+ */
+- (void)addSessionStartedEventListener:(SessionEventHandlerBlock)eventHandler;
+
+/**
+ * Subscribes to SessionStopped event using block.
+ */
+- (void)addSessionStoppedEventListener:(SessionEventHandlerBlock)eventHandler;
+
+/**
+ * Subscribes to SpeechStartDetected event using block.
+ */
+- (void)addSpeechStartDetectedEventListener:(RecognitionEventHandlerBlock)eventHandler;
+
+/**
+ * Subscribes to SpeechEndDetected event using block.
+ */
+- (void)addSpeechEndDetectedEventListener:(RecognitionEventHandlerBlock)eventHandler;
 
 @end
 

@@ -112,8 +112,8 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
     }
     
     /**
-      * Add a (text) target language to translate into.
-      * @param value the language such as de-DE
+      * Adds a (text) target language for translation.
+      * @param value the language identifier in BCP-47 format.
       */
     public void addTargetLanguage(String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");
@@ -123,8 +123,8 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 
     /**
-      * Add a (text) target language to translate into.
-      * @param value the language such as de-DE
+      * Gets all target languages that have been added for translation.
+      * @return the list of target languages.
       */
     public ArrayList<String> getTargetLanguages() {
 
@@ -140,7 +140,7 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 
     /**
       * Sets voice of the translated language, enable voice synthesis output.
-      * @param value
+      * @param value the voice name of synthesis output
       */
     public void setVoiceName(String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");

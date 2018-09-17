@@ -4,12 +4,14 @@
 //
 
 #import "../../shared/test.h"
+#import "../../shared/test_audio.h"
 
 int main(int argc, char * argv[]) {
     @autoreleasepool {
         //return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
         [EndToEndTests runTest];
         
+        //[AudioStreamTest run];
         return 0;
     }
 }

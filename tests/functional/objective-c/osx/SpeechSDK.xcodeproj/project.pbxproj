@@ -10,6 +10,7 @@
 		3C5D93F72146CB57000C7129 /* TurnOnTheLamp.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3C5D93F52146CB56000C7129 /* TurnOnTheLamp.wav */; };
 		3C5D93F82146CB57000C7129 /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3C5D93F62146CB56000C7129 /* whatstheweatherlike.wav */; };
 		3C5D93FE2146D411000C7129 /* test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D93FC2146D410000C7129 /* test.m */; };
+		3C5D941321483ACE000C7129 /* test_audio.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D941221483ACE000C7129 /* test_audio.mm */; };
 		3CBD7F13211CD69B00F72336 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3CBD7F12211CD69B00F72336 /* Assets.xcassets */; };
 		3CBD7F19211CD69C00F72336 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CBD7F18211CD69C00F72336 /* main.m */; };
 		3CBD7F23211CD69C00F72336 /* SpeechSDKTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CBD7F22211CD69C00F72336 /* SpeechSDKTests.m */; };
@@ -32,6 +33,8 @@
 		3C5D93F62146CB56000C7129 /* whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = whatstheweatherlike.wav; path = ../../../input/audio/whatstheweatherlike.wav; sourceTree = "<group>"; };
 		3C5D93FC2146D410000C7129 /* test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = test.m; path = ../../shared/test.m; sourceTree = "<group>"; };
 		3C5D93FD2146D410000C7129 /* test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = test.h; path = ../../shared/test.h; sourceTree = "<group>"; };
+		3C5D941121480C1E000C7129 /* test_audio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = test_audio.h; path = ../../shared/test_audio.h; sourceTree = "<group>"; };
+		3C5D941221483ACE000C7129 /* test_audio.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = test_audio.mm; path = ../../shared/test_audio.mm; sourceTree = "<group>"; };
 		3C61523C2125825900B2E94E /* libMicrosoft.CognitiveServices.Speech.core.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libMicrosoft.CognitiveServices.Speech.core.dylib; path = ../../../../build_mac_debug/lib/libMicrosoft.CognitiveServices.Speech.core.dylib; sourceTree = "<group>"; };
 		3CBD7F06211CD69B00F72336 /* SpeechSDK.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpeechSDK.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3CBD7F12211CD69B00F72336 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -90,6 +93,8 @@
 				3CBD7F12211CD69B00F72336 /* Assets.xcassets */,
 				3CBD7F17211CD69B00F72336 /* Info.plist */,
 				3CBD7F18211CD69C00F72336 /* main.m */,
+				3C5D941121480C1E000C7129 /* test_audio.h */,
+				3C5D941221483ACE000C7129 /* test_audio.mm */,
 			);
 			path = SpeechSDK;
 			sourceTree = "<group>";
@@ -216,6 +221,7 @@
 			files = (
 				3CBD7F19211CD69C00F72336 /* main.m in Sources */,
 				3C5D93FE2146D411000C7129 /* test.m in Sources */,
+				3C5D941321483ACE000C7129 /* test_audio.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

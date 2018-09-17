@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		3C0A8E2A213FFF81005325E2 /* SpeechSDK_Framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C0A8E20213FFF80005325E2 /* SpeechSDK_Framework.framework */; };
-		3C0A8E2F213FFF81005325E2 /* SpeechSDK_FrameworkTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C0A8E2E213FFF81005325E2 /* SpeechSDK_FrameworkTests.m */; };
 		3C0A911B214148EC005325E2 /* libfactory.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C0A9116214148EB005325E2 /* libfactory.a */; };
 		3C0A911C214148EC005325E2 /* libcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C0A9117214148EC005325E2 /* libcommon.a */; };
 		3C0A911D214148EC005325E2 /* libusp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C0A9118214148EC005325E2 /* libusp.a */; };
@@ -16,7 +15,6 @@
 		3C0A911F214148EC005325E2 /* libsr.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C0A911A214148EC005325E2 /* libsr.a */; };
 		3C0A912B21415293005325E2 /* speech_recognition_result.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A912521415292005325E2 /* speech_recognition_result.h */; };
 		3C0A912E21415293005325E2 /* speech_recognizer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A912821415292005325E2 /* speech_recognizer.h */; };
-		3C0A912F21415293005325E2 /* speech_factory.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A912921415293005325E2 /* speech_factory.h */; };
 		3C0A9140214152DA005325E2 /* speech_recognition_result.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C0A9134214152D9005325E2 /* speech_recognition_result.mm */; };
 		3C0A9141214152DA005325E2 /* speech_recognition_event_args.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C0A9135214152D9005325E2 /* speech_recognition_event_args.mm */; };
 		3C0A9142214152DA005325E2 /* speech_recognizer_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A9136214152D9005325E2 /* speech_recognizer_private.h */; };
@@ -25,7 +23,6 @@
 		3C0A9146214152DA005325E2 /* speech_recognition_result_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A913A214152D9005325E2 /* speech_recognition_result_private.h */; };
 		3C0A9147214152DA005325E2 /* speech_recognizer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C0A913B214152D9005325E2 /* speech_recognizer.mm */; };
 		3C0A9148214152DA005325E2 /* nsstring_stdstring.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A913C214152D9005325E2 /* nsstring_stdstring.h */; };
-		3C0A9149214152DA005325E2 /* speech_factory.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C0A913D214152D9005325E2 /* speech_factory.mm */; };
 		3C0A914B214152E6005325E2 /* SpeechSDK_Framework.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A914A214152E6005325E2 /* SpeechSDK_Framework.h */; };
 		3C0A916221415460005325E2 /* event_helpers.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A914F2141545D005325E2 /* event_helpers.h */; };
 		3C0A916321415460005325E2 /* speechapi_c_keyword_recognition_model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C0A91502141545D005325E2 /* speechapi_c_keyword_recognition_model.cpp */; };
@@ -45,8 +42,7 @@
 		3C0A917221415460005325E2 /* stdafx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C0A915F2141545F005325E2 /* stdafx.cpp */; };
 		3C0A917321415460005325E2 /* stdafx.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A91602141545F005325E2 /* stdafx.h */; };
 		3C0A917421415460005325E2 /* speechapi_c_intent_trigger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C0A91612141545F005325E2 /* speechapi_c_intent_trigger.cpp */; };
-		3C200BB121455E6700051AD9 /* recognition_error_event_args.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C200BAF21455E6600051AD9 /* recognition_error_event_args.mm */; };
-		3C200BB221455E6700051AD9 /* recognition_error_event_args_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C200BB021455E6600051AD9 /* recognition_error_event_args_private.h */; };
+		3C159965214BC69A00AAE1E3 /* util.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C159964214BC69A00AAE1E3 /* util.mm */; };
 		3C2B03BC21423B8A0074206C /* libaziotsharedutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C2B03BB21423B8A0074206C /* libaziotsharedutil.a */; };
 		3C2B03BE21423BC80074206C /* libparson.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C2B03BD21423BC80074206C /* libparson.a */; };
 		3C2B03C021423EA50074206C /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C2B03BF21423EA50074206C /* CFNetwork.framework */; };
@@ -62,9 +58,29 @@
 		3C5D93F22146A87D000C7129 /* speechapi_c_audio_stream_format.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D93EE2146A87C000C7129 /* speechapi_c_audio_stream_format.cpp */; };
 		3C5D93F32146A87D000C7129 /* speechapi_c_audio_stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D93EF2146A87C000C7129 /* speechapi_c_audio_stream.cpp */; };
 		3C5D93F42146A87D000C7129 /* speechapi_c_audio_config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D93F02146A87C000C7129 /* speechapi_c_audio_config.cpp */; };
+		3C5D94052147E7C5000C7129 /* audio_stream_format.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D93FF2147E7C4000C7129 /* audio_stream_format.mm */; };
+		3C5D94062147E7C5000C7129 /* audio_stream_format_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D94002147E7C4000C7129 /* audio_stream_format_private.h */; };
+		3C5D94072147E7C5000C7129 /* audio_stream_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D94012147E7C5000C7129 /* audio_stream_private.h */; };
+		3C5D94082147E7C5000C7129 /* audio_stream.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D94022147E7C5000C7129 /* audio_stream.mm */; };
+		3C5D94092147E7C5000C7129 /* audio_config_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D94032147E7C5000C7129 /* audio_config_private.h */; };
+		3C5D940A2147E7C5000C7129 /* audio_config.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D94042147E7C5000C7129 /* audio_config.mm */; };
+		3C5D940E2147E7EC000C7129 /* audio_config.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D940B2147E7EB000C7129 /* audio_config.h */; };
+		3C5D940F2147E7EC000C7129 /* audio_stream_format.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D940C2147E7EB000C7129 /* audio_stream_format.h */; };
+		3C5D94102147E7EC000C7129 /* audio_stream.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D940D2147E7EB000C7129 /* audio_stream.h */; };
+		3C5D941B21494DB2000C7129 /* speech_config.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D941421494DB2000C7129 /* speech_config.mm */; };
+		3C5D941E21494DB2000C7129 /* speech_config_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D941721494DB2000C7129 /* speech_config_private.h */; };
+		3C5D942321494DD7000C7129 /* speech_config.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D942221494DD7000C7129 /* speech_config.h */; };
+		3C5D942621495A69000C7129 /* speechapi_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D942521495A69000C7129 /* speechapi_private.h */; };
+		3C5D94292149A8BB000C7129 /* speech_translation_config_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D94272149A8BB000C7129 /* speech_translation_config_private.h */; };
+		3C5D942A2149A8BB000C7129 /* speech_translation_config.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D94282149A8BB000C7129 /* speech_translation_config.mm */; };
+		3C5D942C2149A8C9000C7129 /* speech_translation_config.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D942B2149A8C8000C7129 /* speech_translation_config.h */; };
+		3C71F3202149B6170016CEAC /* speechapi_c_speech_config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C71F31F2149B6160016CEAC /* speechapi_c_speech_config.cpp */; };
+		3C71F323214A7F5D0016CEAC /* recognizer_property_collection.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C71F322214A7F5D0016CEAC /* recognizer_property_collection.mm */; };
+		3C71F326214A80830016CEAC /* recognizer_property_collection_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C71F325214A80830016CEAC /* recognizer_property_collection_private.h */; };
+		3C71F32D214AE6490016CEAC /* recognition_result_property_collection.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C71F32B214AE6480016CEAC /* recognition_result_property_collection.mm */; };
+		3C71F32E214AE6490016CEAC /* recognition_result_property_collection_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C71F32C214AE6480016CEAC /* recognition_result_property_collection_private.h */; };
 		3CC674AE2145493E001007EF /* translation_synthesis_result.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CC674A82145493E001007EF /* translation_synthesis_result.h */; };
 		3CC674B02145493E001007EF /* translation_text_result.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CC674AA2145493E001007EF /* translation_text_result.h */; };
-		3CC674B12145493E001007EF /* recognition_error_event_args.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CC674AB2145493E001007EF /* recognition_error_event_args.h */; };
 		3CC674B22145493E001007EF /* translation_recognizer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CC674AC2145493E001007EF /* translation_recognizer.h */; };
 		3CC674C021454954001007EF /* translation_text_result.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CC674B621454953001007EF /* translation_text_result.mm */; };
 		3CC674C121454954001007EF /* translation_recognizer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CC674B721454953001007EF /* translation_recognizer.mm */; };
@@ -72,10 +88,10 @@
 		3CC674C421454954001007EF /* translation_synthesis_result.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CC674BA21454953001007EF /* translation_synthesis_result.mm */; };
 		3CC674C621454954001007EF /* translation_synthesis_result_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CC674BC21454954001007EF /* translation_synthesis_result_private.h */; };
 		3CC674C721454954001007EF /* translation_text_result_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CC674BD21454954001007EF /* translation_text_result_private.h */; };
-		3CF8203921463776001970FB /* translation_text_event_args.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203221463776001970FB /* translation_text_event_args.h */; };
+		3CF8203921463776001970FB /* translation_text_result_event_args.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203221463776001970FB /* translation_text_result_event_args.h */; };
 		3CF8203A21463776001970FB /* intent_recognition_event_args.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203321463776001970FB /* intent_recognition_event_args.h */; };
 		3CF8203B21463776001970FB /* speech_recognition_event_args.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203421463776001970FB /* speech_recognition_event_args.h */; };
-		3CF8203C21463776001970FB /* translation_synthesis_event_args.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203521463776001970FB /* translation_synthesis_event_args.h */; };
+		3CF8203C21463776001970FB /* translation_synthesis_result_event_args.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203521463776001970FB /* translation_synthesis_result_event_args.h */; };
 		3CF8203D21463776001970FB /* language_understanding_model.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203621463776001970FB /* language_understanding_model.h */; };
 		3CF8203E21463776001970FB /* intent_recognition_result.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203721463776001970FB /* intent_recognition_result.h */; };
 		3CF8203F21463776001970FB /* intent_recognizer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203821463776001970FB /* intent_recognizer.h */; };
@@ -83,16 +99,16 @@
 		3CF8204D21463792001970FB /* intent_recognition_event_args.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CF8204121463791001970FB /* intent_recognition_event_args.mm */; };
 		3CF8204E21463792001970FB /* intent_recognition_result.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CF8204221463791001970FB /* intent_recognition_result.mm */; };
 		3CF8204F21463792001970FB /* language_understanding_model_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8204321463791001970FB /* language_understanding_model_private.h */; };
-		3CF8205021463792001970FB /* translation_synthesis_event_args.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CF8204421463791001970FB /* translation_synthesis_event_args.mm */; };
-		3CF8205121463792001970FB /* translation_text_event_args_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8204521463791001970FB /* translation_text_event_args_private.h */; };
+		3CF8205021463792001970FB /* translation_synthesis_result_event_args.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CF8204421463791001970FB /* translation_synthesis_result_event_args.mm */; };
+		3CF8205121463792001970FB /* translation_text_result_event_args_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8204521463791001970FB /* translation_text_result_event_args_private.h */; };
 		3CF8205221463792001970FB /* intent_recognition_event_args_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8204621463792001970FB /* intent_recognition_event_args_private.h */; };
-		3CF8205321463792001970FB /* translation_synthesis_event_args_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8204721463792001970FB /* translation_synthesis_event_args_private.h */; };
-		3CF8205421463792001970FB /* translation_text_event_args.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CF8204821463792001970FB /* translation_text_event_args.mm */; };
+		3CF8205321463792001970FB /* translation_synthesis_result_event_args_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8204721463792001970FB /* translation_synthesis_result_event_args_private.h */; };
+		3CF8205421463792001970FB /* translation_text_result_event_args.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CF8204821463792001970FB /* translation_text_result_event_args.mm */; };
 		3CF8205521463792001970FB /* intent_recognition_result_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8204921463792001970FB /* intent_recognition_result_private.h */; };
 		3CF8205621463792001970FB /* intent_recognizer_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8204A21463792001970FB /* intent_recognizer_private.h */; };
 		3CF8205721463792001970FB /* intent_recognizer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CF8204B21463792001970FB /* intent_recognizer.mm */; };
-		3CF8205E21464489001970FB /* recognition_result_base.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CF8205D21464489001970FB /* recognition_result_base.mm */; };
-		3CF8206021464C1C001970FB /* recognition_result_base_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8205F21464C1C001970FB /* recognition_result_base_private.h */; };
+		3CF8205E21464489001970FB /* recognition_result.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CF8205D21464489001970FB /* recognition_result.mm */; };
+		3CF8206021464C1C001970FB /* recognition_result_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8205F21464C1C001970FB /* recognition_result_private.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -109,7 +125,6 @@
 		3C0A8E20213FFF80005325E2 /* SpeechSDK_Framework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SpeechSDK_Framework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C0A8E24213FFF80005325E2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3C0A8E29213FFF81005325E2 /* SpeechSDK.FrameworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpeechSDK.FrameworkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		3C0A8E2E213FFF81005325E2 /* SpeechSDK_FrameworkTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SpeechSDK_FrameworkTests.m; sourceTree = "<group>"; };
 		3C0A8E30213FFF81005325E2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3C0A9116214148EB005325E2 /* libfactory.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfactory.a; path = ../../../../build_mac_debug/lib/libfactory.a; sourceTree = "<group>"; };
 		3C0A9117214148EC005325E2 /* libcommon.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcommon.a; path = ../../../../build_mac_debug/lib/libcommon.a; sourceTree = "<group>"; };
@@ -118,7 +133,6 @@
 		3C0A911A214148EC005325E2 /* libsr.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libsr.a; path = ../../../../build_mac_debug/lib/libsr.a; sourceTree = "<group>"; };
 		3C0A912521415292005325E2 /* speech_recognition_result.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_recognition_result.h; path = ../../public/speech_recognition_result.h; sourceTree = "<group>"; };
 		3C0A912821415292005325E2 /* speech_recognizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_recognizer.h; path = ../../public/speech_recognizer.h; sourceTree = "<group>"; };
-		3C0A912921415293005325E2 /* speech_factory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_factory.h; path = ../../public/speech_factory.h; sourceTree = "<group>"; };
 		3C0A9134214152D9005325E2 /* speech_recognition_result.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_recognition_result.mm; path = ../../src/speech_recognition_result.mm; sourceTree = "<group>"; };
 		3C0A9135214152D9005325E2 /* speech_recognition_event_args.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_recognition_event_args.mm; path = ../../src/speech_recognition_event_args.mm; sourceTree = "<group>"; };
 		3C0A9136214152D9005325E2 /* speech_recognizer_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_recognizer_private.h; path = ../../src/speech_recognizer_private.h; sourceTree = "<group>"; };
@@ -127,7 +141,6 @@
 		3C0A913A214152D9005325E2 /* speech_recognition_result_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_recognition_result_private.h; path = ../../src/speech_recognition_result_private.h; sourceTree = "<group>"; };
 		3C0A913B214152D9005325E2 /* speech_recognizer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_recognizer.mm; path = ../../src/speech_recognizer.mm; sourceTree = "<group>"; };
 		3C0A913C214152D9005325E2 /* nsstring_stdstring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nsstring_stdstring.h; path = ../../src/nsstring_stdstring.h; sourceTree = "<group>"; };
-		3C0A913D214152D9005325E2 /* speech_factory.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_factory.mm; path = ../../src/speech_factory.mm; sourceTree = "<group>"; };
 		3C0A914A214152E6005325E2 /* SpeechSDK_Framework.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechSDK_Framework.h; sourceTree = "<group>"; };
 		3C0A914F2141545D005325E2 /* event_helpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = event_helpers.h; path = ../../../../core/c_api/event_helpers.h; sourceTree = "<group>"; };
 		3C0A91502141545D005325E2 /* speechapi_c_keyword_recognition_model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_keyword_recognition_model.cpp; path = ../../../../core/c_api/speechapi_c_keyword_recognition_model.cpp; sourceTree = "<group>"; };
@@ -147,10 +160,10 @@
 		3C0A915F2141545F005325E2 /* stdafx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = stdafx.cpp; path = ../../../../core/c_api/stdafx.cpp; sourceTree = "<group>"; };
 		3C0A91602141545F005325E2 /* stdafx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stdafx.h; path = ../../../../core/c_api/stdafx.h; sourceTree = "<group>"; };
 		3C0A91612141545F005325E2 /* speechapi_c_intent_trigger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_intent_trigger.cpp; path = ../../../../core/c_api/speechapi_c_intent_trigger.cpp; sourceTree = "<group>"; };
+		3C159964214BC69A00AAE1E3 /* util.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = util.mm; path = ../../src/util.mm; sourceTree = "<group>"; };
+		3C159966214BC6B800AAE1E3 /* util_private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = util_private.h; path = ../../src/util_private.h; sourceTree = "<group>"; };
 		3C1F5462214277EF00456DFE /* recognizer_private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = recognizer_private.h; path = ../../src/recognizer_private.h; sourceTree = "<group>"; };
-		3C200BAE214555D000051AD9 /* recognition_status.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = recognition_status.h; path = ../../public/recognition_status.h; sourceTree = "<group>"; };
-		3C200BAF21455E6600051AD9 /* recognition_error_event_args.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = recognition_error_event_args.mm; path = ../../src/recognition_error_event_args.mm; sourceTree = "<group>"; };
-		3C200BB021455E6600051AD9 /* recognition_error_event_args_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = recognition_error_event_args_private.h; path = ../../src/recognition_error_event_args_private.h; sourceTree = "<group>"; };
+		3C200BAE214555D000051AD9 /* speech_enums.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = speech_enums.h; path = ../../public/speech_enums.h; sourceTree = "<group>"; };
 		3C2B03BB21423B8A0074206C /* libaziotsharedutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libaziotsharedutil.a; path = ../../../../build_mac_debug/lib/libaziotsharedutil.a; sourceTree = "<group>"; };
 		3C2B03BD21423BC80074206C /* libparson.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libparson.a; path = ../../../../build_mac_debug/lib/libparson.a; sourceTree = "<group>"; };
 		3C2B03BF21423EA50074206C /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
@@ -166,9 +179,31 @@
 		3C5D93EE2146A87C000C7129 /* speechapi_c_audio_stream_format.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_audio_stream_format.cpp; path = ../../../../core/c_api/speechapi_c_audio_stream_format.cpp; sourceTree = "<group>"; };
 		3C5D93EF2146A87C000C7129 /* speechapi_c_audio_stream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_audio_stream.cpp; path = ../../../../core/c_api/speechapi_c_audio_stream.cpp; sourceTree = "<group>"; };
 		3C5D93F02146A87C000C7129 /* speechapi_c_audio_config.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_audio_config.cpp; path = ../../../../core/c_api/speechapi_c_audio_config.cpp; sourceTree = "<group>"; };
+		3C5D93FF2147E7C4000C7129 /* audio_stream_format.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = audio_stream_format.mm; path = ../../src/audio_stream_format.mm; sourceTree = "<group>"; };
+		3C5D94002147E7C4000C7129 /* audio_stream_format_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = audio_stream_format_private.h; path = ../../src/audio_stream_format_private.h; sourceTree = "<group>"; };
+		3C5D94012147E7C5000C7129 /* audio_stream_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = audio_stream_private.h; path = ../../src/audio_stream_private.h; sourceTree = "<group>"; };
+		3C5D94022147E7C5000C7129 /* audio_stream.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = audio_stream.mm; path = ../../src/audio_stream.mm; sourceTree = "<group>"; };
+		3C5D94032147E7C5000C7129 /* audio_config_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = audio_config_private.h; path = ../../src/audio_config_private.h; sourceTree = "<group>"; };
+		3C5D94042147E7C5000C7129 /* audio_config.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = audio_config.mm; path = ../../src/audio_config.mm; sourceTree = "<group>"; };
+		3C5D940B2147E7EB000C7129 /* audio_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = audio_config.h; path = ../../public/audio_config.h; sourceTree = "<group>"; };
+		3C5D940C2147E7EB000C7129 /* audio_stream_format.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = audio_stream_format.h; path = ../../public/audio_stream_format.h; sourceTree = "<group>"; };
+		3C5D940D2147E7EB000C7129 /* audio_stream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = audio_stream.h; path = ../../public/audio_stream.h; sourceTree = "<group>"; };
+		3C5D941421494DB2000C7129 /* speech_config.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_config.mm; path = ../../src/speech_config.mm; sourceTree = "<group>"; };
+		3C5D941721494DB2000C7129 /* speech_config_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_config_private.h; path = ../../src/speech_config_private.h; sourceTree = "<group>"; };
+		3C5D942221494DD7000C7129 /* speech_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_config.h; path = ../../public/speech_config.h; sourceTree = "<group>"; };
+		3C5D942421495133000C7129 /* speechapi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = speechapi.h; path = ../../public/speechapi.h; sourceTree = "<group>"; };
+		3C5D942521495A69000C7129 /* speechapi_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speechapi_private.h; path = ../../src/speechapi_private.h; sourceTree = "<group>"; };
+		3C5D94272149A8BB000C7129 /* speech_translation_config_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_translation_config_private.h; path = ../../src/speech_translation_config_private.h; sourceTree = "<group>"; };
+		3C5D94282149A8BB000C7129 /* speech_translation_config.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_translation_config.mm; path = ../../src/speech_translation_config.mm; sourceTree = "<group>"; };
+		3C5D942B2149A8C8000C7129 /* speech_translation_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_translation_config.h; path = ../../public/speech_translation_config.h; sourceTree = "<group>"; };
+		3C71F31F2149B6160016CEAC /* speechapi_c_speech_config.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_speech_config.cpp; path = ../../../../core/c_api/speechapi_c_speech_config.cpp; sourceTree = "<group>"; };
+		3C71F321214A7BD70016CEAC /* property_collection.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = property_collection.h; path = ../../public/property_collection.h; sourceTree = "<group>"; };
+		3C71F322214A7F5D0016CEAC /* recognizer_property_collection.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = recognizer_property_collection.mm; path = ../../src/recognizer_property_collection.mm; sourceTree = "<group>"; };
+		3C71F325214A80830016CEAC /* recognizer_property_collection_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = recognizer_property_collection_private.h; path = ../../src/recognizer_property_collection_private.h; sourceTree = "<group>"; };
+		3C71F32B214AE6480016CEAC /* recognition_result_property_collection.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = recognition_result_property_collection.mm; path = ../../src/recognition_result_property_collection.mm; sourceTree = "<group>"; };
+		3C71F32C214AE6480016CEAC /* recognition_result_property_collection_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = recognition_result_property_collection_private.h; path = ../../src/recognition_result_property_collection_private.h; sourceTree = "<group>"; };
 		3CC674A82145493E001007EF /* translation_synthesis_result.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = translation_synthesis_result.h; path = ../../public/translation_synthesis_result.h; sourceTree = "<group>"; };
 		3CC674AA2145493E001007EF /* translation_text_result.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = translation_text_result.h; path = ../../public/translation_text_result.h; sourceTree = "<group>"; };
-		3CC674AB2145493E001007EF /* recognition_error_event_args.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = recognition_error_event_args.h; path = ../../public/recognition_error_event_args.h; sourceTree = "<group>"; };
 		3CC674AC2145493E001007EF /* translation_recognizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = translation_recognizer.h; path = ../../public/translation_recognizer.h; sourceTree = "<group>"; };
 		3CC674B621454953001007EF /* translation_text_result.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = translation_text_result.mm; path = ../../src/translation_text_result.mm; sourceTree = "<group>"; };
 		3CC674B721454953001007EF /* translation_recognizer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = translation_recognizer.mm; path = ../../src/translation_recognizer.mm; sourceTree = "<group>"; };
@@ -177,10 +212,10 @@
 		3CC674BC21454954001007EF /* translation_synthesis_result_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = translation_synthesis_result_private.h; path = ../../src/translation_synthesis_result_private.h; sourceTree = "<group>"; };
 		3CC674BD21454954001007EF /* translation_text_result_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = translation_text_result_private.h; path = ../../src/translation_text_result_private.h; sourceTree = "<group>"; };
 		3CE340A92142836100CCA7F7 /* common_private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = common_private.h; path = ../../src/common_private.h; sourceTree = "<group>"; };
-		3CF8203221463776001970FB /* translation_text_event_args.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = translation_text_event_args.h; path = ../../public/translation_text_event_args.h; sourceTree = "<group>"; };
+		3CF8203221463776001970FB /* translation_text_result_event_args.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = translation_text_result_event_args.h; path = ../../public/translation_text_result_event_args.h; sourceTree = "<group>"; };
 		3CF8203321463776001970FB /* intent_recognition_event_args.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = intent_recognition_event_args.h; path = ../../public/intent_recognition_event_args.h; sourceTree = "<group>"; };
 		3CF8203421463776001970FB /* speech_recognition_event_args.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_recognition_event_args.h; path = ../../public/speech_recognition_event_args.h; sourceTree = "<group>"; };
-		3CF8203521463776001970FB /* translation_synthesis_event_args.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = translation_synthesis_event_args.h; path = ../../public/translation_synthesis_event_args.h; sourceTree = "<group>"; };
+		3CF8203521463776001970FB /* translation_synthesis_result_event_args.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = translation_synthesis_result_event_args.h; path = ../../public/translation_synthesis_result_event_args.h; sourceTree = "<group>"; };
 		3CF8203621463776001970FB /* language_understanding_model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = language_understanding_model.h; path = ../../public/language_understanding_model.h; sourceTree = "<group>"; };
 		3CF8203721463776001970FB /* intent_recognition_result.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = intent_recognition_result.h; path = ../../public/intent_recognition_result.h; sourceTree = "<group>"; };
 		3CF8203821463776001970FB /* intent_recognizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = intent_recognizer.h; path = ../../public/intent_recognizer.h; sourceTree = "<group>"; };
@@ -188,17 +223,17 @@
 		3CF8204121463791001970FB /* intent_recognition_event_args.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = intent_recognition_event_args.mm; path = ../../src/intent_recognition_event_args.mm; sourceTree = "<group>"; };
 		3CF8204221463791001970FB /* intent_recognition_result.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = intent_recognition_result.mm; path = ../../src/intent_recognition_result.mm; sourceTree = "<group>"; };
 		3CF8204321463791001970FB /* language_understanding_model_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = language_understanding_model_private.h; path = ../../src/language_understanding_model_private.h; sourceTree = "<group>"; };
-		3CF8204421463791001970FB /* translation_synthesis_event_args.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = translation_synthesis_event_args.mm; path = ../../src/translation_synthesis_event_args.mm; sourceTree = "<group>"; };
-		3CF8204521463791001970FB /* translation_text_event_args_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = translation_text_event_args_private.h; path = ../../src/translation_text_event_args_private.h; sourceTree = "<group>"; };
+		3CF8204421463791001970FB /* translation_synthesis_result_event_args.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = translation_synthesis_result_event_args.mm; path = ../../src/translation_synthesis_result_event_args.mm; sourceTree = "<group>"; };
+		3CF8204521463791001970FB /* translation_text_result_event_args_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = translation_text_result_event_args_private.h; path = ../../src/translation_text_result_event_args_private.h; sourceTree = "<group>"; };
 		3CF8204621463792001970FB /* intent_recognition_event_args_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = intent_recognition_event_args_private.h; path = ../../src/intent_recognition_event_args_private.h; sourceTree = "<group>"; };
-		3CF8204721463792001970FB /* translation_synthesis_event_args_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = translation_synthesis_event_args_private.h; path = ../../src/translation_synthesis_event_args_private.h; sourceTree = "<group>"; };
-		3CF8204821463792001970FB /* translation_text_event_args.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = translation_text_event_args.mm; path = ../../src/translation_text_event_args.mm; sourceTree = "<group>"; };
+		3CF8204721463792001970FB /* translation_synthesis_result_event_args_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = translation_synthesis_result_event_args_private.h; path = ../../src/translation_synthesis_result_event_args_private.h; sourceTree = "<group>"; };
+		3CF8204821463792001970FB /* translation_text_result_event_args.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = translation_text_result_event_args.mm; path = ../../src/translation_text_result_event_args.mm; sourceTree = "<group>"; };
 		3CF8204921463792001970FB /* intent_recognition_result_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = intent_recognition_result_private.h; path = ../../src/intent_recognition_result_private.h; sourceTree = "<group>"; };
 		3CF8204A21463792001970FB /* intent_recognizer_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = intent_recognizer_private.h; path = ../../src/intent_recognizer_private.h; sourceTree = "<group>"; };
 		3CF8204B21463792001970FB /* intent_recognizer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = intent_recognizer.mm; path = ../../src/intent_recognizer.mm; sourceTree = "<group>"; };
-		3CF8205921464219001970FB /* recognition_result_base.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = recognition_result_base.h; path = ../../public/recognition_result_base.h; sourceTree = "<group>"; };
-		3CF8205D21464489001970FB /* recognition_result_base.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = recognition_result_base.mm; path = ../../src/recognition_result_base.mm; sourceTree = "<group>"; };
-		3CF8205F21464C1C001970FB /* recognition_result_base_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = recognition_result_base_private.h; path = ../../src/recognition_result_base_private.h; sourceTree = "<group>"; };
+		3CF8205921464219001970FB /* recognition_result.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = recognition_result.h; path = ../../public/recognition_result.h; sourceTree = "<group>"; };
+		3CF8205D21464489001970FB /* recognition_result.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = recognition_result.mm; path = ../../src/recognition_result.mm; sourceTree = "<group>"; };
+		3CF8205F21464C1C001970FB /* recognition_result_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = recognition_result_private.h; path = ../../src/recognition_result_private.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -262,7 +297,6 @@
 		3C0A8E2D213FFF81005325E2 /* SpeechSDK.FrameworkTests */ = {
 			isa = PBXGroup;
 			children = (
-				3C0A8E2E213FFF81005325E2 /* SpeechSDK_FrameworkTests.m */,
 				3C0A8E30213FFF81005325E2 /* Info.plist */,
 			);
 			path = SpeechSDK.FrameworkTests;
@@ -286,25 +320,30 @@
 		3C0A91232141527C005325E2 /* public */ = {
 			isa = PBXGroup;
 			children = (
+				3C5D940B2147E7EB000C7129 /* audio_config.h */,
+				3C5D940C2147E7EB000C7129 /* audio_stream_format.h */,
+				3C5D940D2147E7EB000C7129 /* audio_stream.h */,
 				3CF8203321463776001970FB /* intent_recognition_event_args.h */,
 				3CF8203721463776001970FB /* intent_recognition_result.h */,
 				3CF8203821463776001970FB /* intent_recognizer.h */,
 				3CF8203621463776001970FB /* language_understanding_model.h */,
-				3CF8203421463776001970FB /* speech_recognition_event_args.h */,
-				3CF8203521463776001970FB /* translation_synthesis_event_args.h */,
-				3CF8203221463776001970FB /* translation_text_event_args.h */,
-				3CC674AB2145493E001007EF /* recognition_error_event_args.h */,
-				3CC674AC2145493E001007EF /* translation_recognizer.h */,
-				3CC674A82145493E001007EF /* translation_synthesis_result.h */,
-				3CC674AA2145493E001007EF /* translation_text_result.h */,
+				3C71F321214A7BD70016CEAC /* property_collection.h */,
 				3C2B03C4214243C50074206C /* recognition_event_args.h */,
+				3CF8205921464219001970FB /* recognition_result.h */,
 				3C2B03C3214243C50074206C /* recognizer.h */,
 				3C2B03C5214243C50074206C /* session_event_args.h */,
-				3C0A912921415293005325E2 /* speech_factory.h */,
+				3C5D942221494DD7000C7129 /* speech_config.h */,
+				3C200BAE214555D000051AD9 /* speech_enums.h */,
+				3CF8203421463776001970FB /* speech_recognition_event_args.h */,
 				3C0A912521415292005325E2 /* speech_recognition_result.h */,
 				3C0A912821415292005325E2 /* speech_recognizer.h */,
-				3C200BAE214555D000051AD9 /* recognition_status.h */,
-				3CF8205921464219001970FB /* recognition_result_base.h */,
+				3C5D942B2149A8C8000C7129 /* speech_translation_config.h */,
+				3C5D942421495133000C7129 /* speechapi.h */,
+				3CC674AC2145493E001007EF /* translation_recognizer.h */,
+				3CF8203521463776001970FB /* translation_synthesis_result_event_args.h */,
+				3CC674A82145493E001007EF /* translation_synthesis_result.h */,
+				3CF8203221463776001970FB /* translation_text_result_event_args.h */,
+				3CC674AA2145493E001007EF /* translation_text_result.h */,
 			);
 			name = public;
 			sourceTree = "<group>";
@@ -312,7 +351,13 @@
 		3C0A9131214152C0005325E2 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				3CF8205F21464C1C001970FB /* recognition_result_base_private.h */,
+				3C5D94032147E7C5000C7129 /* audio_config_private.h */,
+				3C5D94042147E7C5000C7129 /* audio_config.mm */,
+				3C5D94002147E7C4000C7129 /* audio_stream_format_private.h */,
+				3C5D93FF2147E7C4000C7129 /* audio_stream_format.mm */,
+				3C5D94012147E7C5000C7129 /* audio_stream_private.h */,
+				3C5D94022147E7C5000C7129 /* audio_stream.mm */,
+				3CE340A92142836100CCA7F7 /* common_private.h */,
 				3CF8204621463792001970FB /* intent_recognition_event_args_private.h */,
 				3CF8204121463791001970FB /* intent_recognition_event_args.mm */,
 				3CF8204921463792001970FB /* intent_recognition_result_private.h */,
@@ -321,35 +366,43 @@
 				3CF8204B21463792001970FB /* intent_recognizer.mm */,
 				3CF8204321463791001970FB /* language_understanding_model_private.h */,
 				3CF8204021463791001970FB /* language_understanding_model.mm */,
-				3CF8204721463792001970FB /* translation_synthesis_event_args_private.h */,
-				3CF8204421463791001970FB /* translation_synthesis_event_args.mm */,
-				3CF8204521463791001970FB /* translation_text_event_args_private.h */,
-				3CF8204821463792001970FB /* translation_text_event_args.mm */,
-				3C200BB021455E6600051AD9 /* recognition_error_event_args_private.h */,
-				3C200BAF21455E6600051AD9 /* recognition_error_event_args.mm */,
-				3CC674B821454953001007EF /* translation_recognizer_private.h */,
-				3CC674B721454953001007EF /* translation_recognizer.mm */,
-				3CC674BC21454954001007EF /* translation_synthesis_result_private.h */,
-				3CC674BA21454953001007EF /* translation_synthesis_result.mm */,
-				3CC674BD21454954001007EF /* translation_text_result_private.h */,
-				3CC674B621454953001007EF /* translation_text_result.mm */,
+				3C0A913C214152D9005325E2 /* nsstring_stdstring.h */,
+				3C0A9138214152D9005325E2 /* nsstring_stdstring.mm */,
 				3C2B03CB214243D80074206C /* recognition_event_args_private.h */,
 				3C2B03CC214243D80074206C /* recognition_event_args.mm */,
+				3CF8205F21464C1C001970FB /* recognition_result_private.h */,
+				3C71F32C214AE6480016CEAC /* recognition_result_property_collection_private.h */,
+				3C71F32B214AE6480016CEAC /* recognition_result_property_collection.mm */,
+				3CF8205D21464489001970FB /* recognition_result.mm */,
+				3C1F5462214277EF00456DFE /* recognizer_private.h */,
+				3C71F325214A80830016CEAC /* recognizer_property_collection_private.h */,
+				3C71F322214A7F5D0016CEAC /* recognizer_property_collection.mm */,
 				3C2B03C9214243D70074206C /* recognizer.mm */,
 				3C2B03CD214243D80074206C /* session_event_args_private.h */,
 				3C2B03CA214243D70074206C /* session_event_args.mm */,
-				3C0A913C214152D9005325E2 /* nsstring_stdstring.h */,
-				3C0A9138214152D9005325E2 /* nsstring_stdstring.mm */,
-				3C0A913D214152D9005325E2 /* speech_factory.mm */,
+				3C5D941721494DB2000C7129 /* speech_config_private.h */,
+				3C5D941421494DB2000C7129 /* speech_config.mm */,
 				3C0A9137214152D9005325E2 /* speech_recognition_event_args_private.h */,
 				3C0A9135214152D9005325E2 /* speech_recognition_event_args.mm */,
 				3C0A913A214152D9005325E2 /* speech_recognition_result_private.h */,
 				3C0A9134214152D9005325E2 /* speech_recognition_result.mm */,
 				3C0A9136214152D9005325E2 /* speech_recognizer_private.h */,
 				3C0A913B214152D9005325E2 /* speech_recognizer.mm */,
-				3C1F5462214277EF00456DFE /* recognizer_private.h */,
-				3CE340A92142836100CCA7F7 /* common_private.h */,
-				3CF8205D21464489001970FB /* recognition_result_base.mm */,
+				3C5D94272149A8BB000C7129 /* speech_translation_config_private.h */,
+				3C5D94282149A8BB000C7129 /* speech_translation_config.mm */,
+				3C5D942521495A69000C7129 /* speechapi_private.h */,
+				3CC674B821454953001007EF /* translation_recognizer_private.h */,
+				3CC674B721454953001007EF /* translation_recognizer.mm */,
+				3CF8204721463792001970FB /* translation_synthesis_result_event_args_private.h */,
+				3CF8204421463791001970FB /* translation_synthesis_result_event_args.mm */,
+				3CC674BC21454954001007EF /* translation_synthesis_result_private.h */,
+				3CC674BA21454953001007EF /* translation_synthesis_result.mm */,
+				3CF8204521463791001970FB /* translation_text_result_event_args_private.h */,
+				3CF8204821463792001970FB /* translation_text_result_event_args.mm */,
+				3CC674BD21454954001007EF /* translation_text_result_private.h */,
+				3CC674B621454953001007EF /* translation_text_result.mm */,
+				3C159966214BC6B800AAE1E3 /* util_private.h */,
+				3C159964214BC69A00AAE1E3 /* util.mm */,
 			);
 			name = src;
 			sourceTree = "<group>";
@@ -357,6 +410,7 @@
 		3C0A914C21415425005325E2 /* c_api */ = {
 			isa = PBXGroup;
 			children = (
+				3C71F31F2149B6160016CEAC /* speechapi_c_speech_config.cpp */,
 				3C5D93F02146A87C000C7129 /* speechapi_c_audio_config.cpp */,
 				3C5D93EE2146A87C000C7129 /* speechapi_c_audio_stream_format.cpp */,
 				3C5D93EF2146A87C000C7129 /* speechapi_c_audio_stream.cpp */,
@@ -390,19 +444,22 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3CF8206021464C1C001970FB /* recognition_result_base_private.h in Headers */,
+				3CF8206021464C1C001970FB /* recognition_result_private.h in Headers */,
+				3C5D94092147E7C5000C7129 /* audio_config_private.h in Headers */,
 				3C0A9148214152DA005325E2 /* nsstring_stdstring.h in Headers */,
 				3C0A912B21415293005325E2 /* speech_recognition_result.h in Headers */,
-				3CF8203C21463776001970FB /* translation_synthesis_event_args.h in Headers */,
+				3CF8203C21463776001970FB /* translation_synthesis_result_event_args.h in Headers */,
 				3CF8203D21463776001970FB /* language_understanding_model.h in Headers */,
+				3C5D941E21494DB2000C7129 /* speech_config_private.h in Headers */,
 				3CF8203B21463776001970FB /* speech_recognition_event_args.h in Headers */,
-				3CF8205121463792001970FB /* translation_text_event_args_private.h in Headers */,
+				3CF8205121463792001970FB /* translation_text_result_event_args_private.h in Headers */,
 				3CF8203A21463776001970FB /* intent_recognition_event_args.h in Headers */,
-				3C200BB221455E6700051AD9 /* recognition_error_event_args_private.h in Headers */,
 				3C0A9142214152DA005325E2 /* speech_recognizer_private.h in Headers */,
 				3CC674AE2145493E001007EF /* translation_synthesis_result.h in Headers */,
 				3CF8205221463792001970FB /* intent_recognition_event_args_private.h in Headers */,
-				3CF8205321463792001970FB /* translation_synthesis_event_args_private.h in Headers */,
+				3CF8205321463792001970FB /* translation_synthesis_result_event_args_private.h in Headers */,
+				3C5D942321494DD7000C7129 /* speech_config.h in Headers */,
+				3C5D94072147E7C5000C7129 /* audio_stream_private.h in Headers */,
 				3C0A912E21415293005325E2 /* speech_recognizer.h in Headers */,
 				3C0A916F21415460005325E2 /* handle_helpers.h in Headers */,
 				3CF8205621463792001970FB /* intent_recognizer_private.h in Headers */,
@@ -410,23 +467,30 @@
 				3C0A916C21415460005325E2 /* try_catch_helpers.h in Headers */,
 				3CC674C721454954001007EF /* translation_text_result_private.h in Headers */,
 				3CF8205521463792001970FB /* intent_recognition_result_private.h in Headers */,
-				3CC674B12145493E001007EF /* recognition_error_event_args.h in Headers */,
+				3C71F32E214AE6490016CEAC /* recognition_result_property_collection_private.h in Headers */,
 				3C2B03C6214243C50074206C /* recognizer.h in Headers */,
+				3C5D940F2147E7EC000C7129 /* audio_stream_format.h in Headers */,
 				3C0A917321415460005325E2 /* stdafx.h in Headers */,
 				3C0A9143214152DA005325E2 /* speech_recognition_event_args_private.h in Headers */,
 				3CF8203F21463776001970FB /* intent_recognizer.h in Headers */,
-				3C0A912F21415293005325E2 /* speech_factory.h in Headers */,
 				3CF8204F21463792001970FB /* language_understanding_model_private.h in Headers */,
-				3CF8203921463776001970FB /* translation_text_event_args.h in Headers */,
+				3CF8203921463776001970FB /* translation_text_result_event_args.h in Headers */,
+				3C5D940E2147E7EC000C7129 /* audio_config.h in Headers */,
+				3C5D94102147E7EC000C7129 /* audio_stream.h in Headers */,
+				3C5D942C2149A8C9000C7129 /* speech_translation_config.h in Headers */,
 				3C2B03D2214243D80074206C /* session_event_args_private.h in Headers */,
 				3C2B03C8214243C50074206C /* session_event_args.h in Headers */,
+				3C71F326214A80830016CEAC /* recognizer_property_collection_private.h in Headers */,
 				3CC674C621454954001007EF /* translation_synthesis_result_private.h in Headers */,
 				3C2B03D0214243D80074206C /* recognition_event_args_private.h in Headers */,
 				3C0A914B214152E6005325E2 /* SpeechSDK_Framework.h in Headers */,
 				3CC674B02145493E001007EF /* translation_text_result.h in Headers */,
+				3C5D94292149A8BB000C7129 /* speech_translation_config_private.h in Headers */,
+				3C5D94062147E7C5000C7129 /* audio_stream_format_private.h in Headers */,
 				3CC674C221454954001007EF /* translation_recognizer_private.h in Headers */,
 				3C0A9146214152DA005325E2 /* speech_recognition_result_private.h in Headers */,
 				3CF8203E21463776001970FB /* intent_recognition_result.h in Headers */,
+				3C5D942621495A69000C7129 /* speechapi_private.h in Headers */,
 				3C0A916221415460005325E2 /* event_helpers.h in Headers */,
 				3CC674B22145493E001007EF /* translation_recognizer.h in Headers */,
 			);
@@ -478,7 +542,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0940;
-				ORGANIZATIONNAME = carbon;
+				ORGANIZATIONNAME = Microsoft;
 				TargetAttributes = {
 					3C0A8E1F213FFF80005325E2 = {
 						CreatedOnToolsVersion = 9.4.1;
@@ -534,16 +598,19 @@
 				3C0A9144214152DA005325E2 /* nsstring_stdstring.mm in Sources */,
 				3C0A916D21415460005325E2 /* speechapi_c_translation_result.cpp in Sources */,
 				3C0A916621415460005325E2 /* speechapi_c_error.cpp in Sources */,
-				3CF8205421463792001970FB /* translation_text_event_args.mm in Sources */,
+				3C5D940A2147E7C5000C7129 /* audio_config.mm in Sources */,
+				3CF8205421463792001970FB /* translation_text_result_event_args.mm in Sources */,
 				3C0A9147214152DA005325E2 /* speech_recognizer.mm in Sources */,
 				3C2B03CF214243D80074206C /* session_event_args.mm in Sources */,
 				3CF8204E21463792001970FB /* intent_recognition_result.mm in Sources */,
 				3C2B03D1214243D80074206C /* recognition_event_args.mm in Sources */,
 				3C5D93F42146A87D000C7129 /* speechapi_c_audio_config.cpp in Sources */,
 				3CC674C121454954001007EF /* translation_recognizer.mm in Sources */,
-				3CF8205021463792001970FB /* translation_synthesis_event_args.mm in Sources */,
+				3CF8205021463792001970FB /* translation_synthesis_result_event_args.mm in Sources */,
 				3CC674C021454954001007EF /* translation_text_result.mm in Sources */,
+				3C5D94052147E7C5000C7129 /* audio_stream_format.mm in Sources */,
 				3C5D93F22146A87D000C7129 /* speechapi_c_audio_stream_format.cpp in Sources */,
+				3C159965214BC69A00AAE1E3 /* util.mm in Sources */,
 				3CF8205721463792001970FB /* intent_recognizer.mm in Sources */,
 				3C0A916421415460005325E2 /* speechapi_c_translation_recognizer.cpp in Sources */,
 				3CF8204C21463792001970FB /* language_understanding_model.mm in Sources */,
@@ -552,19 +619,23 @@
 				3C0A916721415460005325E2 /* speechapi_c_factory.cpp in Sources */,
 				3C0A916B21415460005325E2 /* speechapi_c_result.cpp in Sources */,
 				3C0A917221415460005325E2 /* stdafx.cpp in Sources */,
+				3C5D94082147E7C5000C7129 /* audio_stream.mm in Sources */,
 				3CF8204D21463792001970FB /* intent_recognition_event_args.mm in Sources */,
 				3C0A916521415460005325E2 /* event_helpers.cpp in Sources */,
+				3C5D942A2149A8BB000C7129 /* speech_translation_config.mm in Sources */,
+				3C71F3202149B6170016CEAC /* speechapi_c_speech_config.cpp in Sources */,
 				3C0A917021415460005325E2 /* speechapi_c_intent_result.cpp in Sources */,
 				3C0A916921415460005325E2 /* speechapi_c_recognizer.cpp in Sources */,
-				3C200BB121455E6700051AD9 /* recognition_error_event_args.mm in Sources */,
+				3C5D941B21494DB2000C7129 /* speech_config.mm in Sources */,
 				3C0A917121415460005325E2 /* speechapi_c_session.cpp in Sources */,
-				3C0A9149214152DA005325E2 /* speech_factory.mm in Sources */,
 				3C0A916A21415460005325E2 /* speechapi_c_intent_recognizer.cpp in Sources */,
 				3C2B03CE214243D80074206C /* recognizer.mm in Sources */,
 				3C0A917421415460005325E2 /* speechapi_c_intent_trigger.cpp in Sources */,
+				3C71F32D214AE6490016CEAC /* recognition_result_property_collection.mm in Sources */,
 				3C5D93F32146A87D000C7129 /* speechapi_c_audio_stream.cpp in Sources */,
+				3C71F323214A7F5D0016CEAC /* recognizer_property_collection.mm in Sources */,
 				3C5D93F12146A87D000C7129 /* speechapi_c_property_bag.cpp in Sources */,
-				3CF8205E21464489001970FB /* recognition_result_base.mm in Sources */,
+				3CF8205E21464489001970FB /* recognition_result.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -572,7 +643,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3C0A8E2F213FFF81005325E2 /* SpeechSDK_FrameworkTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
