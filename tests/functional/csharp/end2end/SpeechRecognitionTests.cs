@@ -441,12 +441,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.IsTrue(result.Reason == ResultReason.NoMatch, result.Reason.ToString());
+                Assert.AreEqual(ResultReason.NoMatch, result.Reason);
                 Assert.IsTrue(result.OffsetInTicks > 0, result.OffsetInTicks.ToString());
                 Assert.IsTrue(String.IsNullOrEmpty(result.Text), result.Text);
 
                 var noMatch = NoMatchDetails.FromResult(result);
-                Assert.IsTrue(noMatch.Reason == NoMatchReason.InitialSilenceTimeout, noMatch.Reason.ToString());
+                Assert.AreEqual(NoMatchReason.InitialSilenceTimeout, noMatch.Reason);
             }
         }
     }

@@ -145,6 +145,9 @@ void CSpxRecognitionResult::InitTranslationTextResult(TranslationStatusCode stat
         case ResultReason::RecognizedSpeech:
             m_reason = ResultReason::TranslatedSpeech;
             break;
+        case ResultReason::NoMatch:
+            // no match is  also considered as success and passed through.
+            break;
         default:
             SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
             break;

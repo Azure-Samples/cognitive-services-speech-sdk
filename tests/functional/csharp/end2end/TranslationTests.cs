@@ -217,5 +217,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
             Assert.IsTrue(actualTranslations[0].Last().Result.Text.Contains("What"));
         }
+
+        [TestMethod]
+        public async Task TestInitialSilenceTimeout()
+        {
+            var toLanguages = new List<string>() { Language.DE };
+            var result = await this.translationHelper.GetTranslationFinalResult(TestData.English.Silence.AudioFile, Language.EN, toLanguages);
+
+            Assert.IsNotNull(result, "Translation should not be null");
+            Console.WriteLine(result.ToString());
+
+            var errorDetails = result.Reason == ResultReason.Canceled ? CancellationDetails.FromResult(result).ErrorDetails : "";
+            Console.WriteLine($"Reason: {result.Reason}, ErrorDetails: {errorDetails}");
+            Assert.AreEqual(ResultReason.NoMatch, result.Reason);
+            var noMatch = NoMatchDetails.FromResult(result);
+            Assert.AreEqual(NoMatchReason.InitialSilenceTimeout, noMatch.Reason);
+        }
+
     }
 }
