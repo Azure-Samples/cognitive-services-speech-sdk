@@ -88,3 +88,6 @@ public_samples/**/packages
 public_samples/**/bin
 public_samples/**/obj
 public_samples/**/objd
+
+# generated pods directory
+tests/functional/objective-c/*/Pods/

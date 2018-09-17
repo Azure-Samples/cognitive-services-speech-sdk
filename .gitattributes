@@ -10,6 +10,7 @@ Dockerfile text
 LICENSE text
 Makefile text
 gradlew text
+Podfile text
 proguard-rules.pro text
 
 *.appxmanifest text
@@ -30,6 +31,7 @@ proguard-rules.pro text
 *.java text
 *.js text
 *.json text
+*.lock text
 *.m text
 *.md text
 *.mm text
@@ -38,6 +40,7 @@ proguard-rules.pro text
 *.php text
 *.pl text
 *.plist text
+*.podspec text
 *.prefs text
 *.project text
 *.properties text
@@ -57,6 +60,9 @@ proguard-rules.pro text
 *.vcxproj.user text
 *.xaml text
 *.xaml.cs text
+*.xcscheme text
+*.xcscmblueprint text
+*.xcworkspacedata text
 *.xml text
 *.yml text
 

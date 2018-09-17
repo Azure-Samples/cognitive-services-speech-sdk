@@ -6,24 +6,41 @@
 	objectVersion = 50;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		A25A5D14214729630013ED7C /* UniversalFramework-macOS */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = A25A5D16214729630013ED7C /* Build configuration list for PBXAggregateTarget "UniversalFramework-macOS" */;
+			buildPhases = (
+				A25A5D15214729630013ED7C /* Run Script */,
+			);
+			dependencies = (
+			);
+			name = "UniversalFramework-macOS";
+			productName = UniversalFramework;
+		};
+		A2E689BB21431FFB000A6160 /* UniversalFramework-iOS */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = A2E689BC21431FFC000A6160 /* Build configuration list for PBXAggregateTarget "UniversalFramework-iOS" */;
+			buildPhases = (
+				A2E689BF2143200D000A6160 /* Run Script */,
+			);
+			dependencies = (
+			);
+			name = "UniversalFramework-iOS";
+			productName = UniversalFramework;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
-		3C0A8E2A213FFF81005325E2 /* SpeechSDK_Framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C0A8E20213FFF80005325E2 /* SpeechSDK_Framework.framework */; };
-		3C0A911B214148EC005325E2 /* libfactory.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C0A9116214148EB005325E2 /* libfactory.a */; };
-		3C0A911C214148EC005325E2 /* libcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C0A9117214148EC005325E2 /* libcommon.a */; };
-		3C0A911D214148EC005325E2 /* libusp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C0A9118214148EC005325E2 /* libusp.a */; };
-		3C0A911E214148EC005325E2 /* libaudio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C0A9119214148EC005325E2 /* libaudio.a */; };
-		3C0A911F214148EC005325E2 /* libsr.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C0A911A214148EC005325E2 /* libsr.a */; };
-		3C0A912B21415293005325E2 /* speech_recognition_result.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A912521415292005325E2 /* speech_recognition_result.h */; };
-		3C0A912E21415293005325E2 /* speech_recognizer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A912821415292005325E2 /* speech_recognizer.h */; };
+		3C0A912B21415293005325E2 /* speech_recognition_result.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A912521415292005325E2 /* speech_recognition_result.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3C0A912E21415293005325E2 /* speech_recognizer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A912821415292005325E2 /* speech_recognizer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3C0A9140214152DA005325E2 /* speech_recognition_result.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C0A9134214152D9005325E2 /* speech_recognition_result.mm */; };
-		3C0A9141214152DA005325E2 /* speech_recognition_event_args.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C0A9135214152D9005325E2 /* speech_recognition_event_args.mm */; };
 		3C0A9142214152DA005325E2 /* speech_recognizer_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A9136214152D9005325E2 /* speech_recognizer_private.h */; };
-		3C0A9143214152DA005325E2 /* speech_recognition_event_args_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A9137214152D9005325E2 /* speech_recognition_event_args_private.h */; };
-		3C0A9144214152DA005325E2 /* nsstring_stdstring.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C0A9138214152D9005325E2 /* nsstring_stdstring.mm */; };
+		3C0A9144214152DA005325E2 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		3C0A9146214152DA005325E2 /* speech_recognition_result_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A913A214152D9005325E2 /* speech_recognition_result_private.h */; };
 		3C0A9147214152DA005325E2 /* speech_recognizer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C0A913B214152D9005325E2 /* speech_recognizer.mm */; };
 		3C0A9148214152DA005325E2 /* nsstring_stdstring.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A913C214152D9005325E2 /* nsstring_stdstring.h */; };
-		3C0A914B214152E6005325E2 /* SpeechSDK_Framework.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A914A214152E6005325E2 /* SpeechSDK_Framework.h */; };
+		3C0A914B214152E6005325E2 /* SpeechSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A914A214152E6005325E2 /* SpeechSDK.h */; };
 		3C0A916221415460005325E2 /* event_helpers.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A914F2141545D005325E2 /* event_helpers.h */; };
 		3C0A916321415460005325E2 /* speechapi_c_keyword_recognition_model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C0A91502141545D005325E2 /* speechapi_c_keyword_recognition_model.cpp */; };
 		3C0A916421415460005325E2 /* speechapi_c_translation_recognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C0A91512141545D005325E2 /* speechapi_c_translation_recognizer.cpp */; };
@@ -43,12 +60,8 @@
 		3C0A917321415460005325E2 /* stdafx.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C0A91602141545F005325E2 /* stdafx.h */; };
 		3C0A917421415460005325E2 /* speechapi_c_intent_trigger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C0A91612141545F005325E2 /* speechapi_c_intent_trigger.cpp */; };
 		3C159965214BC69A00AAE1E3 /* util.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C159964214BC69A00AAE1E3 /* util.mm */; };
-		3C2B03BC21423B8A0074206C /* libaziotsharedutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C2B03BB21423B8A0074206C /* libaziotsharedutil.a */; };
-		3C2B03BE21423BC80074206C /* libparson.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C2B03BD21423BC80074206C /* libparson.a */; };
-		3C2B03C021423EA50074206C /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C2B03BF21423EA50074206C /* CFNetwork.framework */; };
-		3C2B03C6214243C50074206C /* recognizer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C2B03C3214243C50074206C /* recognizer.h */; };
-		3C2B03C7214243C50074206C /* recognition_event_args.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C2B03C4214243C50074206C /* recognition_event_args.h */; };
-		3C2B03C8214243C50074206C /* session_event_args.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C2B03C5214243C50074206C /* session_event_args.h */; };
+		3C2B03C6214243C50074206C /* recognizer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C2B03C3214243C50074206C /* recognizer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3C2B03C8214243C50074206C /* session_event_args.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C2B03C5214243C50074206C /* session_event_args.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3C2B03CE214243D80074206C /* recognizer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C2B03C9214243D70074206C /* recognizer.mm */; };
 		3C2B03CF214243D80074206C /* session_event_args.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C2B03CA214243D70074206C /* session_event_args.mm */; };
 		3C2B03D0214243D80074206C /* recognition_event_args_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C2B03CB214243D80074206C /* recognition_event_args_private.h */; };
@@ -64,37 +77,36 @@
 		3C5D94082147E7C5000C7129 /* audio_stream.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D94022147E7C5000C7129 /* audio_stream.mm */; };
 		3C5D94092147E7C5000C7129 /* audio_config_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D94032147E7C5000C7129 /* audio_config_private.h */; };
 		3C5D940A2147E7C5000C7129 /* audio_config.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D94042147E7C5000C7129 /* audio_config.mm */; };
-		3C5D940E2147E7EC000C7129 /* audio_config.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D940B2147E7EB000C7129 /* audio_config.h */; };
-		3C5D940F2147E7EC000C7129 /* audio_stream_format.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D940C2147E7EB000C7129 /* audio_stream_format.h */; };
-		3C5D94102147E7EC000C7129 /* audio_stream.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D940D2147E7EB000C7129 /* audio_stream.h */; };
+		3C5D940E2147E7EC000C7129 /* audio_config.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D940B2147E7EB000C7129 /* audio_config.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3C5D940F2147E7EC000C7129 /* audio_stream_format.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D940C2147E7EB000C7129 /* audio_stream_format.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3C5D94102147E7EC000C7129 /* audio_stream.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D940D2147E7EB000C7129 /* audio_stream.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3C5D941B21494DB2000C7129 /* speech_config.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D941421494DB2000C7129 /* speech_config.mm */; };
 		3C5D941E21494DB2000C7129 /* speech_config_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D941721494DB2000C7129 /* speech_config_private.h */; };
-		3C5D942321494DD7000C7129 /* speech_config.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D942221494DD7000C7129 /* speech_config.h */; };
+		3C5D942321494DD7000C7129 /* speech_config.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D942221494DD7000C7129 /* speech_config.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3C5D942621495A69000C7129 /* speechapi_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D942521495A69000C7129 /* speechapi_private.h */; };
 		3C5D94292149A8BB000C7129 /* speech_translation_config_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D94272149A8BB000C7129 /* speech_translation_config_private.h */; };
 		3C5D942A2149A8BB000C7129 /* speech_translation_config.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D94282149A8BB000C7129 /* speech_translation_config.mm */; };
-		3C5D942C2149A8C9000C7129 /* speech_translation_config.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D942B2149A8C8000C7129 /* speech_translation_config.h */; };
+		3C5D942C2149A8C9000C7129 /* speech_translation_config.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D942B2149A8C8000C7129 /* speech_translation_config.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3C71F3202149B6170016CEAC /* speechapi_c_speech_config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C71F31F2149B6160016CEAC /* speechapi_c_speech_config.cpp */; };
 		3C71F323214A7F5D0016CEAC /* recognizer_property_collection.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C71F322214A7F5D0016CEAC /* recognizer_property_collection.mm */; };
 		3C71F326214A80830016CEAC /* recognizer_property_collection_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C71F325214A80830016CEAC /* recognizer_property_collection_private.h */; };
 		3C71F32D214AE6490016CEAC /* recognition_result_property_collection.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C71F32B214AE6480016CEAC /* recognition_result_property_collection.mm */; };
 		3C71F32E214AE6490016CEAC /* recognition_result_property_collection_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C71F32C214AE6480016CEAC /* recognition_result_property_collection_private.h */; };
-		3CC674AE2145493E001007EF /* translation_synthesis_result.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CC674A82145493E001007EF /* translation_synthesis_result.h */; };
-		3CC674B02145493E001007EF /* translation_text_result.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CC674AA2145493E001007EF /* translation_text_result.h */; };
-		3CC674B22145493E001007EF /* translation_recognizer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CC674AC2145493E001007EF /* translation_recognizer.h */; };
+		3CC674AE2145493E001007EF /* translation_synthesis_result.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CC674A82145493E001007EF /* translation_synthesis_result.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3CC674B02145493E001007EF /* translation_text_result.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CC674AA2145493E001007EF /* translation_text_result.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3CC674C021454954001007EF /* translation_text_result.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CC674B621454953001007EF /* translation_text_result.mm */; };
 		3CC674C121454954001007EF /* translation_recognizer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CC674B721454953001007EF /* translation_recognizer.mm */; };
 		3CC674C221454954001007EF /* translation_recognizer_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CC674B821454953001007EF /* translation_recognizer_private.h */; };
 		3CC674C421454954001007EF /* translation_synthesis_result.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CC674BA21454953001007EF /* translation_synthesis_result.mm */; };
 		3CC674C621454954001007EF /* translation_synthesis_result_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CC674BC21454954001007EF /* translation_synthesis_result_private.h */; };
 		3CC674C721454954001007EF /* translation_text_result_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CC674BD21454954001007EF /* translation_text_result_private.h */; };
-		3CF8203921463776001970FB /* translation_text_result_event_args.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203221463776001970FB /* translation_text_result_event_args.h */; };
-		3CF8203A21463776001970FB /* intent_recognition_event_args.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203321463776001970FB /* intent_recognition_event_args.h */; };
-		3CF8203B21463776001970FB /* speech_recognition_event_args.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203421463776001970FB /* speech_recognition_event_args.h */; };
-		3CF8203C21463776001970FB /* translation_synthesis_result_event_args.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203521463776001970FB /* translation_synthesis_result_event_args.h */; };
-		3CF8203D21463776001970FB /* language_understanding_model.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203621463776001970FB /* language_understanding_model.h */; };
-		3CF8203E21463776001970FB /* intent_recognition_result.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203721463776001970FB /* intent_recognition_result.h */; };
-		3CF8203F21463776001970FB /* intent_recognizer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203821463776001970FB /* intent_recognizer.h */; };
+		3CF8203921463776001970FB /* translation_text_result_event_args.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203221463776001970FB /* translation_text_result_event_args.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3CF8203A21463776001970FB /* intent_recognition_event_args.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203321463776001970FB /* intent_recognition_event_args.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3CF8203B21463776001970FB /* speech_recognition_event_args.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203421463776001970FB /* speech_recognition_event_args.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3CF8203C21463776001970FB /* translation_synthesis_result_event_args.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203521463776001970FB /* translation_synthesis_result_event_args.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3CF8203D21463776001970FB /* language_understanding_model.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203621463776001970FB /* language_understanding_model.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3CF8203E21463776001970FB /* intent_recognition_result.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203721463776001970FB /* intent_recognition_result.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3CF8203F21463776001970FB /* intent_recognizer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8203821463776001970FB /* intent_recognizer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3CF8204C21463792001970FB /* language_understanding_model.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CF8204021463791001970FB /* language_understanding_model.mm */; };
 		3CF8204D21463792001970FB /* intent_recognition_event_args.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CF8204121463791001970FB /* intent_recognition_event_args.mm */; };
 		3CF8204E21463792001970FB /* intent_recognition_result.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CF8204221463791001970FB /* intent_recognition_result.mm */; };
@@ -105,10 +117,24 @@
 		3CF8205321463792001970FB /* translation_synthesis_result_event_args_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8204721463792001970FB /* translation_synthesis_result_event_args_private.h */; };
 		3CF8205421463792001970FB /* translation_text_result_event_args.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CF8204821463792001970FB /* translation_text_result_event_args.mm */; };
 		3CF8205521463792001970FB /* intent_recognition_result_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8204921463792001970FB /* intent_recognition_result_private.h */; };
-		3CF8205621463792001970FB /* intent_recognizer_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8204A21463792001970FB /* intent_recognizer_private.h */; };
 		3CF8205721463792001970FB /* intent_recognizer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CF8204B21463792001970FB /* intent_recognizer.mm */; };
 		3CF8205E21464489001970FB /* recognition_result.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3CF8205D21464489001970FB /* recognition_result.mm */; };
 		3CF8206021464C1C001970FB /* recognition_result_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8205F21464C1C001970FB /* recognition_result_private.h */; };
+		A2A1CB6221503701003D9B93 /* MicrosoftCognitiveServicesSpeech.h in Headers */ = {isa = PBXBuildFile; fileRef = A2A1CB6121503701003D9B93 /* MicrosoftCognitiveServicesSpeech.h */; };
+		A2A1CB6621503755003D9B93 /* speech_recognition_event_args_private.h in Headers */ = {isa = PBXBuildFile; fileRef = A2A1CB6321503754003D9B93 /* speech_recognition_event_args_private.h */; };
+		A2A1CB6721503755003D9B93 /* nsstring_stdstring.mm in Sources */ = {isa = PBXBuildFile; fileRef = A2A1CB6421503754003D9B93 /* nsstring_stdstring.mm */; };
+		A2A1CB6821503755003D9B93 /* speech_recognition_event_args.mm in Sources */ = {isa = PBXBuildFile; fileRef = A2A1CB6521503754003D9B93 /* speech_recognition_event_args.mm */; };
+		A2A1CB6A215037BC003D9B93 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2A1CB69215037BC003D9B93 /* CFNetwork.framework */; };
+		A2A1CB6B21503FD3003D9B93 /* property_collection.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C71F321214A7BD70016CEAC /* property_collection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A2A1CB6C21503FD3003D9B93 /* recognition_event_args.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C2B03C4214243C50074206C /* recognition_event_args.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A2A1CB6D21503FD3003D9B93 /* recognition_result.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8205921464219001970FB /* recognition_result.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A2A1CB6E21503FD3003D9B93 /* speech_enums.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C200BAE214555D000051AD9 /* speech_enums.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A2A1CB6F21503FD3003D9B93 /* speechapi.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C5D942421495133000C7129 /* speechapi.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A2A1CB7021503FD4003D9B93 /* translation_recognizer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CC674AC2145493E001007EF /* translation_recognizer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A2A1CB7121503FF8003D9B93 /* common_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CE340A92142836100CCA7F7 /* common_private.h */; };
+		A2A1CB7221503FFD003D9B93 /* intent_recognizer_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8204A21463792001970FB /* intent_recognizer_private.h */; };
+		A2A1CB7321504005003D9B93 /* recognizer_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C1F5462214277EF00456DFE /* recognizer_private.h */; };
+		A2A1CB742150400B003D9B93 /* util_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C159966214BC6B800AAE1E3 /* util_private.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -122,26 +148,18 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		3C0A8E20213FFF80005325E2 /* SpeechSDK_Framework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SpeechSDK_Framework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3C0A8E20213FFF80005325E2 /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MicrosoftCognitiveServicesSpeech.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C0A8E24213FFF80005325E2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		3C0A8E29213FFF81005325E2 /* SpeechSDK.FrameworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpeechSDK.FrameworkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3C0A8E29213FFF81005325E2 /* SpeechSDKTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpeechSDKTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C0A8E30213FFF81005325E2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		3C0A9116214148EB005325E2 /* libfactory.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfactory.a; path = ../../../../build_mac_debug/lib/libfactory.a; sourceTree = "<group>"; };
-		3C0A9117214148EC005325E2 /* libcommon.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcommon.a; path = ../../../../build_mac_debug/lib/libcommon.a; sourceTree = "<group>"; };
-		3C0A9118214148EC005325E2 /* libusp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libusp.a; path = ../../../../build_mac_debug/lib/libusp.a; sourceTree = "<group>"; };
-		3C0A9119214148EC005325E2 /* libaudio.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libaudio.a; path = ../../../../build_mac_debug/lib/libaudio.a; sourceTree = "<group>"; };
-		3C0A911A214148EC005325E2 /* libsr.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libsr.a; path = ../../../../build_mac_debug/lib/libsr.a; sourceTree = "<group>"; };
 		3C0A912521415292005325E2 /* speech_recognition_result.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_recognition_result.h; path = ../../public/speech_recognition_result.h; sourceTree = "<group>"; };
 		3C0A912821415292005325E2 /* speech_recognizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_recognizer.h; path = ../../public/speech_recognizer.h; sourceTree = "<group>"; };
 		3C0A9134214152D9005325E2 /* speech_recognition_result.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_recognition_result.mm; path = ../../src/speech_recognition_result.mm; sourceTree = "<group>"; };
-		3C0A9135214152D9005325E2 /* speech_recognition_event_args.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_recognition_event_args.mm; path = ../../src/speech_recognition_event_args.mm; sourceTree = "<group>"; };
 		3C0A9136214152D9005325E2 /* speech_recognizer_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_recognizer_private.h; path = ../../src/speech_recognizer_private.h; sourceTree = "<group>"; };
-		3C0A9137214152D9005325E2 /* speech_recognition_event_args_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_recognition_event_args_private.h; path = ../../src/speech_recognition_event_args_private.h; sourceTree = "<group>"; };
-		3C0A9138214152D9005325E2 /* nsstring_stdstring.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = nsstring_stdstring.mm; path = ../../src/nsstring_stdstring.mm; sourceTree = "<group>"; };
 		3C0A913A214152D9005325E2 /* speech_recognition_result_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_recognition_result_private.h; path = ../../src/speech_recognition_result_private.h; sourceTree = "<group>"; };
 		3C0A913B214152D9005325E2 /* speech_recognizer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_recognizer.mm; path = ../../src/speech_recognizer.mm; sourceTree = "<group>"; };
 		3C0A913C214152D9005325E2 /* nsstring_stdstring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nsstring_stdstring.h; path = ../../src/nsstring_stdstring.h; sourceTree = "<group>"; };
-		3C0A914A214152E6005325E2 /* SpeechSDK_Framework.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechSDK_Framework.h; sourceTree = "<group>"; };
+		3C0A914A214152E6005325E2 /* SpeechSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechSDK.h; sourceTree = "<group>"; };
 		3C0A914F2141545D005325E2 /* event_helpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = event_helpers.h; path = ../../../../core/c_api/event_helpers.h; sourceTree = "<group>"; };
 		3C0A91502141545D005325E2 /* speechapi_c_keyword_recognition_model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_keyword_recognition_model.cpp; path = ../../../../core/c_api/speechapi_c_keyword_recognition_model.cpp; sourceTree = "<group>"; };
 		3C0A91512141545D005325E2 /* speechapi_c_translation_recognizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_translation_recognizer.cpp; path = ../../../../core/c_api/speechapi_c_translation_recognizer.cpp; sourceTree = "<group>"; };
@@ -164,9 +182,6 @@
 		3C159966214BC6B800AAE1E3 /* util_private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = util_private.h; path = ../../src/util_private.h; sourceTree = "<group>"; };
 		3C1F5462214277EF00456DFE /* recognizer_private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = recognizer_private.h; path = ../../src/recognizer_private.h; sourceTree = "<group>"; };
 		3C200BAE214555D000051AD9 /* speech_enums.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = speech_enums.h; path = ../../public/speech_enums.h; sourceTree = "<group>"; };
-		3C2B03BB21423B8A0074206C /* libaziotsharedutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libaziotsharedutil.a; path = ../../../../build_mac_debug/lib/libaziotsharedutil.a; sourceTree = "<group>"; };
-		3C2B03BD21423BC80074206C /* libparson.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libparson.a; path = ../../../../build_mac_debug/lib/libparson.a; sourceTree = "<group>"; };
-		3C2B03BF21423EA50074206C /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		3C2B03C3214243C50074206C /* recognizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = recognizer.h; path = ../../public/recognizer.h; sourceTree = "<group>"; };
 		3C2B03C4214243C50074206C /* recognition_event_args.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = recognition_event_args.h; path = ../../public/recognition_event_args.h; sourceTree = "<group>"; };
 		3C2B03C5214243C50074206C /* session_event_args.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = session_event_args.h; path = ../../public/session_event_args.h; sourceTree = "<group>"; };
@@ -234,6 +249,13 @@
 		3CF8205921464219001970FB /* recognition_result.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = recognition_result.h; path = ../../public/recognition_result.h; sourceTree = "<group>"; };
 		3CF8205D21464489001970FB /* recognition_result.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = recognition_result.mm; path = ../../src/recognition_result.mm; sourceTree = "<group>"; };
 		3CF8205F21464C1C001970FB /* recognition_result_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = recognition_result_private.h; path = ../../src/recognition_result_private.h; sourceTree = "<group>"; };
+		A26346932149D24C00E2D463 /* UniversalFramework-iOS.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "UniversalFramework-iOS.sh"; sourceTree = "<group>"; };
+		A26346942149D26B00E2D463 /* UniversalFramework-macOS.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "UniversalFramework-macOS.sh"; sourceTree = "<group>"; };
+		A2A1CB6121503701003D9B93 /* MicrosoftCognitiveServicesSpeech.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MicrosoftCognitiveServicesSpeech.h; sourceTree = "<group>"; };
+		A2A1CB6321503754003D9B93 /* speech_recognition_event_args_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_recognition_event_args_private.h; path = ../../src/speech_recognition_event_args_private.h; sourceTree = "<group>"; };
+		A2A1CB6421503754003D9B93 /* nsstring_stdstring.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = nsstring_stdstring.mm; path = ../../src/nsstring_stdstring.mm; sourceTree = "<group>"; };
+		A2A1CB6521503754003D9B93 /* speech_recognition_event_args.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_recognition_event_args.mm; path = ../../src/speech_recognition_event_args.mm; sourceTree = "<group>"; };
+		A2A1CB69215037BC003D9B93 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -241,14 +263,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3C2B03C021423EA50074206C /* CFNetwork.framework in Frameworks */,
-				3C2B03BE21423BC80074206C /* libparson.a in Frameworks */,
-				3C2B03BC21423B8A0074206C /* libaziotsharedutil.a in Frameworks */,
-				3C0A911B214148EC005325E2 /* libfactory.a in Frameworks */,
-				3C0A911C214148EC005325E2 /* libcommon.a in Frameworks */,
-				3C0A911D214148EC005325E2 /* libusp.a in Frameworks */,
-				3C0A911E214148EC005325E2 /* libaudio.a in Frameworks */,
-				3C0A911F214148EC005325E2 /* libsr.a in Frameworks */,
+				A2A1CB6A215037BC003D9B93 /* CFNetwork.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -256,7 +271,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3C0A8E2A213FFF81005325E2 /* SpeechSDK_Framework.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -266,8 +280,9 @@
 		3C0A8E16213FFF80005325E2 = {
 			isa = PBXGroup;
 			children = (
-				3C0A8E22213FFF80005325E2 /* SpeechSDK.Framework */,
-				3C0A8E2D213FFF81005325E2 /* SpeechSDK.FrameworkTests */,
+				A26346922149D22000E2D463 /* TargetGenerationScripts */,
+				3C0A8E22213FFF80005325E2 /* SpeechSDK */,
+				3C0A8E2D213FFF81005325E2 /* SpeechSDKTests */,
 				3C0A8E21213FFF80005325E2 /* Products */,
 				3C0A9115214148EB005325E2 /* Frameworks */,
 			);
@@ -276,43 +291,37 @@
 		3C0A8E21213FFF80005325E2 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				3C0A8E20213FFF80005325E2 /* SpeechSDK_Framework.framework */,
-				3C0A8E29213FFF81005325E2 /* SpeechSDK.FrameworkTests.xctest */,
+				3C0A8E20213FFF80005325E2 /* MicrosoftCognitiveServicesSpeech.framework */,
+				3C0A8E29213FFF81005325E2 /* SpeechSDKTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		3C0A8E22213FFF80005325E2 /* SpeechSDK.Framework */ = {
+		3C0A8E22213FFF80005325E2 /* SpeechSDK */ = {
 			isa = PBXGroup;
 			children = (
+				A2A1CB6121503701003D9B93 /* MicrosoftCognitiveServicesSpeech.h */,
 				3C0A914C21415425005325E2 /* c_api */,
-				3C0A914A214152E6005325E2 /* SpeechSDK_Framework.h */,
+				3C0A914A214152E6005325E2 /* SpeechSDK.h */,
 				3C0A9131214152C0005325E2 /* src */,
 				3C0A91232141527C005325E2 /* public */,
 				3C0A8E24213FFF80005325E2 /* Info.plist */,
 			);
-			path = SpeechSDK.Framework;
+			path = SpeechSDK;
 			sourceTree = "<group>";
 		};
-		3C0A8E2D213FFF81005325E2 /* SpeechSDK.FrameworkTests */ = {
+		3C0A8E2D213FFF81005325E2 /* SpeechSDKTests */ = {
 			isa = PBXGroup;
 			children = (
 				3C0A8E30213FFF81005325E2 /* Info.plist */,
 			);
-			path = SpeechSDK.FrameworkTests;
+			path = SpeechSDKTests;
 			sourceTree = "<group>";
 		};
 		3C0A9115214148EB005325E2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				3C2B03BF21423EA50074206C /* CFNetwork.framework */,
-				3C2B03BD21423BC80074206C /* libparson.a */,
-				3C2B03BB21423B8A0074206C /* libaziotsharedutil.a */,
-				3C0A9119214148EC005325E2 /* libaudio.a */,
-				3C0A9117214148EC005325E2 /* libcommon.a */,
-				3C0A9116214148EB005325E2 /* libfactory.a */,
-				3C0A911A214148EC005325E2 /* libsr.a */,
-				3C0A9118214148EC005325E2 /* libusp.a */,
+				A2A1CB69215037BC003D9B93 /* CFNetwork.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -351,6 +360,9 @@
 		3C0A9131214152C0005325E2 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				A2A1CB6421503754003D9B93 /* nsstring_stdstring.mm */,
+				A2A1CB6321503754003D9B93 /* speech_recognition_event_args_private.h */,
+				A2A1CB6521503754003D9B93 /* speech_recognition_event_args.mm */,
 				3C5D94032147E7C5000C7129 /* audio_config_private.h */,
 				3C5D94042147E7C5000C7129 /* audio_config.mm */,
 				3C5D94002147E7C4000C7129 /* audio_stream_format_private.h */,
@@ -367,7 +379,6 @@
 				3CF8204321463791001970FB /* language_understanding_model_private.h */,
 				3CF8204021463791001970FB /* language_understanding_model.mm */,
 				3C0A913C214152D9005325E2 /* nsstring_stdstring.h */,
-				3C0A9138214152D9005325E2 /* nsstring_stdstring.mm */,
 				3C2B03CB214243D80074206C /* recognition_event_args_private.h */,
 				3C2B03CC214243D80074206C /* recognition_event_args.mm */,
 				3CF8205F21464C1C001970FB /* recognition_result_private.h */,
@@ -382,8 +393,6 @@
 				3C2B03CA214243D70074206C /* session_event_args.mm */,
 				3C5D941721494DB2000C7129 /* speech_config_private.h */,
 				3C5D941421494DB2000C7129 /* speech_config.mm */,
-				3C0A9137214152D9005325E2 /* speech_recognition_event_args_private.h */,
-				3C0A9135214152D9005325E2 /* speech_recognition_event_args.mm */,
 				3C0A913A214152D9005325E2 /* speech_recognition_result_private.h */,
 				3C0A9134214152D9005325E2 /* speech_recognition_result.mm */,
 				3C0A9136214152D9005325E2 /* speech_recognizer_private.h */,
@@ -437,6 +446,15 @@
 			name = c_api;
 			sourceTree = "<group>";
 		};
+		A26346922149D22000E2D463 /* TargetGenerationScripts */ = {
+			isa = PBXGroup;
+			children = (
+				A26346932149D24C00E2D463 /* UniversalFramework-iOS.sh */,
+				A26346942149D26B00E2D463 /* UniversalFramework-macOS.sh */,
+			);
+			path = TargetGenerationScripts;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -444,64 +462,72 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3C0A912B21415293005325E2 /* speech_recognition_result.h in Headers */,
+				3CF8203B21463776001970FB /* speech_recognition_event_args.h in Headers */,
+				3C5D942321494DD7000C7129 /* speech_config.h in Headers */,
+				3CF8203A21463776001970FB /* intent_recognition_event_args.h in Headers */,
+				3CF8203921463776001970FB /* translation_text_result_event_args.h in Headers */,
+				3CC674AE2145493E001007EF /* translation_synthesis_result.h in Headers */,
+				3CF8203F21463776001970FB /* intent_recognizer.h in Headers */,
+				3C5D940E2147E7EC000C7129 /* audio_config.h in Headers */,
+				3C5D94102147E7EC000C7129 /* audio_stream.h in Headers */,
+				3C2B03C6214243C50074206C /* recognizer.h in Headers */,
+				3C0A912E21415293005325E2 /* speech_recognizer.h in Headers */,
+				3C5D942C2149A8C9000C7129 /* speech_translation_config.h in Headers */,
+				A2A1CB6B21503FD3003D9B93 /* property_collection.h in Headers */,
+				A2A1CB6C21503FD3003D9B93 /* recognition_event_args.h in Headers */,
+				A2A1CB6D21503FD3003D9B93 /* recognition_result.h in Headers */,
+				A2A1CB7021503FD4003D9B93 /* translation_recognizer.h in Headers */,
+				A2A1CB6E21503FD3003D9B93 /* speech_enums.h in Headers */,
+				3CC674B02145493E001007EF /* translation_text_result.h in Headers */,
+				A2A1CB6F21503FD3003D9B93 /* speechapi.h in Headers */,
+				3CF8203C21463776001970FB /* translation_synthesis_result_event_args.h in Headers */,
+				3C5D940F2147E7EC000C7129 /* audio_stream_format.h in Headers */,
+				3CF8203E21463776001970FB /* intent_recognition_result.h in Headers */,
+				3C2B03C8214243C50074206C /* session_event_args.h in Headers */,
+				3CF8203D21463776001970FB /* language_understanding_model.h in Headers */,
+				A2A1CB742150400B003D9B93 /* util_private.h in Headers */,
+				A2A1CB7321504005003D9B93 /* recognizer_private.h in Headers */,
+				A2A1CB7221503FFD003D9B93 /* intent_recognizer_private.h in Headers */,
+				A2A1CB7121503FF8003D9B93 /* common_private.h in Headers */,
 				3CF8206021464C1C001970FB /* recognition_result_private.h in Headers */,
 				3C5D94092147E7C5000C7129 /* audio_config_private.h in Headers */,
 				3C0A9148214152DA005325E2 /* nsstring_stdstring.h in Headers */,
-				3C0A912B21415293005325E2 /* speech_recognition_result.h in Headers */,
-				3CF8203C21463776001970FB /* translation_synthesis_result_event_args.h in Headers */,
-				3CF8203D21463776001970FB /* language_understanding_model.h in Headers */,
 				3C5D941E21494DB2000C7129 /* speech_config_private.h in Headers */,
-				3CF8203B21463776001970FB /* speech_recognition_event_args.h in Headers */,
 				3CF8205121463792001970FB /* translation_text_result_event_args_private.h in Headers */,
-				3CF8203A21463776001970FB /* intent_recognition_event_args.h in Headers */,
 				3C0A9142214152DA005325E2 /* speech_recognizer_private.h in Headers */,
-				3CC674AE2145493E001007EF /* translation_synthesis_result.h in Headers */,
 				3CF8205221463792001970FB /* intent_recognition_event_args_private.h in Headers */,
 				3CF8205321463792001970FB /* translation_synthesis_result_event_args_private.h in Headers */,
-				3C5D942321494DD7000C7129 /* speech_config.h in Headers */,
 				3C5D94072147E7C5000C7129 /* audio_stream_private.h in Headers */,
-				3C0A912E21415293005325E2 /* speech_recognizer.h in Headers */,
 				3C0A916F21415460005325E2 /* handle_helpers.h in Headers */,
-				3CF8205621463792001970FB /* intent_recognizer_private.h in Headers */,
-				3C2B03C7214243C50074206C /* recognition_event_args.h in Headers */,
+				A2A1CB6621503755003D9B93 /* speech_recognition_event_args_private.h in Headers */,
 				3C0A916C21415460005325E2 /* try_catch_helpers.h in Headers */,
 				3CC674C721454954001007EF /* translation_text_result_private.h in Headers */,
 				3CF8205521463792001970FB /* intent_recognition_result_private.h in Headers */,
 				3C71F32E214AE6490016CEAC /* recognition_result_property_collection_private.h in Headers */,
-				3C2B03C6214243C50074206C /* recognizer.h in Headers */,
-				3C5D940F2147E7EC000C7129 /* audio_stream_format.h in Headers */,
 				3C0A917321415460005325E2 /* stdafx.h in Headers */,
-				3C0A9143214152DA005325E2 /* speech_recognition_event_args_private.h in Headers */,
-				3CF8203F21463776001970FB /* intent_recognizer.h in Headers */,
 				3CF8204F21463792001970FB /* language_understanding_model_private.h in Headers */,
-				3CF8203921463776001970FB /* translation_text_result_event_args.h in Headers */,
-				3C5D940E2147E7EC000C7129 /* audio_config.h in Headers */,
-				3C5D94102147E7EC000C7129 /* audio_stream.h in Headers */,
-				3C5D942C2149A8C9000C7129 /* speech_translation_config.h in Headers */,
 				3C2B03D2214243D80074206C /* session_event_args_private.h in Headers */,
-				3C2B03C8214243C50074206C /* session_event_args.h in Headers */,
 				3C71F326214A80830016CEAC /* recognizer_property_collection_private.h in Headers */,
 				3CC674C621454954001007EF /* translation_synthesis_result_private.h in Headers */,
 				3C2B03D0214243D80074206C /* recognition_event_args_private.h in Headers */,
-				3C0A914B214152E6005325E2 /* SpeechSDK_Framework.h in Headers */,
-				3CC674B02145493E001007EF /* translation_text_result.h in Headers */,
+				3C0A914B214152E6005325E2 /* SpeechSDK.h in Headers */,
 				3C5D94292149A8BB000C7129 /* speech_translation_config_private.h in Headers */,
 				3C5D94062147E7C5000C7129 /* audio_stream_format_private.h in Headers */,
 				3CC674C221454954001007EF /* translation_recognizer_private.h in Headers */,
 				3C0A9146214152DA005325E2 /* speech_recognition_result_private.h in Headers */,
-				3CF8203E21463776001970FB /* intent_recognition_result.h in Headers */,
+				A2A1CB6221503701003D9B93 /* MicrosoftCognitiveServicesSpeech.h in Headers */,
 				3C5D942621495A69000C7129 /* speechapi_private.h in Headers */,
 				3C0A916221415460005325E2 /* event_helpers.h in Headers */,
-				3CC674B22145493E001007EF /* translation_recognizer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		3C0A8E1F213FFF80005325E2 /* SpeechSDK.Framework */ = {
+		3C0A8E1F213FFF80005325E2 /* SpeechSDK */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3C0A8E34213FFF81005325E2 /* Build configuration list for PBXNativeTarget "SpeechSDK.Framework" */;
+			buildConfigurationList = 3C0A8E34213FFF81005325E2 /* Build configuration list for PBXNativeTarget "SpeechSDK" */;
 			buildPhases = (
 				3C0A8E1B213FFF80005325E2 /* Sources */,
 				3C0A8E1C213FFF80005325E2 /* Frameworks */,
@@ -512,14 +538,14 @@
 			);
 			dependencies = (
 			);
-			name = SpeechSDK.Framework;
+			name = SpeechSDK;
 			productName = SpeechSDK.Framework;
-			productReference = 3C0A8E20213FFF80005325E2 /* SpeechSDK_Framework.framework */;
+			productReference = 3C0A8E20213FFF80005325E2 /* MicrosoftCognitiveServicesSpeech.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		3C0A8E28213FFF81005325E2 /* SpeechSDK.FrameworkTests */ = {
+		3C0A8E28213FFF81005325E2 /* SpeechSDKTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3C0A8E37213FFF81005325E2 /* Build configuration list for PBXNativeTarget "SpeechSDK.FrameworkTests" */;
+			buildConfigurationList = 3C0A8E37213FFF81005325E2 /* Build configuration list for PBXNativeTarget "SpeechSDKTests" */;
 			buildPhases = (
 				3C0A8E25213FFF81005325E2 /* Sources */,
 				3C0A8E26213FFF81005325E2 /* Frameworks */,
@@ -530,9 +556,9 @@
 			dependencies = (
 				3C0A8E2C213FFF81005325E2 /* PBXTargetDependency */,
 			);
-			name = SpeechSDK.FrameworkTests;
+			name = SpeechSDKTests;
 			productName = SpeechSDK.FrameworkTests;
-			productReference = 3C0A8E29213FFF81005325E2 /* SpeechSDK.FrameworkTests.xctest */;
+			productReference = 3C0A8E29213FFF81005325E2 /* SpeechSDKTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -550,9 +576,12 @@
 					3C0A8E28213FFF81005325E2 = {
 						CreatedOnToolsVersion = 9.4.1;
 					};
+					A2E689BB21431FFB000A6160 = {
+						CreatedOnToolsVersion = 9.4.1;
+					};
 				};
 			};
-			buildConfigurationList = 3C0A8E1A213FFF80005325E2 /* Build configuration list for PBXProject "SpeechSDK.Framework" */;
+			buildConfigurationList = 3C0A8E1A213FFF80005325E2 /* Build configuration list for PBXProject "SpeechSDK" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -564,8 +593,10 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				3C0A8E1F213FFF80005325E2 /* SpeechSDK.Framework */,
-				3C0A8E28213FFF81005325E2 /* SpeechSDK.FrameworkTests */,
+				3C0A8E1F213FFF80005325E2 /* SpeechSDK */,
+				3C0A8E28213FFF81005325E2 /* SpeechSDKTests */,
+				A2E689BB21431FFB000A6160 /* UniversalFramework-iOS */,
+				A25A5D14214729630013ED7C /* UniversalFramework-macOS */,
 			);
 		};
 /* End PBXProject section */
@@ -587,6 +618,37 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		A25A5D15214729630013ED7C /* Run Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Run Script";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "${PROJECT_DIR}/TargetGenerationScripts/UniversalFramework-macOS.sh";
+		};
+		A2E689BF2143200D000A6160 /* Run Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Run Script";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "${PROJECT_DIR}/TargetGenerationScripts/UniversalFramework-iOS.sh";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		3C0A8E1B213FFF80005325E2 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -595,7 +657,7 @@
 				3C0A916321415460005325E2 /* speechapi_c_keyword_recognition_model.cpp in Sources */,
 				3CC674C421454954001007EF /* translation_synthesis_result.mm in Sources */,
 				3C0A9140214152DA005325E2 /* speech_recognition_result.mm in Sources */,
-				3C0A9144214152DA005325E2 /* nsstring_stdstring.mm in Sources */,
+				3C0A9144214152DA005325E2 /* (null) in Sources */,
 				3C0A916D21415460005325E2 /* speechapi_c_translation_result.cpp in Sources */,
 				3C0A916621415460005325E2 /* speechapi_c_error.cpp in Sources */,
 				3C5D940A2147E7C5000C7129 /* audio_config.mm in Sources */,
@@ -610,12 +672,13 @@
 				3CC674C021454954001007EF /* translation_text_result.mm in Sources */,
 				3C5D94052147E7C5000C7129 /* audio_stream_format.mm in Sources */,
 				3C5D93F22146A87D000C7129 /* speechapi_c_audio_stream_format.cpp in Sources */,
+				A2A1CB6721503755003D9B93 /* nsstring_stdstring.mm in Sources */,
 				3C159965214BC69A00AAE1E3 /* util.mm in Sources */,
 				3CF8205721463792001970FB /* intent_recognizer.mm in Sources */,
 				3C0A916421415460005325E2 /* speechapi_c_translation_recognizer.cpp in Sources */,
 				3CF8204C21463792001970FB /* language_understanding_model.mm in Sources */,
-				3C0A9141214152DA005325E2 /* speech_recognition_event_args.mm in Sources */,
 				3C0A916821415460005325E2 /* speechapi_c_language_understanding_model.cpp in Sources */,
+				A2A1CB6821503755003D9B93 /* speech_recognition_event_args.mm in Sources */,
 				3C0A916721415460005325E2 /* speechapi_c_factory.cpp in Sources */,
 				3C0A916B21415460005325E2 /* speechapi_c_result.cpp in Sources */,
 				3C0A917221415460005325E2 /* stdafx.cpp in Sources */,
@@ -651,7 +714,7 @@
 /* Begin PBXTargetDependency section */
 		3C0A8E2C213FFF81005325E2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 3C0A8E1F213FFF80005325E2 /* SpeechSDK.Framework */;
+			target = 3C0A8E1F213FFF80005325E2 /* SpeechSDK */;
 			targetProxy = 3C0A8E2B213FFF81005325E2 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -689,7 +752,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
@@ -711,8 +774,10 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = YES;
-				ONLY_ACTIVE_ARCH = YES;
+				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
+				VALID_ARCHS = "i386 x86_64 armv7s arm64 armv7";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -750,7 +815,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -767,6 +832,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
+				VALID_ARCHS = "i386 x86_64 armv7s arm64 armv7";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -775,11 +842,11 @@
 		3C0A8E35213FFF81005325E2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -792,17 +859,32 @@
 					"$(SRCROOT)/../../../core/include",
 					"$(SRCROOT)/../../../../external/azure-c-shared-utility/inc",
 				);
-				INFOPLIST_FILE = SpeechSDK.Framework/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/SpeechSDK/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../../../../build_mac_debug/lib";
-				PRODUCT_BUNDLE_IDENTIFIER = "Microsoft.SpeechSDK-Framework";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../../../../**";
+				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(SRCROOT)/../../../../build_ios_device_debug/lib/**";
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(SRCROOT)/../../../../build_ios_simulator_debug/lib";
+				"LIBRARY_SEARCH_PATHS[sdk=macosx*]" = "$(SRCROOT)/../../../../build_mac_debug/lib/**";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-laudio",
+					"-laziotsharedutil",
+					"-lcommon",
+					"-lfactory",
+					"-lparson",
+					"-lsr",
+					"-lusp",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = Microsoft.CognitiveServices.Speech;
+				PRODUCT_NAME = MicrosoftCognitiveServicesSpeech;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx10.13;
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
@@ -810,11 +892,11 @@
 		3C0A8E36213FFF81005325E2 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -827,17 +909,32 @@
 					"$(SRCROOT)/../../../core/include",
 					"$(SRCROOT)/../../../../external/azure-c-shared-utility/inc",
 				);
-				INFOPLIST_FILE = SpeechSDK.Framework/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/SpeechSDK/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../../../../build_mac_debug/lib";
-				PRODUCT_BUNDLE_IDENTIFIER = "Microsoft.SpeechSDK-Framework";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../../../../**";
+				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(SRCROOT)/../../../../build_ios_device_release/lib";
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(SRCROOT)/../../../../build_ios_simulator_release/lib";
+				"LIBRARY_SEARCH_PATHS[sdk=macosx*]" = "$(SRCROOT)/../../../../build_mac_release/lib";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-laudio",
+					"-laziotsharedutil",
+					"-lcommon",
+					"-lfactory",
+					"-lparson",
+					"-lsr",
+					"-lusp",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = Microsoft.CognitiveServices.Speech;
+				PRODUCT_NAME = MicrosoftCognitiveServicesSpeech;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = macosx10.13;
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -845,7 +942,7 @@
 		3C0A8E38213FFF81005325E2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -865,7 +962,7 @@
 		3C0A8E39213FFF81005325E2 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -882,10 +979,56 @@
 			};
 			name = Release;
 		};
+		A25A5D17214729630013ED7C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				PRODUCT_NAME = MicrosoftCognitiveServicesSpeech;
+				SUPPORTED_PLATFORMS = macosx;
+				VALID_ARCHS = x86_64;
+			};
+			name = Debug;
+		};
+		A25A5D18214729630013ED7C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				PRODUCT_NAME = MicrosoftCognitiveServicesSpeech;
+				SUPPORTED_PLATFORMS = macosx;
+				VALID_ARCHS = x86_64;
+			};
+			name = Release;
+		};
+		A2E689BD21431FFC000A6160 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				PRODUCT_NAME = MicrosoftCognitiveServicesSpeech;
+				SDKROOT = iphoneos11.4;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+			};
+			name = Debug;
+		};
+		A2E689BE21431FFC000A6160 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				PRODUCT_NAME = MicrosoftCognitiveServicesSpeech;
+				SDKROOT = iphoneos11.4;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		3C0A8E1A213FFF80005325E2 /* Build configuration list for PBXProject "SpeechSDK.Framework" */ = {
+		3C0A8E1A213FFF80005325E2 /* Build configuration list for PBXProject "SpeechSDK" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3C0A8E32213FFF81005325E2 /* Debug */,
@@ -894,7 +1037,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3C0A8E34213FFF81005325E2 /* Build configuration list for PBXNativeTarget "SpeechSDK.Framework" */ = {
+		3C0A8E34213FFF81005325E2 /* Build configuration list for PBXNativeTarget "SpeechSDK" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3C0A8E35213FFF81005325E2 /* Debug */,
@@ -903,11 +1046,29 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3C0A8E37213FFF81005325E2 /* Build configuration list for PBXNativeTarget "SpeechSDK.FrameworkTests" */ = {
+		3C0A8E37213FFF81005325E2 /* Build configuration list for PBXNativeTarget "SpeechSDKTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3C0A8E38213FFF81005325E2 /* Debug */,
 				3C0A8E39213FFF81005325E2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A25A5D16214729630013ED7C /* Build configuration list for PBXAggregateTarget "UniversalFramework-macOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A25A5D17214729630013ED7C /* Debug */,
+				A25A5D18214729630013ED7C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A2E689BC21431FFC000A6160 /* Build configuration list for PBXAggregateTarget "UniversalFramework-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A2E689BD21431FFC000A6160 /* Debug */,
+				A2E689BE21431FFC000A6160 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

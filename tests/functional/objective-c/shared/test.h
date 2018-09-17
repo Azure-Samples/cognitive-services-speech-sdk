@@ -7,9 +7,7 @@
 #ifndef test_h
 #define test_h
 
-
-#import "speechapi.h"
-
+#import <MicrosoftCognitiveServicesSpeech/speechapi.h>
 
 @interface EndToEndTests : NSObject
 
