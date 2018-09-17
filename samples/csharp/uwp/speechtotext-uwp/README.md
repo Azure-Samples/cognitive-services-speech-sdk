@@ -40,6 +40,7 @@ The app displays a graphical user interface (GUI).
 > **Note:**
 > if you are using your own `.wav` file as input source, make sure it is in the right format.
 > Currently, the only supported `.wav` format is **mono (single-channel), 16 kHz sample rate, 16 bits per sample**.
+> You may also use the [weather .wav file](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/dotnet-windows/speechtotext-wpf/speechtotext-wpf/audio) in the Speech samples.
 
 ## References
 
