@@ -25,7 +25,7 @@ namespace Microsoft.CognitiveServices.Speech
     ///     {
     ///         // Subscribes to events.
     ///         recognizer.Recognizing += (s, e) => {
-    ///             Console.WriteLine($"RECOGNIZING: Text={result.Text}");
+    ///             Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
     ///         };
     ///
     ///         recognizer.Recognized += (s, e) => {

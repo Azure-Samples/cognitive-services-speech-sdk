@@ -22,7 +22,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     ///
     ///     // Sets source and target languages.
     ///     string fromLanguage = "en-US";
-    ///     config.Language = fromLanguage;
+    ///     config.SpeechRecognitionLanguage = fromLanguage;
     ///     config.AddTargetLanguage("de");
     ///
     ///     // Sets voice name of synthesis output.
@@ -43,7 +43,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     ///
     ///         recognizer.Recognized += (s, e) =>
     ///         {
-    ///             if (result.Reason == ResultReason.TranslatedSpeech)
+    ///             if (e.Result.Reason == ResultReason.TranslatedSpeech)
     ///             {
     ///                 Console.WriteLine($"\nFinal result: Reason: {e.Result.Reason.ToString()}, recognized text in {fromLanguage}: {e.Result.Text}.");
     ///                 foreach (var element in e.Result.Translations)
@@ -235,7 +235,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         ///     var config = SpeechTranslationConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
         ///
         ///     string fromLanguage = "en-US";
-        ///     config.Language = fromLanguage;
+        ///     config.SpeechRecognitionLanguage = fromLanguage;
         ///     config.AddTargetLanguage("de");
         ///
         ///     // Creates a translation recognizer.
