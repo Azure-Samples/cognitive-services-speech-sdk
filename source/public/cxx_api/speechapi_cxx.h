@@ -8,6 +8,7 @@
 #pragma once
 
 #include <speechapi_cxx_common.h>
+#include <speechapi_cxx_string_helpers.h>
 #include <speechapi_cxx_smart_handle.h>
 
 #include <speechapi_cxx_properties.h>

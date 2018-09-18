@@ -26,6 +26,7 @@ void __swig_spx_do_trace_message(int level, const char* pszTitle, const char* ps
 
 %{
 #include <speechapi_cxx_common.h>
+#include <speechapi_cxx_string_helpers.h>
 #include "speechapi_cxx_audio_stream.h"
 %}
 

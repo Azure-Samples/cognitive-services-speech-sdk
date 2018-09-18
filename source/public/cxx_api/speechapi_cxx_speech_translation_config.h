@@ -9,6 +9,7 @@
 #include <sstream>
 
 #include "speechapi_cxx_properties.h"
+#include <speechapi_cxx_string_helpers.h>
 #include "speechapi_c_common.h"
 #include "speechapi_c_speech_config.h"
 
@@ -25,10 +26,10 @@ public:
     /// </summary>
     /// <param name="subscription">The subscription key.</param>
     /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
-    static std::shared_ptr<SpeechTranslationConfig> FromSubscription(const std::string& subscription, const std::string& region)
+    static std::shared_ptr<SpeechTranslationConfig> FromSubscription(const SPXSTRING& subscription, const SPXSTRING& region)
     {
         SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(speech_config_from_subscription(&hconfig, subscription.c_str(), region.c_str()));
+        SPX_THROW_ON_FAIL(speech_config_from_subscription(&hconfig, Utils::ToUTF8(subscription).c_str(), Utils::ToUTF8(region).c_str()));
         return std::shared_ptr<SpeechTranslationConfig>(new SpeechTranslationConfig(hconfig));
     }
 
@@ -37,10 +38,10 @@ public:
     /// </summary>
     /// <param name="authToken">The authorization token.</param>
     /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
-    static std::shared_ptr<SpeechTranslationConfig> FromAuthorizationToken(const std::string& authToken, const std::string& region)
+    static std::shared_ptr<SpeechTranslationConfig> FromAuthorizationToken(const SPXSTRING& authToken, const SPXSTRING& region)
     {
         SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(speech_config_from_authorization_token(&hconfig, authToken.c_str(), region.c_str()));
+        SPX_THROW_ON_FAIL(speech_config_from_authorization_token(&hconfig, Utils::ToUTF8(authToken).c_str(), Utils::ToUTF8(region).c_str()));
         return std::shared_ptr<SpeechTranslationConfig>(new SpeechTranslationConfig(hconfig));
     }
 
@@ -54,31 +55,31 @@ public:
     /// </summary>
     /// <param name="endpoint">The service endpoint to connect to.</param>
     /// <param name="subscriptionKey">The subscription key.</param>
-    static std::shared_ptr<SpeechTranslationConfig> FromEndpoint(const std::string& endpoint, const std::string& subscription)
+    static std::shared_ptr<SpeechTranslationConfig> FromEndpoint(const SPXSTRING& endpoint, const SPXSTRING& subscription)
     {
         SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(speech_config_from_endpoint(&hconfig, endpoint.c_str(), subscription.c_str()));
+        SPX_THROW_ON_FAIL(speech_config_from_endpoint(&hconfig, Utils::ToUTF8(endpoint).c_str(), Utils::ToUTF8(subscription).c_str()));
         return std::shared_ptr<SpeechTranslationConfig>(new SpeechTranslationConfig(hconfig));
     }
 
     /// <summary>
     /// Adds target language for translation.
     /// </summary>
-    void AddTargetLanguage(const std::string& language)
+    void AddTargetLanguage(const SPXSTRING& language)
     {
         if (!m_targetLanguages.empty())
             m_targetLanguages += ",";
-        m_targetLanguages += language;
+        m_targetLanguages += Utils::ToUTF8(language);
         property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_TranslationToLanguages), nullptr, m_targetLanguages.c_str());
     }
 
     /// <summary>
     /// Gets target languages for translation.
     /// </summary>
-    std::vector<std::string> GetTargetLanguages() const
+    std::vector<SPXSTRING> GetTargetLanguages() const
     {
-        std::vector<std::string> result;
-        auto targetLanguges = GetProperty(PropertyId::SpeechServiceConnection_TranslationToLanguages);
+        std::vector<SPXSTRING> result;
+        auto targetLanguges = Utils::ToUTF8(GetProperty(PropertyId::SpeechServiceConnection_TranslationToLanguages));
         if (targetLanguges.empty())
             return result;
 
@@ -87,7 +88,7 @@ public:
         std::string token;
         while (std::getline(langaugeStream, token, ','))
         {
-            result.push_back(token);
+            result.push_back(Utils::ToSPXString(token));
         }
         return result;
     }
@@ -95,16 +96,16 @@ public:
     /// <summary>
     /// Sets output voice name.
     /// </summary>
-    void SetVoiceName(const std::string& voice)
+    void SetVoiceName(const SPXSTRING& voice)
     {
         property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_TranslationFeatures), nullptr, "textToSpeech");
-        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_TranslationVoice), nullptr, voice.c_str());
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_TranslationVoice), nullptr, Utils::ToUTF8(voice).c_str());
     }
 
     /// <summary>
     /// Gets output voice name.
     /// </summary>
-    std::string GetVoiceName() const
+    SPXSTRING GetVoiceName() const
     {
         return GetProperty(PropertyId::SpeechServiceConnection_TranslationVoice);
     }

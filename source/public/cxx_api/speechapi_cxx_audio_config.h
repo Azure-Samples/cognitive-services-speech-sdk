@@ -11,6 +11,7 @@
 #include <string>
 #include <spxdebug.h>
 #include <speechapi_cxx_common.h>
+#include <speechapi_cxx_string_helpers.h>
 #include <speechapi_cxx_smart_handle.h>
 #include <speechapi_cxx_audio_stream_format.h>
 #include <speechapi_cxx_audio_stream.h>
@@ -53,10 +54,10 @@ public:
     /// </summary>
     /// <param name="fileName">Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.</param>
     /// <returns>A shared pointer to the AudioConfig object</returns>
-    static std::shared_ptr<AudioConfig> FromWavFileInput(const std::string& fileName)
+    static std::shared_ptr<AudioConfig> FromWavFileInput(const SPXSTRING& fileName)
     {
         SPXAUDIOCONFIGHANDLE haudioConfig = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(audio_config_create_audio_input_from_wav_file_name(&haudioConfig, fileName.c_str()));
+        SPX_THROW_ON_FAIL(audio_config_create_audio_input_from_wav_file_name(&haudioConfig, Utils::ToUTF8(fileName).c_str()));
 
         auto config = new AudioConfig(haudioConfig);
         return std::shared_ptr<AudioConfig>(config);
@@ -77,11 +78,6 @@ public:
         auto config = new AudioConfig(haudioConfig);
         return std::shared_ptr<AudioConfig>(config);
     }
-
-    // static std::shared_ptr<AudioConfig> FromUrl(const char* url) {};
-    // static std::shared_ptr<AudioConfig> FromUrlStream(const char* url, std::shared_ptr<AudioStreamFormat> format) {};
-    // static std::shared_ptr<AudioConfig> FromStreamInput(const char* fileName, std::shared_ptr<AudioStreamFormat> format) {};
-    // static std::shared_ptr<AudioConfig> FromDeviceInput(std::shared_ptr<AudioInputDevice> device) {};
 
 protected:
 

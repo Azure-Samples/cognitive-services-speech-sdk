@@ -7,6 +7,9 @@
 #endif
 %}
 
+%ignore Microsoft::CognitiveServices::Speech::Utils::ToUTF8;
+%ignore Microsoft::CognitiveServices::Speech::Utils::ToSPXString;
+
 // Add necessary symbols to generated header
 %{
 #include <wrappers.h>
@@ -17,6 +20,7 @@
 %include <std_except.i>
 %include <std_shared_ptr.i>
 %include <std_string.i>
+%include <std_wstring.i>
 %include <stdint.i>
 %include <std_vector.i>
 %include <std_map.i>
@@ -60,15 +64,20 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::PullAudioInputStream)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Audio::PullAudioInputStreamCallback)
 
-
+#ifdef SPX_UWP
+%template(StringVector) std::vector<std::wstring>;
+%template(StdMapStringString) std::map<std::wstring, std::wstring>;
+#else
 %template(StringVector) std::vector<std::string>;
 %template(StdMapStringString) std::map<std::string, std::string>;
+#endif
 
 %ignore CallbackWrapper::GetFunction();
 %ignore FutureWrapper::FutureWrapper;
 %include <wrappers.h>
 
 %include <speechapi_cxx_common.h>
+%include <speechapi_cxx_string_helpers.h>
 %include <speechapi_cxx_enums.h>
 
 %ignore Microsoft::CognitiveServices::Speech::NotYetImplementedException;
@@ -76,6 +85,7 @@
 %ignore operator=;
 %ignore operator[];
 %ignore operator const std::string;
+%ignore operator const std::wstring;
 %ignore operator int32_t;
 %ignore operator SPXLUISHANDLE;
 %ignore operator SPXTRIGGERHANDLE;

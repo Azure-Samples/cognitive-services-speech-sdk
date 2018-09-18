@@ -7,6 +7,7 @@
 
 #pragma once
 #include <speechapi_cxx_common.h>
+#include <speechapi_cxx_string_helpers.h>
 #include <speechapi_cxx_language_understanding_model.h>
 
 
@@ -27,10 +28,10 @@ public:
     /// </summary>
     /// <param name="simplePhrase">The simple phrase to create an intent trigger for.</param>
     /// <returns>A shared pointer to an intent trigger.</returns>
-    static std::shared_ptr<IntentTrigger> From(const std::string& simplePhrase)
+    static std::shared_ptr<IntentTrigger> From(const SPXSTRING& simplePhrase)
     {
         SPXTRIGGERHANDLE htrigger = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(intent_trigger_create_from_phrase(&htrigger, simplePhrase.c_str()));
+        SPX_THROW_ON_FAIL(intent_trigger_create_from_phrase(&htrigger, Utils::ToUTF8(simplePhrase).c_str()));
         return std::make_shared<IntentTrigger>(htrigger);
     }
 
@@ -52,10 +53,10 @@ public:
     /// <param name="model">The LanguageUnderstandingModel to create an intent trigger for.</param>
     /// <param name="model">The intent name to create an intent trigger for.</param>
     /// <returns>A shared pointer to an intent trigger.</returns>
-    static std::shared_ptr<IntentTrigger> From(std::shared_ptr<LanguageUnderstandingModel> model, const std::string& intentName)
+    static std::shared_ptr<IntentTrigger> From(std::shared_ptr<LanguageUnderstandingModel> model, const SPXSTRING& intentName)
     {
         SPXTRIGGERHANDLE htrigger = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(intent_trigger_create_from_language_understanding_model(&htrigger, (SPXLUMODELHANDLE)(*model.get()), intentName.c_str()));
+        SPX_THROW_ON_FAIL(intent_trigger_create_from_language_understanding_model(&htrigger, (SPXLUMODELHANDLE)(*model.get()), Utils::ToUTF8(intentName).c_str()));
         return std::make_shared<IntentTrigger>(htrigger);
     }
 

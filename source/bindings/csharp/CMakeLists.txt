@@ -11,6 +11,9 @@ set(SOURCES "${SRC_DIR}/carbon_csharp.i")
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
   set(CSHARP_BINDINGS ${PROJECT_NAME}.bindings.uwp)
+  set(CMAKE_SWIG_FLAGS
+      "${CMAKE_SWIG_FLAGS}"
+      -DSPX_UWP)
 else()
   set(CSHARP_BINDINGS ${PROJECT_NAME}.bindings)
 endif()
@@ -25,9 +28,11 @@ set(SWIG_MODULE_${CSHARP_BINDINGS}_EXTRA_DEPS
 # ${SWIG_INTERFACE} should resolve to {repo/root}/bindings/carbon.i
 # warning 302: identifier redefined by ...
 set(CMAKE_SWIG_FLAGS
+   "${CMAKE_SWIG_FLAGS}"
    -w401,516,503,302
    -namespace Microsoft.CognitiveServices.Speech.Internal
    -DSWIG_CSHARP_NO_STRING_HELPER
+   -DSWIG_CSHARP_NO_WSTRING_HELPER
    -dllimport "${CSHARP_BINDINGS}.dll")
 set_source_files_properties("${SRC_DIR}/carbon_csharp.i" PROPERTIES
     CPLUSPLUS ON)

@@ -1,0 +1,71 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+
+#pragma once
+
+#include <string>
+#include <codecvt>
+#include <locale>
+#include <wchar.h>
+#include <speechapi_cxx_common.h>
+#include <speechapi_c_error.h>
+
+#if defined(SWIG) && defined(SPX_UWP)
+#define SPXSTRING std::wstring
+#else
+#define SPXSTRING std::string
+#endif
+
+namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace Utils {
+
+#if defined(SWIG) && defined(SPX_UWP)
+inline std::wstring ToSPXString(const std::string& value)
+{
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+    return converter.from_bytes(value);
+}
+
+inline std::wstring ToSPXString(const char* value)
+{
+    if (!value)
+        return L"";
+    return ToSPXString(std::string(value));
+}
+#else
+inline const char* ToSPXString(const char* value)
+{
+    return value;
+}
+
+inline std::string ToSPXString(const std::string& value)
+{
+    return value;
+}
+#endif
+
+inline std::string ToUTF8(const std::wstring& value)
+{
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+    return converter.to_bytes(value);
+}
+
+inline std::string ToUTF8(const wchar_t* value)
+{
+    if (!value)
+        return "";
+    return ToUTF8(std::wstring(value));
+}
+
+inline std::string ToUTF8(const std::string& value)
+{
+    return value;
+}
+
+inline const char* ToUTF8(const char* value)
+{
+    return value;
+}
+
+}}}}

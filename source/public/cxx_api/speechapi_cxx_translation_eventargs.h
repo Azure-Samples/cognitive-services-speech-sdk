@@ -123,7 +123,7 @@ private:
     /// In case of an unsuccessful recognition, provides a details of why the occurred error.
     /// This field is only filled-out if the reason canceled (<see cref="Reason"/>) is set to Error.
     /// </summary>
-    const std::string ErrorDetails;
+    const SPXSTRING ErrorDetails;
 
 #if defined(SWIG) || defined(BINDING_OBJECTIVE_C)
 public:

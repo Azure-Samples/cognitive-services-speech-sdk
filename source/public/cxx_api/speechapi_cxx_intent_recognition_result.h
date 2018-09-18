@@ -8,6 +8,7 @@
 #pragma once
 #include <string>
 #include <speechapi_cxx_common.h>
+#include <speechapi_cxx_string_helpers.h>
 #include <speechapi_c.h>
 
 
@@ -31,7 +32,7 @@ public:
         IntentId(m_intentId)
     {
         PopulateIntentFields(hresult, &m_intentId);
-        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%s; reason=0x%x; text=%s", __FUNCTION__, this, Handle, ResultId.c_str(), Reason, Text.c_str());
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%s; reason=0x%x; text=%s", __FUNCTION__, this, Handle, Utils::ToUTF8(ResultId).c_str(), Reason, Utils::ToUTF8(Text).c_str());
     }
 
     /// <summary>
@@ -45,26 +46,26 @@ public:
     /// <summary>
     /// Unique intent id.
     /// </summary>
-    const std::string& IntentId;
+    const SPXSTRING& IntentId;
 
 private:
     DISABLE_DEFAULT_CTORS(IntentRecognitionResult);
 
-    void PopulateIntentFields(SPXRESULTHANDLE hresult, std::string* pintentId)
+    void PopulateIntentFields(SPXRESULTHANDLE hresult, SPXSTRING* pintentId)
     {
         SPX_INIT_HR(hr);
-        
+
         const size_t maxCharCount = 1024;
         char sz[maxCharCount+1];
 
         if (pintentId != nullptr && recognizer_result_handle_is_valid(hresult))
         {
             SPX_THROW_ON_FAIL(hr = intent_result_get_intent_id(hresult, sz, maxCharCount));
-            *pintentId = sz;
+            *pintentId = Utils::ToSPXString(sz);
         }
     }
 
-    std::string m_intentId;
+    SPXSTRING m_intentId;
 };
 
 

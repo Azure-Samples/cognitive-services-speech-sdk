@@ -11,6 +11,7 @@
 #include <map>
 #include <new>
 #include <speechapi_cxx_common.h>
+#include <speechapi_cxx_string_helpers.h>
 #include <speechapi_cxx_enums.h>
 #include <speechapi_c.h>
 #include <speechapi_cxx_speech_recognition_result.h>
@@ -28,7 +29,7 @@ class TranslationTextResult final : public RecognitionResult
 {
 private:
 
-    std::map<std::string, std::string> m_translations;
+    std::map<SPXSTRING, SPXSTRING> m_translations;
 
 public:
     /// <summary>
@@ -55,7 +56,7 @@ public:
     /// Presents the translation results. Each item in the map is a key value pair, where key is the language tag of the translated text,
     /// and value is the translation text in that language.
     /// </summary>
-    const std::map<std::string, std::string>& Translations;
+    const std::map<SPXSTRING, SPXSTRING>& Translations;
 
 private:
     void PopulateResultFields(SPXRESULTHANDLE resultHandle)
@@ -82,7 +83,7 @@ private:
 
         for (size_t i = 0; i < phraseBuffer->numberEntries; i++)
         {
-            m_translations[std::string(phraseBuffer->targetLanguages[i])] = std::string(phraseBuffer->translationTexts[i]);
+            m_translations[Utils::ToSPXString(phraseBuffer->targetLanguages[i])] = Utils::ToSPXString(phraseBuffer->translationTexts[i]);
         }
 
         SPX_DBG_TRACE_VERBOSE("Translation phrases: numberentries: %d", (int)m_translations.size());
@@ -90,7 +91,7 @@ private:
         for (const auto& cf : m_translations)
         {
             (void)(cf); // prevent warning for cf when compiling release builds
-            SPX_DBG_TRACE_VERBOSE(" phrase for %s: %s", cf.first.c_str(), cf.second.c_str());
+            SPX_DBG_TRACE_VERBOSE(" phrase for %ls: %ls", cf.first.c_str(), cf.second.c_str());
         }
 #endif
     };

@@ -3,6 +3,7 @@
 #include <string>
 #include <spxdebug.h>
 #include <speechapi_cxx_common.h>
+#include <speechapi_cxx_string_helpers.h>
 #include <speechapi_cxx_enums.h>
 #include <speechapi_c_session.h>
 #include <speechapi_c_property_bag.h>
@@ -26,24 +27,24 @@ public:
         }
     }
 
-    void SetProperty(PropertyId propertyID, const std::string& value)
+    void SetProperty(PropertyId propertyID, const SPXSTRING& value)
     {
-        property_bag_set_string(m_propbag, (int)propertyID, NULL, value.c_str());
+        property_bag_set_string(m_propbag, (int)propertyID, NULL, Utils::ToUTF8(value).c_str());
     }
 
-    void SetProperty(const std::string& propertyName, const std::string& value)
+    void SetProperty(const SPXSTRING& propertyName, const SPXSTRING& value)
     {
-        property_bag_set_string(m_propbag, -1, propertyName.c_str(), value.c_str());
+        property_bag_set_string(m_propbag, -1, Utils::ToUTF8(propertyName).c_str(), Utils::ToUTF8(value).c_str());
     }
 
-    std::string GetProperty(PropertyId propertyID, const std::string& defaultValue = "")
+    SPXSTRING GetProperty(PropertyId propertyID, const SPXSTRING& defaultValue = SPXSTRING())
     {
-        return property_bag_get_string(m_propbag, static_cast<int>(propertyID), nullptr, defaultValue.c_str());
+        return Utils::ToSPXString(property_bag_get_string(m_propbag, static_cast<int>(propertyID), nullptr, Utils::ToUTF8(defaultValue).c_str()));
     }
 
-    std::string GetProperty(const std::string& propertyName, const std::string& defaultValue = "")
+    SPXSTRING GetProperty(const SPXSTRING& propertyName, const SPXSTRING& defaultValue = SPXSTRING())
     {
-        return property_bag_get_string(m_propbag, -1, propertyName.c_str(), defaultValue.c_str());
+        return Utils::ToSPXString(property_bag_get_string(m_propbag, -1, Utils::ToUTF8(propertyName).c_str(), Utils::ToUTF8(defaultValue).c_str()));
     }
 
 protected:

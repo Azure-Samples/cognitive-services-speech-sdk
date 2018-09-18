@@ -8,6 +8,7 @@
 #pragma once
 #include <string>
 #include <speechapi_cxx_common.h>
+#include <speechapi_cxx_string_helpers.h>
 #include <speechapi_c_recognizer.h>
 #include <speechapi_cxx_eventargs.h>
 #include <spxdebug.h>
@@ -40,7 +41,7 @@ public:
     /// <summary>
     /// Session identifier (a GUID in string format).
     /// </summary>
-    const std::string& SessionId;
+    const SPXSTRING& SessionId;
 
 
 protected:
@@ -50,14 +51,14 @@ protected:
     /// <summary>
     /// Extract session identifier from given event handle <paramref name="hevent"/>
     /// </summary>
-    static const std::string GetSessionId(SPXEVENTHANDLE hevent)
+    static const SPXSTRING GetSessionId(SPXEVENTHANDLE hevent)
     {
         static const auto cchMaxUUID = 36;
         static const auto cchMaxSessionId = cchMaxUUID + 1;
         char sessionId[cchMaxSessionId] = {};
 
         SPX_THROW_ON_FAIL(recognizer_session_event_get_session_id(hevent, sessionId, cchMaxSessionId));
-        return std::string(sessionId);
+        return Utils::ToSPXString(sessionId);
     };
 
     /*! \endcond */
@@ -66,7 +67,7 @@ private:
 
     DISABLE_DEFAULT_CTORS(SessionEventArgs);
 
-    std::string m_sessionId;
+    SPXSTRING m_sessionId;
 };
 
 

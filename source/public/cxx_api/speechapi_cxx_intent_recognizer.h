@@ -7,6 +7,7 @@
 
 #pragma once
 #include <speechapi_cxx_common.h>
+#include <speechapi_cxx_string_helpers.h>
 #include <speechapi_c.h>
 #include <speechapi_cxx_recognizer.h>
 #include <speechapi_cxx_intent_recognition_result.h>
@@ -130,7 +131,7 @@ public:
     /// </summary>
     /// <param name="simplePhrase">The phrase corresponding to the intent.</param>
     /// <remarks>Once recognized, the IntentRecognitionResult's IntentId property will match the simplePhrase specified here.</remarks>
-    void AddIntent(const std::string& simplePhrase)
+    void AddIntent(const SPXSTRING& simplePhrase)
     {
         auto trigger = IntentTrigger::From(simplePhrase);
         return AddIntent(trigger, simplePhrase);
@@ -142,7 +143,7 @@ public:
     /// <param name="simplePhrase">The phrase corresponding to the intent.</param>
     /// <param name="intentId">A custom id string to be returned in the IntentRecognitionResult's IntentId property.</param>
     /// <remarks>Once recognized, the result's intent id will match the id supplied here.</remarks>
-    void AddIntent(const std::string& simplePhrase, const std::string& intentId)
+    void AddIntent(const SPXSTRING& simplePhrase, const SPXSTRING& intentId)
     {
         auto trigger = IntentTrigger::From(simplePhrase);
         return AddIntent(trigger, intentId);
@@ -154,7 +155,7 @@ public:
     /// <param name="model">The language understanding model containing the intent.</param>
     /// <param name="intentName">The name of the single intent to be included from the language understanding model.</param>
     /// <remarks>Once recognized, the IntentRecognitionResult's IntentId property will contain the intentName specified here.</remarks>
-    void AddIntent(std::shared_ptr<LanguageUnderstandingModel> model, const std::string& intentName)
+    void AddIntent(std::shared_ptr<LanguageUnderstandingModel> model, const SPXSTRING& intentName)
     {
         auto trigger = IntentTrigger::From(model, intentName);
         AddIntent(trigger, intentName);
@@ -166,7 +167,7 @@ public:
     /// <param name="model">The language understanding model containing the intent.</param>
     /// <param name="intentName">The name of the single intent to be included from the language understanding model.</param>
     /// <param name="intentId">A custom id string to be returned in the IntentRecognitionResult's IntentId property.</param>
-    void AddIntent(std::shared_ptr<LanguageUnderstandingModel> model, const std::string& intentName, const std::string& intentId)
+    void AddIntent(std::shared_ptr<LanguageUnderstandingModel> model, const SPXSTRING& intentName, const SPXSTRING& intentId)
     {
         auto trigger = IntentTrigger::From(model, intentName);
         AddIntent(trigger, intentId);
@@ -177,7 +178,7 @@ public:
     /// </summary>
     /// <param name="model">The language understanding model containing the intents.</param>
     /// <param name="intentId">A custom string id to be returned in the IntentRecognitionResult's IntentId property.</param>
-    void AddAllIntents(std::shared_ptr<LanguageUnderstandingModel> model, const std::string& intentId)
+    void AddAllIntents(std::shared_ptr<LanguageUnderstandingModel> model, const SPXSTRING& intentId)
     {
         auto trigger = IntentTrigger::From(model);
         AddIntent(trigger, intentId);
@@ -188,15 +189,15 @@ public:
     /// </summary>
     /// <param name="trigger">The IntentTrigger corresponding to the intent.</param>
     /// <param name="intentId">A custom string id to be returned in the IntentRecognitionResult's IntentId property.</param>
-    void AddIntent(std::shared_ptr<IntentTrigger> trigger, const std::string& intentId)
+    void AddIntent(std::shared_ptr<IntentTrigger> trigger, const SPXSTRING& intentId)
     {
-        SPX_THROW_ON_FAIL(intent_recognizer_add_intent(m_hreco, intentId.c_str(), (SPXTRIGGERHANDLE)(*trigger.get())));
+        SPX_THROW_ON_FAIL(intent_recognizer_add_intent(m_hreco, Utils::ToUTF8(intentId).c_str(), (SPXTRIGGERHANDLE)(*trigger.get())));
     }
 
     /// Sets the authorization token that will be used for connecting to the service.
     /// </summary>
     /// <param name="token">A string that represents the authorization token.</param>
-    void SetAuthorizationToken(const std::string& token)
+    void SetAuthorizationToken(const SPXSTRING& token)
     {
         Properties.SetProperty(PropertyId::SpeechServiceAuthorization_Token, token);
     }
@@ -205,9 +206,9 @@ public:
     /// Gets the authorization token.
     /// </summary>
     /// <returns>Authorization token</returns>
-    std::string GetAuthorizationToken()
+    SPXSTRING GetAuthorizationToken()
     {
-        return Properties.GetProperty(PropertyId::SpeechServiceAuthorization_Token, "");
+        return Properties.GetProperty(PropertyId::SpeechServiceAuthorization_Token, SPXSTRING());
     }
 
 private:

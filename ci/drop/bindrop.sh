@@ -34,6 +34,7 @@ JAVASUPPORTED=true
 
 if [[ $TARGET == UWP ]]; then
   CSHARPBINDINGSNAME=Microsoft.CognitiveServices.Speech.csharp.bindings.uwp
+  JAVASUPPORTED=false
 else
   CSHARPBINDINGSNAME=Microsoft.CognitiveServices.Speech.csharp.bindings
 fi

@@ -172,7 +172,7 @@ function fixLinks($line, $file) {
       $def = $m.Groups['def'].Value
 
       if (-not $ourIndex.ContainsKey($def)) {
-        Write-Error "Unexpected reference definition for $refTarget from file $file"
+        Write-Error "Unexpected reference definition for $def from file $file"
       } else {
         $indexEntry = $ourIndex[$def]
         if ($indexEntry.Anchor) {

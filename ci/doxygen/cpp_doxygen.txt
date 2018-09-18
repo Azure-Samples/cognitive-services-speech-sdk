@@ -902,7 +902,7 @@ EXCLUDE_PATTERNS       =
 # exclude all test directories use the pattern */test/*
 
 # TODO why are these exposed at all?
-EXCLUDE_SYMBOLS        = SpeechFactory::InternalCognitiveServicesSpeechFactory SpeechFactory::InternalCognitiveServicesSpeechFactory::_SpeechApi_AudioInputStreamAdapter
+EXCLUDE_SYMBOLS        = SpeechFactory::InternalCognitiveServicesSpeechFactory SpeechFactory::InternalCognitiveServicesSpeechFactory::_SpeechApi_AudioInputStreamAdapter Microsoft::CognitiveServices::Speech::Utils
 
 # The EXAMPLE_PATH tag can be used to specify one or more files or directories
 # that contain example code fragments that are included (see the \include

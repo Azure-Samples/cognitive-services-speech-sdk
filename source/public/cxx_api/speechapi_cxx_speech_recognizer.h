@@ -124,16 +124,16 @@ public:
     /// Gets the endpoint ID of a customized speech model that is used for speech recognition.
     /// </summary>
     /// <returns>the endpoint ID of a customized speech model that is used for speech recognition</returns>
-    std::string GetEndpointId()
+    SPXSTRING GetEndpointId()
     {
-        return Properties.GetProperty(PropertyId::SpeechServiceConnection_EndpointId, "");
+        return Properties.GetProperty(PropertyId::SpeechServiceConnection_EndpointId, SPXSTRING());
     }
 
     /// <summary>
     /// Sets the authorization token that will be used for connecting the server.
     /// </summary>
     /// <param name="value">A string that represents the endpoint id.</param>
-    void SetAuthorizationToken(const std::string& token)
+    void SetAuthorizationToken(const SPXSTRING& token)
     {
         Properties.SetProperty(PropertyId::SpeechServiceAuthorization_Token, token);
     }
@@ -142,9 +142,9 @@ public:
     /// Gets the authorization token.
     /// </summary>
     /// <returns>Authorization token</returns>
-    std::string GetAuthorizationToken()
+    SPXSTRING GetAuthorizationToken()
     {
-        return Properties.GetProperty(PropertyId::SpeechServiceAuthorization_Token, "");
+        return Properties.GetProperty(PropertyId::SpeechServiceAuthorization_Token, SPXSTRING());
     }
 
 private:

@@ -57,7 +57,7 @@ public:
     /// used in case where a recognizer handle has been created by methods via C-API.
     /// </remarks>
     /// <param name="hreco">The handle of the recognizer that is returned by C-API.</param>
-    explicit TranslationRecognizer(SPXRECOHANDLE hreco) : 
+    explicit TranslationRecognizer(SPXRECOHANDLE hreco) :
         BaseType(hreco),
         Properties(m_properties),
         Synthesizing(GetTranslationAudioEventConnectionsChangedCallback(), GetTranslationAudioEventConnectionsChangedCallback(), false)
@@ -137,7 +137,7 @@ public:
     /// Sets the authorization token that will be used for connecting the service.
     /// </summary>
     /// <param name="token">A string that represents the endpoint id.</param>
-    void SetAuthorizationToken(const std::string& token)
+    void SetAuthorizationToken(const SPXSTRING& token)
     {
         Properties.SetProperty(PropertyId::SpeechServiceAuthorization_Token, token);
     }
@@ -146,9 +146,9 @@ public:
     /// Gets the authorization token.
     /// </summary>
     /// <returns>Authorization token</returns>
-    std::string GetAuthorizationToken()
+    SPXSTRING GetAuthorizationToken()
     {
-        return Properties.GetProperty(PropertyId::SpeechServiceAuthorization_Token, "");
+        return Properties.GetProperty(PropertyId::SpeechServiceAuthorization_Token, SPXSTRING());
     }
 
     /// <summary>

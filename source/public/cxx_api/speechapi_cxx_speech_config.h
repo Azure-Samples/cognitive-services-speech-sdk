@@ -9,6 +9,7 @@
 #include <string>
 
 #include "speechapi_cxx_properties.h"
+#include <speechapi_cxx_string_helpers.h>
 #include "speechapi_c_common.h"
 #include "speechapi_c_speech_config.h"
 
@@ -29,10 +30,10 @@ public:
     /// </summary>
     /// <param name="subscription">The subscription key.</param>
     /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
-    static std::shared_ptr<SpeechConfig> FromSubscription(const std::string& subscription, const std::string& region)
+    static std::shared_ptr<SpeechConfig> FromSubscription(const SPXSTRING& subscription, const SPXSTRING& region)
     {
         SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(speech_config_from_subscription(&hconfig, subscription.c_str(), region.c_str()));
+        SPX_THROW_ON_FAIL(speech_config_from_subscription(&hconfig, Utils::ToUTF8(subscription).c_str(), Utils::ToUTF8(region).c_str()));
 
         auto ptr = new SpeechConfig(hconfig);
         return std::shared_ptr<SpeechConfig>(ptr);
@@ -43,10 +44,10 @@ public:
     /// </summary>
     /// <param name="authToken">The authorization token.</param>
     /// <param name="region">The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).</param>
-    static std::shared_ptr<SpeechConfig> FromAuthorizationToken(const std::string& authToken, const std::string& region)
+    static std::shared_ptr<SpeechConfig> FromAuthorizationToken(const SPXSTRING& authToken, const SPXSTRING& region)
     {
         SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(speech_config_from_authorization_token(&hconfig, authToken.c_str(), region.c_str()));
+        SPX_THROW_ON_FAIL(speech_config_from_authorization_token(&hconfig, Utils::ToUTF8(authToken).c_str(), Utils::ToUTF8(region).c_str()));
 
         auto ptr = new SpeechConfig(hconfig);
         return std::shared_ptr<SpeechConfig>(ptr);
@@ -62,10 +63,10 @@ public:
     /// </summary>
     /// <param name="endpoint">The service endpoint to connect to.</param>
     /// <param name="subscriptionKey">The subscription key.</param>
-    static std::shared_ptr<SpeechConfig> FromEndpoint(const std::string& endpoint, const std::string& subscription)
+    static std::shared_ptr<SpeechConfig> FromEndpoint(const SPXSTRING& endpoint, const SPXSTRING& subscription)
     {
         SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(speech_config_from_endpoint(&hconfig, endpoint.c_str(), subscription.c_str()));
+        SPX_THROW_ON_FAIL(speech_config_from_endpoint(&hconfig, Utils::ToUTF8(endpoint).c_str(), Utils::ToUTF8(subscription).c_str()));
 
         auto ptr = new SpeechConfig(hconfig);
         return std::shared_ptr<SpeechConfig>(ptr);
@@ -75,16 +76,16 @@ public:
     /// Set the input language to the speech recognizer.
     /// </summary>
     /// <param name="lang">Specifies the name of spoken language to be recognized in BCP-47 format.</param>
-    void SetSpeechRecognitionLanguage(const std::string & lang)
+    void SetSpeechRecognitionLanguage(const SPXSTRING& lang)
     {
-        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_RecoLanguage), nullptr, lang.c_str());
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_RecoLanguage), nullptr, Utils::ToUTF8(lang).c_str());
     }
 
     /// <summary>
     /// Gets the input language to the speech recognition.
     /// The language is specified in BCP-47 format.
     /// </summary>
-    std::string GetSpeechRecognitionLanguage() const
+    SPXSTRING GetSpeechRecognitionLanguage() const
     {
         return GetProperty(PropertyId::SpeechServiceConnection_RecoLanguage);
     }
@@ -92,15 +93,15 @@ public:
     /// <summary>
     /// Sets the endpoint ID.
     /// </summary>
-    void SetEndpointId(const std::string & endpointId)
+    void SetEndpointId(const SPXSTRING& endpointId)
     {
-        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_EndpointId), nullptr, endpointId.c_str());
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceConnection_EndpointId), nullptr, Utils::ToUTF8(endpointId).c_str());
     }
 
     /// <summary>
     /// Gets the endpoint ID.
     /// </summary>
-    std::string GetEndpointId() const
+    SPXSTRING GetEndpointId() const
     {
         return GetProperty(PropertyId::SpeechServiceConnection_EndpointId);
     }
@@ -108,15 +109,15 @@ public:
     /// <summary>
     /// Sets the Authorization Token to connect to the service.
     /// </summary>
-    void SetAuthorizationToken(const std::string& token)
+    void SetAuthorizationToken(const SPXSTRING& token)
     {
-        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceAuthorization_Token), nullptr, token.c_str());
+        property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceAuthorization_Token), nullptr, Utils::ToUTF8(token).c_str());
     }
 
     /// <summary>
     /// Gets the Authorization token that is used to create a recognizer.
     /// </summary>
-    std::string GetAuthorizationToken() const
+    SPXSTRING GetAuthorizationToken() const
     {
         return GetProperty(PropertyId::SpeechServiceAuthorization_Token);
     }
@@ -124,7 +125,7 @@ public:
     /// <summary>
     /// Gets the SubscriptionKey key that used to create Speech Recognizer or Intent Recognizer or Translation Recognizer.
     /// </summary>
-    std::string GetSubscriptionKey() const
+    SPXSTRING GetSubscriptionKey() const
     {
         return GetProperty(PropertyId::SpeechServiceConnection_Key);
     }
@@ -132,7 +133,7 @@ public:
     /// <summary>
     /// Gets the region key that used to create Speech Recognizer or Intent Recognizer or Translation Recognizer.
     /// </summary>
-    std::string GetRegion() const
+    SPXSTRING GetRegion() const
     {
         return GetProperty(PropertyId::SpeechServiceConnection_Region);
     }
@@ -143,7 +144,7 @@ public:
     OutputFormat GetOutputFormat() const
     {
         auto result = GetProperty(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse);
-        return result == "true" ? OutputFormat::Detailed : OutputFormat::Simple;
+        return result == Utils::ToSPXString("true") ? OutputFormat::Detailed : OutputFormat::Simple;
     }
 
     /// <summary>
@@ -153,7 +154,7 @@ public:
     void SetOutputFormat(OutputFormat format)
     {
         property_bag_set_string(m_propertybag, static_cast<int>(PropertyId::SpeechServiceResponse_RequestDetailedResultTrueFalse), nullptr,
-            format == OutputFormat::Detailed ? "true" : "false");
+            format == OutputFormat::Detailed ? Utils::ToUTF8("true") : Utils::ToUTF8("false"));
     }
 
     /// <summary>
@@ -161,29 +162,29 @@ public:
     /// </summary>
     /// <param name="name">The property name.</param>
     /// <param name="value">The property value.</param>
-    void SetProperty(const std::string& name, const std::string& value)
+    void SetProperty(const SPXSTRING& name, const SPXSTRING& value)
     {
-        property_bag_set_string(m_propertybag, -1, name.c_str(), value.c_str());
+        property_bag_set_string(m_propertybag, -1, Utils::ToUTF8(name).c_str(), Utils::ToUTF8(value).c_str());
     }
 
     /// <summary>
     /// Gets a property value by name.
     /// </summary>
     /// <param name="name">The parameter name.</param>
-    std::string GetProperty(const std::string& name) const
+    SPXSTRING GetProperty(const SPXSTRING& name) const
     {
-        const char* value = property_bag_get_string(m_propertybag, -1, name.c_str(), "");
-        return CopyAndFreePropertyString(value);
+        const char* value = property_bag_get_string(m_propertybag, -1, Utils::ToUTF8(name).c_str(), "");
+        return Utils::ToSPXString(CopyAndFreePropertyString(value));
     }
 
     /// <summary>
     /// Gets a property value by ID.
     /// </summary>
     /// <param name="id">The parameter id.</param>
-    std::string GetProperty(PropertyId id) const
+    SPXSTRING GetProperty(PropertyId id) const
     {
         const char* value = property_bag_get_string(m_propertybag, static_cast<int>(id), nullptr, "");
-        return CopyAndFreePropertyString(value);
+        return Utils::ToSPXString(CopyAndFreePropertyString(value));
     }
 
     /// <summary>
@@ -191,9 +192,9 @@ public:
     /// </summary>
     /// <param name="id">The property id.</param>
     /// <param name="value">The property value.</param>
-    void SetProperty(PropertyId id, const std::string& value)
+    void SetProperty(PropertyId id, const SPXSTRING& value)
     {
-        property_bag_set_string(m_propertybag, static_cast<int>(id), nullptr, value.c_str());
+        property_bag_set_string(m_propertybag, static_cast<int>(id), nullptr, Utils::ToUTF8(value).c_str());
     }
 
     /// <summary>

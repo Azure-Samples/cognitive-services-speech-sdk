@@ -7,6 +7,7 @@
 
 #pragma once
 #include <speechapi_cxx_common.h>
+#include <speechapi_cxx_string_helpers.h>
 #include <speechapi_c_keyword_recognition_model.h>
 
 
@@ -26,10 +27,10 @@ public:
     /// </summary>
     /// <param name="fileName">The file name of the keyword recognition model.</param>
     /// <returns>A shared pointer to keyword recognition model.</returns>
-    static std::shared_ptr<KeywordRecognitionModel> FromFile(const std::string& fileName)
+    static std::shared_ptr<KeywordRecognitionModel> FromFile(const SPXSTRING& fileName)
     {
         SPXKEYWORDHANDLE hkeyword = SPXHANDLE_INVALID;
-        SPX_THROW_ON_FAIL(keyword_recognition_model_create_from_file(fileName.c_str(), &hkeyword));
+        SPX_THROW_ON_FAIL(keyword_recognition_model_create_from_file(Utils::ToUTF8(fileName).c_str(), &hkeyword));
         return std::make_shared<KeywordRecognitionModel>(hkeyword);
     }
 

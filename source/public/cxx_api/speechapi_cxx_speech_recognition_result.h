@@ -8,6 +8,7 @@
 #pragma once
 #include <string>
 #include <speechapi_cxx_common.h>
+#include <speechapi_cxx_string_helpers.h>
 #include <speechapi_c.h>
 #include <speechapi_cxx_recognition_result.h>
 
@@ -24,7 +25,7 @@ public:
     explicit SpeechRecognitionResult(SPXRESULTHANDLE hresult) :
         RecognitionResult(hresult)
     {
-        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%s; reason=0x%x; text=%s", __FUNCTION__, this, Handle, ResultId.c_str(), Reason, Text.c_str());
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) -- resultid=%s; reason=0x%x; text=%s", __FUNCTION__, this, Handle, Utils::ToUTF8(ResultId).c_str(), Reason, Utils::ToUTF8(Text).c_str());
     }
 
     virtual ~SpeechRecognitionResult()
