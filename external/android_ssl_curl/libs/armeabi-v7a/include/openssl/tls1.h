@@ -1,5 +1,5 @@
 /*
- * Copyright 1995-2016 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 1995-2018 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the OpenSSL license (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -226,12 +226,12 @@ __owur int SSL_get_servername_type(const SSL *s);
  * as specified in RFC 5705. It writes |olen| bytes to |out| given a label and
  * optional context. (Since a zero length context is allowed, the |use_context|
  * flag controls whether a context is included.) It returns 1 on success and
- * zero otherwise.
+ * 0 or -1 otherwise.
  */
 __owur int SSL_export_keying_material(SSL *s, unsigned char *out, size_t olen,
-                               const char *label, size_t llen,
-                               const unsigned char *p, size_t plen,
-                               int use_context);
+                                      const char *label, size_t llen,
+                                      const unsigned char *context,
+                                      size_t contextlen, int use_context);
 
 int SSL_get_sigalgs(SSL *s, int idx,
                     int *psign, int *phash, int *psignandhash,
@@ -298,9 +298,9 @@ SSL_CTX_ctrl(ssl,SSL_CTRL_GET_TLSEXT_STATUS_REQ_CB,0, (void (**)(void))cb)
 SSL_CTX_callback_ctrl(ssl,SSL_CTRL_SET_TLSEXT_STATUS_REQ_CB,(void (*)(void))cb)
 
 # define SSL_CTX_get_tlsext_status_arg(ssl, arg) \
-SSL_CTX_ctrl(ssl,SSL_CTRL_GET_TLSEXT_STATUS_REQ_CB_ARG,0, (void *)arg
+        SSL_CTX_ctrl(ssl,SSL_CTRL_GET_TLSEXT_STATUS_REQ_CB_ARG,0, (void *)arg)
 # define SSL_CTX_set_tlsext_status_arg(ssl, arg) \
-SSL_CTX_ctrl(ssl,SSL_CTRL_SET_TLSEXT_STATUS_REQ_CB_ARG,0, (void *)arg)
+        SSL_CTX_ctrl(ssl,SSL_CTRL_SET_TLSEXT_STATUS_REQ_CB_ARG,0, (void *)arg)
 
 #define SSL_CTX_set_tlsext_status_type(ssl, type) \
         SSL_CTX_ctrl(ssl, SSL_CTRL_SET_TLSEXT_STATUS_REQ_TYPE, type, NULL)
@@ -883,7 +883,13 @@ SSL_CTX_callback_ctrl(ssl,SSL_CTRL_SET_TLSEXT_TICKET_KEY_CB,(void (*)(void))cb)
  * when correcting this number, correct also SSL3_CT_NUMBER in ssl3.h (see
  * comment there)
  */
-# define TLS_CT_NUMBER                   9
+# define TLS_CT_NUMBER                   10
+
+# if defined(SSL3_CT_NUMBER)
+#  if TLS_CT_NUMBER != SSL3_CT_NUMBER
+#    error "SSL/TLS CT_NUMBER values do not match"
+#  endif
+# endif
 
 # define TLS1_FINISH_MAC_LENGTH          12
 

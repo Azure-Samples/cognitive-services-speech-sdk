@@ -1,5 +1,5 @@
 /*
- * Copyright 1995-2016 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 1995-2018 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the OpenSSL license (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -95,14 +95,14 @@ extern "C" {
 # define SSL_TXT_NULL            "NULL"
 
 # define SSL_TXT_kRSA            "kRSA"
-# define SSL_TXT_kDHr            "kDHr"
-# define SSL_TXT_kDHd            "kDHd"
-# define SSL_TXT_kDH             "kDH"
+# define SSL_TXT_kDHr            "kDHr"/* this cipher class has been removed */
+# define SSL_TXT_kDHd            "kDHd"/* this cipher class has been removed */
+# define SSL_TXT_kDH             "kDH"/* this cipher class has been removed */
 # define SSL_TXT_kEDH            "kEDH"/* alias for kDHE */
 # define SSL_TXT_kDHE            "kDHE"
-# define SSL_TXT_kECDHr          "kECDHr"
-# define SSL_TXT_kECDHe          "kECDHe"
-# define SSL_TXT_kECDH           "kECDH"
+# define SSL_TXT_kECDHr          "kECDHr"/* this cipher class has been removed */
+# define SSL_TXT_kECDHe          "kECDHe"/* this cipher class has been removed */
+# define SSL_TXT_kECDH           "kECDH"/* this cipher class has been removed */
 # define SSL_TXT_kEECDH          "kEECDH"/* alias for kECDHE */
 # define SSL_TXT_kECDHE          "kECDHE"
 # define SSL_TXT_kPSK            "kPSK"
@@ -114,8 +114,8 @@ extern "C" {
 
 # define SSL_TXT_aRSA            "aRSA"
 # define SSL_TXT_aDSS            "aDSS"
-# define SSL_TXT_aDH             "aDH"
-# define SSL_TXT_aECDH           "aECDH"
+# define SSL_TXT_aDH             "aDH"/* this cipher class has been removed */
+# define SSL_TXT_aECDH           "aECDH"/* this cipher class has been removed */
 # define SSL_TXT_aECDSA          "aECDSA"
 # define SSL_TXT_aPSK            "aPSK"
 # define SSL_TXT_aGOST94         "aGOST94"
@@ -297,6 +297,8 @@ typedef int (*SSL_verify_cb)(int preverify_ok, X509_STORE_CTX *x509_ctx);
 # define SSL_OP_NO_COMPRESSION                           0x00020000U
 /* Permit unsafe legacy renegotiation */
 # define SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION        0x00040000U
+/* Disable encrypt-then-mac */
+# define SSL_OP_NO_ENCRYPT_THEN_MAC                      0x00080000U
 /*
  * Set on servers to choose the cipher according to the server's preferences
  */
@@ -320,6 +322,9 @@ typedef int (*SSL_verify_cb)(int preverify_ok, X509_STORE_CTX *x509_ctx);
 # define SSL_OP_NO_SSL_MASK (SSL_OP_NO_SSLv3|\
         SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1|SSL_OP_NO_TLSv1_2)
 # define SSL_OP_NO_DTLS_MASK (SSL_OP_NO_DTLSv1|SSL_OP_NO_DTLSv1_2)
+
+/* Disallow all renegotiation */
+# define SSL_OP_NO_RENEGOTIATION                         0x40000000U
 
 /*
  * Make server add server-hello extension from early version of cryptopro
@@ -962,8 +967,8 @@ size_t SSL_get_peer_finished(const SSL *s, void *buf, size_t count);
 # define SSL_VERIFY_FAIL_IF_NO_PEER_CERT 0x02
 # define SSL_VERIFY_CLIENT_ONCE          0x04
 
-# define OpenSSL_add_ssl_algorithms()    SSL_library_init()
 # if OPENSSL_API_COMPAT < 0x10100000L
+#  define OpenSSL_add_ssl_algorithms()   SSL_library_init()
 #  define SSLeay_add_ssl_algorithms()    SSL_library_init()
 # endif
 
@@ -1158,6 +1163,8 @@ DECLARE_PEM_rw(SSL_SESSION, SSL_SESSION)
 # define SSL_CTRL_GET_TLSEXT_STATUS_REQ_TYPE     127
 # define SSL_CTRL_GET_TLSEXT_STATUS_REQ_CB       128
 # define SSL_CTRL_GET_TLSEXT_STATUS_REQ_CB_ARG   129
+# define SSL_CTRL_GET_MIN_PROTO_VERSION          130
+# define SSL_CTRL_GET_MAX_PROTO_VERSION          131
 # define SSL_CERT_SET_FIRST                      1
 # define SSL_CERT_SET_NEXT                       2
 # define SSL_CERT_SET_SERVER                     3
@@ -1289,10 +1296,18 @@ DECLARE_PEM_rw(SSL_SESSION, SSL_SESSION)
         SSL_CTX_ctrl(ctx, SSL_CTRL_SET_MIN_PROTO_VERSION, version, NULL)
 #define SSL_CTX_set_max_proto_version(ctx, version) \
         SSL_CTX_ctrl(ctx, SSL_CTRL_SET_MAX_PROTO_VERSION, version, NULL)
+#define SSL_CTX_get_min_proto_version(ctx) \
+        SSL_CTX_ctrl(ctx, SSL_CTRL_GET_MIN_PROTO_VERSION, 0, NULL)
+#define SSL_CTX_get_max_proto_version(ctx) \
+        SSL_CTX_ctrl(ctx, SSL_CTRL_GET_MAX_PROTO_VERSION, 0, NULL)
 #define SSL_set_min_proto_version(s, version) \
         SSL_ctrl(s, SSL_CTRL_SET_MIN_PROTO_VERSION, version, NULL)
 #define SSL_set_max_proto_version(s, version) \
         SSL_ctrl(s, SSL_CTRL_SET_MAX_PROTO_VERSION, version, NULL)
+#define SSL_get_min_proto_version(s) \
+        SSL_ctrl(s, SSL_CTRL_GET_MIN_PROTO_VERSION, 0, NULL)
+#define SSL_get_max_proto_version(s) \
+        SSL_ctrl(s, SSL_CTRL_GET_MAX_PROTO_VERSION, 0, NULL)
 
 #if OPENSSL_API_COMPAT < 0x10100000L
 /* Provide some compatibility macros for removed functionality. */
@@ -1343,7 +1358,7 @@ __owur int SSL_get_fd(const SSL *s);
 __owur int SSL_get_rfd(const SSL *s);
 __owur int SSL_get_wfd(const SSL *s);
 __owur const char *SSL_get_cipher_list(const SSL *s, int n);
-__owur char *SSL_get_shared_ciphers(const SSL *s, char *buf, int len);
+__owur char *SSL_get_shared_ciphers(const SSL *s, char *buf, int size);
 __owur int SSL_get_read_ahead(const SSL *s);
 __owur int SSL_pending(const SSL *s);
 __owur int SSL_has_pending(const SSL *s);
@@ -1444,7 +1459,7 @@ int SSL_SESSION_up_ref(SSL_SESSION *ses);
 void SSL_SESSION_free(SSL_SESSION *ses);
 __owur int i2d_SSL_SESSION(SSL_SESSION *in, unsigned char **pp);
 __owur int SSL_set_session(SSL *to, SSL_SESSION *session);
-__owur int SSL_CTX_add_session(SSL_CTX *s, SSL_SESSION *c);
+int SSL_CTX_add_session(SSL_CTX *s, SSL_SESSION *c);
 int SSL_CTX_remove_session(SSL_CTX *, SSL_SESSION *c);
 __owur int SSL_CTX_set_generate_session_id(SSL_CTX *, GEN_SESSION_CB);
 __owur int SSL_set_generate_session_id(SSL *, GEN_SESSION_CB);
@@ -1517,7 +1532,7 @@ __owur int SSL_CTX_dane_mtype_set(SSL_CTX *ctx, const EVP_MD *md,
                                   uint8_t mtype, uint8_t ord);
 __owur int SSL_dane_enable(SSL *s, const char *basedomain);
 __owur int SSL_dane_tlsa_add(SSL *s, uint8_t usage, uint8_t selector,
-                             uint8_t mtype, unsigned char *data, size_t dlen);
+                             uint8_t mtype, unsigned const char *data, size_t dlen);
 __owur int SSL_get0_dane_authority(SSL *s, X509 **mcert, EVP_PKEY **mspki);
 __owur int SSL_get0_dane_tlsa(SSL *s, uint8_t *usage, uint8_t *selector,
                               uint8_t *mtype, unsigned const char **data,
@@ -2095,6 +2110,7 @@ int ERR_load_SSL_strings(void);
 # define SSL_F_DTLS_CONSTRUCT_HELLO_VERIFY_REQUEST        385
 # define SSL_F_DTLS_GET_REASSEMBLED_MESSAGE               370
 # define SSL_F_DTLS_PROCESS_HELLO_VERIFY                  386
+# define SSL_F_DTLS_WAIT_FOR_DRY                          592
 # define SSL_F_OPENSSL_INIT_SSL                           342
 # define SSL_F_OSSL_STATEM_CLIENT_READ_TRANSITION         417
 # define SSL_F_OSSL_STATEM_SERVER_READ_TRANSITION         418
@@ -2116,6 +2132,7 @@ int ERR_load_SSL_strings(void);
 # define SSL_F_SSL3_SETUP_KEY_BLOCK                       157
 # define SSL_F_SSL3_SETUP_READ_BUFFER                     156
 # define SSL_F_SSL3_SETUP_WRITE_BUFFER                    291
+# define SSL_F_SSL3_TAKE_MAC                              425
 # define SSL_F_SSL3_WRITE_BYTES                           158
 # define SSL_F_SSL3_WRITE_PENDING                         159
 # define SSL_F_SSL_ADD_CERT_CHAIN                         316
@@ -2189,6 +2206,8 @@ int ERR_load_SSL_strings(void);
 # define SSL_F_SSL_PARSE_SERVERHELLO_USE_SRTP_EXT         311
 # define SSL_F_SSL_PEEK                                   270
 # define SSL_F_SSL_READ                                   223
+# define SSL_F_SSL_RENEGOTIATE                            516
+# define SSL_F_SSL_RENEGOTIATE_ABBREVIATED                546
 # define SSL_F_SSL_SCAN_CLIENTHELLO_TLSEXT                320
 # define SSL_F_SSL_SCAN_SERVERHELLO_TLSEXT                321
 # define SSL_F_SSL_SESSION_DUP                            348

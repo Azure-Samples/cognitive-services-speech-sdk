@@ -1,5 +1,5 @@
 /*
- * Copyright 1995-2016 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 1995-2018 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the OpenSSL license (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -146,6 +146,8 @@ int CRYPTO_mem_ctrl(int mode);
         CRYPTO_secure_zalloc(num, OPENSSL_FILE, OPENSSL_LINE)
 # define OPENSSL_secure_free(addr) \
         CRYPTO_secure_free(addr, OPENSSL_FILE, OPENSSL_LINE)
+# define OPENSSL_secure_clear_free(addr, num) \
+        CRYPTO_secure_clear_free(addr, num, OPENSSL_FILE, OPENSSL_LINE)
 # define OPENSSL_secure_actual_size(ptr) \
         CRYPTO_secure_actual_size(ptr)
 
@@ -285,6 +287,8 @@ int CRYPTO_secure_malloc_done(void);
 void *CRYPTO_secure_malloc(size_t num, const char *file, int line);
 void *CRYPTO_secure_zalloc(size_t num, const char *file, int line);
 void CRYPTO_secure_free(void *ptr, const char *file, int line);
+void CRYPTO_secure_clear_free(void *ptr, size_t num,
+                              const char *file, int line);
 int CRYPTO_secure_allocated(const void *ptr);
 int CRYPTO_secure_malloc_initialized(void);
 size_t CRYPTO_secure_actual_size(void *ptr);
@@ -367,7 +371,9 @@ int CRYPTO_memcmp(const volatile void * volatile in_a,
 # define OPENSSL_INIT_ENGINE_CAPI            0x00002000L
 # define OPENSSL_INIT_ENGINE_PADLOCK         0x00004000L
 # define OPENSSL_INIT_ENGINE_AFALG           0x00008000L
-/* OPENSSL_INIT flag 0x00010000 reserved for internal use */
+/* OPENSSL_INIT_ZLIB                         0x00010000L */
+/* currently unused                          0x00020000L */
+/* OPENSSL_INIT_BASE_ONLY                    0x00040000L */
 /* OPENSSL_INIT flag range 0xfff00000 reserved for OPENSSL_init_ssl() */
 /* Max OPENSSL_INIT flag value is 0x80000000 */
 

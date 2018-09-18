@@ -1,5 +1,5 @@
 /*
- * Copyright 1995-2016 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 1995-2018 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the OpenSSL license (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -1055,6 +1055,7 @@ int ERR_load_X509_strings(void);
 # define X509_F_X509_LOAD_CERT_CRL_FILE                   132
 # define X509_F_X509_LOAD_CERT_FILE                       111
 # define X509_F_X509_LOAD_CRL_FILE                        112
+# define X509_F_X509_LOOKUP_METH_NEW                      160
 # define X509_F_X509_NAME_ADD_ENTRY                       113
 # define X509_F_X509_NAME_ENTRY_CREATE_BY_NID             114
 # define X509_F_X509_NAME_ENTRY_CREATE_BY_TXT             131
