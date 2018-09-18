@@ -39,12 +39,13 @@
 #define EXTERN
 #endif
 
-namespace Keys 
+namespace Keys
 {
     EXTERN std::string Speech;
     EXTERN std::string CRIS;
     EXTERN std::string LanguageUnderstanding;
     EXTERN std::string Skyman;
+    EXTERN std::string LuisAppid;
 }
 
 namespace Config
@@ -80,6 +81,9 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
         | Opt(Keys::Speech, "SpeechSubscriptionKey") // bind variable to a new option, with a hint string
         ["--keySpeech"]    // the option names it will respond to
     ("The subscription key for speech")
+        | Opt(Keys::LuisAppid, "LUISAppid")
+        ["--keyLuisAppid"]
+    ("The LUIS Appid for intent recognizer")
         | Opt(Keys::CRIS, "CRISSubscriptionKey")
         ["--keyCRIS"]
     ("The subscription key for CRIS")

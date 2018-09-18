@@ -21,9 +21,11 @@ using namespace Microsoft::CognitiveServices::Speech::Impl; // for mocks
 
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
+using namespace Microsoft::CognitiveServices::Speech::Intent;
 using namespace std;
 
 static string input_file("tests/input/whatstheweatherlike.wav");
+static string lamp_file("tests/input/TurnOnTheLamp.wav");
 
 static std::shared_ptr<SpeechConfig> CurrentSpeechConfig()
 {
@@ -82,6 +84,22 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
+#if 0 //todo: turn it on after adding "--keyLuisAppid  --keyLU" to cxx_api_tests
+    SECTION("Intent Recognizer basics")
+    {
+        auto sc = SpeechConfig::FromSubscription(Keys::LanguageUnderstanding, Config::Region);
+        auto audioInput = AudioConfig::FromWavFileInput(lamp_file);
+        auto recognizer = IntentRecognizer::FromConfig(sc, audioInput);
+
+        auto model = LanguageUnderstandingModel::FromAppId(Keys::LuisAppid);
+        recognizer->AddIntent(model, "localIntent");
+
+        auto result = recognizer->RecognizeOnceAsync().get();
+        CHECK(result != nullptr);
+
+        REQUIRE(!(result->Properties.GetProperty(PropertyId::LanguageUnderstandingServiceResponse_JsonResult)).empty());
+    }
+#endif
     SECTION("Check that recognizer does not crash while async op is in progress")
     {
         UseMocks(true);

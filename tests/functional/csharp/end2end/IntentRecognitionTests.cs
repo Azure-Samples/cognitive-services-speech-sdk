@@ -55,8 +55,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             return recognizer;
         }
 
-        [DataTestMethod]
-        [DataRow("localIntent", "HomeAutomation.TurnOn", "localIntent")]
+        [DataTestMethod]        
         [DataRow("localIntent", "NonExistingOne", "")]
         [DataRow("", "", "HomeAutomation.TurnOn")]
         [DataRow("DontCare", "", "HomeAutomation.TurnOn")]
@@ -75,6 +74,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        // Expect: System.ArgumentNullException: null wstring for [DataRow("DontCare", null, "HomeAutomation.TurnOn")]
+        [DataTestMethod]
+        [DataRow("localIntent", "HomeAutomation.TurnOn", "localIntent")]
+        [Ignore] // Service flaky? VSTS 1411509
+        public async Task RecognizeIntentValidInputs(string localIntent, string modelIntent, string expectedIntent)
+        {
+            var audioInput = AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile);
+            using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
+            {
+                var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
+                recognizer.AddIntent(model, modelIntent, localIntent);
+
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(TestData.English.HomeAutomation.TurnOn.Utterance, result.Text);
+                Assert.IsFalse(string.IsNullOrEmpty(result.Properties.GetProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult)));
+                Assert.AreEqual(expectedIntent, result.IntentId);
+            }
+        }
     }
 }
