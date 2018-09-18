@@ -1,15 +1,15 @@
-package com.microsoft.cognitiveservices.speech.translation;
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+package com.microsoft.cognitiveservices.speech.translation;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 import com.microsoft.cognitiveservices.speech.ResultReason;
 
 /**
-  * Defines translation synthesis result, i.e. the voice output of the translated text in the target language.
-  */
+ * Defines translation synthesis result, i.e. the voice output of the translated text in the target language.
+ */
 public final class TranslationSynthesisResult
 {
     private com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResult _resultImpl;
@@ -24,8 +24,8 @@ public final class TranslationSynthesisResult
     }
 
     /**
-      * Explicitly frees any external resource attached to the object
-      */
+     * Explicitly frees any external resource attached to the object
+     */
     public void close() {
         if (this._resultImpl != null) {
             this._resultImpl.delete();
@@ -60,9 +60,9 @@ public final class TranslationSynthesisResult
     private byte[] _AudioData;
 
     /**
-      * Returns a String that represents the speech recognition result.
-      * @return A String that represents the speech recognition result.
-      */
+     * Returns a String that represents the speech recognition result.
+     * @return A String that represents the speech recognition result.
+     */
     @Override
     public String toString() {
         return "TranslationSynthesisResult" + 

@@ -9,7 +9,7 @@ import java.util.concurrent.Future;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
-import com.microsoft.cognitiveservices.speech.SpeechRecognitionResultEventArgs;
+import com.microsoft.cognitiveservices.speech.SpeechRecognitionEventArgs;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 
 public class SampleRecognizeWithIntermediateResults implements Runnable {
@@ -28,8 +28,8 @@ public class SampleRecognizeWithIntermediateResults implements Runnable {
             audioInput = AudioConfig.fromWavFileInput(SampleSettings.WavFile);
             reco = new SpeechRecognizer(config, audioInput);
 
-            reco.recognizing.addEventListener((o, speechRecognitionResultEventArgs) -> {
-                String s = speechRecognitionResultEventArgs.getResult().getText();
+            reco.recognizing.addEventListener((o, speechRecognitionEventArgs) -> {
+                String s = speechRecognitionEventArgs.getResult().getText();
 
                 System.out.println("Intermediate result received: " + s);
             });

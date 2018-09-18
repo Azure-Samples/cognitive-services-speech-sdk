@@ -179,18 +179,15 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/KeywordRecognitionModel.java
     ${PACKAGE_DIR}/PropertyCollection.java
     ${PACKAGE_DIR}/RecognitionEventArgs.java
-    ${PACKAGE_DIR}/RecognitionEventType.java
     ${PACKAGE_DIR}/ResultReason.java
     ${PACKAGE_DIR}/CancellationReason.java
     ${PACKAGE_DIR}/NoMatchDetails.java
     ${PACKAGE_DIR}/NoMatchReason.java
     ${PACKAGE_DIR}/Recognizer.java
-    ${PACKAGE_DIR}/ResultParameterNames.java
     ${PACKAGE_DIR}/SessionEventArgs.java
-    ${PACKAGE_DIR}/SessionEventType.java
     ${PACKAGE_DIR}/SpeechConfig.java
     ${PACKAGE_DIR}/SpeechRecognitionResult.java
-    ${PACKAGE_DIR}/SpeechRecognitionResultEventArgs.java
+    ${PACKAGE_DIR}/SpeechRecognitionEventArgs.java
     ${PACKAGE_DIR}/SpeechRecognitionCanceledEventArgs.java
     ${PACKAGE_DIR}/SpeechRecognizer.java
     
@@ -204,7 +201,7 @@ set(JAVA_SOURCES
     ${PACKAGE_DIR}/audio/PullAudioInputStreamCallback
 
     ${PACKAGE_DIR}/intent/IntentRecognitionResult.java
-    ${PACKAGE_DIR}/intent/IntentRecognitionResultEventArgs.java
+    ${PACKAGE_DIR}/intent/IntentRecognitionEventArgs.java
     ${PACKAGE_DIR}/intent/IntentRecognitionCanceledEventArgs.java
     ${PACKAGE_DIR}/intent/IntentRecognizer.java
     ${PACKAGE_DIR}/intent/LanguageUnderstandingModel.java

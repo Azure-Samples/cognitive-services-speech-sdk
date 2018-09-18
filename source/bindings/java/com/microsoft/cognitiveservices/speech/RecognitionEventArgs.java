@@ -1,8 +1,8 @@
-package com.microsoft.cognitiveservices.speech;
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+package com.microsoft.cognitiveservices.speech;
 
 import java.math.*;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
@@ -10,25 +10,17 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 /**
  * Defines payload for session events like Speech Start/End Detected
  */
-public final class RecognitionEventArgs // extends EventArgs
+public class RecognitionEventArgs extends SessionEventArgs
 {
-    public RecognitionEventArgs(com.microsoft.cognitiveservices.speech.internal.RecognitionEventArgs arg)
-    {
+    public RecognitionEventArgs(com.microsoft.cognitiveservices.speech.internal.RecognitionEventArgs arg) {
+        super(arg);
+
         Contracts.throwIfNull(arg, "arg");
-
-        this.sessionId = arg.getSessionId();
         this.offset = arg.getOffset();
-
-        Contracts.throwIfNull(this.sessionId, "SessionId");
     }
 
     /**
-     * Represents the session identifier.
-     */
-    public final String sessionId;
-
-    /**
-     * Represents the message offset
+     * Represents the message offset in 100nsec increments.
      */
     public final BigInteger offset;
 
@@ -38,6 +30,6 @@ public final class RecognitionEventArgs // extends EventArgs
      */
     @Override
     public String toString() {
-        return "SessionId: " + sessionId.toString() + " Offset: " + offset.toString() + ".";
+        return "SessionId: " + this.getSessionId() + " Offset: " + offset.toString() + ".";
     }
 }

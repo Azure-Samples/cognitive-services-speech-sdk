@@ -1,18 +1,15 @@
-package com.microsoft.cognitiveservices.speech;
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+package com.microsoft.cognitiveservices.speech;
+
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
-import com.microsoft.cognitiveservices.speech.CancellationReason;
-import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
-import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
-import com.microsoft.cognitiveservices.speech.translation.TranslationTextResult;
 
 /**
-  * Contains detailed information about why a result was canceled.
-  */
+ * Contains detailed information about why a result was canceled.
+ */
 public class CancellationDetails {
 
     private CancellationReason reason;
@@ -20,31 +17,11 @@ public class CancellationDetails {
     private com.microsoft.cognitiveservices.speech.internal.CancellationDetails _cancellationImpl;
 
     /**
-      * Creates an instance of CancellationDetails object for the canceled SpeechRecognitionResult.
-      * @param result The result that was canceled.
-      * @return The cancellation details object being created.
-      */
-    public static com.microsoft.cognitiveservices.speech.CancellationDetails fromResult(SpeechRecognitionResult result) {
-        com.microsoft.cognitiveservices.speech.internal.CancellationDetails cancellation = com.microsoft.cognitiveservices.speech.internal.CancellationDetails.FromResult(result.getResultImpl());
-        return new com.microsoft.cognitiveservices.speech.CancellationDetails(cancellation);
-    }
-
-    /**
-      * Creates an instance of CancellationDetails object for the canceled IntentRecognitionResult.
-      * @param result The result that was canceled.
-      * @return The cancellation details object being created.
-      */
-    public static com.microsoft.cognitiveservices.speech.CancellationDetails fromResult(IntentRecognitionResult result) {
-        com.microsoft.cognitiveservices.speech.internal.CancellationDetails cancellation = com.microsoft.cognitiveservices.speech.internal.CancellationDetails.FromResult(result.getResultImpl());
-        return new com.microsoft.cognitiveservices.speech.CancellationDetails(cancellation);
-    }
-
-    /**
-      * Creates an instance of CancellationDetails object for the canceled TranslationTextResult.
-      * @param result The result that was canceled.
-      * @return The cancellation details object being created.
-      */
-    public static com.microsoft.cognitiveservices.speech.CancellationDetails fromResult(TranslationTextResult result) {
+     * Creates an instance of CancellationDetails object for the canceled RecognitionResult.
+     * @param result The result that was canceled.
+     * @return The cancellation details object being created.
+     */
+    public static com.microsoft.cognitiveservices.speech.CancellationDetails fromResult(RecognitionResult result) {
         com.microsoft.cognitiveservices.speech.internal.CancellationDetails cancellation = com.microsoft.cognitiveservices.speech.internal.CancellationDetails.FromResult(result.getResultImpl());
         return new com.microsoft.cognitiveservices.speech.CancellationDetails(cancellation);
     }
@@ -58,8 +35,8 @@ public class CancellationDetails {
     }
 
     /**
-      * Explicitly frees any external resource attached to the object
-      */
+     * Explicitly frees any external resource attached to the object
+     */
     public void close() {
         if (this._cancellationImpl != null) {
             this._cancellationImpl.delete();
@@ -68,29 +45,29 @@ public class CancellationDetails {
     }
 
     /**
-      * The reason the recognition was canceled.
-      * @return Specifies the reason canceled.
-      */
+     * The reason the recognition was canceled.
+     * @return Specifies the reason canceled.
+     */
     public CancellationReason getReason() {
         return this.reason;
     }
 
     /**
-    * In case of an unsuccessful recognition, provides a details of why the occurred error.
-    * This field is only filled-out if the reason canceled (@see getReason) is set to Error.
-    * @return A String that represents the error details.
-    */
+     * In case of an unsuccessful recognition, provides a details of why the occurred error.
+     * This field is only filled-out if the reason canceled (@see getReason) is set to Error.
+     * @return A String that represents the error details.
+     */
     public String getErrorDetails() {
         return this.errorDetails;
     }
 
     /**
-      * Returns a String that represents the cancellation details.
-      * @return A String that represents the cancellation details.
-      */
+     * Returns a String that represents the cancellation details.
+     * @return A String that represents the cancellation details.
+     */
     @Override
     public String toString() {
         return "CancellationReason:" + this.reason +
-               " ErrorDetails:" + this.errorDetails;
+                " ErrorDetails:" + this.errorDetails;
     }
 }

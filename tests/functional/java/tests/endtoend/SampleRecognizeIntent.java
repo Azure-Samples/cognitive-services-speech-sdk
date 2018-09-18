@@ -13,7 +13,7 @@ import java.util.concurrent.Future;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
-import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResultEventArgs;
+import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionEventArgs;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
 
@@ -26,8 +26,8 @@ public class SampleRecognizeIntent implements Runnable {
         return recognitionResult;
     }
     
-    private IntentRecognitionResultEventArgs intentRecognitionResultEventArgs2;
-    public IntentRecognitionResultEventArgs getRecognizing() {
+    private IntentRecognitionEventArgs intentRecognitionResultEventArgs2;
+    public IntentRecognitionEventArgs getRecognizing() {
         return intentRecognitionResultEventArgs2;
     }
     

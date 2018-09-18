@@ -30,7 +30,7 @@ public class SampleRecognizeWithIntermediateResultsTest {
         
         test.run();
        
-        assertNotNull(test.getSpeechRecognitionResultEventArgs()); // there was at least on intermediate result
+        assertNotNull(test.getSpeechRecognitionEventArgs()); // there was at least on intermediate result
         assertNotNull(test.getResult()); // we got the final result
         assertEquals("What's the weather like?", test.getResult().getText()); // we get the text expected
     }

@@ -1,50 +1,26 @@
-package com.microsoft.cognitiveservices.speech;
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+package com.microsoft.cognitiveservices.speech;
 
-import com.microsoft.cognitiveservices.speech.internal.NoMatchReason;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
-import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
-import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
-import com.microsoft.cognitiveservices.speech.translation.TranslationTextResult;
 
 
 /**
-  * Contains detailed information for NoMatch recognition results.
-  */
+ * Contains detailed information for NoMatch recognition results.
+ */
 public class NoMatchDetails {
 
     private com.microsoft.cognitiveservices.speech.NoMatchReason _reason;
     private com.microsoft.cognitiveservices.speech.internal.NoMatchDetails _noMatchImpl;
 
     /**
-      * Creates an instance of NoMatchDetails object for the NoMatch SpeechRecognitionResults.
-      * @param The recognition result that has NoMatch returned in Reason.
-      * @return The NoMatchDetails object being created.
-      */
-      public static com.microsoft.cognitiveservices.speech.NoMatchDetails fromResult(SpeechRecognitionResult result) {
-        com.microsoft.cognitiveservices.speech.internal.NoMatchDetails noMatchImpl = com.microsoft.cognitiveservices.speech.internal.NoMatchDetails.FromResult(result.getResultImpl());
-        return new NoMatchDetails(noMatchImpl);
-    }
-
-    /**
-      * Creates an instance of NoMatchDetails object for the NoMatch IntentRecognitionResult.
-      * @param The recognition result that has NoMatch returned in Reason.
-      * @return The NoMatchDetails object being created.
-      */
-    public static com.microsoft.cognitiveservices.speech.NoMatchDetails fromResult(IntentRecognitionResult result) {
-        com.microsoft.cognitiveservices.speech.internal.NoMatchDetails noMatchImpl = com.microsoft.cognitiveservices.speech.internal.NoMatchDetails.FromResult(result.getResultImpl());
-        return new NoMatchDetails(noMatchImpl);
-    }
-
-    /**
-      * Creates an instance of NoMatchDetails object for the NoMatch TranslationTextResult.
-      * @param The recognition result that has NoMatch returned in Reason.
-      * @return The NoMatchDetails object being created.
-      */
-    public static com.microsoft.cognitiveservices.speech.NoMatchDetails fromResult(TranslationTextResult result) {
+     * Creates an instance of NoMatchDetails object for the NoMatch SpeechRecognitionResults.
+     * @param The recognition result that has NoMatch returned in Reason.
+     * @return The NoMatchDetails object being created.
+     */
+    public static com.microsoft.cognitiveservices.speech.NoMatchDetails fromResult(RecognitionResult result) {
         com.microsoft.cognitiveservices.speech.internal.NoMatchDetails noMatchImpl = com.microsoft.cognitiveservices.speech.internal.NoMatchDetails.FromResult(result.getResultImpl());
         return new NoMatchDetails(noMatchImpl);
     }
@@ -57,8 +33,8 @@ public class NoMatchDetails {
     }
 
     /**
-      * Explicitly frees any external resource attached to the object
-      */
+     * Explicitly frees any external resource attached to the object
+     */
     public void close() {
         if (this._noMatchImpl != null) {
             this._noMatchImpl.delete();
@@ -67,17 +43,17 @@ public class NoMatchDetails {
     }
 
     /**
-      * The reason why NoMatch is returned.
-      * @return Specifies the reason for NoMatch.
-      */
+     * The reason why NoMatch is returned.
+     * @return Specifies the reason for NoMatch.
+     */
     public com.microsoft.cognitiveservices.speech.NoMatchReason getReason() {
         return this._reason;
     }
 
     /**
-      * Returns a String that represents the no match details.
-      * @return A String that represents the no match details.
-      */
+     * Returns a String that represents the no match details.
+     * @return A String that represents the no match details.
+     */
     @Override
     public String toString() {
         return "NoMatchReason:" + this._reason;

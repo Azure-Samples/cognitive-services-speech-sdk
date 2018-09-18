@@ -1,8 +1,8 @@
-package com.microsoft.cognitiveservices.speech;
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+package com.microsoft.cognitiveservices.speech;
 
 import java.io.Closeable;
 import java.util.concurrent.ExecutorService;
@@ -42,6 +42,7 @@ public class Recognizer implements Closeable
      */
     final public EventHandlerImpl<RecognitionEventArgs> speechEndDetected = new EventHandlerImpl<RecognitionEventArgs>();
 
+    @SuppressWarnings("unused")
     private AudioConfig audioInputKeepAlive;
 
     /**
@@ -51,10 +52,10 @@ public class Recognizer implements Closeable
     protected Recognizer(AudioConfig audioInput) {
         // Note: Since ais is optional, no test for null reference
         audioInputKeepAlive = audioInput;
-        sessionStartedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStartedEvent);
-        sessionStoppedHandler = new SessionEventHandlerImpl(this, SessionEventType.SessionStoppedEvent);
-        speechStartDetectedHandler = new RecognitionEventHandlerImpl(this, RecognitionEventType.SpeechStartDetectedEvent);
-        speechEndDetectedHandler = new RecognitionEventHandlerImpl(this, RecognitionEventType.SpeechEndDetectedEvent);
+        sessionStartedHandler = new SessionEventHandlerImpl(this, true); // SessionEventType.SessionStartedEvent
+        sessionStoppedHandler = new SessionEventHandlerImpl(this, false); // SessionEventType.SessionStoppedEvent
+        speechStartDetectedHandler = new RecognitionEventHandlerImpl(this, true); // RecognitionEventType.SpeechStartDetectedEvent
+        speechEndDetectedHandler = new RecognitionEventHandlerImpl(this, false); // RecognitionEventType.SpeechEndDetectedEvent
     }
 
     /**
@@ -98,11 +99,11 @@ public class Recognizer implements Closeable
      */
     class SessionEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SessionEventListener {
 
-        public SessionEventHandlerImpl(Recognizer recognizer, SessionEventType eventType) {
+        public SessionEventHandlerImpl(Recognizer recognizer, Boolean sessionStartedEvent) {
             Contracts.throwIfNull(recognizer, "recognizer");
 
             this.recognizer = recognizer;
-            this.eventType = eventType;
+            this.sessionStartedEvent = sessionStartedEvent;
         }
 
         @Override
@@ -114,7 +115,7 @@ public class Recognizer implements Closeable
             }
 
             SessionEventArgs arg = new SessionEventArgs(eventArgs);
-            EventHandlerImpl<SessionEventArgs>  handler = this.eventType == SessionEventType.SessionStartedEvent ?
+            EventHandlerImpl<SessionEventArgs>  handler = this.sessionStartedEvent ?
                     this.recognizer.sessionStarted : this.recognizer.sessionStopped;
 
             if (handler != null) {
@@ -123,7 +124,7 @@ public class Recognizer implements Closeable
         }
 
         private Recognizer recognizer;
-        private SessionEventType eventType;
+        private Boolean sessionStartedEvent;
 
     }
 
@@ -132,12 +133,12 @@ public class Recognizer implements Closeable
      */
     class RecognitionEventHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.RecognitionEventListener
     {
-        public RecognitionEventHandlerImpl(Recognizer recognizer, RecognitionEventType eventType)
+        public RecognitionEventHandlerImpl(Recognizer recognizer, Boolean recognitionEventStarted)
         {
             Contracts.throwIfNull(recognizer, "recognizer");
 
             this.recognizer = recognizer;
-            this.eventType = eventType;
+            this.recognitionEventStarted = recognitionEventStarted;
         }
 
         @Override
@@ -151,7 +152,7 @@ public class Recognizer implements Closeable
             }
 
             RecognitionEventArgs arg = new RecognitionEventArgs(eventArgs);
-            EventHandlerImpl<RecognitionEventArgs>  handler = this.eventType == RecognitionEventType.SpeechStartDetectedEvent ?
+            EventHandlerImpl<RecognitionEventArgs>  handler = this.recognitionEventStarted ?
                     this.recognizer.speechStartDetected : this.recognizer.speechEndDetected;
 
             if (handler != null)
@@ -161,7 +162,7 @@ public class Recognizer implements Closeable
         }
 
         private Recognizer recognizer;
-        private RecognitionEventType eventType;
+        private Boolean recognitionEventStarted;
 
     }
 }

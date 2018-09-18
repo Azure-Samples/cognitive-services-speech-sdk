@@ -1,8 +1,8 @@
-package com.microsoft.cognitiveservices.speech;
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+package com.microsoft.cognitiveservices.speech;
 
 import java.util.concurrent.Future;
 
@@ -15,31 +15,31 @@ import com.microsoft.cognitiveservices.speech.PropertyCollection;
 
 
 /**
-  * Performs speech recognition from microphone, file, or other audio input streams, and gets transcribed text as result.
-  * 
-  */
+ * Performs speech recognition from microphone, file, or other audio input streams, and gets transcribed text as result.
+ *
+ */
 public final class SpeechRecognizer extends com.microsoft.cognitiveservices.speech.Recognizer
 {
     /**
-      * The event recognizing signals that an intermediate recognition result is received.
-      */
-    final public EventHandlerImpl<SpeechRecognitionResultEventArgs> recognizing = new EventHandlerImpl<SpeechRecognitionResultEventArgs>();
+     * The event recognizing signals that an intermediate recognition result is received.
+     */
+    final public EventHandlerImpl<SpeechRecognitionEventArgs> recognizing = new EventHandlerImpl<SpeechRecognitionEventArgs>();
 
     /**
-      * The event recognized signals that a final recognition result is received.
-      */
-    final public EventHandlerImpl<SpeechRecognitionResultEventArgs> recognized = new EventHandlerImpl<SpeechRecognitionResultEventArgs>();
+     * The event recognized signals that a final recognition result is received.
+     */
+    final public EventHandlerImpl<SpeechRecognitionEventArgs> recognized = new EventHandlerImpl<SpeechRecognitionEventArgs>();
 
     /**
-      * The event canceled signals that the recognition was canceled.
-      */
+     * The event canceled signals that the recognition was canceled.
+     */
     final public EventHandlerImpl<SpeechRecognitionCanceledEventArgs> canceled = new EventHandlerImpl<SpeechRecognitionCanceledEventArgs>();
 
     /**
-      * SpeechRecognizer constructor.
-      * @param recoImpl The recognizer implementation
-      * @param audioInput An optional audio input configuration associated with the recognizer
-      */
+     * SpeechRecognizer constructor.
+     * @param recoImpl The recognizer implementation
+     * @param audioInput An optional audio input configuration associated with the recognizer
+     */
     private SpeechRecognizer(com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer recoImpl, AudioConfig audioConfig) {
         super(audioConfig);
 
@@ -65,66 +65,66 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
 
     private class PrivatePropertyCollection extends com.microsoft.cognitiveservices.speech.PropertyCollection {
         public PrivatePropertyCollection(com.microsoft.cognitiveservices.speech.internal.PropertyCollection collection) {
-          super(collection);
+            super(collection);
         }
     }
 
     /**
-      * Initializes a new instance of Speech Recognizer.
-      * @param speechConfig speech configuration.
-      */
+     * Initializes a new instance of Speech Recognizer.
+     * @param speechConfig speech configuration.
+     */
     public SpeechRecognizer(SpeechConfig speechConfig)
     {
         this(com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), null), null);
     }
 
     /**
-      * Initializes a new instance of Speech Recognizer.
-      * @param speechConfig speech configuration.
-      * @param audioConfig audio configuration.
-      */
+     * Initializes a new instance of Speech Recognizer.
+     * @param speechConfig speech configuration.
+     * @param audioConfig audio configuration.
+     */
     public SpeechRecognizer(SpeechConfig speechConfig, AudioConfig audioConfig)
     {
         this(com.microsoft.cognitiveservices.speech.internal.SpeechRecognizer.FromConfig(speechConfig.getImpl(), audioConfig.getConfigImpl()), audioConfig);
     }
 
     /**
-      * Gets the endpoint ID of a customized speech model that is used for speech recognition.
-      * @return the endpoint ID of a customized speech model that is used for speech recognition.
-      */
+     * Gets the endpoint ID of a customized speech model that is used for speech recognition.
+     * @return the endpoint ID of a customized speech model that is used for speech recognition.
+     */
     public String getEndpointId() {
         return recoImpl.GetEndpointId();
     }
-    
+
     /**
-      * Sets the authorization token used to communicate with the service.
-      * @param token Authorization token.
-      */
+     * Sets the authorization token used to communicate with the service.
+     * @param token Authorization token.
+     */
     public void setAuthorizationToken(String token) {
         Contracts.throwIfNullOrWhitespace(token, "token");
         recoImpl.SetAuthorizationToken(token);
     }
 
     /**
-      * Gets the authorization token used to communicate with the service.
-      * @return Authorization token.
-      */
+     * Gets the authorization token used to communicate with the service.
+     * @return Authorization token.
+     */
     public String getAuthorizationToken() {
         return recoImpl.GetAuthorizationToken();
     }
 
     /**
-      * Gets the spoken language of recognition.
-      * @return The spoken language of recognition.
-      */
+     * Gets the spoken language of recognition.
+     * @return The spoken language of recognition.
+     */
     public String getSpeechRecognitionLanguage() {
         return _Parameters.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage);
     }
 
     /**
-      * Gets the output format of recognition.
-      * @return The output format of recognition.
-      */
+     * Gets the output format of recognition.
+     * @return The output format of recognition.
+     */
     public OutputFormat getOutputFormat() {
         if (_Parameters.getProperty(PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse).equals("true")) {
             return OutputFormat.Detailed;
@@ -134,9 +134,9 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     }
 
     /**
-      * The collection or properties and their values defined for this SpeechRecognizer.
-      * @return The collection or properties and their values defined for this SpeechRecognizer.
-      */
+     * The collection or properties and their values defined for this SpeechRecognizer.
+     * @return The collection or properties and their values defined for this SpeechRecognizer.
+     */
     public PropertyCollection getProperties() {
         return _Parameters;
     }
@@ -144,67 +144,67 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
     private com.microsoft.cognitiveservices.speech.PropertyCollection _Parameters;
 
     /**
-      * Starts speech recognition, and stops after the first utterance is recognized. The task returns the recognition text as result.
-      * Note: RecognizeOnceAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
-      * @return A task representing the recognition operation. The task returns a value of SpeechRecognitionResult
-      */
+     * Starts speech recognition, and stops after the first utterance is recognized. The task returns the recognition text as result.
+     * Note: RecognizeOnceAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
+     * @return A task representing the recognition operation. The task returns a value of SpeechRecognitionResult
+     */
     public Future<SpeechRecognitionResult> recognizeOnceAsync() {
         return s_executorService.submit(() -> {
-                return new SpeechRecognitionResult(recoImpl.Recognize()); 
-            });
+            return new SpeechRecognitionResult(recoImpl.Recognize());
+        });
     }
 
     /**
-      * Starts speech recognition on a continuous audio stream, until stopContinuousRecognitionAsync() is called.
-      * User must subscribe to events to receive recognition results.
-      * @return A task representing the asynchronous operation that starts the recognition.
-      */
+     * Starts speech recognition on a continuous audio stream, until stopContinuousRecognitionAsync() is called.
+     * User must subscribe to events to receive recognition results.
+     * @return A task representing the asynchronous operation that starts the recognition.
+     */
     public Future<Void> startContinuousRecognitionAsync() {
         return s_executorService.submit(() -> {
-                recoImpl.StartContinuousRecognition();
-                return null;
-            });
+            recoImpl.StartContinuousRecognition();
+            return null;
+        });
     }
 
     /**
-      * Stops continuous speech recognition.
-      * @return A task representing the asynchronous operation that stops the recognition.
-      */
+     * Stops continuous speech recognition.
+     * @return A task representing the asynchronous operation that stops the recognition.
+     */
     public Future<Void> stopContinuousRecognitionAsync() {
         return s_executorService.submit(() -> {
-                recoImpl.StopContinuousRecognition();
-                return null;
-            });
+            recoImpl.StopContinuousRecognition();
+            return null;
+        });
     }
 
     /**
-      * Starts speech recognition on a continuous audio stream with keyword spotting, until stopKeywordRecognitionAsync() is called.
-      * User must subscribe to events to receive recognition results.
-      * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
-      * @param model The keyword recognition model that specifies the keyword to be recognized.
-      * @return A task representing the asynchronous operation that starts the recognition.
-      */
+     * Starts speech recognition on a continuous audio stream with keyword spotting, until stopKeywordRecognitionAsync() is called.
+     * User must subscribe to events to receive recognition results.
+     * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
+     * @param model The keyword recognition model that specifies the keyword to be recognized.
+     * @return A task representing the asynchronous operation that starts the recognition.
+     */
     public Future<Void> startKeywordRecognitionAsync(KeywordRecognitionModel model) {
         Contracts.throwIfNull(model, "model");
 
         return s_executorService.submit(() -> {
-                recoImpl.StartKeywordRecognition(model.getModelImpl());
-                return null;
-            });
+            recoImpl.StartKeywordRecognition(model.getModelImpl());
+            return null;
+        });
     }
 
     /**
-      * Stops continuous speech recognition.
-      * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
-      * @return A task representing the asynchronous operation that stops the recognition.
-      */
+     * Stops continuous speech recognition.
+     * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
+     * @return A task representing the asynchronous operation that stops the recognition.
+     */
     public Future<Void> stopKeywordRecognitionAsync() {
         return s_executorService.submit(() -> {
-                recoImpl.StopKeywordRecognition();
-                return null;
-            });
+            recoImpl.StopKeywordRecognition();
+            return null;
+        });
     }
-    
+
     @Override
     protected void dispose(boolean disposing)
     {
@@ -244,7 +244,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
 
     // Defines an internal class to raise an event for intermediate/final result when a corresponding callback is invoked by the native layer.
     private class ResultHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventListener {
-        
+
         ResultHandlerImpl(SpeechRecognizer recognizer, boolean isRecognizedHandler) {
             Contracts.throwIfNull(recognizer, "recognizer");
 
@@ -255,13 +255,13 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
         @Override
         public void Execute(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionEventArgs eventArgs) {
             Contracts.throwIfNull(eventArgs, "eventArgs");
-            
+
             if (recognizer.disposed) {
                 return;
             }
 
-            SpeechRecognitionResultEventArgs resultEventArg = new SpeechRecognitionResultEventArgs(eventArgs);
-            EventHandlerImpl<SpeechRecognitionResultEventArgs> handler = isRecognizedHandler ? recognizer.recognized : recognizer.recognizing;
+            SpeechRecognitionEventArgs resultEventArg = new SpeechRecognitionEventArgs(eventArgs);
+            EventHandlerImpl<SpeechRecognitionEventArgs> handler = isRecognizedHandler ? recognizer.recognized : recognizer.recognizing;
             if (handler != null) {
                 handler.fireEvent(this.recognizer, resultEventArg);
             }
@@ -273,7 +273,7 @@ public final class SpeechRecognizer extends com.microsoft.cognitiveservices.spee
 
     // Defines an internal class to raise an event for error during recognition when a corresponding callback is invoked by the native layer.
     private class CanceledHandlerImpl extends com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionCanceledEventListener {
-        
+
         CanceledHandlerImpl(SpeechRecognizer recognizer) {
             Contracts.throwIfNull(recognizer, "recognizer");
             this.recognizer = recognizer;

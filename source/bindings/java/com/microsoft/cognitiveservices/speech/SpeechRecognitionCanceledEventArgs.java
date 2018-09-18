@@ -1,22 +1,22 @@
-package com.microsoft.cognitiveservices.speech;
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+package com.microsoft.cognitiveservices.speech;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
-import com.microsoft.cognitiveservices.speech.internal.CancellationDetails;
 import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 
 /**
-  * Defines payload of speech recognition canceled events.
-  */
-public final class SpeechRecognitionCanceledEventArgs {
+ * Defines payload of speech recognition canceled events.
+ */
+public final class SpeechRecognitionCanceledEventArgs extends SpeechRecognitionEventArgs {
 
     SpeechRecognitionCanceledEventArgs(com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionCanceledEventArgs e) {
-        Contracts.throwIfNull(e, "e");
+        super(e);
 
+        Contracts.throwIfNull(e, "e");
         this._eventArgImpl = e;
         this._Result = new SpeechRecognitionResult(e.GetResult());
 
@@ -29,50 +29,35 @@ public final class SpeechRecognitionCanceledEventArgs {
     }
 
     /**
-      * Specifies the recognition result.
-      * @return the recognition result.
-      */
-    public SpeechRecognitionResult getResult() {
-        return _Result;
-    }
-
-    /**
-      * Specifies the session identifier.
-      * @return the session identifier.
-      */
-    public final String getSessionId() {
-        return _SessionId;
-    }
-
-    /**
-      * The reason the recognition was canceled.
-      * @return Specifies the reason canceled.
-      */
-      public CancellationReason getReason() {
+     * The reason the recognition was canceled.
+     * @return Specifies the reason canceled.
+     */
+    public CancellationReason getReason() {
         return this._cancellationReason ;
     }
 
     /**
-      * The error details of why the cancellation occurred.
-      * @return A String that represents the error details.
-      */
+     * The error details of why the cancellation occurred.
+     * @return A String that represents the error details.
+     */
     public String getErrorDetails() {
         return this._errorDetails;
     }
 
     /**
-      * Returns a String that represents the speech recognition canceled event args.
-      * @return A String that represents the speech recognition canceled event args.
-      */
+     * Returns a String that represents the speech recognition canceled event args.
+     * @return A String that represents the speech recognition canceled event args.
+     */
     @Override
     public String toString() {
         return "SessionId:" + _SessionId +
-               " ResultId:" + _Result.getResultId() +
-               " CancellationReason:" + _cancellationReason  +
-               " Recognized text:<" + _errorDetails +
-               ">.";
+                " ResultId:" + _Result.getResultId() +
+                " CancellationReason:" + _cancellationReason  +
+                " Recognized text:<" + _errorDetails +
+                ">.";
     }
 
+    @SuppressWarnings("unused")
     private com.microsoft.cognitiveservices.speech.internal.SpeechRecognitionCanceledEventArgs _eventArgImpl;
     private String _SessionId;
     private SpeechRecognitionResult _Result;

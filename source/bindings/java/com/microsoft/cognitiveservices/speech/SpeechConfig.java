@@ -1,24 +1,17 @@
-package com.microsoft.cognitiveservices.speech;
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+package com.microsoft.cognitiveservices.speech;
 
 import java.io.Closeable;
-import java.net.URI;
-import java.util.ArrayList;
-import java.io.File;
-import java.io.IOException;
 
-import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
-import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
-import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
- /**
-   * Speech configuration.
-   */
- public final class SpeechConfig implements Closeable {
+/**
+ * Speech configuration.
+ */
+public class SpeechConfig implements Closeable {
 
     // load the native library. Hold the class active so the
     // class GC does not reclaim it (and the local variables!)
@@ -56,20 +49,20 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
     }
 
     /**
-      * Creates an instance of speech config.
-      */
-    private SpeechConfig(com.microsoft.cognitiveservices.speech.internal.SpeechConfig configImpl) {
+     * Creates an instance of speech config.
+     */
+    protected SpeechConfig(com.microsoft.cognitiveservices.speech.internal.SpeechConfig configImpl) {
         Contracts.throwIfNull(configImpl, "configImpl");
 
         this.speechConfigImpl = configImpl;
     }
 
     /**
-      * Creates an instance of a speech config with specified subscription key and service region.
-      * @param subscriptionKey The subscription key.
-      * @param region The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
-      * @return A speech config instance.
-      */
+     * Creates an instance of a speech config with specified subscription key and service region.
+     * @param subscriptionKey The subscription key.
+     * @param region The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
+     * @return A speech config instance.
+     */
     public static SpeechConfig fromSubscription(String subscriptionKey, String region) {
         Contracts.throwIfIllegalSubscriptionKey(subscriptionKey, "subscriptionKey");
         Contracts.throwIfNullOrWhitespace(region, "region");
@@ -78,15 +71,15 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
     }
 
     /**
-      * Creates an instance of a speech config with specified authorization token and service region.
-      * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
-      * expires, the caller needs to refresh it by calling `setAuthorizationToken` with a new valid token.
-      * Otherwise, all the recognizers created by this SpeechConfig instance will encounter errors during recognition.
-      * For long-living recognizers, `setAuthorizationToken` needs to called on the recognizer.
-      * @param authorizationToken The authorization token.
-      * @param region The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
-      * @return A speech config instance.
-      */
+     * Creates an instance of a speech config with specified authorization token and service region.
+     * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
+     * expires, the caller needs to refresh it by calling `setAuthorizationToken` with a new valid token.
+     * Otherwise, all the recognizers created by this SpeechConfig instance will encounter errors during recognition.
+     * For long-living recognizers, `setAuthorizationToken` needs to called on the recognizer.
+     * @param authorizationToken The authorization token.
+     * @param region The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
+     * @return A speech config instance.
+     */
     public static SpeechConfig fromAuthorizationToken(String authorizationToken, String region) {
         Contracts.throwIfNullOrWhitespace(authorizationToken, "authorizationToken");
         Contracts.throwIfNullOrWhitespace(region, "region");
@@ -95,16 +88,16 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
     }
 
     /**
-      * Creates an instance of the speech config with specified endpoint and subscription key.
-      * This method is intended only for users who use a non-standard service endpoint or paramters.
-      * Note: The query parameters specified in the endpoint URL are not changed, even if they are set by any other APIs.
-      * For example, if language is defined in the uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
-      * the language setting in uri takes precedence, and the effective language is "de-DE".
-      * Only the parameters that are not specified in the endpoint URL can be set by other APIs.
-      * @param endpoint The service endpoint to connect to.
-      * @param subscriptionKey The subscription key.
-      * @return A speech config instance.
-      */
+     * Creates an instance of the speech config with specified endpoint and subscription key.
+     * This method is intended only for users who use a non-standard service endpoint or paramters.
+     * Note: The query parameters specified in the endpoint URL are not changed, even if they are set by any other APIs.
+     * For example, if language is defined in the uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
+     * the language setting in uri takes precedence, and the effective language is "de-DE".
+     * Only the parameters that are not specified in the endpoint URL can be set by other APIs.
+     * @param endpoint The service endpoint to connect to.
+     * @param subscriptionKey The subscription key.
+     * @return A speech config instance.
+     */
     public static SpeechConfig fromEndpoint(java.net.URI endpoint, String subscriptionKey) {
         Contracts.throwIfNull(endpoint, "endpoint");
         Contracts.throwIfIllegalSubscriptionKey(subscriptionKey, "subscriptionKey");
@@ -113,62 +106,110 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
     }
 
     /**
-      * Sets the authorization token.
-      * If this is set, subscription key is ignored.
-      * User needs to make sure the provided authorization token is valid and not expired.
-      * @param value the authorization token.
-      */
+     * Sets the authorization token.
+     * If this is set, subscription key is ignored.
+     * User needs to make sure the provided authorization token is valid and not expired.
+     * @param value the authorization token.
+     */
     public void setAuthorizationToken(String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");
 
-       speechConfigImpl.SetAuthorizationToken(value);
+        speechConfigImpl.SetAuthorizationToken(value);
     }
 
     /**
-      * Sets the speech recognition language
-      * @param value the language identifier in BCP-47 format.
-      */
+     * Gets the authorization token.
+     * If this is set, subscription key is ignored.
+     * User needs to make sure the provided authorization token is valid and not expired.
+     * @return The authorization token.
+     */
+    public String getAuthorizationToken() {
+        return speechConfigImpl.GetAuthorizationToken();
+    }
+
+    /**
+     * Sets the speech recognition language
+     * @param value the language identifier in BCP-47 format.
+     */
     public void setSpeechRecognitionLanguage(String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");
 
-        speechConfigImpl.SetSpeechRecognitionLanguage(value);        
+        speechConfigImpl.SetSpeechRecognitionLanguage(value);
     }
 
     /**
-      * Sets output format.
-      */
+     * Sets the speech recognition language
+     * If this is set, subscription key is ignored.
+     * User needs to make sure the provided authorization token is valid and not expired.
+     * @return Returns the recognition language.
+     */
+    public String getSpeechRecognitionLanguage() {
+        return speechConfigImpl.GetSpeechRecognitionLanguage();
+    }
+
+    /**
+     * Sets output format.
+     * @param format The output format.
+     */
     public void setOutputFormat(OutputFormat format) {
         String value = "false";
         if(format == OutputFormat.Detailed) {
             value = "true";
         }
-        speechConfigImpl.SetProperty(com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse, value);        
+        speechConfigImpl.SetProperty(com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse, value);
     }
 
     /**
-      * Sets the endpoint ID of a customized speech model that is used for speech recognition.
-      * @param value the endpoint ID
-      */
+     * Gets output format.
+     * @return Returns the output format.
+     */
+    public OutputFormat getOutputFormat() {
+        String result = speechConfigImpl.GetProperty(com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceResponse_RequestDetailedResultTrueFalse);
+        return (result.equals("true") ? OutputFormat.Detailed : OutputFormat.Simple);
+    }
+
+    /**
+     * Sets the endpoint ID of a customized speech model that is used for speech recognition.
+     * @param value the endpoint ID
+     */
     public void setEndpointId(String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");
 
-       speechConfigImpl.SetEndpointId(value);
+        speechConfigImpl.SetEndpointId(value);
     }
 
     /**
-      * Sets a named property as value
-      * @param name the name of the property
-      * @param value the value
-      */
+     * Gets the endpoint ID of a customized speech model that is used for speech recognition.
+     * @return The endpoint ID
+     */
+    public String getEndpointId() {
+        return speechConfigImpl.GetEndpointId();
+    }
+
+    /**
+     * Sets a named property as value
+     * @param name the name of the property
+     * @param value the value
+     */
     public void setProperty(String name, String value) {
         Contracts.throwIfNullOrWhitespace(value, "value");
 
-        speechConfigImpl.SetProperty(name, value);        
+        speechConfigImpl.SetProperty(name, value);
     }
 
     /**
-      * Dispose of associated resources.
-      */
+     * Gets a named property as value
+     * @param name the name of the property
+     * @return The value
+     */
+    public String getProperty(String name) {
+        return speechConfigImpl.GetProperty(name);
+    }
+
+    /**
+     * Dispose of associated resources.
+     */
+    @Override
     public void close() {
         if (disposed) {
             return;
@@ -177,11 +218,11 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
         speechConfigImpl.delete();
         disposed = true;
     }
-    
+
     /**
-      * Returns the Speech Config
-      * @return The implementation of the Speech Config
-      */
+     * Returns the Speech Config
+     * @return The implementation of the Speech Config
+     */
     public com.microsoft.cognitiveservices.speech.internal.SpeechConfig getImpl()
     {
         return speechConfigImpl;

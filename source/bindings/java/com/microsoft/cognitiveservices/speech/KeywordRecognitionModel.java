@@ -1,32 +1,32 @@
-package com.microsoft.cognitiveservices.speech;
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+package com.microsoft.cognitiveservices.speech;
 
+import java.io.BufferedInputStream;
 import java.io.Closeable;
-import com.microsoft.cognitiveservices.speech.util.Contracts;
-
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.io.BufferedInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import java.util.Random;
+
+import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 
 /**
-  * Represents a keyword recognition model for recognizing when
-  * the user says a keyword to initiate further speech recognition.
-  */
+ * Represents a keyword recognition model for recognizing when
+ * the user says a keyword to initiate further speech recognition.
+ */
 public class KeywordRecognitionModel implements Closeable
-{ 
+{
     // load the native library.
     static {
+        @SuppressWarnings("unused")
         Class<?> speechFactorLoadTrigger = SpeechConfig.speechConfigClass;
     }
 
@@ -53,8 +53,16 @@ public class KeywordRecognitionModel implements Closeable
             // PK indicates its a zip file
             boolean isZipped = (len == 2) && (magic[0] == 0x50) && (magic[1] == 0x4b);
 
-            KeywordRecognitionModel ret = fromStream(inputStream, f.getName(), isZipped);
-            inputStream.close();
+            KeywordRecognitionModel ret = null;
+            if(isZipped) {
+                ret = fromStream(inputStream, f.getName(), isZipped);
+                inputStream.close();
+            }
+            else {
+                // if not zipped, just take the original file.
+                inputStream.close();
+                ret = new KeywordRecognitionModel(com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel.FromFile(f.getAbsolutePath()));
+            }
 
             return ret;
         }
@@ -140,8 +148,9 @@ public class KeywordRecognitionModel implements Closeable
     }
 
     /**
-      * Dispose of associated resources.
-      */
+     * Dispose of associated resources.
+     */
+    @Override
     public void close()
     {
         if (disposed)
@@ -163,9 +172,9 @@ public class KeywordRecognitionModel implements Closeable
 
     private com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel modelImpl;
     /**
-      * Returns the keyword recognition model.
-      * @return The implementation of the model.
-      */
+     * Returns the keyword recognition model.
+     * @return The implementation of the model.
+     */
     public com.microsoft.cognitiveservices.speech.internal.KeywordRecognitionModel getModelImpl()
     {
         return modelImpl;

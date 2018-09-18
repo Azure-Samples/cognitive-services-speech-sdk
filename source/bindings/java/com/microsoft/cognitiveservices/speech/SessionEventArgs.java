@@ -1,8 +1,8 @@
-package com.microsoft.cognitiveservices.speech;
 //
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+package com.microsoft.cognitiveservices.speech;
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
@@ -10,12 +10,12 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 /**
  * Defines payload for SessionStarted/Stopped events.
  */
-public final class SessionEventArgs // extends EventArgs
+public class SessionEventArgs // extends EventArgs
 {
     /**
-      * Constructs a SessionEcentArgs.
-      * @param arg The native SessionEventArgs
-      */
+     * Constructs a SessionEcentArgs.
+     * @param arg The native SessionEventArgs
+     */
     public SessionEventArgs(com.microsoft.cognitiveservices.speech.internal.SessionEventArgs arg) {
         Contracts.throwIfNull(arg, "arg");
 
@@ -25,9 +25,9 @@ public final class SessionEventArgs // extends EventArgs
     }
 
     /**
-      * Represents the session identifier.
-      * @return Represents the session identifier.
-      */
+     * Represents the session identifier.
+     * @return Represents the session identifier.
+     */
     public String getSessionId() {
         return _sessionId;
     }
@@ -40,7 +40,6 @@ public final class SessionEventArgs // extends EventArgs
      */
     @Override
     public String toString() {
-        return "SessionId: " + _sessionId.toString() +
-               ".";
+        return "SessionId: " + _sessionId.toString() + ".";
     }
 }
