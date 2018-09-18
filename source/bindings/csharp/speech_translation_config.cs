@@ -99,6 +99,10 @@ namespace Microsoft.CognitiveServices.Speech
             {
                 this.impl.SetVoiceName(value);
             }
+            get
+            {
+                return this.impl.GetVoiceName();
+            }
         }
     }
 }
