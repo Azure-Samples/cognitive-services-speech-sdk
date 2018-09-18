@@ -6,7 +6,7 @@
 </head>
 <body style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px;">
     <div id="warning">
-        <h1 style="font-weight:500;">Speech Recognition SDK not found.</h1>
+        <h1 style="font-weight:500;">Speech Recognition SpeechSDK not found.</h1>
         <h2 style="font-weight:500;">Please execute <code>npm run bundle</code> and reload.</h2>
     </div>
     <div id="content" style="display:none">
@@ -93,21 +93,21 @@
             </td>
             </tr>
             <tr>
-                <td align="right"><b>Speech SDK API recognizeOnceAsync:</b></td>
+                <td align="right"><b>Speech SpeechSDK API recognizeOnceAsync:</b></td>
                 <td>
                     <button id="speechsdkStartRecognizeOnceAsync">recognizeOnceAsync()</button>
                     <button id="speechsdkStopRecognizeOnceAsync" disabled="disabled">STOP recognizeOnceAsync()</button>
                 </td>
             </tr>
             <tr>
-                <td align="right"><b>Speech SDK API Continous Recognition:</b></td>
+                <td align="right"><b>Speech SpeechSDK API Continous Recognition:</b></td>
                 <td>
                     <button id="speechsdkStartContinousRecognition">startContinuousRecognitionAsync()</button>
                     <button id="speechsdkStopContinousRecognition" disabled="disabled">STOP stopContinuousRecognitionAsync()</button>
                 </td>
             </tr>
             <tr>
-                <td align="right"><b>Speech SDK API Translation:</b></td>
+                <td align="right"><b>Speech SpeechSDK API Translation:</b></td>
                 <td>
                     <button id="speechsdkStartContinousTranslation">startContinousTranslation()</button>
                     <button id="speechsdkStopContinousTranslation" disabled="disabled">STOP stopContinousTranslation()</button>
@@ -171,10 +171,10 @@
         </table>
     </div>
 
-    <!-- SDK REFERENCE -->
-    <script src="../../distrib/speech.sdk.bundle.js"></script>
+    <!-- SpeechSDK REFERENCE -->
+    <script src="../../distrib/microsoft.cognitiveservices.speech.sdk.bundle.js"></script>
 
-    <!-- Speech SDK Authorization token -->
+    <!-- Speech SpeechSDK Authorization token -->
     <script>
     // Note: Replace the URL with a valid endpoint to retrieve
     //       authorization tokens for your subscription.
@@ -200,14 +200,14 @@
     }
     </script>
   
-    <!-- SDK USAGE -->
+    <!-- SpeechSDK USAGE -->
     <script>
-        // On document load resolve the SDK dependency
+        // On document load resolve the SpeechSDK dependency
         function Initialize(onComplete) {
-            if (!!window.SDK) {
+            if (!!window.SpeechSDK) {
                 document.getElementById('content').style.display = 'block';
                 document.getElementById('warning').style.display = 'none';
-                onComplete(window.SDK);
+                onComplete(window.SpeechSDK);
             }
         }
     </script>
@@ -218,7 +218,7 @@
         var key, authorizationToken;
         var regionOptions;
         var languageOptions, formatOptions, inputSource, filePicker;
-        var SDK;
+        var SpeechSDK;
         var recognizer;
 
         var reco;
@@ -253,20 +253,20 @@
                 phraseDiv.innerHTML = "";
                 statusDiv.innerHTML = "";
 
-                var audioConfig = audioFileValid ? SDK.AudioConfig.fromWavFileInput(audioFile) : SDK.AudioConfig.fromDefaultMicrophoneInput();
+                var audioConfig = audioFileValid ? SpeechSDK.AudioConfig.fromWavFileInput(audioFile) : SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
                 var speechConfig;
                 if(authorizationToken) {
-                    speechConfig = SDK.SpeechConfig.fromAuthorizationToken(authorizationToken, regionOptions.value);
+                    speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, regionOptions.value);
                 } else {
                     if (key.value == "" || key.value == "YOUR_SPEECH_API_KEY") {
                         alert("Please enter your Cognitive Services Speech subscription key!");
                         return;
                     }
-                    speechConfig = SDK.SpeechConfig.fromSubscription(key.value, regionOptions.value);
+                    speechConfig = SpeechSDK.SpeechConfig.fromSubscription(key.value, regionOptions.value);
                 }
 
                 speechConfig.language = languageOptions.value;
-                reco = new SDK.SpeechRecognizer(speechConfig, audioConfig);
+                reco = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
 
                 reco.recognizing = function (s, e) {
                     window.console.log(e);
@@ -332,30 +332,32 @@
                 phraseDiv.innerHTML = "";
                 statusDiv.innerHTML = "";
 
-                var audioConfig = audioFileValid ? SDK.AudioConfig.fromWavFileInput(audioFile) : SDK.AudioConfig.fromDefaultMicrophoneInput();
+                var audioConfig = audioFileValid ? SpeechSDK.AudioConfig.fromWavFileInput(audioFile) : SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
                 var speechConfig;
                 if(authorizationToken) {
-                    speechConfig = SDK.SpeechConfig.fromAuthorizationToken(authorizationToken, regionOptions.value);
+                    speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, regionOptions.value);
                 } else {
                     if (key.value == "" || key.value == "YOUR_SPEECH_API_KEY") {
                         alert("Please enter your Cognitive Services Speech subscription key!");
                         return;
                     }
-                    speechConfig = SDK.SpeechConfig.fromSubscription(key.value, regionOptions.value);
+                    speechConfig = SpeechSDK.SpeechConfig.fromSubscription(key.value, regionOptions.value);
                 }
 
                 speechConfig.language = languageOptions.value;
-                speechConfig.setProperty(SDK.RecognizerParameterNames.TranslationFromLanguage, languageOptions.value);
-                speechConfig.setProperty(SDK.RecognizerParameterNames.TranslationToLanguage, [languageTargetOptions.value.split(":")[0], languageOptions.value]);
+                speechConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_TranslationFromLanguage, languageOptions.value);
+
+    
+                speechConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_TranslationToLanguages, [languageTargetOptions.value.split(":")[0], languageOptions.value]);
                 if (voiceOutput.checked) {
-                    speechConfig.setProperty(SDK.RecognizerParameterNames.TranslationVoice, languageTargetOptions.value.replace(":", "-"));
+                    speechConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_TranslationVoice, languageTargetOptions.value.replace(":", "-"));
                 }
 
-                reco = new SDK.TranslationRecognizer(speechConfig, audioConfig);
+                reco = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
 
                 reco.recognizing = function (s, e) {
                     window.console.log(e);
-                    hypothesisDiv.innerHTML = JSON.stringify(e.result.translations.values);
+                    hypothesisDiv.innerHTML = JSON.stringify(e.result.translations.map.values);
                 };
 
                 reco.recognized = function (s, e) {
@@ -363,7 +365,7 @@
 
                     statusDiv.innerHTML = "";
                     hypothesisDiv.innerHTML = "";
-                    phraseDiv.innerHTML += JSON.stringify(e.result.translations.values) + "\r\n";
+                    phraseDiv.innerHTML += JSON.stringify(e.result.translations.map.values) + "\r\n";
                 };
 
                 reco.synthesizing = function (s, e) {
@@ -431,20 +433,20 @@
                 phraseDiv.innerHTML = "";
                 statusDiv.innerHTML = "";
 
-                var audioConfig = audioFileValid ? SDK.AudioConfig.fromWavFileInput(audioFile) : SDK.AudioConfig.fromDefaultMicrophoneInput();
+                var audioConfig = audioFileValid ? SpeechSDK.AudioConfig.fromWavFileInput(audioFile) : SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
                 var speechConfig;
                 if(authorizationToken) {
-                    speechConfig = SDK.SpeechConfig.fromAuthorizationToken(authorizationToken, regionOptions.value);
+                    speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, regionOptions.value);
                 } else {
                     if (key.value == "" || key.value == "YOUR_SPEECH_API_KEY") {
                         alert("Please enter your Cognitive Services Speech subscription key!");
                         return;
                     }
-                    speechConfig = SDK.SpeechConfig.fromSubscription(key.value, regionOptions.value);
+                    speechConfig = SpeechSDK.SpeechConfig.fromSubscription(key.value, regionOptions.value);
                 }
 
                 speechConfig.language = languageOptions.value;
-                reco = new SDK.SpeechRecognizer(speechConfig, audioConfig);
+                reco = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
 
                 reco.recognizing = function (s, e) {
                     window.console.log(e);
@@ -528,11 +530,11 @@
             });
 
             filePicker.addEventListener("change", function () {
-                audioFile = new SDK.FileInputStream(filePicker.files[0]);
+                audioFile = new SpeechSDK.FileInputStream(filePicker.files[0]);
             });
 
             Initialize(function (speechSdk) {
-                SDK = speechSdk;
+                SpeechSDK = speechSdk;
                 sdkStartContinousRecognitionBtn.disabled = false;
                 sdkStartRecognizeOnceAsyncBtn.disabled = false;
 

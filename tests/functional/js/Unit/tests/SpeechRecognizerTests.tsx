@@ -3,8 +3,8 @@
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 import { setTimeout } from "timers";
-import * as sdk from "../../../../../source/bindings/js/Speech.Browser.Sdk";
-import { RecognitionEventType, SessionEventType } from "../../../../../source/bindings/js/Speech.Browser.Sdk";
+import * as sdk from "../../../../../source/bindings/js/microsoft.cognitiveservices.speech.sdk";
+import { RecognitionEventType, SessionEventType } from "../../../../../source/bindings/js/microsoft.cognitiveservices.speech.sdk";
 import { Settings } from "./Settings";
 import { WaveFileAudioInput } from "./WaveFileAudioInputStream";
 

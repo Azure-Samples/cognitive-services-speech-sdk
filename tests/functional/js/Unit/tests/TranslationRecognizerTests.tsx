@@ -4,8 +4,8 @@
 //
 
 import { setTimeout } from "timers";
-import * as sdk from "../../../../../source/bindings/js/Speech.Browser.Sdk";
-import { RecognitionEventType, SessionEventType } from "../../../../../source/bindings/js/Speech.Browser.Sdk";
+import * as sdk from "../../../../../source/bindings/js/microsoft.cognitiveservices.speech.sdk";
+import { RecognitionEventType, SessionEventType } from "../../../../../source/bindings/js/microsoft.cognitiveservices.speech.sdk";
 import { ByteBufferAudioFile } from "./ByteBufferAudioFile";
 import { Settings } from "./Settings";
 import { default as WaitForCondition } from "./Utilities";

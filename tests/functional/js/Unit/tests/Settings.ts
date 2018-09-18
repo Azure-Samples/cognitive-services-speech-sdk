@@ -3,7 +3,7 @@
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-import * as sdk from "../../../../../source/bindings/js/Speech.Browser.Sdk";
+import * as sdk from "../../../../../source/bindings/js/microsoft.cognitiveservices.speech.sdk";
 
 export class Settings {
 

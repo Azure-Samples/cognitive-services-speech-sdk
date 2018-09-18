@@ -4,7 +4,7 @@
 //
 
 import { isString } from "util";
-import * as sdk from "../../../../../source/bindings/js/Speech.Browser.Sdk";
+import * as sdk from "../../../../../source/bindings/js/microsoft.cognitiveservices.speech.sdk";
 import { Settings } from "./Settings";
 import { WaveFileAudioInput } from "./WaveFileAudioInputStream";
 

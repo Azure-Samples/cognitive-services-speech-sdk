@@ -52,8 +52,8 @@
             var pathExists = fs.existsSync(__dirname + '/../../'+path);
 
             if (!pathExists ||
-                !path.endsWith('speech.sdk.bundle.js') &&
-                !path.endsWith('speech.sdk.bundle.js.map')) {
+                !path.endsWith('microsoft.cognitiveservices.speech.sdk.bundle.js') &&
+                !path.endsWith('microsoft.cognitiveservices.speech.sdk.bundle.js.map')) {
                 respond(404);
             } else {
                 var type = 'application/javascript';

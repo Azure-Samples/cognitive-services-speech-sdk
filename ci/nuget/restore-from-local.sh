@@ -14,6 +14,7 @@ type $NUGETEXETOOLPATH
 
 [[ -d $PACKAGE_PATH ]]
 [[ -d $SLN_PATH ]]
+PACKAGE_PATH="$(cygpath --windows --absolute "$PACKAGE_PATH")"
 
 find "$SLN_PATH" -name \*.sln -print0 |
   xargs -0 -n1 --verbose $NUGETEXETOOLPATH restore -noninteractive -NonInteractive -NoCache -Source "$(dirname "$PACKAGE_PATH")"

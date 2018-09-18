@@ -64,6 +64,7 @@ public class IntentRecognitionSamples {
                 System.out.println("CANCELED: Did you update the subscription info?");
             }
         }
+        // </IntentRecognitionWithMicrophone>
     }
 
     // Intent recognition in the specified language, using microphone.

@@ -10,7 +10,7 @@
   gulp.task("build_ES5", function() {
       return gulp.src([
               "src/**/*.ts",
-              "Speech.Browser.Sdk.ts"],
+              "microsoft.cognitiveservices.speech.sdk.ts"],
               {base: '.'})
           .pipe(tslint({
         formatter: "prose",
@@ -37,7 +37,7 @@
   gulp.task("bundle", ["build_ES5"], function () {
       return gulp.src('samples/browser/sample_app.js')
       .pipe(webpack({
-          output: {filename: 'speech.sdk.bundle.js'},
+          output: {filename: 'microsoft.cognitiveservices.speech.sdk.bundle.js'},
           devtool: 'source-map',
           module:  {
               rules: [{

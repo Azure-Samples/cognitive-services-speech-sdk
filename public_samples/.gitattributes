@@ -15,13 +15,17 @@ proguard-rules.pro text
 *.csproj text
 *.gradle text
 *.h text
+*.html text
 *.java text
 *.json text
 *.m text
 *.md text
+*.pbxproj text
+*.php text
 *.pl text
 *.plist text
 *.prefs text
+*.pro text
 *.properties text
 *.sln text
 *.storyboard text

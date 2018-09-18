@@ -97,9 +97,9 @@ phases:
         . ci/functions.sh
         vsts_updatebuildnumber $(SPEECHSDK_SEMVER2NOMETA)
         vsts_addbuildtag $(SPEECHSDK_BUILD_TYPE)
-  - task: Bash@3
-    inputs:
-      filePath: ci/check-git-head.sh
+  - bash:
+      ./ci/check-git-head.sh &&
+      find public_samples -name \*.java -or -name \*.cpp -or -name \*.cs -or -name \*.m -or -name pom.xml -or -name \*.html -or -name \*.xaml | xargs perl ci/check-docfx-codetags.pl
     displayName: Repository checks
 
 - phase: WindowsSdlBuild
@@ -1395,6 +1395,8 @@ phases:
   queue:
     name: Hosted VS2017
     demands: npm
+  variables:
+    NPM_REGISTRY: https://csspeechstorage.blob.core.windows.net/npm/de13462a
   steps:
   - task: Bash@3
     name: var
@@ -1430,12 +1432,38 @@ phases:
   - script: RunTests.cmd SpeechSubscriptionKey:$(KeySkyman) SpeechRegion:westus
     displayName: 'Run tests'
     workingDirectory: tests/functional/js/Unit
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
   - task: PublishTestResults@2
     displayName: 'Publish Test Results **/TEST-*.xml'
-    condition: always()
+    condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-tslint.TSLint@1
     displayName: 'Run TSLint'
     enabled: false
+  - task: Npm@1
+    displayName: 'npm pack'
+    inputs:
+      command: custom
+      workingDir: source/bindings/js
+      verbose: false
+      customCommand: 'pack'
+  - bash: |
+      set -e -o pipefail -x
+      PACKAGE_BASE=microsoft-cognitiveservices-speech-sdk
+      PACKAGE_NAME=$PACKAGE_BASE-$SPEECHSDK_SEMVER2NOMETA.tgz
+      PACKAGE_IN=source/bindings/js/$PACKAGE_NAME
+      PACKAGE_OUT="$(Build.ArtifactStagingDirectory)/Out/JavaScript/npm"
+      QUICKSTART_OUT="$(Build.ArtifactStagingDirectory)/Out/JavaScript/js-browser"
+      mkdir -p "$PACKAGE_OUT"
+      ./ci/generate-npm-index-json.sh "$PACKAGE_IN" "$SPEECHSDK_SEMVER2NOMETA" "$(NPM_REGISTRY)" > "$PACKAGE_OUT/$PACKAGE_BASE"
+      cp --preserve "$PACKAGE_IN" "$PACKAGE_OUT"
+      cp --preserve --recursive public_samples/quickstart/js-browser "$QUICKSTART_OUT"
+      cp --preserve source/bindings/js/distrib/microsoft.cognitiveservices.speech.sdk.bundle.* "$QUICKSTART_OUT"
+  - task: PublishBuildArtifacts@1
+    displayName: Publish drop
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/Out/JavaScript'
+      ArtifactName: JavaScript
+      publishLocation: Container
 
 - phase: Doxygen
   dependsOn: Pre

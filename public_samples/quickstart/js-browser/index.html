@@ -7,7 +7,7 @@
 <body style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px;">
   <!-- <uidiv> -->
   <div id="warning">
-    <h1 style="font-weight:500;">Speech Recognition Speech SDK not found (speech.sdk.bundle.js missing).</h1>
+    <h1 style="font-weight:500;">Speech Recognition Speech SDK not found (microsoft.cognitiveservices.speech.sdk.bundle.js missing).</h1>
   </div>
   
   <div id="content" style="display:none">
@@ -38,7 +38,7 @@
 
   <!-- <speechsdkref> -->
   <!-- Speech SDK reference sdk. -->
-  <script src="speech.sdk.bundle.js"></script>
+  <script src="microsoft.cognitiveservices.speech.sdk.bundle.js"></script>
   <!-- </speechsdkref> -->
 
   <!-- <authorizationfunction> -->
@@ -55,10 +55,11 @@
       a.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       a.send("");
       a.onload = function() {
+          var token = JSON.parse(atob(this.responseText.split(".")[1]));
+          regionKey.value = token.region;
+          authorizationToken = this.responseText;
           subscriptionKey.disabled = true;
           subscriptionKey.value = "using authorization token (hit F5 to refresh)";
-          token = this.responseText;
-          authorizationToken = token;
           console.log("Got an authorization token: " + token);
       }
     }

@@ -1,11 +1,12 @@
 {
-  "name": "microsoft-speech-sdk-js-browser",
+  "name": "microsoft-cognitiveservices-speech-sdk",
   "version": "0.7.0",
-  "description": "Microsoft Speech SDK for browsers",
-  "main": "distrib/Speech.Browser.Sdk.js",
-  "types": "distrib/speech.browser.sdk.d.ts",
+  "description": "Microsoft Cognitive Services Speech SDK",
+  "main": "distrib/microsoft.cognitiveservices.speech.sdk.js",
+  "types": "distrib/microsoft.cognitiveservices.speech.sdk.d.ts",
   "keywords": [
     "microsoft",
+    "cognitiveservices",
     "speech",
     "sdk",
     "javascript",
@@ -17,7 +18,7 @@
     "speechtotext"
   ],
   "author": "Microsoft",
-  "license": "MIT",
+  "license": "https://aka.ms/csspeech/license201809",
   "devDependencies": {
     "gulp": "^3.9.1",
     "gulp-minify": "0.0.15",
