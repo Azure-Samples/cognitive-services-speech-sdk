@@ -21,7 +21,7 @@ static_assert((int)ResultReason_RecognizedIntent == (int)ResultReason::Recognize
 static_assert((int)ResultReason_TranslatingSpeech == (int)ResultReason::TranslatingSpeech, "ResultReason_* enum values == ResultReason::* enum values");
 static_assert((int)ResultReason_TranslatedSpeech == (int)ResultReason::TranslatedSpeech, "ResultReason_* enum values == ResultReason::* enum values");
 static_assert((int)ResultReason_SynthesizingAudio == (int)ResultReason::SynthesizingAudio, "ResultReason_* enum values == ResultReason::* enum values");
-static_assert((int)ResultReason_SynthesizingAudioComplete == (int)ResultReason::SynthesizingAudioComplete, "ResultReason_* enum values == ResultReason::* enum values");
+static_assert((int)ResultReason_SynthesizingAudioComplete == (int)ResultReason::SynthesizingAudioCompleted, "ResultReason_* enum values == ResultReason::* enum values");
 
 static_assert((int)CancellationReason_Error == (int)CancellationReason::Error, "CancellationReason_* enum values == CancellationReason::* enum values");
 static_assert((int)CancellationReason_EndOfStream == (int)CancellationReason::EndOfStream, "CancellationReason_* enum values == CancellationReason::* enum values");

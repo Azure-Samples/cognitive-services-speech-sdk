@@ -91,6 +91,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     {
                         synthesisResultEvents.Add(e);
                     }
+                    if (e.Result.Audio.Length == 0 && e.Result.Reason != ResultReason.SynthesizingAudioCompleted)
+                    {
+                        Assert.Fail($"Synthesizing event failure: Reason:{0} Audio.Length={1}", e.Result.Reason, e.Result.Audio.Length);
+                    }
                 };
 
                 recognizer.SessionStarted += (s, e) =>

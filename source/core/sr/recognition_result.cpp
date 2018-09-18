@@ -182,7 +182,7 @@ void CSpxRecognitionResult::InitTranslationSynthesisResult(SynthesisStatusCode s
 
     m_reason = m_audioLength > 0
         ? ResultReason::SynthesizingAudio
-        : ResultReason::SynthesizingAudioComplete;
+        : ResultReason::SynthesizingAudioCompleted;
 
     if (status == SynthesisStatusCode::Error)
     {

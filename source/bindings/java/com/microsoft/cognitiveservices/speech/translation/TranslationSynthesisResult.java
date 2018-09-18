@@ -5,6 +5,7 @@ package com.microsoft.cognitiveservices.speech.translation;
 //
 
 import com.microsoft.cognitiveservices.speech.util.Contracts;
+import com.microsoft.cognitiveservices.speech.ResultReason;
 
 /**
   * Defines translation synthesis result, i.e. the voice output of the translated text in the target language.
@@ -12,12 +13,14 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 public final class TranslationSynthesisResult
 {
     private com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResult _resultImpl;
+    private ResultReason _reason;
 
     TranslationSynthesisResult(com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResult result) {
         Contracts.throwIfNull(result, "result");
 
         _resultImpl = result;
         _AudioData = null;
+        _reason = ResultReason.values()[result.getReason().swigValue()];
     }
 
     /**
@@ -28,6 +31,14 @@ public final class TranslationSynthesisResult
             this._resultImpl.delete();
         }
         this._resultImpl = null;
+    }
+
+    /**
+      * Specifies reason the result was created.
+      * @return Specifies reason of the result.
+      */
+      public ResultReason getReason() {
+        return this._reason;
     }
 
     /**
@@ -54,6 +65,9 @@ public final class TranslationSynthesisResult
       */
     @Override
     public String toString() {
-        return "TranslationSynthesisResult: <<audioData " + (_AudioData != null ? _AudioData.length : "no") + " bytes available>>";
+        return "TranslationSynthesisResult" + 
+               " Reason:" + this._reason +
+               " Audio.length:" + this._AudioData.length +
+               ".";
     }
 }

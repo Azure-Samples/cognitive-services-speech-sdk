@@ -32,7 +32,7 @@ namespace MicrosoftSpeechSDKSamples
         private static void MySynthesizingEventHandler(object sender, TranslationSynthesisResultEventArgs e)
         {
             Console.WriteLine($"Translation: synthesis result: {e.ToString()}.");
-            if (e.Result.Audio.Length > 0)
+            if (e.Result.Reason != ResultReason.SynthesizingAudioCompleted)
             {
                 using (var m = new MemoryStream(e.Result.Audio))
                 {

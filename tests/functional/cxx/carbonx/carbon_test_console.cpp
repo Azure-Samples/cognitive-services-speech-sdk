@@ -1298,7 +1298,7 @@ std::string CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
     static_assert(6 == (int)ResultReason::TranslatingSpeech, "ResultReason::* enum values changed!");
     static_assert(7 == (int)ResultReason::TranslatedSpeech, "ResultReason::* enum values changed!");
     static_assert(8 == (int)ResultReason::SynthesizingAudio, "ResultReason::* enum values changed!");
-    static_assert(9 == (int)ResultReason::SynthesizingAudioComplete, "ResultReason::* enum values changed!");
+    static_assert(9 == (int)ResultReason::SynthesizingAudioCompleted, "ResultReason::* enum values changed!");
 
     static_assert(1 == (int)CancellationReason::Error, "CancellationReason::* enum values changed!");
     static_assert(2 == (int)CancellationReason::EndOfStream, "CancellationReason::* enum values changed!");
@@ -1317,7 +1317,7 @@ std::string CarbonTestConsole::ToString(const SpeechRecognitionEventArgs& e)
         "TranslatingSpeech",
         "TranslatedSpeech",
         "SynthesizingAudio",
-        "SynthesizingAudioComplete"
+        "SynthesizingAudioCompleted"
     };
 
     std::string reasonsCanceled[] = {
@@ -1371,7 +1371,7 @@ std::string CarbonTestConsole::ToString(const IntentRecognitionEventArgs& e)
     static_assert(6 == (int)ResultReason::TranslatingSpeech, "ResultReason::* enum values changed!");
     static_assert(7 == (int)ResultReason::TranslatedSpeech, "ResultReason::* enum values changed!");
     static_assert(8 == (int)ResultReason::SynthesizingAudio, "ResultReason::* enum values changed!");
-    static_assert(9 == (int)ResultReason::SynthesizingAudioComplete, "ResultReason::* enum values changed!");
+    static_assert(9 == (int)ResultReason::SynthesizingAudioCompleted, "ResultReason::* enum values changed!");
 
     static_assert(1 == (int)CancellationReason::Error, "CancellationReason::* enum values changed!");
     static_assert(2 == (int)CancellationReason::EndOfStream, "CancellationReason::* enum values changed!");
@@ -1390,7 +1390,7 @@ std::string CarbonTestConsole::ToString(const IntentRecognitionEventArgs& e)
         "TranslatingSpeech",
         "TranslatedSpeech",
         "SynthesizingAudio",
-        "SynthesizingAudioComplete"
+        "SynthesizingAudioCompleted"
     };
 
     std::string reasonsCanceled[] = {
@@ -1444,7 +1444,7 @@ std::string CarbonTestConsole::ToString(const TranslationTextResultEventArgs& e)
     static_assert(6 == (int)ResultReason::TranslatingSpeech, "ResultReason::* enum values changed!");
     static_assert(7 == (int)ResultReason::TranslatedSpeech, "ResultReason::* enum values changed!");
     static_assert(8 == (int)ResultReason::SynthesizingAudio, "ResultReason::* enum values changed!");
-    static_assert(9 == (int)ResultReason::SynthesizingAudioComplete, "ResultReason::* enum values changed!");
+    static_assert(9 == (int)ResultReason::SynthesizingAudioCompleted, "ResultReason::* enum values changed!");
 
     static_assert(1 == (int)CancellationReason::Error, "CancellationReason::* enum values changed!");
     static_assert(2 == (int)CancellationReason::EndOfStream, "CancellationReason::* enum values changed!");
@@ -1463,7 +1463,7 @@ std::string CarbonTestConsole::ToString(const TranslationTextResultEventArgs& e)
         "TranslatingSpeech",
         "TranslatedSpeech",
         "SynthesizingAudio",
-        "SynthesizingAudioComplete"
+        "SynthesizingAudioCompleted"
     };
     std::string reasonsCanceled[] = {
         "",

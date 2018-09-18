@@ -68,7 +68,7 @@ typedef NS_ENUM(NSUInteger, ResultReason)
     /**
       * Indicates the synthesized audio is now complete for this phrase.
       */
-    SynthesizingAudioComplete = 9
+    SynthesizingAudioCompleted = 9
 };
 
 /**

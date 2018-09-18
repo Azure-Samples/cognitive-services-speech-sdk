@@ -25,7 +25,7 @@ namespace Microsoft.CognitiveServices.Speech
             Trace.Assert((int)ResultReason.TranslatingSpeech == (int)Internal.ResultReason.TranslatingSpeech);
             Trace.Assert((int)ResultReason.TranslatedSpeech == (int)Internal.ResultReason.TranslatedSpeech);
             Trace.Assert((int)ResultReason.SynthesizingAudio == (int)Internal.ResultReason.SynthesizingAudio);
-            Trace.Assert((int)ResultReason.SynthesizingAudioComplete == (int)Internal.ResultReason.SynthesizingAudioComplete);
+            Trace.Assert((int)ResultReason.SynthesizingAudioCompleted == (int)Internal.ResultReason.SynthesizingAudioCompleted);
 
             resultImpl = result;
             this.ResultId = result.ResultId;

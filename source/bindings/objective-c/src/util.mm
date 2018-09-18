@@ -39,8 +39,8 @@
         case SpeechImpl::ResultReason::SynthesizingAudio:
             reason = ResultReason::SynthesizingAudio;
             break;
-        case SpeechImpl::ResultReason::SynthesizingAudioComplete:
-            reason = ResultReason::SynthesizingAudioComplete;
+        case SpeechImpl::ResultReason::SynthesizingAudioCompleted:
+            reason = ResultReason::SynthesizingAudioCompleted;
             break;
         default:
             // Todo error handling.

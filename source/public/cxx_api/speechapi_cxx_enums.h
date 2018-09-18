@@ -193,7 +193,7 @@ enum class ResultReason
     /// <summary>
     /// Indicates the synthesized audio is now complete for this phrase.
     /// </summary>
-    SynthesizingAudioComplete = 9
+    SynthesizingAudioCompleted = 9
 };
 
 /// <summary>

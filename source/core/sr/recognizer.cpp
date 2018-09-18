@@ -174,7 +174,7 @@ void CSpxRecognizer::FireResultEvent(const std::wstring& sessionId, std::shared_
         break;
 
     case ResultReason::SynthesizingAudio:
-    case ResultReason::SynthesizingAudioComplete:
+    case ResultReason::SynthesizingAudioCompleted:
         pevent = &TranslationSynthesisResult;
         break;
 

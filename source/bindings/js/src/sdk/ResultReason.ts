@@ -58,5 +58,5 @@ export enum ResultReason {
     /**
      * Indicates the synthesized audio is now complete for this phrase.
      */
-    SynthesizingAudioComplete,
+    SynthesizingAudioCompleted,
 }

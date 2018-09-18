@@ -106,6 +106,7 @@ class TranslationSynthesisResult
 {
 private:
 
+    ResultReason m_reason;
     std::vector<uint8_t> m_audioData;
 
 public:
@@ -114,10 +115,11 @@ public:
     /// </summary>
     /// <param name="resultHandle">The handle of the result returned by recognizer in C-API.</param>
     explicit TranslationSynthesisResult(SPXRESULTHANDLE resultHandle) :
+        Reason(m_reason),
         Audio(m_audioData)
     {
         PopulateResultFields(resultHandle);
-        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x)", __FUNCTION__, this, resultHandle);
+        SPX_DBG_TRACE_VERBOSE("%s (this=0x%x, handle=0x%x) reason=0x%x", __FUNCTION__, this, resultHandle, Reason);
     };
 
     /// <summary>
@@ -129,6 +131,11 @@ public:
     };
 
     /// <summary>
+    /// Recognition reason.
+    /// </summary>
+    const ResultReason& Reason;
+
+    /// <summary>
     /// The voice output of the translated text in the target language.
     /// </summary>
     const std::vector<uint8_t>& Audio;
@@ -136,9 +143,15 @@ public:
 
 private:
 
+    DISABLE_DEFAULT_CTORS(TranslationSynthesisResult);
+
     void PopulateResultFields(SPXRESULTHANDLE resultHandle)
     {
         SPX_INIT_HR(hr);
+
+        Result_Reason resultReason;
+        SPX_THROW_ON_FAIL(hr = result_get_reason(resultHandle, &resultReason));
+        m_reason = (ResultReason)resultReason;
 
         size_t bufLen = 0;
         hr = translation_synthesis_result_get_audio_data(resultHandle, nullptr, &bufLen);
@@ -151,8 +164,6 @@ private:
 
         SPX_DBG_TRACE_VERBOSE("Translation synthesis: audio length: %d, verctor size:", bufLen, m_audioData.size());
     };
-
-    DISABLE_DEFAULT_CTORS(TranslationSynthesisResult);
 };
 
 
