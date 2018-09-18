@@ -107,7 +107,6 @@ SPXAPI recognizer_create_translation_recognizer_from_config(SPXRECOHANDLE* phrec
         auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioInput);
         recognizer = factory->CreateTranslationRecognizerFromConfig(source_lang, vlangs, voice, audioInput);
 
-        // TODO: track the factory weixu where to save the factory handle? who cleans this up?
         auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
         factoryhandles->TrackHandle(factory);
 
@@ -146,7 +145,6 @@ SPXAPI recognizer_create_intent_recognizer_from_config(SPXRECOHANDLE* phreco, SP
         auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioInput);
         std::shared_ptr<ISpxRecognizer> recognizer = factory->CreateIntentRecognizerFromConfig(lang.c_str(), format, audioInput);
 
-        // TODO: track the factory weixu where to save the factory handle? who cleans this up?
         auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
         factoryhandles->TrackHandle(factory);
 
@@ -154,6 +152,5 @@ SPXAPI recognizer_create_intent_recognizer_from_config(SPXRECOHANDLE* phreco, SP
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
     }
-    SPXAPI_CATCH_AND_RETURN_HR(hr);
-    
+    SPXAPI_CATCH_AND_RETURN_HR(hr);    
 }

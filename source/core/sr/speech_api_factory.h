@@ -28,6 +28,14 @@ class CSpxSpeechApiFactory :
 {
 public:
 
+    // debugging to make sure CSpxSpeechApiFactory is released.
+#if _DEBUG
+    ~ CSpxSpeechApiFactory()
+    {
+        SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+    }
+#endif
+
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxInterfaceBase)
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)

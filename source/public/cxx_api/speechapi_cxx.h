@@ -11,9 +11,9 @@
 #include <speechapi_cxx_smart_handle.h>
 
 #include <speechapi_cxx_properties.h>
-#include <speechapi_cxx_speech_config.h>
 #include <speechapi_cxx_audio_stream_format.h>
 #include <speechapi_cxx_audio_stream.h>
+#include <speechapi_cxx_speech_config.h>
 #include <speechapi_cxx_audio_config.h>
 
 #include <speechapi_cxx_eventargs.h>
@@ -40,7 +40,7 @@
 
 #include <speechapi_cxx_translation_result.h>
 #include <speechapi_cxx_translation_eventargs.h>
-#include <speechapi_cxx_translation_recognizer.h>
 #include <speechapi_cxx_speech_translation_config.h>
+#include <speechapi_cxx_translation_recognizer.h>
 
 #include <speechapi_cxx_session.h>

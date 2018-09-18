@@ -17,7 +17,7 @@ namespace Speech {
 namespace Impl {
 
 
-#define SPXFACTORYHANDLE_ROOTSITEPARAMETERS_MOCK ((SPXFACTORYHANDLE)+1)
+#define SPXFACTORYHANDLE_ROOTSITEPARAMETERS_MOCK ((SPXHANDLE)+1)
 
 void SpxSetMockParameterString(const char* name, const char* value);
 

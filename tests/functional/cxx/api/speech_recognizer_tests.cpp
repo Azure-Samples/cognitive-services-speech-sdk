@@ -100,6 +100,24 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         REQUIRE(!(result->Properties.GetProperty(PropertyId::LanguageUnderstandingServiceResponse_JsonResult)).empty());
     }
 #endif
+    SECTION("Check that recognition can set authurization token")
+    {
+        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
+
+        UseMocks(false);
+        REQUIRE(exists(PAL::ToWString(input_file)));
+        REQUIRE(!IsUsingMocks());
+
+        auto recognizer = CreateRecognizers<SpeechRecognizer>(input_file);
+
+        std::string token("Thursday");
+        recognizer->SetAuthorizationToken(token);
+        REQUIRE(recognizer->GetAuthorizationToken() == token);
+
+        token = "Friday";
+        recognizer->SetAuthorizationToken(token);
+        REQUIRE(recognizer->GetAuthorizationToken() == token);
+    }
     SECTION("Check that recognizer does not crash while async op is in progress")
     {
         UseMocks(true);
@@ -163,7 +181,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             std::map<Callbacks, atomic_int> callbackCounts = createCallbacksMap();
 
             // We're going to loop thru 11 times... The first 10, we'll use mocks. The last time we'll use the USP
-            // NOTE: Please keep this at 11... It tests various "race"/"speed" configurations of the core system... 
+            // NOTE: Please keep this at 11... It tests various "race"/"speed" configurations of the core system...
             // NOTE: When running agains the localhost, loop 20 times... Half the time, we'll use mocks, and half - the USP.
             const int numLoops = (Config::Endpoint.empty()) ? 11 : 20;
 
@@ -286,7 +304,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         // Comment out the next line to see for yourself (repros on Linux build machines).
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
     }
-   
+
     SECTION("Wrong Key triggers Canceled Event ")
     {
         REQUIRE(exists(PAL::ToWString(input_file)));
@@ -429,7 +447,7 @@ TEST_CASE("Speech on local server", "[api][cxx]")
         REQUIRE(!IsUsingMocks());
 
         const int numLoops = 10;
-        
+
         auto sc = SpeechConfig::FromEndpoint(Config::Endpoint, R"({"max_timeout":"0"})");
         for (int i = 0; i < numLoops; i++)
         {
@@ -508,7 +526,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
 
         auto callback1 = [&](const SpeechRecognitionEventArgs& args)
         {
-            if (args.Result->Reason == ResultReason::RecognizedSpeech) 
+            if (args.Result->Reason == ResultReason::RecognizedSpeech)
             {
                 recognizer->Canceled.DisconnectAll();
             }
@@ -545,7 +563,7 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
             recognizer.reset();
         };
         auto canceledCallback3 = [&](const SpeechRecognitionEventArgs& args) { callback3(args); };
-        
+
         recognizer = CreateRecognizers<SpeechRecognizer>(input_file);
         recognizer->Recognized.Connect(callback3);
         recognizer->Canceled.Connect(canceledCallback3);
