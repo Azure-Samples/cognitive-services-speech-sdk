@@ -168,8 +168,9 @@ phases:
       # Needed for SDL:
       createLogFile: true
   # Checks BEGIN
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
-    displayName: 'Run Roslyn Analyzers'
+  # Disabling Roslyn analyzers due to a recent restrictive update
+  # - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
+  #   displayName: 'Run Roslyn Analyzers'
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-binskim.BinSkim@3
     displayName: 'BinSkim (can pass only with Spectre mitigation)'
     inputs:

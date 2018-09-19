@@ -5,12 +5,12 @@
 
 #import "speechapi_private.h"
 
-@implementation TranslationTextResult
+@implementation TranslationRecognitionResult
 {
-    std::shared_ptr<TranslationImpl::TranslationTextResult> resultImpl;
+    std::shared_ptr<TranslationImpl::TranslationRecognitionResult> resultImpl;
 }
 
-- (instancetype)init :(std::shared_ptr<TranslationImpl::TranslationTextResult>)resultHandle
+- (instancetype)init :(std::shared_ptr<TranslationImpl::TranslationRecognitionResult>)resultHandle
 {
     self = [super init :resultHandle];
     resultImpl = resultHandle;

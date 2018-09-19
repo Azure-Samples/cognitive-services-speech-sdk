@@ -19,9 +19,9 @@ struct TranslationEventHandlerHelper
     void addRecognizedEventHandler()
     {
         NSLog(@"Add RecognizedEventHandler");
-        recoImpl->Recognized.Connect([this] (const TranslationImpl::TranslationTextResultEventArgs& e)
+        recoImpl->Recognized.Connect([this] (const TranslationImpl::TranslationRecognitionEventArgs& e)
                                      {
-                                         TranslationTextResultEventArgs *eventArgs = [[TranslationTextResultEventArgs alloc] init: e];
+                                         TranslationRecognitionEventArgs *eventArgs = [[TranslationRecognitionEventArgs alloc] init: e];
                                          [recognizer onRecognizedEvent: eventArgs];
                                      });
     }
@@ -29,9 +29,9 @@ struct TranslationEventHandlerHelper
     void addRecognizingEventHandler()
     {
         NSLog(@"Add RecognizingEventHandler");
-        recoImpl->Recognizing.Connect([this] (const TranslationImpl::TranslationTextResultEventArgs& e)
+        recoImpl->Recognizing.Connect([this] (const TranslationImpl::TranslationRecognitionEventArgs& e)
                                       {
-                                          TranslationTextResultEventArgs *eventArgs = [[TranslationTextResultEventArgs alloc] init: e];
+                                          TranslationRecognitionEventArgs *eventArgs = [[TranslationRecognitionEventArgs alloc] init: e];
                                           [recognizer onRecognizingEvent: eventArgs];
                                       });
     }
@@ -39,9 +39,9 @@ struct TranslationEventHandlerHelper
     void addCanceledEventHandler()
     {
         NSLog(@"Add CanceledEventHandler");
-        recoImpl->Canceled.Connect([this] (const TranslationImpl::TranslationTextResultCanceledEventArgs& e)
+        recoImpl->Canceled.Connect([this] (const TranslationImpl::TranslationRecognitionCanceledEventArgs& e)
                                    {
-                                       TranslationTextResultCanceledEventArgs *eventArgs = [[TranslationTextResultCanceledEventArgs alloc] init:e];
+                                       TranslationRecognitionCanceledEventArgs *eventArgs = [[TranslationRecognitionCanceledEventArgs alloc] init:e];
                                        [recognizer onCanceledEvent: eventArgs];
                                    });
     }
@@ -49,9 +49,9 @@ struct TranslationEventHandlerHelper
     void addSynthesizingEventHandler()
     {
         NSLog(@"Add SynthesisResultEventHandler");
-        recoImpl->Synthesizing.Connect([this] (const TranslationImpl::TranslationSynthesisResultEventArgs& e)
+        recoImpl->Synthesizing.Connect([this] (const TranslationImpl::TranslationSynthesisEventArgs& e)
             {
-                TranslationSynthesisResultEventArgs *eventArgs = [[TranslationSynthesisResultEventArgs alloc] init: e];
+                TranslationSynthesisEventArgs *eventArgs = [[TranslationSynthesisEventArgs alloc] init: e];
                 [recognizer onSynthesizingEvent: eventArgs];
             });
     }
@@ -190,39 +190,39 @@ struct TranslationEventHandlerHelper
     return [NSString stringWithString:recoImpl->GetAuthorizationToken()];
 }
 
-- (TranslationTextResult *)recognizeOnce
+- (TranslationRecognitionResult *)recognizeOnce
 {
-    TranslationTextResult *result = nil;
+    TranslationRecognitionResult *result = nil;
     
     if (recoImpl == nullptr) {
-        result = [[TranslationTextResult alloc] initWithError: @"Recognizer has been closed."];
+        result = [[TranslationRecognitionResult alloc] initWithError: @"Recognizer has been closed."];
         return result;
     }
     
     try {
-        std::shared_ptr<TranslationImpl::TranslationTextResult> resultImpl = recoImpl->RecognizeOnceAsync().get();
+        std::shared_ptr<TranslationImpl::TranslationRecognitionResult> resultImpl = recoImpl->RecognizeOnceAsync().get();
         if (resultImpl == nullptr) {
-            result = [[TranslationTextResult alloc] initWithError: @"No result available."];
+            result = [[TranslationRecognitionResult alloc] initWithError: @"No result available."];
         }
         else
         {
-            result = [[TranslationTextResult alloc] init: resultImpl];
+            result = [[TranslationRecognitionResult alloc] init: resultImpl];
         }
     }
     catch (...) {
         // Todo: better error handling
         NSLog(@"exception caught");
-        result = [[TranslationTextResult alloc] initWithError: @"Runtime Exception"];
+        result = [[TranslationRecognitionResult alloc] initWithError: @"Runtime Exception"];
     }
     
     return result;
 }
 
-- (void)recognizeOnceAsync:(void (^)(TranslationTextResult *))resultReceivedBlock
+- (void)recognizeOnceAsync:(void (^)(TranslationRecognitionResult *))resultReceivedBlock
 {
-    TranslationTextResult *result = nil;
+    TranslationRecognitionResult *result = nil;
     if (recoImpl == nullptr) {
-        result = [[TranslationTextResult alloc] initWithError: @"Recognizer has been closed."];
+        result = [[TranslationRecognitionResult alloc] initWithError: @"Recognizer has been closed."];
         dispatch_async(dispatchQueue, ^{
             resultReceivedBlock(result);
         });
@@ -230,19 +230,19 @@ struct TranslationEventHandlerHelper
     }
     
     try {
-        std::shared_ptr<TranslationImpl::TranslationTextResult> resultImpl = recoImpl->RecognizeOnceAsync().get();
+        std::shared_ptr<TranslationImpl::TranslationRecognitionResult> resultImpl = recoImpl->RecognizeOnceAsync().get();
         if (resultImpl == nullptr) {
-            result = [[TranslationTextResult alloc] initWithError: @"No result available."];
+            result = [[TranslationRecognitionResult alloc] initWithError: @"No result available."];
         }
         else
         {
-            result = [[TranslationTextResult alloc] init: resultImpl];
+            result = [[TranslationRecognitionResult alloc] init: resultImpl];
         }
     }
     catch (...) {
         // Todo: better error handling
         NSLog(@"exception caught");
-        result = [[TranslationTextResult alloc] initWithError: @"Runtime Exception"];
+        result = [[TranslationRecognitionResult alloc] initWithError: @"Runtime Exception"];
     }
     
     dispatch_async(dispatchQueue, ^{
@@ -284,7 +284,7 @@ struct TranslationEventHandlerHelper
     }
 }
 
-- (void)onRecognizedEvent:(TranslationTextResultEventArgs *)eventArgs
+- (void)onRecognizedEvent:(TranslationRecognitionEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onRecognizedEvent");
     NSArray* workCopyOfList;
@@ -293,12 +293,12 @@ struct TranslationEventHandlerHelper
     [recognizedLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
-            ((TranslationTextResultEventHandlerBlock)handle)(self, eventArgs);
+            ((TranslationRecognitionResultEventHandlerBlock)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)onRecognizingEvent:(TranslationTextResultEventArgs *)eventArgs
+- (void)onRecognizingEvent:(TranslationRecognitionEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onRecognizingEvent");
     NSArray* workCopyOfList;
@@ -307,12 +307,12 @@ struct TranslationEventHandlerHelper
     [recognizingLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
-            ((TranslationTextResultEventHandlerBlock)handle)(self, eventArgs);
+            ((TranslationRecognitionResultEventHandlerBlock)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)onSynthesizingEvent:(TranslationSynthesisResultEventArgs *)eventArgs
+- (void)onSynthesizingEvent:(TranslationSynthesisEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onSynthesisResultEvent");
     NSArray* workCopyOfList;
@@ -326,7 +326,7 @@ struct TranslationEventHandlerHelper
     }
 }
 
-- (void)onCanceledEvent:(TranslationTextResultCanceledEventArgs *)eventArgs
+- (void)onCanceledEvent:(TranslationRecognitionCanceledEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onCanceledEvent");
     NSArray* workCopyOfList;
@@ -335,12 +335,12 @@ struct TranslationEventHandlerHelper
     [canceledLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
-            ((TranslationTextResultCanceledEventHandlerBlock)handle)(self, eventArgs);
+            ((TranslationRecognitionResultCanceledEventHandlerBlock)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)addRecognizedEventListener:(TranslationTextResultEventHandlerBlock)eventHandler
+- (void)addRecognizedEventListener:(TranslationRecognitionResultEventHandlerBlock)eventHandler
 {
     [recognizedLock lock];
     [recognizedEventListenerList addObject:eventHandler];
@@ -348,7 +348,7 @@ struct TranslationEventHandlerHelper
     return;
 }
 
-- (void)addRecognizingEventListener:(TranslationTextResultEventHandlerBlock)eventHandler
+- (void)addRecognizingEventListener:(TranslationRecognitionResultEventHandlerBlock)eventHandler
 {
     [recognizingLock lock];
     [recognizingEventListenerList addObject:eventHandler];
@@ -356,7 +356,7 @@ struct TranslationEventHandlerHelper
     return;
 }
 
-- (void)addCanceledEventListener:(TranslationTextResultCanceledEventHandlerBlock)eventHandler
+- (void)addCanceledEventListener:(TranslationRecognitionResultCanceledEventHandlerBlock)eventHandler
 {
     [canceledLock lock];
     [canceledEventListenerList addObject:eventHandler];

@@ -87,7 +87,7 @@
     translationRecognizer = [TranslationRecognizer fromConfig:translationConfig usingAudio:weatherAudioSource];
     NSString *translationVoice = [translationRecognizer.properties getPropertyByName:@"TRANSLATION-Voice"];
     NSLog(@"Property Collection: TranslationVoice is read from property collection: %@", translationVoice);
-    TranslationTextResult *translationResult = [translationRecognizer recognizeOnce];
+    TranslationRecognitionResult *translationResult = [translationRecognizer recognizeOnce];
     NSLog(@"RecognizeOnce: Translation result: recognized: %@. Status %ld.", translationResult.text, (long)translationResult.reason);
     for (id lang in [translationResult.translations allKeys]) {
         NSLog(@"RecognizeOnce: Translation result: translated into %@: %@", lang, [translationResult.translations objectForKey:lang]);
@@ -96,7 +96,7 @@
     // Test2: Use RecognizeOnceAsync() with completion block
     translationRecognizer = [TranslationRecognizer fromConfig:translationConfig usingAudio:weatherAudioSource];
     end = false;
-    [translationRecognizer recognizeOnceAsync: ^ (TranslationTextResult *result){
+    [translationRecognizer recognizeOnceAsync: ^ (TranslationRecognitionResult *result){
         NSLog(@"RecognizeOnceAsync: Translation result: recognized: %@. Status %ld.", result.text, (long)result.reason);
         for (id lang in [result.translations allKeys]) {
             NSLog(@"RecognizeOnceAsync: Translation result: translated into %@: %@", lang, [result.translations objectForKey:lang]);
@@ -122,20 +122,20 @@
     [translationRecognizer addSpeechEndDetectedEventListener: ^ (Recognizer *recognizer, RecognitionEventArgs *eventArgs) {
         NSLog(@"Received SpeechEnd event. SessionId: %@ Offset: %d", eventArgs.sessionId, (int)eventArgs.offset);
     }];
-    [translationRecognizer addRecognizedEventListener: ^ (TranslationRecognizer *recognizer, TranslationTextResultEventArgs *eventArgs) {
+    [translationRecognizer addRecognizedEventListener: ^ (TranslationRecognizer *recognizer, TranslationRecognitionEventArgs *eventArgs) {
         NSLog(@"Received final result event. SessionId: %@, recognition result:%@. Status %ld.", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.reason);
         for (id lang in [eventArgs.result.translations allKeys]) {
             NSLog(@"Translation result: translated into %@: %@", lang, [eventArgs.result.translations objectForKey:lang]);
         }
     }];
-    [translationRecognizer addRecognizingEventListener: ^ (TranslationRecognizer *recognizer, TranslationTextResultEventArgs *eventArgs) {
+    [translationRecognizer addRecognizingEventListener: ^ (TranslationRecognizer *recognizer, TranslationRecognitionEventArgs *eventArgs) {
         NSLog(@"Received intermediate result event. SessionId: %@, intermediate result:%@.", eventArgs.sessionId, eventArgs.result.text);
         for (id lang in [eventArgs.result.translations allKeys]) {
             NSLog(@"Translation result: translated into %@: %@", lang, [eventArgs.result.translations objectForKey:lang]);
         }
         NSLog(@"Received JSON: %@", [eventArgs.result.properties getPropertyByName:@"RESULT-Json"]);
     }];
-    [translationRecognizer addSynthesizingEventListener: ^ (TranslationRecognizer * recognizer, TranslationSynthesisResultEventArgs *eventArgs) {
+    [translationRecognizer addSynthesizingEventListener: ^ (TranslationRecognizer * recognizer, TranslationSynthesisEventArgs *eventArgs) {
         NSLog(@"Received synthesis result event. SessionId: %@, audio length:%lu.", eventArgs.sessionId, (unsigned long)[eventArgs.result.audio length]);
     }];
     end = false;

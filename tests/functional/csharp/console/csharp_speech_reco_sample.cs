@@ -17,12 +17,12 @@ namespace MicrosoftSpeechSDKSamples
 {
     public class SpeechRecognitionSamples
     {
-        private static void MyRecognizingEventHandler(object sender, SpeechRecognitionResultEventArgs e)
+        private static void MyRecognizingEventHandler(object sender, SpeechRecognitionEventArgs e)
         {
             Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: intermediate result: {0}, Offset: {1}, Duration: {2} ", e.ToString(), e.Result.OffsetInTicks, e.Result.Duration));
         }
 
-        private static void MyRecognizedEventHandler(object sender, SpeechRecognitionResultEventArgs e)
+        private static void MyRecognizedEventHandler(object sender, SpeechRecognitionEventArgs e)
         {
             Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech recognition: final result: {0}, Offset: {1}, Duration: {2} ", e.ToString(), e.Result.OffsetInTicks, e.Result.Duration));
         }

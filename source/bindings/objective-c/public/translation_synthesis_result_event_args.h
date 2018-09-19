@@ -13,7 +13,7 @@
 /**
   * Defines payload of translation synthesis result event.
   */
-@interface TranslationSynthesisResultEventArgs : SessionEventArgs
+@interface TranslationSynthesisEventArgs : SessionEventArgs
 
 /**
   * The translation synthesis result.

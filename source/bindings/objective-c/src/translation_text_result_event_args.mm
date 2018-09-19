@@ -5,20 +5,20 @@
 
 #import "speechapi_private.h"
 
-@implementation TranslationTextResultEventArgs
+@implementation TranslationRecognitionEventArgs
 
-- (instancetype)init:(const TranslationImpl::TranslationTextResultEventArgs&)e
+- (instancetype)init:(const TranslationImpl::TranslationRecognitionEventArgs&)e
 {
     self = [super init:e];
-    _result = [[TranslationTextResult alloc] init :e.GetResult()];
+    _result = [[TranslationRecognitionResult alloc] init :e.GetResult()];
     return self;
 }
 
 @end
 
-@implementation TranslationTextResultCanceledEventArgs
+@implementation TranslationRecognitionCanceledEventArgs
 
-- (instancetype)init:(const TranslationImpl::TranslationTextResultCanceledEventArgs&)e
+- (instancetype)init:(const TranslationImpl::TranslationRecognitionCanceledEventArgs&)e
 {
     self = [super init:e];
     auto cancellationDetails = e.GetCancellationDetails();

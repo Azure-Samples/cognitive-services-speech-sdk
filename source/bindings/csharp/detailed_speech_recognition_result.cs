@@ -43,30 +43,30 @@ namespace Microsoft.CognitiveServices.Speech
         /// Confidence of recognition.
         /// </summary>
         [DataMember]
-        public double Confidence;
+        public double Confidence { get; private set; }
 
         /// <summary>
         /// Recognized text.
         /// </summary>
         [DataMember(Name = "Display")]
-        public string Text;
+        public string Text { get; private set; }
 
         /// <summary>
         /// Raw lexical form.
         /// </summary>
         [DataMember(Name = "Lexical")]
-        public string LexicalForm;
+        public string LexicalForm { get; private set; }
 
         /// <summary>
         /// Normalized form.
         /// </summary>
         [DataMember(Name = "ITN")]
-        public string NormalizedForm;
+        public string NormalizedForm { get; private set; }
 
         /// <summary>
         /// Normalized form with masked profanity.
         /// </summary>
         [DataMember(Name = "MaskedITN")]
-        public string MaskedNormalizedForm;
+        public string MaskedNormalizedForm { get; private set; }
     }
 }

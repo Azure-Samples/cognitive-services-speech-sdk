@@ -14,9 +14,9 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     /// <summary>
     /// Defines tranlsation result.
     /// </summary>
-    public sealed class TranslationTextResult : SpeechRecognitionResult
+    public sealed class TranslationRecognitionResult : RecognitionResult
     {
-        internal TranslationTextResult(Internal.TranslationTextResult result) : base(result)
+        internal TranslationRecognitionResult(Internal.TranslationRecognitionResult result) : base(result)
         {
             translationResultImpl = result;
             translationTextResultMap = new Dictionary<string, string>();
@@ -49,7 +49,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         }
 
         // Hold the reference
-        private Internal.TranslationTextResult translationResultImpl;
+        private Internal.TranslationRecognitionResult translationResultImpl;
 
         private Dictionary<string, string> translationTextResultMap;
     }

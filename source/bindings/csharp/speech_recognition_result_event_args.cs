@@ -8,24 +8,19 @@ namespace Microsoft.CognitiveServices.Speech
     /// <summary>
     /// Define payload of speech recognizing/recognized events.
     /// </summary>
-    public sealed class SpeechRecognitionResultEventArgs : System.EventArgs
+    public class SpeechRecognitionEventArgs : RecognitionEventArgs
     {
-        internal SpeechRecognitionResultEventArgs(Internal.SpeechRecognitionEventArgs e)
+        internal SpeechRecognitionEventArgs(Internal.SpeechRecognitionEventArgs e)
+            : base(e)
         {
             eventArgImpl = e;
             Result = new SpeechRecognitionResult(e.GetResult());
-            SessionId = e.SessionId;
         }
 
         /// <summary>
         /// Specifies the recognition result.
         /// </summary>
         public SpeechRecognitionResult Result { get; }
-
-        /// <summary>
-        /// Specifies the session identifier.
-        /// </summary>
-        public string SessionId { get; }
 
         /// <summary>
         /// Returns a string that represents the speech recognition result event.
@@ -43,28 +38,16 @@ namespace Microsoft.CognitiveServices.Speech
     /// <summary>
     /// Define payload of speech recognition canceled result events.
     /// </summary>
-    public sealed class SpeechRecognitionCanceledEventArgs : System.EventArgs
+    public sealed class SpeechRecognitionCanceledEventArgs : SpeechRecognitionEventArgs
     {
         internal SpeechRecognitionCanceledEventArgs(Internal.SpeechRecognitionCanceledEventArgs e)
+            : base(e)
         {
             eventArgImpl = e;
-            Result = new SpeechRecognitionResult(e.GetResult());
-            SessionId = e.SessionId;
-            
             var cancellation = e.GetCancellationDetails();
             Reason = (CancellationReason)cancellation.Reason;
             ErrorDetails = cancellation.ErrorDetails;
         }
-
-        /// <summary>
-        /// Specifies the recognition result.
-        /// </summary>
-        public SpeechRecognitionResult Result { get; }
-
-        /// <summary>
-        /// Specifies the session identifier.
-        /// </summary>
-        public string SessionId { get; }
 
         /// <summary>
         /// The reason the recognition was canceled.

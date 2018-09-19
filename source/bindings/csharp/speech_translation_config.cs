@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Microsoft.CognitiveServices.Speech
 {
@@ -62,9 +63,9 @@ namespace Microsoft.CognitiveServices.Speech
         }
 
         /// <summary>
-        /// Gets a list of languages to tranlate to.
+        /// Gets a collection of languages to translate to.
         /// </summary>
-        public List<string> TargetLanguages
+        public ReadOnlyCollection<string> TargetLanguages
         {
             get
             {
@@ -75,7 +76,7 @@ namespace Microsoft.CognitiveServices.Speech
                     result.Add(v[i]);
                 }
 
-                return result;
+                return new ReadOnlyCollection<string>(result);
             }
         }
 

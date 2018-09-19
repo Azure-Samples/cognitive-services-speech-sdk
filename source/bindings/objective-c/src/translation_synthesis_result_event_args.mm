@@ -5,9 +5,9 @@
 
 #import "speechapi_private.h"
 
-@implementation TranslationSynthesisResultEventArgs
+@implementation TranslationSynthesisEventArgs
 
-- (instancetype)init:(const TranslationImpl::TranslationSynthesisResultEventArgs&)e
+- (instancetype)init:(const TranslationImpl::TranslationSynthesisEventArgs&)e
 {
     self = [super init:e];
 

@@ -25,7 +25,7 @@ namespace Translation {
 /// Defines the translation text result.
 /// </summary>
 
-class TranslationTextResult final : public RecognitionResult
+class TranslationRecognitionResult final : public RecognitionResult
 {
 private:
 
@@ -33,10 +33,10 @@ private:
 
 public:
     /// <summary>
-    /// It is intended for internal use only. It creates an instance of <see cref="TranslationTextResult"/>.
+    /// It is intended for internal use only. It creates an instance of <see cref="TranslationRecognitionResult"/>.
     /// </summary>
     /// <param name="resultHandle">The handle of the result returned by recognizer in C-API.</param>
-    explicit TranslationTextResult(SPXRESULTHANDLE resultHandle) :
+    explicit TranslationRecognitionResult(SPXRESULTHANDLE resultHandle) :
         RecognitionResult(resultHandle),
         Translations(m_translations)
     {
@@ -47,7 +47,7 @@ public:
     /// <summary>
     /// Destructs the instance.
     /// </summary>
-    virtual ~TranslationTextResult()
+    virtual ~TranslationRecognitionResult()
     {
         SPX_DBG_TRACE_VERBOSE("%s (this-0x%x, handle=0x%x)", __FUNCTION__, this, Handle);
     }
@@ -96,7 +96,7 @@ private:
 #endif
     };
 
-    DISABLE_DEFAULT_CTORS(TranslationTextResult);
+    DISABLE_DEFAULT_CTORS(TranslationRecognitionResult);
 };
 
 

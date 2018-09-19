@@ -10,48 +10,33 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 /**
  * Defines content of an intent recognizing/recognized events.
  */
-public class IntentRecognitionEventArgs
-{
-    IntentRecognitionEventArgs(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionEventArgs eventArg)
-    {
+public class IntentRecognitionEventArgs extends com.microsoft.cognitiveservices.speech.RecognitionEventArgs {
+
+    IntentRecognitionEventArgs(com.microsoft.cognitiveservices.speech.internal.IntentRecognitionEventArgs eventArg) {
+        super(eventArg);
         Contracts.throwIfNull(eventArg, "eventArg");
 
         this.eventArgImpl = eventArg;
         this._Result = new IntentRecognitionResult(eventArg.GetResult());
-        this._SessionId = eventArg.getSessionId();
-
-        Contracts.throwIfNull(this._SessionId, "SessionId");
     }
 
     /**
      * Represents the intent recognition result.
      * @return Represents the intent recognition result.
      */
-    public final IntentRecognitionResult getResult()
-    {
+    public final IntentRecognitionResult getResult() {
         return _Result;
     }
     private IntentRecognitionResult  _Result;
 
-    /**
-     * A String represents the session identifier.
-     * @return A String represents the session identifier.
-     */
-    public final String getSessionId()
-    {
-        return _SessionId;
-    }
-
-    private String _SessionId;
 
     /**
      * Returns a String that represents the session id and the intent recognition result event.
      * @return A String that represents the intent recognition result event.
      */
     @Override
-    public String toString()
-    {
-        return "SessionId:" + _SessionId +
+    public String toString() {
+        return "SessionId:" + getSessionId() +
                 " ResultId:" + _Result.getResultId() +
                 " Reason:" + _Result.getReason() +
                 " IntentId:<" + _Result.getIntentId() +

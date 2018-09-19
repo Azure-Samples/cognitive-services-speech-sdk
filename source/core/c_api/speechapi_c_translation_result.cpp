@@ -20,7 +20,7 @@ SPXAPI translation_text_result_get_translation_text_buffer_header(SPXRESULTHANDL
         auto resulthandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognitionResult, SPXRESULTHANDLE>();
         auto result = (*resulthandles)[handle];
 
-        auto textResult = SpxQueryInterface<ISpxTranslationTextResult>(result);
+        auto textResult = SpxQueryInterface<ISpxTranslationRecognitionResult>(result);
         auto translationPhrases = textResult->GetTranslationText();
 
         size_t entries = translationPhrases.size();

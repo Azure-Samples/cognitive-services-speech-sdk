@@ -10,15 +10,15 @@
 
 #import "common_private.h"
 
-@interface TranslationTextResultEventArgs (Private)
+@interface TranslationRecognitionEventArgs (Private)
 
-- (instancetype)init: (const TranslationImpl::TranslationTextResultEventArgs&)e;
+- (instancetype)init: (const TranslationImpl::TranslationRecognitionEventArgs&)e;
 
 @end
 
-@interface TranslationTextResultCanceledEventArgs (Private)
+@interface TranslationRecognitionCanceledEventArgs (Private)
 
-- (instancetype)init: (const TranslationImpl::TranslationTextResultCanceledEventArgs&)e;
+- (instancetype)init: (const TranslationImpl::TranslationRecognitionCanceledEventArgs&)e;
 
 @end
 

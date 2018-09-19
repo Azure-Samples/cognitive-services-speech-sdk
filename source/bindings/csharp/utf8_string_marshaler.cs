@@ -14,7 +14,7 @@ namespace Microsoft.CognitiveServices.Speech
         private static Utf8StringMarshaler marshaler;
 
         // Limit the length by 4 MB for safety check if something bad has happened on the native side.
-        private static readonly int lengthLimit = 1 << 22;
+        private const int lengthLimit = 1 << 22;
 
         public object MarshalNativeToManaged(IntPtr native)
         {

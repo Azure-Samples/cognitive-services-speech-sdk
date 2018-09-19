@@ -27,7 +27,7 @@ namespace Translation {
 /// <summary>
 /// Performs translation on the speech input.
 /// </summary>
-class TranslationRecognizer final : public AsyncRecognizer<TranslationTextResult, TranslationTextResultEventArgs, TranslationTextResultCanceledEventArgs>
+class TranslationRecognizer final : public AsyncRecognizer<TranslationRecognitionResult, TranslationRecognitionEventArgs, TranslationRecognitionCanceledEventArgs>
 {
 public:
      /// <summary>
@@ -47,7 +47,7 @@ public:
 
     // The AsyncRecognizer only deals with events for translation text result. The audio output event
     // is managed by OnTranslationSynthesisResult.
-    using BaseType = AsyncRecognizer<TranslationTextResult, TranslationTextResultEventArgs, TranslationTextResultCanceledEventArgs>;
+    using BaseType = AsyncRecognizer<TranslationRecognitionResult, TranslationRecognitionEventArgs, TranslationRecognitionCanceledEventArgs>;
 
     /// <summary>
     /// It is intended for internal use only. It creates an instance of <see cref="TranslationRecognizer"/>. 
@@ -76,13 +76,13 @@ public:
 
     /// <summary>
     /// Starts translation recognition as an asynchronous operation, and stops after the first utterance is recognized.
-    /// The asynchronous operation returns <see creaf="TranslationTextResult"/> as result.
+    /// The asynchronous operation returns <see creaf="TranslationRecognitionResult"/> as result.
     /// Note: RecognizeOnceAsync() returns when the first utterance has been recognized, 
     /// so it is suitable only for single shot recognition like command or query.
     /// For long-running recognition, use StartContinuousRecognitionAsync() instead.
     /// </summary>
-    /// <returns>An asynchronous operation representing the recognition. It returns a value of <see cref="TranslationTextResult"/> as result.</returns>
-    std::future<std::shared_ptr<TranslationTextResult>> RecognizeOnceAsync() override
+    /// <returns>An asynchronous operation representing the recognition. It returns a value of <see cref="TranslationRecognitionResult"/> as result.</returns>
+    std::future<std::shared_ptr<TranslationRecognitionResult>> RecognizeOnceAsync() override
     {
         return BaseType::RecognizeOnceAsyncInternal();
     }
@@ -159,7 +159,7 @@ public:
     /// <summary>
     /// The event signals that a translation synthesis result is received.
     /// </summary>
-    EventSignal<const TranslationSynthesisResultEventArgs&> Synthesizing;
+    EventSignal<const TranslationSynthesisEventArgs&> Synthesizing;
 
 private:
 
@@ -167,9 +167,9 @@ private:
 
     friend class Microsoft::CognitiveServices::Speech::Session;
 
-    std::function<void(const EventSignal<const TranslationSynthesisResultEventArgs&>&)> GetTranslationAudioEventConnectionsChangedCallback()
+    std::function<void(const EventSignal<const TranslationSynthesisEventArgs&>&)> GetTranslationAudioEventConnectionsChangedCallback()
     {
-        return [=](const EventSignal<const TranslationSynthesisResultEventArgs&>& audioEvent) {
+        return [=](const EventSignal<const TranslationSynthesisEventArgs&>& audioEvent) {
             if (&audioEvent == &Synthesizing)
             {
                 translator_synthesizing_audio_set_callback(m_hreco, Synthesizing.IsConnected() ? FireEvent_TranslationSynthesisResult : nullptr, this);
@@ -180,7 +180,7 @@ private:
     static void FireEvent_TranslationSynthesisResult(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
     {
         UNUSED(hreco);
-        std::unique_ptr<TranslationSynthesisResultEventArgs> recoEvent{ new TranslationSynthesisResultEventArgs(hevent) };
+        std::unique_ptr<TranslationSynthesisEventArgs> recoEvent{ new TranslationSynthesisEventArgs(hevent) };
 
         auto pThis = static_cast<TranslationRecognizer*>(pvContext);
         auto keepAlive = pThis->shared_from_this();

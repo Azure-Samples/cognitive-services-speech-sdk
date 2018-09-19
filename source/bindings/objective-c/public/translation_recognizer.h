@@ -20,9 +20,9 @@
  */
 @interface TranslationRecognizer : Recognizer
 
-typedef void (^TranslationTextResultEventHandlerBlock)(TranslationRecognizer *, TranslationTextResultEventArgs *);
-typedef void (^TranslationTextResultCanceledEventHandlerBlock)(TranslationRecognizer *, TranslationTextResultCanceledEventArgs *);
-typedef void (^TranslationSynthesisResultEventHandlerBlock)(TranslationRecognizer *, TranslationSynthesisResultEventArgs *);
+typedef void (^TranslationRecognitionResultEventHandlerBlock)(TranslationRecognizer *, TranslationRecognitionEventArgs *);
+typedef void (^TranslationRecognitionResultCanceledEventHandlerBlock)(TranslationRecognizer *, TranslationRecognitionCanceledEventArgs *);
+typedef void (^TranslationSynthesisResultEventHandlerBlock)(TranslationRecognizer *, TranslationSynthesisEventArgs *);
 
 /**
   * Creates a new instance of translation recognizer.
@@ -56,13 +56,13 @@ typedef void (^TranslationSynthesisResultEventHandlerBlock)(TranslationRecognize
   * Note: it returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
   * @return the result of translation.
   */
-- (TranslationTextResult *)recognizeOnce;
+- (TranslationRecognitionResult *)recognizeOnce;
 
 /**
   * Starts speech translation, and the block function is called when the first utterance has been recognized.
   * Note: it returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
   */
-- (void)recognizeOnceAsync:(void (^)(TranslationTextResult *))resultReceivedBlock;
+- (void)recognizeOnceAsync:(void (^)(TranslationRecognitionResult *))resultReceivedBlock;
 
 /**
   * Starts speech translation on a continuous audio stream, until stopContinuousRecognitionAsync() is called.
@@ -78,12 +78,12 @@ typedef void (^TranslationSynthesisResultEventHandlerBlock)(TranslationRecognize
 /**
   * Subscribes to Recognized event which indicates a final result has been recognized.
   */
-- (void)addRecognizedEventListener:(TranslationTextResultEventHandlerBlock)eventHandler;
+- (void)addRecognizedEventListener:(TranslationRecognitionResultEventHandlerBlock)eventHandler;
 
 /**
   * Subscribes to Recognizing event which indicates an intermediate result has been recognized.
   */
-- (void)addRecognizingEventListener:(TranslationTextResultEventHandlerBlock)eventHandler;
+- (void)addRecognizingEventListener:(TranslationRecognitionResultEventHandlerBlock)eventHandler;
 
 /**
   * Subscribes to Synthesizing event which indicates a synthesis voice output has been received.
@@ -93,7 +93,7 @@ typedef void (^TranslationSynthesisResultEventHandlerBlock)(TranslationRecognize
 /**
   * Subscribes to Canceled event which indicates an error occurred during recognition.
   */
-- (void)addCanceledEventListener:(TranslationTextResultCanceledEventHandlerBlock)eventHandler;
+- (void)addCanceledEventListener:(TranslationRecognitionResultCanceledEventHandlerBlock)eventHandler;
 
 @end
 

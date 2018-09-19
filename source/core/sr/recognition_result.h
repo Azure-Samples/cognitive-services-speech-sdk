@@ -14,8 +14,8 @@ class CSpxRecognitionResult :
     public ISpxRecognitionResultInit,
     public ISpxIntentRecognitionResult,
     public ISpxIntentRecognitionResultInit,
-    public ISpxTranslationTextResult,
-    public ISpxTranslationTextResultInit,
+    public ISpxTranslationRecognitionResult,
+    public ISpxTranslationRecognitionResultInit,
     public ISpxTranslationSynthesisResult,
     public ISpxTranslationSynthesisResultInit,
     public ISpxPropertyBagImpl
@@ -30,8 +30,8 @@ public:
         SPX_INTERFACE_MAP_ENTRY(ISpxRecognitionResultInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxIntentRecognitionResult)
         SPX_INTERFACE_MAP_ENTRY(ISpxIntentRecognitionResultInit)
-        SPX_INTERFACE_MAP_ENTRY(ISpxTranslationTextResult)
-        SPX_INTERFACE_MAP_ENTRY(ISpxTranslationTextResultInit)
+        SPX_INTERFACE_MAP_ENTRY(ISpxTranslationRecognitionResult)
+        SPX_INTERFACE_MAP_ENTRY(ISpxTranslationRecognitionResultInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxTranslationSynthesisResult)
         SPX_INTERFACE_MAP_ENTRY(ISpxTranslationSynthesisResultInit)
         SPX_INTERFACE_MAP_ENTRY(ISpxNamedProperties)
@@ -59,11 +59,11 @@ public:
     // --- ISpxIntentRecognitionResultInit ---
     void InitIntentResult(const wchar_t* intentId, const wchar_t* jsonPayload) override;
 
-    // -- ISpxTranslationTextResult ---
+    // -- ISpxTranslationRecognitionResult ---
     const std::map<std::wstring, std::wstring>& GetTranslationText() override;
 
-    // -- ISpxTranslationTextResulInit --
-    void InitTranslationTextResult(TranslationStatusCode status, const std::map<std::wstring, std::wstring>& translations, const std::wstring& failureReason) override;
+    // -- ISpxTranslationRecognitionResultInit --
+    void InitTranslationRecognitionResult(TranslationStatusCode status, const std::map<std::wstring, std::wstring>& translations, const std::wstring& failureReason) override;
 
     // -- ISpxTranslationSynthesisResult ---
     const uint8_t* GetAudio() const override;

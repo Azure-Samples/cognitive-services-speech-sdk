@@ -14,19 +14,19 @@
 /**
   * Defines payload of text translation recognizing/recognized events.
   */
-@interface TranslationTextResultEventArgs : RecognitionEventArgs
+@interface TranslationRecognitionEventArgs : RecognitionEventArgs
 
 /**
   * The translation text result.
   */
-@property (readonly) TranslationTextResult *result;
+@property (readonly) TranslationRecognitionResult *result;
 
 @end
 
 /**
   * Defines payload of text translation canceled events.
   */
-@interface TranslationTextResultCanceledEventArgs : TranslationTextResultEventArgs
+@interface TranslationRecognitionCanceledEventArgs : TranslationRecognitionEventArgs
 
 /**
   * The reason why the text translation was canceled.

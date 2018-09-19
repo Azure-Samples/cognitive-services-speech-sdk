@@ -24,8 +24,8 @@ namespace Microsoft.CognitiveServices.Speech.Translation
             Trace.Assert((int)ResultReason.SynthesizingAudioCompleted == (int)Internal.ResultReason.SynthesizingAudioCompleted);
             Reason = (ResultReason)((int)result.Reason);
 
-            Audio = new byte[result.Audio.Count];
-            result.Audio.CopyTo(Audio);
+            audio = new byte[result.Audio.Count];
+            result.Audio.CopyTo(audio);
         }
 
         /// <summary>
@@ -36,7 +36,8 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// <summary>
         /// The voice output of the translated text in the target language.
         /// </summary>
-        public byte[] Audio { get; }
+        /// <returns>Synthesized audio data.</returns>
+        public byte[] GetAudio() { return (byte[])audio.Clone(); }
 
         /// <summary>
         /// Returns a string that represents the synthesis result.
@@ -44,7 +45,7 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         /// <returns>A string that represents the synthesis result.</returns>
         public override string ToString()
         {
-            var text = string.Format(CultureInfo.InvariantCulture, "Reason: {0}; AudioSize:{1}", Reason, Audio.Length);
+            var text = string.Format(CultureInfo.InvariantCulture, "Reason: {0}; AudioSize:{1}", Reason, audio.Length);
             if (Reason == ResultReason.SynthesizingAudioCompleted)
             {
                 text += string.Format(CultureInfo.InvariantCulture, " (end of synthesis data)");
@@ -54,5 +55,6 @@ namespace Microsoft.CognitiveServices.Speech.Translation
 
         // Hold the referece.
         private Internal.TranslationSynthesisResult resultImpl;
+        private byte[] audio;
     }
 }

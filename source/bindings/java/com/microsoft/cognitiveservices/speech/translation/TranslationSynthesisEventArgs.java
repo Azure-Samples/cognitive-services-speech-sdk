@@ -10,9 +10,9 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 /**
  * Defines the content of translation synthesis result event.
  */
-public final class TranslationSynthesisResultEventArgs extends SessionEventArgs
+public final class TranslationSynthesisEventArgs extends SessionEventArgs
 {
-    TranslationSynthesisResultEventArgs(com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResultEventArgs eventArg) {
+    TranslationSynthesisEventArgs(com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisEventArgs eventArg) {
         super(eventArg);
 
         Contracts.throwIfNull(eventArg, "eventArg");

@@ -10,9 +10,9 @@
 
 #import "common_private.h"
 
-@interface TranslationSynthesisResultEventArgs (Private)
+@interface TranslationSynthesisEventArgs (Private)
 
-- (instancetype)init: (const TranslationImpl::TranslationSynthesisResultEventArgs&)e;
+- (instancetype)init: (const TranslationImpl::TranslationSynthesisEventArgs&)e;
 
 @end
 

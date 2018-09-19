@@ -2,8 +2,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-// speechapi_cxx_translation_eventargs.h: Public API declarations for TranslationEventArgs C++ class
-//
 
 #pragma once
 #include <speechapi_cxx_common.h>
@@ -20,23 +18,23 @@ namespace Translation {
 /// <summary>
 /// Defines payload that is sent with the event <see cref="Recognizing"/> or <see cref="Recognized"/>.
 /// </summary>
-class TranslationTextResultEventArgs : public RecognitionEventArgs
+class TranslationRecognitionEventArgs : public RecognitionEventArgs
 {
 private:
 
     SPXEVENTHANDLE m_hevent;
-    std::shared_ptr<TranslationTextResult> m_result;
+    std::shared_ptr<TranslationRecognitionResult> m_result;
 
 public:
 
     /// <summary>
-    /// It is intended for internal use only. It creates an instance of <see cref="TranslationTextResultEventArgs"/>.
+    /// It is intended for internal use only. It creates an instance of <see cref="TranslationRecognitionEventArgs"/>.
     /// </summary>
     /// <param name="resultHandle">The handle returned by recognizer in C-API.</param>
-    explicit TranslationTextResultEventArgs(SPXEVENTHANDLE hevent) :
+    explicit TranslationRecognitionEventArgs(SPXEVENTHANDLE hevent) :
         RecognitionEventArgs(hevent),
         m_hevent(hevent),
-        m_result(std::make_shared<TranslationTextResult>(ResultHandleFromEventHandle(hevent))),
+        m_result(std::make_shared<TranslationRecognitionResult>(ResultHandleFromEventHandle(hevent))),
         Result(m_result)
     {
         UNUSED(m_hevent);
@@ -46,15 +44,15 @@ public:
     /// <summary>
     /// Destructs the instance.
     /// </summary>
-    virtual ~TranslationTextResultEventArgs() { };
+    virtual ~TranslationRecognitionEventArgs() { };
 
 #if defined(SWIG) || defined(BINDING_OBJECTIVE_C)
 private:
 #endif
     /// <summary>
-    /// Contains the translation text result.
+    /// Contains the translation recognition result.
     /// </summary>
-    std::shared_ptr<TranslationTextResult> Result;
+    std::shared_ptr<TranslationRecognitionResult> Result;
 
 #if defined(SWIG) || defined(BINDING_OBJECTIVE_C)
 public:
@@ -64,10 +62,10 @@ protected:
     /// <summary>
     /// Contains the translation text result.
     /// </summary>
-    std::shared_ptr<TranslationTextResult> GetResult() const { return m_result; }
+    std::shared_ptr<TranslationRecognitionResult> GetResult() const { return m_result; }
 
 private:
-    DISABLE_DEFAULT_CTORS(TranslationTextResultEventArgs);
+    DISABLE_DEFAULT_CTORS(TranslationRecognitionEventArgs);
 
     SPXRESULTHANDLE ResultHandleFromEventHandle(SPXEVENTHANDLE hevent)
     {
@@ -81,7 +79,7 @@ private:
 /// <summary>
 /// Class for translation recognition canceled event arguments.
 /// </summary>
-class TranslationTextResultCanceledEventArgs final : public TranslationTextResultEventArgs
+class TranslationRecognitionCanceledEventArgs final : public TranslationRecognitionEventArgs
 {
 private:
 
@@ -94,8 +92,8 @@ public:
     /// Constructor.
     /// </summary>
     /// <param name="hevent">Event handle</param>
-    explicit TranslationTextResultCanceledEventArgs(SPXEVENTHANDLE hevent) :
-        TranslationTextResultEventArgs(hevent),
+    explicit TranslationRecognitionCanceledEventArgs(SPXEVENTHANDLE hevent) :
+        TranslationRecognitionEventArgs(hevent),
         m_cancellation(CancellationDetails::FromResult(GetResult())),
         m_cancellationReason(m_cancellation->Reason),
         Reason(m_cancellationReason),
@@ -105,7 +103,7 @@ public:
     };
 
     /// <inheritdoc/>
-    virtual ~TranslationTextResultCanceledEventArgs()
+    virtual ~TranslationRecognitionCanceledEventArgs()
     {
         SPX_DBG_TRACE_VERBOSE("%s (this-0x%x)", __FUNCTION__, this);
     };
@@ -137,7 +135,7 @@ private:
 
 private:
 
-    DISABLE_DEFAULT_CTORS(TranslationTextResultCanceledEventArgs);
+    DISABLE_DEFAULT_CTORS(TranslationRecognitionCanceledEventArgs);
 };
 
 
@@ -145,7 +143,7 @@ private:
 /// <summary>
 /// Defines payload that is sent with the event <see cref="Synthesizing"/>.
 /// </summary>
-class TranslationSynthesisResultEventArgs final : public SessionEventArgs
+class TranslationSynthesisEventArgs final : public SessionEventArgs
 {
 private:
 
@@ -154,10 +152,10 @@ private:
 
 public:
     /// <summary>
-    /// It is intended for internal use only. It creates an instance of <see cref="TranslationSynthesisResultEventArgs"/>.
+    /// It is intended for internal use only. It creates an instance of <see cref="TranslationSynthesisEventArgs"/>.
     /// </summary>
     /// <param name="resultHandle">The handle returned by recognizer in C-API.</param>
-    explicit TranslationSynthesisResultEventArgs(SPXEVENTHANDLE hevent) :
+    explicit TranslationSynthesisEventArgs(SPXEVENTHANDLE hevent) :
         SessionEventArgs(hevent),
         m_hevent(hevent),
         m_result(std::make_shared<TranslationSynthesisResult>(SynthesisResultHandleFromEventHandle(hevent))),
@@ -170,7 +168,7 @@ public:
     /// <summary>
     /// Destructs the instance.
     /// </summary>
-    virtual ~TranslationSynthesisResultEventArgs() { };
+    virtual ~TranslationSynthesisEventArgs() { };
 
 #if defined(SWIG) || defined(BINDING_OBJECTIVE_C)
 private:
@@ -192,7 +190,7 @@ private:
 
 private:
 
-    DISABLE_DEFAULT_CTORS(TranslationSynthesisResultEventArgs);
+    DISABLE_DEFAULT_CTORS(TranslationSynthesisEventArgs);
 
     SPXRESULTHANDLE SynthesisResultHandleFromEventHandle(SPXEVENTHANDLE hevent)
     {

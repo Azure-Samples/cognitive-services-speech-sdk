@@ -10,9 +10,9 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 /**
  * Defines payload of translation canceled events.
  */
-public final class TranslationTextResultCanceledEventArgs extends TranslationTextResultEventArgs {
+public final class TranslationRecognitionCanceledEventArgs extends TranslationRecognitionEventArgs {
 
-    TranslationTextResultCanceledEventArgs(com.microsoft.cognitiveservices.speech.internal.TranslationTextResultCanceledEventArgs e) {
+    TranslationRecognitionCanceledEventArgs(com.microsoft.cognitiveservices.speech.internal.TranslationRecognitionCanceledEventArgs e) {
         super(e);
         
         Contracts.throwIfNull(e, "e");
@@ -54,7 +54,7 @@ public final class TranslationTextResultCanceledEventArgs extends TranslationTex
     }
 
     @SuppressWarnings("unused")
-    private com.microsoft.cognitiveservices.speech.internal.TranslationTextResultCanceledEventArgs _eventArgImpl;
+    private com.microsoft.cognitiveservices.speech.internal.TranslationRecognitionCanceledEventArgs _eventArgImpl;
     private CancellationReason _cancellationReason ;
     private String _errorDetails;
 }

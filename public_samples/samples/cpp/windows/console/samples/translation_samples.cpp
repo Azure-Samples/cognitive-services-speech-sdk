@@ -91,7 +91,7 @@ void TranslationContinuousRecognition()
     auto recognizer = TranslationRecognizer::FromConfig(config);
 
     // Subscribes to events.
-    recognizer->Recognizing.Connect([](const TranslationTextResultEventArgs& e)
+    recognizer->Recognizing.Connect([](const TranslationRecognitionEventArgs& e)
     {
         cout << "Recognizing:" << e.Result->Text << std::endl;
         for (const auto& it : e.Result->Translations)
@@ -100,7 +100,7 @@ void TranslationContinuousRecognition()
         }
     });
 
-    recognizer->Recognized.Connect([](const TranslationTextResultEventArgs& e)
+    recognizer->Recognized.Connect([](const TranslationRecognitionEventArgs& e)
     {
         if (e.Result->Reason == ResultReason::TranslatedSpeech)
         {
@@ -121,7 +121,7 @@ void TranslationContinuousRecognition()
         }
     });
 
-    recognizer->Canceled.Connect([](const TranslationTextResultCanceledEventArgs& e)
+    recognizer->Canceled.Connect([](const TranslationRecognitionCanceledEventArgs& e)
     {
         cout << "CANCELED: Reason=" << (int)e.Reason << std::endl;
 
@@ -132,7 +132,7 @@ void TranslationContinuousRecognition()
         }
     });
 
-    recognizer->Synthesizing.Connect([](const TranslationSynthesisResultEventArgs& e)
+    recognizer->Synthesizing.Connect([](const TranslationSynthesisEventArgs& e)
     {
         auto size = e.Result->Audio.size();
         cout << "Translation synthesis result: size of audio data: " << size

@@ -19,22 +19,22 @@ namespace MicrosoftSpeechSDKSamples
 {
     public class TranslationSamples
     {
-        private static void MyRecognizingEventHandler(object sender, TranslationTextResultEventArgs e)
+        private static void MyRecognizingEventHandler(object sender, TranslationRecognitionEventArgs e)
         {
             Console.WriteLine($"Translation: intermediate result: {e.ToString()}.");
         }
 
-        private static void MyRecognizedEventHandler(object sender, TranslationTextResultEventArgs e)
+        private static void MyRecognizedEventHandler(object sender, TranslationRecognitionEventArgs e)
         {
             Console.WriteLine($"Translation: final result: {e.ToString()}.");
         }
 
-        private static void MySynthesizingEventHandler(object sender, TranslationSynthesisResultEventArgs e)
+        private static void MySynthesizingEventHandler(object sender, TranslationSynthesisEventArgs e)
         {
             Console.WriteLine($"Translation: synthesis result: {e.ToString()}.");
             if (e.Result.Reason != ResultReason.SynthesizingAudioCompleted)
             {
-                using (var m = new MemoryStream(e.Result.Audio))
+                using (var m = new MemoryStream(e.Result.GetAudio()))
                 {
                     SoundPlayer simpleSound = new SoundPlayer(m);
                     simpleSound.PlaySync();
@@ -42,7 +42,7 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
-        private static void MyCanceledEventHandler(object sender, TranslationTextResultCanceledEventArgs e)
+        private static void MyCanceledEventHandler(object sender, TranslationRecognitionCanceledEventArgs e)
         {
             Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Translation: canceled. SessionId: {0}, Reason: {1}", e.SessionId, e.Reason));
         }

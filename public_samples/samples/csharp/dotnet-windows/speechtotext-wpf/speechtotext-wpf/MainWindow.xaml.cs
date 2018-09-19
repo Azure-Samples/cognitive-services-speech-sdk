@@ -321,13 +321,13 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
                 isChecked = this.immediateResultsCheckBox.IsChecked == true;
             });
 
-            EventHandler<SpeechRecognitionResultEventArgs> recognizingHandler = (sender, e) => RecognizedEventHandler(e, recoType);
+            EventHandler<SpeechRecognitionEventArgs> recognizingHandler = (sender, e) => RecognizedEventHandler(e, recoType);
             if (isChecked)
             {
                 recognizer.Recognizing += recognizingHandler;
             }
 
-            EventHandler<SpeechRecognitionResultEventArgs> recognizedHandler = (sender, e) => RecognizedEventHandler(e, recoType);
+            EventHandler<SpeechRecognitionEventArgs> recognizedHandler = (sender, e) => RecognizedEventHandler(e, recoType);
             EventHandler<SpeechRecognitionCanceledEventArgs> canceledHandler = (sender, e) => CanceledEventHandler(e, recoType, source);
             EventHandler<SessionEventArgs> sessionStartedHandler = (sender, e) => SessionStartedEventHandler(e, recoType);
             EventHandler<SessionEventArgs> sessionStoppedHandler = (sender, e) => SessionStoppedEventHandler(e, recoType, source);
@@ -366,7 +366,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
         /// <summary>
         /// Logs intermediate recognition results
         /// </summary>
-        private void RecognizingEventHandler(SpeechRecognitionResultEventArgs e, RecoType rt)
+        private void RecognizingEventHandler(SpeechRecognitionEventArgs e, RecoType rt)
         {
             var log = (rt == RecoType.Base) ? this.baseModelLogText : this.customModelLogText;
             this.WriteLine(log, "Intermediate result: {0} ", e.Result.Text);
@@ -375,7 +375,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
         /// <summary>
         /// Logs the final recognition result
         /// </summary>
-        private void RecognizedEventHandler(SpeechRecognitionResultEventArgs e, RecoType rt)
+        private void RecognizedEventHandler(SpeechRecognitionEventArgs e, RecoType rt)
         {
             TextBox log;
             if (rt == RecoType.Base)

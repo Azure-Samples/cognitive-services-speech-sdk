@@ -18,12 +18,12 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <summary>
         /// The event <see cref="Recognizing"/> signals that an intermediate recognition result is received.
         /// </summary>
-        public event EventHandler<IntentRecognitionResultEventArgs> Recognizing;
+        public event EventHandler<IntentRecognitionEventArgs> Recognizing;
 
         /// <summary>
         /// The event <see cref="Recognized"/> signals that a final recognition result is received.
         /// </summary>
-        public event EventHandler<IntentRecognitionResultEventArgs> Recognized;
+        public event EventHandler<IntentRecognitionEventArgs> Recognized;
 
         /// <summary>
         /// The event <see cref="Canceled"/> signals that the intent recognition was canceled.
@@ -260,7 +260,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
 
             public override void Execute(Internal.IntentRecognitionEventArgs eventArgs)
             {
-                var resultEventArg = new IntentRecognitionResultEventArgs(eventArgs);
+                var resultEventArg = new IntentRecognitionEventArgs(eventArgs);
                 var handler = isRecognizedHandler ? recognizer.Recognized : recognizer.Recognizing;
                 if (handler != null)
                 {

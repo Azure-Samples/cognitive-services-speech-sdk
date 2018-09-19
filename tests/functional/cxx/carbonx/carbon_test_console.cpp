@@ -1096,12 +1096,12 @@ void CarbonTestConsole::recognizer_recognize_once(std::shared_ptr<TranslationRec
     auto result = future.get();
     ConsoleWriteLine("RecognizeOnceAsync %s... Waiting... Done!\n", name.c_str());
 
-    ConsoleWriteLine("TranslationTextResult: ResultId=%s, RecognizedText=%s", result->TranslationTextResult::ResultId.c_str(), result->Text.c_str());
+    ConsoleWriteLine("TranslationRecognitionResult: ResultId=%s, RecognizedText=%s", result->TranslationRecognitionResult::ResultId.c_str(), result->Text.c_str());
 
     if (result->Reason == ResultReason::Canceled)
     {
         auto cancellation = CancellationDetails::FromResult(result);
-        ConsoleWriteLine("TranslationTextResult: CancellationReason=%d; ErrorDetails=%s", cancellation->Reason, cancellation->ErrorDetails.c_str());
+        ConsoleWriteLine("TranslationRecognitionResult: CancellationReason=%d; ErrorDetails=%s", cancellation->Reason, cancellation->ErrorDetails.c_str());
     }
 
     for (auto it : result->Translations)
@@ -1433,7 +1433,7 @@ std::string CarbonTestConsole::ToString(const IntentRecognitionEventArgs& e)
     return str;
 }
 
-std::string CarbonTestConsole::ToString(const TranslationTextResultEventArgs& e)
+std::string CarbonTestConsole::ToString(const TranslationRecognitionEventArgs& e)
 {
     static_assert(0 == (int)ResultReason::NoMatch, "ResultReason::* enum values changed!");
     static_assert(1 == (int)ResultReason::Canceled, "ResultReason::* enum values changed!");
@@ -1479,7 +1479,7 @@ std::string CarbonTestConsole::ToString(const TranslationTextResultEventArgs& e)
     };
 
     std::string str;
-    str += "TranslationEventArgs<TranslationTextResult> = { \n";
+    str += "TranslationEventArgs<TranslationRecognitionResult> = { \n";
     str += "  SessionId = '" + e.SessionId + "'\n";
     str += "  Result = {\n";
     str += "    ResultId = '" + e.Result->ResultId + "'\n";
@@ -1509,7 +1509,7 @@ std::string CarbonTestConsole::ToString(const TranslationTextResultEventArgs& e)
     return str;
 }
 
-std::string CarbonTestConsole::ToString(const TranslationSynthesisResultEventArgs& e)
+std::string CarbonTestConsole::ToString(const TranslationSynthesisEventArgs& e)
 {
     std::string str;
     str += "TranslationEventArgs<TranslationSynthesisResult> = { \n";

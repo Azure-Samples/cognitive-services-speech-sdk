@@ -68,12 +68,12 @@ namespace Microsoft.CognitiveServices.Speech
         /// <summary>
         /// The event <see cref="Recognizing"/> signals that an intermediate recognition result is received.
         /// </summary>
-        public event EventHandler<SpeechRecognitionResultEventArgs> Recognizing;
+        public event EventHandler<SpeechRecognitionEventArgs> Recognizing;
 
         /// <summary>
         /// The event <see cref="Recognized"/> signals that a final recognition result is received.
         /// </summary>
-        public event EventHandler<SpeechRecognitionResultEventArgs> Recognized;
+        public event EventHandler<SpeechRecognitionEventArgs> Recognized;
 
         /// <summary>
         /// The event <see cref="Canceled"/> signals that the speech recognition was canceled.
@@ -327,7 +327,7 @@ namespace Microsoft.CognitiveServices.Speech
                     return;
                 }
 
-                var resultEventArg = new SpeechRecognitionResultEventArgs(eventArgs);
+                var resultEventArg = new SpeechRecognitionEventArgs(eventArgs);
                 var handler = isRecognizedHandler ? recognizer.Recognized : recognizer.Recognizing;
                 if (handler != null)
                 {

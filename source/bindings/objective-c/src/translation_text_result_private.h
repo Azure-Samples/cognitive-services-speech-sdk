@@ -10,9 +10,9 @@
 #import "recognition_result_private.h"
 #import "common_private.h"
 
-@interface TranslationTextResult (Private)
+@interface TranslationRecognitionResult (Private)
 
-- (instancetype)init :(std::shared_ptr<TranslationImpl::TranslationTextResult>)resultHandle;
+- (instancetype)init :(std::shared_ptr<TranslationImpl::TranslationRecognitionResult>)resultHandle;
 
 @end
 

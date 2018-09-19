@@ -76,14 +76,15 @@ namespace MicrosoftSpeechSDKSamples
 
                 recognizer.Synthesizing += (s, e) =>
                 {
-                    Console.WriteLine(e.Result.Audio.Length != 0
-                        ? $"AudioSize: {e.Result.Audio.Length}"
-                        : $"AudioSize: {e.Result.Audio.Length} (end of synthesis data)");
+                    var audio = e.Result.GetAudio();
+                    Console.WriteLine(audio.Length != 0
+                        ? $"AudioSize: {audio.Length}"
+                        : $"AudioSize: {audio.Length} (end of synthesis data)");
 
-                    if (e.Result.Audio.Length > 0)
+                    if (audio.Length > 0)
                     {
                         #if NET461
-                        using (var m = new MemoryStream(e.Result.Audio))
+                        using (var m = new MemoryStream(audio))
                         {
                             SoundPlayer simpleSound = new SoundPlayer(m);
                             simpleSound.PlaySync();

@@ -441,7 +441,7 @@ namespace Microsoft.CognitiveServices.Speech.Audio
     /// <summary>
     /// Adapter class to the native stream api.
     /// </summary>
-    public sealed class BinaryAudioStreamReader : PullAudioInputStreamCallback, IDisposable
+    public sealed class BinaryAudioStreamReader : PullAudioInputStreamCallback
     {
         private System.IO.BinaryReader _reader;
 

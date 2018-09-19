@@ -129,7 +129,7 @@ const map<wstring, wstring>& CSpxRecognitionResult::GetTranslationText()
     return m_translations;
 }
 
-void CSpxRecognitionResult::InitTranslationTextResult(TranslationStatusCode status, const map<wstring, wstring>& translations, const wstring& failureReason)
+void CSpxRecognitionResult::InitTranslationRecognitionResult(TranslationStatusCode status, const map<wstring, wstring>& translations, const wstring& failureReason)
 {
     SPX_DBG_TRACE_FUNCTION();
 

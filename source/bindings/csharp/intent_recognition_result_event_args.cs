@@ -8,24 +8,19 @@ namespace Microsoft.CognitiveServices.Speech.Intent
     /// <summary>
     /// Define payload of intent recognizing/recognized events.
     /// </summary>
-    public sealed class IntentRecognitionResultEventArgs : System.EventArgs
+    public class IntentRecognitionEventArgs : RecognitionEventArgs
     {
-        internal IntentRecognitionResultEventArgs(Internal.IntentRecognitionEventArgs e)
+        internal IntentRecognitionEventArgs(Internal.IntentRecognitionEventArgs e)
+            : base(e)
         {
             eventArgImpl = e;
             Result = new IntentRecognitionResult(e.GetResult());
-            SessionId = e.SessionId;
         }
 
         /// <summary>
         /// Represents the intent recognition result.
         /// </summary>
         public IntentRecognitionResult Result { get; }
-
-        /// <summary>
-        /// A String represents the session identifier.
-        /// </summary>
-        public string SessionId { get; }
 
         /// <summary>
         /// Returns a string that represents the session id and the intent recognition result event.
@@ -44,28 +39,17 @@ namespace Microsoft.CognitiveServices.Speech.Intent
     /// <summary>
     /// Define payload of intent recognition canceled result events.
     /// </summary>
-    public sealed class IntentRecognitionCanceledEventArgs : System.EventArgs
+    public sealed class IntentRecognitionCanceledEventArgs : IntentRecognitionEventArgs
     {
         internal IntentRecognitionCanceledEventArgs(Internal.IntentRecognitionCanceledEventArgs e)
+            : base(e)
         {
             eventArgImpl = e;
-            Result = new IntentRecognitionResult(e.GetResult());
-            SessionId = e.SessionId;
 
             var cancellation = e.GetCancellationDetails();
             Reason = (CancellationReason)cancellation.Reason;
             ErrorDetails = cancellation.ErrorDetails;
         }
-
-        /// <summary>
-        /// Represents the intent recognition result.
-        /// </summary>
-        public IntentRecognitionResult Result { get; }
-
-        /// <summary>
-        /// A String represents the session identifier.
-        /// </summary>
-        public string SessionId { get; }
 
         /// <summary>
         /// The reason the result was canceled.

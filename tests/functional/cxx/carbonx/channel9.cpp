@@ -312,11 +312,11 @@ void CarbonTestConsole::ch9_do_translation()
     sc->AddTargetLanguage("es-ES");
     auto recognizer = TranslationRecognizer::FromConfig(sc, nullptr);
 
-    recognizer->Recognizing += [](const TranslationTextResultEventArgs& e) {
+    recognizer->Recognizing += [](const TranslationRecognitionEventArgs& e) {
         printf("INTERMEDIATE: %s ...\n", e.Result->Text.c_str());
     };
 
-    recognizer->Recognized += [](const TranslationTextResultEventArgs& e) {
+    recognizer->Recognized += [](const TranslationRecognitionEventArgs& e) {
         printf("FINAL RESULT: '%s'\n", e.Result->Text.c_str());
         for (auto translation : e.Result->Translations) {
             printf(" TRANSLATION: '%s' => '%s'\n", translation.first.c_str(), translation.second.c_str());

@@ -144,10 +144,10 @@ private:
     void SpeechRecognizer_NoMatchHandler(const SpeechRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("NoMatchHandler: %s", ToString(e).c_str()); }
     void SpeechRecognizer_CanceledHandler(const SpeechRecognitionCanceledEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("CanceledHandler: %s", ToString(e).c_str()); };
 
-    void TranslationRecognizer_RecognizingHandler(const TranslationTextResultEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("Translation RecognizingHandler: %s", ToString(e).c_str()); };
-    void TranslationRecognizer_RecognizedHandler(const TranslationTextResultEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("Translation RecognizedHandler: %s", ToString(e).c_str()); }
-    void TranslationRecognizer_SynthesisResultHandler(const TranslationSynthesisResultEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("Translation SynthesisResultHandler: %s", ToString(e).c_str()); }
-    void TranslationRecognizer_ErrorHandler(const TranslationSynthesisResultEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("Translation ErrorHandler: %s", ToString(e).c_str()); }
+    void TranslationRecognizer_RecognizingHandler(const TranslationRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("Translation RecognizingHandler: %s", ToString(e).c_str()); };
+    void TranslationRecognizer_RecognizedHandler(const TranslationRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("Translation RecognizedHandler: %s", ToString(e).c_str()); }
+    void TranslationRecognizer_SynthesisResultHandler(const TranslationSynthesisEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("Translation SynthesisResultHandler: %s", ToString(e).c_str()); }
+    void TranslationRecognizer_ErrorHandler(const TranslationSynthesisEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("Translation ErrorHandler: %s", ToString(e).c_str()); }
 
     void IntentRecognizer_RecognizingHandler(const IntentRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("RecognizingHandler: %s", ToString(e).c_str()); };
     void IntentRecognizer_RecognizedHandler(const IntentRecognitionEventArgs& e) { SPX_DBG_TRACE_VERBOSE("%s: %s", __FUNCTION__, ToString(e).c_str()); ConsoleWriteLine("RecognizedHandler: %s", ToString(e).c_str()); }
@@ -159,8 +159,8 @@ private:
     std::string BoolToString(bool f);
     std::string ToString(const SpeechRecognitionEventArgs& e);
     std::string ToString(const IntentRecognitionEventArgs& e);
-    std::string ToString(const TranslationTextResultEventArgs& e);
-    std::string ToString(const TranslationSynthesisResultEventArgs& e);
+    std::string ToString(const TranslationRecognitionEventArgs& e);
+    std::string ToString(const TranslationSynthesisEventArgs& e);
 
     void ConsoleInput_Session(const char*);
 

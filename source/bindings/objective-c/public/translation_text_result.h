@@ -12,7 +12,7 @@
 /**
   * Defines translation text result.
   */
-@interface TranslationTextResult : RecognitionResult
+@interface TranslationRecognitionResult : RecognitionResult
 
 /**
   * The translation results. Each item in the dictionary represents translation result in one of target languages, where the key

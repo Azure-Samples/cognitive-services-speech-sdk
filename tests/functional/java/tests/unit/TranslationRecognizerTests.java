@@ -26,7 +26,7 @@ import com.microsoft.cognitiveservices.speech.Recognizer;
 import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig;
 import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
-import com.microsoft.cognitiveservices.speech.translation.TranslationTextResult;
+import com.microsoft.cognitiveservices.speech.translation.TranslationRecognitionResult;
 
 import tests.Settings;
 
@@ -229,7 +229,7 @@ public class TranslationRecognizerTests {
         assertNotNull(r.getRecoImpl());
         assertTrue(r instanceof Recognizer);
 
-        Future<TranslationTextResult> future = r.recognizeOnceAsync();
+        Future<TranslationRecognitionResult> future = r.recognizeOnceAsync();
         assertNotNull(future);
 
         // Wait for max 30 seconds
@@ -238,7 +238,7 @@ public class TranslationRecognizerTests {
         assertFalse(future.isCancelled());
         assertTrue(future.isDone());
 
-        TranslationTextResult res = future.get();
+        TranslationRecognitionResult res = future.get();
         assertNotNull(res);
         assertTrue(ResultReason.RecognizedSpeech == res.getReason() ||
                 ResultReason.RecognizedIntent == res.getReason());
@@ -312,7 +312,7 @@ public class TranslationRecognizerTests {
 
         // TODO there is no guarantee that SessionStoppedEvent comes before the recognizeOnceAsync() call returns?!
         //      this is why below SessionStoppedEvent checks are conditional
-        TranslationTextResult res = r.recognizeOnceAsync().get();
+        TranslationRecognitionResult res = r.recognizeOnceAsync().get();
         assertNotNull(res);
         assertTrue(res.getReason() != ResultReason.Canceled);
         assertEquals("What's the weather like?", res.getText());

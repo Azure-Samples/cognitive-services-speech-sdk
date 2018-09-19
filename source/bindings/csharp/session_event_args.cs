@@ -9,7 +9,7 @@ namespace Microsoft.CognitiveServices.Speech
     /// <summary>
     /// Defines payload for SessionStarted/Stopped events.
     /// </summary>
-    public sealed class SessionEventArgs : System.EventArgs
+    public class SessionEventArgs : System.EventArgs
     {
         internal SessionEventArgs(Internal.SessionEventArgs arg)
         {

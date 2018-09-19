@@ -41,12 +41,12 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        public async Task<List<SpeechRecognitionResultEventArgs>> GetSpeechFinalRecognitionContinuous(SpeechConfig config, string audioFile)
+        public async Task<List<SpeechRecognitionEventArgs>> GetSpeechFinalRecognitionContinuous(SpeechConfig config, string audioFile)
         {
             using (var recognizer = TrackSessionId(CreateSpeechRecognizerWithStream(config, audioFile)))
             {
                 var tcs = new TaskCompletionSource<bool>();
-                var textResultEvents = new List<SpeechRecognitionResultEventArgs>();
+                var textResultEvents = new List<SpeechRecognitionEventArgs>();
 
                 recognizer.Recognized += (s, e) =>
                 {
@@ -74,23 +74,23 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        public async Task<List<List<SpeechRecognitionResultEventArgs>>> GetSpeechIntermediateRecognitionContinuous(SpeechConfig config, string audioFile)
+        public async Task<List<List<SpeechRecognitionEventArgs>>> GetSpeechIntermediateRecognitionContinuous(SpeechConfig config, string audioFile)
         {
             using (var recognizer = TrackSessionId(CreateSpeechRecognizerWithStream(config, audioFile)))
             {
                 var tcs = new TaskCompletionSource<bool>();
-                var listOfIntermediateResults = new List<List<SpeechRecognitionResultEventArgs>>();
-                List<SpeechRecognitionResultEventArgs> receivedRecognizingEvents = null;
+                var listOfIntermediateResults = new List<List<SpeechRecognitionEventArgs>>();
+                List<SpeechRecognitionEventArgs> receivedRecognizingEvents = null;
 
                 recognizer.SessionStarted += (s, e) =>
                 {
-                    receivedRecognizingEvents = new List<SpeechRecognitionResultEventArgs>();
+                    receivedRecognizingEvents = new List<SpeechRecognitionEventArgs>();
                 };
                 recognizer.Recognizing += (s, e) => receivedRecognizingEvents.Add(e);
                 recognizer.Recognized += (s, e) =>
                 {
                     listOfIntermediateResults.Add(receivedRecognizingEvents);
-                    receivedRecognizingEvents = new List<SpeechRecognitionResultEventArgs>();
+                    receivedRecognizingEvents = new List<SpeechRecognitionEventArgs>();
                 };
                 recognizer.SessionStopped += (s, e) =>
                 {

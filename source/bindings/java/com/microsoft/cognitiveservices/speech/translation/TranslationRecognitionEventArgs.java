@@ -9,43 +9,29 @@ import com.microsoft.cognitiveservices.speech.util.Contracts;
 /**
  * Defines payload of translation recognizing/recognized events.
  */
-public class TranslationTextResultEventArgs //: System.EventArgs
-{
-    TranslationTextResultEventArgs(com.microsoft.cognitiveservices.speech.internal.TranslationTextResultEventArgs eventArg)
-    {
+public class TranslationRecognitionEventArgs extends com.microsoft.cognitiveservices.speech.RecognitionEventArgs {
+    TranslationRecognitionEventArgs(com.microsoft.cognitiveservices.speech.internal.TranslationRecognitionEventArgs eventArg) {
+        super(eventArg);
         Contracts.throwIfNull(eventArg, "eventArg");
 
-        this._Result = new TranslationTextResult(eventArg.GetResult());
-        this._SessionId = eventArg.getSessionId();
+        this._Result = new TranslationRecognitionResult(eventArg.GetResult());
     }
 
     /**
      * Specifies the recognition result.
      * @return the recognition result.
      */
-    public final TranslationTextResult getResult()
-    {
+    public final TranslationRecognitionResult getResult() {
         return _Result;
     }
-    private TranslationTextResult _Result;
-
-    /**
-     * Specifies the session identifier.
-     * @return the session identifier.
-     */
-    public final String getSessionId()
-    {
-        return _SessionId;
-    }
-    private String _SessionId;
+    private TranslationRecognitionResult _Result;
 
     /**
      * Returns a String that represents the speech recognition result event.
      * @return A String that represents the speech recognition result event.
      */
     @Override
-    public String toString()
-    {
-        return "TranslationTextResult";
+    public String toString() {
+        return "TranslationRecognitionResult";
     }
 }

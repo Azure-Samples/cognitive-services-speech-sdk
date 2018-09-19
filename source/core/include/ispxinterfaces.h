@@ -735,16 +735,16 @@ public:
 
 enum class TranslationStatusCode { Success, Error };
 
-class ISpxTranslationTextResult : public ISpxInterfaceBaseFor<ISpxTranslationTextResult>
+class ISpxTranslationRecognitionResult : public ISpxInterfaceBaseFor<ISpxTranslationRecognitionResult>
 {
 public:
     virtual const std::map<std::wstring, std::wstring>& GetTranslationText() = 0;
 };
 
-class ISpxTranslationTextResultInit : public ISpxInterfaceBaseFor<ISpxTranslationTextResultInit>
+class ISpxTranslationRecognitionResultInit : public ISpxInterfaceBaseFor<ISpxTranslationRecognitionResultInit>
 {
 public:
-    virtual void InitTranslationTextResult(TranslationStatusCode status, const std::map<std::wstring, std::wstring>& translations, const std::wstring& failureReason) = 0;
+    virtual void InitTranslationRecognitionResult(TranslationStatusCode status, const std::map<std::wstring, std::wstring>& translations, const std::wstring& failureReason) = 0;
 };
 
 enum class SynthesisStatusCode { Success, SynthesisEnd, Error };

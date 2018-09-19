@@ -49,9 +49,9 @@
 %shared_ptr(Microsoft::CognitiveServices::Speech::Intent::IntentTrigger)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Intent::LanguageUnderstandingModel)
 %shared_ptr(Microsoft::CognitiveServices::Speech::KeywordRecognitionModel)
-%shared_ptr(Microsoft::CognitiveServices::Speech::Translation::TranslationTextResult)
+%shared_ptr(Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResult)
-%shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationTextResult, Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultEventArgs, Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultCanceledEventArgs>)
+%shared_ptr(Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult, Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionEventArgs, Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs>)
 %shared_ptr(Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer)
 %shared_ptr(Microsoft::CognitiveServices::Speech::PropertyCollection)
 %shared_ptr(Microsoft::CognitiveServices::Speech::SpeechConfig)
@@ -93,12 +93,12 @@
 %inline %{
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::SpeechRecognitionResult> SpeechRecognitionResultPtr;
     typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Intent::IntentRecognitionResult> IntentRecognitionResultPtr;
-    typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Translation::TranslationTextResult> TranslationTextResultPtr;
+    typedef std::shared_ptr<Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult> TranslationRecognitionResultPtr;
 %}
 
 %template(SpeechRecognitionResultPtrFuture) FutureWrapper<SpeechRecognitionResultPtr>;
 %template(IntentRecognitionResultPtrFuture) FutureWrapper<IntentRecognitionResultPtr>;
-%template(TranslationTextResultPtrFuture) FutureWrapper<TranslationTextResultPtr>;
+%template(TranslationRecognitionResultPtrFuture) FutureWrapper<TranslationRecognitionResultPtr>;
 %template(VoidFuture) FutureWrapper<void>;
 
 
@@ -220,7 +220,7 @@
 
 %extend Microsoft::CognitiveServices::Speech::Translation::TranslationRecognizer {
 
-    TranslationTextResultPtr Recognize() {
+    TranslationRecognitionResultPtr Recognize() {
         return ($self)->RecognizeOnceAsync().get();
     }
 
@@ -244,9 +244,9 @@
         ($self)->StopKeywordRecognitionAsync().get();
     }
 
-    FutureWrapper<TranslationTextResultPtr> RecognizeOnceAsync() {
+    FutureWrapper<TranslationRecognitionResultPtr> RecognizeOnceAsync() {
         auto future = ($self)->RecognizeOnceAsync();
-        return FutureWrapper<TranslationTextResultPtr>(std::move(future));
+        return FutureWrapper<TranslationRecognitionResultPtr>(std::move(future));
     }
 
     FutureWrapper<void> StartContinuousRecognitionAsync()
@@ -435,23 +435,23 @@
 %include <speechapi_cxx_translation_eventargs.h>
 
 #ifdef SWIGPYTHON
-%template(_TranslationTextEventCallback) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultEventArgs&>;
-%template(_TranslationTextCanceledEventCallback) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultCanceledEventArgs&>;
-%template(_TranslationSynthesisEventCallback) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResultEventArgs&>;
+%template(_TranslationTextEventCallback) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionEventArgs&>;
+%template(_TranslationTextCanceledEventCallback) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs&>;
+%template(_TranslationSynthesisEventCallback) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisEventArgs&>;
 #elif defined(SWIGJAVA)
-%template(TranslationTexEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultEventArgs&>;
-%template(TranslationTexCanceledEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultCanceledEventArgs&>;
-%template(TranslationSynthesisEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResultEventArgs&>;
+%template(TranslationTexEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionEventArgs&>;
+%template(TranslationTexCanceledEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs&>;
+%template(TranslationSynthesisEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisEventArgs&>;
 #else
-%template(TranslationTextEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultEventArgs&>;
-%template(TranslationTextCanceledEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultCanceledEventArgs&>;
-%template(TranslationSynthesisEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResultEventArgs&>;
+%template(TranslationTextEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionEventArgs&>;
+%template(TranslationTextCanceledEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs&>;
+%template(TranslationSynthesisEventListener) CallbackWrapper<const Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisEventArgs&>;
 #endif
 
-%template(TranslationTextEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultEventArgs&>;
-%template(TranslationTextCanceledEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultCanceledEventArgs&>;
-%template(TranslationSynthesisEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisResultEventArgs&>;
-%template(TranslationRecognizerBase) Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationTextResult, Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultEventArgs, Microsoft::CognitiveServices::Speech::Translation::TranslationTextResultCanceledEventArgs>;
+%template(TranslationTextEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionEventArgs&>;
+%template(TranslationTextCanceledEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs&>;
+%template(TranslationSynthesisEventSignal) Microsoft::CognitiveServices::Speech::EventSignal<const Microsoft::CognitiveServices::Speech::Translation::TranslationSynthesisEventArgs&>;
+%template(TranslationRecognizerBase) Microsoft::CognitiveServices::Speech::AsyncRecognizer<Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionResult, Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionEventArgs, Microsoft::CognitiveServices::Speech::Translation::TranslationRecognitionCanceledEventArgs>;
 
 %include <speechapi_cxx_translation_recognizer.h>
 

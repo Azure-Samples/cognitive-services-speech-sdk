@@ -832,10 +832,10 @@ void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHyp
                 namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
 
                 // Update our result to be a "TranslationText" result.
-                auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
+                auto initTranslationResult = SpxQueryInterface<ISpxTranslationRecognitionResultInit>(result);
 
                 auto status = GetTranslationStatus(message.translation.translationStatus);
-                initTranslationResult->InitTranslationTextResult(status, message.translation.translations, message.translation.failureReason);
+                initTranslationResult->InitTranslationRecognitionResult(status, message.translation.translations, message.translation.failureReason);
 
                 // Fire the result
                 site->FireAdapterResult_Intermediate(this, message.offset, result);
@@ -891,10 +891,10 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
             namedProperties->SetStringValue(GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult), PAL::ToString(message.json).c_str());
 
             // Update our result to be an "TranslationText" result.
-            auto initTranslationResult = SpxQueryInterface<ISpxTranslationTextResultInit>(result);
+            auto initTranslationResult = SpxQueryInterface<ISpxTranslationRecognitionResultInit>(result);
 
             auto status = GetTranslationStatus(message.translation.translationStatus);
-            initTranslationResult->InitTranslationTextResult(status, message.translation.translations, message.translation.failureReason);
+            initTranslationResult->InitTranslationRecognitionResult(status, message.translation.translations, message.translation.failureReason);
 
             // Fire the result
             site->FireAdapterResult_FinalResult(this, message.offset, result);

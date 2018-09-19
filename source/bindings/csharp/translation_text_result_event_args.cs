@@ -12,24 +12,19 @@ namespace Microsoft.CognitiveServices.Speech.Translation
     /// <summary>
     /// Define payload of translation recognizing/recognized events.
     /// </summary>
-    public sealed class TranslationTextResultEventArgs : System.EventArgs
+    public class TranslationRecognitionEventArgs : RecognitionEventArgs
     {
-        internal TranslationTextResultEventArgs(Microsoft.CognitiveServices.Speech.Internal.TranslationTextResultEventArgs e)
+        internal TranslationRecognitionEventArgs(Microsoft.CognitiveServices.Speech.Internal.TranslationRecognitionEventArgs e)
+            : base(e)
         {
             eventArgImpl = e;
-            Result = new TranslationTextResult(e.GetResult());
-            SessionId = e.SessionId;
+            Result = new TranslationRecognitionResult(e.GetResult());
         }
 
         /// <summary>
         /// Specifies the recognition result.
         /// </summary>
-        public TranslationTextResult Result { get; }
-
-        /// <summary>
-        /// Specifies the session identifier.
-        /// </summary>
-        public string SessionId { get; }
+        public TranslationRecognitionResult Result { get; }
 
         /// <summary>
         /// Returns a string that represents the speech recognition result event.
@@ -41,34 +36,22 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         }
 
         // Hold the reference
-        Microsoft.CognitiveServices.Speech.Internal.TranslationTextResultEventArgs eventArgImpl;
+        Microsoft.CognitiveServices.Speech.Internal.TranslationRecognitionEventArgs eventArgImpl;
     }
 
     /// <summary>
     /// Define payload of translation text result recognition canceled result events.
     /// </summary>
-    public sealed class TranslationTextResultCanceledEventArgs : System.EventArgs
+    public sealed class TranslationRecognitionCanceledEventArgs : TranslationRecognitionEventArgs
     {
-        internal TranslationTextResultCanceledEventArgs(Microsoft.CognitiveServices.Speech.Internal.TranslationTextResultCanceledEventArgs e)
+        internal TranslationRecognitionCanceledEventArgs(Microsoft.CognitiveServices.Speech.Internal.TranslationRecognitionCanceledEventArgs e)
+            : base(e)
         {
             eventArgImpl = e;
-            Result = new TranslationTextResult(e.GetResult());
-            SessionId = e.SessionId;
-
             var cancellation = e.GetCancellationDetails();
             Reason = (CancellationReason)cancellation.Reason;
             ErrorDetails = cancellation.ErrorDetails;
         }
-
-        /// <summary>
-        /// Specifies the recognition result.
-        /// </summary>
-        public TranslationTextResult Result { get; }
-
-        /// <summary>
-        /// Specifies the session identifier.
-        /// </summary>
-        public string SessionId { get; }
 
         /// <summary>
         /// The reason the recognition was canceled.
@@ -91,6 +74,6 @@ namespace Microsoft.CognitiveServices.Speech.Translation
         }
 
         // Hold the reference
-        Microsoft.CognitiveServices.Speech.Internal.TranslationTextResultCanceledEventArgs eventArgImpl;
+        Microsoft.CognitiveServices.Speech.Internal.TranslationRecognitionCanceledEventArgs eventArgImpl;
     }
 }

@@ -21,22 +21,22 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
     /**
      * The event recognizing signals that an intermediate recognition result is received.
      */
-    public final EventHandlerImpl<TranslationTextResultEventArgs> recognizing = new EventHandlerImpl<TranslationTextResultEventArgs>();
+    public final EventHandlerImpl<TranslationRecognitionEventArgs> recognizing = new EventHandlerImpl<TranslationRecognitionEventArgs>();
 
     /**
      * The event recognized signals that a final recognition result is received.
      */
-    public final EventHandlerImpl<TranslationTextResultEventArgs> recognized = new EventHandlerImpl<TranslationTextResultEventArgs>();
+    public final EventHandlerImpl<TranslationRecognitionEventArgs> recognized = new EventHandlerImpl<TranslationRecognitionEventArgs>();
 
     /**
      * The event canceled signals that the recognition/translation was canceled.
      */
-    public final EventHandlerImpl<TranslationTextResultCanceledEventArgs> canceled = new EventHandlerImpl<TranslationTextResultCanceledEventArgs>();
+    public final EventHandlerImpl<TranslationRecognitionCanceledEventArgs> canceled = new EventHandlerImpl<TranslationRecognitionCanceledEventArgs>();
 
     /**
      * The event synthesizing signals that a translation synthesis result is received.
      */
-    public final EventHandlerImpl<TranslationSynthesisResultEventArgs> synthesizing = new EventHandlerImpl<TranslationSynthesisResultEventArgs>();
+    public final EventHandlerImpl<TranslationSynthesisEventArgs> synthesizing = new EventHandlerImpl<TranslationSynthesisEventArgs>();
 
     /**
      * Constructs an instance of a translation recognizer.
@@ -149,11 +149,11 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
     /**
      * Starts recognition and translation, and stops after the first utterance is recognized. The task returns the translation text as result.
      * Note: RecognizeOnceAsync() returns when the first utterance has been recognized, so it is suitableonly for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
-     * @return A task representing the recognition operation. The task returns a value of TranslationTextResult.
+     * @return A task representing the recognition operation. The task returns a value of TranslationRecognitionResult.
      */
-    public Future<TranslationTextResult> recognizeOnceAsync() {
+    public Future<TranslationRecognitionResult> recognizeOnceAsync() {
         return s_executorService.submit(() -> {
-            return new TranslationTextResult(recoImpl.Recognize());
+            return new TranslationRecognitionResult(recoImpl.Recognize());
         });
     }
 
@@ -233,7 +233,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         }
 
         @Override
-        public void Execute(com.microsoft.cognitiveservices.speech.internal.TranslationTextResultEventArgs eventArgs)
+        public void Execute(com.microsoft.cognitiveservices.speech.internal.TranslationRecognitionEventArgs eventArgs)
         {
             Contracts.throwIfNull(eventArgs, "eventArgs");
 
@@ -242,8 +242,8 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
                 return;
             }
 
-            TranslationTextResultEventArgs resultEventArg = new TranslationTextResultEventArgs(eventArgs);
-            EventHandlerImpl<TranslationTextResultEventArgs>  handler = isRecognizedHandler ? recognizer.recognized : recognizer.recognizing;
+            TranslationRecognitionEventArgs resultEventArg = new TranslationRecognitionEventArgs(eventArgs);
+            EventHandlerImpl<TranslationRecognitionEventArgs>  handler = isRecognizedHandler ? recognizer.recognized : recognizer.recognizing;
             if (handler != null)
             {
                 handler.fireEvent(this.recognizer, resultEventArg);
@@ -262,14 +262,14 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         }
 
         @Override
-        public void Execute(com.microsoft.cognitiveservices.speech.internal.TranslationTextResultCanceledEventArgs eventArgs) {
+        public void Execute(com.microsoft.cognitiveservices.speech.internal.TranslationRecognitionCanceledEventArgs eventArgs) {
             Contracts.throwIfNull(eventArgs, "eventArgs");
             if (recognizer.disposed) {
                 return;
             }
 
-            TranslationTextResultCanceledEventArgs resultEventArg = new TranslationTextResultCanceledEventArgs(eventArgs);
-            EventHandlerImpl<TranslationTextResultCanceledEventArgs> handler = this.recognizer.canceled;
+            TranslationRecognitionCanceledEventArgs resultEventArg = new TranslationRecognitionCanceledEventArgs(eventArgs);
+            EventHandlerImpl<TranslationRecognitionCanceledEventArgs> handler = this.recognizer.canceled;
 
             if (handler != null) {
                 handler.fireEvent(this.recognizer, resultEventArg);
@@ -290,7 +290,7 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
         }
 
         @Override
-        public void Execute(com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisResultEventArgs eventArgs)
+        public void Execute(com.microsoft.cognitiveservices.speech.internal.TranslationSynthesisEventArgs eventArgs)
         {
             Contracts.throwIfNull(eventArgs, "eventArgs");
 
@@ -299,8 +299,8 @@ public final class TranslationRecognizer extends com.microsoft.cognitiveservices
                 return;
             }
 
-            TranslationSynthesisResultEventArgs resultEventArg = new TranslationSynthesisResultEventArgs(eventArgs);
-            EventHandlerImpl<TranslationSynthesisResultEventArgs> handler = recognizer.synthesizing;
+            TranslationSynthesisEventArgs resultEventArg = new TranslationSynthesisEventArgs(eventArgs);
+            EventHandlerImpl<TranslationSynthesisEventArgs> handler = recognizer.synthesizing;
             if (handler != null)
             {
                 handler.fireEvent(this.recognizer, resultEventArg);

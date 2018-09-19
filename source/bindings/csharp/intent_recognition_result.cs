@@ -10,7 +10,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
     /// <summary>
     /// Defines result of intent recognition.
     /// </summary>
-    public sealed class IntentRecognitionResult : SpeechRecognitionResult
+    public sealed class IntentRecognitionResult : RecognitionResult
     {
         internal IntentRecognitionResult(Internal.IntentRecognitionResult result)
             : base(result)

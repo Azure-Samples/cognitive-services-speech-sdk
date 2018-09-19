@@ -57,11 +57,11 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        public async Task<TranslationTextResult> GetTranslationFinalResult(string path, string fromLanguage, List<string> toLanguages)
+        public async Task<TranslationRecognitionResult> GetTranslationFinalResult(string path, string fromLanguage, List<string> toLanguages)
         {
             using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages)))
             {
-                TranslationTextResult result = null;
+                TranslationRecognitionResult result = null;
                 await Task.WhenAny(recognizer.RecognizeOnceAsync().ContinueWith(t => result = t.Result), Task.Delay(timeout));
                 return result;
             }
@@ -87,13 +87,13 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 recognizer.Synthesizing += (s, e) =>
                 {
                     Console.WriteLine($"Received synthesis event: {e.ToString()}");
-                    if (e.Result.Audio.Length > 0)
+                    if (e.Result.GetAudio().Length > 0)
                     {
                         synthesisResultEvents.Add(e);
                     }
-                    if (e.Result.Audio.Length == 0 && e.Result.Reason != ResultReason.SynthesizingAudioCompleted)
+                    if (e.Result.GetAudio().Length == 0 && e.Result.Reason != ResultReason.SynthesizingAudioCompleted)
                     {
-                        Assert.Fail($"Synthesizing event failure: Reason:{0} Audio.Length={1}", e.Result.Reason, e.Result.Audio.Length);
+                        Assert.Fail($"Synthesizing event failure: Reason:{0} Audio.Length={1}", e.Result.Reason, e.Result.GetAudio().Length);
                     }
                 };
 
@@ -123,18 +123,18 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             }
         }
 
-        public async Task<List<List<TranslationTextResultEventArgs>>> GetTranslationRecognizingContinuous(string path, string fromLanguage, List<string> toLanguages)
+        public async Task<List<List<TranslationRecognitionEventArgs>>> GetTranslationRecognizingContinuous(string path, string fromLanguage, List<string> toLanguages)
         {
             using (var recognizer = TrackSessionId(CreateTranslationRecognizer(path, fromLanguage, toLanguages)))
             {
                 var tcs = new TaskCompletionSource<bool>();
-                var listOfIntermediateResults = new List<List<TranslationTextResultEventArgs>>();
-                List<TranslationTextResultEventArgs> receivedRecognizingEvents = null;
+                var listOfIntermediateResults = new List<List<TranslationRecognitionEventArgs>>();
+                List<TranslationRecognitionEventArgs> receivedRecognizingEvents = null;
 
                 recognizer.SessionStarted += (s, e) =>
                 {
                     Console.WriteLine($"Session started {e.ToString()}");
-                    receivedRecognizingEvents = new List<TranslationTextResultEventArgs>();
+                    receivedRecognizingEvents = new List<TranslationRecognitionEventArgs>();
                 };
                 recognizer.SessionStopped += (s, e) =>
                 {
@@ -151,7 +151,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 {
                     Console.WriteLine($"Got final result {e.ToString()}");
                     listOfIntermediateResults.Add(receivedRecognizingEvents);
-                    receivedRecognizingEvents = new List<TranslationTextResultEventArgs>();
+                    receivedRecognizingEvents = new List<TranslationRecognitionEventArgs>();
                 };
 
                 string canceled = string.Empty;

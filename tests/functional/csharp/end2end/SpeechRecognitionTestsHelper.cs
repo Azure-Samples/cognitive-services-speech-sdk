@@ -78,7 +78,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             return recognizedText.Count > 0 ? recognizedText[0] : string.Empty;
         }
 
-        private void RecognizedEventCounter(object sender, SpeechRecognitionResultEventArgs e)
+        private void RecognizedEventCounter(object sender, SpeechRecognitionEventArgs e)
         {
             RecognizedEventCount++;
         }

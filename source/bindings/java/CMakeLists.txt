@@ -139,15 +139,15 @@ set(SWIG_JAVA_SOURCES
     ${CMAKE_SWIG_OUTDIR}/TranslationSynthesisEventListener.java
     ${CMAKE_SWIG_OUTDIR}/TranslationSynthesisEventSignal.java
     ${CMAKE_SWIG_OUTDIR}/TranslationSynthesisResult.java
-    ${CMAKE_SWIG_OUTDIR}/TranslationSynthesisResultEventArgs.java
+    ${CMAKE_SWIG_OUTDIR}/TranslationSynthesisEventArgs.java
     ${CMAKE_SWIG_OUTDIR}/TranslationTexEventListener.java
     ${CMAKE_SWIG_OUTDIR}/TranslationTexCanceledEventListener.java
     ${CMAKE_SWIG_OUTDIR}/TranslationTextEventSignal.java
     ${CMAKE_SWIG_OUTDIR}/TranslationTextCanceledEventSignal.java
-    ${CMAKE_SWIG_OUTDIR}/TranslationTextResult.java
-    ${CMAKE_SWIG_OUTDIR}/TranslationTextResultEventArgs.java
-    ${CMAKE_SWIG_OUTDIR}/TranslationTextResultCanceledEventArgs.java
-    ${CMAKE_SWIG_OUTDIR}/TranslationTextResultPtrFuture.java
+    ${CMAKE_SWIG_OUTDIR}/TranslationRecognitionResult.java
+    ${CMAKE_SWIG_OUTDIR}/TranslationRecognitionEventArgs.java
+    ${CMAKE_SWIG_OUTDIR}/TranslationRecognitionCanceledEventArgs.java
+    ${CMAKE_SWIG_OUTDIR}/TranslationRecognitionResultPtrFuture.java
     ${CMAKE_SWIG_OUTDIR}/StdMapStringString.java
     ${CMAKE_SWIG_OUTDIR}/StdMapStringStringMapIterator.java
 
@@ -208,10 +208,10 @@ set(JAVA_SOURCES
 
     ${PACKAGE_DIR}/translation/TranslationRecognizer.java
     ${PACKAGE_DIR}/translation/TranslationSynthesisResult.java
-    ${PACKAGE_DIR}/translation/TranslationSynthesisResultEventArgs.java
-    ${PACKAGE_DIR}/translation/TranslationTextResult.java
-    ${PACKAGE_DIR}/translation/TranslationTextResultEventArgs.java
-    ${PACKAGE_DIR}/translation/TranslationTextResultCanceledEventArgs.java
+    ${PACKAGE_DIR}/translation/TranslationSynthesisEventArgs.java
+    ${PACKAGE_DIR}/translation/TranslationRecognitionResult.java
+    ${PACKAGE_DIR}/translation/TranslationRecognitionEventArgs.java
+    ${PACKAGE_DIR}/translation/TranslationRecognitionCanceledEventArgs.java
     ${PACKAGE_DIR}/translation/SpeechTranslationConfig.java
 
     ${PACKAGE_DIR}/util/EventHandler.java

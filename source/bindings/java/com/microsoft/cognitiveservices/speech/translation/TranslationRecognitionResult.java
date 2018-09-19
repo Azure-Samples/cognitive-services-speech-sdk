@@ -11,10 +11,10 @@ import com.microsoft.cognitiveservices.speech.RecognitionResult;
 import com.microsoft.cognitiveservices.speech.util.Contracts;
 
 /**
- * Defines translation text result.
- */
-public final class TranslationTextResult extends RecognitionResult {
-    TranslationTextResult(com.microsoft.cognitiveservices.speech.internal.TranslationTextResult result) {
+  * Defines translation recognition result.
+  */
+public final class TranslationRecognitionResult extends RecognitionResult {
+    TranslationRecognitionResult(com.microsoft.cognitiveservices.speech.internal.TranslationRecognitionResult result) {
         super(result);
 
         Contracts.throwIfNull(result, "result");
