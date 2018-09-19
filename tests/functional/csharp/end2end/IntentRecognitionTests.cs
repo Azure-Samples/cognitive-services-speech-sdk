@@ -88,44 +88,40 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
                 Assert.AreEqual(expectedIntentId, result.IntentId);
                 Assert.AreEqual(TestData.English.HomeAutomation.TurnOn.Utterance, result.Text);
+                var json = result.Properties.GetProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult);
+                Assert.IsFalse(string.IsNullOrEmpty(json), "Empty JSON from intent recognition");
+                // TODO check JSON validity
             }
         }
 
-        [DataTestMethod]
-        [DataRow("", "", "HomeAutomation.TurnOn")]
-        [DataRow("", "my-custom-intent-id-string", "my-custom-intent-id-string")]
-        [DataRow("HomeAutomation.TurnOn", "", "HomeAutomation.TurnOn")]
-        [DataRow("HomeAutomation.TurnOn", "my-custom-intent-id-string", "my-custom-intent-id-string")]
-        [DataRow("intent-name-that-doesnt-exist", "", "")]
-        [DataRow("intent-name-that-doesnt-exist", "my-custom-intent-id-string", "")]
-        public async Task RecognizeIntentValidInputs(string intentName, string intentId, string expectedIntentId)
+        [TestMethod]
+        public async Task RecognizeIntentSimplePhrase()
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile);
-            using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
-            {
-                var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
-                if (string.IsNullOrEmpty(intentName) && string.IsNullOrEmpty(intentId))
-                {
-                    recognizer.AddAllIntents(model);
-                }
-                else if (string.IsNullOrEmpty(intentName))
-                {
-                    recognizer.AddAllIntents(model, intentId);
-                }
-                else if (string.IsNullOrEmpty(intentId))
-                {
-                    recognizer.AddIntent(model, intentName);
-                }
-                else
-                {
-                    recognizer.AddIntent(model, intentName, intentId);
-                }
 
-                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-                Assert.AreEqual(expectedIntentId, result.IntentId);
-                Assert.AreEqual(TestData.English.HomeAutomation.TurnOn.Utterance, result.Text);
-                Assert.IsFalse(string.IsNullOrEmpty(result.Properties.GetProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult)));
-            }
+            foreach (bool matchingPhrase in new bool[] { false, true })
+                foreach (bool singleArgument in new bool[] { false, true })
+                {
+                    var phrase = matchingPhrase ? TestData.English.HomeAutomation.TurnOn.Utterance : "do not match this";
+                    using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
+                    {
+                        var someId = "id1";
+                        var expectedId = matchingPhrase ? (singleArgument ? phrase : someId) : "";
+                        if (singleArgument)
+                        {
+                            recognizer.AddIntent(phrase);
+                        }
+                        else
+                        {
+                            recognizer.AddIntent(phrase, someId);
+                        }
+                        var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                        Assert.AreEqual(TestData.English.HomeAutomation.TurnOn.Utterance, result.Text);
+                        Assert.AreEqual(expectedId, result.IntentId,
+                            $"Unexpected intent ID for singleArgument={singleArgument} matchingPhrase={matchingPhrase}: is {result.IntentId}, expected {expectedId}");
+                    }
+                }
         }
     }
 }
+

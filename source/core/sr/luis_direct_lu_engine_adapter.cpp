@@ -35,10 +35,21 @@ void CSpxLuisDirectEngineAdapter::Term()
 {
     m_triggerMap.clear();
     m_intentNameToIdMap.clear();
+    m_intentPhraseToIdMap.clear();
 }
 
 void CSpxLuisDirectEngineAdapter::AddIntentTrigger(const wchar_t* id, std::shared_ptr<ISpxTrigger> trigger)
 {
+    auto intentId = (id == nullptr || id[0] == '\0') ? std::wstring() : id;
+
+    auto phrase = trigger->GetPhrase();
+    if (!phrase.empty())
+    {
+        std::unique_lock<std::mutex> lock(m_mutex);
+        m_triggerMap.emplace(intentId, trigger);
+        m_intentPhraseToIdMap[phrase] = !intentId.empty() ? intentId : phrase;
+    }
+
     // Luis Direct only works with luis models ... not phrase triggers ... 
     auto model = trigger->GetModel();
     if (model != nullptr)
@@ -51,7 +62,6 @@ void CSpxLuisDirectEngineAdapter::AddIntentTrigger(const wchar_t* id, std::share
             model->UpdateSubscription(PAL::ToWString(key).c_str(), PAL::ToWString(region).c_str());
         }
 
-        auto intentId = (id == nullptr || id[0] == '\0') ? std::wstring() : id;
         auto intentName = trigger->GetModelIntentName();
 
         std::unique_lock<std::mutex> lock(m_mutex);
@@ -173,6 +183,15 @@ void CSpxLuisDirectEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionR
         auto json = properties->GetStringValue(GetPropertyName(PropertyId::LanguageUnderstandingServiceResponse_JsonResult));
         SPX_DBG_TRACE_VERBOSE("%s: text='%s'; already-existing-IntentResultJson='%s'", __FUNCTION__, resultText.c_str(), json.c_str());
 
+        auto simplePhraseIntentId = IntentIdFromSimplePhraseTriggers(result);
+        if (!simplePhraseIntentId.empty())
+        {
+            // Update our result to be an "Intent" result, with the appropriate ID
+            auto initIntentResult = SpxQueryInterface<ISpxIntentRecognitionResultInit>(result);
+            initIntentResult->InitIntentResult(simplePhraseIntentId.c_str(), L"");
+            return;
+        }
+
         // If we don't already have the LUIS json, fetch it from LUIS now...
         if (json.empty())
         {
@@ -287,5 +306,29 @@ std::wstring CSpxLuisDirectEngineAdapter::IntentIdFromIntentName(const std::wstr
         : m_useThisIdWhenNameNotFoundInMap;
 }
 
+std::wstring CSpxLuisDirectEngineAdapter::IntentIdFromSimplePhraseTriggers(std::shared_ptr<ISpxRecognitionResult> result)
+{
+    auto namedProperties = SpxQueryInterface<ISpxNamedProperties>(result);
+
+    auto phrase = result->GetText();
+    if (m_intentPhraseToIdMap.find(phrase) != m_intentPhraseToIdMap.end())
+    {
+        return m_intentPhraseToIdMap[phrase];
+    }
+
+    phrase = PAL::ToWString(namedProperties->GetStringValue("ITN"));
+    if (m_intentPhraseToIdMap.find(phrase) != m_intentPhraseToIdMap.end())
+    {
+        return m_intentPhraseToIdMap[phrase];
+    }
+
+    phrase = PAL::ToWString(namedProperties->GetStringValue("Lexical"));
+    if (m_intentPhraseToIdMap.find(phrase) != m_intentPhraseToIdMap.end())
+    {
+        return m_intentPhraseToIdMap[phrase];
+    }
+
+    return L"";
+}
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

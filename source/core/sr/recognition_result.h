@@ -72,12 +72,17 @@ public:
     // ISpxTranslationSynthesisResultInit
     void InitTranslationSynthesisResult(SynthesisStatusCode status, const uint8_t* audioData, size_t audioLength, const std::wstring& failureReason) override;
 
+    // --- ISpxNamedProperties (overrides)
+    void SetStringValue(const char* name, const char* value) override;
+
 private:
 
     CSpxRecognitionResult(const CSpxRecognitionResult&) = delete;
     CSpxRecognitionResult(const CSpxRecognitionResult&&) = delete;
 
     CSpxRecognitionResult& operator=(const CSpxRecognitionResult&) = delete;
+
+    void InitPropertiesFromJsonResult(const char* value);
 
     std::wstring m_resultId;
     std::wstring m_text;

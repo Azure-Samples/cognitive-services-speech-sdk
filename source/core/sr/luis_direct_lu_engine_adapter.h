@@ -56,10 +56,12 @@ private:
 
     std::wstring ExtractIntent(const std::string& json);
     std::wstring IntentIdFromIntentName(const std::wstring& intentName);
+    std::wstring IntentIdFromSimplePhraseTriggers(std::shared_ptr<ISpxRecognitionResult> result);
 
     std::mutex m_mutex;
     std::map<std::wstring, std::shared_ptr<ISpxTrigger>> m_triggerMap;
     std::map<std::wstring, std::wstring> m_intentNameToIdMap;
+    std::map<std::wstring, std::wstring> m_intentPhraseToIdMap;
 
     bool m_matchAllIntents = false;
     bool m_useIntentNameAsIdWhenNotFoundInMap = false;

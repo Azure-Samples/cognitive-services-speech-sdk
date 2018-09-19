@@ -193,6 +193,9 @@ void CarbonTestConsole::ch9_do_intent()
     recognizer->AddIntent(model, "TV.ShowGuide");
     // recognizer->AddAllIntents(model, "id-representing-all-intents");
     // recognizer->AddAllIntents(model);
+    recognizer->AddIntent("This is a test.", "test");
+    recognizer->AddIntent("Switch the to channel 34.", "34");
+    recognizer->AddIntent("what's the weather like", "weather");
 
     printf("Listening...\n");
     auto result = recognizer->RecognizeOnceAsync().get();
@@ -228,6 +231,9 @@ void CarbonTestConsole::ch9_do_intent_continuous()
     recognizer->AddIntent(model, "TV.ShowGuide");
     // recognizer->AddAllIntents(model, "id-representing-all-intents");
     // recognizer->AddAllIntents(model);
+    recognizer->AddIntent("This is a test.", "test");
+    recognizer->AddIntent("Switch the to channel 34.", "34");
+    recognizer->AddIntent("what's the weather like", "weather");
 
     recognizer->StartContinuousRecognitionAsync();
 

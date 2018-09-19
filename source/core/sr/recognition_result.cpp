@@ -3,6 +3,17 @@
 #include "guid_utils.h"
 #include "property_id_2_name_map.h"
 
+#ifdef _MSC_VER
+#pragma warning( push )
+// disable: (8300,27): error 28020:  : The expression '0&lt;=_Param_(1)&amp;&amp;_Param_(1)&lt;=64-1' is not true at this call.
+#pragma warning( disable : 28020 )
+#include "json.hpp"
+#pragma warning( pop )
+#else
+#include "json.hpp"
+#endif
+using json = nlohmann::json;
+
 using namespace std;
 
 namespace Microsoft {
@@ -195,6 +206,40 @@ void CSpxRecognitionResult::InitTranslationSynthesisResult(SynthesisStatusCode s
     }
 }
 
+void CSpxRecognitionResult::SetStringValue(const char* name, const char* value)
+{
+    ISpxPropertyBagImpl::SetStringValue(name, value);
+
+    if (PAL::stricmp(name, GetPropertyName(PropertyId::SpeechServiceResponse_JsonResult)) == 0)
+    {
+        InitPropertiesFromJsonResult(value);
+    }
+}
+
+void CSpxRecognitionResult::InitPropertiesFromJsonResult(const char* value)
+{
+    if (value != nullptr && value[0] != '\0')
+    {
+        SPX_DBG_TRACE_VERBOSE("%s: json='%s'", __FUNCTION__, value);
+        auto root = json::parse(value);
+        auto nBest = root["NBest"];
+        if (nBest.is_array())
+        {
+            auto firstBest = nBest[0];
+            auto itn = firstBest["ITN"].get<string>();
+            if (!itn.empty())
+            {
+                SetStringValue("ITN", itn.c_str());
+            }
+
+            auto lexical = firstBest["Lexical"].get<string>();
+            if (!lexical.empty())
+            {
+                SetStringValue("Lexical", lexical.c_str());
+            }
+        }
+    }
+}
+
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl
-

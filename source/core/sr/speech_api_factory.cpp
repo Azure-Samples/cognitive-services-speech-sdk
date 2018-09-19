@@ -25,6 +25,7 @@ std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateSpeechRecognizerFrom
 
 std::shared_ptr<ISpxRecognizer> CSpxSpeechApiFactory::CreateIntentRecognizerFromConfig(const char* pszLanguage, OutputFormat format, std::shared_ptr<ISpxAudioConfig> audioInput)
 {
+    format = OutputFormat::Detailed;
     return CreateRecognizerFromConfigInternal("CSpxAudioStreamSession", "CSpxIntentRecognizer", pszLanguage, format, audioInput);
 }
 
