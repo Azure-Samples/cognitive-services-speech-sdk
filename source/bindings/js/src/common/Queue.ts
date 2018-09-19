@@ -1,3 +1,7 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// See https://aka.ms/csspeech/license201809 for the full license information.
+//
 import { InvalidOperationError, ObjectDisposedError } from "./Error";
 import { IDetachable } from "./IDetachable";
 import { IDisposable } from "./IDisposable";

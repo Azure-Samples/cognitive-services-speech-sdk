@@ -1,3 +1,7 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// See https://aka.ms/csspeech/license201809 for the full license information.
+//
 import { EventType, IEventListener, PlatformEvent } from "../common/Exports";
 
 export class ConsoleLoggingListener implements IEventListener<PlatformEvent> {

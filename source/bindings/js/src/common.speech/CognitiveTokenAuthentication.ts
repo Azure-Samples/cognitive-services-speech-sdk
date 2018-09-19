@@ -1,3 +1,7 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// See https://aka.ms/csspeech/license201809 for the full license information.
+//
 import { ArgumentNullError, Promise, PromiseHelper } from "../common/Exports";
 import { AuthInfo, IAuthentication } from "./IAuthentication";
 

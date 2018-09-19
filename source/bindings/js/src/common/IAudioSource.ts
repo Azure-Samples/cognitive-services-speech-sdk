@@ -1,3 +1,7 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// See https://aka.ms/csspeech/license201809 for the full license information.
+//
 import { AudioSourceEvent } from "./AudioSourceEvents";
 import { EventSource } from "./EventSource";
 import { IDetachable } from "./IDetachable";

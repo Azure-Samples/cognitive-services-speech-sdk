@@ -1,3 +1,7 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// See https://aka.ms/csspeech/license201809 for the full license information.
+//
 import { ConnectionEvent } from "./ConnectionEvents";
 import { ConnectionMessage } from "./ConnectionMessage";
 import { ConnectionOpenResponse } from "./ConnectionOpenResponse";

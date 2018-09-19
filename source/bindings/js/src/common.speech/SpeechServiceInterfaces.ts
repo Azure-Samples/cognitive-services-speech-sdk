@@ -1,3 +1,7 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// See https://aka.ms/csspeech/license201809 for the full license information.
+//
 import { RecognitionCompletionStatus } from "../../src/common.speech/Exports";
 import { SynthesisStatus } from "../sdk/SynthesisStatus";
 import { TranslationStatus } from "./TranslationStatus";

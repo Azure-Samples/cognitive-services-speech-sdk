@@ -1,6 +1,6 @@
 //
 // Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// See https://aka.ms/csspeech/license201809 for the full license information.
 //
 // speechapi_cxx_language_understanding_model.h: Public API declarations for LanguageUnderstandingModel C++ class
 //

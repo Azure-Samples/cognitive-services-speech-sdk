@@ -1,6 +1,6 @@
 //
 // copyright (c) Microsoft. All rights reserved.
-// licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// See https://aka.ms/csspeech/license201809 for the full license information.
 //
 import { SessionEventArgs, TranslationSynthesisResult } from "./Exports";
 

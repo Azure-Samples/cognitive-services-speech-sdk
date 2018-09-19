@@ -27,6 +27,7 @@ case $SPEECHSDK_BUILD_AGENT_PLATFORM in
         sudo lsof -t /var/lib/dpkg/lock | sudo xargs --no-run-if-empty --verbose kill -9
         echo LSOF after kill
         sudo lsof /var/lib/dpkg/lock
+        sudo dpkg --configure -a
         echo DONE
       )
     fi

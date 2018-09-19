@@ -1,3 +1,7 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// See https://aka.ms/csspeech/license201809 for the full license information.
+//
 import { MessageType } from "./ConnectionMessage";
 import { ArgumentNullError, InvalidOperationError } from "./Error";
 import { CreateNoDashGuid } from "./Guid";

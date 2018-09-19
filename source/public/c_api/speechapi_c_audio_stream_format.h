@@ -1,6 +1,6 @@
 //
 // Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// See https://aka.ms/csspeech/license201809 for the full license information.
 //
 // speechapi_c_audio_stream_format.h: Public API declarations for audio stream format related C methods and types
 //
