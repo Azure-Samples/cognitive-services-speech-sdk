@@ -43,17 +43,16 @@ namespace Keys
 {
     EXTERN std::string Speech;
     EXTERN std::string CRIS;
-    EXTERN std::string LanguageUnderstanding;
+    EXTERN std::string LUIS;
     EXTERN std::string Skyman;
-    EXTERN std::string LuisAppid;
 }
 
 namespace Config
 {
     EXTERN std::string Endpoint;
     EXTERN std::string Region;
+    EXTERN std::string LuisAppId;
 }
-
 
 
 inline bool exists(const std::wstring& name) {
@@ -71,6 +70,8 @@ inline void add_signal_handlers()
     Debug::HookSignalHandlers();
 }
 
+
+
 #if defined(CATCH_CONFIG_RUNNER)
 inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
 {
@@ -81,14 +82,11 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
         | Opt(Keys::Speech, "SpeechSubscriptionKey") // bind variable to a new option, with a hint string
         ["--keySpeech"]    // the option names it will respond to
     ("The subscription key for speech")
-        | Opt(Keys::LuisAppid, "LUISAppid")
-        ["--keyLuisAppid"]
-    ("The LUIS Appid for intent recognizer")
         | Opt(Keys::CRIS, "CRISSubscriptionKey")
         ["--keyCRIS"]
     ("The subscription key for CRIS")
-        | Opt(Keys::LanguageUnderstanding, "LanguageUnderstandingSubscriptionKey")
-        ["--keyLU"]
+        | Opt(Keys::LUIS, "LuisSubscriptionKey")
+        ["--keyLUIS"]
     ("The subscription key for LanguageUnderstanding")
         | Opt(Keys::Skyman, "SkymanSubscriptionKey")
         ["--keySkyman"]
@@ -98,7 +96,11 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
     ("The endpoint url to test against.")
         | Opt(Config::Region, "RegionId")
         ["--regionId"]
-    ("The region id to be used for subscription and authorization requests");
+    ("The region id to be used for subscription and authorization requests")
+        | Opt(Config::LuisAppId, "LuisAppId")
+        ["--luisAppId"]
+    ("The language understanding app id to be used intent recognition tests")
+    ;
 
     // Now pass the new composite back to Catch so it uses that
     session.cli(cli);
@@ -107,3 +109,20 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
     return session.applyCommandLine(argc, argv);
 }
 #endif
+
+#define SPXTEST_SECTION(msg) SECTION(msg) if ([=](){ \
+    SPX_DBG_TRACE_INFO("SPXTEST_SECTION('%s') %s(%d)", msg, __FILE__, __LINE__);  \
+    return 1; }())
+
+#define SPXTEST_GIVEN(msg) GIVEN(msg) if ([=](){ \
+    SPX_DBG_TRACE_INFO("SPXTEST_GIVEN('%s') %s(%d):", msg, __FILE__, __LINE__); \
+    return 1; }())
+
+#define SPXTEST_WHEN(msg) WHEN(msg) if ([=](){ \
+    SPX_DBG_TRACE_INFO("SPXTEST_WHEN('%s') %s(%d):", msg, __FILE__, __LINE__); \
+    return 1; }())
+
+#define SPXTEST_REQUIRE(expr) \
+    SPX_DBG_TRACE_INFO("SPXTEST_REQUIRE('%s'): %s(%d):", __SPX_EXPR_AS_STRING(expr), __FILE__, __LINE__); \
+    SPX_DBG_TRACE_ERROR_IF(!(expr), "SPXTEST_REQUIRE('%s') FAILED: %s(%d):", __SPX_EXPR_AS_STRING(expr), __FILE__, __LINE__); \
+    REQUIRE(expr)

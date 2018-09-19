@@ -217,8 +217,16 @@ public final class IntentRecognizer extends com.microsoft.cognitiveservices.spee
         Contracts.throwIfNull(model, "model");
         Contracts.throwIfNullOrWhitespace(intentId, "intentId");
 
-        IntentTrigger trigger = com.microsoft.cognitiveservices.speech.internal.IntentTrigger.From(model.getModelImpl());
-        recoImpl.AddIntent(trigger, intentId);
+        recoImpl.AddAllIntents(model.getModelImpl(), intentId);
+    }
+
+    /**
+      * Adds all intents from the specified Language Understanding Model.
+      * @param model The language understanding model containing the intents.
+      */
+      public void addAllIntents(LanguageUnderstandingModel model) {
+        Contracts.throwIfNull(model, "model");
+        recoImpl.AddAllIntents(model.getModelImpl());
     }
 
     /**

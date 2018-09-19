@@ -16,9 +16,6 @@ using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 SPXAPI intent_recognizer_add_intent(SPXRECOHANDLE hreco, const char* intentId, SPXTRIGGERHANDLE htrigger)
 {
-    if (intentId == nullptr)
-        return SPXERR_INVALID_ARG;
-
     SPXAPI_INIT_HR_TRY(hr)
     {
         auto triggerhandles = CSpxSharedPtrHandleTableManager::Get<ISpxTrigger, SPXTRIGGERHANDLE>();
@@ -30,7 +27,7 @@ SPXAPI intent_recognizer_add_intent(SPXRECOHANDLE hreco, const char* intentId, S
         auto intentRecognizer = SpxQueryInterface<ISpxIntentRecognizer>(recognizer);
         SPX_IFTRUE_THROW_HR(intentRecognizer == nullptr, SPXERR_INVALID_ARG);
 
-        intentRecognizer->AddIntentTrigger(PAL::ToWString(intentId).c_str(), trigger);
+        intentRecognizer->AddIntentTrigger(intentId == nullptr ? nullptr : PAL::ToWString(intentId).c_str(), trigger);
     }
     SPXAPI_CATCH_AND_RETURN_HR(hr);
 }

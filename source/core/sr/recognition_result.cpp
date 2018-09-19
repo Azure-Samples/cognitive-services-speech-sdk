@@ -121,7 +121,7 @@ void CSpxRecognitionResult::InitIntentResult(const wchar_t* intentId, const wcha
         }
     }
 
-    SetStringValue(GetPropertyName(PropertyId::LanguageUnderstandingServiceResponse_JsonResult), jsonPayload ? PAL::ToString(std::wstring(jsonPayload)).c_str() : "");
+    SetStringValue(GetPropertyName(PropertyId::LanguageUnderstandingServiceResponse_JsonResult), jsonPayload ? PAL::ToString(jsonPayload).c_str() : "");
 }
 
 const map<wstring, wstring>& CSpxRecognitionResult::GetTranslationText()

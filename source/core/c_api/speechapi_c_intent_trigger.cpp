@@ -36,9 +36,6 @@ SPXAPI intent_trigger_create_from_phrase(SPXTRIGGERHANDLE* htrigger, const char*
 
 SPXAPI intent_trigger_create_from_language_understanding_model(SPXTRIGGERHANDLE* htrigger, SPXLUMODELHANDLE hlumodel, const char* intentName)
 {
-    if (intentName == nullptr)
-        return SPXERR_INVALID_ARG;
-
     SPXAPI_INIT_HR_TRY(hr)
     {
         *htrigger = SPXHANDLE_INVALID;
@@ -47,7 +44,9 @@ SPXAPI intent_trigger_create_from_language_understanding_model(SPXTRIGGERHANDLE*
         auto model = (*languageUnderstandingModelHandles)[hlumodel];
 
         auto trigger = SpxCreateObjectWithSite<ISpxTrigger>("CSpxIntentTrigger", SpxGetRootSite());
-        trigger->InitLanguageUnderstandingModelTrigger(model, PAL::ToWString(intentName).c_str());
+        trigger->InitLanguageUnderstandingModelTrigger(model, intentName != nullptr
+            ? PAL::ToWString(intentName).c_str()
+            : L"");
 
         auto triggerhandles = CSpxSharedPtrHandleTableManager::Get<ISpxTrigger, SPXTRIGGERHANDLE>();
         *htrigger = triggerhandles->TrackHandle(trigger);

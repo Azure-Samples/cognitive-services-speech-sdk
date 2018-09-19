@@ -20,7 +20,7 @@ void CSpxIntentTrigger::InitLanguageUnderstandingModelTrigger(std::shared_ptr<IS
     SPX_IFTRUE_THROW_HR(!m_intentName.empty() || m_model != nullptr, SPXERR_ALREADY_INITIALIZED);
     SPX_IFTRUE_THROW_HR(!m_phrase.empty(), SPXERR_ALREADY_INITIALIZED);
     m_model = model;
-    m_intentName = intentName; 
+    m_intentName = (intentName == nullptr) ? std::wstring() : intentName;
 }
 
 

@@ -177,6 +177,17 @@ public:
     /// Adds all intents from the specified Language Understanding Model.
     /// </summary>
     /// <param name="model">The language understanding model containing the intents.</param>
+    /// <remarks>Once recognized, the IntentRecognitionResult's IntentId property will contain the name of the intent recognized.</remarks>
+    void AddAllIntents(std::shared_ptr<LanguageUnderstandingModel> model)
+    {
+        auto trigger = IntentTrigger::From(model);
+        AddIntent(trigger, SPXSTRING_EMPTY);
+    }
+
+    /// <summary>
+    /// Adds all intents from the specified Language Understanding Model.
+    /// </summary>
+    /// <param name="model">The language understanding model containing the intents.</param>
     /// <param name="intentId">A custom string id to be returned in the IntentRecognitionResult's IntentId property.</param>
     void AddAllIntents(std::shared_ptr<LanguageUnderstandingModel> model, const SPXSTRING& intentId)
     {

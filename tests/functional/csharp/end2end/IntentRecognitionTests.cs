@@ -55,40 +55,76 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             return recognizer;
         }
 
-        [DataTestMethod]        
-        [DataRow("localIntent", "NonExistingOne", "")]
+        [DataTestMethod]
         [DataRow("", "", "HomeAutomation.TurnOn")]
-        [DataRow("DontCare", "", "HomeAutomation.TurnOn")]
-        [Ignore] // Service flaky? VSTS 1411509
-        public async Task RecognizeIntent(string localIntent, string modelIntent, string expectedIntent)
+        [DataRow("", "my-custom-intent-id-string", "my-custom-intent-id-string")]
+        [DataRow("HomeAutomation.TurnOn", "", "HomeAutomation.TurnOn")]
+        [DataRow("HomeAutomation.TurnOn", "my-custom-intent-id-string", "my-custom-intent-id-string")]
+        [DataRow("intent-name-that-doesnt-exist", "", "")]
+        [DataRow("intent-name-that-doesnt-exist", "my-custom-intent-id-string", "")]
+        public async Task RecognizeIntent(string intentName, string intentId, string expectedIntentId)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile);
             using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
             {
                 var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
-                recognizer.AddIntent(model, modelIntent, localIntent);
+                if (string.IsNullOrEmpty(intentName) && string.IsNullOrEmpty(intentId))
+                {
+                    recognizer.AddAllIntents(model);
+                }
+                else if (string.IsNullOrEmpty(intentName))
+                {
+                    recognizer.AddAllIntents(model, intentId);
+                }
+                else if (string.IsNullOrEmpty(intentId))
+                {
+                    recognizer.AddIntent(model, intentName);
+                }
+                else
+                {
+                    recognizer.AddIntent(model, intentName, intentId);
+                }
 
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(expectedIntentId, result.IntentId);
                 Assert.AreEqual(TestData.English.HomeAutomation.TurnOn.Utterance, result.Text);
-                Assert.AreEqual(expectedIntent, result.IntentId);
             }
         }
 
         [DataTestMethod]
-        [DataRow("localIntent", "HomeAutomation.TurnOn", "localIntent")]
-        [Ignore] // Service flaky? VSTS 1411509
-        public async Task RecognizeIntentValidInputs(string localIntent, string modelIntent, string expectedIntent)
+        [DataRow("", "", "HomeAutomation.TurnOn")]
+        [DataRow("", "my-custom-intent-id-string", "my-custom-intent-id-string")]
+        [DataRow("HomeAutomation.TurnOn", "", "HomeAutomation.TurnOn")]
+        [DataRow("HomeAutomation.TurnOn", "my-custom-intent-id-string", "my-custom-intent-id-string")]
+        [DataRow("intent-name-that-doesnt-exist", "", "")]
+        [DataRow("intent-name-that-doesnt-exist", "my-custom-intent-id-string", "")]
+        public async Task RecognizeIntentValidInputs(string intentName, string intentId, string expectedIntentId)
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.HomeAutomation.TurnOn.AudioFile);
             using (var recognizer = TrackSessionId(new IntentRecognizer(config, audioInput)))
             {
                 var model = LanguageUnderstandingModel.FromAppId(languageUnderstandingHomeAutomationAppId);
-                recognizer.AddIntent(model, modelIntent, localIntent);
+                if (string.IsNullOrEmpty(intentName) && string.IsNullOrEmpty(intentId))
+                {
+                    recognizer.AddAllIntents(model);
+                }
+                else if (string.IsNullOrEmpty(intentName))
+                {
+                    recognizer.AddAllIntents(model, intentId);
+                }
+                else if (string.IsNullOrEmpty(intentId))
+                {
+                    recognizer.AddIntent(model, intentName);
+                }
+                else
+                {
+                    recognizer.AddIntent(model, intentName, intentId);
+                }
 
                 var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+                Assert.AreEqual(expectedIntentId, result.IntentId);
                 Assert.AreEqual(TestData.English.HomeAutomation.TurnOn.Utterance, result.Text);
                 Assert.IsFalse(string.IsNullOrEmpty(result.Properties.GetProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult)));
-                Assert.AreEqual(expectedIntent, result.IntentId);
             }
         }
     }

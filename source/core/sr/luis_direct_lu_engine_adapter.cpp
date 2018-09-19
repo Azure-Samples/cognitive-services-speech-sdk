@@ -51,15 +51,34 @@ void CSpxLuisDirectEngineAdapter::AddIntentTrigger(const wchar_t* id, std::share
             model->UpdateSubscription(PAL::ToWString(key).c_str(), PAL::ToWString(region).c_str());
         }
 
-        std::unique_lock<std::mutex> lock(m_mutex);
-        m_triggerMap.emplace(id, trigger);
-
+        auto intentId = (id == nullptr || id[0] == '\0') ? std::wstring() : id;
         auto intentName = trigger->GetModelIntentName();
-        m_intentNameToIdMap[intentName] = id;
 
-        if (!m_emptyIntentNameOk && intentName.empty())
+        std::unique_lock<std::mutex> lock(m_mutex);
+        m_triggerMap.emplace(intentId, trigger);
+
+        if (!intentName.empty() && !intentId.empty())
         {
-            m_emptyIntentNameOk = true;
+            // We've got both intentName and intentId ... add to the map
+            m_intentNameToIdMap[intentName] = intentId;
+        }
+        else if (!intentName.empty() && intentId.empty())
+        {
+            // We've got the intentName, but no intentId ... use intentName as the id
+            m_intentNameToIdMap[intentName] = intentName;
+        }
+        else if (intentName.empty() && intentId.empty())
+        {
+            // We've got neither intentName nor IntentId
+            m_matchAllIntents = true;
+            m_useIntentNameAsIdWhenNotFoundInMap = true;
+        }
+        else if (intentName.empty() && !intentId.empty())
+        {
+            // We've got an intentId but no intentName
+            m_matchAllIntents = true;
+            m_useIntentNameAsIdWhenNotFoundInMap = false;
+            m_useThisIdWhenNameNotFoundInMap = intentId;
         }
     }
 }
@@ -253,11 +272,19 @@ std::wstring CSpxLuisDirectEngineAdapter::ExtractIntent(const std::string& str)
 std::wstring CSpxLuisDirectEngineAdapter::IntentIdFromIntentName(const std::wstring& intentName)
 {
     std::unique_lock<std::mutex> lock(m_mutex);
+
     if (m_intentNameToIdMap.find(intentName) != m_intentNameToIdMap.end())
     {
         return m_intentNameToIdMap[intentName];
     }
-    return m_emptyIntentNameOk ? intentName : L"";
+    else if (!m_matchAllIntents)
+    {
+        return L""; // blank intentId indicating we didn't find it...
+    }
+
+    return m_useIntentNameAsIdWhenNotFoundInMap
+        ? intentName
+        : m_useThisIdWhenNameNotFoundInMap;
 }
 
 

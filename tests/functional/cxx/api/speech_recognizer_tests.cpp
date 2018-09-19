@@ -84,44 +84,29 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
-#if 0 //todo: turn it on after adding "--keyLuisAppid  --keyLU" to cxx_api_tests
-    SECTION("Intent Recognizer basics")
-    {
-        auto sc = SpeechConfig::FromSubscription(Keys::LanguageUnderstanding, Config::Region);
-        auto audioInput = AudioConfig::FromWavFileInput(lamp_file);
-        auto recognizer = IntentRecognizer::FromConfig(sc, audioInput);
-
-        auto model = LanguageUnderstandingModel::FromAppId(Keys::LuisAppid);
-        recognizer->AddIntent(model, "localIntent");
-
-        auto result = recognizer->RecognizeOnceAsync().get();
-        CHECK(result != nullptr);
-
-        REQUIRE(!(result->Properties.GetProperty(PropertyId::LanguageUnderstandingServiceResponse_JsonResult)).empty());
-    }
-#endif
-    SECTION("Check that recognition can set authurization token")
+    SPXTEST_SECTION("Check that recognition can set authurization token")
     {
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
         UseMocks(false);
-        REQUIRE(exists(PAL::ToWString(input_file)));
-        REQUIRE(!IsUsingMocks());
+        SPXTEST_REQUIRE(exists(PAL::ToWString(input_file)));
+        SPXTEST_REQUIRE(!IsUsingMocks());
 
         auto recognizer = CreateRecognizers<SpeechRecognizer>(input_file);
 
         std::string token("Thursday");
         recognizer->SetAuthorizationToken(token);
-        REQUIRE(recognizer->GetAuthorizationToken() == token);
+        SPXTEST_REQUIRE(recognizer->GetAuthorizationToken() == token);
 
         token = "Friday";
         recognizer->SetAuthorizationToken(token);
-        REQUIRE(recognizer->GetAuthorizationToken() == token);
+        SPXTEST_REQUIRE(recognizer->GetAuthorizationToken() == token);
     }
-    SECTION("Check that recognizer does not crash while async op is in progress")
+
+    SPXTEST_SECTION("Check that recognizer does not crash while async op is in progress")
     {
         UseMocks(true);
-        REQUIRE(IsUsingMocks());
+        SPXTEST_REQUIRE(IsUsingMocks());
 
         const int numLoops = 10;
 
@@ -130,13 +115,13 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             for (int i = 0; i < numLoops; i++)
             {
                 auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig());
-                REQUIRE(recognizer != nullptr);
+                SPXTEST_REQUIRE(recognizer != nullptr);
                 futures.push_back(recognizer->RecognizeOnceAsync());
             }
         }
 
         auto model = KeywordRecognitionModel::FromFile("tests/input/heycortana_en-US.table");
-        REQUIRE(model != nullptr);
+        SPXTEST_REQUIRE(model != nullptr);
 
         {
             vector<std::future<void>> futures;
@@ -144,7 +129,7 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
             for (int i = 0; i < numLoops*numAsyncMethods; i++)
             {
                 auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig());
-                REQUIRE(recognizer != nullptr);
+                SPXTEST_REQUIRE(recognizer != nullptr);
                 if (i % numAsyncMethods == 0)
                 {
                     futures.push_back(recognizer->StartContinuousRecognitionAsync());
@@ -171,12 +156,12 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
 
         UseMocks(true);
 
-        REQUIRE(exists(PAL::ToWString(input_file)));
+        SPXTEST_REQUIRE(exists(PAL::ToWString(input_file)));
 
         mutex mtx;
         condition_variable cv;
 
-        WHEN("We checking to make sure callback counts are correct (checking multiple times, and multiple speeds times) ...")
+        SPXTEST_WHEN("We checking to make sure callback counts are correct (checking multiple times, and multiple speeds times) ...")
         {
             std::map<Callbacks, atomic_int> callbackCounts = createCallbacksMap();
 
@@ -205,8 +190,8 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
                 SPX_TRACE_VERBOSE("%s: START of loop #%d; mockUsp=%d; realtime=%d", __FUNCTION__, i, useMockUsp, realTimeRate);
 
                 auto recognizer = CreateRecognizers<SpeechRecognizer>(input_file);
-                REQUIRE(recognizer != nullptr);
-                REQUIRE(IsUsingMocks(useMockUsp));
+                SPXTEST_REQUIRE(recognizer != nullptr);
+                SPXTEST_REQUIRE(IsUsingMocks(useMockUsp));
 
                 bool sessionEnded = false;
 
@@ -267,36 +252,36 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         UseMocks(false);
     }
 
-    SECTION("Check that recognition result contains original json payload.")
+    SPXTEST_SECTION("Check that recognition result contains original json payload.")
     {
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
         UseMocks(false);
-        REQUIRE(exists(PAL::ToWString(input_file)));
-        REQUIRE(!IsUsingMocks());
+        SPXTEST_REQUIRE(exists(PAL::ToWString(input_file)));
+        SPXTEST_REQUIRE(!IsUsingMocks());
 
         auto recognizer = CreateRecognizers<SpeechRecognizer>(input_file);
         auto result = recognizer->RecognizeOnceAsync().get();
-        REQUIRE(!result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult).empty());
+        SPXTEST_REQUIRE(!result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult).empty());
     }
 
-    SECTION("Check that recognition result contains error details.")
+    SPXTEST_SECTION("Check that recognition result contains error details.")
     {
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
         UseMocks(false);
-        REQUIRE(exists(PAL::ToWString(input_file)));
-        REQUIRE(!IsUsingMocks());
+        SPXTEST_REQUIRE(exists(PAL::ToWString(input_file)));
+        SPXTEST_REQUIRE(!IsUsingMocks());
         auto badKeyConfig = SpeechConfig::FromSubscription("invalid_key", "invalid_region");
         auto audioConfig = AudioConfig::FromWavFileInput(input_file);
         auto recognizer = SpeechRecognizer::FromConfig(badKeyConfig, audioConfig);
         auto result = recognizer->RecognizeOnceAsync().get();
 
-        REQUIRE(result->Reason == ResultReason::Canceled);
+        SPXTEST_REQUIRE(result->Reason == ResultReason::Canceled);
 
         auto cancellation = CancellationDetails::FromResult(result);
-        REQUIRE(cancellation->Reason == CancellationReason::Error);
-        REQUIRE(!cancellation->ErrorDetails.empty());
+        SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::Error);
+        SPXTEST_REQUIRE(!cancellation->ErrorDetails.empty());
 
         // NOTE: Looks like we still do need this...
         // TODO: there's a data race in the audio_pump thread when it tries to
@@ -305,9 +290,9 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
     }
 
-    SECTION("Wrong Key triggers Canceled Event ")
+    SPXTEST_SECTION("Wrong Key triggers Canceled Event ")
     {
-        REQUIRE(exists(PAL::ToWString(input_file)));
+        SPXTEST_REQUIRE(exists(PAL::ToWString(input_file)));
         UseMocks(false);
         mutex mtx;
         condition_variable cv;
@@ -320,27 +305,27 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         auto recognizer = SpeechRecognizer::FromConfig(sc, a);
 
         recognizer->Canceled.Connect([&](const SpeechRecognitionCanceledEventArgs& args) {
-            REQUIRE(args.Reason == CancellationReason::Error);
-            REQUIRE(!args.ErrorDetails.empty());
+            SPXTEST_REQUIRE(args.Reason == CancellationReason::Error);
+            SPXTEST_REQUIRE(!args.ErrorDetails.empty());
             unique_lock<mutex> lock(mtx);
             connectionReportedError = true;
             cv.notify_one();
         });
 
         auto result = recognizer->RecognizeOnceAsync().get();
-        // TODO ENABLE AFTER FIXING BROKEN SERVICE       REQUIRE(result->Reason == ResultReason::Canceled);
+        // TODO ENABLE AFTER FIXING BROKEN SERVICE       SPXTEST_REQUIRE(result->Reason == ResultReason::Canceled);
 
         {
             unique_lock<mutex> lock(mtx);
             cv.wait_for(lock, std::chrono::seconds(10));
-            // TODO ENABLE AFTER FIXING BROKEN SERVICE           REQUIRE(connectionReportedError);
+            // TODO ENABLE AFTER FIXING BROKEN SERVICE           SPXTEST_REQUIRE(connectionReportedError);
         }
     }
 
-    SECTION("German Speech Recognition works")
+    SPXTEST_SECTION("German Speech Recognition works")
     {
         string german_input_file("tests/input/CallTheFirstOne.wav");
-        REQUIRE(exists(PAL::ToWString(german_input_file)));
+        SPXTEST_REQUIRE(exists(PAL::ToWString(german_input_file)));
 
         auto sc = !Config::Endpoint.empty() ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech) : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
         sc->SetSpeechRecognitionLanguage("de-DE");
@@ -348,14 +333,14 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
 
         auto result = recognizer->RecognizeOnceAsync().get();
-        REQUIRE(result != nullptr);
-        REQUIRE(!result->Text.empty());
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(!result->Text.empty());
     }
 
-    SECTION("German Speech Recognition works")
+    SPXTEST_SECTION("German Speech Recognition works")
     {
         string german_input_file("tests/input/CallTheFirstOne.wav");
-        REQUIRE(exists(PAL::ToWString(german_input_file)));
+        SPXTEST_REQUIRE(exists(PAL::ToWString(german_input_file)));
 
         auto sc = !Config::Endpoint.empty() ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech) : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
         sc->SetSpeechRecognitionLanguage("de-DE");
@@ -363,8 +348,8 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
 
         auto result = recognizer->RecognizeOnceAsync().get();
-        REQUIRE(result != nullptr);
-        REQUIRE(!result->Text.empty());
+        SPXTEST_REQUIRE(result != nullptr);
+        SPXTEST_REQUIRE(!result->Text.empty());
     }
 }
 
@@ -383,13 +368,13 @@ TEST_CASE("KWS basics", "[api][cxx]")
         int gotFinalResult = 0;
         int gotSessionStopped = 0;
 
-        WHEN("We do a keyword recognition with a speech recognizer")
+        SPXTEST_WHEN("We do a keyword recognition with a speech recognizer")
         {
             SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
             auto recognizer = SpeechRecognizer::FromConfig(CurrentSpeechConfig());
-            REQUIRE(recognizer != nullptr);
-            REQUIRE(IsUsingMocks(true));
+            SPXTEST_REQUIRE(recognizer != nullptr);
+            SPXTEST_REQUIRE(IsUsingMocks(true));
 
             recognizer->Recognized += [&](const SpeechRecognitionEventArgs& /* e */) {
                 std::unique_lock<std::mutex> lock(mtx);
@@ -419,7 +404,7 @@ TEST_CASE("KWS basics", "[api][cxx]")
 
                 THEN("We should see that we got at least 1 Recognized and the same number of SessionStopped events")
                 {
-                    REQUIRE(gotFinalResult >= 1);
+                    SPXTEST_REQUIRE(gotFinalResult >= 1);
                 }
             }
 
@@ -433,7 +418,7 @@ TEST_CASE("KWS basics", "[api][cxx]")
 TEST_CASE("Speech on local server", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
-    SECTION("Stress testing against the local server")
+    SPXTEST_SECTION("Stress testing against the local server")
     {
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
@@ -443,8 +428,8 @@ TEST_CASE("Speech on local server", "[api][cxx]")
         }
 
         UseMocks(false);
-        REQUIRE(exists(PAL::ToWString(input_file)));
-        REQUIRE(!IsUsingMocks());
+        SPXTEST_REQUIRE(exists(PAL::ToWString(input_file)));
+        SPXTEST_REQUIRE(!IsUsingMocks());
 
         const int numLoops = 10;
 
@@ -454,8 +439,8 @@ TEST_CASE("Speech on local server", "[api][cxx]")
             auto audioConfig = AudioConfig::FromWavFileInput(input_file);
             auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
             auto result = recognizer->RecognizeOnceAsync().get();
-            REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
-            REQUIRE(result->Text == "Remind me to buy 5 iPhones.");
+            SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+            SPXTEST_REQUIRE(result->Text == "Remind me to buy 5 iPhones.");
         }
 
         // BUGBUG: this currently fails because CSpxAudioStreamSession::WaitForRecognition() returns a nullptr on a timeout.
@@ -466,8 +451,8 @@ TEST_CASE("Speech on local server", "[api][cxx]")
         auto audioConfig = AudioConfig::FromWavFileInput(input_file);
         auto recognizer = factory->CreateSpeechRecognizerFromConfig(audioConfig);
         auto result = recognizer->RecognizeOnceAsync().get();
-        REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
-        REQUIRE(result->Text == L"Remind me to buy 5 iPhones.");
+        SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+        SPXTEST_REQUIRE(result->Text == L"Remind me to buy 5 iPhones.");
         }
         */
     }
@@ -477,18 +462,18 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
 {
     SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
-    REQUIRE(exists(PAL::ToWString(input_file)));
+    SPXTEST_REQUIRE(exists(PAL::ToWString(input_file)));
 
     mutex mtx;
     condition_variable cv;
 
-    SECTION("Check for competing or conflicting conditions in destructor.")
+    SPXTEST_SECTION("Check for competing or conflicting conditions in destructor.")
     {
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
         bool callback_invoked = false;
 
-        REQUIRE(!IsUsingMocks());
+        SPXTEST_REQUIRE(!IsUsingMocks());
         auto recognizer = CreateRecognizers<SpeechRecognizer>(input_file);
 
         auto callback = [&](const SpeechRecognitionEventArgs& args)
@@ -512,16 +497,16 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
         {
             unique_lock<mutex> lock(mtx);
             cv.wait_for(lock, std::chrono::seconds(10), [&] { return callback_invoked; });
-            REQUIRE(callback_invoked);
+            SPXTEST_REQUIRE(callback_invoked);
         }
         recognizer.reset();
     }
 
-    SECTION("Check for a deadlock in disconnect.")
+    SPXTEST_SECTION("Check for a deadlock in disconnect.")
     {
         SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
 
-        REQUIRE(!IsUsingMocks());
+        SPXTEST_REQUIRE(!IsUsingMocks());
         auto recognizer = CreateRecognizers<SpeechRecognizer>(input_file);
 
         auto callback1 = [&](const SpeechRecognitionEventArgs& args)

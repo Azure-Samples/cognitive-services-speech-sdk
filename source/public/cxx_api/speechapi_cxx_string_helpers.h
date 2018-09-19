@@ -14,8 +14,10 @@
 
 #if defined(SWIG) && defined(SPX_UWP)
 #define SPXSTRING std::wstring
+#define SPXSTRING_EMPTY std::wstring()
 #else
 #define SPXSTRING std::string
+#define SPXSTRING_EMPTY std::string()
 #endif
 
 namespace Microsoft { namespace CognitiveServices { namespace Speech { namespace Utils {

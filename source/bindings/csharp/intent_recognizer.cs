@@ -189,8 +189,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <remarks>Once recognized, the IntentRecognitionResult's IntentId property will contain the intentName specified here.</remarks>
         public void AddIntent(LanguageUnderstandingModel model, string intentName)
         {
-            var trigger = Microsoft.CognitiveServices.Speech.Internal.IntentTrigger.From(model.modelImpl, intentName);
-            recoImpl.AddIntent(trigger, intentName);
+            recoImpl.AddIntent(model.modelImpl, intentName);
         }
 
         /// <summary>
@@ -201,8 +200,7 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <param name="intentId">A custom id string to be returned in the IntentRecognitionResult's IntentId property.</param>
         public void AddIntent(LanguageUnderstandingModel model, string intentName, string intentId)
         {
-            var trigger = Microsoft.CognitiveServices.Speech.Internal.IntentTrigger.From(model.modelImpl, intentName);
-            recoImpl.AddIntent(trigger, intentId);
+            recoImpl.AddIntent(model.modelImpl, intentName, intentId);
         }
 
         /// <summary>
@@ -212,8 +210,16 @@ namespace Microsoft.CognitiveServices.Speech.Intent
         /// <param name="intentId">A custom string id to be returned in the IntentRecognitionResult's IntentId property.</param>
         public void AddAllIntents(LanguageUnderstandingModel model, string intentId)
         {
-            var trigger = Microsoft.CognitiveServices.Speech.Internal.IntentTrigger.From(model.modelImpl);
-            recoImpl.AddIntent(trigger, intentId);
+            recoImpl.AddAllIntents(model.modelImpl, intentId);
+        }
+
+        /// <summary>
+        /// Adds all intents from the specified Language Understanding Model.
+        /// </summary>
+        /// <param name="model">The language understanding model from Language Understanding service.</param>
+        public void AddAllIntents(LanguageUnderstandingModel model)
+        {
+            recoImpl.AddAllIntents(model.modelImpl);
         }
 
         protected override void Dispose(bool disposing)

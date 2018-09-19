@@ -22,7 +22,7 @@ class CSpxLuisDirectEngineAdapter :
 {
 public:
 
-    CSpxLuisDirectEngineAdapter() : m_emptyIntentNameOk(false) { }
+    CSpxLuisDirectEngineAdapter() : m_matchAllIntents(false) { }
 
     SPX_INTERFACE_MAP_BEGIN()
         SPX_INTERFACE_MAP_ENTRY(ISpxObjectWithSite)
@@ -60,7 +60,10 @@ private:
     std::mutex m_mutex;
     std::map<std::wstring, std::shared_ptr<ISpxTrigger>> m_triggerMap;
     std::map<std::wstring, std::wstring> m_intentNameToIdMap;
-    bool m_emptyIntentNameOk;
+
+    bool m_matchAllIntents = false;
+    bool m_useIntentNameAsIdWhenNotFoundInMap = false;
+    std::wstring m_useThisIdWhenNameNotFoundInMap;
 };
 
 

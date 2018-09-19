@@ -41,7 +41,7 @@ void CSpxMockLuEngineAdapter::Term()
 void CSpxMockLuEngineAdapter::AddIntentTrigger(const wchar_t* id, std::shared_ptr<ISpxTrigger> trigger)
 {
     std::unique_lock<std::mutex> lock(m_mutex);
-    m_triggerMap.emplace(id, trigger);
+    m_triggerMap.emplace(id == nullptr ? L"" : id, trigger);
 }
 
 std::list<std::string> CSpxMockLuEngineAdapter::GetListenForList()
