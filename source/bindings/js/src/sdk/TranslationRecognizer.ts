@@ -34,12 +34,11 @@ import {
     Recognizer,
     ResultReason,
     Translation,
-    TranslationStatus,
+    TranslationRecognitionCanceledEventArgs,
+    TranslationRecognitionEventArgs,
+    TranslationRecognitionResult,
+    TranslationSynthesisEventArgs,
     TranslationSynthesisResult,
-    TranslationSynthesisResultEventArgs,
-    TranslationTextResult,
-    TranslationTextResultCanceledEventArgs,
-    TranslationTextResultEventArgs,
 } from "./Exports";
 import { SpeechTranslationConfig, SpeechTranslationConfigImpl } from "./SpeechTranslationConfig";
 import { SynthesisStatus } from "./SynthesisStatus";
@@ -67,7 +66,7 @@ export class TranslationRecognizer extends Recognizer {
         this.disposedTranslationRecognizer = false;
         this.privProperties = configImpl.properties.clone();
 
-        if (this.properties.hasProperty(PropertyId.SpeechServiceConnection_TranslationVoice)) {
+        if (this.properties.getProperty(PropertyId.SpeechServiceConnection_TranslationVoice, undefined) !== undefined) {
             Contracts.throwIfNullOrWhitespace(this.properties.getProperty(PropertyId.SpeechServiceConnection_TranslationVoice), PropertyId[PropertyId.SpeechServiceConnection_TranslationVoice]);
         }
 
@@ -79,25 +78,25 @@ export class TranslationRecognizer extends Recognizer {
      * The event recognizing signals that an intermediate recognition result is received.
      * @property
      */
-    public recognizing: (sender: TranslationRecognizer, event: TranslationTextResultEventArgs) => void;
+    public recognizing: (sender: TranslationRecognizer, event: TranslationRecognitionEventArgs) => void;
 
     /**
      * The event recognized signals that a final recognition result is received.
      * @property
      */
-    public recognized: (sender: TranslationRecognizer, event: TranslationTextResultEventArgs) => void;
+    public recognized: (sender: TranslationRecognizer, event: TranslationRecognitionEventArgs) => void;
 
     /**
      * The event canceled signals that an error occurred during recognition.
      * @property
      */
-    public canceled: (sender: TranslationRecognizer, event: TranslationTextResultCanceledEventArgs) => void;
+    public canceled: (sender: TranslationRecognizer, event: TranslationRecognitionCanceledEventArgs) => void;
 
     /**
      * The event synthesizing signals that a translation synthesis result is received.
      * @property
      */
-    public synthesizing: (sender: TranslationRecognizer, event: TranslationSynthesisResultEventArgs) => void;
+    public synthesizing: (sender: TranslationRecognizer, event: TranslationSynthesisEventArgs) => void;
 
     /**
      * Gets the language name that was set when the recognizer was created.
@@ -166,7 +165,7 @@ export class TranslationRecognizer extends Recognizer {
      * @param cb - Callback that received the result when the translation has completed.
      * @param err - Callback invoked in case of an error.
      */
-    public recognizeOnceAsync(cb?: (e: TranslationTextResult) => void, err?: (e: string) => void): void {
+    public recognizeOnceAsync(cb?: (e: TranslationRecognitionResult) => void, err?: (e: string) => void): void {
         Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
 
         this.implCloseExistingRecognizer();
@@ -187,7 +186,7 @@ export class TranslationRecognizer extends Recognizer {
     }
 
     /**
-     * Starts recognition and translation on a continuous audio stream, until stopContinuousRecognitionAsync() is called.
+     * Starts recognition and translation, until stopContinuousRecognitionAsync() is called.
      * User must subscribe to events to receive translation results.
      * @member
      * @param cb - Callback that received the translation has started.
@@ -291,7 +290,7 @@ export class TranslationRecognizer extends Recognizer {
             this.reco = undefined;
         }
     }
-    private implDispatchMessageHandler(event: SpeechRecognitionEvent, cb?: (e: TranslationTextResult) => void, err?: (e: string) => void): void {
+    private implDispatchMessageHandler(event: SpeechRecognitionEvent, cb?: (e: TranslationRecognitionResult) => void, err?: (e: string) => void): void {
 
         if (!this.reco) {
             return;
@@ -302,11 +301,14 @@ export class TranslationRecognizer extends Recognizer {
                     const recoEndedEvent: RecognitionEndedEvent = event as RecognitionEndedEvent;
 
                     if (recoEndedEvent.Status !== RecognitionCompletionStatus.Success) {
-                        const result: TranslationTextResult = new TranslationTextResult();
-                        result.reason = ResultReason.Canceled;
-                        result.errorDetails = RecognitionCompletionStatus[recoEndedEvent.Status] + ": " + recoEndedEvent.Error;
+                        const result = new TranslationRecognitionResult(
+                            undefined, undefined,
+                            ResultReason.Canceled,
+                            undefined, undefined, undefined,
+                            RecognitionCompletionStatus[recoEndedEvent.Status] + ": " + recoEndedEvent.Error,
+                            undefined, undefined);
 
-                        const errorEvent: TranslationTextResultCanceledEventArgs = new TranslationTextResultCanceledEventArgs(
+                        const errorEvent: TranslationRecognitionCanceledEventArgs = new TranslationRecognitionCanceledEventArgs(
                             recoEndedEvent.SessionId,
                             CancellationReason.Error,
                             recoEndedEvent.Error,
@@ -344,15 +346,18 @@ export class TranslationRecognizer extends Recognizer {
                 const evResult = event as SpeechRecognitionResultEvent<ISimpleSpeechPhrase>;
 
                 const reason = EnumTranslation.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
-                const result: TranslationTextResult = new TranslationTextResult();
-                result.json = JSON.stringify(evResult.Result);
-                result.offset = evResult.Result.Offset;
-                result.duration = evResult.Result.Duration;
-                result.text = evResult.Result.DisplayText;
-                result.reason = reason;
+                const result = new TranslationRecognitionResult(
+                    undefined, undefined,
+                    reason,
+                    evResult.Result.DisplayText,
+                    evResult.Result.Duration,
+                    evResult.Result.Offset,
+                    undefined,
+                    JSON.stringify(evResult.Result),
+                    undefined);
 
                 if (reason === ResultReason.Canceled) {
-                    const ev = new TranslationTextResultCanceledEventArgs(
+                    const ev = new TranslationRecognitionCanceledEventArgs(
                         evResult.SessionId,
                         EnumTranslation.implTranslateCancelResult(evResult.Result.RecognitionStatus),
                         null,
@@ -368,9 +373,7 @@ export class TranslationRecognizer extends Recognizer {
                         }
                     }
                 } else {
-                    const ev = new TranslationTextResultEventArgs();
-                    ev.sessionId = evResult.SessionId;
-                    ev.result = result;
+                    const ev = new TranslationRecognitionEventArgs(result, 0/*offset*/, evResult.SessionId);
 
                     if (!!this.recognized) {
                         try {
@@ -403,7 +406,7 @@ export class TranslationRecognizer extends Recognizer {
             case "TranslationPhraseEvent":
                 {
                     const evResult = event as TranslationPhraseEvent;
-                    const result: TranslationTextResultEventArgs = this.FireEventForResult(evResult);
+                    const result: TranslationRecognitionEventArgs = this.FireEventForResult(evResult);
 
                     if (!!this.recognized) {
                         try {
@@ -436,7 +439,7 @@ export class TranslationRecognizer extends Recognizer {
                 {
                     const evResult = event as TranslationHypothesisEvent;
 
-                    const result: TranslationTextResultEventArgs = this.FireEventForResult(evResult);
+                    const result: TranslationRecognitionEventArgs = this.FireEventForResult(evResult);
 
                     if (!!this.recognizing) {
                         try {
@@ -453,13 +456,16 @@ export class TranslationRecognizer extends Recognizer {
             case "TranslationFailedEvent":
                 {
                     const evResult = event as TranslationFailedEvent;
-                    const retEvent: TranslationTextResultEventArgs = new TranslationTextResultEventArgs();
-                    retEvent.result = new TranslationTextResult();
-                    retEvent.sessionId = evResult.SessionId;
-                    retEvent.result.duration = evResult.Result.Duration;
-                    retEvent.result.offset = evResult.Result.Offset;
-                    retEvent.result.reason = ResultReason.RecognizedSpeech;
-                    retEvent.result.text = evResult.Result.Text;
+
+                    const result = new TranslationRecognitionResult(
+                        undefined, undefined,
+                        ResultReason.RecognizedSpeech,
+                        evResult.Result.Text,
+                        evResult.Result.Duration,
+                        evResult.Result.Offset,
+                        undefined, undefined, undefined);
+
+                    const retEvent: TranslationRecognitionEventArgs = new TranslationRecognitionEventArgs(result, 0 /*todo*/, evResult.SessionId);
 
                     if (!!this.recognized) {
                         try {
@@ -491,12 +497,11 @@ export class TranslationRecognizer extends Recognizer {
             case "TranslationSynthesisEvent":
                 {
                     const evResut: TranslationSynthesisEvent = event as TranslationSynthesisEvent;
-                    const retEvent: TranslationSynthesisResultEventArgs = new TranslationSynthesisResultEventArgs();
 
-                    retEvent.result = new TranslationSynthesisResult();
-                    retEvent.result.audio = evResut.Result;
-                    retEvent.result.reason = (undefined === retEvent.result.audio) ? SynthesisStatus.SynthesisEnd : SynthesisStatus.Success;
-                    retEvent.sessionId = evResut.SessionId;
+                    const audio = evResut.Result;
+                    const reason = (undefined === audio) ? SynthesisStatus.SynthesisEnd : SynthesisStatus.Success;
+                    const result = new TranslationSynthesisResult(reason, audio);
+                    const retEvent: TranslationSynthesisEventArgs = new TranslationSynthesisEventArgs(result, evResut.SessionId);
 
                     if (!!this.synthesizing) {
                         try {
@@ -512,11 +517,9 @@ export class TranslationRecognizer extends Recognizer {
             case "TranslationSynthesisErrorEvent":
                 {
                     const evResult: TranslationSynthesisErrorEvent = event as TranslationSynthesisErrorEvent;
-                    const retEvent: TranslationSynthesisResultEventArgs = new TranslationSynthesisResultEventArgs();
 
-                    retEvent.result = new TranslationSynthesisResult();
-                    retEvent.result.reason = evResult.Result.SynthesisStatus;
-                    retEvent.sessionId = evResult.SessionId;
+                    const result = new TranslationSynthesisResult(evResult.Result.SynthesisStatus, undefined);
+                    const retEvent: TranslationSynthesisEventArgs = new TranslationSynthesisEventArgs(result, evResult.SessionId);
 
                     if (!!this.synthesizing) {
                         this.synthesizing(this, retEvent);
@@ -524,7 +527,7 @@ export class TranslationRecognizer extends Recognizer {
 
                     if (!!this.canceled) {
                         // And raise a canceled event to send the rich(er) error message back.
-                        const canceledResult: TranslationTextResultCanceledEventArgs = new TranslationTextResultCanceledEventArgs(
+                        const canceledResult: TranslationRecognitionCanceledEventArgs = new TranslationRecognitionCanceledEventArgs(
                             evResult.SessionId,
                             CancellationReason.Error,
                             evResult.Result.FailureReason,
@@ -543,22 +546,24 @@ export class TranslationRecognizer extends Recognizer {
         }
     }
 
-    private FireEventForResult(evResult: TranslationPhraseEvent | TranslationHypothesisEvent): TranslationTextResultEventArgs {
-        const ev = new TranslationTextResultEventArgs();
-        ev.sessionId = evResult.SessionId;
-
-        ev.result = new TranslationTextResult();
-        ev.result.duration = evResult.Result.Duration;
-        ev.result.json = JSON.stringify(evResult.Result);
-        ev.result.offset = evResult.Result.Offset;
-        ev.result.reason = ResultReason.TranslatedSpeech;
-        ev.result.text = evResult.Result.Text;
-
-        ev.result.translations = new Translation();
+    private FireEventForResult(evResult: TranslationPhraseEvent | TranslationHypothesisEvent): TranslationRecognitionEventArgs {
+        const translations = new Translation();
         for (const translation of evResult.Result.Translation.Translations) {
-            ev.result.translations.set(translation.Language, translation.Text);
+            translations.set(translation.Language, translation.Text);
         }
 
+        const result = new TranslationRecognitionResult(
+            translations,
+            undefined,
+            ResultReason.TranslatedSpeech,
+            evResult.Result.Text,
+            evResult.Result.Duration,
+            evResult.Result.Offset,
+            undefined,
+            JSON.stringify(evResult.Result),
+            undefined);
+
+        const ev = new TranslationRecognitionEventArgs(result, 0, evResult.SessionId);
         return ev;
     }
 }

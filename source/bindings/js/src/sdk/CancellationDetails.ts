@@ -14,19 +14,26 @@ import {
 
 /**
  * Contains detailed information about why a result was canceled.
+ * @class
  */
 export class CancellationDetails {
+    private privReason: CancellationReason;
+    private privErrorDetails: string;
 
-    private reason: CancellationReason;
-    private errorDetails: string;
-
+    /**
+     * Creates and initializes an instance of this class.
+     * @constructor
+     * @param reason The cancellation reason.
+     * @param errorDetails The error details, if provided.
+     */
     private constructor(reason: CancellationReason, errorDetails: string) {
-        this.reason = reason;
-        this.errorDetails = errorDetails;
+        this.privReason = reason;
+        this.privErrorDetails = errorDetails;
     }
 
     /**
      * Creates an instance of CancellationDetails object for the canceled RecognitionResult.
+     * @member
      * @param result The result that was canceled.
      * @return The cancellation details object being created.
      */
@@ -56,18 +63,20 @@ export class CancellationDetails {
 
     /**
      * The reason the recognition was canceled.
+     * @property
      * @return Specifies the reason canceled.
      */
-    public get Reason(): CancellationReason {
-        return this.reason;
+    public get reason(): CancellationReason {
+        return this.privReason;
     }
 
     /**
      * In case of an unsuccessful recognition, provides a details of why the occurred error.
      * This field is only filled-out if the reason canceled (@see getReason) is set to Error.
+     * @property
      * @return A String that represents the error details.
      */
-    public get ErrorDetails(): string {
-        return this.errorDetails;
+    public get errorDetails(): string {
+        return this.privErrorDetails;
     }
 }

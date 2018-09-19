@@ -25,3 +25,4 @@ export * from "./RawWebsocketMessage";
 export * from "./RiffPcmEncoder";
 export * from "./Storage";
 export * from "./Stream";
+export { TranslationStatus } from "../common.speech/TranslationStatus";

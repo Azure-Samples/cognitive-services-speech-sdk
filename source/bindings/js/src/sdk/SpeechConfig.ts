@@ -62,6 +62,7 @@ export abstract class SpeechConfig {
 
     /**
      * Creates an instance of the speech factory with specified initial authorization token and region.
+     * @member
      * @param authorizationToken The initial authorization token.
      * @param region The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
      * @returns A speech factory instance.
@@ -76,18 +77,6 @@ export abstract class SpeechConfig {
         speechImpl.authorizationToken = authorizationToken;
         return speechImpl;
     }
-
-    /**
-     * Returns the subscription key.
-     * @property
-     */
-    public abstract get subscriptionKey(): string;
-
-    /**
-     * Returns the current region.
-     * @property
-     */
-    public abstract get region(): string;
 
     /**
      * Returns the current authorization token.
@@ -135,23 +124,27 @@ export abstract class SpeechConfig {
 
     /**
      * Sets output format.
+     * @property
      */
     public abstract set outputFormat(format: OutputFormat);
 
     /**
      * Gets output format.
+     * @property
      * @return Returns the output format.
      */
     public abstract get outputFormat(): OutputFormat;
 
     /**
      * Sets the endpoint ID of a customized speech model that is used for speech recognition.
+     * @property
      * @param value the endpoint ID
      */
     public abstract set endpointId(value: string);
 
     /**
      * Gets the endpoint ID of a customized speech model that is used for speech recognition.
+     * @property
      * @return The endpoint ID
      */
     public abstract get endpointId(): string;
@@ -222,10 +215,6 @@ export class SpeechConfigImpl extends SpeechConfig {
 
     public get endpointId(): string {
         return this.privProperties.getProperty(PropertyId.SpeechServiceConnection_EndpointId);
-    }
-
-    public has(key: string): boolean {
-        return this.privProperties.hasProperty(key);
     }
 
     public setProperty(name: string | PropertyId, value: string): void {

@@ -1,3 +1,5 @@
+import { Contracts } from "./Contracts";
+
 //
 // copyright (c) Microsoft. All rights reserved.
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
@@ -26,8 +28,22 @@ export class KeywordRecognitionModel {
      * @returns The keyword recognition model being created.
      */
     public static fromFile(fileName: string): KeywordRecognitionModel {
-        // Contracts.throwIfFileDoesNotExist(fileName, "fileName");
-        return new KeywordRecognitionModel();
+        Contracts.throwIfFileDoesNotExist(fileName, "fileName");
+
+        throw new Error("Not yet implemented.");
+    }
+
+    /**
+     * Creates a keyword recognition model using the specified filename.
+     * @member
+     * @param {string} file - A File that represents file for the keyword recognition model.
+     *                 Note, the file can point to a zip file in which case the model will be extracted from the zip.
+     * @returns The keyword recognition model being created.
+     */
+    public static fromStream(file: File): KeywordRecognitionModel {
+        Contracts.throwIfNull(file, "file");
+
+        throw new Error("Not yet implemented.");
     }
 
     /**

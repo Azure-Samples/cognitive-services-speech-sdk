@@ -31,6 +31,7 @@ import {
     IntentRecognitionCanceledEventArgs,
     IntentRecognitionEventArgs,
     IntentRecognitionResult,
+    KeywordRecognitionModel,
     LanguageUnderstandingModel,
     PropertyCollection,
     PropertyId,
@@ -167,10 +168,10 @@ export class IntentRecognizer extends Recognizer {
     }
 
     /**
-     * Starts speech recognition on a continuous audio stream, until stopContinuousRecognitionAsync() is called.
+     * Starts speech recognition, until stopContinuousRecognitionAsync() is called.
      * User must subscribe to events to receive recognition results.
      * @member
-     * @param cb - Callback that received the recognition has started.
+     * @param cb - Callback invoked once the recognition has started.
      * @param err - Callback invoked in case of an error.
      */
     public startContinuousRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
@@ -216,7 +217,7 @@ export class IntentRecognizer extends Recognizer {
     /**
      * Stops continuous intent recognition.
      * @member
-     * @param cb - Callback that received the recognition has stopped.
+     * @param cb - Callback invoked once the recognition has stopped.
      * @param err - Callback invoked in case of an error.
      */
     public stopContinuousRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
@@ -232,6 +233,36 @@ export class IntentRecognizer extends Recognizer {
                     err(e);
                 }
             }
+        }
+    }
+
+    /**
+     * Starts speech recognition with keyword spotting, until stopKeywordRecognitionAsync() is called.
+     * User must subscribe to events to receive recognition results.
+     * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
+     * @member
+     * @param model The keyword recognition model that specifies the keyword to be recognized.
+     * @param cb - Callback invoked once the recognition has started.
+     * @param err - Callback invoked in case of an error.
+     */
+    public startKeywordRecognitionAsync(model: KeywordRecognitionModel, cb?: () => void, err?: (e: string) => void): void {
+        Contracts.throwIfNull(model, "model");
+
+        if (!!err) {
+            err("Not yet implemented.");
+        }
+    }
+
+    /**
+     * Stops continuous speech recognition.
+     * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
+     * @member
+     * @param cb - Callback invoked once the recognition has stopped.
+     * @param err - Callback invoked in case of an error.
+     */
+    public stopKeywordRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
+        if (!!cb) {
+            cb();
         }
     }
 
@@ -321,15 +352,18 @@ export class IntentRecognizer extends Recognizer {
                     const recoEndedEvent: RecognitionEndedEvent = event as RecognitionEndedEvent;
 
                     if (recoEndedEvent.Status !== RecognitionCompletionStatus.Success) {
-                        const result: IntentRecognitionResult = new IntentRecognitionResult();
-                        result.errorDetails = RecognitionCompletionStatus[recoEndedEvent.Status] + ": " + recoEndedEvent.Error;
-                        result.reason = ResultReason.Canceled;
+                        const result: IntentRecognitionResult = new IntentRecognitionResult(
+                            undefined, undefined, undefined,
+                            ResultReason.Canceled,
+                            undefined, undefined, undefined,
+                            RecognitionCompletionStatus[recoEndedEvent.Status] + ": " + recoEndedEvent.Error,
+                            undefined, undefined);
 
                         const errorEvent: IntentRecognitionCanceledEventArgs = new IntentRecognitionCanceledEventArgs(
-                            result,
-                            recoEndedEvent.SessionId,
                             CancellationReason.Error,
-                            recoEndedEvent.Error);
+                            recoEndedEvent.Error,
+                            result,
+                            0, recoEndedEvent.SessionId);
 
                         if (this.canceled) {
                             try {
@@ -360,19 +394,22 @@ export class IntentRecognizer extends Recognizer {
                     const evResult = event as SpeechRecognitionResultEvent<ISimpleSpeechPhrase>;
 
                     const reason = EnumTranslation.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
-                    const result: IntentRecognitionResult = new IntentRecognitionResult();
-                    result.json = JSON.stringify(evResult.Result);
-                    result.text = evResult.Result.DisplayText;
-                    result.duration = evResult.Result.Duration;
-                    result.offset = evResult.Result.Offset;
-                    result.reason = reason;
+                    const result: IntentRecognitionResult = new IntentRecognitionResult(
+                        undefined, undefined, undefined,
+                        reason,
+                        evResult.Result.DisplayText,
+                        evResult.Result.Duration,
+                        evResult.Result.Offset,
+                        undefined,
+                        JSON.stringify(evResult.Result),
+                        undefined);
 
                     if (reason === ResultReason.Canceled) {
                         const ev = new IntentRecognitionCanceledEventArgs(
-                            result,
-                            evResult.SessionId,
                             EnumTranslation.implTranslateCancelResult(evResult.Result.RecognitionStatus),
-                            "");
+                            "",
+                            result,
+                            0, evResult.SessionId);
 
                         if (!!this.canceled) {
                             try {
@@ -396,9 +433,7 @@ export class IntentRecognizer extends Recognizer {
                             }
                         }
                     } else {
-                        const ev = new IntentRecognitionEventArgs();
-                        ev.sessionId = evResult.SessionId;
-                        ev.result = result;
+                        let ev = new IntentRecognitionEventArgs(result, 0 /*TODO*/, evResult.SessionId);
 
                         const sendEvent: () => void = () => {
                             if (!!this.recognized) {
@@ -431,7 +466,20 @@ export class IntentRecognizer extends Recognizer {
                         const status = (RecognitionStatus2 as any)[evResult.Result.RecognitionStatus];
                         if (status === RecognitionStatus2.InitialSilenceTimeout ||
                             status === RecognitionStatus2.BabbleTimeout) {
-                            ev.result.reason = ResultReason.NoMatch;
+                            ev = new IntentRecognitionEventArgs(
+                                new IntentRecognitionResult(
+                                    ev.result.intentId,
+                                    ev.result.languageUnderstanding,
+                                    ev.result.resultId,
+                                    ResultReason.NoMatch,
+                                    ev.result.text,
+                                    ev.result.duration,
+                                    ev.result.offset,
+                                    ev.result.errorDetails,
+                                    ev.result.json,
+                                    ev.result.properties),
+                                ev.offset,
+                                ev.sessionId);
                         }
 
                         // If intent data was sent, the terminal result for this redognizer is an intent being found.
@@ -458,11 +506,14 @@ export class IntentRecognizer extends Recognizer {
                 {
                     const evResult = event as SpeechRecognitionResultEvent<ISpeechHypothesis>;
 
-                    const ev = new IntentRecognitionEventArgs();
-                    ev.sessionId = evResult.SessionId;
+                    const result = new IntentRecognitionResult(
+                        undefined, undefined, undefined,
+                        undefined, undefined, undefined,
+                        undefined, undefined,
+                        JSON.stringify(evResult.Result),
+                        undefined);
 
-                    ev.result = new IntentRecognitionResult();
-                    ev.result.json = JSON.stringify(evResult.Result);
+                    const ev = new IntentRecognitionEventArgs(result, 0 /*TODO*/, evResult.SessionId);
 
                     if (!!this.recognizing) {
                         try {
@@ -484,9 +535,7 @@ export class IntentRecognizer extends Recognizer {
 
                     if (undefined === ev) {
                         // Odd... Not sure this can happen
-                        ev = new IntentRecognitionEventArgs();
-                        ev.sessionId = evResult.SessionId;
-                        ev.result = new IntentRecognitionResult();
+                        ev = new IntentRecognitionEventArgs(new IntentRecognitionResult(), 0 /*TODO*/, evResult.SessionId);
                     }
 
                     // If LUIS didn't return anything, send the existng event, else
@@ -500,14 +549,28 @@ export class IntentRecognizer extends Recognizer {
                     }
 
                     if (null !== evResult.Result && addedIntent !== undefined) {
+                        const languageUnderstanding = JSON.stringify(evResult.Result);
+                        const intentId = addedIntent.intentName === undefined ? evResult.Result.topScoringIntent.intent : addedIntent.intentName;
+                        let reason = ev.result.reason;
 
-                        ev.result.intentId = addedIntent.intentName === undefined ? evResult.Result.topScoringIntent.intent : addedIntent.intentName;
-
-                        if (undefined !== ev.result.intentId) {
-                            ev.result.reason = ResultReason.RecognizedIntent;
+                        if (undefined !== intentId) {
+                            reason = ResultReason.RecognizedIntent;
                         }
 
-                        ev.result.languageUnderstanding = JSON.stringify(evResult.Result);
+                        ev = new IntentRecognitionEventArgs(
+                            new IntentRecognitionResult(
+                                intentId,
+                                languageUnderstanding,
+                                ev.result.resultId,
+                                reason,
+                                ev.result.text,
+                                ev.result.duration,
+                                ev.result.offset,
+                                ev.result.errorDetails,
+                                ev.result.json,
+                                ev.result.properties),
+                            ev.offset,
+                            ev.sessionId);
                     }
 
                     if (!!this.recognized) {

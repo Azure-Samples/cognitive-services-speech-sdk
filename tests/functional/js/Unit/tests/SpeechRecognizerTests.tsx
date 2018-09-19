@@ -176,6 +176,10 @@ test("testRecognizeOnceAsync1", (done: jest.DoneCallback) => {
 });
 
 test("testRecognizeOnceAsync2", (done: jest.DoneCallback) => {
+    const SpeechStartDetectedEvent = "SpeechStartDetectedEvent";
+    const SpeechEndDetectedEvent = "SpeechEndDetectedEvent";
+    const SessionStartedEvent = "SessionStartedEvent";
+    const SessionStoppedEvent = "SessionStoppedEvent";
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
     s.speechRecognitionLanguage = "en-US";
@@ -208,22 +212,22 @@ test("testRecognizeOnceAsync2", (done: jest.DoneCallback) => {
     r.speechStartDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs) => {
         const now: number = eventIdentifier++;
         // tslint:disable-next-line:no-string-literal
-        eventsMap[sdk.RecognitionEventType.SpeechStartDetectedEvent.toString()] = now;
+        eventsMap[SpeechStartDetectedEvent] = now;
     };
     r.speechEndDetected = (o: sdk.Recognizer, e: sdk.RecognitionEventArgs) => {
         const now: number = eventIdentifier++;
-        eventsMap[sdk.RecognitionEventType.SpeechEndDetectedEvent.toString()] = now;
+        eventsMap[SpeechEndDetectedEvent] = now;
     };
 
     r.sessionStarted = (o: sdk.Recognizer, e: sdk.SessionEventArgs) => {
         const now: number = eventIdentifier++;
-        eventsMap[Session + sdk.SessionEventType.SessionStartedEvent.toString()] = now;
-        eventsMap[Session + sdk.SessionEventType.SessionStartedEvent.toString() + "-" + Date.now().toPrecision(4)] = now;
+        eventsMap[Session + SessionStartedEvent] = now;
+        eventsMap[Session + SessionStartedEvent + "-" + Date.now().toPrecision(4)] = now;
     };
     r.sessionStopped = (o: sdk.Recognizer, e: sdk.SessionEventArgs) => {
         const now: number = eventIdentifier++;
-        eventsMap[Session + sdk.SessionEventType.SessionStoppedEvent.toString()] = now;
-        eventsMap[Session + sdk.SessionEventType.SessionStoppedEvent.toString() + "-" + Date.now().toPrecision(4)] = now;
+        eventsMap[Session + SessionStoppedEvent] = now;
+        eventsMap[Session + SessionStoppedEvent + "-" + Date.now().toPrecision(4)] = now;
     };
 
     // note: TODO session stopped event not necessarily raised before async operation returns!
@@ -240,45 +244,45 @@ test("testRecognizeOnceAsync2", (done: jest.DoneCallback) => {
 
             expect(LAST_RECORDED_EVENT_ID).toBeGreaterThan(FIRST_EVENT_ID);
 
-            expect(Session + sdk.SessionEventType.SessionStartedEvent in eventsMap).toEqual(true);
-            expect(eventsMap[Session + sdk.SessionEventType.SessionStartedEvent.toString()]).toEqual(FIRST_EVENT_ID);
+            expect(Session + SessionStartedEvent in eventsMap).toEqual(true);
+            expect(eventsMap[Session + SessionStartedEvent]).toEqual(FIRST_EVENT_ID);
 
-            if (Session + sdk.SessionEventType.SessionStoppedEvent.toString() in eventsMap) {
-                expect(LAST_RECORDED_EVENT_ID).toEqual(eventsMap[Session + sdk.SessionEventType.SessionStoppedEvent.toString()]);
+            if (Session + SessionStoppedEvent in eventsMap) {
+                expect(LAST_RECORDED_EVENT_ID).toEqual(eventsMap[Session + SessionStoppedEvent]);
             }
             // end events come after start events.
-            if (Session + sdk.SessionEventType.SessionStoppedEvent.toString() in eventsMap) {
-                expect(eventsMap[Session + sdk.SessionEventType.SessionStartedEvent.toString()])
-                    .toBeLessThan(eventsMap[Session + sdk.SessionEventType.SessionStoppedEvent.toString()]);
+            if (Session + SessionStoppedEvent in eventsMap) {
+                expect(eventsMap[Session + SessionStartedEvent])
+                    .toBeLessThan(eventsMap[Session + SessionStoppedEvent]);
             }
 
-            expect(eventsMap[sdk.RecognitionEventType.SpeechStartDetectedEvent.toString()])
-                .toBeLessThan(eventsMap[sdk.RecognitionEventType.SpeechEndDetectedEvent.toString()]);
-            expect((FIRST_EVENT_ID + 1)).toEqual(eventsMap[sdk.RecognitionEventType.SpeechStartDetectedEvent.toString()]);
+            expect(eventsMap[SpeechStartDetectedEvent])
+                .toBeLessThan(eventsMap[SpeechEndDetectedEvent]);
+            expect((FIRST_EVENT_ID + 1)).toEqual(eventsMap[SpeechStartDetectedEvent]);
 
             // make sure, first end of speech, then final result
-            expect((LAST_RECORDED_EVENT_ID - 2)).toEqual(eventsMap[sdk.RecognitionEventType.SpeechEndDetectedEvent.toString()]);
+            expect((LAST_RECORDED_EVENT_ID - 2)).toEqual(eventsMap[SpeechEndDetectedEvent]);
 
             expect((LAST_RECORDED_EVENT_ID - 1)).toEqual(eventsMap[Recognized]);
 
             // recognition events come after session start but before session end events
-            expect(eventsMap[Session + sdk.SessionEventType.SessionStartedEvent.toString()])
-                .toBeLessThan(eventsMap[sdk.RecognitionEventType.SpeechStartDetectedEvent.toString()]);
+            expect(eventsMap[Session + SessionStartedEvent])
+                .toBeLessThan(eventsMap[SpeechStartDetectedEvent]);
 
-            if (Session + sdk.SessionEventType.SessionStoppedEvent.toString() in eventsMap) {
-                expect(eventsMap[sdk.RecognitionEventType.SpeechEndDetectedEvent.toString()])
-                    .toBeLessThan(eventsMap[Session + sdk.SessionEventType.SessionStoppedEvent.toString()]);
+            if (Session + SessionStoppedEvent in eventsMap) {
+                expect(eventsMap[SpeechEndDetectedEvent])
+                    .toBeLessThan(eventsMap[Session + SessionStoppedEvent]);
             }
 
             // there is no partial result reported after the final result
             // (and check that we have intermediate and final results recorded)
             if (Recognizing in eventsMap) {
                 expect(eventsMap[Recognizing])
-                    .toBeGreaterThan(eventsMap[sdk.RecognitionEventType.SpeechStartDetectedEvent.toString()]);
+                    .toBeGreaterThan(eventsMap[SpeechStartDetectedEvent]);
             }
 
             // speech should stop before getting the final result.
-            expect(eventsMap[Recognized]).toBeGreaterThan(eventsMap[sdk.RecognitionEventType.SpeechEndDetectedEvent.toString()]);
+            expect(eventsMap[Recognized]).toBeGreaterThan(eventsMap[SpeechEndDetectedEvent]);
 
             expect(eventsMap[Recognizing]).toBeLessThan(eventsMap[Recognized]);
 
@@ -661,7 +665,7 @@ test("InitialSilenceTimeout", (done: jest.DoneCallback) => {
         expect(res.text).toBeUndefined();
 
         const nmd: sdk.NoMatchDetails = sdk.NoMatchDetails.fromResult(res);
-        expect(nmd.Reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
+        expect(nmd.reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
 
         if (true === oneReport) {
             done();
@@ -679,7 +683,7 @@ test("InitialSilenceTimeout", (done: jest.DoneCallback) => {
             expect(res.text).toBeUndefined();
 
             const nmd: sdk.NoMatchDetails = sdk.NoMatchDetails.fromResult(res);
-            expect(nmd.Reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
+            expect(nmd.reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
 
             r.close();
             s.close();
@@ -768,7 +772,7 @@ test("emptyFile", (done: jest.DoneCallback) => {
         (p2: sdk.SpeechRecognitionResult) => {
             expect(p2.reason).toEqual(sdk.ResultReason.Canceled);
             const cancelDetails: sdk.CancellationDetails = sdk.CancellationDetails.fromResult(p2);
-            expect(cancelDetails.Reason).toEqual(sdk.CancellationReason.Error);
+            expect(cancelDetails.reason).toEqual(sdk.CancellationReason.Error);
 
             if (true === oneCalled) {
                 r.close();
@@ -861,7 +865,7 @@ test("burst of silence", (done: jest.DoneCallback) => {
             expect(res).not.toBeUndefined();
             expect(res.reason).toEqual(sdk.ResultReason.NoMatch);
             const nmd: sdk.NoMatchDetails = sdk.NoMatchDetails.fromResult(res);
-            expect(nmd.Reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
+            expect(nmd.reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
 
             r.close();
             s.close();

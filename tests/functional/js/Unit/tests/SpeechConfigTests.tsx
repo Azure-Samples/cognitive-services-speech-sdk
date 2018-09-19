@@ -31,24 +31,6 @@ test("testFromSubscriptionSuccess", () => {
     s.close();
 });
 
-test("testGetSubscriptionKey", () => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    expect(s).not.toBeUndefined();
-    expect(s.subscriptionKey).toEqual(Settings.SpeechSubscriptionKey);
-    expect(s.getProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_Key])).toEqual(Settings.SpeechSubscriptionKey);
-
-    s.close();
-});
-
-test("testGetRegion", () => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
-    expect(s).not.toBeUndefined();
-    expect(Settings.SpeechRegion).toEqual(s.region);
-
-    s.close();
-});
-
 test("testFromEndpoint1", () => {
     expect(() => sdk.SpeechConfig.fromEndpoint(null, null)).toThrowError();
 });
@@ -70,15 +52,6 @@ test.skip("testFromEndpointSuccess", () => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromEndpoint(new URL("http://www.example.com"), "Settings.SpeechSubscriptionKey");
 
     expect(s).not.toBeUndefined();
-
-    s.close();
-});
-
-test("testGetParameters1", () => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
-    expect(s.region).toEqual(s.getProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_Region], null));
-    expect(s.subscriptionKey).toEqual(s.getProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_Key], null));
 
     s.close();
 });

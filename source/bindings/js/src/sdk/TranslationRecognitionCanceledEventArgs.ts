@@ -5,40 +5,44 @@
 
 import {
     CancellationReason,
-    IntentRecognitionResult,
+    TranslationRecognitionResult,
 } from "./Exports";
-
 /**
- * Define payload of intent recognition canceled result events.
+ * Define payload of speech recognition canceled result events.
  */
-export class IntentRecognitionCanceledEventArgs {
-
-    private privResult: IntentRecognitionResult;
+export class TranslationRecognitionCanceledEventArgs {
+    private privResult: TranslationRecognitionResult;
     private privSessionId: string;
     private privCancelReason: CancellationReason;
     private privErrorDetails: string;
 
-    public constructor(
-        result: IntentRecognitionResult,
-        sessionId: string,
-        cancelReason: CancellationReason,
-        errorDetails: string) {
-        this.privResult = result;
-        this.privSessionId = sessionId;
-        this.privCancelReason = cancelReason;
+    /**
+     * Creates and initializes an instance of this class.
+     * @constructor
+     * @param sessionid The session id.
+     * @param cancellationReason The cancellation reason.
+     * @param errorDetails Error details, if provided.
+     * @param result The result.
+     */
+    public constructor(sessionid: string, cancellationReason: CancellationReason, errorDetails: string, result: TranslationRecognitionResult) {
+        this.privCancelReason = cancellationReason;
         this.privErrorDetails = errorDetails;
+        this.privResult = result;
+        this.privSessionId = sessionid;
     }
 
     /**
      * Specifies the recognition result.
+     * @property
      * @return the recognition result.
      */
-    public get result(): IntentRecognitionResult {
+    public get result(): TranslationRecognitionResult {
         return this.privResult;
     }
 
     /**
      * Specifies the session identifier.
+     * @property
      * @return the session identifier.
      */
     public get sessionId(): string {
@@ -47,6 +51,7 @@ export class IntentRecognitionCanceledEventArgs {
 
     /**
      * The reason the recognition was canceled.
+     * @property
      * @return Specifies the reason canceled.
      */
     public get reason(): CancellationReason {
@@ -56,6 +61,7 @@ export class IntentRecognitionCanceledEventArgs {
     /**
      * In case of an unsuccessful recognition, provides a details of why the occurred error.
      * This field is only filled-out if the reason canceled (@see getReason) is set to Error.
+     * @property
      * @return A String that represents the error details.
      */
     public get errorDetails(): string {

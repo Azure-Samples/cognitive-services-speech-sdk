@@ -185,7 +185,7 @@ test("InitialSilenceTimeout", (done: jest.DoneCallback) => {
         expect(res.text).toBeUndefined();
 
         const nmd: sdk.NoMatchDetails = sdk.NoMatchDetails.fromResult(res);
-        expect(nmd.Reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
+        expect(nmd.reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
 
         if (true === oneReport) {
             done();
@@ -203,7 +203,7 @@ test("InitialSilenceTimeout", (done: jest.DoneCallback) => {
             expect(res.text).toBeUndefined();
 
             const nmd: sdk.NoMatchDetails = sdk.NoMatchDetails.fromResult(res);
-            expect(nmd.Reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
+            expect(nmd.reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
 
             r.close();
             s.close();
@@ -242,7 +242,7 @@ test.skip("emptyFile", (done: jest.DoneCallback) => {
     r.canceled = (o: sdk.Recognizer, e: sdk.IntentRecognitionCanceledEventArgs): void => {
         expect(e.reason).toEqual(sdk.CancellationReason.Error);
         const cancelDetails: sdk.CancellationDetails = sdk.CancellationDetails.fromResult(e.result);
-        expect(cancelDetails.Reason).toEqual(sdk.CancellationReason.Error);
+        expect(cancelDetails.reason).toEqual(sdk.CancellationReason.Error);
 
         if (true === oneCalled) {
             done();

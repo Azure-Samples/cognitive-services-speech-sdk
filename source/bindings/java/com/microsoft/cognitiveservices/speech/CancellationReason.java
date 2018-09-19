@@ -12,10 +12,25 @@ public enum CancellationReason
     /**
      * Indicates that an error occurred during speech recognition. Use getErrorDetails() contains detailed error response.
      */
-    Error,
+    Error(com.microsoft.cognitiveservices.speech.internal.CancellationReason.Error),
 
     /**
      * Indicates that the end of the audio stream was reached.
      */
-    EndOfStream
+    EndOfStream(com.microsoft.cognitiveservices.speech.internal.CancellationReason.EndOfStream);
+
+    
+    private CancellationReason(com.microsoft.cognitiveservices.speech.internal.CancellationReason id) {
+        this.id = id;
+    }
+
+    /**
+     * Returns the internal value property id
+     *
+     * @param
+     * @return the speech property id
+     */
+    public com.microsoft.cognitiveservices.speech.internal.CancellationReason getValue() { return this.id; }
+
+    private final com.microsoft.cognitiveservices.speech.internal.CancellationReason id;    
 }

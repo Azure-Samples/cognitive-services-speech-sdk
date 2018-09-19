@@ -39,7 +39,6 @@ import {
  */
 export abstract class Recognizer {
     private disposed: boolean;
-
     protected audioConfig: AudioConfig;
 
     /**
@@ -172,8 +171,7 @@ export abstract class Recognizer {
                     break;
 
                 case "RecognitionStartedEvent": // Fires when the client connects to the service successfuly.
-                    sessionStartStopEventArgs = new SessionEventArgs();
-                    sessionStartStopEventArgs.sessionId = event.SessionId;
+                    sessionStartStopEventArgs = new SessionEventArgs(event.SessionId);
 
                     if (!!this.sessionStarted) {
                         this.sessionStarted(this, sessionStartStopEventArgs);
@@ -183,8 +181,7 @@ export abstract class Recognizer {
                 case "RecognitionEndedEvent":
                     const recoEndedEvent = event as RecognitionEndedEvent;
 
-                    sessionStartStopEventArgs = new SessionEventArgs();
-                    sessionStartStopEventArgs.sessionId = recoEndedEvent.SessionId;
+                    sessionStartStopEventArgs = new SessionEventArgs(recoEndedEvent.SessionId);
 
                     if (recoEndedEvent.Status !== RecognitionCompletionStatus.Success) {
                         if (cb) {
@@ -198,9 +195,7 @@ export abstract class Recognizer {
                     break;
 
                 case "SpeechStartDetectedEvent":
-                    speechStartStopEventArgs = new RecognitionEventArgs();
-                    speechStartStopEventArgs.sessionId = event.SessionId;
-                    speechStartStopEventArgs.offset = 0; // TODO
+                    speechStartStopEventArgs = new RecognitionEventArgs(0 /*TODO*/, event.SessionId);
 
                     if (!!this.speechStartDetected) {
                         this.speechStartDetected(this, speechStartStopEventArgs);
@@ -208,9 +203,7 @@ export abstract class Recognizer {
                     break;
 
                 case "SpeechEndDetectedEvent":
-                    speechStartStopEventArgs = new RecognitionEventArgs();
-                    speechStartStopEventArgs.sessionId = event.SessionId;
-                    speechStartStopEventArgs.offset = 0; // TODO
+                    speechStartStopEventArgs = new RecognitionEventArgs(0 /*TODO*/, event.SessionId);
 
                     if (!!this.speechEndDetected) {
                         this.speechEndDetected(this, speechStartStopEventArgs);

@@ -16,7 +16,7 @@ case $SPEECHSDK_BUILD_AGENT_PLATFORM in
     PIDS="$(sudo lsof -t /var/lib/dpkg/lock || true)"
     if [[ -n $PIDS ]]; then
       (
-        set +x
+        set +e
         echo PID for /var/lib/dpkg/lock: $PIDS
         echo Running processes:
         sudo ps axjfw

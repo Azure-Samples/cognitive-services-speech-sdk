@@ -1,6 +1,6 @@
 import { RecognitionCompletionStatus } from "../../src/common.speech/Exports";
 import { SynthesisStatus } from "../sdk/SynthesisStatus";
-import { TranslationStatus } from "../sdk/TranslationStatus";
+import { TranslationStatus } from "./TranslationStatus";
 
 export enum RecognitionStatus2 {
     Success,

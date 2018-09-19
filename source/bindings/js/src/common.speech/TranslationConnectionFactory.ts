@@ -41,7 +41,7 @@ export class TranslationConnectionFactory implements IConnectionFactory {
         const voiceName: string = "voice";
         const featureName: string = "features";
 
-        if (config.parameters.hasProperty(PropertyId.SpeechServiceConnection_TranslationVoice)) {
+        if (config.parameters.getProperty(PropertyId.SpeechServiceConnection_TranslationVoice, undefined) !== undefined) {
             queryParams[voiceName] = config.parameters.getProperty(PropertyId.SpeechServiceConnection_TranslationVoice);
             queryParams[featureName] = "texttospeech";
         }

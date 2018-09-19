@@ -67,31 +67,6 @@ export class PropertyCollection {
     }
 
     /**
-     * Checks whether the parameter specified by name has a String value.
-     * @member
-     * @param {string} key - The parameter name.
-     * @returns true if the parameter has a value, and false otherwise.
-     */
-    public hasProperty(key: string | PropertyId): boolean {
-        let keyToUse: string;
-
-        if (typeof key === "string") {
-            keyToUse = key;
-        } else {
-            keyToUse = PropertyId[key];
-        }
-
-        // tslint:disable-next-line:prefer-for-of
-        for (let n = 0; n < this.keys.length; n++) {
-            if (this.keys[n] === keyToUse) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Clones the collection.
      * @member
      * @returns A copy of the collection.

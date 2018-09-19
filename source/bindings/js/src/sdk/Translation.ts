@@ -35,14 +35,4 @@ export class Translation {
     public set(key: string, value: string): void {
         this.map.setProperty(key, value);
     }
-
-    /**
-     * Checks whether the parameter specified by name has a String value.
-     * @member
-     * @param {string} key - The parameter name.
-     * @returns true if the parameter has a value, and false otherwise.
-     */
-    public has(key: string ): boolean {
-        return this.map.hasProperty(key);
-    }
 }

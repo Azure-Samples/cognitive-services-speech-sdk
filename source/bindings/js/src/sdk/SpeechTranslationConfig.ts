@@ -207,7 +207,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      */
     public get targetLanguages(): string[] {
 
-        if (this.speechProperties.hasProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages)) {
+        if (this.speechProperties.getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages, undefined) !== undefined) {
             return this.speechProperties.getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages).split(",");
         } else {
             return [];
@@ -221,6 +221,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
 
     /**
      * Sets voice of the translated language, enable voice synthesis output.
+     * @property
      * @param value
      */
     public set voiceName(value: string) {
@@ -229,24 +230,48 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
         this.properties.setProperty(PropertyId.SpeechServiceConnection_TranslationVoice, value);
     }
 
+    /**
+     * Provides the region.
+     * @property
+     * @returns The region.
+     */
     public get region(): string {
         return this.speechProperties.getProperty(PropertyId.SpeechServiceConnection_Region);
     }
 
+    /**
+     * Allows for setting arbitrary properties.
+     * @member
+     * @param name - The name of the property.
+     * @param value - The value of the property.
+     */
     public setProperty(name: string, value: string): void {
         this.properties.setProperty(name, value);
     }
 
+    /**
+     * Allows for retrieving arbitrary property values.
+     * @member
+     * @param name - The name of the property.
+     * @param def - The default value of the property in case it is not set.
+     * @returns The value of the property.
+     */
     public getProperty(name: string, def?: string): string {
         return this.speechProperties.getProperty(name, def);
     }
 
+    /**
+     * Provides access to custom properties.
+     * @property
+     * @returns The properties.
+     */
     public get properties(): PropertyCollection {
         return this.speechProperties;
     }
 
     /**
      * Dispose of associated resources.
+     * @member
      */
     public close(): void {
         return;

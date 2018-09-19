@@ -27,6 +27,7 @@ import { Contracts } from "./Contracts";
 import {
     AudioConfig,
     CancellationReason,
+    KeywordRecognitionModel,
     OutputFormat,
     PropertyCollection,
     PropertyId,
@@ -90,17 +91,6 @@ export class SpeechRecognizer extends Recognizer {
         Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
 
         return this.properties.getProperty(PropertyId.SpeechServiceConnection_EndpointId, "00000000-0000-0000-0000-000000000000");
-    }
-
-    /**
-     * Sets the endpoint id of a customized speech model that is used for speech recognition.
-     * @property
-     * @param value The endpoint id of a customized speech model that is used for speech recognition.
-     */
-    public set endpointId(value: string) {
-        Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
-        Contracts.throwIfNullOrWhitespace(value, "value");
-        this.properties.setProperty(PropertyId.SpeechServiceConnection_EndpointId, value);
     }
 
     /**
@@ -184,10 +174,10 @@ export class SpeechRecognizer extends Recognizer {
     }
 
     /**
-     * Starts speech recognition on a continuous audio stream, until stopContinuousRecognitionAsync() is called.
+     * Starts speech recognition, until stopContinuousRecognitionAsync() is called.
      * User must subscribe to events to receive recognition results.
      * @member
-     * @param cb - Callback that received the recognition has started.
+     * @param cb - Callback invoked once the recognition has started.
      * @param err - Callback invoked in case of an error.
      */
     public startContinuousRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
@@ -225,7 +215,7 @@ export class SpeechRecognizer extends Recognizer {
     /**
      * Stops continuous speech recognition.
      * @member
-     * @param cb - Callback that received the recognition has stopped.
+     * @param cb - Callback invoked once the recognition has stopped.
      * @param err - Callback invoked in case of an error.
      */
     public stopContinuousRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
@@ -241,6 +231,36 @@ export class SpeechRecognizer extends Recognizer {
                     err(e);
                 }
             }
+        }
+    }
+
+    /**
+     * Starts speech recognition with keyword spotting, until stopKeywordRecognitionAsync() is called.
+     * User must subscribe to events to receive recognition results.
+     * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
+     * @member
+     * @param model The keyword recognition model that specifies the keyword to be recognized.
+     * @param cb - Callback invoked once the recognition has started.
+     * @param err - Callback invoked in case of an error.
+     */
+    public startKeywordRecognitionAsync(model: KeywordRecognitionModel, cb?: () => void, err?: (e: string) => void): void {
+        Contracts.throwIfNull(model, "model");
+
+        if (!!err) {
+            err("Not yet implemented.");
+        }
+    }
+
+    /**
+     * Stops continuous speech recognition.
+     * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
+     * @member
+     * @param cb - Callback invoked once the recognition has stopped.
+     * @param err - Callback invoked in case of an error.
+     */
+    public stopKeywordRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
+        if (!!cb) {
+            cb();
         }
     }
 
@@ -305,12 +325,12 @@ export class SpeechRecognizer extends Recognizer {
                 {
                     const recoEndedEvent: RecognitionEndedEvent = event as RecognitionEndedEvent;
                     if (recoEndedEvent.Status !== RecognitionCompletionStatus.Success) {
-                        const errorEvent: SpeechRecognitionCanceledEventArgs = new SpeechRecognitionCanceledEventArgs();
                         const errorText: string = RecognitionCompletionStatus[recoEndedEvent.Status] + ": " + recoEndedEvent.Error;
-
-                        errorEvent.reason = CancellationReason.Error;
-                        errorEvent.sessionId = recoEndedEvent.SessionId;
-                        errorEvent.errorDetails = errorText;
+                        const errorEvent: SpeechRecognitionCanceledEventArgs = new SpeechRecognitionCanceledEventArgs(
+                            CancellationReason.Error,
+                            errorText,
+                            0, /*todo*/
+                            recoEndedEvent.SessionId);
 
                         if (this.canceled) {
                             try {
@@ -322,9 +342,12 @@ export class SpeechRecognizer extends Recognizer {
                             }
                         }
 
-                        const result: SpeechRecognitionResult = new SpeechRecognitionResult();
-                        result.reason = ResultReason.Canceled;
-                        result.errorDetails = errorText;
+                        const result = new SpeechRecognitionResult(
+                            undefined,
+                            ResultReason.Canceled,
+                            undefined, undefined, undefined,
+                            errorText,
+                            undefined, undefined);
 
                         // report result to promise.
                         if (!!cb) {
@@ -347,17 +370,22 @@ export class SpeechRecognizer extends Recognizer {
 
                     const reason = EnumTranslation.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
 
-                    const result: SpeechRecognitionResult = new SpeechRecognitionResult();
-                    result.reason = reason;
-                    result.duration = evResult.Result.Duration;
-                    result.offset = evResult.Result.Duration;
-                    result.text = evResult.Result.DisplayText;
-                    result.json = JSON.stringify(evResult.Result);
+                    const result = new SpeechRecognitionResult(
+                        undefined,
+                        reason,
+                        evResult.Result.DisplayText,
+                        evResult.Result.Duration,
+                        evResult.Result.Offset,
+                        undefined,
+                        JSON.stringify(evResult.Result),
+                        undefined);
 
                     if (reason === ResultReason.Canceled) {
-                        const ev = new SpeechRecognitionCanceledEventArgs();
-                        ev.sessionId = evResult.SessionId;
-                        ev.reason = EnumTranslation.implTranslateCancelResult(evResult.Result.RecognitionStatus);
+                        const ev = new SpeechRecognitionCanceledEventArgs(
+                            EnumTranslation.implTranslateCancelResult(evResult.Result.RecognitionStatus),
+                            "",
+                            0, /*todo*/
+                            evResult.SessionId);
 
                         if (!!this.canceled) {
                             try {
@@ -369,9 +397,7 @@ export class SpeechRecognizer extends Recognizer {
                             }
                         }
                     } else {
-                        const ev = new SpeechRecognitionEventArgs();
-                        ev.sessionId = evResult.SessionId;
-                        ev.result = result;
+                        const ev = new SpeechRecognitionEventArgs(result, 0/*todo*/, evResult.SessionId);
 
                         if (!!this.recognized) {
                             try {
@@ -408,19 +434,22 @@ export class SpeechRecognizer extends Recognizer {
 
                     const reason = EnumTranslation.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
 
-                    const result: SpeechRecognitionResult = new SpeechRecognitionResult();
-                    result.json = JSON.stringify(evResult.Result);
-                    result.offset = evResult.Result.Offset;
-                    result.duration = evResult.Result.Duration;
-                    result.reason = reason;
-                    if (reason === ResultReason.RecognizedSpeech) {
-                        result.text = evResult.Result.NBest[0].Display;
-                    }
+                    const result = new SpeechRecognitionResult(
+                        undefined,
+                        reason,
+                        (reason === ResultReason.RecognizedSpeech) ? evResult.Result.NBest[0].Display : undefined,
+                        evResult.Result.Duration,
+                        evResult.Result.Offset,
+                        undefined,
+                        JSON.stringify(evResult.Result),
+                        undefined);
 
                     if (reason === ResultReason.Canceled) {
-                        const ev = new SpeechRecognitionCanceledEventArgs();
-                        ev.sessionId = evResult.SessionId;
-                        ev.reason = EnumTranslation.implTranslateCancelResult(evResult.Result.RecognitionStatus);
+                        const ev = new SpeechRecognitionCanceledEventArgs(
+                            EnumTranslation.implTranslateCancelResult(evResult.Result.RecognitionStatus),
+                            "",
+                            0, /*todo*/
+                            evResult.SessionId);
 
                         if (!!this.canceled) {
                             try {
@@ -432,9 +461,7 @@ export class SpeechRecognizer extends Recognizer {
                             }
                         }
                     } else {
-                        const ev = new SpeechRecognitionEventArgs();
-                        ev.sessionId = evResult.SessionId;
-                        ev.result = result;
+                        const ev = new SpeechRecognitionEventArgs(result, 0/*todo*/,  evResult.SessionId);
 
                         if (!!this.recognized) {
                             try {
@@ -463,14 +490,16 @@ export class SpeechRecognizer extends Recognizer {
                 {
                     const evResult = event as SpeechRecognitionResultEvent<ISpeechHypothesis>;
 
-                    const ev = new SpeechRecognitionEventArgs();
-                    ev.sessionId = evResult.SessionId;
+                    const result = new SpeechRecognitionResult(
+                        undefined, undefined,
+                        evResult.Result.Text,
+                        evResult.Result.Duration,
+                        evResult.Result.Offset,
+                        undefined,
+                        JSON.stringify(evResult.Result),
+                        undefined);
 
-                    ev.result = new SpeechRecognitionResult();
-                    ev.result.json = JSON.stringify(evResult.Result);
-                    ev.result.offset = evResult.Result.Offset;
-                    ev.result.duration = evResult.Result.Duration;
-                    ev.result.text = evResult.Result.Text;
+                    const ev = new SpeechRecognitionEventArgs(result, 0/*todo*/, evResult.SessionId);
 
                     if (!!this.recognizing) {
                         try {

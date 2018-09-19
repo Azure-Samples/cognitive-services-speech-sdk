@@ -11,25 +11,32 @@ import {
     IntentRecognitionResult,
     NoMatchReason,
     SpeechRecognitionResult,
-    TranslationTextResult,
+    TranslationRecognitionResult,
 } from "./Exports";
+import { RecognitionResult } from "./RecognitionResult";
 
 /**
  * Contains detailed information for NoMatch recognition results.
  */
 export class NoMatchDetails {
-    private reason: NoMatchReason;
+    private privReason: NoMatchReason;
 
+    /**
+     * Creates and initializes an instance of this class.
+     * @constructor
+     * @param reason The no-match reason.
+     */
     private constructor(reason: NoMatchReason) {
-        this.reason = reason;
+        this.privReason = reason;
     }
 
     /**
      * Creates an instance of NoMatchDetails object for the NoMatch SpeechRecognitionResults.
+     * @member
      * @param The recognition result that was not recognized.
      * @return The no match details object being created.
      */
-    public static fromResult(result: SpeechRecognitionResult | IntentRecognitionResult | TranslationTextResult): NoMatchDetails {
+    public static fromResult(result: SpeechRecognitionResult | IntentRecognitionResult | TranslationRecognitionResult): NoMatchDetails {
         const simpleSpeech: ISimpleSpeechPhrase = JSON.parse(result.json);
 
         let reason: NoMatchReason = NoMatchReason.NotRecognized;
@@ -53,9 +60,10 @@ export class NoMatchDetails {
 
     /**
      * The reason the recognition was canceled.
+     * @property
      * @return Specifies the reason canceled.
      */
-    public get Reason(): NoMatchReason {
-        return this.reason;
+    public get reason(): NoMatchReason {
+        return this.privReason;
     }
 }

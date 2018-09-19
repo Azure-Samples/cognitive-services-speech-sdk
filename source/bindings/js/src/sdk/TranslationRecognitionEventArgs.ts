@@ -2,23 +2,23 @@
 // copyright (c) Microsoft. All rights reserved.
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-import { PropertyCollection, RecognitionEventArgs, ResultReason, SpeechRecognitionResult } from "./Exports";
+import { RecognitionEventArgs, TranslationRecognitionResult } from "./Exports";
 
 /**
- * Defines contents of speech recognizing/recognized event.
+ * Translation text result event arguments.
  * @class
  */
-export class SpeechRecognitionEventArgs extends RecognitionEventArgs {
-    private privResult: SpeechRecognitionResult;
+export class TranslationRecognitionEventArgs extends RecognitionEventArgs {
+    private privResult: TranslationRecognitionResult;
 
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param result The speech recognition result.
+     * @param result The translation recognition result.
      * @param offset The offset.
      * @param sessionId The session id.
      */
-    public constructor(result: SpeechRecognitionResult, offset?: number, sessionId?: string) {
+    public constructor(result: TranslationRecognitionResult, offset?: number, sessionId?: string) {
         super(offset, sessionId);
 
         this.privResult = result;
@@ -29,7 +29,7 @@ export class SpeechRecognitionEventArgs extends RecognitionEventArgs {
      * @property
      * @returns the recognition result.
      */
-    public get result(): SpeechRecognitionResult {
+    public get result(): TranslationRecognitionResult {
         return this.privResult;
     }
 }

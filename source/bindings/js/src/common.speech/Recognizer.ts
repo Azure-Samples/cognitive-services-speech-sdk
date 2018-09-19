@@ -18,11 +18,11 @@ import {
     Promise,
     PromiseHelper,
     PromiseResult,
+    TranslationStatus,
 } from "../common/Exports";
 import {
     OutputFormat,
     SynthesisStatus,
-    TranslationStatus,
 } from "../sdk/Exports";
 import {
     IDetailedSpeechPhrase,

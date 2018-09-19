@@ -1,28 +1,32 @@
 //
-// copyright (c) Microsoft. All rights reserved.
-// licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-import { CancellationReason, RecognitionEventArgs } from "./Exports";
+import {
+    CancellationReason,
+    IntentRecognitionEventArgs,
+    IntentRecognitionResult,
+    PropertyCollection,
+    ResultReason,
+} from "./Exports";
 
 /**
- * Defines content of a RecognitionErrorEvent.
- * @class
+ * Define payload of intent recognition canceled result events.
  */
-export class SpeechRecognitionCanceledEventArgs extends RecognitionEventArgs {
+export class IntentRecognitionCanceledEventArgs extends IntentRecognitionEventArgs {
     private privReason: CancellationReason;
     private privErrorDetails: string;
 
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param reason The cancellation reason.
-     * @param errorDetails Error details, if provided.
+     * @param result The result of the intent recognition.
      * @param offset The offset.
      * @param sessionId The session id.
      */
-    public constructor(reason: CancellationReason, errorDetails: string, offset?: number, sessionId?: string) {
-        super(offset, sessionId);
+    public constructor(reason: CancellationReason, errorDetails: string, result?: IntentRecognitionResult, offset?: number, sessionId?: string) {
+        super(result, offset, sessionId);
 
         this.privReason = reason;
         this.privErrorDetails = errorDetails;
