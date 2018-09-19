@@ -67,7 +67,13 @@ if(WIN32)
 elseif(APPLE)
     list(APPEND SOURCES
         "${SRC_DIR}/osx/microphone.cpp"
+        "${SRC_DIR}/osx/audio_sys.c"
     )
+    FIND_LIBRARY(AUDIO_TOOLBOX AudioToolbox)
+    if (NOT AUDIO_TOOLBOX)
+        message(FATAL_ERROR "AudioToolbox not found")
+    endif()
+list(APPEND AUDIO_LIBS ${AUDIO_TOOLBOX})
 else()
     if (NOT (CMAKE_SYSTEM_NAME STREQUAL "Android"))
         list(APPEND SOURCES

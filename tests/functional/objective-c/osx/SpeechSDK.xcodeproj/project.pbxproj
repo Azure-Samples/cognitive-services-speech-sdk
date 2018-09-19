@@ -37,6 +37,8 @@
 		3C5D93FD2146D410000C7129 /* test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = test.h; path = ../../shared/test.h; sourceTree = "<group>"; };
 		3C5D941121480C1E000C7129 /* test_audio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = test_audio.h; path = ../../shared/test_audio.h; sourceTree = "<group>"; };
 		3C5D941221483ACE000C7129 /* test_audio.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = test_audio.mm; path = ../../shared/test_audio.mm; sourceTree = "<group>"; };
+		3C676486214EA6CA00FCB533 /* microphone_test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = microphone_test.h; path = ../../shared/microphone_test.h; sourceTree = "<group>"; };
+		3C676487214EA6CA00FCB533 /* microphone_test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = microphone_test.m; path = ../../shared/microphone_test.m; sourceTree = "<group>"; };
 		3CBD7F06211CD69B00F72336 /* SpeechSDK.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpeechSDK.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3CBD7F12211CD69B00F72336 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3CBD7F17211CD69B00F72336 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };

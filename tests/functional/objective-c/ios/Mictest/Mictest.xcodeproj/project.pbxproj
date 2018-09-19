@@ -1,0 +1,656 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3C67649A214EE0B100FCB533 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C676499214EE0B100FCB533 /* AppDelegate.m */; };
+		3C67649D214EE0B100FCB533 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C67649C214EE0B100FCB533 /* ViewController.m */; };
+		3C6764A0214EE0B100FCB533 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3C67649E214EE0B100FCB533 /* Main.storyboard */; };
+		3C6764A2214EE0B100FCB533 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3C6764A1214EE0B100FCB533 /* Assets.xcassets */; };
+		3C6764A5214EE0B100FCB533 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3C6764A3214EE0B100FCB533 /* LaunchScreen.storyboard */; };
+		3C6764A8214EE0B100FCB533 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764A7214EE0B100FCB533 /* main.m */; };
+		3C6764AF214EE0F300FCB533 /* public in Resources */ = {isa = PBXBuildFile; fileRef = 3C6764AE214EE0F300FCB533 /* public */; };
+		3C6764B3214EE14B00FCB533 /* c_api in Resources */ = {isa = PBXBuildFile; fileRef = 3C6764B2214EE14B00FCB533 /* c_api */; };
+		3C6764B6214EE1F000FCB533 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C6764B5214EE1F000FCB533 /* CFNetwork.framework */; };
+		3C6764BE214EE22800FCB533 /* libfactory.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C6764B7214EE22800FCB533 /* libfactory.a */; };
+		3C6764BF214EE22800FCB533 /* libsr.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C6764B8214EE22800FCB533 /* libsr.a */; };
+		3C6764C0214EE22800FCB533 /* libcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C6764B9214EE22800FCB533 /* libcommon.a */; };
+		3C6764C1214EE22800FCB533 /* libaudio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C6764BA214EE22800FCB533 /* libaudio.a */; };
+		3C6764C3214EE22800FCB533 /* libparson.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C6764BC214EE22800FCB533 /* libparson.a */; };
+		3C6764C4214EE22800FCB533 /* libaziotsharedutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C6764BD214EE22800FCB533 /* libaziotsharedutil.a */; };
+		3C6764C7214EE24200FCB533 /* microphone_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764C6214EE24200FCB533 /* microphone_test.m */; };
+		3C6764C9214EE4CB00FCB533 /* libusp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C6764C8214EE4CB00FCB533 /* libusp.a */; };
+		3C6764FE214EE52300FCB533 /* language_understanding_model.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764CA214EE51E00FCB533 /* language_understanding_model.mm */; };
+		3C6764FF214EE52300FCB533 /* audio_stream.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764CC214EE51E00FCB533 /* audio_stream.mm */; };
+		3C676500214EE52300FCB533 /* recognition_result.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764CD214EE51E00FCB533 /* recognition_result.mm */; };
+		3C676501214EE52300FCB533 /* util.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764D0214EE51F00FCB533 /* util.mm */; };
+		3C676502214EE52300FCB533 /* speech_recognition_event_args.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764D1214EE51F00FCB533 /* speech_recognition_event_args.mm */; };
+		3C676503214EE52300FCB533 /* translation_recognizer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764D4214EE51F00FCB533 /* translation_recognizer.mm */; };
+		3C676504214EE52300FCB533 /* intent_recognizer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764D5214EE51F00FCB533 /* intent_recognizer.mm */; };
+		3C676505214EE52300FCB533 /* speech_recognizer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764D7214EE51F00FCB533 /* speech_recognizer.mm */; };
+		3C676506214EE52300FCB533 /* recognizer_property_collection.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764D8214EE51F00FCB533 /* recognizer_property_collection.mm */; };
+		3C676507214EE52300FCB533 /* recognition_result_property_collection.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764DA214EE51F00FCB533 /* recognition_result_property_collection.mm */; };
+		3C676508214EE52300FCB533 /* recognizer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764DB214EE51F00FCB533 /* recognizer.mm */; };
+		3C676509214EE52300FCB533 /* nsstring_stdstring.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764DD214EE52000FCB533 /* nsstring_stdstring.mm */; };
+		3C67650A214EE52300FCB533 /* recognition_event_args.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764DE214EE52000FCB533 /* recognition_event_args.mm */; };
+		3C67650B214EE52300FCB533 /* intent_recognition_event_args.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764E0214EE52000FCB533 /* intent_recognition_event_args.mm */; };
+		3C67650C214EE52300FCB533 /* translation_text_result.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764E3214EE52000FCB533 /* translation_text_result.mm */; };
+		3C67650D214EE52300FCB533 /* translation_synthesis_result_event_args.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764E4214EE52000FCB533 /* translation_synthesis_result_event_args.mm */; };
+		3C67650E214EE52300FCB533 /* audio_stream_format.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764E6214EE52100FCB533 /* audio_stream_format.mm */; };
+		3C67650F214EE52300FCB533 /* translation_text_result_event_args.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764E8214EE52100FCB533 /* translation_text_result_event_args.mm */; };
+		3C676510214EE52300FCB533 /* session_event_args.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764EA214EE52100FCB533 /* session_event_args.mm */; };
+		3C676511214EE52300FCB533 /* speech_config.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764EF214EE52100FCB533 /* speech_config.mm */; };
+		3C676512214EE52300FCB533 /* translation_synthesis_result.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764F5214EE52200FCB533 /* translation_synthesis_result.mm */; };
+		3C676513214EE52300FCB533 /* speech_translation_config.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764F6214EE52200FCB533 /* speech_translation_config.mm */; };
+		3C676514214EE52300FCB533 /* audio_config.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764F8214EE52200FCB533 /* audio_config.mm */; };
+		3C676515214EE52300FCB533 /* speech_recognition_result.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764FA214EE52200FCB533 /* speech_recognition_result.mm */; };
+		3C676516214EE52300FCB533 /* intent_recognition_result.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C6764FB214EE52300FCB533 /* intent_recognition_result.mm */; };
+		3C67652B214EE58A00FCB533 /* speechapi_c_keyword_recognition_model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C676518214EE58800FCB533 /* speechapi_c_keyword_recognition_model.cpp */; };
+		3C67652C214EE58A00FCB533 /* speechapi_c_audio_stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C676519214EE58800FCB533 /* speechapi_c_audio_stream.cpp */; };
+		3C67652D214EE58A00FCB533 /* speechapi_c_translation_recognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C67651A214EE58800FCB533 /* speechapi_c_translation_recognizer.cpp */; };
+		3C67652E214EE58A00FCB533 /* event_helpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C67651B214EE58800FCB533 /* event_helpers.cpp */; };
+		3C67652F214EE58A00FCB533 /* speechapi_c_audio_config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C67651C214EE58800FCB533 /* speechapi_c_audio_config.cpp */; };
+		3C676530214EE58A00FCB533 /* speechapi_c_error.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C67651D214EE58800FCB533 /* speechapi_c_error.cpp */; };
+		3C676531214EE58A00FCB533 /* speechapi_c_factory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C67651E214EE58900FCB533 /* speechapi_c_factory.cpp */; };
+		3C676532214EE58A00FCB533 /* speechapi_c_language_understanding_model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C67651F214EE58900FCB533 /* speechapi_c_language_understanding_model.cpp */; };
+		3C676533214EE58A00FCB533 /* speechapi_c_intent_recognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C676520214EE58900FCB533 /* speechapi_c_intent_recognizer.cpp */; };
+		3C676534214EE58A00FCB533 /* speechapi_c_property_bag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C676521214EE58900FCB533 /* speechapi_c_property_bag.cpp */; };
+		3C676535214EE58A00FCB533 /* speechapi_c_recognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C676522214EE58900FCB533 /* speechapi_c_recognizer.cpp */; };
+		3C676536214EE58A00FCB533 /* speechapi_c_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C676523214EE58900FCB533 /* speechapi_c_result.cpp */; };
+		3C676537214EE58A00FCB533 /* speechapi_c_speech_config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C676524214EE58900FCB533 /* speechapi_c_speech_config.cpp */; };
+		3C676538214EE58A00FCB533 /* speechapi_c_translation_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C676525214EE58900FCB533 /* speechapi_c_translation_result.cpp */; };
+		3C676539214EE58A00FCB533 /* speechapi_c_intent_result.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C676527214EE58900FCB533 /* speechapi_c_intent_result.cpp */; };
+		3C67653A214EE58A00FCB533 /* speechapi_c_audio_stream_format.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C676528214EE58A00FCB533 /* speechapi_c_audio_stream_format.cpp */; };
+		3C67653B214EE58A00FCB533 /* speechapi_c_session.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C676529214EE58A00FCB533 /* speechapi_c_session.cpp */; };
+		3C67653C214EE58A00FCB533 /* speechapi_c_intent_trigger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C67652A214EE58A00FCB533 /* speechapi_c_intent_trigger.cpp */; };
+		3C676540214EE5A000FCB533 /* stdafx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C67653F214EE5A000FCB533 /* stdafx.cpp */; };
+		3C676542214EE66600FCB533 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C676541214EE66600FCB533 /* AudioToolbox.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		3C676495214EE0B100FCB533 /* Mictest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mictest.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3C676498214EE0B100FCB533 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		3C676499214EE0B100FCB533 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		3C67649B214EE0B100FCB533 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		3C67649C214EE0B100FCB533 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		3C67649F214EE0B100FCB533 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		3C6764A1214EE0B100FCB533 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3C6764A4214EE0B100FCB533 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		3C6764A6214EE0B100FCB533 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3C6764A7214EE0B100FCB533 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		3C6764AE214EE0F300FCB533 /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; name = public; path = "../../../../../../source/bindings/objective-c/public"; sourceTree = "<group>"; };
+		3C6764B2214EE14B00FCB533 /* c_api */ = {isa = PBXFileReference; lastKnownFileType = folder; name = c_api; path = ../../../../../../source/core/c_api; sourceTree = "<group>"; };
+		3C6764B5214EE1F000FCB533 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		3C6764B7214EE22800FCB533 /* libfactory.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfactory.a; path = ../../../../../build_ios_debug/lib/libfactory.a; sourceTree = "<group>"; };
+		3C6764B8214EE22800FCB533 /* libsr.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libsr.a; path = ../../../../../build_ios_debug/lib/libsr.a; sourceTree = "<group>"; };
+		3C6764B9214EE22800FCB533 /* libcommon.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcommon.a; path = ../../../../../build_ios_debug/lib/libcommon.a; sourceTree = "<group>"; };
+		3C6764BA214EE22800FCB533 /* libaudio.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libaudio.a; path = ../../../../../build_ios_debug/lib/libaudio.a; sourceTree = "<group>"; };
+		3C6764BB214EE22800FCB533 /* libcarbon-mock.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libcarbon-mock.dylib"; path = "../../../../../build_ios_debug/lib/libcarbon-mock.dylib"; sourceTree = "<group>"; };
+		3C6764BC214EE22800FCB533 /* libparson.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libparson.a; path = ../../../../../build_ios_debug/lib/libparson.a; sourceTree = "<group>"; };
+		3C6764BD214EE22800FCB533 /* libaziotsharedutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libaziotsharedutil.a; path = ../../../../../build_ios_debug/lib/libaziotsharedutil.a; sourceTree = "<group>"; };
+		3C6764C5214EE24200FCB533 /* microphone_test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = microphone_test.h; path = ../../../shared/microphone_test.h; sourceTree = "<group>"; };
+		3C6764C6214EE24200FCB533 /* microphone_test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = microphone_test.m; path = ../../../shared/microphone_test.m; sourceTree = "<group>"; };
+		3C6764C8214EE4CB00FCB533 /* libusp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libusp.a; path = ../../../../../build_ios_simulator_debug/lib/libusp.a; sourceTree = "<group>"; };
+		3C6764CA214EE51E00FCB533 /* language_understanding_model.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = language_understanding_model.mm; path = "../../../../../../source/bindings/objective-c/src/language_understanding_model.mm"; sourceTree = "<group>"; };
+		3C6764CB214EE51E00FCB533 /* audio_stream_format_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = audio_stream_format_private.h; path = "../../../../../../source/bindings/objective-c/src/audio_stream_format_private.h"; sourceTree = "<group>"; };
+		3C6764CC214EE51E00FCB533 /* audio_stream.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = audio_stream.mm; path = "../../../../../../source/bindings/objective-c/src/audio_stream.mm"; sourceTree = "<group>"; };
+		3C6764CD214EE51E00FCB533 /* recognition_result.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = recognition_result.mm; path = "../../../../../../source/bindings/objective-c/src/recognition_result.mm"; sourceTree = "<group>"; };
+		3C6764CE214EE51F00FCB533 /* speech_recognizer_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_recognizer_private.h; path = "../../../../../../source/bindings/objective-c/src/speech_recognizer_private.h"; sourceTree = "<group>"; };
+		3C6764CF214EE51F00FCB533 /* language_understanding_model_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = language_understanding_model_private.h; path = "../../../../../../source/bindings/objective-c/src/language_understanding_model_private.h"; sourceTree = "<group>"; };
+		3C6764D0214EE51F00FCB533 /* util.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = util.mm; path = "../../../../../../source/bindings/objective-c/src/util.mm"; sourceTree = "<group>"; };
+		3C6764D1214EE51F00FCB533 /* speech_recognition_event_args.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_recognition_event_args.mm; path = "../../../../../../source/bindings/objective-c/src/speech_recognition_event_args.mm"; sourceTree = "<group>"; };
+		3C6764D2214EE51F00FCB533 /* nsstring_stdstring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nsstring_stdstring.h; path = "../../../../../../source/bindings/objective-c/src/nsstring_stdstring.h"; sourceTree = "<group>"; };
+		3C6764D3214EE51F00FCB533 /* translation_recognizer_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = translation_recognizer_private.h; path = "../../../../../../source/bindings/objective-c/src/translation_recognizer_private.h"; sourceTree = "<group>"; };
+		3C6764D4214EE51F00FCB533 /* translation_recognizer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = translation_recognizer.mm; path = "../../../../../../source/bindings/objective-c/src/translation_recognizer.mm"; sourceTree = "<group>"; };
+		3C6764D5214EE51F00FCB533 /* intent_recognizer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = intent_recognizer.mm; path = "../../../../../../source/bindings/objective-c/src/intent_recognizer.mm"; sourceTree = "<group>"; };
+		3C6764D6214EE51F00FCB533 /* speech_recognition_result_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_recognition_result_private.h; path = "../../../../../../source/bindings/objective-c/src/speech_recognition_result_private.h"; sourceTree = "<group>"; };
+		3C6764D7214EE51F00FCB533 /* speech_recognizer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_recognizer.mm; path = "../../../../../../source/bindings/objective-c/src/speech_recognizer.mm"; sourceTree = "<group>"; };
+		3C6764D8214EE51F00FCB533 /* recognizer_property_collection.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = recognizer_property_collection.mm; path = "../../../../../../source/bindings/objective-c/src/recognizer_property_collection.mm"; sourceTree = "<group>"; };
+		3C6764D9214EE51F00FCB533 /* intent_recognition_result_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = intent_recognition_result_private.h; path = "../../../../../../source/bindings/objective-c/src/intent_recognition_result_private.h"; sourceTree = "<group>"; };
+		3C6764DA214EE51F00FCB533 /* recognition_result_property_collection.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = recognition_result_property_collection.mm; path = "../../../../../../source/bindings/objective-c/src/recognition_result_property_collection.mm"; sourceTree = "<group>"; };
+		3C6764DB214EE51F00FCB533 /* recognizer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = recognizer.mm; path = "../../../../../../source/bindings/objective-c/src/recognizer.mm"; sourceTree = "<group>"; };
+		3C6764DC214EE52000FCB533 /* recognizer_property_collection_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = recognizer_property_collection_private.h; path = "../../../../../../source/bindings/objective-c/src/recognizer_property_collection_private.h"; sourceTree = "<group>"; };
+		3C6764DD214EE52000FCB533 /* nsstring_stdstring.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = nsstring_stdstring.mm; path = "../../../../../../source/bindings/objective-c/src/nsstring_stdstring.mm"; sourceTree = "<group>"; };
+		3C6764DE214EE52000FCB533 /* recognition_event_args.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = recognition_event_args.mm; path = "../../../../../../source/bindings/objective-c/src/recognition_event_args.mm"; sourceTree = "<group>"; };
+		3C6764DF214EE52000FCB533 /* translation_synthesis_result_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = translation_synthesis_result_private.h; path = "../../../../../../source/bindings/objective-c/src/translation_synthesis_result_private.h"; sourceTree = "<group>"; };
+		3C6764E0214EE52000FCB533 /* intent_recognition_event_args.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = intent_recognition_event_args.mm; path = "../../../../../../source/bindings/objective-c/src/intent_recognition_event_args.mm"; sourceTree = "<group>"; };
+		3C6764E1214EE52000FCB533 /* recognition_event_args_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = recognition_event_args_private.h; path = "../../../../../../source/bindings/objective-c/src/recognition_event_args_private.h"; sourceTree = "<group>"; };
+		3C6764E2214EE52000FCB533 /* speech_config_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_config_private.h; path = "../../../../../../source/bindings/objective-c/src/speech_config_private.h"; sourceTree = "<group>"; };
+		3C6764E3214EE52000FCB533 /* translation_text_result.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = translation_text_result.mm; path = "../../../../../../source/bindings/objective-c/src/translation_text_result.mm"; sourceTree = "<group>"; };
+		3C6764E4214EE52000FCB533 /* translation_synthesis_result_event_args.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = translation_synthesis_result_event_args.mm; path = "../../../../../../source/bindings/objective-c/src/translation_synthesis_result_event_args.mm"; sourceTree = "<group>"; };
+		3C6764E5214EE52000FCB533 /* speechapi_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speechapi_private.h; path = "../../../../../../source/bindings/objective-c/src/speechapi_private.h"; sourceTree = "<group>"; };
+		3C6764E6214EE52100FCB533 /* audio_stream_format.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = audio_stream_format.mm; path = "../../../../../../source/bindings/objective-c/src/audio_stream_format.mm"; sourceTree = "<group>"; };
+		3C6764E7214EE52100FCB533 /* audio_stream_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = audio_stream_private.h; path = "../../../../../../source/bindings/objective-c/src/audio_stream_private.h"; sourceTree = "<group>"; };
+		3C6764E8214EE52100FCB533 /* translation_text_result_event_args.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = translation_text_result_event_args.mm; path = "../../../../../../source/bindings/objective-c/src/translation_text_result_event_args.mm"; sourceTree = "<group>"; };
+		3C6764E9214EE52100FCB533 /* speech_recognition_event_args_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_recognition_event_args_private.h; path = "../../../../../../source/bindings/objective-c/src/speech_recognition_event_args_private.h"; sourceTree = "<group>"; };
+		3C6764EA214EE52100FCB533 /* session_event_args.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = session_event_args.mm; path = "../../../../../../source/bindings/objective-c/src/session_event_args.mm"; sourceTree = "<group>"; };
+		3C6764EB214EE52100FCB533 /* translation_text_result_event_args_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = translation_text_result_event_args_private.h; path = "../../../../../../source/bindings/objective-c/src/translation_text_result_event_args_private.h"; sourceTree = "<group>"; };
+		3C6764EC214EE52100FCB533 /* translation_text_result_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = translation_text_result_private.h; path = "../../../../../../source/bindings/objective-c/src/translation_text_result_private.h"; sourceTree = "<group>"; };
+		3C6764ED214EE52100FCB533 /* session_event_args_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = session_event_args_private.h; path = "../../../../../../source/bindings/objective-c/src/session_event_args_private.h"; sourceTree = "<group>"; };
+		3C6764EE214EE52100FCB533 /* common_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = common_private.h; path = "../../../../../../source/bindings/objective-c/src/common_private.h"; sourceTree = "<group>"; };
+		3C6764EF214EE52100FCB533 /* speech_config.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_config.mm; path = "../../../../../../source/bindings/objective-c/src/speech_config.mm"; sourceTree = "<group>"; };
+		3C6764F0214EE52200FCB533 /* translation_synthesis_result_event_args_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = translation_synthesis_result_event_args_private.h; path = "../../../../../../source/bindings/objective-c/src/translation_synthesis_result_event_args_private.h"; sourceTree = "<group>"; };
+		3C6764F1214EE52200FCB533 /* speech_translation_config_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = speech_translation_config_private.h; path = "../../../../../../source/bindings/objective-c/src/speech_translation_config_private.h"; sourceTree = "<group>"; };
+		3C6764F2214EE52200FCB533 /* intent_recognizer_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = intent_recognizer_private.h; path = "../../../../../../source/bindings/objective-c/src/intent_recognizer_private.h"; sourceTree = "<group>"; };
+		3C6764F3214EE52200FCB533 /* recognizer_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = recognizer_private.h; path = "../../../../../../source/bindings/objective-c/src/recognizer_private.h"; sourceTree = "<group>"; };
+		3C6764F4214EE52200FCB533 /* util_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = util_private.h; path = "../../../../../../source/bindings/objective-c/src/util_private.h"; sourceTree = "<group>"; };
+		3C6764F5214EE52200FCB533 /* translation_synthesis_result.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = translation_synthesis_result.mm; path = "../../../../../../source/bindings/objective-c/src/translation_synthesis_result.mm"; sourceTree = "<group>"; };
+		3C6764F6214EE52200FCB533 /* speech_translation_config.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_translation_config.mm; path = "../../../../../../source/bindings/objective-c/src/speech_translation_config.mm"; sourceTree = "<group>"; };
+		3C6764F7214EE52200FCB533 /* audio_config_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = audio_config_private.h; path = "../../../../../../source/bindings/objective-c/src/audio_config_private.h"; sourceTree = "<group>"; };
+		3C6764F8214EE52200FCB533 /* audio_config.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = audio_config.mm; path = "../../../../../../source/bindings/objective-c/src/audio_config.mm"; sourceTree = "<group>"; };
+		3C6764F9214EE52200FCB533 /* recognition_result_property_collection_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = recognition_result_property_collection_private.h; path = "../../../../../../source/bindings/objective-c/src/recognition_result_property_collection_private.h"; sourceTree = "<group>"; };
+		3C6764FA214EE52200FCB533 /* speech_recognition_result.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_recognition_result.mm; path = "../../../../../../source/bindings/objective-c/src/speech_recognition_result.mm"; sourceTree = "<group>"; };
+		3C6764FB214EE52300FCB533 /* intent_recognition_result.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = intent_recognition_result.mm; path = "../../../../../../source/bindings/objective-c/src/intent_recognition_result.mm"; sourceTree = "<group>"; };
+		3C6764FC214EE52300FCB533 /* recognition_result_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = recognition_result_private.h; path = "../../../../../../source/bindings/objective-c/src/recognition_result_private.h"; sourceTree = "<group>"; };
+		3C6764FD214EE52300FCB533 /* intent_recognition_event_args_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = intent_recognition_event_args_private.h; path = "../../../../../../source/bindings/objective-c/src/intent_recognition_event_args_private.h"; sourceTree = "<group>"; };
+		3C676517214EE58800FCB533 /* event_helpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = event_helpers.h; path = ../../../../../../source/core/c_api/event_helpers.h; sourceTree = "<group>"; };
+		3C676518214EE58800FCB533 /* speechapi_c_keyword_recognition_model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_keyword_recognition_model.cpp; path = ../../../../../../source/core/c_api/speechapi_c_keyword_recognition_model.cpp; sourceTree = "<group>"; };
+		3C676519214EE58800FCB533 /* speechapi_c_audio_stream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_audio_stream.cpp; path = ../../../../../../source/core/c_api/speechapi_c_audio_stream.cpp; sourceTree = "<group>"; };
+		3C67651A214EE58800FCB533 /* speechapi_c_translation_recognizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_translation_recognizer.cpp; path = ../../../../../../source/core/c_api/speechapi_c_translation_recognizer.cpp; sourceTree = "<group>"; };
+		3C67651B214EE58800FCB533 /* event_helpers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = event_helpers.cpp; path = ../../../../../../source/core/c_api/event_helpers.cpp; sourceTree = "<group>"; };
+		3C67651C214EE58800FCB533 /* speechapi_c_audio_config.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_audio_config.cpp; path = ../../../../../../source/core/c_api/speechapi_c_audio_config.cpp; sourceTree = "<group>"; };
+		3C67651D214EE58800FCB533 /* speechapi_c_error.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_error.cpp; path = ../../../../../../source/core/c_api/speechapi_c_error.cpp; sourceTree = "<group>"; };
+		3C67651E214EE58900FCB533 /* speechapi_c_factory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_factory.cpp; path = ../../../../../../source/core/c_api/speechapi_c_factory.cpp; sourceTree = "<group>"; };
+		3C67651F214EE58900FCB533 /* speechapi_c_language_understanding_model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_language_understanding_model.cpp; path = ../../../../../../source/core/c_api/speechapi_c_language_understanding_model.cpp; sourceTree = "<group>"; };
+		3C676520214EE58900FCB533 /* speechapi_c_intent_recognizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_intent_recognizer.cpp; path = ../../../../../../source/core/c_api/speechapi_c_intent_recognizer.cpp; sourceTree = "<group>"; };
+		3C676521214EE58900FCB533 /* speechapi_c_property_bag.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_property_bag.cpp; path = ../../../../../../source/core/c_api/speechapi_c_property_bag.cpp; sourceTree = "<group>"; };
+		3C676522214EE58900FCB533 /* speechapi_c_recognizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_recognizer.cpp; path = ../../../../../../source/core/c_api/speechapi_c_recognizer.cpp; sourceTree = "<group>"; };
+		3C676523214EE58900FCB533 /* speechapi_c_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_result.cpp; path = ../../../../../../source/core/c_api/speechapi_c_result.cpp; sourceTree = "<group>"; };
+		3C676524214EE58900FCB533 /* speechapi_c_speech_config.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_speech_config.cpp; path = ../../../../../../source/core/c_api/speechapi_c_speech_config.cpp; sourceTree = "<group>"; };
+		3C676525214EE58900FCB533 /* speechapi_c_translation_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_translation_result.cpp; path = ../../../../../../source/core/c_api/speechapi_c_translation_result.cpp; sourceTree = "<group>"; };
+		3C676526214EE58900FCB533 /* handle_helpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = handle_helpers.h; path = ../../../../../../source/core/c_api/handle_helpers.h; sourceTree = "<group>"; };
+		3C676527214EE58900FCB533 /* speechapi_c_intent_result.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_intent_result.cpp; path = ../../../../../../source/core/c_api/speechapi_c_intent_result.cpp; sourceTree = "<group>"; };
+		3C676528214EE58A00FCB533 /* speechapi_c_audio_stream_format.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_audio_stream_format.cpp; path = ../../../../../../source/core/c_api/speechapi_c_audio_stream_format.cpp; sourceTree = "<group>"; };
+		3C676529214EE58A00FCB533 /* speechapi_c_session.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_session.cpp; path = ../../../../../../source/core/c_api/speechapi_c_session.cpp; sourceTree = "<group>"; };
+		3C67652A214EE58A00FCB533 /* speechapi_c_intent_trigger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speechapi_c_intent_trigger.cpp; path = ../../../../../../source/core/c_api/speechapi_c_intent_trigger.cpp; sourceTree = "<group>"; };
+		3C67653D214EE59F00FCB533 /* stdafx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stdafx.h; path = ../../../../../../source/core/c_api/stdafx.h; sourceTree = "<group>"; };
+		3C67653E214EE59F00FCB533 /* try_catch_helpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = try_catch_helpers.h; path = ../../../../../../source/core/c_api/try_catch_helpers.h; sourceTree = "<group>"; };
+		3C67653F214EE5A000FCB533 /* stdafx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = stdafx.cpp; path = ../../../../../../source/core/c_api/stdafx.cpp; sourceTree = "<group>"; };
+		3C676541214EE66600FCB533 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3C676492214EE0B100FCB533 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3C676542214EE66600FCB533 /* AudioToolbox.framework in Frameworks */,
+				3C6764C9214EE4CB00FCB533 /* libusp.a in Frameworks */,
+				3C6764BE214EE22800FCB533 /* libfactory.a in Frameworks */,
+				3C6764BF214EE22800FCB533 /* libsr.a in Frameworks */,
+				3C6764C0214EE22800FCB533 /* libcommon.a in Frameworks */,
+				3C6764C1214EE22800FCB533 /* libaudio.a in Frameworks */,
+				3C6764C3214EE22800FCB533 /* libparson.a in Frameworks */,
+				3C6764C4214EE22800FCB533 /* libaziotsharedutil.a in Frameworks */,
+				3C6764B6214EE1F000FCB533 /* CFNetwork.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3C67648C214EE0B100FCB533 = {
+			isa = PBXGroup;
+			children = (
+				3C676497214EE0B100FCB533 /* Mictest */,
+				3C676496214EE0B100FCB533 /* Products */,
+				3C6764B4214EE1F000FCB533 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		3C676496214EE0B100FCB533 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3C676495214EE0B100FCB533 /* Mictest.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3C676497214EE0B100FCB533 /* Mictest */ = {
+			isa = PBXGroup;
+			children = (
+				3C67653F214EE5A000FCB533 /* stdafx.cpp */,
+				3C67653D214EE59F00FCB533 /* stdafx.h */,
+				3C67653E214EE59F00FCB533 /* try_catch_helpers.h */,
+				3C67651B214EE58800FCB533 /* event_helpers.cpp */,
+				3C676517214EE58800FCB533 /* event_helpers.h */,
+				3C676526214EE58900FCB533 /* handle_helpers.h */,
+				3C67651C214EE58800FCB533 /* speechapi_c_audio_config.cpp */,
+				3C676528214EE58A00FCB533 /* speechapi_c_audio_stream_format.cpp */,
+				3C676519214EE58800FCB533 /* speechapi_c_audio_stream.cpp */,
+				3C67651D214EE58800FCB533 /* speechapi_c_error.cpp */,
+				3C67651E214EE58900FCB533 /* speechapi_c_factory.cpp */,
+				3C676520214EE58900FCB533 /* speechapi_c_intent_recognizer.cpp */,
+				3C676527214EE58900FCB533 /* speechapi_c_intent_result.cpp */,
+				3C67652A214EE58A00FCB533 /* speechapi_c_intent_trigger.cpp */,
+				3C676518214EE58800FCB533 /* speechapi_c_keyword_recognition_model.cpp */,
+				3C67651F214EE58900FCB533 /* speechapi_c_language_understanding_model.cpp */,
+				3C676521214EE58900FCB533 /* speechapi_c_property_bag.cpp */,
+				3C676522214EE58900FCB533 /* speechapi_c_recognizer.cpp */,
+				3C676523214EE58900FCB533 /* speechapi_c_result.cpp */,
+				3C676529214EE58A00FCB533 /* speechapi_c_session.cpp */,
+				3C676524214EE58900FCB533 /* speechapi_c_speech_config.cpp */,
+				3C67651A214EE58800FCB533 /* speechapi_c_translation_recognizer.cpp */,
+				3C676525214EE58900FCB533 /* speechapi_c_translation_result.cpp */,
+				3C6764F7214EE52200FCB533 /* audio_config_private.h */,
+				3C6764F8214EE52200FCB533 /* audio_config.mm */,
+				3C6764CB214EE51E00FCB533 /* audio_stream_format_private.h */,
+				3C6764E6214EE52100FCB533 /* audio_stream_format.mm */,
+				3C6764E7214EE52100FCB533 /* audio_stream_private.h */,
+				3C6764CC214EE51E00FCB533 /* audio_stream.mm */,
+				3C6764EE214EE52100FCB533 /* common_private.h */,
+				3C6764FD214EE52300FCB533 /* intent_recognition_event_args_private.h */,
+				3C6764E0214EE52000FCB533 /* intent_recognition_event_args.mm */,
+				3C6764D9214EE51F00FCB533 /* intent_recognition_result_private.h */,
+				3C6764FB214EE52300FCB533 /* intent_recognition_result.mm */,
+				3C6764F2214EE52200FCB533 /* intent_recognizer_private.h */,
+				3C6764D5214EE51F00FCB533 /* intent_recognizer.mm */,
+				3C6764CF214EE51F00FCB533 /* language_understanding_model_private.h */,
+				3C6764CA214EE51E00FCB533 /* language_understanding_model.mm */,
+				3C6764D2214EE51F00FCB533 /* nsstring_stdstring.h */,
+				3C6764DD214EE52000FCB533 /* nsstring_stdstring.mm */,
+				3C6764E1214EE52000FCB533 /* recognition_event_args_private.h */,
+				3C6764DE214EE52000FCB533 /* recognition_event_args.mm */,
+				3C6764FC214EE52300FCB533 /* recognition_result_private.h */,
+				3C6764F9214EE52200FCB533 /* recognition_result_property_collection_private.h */,
+				3C6764DA214EE51F00FCB533 /* recognition_result_property_collection.mm */,
+				3C6764CD214EE51E00FCB533 /* recognition_result.mm */,
+				3C6764F3214EE52200FCB533 /* recognizer_private.h */,
+				3C6764DC214EE52000FCB533 /* recognizer_property_collection_private.h */,
+				3C6764D8214EE51F00FCB533 /* recognizer_property_collection.mm */,
+				3C6764DB214EE51F00FCB533 /* recognizer.mm */,
+				3C6764ED214EE52100FCB533 /* session_event_args_private.h */,
+				3C6764EA214EE52100FCB533 /* session_event_args.mm */,
+				3C6764E2214EE52000FCB533 /* speech_config_private.h */,
+				3C6764EF214EE52100FCB533 /* speech_config.mm */,
+				3C6764E9214EE52100FCB533 /* speech_recognition_event_args_private.h */,
+				3C6764D1214EE51F00FCB533 /* speech_recognition_event_args.mm */,
+				3C6764D6214EE51F00FCB533 /* speech_recognition_result_private.h */,
+				3C6764FA214EE52200FCB533 /* speech_recognition_result.mm */,
+				3C6764CE214EE51F00FCB533 /* speech_recognizer_private.h */,
+				3C6764D7214EE51F00FCB533 /* speech_recognizer.mm */,
+				3C6764F1214EE52200FCB533 /* speech_translation_config_private.h */,
+				3C6764F6214EE52200FCB533 /* speech_translation_config.mm */,
+				3C6764E5214EE52000FCB533 /* speechapi_private.h */,
+				3C6764D3214EE51F00FCB533 /* translation_recognizer_private.h */,
+				3C6764D4214EE51F00FCB533 /* translation_recognizer.mm */,
+				3C6764F0214EE52200FCB533 /* translation_synthesis_result_event_args_private.h */,
+				3C6764E4214EE52000FCB533 /* translation_synthesis_result_event_args.mm */,
+				3C6764DF214EE52000FCB533 /* translation_synthesis_result_private.h */,
+				3C6764F5214EE52200FCB533 /* translation_synthesis_result.mm */,
+				3C6764EB214EE52100FCB533 /* translation_text_result_event_args_private.h */,
+				3C6764E8214EE52100FCB533 /* translation_text_result_event_args.mm */,
+				3C6764EC214EE52100FCB533 /* translation_text_result_private.h */,
+				3C6764E3214EE52000FCB533 /* translation_text_result.mm */,
+				3C6764F4214EE52200FCB533 /* util_private.h */,
+				3C6764D0214EE51F00FCB533 /* util.mm */,
+				3C6764C5214EE24200FCB533 /* microphone_test.h */,
+				3C6764C6214EE24200FCB533 /* microphone_test.m */,
+				3C6764B2214EE14B00FCB533 /* c_api */,
+				3C6764AE214EE0F300FCB533 /* public */,
+				3C676498214EE0B100FCB533 /* AppDelegate.h */,
+				3C676499214EE0B100FCB533 /* AppDelegate.m */,
+				3C67649B214EE0B100FCB533 /* ViewController.h */,
+				3C67649C214EE0B100FCB533 /* ViewController.m */,
+				3C67649E214EE0B100FCB533 /* Main.storyboard */,
+				3C6764A1214EE0B100FCB533 /* Assets.xcassets */,
+				3C6764A3214EE0B100FCB533 /* LaunchScreen.storyboard */,
+				3C6764A6214EE0B100FCB533 /* Info.plist */,
+				3C6764A7214EE0B100FCB533 /* main.m */,
+			);
+			path = Mictest;
+			sourceTree = "<group>";
+		};
+		3C6764B4214EE1F000FCB533 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				3C676541214EE66600FCB533 /* AudioToolbox.framework */,
+				3C6764C8214EE4CB00FCB533 /* libusp.a */,
+				3C6764BA214EE22800FCB533 /* libaudio.a */,
+				3C6764BD214EE22800FCB533 /* libaziotsharedutil.a */,
+				3C6764BB214EE22800FCB533 /* libcarbon-mock.dylib */,
+				3C6764B9214EE22800FCB533 /* libcommon.a */,
+				3C6764B7214EE22800FCB533 /* libfactory.a */,
+				3C6764BC214EE22800FCB533 /* libparson.a */,
+				3C6764B8214EE22800FCB533 /* libsr.a */,
+				3C6764B5214EE1F000FCB533 /* CFNetwork.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3C676494214EE0B100FCB533 /* Mictest */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3C6764AB214EE0B100FCB533 /* Build configuration list for PBXNativeTarget "Mictest" */;
+			buildPhases = (
+				3C676491214EE0B100FCB533 /* Sources */,
+				3C676492214EE0B100FCB533 /* Frameworks */,
+				3C676493214EE0B100FCB533 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Mictest;
+			productName = Mictest;
+			productReference = 3C676495214EE0B100FCB533 /* Mictest.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3C67648D214EE0B100FCB533 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0940;
+				ORGANIZATIONNAME = MSFT;
+				TargetAttributes = {
+					3C676494214EE0B100FCB533 = {
+						CreatedOnToolsVersion = 9.4.1;
+					};
+				};
+			};
+			buildConfigurationList = 3C676490214EE0B100FCB533 /* Build configuration list for PBXProject "Mictest" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 3C67648C214EE0B100FCB533;
+			productRefGroup = 3C676496214EE0B100FCB533 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3C676494214EE0B100FCB533 /* Mictest */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3C676493214EE0B100FCB533 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3C6764A5214EE0B100FCB533 /* LaunchScreen.storyboard in Resources */,
+				3C6764AF214EE0F300FCB533 /* public in Resources */,
+				3C6764A2214EE0B100FCB533 /* Assets.xcassets in Resources */,
+				3C6764B3214EE14B00FCB533 /* c_api in Resources */,
+				3C6764A0214EE0B100FCB533 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3C676491214EE0B100FCB533 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3C67649D214EE0B100FCB533 /* ViewController.m in Sources */,
+				3C676530214EE58A00FCB533 /* speechapi_c_error.cpp in Sources */,
+				3C6764A8214EE0B100FCB533 /* main.m in Sources */,
+				3C67649A214EE0B100FCB533 /* AppDelegate.m in Sources */,
+				3C676507214EE52300FCB533 /* recognition_result_property_collection.mm in Sources */,
+				3C676514214EE52300FCB533 /* audio_config.mm in Sources */,
+				3C676508214EE52300FCB533 /* recognizer.mm in Sources */,
+				3C676534214EE58A00FCB533 /* speechapi_c_property_bag.cpp in Sources */,
+				3C676532214EE58A00FCB533 /* speechapi_c_language_understanding_model.cpp in Sources */,
+				3C676505214EE52300FCB533 /* speech_recognizer.mm in Sources */,
+				3C676509214EE52300FCB533 /* nsstring_stdstring.mm in Sources */,
+				3C676516214EE52300FCB533 /* intent_recognition_result.mm in Sources */,
+				3C676504214EE52300FCB533 /* intent_recognizer.mm in Sources */,
+				3C676512214EE52300FCB533 /* translation_synthesis_result.mm in Sources */,
+				3C676500214EE52300FCB533 /* recognition_result.mm in Sources */,
+				3C67652B214EE58A00FCB533 /* speechapi_c_keyword_recognition_model.cpp in Sources */,
+				3C67650D214EE52300FCB533 /* translation_synthesis_result_event_args.mm in Sources */,
+				3C67652E214EE58A00FCB533 /* event_helpers.cpp in Sources */,
+				3C67650C214EE52300FCB533 /* translation_text_result.mm in Sources */,
+				3C6764FE214EE52300FCB533 /* language_understanding_model.mm in Sources */,
+				3C67652D214EE58A00FCB533 /* speechapi_c_translation_recognizer.cpp in Sources */,
+				3C676540214EE5A000FCB533 /* stdafx.cpp in Sources */,
+				3C676536214EE58A00FCB533 /* speechapi_c_result.cpp in Sources */,
+				3C676531214EE58A00FCB533 /* speechapi_c_factory.cpp in Sources */,
+				3C67650B214EE52300FCB533 /* intent_recognition_event_args.mm in Sources */,
+				3C676501214EE52300FCB533 /* util.mm in Sources */,
+				3C67650E214EE52300FCB533 /* audio_stream_format.mm in Sources */,
+				3C67652F214EE58A00FCB533 /* speechapi_c_audio_config.cpp in Sources */,
+				3C67653C214EE58A00FCB533 /* speechapi_c_intent_trigger.cpp in Sources */,
+				3C67652C214EE58A00FCB533 /* speechapi_c_audio_stream.cpp in Sources */,
+				3C676510214EE52300FCB533 /* session_event_args.mm in Sources */,
+				3C676539214EE58A00FCB533 /* speechapi_c_intent_result.cpp in Sources */,
+				3C676502214EE52300FCB533 /* speech_recognition_event_args.mm in Sources */,
+				3C676537214EE58A00FCB533 /* speechapi_c_speech_config.cpp in Sources */,
+				3C676533214EE58A00FCB533 /* speechapi_c_intent_recognizer.cpp in Sources */,
+				3C676535214EE58A00FCB533 /* speechapi_c_recognizer.cpp in Sources */,
+				3C676538214EE58A00FCB533 /* speechapi_c_translation_result.cpp in Sources */,
+				3C67650A214EE52300FCB533 /* recognition_event_args.mm in Sources */,
+				3C67650F214EE52300FCB533 /* translation_text_result_event_args.mm in Sources */,
+				3C676503214EE52300FCB533 /* translation_recognizer.mm in Sources */,
+				3C676515214EE52300FCB533 /* speech_recognition_result.mm in Sources */,
+				3C67653A214EE58A00FCB533 /* speechapi_c_audio_stream_format.cpp in Sources */,
+				3C676506214EE52300FCB533 /* recognizer_property_collection.mm in Sources */,
+				3C676511214EE52300FCB533 /* speech_config.mm in Sources */,
+				3C6764FF214EE52300FCB533 /* audio_stream.mm in Sources */,
+				3C67653B214EE58A00FCB533 /* speechapi_c_session.cpp in Sources */,
+				3C6764C7214EE24200FCB533 /* microphone_test.m in Sources */,
+				3C676513214EE52300FCB533 /* speech_translation_config.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		3C67649E214EE0B100FCB533 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3C67649F214EE0B100FCB533 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		3C6764A3214EE0B100FCB533 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3C6764A4214EE0B100FCB533 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		3C6764A9214EE0B100FCB533 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		3C6764AA214EE0B100FCB533 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		3C6764AC214EE0B100FCB533 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../../../../source/bindings/objective-c/public",
+					"$(SRCROOT)/../../../../../source/public/cxx_api",
+					"$(SRCROOT)/../../../../../source/public/c_api",
+					"$(SRCROOT)/../../../../../source/core/common/include",
+					"$(SRCROOT)/../../../../../source/core/include",
+					"$(SRCROOT)/../../../../../external/azure-c-shared-utility/inc",
+				);
+				INFOPLIST_FILE = Mictest/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../../../../../build_ios_device_debug/lib";
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.cognitiveservices.Mictest;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3C6764AD214EE0B100FCB533 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../../../../source/bindings/objective-c/public",
+					"$(SRCROOT)/../../../../../source/public/cxx_api",
+					"$(SRCROOT)/../../../../../source/public/c_api",
+					"$(SRCROOT)/../../../../../source/core/common/include",
+					"$(SRCROOT)/../../../../../source/core/include",
+					"$(SRCROOT)/../../../../../external/azure-c-shared-utility/inc",
+				);
+				INFOPLIST_FILE = Mictest/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../../../../../build_ios_device_debug/lib";
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.cognitiveservices.Mictest;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3C676490214EE0B100FCB533 /* Build configuration list for PBXProject "Mictest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3C6764A9214EE0B100FCB533 /* Debug */,
+				3C6764AA214EE0B100FCB533 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3C6764AB214EE0B100FCB533 /* Build configuration list for PBXNativeTarget "Mictest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3C6764AC214EE0B100FCB533 /* Debug */,
+				3C6764AD214EE0B100FCB533 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3C67648D214EE0B100FCB533 /* Project object */;
+}

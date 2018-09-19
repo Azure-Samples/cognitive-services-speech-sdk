@@ -52,8 +52,10 @@ void MicrophonePumpBase::StartPump(SinkType processor)
         m_sink = std::move(processor);
     }
 
+    SPX_DBG_TRACE_VERBOSE("%s starting audio input", __FUNCTION__);
     auto result = audio_input_start(m_audioHandle);
     SPX_IFTRUE_THROW_HR(result != AUDIO_RESULT_OK, SPXERR_MIC_ERROR);
+    SPX_DBG_TRACE_VERBOSE("%s audio input started!", __FUNCTION__);
 
     unique_lock<mutex> lock(m_mutex);
     // wait for audio capture thread finishing getAudioReady.
