@@ -25,10 +25,4 @@
     return [NSString stringWithString:resultImpl->Properties.GetProperty([name string])];
 }
 
--(void)setPropertyTo:(NSString *)value byName:(NSString *)name
-{
-    resultImpl->Properties.SetProperty([name string], [value string]);
-}
-
-
 @end

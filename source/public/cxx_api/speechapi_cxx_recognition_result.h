@@ -81,7 +81,7 @@ public:
     /// <summary>
     /// Collection of additional RecognitionResult properties.
     /// </summary>
-    PropertyCollection& Properties;
+    const PropertyCollection& Properties;
 
     /// <summary>
     /// Internal. Explicit conversion operator.

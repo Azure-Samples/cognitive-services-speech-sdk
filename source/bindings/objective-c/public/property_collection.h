@@ -26,6 +26,7 @@
   * @param name The property name.
   * @param value The value of the property.
   */
+@optional
 -(void)setPropertyTo:(NSString *)value byName:(NSString *)name;
 
 // -(void)setPropertyTo:(NSString *)value byId:(SpeechPropertyId)propertyID;

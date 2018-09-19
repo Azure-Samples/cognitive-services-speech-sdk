@@ -37,12 +37,12 @@ public:
         property_bag_set_string(m_propbag, -1, Utils::ToUTF8(propertyName).c_str(), Utils::ToUTF8(value).c_str());
     }
 
-    SPXSTRING GetProperty(PropertyId propertyID, const SPXSTRING& defaultValue = SPXSTRING())
+    SPXSTRING GetProperty(PropertyId propertyID, const SPXSTRING& defaultValue = SPXSTRING()) const
     {
         return Utils::ToSPXString(property_bag_get_string(m_propbag, static_cast<int>(propertyID), nullptr, Utils::ToUTF8(defaultValue).c_str()));
     }
 
-    SPXSTRING GetProperty(const SPXSTRING& propertyName, const SPXSTRING& defaultValue = SPXSTRING())
+    SPXSTRING GetProperty(const SPXSTRING& propertyName, const SPXSTRING& defaultValue = SPXSTRING()) const
     {
         return Utils::ToSPXString(property_bag_get_string(m_propbag, -1, Utils::ToUTF8(propertyName).c_str(), Utils::ToUTF8(defaultValue).c_str()));
     }
@@ -58,7 +58,6 @@ protected:
 private:
 
     DISABLE_COPY_AND_MOVE(PropertyCollection);
-
     SPXPROPERTYBAGHANDLE m_propbag;
 };
 
