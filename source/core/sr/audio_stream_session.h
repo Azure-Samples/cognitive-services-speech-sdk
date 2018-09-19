@@ -213,6 +213,7 @@ private:
 
     void InformAdapterSetFormatStarting(SPXWAVEFORMATEX* format);
     void InformAdapterSetFormatStopping(SessionState comingFromState);
+    void EncounteredEndOfStream();
 
     enum AdapterDoneProcessingAudio { Keyword, Speech };
     void AdapterCompletedSetFormatStop(AdapterDoneProcessingAudio doneAdapter);
@@ -276,6 +277,9 @@ private:
     ReadWriteMutex_Type m_stateMutex;
     RecognitionKind m_recoKind;
     SessionState m_sessionState;
+
+    bool m_sawEndOfStream;
+    bool m_fireEndOfStreamAtSessionStop;
 
     bool m_expectAdapterStartedTurn;
     bool m_expectAdapterStoppedTurn;

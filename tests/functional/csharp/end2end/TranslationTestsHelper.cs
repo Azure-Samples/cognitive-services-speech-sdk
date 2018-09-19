@@ -77,7 +77,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 var synthesisResultEvents = new List<EventArgs>();
 
                 string canceled = string.Empty;
-                recognizer.Canceled += (s, e) => { canceled = e.ToString(); };
+                recognizer.Canceled += (s, e) => { canceled = e.ErrorDetails; };
                 recognizer.Recognized += (s, e) =>
                 {
                     Console.WriteLine($"Received final result event: {e.ToString()}");
@@ -155,11 +155,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 };
 
                 string canceled = string.Empty;
-                recognizer.Canceled += (s, e) =>
-                {
-                    canceled = e.ToString();
-                    tcs.TrySetResult(false);
-                };
+                recognizer.Canceled += (s, e) => { canceled = e.ErrorDetails; };
 
                 await recognizer.StartContinuousRecognitionAsync();
                 await Task.WhenAny(tcs.Task, Task.Delay(timeout));

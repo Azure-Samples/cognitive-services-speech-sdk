@@ -35,6 +35,8 @@ CSpxAudioStreamSession::CSpxAudioStreamSession() :
     m_sessionId(PAL::CreateGuidWithoutDashes()),
     m_recoKind(RecognitionKind::Idle),
     m_sessionState(SessionState::Idle),
+    m_sawEndOfStream(false),
+    m_fireEndOfStreamAtSessionStop(false),
     m_expectAdapterStartedTurn(false),
     m_expectAdapterStoppedTurn(false),
     m_adapterAudioMuted(false),
@@ -179,6 +181,7 @@ void CSpxAudioStreamSession::SetFormat(SPXWAVEFORMATEX* pformat)
         SPX_DBG_TRACE_VERBOSE("%s: Now WaitForAdapterCompletedSetFormatStop (from ProcessingAudio) ...", __FUNCTION__);
         SPX_DBG_ASSERT(readLock.owns_lock()); // Keep the lock to call InformAdapterSetFormatStopping()...
         InformAdapterSetFormatStopping(SessionState::ProcessingAudio);
+        EncounteredEndOfStream();
     }
     else
     {
@@ -281,6 +284,11 @@ bool CSpxAudioStreamSession::ProcessNextAudio()
             }
 
             processor->ProcessAudio(item->data, (uint32_t)item->size);
+            if (item->size > 0)
+            {
+                m_fireEndOfStreamAtSessionStop = false;
+            }
+
             return true;
         }
     }
@@ -578,6 +586,7 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::WaitForRecognitio
     if (!m_recoAsyncResult) // Deal with the timeout condition...
     {
         SPX_DBG_TRACE_VERBOSE("%s: Timed out waiting for recognition result... ", __FUNCTION__);
+        m_fireEndOfStreamAtSessionStop = false;
 
         // We'll need to stop the pump ourselves...
         if (ChangeState(SessionState::ProcessingAudio, SessionState::StoppingPump))
@@ -622,6 +631,7 @@ void CSpxAudioStreamSession::FireSessionStartedEvent()
     SPX_DBG_TRACE_FUNCTION();
 
     FireEvent(EventType::SessionStart);
+    m_fireEndOfStreamAtSessionStop = true;
 }
 
 void CSpxAudioStreamSession::FireSessionStoppedEvent()
@@ -650,11 +660,14 @@ void CSpxAudioStreamSession::EnsureFireResultEvent()
 {
      // Since we're not holding a lock throughout this "ensure" method, a conflict is still possible.
      // That said, the conflict is benign, in the worst case we just created a throw away no-match result.
-     if (m_recoAsyncWaiting)
+     if (m_recoAsyncWaiting || (m_fireEndOfStreamAtSessionStop && m_sawEndOfStream))
      {
          auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
-         auto timeoutCanceledResult = factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, CancellationReason::Error, L"Timeout: no recognition result received.", 0, 0);
-         WaitForRecognition_Complete(timeoutCanceledResult);
+         auto result = (m_fireEndOfStreamAtSessionStop && m_sawEndOfStream)
+            ? factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, CancellationReason::EndOfStream, nullptr, 0, 0)
+            : factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, CancellationReason::Error, L"Timeout: no recognition result received.", 0, 0);
+         WaitForRecognition_Complete(result);
+         m_fireEndOfStreamAtSessionStop = false;
      }
 }
 
@@ -1427,6 +1440,15 @@ void CSpxAudioStreamSession::InformAdapterSetFormatStopping(SessionState comingF
             m_audioProcessor->SetFormat(nullptr);
         }
         m_adapterAudioMuted = false;
+    }
+}
+
+void CSpxAudioStreamSession::EncounteredEndOfStream()
+{
+    m_sawEndOfStream = true;
+    if (IsKind(RecognitionKind::Continuous))
+    {
+        m_fireEndOfStreamAtSessionStop = true;
     }
 }
 

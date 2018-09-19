@@ -149,15 +149,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 recognizer.Recognized += (s, e) =>
                 {
                     Console.WriteLine($"Result recognized {e.ToString()}");
-                    if (e.Result.Reason == ResultReason.Canceled)
-                    {
-                        Console.WriteLine($"Received cancelled result {e.Result.ToString()}, exiting");
-                        taskSource.SetResult(false);
-                    }
-                    else
-                    {
-                        results.Add(e.Result);
-                    }
+                    results.Add(e.Result);
                 };
 
                 recognizer.SessionStarted += (s, e) =>
@@ -175,7 +167,6 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 recognizer.Canceled += (s, e) =>
                 {
                     Console.WriteLine($"Received cancel event {e.ToString()}, exiting");
-                    taskSource.SetResult(false);
                 };
 
                 await recognizer.StartContinuousRecognitionAsync();

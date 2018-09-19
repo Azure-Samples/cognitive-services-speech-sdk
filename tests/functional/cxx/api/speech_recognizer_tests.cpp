@@ -337,6 +337,102 @@ TEST_CASE("Speech Recognizer basics", "[api][cxx]")
         SPXTEST_REQUIRE(!result->Text.empty());
     }
 
+    SPXTEST_SECTION("Canceled/EndOfStream works")
+    {
+        SPXTEST_REQUIRE(exists(PAL::ToWString(input_file)));
+
+        auto sc = !Config::Endpoint.empty() ? SpeechConfig::FromEndpoint(Config::Endpoint, Keys::Speech) : SpeechConfig::FromSubscription(Keys::Speech, Config::Region);
+        auto audioConfig = AudioConfig::FromWavFileInput(input_file);
+        auto recognizer = SpeechRecognizer::FromConfig(sc, audioConfig);
+
+        WHEN("using RecognizeOnceAsync() result")
+        {
+            auto result = recognizer->RecognizeOnceAsync().get();
+            SPXTEST_REQUIRE(result != nullptr);
+            SPXTEST_REQUIRE(!result->Text.empty());
+            SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+
+            result = recognizer->RecognizeOnceAsync().get();
+            SPXTEST_REQUIRE(result != nullptr);
+            SPXTEST_REQUIRE(result->Text.empty());
+            SPXTEST_REQUIRE(result->Reason == ResultReason::Canceled);
+
+            auto cancellation = CancellationDetails::FromResult(result);
+            SPXTEST_REQUIRE(cancellation != nullptr);
+            SPXTEST_REQUIRE(cancellation->ErrorDetails.empty());
+            SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::EndOfStream);
+        }
+
+        WHEN("using RecognizeOnceAsync() and SpeechRecognitionCanceledEventArgs e.Result")
+        {
+            mutex mtx;
+            condition_variable cv;
+
+            auto sessionStartedCount = 0;
+            auto recognizedCount = 0;
+            auto endOfStreamCount = 0;
+            auto sessionStoppedCount = 0;
+
+            recognizer->Recognized.Connect([&](const SpeechRecognitionEventArgs& e) {
+
+                SPXTEST_REQUIRE(sessionStartedCount == 1);
+                SPXTEST_REQUIRE(recognizedCount == 0);
+                SPXTEST_REQUIRE(endOfStreamCount == 0);
+                SPXTEST_REQUIRE(sessionStoppedCount == 0);
+
+                recognizedCount++;
+
+                auto result = e.Result;
+                SPXTEST_REQUIRE(!result->Text.empty());
+                SPXTEST_REQUIRE(result->Reason == ResultReason::RecognizedSpeech);
+            });
+
+            recognizer->Canceled.Connect([&](const SpeechRecognitionCanceledEventArgs& e) {
+
+                SPXTEST_REQUIRE(sessionStartedCount == 2);
+                SPXTEST_REQUIRE(recognizedCount == 1);
+                SPXTEST_REQUIRE(endOfStreamCount == 0);
+                SPXTEST_REQUIRE(sessionStoppedCount == 1);
+
+                ++endOfStreamCount;
+
+                auto result = e.Result;
+                SPXTEST_REQUIRE(result->Text.empty());
+                SPXTEST_REQUIRE(result->Reason == ResultReason::Canceled);
+
+                auto cancellation = CancellationDetails::FromResult(result);
+                SPXTEST_REQUIRE(cancellation->ErrorDetails.empty());
+                SPXTEST_REQUIRE(cancellation->Reason == CancellationReason::EndOfStream);
+                SPXTEST_REQUIRE(e.Reason == CancellationReason::EndOfStream);
+            });
+
+            recognizer->SessionStarted.Connect([&](const SessionEventArgs& /* e */) {
+                ++sessionStartedCount;
+                cv.notify_all();
+            });
+
+            recognizer->SessionStopped.Connect([&](const SessionEventArgs& /* e */) {
+                ++sessionStoppedCount;
+                cv.notify_all();
+            });
+
+            auto result = recognizer->RecognizeOnceAsync().get();
+            SPXTEST_REQUIRE(result != nullptr);
+
+            result = recognizer->RecognizeOnceAsync().get();
+            SPXTEST_REQUIRE(result != nullptr);
+
+            std::unique_lock<std::mutex> lock(mtx);
+            cv.wait_for(lock, std::chrono::seconds(30), [&] { return recognizedCount == 1 && endOfStreamCount == 1 && sessionStartedCount == 2 && sessionStoppedCount == 2; });
+            lock.unlock();
+
+            SPXTEST_REQUIRE(sessionStartedCount == 2);
+            SPXTEST_REQUIRE(recognizedCount == 1);
+            SPXTEST_REQUIRE(endOfStreamCount == 1);
+            SPXTEST_REQUIRE(sessionStoppedCount == 2);
+        }
+    }
+
     SPXTEST_SECTION("German Speech Recognition works")
     {
         string german_input_file("tests/input/CallTheFirstOne.wav");

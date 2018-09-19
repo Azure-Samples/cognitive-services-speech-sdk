@@ -399,7 +399,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
                 string canceled = string.Empty;
-                recognizer.Canceled += (s, e) => { canceled = e.ToString(); };
+                recognizer.Canceled += (s, e) => { canceled = e.ErrorDetails; };
                 for (int i = 0; i < NumberOfIterations; ++i)
                 {
                     await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
@@ -421,7 +421,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
             using (var recognizer = TrackSessionId(new SpeechRecognizer(this.config, audioInput)))
             {
                 string canceled = string.Empty;
-                recognizer.Canceled += (s, e) => { canceled = e.ToString(); };
+                recognizer.Canceled += (s, e) => { canceled = e.ErrorDetails; };
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
                 await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
                 await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);

@@ -59,7 +59,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     tcs.TrySetResult(true);
                 };
                 string canceled = string.Empty;
-                recognizer.Canceled += (s, e) => { canceled = e.ToString(); };
+                recognizer.Canceled += (s, e) => { canceled = e.ErrorDetails; };
 
                 await recognizer.StartContinuousRecognitionAsync();
                 await Task.WhenAny(tcs.Task, Task.Delay(timeout));
@@ -97,7 +97,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                     tcs.TrySetResult(true);
                 };
                 string canceled = string.Empty;
-                recognizer.Canceled += (s, e) => { canceled = e.ToString(); };
+                recognizer.Canceled += (s, e) => { canceled = e.ErrorDetails; };
 
                 await recognizer.StartContinuousRecognitionAsync();
                 await Task.WhenAny(tcs.Task, Task.Delay(timeout));

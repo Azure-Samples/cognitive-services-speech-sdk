@@ -48,7 +48,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
                 taskCompletionSource.TrySetResult(0);
             };
             string canceled = string.Empty;
-            recognizer.Canceled += (s, e) => { canceled = e.ToString(); };
+            recognizer.Canceled += (s, e) => { canceled = e.ErrorDetails; };
 
             await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
             await Task.WhenAny(taskCompletionSource.Task, Task.Delay(timeout));
@@ -85,7 +85,10 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
 
         private void CanceledEventCounter(object sender, SpeechRecognitionCanceledEventArgs e)
         {
-            ErrorEventCount++;
+            if (e.Reason == CancellationReason.Error)
+            {
+                ErrorEventCount++;
+            }
         }
 
         private void SessionStartedEventCounter(object sender, SessionEventArgs e)
