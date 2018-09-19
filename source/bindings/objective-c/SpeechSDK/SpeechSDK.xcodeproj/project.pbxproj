@@ -135,6 +135,7 @@
 		A2A1CB7221503FFD003D9B93 /* intent_recognizer_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CF8204A21463792001970FB /* intent_recognizer_private.h */; };
 		A2A1CB7321504005003D9B93 /* recognizer_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C1F5462214277EF00456DFE /* recognizer_private.h */; };
 		A2A1CB742150400B003D9B93 /* util_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C159966214BC6B800AAE1E3 /* util_private.h */; };
+		F3C9ED832152566F00BB13CD /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3C9ED822152566E00BB13CD /* AudioToolbox.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -256,6 +257,7 @@
 		A2A1CB6421503754003D9B93 /* nsstring_stdstring.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = nsstring_stdstring.mm; path = ../../src/nsstring_stdstring.mm; sourceTree = "<group>"; };
 		A2A1CB6521503754003D9B93 /* speech_recognition_event_args.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = speech_recognition_event_args.mm; path = ../../src/speech_recognition_event_args.mm; sourceTree = "<group>"; };
 		A2A1CB69215037BC003D9B93 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		F3C9ED822152566E00BB13CD /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -263,6 +265,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F3C9ED832152566F00BB13CD /* AudioToolbox.framework in Frameworks */,
 				A2A1CB6A215037BC003D9B93 /* CFNetwork.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -321,6 +324,7 @@
 		3C0A9115214148EB005325E2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F3C9ED822152566E00BB13CD /* AudioToolbox.framework */,
 				A2A1CB69215037BC003D9B93 /* CFNetwork.framework */,
 			);
 			name = Frameworks;
