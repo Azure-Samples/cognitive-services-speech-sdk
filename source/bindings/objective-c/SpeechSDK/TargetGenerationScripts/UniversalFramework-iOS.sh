@@ -59,9 +59,9 @@ mkdir "${UNIVERSAL_LIBRARY_DIR}"
 
 mkdir "${UNIVERSAL_FRAMEWORK}"
 
-cp -r "${DEVICE_LIBRARY_PATH}/." "${UNIVERSAL_FRAMEWORK}"
+cp -R "${DEVICE_LIBRARY_PATH}/." "${UNIVERSAL_FRAMEWORK}"
 
-cp -r "${SIMULATOR_LIBRARY_PATH}/." "${UNIVERSAL_FRAMEWORK}"
+cp -R "${SIMULATOR_LIBRARY_PATH}/." "${UNIVERSAL_FRAMEWORK}"
 
 # Create universal framework.
 
@@ -78,10 +78,10 @@ rm -rf "${OUTPUT_DIR}"
 mkdir -p "${OUTPUT_DIR}"
 
 # Copy the universal framework and license file to the output directory.
-cp -r "${UNIVERSAL_FRAMEWORK}" "${OUTPUT_DIR}"
+cp -R "${UNIVERSAL_FRAMEWORK}" "${OUTPUT_DIR}"
 cp "${PROJECT_DIR}/../../../../license.md" "${OUTPUT_DIR}"
 
 # Zipping the framework and license in order to create the archive we will make available as 'source' for the .podspec.
 cd "${OUTPUT_DIR}"
-zip -r "${FRAMEWORK_NAME}-iOS.zip" "license.md" "${FRAMEWORK_NAME}.framework"
+zip --symlinks -r "${FRAMEWORK_NAME}-iOS.zip" "license.md" "${FRAMEWORK_NAME}.framework"
 cd -

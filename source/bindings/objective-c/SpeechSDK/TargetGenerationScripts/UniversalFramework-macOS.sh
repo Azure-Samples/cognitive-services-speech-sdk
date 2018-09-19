@@ -43,10 +43,11 @@ rm -rf "${OUTPUT_DIR}"
 mkdir -p "${OUTPUT_DIR}"
 
 # Copy the Mac framework and license file to the output directory.
-cp -r "${MAC_LIBRARY_PATH}" "${OUTPUT_DIR}"
+# Using -R so that symlinks are maintained.
+cp -R "${MAC_LIBRARY_PATH}" "${OUTPUT_DIR}"
 cp "${PROJECT_DIR}/../../../../license.md" "${OUTPUT_DIR}"
 
 # Zipping the framework and license in order to create the archive we will make available as 'source' for the .podspec.
 cd "${OUTPUT_DIR}"
-zip -r "${FRAMEWORK_NAME}-OSX.zip" "license.md" "${FRAMEWORK_NAME}.framework"
+zip --symlinks -r "${FRAMEWORK_NAME}-OSX.zip" "license.md" "${FRAMEWORK_NAME}.framework"
 cd -

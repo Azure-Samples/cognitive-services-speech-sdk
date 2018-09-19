@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		313DEE1B9AF5A2A50CD4057A /* Pods_SpeechSDK_iOSTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CAFFE545327ECA0B7823008F /* Pods_SpeechSDK_iOSTests.framework */; };
+		3C4559B879634422F2D417D1 /* Pods_SpeechSDK_iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 611F82DFE742C2CB2FC183D3 /* Pods_SpeechSDK_iOS.framework */; };
 		3C5D93EC2146856B000C7129 /* TurnOnTheLamp.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3C5D93EB2146856B000C7129 /* TurnOnTheLamp.wav */; };
 		3C5D93FA2146CC61000C7129 /* test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D93F92146CC61000C7129 /* test.m */; };
 		3CA6CF8B211F471500CD2768 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CA6CF8A211F471500CD2768 /* AppDelegate.m */; };
@@ -17,8 +19,6 @@
 		3CA6CF99211F471600CD2768 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CA6CF98211F471600CD2768 /* main.m */; };
 		3CA6CFA3211F471600CD2768 /* SpeechSDK_iOSTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CA6CFA2211F471600CD2768 /* SpeechSDK_iOSTests.m */; };
 		3CC3789C2121CFD600F07A66 /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3CC3789B2121CFD600F07A66 /* whatstheweatherlike.wav */; };
-		483C76A0C1C206B70E2B6248 /* Pods_SpeechSDK_iOSTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 335AE1FCE9FAB73281371047 /* Pods_SpeechSDK_iOSTests.framework */; };
-		86D616E4EE22973B45BFE2F6 /* Pods_SpeechSDK_iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49CAA1BA9A1C21768AEABE94 /* Pods_SpeechSDK_iOS.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -32,7 +32,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		335AE1FCE9FAB73281371047 /* Pods_SpeechSDK_iOSTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SpeechSDK_iOSTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3BB1459A434B9BA5D7D7C886 /* Pods-SpeechSDK_iOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpeechSDK_iOSTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SpeechSDK_iOSTests/Pods-SpeechSDK_iOSTests.debug.xcconfig"; sourceTree = "<group>"; };
 		3C5D93EB2146856B000C7129 /* TurnOnTheLamp.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = TurnOnTheLamp.wav; path = ../../../input/audio/TurnOnTheLamp.wav; sourceTree = "<group>"; };
 		3C5D93F92146CC61000C7129 /* test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = test.m; path = ../../shared/test.m; sourceTree = "<group>"; };
 		3C5D93FB2146CD40000C7129 /* test.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = test.h; path = ../../shared/test.h; sourceTree = "<group>"; };
@@ -50,11 +50,11 @@
 		3CA6CFA2211F471600CD2768 /* SpeechSDK_iOSTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SpeechSDK_iOSTests.m; sourceTree = "<group>"; };
 		3CA6CFA4211F471600CD2768 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3CC3789B2121CFD600F07A66 /* whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = whatstheweatherlike.wav; path = ../../../../tests/input/audio/whatstheweatherlike.wav; sourceTree = "<group>"; };
-		49CAA1BA9A1C21768AEABE94 /* Pods_SpeechSDK_iOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SpeechSDK_iOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		4F4AF1B5A5076687390E6A0A /* Pods-SpeechSDK_iOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpeechSDK_iOSTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-SpeechSDK_iOSTests/Pods-SpeechSDK_iOSTests.release.xcconfig"; sourceTree = "<group>"; };
-		8E3CDA7907EF78A5CA1E5547 /* Pods-SpeechSDK_iOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpeechSDK_iOS.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SpeechSDK_iOS/Pods-SpeechSDK_iOS.debug.xcconfig"; sourceTree = "<group>"; };
-		A8FF6C09BCF7475A2B15FA30 /* Pods-SpeechSDK_iOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpeechSDK_iOSTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SpeechSDK_iOSTests/Pods-SpeechSDK_iOSTests.debug.xcconfig"; sourceTree = "<group>"; };
-		B94080AE01ABFF699B5C3D1A /* Pods-SpeechSDK_iOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpeechSDK_iOS.release.xcconfig"; path = "Pods/Target Support Files/Pods-SpeechSDK_iOS/Pods-SpeechSDK_iOS.release.xcconfig"; sourceTree = "<group>"; };
+		3FF46A9CAF458499AC36A9A3 /* Pods-SpeechSDK_iOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpeechSDK_iOSTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-SpeechSDK_iOSTests/Pods-SpeechSDK_iOSTests.release.xcconfig"; sourceTree = "<group>"; };
+		611F82DFE742C2CB2FC183D3 /* Pods_SpeechSDK_iOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SpeechSDK_iOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B72E6C3CF6637838CAB04104 /* Pods-SpeechSDK_iOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpeechSDK_iOS.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SpeechSDK_iOS/Pods-SpeechSDK_iOS.debug.xcconfig"; sourceTree = "<group>"; };
+		CAFFE545327ECA0B7823008F /* Pods_SpeechSDK_iOSTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SpeechSDK_iOSTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EFCBF410E72D8DD74A73DD3C /* Pods-SpeechSDK_iOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpeechSDK_iOS.release.xcconfig"; path = "Pods/Target Support Files/Pods-SpeechSDK_iOS/Pods-SpeechSDK_iOS.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,7 +62,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				86D616E4EE22973B45BFE2F6 /* Pods_SpeechSDK_iOS.framework in Frameworks */,
+				3C4559B879634422F2D417D1 /* Pods_SpeechSDK_iOS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,13 +70,22 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				483C76A0C1C206B70E2B6248 /* Pods_SpeechSDK_iOSTests.framework in Frameworks */,
+				313DEE1B9AF5A2A50CD4057A /* Pods_SpeechSDK_iOSTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		20CD5EAE5FA4504C32A2EAAE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				611F82DFE742C2CB2FC183D3 /* Pods_SpeechSDK_iOS.framework */,
+				CAFFE545327ECA0B7823008F /* Pods_SpeechSDK_iOSTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		3CA6CF7D211F471500CD2768 = {
 			isa = PBXGroup;
 			children = (
@@ -85,8 +94,8 @@
 				3CA6CF88211F471500CD2768 /* SpeechSDK_iOS */,
 				3CA6CFA1211F471600CD2768 /* SpeechSDK_iOSTests */,
 				3CA6CF87211F471500CD2768 /* Products */,
-				C7E86040132640735BAC0A00 /* Pods */,
-				E7092A90F684AAAAF7C769DA /* Frameworks */,
+				8C6F0790DB5A2ED926FBE7A6 /* Pods */,
+				20CD5EAE5FA4504C32A2EAAE /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -126,24 +135,15 @@
 			path = SpeechSDK_iOSTests;
 			sourceTree = "<group>";
 		};
-		C7E86040132640735BAC0A00 /* Pods */ = {
+		8C6F0790DB5A2ED926FBE7A6 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				8E3CDA7907EF78A5CA1E5547 /* Pods-SpeechSDK_iOS.debug.xcconfig */,
-				B94080AE01ABFF699B5C3D1A /* Pods-SpeechSDK_iOS.release.xcconfig */,
-				A8FF6C09BCF7475A2B15FA30 /* Pods-SpeechSDK_iOSTests.debug.xcconfig */,
-				4F4AF1B5A5076687390E6A0A /* Pods-SpeechSDK_iOSTests.release.xcconfig */,
+				B72E6C3CF6637838CAB04104 /* Pods-SpeechSDK_iOS.debug.xcconfig */,
+				EFCBF410E72D8DD74A73DD3C /* Pods-SpeechSDK_iOS.release.xcconfig */,
+				3BB1459A434B9BA5D7D7C886 /* Pods-SpeechSDK_iOSTests.debug.xcconfig */,
+				3FF46A9CAF458499AC36A9A3 /* Pods-SpeechSDK_iOSTests.release.xcconfig */,
 			);
 			name = Pods;
-			sourceTree = "<group>";
-		};
-		E7092A90F684AAAAF7C769DA /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				49CAA1BA9A1C21768AEABE94 /* Pods_SpeechSDK_iOS.framework */,
-				335AE1FCE9FAB73281371047 /* Pods_SpeechSDK_iOSTests.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -153,11 +153,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3CA6CFA7211F471600CD2768 /* Build configuration list for PBXNativeTarget "SpeechSDK_iOS" */;
 			buildPhases = (
-				AE1C52C398C7552AB778159F /* [CP] Check Pods Manifest.lock */,
+				D0490DD24E82873088C924C4 /* [CP] Check Pods Manifest.lock */,
 				3CA6CF82211F471500CD2768 /* Sources */,
 				3CA6CF83211F471500CD2768 /* Frameworks */,
 				3CA6CF84211F471500CD2768 /* Resources */,
-				FB321DCC92909947D4EDBC46 /* [CP] Embed Pods Frameworks */,
+				531167657EFDEA8B35924D1D /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -172,7 +172,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3CA6CFAA211F471600CD2768 /* Build configuration list for PBXNativeTarget "SpeechSDK_iOSTests" */;
 			buildPhases = (
-				5CDC696B841650F22C5017B7 /* [CP] Check Pods Manifest.lock */,
+				9D7C918F012B757288EAB804 /* [CP] Check Pods Manifest.lock */,
 				3CA6CF9A211F471600CD2768 /* Sources */,
 				3CA6CF9B211F471600CD2768 /* Frameworks */,
 				3CA6CF9C211F471600CD2768 /* Resources */,
@@ -249,16 +249,42 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		5CDC696B841650F22C5017B7 /* [CP] Check Pods Manifest.lock */ = {
+		531167657EFDEA8B35924D1D /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-SpeechSDK_iOS/Pods-SpeechSDK_iOS-frameworks.sh",
+				"${PODS_ROOT}/Microsoft-CognitiveServices-Speech-for-iOS/MicrosoftCognitiveServicesSpeech.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MicrosoftCognitiveServicesSpeech.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SpeechSDK_iOS/Pods-SpeechSDK_iOS-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		9D7C918F012B757288EAB804 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
 			);
 			inputPaths = (
 				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
 				"${PODS_ROOT}/Manifest.lock",
 			);
 			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
 			outputPaths = (
 				"$(DERIVED_FILE_DIR)/Pods-SpeechSDK_iOSTests-checkManifestLockResult.txt",
 			);
@@ -267,40 +293,26 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		AE1C52C398C7552AB778159F /* [CP] Check Pods Manifest.lock */ = {
+		D0490DD24E82873088C924C4 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			inputFileListPaths = (
 			);
 			inputPaths = (
 				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
 				"${PODS_ROOT}/Manifest.lock",
 			);
 			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
 			outputPaths = (
 				"$(DERIVED_FILE_DIR)/Pods-SpeechSDK_iOS-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		FB321DCC92909947D4EDBC46 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-SpeechSDK_iOS/Pods-SpeechSDK_iOS-frameworks.sh",
-				"${PODS_ROOT}/Microsoft-CognitiveServices-Speech-for-iOS/MicrosoftCognitiveServicesSpeech.framework",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MicrosoftCognitiveServicesSpeech.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SpeechSDK_iOS/Pods-SpeechSDK_iOS-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -467,12 +479,12 @@
 		};
 		3CA6CFA8211F471600CD2768 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8E3CDA7907EF78A5CA1E5547 /* Pods-SpeechSDK_iOS.debug.xcconfig */;
+			baseConfigurationReference = B72E6C3CF6637838CAB04104 /* Pods-SpeechSDK_iOS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = UBF8T346G9;
-				ENABLE_BITCODE = NO;
+				ENABLE_BITCODE = YES;
 				INFOPLIST_FILE = SpeechSDK_iOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks $(SRCROOT)/../../../../build_ios_simulator_debug/lib";
 				OTHER_LDFLAGS = (
@@ -488,12 +500,12 @@
 		};
 		3CA6CFA9211F471600CD2768 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B94080AE01ABFF699B5C3D1A /* Pods-SpeechSDK_iOS.release.xcconfig */;
+			baseConfigurationReference = EFCBF410E72D8DD74A73DD3C /* Pods-SpeechSDK_iOS.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = UBF8T346G9;
-				ENABLE_BITCODE = NO;
+				ENABLE_BITCODE = YES;
 				INFOPLIST_FILE = SpeechSDK_iOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks $(SRCROOT)/../../../../build_ios_simulator_debug/lib";
 				OTHER_LDFLAGS = (
@@ -509,7 +521,7 @@
 		};
 		3CA6CFAB211F471600CD2768 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A8FF6C09BCF7475A2B15FA30 /* Pods-SpeechSDK_iOSTests.debug.xcconfig */;
+			baseConfigurationReference = 3BB1459A434B9BA5D7D7C886 /* Pods-SpeechSDK_iOSTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -524,7 +536,7 @@
 		};
 		3CA6CFAC211F471600CD2768 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4F4AF1B5A5076687390E6A0A /* Pods-SpeechSDK_iOSTests.release.xcconfig */;
+			baseConfigurationReference = 3FF46A9CAF458499AC36A9A3 /* Pods-SpeechSDK_iOSTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
