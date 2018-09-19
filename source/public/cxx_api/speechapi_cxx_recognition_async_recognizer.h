@@ -133,9 +133,6 @@ protected:
     {
         SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
 
-        // Ask the base to term first, thus avoiding deadlocks in up/down vs down/up lock order
-        Recognizer::TermRecognizer();
-
         // Disconnect the event signals in reverse construction order
         Canceled.DisconnectAll();
         Recognized.DisconnectAll();
@@ -154,6 +151,9 @@ protected:
                 *handle = SPXHANDLE_INVALID;
             }
         }
+
+        // Ask the base to term
+        Recognizer::TermRecognizer();
     }
 
     std::future<std::shared_ptr<RecoResult>> RecognizeOnceAsyncInternal()

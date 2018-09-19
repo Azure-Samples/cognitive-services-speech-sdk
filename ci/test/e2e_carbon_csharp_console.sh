@@ -79,10 +79,8 @@ for action in $Actions; do
     variantArg="${variants[$variantIndex + 1]}"
     TEST_NAME="$action $variant"
 
-    if [[ "$TEST_NAME" != "translation baseModel" ]]; then
-      runTest TESTRUNNER "$TEST_NAME" "$PLATFORMS_TO_RUN" $TIMEOUT_SECONDS \
-        $CARBON_CSHARP_CONSOLE $action $variantArg
-    fi
+    runTest TESTRUNNER "$TEST_NAME" "$PLATFORMS_TO_RUN" $TIMEOUT_SECONDS \
+      $CARBON_CSHARP_CONSOLE $action $variantArg
   done
 
   if [[ $action == speech ]]; then

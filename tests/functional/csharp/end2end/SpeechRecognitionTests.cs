@@ -364,6 +364,7 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
+        [Ignore] // Service is being investigated
         public async Task TestSingleShotTwice()
         {
             var audioInput = AudioConfig.FromWavFileInput(TestData.English.Batman.AudioFile);

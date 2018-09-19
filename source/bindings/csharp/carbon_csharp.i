@@ -69,7 +69,7 @@ static SWIG_CSharpWStringHelperCallback SWIG_csharp_wstring_callback = NULL;
 
 %}
 
-
+#if !defined(SPX_UWP)
 %pragma(csharp) imclasscode=%{
 
   protected class SWIGStringHelper {
@@ -84,7 +84,7 @@ static SWIG_CSharpWStringHelperCallback SWIG_csharp_wstring_callback = NULL;
 
     static SWIGStringDelegate stringDelegate = new SWIGStringDelegate(CreateString);
 
-    [global::System.Runtime.InteropServices.DllImport("Microsoft.CognitiveServices.Speech.csharp.bindings.dll", EntryPoint="SWIGRegisterStringCallback_carbon_csharp")]
+    [global::System.Runtime.InteropServices.DllImport("$dllimport", EntryPoint="SWIGRegisterStringCallback_$module")]
     public static extern void SWIGRegisterStringCallback_carbon_csharp(SWIGStringDelegate stringDelegate);
 
     static string CreateString(string cString) {
@@ -97,8 +97,28 @@ static SWIG_CSharpWStringHelperCallback SWIG_csharp_wstring_callback = NULL;
   }
 
   static protected SWIGStringHelper swigStringHelper = new SWIGStringHelper();
+%}
 
+%insert(runtime) %{
+#ifdef __cplusplus
+extern "C"
+#endif
+SWIGEXPORT void SWIGSTDCALL SWIGRegisterStringCallback_carbon_csharp(SWIG_CSharpStringHelperCallback callback) {
+  SWIG_csharp_string_callback = callback;
+}
+%}
 
+SWIGCSHARP_IMTYPE_STRING(std::string)
+SWIGCSHARP_IMTYPE_STRING(std::string&)
+SWIGCSHARP_IMTYPE_STRING(const std::string&)
+SWIGCSHARP_IMTYPE_STRING(std::string*)
+SWIGCSHARP_IMTYPE_STRING(const std::string*)
+SWIGCSHARP_IMTYPE_STRING(char*)
+SWIGCSHARP_IMTYPE_STRING(const char*)
+SWIG_STD_VECTOR_ENHANCED(std::vector<std::string>)
+
+#else
+%pragma(csharp) imclasscode=%{
   protected class SWIGWStringHelper
   {
     [return: System.Runtime.InteropServices.MarshalAs(global::System.Runtime.InteropServices.UnmanagedType.BStr)]
@@ -128,27 +148,10 @@ static SWIG_CSharpWStringHelperCallback SWIG_csharp_wstring_callback = NULL;
 #ifdef __cplusplus
 extern "C"
 #endif
-SWIGEXPORT void SWIGSTDCALL SWIGRegisterStringCallback_carbon_csharp(SWIG_CSharpStringHelperCallback callback) {
-  SWIG_csharp_string_callback = callback;
-}
-
-#ifdef __cplusplus
-extern "C"
-#endif
 SWIGEXPORT void SWIGSTDCALL SWIGRegisterWStringCallback_$module(SWIG_CSharpWStringHelperCallback callback) {
  SWIG_csharp_wstring_callback = callback;
 }
 %}
-
-SWIGCSHARP_IMTYPE_STRING(std::string)
-SWIGCSHARP_IMTYPE_STRING(std::string&)
-SWIGCSHARP_IMTYPE_STRING(const std::string&)
-SWIGCSHARP_IMTYPE_STRING(std::string*)
-SWIGCSHARP_IMTYPE_STRING(const std::string*)
-SWIGCSHARP_IMTYPE_STRING(char*)
-SWIGCSHARP_IMTYPE_STRING(const char*)
-
-SWIG_STD_VECTOR_ENHANCED(std::vector<std::string>)
 
 SWIGCSHARP_IMTYPE_WSTRING(std::wstring)
 SWIGCSHARP_IMTYPE_WSTRING(std::wstring&)
@@ -157,8 +160,10 @@ SWIGCSHARP_IMTYPE_WSTRING(std::wstring*)
 SWIGCSHARP_IMTYPE_WSTRING(const std::wstring*)
 SWIGCSHARP_IMTYPE_WSTRING(wchar_t*)
 SWIGCSHARP_IMTYPE_WSTRING(const wchar_t*)
-
 SWIG_STD_VECTOR_ENHANCED(std::vector<std::wstring>)
+
+#endif
+
 %template(UnsignedCharVector) std::vector<unsigned char>;
 
 %ignore operator bool;

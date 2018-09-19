@@ -5,10 +5,4 @@
     <SpeechNativePlatform Condition="'$(PlatformTarget)' == 'x86'">Win32</SpeechNativePlatform>
   </PropertyGroup>
   <Import Project="$(MSBuildThisFileDirectory)\..\Microsoft.CognitiveServices.Speech.props" />
-  <ItemGroup>
-    <None Include="$(SpeechNativeLibDir)\Microsoft.CognitiveServices.Speech.core.dll">
-      <Link>Microsoft.CognitiveServices.Speech.core.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
 </Project>
