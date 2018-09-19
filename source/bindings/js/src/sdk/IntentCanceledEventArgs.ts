@@ -18,6 +18,17 @@ export class IntentRecognitionCanceledEventArgs {
     private privCancelReason: CancellationReason;
     private privErrorDetails: string;
 
+    public constructor(
+        result: IntentRecognitionResult,
+        sessionId: string,
+        cancelReason: CancellationReason,
+        errorDetails: string) {
+        this.privResult = result;
+        this.privSessionId = sessionId;
+        this.privCancelReason = cancelReason;
+        this.privErrorDetails = errorDetails;
+    }
+
     /**
      * Specifies the recognition result.
      * @return the recognition result.

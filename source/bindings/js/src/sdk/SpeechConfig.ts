@@ -35,6 +35,7 @@ export abstract class SpeechConfig {
 
         const speechImpl: SpeechConfigImpl = new SpeechConfigImpl();
         speechImpl.setProperty(PropertyId.SpeechServiceConnection_Region, region);
+        speechImpl.setProperty(PropertyId.SpeechServiceConnection_IntentRegion, region);
         speechImpl.setProperty(PropertyId.SpeechServiceConnection_Key, subscriptionKey);
 
         return speechImpl;
@@ -71,6 +72,7 @@ export abstract class SpeechConfig {
 
         const speechImpl: SpeechConfigImpl = new SpeechConfigImpl();
         speechImpl.setProperty(PropertyId.SpeechServiceConnection_Region, region);
+        speechImpl.setProperty(PropertyId.SpeechServiceConnection_IntentRegion, region);
         speechImpl.authorizationToken = authorizationToken;
         return speechImpl;
     }
@@ -137,10 +139,22 @@ export abstract class SpeechConfig {
     public abstract set outputFormat(format: OutputFormat);
 
     /**
+     * Gets output format.
+     * @return Returns the output format.
+     */
+    public abstract get outputFormat(): OutputFormat;
+
+    /**
      * Sets the endpoint ID of a customized speech model that is used for speech recognition.
      * @param value the endpoint ID
      */
     public abstract set endpointId(value: string);
+
+    /**
+     * Gets the endpoint ID of a customized speech model that is used for speech recognition.
+     * @return The endpoint ID
+     */
+    public abstract get endpointId(): string;
 
     /**
      * Closes the configuration.
@@ -194,12 +208,20 @@ export class SpeechConfigImpl extends SpeechConfig {
         this.privProperties.setProperty(PropertyId.SpeechServiceConnection_RecoLanguage, value);
     }
 
+    public get outputFormat(): OutputFormat {
+        return (OutputFormat as any)[this.privProperties.getProperty(OutputFormatPropertyName, OutputFormat[OutputFormat.Simple])];
+    }
+
     public set outputFormat(value: OutputFormat) {
         this.privProperties.setProperty(OutputFormatPropertyName, OutputFormat[value]);
     }
 
     public set endpointId(value: string) {
         this.privProperties.setProperty(PropertyId.SpeechServiceConnection_Endpoint, value);
+    }
+
+    public get endpointId(): string {
+        return this.privProperties.getProperty(PropertyId.SpeechServiceConnection_EndpointId);
     }
 
     public has(key: string): boolean {

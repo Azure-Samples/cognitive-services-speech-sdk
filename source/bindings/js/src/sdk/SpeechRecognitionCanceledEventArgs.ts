@@ -3,26 +3,13 @@
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-import { CancellationReason, SpeechRecognitionResult } from "./Exports";
+import { CancellationReason, SessionEventArgs } from "./Exports";
 
 /**
  * Defines content of a RecognitionErrorEvent.
  * @class
  */
-export class SpeechRecognitionCanceledEventArgs {
-    /**
-     * Specifies the recognition result.
-     * @return the recognition result.
-     */
-    public result: SpeechRecognitionResult;
-
-    /**
-     * Specifies the session identifier.
-     * @property
-     * @returns Specifies the session identifier.
-     */
-    public sessionId: string;
-
+export class SpeechRecognitionCanceledEventArgs extends SessionEventArgs {
     /**
      * The reason the recognition was canceled.
      * @return Specifies the reason canceled.

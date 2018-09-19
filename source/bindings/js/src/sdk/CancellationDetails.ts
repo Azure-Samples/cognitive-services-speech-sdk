@@ -4,10 +4,12 @@
 //
 
 import {
+    ISimpleSpeechPhrase,
+    RecognitionStatus2,
+} from "../common.speech/Exports";
+import {
     CancellationReason,
-    IntentRecognitionResult,
-    SpeechRecognitionResult,
-    TranslationTextResult,
+    RecognitionResult,
 } from "./Exports";
 
 /**
@@ -18,13 +20,38 @@ export class CancellationDetails {
     private reason: CancellationReason;
     private errorDetails: string;
 
+    private constructor(reason: CancellationReason, errorDetails: string) {
+        this.reason = reason;
+        this.errorDetails = errorDetails;
+    }
+
     /**
-     * Creates an instance of CancellationDetails object for the canceled SpeechRecognitionResult.
+     * Creates an instance of CancellationDetails object for the canceled RecognitionResult.
      * @param result The result that was canceled.
      * @return The cancellation details object being created.
      */
-    public static fromResult(result: SpeechRecognitionResult | IntentRecognitionResult | TranslationTextResult): CancellationDetails {
-        throw new Error("NYI");
+    public static fromResult(result: RecognitionResult): CancellationDetails {
+        const simpleSpeech: ISimpleSpeechPhrase = JSON.parse(result.json);
+
+        let reason = CancellationReason.EndOfStream;
+        const recognitionStatus2: string = "" + simpleSpeech.RecognitionStatus;
+        const recstatus2 = (RecognitionStatus2 as any)[recognitionStatus2];
+        switch (recstatus2) {
+            case RecognitionStatus2.Success:
+            case RecognitionStatus2.EndOfDictation:
+            case RecognitionStatus2.NoMatch:
+                reason = CancellationReason.EndOfStream;
+                break;
+            case RecognitionStatus2.InitialSilenceTimeout:
+            case RecognitionStatus2.BabbleTimeout:
+            case RecognitionStatus2.Error:
+            default:
+                reason = CancellationReason.Error;
+                break;
+        }
+
+        return new CancellationDetails(reason, result.errorDetails);
+
     }
 
     /**

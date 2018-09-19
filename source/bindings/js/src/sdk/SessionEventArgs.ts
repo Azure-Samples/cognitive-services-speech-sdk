@@ -14,5 +14,5 @@ export class SessionEventArgs {
      * @property
      * @returns Represents the session identifier.
      */
-    public SessionId: string;
+    public sessionId: string;
 }

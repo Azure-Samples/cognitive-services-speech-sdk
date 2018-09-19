@@ -242,6 +242,7 @@ export class PullAudioInputStreamImpl extends PullAudioInputStream implements IA
     private format: AudioStreamFormat;
     private id: string;
     private events: EventSource<AudioSourceEvent>;
+    private isClosed: boolean;
 
     /**
      * Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods, using the default format (16 kHz 16bit mono PCM).
@@ -260,6 +261,7 @@ export class PullAudioInputStreamImpl extends PullAudioInputStream implements IA
         this.events = new EventSource<AudioSourceEvent>();
         this.id = CreateNoDashGuid();
         this.callback = callback;
+        this.isClosed = false;
     }
 
     /**
@@ -267,6 +269,7 @@ export class PullAudioInputStreamImpl extends PullAudioInputStream implements IA
      * @member
      */
     public close(): void {
+        this.isClosed = true;
         this.callback.close();
     }
 
@@ -302,7 +305,7 @@ export class PullAudioInputStreamImpl extends PullAudioInputStream implements IA
 
                         return PromiseHelper.FromResult<IStreamChunk<ArrayBuffer>>({
                             Buffer: readBuff,
-                            IsEnd: false,
+                            IsEnd: this.isClosed,
                         });
                     },
                 };

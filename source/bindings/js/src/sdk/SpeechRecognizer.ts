@@ -3,11 +3,12 @@
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 import {
+    EnumTranslation,
     IAuthentication,
     IConnectionFactory,
     IDetailedSpeechPhrase,
     ISimpleSpeechPhrase,
-    ISpeechFragment,
+    ISpeechHypothesis,
     OutputFormatPropertyName,
     PlatformConfig,
     RecognitionCompletionStatus,
@@ -26,15 +27,14 @@ import { Contracts } from "./Contracts";
 import {
     AudioConfig,
     CancellationReason,
-    KeywordRecognitionModel,
     OutputFormat,
     PropertyCollection,
     PropertyId,
     Recognizer,
     ResultReason,
     SpeechRecognitionCanceledEventArgs,
+    SpeechRecognitionEventArgs,
     SpeechRecognitionResult,
-    SpeechRecognitionResultEventArgs,
 } from "./Exports";
 import { SpeechConfig, SpeechConfigImpl } from "./SpeechConfig";
 
@@ -67,13 +67,13 @@ export class SpeechRecognizer extends Recognizer {
      * The event recognizing signals that an intermediate recognition result is received.
      * @property
      */
-    public recognizing: (sender: Recognizer, event: SpeechRecognitionResultEventArgs) => void;
+    public recognizing: (sender: Recognizer, event: SpeechRecognitionEventArgs) => void;
 
     /**
      * The event recognized signals that a final recognition result is received.
      * @property
      */
-    public recognized: (sender: Recognizer, event: SpeechRecognitionResultEventArgs) => void;
+    public recognized: (sender: Recognizer, event: SpeechRecognitionEventArgs) => void;
 
     /**
      * The event canceled signals that an error occurred during recognition.
@@ -206,20 +206,20 @@ export class SpeechRecognizer extends Recognizer {
                 return;
             }
 
-            // report result to promise.
-            if (!!cb) {
-                try {
-                    cb();
-                } catch (e) {
-                    if (!!err) {
-                        err(e);
-                    }
-                }
-                cb = undefined;
-            }
-
-            this.implDispatchMessageHandler(event, undefined, err);
+            this.implDispatchMessageHandler(event, undefined, undefined);
         });
+
+        // report result to promise.
+        if (!!cb) {
+            try {
+                cb();
+            } catch (e) {
+                if (!!err) {
+                    err(e);
+                }
+            }
+            cb = undefined;
+        }
     }
 
     /**
@@ -242,37 +242,6 @@ export class SpeechRecognizer extends Recognizer {
                 }
             }
         }
-    }
-
-    /**
-     * Starts speech recognition on a continuous audio stream with keyword spotting, until stopKeywordRecognitionAsync() is called.
-     * User must subscribe to events to receive recognition results.
-     * Note: Key word spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
-     * @member
-     * @param {KeywordRecognitionModel} model - The keyword recognition model that specifies the keyword to be recognized.
-     * @param cb - Callback that received the recognition has started.
-     * @param err - Callback invoked in case of an error.
-     */
-    public startKeywordRecognitionAsync(model: KeywordRecognitionModel, cb?: () => void, err?: (e: string) => void): void {
-        Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
-        Contracts.throwIfNull(model, "model");
-
-        this.implCloseExistingRecognizer();
-        throw new Error("keyword recognition not supported");
-    }
-
-    /**
-     * Stops continuous speech recognition.
-     * Note: Key word spotting functionality is only available on the Cognitive Services Device SDK. This functionality is currently not included in the SDK itself.
-     * @member
-     * @param cb - Callback that received the recognition has stopped.
-     * @param err - Callback invoked in case of an error.
-     */
-    public stopKeywordRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
-        Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
-
-        this.implCloseExistingRecognizer();
-        throw new Error("keyword recognition not supported");
     }
 
     /**
@@ -337,17 +306,36 @@ export class SpeechRecognizer extends Recognizer {
                     const recoEndedEvent: RecognitionEndedEvent = event as RecognitionEndedEvent;
                     if (recoEndedEvent.Status !== RecognitionCompletionStatus.Success) {
                         const errorEvent: SpeechRecognitionCanceledEventArgs = new SpeechRecognitionCanceledEventArgs();
+                        const errorText: string = RecognitionCompletionStatus[recoEndedEvent.Status] + ": " + recoEndedEvent.Error;
 
                         errorEvent.reason = CancellationReason.Error;
                         errorEvent.sessionId = recoEndedEvent.SessionId;
-                        errorEvent.errorDetails = recoEndedEvent.Error;
+                        errorEvent.errorDetails = errorText;
 
                         if (this.canceled) {
-                            this.canceled(this, errorEvent); // call error handler, if configured
+                            try {
+                                this.canceled(this, errorEvent);
+                                /* tslint:disable:no-empty */
+                            } catch (error) {
+                                // Not going to let errors in the event handler
+                                // trip things up.
+                            }
                         }
 
-                        if (!!err) {
-                            err(recoEndedEvent.Error); // call error handler, if configured
+                        const result: SpeechRecognitionResult = new SpeechRecognitionResult();
+                        result.reason = ResultReason.Canceled;
+                        result.errorDetails = errorText;
+
+                        // report result to promise.
+                        if (!!cb) {
+                            try {
+                                cb(result);
+                                /* tslint:disable:no-empty */
+                            } catch (e) {
+                                if (!!err) {
+                                    err(e);
+                                }
+                            }
                         }
                     }
                 }
@@ -357,47 +345,59 @@ export class SpeechRecognizer extends Recognizer {
                 {
                     const evResult = event as SpeechRecognitionResultEvent<ISimpleSpeechPhrase>;
 
-                    const reason = this.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
+                    const reason = EnumTranslation.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
+
+                    const result: SpeechRecognitionResult = new SpeechRecognitionResult();
+                    result.reason = reason;
+                    result.duration = evResult.Result.Duration;
+                    result.offset = evResult.Result.Duration;
+                    result.text = evResult.Result.DisplayText;
+                    result.json = JSON.stringify(evResult.Result);
+
                     if (reason === ResultReason.Canceled) {
                         const ev = new SpeechRecognitionCanceledEventArgs();
                         ev.sessionId = evResult.SessionId;
-                        ev.reason = this.implTranslateCancelResult(evResult.Result.RecognitionStatus);
+                        ev.reason = EnumTranslation.implTranslateCancelResult(evResult.Result.RecognitionStatus);
 
                         if (!!this.canceled) {
-                            this.canceled(this, ev);
-                        }
-
-                        // report result to promise.
-                        if (!!err) {
-                            err(evResult.Result.DisplayText);
-                            err = undefined;
+                            try {
+                                this.canceled(this, ev);
+                                /* tslint:disable:no-empty */
+                            } catch (error) {
+                                // Not going to let errors in the event handler
+                                // trip things up.
+                            }
                         }
                     } else {
-                        const ev = new SpeechRecognitionResultEventArgs();
+                        const ev = new SpeechRecognitionEventArgs();
                         ev.sessionId = evResult.SessionId;
-
-                        ev.result = new SpeechRecognitionResult();
-                        ev.result.json = JSON.stringify(evResult.Result);
-                        ev.result.offset = evResult.Result.Offset;
-                        ev.result.duration = evResult.Result.Duration;
-                        ev.result.text = evResult.Result.DisplayText;
-                        ev.result.reason = reason;
+                        ev.result = result;
 
                         if (!!this.recognized) {
-                            this.recognized(this, ev);
-                        }
-
-                        // report result to promise.
-                        if (!!cb) {
                             try {
-                                cb(ev.result);
-                            } catch (e) {
-                                if (!!err) {
-                                    err(e);
-                                }
+                                this.recognized(this, ev);
+                                /* tslint:disable:no-empty */
+                            } catch (error) {
+                                // Not going to let errors in the event handler
+                                // trip things up.
                             }
-                            cb = undefined;
                         }
+                    }
+
+                    // report result to promise.
+                    if (!!cb) {
+                        try {
+                            cb(result);
+                        } catch (e) {
+                            if (!!err) {
+                                err(e);
+                            }
+                        }
+                        // Only invoke the call back once.
+                        // and if it's successful don't invoke the
+                        // error after that.
+                        cb = undefined;
+                        err = undefined;
                     }
                 }
                 break;
@@ -406,54 +406,64 @@ export class SpeechRecognizer extends Recognizer {
                 {
                     const evResult = event as SpeechRecognitionResultEvent<IDetailedSpeechPhrase>;
 
-                    const reason = this.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
+                    const reason = EnumTranslation.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
+
+                    const result: SpeechRecognitionResult = new SpeechRecognitionResult();
+                    result.json = JSON.stringify(evResult.Result);
+                    result.offset = evResult.Result.Offset;
+                    result.duration = evResult.Result.Duration;
+                    result.reason = reason;
+                    if (reason === ResultReason.RecognizedSpeech) {
+                        result.text = evResult.Result.NBest[0].Display;
+                    }
+
                     if (reason === ResultReason.Canceled) {
                         const ev = new SpeechRecognitionCanceledEventArgs();
                         ev.sessionId = evResult.SessionId;
-                        ev.reason = this.implTranslateCancelResult(evResult.Result.RecognitionStatus);
+                        ev.reason = EnumTranslation.implTranslateCancelResult(evResult.Result.RecognitionStatus);
 
                         if (!!this.canceled) {
-                            this.canceled(this, ev);
-                        }
-
-                        // report result to promise.
-                        if (!!err) {
-                            err(JSON.stringify(evResult.Result));
-                            err = undefined;
+                            try {
+                                this.canceled(this, ev);
+                                /* tslint:disable:no-empty */
+                            } catch (error) {
+                                // Not going to let errors in the event handler
+                                // trip things up.
+                            }
                         }
                     } else {
-                        const ev = new SpeechRecognitionResultEventArgs();
+                        const ev = new SpeechRecognitionEventArgs();
                         ev.sessionId = evResult.SessionId;
-
-                        ev.result = new SpeechRecognitionResult();
-                        ev.result.json = JSON.stringify(evResult.Result);
-                        ev.result.offset = evResult.Result.Offset;
-                        ev.result.duration = evResult.Result.Duration;
-                        ev.result.reason = reason;
+                        ev.result = result;
 
                         if (!!this.recognized) {
-                            this.recognized(this, ev);
+                            try {
+                                this.recognized(this, ev);
+                                /* tslint:disable:no-empty */
+                            } catch (error) {
+                                // Not going to let errors in the event handler
+                                // trip things up.
+                            }
                         }
 
-                        // report result to promise.
-                        if (!!cb) {
-                            try {
-                                cb(ev.result);
-                            } catch (e) {
-                                if (!!err) {
-                                    err(e);
-                                }
-                            }
-                            cb = undefined;
+                    }
+                    // report result to promise.
+                    if (!!cb) {
+                        try {
+                            cb(result);
+                            /* tslint:disable:no-empty */
+                        } catch (error) {
+                            // Not going to let errors in the event handler
+                            // trip things up.
                         }
                     }
                 }
                 break;
             case "SpeechHypothesisEvent":
                 {
-                    const evResult = event as SpeechRecognitionResultEvent<ISpeechFragment>;
+                    const evResult = event as SpeechRecognitionResultEvent<ISpeechHypothesis>;
 
-                    const ev = new SpeechRecognitionResultEventArgs();
+                    const ev = new SpeechRecognitionEventArgs();
                     ev.sessionId = evResult.SessionId;
 
                     ev.result = new SpeechRecognitionResult();
@@ -463,61 +473,16 @@ export class SpeechRecognizer extends Recognizer {
                     ev.result.text = evResult.Result.Text;
 
                     if (!!this.recognizing) {
-                        this.recognizing(this, ev);
+                        try {
+                            this.recognizing(this, ev);
+                            /* tslint:disable:no-empty */
+                        } catch (error) {
+                            // Not going to let errors in the event handler
+                            // trip things up.
+                        }
                     }
                 }
                 break;
         }
-    }
-
-    private implTranslateRecognitionResult(recognitionStatus: RecognitionStatus2): ResultReason {
-        let reason = ResultReason.Canceled;
-        const recognitionStatus2: string = "" + recognitionStatus;
-        const recstatus2 = (RecognitionStatus2 as any)[recognitionStatus2];
-        switch (recstatus2) {
-            case RecognitionStatus2.Success:
-            case RecognitionStatus2.EndOfDictation:
-                reason = ResultReason.RecognizedSpeech;
-                break;
-
-            case RecognitionStatus2.NoMatch:
-                reason = ResultReason.NoMatch;
-                break;
-
-            case RecognitionStatus2.InitialSilenceTimeout:
-                reason = ResultReason.Canceled;
-                break;
-
-            case RecognitionStatus2.BabbleTimeout:
-                reason = ResultReason.Canceled;
-                break;
-
-            case RecognitionStatus2.Error:
-            default:
-                reason = ResultReason.Canceled;
-                break;
-        }
-
-        return reason;
-    }
-
-    private implTranslateCancelResult(recognitionStatus: RecognitionStatus2): CancellationReason {
-        let reason = CancellationReason.EndOfStream;
-        const recognitionStatus2: string = "" + recognitionStatus;
-        const recstatus2 = (RecognitionStatus2 as any)[recognitionStatus2];
-        switch (recstatus2) {
-            case RecognitionStatus2.Success:
-            case RecognitionStatus2.EndOfDictation:
-            case RecognitionStatus2.NoMatch:
-                reason = CancellationReason.EndOfStream;
-                break;
-            case RecognitionStatus2.InitialSilenceTimeout:
-            case RecognitionStatus2.BabbleTimeout:
-            case RecognitionStatus2.Error:
-            default:
-                reason = CancellationReason.Error;
-                break;
-        }
-        return reason;
     }
 }

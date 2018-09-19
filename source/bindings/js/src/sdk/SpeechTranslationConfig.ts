@@ -3,18 +3,29 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-import { Contracts } from "./Contracts";
-import { PropertyCollection, PropertyId } from "./Exports";
+import {
+    OutputFormatPropertyName,
+} from "../common.speech/Exports";
+import {
+    Contracts,
+} from "./Contracts";
+import {
+    OutputFormat,
+    PropertyCollection,
+    PropertyId,
+    SpeechConfig,
+} from "./Exports";
 
 /**
  * Speech translation configuration.
  */
-export abstract class SpeechTranslationConfig {
+export abstract class SpeechTranslationConfig extends SpeechConfig {
 
     /**
      * Creates an instance of recognizer config.
      */
     protected constructor() {
+        super();
     }
 
     /**
@@ -101,6 +112,12 @@ export abstract class SpeechTranslationConfig {
      */
     public abstract get targetLanguages(): string[];
 
+    /*
+     * Returns the selected voice name.
+     * @return The voice name.
+     */
+    public abstract get voiceName(): string;
+
     /**
      * Sets voice of the translated language, enable voice synthesis output.
      * @param value
@@ -122,7 +139,6 @@ export abstract class SpeechTranslationConfig {
 
 // tslint:disable-next-line:max-classes-per-file
 export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
-
     private speechProperties: PropertyCollection;
 
     public constructor() {
@@ -151,9 +167,28 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
     public set speechRecognitionLanguage(value: string) {
         Contracts.throwIfNullOrWhitespace(value, "value");
 
-        this.properties.setProperty(PropertyId.SpeechServiceConnection_TranslationFromLanguage, value);
+        this.properties.setProperty(PropertyId.SpeechServiceConnection_RecoLanguage, value);
     }
 
+    public get subscriptionKey(): string {
+        return this.speechProperties.getProperty(PropertyId[PropertyId.SpeechServiceConnection_Key]);
+    }
+
+    public get outputFormat(): OutputFormat {
+        return (OutputFormat as any)[this.speechProperties.getProperty(OutputFormatPropertyName, OutputFormat[OutputFormat.Simple])];
+    }
+
+    public set outputFormat(value: OutputFormat) {
+        this.speechProperties.setProperty(OutputFormatPropertyName, OutputFormat[value]);
+    }
+
+    public set endpointId(value: string) {
+        this.speechProperties.setProperty(PropertyId.SpeechServiceConnection_Endpoint, value);
+    }
+
+    public get endpointId(): string {
+        return this.speechProperties.getProperty(PropertyId.SpeechServiceConnection_EndpointId);
+    }
     /**
      * Add a (text) target language to translate into.
      * @param value the language such as de-DE
@@ -180,6 +215,10 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
 
     }
 
+    public get voiceName(): string {
+        return this.getProperty(PropertyId[PropertyId.SpeechServiceConnection_TranslationVoice]);
+    }
+
     /**
      * Sets voice of the translated language, enable voice synthesis output.
      * @param value
@@ -190,8 +229,16 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
         this.properties.setProperty(PropertyId.SpeechServiceConnection_TranslationVoice, value);
     }
 
+    public get region(): string {
+        return this.speechProperties.getProperty(PropertyId.SpeechServiceConnection_Region);
+    }
+
     public setProperty(name: string, value: string): void {
         this.properties.setProperty(name, value);
+    }
+
+    public getProperty(name: string, def?: string): string {
+        return this.speechProperties.getProperty(name, def);
     }
 
     public get properties(): PropertyCollection {

@@ -30,7 +30,7 @@ export class TranslationConnectionFactory implements IConnectionFactory {
         }
 
         const queryParams: IStringDictionary<string> = {
-            from: config.parameters.getProperty(PropertyId.SpeechServiceConnection_TranslationFromLanguage),
+            from: config.parameters.getProperty(PropertyId.SpeechServiceConnection_RecoLanguage),
             to: config.parameters.getProperty(PropertyId.SpeechServiceConnection_TranslationToLanguages),
         };
 

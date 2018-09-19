@@ -89,7 +89,7 @@ public class SpeechConfig implements Closeable {
 
     /**
      * Creates an instance of the speech config with specified endpoint and subscription key.
-     * This method is intended only for users who use a non-standard service endpoint or paramters.
+     * This method is intended only for users who use a non-standard service endpoint or parameters.
      * Note: The query parameters specified in the endpoint URL are not changed, even if they are set by any other APIs.
      * For example, if language is defined in the uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
      * the language setting in uri takes precedence, and the effective language is "de-DE".

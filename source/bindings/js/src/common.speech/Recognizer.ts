@@ -19,12 +19,33 @@ import {
     PromiseHelper,
     PromiseResult,
 } from "../common/Exports";
-import { OutputFormat, SynthesisStatus, TranslationStatus } from "../sdk/Exports";
-import { OutputFormatPropertyName } from "./Exports";
-import { AuthInfo, IAuthentication } from "./IAuthentication";
+import {
+    OutputFormat,
+    SynthesisStatus,
+    TranslationStatus,
+} from "../sdk/Exports";
+import {
+    IDetailedSpeechPhrase,
+    IIntentResponse,
+    ISimpleSpeechPhrase,
+    ISpeechEndDetectedResult,
+    ISpeechHypothesis,
+    ISpeechStartDetected,
+    ITranslationHypothesis,
+    ITranslationPhrase,
+    ITranslationSynthesisEnd,
+    ITurnStart,
+    OutputFormatPropertyName,
+    RecognitionStatus2,
+} from "./Exports";
+import {
+    AuthInfo,
+    IAuthentication,
+} from "./IAuthentication";
 import { IConnectionFactory } from "./IConnectionFactory";
 import {
     ConnectingToServiceEvent,
+    IntentResponseEvent,
     ListeningStartedEvent,
     RecognitionCompletionStatus,
     RecognitionEndedEvent,
@@ -40,25 +61,13 @@ import {
     SpeechStartDetectedEvent,
     TranslationFailedEvent,
     TranslationHypothesisEvent,
-    TranslationSimplePhraseEvent,
+    TranslationPhraseEvent,
     TranslationSynthesisErrorEvent,
     TranslationSynthesisEvent,
 } from "./RecognitionEvents";
 import { RecognizerConfig } from "./RecognizerConfig";
 import { ServiceTelemetryListener } from "./ServiceTelemetryListener.Internal";
 import { SpeechConnectionMessage } from "./SpeechConnectionMessage.Internal";
-import {
-    IDetailedSpeechPhrase,
-    ISimpleSpeechPhrase,
-    ISpeechEndDetectedResult,
-    ISpeechFragment,
-    ISpeechStartDetectedResult,
-    ISynthesisEnd,
-    ITranslationFragment,
-    ITranslationPhrase,
-    ITranslationStatus,
-    RecognitionStatus2,
-} from "./SpeechResults";
 
 export abstract class ServiceRecognizerBase implements IDisposable {
     private authentication: IAuthentication;
@@ -428,23 +437,17 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
                 const status2: string = "" + translatedPhrase.RecognitionStatus;
                 const recstatus2 = (RecognitionStatus2 as any)[status2];
 
-                switch (recstatus2) {
-                    case RecognitionStatus2.Success:
-                        {
-                            // OK, the recognition was successful. How'd the translation do?
-                            const translatedMessage: ITranslationFragment = JSON.parse(connectionMessage.TextBody);
-
-                            if ((TranslationStatus as any)[translatedMessage.Translation.TranslationStatus] === TranslationStatus.Success) {
-                                requestSession.OnServiceSimpleTranslationPhraseResponse(translatedMessage);
-                            } else {
-                                requestSession.OnServiceTranslationErrorResponse(translatedMessage);
-                            }
-                            break;
-                        }
-                    case RecognitionStatus2.Error:
-                        {
-                            requestSession.OnServiceRecognitionErrorResponse(translatedPhrase);
-                        }
+                if (recstatus2 === RecognitionStatus2.Success) {
+                    // OK, the recognition was successful. How'd the translation do?
+                    if ((TranslationStatus as any)[translatedPhrase.Translation.TranslationStatus] === TranslationStatus.Success) {
+                        requestSession.OnServiceTranslationPhraseResponse(translatedPhrase);
+                    } else {
+                        requestSession.OnServiceTranslationErrorResponse(translatedPhrase);
+                    }
+                    break;
+                } else {
+                    // Hate to reparse it, but the data types are different.
+                    requestSession.OnServiceRecognitionErrorResponse(JSON.parse(connectionMessage.TextBody));
                 }
                 break;
             case "translation.synthesis":
@@ -461,16 +464,71 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
                     this.SendTelemetryData(requestSession.RequestId, connection, requestSession.GetTelemetry());
                 }
 
-                const synthEnd: ISynthesisEnd = JSON.parse(connectionMessage.TextBody);
+                const synthEnd: ITranslationSynthesisEnd = JSON.parse(connectionMessage.TextBody);
                 const status3: string = "" + synthEnd.SynthesisStatus;
                 const synthStatus = (SynthesisStatus as any)[status3];
                 synthEnd.SynthesisStatus = synthStatus;
 
                 switch (synthStatus) {
                     case SynthesisStatus.Error:
-                        {
-                            requestSession.OnServiceTranslationSynthesisError(synthEnd);
-                        }
+                        requestSession.OnServiceTranslationSynthesisError(synthEnd);
+                        break;
+                    case SynthesisStatus.Success:
+                        requestSession.OnServiceTranslationSynthesis(undefined);
+                        break;
+                }
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+// tslint:disable-next-line:max-classes-per-file
+export class IntentServiceRecognizer extends ServiceRecognizerBase {
+
+    public constructor(
+        authentication: IAuthentication,
+        connectionFactory: IConnectionFactory,
+        audioSource: IAudioSource,
+        recognizerConfig: RecognizerConfig) {
+        super(authentication, connectionFactory, audioSource, recognizerConfig);
+    }
+
+    protected GetSession(audioSourceId: string, onEventCallback: (event: SpeechRecognitionEvent) => void): RequestSessionBase {
+        return new IntentRequestSession(audioSourceId, onEventCallback);
+    }
+
+    protected ProcessTypeSpecificMessages(connectionMessage: SpeechConnectionMessage, session: RequestSessionBase, connection: IConnection): void {
+        const requestSession: IntentRequestSession = session as IntentRequestSession;
+
+        switch (connectionMessage.Path.toLowerCase()) {
+            case "speech.hypothesis":
+                requestSession.OnServiceSpeechHypothesisResponse(JSON.parse(connectionMessage.TextBody));
+                break;
+            case "speech.phrase":
+                if (this.recognizerConfig.IsContinuousRecognition) {
+                    // For continuous recognition telemetry has to be sent for every phrase as per spec.
+                    this.SendTelemetryData(requestSession.RequestId, connection, requestSession.GetTelemetry());
+                }
+                if (this.recognizerConfig.parameters.getProperty(OutputFormatPropertyName) === OutputFormat[OutputFormat.Simple]) {
+                    requestSession.OnServiceSimpleSpeechPhraseResponse(JSON.parse(connectionMessage.TextBody));
+                } else {
+                    requestSession.OnServiceDetailedSpeechPhraseResponse(JSON.parse(connectionMessage.TextBody));
+                }
+                break;
+            case "response":
+                // Response from LUIS
+                if (this.recognizerConfig.IsContinuousRecognition) {
+                    // For continuous recognition telemetry has to be sent for every phrase as per spec.
+                    this.SendTelemetryData(requestSession.RequestId, connection, requestSession.GetTelemetry());
+                }
+
+                if (connectionMessage.TextBody === "") {
+                    // The query to LUIS failed, and nothing came back.
+                    requestSession.OnServiceIntentResponse(null);
+                } else {
+                    requestSession.OnServiceIntentResponse(JSON.parse(connectionMessage.TextBody));
                 }
                 break;
             default:
@@ -566,17 +624,17 @@ export abstract class RequestSessionBase {
         }
     }
 
-    public OnServiceTurnStartResponse = (response: ITurnStartResponse): void => {
+    public OnServiceTurnStartResponse = (response: ITurnStart): void => {
         if (response && response.context && response.context.serviceTag) {
             this.serviceTag = response.context.serviceTag;
         }
     }
 
-    public OnServiceSpeechStartDetectedResponse = (result: ISpeechStartDetectedResult): void => {
+    public OnServiceSpeechStartDetectedResponse = (result: ISpeechStartDetected): void => {
         this.OnEvent(new SpeechStartDetectedEvent(this.RequestId, this.sessionId, result));
     }
 
-    public OnServiceSpeechFragmentResponse = (result: ISpeechFragment): void => {
+    public OnServiceSpeechFragmentResponse = (result: ISpeechHypothesis): void => {
         this.OnEvent(new SpeechFragmentEvent(this.RequestId, this.sessionId, result));
     }
 
@@ -641,7 +699,7 @@ class SpeechRequestSession extends RequestSessionBase {
         super(audioSourceId, onEventCallback);
     }
 
-    public OnServiceSpeechHypothesisResponse = (result: ISpeechFragment): void => {
+    public OnServiceSpeechHypothesisResponse = (result: ISpeechHypothesis): void => {
         this.OnEvent(new SpeechHypothesisEvent(this.RequestId, this.sessionId, result));
     }
 
@@ -660,19 +718,19 @@ class TranslationRequestSession extends RequestSessionBase {
         super(audioSourceId, onEventCallback);
     }
 
-    public OnServiceTranslationHypothesisResponse = (result: ITranslationFragment): void => {
+    public OnServiceTranslationHypothesisResponse = (result: ITranslationHypothesis): void => {
         this.OnEvent(new TranslationHypothesisEvent(this.RequestId, this.sessionId, result));
     }
 
-    public OnServiceSimpleTranslationPhraseResponse = (result: ITranslationFragment): void => {
-        this.OnEvent(new TranslationSimplePhraseEvent(this.RequestId, this.sessionId, result));
+    public OnServiceTranslationPhraseResponse = (result: ITranslationPhrase): void => {
+        this.OnEvent(new TranslationPhraseEvent(this.RequestId, this.sessionId, result));
     }
 
-    public OnServiceTranslationErrorResponse = (result: ITranslationFragment): void => {
+    public OnServiceTranslationErrorResponse = (result: ITranslationPhrase): void => {
         this.OnEvent(new TranslationFailedEvent(this.RequestId, this.sessionId, result));
     }
 
-    public OnServiceRecognitionErrorResponse = (result: ITranslationPhrase): void => {
+    public OnServiceRecognitionErrorResponse = (result: ISimpleSpeechPhrase): void => {
         this.OnEvent(new RecognitionFailedEvent(this.RequestId, this.sessionId, result));
     }
 
@@ -680,15 +738,18 @@ class TranslationRequestSession extends RequestSessionBase {
         this.OnEvent(new TranslationSynthesisEvent(this.RequestId, this.sessionId, result));
     }
 
-    public OnServiceTranslationSynthesisError = (result: ISynthesisEnd): void => {
+    public OnServiceTranslationSynthesisError = (result: ITranslationSynthesisEnd): void => {
         this.OnEvent(new TranslationSynthesisErrorEvent(this.RequestId, this.sessionId, result));
     }
 }
 
-export interface ITurnStartResponse {
-    context: ITurnStartContext;
-}
+// tslint:disable-next-line:max-classes-per-file
+class IntentRequestSession extends SpeechRequestSession {
+    constructor(audioSourceId: string, onEventCallback: (event: SpeechRecognitionEvent) => void) {
+        super(audioSourceId, onEventCallback);
+    }
 
-export interface ITurnStartContext {
-    serviceTag: string;
+    public OnServiceIntentResponse = (result: IIntentResponse): void => {
+        this.OnEvent(new IntentResponseEvent(this.RequestId, this.sessionId, result));
+    }
 }

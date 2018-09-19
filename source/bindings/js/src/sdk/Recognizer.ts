@@ -150,7 +150,7 @@ export abstract class Recognizer {
     }
 
     // Start the recognition
-    protected implRecognizerStart(recognizer: ServiceRecognizerBase, cb: (event: SpeechRecognitionEvent) => void): void {
+    protected implRecognizerStart(recognizer: ServiceRecognizerBase, cb: (event: SpeechRecognitionEvent) => void, speechContext?: string): void {
         recognizer.Recognize((event: SpeechRecognitionEvent) => {
             if (this.disposed) {
                 return;
@@ -173,7 +173,7 @@ export abstract class Recognizer {
 
                 case "RecognitionStartedEvent": // Fires when the client connects to the service successfuly.
                     sessionStartStopEventArgs = new SessionEventArgs();
-                    sessionStartStopEventArgs.SessionId = event.SessionId;
+                    sessionStartStopEventArgs.sessionId = event.SessionId;
 
                     if (!!this.sessionStarted) {
                         this.sessionStarted(this, sessionStartStopEventArgs);
@@ -184,7 +184,7 @@ export abstract class Recognizer {
                     const recoEndedEvent = event as RecognitionEndedEvent;
 
                     sessionStartStopEventArgs = new SessionEventArgs();
-                    sessionStartStopEventArgs.SessionId = recoEndedEvent.SessionId;
+                    sessionStartStopEventArgs.sessionId = recoEndedEvent.SessionId;
 
                     if (recoEndedEvent.Status !== RecognitionCompletionStatus.Success) {
                         if (cb) {
@@ -222,6 +222,6 @@ export abstract class Recognizer {
                         cb(event); // call continuation, if configured.
                     }
             }
-        });
+        }, speechContext);
     }
 }

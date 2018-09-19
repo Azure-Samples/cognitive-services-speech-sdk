@@ -44,11 +44,6 @@ export enum PropertyId {
     SpeechServiceConnection_EndpointId,
 
     /**
-     * Translation from language.
-     */
-    SpeechServiceConnection_TranslationFromLanguage,
-
-    /**
      * Translation to languages.
      */
     SpeechServiceConnection_TranslationToLanguages,
@@ -69,29 +64,9 @@ export enum PropertyId {
     SpeechServiceConnection_IntentRegion,
 
     /**
-     * Intent source language. TODO:REMOVE
-     */
-    SpeechServiceConnection_IntentSourceLanguage,
-
-    /**
      * Recognition mode.
      */
     SpeechServiceConnection_RecoMode,
-
-    /**
-     * Interactive mode. TODO:REMOVE
-     */
-    SpeechServiceConnection_RecoMode_Interactive,
-
-    /**
-     * Conversation mode. TODO:REMOVE
-     */
-    SpeechServiceConnection_RecoMode_Conversation,
-
-    /**
-     * Dictation mode. TODO:REMOVE
-     */
-    SpeechServiceConnection_RecoMode_Dictation,
 
     /**
      * Recognition language.
@@ -99,7 +74,7 @@ export enum PropertyId {
     SpeechServiceConnection_RecoLanguage,
 
     /**
-     * Session id. TODO: REMOVE
+     * Session id.
      */
     Speech_SessionId,
 
@@ -112,11 +87,6 @@ export enum PropertyId {
      * Profanity filtering required.
      */
     SpeechServiceResponse_RequestProfanityFilterTrueFalse,
-
-    /**
-     * TODO:WHAT IS THIS FOR?
-     */
-    SpeechServiceResponse_Json,
 
     /**
      * JSON in result.
@@ -142,4 +112,9 @@ export enum PropertyId {
      * Cancellation detailed text.
      */
     CancellationDetails_ReasonDetailedText,
+
+    /**
+     * JSON result of language understanding service.
+     */
+    LanguageUnderstandingServiceResponse_JsonResult,
 }

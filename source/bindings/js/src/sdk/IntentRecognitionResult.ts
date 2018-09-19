@@ -3,11 +3,13 @@
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+import { RecognitionResult } from "./Exports";
+
 /**
  * Intent recognition result.
  * @class
  */
-export class IntentRecognitionResult {
+export class IntentRecognitionResult extends RecognitionResult {
     /**
      * A String that represents the intent identifier being recognized.
      * @property
