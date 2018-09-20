@@ -498,7 +498,7 @@ phases:
     displayName: Generate solution
     inputs:
       workingDirectory: 'build/$(BuildPlatform)'
-      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -Duse_default_uuid=ON -Duse_builtin_httpapi=ON -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0 -Dskip_samples=ON -Duse_openssl=ON -Duse_schannel=OFF -DOPENSSL_ROOT_DIR=../../external/uwp_ssl/lib/$(BuildPlatform) -DOPENSSL_INCLUDE_DIR=../../external/uwp_ssl/include -DOPENSSL_USE_STATIC_LIBS=TRUE -DBUILD_PYTHON=OFF -DBUILD_JAVA=OFF ../..'
+      cmakeArgs: '-G "$(SPEECHSDK_CMAKE_GENERATOR)" -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0 -Duse_default_uuid=ON -Duse_openssl=ON -Duse_schannel=OFF -DOPENSSL_ROOT_DIR=../../external/uwp_ssl/lib/$(BuildPlatform) -DOPENSSL_INCLUDE_DIR=../../external/uwp_ssl/include -DOPENSSL_USE_STATIC_LIBS=TRUE -DBUILD_PYTHON=OFF -DBUILD_JAVA=OFF ../..'
   - task: NuGetCommand@2
     displayName: NuGet restore
     inputs:
