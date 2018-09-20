@@ -13,6 +13,13 @@ message("BUILD_PYTHON=${BUILD_PYTHON}")
 message("BUILD_CSHARP=${BUILD_CSHARP}")
 message("BUILD_JAVA=${BUILD_JAVA}")
 
+# Configure CCache if available
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+        set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+        set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+endif(CCACHE_FOUND)
+
 option(SPECTRE_MITIGATION "Build with Spectre mitigation" OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -81,6 +88,14 @@ elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 elseif(ANDROID)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra -Wno-long-long -Wpedantic -fPIC -Wno-gnu-zero-variadic-macro-arguments")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  # compilation flags required by security checks
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstack-protector-strong -Wformat -Wformat-security -Werror=format-security")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector-strong -Wformat -Wformat-security -Werror=format-security")
+
+  set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} -fPIC")
+
+  message("compiling with ${CMAKE_CXX_FLAGS}")
 endif()
 
 # Android build complains about
@@ -105,6 +120,8 @@ set(CARBON_INCLUDE "${CARBON_CORE}/include")
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
   set(SPEECHSDK_CORE_LIBRARY "Microsoft.CognitiveServices.Speech.core.uwp")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+  set(SPEECHSDK_CORE_LIBRARY "MicrosoftCognitiveServicesSpeech")
 else()
   set(SPEECHSDK_CORE_LIBRARY "Microsoft.CognitiveServices.Speech.core")
 endif()
