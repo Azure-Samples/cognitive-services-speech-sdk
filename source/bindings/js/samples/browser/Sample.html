@@ -226,7 +226,14 @@
         var sdkStartContinousTranslationBtn, sdkStopContinousTranslationBtn;
         var sdkStartRecognizeOnceAsyncBtn, sdkStopRecognizeOnceAsyncBtn, languageTargetOptions, voiceOutput;
         var audioFile, audioFileValid;
-        var soundContext = new AudioContext();
+
+        var soundContext = undefined;
+        try {
+            soundContext = new AudioContext();
+        }
+        catch(e) {
+            window.console.log("no sound context found, no audio output. " + e);
+        }
 
         document.addEventListener("DOMContentLoaded", function () {
             createBtn = document.getElementById("createBtn");
@@ -371,7 +378,7 @@
                 reco.synthesizing = function (s, e) {
                     window.console.log(e);
 
-                    if (e.result.audio) {
+                    if (e.result.audio && soundContext) {
                         var source = soundContext.createBufferSource();
                         soundContext.decodeAudioData(e.result.audio, function (newBuffer) {
                             source.buffer = newBuffer;
