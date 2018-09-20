@@ -141,48 +141,60 @@ void Connection::Impl::Invoke(std::function<void()> callback)
 
 void Connection::Impl::WorkThread(weak_ptr<Connection::Impl> ptr)
 {
+    try
     {
-        auto connection = ptr.lock();
-        if (connection == nullptr) 
         {
-            return;
+            auto connection = ptr.lock();
+            if (connection == nullptr)
+            {
+                return;
+            }
+            connection->SignalConnected();
         }
-        connection->SignalConnected();
+
+        while (true)
+        {
+            auto connection = ptr.lock();
+            if (connection == nullptr)
+            {
+                // connection is destroyed, our work here is done.
+                return;
+            }
+
+            unique_lock<recursive_mutex> lock(connection->m_mutex);
+            if (!connection->m_connected)
+            {
+                return;
+            }
+
+            auto callbacks = connection->m_config.m_callbacks;
+
+            try
+            {
+                TransportDoWork(connection->m_transport.get());
+            }
+            catch (const exception& e)
+            {
+                connection->Invoke([&] { callbacks->OnError(false, e.what()); });
+            }
+            catch (...)
+            {
+                connection->Invoke([&] { callbacks->OnError(false, "Unhandled exception in the USP layer."); });
+            }
+
+            connection->m_cv.wait_for(lock, chrono::milliseconds(200), [&] {return connection->m_haveWork || !connection->m_connected; });
+            connection->m_haveWork = false;
+        }
+    }
+    catch (const std::exception& ex) {
+        (void)ex; // release builds
+        LogError("%s Unexpected Exception %s. Thread terminated", __FUNCTION__, ex.what());
+    }
+    catch (...) {
+        LogError("%s Unexpected Exception. Thread terminated", __FUNCTION__);
     }
 
-    while (true)
-    {
-        auto connection = ptr.lock();
-        if (connection == nullptr)
-        {
-            // connection is destroyed, our work here is done.
-            return;
-        }
-
-        unique_lock<recursive_mutex> lock(connection->m_mutex);
-        if (!connection->m_connected)
-        {
-            return;
-        }
-
-        auto callbacks = connection->m_config.m_callbacks;
-
-        try 
-        {
-            TransportDoWork(connection->m_transport.get());
-        }
-        catch (const exception& e)
-        {
-            connection->Invoke([&] { callbacks->OnError(false, e.what()); });
-        }
-        catch (...)
-        {
-            connection->Invoke([&] { callbacks->OnError(false, "Unhandled exception in the USP layer."); });
-        }
-
-        connection->m_cv.wait_for(lock, chrono::milliseconds(200), [&] {return connection->m_haveWork || !connection->m_connected; });
-        connection->m_haveWork = false;
-    }
+    LogInfo("%s Thread ending normally.", __FUNCTION__);
 }
 
 void Connection::Impl::SignalWork()
