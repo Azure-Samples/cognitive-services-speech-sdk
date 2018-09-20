@@ -1249,7 +1249,7 @@ phases:
 
 - phase: IosBuild
   dependsOn: Pre
-  condition: contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' IosBuild ')
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' IosBuild '))
   queue:
     name: Hosted macOS Preview
     timeoutInMinutes: 30
@@ -1324,7 +1324,7 @@ phases:
 
 - phase: OsxBuild
   dependsOn: Pre
-  condition: contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' OsxBuild ')
+  condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' OsxBuild '))
   queue:
     name: Hosted macOS Preview
     timeoutInMinutes: 30
@@ -1413,14 +1413,16 @@ phases:
       type: FilePath
       scriptPath: './ci/drop/bindrop.sh'
       args: '"" $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/OSX-x64/$(BuildConfiguration) OSX'
-    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
+    # TODO Should be re-enabled after GA
+    condition: and(false, succeeded(), eq(variables['BuildConfiguration'], 'Release'))
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
       ArtifactName: OSX
       publishLocation: Container
-    condition: and(succeeded(), eq(variables['BuildConfiguration'], 'Release'))
+    # TODO Should be re-enabled after GA
+    condition: and(false, succeeded(), eq(variables['BuildConfiguration'], 'Release'))
 
 # TODO stuff like version
 - phase: JsBuild
