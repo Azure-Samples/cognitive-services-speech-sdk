@@ -12,6 +12,7 @@ export class SpeechRecognitionResult extends RecognitionResult {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
+     * @public
      * @param {string} resultId - The result id.
      * @param {ResultReason} reason - The reason.
      * @param {string} text - The recognized text.

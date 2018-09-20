@@ -44,6 +44,8 @@ export class RecognitionResult {
     /**
      * Specifies the result identifier.
      * @member RecognitionResult.prototype.resultId
+     * @function
+     * @public
      * @returns Specifies the result identifier.
      */
     public get resultId(): string {
@@ -53,6 +55,8 @@ export class RecognitionResult {
     /**
      * Specifies status of the result.
      * @member RecognitionResult.prototype.reason
+     * @function
+     * @public
      * @returns Specifies status of the result.
      */
     public get reason(): ResultReason {
@@ -62,6 +66,8 @@ export class RecognitionResult {
     /**
      * Presents the recognized text in the result.
      * @member RecognitionResult.prototype.text
+     * @function
+     * @public
      * @returns Presents the recognized text in the result.
      */
     public get text(): string {
@@ -71,6 +77,8 @@ export class RecognitionResult {
     /**
      * Duration of recognized speech in milliseconds.
      * @member RecognitionResult.prototype.duration
+     * @function
+     * @public
      * @returns Duration of recognized speech in milliseconds.
      */
     public get duration(): number {
@@ -80,6 +88,8 @@ export class RecognitionResult {
     /**
      * Offset of recognized speech in milliseconds.
      * @member RecognitionResult.prototype.offset
+     * @function
+     * @public
      * @returns Offset of recognized speech in milliseconds.
      */
     public get offset(): number {
@@ -90,6 +100,8 @@ export class RecognitionResult {
      * In case of an unsuccessful recognition, provides a brief description of an occurred error.
      * This field is only filled-out if the recognition status (@see RecognitionStatus) is set to Canceled.
      * @member RecognitionResult.prototype.errorDetails
+     * @function
+     * @public
      * @returns a brief description of an error.
      */
     public get errorDetails(): string {
@@ -99,6 +111,8 @@ export class RecognitionResult {
     /**
      * A string containing Json serialized recognition result as it was received from the service.
      * @member RecognitionResult.prototype.json
+     * @function
+     * @public
      * @returns Json serialized representation of the result.
      */
     public get json(): string {
@@ -108,6 +122,8 @@ export class RecognitionResult {
     /**
      *  The set of properties exposed in the result.
      * @member RecognitionResult.prototype.properties
+     * @function
+     * @public
      * @returns The set of properties exposed in the result.
      */
     public get properties(): PropertyCollection {

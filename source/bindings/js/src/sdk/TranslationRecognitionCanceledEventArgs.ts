@@ -35,6 +35,8 @@ export class TranslationRecognitionCanceledEventArgs {
     /**
      * Specifies the recognition result.
      * @member TranslationRecognitionCanceledEventArgs.prototype.result
+     * @function
+     * @public
      * @return the recognition result.
      */
     public get result(): TranslationRecognitionResult {
@@ -44,6 +46,8 @@ export class TranslationRecognitionCanceledEventArgs {
     /**
      * Specifies the session identifier.
      * @member TranslationRecognitionCanceledEventArgs.prototype.sessionId
+     * @function
+     * @public
      * @return the session identifier.
      */
     public get sessionId(): string {
@@ -53,6 +57,8 @@ export class TranslationRecognitionCanceledEventArgs {
     /**
      * The reason the recognition was canceled.
      * @member TranslationRecognitionCanceledEventArgs.prototype.reason
+     * @function
+     * @public
      * @return Specifies the reason canceled.
      */
     public get reason(): CancellationReason {
@@ -63,6 +69,8 @@ export class TranslationRecognitionCanceledEventArgs {
      * In case of an unsuccessful recognition, provides a details of why the occurred error.
      * This field is only filled-out if the reason canceled (@see getReason) is set to Error.
      * @member TranslationRecognitionCanceledEventArgs.prototype.errorDetails
+     * @function
+     * @public
      * @return A String that represents the error details.
      */
     public get errorDetails(): string {

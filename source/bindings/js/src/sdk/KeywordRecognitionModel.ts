@@ -23,6 +23,8 @@ export class KeywordRecognitionModel {
     /**
      * Creates a keyword recognition model using the specified filename.
      * @member KeywordRecognitionModel.fromFile
+     * @function
+     * @public
      * @param {string} fileName - A string that represents file name for the keyword recognition model.
      *                 Note, the file can point to a zip file in which case the model will be extracted from the zip.
      * @returns The keyword recognition model being created.
@@ -36,6 +38,8 @@ export class KeywordRecognitionModel {
     /**
      * Creates a keyword recognition model using the specified filename.
      * @member KeywordRecognitionModel.fromStream
+     * @function
+     * @public
      * @param {string} file - A File that represents file for the keyword recognition model.
      *                 Note, the file can point to a zip file in which case the model will be extracted from the zip.
      * @returns The keyword recognition model being created.
@@ -49,6 +53,8 @@ export class KeywordRecognitionModel {
     /**
      * Dispose of associated resources.
      * @member KeywordRecognitionModel.prototype.close
+     * @function
+     * @public
      */
     public close(): void {
         if (this.disposed) {

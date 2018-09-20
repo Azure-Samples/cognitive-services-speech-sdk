@@ -25,6 +25,8 @@ export abstract class SpeechConfig {
     /**
      * Static instance of SpeechConfig returned by passing subscriptionKey and service region.
      * @member SpeechConfig.fromSubscription
+     * @function
+     * @public
      * @param {string} subscriptionKey - The subscription key.
      * @param {string} region - The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
      * @returns The speech factory
@@ -46,6 +48,8 @@ export abstract class SpeechConfig {
      * This method is intended only for users who use a non-standard service endpoint or paramters.
      * the language setting in uri takes precedence, and the effective language is "de-DE".
      * @member SpeechConfig.fromEndpoint
+     * @function
+     * @public
      * @param {URL} endpoint - The service endpoint to connect to.
      * @param {string} subscriptionKey - The subscription key.
      * @returns A speech factory instance.
@@ -63,6 +67,8 @@ export abstract class SpeechConfig {
     /**
      * Creates an instance of the speech factory with specified initial authorization token and region.
      * @member SpeechConfig.fromAuthorizationToken
+     * @function
+     * @public
      * @param {string} authorizationToken - The initial authorization token.
      * @param {string} region - The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
      * @returns A speech factory instance.
@@ -81,6 +87,8 @@ export abstract class SpeechConfig {
     /**
      * Returns the current authorization token.
      * @member SpeechConfig.prototype.authorizationToken
+     * @function
+     * @public
      */
     public abstract get authorizationToken(): string;
 
@@ -89,6 +97,8 @@ export abstract class SpeechConfig {
      * If this is set, subscription key is ignored.
      * User needs to make sure the provided authorization token is valid and not expired.
      * @member SpeechConfig.prototype.authorizationToken
+     * @function
+     * @public
      * @param {string} value - The authorization token.
      */
     public abstract set authorizationToken(value: string);
@@ -96,12 +106,16 @@ export abstract class SpeechConfig {
     /**
      * Returns the configured language.
      * @member SpeechConfig.prototype.speechRecognitionLanguage
+     * @function
+     * @public
      */
     public abstract get speechRecognitionLanguage(): string;
 
     /**
      * Sets the input language.
      * @member SpeechConfig.prototype.speechRecognitionLanguage
+     * @function
+     * @public
      * @param {string} value - The authorization token.
      */
     public abstract set speechRecognitionLanguage(vale: string);
@@ -109,6 +123,8 @@ export abstract class SpeechConfig {
     /**
      * Sets an arbitrary property.
      * @member SpeechConfig.prototype.setProperty
+     * @function
+     * @public
      * @param {string} name - The name of the property to set.
      * @param {string} value - The new value of the property.
      */
@@ -117,6 +133,8 @@ export abstract class SpeechConfig {
     /**
      * Returns the current value of an arbitrary property.
      * @member SpeechConfig.prototype.getProperty
+     * @function
+     * @public
      * @param {string} name - The name of the property to query.
      * @param {string} def - The value to return in case the property is not known.
      * @returns The current value, or provided default, of the given property.
@@ -126,12 +144,16 @@ export abstract class SpeechConfig {
     /**
      * Sets output format.
      * @member SpeechConfig.prototype.outputFormat
+     * @function
+     * @public
      */
     public abstract set outputFormat(format: OutputFormat);
 
     /**
      * Gets output format.
      * @member SpeechConfig.prototype.outputFormat
+     * @function
+     * @public
      * @return Returns the output format.
      */
     public abstract get outputFormat(): OutputFormat;
@@ -139,6 +161,8 @@ export abstract class SpeechConfig {
     /**
      * Sets the endpoint ID of a customized speech model that is used for speech recognition.
      * @member SpeechConfig.prototype.endpointId
+     * @function
+     * @public
      * @param {string} value - The endpoint ID
      */
     public abstract set endpointId(value: string);
@@ -146,6 +170,8 @@ export abstract class SpeechConfig {
     /**
      * Gets the endpoint ID of a customized speech model that is used for speech recognition.
      * @member SpeechConfig.prototype.endpointId
+     * @function
+     * @public
      * @return The endpoint ID
      */
     public abstract get endpointId(): string;
@@ -153,6 +179,8 @@ export abstract class SpeechConfig {
     /**
      * Closes the configuration.
      * @member SpeechConfig.prototype.close
+     * @function
+     * @public
      */
     /* tslint:disable:no-empty */
     public close(): void { }

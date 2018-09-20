@@ -26,6 +26,8 @@ export class TranslationSynthesisResult {
     /**
      * Translated text in the target language.
      * @member TranslationSynthesisResult.prototype.audio
+     * @function
+     * @public
      * @returns Translated audio in the target language.
      */
     public get audio(): ArrayBuffer {
@@ -35,6 +37,8 @@ export class TranslationSynthesisResult {
     /**
      * The synthesis status.
      * @member TranslationSynthesisResult.prototype.reason
+     * @function
+     * @public
      * @returns The synthesis status.
      */
     public get reason(): SynthesisStatus {

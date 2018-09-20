@@ -37,6 +37,8 @@ export class IntentRecognitionResult extends SpeechRecognitionResult {
     /**
      * A String that represents the intent identifier being recognized.
      * @member IntentRecognitionResult.prototype.intentId
+     * @function
+     * @public
      * @returns A String that represents the intent identifier being recognized.
      */
     public get intentId(): string {
@@ -46,6 +48,8 @@ export class IntentRecognitionResult extends SpeechRecognitionResult {
     /**
      * A String that represents the intent including properties being recognized.
      * @member IntentRecognitionResult.prototype.languageUnderstanding
+     * @function
+     * @public
      * @returns A String that represents the intent including properties being recognized.
      */
     public get languageUnderstanding(): string {

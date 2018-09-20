@@ -34,6 +34,8 @@ export class CancellationDetails {
     /**
      * Creates an instance of CancellationDetails object for the canceled RecognitionResult.
      * @member CancellationDetails.fromResult
+     * @function
+     * @public
      * @param {RecognitionResult} result - The result that was canceled.
      * @return - The cancellation details object being created.
      */
@@ -64,6 +66,8 @@ export class CancellationDetails {
     /**
      * The reason the recognition was canceled.
      * @member CancellationDetails.prototype.reason
+     * @function
+     * @public
      * @return Specifies the reason canceled.
      */
     public get reason(): CancellationReason {
@@ -74,6 +78,8 @@ export class CancellationDetails {
      * In case of an unsuccessful recognition, provides a details of why the occurred error.
      * This field is only filled-out if the reason canceled (@see getReason) is set to Error.
      * @member CancellationDetails.prototype.errorDetails
+     * @function
+     * @public
      * @return A String that represents the error details.
      */
     public get errorDetails(): string {

@@ -34,6 +34,8 @@ export class NoMatchDetails {
     /**
      * Creates an instance of NoMatchDetails object for the NoMatch SpeechRecognitionResults.
      * @member NoMatchDetails.fromResult
+     * @function
+     * @public
      * @param {SpeechRecognitionResult | IntentRecognitionResult | TranslationRecognitionResult} result - The recognition result that was not recognized.
      * @return The no match details object being created.
      */
@@ -62,6 +64,8 @@ export class NoMatchDetails {
     /**
      * The reason the recognition was canceled.
      * @member NoMatchDetails.prototype.reason
+     * @function
+     * @public
      * @return Specifies the reason canceled.
      */
     public get reason(): NoMatchReason {

@@ -36,6 +36,8 @@ export class IntentRecognitionCanceledEventArgs extends IntentRecognitionEventAr
     /**
      * The reason the recognition was canceled.
      * @member IntentRecognitionCanceledEventArgs.prototype.reason
+     * @function
+     * @public
      * @return Specifies the reason canceled.
      */
     public get reason(): CancellationReason {
@@ -46,6 +48,8 @@ export class IntentRecognitionCanceledEventArgs extends IntentRecognitionEventAr
      * In case of an unsuccessful recognition, provides a details of why the occurred error.
      * This field is only filled-out if the reason canceled (@see getReason) is set to Error.
      * @member IntentRecognitionCanceledEventArgs.prototype.errorDetails
+     * @function
+     * @public
      * @return A String that represents the error details.
      */
     public get errorDetails(): string {

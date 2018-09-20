@@ -16,6 +16,8 @@ export abstract class AudioConfig {
     /**
      * Creates an AudioConfig object representing the default microphone on the system.
      * @member AudioConfig.fromDefaultMicrophoneInput
+     * @function
+     * @public
      * @returns The audio input configuration being created.
      */
     public static fromDefaultMicrophoneInput(): AudioConfig {
@@ -26,6 +28,8 @@ export abstract class AudioConfig {
     /**
      * Creates an AudioConfig object representing the specified file.
      * @member AudioConfig.fromWavFileInput
+     * @function
+     * @public
      * @param {File} fileName - Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
      * @returns The audio input configuration being created.
      */
@@ -36,6 +40,8 @@ export abstract class AudioConfig {
     /**
      * Creates an AudioConfig object representing the specified stream.
      * @member AudioConfig.fromStreamInput
+     * @function
+     * @public
      * @param {AudioInputStream | PullAudioInputStreamCallback} audioStream - Specifies the custom audio input stream. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
      * @returns The audio input configuration being created.
      */
@@ -54,6 +60,8 @@ export abstract class AudioConfig {
     /**
      * Explicitly frees any external resource attached to the object
      * @member AudioConfig.prototype.close
+     * @function
+     * @public
      */
     public abstract close(): void;
 }
@@ -78,6 +86,8 @@ export class AudioConfigImpl extends AudioConfig implements IAudioSource {
 
     /**
      * @member AudioConfigImpl.prototype.close
+     * @function
+     * @public
      */
     public close(): void {
         this.source.TurnOff();
@@ -85,6 +95,8 @@ export class AudioConfigImpl extends AudioConfig implements IAudioSource {
 
     /**
      * @member AudioConfigImpl.prototype.Id
+     * @function
+     * @public
      */
     public Id(): string {
         return this.source.Id();
@@ -92,6 +104,8 @@ export class AudioConfigImpl extends AudioConfig implements IAudioSource {
 
     /**
      * @member AudioConfigImpl.prototype.TurnOn
+     * @function
+     * @public
      * @returns A promise.
      */
     public TurnOn(): Promise<boolean> {
@@ -100,6 +114,8 @@ export class AudioConfigImpl extends AudioConfig implements IAudioSource {
 
     /**
      * @member AudioConfigImpl.prototype.Attach
+     * @function
+     * @public
      * @param {string} audioNodeId - The audio node id.
      * @returns A promise.
      */
@@ -109,6 +125,8 @@ export class AudioConfigImpl extends AudioConfig implements IAudioSource {
 
     /**
      * @member AudioConfigImpl.prototype.Detach
+     * @function
+     * @public
      * @param {string} audioNodeId - The audio node id.
      */
     public Detach(audioNodeId: string): void {
@@ -117,6 +135,8 @@ export class AudioConfigImpl extends AudioConfig implements IAudioSource {
 
     /**
      * @member AudioConfigImpl.prototype.TurnOff
+     * @function
+     * @public
      * @returns A promise.
      */
     public TurnOff(): Promise<boolean> {
@@ -125,6 +145,8 @@ export class AudioConfigImpl extends AudioConfig implements IAudioSource {
 
     /**
      * @member AudioConfigImpl.prototype.Events
+     * @function
+     * @public
      * @returns An event source for audio events.
      */
     public get Events(): EventSource<AudioSourceEvent> {

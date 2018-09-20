@@ -27,6 +27,8 @@ export class TranslationRecognitionEventArgs extends RecognitionEventArgs {
     /**
      * Specifies the recognition result.
      * @member TranslationRecognitionEventArgs.prototype.result
+     * @function
+     * @public
      * @returns the recognition result.
      */
     public get result(): TranslationRecognitionResult {

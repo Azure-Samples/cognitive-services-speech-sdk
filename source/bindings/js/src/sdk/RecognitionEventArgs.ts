@@ -27,6 +27,8 @@ export class RecognitionEventArgs extends SessionEventArgs {
     /**
      * Represents the message offset
      * @member RecognitionEventArgs.prototype.offset
+     * @function
+     * @public
      */
     public get offset(): number {
         return this.privOffset;

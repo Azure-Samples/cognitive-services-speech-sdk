@@ -22,6 +22,8 @@ export class SessionEventArgs {
     /**
      * Represents the session identifier.
      * @member SessionEventArgs.prototype.sessionId
+     * @function
+     * @public
      * @returns Represents the session identifier.
      */
     public get sessionId(): string {

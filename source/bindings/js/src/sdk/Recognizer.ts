@@ -81,6 +81,8 @@ export abstract class Recognizer {
     /**
      * Dispose of associated resources.
      * @member Recognizer.prototype.close
+     * @function
+     * @public
      */
     public close(): void {
         Contracts.throwIfDisposed(this.disposed);
@@ -93,6 +95,8 @@ export abstract class Recognizer {
      * The Boolean parameter disposing indicates whether the method is called from Dispose (if disposing is true) or from the finalizer (if disposing is false).
      * Derived classes should override this method to dispose resource if needed.
      * @member Recognizer.prototype.dispose
+     * @function
+     * @public
      * @param {boolean} disposing - Flag to request disposal.
      */
     protected dispose(disposing: boolean): void {
