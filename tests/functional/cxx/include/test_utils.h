@@ -111,18 +111,18 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
 #endif
 
 #define SPXTEST_SECTION(msg) SECTION(msg) if ([=](){ \
-    SPX_DBG_TRACE_INFO("SPXTEST_SECTION('%s') %s(%d)", msg, __FILE__, __LINE__);  \
+    SPX_TRACE_INFO("SPXTEST_SECTION('%s') %s(%d)", msg, __FILE__, __LINE__);  \
     return 1; }())
 
 #define SPXTEST_GIVEN(msg) GIVEN(msg) if ([=](){ \
-    SPX_DBG_TRACE_INFO("SPXTEST_GIVEN('%s') %s(%d):", msg, __FILE__, __LINE__); \
+    SPX_TRACE_INFO("SPXTEST_GIVEN('%s') %s(%d):", msg, __FILE__, __LINE__); \
     return 1; }())
 
 #define SPXTEST_WHEN(msg) WHEN(msg) if ([=](){ \
-    SPX_DBG_TRACE_INFO("SPXTEST_WHEN('%s') %s(%d):", msg, __FILE__, __LINE__); \
+    SPX_TRACE_INFO("SPXTEST_WHEN('%s') %s(%d):", msg, __FILE__, __LINE__); \
     return 1; }())
 
 #define SPXTEST_REQUIRE(expr) \
-    SPX_DBG_TRACE_INFO("SPXTEST_REQUIRE('%s'): %s(%d):", __SPX_EXPR_AS_STRING(expr), __FILE__, __LINE__); \
-    SPX_DBG_TRACE_ERROR_IF(!(expr), "SPXTEST_REQUIRE('%s') FAILED: %s(%d):", __SPX_EXPR_AS_STRING(expr), __FILE__, __LINE__); \
+    SPX_TRACE_INFO("SPXTEST_REQUIRE('%s'): %s(%d):", __SPX_EXPR_AS_STRING(expr), __FILE__, __LINE__); \
+    SPX_TRACE_ERROR_IF(!(expr), "SPXTEST_REQUIRE('%s') FAILED: %s(%d):", __SPX_EXPR_AS_STRING(expr), __FILE__, __LINE__); \
     REQUIRE(expr)
