@@ -171,6 +171,10 @@ export abstract class SpeechTranslationConfig extends SpeechConfig {
     public abstract close(): void;
 }
 
+/**
+ * @private
+ * @class SpeechTranslationConfigImpl
+ */
 // tslint:disable-next-line:max-classes-per-file
 export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
     private speechProperties: PropertyCollection;

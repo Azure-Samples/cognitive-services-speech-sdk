@@ -42,6 +42,10 @@ export abstract class AudioStreamFormat {
     public abstract close(): void;
 }
 
+/**
+ * @private
+ * @class AudioStreamFormatImpl
+ */
 // tslint:disable-next-line:max-classes-per-file
 export class AudioStreamFormatImpl extends AudioStreamFormat {
     /**

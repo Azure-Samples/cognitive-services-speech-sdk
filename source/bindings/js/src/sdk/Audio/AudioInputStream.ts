@@ -110,6 +110,7 @@ export abstract class PushAudioInputStream extends AudioInputStream {
 
 /**
  * Represents memory backed push audio input stream used for custom audio input configurations.
+ * @private
  * @class PushAudioInputStreamImpl
  */
 // tslint:disable-next-line:max-classes-per-file
@@ -253,6 +254,7 @@ export abstract class PullAudioInputStream extends AudioInputStream {
 
 /**
  * Represents audio input stream used for custom audio input configurations.
+ * @private
  * @class PullAudioInputStreamImpl
  */
 // tslint:disable-next-line:max-classes-per-file

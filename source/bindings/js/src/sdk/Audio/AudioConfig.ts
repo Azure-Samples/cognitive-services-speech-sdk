@@ -68,6 +68,7 @@ export abstract class AudioConfig {
 
 /**
  * Represents audio input stream used for custom audio input configurations.
+ * @private
  * @class AudioConfigImpl
  */
 // tslint:disable-next-line:max-classes-per-file

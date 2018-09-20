@@ -99,6 +99,10 @@ export class LanguageUnderstandingModel {
     }
 }
 
+/**
+ * @private
+ * @class LanguageUnderstandingModelImpl
+ */
 // tslint:disable-next-line:max-classes-per-file
 export class LanguageUnderstandingModelImpl extends LanguageUnderstandingModel {
     public appId: string;

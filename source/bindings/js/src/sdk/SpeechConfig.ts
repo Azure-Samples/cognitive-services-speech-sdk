@@ -186,6 +186,10 @@ export abstract class SpeechConfig {
     public close(): void { }
 }
 
+/**
+ * @private
+ * @class SpeechConfigImpl
+ */
 // tslint:disable-next-line:max-classes-per-file
 export class SpeechConfigImpl extends SpeechConfig {
 
