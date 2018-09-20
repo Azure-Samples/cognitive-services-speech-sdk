@@ -3,17 +3,11 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#ifndef translation_synthesis_result_event_args_private_h
-#define translation_synthesis_result_event_args_private_h
-
-#import "translation_synthesis_result_event_args.h"
-
+#import "SPXTranslationSynthesisEventArgs.h"
 #import "common_private.h"
 
-@interface TranslationSynthesisEventArgs (Private)
+@interface SPXTranslationSynthesisEventArgs (Private)
 
 - (instancetype)init: (const TranslationImpl::TranslationSynthesisEventArgs&)e;
 
 @end
-
-#endif /* translation_synthesis_result_event_args_private_h */

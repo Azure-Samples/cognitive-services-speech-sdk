@@ -5,13 +5,13 @@
 
 #import "speechapi_private.h"
 
-@implementation TranslationSynthesisEventArgs
+@implementation SPXTranslationSynthesisEventArgs
 
 - (instancetype)init:(const TranslationImpl::TranslationSynthesisEventArgs&)e
 {
     self = [super init:e];
 
-    _result = [[TranslationSynthesisResult alloc] init :e.GetResult()];
+    _result = [[SPXTranslationSynthesisResult alloc] init :e.GetResult()];
 
     return self;
 }

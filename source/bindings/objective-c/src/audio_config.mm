@@ -7,54 +7,47 @@
 #import "audio_stream_private.h"
 #import "common_private.h"
 
-@implementation AudioConfig
+@implementation SPXAudioConfiguration
 {
     std::shared_ptr<AudioImpl::AudioConfig> audioImpl;
 }
 
-- (instancetype)init: (std::shared_ptr<AudioImpl::AudioConfig>)audioHandle
+- (instancetype)init
 {
     self = [super init];
-    audioImpl = audioHandle;
+    self->audioImpl = AudioImpl::AudioConfig::FromDefaultMicrophoneInput();
+    if (self->audioImpl == nullptr) {
+        NSLog(@"Unable to create audio config in core using default microphone.");
+        return nil;
+    }
+    return self;
+}
+
+- (instancetype)initWithWavFileInput:(NSString *)path
+{
+    self = [super init];
+    self->audioImpl = AudioImpl::AudioConfig::FromWavFileInput([path string]);
+    if (self->audioImpl == nullptr) {
+        NSLog(@"Unable to create audio config in core using wav file input.");
+        return nil;
+    }
+    return self;
+}
+
+- (instancetype)initWithStreamInput:(SPXAudioInputStream *)stream
+{
+    self = [super init];
+    self->audioImpl = AudioImpl::AudioConfig::FromStreamInput([stream getHandle]);
+    if (self->audioImpl == nullptr) {
+        NSLog(@"Unable to create audio config in core using stream input.");
+        return nil;
+    }
     return self;
 }
 
 - (std::shared_ptr<AudioImpl::AudioConfig>)getHandle
 {
     return audioImpl;
-}
-
-+ (AudioConfig *)fromDefaultMicrophoneInput
-{
-    auto audioImpl = AudioImpl::AudioConfig::FromDefaultMicrophoneInput();
-    if (audioImpl == nullptr) {
-        NSLog(@"Unable to create audio config in core");
-        return nil;
-    }
-    else 
-        return [[AudioConfig alloc] init :audioImpl];
-}
-
-+ (AudioConfig *)fromWavFileInput: (NSString *)path
-{
-    auto audioImpl = AudioImpl::AudioConfig::FromWavFileInput([path string]);
-    if (audioImpl == nullptr) {
-        NSLog(@"Unable to create audio config in core");
-        return nil;
-    }
-    else 
-        return [[AudioConfig alloc] init :audioImpl];
-}
-
-+ (AudioConfig *)fromStreamInput: (AudioInputStream *)stream
-{
-    auto audioImpl = AudioImpl::AudioConfig::FromStreamInput([stream getHandle]);
-    if (audioImpl == nullptr) {
-        NSLog(@"Unable to create audio config in core");
-        return nil;
-    }
-    else
-        return [[AudioConfig alloc] init :audioImpl];
 }
 
 @end

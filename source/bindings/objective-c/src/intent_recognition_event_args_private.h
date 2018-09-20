@@ -3,22 +3,17 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#ifndef intent_recognition_event_args_private_h
-#define intent_recognition_event_args_private_h
-
-#import "intent_recognition_event_args.h"
+#import "SPXIntentRecognitionEventArgs.h"
 #import "common_private.h"
 
-@interface IntentRecognitionEventArgs (Private)
+@interface SPXIntentRecognitionEventArgs (Private)
 
 - (instancetype)init: (const IntentImpl::IntentRecognitionEventArgs&)e;
 
 @end
 
-@interface IntentRecognitionCanceledEventArgs (Private)
+@interface SPXIntentRecognitionCanceledEventArgs (Private)
 
 - (instancetype)init: (const IntentImpl::IntentRecognitionCanceledEventArgs&)e;
 
 @end
-
-#endif /* intent_recognition_event_args_private_h */

@@ -7,7 +7,7 @@
 #define microphone_test_h
 
 #import <Foundation/Foundation.h>
-#import "speechapi.h"
+#import <MicrosoftCognitiveServicesSpeech/SPXSpeechApi.h>
 
 @interface MicrophoneTest : NSObject
 

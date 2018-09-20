@@ -3,16 +3,11 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#ifndef language_understanding_model_private_h
-#define language_understanding_model_private_h
-
-#import "language_understanding_model.h"
+#import "SPXLanguageUnderstandingModel.h"
 #import "common_private.h"
 
-@interface LanguageUnderstandingModel (Private)
+@interface SPXLanguageUnderstandingModel (Private)
 
 - (std::shared_ptr<IntentImpl::LanguageUnderstandingModel>)getModelHandle;
 
 @end
-
-#endif /* language_understanding_model_private_h */

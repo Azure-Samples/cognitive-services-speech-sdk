@@ -3,17 +3,12 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#ifndef intent_recognition_result_private_h
-#define intent_recognition_result_private_h
-
-#import "intent_recognition_result.h"
+#import "SPXIntentRecognitionResult.h"
 #import "recognition_result_private.h"
 #import "common_private.h"
 
-@interface IntentRecognitionResult (Private)
+@interface SPXIntentRecognitionResult (Private)
 
 - (instancetype)init :(std::shared_ptr<IntentImpl::IntentRecognitionResult>)resultHandle;
 
 @end
-
-#endif /* intent_recognition_result_private_h */

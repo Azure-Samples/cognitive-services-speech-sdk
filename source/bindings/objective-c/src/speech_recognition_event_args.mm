@@ -5,18 +5,18 @@
 
 #import "speechapi_private.h"
 
-@implementation SpeechRecognitionEventArgs
+@implementation SPXSpeechRecognitionEventArgs
 
 - (instancetype)init:(const SpeechImpl::SpeechRecognitionEventArgs&)e
 {
     self = [super init:e];
-    _result = [[SpeechRecognitionResult alloc] init:e.GetResult()];
+    _result = [[SPXSpeechRecognitionResult alloc] init:e.GetResult()];
     return self;
 }
 
 @end
 
-@implementation SpeechRecognitionCanceledEventArgs
+@implementation SPXSpeechRecognitionCanceledEventArgs
 
 - (instancetype)init:(const SpeechImpl::SpeechRecognitionCanceledEventArgs&)e
 {

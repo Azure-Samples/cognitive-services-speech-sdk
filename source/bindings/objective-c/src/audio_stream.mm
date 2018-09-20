@@ -7,325 +7,136 @@
 #import "audio_stream_format_private.h"
 #import "common_private.h"
 
-@implementation AudioInputStream
+@implementation SPXAudioInputStream
 {
-    std::shared_ptr<AudioImpl::AudioInputStream> streamImpl;
+    std::shared_ptr<AudioImpl::AudioInputStream> inputStreamImpl;
 }
 
 - (instancetype)init: (std::shared_ptr<AudioImpl::AudioInputStream>)handle
 {
     self = [super init];
-    streamImpl = handle;
+    inputStreamImpl = handle;
     return self;
 }
 
 - (std::shared_ptr<AudioImpl::AudioInputStream>)getHandle
 {
-    return streamImpl;
-}
-
-+ (PushAudioInputStream *)createPushStream
-{
-    auto pushImpl = AudioImpl::AudioInputStream::CreatePushStream();
-    if (pushImpl == nullptr) {
-        NSLog(@"Unable to create push audio input stream in core");
-        return nil;
-    }
-    else 
-        return [[PushAudioInputStream alloc] init :pushImpl];
-}
-
-+ (PushAudioInputStream *)createPushStreamWithFormat: (AudioStreamFormat *)format
-{
-    auto pushImpl = AudioImpl::AudioInputStream::CreatePushStream([format getHandle]);
-    if (pushImpl == nullptr) {
-        NSLog(@"Unable to create push audio input stream in core");
-        return nil;
-    }
-    else 
-        return [[PushAudioInputStream alloc] init :pushImpl];
-}
-
-// Todo: provide protocol based interface for pull stream
-+ (PullAudioInputStream *)createPullStreamWithContext:
-(void *)userContext readBlock: (PullAudioInputStreamReadBlockWithContext)readBlock closeBlock: (PullAudioInputStreamCloseBlockWithContext)closeBlock
-{
-    auto pullImpl = AudioImpl::AudioInputStream::CreatePullStream(
-        [=](uint8_t* buffer, uint32_t size) -> int {
-            NSMutableData* data = [[NSMutableData alloc] initWithCapacity: size];
-            NSInteger ret = readBlock(userContext, data, (NSUInteger)size);
-            if (ret > 0) {
-                if (ret > [data length]) {
-                    NSLog(@"The length of data is less than return value.");
-                    ret = [data length];
-                }
-                std::memcpy(buffer, [data bytes], ret);
-            }
-            return (int)ret;
-        },
-        [=]() -> void {
-            closeBlock(userContext);
-        });
-
-    if (pullImpl == nullptr) {
-        NSLog(@"Unable to create pull audio input stream in core");
-        return nil;
-    }
-    else 
-        return [[PullAudioInputStream alloc] init :pullImpl];
-}
-
-+ (PullAudioInputStream *)createPullStreamUsingReadBlock: (PullAudioInputStreamReadBlock)readBlock closeBlock: (PullAudioInputStreamCloseBlock)closeBlock
-{
-    auto pullImpl = AudioImpl::AudioInputStream::CreatePullStream(
-        [=](uint8_t* buffer, uint32_t size) -> int {
-            NSMutableData* data = [[NSMutableData alloc] initWithCapacity: size];
-            NSInteger ret = readBlock(data, (NSUInteger)size);
-            if (ret > 0) {
-                if (ret > [data length]) {
-                    NSLog(@"The length of data is less than return value.");
-                    ret = [data length];
-                }
-                std::memcpy(buffer, [data bytes], ret);
-            }
-            return (int)ret;
-        },
-        [=]() -> void {
-            closeBlock();
-        });
-
-    if (pullImpl == nullptr) {
-        NSLog(@"Unable to create pull audio input stream in core");
-        return nil;
-    }
-    else 
-        return [[PullAudioInputStream alloc] init :pullImpl];
-}
-
-+ (PullAudioInputStream *)createPullStreamUsingAudioFormat: (AudioStreamFormat *)format withContext: (void *)userContext readBlock: (PullAudioInputStreamReadBlockWithContext)readBlock closeBlock: (PullAudioInputStreamCloseBlockWithContext)closeBlock
-{
-    auto pullImpl = AudioImpl::AudioInputStream::CreatePullStream(
-        [format getHandle],
-        [=](uint8_t* buffer, uint32_t size) -> int {
-            NSMutableData* data = [[NSMutableData alloc] initWithCapacity: size];
-            NSInteger ret = readBlock(userContext, data, (NSUInteger)size);
-            if (ret > 0) {
-                if (ret > [data length]) {
-                    NSLog(@"The length of data is less than return value.");
-                    ret = [data length];
-                }
-                std::memcpy(buffer, [data bytes], ret);
-            }
-            return (int)ret;
-        },
-        [=]() -> void {
-            closeBlock(userContext);
-        });
-
-    if (pullImpl == nullptr) {
-        NSLog(@"Unable to create pull audio input stream in core");
-        return nil;
-    }
-    else 
-        return [[PullAudioInputStream alloc] init :pullImpl];
-}
-
-+ (PullAudioInputStream *)createPullStreamUsingAudioFormat: (AudioStreamFormat *)format readBlock: (PullAudioInputStreamReadBlock)readBlock closeBlock: (PullAudioInputStreamCloseBlock)closeBlock
-{
-    auto pullImpl = AudioImpl::AudioInputStream::CreatePullStream(
-        [format getHandle],
-        [=](uint8_t* buffer, uint32_t size) -> int {
-            NSMutableData* data = [[NSMutableData alloc] initWithCapacity: size];
-            NSInteger ret = readBlock(data, (NSUInteger)size);
-            if (ret > 0) {
-                if (ret > [data length]) {
-                    NSLog(@"The length of data is less than return value.");
-                    ret = [data length];
-                }
-                std::memcpy(buffer, [data bytes], ret);
-            }
-            return (int)ret;
-        },
-        [=]() -> void {
-            closeBlock();
-        });
-
-    if (pullImpl == nullptr) {
-        NSLog(@"Unable to create pull audio input stream in core");
-        return nil;
-    }
-    else 
-        return [[PullAudioInputStream alloc] init :pullImpl];
+    return inputStreamImpl;
 }
 
 @end
 
-@implementation PushAudioInputStream
+@implementation SPXPushAudioInputStream
 {
-    std::shared_ptr<AudioImpl::PushAudioInputStream> pushImpl;
+    std::shared_ptr<AudioImpl::PushAudioInputStream> pushInputStreamImpl;
 }
 
-- (instancetype)init: (std::shared_ptr<AudioImpl::PushAudioInputStream>)handle
-{
-    self = [super init :handle];
-    pushImpl = handle;
-    return self;
-}
-
-+ (PushAudioInputStream *)create
+- (instancetype)init
 {
     auto pushImpl = AudioImpl::PushAudioInputStream::Create();
     if (pushImpl == nullptr) {
         NSLog(@"Unable to create push audio input stream in core");
         return nil;
     }
-    else 
-        return [[PushAudioInputStream alloc] init :pushImpl];
+    return [self initWithImpl:pushImpl];
 }
 
-+ (PushAudioInputStream *)createUsingAudioFormat: (AudioStreamFormat *)format
+- (instancetype)initWithAudioFormat:(SPXAudioStreamFormat *)format
 {
     auto pushImpl = AudioImpl::PushAudioInputStream::Create([format getHandle]);
     if (pushImpl == nullptr) {
         NSLog(@"Unable to create push audio input stream in core");
         return nil;
     }
-    else 
-        return [[PushAudioInputStream alloc] init :pushImpl];
+    return [self initWithImpl:pushImpl];
 }
 
-- (void)write: (NSData *)data
+- (instancetype)initWithImpl: (std::shared_ptr<AudioImpl::PushAudioInputStream>)handle
 {
-    pushImpl->Write((uint8_t *)[data bytes], (uint32_t)[data length]);
+    self = [super init:handle];
+    if (self) {
+        self->pushInputStreamImpl = handle;
+    }
+    return self;
+}
+
+- (void)write:(NSData *)data
+{
+    pushInputStreamImpl->Write((uint8_t *)[data bytes], (uint32_t)[data length]);
 }
 
 - (void)close
 {
-    pushImpl->Close();
+    pushInputStreamImpl->Close();
 }
 
 @end
 
-@implementation PullAudioInputStream
+@implementation SPXPullAudioInputStream
 {
-    std::shared_ptr<AudioImpl::PullAudioInputStream> pullImpl;
+    std::shared_ptr<AudioImpl::PullAudioInputStream> pullInputStreamImpl;
 }
 
-- (instancetype)init: (std::shared_ptr<AudioImpl::PullAudioInputStream>)handle
+- (instancetype)initWithReadHandler:(SPXPullAudioInputStreamReadHandler)readHandler closeHandler:(SPXPullAudioInputStreamCloseHandler)closeHandler
 {
-    self = [super init :handle];
-    pullImpl = handle;
+    auto pullImpl = AudioImpl::PullAudioInputStream::Create(
+        [=](uint8_t* buffer, uint32_t size) -> int {
+            NSMutableData* data = [[NSMutableData alloc] initWithCapacity: size];
+            NSInteger ret = readHandler(data, (NSUInteger)size);
+            if (ret > 0) {
+                if (ret > [data length]) {
+                    NSLog(@"The length of data is less than return value.");
+                    ret = [data length];
+                }
+                std::memcpy(buffer, [data bytes], ret);
+            }
+            return (int)ret;
+        },
+        [=]() -> void {
+            closeHandler();
+        });
+
+    if (pullImpl == nullptr) {
+        NSLog(@"Unable to create pull audio input stream in core");
+        return nil;
+    }
+    return [self initWithImpl:pullImpl];
+}
+
+- (instancetype)initWithAudioFormat:(SPXAudioStreamFormat *)format readHandler:(SPXPullAudioInputStreamReadHandler)readHandler closeHandler:(SPXPullAudioInputStreamCloseHandler)closeHandler
+{
+    auto pullImpl = AudioImpl::PullAudioInputStream::Create(
+        [format getHandle],
+        [=](uint8_t* buffer, uint32_t size) -> int {
+            NSMutableData* data = [[NSMutableData alloc] initWithCapacity: size];
+            NSInteger ret = readHandler(data, (NSUInteger)size);
+            if (ret > 0) {
+                if (ret > [data length]) {
+                    NSLog(@"The length of data is less than return value.");
+                    ret = [data length];
+                }
+                std::memcpy(buffer, [data bytes], ret);
+            }
+            return (int)ret;
+        },
+        [=]() -> void {
+            closeHandler();
+        });
+
+    if (pullImpl == nullptr) {
+        NSLog(@"Unable to create pull audio input stream in core");
+        return nil;
+    }
+    return [self initWithImpl:pullImpl];
+}
+
+- (instancetype)initWithImpl: (std::shared_ptr<AudioImpl::PullAudioInputStream>)handle
+{
+    self = [super init:handle];
+    if (self) {
+        self->pullInputStreamImpl = handle;
+    }
     return self;
-}
-
-+ (PullAudioInputStream *)CreateWithContext: (void *)userContext readBlock:(PullAudioInputStreamReadBlockWithContext)readBlock closeBlock: (PullAudioInputStreamCloseBlockWithContext)closeBlock
-{
-    auto pullImpl = AudioImpl::PullAudioInputStream::Create(
-        [=](uint8_t* buffer, uint32_t size) -> int {
-            NSMutableData* data = [[NSMutableData alloc] initWithCapacity: size];
-            NSInteger ret = readBlock(userContext, data, (NSUInteger)size);
-            if (ret > 0) {
-                if (ret > [data length]) {
-                    NSLog(@"The length of data is less than return value.");
-                    ret = [data length];
-                }
-                std::memcpy(buffer, [data bytes], ret);
-            }
-            return (int)ret;
-        },
-        [=]() -> void {
-            closeBlock(userContext);
-        });
-
-    if (pullImpl == nullptr) {
-        NSLog(@"Unable to create pull audio input stream in core");
-        return nil;
-    }
-    else 
-        return [[PullAudioInputStream alloc] init :pullImpl];
-}
-
-+ (PullAudioInputStream *)CreateUsingReadBlock: (PullAudioInputStreamReadBlock)readBlock closeBlock: (PullAudioInputStreamCloseBlock) closeBlock
-{
-    auto pullImpl = AudioImpl::PullAudioInputStream::Create(
-        [=](uint8_t* buffer, uint32_t size) -> int {
-            NSMutableData* data = [[NSMutableData alloc] initWithCapacity: size];
-            NSInteger ret = readBlock(data, (NSUInteger)size);
-            if (ret > 0) {
-                if (ret > [data length]) {
-                    NSLog(@"The length of data is less than return value.");
-                    ret = [data length];
-                }
-                std::memcpy(buffer, [data bytes], ret);
-            }
-            return (int)ret;
-        },
-        [=]() -> void {
-            closeBlock();
-        });
-
-    if (pullImpl == nullptr) {
-        NSLog(@"Unable to create pull audio input stream in core");
-        return nil;
-    }
-    else 
-        return [[PullAudioInputStream alloc] init :pullImpl];
-}
-
-+ (PullAudioInputStream *)CreateUsingAudioFormat: (AudioStreamFormat *)format withContext: (void *)userContext readBlock: (PullAudioInputStreamReadBlockWithContext)readBlock closeBlock: (PullAudioInputStreamCloseBlockWithContext)closeBlock
-{
-    auto pullImpl = AudioImpl::PullAudioInputStream::Create(
-        [format getHandle],
-        [=](uint8_t* buffer, uint32_t size) -> int {
-            NSMutableData* data = [[NSMutableData alloc] initWithCapacity: size];
-            NSInteger ret = readBlock(userContext, data, (NSUInteger)size);
-            if (ret > 0) {
-                if (ret > [data length]) {
-                    NSLog(@"The length of data is less than return value.");
-                    ret = [data length];
-                }
-                std::memcpy(buffer, [data bytes], ret);
-            }
-            return (int)ret;
-        },
-        [=]() -> void {
-            closeBlock(userContext);
-        });
-
-    if (pullImpl == nullptr) {
-        NSLog(@"Unable to create pull audio input stream in core");
-        return nil;
-    }
-    else 
-        return [[PullAudioInputStream alloc] init :pullImpl];
-}
-
-+ (PullAudioInputStream *)CreateUsingAudioFormat: (AudioStreamFormat *)format readBlock: (PullAudioInputStreamReadBlock)readBlock closeBlock: (PullAudioInputStreamCloseBlock)closeBlock
-{
-    auto pullImpl = AudioImpl::PullAudioInputStream::Create(
-        [format getHandle],
-        [=](uint8_t* buffer, uint32_t size) -> int {
-            NSMutableData* data = [[NSMutableData alloc] initWithCapacity: size];
-            NSInteger ret = readBlock(data, (NSUInteger)size);
-            if (ret > 0) {
-                if (ret > [data length]) {
-                    NSLog(@"The length of data is less than return value.");
-                    ret = [data length];
-                }
-                std::memcpy(buffer, [data bytes], ret);
-            }
-            return (int)ret;
-        },
-        [=]() -> void {
-            closeBlock();
-        });
-
-    if (pullImpl == nullptr) {
-        NSLog(@"Unable to create pull audio input stream in core");
-        return nil;
-    }
-    else 
-        return [[PullAudioInputStream alloc] init :pullImpl];
 }
 
 @end

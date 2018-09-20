@@ -5,16 +5,16 @@
 
 #import "speechapi_private.h"
 
-@implementation TranslationRecognitionResult
+@implementation SPXTranslationRecognitionResult
 {
     std::shared_ptr<TranslationImpl::TranslationRecognitionResult> resultImpl;
 }
 
-- (instancetype)init :(std::shared_ptr<TranslationImpl::TranslationRecognitionResult>)resultHandle
+- (instancetype)init:(std::shared_ptr<TranslationImpl::TranslationRecognitionResult>)resultHandle
 {
     self = [super init :resultHandle];
     resultImpl = resultHandle;
-
+    
     auto resultInMap = resultImpl->Translations;
     _translations = [[NSMutableDictionary alloc] initWithCapacity:resultInMap.size()];
     for (auto it : resultInMap)
@@ -23,7 +23,7 @@
     return self;
 }
 
-- (instancetype)initWithError: (NSString *)message
+- (instancetype)initWithError:(NSString *)message
 {
     self = [super initWithError:message];
     return self;

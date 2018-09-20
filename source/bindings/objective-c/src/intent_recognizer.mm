@@ -7,10 +7,10 @@
 
 struct IntentEventHandlerHelper
 {
-    IntentRecognizer *recognizer;
+    SPXIntentRecognizer *recognizer;
     IntentRecoSharedPtr recoImpl;
     
-    IntentEventHandlerHelper(IntentRecognizer *reco, IntentRecoSharedPtr recoImpl)
+    IntentEventHandlerHelper(SPXIntentRecognizer *reco, IntentRecoSharedPtr recoImpl)
     {
         recognizer = reco;
         this->recoImpl = recoImpl;
@@ -21,7 +21,7 @@ struct IntentEventHandlerHelper
         NSLog(@"Add RecognizedEventHandler");
         recoImpl->Recognized.Connect([this] (const IntentImpl::IntentRecognitionEventArgs& e)
                                      {
-                                         IntentRecognitionEventArgs *eventArgs = [[IntentRecognitionEventArgs alloc] init: e];
+                                         SPXIntentRecognitionEventArgs *eventArgs = [[SPXIntentRecognitionEventArgs alloc] init: e];
                                          [recognizer onRecognizedEvent: eventArgs];
                                      });
     }
@@ -31,7 +31,7 @@ struct IntentEventHandlerHelper
         NSLog(@"Add RecognizingEventHandler");
         recoImpl->Recognizing.Connect([this] (const IntentImpl::IntentRecognitionEventArgs& e)
                                       {
-                                          IntentRecognitionEventArgs *eventArgs = [[IntentRecognitionEventArgs alloc] init: e];
+                                          SPXIntentRecognitionEventArgs *eventArgs = [[SPXIntentRecognitionEventArgs alloc] init: e];
                                           [recognizer onRecognizingEvent: eventArgs];
                                       });
     }
@@ -41,7 +41,7 @@ struct IntentEventHandlerHelper
         NSLog(@"Add CanceledEventHandler");
         recoImpl->Canceled.Connect([this] (const IntentImpl::IntentRecognitionCanceledEventArgs& e)
                                    {
-                                       IntentRecognitionCanceledEventArgs *eventArgs = [[IntentRecognitionCanceledEventArgs alloc] init:e];
+                                       SPXIntentRecognitionCanceledEventArgs *eventArgs = [[SPXIntentRecognitionCanceledEventArgs alloc] init:e];
                                        [recognizer onCanceledEvent: eventArgs];
                                    });
     }
@@ -51,7 +51,7 @@ struct IntentEventHandlerHelper
         NSLog(@"Add SessionStartedEventHandler");
         recoImpl->SessionStarted.Connect([this] (const SpeechImpl::SessionEventArgs& e)
                                          {
-                                             SessionEventArgs *eventArgs = [[SessionEventArgs alloc] init:e];
+                                             SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init:e];
                                              [recognizer onSessionStartedEvent: eventArgs];
                                          });
     }
@@ -61,7 +61,7 @@ struct IntentEventHandlerHelper
         NSLog(@"Add SessionStoppedEventHandler");
         recoImpl->SessionStopped.Connect([this] (const SpeechImpl::SessionEventArgs& e)
                                          {
-                                             SessionEventArgs *eventArgs = [[SessionEventArgs alloc] init:e];
+                                             SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init:e];
                                              [recognizer onSessionStoppedEvent: eventArgs];
                                          });
     }
@@ -71,7 +71,7 @@ struct IntentEventHandlerHelper
         NSLog(@"Add SpeechStartDetectedEventHandler");
         recoImpl->SpeechStartDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
                                               {
-                                                  RecognitionEventArgs *eventArgs = [[RecognitionEventArgs alloc] init:e];
+                                                  SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init:e];
                                                   [recognizer onSpeechStartDetectedEvent: eventArgs];
                                               });
     }
@@ -81,77 +81,76 @@ struct IntentEventHandlerHelper
         NSLog(@"Add SpeechStopDetectedEventHandler");
         recoImpl->SpeechEndDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
                                             {
-                                                RecognitionEventArgs *eventArgs = [[RecognitionEventArgs alloc] init:e];
+                                                SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init:e];
                                                 [recognizer onSpeechEndDetectedEvent: eventArgs];
                                             });
     }
 };
 
-@implementation IntentRecognizer
+@implementation SPXIntentRecognizer
 {
-    IntentRecoSharedPtr recoImpl;
+    IntentRecoSharedPtr intentRecoImpl;
     dispatch_queue_t dispatchQueue;
     
-    NSMutableArray *recognizedEventListenerList;
+    NSMutableArray *recognizedEventHandlerList;
     NSLock *recognizedLock;
-    NSMutableArray *recognizingEventListenerList;
+    NSMutableArray *recognizingEventHandlerList;
     NSLock *recognizingLock;
-    NSMutableArray *canceledEventListenerList;
+    NSMutableArray *canceledEventHandlerList;
     NSLock *canceledLock;
     
     struct IntentEventHandlerHelper *eventImpl;
 }
 
-+ (IntentRecognizer *)fromConfig: (SpeechConfig *)speechConfig
+- (instancetype)init:(SPXSpeechConfiguration *)speechConfiguration
 {
     try {
-        auto intentRecoImpl = IntentImpl::IntentRecognizer::FromConfig([speechConfig getHandle]);
-        if (intentRecoImpl == nullptr)
+        auto recoImpl = IntentImpl::IntentRecognizer::FromConfig([speechConfiguration getHandle]);
+        if (recoImpl == nullptr)
             return nil;
-        return [[IntentRecognizer alloc] init :intentRecoImpl];
+        return [self initWithImpl:recoImpl];
     }
     catch (...) {
         // Todo: better error handling.
-        NSLog(@"Exception caught when creating IntentRecognizer in core.");
+        NSLog(@"Exception caught when creating SPXIntentRecognizer in core.");
     }
     return nil;
 }
 
-+ (IntentRecognizer *)fromConfig: (SpeechConfig *)speechConfig usingAudio: (AudioConfig *)audioConfig
+- (instancetype)initWithSpeechConfiguration:(SPXSpeechConfiguration *)speechConfiguration audioConfiguration:(SPXAudioConfiguration *)audioConfiguration
 {
     try {
-        auto intentRecoImpl = IntentImpl::IntentRecognizer::FromConfig([speechConfig getHandle], [audioConfig getHandle]);
-        if (intentRecoImpl == nullptr)
+        auto recoImpl = IntentImpl::IntentRecognizer::FromConfig([speechConfiguration getHandle], [audioConfiguration getHandle]);
+        if (recoImpl == nullptr)
             return nil;
-        return [[IntentRecognizer alloc] init :intentRecoImpl];
+        return [self initWithImpl:recoImpl];
     }
     catch (...) {
         // Todo: better error handling.
-        NSLog(@"Exception caught when creating IntentRecognizer in core.");
+        NSLog(@"Exception caught when creating SPXIntentRecognizer in core.");
     }
     return nil;
 }
 
-
-- (instancetype)init :(IntentRecoSharedPtr)recoHandle
+- (instancetype)initWithImpl:(IntentRecoSharedPtr)recoHandle
 {
     self = [super initFrom:recoHandle withParameters:&recoHandle->Properties];
-    recoImpl = recoHandle;
-    if (recoImpl == nullptr) {
+    self->intentRecoImpl = recoHandle;
+    if (!self || intentRecoImpl == nullptr) {
         return nil;
     }
     else
     {
         dispatchQueue = dispatch_queue_create("com.microsoft.cognitiveservices.speech", nil);
         
-        recognizedEventListenerList = [NSMutableArray array];
-        recognizingEventListenerList = [NSMutableArray array];
-        canceledEventListenerList = [NSMutableArray array];
+        recognizedEventHandlerList = [NSMutableArray array];
+        recognizingEventHandlerList = [NSMutableArray array];
+        canceledEventHandlerList = [NSMutableArray array];
         recognizedLock = [[NSLock alloc] init];
         recognizingLock = [[NSLock alloc] init];
         canceledLock = [[NSLock alloc] init];
         
-        eventImpl = new IntentEventHandlerHelper(self, recoImpl);
+        eventImpl = new IntentEventHandlerHelper(self, intentRecoImpl);
         [super setDispatchQueue: dispatchQueue];
 
         eventImpl->addRecognizingEventHandler();
@@ -168,109 +167,114 @@ struct IntentEventHandlerHelper
 
 - (void)setAuthorizationToken: (NSString *)token
 {
-    recoImpl->SetAuthorizationToken([token string]);
+    intentRecoImpl->SetAuthorizationToken([token string]);
 }
 
-- (NSString *)getAuthorizationToken
+- (NSString *)authorizationToken
 {
-    return [NSString stringWithString:recoImpl->GetAuthorizationToken()];
+    return [NSString stringWithString:intentRecoImpl->GetAuthorizationToken()];
 }
 
 - (void)addIntentFromPhrase:(NSString *)simplePhrase
 {
-    recoImpl->AddIntent([simplePhrase string]);
+    intentRecoImpl->AddIntent([simplePhrase string]);
 }
 
 - (void)addIntentFromPhrase:(NSString *)simplePhrase mappingToId:(NSString *)intentId
 {
-    recoImpl->AddIntent([simplePhrase string], [intentId string]);
+    intentRecoImpl->AddIntent([simplePhrase string], [intentId string]);
 }
 
-- (void)addIntent: (NSString *)intentName fromModel:(LanguageUnderstandingModel *)model
+- (void)addIntent: (NSString *)intentName fromModel:(SPXLanguageUnderstandingModel *)model
 {
-    recoImpl->AddIntent([model getModelHandle], [intentName string]);
+    intentRecoImpl->AddIntent([model getModelHandle], [intentName string]);
 }
 
-- (void)addIntent: (NSString *)intentName fromModel:(LanguageUnderstandingModel *)model mappingToId:(NSString *)intentId
+- (void)addIntent: (NSString *)intentName fromModel:(SPXLanguageUnderstandingModel *)model mappingToId:(NSString *)intentId
 {
-    recoImpl->AddIntent([model getModelHandle], [intentName string], [intentId string]);
+    intentRecoImpl->AddIntent([model getModelHandle], [intentName string], [intentId string]);
 }
 
-- (void)addAllIntentsFromModel:(LanguageUnderstandingModel *)model mappingToId:(NSString *)intentId
+- (void)addAllIntentsFromModel:(nonnull SPXLanguageUnderstandingModel *)model
 {
-    recoImpl->AddAllIntents([model getModelHandle], [intentId string]);
+    intentRecoImpl->AddAllIntents([model getModelHandle]);
 }
 
-- (IntentRecognitionResult *)recognizeOnce
+- (void)addAllIntentsFromModel:(SPXLanguageUnderstandingModel *)model mappingToId:(NSString *)intentId
 {
-    IntentRecognitionResult *result = nil;
+    intentRecoImpl->AddAllIntents([model getModelHandle], [intentId string]);
+}
+
+- (SPXIntentRecognitionResult *)recognizeOnce
+{
+    SPXIntentRecognitionResult *result = nil;
     
-    if (recoImpl == nullptr) {
-        result = [[IntentRecognitionResult alloc] initWithError: @"Recognizer has been closed."];
+    if (intentRecoImpl == nullptr) {
+        result = [[SPXIntentRecognitionResult alloc] initWithError: @"SPXRecognizer has been closed."];
         return result;
     }
     
     try {
-        std::shared_ptr<IntentImpl::IntentRecognitionResult> resultImpl = recoImpl->RecognizeOnceAsync().get();
+        std::shared_ptr<IntentImpl::IntentRecognitionResult> resultImpl = intentRecoImpl->RecognizeOnceAsync().get();
         if (resultImpl == nullptr) {
-            result = [[IntentRecognitionResult alloc] initWithError: @"No result available."];
+            result = [[SPXIntentRecognitionResult alloc] initWithError: @"No result available."];
         }
         else
         {
-            result = [[IntentRecognitionResult alloc] init: resultImpl];
+            result = [[SPXIntentRecognitionResult alloc] init: resultImpl];
         }
     }
     catch (...) {
         // Todo: better error handling
         NSLog(@"exception caught");
-        result = [[IntentRecognitionResult alloc] initWithError: @"Runtime Exception"];
+        result = [[SPXIntentRecognitionResult alloc] initWithError: @"Runtime Exception"];
     }
     
     return result;
 }
 
-- (void)recognizeOnceAsync:(void (^)(IntentRecognitionResult *))resultReceivedBlock
+- (void)recognizeOnceAsync:(void (^)(SPXIntentRecognitionResult *))resultReceivedHandler
 {
-    IntentRecognitionResult *result = nil;
-    if (recoImpl == nullptr) {
-        result = [[IntentRecognitionResult alloc] initWithError: @"Recognizer has been closed."];
+    SPXIntentRecognitionResult *result = nil;
+    if (intentRecoImpl == nullptr) {
+        result = [[SPXIntentRecognitionResult alloc] initWithError: @"SPXRecognizer has been closed."];
         dispatch_async(dispatchQueue, ^{
-            resultReceivedBlock(result);
+            resultReceivedHandler(result);
         });
         return;
     }
     
     try {
-        std::shared_ptr<IntentImpl::IntentRecognitionResult> resultImpl = recoImpl->RecognizeOnceAsync().get();
+        std::shared_ptr<IntentImpl::IntentRecognitionResult> resultImpl = intentRecoImpl->RecognizeOnceAsync().get();
         if (resultImpl == nullptr) {
-            result = [[IntentRecognitionResult alloc] initWithError: @"No result available."];
+            result = [[SPXIntentRecognitionResult alloc] initWithError: @"No result available."];
         }
         else
         {
-            result = [[IntentRecognitionResult alloc] init: resultImpl];
+            result = [[SPXIntentRecognitionResult alloc] init: resultImpl];
         }
     }
     catch (...) {
         // Todo: better error handling
         NSLog(@"exception caught");
-        result = [[IntentRecognitionResult alloc] initWithError: @"Runtime Exception"];
+        result = [[SPXIntentRecognitionResult alloc] initWithError: @"Runtime Exception"];
     }
     
     dispatch_async(dispatchQueue, ^{
-        resultReceivedBlock(result);
+        resultReceivedHandler(result);
     });
 }
 
 - (void)startContinuousRecognition
 {
-    if (recoImpl == nullptr) {
+    if (intentRecoImpl == nullptr) {
         // Todo: return error?
-        NSLog(@"Recognizer handle is null");
+        NSLog(@"SPXRecognizer handle is null");
         return;
     }
     
     try {
-        recoImpl->StartContinuousRecognitionAsync().get();
+        intentRecoImpl->StartContinuousRecognitionAsync().get();
     }
     catch (...) {
         // Todo: better error handling
@@ -280,14 +284,14 @@ struct IntentEventHandlerHelper
 
 - (void)stopContinuousRecognition
 {
-    if (recoImpl == nullptr) {
+    if (intentRecoImpl == nullptr) {
         // Todo: return error?
-        NSLog(@"Recognizer handle is null");
+        NSLog(@"SPXRecognizer handle is null");
         return;
     }
     
     try {
-        recoImpl->StopContinuousRecognitionAsync().get();
+        intentRecoImpl->StopContinuousRecognitionAsync().get();
     }
     catch (...) {
         // Todo: better error handling
@@ -295,68 +299,68 @@ struct IntentEventHandlerHelper
     }
 }
 
-- (void)onRecognizedEvent:(IntentRecognitionEventArgs *)eventArgs
+- (void)onRecognizedEvent:(SPXIntentRecognitionEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onRecognizedEvent");
     NSArray* workCopyOfList;
     [recognizedLock lock];
-    workCopyOfList = [NSArray arrayWithArray:recognizedEventListenerList];
+    workCopyOfList = [NSArray arrayWithArray:recognizedEventHandlerList];
     [recognizedLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
-            ((IntentRecognitionEventHandlerBlock)handle)(self, eventArgs);
+            ((SPXIntentRecognitionEventHandler)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)onRecognizingEvent:(IntentRecognitionEventArgs *)eventArgs
+- (void)onRecognizingEvent:(SPXIntentRecognitionEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onRecognizingEvent");
     NSArray* workCopyOfList;
     [recognizingLock lock];
-    workCopyOfList = [NSArray arrayWithArray:recognizingEventListenerList];
+    workCopyOfList = [NSArray arrayWithArray:recognizingEventHandlerList];
     [recognizingLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
-            ((IntentRecognitionEventHandlerBlock)handle)(self, eventArgs);
+            ((SPXIntentRecognitionEventHandler)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)onCanceledEvent:(IntentRecognitionCanceledEventArgs *)eventArgs
+- (void)onCanceledEvent:(SPXIntentRecognitionCanceledEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onCanceledEvent");
     NSArray* workCopyOfList;
     [canceledLock lock];
-    workCopyOfList = [NSArray arrayWithArray:canceledEventListenerList];
+    workCopyOfList = [NSArray arrayWithArray:canceledEventHandlerList];
     [canceledLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
-            ((IntentRecognitionCanceledEventHandlerBlock)handle)(self, eventArgs);
+            ((SPXIntentRecognitionCanceledEventHandler)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)addRecognizedEventListener:(IntentRecognitionEventHandlerBlock)eventHandler
+- (void)addRecognizedEventHandler:(SPXIntentRecognitionEventHandler)eventHandler
 {
     [recognizedLock lock];
-    [recognizedEventListenerList addObject:eventHandler];
+    [recognizedEventHandlerList addObject:eventHandler];
     [recognizedLock unlock];
     return;
 }
 
-- (void)addRecognizingEventListener:(IntentRecognitionEventHandlerBlock)eventHandler
+- (void)addRecognizingEventHandler:(SPXIntentRecognitionEventHandler)eventHandler
 {
     [recognizingLock lock];
-    [recognizingEventListenerList addObject:eventHandler];
+    [recognizingEventHandlerList addObject:eventHandler];
     [recognizingLock unlock];
     return;
 }
 
-- (void)addCanceledEventListener:(IntentRecognitionCanceledEventHandlerBlock)eventHandler
+- (void)addCanceledEventHandler:(SPXIntentRecognitionCanceledEventHandler)eventHandler
 {
     [canceledLock lock];
-    [canceledEventListenerList addObject:eventHandler];
+    [canceledEventHandlerList addObject:eventHandler];
     [canceledLock unlock];
     return;
 }

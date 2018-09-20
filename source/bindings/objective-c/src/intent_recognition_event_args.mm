@@ -5,19 +5,19 @@
 
 #import "speechapi_private.h"
 
-@implementation IntentRecognitionEventArgs
+@implementation SPXIntentRecognitionEventArgs
 
 - (instancetype)init:(const IntentImpl::IntentRecognitionEventArgs&)e
 {
     self = [super init:e];
-    _result = [[IntentRecognitionResult alloc] init :e.GetResult()];
+    _result = [[SPXIntentRecognitionResult alloc] init :e.GetResult()];
 
     return self;
 }
 
 @end
 
-@implementation IntentRecognitionCanceledEventArgs
+@implementation SPXIntentRecognitionCanceledEventArgs
 
 - (instancetype)init:(const IntentImpl::IntentRecognitionCanceledEventArgs&)e
 {
