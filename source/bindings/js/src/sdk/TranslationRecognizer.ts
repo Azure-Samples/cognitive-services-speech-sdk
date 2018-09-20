@@ -8,7 +8,6 @@ import {
     IConnectionFactory,
     InternalErrorEvent,
     ISimpleSpeechPhrase,
-    ITranslationPhrase,
     PlatformConfig,
     RecognitionCompletionStatus,
     RecognitionEndedEvent,
@@ -591,6 +590,7 @@ export class TranslationRecognizer extends Recognizer {
                         CancellationReason.Error,
                         result.errorDetails,
                         result);
+
                     try {
                         this.canceled(this, canceledResult);
                         /* tslint:disable:no-empty */
@@ -598,6 +598,7 @@ export class TranslationRecognizer extends Recognizer {
                         // Not going to let errors in the event handler
                         // trip things up.
                     }
+
                     // report result to promise.
                     if (!!cb) {
                         try {
