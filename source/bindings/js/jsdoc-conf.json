@@ -30,6 +30,6 @@
         "private": false,
         "lenient": true,
         "destination": "./outjs",
-        "template": "/fvm-doc/node_modules/@pixi/jsdoc-template"
+        "template": "templates/default"
     }
 }
