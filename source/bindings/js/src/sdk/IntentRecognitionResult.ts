@@ -44,15 +44,4 @@ export class IntentRecognitionResult extends SpeechRecognitionResult {
     public get intentId(): string {
         return this.privIntentId;
     }
-
-    /**
-     * A String that represents the intent including properties being recognized.
-     * @member IntentRecognitionResult.prototype.languageUnderstanding
-     * @function
-     * @public
-     * @returns {string} A String that represents the intent including properties being recognized.
-     */
-    public get languageUnderstanding(): string {
-        return this.privLanguageUnderstanding;
-    }
 }
