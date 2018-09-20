@@ -140,6 +140,9 @@ HRESULT WASAPICapture::ActivateCompleted(IActivateAudioInterfaceAsyncOperation *
         0,
         &audioInFormat,
         nullptr);
+    EXIT_ON_ERROR(hr);
+
+    hr = pAudioInputClient->SetEventHandle(hBufferReady);
 
 Exit:
     if (FAILED(hr))
@@ -397,9 +400,6 @@ AUDIO_RESULT audio_input_start(AUDIO_SYS_HANDLE handle)
         audioData->hCaptureThread = std::thread(&captureThreadProc, (LPVOID)audioData);
         EXIT_ON_ERROR_IF(E_FAIL, audioData->hCaptureThread.native_handle() == nullptr);
     }
-
-    hr = audioData->spCapture->pAudioInputClient->SetEventHandle(audioData->spCapture->hBufferReady);
-    EXIT_ON_ERROR(hr);
 
     // Start recording, Starting the stream causes the IAudioClient object to begin streaming data between the endpoint buffer and the audio engine.
     hr = audioData->spCapture->pAudioInputClient->Start();

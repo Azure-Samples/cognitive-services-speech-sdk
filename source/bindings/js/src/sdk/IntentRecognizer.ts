@@ -646,7 +646,6 @@ export class IntentRecognizer extends Recognizer {
                     const result: IntentRecognitionResult = new IntentRecognitionResult(
                         undefined,
                         undefined,
-                        undefined,
                         ResultReason.Canceled,
                         undefined,
                         undefined,

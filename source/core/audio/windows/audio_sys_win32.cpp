@@ -459,6 +459,8 @@ HRESULT audio_create_events(AUDIO_SYS_DATA * const audioData)
     audioData->hRenderThreadDidExit = CreateEvent(0, FALSE, TRUE, nullptr);
     EXIT_ON_ERROR_IF(E_FAIL, NULL == audioData->hRenderThreadDidExit);
 
+    hr = audioData->pAudioInputClient->SetEventHandle(audioData->hBufferReady);    
+
 Exit:
     if (FAILED(hr))
     {
@@ -772,9 +774,6 @@ AUDIO_RESULT audio_input_start(AUDIO_SYS_HANDLE handle)
         EXIT_ON_ERROR_IF(E_FAIL, audioData->hCaptureThread == nullptr);
     }
 
-    hr = audioData->pAudioInputClient->SetEventHandle(audioData->hBufferReady);
-    EXIT_ON_ERROR(hr);
-
     // Start recording, Starting the stream causes the IAudioClient object to begin streaming data between the endpoint buffer and the audio engine.
     hr = audioData->pAudioInputClient->Start();
     EXIT_ON_ERROR_IF(E_FAIL, hr != S_OK);
@@ -801,6 +800,7 @@ AUDIO_RESULT audio_input_stop(AUDIO_SYS_HANDLE handle)
             SetEvent(audioData->hCaptureThreadShouldExit);
             WaitForSingleObject(audioData->hCaptureThread, INFINITE);
             CloseHandle(audioData->hCaptureThread);
+            audioData->hCaptureThread = nullptr;
 
             result = AUDIO_RESULT_OK;
         }
