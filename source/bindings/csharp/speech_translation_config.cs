@@ -59,7 +59,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A speech config instance.</returns>
         public new static SpeechTranslationConfig FromEndpoint(Uri endpoint, string subscriptionKey)
         {
-            return new SpeechTranslationConfig(Internal.SpeechTranslationConfig.FromEndpoint(endpoint.ToString(), subscriptionKey));
+            return new SpeechTranslationConfig(Internal.SpeechTranslationConfig.FromEndpoint(Uri.EscapeUriString(endpoint.ToString()), subscriptionKey));
         }
 
         /// <summary>

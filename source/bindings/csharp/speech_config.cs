@@ -58,7 +58,7 @@ namespace Microsoft.CognitiveServices.Speech
         /// <returns>A speech config instance.</returns>
         public static SpeechConfig FromEndpoint(Uri endpoint, string subscriptionKey)
         {
-            return new SpeechConfig(Internal.SpeechConfig.FromEndpoint(endpoint.ToString(), subscriptionKey));
+            return new SpeechConfig(Internal.SpeechConfig.FromEndpoint(Uri.EscapeUriString(endpoint.ToString()), subscriptionKey));
         }
 
         /// <summary>
