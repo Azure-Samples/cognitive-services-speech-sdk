@@ -8,6 +8,9 @@ import static org.junit.Assert.*;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import com.microsoft.cognitiveservices.speech.PropertyId;
+
 import org.junit.Ignore;
 
 import tests.Settings;
@@ -32,7 +35,7 @@ public class SampleRecognizeIntentTest {
         assertNotNull(test.getResult()); // we got the final result
         assertEquals("What's the weather like?", test.getResult().getText());
         
-        String s = test.getResult().getLanguageUnderstanding();
+        String s = test.getResult().getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult);
         assertNotNull(s);
         assertTrue(s.length() > 0);
         assertTrue(s.indexOf("\"topScoringIntent\":") > 0);

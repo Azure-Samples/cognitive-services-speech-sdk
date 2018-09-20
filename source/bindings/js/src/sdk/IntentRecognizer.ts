@@ -357,7 +357,7 @@ export class IntentRecognizer extends Recognizer {
 
                     if (recoEndedEvent.Status !== RecognitionCompletionStatus.Success) {
                         const result: IntentRecognitionResult = new IntentRecognitionResult(
-                            undefined, undefined, undefined,
+                            undefined, undefined,
                             ResultReason.Canceled,
                             undefined, undefined, undefined,
                             RecognitionCompletionStatus[recoEndedEvent.Status] + ": " + recoEndedEvent.Error,
@@ -399,7 +399,7 @@ export class IntentRecognizer extends Recognizer {
 
                     const reason = EnumTranslation.implTranslateRecognitionResult(evResult.Result.RecognitionStatus);
                     const result: IntentRecognitionResult = new IntentRecognitionResult(
-                        undefined, undefined, undefined,
+                        undefined, undefined,
                         reason,
                         evResult.Result.DisplayText,
                         evResult.Result.Duration,
@@ -473,7 +473,6 @@ export class IntentRecognizer extends Recognizer {
                             ev = new IntentRecognitionEventArgs(
                                 new IntentRecognitionResult(
                                     ev.result.intentId,
-                                    ev.result.languageUnderstanding,
                                     ev.result.resultId,
                                     ResultReason.NoMatch,
                                     ev.result.text,
@@ -511,7 +510,7 @@ export class IntentRecognizer extends Recognizer {
                     const evResult = event as SpeechRecognitionResultEvent<ISpeechHypothesis>;
 
                     const result = new IntentRecognitionResult(
-                        undefined, undefined, undefined,
+                        undefined, undefined,
                         undefined, undefined, undefined,
                         undefined, undefined,
                         JSON.stringify(evResult.Result),
@@ -553,7 +552,6 @@ export class IntentRecognizer extends Recognizer {
                     }
 
                     if (null !== evResult.Result && addedIntent !== undefined) {
-                        const languageUnderstanding = JSON.stringify(evResult.Result);
                         const intentId = addedIntent.intentName === undefined ? evResult.Result.topScoringIntent.intent : addedIntent.intentName;
                         let reason = ev.result.reason;
 
@@ -561,10 +559,15 @@ export class IntentRecognizer extends Recognizer {
                             reason = ResultReason.RecognizedIntent;
                         }
 
+                        // make sure, properties is set.
+                        const properties = (undefined !== ev.result.properties) ?
+                            ev.result.properties : new PropertyCollection();
+
+                        properties.setProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult, JSON.stringify(evResult.Result));
+
                         ev = new IntentRecognitionEventArgs(
                             new IntentRecognitionResult(
                                 intentId,
-                                languageUnderstanding,
                                 ev.result.resultId,
                                 reason,
                                 ev.result.text,
@@ -572,7 +575,7 @@ export class IntentRecognizer extends Recognizer {
                                 ev.result.offset,
                                 ev.result.errorDetails,
                                 ev.result.json,
-                                ev.result.properties),
+                                properties),
                             ev.offset,
                             ev.sessionId);
                     }
