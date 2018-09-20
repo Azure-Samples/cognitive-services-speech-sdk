@@ -77,24 +77,32 @@ export class TranslationRecognizer extends Recognizer {
     /**
      * The event recognizing signals that an intermediate recognition result is received.
      * @member TranslationRecognizer.prototype.recognizing
+     * @function
+     * @public
      */
     public recognizing: (sender: TranslationRecognizer, event: TranslationRecognitionEventArgs) => void;
 
     /**
      * The event recognized signals that a final recognition result is received.
      * @member TranslationRecognizer.prototype.recognized
+     * @function
+     * @public
      */
     public recognized: (sender: TranslationRecognizer, event: TranslationRecognitionEventArgs) => void;
 
     /**
      * The event canceled signals that an error occurred during recognition.
      * @member TranslationRecognizer.prototype.canceled
+     * @function
+     * @public
      */
     public canceled: (sender: TranslationRecognizer, event: TranslationRecognitionCanceledEventArgs) => void;
 
     /**
      * The event synthesizing signals that a translation synthesis result is received.
      * @member TranslationRecognizer.prototype.synthesizing
+     * @function
+     * @public
      */
     public synthesizing: (sender: TranslationRecognizer, event: TranslationSynthesisEventArgs) => void;
 

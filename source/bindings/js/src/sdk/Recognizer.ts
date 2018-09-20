@@ -57,24 +57,32 @@ export abstract class Recognizer {
     /**
      * Defines event handler for session started events.
      * @member Recognizer.prototype.sessionStarted
+     * @function
+     * @public
      */
     public sessionStarted: (sender: Recognizer, event: SessionEventArgs) => void;
 
     /**
      * Defines event handler for session stopped events.
      * @member Recognizer.prototype.sessionStopped
+     * @function
+     * @public
      */
     public sessionStopped: (sender: Recognizer, event: SessionEventArgs) => void;
 
     /**
      * Defines event handler for speech started events.
      * @member Recognizer.prototype.speechStartDetected
+     * @function
+     * @public
      */
     public speechStartDetected: (sender: Recognizer, event: RecognitionEventArgs) => void;
 
     /**
      * Defines event handler for speech stopped events.
      * @member Recognizer.prototype.speechEndDetected
+     * @function
+     * @public
      */
     public speechEndDetected: (sender: Recognizer, event: RecognitionEventArgs) => void;
 

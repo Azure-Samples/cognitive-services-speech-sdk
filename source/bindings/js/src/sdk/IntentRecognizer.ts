@@ -82,18 +82,24 @@ export class IntentRecognizer extends Recognizer {
     /**
      * The event recognizing signals that an intermediate recognition result is received.
      * @member IntentRecognizer.prototype.recognizing
+     * @function
+     * @public
      */
     public recognizing: (sender: IntentRecognizer, event: IntentRecognitionEventArgs) => void;
 
     /**
      * The event recognized signals that a final recognition result is received.
      * @member IntentRecognizer.prototype.recognized
+     * @function
+     * @public
      */
     public recognized: (sender: IntentRecognizer, event: IntentRecognitionEventArgs) => void;
 
     /**
      * The event canceled signals that an error occurred during recognition.
      * @member IntentRecognizer.prototype.canceled
+     * @function
+     * @public
      */
     public canceled: (sender: IntentRecognizer, event: IntentRecognitionCanceledEventArgs) => void;
 
@@ -126,7 +132,7 @@ export class IntentRecognizer extends Recognizer {
      * @member IntentRecognizer.prototype.authorizationToken
      * @function
      * @public
-     * @param value - Authorization token.
+     * @param {string} value - Authorization token.
      */
     public set authorizationToken(value: string) {
         this.properties.setProperty(PropertyId.SpeechServiceAuthorization_Token, value);
@@ -259,7 +265,7 @@ export class IntentRecognizer extends Recognizer {
      * @member IntentRecognizer.prototype.startKeywordRecognitionAsync
      * @function
      * @public
-     * @param model - The keyword recognition model that specifies the keyword to be recognized.
+     * @param {KeywordRecognitionModel} model - The keyword recognition model that specifies the keyword to be recognized.
      * @param cb - Callback invoked once the recognition has started.
      * @param err - Callback invoked in case of an error.
      */
