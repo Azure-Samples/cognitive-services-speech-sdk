@@ -25,7 +25,7 @@ export class NoMatchDetails {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param reason The no-match reason.
+     * @param reason - The no-match reason.
      */
     private constructor(reason: NoMatchReason) {
         this.privReason = reason;
@@ -34,7 +34,7 @@ export class NoMatchDetails {
     /**
      * Creates an instance of NoMatchDetails object for the NoMatch SpeechRecognitionResults.
      * @member NoMatchDetails.fromResult
-     * @param The recognition result that was not recognized.
+     * @param result - The recognition result that was not recognized.
      * @return The no match details object being created.
      */
     public static fromResult(result: SpeechRecognitionResult | IntentRecognitionResult | TranslationRecognitionResult): NoMatchDetails {

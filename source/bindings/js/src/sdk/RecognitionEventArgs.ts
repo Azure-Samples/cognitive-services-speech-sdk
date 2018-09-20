@@ -15,8 +15,8 @@ export class RecognitionEventArgs extends SessionEventArgs {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param offset The offset.
-     * @param sessionId The session id.
+     * @param offset - The offset.
+     * @param sessionId - The session id.
      */
     public constructor(offset: number, sessionId?: string) {
         super(sessionId);

@@ -96,7 +96,7 @@ export class SpeechRecognizer extends Recognizer {
     /**
      * Sets the authorization token used to communicate with the service.
      * @member SpeechRecognizer.prototype.authorizationToken
-     * @param token Authorization token.
+     * @param token - Authorization token.
      */
     public set authorizationToken(token: string) {
         Contracts.throwIfNullOrWhitespace(token, "token");

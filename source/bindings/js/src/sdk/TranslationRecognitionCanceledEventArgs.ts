@@ -20,10 +20,10 @@ export class TranslationRecognitionCanceledEventArgs {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param sessionid The session id.
-     * @param cancellationReason The cancellation reason.
-     * @param errorDetails Error details, if provided.
-     * @param result The result.
+     * @param sessionid - The session id.
+     * @param cancellationReason - The cancellation reason.
+     * @param errorDetails - Error details, if provided.
+     * @param result - The result.
      */
     public constructor(sessionid: string, cancellationReason: CancellationReason, errorDetails: string, result: TranslationRecognitionResult) {
         this.privCancelReason = cancellationReason;

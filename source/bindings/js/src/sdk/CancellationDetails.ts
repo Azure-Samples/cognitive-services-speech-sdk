@@ -23,8 +23,8 @@ export class CancellationDetails {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param reason The cancellation reason.
-     * @param errorDetails The error details, if provided.
+     * @param reason - The cancellation reason.
+     * @param errorDetails - The error details, if provided.
      */
     private constructor(reason: CancellationReason, errorDetails: string) {
         this.privReason = reason;
@@ -34,8 +34,8 @@ export class CancellationDetails {
     /**
      * Creates an instance of CancellationDetails object for the canceled RecognitionResult.
      * @member CancellationDetails.fromResult
-     * @param result The result that was canceled.
-     * @return The cancellation details object being created.
+     * @param result - The result that was canceled.
+     * @return - The cancellation details object being created.
      */
     public static fromResult(result: RecognitionResult): CancellationDetails {
         const simpleSpeech: ISimpleSpeechPhrase = JSON.parse(result.json);

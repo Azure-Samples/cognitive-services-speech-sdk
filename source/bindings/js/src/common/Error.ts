@@ -15,7 +15,7 @@ export class ArgumentNullError extends Error {
     /**
      * Creates an instance of ArgumentNullError.
      *
-     * @param {string} argumentName Name of the argument that is null
+     * @param {string} argumentName - Name of the argument that is null
      *
      * @memberOf ArgumentNullError
      */
@@ -39,7 +39,7 @@ export class InvalidOperationError extends Error {
     /**
      * Creates an instance of InvalidOperationError.
      *
-     * @param {string} error The error
+     * @param {string} error - The error
      *
      * @memberOf InvalidOperationError
      */
@@ -63,8 +63,8 @@ export class ObjectDisposedError extends Error {
     /**
      * Creates an instance of ObjectDisposedError.
      *
-     * @param {string} objectName The object that is disposed
-     * @param {string} error The error
+     * @param {string} objectName - The object that is disposed
+     * @param {string} error - The error
      *
      * @memberOf ObjectDisposedError
      */

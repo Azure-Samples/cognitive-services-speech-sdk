@@ -22,9 +22,9 @@ export class IntentRecognitionCanceledEventArgs extends IntentRecognitionEventAr
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param result The result of the intent recognition.
-     * @param offset The offset.
-     * @param sessionId The session id.
+     * @param result - The result of the intent recognition.
+     * @param offset - The offset.
+     * @param sessionId - The session id.
      */
     public constructor(reason: CancellationReason, errorDetails: string, result?: IntentRecognitionResult, offset?: number, sessionId?: string) {
         super(result, offset, sessionId);

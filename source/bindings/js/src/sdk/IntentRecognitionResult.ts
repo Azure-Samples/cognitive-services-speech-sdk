@@ -16,16 +16,16 @@ export class IntentRecognitionResult extends SpeechRecognitionResult {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param intentId The intent id.
-     * @param languageUnderstanding Language understanding.
-     * @param resultId The result id.
-     * @param reason The reason.
-     * @param text The recognized text.
-     * @param duration The duration.
-     * @param offset The offset into the stream.
-     * @param errorDetails Error details, if provided.
-     * @param json Additional Json, if provided.
-     * @param properties Additional properties, if provided.
+     * @param intentId - The intent id.
+     * @param languageUnderstanding - Language understanding.
+     * @param resultId - The result id.
+     * @param reason - The reason.
+     * @param text - The recognized text.
+     * @param duration - The duration.
+     * @param offset - The offset into the stream.
+     * @param errorDetails - Error details, if provided.
+     * @param json - Additional Json, if provided.
+     * @param properties - Additional properties, if provided.
      */
     constructor(intentId?: string, languageUnderstanding?: string, resultId?: string, reason?: ResultReason, text?: string, duration?: number, offset?: number, errorDetails?: string, json?: string, properties?: PropertyCollection) {
         super(resultId, reason, text, duration, offset, errorDetails, json, properties);

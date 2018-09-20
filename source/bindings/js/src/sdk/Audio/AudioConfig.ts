@@ -26,7 +26,7 @@ export abstract class AudioConfig {
     /**
      * Creates an AudioConfig object representing the specified file.
      * @member AudioConfig.fromWavFileInput
-     * @param fileName Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
+     * @param fileName - Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
      * @returns The audio input configuration being created.
      */
     public static fromWavFileInput(file: File): AudioConfig {
@@ -36,8 +36,8 @@ export abstract class AudioConfig {
     /**
      * Creates an AudioConfig object representing the specified stream.
      * @member AudioConfig.fromStreamInput
-     * @param audioStream Specifies the custom audio input stream. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
-     * @param callback Specifies the pull audio input stream callback. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
+     * @param audioStream - Specifies the custom audio input stream. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
+     * @param callback - Specifies the pull audio input stream callback. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
      * @returns The audio input configuration being created.
      */
     public static fromStreamInput(audioStream: AudioInputStream | PullAudioInputStreamCallback): AudioConfig {

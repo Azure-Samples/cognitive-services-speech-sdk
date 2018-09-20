@@ -14,8 +14,8 @@ export class TranslationSynthesisEventArgs extends SessionEventArgs {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param result The translation synthesis result.
-     * @param sessionId The session id.
+     * @param result - The translation synthesis result.
+     * @param sessionId - The session id.
      */
     public constructor(result: TranslationSynthesisResult, sessionId?: string) {
         super(sessionId);

@@ -14,9 +14,9 @@ export class TranslationRecognitionEventArgs extends RecognitionEventArgs {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param result The translation recognition result.
-     * @param offset The offset.
-     * @param sessionId The session id.
+     * @param result - The translation recognition result.
+     * @param offset - The offset.
+     * @param sessionId - The session id.
      */
     public constructor(result: TranslationRecognitionResult, offset?: number, sessionId?: string) {
         super(offset, sessionId);

@@ -144,7 +144,7 @@ export class TranslationRecognizer extends Recognizer {
     /**
      * Sets the authorization token used to communicate with the service.
      * @member TranslationRecognizer.prototype.authorizationToken
-     * @param value Authorization token.
+     * @param value - Authorization token.
      */
     public set authorizationToken(value: string) {
         this.properties.setProperty(PropertyId.SpeechServiceAuthorization_Token, value);

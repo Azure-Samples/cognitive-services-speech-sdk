@@ -120,7 +120,7 @@ export class IntentRecognizer extends Recognizer {
     /**
      * Sets the authorization token used to communicate with the service.
      * @member IntentRecognizer.prototype.authorizationToken
-     * @param value Authorization token.
+     * @param value - Authorization token.
      */
     public set authorizationToken(value: string) {
         this.properties.setProperty(PropertyId.SpeechServiceAuthorization_Token, value);
@@ -243,7 +243,7 @@ export class IntentRecognizer extends Recognizer {
      * User must subscribe to events to receive recognition results.
      * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
      * @member IntentRecognizer.prototype.startKeywordRecognitionAsync
-     * @param model The keyword recognition model that specifies the keyword to be recognized.
+     * @param model - The keyword recognition model that specifies the keyword to be recognized.
      * @param cb - Callback invoked once the recognition has started.
      * @param err - Callback invoked in case of an error.
      */
@@ -684,8 +684,8 @@ class AddedLmIntent {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param modelImpl The model.
-     * @param intentName The intent name.
+     * @param modelImpl - The model.
+     * @param intentName - The intent name.
      */
     public constructor(modelImpl: LanguageUnderstandingModelImpl, intentName: string) {
         this.modelImpl = modelImpl;

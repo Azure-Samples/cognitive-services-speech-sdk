@@ -15,15 +15,15 @@ export class TranslationRecognitionResult extends SpeechRecognitionResult {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param translations The translations.
-     * @param resultId The result id.
-     * @param reason The reason.
-     * @param text The recognized text.
-     * @param duration The duration.
-     * @param offset The offset into the stream.
-     * @param errorDetails Error details, if provided.
-     * @param json Additional Json, if provided.
-     * @param properties Additional properties, if provided.
+     * @param translations - The translations.
+     * @param resultId - The result id.
+     * @param reason - The reason.
+     * @param text - The recognized text.
+     * @param duration - The duration.
+     * @param offset - The offset into the stream.
+     * @param errorDetails - Error details, if provided.
+     * @param json - Additional Json, if provided.
+     * @param properties - Additional properties, if provided.
      */
     public constructor(translations: Translation, resultId?: string, reason?: ResultReason, text?: string, duration?: number, offset?: number, errorDetails?: string, json?: string, properties?: PropertyCollection) {
         super(resultId, reason, text, duration, offset, errorDetails, json, properties);
