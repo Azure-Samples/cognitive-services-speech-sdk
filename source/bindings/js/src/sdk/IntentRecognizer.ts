@@ -11,6 +11,7 @@ import {
     IIntentResponse,
     IntentConnectionFactory,
     IntentServiceRecognizer,
+    InternalErrorEvent,
     ISimpleSpeechPhrase,
     ISpeechHypothesis,
     PlatformConfig,
