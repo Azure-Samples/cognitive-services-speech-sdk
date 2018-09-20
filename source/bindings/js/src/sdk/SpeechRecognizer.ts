@@ -93,7 +93,7 @@ export class SpeechRecognizer extends Recognizer {
      * @member SpeechRecognizer.prototype.endpointId
      * @function
      * @public
-     * @returns the endpoint id of a customized speech model that is used for speech recognition.
+     * @returns {string} the endpoint id of a customized speech model that is used for speech recognition.
      */
     public get endpointId(): string {
         Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
@@ -118,7 +118,7 @@ export class SpeechRecognizer extends Recognizer {
      * @member SpeechRecognizer.prototype.authorizationToken
      * @function
      * @public
-     * @return Authorization token.
+     * @returns {string} Authorization token.
      */
     public get authorizationToken(): string {
         return this.properties.getProperty(PropertyId.SpeechServiceAuthorization_Token);
@@ -129,7 +129,7 @@ export class SpeechRecognizer extends Recognizer {
      * @member SpeechRecognizer.prototype.speechRecognitionLanguage
      * @function
      * @public
-     * @returns The spoken language of recognition.
+     * @returns {string} The spoken language of recognition.
      */
     public get speechRecognitionLanguage(): string {
         Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
@@ -142,7 +142,7 @@ export class SpeechRecognizer extends Recognizer {
      * @member SpeechRecognizer.prototype.outputFormat
      * @function
      * @public
-     * @returns The output format of recognition.
+     * @returns {OutputFormat} The output format of recognition.
      */
     public get outputFormat(): OutputFormat {
         Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
@@ -159,7 +159,7 @@ export class SpeechRecognizer extends Recognizer {
      * @member SpeechRecognizer.prototype.properties
      * @function
      * @public
-     * @returns The collection of properties and their values defined for this SpeechRecognizer.
+     * @returns {PropertyCollection} The collection of properties and their values defined for this SpeechRecognizer.
      */
     public get properties(): PropertyCollection {
         return this.privProperties;

@@ -28,7 +28,7 @@ export class TranslationSynthesisEventArgs extends SessionEventArgs {
      * @member TranslationSynthesisEventArgs.prototype.result
      * @function
      * @public
-     * @returns Specifies the translation synthesis result.
+     * @returns {TranslationSynthesisResult} Specifies the translation synthesis result.
      */
     public get result(): TranslationSynthesisResult {
         return this.privResult;

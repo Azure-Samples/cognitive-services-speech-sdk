@@ -13,7 +13,7 @@ export abstract class AudioStreamFormat {
      * @member AudioStreamFormat.getDefaultInputFormat
      * @function
      * @public
-     * @returns The audio stream format being created.
+     * @returns {AudioStreamFormat} The audio stream format being created.
      */
     public static getDefaultInputFormat(): AudioStreamFormat {
         return AudioStreamFormatImpl.getDefaultInputFormat();
@@ -27,7 +27,7 @@ export abstract class AudioStreamFormat {
      * @param {number} samplesPerSecond - Sample rate, in samples per second (Hertz).
      * @param {number} bitsPerSample - Bits per sample, typically 16.
      * @param {number} channels - Number of channels in the waveform-audio data. Monaural data uses one channel and stereo data uses two channels.
-     * @returns The audio stream format being created.
+     * @returns {AudioStreamFormat} The audio stream format being created.
      */
     public static getWaveFormatPCM(samplesPerSecond: number, bitsPerSample: number, channels: number): AudioStreamFormat {
         return new AudioStreamFormatImpl(samplesPerSecond, bitsPerSample, channels);
@@ -66,7 +66,7 @@ export class AudioStreamFormatImpl extends AudioStreamFormat {
      * @member AudioStreamFormatImpl.getDefaultInputFormat
      * @function
      * @public
-     * @returns The default input format.
+     * @returns {AudioStreamFormatImpl} The default input format.
      */
     public static getDefaultInputFormat(): AudioStreamFormatImpl {
         return new AudioStreamFormatImpl();

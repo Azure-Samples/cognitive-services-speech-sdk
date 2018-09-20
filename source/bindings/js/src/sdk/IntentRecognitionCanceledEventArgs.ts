@@ -38,7 +38,7 @@ export class IntentRecognitionCanceledEventArgs extends IntentRecognitionEventAr
      * @member IntentRecognitionCanceledEventArgs.prototype.reason
      * @function
      * @public
-     * @return Specifies the reason canceled.
+     * @returns {CancellationReason} Specifies the reason canceled.
      */
     public get reason(): CancellationReason {
         return this.privReason;
@@ -50,7 +50,7 @@ export class IntentRecognitionCanceledEventArgs extends IntentRecognitionEventAr
      * @member IntentRecognitionCanceledEventArgs.prototype.errorDetails
      * @function
      * @public
-     * @return A String that represents the error details.
+     * @returns {string} A String that represents the error details.
      */
     public get errorDetails(): string {
         return this.privErrorDetails;

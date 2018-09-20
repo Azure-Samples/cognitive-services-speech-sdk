@@ -37,7 +37,7 @@ export class NoMatchDetails {
      * @function
      * @public
      * @param {SpeechRecognitionResult | IntentRecognitionResult | TranslationRecognitionResult} result - The recognition result that was not recognized.
-     * @return The no match details object being created.
+     * @returns {NoMatchDetails} The no match details object being created.
      */
     public static fromResult(result: SpeechRecognitionResult | IntentRecognitionResult | TranslationRecognitionResult): NoMatchDetails {
         const simpleSpeech: ISimpleSpeechPhrase = JSON.parse(result.json);
@@ -66,7 +66,7 @@ export class NoMatchDetails {
      * @member NoMatchDetails.prototype.reason
      * @function
      * @public
-     * @return Specifies the reason canceled.
+     * @returns {NoMatchReason} Specifies the reason canceled.
      */
     public get reason(): NoMatchReason {
         return this.privReason;

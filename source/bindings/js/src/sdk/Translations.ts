@@ -22,7 +22,7 @@ export class Translation {
      * @public
      * @param {string} key - The parameter name.
      * @param {string} def - The default value which is returned if the parameter is not available in the collection.
-     * @returns value of the parameter.
+     * @returns {string} value of the parameter.
      */
     public get(key: string, def?: string): string {
         return this.map.getProperty(key, def);

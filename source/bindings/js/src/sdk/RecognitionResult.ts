@@ -46,7 +46,7 @@ export class RecognitionResult {
      * @member RecognitionResult.prototype.resultId
      * @function
      * @public
-     * @returns Specifies the result identifier.
+     * @returns {string} Specifies the result identifier.
      */
     public get resultId(): string {
         return this.privResultId;
@@ -57,7 +57,7 @@ export class RecognitionResult {
      * @member RecognitionResult.prototype.reason
      * @function
      * @public
-     * @returns Specifies status of the result.
+     * @returns {ResultReason} Specifies status of the result.
      */
     public get reason(): ResultReason {
         return this.privReason;
@@ -68,7 +68,7 @@ export class RecognitionResult {
      * @member RecognitionResult.prototype.text
      * @function
      * @public
-     * @returns Presents the recognized text in the result.
+     * @returns {string} Presents the recognized text in the result.
      */
     public get text(): string {
         return this.privText;
@@ -79,7 +79,7 @@ export class RecognitionResult {
      * @member RecognitionResult.prototype.duration
      * @function
      * @public
-     * @returns Duration of recognized speech in milliseconds.
+     * @returns {number} Duration of recognized speech in milliseconds.
      */
     public get duration(): number {
         return this.privDuration;
@@ -90,7 +90,7 @@ export class RecognitionResult {
      * @member RecognitionResult.prototype.offset
      * @function
      * @public
-     * @returns Offset of recognized speech in milliseconds.
+     * @returns {number} Offset of recognized speech in milliseconds.
      */
     public get offset(): number {
         return this.privOffset;
@@ -102,7 +102,7 @@ export class RecognitionResult {
      * @member RecognitionResult.prototype.errorDetails
      * @function
      * @public
-     * @returns a brief description of an error.
+     * @returns {string} a brief description of an error.
      */
     public get errorDetails(): string {
         return this.privErrorDetails;
@@ -113,7 +113,7 @@ export class RecognitionResult {
      * @member RecognitionResult.prototype.json
      * @function
      * @public
-     * @returns Json serialized representation of the result.
+     * @returns {string} Json serialized representation of the result.
      */
     public get json(): string {
         return this.privJson;
@@ -124,7 +124,7 @@ export class RecognitionResult {
      * @member RecognitionResult.prototype.properties
      * @function
      * @public
-     * @returns The set of properties exposed in the result.
+     * @returns {PropertyCollection} The set of properties exposed in the result.
      */
     public get properties(): PropertyCollection {
         return this.privProperties;

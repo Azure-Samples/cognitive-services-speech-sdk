@@ -29,7 +29,7 @@ export class SpeechRecognitionEventArgs extends RecognitionEventArgs {
      * @member SpeechRecognitionEventArgs.prototype.result
      * @function
      * @public
-     * @returns the recognition result.
+     * @returns {SpeechRecognitionResult} the recognition result.
      */
     public get result(): SpeechRecognitionResult {
         return this.privResult;

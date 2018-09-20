@@ -33,7 +33,7 @@ export { Recognizer } from "./Recognizer";
 export { SpeechRecognizer } from "./SpeechRecognizer";
 export { IntentRecognizer } from "./IntentRecognizer";
 export { TranslationRecognizer } from "./TranslationRecognizer";
-export { Translation } from "./Translation";
+export { Translation } from "./Translations";
 export { NoMatchReason } from "./NoMatchReason";
 export { NoMatchDetails } from "./NoMatchDetails";
 export { TranslationRecognitionCanceledEventArgs } from "./TranslationRecognitionCanceledEventArgs";

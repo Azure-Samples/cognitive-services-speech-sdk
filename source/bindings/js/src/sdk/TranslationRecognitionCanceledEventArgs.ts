@@ -37,7 +37,7 @@ export class TranslationRecognitionCanceledEventArgs {
      * @member TranslationRecognitionCanceledEventArgs.prototype.result
      * @function
      * @public
-     * @return the recognition result.
+     * @returns {TranslationRecognitionResult} the recognition result.
      */
     public get result(): TranslationRecognitionResult {
         return this.privResult;
@@ -48,7 +48,7 @@ export class TranslationRecognitionCanceledEventArgs {
      * @member TranslationRecognitionCanceledEventArgs.prototype.sessionId
      * @function
      * @public
-     * @return the session identifier.
+     * @returns {string} the session identifier.
      */
     public get sessionId(): string {
         return this.privSessionId;
@@ -59,7 +59,7 @@ export class TranslationRecognitionCanceledEventArgs {
      * @member TranslationRecognitionCanceledEventArgs.prototype.reason
      * @function
      * @public
-     * @return Specifies the reason canceled.
+     * @returns {CancellationReason} Specifies the reason canceled.
      */
     public get reason(): CancellationReason {
         return this.privCancelReason;
@@ -71,7 +71,7 @@ export class TranslationRecognitionCanceledEventArgs {
      * @member TranslationRecognitionCanceledEventArgs.prototype.errorDetails
      * @function
      * @public
-     * @return A String that represents the error details.
+     * @returns {string} A String that represents the error details.
      */
     public get errorDetails(): string {
         return this.privErrorDetails;

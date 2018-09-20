@@ -103,7 +103,7 @@ export class TranslationRecognizer extends Recognizer {
      * @member TranslationRecognizer.prototype.speechRecognitionLanguage
      * @function
      * @public
-     * @returns Gets the language name that was set when the recognizer was created.
+     * @returns {string} Gets the language name that was set when the recognizer was created.
      */
     public get speechRecognitionLanguage(): string {
         Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
@@ -117,7 +117,7 @@ export class TranslationRecognizer extends Recognizer {
      * @member TranslationRecognizer.prototype.targetLanguages
      * @function
      * @public
-     * @returns Gets target languages for translation that were set when the recognizer was created.
+     * @returns {string[]} Gets target languages for translation that were set when the recognizer was created.
      */
     public get targetLanguages(): string[] {
         Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
@@ -130,7 +130,7 @@ export class TranslationRecognizer extends Recognizer {
      * @member TranslationRecognizer.prototype.voiceName
      * @function
      * @public
-     * @returns the name of output voice.
+     * @returns {string} the name of output voice.
      */
     public get voiceName(): string {
         Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
@@ -143,7 +143,7 @@ export class TranslationRecognizer extends Recognizer {
      * @member TranslationRecognizer.prototype.authorizationToken
      * @function
      * @public
-     * @return Authorization token.
+     * @returns {string} Authorization token.
      */
     public get authorizationToken(): string {
         return this.properties.getProperty(PropertyId.SpeechServiceAuthorization_Token);
@@ -165,7 +165,7 @@ export class TranslationRecognizer extends Recognizer {
      * @member TranslationRecognizer.prototype.properties
      * @function
      * @public
-     * @returns The collection of properties and their values defined for this TranslationRecognizer.
+     * @returns {PropertyCollection} The collection of properties and their values defined for this TranslationRecognizer.
      */
     public get properties(): PropertyCollection {
         return this.privProperties;

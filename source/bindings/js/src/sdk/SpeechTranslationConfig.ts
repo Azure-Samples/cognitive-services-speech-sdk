@@ -36,7 +36,7 @@ export abstract class SpeechTranslationConfig extends SpeechConfig {
      * @public
      * @param {string} subscriptionKey - The subscription key.
      * @param {string} region - The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
-     * @return The speech config
+     * @returns {SpeechTranslationConfig} The speech config
      */
     public static fromSubscription(subscriptionKey: string, region: string): SpeechTranslationConfig {
         Contracts.throwIfNullOrWhitespace(subscriptionKey, "subscriptionKey");
@@ -58,7 +58,7 @@ export abstract class SpeechTranslationConfig extends SpeechConfig {
      * @public
      * @param {string} authorizationToken - The authorization token.
      * @param {string} region - The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
-     * @return The speech config
+     * @returns {SpeechTranslationConfig} The speech config
      */
     public static fromAuthorizationToken(authorizationToken: string, region: string): SpeechTranslationConfig {
         Contracts.throwIfNullOrWhitespace(authorizationToken, "authorizationToken");
@@ -82,7 +82,7 @@ export abstract class SpeechTranslationConfig extends SpeechConfig {
      * @public
      * @param {URL} endpoint - The service endpoint to connect to.
      * @param {string} subscriptionKey - The subscription key.
-     * @return A speech config instance.
+     * @returns {SpeechTranslationConfig} A speech config instance.
      */
     public static fromEndpoint(endpoint: URL, subscriptionKey: string): SpeechTranslationConfig {
         Contracts.throwIfNull(endpoint, "endpoint");
@@ -139,7 +139,7 @@ export abstract class SpeechTranslationConfig extends SpeechConfig {
      * @member SpeechTranslationConfig.prototype.voiceName
      * @function
      * @public
-     * @returns The voice name.
+     * @returns {string} The voice name.
      */
     public abstract get voiceName(): string;
 
@@ -313,7 +313,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      * @member SpeechTranslationConfigImpl.prototype.region
      * @function
      * @public
-     * @returns The region.
+     * @returns {string} The region.
      */
     public get region(): string {
         return this.speechProperties.getProperty(PropertyId.SpeechServiceConnection_Region);
@@ -338,7 +338,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      * @public
      * @param {string} name - The name of the property.
      * @param {string} def - The default value of the property in case it is not set.
-     * @returns The value of the property.
+     * @returns {string} The value of the property.
      */
     public getProperty(name: string, def?: string): string {
         return this.speechProperties.getProperty(name, def);
@@ -349,7 +349,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      * @member SpeechTranslationConfigImpl.prototype.properties
      * @function
      * @public
-     * @returns The properties.
+     * @returns {PropertyCollection} The properties.
      */
     public get properties(): PropertyCollection {
         return this.speechProperties;

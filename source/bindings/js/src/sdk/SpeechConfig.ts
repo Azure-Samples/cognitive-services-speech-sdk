@@ -29,7 +29,7 @@ export abstract class SpeechConfig {
      * @public
      * @param {string} subscriptionKey - The subscription key.
      * @param {string} region - The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
-     * @returns The speech factory
+     * @returns {SpeechConfig} The speech factory
      */
     public static fromSubscription(subscriptionKey: string, region: string): SpeechConfig {
         Contracts.throwIfNullOrWhitespace(subscriptionKey, "subscriptionKey");
@@ -52,7 +52,7 @@ export abstract class SpeechConfig {
      * @public
      * @param {URL} endpoint - The service endpoint to connect to.
      * @param {string} subscriptionKey - The subscription key.
-     * @returns A speech factory instance.
+     * @returns {SpeechConfig} A speech factory instance.
      */
     public static fromEndpoint(endpoint: URL, subscriptionKey: string): SpeechConfig {
         Contracts.throwIfNull(endpoint, "endpoint");
@@ -71,7 +71,7 @@ export abstract class SpeechConfig {
      * @public
      * @param {string} authorizationToken - The initial authorization token.
      * @param {string} region - The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
-     * @returns A speech factory instance.
+     * @returns {SpeechConfig} A speech factory instance.
      */
     public static fromAuthorizationToken(authorizationToken: string, region: string): SpeechConfig {
         Contracts.throwIfNull(authorizationToken, "authorizationToken");
@@ -137,7 +137,7 @@ export abstract class SpeechConfig {
      * @public
      * @param {string} name - The name of the property to query.
      * @param {string} def - The value to return in case the property is not known.
-     * @returns The current value, or provided default, of the given property.
+     * @returns {string} The current value, or provided default, of the given property.
      */
     public abstract getProperty(name: string, def?: string): string;
 
@@ -154,7 +154,7 @@ export abstract class SpeechConfig {
      * @member SpeechConfig.prototype.outputFormat
      * @function
      * @public
-     * @return Returns the output format.
+     * @returns {OutputFormat} Returns the output format.
      */
     public abstract get outputFormat(): OutputFormat;
 
@@ -172,7 +172,7 @@ export abstract class SpeechConfig {
      * @member SpeechConfig.prototype.endpointId
      * @function
      * @public
-     * @return The endpoint ID
+     * @return {string} The endpoint ID
      */
     public abstract get endpointId(): string;
 

@@ -102,7 +102,7 @@ export class IntentRecognizer extends Recognizer {
      * @member IntentRecognizer.prototype.speechRecognitionLanguage
      * @function
      * @public
-     * @returns the spoken language of recognition.
+     * @returns {string} the spoken language of recognition.
      */
     public get speechRecognitionLanguage(): string {
         Contracts.throwIfDisposed(this.disposedIntentRecognizer);
@@ -115,7 +115,7 @@ export class IntentRecognizer extends Recognizer {
      * @member IntentRecognizer.prototype.authorizationToken
      * @function
      * @public
-     * @return Authorization token.
+     * @returns {string} Authorization token.
      */
     public get authorizationToken(): string {
         return this.properties.getProperty(PropertyId.SpeechServiceAuthorization_Token);
@@ -137,7 +137,7 @@ export class IntentRecognizer extends Recognizer {
      * @member IntentRecognizer.prototype.properties
      * @function
      * @public
-     * @returns The collection of properties and their values defined for this IntentRecognizer.
+     * @returns {PropertyCollection} The collection of properties and their values defined for this IntentRecognizer.
      */
     public get properties(): PropertyCollection {
         return this.privProperties;

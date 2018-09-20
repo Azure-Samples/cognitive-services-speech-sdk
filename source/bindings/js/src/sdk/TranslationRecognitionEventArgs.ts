@@ -29,7 +29,7 @@ export class TranslationRecognitionEventArgs extends RecognitionEventArgs {
      * @member TranslationRecognitionEventArgs.prototype.result
      * @function
      * @public
-     * @returns the recognition result.
+     * @returns {TranslationRecognitionResult} the recognition result.
      */
     public get result(): TranslationRecognitionResult {
         return this.privResult;

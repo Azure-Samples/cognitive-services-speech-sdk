@@ -37,7 +37,7 @@ export class TranslationRecognitionResult extends SpeechRecognitionResult {
      * @member TranslationRecognitionResult.prototype.translations
      * @function
      * @public
-     * @returns the current translation map that holds all translations requested.
+     * @returns {Translation} the current translation map that holds all translations requested.
      */
     public get translations(): Translation {
         return this.privTranslations;

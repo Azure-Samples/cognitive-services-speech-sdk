@@ -22,7 +22,7 @@ export class PropertyCollection {
      * @public
      * @param {string} key - The parameter name.
      * @param {string} def - The default value which is returned if the parameter is not available in the collection.
-     * @returns value of the parameter.
+     * @returns {string} value of the parameter.
      */
     public getProperty(key: PropertyId | string, def?: string): string {
         let keyToUse: string;
@@ -75,7 +75,7 @@ export class PropertyCollection {
      * @member PropertyCollection.prototype.clone
      * @function
      * @public
-     * @returns A copy of the collection.
+     * @returns {PropertyCollection} A copy of the collection.
      */
     public clone(): PropertyCollection {
         const clonedMap = new PropertyCollection();

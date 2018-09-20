@@ -15,7 +15,7 @@ export abstract class PullAudioInputStreamCallback {
      * @function
      * @public
      * @param {ArrayBuffer} dataBuffer - The byte array to store the read data.
-     * @returns the number of bytes have been read.
+     * @returns {number} the number of bytes have been read.
      */
     public abstract read(dataBuffer: ArrayBuffer): number;
 

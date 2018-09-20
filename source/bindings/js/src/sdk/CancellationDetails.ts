@@ -37,7 +37,7 @@ export class CancellationDetails {
      * @function
      * @public
      * @param {RecognitionResult} result - The result that was canceled.
-     * @return - The cancellation details object being created.
+     * @returns {CancellationDetails} The cancellation details object being created.
      */
     public static fromResult(result: RecognitionResult): CancellationDetails {
         const simpleSpeech: ISimpleSpeechPhrase = JSON.parse(result.json);
@@ -68,7 +68,7 @@ export class CancellationDetails {
      * @member CancellationDetails.prototype.reason
      * @function
      * @public
-     * @return Specifies the reason canceled.
+     * @returns {CancellationReason} Specifies the reason canceled.
      */
     public get reason(): CancellationReason {
         return this.privReason;
@@ -80,7 +80,7 @@ export class CancellationDetails {
      * @member CancellationDetails.prototype.errorDetails
      * @function
      * @public
-     * @return A String that represents the error details.
+     * @returns {string} A String that represents the error details.
      */
     public get errorDetails(): string {
         return this.privErrorDetails;
