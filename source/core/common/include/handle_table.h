@@ -147,6 +147,9 @@ public:
 
     void Term()
     {
+        SPX_DBG_TRACE_VERBOSE_IF(m_ptrMap.size() == 0, "%s: ZERO handles 'leaked'", __FUNCTION__, m_ptrMap.size());
+        SPX_DBG_TRACE_WARNING_IF(m_ptrMap.size() >= 1, "%s: non-zero handles 'leaked'", __FUNCTION__, m_ptrMap.size());
+
         WriteLock_Type lock(m_mutex);
         m_handleMap.clear();
         m_ptrMap.clear();

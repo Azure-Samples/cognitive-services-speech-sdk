@@ -56,7 +56,11 @@ CSpxAudioStreamSession::~CSpxAudioStreamSession()
 
 void CSpxAudioStreamSession::Init()
 {
-    // no-op.
+    // NOTE: Due to current owenrship model, and our late-into-the-cycle changes for SpeechConfig objects
+    // the CSpxAudioStreamSession is sited to the CSpxApiFactory. This ApiFactory is not held by the 
+    // dev user at or above the CAPI. Thus ... we must hold it alive in order for the properties to be
+    // obtainable via the standard ISpxNamedProperties mechanisms... It will be released on ::Term()
+    m_siteKeepAlive = GetSite();
 }
 
 void CSpxAudioStreamSession::Term()
@@ -100,6 +104,8 @@ void CSpxAudioStreamSession::Term()
 
     m_audioProcessor = nullptr;
     m_audioBuffer = nullptr;
+
+    SpxTermAndClear(m_siteKeepAlive);
 }
 
 void CSpxAudioStreamSession::InitFromFile(const wchar_t* pszFileName)

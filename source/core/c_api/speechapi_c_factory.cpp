@@ -62,9 +62,6 @@ SPXAPI recognizer_create_speech_recognizer_from_config(SPXRECOHANDLE* phreco, SP
 
         auto recognizer = factory->CreateSpeechRecognizerFromConfig(recoLanguage.c_str(), format, audioInput);
 
-        auto fhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
-        fhandles->TrackHandle(factory);
-
         // track the reco handle
         auto recohandles  = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
@@ -107,9 +104,6 @@ SPXAPI recognizer_create_translation_recognizer_from_config(SPXRECOHANDLE* phrec
         auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioInput);
         recognizer = factory->CreateTranslationRecognizerFromConfig(source_lang, vlangs, voice, audioInput);
 
-        auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
-        factoryhandles->TrackHandle(factory);
-
         // track the reco handle
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();
         *phreco = recohandles->TrackHandle(recognizer);
@@ -144,9 +138,6 @@ SPXAPI recognizer_create_intent_recognizer_from_config(SPXRECOHANDLE* phreco, SP
 
         auto audioInput = AudioConfigFromHandleOrEmptyIfInvalid(haudioInput);
         std::shared_ptr<ISpxRecognizer> recognizer = factory->CreateIntentRecognizerFromConfig(lang.c_str(), format, audioInput);
-
-        auto factoryhandles = CSpxSharedPtrHandleTableManager::Get<ISpxSpeechApiFactory, SPXFACTORYHANDLE>();
-        factoryhandles->TrackHandle(factory);
 
         // track the reco handle
         auto recohandles = CSpxSharedPtrHandleTableManager::Get<ISpxRecognizer, SPXRECOHANDLE>();

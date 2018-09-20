@@ -46,12 +46,15 @@ SPXAPI recognizer_result_handle_release(SPXRESULTHANDLE hresult)
 
 SPXAPI_(bool) recognizer_event_handle_is_valid(SPXEVENTHANDLE hevent)
 {
-    return Handle_IsValid<SPXEVENTHANDLE, ISpxRecognitionEventArgs>(hevent);
+    return Handle_IsValid<SPXEVENTHANDLE, ISpxRecognitionEventArgs>(hevent) ||
+           Handle_IsValid<SPXEVENTHANDLE, ISpxSessionEventArgs>(hevent);
 }
 
 SPXAPI recognizer_event_handle_release(SPXEVENTHANDLE hevent)
 {
-    return Handle_Close<SPXEVENTHANDLE, ISpxRecognitionEventArgs>(hevent);
+    return Handle_IsValid<SPXEVENTHANDLE, ISpxSessionEventArgs>(hevent)
+        ? Handle_Close<SPXEVENTHANDLE, ISpxSessionEventArgs>(hevent)
+        : Handle_Close<SPXEVENTHANDLE, ISpxRecognitionEventArgs>(hevent);
 }
 
 SPXAPI recognizer_enable(SPXRECOHANDLE hreco)
