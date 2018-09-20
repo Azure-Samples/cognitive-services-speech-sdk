@@ -18,7 +18,7 @@ struct IntentEventHandlerHelper
     
     void addRecognizedEventHandler()
     {
-        NSLog(@"Add RecognizedEventHandler");
+        LogDebug(@"Add RecognizedEventHandler");
         recoImpl->Recognized.Connect([this] (const IntentImpl::IntentRecognitionEventArgs& e)
                                      {
                                          SPXIntentRecognitionEventArgs *eventArgs = [[SPXIntentRecognitionEventArgs alloc] init: e];
@@ -28,7 +28,7 @@ struct IntentEventHandlerHelper
     
     void addRecognizingEventHandler()
     {
-        NSLog(@"Add RecognizingEventHandler");
+        LogDebug(@"Add RecognizingEventHandler");
         recoImpl->Recognizing.Connect([this] (const IntentImpl::IntentRecognitionEventArgs& e)
                                       {
                                           SPXIntentRecognitionEventArgs *eventArgs = [[SPXIntentRecognitionEventArgs alloc] init: e];
@@ -38,7 +38,7 @@ struct IntentEventHandlerHelper
     
     void addCanceledEventHandler()
     {
-        NSLog(@"Add CanceledEventHandler");
+        LogDebug(@"Add CanceledEventHandler");
         recoImpl->Canceled.Connect([this] (const IntentImpl::IntentRecognitionCanceledEventArgs& e)
                                    {
                                        SPXIntentRecognitionCanceledEventArgs *eventArgs = [[SPXIntentRecognitionCanceledEventArgs alloc] init:e];
@@ -48,7 +48,7 @@ struct IntentEventHandlerHelper
     
     void addSessionStartedEventHandler()
     {
-        NSLog(@"Add SessionStartedEventHandler");
+        LogDebug(@"Add SessionStartedEventHandler");
         recoImpl->SessionStarted.Connect([this] (const SpeechImpl::SessionEventArgs& e)
                                          {
                                              SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init:e];
@@ -58,7 +58,7 @@ struct IntentEventHandlerHelper
     
     void addSessionStoppedEventHandler()
     {
-        NSLog(@"Add SessionStoppedEventHandler");
+        LogDebug(@"Add SessionStoppedEventHandler");
         recoImpl->SessionStopped.Connect([this] (const SpeechImpl::SessionEventArgs& e)
                                          {
                                              SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init:e];
@@ -68,7 +68,7 @@ struct IntentEventHandlerHelper
     
     void addSpeechStartDetectedEventHandler()
     {
-        NSLog(@"Add SpeechStartDetectedEventHandler");
+        LogDebug(@"Add SpeechStartDetectedEventHandler");
         recoImpl->SpeechStartDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
                                               {
                                                   SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init:e];
@@ -78,7 +78,7 @@ struct IntentEventHandlerHelper
     
     void addSpeechEndDetectedEventHandler()
     {
-        NSLog(@"Add SpeechStopDetectedEventHandler");
+        LogDebug(@"Add SpeechStopDetectedEventHandler");
         recoImpl->SpeechEndDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
                                             {
                                                 SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init:e];
@@ -301,7 +301,7 @@ struct IntentEventHandlerHelper
 
 - (void)onRecognizedEvent:(SPXIntentRecognitionEventArgs *)eventArgs
 {
-    NSLog(@"OBJC: onRecognizedEvent");
+    LogDebug(@"OBJC: onRecognizedEvent");
     NSArray* workCopyOfList;
     [recognizedLock lock];
     workCopyOfList = [NSArray arrayWithArray:recognizedEventHandlerList];
@@ -315,7 +315,7 @@ struct IntentEventHandlerHelper
 
 - (void)onRecognizingEvent:(SPXIntentRecognitionEventArgs *)eventArgs
 {
-    NSLog(@"OBJC: onRecognizingEvent");
+    LogDebug(@"OBJC: onRecognizingEvent");
     NSArray* workCopyOfList;
     [recognizingLock lock];
     workCopyOfList = [NSArray arrayWithArray:recognizingEventHandlerList];
@@ -329,7 +329,7 @@ struct IntentEventHandlerHelper
 
 - (void)onCanceledEvent:(SPXIntentRecognitionCanceledEventArgs *)eventArgs
 {
-    NSLog(@"OBJC: onCanceledEvent");
+    LogDebug(@"OBJC: onCanceledEvent");
     NSArray* workCopyOfList;
     [canceledLock lock];
     workCopyOfList = [NSArray arrayWithArray:canceledEventHandlerList];

@@ -37,7 +37,7 @@
 
 - (void)onSessionStartedEvent:(SPXSessionEventArgs *)eventArgs
 {
-    NSLog(@"OBJC OnSessionStartedEvent");
+    LogDebug(@"OBJC OnSessionStartedEvent");
     NSArray* workCopyOfList;
     [sessionEventArrayLock lock];
     workCopyOfList = [NSArray arrayWithArray:sessionStartedEventHandlerList];
@@ -51,7 +51,7 @@
 
 - (void)onSessionStoppedEvent:(SPXSessionEventArgs *)eventArgs
 {
-    NSLog(@"OBJC OnSessionStoppedEvent");
+    LogDebug(@"OBJC OnSessionStoppedEvent");
     NSArray* workCopyOfList;
     [sessionEventArrayLock lock];
     workCopyOfList = [NSArray arrayWithArray:sessionStoppedEventHandlerList];
@@ -79,7 +79,7 @@
 
 - (void)onSpeechStartDetectedEvent:(SPXRecognitionEventArgs *)eventArgs
 {
-    NSLog(@"OBJC OnSpeechStartDetectedEvent");
+    LogDebug(@"OBJC OnSpeechStartDetectedEvent");
     NSArray* workCopyOfList;
     [speechDetectionEventArrayLock lock];
     workCopyOfList = [NSArray arrayWithArray:speechStartDetectedEventHandlerList];
@@ -93,7 +93,7 @@
 
 - (void)onSpeechEndDetectedEvent:(SPXRecognitionEventArgs *)eventArgs
 {
-    NSLog(@"OBJC OnSpeechEndDetectedEvent");
+    LogDebug(@"OBJC OnSpeechEndDetectedEvent");
     NSArray* workCopyOfList;
     [speechDetectionEventArrayLock lock];
     workCopyOfList = [NSArray arrayWithArray:speechEndDetectedEventHandlerList];

@@ -18,7 +18,7 @@ struct TranslationEventHandlerHelper
     
     void addRecognizedEventHandler()
     {
-        NSLog(@"Add RecognizedEventHandler");
+        LogDebug(@"Add RecognizedEventHandler");
         recoImpl->Recognized.Connect([this] (const TranslationImpl::TranslationRecognitionEventArgs& e)
                                      {
                                          SPXTranslationRecognitionEventArgs *eventArgs = [[SPXTranslationRecognitionEventArgs alloc] init: e];
@@ -28,7 +28,7 @@ struct TranslationEventHandlerHelper
     
     void addRecognizingEventHandler()
     {
-        NSLog(@"Add RecognizingEventHandler");
+        LogDebug(@"Add RecognizingEventHandler");
         recoImpl->Recognizing.Connect([this] (const TranslationImpl::TranslationRecognitionEventArgs& e)
                                       {
                                           SPXTranslationRecognitionEventArgs *eventArgs = [[SPXTranslationRecognitionEventArgs alloc] init: e];
@@ -38,7 +38,7 @@ struct TranslationEventHandlerHelper
     
     void addCanceledEventHandler()
     {
-        NSLog(@"Add CanceledEventHandler");
+        LogDebug(@"Add CanceledEventHandler");
         recoImpl->Canceled.Connect([this] (const TranslationImpl::TranslationRecognitionCanceledEventArgs& e)
                                    {
                                        SPXTranslationRecognitionCanceledEventArgs *eventArgs = [[SPXTranslationRecognitionCanceledEventArgs alloc] init:e];
@@ -48,7 +48,7 @@ struct TranslationEventHandlerHelper
     
     void addSynthesizingEventHandler()
     {
-        NSLog(@"Add SynthesisResultEventHandler");
+        LogDebug(@"Add SynthesisResultEventHandler");
         recoImpl->Synthesizing.Connect([this] (const TranslationImpl::TranslationSynthesisEventArgs& e)
             {
                 SPXTranslationSynthesisEventArgs *eventArgs = [[SPXTranslationSynthesisEventArgs alloc] init: e];
@@ -58,7 +58,7 @@ struct TranslationEventHandlerHelper
 
     void addSessionStartedEventHandler()
     {
-        NSLog(@"Add SessionStartedEventHandler");
+        LogDebug(@"Add SessionStartedEventHandler");
         recoImpl->SessionStarted.Connect([this] (const SpeechImpl::SessionEventArgs& e)
                                          {
                                              SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init:e];
@@ -68,7 +68,7 @@ struct TranslationEventHandlerHelper
     
     void addSessionStoppedEventHandler()
     {
-        NSLog(@"Add SessionStoppedEventHandler");
+        LogDebug(@"Add SessionStoppedEventHandler");
         recoImpl->SessionStopped.Connect([this] (const SpeechImpl::SessionEventArgs& e)
                                          {
                                              SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init:e];
@@ -78,7 +78,7 @@ struct TranslationEventHandlerHelper
     
     void addSpeechStartDetectedEventHandler()
     {
-        NSLog(@"Add SpeechStartDetectedEventHandler");
+        LogDebug(@"Add SpeechStartDetectedEventHandler");
         recoImpl->SpeechStartDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
                                               {
                                                   SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init:e];
@@ -88,7 +88,7 @@ struct TranslationEventHandlerHelper
     
     void addSpeechEndDetectedEventHandler()
     {
-        NSLog(@"Add SpeechStopDetectedEventHandler");
+        LogDebug(@"Add SpeechStopDetectedEventHandler");
         recoImpl->SpeechEndDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
                                             {
                                                 SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init:e];
@@ -286,7 +286,7 @@ struct TranslationEventHandlerHelper
 
 - (void)onRecognizedEvent:(SPXTranslationRecognitionEventArgs *)eventArgs
 {
-    NSLog(@"OBJC: onRecognizedEvent");
+    LogDebug(@"OBJC: onRecognizedEvent");
     NSArray* workCopyOfList;
     [recognizedLock lock];
     workCopyOfList = [NSArray arrayWithArray:recognizedEventHandlerList];
@@ -300,7 +300,7 @@ struct TranslationEventHandlerHelper
 
 - (void)onRecognizingEvent:(SPXTranslationRecognitionEventArgs *)eventArgs
 {
-    NSLog(@"OBJC: onRecognizingEvent");
+    LogDebug(@"OBJC: onRecognizingEvent");
     NSArray* workCopyOfList;
     [recognizingLock lock];
     workCopyOfList = [NSArray arrayWithArray:recognizingEventHandlerList];
@@ -314,7 +314,7 @@ struct TranslationEventHandlerHelper
 
 - (void)onSynthesizingEvent:(SPXTranslationSynthesisEventArgs *)eventArgs
 {
-    NSLog(@"OBJC: onSynthesisResultEvent");
+    LogDebug(@"OBJC: onSynthesisResultEvent");
     NSArray* workCopyOfList;
     [synthesizingLock lock];
     workCopyOfList = [NSArray arrayWithArray:synthesisResultEventHandlerList];
@@ -328,7 +328,7 @@ struct TranslationEventHandlerHelper
 
 - (void)onCanceledEvent:(SPXTranslationRecognitionCanceledEventArgs *)eventArgs
 {
-    NSLog(@"OBJC: onCanceledEvent");
+    LogDebug(@"OBJC: onCanceledEvent");
     NSArray* workCopyOfList;
     [canceledLock lock];
     workCopyOfList = [NSArray arrayWithArray:canceledEventHandlerList];
