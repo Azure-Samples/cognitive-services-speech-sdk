@@ -7,6 +7,7 @@ import {
     IAuthentication,
     IConnectionFactory,
     IDetailedSpeechPhrase,
+    InternalErrorEvent,
     ISimpleSpeechPhrase,
     ISpeechHypothesis,
     OutputFormatPropertyName,
@@ -495,7 +496,7 @@ export class SpeechRecognizer extends Recognizer {
                             }
                         }
                     } else {
-                        const ev = new SpeechRecognitionEventArgs(result, 0/*todo*/,  evResult.SessionId);
+                        const ev = new SpeechRecognitionEventArgs(result, 0/*todo*/, evResult.SessionId);
 
                         if (!!this.recognized) {
                             try {
@@ -543,6 +544,43 @@ export class SpeechRecognizer extends Recognizer {
                             // Not going to let errors in the event handler
                             // trip things up.
                         }
+                    }
+                }
+                break;
+            case "InternalErrorEvent":
+                {
+                    const evResult: InternalErrorEvent = event as InternalErrorEvent;
+                    const result: SpeechRecognitionResult = new SpeechRecognitionResult(
+                        evResult.RequestId,
+                        ResultReason.Canceled,
+                        undefined,
+                        undefined,
+                        undefined,
+                        evResult.Result);
+                    const canceledResult: SpeechRecognitionCanceledEventArgs = new SpeechRecognitionCanceledEventArgs(
+                        CancellationReason.Error,
+                        result.errorDetails);
+                    try {
+                        this.canceled(this, canceledResult);
+                        /* tslint:disable:no-empty */
+                    } catch (error) {
+                        // Not going to let errors in the event handler
+                        // trip things up.
+                    }
+                    // report result to promise.
+                    if (!!cb) {
+                        try {
+                            cb(result);
+                        } catch (e) {
+                            if (!!err) {
+                                err(e);
+                            }
+                        }
+                        // Only invoke the call back once.
+                        // and if it's successful don't invoke thebundle
+                        // error after that.
+                        cb = undefined;
+                        err = undefined;                        }
                     }
                 }
                 break;
