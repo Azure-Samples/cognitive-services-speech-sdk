@@ -385,7 +385,7 @@ USP::Client& CSpxUspRecoEngineAdapter::SetUspAuthentication(std::shared_ptr<ISpx
     // Get the properties that indicates what endpoint to use...
     auto uspSubscriptionKey = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceConnection_Key));
     auto uspAuthToken = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceAuthorization_Token));
-    auto uspRpsToken = properties->GetStringValue(GetPropertyName(PropertyId::SpeechServiceRps_Token));
+    auto uspRpsToken = properties->GetStringValue("SPEECH-RpsToken");
 
     // Use those properties to determine which authentication type to use
     if (!uspSubscriptionKey.empty())
@@ -845,7 +845,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationHypothesis(const USP::TranslationHyp
     else
     {
         SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for warning trace
-        SPX_TRACE_WARNING("%s: Unexpected USP State transition (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+        SPX_DBG_TRACE_WARNING("%s: Unexpected USP State transition (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
     }
 
 }
@@ -903,7 +903,7 @@ void CSpxUspRecoEngineAdapter::OnTranslationPhrase(const USP::TranslationPhraseM
     else
     {
         SPX_DBG_ASSERT(writeLock.owns_lock()); // need to keep the lock for warning trace
-        SPX_TRACE_WARNING("%s: Unexpected USP State transition (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
+        SPX_DBG_TRACE_WARNING("%s: Unexpected USP State transition (audioState/uspState=%d/%d)", __FUNCTION__, m_audioState, m_uspState);
     }
 }
 

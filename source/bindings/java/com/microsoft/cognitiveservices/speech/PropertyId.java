@@ -35,11 +35,6 @@ public enum PropertyId {
     SpeechServiceAuthorization_Type (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceAuthorization_Type),
 
     /// <summary>
-    /// RPS token.
-    /// </summary>
-    SpeechServiceRps_Token (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceRps_Token),
-
-    /// <summary>
     /// Endpoint ID.
     /// </summary>
     SpeechServiceConnection_EndpointId (com.microsoft.cognitiveservices.speech.internal.PropertyId.SpeechServiceConnection_EndpointId),
