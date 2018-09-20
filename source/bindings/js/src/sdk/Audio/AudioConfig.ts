@@ -61,40 +61,73 @@ export abstract class AudioConfig {
 
 /**
  * Represents audio input stream used for custom audio input configurations.
+ * @class AudioConfigImpl
  */
 // tslint:disable-next-line:max-classes-per-file
 export class AudioConfigImpl extends AudioConfig implements IAudioSource {
     private source: IAudioSource;
 
+    /**
+     * Creates and initializes an instance of this class.
+     * @constructor
+     * @param source - An audio source.
+     */
     public constructor(source: IAudioSource) {
         super();
         this.source = source;
     }
 
+    /**
+     * @member AudioConfigImpl.prototype.close
+     */
     public close(): void {
         this.source.TurnOff();
     }
 
+    /**
+     * @member AudioConfigImpl.prototype.Id
+     */
     public Id(): string {
         return this.source.Id();
     }
 
+    /**
+     * @member AudioConfigImpl.prototype.TurnOn
+     * @returns A promise.
+     */
     public TurnOn(): Promise<boolean> {
         return this.source.TurnOn();
     }
 
+    /**
+     * @member AudioConfigImpl.prototype.Attach
+     * @param audioNodeId - The audio node id.
+     * @returns A promise.
+     */
     public Attach(audioNodeId: string): Promise<IAudioStreamNode> {
         return this.source.Attach(audioNodeId);
     }
 
+    /**
+     * @member AudioConfigImpl.prototype.Detach
+     * @param audioNodeId - The audio node id.
+     */
     public Detach(audioNodeId: string): void {
         return this.Detach(audioNodeId);
     }
 
+    /**
+     * @member AudioConfigImpl.prototype.TurnOff
+     * @returns A promise.
+     */
     public TurnOff(): Promise<boolean> {
         return this.source.TurnOff();
     }
 
+    /**
+     * @member AudioConfigImpl.prototype.Events
+     * @returns An event source for audio events.
+     */
     public get Events(): EventSource<AudioSourceEvent> {
         return this.source.Events;
     }
