@@ -6,7 +6,7 @@ import { PropertyCollection, RecognitionEventArgs, ResultReason, SpeechRecogniti
 
 /**
  * Defines contents of speech recognizing/recognized event.
- * @class
+ * @class SpeechRecognitionEventArgs
  */
 export class SpeechRecognitionEventArgs extends RecognitionEventArgs {
     private privResult: SpeechRecognitionResult;
@@ -26,7 +26,7 @@ export class SpeechRecognitionEventArgs extends RecognitionEventArgs {
 
     /**
      * Specifies the recognition result.
-     * @property
+     * @member SpeechRecognitionEventArgs.prototype.result
      * @returns the recognition result.
      */
     public get result(): SpeechRecognitionResult {

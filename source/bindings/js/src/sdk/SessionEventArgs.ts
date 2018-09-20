@@ -5,7 +5,7 @@
 
 /**
  * Defines content for session events like SessionStarted/Stopped, SoundStarted/Stopped.
- * @class
+ * @class SessionEventArgs
  */
 export class SessionEventArgs {
     private privSessionId: string;
@@ -21,6 +21,7 @@ export class SessionEventArgs {
 
     /**
      * Represents the session identifier.
+     * @member SessionEventArgs.prototype.sessionId
      * @returns Represents the session identifier.
      */
     public get sessionId(): string {

@@ -8,7 +8,7 @@ import { Contracts } from "./Contracts";
 /**
  * Represents a keyword recognition model for recognizing when
  * the user says a keyword to initiate further speech recognition.
- * @class
+ * @class KeywordRecognitionModel
  */
 export class KeywordRecognitionModel {
     private disposed: boolean = false;
@@ -22,7 +22,7 @@ export class KeywordRecognitionModel {
 
     /**
      * Creates a keyword recognition model using the specified filename.
-     * @member
+     * @member KeywordRecognitionModel.fromFile
      * @param {string} fileName - A string that represents file name for the keyword recognition model.
      *                 Note, the file can point to a zip file in which case the model will be extracted from the zip.
      * @returns The keyword recognition model being created.
@@ -35,7 +35,7 @@ export class KeywordRecognitionModel {
 
     /**
      * Creates a keyword recognition model using the specified filename.
-     * @member
+     * @member KeywordRecognitionModel.fromStream
      * @param {string} file - A File that represents file for the keyword recognition model.
      *                 Note, the file can point to a zip file in which case the model will be extracted from the zip.
      * @returns The keyword recognition model being created.
@@ -48,7 +48,7 @@ export class KeywordRecognitionModel {
 
     /**
      * Dispose of associated resources.
-     * @member
+     * @member KeywordRecognitionModel.prototype.close
      */
     public close(): void {
         if (this.disposed) {

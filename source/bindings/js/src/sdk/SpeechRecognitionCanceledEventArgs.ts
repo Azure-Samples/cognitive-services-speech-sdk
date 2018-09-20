@@ -7,7 +7,7 @@ import { CancellationReason, RecognitionEventArgs } from "./Exports";
 
 /**
  * Defines content of a RecognitionErrorEvent.
- * @class
+ * @class SpeechRecognitionCanceledEventArgs
  */
 export class SpeechRecognitionCanceledEventArgs extends RecognitionEventArgs {
     private privReason: CancellationReason;
@@ -30,6 +30,7 @@ export class SpeechRecognitionCanceledEventArgs extends RecognitionEventArgs {
 
     /**
      * The reason the recognition was canceled.
+     * @member SpeechRecognitionCanceledEventArgs.prototype.reason
      * @return Specifies the reason canceled.
      */
     public get reason(): CancellationReason {
@@ -39,6 +40,7 @@ export class SpeechRecognitionCanceledEventArgs extends RecognitionEventArgs {
     /**
      * In case of an unsuccessful recognition, provides a details of why the occurred error.
      * This field is only filled-out if the reason canceled (@see getReason) is set to Error.
+     * @member SpeechRecognitionCanceledEventArgs.prototype.errorDetails
      * @return A String that represents the error details.
      */
     public get errorDetails(): string {

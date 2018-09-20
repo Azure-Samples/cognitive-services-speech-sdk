@@ -7,7 +7,7 @@ import { PropertyCollection, ResultReason, SpeechRecognitionResult, Translation 
 
 /**
  * Translation text result.
- * @class
+ * @class TranslationRecognitionResult
  */
 export class TranslationRecognitionResult extends SpeechRecognitionResult {
     private privTranslations: Translation;
@@ -34,7 +34,7 @@ export class TranslationRecognitionResult extends SpeechRecognitionResult {
     /**
      * Presents the translation results. Each item in the dictionary represents a translation result in one of target languages, where the key
      * is the name of the target language, in BCP-47 format, and the value is the translation text in the specified language.
-     * @property
+     * @member TranslationRecognitionResult.prototype.translations
      * @returns the current translation map that holds all translations requested.
      */
     public get translations(): Translation {

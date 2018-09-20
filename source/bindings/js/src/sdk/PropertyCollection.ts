@@ -7,7 +7,7 @@ import { PropertyId } from "./Exports";
 
 /**
  * Represents collection of properties and their values.
- * @class
+ * @class PropertyCollection
  */
 export class PropertyCollection {
     private keys: string[] = [] as string[];
@@ -17,7 +17,7 @@ export class PropertyCollection {
      * Returns the property value in type String. The parameter must have the same type as String.
      * Currently only String, int and bool are allowed.
      * If the name is not available, the specified defaultValue is returned.
-     * @member
+     * @member PropertyCollection.prototype.getProperty
      * @param {string} key - The parameter name.
      * @param {string} def - The default value which is returned if the parameter is not available in the collection.
      * @returns value of the parameter.
@@ -42,7 +42,7 @@ export class PropertyCollection {
 
     /**
      * Sets the String value of the parameter specified by name.
-     * @member
+     * @member PropertyCollection.prototype.setProperty
      * @param {string} key - The parameter name.
      * @param {string} value - The value of the parameter.
      */
@@ -68,7 +68,7 @@ export class PropertyCollection {
 
     /**
      * Clones the collection.
-     * @member
+     * @member PropertyCollection.prototype.clone
      * @returns A copy of the collection.
      */
     public clone(): PropertyCollection {

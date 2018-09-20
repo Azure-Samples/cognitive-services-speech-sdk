@@ -14,7 +14,7 @@ import {
 
 /**
  * Contains detailed information about why a result was canceled.
- * @class
+ * @class CancellationDetails
  */
 export class CancellationDetails {
     private privReason: CancellationReason;
@@ -33,7 +33,7 @@ export class CancellationDetails {
 
     /**
      * Creates an instance of CancellationDetails object for the canceled RecognitionResult.
-     * @member
+     * @member CancellationDetails.fromResult
      * @param result The result that was canceled.
      * @return The cancellation details object being created.
      */
@@ -63,7 +63,7 @@ export class CancellationDetails {
 
     /**
      * The reason the recognition was canceled.
-     * @property
+     * @member CancellationDetails.prototype.reason
      * @return Specifies the reason canceled.
      */
     public get reason(): CancellationReason {
@@ -73,7 +73,7 @@ export class CancellationDetails {
     /**
      * In case of an unsuccessful recognition, provides a details of why the occurred error.
      * This field is only filled-out if the reason canceled (@see getReason) is set to Error.
-     * @property
+     * @member CancellationDetails.prototype.errorDetails
      * @return A String that represents the error details.
      */
     public get errorDetails(): string {

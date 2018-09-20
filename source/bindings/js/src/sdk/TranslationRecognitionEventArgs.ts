@@ -6,7 +6,7 @@ import { RecognitionEventArgs, TranslationRecognitionResult } from "./Exports";
 
 /**
  * Translation text result event arguments.
- * @class
+ * @class TranslationRecognitionEventArgs
  */
 export class TranslationRecognitionEventArgs extends RecognitionEventArgs {
     private privResult: TranslationRecognitionResult;
@@ -26,7 +26,7 @@ export class TranslationRecognitionEventArgs extends RecognitionEventArgs {
 
     /**
      * Specifies the recognition result.
-     * @property
+     * @member TranslationRecognitionEventArgs.prototype.result
      * @returns the recognition result.
      */
     public get result(): TranslationRecognitionResult {

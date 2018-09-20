@@ -6,7 +6,7 @@ import { SessionEventArgs, TranslationSynthesisResult } from "./Exports";
 
 /**
  * Translation Synthesis event arguments
- * @class
+ * @class TranslationSynthesisEventArgs
  */
 export class TranslationSynthesisEventArgs extends SessionEventArgs {
     private privResult: TranslationSynthesisResult;
@@ -25,7 +25,7 @@ export class TranslationSynthesisEventArgs extends SessionEventArgs {
 
     /**
      * Specifies the translation synthesis result.
-     * @property
+     * @member TranslationSynthesisEventArgs.prototype.result
      * @returns Specifies the translation synthesis result.
      */
     public get result(): TranslationSynthesisResult {

@@ -6,7 +6,7 @@ import { PropertyCollection, RecognitionResult, ResultReason } from "./Exports";
 
 /**
  * Defines result of speech recognition.
- * @class
+ * @class SpeechRecognitionResult
  */
 export class SpeechRecognitionResult extends RecognitionResult {
     /**
