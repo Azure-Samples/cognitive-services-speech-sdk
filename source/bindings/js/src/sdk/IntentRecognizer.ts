@@ -301,8 +301,10 @@ export class IntentRecognizer extends Recognizer {
     }
 
     /**
-     * Adds all intents from the specified Language Understanding Model.
+     * @summary aa Adds all intents from the specified Language Understanding Model.
      * @member IntentRecognizer.prototype.addAllIntents
+     * @function
+     * @public
      * @param {LanguageUnderstandingModel} model - The language understanding model containing the intents.
      * @param {string} intentId - A custom id String to be returned in the IntentRecognitionResult's getIntentId() method.
      */

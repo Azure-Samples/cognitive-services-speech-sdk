@@ -14,9 +14,9 @@ export class SpeechRecognitionEventArgs extends RecognitionEventArgs {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param result - The speech recognition result.
-     * @param offset - The offset.
-     * @param sessionId - The session id.
+     * @param {SpeechRecognitionResult} result - The speech recognition result.
+     * @param {number} offset - The offset.
+     * @param {string} sessionId - The session id.
      */
     public constructor(result: SpeechRecognitionResult, offset?: number, sessionId?: string) {
         super(offset, sessionId);

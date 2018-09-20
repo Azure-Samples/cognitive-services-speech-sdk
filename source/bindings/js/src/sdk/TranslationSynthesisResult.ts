@@ -15,8 +15,8 @@ export class TranslationSynthesisResult {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param reason - The synthesis reason.
-     * @param audio - The audio data.
+     * @param {SynthesisStatus} reason - The synthesis reason.
+     * @param {ArrayBuffer} audio - The audio data.
      */
     constructor(reason: SynthesisStatus, audio: ArrayBuffer) {
         this.privReason = reason;

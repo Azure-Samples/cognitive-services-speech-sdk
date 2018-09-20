@@ -20,9 +20,9 @@ export abstract class AudioStreamFormat {
     /**
      * Creates an audio stream format object with the specified pcm waveformat characteristics.
      * @member AudioStreamFormat.getWaveFormatPCM
-     * @param samplesPerSecond - Sample rate, in samples per second (Hertz).
-     * @param bitsPerSample - Bits per sample, typically 16.
-     * @param channels - Number of channels in the waveform-audio data. Monaural data uses one channel and stereo data uses two channels.
+     * @param {number} samplesPerSecond - Sample rate, in samples per second (Hertz).
+     * @param {number} bitsPerSample - Bits per sample, typically 16.
+     * @param {number} channels - Number of channels in the waveform-audio data. Monaural data uses one channel and stereo data uses two channels.
      * @returns The audio stream format being created.
      */
     public static getWaveFormatPCM(samplesPerSecond: number, bitsPerSample: number, channels: number): AudioStreamFormat {
@@ -41,9 +41,9 @@ export class AudioStreamFormatImpl extends AudioStreamFormat {
     /**
      * Creates an instance with the given values.
      * @constructor
-     * @param samplesPerSec - Samples per second.
-     * @param bitsPerSample - Bits per sample.
-     * @param channels - Number of channels.
+     * @param {number} samplesPerSec - Samples per second.
+     * @param {number} bitsPerSample - Bits per sample.
+     * @param {number} channels - Number of channels.
      */
     public constructor(samplesPerSec: number = 16000, bitsPerSample: number = 16, channels: number = 1) {
         super();

@@ -12,7 +12,7 @@ export abstract class PullAudioInputStreamCallback {
     /**
      * Reads data from audio input stream into the data buffer. The maximal number of bytes to be read is determined by the size of dataBuffer.
      * @member PullAudioInputStreamCallback.prototype.read
-     * @param dataBuffer - The byte array to store the read data.
+     * @param {ArrayBuffer} dataBuffer - The byte array to store the read data.
      * @returns the number of bytes have been read.
      */
     public abstract read(dataBuffer: ArrayBuffer): number;

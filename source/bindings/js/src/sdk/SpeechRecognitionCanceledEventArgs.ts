@@ -16,10 +16,10 @@ export class SpeechRecognitionCanceledEventArgs extends RecognitionEventArgs {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param reason - The cancellation reason.
-     * @param errorDetails - Error details, if provided.
-     * @param offset - The offset.
-     * @param sessionId - The session id.
+     * @param {CancellationReason} reason - The cancellation reason.
+     * @param {string} errorDetails - Error details, if provided.
+     * @param {number} offset - The offset.
+     * @param {string} sessionId - The session id.
      */
     public constructor(reason: CancellationReason, errorDetails: string, offset?: number, sessionId?: string) {
         super(offset, sessionId);

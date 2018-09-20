@@ -96,7 +96,7 @@ export class SpeechRecognizer extends Recognizer {
     /**
      * Sets the authorization token used to communicate with the service.
      * @member SpeechRecognizer.prototype.authorizationToken
-     * @param token - Authorization token.
+     * @param {string} token - Authorization token.
      */
     public set authorizationToken(token: string) {
         Contracts.throwIfNullOrWhitespace(token, "token");
@@ -241,7 +241,7 @@ export class SpeechRecognizer extends Recognizer {
      * User must subscribe to events to receive recognition results.
      * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
      * @member SpeechRecognizer.prototype.startKeywordRecognitionAsync
-     * @param model The keyword recognition model that specifies the keyword to be recognized.
+     * @param {KeywordRecognitionModel} model The keyword recognition model that specifies the keyword to be recognized.
      * @param cb - Callback invoked once the recognition has started.
      * @param err - Callback invoked in case of an error.
      */
@@ -279,7 +279,7 @@ export class SpeechRecognizer extends Recognizer {
     /**
      * Disposes any resources held by the object.
      * @member SpeechRecognizer.prototype.dispose
-     * @param disposing - true if disposing the object.
+     * @param {boolean} disposing - true if disposing the object.
      */
     protected dispose(disposing: boolean): void {
         if (this.disposedSpeechRecognizer) {

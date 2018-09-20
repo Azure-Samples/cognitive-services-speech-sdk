@@ -13,7 +13,7 @@ export class SessionEventArgs {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param sessionId - The session id.
+     * @param {string} sessionId - The session id.
      */
     public constructor(sessionId: string) {
         this.privSessionId = sessionId;

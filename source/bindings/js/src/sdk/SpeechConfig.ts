@@ -25,8 +25,8 @@ export abstract class SpeechConfig {
     /**
      * Static instance of SpeechConfig returned by passing subscriptionKey and service region.
      * @member SpeechConfig.fromSubscription
-     * @param subscriptionKey - The subscription key.
-     * @param region - The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
+     * @param {string} subscriptionKey - The subscription key.
+     * @param {string} region - The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
      * @returns The speech factory
      */
     public static fromSubscription(subscriptionKey: string, region: string): SpeechConfig {
@@ -46,8 +46,8 @@ export abstract class SpeechConfig {
      * This method is intended only for users who use a non-standard service endpoint or paramters.
      * the language setting in uri takes precedence, and the effective language is "de-DE".
      * @member SpeechConfig.fromEndpoint
-     * @param endpoint - The service endpoint to connect to.
-     * @param subscriptionKey - The subscription key.
+     * @param {URL} endpoint - The service endpoint to connect to.
+     * @param {string} subscriptionKey - The subscription key.
      * @returns A speech factory instance.
      */
     public static fromEndpoint(endpoint: URL, subscriptionKey: string): SpeechConfig {
@@ -63,8 +63,8 @@ export abstract class SpeechConfig {
     /**
      * Creates an instance of the speech factory with specified initial authorization token and region.
      * @member SpeechConfig.fromAuthorizationToken
-     * @param authorizationToken - The initial authorization token.
-     * @param region - The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
+     * @param {string} authorizationToken - The initial authorization token.
+     * @param {string} region - The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
      * @returns A speech factory instance.
      */
     public static fromAuthorizationToken(authorizationToken: string, region: string): SpeechConfig {
@@ -89,7 +89,7 @@ export abstract class SpeechConfig {
      * If this is set, subscription key is ignored.
      * User needs to make sure the provided authorization token is valid and not expired.
      * @member SpeechConfig.prototype.authorizationToken
-     * @param value - The authorization token.
+     * @param {string} value - The authorization token.
      */
     public abstract set authorizationToken(value: string);
 
@@ -102,23 +102,23 @@ export abstract class SpeechConfig {
     /**
      * Sets the input language.
      * @member SpeechConfig.prototype.speechRecognitionLanguage
-     * @param value - The authorization token.
+     * @param {string} value - The authorization token.
      */
     public abstract set speechRecognitionLanguage(vale: string);
 
     /**
      * Sets an arbitrary property.
      * @member SpeechConfig.prototype.setProperty
-     * @param name - The name of the property to set.
-     * @param value - The new value of the property.
+     * @param {string} name - The name of the property to set.
+     * @param {string} value - The new value of the property.
      */
     public abstract setProperty(name: string, value: string): void;
 
     /**
      * Returns the current value of an arbitrary property.
      * @member SpeechConfig.prototype.getProperty
-     * @param name - The name of the property to query.
-     * @param def - The value to return in case the property is not known.
+     * @param {string} name - The name of the property to query.
+     * @param {string} def - The value to return in case the property is not known.
      * @returns The current value, or provided default, of the given property.
      */
     public abstract getProperty(name: string, def?: string): string;
@@ -139,7 +139,7 @@ export abstract class SpeechConfig {
     /**
      * Sets the endpoint ID of a customized speech model that is used for speech recognition.
      * @member SpeechConfig.prototype.endpointId
-     * @param value - The endpoint ID
+     * @param {string} value - The endpoint ID
      */
     public abstract set endpointId(value: string);
 

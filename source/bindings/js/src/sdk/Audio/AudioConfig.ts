@@ -26,7 +26,7 @@ export abstract class AudioConfig {
     /**
      * Creates an AudioConfig object representing the specified file.
      * @member AudioConfig.fromWavFileInput
-     * @param fileName - Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
+     * @param {File} fileName - Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
      * @returns The audio input configuration being created.
      */
     public static fromWavFileInput(file: File): AudioConfig {
@@ -36,8 +36,7 @@ export abstract class AudioConfig {
     /**
      * Creates an AudioConfig object representing the specified stream.
      * @member AudioConfig.fromStreamInput
-     * @param audioStream - Specifies the custom audio input stream. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
-     * @param callback - Specifies the pull audio input stream callback. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
+     * @param {AudioInputStream | PullAudioInputStreamCallback} audioStream - Specifies the custom audio input stream. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
      * @returns The audio input configuration being created.
      */
     public static fromStreamInput(audioStream: AudioInputStream | PullAudioInputStreamCallback): AudioConfig {
@@ -70,7 +69,7 @@ export class AudioConfigImpl extends AudioConfig implements IAudioSource {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param source - An audio source.
+     * @param {IAudioSource} source - An audio source.
      */
     public constructor(source: IAudioSource) {
         super();
@@ -101,7 +100,7 @@ export class AudioConfigImpl extends AudioConfig implements IAudioSource {
 
     /**
      * @member AudioConfigImpl.prototype.Attach
-     * @param audioNodeId - The audio node id.
+     * @param {string} audioNodeId - The audio node id.
      * @returns A promise.
      */
     public Attach(audioNodeId: string): Promise<IAudioStreamNode> {
@@ -110,7 +109,7 @@ export class AudioConfigImpl extends AudioConfig implements IAudioSource {
 
     /**
      * @member AudioConfigImpl.prototype.Detach
-     * @param audioNodeId - The audio node id.
+     * @param {string} audioNodeId - The audio node id.
      */
     public Detach(audioNodeId: string): void {
         return this.Detach(audioNodeId);
