@@ -17,6 +17,7 @@ import {
     SpeechRecognitionEvent,
 } from "../common.speech/Exports";
 import {
+    InternalErrorEvent,
     RecognitionCompletionStatus,
     RecognitionEndedEvent,
 } from "../common.speech/RecognitionEvents";
@@ -215,6 +216,15 @@ export abstract class Recognizer {
                         cb(event); // call continuation, if configured.
                     }
             }
-        }, speechContext);
+        }, speechContext).On(
+            /* tslint:disable:no-empty */
+            (result: boolean): void => { },
+            (error: string): void => {
+                if (!!cb) {
+                    // Internal error with service communication.
+                    const errorEvent: InternalErrorEvent = new InternalErrorEvent(undefined, undefined, "Runtime error: " + error);
+                    cb(errorEvent);
+                }
+            });
     }
 }

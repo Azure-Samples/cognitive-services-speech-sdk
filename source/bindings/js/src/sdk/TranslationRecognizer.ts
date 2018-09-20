@@ -6,8 +6,8 @@ import {
     EnumTranslation,
     IAuthentication,
     IConnectionFactory,
+    InternalErrorEvent,
     ISimpleSpeechPhrase,
-    ITranslationPhrase,
     PlatformConfig,
     RecognitionCompletionStatus,
     RecognitionEndedEvent,
@@ -540,6 +540,48 @@ export class TranslationRecognizer extends Recognizer {
                             // Not going to let errors in the event handler
                             // trip things up.
                         }
+                    }
+                }
+                break;
+            case "InternalErrorEvent":
+                {
+                    const evResult: InternalErrorEvent = event as InternalErrorEvent;
+                    const result: TranslationRecognitionResult = new TranslationRecognitionResult(
+                        undefined,
+                        evResult.RequestId,
+                        ResultReason.Canceled,
+                        undefined,
+                        undefined,
+                        undefined,
+                        evResult.Result);
+                    const canceledResult: TranslationRecognitionCanceledEventArgs = new TranslationRecognitionCanceledEventArgs(
+                        evResult.SessionId,
+                        CancellationReason.Error,
+                        result.errorDetails,
+                        result);
+
+                    try {
+                        this.canceled(this, canceledResult);
+                        /* tslint:disable:no-empty */
+                    } catch (error) {
+                        // Not going to let errors in the event handler
+                        // trip things up.
+                    }
+
+                    // report result to promise.
+                    if (!!cb) {
+                        try {
+                            cb(result);
+                        } catch (e) {
+                            if (!!err) {
+                                err(e);
+                            }
+                        }
+                        // Only invoke the call back once.
+                        // and if it's successful don't invoke thebundle
+                        // error after that.
+                        cb = undefined;
+                        err = undefined;
                     }
                 }
                 break;

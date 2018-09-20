@@ -146,8 +146,8 @@ export abstract class ServiceRecognizerBase implements IDisposable {
 
                 const audioNode = result.Result;
 
-                this.FetchConnection(requestSession)
-                    .OnSuccessContinueWith((connection: IConnection) => {
+                return this.FetchConnection(requestSession)
+                    .OnSuccessContinueWithPromise((connection: IConnection) => {
                         const messageRetrievalPromise = this.ReceiveMessage(connection, requestSession);
                         const messageSendPromise = this.SendSpeechConfig(requestSession.RequestId, connection, this.recognizerConfig.PlatformConfig.Serialize())
                             .OnSuccessContinueWithPromise((_: boolean) => {
@@ -168,9 +168,9 @@ export abstract class ServiceRecognizerBase implements IDisposable {
                         });
 
                         return completionPromise;
+                    }).OnSuccessContinueWithPromise((_: boolean) => {
+                        return requestSession.CompletionPromise;
                     });
-
-                return requestSession.CompletionPromise;
             });
     }
 
