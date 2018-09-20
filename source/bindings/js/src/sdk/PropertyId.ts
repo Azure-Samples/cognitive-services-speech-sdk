@@ -40,12 +40,6 @@ export enum PropertyId {
     SpeechServiceAuthorization_Type,
 
     /**
-     * RPS token.
-     * @member PropertyId.SpeechServiceRps_Token
-     */
-    SpeechServiceRps_Token,
-
-    /**
      * Endpoint ID.
      * @member PropertyId.SpeechServiceConnection_EndpointId
      */
