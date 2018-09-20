@@ -15,14 +15,61 @@
 
 void CarbonTestConsole::Sample_HelloWorld()
 {
+    SPX_DBG_TRACE_SCOPE("Sample_HelloWorld", "Sample_HelloWorld");
+
     // Create the recognizer "with microphone input"
-    auto recognizer = SpeechRecognizer::FromConfig(SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId), nullptr);
+    auto config = SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId);
+    auto recognizer = SpeechRecognizer::FromConfig(config);
 
-    ConsoleWriteLine("Say something...");
-    auto result = recognizer->RecognizeOnceAsync().get();
+    recognizer->SessionStarted += [&](const SessionEventArgs& e)
+    {
+        ConsoleWriteLine("SESSION STARTED: %s ...", e.SessionId.c_str());
+    };
 
-    // Show the result
-    ConsoleWriteLine("You said '%s'", result->Text.c_str());
+    recognizer->SessionStopped += [&](const SessionEventArgs& e)
+    {
+        ConsoleWriteLine("SESSION STOPPED: %s ...", e.SessionId.c_str());
+        ConsoleWriteLine("Press ENTER to acknowledge...");
+    };
+
+    recognizer->Recognizing += [&](const SpeechRecognitionEventArgs& e)
+    {
+        ConsoleWriteLine("INTERMEDIATE: %s ...", e.Result->Text.c_str());
+    };
+
+    recognizer->Recognized += [&](const SpeechRecognitionEventArgs& e)
+    {
+        ConsoleWriteLine("FINAL RESULT: '%s'", e.Result->Text.c_str());
+    };
+
+    recognizer->Canceled += [&](const SpeechRecognitionCanceledEventArgs& e)
+    {
+        ConsoleWriteLine("CANCELED: Reason=%d", e.Reason);
+        if (e.Reason == CancellationReason::Error)
+        {
+            ConsoleWriteLine("CANCELED: ErrorDetails=%s", e.ErrorDetails.c_str());
+            ConsoleWriteLine("CANCELED: Did you update the subscription info?");
+        }
+    };
+
+    // Listen the first time
+    recognizer->StartContinuousRecognitionAsync();
+    ConsoleWriteLine("Listening... (press ENTER to exit)");
+
+    while (getchar() != '\n');
+    recognizer->StopContinuousRecognitionAsync().get();
+
+    // Wait for user to press ENTER to restart...
+
+    ConsoleWriteLine("Press ENTER to start again...");
+    while (getchar() != '\n');
+
+    // Listen the second time
+    recognizer->StartContinuousRecognitionAsync();
+    ConsoleWriteLine("Listening 2nd time ... (press ENTER to exit)");
+
+    while (getchar() != '\n');
+    recognizer->StopContinuousRecognitionAsync().get();
 }
 
 void CarbonTestConsole::Sample_HelloWorld_WithReasonInfo()
