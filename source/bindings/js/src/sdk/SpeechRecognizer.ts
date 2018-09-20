@@ -560,6 +560,7 @@ export class SpeechRecognizer extends Recognizer {
                     const canceledResult: SpeechRecognitionCanceledEventArgs = new SpeechRecognitionCanceledEventArgs(
                         CancellationReason.Error,
                         result.errorDetails);
+
                     try {
                         this.canceled(this, canceledResult);
                         /* tslint:disable:no-empty */
@@ -567,6 +568,7 @@ export class SpeechRecognizer extends Recognizer {
                         // Not going to let errors in the event handler
                         // trip things up.
                     }
+
                     // report result to promise.
                     if (!!cb) {
                         try {
@@ -580,7 +582,7 @@ export class SpeechRecognizer extends Recognizer {
                         // and if it's successful don't invoke thebundle
                         // error after that.
                         cb = undefined;
-                        err = undefined;                        }
+                        err = undefined;
                     }
                 }
                 break;
