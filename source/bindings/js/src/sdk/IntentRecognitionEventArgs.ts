@@ -14,9 +14,9 @@ export class IntentRecognitionEventArgs extends RecognitionEventArgs {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param result The result of the intent recognition.
-     * @param offset The offset.
-     * @param sessionId The session id.
+     * @param result - The result of the intent recognition.
+     * @param offset - The offset.
+     * @param sessionId - The session id.
      */
     public constructor(result: IntentRecognitionResult, offset?: number, sessionId?: string) {
         super(offset, sessionId);
@@ -26,7 +26,7 @@ export class IntentRecognitionEventArgs extends RecognitionEventArgs {
 
     /**
      * Represents the intent recognition result.
-     * @property
+     * @member IntentRecognitionEventArgs.prototype.result
      * @returns Represents the intent recognition result.
      */
     public get result(): IntentRecognitionResult {

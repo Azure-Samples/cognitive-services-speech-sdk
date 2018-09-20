@@ -36,7 +36,7 @@ import {
 
 /**
  * Defines the base class Recognizer which mainly contains common event handlers.
- * @class
+ * @class Recognizer
  */
 export abstract class Recognizer {
     private disposed: boolean;
@@ -57,31 +57,31 @@ export abstract class Recognizer {
 
     /**
      * Defines event handler for session started events.
-     * @property
+     * @member Recognizer.prototype.sessionStarted
      */
     public sessionStarted: (sender: Recognizer, event: SessionEventArgs) => void;
 
     /**
      * Defines event handler for session stopped events.
-     * @property
+     * @member Recognizer.prototype.sessionStopped
      */
     public sessionStopped: (sender: Recognizer, event: SessionEventArgs) => void;
 
     /**
      * Defines event handler for speech started events.
-     * @property
+     * @member Recognizer.prototype.speechStartDetected
      */
     public speechStartDetected: (sender: Recognizer, event: RecognitionEventArgs) => void;
 
     /**
      * Defines event handler for speech stopped events.
-     * @property
+     * @member Recognizer.prototype.speechEndDetected
      */
     public speechEndDetected: (sender: Recognizer, event: RecognitionEventArgs) => void;
 
     /**
      * Dispose of associated resources.
-     * @member
+     * @member Recognizer.prototype.close
      */
     public close(): void {
         Contracts.throwIfDisposed(this.disposed);
@@ -93,7 +93,7 @@ export abstract class Recognizer {
      * This method performs cleanup of resources.
      * The Boolean parameter disposing indicates whether the method is called from Dispose (if disposing is true) or from the finalizer (if disposing is false).
      * Derived classes should override this method to dispose resource if needed.
-     * @member
+     * @member Recognizer.prototype.dispose
      * @param {boolean} disposing - Flag to request disposal.
      */
     protected dispose(disposing: boolean): void {

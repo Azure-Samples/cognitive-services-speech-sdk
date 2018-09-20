@@ -17,6 +17,7 @@ import { RecognitionResult } from "./RecognitionResult";
 
 /**
  * Contains detailed information for NoMatch recognition results.
+ * @class NoMatchDetails
  */
 export class NoMatchDetails {
     private privReason: NoMatchReason;
@@ -24,7 +25,7 @@ export class NoMatchDetails {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param reason The no-match reason.
+     * @param reason - The no-match reason.
      */
     private constructor(reason: NoMatchReason) {
         this.privReason = reason;
@@ -32,8 +33,8 @@ export class NoMatchDetails {
 
     /**
      * Creates an instance of NoMatchDetails object for the NoMatch SpeechRecognitionResults.
-     * @member
-     * @param The recognition result that was not recognized.
+     * @member NoMatchDetails.fromResult
+     * @param result - The recognition result that was not recognized.
      * @return The no match details object being created.
      */
     public static fromResult(result: SpeechRecognitionResult | IntentRecognitionResult | TranslationRecognitionResult): NoMatchDetails {
@@ -60,7 +61,7 @@ export class NoMatchDetails {
 
     /**
      * The reason the recognition was canceled.
-     * @property
+     * @member NoMatchDetails.prototype.reason
      * @return Specifies the reason canceled.
      */
     public get reason(): NoMatchReason {

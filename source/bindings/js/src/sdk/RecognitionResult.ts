@@ -6,7 +6,7 @@ import { PropertyCollection, ResultReason } from "./Exports";
 
 /**
  * Defines result of speech recognition.
- * @class
+ * @class RecognitionResult
  */
 export class RecognitionResult {
     private privResultId: string;
@@ -21,14 +21,14 @@ export class RecognitionResult {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param resultId The result id.
-     * @param reason The reason.
-     * @param text The recognized text.
-     * @param duration The duration.
-     * @param offset The offset into the stream.
-     * @param errorDetails Error details, if provided.
-     * @param json Additional Json, if provided.
-     * @param properties Additional properties, if provided.
+     * @param resultId - The result id.
+     * @param reason - The reason.
+     * @param text - The recognized text.
+     * @param duration - The duration.
+     * @param offset - The offset into the stream.
+     * @param errorDetails - Error details, if provided.
+     * @param json - Additional Json, if provided.
+     * @param properties - Additional properties, if provided.
      */
     constructor(resultId?: string, reason?: ResultReason, text?: string, duration?: number, offset?: number, errorDetails?: string, json?: string, properties?: PropertyCollection) {
         this.privResultId = resultId;
@@ -43,7 +43,7 @@ export class RecognitionResult {
 
     /**
      * Specifies the result identifier.
-     * @property
+     * @member RecognitionResult.prototype.resultId
      * @returns Specifies the result identifier.
      */
     public get resultId(): string {
@@ -52,7 +52,7 @@ export class RecognitionResult {
 
     /**
      * Specifies status of the result.
-     * @property
+     * @member RecognitionResult.prototype.reason
      * @returns Specifies status of the result.
      */
     public get reason(): ResultReason {
@@ -61,7 +61,7 @@ export class RecognitionResult {
 
     /**
      * Presents the recognized text in the result.
-     * @property
+     * @member RecognitionResult.prototype.text
      * @returns Presents the recognized text in the result.
      */
     public get text(): string {
@@ -70,7 +70,7 @@ export class RecognitionResult {
 
     /**
      * Duration of recognized speech in milliseconds.
-     * @property
+     * @member RecognitionResult.prototype.duration
      * @returns Duration of recognized speech in milliseconds.
      */
     public get duration(): number {
@@ -79,7 +79,7 @@ export class RecognitionResult {
 
     /**
      * Offset of recognized speech in milliseconds.
-     * @property
+     * @member RecognitionResult.prototype.offset
      * @returns Offset of recognized speech in milliseconds.
      */
     public get offset(): number {
@@ -89,7 +89,7 @@ export class RecognitionResult {
     /**
      * In case of an unsuccessful recognition, provides a brief description of an occurred error.
      * This field is only filled-out if the recognition status (@see RecognitionStatus) is set to Canceled.
-     * @property
+     * @member RecognitionResult.prototype.errorDetails
      * @returns a brief description of an error.
      */
     public get errorDetails(): string {
@@ -98,7 +98,7 @@ export class RecognitionResult {
 
     /**
      * A string containing Json serialized recognition result as it was received from the service.
-     * @property
+     * @member RecognitionResult.prototype.json
      * @returns Json serialized representation of the result.
      */
     public get json(): string {
@@ -107,7 +107,7 @@ export class RecognitionResult {
 
     /**
      *  The set of properties exposed in the result.
-     * @property
+     * @member RecognitionResult.prototype.properties
      * @returns The set of properties exposed in the result.
      */
     public get properties(): PropertyCollection {

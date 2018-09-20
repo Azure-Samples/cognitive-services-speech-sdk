@@ -82,25 +82,25 @@ export class IntentRecognizer extends Recognizer {
 
     /**
      * The event recognizing signals that an intermediate recognition result is received.
-     * @property
+     * @member IntentRecognizer.prototype.recognizing
      */
     public recognizing: (sender: IntentRecognizer, event: IntentRecognitionEventArgs) => void;
 
     /**
      * The event recognized signals that a final recognition result is received.
-     * @property
+     * @member IntentRecognizer.prototype.recognized
      */
     public recognized: (sender: IntentRecognizer, event: IntentRecognitionEventArgs) => void;
 
     /**
      * The event canceled signals that an error occurred during recognition.
-     * @property
+     * @member IntentRecognizer.prototype.canceled
      */
     public canceled: (sender: IntentRecognizer, event: IntentRecognitionCanceledEventArgs) => void;
 
     /**
      * Gets the spoken language of recognition.
-     * @property
+     * @member IntentRecognizer.prototype.speechRecognitionLanguage
      * @returns the spoken language of recognition.
      */
     public get speechRecognitionLanguage(): string {
@@ -111,6 +111,7 @@ export class IntentRecognizer extends Recognizer {
 
     /**
      * Gets the authorization token used to communicate with the service.
+     * @member IntentRecognizer.prototype.authorizationToken
      * @return Authorization token.
      */
     public get authorizationToken(): string {
@@ -119,7 +120,8 @@ export class IntentRecognizer extends Recognizer {
 
     /**
      * Sets the authorization token used to communicate with the service.
-     * @param value Authorization token.
+     * @member IntentRecognizer.prototype.authorizationToken
+     * @param value - Authorization token.
      */
     public set authorizationToken(value: string) {
         this.properties.setProperty(PropertyId.SpeechServiceAuthorization_Token, value);
@@ -127,7 +129,7 @@ export class IntentRecognizer extends Recognizer {
 
     /**
      * The collection of properties and their values defined for this IntentRecognizer.
-     * @property
+     * @member IntentRecognizer.prototype.properties
      * @returns The collection of properties and their values defined for this IntentRecognizer.
      */
     public get properties(): PropertyCollection {
@@ -137,7 +139,7 @@ export class IntentRecognizer extends Recognizer {
     /**
      * Starts intent recognition, and stops after the first utterance is recognized. The task returns the recognition text and intent as result.
      * Note: RecognizeOnceAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
-     * @member
+     * @member IntentRecognizer.prototype.recognizeOnceAsync
      * @param cb - Callback that received the recognition has finished with an IntentRecognitionResult.
      * @param err - Callback invoked in case of an error.
      */
@@ -171,7 +173,7 @@ export class IntentRecognizer extends Recognizer {
     /**
      * Starts speech recognition, until stopContinuousRecognitionAsync() is called.
      * User must subscribe to events to receive recognition results.
-     * @member
+     * @member IntentRecognizer.prototype.startContinuousRecognitionAsync
      * @param cb - Callback invoked once the recognition has started.
      * @param err - Callback invoked in case of an error.
      */
@@ -217,7 +219,7 @@ export class IntentRecognizer extends Recognizer {
 
     /**
      * Stops continuous intent recognition.
-     * @member
+     * @member IntentRecognizer.prototype.stopContinuousRecognitionAsync
      * @param cb - Callback invoked once the recognition has stopped.
      * @param err - Callback invoked in case of an error.
      */
@@ -241,8 +243,8 @@ export class IntentRecognizer extends Recognizer {
      * Starts speech recognition with keyword spotting, until stopKeywordRecognitionAsync() is called.
      * User must subscribe to events to receive recognition results.
      * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
-     * @member
-     * @param model The keyword recognition model that specifies the keyword to be recognized.
+     * @member IntentRecognizer.prototype.startKeywordRecognitionAsync
+     * @param model - The keyword recognition model that specifies the keyword to be recognized.
      * @param cb - Callback invoked once the recognition has started.
      * @param err - Callback invoked in case of an error.
      */
@@ -257,7 +259,7 @@ export class IntentRecognizer extends Recognizer {
     /**
      * Stops continuous speech recognition.
      * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
-     * @member
+     * @member IntentRecognizer.prototype.stopKeywordRecognitionAsync
      * @param cb - Callback invoked once the recognition has stopped.
      * @param err - Callback invoked in case of an error.
      */
@@ -269,7 +271,7 @@ export class IntentRecognizer extends Recognizer {
 
     /**
      * Adds a phrase that should be recognized as intent.
-     * @member
+     * @member IntentRecognizer.prototype.addIntent
      * @param {string} intentId - A String that represents the identifier of the intent to be recognized.
      * @param {string} phrase - A String that specifies the phrase representing the intent.
      */
@@ -283,7 +285,7 @@ export class IntentRecognizer extends Recognizer {
 
     /**
      * Adds an intent from Language Understanding service for recognition.
-     * @member
+     * @member IntentRecognizer.prototype.addIntentWithLanguageModel
      * @param {string} intentId - A String that represents the identifier of the intent to be recognized. Ignored if intentName is empty.
      * @param {string} model - The intent model from Language Understanding service.
      * @param {string} intentName - The intent name defined in the intent model. If it is empty, all intent names defined in the model will be added.
@@ -301,8 +303,9 @@ export class IntentRecognizer extends Recognizer {
 
     /**
      * Adds all intents from the specified Language Understanding Model.
-     * @param model The language understanding model containing the intents.
-     * @param intentId A custom id String to be returned in the IntentRecognitionResult's getIntentId() method.
+     * @member IntentRecognizer.prototype.addAllIntents
+     * @param {LanguageUnderstandingModel} model - The language understanding model containing the intents.
+     * @param {string} intentId - A custom id String to be returned in the IntentRecognitionResult's getIntentId() method.
      */
     public addAllIntents(model: LanguageUnderstandingModel, intentId?: string): void {
         Contracts.throwIfNull(model, "model");
@@ -315,7 +318,7 @@ export class IntentRecognizer extends Recognizer {
 
     /**
      * closes all external resources held by an instance of this class.
-     * @member
+     * @member IntentRecognizer.prototype.close
      */
     public close(): void {
         Contracts.throwIfDisposed(this.disposedIntentRecognizer);
@@ -713,11 +716,20 @@ export class IntentRecognizer extends Recognizer {
     }
 }
 
+/**
+ * @class AddedLmIntent
+ */
 // tslint:disable-next-line:max-classes-per-file
 class AddedLmIntent {
     public modelImpl: LanguageUnderstandingModelImpl;
     public intentName: string;
 
+    /**
+     * Creates and initializes an instance of this class.
+     * @constructor
+     * @param modelImpl - The model.
+     * @param intentName - The intent name.
+     */
     public constructor(modelImpl: LanguageUnderstandingModelImpl, intentName: string) {
         this.modelImpl = modelImpl;
         this.intentName = intentName;

@@ -6,7 +6,7 @@ import { PropertyCollection, RecognitionEventArgs, ResultReason, SpeechRecogniti
 
 /**
  * Defines contents of speech recognizing/recognized event.
- * @class
+ * @class SpeechRecognitionEventArgs
  */
 export class SpeechRecognitionEventArgs extends RecognitionEventArgs {
     private privResult: SpeechRecognitionResult;
@@ -14,9 +14,9 @@ export class SpeechRecognitionEventArgs extends RecognitionEventArgs {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param result The speech recognition result.
-     * @param offset The offset.
-     * @param sessionId The session id.
+     * @param result - The speech recognition result.
+     * @param offset - The offset.
+     * @param sessionId - The session id.
      */
     public constructor(result: SpeechRecognitionResult, offset?: number, sessionId?: string) {
         super(offset, sessionId);
@@ -26,7 +26,7 @@ export class SpeechRecognitionEventArgs extends RecognitionEventArgs {
 
     /**
      * Specifies the recognition result.
-     * @property
+     * @member SpeechRecognitionEventArgs.prototype.result
      * @returns the recognition result.
      */
     public get result(): SpeechRecognitionResult {

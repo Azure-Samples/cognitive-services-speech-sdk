@@ -18,6 +18,7 @@ import {
 
 /**
  * Speech translation configuration.
+ * @class SpeechTranslationConfig
  */
 export abstract class SpeechTranslationConfig extends SpeechConfig {
 
@@ -30,8 +31,9 @@ export abstract class SpeechTranslationConfig extends SpeechConfig {
 
     /**
      * Static instance of SpeechTranslationConfig returned by passing subscriptionKey and service region.
-     * @param subscriptionKey The subscription key.
-     * @param region The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
+     * @member SpeechTranslationConfig.fromSubscription
+     * @param subscriptionKey - The subscription key.
+     * @param region - The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
      * @return The speech config
      */
     public static fromSubscription(subscriptionKey: string, region: string): SpeechTranslationConfig {
@@ -49,8 +51,9 @@ export abstract class SpeechTranslationConfig extends SpeechConfig {
      * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
      * expipres, the caller needs to refresh it by setting the property `AuthorizationToken` with a new valid token.
      * Otherwise, all the recognizers created by this SpeechTranslationConfig instance will encounter errors during recognition.
-     * @param authorizationToken The authorization token.
-     * @param region The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
+     * @member SpeechTranslationConfig.fromAuthorizationToken
+     * @param authorizationToken - The authorization token.
+     * @param region - The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
      * @return The speech config
      */
     public static fromAuthorizationToken(authorizationToken: string, region: string): SpeechTranslationConfig {
@@ -70,8 +73,9 @@ export abstract class SpeechTranslationConfig extends SpeechConfig {
      * For example, if language is defined in the uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
      * the language setting in uri takes precedence, and the effective language is "de-DE".
      * Only the properties that are not specified in the endpoint URL can be set by other APIs.
-     * @param endpoint The service endpoint to connect to.
-     * @param subscriptionKey The subscription key.
+     * @member SpeechTranslationConfig.fromEndpoint
+     * @param endpoint - The service endpoint to connect to.
+     * @param subscriptionKey - The subscription key.
      * @return A speech config instance.
      */
     public static fromEndpoint(endpoint: URL, subscriptionKey: string): SpeechTranslationConfig {
@@ -88,7 +92,8 @@ export abstract class SpeechTranslationConfig extends SpeechConfig {
      * Sets the authorization token.
      * If this is set, subscription key is ignored.
      * User needs to make sure the provided authorization token is valid and not expired.
-     * @param value the authorization token.
+     * @member SpeechTranslationConfig.prototype.authorizationToken
+     * @param value - The authorization token.
      */
     public abstract set authorizationToken(value: string);
 
@@ -96,43 +101,50 @@ export abstract class SpeechTranslationConfig extends SpeechConfig {
      * Sets the authorization token.
      * If this is set, subscription key is ignored.
      * User needs to make sure the provided authorization token is valid and not expired.
-     * @param value the authorization token.
+     * @member SpeechTranslationConfig.prototype.speechRecognitionLanguage
+     * @param value - The authorization token.
      */
     public abstract set speechRecognitionLanguage(value: string);
 
     /**
      * Add a (text) target language to translate into.
-     * @param value the language such as de-DE
+     * @member SpeechTranslationConfig.prototype.addTargetLanguage
+     * @param value - The language such as de-DE
      */
     public abstract addTargetLanguage(value: string): void;
 
     /**
      * Add a (text) target language to translate into.
-     * @param value the language such as de-DE
+     * @member SpeechTranslationConfig.prototype.targetLanguages
+     * @param value - The language such as de-DE
      */
     public abstract get targetLanguages(): string[];
 
-    /*
+    /**
      * Returns the selected voice name.
-     * @return The voice name.
+     * @member SpeechTranslationConfig.prototype.voiceName
+     * @returns The voice name.
      */
     public abstract get voiceName(): string;
 
     /**
      * Sets voice of the translated language, enable voice synthesis output.
-     * @param value
+     * @member SpeechTranslationConfig.prototype.voiceName
+     * @param value - The name of the voice.
      */
     public abstract set voiceName(value: string);
 
     /**
      * Sets a named property as value
-     * @param name the name of the property
-     * @param value the value
+     * @member SpeechTranslationConfig.prototype.setProperty
+     * @param name - The name of the property.
+     * @param value - The value.
      */
     public abstract setProperty(name: string, value: string): void;
 
     /**
      * Dispose of associated resources.
+     * @member SpeechTranslationConfig.prototype.close
      */
     public abstract close(): void;
 }
@@ -150,7 +162,8 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      * Sets the authorization token.
      * If this is set, subscription key is ignored.
      * User needs to make sure the provided authorization token is valid and not expired.
-     * @param value the authorization token.
+     * @member SpeechTranslationConfigImpl.prototype.authorizationToken
+     * @param value - The authorization token.
      */
     public set authorizationToken(value: string) {
         Contracts.throwIfNullOrWhitespace(value, "value");
@@ -162,7 +175,8 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
      * Sets the authorization token.
      * If this is set, subscription key is ignored.
      * User needs to make sure the provided authorization token is valid and not expired.
-     * @param value the authorization token.
+     * @member SpeechTranslationConfigImpl.prototype.speechRecognitionLanguage
+     * @param value - The authorization token.
      */
     public set speechRecognitionLanguage(value: string) {
         Contracts.throwIfNullOrWhitespace(value, "value");
@@ -170,28 +184,44 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
         this.properties.setProperty(PropertyId.SpeechServiceConnection_RecoLanguage, value);
     }
 
+    /**
+     * @member SpeechTranslationConfigImpl.prototype.subscriptionKey
+     */
     public get subscriptionKey(): string {
         return this.speechProperties.getProperty(PropertyId[PropertyId.SpeechServiceConnection_Key]);
     }
 
+    /**
+     * @member SpeechTranslationConfigImpl.prototype.outputFormat
+     */
     public get outputFormat(): OutputFormat {
         return (OutputFormat as any)[this.speechProperties.getProperty(OutputFormatPropertyName, OutputFormat[OutputFormat.Simple])];
     }
 
+    /**
+     * @member SpeechTranslationConfigImpl.prototype.outputFormat
+     */
     public set outputFormat(value: OutputFormat) {
         this.speechProperties.setProperty(OutputFormatPropertyName, OutputFormat[value]);
     }
 
+    /**
+     * @member SpeechTranslationConfigImpl.prototype.endpointId
+     */
     public set endpointId(value: string) {
         this.speechProperties.setProperty(PropertyId.SpeechServiceConnection_Endpoint, value);
     }
 
+    /**
+     * @member SpeechTranslationConfigImpl.prototype.endpointId
+     */
     public get endpointId(): string {
         return this.speechProperties.getProperty(PropertyId.SpeechServiceConnection_EndpointId);
     }
     /**
      * Add a (text) target language to translate into.
-     * @param value the language such as de-DE
+     * @member SpeechTranslationConfigImpl.prototype.addTargetLanguage
+     * @param value - The language such as de-DE
      */
     public addTargetLanguage(value: string): void {
         Contracts.throwIfNullOrWhitespace(value, "value");
@@ -203,7 +233,8 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
 
     /**
      * Add a (text) target language to translate into.
-     * @param value the language such as de-DE
+     * @member SpeechTranslationConfigImpl.prototype.targetLanguages
+     * @param value - The language such as de-DE
      */
     public get targetLanguages(): string[] {
 
@@ -215,14 +246,17 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
 
     }
 
+    /**
+     * @member SpeechTranslationConfigImpl.prototype.voiceName
+     */
     public get voiceName(): string {
         return this.getProperty(PropertyId[PropertyId.SpeechServiceConnection_TranslationVoice]);
     }
 
     /**
      * Sets voice of the translated language, enable voice synthesis output.
-     * @property
-     * @param value
+     * @member SpeechTranslationConfigImpl.prototype.voiceName
+     * @param value - The name of the voice.
      */
     public set voiceName(value: string) {
         Contracts.throwIfNullOrWhitespace(value, "value");
@@ -232,7 +266,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
 
     /**
      * Provides the region.
-     * @property
+     * @member SpeechTranslationConfigImpl.prototype.region
      * @returns The region.
      */
     public get region(): string {
@@ -241,7 +275,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
 
     /**
      * Allows for setting arbitrary properties.
-     * @member
+     * @member SpeechTranslationConfigImpl.prototype.setProperty
      * @param name - The name of the property.
      * @param value - The value of the property.
      */
@@ -251,7 +285,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
 
     /**
      * Allows for retrieving arbitrary property values.
-     * @member
+     * @member SpeechTranslationConfigImpl.prototype.getProperty
      * @param name - The name of the property.
      * @param def - The default value of the property in case it is not set.
      * @returns The value of the property.
@@ -262,7 +296,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
 
     /**
      * Provides access to custom properties.
-     * @property
+     * @member SpeechTranslationConfigImpl.prototype.properties
      * @returns The properties.
      */
     public get properties(): PropertyCollection {
@@ -271,7 +305,7 @@ export class SpeechTranslationConfigImpl extends SpeechTranslationConfig {
 
     /**
      * Dispose of associated resources.
-     * @member
+     * @member SpeechTranslationConfigImpl.prototype.close
      */
     public close(): void {
         return;

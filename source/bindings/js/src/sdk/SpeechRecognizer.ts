@@ -42,7 +42,7 @@ import { SpeechConfig, SpeechConfigImpl } from "./SpeechConfig";
 
 /**
  * Performs speech recognition from microphone, file, or other audio input streams, and gets transcribed text as result.
- * @class
+ * @class SpeechRecognizer
  */
 export class SpeechRecognizer extends Recognizer {
     private disposedSpeechRecognizer: boolean = false;
@@ -67,25 +67,25 @@ export class SpeechRecognizer extends Recognizer {
 
     /**
      * The event recognizing signals that an intermediate recognition result is received.
-     * @property
+     * @member SpeechRecognizer.prototype.recognizing
      */
     public recognizing: (sender: Recognizer, event: SpeechRecognitionEventArgs) => void;
 
     /**
      * The event recognized signals that a final recognition result is received.
-     * @property
+     * @member SpeechRecognizer.prototype.recognized
      */
     public recognized: (sender: Recognizer, event: SpeechRecognitionEventArgs) => void;
 
     /**
      * The event canceled signals that an error occurred during recognition.
-     * @property
+     * @member SpeechRecognizer.prototype.canceled
      */
     public canceled: (sender: Recognizer, event: SpeechRecognitionCanceledEventArgs) => void;
 
     /**
      * Gets the endpoint id of a customized speech model that is used for speech recognition.
-     * @property
+     * @member SpeechRecognizer.prototype.endpointId
      * @returns the endpoint id of a customized speech model that is used for speech recognition.
      */
     public get endpointId(): string {
@@ -96,7 +96,8 @@ export class SpeechRecognizer extends Recognizer {
 
     /**
      * Sets the authorization token used to communicate with the service.
-     * @param token Authorization token.
+     * @member SpeechRecognizer.prototype.authorizationToken
+     * @param token - Authorization token.
      */
     public set authorizationToken(token: string) {
         Contracts.throwIfNullOrWhitespace(token, "token");
@@ -105,6 +106,7 @@ export class SpeechRecognizer extends Recognizer {
 
     /**
      * Gets the authorization token used to communicate with the service.
+     * @member SpeechRecognizer.prototype.authorizationToken
      * @return Authorization token.
      */
     public get authorizationToken(): string {
@@ -113,7 +115,7 @@ export class SpeechRecognizer extends Recognizer {
 
     /**
      * Gets the spoken language of recognition.
-     * @property
+     * @member SpeechRecognizer.prototype.speechRecognitionLanguage
      * @returns The spoken language of recognition.
      */
     public get speechRecognitionLanguage(): string {
@@ -124,7 +126,7 @@ export class SpeechRecognizer extends Recognizer {
 
     /**
      * Gets the output format of recognition.
-     * @property
+     * @member SpeechRecognizer.prototype.outputFormat
      * @returns The output format of recognition.
      */
     public get outputFormat(): OutputFormat {
@@ -139,7 +141,7 @@ export class SpeechRecognizer extends Recognizer {
 
     /**
      * The collection of properties and their values defined for this SpeechRecognizer.
-     * @property
+     * @member SpeechRecognizer.prototype.properties
      * @returns The collection of properties and their values defined for this SpeechRecognizer.
      */
     public get properties(): PropertyCollection {
@@ -150,7 +152,7 @@ export class SpeechRecognizer extends Recognizer {
      * Starts speech recognition, and stops after the first utterance is recognized. The task returns the recognition text as result.
      * Note: RecognizeOnceAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition
      *       like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
-     * @member
+     * @member SpeechRecognizer.prototype.recognizeOnceAsync
      * @param cb - Callback that received the SpeechRecognitionResult.
      * @param err - Callback invoked in case of an error.
      */
@@ -177,7 +179,7 @@ export class SpeechRecognizer extends Recognizer {
     /**
      * Starts speech recognition, until stopContinuousRecognitionAsync() is called.
      * User must subscribe to events to receive recognition results.
-     * @member
+     * @member SpeechRecognizer.prototype.startContinuousRecognitionAsync
      * @param cb - Callback invoked once the recognition has started.
      * @param err - Callback invoked in case of an error.
      */
@@ -215,7 +217,7 @@ export class SpeechRecognizer extends Recognizer {
 
     /**
      * Stops continuous speech recognition.
-     * @member
+     * @member SpeechRecognizer.prototype.stopContinuousRecognitionAsync
      * @param cb - Callback invoked once the recognition has stopped.
      * @param err - Callback invoked in case of an error.
      */
@@ -239,7 +241,7 @@ export class SpeechRecognizer extends Recognizer {
      * Starts speech recognition with keyword spotting, until stopKeywordRecognitionAsync() is called.
      * User must subscribe to events to receive recognition results.
      * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
-     * @member
+     * @member SpeechRecognizer.prototype.startKeywordRecognitionAsync
      * @param model The keyword recognition model that specifies the keyword to be recognized.
      * @param cb - Callback invoked once the recognition has started.
      * @param err - Callback invoked in case of an error.
@@ -255,7 +257,7 @@ export class SpeechRecognizer extends Recognizer {
     /**
      * Stops continuous speech recognition.
      * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
-     * @member
+     * @member SpeechRecognizer.prototype.stopKeywordRecognitionAsync
      * @param cb - Callback invoked once the recognition has stopped.
      * @param err - Callback invoked in case of an error.
      */
@@ -267,7 +269,7 @@ export class SpeechRecognizer extends Recognizer {
 
     /**
      * closes all external resources held by an instance of this class.
-     * @member
+     * @member SpeechRecognizer.prototype.close
      */
     public close(): void {
         Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
@@ -277,7 +279,7 @@ export class SpeechRecognizer extends Recognizer {
 
     /**
      * Disposes any resources held by the object.
-     * @member
+     * @member SpeechRecognizer.prototype.dispose
      * @param disposing - true if disposing the object.
      */
     protected dispose(disposing: boolean): void {

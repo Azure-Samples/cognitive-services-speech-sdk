@@ -9,6 +9,7 @@ import {
 } from "./Exports";
 /**
  * Define payload of speech recognition canceled result events.
+ * @class TranslationRecognitionCanceledEventArgs
  */
 export class TranslationRecognitionCanceledEventArgs {
     private privResult: TranslationRecognitionResult;
@@ -19,10 +20,10 @@ export class TranslationRecognitionCanceledEventArgs {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param sessionid The session id.
-     * @param cancellationReason The cancellation reason.
-     * @param errorDetails Error details, if provided.
-     * @param result The result.
+     * @param sessionid - The session id.
+     * @param cancellationReason - The cancellation reason.
+     * @param errorDetails - Error details, if provided.
+     * @param result - The result.
      */
     public constructor(sessionid: string, cancellationReason: CancellationReason, errorDetails: string, result: TranslationRecognitionResult) {
         this.privCancelReason = cancellationReason;
@@ -33,7 +34,7 @@ export class TranslationRecognitionCanceledEventArgs {
 
     /**
      * Specifies the recognition result.
-     * @property
+     * @member TranslationRecognitionCanceledEventArgs.prototype.result
      * @return the recognition result.
      */
     public get result(): TranslationRecognitionResult {
@@ -42,7 +43,7 @@ export class TranslationRecognitionCanceledEventArgs {
 
     /**
      * Specifies the session identifier.
-     * @property
+     * @member TranslationRecognitionCanceledEventArgs.prototype.sessionId
      * @return the session identifier.
      */
     public get sessionId(): string {
@@ -51,7 +52,7 @@ export class TranslationRecognitionCanceledEventArgs {
 
     /**
      * The reason the recognition was canceled.
-     * @property
+     * @member TranslationRecognitionCanceledEventArgs.prototype.reason
      * @return Specifies the reason canceled.
      */
     public get reason(): CancellationReason {
@@ -61,7 +62,7 @@ export class TranslationRecognitionCanceledEventArgs {
     /**
      * In case of an unsuccessful recognition, provides a details of why the occurred error.
      * This field is only filled-out if the reason canceled (@see getReason) is set to Error.
-     * @property
+     * @member TranslationRecognitionCanceledEventArgs.prototype.errorDetails
      * @return A String that represents the error details.
      */
     public get errorDetails(): string {
