@@ -6,8 +6,8 @@ import {
     EnumTranslation,
     IAuthentication,
     IConnectionFactory,
+    InternalErrorEvent,
     ISimpleSpeechPhrase,
-    ITranslationPhrase,
     PlatformConfig,
     RecognitionCompletionStatus,
     RecognitionEndedEvent,
@@ -45,7 +45,7 @@ import { SynthesisStatus } from "./SynthesisStatus";
 
 /**
  * Translation recognizer
- * @class
+ * @class TranslationRecognizer
  */
 export class TranslationRecognizer extends Recognizer {
     private disposedTranslationRecognizer: boolean;
@@ -76,31 +76,31 @@ export class TranslationRecognizer extends Recognizer {
 
     /**
      * The event recognizing signals that an intermediate recognition result is received.
-     * @property
+     * @member TranslationRecognizer.prototype.recognizing
      */
     public recognizing: (sender: TranslationRecognizer, event: TranslationRecognitionEventArgs) => void;
 
     /**
      * The event recognized signals that a final recognition result is received.
-     * @property
+     * @member TranslationRecognizer.prototype.recognized
      */
     public recognized: (sender: TranslationRecognizer, event: TranslationRecognitionEventArgs) => void;
 
     /**
      * The event canceled signals that an error occurred during recognition.
-     * @property
+     * @member TranslationRecognizer.prototype.canceled
      */
     public canceled: (sender: TranslationRecognizer, event: TranslationRecognitionCanceledEventArgs) => void;
 
     /**
      * The event synthesizing signals that a translation synthesis result is received.
-     * @property
+     * @member TranslationRecognizer.prototype.synthesizing
      */
     public synthesizing: (sender: TranslationRecognizer, event: TranslationSynthesisEventArgs) => void;
 
     /**
      * Gets the language name that was set when the recognizer was created.
-     * @property
+     * @member TranslationRecognizer.prototype.speechRecognitionLanguage
      * @returns Gets the language name that was set when the recognizer was created.
      */
     public get speechRecognitionLanguage(): string {
@@ -112,7 +112,7 @@ export class TranslationRecognizer extends Recognizer {
     /**
      * Gets target languages for translation that were set when the recognizer was created.
      * The language is specified in BCP-47 format. The translation will provide translated text for each of language.
-     * @property
+     * @member TranslationRecognizer.prototype.targetLanguages
      * @returns Gets target languages for translation that were set when the recognizer was created.
      */
     public get targetLanguages(): string[] {
@@ -123,7 +123,7 @@ export class TranslationRecognizer extends Recognizer {
 
     /**
      * Gets the name of output voice.
-     * @property
+     * @member TranslationRecognizer.prototype.voiceName
      * @returns the name of output voice.
      */
     public get voiceName(): string {
@@ -134,6 +134,7 @@ export class TranslationRecognizer extends Recognizer {
 
     /**
      * Gets the authorization token used to communicate with the service.
+     * @member TranslationRecognizer.prototype.authorizationToken
      * @return Authorization token.
      */
     public get authorizationToken(): string {
@@ -142,7 +143,8 @@ export class TranslationRecognizer extends Recognizer {
 
     /**
      * Sets the authorization token used to communicate with the service.
-     * @param value Authorization token.
+     * @member TranslationRecognizer.prototype.authorizationToken
+     * @param value - Authorization token.
      */
     public set authorizationToken(value: string) {
         this.properties.setProperty(PropertyId.SpeechServiceAuthorization_Token, value);
@@ -150,7 +152,7 @@ export class TranslationRecognizer extends Recognizer {
 
     /**
      * The collection of properties and their values defined for this TranslationRecognizer.
-     * @property
+     * @member TranslationRecognizer.prototype.properties
      * @returns The collection of properties and their values defined for this TranslationRecognizer.
      */
     public get properties(): PropertyCollection {
@@ -161,7 +163,7 @@ export class TranslationRecognizer extends Recognizer {
      * Starts recognition and translation, and stops after the first utterance is recognized. The task returns the translation text as result.
      * Note: recognizeOnceAsync returns when the first utterance has been recognized, so it is suitableonly
      *       for single shot recognition like command or query. For long-running recognition, use startContinuousRecognitionAsync() instead.
-     * @member
+     * @member TranslationRecognizer.prototype.recognizeOnceAsync
      * @param cb - Callback that received the result when the translation has completed.
      * @param err - Callback invoked in case of an error.
      */
@@ -188,7 +190,7 @@ export class TranslationRecognizer extends Recognizer {
     /**
      * Starts recognition and translation, until stopContinuousRecognitionAsync() is called.
      * User must subscribe to events to receive translation results.
-     * @member
+     * @member TranslationRecognizer.prototype.startContinuousRecognitionAsync
      * @param cb - Callback that received the translation has started.
      * @param err - Callback invoked in case of an error.
      */
@@ -227,7 +229,7 @@ export class TranslationRecognizer extends Recognizer {
 
     /**
      * Stops continuous recognition and translation.
-     * @member
+     * @member TranslationRecognizer.prototype.stopContinuousRecognitionAsync
      * @param cb - Callback that received the translation has stopped.
      * @param err - Callback invoked in case of an error.
      */
@@ -249,7 +251,7 @@ export class TranslationRecognizer extends Recognizer {
 
     /**
      * closes all external resources held by an instance of this class.
-     * @member
+     * @member TranslationRecognizer.prototype.close
      */
     public close(): void {
         Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
@@ -290,6 +292,7 @@ export class TranslationRecognizer extends Recognizer {
             this.reco = undefined;
         }
     }
+
     private implDispatchMessageHandler(event: SpeechRecognitionEvent, cb?: (e: TranslationRecognitionResult) => void, err?: (e: string) => void): void {
 
         if (!this.reco) {
@@ -540,6 +543,48 @@ export class TranslationRecognizer extends Recognizer {
                             // Not going to let errors in the event handler
                             // trip things up.
                         }
+                    }
+                }
+                break;
+            case "InternalErrorEvent":
+                {
+                    const evResult: InternalErrorEvent = event as InternalErrorEvent;
+                    const result: TranslationRecognitionResult = new TranslationRecognitionResult(
+                        undefined,
+                        evResult.RequestId,
+                        ResultReason.Canceled,
+                        undefined,
+                        undefined,
+                        undefined,
+                        evResult.Result);
+                    const canceledResult: TranslationRecognitionCanceledEventArgs = new TranslationRecognitionCanceledEventArgs(
+                        evResult.SessionId,
+                        CancellationReason.Error,
+                        result.errorDetails,
+                        result);
+
+                    try {
+                        this.canceled(this, canceledResult);
+                        /* tslint:disable:no-empty */
+                    } catch (error) {
+                        // Not going to let errors in the event handler
+                        // trip things up.
+                    }
+
+                    // report result to promise.
+                    if (!!cb) {
+                        try {
+                            cb(result);
+                        } catch (e) {
+                            if (!!err) {
+                                err(e);
+                            }
+                        }
+                        // Only invoke the call back once.
+                        // and if it's successful don't invoke thebundle
+                        // error after that.
+                        cb = undefined;
+                        err = undefined;
                     }
                 }
                 break;

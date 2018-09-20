@@ -91,7 +91,7 @@ private:
         for (const auto& cf : m_translations)
         {
             (void)(cf); // prevent warning for cf when compiling release builds
-            SPX_DBG_TRACE_VERBOSE(" phrase for %ls: %ls", cf.first.c_str(), cf.second.c_str());
+            SPX_DBG_TRACE_VERBOSE(" phrase for %s: %s", cf.first.c_str(), cf.second.c_str());
         }
 #endif
     };

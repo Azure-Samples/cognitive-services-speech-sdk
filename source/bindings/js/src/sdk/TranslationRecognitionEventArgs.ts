@@ -6,7 +6,7 @@ import { RecognitionEventArgs, TranslationRecognitionResult } from "./Exports";
 
 /**
  * Translation text result event arguments.
- * @class
+ * @class TranslationRecognitionEventArgs
  */
 export class TranslationRecognitionEventArgs extends RecognitionEventArgs {
     private privResult: TranslationRecognitionResult;
@@ -14,9 +14,9 @@ export class TranslationRecognitionEventArgs extends RecognitionEventArgs {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param result The translation recognition result.
-     * @param offset The offset.
-     * @param sessionId The session id.
+     * @param result - The translation recognition result.
+     * @param offset - The offset.
+     * @param sessionId - The session id.
      */
     public constructor(result: TranslationRecognitionResult, offset?: number, sessionId?: string) {
         super(offset, sessionId);
@@ -26,7 +26,7 @@ export class TranslationRecognitionEventArgs extends RecognitionEventArgs {
 
     /**
      * Specifies the recognition result.
-     * @property
+     * @member TranslationRecognitionEventArgs.prototype.result
      * @returns the recognition result.
      */
     public get result(): TranslationRecognitionResult {

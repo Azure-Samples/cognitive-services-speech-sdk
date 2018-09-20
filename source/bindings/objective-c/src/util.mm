@@ -7,88 +7,88 @@
 
 @implementation Util
 
-+ (ResultReason) fromResultReasonImpl:(SpeechImpl::ResultReason)reasonImpl
++ (SPXResultReason) fromResultReasonImpl:(SpeechImpl::ResultReason)reasonImpl
 {
-    ResultReason reason;
+    SPXResultReason reason;
     switch (reasonImpl)
     {
         case SpeechImpl::ResultReason::NoMatch:
-            reason = ResultReason::NoMatch;
+            reason = SPXResultReason_NoMatch;
             break;
         case SpeechImpl::ResultReason::Canceled:
-            reason = ResultReason::Canceled;
+            reason = SPXResultReason_Canceled;
             break;
         case SpeechImpl::ResultReason::RecognizingSpeech:
-            reason = ResultReason::RecognizingSpeech;
+            reason = SPXResultReason_RecognizingSpeech;
             break;
         case SpeechImpl::ResultReason::RecognizedSpeech:
-            reason = ResultReason::RecognizedSpeech;
+            reason = SPXResultReason_RecognizedSpeech;
             break;
         case SpeechImpl::ResultReason::RecognizingIntent:
-            reason = ResultReason::RecognizedIntent;
+            reason = SPXResultReason_RecognizedIntent;
             break;
         case SpeechImpl::ResultReason::RecognizedIntent:
-            reason = ResultReason::RecognizedIntent;
+            reason = SPXResultReason_RecognizedIntent;
             break;
         case SpeechImpl::ResultReason::TranslatingSpeech:
-            reason = ResultReason::TranslatingSpeech;
+            reason = SPXResultReason_TranslatingSpeech;
             break;
         case SpeechImpl::ResultReason::TranslatedSpeech:
-            reason = ResultReason::TranslatedSpeech;
+            reason = SPXResultReason_TranslatedSpeech;
             break;
         case SpeechImpl::ResultReason::SynthesizingAudio:
-            reason = ResultReason::SynthesizingAudio;
+            reason = SPXResultReason_SynthesizingAudio;
             break;
         case SpeechImpl::ResultReason::SynthesizingAudioCompleted:
-            reason = ResultReason::SynthesizingAudioCompleted;
+            reason = SPXResultReason_SynthesizingAudioCompleted;
             break;
         default:
             // Todo error handling.
             NSLog(@"Unknown ResultReason value: %d.", (int)reasonImpl);
-            reason = ResultReason::Canceled;
+            reason = SPXResultReason_Canceled;
             break;
     }
     return reason;
 }
 
-+ (CancellationReason) fromCancellationReasonImpl:(SpeechImpl::CancellationReason)reasonImpl
++ (SPXCancellationReason) fromCancellationReasonImpl:(SpeechImpl::CancellationReason)reasonImpl
 {
-    CancellationReason reason;
+    SPXCancellationReason reason;
     switch (reasonImpl)
     {
         case SpeechImpl::CancellationReason::Error:
-            reason = CancellationReason::Error;
+            reason = SPXCancellationReason_Error;
             break;
         case SpeechImpl::CancellationReason::EndOfStream:
-            reason = CancellationReason::EndOfStream;
+            reason = SPXCancellationReason_EndOfStream;
             break;
         default:
             // Todo error handling.
             NSLog(@"Unknown CancellationReason value: %d.", (int)reasonImpl);
-            reason = CancellationReason::Error;
+            reason = SPXCancellationReason_Error;
             break;
     }
     return reason;
 }
 
-+ (NoMatchReason) fromNoMatchReasonImpl:(SpeechImpl::NoMatchReason)reasonImpl
++ (SPXNoMatchReason) fromNoMatchReasonImpl:(SpeechImpl::NoMatchReason)reasonImpl
 {
-    NoMatchReason reason;
+    SPXNoMatchReason reason;
     switch (reasonImpl)
     {
         case SpeechImpl::NoMatchReason::NotRecognized:
-            reason = NoMatchReason::NotRecognized;
+            reason = SPXNoMatchReason_NotRecognized;
             break;
         case SpeechImpl::NoMatchReason::InitialSilenceTimeout:
-            reason = NoMatchReason::InitialSilenceTimeout;
+            reason = SPXNoMatchReason_InitialSilenceTimeout;
             break;
         case SpeechImpl::NoMatchReason::InitialBabbleTimeout:
-            reason = NoMatchReason::InitialBabbleTimeout;
+            reason = SPXNoMatchReason_InitialBabbleTimeout;
             break;
         default:
             // Todo error handling.
             NSLog(@"Unknown NoMatchReason value: %d.", (int)reasonImpl);
-            reason = NoMatchReason::NotRecognized;
+            reason = SPXNoMatchReason_NotRecognized;
             break;
     }
     return reason;

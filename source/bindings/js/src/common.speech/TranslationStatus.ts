@@ -5,8 +5,16 @@
 
 /**
  * Defines translation status.
+ * @class TranslationStatus
  */
 export enum TranslationStatus {
+    /**
+     * @member TranslationStatus.Success
+     */
     Success = 0,
+
+    /**
+     * @member TranslationStatus.Error
+     */
     Error,
 }

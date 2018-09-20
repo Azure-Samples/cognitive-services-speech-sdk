@@ -5,7 +5,7 @@
 
 #import "session_event_args_private.h"
 
-@implementation SessionEventArgs
+@implementation SPXSessionEventArgs
 
 - (instancetype)init: (const SpeechImpl::SessionEventArgs&) eventArgsHandle
 {

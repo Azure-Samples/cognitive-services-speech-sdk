@@ -3,9 +3,6 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#ifndef speechapi_private_h
-#define speechapi_private_h
-
 #import "common_private.h"
 
 #import "util_private.h"
@@ -38,5 +35,3 @@
 #import "speech_recognizer_private.h"
 #import "intent_recognizer_private.h"
 #import "translation_recognizer_private.h"
-
-#endif /* speechapi_private_h */

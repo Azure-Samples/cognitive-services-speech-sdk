@@ -36,11 +36,6 @@ namespace Microsoft.CognitiveServices.Speech
         SpeechServiceAuthorization_Type = Internal.PropertyId.SpeechServiceAuthorization_Type,
 
         /// <summary>
-        /// RPS token.
-        /// </summary>
-        SpeechServiceRps_Token = Internal.PropertyId.SpeechServiceRps_Token,
-
-        /// <summary>
         /// Endpoint ID.
         /// </summary>
         SpeechServiceConnection_EndpointId = Internal.PropertyId.SpeechServiceConnection_EndpointId,

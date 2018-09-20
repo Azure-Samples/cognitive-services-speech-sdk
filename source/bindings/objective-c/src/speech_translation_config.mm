@@ -5,78 +5,81 @@
 
 #import "speechapi_private.h"
 
-@implementation SpeechTranslationConfig
+@implementation SPXSpeechTranslationConfiguration
 {
-    std::shared_ptr<TranslationImpl::SpeechTranslationConfig> translationConfigImpl;
+    std::shared_ptr<TranslationImpl::SpeechTranslationConfig> speechTranslationConfigurationImpl;
 }
 
-- (instancetype)init:(std::shared_ptr<TranslationImpl::SpeechTranslationConfig>)handle
+- (instancetype)initWithSubscription:(NSString *)subscriptionKey region:(NSString *)region
 {
-    self = [super init :handle];
-    translationConfigImpl = handle;
+    try {
+        auto configImpl = TranslationImpl::SpeechTranslationConfig::FromSubscription([subscriptionKey string], [region string]);
+        if (configImpl == nullptr) {
+            return nil;
+        }
+        return [self initWithImpl:configImpl];
+    }
+    catch (...) {
+        // Todo: better error handling.
+        NSLog(@"Exception caught.");
+    }
+    return nil;
+}
+
+- (instancetype)initWithAuthorizationToken:(NSString *)authToken region:(NSString *)region
+{
+    try {
+        auto configImpl = TranslationImpl::SpeechTranslationConfig::FromAuthorizationToken([authToken string], [region string]);
+        if (configImpl == nullptr)
+            return nil;
+        return [self initWithImpl:configImpl];
+    }
+    catch (...) {
+        // Todo: better error handling.
+        NSLog(@"Exception caught.");
+    }
+    return nil;
+}
+
+- (instancetype)initWithEndpoint:(NSString *)endpointUri subscription:(NSString *)subscriptionKey
+{
+    try {
+        auto configImpl = TranslationImpl::SpeechTranslationConfig::FromEndpoint([endpointUri string], [subscriptionKey string]);
+        if (configImpl == nullptr)
+            return nil;
+        return [self initWithImpl:configImpl];
+    }
+    catch (...) {
+        // Todo: better error handling.
+        NSLog(@"Exception caught.");
+    }
+    return nil;
+
+}
+
+- (instancetype)initWithImpl:(std::shared_ptr<TranslationImpl::SpeechTranslationConfig>)translationConfigurationImpl
+{
+    self = [super initWithImpl:translationConfigurationImpl];
+    if (!self || translationConfigurationImpl == nullptr) {
+        return nil;
+    }
+    self->speechTranslationConfigurationImpl = translationConfigurationImpl;
     return self;
 }
 
 - (std::shared_ptr<TranslationImpl::SpeechTranslationConfig>)getHandle
 {
-    return translationConfigImpl;
-}
-
-+ (SpeechTranslationConfig *) fromSubscription:(NSString *)subscriptionKey andRegion:(NSString *)region
-{
-    try {
-        auto impl = TranslationImpl::SpeechTranslationConfig::FromSubscription([subscriptionKey string], [region string]);
-        if (impl == nullptr)
-            return nil;
-        return [[SpeechTranslationConfig alloc] init :impl];
-    }
-    catch (...) {
-        // Todo: better error handling.
-        NSLog(@"Exception caught.");
-    }
-    return nil;
-}
-
-
-+ (SpeechTranslationConfig *)fromAuthorizationToken:(NSString *)authToken andRegion:(NSString *)region
-{
-    try {
-        auto impl = TranslationImpl::SpeechTranslationConfig::FromAuthorizationToken([authToken string], [region string]);
-        if (impl == nullptr)
-            return nil;
-        return [[SpeechTranslationConfig alloc] init :impl];
-    }
-    catch (...) {
-        // Todo: better error handling.
-        NSLog(@"Exception caught.");
-    }
-    return nil;
-}
-
-
-+ (SpeechTranslationConfig *)fromEndpoint:(NSString *)endpointUri andSubscription:(NSString *)subscription
-{
-    try {
-        auto configImpl = TranslationImpl::SpeechTranslationConfig::FromEndpoint([endpointUri string], [subscription string]);
-        if (configImpl == nullptr)
-            return nil;
-        return [[SpeechTranslationConfig alloc] init :configImpl];
-    }
-    catch (...) {
-        // Todo: better error handling.
-        NSLog(@"Exception caught.");
-    }
-    return nil;
+    return speechTranslationConfigurationImpl;
 }
 
 - (void)addTargetLanguage:(NSString *)lang
 {
-    translationConfigImpl->AddTargetLanguage([lang string]);
+    speechTranslationConfigurationImpl->AddTargetLanguage([lang string]);
 }
 
-- (NSArray *)getTargetLanguages
+- (NSArray *)targetLanguages
 {
-    auto langsVector = translationConfigImpl->GetTargetLanguages();
+    auto langsVector = speechTranslationConfigurationImpl->GetTargetLanguages();
     NSMutableArray *mutableArray = [[NSMutableArray alloc] initWithCapacity:langsVector.size()];
     for (std::vector<std::string>::iterator it = langsVector.begin(); it != langsVector.end(); ++it){
         [mutableArray addObject:[NSString stringWithString:*it]];
@@ -86,12 +89,12 @@
 
 - (void)setVoiceName:(NSString *)voice
 {
-    translationConfigImpl->SetVoiceName([voice string]);
+    speechTranslationConfigurationImpl->SetVoiceName([voice string]);
 }
 
-- (NSString *)getVoiceName
+- (NSString *)voiceName
 {
-    return [NSString stringWithString:translationConfigImpl->GetVoiceName()];
+    return [NSString stringWithString:speechTranslationConfigurationImpl->GetVoiceName()];
 }
 
 @end

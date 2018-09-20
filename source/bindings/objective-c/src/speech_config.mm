@@ -5,15 +5,63 @@
 
 #import "speechapi_private.h"
 
-@implementation SpeechConfig
+@implementation SPXSpeechConfiguration
 {
     std::shared_ptr<SpeechImpl::SpeechConfig> speechConfigImpl;
 }
 
-- (instancetype)init:(std::shared_ptr<SpeechImpl::SpeechConfig>)handle
+- (instancetype)initWithSubscription:(NSString *)subscriptionKey region:(NSString *)region
+{
+    try {
+        auto configImpl = SpeechImpl::SpeechConfig::FromSubscription([subscriptionKey string], [region string]);
+        if (configImpl == nullptr)
+            return nil;
+        return [self initWithImpl:configImpl];
+    }
+    catch (...) {
+        // Todo: better error handling.
+        NSLog(@"Exception caught.");
+    }
+    return nil;
+}
+
+- (instancetype)initWithAuthorizationToken:(NSString *)authToken region:(NSString *)region
+{
+    try {
+        auto configImpl = SpeechImpl::SpeechConfig::FromAuthorizationToken([authToken string], [region string]);
+        if (configImpl == nullptr)
+            return nil;
+        return [self initWithImpl:configImpl];
+    }
+    catch (...) {
+        // Todo: better error handling.
+        NSLog(@"Exception caught.");
+    }
+    return nil;
+}
+
+- (instancetype)initWithEndpoint:(NSString *)endpointUri subscription:(NSString *)subscriptionKey
+{
+    try {
+        auto configImpl = SpeechImpl::SpeechConfig::FromEndpoint([endpointUri string], [subscriptionKey string]);
+        if (configImpl == nullptr)
+            return nil;
+        return [self initWithImpl:configImpl];
+    }
+    catch (...) {
+        // Todo: better error handling.
+        NSLog(@"Exception caught.");
+    }
+    return nil;
+}
+
+- (instancetype)initWithImpl:(std::shared_ptr<SpeechImpl::SpeechConfig>)configImpl
 {
     self = [super init];
-    speechConfigImpl = handle;
+    if (!self || configImpl == nullptr) {
+        return nil;
+    }
+    speechConfigImpl = configImpl;
     return self;
 }
 
@@ -22,59 +70,12 @@
     return speechConfigImpl;
 }
 
-+ (SpeechConfig*) fromSubscription:(NSString *)subscriptionKey andRegion:(NSString *)region
-{
-    try {
-        auto configImpl = SpeechImpl::SpeechConfig::FromSubscription([subscriptionKey string], [region string]);
-        if (configImpl == nullptr)
-            return nil;
-        return [[SpeechConfig alloc] init :configImpl];
-    }
-    catch (...) {
-        // Todo: better error handling.
-        NSLog(@"Exception caught.");
-    }
-    return nil;
-}
-
-
-+ (SpeechConfig*)fromAuthorizationToken:(NSString *)authToken andRegion:(NSString *)region
-{
-    try {
-        auto configImpl = SpeechImpl::SpeechConfig::FromAuthorizationToken([authToken string], [region string]);
-        if (configImpl == nullptr)
-            return nil;
-        return [[SpeechConfig alloc] init :configImpl];
-    }
-    catch (...) {
-        // Todo: better error handling.
-        NSLog(@"Exception caught.");
-    }
-    return nil;
-}
-
-
-+ (SpeechConfig*)fromEndpoint:(NSString *)endpointUri andSubscription:(NSString *)subscriptionKey
-{
-    try {
-        auto configImpl = SpeechImpl::SpeechConfig::FromEndpoint([endpointUri string], [subscriptionKey string]);
-        if (configImpl == nullptr)
-            return nil;
-        return [[SpeechConfig alloc] init :configImpl];
-    }
-    catch (...) {
-        // Todo: better error handling.
-        NSLog(@"Exception caught.");
-    }
-    return nil;
-}
-
 - (void)setSpeechRecognitionLanguage: (NSString *)lang
 {
     speechConfigImpl->SetSpeechRecognitionLanguage([lang string]);
 }
 
-- (NSString *)getSpeechRecognitionLanguage
+- (NSString *)speechRecognitionLanguage
 {
     return [NSString stringWithString:speechConfigImpl->GetSpeechRecognitionLanguage()];
 }
@@ -84,7 +85,7 @@
     speechConfigImpl->SetEndpointId([endpointId string]);
 }
 
-- (NSString *)getEndpointId
+- (NSString *)endpointId
 {
     return [NSString stringWithString:speechConfigImpl->GetEndpointId()];
 }
@@ -94,29 +95,44 @@
     speechConfigImpl->SetAuthorizationToken([token string]);
 }
 
-- (NSString *)getAuthorizationToken
+- (NSString *)authorizationToken
 {
     return [NSString stringWithString:speechConfigImpl->GetAuthorizationToken()];
 }
 
-- (NSString *)getSubscriptionKey
+- (NSString *)subscriptionKey
 {
     return [NSString stringWithString:speechConfigImpl->GetSubscriptionKey()];
 }
 
-- (NSString *)getRegion
+- (NSString *)region
 {
     return [NSString stringWithString:speechConfigImpl->GetRegion()];
 }
 
-- (void)setValue: (NSString *)value ToPropertyWithName: (NSString *)name
-{
-    return speechConfigImpl->SetProperty([name string], [value string]);
-}
-
-- (NSString *)getValueOfPropertyWithName: (NSString *)name
+-(NSString *)getPropertyByName:(NSString *)name
 {
     return [NSString stringWithString:speechConfigImpl->GetProperty([name string])];
+}
+
+-(NSString *)setPropertyByName:(NSString *)name
+{
+    return [NSString stringWithString:speechConfigImpl->GetProperty([name string])];
+}
+
+-(void)setPropertyTo:(NSString *)value byName:(NSString *)name
+{
+    speechConfigImpl->SetProperty([name string], [value string]);
+}
+
+-(NSString *)getPropertyById:(SPXPropertyId)propertyId
+{
+    return [NSString stringWithString:speechConfigImpl->GetProperty((SpeechImpl::PropertyId)(int)propertyId)];
+}
+
+-(void)setPropertyTo:(NSString *)value byId:(SPXPropertyId)propertyId
+{
+    speechConfigImpl->SetProperty((SpeechImpl::PropertyId)(int)propertyId, [value string]);
 }
 
 @end

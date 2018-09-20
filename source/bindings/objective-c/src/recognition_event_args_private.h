@@ -3,16 +3,11 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#ifndef recognition_event_args_private_h
-#define recognition_event_args_private_h
-
-#import "recognition_event_args.h"
+#import "SPXRecognitionEventArgs.h"
 #import "common_private.h"
 
-@interface RecognitionEventArgs (Private)
+@interface SPXRecognitionEventArgs (Private)
 
 - (instancetype)init :(const SpeechImpl::RecognitionEventArgs&) eventArgsHandle;
 
 @end
-
-#endif /* recognition_event_args_private_h */

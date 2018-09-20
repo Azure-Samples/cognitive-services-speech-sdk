@@ -19,8 +19,6 @@ cmake -G "NMake Makefiles" ^
     -DCMAKE_ANDROID_ARCH_ABI=%TARGET_ARCHITECTURE% ^
     -DCMAKE_ANDROID_STL_TYPE=c++_static ^
     -DOPENSSL_ROOT_DIR="%SOURCE_ROOT%\external\android_ssl_curl\libs\%TARGET_ARCHITECTURE%" ^
-    -DCURL_LIBRARY="%SOURCE_ROOT%\external\android_ssl_curl\libs\%TARGET_ARCHITECTURE%\lib\libcurl.a" ^
-    -DCURL_INCLUDE_DIR="%SOURCE_ROOT%\external\android_ssl_curl\libs\%TARGET_ARCHITECTURE%\include" ^
     -DCMAKE_BUILD_TYPE="%BuildConfiguration%" ^
     .. ^
   && ^

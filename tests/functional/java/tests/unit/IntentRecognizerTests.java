@@ -195,7 +195,7 @@ public class IntentRecognizerTests {
         assertEquals("What's the weather like?", res.getText());
 
         // TODO: check for specific json parameters
-        assertTrue(res.getLanguageUnderstanding().length() > 0);
+        assertTrue(res.getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult).length() > 0);
 
         r.close();
         s.close();
@@ -416,7 +416,7 @@ public class IntentRecognizerTests {
 
         r.recognized.addEventListener((o, e) -> {
             eventsMap.put("recognized", eventIdentifier.getAndIncrement());
-            if(!e.getResult().getLanguageUnderstanding().isEmpty()) {
+            if(!e.getResult().getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult).isEmpty()) {
                 eventsMap.put("IntentReceived", eventIdentifier.getAndIncrement());
             }
         });
@@ -426,7 +426,7 @@ public class IntentRecognizerTests {
         IntentRecognitionResult res = r.recognizeOnceAsync().get();
         assertNotNull(res);
         assertEquals(2, eventsMap.size());
-        assertTrue(res.getLanguageUnderstanding().length() > 0);
+        assertTrue(res.getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult).length() > 0);
         assertTrue(ResultReason.RecognizedSpeech == res.getReason() ||
                 ResultReason.RecognizedIntent == res.getReason());
 
@@ -455,7 +455,7 @@ public class IntentRecognizerTests {
 
         r.recognized.addEventListener((o, e) -> {
             eventsMap.put("recognized", eventIdentifier.getAndIncrement());
-            if(!e.getResult().getLanguageUnderstanding().isEmpty()) {
+            if(!e.getResult().getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult).isEmpty()) {
                 eventsMap.put("IntentReceived", eventIdentifier.getAndIncrement());
             }
         });
@@ -465,7 +465,7 @@ public class IntentRecognizerTests {
         IntentRecognitionResult res = r.recognizeOnceAsync().get();
         assertNotNull(res);
         assertEquals(2, eventsMap.size());
-        assertTrue(res.getLanguageUnderstanding().length() > 0);
+        assertTrue(res.getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult).length() > 0);
         assertTrue(ResultReason.RecognizedSpeech == res.getReason() ||
                 ResultReason.RecognizedIntent == res.getReason());
 

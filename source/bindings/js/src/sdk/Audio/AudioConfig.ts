@@ -10,12 +10,12 @@ import { PullAudioInputStreamImpl, PushAudioInputStreamImpl } from "./AudioInput
 
 /**
  * Represents audio input configuration used for specifying what type of input to use (microphone, file, stream).
- * @class
+ * @class AudioConfig
  */
 export abstract class AudioConfig {
     /**
      * Creates an AudioConfig object representing the default microphone on the system.
-     * @member
+     * @member AudioConfig.fromDefaultMicrophoneInput
      * @returns The audio input configuration being created.
      */
     public static fromDefaultMicrophoneInput(): AudioConfig {
@@ -25,8 +25,8 @@ export abstract class AudioConfig {
 
     /**
      * Creates an AudioConfig object representing the specified file.
-     * @member
-     * @param fileName Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
+     * @member AudioConfig.fromWavFileInput
+     * @param fileName - Specifies the audio input file. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
      * @returns The audio input configuration being created.
      */
     public static fromWavFileInput(file: File): AudioConfig {
@@ -35,9 +35,9 @@ export abstract class AudioConfig {
 
     /**
      * Creates an AudioConfig object representing the specified stream.
-     * @member
-     * @param audioStream Specifies the custom audio input stream. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
-     * @param callback Specifies the pull audio input stream callback. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
+     * @member AudioConfig.fromStreamInput
+     * @param audioStream - Specifies the custom audio input stream. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
+     * @param callback - Specifies the pull audio input stream callback. Currently, only WAV / PCM with 16-bit samples, 16 kHz sample rate, and a single channel (Mono) is supported.
      * @returns The audio input configuration being created.
      */
     public static fromStreamInput(audioStream: AudioInputStream | PullAudioInputStreamCallback): AudioConfig {
@@ -54,7 +54,7 @@ export abstract class AudioConfig {
 
     /**
      * Explicitly frees any external resource attached to the object
-     * @member
+     * @member AudioConfig.prototype.close
      */
     public abstract close(): void;
 }

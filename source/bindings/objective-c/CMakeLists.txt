@@ -22,8 +22,31 @@ source_group("Header Files (public)" FILES ${HEADERS})
 source_group("Header Files (private)" FILES ${HEADERS_PRIVATE})
 source_group("Source Files" FILES ${SOURCES})
 
-add_library(${PROJECT_NAME} SHARED ${HEADERS} ${HEADERS_PRIVATE} ${SOURCES} $<TARGET_OBJECTS:c_api>)
+list(APPEND ALL_FRAMEWORK_HEADERS ${HEADERS} ${SPEECH_C_API_HEADERS} ${SPEECH_CXX_API_HEADERS})
 
+# headers to be installed in the framework must be present in the add_library_call
+# https://cmake.org/pipermail/cmake/2015-July/061143.html
+add_library(${PROJECT_NAME} SHARED ${ALL_FRAMEWORK_HEADERS} ${HEADERS_PRIVATE} ${SOURCES} $<TARGET_OBJECTS:c_api>)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+  FRAMEWORK TRUE
+  FRAMEWORK_VERSION A
+  # settings for Info.plist file
+  # use the default template
+  MACOSX_FRAMEWORK_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Info.plist.in
+  MACOSX_FRAMEWORK_IDENTIFIER com.microsoft.cognitiveservices.SpeechSDK
+  MACOSX_FRAMEWORK_BUNDLE_VERSION 1.0.0
+  MACOSX_FRAMEWORK_SHORT_VERSION_STRING 1
+  # "current version" in semantic format in Mach-O binary file - ???
+  VERSION 1.0.0
+  # "compatibility version" in semantic format in Mach-O binary file - ???
+  SOVERSION 1.0.0
+  PUBLIC_HEADER "${ALL_FRAMEWORK_HEADERS}"
+  PRIVATE_HEADER "${PRIVATE_HEADERS}"
+  # settings for generating an Xcode project
+  XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+  XCODE_ATTRIBUTE_PRODUCT_NAME ${SPEECHSDK_CORE_LIBRARY}
+)
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE sr
@@ -31,4 +54,30 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE usp
     PRIVATE common 
     PRIVATE factory)
+
+# Install
+
+if (CMAKE_IOS_INSTALL_COMBINED AND CMAKE_OSX_SYSROOT MATCHES "os")
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+      XCODE_ATTRIBUTE_ARCHS[sdk=iphonesimulator*] i386 x86_64
+      XCODE_ATTRIBUTE_VALID_ARCHS[sdk=iphonesimulator*] i386 x86_64
+  )
+endif()
+
+include(GNUInstallDirs)
+install(TARGETS ${PROJECT_NAME}
+    EXPORT speechsdk-objc-export
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+install(EXPORT speechsdk-objc-export
+  FILE
+    SpeechSDKTargets.cmake
+  NAMESPACE
+    MicrosoftCognitiveServicesSpeech::
+  DESTINATION
+    ${CMAKE_INSTALL_LIBDIR}/cmake/MicrosoftCognitiveServicesSpeech
+)
 

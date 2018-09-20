@@ -6,7 +6,7 @@
 #import "speech_recognition_result_private.h"
 #import "common_private.h"
 
-@implementation SpeechRecognitionResult
+@implementation SPXSpeechRecognitionResult
 {
     std::shared_ptr<SpeechImpl::SpeechRecognitionResult> resultImpl;
 }

@@ -7,10 +7,10 @@
 
 struct TranslationEventHandlerHelper
 {
-    TranslationRecognizer *recognizer;
+    SPXTranslationRecognizer *recognizer;
     TranslationRecoSharedPtr recoImpl;
     
-    TranslationEventHandlerHelper(TranslationRecognizer *reco, TranslationRecoSharedPtr recoImpl)
+    TranslationEventHandlerHelper(SPXTranslationRecognizer *reco, TranslationRecoSharedPtr recoImpl)
     {
         recognizer = reco;
         this->recoImpl = recoImpl;
@@ -21,7 +21,7 @@ struct TranslationEventHandlerHelper
         NSLog(@"Add RecognizedEventHandler");
         recoImpl->Recognized.Connect([this] (const TranslationImpl::TranslationRecognitionEventArgs& e)
                                      {
-                                         TranslationRecognitionEventArgs *eventArgs = [[TranslationRecognitionEventArgs alloc] init: e];
+                                         SPXTranslationRecognitionEventArgs *eventArgs = [[SPXTranslationRecognitionEventArgs alloc] init: e];
                                          [recognizer onRecognizedEvent: eventArgs];
                                      });
     }
@@ -31,7 +31,7 @@ struct TranslationEventHandlerHelper
         NSLog(@"Add RecognizingEventHandler");
         recoImpl->Recognizing.Connect([this] (const TranslationImpl::TranslationRecognitionEventArgs& e)
                                       {
-                                          TranslationRecognitionEventArgs *eventArgs = [[TranslationRecognitionEventArgs alloc] init: e];
+                                          SPXTranslationRecognitionEventArgs *eventArgs = [[SPXTranslationRecognitionEventArgs alloc] init: e];
                                           [recognizer onRecognizingEvent: eventArgs];
                                       });
     }
@@ -41,7 +41,7 @@ struct TranslationEventHandlerHelper
         NSLog(@"Add CanceledEventHandler");
         recoImpl->Canceled.Connect([this] (const TranslationImpl::TranslationRecognitionCanceledEventArgs& e)
                                    {
-                                       TranslationRecognitionCanceledEventArgs *eventArgs = [[TranslationRecognitionCanceledEventArgs alloc] init:e];
+                                       SPXTranslationRecognitionCanceledEventArgs *eventArgs = [[SPXTranslationRecognitionCanceledEventArgs alloc] init:e];
                                        [recognizer onCanceledEvent: eventArgs];
                                    });
     }
@@ -51,7 +51,7 @@ struct TranslationEventHandlerHelper
         NSLog(@"Add SynthesisResultEventHandler");
         recoImpl->Synthesizing.Connect([this] (const TranslationImpl::TranslationSynthesisEventArgs& e)
             {
-                TranslationSynthesisEventArgs *eventArgs = [[TranslationSynthesisEventArgs alloc] init: e];
+                SPXTranslationSynthesisEventArgs *eventArgs = [[SPXTranslationSynthesisEventArgs alloc] init: e];
                 [recognizer onSynthesizingEvent: eventArgs];
             });
     }
@@ -61,7 +61,7 @@ struct TranslationEventHandlerHelper
         NSLog(@"Add SessionStartedEventHandler");
         recoImpl->SessionStarted.Connect([this] (const SpeechImpl::SessionEventArgs& e)
                                          {
-                                             SessionEventArgs *eventArgs = [[SessionEventArgs alloc] init:e];
+                                             SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init:e];
                                              [recognizer onSessionStartedEvent: eventArgs];
                                          });
     }
@@ -71,7 +71,7 @@ struct TranslationEventHandlerHelper
         NSLog(@"Add SessionStoppedEventHandler");
         recoImpl->SessionStopped.Connect([this] (const SpeechImpl::SessionEventArgs& e)
                                          {
-                                             SessionEventArgs *eventArgs = [[SessionEventArgs alloc] init:e];
+                                             SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init:e];
                                              [recognizer onSessionStoppedEvent: eventArgs];
                                          });
     }
@@ -81,7 +81,7 @@ struct TranslationEventHandlerHelper
         NSLog(@"Add SpeechStartDetectedEventHandler");
         recoImpl->SpeechStartDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
                                               {
-                                                  RecognitionEventArgs *eventArgs = [[RecognitionEventArgs alloc] init:e];
+                                                  SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init:e];
                                                   [recognizer onSpeechStartDetectedEvent: eventArgs];
                                               });
     }
@@ -91,81 +91,81 @@ struct TranslationEventHandlerHelper
         NSLog(@"Add SpeechStopDetectedEventHandler");
         recoImpl->SpeechEndDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
                                             {
-                                                RecognitionEventArgs *eventArgs = [[RecognitionEventArgs alloc] init:e];
+                                                SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init:e];
                                                 [recognizer onSpeechEndDetectedEvent: eventArgs];
                                             });
     }
 };
 
 
-@implementation TranslationRecognizer
+@implementation SPXTranslationRecognizer
 {
-    TranslationRecoSharedPtr recoImpl;
+    TranslationRecoSharedPtr translationRecoImpl;
     dispatch_queue_t dispatchQueue;
 
-    NSMutableArray *recognizedEventListenerList;
+    NSMutableArray *recognizedEventHandlerList;
     NSLock *recognizedLock;
-    NSMutableArray *recognizingEventListenerList;
+    NSMutableArray *recognizingEventHandlerList;
     NSLock *recognizingLock;
-    NSMutableArray *canceledEventListenerList;
+    NSMutableArray *canceledEventHandlerList;
     NSLock *canceledLock;
-    NSMutableArray *synthesisResultEventListenerList;
+    NSMutableArray *synthesisResultEventHandlerList;
     NSLock *synthesizingLock;
     
     struct TranslationEventHandlerHelper *eventImpl;
 }
 
-+ (TranslationRecognizer *)fromConfig: (SpeechTranslationConfig *)translatorConfig
+- (instancetype)init:(SPXSpeechTranslationConfiguration *)translationConfiguration
 {
     try {
-        auto recoImpl = TranslationImpl::TranslationRecognizer::FromConfig([translatorConfig getHandle]);
+        auto recoImpl = TranslationImpl::TranslationRecognizer::FromConfig([translationConfiguration getHandle]);
         if (recoImpl == nullptr)
             return nil;
-        return [[TranslationRecognizer alloc] init :recoImpl];
+        return [self initWithImpl:recoImpl];
     }
     catch (...) {
         // Todo: better error handling.
-        NSLog(@"Exception caught when creating TranslationRecognizer in core.");
+        NSLog(@"Exception caught when creating SPXTranslationRecognizer in core.");
     }
     return nil;
 }
 
-+ (TranslationRecognizer *)fromConfig: (SpeechTranslationConfig *)translatorConfig usingAudio: (AudioConfig *)audioConfig
+- (instancetype)initWithSpeechTranslationConfiguration:(SPXSpeechTranslationConfiguration *)translationConfiguration audioConfiguration:(SPXAudioConfiguration *)audioConfiguration
 {
     try {
-        auto recoImpl = TranslationImpl::TranslationRecognizer::FromConfig([translatorConfig getHandle], [audioConfig getHandle]);
+        auto recoImpl = TranslationImpl::TranslationRecognizer::FromConfig([translationConfiguration getHandle], [audioConfiguration getHandle]);
         if (recoImpl == nullptr)
             return nil;
-        return [[TranslationRecognizer alloc] init :recoImpl];
+        return [self initWithImpl:recoImpl];
     }
     catch (...) {
         // Todo: better error handling.
-        NSLog(@"Exception caught when creating TranslationRecognizer in core.");
+        NSLog(@"Exception caught when creating SPXTranslationRecognizer in core.");
     }
     return nil;
 }
 
-- (instancetype)init :(TranslationRecoSharedPtr)recoHandle
+- (instancetype)initWithImpl:(TranslationRecoSharedPtr)recoHandle
 {
     self = [super initFrom:recoHandle withParameters:&recoHandle->Properties];
-    recoImpl = recoHandle;
-    if (recoImpl == nullptr) {
+    self->translationRecoImpl = recoHandle;
+    if (!self || translationRecoImpl == nullptr) {
         return nil;
     }
     else
     {
         dispatchQueue = dispatch_queue_create("com.microsoft.cognitiveservices.speech", nil);
         
-        recognizedEventListenerList = [NSMutableArray array];
-        recognizingEventListenerList = [NSMutableArray array];
-        canceledEventListenerList = [NSMutableArray array];
-        synthesisResultEventListenerList = [NSMutableArray array];
+        recognizedEventHandlerList = [NSMutableArray array];
+        recognizingEventHandlerList = [NSMutableArray array];
+        canceledEventHandlerList = [NSMutableArray array];
+        synthesisResultEventHandlerList = [NSMutableArray array];
         recognizedLock = [[NSLock alloc] init];
         recognizingLock = [[NSLock alloc] init];
         canceledLock = [[NSLock alloc] init];
         synthesizingLock = [[NSLock alloc] init];
         
-        eventImpl = new TranslationEventHandlerHelper(self, recoImpl);
+        eventImpl = new TranslationEventHandlerHelper(self, translationRecoImpl);
         [super setDispatchQueue: dispatchQueue];
         eventImpl->addRecognizingEventHandler();
         eventImpl->addRecognizedEventHandler();
@@ -182,84 +182,84 @@ struct TranslationEventHandlerHelper
 
 - (void)setAuthorizationToken: (NSString *)token
 {
-    recoImpl->SetAuthorizationToken([token string]);
+    translationRecoImpl->SetAuthorizationToken([token string]);
 }
 
-- (NSString *)getAuthorizationToken
+- (NSString *)authorizationToken
 {
-    return [NSString stringWithString:recoImpl->GetAuthorizationToken()];
+    return [NSString stringWithString:translationRecoImpl->GetAuthorizationToken()];
 }
 
-- (TranslationRecognitionResult *)recognizeOnce
+- (SPXTranslationRecognitionResult *)recognizeOnce
 {
-    TranslationRecognitionResult *result = nil;
+    SPXTranslationRecognitionResult *result = nil;
     
-    if (recoImpl == nullptr) {
-        result = [[TranslationRecognitionResult alloc] initWithError: @"Recognizer has been closed."];
+    if (translationRecoImpl == nullptr) {
+        result = [[SPXTranslationRecognitionResult alloc] initWithError: @"SPXRecognizer has been closed."];
         return result;
     }
     
     try {
-        std::shared_ptr<TranslationImpl::TranslationRecognitionResult> resultImpl = recoImpl->RecognizeOnceAsync().get();
+        std::shared_ptr<TranslationImpl::TranslationRecognitionResult> resultImpl = translationRecoImpl->RecognizeOnceAsync().get();
         if (resultImpl == nullptr) {
-            result = [[TranslationRecognitionResult alloc] initWithError: @"No result available."];
+            result = [[SPXTranslationRecognitionResult alloc] initWithError: @"No result available."];
         }
         else
         {
-            result = [[TranslationRecognitionResult alloc] init: resultImpl];
+            result = [[SPXTranslationRecognitionResult alloc] init: resultImpl];
         }
     }
     catch (...) {
         // Todo: better error handling
         NSLog(@"exception caught");
-        result = [[TranslationRecognitionResult alloc] initWithError: @"Runtime Exception"];
+        result = [[SPXTranslationRecognitionResult alloc] initWithError: @"Runtime Exception"];
     }
     
     return result;
 }
 
-- (void)recognizeOnceAsync:(void (^)(TranslationRecognitionResult *))resultReceivedBlock
+- (void)recognizeOnceAsync:(void (^)(SPXTranslationRecognitionResult *))resultReceivedHandler
 {
-    TranslationRecognitionResult *result = nil;
-    if (recoImpl == nullptr) {
-        result = [[TranslationRecognitionResult alloc] initWithError: @"Recognizer has been closed."];
+    SPXTranslationRecognitionResult *result = nil;
+    if (translationRecoImpl == nullptr) {
+        result = [[SPXTranslationRecognitionResult alloc] initWithError: @"SPXRecognizer has been closed."];
         dispatch_async(dispatchQueue, ^{
-            resultReceivedBlock(result);
+            resultReceivedHandler(result);
         });
         return;
     }
     
     try {
-        std::shared_ptr<TranslationImpl::TranslationRecognitionResult> resultImpl = recoImpl->RecognizeOnceAsync().get();
+        std::shared_ptr<TranslationImpl::TranslationRecognitionResult> resultImpl = translationRecoImpl->RecognizeOnceAsync().get();
         if (resultImpl == nullptr) {
-            result = [[TranslationRecognitionResult alloc] initWithError: @"No result available."];
+            result = [[SPXTranslationRecognitionResult alloc] initWithError: @"No result available."];
         }
         else
         {
-            result = [[TranslationRecognitionResult alloc] init: resultImpl];
+            result = [[SPXTranslationRecognitionResult alloc] init: resultImpl];
         }
     }
     catch (...) {
         // Todo: better error handling
         NSLog(@"exception caught");
-        result = [[TranslationRecognitionResult alloc] initWithError: @"Runtime Exception"];
+        result = [[SPXTranslationRecognitionResult alloc] initWithError: @"Runtime Exception"];
     }
     
     dispatch_async(dispatchQueue, ^{
-        resultReceivedBlock(result);
+        resultReceivedHandler(result);
     });
 }
 
 - (void)startContinuousRecognition
 {
-    if (recoImpl == nullptr) {
+    if (translationRecoImpl == nullptr) {
         // Todo: return error?
-        NSLog(@"Recognizer handle is null");
+        NSLog(@"SPXRecognizer handle is null");
         return;
     }
     
     try {
-        recoImpl->StartContinuousRecognitionAsync().get();
+        translationRecoImpl->StartContinuousRecognitionAsync().get();
     }
     catch (...) {
         // Todo: better error handling
@@ -269,14 +269,14 @@ struct TranslationEventHandlerHelper
 
 - (void)stopContinuousRecognition
 {
-    if (recoImpl == nullptr) {
+    if (translationRecoImpl == nullptr) {
         // Todo: return error?
-        NSLog(@"Recognizer handle is null");
+        NSLog(@"SPXRecognizer handle is null");
         return;
     }
     
     try {
-        recoImpl->StopContinuousRecognitionAsync().get();
+        translationRecoImpl->StopContinuousRecognitionAsync().get();
     }
     catch (...) {
         // Todo: better error handling
@@ -284,90 +284,90 @@ struct TranslationEventHandlerHelper
     }
 }
 
-- (void)onRecognizedEvent:(TranslationRecognitionEventArgs *)eventArgs
+- (void)onRecognizedEvent:(SPXTranslationRecognitionEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onRecognizedEvent");
     NSArray* workCopyOfList;
     [recognizedLock lock];
-    workCopyOfList = [NSArray arrayWithArray:recognizedEventListenerList];
+    workCopyOfList = [NSArray arrayWithArray:recognizedEventHandlerList];
     [recognizedLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
-            ((TranslationRecognitionResultEventHandlerBlock)handle)(self, eventArgs);
+            ((SPXTranslationRecognitionEventHandler)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)onRecognizingEvent:(TranslationRecognitionEventArgs *)eventArgs
+- (void)onRecognizingEvent:(SPXTranslationRecognitionEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onRecognizingEvent");
     NSArray* workCopyOfList;
     [recognizingLock lock];
-    workCopyOfList = [NSArray arrayWithArray:recognizingEventListenerList];
+    workCopyOfList = [NSArray arrayWithArray:recognizingEventHandlerList];
     [recognizingLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
-            ((TranslationRecognitionResultEventHandlerBlock)handle)(self, eventArgs);
+            ((SPXTranslationRecognitionEventHandler)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)onSynthesizingEvent:(TranslationSynthesisEventArgs *)eventArgs
+- (void)onSynthesizingEvent:(SPXTranslationSynthesisEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onSynthesisResultEvent");
     NSArray* workCopyOfList;
     [synthesizingLock lock];
-    workCopyOfList = [NSArray arrayWithArray:synthesisResultEventListenerList];
+    workCopyOfList = [NSArray arrayWithArray:synthesisResultEventHandlerList];
     [synthesizingLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
-            ((TranslationSynthesisResultEventHandlerBlock)handle)(self, eventArgs);
+            ((SPXTranslationSynthesisEventHandler)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)onCanceledEvent:(TranslationRecognitionCanceledEventArgs *)eventArgs
+- (void)onCanceledEvent:(SPXTranslationRecognitionCanceledEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onCanceledEvent");
     NSArray* workCopyOfList;
     [canceledLock lock];
-    workCopyOfList = [NSArray arrayWithArray:canceledEventListenerList];
+    workCopyOfList = [NSArray arrayWithArray:canceledEventHandlerList];
     [canceledLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
-            ((TranslationRecognitionResultCanceledEventHandlerBlock)handle)(self, eventArgs);
+            ((SPXTranslationRecognitionCanceledEventHandler)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)addRecognizedEventListener:(TranslationRecognitionResultEventHandlerBlock)eventHandler
+- (void)addRecognizedEventHandler:(SPXTranslationRecognitionEventHandler)eventHandler
 {
     [recognizedLock lock];
-    [recognizedEventListenerList addObject:eventHandler];
+    [recognizedEventHandlerList addObject:eventHandler];
     [recognizedLock unlock];
     return;
 }
 
-- (void)addRecognizingEventListener:(TranslationRecognitionResultEventHandlerBlock)eventHandler
+- (void)addRecognizingEventHandler:(SPXTranslationRecognitionEventHandler)eventHandler
 {
     [recognizingLock lock];
-    [recognizingEventListenerList addObject:eventHandler];
+    [recognizingEventHandlerList addObject:eventHandler];
     [recognizingLock unlock];
     return;
 }
 
-- (void)addCanceledEventListener:(TranslationRecognitionResultCanceledEventHandlerBlock)eventHandler
+- (void)addCanceledEventHandler:(SPXTranslationRecognitionCanceledEventHandler)eventHandler
 {
     [canceledLock lock];
-    [canceledEventListenerList addObject:eventHandler];
+    [canceledEventHandlerList addObject:eventHandler];
     [canceledLock unlock];
     return;
 }
 
-- (void)addSynthesizingEventListener:(TranslationSynthesisResultEventHandlerBlock)eventHandler
+- (void)addSynthesizingEventHandler:(SPXTranslationSynthesisEventHandler)eventHandler
 {
     [synthesizingLock lock];
-    [synthesisResultEventListenerList addObject:eventHandler];
+    [synthesisResultEventHandlerList addObject:eventHandler];
     [synthesizingLock unlock];
     return;
 }

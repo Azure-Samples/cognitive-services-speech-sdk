@@ -7,10 +7,10 @@
 
 struct SpeechEventHandlerHelper
 {
-    SpeechRecognizer *recognizer;
+    SPXSpeechRecognizer *recognizer;
     SpeechRecoSharedPtr recoImpl;
 
-    SpeechEventHandlerHelper(SpeechRecognizer *reco, SpeechRecoSharedPtr recoImpl)
+    SpeechEventHandlerHelper(SPXSpeechRecognizer *reco, SpeechRecoSharedPtr recoImpl)
     {
         recognizer = reco;
         this->recoImpl = recoImpl;
@@ -21,7 +21,7 @@ struct SpeechEventHandlerHelper
         NSLog(@"Add RecognizedEventHandler");
         recoImpl->Recognized.Connect([this] (const SpeechImpl::SpeechRecognitionEventArgs& e)
             {
-                SpeechRecognitionEventArgs *eventArgs = [[SpeechRecognitionEventArgs alloc] init: e];
+                SPXSpeechRecognitionEventArgs *eventArgs = [[SPXSpeechRecognitionEventArgs alloc] init: e];
                 [recognizer onRecognizedEvent: eventArgs];
             });
     }
@@ -31,7 +31,7 @@ struct SpeechEventHandlerHelper
         NSLog(@"Add RecognizingEventHandler");
         recoImpl->Recognizing.Connect([this] (const SpeechImpl::SpeechRecognitionEventArgs& e)
             {
-                SpeechRecognitionEventArgs *eventArgs = [[SpeechRecognitionEventArgs alloc] init: e];
+                SPXSpeechRecognitionEventArgs *eventArgs = [[SPXSpeechRecognitionEventArgs alloc] init: e];
                 [recognizer onRecognizingEvent: eventArgs];
             });
     }
@@ -41,7 +41,7 @@ struct SpeechEventHandlerHelper
         NSLog(@"Add CanceledEventHandler");
         recoImpl->Canceled.Connect([this] (const SpeechImpl::SpeechRecognitionCanceledEventArgs& e)
             {
-                SpeechRecognitionCanceledEventArgs *eventArgs = [[SpeechRecognitionCanceledEventArgs alloc] init:e];
+                SPXSpeechRecognitionCanceledEventArgs *eventArgs = [[SPXSpeechRecognitionCanceledEventArgs alloc] init:e];
                 [recognizer onCanceledEvent: eventArgs];
             });
     }
@@ -51,7 +51,7 @@ struct SpeechEventHandlerHelper
         NSLog(@"Add SessionStartedEventHandler");
         recoImpl->SessionStarted.Connect([this] (const SpeechImpl::SessionEventArgs& e)
             {
-                SessionEventArgs *eventArgs = [[SessionEventArgs alloc] init:e];
+                SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init:e];
                 [recognizer onSessionStartedEvent: eventArgs];
             });
     }
@@ -61,7 +61,7 @@ struct SpeechEventHandlerHelper
         NSLog(@"Add SessionStoppedEventHandler");
         recoImpl->SessionStopped.Connect([this] (const SpeechImpl::SessionEventArgs& e)
             {
-                SessionEventArgs *eventArgs = [[SessionEventArgs alloc] init:e];
+                SPXSessionEventArgs *eventArgs = [[SPXSessionEventArgs alloc] init:e];
                 [recognizer onSessionStoppedEvent: eventArgs];
             });
     }
@@ -71,7 +71,7 @@ struct SpeechEventHandlerHelper
         NSLog(@"Add SpeechStartDetectedEventHandler");
         recoImpl->SpeechStartDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
             {
-                RecognitionEventArgs *eventArgs = [[RecognitionEventArgs alloc] init:e];
+                SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init:e];
                 [recognizer onSpeechStartDetectedEvent: eventArgs];
             });
     }
@@ -81,77 +81,75 @@ struct SpeechEventHandlerHelper
         NSLog(@"Add SpeechStopDetectedEventHandler");
         recoImpl->SpeechEndDetected.Connect([this] (const SpeechImpl::RecognitionEventArgs& e)
             {
-                RecognitionEventArgs *eventArgs = [[RecognitionEventArgs alloc] init:e];
+                SPXRecognitionEventArgs *eventArgs = [[SPXRecognitionEventArgs alloc] init:e];
                 [recognizer onSpeechEndDetectedEvent: eventArgs];
             });
     }
 };
 
-@implementation SpeechRecognizer
+@implementation SPXSpeechRecognizer
 {
-    SpeechRecoSharedPtr recoImpl;
+    SpeechRecoSharedPtr speechRecoImpl;
     dispatch_queue_t dispatchQueue;
     
-    NSMutableArray *recognizedEventListenerList;
+    NSMutableArray *recognizedEventHandlerList;
     NSLock *recognizedLock;
-    NSMutableArray *recognizingEventListenerList;
+    NSMutableArray *recognizingEventHandlerList;
     NSLock *recognizingLock;
-    NSMutableArray *canceledEventListenerList;
+    NSMutableArray *canceledEventHandlerList;
     NSLock *canceledLock;
     struct SpeechEventHandlerHelper *eventImpl;
     
     RecognizerPropertyCollection *propertyCollection;
 }
 
-+ (SpeechRecognizer *)fromConfig: (SpeechConfig *)speechConfig
-{
-    try {
-        auto recoImpl = SpeechImpl::SpeechRecognizer::FromConfig([speechConfig getHandle]);
+- (instancetype)init:(SPXSpeechConfiguration *)speechConfiguration {
+     try {
+        auto recoImpl = SpeechImpl::SpeechRecognizer::FromConfig([speechConfiguration getHandle]);
         if (recoImpl == nullptr)
             return nil;
-        return [[SpeechRecognizer alloc] init :recoImpl];
+        return [self initWithImpl:recoImpl];
     }
     catch (...) {
         // Todo: better error handling.
-        NSLog(@"Exception caught when creating SpeechRecognizer in core.");
-    }
-    return nil;
-}
-
-+ (SpeechRecognizer *)fromConfig: (SpeechConfig *)speechConfig usingAudio: (AudioConfig *)audioConfig
-{
-    try {
-        auto recoImpl = SpeechImpl::SpeechRecognizer::FromConfig([speechConfig getHandle], [audioConfig getHandle]);
-        if (recoImpl == nullptr)
-            return nil;
-        return [[SpeechRecognizer alloc] init :recoImpl];
-    }
-    catch (...) {
-        // Todo: better error handling.
-        NSLog(@"Exception caught when creating SpeechRecognizer in core.");
+        NSLog(@"Exception caught when creating SPXSpeechRecognizer in core.");
     }
     return nil;
 }
 
 
-- (instancetype)init :(SpeechRecoSharedPtr)recoHandle
+- (instancetype)initWithSpeechConfiguration:(SPXSpeechConfiguration *)speechConfiguration audioConfiguration:(SPXAudioConfiguration *)audioConfiguration {
+    try {
+        auto recoImpl = SpeechImpl::SpeechRecognizer::FromConfig([speechConfiguration getHandle], [audioConfiguration getHandle]);
+        if (recoImpl == nullptr)
+            return nil;
+        return [self initWithImpl:recoImpl];
+    }
+    catch (...) {
+        // Todo: better error handling.
+        NSLog(@"Exception caught when creating SPXSpeechRecognizer in core.");
+    }
+    return nil;
+}
+
+- (instancetype)initWithImpl:(SpeechRecoSharedPtr)recoHandle
 {
     self = [super initFrom:recoHandle withParameters:&recoHandle->Properties];
-    recoImpl = recoHandle;
-    if (recoImpl == nullptr) {
+    self->speechRecoImpl = recoHandle;
+    if (!self || speechRecoImpl == nullptr) {
         return nil;
     }
     else
     {
         dispatchQueue = dispatch_queue_create("com.microsoft.cognitiveservices.speech", nil);
-        recognizedEventListenerList = [NSMutableArray array];
-        recognizingEventListenerList = [NSMutableArray array];
-        canceledEventListenerList = [NSMutableArray array];
+        recognizedEventHandlerList = [NSMutableArray array];
+        recognizingEventHandlerList = [NSMutableArray array];
+        canceledEventHandlerList = [NSMutableArray array];
         recognizedLock = [[NSLock alloc] init];
         recognizingLock = [[NSLock alloc] init];
         canceledLock = [[NSLock alloc] init];
         
-        eventImpl = new SpeechEventHandlerHelper(self, recoImpl);
+        eventImpl = new SpeechEventHandlerHelper(self, speechRecoImpl);
         [super setDispatchQueue: dispatchQueue];
         eventImpl->addRecognizingEventHandler();
         eventImpl->addRecognizedEventHandler();
@@ -167,89 +165,89 @@ struct SpeechEventHandlerHelper
 
 - (void)setAuthorizationToken: (NSString *)token
 {
-    recoImpl->SetAuthorizationToken([token string]);
+    speechRecoImpl->SetAuthorizationToken([token string]);
 }
 
-- (NSString *)getAuthorizationToken
+- (NSString *)authorizationToken
 {
-    return [NSString stringWithString:recoImpl->GetAuthorizationToken()];
+    return [NSString stringWithString:speechRecoImpl->GetAuthorizationToken()];
 }
 
-- (NSString *)getEndpointId
+- (NSString *)endpointId
 {
-    return [NSString stringWithString:recoImpl->GetEndpointId()];
+    return [NSString stringWithString:speechRecoImpl->GetEndpointId()];
 }
 
-- (SpeechRecognitionResult *)recognizeOnce
+- (SPXSpeechRecognitionResult *)recognizeOnce
 {
-    SpeechRecognitionResult *result = nil;
+    SPXSpeechRecognitionResult *result = nil;
     
-    if (recoImpl == nullptr) {
-        result = [[SpeechRecognitionResult alloc] initWithError: @"Recognizer has been closed."];
+    if (speechRecoImpl == nullptr) {
+        result = [[SPXSpeechRecognitionResult alloc] initWithError: @"SPXRecognizer has been closed."];
         return result;
     }
     
     try {
-        std::shared_ptr<SpeechImpl::SpeechRecognitionResult> resultImpl = recoImpl->RecognizeOnceAsync().get();
+        std::shared_ptr<SpeechImpl::SpeechRecognitionResult> resultImpl = speechRecoImpl->RecognizeOnceAsync().get();
         if (resultImpl == nullptr) {
-            result = [[SpeechRecognitionResult alloc] initWithError: @"No result available."];
+            result = [[SPXSpeechRecognitionResult alloc] initWithError: @"No result available."];
         }
         else
         {
-            result = [[SpeechRecognitionResult alloc] init: resultImpl];
+            result = [[SPXSpeechRecognitionResult alloc] init: resultImpl];
         }
     }
     catch (...) {
         // Todo: better error handling
         NSLog(@"exception caught");
-        result = [[SpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
+        result = [[SPXSpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
     }
     
     return result;
 }
 
-- (void)recognizeOnceAsync:(void (^)(SpeechRecognitionResult *))resultReceivedBlock
+- (void)recognizeOnceAsync:(void (^)(SPXSpeechRecognitionResult *))resultReceivedHandler
 {
-    SpeechRecognitionResult *result = nil;
-    if (recoImpl == nullptr) {
-        result = [[SpeechRecognitionResult alloc] initWithError: @"Recognizer has been closed."];
+    SPXSpeechRecognitionResult *result = nil;
+    if (speechRecoImpl == nullptr) {
+        result = [[SPXSpeechRecognitionResult alloc] initWithError: @"SPXRecognizer has been closed."];
         dispatch_async(dispatchQueue, ^{
-            resultReceivedBlock(result);
+            resultReceivedHandler(result);
         });
         return;
     }
     
     try {
-        std::shared_ptr<SpeechImpl::SpeechRecognitionResult> resultImpl = recoImpl->RecognizeOnceAsync().get();
+        std::shared_ptr<SpeechImpl::SpeechRecognitionResult> resultImpl = speechRecoImpl->RecognizeOnceAsync().get();
         if (resultImpl == nullptr) {
-            result = [[SpeechRecognitionResult alloc] initWithError: @"No result available."];
+            result = [[SPXSpeechRecognitionResult alloc] initWithError: @"No result available."];
         }
         else
         {
-            result = [[SpeechRecognitionResult alloc] init: resultImpl];
+            result = [[SPXSpeechRecognitionResult alloc] init: resultImpl];
         }
     }
     catch (...) {
         // Todo: better error handling
         NSLog(@"exception caught");
-        result = [[SpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
+        result = [[SPXSpeechRecognitionResult alloc] initWithError: @"Runtime Exception"];
     }
     
     dispatch_async(dispatchQueue, ^{
-        resultReceivedBlock(result);
+        resultReceivedHandler(result);
     });
 }
 
 - (void)startContinuousRecognition
 {
-    if (recoImpl == nullptr) {
+    if (speechRecoImpl == nullptr) {
         // Todo: return error?
-        NSLog(@"Recognizer handle is null");
+        NSLog(@"SPXRecognizer handle is null");
         return;
     }
     
     try {
-        recoImpl->StartContinuousRecognitionAsync().get();
+        speechRecoImpl->StartContinuousRecognitionAsync().get();
     }
     catch (...) {
         // Todo: better error handling
@@ -259,14 +257,14 @@ struct SpeechEventHandlerHelper
 
 - (void)stopContinuousRecognition
 {
-    if (recoImpl == nullptr) {
+    if (speechRecoImpl == nullptr) {
         // Todo: return error?
-        NSLog(@"Recognizer handle is null");
+        NSLog(@"SPXRecognizer handle is null");
         return;
     }
     
     try {
-        recoImpl->StopContinuousRecognitionAsync().get();
+        speechRecoImpl->StopContinuousRecognitionAsync().get();
     }
     catch (...) {
         // Todo: better error handling
@@ -274,68 +272,68 @@ struct SpeechEventHandlerHelper
     }
 }
 
-- (void)onRecognizedEvent:(SpeechRecognitionEventArgs *)eventArgs
+- (void)onRecognizedEvent:(SPXSpeechRecognitionEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onRecognizedEvent");
     NSArray* workCopyOfList;
     [recognizedLock lock];
-    workCopyOfList = [NSArray arrayWithArray:recognizedEventListenerList];
+    workCopyOfList = [NSArray arrayWithArray:recognizedEventHandlerList];
     [recognizedLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
-            ((SpeechRecognitionEventHandlerBlock)handle)(self, eventArgs);
+            ((SPXSpeechRecognitionEventHandler)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)onRecognizingEvent:(SpeechRecognitionEventArgs *)eventArgs
+- (void)onRecognizingEvent:(SPXSpeechRecognitionEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onRecognizingEvent");
     NSArray* workCopyOfList;
     [recognizingLock lock];
-    workCopyOfList = [NSArray arrayWithArray:recognizingEventListenerList];
+    workCopyOfList = [NSArray arrayWithArray:recognizingEventHandlerList];
     [recognizingLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
-            ((SpeechRecognitionEventHandlerBlock)handle)(self, eventArgs);
+            ((SPXSpeechRecognitionEventHandler)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)onCanceledEvent:(SpeechRecognitionCanceledEventArgs *)eventArgs
+- (void)onCanceledEvent:(SPXSpeechRecognitionCanceledEventArgs *)eventArgs
 {
     NSLog(@"OBJC: onCanceledEvent");
     NSArray* workCopyOfList;
     [canceledLock lock];
-    workCopyOfList = [NSArray arrayWithArray:canceledEventListenerList];
+    workCopyOfList = [NSArray arrayWithArray:canceledEventHandlerList];
     [canceledLock unlock];
     for (id handle in workCopyOfList) {
         dispatch_async(dispatchQueue, ^{
-            ((SpeechRecognitionCanceledEventHandlerBlock)handle)(self, eventArgs);
+            ((SPXSpeechRecognitionCanceledEventHandler)handle)(self, eventArgs);
         });
     }
 }
 
-- (void)addRecognizedEventListener:(SpeechRecognitionEventHandlerBlock)eventHandler
+- (void)addRecognizedEventHandler:(SPXSpeechRecognitionEventHandler)eventHandler
 {
     [recognizedLock lock];
-    [recognizedEventListenerList addObject:eventHandler];
+    [recognizedEventHandlerList addObject:eventHandler];
     [recognizedLock unlock];
     return;
 }
 
-- (void)addRecognizingEventListener:(SpeechRecognitionEventHandlerBlock)eventHandler
+- (void)addRecognizingEventHandler:(SPXSpeechRecognitionEventHandler)eventHandler
 {
     [recognizingLock lock];
-    [recognizingEventListenerList addObject:eventHandler];
+    [recognizingEventHandlerList addObject:eventHandler];
     [recognizingLock unlock];
     return;
 }
 
-- (void)addCanceledEventListener:(SpeechRecognitionCanceledEventHandlerBlock)eventHandler
+- (void)addCanceledEventHandler:(SPXSpeechRecognitionCanceledEventHandler)eventHandler
 {
     [canceledLock lock];
-    [canceledEventListenerList addObject:eventHandler];
+    [canceledEventHandlerList addObject:eventHandler];
     [canceledLock unlock];
     return;
 }

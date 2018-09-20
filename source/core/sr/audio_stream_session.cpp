@@ -310,7 +310,7 @@ bool CSpxAudioStreamSession::ProcessNextAudio()
     }
     else
     {
-        SPX_TRACE_WARNING("%s: Unexpected SessionState: recoKind %d; sessionState %d", __FUNCTION__, m_recoKind, sessionState);
+        SPX_DBG_TRACE_WARNING("%s: Unexpected SessionState: recoKind %d; sessionState %d", __FUNCTION__, m_recoKind, sessionState);
     }
     return false;
 }
@@ -577,7 +577,7 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
     }
     else
     {
-        SPX_TRACE_WARNING("%s: Unexpected State: recoKind %d; sessionState %d", __FUNCTION__, m_recoKind, m_sessionState);
+        SPX_DBG_TRACE_WARNING("%s: Unexpected State: recoKind %d; sessionState %d", __FUNCTION__, m_recoKind, m_sessionState);
     }
 }
 

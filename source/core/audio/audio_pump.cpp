@@ -202,11 +202,12 @@ void CSpxAudioPump::PumpThread(std::shared_ptr<CSpxAudioPump> keepAlive, std::sh
     }
     catch (const std::exception& e)
     {
-        SPX_TRACE_ERROR("ERROR! Unexpected exception happened during pump '%s', setting state to idle.", e.what());
+        UNUSED(e);
+        SPX_DBG_TRACE_ERROR("ERROR! Unexpected exception happened during pump '%s', setting state to idle.", e.what());
     }
     catch (...)
     {
-        SPX_TRACE_ERROR("ERROR! Unexpected exception happened during pump, setting state to idle.");
+        SPX_DBG_TRACE_ERROR("ERROR! Unexpected exception happened during pump, setting state to idle.");
     }
 
     // TODO: This is not correct error handling, we should communicate the error to the user and
@@ -239,7 +240,7 @@ void CSpxAudioPump::WaitForPumpIdle(std::unique_lock<std::mutex>& lock)
     }
 
     SPX_DBG_TRACE_VERBOSE("CSpxAudioPump::WaitForPumpIdle() ... post m_cv.wait_for(); state=%d (requestedState=%d)", m_state, m_stateRequested);
-    SPX_TRACE_WARNING_IF(m_state != State::Idle, "CSpxAudioPump::WaitForPumpIdle(): Unexpected: state != State::Idle; state=%d", m_state);
+    SPX_DBG_TRACE_WARNING_IF(m_state != State::Idle, "CSpxAudioPump::WaitForPumpIdle(): Unexpected: state != State::Idle; state=%d", m_state);
 }
 
 } } } } // Microsoft::CognitiveServices::Speech::Impl

@@ -206,7 +206,7 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
                 reader = new BinaryReader(stream);
 
                 // Create an audio stream from a wav file.
-                audioInput = MicrosoftSpeechSDKSamples.Helper.OpenWaveFile(reader);
+                audioInput = MicrosoftSpeechSDKSamples.Helper.OpenWavFile(reader);
 
                 // Creates an instance of a speech config with specified and service region (e.g., "westus").
                 var config = SpeechConfig.FromSubscription(this.SubscriptionKey, this.Region);

@@ -34,7 +34,6 @@ const SpeechPropertyIdNameHash g_PropertyId2NameMap = {
     { PropertyId::SpeechServiceConnection_Region, "SPEECH-Region" },
     { PropertyId::SpeechServiceAuthorization_Token, "SPEECH-AuthToken" },
     { PropertyId::SpeechServiceAuthorization_Type, "SpeechServiceAuthorization_Type" },
-    { PropertyId::SpeechServiceRps_Token, "SPEECH-RpsToken" },
     { PropertyId::SpeechServiceConnection_EndpointId, "SPEECH-ModelId" },
     { PropertyId::SpeechServiceConnection_TranslationToLanguages, "TRANSLATION-ToLanguages" },
     { PropertyId::SpeechServiceConnection_TranslationVoice, "TRANSLATION-Voice" },

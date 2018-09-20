@@ -6,7 +6,7 @@
 #import "intent_recognition_result_private.h"
 #import "common_private.h"
 
-@implementation IntentRecognitionResult
+@implementation SPXIntentRecognitionResult
 {
     std::shared_ptr<IntentImpl::IntentRecognitionResult> resultImpl;
 }

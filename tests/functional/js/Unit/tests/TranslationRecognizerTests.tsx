@@ -189,6 +189,8 @@ test("RecognizeOnceAsync1", (done: jest.DoneCallback) => {
     r.recognizeOnceAsync(
         (res: sdk.TranslationRecognitionResult) => {
             expect(res).not.toBeUndefined();
+            expect(res.errorDetails).toBeUndefined();
+            expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.TranslatedSpeech]);
             expect(res.translations.get("de", undefined) !== undefined).toEqual(true);
             expect("Wie ist das Wetter?").toEqual(res.translations.get("de", ""));
             expect(res.text).toEqual("What's the weather like?");
@@ -233,6 +235,8 @@ test("Translate Multiple Targets", (done: jest.DoneCallback) => {
     r.recognizeOnceAsync(
         (res: sdk.TranslationRecognitionResult) => {
             expect(res).not.toBeUndefined();
+            expect(res.errorDetails).toBeUndefined();
+            expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.TranslatedSpeech]);
             expect("Wie ist das Wetter?").toEqual(res.translations.get("de", ""));
             expect("What's the weather like?").toEqual(res.translations.get("en", ""));
 
@@ -346,8 +350,10 @@ test("Validate Event Ordering", (done: jest.DoneCallback) => {
     // TODO there is no guarantee that SessionStoppedEvent comes before the recognizeOnceAsync() call returns?!
     //      this is why below SessionStoppedEvent checks are conditional
     r.recognizeOnceAsync((res: sdk.TranslationRecognitionResult) => {
-
         expect(res).not.toBeUndefined();
+        expect(res.errorDetails).toBeUndefined();
+        expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.TranslatedSpeech]);
+
         expect(res.translations.get("en", "")).toEqual("What's the weather like?");
 
         // session events are first and last event
@@ -433,7 +439,11 @@ test("StopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
     expect(r).not.toBeUndefined();
 
     expect(r instanceof sdk.Recognizer).toEqual(true);
+    r.canceled = (o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs): void => {
+        expect(e.errorDetails).toBeUndefined();
+        expect(e.reason).not.toEqual(sdk.CancellationReason.Error);
 
+    };
     r.startContinuousRecognitionAsync(() => {
         const end: number = Date.now() + 1000;
 
@@ -924,6 +934,7 @@ test("InitialSilenceTimeout", (done: jest.DoneCallback) => {
             const res: sdk.TranslationRecognitionResult = p2;
 
             expect(res).not.toBeUndefined();
+            expect(res.errorDetails).toBeUndefined();
             expect(sdk.ResultReason.NoMatch).toEqual(res.reason);
             expect(res.text).toBeUndefined();
 

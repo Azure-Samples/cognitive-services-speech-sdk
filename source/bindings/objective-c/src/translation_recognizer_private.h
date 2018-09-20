@@ -3,21 +3,17 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#ifndef translation_recognizer_private_h
-#define translation_recognizer_private_h
-
-#import "translation_recognizer.h"
+#import "SPXTranslationRecognizer.h"
 #import "translation_synthesis_result_event_args_private.h"
 #import "common_private.h"
 
-@interface TranslationRecognizer (Private)
+@interface SPXTranslationRecognizer (Private)
 
-- (instancetype)init :(TranslationRecoSharedPtr)recoHandle;
+- (instancetype)initWithImpl:(TranslationRecoSharedPtr)recoHandle;
 
-- (void)onRecognizedEvent :(TranslationRecognitionEventArgs *)eventArgs;
-- (void)onRecognizingEvent :(TranslationRecognitionEventArgs *)eventArgs;
-- (void)onSynthesizingEvent :(TranslationSynthesisEventArgs *)eventArgs;
-- (void)onCanceledEvent :(TranslationRecognitionCanceledEventArgs *)eventArgs;
+- (void)onRecognizedEvent:(SPXTranslationRecognitionEventArgs *)eventArgs;
+- (void)onRecognizingEvent:(SPXTranslationRecognitionEventArgs *)eventArgs;
+- (void)onSynthesizingEvent:(SPXTranslationSynthesisEventArgs *)eventArgs;
+- (void)onCanceledEvent:(SPXTranslationRecognitionCanceledEventArgs *)eventArgs;
 
 @end
-#endif /* translation_recognizer_private_h */

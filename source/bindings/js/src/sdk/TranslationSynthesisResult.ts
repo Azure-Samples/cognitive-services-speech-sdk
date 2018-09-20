@@ -6,7 +6,7 @@ import { SynthesisStatus } from "./Exports";
 
 /**
  * Defines translation synthesis result, i.e. the voice output of the translated text in the target language.
- * @class
+ * @class TranslationSynthesisResult
  */
 export class TranslationSynthesisResult {
     private privReason: SynthesisStatus;
@@ -15,8 +15,8 @@ export class TranslationSynthesisResult {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param reason The synthesis reason.
-     * @param audio The audio data.
+     * @param reason - The synthesis reason.
+     * @param audio - The audio data.
      */
     constructor(reason: SynthesisStatus, audio: ArrayBuffer) {
         this.privReason = reason;
@@ -25,7 +25,7 @@ export class TranslationSynthesisResult {
 
     /**
      * Translated text in the target language.
-     * @property
+     * @member TranslationSynthesisResult.prototype.audio
      * @returns Translated audio in the target language.
      */
     public get audio(): ArrayBuffer {
@@ -34,7 +34,7 @@ export class TranslationSynthesisResult {
 
     /**
      * The synthesis status.
-     * @property
+     * @member TranslationSynthesisResult.prototype.reason
      * @returns The synthesis status.
      */
     public get reason(): SynthesisStatus {

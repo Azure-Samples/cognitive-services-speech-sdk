@@ -48,7 +48,7 @@ export class IntentConnectionFactory implements IConnectionFactory {
         const headers: IStringDictionary<string> = {};
         headers[authInfo.HeaderName] = authInfo.Token;
         headers[ConnectionIdHeader] = connectionId;
-        //   console.error(endpoint);
+
         return new WebsocketConnection(endpoint, queryParams, headers, new WebsocketMessageFormatter(), connectionId);
     }
 
