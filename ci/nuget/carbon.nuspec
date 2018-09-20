@@ -24,7 +24,6 @@
     <!-- target and property files -->
     <file src="build\native\Microsoft.CognitiveServices.Speech.targets" target="build\native\Microsoft.CognitiveServices.Speech.targets" />
     <file src="build\net461\Microsoft.CognitiveServices.Speech.targets" target="build\net461\Microsoft.CognitiveServices.Speech.targets" />
-    <file src="build\netstandard2.0\Microsoft.CognitiveServices.Speech.targets" target="build\netstandard2.0\Microsoft.CognitiveServices.Speech.targets" />
     <file src="build\Microsoft.CognitiveServices.Speech.props" target="build\Microsoft.CognitiveServices.Speech.props" />
 
     <!-- C++ header files -->
