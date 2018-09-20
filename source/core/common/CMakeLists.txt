@@ -18,8 +18,6 @@ set(HEADERS
     "${INC_DIR}/factory_helpers.h"
     "${INC_DIR}/guid_utils.h"
     "${INC_DIR}/handle_table.h"
-    "${INC_DIR}/http_helpers.h"
-    "${INC_DIR}/urlencode_helpers.h"
     "${INC_DIR}/mock_controller.h"
     "${INC_DIR}/property_bag_impl.h"
     "${INC_DIR}/resource_manager.h"
@@ -50,8 +48,6 @@ set(HEADERS_PRIVATE
 set(SOURCES
     "${SRC_DIR}/exception.cpp"
     "${SRC_DIR}/handle_table.cpp"
-    "${SRC_DIR}/http_helpers.cpp"
-    "${SRC_DIR}/urlencode_helpers.cpp"
     "${SRC_DIR}/mock_controller.cpp"
     "${SRC_DIR}/trace_message.cpp"
     "${SRC_DIR}/string_utils.cpp"

@@ -3,9 +3,6 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#ifndef common_private_h
-#define common_private_h
-
 #import <Foundation/Foundation.h>
 #import "nsstring_stdstring.h"
 
@@ -22,5 +19,3 @@ using RecognizerSharedPtr = std::shared_ptr<SpeechImpl::Recognizer>;
 using SpeechRecoSharedPtr = std::shared_ptr<SpeechImpl::SpeechRecognizer>;
 using TranslationRecoSharedPtr = std::shared_ptr<TranslationImpl::TranslationRecognizer>;
 using IntentRecoSharedPtr = std::shared_ptr<IntentImpl::IntentRecognizer>;
-
-#endif /* common_private_h */

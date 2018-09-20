@@ -6,39 +6,52 @@
 #import "language_understanding_model_private.h"
 #import "common_private.h"
 
-@implementation LanguageUnderstandingModel
+@implementation SPXLanguageUnderstandingModel
 {
-    std::shared_ptr<IntentImpl::LanguageUnderstandingModel> modelImpl;
+    std::shared_ptr<IntentImpl::LanguageUnderstandingModel> languageUnderstandingModelImpl;
 }
 
-+ (LanguageUnderstandingModel *)FromEndpoint: (NSString *)uri
+- (instancetype)initWithEndpoint:(NSString *)uri
 {
     auto modelImpl = IntentImpl::LanguageUnderstandingModel::FromEndpoint([uri string]);
-    return [[LanguageUnderstandingModel alloc] init :modelImpl];
+    if (modelImpl == nullptr) {
+        return nil;
+    }
+    return [self initWithImpl:modelImpl];
 }
 
-+ (LanguageUnderstandingModel *)FromAppId: (NSString *)appId
+- (instancetype)initWithAppId:(NSString *)appId
 {
     auto modelImpl = IntentImpl::LanguageUnderstandingModel::FromAppId([appId string]);
-    return [[LanguageUnderstandingModel alloc] init :modelImpl];
+    if (modelImpl == nullptr) {
+        return nil;
+    }
+    return [self initWithImpl:modelImpl];
 }
 
-+ (LanguageUnderstandingModel *)FromSubscription: (NSString *)key withAppId: (NSString *)appId andRegion: (NSString *)region
+
+- (instancetype)initWithSubscription:(NSString *)key withAppId:(NSString *)appId andRegion:(NSString *)region
 {
     auto modelImpl = IntentImpl::LanguageUnderstandingModel::FromSubscription([key string], [appId string], [region string]);
-    return [[LanguageUnderstandingModel alloc] init :modelImpl];
+    if (modelImpl == nullptr) {
+        return nil;
+    }
+    return [self initWithImpl:modelImpl];
 }
 
-- (instancetype)init :(std::shared_ptr<IntentImpl::LanguageUnderstandingModel>)modelHandle
+- (instancetype)initWithImpl:(std::shared_ptr<IntentImpl::LanguageUnderstandingModel>)modelImpl
 {
     self = [super init];
-    modelImpl = modelHandle;
+    if (!self || modelImpl == nullptr) {
+        return nil;
+    }
+    languageUnderstandingModelImpl = modelImpl;
     return self;
 }
 
 - (std::shared_ptr<IntentImpl::LanguageUnderstandingModel>)getModelHandle
 {
-    return modelImpl;
+    return languageUnderstandingModelImpl;
 }
 
 @end

@@ -3,17 +3,12 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#ifndef speech_translation_config_private_h
-#define speech_translation_config_private_h
-
-#import "speech_translation_config.h"
+#import "SPXSpeechTranslationConfiguration.h"
 #import "common_private.h"
 
-@interface SpeechTranslationConfig (Private)
+@interface SPXSpeechTranslationConfiguration (Private)
 
-- (instancetype)init: (std::shared_ptr<TranslationImpl::SpeechTranslationConfig>)handle;
+- (instancetype)initWithImpl:(std::shared_ptr<TranslationImpl::SpeechTranslationConfig>)speechTranslationConfigurationImpl;
 - (std::shared_ptr<TranslationImpl::SpeechTranslationConfig>)getHandle;
 
 @end
-
-#endif /* speech_translation_config_private_h */

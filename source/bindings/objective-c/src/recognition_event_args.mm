@@ -6,7 +6,7 @@
 #import "recognition_event_args_private.h"
 #import "session_event_args_private.h"
 
-@implementation RecognitionEventArgs
+@implementation SPXRecognitionEventArgs
 
 - (instancetype)init: (const SpeechImpl::RecognitionEventArgs&)eventArgsHandle
 {

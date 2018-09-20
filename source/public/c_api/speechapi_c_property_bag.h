@@ -24,8 +24,7 @@ enum  PropertyId
     SpeechServiceConnection_Region = 1002,
     SpeechServiceAuthorization_Token = 1003,
     SpeechServiceAuthorization_Type = 1004,
-    SpeechServiceRps_Token = 1005,
-    SpeechServiceConnection_EndpointId = 1006,
+    SpeechServiceConnection_EndpointId = 1005,
 
     SpeechServiceConnection_TranslationToLanguages = 2000,
     SpeechServiceConnection_TranslationVoice = 2001,

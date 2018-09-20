@@ -328,6 +328,10 @@ protected:
         auto pThis = static_cast<AsyncRecognizer*>(pvContext);
         auto keepAlive = pThis->shared_from_this();
         pThis->SessionStarted.Signal(*sessionEvent.get());
+
+        // SessionEventArgs doesn't hold hevent, and thus can't release it properly ... release it here
+        SPX_DBG_ASSERT(recognizer_event_handle_is_valid(hevent));
+        recognizer_event_handle_release(hevent);
     }
 
     static void FireEvent_SessionStopped(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
@@ -338,6 +342,10 @@ protected:
         auto pThis = static_cast<AsyncRecognizer*>(pvContext);
         auto keepAlive = pThis->shared_from_this();
         pThis->SessionStopped.Signal(*sessionEvent.get());
+
+        // SessionEventArgs doesn't hold hevent, and thus can't release it properly ... release it here
+        SPX_DBG_ASSERT(recognizer_event_handle_is_valid(hevent));
+        recognizer_event_handle_release(hevent);
     }
 
     static void FireEvent_SpeechStartDetected(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
@@ -348,6 +356,10 @@ protected:
         auto pThis = static_cast<AsyncRecognizer*>(pvContext);
         auto keepAlive = pThis->shared_from_this();
         pThis->SpeechStartDetected.Signal(*recoEvent.get());
+
+        // RecognitionEventArgs doesn't hold hevent, and thus can't release it properly ... release it here
+        SPX_DBG_ASSERT(recognizer_event_handle_is_valid(hevent));
+        recognizer_event_handle_release(hevent);
     }
 
     static void FireEvent_SpeechEndDetected(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)
@@ -358,6 +370,10 @@ protected:
         auto pThis = static_cast<AsyncRecognizer*>(pvContext);
         auto keepAlive = pThis->shared_from_this();
         pThis->SpeechEndDetected.Signal(*recoEvent.get());
+
+        // RecognitionEventArgs doesn't hold hevent, and thus can't release it properly ... release it here
+        SPX_DBG_ASSERT(recognizer_event_handle_is_valid(hevent));
+        recognizer_event_handle_release(hevent);
     }
 
     static void FireEvent_Recognizing(SPXRECOHANDLE hreco, SPXEVENTHANDLE hevent, void* pvContext)

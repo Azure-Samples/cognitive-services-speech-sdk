@@ -6,12 +6,12 @@
 #import <Foundation/Foundation.h>
 #import "speechapi_private.h"
 
-@implementation RecognitionResult
+@implementation SPXRecognitionResult
 {
     std::shared_ptr<SpeechImpl::RecognitionResult> resultImpl;
 }
 
-- (instancetype)init :(std::shared_ptr<SpeechImpl::RecognitionResult>)resultHandle
+- (instancetype)init:(std::shared_ptr<SpeechImpl::RecognitionResult>)resultHandle
 {
     self = [super init];
     resultImpl = resultHandle;
@@ -28,7 +28,7 @@
 
 - (instancetype)initWithError: (NSString *)message
 {
-    _reason = ResultReason::Canceled;
+    _reason = SPXResultReason_Canceled;
     return self;
 }
 
@@ -39,9 +39,21 @@
 
 @end
 
-@implementation CancellationDetails
+@implementation SPXCancellationDetails
 
-- (instancetype)init :(std::shared_ptr<SpeechImpl::CancellationDetails>)handle
+-(instancetype)initFromCanceledRecognitionResult:(SPXRecognitionResult *)recognitionResult
+{
+    try {
+        auto cancellationDetailsImpl = SpeechImpl::CancellationDetails::FromResult([recognitionResult getHandle]);
+        return [self initWithImpl: cancellationDetailsImpl];
+    } catch (...) {
+        // Todo: better error handling.
+        NSLog(@"Exception caught when creating SPXCancellationDetails in core. Check to make sure that recognition result has the reason Canceled.");
+    }
+    return nil;
+}
+
+- (instancetype)initWithImpl:(std::shared_ptr<SpeechImpl::CancellationDetails>)handle
 {
     self = [super init];
     _reason = [Util fromCancellationReasonImpl:handle->Reason];
@@ -49,25 +61,27 @@
     return self;
 }
 
-+(CancellationDetails *) fromResult:(RecognitionResult *)recognitionResult
-{
-    return [[CancellationDetails alloc] init:SpeechImpl::CancellationDetails::FromResult([recognitionResult getHandle])];
-}
-
 @end
 
-@implementation NoMatchDetails
+@implementation SPXNoMatchDetails
 
-- (instancetype)init :(std::shared_ptr<SpeechImpl::NoMatchDetails>)handle
+-(instancetype)initFromNoMatchRecognitionResult:(SPXRecognitionResult *)recognitionResult
+{
+    try {
+        auto noMatchDetailsImpl = SpeechImpl::NoMatchDetails::FromResult([recognitionResult getHandle]);
+        return [self initWithImpl: noMatchDetailsImpl];
+    } catch (...) {
+        // Todo: better error handling.
+        NSLog(@"Exception caught when creating SPXNoMatchDetails in core. Check to make sure that recognition result has the reason NoMatch.");
+    }
+    return nil;
+}
+
+- (instancetype)initWithImpl:(std::shared_ptr<SpeechImpl::NoMatchDetails>)handle
 {
     self = [super init];
     _reason = [Util fromNoMatchReasonImpl:handle->Reason];
     return self;
-}
-
-+(NoMatchDetails *) fromResult:(RecognitionResult *)recognitionResult
-{
-    return [[NoMatchDetails alloc] init:SpeechImpl::NoMatchDetails::FromResult([recognitionResult getHandle])];
 }
 
 @end

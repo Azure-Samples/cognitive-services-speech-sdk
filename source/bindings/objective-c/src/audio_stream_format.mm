@@ -6,44 +6,37 @@
 #import "audio_stream_format_private.h"
 #import "common_private.h"
 
-@implementation AudioStreamFormat
+@implementation SPXAudioStreamFormat
 {
     std::shared_ptr<AudioImpl::AudioStreamFormat> audioStreamFormatImpl;
 }
 
-- (instancetype)init: (std::shared_ptr<AudioImpl::AudioStreamFormat>)handle
+- (instancetype)init
 {
     self = [super init];
-    audioStreamFormatImpl = handle;
-    return self;
-}
-
-- (std::shared_ptr<AudioImpl::AudioStreamFormat>)getHandle
-{
-    return audioStreamFormatImpl;
-}
-
-+ (AudioStreamFormat *)getDefaultInputFormat
-{
     auto impl = AudioImpl::AudioStreamFormat::GetDefaultInputFormat();
     if (impl == nullptr) {
         NSLog(@"Unable to create audio stream format in core");
         return nil;
     }
-    else 
-        return [[AudioStreamFormat alloc] init :impl];
+    return self;
 }
 
-+ (AudioStreamFormat *)getWaveFormatPCMWithSampleRate: (NSUInteger)samplesPerSecond bitsPerSample: (NSUInteger)bitsPerSample channels: (NSUInteger)channels
+- (instancetype)initUsingPCMWithSampleRate:(NSUInteger)samplesPerSecond bitsPerSample:(NSUInteger)bitsPerSample channels:(NSUInteger)channels
 {
+    self = [super init];
     //Todo: check size convertion error.
     auto impl = AudioImpl::AudioStreamFormat::GetWaveFormatPCM((uint32_t)samplesPerSecond, (uint8_t)bitsPerSample, (uint8_t)channels);
     if (impl == nullptr) {
         NSLog(@"Unable to create audio stream format in core");
         return nil;
     }
-    else 
-        return [[AudioStreamFormat alloc] init :impl];
+    return self;
+}
+
+- (std::shared_ptr<AudioImpl::AudioStreamFormat>)getHandle
+{
+    return audioStreamFormatImpl;
 }
 
 @end

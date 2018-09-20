@@ -5,18 +5,18 @@
 
 #import "speechapi_private.h"
 
-@implementation TranslationRecognitionEventArgs
+@implementation SPXTranslationRecognitionEventArgs
 
 - (instancetype)init:(const TranslationImpl::TranslationRecognitionEventArgs&)e
 {
     self = [super init:e];
-    _result = [[TranslationRecognitionResult alloc] init :e.GetResult()];
+    _result = [[SPXTranslationRecognitionResult alloc] init :e.GetResult()];
     return self;
 }
 
 @end
 
-@implementation TranslationRecognitionCanceledEventArgs
+@implementation SPXTranslationRecognitionCanceledEventArgs
 
 - (instancetype)init:(const TranslationImpl::TranslationRecognitionCanceledEventArgs&)e
 {

@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		313DEE1B9AF5A2A50CD4057A /* Pods_SpeechSDK_iOSTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CAFFE545327ECA0B7823008F /* Pods_SpeechSDK_iOSTests.framework */; };
-		3C4559B879634422F2D417D1 /* Pods_SpeechSDK_iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 611F82DFE742C2CB2FC183D3 /* Pods_SpeechSDK_iOS.framework */; };
 		3C5D93EC2146856B000C7129 /* TurnOnTheLamp.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3C5D93EB2146856B000C7129 /* TurnOnTheLamp.wav */; };
 		3C5D93FA2146CC61000C7129 /* test.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C5D93F92146CC61000C7129 /* test.m */; };
 		3CA6CF8B211F471500CD2768 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CA6CF8A211F471500CD2768 /* AppDelegate.m */; };
@@ -19,6 +17,8 @@
 		3CA6CF99211F471600CD2768 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CA6CF98211F471600CD2768 /* main.m */; };
 		3CA6CFA3211F471600CD2768 /* SpeechSDK_iOSTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CA6CFA2211F471600CD2768 /* SpeechSDK_iOSTests.m */; };
 		3CC3789C2121CFD600F07A66 /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3CC3789B2121CFD600F07A66 /* whatstheweatherlike.wav */; };
+		A2AB0BD1215323B300171A08 /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2AB0BD0215323B300171A08 /* MicrosoftCognitiveServicesSpeech.framework */; };
+		A2AB0BD3215323BB00171A08 /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A2AB0BD0215323B300171A08 /* MicrosoftCognitiveServicesSpeech.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,8 +31,21 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		A2AB0BC72152FF0100171A08 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				A2AB0BD3215323BB00171A08 /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
-		3BB1459A434B9BA5D7D7C886 /* Pods-SpeechSDK_iOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpeechSDK_iOSTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SpeechSDK_iOSTests/Pods-SpeechSDK_iOSTests.debug.xcconfig"; sourceTree = "<group>"; };
 		3C5D93EB2146856B000C7129 /* TurnOnTheLamp.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = TurnOnTheLamp.wav; path = ../../../input/audio/TurnOnTheLamp.wav; sourceTree = "<group>"; };
 		3C5D93F92146CC61000C7129 /* test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = test.m; path = ../../shared/test.m; sourceTree = "<group>"; };
 		3C5D93FB2146CD40000C7129 /* test.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = test.h; path = ../../shared/test.h; sourceTree = "<group>"; };
@@ -50,11 +63,7 @@
 		3CA6CFA2211F471600CD2768 /* SpeechSDK_iOSTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SpeechSDK_iOSTests.m; sourceTree = "<group>"; };
 		3CA6CFA4211F471600CD2768 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3CC3789B2121CFD600F07A66 /* whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = whatstheweatherlike.wav; path = ../../../../tests/input/audio/whatstheweatherlike.wav; sourceTree = "<group>"; };
-		3FF46A9CAF458499AC36A9A3 /* Pods-SpeechSDK_iOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpeechSDK_iOSTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-SpeechSDK_iOSTests/Pods-SpeechSDK_iOSTests.release.xcconfig"; sourceTree = "<group>"; };
-		611F82DFE742C2CB2FC183D3 /* Pods_SpeechSDK_iOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SpeechSDK_iOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		B72E6C3CF6637838CAB04104 /* Pods-SpeechSDK_iOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpeechSDK_iOS.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SpeechSDK_iOS/Pods-SpeechSDK_iOS.debug.xcconfig"; sourceTree = "<group>"; };
-		CAFFE545327ECA0B7823008F /* Pods_SpeechSDK_iOSTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SpeechSDK_iOSTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		EFCBF410E72D8DD74A73DD3C /* Pods-SpeechSDK_iOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpeechSDK_iOS.release.xcconfig"; path = "Pods/Target Support Files/Pods-SpeechSDK_iOS/Pods-SpeechSDK_iOS.release.xcconfig"; sourceTree = "<group>"; };
+		A2AB0BD0215323B300171A08 /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = "../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech-Release-iosuniversal/MicrosoftCognitiveServicesSpeech.framework"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,7 +71,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3C4559B879634422F2D417D1 /* Pods_SpeechSDK_iOS.framework in Frameworks */,
+				A2AB0BD1215323B300171A08 /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,22 +79,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				313DEE1B9AF5A2A50CD4057A /* Pods_SpeechSDK_iOSTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		20CD5EAE5FA4504C32A2EAAE /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				611F82DFE742C2CB2FC183D3 /* Pods_SpeechSDK_iOS.framework */,
-				CAFFE545327ECA0B7823008F /* Pods_SpeechSDK_iOSTests.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 		3CA6CF7D211F471500CD2768 = {
 			isa = PBXGroup;
 			children = (
@@ -94,8 +93,7 @@
 				3CA6CF88211F471500CD2768 /* SpeechSDK_iOS */,
 				3CA6CFA1211F471600CD2768 /* SpeechSDK_iOSTests */,
 				3CA6CF87211F471500CD2768 /* Products */,
-				8C6F0790DB5A2ED926FBE7A6 /* Pods */,
-				20CD5EAE5FA4504C32A2EAAE /* Frameworks */,
+				A2AB0BC02152FB9800171A08 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -135,15 +133,12 @@
 			path = SpeechSDK_iOSTests;
 			sourceTree = "<group>";
 		};
-		8C6F0790DB5A2ED926FBE7A6 /* Pods */ = {
+		A2AB0BC02152FB9800171A08 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				B72E6C3CF6637838CAB04104 /* Pods-SpeechSDK_iOS.debug.xcconfig */,
-				EFCBF410E72D8DD74A73DD3C /* Pods-SpeechSDK_iOS.release.xcconfig */,
-				3BB1459A434B9BA5D7D7C886 /* Pods-SpeechSDK_iOSTests.debug.xcconfig */,
-				3FF46A9CAF458499AC36A9A3 /* Pods-SpeechSDK_iOSTests.release.xcconfig */,
+				A2AB0BD0215323B300171A08 /* MicrosoftCognitiveServicesSpeech.framework */,
 			);
-			name = Pods;
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -153,11 +148,10 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3CA6CFA7211F471600CD2768 /* Build configuration list for PBXNativeTarget "SpeechSDK_iOS" */;
 			buildPhases = (
-				D0490DD24E82873088C924C4 /* [CP] Check Pods Manifest.lock */,
 				3CA6CF82211F471500CD2768 /* Sources */,
 				3CA6CF83211F471500CD2768 /* Frameworks */,
 				3CA6CF84211F471500CD2768 /* Resources */,
-				531167657EFDEA8B35924D1D /* [CP] Embed Pods Frameworks */,
+				A2AB0BC72152FF0100171A08 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -172,7 +166,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3CA6CFAA211F471600CD2768 /* Build configuration list for PBXNativeTarget "SpeechSDK_iOSTests" */;
 			buildPhases = (
-				9D7C918F012B757288EAB804 /* [CP] Check Pods Manifest.lock */,
 				3CA6CF9A211F471600CD2768 /* Sources */,
 				3CA6CF9B211F471600CD2768 /* Frameworks */,
 				3CA6CF9C211F471600CD2768 /* Resources */,
@@ -198,7 +191,7 @@
 				TargetAttributes = {
 					3CA6CF85211F471500CD2768 = {
 						CreatedOnToolsVersion = 9.4.1;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 					};
 					3CA6CF9D211F471600CD2768 = {
 						CreatedOnToolsVersion = 9.4.1;
@@ -247,75 +240,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		531167657EFDEA8B35924D1D /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-SpeechSDK_iOS/Pods-SpeechSDK_iOS-frameworks.sh",
-				"${PODS_ROOT}/Microsoft-CognitiveServices-Speech-for-iOS/MicrosoftCognitiveServicesSpeech.framework",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MicrosoftCognitiveServicesSpeech.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SpeechSDK_iOS/Pods-SpeechSDK_iOS-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		9D7C918F012B757288EAB804 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-SpeechSDK_iOSTests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		D0490DD24E82873088C924C4 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-SpeechSDK_iOS-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		3CA6CF82211F471500CD2768 /* Sources */ = {
@@ -404,6 +328,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech-Debug-iosuniversal/**";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -418,6 +343,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech-Debug-iosuniversal/**";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -462,6 +388,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech-Release-iosuniversal/**";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -470,6 +397,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech-Release-iosuniversal/**";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
@@ -479,20 +407,23 @@
 		};
 		3CA6CFA8211F471600CD2768 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B72E6C3CF6637838CAB04104 /* Pods-SpeechSDK_iOS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = UBF8T346G9;
-				ENABLE_BITCODE = YES;
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = SpeechSDK_iOS/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks $(SRCROOT)/../../../../build_ios_simulator_debug/lib";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks $(SRCROOT)/../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech-Debug-iosuniversal";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-v",
+					"-framework",
+					MicrosoftCognitiveServicesSpeech,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.cognitiveservices.SpeechSDK-iOS";
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.dummyapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "49fd5d3a-1d7e-4977-bf0b-f58ab28ffd93";
+				PROVISIONING_PROFILE_SPECIFIER = "Dummy App Development";
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -500,20 +431,23 @@
 		};
 		3CA6CFA9211F471600CD2768 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EFCBF410E72D8DD74A73DD3C /* Pods-SpeechSDK_iOS.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = UBF8T346G9;
-				ENABLE_BITCODE = YES;
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = SpeechSDK_iOS/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks $(SRCROOT)/../../../../build_ios_simulator_debug/lib";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks $(SRCROOT)/../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech-Release-iosuniversal";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-v",
+					"-framework",
+					MicrosoftCognitiveServicesSpeech,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.cognitiveservices.SpeechSDK-iOS";
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.dummyapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "49fd5d3a-1d7e-4977-bf0b-f58ab28ffd93";
+				PROVISIONING_PROFILE_SPECIFIER = "Dummy App Development";
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -521,7 +455,6 @@
 		};
 		3CA6CFAB211F471600CD2768 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3BB1459A434B9BA5D7D7C886 /* Pods-SpeechSDK_iOSTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -536,7 +469,6 @@
 		};
 		3CA6CFAC211F471600CD2768 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3FF46A9CAF458499AC36A9A3 /* Pods-SpeechSDK_iOSTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;

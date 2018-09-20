@@ -45,14 +45,9 @@ enum class PropertyId
     SpeechServiceAuthorization_Type = 1004,
 
     /// <summary>
-    /// RPS token.
-    /// </summary>
-    SpeechServiceRps_Token = 1005,
-
-    /// <summary>
     /// Endpoint ID.
     /// </summary>
-    SpeechServiceConnection_EndpointId = 1006,
+    SpeechServiceConnection_EndpointId = 1005,
 
     /// <summary>
     /// Translation to languages.

@@ -3,19 +3,15 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-#ifndef speech_recognizer_private_h
-#define speech_recognizer_private_h
-
-#import "speech_recognizer.h"
+#import "SPXSpeechRecognizer.h"
 #import "common_private.h"
 
-@interface SpeechRecognizer (Private)
+@interface SPXSpeechRecognizer (Private)
 
-- (instancetype)init :(SpeechRecoSharedPtr)recoHandle;
+- (instancetype)initWithImpl:(SpeechRecoSharedPtr)recoHandle;
 
-- (void)onRecognizedEvent :(SpeechRecognitionEventArgs *)eventArgs;
-- (void)onRecognizingEvent :(SpeechRecognitionEventArgs *)eventArgs;
-- (void)onCanceledEvent :(SpeechRecognitionCanceledEventArgs *)eventArgs;
+- (void)onRecognizedEvent :(SPXSpeechRecognitionEventArgs *)eventArgs;
+- (void)onRecognizingEvent :(SPXSpeechRecognitionEventArgs *)eventArgs;
+- (void)onCanceledEvent :(SPXSpeechRecognitionCanceledEventArgs *)eventArgs;
 
 @end
-#endif /* speech_recognizer_private_h */

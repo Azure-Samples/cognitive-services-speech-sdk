@@ -237,6 +237,9 @@ private:
 
 
 private:
+
+    std::shared_ptr<ISpxGenericSite> m_siteKeepAlive;
+
     // Unique identifier of the session, used mostly for diagnostics.
     // Is represented by UUID without dashes.
     const std::wstring m_sessionId;

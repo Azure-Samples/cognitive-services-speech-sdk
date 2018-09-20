@@ -6,8 +6,6 @@
 //
 
 #include "stdafx.h"
-#include "http_helpers.h"
-#include "urlencode_helpers.h"
 #include "luis_direct_lu_engine_adapter.h"
 #include "string_utils.h"
 #include "service_helpers.h"
@@ -192,22 +190,6 @@ void CSpxLuisDirectEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionR
             return;
         }
 
-        // If we don't already have the LUIS json, fetch it from LUIS now...
-        if (json.empty())
-        {
-            // Get the connection information for this ONE (1!!) language understanding model reference
-            std::string hostName, relativePath;
-            GetConnectionInfoFromTriggers(resultText, &hostName, &relativePath);
-
-            // If we found a set of connection information...
-            if (!hostName.empty() && !relativePath.empty())
-            {
-                // Contact LUIS, asking it to return the JSON response for the language understanding model specified
-                json = SpxHttpDownloadString(hostName.c_str(), relativePath.c_str());
-                SPX_DBG_TRACE_VERBOSE("LUIS said this: '%s'", json.c_str());
-            }
-        }
-
         if (!json.empty())
         {
             // Extract the intent from the JSON payload
@@ -228,49 +210,6 @@ void CSpxLuisDirectEngineAdapter::ProcessResult(std::shared_ptr<ISpxRecognitionR
             }
         }
     }
-}
-
-void CSpxLuisDirectEngineAdapter::GetConnectionInfoFromTriggers(const std::string& query, std::string* phostName, std::string* prelativePath)
-{
-    // The LUIS Direct LU Engine Adapter currently only allows for a single (1 !!!) language understanding model to be used. If the API developer-user specifies
-    // more than a single language understanding model via AddIntent(), we'll fail this call with SPXERR_ABORT. However, specifying more than one intent, where
-    // all of those intents are from the same language understanding model, is supported. The code below iterates thru all the triggers, finding the
-    // "hostName/relativePath" ... It stores the first one it finds. It then continues iterating thru the triggers, ensuring
-    // that all the other triggers have data that links them to the same language understanding model found initially... 
-
-    std::string hostName, relativePath, id, key, region;
-
-    std::unique_lock<std::mutex> lock(m_mutex);
-    for (auto item : m_triggerMap)
-    {
-        auto trigger = item.second;
-        auto model = trigger->GetModel();
-        if (model != nullptr)
-        {
-            auto str = PAL::ToString(model->GetAppId());
-            SPX_IFTRUE_THROW_HR(!str.empty() && !id.empty() && str != id, SPXERR_ABORT);
-            id = str;
-
-            str = PAL::ToString(model->GetSubscriptionKey());
-            SPX_IFTRUE_THROW_HR(!str.empty() && !key.empty() && str != key, SPXERR_ABORT);
-            key = str;
-
-            str = PAL::ToString(model->GetRegion());
-            SPX_IFTRUE_THROW_HR(!str.empty() && !region.empty() && str != region, SPXERR_ABORT);
-            region = str;
-
-            str = PAL::ToString(model->GetHostName());
-            SPX_IFTRUE_THROW_HR(!str.empty() && !hostName.empty() && str != hostName, SPXERR_INVALID_URL);
-            hostName = str;
-
-            str = PAL::ToString(model->GetPathAndQuery());
-            SPX_IFTRUE_THROW_HR(!str.empty() && !relativePath.empty() && str != relativePath, SPXERR_INVALID_URL);
-            relativePath = str;
-        }
-    }
-
-    *phostName = hostName;
-    *prelativePath = relativePath + Impl::UrlEncode(query);
 }
 
 std::wstring CSpxLuisDirectEngineAdapter::ExtractIntent(const std::string& str)

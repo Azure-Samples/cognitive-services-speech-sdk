@@ -123,7 +123,6 @@ typedef struct _TransportRequest
     TransportResponseCallback    onRecvResponse;
     TransportErrorCallback       onTransportError;
     HTTP_HEADERS_HANDLE          headersHandle;
-    bool                         isWS;
     bool                         isOpen;
     char*                        url;
     void*                        context;
@@ -663,62 +662,9 @@ static void DnsComplete(DnsCacheHandle handle, int error, DNS_RESULT_HANDLE resu
     }
 }
 
-static int SendReceiveOverHTTP(TransportRequest* request, TransportPacket* packet)
-{
-    int err = 0;
-    unsigned int statusCode;
-    BUFFER_HANDLE responseContentHandle = BUFFER_new();
-    HTTP_HEADERS_HANDLE responseHeadersHandle = HTTPHeaders_Alloc();
-    if (!responseHeadersHandle || !responseContentHandle)
-    {
-        err = -1;
-        goto Exit;
-    }
-
-    if (HTTPAPI_ExecuteRequest(
-        request->http.requestHandle,
-        packet ? HTTPAPI_REQUEST_POST : HTTPAPI_REQUEST_GET,
-        request->path,
-        request->headersHandle,
-        packet ? packet->buffer : NULL,
-        packet ? packet->length : 0,
-        &statusCode,
-        responseHeadersHandle,
-        responseContentHandle))
-    {
-        LogError("HTTPAPI_ExecuteRequest failed.");
-        err = -1;
-        goto Exit;
-    }
-
-    if (request->onRecvResponse)
-    {
-        request->onRecvResponse(request, responseHeadersHandle, BUFFER_u_char(responseContentHandle), BUFFER_length(responseContentHandle), statusCode, request->context);
-    }
-    else if (statusCode == 200)
-    {
-        const char* mime = HTTPHeaders_FindHeaderValue(responseHeadersHandle, g_keywordContentType);
-        if (NULL != mime)
-        {
-            ContentDispatch(request->context, NULL /* path */, mime, NULL /* ioBuffer */, responseContentHandle, USE_BUFFER_SIZE);
-        }
-    }
-
-Exit:
-    BUFFER_delete(responseContentHandle);
-    HTTPHeaders_Free(responseHeadersHandle);
-    return err;
-}
-
 static int ProcessPacket(TransportRequest* request, TransportPacket* packet)
 {
     int err = 0;
-    if (!request->isWS)
-    {
-        err = SendReceiveOverHTTP(request, packet);
-        free(packet);
-        return err;
-    }
 
     // re-stamp X-timestamp header value
     char timeString[TIME_STRING_MAX_SIZE] = "";
@@ -749,7 +695,7 @@ static int ProcessPacket(TransportRequest* request, TransportPacket* packet)
 
 static void WsioQueue(TransportRequest* request, TransportPacket* packet)
 {
-    if (request->isWS  &&  request->requestId[0] == '\0')
+    if (request->requestId[0] == '\0')
     {
         LogError("Trying to send on a previously closed socket");
         metrics_transport_invalidstateerror();
@@ -806,7 +752,7 @@ static void PrepareTelemetryPayload(TransportHandle request, const uint8_t* even
 
 void TransportWriteTelemetry(TransportHandle handle, const uint8_t* buffer, size_t bytesToWrite, const char *requestId)
 {
-    if (NULL != handle && handle->isWS)
+    if (NULL != handle)
     {
         TransportPacket *msg = NULL;
         PrepareTelemetryPayload(handle, buffer, bytesToWrite, &msg, requestId);
@@ -818,7 +764,7 @@ void TransportCreateRequestId(TransportHandle transportHandle)
 {
     TransportStream*  stream;
     TransportRequest* request = (TransportRequest*)transportHandle;
-    if (transportHandle && request->isWS)
+    if (transportHandle)
     {
         UniqueId_Generate(request->requestId, sizeof(request->requestId));
         GuidDToNFormat(request->requestId);
@@ -856,6 +802,12 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
 
     if (!host)
     {
+        return NULL;
+    }
+
+    if (strstr(host, g_keywordWSS) != host && strstr(host, g_keywordWS) != host)
+    {
+        // Only WebSockets-based transport
         return NULL;
     }
 
@@ -900,98 +852,80 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
 
     if (strstr(host, g_keywordWSS) == host)
     {
-        request->isWS = true;
         request->ws.config.port = port == -1 ? 443 : port;
         use_ssl = true;
     }
     else if(strstr(host, g_keywordWS) == host)
     {
-        request->isWS = true;
         request->ws.config.port = port == -1 ? 80 : port;
 
         use_ssl = false;
     }
-    else
+
+    if (sizeof(request->connectionId) < strlen(connectionId) + 1)
     {
-        request->isWS = false;
+        free(request);
+        LogError("Invalid size of connection Id. Please use a valid GUID with dashes removed.");
+        return NULL;
     }
 
-    if (request->isWS)
+    strncpy(request->connectionId, connectionId, strlen(connectionId));
+    TransportCreateRequestId(request);
+    HTTPHeaders_ReplaceHeaderNameValuePair(connectionHeaders, "X-ConnectionId", request->connectionId);
+    char* headers = ConstructHeadersString(connectionHeaders);
+    const char* proto = "USP\r\n";
+    size_t len = strlen(proto) + strlen(headers) -2 /*(minus extra '\r\n')*/ + 1;
+    char* str = (char*)malloc(len);
+    if (str == NULL)
     {
-        if (sizeof(request->connectionId) < strlen(connectionId) + 1)
-        {
-            free(request);
-            LogError("Invalid size of connection Id. Please use a valid GUID with dashes removed.");
-            return NULL;
-        }
-
-        strncpy(request->connectionId, connectionId, strlen(connectionId));
-        TransportCreateRequestId(request);
-        HTTPHeaders_ReplaceHeaderNameValuePair(connectionHeaders, "X-ConnectionId", request->connectionId);
-        char* headers = ConstructHeadersString(connectionHeaders);
-        const char* proto = "USP\r\n";
-        size_t len = strlen(proto) + strlen(headers) -2 /*(minus extra '\r\n')*/ + 1;
-        char* str = (char*)malloc(len);
-        if (str == NULL)
-        {
-            free(request);
-            LogError("Failed to allocate memory for connection headers string.");
-            return NULL;
-        }
-        snprintf(str, len, "%s%s", proto, headers);
-        // HACKHACK: azure-c-shared doesn't allow to specify connection ("upgrade") headers, using this as a temporary
-        // workaround until we migrate to something more decent.
-        request->ws.config.protocol = str;
-
-        size_t l = strlen(host);
-        request->url = (char*)malloc(l + 2); // 2=2 x NULL
-        if (request->url != NULL)
-        {
-            host += strlen(use_ssl ? g_keywordWSS : g_keywordWS);
-            dst = request->url;
-            request->ws.config.hostname = port == -1 ? dst : "localhost";
-
-            // split up host + path
-            src = strchr(host, '/');
-            if (NULL != src)
-            {
-                err = 0;
-                memcpy(dst, host, src - host);
-                dst += (src - host);
-                *dst = 0; dst++;
-                request->ws.config.resource_name = dst;
-                strcpy_s(dst, l + 2 - (dst - request->url), src);
-
-                WSIO_CONFIG cfg = request->ws.config;
-                WS_PROTOCOL ws_proto;
-                ws_proto.protocol = cfg.protocol;
-                request->ws.WSHandle = uws_client_create(cfg.hostname, cfg.port, cfg.resource_name, use_ssl, &ws_proto, 1);
-
-                // TODO: this was LWS-specific option, check if we still need it and replace with
-                // one of tcp_keepalive options.
-                // override the system default when there is no TCP activity.
-                // this prevents long system timeouts in the range of minutes
-                // to detect that the network went down.
-                // int val = ANSWER_TIMEOUT_MS;
-                // uws_client_set_option(request->ws.WSHandle, "timeout", &val);
-
-            }
-        }
-
-        free(headers);
-        free(str);
+        free(request);
+        LogError("Failed to allocate memory for connection headers string.");
+        return NULL;
     }
-    else
+    snprintf(str, len, "%s%s", proto, headers);
+    // HACKHACK: azure-c-shared doesn't allow to specify connection ("upgrade") headers, using this as a temporary
+    // workaround until we migrate to something more decent.
+    request->ws.config.protocol = str;
+
+    size_t l = strlen(host);
+    request->url = (char*)malloc(l + 2); // 2=2 x NULL
+    if (request->url != NULL)
     {
-        request->http.tlsIoConfig.hostname = host;
-        request->http.tlsIoConfig.port = 443;
-        request->http.requestHandle = HTTPAPI_CreateConnection(host);
-        if (NULL != request->http.requestHandle)
+        host += strlen(use_ssl ? g_keywordWSS : g_keywordWS);
+        dst = request->url;
+        request->ws.config.hostname = port == -1 ? dst : "localhost";
+
+        // split up host + path
+        src = strchr(host, '/');
+        if (NULL != src)
         {
             err = 0;
-            request->state = TRANSPORT_STATE_CONNECTED;
+            memcpy(dst, host, src - host);
+            dst += (src - host);
+            *dst = 0; dst++;
+            request->ws.config.resource_name = dst;
+            strcpy_s(dst, l + 2 - (dst - request->url), src);
+
+            WSIO_CONFIG cfg = request->ws.config;
+            WS_PROTOCOL ws_proto;
+            ws_proto.protocol = cfg.protocol;
+            request->ws.WSHandle = uws_client_create(cfg.hostname, cfg.port, cfg.resource_name, use_ssl, &ws_proto, 1);
+
+            // TODO: this was LWS-specific option, check if we still need it and replace with
+            // one of tcp_keepalive options.
+            // override the system default when there is no TCP activity.
+            // this prevents long system timeouts in the range of minutes
+            // to detect that the network went down.
+            // int val = ANSWER_TIMEOUT_MS;
+            // uws_client_set_option(request->ws.WSHandle, "timeout", &val);
+
+            int tls_version = OPTION_TLS_VERSION_1_2;
+            uws_client_set_option(request->ws.WSHandle, OPTION_TLS_VERSION, &tls_version);
         }
     }
+
+    free(headers);
+    free(str);
 
     if (!err)
     {
@@ -1021,55 +955,40 @@ void TransportRequestDestroy(TransportHandle transportHandle)
         DnsCacheRemoveContextMatches(request->dnsCache, request);
     }
 
-    if (request->isWS)
+    if (request->ws.WSHandle)
     {
-        if (request->ws.WSHandle)
+        if (request->isOpen)
         {
-            if (request->isOpen)
+            (void)uws_client_close_async(request->ws.WSHandle, OnWSClose, request);
+            // TODO ok to ignore return code?
+            while (request->isOpen)
             {
-                (void)uws_client_close_async(request->ws.WSHandle, OnWSClose, request);
-                // TODO ok to ignore return code?
-                while (request->isOpen)
-                {
-                    uws_client_dowork(request->ws.WSHandle);
-                    ThreadAPI_Sleep(100);
-                }
+                uws_client_dowork(request->ws.WSHandle);
+                ThreadAPI_Sleep(100);
             }
-
-            uws_client_destroy(request->ws.WSHandle);
         }
 
-        for (stream = request->ws.streamHead; NULL != stream; stream = streamNext)
-        {
-            streamNext = stream->next;
-
-            if (stream->ioBuffer)
-            {
-                IoBufferDelete(stream->ioBuffer);
-            }
-
-            if (stream->contentType)
-            {
-                STRING_delete(stream->contentType);
-            }
-
-            free(stream);
-        }
-
-        metrics_transport_closed();
+        uws_client_destroy(request->ws.WSHandle);
     }
-    else
+
+    for (stream = request->ws.streamHead; NULL != stream; stream = streamNext)
     {
-        if (request->http.requestHandle)
+        streamNext = stream->next;
+
+        if (stream->ioBuffer)
         {
-            if (request->isOpen)
-            {
-                HTTPAPI_CloseConnection(request->http.requestHandle);
-                request->http.requestHandle = NULL;
-                request->isOpen = false;
-            }
+            IoBufferDelete(stream->ioBuffer);
         }
+
+        if (stream->contentType)
+        {
+            STRING_delete(stream->contentType);
+        }
+
+        free(stream);
     }
+
+    metrics_transport_closed();
 
     InvalidateRequestId(request);
 
@@ -1141,30 +1060,22 @@ static int TransportOpen(TransportRequest* request)
 {
     if (!request->isOpen)
     {
-        if (!request->isWS)
+        if (NULL == request->ws.WSHandle)
         {
-            // HTTP only opens once the request has been started.
-            request->isOpen = true;
+            return -1;
         }
         else
         {
-            if (NULL == request->ws.WSHandle)
+            metrics_transport_start(request->telemetry, request->connectionId);
+            const int result = uws_client_open_async(request->ws.WSHandle,
+                OnWSOpened, request,
+                OnWSFrameReceived, request,
+                OnWSPeerClosed, request,
+                OnWSError, request);
+            if (result)
             {
+                LogError("uws_client_open_async failed with result %d", result);
                 return -1;
-            }
-            else
-            {
-                metrics_transport_start(request->telemetry, request->connectionId);
-                const int result = uws_client_open_async(request->ws.WSHandle,
-                    OnWSOpened, request,
-                    OnWSFrameReceived, request,
-                    OnWSPeerClosed, request,
-                    OnWSError, request);
-                if (result)
-                {
-                    LogError("uws_client_open_async failed with result %d", result);
-                    return -1;
-                }
             }
         }
     }
@@ -1233,7 +1144,7 @@ int TransportRequestPrepare(TransportHandle transportHandle)
             LogInfo("forcing connection closed");
         }
 
-        if (tokenChanged > 0 && request->isWS &&
+        if (tokenChanged > 0 &&
             (request->state == TRANSPORT_STATE_CONNECTED))
         {
             // The token is snapped at the time that we are connected.  Reset
@@ -1332,12 +1243,6 @@ int TransportStreamPrepare(TransportHandle transportHandle, const char* path)
         return -1;
     }
 
-    if (!request->isWS)
-    {
-        LogError("Streaming over chunked http transfer is not supported.\n");
-        return -1;
-    }
-
     request->streamId++;
 
     if (NULL != path)
@@ -1364,12 +1269,6 @@ int TransportStreamWrite(TransportHandle transportHandle, const uint8_t* buffer,
     if (NULL == request)
     {
         LogError("transportHandle is NULL.");
-        return -1;
-    }
-
-    if (!request->isWS)
-    {
-        LogError("Streaming over chunked http transfer is not supported.\n");
         return -1;
     }
 
@@ -1500,7 +1399,7 @@ void TransportDoWork(TransportHandle transportHandle)
         else
         {
             request->state = TRANSPORT_STATE_NETWORK_CHECKING;
-            const char* host = request->isWS ? request->ws.config.hostname : request->http.tlsIoConfig.hostname;
+            const char* host = request->ws.config.hostname;
             LogInfo("Start network check %s", host);
             metrics_transport_state_start(METRIC_TRANSPORT_STATE_DNS);
             if (DnsCacheGetAddr(request->dnsCache, host, DnsComplete, request))
@@ -1544,10 +1443,7 @@ void TransportDoWork(TransportHandle transportHandle)
         break;
     }
 
-    if (request->isWS)
-    {
-        uws_client_dowork(request->ws.WSHandle);
-    }
+    uws_client_dowork(request->ws.WSHandle);
 }
 
 int TransportSetCallbacks(TransportHandle transportHandle, TransportErrorCallback errorCallback, TransportResponseCallback recvCallback)
@@ -1581,7 +1477,7 @@ static TransportStream* TransportGetStream(TransportHandle transportHandle, int 
     TransportStream* stream;
     TransportRequest* request = (TransportRequest*)transportHandle;
 
-    if (NULL == request || !request->isWS)
+    if (NULL == request)
     {
         return NULL;
     }
@@ -1602,7 +1498,7 @@ static TransportStream* TransportCreateStream(TransportHandle transportHandle, i
     TransportRequest* request = (TransportRequest*)transportHandle;
     TransportStream* stream;
 
-    if (NULL == request || !request->isWS || !contentType)
+    if (NULL == request || !contentType)
     {
         return NULL;
     }

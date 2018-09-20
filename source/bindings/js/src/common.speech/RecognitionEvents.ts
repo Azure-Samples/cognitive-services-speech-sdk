@@ -16,7 +16,7 @@ import {
     ITranslationHypothesis,
     ITranslationPhrase,
     ITranslationSynthesisEnd,
-    } from "./Exports";
+} from "./Exports";
 
 export class SpeechRecognitionEvent extends PlatformEvent {
     private requestId: string;
@@ -221,6 +221,13 @@ export class TranslationSynthesisErrorEvent extends SpeechRecognitionResultEvent
 export class IntentResponseEvent extends SpeechRecognitionResultEvent<IIntentResponse> {
     constructor(requestId: string, sessionId: string, result: IIntentResponse) {
         super("IntentResponseEvent", requestId, sessionId, result);
+    }
+}
+
+// tslint:disable-next-line:max-classes-per-file
+export class InternalErrorEvent extends SpeechRecognitionResultEvent<string> {
+    constructor(requestId: string, sessionId: string, result: string) {
+        super("InternalErrorEvent", requestId, sessionId, result);
     }
 }
 

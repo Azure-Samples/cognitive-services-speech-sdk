@@ -87,13 +87,13 @@ namespace Impl {
         {
             if (m_totalSizeInBytes != 0)
             {
-                SPX_TRACE_ERROR("%s: Invalid state of the audio buffer, no chunks but totalSize %d", __FUNCTION__, (int)m_totalSizeInBytes);
+                SPX_DBG_TRACE_ERROR("%s: Invalid state of the audio buffer, no chunks but totalSize %d", __FUNCTION__, (int)m_totalSizeInBytes);
                 SPX_THROW_HR(SPXERR_RUNTIME_ERROR);
             }
 
             if (bytes > 0)
             {
-                SPX_TRACE_WARNING("%s: Discarding more data than what is available in the buffer %d", __FUNCTION__, (int)bytes);
+                SPX_DBG_TRACE_WARNING("%s: Discarding more data than what is available in the buffer %d", __FUNCTION__, (int)bytes);
             }
 
             m_currentChunk = 0;
@@ -193,7 +193,7 @@ namespace Impl {
         int64_t bytes = DurationToBytes(offsetInTicks) - m_bufferStartOffsetInBytesTurnRelative;
         if (bytes < 0)
         {
-            SPX_TRACE_WARNING("%s: Offset is not monothonically increasing. Current turn offset in bytes %d, discardging bytes", __FUNCTION__,
+            SPX_DBG_TRACE_WARNING("%s: Offset is not monothonically increasing. Current turn offset in bytes %d, discardging bytes", __FUNCTION__,
                 (int)m_bufferStartOffsetInBytesTurnRelative,
                 (int)bytes);
             return;

@@ -8,7 +8,8 @@
 #ifndef test_audio_h
 #define test_audio_h
 
-#import "speechapi.h"
+#import <MicrosoftCognitiveServicesSpeech/SPXSpeechApi.h>
+
 @interface AudioStreamTest :NSObject
 
 +(void) run;

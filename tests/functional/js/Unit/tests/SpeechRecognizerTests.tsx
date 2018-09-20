@@ -878,3 +878,34 @@ test("burst of silence", (done: jest.DoneCallback) => {
             fail(error);
         });
 });
+
+test("RecognizeOnceAsync is async", (done: jest.DoneCallback) => {
+    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    expect(s).not.toBeUndefined();
+
+    s.speechRecognitionLanguage = "en-US";
+
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
+
+    const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s, config);
+    expect(r).not.toBeUndefined();
+    expect(r instanceof sdk.Recognizer);
+
+    let postCall: boolean = false;
+    let resultSeen: boolean = false;
+    r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
+        WaitForCondition(() => postCall, () => {
+            resultSeen = true;
+            expect(e.result.errorDetails).toBeUndefined();
+            expect(e.result.reason).toEqual(sdk.ResultReason.RecognizedSpeech);
+            expect(e.result.text).toEqual(Settings.WaveFileText);
+            done();
+        });
+    };
+
+    r.recognizeOnceAsync();
+
+    expect(resultSeen).toEqual(false);
+    postCall = true;
+});

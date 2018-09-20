@@ -45,14 +45,6 @@ public final class IntentRecognitionResult extends com.microsoft.cognitiveservic
     private String _intentId;
 
     /**
-     * A String that represents the intent including properties being recognized.
-     * @return A String that represents the intent including properties being recognized.
-     */
-    public String getLanguageUnderstanding() {
-        return getProperties().getProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult);
-    }
-
-    /**
      * Returns a String that represents the intent recognition result.
      * @return A String that represents the intent recognition result.
      */

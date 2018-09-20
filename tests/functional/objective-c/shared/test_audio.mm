@@ -119,7 +119,7 @@ void GetFormatFromWavFile()
     // Get audio format from the file header.
     GetFormatFromWavFile();
     
-    PullAudioInputStream* stream = [AudioInputStream createPullStreamUsingReadBlock:
+    SPXPullAudioInputStream* stream = [[SPXPullAudioInputStream alloc] initWithReadHandler:
             ^NSInteger(NSMutableData *data, NSUInteger size) {
                 char* buffer = (char *)[data mutableBytes];
                 if (m_fs.eof())
@@ -133,47 +133,49 @@ void GetFormatFromWavFile()
                     // returns the number of bytes that have been read.
                     return (int)m_fs.gcount();
             }
-            closeBlock :
+            closeHandler:
             ^(void) {
                 m_fs.close();
-            }
-    ];
+            }];
     
-
-    AudioConfig* streamAudioSource = [AudioConfig fromStreamInput:stream];
+    SPXAudioConfiguration* streamAudioSource = [[SPXAudioConfiguration alloc] initWithStreamInput:stream];
     
     NSString *speechKey = @"";
     
     __block bool end = false;
     
-    SpeechConfig *speechConfig = [SpeechConfig fromSubscription:speechKey andRegion:@"westus"];
-    SpeechRecognizer* speechRecognizer = [SpeechRecognizer fromConfig:speechConfig usingAudio:streamAudioSource];
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:@"westus"];
+    SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:streamAudioSource];
     
-    [speechRecognizer addSessionStartedEventListener: ^ (Recognizer *recognizer, SessionEventArgs *eventArgs) {
+    [speechRecognizer addSessionStartedEventHandler: ^ (SPXRecognizer *recognizer, SPXSessionEventArgs *eventArgs) {
         NSLog(@"Received SessionStarted event. SessionId: %@", eventArgs.sessionId);
     }];
-    [speechRecognizer addSessionStoppedEventListener: ^ (Recognizer *recognizer, SessionEventArgs *eventArgs) {
+    [speechRecognizer addSessionStoppedEventHandler: ^ (SPXRecognizer *recognizer, SPXSessionEventArgs *eventArgs) {
         NSLog(@"Received SessionStopped event. SessionId: %@", eventArgs.sessionId);
         end = true;
     }];
-    [speechRecognizer addSpeechStartDetectedEventListener: ^ (Recognizer *recognizer, RecognitionEventArgs *eventArgs) {
+    [speechRecognizer addSpeechStartDetectedEventHandler: ^ (SPXRecognizer *recognizer, SPXRecognitionEventArgs *eventArgs) {
         NSLog(@"Received SpeechStarted event. SessionId: %@ Offset: %d", eventArgs.sessionId, (int)eventArgs.offset);
     }];
-    [speechRecognizer addSpeechEndDetectedEventListener: ^ (Recognizer *recognizer, RecognitionEventArgs *eventArgs) {
+    [speechRecognizer addSpeechEndDetectedEventHandler: ^ (SPXRecognizer *recognizer, SPXRecognitionEventArgs *eventArgs) {
         NSLog(@"Received SpeechEnd event. SessionId: %@ Offset: %d", eventArgs.sessionId, (int)eventArgs.offset);
     }];
-    [speechRecognizer addRecognizedEventListener: ^ (SpeechRecognizer *recognizer, SpeechRecognitionEventArgs *eventArgs) {
+    [speechRecognizer addRecognizedEventHandler: ^ (SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionEventArgs *eventArgs) {
         NSLog(@"Received final result event. SessionId: %@, recognition result:%@. Status %ld.", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.reason);
         NSLog(@"Received JSON: %@", [eventArgs.result.properties getPropertyByName:@"RESULT-Json"]);
     }];
-    [speechRecognizer addRecognizingEventListener: ^ (SpeechRecognizer *recognizer, SpeechRecognitionEventArgs *eventArgs) {
+    [speechRecognizer addRecognizingEventHandler: ^ (SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionEventArgs *eventArgs) {
         NSLog(@"Received intermediate result event. SessionId: %@, intermediate result:%@.", eventArgs.sessionId, eventArgs.result.text);
     }];
-    [speechRecognizer addCanceledEventListener: ^ (SpeechRecognizer *recognizer, SpeechRecognitionCanceledEventArgs *eventArgs) {
+
+    /*
+    [speechRecognizer addCanceledEventHandler: ^ (SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionCanceledEventArgs *eventArgs) {
         NSLog(@"Received canceled event. SessionId: %@, reason:%lu errorDetails:%@.", eventArgs.sessionId, (unsigned long)eventArgs.reason, eventArgs.errorDetails);
-        CancellationDetails *details = [CancellationDetails fromResult:eventArgs.result];
+        SPXCancellationDetails *details = [SPXCancellationDetails fromResult:eventArgs.result];
         NSLog(@"Received cancellation details. reason:%lu errorDetails:%@.", (unsigned long)details.reason, details.errorDetails);
     }];
+    */
+    
     end = false;
     [speechRecognizer startContinuousRecognition];
     while (end == false)

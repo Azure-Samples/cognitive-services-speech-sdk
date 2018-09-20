@@ -181,7 +181,7 @@ export class Promise<T> implements IPromise<T> {
                     const continuationResult: TContinuationResult = continuationCallback(this.sink.Result);
                     continuationDeferral.Resolve(continuationResult);
                 } catch (e) {
-                    continuationDeferral.Reject(`'Unhandled callback error: ${e}'`);
+                    continuationDeferral.Reject(e);
                 }
             },
             (error: string) => {
@@ -189,7 +189,7 @@ export class Promise<T> implements IPromise<T> {
                     const continuationResult: TContinuationResult = continuationCallback(this.sink.Result);
                     continuationDeferral.Resolve(continuationResult);
                 } catch (e) {
-                    continuationDeferral.Reject(`'Unhandled callback error: ${e}. InnerError: ${error}'`);
+                    continuationDeferral.Reject(`'Error handler for error ${error} threw error ${e}'`);
                 }
             },
         );
@@ -212,11 +212,11 @@ export class Promise<T> implements IPromise<T> {
                     const continuationResult: TContinuationResult = continuationCallback(r);
                     continuationDeferral.Resolve(continuationResult);
                 } catch (e) {
-                    continuationDeferral.Reject(`'Unhandled callback error: ${e}'`);
+                    continuationDeferral.Reject(e);
                 }
             },
             (error: string) => {
-                continuationDeferral.Reject(`'Unhandled callback error: ${error}'`);
+                continuationDeferral.Reject(error);
             },
         );
 
@@ -245,7 +245,7 @@ export class Promise<T> implements IPromise<T> {
                         continuationDeferral.Reject(e);
                     });
                 } catch (e) {
-                    continuationDeferral.Reject(`'Unhandled callback error: ${e}'`);
+                    continuationDeferral.Reject(e);
                 }
             },
             (error: string) => {
@@ -260,7 +260,7 @@ export class Promise<T> implements IPromise<T> {
                         continuationDeferral.Reject(e);
                     });
                 } catch (e) {
-                    continuationDeferral.Reject(`'Unhandled callback error: ${e}. InnerError: ${error}'`);
+                    continuationDeferral.Reject(`'Error handler for error ${error} threw error ${e}'`);
                 }
             },
         );
@@ -290,11 +290,11 @@ export class Promise<T> implements IPromise<T> {
                         continuationDeferral.Reject(e);
                     });
                 } catch (e) {
-                    continuationDeferral.Reject(`'Unhandled callback error: ${e}'`);
+                    continuationDeferral.Reject(e);
                 }
             },
             (error: string) => {
-                continuationDeferral.Reject(`'Unhandled callback error: ${error}.'`);
+                continuationDeferral.Reject(error);
             },
         );
 
