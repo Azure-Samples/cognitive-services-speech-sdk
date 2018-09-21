@@ -30,13 +30,13 @@ export abstract class SpeechTranslationConfig extends SpeechConfig {
     }
 
     /**
-     * Static instance of SpeechTranslationConfig returned by passing subscriptionKey and service region.
+     * Static instance of SpeechTranslationConfig returned by passing a subscription key and service region.
      * @member SpeechTranslationConfig.fromSubscription
      * @function
      * @public
      * @param {string} subscriptionKey - The subscription key.
      * @param {string} region - The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
-     * @returns {SpeechTranslationConfig} The speech config
+     * @returns {SpeechTranslationConfig} The speech translation config.
      */
     public static fromSubscription(subscriptionKey: string, region: string): SpeechTranslationConfig {
         Contracts.throwIfNullOrWhitespace(subscriptionKey, "subscriptionKey");
@@ -51,14 +51,14 @@ export abstract class SpeechTranslationConfig extends SpeechConfig {
     /**
      * Static instance of SpeechTranslationConfig returned by passing authorization token and service region.
      * Note: The caller needs to ensure that the authorization token is valid. Before the authorization token
-     * expipres, the caller needs to refresh it by setting the property `AuthorizationToken` with a new valid token.
+     * expipres, the caller needs to refresh it by setting the property authorizationToken with a new valid token.
      * Otherwise, all the recognizers created by this SpeechTranslationConfig instance will encounter errors during recognition.
      * @member SpeechTranslationConfig.fromAuthorizationToken
      * @function
      * @public
      * @param {string} authorizationToken - The authorization token.
      * @param {string} region - The region name (see the <a href="https://aka.ms/csspeech/region">region page</a>).
-     * @returns {SpeechTranslationConfig} The speech config
+     * @returns {SpeechTranslationConfig} The speech translation config.
      */
     public static fromAuthorizationToken(authorizationToken: string, region: string): SpeechTranslationConfig {
         Contracts.throwIfNullOrWhitespace(authorizationToken, "authorizationToken");
@@ -71,10 +71,10 @@ export abstract class SpeechTranslationConfig extends SpeechConfig {
     }
 
     /**
-     * Creates an instance of the speech config with specified endpoint and subscription key.
+     * Creates an instance of the speech translation config with specified endpoint and subscription key.
      * This method is intended only for users who use a non-standard service endpoint or paramters.
      * Note: The query properties specified in the endpoint URL are not changed, even if they are set by any other APIs.
-     * For example, if language is defined in the uri as query parameter "language=de-DE", and also set by CreateSpeechRecognizer("en-US"),
+     * For example, if language is defined in the uri as query parameter "language=de-DE", and also set by the speechRecognitionLanguage property,
      * the language setting in uri takes precedence, and the effective language is "de-DE".
      * Only the properties that are not specified in the endpoint URL can be set by other APIs.
      * @member SpeechTranslationConfig.fromEndpoint

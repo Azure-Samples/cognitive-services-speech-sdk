@@ -330,7 +330,7 @@ export class IntentRecognizer extends Recognizer {
     }
 
     /**
-     * @summary aa Adds all intents from the specified Language Understanding Model.
+     * @summary Adds all intents from the specified Language Understanding Model.
      * @member IntentRecognizer.prototype.addAllIntents
      * @function
      * @public
