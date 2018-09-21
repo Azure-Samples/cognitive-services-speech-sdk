@@ -291,7 +291,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.i(logTag, "Continuous recognition stopped.");
                     String s = result.getText();
 
-                    if (result.getReason() != ResultReason.RecognizedSpeech) {
+                    if (result.getReason() != ResultReason.RecognizedIntent) {
                         String errorDetails = (result.getReason() == ResultReason.Canceled) ? CancellationDetails.fromResult(result).getErrorDetails() : "";
                         s = "Intent failed with " + result.getReason() + ". Did you enter your Language Understanding subscription?" + System.lineSeparator() + errorDetails;
                     }
