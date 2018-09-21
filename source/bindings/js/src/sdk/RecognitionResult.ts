@@ -75,22 +75,22 @@ export class RecognitionResult {
     }
 
     /**
-     * Duration of recognized speech in milliseconds.
+     * Duration of recognized speech in 100 nano second incements.
      * @member RecognitionResult.prototype.duration
      * @function
      * @public
-     * @returns {number} Duration of recognized speech in milliseconds.
+     * @returns {number} Duration of recognized speech in 100 nano second incements.
      */
     public get duration(): number {
         return this.privDuration;
     }
 
     /**
-     * Offset of recognized speech in milliseconds.
+     * Offset of recognized speech in 100 nano second incements.
      * @member RecognitionResult.prototype.offset
      * @function
      * @public
-     * @returns {number} Offset of recognized speech in milliseconds.
+     * @returns {number} Offset of recognized speech in 100 nano second incements.
      */
     public get offset(): number {
         return this.privOffset;
