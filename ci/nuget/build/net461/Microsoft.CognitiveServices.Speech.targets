@@ -5,23 +5,25 @@
     <SpeechNativePlatform Condition="'$(PlatformTarget)' == 'x86'">Win32</SpeechNativePlatform>
   </PropertyGroup>
   <Import Project="$(MSBuildThisFileDirectory)\..\Microsoft.CognitiveServices.Speech.props" />
-  <ItemGroup>
-    <None Include="$(SpeechNativeLibDir)\Microsoft.CognitiveServices.Speech.core.dll">
-      <Link>Microsoft.CognitiveServices.Speech.core.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
   <!-- This is to enable back compat with old nugets on Windows.
        PackageReference takes care of this automatically for any platform. -->
-  <ItemGroup Condition="'$(TargetFramework)' == '' AND ('$(Platform)' == 'x86' OR '$(Platform)' == 'AnyCPU')">
+  <ItemGroup Condition="'$(TargetFramework)' == '' AND ('$(Platform)' == 'x86' OR '$(PlatformTarget)' == 'x86')">
     <None Include="$(SpeechPackageRoot)runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.csharp.bindings.dll">
       <Link>Microsoft.CognitiveServices.Speech.csharp.bindings.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="$(SpeechPackageRoot)runtimes\win-x86\native\Microsoft.CognitiveServices.Speech.core.dll">
+      <Link>Microsoft.CognitiveServices.Speech.core.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == '' AND '$(Platform)' == 'x64'">
+  <ItemGroup Condition="'$(TargetFramework)' == '' AND ('$(Platform)' == 'x64' OR '$(PlatformTarget)' == 'x64')">
     <None Include="$(SpeechPackageRoot)runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.csharp.bindings.dll">
       <Link>Microsoft.CognitiveServices.Speech.csharp.bindings.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(SpeechPackageRoot)runtimes\win-x64\native\Microsoft.CognitiveServices.Speech.core.dll">
+      <Link>Microsoft.CognitiveServices.Speech.core.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
