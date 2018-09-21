@@ -9,7 +9,7 @@ import { PropertyCollection } from "./Exports";
  * Represents collection of parameters and their values.
  * @class Translation
  */
-export class Translation {
+export class Translations {
     // Use an PropertyCollection internally, just wrapping it to hide the | enum syntax it has.
     private map: PropertyCollection = new PropertyCollection();
 

@@ -3,19 +3,19 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
-import { PropertyCollection, ResultReason, SpeechRecognitionResult, Translation } from "./Exports";
+import { PropertyCollection, ResultReason, SpeechRecognitionResult, Translations } from "./Exports";
 
 /**
  * Translation text result.
  * @class TranslationRecognitionResult
  */
 export class TranslationRecognitionResult extends SpeechRecognitionResult {
-    private privTranslations: Translation;
+    private privTranslations: Translations;
 
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param {Translation} translations - The translations.
+     * @param {Translations} translations - The translations.
      * @param {string} resultId - The result id.
      * @param {ResultReason} reason - The reason.
      * @param {string} text - The recognized text.
@@ -25,7 +25,7 @@ export class TranslationRecognitionResult extends SpeechRecognitionResult {
      * @param {string} json - Additional Json, if provided.
      * @param {PropertyCollection} properties - Additional properties, if provided.
      */
-    public constructor(translations: Translation, resultId?: string, reason?: ResultReason, text?: string, duration?: number, offset?: number, errorDetails?: string, json?: string, properties?: PropertyCollection) {
+    public constructor(translations: Translations, resultId?: string, reason?: ResultReason, text?: string, duration?: number, offset?: number, errorDetails?: string, json?: string, properties?: PropertyCollection) {
         super(resultId, reason, text, duration, offset, errorDetails, json, properties);
 
         this.privTranslations = translations;
@@ -37,9 +37,9 @@ export class TranslationRecognitionResult extends SpeechRecognitionResult {
      * @member TranslationRecognitionResult.prototype.translations
      * @function
      * @public
-     * @returns {Translation} the current translation map that holds all translations requested.
+     * @returns {Translations} the current translation map that holds all translations requested.
      */
-    public get translations(): Translation {
+    public get translations(): Translations {
         return this.privTranslations;
     }
 }

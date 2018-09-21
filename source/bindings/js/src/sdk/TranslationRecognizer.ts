@@ -33,7 +33,7 @@ import {
     PropertyId,
     Recognizer,
     ResultReason,
-    Translation,
+    Translations,
     TranslationRecognitionCanceledEventArgs,
     TranslationRecognitionEventArgs,
     TranslationRecognitionResult,
@@ -619,7 +619,7 @@ export class TranslationRecognizer extends Recognizer {
     }
 
     private FireEventForResult(evResult: TranslationPhraseEvent | TranslationHypothesisEvent): TranslationRecognitionEventArgs {
-        const translations = new Translation();
+        const translations = new Translations();
         for (const translation of evResult.Result.Translation.Translations) {
             translations.set(translation.Language, translation.Text);
         }
