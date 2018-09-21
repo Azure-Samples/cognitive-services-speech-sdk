@@ -3,6 +3,10 @@
 // See https://aka.ms/csspeech/license201809 for the full license information.
 //
 
+/**
+ * @class Contracts
+ * @private
+ */
 export class Contracts {
     public static throwIfNullOrUndefined(param: any, name: string): void {
         if (param === undefined || param === null) {

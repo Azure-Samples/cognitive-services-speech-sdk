@@ -25,8 +25,7 @@ import {
     TranslationStatus,
 } from "../common/Exports";
 import {
-    OutputFormat,
-    SynthesisStatus,
+    OutputFormat, ResultReason,
 } from "../sdk/Exports";
 import {
     IDetailedSpeechPhrase,
@@ -470,14 +469,14 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
 
                 const synthEnd: ITranslationSynthesisEnd = JSON.parse(connectionMessage.TextBody);
                 const status3: string = "" + synthEnd.SynthesisStatus;
-                const synthStatus = (SynthesisStatus as any)[status3];
+                const synthStatus = (ResultReason as any)[status3];
                 synthEnd.SynthesisStatus = synthStatus;
 
                 switch (synthStatus) {
-                    case SynthesisStatus.Error:
+                    case ResultReason.Canceled:
                         requestSession.OnServiceTranslationSynthesisError(synthEnd);
                         break;
-                    case SynthesisStatus.Success:
+                    case ResultReason.SynthesizingAudioCompleted:
                         requestSession.OnServiceTranslationSynthesis(undefined);
                         break;
                 }

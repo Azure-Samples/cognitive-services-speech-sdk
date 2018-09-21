@@ -41,7 +41,6 @@ import {
     TranslationSynthesisResult,
 } from "./Exports";
 import { SpeechTranslationConfig, SpeechTranslationConfigImpl } from "./SpeechTranslationConfig";
-import { SynthesisStatus } from "./SynthesisStatus";
 
 /**
  * Translation recognizer
@@ -530,7 +529,7 @@ export class TranslationRecognizer extends Recognizer {
                     const evResut: TranslationSynthesisEvent = event as TranslationSynthesisEvent;
 
                     const audio = evResut.Result;
-                    const reason = (undefined === audio) ? SynthesisStatus.SynthesisEnd : SynthesisStatus.Success;
+                    const reason = (undefined === audio) ? ResultReason.SynthesizingAudioCompleted : ResultReason.SynthesizingAudio;
                     const result = new TranslationSynthesisResult(reason, audio);
                     const retEvent: TranslationSynthesisEventArgs = new TranslationSynthesisEventArgs(result, evResut.SessionId);
 

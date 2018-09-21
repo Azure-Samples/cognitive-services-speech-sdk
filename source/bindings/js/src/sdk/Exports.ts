@@ -22,7 +22,6 @@ export { SpeechRecognitionCanceledEventArgs } from "./SpeechRecognitionCanceledE
 export { TranslationRecognitionEventArgs } from "./TranslationRecognitionEventArgs";
 export { TranslationSynthesisEventArgs } from "./TranslationSynthesisEventArgs";
 export { TranslationRecognitionResult } from "./TranslationRecognitionResult";
-export { SynthesisStatus } from "./SynthesisStatus";
 export { TranslationSynthesisResult } from "./TranslationSynthesisResult";
 export { ResultReason } from "./ResultReason";
 export { SpeechConfig } from "./SpeechConfig";
