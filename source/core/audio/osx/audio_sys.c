@@ -100,7 +100,8 @@ AudioQueueBufferRef popBuffer (AUDIO_SYS_DATA *audioData)
 // Convert OS error codes to human-readable form
 static void stringifyOSStatus(OSStatus error, char *out) {
     *(UInt32 *)(out + 1) = CFSwapInt32HostToBig(error);
-
+// clang-analyze doesn't understand the cast and thinks out[2..4] is uninitialized
+#ifndef __clang_analyzer__
     if (isprint(out[1]) && isprint(out[2]) &&
         isprint(out[3]) && isprint(out[4]))
     {
@@ -110,6 +111,7 @@ static void stringifyOSStatus(OSStatus error, char *out) {
     {
         sprintf(out, "%d", (int)error);
     }
+#endif //__clang_analyzer__
 }
 
 
@@ -121,7 +123,7 @@ static void logOSStatusError(OSStatus error, const char *operation)
     char errorString[20];
     stringifyOSStatus(error, errorString);
 
-    SPX_DBG_TRACE_ERROR("Error: %s (%s)\n", operation, errorString);
+    SPX_DBG_TRACE_ERROR("Error: %s (%s)", operation, errorString);
 }
 
 

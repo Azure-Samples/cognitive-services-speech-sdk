@@ -116,10 +116,17 @@ public:
 private:
 #endif
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-private-field"
+#endif
     /// <summary>
     /// The reason the result was canceled.
     /// </summary>
     const CancellationReason& Reason;
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
     /// <summary>
     /// In case of an unsuccessful recognition, provides a details of why the occurred error.

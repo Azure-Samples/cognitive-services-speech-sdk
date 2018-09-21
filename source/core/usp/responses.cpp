@@ -122,6 +122,7 @@ extern "C" UspResult ContentDispatch(void* context, const char* path, const char
         }
     }
 
+    free(contentBuffer);
     LogError("No handler defined for Content '%s'.", mime);
     return USP_UNKNOWN_PATH_IN_RESPONSE;
 }

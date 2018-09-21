@@ -198,7 +198,7 @@ int GetISO8601TimeOffset(char *buffer, unsigned int length, int offset)
         return -1;
     }
 
-// TODO: get rid of WIN32 branch, else branch should work for 
+// TODO: get rid of WIN32 branch, else branch should work for
 // all platforms.
 #if defined(WIN32)
     struct tm timeinfo;
@@ -364,8 +364,8 @@ static PROPERTYBAG_HANDLE telemetry_add_metricevents(TELEMETRY_DATA *telemetry_o
     {
         PropertybagAddValueToArray(json_array, telemetry_object->connectionJson);
         // current_connection_telemetry_object would be the only one that would have
-        // connectionJson initialized. If connectionJson is initialized for 
-        // any TELEMETRY_DATA object, they would not contain values. 
+        // connectionJson initialized. If connectionJson is initialized for
+        // any TELEMETRY_DATA object, they would not contain values.
         // Hence no need to check other pointers and we can return here.
         return json_array;
     }
@@ -497,7 +497,7 @@ static void tts_flush(TELEMETRY_HANDLE handle, const char *eventName, const char
         ret = populate_event_key_value(pBag, eventName, id, key, value);
     }
 
-    if (ret == 0) 
+    if (ret == 0)
     {
         // Serialize the received messages events and metric events.
         STRING_HANDLE string = PropertybagSerialize(tts_serialize, pBag);
@@ -513,9 +513,9 @@ static void prepare_send_free(TELEMETRY_HANDLE handle, TELEMETRY_DATA *telemetry
     {
         (void) snprintf(requestId, NO_DASH_UUID_LEN, "%s", telemetry_object->requestId);
     }
-    
+
     STRING_HANDLE serialized = PropertybagSerialize(telemetry_serialize, telemetry_object);
-    if (serialized) 
+    if (serialized)
     {
         send_serialized_telemetry(handle, serialized, requestId);
         STRING_delete(serialized);
@@ -543,7 +543,7 @@ static PROPERTYBAG_HANDLE * getJsonForEvent(TELEMETRY_HANDLE handle, const char 
 }
 
 void telemetry_flush(TELEMETRY_HANDLE handle)
-{    
+{
     Lock(handle->lock);
     // Check if events exist in queue. If yes, flush them out first.
     LIST_ITEM_HANDLE queue_item = NULL;
@@ -661,11 +661,11 @@ void inband_connection_telemetry(TELEMETRY_HANDLE handle, const char *connection
 
         connection_data->bPayloadSet &= (ret == 0);
 
-        if (connection_data->bPayloadSet) 
+        if (connection_data->bPayloadSet)
         {
             (void)singlylinkedlist_add(handle->inband_telemetry_queue, connection_data);
         }
-        else 
+        else
         {
             free(connection_data);
         }
@@ -680,10 +680,10 @@ void inband_tts_telemetry(TELEMETRY_HANDLE handle, const char *id, const char *k
 {
     // NOTE: Cortana relic, this function is not currently used anywhere.
     Lock(handle->lock);
-    // If current telemetry object is initialized and populated, 
+    // If current telemetry object is initialized and populated,
     // compare the current active requestId with the requestId associated with the tts event
     // Add the tts event to the current telemetry object if the requestIds are the same
-    
+
     // NOTE: IMPORTANT! this logic is no loger sound!!!
     if (handle->current_telemetry_object) {
         if (!IS_STRING_NULL_OR_EMPTY(handle->current_telemetry_object->requestId) &&
@@ -767,7 +767,7 @@ TELEMETRY_HANDLE telemetry_create(PTELEMETRY_WRITE callback, void* context)
     TELEMETRY_CONTEXT* ctx = (TELEMETRY_CONTEXT *)calloc(1, sizeof(TELEMETRY_CONTEXT));
     if (ctx) {
         ctx->current_telemetry_object = (TELEMETRY_DATA *)calloc(1, sizeof(TELEMETRY_DATA));
-        // as 
+        // as
         ctx->current_connection_telemetry_object = (TELEMETRY_DATA *)calloc(1, sizeof(TELEMETRY_DATA));
         ctx->lock = Lock_Init();
         ctx->callback = callback;

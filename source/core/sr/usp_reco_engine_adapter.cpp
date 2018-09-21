@@ -1216,7 +1216,6 @@ std::string CSpxUspRecoEngineAdapter::GetDgiJsonFromListenForList(std::list<std:
             }
 
             dgiJson += "]";
-            appendComma = true;
         }
 
         dgiJson += "}";  // close object
@@ -1282,7 +1281,6 @@ std::string CSpxUspRecoEngineAdapter::GetSpeechContextJson(const std::string& dg
             contextJson += appendComma ? "," : "";
             contextJson += R"("intent":)";
             contextJson += intentJson;
-            appendComma = true;
         }
 
         contextJson += "}";

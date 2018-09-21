@@ -11,7 +11,7 @@
 #include "platform.h"
 #include "site_helpers.h"
 #include "string_utils.h"
-
+#include <assert.h>
 
 using namespace Microsoft::CognitiveServices::Speech::Impl;
 
@@ -70,6 +70,7 @@ SPXAPI audio_config_create_push_audio_input_stream(SPXAUDIOCONFIGHANDLE* haudioC
     {
         SPX_IFTRUE_THROW_HR(haudioConfig == nullptr, SPXERR_INVALID_ARG);
         SPX_IFTRUE_THROW_HR(haudioStream == nullptr, SPXERR_INVALID_ARG);
+        assert(NULL != haudioStream);
         SPX_THROW_ON_FAIL(audio_stream_create_push_audio_input_stream(haudioStream, hformat));
         SPX_THROW_ON_FAIL(audio_config_create_audio_input_from_stream(haudioConfig, *haudioStream));
     }
@@ -82,6 +83,7 @@ SPXAPI audio_config_create_pull_audio_input_stream(SPXAUDIOCONFIGHANDLE* haudioC
     {
         SPX_IFTRUE_THROW_HR(haudioConfig == nullptr, SPXERR_INVALID_ARG);
         SPX_IFTRUE_THROW_HR(haudioStream == nullptr, SPXERR_INVALID_ARG);
+        assert(nullptr != haudioStream); //FIXME: silence clang warning inside the macro
         SPX_THROW_ON_FAIL(audio_stream_create_pull_audio_input_stream(haudioStream, hformat));
         SPX_THROW_ON_FAIL(audio_config_create_audio_input_from_stream(haudioConfig, *haudioStream));
     }

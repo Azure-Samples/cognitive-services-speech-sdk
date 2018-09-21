@@ -177,7 +177,7 @@ int hexchar_to_int(char c)
 
 int ParseHttpHeaders(HTTP_HEADERS_HANDLE headersHandle, const unsigned char* buffer, size_t size)
 {
-    int ns, ne, vs, offset;
+    int ns, vs, offset;
     bool isDone;
 
     if (NULL == headersHandle)
@@ -187,7 +187,7 @@ int ParseHttpHeaders(HTTP_HEADERS_HANDLE headersHandle, const unsigned char* buf
 
     isDone = false;
     STRING_HANDLE name = NULL, value = NULL;
-    for (ns = ne = offset = vs = 0; offset < (int)size && !isDone; offset++)
+    for (ns = offset = vs = 0; offset < (int)size && !isDone; offset++)
     {
         switch (buffer[offset])
         {
@@ -216,7 +216,7 @@ int ParseHttpHeaders(HTTP_HEADERS_HANDLE headersHandle, const unsigned char* buf
             }
             break;
         case '\n':
-            ne = vs = 0;
+            vs = 0;
             ns = offset + 1;
             break;
         }
@@ -695,6 +695,12 @@ static int ProcessPacket(TransportRequest* request, TransportPacket* packet)
 
 static void WsioQueue(TransportRequest* request, TransportPacket* packet)
 {
+    if (NULL == request)
+    {
+        free(packet);
+        return;
+    }
+
     if (request->requestId[0] == '\0')
     {
         LogError("Trying to send on a previously closed socket");
@@ -731,6 +737,7 @@ static void PrepareTelemetryPayload(TransportHandle request, const uint8_t* even
     int timeStringLen = GetISO8601Time(timeString, TIME_STRING_MAX_SIZE);
     if (timeStringLen < 0)
     {
+        free(msg);
         return;
     }
 
@@ -879,6 +886,7 @@ TransportHandle TransportRequestCreate(const char* host, void* context, TELEMETR
     if (str == NULL)
     {
         free(request);
+        free(headers);
         LogError("Failed to allocate memory for connection headers string.");
         return NULL;
     }
@@ -1212,6 +1220,7 @@ int TransportMessageWrite(TransportHandle transportHandle, const char* path, con
     int timeStringLen = GetISO8601Time(timeString, TIME_STRING_MAX_SIZE);
     if (timeStringLen < 0)
     {
+        free(msg);
         return -1;
     }
 
@@ -1318,6 +1327,7 @@ int TransportStreamWrite(TransportHandle transportHandle, const uint8_t* buffer,
     int timeStringLen = GetISO8601Time(timeString, TIME_STRING_MAX_SIZE);
     if (timeStringLen < 0)
     {
+        free(msg);
         return -1;
     }
 
