@@ -664,14 +664,19 @@ void CSpxAudioStreamSession::FireSpeechEndDetectedEvent(uint64_t offset)
 
 void CSpxAudioStreamSession::EnsureFireResultEvent()
 {
+    SPX_DBG_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
      // Since we're not holding a lock throughout this "ensure" method, a conflict is still possible.
      // That said, the conflict is benign, in the worst case we just created a throw away no-match result.
      if (m_recoAsyncWaiting || (m_fireEndOfStreamAtSessionStop && m_sawEndOfStream))
      {
+         SPX_DBG_TRACE_VERBOSE("%s: Getting ready to fire ResultReason::Canceled result (sawEos=%d, fireEos=%d)", __FUNCTION__, m_sawEndOfStream, m_fireEndOfStreamAtSessionStop);
+
          auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
          auto result = (m_fireEndOfStreamAtSessionStop && m_sawEndOfStream)
             ? factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, CancellationReason::EndOfStream, nullptr, 0, 0)
             : factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, CancellationReason::Error, L"Timeout: no recognition result received.", 0, 0);
+
          WaitForRecognition_Complete(result);
          m_fireEndOfStreamAtSessionStop = false;
      }
@@ -1013,12 +1018,13 @@ void CSpxAudioStreamSession::Error(ISpxRecoEngineAdapter* adapter, ErrorPayload_
     // Otherwise report the error to the user, so that he can recreate a recognizer.
     if (IsKind(RecognitionKind::Continuous) && payload->IsTransportError() && m_shouldRetry)
     {
-        // Currently no back-off, retrying only once.
-        m_shouldRetry = false;
+        SPX_DBG_TRACE_VERBOSE("%s: Trying to reset the engine adapter", __FUNCTION__);
+        m_shouldRetry = false; // Currently no back-off, retrying only once.
         StartResetEngineAdapter();
     }
     else
     {
+        SPX_DBG_TRACE_VERBOSE("%s: Creating/firing ResultReason::Canceled result", __FUNCTION__);
         auto factory = SpxQueryService<ISpxRecoResultFactory>(SpxSharedPtrFromThis<ISpxSession>(this));
         auto error = factory->CreateFinalResult(nullptr, ResultReason::Canceled, NO_MATCH_REASON_NONE, CancellationReason::Error, PAL::ToWString(payload->Info()).c_str(), 0, 0);
         WaitForRecognition_Complete(error);

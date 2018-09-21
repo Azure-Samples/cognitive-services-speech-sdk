@@ -70,12 +70,16 @@ uint16_t CSpxPushAudioInputStream::GetFormat(SPXWAVEFORMATEX* formatBuffer, uint
 
 uint32_t CSpxPushAudioInputStream::Read(uint8_t* buffer, uint32_t bytesToRead)
 {
+    SPX_DBG_TRACE_VERBOSE("%s: bytesToRead=%d", __FUNCTION__, bytesToRead);
+
     uint32_t totalBytesRead = 0;
     while (bytesToRead > 0)
     {
         // If we don't have any bytes in our buffer, let's get a new buffer from the queue
         if (m_bytesLeftInBuffer == 0 && !m_audioQueue.empty())
         {
+            std::unique_lock<std::mutex> lock(m_mutex);
+
             auto item = m_audioQueue.front();
             m_audioQueue.pop();
 
@@ -101,7 +105,7 @@ uint32_t CSpxPushAudioInputStream::Read(uint8_t* buffer, uint32_t bytesToRead)
             }
             else // We waited for more data, but instead...
             {
-                SPX_DBG_ASSERT(m_endOfStream); // Caller told us we're done...
+                SPX_DBG_TRACE_VERBOSE("%s: End of stream detected...", __FUNCTION__);
                 break; // We're outta here!
             }
         }
@@ -109,6 +113,7 @@ uint32_t CSpxPushAudioInputStream::Read(uint8_t* buffer, uint32_t bytesToRead)
         // Now that we know we have a buffer with data in it ... let's copy some bytes
         uint32_t bytesThisLoop = std::min(bytesToRead, m_bytesLeftInBuffer);
         std::memcpy(buffer, m_ptrIntoBuffer, bytesThisLoop);
+        buffer += bytesThisLoop;
 
         // And update our buffering pointers/members
         m_ptrIntoBuffer += bytesThisLoop;
@@ -119,29 +124,46 @@ uint32_t CSpxPushAudioInputStream::Read(uint8_t* buffer, uint32_t bytesToRead)
         SimulateRealtime(bytesThisLoop);
     }
 
+    SPX_DBG_TRACE_VERBOSE("%s: totalBytesRead=%d", __FUNCTION__, totalBytesRead);
     return totalBytesRead;
 }
 
 void CSpxPushAudioInputStream::WriteBuffer(uint8_t* buffer, uint32_t size)
 {
+    SPX_DBG_TRACE_VERBOSE("%s: size=%d", __FUNCTION__, size);
+
     // Allocate the buffer for the audio, and make a copy of the data
     auto newBuffer = SpxAllocSharedAudioBuffer(size);
     memcpy(newBuffer.get(), buffer, size);
 
     // Store the buffer in our queue
+    std::unique_lock<std::mutex> lock(m_mutex);
     m_audioQueue.emplace(newBuffer, size);
+    m_cv.notify_all();
 }
 
 bool CSpxPushAudioInputStream::WaitForMoreData()
 {
-    // TODO: ROBCH: We actually need to wait here; and make sure SignalEndOfStream() does the right thing to unblock us...
-    // Until this is completed, callers must push all data into the stream and then call close before recognition takes place
-    return false;
+    std::unique_lock<std::mutex> lock(m_mutex);
+    if (m_audioQueue.empty())
+    {
+        #ifdef _DEBUG
+            while (!m_cv.wait_for(lock, std::chrono::milliseconds(100), [&] { return !m_audioQueue.empty() || m_endOfStream; }))
+            {
+                SPX_DBG_TRACE_VERBOSE("%s: waiting ...", __FUNCTION__);
+            }
+        #else
+            m_cv.wait(lock, [&] { return !m_audioQueue.empty() || m_endOfStream; });
+        #endif
+    }
+    return !m_audioQueue.empty();
 }
 
 void CSpxPushAudioInputStream::SignalEndOfStream()
 {
+    std::unique_lock<std::mutex> lock(m_mutex);
     m_endOfStream = true;
+    m_cv.notify_all();
 }
 
 void CSpxPushAudioInputStream::SimulateRealtime(uint32_t bytesToSimulateRealTime)

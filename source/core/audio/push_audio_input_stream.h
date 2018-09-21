@@ -65,6 +65,9 @@ private:
 
     uint8_t m_simulateRealtimePercentage = 0;     // 0 == as fast as possible; 100 == real time; 200 == 2x slower than real time
 
+    std::mutex m_mutex;
+    std::condition_variable m_cv;
+
     std::queue<std::pair<SpxSharedAudioBuffer_Type, uint32_t>> m_audioQueue;
     std::shared_ptr<uint8_t> m_buffer;
     uint32_t m_bytesInBuffer;

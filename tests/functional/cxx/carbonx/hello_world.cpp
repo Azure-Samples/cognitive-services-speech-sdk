@@ -11,39 +11,44 @@
 #include "speechapi_cxx_language_understanding_model.h"
 #include "speechapi_cxx_session.h"
 #include "speechapi_cxx_intent_recognizer.h"
+#include "mock_controller.h"
+
+using namespace Microsoft::CognitiveServices::Speech::Impl;
 
 
 void CarbonTestConsole::Sample_HelloWorld()
 {
     SPX_DBG_TRACE_SCOPE("Sample_HelloWorld", "Sample_HelloWorld");
 
-    // Create the recognizer "with microphone input"
+    SpxSetMockParameterBool(R"(CARBON-INTERNAL-MOCK-Microphone)", true);
+    SpxSetMockParameterBool(R"(CARBON-INTERNAL-MOCK-ContinuousAudio)", true);
+    SpxSetMockParameterNumber(R"(CARBON-INTERNAL-MOCK-RealTimeAudioPercentage)", 100);
+    SpxSetMockParameterString(R"(CARBON-INTERNAL-MOCK-WavFileAudio)", R"(c:\temp\emergency-broadcast-system.wav)");
+
     auto config = SpeechConfig::FromSubscription(m_subscriptionKey, m_regionId);
     auto recognizer = SpeechRecognizer::FromConfig(config);
+    // auto audio = AudioConfig::FromWavFileInput(R"(c:\temp\whatstheweatherlike.wav)");
+    // auto recognizer = SpeechRecognizer::FromConfig(config, audio);
 
-    recognizer->SessionStarted += [&](const SessionEventArgs& e)
-    {
+    recognizer->SessionStarted += [&](const SessionEventArgs& e) {
         ConsoleWriteLine("SESSION STARTED: %s ...", e.SessionId.c_str());
     };
 
-    recognizer->SessionStopped += [&](const SessionEventArgs& e)
-    {
+    recognizer->SessionStopped += [&](const SessionEventArgs& e) {
         ConsoleWriteLine("SESSION STOPPED: %s ...", e.SessionId.c_str());
         ConsoleWriteLine("Press ENTER to acknowledge...");
     };
 
-    recognizer->Recognizing += [&](const SpeechRecognitionEventArgs& e)
-    {
+    recognizer->Recognizing += [&](const SpeechRecognitionEventArgs& e) {
         ConsoleWriteLine("INTERMEDIATE: %s ...", e.Result->Text.c_str());
     };
 
-    recognizer->Recognized += [&](const SpeechRecognitionEventArgs& e)
-    {
+    recognizer->Recognized += [&](const SpeechRecognitionEventArgs& e) {
         ConsoleWriteLine("FINAL RESULT: '%s'", e.Result->Text.c_str());
     };
 
-    recognizer->Canceled += [&](const SpeechRecognitionCanceledEventArgs& e)
-    {
+    recognizer->Canceled += [&](const SpeechRecognitionCanceledEventArgs& e) {
+
         ConsoleWriteLine("CANCELED: Reason=%d", e.Reason);
         if (e.Reason == CancellationReason::Error)
         {
@@ -60,13 +65,12 @@ void CarbonTestConsole::Sample_HelloWorld()
     recognizer->StopContinuousRecognitionAsync().get();
 
     // Wait for user to press ENTER to restart...
-
     ConsoleWriteLine("Press ENTER to start again...");
     while (getchar() != '\n');
 
     // Listen the second time
     recognizer->StartContinuousRecognitionAsync();
-    ConsoleWriteLine("Listening 2nd time ... (press ENTER to exit)");
+    ConsoleWriteLine("Listening... (press ENTER to exit)");
 
     while (getchar() != '\n');
     recognizer->StopContinuousRecognitionAsync().get();
