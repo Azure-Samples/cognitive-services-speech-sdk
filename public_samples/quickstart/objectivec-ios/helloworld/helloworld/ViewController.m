@@ -38,6 +38,11 @@
     }
 
     SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
+    if (!speechRecognizer) {
+        NSLog(@"Could not create speech recognizer");
+        [self updateRecognitionErrorText:(@"Speech Recognition Error")];
+        return;
+    }
     
     SPXSpeechRecognitionResult *speechResult = [speechRecognizer recognizeOnce];
     if (SPXResultReason_Canceled == speechResult.reason) {
