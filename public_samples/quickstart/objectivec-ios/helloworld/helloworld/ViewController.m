@@ -46,8 +46,9 @@
     
     SPXSpeechRecognitionResult *speechResult = [speechRecognizer recognizeOnce];
     if (SPXResultReason_Canceled == speechResult.reason) {
-        NSLog(@"Speech recognition was canceled. Did you pass the correct key/region combination?");
-        [self updateRecognitionErrorText:(@"Subscription Error")];
+        SPXCancellationDetails *details = [[SPXCancellationDetails alloc] initFromCanceledRecognitionResult:speechResult];
+        NSLog(@"Speech recognition was canceled: %@. Did you pass the correct key/region combination?", details.errorDetails);
+        [self updateRecognitionErrorText:([NSString stringWithFormat:@"Canceled: %@", details.errorDetails ])];
     } else if (SPXResultReason_RecognizedSpeech == speechResult.reason) {
         [self updateRecognitionResultText:(speechResult.text)];
     } else {
