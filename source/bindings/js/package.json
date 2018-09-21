@@ -2,8 +2,8 @@
   "name": "microsoft-cognitiveservices-speech-sdk",
   "version": "0.7.0",
   "description": "Microsoft Cognitive Services Speech SDK",
-  "main": "distrib/microsoft.cognitiveservices.speech.sdk.js",
-  "types": "distrib/microsoft.cognitiveservices.speech.sdk.d.ts",
+  "main": "distrib/src/sdk/Exports.js",
+  "types": "distrib/src/sdk/Exports.d.ts",
   "keywords": [
     "microsoft",
     "cognitiveservices",
