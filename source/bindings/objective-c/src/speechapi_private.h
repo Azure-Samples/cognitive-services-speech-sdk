@@ -2,6 +2,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
+#ifdef _DEBUG
+#define LogDebug( ... ) NSLog( __VA_ARGS__ )
+#else
+#define LogDebug( ... )
+#endif
 
 #import "common_private.h"
 
@@ -35,3 +40,5 @@
 #import "speech_recognizer_private.h"
 #import "intent_recognizer_private.h"
 #import "translation_recognizer_private.h"
+
+
