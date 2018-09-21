@@ -67,7 +67,7 @@ for flavor in Debug Release; do
     "$DROP_DIR"/Android-arm64/$flavor/public/lib/libMicrosoft.CognitiveServices.Speech.{core,java.bindings}.so \
     "$AAR_DIR"/jni/arm64-v8a
 
-  # TODO add more files?
+  cp --verbose "$SCRIPT_DIR/../../"{REDIST.txt,license.md,ThirdPartyNotices.md} "$AAR_DIR"
 
   # Timestamp
   find "$AAR_DIR" -print0 | xargs -0 touch --date=$NOW

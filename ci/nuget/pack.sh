@@ -15,11 +15,16 @@ fi
 SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
 
-USAGE="Usage: $0 <drop-dir> <version> <output-directory>"
+USAGE="Usage: $0 <redist-dir> <drop-dir> <version> <output-directory>"
 
-DROP_DIR="${1?$USAGE}"
-VERSION="${2?$USAGE}"
-OUTPUT_DIR="${3?$USAGE}"
+REDIST_DIR="${1?$USAGE}"
+DROP_DIR="${2?$USAGE}"
+VERSION="${3?$USAGE}"
+OUTPUT_DIR="${4?$USAGE}"
+
+REDIST_DIR="$(cygpath --unix --absolute "$REDIST_DIR")"
+[[ -e $REDIST_DIR ]]
+REDIST_DIR="$(cygpath --windows --absolute "$REDIST_DIR")"
 
 # Check that Windows drop directory exists and turn into Windows path.
 WINDOWS_DROP_DIR="$(cygpath --unix --absolute "$DROP_DIR/Windows")"
@@ -39,5 +44,5 @@ LINUX_DROP_DIR="$(cygpath --windows --absolute "$LINUX_DROP_DIR")"
 OUTPUT_DIR="$(cygpath --windows --absolute "$OUTPUT_DIR")"
 
 "$NUGETEXETOOLPATH" pack ./ci/nuget/carbon.nuspec \
-  -Properties "WindowsDropDir=$WINDOWS_DROP_DIR;WindowsUwpDropDir=$WINDOWS_UWP_DROP_DIR;LinuxDropDir=$LINUX_DROP_DIR;Version=$VERSION" \
+  -Properties "RedistDir=$REDIST_DIR;WindowsDropDir=$WINDOWS_DROP_DIR;WindowsUwpDropDir=$WINDOWS_UWP_DROP_DIR;LinuxDropDir=$LINUX_DROP_DIR;Version=$VERSION" \
   -OutputDirectory "$OUTPUT_DIR"

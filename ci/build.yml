@@ -719,7 +719,7 @@ phases:
     inputs:
       type: FilePath
       scriptPath: './ci/nuget/pack.sh'
-      args: '$(System.ArtifactsDirectory)\In $(SPEECHSDK_SEMVER2NOMETA) $(Build.ArtifactStagingDirectory)\Windows'
+      args: '$(Build.Repository.LocalPath) $(System.ArtifactsDirectory)\In $(SPEECHSDK_SEMVER2NOMETA) $(Build.ArtifactStagingDirectory)\Windows'
     displayName: Create NuGet
   # We could / should generate this elsewhere? Doesn't only apply to Windows + NuGet anymore...
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
@@ -1489,11 +1489,22 @@ phases:
       PACKAGE_IN=source/bindings/js/$PACKAGE_NAME
       PACKAGE_OUT="$(Build.ArtifactStagingDirectory)/Out/JavaScript/npm"
       QUICKSTART_OUT="$(Build.ArtifactStagingDirectory)/Out/JavaScript/js-browser"
-      mkdir -p "$PACKAGE_OUT"
+      ZIP_OUT="$(Build.ArtifactStagingDirectory)/Out/JavaScript/SpeechSDK-JavaScript-$SPEECHSDK_SEMVER2NOMETA"
+      mkdir -p "$PACKAGE_OUT" "$ZIP_OUT"
       ./ci/generate-npm-index-json.sh "$PACKAGE_IN" "$SPEECHSDK_SEMVER2NOMETA" "$(NPM_REGISTRY)" > "$PACKAGE_OUT/$PACKAGE_BASE"
       cp --preserve "$PACKAGE_IN" "$PACKAGE_OUT"
       cp --preserve --recursive public_samples/quickstart/js-browser "$QUICKSTART_OUT"
       cp --preserve source/bindings/js/distrib/microsoft.cognitiveservices.speech.sdk.bundle.* "$QUICKSTART_OUT"
+      echo SRI hash for microsoft.cognitiveservices.speech.sdk.bundle.js: sha512-"$(openssl dgst -sha512 -binary source/bindings/js/distrib/microsoft.cognitiveservices.speech.sdk.bundle.js | openssl base64 -A)"
+      cp --preserve license.md REDIST.txt source/bindings/js/distrib/microsoft.cognitiveservices.speech.sdk.bundle.* "$ZIP_OUT"
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: $(Build.ArtifactStagingDirectory)/Out/JavaScript/SpeechSDK-JavaScript-$(SPEECHSDK_SEMVER2NOMETA)
+      includeRootFolder: true
+      archiveType: zip
+      archiveFile: $(Build.ArtifactStagingDirectory)/Out/JavaScript/SpeechSDK-JavaScript-$(SPEECHSDK_SEMVER2NOMETA).zip
+    displayName: 'Create .zip'
+  - bash: rm -rf "$(Build.ArtifactStagingDirectory)/Out/JavaScript/SpeechSDK-JavaScript-$(SPEECHSDK_SEMVER2NOMETA)"
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
     inputs:

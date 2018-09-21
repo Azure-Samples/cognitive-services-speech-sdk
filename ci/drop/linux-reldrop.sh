@@ -25,7 +25,7 @@ BASE_NAME="SpeechSDK-Linux-$VERSION"
 cd "$DROP_DIR"
 
 mkdir "$BASE_NAME"
-cp -p "$REPO_DIR/"{license.md,ThirdPartyNotices.md} "$BASE_NAME"
+cp -p "$REPO_DIR/"{REDIST.txt,license.md,ThirdPartyNotices.md} "$BASE_NAME"
 
 echo ::: List of files
 tar \

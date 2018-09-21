@@ -84,5 +84,7 @@ for platformString in "${platforms[@]}"; do
 
 done
 
+cp --verbose "$SCRIPT_DIR/../../"{REDIST.txt,license.md,ThirdPartyNotices.md} "$JAR_DIR"
+
 # Timestamp
 find "$JAR_DIR" -print0 | xargs -0 touch --date=$NOW
