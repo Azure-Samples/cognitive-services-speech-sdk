@@ -5,7 +5,7 @@
 
 // <code>
 #import "ViewController.h"
-#import <MicrosoftCognitiveServicesSpeech/speechapi.h>
+#import <MicrosoftCognitiveServicesSpeech/SPXSpeechApi.h>
 
 @interface ViewController ()
 @property (weak, nonatomic) IBOutlet UIButton *recognizeButton;
@@ -16,42 +16,59 @@
 @implementation ViewController
 
 - (IBAction)recognizeButtonTapped:(UIButton *)sender {
-    __block bool end = false;
+    NSString *speechKey = @"YourSubscriptionKey";
+    NSString *serviceRegion = @"YourServiceRegion";
+
     NSBundle *mainBundle = [NSBundle mainBundle];
     NSString *weatherFile = [mainBundle pathForResource: @"whatstheweatherlike" ofType:@"wav"];
     NSLog(@"Main bundle path: %@", mainBundle);
     NSLog(@"weatherFile path: %@", weatherFile);
-    AudioConfig* weatherAudioSource = [AudioConfig fromWavFileInput:weatherFile];
+    SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
+    if (!weatherAudioSource) {
+        NSLog(@"Loading audio file failed!");
+        [self updateRecognitionErrorText:(@"Audio Error")];
+        return;
+    }
 
-    NSString *speechKey = @"YourSubscriptionKey";
-    NSString *serviceRegion = @"YourServiceRegion";
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:serviceRegion];
+    if (!speechConfig) {
+        NSLog(@"Could not load speech config");
+        [self updateRecognitionErrorText:(@"Speech Config Error")];
+        return;
+    }
 
-    SpeechConfig *speechConfig = [SpeechConfig fromSubscription:speechKey andRegion:serviceRegion];
-    SpeechRecognizer* speechRecognizer = [SpeechRecognizer fromConfig:speechConfig usingAudio:weatherAudioSource];
-
-    [speechRecognizer addSessionEventListener: ^ (Recognizer * recognizer, SessionEventArgs *eventArgs) {
-        NSLog(@"Received Session event. Type:%@(%d) SessionId: %@", eventArgs.eventType == SessionStartedEvent? @"SessionStart" : @"SessionStop", (int)eventArgs.eventType, eventArgs.sessionId);
-        if (eventArgs.eventType == SessionStoppedEvent)
-            end = true;
-    }];
-
-    [speechRecognizer addRecognizedEventListener: ^ (SpeechRecognizer * recognizer, SpeechRecognitionEventArgs *eventArgs) {
-        NSLog(@"Received final result event. SessionId: %@, recognition result:%@. Status %ld.", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.reason);
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self updateRecognitionResultText:(eventArgs.result.text)];
-        });
-    }];
-
-    [speechRecognizer startContinuousRecognition];
-    while (end == false)
-        [NSThread sleepForTimeInterval:1.0f];
-    [speechRecognizer stopContinuousRecognition];
-
-    [speechRecognizer close];
+    SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
+    if (!speechRecognizer) {
+        NSLog(@"Could not create speech recognizer");
+        [self updateRecognitionErrorText:(@"Speech Recognition Error")];
+        return;
+    }
+    
+    SPXSpeechRecognitionResult *speechResult = [speechRecognizer recognizeOnce];
+    if (SPXResultReason_Canceled == speechResult.reason) {
+        SPXCancellationDetails *details = [[SPXCancellationDetails alloc] initFromCanceledRecognitionResult:speechResult];
+        NSLog(@"Speech recognition was canceled: %@. Did you pass the correct key/region combination?", details.errorDetails);
+        [self updateRecognitionErrorText:([NSString stringWithFormat:@"Canceled: %@", details.errorDetails ])];
+    } else if (SPXResultReason_RecognizedSpeech == speechResult.reason) {
+        [self updateRecognitionResultText:(speechResult.text)];
+    } else {
+        NSLog(@"There was an error.");
+        [self updateRecognitionErrorText:(@"Speech Recognition Error")];
+    }
 }
 
 - (void)updateRecognitionResultText:(NSString *) resultText {
-    self.recognitionResultLabel.text = resultText;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.recognitionResultLabel.textColor = UIColor.blackColor;
+        self.recognitionResultLabel.text = resultText;
+    });
+}
+
+- (void)updateRecognitionErrorText:(NSString *) errorText {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.recognitionResultLabel.textColor = UIColor.redColor;
+        self.recognitionResultLabel.text = errorText;
+    });
 }
 
 @end

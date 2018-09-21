@@ -14,8 +14,23 @@
 		F3184E56214674DA0096193E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F3184E54214674DA0096193E /* LaunchScreen.storyboard */; };
 		F3184E59214674DA0096193E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F3184E58214674DA0096193E /* main.m */; };
 		F3184E68214685C80096193E /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = F3184E67214685C70096193E /* whatstheweatherlike.wav */; };
-		F36DD477214C03AD00EB972B /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F36DD476214C03AD00EB972B /* MicrosoftCognitiveServicesSpeech.framework */; };
+		F376163E21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F376163D21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework */; };
+		F376163F21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F376163D21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F376164021540C9D0097B6F1 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				F376163F21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		F3184E46214674D60096193E /* helloworld.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = helloworld.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -29,7 +44,7 @@
 		F3184E57214674DA0096193E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F3184E58214674DA0096193E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		F3184E67214685C70096193E /* whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = whatstheweatherlike.wav; path = ./whatstheweatherlike.wav; sourceTree = "<group>"; };
-		F36DD476214C03AD00EB972B /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MicrosoftCognitiveServicesSpeech.framework; sourceTree = "<group>"; };
+		F376163D21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = ../MicrosoftCognitiveServicesSpeech.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,7 +52,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F36DD477214C03AD00EB972B /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */,
+				F376163E21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -47,6 +62,7 @@
 		F3184E3D214674D60096193E = {
 			isa = PBXGroup;
 			children = (
+				F376163D21540C9D0097B6F1 /* MicrosoftCognitiveServicesSpeech.framework */,
 				F3184E67214685C70096193E /* whatstheweatherlike.wav */,
 				F3184E48214674D60096193E /* helloworld */,
 				F3184E47214674D60096193E /* Products */,
@@ -81,7 +97,6 @@
 		F3184E5F214675180096193E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				F36DD476214C03AD00EB972B /* MicrosoftCognitiveServicesSpeech.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -96,6 +111,7 @@
 				F3184E42214674D60096193E /* Sources */,
 				F3184E43214674D60096193E /* Frameworks */,
 				F3184E44214674D60096193E /* Resources */,
+				F376164021540C9D0097B6F1 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -308,9 +324,8 @@
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = helloworld/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
+					"$(SRCROOT)/..",
 					"@executable_path/Frameworks",
-					"$(SRCROOT)/../speechsdk/lib",
 				);
 				LIBRARY_SEARCH_PATHS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = corp.microsoft.testorg.helloworld;
@@ -332,9 +347,8 @@
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = helloworld/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
 					"$(SRCROOT)/..",
+					"@executable_path/Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = corp.microsoft.testorg.helloworld;
