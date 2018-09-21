@@ -18,5 +18,7 @@
 	<string>Copyright © 2018 Microsoft Corporation. All rights reserved.</string>
 	<key>CFBundleGetInfoString</key>
 	<string>Microsoft Cognitive Services Speech SDK</string>
+	<key>@FRAMEWORK_MINIMUM_OS_VERSION_KEY@</key>
+	<string>@FRAMEWORK_MINIMUM_OS_VERSION_VALUE@</string>
 </dict>
 </plist>
