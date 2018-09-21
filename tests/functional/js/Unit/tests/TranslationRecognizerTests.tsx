@@ -178,7 +178,7 @@ test("RecognizeOnceAsync1", (done: jest.DoneCallback) => {
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
     r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
-        if (e.result.reason === sdk.SynthesisStatus.Error) {
+        if (e.result.reason === sdk.ResultReason.Canceled) {
             r.close();
             s.close();
             setTimeout(() => done(), 1);
@@ -224,7 +224,7 @@ test("Translate Multiple Targets", (done: jest.DoneCallback) => {
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
     r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
-        if (e.result.reason === sdk.SynthesisStatus.Error) {
+        if (e.result.reason === sdk.ResultReason.Canceled) {
             r.close();
             s.close();
             setTimeout(() => done(), 1);
@@ -339,7 +339,7 @@ test("Validate Event Ordering", (done: jest.DoneCallback) => {
     };
 
     r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
-        if (e.result.reason === sdk.SynthesisStatus.Error) {
+        if (e.result.reason === sdk.ResultReason.Canceled) {
             r.close();
             s.close();
             setTimeout(() => done(), 1);
@@ -524,17 +524,17 @@ test("TranslateVoiceRoundTrip", (done: jest.DoneCallback) => {
 
     r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
         switch (e.result.reason) {
-            case sdk.SynthesisStatus.Error:
+            case sdk.ResultReason.Canceled:
                 r.close();
                 s.close();
                 setTimeout(() => done(), 1);
                 fail(e.result.reason);
                 break;
-            case sdk.SynthesisStatus.Success:
+            case sdk.ResultReason.SynthesizingAudio:
                 const result: ArrayBuffer = e.result.audio;
                 rEvents[synthFragmentCount++] = result;
                 break;
-            case sdk.SynthesisStatus.SynthesisEnd:
+            case sdk.ResultReason.SynthesizingAudioCompleted:
                 synthCount++;
                 break;
         }
@@ -614,7 +614,7 @@ test("TranslateVoiceInvalidVoice", (done: jest.DoneCallback) => {
     expect(r instanceof sdk.Recognizer).toEqual(true);
 
     r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
-        if (e.result.reason !== sdk.SynthesisStatus.Error) {
+        if (e.result.reason !== sdk.ResultReason.Canceled) {
             r.close();
             s.close();
             setTimeout(() => done(), 1);
@@ -658,17 +658,17 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
 
     r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
         switch (e.result.reason) {
-            case sdk.SynthesisStatus.Error:
+            case sdk.ResultReason.Canceled:
                 r.close();
                 s.close();
                 setTimeout(() => done(), 1);
                 fail(e.result.reason);
                 break;
-            case sdk.SynthesisStatus.Success:
+            case sdk.ResultReason.SynthesizingAudio:
                 const result: ArrayBuffer = e.result.audio;
                 rEvents[synthFragmentCount++] = result;
                 break;
-            case sdk.SynthesisStatus.SynthesisEnd:
+            case sdk.ResultReason.SynthesizingAudioCompleted:
                 synthCount++;
                 break;
         }
@@ -771,17 +771,17 @@ test("MultiPhrase", (done: jest.DoneCallback) => {
 
     r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
         switch (e.result.reason) {
-            case sdk.SynthesisStatus.Error:
+            case sdk.ResultReason.Canceled:
                 r.close();
                 s.close();
                 setTimeout(() => done(), 1);
                 fail(e.result.reason);
                 break;
-            case sdk.SynthesisStatus.Success:
+            case sdk.ResultReason.SynthesizingAudio:
                 const result: ArrayBuffer = e.result.audio;
                 rEvents[synthFragmentCount++] = result;
                 break;
-            case sdk.SynthesisStatus.SynthesisEnd:
+            case sdk.ResultReason.SynthesizingAudioCompleted:
                 synthCount++;
                 break;
         }
