@@ -138,7 +138,7 @@ export abstract class Recognizer {
             new PlatformConfig(
                 new Context(
                     new OS("navigator.userAgent", "Browser", null),
-                    new Device("SpeechSample", "SpeechSample", "1.0.00000"))), // TODO: Need to get these values from the caller?
+                    new Device("Microsoft", "SpeechSDK", "1.0.0"))), // TODO: Need to get these values from the caller?
             recognitionMode); // SDK.SpeechResultFormat.Simple (Options - Simple/Detailed)
 
         const subscriptionKey = speechProperties.getProperty(PropertyId.SpeechServiceConnection_Key, undefined);
