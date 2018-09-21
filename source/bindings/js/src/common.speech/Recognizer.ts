@@ -500,12 +500,13 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
                         synthEnd.SynthesisStatus = ResultReason.Canceled;
                         requestSession.OnServiceTranslationSynthesisError(synthEnd);
                         break;
-                    case SynthesisStatus.SynthesisEnd:
-                        synthEnd.SynthesisStatus = ResultReason.SynthesizingAudioCompleted;
+                    case SynthesisStatus.Success:
+                        synthEnd.SynthesisStatus = ResultReason.SynthesizingAudio;
                         requestSession.OnServiceTranslationSynthesis(undefined);
                         break;
                     default:
-                        synthEnd.SynthesisStatus = ResultReason.SynthesizingAudio;
+                        synthEnd.SynthesisStatus = ResultReason.SynthesizingAudioCompleted;
+                        break;
                 }
                 break;
             default:
