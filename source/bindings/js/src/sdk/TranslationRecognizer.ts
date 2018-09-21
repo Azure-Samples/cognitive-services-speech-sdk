@@ -33,10 +33,10 @@ import {
     PropertyId,
     Recognizer,
     ResultReason,
-    Translations,
     TranslationRecognitionCanceledEventArgs,
     TranslationRecognitionEventArgs,
     TranslationRecognitionResult,
+    Translations,
     TranslationSynthesisEventArgs,
     TranslationSynthesisResult,
 } from "./Exports";
