@@ -16,27 +16,53 @@
 @implementation ViewController
 
 - (IBAction)recognizeButtonTapped:(UIButton *)sender {
+    NSString *speechKey = @"YourSubscriptionKey";
+    NSString *serviceRegion = @"YourServiceRegion";
+
     NSBundle *mainBundle = [NSBundle mainBundle];
     NSString *weatherFile = [mainBundle pathForResource: @"whatstheweatherlike" ofType:@"wav"];
     NSLog(@"Main bundle path: %@", mainBundle);
     NSLog(@"weatherFile path: %@", weatherFile);
     SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
-
-    NSString *speechKey = @"YourSubscriptionKey";
-    NSString *serviceRegion = @"YourServiceRegion";
+    if (!weatherAudioSource) {
+        NSLog(@"Loading audio file failed!");
+        [self updateRecognitionErrorText:(@"Audio Error")];
+        return;
+    }
 
     SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:serviceRegion];
+    if (!speechConfig) {
+        NSLog(@"Could not load speech config");
+        [self updateRecognitionErrorText:(@"Speech Config Error")];
+        return;
+    }
+
     SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
     
     SPXSpeechRecognitionResult *speechResult = [speechRecognizer recognizeOnce];
-
-    dispatch_async(dispatch_get_main_queue(), ^{
+    if (SPXResultReason_Canceled == speechResult.reason) {
+        NSLog(@"Speech recognition was canceled. Did you pass the correct key/region combination?");
+        [self updateRecognitionErrorText:(@"Subscription Error")];
+    } else if (SPXResultReason_RecognizedSpeech == speechResult.reason) {
         [self updateRecognitionResultText:(speechResult.text)];
-    });
+    } else {
+        NSLog(@"There was an error.");
+        [self updateRecognitionErrorText:(@"Speech Recognition Error")];
+    }
 }
 
 - (void)updateRecognitionResultText:(NSString *) resultText {
-    self.recognitionResultLabel.text = resultText;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.recognitionResultLabel.textColor = UIColor.blackColor;
+        self.recognitionResultLabel.text = resultText;
+    });
+}
+
+- (void)updateRecognitionErrorText:(NSString *) errorText {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.recognitionResultLabel.textColor = UIColor.redColor;
+        self.recognitionResultLabel.text = errorText;
+    });
 }
 
 @end
