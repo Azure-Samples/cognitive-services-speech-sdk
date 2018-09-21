@@ -22,9 +22,9 @@ export class IntentRecognitionCanceledEventArgs extends IntentRecognitionEventAr
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param result - The result of the intent recognition.
-     * @param offset - The offset.
-     * @param sessionId - The session id.
+     * @param {CancellationReason} result - The result of the intent recognition.
+     * @param {string} offset - The offset.
+     * @param {IntentRecognitionResult} sessionId - The session id.
      */
     public constructor(reason: CancellationReason, errorDetails: string, result?: IntentRecognitionResult, offset?: number, sessionId?: string) {
         super(result, offset, sessionId);
@@ -36,7 +36,9 @@ export class IntentRecognitionCanceledEventArgs extends IntentRecognitionEventAr
     /**
      * The reason the recognition was canceled.
      * @member IntentRecognitionCanceledEventArgs.prototype.reason
-     * @return Specifies the reason canceled.
+     * @function
+     * @public
+     * @returns {CancellationReason} Specifies the reason canceled.
      */
     public get reason(): CancellationReason {
         return this.privReason;
@@ -46,7 +48,9 @@ export class IntentRecognitionCanceledEventArgs extends IntentRecognitionEventAr
      * In case of an unsuccessful recognition, provides a details of why the occurred error.
      * This field is only filled-out if the reason canceled (@see getReason) is set to Error.
      * @member IntentRecognitionCanceledEventArgs.prototype.errorDetails
-     * @return A String that represents the error details.
+     * @function
+     * @public
+     * @returns {string} A String that represents the error details.
      */
     public get errorDetails(): string {
         return this.privErrorDetails;

@@ -33,15 +33,14 @@ import {
     PropertyId,
     Recognizer,
     ResultReason,
-    Translation,
     TranslationRecognitionCanceledEventArgs,
     TranslationRecognitionEventArgs,
     TranslationRecognitionResult,
+    Translations,
     TranslationSynthesisEventArgs,
     TranslationSynthesisResult,
 } from "./Exports";
 import { SpeechTranslationConfig, SpeechTranslationConfigImpl } from "./SpeechTranslationConfig";
-import { SynthesisStatus } from "./SynthesisStatus";
 
 /**
  * Translation recognizer
@@ -77,31 +76,41 @@ export class TranslationRecognizer extends Recognizer {
     /**
      * The event recognizing signals that an intermediate recognition result is received.
      * @member TranslationRecognizer.prototype.recognizing
+     * @function
+     * @public
      */
     public recognizing: (sender: TranslationRecognizer, event: TranslationRecognitionEventArgs) => void;
 
     /**
      * The event recognized signals that a final recognition result is received.
      * @member TranslationRecognizer.prototype.recognized
+     * @function
+     * @public
      */
     public recognized: (sender: TranslationRecognizer, event: TranslationRecognitionEventArgs) => void;
 
     /**
      * The event canceled signals that an error occurred during recognition.
      * @member TranslationRecognizer.prototype.canceled
+     * @function
+     * @public
      */
     public canceled: (sender: TranslationRecognizer, event: TranslationRecognitionCanceledEventArgs) => void;
 
     /**
      * The event synthesizing signals that a translation synthesis result is received.
      * @member TranslationRecognizer.prototype.synthesizing
+     * @function
+     * @public
      */
     public synthesizing: (sender: TranslationRecognizer, event: TranslationSynthesisEventArgs) => void;
 
     /**
      * Gets the language name that was set when the recognizer was created.
      * @member TranslationRecognizer.prototype.speechRecognitionLanguage
-     * @returns Gets the language name that was set when the recognizer was created.
+     * @function
+     * @public
+     * @returns {string} Gets the language name that was set when the recognizer was created.
      */
     public get speechRecognitionLanguage(): string {
         Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
@@ -113,7 +122,9 @@ export class TranslationRecognizer extends Recognizer {
      * Gets target languages for translation that were set when the recognizer was created.
      * The language is specified in BCP-47 format. The translation will provide translated text for each of language.
      * @member TranslationRecognizer.prototype.targetLanguages
-     * @returns Gets target languages for translation that were set when the recognizer was created.
+     * @function
+     * @public
+     * @returns {string[]} Gets target languages for translation that were set when the recognizer was created.
      */
     public get targetLanguages(): string[] {
         Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
@@ -124,7 +135,9 @@ export class TranslationRecognizer extends Recognizer {
     /**
      * Gets the name of output voice.
      * @member TranslationRecognizer.prototype.voiceName
-     * @returns the name of output voice.
+     * @function
+     * @public
+     * @returns {string} the name of output voice.
      */
     public get voiceName(): string {
         Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
@@ -135,7 +148,9 @@ export class TranslationRecognizer extends Recognizer {
     /**
      * Gets the authorization token used to communicate with the service.
      * @member TranslationRecognizer.prototype.authorizationToken
-     * @return Authorization token.
+     * @function
+     * @public
+     * @returns {string} Authorization token.
      */
     public get authorizationToken(): string {
         return this.properties.getProperty(PropertyId.SpeechServiceAuthorization_Token);
@@ -144,7 +159,9 @@ export class TranslationRecognizer extends Recognizer {
     /**
      * Sets the authorization token used to communicate with the service.
      * @member TranslationRecognizer.prototype.authorizationToken
-     * @param value - Authorization token.
+     * @function
+     * @public
+     * @param {string} value - Authorization token.
      */
     public set authorizationToken(value: string) {
         this.properties.setProperty(PropertyId.SpeechServiceAuthorization_Token, value);
@@ -153,7 +170,9 @@ export class TranslationRecognizer extends Recognizer {
     /**
      * The collection of properties and their values defined for this TranslationRecognizer.
      * @member TranslationRecognizer.prototype.properties
-     * @returns The collection of properties and their values defined for this TranslationRecognizer.
+     * @function
+     * @public
+     * @returns {PropertyCollection} The collection of properties and their values defined for this TranslationRecognizer.
      */
     public get properties(): PropertyCollection {
         return this.privProperties;
@@ -164,6 +183,8 @@ export class TranslationRecognizer extends Recognizer {
      * Note: recognizeOnceAsync returns when the first utterance has been recognized, so it is suitableonly
      *       for single shot recognition like command or query. For long-running recognition, use startContinuousRecognitionAsync() instead.
      * @member TranslationRecognizer.prototype.recognizeOnceAsync
+     * @function
+     * @public
      * @param cb - Callback that received the result when the translation has completed.
      * @param err - Callback invoked in case of an error.
      */
@@ -191,6 +212,8 @@ export class TranslationRecognizer extends Recognizer {
      * Starts recognition and translation, until stopContinuousRecognitionAsync() is called.
      * User must subscribe to events to receive translation results.
      * @member TranslationRecognizer.prototype.startContinuousRecognitionAsync
+     * @function
+     * @public
      * @param cb - Callback that received the translation has started.
      * @param err - Callback invoked in case of an error.
      */
@@ -230,6 +253,8 @@ export class TranslationRecognizer extends Recognizer {
     /**
      * Stops continuous recognition and translation.
      * @member TranslationRecognizer.prototype.stopContinuousRecognitionAsync
+     * @function
+     * @public
      * @param cb - Callback that received the translation has stopped.
      * @param err - Callback invoked in case of an error.
      */
@@ -252,6 +277,8 @@ export class TranslationRecognizer extends Recognizer {
     /**
      * closes all external resources held by an instance of this class.
      * @member TranslationRecognizer.prototype.close
+     * @function
+     * @public
      */
     public close(): void {
         Contracts.throwIfDisposed(this.disposedTranslationRecognizer);
@@ -502,7 +529,7 @@ export class TranslationRecognizer extends Recognizer {
                     const evResut: TranslationSynthesisEvent = event as TranslationSynthesisEvent;
 
                     const audio = evResut.Result;
-                    const reason = (undefined === audio) ? SynthesisStatus.SynthesisEnd : SynthesisStatus.Success;
+                    const reason = (undefined === audio) ? ResultReason.SynthesizingAudioCompleted : ResultReason.SynthesizingAudio;
                     const result = new TranslationSynthesisResult(reason, audio);
                     const retEvent: TranslationSynthesisEventArgs = new TranslationSynthesisEventArgs(result, evResut.SessionId);
 
@@ -592,7 +619,7 @@ export class TranslationRecognizer extends Recognizer {
     }
 
     private FireEventForResult(evResult: TranslationPhraseEvent | TranslationHypothesisEvent): TranslationRecognitionEventArgs {
-        const translations = new Translation();
+        const translations = new Translations();
         for (const translation of evResult.Result.Translation.Translations) {
             translations.set(translation.Language, translation.Text);
         }

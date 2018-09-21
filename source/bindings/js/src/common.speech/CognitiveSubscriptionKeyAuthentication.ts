@@ -29,6 +29,8 @@ export class CognitiveSubscriptionKeyAuthentication implements IAuthentication {
     /**
      * Fetches the subscription key.
      * @member
+     * @function
+     * @public
      * @param {string} authFetchEventId - The id to fetch.
      */
     public Fetch = (authFetchEventId: string): Promise<AuthInfo> => {
@@ -38,6 +40,8 @@ export class CognitiveSubscriptionKeyAuthentication implements IAuthentication {
     /**
      * Fetches the subscription key.
      * @member
+     * @function
+     * @public
      * @param {string} authFetchEventId - The id to fetch.
      */
     public FetchOnExpiry = (authFetchEventId: string): Promise<AuthInfo> => {

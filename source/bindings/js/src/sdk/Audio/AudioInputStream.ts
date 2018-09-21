@@ -39,8 +39,10 @@ export abstract class AudioInputStream {
     /**
      * Creates a memory backed PushAudioInputStream with the specified audio format.
      * @member AudioInputStream.createPushStream
-     * @param format - The audio data format in which audio will be written to the push audio stream's write() method (currently only support 16 kHz 16bit mono PCM).
-     * @returns The audio input stream being created.
+     * @function
+     * @public
+     * @param {AudioStreamFormat} format - The audio data format in which audio will be written to the push audio stream's write() method (currently only support 16 kHz 16bit mono PCM).
+     * @returns {PushAudioInputStream} The audio input stream being created.
      */
     public static createPushStream(format?: AudioStreamFormat): PushAudioInputStream {
         return PushAudioInputStream.create(format);
@@ -49,9 +51,11 @@ export abstract class AudioInputStream {
     /**
      * Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods.
      * @member AudioInputStream.createPullStream
-     * @param callback - The custom audio input object, derived from PullAudioInputStreamCallback
-     * @param format - The audio data format in which audio will be returned from the callback's read() method (currently only support 16 kHz 16bit mono PCM).
-     * @returns The audio input stream being created.
+     * @function
+     * @public
+     * @param {PullAudioInputStreamCallback} callback - The custom audio input object, derived from PullAudioInputStreamCallback
+     * @param {AudioStreamFormat} format - The audio data format in which audio will be returned from the callback's read() method (currently only support 16 kHz 16bit mono PCM).
+     * @returns {PullAudioInputStream} The audio input stream being created.
      */
     public static createPullStream(callback: PullAudioInputStreamCallback, format?: AudioStreamFormat): PullAudioInputStream {
         return PullAudioInputStream.create(callback, format);
@@ -61,6 +65,8 @@ export abstract class AudioInputStream {
     /**
      * Explicitly frees any external resource attached to the object
      * @member AudioInputStream.prototype.close
+     * @function
+     * @public
      */
     public abstract close(): void;
 }
@@ -75,8 +81,10 @@ export abstract class PushAudioInputStream extends AudioInputStream {
     /**
      * Creates a memory backed PushAudioInputStream with the specified audio format.
      * @member PushAudioInputStream.create
-     * @param format - The audio data format in which audio will be written to the push audio stream's write() method (currently only support 16 kHz 16bit mono PCM).
-     * @returns The push audio input stream being created.
+     * @function
+     * @public
+     * @param {AudioStreamFormat} format - The audio data format in which audio will be written to the push audio stream's write() method (currently only support 16 kHz 16bit mono PCM).
+     * @returns {PushAudioInputStream} The push audio input stream being created.
      */
     public static create(format?: AudioStreamFormat): PushAudioInputStream {
         return new PushAudioInputStreamImpl(format);
@@ -85,19 +93,24 @@ export abstract class PushAudioInputStream extends AudioInputStream {
     /**
      * Writes the audio data specified by making an internal copy of the data.
      * @member PushAudioInputStream.prototype.write
-     * @param dataBuffer - The audio buffer of which this function will make a copy.
+     * @function
+     * @public
+     * @param {ArrayBuffer} dataBuffer - The audio buffer of which this function will make a copy.
      */
     public abstract write(dataBuffer: ArrayBuffer): void;
 
     /**
      * Closes the stream.
      * @member PushAudioInputStream.prototype.close
+     * @function
+     * @public
      */
     public abstract close(): void;
 }
 
 /**
  * Represents memory backed push audio input stream used for custom audio input configurations.
+ * @private
  * @class PushAudioInputStreamImpl
  */
 // tslint:disable-next-line:max-classes-per-file
@@ -111,7 +124,7 @@ export class PushAudioInputStreamImpl extends PushAudioInputStream implements IA
     /**
      * Creates and initalizes an instance with the given values.
      * @constructor
-     * @param format - The audio stream format.
+     * @param {AudioStreamFormat} format - The audio stream format.
      */
     public constructor(format?: AudioStreamFormat) {
         super();
@@ -127,7 +140,9 @@ export class PushAudioInputStreamImpl extends PushAudioInputStream implements IA
     /**
      * Writes the audio data specified by making an internal copy of the data.
      * @member PushAudioInputStreamImpl.prototype.write
-     * @param dataBuffer - The audio buffer of which this function will make a copy.
+     * @function
+     * @public
+     * @param {ArrayBuffer} dataBuffer - The audio buffer of which this function will make a copy.
      */
     public write(dataBuffer: ArrayBuffer): void {
 
@@ -138,6 +153,8 @@ export class PushAudioInputStreamImpl extends PushAudioInputStream implements IA
     /**
      * Closes the stream.
      * @member PushAudioInputStreamImpl.prototype.close
+     * @function
+     * @public
      */
     public close(): void {
         this.stream.Close();
@@ -215,9 +232,11 @@ export abstract class PullAudioInputStream extends AudioInputStream {
     /**
      * Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods, using the default format (16 kHz 16bit mono PCM).
      * @member PullAudioInputStream.create
-     * @param callback - The custom audio input object, derived from PullAudioInputStreamCustomCallback
-     * @param format - The audio data format in which audio will be returned from the callback's read() method (currently only support 16 kHz 16bit mono PCM).
-     * @returns The push audio input stream being created.
+     * @function
+     * @public
+     * @param {PullAudioInputStreamCallback} callback - The custom audio input object, derived from PullAudioInputStreamCustomCallback
+     * @param {AudioStreamFormat} format - The audio data format in which audio will be returned from the callback's read() method (currently only support 16 kHz 16bit mono PCM).
+     * @returns {PullAudioInputStream} The push audio input stream being created.
      */
     public static create(callback: PullAudioInputStreamCallback, format?: AudioStreamFormat): PullAudioInputStream {
         return new PullAudioInputStreamImpl(callback, format);
@@ -226,6 +245,8 @@ export abstract class PullAudioInputStream extends AudioInputStream {
     /**
      * Explicitly frees any external resource attached to the object
      * @member PullAudioInputStream.prototype.close
+     * @function
+     * @public
      */
     public abstract close(): void;
 
@@ -233,6 +254,7 @@ export abstract class PullAudioInputStream extends AudioInputStream {
 
 /**
  * Represents audio input stream used for custom audio input configurations.
+ * @private
  * @class PullAudioInputStreamImpl
  */
 // tslint:disable-next-line:max-classes-per-file
@@ -247,9 +269,8 @@ export class PullAudioInputStreamImpl extends PullAudioInputStream implements IA
     /**
      * Creates a PullAudioInputStream that delegates to the specified callback interface for read() and close() methods, using the default format (16 kHz 16bit mono PCM).
      * @constructor
-     * @param callback - The custom audio input object, derived from PullAudioInputStreamCustomCallback
-     * @param format - The audio data format in which audio will be returned from the callback's read() method (currently only support 16 kHz 16bit mono PCM).
-     * @returns The push audio input stream being created.
+     * @param {PullAudioInputStreamCallback} callback - The custom audio input object, derived from PullAudioInputStreamCustomCallback
+     * @param {AudioStreamFormat} format - The audio data format in which audio will be returned from the callback's read() method (currently only support 16 kHz 16bit mono PCM).
      */
     public constructor(callback: PullAudioInputStreamCallback, format?: AudioStreamFormat) {
         super();
@@ -267,6 +288,8 @@ export class PullAudioInputStreamImpl extends PullAudioInputStream implements IA
     /**
      * Closes the stream.
      * @member PullAudioInputStreamImpl.prototype.close
+     * @function
+     * @public
      */
     public close(): void {
         this.isClosed = true;

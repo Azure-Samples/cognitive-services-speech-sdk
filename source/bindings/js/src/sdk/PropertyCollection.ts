@@ -18,9 +18,11 @@ export class PropertyCollection {
      * Currently only String, int and bool are allowed.
      * If the name is not available, the specified defaultValue is returned.
      * @member PropertyCollection.prototype.getProperty
+     * @function
+     * @public
      * @param {string} key - The parameter name.
      * @param {string} def - The default value which is returned if the parameter is not available in the collection.
-     * @returns value of the parameter.
+     * @returns {string} value of the parameter.
      */
     public getProperty(key: PropertyId | string, def?: string): string {
         let keyToUse: string;
@@ -43,6 +45,8 @@ export class PropertyCollection {
     /**
      * Sets the String value of the parameter specified by name.
      * @member PropertyCollection.prototype.setProperty
+     * @function
+     * @public
      * @param {string} key - The parameter name.
      * @param {string} value - The value of the parameter.
      */
@@ -69,7 +73,9 @@ export class PropertyCollection {
     /**
      * Clones the collection.
      * @member PropertyCollection.prototype.clone
-     * @returns A copy of the collection.
+     * @function
+     * @public
+     * @returns {PropertyCollection} A copy of the collection.
      */
     public clone(): PropertyCollection {
         const clonedMap = new PropertyCollection();

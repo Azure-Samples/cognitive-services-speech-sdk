@@ -27,7 +27,9 @@ export class IntentRecognitionEventArgs extends RecognitionEventArgs {
     /**
      * Represents the intent recognition result.
      * @member IntentRecognitionEventArgs.prototype.result
-     * @returns Represents the intent recognition result.
+     * @function
+     * @public
+     * @returns {IntentRecognitionResult} Represents the intent recognition result.
      */
     public get result(): IntentRecognitionResult {
         return this.privResult;

@@ -68,25 +68,33 @@ export class SpeechRecognizer extends Recognizer {
     /**
      * The event recognizing signals that an intermediate recognition result is received.
      * @member SpeechRecognizer.prototype.recognizing
+     * @function
+     * @public
      */
     public recognizing: (sender: Recognizer, event: SpeechRecognitionEventArgs) => void;
 
     /**
      * The event recognized signals that a final recognition result is received.
      * @member SpeechRecognizer.prototype.recognized
+     * @function
+     * @public
      */
     public recognized: (sender: Recognizer, event: SpeechRecognitionEventArgs) => void;
 
     /**
      * The event canceled signals that an error occurred during recognition.
      * @member SpeechRecognizer.prototype.canceled
+     * @function
+     * @public
      */
     public canceled: (sender: Recognizer, event: SpeechRecognitionCanceledEventArgs) => void;
 
     /**
      * Gets the endpoint id of a customized speech model that is used for speech recognition.
      * @member SpeechRecognizer.prototype.endpointId
-     * @returns the endpoint id of a customized speech model that is used for speech recognition.
+     * @function
+     * @public
+     * @returns {string} the endpoint id of a customized speech model that is used for speech recognition.
      */
     public get endpointId(): string {
         Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
@@ -97,7 +105,9 @@ export class SpeechRecognizer extends Recognizer {
     /**
      * Sets the authorization token used to communicate with the service.
      * @member SpeechRecognizer.prototype.authorizationToken
-     * @param token - Authorization token.
+     * @function
+     * @public
+     * @param {string} token - Authorization token.
      */
     public set authorizationToken(token: string) {
         Contracts.throwIfNullOrWhitespace(token, "token");
@@ -107,7 +117,9 @@ export class SpeechRecognizer extends Recognizer {
     /**
      * Gets the authorization token used to communicate with the service.
      * @member SpeechRecognizer.prototype.authorizationToken
-     * @return Authorization token.
+     * @function
+     * @public
+     * @returns {string} Authorization token.
      */
     public get authorizationToken(): string {
         return this.properties.getProperty(PropertyId.SpeechServiceAuthorization_Token);
@@ -116,7 +128,9 @@ export class SpeechRecognizer extends Recognizer {
     /**
      * Gets the spoken language of recognition.
      * @member SpeechRecognizer.prototype.speechRecognitionLanguage
-     * @returns The spoken language of recognition.
+     * @function
+     * @public
+     * @returns {string} The spoken language of recognition.
      */
     public get speechRecognitionLanguage(): string {
         Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
@@ -127,7 +141,9 @@ export class SpeechRecognizer extends Recognizer {
     /**
      * Gets the output format of recognition.
      * @member SpeechRecognizer.prototype.outputFormat
-     * @returns The output format of recognition.
+     * @function
+     * @public
+     * @returns {OutputFormat} The output format of recognition.
      */
     public get outputFormat(): OutputFormat {
         Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
@@ -142,7 +158,9 @@ export class SpeechRecognizer extends Recognizer {
     /**
      * The collection of properties and their values defined for this SpeechRecognizer.
      * @member SpeechRecognizer.prototype.properties
-     * @returns The collection of properties and their values defined for this SpeechRecognizer.
+     * @function
+     * @public
+     * @returns {PropertyCollection} The collection of properties and their values defined for this SpeechRecognizer.
      */
     public get properties(): PropertyCollection {
         return this.privProperties;
@@ -153,6 +171,8 @@ export class SpeechRecognizer extends Recognizer {
      * Note: RecognizeOnceAsync() returns when the first utterance has been recognized, so it is suitable only for single shot recognition
      *       like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
      * @member SpeechRecognizer.prototype.recognizeOnceAsync
+     * @function
+     * @public
      * @param cb - Callback that received the SpeechRecognitionResult.
      * @param err - Callback invoked in case of an error.
      */
@@ -180,6 +200,8 @@ export class SpeechRecognizer extends Recognizer {
      * Starts speech recognition, until stopContinuousRecognitionAsync() is called.
      * User must subscribe to events to receive recognition results.
      * @member SpeechRecognizer.prototype.startContinuousRecognitionAsync
+     * @function
+     * @public
      * @param cb - Callback invoked once the recognition has started.
      * @param err - Callback invoked in case of an error.
      */
@@ -218,6 +240,8 @@ export class SpeechRecognizer extends Recognizer {
     /**
      * Stops continuous speech recognition.
      * @member SpeechRecognizer.prototype.stopContinuousRecognitionAsync
+     * @function
+     * @public
      * @param cb - Callback invoked once the recognition has stopped.
      * @param err - Callback invoked in case of an error.
      */
@@ -242,7 +266,9 @@ export class SpeechRecognizer extends Recognizer {
      * User must subscribe to events to receive recognition results.
      * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
      * @member SpeechRecognizer.prototype.startKeywordRecognitionAsync
-     * @param model The keyword recognition model that specifies the keyword to be recognized.
+     * @function
+     * @public
+     * @param {KeywordRecognitionModel} model The keyword recognition model that specifies the keyword to be recognized.
      * @param cb - Callback invoked once the recognition has started.
      * @param err - Callback invoked in case of an error.
      */
@@ -258,6 +284,8 @@ export class SpeechRecognizer extends Recognizer {
      * Stops continuous speech recognition.
      * Note: Key word spotting functionality is only available on the Speech Devices SDK. This functionality is currently not included in the SDK itself.
      * @member SpeechRecognizer.prototype.stopKeywordRecognitionAsync
+     * @function
+     * @public
      * @param cb - Callback invoked once the recognition has stopped.
      * @param err - Callback invoked in case of an error.
      */
@@ -270,6 +298,8 @@ export class SpeechRecognizer extends Recognizer {
     /**
      * closes all external resources held by an instance of this class.
      * @member SpeechRecognizer.prototype.close
+     * @function
+     * @public
      */
     public close(): void {
         Contracts.throwIfDisposed(this.disposedSpeechRecognizer);
@@ -280,7 +310,9 @@ export class SpeechRecognizer extends Recognizer {
     /**
      * Disposes any resources held by the object.
      * @member SpeechRecognizer.prototype.dispose
-     * @param disposing - true if disposing the object.
+     * @function
+     * @public
+     * @param {boolean} disposing - true if disposing the object.
      */
     protected dispose(disposing: boolean): void {
         if (this.disposedSpeechRecognizer) {

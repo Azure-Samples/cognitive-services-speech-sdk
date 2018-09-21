@@ -25,8 +25,7 @@ import {
     TranslationStatus,
 } from "../common/Exports";
 import {
-    OutputFormat,
-    SynthesisStatus,
+    OutputFormat, ResultReason,
 } from "../sdk/Exports";
 import {
     IDetailedSpeechPhrase,
@@ -407,6 +406,30 @@ export class SpeechServiceRecognizer extends ServiceRecognizerBase {
     }
 }
 
+/**
+ * @class SynthesisStatus
+ * @private
+ */
+enum SynthesisStatus {
+    /**
+     * The response contains valid audio data.
+     * @member SynthesisStatus.Success
+     */
+    Success,
+
+    /**
+     * Indicates the end of audio data. No valid audio data is included in the message.
+     * @member SynthesisStatus.SynthesisEnd
+     */
+    SynthesisEnd,
+
+    /**
+     * Indicates an error occurred during synthesis data processing.
+     * @member SynthesisStatus.Error
+     */
+    Error,
+}
+
 // tslint:disable-next-line:max-classes-per-file
 export class TranslationServiceRecognizer extends ServiceRecognizerBase {
 
@@ -471,14 +494,18 @@ export class TranslationServiceRecognizer extends ServiceRecognizerBase {
                 const synthEnd: ITranslationSynthesisEnd = JSON.parse(connectionMessage.TextBody);
                 const status3: string = "" + synthEnd.SynthesisStatus;
                 const synthStatus = (SynthesisStatus as any)[status3];
-                synthEnd.SynthesisStatus = synthStatus;
 
                 switch (synthStatus) {
                     case SynthesisStatus.Error:
+                        synthEnd.SynthesisStatus = ResultReason.Canceled;
                         requestSession.OnServiceTranslationSynthesisError(synthEnd);
                         break;
                     case SynthesisStatus.Success:
+                        synthEnd.SynthesisStatus = ResultReason.SynthesizingAudio;
                         requestSession.OnServiceTranslationSynthesis(undefined);
+                        break;
+                    default:
+                        synthEnd.SynthesisStatus = ResultReason.SynthesizingAudioCompleted;
                         break;
                 }
                 break;

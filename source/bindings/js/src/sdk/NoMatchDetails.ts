@@ -25,7 +25,7 @@ export class NoMatchDetails {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param reason - The no-match reason.
+     * @param {NoMatchReason} reason - The no-match reason.
      */
     private constructor(reason: NoMatchReason) {
         this.privReason = reason;
@@ -34,8 +34,10 @@ export class NoMatchDetails {
     /**
      * Creates an instance of NoMatchDetails object for the NoMatch SpeechRecognitionResults.
      * @member NoMatchDetails.fromResult
-     * @param result - The recognition result that was not recognized.
-     * @return The no match details object being created.
+     * @function
+     * @public
+     * @param {SpeechRecognitionResult | IntentRecognitionResult | TranslationRecognitionResult} result - The recognition result that was not recognized.
+     * @returns {NoMatchDetails} The no match details object being created.
      */
     public static fromResult(result: SpeechRecognitionResult | IntentRecognitionResult | TranslationRecognitionResult): NoMatchDetails {
         const simpleSpeech: ISimpleSpeechPhrase = JSON.parse(result.json);
@@ -62,7 +64,9 @@ export class NoMatchDetails {
     /**
      * The reason the recognition was canceled.
      * @member NoMatchDetails.prototype.reason
-     * @return Specifies the reason canceled.
+     * @function
+     * @public
+     * @returns {NoMatchReason} Specifies the reason canceled.
      */
     public get reason(): NoMatchReason {
         return this.privReason;

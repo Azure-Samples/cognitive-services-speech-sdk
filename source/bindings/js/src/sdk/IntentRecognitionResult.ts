@@ -34,7 +34,9 @@ export class IntentRecognitionResult extends SpeechRecognitionResult {
     /**
      * A String that represents the intent identifier being recognized.
      * @member IntentRecognitionResult.prototype.intentId
-     * @returns A String that represents the intent identifier being recognized.
+     * @function
+     * @public
+     * @returns {string} A String that represents the intent identifier being recognized.
      */
     public get intentId(): string {
         return this.privIntentId;

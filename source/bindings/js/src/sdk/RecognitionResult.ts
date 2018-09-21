@@ -21,14 +21,14 @@ export class RecognitionResult {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param resultId - The result id.
-     * @param reason - The reason.
-     * @param text - The recognized text.
-     * @param duration - The duration.
-     * @param offset - The offset into the stream.
-     * @param errorDetails - Error details, if provided.
-     * @param json - Additional Json, if provided.
-     * @param properties - Additional properties, if provided.
+     * @param {string} resultId - The result id.
+     * @param {ResultReason} reason - The reason.
+     * @param {string} text - The recognized text.
+     * @param {number} duration - The duration.
+     * @param {number} offset - The offset into the stream.
+     * @param {string} errorDetails - Error details, if provided.
+     * @param {string} json - Additional Json, if provided.
+     * @param {PropertyCollection} properties - Additional properties, if provided.
      */
     constructor(resultId?: string, reason?: ResultReason, text?: string, duration?: number, offset?: number, errorDetails?: string, json?: string, properties?: PropertyCollection) {
         this.privResultId = resultId;
@@ -44,7 +44,9 @@ export class RecognitionResult {
     /**
      * Specifies the result identifier.
      * @member RecognitionResult.prototype.resultId
-     * @returns Specifies the result identifier.
+     * @function
+     * @public
+     * @returns {string} Specifies the result identifier.
      */
     public get resultId(): string {
         return this.privResultId;
@@ -53,7 +55,9 @@ export class RecognitionResult {
     /**
      * Specifies status of the result.
      * @member RecognitionResult.prototype.reason
-     * @returns Specifies status of the result.
+     * @function
+     * @public
+     * @returns {ResultReason} Specifies status of the result.
      */
     public get reason(): ResultReason {
         return this.privReason;
@@ -62,25 +66,31 @@ export class RecognitionResult {
     /**
      * Presents the recognized text in the result.
      * @member RecognitionResult.prototype.text
-     * @returns Presents the recognized text in the result.
+     * @function
+     * @public
+     * @returns {string} Presents the recognized text in the result.
      */
     public get text(): string {
         return this.privText;
     }
 
     /**
-     * Duration of recognized speech in milliseconds.
+     * Duration of recognized speech in 100 nano second incements.
      * @member RecognitionResult.prototype.duration
-     * @returns Duration of recognized speech in milliseconds.
+     * @function
+     * @public
+     * @returns {number} Duration of recognized speech in 100 nano second incements.
      */
     public get duration(): number {
         return this.privDuration;
     }
 
     /**
-     * Offset of recognized speech in milliseconds.
+     * Offset of recognized speech in 100 nano second incements.
      * @member RecognitionResult.prototype.offset
-     * @returns Offset of recognized speech in milliseconds.
+     * @function
+     * @public
+     * @returns {number} Offset of recognized speech in 100 nano second incements.
      */
     public get offset(): number {
         return this.privOffset;
@@ -90,7 +100,9 @@ export class RecognitionResult {
      * In case of an unsuccessful recognition, provides a brief description of an occurred error.
      * This field is only filled-out if the recognition status (@see RecognitionStatus) is set to Canceled.
      * @member RecognitionResult.prototype.errorDetails
-     * @returns a brief description of an error.
+     * @function
+     * @public
+     * @returns {string} a brief description of an error.
      */
     public get errorDetails(): string {
         return this.privErrorDetails;
@@ -99,7 +111,9 @@ export class RecognitionResult {
     /**
      * A string containing Json serialized recognition result as it was received from the service.
      * @member RecognitionResult.prototype.json
-     * @returns Json serialized representation of the result.
+     * @function
+     * @private
+     * @returns {string} Json serialized representation of the result.
      */
     public get json(): string {
         return this.privJson;
@@ -108,7 +122,9 @@ export class RecognitionResult {
     /**
      *  The set of properties exposed in the result.
      * @member RecognitionResult.prototype.properties
-     * @returns The set of properties exposed in the result.
+     * @function
+     * @public
+     * @returns {PropertyCollection} The set of properties exposed in the result.
      */
     public get properties(): PropertyCollection {
         return this.privProperties;

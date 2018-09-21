@@ -16,10 +16,10 @@ export class SpeechRecognitionCanceledEventArgs extends RecognitionEventArgs {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param reason - The cancellation reason.
-     * @param errorDetails - Error details, if provided.
-     * @param offset - The offset.
-     * @param sessionId - The session id.
+     * @param {CancellationReason} reason - The cancellation reason.
+     * @param {string} errorDetails - Error details, if provided.
+     * @param {number} offset - The offset.
+     * @param {string} sessionId - The session id.
      */
     public constructor(reason: CancellationReason, errorDetails: string, offset?: number, sessionId?: string) {
         super(offset, sessionId);
@@ -31,7 +31,9 @@ export class SpeechRecognitionCanceledEventArgs extends RecognitionEventArgs {
     /**
      * The reason the recognition was canceled.
      * @member SpeechRecognitionCanceledEventArgs.prototype.reason
-     * @return Specifies the reason canceled.
+     * @function
+     * @public
+     * @returns {CancellationReason} Specifies the reason canceled.
      */
     public get reason(): CancellationReason {
         return this.privReason;
@@ -41,7 +43,9 @@ export class SpeechRecognitionCanceledEventArgs extends RecognitionEventArgs {
      * In case of an unsuccessful recognition, provides a details of why the occurred error.
      * This field is only filled-out if the reason canceled (@see getReason) is set to Error.
      * @member SpeechRecognitionCanceledEventArgs.prototype.errorDetails
-     * @return A String that represents the error details.
+     * @function
+     * @public
+     * @returns {string} A String that represents the error details.
      */
     public get errorDetails(): string {
         return this.privErrorDetails;

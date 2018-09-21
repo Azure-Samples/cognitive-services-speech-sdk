@@ -9,7 +9,7 @@ import { PropertyCollection } from "./Exports";
  * Represents collection of parameters and their values.
  * @class Translation
  */
-export class Translation {
+export class Translations {
     // Use an PropertyCollection internally, just wrapping it to hide the | enum syntax it has.
     private map: PropertyCollection = new PropertyCollection();
 
@@ -18,9 +18,11 @@ export class Translation {
      * Currently only String, int and bool are allowed.
      * If the name is not available, the specified defaultValue is returned.
      * @member Translation.prototype.get
+     * @function
+     * @public
      * @param {string} key - The parameter name.
      * @param {string} def - The default value which is returned if the parameter is not available in the collection.
-     * @returns value of the parameter.
+     * @returns {string} value of the parameter.
      */
     public get(key: string, def?: string): string {
         return this.map.getProperty(key, def);
@@ -29,6 +31,8 @@ export class Translation {
     /**
      * Sets the String value of the parameter specified by name.
      * @member Translation.prototype.set
+     * @function
+     * @public
      * @param {string} key - The parameter name.
      * @param {string} value - The value of the parameter.
      */

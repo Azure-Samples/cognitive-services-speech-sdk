@@ -23,8 +23,8 @@ export class CancellationDetails {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param reason - The cancellation reason.
-     * @param errorDetails - The error details, if provided.
+     * @param {CancellationReason} reason - The cancellation reason.
+     * @param {string} errorDetails - The error details, if provided.
      */
     private constructor(reason: CancellationReason, errorDetails: string) {
         this.privReason = reason;
@@ -34,8 +34,10 @@ export class CancellationDetails {
     /**
      * Creates an instance of CancellationDetails object for the canceled RecognitionResult.
      * @member CancellationDetails.fromResult
-     * @param result - The result that was canceled.
-     * @return - The cancellation details object being created.
+     * @function
+     * @public
+     * @param {RecognitionResult} result - The result that was canceled.
+     * @returns {CancellationDetails} The cancellation details object being created.
      */
     public static fromResult(result: RecognitionResult): CancellationDetails {
         const simpleSpeech: ISimpleSpeechPhrase = JSON.parse(result.json);
@@ -64,7 +66,9 @@ export class CancellationDetails {
     /**
      * The reason the recognition was canceled.
      * @member CancellationDetails.prototype.reason
-     * @return Specifies the reason canceled.
+     * @function
+     * @public
+     * @returns {CancellationReason} Specifies the reason canceled.
      */
     public get reason(): CancellationReason {
         return this.privReason;
@@ -74,7 +78,9 @@ export class CancellationDetails {
      * In case of an unsuccessful recognition, provides a details of why the occurred error.
      * This field is only filled-out if the reason canceled (@see getReason) is set to Error.
      * @member CancellationDetails.prototype.errorDetails
-     * @return A String that represents the error details.
+     * @function
+     * @public
+     * @returns {string} A String that represents the error details.
      */
     public get errorDetails(): string {
         return this.privErrorDetails;

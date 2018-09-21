@@ -58,30 +58,40 @@ export abstract class Recognizer {
     /**
      * Defines event handler for session started events.
      * @member Recognizer.prototype.sessionStarted
+     * @function
+     * @public
      */
     public sessionStarted: (sender: Recognizer, event: SessionEventArgs) => void;
 
     /**
      * Defines event handler for session stopped events.
      * @member Recognizer.prototype.sessionStopped
+     * @function
+     * @public
      */
     public sessionStopped: (sender: Recognizer, event: SessionEventArgs) => void;
 
     /**
      * Defines event handler for speech started events.
      * @member Recognizer.prototype.speechStartDetected
+     * @function
+     * @public
      */
     public speechStartDetected: (sender: Recognizer, event: RecognitionEventArgs) => void;
 
     /**
      * Defines event handler for speech stopped events.
      * @member Recognizer.prototype.speechEndDetected
+     * @function
+     * @public
      */
     public speechEndDetected: (sender: Recognizer, event: RecognitionEventArgs) => void;
 
     /**
      * Dispose of associated resources.
      * @member Recognizer.prototype.close
+     * @function
+     * @public
      */
     public close(): void {
         Contracts.throwIfDisposed(this.disposed);
@@ -94,6 +104,8 @@ export abstract class Recognizer {
      * The Boolean parameter disposing indicates whether the method is called from Dispose (if disposing is true) or from the finalizer (if disposing is false).
      * Derived classes should override this method to dispose resource if needed.
      * @member Recognizer.prototype.dispose
+     * @function
+     * @public
      * @param {boolean} disposing - Flag to request disposal.
      */
     protected dispose(disposing: boolean): void {
@@ -126,7 +138,7 @@ export abstract class Recognizer {
             new PlatformConfig(
                 new Context(
                     new OS("navigator.userAgent", "Browser", null),
-                    new Device("SpeechSample", "SpeechSample", "1.0.00000"))), // TODO: Need to get these values from the caller?
+                    new Device("Microsoft", "SpeechSDK", "1.0.0"))), // TODO: Need to get these values from the caller?
             recognitionMode); // SDK.SpeechResultFormat.Simple (Options - Simple/Detailed)
 
         const subscriptionKey = speechProperties.getProperty(PropertyId.SpeechServiceConnection_Key, undefined);

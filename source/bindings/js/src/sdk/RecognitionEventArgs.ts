@@ -15,8 +15,8 @@ export class RecognitionEventArgs extends SessionEventArgs {
     /**
      * Creates and initializes an instance of this class.
      * @constructor
-     * @param offset - The offset.
-     * @param sessionId - The session id.
+     * @param {number} offset - The offset.
+     * @param {string} sessionId - The session id.
      */
     public constructor(offset: number, sessionId?: string) {
         super(sessionId);
@@ -27,6 +27,8 @@ export class RecognitionEventArgs extends SessionEventArgs {
     /**
      * Represents the message offset
      * @member RecognitionEventArgs.prototype.offset
+     * @function
+     * @public
      */
     public get offset(): number {
         return this.privOffset;

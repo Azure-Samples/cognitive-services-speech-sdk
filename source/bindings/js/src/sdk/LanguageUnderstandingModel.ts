@@ -20,8 +20,10 @@ export class LanguageUnderstandingModel {
     /**
      * Creates an language understanding model using the specified endpoint.
      * @member LanguageUnderstandingModel.fromEndpoint
+     * @function
+     * @public
      * @param {URL} uri - A String that represents the endpoint of the language understanding model.
-     * @returns The language understanding model being created.
+     * @returns {LanguageUnderstandingModel} The language understanding model being created.
      */
     public static fromEndpoint(uri: URL): LanguageUnderstandingModel {
         Contracts.throwIfNull(uri, "uri");
@@ -61,8 +63,10 @@ export class LanguageUnderstandingModel {
     /**
      * Creates an language understanding model using the application id of Language Understanding service.
      * @member LanguageUnderstandingModel.fromAppId
+     * @function
+     * @public
      * @param {string} appId - A String that represents the application id of Language Understanding service.
-     * @returns The language understanding model being created.
+     * @returns {LanguageUnderstandingModel} The language understanding model being created.
      */
     public static fromAppId(appId: string): LanguageUnderstandingModel {
         Contracts.throwIfNullOrWhitespace(appId, "appId");
@@ -75,10 +79,12 @@ export class LanguageUnderstandingModel {
     /**
      * Creates a language understanding model using hostname, subscription key and application id of Language Understanding service.
      * @member LanguageUnderstandingModel.fromSubscription
-     * @param subscriptionKey - A String that represents the subscription key of Language Understanding service.
-     * @param appId - A String that represents the application id of Language Understanding service.
-     * @param region - A String that represents the region of the Language Understanding service (see the <a href="https://aka.ms/csspeech/region">region page</a>).
-     * @return The language understanding model being created.
+     * @function
+     * @public
+     * @param {string} subscriptionKey - A String that represents the subscription key of Language Understanding service.
+     * @param {string} appId - A String that represents the application id of Language Understanding service.
+     * @param {LanguageUnderstandingModel} region - A String that represents the region of the Language Understanding service (see the <a href="https://aka.ms/csspeech/region">region page</a>).
+     * @returns {LanguageUnderstandingModel} The language understanding model being created.
      */
     public static fromSubscription(subscriptionKey: string, appId: string, region: string): LanguageUnderstandingModel {
         Contracts.throwIfNullOrWhitespace(subscriptionKey, "subscriptionKey");
@@ -93,6 +99,10 @@ export class LanguageUnderstandingModel {
     }
 }
 
+/**
+ * @private
+ * @class LanguageUnderstandingModelImpl
+ */
 // tslint:disable-next-line:max-classes-per-file
 export class LanguageUnderstandingModelImpl extends LanguageUnderstandingModel {
     public appId: string;
