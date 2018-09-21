@@ -1288,7 +1288,7 @@ phases:
   - task: CMake@1
     displayName: Generate makefiles for iOS device
     inputs:
-      cmakeArgs: ' -DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DBUILD_JAVA=OFF -DBUILD_CSHARP=OFF -DBUILD_PYTHON=OFF -Duse_openssl=OFF -Duse_builtin_httpapi=ON -DCMAKE_TOOLCHAIN_FILE=../external/ios-cmake/ios.toolchain.cmake -DIOS_PLATFORM=OS -DENABLE_BITCODE=1 -DIOS_DEPLOYMENT_TARGET="10.0" -DENABLE_VISIBILITY=1 ..'
+      cmakeArgs: ' -DCMAKE_BUILD_TYPE=$(BuildConfiguration) -DBUILD_JAVA=OFF -DBUILD_CSHARP=OFF -DBUILD_PYTHON=OFF -Duse_openssl=OFF -Duse_builtin_httpapi=ON -DCMAKE_TOOLCHAIN_FILE=../external/ios-cmake/ios.toolchain.cmake -DIOS_PLATFORM=OS -DIOS_ARCH=arm64 -DENABLE_BITCODE=1 -DIOS_DEPLOYMENT_TARGET="10.0" -DENABLE_VISIBILITY=1 ..'
       workingDirectory: build_ios_device
   - task: CMake@1
     displayName: CMake build for iOS device
