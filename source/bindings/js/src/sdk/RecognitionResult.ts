@@ -112,7 +112,7 @@ export class RecognitionResult {
      * A string containing Json serialized recognition result as it was received from the service.
      * @member RecognitionResult.prototype.json
      * @function
-     * @public
+     * @private
      * @returns {string} Json serialized representation of the result.
      */
     public get json(): string {
