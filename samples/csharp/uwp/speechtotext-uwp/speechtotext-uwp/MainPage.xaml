@@ -55,8 +55,8 @@
                 <Button x:Name="inputButton" Content="Speech recognition with microphone input" Click="SpeechRecognitionFromMicrophone_ButtonClicked" Height="35"/>
                 <TextBlock x:Name="recoResultTextBlock"/>
             </StackPanel>
-            <Button Content="Speech Recognition with File Input" Click="{x:Bind SpeechRecogntionFromFile_ButtonClicked}" Margin="0,10,0,0"/>
-            <Button Content="Speech Recognition with Stream Input" Click="{x:Bind SpeechRecogntionFromStream_ButtonClicked}" Margin="0,10,0,0"/>
+            <Button Content="Speech Recognition with File Input" Click="{x:Bind SpeechRecognitionFromFile_ButtonClicked}" Margin="0,10,0,0"/>
+            <Button Content="Speech Recognition with Stream Input" Click="{x:Bind SpeechRecognitionFromStream_ButtonClicked}" Margin="0,10,0,0"/>
             <StackPanel x:Name="StatusPanel" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True">
                 <TextBlock x:Name="StatusLabel" Margin="10,0,0,10" TextWrapping="Wrap" Text="Status:" FontSize="20"/>
                 <Border x:Name="StatusBorder" Margin="0,0,0,0">

@@ -62,7 +62,7 @@ checkEmptyStdout \
 # Note: we rely on binary files being identified correctly (cf. above)
 # TODO limit to specific extensions if necessary
 checkEmptyStdout \
-  "git grep -I -l \$'\t' $gitTree | cut -d: -f2- | grep -v \.sln$ | grep -v /Makefile$" \
+  "git grep -I -l \$'\t' $gitTree | cut -d: -f2- | grep -v ^external/ | grep -v \.sln$ | grep -v /Makefile$ | grep -v project\.pbxproj | grep -v Info\.plist" \
   "text file(s) with hard tabs encountered"
 
 checkEmptyStdout \

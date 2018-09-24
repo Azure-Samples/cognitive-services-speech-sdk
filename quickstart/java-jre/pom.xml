@@ -20,7 +20,7 @@
   <repositories>
     <repository>
       <id>maven-cognitiveservices-speech</id>
-      <name>Public online microsoft cognitive services speech repository</name>
+      <name>Microsoft Cognitive Services Speech Maven Repository</name>
       <url>https://csspeechstorage.blob.core.windows.net/maven/</url>
     </repository>
   </repositories>
@@ -30,7 +30,7 @@
     <dependency>
       <groupId>com.microsoft.cognitiveservices.speech</groupId>
       <artifactId>client-sdk</artifactId>
-      <version>0.6.0</version>
+      <version>1.0.0</version>
     </dependency>
   </dependencies>
   <!-- </dependencies> -->

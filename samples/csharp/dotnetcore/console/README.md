@@ -24,7 +24,7 @@ It runs under .NET Core 2.0 on Windows or Linux (Ubuntu 16.04 x64 only).
 
 ## Build the sample
 
-* **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
+* **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
 * [Download the sample code to your development PC.](../../README.md#get-the-samples)
 
   > **Note:** make sure to download the complete set of samples, not just this directory.
@@ -38,7 +38,7 @@ It runs under .NET Core 2.0 on Windows or Linux (Ubuntu 16.04 x64 only).
   * `YourSubscriptionKey`: replace with your subscription key.
   * `YourServiceRegion`: replace with the [region](https://aka.ms/csspeech/region) your subscription is associated with.
     For example, `westus` or `northeurope`.
-  * `YourDeploymentId` (optional): replace with the deployment ID of your customized model in [CRIS](https://cris.ai).
+  * `YourEndpointId` (optional): replace with the endpoint ID of your customized model in [CRIS](https://cris.ai).
   * The following settings apply for intent recognition powered by the [Language Understanding service (LUIS)](https://aka.ms/csspeech/luisdocs):
     * `YourLanguageUnderstandingSubscriptionKey`: replace with your Language Understanding service subscription key (endpoint key).
     * `YourLanguageUnderstandingServiceRegion`: replace with the region associated with your Language Understanding service subscription.

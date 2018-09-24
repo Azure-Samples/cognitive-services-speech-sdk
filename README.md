@@ -1,13 +1,13 @@
 # Sample Repository for the Microsoft Cognitive Services Speech SDK
 
-This project hosts the **samples** for the Microsoft Cognitive Services Speech SDK (Preview). To find out more about the Microsoft Cognitive Services Speech SDK itself, please visit the [SDK documentation site](https://aka.ms/csspeech).
+This project hosts the **samples** for the Microsoft Cognitive Services Speech SDK. To find out more about the Microsoft Cognitive Services Speech SDK itself, please visit the [SDK documentation site](https://aka.ms/csspeech).
 
 ## Features
 
 This repository hosts samples that help you to get started with several features of the SDK.
 In addition more complex scenarios are included to give you a head-start on using speech technology in your application.
 
-We tested the samples with the latest released version of the SDK (0.6.0) on Windows 10, Ubuntu 16.04 x64, and ARM-based Android devices (API 23: Android 6.0 Marshmallow or higher).
+We tested the samples with the latest released version of the SDK (1.0.0) on Windows 10, Ubuntu 16.04 x64, and ARM-based Android devices (API 23: Android 6.0 Marshmallow or higher).
 
 ## Getting Started
 
@@ -25,7 +25,7 @@ The [SDK documentation](https://aka.ms/csspeech) has extensive sections about ge
 ## Build and run the samples
 
 > **Note: the samples make use of the Microsoft Cognitive Services Speech SDK.
-> By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
+> By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
 
 Please see the description of each individual sample for instructions on how to build and run it.
 
@@ -42,6 +42,8 @@ If you want to build them from scratch, please follow the articles in the Quicks
 | [Quickstart C# .NET Core (Windows or Linux)](./quickstart/csharp-dotnetcore/)                               | Windows, Linux  | Demonstrates one-shot speech recognition from microphone      |
 | [Quickstart for Android](./quickstart/java-android/)                                                        | Android  | Demonstrates one-shot speech recognition from microphone             |
 | [Quickstart Java JRE](./quickstart/java-jre/)                                                               | Windows, Linux | Demonstrates one-shot speech recognition from microphone       |
+| [Quickstart JavaScript](./quickstart/js-browser/)                                                           | Web | Demonstrates one-shot speech recognition from microphone                  |
+| [Quickstart Objective-C](./quickstart/objectivec-ios/)                                                      | iOS | Demonstrates one-shot speech recognition from a file with recorded speech |
 
 The following samples demonstrate additional capabilities of the Speech SDK, such additional modes of speech recognition as well as intent recognition and translation:
 

@@ -12,8 +12,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import com.microsoft.cognitiveservices.speech.RecognitionStatus;
-import com.microsoft.cognitiveservices.speech.SpeechFactory;
+import com.microsoft.cognitiveservices.speech.ResultReason;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 
@@ -36,29 +36,19 @@ public class MainActivity extends AppCompatActivity {
         // Note: we need to request the permissions
         int requestCode = 5; // unique code for the permission request
         ActivityCompat.requestPermissions(MainActivity.this, new String[]{RECORD_AUDIO, INTERNET}, requestCode);
-
-        try {
-            // Note: Configure native platform binding. This currently configures the directory
-            //       in which to store certificates required to access the speech service.
-            //       It is required to call this once after app start.
-            SpeechFactory.configureNativePlatformBindingWithDefaultCertificate();
-        } catch (Exception ex) {
-            Log.e("SpeechSDKDemo", "unexpected " + ex.getMessage());
-            assert(false);
-        }
     }
 
     public void onSpeechButtonClicked(View v) {
         TextView txt = (TextView) this.findViewById(R.id.hello); // 'hello' is the ID of your text view
 
         try {
-            SpeechFactory factory = SpeechFactory.fromSubscription(speechSubscriptionKey, serviceRegion);
-            assert(factory!= null);
+            SpeechConfig config = SpeechConfig.fromSubscription(speechSubscriptionKey, serviceRegion);
+            assert(config != null);
 
-            SpeechRecognizer reco = factory.createSpeechRecognizer();
+            SpeechRecognizer reco = new SpeechRecognizer(config);
             assert(reco != null);
 
-            Future<SpeechRecognitionResult> task = reco.recognizeAsync();
+            Future<SpeechRecognitionResult> task = reco.recognizeOnceAsync();
             assert(task != null);
 
             // Note: this will block the UI thread, so eventually, you want to
@@ -66,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
             SpeechRecognitionResult result = task.get();
             assert(result != null);
 
-            if (result.getReason() == RecognitionStatus.Recognized) {
+            if (result.getReason() == ResultReason.RecognizedSpeech) {
                 txt.setText(result.toString());
             }
             else {
@@ -74,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
             reco.close();
-            factory.close();
         } catch (Exception ex) {
             Log.e("SpeechSDKDemo", "unexpected " + ex.getMessage());
             assert(false);

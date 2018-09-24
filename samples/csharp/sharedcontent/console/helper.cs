@@ -4,18 +4,23 @@
 //
 
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 using System.Diagnostics;
 using System.IO;
+
 
 namespace MicrosoftSpeechSDKSamples
 {
     public class Helper
     {
-        public static AudioInputStream OpenWaveFile(string filename)
+        public static AudioConfig OpenWavFile(string filename)
         {
             BinaryReader reader = new BinaryReader(File.OpenRead(filename));
-            AudioInputStreamFormat format = new AudioInputStreamFormat();
+            return OpenWavFile(reader);
+        }
 
+        public static AudioConfig OpenWavFile(BinaryReader reader)
+        {
             // Tag "RIFF"
             char[] data = new char[4];
             reader.Read(data, 0, 4);
@@ -33,14 +38,15 @@ namespace MicrosoftSpeechSDKSamples
             // Tag: "fmt"
             reader.Read(data, 0, 4);
             Trace.Assert((data[0] == 'f') && (data[1] == 'm') && (data[2] == 't') && (data[3] == ' '), "Wrong format tag in wav header");
+
             // chunk format size
-            long formatSize = reader.ReadInt32();
-            format.FormatTag = reader.ReadUInt16();
-            format.Channels = reader.ReadUInt16();
-            format.SamplesPerSec = (int)reader.ReadUInt32();
-            format.AvgBytesPerSec = (int)reader.ReadUInt32();
-            format.BlockAlign = reader.ReadUInt16();
-            format.BitsPerSample = reader.ReadUInt16();
+            var formatSize = reader.ReadInt32();
+            var formatTag = reader.ReadUInt16();
+            var channels = reader.ReadUInt16();
+            var samplesPerSecond = reader.ReadUInt32();
+            var avgBytesPerSec = reader.ReadUInt32();
+            var blockAlign = reader.ReadUInt16();
+            var bitsPerSample = reader.ReadUInt16();
 
             // Until now we have read 16 bytes in format, the rest is cbSize and is ignored for now.
             if (formatSize > 16)
@@ -55,7 +61,70 @@ namespace MicrosoftSpeechSDKSamples
 
             // now, we have the format in the format parameter and the
             // reader set to the start of the body, i.e., the raw sample data
-            return new BinaryAudioStreamReader(format, reader);
+            AudioStreamFormat format = AudioStreamFormat.GetWaveFormatPCM(samplesPerSecond, (byte)bitsPerSample, (byte)channels);
+            return AudioConfig.FromStreamInput(new BinaryAudioStreamReader(reader), format);
         }
+    }
+
+    /// <summary>
+    /// Adapter class to the native stream api.
+    /// </summary>
+    public sealed class BinaryAudioStreamReader : PullAudioInputStreamCallback
+    {
+        private System.IO.BinaryReader _reader;
+
+        /// <summary>
+        /// Creates and initializes an instance of BinaryAudioStreamReader.
+        /// </summary>
+        /// <param name="reader">The underlying stream to read the audio data from. Note: The stream contains the bare sample data, not the container (like wave header data, etc).</param>
+        public BinaryAudioStreamReader(System.IO.BinaryReader reader)
+        {
+            _reader = reader;
+        }
+
+        /// <summary>
+        /// Creates and initializes an instance of BinaryAudioStreamReader.
+        /// </summary>
+        /// <param name="stream">The underlying stream to read the audio data from. Note: The stream contains the bare sample data, not the container (like wave header data, etc).</param>
+        public BinaryAudioStreamReader(System.IO.Stream stream) 
+            : this(new System.IO.BinaryReader(stream))
+        {
+        }
+
+        /// <summary>
+        /// Reads binary data from the stream.
+        /// </summary>
+        /// <param name="dataBuffer">The buffer to fill</param>
+        /// <param name="size">The size of the buffer.</param>
+        /// <returns>The number of bytes filled, or 0 in case the stream hits its end and there is no more data available.
+        /// If there is no data immediate available, Read() blocks until the next data becomes available.</returns>
+        public override int Read(byte[] dataBuffer, uint size)
+        {
+            return _reader.Read(dataBuffer, 0, (int)size);
+        }
+
+        /// <summary>
+        /// This method performs cleanup of resources.
+        /// The Boolean parameter <paramref name="disposing"/> indicates whether the method is called from <see cref="IDisposable.Dispose"/> (if <paramref name="disposing"/> is true) or from the finalizer (if <paramref name="disposing"/> is false).
+        /// Derived classes should override this method to dispose resource if needed.
+        /// </summary>
+        /// <param name="disposing">Flag to request disposal.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                _reader.Dispose();
+            }
+
+            disposed = true;
+            base.Dispose(disposing);
+        }
+
+        private bool disposed = false;
     }
 }

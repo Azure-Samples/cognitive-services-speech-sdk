@@ -15,75 +15,80 @@ import java.io.FileNotFoundException;
 
 // <toplevel>
 import com.microsoft.cognitiveservices.speech.*;
+import com.microsoft.cognitiveservices.speech.audio.*;
 import com.microsoft.cognitiveservices.speech.translation.*;
 // </toplevel>
 
 @SuppressWarnings("resource") // scanner
 public class TranslationSamples {
     // Translation from microphone.
-    public static void translationWithMicrophoneAsync() throws InterruptedException, ExecutionException, IOException {
+    public static void translationWithMicrophoneAsync() throws InterruptedException, ExecutionException, IOException
+    {
         // <TranslationWithMicrophoneAsync>
-        // Creates an instance of a speech factory with specified
+        // Creates an instance of a speech translation config with specified
         // subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
-        SpeechFactory factory = SpeechFactory.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechTranslationConfig config = SpeechTranslationConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-        // Sets source and target languages
+        // Sets source and target language(s).
         String fromLanguage = "en-US";
-        ArrayList<String> toLanguages = new ArrayList<String>();
-        toLanguages.add("de");
+        config.setSpeechRecognitionLanguage(fromLanguage);
+        config.addTargetLanguage("de");
 
         // Sets voice name of synthesis output.
         String GermanVoice = "de-DE-Hedda";
+        config.setVoiceName(GermanVoice);
 
-        // Creates a translation recognizer using microphone as audio input, and requires voice output.
-        TranslationRecognizer recognizer = factory.createTranslationRecognizer(fromLanguage, toLanguages, GermanVoice);
+        // Creates a translation recognizer using microphone as audio input.
+        TranslationRecognizer recognizer = new TranslationRecognizer(config);
         {
             // Subscribes to events.
-            recognizer.IntermediateResultReceived.addEventListener((s, e) -> {
-                System.out.println("\nPartial result: recognized in " + fromLanguage + ": " + e.getResult().getText() + ".");
-                
-                if (e.getResult().getTranslationStatus() == TranslationStatus.Success) {
+            recognizer.recognizing.addEventListener((s, e) -> {
+                System.out.println("RECOGNIZING in '" + fromLanguage + "': Text=" + e.getResult().getText());
+
+                Map<String, String> map = e.getResult().getTranslations();
+                for(String element : map.keySet()) {
+                    System.out.println("    TRANSLATING into '" + element + "'': " + map.get(element));
+                }
+            });
+
+            recognizer.recognized.addEventListener((s, e) -> {
+                if (e.getResult().getReason() == ResultReason.TranslatedSpeech) {
+                    System.out.println("RECOGNIZED in '" + fromLanguage + "': Text=" + e.getResult().getText());
+
                     Map<String, String> map = e.getResult().getTranslations();
-                    for (String element : map.keySet()) {
-                        System.out.println("    Translated into " + element + ": " + map.get(element));
+                    for(String element : map.keySet()) {
+                        System.out.println("    TRANSLATED into '" + element + "'': " + map.get(element));
                     }
                 }
-                else {
-                    System.out.println("    Translation failed. Status: " + e.getResult().getTranslationStatus() + ", FailureReason: " + e.getResult().getErrorDetails());
+                if (e.getResult().getReason() == ResultReason.RecognizedSpeech) {
+                    System.out.println("RECOGNIZED: Text=" + e.getResult().getText());
+                    System.out.println("    Speech not translated.");
+                }
+                else if (e.getResult().getReason() == ResultReason.NoMatch) {
+                    System.out.println("NOMATCH: Speech could not be recognized.");
                 }
             });
 
-            recognizer.FinalResultReceived.addEventListener((s, e) -> {
-                if (e.getResult().getReason() != RecognitionStatus.Recognized) {
-                    System.out.println("\nFinal result: Status: " + e.getResult().getReason() + ", FailureReason: " + e.getResult().getErrorDetails() + ".");
-                    return;
-                }
-                else {
-                    System.out.println("\nFinal result: Status: " + e.getResult().getReason() + ", recognized text in " + fromLanguage + ": " + e.getResult().getText() + ".");
-                    
-                    if (e.getResult().getTranslationStatus() == TranslationStatus.Success) {
-                        Map<String, String> map = e.getResult().getTranslations();
-                        for(String element : map.keySet()) {
-                            System.out.println("    Translated into " + element + ": " + map.get(element));
-                        }
-                    }
-                    else {
-                        System.out.println("    Translation failed. Status: " + e.getResult().getTranslationStatus() + ", FailureReason: " + e.getResult().getErrorDetails());
-                    }
-                }
-            });
-
-            recognizer.SynthesisResultReceived.addEventListener((s, e) -> {
+            recognizer.synthesizing.addEventListener((s, e) -> {
                 System.out.println("Synthesis result received. Size of audio data: " + e.getResult().getAudio().length);
             });
 
-            recognizer.RecognitionErrorRaised.addEventListener((s, e) -> {
-                System.out.println("\nAn error occurred. Status: " + e.getStatus());
+            recognizer.canceled.addEventListener((s, e) -> {
+                System.out.println("CANCELED: Reason=" + e.getReason());
+
+                if (e.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
+                    System.out.println("CANCELED: Did you update the subscription info?");
+                }
             });
 
-            recognizer.SessionEvent.addEventListener((s, e) -> {
-                System.out.println("\nSession event. Event: " + e.getEventType() + ".");
+            recognizer.sessionStarted.addEventListener((s, e) -> {
+                System.out.println("\nSession started event.");
+            });
+
+            recognizer.sessionStopped.addEventListener((s, e) -> {
+                System.out.println("\nSession stopped event.");
             });
 
             // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
@@ -97,77 +102,80 @@ public class TranslationSamples {
         }
         // </TranslationWithMicrophoneAsync>
     }
-    
+
     // Translation using file input.
     // <TranslationWithFileAsync>
     private static Semaphore stopTranslationWithFileSemaphore;
 
-    public static void translationWithFileAsync() throws InterruptedException, ExecutionException {
+    public static void translationWithFileAsync() throws InterruptedException, ExecutionException
+    {
         stopTranslationWithFileSemaphore = new Semaphore(0);
 
-        // Creates an instance of a speech factory with specified
+        // Creates an instance of a speech translation config with specified
         // subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
-        SpeechFactory factory = SpeechFactory.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechTranslationConfig config = SpeechTranslationConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
         // Sets source and target languages
         String fromLanguage = "en-US";
-        ArrayList<String> toLanguages = new ArrayList<String>();
-        toLanguages.add("de");
-        toLanguages.add("fr");
+        config.setSpeechRecognitionLanguage(fromLanguage);
+        config.addTargetLanguage("de");
+        config.addTargetLanguage("fr");
 
         // Creates a translation recognizer using file as audio input.
         // Replace with your own audio file name.
-        TranslationRecognizer recognizer = factory.createTranslationRecognizerWithFileInput("YourAudioFile.wav", fromLanguage, toLanguages);
+        AudioConfig audioInput = AudioConfig.fromWavFileInput("YourAudioFile.wav");
+        TranslationRecognizer recognizer = new TranslationRecognizer(config, audioInput);
         {
             // Subscribes to events.
-            recognizer.IntermediateResultReceived.addEventListener((s, e) -> {
-                System.out.println("\nPartial result: recognized in " + fromLanguage + ": " + e.getResult().getText() + ".");
-                
-                if (e.getResult().getTranslationStatus() == TranslationStatus.Success) {
+            recognizer.recognizing.addEventListener((s, e) -> {
+                System.out.println("RECOGNIZING in '" + fromLanguage + "': Text=" + e.getResult().getText());
+
+                Map<String, String> map = e.getResult().getTranslations();
+                for(String element : map.keySet()) {
+                    System.out.println("    TRANSLATING into '" + element + "'': " + map.get(element));
+                }
+            });
+
+            recognizer.recognized.addEventListener((s, e) -> {
+                if (e.getResult().getReason() == ResultReason.TranslatedSpeech) {
+                    System.out.println("RECOGNIZED in '" + fromLanguage + "': Text=" + e.getResult().getText());
+
                     Map<String, String> map = e.getResult().getTranslations();
-                    for (String element : map.keySet()) {
-                        System.out.println("    Translated into " + element + ": " + map.get(element));
+                    for(String element : map.keySet()) {
+                        System.out.println("    TRANSLATED into '" + element + "'': " + map.get(element));
                     }
                 }
-                else {
-                    System.out.println("    Translation failed. Status: " + e.getResult().getTranslationStatus() + ", FailureReason: " + e.getResult().getErrorDetails());
+                if (e.getResult().getReason() == ResultReason.RecognizedSpeech) {
+                    System.out.println("RECOGNIZED: Text=" + e.getResult().getText());
+                    System.out.println("    Speech not translated.");
+                }
+                else if (e.getResult().getReason() == ResultReason.NoMatch) {
+                    System.out.println("NOMATCH: Speech could not be recognized.");
                 }
             });
 
-            recognizer.FinalResultReceived.addEventListener((s, e) -> {
-                if (e.getResult().getReason() != RecognitionStatus.Recognized) {
-                    System.out.println("\nFinal result: Status: " + e.getResult().getTranslationStatus() + ", FailureReason: " + e.getResult().getErrorDetails() + ".");
-                    return;
-                }
-                else {
-                    System.out.println("\nFinal result: Status: " + e.getResult().getTranslationStatus() + ", recognized text in " + fromLanguage + ": " + e.getResult().getErrorDetails() + ".");
-                    
-                    if (e.getResult().getTranslationStatus() == TranslationStatus.Success) {
-                        Map<String, String> map = e.getResult().getTranslations();
-                        for (String element : map.keySet()) {
-                            System.out.println("    Translated into " + element + ": " + map.get(element));
-                        }
-                    }
-                    else {
-                        System.out.println("    Translation failed. Status: " + e.getResult().getTranslationStatus() + ", FailureReason: " + e.getResult().getErrorDetails());
-                    }
-                }
-            });
+            recognizer.canceled.addEventListener((s, e) -> {
+                System.out.println("CANCELED: Reason=" + e.getReason());
 
-            recognizer.RecognitionErrorRaised.addEventListener((s, e) -> {
-                System.out.println("\nAn error occurred. Status: " + e.getStatus());
+                if (e.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
+                    System.out.println("CANCELED: Did you update the subscription info?");
+                }
+
                 stopTranslationWithFileSemaphore.release();;
             });
 
-            recognizer.SessionEvent.addEventListener((s, e) -> {
-                System.out.println("\nSession event. Event: " + e.getEventType() + ".");
-                
+            recognizer.sessionStarted.addEventListener((s, e) -> {
+                System.out.println("\nSession started event.");
+            });
+
+            recognizer.sessionStopped.addEventListener((s, e) -> {
+                System.out.println("\nSession stopped event.");
+
                 // Stops translation when session stop is detected.
-                if (e.getEventType() == SessionEventType.SessionStoppedEvent) {
-                    System.out.println("\nStop translation.");
-                    stopTranslationWithFileSemaphore.release();;
-                }
+                System.out.println("\nStop translation.");
+                stopTranslationWithFileSemaphore.release();;
             });
 
             // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
@@ -182,80 +190,83 @@ public class TranslationSamples {
         }
     }
     // </TranslationWithFileAsync>
-    
+
     // Translation using audio stream.
     // <TranslationWithAudioStreamAsync>
     private static Semaphore stopTranslationWithAudioStreamSemaphore;
 
-    public static void translationWithAudioStreamAsync() throws InterruptedException, ExecutionException, FileNotFoundException {
+    public static void translationWithAudioStreamAsync() throws InterruptedException, ExecutionException, FileNotFoundException
+    {
         stopTranslationWithAudioStreamSemaphore = new Semaphore(0);
 
-        // Creates an instance of a speech factory with specified
+        // Creates an instance of a speech translation config with specified
         // subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
-        SpeechFactory factory = SpeechFactory.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechTranslationConfig config = SpeechTranslationConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
         // Sets source and target languages
         String fromLanguage = "en-US";
-        ArrayList<String> toLanguages = new ArrayList<String>();
-        toLanguages.add("de");
-        toLanguages.add("fr");
+        config.setSpeechRecognitionLanguage(fromLanguage);
+        config.addTargetLanguage("de");
+        config.addTargetLanguage("fr");
 
         // Create an audio stream from a wav file.
         // Replace with your own audio file name.
-        AudioInputStream stream = new WavStream(new FileInputStream("YourAudioFile.wav"));
+        PullAudioInputStreamCallback callback = new WavStream(new FileInputStream("YourAudioFile.wav"));
+        AudioConfig audioInput = AudioConfig.fromStreamInput(callback);
 
         // Creates a translation recognizer using audio stream as input.
-        TranslationRecognizer recognizer = factory.createTranslationRecognizerWithStream(stream, fromLanguage, toLanguages);
+        TranslationRecognizer recognizer = new TranslationRecognizer(config, audioInput);
         {
             // Subscribes to events.
-            recognizer.IntermediateResultReceived.addEventListener((s, e) -> {
-                System.out.println("\nPartial result: recognized in " + fromLanguage + ": " + e.getResult().getText() + ".");
-                
-                if (e.getResult().getTranslationStatus() == TranslationStatus.Success) {
+            recognizer.recognizing.addEventListener((s, e) -> {
+                System.out.println("RECOGNIZING in '" + fromLanguage + "': Text=" + e.getResult().getText());
+
+                Map<String, String> map = e.getResult().getTranslations();
+                for(String element : map.keySet()) {
+                    System.out.println("    TRANSLATING into '" + element + "'': " + map.get(element));
+                }
+            });
+
+            recognizer.recognized.addEventListener((s, e) -> {
+                if (e.getResult().getReason() == ResultReason.TranslatedSpeech) {
+                    System.out.println("RECOGNIZED in '" + fromLanguage + "': Text=" + e.getResult().getText());
+
                     Map<String, String> map = e.getResult().getTranslations();
-                    for (String element : map.keySet()) {
-                        System.out.println("    Translated into " + element + ": " + map.get(element));
+                    for(String element : map.keySet()) {
+                        System.out.println("    TRANSLATED into '" + element + "'': " + map.get(element));
                     }
                 }
-                else {
-                    System.out.println("    Translation failed. Status: " + e.getResult().getTranslationStatus() + ", FailureReason: " + e.getResult().getErrorDetails());
+                if (e.getResult().getReason() == ResultReason.RecognizedSpeech) {
+                    System.out.println("RECOGNIZED: Text=" + e.getResult().getText());
+                    System.out.println("    Speech not translated.");
+                }
+                else if (e.getResult().getReason() == ResultReason.NoMatch) {
+                    System.out.println("NOMATCH: Speech could not be recognized.");
                 }
             });
 
-            recognizer.FinalResultReceived.addEventListener((s, e) -> {
-                if (e.getResult().getReason() != RecognitionStatus.Recognized) {
-                    System.out.println("\nFinal result: Status: " + e.getResult().getTranslationStatus() + ", FailureReason: " + e.getResult().getErrorDetails() + ".");
-                    return;
-                }
-                else {
-                    System.out.println("\nFinal result: Status: " + e.getResult().getTranslationStatus() + ", recognized text in " + fromLanguage + ": " + e.getResult().getText() + ".");
-                    
-                    if (e.getResult().getTranslationStatus() == TranslationStatus.Success) {
-                        Map<String, String> map = e.getResult().getTranslations();
-                        for (String element : map.keySet()) {
-                            System.out.println("    Translated into " + element + ": " + map.get(element));
-                        }
-                    }
-                    else {
-                        System.out.println("    Translation failed. Status: " + e.getResult().getTranslationStatus() + ", FailureReason: " + e.getResult().getErrorDetails());
-                    }
-                }
-            });
+            recognizer.canceled.addEventListener((s, e) -> {
+                System.out.println("CANCELED: Reason=" + e.getReason());
 
-            recognizer.RecognitionErrorRaised.addEventListener((s, e) -> {
-                System.out.println("\nAn error occurred. Status: " + e.getStatus());
+                if (e.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
+                    System.out.println("CANCELED: Did you update the subscription info?");
+                }
+
                 stopTranslationWithAudioStreamSemaphore.release();
             });
 
-            recognizer.SessionEvent.addEventListener((s, e) -> {
-                System.out.println("\nSession event. Event: " + e.getEventType() + ".");
-                
+            recognizer.sessionStarted.addEventListener((s, e) -> {
+                System.out.println("\nSession started event.");
+            });
+
+            recognizer.sessionStopped.addEventListener((s, e) -> {
+                System.out.println("\nSession stopped event.");
+
                 // Stops translation when session stop is detected.
-                if (e.getEventType() == SessionEventType.SessionStoppedEvent) {
-                    System.out.println("\nStop translation.");
-                    stopTranslationWithAudioStreamSemaphore.release();
-                }
+                System.out.println("\nStop translation.");
+                stopTranslationWithAudioStreamSemaphore.release();
             });
 
             // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.

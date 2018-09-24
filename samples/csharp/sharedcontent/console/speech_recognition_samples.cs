@@ -7,6 +7,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 // </toplevel>
 
 namespace MicrosoftSpeechSDKSamples
@@ -17,38 +18,41 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionWithMicrophoneAsync()
         {
             // <recognitionWithMicrophone>
-            // Creates an instance of a speech factory with specified subscription key and service region.
+            // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            // The default language is "en-us".
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            // Creates a speech recognizer using microphone as audio input. The default language is "en-us".
-            using (var recognizer = factory.CreateSpeechRecognizer())
+            // Creates a speech recognizer using microphone as audio input.
+            using (var recognizer = new SpeechRecognizer(config))
             {
                 // Starts recognizing.
                 Console.WriteLine("Say something...");
 
-                // Performs recognition.
-                // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
-                // only for single shot recognition like command or query. For long-running recognition, use
-                // StartContinuousRecognitionAsync() instead.
-                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                // Performs recognition. RecognizeOnceAsync() returns when the first utterance has been recognized,
+                // so it is suitable only for single shot recognition like command or query. For long-running
+                // recognition, use StartContinuousRecognitionAsync() instead.
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
                 // Checks result.
-                if (result.RecognitionStatus != RecognitionStatus.Recognized)
+                if (result.Reason == ResultReason.RecognizedSpeech)
                 {
-                    Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-                    if (result.RecognitionStatus == RecognitionStatus.Canceled)
-                    {
-                        Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
-                    }
-                    else
-                    {
-                        Console.WriteLine("No speech could be recognized.\n");
-                    }
+                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
                 }
-                else
+                else if (result.Reason == ResultReason.NoMatch)
                 {
-                    Console.WriteLine($"We recognized: {result.Text}, Offset: {result.OffsetInTicks}, Duration: {result.Duration}.");
+                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                }
+                else if (result.Reason == ResultReason.Canceled)
+                {
+                    var cancellation = CancellationDetails.FromResult(result);
+                    Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                    if (cancellation.Reason == CancellationReason.Error)
+                    {
+                        Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                        Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                    }
                 }
             }
             // </recognitionWithMicrophone>
@@ -58,46 +62,52 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionWithLanguageAndDetailedOutputAsync()
         {
             // <recognitionWithLanguageAndDetailedOutputFormat>
-            // Creates an instance of a speech factory with specified subscription key and service region.
+            // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // Replace the language with your language in BCP-47 format, e.g., en-US.
+            var language = "de-DE";
+            config.SpeechRecognitionLanguage = language;
+            config.OutputFormat = OutputFormat.Detailed;
 
             // Creates a speech recognizer for the specified language, using microphone as audio input.
-            // Replace the language with your language in BCP-47 format, e.g. en-US.
-            var lang = "de-DE";
             // Requests detailed output format.
-            using (var recognizer = factory.CreateSpeechRecognizer(lang, OutputFormat.Detailed))
+            using (var recognizer = new SpeechRecognizer(config))
             {
                 // Starts recognizing.
-                Console.WriteLine($"Say something in {lang} ...");
+                Console.WriteLine($"Say something in {language} ...");
 
-                // Performs recognition.
-                // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
-                // only for single shot recognition like command or query. For long-running recognition, use
-                // StartContinuousRecognitionAsync() instead.
-                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                // Performs recognition. RecognizeOnceAsync() returns when the first utterance has been recognized,
+                // so it is suitable only for single shot recognition like command or query. For long-running
+                // recognition, use StartContinuousRecognitionAsync() instead.
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
                 // Checks result.
-                if (result.RecognitionStatus != RecognitionStatus.Recognized)
+                if (result.Reason == ResultReason.RecognizedSpeech)
                 {
-                    Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-                    if (result.RecognitionStatus == RecognitionStatus.Canceled)
+                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+                    Console.WriteLine("  DETAILED RESULTS:");
+
+                    var detailedResults = result.Best();
+                    foreach (var item in detailedResults) // NOTE: We need to put this in all languages, or take it out of CSharp
                     {
-                        Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
-                    }
-                    else
-                    {
-                        Console.WriteLine("No speech could be recognized.\n");
+                        Console.WriteLine($"    Confidence: {item.Confidence}, Text: {item.Text}, LexicalForm: {item.LexicalForm}, NormalizedForm: {item.NormalizedForm}, MaskedNormalizedForm: {item.MaskedNormalizedForm}");
                     }
                 }
-                else
+                else if (result.Reason == ResultReason.NoMatch)
                 {
-                    Console.WriteLine($"We recognized: {result.Text}, Offset: {result.OffsetInTicks}, Duration: {result.Duration}.");
-                    Console.WriteLine("Detailed results:");
-                    var detailedResults = result.Best();
-                    foreach (var item in detailedResults)
+                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                }
+                else if (result.Reason == ResultReason.Canceled)
+                {
+                    var cancellation = CancellationDetails.FromResult(result);
+                    Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                    if (cancellation.Reason == CancellationReason.Error)
                     {
-                        Console.WriteLine($"Confidence: {item.Confidence}, Text: {item.Text}, LexicalForm: {item.LexicalForm}, NormalizedForm: {item.NormalizedForm}, MaskedNormalizedForm: {item.MaskedNormalizedForm}");
+                        Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                        Console.WriteLine($"CANCELED: Did you update the subscription info?");
                     }
                 }
             }
@@ -108,40 +118,41 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionUsingCustomizedModelAsync()
         {
             // <recognitionCustomized>
-            // Creates an instance of a speech factory with specified subscription key and service region.
+            // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            // Replace with the CRIS endpoint id of your customized model.
+            config.EndpointId = "YourEndpointId";
 
             // Creates a speech recognizer using microphone as audio input.
-            using (var recognizer = factory.CreateSpeechRecognizer())
+            using (var recognizer = new SpeechRecognizer(config))
             {
-                // Replace with the CRIS deployment id of your customized model.
-                recognizer.DeploymentId = "YourDeploymentId";
-
                 Console.WriteLine("Say something...");
 
-                // Performs recognition.
-                // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
-                // only for single shot recognition like command or query. For long-running recognition, use
-                // StartContinuousRecognitionAsync() instead.
-                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                // Performs recognition. RecognizeOnceAsync() returns when the first utterance has been recognized,
+                // so it is suitable only for single shot recognition like command or query. For long-running
+                // recognition, use StartContinuousRecognitionAsync() instead.
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
                 // Checks results.
-                if (result.RecognitionStatus != RecognitionStatus.Recognized)
+                if (result.Reason == ResultReason.RecognizedSpeech)
                 {
-                    Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-                    if (result.RecognitionStatus == RecognitionStatus.Canceled)
-                    {
-                        Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
-                    }
-                    else
-                    {
-                        Console.WriteLine("No speech could be recognized.\n");
-                    }
+                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
                 }
-                else
+                else if (result.Reason == ResultReason.NoMatch)
                 {
-                    Console.WriteLine($"We recognized: {result.Text}, Offset: {result.OffsetInTicks}, Duration: {result.Duration}.");
+                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                }
+                else if (result.Reason == ResultReason.Canceled)
+                {
+                    var cancellation = CancellationDetails.FromResult(result);
+                    Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                    if (cancellation.Reason == CancellationReason.Error)
+                    {
+                        Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                        Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                    }
                 }
             }
             // </recognitionCustomized>
@@ -151,68 +162,71 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task ContinuousRecognitionWithFileAsync()
         {
             // <recognitionContinuousWithFile>
-            // Creates an instance of a speech factory with specified subscription key and service region.
+            // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             var stopRecognition = new TaskCompletionSource<int>();
 
             // Creates a speech recognizer using file as audio input.
             // Replace with your own audio file name.
-            using (var recognizer = factory.CreateSpeechRecognizerWithFileInput(@"whatstheweatherlike.wav"))
+            using (var audioInput = AudioConfig.FromWavFileInput(@"whatstheweatherlike.wav"))
             {
-                // Subscribes to events.
-                recognizer.IntermediateResultReceived += (s, e) => {
-                    Console.WriteLine($"\n    Partial result: {e.Result.Text}.");
-                };
-
-                recognizer.FinalResultReceived += (s, e) => {
-                    var result = e.Result;
-                    Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-                    switch (result.RecognitionStatus)
+                using (var recognizer = new SpeechRecognizer(config, audioInput))
+                {
+                    // Subscribes to events.
+                    recognizer.Recognizing += (s, e) =>
                     {
-                        case RecognitionStatus.Recognized:
-                            Console.WriteLine($"\n    Final result: Text: {result.Text}, Offset: {result.OffsetInTicks}, Duration: {result.Duration}.");
-                            break;
-                        case RecognitionStatus.InitialSilenceTimeout:
-                            Console.WriteLine("The start of the audio stream contains only silence, and the service timed out waiting for speech.\n");
-                            break;
-                        case RecognitionStatus.InitialBabbleTimeout:
-                            Console.WriteLine("The start of the audio stream contains only noise, and the service timed out waiting for speech.\n");
-                            break;
-                        case RecognitionStatus.NoMatch:
-                            Console.WriteLine("The speech was detected in the audio stream, but no words from the target language were matched. Possible reasons could be wrong setting of the target language or wrong format of audio stream.\n");
-                            break;
-                        case RecognitionStatus.Canceled:
-                            Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
-                            break;
-                    }
-                };
+                        Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
+                    };
 
-                recognizer.RecognitionErrorRaised += (s, e) => {
-                    Console.WriteLine($"\n    An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}");
-                    stopRecognition.TrySetResult(0);
-                };
-
-                recognizer.OnSessionEvent += (s, e) => {
-                    Console.WriteLine($"\n    Session event. Event: {e.EventType.ToString()}.");
-                    // Stops recognition when session stop is detected.
-                    if (e.EventType == SessionEventType.SessionStoppedEvent)
+                    recognizer.Recognized += (s, e) =>
                     {
-                        Console.WriteLine($"\nStop recognition.");
+                        if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                        {
+                            Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                        }
+                        else if (e.Result.Reason == ResultReason.NoMatch)
+                        {
+                            Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                        }
+                    };
+
+                    recognizer.Canceled += (s, e) =>
+                    {
+                        Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                        if (e.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
+
                         stopRecognition.TrySetResult(0);
-                    }
-                };
+                    };
 
-                // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
-                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                    recognizer.SessionStarted += (s, e) =>
+                    {
+                        Console.WriteLine("\n    Session started event.");
+                    };
 
-                // Waits for completion.
-                // Use Task.WaitAny to keep the task rooted.
-                Task.WaitAny(new[] { stopRecognition.Task });
+                    recognizer.SessionStopped += (s, e) =>
+                    {
+                        Console.WriteLine("\n    Session stopped event.");
+                        Console.WriteLine("\nStop recognition.");
+                        stopRecognition.TrySetResult(0);
+                    };
 
-                // Stops recognition.
-                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                    // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                    await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                    // Waits for completion.
+                    // Use Task.WaitAny to keep the task rooted.
+                    Task.WaitAny(new[] { stopRecognition.Task });
+
+                    // Stops recognition.
+                    await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                }
             }
             // </recognitionContinuousWithFile>
         }
@@ -221,61 +235,60 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionWithAudioStreamAsync()
         {
             // <recognitionAudioStream>
-            // Creates an instance of a speech factory with specified subscription key and service region.
+            // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             var stopRecognition = new TaskCompletionSource<int>();
 
             // Create an audio stream from a wav file.
             // Replace with your own audio file name.
-            using (var stream = Helper.OpenWaveFile(@"whatstheweatherlike.wav"))
+            using (var audioInput = Helper.OpenWavFile(@"whatstheweatherlike.wav"))
             {
                 // Creates a speech recognizer using audio stream input.
-                using (var recognizer = factory.CreateSpeechRecognizerWithStream(stream))
+                using (var recognizer = new SpeechRecognizer(config, audioInput))
                 {
                     // Subscribes to events.
-                    recognizer.IntermediateResultReceived += (s, e) =>
+                    recognizer.Recognizing += (s, e) =>
                     {
-                        Console.WriteLine($"\n    Partial result: {e.Result.Text}.");
+                        Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
                     };
 
-                    recognizer.FinalResultReceived += (s, e) =>
+                    recognizer.Recognized += (s, e) =>
                     {
-                        var result = e.Result;
-                        if (result.RecognitionStatus == RecognitionStatus.Recognized)
+                        if (e.Result.Reason == ResultReason.RecognizedSpeech)
                         {
-                            Console.WriteLine($"\n    Final result: Status: {result.RecognitionStatus.ToString()}, Text: {result.Text}.");
+                            Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
                         }
-                        else
+                        else if (e.Result.Reason == ResultReason.NoMatch)
                         {
-                            Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-                            if (result.RecognitionStatus == RecognitionStatus.Canceled)
-                            {
-                                Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
-                            }
-                            else
-                            {
-                                Console.WriteLine("No speech could be recognized.\n");
-                            }
+                            Console.WriteLine($"NOMATCH: Speech could not be recognized.");
                         }
                     };
 
-                    recognizer.RecognitionErrorRaised += (s, e) =>
+                    recognizer.Canceled += (s, e) =>
                     {
-                        Console.WriteLine($"\n    An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}");
+                        Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                        if (e.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
+
                         stopRecognition.TrySetResult(0);
                     };
 
-                    recognizer.OnSessionEvent += (s, e) =>
+                    recognizer.SessionStarted += (s, e) =>
                     {
-                        Console.WriteLine($"\nSession event. Event: {e.EventType.ToString()}.");
-                        // Stops translation when session stop is detected.
-                        if (e.EventType == SessionEventType.SessionStoppedEvent)
-                        {
-                            Console.WriteLine($"\nStop recognition.");
-                            stopRecognition.TrySetResult(0);
-                        }
+                        Console.WriteLine("\nSession started event.");
+                    };
+
+                    recognizer.SessionStopped += (s, e) =>
+                    {
+                        Console.WriteLine("\nSession stopped event.");
+                        Console.WriteLine("\nStop recognition.");
+                        stopRecognition.TrySetResult(0);
                     };
 
                     // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.

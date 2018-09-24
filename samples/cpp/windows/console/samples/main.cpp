@@ -12,6 +12,7 @@ extern void SpeechRecognitionWithMicrophone();
 extern void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat();
 extern void SpeechContinuousRecognitionWithFile();
 extern void SpeechRecognitionUsingCustomizedModel();
+extern void SpeechContinuousRecognitionWithStream();
 
 extern void IntentRecognitionWithMicrophone();
 extern void IntentRecognitionWithLanguage();
@@ -30,6 +31,7 @@ void SpeechSamples()
         cout << "2.) Speech recognition in the specified language and using detailed output format.\n";
         cout << "3.) Speech continuous recognition with file input.\n";
         cout << "4.) Speech recognition using customized model.\n";
+        cout << "5.) Speech recognition using stream input.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
 
         input.empty();
@@ -48,6 +50,9 @@ void SpeechSamples()
             break;
         case '4':
             SpeechRecognitionUsingCustomizedModel();
+            break;
+        case '5':
+            SpeechContinuousRecognitionWithStream();
             break;
         case '0':
             break;
