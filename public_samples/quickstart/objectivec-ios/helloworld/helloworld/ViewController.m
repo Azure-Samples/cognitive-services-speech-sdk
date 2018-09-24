@@ -21,8 +21,13 @@
 
     NSBundle *mainBundle = [NSBundle mainBundle];
     NSString *weatherFile = [mainBundle pathForResource: @"whatstheweatherlike" ofType:@"wav"];
-    NSLog(@"Main bundle path: %@", mainBundle);
     NSLog(@"weatherFile path: %@", weatherFile);
+    if (!weatherFile) {
+        NSLog(@"Cannot find audio file!");
+        [self updateRecognitionErrorText:(@"Cannot find audio file")];
+        return;
+    }
+    
     SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
     if (!weatherAudioSource) {
         NSLog(@"Loading audio file failed!");
