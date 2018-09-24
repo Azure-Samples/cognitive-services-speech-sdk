@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Translation;
 #if NET461
 using System.Media;
@@ -22,94 +23,95 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task TranslationWithMicrophoneAsync()
         {
             // <TranslationWithMicrophoneAsync>
-            // Creates an instance of a speech factory with specified subscription key and service region.
-            // Replace with your own subscription key and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
-
-            // Sets source and target languages.
-            // Replace with languages of your choice.
+            // Translation source language.
+            // Replace with a language of your choice.
             string fromLanguage = "en-US";
-            List<string> toLanguages = new List<string>() { "de" };
 
-            // Sets voice name of synthesis output.
+            // Voice name of synthesis output.
             const string GermanVoice = "de-DE-Hedda";
 
-            // Creates a translation recognizer using microphone as audio input, and requires voice output.
-            using (var recognizer = factory.CreateTranslationRecognizer(fromLanguage, toLanguages, GermanVoice))
+            // Creates an instance of a speech translation config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            var config = SpeechTranslationConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            config.SpeechRecognitionLanguage = fromLanguage;
+            config.VoiceName = GermanVoice;
+
+            // Translation target language(s).
+            // Replace with language(s) of your choice.
+            config.AddTargetLanguage("de");
+
+            // Creates a translation recognizer using microphone as audio input.
+            using (var recognizer = new TranslationRecognizer(config))
             {
                 // Subscribes to events.
-                recognizer.IntermediateResultReceived += (s, e) => {
-                    Console.WriteLine($"\nPartial result: recognized in {fromLanguage}: {e.Result.Text}.");
-                    if (e.Result.TranslationStatus == TranslationStatus.Success)
+                recognizer.Recognizing += (s, e) =>
+                {
+                    Console.WriteLine($"RECOGNIZING in '{fromLanguage}': Text={e.Result.Text}");
+                    foreach (var element in e.Result.Translations)
                     {
+                        Console.WriteLine($"    TRANSLATING into '{element.Key}': {element.Value}");
+                    }
+                };
+
+                recognizer.Recognized += (s, e) =>
+                {
+                    if (e.Result.Reason == ResultReason.TranslatedSpeech)
+                    {
+                        Console.WriteLine($"RECOGNIZED in '{fromLanguage}': Text={e.Result.Text}");
                         foreach (var element in e.Result.Translations)
                         {
-                            Console.WriteLine($"    Translated into {element.Key}: {element.Value}");
+                            Console.WriteLine($"    TRANSLATED into '{element.Key}': {element.Value}");
                         }
                     }
-                    else
+                    else if (e.Result.Reason == ResultReason.RecognizedSpeech)
                     {
-                        Console.WriteLine($"    Translation failed. Status: {e.Result.TranslationStatus.ToString()}, FailureReason: {e.Result.FailureReason}");
+                        Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                        Console.WriteLine($"    Speech not translated.");
+                    }
+                    else if (e.Result.Reason == ResultReason.NoMatch)
+                    {
+                        Console.WriteLine($"NOMATCH: Speech could not be recognized.");
                     }
                 };
 
-                recognizer.FinalResultReceived += (s, e) => {
-                    var result = e.Result;
-                    if (result.RecognitionStatus != RecognitionStatus.Recognized)
-                    {
-                        Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-                        if (result.RecognitionStatus == RecognitionStatus.Canceled)
-                        {
-                            Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
-                        }
-                        return;
-                    }
-                    else
-                    {
-                        Console.WriteLine($"\nFinal result: Status: {result.RecognitionStatus.ToString()}, recognized text in {fromLanguage}: {result.Text}.");
-                        if (result.TranslationStatus == TranslationStatus.Success)
-                        {
-                            foreach (var element in result.Translations)
-                            {
-                                Console.WriteLine($"    Translated into {element.Key}: {element.Value}");
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine($"    Translation failed. Status: {result.TranslationStatus.ToString()}, FailureReason: {result.FailureReason}");
-                        }
-                    }
-                };
-
-                recognizer.SynthesisResultReceived += (s, e) =>
+                recognizer.Synthesizing += (s, e) =>
                 {
-                    if (e.Result.Status == SynthesisStatus.Success)
+                    var audio = e.Result.GetAudio();
+                    Console.WriteLine(audio.Length != 0
+                        ? $"AudioSize: {audio.Length}"
+                        : $"AudioSize: {audio.Length} (end of synthesis data)");
+
+                    if (audio.Length > 0)
                     {
-                        Console.WriteLine($"Synthesis result received. Size of audio data: {e.Result.Audio.Length}");
                         #if NET461
-                        using (var m = new MemoryStream(e.Result.Audio))
+                        using (var m = new MemoryStream(audio))
                         {
                             SoundPlayer simpleSound = new SoundPlayer(m);
                             simpleSound.PlaySync();
                         }
                         #endif
                     }
-                    else if (e.Result.Status == SynthesisStatus.SynthesisEnd)
+                };
+
+                recognizer.Canceled += (s, e) =>
+                {
+                    Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                    if (e.Reason == CancellationReason.Error)
                     {
-                        Console.WriteLine($"Synthesis result: end of synthesis result.");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Synthesis error. Status: {e.Result.Status.ToString()}, Failure reason: {e.Result.FailureReason}");
+                        Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                        Console.WriteLine($"CANCELED: Did you update the subscription info?");
                     }
                 };
 
-                recognizer.RecognitionErrorRaised += (s, e) => {
-                    Console.WriteLine($"\nAn error occurred. Status: {e.Status.ToString()}");
+                recognizer.SessionStarted += (s, e) =>
+                {
+                    Console.WriteLine("\nSession started event.");
                 };
 
-                recognizer.OnSessionEvent += (s, e) => {
-                    Console.WriteLine($"\nSession event. Event: {e.EventType.ToString()}.");
+                recognizer.SessionStopped += (s, e) =>
+                {
+                    Console.WriteLine("\nSession stopped event.");
                 };
 
                 // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
@@ -131,103 +133,100 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task TranslationWithFileAsync()
         {
             // <TranslationWithFileAsync>
-            // Creates an instance of a speech factory with specified subscription key and service region. 
+            // Translation source language.
+            // Replace with a language of your choice.
+            string fromLanguage = "en-US";
+
+            // Creates an instance of a speech translation config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechTranslationConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            config.SpeechRecognitionLanguage = fromLanguage;
+
+            // Translation target language(s).
+            // Replace with language(s) of your choice.
+            config.AddTargetLanguage("de");
+            config.AddTargetLanguage("fr");
 
             var stopTranslation = new TaskCompletionSource<int>();
 
-            // Sets source and target languages.
-            // Replace with languages of your choice.
-            string fromLanguage = "en-US";
-            List<string> toLanguages = new List<string>() { "de", "fr" };
-
             // Creates a translation recognizer using file as audio input.
             // Replace with your own audio file name.
-            using (var recognizer = factory.CreateTranslationRecognizerWithFileInput(@"whatstheweatherlike.wav", fromLanguage, toLanguages))
+            using (var audioInput = AudioConfig.FromWavFileInput(@"whatstheweatherlike.wav"))
             {
-                // Subscribes to events.
-                recognizer.IntermediateResultReceived += (s, e) =>
+                using (var recognizer = new TranslationRecognizer(config, audioInput))
                 {
-                    Console.WriteLine($"\nPartial result: recognized in {fromLanguage}: {e.Result.Text}.");
-                    if (e.Result.TranslationStatus == TranslationStatus.Success)
+                    // Subscribes to events.
+                    recognizer.Recognizing += (s, e) =>
                     {
+                        Console.WriteLine($"RECOGNIZING in '{fromLanguage}': Text={e.Result.Text}");
                         foreach (var element in e.Result.Translations)
                         {
-                            Console.WriteLine($"    Translated into {element.Key}: {element.Value}");
+                            Console.WriteLine($"    TRANSLATING into '{element.Key}': {element.Value}");
                         }
-                    }
-                    else
-                    {
-                        Console.WriteLine($"    Translation failed. Status: {e.Result.TranslationStatus.ToString()}, FailureReason: {e.Result.FailureReason}");
-                    }
-                };
+                    };
 
-                recognizer.FinalResultReceived += (s, e) =>
-                {
-                    var result = e.Result;
-                    if (result.RecognitionStatus != RecognitionStatus.Recognized)
-                    {
-                        Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-                        if (result.RecognitionStatus == RecognitionStatus.Canceled)
+                    recognizer.Recognized += (s, e) => {
+                        if (e.Result.Reason == ResultReason.TranslatedSpeech)
                         {
-                            Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
-                        }
-                        else
-                        {
-                            Console.WriteLine("No speech could be recognized.\n");
-                        }
-                        return;
-                    }
-                    else
-                    {
-                        Console.WriteLine($"\nFinal result: Status: {result.RecognitionStatus.ToString()}, recognized text in {fromLanguage}: {result.Text}.");
-                        if (result.TranslationStatus == TranslationStatus.Success)
-                        {
-                            foreach (var element in result.Translations)
+                            Console.WriteLine($"RECOGNIZED in '{fromLanguage}': Text={e.Result.Text}");
+                            foreach (var element in e.Result.Translations)
                             {
-                                Console.WriteLine($"    Translated into {element.Key}: {element.Value}");
+                                Console.WriteLine($"    TRANSLATED into '{element.Key}': {element.Value}");
                             }
                         }
-                        else
+                        else if (e.Result.Reason == ResultReason.RecognizedSpeech)
                         {
-                            Console.WriteLine($"    Translation failed. Status: {result.TranslationStatus.ToString()}, FailureReason: {result.FailureReason}");
+                            Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                            Console.WriteLine($"    Speech not translated.");
                         }
-                    }
-                };
+                        else if (e.Result.Reason == ResultReason.NoMatch)
+                        {
+                            Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                        }
+                    };
 
-                recognizer.RecognitionErrorRaised += (s, e) =>
-                {
-                    Console.WriteLine($"\nAn error occurred. Status: {e.Status.ToString()}");
-                    stopTranslation.TrySetResult(0);
-                };
-
-                recognizer.OnSpeechDetectedEvent += (s, e) =>
-                {
-                    Console.WriteLine($"\nSpeech detected event. Event: {e.EventType.ToString()}.");
-                };
-
-                recognizer.OnSessionEvent += (s, e) =>
-                {
-                    Console.WriteLine($"\nSession event. Event: {e.EventType.ToString()}.");
-                    // Stops translation when session stop is detected.
-                    if (e.EventType == SessionEventType.SessionStoppedEvent)
+                    recognizer.Canceled += (s, e) =>
                     {
+                        Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                        if (e.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
+
+                        stopTranslation.TrySetResult(0);
+                    };
+
+                    recognizer.SpeechStartDetected += (s, e) => {
+                        Console.WriteLine("\nSpeech start detected event.");
+                    };
+
+                    recognizer.SpeechEndDetected += (s, e) => {
+                        Console.WriteLine("\nSpeech end detected event.");
+                    };
+
+                    recognizer.SessionStarted += (s, e) => {
+                        Console.WriteLine("\nSession started event.");
+                    };
+
+                    recognizer.SessionStopped += (s, e) => {
+                        Console.WriteLine("\nSession stopped event.");
                         Console.WriteLine($"\nStop translation.");
                         stopTranslation.TrySetResult(0);
-                    }
-                };
+                    };
 
-                // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
-                Console.WriteLine("Start translation...");
-                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                    // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                    Console.WriteLine("Start translation...");
+                    await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
-                // Waits for completion.
-                // Use Task.WaitAny to keep the task rooted.
-                Task.WaitAny(new[] { stopTranslation.Task });
+                    // Waits for completion.
+                    // Use Task.WaitAny to keep the task rooted.
+                    Task.WaitAny(new[] { stopTranslation.Task });
 
-                // Stops translation.
-                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                    // Stops translation.
+                    await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                }
             }
             // </TranslationWithFileAsync>
         }
@@ -236,94 +235,93 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task TranslationWithAudioStreamAsync()
         {
             // <TranslationWithAudioStreamAsync>
-            // Creates an instance of a speech factory with specified subscription key and service region.
+            // Translation source language.
+            // Replace with a language of your choice.
+            string fromLanguage = "en-US";
+
+            // Creates an instance of a speech translation config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechTranslationConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            config.SpeechRecognitionLanguage = fromLanguage;
+
+            // Translation target language(s).
+            // Replace with language(s) of your choice.
+            config.AddTargetLanguage("de");
+            config.AddTargetLanguage("fr");
 
             var stopTranslation = new TaskCompletionSource<int>();
 
-            // Sets source and target languages
-            // Replace with languages of your choice.
-            string fromLanguage = "en-US";
-            List<string> toLanguages = new List<string>() { "de", "fr" };
-
             // Create an audio stream from a wav file.
             // Replace with your own audio file name.
-            using (var stream = Helper.OpenWaveFile(@"whatstheweatherlike.wav"))
+            using (var audioInput = Helper.OpenWavFile(@"whatstheweatherlike.wav"))
             {
                 // Creates a translation recognizer using audio stream as input.
-                using (var recognizer = factory.CreateTranslationRecognizerWithStream(stream, fromLanguage, toLanguages))
+                using (var recognizer = new TranslationRecognizer(config, audioInput))
                 {
                     // Subscribes to events.
-                    recognizer.IntermediateResultReceived += (s, e) =>
+                    recognizer.Recognizing += (s, e) =>
                     {
-                        Console.WriteLine($"\nPartial result: recognized in {fromLanguage}: {e.Result.Text}.");
-                        if (e.Result.TranslationStatus == TranslationStatus.Success)
+                        Console.WriteLine($"RECOGNIZING in '{fromLanguage}': Text={e.Result.Text}");
+                        foreach (var element in e.Result.Translations)
                         {
+                            Console.WriteLine($"    TRANSLATING into '{element.Key}': {element.Value}");
+                        }
+                    };
+
+                    recognizer.Recognized += (s, e) =>
+                    {
+                        if (e.Result.Reason == ResultReason.TranslatedSpeech)
+                        {
+                            Console.WriteLine($"RECOGNIZED in '{fromLanguage}': Text={e.Result.Text}");
                             foreach (var element in e.Result.Translations)
                             {
-                                Console.WriteLine($"    Translated into {element.Key}: {element.Value}");
+                                Console.WriteLine($"    TRANSLATED into '{element.Key}': {element.Value}");
                             }
                         }
-                        else
+                        else if (e.Result.Reason == ResultReason.RecognizedSpeech)
                         {
-                            Console.WriteLine($"    Translation failed. Status: {e.Result.TranslationStatus.ToString()}, FailureReason: {e.Result.FailureReason}");
+                            Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                            Console.WriteLine($"    Speech not translated.");
+                        }
+                        else if (e.Result.Reason == ResultReason.NoMatch)
+                        {
+                            Console.WriteLine($"NOMATCH: Speech could not be recognized.");
                         }
                     };
 
-                    recognizer.FinalResultReceived += (s, e) =>
+                    recognizer.Canceled += (s, e) =>
                     {
-                        var result = e.Result;
-                        if (result.RecognitionStatus != RecognitionStatus.Recognized)
-                        {
-                            Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-                            if (result.RecognitionStatus == RecognitionStatus.Canceled)
-                            {
-                                Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
-                            }
-                            else
-                            {
-                                Console.WriteLine("No speech could be recognized.\n");
-                            }
-                            return;
-                        }
-                        else
-                        {
-                            Console.WriteLine($"\nFinal result: Status: {result.RecognitionStatus.ToString()}, recognized text in {fromLanguage}: {result.Text}.");
-                            if (result.TranslationStatus == TranslationStatus.Success)
-                            {
-                                foreach (var element in result.Translations)
-                                {
-                                    Console.WriteLine($"    Translated into {element.Key}: {element.Value}");
-                                }
-                            }
-                            else
-                            {
-                                Console.WriteLine($"    Translation failed. Status: {result.TranslationStatus.ToString()}, FailureReason: {result.FailureReason}");
-                            }
-                        }
-                    };
+                        Console.WriteLine($"CANCELED: Reason={e.Reason}");
 
-                    recognizer.RecognitionErrorRaised += (s, e) =>
-                    {
-                        Console.WriteLine($"\nAn error occurred. Status: {e.Status.ToString()}");
+                        if (e.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
+                        
                         stopTranslation.TrySetResult(0);
                     };
 
-                    recognizer.OnSpeechDetectedEvent += (s, e) =>
+                    recognizer.SpeechStartDetected += (s, e) =>
                     {
-                        Console.WriteLine($"\nSpeech detected event. Event: {e.EventType.ToString()}.");
+                        Console.WriteLine("\nSpeech start detected event.");
                     };
 
-                    recognizer.OnSessionEvent += (s, e) =>
+                    recognizer.SpeechEndDetected += (s, e) =>
                     {
-                        Console.WriteLine($"\nSession event. Event: {e.EventType.ToString()}.");
-                    // Stops translation when session stop is detected.
-                    if (e.EventType == SessionEventType.SessionStoppedEvent)
-                        {
-                            Console.WriteLine($"\nStop translation.");
-                            stopTranslation.TrySetResult(0);
-                        }
+                        Console.WriteLine("\nSpeech end detected event.");
+                    };
+
+                    recognizer.SessionStarted += (s, e) =>
+                    {
+                        Console.WriteLine("\nSession started event.");
+                    };
+
+                    recognizer.SessionStopped += (s, e) =>
+                    {
+                        Console.WriteLine($"\nSession stopped event.");
+                        Console.WriteLine($"\nStop translation.");
+                        stopTranslation.TrySetResult(0);
                     };
 
                     // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.

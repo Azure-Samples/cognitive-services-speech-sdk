@@ -20,48 +20,54 @@ using namespace Microsoft::CognitiveServices::Speech::Translation;
 void TranslationWithMicrophone()
 {
     // <TranslationWithMicrophone>
-    // Creates an instance of a speech factory with specified subscription key and service region.
+    // Creates an instance of a speech translation config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
-    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"YourServiceRegion");
+    auto config = SpeechTranslationConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
     // Sets source and target languages
     // Replace with the languages of your choice.
-    auto fromLanguage = L"en-US";
-    vector<wstring> toLanguages { L"de", L"fr" };
+    auto fromLanguage = "en-US";
+    config->SetSpeechRecognitionLanguage(fromLanguage);
+    config->AddTargetLanguage("de");
+    config->AddTargetLanguage("fr");
 
     // Creates a translation recognizer using microphone as audio input.
-    auto recognizer = factory->CreateTranslationRecognizer(fromLanguage, toLanguages);
-    wcout << L"Say something...\n";
+    auto recognizer = TranslationRecognizer::FromConfig(config);
+    cout << "Say something...\n";
 
-    // Starts translation.
-    // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
-    // only for single shot recognition like command or query. For long-running recognition, use
-    // StartContinuousRecognitionAsync() instead.
-    auto result = recognizer->RecognizeAsync().get();
+    // Starts translation. RecognizeOnceAsync() returns when the first utterance has been recognized,
+    // so it is suitable only for single shot recognition like command or query. For long-running
+    // recognition, use StartContinuousRecognitionAsync() instead.
+    auto result = recognizer->RecognizeOnceAsync().get();
 
     // Checks result.
-    if (result->Reason != Reason::Recognized)
+    if (result->Reason == ResultReason::TranslatedSpeech)
     {
-        wcout << L"Recognition Status:" << int(result->Reason);
-        if (result->Reason == Reason::Canceled)
-        {
-            wcout << L"There was an error, reason: " << result->ErrorDetails << std::endl;
-        }
-        else
-        {
-            wcout << L"No speech could be recognized.\n";
-        }
-    }
-    else if (result->TranslationStatus != TranslationStatusCode::Success)
-    {
-        wcout << L"There was an error in translation, status: " << int(result->TranslationStatus) << std::endl;
-    }
-    else
-    {
-        wcout << "We recognized in " << fromLanguage << ": " << result->Text << std::endl;
+        cout << "RECOGNIZED: Text=" << result->Text << std::endl
+             << "  Language=" << fromLanguage << std::endl;
+
         for (const auto& it : result->Translations)
         {
-            wcout << L"    Translated into " << it.first.c_str() << ": " << it.second.c_str() << std::endl;
+            cout << "TRANSLATED into '" << it.first.c_str() << "': " << it.second.c_str() << std::endl;
+        }
+    }
+    else if (result->Reason == ResultReason::RecognizedSpeech)
+    {
+        cout << "RECOGNIZED: Text=" << result->Text << " (text could not be translated)" << std::endl;
+    }
+    else if (result->Reason == ResultReason::NoMatch)
+    {
+        cout << "NOMATCH: Speech could not be recognized." << std::endl;
+    }
+    else if (result->Reason == ResultReason::Canceled)
+    {
+        auto cancellation = CancellationDetails::FromResult(result);
+        cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
+
+        if (cancellation->Reason == CancellationReason::Error)
+        {
+            cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+            cout << "CANCELED: Did you update the subscription info?" << std::endl;
         }
     }
     // </TranslationWithMicrophone>
@@ -71,59 +77,74 @@ void TranslationWithMicrophone()
 void TranslationContinuousRecognition()
 {
     // <TranslationContinuousRecognition>
-    // Creates an instance of a speech factory with specified subscription key and service region.
+    // Creates an instance of a speech translation config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
-    auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"YourServiceRegion");
+    auto config = SpeechTranslationConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
     // Sets source and target languages
-    auto fromLanguage = L"en-US";
-    vector<wstring> toLanguages{ L"de", L"fr" };
+    auto fromLanguage = "en-US";
+    config->SetSpeechRecognitionLanguage(fromLanguage);
+    config->AddTargetLanguage("de");
+    config->AddTargetLanguage("fr");
 
     // Creates a translation recognizer using microphone as audio input.
-    auto recognizer = factory->CreateTranslationRecognizer(fromLanguage, toLanguages);
+    auto recognizer = TranslationRecognizer::FromConfig(config);
 
     // Subscribes to events.
-    recognizer->IntermediateResult.Connect([](const TranslationTextResultEventArgs& e)
+    recognizer->Recognizing.Connect([](const TranslationRecognitionEventArgs& e)
     {
-        wcout << L"IntermediateResult: Recognized text:" << e.Result.Text << std::endl;
-        for (const auto& it : e.Result.Translations)
+        cout << "Recognizing:" << e.Result->Text << std::endl;
+        for (const auto& it : e.Result->Translations)
         {
-            wcout << L"    Translated into " << it.first.c_str() << ": " << it.second.c_str() << std::endl;
+            cout << "  Translated into '" << it.first.c_str() << "': " << it.second.c_str() << std::endl;
         }
     });
 
-    recognizer->FinalResult.Connect([](const TranslationTextResultEventArgs& e)
+    recognizer->Recognized.Connect([](const TranslationRecognitionEventArgs& e)
     {
-        wcout << L"FinalResult: status:" << (int)e.Result.TranslationStatus << L". Recognized Text: " << e.Result.Text << std::endl;
-        for (const auto& it : e.Result.Translations)
+        if (e.Result->Reason == ResultReason::TranslatedSpeech)
         {
-            wcout << L"    Translated into " << it.first.c_str() << ": " << it.second.c_str() << std::endl;
+            cout << "RECOGNIZED: Text=" << e.Result->Text << std::endl;
+        }
+        else if (e.Result->Reason == ResultReason::RecognizedSpeech)
+        {
+            cout << "RECOGNIZED: Text=" << e.Result->Text << " (text could not be translated)" << std::endl;
+        }
+        else if (e.Result->Reason == ResultReason::NoMatch)
+        {
+            cout << "NOMATCH: Speech could not be recognized." << std::endl;
+        }
+
+        for (const auto& it : e.Result->Translations)
+        {
+            cout << "  Translated into '" << it.first.c_str() << "': " << it.second.c_str() << std::endl;
         }
     });
 
-    recognizer->Canceled.Connect([](const TranslationTextResultEventArgs& e)
+    recognizer->Canceled.Connect([](const TranslationRecognitionCanceledEventArgs& e)
     {
-        wcout << L"Canceled:" << (int)e.Result.Reason << L"- " << e.Result.Text << std::endl;
-    });
+        cout << "CANCELED: Reason=" << (int)e.Reason << std::endl;
 
-    recognizer->TranslationSynthesisResultEvent.Connect([](const TranslationSynthesisResultEventArgs& e)
-    {
-        if (e.Result.SynthesisStatus == SynthesisStatusCode::Success)
+        if (e.Reason == CancellationReason::Error)
         {
-            wcout << L"Translation synthesis result: size of audio data: " << e.Result.Audio.size();
-        }
-        else if (e.Result.SynthesisStatus == SynthesisStatusCode::Error)
-        {
-            wcout << L"Translation synthesis error: " << e.Result.FailureReason;
+            cout << "CANCELED: ErrorDetails=" << e.ErrorDetails << std::endl;
+            cout << "CANCELED: Did you update the subscription info?" << std::endl;
         }
     });
 
-    wcout << L"Say something...\n";
+    recognizer->Synthesizing.Connect([](const TranslationSynthesisEventArgs& e)
+    {
+        auto size = e.Result->Audio.size();
+        cout << "Translation synthesis result: size of audio data: " << size
+             << (size == 0 ? "(END)" : "");
+    });
+
+    cout << "Say something...\n";
 
     // Starts continuos recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
     recognizer->StartContinuousRecognitionAsync().wait();
 
-    wcout << L"Press any key to stop\n";
+    cout << "Press any key to stop\n";
     string s;
     getline(cin, s);
 

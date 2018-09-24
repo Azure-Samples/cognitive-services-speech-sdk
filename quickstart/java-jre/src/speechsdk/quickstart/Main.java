@@ -24,38 +24,38 @@ public class Main {
             String serviceRegion = "YourServiceRegion";
 
             int exitCode = 1;
+            SpeechConfig config = SpeechConfig.fromSubscription(speechSubscriptionKey, serviceRegion);
+            assert(config != null);
 
-            SpeechFactory factory = SpeechFactory.fromSubscription(speechSubscriptionKey, serviceRegion);
-            assert(factory != null);
-
-            SpeechRecognizer reco = factory.createSpeechRecognizer();
+            SpeechRecognizer reco = new SpeechRecognizer(config);
             assert(reco != null);
 
             System.out.println("Say something...");
 
-            Future<SpeechRecognitionResult> task = reco.recognizeAsync();
+            Future<SpeechRecognitionResult> task = reco.recognizeOnceAsync();
             assert(task != null);
 
             SpeechRecognitionResult result = task.get();
             assert(result != null);
 
-            if (result.getReason() == RecognitionStatus.Recognized) {
+            if (result.getReason() == ResultReason.RecognizedSpeech) {
                 System.out.println("We recognized: " + result.getText());
                 exitCode = 0;
             }
-            else if (result.getReason() == RecognitionStatus.Canceled) {
-                System.out.println("The request was canceled. Did you update the subscription info?" +
-                                   System.lineSeparator() +
-                                   result.getErrorDetails());
+            else if (result.getReason() == ResultReason.NoMatch) {
+                System.out.println("NOMATCH: Speech could not be recognized.");
             }
-            else {
-                System.out.println("No speech could be recognized. " +
-                                   System.lineSeparator() +
-                                   result.toString());
+            else if (result.getReason() == ResultReason.Canceled) {
+                CancellationDetails cancellation = CancellationDetails.fromResult(result);
+                System.out.println("CANCELED: Reason=" + cancellation.getReason());
+
+                if (cancellation.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
+                    System.out.println("CANCELED: Did you update the subscription info?");
+                }
             }
 
             reco.close();
-            factory.close();
             
             System.exit(exitCode);
         } catch (Exception ex) {

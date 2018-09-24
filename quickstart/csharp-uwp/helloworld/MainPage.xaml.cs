@@ -4,6 +4,7 @@
 //
 // <code>
 using System;
+using System.Text;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
@@ -47,36 +48,42 @@ namespace helloworld
 
         private async void SpeechRecognitionFromMicrophone_ButtonClicked(object sender, RoutedEventArgs e)
         {
-            // Creates an instance of a speech factory with specified subscription key and service region.
+            // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             try
             {
-                // Creates a speech recognizer using microphone as audio input. The default language is "en-us".
-                using (var recognizer = factory.CreateSpeechRecognizer())
+                // Creates a speech recognizer using microphone as audio input.
+                using (var recognizer = new SpeechRecognizer(config))
                 {
                     // Starts recognition. It returns when the first utterance has been recognized.
-                    var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                    var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+
                     // Checks result.
-                    string str;
-                    if (result.RecognitionStatus != RecognitionStatus.Recognized)
+                    StringBuilder sb = new StringBuilder();
+                    if (result.Reason == ResultReason.RecognizedSpeech)
                     {
-                        str = $"Recognition status: {result.RecognitionStatus.ToString()}";
-                        if (result.RecognitionStatus == RecognitionStatus.Canceled)
+                        sb.AppendLine($"RECOGNIZED: Text={result.Text}");
+                    }
+                    else if (result.Reason == ResultReason.NoMatch)
+                    {
+                        sb.AppendLine($"NOMATCH: Speech could not be recognized.");
+                    }
+                    else if (result.Reason == ResultReason.Canceled)
+                    {
+                        var cancellation = CancellationDetails.FromResult(result);
+                        sb.AppendLine($"CANCELED: Reason={cancellation.Reason}");
+
+                        if (cancellation.Reason == CancellationReason.Error)
                         {
-                            str = $"There was an error, reason: {result.RecognitionFailureReason}";
-                        }
-                        else
-                        {
-                            str = "No speech could be recognized.";
+                            sb.AppendLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                            sb.AppendLine($"CANCELED: Did you update the subscription info?");
                         }
                     }
-                    else
-                    {
-                        str = $"We recognized: {result.Text}, Offset: {result.OffsetInTicks}, Duration: {result.Duration}.";
-                    }
-                    NotifyUser(str, NotifyType.StatusMessage);
+
+                    // Update the UI
+                    NotifyUser(sb.ToString(), NotifyType.StatusMessage);
                 }
             }
             catch(Exception ex)

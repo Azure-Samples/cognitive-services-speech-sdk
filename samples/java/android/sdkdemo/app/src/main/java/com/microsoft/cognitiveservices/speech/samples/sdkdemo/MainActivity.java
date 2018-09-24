@@ -13,15 +13,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.microsoft.cognitiveservices.speech.RecognitionStatus;
-import com.microsoft.cognitiveservices.speech.SessionEventType;
+import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
+import com.microsoft.cognitiveservices.speech.ResultReason;
 import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
-import com.microsoft.cognitiveservices.speech.SpeechFactory;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
 import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 import com.microsoft.cognitiveservices.speech.samples.sdkdemo.MicrophoneStream;
+import com.microsoft.cognitiveservices.speech.CancellationDetails;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -94,21 +95,16 @@ public class MainActivity extends AppCompatActivity {
 
             // Request permissions needed for speech recognition
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{RECORD_AUDIO, INTERNET}, permissionRequestId);
-
-            // Note: Configure native platform binding. This currently configures the directory
-            //       in which to store certificates required to access the speech service.
-            //       It is required to call this once after app start.
-            SpeechFactory.configureNativePlatformBindingWithDefaultCertificate();
         }
         catch(Exception ex) {
             Log.e("SpeechSDK", "could not init sdk, " + ex.toString());
             recognizedTextView.setText("Could not initialize: " + ex.toString());
         }
 
-        // create factory
-        final SpeechFactory speechFactory;
+        // create config 
+        final SpeechConfig speechConfig;
         try {
-            speechFactory = SpeechFactory.fromSubscription(SpeechSubscriptionKey, SpeechRegion);
+            speechConfig = SpeechConfig.fromSubscription(SpeechSubscriptionKey, SpeechRegion);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             displayException(ex);
@@ -125,13 +121,16 @@ public class MainActivity extends AppCompatActivity {
             clearTextBox();
 
             try {
-                final SpeechRecognizer reco = speechFactory.createSpeechRecognizerWithStream(createMicrophoneStream());
+                // final AudioConfig audioInput = AudioConfig.fromDefaultMicrophoneInput();
+                final AudioConfig audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
+                final SpeechRecognizer reco = new SpeechRecognizer(speechConfig, audioInput);
 
-                final Future<SpeechRecognitionResult> task = reco.recognizeAsync();
+                final Future<SpeechRecognitionResult> task = reco.recognizeOnceAsync();
                 setOnTaskCompletedListener(task, result -> {
                     String s = result.getText();
-                    if (result.getReason() != RecognitionStatus.Recognized) {
-                       s = "Recognition failed with " + result.getReason() + ". Did you enter your subscription?" + System.lineSeparator() + result.getErrorDetails();
+                    if (result.getReason() != ResultReason.RecognizedSpeech) {
+                        String errorDetails = (result.getReason() == ResultReason.Canceled) ? CancellationDetails.fromResult(result).getErrorDetails() : "";
+                        s = "Recognition failed with " + result.getReason() + ". Did you enter your subscription?" + System.lineSeparator() + errorDetails;
                     }
 
                     reco.close();
@@ -155,15 +154,17 @@ public class MainActivity extends AppCompatActivity {
             clearTextBox();
 
             try {
-                final SpeechRecognizer reco = speechFactory.createSpeechRecognizerWithStream(createMicrophoneStream());
+                // final AudioConfig audioInput = AudioConfig.fromDefaultMicrophoneInput();
+                final AudioConfig audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
+                final SpeechRecognizer reco = new SpeechRecognizer(speechConfig, audioInput);
 
-                reco.IntermediateResultReceived.addEventListener((o, speechRecognitionResultEventArgs) -> {
+                reco.recognizing.addEventListener((o, speechRecognitionResultEventArgs) -> {
                     final String s = speechRecognitionResultEventArgs.getResult().getText();
                     Log.i(logTag, "Intermediate result received: " + s);
                     setRecognizedText(s);
                 });
 
-                final Future<SpeechRecognitionResult> task = reco.recognizeAsync();
+                final Future<SpeechRecognitionResult> task = reco.recognizeOnceAsync();
                 setOnTaskCompletedListener(task, result -> {
                     final String s = result.getText();
                     reco.close();
@@ -184,6 +185,7 @@ public class MainActivity extends AppCompatActivity {
             private static final String logTag = "reco 3";
             private boolean continuousListeningStarted = false;
             private SpeechRecognizer reco = null;
+            private AudioConfig audioInput = null;
             private String buttonText = "";
             private ArrayList<String> content = new ArrayList<>();
 
@@ -213,9 +215,12 @@ public class MainActivity extends AppCompatActivity {
 
                 try {
                     content.clear();
-                    reco = speechFactory.createSpeechRecognizerWithStream(createMicrophoneStream());
+                    
+                    // audioInput = AudioConfig.fromDefaultMicrophoneInput();
+                    audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
+                    reco = new SpeechRecognizer(speechConfig, audioInput);
 
-                    reco.IntermediateResultReceived.addEventListener((o, speechRecognitionResultEventArgs) -> {
+                    reco.recognizing.addEventListener((o, speechRecognitionResultEventArgs) -> {
                         final String s = speechRecognitionResultEventArgs.getResult().getText();
                         Log.i(logTag, "Intermediate result received: " + s);
                         content.add(s);
@@ -223,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
                         content.remove(content.size() - 1);
                     });
 
-                    reco.FinalResultReceived.addEventListener((o, speechRecognitionResultEventArgs) -> {
+                    reco.recognized.addEventListener((o, speechRecognitionResultEventArgs) -> {
                         final String s = speechRecognitionResultEventArgs.getResult().getText();
                         Log.i(logTag, "Final result received: " + s);
                         content.add(s);
@@ -263,28 +268,32 @@ public class MainActivity extends AppCompatActivity {
             content.add("");
             content.add("");
             try {
-                final SpeechFactory intentFactory = SpeechFactory.fromSubscription(LanguageUnderstandingSubscriptionKey, LanguageUnderstandingServiceRegion);
-                final IntentRecognizer reco = intentFactory.createIntentRecognizerWithStream(createMicrophoneStream());
+                final SpeechConfig intentConfig = SpeechConfig.fromSubscription(LanguageUnderstandingSubscriptionKey, LanguageUnderstandingServiceRegion);
+
+                // final AudioConfig audioInput = AudioConfig.fromDefaultMicrophoneInput();
+                final AudioConfig audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
+                final IntentRecognizer reco = new IntentRecognizer(intentConfig, audioInput);
 
                 LanguageUnderstandingModel intentModel = LanguageUnderstandingModel.fromAppId(LanguageUnderstandingAppId);
                 for (Map.Entry<String, String> entry : intentIdMap.entrySet()) {
-                    reco.addIntent(entry.getKey(), intentModel, entry.getValue());
+                    reco.addIntent(intentModel, entry.getValue(), entry.getKey());
                 }
 
-                reco.IntermediateResultReceived.addEventListener((o, intentRecognitionResultEventArgs) -> {
+                reco.recognizing.addEventListener((o, intentRecognitionResultEventArgs) -> {
                     final String s = intentRecognitionResultEventArgs.getResult().getText();
                     Log.i(logTag, "Intermediate result received: " + s);
                     content.set(0, s);
                     setRecognizedText(TextUtils.join(System.lineSeparator(), content));
                 });
 
-                final Future<IntentRecognitionResult> task = reco.recognizeAsync();
+                final Future<IntentRecognitionResult> task = reco.recognizeOnceAsync();
                 setOnTaskCompletedListener(task, result -> {
                     Log.i(logTag, "Continuous recognition stopped.");
                     String s = result.getText();
 
-                    if (result.getReason() != RecognitionStatus.Recognized) {
-                        s = "Intent failed with " + result.getReason() + ". Did you enter your Language Understanding subscription?" + System.lineSeparator() + result.getErrorDetails();
+                    if (result.getReason() != ResultReason.RecognizedIntent) {
+                        String errorDetails = (result.getReason() == ResultReason.Canceled) ? CancellationDetails.fromResult(result).getErrorDetails() : "";
+                        s = "Intent failed with " + result.getReason() + ". Did you enter your Language Understanding subscription?" + System.lineSeparator() + errorDetails;
                     }
 
                     String intentId = result.getIntentId();

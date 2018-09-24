@@ -6,6 +6,7 @@
 namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
 {
     using System;
+    using System.Globalization;
     using System.ComponentModel;
     using System.Diagnostics;
     using System.IO;
@@ -18,6 +19,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
     using System.IO.IsolatedStorage;
 
     using Microsoft.CognitiveServices.Speech;
+    using Microsoft.CognitiveServices.Speech.Audio;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -67,7 +69,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
                 this.OnPropertyChanged<string>();
             }
         }
-        
+
         /// <summary>
         /// Gets or sets region name of the service
         /// </summary>
@@ -79,27 +81,27 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
         public string RecognitionLanguage { get; set; }
 
         /// <summary>
-        /// Gets or sets deployment ID of the custom model
+        /// Gets or sets endpoint ID of the custom model
         /// </summary>
-        public string CustomModelDeploymentId
+        public string CustomModelEndpointId
         {
             get
             {
-                return this.deploymentId;
+                return this.endpointId;
             }
 
             set
             {
-                this.deploymentId = value?.Trim();
+                this.endpointId = value?.Trim();
                 this.OnPropertyChanged<string>();
             }
         }
 
         // Private properties
         private const string defaultLocale = "en-US";
-        private string deploymentId;
+        private string endpointId;
         private string subscriptionKey;
-        private const string deploymentIdFileName = "CustomModelDeploymentId.txt";
+        private const string endpointIdFileName = "CustomModelEndpointId.txt";
         private const string subscriptionKeyFileName = "SubscriptionKey.txt";
         private string wavFileName;
 
@@ -146,7 +148,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
             this.stopButton.IsEnabled = false;
 
             this.SubscriptionKey = this.GetValueFromIsolatedStorage(subscriptionKeyFileName);
-            this.CustomModelDeploymentId = this.GetValueFromIsolatedStorage(deploymentIdFileName);
+            this.CustomModelEndpointId = this.GetValueFromIsolatedStorage(endpointIdFileName);
         }
 
         /// <summary>
@@ -180,14 +182,14 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
                 }
                 else if (this.UseCustomModel)
                 {
-                    MessageBox.Show("Subscription Key or Custom Model DeploymentId is missing or wrong! If you do not need the custom model, please change Settings->Recognition Type.");
-                    this.WriteLine(this.customModelLogText, "--- Error : Subscription Key or Custom Model DeploymentId is wrong or missing! ---");
+                    MessageBox.Show("Subscription Key or Custom Model Endpoint ID is missing or wrong! If you do not need the custom model, please change Settings->Recognition Type.");
+                    this.WriteLine(this.customModelLogText, "--- Error : Subscription Key or Custom Model endpoint ID is wrong or missing! ---");
                 }
                 else if (this.UseBaseAndCustomModels)
                 {
-                    MessageBox.Show("Subscription Key or Custom Model DeploymentId is missing or wrong! If you do not need the custom model, please change Settings->Recognition Type.");
-                    this.WriteLine(this.baseModelLogText, "--- Error : Subscription Key or Custom Model DeploymentId is wrong or missing! ---");
-                    this.WriteLine(this.customModelLogText, "--- Error : Subscription Key or Custom Model DeploymentId is wrong or missing! ---");
+                    MessageBox.Show("Subscription Key or Custom Model endpoint ID is missing or wrong! If you do not need the custom model, please change Settings->Recognition Type.");
+                    this.WriteLine(this.baseModelLogText, "--- Error : Subscription Key or Custom Model endpoint ID is wrong or missing! ---");
+                    this.WriteLine(this.customModelLogText, "--- Error : Subscription Key or Custom Model endpoint ID is wrong or missing! ---");
                 }
 
                 this.EnableButtons();
@@ -230,7 +232,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
             }
             if (this.UseCustomModel || this.UseBaseAndCustomModels)
             {
-                stopCustomRecognitionTaskCompletionSource.TrySetResult(0); 
+                stopCustomRecognitionTaskCompletionSource.TrySetResult(0);
             }
 
             EnableButtons();
@@ -238,65 +240,72 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
 
         /// <summary>
         /// Creates Recognizer with baseline model and selected language:
-        /// Creates a factory with subscription key and selected region
+        /// Creates a config with subscription key and selected region
         /// If input source is audio file, creates recognizer with audio file otherwise with default mic
         /// Waits on RunRecognition
         /// </summary>
         private async Task CreateBaseReco()
         {
             // Todo: suport users to specifiy a different region.
-            var basicFactory = SpeechFactory.FromSubscription(this.SubscriptionKey, this.Region);
-            SpeechRecognizer basicRecognizer;
+            var config = SpeechConfig.FromSubscription(this.SubscriptionKey, this.Region);
+            config.SpeechRecognitionLanguage = this.RecognitionLanguage;
 
+            SpeechRecognizer basicRecognizer;
             if (this.UseMicrophone)
             {
-                using (basicRecognizer = basicFactory.CreateSpeechRecognizer(this.RecognitionLanguage))
+                using (basicRecognizer = new SpeechRecognizer(config))
                 {
                     await this.RunRecognizer(basicRecognizer, RecoType.Base, stopBaseRecognitionTaskCompletionSource).ConfigureAwait(false);
                 }
             }
             else
             {
-                using (basicRecognizer = basicFactory.CreateSpeechRecognizerWithFileInput(wavFileName, this.RecognitionLanguage))
+                using (var audioInput = AudioConfig.FromWavFileInput(wavFileName))
                 {
-                    await this.RunRecognizer(basicRecognizer, RecoType.Base, stopBaseRecognitionTaskCompletionSource).ConfigureAwait(false);
-                }
+                    using (basicRecognizer = new SpeechRecognizer(config, audioInput))
+                    {
+                        await this.RunRecognizer(basicRecognizer, RecoType.Base, stopBaseRecognitionTaskCompletionSource).ConfigureAwait(false);
+                    }
+               }
             }
         }
 
         /// <summary>
-        /// Creates Recognizer with custom model deploymentId and selected language:
-        /// Creates a factory with subscription key and selected region
+        /// Creates Recognizer with custom model endpointId and selected language:
+        /// Creates a config with subscription key and selected region
         /// If input source is audio file, creates recognizer with audio file otherwise with default mic
         /// Waits on RunRecognition
         /// </summary>
         private async Task CreateCustomReco()
         {
             // Todo: suport users to specifiy a different region.
-            var customFactory = SpeechFactory.FromSubscription(this.SubscriptionKey, this.Region);
-            SpeechRecognizer customRecognizer;
+            var config = SpeechConfig.FromSubscription(this.SubscriptionKey, this.Region);
+            config.SpeechRecognitionLanguage = this.RecognitionLanguage;
+            config.EndpointId = this.CustomModelEndpointId;
 
+            SpeechRecognizer customRecognizer;
             if (this.UseMicrophone)
             {
-                using (customRecognizer = customFactory.CreateSpeechRecognizer(this.RecognitionLanguage))
+                using (customRecognizer = new SpeechRecognizer(config))
                 {
-                    customRecognizer.DeploymentId = this.CustomModelDeploymentId;
                     await this.RunRecognizer(customRecognizer, RecoType.Custom, stopCustomRecognitionTaskCompletionSource).ConfigureAwait(false);
                 }
             }
             else
             {
-                using (customRecognizer = customFactory.CreateSpeechRecognizerWithFileInput(wavFileName, this.RecognitionLanguage))
+                using (var audioInput = AudioConfig.FromWavFileInput(wavFileName))
                 {
-                    customRecognizer.DeploymentId = this.CustomModelDeploymentId;
-                    await this.RunRecognizer(customRecognizer, RecoType.Custom, stopCustomRecognitionTaskCompletionSource).ConfigureAwait(false);
-                }
+                    using (customRecognizer = new SpeechRecognizer(config, audioInput))
+                    {
+                        await this.RunRecognizer(customRecognizer, RecoType.Custom, stopCustomRecognitionTaskCompletionSource).ConfigureAwait(false);
+                    }
+               }
             }
         }
 
         /// <summary>
         /// Subscribes to Recognition Events
-        /// Starts the Recognition and waits until Final Result is received, then Stops recognition
+        /// Starts the Recognition and waits until final result is received, then Stops recognition
         /// </summary>
         /// <param name="recognizer">Recognizer object</param>
         /// <param name="recoType">Type of Recognizer</param>
@@ -312,14 +321,25 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
                 isChecked = this.immediateResultsCheckBox.IsChecked == true;
             });
 
+            EventHandler<SpeechRecognitionEventArgs> recognizingHandler = (sender, e) => RecognizedEventHandler(e, recoType);
             if (isChecked)
             {
-                recognizer.IntermediateResultReceived += (sender, e) => IntermediateResultEventHandler(e, recoType);
+                recognizer.Recognizing += recognizingHandler;
             }
-            recognizer.FinalResultReceived += (sender, e) => FinalResultEventHandler(e, recoType);
-            recognizer.RecognitionErrorRaised += (sender, e) => ErrorEventHandler(e, recoType, source);
-            recognizer.OnSessionEvent += (sender, e) => SessionEventHandler(e, recoType, source);
-            recognizer.OnSpeechDetectedEvent += (sender, e) => SpeechDetectedEventHandler(e, recoType);
+
+            EventHandler<SpeechRecognitionEventArgs> recognizedHandler = (sender, e) => RecognizedEventHandler(e, recoType);
+            EventHandler<SpeechRecognitionCanceledEventArgs> canceledHandler = (sender, e) => CanceledEventHandler(e, recoType, source);
+            EventHandler<SessionEventArgs> sessionStartedHandler = (sender, e) => SessionStartedEventHandler(e, recoType);
+            EventHandler<SessionEventArgs> sessionStoppedHandler = (sender, e) => SessionStoppedEventHandler(e, recoType, source);
+            EventHandler<RecognitionEventArgs> speechStartDetectedHandler = (sender, e) => SpeechDetectedEventHandler(e, recoType, "start");
+            EventHandler<RecognitionEventArgs> speechEndDetectedHandler = (sender, e) => SpeechDetectedEventHandler(e, recoType, "end");
+
+            recognizer.Recognized += recognizedHandler;
+            recognizer.Canceled += canceledHandler;
+            recognizer.SessionStarted += sessionStartedHandler;
+            recognizer.SessionStopped += sessionStoppedHandler;
+            recognizer.SpeechStartDetected -= speechStartDetectedHandler;
+            recognizer.SpeechEndDetected -= speechEndDetectedHandler;
 
             //start,wait,stop recognition
             await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
@@ -331,29 +351,31 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
             // unsubscribe from events
             if (isChecked)
             {
-                recognizer.IntermediateResultReceived -= (sender, e) => IntermediateResultEventHandler(e, recoType);
+                recognizer.Recognizing -= recognizingHandler;
             }
-            recognizer.FinalResultReceived -= (sender, e) => FinalResultEventHandler(e, recoType);
-            recognizer.RecognitionErrorRaised -= (sender, e) => ErrorEventHandler(e, recoType, source);
-            recognizer.OnSessionEvent -= (sender, e) => SessionEventHandler(e, recoType, source);
-            recognizer.OnSpeechDetectedEvent -= (sender, e) => SpeechDetectedEventHandler(e, recoType);
+            recognizer.Recognized -= recognizedHandler;
+            recognizer.Canceled -= canceledHandler;
+            recognizer.SessionStarted -= sessionStartedHandler;
+            recognizer.SessionStopped -= sessionStoppedHandler;
+            recognizer.SpeechStartDetected -= speechStartDetectedHandler;
+            recognizer.SpeechEndDetected -= speechEndDetectedHandler;
         }
 
         #region Recognition Event Handlers
 
         /// <summary>
-        /// Logs Intermediate Recognition results
+        /// Logs intermediate recognition results
         /// </summary>
-        private void IntermediateResultEventHandler(SpeechRecognitionResultEventArgs e, RecoType rt)
+        private void RecognizingEventHandler(SpeechRecognitionEventArgs e, RecoType rt)
         {
             var log = (rt == RecoType.Base) ? this.baseModelLogText : this.customModelLogText;
             this.WriteLine(log, "Intermediate result: {0} ", e.Result.Text);
         }
 
         /// <summary>
-        /// Logs the Final result
+        /// Logs the final recognition result
         /// </summary>
-        private void FinalResultEventHandler(SpeechRecognitionResultEventArgs e, RecoType rt)
+        private void RecognizedEventHandler(SpeechRecognitionEventArgs e, RecoType rt)
         {
             TextBox log;
             if (rt == RecoType.Base)
@@ -368,7 +390,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
             }
 
             this.WriteLine(log);
-            this.WriteLine(log, $" --- Final result received. Status: {e.Result.RecognitionStatus.ToString()}. --- ");
+            this.WriteLine(log, $" --- Final result received. Reason: {e.Result.Reason.ToString()}. --- ");
             if (!string.IsNullOrEmpty(e.Result.Text))
             {
                 this.WriteLine(log, e.Result.Text);
@@ -376,35 +398,42 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
         }
 
         /// <summary>
-        /// Logs Error events
+        /// Logs Canceled events
         /// And sets the TaskCompletionSource to 0, in order to trigger Recognition Stop
         /// </summary>
-        private void ErrorEventHandler(RecognitionErrorEventArgs e, RecoType rt, TaskCompletionSource<int> source)
+        private void CanceledEventHandler(SpeechRecognitionCanceledEventArgs e, RecoType rt, TaskCompletionSource<int> source)
         {
             var log = (rt == RecoType.Base) ? this.baseModelLogText : this.customModelLogText;
             source.TrySetResult(0);
-            this.WriteLine(log, "--- Error received ---");
-            this.WriteLine(log, $"Status: {e.Status.ToString()}. Reason: {e.FailureReason}.");
+            this.WriteLine(log, "--- recognition canceled ---");
+            this.WriteLine(log, $"CancellationReason: {e.Reason.ToString()}. ErrorDetails: {e.ErrorDetails}.");
             this.WriteLine(log);
         }
 
         /// <summary>
-        /// If SessionStoppedEvent is received, sets the TaskCompletionSource to 0, in order to trigger Recognition Stop
+        /// Session started event handler.
         /// </summary>
-        private void SessionEventHandler(SessionEventArgs e, RecoType rt, TaskCompletionSource<int> source)
+        private void SessionStartedEventHandler(SessionEventArgs e, RecoType rt)
         {
             var log = (rt == RecoType.Base) ? this.baseModelLogText : this.customModelLogText;
-            this.WriteLine(log, String.Format("Speech recognition: Session event: {0}.", e.ToString()));
-            if (e.EventType == SessionEventType.SessionStoppedEvent)
-            {
-                source.TrySetResult(0);
-            }
+            this.WriteLine(log, String.Format(CultureInfo.InvariantCulture, "Speech recognition: Session started event: {0}.", e.ToString()));
         }
 
-        private void SpeechDetectedEventHandler(RecognitionEventArgs e, RecoType rt)
+        /// <summary>
+        /// Session stopped event handler. Set the TaskCompletionSource to 0, in order to trigger Recognition Stop
+        /// </summary>
+        private void SessionStoppedEventHandler(SessionEventArgs e, RecoType rt, TaskCompletionSource<int> source)
         {
             var log = (rt == RecoType.Base) ? this.baseModelLogText : this.customModelLogText;
-            this.WriteLine(log, String.Format("Speech recognition: Speech event: {0}.", e.ToString()));
+            this.WriteLine(log, String.Format(CultureInfo.InvariantCulture, "Speech recognition: Session stopped event: {0}.", e.ToString()));
+            source.TrySetResult(0);
+        }
+
+        private void SpeechDetectedEventHandler(RecognitionEventArgs e, RecoType rt, string eventType)
+        {
+            var log = (rt == RecoType.Base) ? this.baseModelLogText : this.customModelLogText;
+            this.WriteLine(log, String.Format(CultureInfo.InvariantCulture, "Speech recognition: Speech {0} detected event: {1}.",
+                eventType, e.ToString()));
         }
 
         #endregion
@@ -468,7 +497,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
             try
             {
                 SaveKeyToIsolatedStorage(subscriptionKeyFileName, this.SubscriptionKey);
-                SaveKeyToIsolatedStorage(deploymentIdFileName, this.CustomModelDeploymentId);
+                SaveKeyToIsolatedStorage(endpointIdFileName, this.CustomModelEndpointId);
                 MessageBox.Show("Keys are saved to your disk.\nYou do not need to paste it next time.", "Keys");
             }
             catch (Exception exception)
@@ -487,7 +516,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
         private bool AreKeysValid()
         {
             if (this.subscriptionKey == null || this.subscriptionKey.Length <= 0 ||
-                ((this.UseCustomModel || this.UseBaseAndCustomModels) && (this.deploymentId == null || this.deploymentId.Length <= 0)))
+                ((this.UseCustomModel || this.UseBaseAndCustomModels) && (this.endpointId == null || this.endpointId.Length <= 0)))
             {
                 return false;
             }
@@ -549,7 +578,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
 
         private void WriteLine(TextBox log, string format, params object[] args)
         {
-            var formattedStr = string.Format(format, args);
+            var formattedStr = string.Format(CultureInfo.InvariantCulture, format, args);
             Trace.WriteLine(formattedStr);
             this.Dispatcher.Invoke(() =>
             {
@@ -567,7 +596,7 @@ namespace MicrosoftSpeechSDKSamples.WpfSpeechRecognitionSample
         }
 
         /// <summary>
-        /// Helper function for INotifyPropertyChanged interface 
+        /// Helper function for INotifyPropertyChanged interface
         /// </summary>
         /// <typeparam name="T">Property type</typeparam>
         /// <param name="caller">Property name</param>

@@ -20,14 +20,14 @@ This sample demonstrates various forms of speech recognition, intent recognition
 
 ## Build the sample
 
-* **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
+* **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
 * [Download the sample code to your development PC.](../../README.md#get-the-samples)
 * Create an empty workspace in Eclipse and import the folder containing this sample as a project into your workspace.
 * To tailor the sample to your environment, use search and replace across the whole project to update the following strings:
   * `YourSubscriptionKey`: replace with your subscription key.
   * `YourServiceRegion`: replace with the [region](https://aka.ms/csspeech/region) your subscription is associated with.
     For example, `westus` or `northeurope`.
-  * `YourDeploymentId` (optional): replace with the deployment ID of your customized model in [CRIS](https://cris.ai).
+  * `YourEndpointId` (optional): replace with the endpoint ID of your customized model in [CRIS](https://cris.ai).
   * `YourAudioFile.wav`: replace with a path to a `.wav` file on your disk **(required format: 16 kHz sample rate, 16 bit samples, mono / single-channel)**
   * The following settings apply for intent recognition powered by the [Language Understanding service (LUIS)](https://aka.ms/csspeech/luisdocs):
     * `YourLanguageUnderstandingSubscriptionKey`: replace with your Language Understanding service subscription key (endpoint key).

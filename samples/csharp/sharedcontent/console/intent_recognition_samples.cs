@@ -7,6 +7,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Intent;
 // </toplevel>
 
@@ -18,51 +19,59 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionWithMicrophoneAsync()
         {
             // <intentRecognitionWithMicrophone>
-            // Creates an instance of a speech factory with specified subscription key
+            // Creates an instance of a speech config with specified subscription key
             // and service region. Note that in contrast to other services supported by
-            // the Cognitive Service Speech SDK, the Language Understanding service
+            // the Cognitive Services Speech SDK, the Language Understanding service
             // requires a specific subscription key from https://www.luis.ai/.
             // The Language Understanding service calls the required key 'endpoint key'.
             // Once you've obtained it, replace with below with your own Language Understanding subscription key
             // and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
+            // The default language is "en-us".
+            var config = SpeechConfig.FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
 
-            // Creates an intent recognizer using microphone as audio input.The default language is "en-us".
-            using (var recognizer = factory.CreateIntentRecognizer())
+            // Creates an intent recognizer using microphone as audio input.
+            using (var recognizer = new IntentRecognizer(config))
             {
                 // Creates a Language Understanding model using the app id, and adds specific intents from your model
                 var model = LanguageUnderstandingModel.FromAppId("YourLanguageUnderstandingAppId");
-                recognizer.AddIntent("id1", model, "YourLanguageUnderstandingIntentName1");
-                recognizer.AddIntent("id2", model, "YourLanguageUnderstandingIntentName2");
-                recognizer.AddIntent("any-IntentId-here", model, "YourLanguageUnderstandingIntentName3");
+                recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
+                recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
+                recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
                 // Starts recognizing.
                 Console.WriteLine("Say something...");
 
-                // Performs recognition.
-                // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
-                // only for single shot recognition like command or query. For long-running recognition, use
-                // StartContinuousRecognitionAsync() instead.
-                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                // Performs recognition. RecognizeOnceAsync() returns when the first utterance has been recognized,
+                // so it is suitable only for single shot recognition like command or query. For long-running
+                // recognition, use StartContinuousRecognitionAsync() instead.
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
                 // Checks result.
-                if (result.RecognitionStatus != RecognitionStatus.Recognized)
+                if (result.Reason == ResultReason.RecognizedIntent)
                 {
-                    Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-                    if (result.RecognitionStatus == RecognitionStatus.Canceled)
-                    {
-                        Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
-                    }
-                    else
-                    {
-                        Console.WriteLine("No speech could be recognized.\n");
-                    }
+                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+                    Console.WriteLine($"    Intent Id: {result.IntentId}.");
+                    Console.WriteLine($"    Language Understanding JSON: {result.Properties.GetProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult)}.");
                 }
-                else
+                else if (result.Reason == ResultReason.RecognizedSpeech)
                 {
-                    Console.WriteLine($"We recognized: {result.Text}.");
-                    Console.WriteLine($"\n    Intent Id: {result.IntentId}.");
-                    Console.WriteLine($"\n    Language Understanding JSON: {result.Properties.Get<string>(ResultPropertyKind.LanguageUnderstandingJson)}.");
+                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+                    Console.WriteLine($"    Intent not recognized.");
+                }
+                else if (result.Reason == ResultReason.NoMatch)
+                {
+                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                }
+                else if (result.Reason == ResultReason.Canceled)
+                {
+                    var cancellation = CancellationDetails.FromResult(result);
+                    Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                    if (cancellation.Reason == CancellationReason.Error)
+                    {
+                        Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                        Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                    }
                 }
             }
             // </intentRecognitionWithMicrophone>
@@ -72,71 +81,87 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task ContinuousRecognitionWithFileAsync()
         {
             // <intentContinuousRecognitionWithFile>
-            // Creates an instance of a speech factory with specified subscription key
+            // Creates an instance of a speech config with specified subscription key
             // and service region. Note that in contrast to other services supported by
-            // the Cognitive Service Speech SDK, the Language Understanding service
+            // the Cognitive Services Speech SDK, the Language Understanding service
             // requires a specific subscription key from https://www.luis.ai/.
             // The Language Understanding service calls the required key 'endpoint key'.
             // Once you've obtained it, replace with below with your own Language Understanding subscription key
             // and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
+            var config = SpeechConfig.FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
 
             // Creates an intent recognizer using file as audio input.
             // Replace with your own audio file name.
-            using (var recognizer = factory.CreateIntentRecognizerWithFileInput("whatstheweatherlike.wav"))
+            using (var audioInput = AudioConfig.FromWavFileInput("whatstheweatherlike.wav"))
             {
-                // The TaskCompletionSource to stop recognition.
-                var stopRecognition = new TaskCompletionSource<int>();
+                using (var recognizer = new IntentRecognizer(config, audioInput))
+                {
+                    // The TaskCompletionSource to stop recognition.
+                    var stopRecognition = new TaskCompletionSource<int>();
 
-                // Creates a Language Understanding model using the app id, and adds specific intents from your model
-                var model = LanguageUnderstandingModel.FromAppId("YourLanguageUnderstandingAppId");
-                recognizer.AddIntent("id1", model, "YourLanguageUnderstandingIntentName1");
-                recognizer.AddIntent("id2", model, "YourLanguageUnderstandingIntentName2");
-                recognizer.AddIntent("any-IntentId-here", model, "YourLanguageUnderstandingIntentName3");
+                    // Creates a Language Understanding model using the app id, and adds specific intents from your model
+                    var model = LanguageUnderstandingModel.FromAppId("YourLanguageUnderstandingAppId");
+                    recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
+                    recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
+                    recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
-                // Subscribes to events.
-                recognizer.IntermediateResultReceived += (s, e) => {
-                    Console.WriteLine($"\n    Partial result: {e.Result.Text}.");
-                };
+                    // Subscribes to events.
+                    recognizer.Recognizing += (s, e) => {
+                        Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
+                    };
 
-                recognizer.FinalResultReceived += (s, e) => {
-                    if (e.Result.RecognitionStatus == RecognitionStatus.Recognized)
-                    {
-                        Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, Text: {e.Result.Text}.");
-                        Console.WriteLine($"\n    Intent Id: {e.Result.IntentId}.");
-                        Console.WriteLine($"\n    Language Understanding JSON: {e.Result.Properties.Get<string>(ResultPropertyKind.LanguageUnderstandingJson)}.");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"\n    Final result: Status: {e.Result.RecognitionStatus.ToString()}, FailureReason: {e.Result.RecognitionFailureReason}.");
-                    }
-                };
+                    recognizer.Recognized += (s, e) => {
+                        if (e.Result.Reason == ResultReason.RecognizedIntent)
+                        {
+                            Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                            Console.WriteLine($"    Intent Id: {e.Result.IntentId}.");
+                            Console.WriteLine($"    Language Understanding JSON: {e.Result.Properties.GetProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult)}.");
+                        }
+                        else if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                        {
+                            Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                            Console.WriteLine($"    Intent not recognized.");
+                        }
+                        else if (e.Result.Reason == ResultReason.NoMatch)
+                        {
+                            Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                        }
+                    };
 
-                recognizer.RecognitionErrorRaised += (s, e) => {
-                    Console.WriteLine($"\n    An error occurred. Status: {e.Status.ToString()}, FailureReason: {e.FailureReason}");
-                    stopRecognition.TrySetResult(0);
-                };
+                    recognizer.Canceled += (s, e) => {
+                        Console.WriteLine($"CANCELED: Reason={e.Reason}");
 
-                recognizer.OnSessionEvent += (s, e) => {
-                    Console.WriteLine($"\n    Session event. Event: {e.EventType.ToString()}.");
-                    // Stops recognition when session stop is detected.
-                    if (e.EventType == SessionEventType.SessionStoppedEvent)
-                    {
-                        Console.WriteLine($"\nStop recognition.");
+                        if (e.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
+
                         stopRecognition.TrySetResult(0);
-                    }
-                };
+                    };
 
-                // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
-                Console.WriteLine("Say something...");
-                await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                    recognizer.SessionStarted += (s, e) => {
+                        Console.WriteLine("\n    Session started event.");
+                    };
 
-                // Waits for completion.
-                // Use Task.WaitAny to keep the task rooted.
-                Task.WaitAny(new[] { stopRecognition.Task });
+                    recognizer.SessionStopped += (s, e) => {
+                        Console.WriteLine("\n    Session stopped event.");
+                        Console.WriteLine("\nStop recognition.");
+                        stopRecognition.TrySetResult(0);
+                    };
 
-                // Stops recognition.
-                await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+
+                    // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                    Console.WriteLine("Say something...");
+                    await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                    // Waits for completion.
+                    // Use Task.WaitAny to keep the task rooted.
+                    Task.WaitAny(new[] { stopRecognition.Task });
+
+                    // Stops recognition.
+                    await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                }
             }
             // </intentContinuousRecognitionWithFile>
         }
@@ -145,53 +170,60 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RecognitionWithMicrophoneUsingLanguageAsync()
         {
             // <intentRecognitionWithLanguage>
-            // Creates an instance of a speech factory with specified subscription key
+            // Creates an instance of a speech config with specified subscription key
             // and service region. Note that in contrast to other services supported by
-            // the Cognitive Service Speech SDK, the Language Understanding service
+            // the Cognitive Services Speech SDK, the Language Understanding service
             // requires a specific subscription key from https://www.luis.ai/.
             // The Language Understanding service calls the required key 'endpoint key'.
             // Once you've obtained it, replace with below with your own Language Understanding subscription key
             // and service region (e.g., "westus").
-            var factory = SpeechFactory.FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
+            var config = SpeechConfig.FromSubscription("YourLanguageUnderstandingSubscriptionKey", "YourLanguageUnderstandingServiceRegion");
+            var language = "de-de";
+            config.SpeechRecognitionLanguage = language;
 
             // Creates an intent recognizer in the specified language using microphone as audio input.
-            var lang = "de-de";
-
-            using (var recognizer = factory.CreateIntentRecognizer(lang))
+            using (var recognizer = new IntentRecognizer(config))
             {
                 // Creates a Language Understanding model using the app id, and adds specific intents from your model
                 var model = LanguageUnderstandingModel.FromAppId("YourLanguageUnderstandingAppId");
-                recognizer.AddIntent("id1", model, "YourLanguageUnderstandingIntentName1");
-                recognizer.AddIntent("id2", model, "YourLanguageUnderstandingIntentName2");
-                recognizer.AddIntent("any-IntentId-here", model, "YourLanguageUnderstandingIntentName3");
+                recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
+                recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
+                recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 
                 // Starts recognizing.
-                Console.WriteLine("Say something in " + lang + "...");
+                Console.WriteLine("Say something in " + language + "...");
 
-                // Performs recognition.
-                // RecognizeAsync() returns when the first utterance has been recognized, so it is suitable 
-                // only for single shot recognition like command or query. For long-running recognition, use
-                // StartContinuousRecognitionAsync() instead.
-                var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
+                // Performs recognition. RecognizeOnceAsync() returns when the first utterance has been recognized,
+                // so it is suitable only for single shot recognition like command or query. For long-running
+                // recognition, use StartContinuousRecognitionAsync() instead.
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
 
                 // Checks result.
-                if (result.RecognitionStatus != RecognitionStatus.Recognized)
+                if (result.Reason == ResultReason.RecognizedIntent)
                 {
-                    Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-                    if (result.RecognitionStatus == RecognitionStatus.Canceled)
-                    {
-                        Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
-                    }
-                    else
-                    {
-                        Console.WriteLine("No speech could be recognized.\n");
-                    }
+                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+                    Console.WriteLine($"    Intent Id: {result.IntentId}.");
+                    Console.WriteLine($"    Language Understanding JSON: {result.Properties.GetProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult)}.");
                 }
-                else
+                else if (result.Reason == ResultReason.RecognizedSpeech)
                 {
-                    Console.WriteLine($"We recognized: {result.Text}.");
-                    Console.WriteLine($"\n    Intent Id: {result.IntentId}.");
-                    Console.WriteLine($"\n    Language Understanding JSON: {result.Properties.Get<string>(ResultPropertyKind.LanguageUnderstandingJson)}.");
+                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+                    Console.WriteLine($"    Intent not recognized.");
+                }
+                else if (result.Reason == ResultReason.NoMatch)
+                {
+                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                }
+                else if (result.Reason == ResultReason.Canceled)
+                {
+                    var cancellation = CancellationDetails.FromResult(result);
+                    Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                    if (cancellation.Reason == CancellationReason.Error)
+                    {
+                        Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                        Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                    }
                 }
             }
             // </intentRecognitionWithLanguage>

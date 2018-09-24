@@ -26,7 +26,9 @@
                     <RowDefinition Height="*" MinHeight="200"></RowDefinition>
                     <RowDefinition Height="auto" MaxHeight="330"></RowDefinition>
                 </Grid.RowDefinitions>
-                <TextBlock x:Name="baseModelCurrentText" Grid.Row="0" TextTrimming="WordEllipsis" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10" FontSize="20" TextWrapping="Wrap" FontFamily="Segoe UI Semibold" />
+                <ScrollViewer>
+                    <TextBlock x:Name="baseModelCurrentText" Grid.Row="0" TextTrimming="WordEllipsis" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10" FontSize="20" TextWrapping="Wrap" FontFamily="Segoe UI Semibold" />
+                </ScrollViewer>
                 <Expander ExpandDirection="Up" Grid.Row="1" FontFamily="Segoe UI Semibold" Header=" Baseline Model Output" Margin="10">
                     <TextBox FontFamily="Segoe UI" MaxHeight="250" x:Name="baseModelLogText" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextWrapping="Wrap" Text="" VerticalScrollBarVisibility="Visible" Margin="0, 10, 0, 10"/>
                 </Expander>
@@ -37,7 +39,9 @@
                     <RowDefinition Height="*" MinHeight="200"></RowDefinition>
                     <RowDefinition Height="auto" MaxHeight="330"></RowDefinition>
                 </Grid.RowDefinitions>
-                <TextBlock x:Name="customModelCurrentText" Grid.Row="0" TextTrimming="WordEllipsis"  HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10"  FontSize="20" TextWrapping="Wrap"  FontFamily="Segoe UI Semibold"/>
+                <ScrollViewer>
+                    <TextBlock x:Name="customModelCurrentText" Grid.Row="0" TextTrimming="WordEllipsis"  HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10"  FontSize="20" TextWrapping="Wrap"  FontFamily="Segoe UI Semibold"/>
+                </ScrollViewer>
                 <Expander ExpandDirection="Up" Grid.Row="2" FontFamily="Segoe UI Semibold" Header=" Custom Model Output"  Margin="10">
                     <TextBox FontFamily="Segoe UI" MaxHeight="250" x:Name="customModelLogText"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextWrapping="Wrap"  VerticalScrollBarVisibility="Visible" Margin="0, 10, 0, 10"/>
                 </Expander>
@@ -116,11 +120,11 @@
                                     <TextBox VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="2" Text="{Binding ElementName=mainWindow, Path=SubscriptionKey, Mode=TwoWay}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
                                     <StackPanel Visibility="{Binding IsChecked, ElementName=bothRadioButton ,Converter={StaticResource b2v}}" >
                                         <TextBlock Text="CRIS Model ID:"/>
-                                        <TextBox VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="2" Text="{Binding ElementName=mainWindow, Path=CustomModelDeploymentId, Mode=TwoWay}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+                                        <TextBox VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="2" Text="{Binding ElementName=mainWindow, Path=CustomModelEndpointId, Mode=TwoWay}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
                                     </StackPanel>
                                     <StackPanel Visibility="{Binding IsChecked, ElementName=customRadioButton ,Converter={StaticResource b2v}}" >
                                         <TextBlock Text="CRIS Model ID:"/>
-                                        <TextBox VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="2" Text="{Binding ElementName=mainWindow, Path=CustomModelDeploymentId, Mode=TwoWay}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+                                        <TextBox VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="2" Text="{Binding ElementName=mainWindow, Path=CustomModelEndpointId, Mode=TwoWay}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
                                     </StackPanel>
                                     <Button Margin="0,5,0,0" Padding="5" Height="35" VerticalAlignment="Top" Click="SaveKey_Click">Save Keys</Button>
                                 </StackPanel>

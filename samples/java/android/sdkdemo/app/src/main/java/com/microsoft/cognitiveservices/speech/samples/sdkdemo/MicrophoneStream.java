@@ -9,33 +9,32 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.util.Log;
 
-import com.microsoft.cognitiveservices.speech.AudioInputStream;
-import com.microsoft.cognitiveservices.speech.AudioInputStreamFormat;
+import com.microsoft.cognitiveservices.speech.audio.PullAudioInputStreamCallback;
+import com.microsoft.cognitiveservices.speech.audio.AudioStreamFormat;
 
 /**
- * MicrophoneStream exposes the Android Microphone as an AudioInputStream
+ * MicrophoneStream exposes the Android Microphone as an PullAudioInputStreamCallback
  * to be consumed by the Speech SDK.
  * It configures the microphone with 16 kHz sample rate, 16 bit samples, mono (single-channel).
  */
-public class MicrophoneStream extends AudioInputStream {
+public class MicrophoneStream extends PullAudioInputStreamCallback {
     private final static int SAMPLE_RATE = 16000;
-    private final AudioInputStreamFormat format;
+    private final AudioStreamFormat format;
     private AudioRecord recorder;
 
     public MicrophoneStream() {
-        this.format = new AudioInputStreamFormat();
+        this.format = AudioStreamFormat.getWaveFormatPCM(SAMPLE_RATE, (short)16, (short)1);
         this.initMic();
     }
 
-    @Override
-    public AudioInputStreamFormat getFormat() {
+    public AudioStreamFormat getFormat() {
         return this.format;
     }
 
     @Override
-    public long read(byte[] bytes) {
+    public int read(byte[] bytes) {
         long ret = this.recorder.read(bytes, 0, bytes.length);
-        return ret;
+        return (int)ret;
     }
 
     @Override
@@ -55,13 +54,6 @@ public class MicrophoneStream extends AudioInputStream {
                 .setAudioSource(MediaRecorder.AudioSource.VOICE_RECOGNITION)
                 .setAudioFormat(af)
                 .build();
-
-        this.format.Channels = (short) 1; // MONO
-        this.format.SamplesPerSec = SAMPLE_RATE;
-        this.format.BitsPerSample = 16;
-        this.format.AvgBytesPerSec = 2 * SAMPLE_RATE;
-        this.format.FormatTag = 1; // PCM
-        this.format.BlockAlign = (this.format.BitsPerSample + 7) / 8;
 
         this.recorder.startRecording();
     }
