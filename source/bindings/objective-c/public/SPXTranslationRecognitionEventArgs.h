@@ -9,7 +9,7 @@
 
 
 /**
-  * Defines payload of text translation recognizing/recognized events.
+  * Defines the payload of text translation recognizing/recognized events.
   */
 @interface SPXTranslationRecognitionEventArgs : SPXRecognitionEventArgs
 
@@ -21,7 +21,7 @@
 @end
 
 /**
-  * Defines payload of text translation canceled events.
+  * Defines the payload of text translation canceled events.
   */
 @interface SPXTranslationRecognitionCanceledEventArgs : SPXTranslationRecognitionEventArgs
 

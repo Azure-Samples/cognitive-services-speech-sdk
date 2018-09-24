@@ -7,7 +7,7 @@
 #import "SPXSessionEventArgs.h"
 
 /**
-  * Defines payload for SpeechStartDetected and SpeechEndDetected events.
+  * Defines the payload for SpeechStartDetected and SpeechEndDetected events.
   */
 @interface SPXRecognitionEventArgs : SPXSessionEventArgs
 

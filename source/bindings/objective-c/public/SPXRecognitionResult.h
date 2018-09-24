@@ -8,7 +8,7 @@
 #import "SPXPropertyCollection.h"
 
 /**
-  * Represents recognition result base class.
+  * Represents the recognition result base class.
   */
 @interface SPXRecognitionResult : NSObject
 

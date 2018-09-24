@@ -30,34 +30,37 @@ typedef void (^SPXSpeechRecognitionCanceledEventHandler)(SPXSpeechRecognizer * _
 
 /**
   * Initializes a new instance of speech recognizer.
-  * @param speechConfiguration speech recognition config.
+  * @param speechConfiguration speech recognition configuration.
   * @return an instance of speech recognizer.
   */
 - (nullable instancetype)init:(nonnull SPXSpeechConfiguration *)speechConfiguration;
 
 /**
   * Initializes a new instance of speech recognizer using the specified audio config.
-  * @param speechConfiguration speech recognition config.
+  * @param speechConfiguration speech recognition configuration.
   * @param audioConfiguration audio configuration.
   * @return an instance of speech recognizer.
   */
 - (nullable instancetype)initWithSpeechConfiguration:(nonnull SPXSpeechConfiguration *)speechConfiguration audioConfiguration:(nonnull SPXAudioConfiguration *)audioConfiguration;
 
 /**
-  * Starts speech recognition, and stops after the first utterance is recognized. It returns the recognition text as result.
-  * Note: it returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
+  * Starts speech recognition, and stops after the first utterance is recognized. It returns the final recognition result.
+  * Note: it returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query.
+  * For long-running recognition, use continuous recognition instead.
   * @return the result of speech recognition.
   */
 - (nonnull SPXSpeechRecognitionResult *)recognizeOnce;
 
 /**
-  * Starts speech recognition, and the block function is called when the first utterance has been recognized.
-  * Note: it returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
+  * Starts asynchronous speech recognition.
+  * @param resultReceivedHandler the block function to be called when the first utterance has been recognized.
+  * Note: recognizeOnceAsync stops recognizing when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query.
+  * For long-running recognition, use continuous recognition instead.
   */
 - (void)recognizeOnceAsync:(nonnull void (^)(SPXSpeechRecognitionResult * _Nonnull))resultReceivedHandler;
 
 /**
-  * Starts speech recognition on a continuous audio stream, until stopContinuousRecognitionAsync() is called.
+  * Starts speech recognition on a continuous audio stream, until stopContinuousRecognition() is called.
   * User must subscribe to events to receive recognition results.
   */
 - (void)startContinuousRecognition;
@@ -68,17 +71,17 @@ typedef void (^SPXSpeechRecognitionCanceledEventHandler)(SPXSpeechRecognizer * _
 - (void)stopContinuousRecognition;
 
 /**
-  * Subscribes to Recognized event which indicates a final result has been recognized.
+  * Subscribes to the Recognized event which indicates that a final result has been recognized.
   */
 - (void)addRecognizedEventHandler:(nonnull SPXSpeechRecognitionEventHandler)eventHandler;
 
 /**
-  * Subscribes to Recognizing event which indicates an intermediate result has been recognized.
+  * Subscribes to the Recognizing event which indicates that an intermediate result has been recognized.
   */
 - (void)addRecognizingEventHandler:(nonnull SPXSpeechRecognitionEventHandler)eventHandler;
 
 /**
-  * Subscribes to Canceled event which indicates an error occurred during recognition.
+  * Subscribes to the Canceled event which indicates that an error occurred during recognition.
   */
 - (void)addCanceledEventHandler:(nonnull SPXSpeechRecognitionCanceledEventHandler)eventHandler;
 

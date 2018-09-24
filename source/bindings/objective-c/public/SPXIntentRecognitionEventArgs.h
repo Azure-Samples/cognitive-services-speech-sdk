@@ -8,7 +8,7 @@
 #import "SPXIntentRecognitionResult.h"
 
 /**
-  * Defines payload for intent recognizing/recognized events.
+  * Defines the payload for intent recognizing/recognized events.
   */
 @interface SPXIntentRecognitionEventArgs : SPXRecognitionEventArgs
 
@@ -20,7 +20,7 @@
 @end
 
 /**
-  * Define payload of intent recognition canceled result events.
+  * Defines the payload of intent recognition canceled result events.
   */
 @interface SPXIntentRecognitionCanceledEventArgs : SPXIntentRecognitionEventArgs
 
@@ -30,7 +30,7 @@
 @property (readonly)SPXCancellationReason reason;
 
 /**
-  * The error details of why the occurred error.
+  * The error details of why the error occurred.
   */
 @property (copy, readonly, nullable)NSString *errorDetails;
 

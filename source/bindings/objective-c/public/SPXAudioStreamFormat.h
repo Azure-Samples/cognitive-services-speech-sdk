@@ -6,12 +6,12 @@
 #import <Foundation/Foundation.h>
 
 /**
-  * Represents audio stream format used for custom audio input configurations.
+  * Represents the audio stream format used for custom audio input configurations.
   */
 @interface SPXAudioStreamFormat : NSObject
 
 /**
-  * Initializes the audio stream format object with default audio stream format (16 kHz 16bit mono PCM).
+  * Initializes the audio stream format object with the default audio stream format (16 kHz 16bit mono PCM).
   * @return an instance of audio stream format.
   */
 - (nullable instancetype)init;

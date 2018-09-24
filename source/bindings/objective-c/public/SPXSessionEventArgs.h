@@ -6,7 +6,7 @@
 #import <Foundation/Foundation.h>
 
 /**
-  * Defines payload for SessionStarted/Stopped events.
+  * Defines the payload for SessionStarted/SessionStopped events.
   */
 @interface SPXSessionEventArgs : NSObject
 

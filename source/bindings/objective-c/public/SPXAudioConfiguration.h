@@ -7,7 +7,7 @@
 #import "SPXAudioStream.h"
 
 /**
-  * Represents audio input configuration used for specifying what type of input to use (microphone, file, stream).
+  * Represents the audio input configuration used for specifying what type of input to use (microphone, file, stream).
   */
 @interface SPXAudioConfiguration : NSObject
 

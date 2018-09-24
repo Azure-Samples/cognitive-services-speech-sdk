@@ -6,7 +6,7 @@
 #include <Foundation/Foundation.h>
 
 /**
-  * Represents collection or properties and their values.
+  * Represents a collection of properties and their values.
   */
 @protocol SPXPropertyCollection
 
@@ -37,7 +37,7 @@
 
 /**
   * Returns the property value.
-  * If the specified id is not available, it returns an empty string.
+  * If the specified id is not available, it returns the specified default value.
   * @param propertyId property id.
   * @param defaultValue default value which is returned if the property is not available in the collection.
   * @return value of the property.

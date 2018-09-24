@@ -6,7 +6,7 @@
 #import <Foundation/Foundation.h>
 
 /**
-  * Defines translation synthesis result, i.e. the voice output of the translated text in the target language.
+  * Defines the translation synthesis result, i.e. the voice output of the translated text in the target language.
   */
 @interface SPXTranslationSynthesisResult : NSObject
 

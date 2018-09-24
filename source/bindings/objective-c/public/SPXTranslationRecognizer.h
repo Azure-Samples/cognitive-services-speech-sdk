@@ -27,14 +27,14 @@ typedef void (^SPXTranslationSynthesisEventHandler)(SPXTranslationRecognizer * _
 
 /**
   * Initializes a new instance of translation recognizer.
-  * @param translationConfiguration translation recognition config.
+  * @param translationConfiguration translation recognition configuration.
   * @return an instance of translation recognizer.
   */
 - (nullable instancetype)init:(nonnull SPXSpeechTranslationConfiguration *)translationConfiguration;
 
 /**
-  * Initializes a new instance of speech recognizer using the specified speech configuration and audio configuration.
-  * @param translationConfiguration speech translation recognition config.
+  * Initializes a new instance of speech recognizer using the specified speech and audio configurations.
+  * @param translationConfiguration speech translation recognition configuration.
   * @param audioConfiguration audio configuration.
   * @return an instance of translation recognizer.
   */
@@ -42,20 +42,22 @@ typedef void (^SPXTranslationSynthesisEventHandler)(SPXTranslationRecognizer * _
 
 /**
   * Starts speech translation, and stops after the first utterance is recognized. It returns the transcribed and translated texts as result.
-  * Note: it returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
+  * Note: it returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query.
+  * For long-running recognition, use continuous recognition instead.
   * @return the result of translation.
   */
 - (nonnull SPXTranslationRecognitionResult *)recognizeOnce;
 
 /**
-  * Starts speech translation, and the block function is called when the first utterance has been recognized.
-  * Note: it returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
+  * Starts asynchronous speech translation.
+  * @param resultReceivedHandler the block function to be called when the first utterance has been recognized.
+  * Note: recognizeOnceAsync stops recognizing when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use continuous recognition instead.
   */
 - (void)recognizeOnceAsync:(nonnull void (^)(SPXTranslationRecognitionResult * _Nonnull))resultReceivedHandler;
 
 /**
-  * Starts speech translation on a continuous audio stream, until stopContinuousRecognitionAsync() is called.
-  * User must subscribe to events to receive translation results.
+  * Starts speech translation on a continuous audio stream, until stopContinuousRecognition() is called.
+  * The user must subscribe to events to receive translation results.
   */
 - (void)startContinuousRecognition;
 
@@ -65,22 +67,22 @@ typedef void (^SPXTranslationSynthesisEventHandler)(SPXTranslationRecognizer * _
 - (void)stopContinuousRecognition;
 
 /**
-  * Subscribes to Recognized event which indicates a final result has been recognized.
+  * Subscribes to the Recognized event which indicates that a final result has been recognized.
   */
 - (void)addRecognizedEventHandler:(nonnull SPXTranslationRecognitionEventHandler)eventHandler;
 
 /**
-  * Subscribes to Recognizing event which indicates an intermediate result has been recognized.
+  * Subscribes to the Recognizing event which indicates that an intermediate result has been recognized.
   */
 - (void)addRecognizingEventHandler:(nonnull SPXTranslationRecognitionEventHandler)eventHandler;
 
 /**
-  * Subscribes to Synthesizing event which indicates a synthesis voice output has been received.
+  * Subscribes to the Synthesizing event which indicates that a synthesis voice output has been received.
   */
 - (void)addSynthesizingEventHandler:(nonnull SPXTranslationSynthesisEventHandler)eventHandler;
 
 /**
-  * Subscribes to Canceled event which indicates an error occurred during recognition.
+  * Subscribes to the Canceled event which indicates that an error occurred during recognition.
   */
 - (void)addCanceledEventHandler:(nonnull SPXTranslationRecognitionCanceledEventHandler)eventHandler;
 

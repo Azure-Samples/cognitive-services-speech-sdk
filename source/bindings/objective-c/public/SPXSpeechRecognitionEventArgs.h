@@ -8,7 +8,7 @@
 #import "SPXSpeechRecognitionResult.h"
 
 /**
-  * Defines payload of speech recognizing/recognized event.
+  * Defines the payload of speech recognizing/recognized event.
   */
 @interface SPXSpeechRecognitionEventArgs : SPXRecognitionEventArgs
 
@@ -21,7 +21,7 @@
 
 
 /**
-  * Defines payload of speech recognition canceled events.
+  * Defines the payload of speech recognition canceled events.
   */
 @interface SPXSpeechRecognitionCanceledEventArgs : SPXSpeechRecognitionEventArgs
 

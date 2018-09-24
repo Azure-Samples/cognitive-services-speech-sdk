@@ -7,13 +7,13 @@
 #import "SPXRecognitionResult.h"
 
 /**
-  * Defines result of intent recognition.
+  * Defines the result of intent recognition.
   */
 @interface SPXIntentRecognitionResult : SPXRecognitionResult
 
 
 /**
-  * A string that represents the intent identifier being recognized.
+  * A string that represents an intent identifier to be recognized.
   */
 @property (copy, readonly, nullable)NSString *intentId;
 

@@ -13,7 +13,7 @@
 #import "SPXIntentRecognitionEventArgs.h"
 
 /**
-  * Performs intent recognition on the speech input. It returns both recognized text and recognized intent.
+  * Performs intent recognition on speech input. It returns both recognized text and recognized intent.
   */
 @interface SPXIntentRecognizer : SPXRecognizer
 
@@ -26,15 +26,15 @@ typedef void (^SPXIntentRecognitionCanceledEventHandler)(SPXIntentRecognizer * _
 @property (nonatomic, copy, nullable)NSString *authorizationToken;
 
 /**
-  * Initializes a new instance of intent recognizer using specified speech configuration.
-  * @param speechConfiguration recognition configuration
+  * Initializes a new instance of intent recognizer using the specified speech configuration.
+  * @param speechConfiguration speech recognition configuration.
   * @return an intent recognizer.
   */
 - (nullable instancetype)init:(nonnull SPXSpeechConfiguration *)speechConfiguration;
 
 /**
-  * Initializes a new instance of an intent recognizer using specified speech configuration and audio configuration.
-  * @param speechConfiguration recognition configuration
+  * Initializes a new instance of an intent recognizer using the specified speech and audio configurations.
+  * @param speechConfiguration speech recognition configuration.
   * @param audioConfiguration audio configuration.
   * @return an intent recognizer.
   */
@@ -83,19 +83,20 @@ typedef void (^SPXIntentRecognitionCanceledEventHandler)(SPXIntentRecognizer * _
 
 /**
   * Starts intent recognition, and stops after the first utterance is recognized. It returns the recognition text and intent as result.
-  * Note: it returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
+  * Note: it returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use continuous recognition instead.
   * @return the result of intent recognition.
   */
 - (nonnull SPXIntentRecognitionResult *)recognizeOnce;
 
 /**
-  * Starts intent recognition, and the block function is called when the first utterance has been recognized.
-  * Note: it returns when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use StartContinuousRecognitionAsync() instead.
+  * Starts asynchronous intent recognition.
+  * @param resultReceivedHandler the block function to be called when the first utterance has been recognized.
+  * Note: recognizeOnceAsync stops recognizing when the first utterance has been recognized, so it is suitable only for single shot recognition like command or query. For long-running recognition, use continuous recognition instead.
   */
 - (void)recognizeOnceAsync:(nonnull void (^)(SPXIntentRecognitionResult * _Nonnull)) resultReceivedHandler;
 
 /**
-  * Starts speech recognition on a continuous audio stream, until stopContinuousRecognitionAsync() is called.
+  * Starts speech recognition on a continuous audio stream, until stopContinuousRecognition() is called.
   * User must subscribe to events to receive recognition results.
   */
 - (void)startContinuousRecognition;
@@ -106,17 +107,17 @@ typedef void (^SPXIntentRecognitionCanceledEventHandler)(SPXIntentRecognizer * _
 - (void)stopContinuousRecognition;
 
 /**
-  * Subscribes to Recognized event which indicates a final result has been recognized.
+  * Subscribes to the Recognized event which indicates that a final result has been recognized.
   */
 - (void)addRecognizedEventHandler:(nonnull SPXIntentRecognitionEventHandler)eventHandler;
 
 /**
-  * Subscribes to Recognizing event which indicates an intermediate result has been recognized.
+  * Subscribes to the Recognizing event which indicates an that intermediate result has been recognized.
   */
 - (void)addRecognizingEventHandler:(nonnull SPXIntentRecognitionEventHandler)eventHandler;
 
 /**
-  * Subscribes to Canceled event which indicates an error occurred during recognition.
+  * Subscribes to the Canceled event which indicates that an error occurred during recognition.
   */
 - (void)addCanceledEventHandler:(nonnull SPXIntentRecognitionCanceledEventHandler)eventHandler;
 

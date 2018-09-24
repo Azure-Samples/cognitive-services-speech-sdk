@@ -17,27 +17,31 @@ typedef void (^SPXSessionEventHandler)(SPXRecognizer * _Nonnull, SPXSessionEvent
 typedef void (^SPXRecognitionEventHandler)(SPXRecognizer * _Nonnull, SPXRecognitionEventArgs * _Nonnull);
 
 /**
-  * The collection or properties and their values defined for this SPXRecognizer.
+  * The collection of properties and their values defined for this SPXRecognizer.
   */
 @property (readonly, nullable)id <SPXPropertyCollection> properties;
 
 /**
- * Subscribes to SessionStarted event using block.
+ * Subscribes to the SessionStarted event using the specified handler.
+ * @param eventHandler the handler function for this event.
  */
 - (void)addSessionStartedEventHandler:(nonnull SPXSessionEventHandler)eventHandler;
 
 /**
- * Subscribes to SessionStopped event using block.
+ * Subscribes to the SessionStopped event using the specified handler.
+ * @param eventHandler the handler function for this event.
  */
 - (void)addSessionStoppedEventHandler:(nonnull SPXSessionEventHandler)eventHandler;
 
 /**
- * Subscribes to SpeechStartDetected event using block.
+ * Subscribes to the SpeechStartDetected event using the specified handler.
+ * @param eventHandler the handler function for this event.
  */
 - (void)addSpeechStartDetectedEventHandler:(nonnull SPXRecognitionEventHandler)eventHandler;
 
 /**
- * Subscribes to SpeechEndDetected event using block.
+ * Subscribes to SpeechEndDetected event using the specified handler.
+ * @param eventHandler the handler function for this event.
  */
 - (void)addSpeechEndDetectedEventHandler:(nonnull SPXRecognitionEventHandler)eventHandler;
 
