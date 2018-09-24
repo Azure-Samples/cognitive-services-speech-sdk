@@ -81,6 +81,7 @@ For translation, the `TranslationTextResult` is renamed to `TranslationRecogniti
 ## Intent recognizer
 
 Based on feedback from users, the `AddIntent()` methods in `IntentRecognizer` changed their signature.
+
 | old API | new API |
 |------| ------- |
 | AddIntent(intentId, phrase) | AddIntent(phrase, intentId) |
