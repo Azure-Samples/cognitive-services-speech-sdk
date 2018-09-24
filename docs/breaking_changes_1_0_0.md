@@ -61,6 +61,7 @@ There are some naming changes for event handlers. The table below shows the mapp
 | SynthesisResultReceived | Synthesizing |
 
 The payload name of each event has also been changed.
+
 | old API | new API |
 |------| ------- |
 | SpeechRecognitionResultEventArgs | SpeechRecognitionEventArgs |
