@@ -1261,6 +1261,7 @@ phases:
         BuildConfiguration: Release
   variables:
     BuildPlatform: iOS
+    FrameworkName: MicrosoftCognitiveServicesSpeech
   steps:
   - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
     displayName: Set iOS target platform
@@ -1299,22 +1300,29 @@ phases:
     displayName: Create universal framework
     inputs:
       filePath: 'ci/apple/create-ios-universal-framework.sh'
-      arguments: '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)'
-  # - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-  #   displayName: Create drop files
-  #   inputs:
-  #     type: FilePath
-  #     scriptPath: './ci/drop/bindrop.sh'
-  #     args: '$(BuildPlatform) $(BuildConfiguration) $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration) IOS'
+      arguments: '$(Build.Repository.LocalPath) $(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration) $(FrameworkName)'
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: 'Sign iOS framework'
     inputs:
       ConnectedServiceName: 'Speech SDK ESRP Signing'
       FolderPath: '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)'
-      Pattern: MicrosoftCognitiveServicesSpeech-iOS.zip
+      Pattern: $(FrameworkName)-iOS.zip
       signConfigType: inlineSignParams
       inlineOperation: $(SIGN_PARAMS_IOS)
+  - bash: |
+      # .zip from ESRP puts the content in a deep sub directory.
+      # We re-zip it, and rename it to include the version number.
+      set -e -o pipefail -x
+      mkdir temp
+      cd temp
+      unzip '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)/$(FrameworkName)-iOS.zip'
+      cd "$(find . -type d -name $(FrameworkName).framework -prune)"
+      cd ..
+      zip --symlinks -r '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)/$(FrameworkName)-iOS-$(SPEECHSDK_SEMVER2NOMETA).zip' .
+      # Remove original package.
+      rm '$(Build.ArtifactStagingDirectory)/$(BuildPlatform)/$(BuildConfiguration)/$(FrameworkName)-iOS.zip'
     condition: and(succeeded(), eq(variables['SPEECHSDK_SIGN'], 'true'))
+  # TODO publish more
   - task: PublishBuildArtifacts@1
     displayName: Publish drop
     inputs:
