@@ -14,7 +14,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 ## Get the Speech SDK for iOS
 
-**By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
+**By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
 
 The current version of the Cognitive Services Speech SDK is `1.0.0`.
 
