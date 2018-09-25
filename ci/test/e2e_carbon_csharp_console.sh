@@ -79,6 +79,11 @@ for action in $Actions; do
     variantArg="${variants[$variantIndex + 1]}"
     TEST_NAME="$action $variant"
 
+    # Filter out unsupported combos
+    if [[ $variant == crisModel && ( $action == intent || $action == translation ) ]]; then
+      continue
+    fi
+
     runTest TESTRUNNER "$TEST_NAME" "$PLATFORMS_TO_RUN" $TIMEOUT_SECONDS \
       $CARBON_CSHARP_CONSOLE $action $variantArg
   done

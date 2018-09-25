@@ -77,7 +77,7 @@ namespace MicrosoftSpeechSDKSamples
 
         public static async Task SpeechRecognitionByEndpointAsync(string subscriptionKey, string endpoint, string lang, string model, string fileName, bool useStream, bool useContinuousRecognition)
         {
-            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech Recognition using endopoint:{0}.", endpoint));
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Speech Recognition using endpoint:{0}.", endpoint));
 
             SpeechConfig config = SpeechConfig.FromEndpoint(new Uri(endpoint), subscriptionKey);
             if (!string.IsNullOrEmpty(lang))

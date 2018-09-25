@@ -18,7 +18,7 @@ namespace MicrosoftSpeechSDKSamples
     {
         private static void MyRecognizingEventHandler(object sender, IntentRecognitionEventArgs e)
         {
-            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: intermediate rsult: {0} ", e.ToString()));
+            Console.WriteLine(String.Format(CultureInfo.InvariantCulture, "Intent recognition: intermediate result: {0} ", e.ToString()));
         }
 
         private static void MyRecognizedEventHandler(object sender, IntentRecognitionEventArgs e)

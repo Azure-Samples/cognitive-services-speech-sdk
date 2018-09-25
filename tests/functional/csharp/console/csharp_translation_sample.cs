@@ -120,7 +120,7 @@ namespace MicrosoftSpeechSDKSamples
 
         public static async Task TranslationByEndpointAsync(string subKey, string endpoint, string fileName, bool useStream)
         {
-            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Translation using endopoint:{0}.", endpoint));
+            Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "Translation using endpoint:{0}.", endpoint));
 
             SpeechTranslationConfig config = SpeechTranslationConfig.FromEndpoint(new Uri(endpoint), subKey);
             config.SpeechRecognitionLanguage = FromLang;
