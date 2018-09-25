@@ -53,7 +53,7 @@ public class PropertyCollection implements Closeable {
     }
 
     /**
-     * Sets the propery value by name
+     * Sets the property value by name
      *
      * @param name The property name.
      * @param value The value of the property.

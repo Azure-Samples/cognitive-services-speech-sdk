@@ -1028,15 +1028,15 @@ phases:
         <artifactId>$(SPEECHSDK_MAVEN_ARTIFACT_ID)</artifactId>
         <version>$(SPEECHSDK_SEMVER2NOMETA)</version>
         <packaging>aar</packaging>
-        <name>Microsoft Cognitive Services Speech SDK for Android</name>
+        <name>Microsoft Cognitive Services Speech SDK for Java</name>
         <description>
-          This SDK allows you to use the Microsoft Cognitive Speech Service
-          (Preview). See https://aka.ms/csspeech for more information.
+          This SDK allows you to use the Microsoft Cognitive Speech Service.
+          See https://aka.ms/csspeech for more information.
         </description>
         <licenses>
           <license>
-            <name>Microsoft Software License Terms for Microsoft Cognitive Services Speech SDK Preview</name>
-            <url>https://aka.ms/csspeech/license</url>
+            <name>Microsoft Software License Terms for Microsoft Cognitive Services Speech SDK</name>
+            <url>https://aka.ms/csspeech/license201809</url>
           </license>
         </licenses>
       </project>

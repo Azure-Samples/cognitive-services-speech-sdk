@@ -45,7 +45,7 @@
 -(nullable NSString *)getPropertyById:(SPXPropertyId)propertyId defaultValue:(nonnull NSString *)defaultValue;
 
 /**
-  * Sets the propery value by name.
+  * Sets the property value by name.
   * @param name property name.
   * @param value value of the property.
   */
@@ -53,7 +53,7 @@
 -(void)setPropertyTo:(nonnull NSString *)value byName:(nonnull NSString *)name;
 
 /**
-  * Sets the propery value by property id.
+  * Sets the property value by property id.
   * @param propertyId property id.
   * @param value value of the property.
   */
