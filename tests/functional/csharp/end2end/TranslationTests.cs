@@ -176,11 +176,22 @@ namespace Microsoft.CognitiveServices.Speech.Tests.EndToEnd
         }
 
         [TestMethod]
-        public async Task TranslationWeatherEnToFrCarolineSynthesisResultContinuous()
+        public async Task SynthesisWeatherEnToFrCarolineShortVoice()
+        {
+            await TranslationWeatherEnToFrCarolineSynthesis(Voice.FR);
+        }
+
+        [TestMethod]
+        public async Task SynthesisWeatherEnToFrCarolineFullVoice()
+        {
+            await TranslationWeatherEnToFrCarolineSynthesis("Microsoft Server Speech Text to Speech Voice (fr-FR, Julie, Apollo)");
+        }
+
+        public async Task TranslationWeatherEnToFrCarolineSynthesis(string voice)
         {
             var toLanguages = new List<string>() { Language.FR };
 
-            var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(TestData.English.Weather.AudioFile, Language.EN, toLanguages, Voice.FR);
+            var actualTranslations = await this.translationHelper.GetTranslationRecognizedContinuous(TestData.English.Weather.AudioFile, Language.EN, toLanguages, voice);
             Assert.AreEqual(1, actualTranslations[ResultType.Synthesis].Count);
 
             var actualSynthesisByteResult = (TranslationSynthesisEventArgs)actualTranslations[ResultType.Synthesis].Single();
