@@ -18,7 +18,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 * Start Microsoft Visual Studio 2017 and select **File** \> **Open** \> **Project/Solution**.
 * Navigate to the folder containing this sample, and select the solution file contained within it.
 * Edit the `Program.cs` source:
-  * Replace the string `YourSubscriptionKey` with your own subscription key. Use the `Speech (preview)` resource in Azure (not the `Speech Recognition` resource).
+  * Replace the string `YourSubscriptionKey` with your own subscription key. Use the `Speech` resource in Azure (not the `Speech Recognition` resource).
   * Replace the string `YourServiceRegion` with the service region of your subscription.
     For example, replace with `westus` if you are using the 30-day free trial subscription.
 * Set the active solution configuration and platform to the desired values under **Build** \> **Configuration Manager**:
