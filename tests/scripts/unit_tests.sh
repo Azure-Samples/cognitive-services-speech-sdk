@@ -20,18 +20,16 @@ function run_cxx_api_tests {
 
 set -e
 
-[ $# -lt 6 ] && die "Usage: unit_tests binary_dir action(all|usp_tests|cxx_api_tests) keySpeech keyCris keyLuis keySkyman endpoint"
+[ $# -lt 4 ] && die "Usage: unit_tests binary_dir action(all|usp_tests|cxx_api_tests) keyLuis keySkyman endpoint"
 
 BINARY_DIR="$1"
 USP_TESTS_EXE="$BINARY_DIR/usp_tests"
 CXX_API_TESTS_EXE="$BINARY_DIR/cxx_api_tests"
 
 Action=$2
-UserKeySpeech=$3
-UserKeyCris=$4
-UserKeyLuis=$5
-UserKeySkyman=$6
-endpoint=$7
+UserKeyLuis=$3
+UserKeySkyman=$4
+endpoint=$5
 
 args="--keySpeech $UserKeySkyman"
 [ ! -z $endpoint ] && args+=" --endpoint $endpoint"

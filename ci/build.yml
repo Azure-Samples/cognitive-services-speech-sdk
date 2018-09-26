@@ -391,7 +391,7 @@ phases:
     inputs:
       type: FilePath
       scriptPath: '$(Build.Repository.LocalPath)/ci/test/rununittest.sh'
-      args: './bin/$(BuildConfiguration) $(KeySpeech) $(KeyCris) $(luis-westus-s0-201809-key1) $(KeySkyman)'
+      args: './bin/$(BuildConfiguration) $(luis-westus-s0-201809-key1) $(KeySkyman)'
       cwd: 'build/$(BuildPlatform)'
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
     timeoutInMinutes: 7
@@ -427,7 +427,7 @@ phases:
     inputs:
       type: FilePath
       scriptPath: '$(Build.Repository.LocalPath)/ci/test/runjava.sh'
-      args: '$(Build.Repository.LocalPath) ./ $(BuildConfiguration) $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      args: '$(Build.Repository.LocalPath) ./ $(BuildConfiguration) $(luis-westus-s0-201809-key1) $(KeySkyman)'
       cwd: 'build/$(BuildPlatform)'
     condition: and(eq(variables['BuildConfiguration'], 'Release'), eq(variables['BuildPlatform'], 'x64'),eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
     timeoutInMinutes: 7
@@ -1119,7 +1119,7 @@ phases:
     inputs:
       type: FilePath
       scriptPath: '$(Build.Repository.LocalPath)/ci/test/rununittest.sh'
-      args: './bin $(KeySpeech) $(KeyCris) $(luis-westus-s0-201809-key1) $(KeySkyman)'
+      args: './bin $(luis-westus-s0-201809-key1) $(KeySkyman)'
       cwd: build
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
     timeoutInMinutes: 7
@@ -1146,7 +1146,7 @@ phases:
     inputs:
       type: FilePath
       scriptPath: '$(Build.Repository.LocalPath)/ci/test/runjava.sh'
-      args: '$(Build.Repository.LocalPath) ./ "" $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      args: '$(Build.Repository.LocalPath) ./ "" $(luis-westus-s0-201809-key1) $(KeySkyman)'
       cwd: build
     condition: and(eq(variables['BuildConfiguration'], 'Release'), eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
     timeoutInMinutes: 7
@@ -1380,7 +1380,7 @@ phases:
     inputs:
       type: FilePath
       scriptPath: '$(Build.Repository.LocalPath)/ci/test/rununittest.sh'
-      args: './bin $(KeySpeech) $(KeyCris) $(luis-westus-s0-201809-key1) $(KeySkyman)'
+      args: './bin $(luis-westus-s0-201809-key1) $(KeySkyman)'
       cwd: build
     condition: eq(variables['SPEECHSDK_RUN_TESTS'],'true')
     timeoutInMinutes: 7
@@ -1407,7 +1407,7 @@ phases:
     inputs:
       type: FilePath
       scriptPath: '$(Build.Repository.LocalPath)/ci/test/runjava.sh'
-      args: '$(Build.Repository.LocalPath) ./ "" $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)'
+      args: '$(Build.Repository.LocalPath) ./ "" $(luis-westus-s0-201809-key1) $(KeySkyman)'
       cwd: build
     condition: and(eq(variables['BuildConfiguration'], 'Release'), eq(variables['SPEECHSDK_RUN_TESTS'],'true'))
     timeoutInMinutes: 7

@@ -1,12 +1,10 @@
 #!/bin/bash
 
-[ $# -ne 5 ] && echo -e "Usage: rununittest binary_dir keySpeech keyCris keyLuis keySkyman" && exit 1
+[ $# -ne 3 ] && echo -e "Usage: rununittest binary_dir keyLuis keySkyman" && exit 1
 
 BINARY_DIR=$1
-UserKeySpeech=$2
-UserKeyCris=$3
-UserKeyLuis=$4
-UserKeySkyman=$5
+UserKeyLuis=$2
+UserKeySkyman=$3
 
 set -e
 
@@ -25,10 +23,10 @@ function run_tests {
     fi
     
     pretty_print "Running usp_tests"
-    ./tests/unit_tests.sh $BINARY_DIR usp_tests $UserKeySpeech $UserKeyCris $UserKeyLuis $UserKeySkyman $endpoint
+    ./tests/unit_tests.sh $BINARY_DIR usp_tests $UserKeyLuis $UserKeySkyman $endpoint
 
     pretty_print "Running cxx_api_tests"
-    ./tests/unit_tests.sh $BINARY_DIR cxx_api_tests $UserKeySpeech $UserKeyCris $UserKeyLuis $UserKeySkyman $endpoint
+    ./tests/unit_tests.sh $BINARY_DIR cxx_api_tests $UserKeyLuis $UserKeySkyman $endpoint
 
    # Disable Python for GA
    # if [ "${AGENT_OS}" == "Windows_NT" ] && [ "${BUILDPLATFORM}" == "Win32" ]; then

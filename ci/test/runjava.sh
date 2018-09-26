@@ -2,19 +2,16 @@
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
-# runjava.sh ${BUILD_REPOSITORY_LOCALPATH} ./ $(BuildConfiguration) $(KeySpeech) $(KeyCris) $(KeyLuis) $(KeySkyman)
-[[ $# -eq 7 ]] || {
-  echo -e "Usage: $0 root_dir build_root build_configuration keySpeech keyCris keyLuis keySkyman"
+[[ $# -eq 5 ]] || {
+  echo -e "Usage: $0 root_dir build_root build_configuration keyLuis keySkyman"
   exit 1
 }
 
 SPEECH_SDK_SOURCE_ROOT=$1
 BINARY_DIR=$2
 BUILD_CONFIGURATION=$3
-UserKeySpeech=$4
-UserKeyCris=$5
-UserKeyLuis=$6
-UserKeySkyman=$7
+UserKeyLuis=$4
+UserKeySkyman=$5
 
 set -e
 
@@ -56,7 +53,7 @@ ls ../..
 pretty_print "..junit...................................................................................."
 
 SPEECH_SDK_TEST_PROPERTIES=" \
-  -DSpeechSubscriptionKey=$UserKeySpeech \
+  -DSpeechSubscriptionKey=$UserKeySkyman \
   -DSpeechRegion=westus \
   -DLuisRegion=westus2 \
   -DWaveFile=$SPEECH_SDK_BUILD_ROOT/tests/input/whatstheweatherlike.wav \

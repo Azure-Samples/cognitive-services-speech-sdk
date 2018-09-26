@@ -42,9 +42,7 @@
 namespace Keys
 {
     EXTERN std::string Speech;
-    EXTERN std::string CRIS;
     EXTERN std::string LUIS;
-    EXTERN std::string Skyman;
 }
 
 namespace Config
@@ -82,15 +80,9 @@ inline int parse_cli_args(Catch::Session& session, int argc, char* argv[])
         | Opt(Keys::Speech, "SpeechSubscriptionKey") // bind variable to a new option, with a hint string
         ["--keySpeech"]    // the option names it will respond to
     ("The subscription key for speech")
-        | Opt(Keys::CRIS, "CRISSubscriptionKey")
-        ["--keyCRIS"]
-    ("The subscription key for CRIS")
         | Opt(Keys::LUIS, "LuisSubscriptionKey")
         ["--keyLUIS"]
     ("The subscription key for LanguageUnderstanding")
-        | Opt(Keys::Skyman, "SkymanSubscriptionKey")
-        ["--keySkyman"]
-    ("The subscription key for skyman")
         | Opt(Config::Endpoint, "endpoint")
         ["--endpoint"]
     ("The endpoint url to test against.")
