@@ -55,22 +55,31 @@ inline std::shared_ptr<I> SpxCreateObjectWithSite(const char* className, std::sh
 }
 
 template <class T>
+inline void SpxTerm(const std::shared_ptr<T>& ptr)
+{
+    if (ptr == nullptr)
+        return;
+
+    SPX_DBG_TRACE_VERBOSE("%s: ptr=0x%8x", __FUNCTION__, ptr.get());
+    auto objectWithSite = SpxQueryInterface<ISpxObjectWithSite>(ptr);
+    auto objectInit = SpxQueryInterface<ISpxObjectInit>(ptr);
+    if (objectWithSite != nullptr)
+    {
+        objectWithSite->SetSite(std::weak_ptr<ISpxGenericSite>());
+    }
+    else if (objectInit != nullptr)
+    {
+        objectInit->Term();
+    }
+}
+
+
+template <class T>
 inline void SpxTermAndClear(std::shared_ptr<T>& ptr)
 {
     if (ptr != nullptr)
     {
-        SPX_DBG_TRACE_VERBOSE("%s: ptr=0x%8x", __FUNCTION__, ptr.get());
-        auto objectWithSite = SpxQueryInterface<ISpxObjectWithSite>(ptr);
-        auto objectInit = SpxQueryInterface<ISpxObjectInit>(ptr);
-        if (objectWithSite != nullptr)
-        {
-            objectWithSite->SetSite(std::weak_ptr<ISpxGenericSite>());
-        }
-        else if (objectInit != nullptr)
-        {
-            objectInit->Term();
-        }
-        
+        SpxTerm(ptr);
         ptr = nullptr;
     }
 }

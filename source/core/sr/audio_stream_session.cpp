@@ -94,14 +94,17 @@ void CSpxAudioStreamSession::Term()
     }
 
     // Destroy the pump and all the adapters... (we can't hold any shared_ptr's after this function returns...)
-    SpxTermAndClear(m_audioPump);
+    SpxTerm(m_audioPump);
     SpxTermAndClear(m_kwsAdapter);
-    SpxTermAndClear(m_recoAdapter);
-    SpxTermAndClear(m_luAdapter);
+    SpxTerm(m_recoAdapter);
+    SpxTerm(m_luAdapter);
 
     if (!writeLock.owns_lock())
         writeLock.lock();
 
+    m_audioPump = nullptr;
+    m_recoAdapter = nullptr;
+    m_luAdapter = nullptr;
     m_audioProcessor = nullptr;
     m_audioBuffer = nullptr;
 
@@ -534,7 +537,11 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
 
         // And we'll stop the pump
         SPX_DBG_TRACE_VERBOSE("%s: Now StoppingPump ...", __FUNCTION__);
-        m_audioPump->StopPump();
+        auto audioPump = m_audioPump;
+        if (audioPump)
+        {
+            audioPump->StopPump();
+        }
     }
     else if (stopKind == RecognitionKind::Keyword && !IsKind(RecognitionKind::Keyword))
     {
@@ -563,7 +570,11 @@ void CSpxAudioStreamSession::StopRecognizing(RecognitionKind stopKind)
         // We've been asked to stop whatever it is we're doing, while we're actively processing audio ...
         // So ... Let's stop the pump
         SPX_DBG_TRACE_VERBOSE("%s: Now StoppingPump ...", __FUNCTION__);
-        m_audioPump->StopPump();
+        auto audioPump = m_audioPump;
+        if (audioPump)
+        {
+            audioPump->StopPump();
+        }
     }
     else if (IsState(SessionState::WaitForAdapterCompletedSetFormatStop))
     {
@@ -600,7 +611,13 @@ std::shared_ptr<ISpxRecognitionResult> CSpxAudioStreamSession::WaitForRecognitio
             SPX_DBG_TRACE_VERBOSE("%s: Now StoppingPump ...", __FUNCTION__);
 
             lock.unlock();
-            m_audioPump->StopPump();
+
+            auto audioPump = m_audioPump;
+            if (audioPump)
+            {
+                audioPump->StopPump();
+            }
+
             lock.lock();
         }
 
@@ -945,9 +962,10 @@ void CSpxAudioStreamSession::FireAdapterResult_FinalResult(ISpxRecoEngineAdapter
     }
 
     // Only try and process the result with the LU Adapter if we have one (we won't have one, if nobody every added an IntentTrigger)
-    if (m_luAdapter != nullptr)
+    auto luAdapter = m_luAdapter;
+    if (luAdapter != nullptr)
     {
-        m_luAdapter->ProcessResult(result);
+        luAdapter->ProcessResult(result);
     }
 
     // Todo: For translation, this means that RecognizeAsync() only returns text result, but no audio result. Audio result
@@ -1325,6 +1343,13 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shar
     // Lock the Audio Processor mutex, since we'll be picking which one we're using...
     WriteLock_Type writeLock(m_combinedAdapterAndStateMutex);
 
+    if (!m_audioPump)
+    {
+        // The session was terminated, exiting.
+        SPX_DBG_TRACE_VERBOSE("Audio pump was shutdown, exiting...");
+        return;
+    }
+
     auto cbFormat = m_audioPump->GetFormat(nullptr, 0);
     auto waveformat = SpxAllocWAVEFORMATEX(cbFormat);
     m_audioPump->GetFormat(waveformat.get(), cbFormat);
@@ -1347,7 +1372,12 @@ void CSpxAudioStreamSession::StartAudioPump(RecognitionKind startKind, std::shar
     // Start pumping audio data from the pump, to the Audio Stream Session
     auto ptr = (ISpxAudioProcessor*)this;
     auto pISpxAudioProcessor = ptr->shared_from_this();
-    m_audioPump->StartPump(pISpxAudioProcessor);
+
+    auto audioPump = m_audioPump;
+    if (audioPump)
+    {
+        audioPump->StartPump(pISpxAudioProcessor);
+    }
 
     // The call to StartPump (immediately above) will initiate calls from the pump to this::SetFormat() and then this::ProcessAudio()...
 }
@@ -1360,6 +1390,13 @@ void CSpxAudioStreamSession::HotSwapAdaptersWhilePaused(RecognitionKind startKin
     // Lock the Audio Processor mutex, since we're switching which one we'll be using...
     WriteLock_Type writeLock(m_combinedAdapterAndStateMutex);
     auto oldAudioProcessor = m_audioProcessor;
+
+    if (!m_audioPump)
+    {
+        // The session was terminated, exiting.
+        SPX_DBG_TRACE_VERBOSE("Audio pump was shutdown, exiting...");
+        return;
+    }
 
     // Get the format in which the pump is currently sending audio data to the Session
     auto cbFormat = m_audioPump->GetFormat(nullptr, 0);
@@ -1390,10 +1427,12 @@ void CSpxAudioStreamSession::HotSwapAdaptersWhilePaused(RecognitionKind startKin
 
     // Tell the old Audio Processor that we've sent the last bit of audio data we're going to send
     SPX_DBG_TRACE_VERBOSE_IF(1, "%s: ProcessingAudio - size=%d", __FUNCTION__, 0);
-    oldAudioProcessor->ProcessAudio(nullptr, 0);
-
-    // Then tell it we're finally done, by sending a nullptr SPXWAVEFORMAT
-    oldAudioProcessor->SetFormat(nullptr);
+    if (oldAudioProcessor)
+    {
+        oldAudioProcessor->ProcessAudio(nullptr, 0);
+        // Then tell it we're finally done, by sending a nullptr SPXWAVEFORMAT
+        oldAudioProcessor->SetFormat(nullptr);
+    }
     m_adapterAudioMuted = false;
 
     if (m_audioBuffer)
@@ -1415,13 +1454,17 @@ void CSpxAudioStreamSession::InformAdapterSetFormatStarting(SPXWAVEFORMATEX* for
     m_format = SpxAllocWAVEFORMATEX(sizeOfFormat);
     memcpy(m_format.get(), format, sizeOfFormat);
 
-    if (m_recoAdapter != nullptr)
+    auto recoAdapter = m_recoAdapter;
+    if (recoAdapter != nullptr)
     {
-        m_recoAdapter->SetAdapterMode(!IsKind(RecognitionKind::Continuous));
+        recoAdapter->SetAdapterMode(!IsKind(RecognitionKind::Continuous));
     }
 
     SPX_DBG_ASSERT(format != nullptr);
-    m_audioProcessor->SetFormat(format);
+    if (m_audioProcessor)
+    {
+        m_audioProcessor->SetFormat(format);
+    }
 }
 
 void CSpxAudioStreamSession::InformAdapterSetFormatStopping(SessionState comingFromState)
