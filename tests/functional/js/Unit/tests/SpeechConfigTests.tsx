@@ -5,6 +5,7 @@
 
 import { isString } from "util";
 import * as sdk from "../../../../../source/bindings/js/microsoft.cognitiveservices.speech.sdk";
+import { CreateNoDashGuid } from "../../../../../source/bindings/js/src/common/Guid";
 import { Settings } from "./Settings";
 import { WaveFileAudioInput } from "./WaveFileAudioInputStream";
 
@@ -13,82 +14,80 @@ beforeAll(() => {
     Settings.LoadSettings();
 });
 
-test("testFromSubscription1", () => {
+test("Null Param Check, both.", () => {
     expect(() => sdk.SpeechConfig.fromSubscription(null, null)).toThrowError();
 });
 
-test("testFromSubscription2()", () => {
+test("Null Param Check, Region", () => {
     expect(() => sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, null)).toThrowError();
 });
 
-test("testFromSubscription3", () => {
+test("Null Param Check, Key", () => {
     expect(() => sdk.SpeechConfig.fromSubscription(null, Settings.SpeechRegion)).toThrowError();
 });
 
-test("testFromSubscriptionSuccess", () => {
+test("Valid Params", () => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     expect(s).not.toBeUndefined();
     s.close();
 });
 
-test("testFromEndpoint1", () => {
+test("From Endpoint, but null", () => {
     expect(() => sdk.SpeechConfig.fromEndpoint(null, null)).toThrowError();
 });
 
-test("testFromEndpoint2", () => {
-    expect(() => sdk.SpeechConfig.fromEndpoint(null, Settings.SpeechRegion)).toThrowError();
+test("From Endpoint, endpoihnt numm null", () => {
+    expect(() => sdk.SpeechConfig.fromEndpoint(null, Settings.SpeechSubscriptionKey)).toThrowError();
 });
 
-test("testFromEndpoint3", () => {
+test("From Endpoint, key null", () => {
     expect(() => sdk.SpeechConfig.fromEndpoint(new URL("http://www.example.com"), null)).toThrowError();
 });
 
-test.skip("testFromEndpoint4", () => {
+test.skip("From endpoint, invalid key format.", () => {
     expect(() => sdk.SpeechConfig.fromEndpoint(new URL("http://www.example.com"), "illegal-subscription")).toThrowError();
 });
 
 // TODO use an endpoint that we control so the subscription key is not leaked!
-test.skip("testFromEndpointSuccess", () => {
+test("From endpoing, valid Params", () => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromEndpoint(new URL("http://www.example.com"), "Settings.SpeechSubscriptionKey");
-
     expect(s).not.toBeUndefined();
-
     s.close();
 });
 
 test("TypedParametersAccessableViaPropBag", () => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
-    s.authorizationToken = "token";
-    expect(s.getProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceAuthorization_Token])).toEqual("token");
-
-    s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceAuthorization_Token], "new-val");
-    expect(s.authorizationToken).toEqual("new-val");
-
-    s.speechRecognitionLanguage = "en-GB";
-    expect(s.getProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_RecoLanguage])).toEqual("en-GB");
-
-    s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_RecoLanguage], "ru-RU");
-    expect(s.speechRecognitionLanguage).toEqual("ru-RU");
+    TestParam(() => s.authorizationToken, (val: string) => (s.authorizationToken = val), sdk.PropertyId.SpeechServiceAuthorization_Token, s);
+    TestParam(() => s.endpointId, (val: string) => (s.endpointId = val), sdk.PropertyId.SpeechServiceConnection_EndpointId, s);
+    TestParam(() => s.speechRecognitionLanguage, (val: string) => (s.speechRecognitionLanguage = val), sdk.PropertyId.SpeechServiceConnection_RecoLanguage, s);
 });
 
-test("testGetParametersString", () => {
+const TestParam = (getAccess: () => string, setAccess: (val: string) => void, propEnum: sdk.PropertyId, config: sdk.SpeechConfig): void => {
+    const testString: string = CreateNoDashGuid();
+
+    setAccess(testString);
+    expect(config.getProperty(sdk.PropertyId[propEnum])).toEqual(testString);
+    expect(getAccess()).toEqual(testString);
+
+    const testString2: string = CreateNoDashGuid();
+    config.setProperty(sdk.PropertyId[propEnum], testString2);
+    expect(config.getProperty(sdk.PropertyId[propEnum])).toEqual(testString2);
+    expect(getAccess()).toEqual(testString2);
+};
+
+test("Unset param return default", () => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
-    const name: string = "stringName";
-    const value: string = "stringValue";
+    const name: string = CreateNoDashGuid();
+    const value: string = CreateNoDashGuid();
 
-    s.setProperty(name, value);
-
-    expect(isString(s.getProperty(name, null)));
-
-    expect(value).toEqual(s.getProperty(name, null));
-    expect(value).toEqual(s.getProperty(name, "some-other-default-" + value));
+    expect(s.getProperty(name, value)).toEqual(value);
+    expect(s.getProperty(name)).toBeUndefined();
 
     s.close();
 });
 
-test("testCreateSpeechRecognizer", () => {
+test("Create Recognizer", () => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
     const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s);
@@ -100,37 +99,24 @@ test("testCreateSpeechRecognizer", () => {
     s.close();
 });
 
-test.skip("testCreateSpeechRecognizerLanguage1", () => { // Should no settings just work?
+test("Proeprties are passed to recognizer", () => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
-    expect(() => new sdk.SpeechRecognizer(s)).toThrowError();
-
-    s.close();
-});
-
-test.skip("testCreateSpeechRecognizerLanguage2", () => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    s.speechRecognitionLanguage = "illegal-illegal";
-
-    expect(new sdk.SpeechRecognizer(s)).toThrowError();
-
-    s.close();
-});
-
-test("testCreateSpeechRecognizerLanguageSuccess", () => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    s.speechRecognitionLanguage = "en-US";
+    s.speechRecognitionLanguage = CreateNoDashGuid();
+    s.authorizationToken = CreateNoDashGuid();
+    s.endpointId = CreateNoDashGuid();
 
     const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s);
-
     expect(r).not.toBeUndefined();
     expect(r instanceof sdk.Recognizer);
+    expect(r.authorizationToken).toEqual(s.authorizationToken);
+    expect(r.endpointId).toEqual(s.endpointId);
+    expect(r.speechRecognitionLanguage).toEqual(s.speechRecognitionLanguage);
 
     r.close();
     s.close();
 });
 
-test("testCreateSpeechRecognizerStringSuccess", () => {
+test("Create SR from AudioConfig", () => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
     const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
@@ -145,8 +131,7 @@ test("testCreateSpeechRecognizerStringSuccess", () => {
     s.close();
 });
 
-// Test
-test("testCreateSpeechRecognizerStringString1", () => {
+test("Null Language Throws", () => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     s.speechRecognitionLanguage = null;
 
@@ -155,19 +140,7 @@ test("testCreateSpeechRecognizerStringString1", () => {
     s.close();
 });
 
-test.skip("testCreateSpeechRecognizerStringString3", () => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    s.speechRecognitionLanguage = "illegal-illegal";
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    expect(() => new sdk.SpeechRecognizer(s, config)).toThrowError();
-
-    s.close();
-});
-
-test("testCreateSpeechRecognizerStringStringSuccess", () => {
+test("Create recognizer with language and audioConfig", () => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     s.speechRecognitionLanguage = "en-EN";
 
@@ -180,7 +153,8 @@ test("testCreateSpeechRecognizerStringStringSuccess", () => {
 
     s.close();
 });
-test("testCreateIntentRecognizer", () => {
+
+test("Create Intent Recognizer", () => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
     const r: sdk.IntentRecognizer = new sdk.IntentRecognizer(s);
@@ -192,31 +166,12 @@ test("testCreateIntentRecognizerLanguage1", () => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     s.speechRecognitionLanguage = null;
 
-    try {
-        const r: sdk.IntentRecognizer = new sdk.IntentRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
+    expect(() => new sdk.IntentRecognizer(s)).toThrow();
 
     s.close();
 });
 
-test.skip("testCreateIntentRecognizerLanguage2", () => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    s.speechRecognitionLanguage = "illegal-speechRecognitionLanguage";
-
-    try {
-        const r: sdk.IntentRecognizer = new sdk.IntentRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
-
-    s.close();
-});
-
-test("testCreateIntentRecognizerLanguageSuccess", () => {
+test("Intent Recognizer Success", () => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     s.speechRecognitionLanguage = "en-US";
 
@@ -230,7 +185,7 @@ test("testCreateIntentRecognizerLanguageSuccess", () => {
     s.close();
 });
 
-test("testCreateIntentRecognizerStringSuccess", () => {
+test("Intent Recognizer with Wave File.", () => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     s.speechRecognitionLanguage = "en-US";
 
@@ -247,78 +202,33 @@ test("testCreateIntentRecognizerStringSuccess", () => {
     s.close();
 });
 
-test("testCreateTranslationRecognizerStringArrayListOfString1", () => {
+test("Intent Recognizer null language Throws", () => {
     const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
-    try {
-        const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
+    expect(() => new sdk.TranslationRecognizer(s)).toThrow();
 
     s.close();
 });
 
-test("testCreateTranslationRecognizerStringArrayListOfString2", () => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    s.speechRecognitionLanguage = "illegal";
-
-    try {
-        const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
-
-    s.close();
-});
-
-test("testCreateTranslationRecognizerStringArrayListOfString3", () => {
+test("Translation Recognizer No Target Languages Throws", () => {
     const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     s.speechRecognitionLanguage = "en-EN";
 
-    try {
-        const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
+    expect(() => new sdk.TranslationRecognizer(s)).toThrow();
 
     s.close();
 });
 
-test("testCreateTranslationRecognizerStringArrayListOfString4", () => {
+test("Translation Recognizer No Source Language Throws", () => {
     const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    s.speechRecognitionLanguage = "en-EN";
+    s.addTargetLanguage("en-EN");
 
-    try {
-        const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
+    expect(() => new sdk.TranslationRecognizer(s)).toThrow();
 
     s.close();
 });
 
-test.skip("testCreateTranslationRecognizerStringArrayListOfString5", () => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    s.speechRecognitionLanguage = "en-EN";
-    s.addTargetLanguage("illegal");
-
-    try {
-
-        const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
-
-    s.close();
-});
-
-test("testCreateTranslationRecognizerStringArrayListOfStringSuccess", () => {
+test("Translation Recog success", () => {
     const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     s.speechRecognitionLanguage = "en-EN";
     s.addTargetLanguage("en-US");
@@ -332,102 +242,37 @@ test("testCreateTranslationRecognizerStringArrayListOfStringSuccess", () => {
     s.close();
 });
 
-test("testCreateTranslationRecognizerStringArrayListOfStringString2", () => {
+test("Translation Recognizer Null target languages throws", () => {
     const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationToLanguages], null);
     s.speechRecognitionLanguage = "illegal";
 
-    try {
-        const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
+    expect(() => new sdk.TranslationRecognizer(s)).toThrow();
 
     s.close();
 });
 
-test("testCreateTranslationRecognizerStringArrayListOfStringString3", () => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationToLanguages], null);
-    s.speechRecognitionLanguage = "en-EN";
-
-    try {
-        const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
-
-    s.close();
-});
-
-test("testCreateTranslationRecognizerStringArrayListOfStringString4", () => {
+test("Test Translation Recognizer emty target list throws", () => {
     const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     s.speechRecognitionLanguage = "en-EN";
     s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationToLanguages], "");
 
-    try {
-
-        const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
-
+    expect(() => new sdk.TranslationRecognizer(s)).toThrow();
     s.close();
 });
 
-test("testCreateTranslationRecognizerStringArrayListOfStringString5", () => {
+test("Translation Null voice value throws", () => {
     const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationToLanguages], "illegal");
     s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationVoice], null);
     s.speechRecognitionLanguage = "en-EN";
 
-    try {
-
-        const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
+    expect(() => new sdk.TranslationRecognizer(s)).toThrow();
 
     s.close();
 });
 
-test("testCreateTranslationRecognizerStringArrayListOfStringString6", () => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    s.speechRecognitionLanguage = "en-EN";
-    s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationToLanguages], "en-US");
-    s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationVoice], null);
-
-    try {
-
-        const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
-
-    s.close();
-});
-
-test.skip("testCreateTranslationRecognizerStringArrayListOfStringString7", () => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationToLanguages], "en-US");
-    s.speechRecognitionLanguage = "en-EN";
-
-    try {
-        const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
-
-    s.close();
-});
-
-test("testCreateTranslationRecognizerStringArrayListOfStringStringSuccess", () => {
+test("Translition Recognizer success.", () => {
     const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationToLanguages], "en-US");
     s.speechRecognitionLanguage = "en-EN";
@@ -441,36 +286,7 @@ test("testCreateTranslationRecognizerStringArrayListOfStringStringSuccess", () =
     s.close();
 });
 
-test("testCreateTranslationRecognizerWithFileInputStringStringArrayListOfString1", () => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationToLanguages], null);
-    s.speechRecognitionLanguage = "null";
-
-    try {
-        const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
-
-    s.close();
-});
-
-test.skip("testCreateTranslationRecognizerWithFileInputStringStringArrayListOfString2", () => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationToLanguages], null);
-    s.speechRecognitionLanguage = "illegal";
-
-    try {
-        const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
-
-    s.close();
-});
-test("testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString1", () => {
+test("Translation Recog Nul via prop set for targets", () => {
     const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationToLanguages], null);
 
@@ -479,137 +295,50 @@ test("testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringS
     s.close();
 });
 
-test("testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString3", () => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationToLanguages], null);
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    try {
-        const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
-
-    s.close();
-});
-
-test("testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString4", () => {
+test("Translation Recog Null via propset voice and targets", () => {
     const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationToLanguages], null);
     s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationVoice], null);
 
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    try {
-        const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
+    expect(() => new sdk.TranslationRecognizer(s)).toThrow();
 
     s.close();
 });
 
-test("testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString5", () => {
+test("Translation Recog Null via propset voice and targets with Language", () => {
     const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationToLanguages], null);
     s.speechRecognitionLanguage = "en-US";
     s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationVoice], null);
 
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    try {
-        const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
+    expect(() => new sdk.TranslationRecognizer(s)).toThrow();
 
     s.close();
 });
 
-test("testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString6", () => {
+test("Translation Recog with empty targets via prop", () => {
     const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationToLanguages], "");
     s.speechRecognitionLanguage = "en-US";
     s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationVoice], null);
 
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    try {
-        const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
+    expect(() => new sdk.TranslationRecognizer(s)).toThrow();
 
     s.close();
 });
 
-test.skip("testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString7", () => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationToLanguages], "illegal");
-    s.speechRecognitionLanguage = "en-US";
-    s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationVoice], null);
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    try {
-        const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
-
-    s.close();
-});
-
-test("testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString8", () => {
+test("Translation Recog, Null voice via prop throws", () => {
     const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationToLanguages], "en-US");
     s.speechRecognitionLanguage = "en-US";
     s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationVoice], null);
 
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    try {
-        const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
+    expect(() => new sdk.TranslationRecognizer(s)).toThrow();
 
     s.close();
 });
 
-test.skip("testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringString9", () => {
-    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-    s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationToLanguages], "en-US");
-    s.speechRecognitionLanguage = "en-US";
-    s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationVoice], "illegal");
-
-    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
-    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
-
-    try {
-        const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
-        fail("not expected");
-    } catch (ex) {
-        // expected
-    }
-
-    s.close();
-});
-
-test("testCreateTranslationRecognizerWithFileInputStringStringArrayListOfStringStringSuccess", () => {
+test("Translation Recog success", () => {
     const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
     s.setProperty(sdk.PropertyId[sdk.PropertyId.SpeechServiceConnection_TranslationToLanguages], "en-US");
     s.speechRecognitionLanguage = "en-US";
@@ -631,11 +360,4 @@ test("testClose", () => {
     const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
 
     s.close();
-});
-
-test("testGetFactoryImpl", () => {
-    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
-
-    expect(s).not.toBeUndefined();
-
 });

@@ -909,3 +909,52 @@ test("RecognizeOnceAsync is async", (done: jest.DoneCallback) => {
     expect(resultSeen).toEqual(false);
     postCall = true;
 });
+
+test("InitialSilenceTimeout Continous", (done: jest.DoneCallback) => {
+    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    expect(s).not.toBeUndefined();
+    s.speechRecognitionLanguage = "en-US";
+
+    let p: sdk.PullAudioInputStream;
+
+    p = sdk.AudioInputStream.createPullStream(
+        {
+            close: () => { return; },
+            read: (buffer: ArrayBuffer): number => {
+                return buffer.byteLength;
+            },
+        });
+
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromStreamInput(p);
+
+    const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s, config);
+    expect(r).not.toBeUndefined();
+    expect(r instanceof sdk.Recognizer);
+
+    r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs) => {
+        setTimeout(() => done(), 1);
+        fail(e.errorDetails);
+    };
+
+    r.recognized = (o: sdk.Recognizer, e: sdk.SpeechRecognitionEventArgs) => {
+        const res: sdk.SpeechRecognitionResult = e.result;
+        expect(res).not.toBeUndefined();
+        expect(sdk.ResultReason.NoMatch).toEqual(res.reason);
+        expect(res.text).toBeUndefined();
+
+        const nmd: sdk.NoMatchDetails = sdk.NoMatchDetails.fromResult(res);
+        expect(nmd.reason).toEqual(sdk.NoMatchReason.InitialSilenceTimeout);
+        r.stopContinuousRecognitionAsync();
+        done();
+    };
+
+    /* tslint:disable:no-empty */
+    r.startContinuousRecognitionAsync(() => {
+           },
+        (error: string) => {
+            r.close();
+            s.close();
+            setTimeout(() => done(), 1);
+            fail(error);
+        });
+}, 7500);

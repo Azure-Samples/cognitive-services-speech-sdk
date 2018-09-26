@@ -775,7 +775,7 @@ test("MultiPhrase", (done: jest.DoneCallback) => {
                 r.close();
                 s.close();
                 setTimeout(() => done(), 1);
-                fail(e.result.reason);
+                fail(sdk.ResultReason[e.result.reason]);
                 break;
             case sdk.ResultReason.SynthesizingAudio:
                 const result: ArrayBuffer = e.result.audio;
@@ -997,6 +997,50 @@ test.skip("emptyFile", (done: jest.DoneCallback) => {
 
         },
         (error: string) => {
+            fail(error);
+        });
+});
+
+test("Translate Bad Language", (done: jest.DoneCallback) => {
+    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    expect(s).not.toBeUndefined();
+
+    const f: File = WaveFileAudioInput.LoadFile(Settings.WaveFile);
+    const config: sdk.AudioConfig = sdk.AudioConfig.fromWavFileInput(f);
+    s.addTargetLanguage("bo-GU");
+    s.speechRecognitionLanguage = "en-US";
+
+    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s, config);
+
+    expect(r).not.toBeUndefined();
+
+    expect(r instanceof sdk.Recognizer).toEqual(true);
+
+    r.synthesizing = ((o: sdk.Recognizer, e: sdk.TranslationSynthesisEventArgs) => {
+        if (e.result.reason === sdk.ResultReason.Canceled) {
+            r.close();
+            s.close();
+            setTimeout(() => done(), 1);
+            fail(e.result.reason);
+        }
+    });
+
+    r.recognizeOnceAsync(
+        (res: sdk.TranslationRecognitionResult) => {
+            expect(res).not.toBeUndefined();
+            expect(res.errorDetails).toBeUndefined();
+            expect(sdk.ResultReason[res.reason]).toEqual(sdk.ResultReason[sdk.ResultReason.RecognizedSpeech]);
+            expect(res.translations).toBeUndefined();
+            expect(res.text).toEqual("What's the weather like?");
+
+            r.close();
+            s.close();
+            done();
+        },
+        (error: string) => {
+            r.close();
+            s.close();
+            setTimeout(() => done(), 1);
             fail(error);
         });
 });

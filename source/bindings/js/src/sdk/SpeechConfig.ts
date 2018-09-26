@@ -243,7 +243,7 @@ export class SpeechConfigImpl extends SpeechConfig {
     }
 
     public set endpointId(value: string) {
-        this.privProperties.setProperty(PropertyId.SpeechServiceConnection_Endpoint, value);
+        this.privProperties.setProperty(PropertyId.SpeechServiceConnection_EndpointId, value);
     }
 
     public get endpointId(): string {
