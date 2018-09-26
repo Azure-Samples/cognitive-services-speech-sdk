@@ -1,0 +1,1302 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<title>Microsoft Cognitive Services Speech SDK Preview - Software Development Kit (SDK)
+Use Terms</title>
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"MS Mincho";
+	panose-1:2 2 6 9 4 2 5 8 3 4;}
+@font-face
+	{font-family:SimSun;
+	panose-1:2 1 6 0 3 1 1 1 1 1;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:"Trebuchet MS";
+	panose-1:2 11 6 3 2 2 2 2 2 4;}
+@font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;}
+@font-face
+	{font-family:"\@MS Mincho";
+	panose-1:2 2 6 9 4 2 5 8 3 4;}
+@font-face
+	{font-family:"\@SimSun";
+	panose-1:2 1 6 0 3 1 1 1 1 1;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+h1
+	{mso-style-link:"Heading 1 Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:17.85pt;
+	text-indent:-17.85pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:normal;}
+h2
+	{mso-style-link:"Heading 2 Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:.5in;
+	text-indent:-18.15pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:normal;}
+h3
+	{mso-style-link:"Heading 3 Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:53.85pt;
+	text-indent:-17.85pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;}
+h4
+	{mso-style-link:"Heading 4 Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:71.75pt;
+	text-indent:-17.9pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;}
+h5
+	{mso-style-link:"Heading 5 Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:89.6pt;
+	text-indent:-17.85pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;}
+h6
+	{mso-style-link:"Heading 6 Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:107.45pt;
+	text-indent:-17.85pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;}
+p.MsoHeading7, li.MsoHeading7, div.MsoHeading7
+	{mso-style-link:"Heading 7 Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:125.3pt;
+	text-indent:-17.85pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.MsoHeading8, li.MsoHeading8, div.MsoHeading8
+	{mso-style-link:"Heading 8 Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:143.15pt;
+	text-indent:-17.85pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.MsoHeading9, li.MsoHeading9, div.MsoHeading9
+	{mso-style-link:"Heading 9 Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:161.05pt;
+	text-indent:-17.9pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.MsoFootnoteText, li.MsoFootnoteText, div.MsoFootnoteText
+	{mso-style-link:"Footnote Text Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.MsoCommentText, li.MsoCommentText, div.MsoCommentText
+	{mso-style-link:"Comment Text Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.MsoHeader, li.MsoHeader, div.MsoHeader
+	{mso-style-link:"Header Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.MsoFooter, li.MsoFooter, div.MsoFooter
+	{mso-style-link:"Footer Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+span.MsoFootnoteReference
+	{font-family:"Times New Roman",serif;
+	vertical-align:super;}
+span.MsoCommentReference
+	{font-family:"Times New Roman",serif;}
+span.MsoPageNumber
+	{font-family:"Times New Roman",serif;}
+span.MsoEndnoteReference
+	{font-family:"Times New Roman",serif;
+	vertical-align:super;}
+p.MsoEndnoteText, li.MsoEndnoteText, div.MsoEndnoteText
+	{mso-style-link:"Endnote Text Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.MsoBodyTextIndent, li.MsoBodyTextIndent, div.MsoBodyTextIndent
+	{mso-style-link:"Body Text Indent Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	line-height:200%;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.MsoBodyText2, li.MsoBodyText2, div.MsoBodyText2
+	{mso-style-link:"Body Text 2 Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	line-height:200%;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+a:link, span.MsoHyperlink
+	{mso-style-name:"Hyperlink\,Char Char7";
+	font-family:"Times New Roman",serif;
+	color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;}
+p
+	{margin-right:0in;
+	margin-left:0in;
+	font-size:12.0pt;
+	font-family:"Times New Roman",serif;
+	font-weight:bold;}
+p.MsoCommentSubject, li.MsoCommentSubject, div.MsoCommentSubject
+	{mso-style-link:"Comment Subject Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	font-size:10.0pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:normal;}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-link:"Balloon Text Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	font-size:8.0pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
+	{margin:0in;
+	margin-bottom:.0001pt;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;
+	font-weight:normal;}
+p.MsoRMPane, li.MsoRMPane, div.MsoRMPane
+	{margin:0in;
+	margin-bottom:.0001pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:normal;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:.5in;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst, div.MsoListParagraphCxSpFirst
+	{margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.MsoListParagraphCxSpMiddle, li.MsoListParagraphCxSpMiddle, div.MsoListParagraphCxSpMiddle
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxSpLast
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:.5in;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+span.Heading1Char
+	{mso-style-name:"Heading 1 Char";
+	mso-style-link:"Heading 1";
+	font-family:"Tahoma",sans-serif;}
+span.Heading2Char
+	{mso-style-name:"Heading 2 Char";
+	mso-style-link:"Heading 2";
+	font-family:"Tahoma",sans-serif;}
+span.Heading3Char
+	{mso-style-name:"Heading 3 Char";
+	mso-style-link:"Heading 3";
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+span.Heading4Char
+	{mso-style-name:"Heading 4 Char";
+	mso-style-link:"Heading 4";
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+span.Heading5Char
+	{mso-style-name:"Heading 5 Char";
+	mso-style-link:"Heading 5";
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+span.Heading6Char
+	{mso-style-name:"Heading 6 Char";
+	mso-style-link:"Heading 6";
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+span.Heading7Char
+	{mso-style-name:"Heading 7 Char";
+	mso-style-link:"Heading 7";
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+span.Heading8Char
+	{mso-style-name:"Heading 8 Char";
+	mso-style-link:"Heading 8";
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+span.Heading9Char
+	{mso-style-name:"Heading 9 Char";
+	mso-style-link:"Heading 9";
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Body1, li.Body1, div.Body1
+	{mso-style-name:"Body 1";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:17.85pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Body2, li.Body2, div.Body2
+	{mso-style-name:"Body 2";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:.5in;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Body3, li.Body3, div.Body3
+	{mso-style-name:"Body 3";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:53.85pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Body4, li.Body4, div.Body4
+	{mso-style-name:"Body 4";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:71.75pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Body5, li.Body5, div.Body5
+	{mso-style-name:"Body 5";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:90.15pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Body6, li.Body6, div.Body6
+	{mso-style-name:"Body 6";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:1.5in;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Body7, li.Body7, div.Body7
+	{mso-style-name:"Body 7";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:125.3pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Body8, li.Body8, div.Body8
+	{mso-style-name:"Body 8";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:143.15pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Body9, li.Body9, div.Body9
+	{mso-style-name:"Body 9";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:161.05pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Bullet1, li.Bullet1, div.Bullet1
+	{mso-style-name:"Bullet 1";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:17.85pt;
+	text-indent:-17.85pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Bullet2, li.Bullet2, div.Bullet2
+	{mso-style-name:"Bullet 2";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:.5in;
+	text-indent:-18.15pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Bullet3, li.Bullet3, div.Bullet3
+	{mso-style-name:"Bullet 3";
+	mso-style-link:"Bullet 3 Char1";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:53.85pt;
+	text-indent:-17.85pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Bullet4, li.Bullet4, div.Bullet4
+	{mso-style-name:"Bullet 4";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:71.75pt;
+	text-indent:-17.9pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Bullet5, li.Bullet5, div.Bullet5
+	{mso-style-name:"Bullet 5";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:89.6pt;
+	text-indent:-17.85pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Bullet6, li.Bullet6, div.Bullet6
+	{mso-style-name:"Bullet 6";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:107.45pt;
+	text-indent:-17.85pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Bullet7, li.Bullet7, div.Bullet7
+	{mso-style-name:"Bullet 7";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:125.3pt;
+	text-indent:-17.85pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Bullet8, li.Bullet8, div.Bullet8
+	{mso-style-name:"Bullet 8";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:143.15pt;
+	text-indent:-17.85pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Bullet9, li.Bullet9, div.Bullet9
+	{mso-style-name:"Bullet 9";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:161.05pt;
+	text-indent:-17.9pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.HeadingEULA, li.HeadingEULA, div.HeadingEULA
+	{mso-style-name:"Heading EULA";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	font-size:14.0pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:normal;}
+p.HeadingSoftwareTitle, li.HeadingSoftwareTitle, div.HeadingSoftwareTitle
+	{mso-style-name:"Heading Software Title";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	border:none;
+	padding:0in;
+	font-size:14.0pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:normal;}
+p.Preamble, li.Preamble, div.Preamble
+	{mso-style-name:Preamble;
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:normal;}
+p.PreambleBorder, li.PreambleBorder, div.PreambleBorder
+	{mso-style-name:"Preamble Border";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	border:none;
+	padding:0in;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:normal;}
+p.HeadingWarranty, li.HeadingWarranty, div.HeadingWarranty
+	{mso-style-name:"Heading Warranty";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	text-align:center;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:normal;}
+p.Heading1Warranty, li.Heading1Warranty, div.Heading1Warranty
+	{mso-style-name:"Heading 1 Warranty";
+	mso-style-link:"Heading 1 Warranty Char Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:.25in;
+	text-indent:-.25in;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Heading2Warranty, li.Heading2Warranty, div.Heading2Warranty
+	{mso-style-name:"Heading 2 Warranty";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:.5in;
+	text-indent:-.25in;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Heading3Bold, li.Heading3Bold, div.Heading3Bold
+	{mso-style-name:"Heading 3 Bold";
+	mso-style-link:"Heading 3 Bold Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:53.85pt;
+	text-indent:-17.85pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:normal;}
+p.Bullet4Underline, li.Bullet4Underline, div.Bullet4Underline
+	{mso-style-name:"Bullet 4 Underline";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:71.75pt;
+	text-indent:-17.9pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;
+	text-decoration:underline;}
+p.Bullet3Underline, li.Bullet3Underline, div.Bullet3Underline
+	{mso-style-name:"Bullet 3 Underline";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;
+	text-decoration:underline;}
+p.Body2Underline, li.Body2Underline, div.Body2Underline
+	{mso-style-name:"Body 2 Underline";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:.5in;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;
+	text-decoration:underline;}
+p.Body3Underline, li.Body3Underline, div.Body3Underline
+	{mso-style-name:"Body 3 Underline";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:53.85pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;
+	text-decoration:underline;}
+span.BodyTextIndentChar
+	{mso-style-name:"Body Text Indent Char";
+	mso-style-link:"Body Text Indent";
+	font-family:"Tahoma",sans-serif;}
+p.Bullet4Italics, li.Bullet4Italics, div.Bullet4Italics
+	{mso-style-name:"Bullet 4 Italics";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:71.75pt;
+	text-indent:-17.9pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;
+	font-style:italic;}
+span.Body2Char
+	{mso-style-name:"Body 2 Char";
+	font-family:"Tahoma",sans-serif;}
+span.Body3Char
+	{mso-style-name:"Body 3 Char";
+	font-family:"Tahoma",sans-serif;}
+span.Body4Char
+	{mso-style-name:"Body 4 Char";
+	font-family:"Tahoma",sans-serif;}
+span.Body1Char
+	{mso-style-name:"Body 1 Char";
+	font-family:"Tahoma",sans-serif;}
+p.PreambleBorderAbove, li.PreambleBorderAbove, div.PreambleBorderAbove
+	{mso-style-name:"Preamble Border Above";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:0in;
+	border:none;
+	padding:0in;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:normal;}
+span.FootnoteTextChar
+	{mso-style-name:"Footnote Text Char";
+	mso-style-link:"Footnote Text";
+	font-family:"Tahoma",sans-serif;}
+span.EndnoteTextChar
+	{mso-style-name:"Endnote Text Char";
+	mso-style-link:"Endnote Text";
+	font-family:"Tahoma",sans-serif;}
+span.CommentTextChar
+	{mso-style-name:"Comment Text Char";
+	mso-style-link:"Comment Text";
+	font-family:"Tahoma",sans-serif;}
+p.Char, li.Char, div.Char
+	{mso-style-name:Char;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:0in;
+	line-height:12.0pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.CharCharCharChar, li.CharCharCharChar, div.CharCharCharChar
+	{mso-style-name:"Char Char Char Char";
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:0in;
+	line-height:12.0pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+span.BalloonTextChar
+	{mso-style-name:"Balloon Text Char";
+	mso-style-link:"Balloon Text";
+	font-family:"Tahoma",sans-serif;}
+span.Heading2Char1
+	{mso-style-name:"Heading 2 Char1";
+	font-family:"Trebuchet MS",sans-serif;
+	font-weight:bold;}
+p.CharCharCharChar1, li.CharCharCharChar1, div.CharCharCharChar1
+	{mso-style-name:"Char Char Char Char1";
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:0in;
+	line-height:12.0pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Body0Bold, li.Body0Bold, div.Body0Bold
+	{mso-style-name:"Body 0 Bold";
+	mso-style-link:"Body 0 Bold Char";
+	margin:0in;
+	margin-bottom:.0001pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Body0, li.Body0, div.Body0
+	{mso-style-name:"Body 0";
+	margin:0in;
+	margin-bottom:.0001pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:normal;}
+span.HeaderChar
+	{mso-style-name:"Header Char";
+	mso-style-link:Header;
+	font-family:"Tahoma",sans-serif;}
+span.FooterChar
+	{mso-style-name:"Footer Char";
+	mso-style-link:Footer;
+	font-family:"Tahoma",sans-serif;}
+span.CommentSubjectChar
+	{mso-style-name:"Comment Subject Char";
+	mso-style-link:"Comment Subject";
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+span.Bullet3Char1
+	{mso-style-name:"Bullet 3 Char1";
+	mso-style-link:"Bullet 3";
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.Bullet3Underlined, li.Bullet3Underlined, div.Bullet3Underlined
+	{mso-style-name:"Bullet 3 Underlined";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:53.85pt;
+	text-indent:-17.85pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;
+	text-decoration:underline;}
+span.CharChar
+	{mso-style-name:"Char Char";
+	font-family:"Tahoma",sans-serif;}
+p.AdditionalSoftware, li.AdditionalSoftware, div.AdditionalSoftware
+	{mso-style-name:AdditionalSoftware;
+	margin:0in;
+	margin-bottom:.0001pt;
+	line-height:12.0pt;
+	font-size:9.0pt;
+	font-family:"Trebuchet MS",sans-serif;
+	font-weight:normal;}
+span.CharChar1
+	{mso-style-name:"Char Char1";
+	font-family:"Trebuchet MS",sans-serif;
+	font-weight:bold;}
+p.Bullet4Underlined, li.Bullet4Underlined, div.Bullet4Underlined
+	{mso-style-name:"Bullet 4 Underlined";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:71.75pt;
+	text-indent:-17.9pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;
+	text-decoration:underline;}
+p.HeadingFrenchWarranty, li.HeadingFrenchWarranty, div.HeadingFrenchWarranty
+	{mso-style-name:"Heading French Warranty";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:.25in;
+	text-indent:-.25in;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+span.Body3CharCarCarCarCarCarCarCarCarCarCarCarCarCarCarCarCarCarCarCarCarCarCarCarCar
+	{mso-style-name:"Body 3 Char Car Car Car Car Car Car Car Car Car Car Car Car Car Car Car Car Car Car Car Car Car Car Car Car";
+	font-family:"Tahoma",sans-serif;}
+span.tw4winExternal
+	{mso-style-name:tw4winExternal;
+	font-family:"Courier New";
+	color:gray;}
+span.tw4winMark
+	{mso-style-name:tw4winMark;
+	font-family:"Courier New";
+	color:purple;
+	display:none;
+	vertical-align:sub;}
+span.PreambleChar
+	{mso-style-name:"Preamble Char";
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+span.tw4winError
+	{mso-style-name:tw4winError;
+	font-family:"Courier New";
+	color:lime;}
+span.tw4winTerm
+	{mso-style-name:tw4winTerm;
+	color:blue;}
+span.tw4winPopup
+	{mso-style-name:tw4winPopup;
+	font-family:"Courier New";
+	color:green;}
+span.tw4winJump
+	{mso-style-name:tw4winJump;
+	font-family:"Courier New";
+	color:teal;}
+span.tw4winInternal
+	{mso-style-name:tw4winInternal;
+	font-family:"Courier New";
+	color:red;}
+span.DONOTTRANSLATE
+	{mso-style-name:DO_NOT_TRANSLATE;
+	font-family:"Courier New";
+	color:maroon;}
+span.BodyText2Char
+	{mso-style-name:"Body Text 2 Char";
+	mso-style-link:"Body Text 2";
+	font-family:"Tahoma",sans-serif;}
+p.StyleHeading3BoldAsianTimesNewRoman95pt, li.StyleHeading3BoldAsianTimesNewRoman95pt, div.StyleHeading3BoldAsianTimesNewRoman95pt
+	{mso-style-name:"Style Heading 3 Bold + \(Asian\) Times New Roman 9\.5 pt";
+	mso-style-link:"Style Heading 3 Bold + \(Asian\) Times New Roman 9\.5 pt Char";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:53.85pt;
+	text-indent:-17.85pt;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+span.Heading3BoldChar
+	{mso-style-name:"Heading 3 Bold Char";
+	mso-style-link:"Heading 3 Bold";
+	font-family:"Tahoma",sans-serif;}
+span.StyleHeading3BoldAsianTimesNewRoman95ptChar
+	{mso-style-name:"Style Heading 3 Bold + \(Asian\) Times New Roman 9\.5 pt Char";
+	mso-style-link:"Style Heading 3 Bold + \(Asian\) Times New Roman 9\.5 pt";
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+span.Body0BoldChar
+	{mso-style-name:"Body 0 Bold Char";
+	mso-style-link:"Body 0 Bold";
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+p.LIMPAT4WINEXTERNAL, li.LIMPAT4WINEXTERNAL, div.LIMPAT4WINEXTERNAL
+	{mso-style-name:LIMPA_T4WINEXTERNAL;
+	mso-style-link:"LIMPA_T4WINEXTERNAL Char";
+	margin:0in;
+	margin-bottom:.0001pt;
+	font-size:10.0pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:normal;
+	vertical-align:super;}
+span.LIMPAT4WINEXTERNALChar
+	{mso-style-name:"LIMPA_T4WINEXTERNAL Char";
+	mso-style-link:LIMPA_T4WINEXTERNAL;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;
+	vertical-align:super;}
+p.Heading2FrenchWarranty, li.Heading2FrenchWarranty, div.Heading2FrenchWarranty
+	{mso-style-name:"Heading 2 French Warranty";
+	margin-top:6.0pt;
+	margin-right:0in;
+	margin-bottom:6.0pt;
+	margin-left:.5in;
+	text-indent:-.25in;
+	font-size:9.5pt;
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+span.Heading1WarrantyCharChar
+	{mso-style-name:"Heading 1 Warranty Char Char";
+	mso-style-link:"Heading 1 Warranty";
+	font-family:"Tahoma",sans-serif;
+	font-weight:bold;}
+span.DocID
+	{mso-style-name:DocID;
+	font-family:"Times New Roman",serif;}
+.MsoPapDefault
+	{margin-bottom:10.0pt;
+	line-height:115%;}
+ /* Page Definitions */
+ @page WordSection1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.0in 1.0in 1.0in;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-US link=blue vlink=purple>
+
+<div class=WordSection1>
+
+<p class=HeadingEULA>MICROSOFT SOFTWARE LICENSE TERMS</p>
+
+<p class=MsoNormal><span style='font-size:14.0pt;font-weight:normal'>MICROSOFT
+COGNITIVE SERVICES SPEECH SDK PREVIEW</span></p>
+
+<div class=MsoNormal align=center style='text-align:center'><i><span
+style='font-size:10.0pt'>
+
+<hr size=2 width="100%" align=center>
+
+</span></i></div>
+
+<p class=Preamble><a name="OLE_LINK2"></a><a name="OLE_LINK1"><strong><span
+style='font-family:"Tahoma",sans-serif'>IF YOU LIVE IN (OR ARE A BUSINESS WITH YOUR
+PRINCIPAL PLACE OF BUSINESS IN) THE UNITED STATES, PLEASE READ THE “BINDING
+ARBITRATION AND CLASS ACTION WAIVER” SECTION BELOW. IT AFFECTS HOW DISPUTES ARE
+RESOLVED.</span></strong></a></p>
+
+<div class=Preamble align=center style='text-align:center'><i><span
+style='font-size:10.0pt'>
+
+<hr size=2 width="100%" align=center>
+
+</span></i></div>
+
+<p class=PreambleBorderAbove style='border:none'><span lang=EN>These license
+terms are an agreement between you and Microsoft Corporation (or one of its
+affiliates). They apply to the preview software named above and any Microsoft
+services or software updates (<a name="OLE_LINK15"></a><a name="OLE_LINK14">except
+to the extent such services or updates are accompanied by new or </a></span>additional
+terms, in which case those different terms apply prospectively and do not alter
+your or Microsoft’s rights relating to pre-updated software or services<span
+lang=EN>). </span>IF YOU COMPLY WITH THESE LICENSE TERMS, YOU HAVE THE RIGHTS
+BELOW.  BY USING THE SOFTWARE, YOU ACCEPT THESE TERMS.</p>
+
+<h1><b><span style='font-size:10.0pt'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b><b>INSTALLATION AND USE RIGHTS.</b></h1>
+
+<h2><a name="OLE_LINK17"></a><a name="OLE_LINK4"></a><a name="OLE_LINK3"><b><span
+style='font-size:10.0pt'>a)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b><b>General.</b> You may install and use any number of copies
+of the software to develop and test your applications and integration with
+Cognitive Services Speech Services.</a></h2>
+
+<h2><b><span style='font-size:10.0pt'>b)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b><b>Third Party Software.</b> The software may include third
+party applications that are licensed to you under this agreement or under their
+own terms. License terms, notices, and acknowledgements, if any, for the third
+party applications may be accessible online at <span class=MsoHyperlink><span
+style='font-family:"Tahoma",sans-serif'><a
+href="http://aka.ms/thirdpartynotices">http://aka.ms/thirdpartynotices</a></span></span>
+or in an accompanying notices file. Even if such applications are governed by
+other agreements, the disclaimer, limitations on, and exclusions of damages
+below also apply to the extent allowed by applicable law.</h2>
+
+<h2><b><span style='font-size:10.0pt'>c)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b><b><span lang=EN>Package Managers</span></b><span lang=EN>. </span>The
+software may include package managers, like NuGet, that give you the option to
+download other Microsoft and third-party software packages to use with your
+application. Those packages are under their own licenses, and not this
+agreement. Microsoft does not distribute, license or provide any warranties for
+any of the third-party packages<span lang=EN>.</span></h2>
+
+<h2><b><span style='font-size:10.0pt'>d)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b><b><span lang=EN>Competitive Benchmarking</span></b><span
+lang=EN>. If you are a direct competitor, and you access or use the software
+for purposes of competitive benchmarking, analysis, or intelligence gathering,
+you waive as against Microsoft, its subsidiaries, and its affiliated companies
+(including prospectively) any competitive use, access, and benchmarking test
+restrictions in the terms governing your software to the extent your terms of
+use are, or purport to be, more restrictive than Microsoft’s terms. If you do
+not waive any such purported restrictions in the terms governing your software,
+you are not allowed to access or use this software, and will not do so.</span></h2>
+
+<h1><b><span style='font-size:10.0pt'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b><b>DISTRIBUTABLE CODE.</b> The software may contain code you
+are permitted to distribute (i.e. make available for third parties) in
+applications you develop, as described in this Section. </h1>
+
+<h2><b><span style='font-size:10.0pt'>a)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b><b>Distribution Rights.</b> The code and test files described
+below are distributable if included with the software.</h2>
+
+<p class=Heading3Bold><b><span style='font-size:10.0pt'>i.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></b><u>REDIST.TXT
+Files</u>.<b> </b>You may copy and distribute the object code form of code
+listed on the REDIST list in the software, if any, or in the notice files;</p>
+
+<p class=Heading3Bold><b><span style='font-size:10.0pt'>ii.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></b><u>Sample
+Code, Templates, and Styles</u><span lang=FR>. </span>You may copy, modify, and
+distribute the source and object code form of code marked as “sample”,
+“template”, “simple styles”, and “sketch styles”; and</p>
+
+<p class=Heading3Bold><b><span style='font-size:10.0pt'>iii.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp; </span></span></b><u>Third
+Party Distribution</u>. You may permit distributors of your applications to
+copy and distribute any of this distributable code you elect to distribute with
+your applications<span style='font-family:SimSun'>.</span></p>
+
+<h2><b><span style='font-size:10.0pt'>b)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b><b>Distribution Requirements.</b> For any code you
+distribute, you must:</h2>
+
+<p class=Heading3Bold><b><span style='font-size:10.0pt'>i.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></b>add
+significant primary functionality to it in your applications;</p>
+
+<p class=Heading3Bold><b><span style='font-size:10.0pt'>ii.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></b>require
+distributors and external end users to agree to terms that protect it and
+Microsoft at least as much as this agreement; and</p>
+
+<p class=Heading3Bold><b><span style='font-size:10.0pt'>iii.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp; </span></span></b>indemnify,
+defend, and hold harmless Microsoft from any claims, including attorneys’ fees,
+related to the distribution or use of your applications, except to the extent
+that any claim is based solely on the unmodified distributable code.</p>
+
+<h2><b><span style='font-size:10.0pt'>c)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b><b>Distribution Restrictions.</b> You may not:</h2>
+
+<p class=Heading3Bold><b><span style='font-size:10.0pt'>i.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></b>use
+Microsoft’s trademarks or trade dress in your application in any way that
+suggests your application comes from or is endorsed by Microsoft; or</p>
+
+<p class=Heading3Bold><b><span style='font-size:10.0pt'>ii.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></b>modify
+or distribute the source code of any distributable code so that any part of it
+becomes subject to any license that requires that the distributable code, any
+other part of the software, or any of Microsoft’s other intellectual property
+be disclosed or distributed in source code form, or that others have the right
+to modify it.</p>
+
+<h1><b><span style='font-size:10.0pt'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b><b>DATA COLLECTION</b>. The software may collect information
+about you and your use of the software and send that to Microsoft. Microsoft
+may use this information to provide services and improve Microsoft’s products
+and services. Your opt-out rights, if any, are described in the product
+documentation. Some features in the software may enable collection of data from
+users of your applications that access or use the software. If you use these
+features to enable data collection in your applications, you must comply with
+applicable law, including getting any required user consent, and maintain a
+prominent privacy policy that accurately informs users about how you use,
+collect, and share their data. You can learn more about Microsoft’s data
+collection and use in the product documentation and the <span lang=EN>Microsoft
+Privacy Statement</span> at <span class=MsoHyperlink><span style='font-family:
+"Tahoma",sans-serif'><a href="https://go.microsoft.com/fwlink/?LinkId=512132">https://go.microsoft.com/fwlink/?LinkId=512132</a></span></span><span
+lang=EN style='font-family:"Times New Roman",serif'>. </span><span lang=EN>You
+agree to comply with all applicable provisions of the Microsoft Privacy
+Statement</span>.</h1>
+
+<h1><b><span style='font-size:10.0pt'>4.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b><b>SCOPE OF LICENSE.</b> The software is licensed, not sold.
+Microsoft reserves all other rights. Unless applicable law gives you more
+rights despite this limitation, you will not (and have no right to):</h1>
+
+<h2><b><span style='font-size:10.0pt'>a)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b>work around any technical limitations in the software that
+only allow you to use it in certain ways;</h2>
+
+<h2><b><span style='font-size:10.0pt'>b)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b>reverse engineer, decompile, or disassemble the software, or
+attempt to do so, except and only to the extent permitted by licensing terms
+governing the use of open-source components that may be included with the
+software;</h2>
+
+<h2><b><span style='font-size:10.0pt'>c)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b>remove, minimize, block, or modify any notices of Microsoft
+or its suppliers in the software;</h2>
+
+<h2><b><span style='font-size:10.0pt'>d)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b>use the software in any way that is against the law or to
+create or propagate malware; or</h2>
+
+<h2><b><span style='font-size:10.0pt'>e)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b>share, publish, distribute, or lend the software (except for
+any distributable code, subject to the terms above), provide the software as a
+stand-alone hosted solution for others to use, or transfer the software or this
+agreement to any third party.</h2>
+
+<h1><b><span style='font-size:10.0pt'>5.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b><b>PREVIEW SOFTWARE.</b> The software is a pre-release
+version. It may not operate correctly. It may be different from the
+commercially released version.</h1>
+
+<h1><b><span style='font-size:10.0pt'>6.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b><b>FEEDBACK.</b> If you give feedback about the software to
+Microsoft, you give to Microsoft, without charge, the right to use, share and
+commercialize your feedback in any way and for any purpose. You will not give
+feedback that is subject to a license that requires Microsoft to license its
+software or documentation to third parties because Microsoft includes your
+feedback in them. These rights survive this agreement.</h1>
+
+<h1><span class=MsoHyperlink><b><span style='font-size:10.0pt;font-family:"Tahoma",sans-serif;
+text-decoration:none'>7.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b></span><b>EXPORT RESTRICTIONS.</b> You must comply with all
+domestic and international export laws and regulations that apply to the
+software, which include restrictions on destinations, end users, and end use.
+For further information on export restrictions, visit <span class=MsoHyperlink><span
+style='font-family:"Tahoma",sans-serif'><a href="http://aka.ms/exporting">http://aka.ms/exporting</a></span></span>.</h1>
+
+<h1><b><span style='font-size:10.0pt'>8.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b><b>SUPPORT SERVICES.</b> Microsoft is not obligated under
+this agreement to provide any support services for the software. Any support
+provided is “as is”, “with all faults”, and without warranty of any kind.</h1>
+
+<h1><b><span style='font-size:10.0pt'>9.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></b><b>UPDATES.</b> The software may periodically check for
+updates, and download and install them for you. You may obtain updates only
+from Microsoft or authorized sources. Microsoft may need to update your system
+to provide you with updates. You agree to receive these automatic updates
+without any additional notice. Updates may not include or support all existing
+software features, services, or peripheral devices.</h1>
+
+<h1><a name="OLE_LINK6"></a><a name="OLE_LINK5"></a><a name="OLE_LINK22"></a><a
+name="OLE_LINK16"><b><span style='font-size:10.0pt'>10.<span style='font:7.0pt "Times New Roman"'>
+</span></span></b><strong><span style='font-family:"Tahoma",sans-serif'>BINDING
+ARBITRATION AND CLASS ACTION WAIVER</span></strong></a><strong><span
+style='font-family:"Tahoma",sans-serif'>. This Section applies if you live in
+(or, if a business, your principal place of business is in) the United States.</span></strong><strong><span
+style='font-family:"Tahoma",sans-serif;font-weight:normal'>  </span></strong>If
+you and Microsoft have a dispute, you and Microsoft agree to try for 60 days to
+resolve it informally. If you and Microsoft can’t, you and Microsoft agree to <b>binding
+individual arbitration before the American Arbitration Association</b> under
+the Federal Arbitration Act (“FAA”), and <b>not to sue in court in front of a
+judge or jury</b>. Instead, a neutral arbitrator will decide. <b>Class action
+lawsuits, class-wide arbitrations, private attorney-general actions,</b> and
+any other proceeding where someone acts in a representative capacity <b>are not
+allowed</b>; nor is combining individual proceedings without the consent of all
+parties. The complete Arbitration Agreement contains more terms and is at <a
+href="http://aka.ms/arb-agreement-1">http://aka.ms/arb-agreement-1</a>. You and
+Microsoft agree to these terms.</h1>
+
+<h1><b><span style='font-size:10.0pt'>11.<span style='font:7.0pt "Times New Roman"'>
+</span></span></b><b>ENTIRE AGREEMENT.</b> This agreement, and any other terms
+Microsoft may provide for supplements, updates, or third-party applications, is
+the entire agreement for the software.</h1>
+
+<h1><a name="OLE_LINK24"></a><a name="OLE_LINK23"><b><span style='font-size:
+10.0pt'>12.<span style='font:7.0pt "Times New Roman"'> </span></span></b><b>APPLICABLE
+LAW AND PLACE TO RESOLVE DISPUTES.</b> If you acquired the software in the
+United States or Canada, the laws of the state or province where you live (or,
+if a business, where your principal place of business is located) govern the
+interpretation of this agreement, claims for its breach, and all other claims
+(including consumer protection, unfair competition, and tort claims),
+regardless of conflict of laws principles, except that the FAA governs
+everything related to arbitration. If you acquired the software in any other
+country, its laws apply, except that the FAA governs everything related to
+arbitration. If U.S. federal jurisdiction exists, you and Microsoft consent to
+exclusive jurisdiction and venue in the federal court in King County,
+Washington for all disputes heard in court (excluding arbitration). If not, you
+and Microsoft consent to exclusive jurisdiction and venue in the Superior Court
+of King County, Washington for all disputes heard in court (excluding
+arbitration).</a></h1>
+
+<h1><b><span style='font-size:10.0pt'>13.<span style='font:7.0pt "Times New Roman"'>
+</span></span></b><b>CONSUMER RIGHTS; REGIONAL VARIATIONS.</b> This agreement
+describes certain legal rights. You may have other rights, including consumer
+rights, under the laws of your state or country. Separate and apart from your
+relationship with Microsoft, you may also have rights with respect to the party
+from which you acquired the software. This agreement does not change those
+other rights if the laws of your state or country do not permit it to do so.
+For example, if you acquired the software in one of the below regions, or
+mandatory country law applies, then the following provisions apply to you:</h1>
+
+<p class=MsoListParagraph style='text-indent:-.25in'><span style='font-family:
+"Times New Roman",serif'>a)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Australia.<span style='font-weight:normal'> You have statutory
+guarantees under the Australian Consumer Law and nothing in this agreement is
+intended to affect those rights.</span></p>
+
+<p class=MsoListParagraph style='text-indent:-.25in'><span style='font-family:
+"Times New Roman",serif'>b)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Canada.<span style='font-weight:normal'> If you acquired this
+software in Canada, you may stop receiving updates by turning off the automatic
+update feature, disconnecting your device from the Internet (if and when you
+re-connect to the Internet, however, the software will resume checking for and
+installing updates), or uninstalling the software. The product documentation,
+if any, may also specify how to turn off updates for your specific device or
+software.</span></p>
+
+<p class=MsoListParagraphCxSpLast style='text-indent:-.25in'><span
+style='font-family:"Times New Roman",serif'>c)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Germany and Austria.</p>
+
+<p class=MsoNormal style='margin-left:.75in;text-indent:-.25in'>i.    Warranty.<span
+style='font-weight:normal'> The properly licensed software will perform substantially
+as described in any Microsoft materials that accompany the software. However,
+Microsoft gives no contractual guarantee in relation to the licensed software.</span></p>
+
+<p class=MsoNormal style='margin-left:.75in;text-indent:-.25in'>ii.   Limitation
+of Liability.<span style='font-weight:normal'> In case of intentional conduct,
+gross negligence, claims based on the Product Liability Act, as well as, in
+case of death or personal or physical injury, Microsoft is liable according to
+the statutory law.</span></p>
+
+<h1 style='margin-left:.5in;text-indent:0in'>Subject to the foregoing clause
+ii., Microsoft will only be liable for slight negligence if Microsoft is in
+breach of such material contractual obligations, the fulfillment of which
+facilitate the due performance of this agreement, the breach of which would
+endanger the purpose of this agreement and the compliance with which a party
+may constantly trust in (so-called &quot;cardinal obligations&quot;). In other
+cases of slight negligence, Microsoft will not be liable for slight negligence.</h1>
+
+<h1><b><span style='font-size:10.0pt'>14.<span style='font:7.0pt "Times New Roman"'>
+</span></span></b><b>DISCLAIMER OF WARRANTY. THE SOFTWARE IS LICENSED “AS IS.”
+YOU BEAR THE RISK OF USING IT. MICROSOFT GIVES NO EXPRESS WARRANTIES,
+GUARANTEES, OR CONDITIONS. TO THE EXTENT PERMITTED UNDER APPLICABLE LAWS,
+MICROSOFT EXCLUDES ALL IMPLIED WARRANTIES, INCLUDING MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.</b></h1>
+
+<h1><b><span style='font-size:10.0pt'>15.<span style='font:7.0pt "Times New Roman"'>
+</span></span></b><b>LIMITATION ON AND EXCLUSION OF DAMAGES. IF YOU HAVE ANY
+BASIS FOR RECOVERING DAMAGES DESPITE <a name="OLE_LINK8"></a><a name="OLE_LINK7">THE
+PRECEDING </a>DISCLAIMER OF WARRANTY</b><b>, YOU CAN RECOVER FROM MICROSOFT AND
+ITS SUPPLIERS ONLY DIRECT DAMAGES UP TO U.S. $5.00. YOU CANNOT RECOVER ANY
+OTHER DAMAGES, INCLUDING CONSEQUENTIAL, LOST PROFITS, SPECIAL, INDIRECT, OR
+INCIDENTAL DAMAGES.</b></h1>
+
+<p class=Body1>This limitation applies to (a) anything related to the software,
+services, content (including code) on third party Internet sites, or third
+party applications; and (b) claims for breach of contract, warranty, guarantee,
+or condition; strict liability, negligence, or other tort; or any other claim;
+in each case to the extent permitted by applicable law.</p>
+
+<p class=Body1>It also applies even if Microsoft knew or should have known
+about the possibility of the damages. The above limitation or exclusion may not
+apply to you because your state, province, or country may not allow the
+exclusion or limitation of incidental, consequential, or other damages.</p>
+
+<p class=Body1>&nbsp;</p>
+
+<p class=Body1 style='margin-left:0in'>Please note: As this software is
+distributed in Canada, some of the clauses in this agreement are provided below
+in French.</p>
+
+<p class=Body1 style='margin-left:0in'>Remarque: Ce logiciel étant distribué au
+Canada, certaines des clauses dans ce contrat sont fournies ci-dessous en
+français.</p>
+
+<p class=Body1 style='margin-left:0in'>EXONÉRATION DE GARANTIE. Le logiciel
+visé par une licence est offert « tel quel ». Toute utilisation de ce logiciel
+est à votre seule risque et péril. Microsoft n’accorde aucune autre garantie
+expresse. Vous pouvez bénéficier de droits additionnels en vertu du droit local
+sur la protection des consommateurs, que ce contrat ne peut modifier. La ou
+elles sont permises par le droit locale, les garanties implicites de qualité
+marchande, d’adéquation à un usage particulier et d’absence de contrefaçon sont
+exclues.</p>
+
+<p class=Body1 style='margin-left:0in'>LIMITATION DES DOMMAGES-INTÉRÊTS ET
+EXCLUSION DE RESPONSABILITÉ POUR LES DOMMAGES. Vous pouvez obtenir de Microsoft
+et de ses fournisseurs une indemnisation en cas de dommages directs uniquement
+à hauteur de 5,00 $ US. Vous ne pouvez prétendre à aucune indemnisation pour
+les autres dommages, y compris les dommages spéciaux, indirects ou accessoires
+et pertes de bénéfices.</p>
+
+<p class=Body1 style='margin-left:0in'>Cette limitation concerne:</p>
+
+<p class=Body1 style='margin-left:.25in;text-indent:-.25in'>•    tout ce qui
+est relié au logiciel, aux services ou au contenu (y compris le code) figurant
+sur des sites Internet tiers ou dans des programmes tiers; et</p>
+
+<p class=Body1 style='margin-left:.25in;text-indent:-.25in'>•    les
+réclamations au titre de violation de contrat ou de garantie, ou au titre de
+responsabilité stricte, de négligence ou d’une autre faute dans la limite
+autorisée par la loi en vigueur.</p>
+
+<p class=Body1 style='margin-left:0in'>Elle s’applique également, même si
+Microsoft connaissait ou devrait connaître l’éventualité d’un tel dommage. Si
+votre pays n’autorise pas l’exclusion ou la limitation de responsabilité pour
+les dommages indirects, accessoires ou de quelque nature que ce soit, il se
+peut que la limitation ou l’exclusion ci-dessus ne s’appliquera pas à votre
+égard.</p>
+
+<p class=Body1 style='margin-left:0in'>EFFET JURIDIQUE. Le présent contrat
+décrit certains droits juridiques. Vous pourriez avoir d’autres droits prévus
+par les lois de votre pays. Le présent contrat ne modifie pas les droits que
+vous confèrent les lois de votre pays si celles-ci ne le permettent pas.</p>
+
+</div>
+
+</body>
+
+</html>

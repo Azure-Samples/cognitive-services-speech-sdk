@@ -8,7 +8,7 @@ These license terms are an agreement between you and Microsoft Corporation (or o
 
 ## 1. INSTALLATION AND USE RIGHTS.
 
-a) **General.** You may install and use any number of copies of the software to develop and test your applications and integration with Cognitive Services Speech Services.
+a) **General.** You may install and use any number of copies of the software to develop and test your applications integration of API(s) used to access Cognitive Services Speech Services.
 
 b) **Third Party Software.** The software may include third party applications that are licensed to you under this agreement or under their own terms. License terms, notices, and acknowledgments, if any, for the third party applications may be accessible online at http://aka.ms/thirdpartynotices or in an accompanying notices file. Even if such applications are governed by other agreements, the disclaimer, limitations on, and exclusions of damages below also apply to the extent allowed by applicable law.
 
@@ -20,7 +20,7 @@ The software may contain code you are permitted to distribute (i.e. make availab
 
 **a) Distribution Rights.** The code and test files described below are distributable if included with the software.
 
-i. REDIST.TXT Files. You may copy and distribute the object code form of code listed on the REDIST list in the software, if any, or in the notice files;
+i. REDIST.TXT Files. You may copy and distribute the object code form of code listed on the REDIST list in the software, if any; and
 
 ii. Third Party Distribution. You may permit distributors of your applications to copy and distribute any of this distributable code you elect to distribute with your applications.
 
