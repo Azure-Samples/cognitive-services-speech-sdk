@@ -11,6 +11,7 @@
 #include <memory>
 #include <string>
 #include <speechapi_cxx_common.h>
+#include <speechapi_cxx_string_helpers.h>
 #include <speechapi_c.h>
 #include <speechapi_cxx_recognition_async_recognizer.h>
 #include <speechapi_cxx_speech_recognition_eventargs.h>
@@ -132,7 +133,7 @@ public:
     /// <summary>
     /// Sets the authorization token that will be used for connecting the server.
     /// </summary>
-    /// <param name="value">A string that represents the endpoint id.</param>
+    /// <param name="token">The authorization token.</param>
     void SetAuthorizationToken(const SPXSTRING& token)
     {
         Properties.SetProperty(PropertyId::SpeechServiceAuthorization_Token, token);

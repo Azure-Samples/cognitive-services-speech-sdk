@@ -20,7 +20,12 @@ namespace Speech {
 
 // Forward declaration for friends.
 namespace Translation { class TranslationRecognizer; }
+
+/*! \cond PRIVATE */
+
 namespace Impl { class ISpxRecognizerEvents; }
+
+/*! \endcond */
 
 /// <summary>
 /// Clients can connect to the event signal to receive events, or disconnect from the event signal to stop receiving events.
@@ -100,9 +105,9 @@ public:
     /// <summary>
     /// Connects given callback function to the event signal, to be invoked when the event is signalled.
     /// </summary>
-    /// <remark>
+    /// <remarks>
     /// When the number of connected clients changes from zero to one, the connect callback will be called, if provided.
-    /// </remark>
+    /// </remarks>
     /// <param name="callback">Callback to connect.</param>
     void Connect(CallbackFunction callback)
     {
@@ -118,9 +123,9 @@ public:
     /// <summary>
     /// Disconnects given callback.
     /// <summary>
-    /// <remark>
+    /// <remarks>
     /// When the number of connected clients changes from one to zero, the disconnect callback will be called, if provided.
-    /// </remark>
+    /// </remarks>
     void Disconnect(CallbackFunction callback)
     {
         std::unique_lock<std::recursive_mutex> lock(m_mutex);

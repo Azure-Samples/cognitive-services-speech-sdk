@@ -12,6 +12,7 @@
 #include <string>
 #include <map>
 #include <speechapi_cxx_common.h>
+#include <speechapi_cxx_string_helpers.h>
 #include <speechapi_c.h>
 #include <speechapi_cxx_recognition_async_recognizer.h>
 #include <speechapi_cxx_translation_result.h>
@@ -34,7 +35,9 @@ public:
      /// Create a translation recognizer from a translation config and an audio config.
      /// Users should use this function to create a translation recognizer.
      /// </summary>
-    /// <param name="hreco">The shared smart pointer of the created translation recognizer. </param>
+    /// <param name="speechconfig">Speech translation config.</param>
+    /// <param name="audioInput">Audio config.</param>
+    /// <returns>The shared smart pointer of the created translation recognizer.</returns>
     static std::shared_ptr<TranslationRecognizer> FromConfig(std::shared_ptr<SpeechTranslationConfig> speechconfig, std::shared_ptr<Audio::AudioConfig> audioInput = nullptr)
     {
         SPXRECOHANDLE hreco { SPXHANDLE_INVALID };
@@ -76,7 +79,7 @@ public:
 
     /// <summary>
     /// Starts translation recognition as an asynchronous operation, and stops after the first utterance is recognized.
-    /// The asynchronous operation returns <see creaf="TranslationRecognitionResult"/> as result.
+    /// The asynchronous operation returns <see cref="TranslationRecognitionResult"/> as result.
     /// Note: RecognizeOnceAsync() returns when the first utterance has been recognized, 
     /// so it is suitable only for single shot recognition like command or query.
     /// For long-running recognition, use StartContinuousRecognitionAsync() instead.

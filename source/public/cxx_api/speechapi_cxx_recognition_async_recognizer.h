@@ -430,8 +430,6 @@ protected:
     SPXASYNCHANDLE m_hasyncStartKeyword;
     SPXASYNCHANDLE m_hasyncStopKeyword;
 
-    /*! \endcond */
-
     template <typename Handle, typename Config>
     static Handle HandleOrInvalid(std::shared_ptr<Config> audioInput)
     {
@@ -439,6 +437,8 @@ protected:
             ? (Handle)SPXHANDLE_INVALID
             : (Handle)(*audioInput.get());
     }
+
+    /*! \endcond */
 
 private:
 

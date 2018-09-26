@@ -64,11 +64,14 @@ public:
 
 protected:
 
+    /*! \cond PROTECTED */
+
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
     explicit AudioStreamFormat(SPXAUDIOSTREAMFORMATHANDLE hformat) : m_hformat(hformat) { }
 
+    /*! \endcond */
 
 private:
 

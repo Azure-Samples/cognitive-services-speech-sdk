@@ -81,6 +81,8 @@ public:
 
 protected:
 
+    /*! \cond PROTECTED */
+
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
@@ -90,6 +92,8 @@ protected:
     /// Internal helper method to get the audio stream format handle.
     /// </summary>
     static SPXAUDIOSTREAMHANDLE GetStreamHandle(std::shared_ptr<AudioInputStream> stream) { return (SPXAUDIOSTREAMHANDLE)(*stream.get()); }
+
+    /*! \endcond */
 
 private:
 

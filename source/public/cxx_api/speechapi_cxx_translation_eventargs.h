@@ -5,6 +5,7 @@
 
 #pragma once
 #include <speechapi_cxx_common.h>
+#include <speechapi_cxx_string_helpers.h>
 #include <speechapi_cxx_session_eventargs.h>
 #include <speechapi_cxx_translation_result.h>
 
@@ -30,7 +31,7 @@ public:
     /// <summary>
     /// It is intended for internal use only. It creates an instance of <see cref="TranslationRecognitionEventArgs"/>.
     /// </summary>
-    /// <param name="resultHandle">The handle returned by recognizer in C-API.</param>
+    /// <param name="hevent">The handle returned by recognizer in C-API.</param>
     explicit TranslationRecognitionEventArgs(SPXEVENTHANDLE hevent) :
         RecognitionEventArgs(hevent),
         m_hevent(hevent),
@@ -59,10 +60,15 @@ public:
 #else
 protected:
 #endif
+
+    /*! \cond PROTECTED */
+
     /// <summary>
     /// Contains the translation text result.
     /// </summary>
     std::shared_ptr<TranslationRecognitionResult> GetResult() const { return m_result; }
+
+    /*! \endcond */
 
 private:
     DISABLE_DEFAULT_CTORS(TranslationRecognitionEventArgs);
@@ -161,7 +167,7 @@ public:
     /// <summary>
     /// It is intended for internal use only. It creates an instance of <see cref="TranslationSynthesisEventArgs"/>.
     /// </summary>
-    /// <param name="resultHandle">The handle returned by recognizer in C-API.</param>
+    /// <param name="hevent">The handle returned by recognizer in C-API.</param>
     explicit TranslationSynthesisEventArgs(SPXEVENTHANDLE hevent) :
         SessionEventArgs(hevent),
         m_hevent(hevent),

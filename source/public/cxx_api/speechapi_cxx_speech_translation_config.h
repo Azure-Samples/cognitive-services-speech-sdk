@@ -54,7 +54,7 @@ public:
     /// Only the parameters that are not specified in the endpoint URL can be set by other APIs.
     /// </summary>
     /// <param name="endpoint">The service endpoint to connect to.</param>
-    /// <param name="subscriptionKey">The subscription key.</param>
+    /// <param name="subscription">The subscription key.</param>
     static std::shared_ptr<SpeechTranslationConfig> FromEndpoint(const SPXSTRING& endpoint, const SPXSTRING& subscription)
     {
         SPXSPEECHCONFIGHANDLE hconfig = SPXHANDLE_INVALID;

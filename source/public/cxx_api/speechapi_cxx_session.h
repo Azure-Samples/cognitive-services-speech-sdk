@@ -12,12 +12,13 @@
 #include <string>
 #include <speechapi_cxx_common.h>
 #include <speechapi_c.h>
-#include<speechapi_cxx_properties.h>
+#include <speechapi_cxx_properties.h>
 
 namespace Microsoft {
 namespace CognitiveServices {
 namespace Speech {
 
+/*! \cond PRIVATE */
 
 class Session
 {
@@ -80,5 +81,6 @@ private:
     SPXSESSIONHANDLE m_hsession;
 };
 
+/*! \endcond */
 
 } } } // Microsoft::CognitiveServices::Speech

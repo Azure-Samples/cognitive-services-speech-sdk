@@ -93,6 +93,8 @@ public:
 
 protected:
 
+    /*! \cond PROTECTED */
+
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
@@ -117,6 +119,8 @@ protected:
     /// Internal member variable that holds the smart handle.
     /// </summary>
     SmartHandle<SPXAUDIOSTREAMHANDLE, &audio_stream_release> m_haudioStream;
+
+    /*! \endcond */
 
 private:
 
@@ -178,11 +182,14 @@ public:
 
 protected:
 
+    /*! \cond PROTECTED */
+
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
     explicit PushAudioInputStream(SPXAUDIOSTREAMHANDLE haudioStream) : AudioInputStream(haudioStream) { }
 
+    /*! \endcond */
 
 private:
 
@@ -314,6 +321,8 @@ public:
 
 protected:
 
+    /*! \cond PROTECTED */
+
     /// <summary>
     /// Internal constructor. Creates a new instance using the provided handle.
     /// </summary>
@@ -339,6 +348,8 @@ protected:
         ReadCallbackFunction_Type m_readCallback;
         CloseCallbackFunction_Type m_closeCallback;
     };
+
+    /*! \endcond */
 
 private:
 

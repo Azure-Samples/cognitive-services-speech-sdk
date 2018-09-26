@@ -51,7 +51,7 @@ public:
     /// Creates an intent trigger using the specified LanguageUnderstandingModel and an intent name.
     /// </summary>
     /// <param name="model">The LanguageUnderstandingModel to create an intent trigger for.</param>
-    /// <param name="model">The intent name to create an intent trigger for.</param>
+    /// <param name="intentName">The intent name to create an intent trigger for.</param>
     /// <returns>A shared pointer to an intent trigger.</returns>
     static std::shared_ptr<IntentTrigger> From(std::shared_ptr<LanguageUnderstandingModel> model, const SPXSTRING& intentName)
     {

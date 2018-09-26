@@ -44,6 +44,8 @@ public:
 
 protected:
 
+    /*! \cond PROTECTED */
+
     /// <summary>
     /// Extract offset from given event handle <paramref name="hevent"/>
     /// </summary>
@@ -53,6 +55,8 @@ protected:
         SPX_THROW_ON_FAIL(recognizer_recognition_event_get_offset(hevent, &offset));
         return offset;
     }
+
+    /*! \endcond */
 
 private:
 

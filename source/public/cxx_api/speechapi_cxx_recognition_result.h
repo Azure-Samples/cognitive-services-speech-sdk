@@ -26,6 +26,8 @@ class RecognitionResult
 {
 private:
 
+    /*! \cond PRIVATE */
+
     class PrivatePropertyCollection : public PropertyCollection
     {
     public:
@@ -41,6 +43,8 @@ private:
     };
 
     PrivatePropertyCollection m_properties;
+
+    /*! \endcond */
 
 public:
 

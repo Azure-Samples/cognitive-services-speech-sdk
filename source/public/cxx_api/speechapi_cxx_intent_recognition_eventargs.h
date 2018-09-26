@@ -8,6 +8,7 @@
 #pragma once
 #include <string>
 #include <speechapi_cxx_common.h>
+#include <speechapi_cxx_string_helpers.h>
 #include <speechapi_cxx_recognition_eventargs.h>
 #include <spxdebug.h>
 
@@ -62,10 +63,15 @@ public:
 #else
 protected:
 #endif
+
+    /*! \cond PROTECTED */
+
     /// <summary>
     /// Intent recognition event result.
     /// </summary>
     std::shared_ptr<IntentRecognitionResult> GetResult() const { return m_result; }
+
+    /*! \endcond */
 
 private:
 
