@@ -680,6 +680,7 @@ phases:
         /test/tests/input/audio/whatstheweatherlike.wav \
         java -cp ./public_samples/quickstart/java-jre/target/quickstart-eclipse-1.0.0-SNAPSHOT.jar:/test/"$(JarName)" speechsdk.quickstart.Main
     displayName: Test quickstart-jre
+
 - phase: NuGet
   dependsOn: [Pre, LinuxBuild, LinuxX86Build, WindowsBuild, WindowsUwpBuild]
   condition: and(succeeded(), contains(dependencies.Pre.outputs['var.SPEECHSDK_BUILD_PHASES'], ' WindowsNuGet '))
@@ -835,7 +836,6 @@ phases:
             LanguageUnderstandingServiceRegion westus
             LanguageUnderstandingHomeAutomationAppId $(TEST_INTENT_HOMEAUTOMATION_APPID)
           );
-
           $keysRe = "(?:\\b" . (join "\\b|\\b", keys %A) . "\\b)";
           $keysRe = qr/$keysRe/;
         }
@@ -1526,41 +1526,48 @@ phases:
   queue:
     name: Hosted macOS Preview
     timeoutInMinutes: 30
+  variables:
+    ArtifactOut: $(Build.ArtifactStagingDirectory)/Out
   steps:
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
+  - bash: ./ci/set-variables.sh
     displayName: Set variables
-    inputs:
-      type: FilePath
-      scriptPath: 'ci/set-variables.sh'
-  - task: ms-devlabs.utilitytasks.task-Shellpp.Shell++@0
-    inputs:
-      type: InlineScript
-      script: |
-        set -e -o pipefail
-        brew install doxygen
-        cd ci/doxygen
-        mkdir "$(Build.ArtifactStagingDirectory)/Doxygen"
-        for lang in c cpp csharp java; do
-          (
-            cat ${lang}_doxygen.txt;
-            echo PROJECT_NUMBER=$(SPEECHSDK_SEMVER2);
-            echo 'WARN_FORMAT="##''vso[task.logissue type=warning;sourcepath=$file;linenumber=$line;columnnumber=1]$text"';
-            echo OUTPUT_DIRECTORY=$(Build.ArtifactStagingDirectory)/Doxygen
-          ) | doxygen -
-        done
-        git clone https://github.com/sourcey/moxygen.git
-        cd moxygen
-        git checkout c00d16803a6dfc40796cd4b76271c481ed865243
-        git apply ../0001-Provide-shortname-provide-plain.patch
-        npm install
-        cd ..
-        node moxygen/bin/moxygen.js -o cppapi.md -t ./moxygen_template/cpp -a $(Build.ArtifactStagingDirectory)/Doxygen/cppxml
-        powershell -NoProfile -NoLogo -ExecutionPolicy Bypass -NonInteractive doxmox2docs.ps1 \
-          -DoxygenIndexXml $(Build.ArtifactStagingDirectory)/Doxygen/cppxml/index.xml \
-          -MoxygenApiMd cppapi.md \
-          -OutputDir $(Build.ArtifactStagingDirectory)/Doxygen/cppmd
+  - bash: |
+      set -e -o pipefail
+      cat "$0"
+      ASTOUT="$(ArtifactOut)/objc/ast"
+      MDOUT="$(ArtifactOut)/objc/md"
+      mkdir -p "$ASTOUT" "$MDOUT"
+      clang -fsyntax-only -x objective-c -Xclang -ast-dump source/bindings/objective-c/public/SPXSpeechApi.h \
+        1> "$ASTOUT/stdout.txt" 2> "$ASTOUT/stderr.txt"
+      cd "$MDOUT"
+      perl "$(Build.Repository.LocalPath)/ci/objc-docs-ast-to-md.pl" "$ASTOUT/stdout.txt"
+    displayName: Create Objective-C reference docs
+  - bash: |
+      set -e -o pipefail
+      brew install doxygen
+      cd ci/doxygen
+      mkdir -p "$(ArtifactOut)"
+      for lang in c cpp csharp java; do
+        (
+          cat ${lang}_doxygen.txt;
+          echo PROJECT_NUMBER=$(SPEECHSDK_SEMVER2);
+          echo 'WARN_FORMAT="##''vso[task.logissue type=warning;sourcepath=$file;linenumber=$line;columnnumber=1]$text"';
+          echo OUTPUT_DIRECTORY="$(ArtifactOut)"
+        ) | doxygen -
+      done
+      git clone https://github.com/sourcey/moxygen.git
+      cd moxygen
+      git checkout c00d16803a6dfc40796cd4b76271c481ed865243
+      git apply ../0001-Provide-shortname-provide-plain.patch
+      npm install
+      cd ..
+      node moxygen/bin/moxygen.js -o cppapi.md -t ./moxygen_template/cpp -a "$(ArtifactOut)/cppxml"
+      powershell -NoProfile -NoLogo -ExecutionPolicy Bypass -NonInteractive doxmox2docs.ps1 \
+        -DoxygenIndexXml "$(ArtifactOut)/cppxml/index.xml" \
+        -MoxygenApiMd cppapi.md \
+        -OutputDir "$(ArtifactOut)/cppmd"
   - task: PublishBuildArtifacts@1
     inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)/Doxygen'
+      PathtoPublish: $(ArtifactOut)
       ArtifactName: Doxygen
       publishLocation: Container
