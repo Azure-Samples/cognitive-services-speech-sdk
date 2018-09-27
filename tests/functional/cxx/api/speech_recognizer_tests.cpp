@@ -652,3 +652,37 @@ TEST_CASE("Speech Recognizer is thread-safe.", "[api][cxx]")
         UNUSED(future);
     }
 }
+
+TEST_CASE("Speech Recognizer SpeechConfig validations", "[api][cxx]")
+{
+    SPX_TRACE_SCOPE(__FUNCTION__, __FUNCTION__);
+
+    SPXTEST_SECTION("Check that FromEndpoint raises an exception when called with illegal values")
+    {
+        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
+
+        CHECK_THROWS(SpeechConfig::FromEndpoint("", ""));
+        CHECK_THROWS(SpeechConfig::FromEndpoint("", "illegal-subscription"));
+        CHECK_NOTHROW(SpeechConfig::FromEndpoint("illegal-endpoint", "illegal-subscription"));
+    }
+
+    SPXTEST_SECTION("Check that FromSubscription raises an exception when called with illegal values")
+    {
+        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
+
+        CHECK_THROWS(SpeechConfig::FromSubscription("", ""));
+        CHECK_THROWS(SpeechConfig::FromSubscription("", "illegal-region"));
+        CHECK_THROWS(SpeechConfig::FromSubscription("illegal-subscription", ""));
+        CHECK_NOTHROW(SpeechConfig::FromSubscription("illegal-subscription", "illegal-region"));
+    }
+
+    SPXTEST_SECTION("Check that FromAuthorizationToken raises an exception when called with illegal values")
+    {
+        SPX_TRACE_VERBOSE("%s: line=%d", __FUNCTION__, __LINE__);
+
+        CHECK_THROWS(SpeechConfig::FromAuthorizationToken("", ""));
+        CHECK_THROWS(SpeechConfig::FromAuthorizationToken("", "illegal-region"));
+        CHECK_THROWS(SpeechConfig::FromAuthorizationToken("illegal-token", ""));
+        CHECK_NOTHROW(SpeechConfig::FromAuthorizationToken("illegal-token", "illegal-region"));
+    }
+}

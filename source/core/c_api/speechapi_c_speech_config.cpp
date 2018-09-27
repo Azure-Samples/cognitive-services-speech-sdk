@@ -18,8 +18,8 @@ SPXAPI_(bool) speech_config_is_handle_valid(SPXSPEECHCONFIGHANDLE hconfig)
 
 SPXAPI speech_config_from_subscription(SPXSPEECHCONFIGHANDLE* hconfig, const char* subscription, const char* region)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, subscription == nullptr);
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, region == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, subscription == nullptr || !(*subscription));
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, region == nullptr || !(*region));
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hconfig == nullptr);
 
     SPXAPI_INIT_HR_TRY(hr)
@@ -37,8 +37,8 @@ SPXAPI speech_config_from_subscription(SPXSPEECHCONFIGHANDLE* hconfig, const cha
 
 SPXAPI speech_config_from_authorization_token(SPXSPEECHCONFIGHANDLE* hconfig, const char* authToken, const char* region)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, authToken == nullptr);
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, region == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, authToken == nullptr || !(*authToken));
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, region == nullptr || !(*region));
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hconfig == nullptr);
 
     SPXAPI_INIT_HR_TRY(hr)
@@ -56,7 +56,7 @@ SPXAPI speech_config_from_authorization_token(SPXSPEECHCONFIGHANDLE* hconfig, co
 
 SPXAPI speech_config_from_endpoint(SPXSPEECHCONFIGHANDLE* hconfig, const char* endpoint, const char* subscription)
 {
-    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, endpoint == nullptr);
+    SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, endpoint == nullptr || !(*endpoint));
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, subscription == nullptr);
     SPX_RETURN_HR_IF(SPXERR_INVALID_ARG, hconfig == nullptr);
 
