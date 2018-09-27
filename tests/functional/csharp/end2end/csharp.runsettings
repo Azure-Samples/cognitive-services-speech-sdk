@@ -1,6 +1,10 @@
 <RunSettings>
     <MSTestV2>
         <TestTimeout>450000</TestTimeout>
+        <Parallelize>
+            <Workers>2</Workers>
+            <Scope>MethodLevel</Scope>
+        </Parallelize>
     </MSTestV2>
     <TestRunParameters>
         <Parameter name="UnifiedSpeechSubscriptionKey" value=""/>
