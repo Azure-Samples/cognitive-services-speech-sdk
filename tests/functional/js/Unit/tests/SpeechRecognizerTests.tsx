@@ -3,6 +3,9 @@
 // licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 import * as sdk from "../../../../../source/bindings/js/microsoft.cognitiveservices.speech.sdk";
+import { ConsoleLoggingListener } from "../../../../../source/bindings/js/src/common.browser/Exports";
+import { Events, EventType } from "../../../../../source/bindings/js/src/common/Exports";
+
 import { Settings } from "./Settings";
 import { WaveFileAudioInput } from "./WaveFileAudioInputStream";
 
@@ -20,7 +23,13 @@ let eventIdentifier: number;
 beforeAll(() => {
     // override inputs, if necessary
     Settings.LoadSettings();
+    Events.Instance.AttachListener(new ConsoleLoggingListener(EventType.Debug));
 });
+
+// Test cases are run linerally, the only other mechanism to demark them in the output is to put a console line in each case and
+// report the name.
+// tslint:disable-next-line:no-console
+beforeEach(() => console.info("---------------------------------------Starting test case-----------------------------------"));
 
 test.skip("testDispose", () => {
     // todo: make dispose method public
@@ -118,7 +127,7 @@ test("testGetOutputFormatDetailed", (done: jest.DoneCallback) => {
         s.close();
         done();
     }, (error: string) => {
-        setTimeout(() => done(), 1);
+        setTimeout(done, 1);
         fail(error);
     });
 });
@@ -170,7 +179,7 @@ test("testRecognizeOnceAsync1", (done: jest.DoneCallback) => {
         (error: string) => {
             r.close();
             s.close();
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             fail(error);
         });
 });
@@ -295,7 +304,7 @@ test("testRecognizeOnceAsync2", (done: jest.DoneCallback) => {
         }, (error: string) => {
             r.close();
             s.close();
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             fail(error);
         });
 
@@ -329,12 +338,12 @@ test("testStopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
                     done();
                 },
                 (err: string) => {
-                    setTimeout(() => done(), 1);
+                    setTimeout(done, 1);
                     fail(err);
                 });
         }),
         (err: string) => {
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             fail(err);
         });
 });
@@ -365,7 +374,7 @@ test("testStartStopContinuousRecognitionAsync", (done: jest.DoneCallback) => {
         (error: string) => {
             r.close();
             s.close();
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             fail(error);
         });
 });
@@ -473,7 +482,7 @@ test("PushStream4KNoDelay", (done: jest.DoneCallback) => {
         (error: string) => {
             r.close();
             s.close();
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             fail(error);
         });
 });
@@ -507,7 +516,7 @@ test("PushStream4KPostRecognizePush", (done: jest.DoneCallback) => {
         (error: string) => {
             r.close();
             s.close();
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             fail(error);
         });
 
@@ -571,7 +580,7 @@ test("PullStreamFullFill", (done: jest.DoneCallback) => {
         (error: string) => {
             r.close();
             s.close();
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             fail(error);
         });
 });
@@ -654,7 +663,7 @@ test("InitialSilenceTimeout", (done: jest.DoneCallback) => {
     let oneReport: boolean = false;
 
     r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs) => {
-        setTimeout(() => done(), 1);
+        setTimeout(done, 1);
         fail(e.errorDetails);
     };
 
@@ -696,7 +705,7 @@ test("InitialSilenceTimeout", (done: jest.DoneCallback) => {
         (error: string) => {
             r.close();
             s.close();
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             fail(error);
         });
 }, 7500);
@@ -730,7 +739,7 @@ test.skip("InitialBabbleTimeout", (done: jest.DoneCallback) => {
         (error: string) => {
             r.close();
             s.close();
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             fail(error);
         });
 });
@@ -836,7 +845,7 @@ test("PullStreamSendHalfTheFile", (done: jest.DoneCallback) => {
         (error: string) => {
             r.close();
             s.close();
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             fail(error);
         });
 });
@@ -874,7 +883,7 @@ test("burst of silence", (done: jest.DoneCallback) => {
         (error: string) => {
             r.close();
             s.close();
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             fail(error);
         });
 });
@@ -932,7 +941,7 @@ test("InitialSilenceTimeout Continous", (done: jest.DoneCallback) => {
     expect(r instanceof sdk.Recognizer);
 
     r.canceled = (o: sdk.Recognizer, e: sdk.SpeechRecognitionCanceledEventArgs) => {
-        setTimeout(() => done(), 1);
+        setTimeout(done, 1);
         fail(e.errorDetails);
     };
 
@@ -950,11 +959,68 @@ test("InitialSilenceTimeout Continous", (done: jest.DoneCallback) => {
 
     /* tslint:disable:no-empty */
     r.startContinuousRecognitionAsync(() => {
-           },
+    },
         (error: string) => {
             r.close();
             s.close();
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             fail(error);
         });
-}, 7500);
+}, 10000);
+
+test("Audio Config is optional", () => {
+    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    expect(s).not.toBeUndefined();
+    s.speechRecognitionLanguage = "en-US";
+
+    const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s);
+    expect(r instanceof sdk.Recognizer).toEqual(true);
+
+    r.close();
+    s.close();
+});
+
+test("Default mic is used when audio config is not specified.", () => {
+    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    expect(s).not.toBeUndefined();
+    s.speechRecognitionLanguage = "en-US";
+
+    const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s);
+    expect(r instanceof sdk.Recognizer).toEqual(true);
+    // Node.js doesn't have a microphone natively. So we'll take the specific message that indicates that microphone init failed as evidence it was attempted.
+    r.recognizeOnceAsync(() => fail("RecognizeOnceAsync returned success when it should have failed"),
+        (error: string): void => {
+            expect(error).toEqual("Error: Browser does not support Web Audio API (AudioContext is not available).");
+        });
+
+    r.startContinuousRecognitionAsync(() => fail("startContinuousRecognitionAsync returned success when it should have failed"),
+        (error: string): void => {
+            expect(error).toEqual("Error: Browser does not support Web Audio API (AudioContext is not available).");
+        });
+});
+
+test("Using disposed recognizer invokes error callbacks.", () => {
+    const s: sdk.SpeechConfig = sdk.SpeechConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    expect(s).not.toBeUndefined();
+    s.speechRecognitionLanguage = "en-US";
+
+    const r: sdk.SpeechRecognizer = new sdk.SpeechRecognizer(s);
+    expect(r instanceof sdk.Recognizer).toEqual(true);
+
+    r.close();
+
+    r.recognizeOnceAsync(() => fail("RecognizeOnceAsync on closed recognizer called success callback"),
+        (error: string): void => {
+            expect(error).toEqual("Error: the object is already disposed");
+        });
+
+    r.startContinuousRecognitionAsync(() => fail("startContinuousRecognitionAsync on closed recognizer called success callback"),
+        (error: string): void => {
+            expect(error).toEqual("Error: the object is already disposed");
+        });
+
+    r.stopContinuousRecognitionAsync(() => fail("stopContinuousRecognitionAsync on closed recognizer called success callback"),
+        (error: string): void => {
+            expect(error).toEqual("Error: the object is already disposed");
+        });
+});

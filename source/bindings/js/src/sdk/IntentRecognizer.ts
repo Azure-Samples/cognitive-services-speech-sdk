@@ -64,9 +64,9 @@ export class IntentRecognizer extends Recognizer {
      * @param {AudioConfig} audioConfig - An optional audio input config associated with the recognizer
      */
     public constructor(speechConfig: SpeechConfig, audioConfig?: AudioConfig) {
-        Contracts.throwIfNull(speechConfig, "speechConfig");
+        Contracts.throwIfNullOrUndefined(speechConfig, "speechConfig");
         const configImpl: SpeechConfigImpl = speechConfig as SpeechConfigImpl;
-        Contracts.throwIfNull(configImpl, "speechConfig");
+        Contracts.throwIfNullOrUndefined(configImpl, "speechConfig");
 
         super(audioConfig);
 
@@ -160,30 +160,41 @@ export class IntentRecognizer extends Recognizer {
      * @param err - Callback invoked in case of an error.
      */
     public recognizeOnceAsync(cb?: (e: IntentRecognitionResult) => void, err?: (e: string) => void): void {
-        Contracts.throwIfDisposed(this.disposedIntentRecognizer);
+        try {
+            Contracts.throwIfDisposed(this.disposedIntentRecognizer);
 
-        this.implCloseExistingRecognizer();
+            this.implCloseExistingRecognizer();
 
-        this.reco = this.implRecognizerSetup(
-            RecognitionMode.Interactive,
-            this.properties,
-            this.audioConfig,
-            new IntentConnectionFactory());
+            this.reco = this.implRecognizerSetup(
+                RecognitionMode.Interactive,
+                this.properties,
+                this.audioConfig,
+                new IntentConnectionFactory());
 
-        let contextJson: string;
+            let contextJson: string;
 
-        if (Object.keys(this.addedLmIntents).length !== 0 || undefined !== this.umbrellaIntent) {
-            contextJson = this.buildSpeechContext();
-            this.intentDataSent = true;
-        }
-
-        this.implRecognizerStart(this.reco, (event: SpeechRecognitionEvent) => {
-            if (this.disposedIntentRecognizer || !this.reco) {
-                return;
+            if (Object.keys(this.addedLmIntents).length !== 0 || undefined !== this.umbrellaIntent) {
+                contextJson = this.buildSpeechContext();
+                this.intentDataSent = true;
             }
 
-            this.implDispatchMessageHandler(event, cb, err);
-        }, contextJson);
+            this.implRecognizerStart(this.reco, (event: SpeechRecognitionEvent) => {
+                if (this.disposedIntentRecognizer || !this.reco) {
+                    return;
+                }
+
+                this.implDispatchMessageHandler(event, cb, err);
+            }, contextJson);
+        } catch (error) {
+            if (!!err) {
+                if (error instanceof Error) {
+                    const typedError: Error = error as Error;
+                    err(typedError.name + ": " + typedError.message);
+                } else {
+                    err(error);
+                }
+            }
+        }
     }
 
     /**
@@ -196,43 +207,53 @@ export class IntentRecognizer extends Recognizer {
      * @param err - Callback invoked in case of an error.
      */
     public startContinuousRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
-        Contracts.throwIfDisposed(this.disposedIntentRecognizer);
+        try {
+            Contracts.throwIfDisposed(this.disposedIntentRecognizer);
 
-        this.implCloseExistingRecognizer();
+            this.implCloseExistingRecognizer();
 
-        this.reco = this.implRecognizerSetup(
-            RecognitionMode.Conversation,
-            this.properties,
-            this.audioConfig,
-            new IntentConnectionFactory());
+            this.reco = this.implRecognizerSetup(
+                RecognitionMode.Conversation,
+                this.properties,
+                this.audioConfig,
+                new IntentConnectionFactory());
 
-        let contextJson: string;
+            let contextJson: string;
 
-        if (Object.keys(this.addedLmIntents).length !== 0) {
-            contextJson = this.buildSpeechContext();
-            this.intentDataSent = true;
-        }
-
-        this.implRecognizerStart(this.reco, (event: SpeechRecognitionEvent) => {
-            if (this.disposedIntentRecognizer || !this.reco) {
-                return;
+            if (Object.keys(this.addedLmIntents).length !== 0) {
+                contextJson = this.buildSpeechContext();
+                this.intentDataSent = true;
             }
 
-            this.implDispatchMessageHandler(event, undefined, undefined);
-        }, contextJson);
+            this.implRecognizerStart(this.reco, (event: SpeechRecognitionEvent) => {
+                if (this.disposedIntentRecognizer || !this.reco) {
+                    return;
+                }
 
-        // report result to promise.
-        if (!!cb) {
-            try {
-                cb();
-            } catch (e) {
-                if (!!err) {
-                    err(e);
+                this.implDispatchMessageHandler(event, undefined, undefined);
+            }, contextJson);
+
+            // report result to promise.
+            if (!!cb) {
+                try {
+                    cb();
+                } catch (e) {
+                    if (!!err) {
+                        err(e);
+                    }
+                }
+                cb = undefined;
+            }
+        } catch (error) {
+            if (!!err) {
+                if (error instanceof Error) {
+                    const typedError: Error = error as Error;
+                    err(typedError.name + ": " + typedError.message);
+                } else {
+                    err(error);
                 }
             }
-            cb = undefined;
         }
-
     }
 
     /**
@@ -244,16 +265,27 @@ export class IntentRecognizer extends Recognizer {
      * @param err - Callback invoked in case of an error.
      */
     public stopContinuousRecognitionAsync(cb?: () => void, err?: (e: string) => void): void {
-        Contracts.throwIfDisposed(this.disposedIntentRecognizer);
+        try {
+            Contracts.throwIfDisposed(this.disposedIntentRecognizer);
 
-        this.implCloseExistingRecognizer();
+            this.implCloseExistingRecognizer();
 
-        if (!!cb) {
-            try {
-                cb();
-            } catch (e) {
-                if (!!err) {
-                    err(e);
+            if (!!cb) {
+                try {
+                    cb();
+                } catch (e) {
+                    if (!!err) {
+                        err(e);
+                    }
+                }
+            }
+        } catch (error) {
+            if (!!err) {
+                if (error instanceof Error) {
+                    const typedError: Error = error as Error;
+                    err(typedError.name + ": " + typedError.message);
+                } else {
+                    err(error);
                 }
             }
         }

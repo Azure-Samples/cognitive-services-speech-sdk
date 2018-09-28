@@ -4,7 +4,11 @@
 //
 
 import { setTimeout } from "timers";
+
 import * as sdk from "../../../../../source/bindings/js/microsoft.cognitiveservices.speech.sdk";
+import { ConsoleLoggingListener } from "../../../../../source/bindings/js/src/common.browser/Exports";
+import { Events, EventType } from "../../../../../source/bindings/js/src/common/Exports";
+
 import { ByteBufferAudioFile } from "./ByteBufferAudioFile";
 import { Settings } from "./Settings";
 import { default as WaitForCondition } from "./Utilities";
@@ -13,7 +17,12 @@ import { WaveFileAudioInput } from "./WaveFileAudioInputStream";
 beforeAll(() => {
     // Override inputs, if necessary
     Settings.LoadSettings();
+    Events.Instance.AttachListener(new ConsoleLoggingListener(EventType.Debug));
 });
+
+// Test cases are run linerally, still looking for a way to get the test name to print that doesn't mean changing each test.
+// tslint:disable-next-line:no-console
+beforeEach(() => console.info("---------------------------------------Starting test case-----------------------------------"));
 
 const FIRST_EVENT_ID: number = 1;
 const Recognizing: string = "Recognizing";
@@ -181,7 +190,7 @@ test("RecognizeOnceAsync1", (done: jest.DoneCallback) => {
         if (e.result.reason === sdk.ResultReason.Canceled) {
             r.close();
             s.close();
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             fail(e.result.reason);
         }
     });
@@ -202,7 +211,7 @@ test("RecognizeOnceAsync1", (done: jest.DoneCallback) => {
         (error: string) => {
             r.close();
             s.close();
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             fail(error);
         });
 });
@@ -227,7 +236,7 @@ test("Translate Multiple Targets", (done: jest.DoneCallback) => {
         if (e.result.reason === sdk.ResultReason.Canceled) {
             r.close();
             s.close();
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             fail(e.result.reason);
         }
     });
@@ -342,7 +351,7 @@ test("Validate Event Ordering", (done: jest.DoneCallback) => {
         if (e.result.reason === sdk.ResultReason.Canceled) {
             r.close();
             s.close();
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             fail(e.result.reason);
         }
     });
@@ -527,7 +536,7 @@ test("TranslateVoiceRoundTrip", (done: jest.DoneCallback) => {
             case sdk.ResultReason.Canceled:
                 r.close();
                 s.close();
-                setTimeout(() => done(), 1);
+                setTimeout(done, 1);
                 fail(e.result.reason);
                 break;
             case sdk.ResultReason.SynthesizingAudio:
@@ -547,7 +556,7 @@ test("TranslateVoiceRoundTrip", (done: jest.DoneCallback) => {
             case sdk.CancellationReason.Error:
                 r.close();
                 s.close();
-                setTimeout(() => done(), 1);
+                setTimeout(done, 1);
                 fail(e);
                 break;
             case sdk.CancellationReason.EndOfStream:
@@ -617,7 +626,7 @@ test("TranslateVoiceInvalidVoice", (done: jest.DoneCallback) => {
         if (e.result.reason !== sdk.ResultReason.Canceled) {
             r.close();
             s.close();
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             fail("Should have failed, instead got status");
         }
     });
@@ -625,7 +634,7 @@ test("TranslateVoiceInvalidVoice", (done: jest.DoneCallback) => {
     r.canceled = ((o: sdk.Recognizer, e: sdk.TranslationRecognitionCanceledEventArgs) => {
         r.close();
         s.close();
-        setTimeout(() => done(), 1);
+        setTimeout(done, 1);
 
         expect(e.errorDetails).toEqual("Synthesis service failed with code:  - Could not identify the voice 'de-DE-Hedda)' for the text to speech service ");
     });
@@ -661,7 +670,7 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
             case sdk.ResultReason.Canceled:
                 r.close();
                 s.close();
-                setTimeout(() => done(), 1);
+                setTimeout(done, 1);
                 fail(e.result.reason);
                 break;
             case sdk.ResultReason.SynthesizingAudio:
@@ -681,7 +690,7 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
             case sdk.CancellationReason.Error:
                 r.close();
                 s.close();
-                setTimeout(() => done(), 1);
+                setTimeout(done, 1);
                 fail(e);
                 break;
             case sdk.CancellationReason.EndOfStream:
@@ -728,13 +737,13 @@ test("TranslateVoiceUSToGerman", (done: jest.DoneCallback) => {
                 }, (error: string) => {
                     r2.close();
                     s.close();
-                    setTimeout(() => done(), 1);
+                    setTimeout(done, 1);
                     fail(error);
                 });
             }, (error: string) => {
                 r.close();
                 s.close();
-                setTimeout(() => done(), 1);
+                setTimeout(done, 1);
                 fail(error);
             });
         });
@@ -774,7 +783,7 @@ test("MultiPhrase", (done: jest.DoneCallback) => {
             case sdk.ResultReason.Canceled:
                 r.close();
                 s.close();
-                setTimeout(() => done(), 1);
+                setTimeout(done, 1);
                 fail(sdk.ResultReason[e.result.reason]);
                 break;
             case sdk.ResultReason.SynthesizingAudio:
@@ -794,7 +803,7 @@ test("MultiPhrase", (done: jest.DoneCallback) => {
             case sdk.CancellationReason.Error:
                 r.close();
                 s.close();
-                setTimeout(() => done(), 1);
+                setTimeout(done, 1);
                 fail(e);
                 break;
             case sdk.CancellationReason.EndOfStream:
@@ -843,7 +852,7 @@ test("MultiPhrase", (done: jest.DoneCallback) => {
                             speechEnded = true;
                             break;
                         case sdk.CancellationReason.Error:
-                            setTimeout(() => done(), 1);
+                            setTimeout(done, 1);
                             fail(e.errorDetails);
                             break;
                     }
@@ -855,7 +864,7 @@ test("MultiPhrase", (done: jest.DoneCallback) => {
                             r2.stopContinuousRecognitionAsync(() => {
                                 r2.close();
                                 s.close();
-                                setTimeout(() => done(), 1);
+                                setTimeout(done, 1);
                                 expect(numEvents).toEqual(numPhrases);
                             }, (error: string) => {
                                 fail(error);
@@ -863,12 +872,12 @@ test("MultiPhrase", (done: jest.DoneCallback) => {
                         });
                 },
                     (error: string) => {
-                        setTimeout(() => done(), 1);
+                        setTimeout(done, 1);
                         fail(error);
                     });
 
             }, (error: string) => {
-                setTimeout(() => done(), 1);
+                setTimeout(done, 1);
                 fail(error);
             });
         });
@@ -948,7 +957,7 @@ test("InitialSilenceTimeout", (done: jest.DoneCallback) => {
         (error: string) => {
             r.close();
             s.close();
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             fail(error);
         });
 }, 15000);
@@ -985,7 +994,7 @@ test.skip("emptyFile", (done: jest.DoneCallback) => {
 
     r.recognizeOnceAsync(
         (p2: sdk.SpeechRecognitionResult) => {
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             r.close();
             s.close();
 
@@ -1020,7 +1029,7 @@ test("Translate Bad Language", (done: jest.DoneCallback) => {
         if (e.result.reason === sdk.ResultReason.Canceled) {
             r.close();
             s.close();
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             fail(e.result.reason);
         }
     });
@@ -1040,7 +1049,40 @@ test("Translate Bad Language", (done: jest.DoneCallback) => {
         (error: string) => {
             r.close();
             s.close();
-            setTimeout(() => done(), 1);
+            setTimeout(done, 1);
             fail(error);
+        });
+});
+
+test("Audio Config is optional", () => {
+    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    expect(s).not.toBeUndefined();
+    s.speechRecognitionLanguage = "en-US";
+    s.addTargetLanguage("en-us");
+
+    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
+    expect(r instanceof sdk.Recognizer).toEqual(true);
+
+    r.close();
+    s.close();
+});
+
+test("Default mic is used when audio config is not specified.", () => {
+    const s: sdk.SpeechTranslationConfig = sdk.SpeechTranslationConfig.fromSubscription(Settings.SpeechSubscriptionKey, Settings.SpeechRegion);
+    expect(s).not.toBeUndefined();
+    s.speechRecognitionLanguage = "en-US";
+    s.addTargetLanguage("en-US");
+
+    const r: sdk.TranslationRecognizer = new sdk.TranslationRecognizer(s);
+    expect(r instanceof sdk.Recognizer).toEqual(true);
+    // Node.js doesn't have a microphone natively. So we'll take the specific message that indicates that microphone init failed as evidence it was attempted.
+    r.recognizeOnceAsync(() => fail("RecognizeOnceAsync returned success when it should have failed"),
+        (error: string): void => {
+            expect(error).toEqual("Error: Browser does not support Web Audio API (AudioContext is not available).");
+        });
+
+    r.startContinuousRecognitionAsync(() => fail("startContinuousRecognitionAsync returned success when it should have failed"),
+        (error: string): void => {
+            expect(error).toEqual("Error: Browser does not support Web Audio API (AudioContext is not available).");
         });
 });

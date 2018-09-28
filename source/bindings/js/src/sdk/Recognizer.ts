@@ -48,9 +48,7 @@ export abstract class Recognizer {
      * @param {AudioConfig} audioInput - An optional audio input stream associated with the recognizer
      */
     protected constructor(audioConfig: AudioConfig) {
-        Contracts.throwIfNull(audioConfig, "audioConfig");
-
-        this.audioConfig = audioConfig;
+        this.audioConfig = (audioConfig !== undefined) ? audioConfig : AudioConfig.fromDefaultMicrophoneInput();
 
         this.disposed = false;
     }
