@@ -6,9 +6,11 @@
 #import "microphone_test.h"
 
 @implementation MicrophoneTest
+    
 
-NSString *speechKey = @"";
-NSString *serviceRegion = @"";
+extern NSString *speechKey;
+extern NSString *intentKey;
+NSString *serviceRegion = @"westus";
 
 + (void) runAsync
 {

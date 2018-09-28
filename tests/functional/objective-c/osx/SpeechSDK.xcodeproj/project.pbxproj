@@ -15,8 +15,8 @@
 		3CBD7F13211CD69B00F72336 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3CBD7F12211CD69B00F72336 /* Assets.xcassets */; };
 		3CBD7F19211CD69C00F72336 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CBD7F18211CD69C00F72336 /* main.m */; };
 		3CBD7F23211CD69C00F72336 /* SpeechSDKTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CBD7F22211CD69C00F72336 /* SpeechSDKTests.m */; };
-		A2AB0BDA21532D8900171A08 /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2AB0BD921532D8900171A08 /* MicrosoftCognitiveServicesSpeech.framework */; };
-		A2AB0BDC21532D8D00171A08 /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A2AB0BD921532D8900171A08 /* MicrosoftCognitiveServicesSpeech.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		3CCD06CB2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CCD06CA2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework */; };
+		3CCD06CE215798DC00A348DB /* dummytest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD06CD215798DC00A348DB /* dummytest.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -30,13 +30,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		A2AB0BDD21532D8D00171A08 /* Embed Frameworks */ = {
+		3CCD06C92157892200A348DB /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				A2AB0BDC21532D8D00171A08 /* MicrosoftCognitiveServicesSpeech.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -59,7 +58,9 @@
 		3CBD7F1E211CD69C00F72336 /* SpeechSDKTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpeechSDKTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3CBD7F22211CD69C00F72336 /* SpeechSDKTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SpeechSDKTests.m; sourceTree = "<group>"; };
 		3CBD7F24211CD69C00F72336 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A2AB0BD921532D8900171A08 /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = "../../../../xcode-build-output/MicrosoftCognitiveServicesSpeech-Release-macos/MicrosoftCognitiveServicesSpeech.framework"; sourceTree = "<group>"; };
+		3CCD06CA2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftCognitiveServicesSpeech.framework; path = ../../../../build_mac_debug/lib/MicrosoftCognitiveServicesSpeech.framework; sourceTree = "<group>"; };
+		3CCD06CC215798C100A348DB /* dummytest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = dummytest.h; path = ../../shared/dummytest.h; sourceTree = "<group>"; };
+		3CCD06CD215798DC00A348DB /* dummytest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = dummytest.m; path = ../../shared/dummytest.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,7 +68,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A2AB0BDA21532D8900171A08 /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */,
+				3CCD06CB2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -114,6 +115,8 @@
 				3CBD7F18211CD69C00F72336 /* main.m */,
 				3C5D941121480C1E000C7129 /* test_audio.h */,
 				3C5D941221483ACE000C7129 /* test_audio.mm */,
+				3CCD06CC215798C100A348DB /* dummytest.h */,
+				3CCD06CD215798DC00A348DB /* dummytest.m */,
 			);
 			path = SpeechSDK;
 			sourceTree = "<group>";
@@ -130,7 +133,7 @@
 		A2AB0BD821532D8800171A08 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				A2AB0BD921532D8900171A08 /* MicrosoftCognitiveServicesSpeech.framework */,
+				3CCD06CA2157895C00A348DB /* MicrosoftCognitiveServicesSpeech.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -145,7 +148,7 @@
 				3CBD7F02211CD69B00F72336 /* Sources */,
 				3CBD7F03211CD69B00F72336 /* Frameworks */,
 				3CBD7F04211CD69B00F72336 /* Resources */,
-				A2AB0BDD21532D8D00171A08 /* Embed Frameworks */,
+				3CCD06C92157892200A348DB /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -240,6 +243,7 @@
 			files = (
 				3CBD7F19211CD69C00F72336 /* main.m in Sources */,
 				3C5D93FE2146D411000C7129 /* test.m in Sources */,
+				3CCD06CE215798DC00A348DB /* dummytest.m in Sources */,
 				3C5D941321483ACE000C7129 /* test_audio.mm in Sources */,
 				3C676488214EA6CB00FCB533 /* microphone_test.m in Sources */,
 			);
@@ -399,13 +403,13 @@
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 6H88U8258Q;
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				FRAMEWORK_SEARCH_PATHS = " $(SRCROOT)/../../../../build_mac_debug/lib";
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../../../../source/bindings/objective-c/public",
 				);
 				INFOPLIST_FILE = SpeechSDK/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks $(SRCROOT)/../../../../build_mac_debug/lib";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../../../../build_mac_debug/lib",
@@ -431,13 +435,13 @@
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 6H88U8258Q;
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				FRAMEWORK_SEARCH_PATHS = " $(SRCROOT)/../../../../build_mac_debug/lib";
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../../../../source/bindings/objective-c/public",
 				);
 				INFOPLIST_FILE = SpeechSDK/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks $(SRCROOT)/../../../../build_mac_debug/lib";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../../../../build_mac_debug/lib",

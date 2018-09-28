@@ -12,7 +12,8 @@
 
 @interface AudioStreamTest :NSObject
 
-+(void) run;
++(void) runPushTest;
++(void) runPullTest;
 
 @end
 

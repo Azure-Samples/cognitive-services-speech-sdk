@@ -7,6 +7,9 @@
 
 @implementation EndToEndTests
 
+extern NSString *speechKey;
+extern NSString *intentKey;
+    
 + (void)runTest
 {
     NSBundle *mainBundle = [NSBundle mainBundle];
@@ -16,9 +19,6 @@
     NSString *lampFile = [mainBundle pathForResource: @"TurnOnTheLamp" ofType:@"wav"];
     SPXAudioConfiguration* weatherAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:weatherFile];
     SPXAudioConfiguration* lampAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:lampFile];
-    
-    NSString *speechKey = @"";
-    NSString *intentKey = @"";
     
     __block bool end = false;
     
@@ -31,19 +31,26 @@
     NSString *speechRecoLang = [speechConfig getPropertyByName:@"SPEECH-RecoLanguage"];
     NSLog(@"Speech Config: RecoLang is read from speech config: %@", speechRecoLang);
     [speechConfig setPropertyTo:@"en-US" byName:@"SPEECH-RecoLanguage"];
-     
+
+    
     // Test1: Use RecognizeOnce()
+    
     speechRecognizer= [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
-    speechRegion = [speechRecognizer.properties getPropertyById:SPXSpeechServiceConnectionRegion];
+    speechRegion = [speechRecognizer.properties getPropertyById:SPXSpeechServiceConnectionRegion defaultValue:@"Unknown speech region"];
     NSLog(@"Property Collection: Region is read from property collection: %@", speechRegion);
     speechRecoLang = [speechRecognizer.properties getPropertyById:SPXSpeechServiceConnectionRecognitionLanguage];
     NSLog(@"Property Collection: RecoLang is read from property collection: %@", speechRecoLang);
     
     SPXSpeechRecognitionResult *speechResult = [speechRecognizer recognizeOnce];
     NSLog(@"RecognizeOnce: Recognition result %@. Status %ld, Offset %llu Duration %llu.", speechResult.text, (long)speechResult.reason, speechResult.offset, speechResult.duration);
-    
+    if (speechResult.reason == SPXResultReason_Canceled) {
+     SPXCancellationDetails *details = [[SPXCancellationDetails alloc] initFromCanceledRecognitionResult:speechResult];
+     NSLog(@"Received cancellation details. reason:%lu errorDetails:%@.", (unsigned long)details.reason, details.errorDetails);
+    }
+
     // Test2: Use RecognizeOnceAsync() with completion block
     speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
+
     end = false;
     [speechRecognizer recognizeOnceAsync: ^ (SPXSpeechRecognitionResult *result){
         NSLog(@"RecognizeOnceAsync: Recognition result %@. Status %ld.", result.text, (long)result.reason);
@@ -51,7 +58,7 @@
     }];
     while (end == false)
         [NSThread sleepForTimeInterval:1.0f];
-    
+
     // Test3: Use StartContinuousRecognitionAsync()
     speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:weatherAudioSource];
     [speechRecognizer addSessionStartedEventHandler: ^ (SPXRecognizer *recognizer, SPXSessionEventArgs *eventArgs) {
@@ -68,7 +75,7 @@
         NSLog(@"Received SpeechEnd event. SessionId: %@ Offset: %d", eventArgs.sessionId, (int)eventArgs.offset);
     }];
     [speechRecognizer addRecognizedEventHandler: ^ (SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionEventArgs *eventArgs) {
-        NSLog(@"Received final result event. SessionId: %@, recognition result:%@. Status %ld.", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.reason);
+        NSLog(@"Received final result event. SessionId: %@, recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.reason, eventArgs.result.offset, eventArgs.result.duration, eventArgs.result.resultId);
         NSLog(@"Received JSON: %@", [eventArgs.result.properties getPropertyById:SPXSpeechServiceResponseJsonResult]);
     }];
     [speechRecognizer addRecognizingEventHandler: ^ (SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionEventArgs *eventArgs) {
@@ -149,14 +156,19 @@
         }
     }];
     [translationRecognizer addRecognizingEventHandler: ^ (SPXTranslationRecognizer *recognizer, SPXTranslationRecognitionEventArgs *eventArgs) {
-        NSLog(@"Received intermediate result event. SessionId: %@, intermediate result:%@.", eventArgs.sessionId, eventArgs.result.text);
+        NSLog(@"Received intermediate result event. SessionId: %@, intermediate result:%@ offset %llu duration %llu resultid:%@.", eventArgs.sessionId, eventArgs.result.text, eventArgs.result.offset, eventArgs.result.duration, eventArgs.result.resultId);
         for (id lang in [eventArgs.result.translations allKeys]) {
             NSLog(@"Translation result: translated into %@: %@", lang, [eventArgs.result.translations objectForKey:lang]);
         }
         NSLog(@"Received JSON: %@", [eventArgs.result.properties getPropertyByName:@"RESULT-Json"]);
     }];
     [translationRecognizer addSynthesizingEventHandler: ^ (SPXTranslationRecognizer * recognizer, SPXTranslationSynthesisEventArgs *eventArgs) {
-        NSLog(@"Received synthesis result event. SessionId: %@, audio length:%lu.", eventArgs.sessionId, (unsigned long)[eventArgs.result.audio length]);
+        NSLog(@"Received synthesis result event. SessionId: %@, Reason:%d audio length:%lu.", eventArgs.sessionId, (int)eventArgs.result.reason, (unsigned long)[eventArgs.result.audio length]);
+    }];
+    [translationRecognizer addCanceledEventHandler: ^ (SPXTranslationRecognizer *recognizer, SPXTranslationRecognitionCanceledEventArgs *eventArgs) {
+        NSLog(@"Received canceled event. SessionId: %@, reason:%lu errorDetails:%@.", eventArgs.sessionId, (unsigned long)eventArgs.reason, eventArgs.errorDetails);
+        SPXCancellationDetails *details = [[SPXCancellationDetails alloc] initFromCanceledRecognitionResult:eventArgs.result];
+        NSLog(@"Received cancellation details. reason:%lu errorDetails:%@.", (unsigned long)details.reason, details.errorDetails);
     }];
     end = false;
     [translationRecognizer startContinuousRecognition];
@@ -169,7 +181,18 @@
     SPXIntentRecognizer *intentRecognizer;
     SPXLanguageUnderstandingModel *model = [[SPXLanguageUnderstandingModel alloc] initWithAppId:@"b687b851-56c5-4d31-816f-35a741a3f0be"];
     
+    // test intent recognizer for completeness
+    SPXIntentRecognizer *intentRecoTest = [[SPXIntentRecognizer alloc] init:intentConfig];
+    [intentRecoTest addIntentFromPhrase:@"SimplePhrase"];
+    [intentRecoTest addIntentFromPhrase:@"SimplePhrase2" mappingToId:@"TestIntent1"];
+    [intentRecoTest addIntent:@"HomeAutomation.TurnOn" fromModel:model];
+    [intentRecoTest addIntent:@"HomeAutomation.TurnOn" fromModel:model mappingToId:@"TestIntent2"];
+    [intentRecoTest addAllIntentsFromModel:model];
+    [intentRecoTest addAllIntentsFromModel:model mappingToId:@"LocalAllIntents"];
+    
+    
     // Test1: Use RecognizeOnce()
+    
     intentRecognizer = [[SPXIntentRecognizer alloc] initWithSpeechConfiguration:intentConfig audioConfiguration:lampAudioSource];
     
     [intentRecognizer addIntent:@"HomeAutomation.TurnOn" fromModel:model mappingToId:@"MyIntentRecognizeOnce" ] ;
@@ -192,7 +215,7 @@
     // BUGUG: addAllIntents throw exception at c++
     // [intentRecognizer addAllIntentsFromModel:model mappingToId:@"AllIntentInHomeAutomation"];
     [intentRecognizer addIntent:@"HomeAutomation.TurnOn" fromModel:model];
-    NSString *intentRegion = [intentRecognizer.properties getPropertyByName:@"INTENT-region"];
+    NSString *intentRegion = [intentRecognizer.properties getPropertyByName:@"INTENT-region" defaultValue:@"unknown resgion"];
     NSLog(@"PropertyCollection: Region is read from property collection: %@", intentRegion);
     [intentRecognizer addSessionStartedEventHandler: ^ (SPXRecognizer *recognizer, SPXSessionEventArgs *eventArgs) {
         NSLog(@"Received SessionStarted event. SessionId: %@", eventArgs.sessionId);
@@ -217,6 +240,11 @@
     }];
     [intentRecognizer addRecognizingEventHandler: ^ (SPXIntentRecognizer * recognizer, SPXIntentRecognitionEventArgs *eventArgs) {
         NSLog(@"Received intermediate result event. SessionId: %@, intermediate result:%@. IntentId %@", eventArgs.sessionId, eventArgs.result.text, eventArgs.result.intentId);
+    }];
+    [intentRecognizer addCanceledEventHandler: ^ (SPXIntentRecognizer *recognizer, SPXIntentRecognitionCanceledEventArgs *eventArgs) {
+        NSLog(@"Received canceled event. SessionId: %@, reason:%lu errorDetails:%@.", eventArgs.sessionId, (unsigned long)eventArgs.reason, eventArgs.errorDetails);
+        SPXCancellationDetails *details = [[SPXCancellationDetails alloc] initFromCanceledRecognitionResult:eventArgs.result];
+        NSLog(@"Received cancellation details. reason:%lu errorDetails:%@.", (unsigned long)details.reason, details.errorDetails);
     }];
     end = false;
     [intentRecognizer startContinuousRecognition];

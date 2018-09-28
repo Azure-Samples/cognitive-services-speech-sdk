@@ -7,8 +7,11 @@
 //
 
 #import "ViewController.h"
-#import "../../shared/test.h"
 
+#import "../../shared/test.h"
+#import "../../shared/test_audio.h"
+#import "../../shared/microphone_test.h"
+#import "../../shared/dummytest.h"
 @interface ViewController ()
 
 @end
@@ -18,7 +21,13 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
+    [DummyTest runTest];
     [EndToEndTests runTest];
+    [MicrophoneTest runAsync];
+    [MicrophoneTest runTranslation];
+    [MicrophoneTest runContinuous];
+    [AudioStreamTest runPullTest];
+    [AudioStreamTest runPushTest];
 }
 
 
